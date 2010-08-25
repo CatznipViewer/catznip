@@ -2578,6 +2578,23 @@ void handle_object_edit()
 	return;
 }
 
+// [SL:KB] - Patch: Inventory/AttachmentEdit - Checked: 2010-08-25 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+void handle_attachment_edit(const LLInventoryItem* pItem)
+{
+	if ( (!isAgentAvatarValid()) || (!pItem) )
+		return;
+
+	LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+	if (!pAttachObj)
+		return;
+
+	LLSelectMgr::getInstance()->deselectAll();
+	LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
+
+	handle_object_edit();
+}
+// [/SL:KB]
+
 void handle_object_inspect()
 {
 	LLObjectSelectionHandle selection = LLSelectMgr::getInstance()->getSelection();
