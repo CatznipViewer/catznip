@@ -1407,6 +1407,15 @@ void LLBottomTray::processChatbarCustomization(S32 new_width)
 
 	if (delta_width == 0) return;
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+	// HACK-Catznip: LLNearbyChatScreenChannel is defined in a cpp file where we can't get to it *sighs*
+	LLControlVariable* pControl = gSavedSettings.getControl("NearbyToastWidth");
+	if ( (pControl) && (0 == pControl->getValue().asInteger()) )
+	{
+		(*pControl->getSignal())(pControl, new_width);
+	}
+// [/SL:KB]
+
 	LLView * chiclet_layout_panel = mChicletPanel->getParent();
 	const S32 chiclet_min_width = get_panel_min_width(mToolbarStack, chiclet_layout_panel);
 	const S32 chiclet_panel_width = chiclet_layout_panel->getRect().getWidth();
