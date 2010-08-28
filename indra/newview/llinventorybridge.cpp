@@ -4471,28 +4471,82 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
 		{
 			disabled_items.push_back(std::string("Wearable And Object Wear"));
-			disabled_items.push_back(std::string("Wearable Add"));
+//			disabled_items.push_back(std::string("Wearable Add"));
 			disabled_items.push_back(std::string("Wearable Edit"));
 		}
 
 		// Disable wear and take off based on whether the item is worn.
 		if(item)
 		{
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", TRUE);
+			if ( (pWearOnMenu) && (0 == pWearOnMenu->getChildCount()) )
+			{
+				LLMenuItemCallGL::Params paramsItem; LLSD sdParam;
+				paramsItem.on_click.function_name = "Inventory.WearOn";
+				paramsItem.on_visible.function_name = "Inventory.WearOnLabel";
+
+				// (top)
+				sdParam["action"] = std::string("insert");
+				sdParam["index"] = std::string("top");
+				paramsItem.name = "(top)";	// TODO: needs translation
+				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+				LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
+
+				// One replace + insert option per wearable index
+				for (S32 idxWearable = LLAgentWearables::MAX_CLOTHING_PER_TYPE - 1; idxWearable >= 0; idxWearable--)
+				{
+					sdParam["index"] = idxWearable;
+
+					sdParam["action"] = std::string("replace");
+					paramsItem.name = "(placeholder)";
+					paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+					LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
+
+					if (idxWearable)
+					{
+						sdParam["action"] = std::string("insert");
+						paramsItem.name = "(between)";	// TODO: needs translation
+						paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+						LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
+					}
+				}
+
+				// (bottom)
+				sdParam["action"] = std::string("insert");
+				sdParam["index"] = std::string("bottom");
+				paramsItem.name = "(bottom)";	// TODO: needs translation
+				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+				LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
+			}
+// [/SL:KB]
+
 			switch (item->getType())
 			{
 				case LLAssetType::AT_CLOTHING:
 					items.push_back(std::string("Take Off"));
+
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+					// Only show "Wear On" for unworn clothing items whose wearable type already has a current wearable
+					if ( (gAgentWearables.getWearableCount(item->getWearableType())) && (!get_is_item_worn(item->getUUID())) )
+					{
+						items.push_back(std::string("Wear On"));
+						if ((flags & FIRST_SELECTED_ITEM) == 0)
+							disabled_items.push_back(std::string("Wear On"));
+					}
+// [/SL:KB]
+
 					// Fallthrough since clothing and bodypart share wear options
 				case LLAssetType::AT_BODYPART:
 					if (get_is_item_worn(item->getUUID()))
 					{
 						disabled_items.push_back(std::string("Wearable And Object Wear"));
-						disabled_items.push_back(std::string("Wearable Add"));
+//						disabled_items.push_back(std::string("Wearable Add"));
 					}
 					else
 					{
 						items.push_back(std::string("Wearable And Object Wear"));
-						items.push_back(std::string("Wearable Add"));
+//						items.push_back(std::string("Wearable Add"));
 						disabled_items.push_back(std::string("Take Off"));
 						disabled_items.push_back(std::string("Wearable Edit"));
 					}
@@ -4504,6 +4558,91 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	hide_context_entries(menu, items, disabled_items);
 }
+
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
+{
+	if ( (!pPanel) || (!pPanel->getRootFolder()) || (!sdParam.has("action")) || (!sdParam.has("index")) )
+		return false;
+
+	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
+	if (1 != selItems.size())
+		return false; // "Wear On" only makes sense for a single item selection
+
+	LLFolderViewItem* pFVItem = pPanel->getRootFolder()->getCurSelectedItem();
+	const LLViewerInventoryItem* pItem = (pFVItem) ? pFVItem->getInventoryItem() : NULL;
+	if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_BODYPART == pItem->getType()) )
+		return false; // "Wear On" only makes sense for clothing wearables
+
+	// Now figure out where the user wants it wear on (on top == normal "wear add" so we just pick an invalid index)
+	U32 idxWearable;
+	if (!sdParam["index"].isInteger())
+		idxWearable = ("top" == sdParam["index"].asString()) ? LLAgentWearables::MAX_CLOTHING_PER_TYPE : 0;
+	else
+		idxWearable = sdParam["index"].asInteger();
+
+	// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
+	bool fReplace = ("replace" == sdParam["action"].asString());
+	if ( ((!fReplace) && (idxWearable >= gAgentWearables.getWearableCount(pItem->getWearableType()))) ||
+		 ((fReplace) && (idxWearable == gAgentWearables.getWearableCount(pItem->getWearableType()) - 1)) )
+	{
+		LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, fReplace);
+	}
+	else
+	{
+		LLPointer<LLInventoryCallback> cb = 
+			new LLReorderAndUpdateAppearanceOnDestroy(pItem->getLinkedUUID(), sdParam["index"].asInteger(), fReplace);
+		LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, false, cb);
+	}
+	return true;
+}
+
+bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl, const LLSD& sdParam)
+{
+	LLMenuItemGL* pMenuItem = dynamic_cast<LLMenuItemGL*>(pCtrl);
+	if ( (!pPanel) || (!pPanel->getRootFolder()) || (!pMenuItem) || (!sdParam.has("action")) || (!sdParam.has("index")) )
+		return false;
+
+	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
+	if (1 != selItems.size())
+		return false; // "Wear On" only makes sense for a single item selection
+
+	LLFolderViewItem* pFVItem = pPanel->getRootFolder()->getCurSelectedItem();
+	const LLViewerInventoryItem* pItem = (pFVItem) ? pFVItem->getInventoryItem() : NULL;
+	if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_BODYPART == pItem->getType()) )
+		return false; // "Wear On" only makes sense for clothing wearables
+
+	LLWearableType::EType eType = pItem->getWearableType();
+	U32 cntWearable = gAgentWearables.getWearableCount(eType);
+	if ( (0 == cntWearable) ||
+		 ( (LLAgentWearables::MAX_CLOTHING_PER_TYPE == cntWearable) && 
+		   ((sdParam["index"].isString()) || ("insert" == sdParam["action"].asString())) ) )
+	{
+		return false; // Hide all options if no wearable on this type or if user is at maximum hide "(top)", "(bottom)" and "(between)"
+	}
+
+	// NOTE: "(top)", "(bottom)" and "(between)" options already have their labels set in LLWearableBridge::buildContextMenu()
+	if (sdParam["index"].isInteger())
+	{
+		if (cntWearable <= (U32)sdParam["index"].asInteger())
+			return false; // Hide indices that aren't currently worn to avoid needless clutter
+		if ("replace" == sdParam["action"].asString())
+		{
+			const LLInventoryItem* pWearableItem = gAgentWearables.getWearableInventoryItem(eType, sdParam["index"].asInteger());
+			if (pWearableItem)
+				pMenuItem->setLabel(pWearableItem->getName());
+			else
+			{
+				// NOTE: we needed the inventory item to fetch the asset so this is just over-cautious?
+				const LLWearable* pWearable = gAgentWearables.getWearable(eType, sdParam["index"].asInteger());
+				if (pWearable)
+					pMenuItem->setLabel(pWearable->getName());
+			}
+		}
+	}
+	return true;
+}
+// [/SL:KB]
 
 // Called from menus
 // static
