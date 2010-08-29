@@ -1,0 +1,9 @@
+[UI/FloaterSearch]
+- changed : don't reset the URL each time the search floater is opened
+    -> "Find always resets to start page" (WEB-1819)
+
+[UI/XML]
+- changed : uncommented "Lighting & Shadows" options in the Graphics preferences tab
+- added   : "Inspect" menu item to bring up the old-style Inspect floater (thankies Chloe)
+    -> added to the context menus for: "attachment self", "attachment other" and "object"
+    -> added to the gear menu for object inspectors
