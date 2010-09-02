@@ -183,6 +183,10 @@ public:
 	 */
 	static bool canOfferTeleport(const uuid_vec_t& ids);
 
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (RLVa-2.1.2a) | Added: RLVa-2.0.1a
+	static void addContact(const LLUUID& id);
+// [/SL:KB]
+
 private:
 	static bool callbackAddFriend(const LLSD& notification, const LLSD& response);
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
