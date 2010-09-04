@@ -84,9 +84,17 @@ protected:
 
 		functor_t take_off = boost::bind(&LLAppearanceMgr::removeItemFromAvatar, LLAppearanceMgr::getInstance(), _1);
 
-		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
+//		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		registrar.add("Wearing.EditWearable", boost::bind(handleMultiple, LLAgentWearables::editWearable, mUUIDs));
+		registrar.add("Wearing.EditAttachment", boost::bind(handleMultiple, handle_attachment_edit, mUUIDs));
+		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
+// [/SL:KB]
 		registrar.add("Wearing.TakeOff", boost::bind(handleMultiple, take_off, mUUIDs));
 		registrar.add("Wearing.Detach", boost::bind(handleMultiple, take_off, mUUIDs));
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		registrar.add("Wearing.TakeOffDetach", boost::bind(handleMultiple, take_off, mUUIDs));
+// [/SL:KB]
 
 		LLContextMenu* menu = createFromFile("menu_wearing_tab.xml");
 
@@ -131,8 +139,17 @@ protected:
 		bool allow_detach = !bp_selected && !clothes_selected && attachments_selected;
 		bool allow_take_off = !bp_selected && clothes_selected && !attachments_selected;
 
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		menu->setItemVisible("edit_wearable", (bp_selected || clothes_selected) && !attachments_selected);
+		menu->setItemEnabled("edit_wearable", 1 == mUUIDs.size());
+		menu->setItemVisible("edit_attachment", attachments_selected && !(bp_selected || clothes_selected));
+		menu->setItemEnabled("edit_attachment", 1 == mUUIDs.size());
+// [/SL:KB]
 		menu->setItemVisible("take_off",	allow_take_off);
 		menu->setItemVisible("detach",		allow_detach);
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		menu->setItemVisible("take_off_or_detach", (!allow_detach) && (!allow_take_off) && (clothes_selected) && (attachments_selected));
+// [/SL:KB]
 		menu->setItemVisible("edit_outfit_separator", allow_take_off || allow_detach);
 	}
 };
