@@ -2580,7 +2580,7 @@ void handle_object_edit()
 	return;
 }
 
-// [SL:KB] - Patch: Inventory/AttachmentEdit - Checked: 2010-08-25 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-08-25 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
 void handle_attachment_edit(const LLInventoryItem* pItem)
 {
 	if ( (!isAgentAvatarValid()) || (!pItem) )
