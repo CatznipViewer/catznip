@@ -41,6 +41,28 @@ static void edit_outfit()
 	LLSideTray::getInstance()->showPanel("sidepanel_appearance", LLSD().with("type", "edit_outfit"));
 }
 
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+static void edit_item(const LLUUID& idItem)
+{
+	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
+	if (!pItem)
+		return;
+
+	switch (pItem->getType())
+	{
+		case LLAssetType::AT_BODYPART:
+		case LLAssetType::AT_CLOTHING:
+			LLAgentWearables::editWearable(idItem);
+			break;
+		case LLAssetType::AT_OBJECT:
+			handle_attachment_edit(idItem);
+			break;
+		default:
+			break;
+	}
+}
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 
 class LLWearingGearMenu
@@ -86,8 +108,7 @@ protected:
 
 //		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
 // [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
-		registrar.add("Wearing.EditWearable", boost::bind(handleMultiple, LLAgentWearables::editWearable, mUUIDs));
-		registrar.add("Wearing.EditAttachment", boost::bind(handleMultiple, handle_attachment_edit, mUUIDs));
+		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, edit_item, mUUIDs));
 		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 // [/SL:KB]
 		registrar.add("Wearing.TakeOff", boost::bind(handleMultiple, take_off, mUUIDs));
@@ -140,10 +161,8 @@ protected:
 		bool allow_take_off = !bp_selected && clothes_selected && !attachments_selected;
 
 // [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
-		menu->setItemVisible("edit_wearable", (bp_selected || clothes_selected) && !attachments_selected);
-		menu->setItemEnabled("edit_wearable", 1 == mUUIDs.size());
-		menu->setItemVisible("edit_attachment", attachments_selected && !(bp_selected || clothes_selected));
-		menu->setItemEnabled("edit_attachment", 1 == mUUIDs.size());
+		menu->setItemVisible("edit_item",	bp_selected || clothes_selected || attachments_selected);
+		menu->setItemEnabled("edit_item",	1 == mUUIDs.size());
 // [/SL:KB]
 		menu->setItemVisible("take_off",	allow_take_off);
 		menu->setItemVisible("detach",		allow_detach);

@@ -5,16 +5,9 @@
     <menu_item_call
      label="Edit"
      layout="topleft"
-     name="edit_wearable">
+     name="edit_item">
         <on_click
-         function="Wearing.EditWearable" />
-    </menu_item_call>
-    <menu_item_call
-     label="Edit"
-     layout="topleft"
-     name="edit_attachment">
-        <on_click
-         function="Wearing.EditAttachment" />
+         function="Wearing.EditItem" />
     </menu_item_call>
     <menu_item_call
      label="Take Off"
