@@ -243,7 +243,33 @@ private:
 	bool mUpdateBaseOrder;
 };
 
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+// TODO-Catznip: currently only supports the reordering of one single wearable
+class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
+{
+public:
+	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& inv_item, U32 index, bool do_replace) : mFireCount(0) 
+	{
+		// HACK-Catznip: to keep things easier we use the high bit to signify "replace" vs "insert"
+		mReorderMap.insert(std::pair<LLUUID, S32>(inv_item, (do_replace) ? index : index | 0x80000000));
+	}
+	virtual ~LLReorderAndUpdateAppearanceOnDestroy();
 
+	virtual void fire(const LLUUID& inv_item)
+	{
+		llinfos << "callback fired" << llendl;
+		mFireCount++;
+		mIDs.push_back(inv_item);
+	}
+
+	typedef std::map<LLUUID, S32> reorder_map_t;
+private:
+	U32           mFireCount;
+	uuid_vec_t    mIDs;
+	reorder_map_t mReorderMap;
+};
+// [/SL:KB]
+ 
 #define SUPPORT_ENSEMBLES 0
 
 LLUUID findDescendentCategoryIDByName(const LLUUID& parent_id,const std::string& name);
