@@ -82,6 +82,19 @@ public:
 		key["id"] = landmark_inv_id;
 		LLSideTray::getInstance()->showPanel("panel_places", key);
 	}
+
+// [SL:KB] - Patch: Settings-EmbeddedLandmarkCopy | Checked: 2010-09-05 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+	static void showInfo(const LLVector3d& global_pos)
+	{
+		LLSD key;
+		key["type"] = "remote_place";
+		key["x"] = global_pos.mdV[0];
+		key["y"] = global_pos.mdV[1];
+		key["z"] = global_pos.mdV[2];
+		LLSideTray::getInstance()->showPanel("panel_places", key);
+	}
+// [/SL:KB]
+
 	static void processForeignLandmark(LLLandmark* landmark,
 			const LLUUID& object_id, const LLUUID& notecard_inventory_id,
 			LLPointer<LLInventoryItem> item_ptr)
@@ -95,7 +108,10 @@ public:
 		{
 			showInfo(agent_lanmark->getUUID());
 		}
-		else
+//		else
+// [SL:KB] - Patch: Settings-EmbeddedLandmarkCopy | Checked: 2010-09-05 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		else if (gSavedSettings.getBOOL("EmbeddedLandmarkCopyToInventory"))
+// [/SL:KB]
 		{
 			if (item_ptr.isNull())
 			{
@@ -108,6 +124,12 @@ public:
 				copy_inventory_from_notecard(object_id, notecard_inventory_id, item_ptr.get(), gInventoryCallbacks.registerCB(cb));
 			}
 		}
+// [SL:KB] - Patch: Settings-EmbeddedLandmarkCopy | Checked: 2010-09-05 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+		else
+		{
+			showInfo(global_pos);
+		}
+// [/SL:KB]
 	}
 };
 ///----------------------------------------------------------------------------
@@ -1132,7 +1154,13 @@ void LLViewerTextEditor::openEmbeddedTexture( LLInventoryItem* item, llwchar wc 
 	// LLPreview constructor ItemUUID parameter.
 	if (!item)
 		return;
-	LLPreviewTexture* preview = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID()), TAKE_FOCUS_YES);
+//	LLPreviewTexture* preview = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID()), TAKE_FOCUS_YES);
+// [SL:KB] - Patch: Settings-EmbeddedTextureFocus | Checked: 2010-09-05 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+	// If there's already a preview of the texture open then we do want it to take focus, otherwise leave it up to the debug setting
+	BOOL fHasInstance = (NULL != LLFloaterReg::findTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID())));
+	BOOL fTakeFocus = ( (fHasInstance) || (gSavedSettings.getBOOL("EmbeddedTextureStealsFocus")) ) ? TAKE_FOCUS_YES : TAKE_FOCUS_NO;
+	LLPreviewTexture* preview = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID()), fTakeFocus);
+// [/SL:KB]
 	if (preview)
 	{
 		preview->setAuxItem( item );
