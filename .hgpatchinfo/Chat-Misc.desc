@@ -1,0 +1,2 @@
+[Chat-Misc]
+- changed : prevent the IM tab's name from changing to "XXX is typing" when the other party is typing
