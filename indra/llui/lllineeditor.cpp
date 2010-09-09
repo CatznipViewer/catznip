@@ -1271,7 +1271,11 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			if( mCurrentHistoryLine > mLineHistory.begin() )
 			{
 				mText.assign( *(--mCurrentHistoryLine) );
-				setCursor(llmin((S32)mText.length(), getCursor()));
+//				setCursor(llmin((S32)mText.length(), getCursor()));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+				// Not sure why the behaviour above would be desirable? *confuzzled*
+				setCursor(mText.length());
+// [/SL:KB]
 			}
 			else
 			{
@@ -1288,7 +1292,11 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			if( !mLineHistory.empty() && mCurrentHistoryLine < mLineHistory.end() - 1 )
 			{
 				mText.assign( *(++mCurrentHistoryLine) );
-				setCursor(llmin((S32)mText.length(), getCursor()));
+//				setCursor(llmin((S32)mText.length(), getCursor()));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+				// Not sure why the behaviour above would be desirable? *confuzzled*
+				setCursor(mText.length());
+// [/SL:KB]
 			}
 			else
 			{
