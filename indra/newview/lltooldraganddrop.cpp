@@ -1477,13 +1477,27 @@ bool LLToolDragAndDrop::handleGiveDragAndDrop(LLUUID dest_agent, LLUUID session_
 			if (drop)
 			{
 				LLIMModel::LLIMSession * session = LLIMModel::instance().findIMSession(session_id);
-				if (NULL == session)
+//				if (NULL == session)
+//				{
+//					llassert(NULL != session);
+//					return false;
+//				}
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+				std::string strResidents;
+				if (session)
 				{
-					llassert(NULL != session);
-					return false;
+					strResidents = session->mName;
 				}
+				else
+				{
+					gCacheName->getFullName(dest_agent, strResidents);
+				}
+// [/SL:KB]
 				LLSD substitutions;
-				substitutions["RESIDENTS"] = session->mName;
+//				substitutions["RESIDENTS"] = session->mName;
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+				substitutions["RESIDENTS"] = strResidents;
+// [/SL:KB]
 				substitutions["ITEMS"] = inv_item->getName();
 				LLSD payload;
 				payload["agent_id"] = dest_agent;
