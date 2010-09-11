@@ -1,4 +1,3 @@
 [Settings/Misc]
-- added : "EmbeddedLandmarkCopyToInventory" to control whether embedded landmarks are copied to inventory before previewing
-- added : "EmbeddedTextureStealsFocus" to control whether embedded texture previews take focus when opened
 - fixed : "Plain text chat history" reverts to FALSE if the relevant preference tab is opened while not logged on
+- added : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
