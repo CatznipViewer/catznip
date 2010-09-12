@@ -713,6 +713,9 @@ BOOL LLTextEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		setFocus(TRUE);
 	}
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.1.2d) | Added: Catznip-2.1.2d
+	setCursorAtLocalPos(x, y, FALSE);
+// [/SL:KB]
 	// Prefer editor menu if it has selection. See EXT-6806.
 	if (hasSelection() || !LLTextBase::handleRightMouseDown(x, y, mask))
 	{

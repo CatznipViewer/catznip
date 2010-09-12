@@ -187,6 +187,9 @@ public:
 		mLabel(utf8str_to_wstring(inv_item->getName())),
 		mItem(inv_item),
 		mEditor(editor),
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.1.2d) | Added: Catznip-2.1.2d
+		mContextMenu(NULL),
+// [/SL:KB]
 		mHasMouseHover(false)
 	{
 
@@ -270,6 +273,42 @@ public:
 		return FALSE; 
 	}
 
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.1.2d) | Added: Catznip-2.1.2d
+	/*virtual*/ BOOL			handleRightMouseDown(S32 x, S32 y, MASK mask)
+	{
+		if (!mContextMenu)
+		{
+			LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+			registrar.add("Embedded.Open", boost::bind(&LLEmbeddedItemSegment::onOpen, this));
+			registrar.add("Embedded.CopyToInv", boost::bind(&LLEmbeddedItemSegment::onCopyToInventory, this));
+
+			mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_embedded_item.xml", 
+																					LLMenuGL::sMenuContainer, 
+																					LLMenuHolderGL::child_registry_t::instance());
+		}
+
+		S32 screen_x, screen_y;
+		mEditor.localPointToScreen(x, y, &screen_x, &screen_y);
+		mContextMenu->show(screen_x, screen_y);
+
+		return TRUE;
+	}
+
+	void onOpen()
+	{
+		LLViewerTextEditor* pEditor = dynamic_cast<LLViewerTextEditor*>(&mEditor);
+		if (pEditor)
+			pEditor->openEmbeddedItem(mItem, pEditor->getWText()[pEditor->getCursorPos()]);
+	}
+
+	void onCopyToInventory()
+	{
+		LLViewerTextEditor* pEditor = dynamic_cast<LLViewerTextEditor*>(&mEditor);
+		if (pEditor)
+			pEditor->showCopyToInvDialog(mItem, pEditor->getWText()[pEditor->getCursorPos()]);
+	}
+// [/SL:KB]
+
 	/*virtual*/ LLStyleConstSP		getStyle() const { return mStyle; }
 
 private:
@@ -280,7 +319,9 @@ private:
 	LLPointer<LLInventoryItem> mItem;
 	LLTextEditor&	mEditor;
 	bool			mHasMouseHover;
-
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.1.2d) | Added: Catznip-2.1.2d
+	LLContextMenu*  mContextMenu;
+// [/SL:KB]
 };
 
 
