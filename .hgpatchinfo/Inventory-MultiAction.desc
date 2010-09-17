@@ -1,0 +1,4 @@
+[Inventory/MultiAction]
+- added   : LLFolderViewerListener::peformActionBatch() to handle an action for multiple items of the same type
+- changed : routed LLFolderView::openSelectedItems() to LLFolderView::doToSelected(..., "open")
+    -> fixes <enter>'ing on a selection resulting in "Attachment pending"
