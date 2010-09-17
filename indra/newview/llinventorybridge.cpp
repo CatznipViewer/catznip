@@ -4416,6 +4416,92 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-07-10 (Catznip-2.1.2a) | Modified: Catznip-2.1.1a
+// This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
+void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
+		                                  LLDynamicArray<LLFolderViewEventListener*>& batch)
+{
+	if ( (isAddAction(action)) || ("open" == action) || ("wear_add" == action) )
+	{
+		if (!gAgentWearables.areWearablesLoaded())
+		{
+			LLNotificationsUtil::add("CanNotChangeAppearanceUntilLoaded");
+			return;
+		}
+
+		LLInventoryModel::item_array_t items; bool fWarningTrash = false, fWarningIncomplete = false;
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(batch.get(idx));
+			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
+			if (!pWearableBridge)
+			{
+				continue;
+			}
+			else if (pWearableBridge->isItemInTrash())
+			{
+				if (!fWarningTrash)
+					LLNotificationsUtil::add("CannotWearTrash");
+				fWarningTrash = true;		// Don't spam the user with the same warning over and over again
+				continue;
+			}
+
+			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pWearableBridge->getUUID());
+			if ( (!pItem) || (!pItem->isWearableType()) )
+			{
+				continue;
+			}
+			else if (!pItem->isFinished())
+			{
+				if (!fWarningIncomplete)
+					LLNotificationsUtil::add("CannotWearInfoNotComplete");
+				fWarningIncomplete = true;	// Don't spam the user with the same warning over and over again
+				continue;
+			}
+
+			if (gInventory.isObjectDescendentOf(pWearableBridge->getUUID(), gInventory.getRootFolderID()))
+			{
+				items.push_back(pItem);
+			}
+			else if (gInventory.isObjectDescendentOf(pWearableBridge->getUUID(), gInventory.getLibraryRootFolderID()))
+			{
+				// NOTE: this isn't ideal since it'll cause one call to UpdateAppearanceFromCOF per item, but it should be so rare of an
+				//       occurance that it's not really worthwhile (and it won't actually cause anything bad to happen anyway)
+				LLPointer<LLInventoryCallback> cb = new WearOnAvatarCallback();
+				copy_inventory_item(gAgent.getID(), pItem->getPermissions().getOwner(), pItem->getUUID(), LLUUID::null, std::string(), cb);
+			}
+		}
+
+		if (items.count())
+		{
+			// This is really a lot more complicated than it ought to be:
+			//   - we can't add all the links at the same time because we'll be adding duplicates or multiple wearables of the same type
+			//   - we could add the items one at a time and wait for each link to complete but that really takes too long *sighs*
+			// -> so instead we filter down and then do a mix of "addCOFItemLink" and "linkAll" to do it all at once
+			LLAppearanceMgr::filterWearableItems(items, LLAgentWearables::MAX_CLOTHING_PER_TYPE);
+
+			LLAppearanceMgr::wearables_by_type_t itemsByType(LLWearableType::WT_COUNT);
+			LLAppearanceMgr::divvyWearablesByType(items, itemsByType);
+
+			// Replace the current top wearable for each type but after that just "Wear Add"
+			LLPointer<LLInventoryCallback> cb = new ModifiedCOFCallback();
+			for (S32 type = 0; type < LLWearableType::WT_COUNT; type++)
+			{
+				for (S32 idxItem = 0, cntItem = itemsByType[type].size(); idxItem < cntItem; idxItem++)
+				{
+					LLAppearanceMgr::instance().wearItemOnAvatar(
+						itemsByType[type][idxItem]->getUUID(), true, (("wear_add" != action) && (0 == idxItem)), cb);
+				}
+			}
+		}
+	}
+	else
+	{
+		LLItemBridge::performActionBatch(model, action, batch);
+	}
+}
+// [/SL:KB]
+
 void LLWearableBridge::openItem()
 {
 	LLViewerInventoryItem* item = getItem();
