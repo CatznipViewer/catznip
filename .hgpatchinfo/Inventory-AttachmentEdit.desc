@@ -1,0 +1,6 @@
+[Inventory/AttachmentEdit]
+- added   : "Edit" menu option on the inventory item context menu to easily get a selection for worn attachments
+- added   : "Edit" option to the "Currently Wearing" panel context menu (for both wearables and attachments)
+- added   : "Take Off / Detach" option to the "Currently Wearing" panel context menu when both wearables and attachments are selected
+- added   : "Edit" option to the "wearable item list" control context menu for attachments (see "My Outfits" sidebar tab)
+- changed : ordering of the wear/add/edit/take off context menu options for consistency
