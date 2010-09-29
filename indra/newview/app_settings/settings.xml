@@ -2456,6 +2456,17 @@
       <key>Value</key>
       <integer>-1</integer>
     </map>
+    <key>DebugTimeMessageDecoding</key>
+    <map>
+      <key>Comment</key>
+      <string>Time the decoding of each message</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>DebugViews</key>
     <map>
       <key>Comment</key>
