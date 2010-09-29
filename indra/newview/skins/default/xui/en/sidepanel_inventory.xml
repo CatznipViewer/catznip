@@ -124,6 +124,7 @@
                          tool_tip="Wear seleceted outfit"
                          top="0"
                          width="102" />
+                    <!--
                     <button
                          enabled="false"
                          follows="bottom|left|right"
@@ -145,8 +146,10 @@
                          tool_tip="Teleport to the selected area"
                          top="0"
                          width="102" />
+                    -->
 			    </layout_panel>
 			</layout_stack>
+
 		</panel>
 	</panel>
 
