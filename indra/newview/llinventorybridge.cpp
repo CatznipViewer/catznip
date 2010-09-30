@@ -4486,7 +4486,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
 		{
 			disabled_items.push_back(std::string("Wearable And Object Wear"));
-//			disabled_items.push_back(std::string("Wearable Add"));
+			disabled_items.push_back(std::string("Wearable Add"));
 			disabled_items.push_back(std::string("Wearable Edit"));
 		}
 
@@ -4556,12 +4556,12 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 					if (get_is_item_worn(item->getUUID()))
 					{
 						disabled_items.push_back(std::string("Wearable And Object Wear"));
-//						disabled_items.push_back(std::string("Wearable Add"));
+						disabled_items.push_back(std::string("Wearable Add"));
 					}
 					else
 					{
 						items.push_back(std::string("Wearable And Object Wear"));
-//						items.push_back(std::string("Wearable Add"));
+						items.push_back(std::string("Wearable Add"));
 						disabled_items.push_back(std::string("Take Off"));
 						disabled_items.push_back(std::string("Wearable Edit"));
 					}
