@@ -4574,40 +4574,43 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	hide_context_entries(menu, items, disabled_items);
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
 bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
 {
 	if ( (!pPanel) || (!pPanel->getRootFolder()) || (!sdParam.has("action")) || (!sdParam.has("index")) )
 		return false;
 
+	LLPointer<LLReorderAndUpdateAppearanceOnDestroy> cb = NULL;
+
 	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
-	if (1 != selItems.size())
-		return false; // "Wear On" only makes sense for a single item selection
-
-	LLFolderViewItem* pFVItem = pPanel->getRootFolder()->getCurSelectedItem();
-	const LLViewerInventoryItem* pItem = (pFVItem) ? pFVItem->getInventoryItem() : NULL;
-	if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_BODYPART == pItem->getType()) )
-		return false; // "Wear On" only makes sense for clothing wearables
-
-	// Now figure out where the user wants it wear on (on top == normal "wear add" so we just pick an invalid index)
-	U32 idxWearable;
-	if (!sdParam["index"].isInteger())
-		idxWearable = ("top" == sdParam["index"].asString()) ? LLAgentWearables::MAX_CLOTHING_PER_TYPE : 0;
-	else
-		idxWearable = sdParam["index"].asInteger();
-
-	// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
-	bool fReplace = ("replace" == sdParam["action"].asString());
-	if ( ((!fReplace) && (idxWearable >= gAgentWearables.getWearableCount(pItem->getWearableType()))) ||
-		 ((fReplace) && (idxWearable == gAgentWearables.getWearableCount(pItem->getWearableType()) - 1)) )
+	for (std::set<LLUUID>::const_iterator itSel = selItems.begin(); itSel != selItems.end(); ++itSel)
 	{
-		LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, fReplace);
-	}
-	else
-	{
-		LLPointer<LLInventoryCallback> cb = 
-			new LLReorderAndUpdateAppearanceOnDestroy(pItem->getLinkedUUID(), sdParam["index"].asInteger(), fReplace);
-		LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, false, cb);
+		const LLViewerInventoryItem* pItem = gInventory.getItem(*itSel);
+		if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_CLOTHING != pItem->getType()) )
+			continue; // "Wear On" only makes sense for clothing wearables
+
+		// Now figure out where the user wants it wear on (on top == normal "wear add" so we just pick an invalid index)
+		U32 idxWearable;
+		if (!sdParam["index"].isInteger())
+			idxWearable = ("top" == sdParam["index"].asString()) ? LLAgentWearables::MAX_CLOTHING_PER_TYPE : 0;
+		else
+			idxWearable = sdParam["index"].asInteger();
+
+		if (!cb)
+			cb = new LLReorderAndUpdateAppearanceOnDestroy();
+
+		// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
+		bool fReplace = ("replace" == sdParam["action"].asString());
+		if ( ((!fReplace) && (idxWearable >= gAgentWearables.getWearableCount(pItem->getWearableType()))) ||
+			 ((fReplace) && (idxWearable == gAgentWearables.getWearableCount(pItem->getWearableType()) - 1)) )
+		{
+			LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, fReplace, cb);
+		}
+		else
+		{
+			LLAppearanceMgr::instance().wearItemOnAvatar(pItem->getLinkedUUID(), true, false, cb);
+			cb->addReorderItem(pItem->getLinkedUUID(), sdParam["index"].asInteger(), fReplace);
+		}
 	}
 	return true;
 }
@@ -4620,7 +4623,10 @@ bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl,
 
 	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
 	if (1 != selItems.size())
-		return false; // "Wear On" only makes sense for a single item selection
+	{
+		// If multiple items are selected the only options that really make sense are "(top)" and "(bottom)" (and then only for clothing)
+		return (sdParam["index"].isString()) && (("top" == sdParam["index"].asString()) || ("bottom" == sdParam["index"].asString()));
+	}
 
 	LLFolderViewItem* pFVItem = pPanel->getRootFolder()->getCurSelectedItem();
 	const LLViewerInventoryItem* pItem = (pFVItem) ? pFVItem->getInventoryItem() : NULL;
@@ -4645,7 +4651,9 @@ bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl,
 		{
 			const LLInventoryItem* pWearableItem = gAgentWearables.getWearableInventoryItem(eType, sdParam["index"].asInteger());
 			if (pWearableItem)
+			{
 				pMenuItem->setLabel(pWearableItem->getName());
+			}
 			else
 			{
 				// NOTE: we needed the inventory item to fetch the asset so this is just over-cautious?
