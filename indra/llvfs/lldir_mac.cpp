@@ -194,7 +194,7 @@ LLDir_Mac::LLDir_Mac()
 		{
 			FSRefToLLString(&cacheDirRef, mOSCacheDir);
 //			(void)CFCreateDirectory(&cacheDirRef, CFSTR("SecondLife"),NULL);
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-08-03 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.0.0d
 			(void)CFCreateDirectory(&cacheDirRef, CFSTR("Catznip"),NULL);
 // [/SL:KB]
 		}

@@ -61,7 +61,7 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
 #include "llgroupactions.h"
 // [/SL:KB]
 #include "lltooltip.h"
@@ -5802,7 +5802,7 @@ class LLShowAgentProfile : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
 void handle_show_support_group()
 {
 	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
@@ -8224,7 +8224,7 @@ void initialize_menus()
 	commit.add("ReportAbuse", boost::bind(&handle_report_abuse));
 	commit.add("BuyCurrency", boost::bind(&handle_buy_currency));
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1.2a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
 	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLPromptShowURL(), "PromptShowURL");
