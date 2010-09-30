@@ -8,4 +8,4 @@
     -> re-added fullscreen menu option (enables only if available for the platform)
     -> re-enabled Alt-Enter shortcut for toggling between "default" and "fullscreen"
 - added : added "Fullscreen" as an option to the Advanced / Set Window Size... floater
-    -> BUG - picking a non-fullscreen window size doesn't switch out of fullscreen
+- fixed : selecting a window size doesn't (properly) restore the window if it's currently maximized [Windows only]

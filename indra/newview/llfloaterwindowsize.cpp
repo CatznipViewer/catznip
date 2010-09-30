@@ -135,7 +135,7 @@ void LLFloaterWindowSize::onClickSet()
 	U32 width = 0;
 	U32 height = 0;
 	std::string resolution = ctrl_window_size->getValue().asString();
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1.2a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
 	if ("fullscreen" == resolution)
 	{
 		gViewerWindow->setFullscreenWindow(TRUE);
