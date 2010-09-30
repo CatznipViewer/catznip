@@ -243,23 +243,27 @@ private:
 	bool mUpdateBaseOrder;
 };
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
-// TODO-Catznip: currently only supports the reordering of one single wearable
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
 class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
 {
 public:
-	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& inv_item, U32 index, bool do_replace) : mFireCount(0) 
+	LLReorderAndUpdateAppearanceOnDestroy() : mFireCount(0) {}
+	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& idItem, U32 index, bool do_replace) : mFireCount(0) 
 	{
-		// HACK-Catznip: to keep things easier we use the high bit to signify "replace" vs "insert"
-		mReorderMap.insert(std::pair<LLUUID, S32>(inv_item, (do_replace) ? index : index | 0x80000000));
+		addReorderItem(idItem, index, do_replace);
 	}
 	virtual ~LLReorderAndUpdateAppearanceOnDestroy();
 
-	virtual void fire(const LLUUID& inv_item)
+	void addReorderItem(const LLUUID& idItem, U32 index, bool do_replace)
 	{
-		llinfos << "callback fired" << llendl;
+		// HACK-Catznip: to keep things easier we use the high bit to signify "replace" vs "insert"
+		mReorderMap.insert(std::pair<LLUUID, S32>(idItem, (do_replace) ? index : index | 0x80000000));
+	}
+
+	virtual void fire(const LLUUID& idItem)
+	{
 		mFireCount++;
-		mIDs.push_back(inv_item);
+		mIDs.push_back(idItem);
 	}
 
 	typedef std::map<LLUUID, S32> reorder_map_t;

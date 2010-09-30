@@ -2755,18 +2755,18 @@ BOOL LLAppearanceMgr::getIsProtectedCOFItem(const LLUUID& obj_id) const
 	*/
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
 LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 {
-	llinfos << "done update appearance on destroy" << llendl;
-	
 	if (!LLApp::isExiting())
 	{
 		LLAppearanceMgr* pAppearanceMgr = LLAppearanceMgr::getInstance();
+
+		const LLUUID idCOF = pAppearanceMgr->getCOF();
 		for (uuid_vec_t::const_iterator itLink = mIDs.begin(); itLink != mIDs.end(); ++itLink)
 		{
 			LLViewerInventoryItem* pItem = gInventory.getItem(*itLink);
-			if (!pItem)
+			if ( (!pItem) || (!pItem->isWearableType()) || (idCOF != pItem->getParentUUID()) )
 				continue;
 			reorder_map_t::const_iterator itReorder = mReorderMap.find(pItem->getLinkedUUID());
 			if (itReorder == mReorderMap.end())
@@ -2775,11 +2775,11 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 			LLInventoryModel::cat_array_t folders;
 			LLInventoryModel::item_array_t items;
 			LLFindWearablesOfType f(pItem->getWearableType());
-			gInventory.collectDescendentsIf(pAppearanceMgr->getCOF(), folders, items, FALSE, f, FALSE);
+			gInventory.collectDescendentsIf(idCOF, folders, items, FALSE, f, FALSE);
 
 			// Need to get the item out of the array
 			LLInventoryModel::item_array_t::iterator itTemp = std::find(items.begin(), items.end(), pItem);
-			if (itTemp!= items.end())
+			if (itTemp != items.end())
 				items.erase(itTemp);
 
 			// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
@@ -2805,16 +2805,18 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 				// Now reorder from our item until the end
 				for (; itTemp < items.end(); ++itTemp)
 				{
-					LLViewerInventoryItem* item = *itTemp;
-					if (!item) continue;
+					LLViewerInventoryItem* pItem = *itTemp;
+					if (!pItem)
+						continue;
 
-					std::string new_order_str = build_order_string(pItem->getWearableType(), itTemp - items.begin());
-					if (new_order_str == item->LLInventoryItem::getDescription()) continue;
+					std::string strOrder = build_order_string(pItem->getWearableType(), itTemp - items.begin());
+					if (strOrder == pItem->LLInventoryItem::getDescription())
+						continue;
 
-					item->setDescription(new_order_str);
-					item->setComplete(TRUE);
- 					item->updateServer(FALSE);
-					gInventory.updateItem(item);
+					pItem->setDescription(strOrder);
+					pItem->setComplete(TRUE);
+ 					pItem->updateServer(FALSE);
+					gInventory.updateItem(pItem);
 				}
 			}
 		}
