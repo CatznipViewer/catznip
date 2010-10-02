@@ -4577,7 +4577,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 // [/SL:KB]
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.2.0a) | Added: Catznip-2.0.0d
 		if (item)
 		{
 			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", TRUE);
