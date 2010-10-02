@@ -1,0 +1,5 @@
+[Inventory/MultiWear]
+- dependency : depends on Inventory/MultiAction
+- dependency : [partial] depends on Appearance/Misc to "fix" LLAppearanceMgr::filterWearableItems
+- added : LLWearableBridge::performActionBatch() wears multiple wearables at once
+    -> fixes some instances of COF "corruption"
