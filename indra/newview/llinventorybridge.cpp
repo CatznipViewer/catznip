@@ -3972,6 +3972,102 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-05-31 (Catznip-2.1.2a) | Modified: Catznip-2.0.1a
+class WearAttachmentsCallback : public LLInventoryCallback
+{
+public:
+	WearAttachmentsCallback() {}
+	void fire(const LLUUID& idItem)
+	{
+		mItemIds.push_back(idItem);
+	}
+protected:
+	~WearAttachmentsCallback()
+	{
+		if( LLInventoryCallbackManager::is_instantiated() )
+		{
+			LLInventoryModel::item_array_t items;
+			for (std::list<LLUUID>::const_iterator itItemId = mItemIds.begin(); itItemId != mItemIds.end(); ++itItemId)
+			{
+				LLViewerInventoryItem* pItem = gInventory.getItem(*itItemId);
+				if (pItem)
+					items.push_back(pItem);
+			}
+			if (items.count())
+				gAgentWearables.userAttachMultipleAttachments(items);
+		}
+		else
+		{
+			llwarns << "Dropping unhandled WearAttachmentsCallback" << llendl;
+		}
+	}
+private:
+	std::list<LLUUID> mItemIds;
+};
+
+// This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
+void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string action, 
+		                                LLDynamicArray<LLFolderViewEventListener*>& batch)
+{
+	if ( (isAddAction(action)) || (isRemoveAction(action)) || ("open" == action) )
+	{
+		LLInventoryModel::item_array_t itemsAdd; LLAgentWearables::llvo_vec_t itemsRem; 
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
+			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			if (!pObjBridge)
+				continue;
+			LLViewerInventoryItem* pItem = gInventory.getItem(pObjBridge->getUUID());
+			if (!pItem)
+				continue;
+
+			if ( ((isAddAction(action)) || ("open" == action)) && (!get_is_item_worn(pItem->getUUID())) )
+				itemsAdd.push_back(pItem);
+			else if ( (isAgentAvatarValid()) && ((isRemoveAction(action)) || ("open" == action)) )
+			{
+				LLViewerObject* pObj = gAgentAvatarp->getWornAttachment(pItem->getUUID());
+				if (pObj)
+					itemsRem.push_back(pObj);
+			}
+		}
+
+		if (itemsAdd.count())
+		{
+			LLInventoryModel::item_array_t items; LLInventoryCallback* pCallback = NULL;
+			for (S32 idxItem = 0; idxItem < itemsAdd.count(); idxItem++)
+			{
+				LLViewerInventoryItem* pItem = itemsAdd.get(idxItem);
+				if (!pItem)
+					continue;
+
+				if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getRootFolderID()))
+				{
+					items.push_back(pItem);
+				}
+				else if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getLibraryRootFolderID()))
+				{
+					if (!pCallback)
+						pCallback = new WearAttachmentsCallback();
+					copy_inventory_item(gAgent.getID(), pItem->getPermissions().getOwner(), pItem->getUUID(), LLUUID::null, std::string(), pCallback);
+				}
+			}
+			if (items.count())
+				gAgentWearables.userAttachMultipleAttachments(items);
+		}
+
+		if (itemsRem.size())
+		{
+			gAgentWearables.userRemoveMultipleAttachments(itemsRem);
+		}
+	}
+	else
+	{
+		LLItemBridge::performActionBatch(model, action, batch);
+	}
+}
+// [/SL:KB]
+
 void LLObjectBridge::openItem()
 {
 	// object double-click action is to wear/unwear object

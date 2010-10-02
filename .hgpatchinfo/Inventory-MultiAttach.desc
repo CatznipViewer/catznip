@@ -1,0 +1,4 @@
+[Inventory/MultiAttach]
+- dependency : depends on Inventory/MultiAction
+- added : LLObjectBridge::performActionBatch() attaches multiple selected attachments at once (fixes http://jira.secondlife.com/browse/VWR-5063)
+- fixed : <enter>'ing a selection of multiple objects results in "Attachment pending for this spot"
