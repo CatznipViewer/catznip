@@ -693,7 +693,7 @@ void LLAvatarTracker::processNotify(LLMessageSystem* msg, bool online)
 						notify = TRUE;
 //						args["FIRST"] = first;
 //						args["LAST"] = last;
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-06-05 (Catznip-2.2.0a) | Added: Catznip-2.0.1a
 						args["NAME_SLURL"] = LLSLURL("agent", agent_id, "about").getSLURLString();
 // [/SL:KB]
 					}
