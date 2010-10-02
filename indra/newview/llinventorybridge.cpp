@@ -4420,12 +4420,34 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-07-10 (Catznip-2.1.2a) | Modified: Catznip-2.1.1a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
 void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
 		                                  LLDynamicArray<LLFolderViewEventListener*>& batch)
 {
-	if ( (isAddAction(action)) || ("open" == action) || ("wear_add" == action) )
+	// For "open" (aka <enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
+	bool fRemoveOpen = true;
+	if ("open" == action)
+	{
+		for (S32 idx = 0; (idx < batch.count()) && (fRemoveOpen); idx++)
+		{
+			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(batch.get(idx));
+			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
+			if (!pWearableBridge)
+				continue;
+
+			const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pWearableBridge->getUUID());
+			if ( (pItem) && (pItem->isWearableType()) ) 
+			{
+				if (gInventory.isObjectDescendentOf(pWearableBridge->getUUID(), gInventory.getRootFolderID()))
+					fRemoveOpen &= (bool)get_is_item_worn(pItem->getUUID());
+				else
+					fRemoveOpen = false;	// Library items can never be worn
+			}
+		}
+	}
+
+	if ( (isAddAction(action)) || ("wear_add" == action) || (("open" == action) && (!fRemoveOpen)) )
 	{
 		if (!gAgentWearables.areWearablesLoaded())
 		{
@@ -4433,7 +4455,7 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			return;
 		}
 
-		LLInventoryModel::item_array_t items; bool fWarningTrash = false, fWarningIncomplete = false;
+		LLInventoryModel::item_array_t items; bool fWarningTrash = false;
 		for (S32 idx = 0; idx < batch.count(); idx++)
 		{
 			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(batch.get(idx));
@@ -4451,28 +4473,9 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			}
 
 			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pWearableBridge->getUUID());
-			if ( (!pItem) || (!pItem->isWearableType()) )
-			{
-				continue;
-			}
-			else if (!pItem->isFinished())
-			{
-				if (!fWarningIncomplete)
-					LLNotificationsUtil::add("CannotWearInfoNotComplete");
-				fWarningIncomplete = true;	// Don't spam the user with the same warning over and over again
-				continue;
-			}
-
-			if (gInventory.isObjectDescendentOf(pWearableBridge->getUUID(), gInventory.getRootFolderID()))
+			if ( (pItem) && (pItem->isWearableType()) )
 			{
 				items.push_back(pItem);
-			}
-			else if (gInventory.isObjectDescendentOf(pWearableBridge->getUUID(), gInventory.getLibraryRootFolderID()))
-			{
-				// NOTE: this isn't ideal since it'll cause one call to UpdateAppearanceFromCOF per item, but it should be so rare of an
-				//       occurance that it's not really worthwhile (and it won't actually cause anything bad to happen anyway)
-				LLPointer<LLInventoryCallback> cb = new WearOnAvatarCallback();
-				copy_inventory_item(gAgent.getID(), pItem->getPermissions().getOwner(), pItem->getUUID(), LLUUID::null, std::string(), cb);
 			}
 		}
 
@@ -4499,6 +4502,20 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			}
 		}
 	}
+	else if ( (isRemoveAction(action)) || (("open" == action) && (fRemoveOpen)) )
+	{
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(batch.get(idx));
+			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
+			if (!pWearableBridge)
+				continue;
+
+			const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pWearableBridge->getUUID());
+			if ( (pItem) && (pItem->isWearableType()) )
+				LLAppearanceMgr::instance().removeItemFromAvatar(pItem->getUUID());
+		}
+	}
 	else
 	{
 		LLItemBridge::performActionBatch(model, action, batch);
@@ -4510,10 +4527,19 @@ void LLWearableBridge::openItem()
 {
 	LLViewerInventoryItem* item = getItem();
 
-	if (item)
+//	if (item)
+//	{
+//		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
+//	}
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+	if ( (item) && (item->isWearableType()) )
 	{
-		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
+		// Wearable double-click action should match attachment double-click action (=wear/unwear but don't attempt to unwear body parts)
+		bool fIsWorn = get_is_item_worn(mUUID);
+		if ( (!fIsWorn) || (LLAssetType::AT_BODYPART != item->getType()) )
+			performAction(getInventoryModel(), fIsWorn ? "take_off" : "wear");
 	}
+// [/SL:KB]
 }
 
 void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
