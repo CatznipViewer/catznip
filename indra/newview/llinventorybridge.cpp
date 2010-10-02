@@ -4473,7 +4473,7 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			}
 
 			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pWearableBridge->getUUID());
-			if ( (pItem) && (pItem->isWearableType()) )
+			if ( (pItem) && (pItem->isWearableType()) && (!get_is_item_worn(pItem->getUUID())) )
 			{
 				items.push_back(pItem);
 			}
