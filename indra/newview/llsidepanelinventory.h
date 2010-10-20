@@ -28,6 +28,9 @@
 #define LL_LLSIDEPANELINVENTORY_H
 
 #include "llpanel.h"
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+#include "llinventorymodel.h"
+// [/SL:KB]
 
 class LLFolderViewItem;
 class LLInventoryItem;
@@ -65,6 +68,16 @@ protected:
 	void performActionOnSelection(const std::string &action);
 	void updateVerbs();
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+	// Fills an item array with the currently selected items (returns false on error or if no items selected)
+	bool        getSelectedItems(LLInventoryModel::item_array_t& items) /*const*/;
+	// Returns the action that makes sense for the current selection (or an empty string if none)
+	std::string getSelectionAction() /*const*/;
+
+	void onActivePanelChanged(LLInventoryPanel*);
+	void onModelChanged(U32 mask);
+// [/SL:KB]
+
 	//
 	// UI Elements
 	//
@@ -87,11 +100,12 @@ private:
 	LLButton*					mInfoBtn;
 	LLButton*					mShareBtn;
 	LLButton*					mWearBtn;
+/*
 	LLButton*					mPlayBtn;
 	LLButton*					mTeleportBtn;
-	LLButton*					mOverflowBtn;
 	LLButton*					mShopBtn;
-
+*/
+	LLButton*					mOverflowBtn;
 };
 
 #endif //LL_LLSIDEPANELINVENTORY_H
