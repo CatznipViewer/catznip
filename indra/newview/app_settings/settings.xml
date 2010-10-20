@@ -8780,6 +8780,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ShowProfileFloaters</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows resident profiles in a floater rather than the side tray</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
 	<key>ShowScriptErrors</key>
     <map>
       <key>Comment</key>

@@ -33,6 +33,9 @@
 
 #include "llavatarpropertiesprocessor.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+#include "llfloater.h"
+// [/SL:KB]
 #include "llpanelavatar.h"
 #include "llpanelpicks.h"
 #include "llpanelprofile.h"
@@ -123,7 +126,26 @@ BOOL LLPanelProfileView::postBuild()
 	mStatusText = getChild<LLTextBox>("status");
 	mStatusText->setVisible(false);
 
-	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+//	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (!pParentView)
+	{
+		childSetCommitCallback("back", boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+	}
+	else
+	{
+		pParentView->setTitle(getLabel());
+
+		childSetVisible("back", false);
+
+		// HACK-Catznip: we got rid of the back button so we want to align the name and status controls with the rest
+		LLUICtrl* pNameCtrl = getChild<LLUICtrl>("user_name", FALSE);
+		if (pNameCtrl)
+			pNameCtrl->translate(10 - pNameCtrl->getRect().mLeft, 0);
+		mStatusText->translate(10 - mStatusText->getRect().mLeft, 0);
+	}
+// [/SL:KB]
 	
 	return TRUE;
 }
@@ -196,6 +218,12 @@ void LLPanelProfileView::onAvatarNameCached(const LLUUID& id, const std::string&
 {
 	llassert(getAvatarId() == id);
 	getChild<LLUICtrl>("user_name", FALSE)->setValue(first_name + " " + last_name);
+
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (pParentView)
+		pParentView->setTitle(first_name + " " + last_name + " - " + getLabel());
+// [/SL:KB]
 }
 
 // EOF
