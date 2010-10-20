@@ -1,0 +1,5 @@
+[UI/TabRearrange]
+- added: allow drag-arranging of the tab buttons on an LLTabContainer
+	-> TODO: add support for vertical tabs
+- added: allow drag-rearranging of IM tab buttons
+	-> controlled by RearrangeIMTabs debug setting until it's certain that it'll always work
