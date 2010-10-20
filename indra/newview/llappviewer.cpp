@@ -2181,7 +2181,14 @@ bool LLAppViewer::initConfiguration()
     {   
 		// hack to force the skin to default.
         //gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
-		gDirUtilp->setSkinFolder("default");
+//		gDirUtilp->setSkinFolder("default");
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+		gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
+
+		const LLControlVariable* themefolder = gSavedSettings.getControl("SkinCurrentTheme");
+		if ( (themefolder) && (LLStringUtil::null != skinfolder->getValue().asString()) )
+			gDirUtilp->setSkinThemeFolder(themefolder->getValue().asString());
+// [/SL:KB]
     }
 
     mYieldTime = gSavedSettings.getS32("YieldTime");

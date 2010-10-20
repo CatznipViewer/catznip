@@ -1520,6 +1520,14 @@ bool LLUIImageList::initFromFile()
 			+ "textures"
 			+ gDirUtilp->getDirDelimiter()
 			+ "textures.xml");
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+	// path to theme overrides on current skin
+	paths.push_back(gDirUtilp->getSkinThemeDir()
+			+ gDirUtilp->getDirDelimiter() 
+			+ "textures"
+			+ gDirUtilp->getDirDelimiter()
+			+ "textures.xml");
+// [/SL:KB]
 	// path to user overrides on current skin
 	paths.push_back(gDirUtilp->getUserSkinDir() 
 			+ gDirUtilp->getDirDelimiter() 
