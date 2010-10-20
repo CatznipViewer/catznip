@@ -1667,6 +1667,16 @@
                 <menu_item_call.on_click
                  function="View.ZoomOut" />
             </menu_item_call>
+            <menu_item_separator />
+            <menu_item_call
+             label="Toggle Fullscreen"
+             name="Toggle Fullscreen"
+             shortcut="alt|Enter">
+                <menu_item_call.on_click
+                 function="View.Fullscreen" />
+                <menu_item_call.on_enable
+                 function="View.EnableFullscreen" />
+            </menu_item_call>
             <menu_item_separator
              visible="false"/>
             <!-- Made invisible to avoid a dissonance: menu item toggles the menu where it is located. EXT-8069.
