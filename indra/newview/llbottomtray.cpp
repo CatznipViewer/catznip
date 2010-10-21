@@ -1055,6 +1055,10 @@ S32 LLBottomTray::processWidthDecreased(S32 delta_width)
 		}
 	}
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-10-02 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+	processChatbarResize(mNearbyChatBar->getRect().getWidth());
+// [/SL:KB]
+
 	return extra_shrink_width;
 }
 
@@ -1140,6 +1144,10 @@ void LLBottomTray::processWidthIncreased(S32 delta_width)
 		mNearbyChatBar->reshape(chatbar_panel_width_ + delta_panel, mNearbyChatBar->getRect().getHeight());
 		log(mNearbyChatBar, "applied unprocessed delta width");
 	}
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-10-02 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+	processChatbarResize(mNearbyChatBar->getRect().getWidth());
+// [/SL:KB]
 }
 
 void LLBottomTray::processShowButtons(S32& available_width)
@@ -1698,6 +1706,10 @@ void LLBottomTray::processChatbarCustomization(S32 new_width)
 
 	if (delta_width == 0) return;
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-10-02 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
+	processChatbarResize(new_width);
+// [/SL:KB]
+
 	LLView * chiclet_layout_panel = mChicletPanel->getParent();
 	const S32 chiclet_min_width = get_panel_min_width(mToolbarStack, chiclet_layout_panel);
 	const S32 chiclet_panel_width = chiclet_layout_panel->getRect().getWidth();
@@ -1719,5 +1731,17 @@ void LLBottomTray::processChatbarCustomization(S32 new_width)
 		processHideButtons(required_width, buttons_freed_width);
 	}
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+void LLBottomTray::processChatbarResize(S32 new_width)
+{
+	// HACK-Catznip: LLNearbyChatScreenChannel is defined in a cpp file where we can't get to it *sighs*
+	LLControlVariable* pControl = gSavedSettings.getControl("NearbyToastWidth");
+	if ( (pControl) && (0 == pControl->getValue().asInteger()) )
+	{
+		(*pControl->getSignal())(pControl, new_width);
+	}
+}
+// [/SL:KB]
 
 //EOF
