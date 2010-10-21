@@ -1,0 +1,52 @@
+<llsd>
+    <array>
+        <map>
+        <key>name</key>
+            <string>Viewer 2</string>
+        <key>folder</key>
+            <string>default</string>
+        <key>themes</key>
+            <array>
+                <map>
+                <key>name</key>
+                    <string>Default</string>
+                <key>folder</key>
+                    <string>default</string>
+                </map>
+            </array>
+        </map>
+        <map>
+        <key>name</key>
+            <string>StarLight</string>
+        <key>folder</key>
+            <string>starlight</string>
+        <key>themes</key>
+            <array>
+                <map>
+                <key>name</key>
+                    <string>Default</string>
+                <key>folder</key>
+                    <string>default</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Nostalgia Blue</string>
+                <key>folder</key>
+                    <string>blue</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Original Orange</string>
+                <key>folder</key>
+                    <string>orange</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Original Teal</string>
+                <key>folder</key>
+                    <string>teal</string>
+                </map>
+            </array>
+        </map>
+    </array>
+</llsd>

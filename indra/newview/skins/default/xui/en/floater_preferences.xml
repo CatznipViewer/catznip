@@ -105,6 +105,13 @@
          layout="topleft"
          help_topic="preferences_advanced1_tab"
          name="advanced1" />
+        <panel
+		 class="panel_preference_skins"
+         filename="panel_preferences_skins.xml"
+         label="Skins"
+         layout="topleft"
+         help_topic="preferences_skins_tab"
+         name="skins" />
     </tab_container>
 
 </floater>
