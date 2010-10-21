@@ -1,0 +1,2 @@
+[Settings/ClearCache]
+- added : "CatznipClearCacheMask" to optionally prevent purging history settings when the viewer/browser cache is purged
