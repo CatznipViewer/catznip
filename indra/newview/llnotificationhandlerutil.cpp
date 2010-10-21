@@ -149,8 +149,13 @@ bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
 bool LLHandlerUtil::canLogToNearbyChat(const LLNotificationPtr& notification)
 {
 	return notification->getType() == "notifytip"
-			&&  FRIEND_ONLINE != notification->getName()
-			&& FRIEND_OFFLINE != notification->getName()
+//			&&  FRIEND_ONLINE != notification->getName()
+//			&& FRIEND_OFFLINE != notification->getName()
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-08-26 (Catznip-2.2.0a) | Modified: Catznip-2.1.2a
+            && ( ((gSavedSettings.getBOOL("ChatOnlineNotificationToNearbyChat")) && 
+			      ((FRIEND_ONLINE == notification->getName()) || (FRIEND_OFFLINE == notification->getName()))) ||
+			     ((FRIEND_ONLINE != notification->getName()) && (FRIEND_OFFLINE != notification->getName())) )
+// [/SL:KB]
 			&& INVENTORY_ACCEPTED != notification->getName()
 			&& INVENTORY_DECLINED != notification->getName()
 			&& IM_SYSTEM_MESSAGE_TIP != notification->getName();
