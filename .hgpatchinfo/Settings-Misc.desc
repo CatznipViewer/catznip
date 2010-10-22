@@ -1,0 +1,3 @@
+[Settings/Misc]
+- fixed : "Plain text chat history" reverts to FALSE if the relevant preference tab is opened while not logged on
+- added : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
