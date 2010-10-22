@@ -2820,6 +2820,28 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>EmbeddedLandmarkCopyToInventory</key>
+    <map>
+      <key>Comment</key>
+      <string>Copies an embedded landmark to inventory before previewing it</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>EmbeddedTextureStealsFocus</key>
+    <map>
+      <key>Comment</key>
+      <string>Embedded texture preview will receive focus when opened</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>EnableRippleWater</key>
     <map>
       <key>Comment</key>
