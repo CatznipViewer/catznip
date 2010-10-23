@@ -1,0 +1,5 @@
+[Inventory/MultiAttach]
+- dependency : depends on Inventory/MultiAction
+- added      : LLObjectBridge::performActionBatch() attaches multiple selected attachments at once (fixes http://jira.secondlife.com/browse/VWR-5063)
+- changed    : <enter>'ing a selection of attachments will wear them if at least one is unworn or remove them if all are worn
+    -> undesired edge case would be a selection of all worn attachments + 1 unworn wearable => wearable will get worn while the attachments are detached

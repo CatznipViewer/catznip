@@ -432,6 +432,10 @@ public:
 				   U32 flags);
 	virtual LLUIImagePtr	getIcon() const;
 	virtual void			performAction(LLInventoryModel* model, std::string action);
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-03-29 (Catznip-2.2.0a) | Modified: Catznip-2.0.0g
+	virtual void            performActionBatch(LLInventoryModel* model, std::string action, 
+		                                       LLDynamicArray<LLFolderViewEventListener*>& batch);
+// [/SL:KB]
 	virtual void			openItem();
 	virtual std::string getLabelSuffix() const;
 	virtual void			buildContextMenu(LLMenuGL& menu, U32 flags);
