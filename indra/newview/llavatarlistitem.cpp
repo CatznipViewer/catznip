@@ -286,6 +286,11 @@ void LLAvatarListItem::setTextField(const std::string& text)
 	mTextField->setValue(text);
 }
 
+void LLAvatarListItem::setTextFieldDistance(F32 distance)
+{
+	mTextField->setValue(llformat("%3.2f m", distance));
+}
+
 void LLAvatarListItem::setTextFieldSeconds(U32 secs_since)
 {
 	mTextField->setValue(formatSeconds(secs_since));

@@ -96,6 +96,7 @@ public:
 //	void setLastInteractionTime(U32 secs_since);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
 	void setTextField(const std::string& text);
+	void setTextFieldDistance(F32 distance);
 	void setTextFieldSeconds(U32 secs_since);
 // [/SL:KB]
 	//Show/hide profile/info btn, translating speaker indicator and avatar name coordinates accordingly

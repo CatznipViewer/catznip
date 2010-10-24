@@ -154,6 +154,10 @@ public:
 		}
 	};
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	const id_to_pos_map_t& getAvatarsPositions() { return mAvatarsPositions; }
+// [/SL:KB]
+
 protected:
 	virtual bool doCompare(const LLAvatarListItem* item1, const LLAvatarListItem* item2) const
 	{
@@ -769,6 +773,9 @@ void LLPanelPeople::updateNearbyList()
 
 	LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
 	mNearbyList->setDirty();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	updateDistances();
+// [/SL:KB]
 
 	DISTANCE_COMPARATOR.updateAvatarsPositions(positions, mNearbyList->getIDs());
 	LLActiveSpeakerMgr::instance().update(TRUE);
@@ -784,6 +791,23 @@ void LLPanelPeople::updateRecentList()
 }
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLPanelPeople::updateDistances()
+{
+	// Make sure we're using the same data as the distance comparator
+	const LLAvatarItemDistanceComparator::id_to_pos_map_t& posAvatars = DISTANCE_COMPARATOR.getAvatarsPositions();
+	const LLVector3d& posSelf = gAgent.getPositionGlobal();
+
+	std::vector<LLPanel*> items;
+	mNearbyList->getItems(items);
+	for (std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLAvatarListItem* pItem = static_cast<LLAvatarListItem*>(*itItem);
+		const LLVector3d& posAvatar = posAvatars.find(pItem->getAvatarId())->second;
+
+		pItem->setTextFieldDistance(dist_vec(posAvatar, posSelf));
+	}
+}
+
 // Refresh shown time of our last interaction with all listed avatars.
 void LLPanelPeople::updateLastInteractionTimes()
 {
