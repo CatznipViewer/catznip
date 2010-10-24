@@ -71,7 +71,7 @@
      layout="topleft"
      left_pad="5"
      right="-164"
-     name="last_interaction"
+     name="text_field"
      text_color="LtGray_50"
      value="0s"
      width="35" />

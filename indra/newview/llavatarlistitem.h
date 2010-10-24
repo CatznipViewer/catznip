@@ -93,13 +93,20 @@ public:
 	void setHighlight(const std::string& highlight);
 	void setState(EItemState item_style);
 	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
-	void setLastInteractionTime(U32 secs_since);
+//	void setLastInteractionTime(U32 secs_since);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	void setTextField(const std::string& text);
+	void setTextFieldSeconds(U32 secs_since);
+// [/SL:KB]
 	//Show/hide profile/info btn, translating speaker indicator and avatar name coordinates accordingly
 	void setShowProfileBtn(bool show);
 	void setShowInfoBtn(bool show);
 	void showSpeakingIndicator(bool show);
 	void setShowPermissions(bool show) { mShowPermissions = show; };
-	void showLastInteractionTime(bool show);
+//	void showLastInteractionTime(bool show);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	void showTextField(bool show);
+// [/SL:KB]
 	void setAvatarIconVisible(bool visible);
 	
 	const LLUUID& getAvatarId() const;
@@ -151,7 +158,10 @@ private:
 		ALIC_PERMISSION_MAP,
 		ALIC_PERMISSION_EDIT_MINE,
 		ALIC_PERMISSION_EDIT_THEIRS,
-		ALIC_INTERACTION_TIME,
+//		ALIC_INTERACTION_TIME,
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		ALIC_TEXT_FIELD,
+// [/SL:KB]
 		ALIC_NAME,
 		ALIC_ICON,
 		ALIC_COUNT,
@@ -193,7 +203,10 @@ private:
 	LLView* getItemChildView(EAvatarListItemChildIndex child_index);
 
 	LLTextBox* mAvatarName;
-	LLTextBox* mLastInteractionTime;
+//	LLTextBox* mLastInteractionTime;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLTextBox* mTextField;
+// [/SL:KB]
 	LLStyle::Params mAvatarNameStyle;
 	
 	LLButton* mInfoBtn;

@@ -60,7 +60,10 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 :	LLPanel(),
 	mAvatarIcon(NULL),
 	mAvatarName(NULL),
-	mLastInteractionTime(NULL),
+//	mLastInteractionTime(NULL),
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	mTextField(NULL),
+// [/SL:KB]
 	mIconPermissionOnline(NULL),
 	mIconPermissionMap(NULL),
 	mIconPermissionEditMine(NULL),
@@ -92,7 +95,11 @@ BOOL  LLAvatarListItem::postBuild()
 {
 	mAvatarIcon = getChild<LLAvatarIconCtrl>("avatar_icon");
 	mAvatarName = getChild<LLTextBox>("avatar_name");
-	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
+//	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	mTextField = getChild<LLTextBox>("text_field");
+	mTextField->setVisible(false);
+// [/SL:KB]
 
 	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
 	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
@@ -260,16 +267,30 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, b
 	}
 }
 
-void LLAvatarListItem::showLastInteractionTime(bool show)
+void LLAvatarListItem::showTextField(bool show)
 {
-	mLastInteractionTime->setVisible(show);
+//	mLastInteractionTime->setVisible(show);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	mTextField->setVisible(show);
+// [/SL:KB]
 	updateChildren();
 }
 
-void LLAvatarListItem::setLastInteractionTime(U32 secs_since)
+//void LLAvatarListItem::setLastInteractionTime(U32 secs_since)
+//{
+//	mLastInteractionTime->setValue(formatSeconds(secs_since));
+//}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLAvatarListItem::setTextField(const std::string& text)
 {
-	mLastInteractionTime->setValue(formatSeconds(secs_since));
+	mTextField->setValue(text);
 }
+
+void LLAvatarListItem::setTextFieldSeconds(U32 secs_since)
+{
+	mTextField->setValue(formatSeconds(secs_since));
+}
+// [/SL:KB]
 
 void LLAvatarListItem::setShowInfoBtn(bool show)
 {
@@ -480,18 +501,27 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	S32 permission_edit_theirs_width = avatar_item->mIconPermissionEditMine->getRect().mLeft - avatar_item->mIconPermissionEditTheirs->getRect().mLeft;
 
 	// last interaction time textbox width + padding
-	S32 last_interaction_time_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mLastInteractionTime->getRect().mLeft;
+//	S32 last_interaction_time_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mLastInteractionTime->getRect().mLeft;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	S32 text_field_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+// [/SL:KB]
 
 	// avatar icon width + padding
 	S32 icon_width = avatar_item->mAvatarName->getRect().mLeft - avatar_item->mAvatarIcon->getRect().mLeft;
 
 	sLeftPadding = avatar_item->mAvatarIcon->getRect().mLeft;
-	sRightNamePadding = avatar_item->mLastInteractionTime->getRect().mLeft - avatar_item->mAvatarName->getRect().mRight;
+//	sRightNamePadding = avatar_item->mLastInteractionTime->getRect().mLeft - avatar_item->mAvatarName->getRect().mRight;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	sRightNamePadding = avatar_item->mTextField->getRect().mLeft - avatar_item->mAvatarName->getRect().mRight;
+// [/SL:KB]
 
 	S32 index = ALIC_COUNT;
 	sChildrenWidths[--index] = icon_width;
 	sChildrenWidths[--index] = 0; // for avatar name we don't need its width, it will be calculated as "left available space"
-	sChildrenWidths[--index] = last_interaction_time_width;
+//	sChildrenWidths[--index] = last_interaction_time_width;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	sChildrenWidths[--index] = text_field_width;
+// [/SL:KB]
 	sChildrenWidths[--index] = permission_edit_theirs_width;
 	sChildrenWidths[--index] = permission_edit_mine_width;
 	sChildrenWidths[--index] = permission_map_width;
@@ -611,8 +641,12 @@ LLView* LLAvatarListItem::getItemChildView(EAvatarListItemChildIndex child_view_
 	case ALIC_NAME:
 		child_view = mAvatarName;
 		break;
-	case ALIC_INTERACTION_TIME:
-		child_view = mLastInteractionTime;
+//	case ALIC_INTERACTION_TIME:
+//		child_view = mLastInteractionTime;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	case ALIC_TEXT_FIELD:
+		child_view = mTextField;
+// [/SL:KB]
 		break;
 	case ALIC_SPEAKER_INDICATOR:
 		child_view = mSpeakingIndicator;
