@@ -99,6 +99,7 @@ BOOL  LLAvatarListItem::postBuild()
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
 	mTextField = getChild<LLTextBox>("text_field");
 	mTextField->setVisible(false);
+	mTextField->setRightAlign();
 // [/SL:KB]
 
 	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
@@ -288,7 +289,7 @@ void LLAvatarListItem::setTextField(const std::string& text)
 
 void LLAvatarListItem::setTextFieldDistance(F32 distance)
 {
-	mTextField->setValue(llformat("%3.2f m", distance));
+	mTextField->setValue(llformat("%3.1fm", distance));
 }
 
 void LLAvatarListItem::setTextFieldSeconds(U32 secs_since)

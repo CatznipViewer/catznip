@@ -70,11 +70,11 @@
      height="15"
      layout="topleft"
      left_pad="5"
-     right="-164"
+     right="-171"
      name="text_field"
      text_color="LtGray_50"
      value="0s"
-     width="35" />
+     width="42" />
     <icon
      height="16"
      follows="right"
