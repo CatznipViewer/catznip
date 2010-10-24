@@ -66,6 +66,10 @@
 #define FRIEND_LIST_UPDATE_TIMEOUT	0.5
 #define NEARBY_LIST_UPDATE_INTERVAL 1
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+static const F32 LIT_UPDATE_PERIOD = 5;
+// [/SL:KB]
+
 static const std::string NEARBY_TAB_NAME	= "nearby_panel";
 static const std::string FRIENDS_TAB_NAME	= "friends_panel";
 static const std::string GROUP_TAB_NAME		= "groups_panel";
@@ -546,6 +550,10 @@ BOOL LLPanelPeople::postBuild()
 	mRecentList->setNoItemsMsg(getString("no_recent_people"));
 	mRecentList->setNoFilteredItemsMsg(getString("no_filtered_recent_people"));
 	mRecentList->setShowIcons("RecentListShowIcons");
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	mRecentList->setTextFieldCallback(boost::bind(&LLPanelPeople::updateLastInteractionTimes, this));
+	mRecentList->setTextFieldRefresh(LIT_UPDATE_PERIOD);
+// [/SL:KB]
 
 	mGroupList = getChild<LLGroupList>("group_list");
 	mGroupList->setNoItemsMsg(getString("no_groups_msg"));
@@ -774,6 +782,25 @@ void LLPanelPeople::updateRecentList()
 	LLRecentPeople::instance().get(mRecentList->getIDs());
 	mRecentList->setDirty();
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// Refresh shown time of our last interaction with all listed avatars.
+void LLPanelPeople::updateLastInteractionTimes()
+{
+	S32 now = (S32)LLDate::now().secondsSinceEpoch();
+	std::vector<LLPanel*> items;
+	mRecentList->getItems(items);
+
+	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
+	{
+		// *TODO: error handling
+		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
+		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
+		if (secs_since >= 0)
+			item->setTextFieldSeconds(secs_since);
+	}
+}
+// [/SL:KB]
 
 void LLPanelPeople::buttonSetVisible(std::string btn_name, BOOL visible)
 {
