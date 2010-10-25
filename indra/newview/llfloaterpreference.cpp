@@ -251,6 +251,7 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 			LLTeleportHistoryStorage::getInstance()->save();
 		}
 // [/SL:KB]
+	}
 	
 	return false;
 }
