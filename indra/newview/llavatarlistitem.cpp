@@ -102,10 +102,21 @@ BOOL  LLAvatarListItem::postBuild()
 	mTextField->setRightAlign();
 // [/SL:KB]
 
-	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
-	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
-	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
+//	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
+//	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
+//	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
 	mIconPermissionEditTheirs = getChild<LLIconCtrl>("permission_edit_theirs_icon");
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	// NOTE-Catznip: we're leaving the names unchanged even though they're buttons now because we change too much LL code otherwise
+	mIconPermissionOnline = getChild<LLButton>("permission_online_icon");
+	mIconPermissionMap = getChild<LLButton>("permission_map_icon");
+	mIconPermissionEditMine = getChild<LLButton>("permission_edit_mine_icon");
+
+	mIconPermissionOnline->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_ONLINE_STATUS));
+	mIconPermissionMap->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_MAP_LOCATION));
+	mIconPermissionEditMine->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_MODIFY_OBJECTS));
+// [/SL:KB]
+
 	mIconPermissionOnline->setVisible(false);
 	mIconPermissionMap->setVisible(false);
 	mIconPermissionEditMine->setVisible(false);
@@ -152,7 +163,10 @@ void LLAvatarListItem::onMouseEnter(S32 x, S32 y, MASK mask)
 	mHovered = true;
 	LLPanel::onMouseEnter(x, y, mask);
 
-	showPermissions(mShowPermissions);
+//	showPermissions(mShowPermissions);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	refreshPermissions();
+// [/SL:KB]
 	updateChildren();
 }
 
@@ -165,7 +179,10 @@ void LLAvatarListItem::onMouseLeave(S32 x, S32 y, MASK mask)
 	mHovered = false;
 	LLPanel::onMouseLeave(x, y, mask);
 
-	showPermissions(false);
+//	showPermissions(false);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	refreshPermissions();
+// [/SL:KB]
 	updateChildren();
 }
 
@@ -177,7 +194,10 @@ void LLAvatarListItem::changed(U32 mask)
 
 	if (mask & LLFriendObserver::POWERS)
 	{
-		showPermissions(mShowPermissions && mHovered);
+//		showPermissions(mShowPermissions && mHovered);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		refreshPermissions();
+// [/SL:KB]
 		updateChildren();
 	}
 }
@@ -341,6 +361,12 @@ void LLAvatarListItem::onProfileBtnClick()
 {
 	LLAvatarActions::showProfile(mAvatarId);
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLAvatarListItem::onPermissionBtnToggle(S32 rightToggle)
+{
+}
+// [/SL:KB]
 
 BOOL LLAvatarListItem::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
@@ -614,14 +640,35 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << "name rect after: " << name_view_rect << LL_ENDL;
 }
 
-bool LLAvatarListItem::showPermissions(bool visible)
+//bool LLAvatarListItem::showPermissions(bool visible)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+bool LLAvatarListItem::refreshPermissions()
+// [/SL:KB]
 {
+	static const std::string strUngrantedOverlay = "Permission_Ungranted";
+
 	const LLRelationship* relation = LLAvatarTracker::instance().getBuddyInfo(getAvatarId());
-	if(relation && visible)
+//	if(relation && visible)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	if(relation && mShowPermissions && mHovered)
+// [/SL:KB]
 	{
-		mIconPermissionOnline->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS));
-		mIconPermissionMap->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION));
-		mIconPermissionEditMine->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		bool fGrantedOnline = relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS);
+		mIconPermissionOnline->setVisible( (fGrantedOnline) || (mHovered) );
+		mIconPermissionOnline->setImageOverlay( (fGrantedOnline) ? "" : strUngrantedOverlay);
+
+		bool fGrantedMap = relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION);
+		mIconPermissionMap->setVisible( (fGrantedMap) || (mHovered) );
+		mIconPermissionMap->setImageOverlay( (fGrantedMap) ? "" : strUngrantedOverlay);
+
+		bool fGrantedEditMine = relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS);
+		mIconPermissionEditMine->setVisible( (fGrantedEditMine) || (mHovered) );
+		mIconPermissionEditMine->setImageOverlay( (fGrantedEditMine) ? "" : strUngrantedOverlay);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+//		mIconPermissionOnline->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS));
+//		mIconPermissionMap->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION));
+//		mIconPermissionEditMine->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS));
 		mIconPermissionEditTheirs->setVisible(relation->isRightGrantedFrom(LLRelationship::GRANT_MODIFY_OBJECTS));
 	}
 	else

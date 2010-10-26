@@ -103,9 +103,10 @@ public:
 	void setShowProfileBtn(bool show);
 	void setShowInfoBtn(bool show);
 	void showSpeakingIndicator(bool show);
-	void setShowPermissions(bool show) { mShowPermissions = show; };
+//	void setShowPermissions(bool show) { mShowPermissions = show; };
 //	void showLastInteractionTime(bool show);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	void setShowPermissions(bool show) { mShowPermissions = show; refreshPermissions(); updateChildren(); };
 	void showTextField(bool show);
 // [/SL:KB]
 	void setAvatarIconVisible(bool visible);
@@ -116,6 +117,9 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	void onPermissionBtnToggle(S32 rightToggle);
+// [/SL:KB]
 
 	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
@@ -128,13 +132,18 @@ protected:
 	LLAvatarIconCtrl* mAvatarIcon;
 
 	/// Indicator for permission to see me online.
-	LLIconCtrl* mIconPermissionOnline;
+//	LLIconCtrl* mIconPermissionOnline;
 	/// Indicator for permission to see my position on the map.
-	LLIconCtrl* mIconPermissionMap;
+//	LLIconCtrl* mIconPermissionMap;
 	/// Indicator for permission to edit my objects.
-	LLIconCtrl* mIconPermissionEditMine;
+//	LLIconCtrl* mIconPermissionEditMine;
 	/// Indicator for permission to edit their objects.
 	LLIconCtrl* mIconPermissionEditTheirs;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLButton* mIconPermissionOnline;
+	LLButton* mIconPermissionMap;
+	LLButton* mIconPermissionEditMine;
+// [/SL:KB]
 
 private:
 
@@ -193,7 +202,10 @@ private:
 	 *
 	 * Need to call updateChildren() afterwards to sort out their layout.
 	 */
-	bool showPermissions(bool visible);
+//	bool showPermissions(bool visible);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	bool refreshPermissions();
+// [/SL:KB]
 
 	/**
 	 * Gets child view specified by index.
