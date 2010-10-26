@@ -38,15 +38,14 @@ public:
 	LLFloaterSearchReplace(const LLSD& sdKey);
 	~LLFloaterSearchReplace();
 
-	static void                    show(LLTextEditor* pEditor);
-	static LLFloaterSearchReplace* getInstance() { return LLFloaterReg::findTypedInstance<LLFloaterSearchReplace>("search_replace"); }
+	/*virtual*/ bool hasAccelerators() const;
+	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
+	/*virtual*/	BOOL postBuild();
 
-	/*virtual*/	BOOL	postBuild();
-
+public:
 	LLTextEditor* getEditor() { return mEditor; }
 
-	virtual bool hasAccelerators() const;
-	virtual BOOL handleKeyHere(KEY key, MASK mask);
+	static void show(LLTextEditor* pEditor);
 
 protected:
 	void onBtnSearch();

@@ -33,8 +33,7 @@
 #include "lltexteditor.h"
 
 LLFloaterSearchReplace::LLFloaterSearchReplace(const LLSD& sdKey)
-:	LLFloater(sdKey),
-	mEditor(NULL)
+	: LLFloater(sdKey), mEditor(NULL)
 {
 }
 
