@@ -29,16 +29,16 @@
 
 #include "llfloater.h"
 
-class LLScriptEdCore;
+class LLTextEditor;
 
-class LLFloaterScriptSearch : public LLFloater
+class LLFloaterSearchReplace : public LLFloater
 {
 public:
-	LLFloaterScriptSearch(LLScriptEdCore* editor_core);
-	~LLFloaterScriptSearch();
+	LLFloaterSearchReplace(LLTextEditor* editor);
+	~LLFloaterSearchReplace();
 
 	/*virtual*/	BOOL	postBuild();
-	static void show(LLScriptEdCore* editor_core);
+	static void show(LLTextEditor* editor_core);
 	static void onBtnSearch(void* userdata);
 	void handleBtnSearch();
 
@@ -48,17 +48,17 @@ public:
 	static void onBtnReplaceAll(void* userdata);
 	void handleBtnReplaceAll();
 
-	LLScriptEdCore* getEditorCore() { return mEditorCore; }
-	static LLFloaterScriptSearch* getInstance() { return sInstance; }
+	LLTextEditor* getEditor() { return mEditor; }
+	static LLFloaterSearchReplace* getInstance() { return sInstance; }
 
 	virtual bool hasAccelerators() const;
 	virtual BOOL handleKeyHere(KEY key, MASK mask);
 
 private:
 
-	LLScriptEdCore* mEditorCore;
+	LLTextEditor* mEditor;
 
-	static LLFloaterScriptSearch*	sInstance;
+	static LLFloaterSearchReplace*	sInstance;
 };
 
 #endif // LL_FLOATERSEARCHREPLACE_H

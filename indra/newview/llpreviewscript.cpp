@@ -161,8 +161,12 @@ LLScriptEdCore::~LLScriptEdCore()
 	deleteBridges();
 
 	// If the search window is up for this editor, close it.
-	LLFloaterScriptSearch* script_search = LLFloaterScriptSearch::getInstance();
-	if (script_search && script_search->getEditorCore() == this)
+//	LLFloaterScriptSearch* script_search = LLFloaterScriptSearch::getInstance();
+//	if (script_search && script_search->getEditorCore() == this)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLFloaterSearchReplace* script_search = LLFloaterSearchReplace::getInstance();
+	if (script_search && script_search->getEditor() == mEditor)
+// [/SL:KB]
 	{
 		script_search->closeFloater();
 		delete script_search;
@@ -295,7 +299,10 @@ void LLScriptEdCore::initMenu()
 	menuItem->setEnableCallback(boost::bind(&LLTextEditor::canSelectAll, mEditor));
 
 	menuItem = getChild<LLMenuItemCallGL>("Search / Replace...");
-	menuItem->setClickCallback(boost::bind(&LLFloaterScriptSearch::show, this));
+//	menuItem->setClickCallback(boost::bind(&LLFloaterScriptSearch::show, this));
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	menuItem->setClickCallback(boost::bind(&LLFloaterSearchReplace::show, mEditor));
+// [/SL:KB]
 
 	menuItem = getChild<LLMenuItemCallGL>("Help...");
 	menuItem->setClickCallback(boost::bind(&LLScriptEdCore::onBtnHelp, this));
@@ -936,7 +943,10 @@ void LLPreviewLSL::onSearchReplace(void* userdata)
 {
 	LLPreviewLSL* self = (LLPreviewLSL*)userdata;
 	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
+//	LLFloaterScriptSearch::show(sec);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLFloaterSearchReplace::show(sec->mEditor);
+// [/SL:KB]
 }
 
 // static
@@ -1656,7 +1666,10 @@ void LLLiveLSLEditor::onSearchReplace(void* userdata)
 	LLLiveLSLEditor* self = (LLLiveLSLEditor*)userdata;
 
 	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
+//	LLFloaterScriptSearch::show(sec);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLFloaterSearchReplace::show(sec->mEditor);
+// [/SL:KB]
 }
 
 struct LLLiveLSLSaveData
