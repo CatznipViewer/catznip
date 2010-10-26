@@ -163,14 +163,10 @@ LLScriptEdCore::~LLScriptEdCore()
 	// If the search window is up for this editor, close it.
 //	LLFloaterScriptSearch* script_search = LLFloaterScriptSearch::getInstance();
 //	if (script_search && script_search->getEditorCore() == this)
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
-	LLFloaterSearchReplace* script_search = LLFloaterSearchReplace::getInstance();
-	if (script_search && script_search->getEditor() == mEditor)
-// [/SL:KB]
-	{
-		script_search->closeFloater();
-		delete script_search;
-	}
+//	{
+//		script_search->closeFloater();
+//		delete script_search;
+//	}
 }
 
 BOOL LLScriptEdCore::postBuild()

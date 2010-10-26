@@ -85,6 +85,9 @@
 #include "llfloaterreporter.h"
 #include "llfloaterscriptdebug.h"
 #include "llfloaterscriptlimits.h"
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+#include "llfloatersearchreplace.h"
+// [/SL:KB]
 #include "llfloatersellland.h"
 #include "llfloatersettingsdebug.h"
 #include "llfloatersidetraytab.h"
@@ -241,6 +244,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("stop_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotRunQueue>);
 	LLFloaterReg::add("snapshot", "floater_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSnapshot>);
 	LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);	
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLFloaterReg::add("search_replace", "floater_script_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchReplace>);	
+// [/SL:KB]
 	
 	LLFloaterUIPreviewUtil::registerFloater();
 	LLFloaterReg::add("upload_anim", "floater_animation_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAnimPreview>, "upload");

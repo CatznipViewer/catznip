@@ -28,37 +28,33 @@
 #define LL_FLOATERSEARCHREPLACE_H
 
 #include "llfloater.h"
+#include "llfloaterreg.h"
 
 class LLTextEditor;
 
 class LLFloaterSearchReplace : public LLFloater
 {
 public:
-	LLFloaterSearchReplace(LLTextEditor* editor);
+	LLFloaterSearchReplace(const LLSD& sdKey);
 	~LLFloaterSearchReplace();
 
+	static void                    show(LLTextEditor* pEditor);
+	static LLFloaterSearchReplace* getInstance() { return LLFloaterReg::findTypedInstance<LLFloaterSearchReplace>("search_replace"); }
+
 	/*virtual*/	BOOL	postBuild();
-	static void show(LLTextEditor* editor_core);
-	static void onBtnSearch(void* userdata);
-	void handleBtnSearch();
-
-	static void onBtnReplace(void* userdata);
-	void handleBtnReplace();
-
-	static void onBtnReplaceAll(void* userdata);
-	void handleBtnReplaceAll();
 
 	LLTextEditor* getEditor() { return mEditor; }
-	static LLFloaterSearchReplace* getInstance() { return sInstance; }
 
 	virtual bool hasAccelerators() const;
 	virtual BOOL handleKeyHere(KEY key, MASK mask);
 
+protected:
+	void onBtnSearch();
+	void onBtnReplace();
+	void onBtnReplaceAll();
+
 private:
-
 	LLTextEditor* mEditor;
-
-	static LLFloaterSearchReplace*	sInstance;
 };
 
 #endif // LL_FLOATERSEARCHREPLACE_H

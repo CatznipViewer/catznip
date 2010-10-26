@@ -29,101 +29,79 @@
 #include "llfloatersearchreplace.h"
 
 #include "llcheckboxctrl.h"
-#include "llpreviewscript.h"
+#include "llmultifloater.h"
 #include "lltexteditor.h"
 
-LLFloaterSearchReplace* LLFloaterSearchReplace::sInstance = NULL;
-
-LLFloaterSearchReplace::LLFloaterSearchReplace(LLTextEditor* editor)
-:	LLFloater(LLSD()),
-	mEditor(editor)
+LLFloaterSearchReplace::LLFloaterSearchReplace(const LLSD& sdKey)
+:	LLFloater(sdKey),
+	mEditor(NULL)
 {
-	buildFromFile("floater_script_search.xml");
+}
 
-	sInstance = this;
-	
-	// find floater in which editor is embedded
-	LLView* viewp = (LLView*)editor;
-	while(viewp)
+LLFloaterSearchReplace::~LLFloaterSearchReplace()
+{
+}
+
+//static 
+void LLFloaterSearchReplace::show(LLTextEditor* pEditor)
+{
+	LLFloaterSearchReplace* pSelf = LLFloaterReg::getTypedInstance<LLFloaterSearchReplace>("search_replace");
+	if (!pSelf)
+		return;
+
+	pSelf->mEditor = pEditor;
+	if (pEditor)
 	{
-		LLFloater* floaterp = dynamic_cast<LLFloater*>(viewp);
-		if (floaterp)
+		LLFloater *pDependeeNew = NULL, *pDependeeOld = pSelf->getDependee();
+		LLView* pView = pEditor->getParent();
+		while (pView)
 		{
-			floaterp->addDependentFloater(this);
-			break;
+			pDependeeNew = dynamic_cast<LLFloater*>(pView);
+			if (pDependeeNew)
+			{
+				if (pDependeeNew != pDependeeOld)
+				{
+					if (pDependeeOld)
+						pDependeeOld->removeDependentFloater(pSelf);
+
+					if (!pDependeeNew->getHost())
+						pDependeeNew->addDependentFloater(pSelf);
+					else
+						pDependeeNew->getHost()->addDependentFloater(pSelf);
+				}
+				break;
+			}
+			pView = pView->getParent();
 		}
-		viewp = viewp->getParent();
+
+		pSelf->openFloater();
 	}
 }
 
 BOOL LLFloaterSearchReplace::postBuild()
 {
-	childSetAction("search_btn", onBtnSearch,this);
-	childSetAction("replace_btn", onBtnReplace,this);
-	childSetAction("replace_all_btn", onBtnReplaceAll,this);
+	childSetAction("search_btn", boost::bind(&LLFloaterSearchReplace::onBtnSearch, this));
+	childSetAction("replace_btn", boost::bind(&LLFloaterSearchReplace::onBtnReplace, this));
+	childSetAction("replace_all_btn", boost::bind(&LLFloaterSearchReplace::onBtnReplaceAll, this));
 
 	setDefaultBtn("search_btn");
 
 	return TRUE;
 }
 
-//static 
-void LLFloaterSearchReplace::show(LLTextEditor* editor)
-{
-	if (sInstance && sInstance->mEditor && sInstance->mEditor != editor)
-	{
-		sInstance->closeFloater();
-		delete sInstance;
-	}
-
-	if (!sInstance)
-	{
-		// sInstance will be assigned in the constructor.
-		new LLFloaterSearchReplace(editor);
-	}
-
-	sInstance->openFloater();
-}
-
-LLFloaterSearchReplace::~LLFloaterSearchReplace()
-{
-	sInstance = NULL;
-}
-
-// static 
-void LLFloaterSearchReplace::onBtnSearch(void *userdata)
-{
-	LLFloaterSearchReplace* self = (LLFloaterSearchReplace*)userdata;
-	self->handleBtnSearch();
-}
-
-void LLFloaterSearchReplace::handleBtnSearch()
+void LLFloaterSearchReplace::onBtnSearch()
 {
 	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
 	mEditor->selectNext(getChild<LLUICtrl>("search_text")->getValue().asString(), caseChk->get());
 }
 
-// static 
-void LLFloaterSearchReplace::onBtnReplace(void *userdata)
-{
-	LLFloaterSearchReplace* self = (LLFloaterSearchReplace*)userdata;
-	self->handleBtnReplace();
-}
-
-void LLFloaterSearchReplace::handleBtnReplace()
+void LLFloaterSearchReplace::onBtnReplace()
 {
 	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
 	mEditor->replaceText(getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get());
 }
 
-// static 
-void LLFloaterSearchReplace::onBtnReplaceAll(void *userdata)
-{
-	LLFloaterSearchReplace* self = (LLFloaterSearchReplace*)userdata;
-	self->handleBtnReplaceAll();
-}
-
-void LLFloaterSearchReplace::handleBtnReplaceAll()
+void LLFloaterSearchReplace::onBtnReplaceAll()
 {
 	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
 	mEditor->replaceTextAll(getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get());
