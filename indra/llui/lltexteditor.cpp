@@ -330,7 +330,10 @@ void LLTextEditor::setText(const LLStringExplicit &utf8str, const LLStyle::Param
 	resetDirty();
 }
 
-void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
+//void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+// [/SL:KB]
 {
 	if (search_text_in.empty())
 	{
@@ -351,17 +354,35 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 		
 		if (selected_text == search_text)
 		{
-			// We already have this word selected, we are searching for the next.
-			setCursorPos(mCursorPos + search_text.size());
+//			// We already have this word selected, we are searching for the next.
+//			setCursorPos(mCursorPos + search_text.size());
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+			if (search_up)
+			{
+				// We already have this word selected, we are searching for the previous.
+				setCursorPos(llmax(0, mCursorPos - 1));
+			}
+			else
+			{
+				// We already have this word selected, we are searching for the next.
+				setCursorPos(mCursorPos + search_text.size());
+			}
+// [/SL:KB]
 		}
 	}
 	
-	S32 loc = text.find(search_text,mCursorPos);
-	
+//	S32 loc = text.find(search_text,mCursorPos);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	S32 loc = (search_up) ? text.rfind(search_text, llmax(0, mCursorPos - (S32)search_text.size())) : text.find(search_text,mCursorPos);
+// [/SL:KB]
+
 	// If Maybe we wrapped, search again
 	if (wrap && (-1 == loc))
 	{	
-		loc = text.find(search_text);
+//		loc = text.find(search_text);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		loc = (search_up) ? text.rfind(search_text) : text.find(search_text);
+// [/SL:KB]
 	}
 	
 	// If still -1, then search_text just isn't found.
@@ -380,8 +401,12 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	mSelectionStart = llmin((S32)getLength(), (S32)(mCursorPos + search_text.size()));
 }
 
+//BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
+//							   BOOL case_insensitive, BOOL wrap)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
 BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
-							   BOOL case_insensitive, BOOL wrap)
+							   BOOL case_insensitive, BOOL wrap, BOOL search_up)
+// [/SL:KB]
 {
 	BOOL replaced = FALSE;
 
@@ -409,7 +434,10 @@ BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::str
 		}
 	}
 
-	selectNext(search_text_in, case_insensitive, wrap);
+//	selectNext(search_text_in, case_insensitive, wrap);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	selectNext(search_text_in, case_insensitive, wrap, search_up);
+// [/SL:KB]
 	return replaced;
 }
 
