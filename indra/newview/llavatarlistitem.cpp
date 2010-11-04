@@ -38,6 +38,9 @@
 #include "llavatarnamecache.h"
 #include "llavatariconctrl.h"
 #include "lloutputmonitorctrl.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+#include "llnotificationsutil.h"
+// [/SL:KB]
 
 bool LLAvatarListItem::sStaticInitialized = false;
 S32 LLAvatarListItem::sLeftPadding = 0;
@@ -362,9 +365,78 @@ void LLAvatarListItem::onProfileBtnClick()
 	LLAvatarActions::showProfile(mAvatarId);
 }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
-void LLAvatarListItem::onPermissionBtnToggle(S32 rightToggle)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLAvatarListItem::onPermissionBtnToggle(S32 toggleRight)
 {
+	LLRelationship* pRelationship = const_cast<LLRelationship*>(LLAvatarTracker::instance().getBuddyInfo(mAvatarId));
+	if (!pRelationship)
+		return;
+
+	if (LLRelationship::GRANT_MODIFY_OBJECTS != toggleRight)
+	{
+		S32 rights = pRelationship->getRightsGrantedTo();
+		if ( (rights & toggleRight) == toggleRight)
+		{
+			rights &= ~toggleRight;
+			// Revoke the permission locally until we hear back from the region
+			pRelationship->revokeRights(toggleRight, LLRelationship::GRANT_NONE);
+		}
+		else
+		{
+			rights |= toggleRight;
+			// Grant the permission locally until we hear back from the region
+			pRelationship->grantRights(toggleRight, LLRelationship::GRANT_NONE);
+		}
+
+		LLAvatarPropertiesProcessor::getInstance()->sendFriendRights(mAvatarId, rights);
+		refreshPermissions();
+		updateChildren();
+	}
+	else
+	{
+		LLSD args;
+		args["NAME"] = LLSLURL("agent", mAvatarId, "displayname").getSLURLString();
+
+		if (!pRelationship->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS))
+		{
+			LLNotificationsUtil::add("GrantModifyRights", args, LLSD(), 
+				boost::bind(&LLAvatarListItem::onModifyRightsConfirmationCallback, this, _1, _2, true));
+		}
+		else
+		{
+			LLNotificationsUtil::add("RevokeModifyRights", args, LLSD(),
+				boost::bind(&LLAvatarListItem::onModifyRightsConfirmationCallback, this, _1, _2, false));
+		}
+	}
+}
+
+void LLAvatarListItem::onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (option == 0)
+	{
+		LLRelationship* pRelationship = const_cast<LLRelationship*>(LLAvatarTracker::instance().getBuddyInfo(mAvatarId));
+		if (!pRelationship)
+			return;
+
+		S32 rights = pRelationship->getRightsGrantedTo();
+		if (!fGrant)
+		{
+			rights &= ~LLRelationship::GRANT_MODIFY_OBJECTS;
+			// Revoke the permission locally until we hear back from the region
+			pRelationship->revokeRights(LLRelationship::GRANT_MODIFY_OBJECTS, LLRelationship::GRANT_NONE);
+		}
+		else
+		{
+			rights |= LLRelationship::GRANT_MODIFY_OBJECTS;
+			// Grant the permission locally until we hear back from the region
+			pRelationship->grantRights(LLRelationship::GRANT_MODIFY_OBJECTS, LLRelationship::GRANT_NONE);
+		}
+
+		LLAvatarPropertiesProcessor::getInstance()->sendFriendRights(mAvatarId, rights);
+		refreshPermissions();
+		updateChildren();
+	}
 }
 // [/SL:KB]
 

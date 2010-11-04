@@ -117,8 +117,9 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
-	void onPermissionBtnToggle(S32 rightToggle);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	void onPermissionBtnToggle(S32 toggleRight);
+	void onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant);
 // [/SL:KB]
 
 	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
