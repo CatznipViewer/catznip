@@ -66,6 +66,10 @@
 #include "lltrans.h"
 #include "llcallingcard.h"
 #include "llslurl.h"			// IDEVO
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+#include "llfloaterreporter.h"
+#include "llviewermenu.h"
+// [/SL:KB]
 
 // static
 void LLAvatarActions::requestFriendshipDialog(const LLUUID& id, const std::string& name)
@@ -951,3 +955,38 @@ bool LLAvatarActions::canBlock(const LLUUID& id)
 	bool is_self = id == gAgentID;
 	return !is_self && !is_linden;
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+void LLAvatarActions::report(const LLUUID& idAgent)
+{
+	LLAvatarName avName;
+	LLAvatarNameCache::get(idAgent, &avName);
+
+	LLFloaterReporter::showFromAvatar(idAgent, avName.getCompleteName());
+}
+
+bool LLAvatarActions::canZoomIn(const LLUUID& idAgent)
+{
+	return gObjectList.findObject(idAgent);
+}
+
+void LLAvatarActions::zoomIn(const LLUUID& idAgent)
+{
+	handle_zoom_to_object(idAgent);
+}
+
+bool LLAvatarActions::canLandFreezeOrEject(const LLUUID& idAgent)
+{
+	return enable_freeze_eject(LLSD(idAgent));
+}
+
+void LLAvatarActions::landEject(const LLUUID& idAgent)
+{
+	handle_avatar_eject(LLSD(idAgent));
+}
+
+void LLAvatarActions::landFreeze(const LLUUID& idAgent)
+{
+	handle_avatar_freeze(LLSD(idAgent));
+}
+// [/SL:KB]
