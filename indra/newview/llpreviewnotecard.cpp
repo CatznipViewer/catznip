@@ -152,7 +152,7 @@ BOOL LLPreviewNotecard::handleKeyHere(KEY key, MASK mask)
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
 	if(('F' == key) && (MASK_CONTROL == (mask & MASK_CONTROL)))
 	{
-		LLFloaterSearchReplace::show(getChild<LLViewerTextEditor>("Notecard Editor"));
+		LLFloaterSearchReplace::show(getEditor());
 		return TRUE;
 	}
 // [/SL:KB]
@@ -188,6 +188,13 @@ const LLInventoryItem* LLPreviewNotecard::getDragItem()
 	}
 	return NULL;
 }
+
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+LLTextEditor* LLPreviewNotecard::getEditor()
+{
+	return getChild<LLViewerTextEditor>("Notecard Editor");
+}
+// [/SL:KB]
 
 bool LLPreviewNotecard::hasEmbeddedInventory()
 {

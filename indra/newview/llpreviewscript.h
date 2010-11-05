@@ -140,6 +140,10 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLTextEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
+// [/SL:KB]
+
 protected:
 	virtual BOOL canClose();
 	void closeIfNeeded();
@@ -195,6 +199,10 @@ public:
 	
 	void setIsNew() { mIsNew = TRUE; }
 	
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLTextEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
+// [/SL:KB]
+
 private:
 	virtual BOOL canClose();
 	void closeIfNeeded();
