@@ -67,6 +67,14 @@ LLContextMenu* NearbyMenu::createMenu()
 		registrar.add("Avatar.Share",			boost::bind(&LLAvatarActions::share,					id));
 		registrar.add("Avatar.Pay",				boost::bind(&LLAvatarActions::pay,						id));
 		registrar.add("Avatar.BlockUnblock",	boost::bind(&LLAvatarActions::toggleBlock,				id));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		registrar.add("Avatar.Report",						boost::bind(&LLAvatarActions::report,				id));
+		registrar.add("Avatar.Eject",						boost::bind(&LLAvatarActions::landEject,			id));
+		registrar.add("Avatar.Freeze",						boost::bind(&LLAvatarActions::landFreeze,			id));
+		enable_registrar.add("Avatar.VisibleFreezeEject",	boost::bind(&LLAvatarActions::canLandFreezeOrEject,	id));
+		registrar.add("Avatar.ZoomIn",						boost::bind(&LLAvatarActions::zoomIn,				id));
+		enable_registrar.add("Avatar.VisibleZoomIn",		boost::bind(&LLAvatarActions::canZoomIn,			id));
+// [/SL:KB]
 
 		enable_registrar.add("Avatar.EnableItem", boost::bind(&NearbyMenu::enableContextMenuItem,	this, _2));
 		enable_registrar.add("Avatar.CheckItem",  boost::bind(&NearbyMenu::checkContextMenuItem,	this, _2));

@@ -194,6 +194,17 @@ public:
 	 */
 	static bool canShareSelectedItems(LLInventoryPanel* inv_panel = NULL);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	static void report(const LLUUID& idAgent);
+
+	static bool canZoomIn(const LLUUID& idAgent);
+	static void zoomIn(const LLUUID& idAgent);
+
+	static bool canLandFreezeOrEject(const LLUUID& idAgent);
+	static void landEject(const LLUUID& idAgent);
+	static void landFreeze(const LLUUID& idAgent);
+// [/SL:KB]
+
 private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
 	static bool handleRemove(const LLSD& notification, const LLSD& response);
