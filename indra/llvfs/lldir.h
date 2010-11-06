@@ -102,6 +102,9 @@ class LLDir
 	const std::string &getCAFile() const;			// File containing TLS certificate authorities
 	const std::string &getDirDelimiter() const;	// directory separator for platform (ie. '\' or '/' or ':')
 	const std::string &getSkinDir() const;		// User-specified skin folder.
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+	const std::string &getSkinThemeDir() const;		// User-specified skin theme override folder.
+// [/SL:KB]
 	const std::string &getUserSkinDir() const;		// User-specified skin folder with user modifications. e.g. c:\documents and settings\username\application data\second life\skins\curskin
 	const std::string &getDefaultSkinDir() const;	// folder for default skin. e.g. c:\program files\second life\skins\default
 	const std::string getSkinBaseDir() const;		// folder that contains all installed skins (not user modifications). e.g. c:\program files\second life\skins
@@ -118,7 +121,7 @@ class LLDir
 	std::string getExtension(const std::string& filepath) const; // Excludes '.', e.g getExtension("foo.wav") == "wav"
 
 	// these methods search the various skin paths for the specified file in the following order:
-	// getUserSkinDir(), getSkinDir(), getDefaultSkinDir()
+	// getUserSkinDir(), getSkinThemeDir(), getSkinDir(), getDefaultSkinDir()
 	std::string findSkinnedFilename(const std::string &filename) const;
 	std::string findSkinnedFilename(const std::string &subdir, const std::string &filename) const;
 	std::string findSkinnedFilename(const std::string &subdir1, const std::string &subdir2, const std::string &filename) const;
@@ -134,6 +137,9 @@ class LLDir
 	virtual void setPerAccountChatLogsDir(const std::string &username);		// Set the per user chat log directory.
 	virtual void setLindenUserDir(const std::string &username);		// Set the linden user dir to this user's dir
 	virtual void setSkinFolder(const std::string &skin_folder);
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+	virtual void setSkinThemeFolder(const std::string &theme_folder);
+// [/SL:KB]
 	virtual bool setCacheDir(const std::string &path);
 
 	virtual void dumpCurrentDirectories();
@@ -161,6 +167,9 @@ protected:
 	std::string mDirDelimiter;
 	std::string mSkinBaseDir;			// Base for skins paths.
 	std::string mSkinDir;			// Location for current skin info.
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+	std::string mSkinThemeDir;		// Location for current skin theme override
+// [/SL:KB]
 	std::string mDefaultSkinDir;			// Location for default skin info.
 	std::string mUserSkinDir;			// Location for user-modified skin info.
 	std::string mLLPluginDir;			// Location for plugins and plugin shell
