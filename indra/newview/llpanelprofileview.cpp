@@ -265,10 +265,10 @@ void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id,
 		getChild<LLUICtrl>("solo_username_label")->setVisible( true );
 	}
 
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Modified: 2010-11-07 (Catznip-2.3.0a) | Modified: Catznip-2.3.0a
 	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
 	if (pParentView)
-		pParentView->setTitle(first_name + " " + last_name + " - " + getLabel());
+		pParentView->setTitle(av_name.getCompleteName() + " - " + getLabel());
 // [/SL:KB]
 }
 
