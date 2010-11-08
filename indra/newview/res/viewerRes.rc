@@ -129,8 +129,8 @@ TOOLSIT                 CURSOR                  "toolsit.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,3,0,0
- PRODUCTVERSION 2,3,0,0
+ FILEVERSION 2,4,0,0
+ PRODUCTVERSION 2,4,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -147,12 +147,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Catznip"
             VALUE "FileDescription", "Catznip"
-            VALUE "FileVersion", "2.3.0.0"
+            VALUE "FileVersion", "2.4.0.0"
             VALUE "InternalName", "Catznip"
             VALUE "LegalCopyright", "Copyright ©2009-2010, Kitty Barnett"
             VALUE "OriginalFilename", "Catznip.exe"
             VALUE "ProductName", "Catznip"
-            VALUE "ProductVersion", "2.3.0.0"
+            VALUE "ProductVersion", "2.4.0.0"
         END
     END
     BLOCK "VarFileInfo"
