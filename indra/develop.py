@@ -72,7 +72,7 @@ class PlatformSetup(object):
     standalone = 'OFF'
     unattended = 'OFF'
     universal = 'OFF'
-    project_name = 'SecondLife'
+    project_name = 'Catznip'
     distcc = True
     cmake_opts = []
     word_size = 32
