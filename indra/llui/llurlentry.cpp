@@ -354,7 +354,10 @@ void LLUrlEntryAgent::callObservers(const std::string &id,
 void LLUrlEntryAgent::onAvatarNameCache(const LLUUID& id,
 										const LLAvatarName& av_name)
 {
-	std::string label = av_name.getCompleteName();
+//	std::string label = av_name.getCompleteName();
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	std::string label = getLabelFromAvatarName(av_name);
+// [/SL:KB]
 
 	// received the agent name from the server - tell our observers
 	callObservers(id.asString(), label, mIcon);
@@ -370,35 +373,63 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 	// return a tooltip corresponding to the URL type instead of the generic one
 	std::string url = getUrl(string);
 
+//	if (LLStringUtil::endsWith(url, "/inspect"))
+//	{
+//		return LLTrans::getString("TooltipAgentInspect");
+//	}
+//	if (LLStringUtil::endsWith(url, "/mute"))
+//	{
+//		return LLTrans::getString("TooltipAgentMute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/unmute"))
+//	{
+//		return LLTrans::getString("TooltipAgentUnmute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/im"))
+//	{
+//		return LLTrans::getString("TooltipAgentIM");
+//	}
+//	if (LLStringUtil::endsWith(url, "/pay"))
+//	{
+//		return LLTrans::getString("TooltipAgentPay");
+//	}
+//	if (LLStringUtil::endsWith(url, "/offerteleport"))
+//	{
+//		return LLTrans::getString("TooltipAgentOfferTeleport");
+//	}
+//	if (LLStringUtil::endsWith(url, "/requestfriend"))
+//	{
+//		return LLTrans::getString("TooltipAgentRequestFriend");
+//	}
+//	return LLTrans::getString("TooltipAgentUrl");
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
+		strTooltip = LLTrans::getString("TooltipAgentInspect");
+	else if (LLStringUtil::endsWith(url, "/mute"))
+		strTooltip = LLTrans::getString("TooltipAgentMute");
+	else if (LLStringUtil::endsWith(url, "/unmute"))
+		strTooltip = LLTrans::getString("TooltipAgentUnmute");
+	else if (LLStringUtil::endsWith(url, "/im"))
+		strTooltip = LLTrans::getString("TooltipAgentIM");
+	else if (LLStringUtil::endsWith(url, "/pay"))
+		strTooltip = LLTrans::getString("TooltipAgentPay");
+	else if (LLStringUtil::endsWith(url, "/offerteleport"))
+		strTooltip = LLTrans::getString("TooltipAgentOfferTeleport");
+	else if (LLStringUtil::endsWith(url, "/requestfriend"))
+		strTooltip = LLTrans::getString("TooltipAgentRequestFriend");
+	else
+		strTooltip = LLTrans::getString("TooltipAgentUrl");
+
+	// If we (sometimes) hide the username, we have to show it as part of the tooltip
+	if ( (LLAvatarNameCache::useDisplayNames()) && (SHOW_ALWAYS != s_eShowUsername) )
 	{
-		return LLTrans::getString("TooltipAgentInspect");
+		LLUUID idAgent(getIDStringFromUrl(url)); LLAvatarName avName;
+		if ( (idAgent.notNull()) && (LLAvatarNameCache::get(idAgent, &avName)) )
+			return llformat("%s\n(%s)", avName.mUsername.c_str(), strTooltip.c_str());
 	}
-	if (LLStringUtil::endsWith(url, "/mute"))
-	{
-		return LLTrans::getString("TooltipAgentMute");
-	}
-	if (LLStringUtil::endsWith(url, "/unmute"))
-	{
-		return LLTrans::getString("TooltipAgentUnmute");
-	}
-	if (LLStringUtil::endsWith(url, "/im"))
-	{
-		return LLTrans::getString("TooltipAgentIM");
-	}
-	if (LLStringUtil::endsWith(url, "/pay"))
-	{
-		return LLTrans::getString("TooltipAgentPay");
-	}
-	if (LLStringUtil::endsWith(url, "/offerteleport"))
-	{
-		return LLTrans::getString("TooltipAgentOfferTeleport");
-	}
-	if (LLStringUtil::endsWith(url, "/requestfriend"))
-	{
-		return LLTrans::getString("TooltipAgentRequestFriend");
-	}
-	return LLTrans::getString("TooltipAgentUrl");
+	return strTooltip;
+// [/SL:KB]
 }
 
 bool LLUrlEntryAgent::underlineOnHoverOnly(const std::string &string) const
@@ -431,7 +462,10 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 	LLAvatarName av_name;
 	if (LLAvatarNameCache::get(agent_id, &av_name))
 	{
-		std::string label = av_name.getCompleteName();
+//		std::string label = av_name.getCompleteName();
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+		std::string label = getLabelFromAvatarName(av_name);
+// [/SL:KB]
 
 		// handle suffixes like /mute or /offerteleport
 		label = localize_slapp_label(url, label);
@@ -446,6 +480,21 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 		return LLTrans::getString("LoadingData");
 	}
 }
+
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+LLUrlEntryAgent::EShowUsername LLUrlEntryAgent::s_eShowUsername = LLUrlEntryAgent::SHOW_ALWAYS;
+
+std::string LLUrlEntryAgent::getLabelFromAvatarName(const LLAvatarName& avName)
+{
+	// Use only the display name if: we never show the username, or the display name matches the username
+	if ( (LLAvatarNameCache::useDisplayNames()) && 
+		 ((SHOW_NEVER == s_eShowUsername) || ((SHOW_MISMATCH == s_eShowUsername) && (avName.mIsDisplayNameDefault))) )
+	{
+		return avName.mDisplayName;
+	}
+	return avName.getCompleteName();
+}
+// [/SL:KB]
 
 LLStyle::Params LLUrlEntryAgent::getStyle() const
 {
