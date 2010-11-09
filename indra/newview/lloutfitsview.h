@@ -20,11 +20,16 @@
 #include "llpanel.h"
 #include "llpaneloutfitstab.h"
 
+class LLFolderViewItem;
+class LLInventoryPanel;
+
 class LLOutfitsView : public LLPanelOutfitsTab
 {
 public:
 	LLOutfitsView();
 	virtual ~LLOutfitsView();
+
+	bool canWearSelected();
 
 	/*virtual*/ void onOpen(const LLSD& info);
 	/*virtual*/ BOOL postBuild();
@@ -41,9 +46,17 @@ public:
 	/*virtual*/ void wearSelectedItems();
 	/*virtual*/ bool hasItemSelected();
 
+	void									onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction);
 	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
 
 protected:
+	LLInventoryPanel*				mInvPanel;
+	LLSaveFolderState*				mSavedFolderState;
+
+	std::string						mFilterSubString;
+
+	bool							mItemSelection;				// TRUE if the selection consists solely of inventory items
+	LLUUID							mSelectedCategory;			// Parent UUID of the currently selected items
 	selection_change_signal_t		mSelectionChangeSignal;
 };
 
