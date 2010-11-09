@@ -870,6 +870,7 @@ set(viewer_HEADER_FILES
     llpanelmediasettingspermissions.h
     llpanelmediasettingssecurity.h
     llpanelme.h
+    llpaneloutfitstab.h
     llpanelnearbymedia.h
     llpanelobject.h
     llpanelobjectinventory.h
