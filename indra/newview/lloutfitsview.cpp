@@ -131,6 +131,8 @@ LLOutfitsView::LLOutfitsView()
 	:	LLPanelOutfitsTab()
 	,	mInvPanel(NULL)
 	,	mSavedFolderState(NULL)
+	,	mItemSelection(false)
+	,	mOutfitSelection(false)
 {
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
@@ -141,7 +143,7 @@ LLOutfitsView::~LLOutfitsView()
 	delete mSavedFolderState;
 }
 
-//virtual
+// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
 BOOL LLOutfitsView::postBuild()
 {
 	mInvPanel = getChild<LLInventoryPanel>("outfits_invpanel");
@@ -153,6 +155,7 @@ BOOL LLOutfitsView::postBuild()
 //virtual
 void LLOutfitsView::onOpen(const LLSD& /*info*/)
 {
+	// TODO-Catznip: start fetching the outfit folders if necessary
 }
 
 // virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
@@ -203,11 +206,11 @@ bool LLOutfitsView::isActionEnabled(const LLSD& userdata)
 	const std::string strAction = userdata.asString();
 	if ("delete" == strAction)
 	{
-		return !mItemSelection && LLAppearanceMgr::instance().getCanRemoveOutfit(mSelectedCategory);
+		return (!mItemSelection) && (mOutfitSelection) && (LLAppearanceMgr::instance().getCanRemoveOutfit(mSelectedCategory));
 	}
 	else if ("rename" == strAction)
 	{
-		return get_is_category_renameable(&gInventory, mSelectedCategory);
+		return (mOutfitSelection) && (get_is_category_renameable(&gInventory, mSelectedCategory));
 	}
 	else if ("save_outfit" == strAction)
 	{
@@ -220,26 +223,24 @@ bool LLOutfitsView::isActionEnabled(const LLSD& userdata)
 	{
 		if (gAgentWearables.isCOFChangeInProgress())
 			return false;
-
 		if (hasItemSelected())
 			return canWearSelected();
-
-		// outfit selected
-		return LLAppearanceMgr::instance().getCanReplaceCOF(mSelectedCategory);
+		if (mOutfitSelection)
+			return LLAppearanceMgr::instance().getCanReplaceCOF(mSelectedCategory);
+		return false;
 	}
 	else if ("take_off" == strAction)
 	{
 		// Enable "Take Off" if any of selected items can be taken off
 		// or the selected outfit contains items that can be taken off.
-		return ( hasItemSelected() && canTakeOffSelected() )
-				|| ( !hasItemSelected() && LLAppearanceMgr::getCanRemoveFromCOF(mSelectedCategory) );
+		return ( (hasItemSelected()) && (canTakeOffSelected()) ) || 
+			( (!hasItemSelected()) && (LLAppearanceMgr::getCanRemoveFromCOF(mSelectedCategory)) );
 	}
 	else if ("wear_add" == strAction)
 	{
 		// *TODO: do we ever get here?
 		return LLAppearanceMgr::getCanAddToCOF(mSelectedCategory);
 	}
-
 	return false;
 }
 
@@ -282,6 +283,7 @@ void LLOutfitsView::removeSelected()
 */
 }
 
+// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
 void LLOutfitsView::setSelectedOutfitByUUID(const LLUUID& idOutfit)
 {
 	LLFolderView* pRootFolder = mInvPanel->getRootFolder();
@@ -312,6 +314,7 @@ bool LLOutfitsView::hasItemSelected()
 void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction)
 {
 	mItemSelection = false;
+	mOutfitSelection = false;
 	mSelectedCategory.setNull();
 
 	if (1 == selItems.size())
@@ -333,6 +336,12 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 			mItemSelection = true;
 			mSelectedCategory = get_items_parent(items);
 		}
+	}
+
+	if (mSelectedCategory.notNull())
+	{
+		const LLViewerInventoryCategory* pSelectedCat = gInventory.getCategory(mSelectedCategory);
+		mOutfitSelection = (pSelectedCat) && (LLFolderType::FT_OUTFIT == pSelectedCat->getPreferredType());
 	}
 
 	// URGENT-Catznip: LLPanelOutfitsInventory doesn't currently use the param but we should still try and pass something meaningful

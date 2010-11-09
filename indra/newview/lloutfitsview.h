@@ -56,6 +56,7 @@ protected:
 	std::string						mFilterSubString;
 
 	bool							mItemSelection;				// TRUE if the selection consists solely of inventory items
+	bool                            mOutfitSelection;			// TRUE if mSelectedCategory is of type FT_OUTFIT
 	LLUUID							mSelectedCategory;			// Parent UUID of the currently selected items
 	selection_change_signal_t		mSelectionChangeSignal;
 };
