@@ -661,9 +661,9 @@ class WindowsSetup(PlatformSetup):
             executable = os.path.join('tools','vstool','VSTool.exe')
             vstool_cmd = (executable +
                           ' --solution ' +
-                          os.path.join(build_dir,'SecondLife.sln') +
+                          os.path.join(build_dir,'Catznip.sln') +
                           ' --config ' + self.build_type +
-                          ' --startup secondlife-bin')
+                          ' --startup catznip-bin')
             print 'Running %r in %r' % (vstool_cmd, getcwd())
             self.run(vstool_cmd, name=executable)        
             print >> open(stamp, 'w'), self.build_type
