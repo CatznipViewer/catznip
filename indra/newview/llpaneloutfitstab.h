@@ -14,8 +14,8 @@
  * 
  */
 
-#ifndef LL_LLPANELMYOUTFITS_H
-#define LL_LLPANELMYOUTFITS_H
+#ifndef LL_LLPANELOUTFITSTAB_H
+#define LL_LLPANELOUTFITSTAB_H
 
 #include "llpanelappearancetab.h"
 
@@ -44,7 +44,6 @@ public:
 	 * Returns true if there is a selection inside currently selected outfit
 	 */
 	virtual bool hasItemSelected() = 0;
-
 };
 
-#endif // LL_LLPANELMYOUTFITS_H
+#endif // LL_LLPANELOUTFITSTAB_H
