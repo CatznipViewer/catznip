@@ -95,7 +95,7 @@ class ViewerManifest(LLManifest):
                     self.path("*/xui/*/*.xml")
                     self.path("*/xui/*/widgets/*.xml")
                     self.path("*/themes/*/colors.xml")
-                    if (self.prefix(src="*/themes/*/textures"):
+                    if self.prefix(src="*/themes/*/textures"):
                             self.path("*/*.tga")
                             self.path("*/*.j2c")
                             self.path("*/*.jpg")
