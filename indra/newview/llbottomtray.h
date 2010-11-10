@@ -404,6 +404,9 @@ private:
 	 */
 	void processChatbarCustomization(S32 new_width);
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-10-02 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+	void processChatbarResize(S32 new_width);
+// [/SL:KB]
 
 	MASK mResizeState;
 
