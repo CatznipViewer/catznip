@@ -1,0 +1,2 @@
+[Inventory/Misc]
+- fixed : dragging the "Contents" folder from object inventory to agent inventory shows the "prohibited" cursor
