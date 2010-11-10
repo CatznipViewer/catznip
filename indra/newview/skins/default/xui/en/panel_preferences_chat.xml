@@ -361,6 +361,7 @@
      width="400" />
     <check_box
      enabled="false"
+     control_name="PlainTextChatHistory" 
      height="16"
      label="Enable plain text IM and chat history"
      layout="topleft"
