@@ -1,3 +1,5 @@
 [Settings/Misc]
 - fixed : "Plain text chat history" reverts to FALSE if the relevant preference tab is opened while not logged on
 - added : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
+- fixed : (Un)checking "Custom Port" in preferences shows a notification that can't be dismissed
+    -> see http://redmine.catznip.com/issues/14
