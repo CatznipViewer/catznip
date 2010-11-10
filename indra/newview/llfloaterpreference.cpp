@@ -109,6 +109,13 @@
 const F32 MAX_USER_FAR_CLIP = 512.f;
 const F32 MIN_USER_FAR_CLIP = 64.f;
 
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+const U32 CLEAR_MASK_COOKIES = 0x01;
+const U32 CLEAR_MASK_NAVBAR =  0x02;
+const U32 CLEAR_MASK_SEARCH =  0x04;
+const U32 CLEAR_MASK_TELEPORT = 0x08;
+// [/SL:KB]
+
 //control value for middle mouse as talk2push button
 const static std::string MIDDLE_MOUSE_CV = "MiddleMouse";
 
@@ -194,24 +201,56 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if ( option == 0 ) // YES
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+// [/SL:KB]
+
 		// clean web
 		LLViewerMedia::clearAllCaches();
-		LLViewerMedia::clearAllCookies();
+//		LLViewerMedia::clearAllCookies();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+		if (nClearMask & CLEAR_MASK_COOKIES)
+		{
+			LLViewerMedia::clearAllCookies();
+		}
+// [/SL:KB]
 		
 		// clean nav bar history
-		LLNavigationBar::getInstance()->clearHistoryCache();
+//		LLNavigationBar::getInstance()->clearHistoryCache();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+		if (nClearMask & CLEAR_MASK_NAVBAR)
+		{
+			LLNavigationBar::getInstance()->clearHistoryCache();
+		}
+// [/SL:KB]
 		
 		// flag client texture cache for clearing next time the client runs
 		gSavedSettings.setBOOL("PurgeCacheOnNextStartup", TRUE);
 		LLNotificationsUtil::add("CacheWillClear");
 
-		LLSearchHistory::getInstance()->clearHistory();
-		LLSearchHistory::getInstance()->save();
-		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
-		search_ctrl->clearHistory();
+//		LLSearchHistory::getInstance()->clearHistory();
+//		LLSearchHistory::getInstance()->save();
+//		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+//		search_ctrl->clearHistory();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+		if (nClearMask & CLEAR_MASK_SEARCH)
+		{
+			LLSearchHistory::getInstance()->clearHistory();
+			LLSearchHistory::getInstance()->save();
+			LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+			search_ctrl->clearHistory();
+		}
+// [/SL:KB]
 
-		LLTeleportHistoryStorage::getInstance()->purgeItems();
-		LLTeleportHistoryStorage::getInstance()->save();
+//		LLTeleportHistoryStorage::getInstance()->purgeItems();
+//		LLTeleportHistoryStorage::getInstance()->save();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+		if (nClearMask & CLEAR_MASK_TELEPORT)
+		{
+			LLTeleportHistoryStorage::getInstance()->purgeItems();
+			LLTeleportHistoryStorage::getInstance()->save();
+		}
+// [/SL:KB]
 	}
 	
 	return false;
@@ -299,6 +338,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 //	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.2.1a
+	mCommitCallbackRegistrar.add("Clear.SettingsCheck",			boost::bind(&LLFloaterPreference::onClearSettingsCheck, this, _1, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ResetCache",				boost::bind(&LLFloaterPreference::onClickResetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ClickSkin",				boost::bind(&LLFloaterPreference::onClickSkin, this,_1, _2));
@@ -709,6 +751,32 @@ void LLFloaterPreference::onClickBrowserClearCache()
 {
 	LLNotificationsUtil::add("ConfirmClearBrowserCache", LLSD(), LLSD(), callback_clear_browser_cache);
 }
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+void LLFloaterPreference::onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam)
+{
+	/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast</*const*/ LLCheckBoxCtrl*>(pUICtrl);
+	if (pCheckCtrl)
+	{
+		U32 nClearToggle = 0; std::string strParam = sdParam.asString();
+		if ("cookies" == strParam)
+			nClearToggle = CLEAR_MASK_COOKIES;
+		else if ("navbar" == strParam)
+			nClearToggle = CLEAR_MASK_NAVBAR;
+		else if ("search" == strParam)
+			nClearToggle = CLEAR_MASK_SEARCH;
+		else if ("teleport" == strParam)
+			nClearToggle = CLEAR_MASK_TELEPORT;
+
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+		if (pCheckCtrl->get())
+			nClearMask |= nClearToggle;
+		else
+			nClearMask &= ~nClearToggle;
+		gSavedSettings.setU32("ClearCacheMask", nClearMask);
+	}
+}
+// [/SL:KB]
 
 void LLFloaterPreference::onClickSetCache()
 {
@@ -1379,6 +1447,17 @@ BOOL LLPanelPreference::postBuild()
 	}
 	
 	//////////////////////PanelPrivacy ///////////////////
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+	U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+	if (hasChild("clear_web_cookies"))
+		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
+	if (hasChild("clear_navbar_history"))
+		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
+	if (hasChild("clear_search_history"))
+		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
+	if (hasChild("clear_teleport_history"))
+		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+// [/SL:KB]
 	if (hasChild("media_enabled"))
 	{
 		bool media_enabled = gSavedSettings.getBOOL("AudioStreamingMedia");
