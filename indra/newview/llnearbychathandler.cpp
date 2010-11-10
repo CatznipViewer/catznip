@@ -477,9 +477,9 @@ void LLNearbyChatScreenChannel::onToastWidthChanged(const LLSD& sdValue)
 	//
 	// Resize the active toasts
 	//
-	for(std::vector<LLToast*>::iterator itActive = m_active_toasts.begin(); itActive != m_active_toasts.end(); ++itActive)
+	for(toast_vec_t::iterator itActive = m_active_toasts.begin(); itActive != m_active_toasts.end(); ++itActive)
 	{
-		LLToast* pToast = *itActive;
+		LLToast* pToast = (*itActive).get();
 		LLNearbyChatToastPanel* pToastPanel = (pToast) ? dynamic_cast<LLNearbyChatToastPanel*>(pToast->getPanel()) : NULL;
 		if (!pToastPanel)
 			continue;
@@ -496,9 +496,9 @@ void LLNearbyChatScreenChannel::onToastWidthChanged(const LLSD& sdValue)
 	//
 	// Resize toasts in the toast pool
 	//
-	for(std::list<LLToast*>::iterator itPool = m_toast_pool.begin(); itPool != m_toast_pool.end(); ++itPool)
+	for(toast_list_t::iterator itPool = m_toast_pool.begin(); itPool != m_toast_pool.end(); ++itPool)
 	{
-		LLToast* pToast = *itPool;
+		LLToast* pToast = (*itPool).get();
 		LLNearbyChatToastPanel* pToastPanel = (pToast) ? dynamic_cast<LLNearbyChatToastPanel*>(pToast->getPanel()) : NULL;
 		if (!pToastPanel)
 			continue;
