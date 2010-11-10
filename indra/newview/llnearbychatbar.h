@@ -89,6 +89,15 @@ private:
 class LLNearbyChatBar
 :	public LLPanel
 {
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+public:
+	// Right now we only have two instances of the chatbar, but that might change if we ever embed one into the chat history floater as well
+	typedef enum e_nearby_chatbar_type
+	{
+		CHATBAR_BOTTOMTRAY,			// Bottom tray chatbar
+		CHATBAR_BOTTOMTRAY_LITE		// Bottom tray chatbar (mouselook)
+	} EChatBarType;
+// [/SL:KB]
 public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
 	LLNearbyChatBar();
@@ -97,8 +106,14 @@ public:
 	virtual BOOL postBuild();
 
 	static LLNearbyChatBar* getInstance();
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	static LLNearbyChatBar* getInstance(EChatBarType typeChatBar);
+// [/Sl:KB]
 
 	static bool instanceExists();
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	static bool instanceExists(EChatBarType typeChatBar);
+// [/Sl:KB]
 
 	LLLineEditor* getChatBox() { return mChatBox; }
 

@@ -85,6 +85,9 @@ public:
 
 	LLChicletPanel*		getChicletPanel()	{return mChicletPanel;}
 	LLNearbyChatBar*		getNearbyChatBar();
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	LLNearbyChatBar*		getNearbyChatBar(bool fLiteMode);
+// [/SL:KB]
 
 	void onCommitGesture(LLUICtrl* ctrl);
 

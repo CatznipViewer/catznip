@@ -459,7 +459,7 @@ S32 LLNearbyChatScreenChannel::getToastWidth() const
 	S32 nToastWidth = gSavedSettings.getS32("NearbyToastWidth");
 	if (0 == nToastWidth)			// Follow the width of the nearby chat bar
 	{
-		LLNearbyChatBar* pChatBar = LLNearbyChatBar::getInstance();
+		const LLNearbyChatBar* pChatBar = LLNearbyChatBar::getInstance(LLNearbyChatBar::CHATBAR_BOTTOMTRAY);
 		if (pChatBar)
 		{
 			LLRect rctChatBar = pChatBar->getRect();

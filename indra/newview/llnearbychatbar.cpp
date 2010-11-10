@@ -427,6 +427,28 @@ LLNearbyChatBar* LLNearbyChatBar::getInstance()
 	return LLBottomTray::getInstance() ? LLBottomTray::getInstance()->getNearbyChatBar() : NULL;
 }
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+//static
+LLNearbyChatBar* LLNearbyChatBar::getInstance(EChatBarType typeChatBar)
+{
+	switch (typeChatBar)
+	{
+		case CHATBAR_BOTTOMTRAY:
+			return LLBottomTray::getInstance() ? LLBottomTray::getInstance()->getNearbyChatBar(false) : NULL;
+		case CHATBAR_BOTTOMTRAY_LITE:
+			return LLBottomTray::getInstance() ? LLBottomTray::getInstance()->getNearbyChatBar(true) : NULL;
+		default:
+			return NULL;
+	}
+}
+
+//static
+bool LLNearbyChatBar::instanceExists(EChatBarType typeChatBar)
+{
+	return getInstance(typeChatBar) != NULL;
+}
+// [/SL:KB]
+
 //static
 bool LLNearbyChatBar::instanceExists()
 {
