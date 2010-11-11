@@ -4008,6 +4008,17 @@
       <key>Value</key>
       <real>0.0</real>
     </map>
+    <key>InspectNearbyRemoteObject</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the object inspector on objectim app URLs for nearby objects</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <real>0</real>
+    </map>
      <key>InspectorFadeTime</key>
     <map>
       <key>Comment</key>
