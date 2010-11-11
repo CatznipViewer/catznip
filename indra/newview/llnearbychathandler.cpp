@@ -81,10 +81,21 @@ public:
 		}
 
 // [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
-		gSavedSettings.getControl("NearbyToastWidth")->getSignal()->connect(
-			boost::bind(&LLNearbyChatScreenChannel::onToastWidthChanged, this, _2));
+		ctrl = gSavedSettings.getControl("NearbyToastWidth").get();
+		if (ctrl)
+		{
+			// updateToastWidth() will call getToastWidth() which will set up/break down mChatBarReshapeConnection as needed
+			ctrl->getSignal()->connect(boost::bind(&LLNearbyChatScreenChannel::updateToastWidth, this));
+		}
 // [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	~LLNearbyChatScreenChannel()
+	{
+		mChatBarReshapeConnection.disconnect();
+	}
+// [/SL:KB]
 
 	void addNotification	(LLSD& notification);
 	void arrangeToasts		();
@@ -97,8 +108,8 @@ public:
 	void onToastFade		(LLToast* toast);
 
 // [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
-	S32  getToastWidth() const;
-	void onToastWidthChanged(const LLSD& sdValue);
+	S32  getToastWidth();
+	void updateToastWidth();
 // [/SL:KB]
 
 	void reshape			(S32 width, S32 height, BOOL called_from_parent);
@@ -162,6 +173,10 @@ protected:
 	toast_list_t m_toast_pool;
 
 	bool	mStopProcessing;
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	boost::signals2::connection mChatBarReshapeConnection;
+// [/SL:KB]
 };
 
 //-----------------------------------------------------------------------------------------------
@@ -453,26 +468,38 @@ void LLNearbyChatScreenChannel::reshape			(S32 width, S32 height, BOOL called_fr
 	arrangeToasts();
 }
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
-S32 LLNearbyChatScreenChannel::getToastWidth() const
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Modified: Catznip-2.4.0a
+S32 LLNearbyChatScreenChannel::getToastWidth()
 {
-	S32 nToastWidth = gSavedSettings.getS32("NearbyToastWidth");
-	if (0 == nToastWidth)			// Follow the width of the nearby chat bar
+	static LLCachedControl<S32> snToastWidth(gSavedSettings, "NearbyToastWidth");
+	if (0 == snToastWidth)					// Follow the width of the nearby chat bar
 	{
-		const LLNearbyChatBar* pChatBar = LLNearbyChatBar::getInstance(LLNearbyChatBar::CHATBAR_BOTTOMTRAY);
+		LLNearbyChatBar* pChatBar = LLNearbyChatBar::getInstance(LLNearbyChatBar::CHATBAR_BOTTOMTRAY);
 		if (pChatBar)
 		{
+			if (!mChatBarReshapeConnection.connected())
+				mChatBarReshapeConnection = pChatBar->setReshapeCallback(boost::bind(&LLNearbyChatScreenChannel::updateToastWidth, this));
+
 			LLRect rctChatBar = pChatBar->getRect();
 			return rctChatBar.getWidth();
 		}
 	}
-	return llmax(nToastWidth, 350);	// Provide a sane lower threshold for toast width
+
+	if (mChatBarReshapeConnection.connected())
+		mChatBarReshapeConnection.disconnect();
+
+	return llmax((S32)snToastWidth, 350);	// Provide a sane lower threshold for toast width
 }
 
-void LLNearbyChatScreenChannel::onToastWidthChanged(const LLSD& sdValue)
+void LLNearbyChatScreenChannel::updateToastWidth()
 {
-	// Provide a sane lower threshold for toast width
-	S32 nToastWidth = (sdValue.asInteger() > 300) ? sdValue.asInteger() : 300;
+	static S32 sToastWidthPrev = 0;
+
+	// Do nothing if the toast width hasn't actually changed
+	S32 nToastWidth = getToastWidth();
+	if (sToastWidthPrev == nToastWidth)
+		return;
+	sToastWidthPrev = nToastWidth;
 
 	//
 	// Resize the active toasts

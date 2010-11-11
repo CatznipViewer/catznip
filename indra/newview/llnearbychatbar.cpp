@@ -393,9 +393,19 @@ LLCtrlListInterface* LLGestureComboList::getListInterface()
 
 LLNearbyChatBar::LLNearbyChatBar() 
 :	mChatBox(NULL)
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+,	mReshapeSignal(NULL)
+// [/SL:KB]
 {
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+LLNearbyChatBar::~LLNearbyChatBar()
+{
+	delete mReshapeSignal;
+}
+// [/SL:KB]
 
 //virtual
 BOOL LLNearbyChatBar::postBuild()
@@ -446,6 +456,24 @@ LLNearbyChatBar* LLNearbyChatBar::getInstance(EChatBarType typeChatBar)
 bool LLNearbyChatBar::instanceExists(EChatBarType typeChatBar)
 {
 	return getInstance(typeChatBar) != NULL;
+}
+
+// virtual
+void LLNearbyChatBar::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLPanel::reshape(width, height, called_from_parent);
+
+	if (mReshapeSignal)
+	{
+		(*mReshapeSignal)(this, width, height);
+	}
+}
+
+boost::signals2::connection LLNearbyChatBar::setReshapeCallback(const reshape_signal_t::slot_type& cb)
+{
+	if (!mReshapeSignal)
+		mReshapeSignal = new reshape_signal_t();
+	return mReshapeSignal->connect(cb); 
 }
 // [/SL:KB]
 
