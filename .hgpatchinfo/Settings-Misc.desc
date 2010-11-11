@@ -3,3 +3,7 @@
 - added : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
 - fixed : (Un)checking "Custom Port" in preferences shows a notification that can't be dismissed
     -> see http://redmine.catznip.com/issues/14
+- added : "InspectNearbyRemoteObject" setting to show the object inspector for "objectim" app URLs for nearby objects
+    -> affects plain text chat where llOwnerSay(), llSay() and llInstantMessage() chat from scripts always opens the "remote object inspector" by default
+- fixed : remote object inspector isn't passed any parameters for object IMs
+    -> query string is constructed but was never appended to the "objectim" app URL
