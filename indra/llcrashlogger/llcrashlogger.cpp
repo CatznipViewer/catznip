@@ -372,7 +372,10 @@ bool LLCrashLogger::init()
 	LLCurl::initClass();
 
 	// We assume that all the logs we're looking for reside on the current drive
-	gDirUtilp->initAppDirs("SecondLife");
+//	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
 
 	// Default to the product name "Second Life" (this is overridden by the -name argument)
 	mProductName = "Second Life";
