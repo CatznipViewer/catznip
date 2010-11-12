@@ -588,7 +588,14 @@ LLAppViewer::LLAppViewer() :
 		llerrs << "Oh no! An instance of LLAppViewer already exists! LLAppViewer is sort of like a singleton." << llendl;
 	}
 
-	setupErrorHandling();
+//	setupErrorHandling();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	EMiniDumpType minidump_type = MINIDUMP_NORMAL;
+	if (gSavedSettings.controlExists("SaveMiniDumpType"))
+		minidump_type = (LLApp::EMiniDumpType)gSavedSettings.getU32("SaveMiniDumpType"); 
+
+	setupErrorHandling(minidump_type);
+// [/SL:KB]
 	sInstance = this;
 	gLoggedInTime.stop();
 }
