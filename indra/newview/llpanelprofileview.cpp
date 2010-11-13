@@ -35,6 +35,9 @@
 
 #include "llavatarpropertiesprocessor.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+#include "llfloater.h"
+// [/SL:KB]
 #include "llpanelavatar.h"
 #include "llpanelpicks.h"
 #include "llpanelprofile.h"
@@ -129,8 +132,27 @@ BOOL LLPanelProfileView::postBuild()
 	mStatusText = getChild<LLTextBox>("status");
 	mStatusText->setVisible(false);
 
-	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
-	childSetCommitCallback("copy_to_clipboard",boost::bind(&LLPanelProfileView::onCopyToClipboard,this),NULL);
+//	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (!pParentView)
+	{
+		childSetCommitCallback("back", boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+		childSetCommitCallback("copy_to_clipboard",boost::bind(&LLPanelProfileView::onCopyToClipboard,this),NULL);
+	}
+	else
+	{
+		pParentView->setTitle(getLabel());
+
+		childSetVisible("back", false);
+
+		// HACK-Catznip: we got rid of the back button so we want to align the name and status controls with the rest
+		LLUICtrl* pNameCtrl = getChild<LLUICtrl>("user_name", FALSE);
+		if (pNameCtrl)
+			pNameCtrl->translate(10 - pNameCtrl->getRect().mLeft, 0);
+		mStatusText->translate(10 - mStatusText->getRect().mLeft, 0);
+	}
+// [/SL:KB]
 		
 	return TRUE;
 }
@@ -242,6 +264,12 @@ void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id,
 		getChild<LLUICtrl>("copy_to_clipboard")->setEnabled( false );
 		getChild<LLUICtrl>("solo_username_label")->setVisible( true );
 	}
+
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Modified: 2010-11-07 (Catznip-2.3.0a) | Modified: Catznip-2.3.0a
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (pParentView)
+		pParentView->setTitle(av_name.getCompleteName() + " - " + getLabel());
+// [/SL:KB]
 }
 
 // EOF
