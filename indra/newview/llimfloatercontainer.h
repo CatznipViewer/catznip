@@ -59,9 +59,6 @@ public:
 
 	virtual void setMinimized(BOOL b);
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-08 (Catznip-2.2.0a) | Added: Catznip-2.1.1c
-	virtual void updateFloaterTitle(LLFloater* floaterp) {}
-// [/SL:KB]
 private:
 	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 	avatarID_panel_map_t mSessions;
