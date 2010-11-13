@@ -388,7 +388,7 @@ void QToolAlign::render()
 // only works for our specialized (AABB, position centered) bboxes
 BOOL bbox_overlap(LLBBox bbox1, LLBBox bbox2)
 {
-	const F32 FUDGE = 0.001;  // because of stupid SL precision/rounding
+	const F32 FUDGE = 0.001f;  // because of stupid SL precision/rounding
 	
 	LLVector3 delta = bbox1.getCenterAgent() - bbox2.getCenterAgent();
 
@@ -479,7 +479,7 @@ void QToolAlign::align()
 	std::map<LLPointer<LLViewerObject>, LLBBox > new_bboxes = original_bboxes;
 
 	// find new positions
-	for (S32 i = 0; i < objects.size(); i++)
+	for (U32 i = 0; i < objects.size(); i++)
 	{
 		LLBBox target_bbox = mBBox;
 		LLVector3 target_corner = target_bbox.getCenterAgent() - 
@@ -493,7 +493,7 @@ void QToolAlign::align()
 
 		// for packing, we cycle over several possible positions, taking the smallest that does not overlap
 		F32 smallest = direction * 9999999;  // 999999 guarenteed not to be the smallest
-		for (S32 j = 0; j <= i; j++)
+		for (U32 j = 0; j <= i; j++)
 		{
 			// how far must it move?
 			LLVector3 delta = target_corner - this_corner;
@@ -516,7 +516,7 @@ void QToolAlign::align()
 			
 			if (!mForce) // well, don't check if in force mode
 			{
-				for (S32 k = 0; k < i; k++)
+				for (U32 k = 0; k < i; k++)
 				{
 					LLViewerObject* other_object = objects[k];
 					LLBBox other_bbox = new_bboxes[other_object];
@@ -558,7 +558,7 @@ void QToolAlign::align()
 
 	
 	// now move them
-	for (S32 i = 0; i < objects.size(); i++)
+	for (U32 i = 0; i < objects.size(); i++)
 	{
 		LLViewerObject* object = objects[i];
 
