@@ -1,0 +1,2 @@
+[Settings/ClearCache]
+- added : "ClearCacheMask" setting to optionally prevent purging certain history settings when the viewer/browser cache is purged
