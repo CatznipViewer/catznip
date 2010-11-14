@@ -1,6 +1,6 @@
 [Viewer/Branding]
 - changed : basic rebranding from "Second Life" to "Catznip"
-- changed : viewer channel set to "Catznip Beta" by default
+- changed : viewer channel set to "Catznip Internal" by default
 - changed : use a Catznip-specific cache folder
 - changed : use a Catznip-specific settings folder
 - changed : release notes point to http://catznip.com/viewer/releasenotes/
