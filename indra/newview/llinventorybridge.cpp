@@ -2968,7 +2968,11 @@ void LLFolderBridge::dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_c
 	{
 		LLAppearanceMgr::instance().wearItemOnAvatar(inv_item->getUUID(), true, true);
 	}
-	else
+//	else
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	// Don't create a link when dropping one of our direct descendents
+	else if (inv_item->getParentUUID() != mUUID)
+// [/SL:KB]
 	{
 		LLPointer<LLInventoryCallback> cb = NULL;
 		link_inventory_item(
