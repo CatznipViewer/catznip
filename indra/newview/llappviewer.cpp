@@ -2565,7 +2565,7 @@ void LLAppViewer::writeSystemInfo()
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 
 	gDebugInfo["CPUInfo"]["CPUString"] = gSysCPU.getCPUString();
 	gDebugInfo["CPUInfo"]["CPUFamily"] = gSysCPU.getFamily();
@@ -2669,6 +2669,7 @@ void LLAppViewer::handleViewerCrash()
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
+/*
 	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 	if ( parcel && parcel->getMusicURL()[0])
 	{
@@ -2678,12 +2679,13 @@ void LLAppViewer::handleViewerCrash()
 	{
 		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
 	}
+*/
 	
 	
 	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
-	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
-	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
+//	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
 	gDebugInfo["SessionLength"] = F32(LLFrameTimer::getElapsedSeconds());
 	gDebugInfo["StartupState"] = LLStartUp::getStartupStateString();
 	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer) LLMemory::getCurrentRSS() >> 10;
@@ -2705,6 +2707,11 @@ void LLAppViewer::handleViewerCrash()
 		gDebugInfo["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
 	}
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+/*
 	if(gAgent.getRegion())
 	{
 		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
@@ -2715,6 +2722,7 @@ void LLAppViewer::handleViewerCrash()
 		gDebugInfo["CurrentLocationY"] = loc.mV[1];
 		gDebugInfo["CurrentLocationZ"] = loc.mV[2];
 	}
+*/
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{
@@ -2766,7 +2774,7 @@ void LLAppViewer::handleViewerCrash()
 		gMessageSystem->stopLogging();
 	}
 
-	if (LLWorld::instanceExists()) LLWorld::getInstance()->getInfo(gDebugInfo);
+//	if (LLWorld::instanceExists()) LLWorld::getInstance()->getInfo(gDebugInfo);
 
 	// Close the debug file
 	pApp->writeDebugInfo();
@@ -4396,6 +4404,7 @@ void LLAppViewer::handleLoginComplete()
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
+/*
 	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 	if ( parcel && parcel->getMusicURL()[0])
 	{
@@ -4405,17 +4414,24 @@ void LLAppViewer::handleLoginComplete()
 	{
 		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
 	}
+*/
 	
 	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
-	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
-	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
+//	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+/*
 	if(gAgent.getRegion())
 	{
 		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
 		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
 	}
+*/
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{

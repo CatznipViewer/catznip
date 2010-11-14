@@ -818,7 +818,7 @@ bool idle_startup()
 		}
 		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
-		gDebugInfo["LoginName"] = userid;                                                                              
+//		gDebugInfo["LoginName"] = userid;                                                                              
          
 		// create necessary directories
 		// *FIX: these mkdir's should error check
@@ -2859,11 +2859,11 @@ bool process_login_success_response()
 	// unpack login data needed by the application
 	text = response["agent_id"].asString();
 	if(!text.empty()) gAgentID.set(text);
-	gDebugInfo["AgentID"] = text;
+//	gDebugInfo["AgentID"] = text;
 	
 	text = response["session_id"].asString();
 	if(!text.empty()) gAgentSessionID.set(text);
-	gDebugInfo["SessionID"] = text;
+//	gDebugInfo["SessionID"] = text;
 	
 	text = response["secure_session_id"].asString();
 	if(!text.empty()) gAgent.mSecureSessionID.set(text);
