@@ -3065,11 +3065,17 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 			accept = FALSE;
 		if (move_is_into_current_outfit || move_is_into_outfit)
 		{
-			accept = can_move_to_outfit(inv_item, move_is_into_current_outfit);
+//			accept = can_move_to_outfit(inv_item, move_is_into_current_outfit);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+			accept &= can_move_to_outfit(inv_item, move_is_into_current_outfit);
+// [/SL:KB]
 		}
 		else if (move_is_into_favorites || move_is_into_landmarks)
 		{
-			accept = can_move_to_landmarks(inv_item);
+//			accept = can_move_to_landmarks(inv_item);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+			accept &= can_move_to_landmarks(inv_item);
+// [/SL:KB]
 		}
 
 		if(accept && drop)
