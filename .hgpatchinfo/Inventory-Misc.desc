@@ -2,3 +2,4 @@
 - fixed : dragging the "Contents" folder from object inventory to agent inventory shows the "prohibited" cursor
     -> should copy the contents of the object to the inventory folder it was dropped on
 - fixed : dropping a direct descendent of an outfit folder onto the folder shouldn't create a link to the dropped item
+- fixed : moving a folder link to a different folder moves the target folder rather the folder link

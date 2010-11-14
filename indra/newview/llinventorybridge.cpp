@@ -2707,8 +2707,13 @@ BOOL LLFolderBridge::dragOrDrop(MASK mask, BOOL drop,
 		case DAD_BODYPART:
 		case DAD_ANIMATION:
 		case DAD_GESTURE:
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+		// Moving a folder link to a different folder should move the *link* and not the target folder
+		case DAD_LINK:
+// [/SL:KB]
 			accept = dragItemIntoFolder(inv_item, drop);
 			break;
+/*
 		case DAD_LINK:
 			// DAD_LINK type might mean one of two asset types: AT_LINK or AT_LINK_FOLDER.
 			// If we have an item of AT_LINK_FOLDER type we should process the linked
@@ -2726,6 +2731,7 @@ BOOL LLFolderBridge::dragOrDrop(MASK mask, BOOL drop,
 				accept = dragItemIntoFolder(inv_item, drop);
 			}
 			break;
+*/
 		case DAD_CATEGORY:
 			if (LLFriendCardsManager::instance().isAnyFriendCategory(mUUID))
 			{
