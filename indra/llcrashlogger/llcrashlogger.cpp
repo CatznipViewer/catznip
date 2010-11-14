@@ -162,6 +162,9 @@ void LLCrashLogger::gatherFiles()
 
 		mCrashInPreviousExec = mDebugLog["CrashNotHandled"].asBoolean();
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+		mFileMap["DebugInfoLog"] = db_file_name;
+// [/SL:KB]
 		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
 		mFileMap["SettingsXml"] = mDebugLog["SettingsFilename"].asString();
 		if(mDebugLog.has("CAFilename"))
@@ -176,6 +179,7 @@ void LLCrashLogger::gatherFiles()
 		llinfos << "Using log file from debug log " << mFileMap["SecondLifeLog"] << llendl;
 		llinfos << "Using settings file from debug log " << mFileMap["SettingsXml"] << llendl;
 	}
+/*
 	else
 	{
 		// Figure out the filename of the second life log
@@ -183,6 +187,7 @@ void LLCrashLogger::gatherFiles()
 		mFileMap["SecondLifeLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.log");
 		mFileMap["SettingsXml"] = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,"settings.xml");
 	}
+*/
 
 	if(mCrashInPreviousExec)
 	{
@@ -203,6 +208,13 @@ void LLCrashLogger::gatherFiles()
 		// Crash log receiver has been manually configured.
 		mCrashHost = mDebugLog["CrashHostUrl"].asString();
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	else
+	{
+		mCrashHost = "http://catznip.com/viewer/crash/report/";
+	}
+// [/SL:KB]
+/*
 	else if(mDebugLog.has("CurrentSimHost"))
 	{
 		mCrashHost = "https://";
@@ -219,15 +231,20 @@ void LLCrashLogger::gatherFiles()
 		mCrashHost += grid_host;
 		mCrashHost += ".lindenlab.com:12043/crash/report";
 	}
+*/
 
 	// Use login servers as the alternate, since they are already load balanced and have a known name
-	mAltCrashHost = "https://login.agni.lindenlab.com:12043/crash/report";
+//	mAltCrashHost = "https://login.agni.lindenlab.com:12043/crash/report";
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	mAltCrashHost = "";
+// [/SL:KB]
 
-	mCrashInfo["DebugLog"] = mDebugLog;
+//	mCrashInfo["DebugLog"] = mDebugLog;
 	mFileMap["StatsLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"stats.log");
 	
 	updateApplication("Encoding files...");
 
+/*
 	for(std::map<std::string, std::string>::iterator itr = mFileMap.begin(); itr != mFileMap.end(); ++itr)
 	{
 		std::ifstream f((*itr).second.c_str());
@@ -251,9 +268,17 @@ void LLCrashLogger::gatherFiles()
 
 		mCrashInfo[(*itr).first] = LLStringFn::strip_invalid_xml(rawstr_to_utf8(crash_info));
 	}
+*/
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	if (gDirUtilp->fileExists(minidump_path))
+	{
+		mFileMap["Minidump"] = minidump_path;
+	}
+// [/SL:KB]
+/*
 	if(minidump_path != "")
 	{
 		std::ifstream minidump_stream(minidump_path.c_str(), std::ios_base::in | std::ios_base::binary);
@@ -273,6 +298,7 @@ void LLCrashLogger::gatherFiles()
 		}
 	}
 	mCrashInfo["DebugLog"].erase("MinidumpPath");
+*/
 }
 
 LLSD LLCrashLogger::constructPostData()
@@ -313,7 +339,58 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 	for(int i = 0; i < retries; ++i)
 	{
 		status_message = llformat("%s, try %d...", msg.c_str(), i+1);
-		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
+//		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+		static const std::string BOUNDARY("------------abcdef012345xyZ");
+
+		LLSD headers = LLSD::emptyMap();
+
+		headers["Accept"] = "*/*";
+		headers["Content-Type"] = "multipart/form-data; boundary=" + BOUNDARY;
+
+		std::ostringstream body;
+
+		for (std::map<std::string, std::string>::const_iterator itFile = mFileMap.begin(), endFile = mFileMap.end();
+				itFile != endFile; ++itFile)
+		{
+			if (itFile->second.empty())
+				continue;
+
+			body << "--" << BOUNDARY << "\r\n"
+				 <<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
+				 << "filename=\"" << gDirUtilp->getBaseFileName(itFile->second) << "\"\r\n"
+				 << "Content-Type: application/octet-stream"
+				 << "\r\n\r\n";
+
+			llifstream fstream(itFile->second, std::iostream::binary | std::iostream::out);
+			if (fstream.is_open())
+			{
+				fstream.seekg(0, std::ios::end);
+
+				U32 fileSize = fstream.tellg();
+				fstream.seekg(0, std::ios::beg);
+				std::vector<char> fileBuffer(fileSize);
+
+				fstream.read(&fileBuffer[0], fileSize);
+				body.write(&fileBuffer[0], fileSize);
+
+				fstream.close();
+			}
+
+			body <<	"\r\n";
+		}
+		
+		body << "--" << BOUNDARY << "--\r\n";
+
+		// postRaw() takes ownership of the buffer and releases it later.
+		size_t size = body.str().size();
+		U8 *data = new U8[size];
+		memcpy(data, body.str().data(), size);
+
+		// Send request
+		LLHTTPClient::postRaw(host, data, size, new LLCrashLoggerResponder(), headers);
+// [/SL:KB]
+
 		while(!gBreak)
 		{
 			updateApplication(status_message);
@@ -343,6 +420,10 @@ bool LLCrashLogger::sendCrashLogs()
 	LLSDSerialize::toPrettyXML(post_data, out_file);
 	out_file.close();
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	mFileMap["CrashReportLog"] = report_file;
+// [/SL:KB]
+
 	bool sent = false;
 
 	//*TODO: Translate
@@ -351,7 +432,10 @@ bool LLCrashLogger::sendCrashLogs()
 		sent = runCrashLogPost(mCrashHost, post_data, std::string("Sending to server"), 3, 5);
 	}
 
-	if(!sent)
+//	if(!sent)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	if ( (!sent) && (!mAltCrashHost.empty()) )
+// [/SL:KB]
 	{
 		sent = runCrashLogPost(mAltCrashHost, post_data, std::string("Sending to alternate server"), 3, 5);
 	}
