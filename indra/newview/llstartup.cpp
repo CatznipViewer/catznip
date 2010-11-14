@@ -826,10 +826,31 @@ bool idle_startup()
 		LLFile::mkdir(gDirUtilp->getLindenUserDir());
 
 		// Set PerAccountSettingsFile to the default value.
-		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
-		gSavedSettings.setString("PerAccountSettingsFile",
-			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
-				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
+//		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
+//		gSavedSettings.setString("PerAccountSettingsFile",
+//			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
+//				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+		std::string strPerAccountSettingspath =
+			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount"));
+
+		// If the file doesn't exist, try using the per account settings from Second Life instead
+		if (!gDirUtilp->fileExists(strPerAccountSettingspath))
+		{
+			const std::string strAppName = "Catznip";
+
+			std::string strSLSettingsPath = strPerAccountSettingspath;
+			std::string::size_type idxAppName = strSLSettingsPath.rfind(strAppName);
+			if (std::string::npos != idxAppName)
+			{
+				strSLSettingsPath.replace(idxAppName, strAppName.length(), "SecondLife");
+				if (gDirUtilp->fileExists(strSLSettingsPath))
+					strPerAccountSettingspath = strSLSettingsPath;
+			}
+		}
+
+		gSavedSettings.setString("PerAccountSettingsFile", strPerAccountSettingspath);
+// [/SL:KB]
 
 		// Note: can't store warnings files per account because some come up before login
 		
