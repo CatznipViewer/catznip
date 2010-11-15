@@ -1212,7 +1212,7 @@ if (WINDOWS)
         res/lltoolzoomin.cur
         res/lltoolzoomout.cur
         res/ll_icon.BMP
-        res/ll_icon.ico
+        res/catznip.ico
         res/resource.h
         res/toolpickobject.cur
         res/toolpickobject2.cur
