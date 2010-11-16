@@ -11,8 +11,6 @@
         <key>Value</key>
             <integer>0</integer>
         </map>
-    </map>
-    <map>
     <key>CrashSubmitName</key>
         <map>
         <key>Comment</key>
@@ -24,8 +22,6 @@
         <key>Value</key>
             <integer>0</integer>
         </map>
-    </map>
-    <map>
     <key>CrashSubmitSettings</key>
         <map>
         <key>Comment</key>
