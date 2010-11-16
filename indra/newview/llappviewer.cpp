@@ -2557,7 +2557,7 @@ void LLAppViewer::removeCacheFiles(const std::string& file_mask)
 
 void LLAppViewer::writeSystemInfo()
 {
-	gDebugInfo["SLLog"] = LLError::logFileName();
+//	gDebugInfo["SLLog"] = LLError::logFileName();
 
 	gDebugInfo["ClientInfo"]["Name"] = gSavedSettings.getString("VersionChannelName");
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
@@ -2682,7 +2682,14 @@ void LLAppViewer::handleViewerCrash()
 */
 	
 	
-	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+//	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0b) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitSettings"))
+	{
+		// Only include settings.xml if the user consented
+		gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+	}
+// [/SL:KB]
 //	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 //	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
 //	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
@@ -4416,7 +4423,14 @@ void LLAppViewer::handleLoginComplete()
 	}
 */
 	
-	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+//	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0b) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitSettings"))
+	{
+		// Only include settings.xml if the user consented
+		gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+	}
+// [/SL:KB]
 //	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 //	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
 //	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
