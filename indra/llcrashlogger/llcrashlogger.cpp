@@ -162,9 +162,6 @@ void LLCrashLogger::gatherFiles()
 
 		mCrashInPreviousExec = mDebugLog["CrashNotHandled"].asBoolean();
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
-		mFileMap["DebugInfoLog"] = db_file_name;
-// [/SL:KB]
 		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
 		mFileMap["SettingsXml"] = mDebugLog["SettingsFilename"].asString();
 		if(mDebugLog.has("CAFilename"))
@@ -272,11 +269,16 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0a) | Modified: Catznip-2.4.0b
 	if (gDirUtilp->fileExists(minidump_path))
 	{
 		mFileMap["Minidump"] = minidump_path;
+		// Remove the minidump path after we've retrieved it since it could contain the OS user name
+		mDebugLog.erase("MinidumpPath");
 	}
+
+	// Include debug_info.log as part of CrashReport.log
+	mCrashInfo["DebugLog"] = mDebugLog;
 // [/SL:KB]
 /*
 	if(minidump_path != "")
