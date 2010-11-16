@@ -686,11 +686,11 @@ bool LLAppViewer::init()
 	// Get the single value from the crash settings file, if it exists
 	std::string crash_settings_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, CRASH_SETTINGS_FILE);
 	gCrashSettings.loadFromFile(crash_settings_filename);
-	if(gSavedSettings.getBOOL("IgnoreAllNotifications"))
-	{
-		gCrashSettings.setS32(CRASH_BEHAVIOR_SETTING, CRASH_BEHAVIOR_ALWAYS_SEND);
-		gCrashSettings.saveToFile(crash_settings_filename, FALSE);
-	}
+//	if(gSavedSettings.getBOOL("IgnoreAllNotifications"))
+//	{
+//		gCrashSettings.setS32(CRASH_BEHAVIOR_SETTING, CRASH_BEHAVIOR_ALWAYS_SEND);
+//		gCrashSettings.saveToFile(crash_settings_filename, FALSE);
+//	}
 
 	/////////////////////////////////////////////////
 	// OS-specific login dialogs
