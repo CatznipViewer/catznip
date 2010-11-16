@@ -415,7 +415,7 @@ bool LLCrashLogger::sendCrashLogs()
 	updateApplication("Sending reports...");
 
 	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
-															   "SecondLifeCrashReport");
+															   "CatznipCrashReport");
 	std::string report_file = dump_path + ".log";
 
 	std::ofstream out_file(report_file.c_str());
