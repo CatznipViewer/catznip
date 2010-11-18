@@ -539,11 +539,7 @@ void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LL
 {
 //	mHistoryFileName = av_name.mUsername;
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
-	// Username will be empty when display names are disabled
-	if (!av_name.mUsername.empty())
-		mHistoryFileName = av_name.mUsername;
-	else
-		mHistoryFileName = LLCacheName::buildUsername(av_name.mDisplayName);
+	LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
 
 	// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
 	mName = av_name.getCompleteName();
