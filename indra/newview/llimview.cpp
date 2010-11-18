@@ -782,18 +782,37 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
 bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
 {
+	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames");
+
 	// If we have the name cached then we can simply return the username
 	LLAvatarName avName;
 	if ( (LLAvatarNameCache::get(idAgent, &avName)) && (!avName.mIsDummy) )
 	{
-		// If display names are turned off mUserName will be empty and we have to construct it from the legacy name
-		strFilename = (!avName.mUsername.empty()) ? avName.mUsername : LLCacheName::buildUsername(avName.mDisplayName);
+		if (!fLegacyFilenames)
+		{
+			// If display names are turned off mUserName will be empty and we have to construct it from the legacy name
+			strFilename = (!avName.mUsername.empty()) ? avName.mUsername : LLCacheName::buildUsername(avName.mDisplayName);
+		}
+		else
+		{
+			// Use the legacy name to base the filename on
+			strFilename = LLCacheName::cleanFullName( (!avName.mLegacyFirstName.empty()) ? avName.mDisplayName : avName.getLegacyName() );
+		}
 		return true;
 	}
 
-	// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
-	strFilename = LLCacheName::buildUsername(strName);
-	return strName != strFilename; // If the assumption above was wrong then the two will match which signals failure
+	if (!fLegacyFilenames)
+	{
+		// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
+		strFilename = LLCacheName::buildUsername(strName);
+		return strName != strFilename;	// If the assumption above was wrong then the two will match which signals failure
+	}
+	else
+	{
+		// Strip any possible mention of a username
+		strFilename = LLCacheName::buildLegacyName(strName);
+		return (!strFilename.empty());	// Assume success as long as the filename isn't an empty string
+	}
 }
 // [/SL:KB]
 

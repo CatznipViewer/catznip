@@ -15,3 +15,6 @@
     -> no open IM session => logged to "Catznip Catnap.txt"
 - fixed   : inventory accepted/declined notifications are logged to the wrong file
     -> no open IM session => logged to secondlife____app_agent_<uuid>_completename.txt
+- added   : "UseLegacyIMLogNames" setting to use "old-style" log filenames for P2P IM sessions (TRUE by default)
+    -> needed for people who mix older and newer viewers
+    -> side-steps any other remaining bugs due to log filename change
