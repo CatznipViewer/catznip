@@ -12,3 +12,6 @@
     -> open IM session => logged to "catznip_catnap.txt"
     -> no open IM session => logged to "Catznip Catnap.txt"
 - fixed   : inventory offers to another avie are logged to the wrong file when no IM session is open for that avie
+    -> no open IM session => logged to "Catznip Catnap.txt"
+- fixed   : inventory accepted/declined notifications are logged to the wrong file
+    -> no open IM session => logged to secondlife____app_agent_<uuid>_completename.txt
