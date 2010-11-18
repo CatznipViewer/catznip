@@ -2486,10 +2486,17 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 		// log message to file
 		else
 		{
-			std::string session_name;
-			// since we select user to share item with - his name is already in cache
-			gCacheName->getFullName(args["user_id"], session_name);
-			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
+//			std::string session_name;
+//			// since we select user to share item with - his name is already in cache
+//			gCacheName->getFullName(args["user_id"], session_name);
+//			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+			std::string strFilename;
+			if (LLIMModel::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
+			{
+				LLIMModel::instance().logToFile(strFilename, SYSTEM_FROM, LLUUID::null, message.getString());
+			}
+// [/SL:KB]
 		}
 	}
 }

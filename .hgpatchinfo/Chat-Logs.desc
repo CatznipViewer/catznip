@@ -11,3 +11,4 @@
 - fixed   : teleport offers to another avie are logged to the wrong file when no IM session is open for that avie
     -> open IM session => logged to "catznip_catnap.txt"
     -> no open IM session => logged to "Catznip Catnap.txt"
+- fixed   : inventory offers to another avie are logged to the wrong file when no IM session is open for that avie
