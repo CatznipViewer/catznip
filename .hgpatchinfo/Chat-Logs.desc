@@ -7,3 +7,5 @@
     -> incoming IM session would have a session name of "Catznip Catnap" (legacy name)
     -> outgoing IM session would have a session name of "Catznip Tester (catznip.catnap)" (complete name)
     -> standarized P2P IM session names to "complete name"
+- added   : LLIMModel::buildIMP2PLogFilename() to have one single function to construct log filenames for P2P IMs
+	

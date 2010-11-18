@@ -783,6 +783,24 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 	return true;
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
+{
+	// If we have the name cached then we can simply return the username
+	LLAvatarName avName;
+	if ( (LLAvatarNameCache::get(idAgent, &avName)) && (!avName.mIsDummy) )
+	{
+		// If display names are turned off mUserName will be empty and we have to construct it from the legacy name
+		strFilename = (!avName.mUsername.empty()) ? avName.mUsername : LLCacheName::buildUsername(avName.mDisplayName);
+		return true;
+	}
+
+	// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
+	strFilename = LLCacheName::buildUsername(strName);
+	return strName != strFilename; // If the assumption above was wrong then the two will match which signals failure
+}
+// [/SL:KB]
+
 bool LLIMModel::logToFile(const std::string& file_name, const std::string& from, const LLUUID& from_id, const std::string& utf8_text)
 {
 	if (gSavedPerAccountSettings.getBOOL("LogInstantMessages"))
