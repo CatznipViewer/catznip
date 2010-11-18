@@ -8,4 +8,6 @@
     -> outgoing IM session would have a session name of "Catznip Tester (catznip.catnap)" (complete name)
     -> standarized P2P IM session names to "complete name"
 - added   : LLIMModel::buildIMP2PLogFilename() to have one single function to construct log filenames for P2P IMs
-	
+- fixed   : teleport offers to another avie are logged to the wrong file when no IM session is open for that avie
+    -> open IM session => logged to "catznip_catnap.txt"
+    -> no open IM session => logged to "Catznip Catnap.txt"
