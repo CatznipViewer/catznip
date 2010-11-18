@@ -537,15 +537,43 @@ bool LLIMModel::LLIMSession::isOtherParticipantAvaline()
 
 void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name)
 {
-	mHistoryFileName = av_name.mUsername;
+//	mHistoryFileName = av_name.mUsername;
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+	// Username will be empty when display names are disabled
+	if (!av_name.mUsername.empty())
+		mHistoryFileName = av_name.mUsername;
+	else
+		mHistoryFileName = LLCacheName::buildUsername(av_name.mDisplayName);
+// [/SL:KB]
 }
 
 void LLIMModel::LLIMSession::buildHistoryFileName()
 {
-	mHistoryFileName = mName;
-	
-	//ad-hoc requires sophisticated chat history saving schemes
-	if (isAdHoc())
+//	mHistoryFileName = mName;
+//	
+//	//ad-hoc requires sophisticated chat history saving schemes
+//	if (isAdHoc())
+//	{
+//		//in case of outgoing ad-hoc sessions
+//		if (mInitialTargetIDs.size())
+//		{
+//			std::set<LLUUID> sorted_uuids(mInitialTargetIDs.begin(), mInitialTargetIDs.end());
+//			mHistoryFileName = mName + " hash" + generateHash(sorted_uuids);
+//			return;
+//		}
+//		
+//		//in case of incoming ad-hoc sessions
+//		mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
+//	}
+//
+//	// look up username to use as the log name
+//	if (isP2P())
+//	{
+//		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
+//	}
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+	// Not all of the code above is broken but it becomes a bit of a mess otherwise
+	if (isAdHoc())		//ad-hoc requires sophisticated chat history saving schemes
 	{
 		//in case of outgoing ad-hoc sessions
 		if (mInitialTargetIDs.size())
@@ -558,12 +586,20 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 		//in case of incoming ad-hoc sessions
 		mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
 	}
-
-	// look up username to use as the log name
-	if (isP2P())
+	else if (isP2P())	// look up username to use as the log name
 	{
+		// NOTE-Catznip: [SL-2.4.0] mName will be:
+		//   - the "complete name" if display names are enabled and it's an outgoing IM
+		//   - the "legacy name" if display names are disabled or if it's an incoming IM
+		mHistoryFileName = LLCacheName::buildUsername(mName);
+
 		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
 	}
+	else
+	{
+		mHistoryFileName = mName;
+	}
+// [/SL:KB]
 }
 
 //static
