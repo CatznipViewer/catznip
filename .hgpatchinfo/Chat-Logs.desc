@@ -3,3 +3,7 @@
     -> "Catznip Catnap" => "catznip.catnap"
     -> "Catznip Tester (catznip.catnap)" => "catznip.catnap"
 - fixed   : IM logs are not saved when display names are turned off
+- fixed   : P2P IM session names are inconsistent (chiclet hover tip shows the legacy name rather than the complete name for incoming IM sessions)
+    -> incoming IM session would have a session name of "Catznip Catnap" (legacy name)
+    -> outgoing IM session would have a session name of "Catznip Tester (catznip.catnap)" (complete name)
+    -> standarized P2P IM session names to "complete name"

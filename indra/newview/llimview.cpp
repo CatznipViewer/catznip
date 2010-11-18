@@ -544,6 +544,9 @@ void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LL
 		mHistoryFileName = av_name.mUsername;
 	else
 		mHistoryFileName = LLCacheName::buildUsername(av_name.mDisplayName);
+
+	// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
+	mName = av_name.getCompleteName();
 // [/SL:KB]
 }
 
