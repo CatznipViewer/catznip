@@ -1,0 +1,4 @@
+[Chat/Logs]
+- changed : LLCacheName::buildUsername() will properly extract the username if the passed name is a "complete name"
+    -> "Catznip Catnap" => "catznip.catnap"
+    -> "Catznip Tester (catznip.catnap)" => "catznip.catnap"
