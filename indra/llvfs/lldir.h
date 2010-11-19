@@ -53,6 +53,9 @@ typedef enum ELLPath
 	LL_PATH_EXECUTABLE = 16,
 	LL_PATH_DEFAULT_SKIN = 17,
 	LL_PATH_FONTS = 18,
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+	LL_PATH_TOP_SKINTHEME = 19,
+// [/SL:KB]
 	LL_PATH_LAST
 } ELLPath;
 

@@ -384,6 +384,12 @@ std::string LLDir::getExpandedFilename(ELLPath location, const std::string& subd
 		prefix = getSkinDir();
 		break;
 
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+	case LL_PATH_TOP_SKINTHEME:
+		prefix = getSkinThemeDir();
+		break;
+// [/SL:KB]
+
 	case LL_PATH_DEFAULT_SKIN:
 		prefix = getDefaultSkinDir();
 		break;
