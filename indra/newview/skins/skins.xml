@@ -24,12 +24,6 @@
             <array>
                 <map>
                 <key>name</key>
-                    <string>Default</string>
-                <key>folder</key>
-                    <string>default</string>
-                </map>
-                <map>
-                <key>name</key>
                     <string>Nostalgia Blue</string>
                 <key>folder</key>
                     <string>blue</string>
@@ -38,7 +32,7 @@
                 <key>name</key>
                     <string>Original Orange</string>
                 <key>folder</key>
-                    <string>orange</string>
+                    <string>default</string>
                 </map>
                 <map>
                 <key>name</key>
