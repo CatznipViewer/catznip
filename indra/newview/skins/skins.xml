@@ -26,7 +26,7 @@
                 <key>name</key>
                     <string>Nostalgia Blue</string>
                 <key>folder</key>
-                    <string>blue</string>
+                    <string>nostalgia_blue</string>
                 </map>
                 <map>
                 <key>name</key>
@@ -38,7 +38,25 @@
                 <key>name</key>
                     <string>Original Teal</string>
                 <key>folder</key>
-                    <string>teal</string>
+                    <string>original_teal</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Piggy Pink</string>
+                <key>folder</key>
+                    <string>piggy_pink</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Silver Blue</string>
+                <key>folder</key>
+                    <string>silver_blue</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Silver Pink</string>
+                <key>folder</key>
+                    <string>silver_pink</string>
                 </map>
             </array>
         </map>
