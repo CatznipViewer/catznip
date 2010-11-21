@@ -43,7 +43,7 @@
      left_pad="10"
      height="23"
      width="125"
-     control_name="SaveMiniDumpType"
+     control_name="SaveMinidumpType"
      name="comboSaveMiniDumpType"
 	 enabled="false"
     >
