@@ -1190,6 +1190,8 @@ if (WINDOWS)
         res/arrowcop.cur
         res/arrowcopmulti.cur
         res/arrowdrag.cur
+        res/catznip.bmp
+        res/catznip.ico
         res/circleandline.cur
         res/icon1.ico
         res/llarrow.cur
@@ -1211,8 +1213,6 @@ if (WINDOWS)
         res/lltooltranslate.cur
         res/lltoolzoomin.cur
         res/lltoolzoomout.cur
-        res/ll_icon.BMP
-        res/catznip.ico
         res/resource.h
         res/toolpickobject.cur
         res/toolpickobject2.cur
