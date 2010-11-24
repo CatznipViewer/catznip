@@ -42,12 +42,6 @@
                 </map>
                 <map>
                 <key>name</key>
-                    <string>Piggy Pink</string>
-                <key>folder</key>
-                    <string>piggy_pink</string>
-                </map>
-                <map>
-                <key>name</key>
                     <string>Silver Blue</string>
                 <key>folder</key>
                     <string>silver_blue</string>
