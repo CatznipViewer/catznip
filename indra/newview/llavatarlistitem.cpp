@@ -116,9 +116,9 @@ BOOL  LLAvatarListItem::postBuild()
 	mIconPermissionMap = getChild<LLButton>("permission_map_icon");
 	mIconPermissionEditMine = getChild<LLButton>("permission_edit_mine_icon");
 
-	mIconPermissionOnline->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_ONLINE_STATUS));
-	mIconPermissionMap->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_MAP_LOCATION));
-	mIconPermissionEditMine->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, LLRelationship::GRANT_MODIFY_OBJECTS));
+	mIconPermissionOnline->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_ONLINE_STATUS));
+	mIconPermissionMap->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_MAP_LOCATION));
+	mIconPermissionEditMine->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_MODIFY_OBJECTS));
 // [/SL:KB]
 
 	mIconPermissionOnline->setVisible(false);
