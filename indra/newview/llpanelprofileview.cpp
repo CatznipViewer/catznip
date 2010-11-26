@@ -146,14 +146,25 @@ BOOL LLPanelProfileView::postBuild()
 
 		childSetVisible("back", false);
 
-		// HACK-Catznip: we got rid of the back button so we want to align the name and status controls with the rest
-		LLUICtrl* pNameCtrl = getChild<LLUICtrl>("user_name", FALSE);
-		if (pNameCtrl)
-			pNameCtrl->translate(10 - pNameCtrl->getRect().mLeft, 0);
-		mStatusText->translate(10 - mStatusText->getRect().mLeft, 0);
+		// HACK-Catznip: we got rid of the back button so we want to line up the name controls with the rest
+		LLUICtrl* pCtrls[] = 
+			{
+				getChild<LLUICtrl>("user_name", FALSE),
+				getChild<LLUICtrl>("display_name_label", FALSE),
+				getChild<LLUICtrl>("solo_username_label", FALSE),
+				getChild<LLUICtrl>("user_name_small", FALSE),
+				getChild<LLUICtrl>("user_label", FALSE),
+				getChild<LLUICtrl>("user_slid", FALSE)
+			};
+		int dX = (NULL != pCtrls[0]) ? 10 - pCtrls[0]->getRect().mLeft : 0;
+		for (int idxCtrl = 0; idxCtrl < sizeof(pCtrls) / sizeof(LLUICtrl*); idxCtrl++)
+		{
+			if (pCtrls[idxCtrl])
+				pCtrls[idxCtrl]->translate(dX, 0);
+		}
 	}
 // [/SL:KB]
-		
+
 	return TRUE;
 }
 
