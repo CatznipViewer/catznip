@@ -164,6 +164,10 @@ void LLCrashLogger::gatherFiles()
 
 		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
 		mFileMap["SettingsXml"] = mDebugLog["SettingsFilename"].asString();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-27 (Catznip-2.4.0f) | Added: Catznip-2.4.0f
+		// Remove the settings.xml path after we've retrieved it since it could contain the OS user name
+		mDebugLog.erase("SettingsFilename");
+// [/SL:KB]
 		if(mDebugLog.has("CAFilename"))
 		{
 			LLCurl::setCAFile(mDebugLog["CAFilename"].asString());

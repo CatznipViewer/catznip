@@ -2816,7 +2816,7 @@ void LLAppViewer::handleViewerCrash()
 
 	if (gMessageSystem)
 	{
-		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
+//		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
 		gMessageSystem->stopLogging();
 	}
 
