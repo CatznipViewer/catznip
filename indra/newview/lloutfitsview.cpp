@@ -20,6 +20,7 @@
 #include "llfoldervieweventlistener.h"
 #include "llinventoryfunctions.h"
 #include "llinventorypanel.h"
+#include "llnotificationsutil.h"
 #include "lloutfitsview.h"
 
 // ----------------------------------------------------------------------------
@@ -298,11 +299,22 @@ void LLOutfitsView::performAction(std::string strAction)
 	}
 }
 
+// virtual - Checked: 2010-11-30 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
 void LLOutfitsView::removeSelected()
 {
-/*
-	LLNotificationsUtil::add("DeleteOutfits", LLSD(), LLSD(), boost::bind(&LLOutfitsList::onOutfitsRemovalConfirmation, this, _1, _2));
-*/
+	LLNotificationsUtil::add("DeleteOutfits", LLSD(), LLSD(), boost::bind(&LLOutfitsView::onOutfitsRemovalConfirmation, this, _1, _2));
+}
+
+// virtual - Checked: 2010-11-30 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const LLSD& response)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (idxOption != 0)
+		return; // canceled
+
+	// Copy/paste of the "delete" check in LLOutfitsView::isActionEnabled
+	if ( (!mItemSelection) && (mOutfitSelection) && (LLAppearanceMgr::instance().getCanRemoveOutfit(mSelectedCategory)) )
+		remove_category(&gInventory, mSelectedCategory);
 }
 
 // virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a

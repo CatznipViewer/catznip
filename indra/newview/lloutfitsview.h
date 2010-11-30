@@ -46,8 +46,11 @@ public:
 	/*virtual*/ void wearSelectedItems();
 	/*virtual*/ bool hasItemSelected();
 
-	void									onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction);
 	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
+
+protected:
+	void onOutfitsRemovalConfirmation(const LLSD& notification, const LLSD& response);
+	void onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction);
 
 protected:
 	LLInventoryPanel*				mInvPanel;
