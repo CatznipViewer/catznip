@@ -342,11 +342,18 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 	if (1 == selItems.size())
 	{
 		// One selected inventory object, check if it's a folder
-		LLFolderViewFolder* pFolder = dynamic_cast<LLFolderViewFolder*>(*selItems.begin());
+		const LLFolderViewFolder* pFolder = dynamic_cast<const LLFolderViewFolder*>(*selItems.begin());
 		if (pFolder)
+		{
 			mSelectedCategory = pFolder->getListener()->getUUID();
+		}
 		else
+		{
 			mItemSelection = true;
+			const LLFolderViewFolder* pFolder = (*selItems.begin())->getParentFolder();
+			if (pFolder)
+				mSelectedCategory = pFolder->getListener()->getUUID();
+		}
 	}
 	else
 	{
