@@ -55,6 +55,7 @@ protected:
 
 	std::string						mFilterSubString;
 
+	bool							mFetchStarted;				// TRUE if we started fetching everything under "My Outfits"
 	bool							mItemSelection;				// TRUE if the selection consists solely of inventory items
 	bool                            mOutfitSelection;			// TRUE if mSelectedCategory is of type FT_OUTFIT
 	LLUUID							mSelectedCategory;			// Parent UUID of the currently selected items

@@ -128,11 +128,12 @@ bool get_selected_items(LLInventoryPanel* pInvPanel, LLInventoryModel::item_arra
 static LLRegisterPanelClassWrapper<LLOutfitsView> t_outfits_view("outfits_view");
 
 LLOutfitsView::LLOutfitsView()
-	:	LLPanelOutfitsTab()
-	,	mInvPanel(NULL)
-	,	mSavedFolderState(NULL)
-	,	mItemSelection(false)
-	,	mOutfitSelection(false)
+	: LLPanelOutfitsTab()
+	, mInvPanel(NULL)
+	, mSavedFolderState(NULL)
+	, mFetchStarted(false)
+	, mItemSelection(false)
+	, mOutfitSelection(false)
 {
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
@@ -155,7 +156,28 @@ BOOL LLOutfitsView::postBuild()
 //virtual
 void LLOutfitsView::onOpen(const LLSD& /*info*/)
 {
-	// TODO-Catznip: start fetching the outfit folders if necessary
+	if ( (!mFetchStarted) && (gInventory.isInventoryUsable()) )
+	{
+		const LLUUID idOutfits = gInventory.findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS);
+
+		// Grab all the folders under "My Outfits"
+		LLInventoryModel::cat_array_t folders; LLInventoryModel::item_array_t items;
+		gInventory.collectDescendents(idOutfits, folders, items, FALSE);
+
+		// Add them to the "to fetch" list
+		uuid_vec_t idFolders;
+		idFolders.push_back(idOutfits);
+		for (S32 idxFolder = 0, cntFolder = folders.count(); idxFolder < cntFolder; idxFolder++)
+			idFolders.push_back(folders.get(idxFolder)->getUUID());
+
+		llinfos << "Starting fetch of " << idFolders.size() << " outfit folders" << llendl;
+
+		// Now fetch them all in one go
+		LLInventoryFetchDescendentsObserver fetcher = LLInventoryFetchDescendentsObserver(idFolders);
+		fetcher.startFetch();
+
+		mFetchStarted = true;
+	}
 }
 
 // virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
