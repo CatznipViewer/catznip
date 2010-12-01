@@ -22,6 +22,7 @@
 
 class LLFolderViewItem;
 class LLInventoryPanel;
+class LLOutfitsViewGearMenu;
 
 class LLOutfitsView : public LLPanelOutfitsTab
 {
@@ -29,7 +30,8 @@ public:
 	LLOutfitsView();
 	virtual ~LLOutfitsView();
 
-	bool canWearSelected();
+	bool				canWearSelected();
+	LLInventoryPanel*	getPanel()	{ return mInvPanel; }
 
 	/*virtual*/ void onOpen(const LLSD& info);
 	/*virtual*/ BOOL postBuild();
@@ -54,6 +56,7 @@ protected:
 
 protected:
 	LLInventoryPanel*				mInvPanel;
+	LLOutfitsViewGearMenu*			mGearMenu;
 	LLSaveFolderState*				mSavedFolderState;
 
 	std::string						mFilterSubString;

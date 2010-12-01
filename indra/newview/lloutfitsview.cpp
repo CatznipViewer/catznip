@@ -20,10 +20,13 @@
 #include "llfoldervieweventlistener.h"
 #include "llinventoryfunctions.h"
 #include "llinventorypanel.h"
+#include "llmenubutton.h"
 #include "llnotificationsutil.h"
 #include "lloutfitsview.h"
+#include "lltoggleablemenu.h"
+#include "llviewermenu.h"
 
-// ----------------------------------------------------------------------------
+// ============================================================================
 
 // Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
 LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)
@@ -124,24 +127,94 @@ bool get_selected_items(LLInventoryPanel* pInvPanel, LLInventoryModel::item_arra
 	return !items.empty();
 }
 
-// ----------------------------------------------------------------------------
+// ============================================================================
+// LLOutfitListGearMenu helper class
+
+class LLOutfitsViewGearMenu
+{
+public:
+	LLOutfitsViewGearMenu(LLOutfitsView* pOutfitsView)
+		: mOutfitsView(pOutfitsView),
+		  mMenu(NULL)
+	{
+		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+
+		registrar.add("OutfitsView.Gear.CloseFolders", boost::bind(&LLOutfitsViewGearMenu::onCloseFolders, this));
+		registrar.add("OutfitsView.Gear.OnAction", boost::bind(&LLOutfitsViewGearMenu::onAction, this, _2));
+
+		enable_registrar.add("OutfitsView.Gear.OnEnable", boost::bind(&LLOutfitsViewGearMenu::onEnable, this, _2));
+		enable_registrar.add("OutfitsView.Gear.OnVisible", boost::bind(&LLOutfitsViewGearMenu::onVisible, this, _2));
+
+		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+			"menu_outfitview_gear.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	}
+
+	LLToggleableMenu* getMenu() { return mMenu; }
+
+protected:
+	void onCloseFolders()
+	{
+		LLInventoryPanel* pInvPanel = mOutfitsView->getPanel();
+		if (!pInvPanel)
+			return;
+
+		LLFolderView* pRootFolder = pInvPanel->getRootFolder();
+		if (!pRootFolder)
+			return;
+
+		LLFolderViewFolder* pStartFolder = pRootFolder->getFolderByID(pInvPanel->getStartFolderID());
+		if (!pStartFolder)
+			return;
+
+		// Close all the folders except the start folder
+		pStartFolder->setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+		pStartFolder->setOpen(TRUE);
+		pRootFolder->arrangeAll();
+	}
+
+	void onAction(LLSD::String sdParam)
+	{
+		mOutfitsView->performAction(sdParam);
+	}
+
+	bool onEnable(LLSD::String sdParam)
+	{
+		return mOutfitsView->isActionEnabled(sdParam);
+	}
+
+	bool onVisible(LLSD::String sdParam)
+	{
+		return true;
+	}
+
+protected:
+	LLOutfitsView*			mOutfitsView;
+	LLToggleableMenu*		mMenu;
+};
+
+// ============================================================================
 
 static LLRegisterPanelClassWrapper<LLOutfitsView> t_outfits_view("outfits_view");
 
 LLOutfitsView::LLOutfitsView()
 	: LLPanelOutfitsTab()
 	, mInvPanel(NULL)
+	, mGearMenu(NULL)
 	, mSavedFolderState(NULL)
 	, mFetchStarted(false)
 	, mItemSelection(false)
 	, mOutfitSelection(false)
 {
+	mGearMenu = new LLOutfitsViewGearMenu(this);
+
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
 }
 
 LLOutfitsView::~LLOutfitsView()
 {
+	delete mGearMenu;
 	delete mSavedFolderState;
 }
 
@@ -150,6 +223,9 @@ BOOL LLOutfitsView::postBuild()
 {
 	mInvPanel = getChild<LLInventoryPanel>("outfits_invpanel");
 	mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
+
+	LLMenuButton* pGearBtn = getChild<LLMenuButton>("options_gear_btn");
+	pGearBtn->setMenu(mGearMenu->getMenu());
 
 	return TRUE;
 }
@@ -221,17 +297,17 @@ bool LLOutfitsView::canWearSelected()
 }
 
 // virtual
-bool LLOutfitsView::isActionEnabled(const LLSD& userdata)
+bool LLOutfitsView::isActionEnabled(const LLSD& sdParam)
 {
 	if (mSelectedCategory.isNull())
 		return false;
 
-	const std::string strAction = userdata.asString();
-	if ("delete" == strAction)
+	const std::string strAction = sdParam.asString();
+	if ( ("delete" == strAction) || ("delete_outfit" == strAction) )
 	{
 		return (!mItemSelection) && (mOutfitSelection) && (LLAppearanceMgr::instance().getCanRemoveOutfit(mSelectedCategory));
 	}
-	else if ("rename" == strAction)
+	else if ( ("rename" == strAction) || ("rename_outfit" == strAction) )
 	{
 		return (mOutfitSelection) && (get_is_category_renameable(&gInventory, mSelectedCategory));
 	}
@@ -278,7 +354,7 @@ void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 // virtual - Checked: 
 void LLOutfitsView::performAction(std::string strAction)
 {
-	if (mSelectedCategory.isNull())
+	if (!isActionEnabled(strAction))
 		return;
 
 	LLViewerInventoryCategory* pSelectedCat = gInventory.getCategory(mSelectedCategory);
@@ -293,9 +369,13 @@ void LLOutfitsView::performAction(std::string strAction)
 	{
 		LLAppearanceMgr::instance().wearInventoryCategory(pSelectedCat, FALSE, TRUE);
 	}
-	else if ("rename_outfit" == strAction)
+	else if ( ("rename" == strAction) || ("rename_outfit" == strAction) )
 	{
 		LLAppearanceMgr::instance().renameOutfit(mSelectedCategory);
+	}
+	else if ( ("delete" == strAction) || ("delete_outfit" == strAction) )
+	{
+		removeSelected();
 	}
 }
 
@@ -395,4 +475,5 @@ boost::signals2::connection LLOutfitsView::setSelectionChangeCallback(selection_
 	return mSelectionChangeSignal.connect(cb);
 }
 
+// ============================================================================
 // EOF
