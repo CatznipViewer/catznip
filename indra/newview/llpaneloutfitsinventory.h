@@ -38,6 +38,9 @@ class LLMenuGL;
 class LLSidepanelAppearance;
 class LLTabContainer;
 class LLSaveOutfitComboBtn;
+// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+class LLPanelOutfitsTab;
+// [/SL:KB]
 
 class LLPanelOutfitsInventory : public LLPanel
 {
@@ -75,7 +78,10 @@ protected:
 
 private:
 	LLPanelAppearanceTab*	mActivePanel;
-	LLOutfitsList*			mMyOutfitsPanel;
+//	LLOutfitsList*			mMyOutfitsPanel;
+// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	LLPanelOutfitsTab*		mMyOutfitsPanel;
+// [/SL:KB]
 	LLPanelWearing*			mCurrentOutfitPanel;
 
 	// tab panels                                                                   //
