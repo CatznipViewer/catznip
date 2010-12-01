@@ -31,7 +31,7 @@ public:
 	virtual ~LLOutfitsView();
 
 	bool				canWearSelected();
-	LLInventoryPanel*	getPanel()	{ return mInvPanel; }
+	LLInventoryPanel*	getInventoryPanel()	{ return mInvPanel; }
 
 	/*virtual*/ void onOpen(const LLSD& info);
 	/*virtual*/ BOOL postBuild();
@@ -55,17 +55,17 @@ protected:
 	void onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction);
 
 protected:
-	LLInventoryPanel*				mInvPanel;
-	LLOutfitsViewGearMenu*			mGearMenu;
-	LLSaveFolderState*				mSavedFolderState;
+	LLInventoryPanel*			mInvPanel;
+	LLOutfitsViewGearMenu*		mGearMenu;
+	LLSaveFolderState*			mSavedFolderState;
 
-	std::string						mFilterSubString;
+	std::string					mFilterSubString;
 
-	bool							mFetchStarted;				// TRUE if we started fetching everything under "My Outfits"
-	bool							mItemSelection;				// TRUE if the selection consists solely of inventory items
-	bool                            mOutfitSelection;			// TRUE if mSelectedCategory is of type FT_OUTFIT
-	LLUUID							mSelectedCategory;			// Parent UUID of the currently selected items
-	selection_change_signal_t		mSelectionChangeSignal;
+	bool						mFetchStarted;				// TRUE if we started fetching everything under "My Outfits"
+	bool						mItemSelection;				// TRUE if the selection consists solely of inventory items
+	bool						mOutfitSelection;			// TRUE if mSelectedCategory is of type FT_OUTFIT
+	LLUUID						mSelectedCategory;			// Parent UUID of the currently selected items
+	selection_change_signal_t	mSelectionChangeSignal;
 };
 
 #endif //LL_LLOUTFITSVIEW_H

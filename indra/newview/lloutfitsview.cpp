@@ -84,7 +84,7 @@ bool get_items_wearable(const LLInventoryModel::item_array_t& items)
 	return fWearable;
 }
 
-// Returns TRUE if every item is worn (handles wearables, attachments and gestures)
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
 bool get_items_worn(const LLInventoryModel::item_array_t& items)
 {
 	bool fWorn = true;
@@ -155,7 +155,7 @@ public:
 protected:
 	void onCloseFolders()
 	{
-		LLInventoryPanel* pInvPanel = mOutfitsView->getPanel();
+		LLInventoryPanel* pInvPanel = mOutfitsView->getInventoryPanel();
 		if (!pInvPanel)
 			return;
 
@@ -218,7 +218,7 @@ LLOutfitsView::~LLOutfitsView()
 	delete mSavedFolderState;
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 BOOL LLOutfitsView::postBuild()
 {
 	mInvPanel = getChild<LLInventoryPanel>("outfits_invpanel");
@@ -257,7 +257,7 @@ void LLOutfitsView::onOpen(const LLSD& /*info*/)
 	}
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 void LLOutfitsView::setFilterSubString(const std::string& strFilter)
 {
 	if (mFilterSubString == strFilter)
@@ -287,7 +287,7 @@ void LLOutfitsView::setFilterSubString(const std::string& strFilter)
 	mInvPanel->setFilterSubString(strFilter);
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 bool LLOutfitsView::canWearSelected()
 {
 	LLInventoryModel::item_array_t items;
@@ -355,7 +355,7 @@ bool LLOutfitsView::isActionEnabled(const LLSD& sdParam)
 	return false;
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 {
 	std::set<LLUUID> selItems = mInvPanel->getRootFolder()->getSelectionList();
@@ -363,7 +363,7 @@ void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 	std::copy(selItems.begin(), selItems.end(), selected_uuids.begin());
 }
 
-// virtual - Checked: 
+// virtual
 void LLOutfitsView::performAction(std::string strAction)
 {
 	if (!isActionEnabled(strAction))
@@ -395,13 +395,13 @@ void LLOutfitsView::performAction(std::string strAction)
 	}
 }
 
-// virtual - Checked: 2010-11-30 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// virtual
 void LLOutfitsView::removeSelected()
 {
 	LLNotificationsUtil::add("DeleteOutfits", LLSD(), LLSD(), boost::bind(&LLOutfitsView::onOutfitsRemovalConfirmation, this, _1, _2));
 }
 
-// virtual - Checked: 2010-11-30 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// virtual
 void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const LLSD& response)
 {
 	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -413,7 +413,7 @@ void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const
 		remove_category(&gInventory, mSelectedCategory);
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 void LLOutfitsView::setSelectedOutfitByUUID(const LLUUID& idOutfit)
 {
 	LLFolderView* pRootFolder = mInvPanel->getRootFolder();
@@ -426,7 +426,7 @@ void LLOutfitsView::setSelectedOutfitByUUID(const LLUUID& idOutfit)
 	}
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 void LLOutfitsView::wearSelectedItems()
 {
 	// NOTE-Catznip: this will only work correctly if the Inventory-MultiXXX patch branches are merged in as well
@@ -434,13 +434,12 @@ void LLOutfitsView::wearSelectedItems()
 		mInvPanel->doToSelected(LLSD("wear"));
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 bool LLOutfitsView::hasItemSelected()
 {
 	return mItemSelection;
 }
 
-// Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
 void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction)
 {
 	mItemSelection = false;
@@ -481,11 +480,11 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 		mOutfitSelection = (pSelectedCat) && (LLFolderType::FT_OUTFIT == pSelectedCat->getPreferredType());
 	}
 
-	// URGENT-Catznip: LLPanelOutfitsInventory doesn't currently use the param but we should still try and pass something meaningful
+	// TODO-Catznip: LLPanelOutfitsInventory doesn't currently use the param but we should still try and pass something meaningful
 	mSelectionChangeSignal(LLUUID::null);
 }
 
-// virtual - Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// virtual
 boost::signals2::connection LLOutfitsView::setSelectionChangeCallback(selection_change_callback_t cb)
 {
 	return mSelectionChangeSignal.connect(cb);
