@@ -328,12 +328,24 @@ bool LLOutfitsView::isActionEnabled(const LLSD& sdParam)
 			return LLAppearanceMgr::instance().getCanReplaceCOF(mSelectedCategory);
 		return false;
 	}
+	else if ("replaceoutfit" == strAction)
+	{
+		return (mOutfitSelection) ? LLAppearanceMgr::instance().getCanReplaceCOF(mSelectedCategory) : false;
+	}
+	else if ("addtooutfit" == strAction)
+	{
+		return (mOutfitSelection) ? LLAppearanceMgr::getCanAddToCOF(mSelectedCategory) : false;
+	}
 	else if ("take_off" == strAction)
 	{
 		// Enable "Take Off" if any of selected items can be taken off
 		// or the selected outfit contains items that can be taken off.
 		return ( (hasItemSelected()) && (canTakeOffSelected()) ) || 
 			( (!hasItemSelected()) && (LLAppearanceMgr::getCanRemoveFromCOF(mSelectedCategory)) );
+	}
+	else if ("takeoffoutfit" == strAction)
+	{
+		return (mOutfitSelection) ? LLAppearanceMgr::getCanRemoveFromCOF(mSelectedCategory) : false;
 	}
 	else if ("wear_add" == strAction)
 	{
@@ -368,6 +380,10 @@ void LLOutfitsView::performAction(std::string strAction)
 	else if ("addtooutfit" == strAction)
 	{
 		LLAppearanceMgr::instance().wearInventoryCategory(pSelectedCat, FALSE, TRUE);
+	}
+	else if ("takeoffoutfit" == strAction)
+	{
+		LLAppearanceMgr::instance().takeOffOutfit(mSelectedCategory);
 	}
 	else if ( ("rename" == strAction) || ("rename_outfit" == strAction) )
 	{
