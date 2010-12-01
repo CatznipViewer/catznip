@@ -1,0 +1,10 @@
+[Chat/Misc]
+- dependency : UI-Base patch branch
+- changed : prevent the IM tab's name from changing to "XXX is typing" when the other party is typing
+- fixed   : Ctrl-Up or Ctrl-Down in a line editor should set the cursor to the end of the history line (not the beginning)
+- added   : Ctrl-T shortcut to toggle the conversations floater
+- changed : moved the "slide left" and "slide right" buttons in front of the line editor on the IM session floater
+    -> aligned the top of the avatar icon with the top of the chat history control on the IM control panel
+- added   : "IMUseVerticalTabs" setting to use vertical tabs on the IM container floater
+- added   : "Teleport" option on the chiclet context menu
+    -> added a separator between session type specific options and the shared "Show Session" and "End Session" options
