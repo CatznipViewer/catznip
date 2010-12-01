@@ -23,6 +23,7 @@
 class LLFolderViewItem;
 class LLInventoryPanel;
 class LLOutfitsViewGearMenu;
+class LLSaveFolderState;
 
 class LLOutfitsView : public LLPanelOutfitsTab
 {

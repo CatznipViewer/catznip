@@ -341,7 +341,7 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-static LLRegisterPanelClassWrapper<LLOutfitsList> t_outfits_list("outfits_list");
+//static LLRegisterPanelClassWrapper<LLOutfitsList> t_outfits_list("outfits_list");
 
 LLOutfitsList::LLOutfitsList()
 //	:	LLPanelAppearanceTab()
@@ -353,6 +353,10 @@ LLOutfitsList::LLOutfitsList()
 	,	mIsInitialized(false)
 	,	mItemSelected(false)
 {
+// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-12-01 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+	setXMLFilename("panel_outfits_list.xml");
+// [/SL:KB]
+
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
 
 	mGearMenu = new LLOutfitListGearMenu(this);

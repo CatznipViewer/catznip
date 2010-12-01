@@ -195,7 +195,7 @@ protected:
 
 // ============================================================================
 
-static LLRegisterPanelClassWrapper<LLOutfitsView> t_outfits_view("outfits_view");
+//static LLRegisterPanelClassWrapper<LLOutfitsView> t_outfits_view("outfits_view");
 
 LLOutfitsView::LLOutfitsView()
 	: LLPanelOutfitsTab()
@@ -206,6 +206,8 @@ LLOutfitsView::LLOutfitsView()
 	, mItemSelection(false)
 	, mOutfitSelection(false)
 {
+	setXMLFilename("panel_outfits_view.xml");
+
 	mGearMenu = new LLOutfitsViewGearMenu(this);
 
 	mSavedFolderState = new LLSaveFolderState();
