@@ -84,6 +84,17 @@ public:
 	virtual BOOL hasChildren() const = 0;
 	virtual LLInventoryType::EType getInventoryType() const = 0;
 	virtual void performAction(LLInventoryModel* model, std::string action) = 0;
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.2.0a) | Modified: Catznip-2.0.0g
+	virtual void performActionBatch(LLInventoryModel* model, std::string action, LLDynamicArray<LLFolderViewEventListener*>& batch)
+	{
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			LLFolderViewEventListener* listener = batch.get(idx);
+			if (listener)
+				listener->performAction(model, action);
+		}
+	}
+// [/SL:KB]
 	virtual LLWearableType::EType getWearableType() const = 0;
 	
 	// This method should be called when a drag begins. returns TRUE
