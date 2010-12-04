@@ -13,15 +13,76 @@
      name="log_in_to_change">
         log in to change
     </panel.string>
+   <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="15"
+     layout="topleft"
+     left="30"
+     name="clearcache_textbox"
+     top="10"
+     width="400">
+      Clear:
+    </text>
+    <check_box
+     height="16"
+     follows="left|top"
+     label="Web Cookies"
+     layout="topleft"
+     left_delta="30"
+     name="clear_web_cookies"
+     tool_tip="Clear web browser cookies when the SL cache is cleared"
+     width="280"
+     top_pad="5">
+      <check_box.commit_callback
+       function="Clear.SettingsCheck"
+       parameter="cookies" />
+    </check_box>
+    <check_box
+     follows="left|top"
+     height="16"
+     label="Navigation Bar History"
+     layout="topleft"
+     name="clear_navbar_history"
+     tool_tip="Clear navigation bar history when the SL cache is cleared"
+     width="242">
+      <check_box.commit_callback
+       function="Clear.SettingsCheck"
+       parameter="navbar" />
+    </check_box>
+    <check_box
+     follows="left|top"
+     height="16"
+     label="Search History"
+     layout="topleft"
+     name="clear_search_history"
+     tool_tip="Clear search history when the SL cache is cleared"
+     width="242">
+      <check_box.commit_callback
+       function="Clear.SettingsCheck"
+       parameter="search" />
+    </check_box>
+    <check_box
+     follows="left|top"
+     height="16"
+     label="Teleport History"
+     layout="topleft"
+     name="clear_teleport_history"
+     tool_tip="Clear teleport history when the SL cache is cleared"
+     width="242">
+      <check_box.commit_callback
+       function="Clear.SettingsCheck"
+       parameter="teleport" />
+    </check_box>
     <button
-     follows="left|bottom"
+     follows="left|top"
      height="23"
      label="Clear History"
      tool_tip="Clear login image, last location, teleport history, web, and texture cache"
      layout="topleft"
-     left="30"
+     left="60"
      name="clear_cache"
-     top="10"
      width="145">
         <button.commit_callback
          function="Pref.WebClearCache" />
@@ -35,29 +96,41 @@
      left_pad="10"
      mouse_opaque="false"
      name="cache_size_label_l"
-     top_delta="3"
+     top_delta="6"
      text_color="LtGray_50"
      width="300">
        (Locations, images, web, search history)
     </text>
+
+   <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="15"
+     layout="topleft"
+     left="30"
+     name="privacy_textbox"
+     top_pad="15"
+     width="400">
+      Privacy:
+    </text>
     <check_box
+     follows="left|top"
 	 height="16"
 	 enabled="false"
      label="Only friends and groups know I'm online"
      layout="topleft"
-     left="30"
+     left_delta="30"
      name="online_visibility"
-     top_pad="30"
-     width="350" />
+     width="350"
+     top_pad="5"/>
     <check_box
      enabled_control="EnableVoiceChat"
      control_name="VoiceCallsFriendsOnly"
      height="16"
      label="Only friends and groups can call or IM me"
      layout="topleft"
-     left="30"
      name="voice_call_friends_only_check"
-     top_pad="10"
      width="350" />
     <check_box
      enabled_control="EnableVoiceChat"
@@ -65,33 +138,58 @@
      height="16"
      label="Switch off microphone when ending calls"
      layout="topleft"
-     left="30"
      name="auto_disengage_mic_check"
-     top_pad="10"
      width="350" />
-	<text
+    <button
+     follows="left|top"
+     height="23"
+     label="Block list"
+     layout="topleft"
+     left="60"
+     name="block_list"
+     width="145">
+      <button.commit_callback
+         function="Pref.BlockList"/>
+    </button>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     mouse_opaque="false"
+     name="cache_size_label_l"
+     top_delta="6"
+     text_color="LtGray_50"
+     width="300">
+       (People and/or Objects you have blocked)
+    </text>
+
+	 <text
       type="string"
     length="1"
     follows="left|top"
-     height="10"
+     height="15"
      layout="topleft"
      left="30"
      mouse_opaque="false"
      name="Logs:"
-     top_pad="30"
+     top_pad="15"
      width="350">
         Chat Logs:
     </text>
     <check_box
+     follows="left|top"
 	 enabled="false"
      control_name="LogNearbyChat"
      height="16"
      label="Save nearby chat logs on my computer"
      layout="topleft"
-     left="30"
+     left_delta="30"
      name="log_nearby_chat"
-     top_pad="10"
-     width="350">
+     width="350"
+     top_pad="5">
     </check_box>
     <check_box
 	 enabled="false"
@@ -99,9 +197,7 @@
      height="16"
      label="Save IM logs on my computer"
      layout="topleft"
-     left="30"
      name="log_instant_messages"
-     top_pad="10"
      width="350">
     </check_box>
     <check_box
@@ -110,9 +206,7 @@
      height="16"
      label="Add timestamp to each line in chat log"
      layout="topleft"
-     left_delta="0"
      name="show_timestamps_check_im"
-     top_pad="10"
      width="237" />
 	<check_box
      control_name="LogFileNamewithDate"
@@ -120,9 +214,7 @@
      height="16"
      label="Add datestamp to log file name."
      layout="topleft"
-     left_detla="5"
      name="logfile_name_datestamp"
-     top_pad="10"
      width="350"/>
 	<text
      type="string"
@@ -133,7 +225,7 @@
      left_delta="0"
      mouse_opaque="false"
      name="log_path_desc"
-     top_pad="30"
+     top_pad="5"
      width="128">
         Location of logs:
     </text>    
@@ -163,32 +255,4 @@
         <button.commit_callback
          function="Pref.LogPath" />
     </button>
-    <button
-     follows="left|bottom"
-     height="23"
-     label="Block list"
-     layout="topleft"
-     left="30"
-     name="block_list"
-     top_pad="35"
-     width="145">
-        <!--<button.commit_callback
-         function="SideTray.ShowPanel"-->
-      <button.commit_callback
-         function="Pref.BlockList"/>
-    </button>
-    <text
-     type="string"
-     length="1"
-     follows="left|top"
-     height="10"
-     layout="topleft"
-     left_pad="10"
-     mouse_opaque="false"
-     name="cache_size_label_l"
-     top_delta="3"
-     text_color="LtGray_50"
-     width="300">
-       (People and/or Objects you have blocked)
-    </text>
-    </panel>
+</panel>
