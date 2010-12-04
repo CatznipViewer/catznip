@@ -43,6 +43,9 @@ class LLScrollListCtrl;
 class LLSliderCtrl;
 class LLSD;
 class LLTextBox;
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+class LLComboBox;
+// [/SL:KB]
 
 typedef enum
 	{
@@ -116,8 +119,8 @@ public:
 
 	void onClickSetCache();
 	void onClickResetCache();
-	void onClickSkin(LLUICtrl* ctrl,const LLSD& userdata);
-	void onSelectSkin();
+//	void onClickSkin(LLUICtrl* ctrl,const LLSD& userdata);
+//	void onSelectSkin();
 	void onClickSetKey();
 	void setKey(KEY key);
 	void onClickSetMiddleMouse();
@@ -151,9 +154,9 @@ public:
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	
 	void buildPopupLists();
-	static void refreshSkin(void* data);
+//	static void refreshSkin(void* data);
 private:
-	static std::string sSkin;
+//	static std::string sSkin;
 	// set true if state of double-click action checkbox or radio-group was changed by user
 	// (reset back to false on apply or cancel)
 	bool mDoubleClickActionDirty;
@@ -205,5 +208,29 @@ protected:
 	void resetDirtyChilds();
 	
 };
+
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+class LLPanelPreferenceSkins : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceSkins();
+
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void apply();
+	/*virtual*/ void cancel();
+protected:
+	void onSkinChanged();
+	void onSkinThemeChanged();
+	void refreshSkinList();
+	void refreshSkinThemeList();
+
+protected:
+	std::string m_Skin;
+	LLComboBox* m_pSkinCombo;
+	std::string m_SkinTheme;
+	LLComboBox* m_pSkinThemeCombo;
+	LLSD        m_SkinsInfo;
+};
+// [/SL:KB]
 
 #endif  // LL_LLPREFERENCEFLOATER_H
