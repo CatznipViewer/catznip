@@ -35,6 +35,9 @@
 #include "llfloaterscriptdebug.h"
 #include "llhints.h"
 #include "llnearbychat.h"
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+#include "llnearbychatbar.h"
+// [/SL:KB]
 #include "llrecentpeople.h"
 
 #include "llviewercontrol.h"
@@ -76,7 +79,23 @@ public:
 		{
 			ctrl->getSignal()->connect(boost::bind(&LLNearbyChatScreenChannel::updateToastFadingTime, this));
 		}
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+		ctrl = gSavedSettings.getControl("NearbyToastWidth").get();
+		if (ctrl)
+		{
+			// updateToastWidth() will call getToastWidth() which will set up/break down mChatBarReshapeConnection as needed
+			ctrl->getSignal()->connect(boost::bind(&LLNearbyChatScreenChannel::updateToastWidth, this));
+		}
+// [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	~LLNearbyChatScreenChannel()
+	{
+		mChatBarReshapeConnection.disconnect();
+	}
+// [/SL:KB]
 
 	void addNotification	(LLSD& notification);
 	void arrangeToasts		();
@@ -87,6 +106,11 @@ public:
 
 	void onToastDestroyed	(LLToast* toast, bool app_quitting);
 	void onToastFade		(LLToast* toast);
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+	S32  getToastWidth();
+	void updateToastWidth();
+// [/SL:KB]
 
 	void reshape			(S32 width, S32 height, BOOL called_from_parent);
 
@@ -149,6 +173,10 @@ protected:
 	toast_list_t m_toast_pool;
 
 	bool	mStopProcessing;
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	boost::signals2::connection mChatBarReshapeConnection;
+// [/SL:KB]
 };
 
 //-----------------------------------------------------------------------------------------------
@@ -258,6 +286,12 @@ bool	LLNearbyChatScreenChannel::createPoolToast()
 	if(!panel)
 		return false;
 	
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+	LLRect rctPanel = panel->getRect();
+	rctPanel.setLeftTopAndSize(rctPanel.mLeft, rctPanel.mTop, getToastWidth(), rctPanel.getHeight());
+	panel->setRect(rctPanel);
+// [/SL:KB]
+
 	LLToast::Params p;
 	p.panel = panel;
 	p.lifetime_secs = gSavedSettings.getS32("NearbyToastLifeTime");
@@ -434,6 +468,74 @@ void LLNearbyChatScreenChannel::reshape			(S32 width, S32 height, BOOL called_fr
 	arrangeToasts();
 }
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Modified: Catznip-2.4.0a
+S32 LLNearbyChatScreenChannel::getToastWidth()
+{
+	static LLCachedControl<S32> snToastWidth(gSavedSettings, "NearbyToastWidth");
+	if (0 == snToastWidth)					// Follow the width of the nearby chat bar
+	{
+		LLNearbyChatBar* pChatBar = LLNearbyChatBar::getInstance(LLNearbyChatBar::CHATBAR_BOTTOMTRAY);
+		if (pChatBar)
+		{
+			if (!mChatBarReshapeConnection.connected())
+				mChatBarReshapeConnection = pChatBar->setReshapeCallback(boost::bind(&LLNearbyChatScreenChannel::updateToastWidth, this));
+
+			LLRect rctChatBar = pChatBar->getRect();
+			return rctChatBar.getWidth();
+		}
+	}
+
+	if (mChatBarReshapeConnection.connected())
+		mChatBarReshapeConnection.disconnect();
+
+	return llmax((S32)snToastWidth, 350);	// Provide a sane lower threshold for toast width
+}
+
+void LLNearbyChatScreenChannel::updateToastWidth()
+{
+	static S32 sToastWidthPrev = 0;
+
+	// Do nothing if the toast width hasn't actually changed
+	S32 nToastWidth = getToastWidth();
+	if (sToastWidthPrev == nToastWidth)
+		return;
+	sToastWidthPrev = nToastWidth;
+
+	//
+	// Resize the active toasts
+	//
+	for(toast_vec_t::iterator itActive = m_active_toasts.begin(); itActive != m_active_toasts.end(); ++itActive)
+	{
+		LLToast* pToast = (*itActive).get();
+		LLNearbyChatToastPanel* pToastPanel = (pToast) ? dynamic_cast<LLNearbyChatToastPanel*>(pToast->getPanel()) : NULL;
+		if (!pToastPanel)
+			continue;
+
+		LLRect rctToastPanel = pToastPanel->getRect();
+		rctToastPanel.setLeftTopAndSize(rctToastPanel.mLeft, rctToastPanel.mTop, nToastWidth, rctToastPanel.getHeight());
+		pToastPanel->reshape(rctToastPanel.getWidth(), rctToastPanel.getHeight(), 1);
+		pToastPanel->setRect(rctToastPanel);
+		pToastPanel->snapToMessageHeight();
+		pToast->reshapeToPanel();
+	}
+	arrangeToasts();
+
+	//
+	// Resize toasts in the toast pool
+	//
+	for(toast_list_t::iterator itPool = m_toast_pool.begin(); itPool != m_toast_pool.end(); ++itPool)
+	{
+		LLToast* pToast = (*itPool).get();
+		LLNearbyChatToastPanel* pToastPanel = (pToast) ? dynamic_cast<LLNearbyChatToastPanel*>(pToast->getPanel()) : NULL;
+		if (!pToastPanel)
+			continue;
+
+		LLRect rctToastPanel = pToastPanel->getRect();
+		rctToastPanel.setLeftTopAndSize(rctToastPanel.mLeft, rctToastPanel.mTop, nToastWidth, rctToastPanel.getHeight());
+		pToastPanel->setRect(rctToastPanel);
+	}
+}
+// [/SL:KB]
 
 //-----------------------------------------------------------------------------------------------
 //LLNearbyChatHandler
