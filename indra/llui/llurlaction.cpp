@@ -157,3 +157,21 @@ void LLUrlAction::showProfile(std::string url)
 		}
 	}
 }
+
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-07-10 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+void LLUrlAction::startIM(std::string url)
+{
+	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
+	LLURI uri(url);
+	LLSD path_array = uri.pathArray();
+	if (path_array.size() == 4)
+	{
+		std::string id_str = path_array.get(2).asString();
+		if (LLUUID::validate(id_str))
+		{
+			std::string cmd_str = path_array.get(1).asString();
+			executeSLURL("secondlife:///app/" + cmd_str + "/" + id_str + "/im");
+		}
+	}
+}
+// [/SL:KB]

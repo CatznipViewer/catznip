@@ -76,6 +76,10 @@ public:
 	/// if the Url specifies an SL command in the form like 'app/{cmd}/{id}/*', show its profile
 	static void showProfile(std::string url);
 
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-07-10 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+	static void startIM(std::string url);
+// [/SL:KB]
+
 	/// specify the callbacks to enable this class's functionality
 	static void	setOpenURLCallback(void (*cb) (const std::string& url));
 	static void	setOpenURLInternalCallback(void (*cb) (const std::string& url));
