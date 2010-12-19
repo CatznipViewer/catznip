@@ -35,6 +35,9 @@
 
 #include "llavatarpropertiesprocessor.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+#include "llfloater.h"
+// [/SL:KB]
 #include "llpanelavatar.h"
 #include "llpanelpicks.h"
 #include "llpanelprofile.h"
@@ -55,6 +58,14 @@ public:
 		mProfileView = profile_view;
 	}
 
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-11-28 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+	~AvatarStatusObserver()
+	{
+		if (mAvatarId.notNull())
+			LLAvatarPropertiesProcessor::instance().removeObserver(mAvatarId, this);
+	}
+// [/SL:KB]
+
 	void processProperties(void* data, EAvatarProcessorType type)
 	{
 		if(APT_PROPERTIES != type) return;
@@ -62,17 +73,32 @@ public:
 		if(avatar_data && mProfileView->getAvatarId() == avatar_data->avatar_id)
 		{
 			mProfileView->processOnlineStatus(avatar_data->flags & AVATAR_ONLINE);
-			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
+//			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
 		}
+
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-11-28 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+		// Profile view may have switched to a new avatar already so this needs to be outside the check above
+		LLAvatarPropertiesProcessor::instance().removeObserver(mAvatarId, this);
+		mAvatarId.setNull();
+// [/SL:KB]
 	}
 
 	void subscribe()
 	{
-		LLAvatarPropertiesProcessor::instance().addObserver(mProfileView->getAvatarId(), this);
+//		LLAvatarPropertiesProcessor::instance().addObserver(mProfileView->getAvatarId(), this);
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-11-28 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+		if (mAvatarId.notNull())
+			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
+		mAvatarId = mProfileView->getAvatarId();
+		LLAvatarPropertiesProcessor::instance().addObserver(mAvatarId, this);
+// [/SL:KB]
 	}
 
 private:
 	LLPanelProfileView* mProfileView;
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-11-28 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+	LLUUID				mAvatarId;
+// [/SL:KB]
 };
 
 LLPanelProfileView::LLPanelProfileView()
@@ -129,9 +155,39 @@ BOOL LLPanelProfileView::postBuild()
 	mStatusText = getChild<LLTextBox>("status");
 	mStatusText->setVisible(false);
 
-	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+//	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
 	childSetCommitCallback("copy_to_clipboard",boost::bind(&LLPanelProfileView::onCopyToClipboard,this),NULL);
-		
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (!pParentView)
+	{
+		childSetCommitCallback("back", boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
+	}
+	else
+	{
+		pParentView->setTitle(getLabel());
+
+		childSetVisible("back", false);
+
+		// HACK-Catznip: we got rid of the back button so we want to line up the name controls with the rest
+		LLUICtrl* pCtrls[] = 
+			{
+				getChild<LLUICtrl>("user_name", FALSE),
+				getChild<LLUICtrl>("display_name_label", FALSE),
+				getChild<LLUICtrl>("solo_username_label", FALSE),
+				getChild<LLUICtrl>("user_name_small", FALSE),
+				getChild<LLUICtrl>("user_label", FALSE),
+				getChild<LLUICtrl>("user_slid", FALSE)
+			};
+		int dX = (NULL != pCtrls[0]) ? 10 - pCtrls[0]->getRect().mLeft : 0;
+		for (int idxCtrl = 0; idxCtrl < sizeof(pCtrls) / sizeof(LLUICtrl*); idxCtrl++)
+		{
+			if (pCtrls[idxCtrl])
+				pCtrls[idxCtrl]->translate(dX, 0);
+		}
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -242,6 +298,12 @@ void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id,
 		getChild<LLUICtrl>("copy_to_clipboard")->setEnabled( false );
 		getChild<LLUICtrl>("solo_username_label")->setVisible( true );
 	}
+
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Modified: 2010-11-07 (Catznip-2.3.0a) | Modified: Catznip-2.3.0a
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (pParentView)
+		pParentView->setTitle(av_name.getCompleteName() + " - " + getLabel());
+// [/SL:KB]
 }
 
 // EOF
