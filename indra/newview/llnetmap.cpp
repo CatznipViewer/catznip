@@ -329,16 +329,25 @@ void LLNetMap::draw()
 			S32 i;
 			LLVector3 pos_local;
 			U32 compact_local;
-			U8 bits;
+//			U8 bits;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+			U16 bits;
+// [/SL:KB]
 			// TODO: it'd be very cool to draw these in sorted order from lowest Z to highest.
 			// just be careful to sort the avatar IDs along with the positions. -MG
 			for (i = 0; i < count; i++)
 			{
 				compact_local = regionp->mMapAvatars.get(i);
 
-				bits = compact_local & 0xFF;
+//				bits = compact_local & 0xFF;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+				bits = compact_local & 0xFFFF;
+// [/SL:KB]
 				pos_local.mV[VZ] = F32(bits) * 4.f;
-				compact_local >>= 8;
+//				compact_local >>= 8;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+				compact_local >>= 16;
+// [/SL:KB]
 
 				bits = compact_local & 0xFF;
 				pos_local.mV[VY] = (F32)bits;
