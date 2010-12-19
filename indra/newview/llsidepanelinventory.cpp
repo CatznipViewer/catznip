@@ -41,6 +41,9 @@
 #include "llsidepaneltaskinfo.h"
 #include "lltabcontainer.h"
 #include "llselectmgr.h"
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+#include "lltrans.h"
+// [/SL:KB]
 #include "llweb.h"
 
 static LLRegisterPanelClassWrapper<LLSidepanelInventory> t_inventory("sidepanel_inventory");
@@ -70,23 +73,31 @@ BOOL LLSidepanelInventory::postBuild()
 		mShareBtn = mInventoryPanel->getChild<LLButton>("share_btn");
 		mShareBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShareButtonClicked, this));
 		
+/*
 		mShopBtn = mInventoryPanel->getChild<LLButton>("shop_btn");
 		mShopBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShopButtonClicked, this));
+*/
 
 		mWearBtn = mInventoryPanel->getChild<LLButton>("wear_btn");
 		mWearBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onWearButtonClicked, this));
 		
+/*
 		mPlayBtn = mInventoryPanel->getChild<LLButton>("play_btn");
 		mPlayBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onPlayButtonClicked, this));
 		
 		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
 		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
+*/
 		
 		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
 		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
 		
 		mPanelMainInventory = mInventoryPanel->findChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+		mPanelMainInventory->setActivePanelCallback(boost::bind(&LLSidepanelInventory::onActivePanelChanged, this, _1));
+		mPanelMainInventory->setModelChangedCallback(boost::bind(&LLSidepanelInventory::onModelChanged, this, _1));
+// [/SL:KB]
 		LLTabContainer* tabs = mPanelMainInventory->getChild<LLTabContainer>("inventory filter tabs");
 		tabs->setCommitCallback(boost::bind(&LLSidepanelInventory::updateVerbs, this));
 
@@ -171,6 +182,15 @@ void LLSidepanelInventory::onShopButtonClicked()
 
 void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 {
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+	/*const*/ LLInventoryPanel* pPanel = getActivePanel();
+	if ( (!pPanel) || (!pPanel->getRootFolder()) )
+		return;
+
+	if (!action.empty())
+		pPanel->getRootFolder()->doToSelected(pPanel->getModel(), action);
+// [/SL:KB]
+/*
 	LLPanelMainInventory *panel_main_inventory = mInventoryPanel->findChild<LLPanelMainInventory>("panel_main_inventory");
 	LLFolderViewItem* current_item = panel_main_inventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
 	if (!current_item)
@@ -178,10 +198,15 @@ void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 		return;
 	}
 	current_item->getListener()->performAction(panel_main_inventory->getActivePanel()->getModel(), action);
+*/
 }
 
 void LLSidepanelInventory::onWearButtonClicked()
 {
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+	performActionOnSelection(getSelectionAction());
+// [/SL:KB]
+/*
 	LLPanelMainInventory *panel_main_inventory = mInventoryPanel->findChild<LLPanelMainInventory>("panel_main_inventory");
 	if (!panel_main_inventory)
 	{
@@ -202,8 +227,10 @@ void LLSidepanelInventory::onWearButtonClicked()
 
 	// Wear all selected items.
 	wear_multiple(selected_uuids_vec, true);
+*/
 }
 
+/*
 void LLSidepanelInventory::onPlayButtonClicked()
 {
 	const LLInventoryItem *item = getSelectedItem();
@@ -222,11 +249,14 @@ void LLSidepanelInventory::onPlayButtonClicked()
 		break;
 	}
 }
+*/
 
+/*
 void LLSidepanelInventory::onTeleportButtonClicked()
 {
 	performActionOnSelection("teleport");
 }
+*/
 
 void LLSidepanelInventory::onOverflowButtonClicked()
 {
@@ -282,14 +312,32 @@ void LLSidepanelInventory::updateVerbs()
 
 	mWearBtn->setVisible(FALSE);
 	mWearBtn->setEnabled(FALSE);
+/*
 	mPlayBtn->setVisible(FALSE);
 	mPlayBtn->setEnabled(FALSE);
  	mTeleportBtn->setVisible(FALSE);
  	mTeleportBtn->setEnabled(FALSE);
  	mShopBtn->setVisible(TRUE);
+*/
 
 	mShareBtn->setEnabled(canShare());
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+	// We usurp the "Wear" button and just make it handle everything
+	std::string strAction = getSelectionAction();
+	if (!strAction.empty())
+	{
+		mWearBtn->setLabel(LLTrans::getString("InvAction " + strAction));
+		mWearBtn->setVisible(TRUE);
+		mWearBtn->setEnabled(TRUE);
+
+		bool is_single_selection = getSelectedCount() == 1;
+		mInfoBtn->setEnabled(is_single_selection);
+		mShareBtn->setEnabled(is_single_selection);
+	}
+// [/SL:KB]
+
+/*
 	const LLInventoryItem *item = getSelectedItem();
 	if (!item)
 		return;
@@ -322,6 +370,7 @@ void LLSidepanelInventory::updateVerbs()
 		default:
 			break;
 	}
+*/
 }
 
 bool LLSidepanelInventory::canShare()
@@ -401,3 +450,136 @@ BOOL LLSidepanelInventory::isMainInventoryPanelActive() const
 {
 	return mInventoryPanel->getVisible();
 }
+
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+
+// Returns IT_XXX if every item has the same inventory type or IT_NONE otherwise
+LLInventoryType::EType get_items_invtype(const LLInventoryModel::item_array_t& items)
+{
+	LLInventoryType::EType invType = LLInventoryType::IT_NONE;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+
+		LLInventoryType::EType invTypeItem = pItem->getInventoryType();
+		if (LLInventoryType::IT_NONE == invType)
+			invType = invTypeItem;
+		else if (invType != invTypeItem)
+			return LLInventoryType::IT_NONE;
+	}
+	return invType;
+}
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items)
+{
+	bool fWearable = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
+	{
+		// TODO-Catznip: there has to be a generic function for this *somewhere*?
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_OBJECT:
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+			case LLAssetType::AT_GESTURE:
+				break;
+			default:
+				fWearable = false;
+				break;
+		}
+	}
+	return fWearable;
+}
+
+// Returns TRUE if every item is worn (handles wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items)
+{
+	bool fWorn = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+
+		fWorn = get_is_item_worn(pItem->getUUID());
+	}
+	return fWorn;
+}
+
+bool LLSidepanelInventory::getSelectedItems(LLInventoryModel::item_array_t& items) /*const*/
+{
+	items.clear();
+
+	/*const*/ LLInventoryPanel* pPanel = getActivePanel();
+	if ( (!pPanel) || (!pPanel->getRootFolder()) )
+		return false;
+	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
+	if (selItems.empty())
+		return false;
+
+	for (std::set<LLUUID>::const_iterator itItem = selItems.begin(); itItem != selItems.end(); itItem++)
+	{
+		LLViewerInventoryItem* pItem = pPanel->getModel()->getItem(*itItem);
+		if (!pItem)
+		{
+			// Bit of a hack but if there are categories selected then we don't want to show any actions so we return an empty selection
+			if (pPanel->getModel()->getCategory(*itItem))
+			{
+				items.clear();
+				return false;
+			}
+			continue;
+		}
+		items.push_back(pItem);
+	}
+	return !items.empty();
+}
+
+std::string LLSidepanelInventory::getSelectionAction() /*const*/
+{
+	LLInventoryModel::item_array_t items;
+	if (!getSelectedItems(items))
+		return LLStringUtil::null;
+
+	LLInventoryType::EType invType = get_items_invtype(items);
+	switch (invType)
+	{
+		case LLInventoryType::IT_WEARABLE:
+			return (!get_items_worn(items)) ? "wear" : "take_off";
+		case LLInventoryType::IT_OBJECT:
+		case LLInventoryType::IT_ATTACHMENT:
+			return (!get_items_worn(items)) ? "attach" : "detach";
+		case LLInventoryType::IT_GESTURE:
+			return (!get_items_worn(items)) ? "activate" : "deactivate";
+		case LLInventoryType::IT_LANDMARK:
+			// It doesn't make much sense to teleport to more than one landmark
+			return (1 == getSelectedCount()) ? "teleport" : LLStringUtil::null;
+		case LLInventoryType::IT_NONE:
+			// Mixed selection type
+			return (get_items_wearable(items)) ? ( (!get_items_worn(items)) ? "wear" : "take_off" ) : "open";
+		default:
+			return "open";
+	}
+//	return LLStringUtil::null;
+}
+
+void LLSidepanelInventory::onActivePanelChanged(LLInventoryPanel*)
+{
+	if (isMainInventoryPanelActive())
+		updateVerbs();
+}
+
+void LLSidepanelInventory::onModelChanged(U32 mask)
+{
+	if ( (mask & LLInventoryObserver::LABEL) && (isMainInventoryPanelActive()) )
+		updateVerbs();
+}
+
+// [/SL:KB]
