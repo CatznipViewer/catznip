@@ -46,6 +46,9 @@
 #include "llviewernetwork.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparceloverlay.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h)
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewerstats.h"
 #include "llvlcomposition.h"
@@ -1452,7 +1455,11 @@ LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& regi
 	return pos_global;
 }
 
-void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius) const
+//void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius) const
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, 
+						 const LLVector3d& relative_to, F32 radius, U32 maskFilter) const
+// [/SL:KB]
 {
 	if(avatar_ids != NULL)
 	{
@@ -1471,7 +1478,12 @@ void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positi
 		for (S32 i = 0; i < count; i++)
 		{
 			LLVector3d pos_global = unpackLocalToGlobalPosition(regionp->mMapAvatars.get(i), origin_global);
-			if(dist_vec(pos_global, relative_to) <= radius)
+//			if(dist_vec(pos_global, relative_to) <= radius)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+			if ( ((maskFilter & E_FILTER_BY_AGENT_REGION) && (gAgent.getRegion() == regionp)) ||
+			     ((maskFilter & E_FILTER_BY_DISTANCE) && (dist_vec(pos_global, relative_to) <= radius)) ||
+			     ((maskFilter & E_FILTER_BY_AGENT_PARCEL) && (LLViewerParcelMgr::getInstance()->inAgentParcel(pos_global))) )
+// [/SL:KB]
 			{
 				if(positions != NULL)
 				{

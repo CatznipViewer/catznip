@@ -149,13 +149,27 @@ public:
 	typedef std::list<LLViewerRegion*> region_list_t;
 	const region_list_t& getRegionList() const { return mActiveRegionList; }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+	enum EGetAvatarsFilterMask
+	{
+		E_FILTER_BY_DISTANCE = 1,
+		E_FILTER_BY_AGENT_PARCEL = 2,
+		E_FILTER_BY_AGENT_REGION = 4
+	};
+// [/SL:KB]
+
 	// Returns lists of avatar IDs and their world-space positions within a given distance of a point.
 	// All arguments are optional. Given containers will be emptied and then filled.
 	// Not supplying origin or radius input returns data on all avatars in the known regions.
+//	void getAvatars(
+//		uuid_vec_t* avatar_ids = NULL,
+//		std::vector<LLVector3d>* positions = NULL, 
+//		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX) const;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
 	void getAvatars(
-		uuid_vec_t* avatar_ids = NULL,
-		std::vector<LLVector3d>* positions = NULL, 
-		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX) const;
+		uuid_vec_t* avatar_ids = NULL, std::vector<LLVector3d>* positions = NULL, 
+		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX, U32 maskFilter = E_FILTER_BY_DISTANCE) const;
+// [/SL:KB]
 
 private:
 	region_list_t	mActiveRegionList;

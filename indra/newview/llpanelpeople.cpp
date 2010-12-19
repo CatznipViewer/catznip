@@ -772,7 +772,14 @@ void LLPanelPeople::updateNearbyList()
 
 	std::vector<LLVector3d> positions;
 
-	LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+	static LLCachedControl<U32> maskFilter(gSavedSettings, "NearbyPeopleViewMask");
+
+	LLWorld::getInstance()->getAvatars(
+		&mNearbyList->getIDs(), &positions, 
+		gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"), (maskFilter) ? maskFilter : (U32)LLWorld::E_FILTER_BY_DISTANCE);
+// [/SL:KB]
+//	LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
 	mNearbyList->setDirty();
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
 	updateDistances();
@@ -1315,6 +1322,29 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+	else if ( ("show_range" == chosen_item) || ("show_current_parcel" == chosen_item) || ("show_current_region" == chosen_item) )
+	{
+		U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
+
+		U32 mask = 0;
+		if ("show_range" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_DISTANCE;
+		else if ("show_current_parcel" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_AGENT_PARCEL;
+		else if ("show_current_region" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_AGENT_REGION;
+
+		if (maskFilter & mask)
+			maskFilter &= ~mask;
+		else
+			maskFilter |= mask;
+
+		// Always leave at least one item checked
+		if (maskFilter)
+			gSavedSettings.setU32("NearbyPeopleViewMask", maskFilter);
+	}
+// [/SL:KB]
 }
 
 bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
@@ -1328,6 +1358,17 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_NAME;
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+	U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
+
+	if ("show_range" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_DISTANCE;
+	if ("show_current_parcel" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_AGENT_PARCEL;
+	if ("show_current_region" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_AGENT_REGION;
+// [/SL:KB]
 
 	return false;
 }

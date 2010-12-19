@@ -9154,6 +9154,17 @@
       <key>Value</key>
       <integer>3</integer>
     </map>
+    <key>NearbyPeopleViewMask</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies criteria for nearby people (0x1 = range, 0x2 = current parcel, 0x4 = current region)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>RecentPeopleSortOrder</key>
     <map>
       <key>Comment</key>
