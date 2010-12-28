@@ -1265,7 +1265,7 @@ bool LLAvatarActions::canEstateKickOrTeleportHome(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
 	idAgents.push_back(idAgent);
-	return canLandFreezeOrEjectMultiple(idAgents);
+	return canEstateKickOrTeleportHomeMultiple(idAgents);
 }
 
 // static - Checked: 2010-12-03 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
@@ -1290,7 +1290,7 @@ bool LLAvatarActions::canEstateKickOrTeleportHomeMultiple(uuid_vec_t& idAgents, 
 		else
 			++itAgent;
 	}
-	return (0 != idAgents.size());
+	return fCanKick;
 }
 
 // static - Checked: 2010-12-03 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
