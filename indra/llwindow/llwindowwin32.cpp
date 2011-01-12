@@ -684,7 +684,7 @@ void LLWindowWin32::restore()
 	SetFocus(mWindowHandle);
 }
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.2.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.5.0a) | Added: Catznip-2.0.0a
 BOOL LLWindowWin32::getFullscreenWindow()
 {
 	return (mWindowHandle) && (~GetWindowLong(mWindowHandle, GWL_STYLE) & WS_OVERLAPPEDWINDOW);
@@ -848,7 +848,7 @@ BOOL LLWindowWin32::getPosition(LLCoordScreen *position)
 	return TRUE;
 }
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 BOOL LLWindowWin32::getRestoredPosition(LLCoordScreen *position)
 {
 	if ( (!mWindowHandle) || (!position) )
@@ -890,7 +890,7 @@ BOOL LLWindowWin32::getSize(LLCoordScreen *size)
 	return TRUE;
 }
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 BOOL LLWindowWin32::getRestoredSize(LLCoordScreen *size)
 {
 	if ( (!mWindowHandle) || (!size) )
@@ -947,7 +947,7 @@ BOOL LLWindowWin32::setPosition(const LLCoordScreen position)
 
 BOOL LLWindowWin32::setSize(const LLCoordScreen size)
 {
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
 	if (!mWindowHandle)
 		return FALSE;
 
@@ -985,7 +985,7 @@ BOOL LLWindowWin32::setSize(const LLCoordScreen size)
 
 		moveWindow(position, size);
 		return TRUE;
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
 	}
 // [/SL:KB]
 }

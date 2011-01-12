@@ -1148,7 +1148,7 @@ bool idle_startup()
 	{
 		set_startup_status(0.30f, LLTrans::getString("LoginInitializingWorld"), gAgent.mMOTD);
 		display_startup();
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.5.0a) | Added: Catznip-2.1.1a
 		if ( (gSavedSettings.getBOOL("FullScreenWindow")) && (gViewerWindow->canFullscreenWindow()) )
 		{
 			gViewerWindow->setFullscreenWindow(TRUE);

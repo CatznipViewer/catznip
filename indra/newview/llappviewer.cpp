@@ -2757,7 +2757,7 @@ void LLAppViewer::cleanupSavedSettings()
 	{
 //		BOOL maximized = gViewerWindow->mWindow->getMaximized();
 //		if (!maximized)
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 #ifndef LL_WINDOWS
 		if ( (!gViewerWindow->mWindow->getMaximized()) || (!gViewerWindow->mWindow->getFullscreenWindow()) )
 #endif // !LL_WINDOWS
@@ -2765,11 +2765,11 @@ void LLAppViewer::cleanupSavedSettings()
 		{
 			LLCoordScreen window_pos;
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 #ifndef LL_WINDOWS
 // [/SL:KB]
 			if (gViewerWindow->mWindow->getPosition(&window_pos))
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 #else
 			if (gViewerWindow->mWindow->getRestoredPosition(&window_pos))
 #endif // !LL_WINDOWS
