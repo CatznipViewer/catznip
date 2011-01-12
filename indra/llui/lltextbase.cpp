@@ -1560,6 +1560,9 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.Execute", boost::bind(&LLUrlAction::executeSLURL, url));
 	registrar.add("Url.Teleport", boost::bind(&LLUrlAction::teleportToLocation, url));
 	registrar.add("Url.ShowProfile", boost::bind(&LLUrlAction::showProfile, url));
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-07-10 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+	registrar.add("Url.StartIM", boost::bind(&LLUrlAction::startIM, url));
+// [/SL:KB]
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
 	registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, url));
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
