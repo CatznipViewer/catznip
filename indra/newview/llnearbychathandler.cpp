@@ -35,7 +35,7 @@
 #include "llfloaterscriptdebug.h"
 #include "llhints.h"
 #include "llnearbychat.h"
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 #include "llnearbychatbar.h"
 // [/SL:KB]
 #include "llrecentpeople.h"
@@ -80,7 +80,7 @@ public:
 			ctrl->getSignal()->connect(boost::bind(&LLNearbyChatScreenChannel::updateToastFadingTime, this));
 		}
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 		ctrl = gSavedSettings.getControl("NearbyToastWidth").get();
 		if (ctrl)
 		{
@@ -90,7 +90,7 @@ public:
 // [/SL:KB]
 	}
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 	~LLNearbyChatScreenChannel()
 	{
 		mChatBarReshapeConnection.disconnect();
@@ -107,7 +107,7 @@ public:
 	void onToastDestroyed	(LLToast* toast, bool app_quitting);
 	void onToastFade		(LLToast* toast);
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 	S32  getToastWidth();
 	void updateToastWidth();
 // [/SL:KB]
@@ -174,7 +174,7 @@ protected:
 
 	bool	mStopProcessing;
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 	boost::signals2::connection mChatBarReshapeConnection;
 // [/SL:KB]
 };
@@ -286,7 +286,7 @@ bool	LLNearbyChatScreenChannel::createPoolToast()
 	if(!panel)
 		return false;
 	
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-08-27 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
 	LLRect rctPanel = panel->getRect();
 	rctPanel.setLeftTopAndSize(rctPanel.mLeft, rctPanel.mTop, getToastWidth(), rctPanel.getHeight());
 	panel->setRect(rctPanel);
@@ -471,7 +471,7 @@ void LLNearbyChatScreenChannel::reshape			(S32 width, S32 height, BOOL called_fr
 	arrangeToasts();
 }
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Modified: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Modified: Catznip-2.4.0a
 S32 LLNearbyChatScreenChannel::getToastWidth()
 {
 	static LLCachedControl<S32> snToastWidth(gSavedSettings, "NearbyToastWidth");

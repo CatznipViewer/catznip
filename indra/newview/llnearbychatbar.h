@@ -93,7 +93,7 @@ private:
 class LLNearbyChatBar
 :	public LLPanel
 {
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 public:
 	// Right now we only have two instances of the chatbar, but that might change if we ever embed one into the chat history floater as well
 	typedef enum e_nearby_chatbar_type {
@@ -105,7 +105,7 @@ public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
 	LLNearbyChatBar();
 //	~LLNearbyChatBar() {}
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 	~LLNearbyChatBar();
 // [/SL:KB]
 
@@ -115,7 +115,7 @@ public:
 
 	static bool instanceExists();
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 	static LLNearbyChatBar* getInstance(EChatBarType typeChatBar);
 	static bool instanceExists(EChatBarType typeChatBar);
 
@@ -160,7 +160,7 @@ protected:
 	LLOutputMonitorCtrl* mOutputMonitor;
 	LLLocalSpeakerMgr*  mSpeakerMgr;
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 	reshape_signal_t*	mReshapeSignal;
 // [/SL:KB]
 };

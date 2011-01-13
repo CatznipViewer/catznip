@@ -401,14 +401,14 @@ LLCtrlListInterface* LLGestureComboList::getListInterface()
 
 LLNearbyChatBar::LLNearbyChatBar() 
 :	mChatBox(NULL)
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 ,	mReshapeSignal(NULL)
 // [/SL:KB]
 {
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 }
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 LLNearbyChatBar::~LLNearbyChatBar()
 {
 	delete mReshapeSignal;
@@ -445,7 +445,7 @@ LLNearbyChatBar* LLNearbyChatBar::getInstance()
 	return LLBottomTray::getInstance() ? LLBottomTray::getInstance()->getNearbyChatBar() : NULL;
 }
 
-// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 //static
 LLNearbyChatBar* LLNearbyChatBar::getInstance(EChatBarType typeChatBar)
 {
