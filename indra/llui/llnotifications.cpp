@@ -29,6 +29,9 @@
 #include "llnotifications.h"
 #include "llnotificationtemplate.h"
 #include "llnotificationvisibilityrule.h"
+// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+#include "llnotificationsutil.h"
+// [/SL:KB]
 
 #include "llavatarnamecache.h"
 #include "llinstantmessage.h"
@@ -1522,7 +1525,10 @@ bool LLNotifications::loadVisibilityRules()
 // Add a simple notification (from XUI)
 void LLNotifications::addFromCallback(const LLSD& name)
 {
-	add(LLNotification::Params().name(name.asString()));	
+//	add(LLNotification::Params().name(name.asString()));	
+// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	LLNotificationsUtil::add(name.asString());
+// [/SL:KB]
 }
 
 LLNotificationPtr LLNotifications::add(const std::string& name, 
