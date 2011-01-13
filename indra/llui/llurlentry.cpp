@@ -371,7 +371,7 @@ void LLUrlEntryAgent::onAvatarNameCache(const LLUUID& id,
 										const LLAvatarName& av_name)
 {
 //	std::string label = av_name.getCompleteName();
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	std::string label = getLabelFromAvatarName(av_name);
 // [/SL:KB]
 
@@ -418,7 +418,7 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 //		return LLTrans::getString("TooltipAgentRequestFriend");
 //	}
 //	return LLTrans::getString("TooltipAgentUrl");
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
 		strTooltip = LLTrans::getString("TooltipAgentInspect");
@@ -438,6 +438,7 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 		strTooltip = LLTrans::getString("TooltipAgentUrl");
 
 	// If we (sometimes) hide the username, we have to show it as part of the tooltip
+	// NOTE: if the name isn't currently cached then the tooltip will be the default one, regardless of the current setting
 	if ( (LLAvatarNameCache::useDisplayNames()) && (SHOW_ALWAYS != s_eShowUsername) )
 	{
 		LLUUID idAgent(getIDStringFromUrl(url)); LLAvatarName avName;
@@ -479,7 +480,7 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 	if (LLAvatarNameCache::get(agent_id, &av_name))
 	{
 //		std::string label = av_name.getCompleteName();
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 		std::string label = getLabelFromAvatarName(av_name);
 // [/SL:KB]
 
@@ -497,12 +498,12 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 	}
 }
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 LLUrlEntryAgent::EShowUsername LLUrlEntryAgent::s_eShowUsername = LLUrlEntryAgent::SHOW_ALWAYS;
 
 std::string LLUrlEntryAgent::getLabelFromAvatarName(const LLAvatarName& avName)
 {
-	// Use only the display name if: we never show the username, or the display name matches the username
+	// Only use the display name if: we never show the username, or the display name matches the username
 	if ( (LLAvatarNameCache::useDisplayNames()) && 
 		 ((SHOW_NEVER == s_eShowUsername) || ((SHOW_MISMATCH == s_eShowUsername) && (avName.mIsDisplayNameDefault))) )
 	{
