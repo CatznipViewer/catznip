@@ -76,8 +76,12 @@ public:
 	/// if the Url specifies an SL command in the form like 'app/{cmd}/{id}/*', show its profile
 	static void showProfile(std::string url);
 
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-07-10 (Catznip-2.5.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+	/// if the Url specifies an SL command in the form like 'app/{cmd}/{id}/*', start an IM session
 	static void startIM(std::string url);
+
+	/// if the Url specifies an SL command in the form like 'app/agent/{id}/*', offer a teleport
+	static void offerTeleport(std::string url);
 // [/SL:KB]
 
 	/// specify the callbacks to enable this class's functionality

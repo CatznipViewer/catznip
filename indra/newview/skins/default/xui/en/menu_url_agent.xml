@@ -16,6 +16,13 @@
         <menu_item_call.on_click
          function="Url.StartIM" />
     </menu_item_call>
+    <menu_item_call
+     label="Offer Teleport"
+     layout="topleft"
+     name="Offer Teleport">
+        <menu_item_call.on_click
+         function="Url.OfferTeleport" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft" />
     <menu_item_call
