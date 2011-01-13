@@ -1,5 +1,4 @@
 [Chat/LogFriendStatus]
 - changed : "FriendOnline"/"FriendOffline" notifications (optionally) log to the nearby chat history
-- changed : replaced "[FIRST] [LAST]" with "[NAME_SLURL]"
 - changed : toast notification set to "plain_text" to inhibit the SLURL icon since it already displays the avatar's profile icon
 - added   : "Send Instant Message" option to the SLURL context menu
