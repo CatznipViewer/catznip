@@ -34,7 +34,7 @@
 #include "llgroupiconctrl.h"
 #include "llagent.h"
 #include "lltransientfloatermgr.h"
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.5.0a) | Added: Catznip-2.4.0g
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -147,7 +147,7 @@ LLIMFloaterContainer* LLIMFloaterContainer::getInstance()
 	return LLFloaterReg::getTypedInstance<LLIMFloaterContainer>("im_container");
 }
 
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.5.0a) | Added: Catznip-2.4.0g
 const std::string& LLIMFloaterContainer::getFloaterXMLFile()
 {
 	static const std::string strFile = 
