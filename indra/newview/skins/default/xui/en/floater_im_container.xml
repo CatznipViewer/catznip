@@ -44,6 +44,6 @@
      layout="bottomleft"
      left="1"
      name="im_box_tab_container_icon"
-     bottom="10"
+     bottom="7"
      width="394" />
 </multi_floater>
