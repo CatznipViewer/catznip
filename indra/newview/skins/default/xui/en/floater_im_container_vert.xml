@@ -19,9 +19,9 @@
      left="1"
      name="im_box_tab_container"
      tab_position="left"
-     tab_width="90"
-     tab_max_width = "134"
-     tab_height="24"
+     tab_width="115"
+     tab_max_width = "115"
+     tab_height="20"
      use_custom_icon_ctrl="false"
      tab_icon_ctrl_pad="2"
      halign="left"
@@ -35,15 +35,4 @@
       <last_tab
        tab_bottom_image_flash="Toolbar_Right_Flash"/>
     </tab_container>
-    <icon
-     color="DefaultShadowLight"
-     enabled="false"
-     follows="left|right|bottom"
-     height="24"
-     image_name="tabarea.tga"
-     layout="bottomleft"
-     left="1"
-     name="im_box_tab_container_icon"
-     bottom="10"
-     width="394" />
 </multi_floater>
