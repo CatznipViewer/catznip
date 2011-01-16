@@ -29,10 +29,10 @@
      top="0"
      width="394">
       <first_tab
-       tab_bottom_image_flash="Toolbar_Left_Flash"/>
+       tab_left_image_flash="Toolbar_Left_Flash"/>
       <middle_tab
-       tab_bottom_image_flash="Toolbar_Middle_Flash"/>
+       tab_left_image_flash="Toolbar_Middle_Flash"/>
       <last_tab
-       tab_bottom_image_flash="Toolbar_Right_Flash"/>
+       tab_left_image_flash="Toolbar_Right_Flash"/>
     </tab_container>
 </multi_floater>
