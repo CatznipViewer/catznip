@@ -546,11 +546,14 @@ void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LL
 //	{  
 //		mHistoryFileName = av_name.mUsername;
 //	}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
-	LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-01-16 (Catznip-2.4.0h) | Modified: Catznip-2.4.0h
+	if (!av_name.mIsDummy)
+	{
+		LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
 
-	// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
-	mName = av_name.getCompleteName();
+		// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
+		mName = av_name.getCompleteName();
+	}
 // [/SL:KB]
 }
 
