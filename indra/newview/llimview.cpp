@@ -564,11 +564,14 @@ void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LL
 //	{  
 //		mHistoryFileName = av_name.mUsername;
 //	}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
-	LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-01-16 (Catznip-2.4.0h) | Modified: Catznip-2.4.0h
+	if (!av_name.mIsDummy)
+	{
+		LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
 
-	// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
-	mName = av_name.getCompleteName();
+		// See note in LLIMModel::LLIMSession::buildHistoryFileName() - standardize P2P IM session names to "complete name"
+		mName = av_name.getCompleteName();
+	}
 // [/SL:KB]
 }
 
@@ -626,7 +629,7 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 		// NOTE-Catznip: [SL-2.4.0] mName will be:
 		//   - the "complete name" if display names are enabled and it's an outgoing IM
 		//   - the "legacy name" if display names are disabled or if it's an incoming IM
-		mHistoryFileName = LLIMModel::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
+		LLIMModel::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
 
 		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
 	}
