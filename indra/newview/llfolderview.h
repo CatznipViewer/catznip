@@ -359,7 +359,7 @@ bool sort_item_date(LLFolderViewItem* a, LLFolderViewItem* b);
 // Flags for buildContextMenu()
 const U32 SUPPRESS_OPEN_ITEM = 0x1;
 const U32 FIRST_SELECTED_ITEM = 0x2;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
 const U32 MULTIPLE_SELECTED_ITEMS = 0x4;		// Selection contains more than one item
 
 const U32 BODYPART_SELECTION = 0x10;			// Selection contains AT_BODYPART items (at least one)
