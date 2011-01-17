@@ -22,17 +22,17 @@
      tab_width="115"
      tab_max_width = "115"
      tab_height="20"
-     use_custom_icon_ctrl="false"
+     use_custom_icon_ctrl="true"
      tab_icon_ctrl_pad="2"
      halign="left"
      use_ellipses="true"
      top="0"
      width="394">
       <first_tab
-       tab_bottom_image_flash="Toolbar_Left_Flash"/>
+       tab_left_image_flash="Toolbar_Left_Flash"/>
       <middle_tab
-       tab_bottom_image_flash="Toolbar_Middle_Flash"/>
+       tab_left_image_flash="Toolbar_Middle_Flash"/>
       <last_tab
-       tab_bottom_image_flash="Toolbar_Right_Flash"/>
+       tab_left_image_flash="Toolbar_Right_Flash"/>
     </tab_container>
 </multi_floater>
