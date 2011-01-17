@@ -342,27 +342,74 @@ void LLScriptFloaterManager::onAddNotification(const LLUUID& notification_id)
 	// LLDialog can spawn only one instance, LLLoadURL and LLGiveInventory can spawn unlimited number of instances
 	if(OBJ_SCRIPT == obj_type)
 	{
-		// If an Object spawns more-than-one floater, only the newest one is shown. 
-		// The previous is automatically closed.
-		script_notification_map_t::const_iterator it = findUsingObjectId(object_id);
-		if(it != mNotifications.end())
+//		// If an Object spawns more-than-one floater, only the newest one is shown. 
+//		// The previous is automatically closed.
+//		script_notification_map_t::const_iterator it = findUsingObjectId(object_id);
+//		if(it != mNotifications.end())
+//		{
+//			LLIMChiclet* chiclet = LLChicletBar::getInstance()->getChicletPanel()->findChiclet<LLIMChiclet>(it->first);
+//			if(chiclet)
+//			{
+//				// Pass the new_message icon state further.
+//				set_new_message = chiclet->getShowNewMessagesIcon();
+//			}
+//
+//			LLScriptFloater* floater = LLFloaterReg::findTypedInstance<LLScriptFloater>("script_floater", it->first);
+//			if(floater)
+//			{
+//				// Generate chiclet with a "new message" indicator if a docked window was opened but not in focus. See EXT-3142.
+//				set_new_message |= !floater->hasFocus();
+//			}
+//
+//			removeNotification(it->first);
+//		}
+// [SL:KB] - Patch: UI-ScriptDialog | Checked: 2011-01-17 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+		// We'll allow an object to have more than one script dialog floater open, but we'll still only allow one per chat channel
+		// (in practice a lot of objects will open a new listen channel for each new llDialog but it still cuts down on chiclets somewhat)
+		LLNotificationPtr newNotif = LLNotifications::instance().find(notification_id);
+		if (newNotif)
 		{
-			LLIMChiclet* chiclet = LLChicletBar::getInstance()->getChicletPanel()->findChiclet<LLIMChiclet>(it->first);
-			if(chiclet)
-			{
-				// Pass the new_message icon state further.
-				set_new_message = chiclet->getShowNewMessagesIcon();
-			}
+			// Get the new dialog's response channel
+			LLSD sdPayload = newNotif->getPayload();
+			S32 nNewChannel = sdPayload["chat_channel"].asInteger();
 
-			LLScriptFloater* floater = LLFloaterReg::findTypedInstance<LLScriptFloater>("script_floater", it->first);
-			if(floater)
+			// Iterate over all existing notifications from this object and close the one with the same response channel (if there is one)
+			for (script_notification_map_t::const_iterator itNotif = mNotifications.begin(); itNotif != mNotifications.end(); ++itNotif)
 			{
-				// Generate chiclet with a "new message" indicator if a docked window was opened but not in focus. See EXT-3142.
-				set_new_message |= !floater->hasFocus();
-			}
+				if (itNotif->second == object_id)
+				{
+					LLNotificationPtr curNotif = LLNotifications::instance().find(itNotif->first);
+					if (!curNotif)
+						continue;
 
-			removeNotification(it->first);
+					sdPayload = curNotif->getPayload();
+					if (!sdPayload.has("chat_channel"))
+						continue;
+
+					S32 nCurChannel = sdPayload["chat_channel"].asInteger();
+					if (nNewChannel == nCurChannel)
+					{
+						LLIMChiclet* chiclet = LLChicletBar::getInstance()->getChicletPanel()->findChiclet<LLIMChiclet>(itNotif->first);
+						if(chiclet)
+						{
+							// Pass the new_message icon state further.
+							set_new_message = chiclet->getShowNewMessagesIcon();
+						}
+
+						LLScriptFloater* floater = LLFloaterReg::findTypedInstance<LLScriptFloater>("script_floater", itNotif->first);
+						if(floater)
+						{
+							// Generate chiclet with a "new message" indicator if a docked window was opened but not in focus. See EXT-3142.
+							set_new_message |= !floater->hasFocus();
+						}
+
+						removeNotification(itNotif->first);
+						break;
+					}
+				}
+			}
 		}
+// [/SL:KB]
 	}
 
 	mNotifications.insert(std::make_pair(notification_id, object_id));
