@@ -91,6 +91,9 @@ protected:
 	void		onClickBrowserClearCache();
 	void		onLanguageChange();
 	void		onNameTagOpacityChange(const LLSD& newvalue);
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
+	void		onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam);
+// [/SL:KB]
 
 	// set value of "BusyResponseChanged" in account settings depending on whether busy response
 	// string differs from default after user changes.
