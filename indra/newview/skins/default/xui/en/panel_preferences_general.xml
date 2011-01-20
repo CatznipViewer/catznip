@@ -208,7 +208,17 @@
      name="show_location_checkbox"
      top_delta="5"
      width="256" />
-   <text
+    <check_box
+     control_name="ShowFavoritesOnLogin"
+     enabled="false" 
+     height="16"
+     label="Show my Favorite Landmarks on login"
+     layout="topleft"
+     left="50"
+     name="favorites_on_login_check"
+     top_pad="10"
+     width="350" />
+	 <text
     type="string"
     length="1"
     follows="left|top"
@@ -306,17 +316,6 @@
 	 width="237"
 	 tool_tip="Check to use display names in chat, IM, name tags, etc."
 	 top_pad="3"/>
-	 
-	<check_box
-	 control_name="EnableUIHints"
-	 follows="top|left"
-	 height="16"
-	 label="Enable Viewer UI Hints"
-	 layout="topleft"
-	 left="27"
-	 name="viewer_hints_check"
-	 top_pad="5"
-	 width="237"/>
 	 
 	<text
 	 type="string"
