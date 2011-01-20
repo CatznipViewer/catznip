@@ -1,2 +1,3 @@
 [Settings/ClearCache]
 - added : "ClearCacheMask" setting to optionally prevent purging certain history settings when the viewer/browser cache is purged
+- added : the value of the control variables in LLFloaterPreference::mSavedValues will get restored when the preferences floater is cancel'ed
