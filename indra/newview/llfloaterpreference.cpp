@@ -452,6 +452,11 @@ BOOL LLFloaterPreference::postBuild()
 		gSavedPerAccountSettings.setString("BusyModeResponse", LLTrans::getString("BusyModeResponseDefault"));
 	}
 
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	// Make sure 'ClearCacheMask' gets restored to its previous value when the floater is cancel'ed
+	mSavedValues.insert(std::pair<LLControlVariable*, LLSD>(gSavedSettings.getControl("ClearCacheMask"), LLSD()));
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -501,6 +506,14 @@ void LLFloaterPreference::saveSettings()
 		if (panel)
 			panel->saveSettings();
 	}
+
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	// Store a copy of the current value for all settings in 'mSavedValues' so we can revert them if necessary
+	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
+	{
+		itSavedValue->second = itSavedValue->first->getValue();
+	}
+// [/SL:KB]
 }	
 
 void LLFloaterPreference::apply()
@@ -627,6 +640,13 @@ void LLFloaterPreference::cancel()
 		if (panel)
 			panel->cancel();
 	}
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	// Restore all settings in 'mSavedValues' to their previous value
+	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
+	{
+		itSavedValue->first->set(itSavedValue->second);
+	}
+// [/SL:KB]
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
 	
@@ -1261,6 +1281,18 @@ void LLFloaterPreference::refresh()
 {
 	LLPanel::refresh();
 
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+	// Call refresh() on all panels that derive from LLPanelPreference
+	LLTabContainer* pTabContainer = getChild<LLTabContainer>("pref core");
+	for (child_list_t::const_iterator itChild = pTabContainer->getChildList()->begin();
+		 itChild != pTabContainer->getChildList()->end(); ++itChild)
+	{
+		LLPanelPreference* pPrefPanel = dynamic_cast<LLPanelPreference*>(*itChild);
+		if (pPrefPanel)
+			pPrefPanel->refresh();
+	}
+// [/SL:KB]
+
 	// sliders and their text boxes
 	//	mPostProcess = gSavedSettings.getS32("RenderGlowResolutionPow");
 	// slider text boxes
@@ -1643,17 +1675,6 @@ BOOL LLPanelPreference::postBuild()
 	}
 	
 	//////////////////////PanelPrivacy ///////////////////
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.1.1a
-	U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
-	if (hasChild("clear_web_cookies"))
-		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
-	if (hasChild("clear_navbar_history"))
-		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
-	if (hasChild("clear_search_history"))
-		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
-	if (hasChild("clear_teleport_history"))
-		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
-// [/SL:KB]
 	if (hasChild("media_enabled"))
 	{
 		bool media_enabled = gSavedSettings.getBOOL("AudioStreamingMedia");
@@ -1687,6 +1708,22 @@ BOOL LLPanelPreference::postBuild()
 	apply();
 	return true;
 }
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.5.0a) | Added: Catznip-2.1.1a
+void LLPanelPreference::refresh()
+{
+	//////////////////////PanelPrivacy ///////////////////
+	U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+	if (hasChild("clear_web_cookies"))
+		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
+	if (hasChild("clear_navbar_history"))
+		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
+	if (hasChild("clear_search_history"))
+		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
+	if (hasChild("clear_teleport_history"))
+		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+}
+// [/SL:KB]
 
 void LLPanelPreference::apply()
 {

@@ -179,6 +179,11 @@ private:
 	std::string mDirectoryVisibility;
 	
 	LLAvatarData mAvatarProperties;
+
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
+	control_values_map_t mSavedValues;
+// [/SL:KB]
 };
 
 class LLPanelPreference : public LLPanel
@@ -189,6 +194,9 @@ public:
 	
 	virtual void apply();
 	virtual void cancel();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	virtual void refresh();
+// [/SL:KB]
 	void setControlFalse(const LLSD& user_data);
 	virtual void setHardwareDefaults(){};
 
