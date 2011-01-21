@@ -37,6 +37,23 @@
 
 class LLDate;
 
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+class LLRecentPeoplePersistentItem
+{
+	friend class LLRecentPeople;
+public:
+	LLRecentPeoplePersistentItem() {}
+	LLRecentPeoplePersistentItem(const LLUUID& idAgent) : m_idAgent(idAgent), m_Date(LLDate::now()) {}
+	LLRecentPeoplePersistentItem(const LLSD& sdItem);
+
+	LLSD toLLSD() const;
+
+protected:
+	LLUUID	m_idAgent;
+	LLDate	m_Date;
+};
+// [/SL:KB]
+
 /**
  * List of people the agent recently interacted with.
  * 
@@ -51,8 +68,22 @@ class LLDate;
 class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LLSimpleListener
 {
 	LOG_CLASS(LLRecentPeople);
+
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	friend class LLSingleton<LLRecentPeople>;
+protected:
+	LLRecentPeople();
+// [/SL:KB]
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
+	
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	void dump() const;
+	void load();
+	void save() const;
+
+	void purgeItems();
+// [/SL:KB]
 	
 	/**
 	 * Add specified avatar to the list if it's not there already.
@@ -92,8 +123,13 @@ public:
 	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
 private:
-	typedef std::map<LLUUID, LLDate> recent_people_t;
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	std::string			mHistoryFilename;
+	typedef std::map<LLUUID, LLRecentPeoplePersistentItem> recent_people_t;
 	recent_people_t		mPeople;
+// [/SL:KB]
+//	typedef std::map<LLUUID, LLDate> recent_people_t;
+//	recent_people_t		mPeople;
 	signal_t			mChangedSignal;
 };
 
