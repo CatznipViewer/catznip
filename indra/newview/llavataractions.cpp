@@ -304,6 +304,10 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 {
 	if (id.notNull())
 	{
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
+		{
+// [/SL:KB]
 		LLSD params;
 		params["id"] = id;
 		params["open_tab_name"] = "panel_profile";
@@ -333,6 +337,13 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 			LLSideTray::getInstance()->showPanel("panel_profile_view", params);
 		}
 #endif
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+	}
+		else
+		{
+			LLFloaterReg::showInstance("floater_profile_view", LLSD().with("id", id));
+		}
+// [/SL:KB]
 	}
 }
 
