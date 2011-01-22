@@ -304,41 +304,41 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 {
 	if (id.notNull())
 	{
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 		{
 // [/SL:KB]
-		LLSD params;
-		params["id"] = id;
-		params["open_tab_name"] = "panel_profile";
+			LLSD params;
+			params["id"] = id;
+			params["open_tab_name"] = "panel_profile";
 
-		// PROFILES: open in webkit window
-		std::string full_name;
-		if (gCacheName->getFullName(id,full_name))
-		{
-			std::string agent_name = LLCacheName::buildUsername(full_name);
-			llinfos << "opening web profile for " << agent_name << llendl;		
-			std::string url = getProfileURL(agent_name);
-			LLWeb::loadWebURLInternal(url);
-		}
-		else
-		{
-			llwarns << "no name info for agent id " << id << llendl;
-		}
+			// PROFILES: open in webkit window
+			std::string full_name;
+			if (gCacheName->getFullName(id,full_name))
+			{
+				std::string agent_name = LLCacheName::buildUsername(full_name);
+				llinfos << "opening web profile for " << agent_name << llendl;		
+				std::string url = getProfileURL(agent_name);
+				LLWeb::loadWebURLInternal(url);
+			}
+			else
+			{
+				llwarns << "no name info for agent id " << id << llendl;
+			}
 #if 0
-		//Show own profile
-		if(gAgent.getID() == id)
-		{
-			LLSideTray::getInstance()->showPanel("panel_me", params);
-		}
-		//Show other user profile
-		else
-		{
-			LLSideTray::getInstance()->showPanel("panel_profile_view", params);
-		}
+			//Show own profile
+			if(gAgent.getID() == id)
+			{
+				LLSideTray::getInstance()->showPanel("panel_me", params);
+			}
+			//Show other user profile
+			else
+			{
+				LLSideTray::getInstance()->showPanel("panel_profile_view", params);
+			}
 #endif
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.1.2c) | Added: Catznip-2.1.2c
-	}
+// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+		}
 		else
 		{
 			LLFloaterReg::showInstance("floater_profile_view", LLSD().with("id", id));

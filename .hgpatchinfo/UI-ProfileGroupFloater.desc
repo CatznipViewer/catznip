@@ -1,5 +1,3 @@
 [UI/ProfileGroupFloater]
-- added : "ShowProfileFloaters" setting to show profiles in floaters rather than the sidebar
-    -> TODO: code is rather rough at the moment and needs revisiting
-- fixed : drag-and-drop of inventory items onto a profile no longer works
-    -> LL's using the session_id to get the name of the resident which is rather puzzling
+- added : "ShowProfileFloaters" setting to show profiles in floaters rather than the sidebar or web profiles
+- fixed : drag-and-drop of inventory items onto a profile no longer works [see LLPanelProfileView::handleDragAndDrop()]
