@@ -211,6 +211,8 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                          multi_select="true"
                          name="avatars_online"
                          show_permissions_granted="true"
+                         show_profile_btn="false"
+                         show_speaking_indicator="false"
                          top="0"
                          width="307" />
                 </accordion_tab>
@@ -228,6 +230,8 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                          multi_select="true"
                          name="avatars_all"
                          show_permissions_granted="true"
+                         show_profile_btn="false"
+                         show_speaking_indicator="false"
                          top="0"
                          width="307" />
                 </accordion_tab>
