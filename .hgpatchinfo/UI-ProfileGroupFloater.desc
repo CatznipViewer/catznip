@@ -1,3 +1,4 @@
 [UI/ProfileGroupFloater]
-- added : "ShowProfileFloaters" setting to show profiles in floaters rather than the sidebar or web profiles
 - fixed : drag-and-drop of inventory items onto a profile no longer works [see LLPanelProfileView::handleDragAndDrop()]
+- added : "ShowProfileFloaters" setting to show profiles in a floater rather than the sidebar or web profiles
+- added : "ShowGroupFloaters" setting to show group information in a floater rather than the sidebar

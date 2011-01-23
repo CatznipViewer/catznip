@@ -8979,6 +8979,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ShowGroupFloaters</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows group information in a floater rather than the sidebar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>ShowHoverTips</key>
     <map>
       <key>Comment</key>
@@ -9026,7 +9037,7 @@
     <key>ShowProfileFloaters</key>
     <map>
       <key>Comment</key>
-      <string>Shows resident profiles in a floater rather than the side tray</string>
+      <string>Shows resident profiles in a floater rather than the sidebar</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
