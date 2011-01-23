@@ -89,6 +89,9 @@ protected:
 	void		onBtnApply();
 
 	void		onClickBrowserClearCache();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	void		onClickClearViewerCache();
+// [/SL:KB]
 	void		onLanguageChange();
 	void		onNameTagOpacityChange(const LLSD& newvalue);
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.5.0a) | Added: Catznip-2.1.1a

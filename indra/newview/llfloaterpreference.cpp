@@ -344,6 +344,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 //	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.5.0a) | Added: Catznip-2.2.1a
+	mCommitCallbackRegistrar.add("Pref.ClearViewerCache",		boost::bind(&LLFloaterPreference::onClickClearViewerCache, this));
 	mCommitCallbackRegistrar.add("Clear.SettingsCheck",			boost::bind(&LLFloaterPreference::onClearSettingsCheck, this, _1, _2));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
@@ -882,6 +883,15 @@ void LLFloaterPreference::onClickBrowserClearCache()
 {
 	LLNotificationsUtil::add("ConfirmClearBrowserCache", LLSD(), LLSD(), callback_clear_browser_cache);
 }
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+void LLFloaterPreference::onClickClearViewerCache()
+{
+	// Flag client texture cache for clearing next time the client runs
+	gSavedSettings.setBOOL("PurgeCacheOnNextStartup", TRUE);
+	LLNotificationsUtil::add("CacheWillClear");
+}
+// [/SL:KB]
 
 // Called when user changes language via the combobox.
 void LLFloaterPreference::onLanguageChange()
