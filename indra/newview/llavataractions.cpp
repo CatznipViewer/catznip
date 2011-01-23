@@ -304,7 +304,7 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 {
 	if (id.notNull())
 	{
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 		{
 // [/SL:KB]
@@ -337,7 +337,7 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 				LLSideTray::getInstance()->showPanel("panel_profile_view", params);
 			}
 #endif
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 		}
 		else
 		{

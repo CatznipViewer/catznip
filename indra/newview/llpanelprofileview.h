@@ -32,7 +32,7 @@
 #include "llavatarpropertiesprocessor.h"
 #include "llagent.h"
 #include "lltooldraganddrop.h"
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 #include "llfloater.h"
 // [/SL:KB]
 
@@ -69,7 +69,7 @@ public:
 	{
 //		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), gAgent.getSessionID(), drop,
 //				 cargo_type, cargo_data, accept);
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), LLUUID::null, drop, cargo_type, cargo_data, accept);
 // [/SL:KB]
 
@@ -111,7 +111,7 @@ private:
 	AvatarStatusObserver* mAvatarStatusObserver;
 };
 
-// [SL:KB] - Patch : UI-ProfileGroupFloater | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patc : UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
 class LLFloaterProfileView : public LLFloater
 {
 public:
