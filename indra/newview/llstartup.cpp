@@ -840,7 +840,14 @@ bool idle_startup()
 		}
 		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
-		gDebugInfo["LoginName"] = userid;                                                                              
+//		gDebugInfo["LoginName"] = userid;                                                                              
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0b) | Added: Catznip-2.4.0b
+		if (gCrashSettings.getBOOL("CrashSubmitName"))
+		{
+			// Only include the agent name if the user consented
+			gDebugInfo["LoginName"] = userid;                                                                              
+		}
+// [/SL:KB]
          
 		// create necessary directories
 		// *FIX: these mkdir's should error check
@@ -848,10 +855,31 @@ bool idle_startup()
 		LLFile::mkdir(gDirUtilp->getLindenUserDir());
 
 		// Set PerAccountSettingsFile to the default value.
-		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
-		gSavedSettings.setString("PerAccountSettingsFile",
-			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
-				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
+//		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
+//		gSavedSettings.setString("PerAccountSettingsFile",
+//			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
+//				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+		std::string strPerAccountSettingspath =
+			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount"));
+
+		// If the file doesn't exist, try using the per account settings from Second Life instead
+		if (!gDirUtilp->fileExists(strPerAccountSettingspath))
+		{
+			const std::string strAppName = "Catznip";
+
+			std::string strSLSettingsPath = strPerAccountSettingspath;
+			std::string::size_type idxAppName = strSLSettingsPath.rfind(strAppName);
+			if (std::string::npos != idxAppName)
+			{
+				strSLSettingsPath.replace(idxAppName, strAppName.length(), "SecondLife");
+				if (gDirUtilp->fileExists(strSLSettingsPath))
+					strPerAccountSettingspath = strSLSettingsPath;
+			}
+		}
+
+		gSavedSettings.setString("PerAccountSettingsFile", strPerAccountSettingspath);
+// [/SL:KB]
 
 		// Note: can't store warnings files per account because some come up before login
 		
@@ -2880,7 +2908,14 @@ bool process_login_success_response()
 	// unpack login data needed by the application
 	text = response["agent_id"].asString();
 	if(!text.empty()) gAgentID.set(text);
-	gDebugInfo["AgentID"] = text;
+//	gDebugInfo["AgentID"] = text;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0b) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitName"))
+	{
+		// Only include the agent UUID if the user consented
+		gDebugInfo["AgentID"] = text;
+	}
+// [/SL:KB]
 	
 	// Agent id needed for parcel info request in LLUrlEntryParcel
 	// to resolve parcel name.
@@ -2888,7 +2923,7 @@ bool process_login_success_response()
 
 	text = response["session_id"].asString();
 	if(!text.empty()) gAgentSessionID.set(text);
-	gDebugInfo["SessionID"] = text;
+//	gDebugInfo["SessionID"] = text;
 
 	// Session id needed for parcel info request in LLUrlEntryParcel
 	// to resolve parcel name.
