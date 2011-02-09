@@ -414,8 +414,12 @@ bool LLCrashLogger::sendCrashLogs()
 
 	updateApplication("Sending reports...");
 
+//	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+//															   "SecondLifeCrashReport");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
 															   "CatznipCrashReport");
+// [/SL:KB]
 	std::string report_file = dump_path + ".log";
 
 	std::ofstream out_file(report_file.c_str());
