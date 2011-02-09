@@ -1806,7 +1806,7 @@ void LLPanelPreferenceGraphics::setHardwareDefaults()
 	LLPanelPreference::setHardwareDefaults();
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0b) | Added: Catznip-2.4.0b
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0b
 static LLRegisterPanelClassWrapper<LLPanelPreferenceCrashReports> t_pref_crashreports("panel_preference_crashreports");
 
 LLPanelPreferenceCrashReports::LLPanelPreferenceCrashReports()
@@ -1871,5 +1871,4 @@ void LLPanelPreferenceCrashReports::apply()
 void LLPanelPreferenceCrashReports::cancel()
 {
 }
-
 // [/SL:KB]

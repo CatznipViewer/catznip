@@ -225,7 +225,7 @@ protected:
 	
 };
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-10-21 (Catznip-2.6.0a) | Added: Catznip-2.2.0c
 class LLPanelPreferenceCrashReports : public LLPanelPreference
 {
 public:

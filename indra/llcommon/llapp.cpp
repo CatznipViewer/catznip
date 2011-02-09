@@ -283,7 +283,7 @@ void LLApp::stepFrame()
 
 
 //void LLApp::setupErrorHandling()
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 void LLApp::setupErrorHandling(EMiniDumpType minidump_type)
 // [/SL:KB]
 {
@@ -301,7 +301,7 @@ void LLApp::setupErrorHandling(EMiniDumpType minidump_type)
 		llwarns << "adding breakpad exception handler" << llendl;
 //		mExceptionHandler = new google_breakpad::ExceptionHandler(
 //			L"C:\\Temp\\", 0, windows_post_minidump_callback, 0, google_breakpad::ExceptionHandler::HANDLER_ALL);
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		U32 maskMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths;
 		switch (minidump_type)
 		{

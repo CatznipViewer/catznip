@@ -205,7 +205,7 @@ void LLCrashLogger::gatherFiles()
 		// Crash log receiver has been manually configured.
 		mCrashHost = mDebugLog["CrashHostUrl"].asString();
 	}
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	else
 	{
 		mCrashHost = "http://catznip.com/viewer/crash/report/";
@@ -232,7 +232,7 @@ void LLCrashLogger::gatherFiles()
 
 	// Use login servers as the alternate, since they are already load balanced and have a known name
 //	mAltCrashHost = "https://login.agni.lindenlab.com:12043/crash/report";
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	mAltCrashHost = "";
 // [/SL:KB]
 
@@ -269,7 +269,7 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4.0a) | Modified: Catznip-2.4.0b
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.6.0a) | Modified: Catznip-2.4.0b
 	if (gDirUtilp->fileExists(minidump_path))
 	{
 		mFileMap["Minidump"] = minidump_path;
@@ -342,7 +342,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 	{
 		status_message = llformat("%s, try %d...", msg.c_str(), i+1);
 //		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		static const std::string BOUNDARY("------------abcdef012345xyZ");
 
 		LLSD headers = LLSD::emptyMap();
@@ -422,7 +422,7 @@ bool LLCrashLogger::sendCrashLogs()
 	LLSDSerialize::toPrettyXML(post_data, out_file);
 	out_file.close();
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	mFileMap["CrashReportLog"] = report_file;
 // [/SL:KB]
 
@@ -435,7 +435,7 @@ bool LLCrashLogger::sendCrashLogs()
 	}
 
 //	if(!sent)
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	if ( (!sent) && (!mAltCrashHost.empty()) )
 // [/SL:KB]
 	{
