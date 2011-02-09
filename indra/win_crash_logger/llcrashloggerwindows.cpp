@@ -292,7 +292,10 @@ void LLCrashLoggerWindows::gatherPlatformSpecificFiles()
 	SetCursor(gCursorWait);
 	// At this point we're responsive enough the user could click the close button
 	SetCursor(gCursorArrow);
-	mDebugLog["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();
+//	mDebugLog["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	mCrashInfo["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();
+// [/SL:KB]
 }
 
 bool LLCrashLoggerWindows::mainLoop()
