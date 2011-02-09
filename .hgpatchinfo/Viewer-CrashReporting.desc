@@ -1,0 +1,5 @@
+[Viewer/CrashReporting]
+- added   : SaveMinidumpType setting to control minidump creation type [Windows-only]
+    -> include MiniDumpFilterModulePaths by default to strip loaded module paths
+- changed : Windows crash logger will send crash reports to catznip.com if crash reporting is enabled
+    -> pruned some of the information that's normally saved to debug_info.log
