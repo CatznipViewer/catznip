@@ -215,6 +215,14 @@ bool LLUIColorTable::loadFromSettings()
 		result |= loadFromFilename(current_filename, mLoadedColors);
 	}
 
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+	std::string theme_filename = gDirUtilp->getExpandedFilename(LL_PATH_TOP_SKINTHEME, "colors.xml");
+	if (gDirUtilp->fileExists(theme_filename))
+	{
+		result |= loadFromFilename(theme_filename, mLoadedColors);
+	}
+// [/SL:KB]
+
 	current_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SKIN, "colors.xml");
 	if(current_filename != default_filename)
 	{
