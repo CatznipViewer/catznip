@@ -1125,7 +1125,7 @@ void LLFolderView::openSelectedItems( void )
 {
 	if(getVisible() && getEnabled())
 	{
-// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-04-15 (Catznip-2.2.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-04-15 (Catznip-2.5.0a) | Added: Catznip-2.0.0a
 		LLInventoryPanel* pInvPanel = dynamic_cast<LLInventoryPanel*>(mParentPanel);
 		if (pInvPanel)
 		{
@@ -2162,7 +2162,7 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 		LLFloater::setFloaterHost(multi_propertiesp);
 	}
 
-// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.2.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.5.0a) | Added: Catznip-2.0.0a
 	// If we group the selected items together per type then each LLFolderViewEventListener derived class can support batched actions
 	typedef std::map<const std::type_info*, LLDynamicArray<LLFolderViewEventListener*>, LLCompareTypeID> type_batch_map_t;
 	type_batch_map_t mapTypeBatch;
@@ -2174,7 +2174,7 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 		LLInvFVBridge* bridge = (LLInvFVBridge*)folder_item->getListener();
 		if(!bridge) continue;
 //		bridge->performAction(model, action);
-// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.2.0a) | Modified: Catznip-2.0.0g
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.5.0a) | Modified: Catznip-2.0.0g
 		const std::type_info* typeBridge = &typeid(*bridge);
 		type_batch_map_t::iterator itTypeBatch = mapTypeBatch.find(typeBridge);
 		if (itTypeBatch == mapTypeBatch.end())
@@ -2186,7 +2186,7 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 // [/SL:KB]
 	}
 
-// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.2.0a) | Modified: Catznip-2.0.0g
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.5.0a) | Modified: Catznip-2.0.0g
 	for (type_batch_map_t::iterator itTypeBatch = mapTypeBatch.begin(); itTypeBatch != mapTypeBatch.end(); ++itTypeBatch)
 	{
 		LLDynamicArray<LLFolderViewEventListener*>& batch_items = itTypeBatch->second;
