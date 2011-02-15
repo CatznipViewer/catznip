@@ -179,7 +179,7 @@ public:
 
 	bool isInUpdateAppearanceFromCOF() { return mIsInUpdateAppearanceFromCOF; }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-04-15 (Catznip-2.2.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-04-15 (Catznip-2.5.0a) | Added: Catznip-2.0.0a
 	// We need this to be public since we use it in LLWearableBridge::performActionBatch
 	static void filterWearableItems(LLInventoryModel::item_array_t& items, S32 max_per_type);
 // [/SL:KB]

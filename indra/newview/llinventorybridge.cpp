@@ -4584,7 +4584,7 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.5.0a) | Modified: Catznip-2.2.0a
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
 void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
 		                                  LLDynamicArray<LLFolderViewEventListener*>& batch)
@@ -4695,7 +4695,7 @@ void LLWearableBridge::openItem()
 //	{
 //		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
 //	}
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
 	if ( (item) && (item->isWearableType()) )
 	{
 		// Wearable double-click action should match attachment double-click action (=wear/unwear but don't attempt to unwear body parts)
