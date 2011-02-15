@@ -27,7 +27,7 @@
   orientation="horizontal"
   name="im_panels"
   tab_group="1"
-  top="20"
+  top="15"
   left="0">
     <layout_panel
       name="im_control_panel_holder"
@@ -48,46 +48,49 @@
        left="0"
        tab_group="2"
        top="0"
-       height="200"
+       height="220"
 	     width="254"
        user_resize="true">
-        <button
-          height="20"
-          follows="left|top"
-          top="0"
-          left="2"
-          image_overlay="TabIcon_Open_Off"
-          layout="topleft"
-          width="25"
-          name="slide_left_btn" />
-         <button
-          height="20"
-          follows="left|top"
-          top="0"
-          left="2"
-          image_overlay="TabIcon_Close_Off"
-          width="25"
-          name="slide_right_btn" />
         <chat_history
 	 font="SansSerifSmall"
          follows="left|right|top|bottom"
-         height="150"
+         top="6"
+         height="188"
          name="chat_history"
          parse_highlights="true"
          parse_urls="true"
         left="1"
          width="249">
         </chat_history>
+        <button
+          height="20"
+          follows="left|bottom"
+          bottom="0"
+          left="0"
+          image_overlay="TabIcon_Open_Off"
+          layout="bottomleft"
+          width="25"
+          name="slide_left_btn" />
+         <button
+          height="20"
+          follows="left|bottom"
+          bottom="0"
+          left="0"
+          image_overlay="TabIcon_Close_Off"
+          layout="bottomleft"
+          width="25"
+          name="slide_right_btn" />
         <line_editor
          bottom="0"
          follows="left|right|bottom"
-	 font="SansSerifSmall"
+         font="SansSerifSmall"
+         left="30"
          height="20"
          label="To"
          layout="bottomleft"
          name="chat_editor"
          tab_group="3"
-         width="249">
+         width="219">
         </line_editor>
     </layout_panel>
   </layout_stack>
