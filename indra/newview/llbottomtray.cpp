@@ -271,6 +271,13 @@ LLNearbyChatBar* LLBottomTray::getNearbyChatBar()
 	return mIsInLiteMode ? mBottomTrayLite->mNearbyChatBar : mNearbyChatBar;
 }
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+LLNearbyChatBar* LLBottomTray::getNearbyChatBar(bool fLiteMode) const
+{
+	return (fLiteMode) ? mBottomTrayLite->mNearbyChatBar : mNearbyChatBar;
+}
+// [/SL:KB]
+
 LLIMChiclet* LLBottomTray::createIMChiclet(const LLUUID& session_id)
 {
 	LLIMChiclet::EType im_chiclet_type = LLIMChiclet::getIMSessionType(session_id);

@@ -93,16 +93,38 @@ private:
 class LLNearbyChatBar
 :	public LLPanel
 {
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+public:
+	// Right now we only have two instances of the chatbar, but that might change if we ever embed one into the chat history floater as well
+	typedef enum e_nearby_chatbar_type {
+		CHATBAR_BOTTOMTRAY,			// Bottom tray chatbar
+		CHATBAR_BOTTOMTRAY_LITE		// Bottom tray chatbar (mouselook)
+	} EChatBarType;
+// [/SL:KB]
 public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
 	LLNearbyChatBar();
-	~LLNearbyChatBar() {}
+//	~LLNearbyChatBar() {}
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+	~LLNearbyChatBar();
+// [/SL:KB]
 
 	virtual BOOL postBuild();
 
 	static LLNearbyChatBar* getInstance();
 
 	static bool instanceExists();
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+	static LLNearbyChatBar* getInstance(EChatBarType typeChatBar);
+	static bool instanceExists(EChatBarType typeChatBar);
+
+	// TODO-Catznip: find a better way to do this? The old way had calls embedded in LLBottomTray but that didn't seem very nice either
+	virtual void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
+
+	typedef boost::signals2::signal<void (LLUICtrl* ctrl, S32 width, S32 height)> reshape_signal_t;
+	boost::signals2::connection setReshapeCallback(const reshape_signal_t::slot_type& cb);
+// [/SL:KB]
 
 	LLLineEditor* getChatBox() { return mChatBox; }
 
@@ -137,6 +159,10 @@ protected:
 	LLLineEditor*		mChatBox;
 	LLOutputMonitorCtrl* mOutputMonitor;
 	LLLocalSpeakerMgr*  mSpeakerMgr;
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+	reshape_signal_t*	mReshapeSignal;
+// [/SL:KB]
 };
 
 #endif
