@@ -785,7 +785,7 @@ BOOL LLTaskCategoryBridge::startDrag(EDragAndDropType* type, LLUUID* id) const
 				}
 			}
 */
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-10 (Catznip-2.3.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
 			const LLInventoryObject* cat = object->getInventoryObject(mUUID);
 			if ( (cat) && (move_inv_category_world_to_agent(mUUID, LLUUID::null, FALSE)) )
 			{
