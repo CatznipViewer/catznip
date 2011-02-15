@@ -1868,13 +1868,54 @@ BOOL LLFolderView::handleRightMouseDown( S32 x, S32 y, MASK mask )
 		// Successively filter out invalid options
 
 		U32 flags = FIRST_SELECTED_ITEM;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
+		if (mSelectedItems.size() > 1)
+			flags |= MULTIPLE_SELECTED_ITEMS;
+
+		// NOTE-Catznip: this is really a bad hack but I can't really think of a better way short of just rewriting all menu item handling
+		U32 cntWearable = 0, cntWorn = 0;
+		for (selected_items_t::const_iterator itSel = mSelectedItems.begin(); itSel != mSelectedItems.end(); ++itSel)
+		{
+			const LLViewerInventoryItem* pItem = (*itSel)->getInventoryItem();
+			if (!pItem)
+				continue;
+
+			LLAssetType::EType typeItem = pItem->getType();
+			if ( (LLAssetType::AT_BODYPART == typeItem) || (LLAssetType::AT_CLOTHING == typeItem) || (LLAssetType::AT_OBJECT == typeItem) )
+			{
+				if (LLAssetType::AT_BODYPART == typeItem)
+					flags |= BODYPART_SELECTION;
+				else if (LLAssetType::AT_CLOTHING == typeItem)
+					flags |= CLOTHING_SELECTION;
+				else if (LLAssetType::AT_OBJECT == typeItem)
+					flags |= ATTACHMENT_SELECTION;
+
+				cntWearable++;
+				if (get_is_item_worn(pItem->getLinkedUUID()))
+					cntWorn++;
+			}
+			else
+			{
+				flags |= NONWEARABLE_SELECTION;
+			}
+		}
+
+		if ( (cntWearable) && (cntWorn) )
+		{
+			flags |= (cntWearable == cntWorn) ? WORN_SELECTION : PARTIAL_WORN_SELECTION;
+		}
+// [/SL:KB]
+
 		for (selected_items_t::iterator item_itor = mSelectedItems.begin(); 
 			 item_itor != mSelectedItems.end(); 
 			 ++item_itor)
 		{
 			LLFolderViewItem* selected_item = (*item_itor);
 			selected_item->buildContextMenu(*menu, flags);
-			flags = 0x0;
+//			flags = 0x0;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
+			flags &= ~FIRST_SELECTED_ITEM;
+// [/SL:KB]
 		}
 	   
 		addNoOptions(menu);
