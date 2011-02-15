@@ -178,6 +178,23 @@ protected:
 	/*virtual*/ void callObservers(const std::string &id, const std::string &label, const std::string& icon);
 private:
 	void onAvatarNameCache(const LLUUID& id, const LLAvatarName& av_name);
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	// HACK-Catznip: we don't have access to gSavedSettings here and I can't really think of a better way to configure these options
+public:
+	typedef enum e_show_username_type
+	{
+		SHOW_ALWAYS = 0,		// Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
+		SHOW_MISMATCH = 1,		// Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
+		SHOW_NEVER = 2			// Never show the username as part of the label (will still be visible on the tooltip)
+	} EShowUsername;
+
+	static EShowUsername	getShowUsername()								{ return s_eShowUsername; }
+	static void				setShowUsername(EShowUsername eShowUsername)	{ s_eShowUsername = eShowUsername; }
+protected:
+	std::string				getLabelFromAvatarName(const LLAvatarName& avName);
+
+	static EShowUsername	s_eShowUsername;
+// [/SL:KB]
 };
 
 ///
