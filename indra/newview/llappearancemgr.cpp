@@ -2759,7 +2759,7 @@ BOOL LLAppearanceMgr::getIsProtectedCOFItem(const LLUUID& obj_id) const
 	*/
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.5.0a) | Modified: Catznip-2.2.0a
 LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 {
 	if (!LLApp::isExiting())
@@ -2787,7 +2787,7 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 				items.erase(itTemp);
 
 			// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
-			bool fReplace = ((itReorder->second & 0x80000000) == 0); U32 idxAt = (itReorder->second & 0x7FFFFFFF);
+			bool fReplace = itReorder->second.fReplace; U32 idxAt = itReorder->second.nIndex;
 			if ( ((!fReplace) && (idxAt <= items.size())) || ((fReplace) && (idxAt < items.size() - 1)) )
 			{
 				std::sort(items.begin(), items.end(), WearablesOrderComparator(pItem->getWearableType()));
@@ -2798,7 +2798,7 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 				}
 				else
 				{
-					if (items[itReorder->second])
+					if (items[idxAt])
 						pAppearanceMgr->removeCOFItemLinks(items[idxAt]->getLinkedUUID(), false);
 					items[idxAt] = pItem;
 				}

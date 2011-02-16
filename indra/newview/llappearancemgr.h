@@ -243,7 +243,7 @@ private:
 	bool mUpdateBaseOrder;
 };
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.5.0a) | Modified: Catznip-2.2.0a
 class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
 {
 public:
@@ -256,8 +256,7 @@ public:
 
 	void addReorderItem(const LLUUID& idItem, U32 index, bool do_replace)
 	{
-		// HACK-Catznip: to keep things easier we use the high bit to signify "replace" vs "insert"
-		mReorderMap.insert(std::pair<LLUUID, S32>(idItem, (do_replace) ? index : index | 0x80000000));
+		mReorderMap.insert(std::pair<LLUUID, reorder_data_t>(idItem, reorder_data_t(do_replace, index)));
 	}
 
 	virtual void fire(const LLUUID& idItem)
@@ -265,8 +264,18 @@ public:
 		mFireCount++;
 		mIDs.push_back(idItem);
 	}
-
-	typedef std::map<LLUUID, S32> reorder_map_t;
+protected:
+	union reorder_data_t
+	{
+		U32 ReorderData;
+		struct
+		{
+			U32 fReplace:1;
+			U32 nIndex:31;
+		};
+		reorder_data_t(bool replace, U32 index) : fReplace(replace), nIndex(index) {}
+	};
+	typedef std::map<LLUUID, reorder_data_t> reorder_map_t;
 private:
 	U32           mFireCount;
 	uuid_vec_t    mIDs;

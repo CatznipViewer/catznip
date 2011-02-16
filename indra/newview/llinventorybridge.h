@@ -489,7 +489,7 @@ public:
 	static void 	removeAllClothesFromAvatar();
 	void			removeFromAvatar();
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.2.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.5.0a) | Added: Catznip-2.0.0d
 	static  bool    doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam);
 	static  bool    getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl, const LLSD& sdParam);
 // [/SL:KB]
