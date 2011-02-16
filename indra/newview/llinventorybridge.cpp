@@ -4266,22 +4266,20 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			if (!isAgentAvatarValid()) return;
 
-/*
-			if( get_is_item_worn( mUUID ) )
-			{
-				items.push_back(std::string("Wearable And Object Separator"));
-				items.push_back(std::string("Detach From Yourself"));
-			}
-			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
-			{
-				items.push_back(std::string("Wearable And Object Separator"));
-				items.push_back(std::string("Wearable And Object Wear"));
-				items.push_back(std::string("Wearable Add"));
-				items.push_back(std::string("Attach To"));
-				items.push_back(std::string("Attach To HUD"));
-				// commented out for DEV-32347
-				//items.push_back(std::string("Restore to Last Position"));
-*/
+//			if( get_is_item_worn( mUUID ) )
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Detach From Yourself"));
+//			}
+//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Wearable And Object Wear"));
+//				items.push_back(std::string("Wearable Add"));
+//				items.push_back(std::string("Attach To"));
+//				items.push_back(std::string("Attach To HUD"));
+//				// commented out for DEV-32347
+//				//items.push_back(std::string("Restore to Last Position"));
 // [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2.0a) | Added: Catznip-2.2.0a
 			items.push_back(std::string("Wearable And Object Separator"));
 
@@ -4762,44 +4760,42 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			}
 		}
 // [/SL:KB]
-/*
-		if(item)
-		{
-			switch (item->getType())
-			{
-				case LLAssetType::AT_CLOTHING:
-					items.push_back(std::string("Take Off"));
-
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
-					// Only show "Wear On" for unworn clothing items whose wearable type already has a current wearable
-					if ( (gAgentWearables.getWearableCount(item->getWearableType())) && (!get_is_item_worn(item->getUUID())) )
-					{
-						items.push_back(std::string("Wear On"));
-						if ((flags & FIRST_SELECTED_ITEM) == 0)
-							disabled_items.push_back(std::string("Wear On"));
-					}
-// [/SL:KB]
-
-					// Fallthrough since clothing and bodypart share wear options
-				case LLAssetType::AT_BODYPART:
-					if (get_is_item_worn(item->getUUID()))
-					{
-						disabled_items.push_back(std::string("Wearable And Object Wear"));
-						disabled_items.push_back(std::string("Wearable Add"));
-					}
-					else
-					{
-						items.push_back(std::string("Wearable And Object Wear"));
-						items.push_back(std::string("Wearable Add"));
-						disabled_items.push_back(std::string("Take Off"));
-						disabled_items.push_back(std::string("Wearable Edit"));
-					}
-					break;
-				default:
-					break;
-			}
-		}
-*/
+//		if(item)
+//		{
+//			switch (item->getType())
+//			{
+//				case LLAssetType::AT_CLOTHING:
+//					items.push_back(std::string("Take Off"));
+//
+//// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+//					// Only show "Wear On" for unworn clothing items whose wearable type already has a current wearable
+//					if ( (gAgentWearables.getWearableCount(item->getWearableType())) && (!get_is_item_worn(item->getUUID())) )
+//					{
+//						items.push_back(std::string("Wear On"));
+//						if ((flags & FIRST_SELECTED_ITEM) == 0)
+//							disabled_items.push_back(std::string("Wear On"));
+//					}
+//// [/SL:KB]
+//
+//					// Fallthrough since clothing and bodypart share wear options
+//				case LLAssetType::AT_BODYPART:
+//					if (get_is_item_worn(item->getUUID()))
+//					{
+//						disabled_items.push_back(std::string("Wearable And Object Wear"));
+//						disabled_items.push_back(std::string("Wearable Add"));
+//					}
+//					else
+//					{
+//						items.push_back(std::string("Wearable And Object Wear"));
+//						items.push_back(std::string("Wearable Add"));
+//						disabled_items.push_back(std::string("Take Off"));
+//						disabled_items.push_back(std::string("Wearable Edit"));
+//					}
+//					break;
+//				default:
+//					break;
+//			}
+//		}
 	}
 	hide_context_entries(menu, items, disabled_items);
 }
