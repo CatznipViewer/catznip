@@ -1,3 +1,6 @@
+[UI/Misc]
+- added   : added "Refresh L$ Balance" option to the Advanced menu
+
 [UI/FloaterSearch]
 - changed : don't reset the URL each time the search floater is opened
     -> "Find always resets to start page" (WEB-1819)

@@ -104,7 +104,7 @@ BOOL LLFloaterSearch::postBuild()
 void LLFloaterSearch::onOpen(const LLSD& key)
 {
 //	search(key);
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2010-06-23 (Catznip-2.1.0a) | Added: Catznip-2.1.0a
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2010-06-23 (Catznip-2.5.0a) | Added: Catznip-2.1.0a
 	if ( (key.has("category")) || (mBrowser->getCurrentNavUrl().empty()))
 	{
 		search(key);
