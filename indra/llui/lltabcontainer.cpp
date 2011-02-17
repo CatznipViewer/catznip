@@ -209,7 +209,7 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
 	tab_allow_rearrange("tab_allow_rearrange", false),
 // [/SL:KB]
 	tab_padding_right("tab_padding_right"),
@@ -229,7 +229,7 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
 	mAllowRearrange(p.tab_allow_rearrange),
 // [/SL:KB]
 	mScrolled(FALSE),
@@ -582,7 +582,7 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 //			LLButton* tab_button = getTab(index)->mButton;
 			gFocusMgr.setMouseCapture(this);
 //			tab_button->setFocus(TRUE);
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
 			// Only set keyboard focus to the tab button of the active panel (if we have one) if the user actually clicked on it
 			if (mCurrentTabIdx >= 0)
 			{
@@ -742,7 +742,7 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 {
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
 	if ( (mAllowRearrange) && (hasMouseCapture()) )
 	{
 		return FALSE;	// Don't process movement keys while the user might be rearranging tabs
@@ -2080,14 +2080,13 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
 //				tuple->mButton->onCommit();
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.1.2a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
 				if ( (mAllowRearrange) && (mCurrentTabIdx >= 0) && (mTabList[mCurrentTabIdx]->mButton->hasFocus()) )
 				{
 					S32 idxHover = iter - mTabList.begin();
 					if ( (mCurrentTabIdx >= mLockedTabCount) && (idxHover >= mLockedTabCount) && (mCurrentTabIdx != idxHover) )
 					{
 						// Only rearrange the tabs if the mouse pointer has cleared the overlap area
-						// TODO-Catznip: [Catznip-2.1] The "cleared overlap" needs more testing for a variety of tab configurations
 						bool fClearedOverlap = 
 							(mIsVertical) 
 							? false				// TODO-Catznip: handle vertical tabs as well
