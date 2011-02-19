@@ -2080,20 +2080,22 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
 //				tuple->mButton->onCommit();
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
 				if ( (mAllowRearrange) && (mCurrentTabIdx >= 0) && (mTabList[mCurrentTabIdx]->mButton->hasFocus()) )
 				{
 					S32 idxHover = iter - mTabList.begin();
 					if ( (mCurrentTabIdx >= mLockedTabCount) && (idxHover >= mLockedTabCount) && (mCurrentTabIdx != idxHover) )
 					{
+						LLRect rctCurTab = mTabList[mCurrentTabIdx]->mButton->getRect();
+						LLRect rctHoverTab = mTabList[idxHover]->mButton->getRect();
+
 						// Only rearrange the tabs if the mouse pointer has cleared the overlap area
 						bool fClearedOverlap = 
-							(mIsVertical) 
-							? false				// TODO-Catznip: handle vertical tabs as well
-							: ( (idxHover > mCurrentTabIdx) &&
-							    (x > mTabList[mCurrentTabIdx]->mButton->getRect().mLeft + mTabList[idxHover]->mButton->getRect().getWidth()) ) ||
-							  ( (idxHover < mCurrentTabIdx) &&
-							    (x < mTabList[idxHover]->mButton->getRect().mLeft + mTabList[mCurrentTabIdx]->mButton->getRect().getWidth()) );
+						  (mIsVertical) 
+							? ( (idxHover < mCurrentTabIdx) && (y > rctHoverTab.mTop - rctCurTab.getHeight()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (y < rctCurTab.mTop - rctHoverTab.getHeight()) )
+							: ( (idxHover < mCurrentTabIdx) && (x < rctHoverTab.mLeft + rctCurTab.getWidth()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (x > rctCurTab.mLeft + rctHoverTab.getWidth()) );
 						if (fClearedOverlap)
 						{
 							tuple = mTabList[mCurrentTabIdx];
