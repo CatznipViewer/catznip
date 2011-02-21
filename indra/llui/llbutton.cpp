@@ -850,12 +850,27 @@ void LLButton::draw()
 				overlay_color);
 			break;
 		case LLFontGL::HCENTER:
-			mImageOverlay->draw(
-				center_x - (overlay_width / 2), 
-				center_y - (overlay_height / 2), 
-				overlay_width, 
-				overlay_height, 
-				overlay_color);
+//			mImageOverlay->draw(
+//				center_x - (overlay_width / 2), 
+//				center_y - (overlay_height / 2), 
+//				overlay_width, 
+//				overlay_height, 
+//				overlay_color);
+// [SL:KB] - Patch: Control-Button | Checked: 2011-02-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+			{
+				text_left += overlay_width + mImgOverlayLabelSpace;
+				text_width -= overlay_width + mImgOverlayLabelSpace;
+
+				S32 label_width = (!label.empty()) ? mImgOverlayLabelSpace + mGLFont->getWidth(label.c_str(), 0, S32_MAX) : 0;
+
+				mImageOverlay->draw(
+					center_x - ((overlay_width + label_width) / 2), 
+					center_y - (overlay_height / 2), 
+					overlay_width, 
+					overlay_height, 
+					overlay_color);
+			}
+// [/SL:KB]
 			break;
 		case LLFontGL::RIGHT:
 			text_right -= overlay_width + mImgOverlayLabelSpace;
