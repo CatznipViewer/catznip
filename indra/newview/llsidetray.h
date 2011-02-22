@@ -205,6 +205,7 @@ protected:
 	LLPanel*	openChildPanel	(LLSideTrayTab* tab, const std::string& panel_name, const LLSD& params);
 
 	void		onTabButtonClick(std::string name);
+	bool		onTabDestroy	(const LLSideTrayTab* tab);
 	void		onToggleCollapse();
 
 private:
