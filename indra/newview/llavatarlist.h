@@ -47,7 +47,7 @@ class LLAvatarList : public LLFlatListViewEx
 {
 	LOG_CLASS(LLAvatarList);
 public:
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	struct TextCallbackParam : public LLInitParam::Block<TextCallbackParam, LLUICtrl::CommitCallbackParam>
 	{
 		Optional<F32> refresh_time;
@@ -58,13 +58,13 @@ public:
 
 	struct Params : public LLInitParam::Block<Params, LLFlatListViewEx::Params>
 	{
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 		Optional<TextCallbackParam> text_callback;
 // [/SL:KB]
 
 		Optional<bool>	ignore_online_status, // show all items as online
 //						show_last_interaction_time, // show most recent interaction time. *HACK: move this to a derived class
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 						show_text_field,
 // [/SL:KB]
 						show_info_btn,
@@ -109,7 +109,7 @@ public:
 
 	boost::signals2::connection setItemDoubleClickCallback(const mouse_signal_t::slot_type& cb);
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	boost::signals2::connection setTextFieldCallback(const commit_signal_t::slot_type& cb);
 	void                        setTextFieldRefresh(F32 refresh_time);
 // [/SL:KB]
@@ -136,7 +136,7 @@ private:
 
 	bool mIgnoreOnlineStatus;
 //	bool mShowLastInteractionTime;
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	bool mShowTextField;
 // [/SL:KB]
 	bool mDirty;
@@ -148,7 +148,7 @@ private:
 	bool mShowPermissions;
 
 //	LLTimer*				mLITUpdateTimer; // last interaction time update timer
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	LLTimer*				mTextFieldUpdateTimer;
 	F32						mTextFieldUpdateExpiration;
 	commit_signal_t*		mTextFieldUpdateSignal;

@@ -96,7 +96,7 @@ public:
 	void setState(EItemState item_style);
 	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
 //	void setLastInteractionTime(U32 secs_since);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	void setTextField(const std::string& text);
 	void setTextFieldDistance(F32 distance);
 	void setTextFieldSeconds(U32 secs_since);
@@ -107,8 +107,10 @@ public:
 	void showSpeakingIndicator(bool show);
 //	void setShowPermissions(bool show) { mShowPermissions = show; };
 //	void showLastInteractionTime(bool show);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	void setShowPermissions(bool show) { mShowPermissions = show; refreshPermissions(); updateChildren(); };
+// [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	void showTextField(bool show);
 // [/SL:KB]
 	void setAvatarIconVisible(bool visible);
@@ -119,7 +121,7 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-11-04 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	void onPermissionBtnToggle(S32 toggleRight);
 	void onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant);
 // [/SL:KB]
@@ -142,7 +144,7 @@ protected:
 //	LLIconCtrl* mIconPermissionEditMine;
 	/// Indicator for permission to edit their objects.
 	LLIconCtrl* mIconPermissionEditTheirs;
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	LLButton* mIconPermissionOnline;
 	LLButton* mIconPermissionMap;
 	LLButton* mIconPermissionEditMine;
@@ -172,7 +174,7 @@ private:
 		ALIC_PERMISSION_EDIT_MINE,
 		ALIC_PERMISSION_EDIT_THEIRS,
 //		ALIC_INTERACTION_TIME,
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 		ALIC_TEXT_FIELD,
 // [/SL:KB]
 		ALIC_NAME,
@@ -206,7 +208,7 @@ private:
 	 * Need to call updateChildren() afterwards to sort out their layout.
 	 */
 //	bool showPermissions(bool visible);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	bool refreshPermissions();
 // [/SL:KB]
 
@@ -220,7 +222,7 @@ private:
 
 	LLTextBox* mAvatarName;
 //	LLTextBox* mLastInteractionTime;
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	LLTextBox* mTextField;
 // [/SL:KB]
 	LLStyle::Params mAvatarNameStyle;

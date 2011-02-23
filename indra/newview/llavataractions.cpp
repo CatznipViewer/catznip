@@ -68,7 +68,7 @@
 #include "lltrans.h"
 #include "llcallingcard.h"
 #include "llslurl.h"			// IDEVO
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-02 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
 #include "llfloaterreporter.h"
 #include "llparcel.h"
 #include "llviewermenu.h"
@@ -977,7 +977,7 @@ bool LLAvatarActions::canBlock(const LLUUID& id)
 	return !is_self && !is_linden;
 }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
 void LLAvatarActions::report(const LLUUID& idAgent)
 {
 	LLAvatarName avName;

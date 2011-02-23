@@ -1422,24 +1422,24 @@ void send_agent_resume()
 }
 
 //static LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
 LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
 // [/SL:KB]
 {
 	LLVector3d pos_global;
 	LLVector3 pos_local;
 //	U8 bits;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
 	U16 bits;
 // [/SL:KB]
 
 //	bits = compact_local & 0xFF;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
 	bits = compact_local & 0xFFFF;
 // [/SL:KB]
 	pos_local.mV[VZ] = F32(bits) * 4.f;
 //	compact_local >>= 8;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
 	compact_local >>= 16;
 // [/SL:KB]
 
