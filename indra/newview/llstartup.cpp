@@ -73,6 +73,9 @@
 #include "llsdutil_math.h"
 #include "llsecondlifeurls.h"
 #include "llstring.h"
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+#include "llurlentry.h"
+// [/SL:KB]
 #include "lluserrelations.h"
 #include "llversioninfo.h"
 #include "llviewercontrol.h"
@@ -2689,6 +2692,10 @@ void LLStartUp::initNameCache()
 	// capabilities for display name lookup
 	LLAvatarNameCache::initClass(false);
 	LLAvatarNameCache::setUseDisplayNames(gSavedSettings.getBOOL("UseDisplayNames"));
+
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	LLUrlEntryAgent::setShowUsername((LLUrlEntryAgent::EShowUsername)gSavedSettings.getU32("AgentLinkShowUsernames"));
+// [/SL:KB]
 }
 
 void LLStartUp::cleanupNameCache()
