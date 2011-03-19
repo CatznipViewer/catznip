@@ -31,6 +31,9 @@
 #include "llview.h"
 #include "llwindow.h"
 #include "llurlregistry.h"
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+#include "llavatarnamecache.h"
+// [/SL:KB]
 
 // global state for the callback functions
 void (*LLUrlAction::sOpenURLCallback) (const std::string& url) = NULL;
@@ -140,6 +143,40 @@ void LLUrlAction::copyLabelToClipboard(std::string url)
 		LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(match.getLabel()));
 	}	
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+void LLUrlAction::copyToClipboard(std::string url, LLSD sdAction)
+{
+	// Get id from 'secondlife:///app/agent/{id}/{action}'
+	LLURI uri(url);
+	LLSD sdPath = uri.pathArray();
+	if (sdPath.size() == 4)
+	{
+		std::string strCommand = sdPath.get(1).asString();
+		LLUUID uuid(sdPath.get(2).asString());
+		if ( (uuid.notNull()) && ("agent" == strCommand) )
+		{
+			LLAvatarName avName;
+			if (LLAvatarNameCache::get(uuid, &avName))
+			{
+				std::string strAction = sdAction.asString();
+				if ("fullname" == strAction)
+				{
+					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getCompleteName()));
+				}
+				else if ("displayname" == strAction)
+				{
+					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.mDisplayName));
+				}
+				else if ("username" == strAction)
+				{
+					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.mUsername));
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 void LLUrlAction::showProfile(std::string url)
 {

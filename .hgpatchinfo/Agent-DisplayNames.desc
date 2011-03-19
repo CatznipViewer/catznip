@@ -4,3 +4,4 @@
        1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
        2 = Never show the username as part of the label (will still be visible on the tooltip)
 - changed : don't replace existing cached names with dummies on lookup failure
+- changed : split "Copy Name to Clipboard" SLurl context menu option into "Copy Display Name" and "Cope Fullname" options
