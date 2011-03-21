@@ -62,6 +62,9 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+#include "llgroupactions.h"
+// [/SL:KB]
 #include "lltooltip.h"
 #include "llhints.h"
 #include "llhudeffecttrail.h"
@@ -5764,6 +5767,17 @@ class LLToggleAgentProfile : public view_listener_t
 	}
 };
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+void handle_show_support_group()
+{
+	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
+	if (gAgent.isInGroup(idSupportGroup, true))
+		LLGroupActions::startIM(idSupportGroup);
+	else
+		LLGroupActions::show(idSupportGroup);
+}
+// [/SL:KB]
+
 class LLLandEdit : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
@@ -8165,6 +8179,10 @@ void initialize_menus()
 	commit.add("BuyCurrency", boost::bind(&handle_buy_currency));
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.2.0a) | Added: Catznip-2.1.2a
+	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
+// [/SL:KB]
+
 	view_listener_t::addMenu(new LLPromptShowURL(), "PromptShowURL");
 	view_listener_t::addMenu(new LLShowAgentProfile(), "ShowAgentProfile");
 	view_listener_t::addMenu(new LLToggleAgentProfile(), "ToggleAgentProfile");
