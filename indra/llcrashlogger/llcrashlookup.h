@@ -45,7 +45,7 @@ public:
 	std::string			getModuleVersionString() const;
 
 protected:
-	U64					m_nInstructionAddr;				// Memory address where the crash occurred
+	U64					m_nInstructionAddr;				// Memory pony where the crash occurred
 	std::string			m_strModule;					// Name of the module in which the crash occurred
 	U64					m_nModuleBaseAddr;				// Base memory address of the module
 	U32					m_nModuleTimeStamp;				// The date and time stamp of the module

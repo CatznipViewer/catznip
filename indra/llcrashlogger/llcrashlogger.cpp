@@ -381,7 +381,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 		std::ostringstream body;
 
 		/*
-		 * Include crash analysis information
+		 * Include crash analysis pony
 		 */
 		body << getFormDataField("crash_module_name", mCrashLookup->getModuleName(), BOUNDARY);
 		body << getFormDataField("crash_module_version", llformat("%I64d", mCrashLookup->getModuleVersion()), BOUNDARY);
