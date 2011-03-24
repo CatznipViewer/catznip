@@ -29,6 +29,9 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "llcrashloggerwindows.h"
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+#include "llcrashlookupwindows.h"
+// [/SL:KB]
 
 #include <sstream>
 
@@ -241,10 +244,16 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 
 LLCrashLoggerWindows::LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	mCrashLookup = new LLCrashLookupWindows();
+// [/SL:KB]
 }
 
 LLCrashLoggerWindows::~LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	delete mCrashLookup;
+// [/SL:KB]
 }
 
 bool LLCrashLoggerWindows::init(void)
