@@ -196,6 +196,44 @@ public:
 	 */
 	static bool canShareSelectedItems(LLInventoryPanel* inv_panel = NULL);
 
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
+	static void report(const LLUUID& idAgent);
+
+	static bool canZoomIn(const LLUUID& idAgent);
+	static void zoomIn(const LLUUID& idAgent);
+
+	//
+	// Parcel actions
+	//
+public:
+	static bool canLandFreezeOrEject(const LLUUID& idAgent);
+	static void landEject(const LLUUID& idAgent);
+	static void landFreeze(const LLUUID& idAgent);
+
+	static bool canLandFreezeOrEjectMultiple(uuid_vec_t& idAgents, bool fFilter = false);
+	static void landEjectMultiple(const uuid_vec_t& idAgents);
+	static void landFreezeMultiple(const uuid_vec_t& idAgents);
+protected:
+	static bool callbackLandEject(const LLSD& notification, const LLSD& response);
+	static bool callbackLandFreeze(const LLSD& notification, const LLSD& response);
+
+
+	//
+	// Estate actions
+	//
+public:
+	static bool canEstateKickOrTeleportHome(const LLUUID& idAgent);
+	static void estateKick(const LLUUID& idAgent);
+	static void estateTeleportHome(const LLUUID& idAgent);
+
+	static bool canEstateKickOrTeleportHomeMultiple(uuid_vec_t& idAgents, bool fFilter = false);
+	static void estateKickMultiple(const uuid_vec_t& idAgents);
+	static void estateTeleportHomeMultiple(const uuid_vec_t& idAgents);
+protected:
+	static bool callbackEstateKick(const LLSD& notification, const LLSD& response);
+	static bool callbackEstateTeleportHome(const LLSD& notification, const LLSD& response);
+// [/SL:KB]
+
 private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
 	static bool handleRemove(const LLSD& notification, const LLSD& response);
