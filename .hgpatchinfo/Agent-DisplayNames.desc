@@ -1,0 +1,6 @@
+[Agent/DisplayNames]
+- added   : "AgentLinkShowUsernames" setting to control when the username is shown as part of an agent app URL label
+    -> 0 = Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
+       1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
+       2 = Never show the username as part of the label (will still be visible on the tooltip)
+- changed : don't replace existing cached names with dummies on lookup failure
