@@ -81,6 +81,7 @@ class ViewerManifest(LLManifest):
             # skins
             if self.prefix(src="skins"):
                     self.path("paths.xml")
+                    self.path("skins.xml")
                     # include the entire textures directory recursively
                     if self.prefix(src="*/textures"):
                             self.path("*/*.tga")
@@ -95,6 +96,18 @@ class ViewerManifest(LLManifest):
                             self.end_prefix("*/textures")
                     self.path("*/xui/*/*.xml")
                     self.path("*/xui/*/widgets/*.xml")
+                    self.path("*/themes/*/colors.xml")
+                    if self.prefix(src="*/themes/*/textures"):
+                            self.path("*/*.tga")
+                            self.path("*/*.j2c")
+                            self.path("*/*.jpg")
+                            self.path("*/*.png")
+                            self.path("*.tga")
+                            self.path("*.j2c")
+                            self.path("*.jpg")
+                            self.path("*.png")
+                            self.end_prefix("*/textures")
+                    
                     self.path("*/*.xml")
 
                     # Local HTML files (e.g. loading screen)
@@ -242,8 +255,8 @@ class WindowsManifest(ViewerManifest):
         #self.enable_crt_manifest_check()
 
         if self.is_packaging_viewer():
-            # Find secondlife-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
-            self.path(src='%s/secondlife-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
+            self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
 
         # Plugin host application
         self.path(os.path.join(os.pardir,
@@ -482,34 +495,34 @@ class WindowsManifest(ViewerManifest):
         if self.default_channel():
             if self.default_grid():
                 # release viewer
-                installer_file = "Second_Life_%(version_dashes)s_Setup.exe"
+                installer_file = "Catznip_%(version_dashes)s_Setup.exe"
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
-                !define INSTNAME   "SecondLifeViewer2"
-                !define SHORTCUT   "Second Life Viewer 2"
+                !define INSTNAME   "CatznipViewer2"
+                !define SHORTCUT   "Catznip Viewer 2"
                 !define URLNAME   "secondlife"
-                Caption "Second Life ${VERSION}"
+                Caption "Catznip ${VERSION}"
                 """
             else:
                 # beta grid viewer
-                installer_file = "Second_Life_%(version_dashes)s_(%(grid_caps)s)_Setup.exe"
+                installer_file = "Catznip_%(version_dashes)s_(%(grid_caps)s)_Setup.exe"
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
-                !define INSTNAME   "SecondLife%(grid_caps)s"
-                !define SHORTCUT   "Second Life (%(grid_caps)s)"
+                !define INSTNAME   "Catznip%(grid_caps)s"
+                !define SHORTCUT   "Catznip (%(grid_caps)s)"
                 !define URLNAME   "secondlife%(grid)s"
                 !define UNINSTALL_SETTINGS 1
-                Caption "Second Life %(grid)s ${VERSION}"
+                Caption "Catznip %(grid)s ${VERSION}"
                 """
         else:
             # some other channel on some grid
-            installer_file = "Second_Life_%(version_dashes)s_%(channel_oneword)s_Setup.exe"
+            installer_file = "Catznip_%(version_dashes)s_%(channel_oneword)s_Setup.exe"
             grid_vars_template = """
             OutFile "%(installer_file)s"
             !define INSTFLAGS "%(flags)s"
-            !define INSTNAME   "SecondLife%(channel_oneword)s"
+            !define INSTNAME   "Catznip%(channel_oneword)s"
             !define SHORTCUT   "%(channel)s"
             !define URLNAME   "secondlife"
             !define UNINSTALL_SETTINGS 1
@@ -825,12 +838,12 @@ class LinuxManifest(ViewerManifest):
     def construct(self):
         super(LinuxManifest, self).construct()
         self.path("licenses-linux.txt","licenses.txt")
-        self.path("res/ll_icon.png","secondlife_icon.png")
+        self.path("res/catznip.png","secondlife_icon.png")
         if self.prefix("linux_tools", dst=""):
             self.path("client-readme.txt","README-linux.txt")
             self.path("client-readme-voice.txt","README-linux-voice.txt")
             self.path("client-readme-joystick.txt","README-linux-joystick.txt")
-            self.path("wrapper.sh","secondlife")
+            self.path("wrapper.sh","catznip")
             self.path("handle_secondlifeprotocol.sh", "etc/handle_secondlifeprotocol.sh")
             self.path("register_secondlifeprotocol.sh", "etc/register_secondlifeprotocol.sh")
             self.path("refresh_desktop_app_entry.sh", "etc/refresh_desktop_app_entry.sh")
@@ -841,7 +854,7 @@ class LinuxManifest(ViewerManifest):
         # Create an appropriate gridargs.dat for this package, denoting required grid.
         self.put_in_file(self.flags_list(), 'etc/gridargs.dat')
 
-        self.path("secondlife-bin","bin/do-not-directly-run-secondlife-bin")
+        self.path("secondlife-bin","bin/catznip-do-not-directly-run-bin")
         self.path("../linux_crash_logger/linux-crash-logger","bin/linux-crash-logger.bin")
         self.path("../linux_updater/linux-updater", "bin/linux-updater.bin")
         self.path("../llplugin/slplugin/SLPlugin", "bin/SLPlugin")
