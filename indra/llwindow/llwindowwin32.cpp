@@ -686,6 +686,40 @@ void LLWindowWin32::restore()
 	SetFocus(mWindowHandle);
 }
 
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.5.0a) | Added: Catznip-2.0.0a
+BOOL LLWindowWin32::getFullscreenWindow()
+{
+	return (mWindowHandle) && (~GetWindowLong(mWindowHandle, GWL_STYLE) & WS_OVERLAPPEDWINDOW);
+}
+
+void LLWindowWin32::setFullscreenWindow(BOOL fFullscreen)
+{
+	if (getFullscreenWindow() == fFullscreen)
+		return;
+
+	DWORD dwStyle = GetWindowLong(mWindowHandle, GWL_STYLE);
+	if (fFullscreen)
+	{
+		HMONITOR hMonitor = MonitorFromWindow(mWindowHandle, MONITOR_DEFAULTTONULL);
+		MONITORINFO infoMonitor = { sizeof(infoMonitor) };
+		mRestoredPlacement.length = sizeof(WINDOWPLACEMENT);
+		if ( (GetWindowPlacement(mWindowHandle, &mRestoredPlacement)) && (hMonitor) && (GetMonitorInfo(hMonitor, &infoMonitor)) )
+		{
+			SetWindowLong(mWindowHandle, GWL_STYLE, dwStyle & ~WS_OVERLAPPEDWINDOW);
+			SetWindowPos(mWindowHandle, HWND_TOP, 
+			  infoMonitor.rcMonitor.left, infoMonitor.rcMonitor.top, 
+			  infoMonitor.rcMonitor.right - infoMonitor.rcMonitor.left, infoMonitor.rcMonitor.bottom - infoMonitor.rcMonitor.top, 
+			  SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+		}
+	}
+	else
+	{
+		SetWindowLong(mWindowHandle, GWL_STYLE, dwStyle | WS_OVERLAPPEDWINDOW);
+		SetWindowPlacement(mWindowHandle, &mRestoredPlacement);
+		SetWindowPos(mWindowHandle, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+	}
+}
+// [/SL:KB]
 
 // close() destroys all OS-specific code associated with a window.
 // Usually called from LLWindowManager::destroyWindow()
@@ -816,6 +850,32 @@ BOOL LLWindowWin32::getPosition(LLCoordScreen *position)
 	return TRUE;
 }
 
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
+BOOL LLWindowWin32::getRestoredPosition(LLCoordScreen *position)
+{
+	if ( (!mWindowHandle) || (!position) )
+		return FALSE;
+
+	RECT* prctWindow = NULL;
+	if (getFullscreenWindow())
+	{
+		prctWindow = &mRestoredPlacement.rcNormalPosition;
+	}
+	else
+	{
+		WINDOWPLACEMENT wp;
+		wp.length = sizeof(WINDOWPLACEMENT);
+		if (!GetWindowPlacement(mWindowHandle, &wp))
+			return FALSE;
+		prctWindow = &wp.rcNormalPosition;
+	}
+
+	position->mX = prctWindow->left;
+	position->mY = prctWindow->top;
+	return TRUE;
+}
+// [/SL:KB]
+
 BOOL LLWindowWin32::getSize(LLCoordScreen *size)
 {
 	RECT window_rect;
@@ -831,6 +891,32 @@ BOOL LLWindowWin32::getSize(LLCoordScreen *size)
 	size->mY = window_rect.bottom - window_rect.top;
 	return TRUE;
 }
+
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
+BOOL LLWindowWin32::getRestoredSize(LLCoordScreen *size)
+{
+	if ( (!mWindowHandle) || (!size) )
+		return FALSE;
+
+	RECT* prctWindow = NULL;
+	if (getFullscreenWindow())
+	{
+		prctWindow = &mRestoredPlacement.rcNormalPosition;
+	}
+	else
+	{
+		WINDOWPLACEMENT wp;
+		wp.length = sizeof(WINDOWPLACEMENT);
+		if (!GetWindowPlacement(mWindowHandle, &wp))
+			return FALSE;
+		prctWindow = &wp.rcNormalPosition;
+	}
+
+	size->mX = prctWindow->right - prctWindow->left;
+	size->mY = prctWindow->bottom - prctWindow->top;
+	return TRUE;
+}
+// [/SL:KB]
 
 BOOL LLWindowWin32::getSize(LLCoordWindow *size)
 {
@@ -863,16 +949,47 @@ BOOL LLWindowWin32::setPosition(const LLCoordScreen position)
 
 BOOL LLWindowWin32::setSize(const LLCoordScreen size)
 {
-	LLCoordScreen position;
-
-	getPosition(&position);
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
 	if (!mWindowHandle)
-	{
 		return FALSE;
-	}
 
-	moveWindow(position, size);
-	return TRUE;
+	if (getFullscreenWindow())
+	{
+		mRestoredPlacement.showCmd = SW_RESTORE;
+		mRestoredPlacement.rcNormalPosition.right = mRestoredPlacement.rcNormalPosition.left + size.mX;
+		mRestoredPlacement.rcNormalPosition.bottom = mRestoredPlacement.rcNormalPosition.top + size.mY;
+		setFullscreenWindow(FALSE);
+		return TRUE;
+	}
+	else if (getMaximized())
+	{
+		WINDOWPLACEMENT wp;
+		wp.length = sizeof(WINDOWPLACEMENT);
+		if (!GetWindowPlacement(mWindowHandle, &wp))
+			return FALSE;
+
+		wp.showCmd = SW_RESTORE;
+		wp.rcNormalPosition.right = wp.rcNormalPosition.left + size.mX;
+		wp.rcNormalPosition.bottom = wp.rcNormalPosition.top + size.mY;
+
+		return SetWindowPlacement(mWindowHandle, &wp);
+	}
+	else
+	{
+// [/SL:KB]
+		LLCoordScreen position;
+
+		getPosition(&position);
+		if (!mWindowHandle)
+		{
+			return FALSE;
+		}
+
+		moveWindow(position, size);
+		return TRUE;
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-09-30 (Catznip-2.5.0a) | Added: Catznip-2.2.0a
+	}
+// [/SL:KB]
 }
 
 // changing fullscreen resolution
