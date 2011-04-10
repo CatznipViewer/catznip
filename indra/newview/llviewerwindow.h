@@ -365,7 +365,7 @@ public:
 	// Prints window implementation details
 	void			dumpState();
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.5.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
 	bool			canFullscreenWindow();
 	bool			getFullscreenWindow();
 	void			setFullscreenWindow(BOOL fFullscreen);

@@ -2002,7 +2002,7 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 
 		// store new settings for the mode we are in, regardless
 		// Only save size if not maximized
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-88-26 (Catznip-2.5.0a) | Modified: Catznip-2.1.1a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-88-26 (Catznip-2.6.0a) | Modified: Catznip-2.1.1a
 #ifndef LL_WINDOWS
 		if (!gViewerWindow->getFullscreenWindow())
 #endif // LL_WINDOWS
@@ -2012,7 +2012,7 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 			gSavedSettings.setBOOL("WindowMaximized", maximized);
 
 			LLCoordScreen window_size;
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
 #ifndef LL_WINDOWS
 			if (!maximized
 				&& mWindow->getSize(&window_size))
@@ -2024,7 +2024,7 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 				gSavedSettings.setS32("WindowWidth", window_size.mX);
 				gSavedSettings.setS32("WindowHeight", window_size.mY);
 			}
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.5.0a) | Modified: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.6.0a) | Modified: Catznip-2.1.2a
 		}
 // [/SL:KB]
 
@@ -4552,7 +4552,7 @@ void LLViewerWindow::initFonts(F32 zoom_factor)
 	LLFontGL::loadDefaultFonts();
 }
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.5.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
 bool LLViewerWindow::canFullscreenWindow()
 {
 #ifdef LL_WINDOWS
