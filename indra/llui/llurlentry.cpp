@@ -372,7 +372,7 @@ void LLUrlEntryAgent::onAvatarNameCache(const LLUUID& id,
 										const LLAvatarName& av_name)
 {
 //	std::string label = av_name.getCompleteName();
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	std::string label = getLabelFromAvatarName(av_name);
 // [/SL:KB]
 
@@ -419,7 +419,7 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 //		return LLTrans::getString("TooltipAgentRequestFriend");
 //	}
 //	return LLTrans::getString("TooltipAgentUrl");
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
 		strTooltip = LLTrans::getString("TooltipAgentInspect");
@@ -481,7 +481,7 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 	if (LLAvatarNameCache::get(agent_id, &av_name))
 	{
 //		std::string label = av_name.getCompleteName();
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 		std::string label = getLabelFromAvatarName(av_name);
 // [/SL:KB]
 
@@ -499,7 +499,7 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 	}
 }
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 LLUrlEntryAgent::EShowUsername LLUrlEntryAgent::s_eShowUsername = LLUrlEntryAgent::SHOW_ALWAYS;
 
 std::string LLUrlEntryAgent::getLabelFromAvatarName(const LLAvatarName& avName)

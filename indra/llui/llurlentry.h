@@ -181,7 +181,7 @@ protected:
 	/*virtual*/ void callObservers(const std::string &id, const std::string &label, const std::string& icon);
 private:
 	void onAvatarNameCache(const LLUUID& id, const LLAvatarName& av_name);
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	// HACK-Catznip: we don't have access to gSavedSettings here and I can't really think of a better way to configure these options
 public:
 	typedef enum e_show_username_type

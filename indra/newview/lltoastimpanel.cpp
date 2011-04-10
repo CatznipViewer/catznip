@@ -28,7 +28,7 @@
 #include "lltoastimpanel.h"
 
 #include "llagent.h"
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2010-11-13 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2010-11-13 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 #include "llavatarnamecache.h"
 // [/SL:KB]
 #include "llfloaterreg.h"
@@ -74,7 +74,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 		
 		style_params.font.style ="ITALIC";
 //		mMessage->appendText(p.from, FALSE, style_params);
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2010-11-13 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2010-11-13 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		// NOTE: on_avatar_name_cache_toast() sets "FROM" to "LLAvatarName::getCompleteName()"
 		//  -> we don't need to show the username in the header *and* the emote so just leave it out of the emote to make it look prettier
 		LLAvatarName avName;
