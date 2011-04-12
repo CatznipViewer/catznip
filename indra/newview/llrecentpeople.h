@@ -37,7 +37,7 @@
 
 class LLDate;
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
 class LLRecentPeoplePersistentItem
 {
 	friend class LLRecentPeople;
@@ -70,7 +70,7 @@ class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LL
 {
 	LOG_CLASS(LLRecentPeople);
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	friend class LLSingleton<LLRecentPeople>;
 protected:
 	LLRecentPeople();
@@ -78,7 +78,7 @@ protected:
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
 	
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	void dump() const;
 	void load();
 	void save() const;
@@ -151,7 +151,7 @@ private:
 
 	const LLUUID& getIDByPhoneNumber(const LLSD& userdata);
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	std::string			mPersistentFilename;
 	typedef std::map<LLUUID, LLRecentPeoplePersistentItem> recent_people_t;
 	recent_people_t		mPeople;

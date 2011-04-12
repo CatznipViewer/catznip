@@ -26,7 +26,7 @@
 
 #include "llviewerprecompiledheaders.h"
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 #include "llsd.h"
 #include "llsdserialize.h"
 // [/SL:KB]
@@ -38,7 +38,7 @@
 
 using namespace LLOldEvents;
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
 {
 	m_idAgent = sdItem["agent_id"].asUUID();
@@ -56,7 +56,7 @@ LLSD LLRecentPeoplePersistentItem::toLLSD() const
 }
 // [/SL:KB]
 
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 LLRecentPeople::LLRecentPeople()
 	: mPersistentFilename("recent_people.txt")
 {
@@ -84,7 +84,7 @@ void LLRecentPeople::load()
 		std::istringstream iss(strLine);
 		if (sdParser->parse(iss, sdItem, strLine.length()) == LLSDParser::PARSE_FAILURE)
 		{
-			llinfos << "Parsing saved teleport history failed" << llendl;
+			llinfos << "Parsing recent people failed" << llendl;
 			break;
 		}
 
@@ -140,7 +140,7 @@ bool LLRecentPeople::add(const LLUUID& id, const LLSD& userdata)
 
 //		//[] instead of insert to replace existing id->llsd["date"] with new date value
 //		mPeople[id] = userdata;
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 		// Update the timestamp and userdata if the person already exists, otherwise insert a new item
 		recent_people_t::iterator itItem = mPeople.find(id);
 		if (mPeople.end() != itItem)
@@ -178,7 +178,7 @@ const LLDate LLRecentPeople::getDate(const LLUUID& id) const
 {
 	recent_people_t::const_iterator it = mPeople.find(id);
 //	if (it!= mPeople.end()) return it->second["date"].asDate();
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	if (it!= mPeople.end()) return it->second.m_Date;
 // [/SL:KB]
 
@@ -192,7 +192,7 @@ const LLSD& LLRecentPeople::getData(const LLUUID& id) const
 
 //	if (it != mPeople.end())
 //		return it->second;
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
 	if (it != mPeople.end()) 
 		return it->second.m_sdUserdata;
 // [/SL:KB]
@@ -212,7 +212,7 @@ bool LLRecentPeople::isAvalineCaller(const LLUUID& id) const
 //	}
 //
 //	return false;
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
 	const LLSD& sdData = getData(id);
 	return (sdData.has("avaline_call")) && (sdData["avaline_call"].asBoolean());
 // [/SL:KB]
@@ -226,7 +226,7 @@ const LLUUID& LLRecentPeople::getIDByPhoneNumber(const LLSD& userdata)
 	for (recent_people_t::const_iterator it = mPeople.begin(); it != mPeople.end(); ++it)
 	{
 //		const LLSD& user_info = it->second;
-// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
 		const LLSD& user_info = it->second.m_sdUserdata;
 // [/SL:KB]
 		
