@@ -50,7 +50,7 @@
 #include "llnotificationsutil.h"
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
-// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 #include "llviewerobjectlist.h"
 // [/SL:KB]
 #include "llviewerregion.h"
@@ -90,7 +90,7 @@ public:
 			return false;
 		}
 
-// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		// If the viewer knows about the object (optionally) show the object inspector, otherwise show the remote object inspector
 		if ( (gSavedSettings.getBOOL("InspectNearbyRemoteObject")) && (gObjectList.findObject(object_id)) )
 		{
@@ -106,7 +106,7 @@ public:
 			payload["slurl"] = LLWeb::escapeURL(query_map["slurl"]);
 			payload["group_owned"] = query_map["groupowned"];
 			LLFloaterReg::showInstance("inspect_remote_object", payload);
-// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		}
 // [/SL:KB]
 		return true;

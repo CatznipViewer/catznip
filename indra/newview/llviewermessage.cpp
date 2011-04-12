@@ -2705,7 +2705,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			}	
 
 //			chat.mURL = LLSLURL("objectim", session_id, "").getSLURLString();
-// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-02 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-02 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 			chat.mURL = LLSLURL("objectim", session_id, LLURI::mapToQueryString(query_string)).getSLURLString();
 // [/SL:KB]
 			chat.mText = message;

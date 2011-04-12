@@ -29,7 +29,7 @@
 #include "llnotifications.h"
 #include "llnotificationtemplate.h"
 #include "llnotificationvisibilityrule.h"
-// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 #include "llnotificationsutil.h"
 // [/SL:KB]
 
@@ -1536,7 +1536,7 @@ bool LLNotifications::loadVisibilityRules()
 void LLNotifications::addFromCallback(const LLSD& name)
 {
 //	add(LLNotification::Params().name(name.asString()));	
-// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: Settings-Misc | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	LLNotificationsUtil::add(name.asString());
 // [/SL:KB]
 }

@@ -1275,7 +1275,7 @@ bool idle_startup()
 //			gMessageSystem->setTimeDecodes( TRUE );				// Time the decode of each msg
 //			gMessageSystem->setTimeDecodesSpamThreshold( 0.05f );  // Spam if a single msg takes over 50ms to decode
 //		#endif
-// [SL:KB] - Patch: Settings-DebugTimeMessageDecoding | Checked: 2010-09-06 (Catznip-2.2.0a) | Added: Catznip-2.1.2b
+// [SL:KB] - Patch: Settings-DebugTimeMessageDecoding | Checked: 2010-09-06 (Catznip-2.6.0a) | Added: Catznip-2.1.2b
 		if (gSavedSettings.getBOOL("DebugTimeMessageDecoding"))
 		{
 			gMessageSystem->setTimeDecodes( TRUE );				// Time the decode of each msg
