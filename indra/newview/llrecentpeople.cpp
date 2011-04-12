@@ -65,6 +65,7 @@ LLRecentPeople::LLRecentPeople()
 
 void LLRecentPeople::load()
 {
+#ifndef LL_RELEASE_FOR_DOWNLOAD
 	llifstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
 	if (!fileRecentPeople.is_open())
 	{
@@ -94,10 +95,12 @@ void LLRecentPeople::load()
 	fileRecentPeople.close();
 
 	mChangedSignal();
+#endif // LL_RELEASE_FOR_DOWNLOAD
 }
 
 void LLRecentPeople::save() const
 {
+#ifndef LL_RELEASE_FOR_DOWNLOAD
 	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
 	if (!fileRecentPeople.is_open())
 	{
@@ -108,6 +111,7 @@ void LLRecentPeople::save() const
 	for (recent_people_t::const_iterator itItem = mPeople.begin(); itItem != mPeople.end(); ++itItem)
 		fileRecentPeople << LLSDOStreamer<LLSDNotationFormatter>(itItem->second.toLLSD()) << std::endl;
 	fileRecentPeople.close();
+#endif // LL_RELEASE_FOR_DOWNLOAD
 }
 
 void LLRecentPeople::purgeItems()
