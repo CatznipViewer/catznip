@@ -1535,16 +1535,16 @@ bool LLUIImageList::initFromFile()
 		parser.readXUI(update_root, images, skin_update_path);
 	}
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-13 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
 	// add components defined in current theme
 	std::string theme_update_path = gDirUtilp->getSkinThemeDir() 
 									+ "textures"
 									+ gDirUtilp->getDirDelimiter()
 									+ "textures.xml";
 	if (theme_update_path != base_file_path
-		&& LLXMLNode::parseFile(skin_update_path, update_root, NULL))
+		&& LLXMLNode::parseFile(theme_update_path, update_root, NULL))
 	{
-		parser.readXUI(update_root, images, skin_update_path);
+		parser.readXUI(update_root, images, theme_update_path);
 	}
 // [/SL:KB]
 
