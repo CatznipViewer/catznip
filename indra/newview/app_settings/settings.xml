@@ -1487,6 +1487,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ClearCacheMask</key>
+    <map>
+      <key>Comment</key>
+      <string>Determines which history settings get purged and which preserved (bitmask - do not set manually)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>4294967295</integer>
+    </map>
     <key>ClientSettingsFile</key>
     <map>
       <key>Comment</key>

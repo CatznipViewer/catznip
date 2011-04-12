@@ -1,0 +1,5 @@
+[Settings/ClearCache]
+- added   : "ClearCacheMask" setting to optionally prevent purging certain history settings when the viewer/browser cache is purged
+- added   : the value of the control variables in LLFloaterPreference::mSavedValues will get restored when the preferences floater is cancel'ed
+- changed : moved the "Show my Favorite Landmarks at Login" checkbox to the "General" preferences tab
+- added   : "Clear Cache" button to the "Setup" preferences tab to clear only the viewer cache

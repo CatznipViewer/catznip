@@ -26,12 +26,96 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+#include "llsd.h"
+#include "llsdserialize.h"
+// [/SL:KB]
+
 #include "llrecentpeople.h"
 #include "llgroupmgr.h"
 
 #include "llagent.h"
 
 using namespace LLOldEvents;
+
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
+{
+	m_idAgent = sdItem["agent_id"].asUUID();
+	m_Date = sdItem["date"].asDate();
+	m_sdUserdata = sdItem["userdata"];
+}
+
+LLSD LLRecentPeoplePersistentItem::toLLSD() const
+{
+	LLSD sdItem;
+	sdItem["agent_id"] = m_idAgent;
+	sdItem["date"] = m_Date;
+	sdItem["userdata"] = m_sdUserdata;
+	return sdItem;
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+LLRecentPeople::LLRecentPeople()
+	: mPersistentFilename("recent_people.txt")
+{
+	load();
+}
+
+void LLRecentPeople::load()
+{
+	llifstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
+	if (!fileRecentPeople.is_open())
+	{
+		llwarns << "Can't open recent people persistent file \"" << mPersistentFilename << "\" for reading" << llendl;
+		return;
+	}
+
+	mPeople.clear();
+
+	// The parser's destructor is protected so we cannot create in the stack.
+	LLPointer<LLSDParser> sdParser = new LLSDNotationParser();
+
+	std::string strLine; LLSD sdItem;
+	while (std::getline(fileRecentPeople, strLine))
+	{
+		std::istringstream iss(strLine);
+		if (sdParser->parse(iss, sdItem, strLine.length()) == LLSDParser::PARSE_FAILURE)
+		{
+			llinfos << "Parsing saved teleport history failed" << llendl;
+			break;
+		}
+
+		LLRecentPeoplePersistentItem persistentItem(sdItem);
+		mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.m_idAgent, persistentItem));
+	}
+
+	fileRecentPeople.close();
+
+	mChangedSignal();
+}
+
+void LLRecentPeople::save() const
+{
+	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
+	if (!fileRecentPeople.is_open())
+	{
+		llwarns << "Can't open people history file \"" << mPersistentFilename << "\" for writing" << llendl;
+		return;
+	}
+
+	for (recent_people_t::const_iterator itItem = mPeople.begin(); itItem != mPeople.end(); ++itItem)
+		fileRecentPeople << LLSDOStreamer<LLSDNotationFormatter>(itItem->second.toLLSD()) << std::endl;
+	fileRecentPeople.close();
+}
+
+void LLRecentPeople::purgeItems()
+{
+	mPeople.clear();
+	mChangedSignal();
+}
+// [/SL:KB]
 
 bool LLRecentPeople::add(const LLUUID& id, const LLSD& userdata)
 {
@@ -50,8 +134,24 @@ bool LLRecentPeople::add(const LLUUID& id, const LLSD& userdata)
 		if (caller_id.notNull())
 			mPeople.erase(caller_id);
 
-		//[] instead of insert to replace existing id->llsd["date"] with new date value
-		mPeople[id] = userdata;
+//		//[] instead of insert to replace existing id->llsd["date"] with new date value
+//		mPeople[id] = userdata;
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+		// Update the timestamp and userdata if the person already exists, otherwise insert a new item
+		recent_people_t::iterator itItem = mPeople.find(id);
+		if (mPeople.end() != itItem)
+		{
+			itItem->second.m_Date = LLDate::now();
+			itItem->second.m_sdUserdata = userdata;
+		}
+		else
+		{
+			mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(id, LLRecentPeoplePersistentItem(id)));
+		}
+
+		save();
+// [/SL:KB]
+
 		mChangedSignal();
 	}
 
@@ -73,7 +173,10 @@ void LLRecentPeople::get(uuid_vec_t& result) const
 const LLDate LLRecentPeople::getDate(const LLUUID& id) const
 {
 	recent_people_t::const_iterator it = mPeople.find(id);
-	if (it!= mPeople.end()) return it->second["date"].asDate();
+//	if (it!= mPeople.end()) return it->second["date"].asDate();
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+	if (it!= mPeople.end()) return it->second.m_Date;
+// [/SL:KB]
 
 	static LLDate no_date = LLDate();
 	return no_date;
@@ -83,8 +186,12 @@ const LLSD& LLRecentPeople::getData(const LLUUID& id) const
 {
 	recent_people_t::const_iterator it = mPeople.find(id);
 
-	if (it != mPeople.end())
-		return it->second;
+//	if (it != mPeople.end())
+//		return it->second;
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	if (it != mPeople.end()) 
+		return it->second.m_sdUserdata;
+// [/SL:KB]
 
 	static LLSD no_data = LLSD();
 	return no_data;
@@ -92,15 +199,19 @@ const LLSD& LLRecentPeople::getData(const LLUUID& id) const
 
 bool LLRecentPeople::isAvalineCaller(const LLUUID& id) const
 {
-	recent_people_t::const_iterator it = mPeople.find(id);
-
-	if (it != mPeople.end())
-	{
-		const LLSD& user = it->second;		
-		return user["avaline_call"].asBoolean();
-	}
-
-	return false;
+//	recent_people_t::const_iterator it = mPeople.find(id);
+//
+//	if (it != mPeople.end())
+//	{
+//		const LLSD& user = it->second;		
+//		return user["avaline_call"].asBoolean();
+//	}
+//
+//	return false;
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	const LLSD& sdData = getData(id);
+	return (sdData.has("avaline_call")) && (sdData["avaline_call"].asBoolean());
+// [/SL:KB]
 }
 
 const LLUUID& LLRecentPeople::getIDByPhoneNumber(const LLSD& userdata)
@@ -110,7 +221,10 @@ const LLUUID& LLRecentPeople::getIDByPhoneNumber(const LLSD& userdata)
 
 	for (recent_people_t::const_iterator it = mPeople.begin(); it != mPeople.end(); ++it)
 	{
-		const LLSD& user_info = it->second;
+//		const LLSD& user_info = it->second;
+// [SL:KB] - Patch: Sidepanel-RecentPeopleStorage | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+		const LLSD& user_info = it->second.m_sdUserdata;
+// [/SL:KB]
 		
 		if (user_info["call_number"].asString() == userdata["call_number"].asString())
 			return it->first;
