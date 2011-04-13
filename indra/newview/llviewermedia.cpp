@@ -531,7 +531,7 @@ std::string LLViewerMedia::getCurrentUserAgent()
 	// Don't use user-visible string to avoid 
 	// punctuation and strange characters.
 	std::string skin_name = gSavedSettings.getString("SkinCurrent");
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	std::string theme_name = gSavedSettings.getString("SkinCurrentTheme");
 // [/SL:KB]
 
@@ -549,7 +549,7 @@ std::string LLViewerMedia::getCurrentUserAgent()
 	codec << "SecondLife/";
 	codec << LLVersionInfo::getVersion();
 //	codec << " (" << channel << "; " << skin_name << " skin)";
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	codec << " (" << channel << "; " << skin_name << " skin" << "; " << theme_name << " theme)";
 // [/SL:KB]
 	llinfos << codec.str() << llendl;

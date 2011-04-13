@@ -292,7 +292,7 @@ const std::string &LLDir::getSkinDir() const
 	return mSkinDir;
 }
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.5.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.6.0a) | Added: Catznip-2.2.0c
 const std::string& LLDir::getSkinThemeDir() const
 {
 	return mSkinThemeDir;
@@ -395,7 +395,7 @@ std::string LLDir::getExpandedFilename(ELLPath location, const std::string& subd
 		prefix = getSkinDir();
 		break;
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
 	case LL_PATH_TOP_SKINTHEME:
 		prefix = getSkinThemeDir();
 		break;
@@ -532,8 +532,8 @@ std::string LLDir::findSkinnedFilename(const std::string &subdir1, const std::st
 	std::vector<std::string> search_paths;
 	
 	search_paths.push_back(getUserSkinDir() + subdirs);		// first look in user skin override
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.5.0a) | Added: Catznip-2.2.0c
-	search_paths.push_back(getSkinThemeDir() + subdirs);		// then in the skin theme
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.6.0a) | Added: Catznip-2.2.0c
+	search_paths.push_back(getSkinThemeDir() + subdirs);	// then in the skin theme
 // [/SL:KB]
 	search_paths.push_back(getSkinDir() + subdirs);			// then in current skin
 	search_paths.push_back(getDefaultSkinDir() + subdirs);  // then default skin
@@ -643,7 +643,7 @@ void LLDir::setSkinFolder(const std::string &skin_folder)
 	mSkinDir += mDirDelimiter;
 	mSkinDir += skin_folder;
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.5.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.6.0a) | Added: Catznip-2.2.0c
 	setSkinThemeFolder("default");
 // [/SL:KB]
 
@@ -662,7 +662,7 @@ void LLDir::setSkinFolder(const std::string &skin_folder)
 	mDefaultSkinDir += "default";
 }
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.5.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.6.0a) | Added: Catznip-2.2.0c
 void LLDir::setSkinThemeFolder(const std::string& theme_folder)
 {
 	mSkinThemeDir = mSkinDir;
@@ -715,7 +715,7 @@ void LLDir::dumpCurrentDirectories()
 	LL_DEBUGS2("AppInit","Directories") << "  CAFile:				 " << getCAFile() << LL_ENDL;
 	LL_DEBUGS2("AppInit","Directories") << "  SkinBaseDir:           " << getSkinBaseDir() << LL_ENDL;
 	LL_DEBUGS2("AppInit","Directories") << "  SkinDir:               " << getSkinDir() << LL_ENDL;
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	LL_DEBUGS2("AppInit","Directories") << "  SkinThemeDir:          " << getSkinThemeDir() << LL_ENDL;
 // [/SL:KB]
 }

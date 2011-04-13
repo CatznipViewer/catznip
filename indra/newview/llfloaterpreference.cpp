@@ -81,7 +81,7 @@
 #include "llerror.h"
 #include "llfontgl.h"
 #include "llrect.h"
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.6.0c) | Added: Catznip-2.2.0c
 #include "llsdserialize.h"
 // [/SL:KB]
 #include "llstring.h"
@@ -491,13 +491,13 @@ void LLFloaterPreference::apply()
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
 	
 	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-/*
-	if (sSkin != gSavedSettings.getString("SkinCurrent"))
-	{
-		LLNotificationsUtil::add("ChangeSkin");
-		refreshSkin(this);
-	}
-*/
+
+//	if (sSkin != gSavedSettings.getString("SkinCurrent"))
+//	{
+//		LLNotificationsUtil::add("ChangeSkin");
+//		refreshSkin(this);
+//	}
+
 	// Call apply() on all panels that derive from LLPanelPreference
 	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
 		 iter != tabcontainer->getChildList()->end(); ++iter)
@@ -915,26 +915,24 @@ void LLFloaterPreference::onClickResetCache()
 	gSavedSettings.setString("CacheLocationTopFolder", top_folder);
 }
 
-/*
-void LLFloaterPreference::onClickSkin(LLUICtrl* ctrl, const LLSD& userdata)
-{
-	gSavedSettings.setString("SkinCurrent", userdata.asString());
-	ctrl->setValue(userdata.asString());
-}
-
-void LLFloaterPreference::onSelectSkin()
-{
-	std::string skin_selection = getChild<LLRadioGroup>("skin_selection")->getValue().asString();
-	gSavedSettings.setString("SkinCurrent", skin_selection);
-}
-
-void LLFloaterPreference::refreshSkin(void* data)
-{
-	LLPanel*self = (LLPanel*)data;
-	sSkin = gSavedSettings.getString("SkinCurrent");
-	self->getChild<LLRadioGroup>("skin_selection", true)->setValue(sSkin);
-}
-*/
+//void LLFloaterPreference::onClickSkin(LLUICtrl* ctrl, const LLSD& userdata)
+//{
+//	gSavedSettings.setString("SkinCurrent", userdata.asString());
+//	ctrl->setValue(userdata.asString());
+//}
+//
+//void LLFloaterPreference::onSelectSkin()
+//{
+//	std::string skin_selection = getChild<LLRadioGroup>("skin_selection")->getValue().asString();
+//	gSavedSettings.setString("SkinCurrent", skin_selection);
+//}
+//
+//void LLFloaterPreference::refreshSkin(void* data)
+//{
+//	LLPanel*self = (LLPanel*)data;
+//	sSkin = gSavedSettings.getString("SkinCurrent");
+//	self->getChild<LLRadioGroup>("skin_selection", true)->setValue(sSkin);
+//}
 
 void LLFloaterPreference::buildPopupLists()
 {
@@ -1587,20 +1585,18 @@ BOOL LLPanelPreference::postBuild()
 	
 	//////////////////////PanelSkins ///////////////////
 	
-/*
-	if (hasChild("skin_selection"))
-	{
-		LLFloaterPreference::refreshSkin(this);
-
-		// if skin is set to a skin that no longer exists (silver) set back to default
-		if (getChild<LLRadioGroup>("skin_selection")->getSelectedIndex() < 0)
-		{
-			gSavedSettings.setString("SkinCurrent", "default");
-			LLFloaterPreference::refreshSkin(this);
-		}
-
-	}
-*/
+//	if (hasChild("skin_selection"))
+//	{
+//		LLFloaterPreference::refreshSkin(this);
+//
+//		// if skin is set to a skin that no longer exists (silver) set back to default
+//		if (getChild<LLRadioGroup>("skin_selection")->getSelectedIndex() < 0)
+//		{
+//			gSavedSettings.setString("SkinCurrent", "default");
+//			LLFloaterPreference::refreshSkin(this);
+//		}
+//
+//	}
 
 	if(hasChild("online_visibility") && hasChild("send_im_to_email"))
 	{
@@ -1838,7 +1834,7 @@ void LLPanelPreferenceGraphics::setHardwareDefaults()
 	LLPanelPreference::setHardwareDefaults();
 }
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.6.0c) | Added: Catznip-2.2.0c
 static LLRegisterPanelClassWrapper<LLPanelPreferenceSkins> t_pref_skins("panel_preference_skins");
 
 LLPanelPreferenceSkins::LLPanelPreferenceSkins() : LLPanelPreference(), m_pSkinCombo(NULL), m_pSkinThemeCombo(NULL)

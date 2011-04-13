@@ -2397,7 +2397,7 @@ bool LLAppViewer::initConfiguration()
 		loadSettingsFromDirectory("CurrentSkin");
 
 		const LLControlVariable* themefolder = gSavedSettings.getControl("SkinCurrentTheme");
-		if ( (themefolder) && (LLStringUtil::null != skinfolder->getValue().asString()) )
+		if ( (themefolder) && (LLStringUtil::null != themefolder->getValue().asString()) )
 		{
 			gDirUtilp->setSkinThemeFolder(themefolder->getValue().asString());
 			loadSettingsFromDirectory("CurrentSkinTheme");
