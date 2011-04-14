@@ -681,7 +681,10 @@ bool LLAppViewer::init()
 
 	// Need to do this initialization before we do anything else, since anything
 	// that touches files should really go through the lldir API
-	gDirUtilp->initAppDirs("SecondLife");
+//	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
 	// set skin search path to default, will be overridden later
 	// this allows simple skinned file lookups to work
 	gDirUtilp->setSkinFolder("default");
@@ -2167,6 +2170,12 @@ bool LLAppViewer::initConfiguration()
 	
 	// - selectively apply settings 
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	// We used to dump our settings into the regular "SecondLife" folder, but since we're using our own folder now we need to try and
+	// provide a seamless transition for a few releases
+	bool fLegacySettings = false; const std::string strClientSettingsFile = gSavedSettings.getString("ClientSettingsFile");
+// [/SL:KB]
+
 	// If the user has specified a alternate settings file name.
 	// Load	it now before loading the user_settings/settings.xml
 	if(clp.hasOption("settings"))
@@ -2178,9 +2187,36 @@ bool LLAppViewer::initConfiguration()
 		llinfos	<< "Using command line specified settings filename: " 
 			<< user_settings_filename << llendl;
 	}
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	else if (!gDirUtilp->fileExists(strClientSettingsFile))
+	{
+		// There's no user_settings override in our folder, but there might be one in Second Life's from a previous release
+		std::string strLegacySettingsPath = gDirUtilp->getOSUserDir();
+		strLegacySettingsPath += gDirUtilp->getDirDelimiter();
+		strLegacySettingsPath += "SecondLife";
+		strLegacySettingsPath += gDirUtilp->getDirDelimiter();
+		strLegacySettingsPath += "user_settings";
+		strLegacySettingsPath += gDirUtilp->getDirDelimiter();
+		strLegacySettingsPath += "settings_catznip2.xml";
+
+		if (gDirUtilp->fileExists(strLegacySettingsPath))
+		{
+			fLegacySettings = true;
+			gSavedSettings.setString("ClientSettingsFile", strLegacySettingsPath);
+		}
+	}
+// [/SL:KB]
 
 	// - load overrides from user_settings 
 	loadSettingsFromDirectory("User");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	if (fLegacySettings)
+	{
+		// We loaded the override from our left-over file so save the settings to their new, proper place
+		gSavedSettings.setString("ClientSettingsFile", strClientSettingsFile);
+		gSavedSettings.saveToFile(gSavedSettings.getString("ClientSettingsFile"), TRUE);
+	}
+// [/SL:KB]
 
 	if (gSavedSettings.getBOOL("FirstRunThisInstall"))
 	{
@@ -3145,7 +3181,7 @@ void LLAppViewer::handleViewerCrash()
 
 	if (gMessageSystem)
 	{
-		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
+//		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
 		gMessageSystem->stopLogging();
 	}
 
