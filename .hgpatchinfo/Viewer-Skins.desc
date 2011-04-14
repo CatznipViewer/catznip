@@ -7,3 +7,4 @@
 - added   : minimal functionality "Skins" preference tab for easy skin switching
 - changed : include the theme name in the user agent used by the internal browser
 - changed : don't switch to the "Minimal" skin on the first run after a new install
+- fixed   : the "Minimal" skin is over-reported in the viewer statistics
