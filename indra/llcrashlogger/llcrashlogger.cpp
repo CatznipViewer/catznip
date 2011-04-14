@@ -222,7 +222,7 @@ void LLCrashLogger::gatherFiles()
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
 	else
 	{
-		mCrashHost = "http://catznip.com/viewer/crash/report/2.6.0a/index.php";
+		mCrashHost = "http://catznip.com/viewer/crash/report/2.6/";
 	}
 // [/SL:KB]
 /*
