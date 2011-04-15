@@ -2731,31 +2731,29 @@ BOOL LLFolderBridge::dragOrDrop(MASK mask, BOOL drop,
 		case DAD_BODYPART:
 		case DAD_ANIMATION:
 		case DAD_GESTURE:
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		// Moving a folder link to a different folder should move the *link* and not the target folder
 		case DAD_LINK:
 // [/SL:KB]
 			accept = dragItemIntoFolder(inv_item, drop);
 			break;
-/*
-		case DAD_LINK:
-			// DAD_LINK type might mean one of two asset types: AT_LINK or AT_LINK_FOLDER.
-			// If we have an item of AT_LINK_FOLDER type we should process the linked
-			// category being dragged or dropped into folder.
-			if (inv_item && LLAssetType::AT_LINK_FOLDER == inv_item->getActualType())
-			{
-				LLInventoryCategory* linked_category = gInventory.getCategory(inv_item->getLinkedUUID());
-				if (linked_category)
-				{
-					accept = dragCategoryIntoFolder((LLInventoryCategory*)linked_category, drop);
-				}
-			}
-			else
-			{
-				accept = dragItemIntoFolder(inv_item, drop);
-			}
-			break;
-*/
+//		case DAD_LINK:
+//			// DAD_LINK type might mean one of two asset types: AT_LINK or AT_LINK_FOLDER.
+//			// If we have an item of AT_LINK_FOLDER type we should process the linked
+//			// category being dragged or dropped into folder.
+//			if (inv_item && LLAssetType::AT_LINK_FOLDER == inv_item->getActualType())
+//			{
+//				LLInventoryCategory* linked_category = gInventory.getCategory(inv_item->getLinkedUUID());
+//				if (linked_category)
+//				{
+//					accept = dragCategoryIntoFolder((LLInventoryCategory*)linked_category, drop);
+//				}
+//			}
+//			else
+//			{
+//				accept = dragItemIntoFolder(inv_item, drop);
+//			}
+//			break;
 		case DAD_CATEGORY:
 			if (LLFriendCardsManager::instance().isAnyFriendCategory(mUUID))
 			{
@@ -2999,7 +2997,7 @@ void LLFolderBridge::dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_c
 		LLAppearanceMgr::instance().wearItemOnAvatar(inv_item->getUUID(), true, true);
 	}
 //	else
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	// Don't create a link when dropping one of our direct descendents
 	else if (inv_item->getParentUUID() != mUUID)
 // [/SL:KB]
@@ -3096,14 +3094,14 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 		if (move_is_into_current_outfit || move_is_into_outfit)
 		{
 //			accept = can_move_to_outfit(inv_item, move_is_into_current_outfit);
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 			accept &= can_move_to_outfit(inv_item, move_is_into_current_outfit);
 // [/SL:KB]
 		}
 		else if (move_is_into_favorites || move_is_into_landmarks)
 		{
 //			accept = can_move_to_landmarks(inv_item);
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 			accept &= can_move_to_landmarks(inv_item);
 // [/SL:KB]
 		}
