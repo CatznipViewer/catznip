@@ -4009,6 +4009,28 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>IMShowTabImage</key>
+    <map>
+      <key>Comment</key>
+      <string>Show avatar/group image on the IM tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>IMUseVerticalTabs</key>
+    <map>
+      <key>Comment</key>
+      <string>Use vertical tabs for IMs</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>IgnoreAllNotifications</key>
     <map>
       <key>Comment</key>

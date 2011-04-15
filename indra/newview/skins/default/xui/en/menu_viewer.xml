@@ -1592,6 +1592,17 @@
              function="Floater.Toggle"
              parameter="search" />
             </menu_item_check>
+            <menu_item_check
+             label="Conversations"
+             name="Conversations"
+             shortcut="control|T">
+              <menu_item_check.on_check
+               function="Floater.Visible"
+               parameter="im_container" />
+              <menu_item_check.on_click
+               function="Floater.Toggle"
+               parameter="im_container" />
+            </menu_item_check>
             <menu_item_call
              enabled="false"
              label="Release Keys"
