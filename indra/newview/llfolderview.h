@@ -362,5 +362,18 @@ bool sort_item_date(LLFolderViewItem* a, LLFolderViewItem* b);
 // Flags for buildContextMenu()
 const U32 SUPPRESS_OPEN_ITEM = 0x1;
 const U32 FIRST_SELECTED_ITEM = 0x2;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+const U32 MULTIPLE_SELECTED_ITEMS = 0x4;		// Selection contains more than one item
+
+const U32 BODYPART_SELECTION = 0x10;			// Selection contains AT_BODYPART items (at least one)
+const U32 CLOTHING_SELECTION = 0x20;			// Selection contains AT_CLOTHING items (at least one)
+const U32 ATTACHMENT_SELECTION = 0x40;			// Selection contains AT_OBJECT items (at least one)
+const U32 NONWEARABLE_SELECTION = 0x80;			// Selection contains non-wearable items (at least one)
+const U32 WEARABLE_SELECTION_MASK = 0x70;		// "Selection has at least one wearable item"
+
+const U32 WORN_SELECTION = 0x100;				// All wearable items in the selection are worn
+const U32 PARTIAL_WORN_SELECTION = 0x200;		// Some wearable items in the selection are worn
+const U32 WORN_SELECTION_MASK = 0x300;			// "Selection has at least one worn item"
+// [/SL:KB]
 
 #endif // LL_LLFOLDERVIEW_H
