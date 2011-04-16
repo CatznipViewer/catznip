@@ -4338,7 +4338,10 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 				}
 // [/SL:KB]
 
-				if (!gAgentAvatarp->canAttachMoreObjects())
+//				if (!gAgentAvatarp->canAttachMoreObjects())
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+				if ( (!gAgentAvatarp->canAttachMoreObjects()) && (0 == (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))) )
+// [/SL:KB]
 				{
 					disabled_items.push_back(std::string("Wearable And Object Wear"));
 					disabled_items.push_back(std::string("Wearable Add"));
