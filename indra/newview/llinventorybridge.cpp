@@ -4139,7 +4139,7 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-2.5.0a) | Modified: Catznip-2.0.1a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-2.6.0a) | Modified: Catznip-2.0.1a
 class WearAttachmentsCallback : public LLInventoryCallback
 {
 public:
