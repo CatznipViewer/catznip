@@ -2767,7 +2767,7 @@ BOOL LLAppearanceMgr::getIsProtectedCOFItem(const LLUUID& obj_id) const
 	*/
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.5.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.6.0a) | Modified: Catznip-2.2.0a
 LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 {
 	if (!LLApp::isExiting())

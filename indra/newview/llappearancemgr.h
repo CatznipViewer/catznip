@@ -243,7 +243,7 @@ private:
 	bool mUpdateBaseOrder;
 };
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.5.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.6.0a) | Modified: Catznip-2.2.0a
 class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
 {
 public:
