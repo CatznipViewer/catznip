@@ -4139,6 +4139,119 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-2.5.0a) | Modified: Catznip-2.0.1a
+class WearAttachmentsCallback : public LLInventoryCallback
+{
+public:
+	WearAttachmentsCallback(bool fReplace) : mReplace(fReplace) {}
+	void fire(const LLUUID& idItem)
+	{
+		mItemIds.push_back(idItem);
+	}
+protected:
+	~WearAttachmentsCallback()
+	{
+		if( LLInventoryCallbackManager::is_instantiated() )
+		{
+			for (std::list<LLUUID>::const_iterator itItemId = mItemIds.begin(); itItemId != mItemIds.end(); ++itItemId)
+			{
+				const LLViewerInventoryItem* pItem = gInventory.getItem(*itItemId);
+				if (pItem)
+				{
+					LLAttachmentsMgr::instance().addAttachment(pItem->getUUID(), 0, !mReplace);
+				}
+			}
+		}
+		else
+		{
+			llwarns << "Dropping unhandled WearAttachmentsCallback" << llendl;
+		}
+	}
+private:
+	bool mReplace;
+	std::list<LLUUID> mItemIds;
+};
+
+// This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
+void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string action, 
+		                                LLDynamicArray<LLFolderViewEventListener*>& batch)
+{
+	// For "open" (aka <enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
+	bool fRemoveOpen = true;
+	if ("open" == action)
+	{
+		for (S32 idx = 0; (idx < batch.count()) && (fRemoveOpen); idx++)
+		{
+			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
+			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			if (!pObjBridge)
+				continue;
+
+			const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pObjBridge->getUUID());
+			if (pItem)
+			{
+				if (gInventory.isObjectDescendentOf(pObjBridge->getUUID(), gInventory.getRootFolderID()))
+					fRemoveOpen &= (bool)get_is_item_worn(pItem->getUUID());
+				else
+					fRemoveOpen = false;	// Library items can never be worn
+			}
+		}
+	}
+
+	if ( (isAddAction(action)) || ("wear_add" == action) || (("open" == action) && (!fRemoveOpen)) )
+	{
+		LLInventoryCallback* pCallback = NULL;
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
+			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			if (!pObjBridge)
+				continue;
+			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pObjBridge->getUUID());
+			if ( (!pItem) || (get_is_item_worn(pItem->getUUID())) )
+				continue;
+
+			if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getRootFolderID()))
+			{
+				LLAttachmentsMgr::instance().addAttachment(pItem->getUUID(), 0, ("wear_add" == action));
+			}
+			else if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getLibraryRootFolderID()))
+			{
+				if (!pCallback)
+					pCallback = new WearAttachmentsCallback("wear_add" != action);
+				copy_inventory_item(gAgent.getID(), pItem->getPermissions().getOwner(), pItem->getUUID(), LLUUID::null, std::string(), pCallback);
+			}
+		}
+	}
+	else if ( (isRemoveAction(action)) || (("open" == action) && (fRemoveOpen)) )
+	{
+		LLAgentWearables::llvo_vec_t itemsRem; 
+		for (S32 idx = 0; idx < batch.count(); idx++)
+		{
+			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
+			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			if (!pObjBridge)
+				continue;
+			const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pObjBridge->getUUID());
+			if (!pItem)
+				continue;
+			LLViewerObject* pObj = gAgentAvatarp->getWornAttachment(pItem->getUUID());
+			if (pObj)
+				itemsRem.push_back(pObj);
+		}
+
+		if (itemsRem.size())
+		{
+			gAgentWearables.userRemoveMultipleAttachments(itemsRem);
+		}
+	}
+	else
+	{
+		LLItemBridge::performActionBatch(model, action, batch);
+	}
+}
+// [/SL:KB]
+
 void LLObjectBridge::openItem()
 {
 	// object double-click action is to wear/unwear object
