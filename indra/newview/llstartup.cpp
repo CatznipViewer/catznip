@@ -2663,8 +2663,8 @@ void LLStartUp::initNameCache()
 	LLAvatarNameCache::initClass(false);
 	LLAvatarNameCache::setUseDisplayNames(gSavedSettings.getBOOL("UseDisplayNames"));
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
-	LLUrlEntryAgent::setShowUsername((LLUrlEntryAgent::EShowUsername)gSavedSettings.getU32("AgentLinkShowUsernames"));
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+	LLAvatarName::setShowUsername((LLAvatarName::EShowUsername)gSavedSettings.getU32("AgentLinkShowUsernames"));
 // [/SL:KB]
 }
 

@@ -32,7 +32,7 @@
 // Library includes
 #include "llwindow.h"	// getGamma()
 // [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
-#include "llurlentry.h"
+#include "llavatarname.h"
 // [/SL:KB]
 
 // For Listeners
@@ -488,11 +488,11 @@ bool toggle_agent_pause(const LLSD& newvalue)
 	return true;
 }
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
 bool handleAgentLinkUsernamesChanged(const LLSD& sdValue)
 {
 	U32 nValue = sdValue.asInteger();
-	LLUrlEntryAgent::setShowUsername((LLUrlEntryAgent::EShowUsername)nValue);
+	LLAvatarName::setShowUsername((LLAvatarName::EShowUsername)nValue);
 	return true;
 }
 // [/SL:KB]
