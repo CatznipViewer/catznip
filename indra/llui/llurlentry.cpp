@@ -610,7 +610,10 @@ LLUrlEntryAgentCompleteName::LLUrlEntryAgentCompleteName()
 
 std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name)
 {
-	return avatar_name.getCompleteName();
+//	return avatar_name.getCompleteName();
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	return avatar_name.getCompleteName(LLAvatarName::SHOW_ALWAYS);
+// [/SL:KB]
 }
 
 //
