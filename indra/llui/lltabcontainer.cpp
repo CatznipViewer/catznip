@@ -132,7 +132,7 @@ public:
 //			icon_rect.setLeftTopAndSize(button_rect.mLeft + mIconCtrlPad, button_rect.mTop - mIconCtrlPad, 
 //				icon_size, icon_size);
 //			setLeftHPad(icon_size + mIconCtrlPad * 2);
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 			// TODO-Catznip: this should be fixed for HCENTER and RIGHT as well
 			icon_rect.setLeftTopAndSize(mIconCtrlPad * 1.5, button_rect.getHeight() - mIconCtrlPad, icon_size, icon_size);
 			setLeftHPad(icon_size + mIconCtrlPad * 3);
@@ -1647,7 +1647,7 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 {
 	static LLUICachedControl<S32> tab_padding ("UITabPadding", 0);
 
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	S32 image_overlay_width = 0;
 
 	if(mCustomIconCtrlUsed)
@@ -1691,7 +1691,7 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 		// tabs have changed size, might need to scroll to see current tab
 		updateMaxScrollPos();
 	}
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	else
 	{
 		tuple->mPadding = image_overlay_width;

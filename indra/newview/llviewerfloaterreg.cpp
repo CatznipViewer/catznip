@@ -170,7 +170,7 @@ void LLViewerFloaterReg::registerFloaters()
 
 	LLFloaterReg::add("impanel", "floater_im_session.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloater>);
 //	LLFloaterReg::add("im_container", "floater_im_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloaterContainer>);
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.5.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
 	LLFloaterReg::addWithFileCallback("im_container", &LLIMFloaterContainer::getFloaterXMLFile, (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloaterContainer>);
 // [/SL:KB]
 	LLFloaterReg::add("im_well_window", "floater_sys_well.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMWellWindow>);

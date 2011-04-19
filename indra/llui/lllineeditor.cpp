@@ -1310,7 +1310,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			if( mCurrentHistoryLine > mLineHistory.begin() )
 			{
 				mText.assign( *(--mCurrentHistoryLine) );
-// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.2.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.6.0a) | Added: Catznip-2.1.2c
 				// HACK-Catznip: there's a bug here (or undesirable behaviour at the least)
 				//   -> if the last line was longer than the current one then none of the text ends up visible
 				setCursor(0);
@@ -1332,7 +1332,7 @@ BOOL LLLineEditor::handleSpecialKey(KEY key, MASK mask)
 			if( !mLineHistory.empty() && mCurrentHistoryLine < mLineHistory.end() - 1 )
 			{
 				mText.assign( *(++mCurrentHistoryLine) );
-// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.2.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-09-09 (Catznip-2.6.0a) | Added: Catznip-2.1.2c
 				// HACK-Catznip: there's a bug here (or undesirable behaviour at the least)
 				//   -> if the last line was longer than the current one then none of the text ends up visible
 				setCursor(0);
