@@ -103,14 +103,20 @@ BOOL LLFloaterSearch::postBuild()
 
 void LLFloaterSearch::onOpen(const LLSD& key)
 {
-	search(key);
+//	search(key);
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2010-06-23 (Catznip-2.5.0a) | Added: Catznip-2.1.0a
+	if ( (key.has("category")) || (mBrowser->getCurrentNavUrl().empty()))
+	{
+		search(key);
+	}
+// [/SL:KB]
 }
 
 void LLFloaterSearch::onClose(bool app_quitting)
 {
 	// tear down the web view so we don't show the previous search
 	// result when the floater is opened next time
-	destroy();
+//	destroy();
 }
 
 void LLFloaterSearch::handleMediaEvent(LLPluginClassMedia *self, EMediaEvent event)
