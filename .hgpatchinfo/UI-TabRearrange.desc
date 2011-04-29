@@ -1,0 +1,4 @@
+[UI/TabRearrange]
+- added : allow drag-arranging of the tab buttons on an LLTabContainer
+- added : allow drag-rearranging of IM tab buttons (controlled by RearrangeIMTabs debug setting)
+
