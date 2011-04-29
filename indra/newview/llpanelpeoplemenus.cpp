@@ -60,7 +60,7 @@ LLContextMenu* NearbyMenu::createMenu()
 		registrar.add("Avatar.Profile",			boost::bind(&LLAvatarActions::showProfile,				id));
 		registrar.add("Avatar.AddFriend",		boost::bind(&LLAvatarActions::requestFriendshipDialog,	id));
 		registrar.add("Avatar.RemoveFriend",	boost::bind(&LLAvatarActions::removeFriendDialog, 		id));
-// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.5.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
 		registrar.add("Avatar.AddContact",		boost::bind(&LLAvatarActions::addContact, 				id));
 // [/SL:KB]
 		registrar.add("Avatar.IM",				boost::bind(&LLAvatarActions::startIM,					id));
