@@ -104,9 +104,12 @@ BOOL LLFloaterSearch::postBuild()
 void LLFloaterSearch::onOpen(const LLSD& key)
 {
 //	search(key);
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2010-06-23 (Catznip-2.5.0a) | Added: Catznip-2.1.0a
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2010-06-23 (Catznip-2.6.0a) | Added: Catznip-2.1.0a
 	if ( (key.has("category")) || (mBrowser->getCurrentNavUrl().empty()))
 	{
+		// New search triggered - blank the page while loading, instead of temporarily showing stale results
+		mBrowser->navigateTo("about:blank");
+
 		search(key);
 	}
 // [/SL:KB]
