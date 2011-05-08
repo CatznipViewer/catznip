@@ -2936,6 +2936,10 @@ void LLAppViewer::writeSystemInfo()
 //	gDebugInfo["SLLog"] = LLError::logFileName();
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
@@ -3039,7 +3043,10 @@ void LLAppViewer::handleViewerCrash()
 	//We already do this in writeSystemInfo(), but we do it again here to make /sure/ we have a version
 	//to check against no matter what
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
-
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
@@ -4854,7 +4861,10 @@ void LLAppViewer::handleLoginComplete()
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
-
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
