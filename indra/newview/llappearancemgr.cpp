@@ -2471,7 +2471,7 @@ public:
 //		{
 //			outfits_list->setSelectedOutfitByUUID(mFolderID);
 //		}
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 		LLPanelOutfitsTab *outfits_tab =
 			dynamic_cast<LLPanelOutfitsTab*>(LLSideTray::getInstance()->getPanel("outfitslist_tab"));
 		if (outfits_tab)

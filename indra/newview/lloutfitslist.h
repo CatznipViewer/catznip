@@ -33,7 +33,7 @@
 // newview
 #include "llinventorymodel.h"
 //#include "llpanelappearancetab.h"
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 #include "llpaneloutfitstab.h"
 // [/SL:KB]
 
@@ -70,7 +70,7 @@ public:
  * Starts fetching necessary inventory content on first opening.
  */
 //class LLOutfitsList : public LLPanelAppearanceTab
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 class LLOutfitsList : public LLPanelOutfitsTab
 // [/SL:KB]
 {
@@ -91,17 +91,17 @@ public:
 	void highlightBaseOutfit();
 
 //	void performAction(std::string action);
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ void performAction(std::string action);
 // [/SL:KB]
 
 //	void removeSelected();
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ void removeSelected();
 // [/SL:KB]
 
 //	void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
 // [/SL:KB]
 
@@ -114,13 +114,13 @@ public:
 	/*virtual*/ void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const;
 
 //	boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
 // [/SL:KB]
 
 	// Collects selected items from all selected lists and wears them(if possible- adds, else replaces)
 //	void wearSelectedItems();
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ void wearSelectedItems();
 // [/SL:KB]
 
@@ -128,7 +128,7 @@ public:
 	 * Returns true if there is a selection inside currently selected outfit
 	 */
 //	bool hasItemSelected();
-// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
 	/*virtual*/ bool hasItemSelected();
 // [/SL:KB]
 
