@@ -276,7 +276,10 @@ void LLPanelOutfitsInventory::initTabPanels()
 	mCurrentOutfitPanel = findChild<LLPanelWearing>(COF_TAB_NAME);
 	mCurrentOutfitPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
-	mMyOutfitsPanel = findChild<LLOutfitsList>(OUTFITS_TAB_NAME);
+//	mMyOutfitsPanel = findChild<LLOutfitsList>(OUTFITS_TAB_NAME);
+// [SL:KB] - Patch: SidepanelOutfits-OutfitsView | Checked: 2010-11-09 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+	mMyOutfitsPanel = findChild<LLPanelOutfitsTab>(OUTFITS_TAB_NAME);
+// [/SL:KB]
 	mMyOutfitsPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
 	mAppearanceTabs = getChild<LLTabContainer>("appearance_tabs");
