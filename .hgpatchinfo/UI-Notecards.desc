@@ -1,0 +1,8 @@
+[UI/Notecards]
+- added : "Open" / "Copy to Inventory" context menu for embedded items
+- added : "Search Up" checkbox on the "Search / Replace" floater
+- added : Ctrl-F to open the Search/Replace floater for notecards
+- added : "EmbeddedLandmarkCopyToInventory" to control whether embedded landmarks are copied to inventory before previewing
+- added : "EmbeddedTextureStealsFocus" to control whether embedded texture previews take focus when opened
+- fixed : properly hand off the Search/Replace floater when dependant on a notecard/script preview inside of a multipreview floater
+- fixed : embedded texture previews have a blank floater title
