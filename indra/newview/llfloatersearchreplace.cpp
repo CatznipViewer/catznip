@@ -105,8 +105,6 @@ void LLFloaterSearchReplace::onBtnReplaceAll()
 
 bool LLFloaterSearchReplace::hasAccelerators() const
 {
-	// Pass this on to the editor we're operating on (or any view up along its hierarchy 
-	// (allows Ctrl-F to work when the floater itself has focus - see changeset 0c8947e5f433)
 	const LLView* pView = (LLView*)mEditor;
 	while (pView)
 	{
@@ -119,14 +117,17 @@ bool LLFloaterSearchReplace::hasAccelerators() const
 
 BOOL LLFloaterSearchReplace::handleKeyHere(KEY key, MASK mask)
 {
-	// Pass this on to the editor we're operating on (or any view up along its hierarchy 
+	// Pass this on to the editor we're operating on (or any view up along its hierarchy) if we don't handle the key ourselves 
 	// (allows Ctrl-F to work when the floater itself has focus - see changeset 0c8947e5f433)
-	LLView* pView = (LLView*)mEditor;
-	while (pView)
+	if (!LLFloater::handleKeyHere(key, mask))
 	{
-		if (pView->hasAccelerators())
-			return pView->handleKeyHere(key, mask);
-		pView = pView->getParent();
+		LLView* pView = (LLView*)mEditor;
+		while (pView)
+		{
+			if ( (pView->hasAccelerators()) && (pView->handleKeyHere(key, mask)) )
+				return TRUE;
+			pView = pView->getParent();
+		}
 	}
 	return FALSE;
 }
