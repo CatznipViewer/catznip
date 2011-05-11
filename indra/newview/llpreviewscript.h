@@ -169,7 +169,7 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	LLTextEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
 // [/SL:KB]
 
@@ -227,7 +227,7 @@ public:
 	
 	void setIsNew() { mIsNew = TRUE; }
 	
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	LLTextEditor* getEditor() { return (mScriptEd) ? mScriptEd->mEditor : NULL; }
 // [/SL:KB]
 

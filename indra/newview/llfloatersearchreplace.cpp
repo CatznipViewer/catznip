@@ -84,22 +84,22 @@ BOOL LLFloaterSearchReplace::postBuild()
 
 void LLFloaterSearchReplace::onBtnSearch()
 {
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
+	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+	/*const*/ LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
 	mEditor->selectNext(getChild<LLUICtrl>("search_text")->getValue().asString(), caseChk->get(), TRUE, prevChk->get());
 }
 
 void LLFloaterSearchReplace::onBtnReplace()
 {
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
+	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+	/*const*/ LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
 	mEditor->replaceText(
 		getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get(), TRUE, prevChk->get());
 }
 
 void LLFloaterSearchReplace::onBtnReplaceAll()
 {
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
 	mEditor->replaceTextAll(getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get());
 }
 
