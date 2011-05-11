@@ -6,3 +6,4 @@
 - added : "EmbeddedTextureStealsFocus" to control whether embedded texture previews take focus when opened
 - fixed : properly hand off the Search/Replace floater when dependant on a notecard/script preview inside of a multipreview floater
 - fixed : embedded texture previews have a blank floater title
+- fixed : notecard preview floater doesn't remember its position and size
