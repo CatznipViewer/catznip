@@ -791,6 +791,36 @@ void LLInventoryPanel::openAllFolders()
 	mFolderRoot->arrangeAll();
 }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+bool LLInventoryPanel::getSelectedItems(LLInventoryModel::item_array_t& items) const
+{
+	items.clear();
+
+	if ( (!mFolderRoot) || (!mInventory) )
+		return false;
+	std::set<LLUUID> selItems = mFolderRoot->getSelectionList();
+	if (selItems.empty())
+		return false;
+
+	for (std::set<LLUUID>::const_iterator itItem = selItems.begin(); itItem != selItems.end(); itItem++)
+	{
+		LLViewerInventoryItem* pItem = mInventory->getItem(*itItem);
+		if (!pItem)
+		{
+			// Bit of a hack but if there are categories selected then we don't want to show any actions so we return an empty selection
+			if (mInventory->getCategory(*itItem))
+			{
+				items.clear();
+				return false;
+			}
+			continue;
+		}
+		items.push_back(pItem);
+	}
+	return !items.empty();
+}
+// [/SL:KB]
+
 void LLInventoryPanel::setSelection(const LLUUID& obj_id, BOOL take_keyboard_focus)
 {
 	// Don't select objects in COF (e.g. to prevent refocus when items are worn).

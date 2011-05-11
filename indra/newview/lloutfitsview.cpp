@@ -27,108 +27,8 @@
 #include "llviewermenu.h"
 
 // ============================================================================
-
-// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
-LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)
-{
-	LLUUID idParent;
-	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
-	{
-		const LLViewerInventoryItem* pItem = itItem->get();
-		if (!pItem)
-			continue;
-
-		if (idParent.isNull())
-			idParent = pItem->getParentUUID();
-		else if (idParent != pItem->getParentUUID())
-			return LLUUID::null;
-	}
-	return idParent;
-}
-
-// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
-bool get_item_wearable(const LLInventoryItem* pItem)
-{
-	if (pItem)
-	{
-		switch (pItem->getType())
-		{
-			case LLAssetType::AT_OBJECT:
-			case LLAssetType::AT_BODYPART:
-			case LLAssetType::AT_CLOTHING:
-			case LLAssetType::AT_GESTURE:
-				return true;
-			default:
-				return false;
-		}
-	}
-	return false;
-}
-
-bool get_item_wearable(const LLUUID& idItem)
-{
-	return get_item_wearable(gInventory.getItem(idItem));
-}
-
-// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
-bool get_items_wearable(const LLInventoryModel::item_array_t& items)
-{
-	bool fWearable = true;
-	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
-	{
-		const LLViewerInventoryItem* pItem = itItem->get();
-		if (!pItem)
-			continue;
-		fWearable = get_item_wearable(pItem);
-	}
-	return fWearable;
-}
-
-// Returns TRUE if every item is worn (wearables, attachments and gestures)
-bool get_items_worn(const LLInventoryModel::item_array_t& items)
-{
-	bool fWorn = true;
-	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
-	{
-		const LLViewerInventoryItem* pItem = itItem->get();
-		if (!pItem)
-			continue;
-
-		fWorn = get_is_item_worn(pItem->getUUID());
-	}
-	return fWorn;
-}
-
-bool get_selected_items(LLInventoryPanel* pInvPanel, LLInventoryModel::item_array_t& items)
-{
-	items.clear();
-
-	if ( (!pInvPanel) || (!pInvPanel->getRootFolder()) )
-		return false;
-	std::set<LLUUID> selItems = pInvPanel->getRootFolder()->getSelectionList();
-	if (selItems.empty())
-		return false;
-
-	for (std::set<LLUUID>::const_iterator itItem = selItems.begin(); itItem != selItems.end(); itItem++)
-	{
-		LLViewerInventoryItem* pItem = pInvPanel->getModel()->getItem(*itItem);
-		if (!pItem)
-		{
-			// Bit of a hack but if there are categories selected then we don't want to show any actions so we return an empty selection
-			if (pInvPanel->getModel()->getCategory(*itItem))
-			{
-				items.clear();
-				return false;
-			}
-			continue;
-		}
-		items.push_back(pItem);
-	}
-	return !items.empty();
-}
-
-// ============================================================================
 // LLOutfitListGearMenu helper class
+//
 
 class LLOutfitsViewGearMenu
 {
@@ -293,7 +193,7 @@ void LLOutfitsView::setFilterSubString(const std::string& strFilter)
 bool LLOutfitsView::canWearSelected()
 {
 	LLInventoryModel::item_array_t items;
-	if (get_selected_items(mInvPanel, items))
+	if (mInvPanel->getSelectedItems(items))
 		return get_items_wearable(items);
 	return false;
 }
@@ -468,7 +368,7 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 	{
 		// If more than one inventory object is selected we need to make sure it isn't a mixed selection of items and categories
 		LLInventoryModel::item_array_t items;
-		if (get_selected_items(mInvPanel, items))
+		if (mInvPanel->getSelectedItems(items))
 		{
 			// Selection consists solely of inventory items
 			mItemSelection = true;
