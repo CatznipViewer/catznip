@@ -50,7 +50,10 @@
 static LLDefaultChildRegistry::Register<LLAvatarList> r("avatar_list");
 
 // Last interaction time update period.
-static const F32 LIT_UPDATE_PERIOD = 5;
+//static const F32 LIT_UPDATE_PERIOD = 5;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+static const F32 TEXT_UPDATE_PERIOD = 5;
+// [/SL:KB]
 
 // Maximum number of avatars that can be added to a list in one pass.
 // Used to limit time spent for avatar list update per frame.
@@ -116,9 +119,19 @@ static bool findInsensitive(std::string haystack, const std::string& needle_uppe
 static const LLAvatarItemNameComparator NAME_COMPARATOR;
 static const LLFlatListView::ItemReverseComparator REVERSE_NAME_COMPARATOR(NAME_COMPARATOR);
 
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+LLAvatarList::TextCallbackParam::TextCallbackParam()
+	: refresh_time("refresh_time", TEXT_UPDATE_PERIOD)
+{
+}
+// [/SL:KB]
+
 LLAvatarList::Params::Params()
 : ignore_online_status("ignore_online_status", false)
-, show_last_interaction_time("show_last_interaction_time", false)
+//, show_last_interaction_time("show_last_interaction_time", false)
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+, show_text_field("show_text_field", false)
+// [/SL:KB]
 , show_info_btn("show_info_btn", true)
 , show_profile_btn("show_profile_btn", true)
 , show_speaking_indicator("show_speaking_indicator", true)
@@ -129,11 +142,19 @@ LLAvatarList::Params::Params()
 LLAvatarList::LLAvatarList(const Params& p)
 :	LLFlatListViewEx(p)
 , mIgnoreOnlineStatus(p.ignore_online_status)
-, mShowLastInteractionTime(p.show_last_interaction_time)
+//, mShowLastInteractionTime(p.show_last_interaction_time)
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+, mShowTextField(p.show_text_field)
+// [/SL:KB]
 , mContextMenu(NULL)
 , mDirty(true) // to force initial update
 , mNeedUpdateNames(false)
-, mLITUpdateTimer(NULL)
+//, mLITUpdateTimer(NULL)
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+, mTextFieldUpdateTimer(NULL)
+, mTextFieldUpdateExpiration(p.text_callback.refresh_time)
+, mTextFieldUpdateSignal(NULL)
+// [/SL:KB]
 , mShowIcons(true)
 , mShowInfoBtn(p.show_info_btn)
 , mShowProfileBtn(p.show_profile_btn)
@@ -145,12 +166,19 @@ LLAvatarList::LLAvatarList(const Params& p)
 	// Set default sort order.
 	setComparator(&NAME_COMPARATOR);
 
-	if (mShowLastInteractionTime)
+//	if (mShowLastInteractionTime)
+//	{
+//		mLITUpdateTimer = new LLTimer();
+//		mLITUpdateTimer->setTimerExpirySec(0); // zero to force initial update
+//		mLITUpdateTimer->start();
+//	}
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	if (p.text_callback.isProvided())
 	{
-		mLITUpdateTimer = new LLTimer();
-		mLITUpdateTimer->setTimerExpirySec(0); // zero to force initial update
-		mLITUpdateTimer->start();
+		mShowTextField = true;
+		setTextFieldCallback(initCommitCallback(p.text_callback));
 	}
+// [/SL:KB]
 	
 	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLAvatarList::handleDisplayNamesOptionChanged, this));
 }
@@ -164,7 +192,11 @@ void LLAvatarList::handleDisplayNamesOptionChanged()
 
 LLAvatarList::~LLAvatarList()
 {
-	delete mLITUpdateTimer;
+//	delete mLITUpdateTimer;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	delete mTextFieldUpdateTimer;
+	delete mTextFieldUpdateSignal;
+// [/SL:KB]
 }
 
 void LLAvatarList::setShowIcons(std::string param_name)
@@ -189,11 +221,19 @@ void LLAvatarList::draw()
 	if (mDirty)
 		refresh();
 
-	if (mShowLastInteractionTime && mLITUpdateTimer->hasExpired())
+//	if (mShowLastInteractionTime && mLITUpdateTimer->hasExpired())
+//	{
+//		updateLastInteractionTimes();
+//		mLITUpdateTimer->setTimerExpirySec(LIT_UPDATE_PERIOD); // restart the timer
+//	}
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	if ( (mShowTextField) && (mTextFieldUpdateTimer) && (mTextFieldUpdateTimer->hasExpired()) )
 	{
-		updateLastInteractionTimes();
-		mLITUpdateTimer->setTimerExpirySec(LIT_UPDATE_PERIOD); // restart the timer
+		if (mTextFieldUpdateSignal)
+			(*mTextFieldUpdateSignal)(this, LLSD());
+		mTextFieldUpdateTimer->setTimerExpirySec(mTextFieldUpdateExpiration); // Restart the timer
 	}
+// [/SL:KB]
 }
 
 //virtual
@@ -240,7 +280,10 @@ void LLAvatarList::addAvalineItem(const LLUUID& item_id, const LLUUID& session_i
 	LLAvalineListItem* item = new LLAvalineListItem(/*hide_number=*/false);
 	item->setAvatarId(item_id, session_id, true, false);
 	item->setName(item_name);
-	item->showLastInteractionTime(mShowLastInteractionTime);
+//	item->showLastInteractionTime(mShowLastInteractionTime);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2011-03-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	item->showTextField(mShowTextField);
+// [/SL:KB]
 	item->showSpeakingIndicator(mShowSpeakingIndicator);
 	item->setOnline(false);
 
@@ -435,7 +478,10 @@ void LLAvatarList::addNewItem(const LLUUID& id, const std::string& name, BOOL is
 	// This sets the name as a side effect
 	item->setAvatarId(id, mSessionID, mIgnoreOnlineStatus);
 	item->setOnline(mIgnoreOnlineStatus ? true : is_online);
-	item->showLastInteractionTime(mShowLastInteractionTime);
+//	item->showLastInteractionTime(mShowLastInteractionTime);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+	item->showTextField(mShowTextField);
+// [/SL:KB]
 
 	item->setAvatarIconVisible(mShowIcons);
 	item->setShowInfoBtn(mShowInfoBtn);
@@ -505,21 +551,38 @@ void LLAvatarList::computeDifference(
 }
 
 // Refresh shown time of our last interaction with all listed avatars.
-void LLAvatarList::updateLastInteractionTimes()
-{
-	S32 now = (S32) LLDate::now().secondsSinceEpoch();
-	std::vector<LLPanel*> items;
-	getItems(items);
+//void LLAvatarList::updateLastInteractionTimes()
+//{
+//	S32 now = (S32) LLDate::now().secondsSinceEpoch();
+//	std::vector<LLPanel*> items;
+//	getItems(items);
+//
+//	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
+//	{
+//		// *TODO: error handling
+//		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
+//		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
+//		if (secs_since >= 0)
+//			item->setLastInteractionTime(secs_since);
+//	}
+//}
 
-	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
-	{
-		// *TODO: error handling
-		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
-		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
-		if (secs_since >= 0)
-			item->setLastInteractionTime(secs_since);
-	}
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+boost::signals2::connection LLAvatarList::setTextFieldCallback(const commit_signal_t::slot_type& cb) 
+{ 
+	if (!mTextFieldUpdateSignal) mTextFieldUpdateSignal = new commit_signal_t();
+	return mTextFieldUpdateSignal->connect(cb); 
 }
+
+void LLAvatarList::setTextFieldRefresh(F32 refresh_time)
+{
+	mTextFieldUpdateTimer = new LLTimer();
+	mTextFieldUpdateTimer->setTimerExpirySec(0); // zero to force initial update
+	mTextFieldUpdateTimer->start();
+
+	mTextFieldUpdateExpiration = refresh_time;
+}
+// [/SL:KB]
 
 void LLAvatarList::onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask)
 {
@@ -582,7 +645,10 @@ BOOL LLAvalineListItem::postBuild()
 	if (rv)
 	{
 		setOnline(true);
-		showLastInteractionTime(false);
+//		showLastInteractionTime(false);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+		showTextField(false);
+// [/SL:KB]
 		setShowProfileBtn(false);
 		setShowInfoBtn(false);
 		mAvatarIcon->setValue("Avaline_Icon");

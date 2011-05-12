@@ -118,6 +118,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              left="3"
              multi_select="true"
              name="avatar_list"
+             show_text_field="true"
              top="145"
              width="306" />
             <panel
@@ -158,6 +159,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                <commit_callback
                   function="People.addFriend" />
              </button>
+             <!--
              <icon
              follows="bottom|left|right"
              height="25"
@@ -167,6 +169,22 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              name="dummy_icon"
              width="243"
              />
+             -->
+             <slider
+              follows="bottom|left"
+              layout="topleft"
+              left_pad="10"
+              width="241"
+              height="16"
+              control_name="NearMeRange"
+              label="Range (m) :"
+              label_width="65"
+              decimal_digits="0"
+              initial_value="96"
+              increment="16"
+              min_val="32"
+              max_val="512"
+              name="NearMeRange" />
             </panel>
         </panel>
         <panel
@@ -209,6 +227,8 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                          multi_select="true"
                          name="avatars_online"
                          show_permissions_granted="true"
+                         show_profile_btn="false"
+                         show_speaking_indicator="false"
                          top="0"
                          width="307" />
                 </accordion_tab>
@@ -226,6 +246,8 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                          multi_select="true"
                          name="avatars_all"
                          show_permissions_granted="true"
+                         show_profile_btn="false"
+                         show_speaking_indicator="false"
                          top="0"
                          width="307" />
                 </accordion_tab>
@@ -497,7 +519,8 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              left="3"
              multi_select="true"
              name="avatar_list"
-             show_last_interaction_time="true"
+             show_speaking_indicator="false"
+             show_text_field="true"
              top="0"
              width="307" />
             <panel

@@ -73,6 +73,10 @@ private:
 	void					updateFriendList();
 	void					updateNearbyList();
 	void					updateRecentList();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	void					updateDistances();
+	void					updateLastInteractionTimes();
+// [/SL:KB]
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
 

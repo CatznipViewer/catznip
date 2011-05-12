@@ -95,13 +95,24 @@ public:
 	void setHighlight(const std::string& highlight);
 	void setState(EItemState item_style);
 	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
-	void setLastInteractionTime(U32 secs_since);
+//	void setLastInteractionTime(U32 secs_since);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	void setTextField(const std::string& text);
+	void setTextFieldDistance(F32 distance);
+	void setTextFieldSeconds(U32 secs_since);
+// [/SL:KB]
 	//Show/hide profile/info btn, translating speaker indicator and avatar name coordinates accordingly
 	void setShowProfileBtn(bool show);
 	void setShowInfoBtn(bool show);
 	void showSpeakingIndicator(bool show);
-	void setShowPermissions(bool show) { mShowPermissions = show; };
-	void showLastInteractionTime(bool show);
+//	void setShowPermissions(bool show) { mShowPermissions = show; };
+//	void showLastInteractionTime(bool show);
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	void setShowPermissions(bool show) { mShowPermissions = show; refreshPermissions(); updateChildren(); };
+// [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	void showTextField(bool show);
+// [/SL:KB]
 	void setAvatarIconVisible(bool visible);
 	
 	const LLUUID& getAvatarId() const;
@@ -110,6 +121,10 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-11-04 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	void onPermissionBtnToggle(S32 toggleRight);
+	void onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant);
+// [/SL:KB]
 
 	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
@@ -122,13 +137,18 @@ protected:
 	LLAvatarIconCtrl* mAvatarIcon;
 
 	/// Indicator for permission to see me online.
-	LLIconCtrl* mIconPermissionOnline;
+//	LLIconCtrl* mIconPermissionOnline;
 	/// Indicator for permission to see my position on the map.
-	LLIconCtrl* mIconPermissionMap;
+//	LLIconCtrl* mIconPermissionMap;
 	/// Indicator for permission to edit my objects.
-	LLIconCtrl* mIconPermissionEditMine;
+//	LLIconCtrl* mIconPermissionEditMine;
 	/// Indicator for permission to edit their objects.
 	LLIconCtrl* mIconPermissionEditTheirs;
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	LLButton* mIconPermissionOnline;
+	LLButton* mIconPermissionMap;
+	LLButton* mIconPermissionEditMine;
+// [/SL:KB]
 
 private:
 
@@ -153,7 +173,10 @@ private:
 		ALIC_PERMISSION_MAP,
 		ALIC_PERMISSION_EDIT_MINE,
 		ALIC_PERMISSION_EDIT_THEIRS,
-		ALIC_INTERACTION_TIME,
+//		ALIC_INTERACTION_TIME,
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+		ALIC_TEXT_FIELD,
+// [/SL:KB]
 		ALIC_NAME,
 		ALIC_ICON,
 		ALIC_COUNT,
@@ -184,7 +207,10 @@ private:
 	 *
 	 * Need to call updateChildren() afterwards to sort out their layout.
 	 */
-	bool showPermissions(bool visible);
+//	bool showPermissions(bool visible);
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	bool refreshPermissions();
+// [/SL:KB]
 
 	/**
 	 * Gets child view specified by index.
@@ -195,7 +221,10 @@ private:
 	LLView* getItemChildView(EAvatarListItemChildIndex child_index);
 
 	LLTextBox* mAvatarName;
-	LLTextBox* mLastInteractionTime;
+//	LLTextBox* mLastInteractionTime;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+	LLTextBox* mTextField;
+// [/SL:KB]
 	LLStyle::Params mAvatarNameStyle;
 	
 	LLButton* mInfoBtn;

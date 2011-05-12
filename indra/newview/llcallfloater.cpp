@@ -69,7 +69,10 @@ public:
 		if (rv)
 		{
 			setOnline(true);
-			showLastInteractionTime(false);
+//			showLastInteractionTime(false);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+			showTextField(false);
+// [/SL:KB]
 			setShowProfileBtn(false);
 			setShowInfoBtn(false);
 			mAvatarIcon->setValue("Avaline_Icon");
