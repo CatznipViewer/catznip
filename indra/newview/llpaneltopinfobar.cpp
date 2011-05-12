@@ -30,6 +30,9 @@
 
 #include "llagent.h"
 #include "llagentui.h"
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+#include "llappviewer.h"
+// [/SL:KB]
 #include "llclipboard.h"
 #include "lllandmarkactions.h"
 #include "lllocationinputctrl.h"
@@ -62,12 +65,20 @@ private:
 	LLPanelTopInfoBar* mTopInfoBar;
 };
 
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+static LLRegisterPanelClassWrapper<LLPanelTopInfoBar> t_topinfo_bar("topinfo_bar");
+// [/SL:KB]
+
 LLPanelTopInfoBar::LLPanelTopInfoBar(): mParcelChangedObserver(0)
 {
 	LLUICtrl::CommitCallbackRegistry::currentRegistrar()
 			.add("TopInfoBar.Action", boost::bind(&LLPanelTopInfoBar::onContextMenuItemClicked, this, _2));
 
-	buildFromFile( "panel_topinfo_bar.xml");
+//	buildFromFile( "panel_topinfo_bar.xml");
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// set a listener function for LoginComplete event
+	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLPanelTopInfoBar::handleLoginComplete, this));
+// [/SL:KB]
 }
 
 LLPanelTopInfoBar::~LLPanelTopInfoBar()
@@ -164,7 +175,7 @@ BOOL LLPanelTopInfoBar::postBuild()
 	mParcelMgrConnection = LLViewerParcelMgr::getInstance()->addAgentParcelChangedCallback(
 			boost::bind(&LLPanelTopInfoBar::onAgentParcelChange, this));
 
-	setVisibleCallback(boost::bind(&LLPanelTopInfoBar::onVisibilityChange, this, _2));
+//	setVisibleCallback(boost::bind(&LLPanelTopInfoBar::onVisibilityChange, this, _2));
 
 	return TRUE;
 }
@@ -181,29 +192,36 @@ void LLPanelTopInfoBar::onNavBarShowParcelPropertiesCtrlChanged()
 
 // when panel is shown, all minimized floaters should be shifted downwards to prevent overlapping of
 // PanelTopInfoBar. See EXT-7951.
-void LLPanelTopInfoBar::onVisibilityChange(const LLSD& show)
-{
-	// this height is used as a vertical offset for ALREADY MINIMIZED floaters
-	// when PanelTopInfoBar visibility changes
-	S32 height = getRect().getHeight();
-
-	// this vertical offset is used for a start minimize position of floaters that
-	// are NOT MIMIMIZED YET
-	S32 minimize_pos_offset = 0;
-
-	if (show.asBoolean())
-	{
-		height = minimize_pos_offset = -height;
-	}
-
-	gFloaterView->shiftFloaters(0, height);
-	gFloaterView->setMinimizePositionVerticalOffset(minimize_pos_offset);
-}
+//void LLPanelTopInfoBar::onVisibilityChange(const LLSD& show)
+//{
+//	// this height is used as a vertical offset for ALREADY MINIMIZED floaters
+//	// when PanelTopInfoBar visibility changes
+//	S32 height = getRect().getHeight();
+//
+//	// this vertical offset is used for a start minimize position of floaters that
+//	// are NOT MIMIMIZED YET
+//	S32 minimize_pos_offset = 0;
+//
+//	if (show.asBoolean())
+//	{
+//		height = minimize_pos_offset = -height;
+//	}
+//
+//	gFloaterView->shiftFloaters(0, height);
+//	gFloaterView->setMinimizePositionVerticalOffset(minimize_pos_offset);
+//}
 
 void LLPanelTopInfoBar::draw()
 {
-	updateParcelInfoText();
-	updateHealth();
+//	updateParcelInfoText();
+//	updateHealth();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	if (getVisible())
+	{
+		updateParcelInfoText();
+		updateHealth();
+	}
+// [/SL:KB]
 
 	LLPanel::draw();
 }
@@ -338,7 +356,10 @@ void LLPanelTopInfoBar::updateHealth()
 void LLPanelTopInfoBar::layoutParcelIcons()
 {
 	// TODO: remove hard-coded values and read them as xml parameters
-	static const int FIRST_ICON_HPAD = 32;
+//	static const int FIRST_ICON_HPAD = 32;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	static const int FIRST_ICON_HPAD = 10;
+// [/SL:KB]
 	static const int LAST_ICON_HPAD = 11;
 
 	S32 left = mParcelInfoText->getRect().mRight + FIRST_ICON_HPAD;
@@ -351,7 +372,10 @@ void LLPanelTopInfoBar::layoutParcelIcons()
 	}
 
 	LLRect rect = getRect();
-	rect.set(rect.mLeft, rect.mTop, left + LAST_ICON_HPAD, rect.mBottom);
+	//rect.set(rect.mLeft, rect.mTop, left + LAST_ICON_HPAD, rect.mBottom);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	rect.setOriginAndSize(rect.mLeft, rect.mBottom, left + LAST_ICON_HPAD, rect.getHeight());
+// [/SL:KB]
 	setRect(rect);
 }
 

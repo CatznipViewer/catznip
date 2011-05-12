@@ -34,11 +34,14 @@ class LLTextBox;
 class LLIconCtrl;
 class LLParcelChangeObserver;
 
-class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
+//class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+class LLPanelTopInfoBar : public LLPanel
+// [/SL:KB]
 {
 	LOG_CLASS(LLPanelTopInfoBar);
 
-	friend class LLDestroyClass<LLPanelTopInfoBar>;
+//	friend class LLDestroyClass<LLPanelTopInfoBar>;
 
 public:
 	LLPanelTopInfoBar();
@@ -52,10 +55,10 @@ public:
 	 */
 	void handleLoginComplete();
 
-	/**
-	 * Called when the top info bar gets shown or hidden
-	 */
-	void onVisibilityChange(const LLSD& show);
+//	/**
+//	 * Called when the top info bar gets shown or hidden
+//	 */
+//	void onVisibilityChange(const LLSD& show);
 
 private:
 	class LLParcelChangeObserver;
@@ -146,16 +149,16 @@ private:
 	 */
 	void setParcelInfoText(const std::string& new_text);
 
-	/**
-	 *  Implementation of LLDestroyClass<LLSideTray>
-	 */
-	static void destroyClass()
-	{
-		if (LLPanelTopInfoBar::instanceExists())
-		{
-			LLPanelTopInfoBar::getInstance()->setEnabled(FALSE);
-		}
-	}
+//	/**
+//	 *  Implementation of LLDestroyClass<LLSideTray>
+//	 */
+//	static void destroyClass()
+//	{
+//		if (LLPanelTopInfoBar::instanceExists())
+//		{
+//			LLPanelTopInfoBar::getInstance()->setEnabled(FALSE);
+//		}
+//	}
 
 	LLButton* 				mInfoBtn;
 	LLTextBox* 				mParcelInfoText;

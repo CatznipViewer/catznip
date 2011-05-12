@@ -3,6 +3,8 @@
 - changed : don't reset the URL each time the search floater is opened
     -> "Find always resets to start page" (WEB-1819)
 - changed : uncommented "Lighting & Shadows" options in the Graphics preferences tab
+- changed : embedded the "Mini-Location" bar into the status bar
+    -> "Mini-Location" bar can also be shown independently of the navigation bar
 - added   : "Inspect" menu item to bring up the old-style Inspect floater (thankies Chloe)
     -> added to the context menus for: "attachment self", "attachment other" and "object"
     -> added to the gear menu for object inspectors

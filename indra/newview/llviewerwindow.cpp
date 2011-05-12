@@ -1749,18 +1749,21 @@ void LLViewerWindow::initWorldUI()
 		navbar->showFavoritesPanel(FALSE);
 	}
 
-	// Top Info bar
-	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
-	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
-
-	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
-
-	topinfo_bar_container->addChild(topinfo_bar);
-	topinfo_bar_container->setVisible(TRUE);
-
+//	// Top Info bar
+//	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
+//	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
+//
+//	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
+//
+//	topinfo_bar_container->addChild(topinfo_bar);
+//	topinfo_bar_container->setVisible(TRUE);
+//
 	if (!gSavedSettings.getBOOL("ShowMiniLocationPanel"))
 	{
-		topinfo_bar->setVisible(FALSE);
+//		topinfo_bar->setVisible(FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+		gStatusBar->showTopInfoBar(FALSE);
+// [/SL:KB]
 	}
 
 	if ( gHUDView == NULL )

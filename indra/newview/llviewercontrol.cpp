@@ -71,6 +71,9 @@
 #include "llpanellogin.h"
 #include "llpaneltopinfobar.h"
 #include "llupdaterservice.h"
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+#include "llstatusbar.h"
+// [/SL:KB]
 
 #ifdef TOGGLE_HACKED_GODLIKE_VIEWER
 BOOL 				gHackGodmode = FALSE;
@@ -484,7 +487,7 @@ bool toggle_show_navigation_panel(const LLSD& newvalue)
 	bool value = newvalue.asBoolean();
 
 	LLNavigationBar::getInstance()->showNavigationPanel(value);
-	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
+//	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
 
 	return true;
 }
@@ -499,8 +502,14 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
 
-	LLPanelTopInfoBar::getInstance()->setVisible(value);
-	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
+//	LLPanelTopInfoBar::getInstance()->setVisible(value);
+//	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	if (gStatusBar)
+	{
+		gStatusBar->showTopInfoBar(value);
+	}
+// [/SL:KB]
 
 	return true;
 }
