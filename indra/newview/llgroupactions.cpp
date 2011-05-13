@@ -40,6 +40,9 @@
 #include "llsidetray.h"
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "llimfloater.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //
 // Globals
@@ -237,15 +240,31 @@ void LLGroupActions::activate(const LLUUID& group_id)
 	gAgent.sendReliableMessage();
 }
 
-static bool isGroupUIVisible()
+//static bool isGroupUIVisible()
+//{
+//	static LLPanel* panel = 0;
+//	if(!panel)
+//		panel = LLSideTray::getInstance()->getPanel("panel_group_info_sidetray");
+//	if(!panel)
+//		return false;
+//	return panel->isInVisibleChain();
+//}
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+static bool isGroupVisible(const LLUUID& idGroup)
 {
+	// Check if we have this group open as a floater
+	if (NULL != LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", idGroup)))
+		return true;
+
+	// Check for *a* visible group in the sidebar
 	static LLPanel* panel = 0;
-	if(!panel)
+	if (!panel)
 		panel = LLSideTray::getInstance()->getPanel("panel_group_info_sidetray");
-	if(!panel)
+	if (!panel)
 		return false;
 	return panel->isInVisibleChain();
 }
+// [/SL:KB]
 
 // static 
 void LLGroupActions::inspect(const LLUUID& group_id)
@@ -259,38 +278,87 @@ void LLGroupActions::show(const LLUUID& group_id)
 	if (group_id.isNull())
 		return;
 
-	LLSD params;
-	params["group_id"] = group_id;
-	params["open_tab_name"] = "panel_group_info_sidetray";
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+// [/SL:KB]
+		LLSD params;
+		params["group_id"] = group_id;
+		params["open_tab_name"] = "panel_group_info_sidetray";
 
-	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+		LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	}
+	else
+	{
+		LLFloaterReg::showInstance("floater_group_info", LLSD().with("group_id", group_id));
+	}
+// [/SL:KB]
 }
 
-void LLGroupActions::refresh_notices()
+//void LLGroupActions::refresh_notices()
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+void LLGroupActions::refresh_notices(const LLUUID& group_id)
+// [/SL:KB]
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!isGroupVisible(group_id))
 		return;
+// [/SL:KB]
 
 	LLSD params;
-	params["group_id"] = LLUUID::null;
+//	params["group_id"] = LLUUID::null;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	params["group_id"] = group_id;
+// [/SL:KB]
 	params["open_tab_name"] = "panel_group_info_sidetray";
 	params["action"] = "refresh_notices";
 
-	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+//	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+		LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+	}
+	else
+	{
+		LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
+		if (pFloater)
+			pFloater->onOpen(params);
+	}
+// [/SL:KB]
 }
 
 //static 
 void LLGroupActions::refresh(const LLUUID& group_id)
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!isGroupVisible(group_id))
 		return;
+// [/SL:KB]
 
 	LLSD params;
 	params["group_id"] = group_id;
 	params["open_tab_name"] = "panel_group_info_sidetray";
 	params["action"] = "refresh";
 
-	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+//	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+		LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+	}
+	else
+	{
+		LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
+		if (pFloater)
+			pFloater->onOpen(params);
+	}
+// [/SL:KB]
 }
 
 //static 
@@ -307,8 +375,12 @@ void LLGroupActions::createGroup()
 //static
 void LLGroupActions::closeGroup(const LLUUID& group_id)
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	if (!isGroupVisible(group_id))
 		return;
+// [/SL:KB]
 
 	LLSD params;
 	params["group_id"] = group_id;
@@ -316,6 +388,10 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 	params["action"] = "close";
 
 	LLSideTray::getInstance()->showPanel("panel_group_info_sidetray", params);
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+	LLFloaterReg::hideInstance("floater_group_info", LLSD().with("group_id", group_id));
+// [/SL:KB]
 }
 
 

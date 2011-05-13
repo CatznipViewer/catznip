@@ -32,6 +32,9 @@
 #include "llavatarpropertiesprocessor.h"
 #include "llagent.h"
 #include "lltooldraganddrop.h"
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+#include "llfloater.h"
+// [/SL:KB]
 
 class LLAvatarName;
 class LLPanelProfile;
@@ -64,8 +67,11 @@ public:
 						   void *cargo_data, EAcceptance *accept,
 						   std::string& tooltip_msg)
 	{
-		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), gAgent.getSessionID(), drop,
-				 cargo_type, cargo_data, accept);
+//		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), gAgent.getSessionID(), drop,
+//				 cargo_type, cargo_data, accept);
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), LLUUID::null, drop, cargo_type, cargo_data, accept);
+// [/SL:KB]
 
 		return TRUE;
 	}
@@ -104,5 +110,24 @@ private:
 	LLTextBox* mStatusText;
 	AvatarStatusObserver* mAvatarStatusObserver;
 };
+
+// [SL:KB] - Patc : UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.5.0a) | Added: Catznip-2.1.2c
+class LLFloaterProfileView : public LLFloater
+{
+public:
+	LLFloaterProfileView(const LLSD& sdKey) : LLFloater(sdKey) {}
+	virtual ~LLFloaterProfileView() {}
+	
+	/*virtual*/ void onOpen(const LLSD& sdKey)
+	{
+		LLPanel* pPanel = findChild<LLPanel>("panel_profile_view");
+		if(pPanel)
+		{
+			pPanel->onOpen(sdKey);
+		}
+	}
+
+};
+// [/SL:KB]
 
 #endif //LL_LLPANELPROFILEVIEW_H
