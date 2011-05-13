@@ -108,7 +108,7 @@ public:
 //	void setShowPermissions(bool show) { mShowPermissions = show; };
 //	void showLastInteractionTime(bool show);
 // [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
-	void setShowPermissions(bool show) { mShowPermissions = show; refreshPermissions(); updateChildren(); };
+	void setShowPermissions(bool show);
 // [/SL:KB]
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	void showTextField(bool show);

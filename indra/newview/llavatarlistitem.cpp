@@ -148,6 +148,18 @@ BOOL  LLAvatarListItem::postBuild()
 		sStaticInitialized = true;
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Disable all controls by default so we'll know which ones we can skip in updateChildren()
+	mIconPermissionOnline->setEnabled(mShowPermissions);
+	mIconPermissionMap->setEnabled(mShowPermissions);
+	mIconPermissionEditMine->setEnabled(mShowPermissions);
+	mIconPermissionEditTheirs->setEnabled(mShowPermissions);
+	mSpeakingIndicator->setEnabled(false);
+	mInfoBtn->setEnabled(mShowInfoBtn);
+	mProfileBtn->setEnabled(mShowProfileBtn);
+	mTextField->LLUICtrl::setEnabled(false);					// Disabled and invisible by default (see above)
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -295,11 +307,33 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, b
 	}
 }
 
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+void LLAvatarListItem::setShowPermissions(bool show)
+{
+	mShowPermissions = show;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Reenable the controls for updateChildren()
+	mIconPermissionOnline->setEnabled(show);
+	mIconPermissionMap->setEnabled(show);
+	mIconPermissionEditMine->setEnabled(show);
+	mIconPermissionEditTheirs->setEnabled(show);
+// [/SL:KB]
+	
+	refreshPermissions();
+	updateChildren();
+}
+// [/SL:KB]
+
 void LLAvatarListItem::showTextField(bool show)
 {
 //	mLastInteractionTime->setVisible(show);
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
 	mTextField->setVisible(show);
+// [/SL:KB]
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Reenable updateChildren()
+	mTextField->LLUICtrl::setEnabled(show);
 // [/SL:KB]
 	updateChildren();
 }
@@ -328,11 +362,19 @@ void LLAvatarListItem::setTextFieldSeconds(U32 secs_since)
 void LLAvatarListItem::setShowInfoBtn(bool show)
 {
 	mShowInfoBtn = show;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Reenable for updateChildren()
+	mInfoBtn->setEnabled(show);
+// [/SL:KB]
 }
 
 void LLAvatarListItem::setShowProfileBtn(bool show)
 {
 	mShowProfileBtn = show;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Reenable for updateChildren()
+	mProfileBtn->setEnabled(show);
+// [/SL:KB]
 }
 
 void LLAvatarListItem::showSpeakingIndicator(bool visible)
@@ -343,6 +385,9 @@ void LLAvatarListItem::showSpeakingIndicator(bool visible)
 // Disabled to not contradict with SpeakingIndicatorManager functionality. EXT-3976
 // probably this method should be totally removed.
 //	mSpeakingIndicator->setVisible(visible);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	mSpeakingIndicator->setEnabled(visible);
+// [/SL:KB]
 //	updateChildren();
 }
 
@@ -668,7 +713,10 @@ void LLAvatarListItem::updateChildren()
 
 		LL_DEBUGS("AvatarItemReshape") << "Processing control: " << control->getName() << LL_ENDL;
 		// skip invisible views
-		if (!control->getVisible()) continue;
+//		if (!control->getVisible()) continue;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+		if (!control->getEnabled()) continue;
+// [/SL:KB]
 
 		S32 ctrl_width = sChildrenWidths[i]; // including space between current & left controls
 

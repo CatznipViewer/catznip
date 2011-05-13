@@ -65,6 +65,7 @@
      value="(loading)"
      width="180" />
     <icon
+     enabled="false"
      height="16"
      follows="right"
      image_name="Permission_Edit_Objects_Theirs"
@@ -76,6 +77,7 @@
      top="4"
      width="16" />
     <button
+     enabled="false"
      height="16"
      follows="right"
      image_unselected="Permission_Edit_Objects_Mine"
@@ -87,6 +89,7 @@
      top_delta="0"
      width="16" />
     <button
+     enabled="false"
      height="16"
      follows="right"
      image_unselected="Permission_Visible_Map"
@@ -98,6 +101,7 @@
      top_delta="0"
      width="16" />
     <button
+     enabled="false"
      height="16"
      follows="right"
      image_unselected="Permission_Visible_Online"
@@ -109,6 +113,7 @@
      top_delta="0"
      width="16" />
     <button
+     enabled="false"
      follows="right"
      height="16"
      image_pressed="Info_Press"
@@ -121,6 +126,7 @@
      top_delta="0"
      width="16" />
     <button
+     enabled="false"
      follows="right"
      height="20"
      image_overlay="Web_Profile_Off"
@@ -146,6 +152,7 @@
      width="42" />
     <output_monitor
      auto_update="true"
+     enabled="false"
      follows="right"
      draw_border="false"
      height="16"
