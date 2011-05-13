@@ -851,7 +851,7 @@ bool LLViewerRegion::isAlive()
 }
 
 //BOOL LLViewerRegion::isOwnedSelf(const LLVector3& pos)
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
 BOOL LLViewerRegion::isOwnedSelf(const LLVector3& pos) const
 // [/SL:KB]
 {
@@ -865,7 +865,7 @@ BOOL LLViewerRegion::isOwnedSelf(const LLVector3& pos) const
 
 // Owned by a group you belong to?  (officer or member)
 //BOOL LLViewerRegion::isOwnedGroup(const LLVector3& pos)
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
 BOOL LLViewerRegion::isOwnedGroup(const LLVector3& pos) const
 // [/SL:KB]
 {
@@ -938,7 +938,7 @@ public:
 				pos <<= 8;
 				pos |= y;
 //				pos <<= 8;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 				pos <<= 16;
 // [/SL:KB]
 				pos |= z;
@@ -975,7 +975,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 	U8 x_pos = 0;
 	U8 y_pos = 0;
 	U8 z_pos = 0;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	U16 z_pos16 = 0;
 // [/SL:KB]
 
@@ -993,7 +993,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_X, x_pos, i);
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_Y, y_pos, i);
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_Z, z_pos, i);
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 		z_pos16 = z_pos;
 // [/SL:KB]
 		LLUUID agent_id = LLUUID::null;
@@ -1001,7 +1001,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 		{
 			msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id, i);
 
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 			if (0 == z_pos)
 			{
 				const LLViewerObject* pAvatarObj = gObjectList.findObject(agent_id);
@@ -1034,7 +1034,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 			pos |= y_pos;
 //			pos <<= 8;
 //			pos |= z_pos;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 			pos <<= 16;
 			pos |= z_pos16;
 // [/SL:KB]

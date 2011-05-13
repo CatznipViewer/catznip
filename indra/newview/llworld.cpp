@@ -46,7 +46,7 @@
 #include "llviewernetwork.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparceloverlay.h"
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 #include "llviewerparcelmgr.h"
 // [/SL:KB]
 #include "llviewerregion.h"
@@ -1418,24 +1418,24 @@ void send_agent_resume()
 }
 
 //static LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
 LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
 // [/SL:KB]
 {
 	LLVector3d pos_global;
 	LLVector3 pos_local;
 //	U8 bits;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	U16 bits;
 // [/SL:KB]
 
 //	bits = compact_local & 0xFF;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	bits = compact_local & 0xFFFF;
 // [/SL:KB]
 	pos_local.mV[VZ] = F32(bits) * 4.f;
 //	compact_local >>= 8;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	compact_local >>= 16;
 // [/SL:KB]
 
@@ -1452,7 +1452,7 @@ LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& regi
 }
 
 //void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius) const
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, 
 						 const LLVector3d& relative_to, F32 radius, U32 maskFilter) const
 // [/SL:KB]
@@ -1505,7 +1505,7 @@ void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positi
 		{
 			LLVector3d pos_global = unpackLocalToGlobalPosition(regionp->mMapAvatars.get(i), origin_global);
 //			if(dist_vec_squared(pos_global, relative_to) <= radius_squared)
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 			if ( ((maskFilter & E_FILTER_BY_AGENT_REGION) && (gAgent.getRegion() == regionp)) ||
 			     ((maskFilter & E_FILTER_BY_DISTANCE) && (dist_vec_squared(pos_global, relative_to) <= radius_squared)) ||
 			     ((maskFilter & E_FILTER_BY_AGENT_PARCEL) && (LLViewerParcelMgr::getInstance()->inAgentParcel(pos_global))) )

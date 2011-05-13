@@ -149,7 +149,7 @@ public:
 	typedef std::list<LLViewerRegion*> region_list_t;
 	const region_list_t& getRegionList() const { return mActiveRegionList; }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	enum EGetAvatarsFilterMask
 	{
 		E_FILTER_BY_DISTANCE = 1,
@@ -165,7 +165,7 @@ public:
 //		uuid_vec_t* avatar_ids = NULL,
 //		std::vector<LLVector3d>* positions = NULL, 
 //		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX) const;
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	void getAvatars(
 		uuid_vec_t* avatar_ids = NULL, std::vector<LLVector3d>* positions = NULL, 
 		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX, U32 maskFilter = E_FILTER_BY_DISTANCE) const;

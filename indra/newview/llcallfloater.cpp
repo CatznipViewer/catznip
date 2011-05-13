@@ -70,7 +70,7 @@ public:
 		{
 			setOnline(true);
 //			showLastInteractionTime(false);
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 			showTextField(false);
 // [/SL:KB]
 			setShowProfileBtn(false);

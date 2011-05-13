@@ -68,7 +68,7 @@
 #define FRIEND_LIST_UPDATE_TIMEOUT	0.5
 #define NEARBY_LIST_UPDATE_INTERVAL 1
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 static const F32 LIT_UPDATE_PERIOD = 5;
 // [/SL:KB]
 
@@ -156,7 +156,7 @@ public:
 		}
 	};
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	const id_to_pos_map_t& getAvatarsPositions() { return mAvatarsPositions; }
 // [/SL:KB]
 
@@ -595,7 +595,7 @@ BOOL LLPanelPeople::postBuild()
 	mRecentList->setNoItemsMsg(getString("no_recent_people"));
 	mRecentList->setNoFilteredItemsMsg(getString("no_filtered_recent_people"));
 	mRecentList->setShowIcons("RecentListShowIcons");
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	mRecentList->setTextFieldCallback(boost::bind(&LLPanelPeople::updateLastInteractionTimes, this));
 	mRecentList->setTextFieldRefresh(LIT_UPDATE_PERIOD);
 // [/SL:KB]
@@ -817,7 +817,7 @@ void LLPanelPeople::updateNearbyList()
 
 	std::vector<LLVector3d> positions;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	static LLCachedControl<U32> maskFilter(gSavedSettings, "NearbyPeopleViewMask");
 
 	LLWorld::getInstance()->getAvatars(
@@ -826,7 +826,7 @@ void LLPanelPeople::updateNearbyList()
 // [/SL:KB]
 //	LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
 	mNearbyList->setDirty();
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	updateDistances();
 // [/SL:KB]
 
@@ -843,7 +843,7 @@ void LLPanelPeople::updateRecentList()
 	mRecentList->setDirty();
 }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 void LLPanelPeople::updateDistances()
 {
 	// Make sure we're using the same data as the distance comparator
@@ -854,27 +854,31 @@ void LLPanelPeople::updateDistances()
 	mNearbyList->getItems(items);
 	for (std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
 	{
-		LLAvatarListItem* pItem = static_cast<LLAvatarListItem*>(*itItem);
-		const LLVector3d& posAvatar = posAvatars.find(pItem->getAvatarId())->second;
-
-		pItem->setTextFieldDistance(dist_vec(posAvatar, posSelf));
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(*itItem);
+		if (pItem)
+		{
+			auto itAvatar = posAvatars.find(pItem->getAvatarId());
+			if (posAvatars.end() != itAvatar)
+				pItem->setTextFieldDistance(dist_vec(itAvatar->second, posSelf));
+		}
 	}
 }
 
 // Refresh shown time of our last interaction with all listed avatars.
 void LLPanelPeople::updateLastInteractionTimes()
 {
-	S32 now = (S32)LLDate::now().secondsSinceEpoch();
 	std::vector<LLPanel*> items;
 	mRecentList->getItems(items);
-
-	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
+	for( std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
 	{
-		// *TODO: error handling
-		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
-		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
-		if (secs_since >= 0)
-			item->setTextFieldSeconds(secs_since);
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(*itItem);
+		if (pItem)
+		{
+			S32 secsNow = LLDate::now().secondsSinceEpoch();
+			S32 secsDuration = secsNow - LLRecentPeople::instance().getDate(pItem->getAvatarId()).secondsSinceEpoch();
+			if (secsDuration >= 0)
+				pItem->setTextFieldSeconds(secsDuration);
+		}
 	}
 }
 // [/SL:KB]
@@ -1373,7 +1377,7 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	else if ( ("show_range" == chosen_item) || ("show_current_parcel" == chosen_item) || ("show_current_region" == chosen_item) )
 	{
 		U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
@@ -1410,7 +1414,7 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4.0h) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
 	U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
 
 	if ("show_range" == item)

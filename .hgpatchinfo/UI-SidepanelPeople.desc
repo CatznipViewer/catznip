@@ -1,0 +1,24 @@
+[UI/SidepanelPeople]
+- added   : distance field in the "Nearby" people sidebar tab
+- added   : slider to the "Nearby" people sidebar panel to easily adjust the "NearMeRange" setting (inspired by Starlight)
+- added   : "Show within Range", "Show on Current Parcel" and "Show on Current Region" options to the nearby people sidebar tab gear menu
+- added   : "Report", "Eject", "Freeze" and "Zoom In" to the "Nearby" people sidebar panel context menu
+    -> also reordered the menu options to match the "Inspect Avatar" gear dropdown menu
+	-> "Freeze" and "Eject" and "Kick" and "Teleport Home" operate on both single and multiple avatars
+    -> new methods don't suffer from the limitation that they only work on avatars who made it on the interest list
+- changed : "NearbyPeopleSortOrder" setting default from "by recent speakers" to "by distance"
+- changed : friend permissions can be toggled directly from the friends list
+- changed : attempt to get the Z-position from an avatar instance if the CoarseLocationUpdate for an agent's Z-position is zero
+- changed : don't show the "profile button" and "speaking indicator" on the "My Friends" avatar list in the people sidebar tab
+- changed : don't show the "speaking indicator" on the "Recent" avatar list in the people sidebar tab
+- changed : moved the avatar list item text field to the next-to-last slot
+    -> prevents other icons from popping into view when hovering (and subsequently displacing the text field)
+- changed : line up shown avatar list item child controls in columns rather than compacting them together
+    -> before: 1 2 3 4 => 2 used but invisible => 3 unused => 1 4
+               1 2 3 4 => 2 used and visible   => 3 unsued => 1 2 4
+    -> after : 1 2 3 4 => 2 used but invisible => 3 unused => 1 2 4
+               1 2 3 4 => 2 used and visible   => 3 unsued => 1 2 4
+    => as long as a "column" is shown then all items will have a dedicated (empty) visible space for it
+- changed : "Freeze/Unfreeze" and "Eject/Ban" on the avatar context menu use the new LLAvatarActions functions
+    -> adds the ability to affect agents outside of draw distance and (improved) display name handling
+- fixed   : [VWR-24218] Crash in findChildPanel() when quitting the viewer

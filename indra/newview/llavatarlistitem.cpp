@@ -38,7 +38,7 @@
 #include "llavatarnamecache.h"
 #include "llavatariconctrl.h"
 #include "lloutputmonitorctrl.h"
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 #include "llnotificationsutil.h"
 // [/SL:KB]
 
@@ -65,7 +65,7 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	mAvatarIcon(NULL),
 	mAvatarName(NULL),
 //	mLastInteractionTime(NULL),
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	mTextField(NULL),
 // [/SL:KB]
 	mIconPermissionOnline(NULL),
@@ -100,7 +100,7 @@ BOOL  LLAvatarListItem::postBuild()
 	mAvatarIcon = getChild<LLAvatarIconCtrl>("avatar_icon");
 	mAvatarName = getChild<LLTextBox>("avatar_name");
 //	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	mTextField = getChild<LLTextBox>("text_field");
 	mTextField->setVisible(false);
 	mTextField->setRightAlign();
@@ -110,7 +110,7 @@ BOOL  LLAvatarListItem::postBuild()
 //	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
 //	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
 	mIconPermissionEditTheirs = getChild<LLIconCtrl>("permission_edit_theirs_icon");
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	// NOTE-Catznip: we're leaving the names unchanged even though they're buttons now because we change too much LL code otherwise
 	mIconPermissionOnline = getChild<LLButton>("permission_online_icon");
 	mIconPermissionMap = getChild<LLButton>("permission_map_icon");
@@ -183,7 +183,7 @@ void LLAvatarListItem::onMouseEnter(S32 x, S32 y, MASK mask)
 	LLPanel::onMouseEnter(x, y, mask);
 
 //	showPermissions(mShowPermissions);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	refreshPermissions();
 // [/SL:KB]
 	updateChildren();
@@ -199,7 +199,7 @@ void LLAvatarListItem::onMouseLeave(S32 x, S32 y, MASK mask)
 	LLPanel::onMouseLeave(x, y, mask);
 
 //	showPermissions(false);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	refreshPermissions();
 // [/SL:KB]
 	updateChildren();
@@ -214,7 +214,7 @@ void LLAvatarListItem::changed(U32 mask)
 	if (mask & LLFriendObserver::POWERS)
 	{
 //		showPermissions(mShowPermissions && mHovered);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 		refreshPermissions();
 // [/SL:KB]
 		updateChildren();
@@ -328,7 +328,7 @@ void LLAvatarListItem::setShowPermissions(bool show)
 void LLAvatarListItem::showTextField(bool show)
 {
 //	mLastInteractionTime->setVisible(show);
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	mTextField->setVisible(show);
 // [/SL:KB]
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
@@ -342,7 +342,7 @@ void LLAvatarListItem::showTextField(bool show)
 //{
 //	mLastInteractionTime->setValue(formatSeconds(secs_since));
 //}
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 void LLAvatarListItem::setTextField(const std::string& text)
 {
 	mTextField->setValue(text);
@@ -386,6 +386,7 @@ void LLAvatarListItem::showSpeakingIndicator(bool visible)
 // probably this method should be totally removed.
 //	mSpeakingIndicator->setVisible(visible);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Reenable for updateChildren()
 	mSpeakingIndicator->setEnabled(visible);
 // [/SL:KB]
 //	updateChildren();
@@ -414,7 +415,7 @@ void LLAvatarListItem::onProfileBtnClick()
 	LLAvatarActions::showProfile(mAvatarId);
 }
 
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-11-04 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-11-04 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 void LLAvatarListItem::onPermissionBtnToggle(S32 toggleRight)
 {
 	LLRelationship* pRelationship = const_cast<LLRelationship*>(LLAvatarTracker::instance().getBuddyInfo(mAvatarId));
@@ -772,7 +773,7 @@ void LLAvatarListItem::updateChildren()
 }
 
 //bool LLAvatarListItem::showPermissions(bool visible)
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 bool LLAvatarListItem::refreshPermissions()
 // [/SL:KB]
 {
@@ -780,11 +781,11 @@ bool LLAvatarListItem::refreshPermissions()
 
 	const LLRelationship* relation = LLAvatarTracker::instance().getBuddyInfo(getAvatarId());
 //	if(relation && visible)
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	if(relation && mShowPermissions && mHovered)
 // [/SL:KB]
 	{
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 		bool fGrantedOnline = relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS);
 		mIconPermissionOnline->setVisible( (fGrantedOnline) || (mHovered) );
 		mIconPermissionOnline->setImageOverlay( (fGrantedOnline) ? "" : strUngrantedOverlay);
@@ -827,7 +828,7 @@ LLView* LLAvatarListItem::getItemChildView(EAvatarListItemChildIndex child_view_
 		break;
 //	case ALIC_INTERACTION_TIME:
 //		child_view = mLastInteractionTime;
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	case ALIC_TEXT_FIELD:
 		child_view = mTextField;
 // [/SL:KB]

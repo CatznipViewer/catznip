@@ -267,7 +267,7 @@ public:
 //
 //	// Owned by a group you belong to?  (officer OR member)
 //	BOOL isOwnedGroup(const LLVector3& pos);
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
 	BOOL isOwnedSelf(const LLVector3& pos) const;
 
 	// Owned by a group you belong to?  (officer OR member)

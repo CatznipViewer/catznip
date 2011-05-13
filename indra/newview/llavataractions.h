@@ -196,7 +196,7 @@ public:
 	 */
 	static bool canShareSelectedItems(LLInventoryPanel* inv_panel = NULL);
 
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4.0g) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.6.0a) | Modified: Catznip-2.4.0g
 	static void report(const LLUUID& idAgent);
 
 	static bool canZoomIn(const LLUUID& idAgent);
