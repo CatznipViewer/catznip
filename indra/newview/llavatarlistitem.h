@@ -167,6 +167,9 @@ private:
 	 */
 	typedef enum e_avatar_item_child {
 		ALIC_SPEAKER_INDICATOR,
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+		ALIC_TEXT_FIELD,
+// [/SL:KB]
 		ALIC_PROFILE_BUTTON,
 		ALIC_INFO_BUTTON,
 		ALIC_PERMISSION_ONLINE,
@@ -175,7 +178,7 @@ private:
 		ALIC_PERMISSION_EDIT_THEIRS,
 //		ALIC_INTERACTION_TIME,
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.5.0a) | Added: Catznip-2.3.0a
-		ALIC_TEXT_FIELD,
+//		ALIC_TEXT_FIELD,
 // [/SL:KB]
 		ALIC_NAME,
 		ALIC_ICON,

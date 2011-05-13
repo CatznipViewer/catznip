@@ -590,8 +590,16 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	//speaking indicator width + padding
 	S32 speaking_indicator_width = avatar_item->getRect().getWidth() - avatar_item->mSpeakingIndicator->getRect().mLeft;
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	// Text field textbox width + padding
+	S32 text_field_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+// [/SL:KB]
+
 	//profile btn width + padding
-	S32 profile_btn_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+//	S32 profile_btn_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	S32 profile_btn_width = avatar_item->mTextField->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+// [/SL:KB]
 
 	//info btn width + padding
 	S32 info_btn_width = avatar_item->mProfileBtn->getRect().mLeft - avatar_item->mInfoBtn->getRect().mLeft;
@@ -610,8 +618,8 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 
 	// last interaction time textbox width + padding
 //	S32 last_interaction_time_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mLastInteractionTime->getRect().mLeft;
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
-	S32 text_field_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+//	S32 text_field_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
 // [/SL:KB]
 
 	// avatar icon width + padding
@@ -623,8 +631,8 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	sChildrenWidths[--index] = icon_width;
 	sChildrenWidths[--index] = 0; // for avatar name we don't need its width, it will be calculated as "left available space"
 //	sChildrenWidths[--index] = last_interaction_time_width;
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3.0a) | Added: Catznip-2.3.0a
-	sChildrenWidths[--index] = text_field_width;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+//	sChildrenWidths[--index] = text_field_width;
 // [/SL:KB]
 	sChildrenWidths[--index] = permission_edit_theirs_width;
 	sChildrenWidths[--index] = permission_edit_mine_width;
@@ -632,6 +640,9 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	sChildrenWidths[--index] = permission_online_width;
 	sChildrenWidths[--index] = info_btn_width;
 	sChildrenWidths[--index] = profile_btn_width;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	sChildrenWidths[--index] = text_field_width;
+// [/SL:KB]
 	sChildrenWidths[--index] = speaking_indicator_width;
 	llassert(index == 0);
 }
