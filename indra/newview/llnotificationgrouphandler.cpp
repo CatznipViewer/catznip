@@ -99,7 +99,7 @@ bool LLGroupHandler::processNotification(const LLSD& notify)
 		mNewNotificationSignal();
 
 //		LLGroupActions::refresh_notices();
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 		LLGroupActions::refresh_notices(notification->getPayload()["group_id"].asUUID());
 // [/SL:KB]
 	}

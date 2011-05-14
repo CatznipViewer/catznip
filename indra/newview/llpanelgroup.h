@@ -26,7 +26,7 @@
 #ifndef LL_LLPANELGROUP_H
 #define LL_LLPANELGROUP_H
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 #include "llfloater.h"
 // [/SL:KB]
 #include "llgroupmgr.h"
@@ -125,7 +125,7 @@ protected:
 	LLUICtrl*		mJoinText;
 };
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 class LLFloaterGroupInfo : public LLFloater
 {
 public:

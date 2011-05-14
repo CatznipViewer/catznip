@@ -167,11 +167,11 @@ BOOL LLPanelGroup::postBuild()
 	getChild<LLButton>("btn_create")->setVisible(false);
 
 //	childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
 	if (!pParentView)
 	{
-		childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
+		childSetCommitCallback("back", boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
 	}
 	else
 	{
@@ -635,12 +635,11 @@ void LLPanelGroup::showNotice(const std::string& subject,
 
 //	if(panel->getID() != group_id)//???? only for current group_id or switch panels? FIXME
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	if (panel->getID() != group_id)
 	{
 		// Group isn't open in the sidebar, check for a floater
-		LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
-
+		const LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
 		panel = (pFloater) ? pFloater->findChild<LLPanelGroup>("panel_group_info_sidetray") : NULL;
 		if ( (!panel) || (panel->getID() != group_id) )
 			return;

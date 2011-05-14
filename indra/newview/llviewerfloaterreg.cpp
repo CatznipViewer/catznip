@@ -115,7 +115,7 @@
 #include "llnearbychat.h"
 #include "llpanelblockedlist.h"
 #include "llpanelclassified.h"
-// [SL:KB] - Patch: UI-ProfileGroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-ProfileGroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
 #include "llpanelgroup.h"
 #include "llpanelprofileview.h"
 // [/SL:KB]
@@ -164,7 +164,7 @@ void LLViewerFloaterReg::registerFloaters()
 
 	LLFloaterReg::add("event", "floater_event.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterEvent>);
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-ProfileGroupFloaters | Checked: 2011-01-23 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
 	LLFloaterReg::add("floater_group_info", "floater_group_info.xml", &LLFloaterReg::build<LLFloaterGroupInfo>);
 	LLFloaterReg::add("floater_profile_view", "floater_profile_view.xml", &LLFloaterReg::build<LLFloaterProfileView>);
 // [/SL:KB]
