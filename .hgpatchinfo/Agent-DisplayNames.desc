@@ -1,0 +1,10 @@
+[Agent/DisplayNames]
+- added   : "AgentLinkShowUsernames" setting to control when the username is shown as part of an agent app URL label
+    -> 0 = Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
+       1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
+       2 = Never show the username as part of the label (will still be visible on the tooltip)
+- changed : don't replace existing cached names with dummies on lookup failure
+- changed : split "Copy Name to Clipboard" SLurl context menu option into "Copy Display Name" and "Cope Fullname" options
+- changed : show the display name - rather than the complete name - on emotes in IM toasts
+    -> the username is already shown in the header so it's redundant to show it as part of the emote as well (and it doesn't really look very appealing)
+- fixed   : secondlife:///app/agent/<uuid>/completename no longer shows the complete name of the specified agent
