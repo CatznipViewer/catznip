@@ -65,14 +65,20 @@ public:
 	virtual void error(std::string const & message) = 0;
 	
 	// A newer version is available, but the current version may still be used.
-	virtual void optionalUpdate(std::string const & newVersion,
-								LLURI const & uri,
-								std::string const & hash) = 0;
-	
+//	virtual void optionalUpdate(std::string const & newVersion,
+//								LLURI const & uri,
+//								std::string const & hash) = 0;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	virtual void optionalUpdate(const LLSD& sdData) = 0;
+// [/SL:KB]
+
 	// A newer version is available, and the current version is no longer valid. 
-	virtual void requiredUpdate(std::string const & newVersion,
-								LLURI const & uri,
-								std::string const & hash) = 0;
+//	virtual void requiredUpdate(std::string const & newVersion,
+//								LLURI const & uri,
+//								std::string const & hash) = 0;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	virtual void requiredUpdate(const LLSD& sdData) = 0;
+// [/SL:KB]
 	
 	// The checked version is up to date; no newer version exists.
 	virtual void upToDate(void) = 0;
