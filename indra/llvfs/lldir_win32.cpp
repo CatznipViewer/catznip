@@ -43,6 +43,9 @@
 DWORD GetDllVersion(LPCTSTR lpszDllName);
 
 LLDir_Win32::LLDir_Win32()
+// [SL:KB] - Patch: Viewer-Build | Checked: 2011-04-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	: mDirSearch_h(INVALID_HANDLE_VALUE)
+// [/SL:KB]
 {
 	mDirDelimiter = "\\";
 
@@ -253,7 +256,10 @@ BOOL LLDir_Win32::getNextFileInDir(const std::string &dirname, const std::string
 	if (pathname != mCurrentDir)
 	{
 		// different dir specified, close old search
-		if (!mCurrentDir.empty())
+//		if (!mCurrentDir.empty())
+// [SL:KB] - Patch: Viewer-Build | Checked: 2011-04-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+		if (INVALID_HANDLE_VALUE != mDirSearch_h)
+// [/SL:KB]
 		{
 			FindClose(mDirSearch_h);
 		}
@@ -289,7 +295,11 @@ BOOL LLDir_Win32::getNextFileInDir(const std::string &dirname, const std::string
     {
        // No more files, so reset to beginning of directory
        FindClose(mDirSearch_h);
-       mCurrentDir[0] = '\000';
+//       mCurrentDir[0] = '\000';
+// [SL:KB] - Patch: Viewer-Build | Checked: 2011-04-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	   mDirSearch_h = INVALID_HANDLE_VALUE;
+	   mCurrentDir.clear();
+// [/SL:KB]
     }
 
     if (fileFound)

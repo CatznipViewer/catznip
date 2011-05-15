@@ -852,7 +852,10 @@ void send_stats()
 	body["DisplayNamesEnabled"] = gSavedSettings.getBOOL("UseDisplayNames");
 	body["DisplayNamesShowUsername"] = gSavedSettings.getBOOL("NameTagShowUsernames");
 	
-	body["MinimalSkin"] = !gSavedSettings.getString("SessionSettingsFile").empty();
+//	body["MinimalSkin"] = !gSavedSettings.getString("SessionSettingsFile").empty();
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-15 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	body["MinimalSkin"] = ("settings_minimal.xml" == gSavedSettings.getString("SessionSettingsFile"));
+// [/SL:KB]
 	
 	LLViewerStats::getInstance()->addToMessage(body);
 	LLHTTPClient::post(url, body, new ViewerStatsResponder());
