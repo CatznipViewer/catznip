@@ -13,8 +13,8 @@ if (COMMAND cmake_policy)
   cmake_policy(SET CMP0003 OLD)
 endif (COMMAND cmake_policy)
 
-set(ROOT_PROJECT_NAME "SecondLife" CACHE STRING
-    "The root project/makefile/solution name. Defaults to SecondLife.")
+set(ROOT_PROJECT_NAME "Catznip" CACHE STRING
+    "The root project/makefile/solution name. Defaults to Catznip.")
 project(${ROOT_PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -99,7 +99,7 @@ if (VIEWER)
   endif (LINUX)
 
   add_subdirectory(${VIEWER_PREFIX}newview)
-  add_dependencies(viewer secondlife-bin)
+  add_dependencies(viewer catznip-bin)
 endif (VIEWER)
 
 # Linux builds the viewer and server in 2 separate projects

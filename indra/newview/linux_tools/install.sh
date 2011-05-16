@@ -48,8 +48,8 @@ function warn()
 function homedir_install()
 {
     warn "You are not running as a privileged user, so you will only be able"
-    warn "to install the Second Life Viewer in your home directory. If you"
-    warn "would like to install the Second Life Viewer system-wide, please run"
+    warn "to install the Catznip Viewer in your home directory. If you"
+    warn "would like to install the Catznip Viewer system-wide, please run"
     warn "this script as the root user, or with the 'sudo' command."
     echo
 
