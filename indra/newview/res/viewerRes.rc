@@ -148,9 +148,9 @@ BEGIN
             VALUE "CompanyName", "Catznip"
             VALUE "FileDescription", "Catznip"
             VALUE "FileVersion", "2.6.0.0"
-            VALUE "InternalName", "Catznip"
-            VALUE "LegalCopyright", "Copyright ©2009-2010, Kitty Barnett"
-            VALUE "OriginalFilename", "Catznip.exe"
+            VALUE "InternalName", "Catznip.exe"
+            VALUE "LegalCopyright", "Copyright (C)2001-2011, portions by Linden Research, Inc, portions by Kitty Barnett"
+            VALUE "OriginalFilename", "catznip-bin.exe"
             VALUE "ProductName", "Catznip"
             VALUE "ProductVersion", "2.6.0.0"
         END
