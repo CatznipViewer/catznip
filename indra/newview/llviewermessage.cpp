@@ -1713,8 +1713,24 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			// or IM_GROUP_NOTICE_INVENTORY_DECLINED
 		default:
 			// close button probably (or any of the fall-throughs from above)
-			msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
-			msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+			if ( (IM_TASK_INVENTORY_OFFERED == mIM) && ((IOR_BUSY == button) || ( IOR_DECLINE == button)) && 
+				 (gSavedSettings.getBOOL("DeclineTaskOfferToTrash")) )
+			{
+				// open_inventory_offer() will call highlight_offered_object() which returns false for items in the trash 
+				// so we don't have to do anything to suppress the task opener
+				const LLUUID idTash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+				msg->addU8Fast(_PREHASH_Dialog, IM_TASK_INVENTORY_ACCEPTED);
+				msg->addBinaryDataFast(_PREHASH_BinaryBucket, &idTash.mData, sizeof(idTash.mData));
+			}
+			else
+			{
+// [/SL:KB]
+				msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
+				msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+			}
+// [/SL:KB]
 			// send the message
 			msg->sendReliable(mHost);
 
