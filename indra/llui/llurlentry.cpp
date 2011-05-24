@@ -387,35 +387,64 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 	// return a tooltip corresponding to the URL type instead of the generic one
 	std::string url = getUrl(string);
 
+//	if (LLStringUtil::endsWith(url, "/inspect"))
+//	{
+//		return LLTrans::getString("TooltipAgentInspect");
+//	}
+//	if (LLStringUtil::endsWith(url, "/mute"))
+//	{
+//		return LLTrans::getString("TooltipAgentMute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/unmute"))
+//	{
+//		return LLTrans::getString("TooltipAgentUnmute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/im"))
+//	{
+//		return LLTrans::getString("TooltipAgentIM");
+//	}
+//	if (LLStringUtil::endsWith(url, "/pay"))
+//	{
+//		return LLTrans::getString("TooltipAgentPay");
+//	}
+//	if (LLStringUtil::endsWith(url, "/offerteleport"))
+//	{
+//		return LLTrans::getString("TooltipAgentOfferTeleport");
+//	}
+//	if (LLStringUtil::endsWith(url, "/requestfriend"))
+//	{
+//		return LLTrans::getString("TooltipAgentRequestFriend");
+//	}
+//	return LLTrans::getString("TooltipAgentUrl");
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
+		strTooltip = LLTrans::getString("TooltipAgentInspect");
+	else if (LLStringUtil::endsWith(url, "/mute"))
+		strTooltip = LLTrans::getString("TooltipAgentMute");
+	else if (LLStringUtil::endsWith(url, "/unmute"))
+		strTooltip = LLTrans::getString("TooltipAgentUnmute");
+	else if (LLStringUtil::endsWith(url, "/im"))
+		strTooltip = LLTrans::getString("TooltipAgentIM");
+	else if (LLStringUtil::endsWith(url, "/pay"))
+		strTooltip = LLTrans::getString("TooltipAgentPay");
+	else if (LLStringUtil::endsWith(url, "/offerteleport"))
+		strTooltip = LLTrans::getString("TooltipAgentOfferTeleport");
+	else if (LLStringUtil::endsWith(url, "/requestfriend"))
+		strTooltip = LLTrans::getString("TooltipAgentRequestFriend");
+	else
+		strTooltip = LLTrans::getString("TooltipAgentUrl");
+
+	// If we (sometimes) hide the username, we have to show it as part of the tooltip
+	// NOTE: if the name isn't currently cached then the tooltip will be the default one, regardless of the current setting
+	if ( (LLAvatarNameCache::useDisplayNames()) && (LLAvatarName::SHOW_ALWAYS != LLAvatarName::getShowUsername()) )
 	{
-		return LLTrans::getString("TooltipAgentInspect");
+		LLUUID idAgent(getIDStringFromUrl(url)); LLAvatarName avName;
+		if ( (idAgent.notNull()) && (LLAvatarNameCache::get(idAgent, &avName)) )
+			return llformat("%s\n(%s)", avName.mUsername.c_str(), strTooltip.c_str());
 	}
-	if (LLStringUtil::endsWith(url, "/mute"))
-	{
-		return LLTrans::getString("TooltipAgentMute");
-	}
-	if (LLStringUtil::endsWith(url, "/unmute"))
-	{
-		return LLTrans::getString("TooltipAgentUnmute");
-	}
-	if (LLStringUtil::endsWith(url, "/im"))
-	{
-		return LLTrans::getString("TooltipAgentIM");
-	}
-	if (LLStringUtil::endsWith(url, "/pay"))
-	{
-		return LLTrans::getString("TooltipAgentPay");
-	}
-	if (LLStringUtil::endsWith(url, "/offerteleport"))
-	{
-		return LLTrans::getString("TooltipAgentOfferTeleport");
-	}
-	if (LLStringUtil::endsWith(url, "/requestfriend"))
-	{
-		return LLTrans::getString("TooltipAgentRequestFriend");
-	}
-	return LLTrans::getString("TooltipAgentUrl");
+	return strTooltip;
+// [/SL:KB]
 }
 
 bool LLUrlEntryAgent::underlineOnHoverOnly(const std::string &string) const
@@ -581,7 +610,10 @@ LLUrlEntryAgentCompleteName::LLUrlEntryAgentCompleteName()
 
 std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name)
 {
-	return avatar_name.getCompleteName();
+//	return avatar_name.getCompleteName();
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	return avatar_name.getCompleteName(LLAvatarName::SHOW_ALWAYS);
+// [/SL:KB]
 }
 
 //
