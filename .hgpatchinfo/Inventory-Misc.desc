@@ -1,0 +1,3 @@
+[Inventory/Misc]
+- fixed : dropping a direct descendent of an outfit folder onto the folder shouldn't create a link to the dropped item
+- fixed : moving a folder link to a different folder moves the target folder rather the folder link
