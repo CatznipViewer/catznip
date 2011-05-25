@@ -90,6 +90,9 @@ public:
 
 	LLChicletPanel*		getChicletPanel()	{return mChicletPanel;}
 	LLNearbyChatBar*		getNearbyChatBar();
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.5.0a) | Added: Catznip-2.4.0a
+	LLNearbyChatBar*		getNearbyChatBar(bool fLiteMode) const;
+// [/SL:KB]
 
 	void onCommitGesture(LLUICtrl* ctrl);
 
@@ -466,7 +469,6 @@ private:
 	 * Auto-hidden buttons are those that re-appear as soon as we have enough available space.
 	 */
 	void setAutoHidden(MASK button_types, bool hide);
-
 	/// Buttons automatically hidden due to lack of space.
 	MASK mResizeState;
 
