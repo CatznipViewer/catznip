@@ -2177,7 +2177,7 @@ bool LLAppViewer::initConfiguration()
 
 	if (gSavedSettings.getBOOL("FirstRunThisInstall"))
 	{
-		gSavedSettings.setString("SessionSettingsFile", "settings_minimal.xml");
+//		gSavedSettings.setString("SessionSettingsFile", "settings_minimal.xml");
 		gSavedSettings.setBOOL("FirstRunThisInstall", FALSE);
 	}
 
@@ -2390,8 +2390,19 @@ bool LLAppViewer::initConfiguration()
     if(skinfolder && LLStringUtil::null != skinfolder->getValue().asString())
     {   
 		// hack to force the skin to default.
-        gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
-		//gDirUtilp->setSkinFolder("default");
+//        gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
+//		//gDirUtilp->setSkinFolder("default");
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-13 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+		gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
+		loadSettingsFromDirectory("CurrentSkin");
+
+		const LLControlVariable* themefolder = gSavedSettings.getControl("SkinCurrentTheme");
+		if ( (themefolder) && (LLStringUtil::null != themefolder->getValue().asString()) )
+		{
+			gDirUtilp->setSkinThemeFolder(themefolder->getValue().asString());
+			loadSettingsFromDirectory("CurrentSkinTheme");
+		}
+// [/SL:KB]
     }
 
     mYieldTime = gSavedSettings.getS32("YieldTime");
