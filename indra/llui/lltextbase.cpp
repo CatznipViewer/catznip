@@ -1584,7 +1584,7 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.Execute", boost::bind(&LLUrlAction::executeSLURL, url));
 	registrar.add("Url.Teleport", boost::bind(&LLUrlAction::teleportToLocation, url));
 	registrar.add("Url.ShowProfile", boost::bind(&LLUrlAction::showProfile, url));
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
 	registrar.add("Url.StartIM", boost::bind(&LLUrlAction::startIM, url));
 	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
 // [/SL:KB]

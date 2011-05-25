@@ -158,7 +158,7 @@ void LLUrlAction::showProfile(std::string url)
 	}
 }
 
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.5.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
 void LLUrlAction::startIM(std::string url)
 {
 	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
@@ -180,18 +180,12 @@ void LLUrlAction::offerTeleport(std::string url)
 	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
 	LLURI uri(url);
 	LLSD path_array = uri.pathArray();
-	if (path_array.size() == 4)
+	if ( (path_array.size() == 4) && ("agent" == path_array.get(1).asString()) )
 	{
+		// Teleport offers only make sense for agents
 		std::string id_str = path_array.get(2).asString();
 		if (LLUUID::validate(id_str))
-		{
-			std::string cmd_str = path_array.get(1).asString();
-			// Teleport offers only make sense for agents
-			if ("agent" == cmd_str)
-			{
-				executeSLURL("secondlife:///app/" + cmd_str + "/" + id_str + "/offerteleport");
-			}
-		}
+			executeSLURL("secondlife:///app/agent/" + id_str + "/offerteleport");
 	}
 }
 // [/SL:KB]
