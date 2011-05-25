@@ -1421,6 +1421,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ChatOnlineNotificationToNearbyChat</key>
+    <map>
+      <key>Comment</key>
+      <string>Optionally logs friends online and offline notifications to the nearby chat floater</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>ChatPersistTime</key>
     <map>
       <key>Comment</key>
