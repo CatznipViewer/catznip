@@ -1,0 +1,9 @@
+[Inventory/MultiWear]
+- dependency : depends on Inventory/MultiAction
+- dependency : [partial] depends on Appearance/Misc to "fix" LLAppearanceMgr::filterWearableItems
+- added      : LLWearableBridge::performActionBatch() wears multiple wearables at once
+    -> fixes some instances of COF "corruption"
+- changed    : <enter>'ing a selection of wearables will wear them if at least one is unworn or remove them if all are worn
+    -> undesired edge case would be a selection of all worn wearables + 1 unworn attachment => attachment will get attached while the wearables are removed
+- fixed      : double-clicking a wearable wears it if it's unworn and removes it if it's worn
+    -> behaviour is made consistent with the double-click behaviour of an attachment
