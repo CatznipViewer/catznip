@@ -1,3 +1,7 @@
 [Inventory/Misc]
+- added : "DeclineTaskOfferToTrash" to accept inventory offers from objects into the trash when declining
+- added : "Move to 'Lost and Found'" to the inventory context menu for unparented folders
+    -> folders with a NULL UUID parent will show as existing on the same level as "My Inventory"
+    -> regular drag-and-drop or other inventory operations won't succeed and fixing normally requires Linden Lab intervention
 - fixed : dropping a direct descendent of an outfit folder onto the folder shouldn't create a link to the dropped item
 - fixed : moving a folder link to a different folder moves the target folder rather the folder link
