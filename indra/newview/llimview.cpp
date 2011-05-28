@@ -564,8 +564,8 @@ void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LL
 //	{  
 //		mHistoryFileName = av_name.mUsername;
 //	}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-01-16 (Catznip-2.4.0h) | Modified: Catznip-2.4.0h
-	if (!av_name.mIsDummy)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-01-16 (Catznip-2.6.0a) | Modified: Catznip-2.4.0h
+	if (!av_name.mIsTemporaryName)
 	{
 		LLIMModel::buildIMP2PLogFilename(avatar_id, mName, mHistoryFileName);
 
@@ -604,7 +604,7 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 //	{
 //		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
 //	}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
 	// Not all of the code above is broken but it becomes a bit of a mess otherwise
 	if (isAdHoc())		//ad-hoc requires sophisticated chat history saving schemes
 	{
@@ -626,7 +626,7 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 	}
 	else if (isP2P())	// look up username to use as the log name
 	{
-		// NOTE-Catznip: [SL-2.4.0] mName will be:
+		// NOTE-Catznip: [SL-2.6.0] mName will be:
 		//   - the "complete name" if display names are enabled and it's an outgoing IM
 		//   - the "legacy name" if display names are disabled or if it's an incoming IM
 		LLIMModel::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
@@ -818,14 +818,14 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
 bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
 {
 	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames");
 
 	// If we have the name cached then we can simply return the username
 	LLAvatarName avName;
-	if ( (LLAvatarNameCache::get(idAgent, &avName)) && (!avName.mIsDummy) )
+	if ( (LLAvatarNameCache::get(idAgent, &avName)) && (!avName.mIsTemporaryName) )
 	{
 		if (!fLegacyFilenames)
 		{
@@ -2549,7 +2549,7 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 //			// since we select user to share item with - his name is already in cache
 //			gCacheName->getFullName(args["user_id"], session_name);
 //			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
 			std::string strFilename;
 			if (LLIMModel::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
 			{

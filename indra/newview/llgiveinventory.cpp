@@ -313,7 +313,7 @@ void LLGiveInventory::logInventoryOffer(const LLUUID& to_agent, const LLUUID &im
 //		{
 //			LLIMModel::instance().logToFile(full_name, LLTrans::getString("SECOND_LIFE"), im_session_id, LLTrans::getString("inventory_item_offered-im"));
 //		}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4.0c) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
 		std::string strFilename;
 		if (LLIMModel::buildIMP2PLogFilename(to_agent, LLStringUtil::null, strFilename))
 		{
