@@ -1,0 +1,12 @@
+[Viewer/Branding]
+- changed : basic rebranding from "Second Life" to "Catznip"
+- changed : viewer channel set to "Catznip Internal" by default
+- changed : use a Catznip-specific cache folder
+- changed : use a Catznip-specific settings folder
+- changed : release notes point to http://catznip.com/viewer/releasenotes/
+- changed : login page points to http://catznip.com/viewer/login/
+- changed : Windows crash logger will send crash reports to catznip.com if crash reporting is enabled
+    -> pruned some of the information that's normally saved to debug_info.log
+- added   : "Help / Catznip Support Group" menu option to either open the support group profile (if not a member) or start a group chat session
+- added   : SaveMinidumpType setting to control minidump creation type [Windows-only]
+    -> include MiniDumpFilterModulePaths by default to strip loaded module paths
