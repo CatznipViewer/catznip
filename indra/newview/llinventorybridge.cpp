@@ -4691,13 +4691,22 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 
 		// Disable wear and take off based on whether the item is worn.
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-05-29 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+		bool fIsWorn = get_is_item_worn(item->getUUID());
+
 		// Show "Wear" and "Add" for a selection where not all wearable items are currently worn
-		// (but disable "Add" below if at least one of the unworn items is a bodypart)
 		if ((flags & WORN_SELECTION) == 0)
 		{
 			items.push_back(std::string("Wearable And Object Wear"));
 			items.push_back(std::string("Wearable Add"));
+
+			// Disable "Add" if at least one unworn wearable already has MAX_CLOTHING_PER_TYPE worn, or does not allow for multi-wearables
+			if ( (!fIsWorn) &&
+				 ( (!LLWearableType::getAllowMultiwear(mWearableType)) || 
+				   (gAgentWearables.getWearableCount(mWearableType) >= LLAgentWearables::MAX_CLOTHING_PER_TYPE) ) )
+			{
+					disabled_items.push_back(std::string("Wearable Add"));
+			}
 		}
 
 		// Show "Take Off" for a selection where some of the selected items are worn
@@ -4709,36 +4718,12 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 				items.push_back(std::string("Wearable And Object Take Off"));
 			else
 				items.push_back(std::string("Take Off"));
-		}
 
-		if (item)
-		{
-			switch (item->getType())
+			// Disable "Take Off / Detach" if at least one of the worn items is a bodypart
+			if ( (fIsWorn) && (item) && (LLAssetType::AT_BODYPART == item->getType()) )
 			{
-				case LLAssetType::AT_CLOTHING:
-					break;
-				case LLAssetType::AT_BODYPART:
-					if (get_is_item_worn(item->getUUID()))
-					{
-						disabled_items.push_back(std::string("Take Off"));
-						disabled_items.push_back(std::string("Wearable And Object Take Off"));
-					}
-					else
-					{
-						disabled_items.push_back(std::string("Wearable Add"));
-					}
-
-					if (LLWearableType::getAllowMultiwear(mWearableType))
-					{
-						items.push_back(std::string("Wearable Add"));
-						if (gAgentWearables.getWearableCount(mWearableType) >= LLAgentWearables::MAX_CLOTHING_PER_TYPE)
-						{
-							disabled_items.push_back(std::string("Wearable Add"));
-						}
-					}
-					break;
-				default:
-					break;
+				disabled_items.push_back(std::string("Take Off"));
+				disabled_items.push_back(std::string("Wearable And Object Take Off"));
 			}
 		}
 // [/SL:KB]
@@ -4758,11 +4743,19 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 //					else
 //					{
 //						items.push_back(std::string("Wearable And Object Wear"));
-//						items.push_back(std::string("Wearable Add"));
 //						disabled_items.push_back(std::string("Take Off"));
 //						disabled_items.push_back(std::string("Wearable Edit"));
 //					}
 //					break;
+//
+//					if (LLWearableType::getAllowMultiwear(mWearableType))
+//					{
+//						items.push_back(std::string("Wearable Add"));
+//						if (gAgentWearables.getWearableCount(mWearableType) > 0)
+//						{
+//							disabled_items.push_back(std::string("Wearable Add"));
+//						}
+//					}
 //				default:
 //					break;
 //			}
