@@ -1099,6 +1099,14 @@
 	<string name="Snapshots" value=" Fotos,"/>
 	<string name="No Filters" value="Nein "/>
 	<string name="Since Logoff" value=" - Seit Abmeldung"/>
+	<string name="InvAction wear">Anziehen</string>
+	<string name="InvAction take_off">Ausziehen</string>
+	<string name="InvAction attach">Anziehen</string>
+	<string name="InvAction detach">Ausziehen</string>
+	<string name="InvAction activate">Aktivieren</string>
+	<string name="InvAction deactivate">Deaktivieren</string>
+	<string name="InvAction teleport">Teleportieren</string>
+	<string name="InvAction open">Öffnen</string>
 	<string name="InvFolder My Inventory">
 		Mein Inventar
 	</string>
