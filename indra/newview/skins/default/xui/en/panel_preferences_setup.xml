@@ -168,7 +168,7 @@
    left_pad="5"
    name="set_cache"
    top_delta="-1"
-   width="100">
+   width="80">
     <button.commit_callback
      function="Pref.SetCache" />
   </button>
@@ -181,9 +181,22 @@
     left_pad="3"
     name="reset_cache"
     top_delta="0"
-    width="100">
+    width="80">
     <button.commit_callback
      function="Pref.ResetCache" />
+  </button>
+  <button
+    follows="left|top"
+    height="23"
+    label="Clear Cache"
+    label_selected="Clear Cache"
+    layout="topleft"
+    left_pad="3"
+    name="clear_viewer_cache"
+    top_delta="0"
+    width="80">
+    <button.commit_callback
+     function="Pref.ClearViewerCache" />
   </button>
 
   <text
