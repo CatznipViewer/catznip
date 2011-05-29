@@ -4712,7 +4712,8 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			// (or if it's a single clothing item then only show it if its wearable type already has a current wearable
 			if ( ( (flags & MULTIPLE_SELECTED_ITEMS) && ((flags & PARTIAL_WORN_SELECTION) == 0) &&
 				   ((flags & (ATTACHMENT_SELECTION | BODYPART_SELECTION | NONWEARABLE_SELECTION)) == 0) ) ||
-			     ( ((flags & MULTIPLE_SELECTED_ITEMS) == 0) && (gAgentWearables.getWearableCount(item->getWearableType())) ) )
+			     ( ((flags & MULTIPLE_SELECTED_ITEMS) == 0) && (gAgentWearables.getWearableCount(item->getWearableType())) &&
+				   (LLWearableType::getAllowMultiwear(item->getWearableType())) ) )
 			{
 				items.push_back(std::string("Wear On"));
 			}
@@ -4843,8 +4844,8 @@ bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
 	for (std::set<LLUUID>::const_iterator itSel = selItems.begin(); itSel != selItems.end(); ++itSel)
 	{
 		const LLViewerInventoryItem* pItem = gInventory.getItem(*itSel);
-		if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_CLOTHING != pItem->getType()) )
-			continue; // "Wear On" only makes sense for clothing wearables
+		if ( (!pItem) || (!pItem->isWearableType()) || (!LLWearableType::getAllowMultiwear(pItem->getWearableType())) )
+			continue; // "Wear On" only makes sense for wearables we can wear multiple of
 
 		// Now figure out where the user wants it wear on (on top == normal "wear add" so we just pick an invalid index)
 		U32 idxWearable;
@@ -4887,8 +4888,8 @@ bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl,
 
 	LLFolderViewItem* pFVItem = pPanel->getRootFolder()->getCurSelectedItem();
 	const LLViewerInventoryItem* pItem = (pFVItem) ? pFVItem->getInventoryItem() : NULL;
-	if ( (!pItem) || (!pItem->isWearableType()) || (LLAssetType::AT_BODYPART == pItem->getType()) )
-		return false; // "Wear On" only makes sense for clothing wearables
+	if ( (!pItem) || (!pItem->isWearableType()) || (!LLWearableType::getAllowMultiwear(pItem->getWearableType())) )
+		return false; // "Wear On" only makes sense for wearables we can wear multiple of
 
 	LLWearableType::EType eType = pItem->getWearableType();
 	U32 cntWearable = gAgentWearables.getWearableCount(eType);
