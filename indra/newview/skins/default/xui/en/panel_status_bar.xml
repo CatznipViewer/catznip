@@ -34,6 +34,16 @@
         L$ [AMT]
     </panel.string>
   <panel
+    class="topinfo_bar"
+    filename="panel_topinfo_bar.xml"
+    follows="top|left"
+    height="19"
+    layout="topleft"
+    left="425"
+    name="topinfo_bar"
+    top="2"
+    width="250" />
+  <panel
     height="18"
     left="-315"
     width="95"

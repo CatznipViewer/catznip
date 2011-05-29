@@ -1739,10 +1739,10 @@ void LLAgent::endAnimationUpdateUI()
 		LLNavigationBar::getInstance()->setVisible(TRUE);
 		gStatusBar->setVisibleForMouselook(true);
 
-		if (gSavedSettings.getBOOL("ShowMiniLocationPanel"))
-		{
-			LLPanelTopInfoBar::getInstance()->setVisible(TRUE);
-		}
+//		if (gSavedSettings.getBOOL("ShowMiniLocationPanel"))
+//		{
+//			LLPanelTopInfoBar::getInstance()->setVisible(TRUE);
+//		}
 
 		LLBottomTray::getInstance()->onMouselookModeOut();
 
@@ -1846,7 +1846,7 @@ void LLAgent::endAnimationUpdateUI()
 		LLNavigationBar::getInstance()->setVisible(FALSE);
 		gStatusBar->setVisibleForMouselook(false);
 
-		LLPanelTopInfoBar::getInstance()->setVisible(FALSE);
+//		LLPanelTopInfoBar::getInstance()->setVisible(FALSE);
 
 		LLBottomTray::getInstance()->onMouselookModeIn();
 
