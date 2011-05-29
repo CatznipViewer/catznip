@@ -122,6 +122,9 @@ public:
 
 	// Call this method to set the selection.
 	void openAllFolders();
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+	bool getSelectedItems(LLInventoryModel::item_array_t& items) const;
+// [/SL:KB]
 	void setSelection(const LLUUID& obj_id, BOOL take_keyboard_focus);
 	void setSelectCallback(const LLFolderView::signal_t::slot_type& cb);
 	void clearSelection();

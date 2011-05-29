@@ -28,6 +28,9 @@
 #ifndef LL_LLINVENTORYFUNCTIONS_H
 #define LL_LLINVENTORYFUNCTIONS_H
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+#include "llinventorymodel.h"
+// [/SL:KB]
 #include "llinventorytype.h"
 #include "llfolderview.h"
 #include "llfolderviewitem.h"
@@ -48,6 +51,23 @@ BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id);
 BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id);
+
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+// These functions are shared betwen UI-SidepanelInventory and UI-SidepanelOutfitsView
+
+// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
+LLUUID get_items_parent(const LLInventoryModel::item_array_t& items);
+
+// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
+bool get_item_wearable(const LLInventoryItem* pItem);
+bool get_item_wearable(const LLUUID& idItem);
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items);
+
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items);
+// [/SL:KB]
 
 void show_item_profile(const LLUUID& item_uuid);
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
