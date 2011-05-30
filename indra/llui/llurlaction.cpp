@@ -145,7 +145,7 @@ void LLUrlAction::copyLabelToClipboard(std::string url)
 }
 
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
-void LLUrlAction::copyToClipboard(std::string strURL, LLSD sdAction)
+void LLUrlAction::copyToClipboard(std::string strURL, const LLSD& sdAction)
 {
 	// Get id from 'secondlife:///app/agent/{id}/{action}'
 	LLURI sdURI(strURL); LLSD sdPath = sdURI.pathArray();
