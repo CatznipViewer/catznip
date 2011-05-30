@@ -472,80 +472,11 @@ LLInventoryType::EType get_items_invtype(const LLInventoryModel::item_array_t& i
 	return invType;
 }
 
-// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
-bool get_items_wearable(const LLInventoryModel::item_array_t& items)
-{
-	bool fWearable = true;
-	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
-	{
-		// TODO-Catznip: there has to be a generic function for this *somewhere*?
-		const LLViewerInventoryItem* pItem = itItem->get();
-		if (!pItem)
-			continue;
-
-		switch (pItem->getType())
-		{
-			case LLAssetType::AT_OBJECT:
-			case LLAssetType::AT_BODYPART:
-			case LLAssetType::AT_CLOTHING:
-			case LLAssetType::AT_GESTURE:
-				break;
-			default:
-				fWearable = false;
-				break;
-		}
-	}
-	return fWearable;
-}
-
-// Returns TRUE if every item is worn (handles wearables, attachments and gestures)
-bool get_items_worn(const LLInventoryModel::item_array_t& items)
-{
-	bool fWorn = true;
-	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
-	{
-		const LLViewerInventoryItem* pItem = itItem->get();
-		if (!pItem)
-			continue;
-
-		fWorn = get_is_item_worn(pItem->getUUID());
-	}
-	return fWorn;
-}
-
-bool LLSidepanelInventory::getSelectedItems(LLInventoryModel::item_array_t& items) /*const*/
-{
-	items.clear();
-
-	/*const*/ LLInventoryPanel* pPanel = getActivePanel();
-	if ( (!pPanel) || (!pPanel->getRootFolder()) )
-		return false;
-	std::set<LLUUID> selItems = pPanel->getRootFolder()->getSelectionList();
-	if (selItems.empty())
-		return false;
-
-	for (std::set<LLUUID>::const_iterator itItem = selItems.begin(); itItem != selItems.end(); itItem++)
-	{
-		LLViewerInventoryItem* pItem = pPanel->getModel()->getItem(*itItem);
-		if (!pItem)
-		{
-			// Bit of a hack but if there are categories selected then we don't want to show any actions so we return an empty selection
-			if (pPanel->getModel()->getCategory(*itItem))
-			{
-				items.clear();
-				return false;
-			}
-			continue;
-		}
-		items.push_back(pItem);
-	}
-	return !items.empty();
-}
-
 std::string LLSidepanelInventory::getSelectionAction() /*const*/
 {
 	LLInventoryModel::item_array_t items;
-	if (!getSelectedItems(items))
+	/*const*/ LLInventoryPanel* pPanel = getActivePanel();
+	if ( (!pPanel) || (!pPanel->getSelectedItems(items)) )
 		return LLStringUtil::null;
 
 	LLInventoryType::EType invType = get_items_invtype(items);

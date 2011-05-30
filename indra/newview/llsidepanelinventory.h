@@ -71,8 +71,6 @@ protected:
 	bool canWearSelected(); // check whether selected items can be worn
 
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
-	// Fills an item array with the currently selected items (returns false on error or if no items selected)
-	bool        getSelectedItems(LLInventoryModel::item_array_t& items) /*const*/;
 	// Returns the action that makes sense for the current selection (or an empty string if none)
 	std::string getSelectionAction() /*const*/;
 
