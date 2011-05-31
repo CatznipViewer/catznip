@@ -82,7 +82,10 @@ namespace LLAvatarNameCache
 	LLFrameTimer sRequestTimer;
 
     /// Maximum time an unrefreshed cache entry is allowed
-    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
+//    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+    const F64 MAX_UNREFRESHED_TIME = 90.0 * 60.0;
+// [/SL:KB]
 
     /// Time when unrefreshed cached names were checked last
     static F64 sLastExpireCheck;
