@@ -193,7 +193,10 @@ public:
 		F64 expires = LLAvatarNameCache::nameExpirationFromHeaders(mHeaders);
 		F64 now = LLFrameTimer::getTotalSeconds();
 
-		LLSD agents = content["agents"];
+//		LLSD agents = content["agents"];
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+		const LLSD& agents = content["agents"];
+// [/SL:KB]
 		LLSD::array_const_iterator it = agents.beginArray();
 		for ( ; it != agents.endArray(); ++it)
 		{
@@ -223,7 +226,10 @@ public:
 		}
 
 		// Same logic as error response case
-		LLSD unresolved_agents = content["bad_ids"];
+//		LLSD unresolved_agents = content["bad_ids"];
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+		const LLSD& unresolved_agents = content["bad_ids"];
+// [/SL:KB]
 		S32  num_unresolved = unresolved_agents.size();
 		if (num_unresolved > 0)
 		{
