@@ -11618,6 +11618,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ViewerDataURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer data service (supplies custom MOTD, blocked viewer versions, etc))</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+    </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
       <key>Comment</key>
