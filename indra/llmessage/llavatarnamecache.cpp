@@ -678,12 +678,22 @@ void LLAvatarNameCache::get(const LLUUID& agent_id, callback_slot_t slot)
 			{
 				const LLAvatarName& av_name = it->second;
 				
-				if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+				// Don't wait for the lookup before firing the callback if we have a valid cached entry
+				if ( (!av_name.mIsTemporaryName) && (av_name.mExpires > LLFrameTimer::getTotalSeconds() - MAX_UNREFRESHED_TIME) )
 				{
-					// ...name already exists in cache, fire callback now
+					if ( (av_name.mExpires < LLFrameTimer::getTotalSeconds()) && (!isRequestPending(agent_id)) )
+						sAskQueue.insert(agent_id);
 					fireSignal(agent_id, slot, av_name);
 					return;
 				}
+// [/SL:KB]
+//				if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+//				{
+//					// ...name already exists in cache, fire callback now
+//					fireSignal(agent_id, slot, av_name);
+//					return;
+//				}
 			}
 		}
 		else
