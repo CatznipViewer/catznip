@@ -238,17 +238,20 @@ void LLFloaterBuy::inventoryChanged(LLViewerObject* obj,
 		LLSD row;
 
 		// Compute icon for this item
-		BOOL item_is_multi = FALSE;
-		if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED 
-			|| inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS)
-		{
-			item_is_multi = TRUE;
-		}
-
-		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), 
-							 inv_item->getInventoryType(),
-							 inv_item->getFlags(),
-							 item_is_multi);
+//		BOOL item_is_multi = FALSE;
+//		if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED 
+//			|| inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS)
+//		{
+//			item_is_multi = TRUE;
+//		}
+//
+//		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), 
+//							 inv_item->getInventoryType(),
+//							 inv_item->getFlags(),
+//							 item_is_multi);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+// [/SL:KB]
 		row["columns"][0]["column"] = "icon";
 		row["columns"][0]["type"] = "icon";
 		row["columns"][0]["value"] = icon_name;

@@ -337,9 +337,12 @@ time_t LLTaskInvFVBridge::getCreationDate() const
 
 LLUIImagePtr LLTaskInvFVBridge::getIcon() const
 {
-	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
-
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
+//	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
+//
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
 }
 
 void LLTaskInvFVBridge::openItem()
@@ -1224,7 +1227,10 @@ public:
 
 LLUIImagePtr LLTaskWearableBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
 }
 
 
