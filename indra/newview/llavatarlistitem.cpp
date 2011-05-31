@@ -40,6 +40,7 @@
 #include "lloutputmonitorctrl.h"
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 #include "llnotificationsutil.h"
+#include "llslurl.h"
 // [/SL:KB]
 
 bool LLAvatarListItem::sStaticInitialized = false;
@@ -285,7 +286,10 @@ void LLAvatarListItem::setState(EItemState item_style)
 	mAvatarIcon->setColor(item_icon_color_map[item_style]);
 }
 
-void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+//void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, ENameFormat name_format, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+// [/SL:KB]
 {
 	if (mAvatarId.notNull())
 		LLAvatarTracker::instance().removeParticularFriendObserver(mAvatarId, this);
@@ -302,8 +306,11 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, b
 		mAvatarIcon->setValue(id);
 
 		// Set avatar name.
-		LLAvatarNameCache::get(id,
-			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
+//		LLAvatarNameCache::get(id,
+//			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+		LLAvatarNameCache::get(id, boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
+// [/SL:KB]
 	}
 }
 
@@ -527,11 +534,17 @@ std::string LLAvatarListItem::getAvatarToolTip() const
 	return mAvatarName->getToolTip();
 }
 
-void LLAvatarListItem::updateAvatarName()
+//void LLAvatarListItem::updateAvatarName()
+//{
+//	LLAvatarNameCache::get(getAvatarId(),
+//			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
+//}
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+void LLAvatarListItem::updateAvatarName(ENameFormat name_format)
 {
-	LLAvatarNameCache::get(getAvatarId(),
-			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
+	LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
 }
+// [/SL:KB]
 
 //== PRIVATE SECITON ==========================================================
 
@@ -540,9 +553,31 @@ void LLAvatarListItem::setNameInternal(const std::string& name, const std::strin
 	LLTextUtil::textboxSetHighlightedVal(mAvatarName, mAvatarNameStyle, name, highlight);
 }
 
-void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, ENameFormat name_format)
 {
-	setAvatarName(av_name.mDisplayName);
+	switch (name_format)
+	{
+		case NF_USERNAME:
+			return (!avName.mUsername.empty()) ? avName.mUsername : avName.mDisplayName;
+		case NF_COMPLETENAME:
+			return avName.getCompleteName();
+		case NF_DISPLAYNAME:
+		default:
+			return avName.mDisplayName;
+	}
+}
+// [/SL:KB]
+
+//void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, ENameFormat name_format)
+// [/SL:KB]
+{
+//	setAvatarName(av_name.mDisplayName);
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	setAvatarName(formatAvatarName(av_name, name_format));
+// [/SL:KB]
 	setAvatarToolTip(av_name.mUsername);
 
 	//requesting the list to resort

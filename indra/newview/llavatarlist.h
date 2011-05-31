@@ -131,6 +131,9 @@ protected:
 	void rebuildNames();
 	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
 	void updateAvatarNames();
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	LLAvatarListItem::ENameFormat getAvatarNameFormat() const;
+// [/SL:KB]
 
 private:
 

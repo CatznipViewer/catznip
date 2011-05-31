@@ -65,6 +65,15 @@ public:
 		IS_OFFLINE,
 	} EItemState;
 
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	typedef enum e_name_format
+	{
+		NF_DISPLAYNAME,
+		NF_USERNAME,
+		NF_COMPLETENAME
+	} ENameFormat;
+// [/SL:KB]
+
 	/**
 	 * Creates an instance of LLAvatarListItem.
 	 *
@@ -89,12 +98,19 @@ public:
 	virtual void changed(U32 mask); // from LLFriendObserver
 
 	void setOnline(bool online);
-	void updateAvatarName(); // re-query the name cache
+//	void updateAvatarName(); // re-query the name cache
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	void updateAvatarName(ENameFormat name_format); // re-query the name cache
+// [/SL:KB]
 	void setAvatarName(const std::string& name);
 	void setAvatarToolTip(const std::string& tooltip);
 	void setHighlight(const std::string& highlight);
 	void setState(EItemState item_style);
-	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
+//	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	void setAvatarId(const LLUUID& id, const LLUUID& session_id, ENameFormat name_format, bool ignore_status_changes = false, bool is_resident = true);
+	static std::string formatAvatarName(const LLAvatarName& avName, ENameFormat name_format);
+// [/SL:KB]
 //	void setLastInteractionTime(U32 secs_since);
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
 	void setTextField(const std::string& text);
@@ -186,7 +202,10 @@ private:
 	} EAvatarListItemChildIndex;
 
 	void setNameInternal(const std::string& name, const std::string& highlight);
-	void onAvatarNameCache(const LLAvatarName& av_name);
+//	void onAvatarNameCache(const LLAvatarName& av_name);
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-2.6.0b) | Added: Catnzip-2.6.0b
+	void onAvatarNameCache(const LLAvatarName& av_name, ENameFormat name_format);
+// [/SL:KB]
 
 	std::string formatSeconds(U32 secs);
 
