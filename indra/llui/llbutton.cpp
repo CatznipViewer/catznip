@@ -79,6 +79,9 @@ LLButton::Params::Params()
 	image_top_pad("image_top_pad"),
 	image_bottom_pad("image_bottom_pad"),
 	imgoverlay_label_space("imgoverlay_label_space", 1),
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Added: Catznip-2.5.0b
+	imgoverlay_label_align("imgoverlay_label_align", false),
+// [/SL:KB]
 	label_color("label_color"),
 	label_color_selected("label_color_selected"),	// requires is_toggle true
 	label_color_disabled("label_color_disabled"),
@@ -151,6 +154,9 @@ LLButton::LLButton(const LLButton::Params& p)
 	mImageOverlayTopPad(p.image_top_pad),
 	mImageOverlayBottomPad(p.image_bottom_pad),
 	mImgOverlayLabelSpace(p.imgoverlay_label_space),
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Added: Catznip-2.5.0b
+	mImgOverlayLabelAlign(p.imgoverlay_label_align),
+// [/SL:KB]
 	mIsToggle(p.is_toggle),
 	mScaleImage(p.scale_image),
 	mDropShadowedText(p.label_shadow),
@@ -850,13 +856,8 @@ void LLButton::draw()
 				overlay_color);
 			break;
 		case LLFontGL::HCENTER:
-//			mImageOverlay->draw(
-//				center_x - (overlay_width / 2), 
-//				center_y - (overlay_height / 2), 
-//				overlay_width, 
-//				overlay_height, 
-//				overlay_color);
-// [SL:KB] - Patch: Control-Button | Checked: 2011-02-21 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Modified: Catznip-2.6.0b
+			if (mImgOverlayLabelAlign)
 			{
 				text_left += overlay_width + mImgOverlayLabelSpace;
 				text_width -= overlay_width + mImgOverlayLabelSpace;
@@ -869,6 +870,17 @@ void LLButton::draw()
 					overlay_width, 
 					overlay_height, 
 					overlay_color);
+			}
+			else
+			{
+// [/SL:KB]
+				mImageOverlay->draw(
+					center_x - (overlay_width / 2), 
+					center_y - (overlay_height / 2), 
+					overlay_width, 
+					overlay_height, 
+					overlay_color);
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Modified: Catznip-2.6.0b
 			}
 // [/SL:KB]
 			break;
