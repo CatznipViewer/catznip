@@ -42,7 +42,9 @@
 #include "llsdserialize.h"
 
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
-#include <shellapi.h>
+#ifdef LL_WINDOWS
+	#include <shellapi.h>
+#endif // LL_WINDOWS
 // [/SL:KB]
 
 LLPumpIO* gServicePump;
