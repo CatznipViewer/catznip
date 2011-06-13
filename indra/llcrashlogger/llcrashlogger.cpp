@@ -213,8 +213,15 @@ void LLCrashLogger::gatherFiles()
 		// instance that launched this process has overwritten
 		// SecondLife.log
 		std::string log_filename = mFileMap["SecondLifeLog"];
-		log_filename.replace(log_filename.size() - 4, 4, ".old");
-		mFileMap["SecondLifeLog"] = log_filename;
+//		log_filename.replace(log_filename.size() - 4, 4, ".old");
+//		mFileMap["SecondLifeLog"] = log_filename;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+		if (!log_filename.empty())
+		{
+			log_filename.replace(log_filename.size() - 4, 4, ".old");
+			mFileMap["SecondLifeLog"] = log_filename;
+		}
+// [/SL:KB]
 	}
 
 	gatherPlatformSpecificFiles();
