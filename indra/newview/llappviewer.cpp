@@ -302,6 +302,9 @@ BOOL gPeriodicSlowFrame = FALSE;
 
 BOOL gCrashOnStartup = FALSE;
 BOOL gLLErrorActivated = FALSE;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+std::string gLLErrorLastMessage;
+// [/SL:KB]
 BOOL gLogoutInProgress = FALSE;
 
 ////////////////////////////////////////////////////////////
@@ -1841,6 +1844,9 @@ bool LLAppViewer::cleanup()
 void watchdog_llerrs_callback(const std::string &error_string)
 {
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 
 #ifdef LL_WINDOWS
 	RaiseException(0,0,0,0);
@@ -1895,6 +1901,9 @@ void errorCallback(const std::string &error_string)
 
 	//Set the ErrorActivated global so we know to create a marker file
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 	
 //	LLError::crashAndLoop(error_string);
 // [SL:KB] - Patch: Viewer-Build | Checked: 2010-12-04 (Catznip-2.6.0a) | Added: Catznip-2.4.0g
@@ -3094,7 +3103,19 @@ void LLAppViewer::handleViewerCrash()
 	}
 	else
 	{
-		gDebugInfo["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+//		gDebugInfo["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+		if (gLLErrorActivated)
+		{
+			gDebugInfo["LastExecEvent"] = LAST_EXEC_LLERROR_CRASH;
+			gDebugInfo["LastErrorMessage"] = gLLErrorLastMessage;
+		}
+		else
+		{
+			gDebugInfo["LastExecEvent"] = LAST_EXEC_OTHER_CRASH;
+		}
+// [/SL:KB]
+
 	}
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
