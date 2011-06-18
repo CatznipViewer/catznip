@@ -11221,7 +11221,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://catznip.com/viewer</string>
+      <string>http://viewer.catznip.com/</string>
     </map>
     <key>UpdaterServicePath</key>
     <map>
