@@ -157,14 +157,14 @@ void LLUpdateChecker::Implementation::completed(U32 status,
 		LL_INFOS("UpdateCheck") << "version invalid" << llendl;
 //		LLURI uri(content["url"].asString());
 //		mClient.requiredUpdate(content["version"].asString(), uri, content["hash"].asString());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 		mClient.requiredUpdate(content);
 // [/SL:KB]
 	} else {
 		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" << llendl;
 //		LLURI uri(content["url"].asString());
 //		mClient.optionalUpdate(content["version"].asString(), uri, content["hash"].asString());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 		mClient.optionalUpdate(content);
 // [/SL:KB]
 	}

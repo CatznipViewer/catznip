@@ -2668,7 +2668,7 @@ namespace {
 
 		LLSD substitutions;
 		substitutions["VERSION"] = data["version"];
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 		if (data.has("more_info"))
 		{
 			substitutions["RELEASE_NOTES_FULL_URL"] = data["more_info"].asString();
@@ -2694,7 +2694,7 @@ namespace {
 			relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
 			relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
 			substitutions["RELEASE_NOTES_FULL_URL"] = relnotes_url.getString();
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 		}
 // [/SL:KB]
 

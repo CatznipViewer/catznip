@@ -56,7 +56,7 @@ public:
 //				  std::string const & hash, 
 //				  std::string const & updateVersion,
 //				  bool required=false);
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 	void download(const LLSD& sdUpdateData,
 				  bool required=false);
 // [/SL:KB]

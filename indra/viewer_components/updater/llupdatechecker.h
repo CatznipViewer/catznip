@@ -68,7 +68,7 @@ public:
 //	virtual void optionalUpdate(std::string const & newVersion,
 //								LLURI const & uri,
 //								std::string const & hash) = 0;
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 	virtual void optionalUpdate(const LLSD& sdData) = 0;
 // [/SL:KB]
 
@@ -76,7 +76,7 @@ public:
 //	virtual void requiredUpdate(std::string const & newVersion,
 //								LLURI const & uri,
 //								std::string const & hash) = 0;
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
 	virtual void requiredUpdate(const LLSD& sdData) = 0;
 // [/SL:KB]
 	
