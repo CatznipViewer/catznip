@@ -436,6 +436,19 @@ BOOL LLFloaterPreference::postBuild()
 		gSavedPerAccountSettings.setString("BusyModeResponse", LLTrans::getString("BusyModeResponseDefault"));
 	}
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-11 (Catznip-2.6.c) | Added: Catznip-2.6.0c
+#ifndef LL_SEND_CRASH_REPORTS
+	// Hide the crash report tab if crash reporting isn't enabled
+	LLTabContainer* pTabContainer = getChild<LLTabContainer>("pref core");
+	if (pTabContainer)
+	{
+		LLPanel* pCrashReportPanel = pTabContainer->getPanelByName("crashreports");
+		if (pCrashReportPanel)
+			pTabContainer->removeTabPanel(pCrashReportPanel);
+	}
+#endif // LL_SEND_CRASH_REPORTS
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -1860,3 +1873,70 @@ void LLPanelPreferenceGraphics::setHardwareDefaults()
 	resetDirtyChilds();
 	LLPanelPreference::setHardwareDefaults();
 }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0b
+static LLRegisterPanelClassWrapper<LLPanelPreferenceCrashReports> t_pref_crashreports("panel_preference_crashreports");
+
+LLPanelPreferenceCrashReports::LLPanelPreferenceCrashReports()
+	: LLPanelPreference()
+{
+}
+
+BOOL LLPanelPreferenceCrashReports::postBuild()
+{
+	S32 nCrashSubmitBehavior = gCrashSettings.getS32("CrashSubmitBehavior");
+
+	LLCheckBoxCtrl* pSendCrashReports = getChild<LLCheckBoxCtrl>("checkSendCrashReports");
+	pSendCrashReports->set(CRASH_BEHAVIOR_NEVER_SEND != nCrashSubmitBehavior);
+	pSendCrashReports->setCommitCallback(boost::bind(&LLPanelPreferenceCrashReports::refresh, this));
+
+	LLCheckBoxCtrl* pSendAlwaysAsk = getChild<LLCheckBoxCtrl>("checkSendCrashReportsAlwaysAsk");
+	pSendAlwaysAsk->set(CRASH_BEHAVIOR_ASK == nCrashSubmitBehavior);
+
+	LLCheckBoxCtrl* pSendSettings = getChild<LLCheckBoxCtrl>("checkSendSettings");
+	pSendSettings->set(gCrashSettings.getBOOL("CrashSubmitSettings"));
+
+	LLCheckBoxCtrl* pSendName = getChild<LLCheckBoxCtrl>("checkSendName");
+	pSendName->set(gCrashSettings.getBOOL("CrashSubmitName"));
+
+	refresh();
+
+	return LLPanelPreference::postBuild();
+}
+
+void LLPanelPreferenceCrashReports::refresh()
+{
+#if LL_WINDOWS
+	LLCheckBoxCtrl* pSendCrashReports = getChild<LLCheckBoxCtrl>("checkSendCrashReports");
+	pSendCrashReports->setEnabled(TRUE);
+
+	bool fEnable = pSendCrashReports->get();
+	getChild<LLUICtrl>("comboSaveMiniDumpType")->setEnabled(fEnable);
+	getChild<LLUICtrl>("checkSendCrashReportsAlwaysAsk")->setEnabled(fEnable);
+	getChild<LLUICtrl>("checkSendSettings")->setEnabled(fEnable);
+	getChild<LLUICtrl>("checkSendName")->setEnabled(fEnable);
+#endif // LL_WINDOWS
+}
+
+void LLPanelPreferenceCrashReports::apply()
+{
+#if LL_WINDOWS
+	LLCheckBoxCtrl* pSendCrashReports = getChild<LLCheckBoxCtrl>("checkSendCrashReports");
+	LLCheckBoxCtrl* pSendAlwaysAsk = getChild<LLCheckBoxCtrl>("checkSendCrashReportsAlwaysAsk");
+	if (pSendCrashReports->get())
+		gCrashSettings.setS32("CrashSubmitBehavior", (pSendAlwaysAsk->get()) ? CRASH_BEHAVIOR_ASK : CRASH_BEHAVIOR_ALWAYS_SEND);
+	else
+		gCrashSettings.setS32("CrashSubmitBehavior", CRASH_BEHAVIOR_NEVER_SEND);
+
+	LLCheckBoxCtrl* pSendSettings = getChild<LLCheckBoxCtrl>("checkSendSettings");
+	gCrashSettings.setBOOL("CrashSubmitSettings", pSendSettings->get());
+
+	LLCheckBoxCtrl* pSendName = getChild<LLCheckBoxCtrl>("checkSendName");
+	gCrashSettings.setBOOL("CrashSubmitName", pSendName->get());
+#endif // LL_WINDOWS
+}
+
+void LLPanelPreferenceCrashReports::cancel()
+{
+}
+// [/SL:KB]
