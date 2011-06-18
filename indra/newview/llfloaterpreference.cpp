@@ -436,7 +436,7 @@ BOOL LLFloaterPreference::postBuild()
 		gSavedPerAccountSettings.setString("BusyModeResponse", LLTrans::getString("BusyModeResponseDefault"));
 	}
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-11 (Catznip-2.6.c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-11 (Catznip-2.7.0a) | Added: Catznip-2.6.0c
 #ifndef LL_SEND_CRASH_REPORTS
 	// Hide the crash report tab if crash reporting isn't enabled
 	LLTabContainer* pTabContainer = getChild<LLTabContainer>("pref core");
@@ -1896,7 +1896,7 @@ void LLPanelPreferenceGraphics::setHardwareDefaults()
 	LLPanelPreference::setHardwareDefaults();
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.6.0a) | Added: Catznip-2.4.0b
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.7.0a) | Added: Catznip-2.4.0b
 static LLRegisterPanelClassWrapper<LLPanelPreferenceCrashReports> t_pref_crashreports("panel_preference_crashreports");
 
 LLPanelPreferenceCrashReports::LLPanelPreferenceCrashReports()
