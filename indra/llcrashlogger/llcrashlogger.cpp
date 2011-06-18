@@ -232,10 +232,10 @@ void LLCrashLogger::gatherFiles()
 		// Crash log receiver has been manually configured.
 		mCrashHost = mDebugLog["CrashHostUrl"].asString();
 	}
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-18 (Catznip-2.6.0c) | Modified: Catznip-2.6.0c
 	else
 	{
-		mCrashHost = "http://catznip.com/viewer/crash/report/2.6/";
+		mCrashHost = "http://viewer.catznip.com/crash/report/";
 	}
 // [/SL:KB]
 /*
