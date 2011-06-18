@@ -407,6 +407,38 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 		}
 
 		/*
+		 * Include information about the last execution event
+		 */
+		S32 nLastExecEvent = mDebugLog["LastExecEvent"].asInteger(); std::string strLastExecEvent, strLastExecMsg;
+		switch (nLastExecEvent)
+		{
+			case LAST_EXEC_NORMAL:
+				strLastExecEvent = "normal";
+				break;
+			case LAST_EXEC_FROZE:
+				strLastExecEvent = "froze";
+				break;
+			case LAST_EXEC_LLERROR_CRASH:
+				strLastExecEvent = "llerror_crash";
+				strLastExecMsg = mDebugLog["LastErrorMessage"];
+				break;
+			case LAST_EXEC_OTHER_CRASH:
+				strLastExecEvent = "other_crash";
+				break;
+			case LAST_EXEC_LOGOUT_FROZE:
+				strLastExecEvent = "logout_froze";
+				break;
+			case LAST_EXEC_LOGOUT_CRASH:
+				strLastExecEvent = "logout_crash";
+				break;
+		}
+		body << getFormDataField("last_exec_event", strLastExecEvent, BOUNDARY);
+		if (!strLastExecMsg.empty())
+		{
+			body << getFormDataField("last_exec_message", strLastExecMsg, BOUNDARY);
+		}
+
+		/*
 		 * Include crash analysis pony
 		 */
 		if (mCrashLookup)
