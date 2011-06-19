@@ -96,17 +96,6 @@ class ViewerManifest(LLManifest):
                             self.end_prefix("*/textures")
                     self.path("*/xui/*/*.xml")
                     self.path("*/xui/*/widgets/*.xml")
-                    self.path("*/themes/*/colors.xml")
-                    if self.prefix(src="*/themes/*/textures"):
-                            self.path("*/*.tga")
-                            self.path("*/*.j2c")
-                            self.path("*/*.jpg")
-                            self.path("*/*.png")
-                            self.path("*.tga")
-                            self.path("*.j2c")
-                            self.path("*.jpg")
-                            self.path("*.png")
-                            self.end_prefix("*/textures")
                     
                     self.path("*/*.xml")
 
@@ -150,7 +139,7 @@ class ViewerManifest(LLManifest):
     def channel(self):
         return self.args['channel']
     def channel_unique(self):
-        return self.channel().replace("Second Life", "").strip()
+        return self.channel().replace("Catznip", "").strip()
     def channel_oneword(self):
         return "".join(self.channel_unique().split())
     def channel_lowerword(self):
@@ -192,9 +181,9 @@ class WindowsManifest(ViewerManifest):
     def final_exe(self):
         if self.default_channel():
             if self.default_grid():
-                return "SecondLife.exe"
+                return "Catznip.exe"
             else:
-                return "SecondLifePreview.exe"
+                return "CatznipPreview.exe"
         else:
             return ''.join(self.channel().split()) + '.exe'
 
@@ -500,6 +489,8 @@ class WindowsManifest(ViewerManifest):
             }
 
         version_vars = """
+        !define PRODUCT_SHORT "Catznip"
+        !define PRODUCT_LONG "Catznip viewer"
         !define INSTEXE  "%(final_exe)s"
         !define VERSION "%(version_short)s"
         !define VERSION_LONG "%(version)s"
@@ -547,7 +538,7 @@ class WindowsManifest(ViewerManifest):
             installer_file = installer_file % substitution_strings
         substitution_strings['installer_file'] = installer_file
 
-        tempfile = "secondlife_setup_tmp.nsi"
+        tempfile = "catznip_setup_tmp.nsi"
         # the following replaces strings in the nsi template
         # it also does python-style % substitution
         self.replace_in("installers/windows/installer_template.nsi", tempfile, {
@@ -564,6 +555,8 @@ class WindowsManifest(ViewerManifest):
         NSIS_path = os.path.expandvars('${ProgramFiles}\\NSIS\\Unicode\\makensis.exe')
         if not os.path.exists(NSIS_path):
             NSIS_path = os.path.expandvars('${ProgramFiles(x86)}\\NSIS\\Unicode\\makensis.exe')
+        if not os.path.exists(NSIS_path):
+            NSIS_path = 'd:\\Tools\\NSIS\\Unicode\\makensis.exe'
         self.run_command('"' + proper_windows_path(NSIS_path) + '" ' + self.dst_path_of(tempfile))
         # self.remove(self.dst_path_of(tempfile))
         # If we're on a build machine, sign the code using our Authenticode certificate. JC
@@ -590,7 +583,7 @@ class DarwinManifest(ViewerManifest):
 
     def construct(self):
         # copy over the build result (this is a no-op if run within the xcode script)
-        self.path(self.args['configuration'] + "/Second Life.app", dst="")
+        self.path(self.args['configuration'] + "/Catznip.app", dst="")
 
         if self.prefix(src="", dst="Contents"):  # everything goes in Contents
             self.path("Info-SecondLife.plist", dst="Info.plist")
@@ -743,7 +736,7 @@ class DarwinManifest(ViewerManifest):
         if not self.default_channel():
             channel_standin = self.channel()
 
-        imagename="SecondLife_" + '_'.join(self.args['version'])
+        imagename="Catznip_" + '_'.join(self.args['version'])
 
         # MBW -- If the mounted volume name changes, it breaks the .DS_Store's background image and icon positioning.
         #  If we really need differently named volumes, we'll need to create multiple DS_Store file images, or use some other trick.
