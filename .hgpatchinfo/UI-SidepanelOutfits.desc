@@ -4,3 +4,4 @@
 - added   : specialized inventory view of the "My Outfits" in the Appearance sidebar panel (see LLOutfitsView class)
 - added   : "UseOutfitInventoryView" setting to switch between the default accordion view and the new inventory view (defaults to inventory view)
 - changed : show the target attachment point for worn attachments in a wearable item list (see "Wearing" outfit panel)
+- changed : worn item colour in a wearable item list from green (=EmphasisColor) to white (=default colour)
