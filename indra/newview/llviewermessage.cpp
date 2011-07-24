@@ -3210,6 +3210,14 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		is_owned_by_me = chatter->permYouOwner();
 	}
 
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2011-07-25 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+	if ( (!chatter) && (chat.mPosAgent.isExactlyZero()) )
+	{
+		// If we don't know about the object then grab its position from the message
+		msg->getVector3("ChatData", "Position", chat.mPosAgent);
+	}
+// [/SL:KB]
+
 	if (is_audible)
 	{
 		BOOL visible_in_chat_bubble = FALSE;

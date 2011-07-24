@@ -7,3 +7,4 @@
     -> affects plain text chat where llOwnerSay(), llSay() and llInstantMessage() chat from scripts always opens the "remote object inspector" by default
 - fixed : remote object inspector isn't passed any parameters for object IMs
     -> query string is constructed but was never appended to the "objectim" app URL
+- fixed : llOwnerSay from objects outside draw distance shows 0,0,0 for the object coordinates on the remote object inspector
