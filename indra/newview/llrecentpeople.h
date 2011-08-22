@@ -120,7 +120,10 @@ public:
 	 * 
 	 * @param result where to put the result.
 	 */
-	void get(uuid_vec_t& result) const;
+//	void get(uuid_vec_t& result) const;
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	void get(uuid_vec_t& result, EInteractionType interaction) const;
+// [/SL:KB]
 
 	/**
 	 * Returns last interaction time with specified participant
@@ -128,7 +131,7 @@ public:
 	 */
 //	const LLDate getDate(const LLUUID& id) const;
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
-	const LLDate getDate(const LLUUID& id, EInteractionType interaction = IT_GENERAL) const;
+	const LLDate getDate(const LLUUID& id, EInteractionType interaction) const;
 // [/SL:KB]
 
 	/**

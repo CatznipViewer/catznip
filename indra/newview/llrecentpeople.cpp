@@ -232,11 +232,20 @@ bool LLRecentPeople::contains(const LLUUID& id) const
 	return mPeople.find(id) != mPeople.end();
 }
 
-void LLRecentPeople::get(uuid_vec_t& result) const
+//void LLRecentPeople::get(uuid_vec_t& result) const
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+void LLRecentPeople::get(uuid_vec_t& result, EInteractionType interaction) const
+// [/SL:KB]
 {
 	result.clear();
 	for (recent_people_t::const_iterator pos = mPeople.begin(); pos != mPeople.end(); ++pos)
-		result.push_back((*pos).first);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	{
+		if ((*pos).second.getLastInteraction(interaction).notNull())
+			result.push_back((*pos).first);
+	}
+// [/SL:KB]
+//		result.push_back((*pos).first);
 }
 
 //const LLDate LLRecentPeople::getDate(const LLUUID& id) const
