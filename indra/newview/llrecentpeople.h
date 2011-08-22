@@ -36,23 +36,8 @@
 #include <boost/signals2.hpp>
 
 class LLDate;
-
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
-class LLRecentPeoplePersistentItem
-{
-	friend class LLRecentPeople;
-public:
-	LLRecentPeoplePersistentItem() {}
-	LLRecentPeoplePersistentItem(const LLUUID& idAgent, const LLSD& sdUserdata = LLSD()) 
-		: m_idAgent(idAgent), m_Date(LLDate::now()), m_sdUserdata(sdUserdata) {}
-	LLRecentPeoplePersistentItem(const LLSD& sdItem);
-
-	LLSD toLLSD() const;
-protected:
-	LLUUID	m_idAgent;
-	LLDate	m_Date;
-	LLSD	m_sdUserdata;
-};
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+class LLRecentPeoplePersistentItem;
 // [/SL:KB]
 
 /**
@@ -66,7 +51,10 @@ protected:
  * 
  *TODO: purge least recently added items? 
  */
-class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LLSimpleListener
+//class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LLSimpleListener
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+class LLRecentPeople : public LLSingleton<LLRecentPeople>
+// [/SL:KB]
 {
 	LOG_CLASS(LLRecentPeople);
 
@@ -77,7 +65,25 @@ protected:
 // [/SL:KB]
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
-	
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+public:
+	enum EInteractionType
+	{
+		IT_GENERAL = 0,	// 
+		IT_CHAT,		// Public/main chat (text or voice)
+		IT_IM,			// Instant messages (text or voice)
+		IT_INVENTORY,	// Offered or accepted inventory
+		IT_AVALINE,
+		IT_COUNT,
+		IT_INVALID = IT_COUNT
+	};
+protected:
+	static const std::string s_itTypeNames[IT_COUNT + 1];	// +1 to store "invalid"
+public:
+	static const std::string& getTypeNameFromType(EInteractionType eInteraction);
+	static EInteractionType   getTypeFromTypeName(const std::string& strInteraction);
+// [/SL:KB]
+
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
 	void dump() const;
 	void load();
@@ -98,7 +104,10 @@ public:
 	 *
 	 * @return false if the avatar is in the list already, true otherwise
 	 */
-	bool add(const LLUUID& id, const LLSD& userdata = LLSD().with("date", LLDate::now()));
+//	bool add(const LLUUID& id, const LLSD& userdata = LLSD().with("date", LLDate::now()));
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	bool add(const LLUUID& id, EInteractionType interaction, const LLSD& userdata = LLSD().with("date", LLDate::now()));
+// [/SL:KB]
 
 	/**
 	 * @param id avatar to search.
@@ -117,7 +126,10 @@ public:
 	 * Returns last interaction time with specified participant
 	 *
 	 */
-	const LLDate getDate(const LLUUID& id) const;
+//	const LLDate getDate(const LLUUID& id) const;
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	const LLDate getDate(const LLUUID& id, EInteractionType interaction = IT_GENERAL) const;
+// [/SL:KB]
 
 	/**
 	 * Returns data about specified participant
@@ -145,7 +157,7 @@ public:
 	/**
 	 * LLSimpleListener interface.
 	 */
-	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
+//	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
 private:
 
@@ -160,5 +172,26 @@ private:
 //	recent_people_t		mPeople;
 	signal_t			mChangedSignal;
 };
+
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+class LLRecentPeoplePersistentItem
+{
+public:
+	LLRecentPeoplePersistentItem(const LLUUID& idAgent, LLRecentPeople::EInteractionType itType, const LLSD& sdUserdata = LLSD());
+	LLRecentPeoplePersistentItem(const LLSD& sdItem);
+
+	const LLUUID&	getAgentId() const					{ return m_idAgent; }
+	LLDate			getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const;
+	const LLSD&		getUserdata() const					{ return m_sdUserdata; }
+	void			setLastInteraction(LLRecentPeople::EInteractionType eInteraction, LLDate timestamp = LLDate::now());
+	void			setUserdata(const LLSD& sdUserdate)	{ m_sdUserdata = sdUserdate; }
+
+	LLSD toLLSD() const;
+protected:
+	LLUUID	m_idAgent;
+	LLDate	m_InteractionTimes[LLRecentPeople::IT_COUNT];
+	LLSD	m_sdUserdata;
+};
+// [/SL:KB]
 
 #endif // LL_LLRECENTPEOPLE_H

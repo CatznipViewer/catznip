@@ -703,6 +703,11 @@ BOOL LLPanelPeople::postBuild()
 
 	LLVoiceClient::getInstance()->addObserver(this);
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	// Initally Populate the initial recent people (from persistent storage)
+	updateRecentList();
+// [/SL:KB]
+
 	// call this method in case some list is empty and buttons can be in inconsistent state
 	updateButtons();
 
