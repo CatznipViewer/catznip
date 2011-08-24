@@ -42,6 +42,10 @@ static const std::string IS_DISPLAY_NAME_DEFAULT("is_display_name_default");
 static const std::string DISPLAY_NAME_EXPIRES("display_name_expires");
 static const std::string DISPLAY_NAME_NEXT_UPDATE("display_name_next_update");
 
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+LLAvatarName::EShowUsername LLAvatarName::s_eShowUsername = LLAvatarName::SHOW_ALWAYS;
+// [/SL:KB]
+
 LLAvatarName::LLAvatarName()
 :	mUsername(),
 	mDisplayName(),
@@ -87,13 +91,20 @@ void LLAvatarName::fromLLSD(const LLSD& sd)
 	mNextUpdate = next_update.secondsSinceEpoch();
 }
 
-std::string LLAvatarName::getCompleteName() const
+//std::string LLAvatarName::getCompleteName() const
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+std::string LLAvatarName::getCompleteName(EShowUsername eShowUsername) const
+// [/SL:KB]
 {
 	std::string name;
-	if (mUsername.empty() || mIsDisplayNameDefault)
+//	if (mUsername.empty() || mIsDisplayNameDefault)
 	// If the display name feature is off
 	// OR this particular display name is defaulted (i.e. based on user name),
 	// then display only the easier to read instance of the person's name.
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+	if ( (mUsername.empty()) || 
+		 ((SHOW_NEVER == s_eShowUsername) || ((SHOW_MISMATCH == s_eShowUsername) && (mIsDisplayNameDefault))) )
+// [/SL:KB]
 	{
 		name = mDisplayName;
 	}
