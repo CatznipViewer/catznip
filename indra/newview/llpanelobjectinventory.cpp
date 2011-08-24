@@ -1265,7 +1265,10 @@ LLTaskMeshBridge::LLTaskMeshBridge(
 
 LLUIImagePtr LLTaskMeshBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-08-24 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, mFlags);
+// [/SL:KB]
 }
 
 void LLTaskMeshBridge::openItem()
