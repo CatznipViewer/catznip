@@ -487,10 +487,13 @@ namespace action_give_inventory
 	 * Checks My Inventory visibility.
 	 */
 
-	static bool is_give_inventory_acceptable()
+//	static bool is_give_inventory_acceptable()
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+	static bool is_give_inventory_acceptable(const uuid_set_t inventory_selected_uuids)
+// [/SL:KB]
 	{
-		// check selection in the panel
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		// check selection in the panel
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
 		if (inventory_selected_uuids.empty()) return false; // nothing selected
 
 		bool acceptable = false;
@@ -579,7 +582,12 @@ namespace action_give_inventory
 			return;
 		}
 
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+		uuid_set_t inventory_selected_uuids; const LLSD& sdPayload = notification["payload"];
+		for (LLSD::array_const_iterator itItem = sdPayload.beginArray(); itItem != sdPayload.endArray(); ++itItem)
+			inventory_selected_uuids.insert(itItem->asUUID());
+// [/SL:KB]
 		if (inventory_selected_uuids.empty())
 		{
 			return;
@@ -647,6 +655,16 @@ namespace action_give_inventory
 		}
 	}
 
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+	static const uuid_set_t get_inventory_selection()
+	{
+		LLInventoryPanel* pInvPanel = get_active_inventory_panel();
+		if (pInvPanel)
+			return pInvPanel->getRootFolder()->getSelectionList();
+		return std::set<LLUUID>();
+	}
+// [/SL:KB]
+
 	/**
 	 * Performs "give inventory" operations for provided avatars.
 	 *
@@ -656,11 +674,14 @@ namespace action_give_inventory
 	 * @param avatar_names - avatar names request to be sent.
 	 * @param avatar_uuids - avatar names request to be sent.
 	 */
-	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names)
+//	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names, const uuid_set_t inventory_selected_uuids)
+// [/SL:KB]
 	{
 		llassert(avatar_names.size() == avatar_uuids.size());
 
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
 		if (inventory_selected_uuids.empty())
 		{
 			return;
@@ -675,9 +696,17 @@ namespace action_give_inventory
 		LLSD substitutions;
 		substitutions["RESIDENTS"] = residents;
 		substitutions["ITEMS"] = items;
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+		LLSD sdPayload;
+		for (uuid_set_t::const_iterator itItem = inventory_selected_uuids.begin(); itItem != inventory_selected_uuids.end(); ++itItem)
+			sdPayload.append(*itItem);
+// [/SL:KB]
 		LLShareInfo::instance().mAvatarNames = avatar_names;
 		LLShareInfo::instance().mAvatarUuids = avatar_uuids;
-		LLNotificationsUtil::add("ShareItemsConfirmation", substitutions, LLSD(), &give_inventory_cb);
+//		LLNotificationsUtil::add("ShareItemsConfirmation", substitutions, LLSD(), &give_inventory_cb);
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+		LLNotificationsUtil::add("ShareItemsConfirmation", substitutions, sdPayload, &give_inventory_cb);
+// [/SL:KB]
 	}
 }
 
@@ -713,9 +742,14 @@ void LLAvatarActions::shareWithAvatars()
 {
 	using namespace action_give_inventory;
 
-	LLFloaterAvatarPicker* picker =
-		LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2), TRUE, FALSE);
-	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable));
+//	LLFloaterAvatarPicker* picker =
+//		LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2), TRUE, FALSE);
+//	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable));
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+	const uuid_set_t idItems = get_inventory_selection();
+	LLFloaterAvatarPicker* picker = LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2, idItems), TRUE, FALSE);
+	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable, idItems));
+// [/SL:KB]
 	picker->openFriendsTab();
 	LLNotificationsUtil::add("ShareNotification");
 }

@@ -81,16 +81,22 @@ public:
 		ICONNAME_NONE = -1
 	};
 
-	static const std::string& getIconName(LLAssetType::EType asset_type,
-										  LLInventoryType::EType inventory_type = LLInventoryType::IT_NONE,
-										  U32 misc_flag = 0, // different meanings depending on item type
-										  BOOL item_is_multi = FALSE);
+//	static const std::string& getIconName(LLAssetType::EType asset_type,
+//										  LLInventoryType::EType inventory_type = LLInventoryType::IT_NONE,
+//										  U32 misc_flag = 0, // different meanings depending on item type
+//										  BOOL item_is_multi = FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+	static const std::string& getIconName(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag = 0);
+// [/SL:KB]
 	static const std::string& getIconName(EIconName idx);
 
-	static LLUIImagePtr getIcon(LLAssetType::EType asset_type,
-								LLInventoryType::EType inventory_type = LLInventoryType::IT_NONE,
-								U32 misc_flag = 0, // different meanings depending on item type
-								BOOL item_is_multi = FALSE);
+//	static LLUIImagePtr getIcon(LLAssetType::EType asset_type,
+//								LLInventoryType::EType inventory_type = LLInventoryType::IT_NONE,
+//								U32 misc_flag = 0, // different meanings depending on item type
+//								BOOL item_is_multi = FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+	static LLUIImagePtr getIcon(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag = 0);
+// [/SL:KB]
 	static LLUIImagePtr getIcon(EIconName idx);
 
 protected:
