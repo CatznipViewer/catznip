@@ -209,6 +209,9 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
+	tab_allow_rearrange("tab_allow_rearrange", false),
+// [/SL:KB]
 	tab_padding_right("tab_padding_right"),
 	first_tab("first_tab"),
 	middle_tab("middle_tab"),
@@ -226,6 +229,9 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
+	mAllowRearrange(p.tab_allow_rearrange),
+// [/SL:KB]
 	mScrolled(FALSE),
 	mScrollPos(0),
 	mScrollPosPixels(0),
@@ -571,11 +577,20 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 		}
 		if( tab_rect.pointInRect( x, y ) )
 		{
-			S32 index = getCurrentPanelIndex();
-			index = llclamp(index, 0, tab_count-1);
-			LLButton* tab_button = getTab(index)->mButton;
+//			S32 index = getCurrentPanelIndex();
+//			index = llclamp(index, 0, tab_count-1);
+//			LLButton* tab_button = getTab(index)->mButton;
 			gFocusMgr.setMouseCapture(this);
-			tab_button->setFocus(TRUE);
+//			tab_button->setFocus(TRUE);
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
+			// Only set keyboard focus to the tab button of the active panel (if we have one) if the user actually clicked on it
+			if (mCurrentTabIdx >= 0)
+			{
+				LLButton* pActiveTabBtn = mTabList[mCurrentTabIdx]->mButton;
+				if (pActiveTabBtn->pointInView(x - pActiveTabBtn->getRect().mLeft, y - pActiveTabBtn->getRect().mBottom))
+					pActiveTabBtn->setFocus(TRUE);
+			}
+// [/SL:KB]
 		}
 	}
 	return handled;
@@ -727,6 +742,12 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 {
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
+	if ( (mAllowRearrange) && (hasMouseCapture()) )
+	{
+		return FALSE;	// Don't process movement keys while the user might be rearranging tabs
+	}
+// [/SL:KB]
 	BOOL handled = FALSE;
 	if (key == KEY_LEFT && mask == MASK_ALT)
 	{
@@ -2058,7 +2079,42 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
-				tuple->mButton->onCommit();
+//				tuple->mButton->onCommit();
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
+				if ( (mAllowRearrange) && (mCurrentTabIdx >= 0) && (mTabList[mCurrentTabIdx]->mButton->hasFocus()) )
+				{
+					S32 idxHover = iter - mTabList.begin();
+					if ( (mCurrentTabIdx >= mLockedTabCount) && (idxHover >= mLockedTabCount) && (mCurrentTabIdx != idxHover) )
+					{
+						LLRect rctCurTab = mTabList[mCurrentTabIdx]->mButton->getRect();
+						LLRect rctHoverTab = mTabList[idxHover]->mButton->getRect();
+
+						// Only rearrange the tabs if the mouse pointer has cleared the overlap area
+						bool fClearedOverlap = 
+						  (mIsVertical) 
+							? ( (idxHover < mCurrentTabIdx) && (y > rctHoverTab.mTop - rctCurTab.getHeight()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (y < rctCurTab.mTop - rctHoverTab.getHeight()) )
+							: ( (idxHover < mCurrentTabIdx) && (x < rctHoverTab.mLeft + rctCurTab.getWidth()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (x > rctCurTab.mLeft + rctHoverTab.getWidth()) );
+						if (fClearedOverlap)
+						{
+							tuple = mTabList[mCurrentTabIdx];
+
+							mTabList.erase(mTabList.begin() + mCurrentTabIdx);
+							mTabList.insert(mTabList.begin() + idxHover, tuple);
+
+							tuple->mButton->onCommit();
+							tuple->mButton->setFocus(TRUE);
+						}
+					}
+				}
+				else
+				{
+					tuple->mButton->onCommit();
+					tuple->mButton->setFocus(TRUE);
+				}
+				break;
+// [/SL:KB]
 			}
 		}
 	}
