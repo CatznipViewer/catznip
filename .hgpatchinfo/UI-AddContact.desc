@@ -1,0 +1,3 @@
+[UI/AddContact]
+- changed : "Add Friend" and "Remove Friend" enabler on the avatar list context menu from on_enable to on_visible
+- added   : "Add Contact" option to various context menus
