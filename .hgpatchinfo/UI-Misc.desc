@@ -1,0 +1,12 @@
+[UI/Misc]
+- added   : added "Refresh L$ Balance" option to the Advanced menu
+- changed : don't reset the URL each time the search floater is opened
+    -> "Find always resets to start page" (WEB-1819)
+- changed : uncommented "Lighting & Shadows" options in the Graphics preferences tab
+- changed : embedded the "Mini-Location" bar into the status bar
+    -> "Mini-Location" bar can also be shown independently of the navigation bar
+- added   : "Inspect" menu item to bring up the old-style Inspect floater (thankies Chloe)
+    -> added to the context menus for: "attachment self", "attachment other" and "object"
+    -> added to the gear menu for object inspectors
+- fixed   : [CATZ-3] Drag-and-hold doesn't activate tab buttons on the build floater
+    -> see issue for more detailed information

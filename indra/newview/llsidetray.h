@@ -171,7 +171,10 @@ public:
 
 	LLPanel*	getButtonsPanel() { return mButtonsPanel; }
 
-	bool		getCollapsed() { return mCollapsed; }
+//	bool		getCollapsed() { return mCollapsed; }
+// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+	bool		getCollapsed() const { return mCollapsed; }
+// [/SL:KB]
 
 	void		setTabButtonBadgeDriver(std::string tabName, LLSideTrayTabBadgeDriver* driver);
 

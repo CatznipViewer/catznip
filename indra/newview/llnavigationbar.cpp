@@ -710,7 +710,7 @@ void LLNavigationBar::onNavigationButtonHeldUp(LLButton* nav_button)
 void LLNavigationBar::handleLoginComplete()
 {
 	LLTeleportHistory::getInstance()->handleLoginComplete();
-	LLPanelTopInfoBar::instance().handleLoginComplete();
+//	LLPanelTopInfoBar::instance().handleLoginComplete();
 	mCmbLocation->handleLoginComplete();
 }
 
