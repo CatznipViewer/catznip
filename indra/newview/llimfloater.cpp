@@ -326,6 +326,9 @@ void LLIMFloater::updateSessionName(const std::string& ui_title,
 									const std::string& ui_label)
 {
 	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + ui_label);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-11-13 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+	setShortTitle(ui_title);
+// [/SL:KB]
 	setTitle(ui_title);	
 }
 
