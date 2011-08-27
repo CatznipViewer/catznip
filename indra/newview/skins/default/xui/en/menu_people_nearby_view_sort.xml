@@ -34,6 +34,37 @@
        parameter="sort_distance"/>
   </menu_item_check>
   <menu_item_separator layout="topleft" />
+  <menu_item_check
+     label="Show People within Range"
+     name="show_range">
+    <menu_item_check.on_click
+       function="People.Nearby.ViewSort.Action"
+       parameter="show_range"/>
+    <menu_item_check.on_check
+       function="People.Nearby.ViewSort.CheckItem"
+       parameter="show_range"/>
+  </menu_item_check>
+  <menu_item_check
+     label="Show People on Current Parcel"
+     name="show_current_parcel">
+    <menu_item_check.on_click
+       function="People.Nearby.ViewSort.Action"
+       parameter="show_current_parcel"/>
+    <menu_item_check.on_check
+       function="People.Nearby.ViewSort.CheckItem"
+       parameter="show_current_parcel"/>
+  </menu_item_check>
+  <menu_item_check
+     label="Show People on Current Region"
+     name="show_current_region">
+    <menu_item_check.on_click
+       function="People.Nearby.ViewSort.Action"
+       parameter="show_current_region"/>
+    <menu_item_check.on_check
+       function="People.Nearby.ViewSort.CheckItem"
+       parameter="show_current_region"/>
+  </menu_item_check>
+  <menu_item_separator layout="topleft" />
   <menu_item_check name="view_icons" label="View People Icons">
     <menu_item_check.on_click
      function="People.Nearby.ViewSort.Action"
