@@ -54,5 +54,32 @@
                 </map>
             </array>
         </map>
+        <map>
+        <key>name</key>
+            <string>StarDust</string>
+        <key>folder</key>
+            <string>stardust</string>
+        <key>themes</key>
+            <array>
+                <map>
+                <key>name</key>
+                    <string>Nostalgia Blue</string>
+                <key>folder</key>
+                    <string>nostalgia_blue</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Original Orange</string>
+                <key>folder</key>
+                    <string>default</string>
+                </map>
+                <map>
+                <key>name</key>
+                    <string>Silver Pink</string>
+                <key>folder</key>
+                    <string>silver_pink</string>
+                </map>
+            </array>
+        </map>
     </array>
 </llsd>
