@@ -2333,11 +2333,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Debug</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2421,11 +2421,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>RelWithDebInfo</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2509,11 +2509,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Release</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
