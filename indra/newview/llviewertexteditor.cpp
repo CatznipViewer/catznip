@@ -280,7 +280,11 @@ public:
 		{
 			LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 			registrar.add("Embedded.Open", boost::bind(&LLEmbeddedItemSegment::onOpen, this));
+			registrar.add("Embedded.Teleport", boost::bind(&LLEmbeddedItemSegment::onTeleport, this));
 			registrar.add("Embedded.CopyToInv", boost::bind(&LLEmbeddedItemSegment::onCopyToInventory, this));
+
+			LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+			enable_registrar.add("Embedded.VisibleTeleport", boost::bind(&LLEmbeddedItemSegment::showTeleport, this));
 
 			mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_embedded_item.xml", 
 																					 LLMenuGL::sMenuContainer, 
@@ -299,6 +303,18 @@ public:
 		LLViewerTextEditor* pEditor = dynamic_cast<LLViewerTextEditor*>(&mEditor);
 		if (pEditor)
 			pEditor->openEmbeddedItem(mItem, pEditor->getWText()[pEditor->getCursorPos()]);
+	}
+
+	void onTeleport()
+	{
+		LLViewerTextEditor* pEditor = dynamic_cast<LLViewerTextEditor*>(&mEditor);
+		if (pEditor)
+			pEditor->teleportEmbeddedLandmark(mItem, pEditor->getWText()[pEditor->getCursorPos()]);
+	}
+
+	bool showTeleport()
+	{
+		return (LLAssetType::AT_LANDMARK == mItem->getType());
 	}
 
 	void onCopyToInventory()
@@ -1237,6 +1253,26 @@ void LLViewerTextEditor::openEmbeddedLandmark( LLPointer<LLInventoryItem> item_p
 				mNotecardInventoryID, item_ptr);
 	}
 }
+
+// [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+void teleport_embedded_landmark(LLLandmark* pLandmark)
+{
+	LLVector3d posGlobal;
+	pLandmark->getGlobalPos(posGlobal);
+	if (!posGlobal.isExactlyZero())
+		gAgent.teleportViaLocation(posGlobal);
+}
+
+void LLViewerTextEditor::teleportEmbeddedLandmark(LLPointer<LLInventoryItem> item_ptr, llwchar wc)
+{
+	if (item_ptr.isNull())
+		return;
+
+	LLLandmark* pLandmark = gLandmarkList.getAsset(item_ptr->getAssetUUID(), boost::bind(&teleport_embedded_landmark, _1));
+	if (pLandmark)
+		teleport_embedded_landmark(pLandmark);
+}
+// [/SL:KB]
 
 void LLViewerTextEditor::openEmbeddedNotecard( LLInventoryItem* item, llwchar wc )
 {

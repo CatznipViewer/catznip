@@ -11,6 +11,19 @@
      function="Embedded.EnableOpen" />
   </menu_item_call>
   <menu_item_call
+   label="Teleport"
+   layout="topleft"
+   name="Teleport">
+    <menu_item_call.on_click
+     function="Embedded.Teleport" />
+    <menu_item_call.on_visible
+     function="Embedded.VisibleTeleport" />
+  </menu_item_call>
+
+  <menu_item_separator
+   layout="topleft" />
+
+  <menu_item_call
    label="Copy to Inventory"
    layout="topleft"
    name="Copy to Inventory">
