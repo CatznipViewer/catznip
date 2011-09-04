@@ -34,6 +34,7 @@ public:
 	bool				canWearSelected();
 	LLInventoryPanel*	getInventoryPanel()	{ return mInvPanel; }
 
+				bool onIdle();
 	/*virtual*/ void onOpen(const LLSD& info);
 	/*virtual*/ BOOL postBuild();
 

@@ -10,21 +10,18 @@
    left="0"
    top="0"
    width="312">
-    <inventory_panel
+    <panel
      background_visible="true"
-     bg_alpha_color="DkGray2"
-     bg_opaque_color="DkGray2"
-     allow_multi_select="true"
+     bg_alpha_color="LtGray"
+     bg_opaque_color="LtGray"
+     border="true"
      follows="all"
-     border="false"
-     left="3"
-     top="0"
-     width="309"
      height="400"
-     mouse_opaque="true"
      layout="topleft"
-     name="outfits_invpanel"
-     start_folder="My Outfits" /> 
+     left="3"
+     name="outfits_invpanel_placeholder" 
+     top="0"
+     width="309" /> 
     <panel
      background_visible="true"
 	 follows="bottom|left|right"

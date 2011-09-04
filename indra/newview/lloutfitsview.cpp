@@ -124,13 +124,29 @@ LLOutfitsView::~LLOutfitsView()
 // virtual
 BOOL LLOutfitsView::postBuild()
 {
-	mInvPanel = getChild<LLInventoryPanel>("outfits_invpanel");
-	mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
+	// EXP-915 (Revision aa1ada3f8878) broke being able to initialize a start folder so we're working around it by dynamically creating
+	// the inventory panel after the inventory has reached a usuable state
+	doOnIdleRepeating(boost::bind(&LLOutfitsView::onIdle, this));
 
 	LLMenuButton* pGearBtn = getChild<LLMenuButton>("options_gear_btn");
 	pGearBtn->setMenu(mGearMenu->getMenu());
 
 	return TRUE;
+}
+
+bool LLOutfitsView::onIdle()
+{
+	if ( (gInventory.isInventoryUsable()) && (!mInvPanel) )
+	{
+		LLView *pInvPanelPlaceholder = findChild<LLView>("outfits_invpanel_placeholder");
+	
+		mInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
+		mInvPanel->setShape(pInvPanelPlaceholder->getRect());
+		mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
+	
+		pInvPanelPlaceholder->setVisible(FALSE);
+	}
+	return (NULL != mInvPanel);
 }
 
 //virtual
