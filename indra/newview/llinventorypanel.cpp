@@ -284,6 +284,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 
 	// hide inbox
 	getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+	getFilter()->markDefault();
+// [/SL:KB]
 
 	// Initialize base class params.
 	LLPanel::initFromParams(params);
@@ -1234,6 +1237,9 @@ public:
 		LLInventoryPanel::initFromParams(p);
 		// turn on inbox for recent items
 		getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+		getFilter()->markDefault();
+// [/SL:KB]
 	}
 
 protected:
