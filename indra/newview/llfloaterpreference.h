@@ -259,4 +259,18 @@ private:
 };
 
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-10-21 (Catznip-2.7.0a) | Added: Catznip-2.2.0c
+class LLPanelPreferenceCrashReports : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceCrashReports();
+
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void apply();
+	/*virtual*/ void cancel();
+
+	void refresh();
+};
+// [/SL:KB]
+
 #endif  // LL_LLPREFERENCEFLOATER_H
