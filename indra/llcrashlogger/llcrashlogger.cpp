@@ -587,7 +587,7 @@ bool LLCrashLogger::init()
 
 	// We assume that all the logs we're looking for reside on the current drive
 //	gDirUtilp->initAppDirs("SecondLife");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 	gDirUtilp->initAppDirs("Catznip");
 // [/SL:KB]
 

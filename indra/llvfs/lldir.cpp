@@ -269,7 +269,7 @@ std::string LLDir::buildSLOSCacheDir() const
 	else
 	{
 //		res = getOSCacheDir() + mDirDelimiter + "SecondLife";
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-08-03 (Catznip-2.2.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
 		res = getOSCacheDir() + mDirDelimiter + "Catznip";
 // [/SL:KB]
 	}

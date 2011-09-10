@@ -265,7 +265,7 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 void fetch_viewer_data();
 // [/SL:KB]
 
@@ -429,7 +429,7 @@ bool idle_startup()
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 		fetch_viewer_data();
 // [/SL:KB]
 
@@ -876,31 +876,10 @@ bool idle_startup()
 		LLFile::mkdir(gDirUtilp->getLindenUserDir());
 
 		// Set PerAccountSettingsFile to the default value.
-//		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
-//		gSavedSettings.setString("PerAccountSettingsFile",
-//			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
-//				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-14 (Catznip-2.4.0a) | Added: Catznip-2.4.0a
-		std::string strPerAccountSettingspath =
-			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount"));
-
-		// If the file doesn't exist, try using the per account settings from Second Life instead
-		if (!gDirUtilp->fileExists(strPerAccountSettingspath))
-		{
-			const std::string strAppName = "Catznip";
-
-			std::string strSLSettingsPath = strPerAccountSettingspath;
-			std::string::size_type idxAppName = strSLSettingsPath.rfind(strAppName);
-			if (std::string::npos != idxAppName)
-			{
-				strSLSettingsPath.replace(idxAppName, strAppName.length(), "SecondLife");
-				if (gDirUtilp->fileExists(strSLSettingsPath))
-					strPerAccountSettingspath = strSLSettingsPath;
-			}
-		}
-
-		gSavedSettings.setString("PerAccountSettingsFile", strPerAccountSettingspath);
-// [/SL:KB]
+		std::string per_account_settings_file = LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount");
+		gSavedSettings.setString("PerAccountSettingsFile",
+			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
+				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
 
 		// Note: can't store warnings files per account because some come up before login
 		
@@ -3295,7 +3274,7 @@ bool process_login_success_response()
 	}
 
 //	gAgent.mMOTD.assign(response["message"]);
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 	if (gAgent.mMOTD.empty())
 		gAgent.mMOTD.assign(response["message"]);
 // [/SL:KB]
@@ -3483,7 +3462,7 @@ void transition_back_to_login_panel(const std::string& emsg)
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
 {
 public:

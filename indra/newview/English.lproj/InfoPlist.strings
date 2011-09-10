@@ -2,6 +2,6 @@
 
 CFBundleName = "Catznip";
 
-CFBundleShortVersionString = "Catznip version 2.8.0.0";
-CFBundleGetInfoString = "Catznip version 2.8.0.0, Copyright 2004-2011 Kitty Barnett, Inc.";
+CFBundleShortVersionString = "Catznip version 3.0.0.0";
+CFBundleGetInfoString = "Catznip version 3.0.0.0, Copyright 2010-2011 Kitty Barnett, Inc.";
 

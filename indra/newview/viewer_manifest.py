@@ -117,7 +117,6 @@ class ViewerManifest(LLManifest):
                             self.end_prefix("*/textures")
                     self.path("*/xui/*/*.xml")
                     self.path("*/xui/*/widgets/*.xml")
-                    
                     self.path("*/*.xml")
 
                     # Local HTML files (e.g. loading screen)
@@ -945,9 +944,9 @@ class LinuxManifest(ViewerManifest):
         # Get the icons based on the channel
         icon_path = self.icon_path()
         if self.prefix(src=icon_path, dst="") :
-            self.path("catznip_256.png","catznip_icon.png")
+            self.path("catznip_64.png","catznip_icon.png")
             if self.prefix(src="",dst="res-sdl") :
-                self.path("catznip_256.BMP","ll_icon.BMP")
+                self.path("catznip_64.BMP","ll_icon.BMP")
                 self.end_prefix("res-sdl")
             self.end_prefix(icon_path)
 
