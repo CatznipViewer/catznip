@@ -227,12 +227,13 @@ public:
 	 * DO NOT call this method if your application has specialized
 	 * error handling code.
 	 */
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.7.0a) | Added: Catznip-2.4.0a
-	typedef enum minidump_type_t {
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	enum EMiniDumpType
+	{
 		MINIDUMP_MINIMAL = 0,
 		MINIDUMP_NORMAL = 1,
 		MINIDUMP_EXTENDED = 2
-	} EMiniDumpType;
+	};
 
 	void setupErrorHandling(EMiniDumpType minidump_type = MINIDUMP_NORMAL);
 // [/SL:KB]

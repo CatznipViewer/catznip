@@ -33,7 +33,7 @@
 #include "llapp.h"
 #include "llsd.h"
 #include "llcontrol.h"
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 #include "llcrashlookup.h"
 // [/SL:KB]
 
@@ -55,7 +55,7 @@ public:
 	void setUserText(const std::string& text) { mCrashInfo["UserNotes"] = text; }
 	S32 getCrashBehavior() { return mCrashBehavior; }
 	bool runCrashLogPost(std::string host, LLSD data, std::string msg, int retries, int timeout);
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	std::string getCrashInformationLink() { return mCrashLink; }
 	void		setCrashInformationLink(const std::string& strCrashLink) { mCrashLink = strCrashLink; }
 // [/SL:KB]
@@ -67,7 +67,7 @@ protected:
 	LLControlGroup mCrashSettings;
 	std::string mProductName;
 	LLSD mCrashInfo;
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	LLCrashLookup*	mCrashLookup;
 	std::string		mCrashLink;
 // [/SL:KB]

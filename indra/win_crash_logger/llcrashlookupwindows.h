@@ -45,4 +45,4 @@ protected:
 
 #endif // LL_SEND_CRASH_REPORTS
 
-#endif // LLCRASHLOOKUP_H
+#endif // LLCRASHLOOKUPWINDOWS_H

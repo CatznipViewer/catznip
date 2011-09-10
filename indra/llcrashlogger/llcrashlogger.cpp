@@ -43,7 +43,7 @@
 #include "llhttpclient.h"
 #include "llsdserialize.h"
 
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 #ifdef LL_WINDOWS
 	#include <shellapi.h>
 #endif // LL_WINDOWS
@@ -67,7 +67,7 @@ public:
 
 	virtual void result(const LLSD& content)
 	{
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 		if ( (content.has("crash_link")) && (!content["crash_link"].asString().empty()) )
 		{
 			((LLCrashLogger*)LLCrashLogger::instance())->setCrashInformationLink(content["crash_link"].asString());
@@ -80,7 +80,7 @@ public:
 };
 
 LLCrashLogger::LLCrashLogger() :
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	mCrashLookup(NULL),
 // [/SL:KB]
 	mCrashBehavior(CRASH_BEHAVIOR_ALWAYS_SEND),
@@ -169,7 +169,7 @@ void LLCrashLogger::gatherFiles()
 
 		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
 		mFileMap["SettingsXml"] = mDebugLog["SettingsFilename"].asString();
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-27 (Catznip-2.7.0a) | Added: Catznip-2.4.0f
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-27 (Catznip-3.0.0a) | Added: Catznip-2.4.0f
 		// Remove the settings.xml path after we've retrieved it since it could contain the OS user name
 		mDebugLog.erase("SettingsFilename");
 // [/SL:KB]
@@ -202,7 +202,7 @@ void LLCrashLogger::gatherFiles()
 		std::string log_filename = mFileMap["SecondLifeLog"];
 //		log_filename.replace(log_filename.size() - 4, 4, ".old");
 //		mFileMap["SecondLifeLog"] = log_filename;
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.7.0a) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 		if (!log_filename.empty())
 		{
 			log_filename.replace(log_filename.size() - 4, 4, ".old");
@@ -219,7 +219,7 @@ void LLCrashLogger::gatherFiles()
 		// Crash log receiver has been manually configured.
 		mCrashHost = mDebugLog["CrashHostUrl"].asString();
 	}
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-18 (Catznip-2.7.0a) | Modified: Catznip-2.6.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-18 (Catznip-3.0.0a) | Modified: Catznip-2.6.0c
 	else
 	{
 		mCrashHost = "http://viewer.catznip.com/crash/report/";
@@ -244,7 +244,7 @@ void LLCrashLogger::gatherFiles()
 
 	// Use login servers as the alternate, since they are already load balanced and have a known name
 //	mAltCrashHost = "https://login.agni.lindenlab.com:12043/crash/report";
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.7.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 	mAltCrashHost = "";
 // [/SL:KB]
 
@@ -279,7 +279,7 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.7.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 	if (gDirUtilp->fileExists(minidump_path))
 	{
 		mFileMap["Minidump"] = minidump_path;
@@ -368,7 +368,7 @@ bool LLCrashLogger::saveCrashBehaviorSetting(S32 crash_behavior)
 	return true;
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 std::string getFormDataField(const std::string& strFieldName, const std::string& strFieldValue, const std::string& strBoundary)
 {
 	std::ostringstream streamFormPart;
@@ -388,7 +388,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 	{
 		updateApplication(llformat("%s, try %d...", msg.c_str(), i+1));
 //		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.7.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 		static const std::string BOUNDARY("------------abcdef012345xyZ");
 
 		LLSD headers = LLSD::emptyMap();
@@ -436,9 +436,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 		}
 		body << getFormDataField("last_exec_event", strLastExecEvent, BOUNDARY);
 		if (!strLastExecMsg.empty())
-		{
 			body << getFormDataField("last_exec_message", strLastExecMsg, BOUNDARY);
-		}
 
 		/*
 		 * Include crash analysis pony
@@ -521,7 +519,7 @@ bool LLCrashLogger::sendCrashLogs()
 
 //	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
 //															   "SecondLifeCrashReport");
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.7.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 	std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
 															   "CatznipCrashReport");
 // [/SL:KB]
@@ -531,7 +529,7 @@ bool LLCrashLogger::sendCrashLogs()
 	LLSDSerialize::toPrettyXML(post_data, out_file);
 	out_file.close();
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.7.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 	mFileMap["CrashReportLog"] = report_file;
 // [/SL:KB]
 
@@ -544,7 +542,7 @@ bool LLCrashLogger::sendCrashLogs()
 	}
 
 //	if(!sent)
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.7.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 	if ( (!sent) && (!mAltCrashHost.empty()) )
 // [/SL:KB]
 	{
@@ -553,7 +551,7 @@ bool LLCrashLogger::sendCrashLogs()
 	
 	mSentCrashLogs = sent;
 
-// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.7.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	if (!mCrashLink.empty())
 	{
 #if LL_WINDOWS && LL_SEND_CRASH_REPORTS
