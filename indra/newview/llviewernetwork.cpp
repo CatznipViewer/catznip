@@ -34,8 +34,14 @@
 #include "lltrans.h"
 #include "llweb.h"
 
-                                                            
-const char* DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+//const char* DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-08-27 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+const char* DEFAULT_LOGIN_PAGE = "http://catznip.com/viewer/login-test/";
+#else
+const char* DEFAULT_LOGIN_PAGE = "http://catznip.com/viewer/login/";
+#endif // LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
 
 const char* SYSTEM_GRID_SLURL_BASE = "secondlife://%s/secondlife/";
 const char* MAIN_GRID_SLURL_BASE = "http://maps.secondlife.com/secondlife/";
