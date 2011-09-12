@@ -962,6 +962,17 @@ void set_dad_inbox_object(const LLUUID& object_id)
 //know what to watch for, so instead we just watch for all additions.
 class LLOpenTaskOffer : public LLInventoryAddedObserver
 {
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+public:
+	// TODO-Catznip: a better/cleaner solution would be to create a class instance on demand. Look into why LL didn't do it that way?
+	void addMoveFromTaskFolder(const LLUUID& idFolder, U32 cntItems)
+	{
+		mMoveFromTaskFolders.insert(std::pair<LLUUID, U32>(idFolder, cntItems));
+	}
+protected:
+	std::map<LLUUID, U32> mMoveFromTaskFolders;
+// [/SL:KB]
+
 protected:
 	/*virtual*/ void done()
 	{
@@ -982,6 +993,16 @@ protected:
 						LL_DEBUGS("Inventory_Move") << "Found asset UUID: " << asset_uuid << LL_ENDL;
 						was_moved = true;
 					}
+
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+					std::map<LLUUID, U32>::iterator itFolder = mMoveFromTaskFolders.find(added_item->getParentUUID());
+					if (mMoveFromTaskFolders.end() != itFolder)
+					{
+						if (0 == --itFolder->second)
+							mMoveFromTaskFolders.erase(itFolder);
+						was_moved = true;
+					}
+// [/SL:KB]
 				}
 			}
 
@@ -1011,6 +1032,16 @@ protected:
 
 //one global instance to bind them
 LLOpenTaskOffer* gNewInventoryObserver=NULL;
+
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// Hacky way of getting from move_task_inventory_callback() in llinventorybridge.cpp to the LLOpenTaskOffer class here *sighs*
+void move_task_inventory_register_folder(const LLUUID& idFolder, U32 cntItems)
+{
+	if (gNewInventoryObserver)
+		gNewInventoryObserver->addMoveFromTaskFolder(idFolder, cntItems);
+}
+// [/SL:KB]
+
 class LLNewInventoryHintObserver : public LLInventoryAddedObserver
 {
 protected:

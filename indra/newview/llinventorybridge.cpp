@@ -2976,14 +2976,25 @@ bool move_task_inventory_callback(const LLSD& notification, const LLSD& response
 
 	if(option == 0 && object)
 	{
-		if (cat_and_wear && cat_and_wear->mWear)
+//		if (cat_and_wear && cat_and_wear->mWear)
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+		if (cat_and_wear)
+// [/SL:KB]
 		{
 			LLInventoryObject::object_list_t inventory_objects;
 			object->getInventoryContents(inventory_objects);
 			int contents_count = inventory_objects.size()-1; //subtract one for containing folder
 
-			LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count);
-			gInventory.addObserver(inventoryObserver);
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+			move_task_inventory_register_folder(cat_and_wear->mCatID, contents_count);
+			if (cat_and_wear->mWear)
+			{
+				LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count);
+				gInventory.addObserver(inventoryObserver);
+			}
+// [/SL:KB]
+//			LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count);
+//			gInventory.addObserver(inventoryObserver);
 		}
 
 		two_uuids_list_t::iterator move_it;
