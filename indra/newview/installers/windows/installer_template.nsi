@@ -83,7 +83,7 @@ SetOverwrite on							; stomp files by default
 AutoCloseWindow true					; after all files install, close window
 
 InstallDir "$PROGRAMFILES\${INSTNAME}"
-InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" ""
+InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 Page directory dirPre
 Page instfiles
@@ -200,7 +200,7 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function CheckIfAlreadyCurrent
     Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version"
     StrCmp $0 ${VERSION_LONG} 0 continue_install
     StrCmp $SKIP_DIALOGS "true" continue_install
     MessageBox MB_OKCANCEL $(CheckIfCurrentMB) /SD IDOK IDOK continue_install
@@ -414,15 +414,15 @@ Push $2
 
 	; If uninstalling a normal install remove everything
 	; Otherwise (preview/dmz etc) just remove cache
-    StrCmp $INSTFLAGS "" RM_ALL RM_CACHE
-      RM_ALL:
-        RMDir /r "$2\Application Data\SecondLife"
-      RM_CACHE:
+;    StrCmp $INSTFLAGS "" RM_ALL RM_CACHE
+;      RM_ALL:
+;        RMDir /r "$2\Application Data\SecondLife"
+;      RM_CACHE:
         # Local Settings directory is the cache, there is no "cache" subdir
-        RMDir /r "$2\Local Settings\Application Data\SecondLife"
+        RMDir /r "$2\Local Settings\Application Data\Catznip"
         # Vista version of the same
-        RMDir /r "$2\AppData\Local\SecondLife"
-        Delete "$2\Application Data\SecondLife\user_settings\settings_windlight.xml"
+        RMDir /r "$2\AppData\Local\Catznip"
+;        Delete "$2\Application Data\SecondLife\user_settings\settings_windlight.xml"
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -434,16 +434,16 @@ Pop $1
 Pop $0
 
 ; Delete files in Documents and Settings\All Users\SecondLife
-Push $0
-  ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-  StrCmp $0 "" +2
-  RMDir /r "$0\SecondLife"
-Pop $0
+;Push $0
+;  ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;  StrCmp $0 "" +2
+;  RMDir /r "$0\SecondLife"
+;Pop $0
 
 ; Delete filse in C:\Windows\Application Data\SecondLife
 ; If the user is running on a pre-NT system, Application Data lives here instead of
 ; in Documents and Settings.
-RMDir /r "$WINDIR\Application Data\SecondLife"
+;RMDir /r "$WINDIR\Application Data\SecondLife"
 
 FunctionEnd
 
@@ -571,7 +571,7 @@ SetShellVarContext all
 Call un.CloseSecondLife
 
 ; Clean up registry keys and subkeys (these should all be !defines somewhere)
-DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG"
+DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG"
 DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG"
 
 ; Clean up shortcuts
@@ -710,7 +710,7 @@ Function .onInit
 lbl_configure_default_lang:
     ; If we currently have a version of SL installed, default to the language of that install
     ; Otherwise don't change $LANGUAGE and it will default to the OS UI language.
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors +2 0 ; If error skip the copy instruction 
 	StrCpy $LANGUAGE $0
 
@@ -732,7 +732,7 @@ lbl_build_menu:
     StrCpy $LANGUAGE $0
 
 	; save language in registry		
-	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage" $LANGUAGE
+	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage" $LANGUAGE
 lbl_return:
     Pop $0
     Return
@@ -742,7 +742,7 @@ FunctionEnd
 Function un.onInit
 	; read language from registry and set for uninstaller
     ; Key will be removed on successful uninstall
-	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors lbl_end
 	StrCpy $LANGUAGE $0
 lbl_end:
@@ -828,11 +828,11 @@ CreateShortCut "$INSTDIR\Uninstall $INSTSHORTCUT.lnk" \
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Write registry
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "" "$INSTDIR"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version" "${VERSION_LONG}"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Flags" "$INSTFLAGS"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Exe" "$INSTEXE"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "" "$INSTDIR"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version" "${VERSION_LONG}"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Flags" "$INSTFLAGS"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Exe" "$INSTEXE"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayName" "$INSTPROG (remove only)"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "UninstallString" '"$INSTDIR\uninst.exe"'
 
