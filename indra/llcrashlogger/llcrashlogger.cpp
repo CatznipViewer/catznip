@@ -279,13 +279,14 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.7.0a) | Modified: Catznip-2.6.0a
-	if (gDirUtilp->fileExists(minidump_path))
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-09-23 (Catznip-2.8.0e) | Modified: Catznip-2.8.0e
+	if (!minidump_path.empty())
 	{
-		mFileMap["Minidump"] = minidump_path;
-		if (mCrashLookup)
+		if (gDirUtilp->fileExists(minidump_path))
 		{
-			mCrashLookup->initFromDump(minidump_path);
+			mFileMap["Minidump"] = minidump_path;
+			if (mCrashLookup)
+				mCrashLookup->initFromDump(minidump_path);
 		}
 		// Remove the minidump path after we've retrieved it since it could contain the OS user name
 		mDebugLog.erase("MinidumpPath");
