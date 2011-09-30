@@ -400,7 +400,10 @@ void LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
 	logInventoryOffer(to_agent, im_session_id);
 
 	// add buddy to recent people list
-	LLRecentPeople::instance().add(to_agent);
+//	LLRecentPeople::instance().add(to_agent);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	LLRecentPeople::instance().add(to_agent, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
 }
 
 // static
@@ -455,7 +458,10 @@ void LLGiveInventory::commitGiveInventoryCategory(const LLUUID& to_agent,
 		<< cat->getUUID() << llendl;
 
 	// add buddy to recent people list
-	LLRecentPeople::instance().add(to_agent);
+//	LLRecentPeople::instance().add(to_agent);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	LLRecentPeople::instance().add(to_agent, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
 
 	// Test out how many items are being given.
 	LLViewerInventoryCategory::cat_array_t cats;

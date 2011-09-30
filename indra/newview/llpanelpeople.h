@@ -72,7 +72,10 @@ private:
 	void					updateFriendListHelpText();
 	void					updateFriendList();
 	void					updateNearbyList();
-	void					updateRecentList();
+//	void					updateRecentList();
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+	void					updateRecentList(bool fForceUpdate);
+// [/SL:KB]
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
 
