@@ -26,9 +26,10 @@
 
 #include "llviewerprecompiledheaders.h"
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-01 (Catznip-3.0.0a) | Modified: Catznip-3.0.0a
 #include "llsd.h"
 #include "llsdserialize.h"
+#include "llviewercontrol.h"
 // [/SL:KB]
 
 #include "llrecentpeople.h"
@@ -48,6 +49,8 @@ LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLUUID& idAgent
 
 LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
 {
+	static LLCachedControl<U32> CUTOFF_DAYS(gSavedSettings, "RecentPeopleCutOffDays");
+
 	m_idAgent = sdItem["agent_id"].asUUID();
 	if ( (sdItem.has("interactions")) && (sdItem["interactions"].isMap()) )
 	{
@@ -55,8 +58,9 @@ LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
 		for (LLSD::map_const_iterator itInteraction = sdInteractions.beginMap(); itInteraction != sdInteractions.endMap(); ++itInteraction)
 		{
 			LLRecentPeople::EInteractionType eInteraction = LLRecentPeople::getTypeFromTypeName(itInteraction->first);
-			if (eInteraction < LLRecentPeople::IT_COUNT)
-				setLastInteraction(eInteraction, itInteraction->second.asDate());
+			const LLDate tsInteraction = itInteraction->second.asDate();
+			if ( (eInteraction < LLRecentPeople::IT_COUNT) && ((0 == CUTOFF_DAYS) || (LLDate::now() - tsInteraction < CUTOFF_DAYS * 86400)) )
+				setLastInteraction(eInteraction, tsInteraction);
 		}
 	}
 	m_sdUserdata = sdItem["userdata"];
@@ -65,6 +69,14 @@ LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
 LLDate LLRecentPeoplePersistentItem::getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const
 {
 	return (eInteraction < LLRecentPeople::IT_COUNT) ? m_InteractionTimes[eInteraction] : LLDate();
+}
+
+bool LLRecentPeoplePersistentItem::isDefault() const
+{
+	for (int idxInteraction = 0; idxInteraction < LLRecentPeople::IT_COUNT; idxInteraction++)
+		if (getLastInteraction((LLRecentPeople::EInteractionType)idxInteraction).notNull())
+			return false;
+	return true;
 }
 
 void LLRecentPeoplePersistentItem::setLastInteraction(LLRecentPeople::EInteractionType eInteraction, LLDate timestamp)
@@ -151,7 +163,8 @@ void LLRecentPeople::load()
 		}
 
 		LLRecentPeoplePersistentItem persistentItem(sdItem);
-		mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
+		if (!persistentItem.isDefault())
+			mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
 	}
 
 	fileRecentPeople.close();

@@ -186,6 +186,7 @@ public:
 	const LLUUID&	getAgentId() const					{ return m_idAgent; }
 	LLDate			getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const;
 	const LLSD&		getUserdata() const					{ return m_sdUserdata; }
+	bool			isDefault() const;
 	void			setLastInteraction(LLRecentPeople::EInteractionType eInteraction, LLDate timestamp = LLDate::now());
 	void			setUserdata(const LLSD& sdUserdate)	{ m_sdUserdata = sdUserdate; }
 
