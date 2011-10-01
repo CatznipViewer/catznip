@@ -90,6 +90,7 @@ public:
 	void save() const;
 
 	void purgeItems();
+	void reloadItems();
 // [/SL:KB]
 	
 	/**

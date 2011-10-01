@@ -167,8 +167,6 @@ void LLRecentPeople::load()
 	}
 
 	fileRecentPeople.close();
-
-	mChangedSignal();
 }
 
 void LLRecentPeople::save() const
@@ -190,6 +188,13 @@ void LLRecentPeople::purgeItems()
 	mPeople.clear();
 	mChangedSignal();
 }
+
+void LLRecentPeople::reloadItems()
+{
+	save();
+	load();
+}
+
 // [/SL:KB]
 
 //bool LLRecentPeople::add(const LLUUID& id, const LLSD& userdata)

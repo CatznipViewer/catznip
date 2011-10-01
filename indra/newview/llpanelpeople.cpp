@@ -716,6 +716,7 @@ BOOL LLPanelPeople::postBuild()
 	updateRecentList(true);
 	// Refresh the list whenever the interaction filter changes
 	gSavedSettings.getControl("RecentPeopleInteractionFilter")->getSignal()->connect(boost::bind(&LLPanelPeople::updateRecentList, this, true));
+	gSavedSettings.getControl("RecentPeopleCutOffDays")->getSignal()->connect(boost::bind(&LLPanelPeople::refreshRecentList, this));
 // [/SL:KB]
 
 	// call this method in case some list is empty and buttons can be in inconsistent state
@@ -829,6 +830,12 @@ void LLPanelPeople::updateNearbyList()
 
 //void LLPanelPeople::updateRecentList()
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+void LLPanelPeople::refreshRecentList()
+{
+	LLRecentPeople::instance().reloadItems();
+	updateRecentList(true);
+}
+
 void LLPanelPeople::updateRecentList(bool fForceUpdate)
 // [/SL:KB]
 {
