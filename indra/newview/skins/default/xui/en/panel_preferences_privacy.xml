@@ -33,7 +33,7 @@
      left="60"
      name="clear_web_cookies"
      tool_tip="Clear web browser cookies when the SL cache is cleared"
-     width="150"
+     width="120"
      top_pad="5">
       <check_box.commit_callback
        function="Clear.SettingsCheck"
@@ -44,13 +44,26 @@
      height="16"
      label="Navigation Bar History"
      layout="topleft"
-	 left_delta="175"
+	 left_delta="125"
      name="clear_navbar_history"
      tool_tip="Clear navigation bar history when the SL cache is cleared"
-     width="150">
+     width="120">
       <check_box.commit_callback
        function="Clear.SettingsCheck"
        parameter="navbar" />
+    </check_box>
+    <check_box
+     follows="left|top"
+     height="16"
+     label="People History"
+     layout="topleft"
+	 left_delta="160"
+     name="clear_people_history"
+     tool_tip="Clear people history when the SL cache is cleared"
+     width="120">
+      <check_box.commit_callback
+       function="Clear.SettingsCheck"
+       parameter="people" />
     </check_box>
     <check_box
      follows="left|top"
@@ -60,7 +73,7 @@
      left="60"
      name="clear_search_history"
      tool_tip="Clear search history when the SL cache is cleared"
-     width="150">
+     width="120">
       <check_box.commit_callback
        function="Clear.SettingsCheck"
        parameter="search" />
@@ -70,10 +83,10 @@
      height="16"
      label="Teleport History"
      layout="topleft"
-	 left_delta="175"
+	 left_delta="125"
      name="clear_teleport_history"
      tool_tip="Clear teleport history when the SL cache is cleared"
-     width="242">
+     width="120">
       <check_box.commit_callback
        function="Clear.SettingsCheck"
        parameter="teleport" />

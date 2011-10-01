@@ -104,6 +104,9 @@
 #include "lluictrlfactory.h"
 #include "llviewermedia.h"
 #include "llpluginclassmedia.h"
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+#include "llrecentpeople.h"
+// [/SL:KB]
 #include "llteleporthistorystorage.h"
 #include "llproxy.h"
 
@@ -119,6 +122,7 @@ const U32 CLEAR_MASK_COOKIES	= 0x01;
 const U32 CLEAR_MASK_NAVBAR		= 0x02;
 const U32 CLEAR_MASK_SEARCH		= 0x04;
 const U32 CLEAR_MASK_TELEPORT	= 0x08;
+const U32 CLEAR_MASK_PEOPLE		= 0x10;
 // [/SL:KB]
 
 //control value for middle mouse as talk2push button
@@ -268,7 +272,15 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 		{
 			LLTeleportHistoryStorage::getInstance()->purgeItems();
 			LLTeleportHistoryStorage::getInstance()->save();
-	}
+		}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+		if (nClearMask & CLEAR_MASK_PEOPLE)
+		{
+			LLRecentPeople::getInstance()->purgeItems();
+			LLRecentPeople::getInstance()->save();
+		}
 // [/SL:KB]
 	}
 	
@@ -947,6 +959,8 @@ void LLFloaterPreference::onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sd
 			nClearToggle = CLEAR_MASK_SEARCH;
 		else if ("teleport" == strParam)
 			nClearToggle = CLEAR_MASK_TELEPORT;
+		else if ("people" == strParam)
+			nClearToggle = CLEAR_MASK_PEOPLE;
 
 		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
 		if (pCheckCtrl->get())
@@ -1842,6 +1856,8 @@ void LLPanelPreference::refresh()
 		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
 	if (hasChild("clear_teleport_history"))
 		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+	if (hasChild("clear_people_history"))
+		getChild<LLCheckBoxCtrl>("clear_people_history")->set(nClearMask & CLEAR_MASK_PEOPLE);
 }
 // [/SL:KB]
 
