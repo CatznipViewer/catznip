@@ -1453,13 +1453,13 @@ bool LLAppViewer::cleanup()
 	}
 	LLMetricPerformanceTesterBasic::cleanClass();
 
-	// remove any old breakpad minidump files from the log directory
-	if (! isError())
-	{
-		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
-		logdir += gDirUtilp->getDirDelimiter();
-		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
-	}
+//	// remove any old breakpad minidump files from the log directory
+//	if (! isError())
+//	{
+//		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+//		logdir += gDirUtilp->getDirDelimiter();
+//		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+//	}
 
 	// *TODO - generalize this and move DSO wrangling to a helper class -brad
 	std::set<struct apr_dso_handle_t *>::const_iterator i;
@@ -2829,6 +2829,12 @@ void LLAppViewer::checkForCrash(void)
     }
 #endif // LL_SEND_CRASH_REPORTS    
     
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// Remove any old breakpad minidump files from the log directory
+	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+	logdir += gDirUtilp->getDirDelimiter();
+	gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+// [/SL:KB]
 }
 
 //
