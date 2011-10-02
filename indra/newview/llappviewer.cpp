@@ -1694,6 +1694,11 @@ bool LLAppViewer::cleanup()
 		llinfos << "Saved settings" << llendflush;
 	}
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
+	gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+// [/SL:KB]
+
 	std::string warnings_settings_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Warnings"));
 	gWarningSettings.saveToFile(warnings_settings_filename, TRUE);
 
@@ -2141,6 +2146,10 @@ bool LLAppViewer::initConfiguration()
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
 	gSavedSettings.setString("ClientSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	gSavedSettings.setString("CrashSettingsFile", 
+        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
+// [/SL:KB]
 
 	gSavedSettings.setString("VersionChannelName", LLVersionInfo::getChannel());
 
