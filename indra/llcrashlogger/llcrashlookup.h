@@ -28,7 +28,7 @@
 class LLCrashLookup
 {
 public:
-	LLCrashLookup() {}
+	LLCrashLookup();
 	virtual ~LLCrashLookup() {}
 
 public:

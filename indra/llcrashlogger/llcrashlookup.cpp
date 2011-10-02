@@ -24,6 +24,11 @@
 
 #include "llcrashlookup.h"
 
+LLCrashLookup::LLCrashLookup()
+	: m_nInstructionAddr(0), m_strModule("unknown"), m_nModuleBaseAddr(0), m_nModuleTimeStamp(0), m_nModuleChecksum(0), m_nModuleVersion(0)
+{
+}
+
 std::string LLCrashLookup::getModuleVersionString() const
 {
 	std::string strVersion = llformat("%d.%d.%d.%d", 

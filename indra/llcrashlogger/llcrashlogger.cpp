@@ -279,13 +279,14 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
-	if (gDirUtilp->fileExists(minidump_path))
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-09-23 (Catznip-3.0.0a) | Modified: Catznip-2.8.0e
+	if (!minidump_path.empty())
 	{
-		mFileMap["Minidump"] = minidump_path;
-		if (mCrashLookup)
+		if (gDirUtilp->fileExists(minidump_path))
 		{
-			mCrashLookup->initFromDump(minidump_path);
+			mFileMap["Minidump"] = minidump_path;
+			if (mCrashLookup)
+				mCrashLookup->initFromDump(minidump_path);
 		}
 		// Remove the minidump path after we've retrieved it since it could contain the OS user name
 		mDebugLog.erase("MinidumpPath");
@@ -455,29 +456,33 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 		for (std::map<std::string, std::string>::const_iterator itFile = mFileMap.begin(), endFile = mFileMap.end();
 				itFile != endFile; ++itFile)
 		{
-			if (itFile->second.empty())
+			std::string strFileName = gDirUtilp->getBaseFileName(itFile->second);
+			if (strFileName.empty())
 				continue;
+
+			llifstream fstream(itFile->second, std::iostream::binary | std::iostream::out);
+			if (!fstream.is_open())
+			{
+				body << getFormDataField("filemap[]", llformat("%s (unable to open)", strFileName), BOUNDARY);
+				continue;
+			}
+
+			fstream.seekg(0, std::ios::end);
+			U32 szFile = fstream.tellg();
+			body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szFile), BOUNDARY);
+			fstream.seekg(0, std::ios::beg);
 
 			body << "--" << BOUNDARY << "\r\n"
 				 <<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
-				 << "filename=\"" << gDirUtilp->getBaseFileName(itFile->second) << "\"\r\n"
+				 << "filename=\"" << strFileName << "\"\r\n"
 				 << "Content-Type: application/octet-stream"
 				 << "\r\n\r\n";
 
-			llifstream fstream(itFile->second, std::iostream::binary | std::iostream::out);
-			if (fstream.is_open())
-			{
-				fstream.seekg(0, std::ios::end);
+			std::vector<char> fileBuffer(szFile);
+			fstream.read(&fileBuffer[0], szFile);
+			body.write(&fileBuffer[0], szFile);
 
-				U32 fileSize = fstream.tellg();
-				fstream.seekg(0, std::ios::beg);
-				std::vector<char> fileBuffer(fileSize);
-
-				fstream.read(&fileBuffer[0], fileSize);
-				body.write(&fileBuffer[0], fileSize);
-
-				fstream.close();
-			}
+			fstream.close();
 
 			body <<	"\r\n";
 		}
