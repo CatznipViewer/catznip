@@ -472,21 +472,21 @@ void LLIMModel::LLIMSession::addMessagesFromHistory(const std::list<LLSD>& histo
 	}
 }
 
-void LLIMModel::LLIMSession::chatFromLogFile(LLLogChat::ELogLineType type, const LLSD& msg, void* userdata)
-{
-	if (!userdata) return;
-
-	LLIMSession* self = (LLIMSession*) userdata;
-
-	if (type == LLLogChat::LOG_LINE)
-	{
-		self->addMessage("", LLSD(), msg["message"].asString(), "", true);
-	}
-	else if (type == LLLogChat::LOG_LLSD)
-	{
-		self->addMessage(msg["from"].asString(), msg["from_id"].asUUID(), msg["message"].asString(), msg["time"].asString(), true);
-	}
-}
+//void LLIMModel::LLIMSession::chatFromLogFile(LLLogChat::ELogLineType type, const LLSD& msg, void* userdata)
+//{
+//	if (!userdata) return;
+//
+//	LLIMSession* self = (LLIMSession*) userdata;
+//
+//	if (type == LLLogChat::LOG_LINE)
+//	{
+//		self->addMessage("", LLSD(), msg["message"].asString(), "", true);
+//	}
+//	else if (type == LLLogChat::LOG_LLSD)
+//	{
+//		self->addMessage(msg["from"].asString(), msg["from_id"].asUUID(), msg["message"].asString(), msg["time"].asString(), true);
+//	}
+//}
 
 LLIMModel::LLIMSession* LLIMModel::findIMSession(const LLUUID& session_id) const
 {

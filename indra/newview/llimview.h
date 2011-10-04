@@ -82,7 +82,7 @@ public:
 		void onVoiceChannelStateChanged(const LLVoiceChannel::EState& old_state, const LLVoiceChannel::EState& new_state, const LLVoiceChannel::EDirection& direction);
 		
 		/** @deprecated */
-		static void chatFromLogFile(LLLogChat::ELogLineType type, const LLSD& msg, void* userdata);
+//		static void chatFromLogFile(LLLogChat::ELogLineType type, const LLSD& msg, void* userdata);
 
 		bool isOutgoingAdHoc();
 		bool isAdHoc();
