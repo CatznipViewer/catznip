@@ -4301,8 +4301,13 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 void LLObjectBridge::openItem()
 {
 	// object double-click action is to wear/unwear object
-	performAction(getInventoryModel(),
-		      get_is_item_worn(mUUID) ? "detach" : "attach");
+//	performAction(getInventoryModel(),
+//		      get_is_item_worn(mUUID) ? "detach" : "attach");
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	MASK mask = gKeyboard->currentMask(TRUE);
+	const char* pstrAction = get_is_item_worn(mUUID) ? "detach" : ((!(mask & MASK_CONTROL)) ? "attach" : "wear_add");
+	performAction(getInventoryModel(), pstrAction);
+// [/SL:KB]
 }
 
 std::string LLObjectBridge::getLabelSuffix() const
@@ -4857,13 +4862,17 @@ void LLWearableBridge::openItem()
 //	{
 //		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
 //	}
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2011-10-04 (Catznip-3.0.0a) | Modified: Catznip-3.0.0a
 	if ( (item) && (item->isWearableType()) )
 	{
 		// Wearable double-click action should match attachment double-click action (=wear/unwear but don't attempt to unwear body parts)
 		bool fIsWorn = get_is_item_worn(mUUID);
 		if ( (!fIsWorn) || (LLAssetType::AT_BODYPART != item->getType()) )
-			performAction(getInventoryModel(), fIsWorn ? "take_off" : "wear");
+		{
+			MASK mask = gKeyboard->currentMask(TRUE);
+			const char* pstrAction = get_is_item_worn(mUUID) ? "take_off" : ((!(mask & MASK_CONTROL)) ? "wear" : "wear_add");
+			performAction(getInventoryModel(), pstrAction);
+		}
 	}
 // [/SL:KB]
 }

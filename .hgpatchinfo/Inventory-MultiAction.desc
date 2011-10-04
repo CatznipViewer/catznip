@@ -1,5 +1,6 @@
 [Inventory/MultiAction]
 - added   : LLFolderViewerListener::peformActionBatch() to handle an action for multiple items of the same type
+- added   : <Ctrl> as a wear add modifier (i.e. <Ctrl>+<Enter> add wears the selection rather than replaces and similarly with double-click)
 - changed : routed LLFolderView::openSelectedItems() to LLFolderView::doToSelected(..., "open")
     -> fixes <enter>'ing on a selection resulting in "Attachment pending"
 
