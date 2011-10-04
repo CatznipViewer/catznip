@@ -4246,6 +4246,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 
 	if ( (isAddAction(action)) || ("wear_add" == action) || (("open" == action) && (!fRemoveOpen)) )
 	{
+		MASK mask = gKeyboard->currentMask(TRUE);
 		LLInventoryCallback* pCallback = NULL;
 		for (S32 idx = 0; idx < batch.count(); idx++)
 		{
@@ -4259,7 +4260,8 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 
 			if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getRootFolderID()))
 			{
-				LLAttachmentsMgr::instance().addAttachment(pItem->getUUID(), 0, ("wear_add" == action));
+				bool fWearAdd = ("wear_add" == action) || (("open" == action) && (mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickAttachmentAdd")));
+				LLAttachmentsMgr::instance().addAttachment(pItem->getUUID(), 0, fWearAdd);
 			}
 			else if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getLibraryRootFolderID()))
 			{
@@ -4305,7 +4307,9 @@ void LLObjectBridge::openItem()
 //		      get_is_item_worn(mUUID) ? "detach" : "attach");
 // [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	MASK mask = gKeyboard->currentMask(TRUE);
-	const char* pstrAction = get_is_item_worn(mUUID) ? "detach" : ((!(mask & MASK_CONTROL)) ? "attach" : "wear_add");
+	const char* pstrAction = 
+		get_is_item_worn(mUUID) ? "detach" 
+		                        : ((mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickAttachmentAdd"))) ? "wear_add" : "attach";
 	performAction(getInventoryModel(), pstrAction);
 // [/SL:KB]
 }
@@ -4810,6 +4814,7 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			}
 		}
 
+		MASK mask = gKeyboard->currentMask(TRUE);
 		if (items.count())
 		{
 			// This is really a lot more complicated than it ought to be:
@@ -4827,8 +4832,8 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			{
 				for (S32 idxItem = 0, cntItem = itemsByType[type].size(); idxItem < cntItem; idxItem++)
 				{
-					LLAppearanceMgr::instance().wearItemOnAvatar(
-						itemsByType[type][idxItem]->getUUID(), true, (("wear_add" != action) && (0 == idxItem)), cb);
+					bool fWearAdd = ("wear_add" == action) || (("open" == action) && (mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickWearableAdd")));
+					LLAppearanceMgr::instance().wearItemOnAvatar(itemsByType[type][idxItem]->getUUID(), true, !fWearAdd && (0 == idxItem), cb);
 				}
 			}
 		}
@@ -4869,8 +4874,12 @@ void LLWearableBridge::openItem()
 		bool fIsWorn = get_is_item_worn(mUUID);
 		if ( (!fIsWorn) || (LLAssetType::AT_BODYPART != item->getType()) )
 		{
-			MASK mask = gKeyboard->currentMask(TRUE);
-			const char* pstrAction = get_is_item_worn(mUUID) ? "take_off" : ((!(mask & MASK_CONTROL)) ? "wear" : "wear_add");
+			const char* pstrAction = (fIsWorn) ? "take_off" : "wear";
+
+			MASK mask = gKeyboard->currentMask(TRUE); 
+			if ( (!fIsWorn) && (LLAssetType::AT_BODYPART != item->getType()) )
+				pstrAction = ((mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickWearableAdd"))) ? "wear_add" : "wear";
+
 			performAction(getInventoryModel(), pstrAction);
 		}
 	}
