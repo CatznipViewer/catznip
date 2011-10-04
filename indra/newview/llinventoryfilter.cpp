@@ -259,7 +259,10 @@ BOOL LLInventoryFilter::isNotDefault() const
 	return mFilterOps.mFilterObjectTypes != mDefaultFilterOps.mFilterObjectTypes 
 		|| mFilterOps.mFilterCategoryTypes != mDefaultFilterOps.mFilterCategoryTypes 
 		|| mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes 
-		|| mFilterOps.mFilterTypes != FILTERTYPE_OBJECT
+//		|| mFilterOps.mFilterTypes != FILTERTYPE_OBJECT
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+		|| mFilterOps.mFilterTypes != mDefaultFilterOps.mFilterTypes
+// [/SL:KB]
 		|| mFilterOps.mFilterLinks != FILTERLINK_INCLUDE_LINKS
 		|| mFilterSubString.size() 
 		|| mFilterOps.mPermissions != mDefaultFilterOps.mPermissions
