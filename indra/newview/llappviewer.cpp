@@ -2484,7 +2484,7 @@ bool LLAppViewer::initConfiguration()
 		// hack to force the skin to default.
 //        gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
 //		//gDirUtilp->setSkinFolder("default");
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-13 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-13 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 		gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
 		loadSettingsFromDirectory("CurrentSkin");
 

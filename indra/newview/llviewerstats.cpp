@@ -855,7 +855,7 @@ void send_stats()
 	body["DisplayNamesShowUsername"] = gSavedSettings.getBOOL("NameTagShowUsernames");
 	
 //	body["MinimalSkin"] = !gSavedSettings.getString("SessionSettingsFile").empty();
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-15 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-04-15 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	body["MinimalSkin"] = ("settings_minimal.xml" == gSavedSettings.getString("SessionSettingsFile"));
 // [/SL:KB]
 	

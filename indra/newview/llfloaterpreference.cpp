@@ -83,7 +83,7 @@
 #include "llerror.h"
 #include "llfontgl.h"
 #include "llrect.h"
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.6.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a)
 #include "llsdserialize.h"
 // [/SL:KB]
 #include "llstring.h"
@@ -2110,7 +2110,7 @@ void LLFloaterPreferenceProxy::onChangeSocksSettings()
 
 };
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.6.0c) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
 static LLRegisterPanelClassWrapper<LLPanelPreferenceSkins> t_pref_skins("panel_preference_skins");
 
 LLPanelPreferenceSkins::LLPanelPreferenceSkins() : LLPanelPreference(), m_pSkinCombo(NULL), m_pSkinThemeCombo(NULL)
