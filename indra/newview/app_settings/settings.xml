@@ -2650,7 +2650,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>0</boolean>
     </map>
     <key>DebugViews</key>
     <map>
@@ -4213,7 +4213,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <real>0</real>
+      <boolean>0</boolean>
     </map>
      <key>InspectorFadeTime</key>
     <map>
