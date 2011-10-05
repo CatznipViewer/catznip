@@ -1117,6 +1117,15 @@ void LLPanelPeople::onTabSelected(const LLSD& param)
 		mFilterEditor->setLabel(getString("groups_filter_label"));
 	else
 		mFilterEditor->setLabel(getString("people_filter_label"));
+
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	if (RECENT_TAB_NAME == tab_name)
+	{
+		// Force an update when opening the tab
+		mRecentList->setDirty(true, true);
+		mRecentList->updateLastInteractionTimes();
+	}
+// [/SL:KB]
 }
 
 void LLPanelPeople::onAvatarListDoubleClicked(LLUICtrl* ctrl)
