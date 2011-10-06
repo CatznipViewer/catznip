@@ -5,6 +5,7 @@
  min_height="350"
  width="343"
  can_close="true"
+ save_rect="true"
  can_resize="true">
     <panel
      background_visible="false"
