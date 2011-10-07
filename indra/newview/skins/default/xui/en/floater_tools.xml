@@ -248,6 +248,7 @@
 			function="BuildTool.selectComponent"/>
 	</check_box>
 
+<!--
    <button
      follows="left|top"
      height="20"
@@ -271,6 +272,7 @@
 	  <button.commit_callback
 	     function="BuildTool.UnlinkObjects"/>
     </button>
+-->
     <check_box
      control_name="ScaleUniform"
      height="19"
@@ -770,7 +772,32 @@
     <!--  width="143"> -->
     <!--     Prims: [COUNT] -->
     <!-- </text> -->
-    <view_border
+ 
+   <button
+    follows="left|top"
+    height="20"
+    label="Link"
+    top="155"
+    layout="topleft"
+    left="10"
+    name="link_btn"
+    width="60">
+	  <button.commit_callback
+	   function="BuildTool.LinkObjects"/>
+   </button>
+   <button
+    follows="left|top"
+    height="20"
+    label="Unlink"
+    layout="topleft"
+    left_pad="2"
+    name="unlink_btn"
+    width="60">
+	  <button.commit_callback
+	   function="BuildTool.UnlinkObjects"/>
+   </button>
+	
+   <view_border
     bevel_style="none"
     follows="top|left"
     height="0"
@@ -789,7 +816,7 @@
      tab_min_width="40"
      tab_position="top"
      tab_height="25"
-     top="173"
+     top="178"
      width="295">
 	
 <panel
