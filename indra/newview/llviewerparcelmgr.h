@@ -232,7 +232,10 @@ public:
 	void	sendParcelDwellRequest();
 
 	// If the point is outside the current hover parcel, request more data
-	void	setHoverParcel(const LLVector3d& pos_global);
+//	void	setHoverParcel(const LLVector3d& pos_global);
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+	void	setHoverParcel(const LLVector3d& pos_global, bool force_request = false);
+// [/SL:KB]
 
 	bool	canAgentBuyParcel(LLParcel*, bool forGroup) const;
 	

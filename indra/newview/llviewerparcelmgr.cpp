@@ -1319,13 +1319,19 @@ void LLViewerParcelMgr::sendParcelPropertiesUpdate(LLParcel* parcel, bool use_ag
 }
 
 
-void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos)
+//void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos, bool force_request)
+// [/SL:KB]
 {
 	static U32 last_west, last_south;
 
 
 	// only request parcel info when tooltip is shown
-	if (!gSavedSettings.getBOOL("ShowLandHoverTip"))
+//	if (!gSavedSettings.getBOOL("ShowLandHoverTip"))
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.0a) | Added: Catznip-2.0.1a
+	if ( (!gSavedSettings.getBOOL("ShowLandHoverTip")) && (!force_request) )
+// [/SL:KB]
 	{
 		return;
 	}

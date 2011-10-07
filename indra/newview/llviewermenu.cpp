@@ -118,8 +118,12 @@ using namespace LLVOAvatarDefines;
 
 static boost::unordered_map<std::string, LLStringExplicit> sDefaultItemLabels;
 
-BOOL enable_land_build(void*);
-BOOL enable_object_build(void*);
+//BOOL enable_land_build(void*);
+//BOOL enable_object_build(void*);
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+bool enable_land_build();
+bool enable_object_build();
+// [/SL:KB]
 
 LLVOAvatar* find_avatar_from_object( LLViewerObject* object );
 LLVOAvatar* find_avatar_from_object( const LLUUID& object_id );
@@ -338,6 +342,12 @@ void LLMenuParcelObserver::changed()
 	BOOL buyable = enable_buy_land(NULL);
 	gMenuHolder->childSetEnabled("Land Buy", buyable);
 	gMenuHolder->childSetEnabled("Buy Land...", buyable);
+
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+	LLView* pLandCreate = gMenuLand->findChild<LLView>("Create");
+	if (pLandCreate)
+		pLandCreate->setEnabled(enable_land_build());
+// [/SL:KB]
 }
 
 
@@ -2555,6 +2565,11 @@ class LLObjectBuild : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+		// Makes "Build" on the object context menu work properly
+		LLSelectMgr::getInstance()->deselectAll();
+// [/SL:KB]
+
 		if (gAgentCamera.getFocusOnAvatar() && !LLToolMgr::getInstance()->inEdit() && gSavedSettings.getBOOL("EditCameraMovement") )
 		{
 			// zoom in if we're looking at the avatar
@@ -2648,7 +2663,7 @@ class LLLandBuild : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 		LLViewerParcelMgr::getInstance()->deselectLand();
-
+ 
 		if (gAgentCamera.getFocusOnAvatar() && !LLToolMgr::getInstance()->inEdit() && gSavedSettings.getBOOL("EditCameraMovement") )
 		{
 			// zoom in if we're looking at the avatar
@@ -2694,32 +2709,72 @@ class LLLandEnableBuyPass : public view_listener_t
 };
 
 // BUG: Should really check if CLICK POINT is in a parcel where you can build.
-BOOL enable_land_build(void*)
+//BOOL enable_land_build(void*)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+bool enable_land_build()
+// [/SL:KB]
 {
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+	bool can_build = false;
+
+	LLParcelSelectionHandle selParcel = LLViewerParcelMgr::getInstance()->getParcelSelection();
+	if ( (selParcel.notNull()) && (selParcel->getParcel()))
 	{
-		can_build = agent_parcel->getAllowModify();
+		can_build = selParcel->getParcel()->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
+			(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(selParcel->getParcel(), GP_LAND_ALLOW_CREATE));
 	}
+// [/SL:KB]
+//	BOOL can_build = FALSE;
+//	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if (agent_parcel)
+//	{
+//		can_build = agent_parcel->getAllowModify();
+//	}
 	return can_build;
 }
 
 // BUG: Should really check if OBJECT is in a parcel where you can build.
-BOOL enable_object_build(void*)
+//BOOL enable_object_build(void*)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.0a) | Added: Catznip-2.0.0a
+bool enable_object_build()
+// [/SL:KB]
 {
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+	bool can_build = false;
+
+	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+	if (pObj)
 	{
-		can_build = agent_parcel->getAllowModify();
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(pObj->getPositionGlobal()))
+		{
+			can_build = LLViewerParcelMgr::getInstance()->allowAgentBuild();
+		}
+		else
+		{
+			// Piggy-back on the hover parcel (shouldn't cause excessive region load since the object should remain stationary)
+			// TODO-Catznip: the enabler doesn't get called all the time so this might not resolve in time :(
+			LLViewerParcelMgr::getInstance()->setHoverParcel(pObj->getPositionGlobal(), true);
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();	// Returns NULL if request pending
+			if (pHoverParcel)
+			{
+				can_build = pHoverParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
+					(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(pHoverParcel, GP_LAND_ALLOW_CREATE));
+			}
+		}
 	}
+// [/SL:KB]
+//	BOOL can_build = FALSE;
+//	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if (agent_parcel)
+//	{
+//		can_build = agent_parcel->getAllowModify();
+//	}
 	return can_build;
 }
 
@@ -2745,10 +2800,10 @@ bool enable_object_edit()
 }
 
 // mutually exclusive - show either edit option or build in menu
-bool enable_object_build()
-{
-	return !enable_object_edit();
-}
+//bool enable_object_build()
+//{
+//	return !enable_object_edit();
+//}
 
 class LLSelfRemoveAllAttachments : public view_listener_t
 {
@@ -8312,7 +8367,10 @@ void initialize_menus()
 	enable.add("EnablePayObject", boost::bind(&enable_pay_object));
 	enable.add("EnablePayAvatar", boost::bind(&enable_pay_avatar));
 	enable.add("EnableEdit", boost::bind(&enable_object_edit));
-	enable.add("VisibleBuild", boost::bind(&enable_object_build));
+//	enable.add("VisibleBuild", boost::bind(&enable_object_build));
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+	enable.add("Object.EnableBuild", boost::bind(&enable_object_build));
+// [/SL:KB]
 
 	view_listener_t::addMenu(new LLFloaterVisible(), "FloaterVisible");
 	view_listener_t::addMenu(new LLShowSidetrayPanel(), "ShowSidetrayPanel");
