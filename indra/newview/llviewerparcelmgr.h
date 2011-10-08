@@ -108,7 +108,7 @@ public:
 	void writeSegmentsFromBitmap(U8* bitmap, U8* segments);
 
 //	void writeAgentParcelFromBitmap(U8* bitmap);
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 protected:
 	void writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap);
 public:
@@ -163,7 +163,7 @@ public:
 	LLParcel *getAgentParcel() const;
 
 //	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 protected:
 	BOOL	inParcelOverlay(const U8* overlay, const LLVector3& pos_region) const;
 public:
@@ -247,7 +247,7 @@ public:
 
 	// If the point is outside the current hover parcel, request more data
 //	void	setHoverParcel(const LLVector3d& pos_global);
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
 	void	setHoverParcel(const LLVector3d& pos_global, bool force_request = false);
 // [/SL:KB]
 
@@ -367,7 +367,7 @@ private:
 	S32							mParcelsPerEdge;
 	U8*							mHighlightSegments;
 	U8*							mAgentParcelOverlay;
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	U8*							mHoverParcelOverlay;
 // [/SL:KB]
 

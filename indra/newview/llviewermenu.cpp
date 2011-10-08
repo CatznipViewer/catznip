@@ -2566,7 +2566,6 @@ class LLObjectBuild : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 // [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
-		// Makes "Build" on the object context menu work properly
 		LLSelectMgr::getInstance()->deselectAll();
 // [/SL:KB]
 
@@ -2663,7 +2662,7 @@ class LLLandBuild : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 		LLViewerParcelMgr::getInstance()->deselectLand();
- 
+
 		if (gAgentCamera.getFocusOnAvatar() && !LLToolMgr::getInstance()->inEdit() && gSavedSettings.getBOOL("EditCameraMovement") )
 		{
 			// zoom in if we're looking at the avatar
@@ -2717,13 +2716,15 @@ bool enable_land_build()
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
-	bool can_build = false;
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+	// NOTE: we'll prefer "false positives" (enabling build when we can't actually build) over "false negatives"
+	//   -> otherwise if we don't get a response back from the region quickly enough, build will be disabled which might annoy the user
+	bool can_build = true;
 
 	LLParcelSelectionHandle selParcel = LLViewerParcelMgr::getInstance()->getParcelSelection();
 	if ( (selParcel.notNull()) && (selParcel->getParcel()))
 	{
-		can_build = selParcel->getParcel()->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
+		can_build = (selParcel->getParcel()->allowModifyBy(gAgent.getID(), gAgent.getGroupID())) ||
 			(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(selParcel->getParcel(), GP_LAND_ALLOW_CREATE));
 	}
 // [/SL:KB]
@@ -2762,7 +2763,7 @@ bool enable_object_build()
 			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
 			if (pHoverParcel)
 			{
-				can_build = pHoverParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
+				can_build = (pHoverParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID())) ||
 					(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(pHoverParcel, GP_LAND_ALLOW_CREATE));
 			}
 		}

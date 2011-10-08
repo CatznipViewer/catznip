@@ -1250,15 +1250,15 @@ void LLToolDragAndDrop::dropObject(LLViewerObject* raycast_target,
 		{
 			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 			if (pAgentParcel)
-				idGroup = LLViewerParcelMgr::getInstance()->getAgentParcel()->getGroupID();
+				idGroup = pAgentParcel->getGroupID();
 		}
 		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
 		{
-			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();	// Returns NULL if request pending
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
 			if (pHoverParcel)
-				idGroup = LLViewerParcelMgr::getInstance()->getHoverParcel()->getGroupID();
+				idGroup = pHoverParcel->getGroupID();
 		}
-		if ( (idGroup.isNull()) || (!gAgent.isInGroup(idGroup)) )
+		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 			idGroup = gAgent.getGroupID();
 	}
 	msg->addUUIDFast(_PREHASH_GroupID, idGroup);
@@ -1760,7 +1760,8 @@ EAcceptance LLToolDragAndDrop::dad3dRezObjectOnLand(
 // [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	else if ( (accept) && (gSavedSettings.getBOOL("RezUnderLandGroup")) )
 	{
-		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
 		{
 			LLViewerParcelMgr::getInstance()->setHoverParcel(mLastHitPos, true);
 			return ACCEPT_NO;
@@ -1848,7 +1849,8 @@ EAcceptance LLToolDragAndDrop::dad3dRezObjectOnObject(
 // [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	else if ( (accept) && (gSavedSettings.getBOOL("RezUnderLandGroup")) )
 	{
-		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
 		{
 			LLViewerParcelMgr::getInstance()->setHoverParcel(mLastHitPos, true);
 			return ACCEPT_NO;

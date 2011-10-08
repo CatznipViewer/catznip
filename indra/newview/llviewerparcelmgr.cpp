@@ -156,7 +156,7 @@ LLViewerParcelMgr::LLViewerParcelMgr()
 		mAgentParcelOverlay[i] = 0;
 	}
 
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	mHoverParcelOverlay = new U8[mParcelsPerEdge * mParcelsPerEdge];
 	for (i = 0; i < mParcelsPerEdge * mParcelsPerEdge; i++)
 	{
@@ -200,7 +200,7 @@ LLViewerParcelMgr::~LLViewerParcelMgr()
 	delete[] mAgentParcelOverlay;
 	mAgentParcelOverlay = NULL;
 
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	delete[] mHoverParcelOverlay;
 	mHoverParcelOverlay = NULL;
 // [/SL:KB]
@@ -391,7 +391,7 @@ void LLViewerParcelMgr::writeSegmentsFromBitmap(U8* bitmap, U8* segments)
 
 
 //void LLViewerParcelMgr::writeAgentParcelFromBitmap(U8* bitmap)
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 void LLViewerParcelMgr::writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap)
 // [/SL:KB]
 {
@@ -411,17 +411,17 @@ void LLViewerParcelMgr::writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap)
 			{
 				if (byte & (1 << bit) )
 				{
-//					mAgentParcelOverlay[x+y*IN_STRIDE] = 1;
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 					overlay[x+y*IN_STRIDE] = 1;
 // [/SL:KB]
+//					mAgentParcelOverlay[x+y*IN_STRIDE] = 1;
 				}
 				else
 				{
-//					mAgentParcelOverlay[x+y*IN_STRIDE] = 0;
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 					overlay[x+y*IN_STRIDE] = 0;
 // [/SL:KB]
+//					mAgentParcelOverlay[x+y*IN_STRIDE] = 0;
 				}
 				x++;
 			}
@@ -841,7 +841,7 @@ BOOL LLViewerParcelMgr::canHearSound(const LLVector3d &pos_global) const
 //		return FALSE;
 //	}
 //}
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
 {
 	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(pos_global);
@@ -1382,7 +1382,7 @@ void LLViewerParcelMgr::sendParcelPropertiesUpdate(LLParcel* parcel, bool use_ag
 
 
 //void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos)
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
 void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos, bool force_request)
 // [/SL:KB]
 {
@@ -1391,7 +1391,7 @@ void LLViewerParcelMgr::setHoverParcel(const LLVector3d& pos, bool force_request
 
 	// only request parcel info when tooltip is shown
 //	if (!gSavedSettings.getBOOL("ShowLandHoverTip"))
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2010-04-12 (Catznip-2.0.0a) | Added: Catznip-2.0.1a
 	if ( (!gSavedSettings.getBOOL("ShowLandHoverTip")) && (!force_request) )
 // [/SL:KB]
 	{
@@ -1657,7 +1657,7 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 				instance->mTeleportFinishedSignal(gAgent.getPositionGlobal());
 			}
 		}
-// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 		else if (parcel == LLViewerParcelMgr::getInstance()->mHoverParcel)
 		{
 			S32 bitmap_size =	LLViewerParcelMgr::getInstance()->mParcelsPerEdge

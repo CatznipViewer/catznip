@@ -240,20 +240,20 @@ BOOL LLToolPlacer::addObject( LLPCode pcode, S32 x, S32 y, U8 use_physics )
 	LLUUID idGroup = gAgent.getGroupID();
 	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
 	{
-		LLVector3d posGlobal = regionp->getPosGlobalFromRegion(ray_end_region);
-		if (LLViewerParcelMgr::getInstance()->inAgentParcel(posGlobal))
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
 		{
 			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
 			if (pAgentParcel)
-				idGroup = LLViewerParcelMgr::getInstance()->getAgentParcel()->getGroupID();
+				idGroup = pAgentParcel->getGroupID();
 		}
-		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(posGlobal))
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
 		{
-			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();	// Returns NULL if request pending
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
 			if (pHoverParcel)
-				idGroup = LLViewerParcelMgr::getInstance()->getHoverParcel()->getGroupID();
+				idGroup = pHoverParcel->getGroupID();
 		}
-		if ( (idGroup.isNull()) || (!gAgent.isInGroup(idGroup)) )
+
+		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 			idGroup = gAgent.getGroupID();
 	}
 	gMessageSystem->addUUIDFast(_PREHASH_GroupID, idGroup);
@@ -551,8 +551,13 @@ BOOL LLToolPlacer::handleHover(S32 x, S32 y, MASK mask)
 	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
 	{
 		LLPickInfo pick = gViewerWindow->pickImmediate(x, y, FALSE);
-		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(pick.mPosGlobal)) && (!LLViewerParcelMgr::getInstance()->inHoverParcel(pick.mPosGlobal)) )
+		mLastHitPos = pick.mPosGlobal;
+
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		{
 			LLViewerParcelMgr::getInstance()->setHoverParcel(pick.mPosGlobal, true);
+		}
 	}
 // [/SL:KB]
 
