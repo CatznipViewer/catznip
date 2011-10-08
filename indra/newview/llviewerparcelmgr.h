@@ -107,7 +107,14 @@ public:
 	// parcel.
 	void writeSegmentsFromBitmap(U8* bitmap, U8* segments);
 
-	void writeAgentParcelFromBitmap(U8* bitmap);
+//	void writeAgentParcelFromBitmap(U8* bitmap);
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+protected:
+	void writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap);
+public:
+	void writeAgentParcelFromBitmap(U8* bitmap) { writeParcelOverlayFromBitmap(mAgentParcelOverlay, bitmap); }
+	void writeHoverParcelFromBitmap(U8* bitmap) { writeParcelOverlayFromBitmap(mHoverParcelOverlay, bitmap); }
+// [/SL:KB]
 
 	// Select the collision parcel
 	void selectCollisionParcel();
@@ -155,7 +162,14 @@ public:
 	//LLParcel *getParcelSelection() const;
 	LLParcel *getAgentParcel() const;
 
+//	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+protected:
+	BOOL	inParcelOverlay(const U8* overlay, const LLVector3& pos_region) const;
+public:
 	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
+	BOOL	inHoverParcel(const LLVector3d &pos_global) const;
+// [/SL:KB]
 
 	// Returns a pointer only when it has valid data.
 	LLParcel*	getHoverParcel() const;
@@ -353,6 +367,9 @@ private:
 	S32							mParcelsPerEdge;
 	U8*							mHighlightSegments;
 	U8*							mAgentParcelOverlay;
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	U8*							mHoverParcelOverlay;
+// [/SL:KB]
 
 	// Raw data buffer for unpacking parcel overlay chunks
 	// Size = parcels_per_edge * parcels_per_edge / parcel_overlay_chunks
