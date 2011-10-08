@@ -54,6 +54,10 @@
 #include "llaudioengine.h"
 #include "llhudeffecttrail.h"
 #include "llviewerobjectlist.h"
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+#include "llparcel.h"
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewercamera.h"
 #include "llviewerstats.h"
 #include "llvoavatarself.h"
@@ -231,7 +235,29 @@ BOOL LLToolPlacer::addObject( LLPCode pcode, S32 x, S32 y, U8 use_physics )
 	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
 	gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 	gMessageSystem->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-	gMessageSystem->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+//	gMessageSystem->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		LLVector3d posGlobal = regionp->getPosGlobalFromRegion(ray_end_region);
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(posGlobal))
+		{
+			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+			if (pAgentParcel)
+				idGroup = LLViewerParcelMgr::getInstance()->getAgentParcel()->getGroupID();
+		}
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(posGlobal))
+		{
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();	// Returns NULL if request pending
+			if (pHoverParcel)
+				idGroup = LLViewerParcelMgr::getInstance()->getHoverParcel()->getGroupID();
+		}
+		if ( (idGroup.isNull()) || (!gAgent.isInGroup(idGroup)) )
+			idGroup = gAgent.getGroupID();
+	}
+	gMessageSystem->addUUIDFast(_PREHASH_GroupID, idGroup);
+// [/SL:KB]
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
 	gMessageSystem->addU8Fast(_PREHASH_Material,	material);
 
@@ -520,6 +546,16 @@ BOOL LLToolPlacer::handleHover(S32 x, S32 y, MASK mask)
 {
 	lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPlacer" << llendl;		
 	gViewerWindow->setCursor(UI_CURSOR_TOOLCREATE);
+
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		LLPickInfo pick = gViewerWindow->pickImmediate(x, y, FALSE);
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(pick.mPosGlobal)) && (!LLViewerParcelMgr::getInstance()->inHoverParcel(pick.mPosGlobal)) )
+			LLViewerParcelMgr::getInstance()->setHoverParcel(pick.mPosGlobal, true);
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
