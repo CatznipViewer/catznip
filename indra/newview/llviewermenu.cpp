@@ -2745,8 +2745,10 @@ bool enable_object_build()
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0.1a) | Added: Catznip-2.0.0a
-	bool can_build = false;
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2011-10-07 (Catznip-3.0.0a) | Modified: Catznip-3.0.0a
+	// NOTE: we'll prefer "false positives" (enabling build when we can't actually build) over "false negatives"
+	//   -> otherwise if we don't get a response back from the region quickly enough, build will be disabled which might annoy the user
+	bool can_build = true;
 
 	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 	if (pObj)
@@ -2755,17 +2757,18 @@ bool enable_object_build()
 		{
 			can_build = LLViewerParcelMgr::getInstance()->allowAgentBuild();
 		}
-		else
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(pObj->getPositionGlobal()))
 		{
-			// Piggy-back on the hover parcel (shouldn't cause excessive region load since the object should remain stationary)
-			// TODO-Catznip: the enabler doesn't get called all the time so this might not resolve in time :(
-			LLViewerParcelMgr::getInstance()->setHoverParcel(pObj->getPositionGlobal(), true);
-			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();	// Returns NULL if request pending
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
 			if (pHoverParcel)
 			{
 				can_build = pHoverParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID()) ||
 					(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(pHoverParcel, GP_LAND_ALLOW_CREATE));
 			}
+		}
+		else
+		{
+			LLViewerParcelMgr::getInstance()->setHoverParcel(pObj->getPositionGlobal(), true);
 		}
 	}
 // [/SL:KB]
