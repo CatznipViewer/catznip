@@ -37,6 +37,9 @@
 #include "llstring.h"
 #include "llvolume.h"
 #include "m3math.h"
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a)
+#include "llsdutil_math.h"
+// [/SL:KB]
 
 // project includes
 #include "llagent.h"
@@ -122,6 +125,10 @@ BOOL	LLPanelObject::postBuild()
 
 	// Position
 	mLabelPosition = getChild<LLTextBox>("label position");
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopyPosition = findChild<LLButton>("copy_position_btn");
+	mBtnPastePosition = findChild<LLButton>("paste_position_btn");
+// [/SL:KB]
 	mCtrlPosX = getChild<LLSpinCtrl>("Pos X");
 	childSetCommitCallback("Pos X",onCommitPosition,this);
 	mCtrlPosY = getChild<LLSpinCtrl>("Pos Y");
@@ -131,6 +138,10 @@ BOOL	LLPanelObject::postBuild()
 
 	// Scale
 	mLabelSize = getChild<LLTextBox>("label size");
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopySize = findChild<LLButton>("copy_size_btn");
+	mBtnPasteSize = findChild<LLButton>("paste_size_btn");
+// [/SL:KB]
 	mCtrlScaleX = getChild<LLSpinCtrl>("Scale X");
 	childSetCommitCallback("Scale X",onCommitScale,this);
 
@@ -144,6 +155,10 @@ BOOL	LLPanelObject::postBuild()
 
 	// Rotation
 	mLabelRotation = getChild<LLTextBox>("label rotation");
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopyRotation = findChild<LLButton>("copy_rotation_btn");
+	mBtnPasteRotation = findChild<LLButton>("paste_rotation_btn");
+// [/SL:KB]
 	mCtrlRotX = getChild<LLSpinCtrl>("Rot X");
 	childSetCommitCallback("Rot X",onCommitRotation,this);
 	mCtrlRotY = getChild<LLSpinCtrl>("Rot Y");
@@ -280,6 +295,14 @@ BOOL	LLPanelObject::postBuild()
 
 LLPanelObject::LLPanelObject()
 :	LLPanel(),
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopyPosition(NULL),
+	mBtnPastePosition(NULL),
+	mBtnCopySize(NULL),
+	mBtnPasteSize(NULL),
+	mBtnCopyRotation(NULL),
+	mBtnPasteRotation(NULL),
+// [/SL:KB]
 	mIsPhysical(FALSE),
 	mIsTemporary(FALSE),
 	mIsPhantom(FALSE),
@@ -288,6 +311,10 @@ LLPanelObject::LLPanelObject()
 	mSculptTextureRevert(LLUUID::null),
 	mSculptTypeRevert(0)
 {
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mCommitCallbackRegistrar.add("BuildTool.CopyParams", boost::bind(&LLPanelObject::onClickBtnCopyParams, this, _2));
+	mCommitCallbackRegistrar.add("BuildTool.PasteParams", boost::bind(&LLPanelObject::onClickBtnPasteParams, this, _2));
+// [/SL:KB]
 }
 
 
@@ -380,6 +407,10 @@ void LLPanelObject::getState( )
 
 
 	mLabelPosition->setEnabled( enable_move );
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopyPosition->setEnabled(enable_move);
+	mBtnPastePosition->setEnabled(enable_move && mObjectClipboard.has("position"));
+// [/SL:KB]
 	mCtrlPosX->setEnabled(enable_move);
 	mCtrlPosY->setEnabled(enable_move);
 	mCtrlPosZ->setEnabled(enable_move);
@@ -405,6 +436,10 @@ void LLPanelObject::getState( )
 	}
 
 	mLabelSize->setEnabled( enable_scale );
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopySize->setEnabled(enable_scale);
+	mBtnPasteSize->setEnabled(enable_scale && mObjectClipboard.has("size"));
+// [/SL:KB]
 	mCtrlScaleX->setEnabled( enable_scale );
 	mCtrlScaleY->setEnabled( enable_scale );
 	mCtrlScaleZ->setEnabled( enable_scale );
@@ -436,6 +471,10 @@ void LLPanelObject::getState( )
 	}
 
 	mLabelRotation->setEnabled( enable_rotate );
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	mBtnCopyRotation->setEnabled(enable_rotate);
+	mBtnPasteRotation->setEnabled(enable_rotate && mObjectClipboard.has("rotation"));
+// [/SL:KB]
 	mCtrlRotX->setEnabled( enable_rotate );
 	mCtrlRotY->setEnabled( enable_rotate );
 	mCtrlRotZ->setEnabled( enable_rotate );
@@ -2028,3 +2067,78 @@ void LLPanelObject::onCommitSculptType(LLUICtrl *ctrl, void* userdata)
 
 	self->sendSculpt();
 }
+
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
+{
+	std::string strParam = sdParam.asString();
+	if ("position" == strParam)
+	{
+		mObjectClipboard["position"] = ll_sd_from_vector3(LLVector3(mCtrlPosX->get(), mCtrlPosY->get(), mCtrlPosZ->get()));
+		if (!mBtnPastePosition->getEnabled())
+			refresh();
+	}
+	else if ("size" == strParam)
+	{
+		mObjectClipboard["size"] = ll_sd_from_vector3(LLVector3(mCtrlScaleX->get(), mCtrlScaleY->get(), mCtrlScaleZ->get()));
+		if (!mBtnPasteSize->getEnabled())
+			refresh();
+	}
+	else if ("rotation" == strParam)
+	{
+		mObjectClipboard["rotation"] = ll_sd_from_vector3(LLVector3(mCtrlRotX->get(), mCtrlRotY->get(), mCtrlRotZ->get()));
+		if (!mBtnPasteRotation->getEnabled())
+			refresh();
+	}
+}
+
+void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
+{
+	std::string strParam = sdParam.asString();
+	if (!mObjectClipboard.has(strParam))
+		return;
+
+	if ("position" == strParam)
+	{
+		LLVector3 pos = ll_vector3_from_sd(mObjectClipboard["position"]);
+		mCtrlPosX->set(pos.mV[VX]);
+		mCtrlPosY->set(pos.mV[VY]);
+		mCtrlPosZ->set(pos.mV[VZ]);
+
+		LLCalc* pCalc = LLCalc::getInstance();
+		pCalc->setVar(LLCalc::X_POS, pos.mV[VX]);
+		pCalc->setVar(LLCalc::Y_POS, pos.mV[VY]);
+		pCalc->setVar(LLCalc::Z_POS, pos.mV[VZ]);
+
+		sendPosition(FALSE);
+	}
+	else if ("size" == strParam)
+	{
+		LLVector3 size = ll_vector3_from_sd(mObjectClipboard["size"]);
+		mCtrlScaleX->set(size.mV[VX]);
+		mCtrlScaleY->set(size.mV[VY]);
+		mCtrlScaleZ->set(size.mV[VZ]);
+
+		LLCalc* pCalc = LLCalc::getInstance();
+		pCalc->setVar(LLCalc::X_SCALE, size.mV[VX]);
+		pCalc->setVar(LLCalc::Y_SCALE, size.mV[VY]);
+		pCalc->setVar(LLCalc::Z_SCALE, size.mV[VZ]);
+
+		sendScale(FALSE);
+	}
+	else if ("rotation" == strParam)
+	{
+		LLVector3 rotEuler = ll_vector3_from_sd(mObjectClipboard["rotation"]);
+		mCtrlRotX->set(rotEuler.mV[VX]);
+		mCtrlRotY->set(rotEuler.mV[VY]);
+		mCtrlRotZ->set(rotEuler.mV[VZ]);
+
+		LLCalc* pCalc = LLCalc::getInstance();
+		pCalc->setVar(LLCalc::X_ROT, rotEuler.mV[VX]);
+		pCalc->setVar(LLCalc::Y_ROT, rotEuler.mV[VY]);
+		pCalc->setVar(LLCalc::Z_ROT, rotEuler.mV[VZ]);
+
+		sendRotation(FALSE);
+	}
+}
+// [/SL:KB]

@@ -1384,9 +1384,34 @@ even though the user gets a free copy.
              layout="topleft"
              name="label position"
              top_pad="10"
-             width="121">
-                Position (meters)
+             width="50">
+                Position
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_position_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="position" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_position_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="position" />
+            </button>
             <spinner
              follows="left|top"
              height="19"
@@ -1395,12 +1420,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="512"
              min_val="-256"
              name="Pos X"
              text_enabled_color="1 0 0.3 .7"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              follows="left|top"
@@ -1437,12 +1462,36 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label size"
-             top_pad="6"
-             width="121">
-                Size (meters)
+             top_pad="10"
+             width="50">
+                Size
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_size_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="size" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_size_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="size" />
+            </button>
             <spinner
              follows="left|top"
              height="19"
@@ -1451,12 +1500,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="64"
              min_val="0.01"
              name="Scale X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              follows="left|top"
@@ -1494,12 +1543,36 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label rotation"
              top_pad="10"
-             width="121">
-                Rotation (degrees)
+             width="50">
+                Rotation
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_rotation_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="rotation" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_rotation_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="rotation" />
+            </button>
             <spinner
              decimal_digits="2"
              follows="left|top"
@@ -1509,12 +1582,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="9999"
              min_val="-9999"
              name="Rot X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              decimal_digits="2"
