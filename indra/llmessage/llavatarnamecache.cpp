@@ -83,7 +83,7 @@ namespace LLAvatarNameCache
 
     /// Maximum time an unrefreshed cache entry is allowed
 //    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
-// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
     const F64 MAX_UNREFRESHED_TIME = 90.0 * 60.0;
 // [/SL:KB]
 
@@ -197,7 +197,7 @@ public:
 		F64 now = LLFrameTimer::getTotalSeconds();
 
 //		LLSD agents = content["agents"];
-// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 		const LLSD& agents = content["agents"];
 // [/SL:KB]
 		LLSD::array_const_iterator it = agents.beginArray();
@@ -230,7 +230,7 @@ public:
 
 		// Same logic as error response case
 //		LLSD unresolved_agents = content["bad_ids"];
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 		const LLSD& unresolved_agents = content["bad_ids"];
 // [/SL:KB]
 		S32  num_unresolved = unresolved_agents.size();
@@ -313,7 +313,7 @@ void LLAvatarNameCache::processName(const LLUUID& agent_id,
 	if (add_to_cache)
 	{
 //		sCache[agent_id] = av_name;
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2010-12-28 (Catznip-2.6.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2010-12-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
 		// Don't replace existing entries with dummies
 		cache_t::iterator itName = (av_name.mIsTemporaryName) ? sCache.find(agent_id) : sCache.end();
 		if (sCache.end() != itName)
@@ -681,7 +681,7 @@ void LLAvatarNameCache::get(const LLUUID& agent_id, callback_slot_t slot)
 			{
 				const LLAvatarName& av_name = it->second;
 				
-// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 				// Don't wait for the lookup before firing the callback if we have a valid cached entry
 				if ( (!av_name.mIsTemporaryName) && (av_name.mExpires > LLFrameTimer::getTotalSeconds() - MAX_UNREFRESHED_TIME) )
 				{

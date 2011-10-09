@@ -1742,7 +1742,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 		// check to see if we have a UUID for this row
 //		std::string id = item->getValue().asString();
 //		LLUUID uuid(id);
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 		LLUUID uuid; const LLSD& sdValue = item->getValue();
 		if (sdValue.has("uuid"))
 			uuid = sdValue["uuid"].asUUID();
@@ -1758,7 +1758,7 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 //			registrar.add("Url.Execute", boost::bind(&LLScrollListCtrl::showNameDetails, id, is_group));
 //			registrar.add("Url.CopyLabel", boost::bind(&LLScrollListCtrl::copyNameToClipboard, id, is_group));
 //			registrar.add("Url.CopyUrl", boost::bind(&LLScrollListCtrl::copySLURLToClipboard, id, is_group));
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 			//std::string url = LLSLURL( (!is_group) ? "agent" : "group", uuid, "about").getSLURLString();
 			std::string url = llformat("secondlife:///app/%s/%s/about", ((!is_group) ? "agent" : "group"), uuid.asString().c_str());
 			registrar.add("Url.ShowProfile", boost::bind(&LLUrlAction::showProfile, url));

@@ -31,7 +31,7 @@
 #include "llview.h"
 #include "llwindow.h"
 #include "llurlregistry.h"
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a)
 #include "llavatarnamecache.h"
 // [/SL:KB]
 
@@ -144,7 +144,7 @@ void LLUrlAction::copyLabelToClipboard(std::string url)
 	}	
 }
 
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 void LLUrlAction::copyToClipboard(std::string strURL, const LLSD& sdAction)
 {
 	// Get id from 'secondlife:///app/agent/{id}/{action}'
@@ -161,7 +161,7 @@ void LLUrlAction::copyToClipboard(std::string strURL, const LLSD& sdAction)
 				std::string strAction = sdAction.asString();
 				if ("fullname" == strAction)
 				{
-					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getCompleteName()));
+					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getCompleteName(LLAvatarName::SHOW_ALWAYS)));
 				}
 				else if ("displayname" == strAction)
 				{

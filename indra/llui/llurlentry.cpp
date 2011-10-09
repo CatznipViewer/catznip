@@ -416,7 +416,7 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 //		return LLTrans::getString("TooltipAgentRequestFriend");
 //	}
 //	return LLTrans::getString("TooltipAgentUrl");
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-2.6.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
 	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
 		strTooltip = LLTrans::getString("TooltipAgentInspect");
@@ -611,7 +611,7 @@ LLUrlEntryAgentCompleteName::LLUrlEntryAgentCompleteName()
 std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name)
 {
 //	return avatar_name.getCompleteName();
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-18 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	return avatar_name.getCompleteName(LLAvatarName::SHOW_ALWAYS);
 // [/SL:KB]
 }

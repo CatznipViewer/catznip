@@ -43,7 +43,7 @@ public:
 
 	void fromLLSD(const LLSD& sd);
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 public:
 	typedef enum e_show_username_type
 	{
@@ -59,7 +59,7 @@ public:
 	// For normal names, returns "James Linden (james.linden)"
 	// When display names are disabled returns just "James Linden"
 //	std::string getCompleteName() const;
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 	std::string getCompleteName(EShowUsername eShowUsername = s_eShowUsername) const;
 // [/SL:KB]
 
@@ -107,7 +107,7 @@ public:
 	// Unix time-from-epoch seconds
 	F64 mNextUpdate;
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 	static EShowUsername s_eShowUsername;
 // [/SL:KB]
 };
