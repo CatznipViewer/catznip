@@ -812,7 +812,13 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
 
 				// Add link to avatar's inspector and delimiter to message.
-				mEditor->appendText(std::string(link_params.link_href) + delimiter, false, link_params);
+//				mEditor->appendText(std::string(link_params.link_href) + delimiter, false, link_params);
+// [SL:KB] - Patch: DisplayName-Misc | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+				mEditor->appendText(std::string(link_params.link_href), false, link_params);
+
+				link_params.link_href = LLStringUtil::null;
+				mEditor->appendText(delimiter, false, link_params);
+// [/SL:KB]
 			}
 			else
 			{
