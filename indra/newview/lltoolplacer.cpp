@@ -501,6 +501,28 @@ BOOL LLToolPlacer::addDuplicate(S32 x, S32 y)
 		ray_target_id.setNull();
 	}
 
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
+		{
+			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+			if (pAgentParcel)
+				idGroup = pAgentParcel->getGroupID();
+		}
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
+		{
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
+			if (pHoverParcel)
+				idGroup = pHoverParcel->getGroupID();
+		}
+
+		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
+			idGroup = gAgent.getGroupID();
+	}
+// [/SL:KB]
+
 	LLSelectMgr::getInstance()->selectDuplicateOnRay(ray_start_region,
 										ray_end_region,
 										b_hit_land,			// suppress raycast
@@ -508,6 +530,9 @@ BOOL LLToolPlacer::addDuplicate(S32 x, S32 y)
 										ray_target_id,
 										gSavedSettings.getBOOL("CreateToolCopyCenters"),
 										gSavedSettings.getBOOL("CreateToolCopyRotates"),
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+										idGroup,
+// [/SL:KB]
 										FALSE);				// select copy
 
 	if (regionp

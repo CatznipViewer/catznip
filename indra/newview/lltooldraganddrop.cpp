@@ -1258,6 +1258,7 @@ void LLToolDragAndDrop::dropObject(LLViewerObject* raycast_target,
 			if (pHoverParcel)
 				idGroup = pHoverParcel->getGroupID();
 		}
+
 		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 			idGroup = gAgent.getGroupID();
 	}
