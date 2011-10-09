@@ -11,8 +11,9 @@
  save_rect="true"
   auto_tile="true"
  save_visibility="true"
+  single_instance="true"
   title=""
   initial_mime_type="text/html"
   width="780"
-             tab_stop="true"
+
   filename="floater_web_content.xml"/>

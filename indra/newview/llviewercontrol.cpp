@@ -72,6 +72,9 @@
 #include "llpanellogin.h"
 #include "llpaneltopinfobar.h"
 #include "llupdaterservice.h"
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+#include "llstatusbar.h"
+// [/SL:KB]
 
 #ifdef TOGGLE_HACKED_GODLIKE_VIEWER
 BOOL 				gHackGodmode = FALSE;
@@ -515,6 +518,15 @@ bool handleVelocityInterpolate(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+bool handleSettingF32Change(const LLSD& sdValue, F32* pValue)
+{
+	if (pValue)
+		*pValue = sdValue.asReal();
+	return true;
+}
+// [/SL:KB]
+
 bool handleForceShowGrid(const LLSD& newvalue)
 {
 	LLPanelLogin::updateServer( );
@@ -539,7 +551,7 @@ bool toggle_show_navigation_panel(const LLSD& newvalue)
 	bool value = newvalue.asBoolean();
 
 	LLNavigationBar::getInstance()->showNavigationPanel(value);
-	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
+//	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
 
 	return true;
 }
@@ -554,8 +566,14 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
 
-	LLPanelTopInfoBar::getInstance()->setVisible(value);
-	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
+//	LLPanelTopInfoBar::getInstance()->setVisible(value);
+//	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+	if (gStatusBar)
+	{
+		gStatusBar->showTopInfoBar(value);
+	}
+// [/SL:KB]
 
 	return true;
 }
@@ -738,6 +756,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("UpdaterServiceSetting")->getSignal()->connect(boost::bind(&toggle_updater_service_active, _2));
 	gSavedSettings.getControl("ForceShowGrid")->getSignal()->connect(boost::bind(&handleForceShowGrid, _2));
 	gSavedSettings.getControl("RenderTransparentWater")->getSignal()->connect(boost::bind(&handleRenderTransparentWaterChanged, _2));
+// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+	gSavedSettings.getControl("DragAndDropCommitDelay")->getSignal()->connect(boost::bind(&handleSettingF32Change, _2, &DELAY_DRAG_HOVER_COMMIT));
+// [/SL:KB]
 }
 
 #if TEST_CACHED_CONTROL
