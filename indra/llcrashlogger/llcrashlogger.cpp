@@ -279,7 +279,7 @@ void LLCrashLogger::gatherFiles()
 	
 	// Add minidump as binary.
 	std::string minidump_path = mDebugLog["MinidumpPath"];
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-09-23 (Catznip-2.8.0e) | Modified: Catznip-2.8.0e
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-09-23 (Catznip-3.0.0a) | Modified: Catznip-2.8.0e
 	if (!minidump_path.empty())
 	{
 		if (gDirUtilp->fileExists(minidump_path))
@@ -423,7 +423,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 				break;
 			case LAST_EXEC_LLERROR_CRASH:
 				strLastExecEvent = "llerror_crash";
-				strLastExecMsg = mDebugLog["LastErrorMessage"];
+				strLastExecMsg = mDebugLog["LastErrorMessage"].asString();
 				break;
 			case LAST_EXEC_OTHER_CRASH:
 				strLastExecEvent = "other_crash";
@@ -463,7 +463,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 			llifstream fstream(itFile->second, std::iostream::binary | std::iostream::out);
 			if (!fstream.is_open())
 			{
-				body << getFormDataField("filemap[]", llformat("%s (unable to open)", strFileName), BOUNDARY);
+				body << getFormDataField("filemap[]", llformat("%s (unable to open)", strFileName.c_str()), BOUNDARY);
 				continue;
 			}
 
