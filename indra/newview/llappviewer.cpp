@@ -1497,13 +1497,13 @@ bool LLAppViewer::cleanup()
 	}
 	LLMetricPerformanceTesterBasic::cleanClass();
 
-	// remove any old breakpad minidump files from the log directory
-	if (! isError())
-	{
-		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
-		logdir += gDirUtilp->getDirDelimiter();
-		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
-	}
+//	// remove any old breakpad minidump files from the log directory
+//	if (! isError())
+//	{
+//		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+//		logdir += gDirUtilp->getDirDelimiter();
+//		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+//	}
 
 	// *TODO - generalize this and move DSO wrangling to a helper class -brad
 	std::set<struct apr_dso_handle_t *>::const_iterator i;
@@ -1737,6 +1737,11 @@ bool LLAppViewer::cleanup()
 		gSavedPerAccountSettings.saveToFile(gSavedSettings.getString("PerAccountSettingsFile"), TRUE);
 		llinfos << "Saved settings" << llendflush;
 	}
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
+	gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+// [/SL:KB]
 
 	std::string warnings_settings_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Warnings"));
 	gWarningSettings.saveToFile(warnings_settings_filename, TRUE);
@@ -2187,6 +2192,10 @@ bool LLAppViewer::initConfiguration()
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
 	gSavedSettings.setString("ClientSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	gSavedSettings.setString("CrashSettingsFile", 
+        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
+// [/SL:KB]
 
 	gSavedSettings.setString("VersionChannelName", LLVersionInfo::getChannel());
 
@@ -2866,6 +2875,12 @@ void LLAppViewer::checkForCrash(void)
     }
 #endif // LL_SEND_CRASH_REPORTS    
     
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// Remove any old breakpad minidump files from the log directory
+	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+	logdir += gDirUtilp->getDirDelimiter();
+	gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+// [/SL:KB]
 }
 
 //
