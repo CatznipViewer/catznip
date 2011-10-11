@@ -968,14 +968,14 @@ class LinuxManifest(ViewerManifest):
     def copy_finish(self):
         # Force executable permissions to be set for scripts
         # see CHOP-223 and http://mercurial.selenic.com/bts/issue1802
-        for script in 'secondlife', 'bin/update_install':
+        for script in 'catznip', 'bin/update_install':
             self.run_command("chmod +x %r" % os.path.join(self.get_dst_prefix(), script))
 
     def package_finish(self):
         if 'installer_name' in self.args:
             installer_name = self.args['installer_name']
         else:
-            installer_name_components = ['SecondLife_', self.args.get('arch')]
+            installer_name_components = ['Catznip_', self.args.get('arch')]
             installer_name_components.extend(self.args['version'])
             installer_name = "_".join(installer_name_components)
             if self.default_channel():
