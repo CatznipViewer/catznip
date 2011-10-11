@@ -73,7 +73,7 @@ private:
 	void					updateFriendList();
 	void					updateNearbyList();
 //	void					updateRecentList();
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	void					refreshRecentList();
 	void					updateRecentList(bool fForceUpdate);
 // [/SL:KB]

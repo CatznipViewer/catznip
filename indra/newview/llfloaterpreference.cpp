@@ -104,7 +104,7 @@
 #include "lluictrlfactory.h"
 #include "llviewermedia.h"
 #include "llpluginclassmedia.h"
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0.0a)
 #include "llrecentpeople.h"
 // [/SL:KB]
 #include "llteleporthistorystorage.h"
@@ -117,7 +117,7 @@ const F32 MAX_USER_FAR_CLIP = 512.f;
 const F32 MIN_USER_FAR_CLIP = 64.f;
 const F32 BANDWIDTH_UPDATER_TIMEOUT = 0.5f;
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 const U32 CLEAR_MASK_COOKIES	= 0x01;
 const U32 CLEAR_MASK_NAVBAR		= 0x02;
 const U32 CLEAR_MASK_SEARCH		= 0x04;
@@ -224,14 +224,14 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if ( option == 0 ) // YES
 	{
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
 // [/SL:KB]
 
 		// clean web
 		LLViewerMedia::clearAllCaches();
 //		LLViewerMedia::clearAllCookies();
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 		if (nClearMask & CLEAR_MASK_COOKIES)
 		{
 			LLViewerMedia::clearAllCookies();
@@ -240,7 +240,7 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 		
 		// clean nav bar history
 //		LLNavigationBar::getInstance()->clearHistoryCache();
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 		if (nClearMask & CLEAR_MASK_NAVBAR)
 		{
 			LLNavigationBar::getInstance()->clearHistoryCache();
@@ -255,7 +255,7 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 //		LLSearchHistory::getInstance()->save();
 //		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
 //		search_ctrl->clearHistory();
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 		if (nClearMask & CLEAR_MASK_SEARCH)
 		{
 			LLSearchHistory::getInstance()->clearHistory();
@@ -267,7 +267,7 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 
 //		LLTeleportHistoryStorage::getInstance()->purgeItems();
 //		LLTeleportHistoryStorage::getInstance()->save();
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 		if (nClearMask & CLEAR_MASK_TELEPORT)
 		{
 			LLTeleportHistoryStorage::getInstance()->purgeItems();
@@ -373,8 +373,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.2.1a
-	mCommitCallbackRegistrar.add("Pref.ClearViewerCache",		boost::bind(&LLFloaterPreference::onClickClearViewerCache, this));
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.2.1a
 	mCommitCallbackRegistrar.add("Clear.SettingsCheck",			boost::bind(&LLFloaterPreference::onClearSettingsCheck, this, _1, _2));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
@@ -508,7 +507,7 @@ BOOL LLFloaterPreference::postBuild()
 		gSavedPerAccountSettings.setString("BusyModeResponse", LLTrans::getString("BusyModeResponseDefault"));
 	}
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	// Make sure 'ClearCacheMask' gets restored to its previous value when the floater is cancel'ed
 	mSavedValues.insert(std::pair<LLControlVariable*, LLSD>(gSavedSettings.getControl("ClearCacheMask"), LLSD()));
 // [/SL:KB]
@@ -563,7 +562,7 @@ void LLFloaterPreference::saveSettings()
 			panel->saveSettings();
 	}
 
-// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	// Store a copy of the current value for all settings in 'mSavedValues' so we can revert them if necessary
 	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
 	{
@@ -668,7 +667,7 @@ void LLFloaterPreference::cancel()
 		if (panel)
 			panel->cancel();
 	}
-// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	// Restore all settings in 'mSavedValues' to their previous value
 	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
 	{
@@ -913,15 +912,6 @@ void LLFloaterPreference::onClickBrowserClearCache()
 	LLNotificationsUtil::add("ConfirmClearBrowserCache", LLSD(), LLSD(), callback_clear_browser_cache);
 }
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-23 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
-void LLFloaterPreference::onClickClearViewerCache()
-{
-	// Flag client texture cache for clearing next time the client runs
-	gSavedSettings.setBOOL("PurgeCacheOnNextStartup", TRUE);
-	LLNotificationsUtil::add("CacheWillClear");
-}
-// [/SL:KB]
-
 // Called when user changes language via the combobox.
 void LLFloaterPreference::onLanguageChange()
 {
@@ -944,7 +934,7 @@ void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 	}
 }
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 void LLFloaterPreference::onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam)
 {
 	/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast</*const*/ LLCheckBoxCtrl*>(pUICtrl);
@@ -1345,7 +1335,7 @@ void LLFloaterPreference::refresh()
 {
 	LLPanel::refresh();
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-3.0.0a) | Modified: Catznip-2.5.0a
 	// Call refresh() on all panels that derive from LLPanelPreference
 	LLTabContainer* pTabContainer = getChild<LLTabContainer>("pref core");
 	for (child_list_t::const_iterator itChild = pTabContainer->getChildList()->begin();
@@ -1843,7 +1833,7 @@ BOOL LLPanelPreference::postBuild()
 	return true;
 }
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.6.0a) | Added: Catznip-2.1.1a
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
 void LLPanelPreference::refresh()
 {
 	//////////////////////PanelPrivacy ///////////////////

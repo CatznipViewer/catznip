@@ -36,7 +36,7 @@
 #include <boost/signals2.hpp>
 
 class LLDate;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
 class LLRecentPeoplePersistentItem;
 // [/SL:KB]
 
@@ -52,20 +52,20 @@ class LLRecentPeoplePersistentItem;
  *TODO: purge least recently added items? 
  */
 //class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LLSimpleListener
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 class LLRecentPeople : public LLSingleton<LLRecentPeople>
 // [/SL:KB]
 {
 	LOG_CLASS(LLRecentPeople);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	friend class LLSingleton<LLRecentPeople>;
 protected:
 	LLRecentPeople();
 // [/SL:KB]
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 public:
 	enum EInteractionType
 	{
@@ -84,7 +84,7 @@ public:
 	static EInteractionType   getTypeFromTypeName(const std::string& strInteraction);
 // [/SL:KB]
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	void dump() const;
 	void load();
 	void save() const;
@@ -106,7 +106,7 @@ public:
 	 * @return false if the avatar is in the list already, true otherwise
 	 */
 //	bool add(const LLUUID& id, const LLSD& userdata = LLSD().with("date", LLDate::now()));
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	bool add(const LLUUID& id, EInteractionType interaction, const LLSD& userdata = LLSD().with("date", LLDate::now()));
 // [/SL:KB]
 
@@ -122,7 +122,7 @@ public:
 	 * @param result where to put the result.
 	 */
 //	void get(uuid_vec_t& result) const;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	void get(uuid_vec_t& result, EInteractionType interaction) const;
 // [/SL:KB]
 
@@ -131,7 +131,7 @@ public:
 	 *
 	 */
 //	const LLDate getDate(const LLUUID& id) const;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	const LLDate getDate(const LLUUID& id, EInteractionType interaction) const;
 // [/SL:KB]
 
@@ -167,7 +167,7 @@ private:
 
 	const LLUUID& getIDByPhoneNumber(const LLSD& userdata);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.6.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	std::string			mPersistentFilename;
 	typedef std::map<LLUUID, LLRecentPeoplePersistentItem> recent_people_t;
 	recent_people_t		mPeople;
@@ -177,7 +177,7 @@ private:
 	signal_t			mChangedSignal;
 };
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
 class LLRecentPeoplePersistentItem
 {
 public:

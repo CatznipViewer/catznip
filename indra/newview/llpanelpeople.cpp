@@ -88,7 +88,7 @@ protected:
 		LLRecentPeople& people = LLRecentPeople::instance();
 //		const LLDate& date1 = people.getDate(avatar_item1->getAvatarId());
 //		const LLDate& date2 = people.getDate(avatar_item2->getAvatarId());
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 		static LLCachedControl<U32> INTERACTION_FILTER(gSavedSettings, "RecentPeopleInteractionFilter");
 		const LLDate& date1 = people.getDate(avatar_item1->getAvatarId(), (LLRecentPeople::EInteractionType)(U32)INTERACTION_FILTER);
 		const LLDate& date2 = people.getDate(avatar_item2->getAvatarId(), (LLRecentPeople::EInteractionType)(U32)INTERACTION_FILTER);
@@ -515,7 +515,7 @@ LLPanelPeople::LLPanelPeople()
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));
 	mNearbyListUpdater = new LLNearbyListUpdater(boost::bind(&LLPanelPeople::updateNearbyList,	this));
 //	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList, this, false));
 // [/SL:KB]
 	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
@@ -711,7 +711,7 @@ BOOL LLPanelPeople::postBuild()
 
 	LLVoiceClient::getInstance()->addObserver(this);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	// Initially populate the initial recent people (from persistent storage)
 	updateRecentList(true);
 	// Refresh the list whenever the interaction filter changes
@@ -829,7 +829,7 @@ void LLPanelPeople::updateNearbyList()
 }
 
 //void LLPanelPeople::updateRecentList()
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 void LLPanelPeople::refreshRecentList()
 {
 	LLRecentPeople::instance().reloadItems();
@@ -844,7 +844,7 @@ void LLPanelPeople::updateRecentList(bool fForceUpdate)
 
 //	LLRecentPeople::instance().get(mRecentList->getIDs());
 //	mRecentList->setDirty();
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	LLRecentPeople::instance().get(mRecentList->getIDs(), (LLRecentPeople::EInteractionType)gSavedSettings.getU32("RecentPeopleInteractionFilter"));
 	mRecentList->setDirty(true, fForceUpdate);
 	if (fForceUpdate)

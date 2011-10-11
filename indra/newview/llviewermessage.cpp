@@ -181,7 +181,7 @@ bool friendship_offer_callback(const LLSD& notification, const LLSD& response)
 
 	// add friend to recent people list
 //	LLRecentPeople::instance().add(payload["from_id"]);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
 // [/SL:KB]
 
@@ -1453,7 +1453,7 @@ void LLOfferInfo::send_auto_receive_response(void)
 	{
 		// add buddy to recent people list
 //		LLRecentPeople::instance().add(mFromID);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 		LLRecentPeople::instance().add(mFromID, LLRecentPeople::IT_INVENTORY);
 // [/SL:KB]
 	}
@@ -6373,7 +6373,7 @@ bool handle_lure_callback(const LLSD& notification, const LLSD& response)
 
 				// Add the recepient to the recent people list.
 //				LLRecentPeople::instance().add(target_id);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 				LLRecentPeople::instance().add(target_id, LLRecentPeople::IT_GENERAL);
 // [/SL:KB]
 			}

@@ -511,7 +511,7 @@ void LLVoiceChannelGroup::activate()
 				{
 					const LLUUID id = *it;
 //					LLRecentPeople::instance().add(id);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 					LLRecentPeople::instance().add(id, LLRecentPeople::IT_IM);
 // [/SL:KB]
 				}
@@ -963,14 +963,14 @@ void LLVoiceChannelP2P::addToTheRecentPeopleList()
 		call_data["date"]			= LLDate::now();
 		
 //		LLRecentPeople::instance().add(mOtherUserID, call_data);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 		LLRecentPeople::instance().add(mOtherUserID, LLRecentPeople::IT_AVALINE, call_data);
 // [/SL:KB]
 	}
 	else
 	{
 //		LLRecentPeople::instance().add(mOtherUserID);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 		LLRecentPeople::instance().add(mOtherUserID, LLRecentPeople::IT_IM);
 // [/SL:KB]
 	}
