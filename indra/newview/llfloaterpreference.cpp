@@ -1686,12 +1686,16 @@ BOOL LLPanelPreference::postBuild()
 	//////////////////////PanelSpellCheck//////////////////////
 	if (hasChild("checkSpellCheck"))
 	{
-		std::vector<std::string> dictList;
-		if (LLHunspellWrapper::instance().getInstalledDictionaries(dictList))
+		const LLSD& sdDictionaries = LLHunspellWrapper::instance().getDictionaryMap();
+		if (sdDictionaries.size())
 		{
 			LLComboBox* pMainDictionaryList = findChild<LLComboBox>("comboDictionaryMain");
-			for (std::vector<std::string>::const_iterator itDict = dictList.begin(); itDict != dictList.end(); ++itDict)
-				pMainDictionaryList->add(*itDict);
+			for (LLSD::array_const_iterator itDict = sdDictionaries.beginArray(); itDict != sdDictionaries.endArray(); ++itDict)
+			{
+				const LLSD& sdDict = *itDict;
+				if (sdDict.has("language"))
+					pMainDictionaryList->add(sdDict["language"].asString());
+			}
 			pMainDictionaryList->setControlName("SpellCheckDictionary");
 		}
 	}

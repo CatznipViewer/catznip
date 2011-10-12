@@ -39,9 +39,9 @@ public:
 	 * Dictionary related functions
 	 */
 public:
-	const std::string	getCurrentDictionary() const					{ return m_strDictionaryName; }
-	S32					getDictionaries(std::vector<std::string>& strDictionaryList) const;
-	S32					getInstalledDictionaries(std::vector<std::string>& strDictionaryList) const;
+	const LLSD			getDictionaryData(const std::string& strDictionary) const;
+	const LLSD&			getDictionaryMap() const		{ return m_sdDictionaryMap; }
+	void				refreshDictionaryMap();
 
 	void				addToCustomDictionary(const std::string& strWord);
 	void				addToIgnoreList(const std::string& strWord);
@@ -60,8 +60,10 @@ public:
 	 * Static member functions
 	 */
 public:
-	static bool useSpellCheck();
-	static void setUseSpellCheck(const std::string& strDictionary);
+	static const std::string	getDictionaryAppPath();
+	static const std::string	getDictionaryUserPath();
+	static void					setUseSpellCheck(const std::string& strDictionary);
+	static bool					useSpellCheck();
 
 	/*
 	 * Member variables
@@ -70,8 +72,6 @@ protected:
 	Hunspell*					m_pHunspell;
 	std::string					m_strDictionaryName;
 	std::string					m_strDictionaryFile;
-	std::string					m_strDictionaryAppPath;
-	std::string					m_strDictionaryUserPath;
 	LLSD						m_sdDictionaryMap;
 	std::vector<std::string>	m_IgnoreList;
 
