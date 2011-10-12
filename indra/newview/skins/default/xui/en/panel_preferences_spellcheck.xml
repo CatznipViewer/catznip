@@ -11,9 +11,9 @@
  width="517">
     <check_box
      control_name="SpellCheck"
-	 enabled="true"
-	 follows="top|left"
-	 height="16"
+     enabled="true"
+     follows="top|left"
+     height="16"
      label="Enable spell checking"
      layout="topleft"
      left="30"
@@ -28,9 +28,9 @@
      height="10"
      label="Logs:"
      layout="topleft"
-	 left="80"
+     left="55"
      mouse_opaque="false"
-	 name="textDictionaryMain"
+     name="textDictionaryMain"
      top_pad="15"
      type="string"
      width="90"
@@ -47,5 +47,86 @@
      top_pad="-15"
      width="175"
     />
+
+    <text
+     enabled_control="SpellCheck"
+     follows="top|left"
+     height="10"
+     label="Logs:"
+     layout="topleft"
+     left="55"
+     mouse_opaque="false"
+     name="textDictionaryAdditional"
+     top_pad="15"
+     type="string"
+     width="190"
+    >
+      Additional dictionaries :
+    </text>
+    <text
+     type="string"
+     length="1"
+     follows="top|left"
+     height="12"
+     layout="topleft"
+     left="80"
+     name="show_label"
+     top_pad="10"
+     width="175">
+        Active
+    </text>
+    <text
+     type="string"
+     length="1"
+     follows="top|left"
+     height="12"
+     layout="topleft"
+     left_pad="45"
+     name="show_label"
+     width="175">
+        Available
+    </text>
+    <scroll_list
+     follows="top|left"
+     height="155"
+     layout="topleft"
+     left="80"
+     multi_select="true"
+     name="listActive"
+     sort_column="0"
+     sort_ascending="true" 
+     width="175" />
+    <button
+     follows="top|left"
+     height="26"
+     image_overlay="Arrow_Left"
+     hover_glow_amount="0.15"
+     layout="topleft"
+     left_pad="10"
+     name="btnActiveAdd"
+     top_delta="50"
+     width="25">
+    </button>
+    <button
+     follows="top|left"
+     height="26"
+     image_overlay="Arrow_Right"
+     hover_glow_amount="0.15"
+     layout="topleft"
+     name="btnActiveRemove"
+     top_delta="30"
+     width="25">
+    </button>
+    <scroll_list
+     follows="top|left"
+     height="155"
+     layout="topleft"
+     left_pad="10"
+     multi_select="true"
+     name="listAvailable"
+     sort_column="0"
+     sort_ascending="true" 
+     top_pad="-105"
+     width="175" />
 
 </panel>

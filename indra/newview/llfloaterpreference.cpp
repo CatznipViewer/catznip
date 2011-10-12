@@ -110,8 +110,9 @@
 #include "lllogininstance.h"        // to check if logged in yet
 #include "llsdserialize.h"
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a)
 #include "llhunspell.h"
+#include <boost/algorithm/string.hpp>
 // [/SL:KB]
 
 const F32 MAX_USER_FAR_CLIP = 512.f;
@@ -1682,10 +1683,13 @@ BOOL LLPanelPreference::postBuild()
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
 	//////////////////////PanelSpellCheck//////////////////////
 	if (hasChild("checkSpellCheck"))
 	{
+		//
+		// Populate the main dictionary combobox
+		//
 		const LLSD& sdDictionaries = LLHunspellWrapper::instance().getDictionaryMap();
 		if (sdDictionaries.size())
 		{
@@ -1693,11 +1697,54 @@ BOOL LLPanelPreference::postBuild()
 			for (LLSD::array_const_iterator itDict = sdDictionaries.beginArray(); itDict != sdDictionaries.endArray(); ++itDict)
 			{
 				const LLSD& sdDict = *itDict;
-				if (sdDict.has("language"))
+				if ( (sdDict["installed"].asBoolean()) && (sdDict.has("language")) )
 					pMainDictionaryList->add(sdDict["language"].asString());
 			}
 			pMainDictionaryList->setControlName("SpellCheckDictionary");
 		}
+
+		LLSD sdRow;
+		sdRow["columns"][0]["column"] = "name";
+		sdRow["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
+		sdRow["columns"][0]["font"]["style"] = "NORMAL";
+
+		//
+		// Populate the active dictionary list
+		//
+		std::vector<std::string> dictActiveList;
+		boost::split(dictActiveList, gSavedSettings.getString("SpellCheckDictionarySecondary"), boost::is_any_of(std::string(",")));
+
+		LLScrollListCtrl* pDictActiveList = findChild<LLScrollListCtrl>("listActive");
+		pDictActiveList->sortByColumnIndex(0, true);
+		for (std::vector<std::string>::const_iterator itActive = dictActiveList.begin(); itActive != dictActiveList.end(); ++itActive)
+		{
+			sdRow["columns"][0]["value"] = *itActive;
+			pDictActiveList->addElement(sdRow);
+		}
+
+		//
+		// Populate the available dictionary list
+		//
+		dictActiveList.push_back(gSavedSettings.getString("SpellCheckDictionary"));
+
+		LLScrollListCtrl* pDictAvailList = findChild<LLScrollListCtrl>("listAvailable");
+		pDictAvailList->sortByColumnIndex(0, true);
+		for (LLSD::array_const_iterator itDict = sdDictionaries.beginArray(); itDict != sdDictionaries.endArray(); ++itDict)
+		{
+			const LLSD& sdDict = *itDict;
+			if ( (sdDict["installed"].asBoolean()) && (sdDict.has("language")) && 
+				 (dictActiveList.end() == std::find(dictActiveList.begin(), dictActiveList.end(), sdDict["language"].asString())) )
+			{
+				sdRow["columns"][0]["value"] = sdDict["language"].asString();
+				pDictAvailList->addElement(sdRow);
+			}
+		}
+
+		//
+		// Set up the add/remove buttons
+		//
+		findChild<LLButton>("btnActiveAdd")->setCommitCallback(boost::bind(&LLPanelPreference::onBtnActiveDictAddRemove, this, "listAvailable", "listActive"));
+		findChild<LLButton>("btnActiveRemove")->setCommitCallback(boost::bind(&LLPanelPreference::onBtnActiveDictAddRemove, this, "listActive", "listAvailable"));
 	}
 // [/SL:KB]
 
@@ -1714,7 +1761,20 @@ LLPanelPreference::~LLPanelPreference()
 }
 void LLPanelPreference::apply()
 {
-	// no-op
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	//////////////////////PanelSpellCheck//////////////////////
+	if (hasChild("checkSpellCheck"))
+	{
+		std::vector<std::string> dictActiveList;
+
+		LLScrollListCtrl* pDictActiveList = findChild<LLScrollListCtrl>("listActive");
+		std::vector<LLScrollListItem*> selActive = pDictActiveList->getAllData();
+		for (std::vector<LLScrollListItem*>::const_iterator itSel = selActive.begin(); itSel != selActive.end(); ++itSel)
+			dictActiveList.push_back((*itSel)->getColumn(0)->getValue().asString());
+
+		gSavedSettings.setString("SpellCheckDictionarySecondary", boost::join(dictActiveList, ","));
+	}
+// [/SL:KB]
 }
 
 void LLPanelPreference::saveSettings()
@@ -1755,6 +1815,27 @@ void LLPanelPreference::saveSettings()
 		}
 	}	
 }
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+void LLPanelPreference::onBtnActiveDictAddRemove(const char* pstrFrom, const char* pstrTo)
+{
+	LLScrollListCtrl* pFromList = findChild<LLScrollListCtrl>(pstrFrom);
+	LLScrollListCtrl* pToList = findChild<LLScrollListCtrl>(pstrTo);
+
+	LLSD sdRow;
+	sdRow["columns"][0]["column"] = "name";
+	sdRow["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
+	sdRow["columns"][0]["font"]["style"] = "NORMAL";
+
+	std::vector<LLScrollListItem*> selActive = pFromList->getAllSelected();
+	for (std::vector<LLScrollListItem*>::const_iterator itSel = selActive.begin(); itSel != selActive.end(); ++itSel)
+	{
+		sdRow["columns"][0]["value"] = (*itSel)->getColumn(0)->getValue();
+		pToList->addElement(sdRow);
+	}
+	pFromList->deleteSelectedItems();
+}
+// [/SL:KB]
 
 void LLPanelPreference::showFriendsOnlyWarning(LLUICtrl* checkbox, const LLSD& value)
 {
