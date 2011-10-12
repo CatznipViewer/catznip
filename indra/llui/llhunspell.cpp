@@ -38,20 +38,20 @@ static const std::string c_strDictIgnoreSuffix = "_ignore";
 // ============================================================================
 
 // Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-LLHunspellWrapper::LLHunspellWrapper()
+LLSpellChecker::LLSpellChecker()
 	: m_pHunspell(NULL)
 {
 	// Load initial dictionary information
 	refreshDictionaryMap();
 }
 
-LLHunspellWrapper::~LLHunspellWrapper()
+LLSpellChecker::~LLSpellChecker()
 {
 	delete m_pHunspell;
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-bool LLHunspellWrapper::checkSpelling(const std::string& strWord) const
+bool LLSpellChecker::checkSpelling(const std::string& strWord) const
 {
 	if ( (!m_pHunspell) || (strWord.length() < 3) || (0 != m_pHunspell->spell(strWord.c_str())) )
 	{
@@ -66,7 +66,7 @@ bool LLHunspellWrapper::checkSpelling(const std::string& strWord) const
 	return false;
 }
 
-S32 LLHunspellWrapper::getSuggestions(const std::string& strWord, std::vector<std::string>& strSuggestionList) const
+S32 LLSpellChecker::getSuggestions(const std::string& strWord, std::vector<std::string>& strSuggestionList) const
 {
 	if ( (!m_pHunspell) || (strWord.length() < 3) )
 		return 0;
@@ -88,7 +88,7 @@ S32 LLHunspellWrapper::getSuggestions(const std::string& strWord, std::vector<st
 //
 
 // Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-const LLSD LLHunspellWrapper::getDictionaryData(const std::string& strDictionary) const
+const LLSD LLSpellChecker::getDictionaryData(const std::string& strDictionary) const
 {
 	for (LLSD::array_const_iterator itDictInfo = m_sdDictionaryMap.beginArray(), endDictInfo = m_sdDictionaryMap.endArray();
 			itDictInfo != endDictInfo; ++itDictInfo)
@@ -101,7 +101,7 @@ const LLSD LLHunspellWrapper::getDictionaryData(const std::string& strDictionary
 }
 
 // Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-void LLHunspellWrapper::refreshDictionaryMap()
+void LLSpellChecker::refreshDictionaryMap()
 {
 	std::string strDictionaryAppPath = getDictionaryAppPath();
 	std::string strDictionaryUserPath = getDictionaryUserPath();
@@ -133,7 +133,7 @@ void LLHunspellWrapper::refreshDictionaryMap()
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-bool LLHunspellWrapper::setCurrentDictionary(const std::string& strDictionary)
+bool LLSpellChecker::setCurrentDictionary(const std::string& strDictionary)
 {
 	if (strDictionary == m_strDictionaryName)
 		return false;
@@ -208,7 +208,7 @@ bool LLHunspellWrapper::setCurrentDictionary(const std::string& strDictionary)
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-void LLHunspellWrapper::addToCustomDictionary(const std::string& strWord)
+void LLSpellChecker::addToCustomDictionary(const std::string& strWord)
 {
 	if (m_pHunspell)
 		m_pHunspell->add(strWord.c_str());
@@ -217,7 +217,7 @@ void LLHunspellWrapper::addToCustomDictionary(const std::string& strWord)
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-void LLHunspellWrapper::addToIgnoreList(const std::string& strWord)
+void LLSpellChecker::addToIgnoreList(const std::string& strWord)
 {
 	std::string strWordLower(strWord);
 	LLStringUtil::toLower(strWordLower);
@@ -230,7 +230,7 @@ void LLHunspellWrapper::addToIgnoreList(const std::string& strWord)
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-void LLHunspellWrapper::addToDictFile(const std::string& strDictPath, const std::string& strWord)
+void LLSpellChecker::addToDictFile(const std::string& strDictPath, const std::string& strWord)
 {
 	// TODO-Catznip: has to be a better way to add one word to the end and increment the line count?
 	std::vector<std::string> wordList;
@@ -275,17 +275,17 @@ void LLHunspellWrapper::addToDictFile(const std::string& strDictPath, const std:
 // Static member functions
 //
 
-LLHunspellWrapper::settings_change_signal_t LLHunspellWrapper::s_SettingsChangeSignal;
+LLSpellChecker::settings_change_signal_t LLSpellChecker::s_SettingsChangeSignal;
 
 // Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-const std::string LLHunspellWrapper::getDictionaryAppPath()
+const std::string LLSpellChecker::getDictionaryAppPath()
 {
 	std::string strDictionaryAppPath = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "dictionaries", "");
 	return strDictionaryAppPath;
 }
 
 // Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-const std::string LLHunspellWrapper::getDictionaryUserPath()
+const std::string LLSpellChecker::getDictionaryUserPath()
 {
 	std::string strDictionaryUserPath = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "dictionaries", "");
 	if (!gDirUtilp->fileExists(strDictionaryUserPath))
@@ -293,20 +293,20 @@ const std::string LLHunspellWrapper::getDictionaryUserPath()
 	return strDictionaryUserPath;
 }
 
-boost::signals2::connection LLHunspellWrapper::setSettingsChangeCallback(const settings_change_signal_t::slot_type& cb)
+boost::signals2::connection LLSpellChecker::setSettingsChangeCallback(const settings_change_signal_t::slot_type& cb)
 {
 	return s_SettingsChangeSignal.connect(cb);
 }
 
-bool LLHunspellWrapper::useSpellCheck()
+bool LLSpellChecker::useSpellCheck()
 {
-	return (LLHunspellWrapper::instanceExists()) || (LLHunspellWrapper::instance().m_pHunspell);
+	return (LLSpellChecker::instanceExists()) || (LLSpellChecker::instance().m_pHunspell);
 }
 
-void LLHunspellWrapper::setUseSpellCheck(const std::string& strDictionary)
+void LLSpellChecker::setUseSpellCheck(const std::string& strDictionary)
 {
 	if ( ((strDictionary.empty()) && (useSpellCheck())) || (!strDictionary.empty()) )
-		LLHunspellWrapper::instance().setCurrentDictionary(strDictionary);
+		LLSpellChecker::instance().setCurrentDictionary(strDictionary);
 }
 
 // ============================================================================

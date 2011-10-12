@@ -317,7 +317,7 @@ public:
 	{
 		if (isGoodStatus(status))
 		{
-			std::string strPath = LLHunspellWrapper::getDictionaryUserPath() + "dictionaries.xml";
+			std::string strPath = LLSpellChecker::getDictionaryUserPath() + "dictionaries.xml";
 			llinfos << "Writing dictionary list to " << strPath << llendl;
 			
 			S32 file_size = buffer->countAfter(channels.in(), NULL);
@@ -333,8 +333,8 @@ public:
 				out.close();
 			}
 
-			if (LLHunspellWrapper::instanceExists())
-				LLHunspellWrapper::instance().refreshDictionaryMap();
+			if (LLSpellChecker::instanceExists())
+				LLSpellChecker::instance().refreshDictionaryMap();
 		}
 	}
 };
@@ -446,7 +446,7 @@ bool idle_startup()
 		// load dynamic GPU/feature tables from website (S3)
 		LLFeatureManager::getInstance()->fetchHTTPTables();
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-		if (LLHunspellWrapper::instanceExists())
+		if (LLSpellChecker::instanceExists())
 			fetch_dictionary_list();
 // [/SL:KB]
 		

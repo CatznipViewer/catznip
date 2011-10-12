@@ -2534,7 +2534,7 @@ bool LLAppViewer::initConfiguration()
 
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
 	if (gSavedSettings.getBOOL("SpellCheck"))
-		LLHunspellWrapper::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
+		LLSpellChecker::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
 // [/SL:KB]
 
     mYieldTime = gSavedSettings.getS32("YieldTime");

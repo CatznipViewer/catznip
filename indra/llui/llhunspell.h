@@ -24,12 +24,12 @@ class Hunspell;
 
 // ============================================================================
 
-class LLHunspellWrapper : public LLSingleton<LLHunspellWrapper>
+class LLSpellChecker : public LLSingleton<LLSpellChecker>
 {
-	friend class LLSingleton<LLHunspellWrapper>;
+	friend class LLSingleton<LLSpellChecker>;
 protected:
-	LLHunspellWrapper();
-	~LLHunspellWrapper();
+	LLSpellChecker();
+	~LLSpellChecker();
 
 public:
 	bool	checkSpelling(const std::string& strWord) const;

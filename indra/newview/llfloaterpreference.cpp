@@ -1690,7 +1690,7 @@ BOOL LLPanelPreference::postBuild()
 		//
 		// Populate the main dictionary combobox
 		//
-		const LLSD& sdDictionaries = LLHunspellWrapper::instance().getDictionaryMap();
+		const LLSD& sdDictionaries = LLSpellChecker::instance().getDictionaryMap();
 		if (sdDictionaries.size())
 		{
 			LLComboBox* pMainDictionaryList = findChild<LLComboBox>("comboDictionaryMain");

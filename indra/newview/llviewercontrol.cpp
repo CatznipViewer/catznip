@@ -530,14 +530,14 @@ bool handleForceShowGrid(const LLSD& newvalue)
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
 bool handleSpellCheckChanged(const LLSD& sdValue)
 {
-	LLHunspellWrapper::setUseSpellCheck((sdValue.asBoolean()) ? gSavedSettings.getString("SpellCheckDictionary") : LLStringUtil::null);
+	LLSpellChecker::setUseSpellCheck((sdValue.asBoolean()) ? gSavedSettings.getString("SpellCheckDictionary") : LLStringUtil::null);
 	return true;
 }
 
 bool handleSpellCheckDictChanged(const LLSD& sdValue)
 {
 	if (gSavedSettings.getBOOL("SpellCheck"))
-		LLHunspellWrapper::setUseSpellCheck(sdValue.asString());
+		LLSpellChecker::setUseSpellCheck(sdValue.asString());
 	return true;
 }
 // [/SL:KB]

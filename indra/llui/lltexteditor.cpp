@@ -704,7 +704,7 @@ void LLTextEditor::replaceWithSuggestion(U32 idxSuggestion)
 void LLTextEditor::addToDictionary()
 {
 	if (canAddToDictionary())
-		LLHunspellWrapper::instance().addToCustomDictionary(getMisspelledWord(mCursorPos));
+		LLSpellChecker::instance().addToCustomDictionary(getMisspelledWord(mCursorPos));
 }
 
 // Checked: 2011-09-09 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
@@ -717,7 +717,7 @@ bool LLTextEditor::canAddToDictionary() const
 void LLTextEditor::addToIgnore()
 {
 	if (canAddToIgnore())
-		LLHunspellWrapper::instance().addToIgnoreList(getMisspelledWord(mCursorPos));
+		LLSpellChecker::instance().addToIgnoreList(getMisspelledWord(mCursorPos));
 }
 
 // Checked: 2011-09-09 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
@@ -2070,7 +2070,7 @@ void LLTextEditor::showContextMenu(S32 x, S32 y)
 		// If the cursor is on a misspelled word, retrieve suggestions for it
 		std::string strMisspelledWord = getMisspelledWord(mCursorPos);
 		if ((fMisspelledWord = !strMisspelledWord.empty()) == true)
-			LLHunspellWrapper::instance().getSuggestions(strMisspelledWord, mSuggestionList);
+			LLSpellChecker::instance().getSuggestions(strMisspelledWord, mSuggestionList);
 	}
 
 	// Show/hide spell checking related menu items

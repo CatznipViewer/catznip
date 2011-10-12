@@ -172,7 +172,7 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mTripleClickTimer.reset();
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
 	if (mSpellCheck)
-		LLHunspellWrapper::setSettingsChangeCallback(boost::bind(&LLLineEditor::onSpellCheckSettingsChange, this));
+		LLSpellChecker::setSettingsChangeCallback(boost::bind(&LLLineEditor::onSpellCheckSettingsChange, this));
 	mSpellCheckTimer.reset();
 // [/SL:KB]
 	setText(p.default_text());
@@ -542,7 +542,7 @@ void LLLineEditor::selectAll()
 // Checked: 2010-12-19 (Catznip-2.7.0a) | Added: Catznip-2.5.0a
 bool LLLineEditor::useSpellCheck() const
 {
-	return (LLHunspellWrapper::useSpellCheck()) && (!mReadOnly) && (mSpellCheck);
+	return (LLSpellChecker::useSpellCheck()) && (!mReadOnly) && (mSpellCheck);
 }
 
 // Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
@@ -587,7 +587,7 @@ void LLLineEditor::replaceWithSuggestion(U32 idxSuggestion)
 void LLLineEditor::addToDictionary()
 {
 	if (canAddToDictionary())
-		LLHunspellWrapper::instance().addToCustomDictionary(getMisspelledWord(mCursorPos));
+		LLSpellChecker::instance().addToCustomDictionary(getMisspelledWord(mCursorPos));
 }
 
 // Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
@@ -600,7 +600,7 @@ bool LLLineEditor::canAddToDictionary() const
 void LLLineEditor::addToIgnore()
 {
 	if (canAddToIgnore())
-		LLHunspellWrapper::instance().addToIgnoreList(getMisspelledWord(mCursorPos));
+		LLSpellChecker::instance().addToIgnoreList(getMisspelledWord(mCursorPos));
 }
 
 // Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
@@ -1959,7 +1959,7 @@ void LLLineEditor::draw()
 
 				// Don't process words shorter than 3 characters
 				std::string strWord = wstring_to_utf8str(wstrText.substr(idxWordStart, idxWordEnd - idxWordStart));
-				if ( (strWord.length() >= 3) && (!LLHunspellWrapper::instance().checkSpelling(strWord)) )
+				if ( (strWord.length() >= 3) && (!LLSpellChecker::instance().checkSpelling(strWord)) )
 					mMisspellRanges.push_back(std::pair<U32, U32>(idxStart + idxWordStart, idxStart + idxWordEnd));
 
 				// Find the start of the next word
@@ -2631,7 +2631,7 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 			// If the cursor is on a misspelled word, retrieve suggestions for it
 			std::string strMisspelledWord = getMisspelledWord(mCursorPos);
 			if ((fMisspelledWord = !strMisspelledWord.empty()) == true)
-				LLHunspellWrapper::instance().getSuggestions(strMisspelledWord, mSuggestionList);
+				LLSpellChecker::instance().getSuggestions(strMisspelledWord, mSuggestionList);
 		}
 
 		// Show/hide spell checking related menu items

@@ -253,7 +253,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-07 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
 	if (mSpellCheck)
-		LLHunspellWrapper::setSettingsChangeCallback(boost::bind(&LLTextBase::onSpellCheckSettingsChange, this));
+		LLSpellChecker::setSettingsChangeCallback(boost::bind(&LLTextBase::onSpellCheckSettingsChange, this));
 	mSpellCheckTimer.reset();
 // [/SL:KB]
 
@@ -601,7 +601,7 @@ void LLTextBase::drawText()
 
 					// Don't process words shorter than 3 characters
 					std::string strWord = wstring_to_utf8str(wstrText.substr(idxWordStart, idxWordEnd - idxWordStart));
-					if ( (strWord.length() >= 3) && (!LLHunspellWrapper::instance().checkSpelling(strWord)) )
+					if ( (strWord.length() >= 3) && (!LLSpellChecker::instance().checkSpelling(strWord)) )
 						mMisspellRanges.push_back(std::pair<U32, U32>(idxWordStart, idxWordEnd));
 
 					// Find the start of the next word
@@ -1220,7 +1220,7 @@ void LLTextBase::deselect()
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-07 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
 bool LLTextBase::useSpellCheck() const
 {
-	return (LLHunspellWrapper::useSpellCheck()) && (!mReadOnly) && (mSpellCheck);
+	return (LLSpellChecker::useSpellCheck()) && (!mReadOnly) && (mSpellCheck);
 }
 
 void LLTextBase::onSpellCheckSettingsChange()
