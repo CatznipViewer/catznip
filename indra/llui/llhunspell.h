@@ -32,36 +32,31 @@ protected:
 	~LLSpellChecker();
 
 public:
-	bool	checkSpelling(const std::string& strWord) const;
-	S32		getSuggestions(const std::string& strWord, std::vector<std::string>& strSuggestionList) const;
+	void addToCustomDictionary(const std::string& strWord);
+	void addToIgnoreList(const std::string& strWord);
+	bool checkSpelling(const std::string& strWord) const;
+	S32  getSuggestions(const std::string& strWord, std::vector<std::string>& strSuggestionList) const;
 
 	/*
 	 * Dictionary related functions
 	 */
 public:
-	const LLSD			getDictionaryData(const std::string& strDictionary) const;
-	const LLSD&			getDictionaryMap() const		{ return m_sdDictionaryMap; }
-	void				refreshDictionaryMap();
-
-	void				addToCustomDictionary(const std::string& strWord);
-	void				addToIgnoreList(const std::string& strWord);
+	const LLSD	getDictionaryData(const std::string& strDictionary) const;
+	const LLSD&	getDictionaryMap() const		{ return m_sdDictionaryMap; }
+	void		refreshDictionaryMap();
+	void		setSecondaryDictionaries(std::vector<std::string> dictList);
 protected:
-	void				addToDictFile(const std::string& strDictPath, const std::string& strWord);
-	bool				setCurrentDictionary(const std::string& strDictionary);
-
-	/*
-	 * Event callbacks
-	 */
-public:
-	typedef boost::signals2::signal<void()> settings_change_signal_t;
-	static boost::signals2::connection setSettingsChangeCallback(const settings_change_signal_t::slot_type& cb);
+	void		addToDictFile(const std::string& strDictPath, const std::string& strWord);
+	void		initHunspell(const std::string& strDictionary);
 
 	/*
 	 * Static member functions
 	 */
 public:
+	typedef boost::signals2::signal<void()> settings_change_signal_t;
 	static const std::string	getDictionaryAppPath();
 	static const std::string	getDictionaryUserPath();
+	static boost::signals2::connection setSettingsChangeCallback(const settings_change_signal_t::slot_type& cb);
 	static void					setUseSpellCheck(const std::string& strDictionary);
 	static bool					useSpellCheck();
 
@@ -72,6 +67,7 @@ protected:
 	Hunspell*					m_pHunspell;
 	std::string					m_strDictionaryName;
 	std::string					m_strDictionaryFile;
+	std::vector<std::string>	m_SecondaryDictionaries;
 	LLSD						m_sdDictionaryMap;
 	std::vector<std::string>	m_IgnoreList;
 

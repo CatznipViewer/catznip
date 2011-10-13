@@ -133,81 +133,6 @@ void LLSpellChecker::refreshDictionaryMap()
 }
 
 // Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-bool LLSpellChecker::setCurrentDictionary(const std::string& strDictionary)
-{
-	if (strDictionary == m_strDictionaryName)
-		return false;
-	s_SettingsChangeSignal();
-
-	if (m_pHunspell)
-	{
-		delete m_pHunspell;
-		m_pHunspell = NULL;
-		m_strDictionaryName = m_strDictionaryFile = "";
-		m_IgnoreList.clear();
-	}
-
-	if (strDictionary.empty())
-		return false;
-
-	LLSD sdDictInfo;
-	for (LLSD::array_const_iterator itDictInfo = m_sdDictionaryMap.beginArray(), endDictInfo = m_sdDictionaryMap.endArray();
-			itDictInfo != endDictInfo; ++itDictInfo)
-	{
-		const LLSD& sdDict = *itDictInfo;
-		if ( (sdDict["installed"].asBoolean()) && (strDictionary == sdDict["language"].asString()) )
-			sdDictInfo = sdDict;
-	}
-
-	std::string strPathDictApp = getDictionaryAppPath();
-	std::string strPathDictUser = getDictionaryUserPath();
-	if (sdDictInfo.has("name"))
-	{
-		std::string strFileAff = sdDictInfo["name"].asString() + ".aff";
-		std::string strFileDic = sdDictInfo["name"].asString() + ".dic";
-
-		if ( (gDirUtilp->fileExists(strPathDictUser + strFileAff)) && (gDirUtilp->fileExists(strPathDictUser + strFileDic)) )
-			m_pHunspell = new Hunspell((strPathDictUser + strFileAff).c_str(), (strPathDictUser + strFileDic).c_str());
-		else if ( (gDirUtilp->fileExists(strPathDictApp + strFileAff)) && (gDirUtilp->fileExists(strPathDictApp + strFileDic)) )
-			m_pHunspell = new Hunspell((strPathDictApp + strFileAff).c_str(), (strPathDictApp + strFileDic).c_str());
-		if (!m_pHunspell)
-			return false;
-
-		m_strDictionaryName = strDictionary;
-		m_strDictionaryFile = sdDictInfo["name"].asString();
-
-		// Add the custom dictionary (if there is one)
-		if (sdDictInfo["has_custom"].asBoolean())
-		{
-			std::string strPathCustomDic = strPathDictUser + m_strDictionaryFile + c_strDictCustomSuffix + ".dic";
-			m_pHunspell->add_dic(strPathCustomDic.c_str());
-		}
-
-		// Load the ignore list (if there is one)
-		if (sdDictInfo["has_ignore"].asBoolean())
-		{
-			llifstream fileDictIgnore(strPathDictUser + m_strDictionaryFile + c_strDictIgnoreSuffix + ".dic", std::ios::in);
-			if (fileDictIgnore.is_open())
-			{
-				std::string strWord; int idxLine = 0;
-				while (getline(fileDictIgnore, strWord))
-				{
-					// Skip over the first line since that's just a line count
-					if (0 != idxLine)
-					{
-						LLStringUtil::toLower(strWord);
-						m_IgnoreList.push_back(strWord);
-					}
-					idxLine++;
-				}
-			}
-		}
-	}
-
-	return (NULL != m_pHunspell);
-}
-
-// Checked: 2010-12-23 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
 void LLSpellChecker::addToCustomDictionary(const std::string& strWord)
 {
 	if (m_pHunspell)
@@ -271,6 +196,125 @@ void LLSpellChecker::addToDictFile(const std::string& strDictPath, const std::st
 	}
 }
 
+// Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+void LLSpellChecker::setSecondaryDictionaries(std::vector<std::string> dictList)
+{
+	// Check if we're only adding secondary dictionaries, or removing them
+	std::vector<std::string> dictAdded(llmax(dictList.size(), m_SecondaryDictionaries.size())), dictRemoved(llmax(dictList.size(), m_SecondaryDictionaries.size()));
+	std::sort(dictList.begin(), dictList.end());
+	std::sort(m_SecondaryDictionaries.begin(), m_SecondaryDictionaries.end());
+	std::vector<std::string>::iterator endAdded = std::set_difference(dictList.begin(), dictList.end(), m_SecondaryDictionaries.begin(), m_SecondaryDictionaries.end(), dictAdded.begin());
+	std::vector<std::string>::iterator endRemoved = std::set_difference(m_SecondaryDictionaries.begin(), m_SecondaryDictionaries.end(), dictList.begin(), dictList.end(), dictRemoved.begin());
+
+	if (endRemoved != dictRemoved.begin())		// We can't remove secondary dictionaries so we need to recreate the Hunspell instance
+	{
+		m_SecondaryDictionaries = dictList;
+
+		std::string strDictionary = m_strDictionaryName;
+		initHunspell(strDictionary);
+	}
+	else if (endAdded != dictAdded.begin())		// Add the new secondary dictionaries one by one
+	{
+		const std::string strPathDictApp = getDictionaryAppPath();
+		const std::string strPathDictUser = getDictionaryUserPath();
+		for (std::vector<std::string>::const_iterator itAdded = dictAdded.begin(); itAdded != endAdded; ++itAdded)
+		{
+			const LLSD sdDictInfo = getDictionaryData(*itAdded);
+			if ( (!sdDictInfo.isDefined()) || (!sdDictInfo["installed"].asBoolean()) )
+				continue;
+
+			const std::string strFileDic = sdDictInfo["name"].asString() + ".dic";
+			if (gDirUtilp->fileExists(strPathDictUser + strFileDic))
+				m_pHunspell->add_dic((strPathDictUser + strFileDic).c_str());
+			else if (gDirUtilp->fileExists(strPathDictApp + strFileDic))
+				m_pHunspell->add_dic((strPathDictApp + strFileDic).c_str());
+		}
+		m_SecondaryDictionaries = dictList;
+		s_SettingsChangeSignal();
+	}
+}
+
+// Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+void LLSpellChecker::initHunspell(const std::string& strDictionary)
+{
+	if (m_pHunspell)
+	{
+		delete m_pHunspell;
+		m_pHunspell = NULL;
+		m_strDictionaryName.clear();
+		m_strDictionaryFile.clear();
+		m_IgnoreList.clear();
+	}
+
+	const LLSD sdDictInfo = (!strDictionary.empty()) ? getDictionaryData(strDictionary) : LLSD();
+	if ( (!sdDictInfo.isDefined()) || (!sdDictInfo["installed"].asBoolean()) )
+	{
+		s_SettingsChangeSignal();
+		return;
+	}
+
+	std::string strPathDictApp = getDictionaryAppPath();
+	std::string strPathDictUser = getDictionaryUserPath();
+	if (sdDictInfo.has("name"))
+	{
+		const std::string strFileAff = sdDictInfo["name"].asString() + ".aff";
+		const std::string strFileDic = sdDictInfo["name"].asString() + ".dic";
+		if ( (gDirUtilp->fileExists(strPathDictUser + strFileAff)) && (gDirUtilp->fileExists(strPathDictUser + strFileDic)) )
+			m_pHunspell = new Hunspell((strPathDictUser + strFileAff).c_str(), (strPathDictUser + strFileDic).c_str());
+		else if ( (gDirUtilp->fileExists(strPathDictApp + strFileAff)) && (gDirUtilp->fileExists(strPathDictApp + strFileDic)) )
+			m_pHunspell = new Hunspell((strPathDictApp + strFileAff).c_str(), (strPathDictApp + strFileDic).c_str());
+		if (!m_pHunspell)
+			return;
+
+		m_strDictionaryName = strDictionary;
+		m_strDictionaryFile = sdDictInfo["name"].asString();
+
+		// Add the custom dictionary (if there is one)
+		if (sdDictInfo["has_custom"].asBoolean())
+		{
+			std::string strPathCustomDic = strPathDictUser + m_strDictionaryFile + c_strDictCustomSuffix + ".dic";
+			m_pHunspell->add_dic(strPathCustomDic.c_str());
+		}
+
+		// Load the ignore list (if there is one)
+		if (sdDictInfo["has_ignore"].asBoolean())
+		{
+			llifstream fileDictIgnore(strPathDictUser + m_strDictionaryFile + c_strDictIgnoreSuffix + ".dic", std::ios::in);
+			if (fileDictIgnore.is_open())
+			{
+				std::string strWord; int idxLine = 0;
+				while (getline(fileDictIgnore, strWord))
+				{
+					// Skip over the first line since that's just a line count
+					if (0 != idxLine)
+					{
+						LLStringUtil::toLower(strWord);
+						m_IgnoreList.push_back(strWord);
+					}
+					idxLine++;
+				}
+			}
+		}
+
+		// Add the secondary dictionaries
+		for (std::vector<std::string>::const_iterator itSecondary = m_SecondaryDictionaries.begin(); 
+				itSecondary != m_SecondaryDictionaries.end(); ++itSecondary)
+		{
+			const LLSD sdDictInfo = getDictionaryData(*itSecondary);
+			if ( (!sdDictInfo.isDefined()) || (!sdDictInfo["installed"].asBoolean()) )
+				continue;
+
+			const std::string strFileDic = sdDictInfo["name"].asString() + ".dic";
+			if (gDirUtilp->fileExists(strPathDictUser + strFileDic))
+				m_pHunspell->add_dic((strPathDictUser + strFileAff).c_str());
+			else if (gDirUtilp->fileExists(strPathDictApp + strFileDic))
+				m_pHunspell->add_dic((strPathDictApp + strFileAff).c_str());
+		}
+	}
+
+	s_SettingsChangeSignal();
+}
+
 // ============================================================================
 // Static member functions
 //
@@ -305,8 +349,11 @@ bool LLSpellChecker::useSpellCheck()
 
 void LLSpellChecker::setUseSpellCheck(const std::string& strDictionary)
 {
-	if ( ((strDictionary.empty()) && (useSpellCheck())) || (!strDictionary.empty()) )
-		LLSpellChecker::instance().setCurrentDictionary(strDictionary);
+	if ( (((strDictionary.empty()) && (useSpellCheck())) || (!strDictionary.empty())) && 
+		 (LLSpellChecker::instance().m_strDictionaryName != strDictionary) )
+	{
+		LLSpellChecker::instance().initHunspell(strDictionary);
+	}
 }
 
 // ============================================================================

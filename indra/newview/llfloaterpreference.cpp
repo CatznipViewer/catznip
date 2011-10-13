@@ -1772,6 +1772,7 @@ void LLPanelPreference::apply()
 		for (std::vector<LLScrollListItem*>::const_iterator itSel = selActive.begin(); itSel != selActive.end(); ++itSel)
 			dictActiveList.push_back((*itSel)->getColumn(0)->getValue().asString());
 
+		LLSpellChecker::instance().setSecondaryDictionaries(dictActiveList);
 		gSavedSettings.setString("SpellCheckDictionarySecondary", boost::join(dictActiveList, ","));
 	}
 // [/SL:KB]
