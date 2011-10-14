@@ -101,7 +101,7 @@ LLIconDictionary::LLIconDictionary()
 //	const std::string& icon_name = getIconName(asset_type, inventory_type, misc_flag, item_is_multi);
 //	return LLUI::getUIImage(icon_name);
 //}
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 LLUIImagePtr LLInventoryIcon::getIcon(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag)
 {
 	const std::string& icon_name = getIconName(asset_type, inventory_type, misc_flag);
@@ -118,7 +118,7 @@ LLUIImagePtr LLInventoryIcon::getIcon(EIconName idx)
 //												LLInventoryType::EType inventory_type,
 //												U32 misc_flag,
 //												BOOL item_is_multi)
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag)
 // [/SL:KB]
 {
@@ -142,7 +142,7 @@ const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type, L
 			break;
 		case LLAssetType::AT_LANDMARK:
 //			idx = (misc_flag != 0) ? ICONNAME_LANDMARK_VISITED : ICONNAME_LANDMARK;
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 			idx = (misc_flag & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED) ? ICONNAME_LANDMARK_VISITED : ICONNAME_LANDMARK;
 // [/SL:KB]
 			break;
@@ -172,7 +172,7 @@ const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type, L
 			break;
 		case LLAssetType::AT_OBJECT:
 //			idx = ICONNAME_OBJECT;
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 			idx = (misc_flag & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS) ? ICONNAME_OBJECT_MULTI : ICONNAME_OBJECT;
 // [/SL:KB]
 			break;

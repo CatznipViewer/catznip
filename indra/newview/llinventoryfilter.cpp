@@ -260,7 +260,7 @@ BOOL LLInventoryFilter::isNotDefault() const
 		|| mFilterOps.mFilterCategoryTypes != mDefaultFilterOps.mFilterCategoryTypes 
 		|| mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes 
 //		|| mFilterOps.mFilterTypes != FILTERTYPE_OBJECT
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
 		|| mFilterOps.mFilterTypes != mDefaultFilterOps.mFilterTypes
 // [/SL:KB]
 		|| mFilterOps.mFilterLinks != FILTERLINK_INCLUDE_LINKS

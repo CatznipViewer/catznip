@@ -138,7 +138,7 @@ protected:
 	BOOL isLinkedObjectMissing() const; // Is this a linked obj whose baseobj is not in inventory?
 
 	BOOL isAgentInventory() const; // false if lost or in the inventory library
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	BOOL isLibraryInventory() const;
 	BOOL isLostInventory() const;
 // [/SL:KB]
@@ -189,7 +189,7 @@ public:
 //				 LLFolderView* root,
 //				 const LLUUID& uuid) :
 //		LLInvFVBridge(inventory, root, uuid) {}
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 	LLItemBridge(LLInventoryPanel* inventory, 
 				 LLFolderView* root,
 				 const LLUUID& uuid,
@@ -227,7 +227,7 @@ protected:
 	static void buildDisplayName(LLInventoryItem* item, std::string& name);
 
 	mutable std::string mDisplayName;
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6.0b) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 	U32 mFlags;
 // [/SL:KB]
 };
