@@ -4185,7 +4185,7 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-2.6.0a) | Modified: Catznip-2.0.1a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.0.1a
 class WearAttachmentsCallback : public LLInventoryCallback
 {
 public:
@@ -4197,7 +4197,7 @@ public:
 protected:
 	~WearAttachmentsCallback()
 	{
-		if( LLInventoryCallbackManager::is_instantiated() )
+		if (LLInventoryCallbackManager::is_instantiated())
 		{
 			for (std::list<LLUUID>::const_iterator itItemId = mItemIds.begin(); itItemId != mItemIds.end(); ++itItemId)
 			{
@@ -4229,7 +4229,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 		for (S32 idx = 0; (idx < batch.count()) && (fRemoveOpen); idx++)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
-			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
 			if (!pObjBridge)
 				continue;
 
@@ -4251,7 +4251,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 		for (S32 idx = 0; idx < batch.count(); idx++)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
-			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
 			if (!pObjBridge)
 				continue;
 			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pObjBridge->getUUID());
@@ -4277,7 +4277,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 		for (S32 idx = 0; idx < batch.count(); idx++)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(batch.get(idx));
-			llassert(pObjBridge);	// batch should only contain LLObjectBridge instances
+			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
 			if (!pObjBridge)
 				continue;
 			const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(pObjBridge->getUUID());
@@ -4755,7 +4755,7 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.6.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
 void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
 		                                  LLDynamicArray<LLFolderViewEventListener*>& batch)
