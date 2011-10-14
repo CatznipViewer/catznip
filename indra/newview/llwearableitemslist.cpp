@@ -36,7 +36,7 @@
 #include "llinventoryfunctions.h"
 #include "lltransutil.h"
 #include "llviewerattachmenu.h"
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 #include "llviewermenu.h"
 // [/SL:KB]
 #include "llvoavatarself.h"
@@ -797,7 +797,7 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	registrar.add("Wearable.Wear", boost::bind(wear_multiple, ids, true));
 	registrar.add("Wearable.Add", boost::bind(wear_multiple, ids, false));
 //	registrar.add("Wearable.Edit", boost::bind(handleMultiple, LLAgentWearables::editWearable, ids));
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 	registrar.add("Wearable.Edit", boost::bind(handle_item_edit, selected_id));
 // [/SL:KB]
 	registrar.add("Wearable.CreateNew", boost::bind(createNewWearable, selected_id));
@@ -861,7 +861,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 		const bool is_link = item->getIsLinkType();
 		const bool is_worn = get_is_item_worn(id);
 //		const bool is_editable = gAgentWearables.isWearableModifiable(id);
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 		const bool is_editable = 
 			(item->isWearableType()) ? gAgentWearables.isWearableModifiable(id) : (LLAssetType::AT_OBJECT == item->getType());
 // [/SL:KB]
@@ -900,7 +900,7 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	setMenuItemVisible(menu, "wear_replace",		n_worn == 0 && n_already_worn != 0 && can_be_worn);
 	//visible only when one item selected and this item is worn
 //	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART) && n_worn == n_items && n_worn == 1);
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART|MASK_ATTACHMENT) && n_worn == n_items && n_worn == 1);
 // [/SL:KB]
 	setMenuItemEnabled(menu, "edit",				n_editable == 1 && n_worn == 1 && n_items == 1);
