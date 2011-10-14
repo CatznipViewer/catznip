@@ -2253,8 +2253,8 @@ void LLFolderView::doIdle()
 				{
 					setSelectionFromRoot(NULL, mParentPanel->hasFocus());
 				}
+				scrollToShowSelection();
 			}
-			scrollToShowSelection();
 		}
 // [/SL:KB]
 
