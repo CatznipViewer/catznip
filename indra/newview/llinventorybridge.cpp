@@ -398,7 +398,7 @@ BOOL LLInvFVBridge::isClipboardPasteable() const
 		const LLViewerInventoryItem *item = model->getItem(item_id);
 		if (item)
 		{
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 			// Can't copy worn objects. DEV-15183 [see P-JIRA: http://jira.secondlife.com/browse/VWR-6110]
 //			if ( (!item->getIsLinkType()) && (get_is_item_worn(item->getUUID())) )
 //			{
@@ -408,7 +408,7 @@ BOOL LLInvFVBridge::isClipboardPasteable() const
 
 			if (!item->getPermissions().allowCopyBy(agent_id))
 			{
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 				// We allow copy/pasting of links as long as their target is available
 				// (and disallow if the user is trying to paste a folder link pointing to the current folder)
 				if ( (!item->getIsLinkType()) || (!item->getLinkedItem()) ||
@@ -580,19 +580,17 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 					disabled_items.push_back(std::string("Copy Asset UUID"));
 				}
 			}
-/*
-			items.push_back(std::string("Copy Separator"));
-			
-			items.push_back(std::string("Copy"));
-			if (!isItemCopyable())
-			{
-				disabled_items.push_back(std::string("Copy"));
-			}
-*/
+//			items.push_back(std::string("Copy Separator"));
+//			
+//			items.push_back(std::string("Copy"));
+//			if (!isItemCopyable())
+//			{
+//				disabled_items.push_back(std::string("Copy"));
+//			}
 		}
 	}
 
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 	items.push_back(std::string("Copy Separator"));
 	
 	items.push_back(std::string("Copy"));
@@ -1380,7 +1378,7 @@ BOOL LLItemBridge::removeItem()
 	// we can't do this check because we may have items in a folder somewhere that is
 	// not yet in memory, so we don't want false negatives.  (If disabled, then we 
 	// know we only have links in the Outfits folder which we explicitly fetch.)
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-06-01 (Catznip-2.6.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-06-01 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
 	// Users move folders around and reuse links that way... if we know something has links then it's just bad not to warn them :|
 // [/SL:KB]
 //	if (!gSavedSettings.getBOOL("InventoryLinking"))
@@ -1401,7 +1399,7 @@ BOOL LLItemBridge::removeItem()
 			{
 				// Warn if the user is will break any links when deleting this item.
 				LLNotifications::instance().add(params);
-				return FALSE;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+				return FALSE;
 			}
 		}
 	}
@@ -1438,17 +1436,15 @@ BOOL LLItemBridge::isItemCopyable() const
 	LLViewerInventoryItem* item = getItem();
 	if (item)
 	{
-/*
-		// Can't copy worn objects. DEV-15183
-		if(get_is_item_worn(mUUID))
-		{
-			return FALSE;
-		}
-*/
+//		// Can't copy worn objects. DEV-15183
+//		if(get_is_item_worn(mUUID))
+//		{
+//			return FALSE;
+//		}
 
 //		// You can never copy a link.
 //		if (item->getIsLinkType())
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 		// We'll allow copying a link if:
 		//   - its target is available
 		//   - it doesn't point to another link [see LLViewerInventoryItem::getLinkedItem() which returns NULL in that case]
@@ -1461,7 +1457,7 @@ BOOL LLItemBridge::isItemCopyable() const
 		// All items can be copied in god mode since you can
 		// at least paste-as-link the item, though you 
 		// still may not be able paste the item.
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 		// User can copy the item if:
 		//   - the item (or its target in the case of a link) is "copy"
 		//   - and/or if the item (or its target in the case of a link) has a linkable asset type
@@ -2454,7 +2450,7 @@ void LLFolderBridge::pasteFromClipboard()
 				}
 				else
 				{
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 					if (item->getPermissions().allowCopyBy(gAgent.getID()))
 					{
 // [/SL:KB]
@@ -2465,7 +2461,7 @@ void LLFolderBridge::pasteFromClipboard()
 							parent_id,
 							std::string(),
 							LLPointer<LLInventoryCallback>(NULL));
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.6.0a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
 					}
 					else if (LLAssetType::lookupIsLinkType(item->getActualType()))
 					{
