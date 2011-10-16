@@ -4353,7 +4353,7 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 //				items.push_back(std::string("Attach To HUD"));
 //				// commented out for DEV-32347
 //				//items.push_back(std::string("Restore to Last Position"));
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
 			items.push_back(std::string("Wearable And Object Separator"));
 
 			// Show "Detach" for a selection where some of the selected items are worn
@@ -4385,7 +4385,7 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 // [/SL:KB]
 
 //				if (!gAgentAvatarp->canAttachMoreObjects())
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 				if ( (!gAgentAvatarp->canAttachMoreObjects()) && (0 == (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))) )
 // [/SL:KB]
 				{
@@ -4737,7 +4737,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 
 		// Disable wear and take off based on whether the item is worn.
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-05-29 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-05-29 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 		bool fIsWorn = get_is_item_worn(item->getUUID());
 
 		// Show "Wear" and "Add" for a selection where not all wearable items are currently worn

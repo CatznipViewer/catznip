@@ -2366,7 +2366,7 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 	// Successively filter out invalid options
 
 	U32 flags = FIRST_SELECTED_ITEM;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
 	if (mSelectedItems.size() > 1)
 		flags |= MULTIPLE_SELECTED_ITEMS;
 
@@ -2411,7 +2411,7 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 		LLFolderViewItem* selected_item = (*item_itor);
 		selected_item->buildContextMenu(*menu, flags);
 //		flags = 0x0;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.6.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
 		flags &= ~FIRST_SELECTED_ITEM;
 // [/SL:KB]
 	}
