@@ -203,10 +203,10 @@ BOOL LLFloaterProperties::postBuild()
 	getChild<LLUICtrl>("LabelItemName")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitName,this));
 	getChild<LLLineEditor>("LabelItemDesc")->setPrevalidate(&LLTextValidate::validateASCIIPrintableNoPipe);
 	getChild<LLUICtrl>("LabelItemDesc")->setCommitCallback(boost::bind(&LLFloaterProperties:: onCommitDescription, this));
-	// Creator information
-	getChild<LLUICtrl>("BtnCreator")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickCreator,this));
-	// owner information
-	getChild<LLUICtrl>("BtnOwner")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickOwner,this));
+//	// Creator information
+//	getChild<LLUICtrl>("BtnCreator")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickCreator,this));
+//	// owner information
+//	getChild<LLUICtrl>("BtnOwner")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickOwner,this));
 	// acquired date
 	// owner permissions
 	// Permissions debug text
@@ -253,9 +253,9 @@ void LLFloaterProperties::refresh()
 			"LabelItemName",
 			"LabelItemDesc",
 			"LabelCreatorName",
-			"BtnCreator",
+//			"BtnCreator",
 			"LabelOwnerName",
-			"BtnOwner",
+//			"BtnOwner",
 			"CheckOwnerModify",
 			"CheckOwnerCopy",
 			"CheckOwnerTransfer",
@@ -354,17 +354,16 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 //		gCacheName->getFullName(item->getCreatorUUID(), name);
 // [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
 		LLUUID creator_id = item->getCreatorUUID();
-		std::string name =
-			LLSLURL("agent", creator_id, "completename").getSLURLString();
+		std::string name = LLSLURL("agent", creator_id, "inspect").getSLURLString();
 // [/SL:KB]
-		getChildView("BtnCreator")->setEnabled(TRUE);
+//		getChildView("BtnCreator")->setEnabled(TRUE);
 		getChildView("LabelCreatorTitle")->setEnabled(TRUE);
 		getChildView("LabelCreatorName")->setEnabled(TRUE);
 		getChild<LLUICtrl>("LabelCreatorName")->setValue(name);
 	}
 	else
 	{
-		getChildView("BtnCreator")->setEnabled(FALSE);
+//		getChildView("BtnCreator")->setEnabled(FALSE);
 		getChildView("LabelCreatorTitle")->setEnabled(FALSE);
 		getChildView("LabelCreatorName")->setEnabled(FALSE);
 		getChild<LLUICtrl>("LabelCreatorName")->setValue(getString("unknown"));
@@ -385,17 +384,17 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 //			gCacheName->getFullName(perm.getOwner(), name);
 // [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
 			LLUUID owner_id = perm.getOwner();
-			name = LLSLURL("agent", owner_id, "completename").getSLURLString();
+			name = LLSLURL("agent", owner_id, "inspect").getSLURLString();
 // [/SL:KB]
 		}
-		getChildView("BtnOwner")->setEnabled(TRUE);
+//		getChildView("BtnOwner")->setEnabled(TRUE);
 		getChildView("LabelOwnerTitle")->setEnabled(TRUE);
 		getChildView("LabelOwnerName")->setEnabled(TRUE);
 		getChild<LLUICtrl>("LabelOwnerName")->setValue(name);
 	}
 	else
 	{
-		getChildView("BtnOwner")->setEnabled(FALSE);
+//		getChildView("BtnOwner")->setEnabled(FALSE);
 		getChildView("LabelOwnerTitle")->setEnabled(FALSE);
 		getChildView("LabelOwnerName")->setEnabled(FALSE);
 		getChild<LLUICtrl>("LabelOwnerName")->setValue(getString("public"));
