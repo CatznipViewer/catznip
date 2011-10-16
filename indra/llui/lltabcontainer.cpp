@@ -209,7 +209,7 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	tab_drag_commit("tab_drag_commit", false),
 // [/SL:KB]
 	tab_padding_right("tab_padding_right"),
@@ -228,7 +228,7 @@ LLTabContainer::Params::Params()
 LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	mDragAndDropHoverCommit(p.tab_drag_commit),
 	mDragAndDropHoverIdx(-1),
 // [/SL:KB]
@@ -822,11 +822,11 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 {
 	BOOL has_scroll_arrows = (getMaxScrollPos() > 0);
 
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	S32 curHoverIdx = -1;
 	if (!getTabsHidden())
 	{
-		for(tuple_list_t::const_iterator itTab = mTabList.begin(); itTab != mTabList.end(); ++itTab)
+		for (tuple_list_t::const_iterator itTab = mTabList.begin(); itTab != mTabList.end(); ++itTab)
 		{
 			const LLTabTuple* pTuple = *itTab;
 			S32 local_x = x - pTuple->mButton->getRect().mLeft;
@@ -847,7 +847,7 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 // [/SL:KB]
 
 //	if( mDragAndDropDelayTimer.getStarted() && mDragAndDropDelayTimer.getElapsedTimeF32() > SCROLL_DELAY_TIME )
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	if ( (mDragAndDropHoverCommit) && (mDragAndDropDelayTimer.getStarted()) && (mDragAndDropDelayTimer.getElapsedTimeF32() > DELAY_DRAG_HOVER_COMMIT) )
 // [/SL:KB]
 	{
@@ -879,7 +879,7 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 			}
 		}
 
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 		if (-1 != mDragAndDropHoverIdx)
 		{
 			const LLTabTuple* pTuple = mTabList[mDragAndDropHoverIdx];

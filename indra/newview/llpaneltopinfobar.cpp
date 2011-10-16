@@ -30,7 +30,7 @@
 
 #include "llagent.h"
 #include "llagentui.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 #include "llappviewer.h"
 // [/SL:KB]
 #include "llclipboard.h"
@@ -65,7 +65,7 @@ private:
 	LLPanelTopInfoBar* mTopInfoBar;
 };
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 static LLRegisterPanelClassWrapper<LLPanelTopInfoBar> t_topinfo_bar("topinfo_bar");
 // [/SL:KB]
 
@@ -75,7 +75,7 @@ LLPanelTopInfoBar::LLPanelTopInfoBar(): mParcelChangedObserver(0)
 			.add("TopInfoBar.Action", boost::bind(&LLPanelTopInfoBar::onContextMenuItemClicked, this, _2));
 
 //	buildFromFile( "panel_topinfo_bar.xml");
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	// set a listener function for LoginComplete event
 	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLPanelTopInfoBar::handleLoginComplete, this));
 // [/SL:KB]
@@ -218,7 +218,7 @@ void LLPanelTopInfoBar::draw()
 {
 //	updateParcelInfoText();
 //	updateHealth();
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	if (getVisible())
 	{
 		updateParcelInfoText();
@@ -362,7 +362,7 @@ void LLPanelTopInfoBar::layoutParcelIcons()
 {
 	// TODO: remove hard-coded values and read them as xml parameters
 //	static const int FIRST_ICON_HPAD = 32;
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	static const int FIRST_ICON_HPAD = 10;
 // [/SL:KB]
 	static const int LAST_ICON_HPAD = 11;
@@ -378,7 +378,7 @@ void LLPanelTopInfoBar::layoutParcelIcons()
 
 	LLRect rect = getRect();
 	//rect.set(rect.mLeft, rect.mTop, left + LAST_ICON_HPAD, rect.mBottom);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	rect.setOriginAndSize(rect.mLeft, rect.mBottom, left + LAST_ICON_HPAD, rect.getHeight());
 // [/SL:KB]
 	setRect(rect);

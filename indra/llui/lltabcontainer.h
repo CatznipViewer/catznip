@@ -83,7 +83,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 		/**
 		 * Holding the mouse over a tab button while dragging will activate that tab 
 		 */
@@ -296,7 +296,7 @@ private:
 	// Padding to the left of text labels of tab buttons
 	S32								mLabelPadLeft;
 
-// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Checked: UI-TabDndButtonCommit | Checked: 2011-06-16 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	bool							mDragAndDropHoverCommit;
 	S32								mDragAndDropHoverIdx;
 // [/SL:KB]

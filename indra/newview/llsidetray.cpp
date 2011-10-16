@@ -538,7 +538,7 @@ public:
 		mBadgeDriver = driver;
 	}
 
-// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
 	                                   EAcceptance* accept, std::string& tooltip_msg)
 	{
@@ -571,7 +571,7 @@ protected:
 		, mDragLastScreenY(0)
 		, mBadgeDriver(NULL)
 //	{}
-// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	{
 		mDragCommitDelayTimer.stop();
 	}
@@ -595,7 +595,7 @@ private:
 
 	LLSideTrayTabBadgeDriver*	mBadgeDriver;
 
-// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	LLFrameTimer mDragCommitDelayTimer;
 // [/SL:KB]
 };

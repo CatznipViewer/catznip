@@ -60,7 +60,7 @@ template class LLButton* LLView::getChild<class LLButton>(
 S32	LLBUTTON_H_PAD	= 0;
 S32 BTN_HEIGHT_SMALL= 0;
 S32 BTN_HEIGHT		= 0;
-// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 F32 DELAY_DRAG_HOVER_COMMIT = 0.5;
 // [/SL:KB]
 

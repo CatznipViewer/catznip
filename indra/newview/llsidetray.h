@@ -172,7 +172,7 @@ public:
 	LLPanel*	getButtonsPanel() { return mButtonsPanel; }
 
 //	bool		getCollapsed() { return mCollapsed; }
-// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-SideTrayDndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	bool		getCollapsed() const { return mCollapsed; }
 // [/SL:KB]
 

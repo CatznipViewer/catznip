@@ -426,7 +426,7 @@ S32 LLAvatarList::notifyParent(const LLSD& info)
 		sort();
 		return 1;
 	}
-// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	else if ( (info.has("select")) && (info["select"].isUUID()) )
 	{
 		const LLSD& sdValue = getSelectedValue();

@@ -72,7 +72,7 @@
 #include "llpanellogin.h"
 #include "llpaneltopinfobar.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 #include "llstatusbar.h"
 // [/SL:KB]
 
@@ -518,7 +518,7 @@ bool handleVelocityInterpolate(const LLSD& newvalue)
 	return true;
 }
 
-// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 bool handleSettingF32Change(const LLSD& sdValue, F32* pValue)
 {
 	if (pValue)
@@ -568,7 +568,7 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 
 //	LLPanelTopInfoBar::getInstance()->setVisible(value);
 //	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	if (gStatusBar)
 	{
 		gStatusBar->showTopInfoBar(value);
@@ -756,7 +756,7 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("UpdaterServiceSetting")->getSignal()->connect(boost::bind(&toggle_updater_service_active, _2));
 	gSavedSettings.getControl("ForceShowGrid")->getSignal()->connect(boost::bind(&handleForceShowGrid, _2));
 	gSavedSettings.getControl("RenderTransparentWater")->getSignal()->connect(boost::bind(&handleRenderTransparentWaterChanged, _2));
-// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-DndButtonCommit | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 	gSavedSettings.getControl("DragAndDropCommitDelay")->getSignal()->connect(boost::bind(&handleSettingF32Change, _2, &DELAY_DRAG_HOVER_COMMIT));
 // [/SL:KB]
 }

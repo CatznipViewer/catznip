@@ -83,7 +83,7 @@ public:
 	S32 getSquareMetersLeft() const;
 
 	LLPanelNearByMedia* getNearbyMediaPanel() { return mPanelNearByMedia; }
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	void				showTopInfoBar(bool fVisible);
 // [/SL:KB]
 

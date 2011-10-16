@@ -38,7 +38,7 @@
 #include "llavatarnamecache.h"
 #include "llavatariconctrl.h"
 #include "lloutputmonitorctrl.h"
-// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 #include "lltooldraganddrop.h"
 // [/SL:KB]
 
@@ -337,7 +337,7 @@ BOOL LLAvatarListItem::handleDoubleClick(S32 x, S32 y, MASK mask)
 	return LLPanel::handleDoubleClick(x, y, mask);
 }
 
-// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-2.6.0c) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
 BOOL LLAvatarListItem::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void *cargo_data, 
 	                                     EAcceptance *accept, std::string& tooltip_msg)
 {
