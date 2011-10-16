@@ -2172,7 +2172,11 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 		LLFloater::setFloaterHost(multi_previewp);
 	
 	}
-	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+//	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	else if ( ("task_properties" == action || "properties" == action) && (selected_items.size() > 1) && 
+		      (gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
+// [/SL:KB]
 	{
 		multi_propertiesp = new LLMultiProperties();
 		gFloaterView->addChild(multi_propertiesp);
