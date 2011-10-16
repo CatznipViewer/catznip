@@ -4753,7 +4753,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			{
 					disabled_items.push_back(std::string("Wearable Add"));
 			}
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-10-02 (Catznip-2.6.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
 			// Show the "Wear On" submenus if multiple clothing items are selected and none of them are worn
 			// (or if it's a single clothing item then only show it if its wearable type already has a current wearable
 			if ( ( (flags & MULTIPLE_SELECTED_ITEMS) && ((flags & PARTIAL_WORN_SELECTION) == 0) &&
@@ -4785,7 +4785,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 // [/SL:KB]
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.6.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
 		if (item)
 		{
 			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", TRUE);
@@ -4878,7 +4878,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	hide_context_entries(menu, items, disabled_items);
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.6.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
 bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
 {
 	if ( (!pPanel) || (!pPanel->getRootFolder()) || (!sdParam.has("action")) || (!sdParam.has("index")) )
