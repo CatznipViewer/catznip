@@ -126,7 +126,7 @@ void LLPanelWearableOutfitItem::updateItem(const std::string& name,
 	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkInCOF(mInventoryItemUUID))
 	{
 //		search_label += LLTrans::getString("worn");
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6.0e) | Added: Catznip-2.6.0e
+// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
 		switch (mInventoryItemAssetType)
 		{
 			case LLAssetType::AT_OBJECT:

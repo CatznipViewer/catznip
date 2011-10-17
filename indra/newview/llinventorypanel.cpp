@@ -918,7 +918,7 @@ void LLInventoryPanel::openAllFolders()
 	mFolderRoot->arrangeAll();
 }
 
-// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.6.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
 bool LLInventoryPanel::getSelectedItems(LLInventoryModel::item_array_t& items) const
 {
 	items.clear();
