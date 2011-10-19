@@ -86,8 +86,13 @@ protected:
 	virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
 	{
 		LLRecentPeople& people = LLRecentPeople::instance();
-		const LLDate& date1 = people.getDate(avatar_item1->getAvatarId());
-		const LLDate& date2 = people.getDate(avatar_item2->getAvatarId());
+//		const LLDate& date1 = people.getDate(avatar_item1->getAvatarId());
+//		const LLDate& date2 = people.getDate(avatar_item2->getAvatarId());
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+		static LLCachedControl<U32> INTERACTION_FILTER(gSavedSettings, "RecentPeopleInteractionFilter");
+		const LLDate& date1 = people.getDate(avatar_item1->getAvatarId(), (LLRecentPeople::EInteractionType)(U32)INTERACTION_FILTER);
+		const LLDate& date2 = people.getDate(avatar_item2->getAvatarId(), (LLRecentPeople::EInteractionType)(U32)INTERACTION_FILTER);
+// [/SL:KB]
 
 		//older comes first
 		return date1 > date2;
@@ -509,7 +514,10 @@ LLPanelPeople::LLPanelPeople()
 {
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));
 	mNearbyListUpdater = new LLNearbyListUpdater(boost::bind(&LLPanelPeople::updateNearbyList,	this));
-	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
+//	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList, this, false));
+// [/SL:KB]
 	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
 	mCommitCallbackRegistrar.add("People.addFriend", boost::bind(&LLPanelPeople::onAddFriendButtonClicked, this));
 }
@@ -703,6 +711,14 @@ BOOL LLPanelPeople::postBuild()
 
 	LLVoiceClient::getInstance()->addObserver(this);
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	// Initially populate the initial recent people (from persistent storage)
+	updateRecentList(true);
+	// Refresh the list whenever the interaction filter changes
+	gSavedSettings.getControl("RecentPeopleInteractionFilter")->getSignal()->connect(boost::bind(&LLPanelPeople::updateRecentList, this, true));
+	gSavedSettings.getControl("RecentPeopleCutOffDays")->getSignal()->connect(boost::bind(&LLPanelPeople::refreshRecentList, this));
+// [/SL:KB]
+
 	// call this method in case some list is empty and buttons can be in inconsistent state
 	updateButtons();
 
@@ -812,13 +828,28 @@ void LLPanelPeople::updateNearbyList()
 	LLActiveSpeakerMgr::instance().update(TRUE);
 }
 
-void LLPanelPeople::updateRecentList()
+//void LLPanelPeople::updateRecentList()
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+void LLPanelPeople::refreshRecentList()
+{
+	LLRecentPeople::instance().reloadItems();
+	updateRecentList(true);
+}
+
+void LLPanelPeople::updateRecentList(bool fForceUpdate)
+// [/SL:KB]
 {
 	if (!mRecentList)
 		return;
 
-	LLRecentPeople::instance().get(mRecentList->getIDs());
-	mRecentList->setDirty();
+//	LLRecentPeople::instance().get(mRecentList->getIDs());
+//	mRecentList->setDirty();
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	LLRecentPeople::instance().get(mRecentList->getIDs(), (LLRecentPeople::EInteractionType)gSavedSettings.getU32("RecentPeopleInteractionFilter"));
+	mRecentList->setDirty(true, fForceUpdate);
+	if (fForceUpdate)
+		mRecentList->updateLastInteractionTimes();
+// [/SL:KB]
 }
 
 void LLPanelPeople::buttonSetVisible(std::string btn_name, BOOL visible)
@@ -1086,6 +1117,15 @@ void LLPanelPeople::onTabSelected(const LLSD& param)
 		mFilterEditor->setLabel(getString("groups_filter_label"));
 	else
 		mFilterEditor->setLabel(getString("people_filter_label"));
+
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	if (RECENT_TAB_NAME == tab_name)
+	{
+		// Force an update when opening the tab
+		mRecentList->setDirty(true, true);
+		mRecentList->updateLastInteractionTimes();
+	}
+// [/SL:KB]
 }
 
 void LLPanelPeople::onAvatarListDoubleClicked(LLUICtrl* ctrl)
