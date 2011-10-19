@@ -103,6 +103,9 @@
 #include "llvfsthread.h"
 #include "llvolumemgr.h"
 #include "llxfermanager.h"
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.7.0a) | Added: Catznip-2.5.0a
+#include "llhunspell.h"
+// [/SL:KB]
 
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
@@ -2528,6 +2531,11 @@ bool LLAppViewer::initConfiguration()
         gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
 		//gDirUtilp->setSkinFolder("default");
     }
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+	if (gSavedSettings.getBOOL("SpellCheck"))
+		LLHunspellWrapper::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
+// [/SL:KB]
 
     mYieldTime = gSavedSettings.getS32("YieldTime");
 
