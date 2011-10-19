@@ -54,6 +54,9 @@ const std::string LLInventoryPanel::RECENTITEMS_SORT_ORDER = std::string("Recent
 const std::string LLInventoryPanel::INHERIT_SORT_ORDER = std::string("");
 static const LLInventoryFVBridgeBuilder INVENTORY_BRIDGE_BUILDER;
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-06-29 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+bool LLInventoryPanel::s_fActiveSidebar = false;
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLInventoryPanelObserver
@@ -239,6 +242,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	// hide inbox
 	getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
 	getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+	getFilter()->markDefault();
+// [/SL:KB]
 
 	// Initialize base class params.
 	LLPanel::initFromParams(params);
@@ -864,6 +870,10 @@ void LLInventoryPanel::onFocusReceived()
 	// inventory now handles cut/copy/paste/delete
 	LLEditMenuHandler::gEditMenuHandler = mFolderRoot;
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-06-29 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+	s_fActiveSidebar = (LLSideTray::instanceCreated()) && (hasAncestor(LLSideTray::getInstance()->getPanel("sidepanel_inventory")));
+// [/SL:KB]
+
 	LLPanel::onFocusReceived();
 }
 
@@ -1090,8 +1100,12 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	LLInventoryPanel* res = NULL;
 	LLFloater* active_inv_floaterp = NULL;
 
-	// A. If the inventory side panel is open, use that preferably.
-	if (is_inventorysp_active())
+//	// A. If the inventory side panel is open, use that preferably.
+//	if (is_inventorysp_active())
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-06-29 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+	// A. If the inventory side panel is open and the last inventory panel the user had focus on, use that preferably.
+	if ( (is_inventorysp_active()) && (s_fActiveSidebar) )
+// [/SL:KB]
 	{
 		LLSidepanelInventory *inventorySP = dynamic_cast<LLSidepanelInventory *>(LLSideTray::getInstance()->getPanel("sidepanel_inventory"));
 		if (inventorySP)
@@ -1188,6 +1202,9 @@ public:
 		LLInventoryPanel::initFromParams(p);
 		// turn on inbox for recent items
 		getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+		getFilter()->markDefault();
+// [/SL:KB]
 	}
 
 protected:

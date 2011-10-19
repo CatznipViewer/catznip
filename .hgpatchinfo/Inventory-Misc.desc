@@ -1,0 +1,38 @@
+[Inventory/Misc]
+- added : "DeclineTaskOfferToTrash" to accept inventory offers from objects into the trash when declining
+- added : "Move to 'Lost and Found'" to the inventory context menu for unparented folders
+    -> folders with a NULL UUID parent will show as existing on the same level as "My Inventory"
+    -> regular drag-and-drop or other inventory operations won't succeed and fixing normally requires Linden Lab intervention
+- fixed : dropping a direct descendent of an outfit folder onto the folder shouldn't create a link to the dropped item
+- fixed : moving a folder link to a different folder moves the target folder rather the folder link
+- fixed : right-click open + "Copy to Inventory" triggers the task opener inventory observer and incoming item throttle
+- fixed : "Buy" and "Buy Contents" floater show the "multi object" icon for half of the wearable types
+    -> the inventory flags were being OR'ed with II_FLAGS_LANDMARK_VISITED which equals 1
+    -> every odd valued LLWearable::EType would be shown with the "multi object" icon rather than the proper wearable type icon
+- fixed : "Find Original" in an inventory floater highlights the link in the inventory sidebar if it's currently visible
+    -> Repro:
+         - open the inventory sidebar
+         - open an inventory floater
+         - expand "Current Outfit" on the inventory floater and pick "Find Original"
+- fixed : "Share" doesn't remember the original inventory selection
+    -> Repro:
+         (1) open inventory sidebar and select an item + collapse the sidebar
+         (2) open two inventory floaters and right-click "Share" an item on the second floater
+         (3) close the second inventory floater
+         => after selecting a resident you'll see "Are you sure you want to share: My Inventory"
+- fixed : EXP-922 (revision 621882f33b50) causes the entire inventory to be fetched at log-on
+    -> hiding the Inbox folder results in LLInventoryFilter::isNotDefault() returning TRUE
+    -> LLFolderViewFolder::filter() will then kick off LLInventoryModelBackgroundFetch::instance().start() on the root folder with recursive == true
+- fixed : inventory panel scrolls to the current selection whenever the current filter becomes out of date even if the panel currently has the focus
+    -> Repro:
+         (1) left-click an inventory item to set a selection
+         (2) scroll up or down until the currently selected item isn't visible anymore
+         (3) trigger an online/offline notification
+- fixed : inventory selection jumps to the first visible (filtered) item when deleting the last visible (filtered) item in a folder
+    -> Repro:
+         (1) create a folder with two items
+         (2) delete the first item => selection moves to the second item
+         (3) delete the second item => selection moves to the first matched item
+    -> in (3) the selection actually moves to the next visible folder [see LLFolderView::removeSelectedItems()]
+    -> getFiltered() on the folder will return FALSE since while it might have filtered descendents, it won't match it itself
+    => LLFolderView::doIdle() will set the selection to the first filtered item
