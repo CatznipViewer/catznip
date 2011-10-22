@@ -50,8 +50,8 @@ public:
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/	void onClose(bool app_quitting);
 
-	void setGridMode(EGridMode mode);
-	void updateGridMode();
+//	void setGridMode(EGridMode mode);
+//	void updateGridMode();
 
 private:
 
@@ -60,7 +60,7 @@ private:
 	LLFloaterBuildOptions(const LLSD& key);
 	~LLFloaterBuildOptions();
 
-	LLComboBox*	mComboGridMode;
+//	LLComboBox*	mComboGridMode;
 	LLObjectSelectionHandle	mObjectSelection;
 };
 #endif
