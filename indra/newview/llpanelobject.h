@@ -98,6 +98,10 @@ protected:
 	
 protected:
 	// Per-object options
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	LLButton*		mBtnCopyPrimParams;
+	LLButton*		mBtnPastePrimParams;
+// [/SL:KB]
 	LLComboBox*		mComboBaseType;
 
 	LLTextBox*		mLabelCut;

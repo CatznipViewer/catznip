@@ -1633,11 +1633,48 @@ even though the user gets a free copy.
              width="150">
                 Prim Type
             </text>-->
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left="125"
+             name="label rotation"
+             top="5"
+             width="75">
+                Prim Params
+            </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="38"
+             name="copy_primparams_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="prim_params" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_primparams_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="prim_params" />
+            </button>
             <combo_box
              height="19"
              layout="topleft"
              name="comboBaseType"
-             top="6"
+             top_pad="0"
              left="125"
              width="150">
                 <combo_box.item

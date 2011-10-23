@@ -169,6 +169,10 @@ BOOL	LLPanelObject::postBuild()
 	//--------------------------------------------------------
 		
 	// Base Type
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	mBtnCopyPrimParams = findChild<LLButton>("copy_primparams_btn");
+	mBtnPastePrimParams = findChild<LLButton>("paste_primparams_btn");
+// [/SL:KB]
 	mComboBaseType = getChild<LLComboBox>("comboBaseType");
 	childSetCommitCallback("comboBaseType",onCommitParametric,this);
 
@@ -302,6 +306,8 @@ LLPanelObject::LLPanelObject()
 	mBtnPasteSize(NULL),
 	mBtnCopyRotation(NULL),
 	mBtnPasteRotation(NULL),
+	mBtnCopyPrimParams(NULL),
+	mBtnPastePrimParams(NULL),
 // [/SL:KB]
 	mIsPhysical(FALSE),
 	mIsTemporary(FALSE),
@@ -987,6 +993,10 @@ void LLPanelObject::getState( )
 	}
 
 	// Update field enablement
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	mBtnCopyPrimParams->setEnabled( enabled );
+	mBtnPastePrimParams->setEnabled( enabled );
+// [/SL:KB]
 	mComboBaseType	->setEnabled( enabled );
 
 	mLabelCut		->setEnabled( enabled );
@@ -1943,6 +1953,17 @@ void LLPanelObject::clearCtrls()
 	mLabelRadiusOffset->setEnabled( FALSE );
 	mLabelRevolutions->setEnabled( FALSE );
 
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	mBtnCopyPosition->setEnabled(FALSE);
+	mBtnPastePosition->setEnabled(FALSE);
+	mBtnCopySize->setEnabled(FALSE);
+	mBtnPasteSize->setEnabled(FALSE);
+	mBtnCopyRotation->setEnabled(FALSE);
+	mBtnPasteRotation->setEnabled(FALSE);
+	mBtnCopyPrimParams->setEnabled(FALSE);
+	mBtnPastePrimParams->setEnabled(FALSE);
+// [/SL:KB]
+
 	getChildView("select_single")->setVisible( FALSE);
 	getChildView("edit_object")->setVisible( TRUE);	
 	getChildView("edit_object")->setEnabled(FALSE);
@@ -2077,26 +2098,40 @@ void LLPanelObject::onCommitSculptType(LLUICtrl *ctrl, void* userdata)
 	self->sendSculpt();
 }
 
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
 void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
 {
 	std::string strParam = sdParam.asString();
 	if ("position" == strParam)
 	{
-		mObjectClipboard["position"] = ll_sd_from_vector3(LLVector3(mCtrlPosX->get(), mCtrlPosY->get(), mCtrlPosZ->get()));
+		mObjectClipboard["position"] = ll_sd_from_vector3(mObject->getPositionEdit());
 		if (!mBtnPastePosition->getEnabled())
 			refresh();
 	}
 	else if ("size" == strParam)
 	{
-		mObjectClipboard["size"] = ll_sd_from_vector3(LLVector3(mCtrlScaleX->get(), mCtrlScaleY->get(), mCtrlScaleZ->get()));
+		mObjectClipboard["size"] = ll_sd_from_vector3(mObject->getScale());
 		if (!mBtnPasteSize->getEnabled())
 			refresh();
 	}
 	else if ("rotation" == strParam)
 	{
-		mObjectClipboard["rotation"] = ll_sd_from_vector3(LLVector3(mCtrlRotX->get(), mCtrlRotY->get(), mCtrlRotZ->get()));
+		mObjectClipboard["rotation"] = ll_sd_from_quaternion(mObject->getRotationEdit());
 		if (!mBtnPasteRotation->getEnabled())
+			refresh();
+	}
+	else if ("prim_params" == strParam)
+	{
+		if (LL_PCODE_VOLUME != mObject->getPCode())
+			return;
+
+		if (mObject->getParameterEntryInUse(LLNetworkData::PARAMS_SCULPT))
+			mObjectClipboard["prim_params"]["sculpt"] = ((LLSculptParams*)mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT))->asLLSD();
+		else
+			mObjectClipboard["prim_params"].erase("sculpt");
+
+		mObjectClipboard["prim_params"]["volume"] = mObject->getVolume()->getParams().asLLSD();
+		if (!mBtnPastePrimParams->getEnabled())
 			refresh();
 	}
 }
@@ -2137,7 +2172,13 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 	}
 	else if ("rotation" == strParam)
 	{
-		LLVector3 rotEuler = ll_vector3_from_sd(mObjectClipboard["rotation"]);
+		LLQuaternion rot = ll_quaternion_from_sd(mObjectClipboard["rotation"]); LLVector3 rotEuler;
+		rot.getEulerAngles(&(rotEuler.mV[VX]), &(rotEuler.mV[VY]), &(rotEuler.mV[VZ]));
+		rotEuler *= RAD_TO_DEG;
+		rotEuler.mV[VX] = fmod(llround(rotEuler.mV[VX], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+		rotEuler.mV[VY] = fmod(llround(rotEuler.mV[VY], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+		rotEuler.mV[VZ] = fmod(llround(rotEuler.mV[VZ], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
+
 		mCtrlRotX->set(rotEuler.mV[VX]);
 		mCtrlRotY->set(rotEuler.mV[VY]);
 		mCtrlRotZ->set(rotEuler.mV[VZ]);
@@ -2148,6 +2189,28 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 		pCalc->setVar(LLCalc::Z_ROT, rotEuler.mV[VZ]);
 
 		sendRotation(FALSE);
+	}
+	else if ("prim_params" == strParam)
+	{
+		if (LL_PCODE_VOLUME != mObject->getPCode())
+			return;
+
+		if (mObjectClipboard["prim_params"].has("sculpt"))
+		{
+			LLSculptParams sculpt_params;
+			sculpt_params.fromLLSD(mObjectClipboard["prim_params"]["sculpt"]);
+			mObject->setParameterEntry(LLNetworkData::PARAMS_SCULPT, sculpt_params, TRUE);
+		}
+		else
+		{
+			mObject->setParameterEntryInUse(LLNetworkData::PARAMS_SCULPT, FALSE, TRUE);
+		}
+
+		LLVolumeParams volume_params;
+		volume_params.fromLLSD(mObjectClipboard["prim_params"]["volume"]);
+		mObject->updateVolume(volume_params);
+		
+		refresh();
 	}
 }
 // [/SL:KB]
