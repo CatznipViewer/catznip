@@ -244,8 +244,8 @@ BOOL gQuietSnapshot = FALSE;
 
 static const F32 MIN_DISPLAY_SCALE = 0.75f;
 
-std::string	LLViewerWindow::sSnapshotBaseName;
-std::string	LLViewerWindow::sSnapshotDir;
+//std::string	LLViewerWindow::sSnapshotBaseName;
+//std::string	LLViewerWindow::sSnapshotDir;
 
 std::string	LLViewerWindow::sMovieBaseName;
 
@@ -1572,9 +1572,9 @@ LLViewerWindow::LLViewerWindow(
 	llinfos << "NOTE: ALL NOTIFICATIONS THAT OCCUR WILL GET ADDED TO IGNORE LIST FOR LATER RUNS." << llendl;
 
 	// Default to application directory.
-	LLViewerWindow::sSnapshotBaseName = "Snapshot";
+//	LLViewerWindow::sSnapshotBaseName = "Snapshot";
 	LLViewerWindow::sMovieBaseName = "SLmovie";
-	resetSnapshotLoc();
+//	resetSnapshotLoc();
 
 	// create window
 	mWindow = LLWindowManager::createWindow(this,
@@ -4020,7 +4020,10 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 }
 
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
-BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
+//BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool fPathPrompt)
+// [/SL:KB]
 {
 	if (!image)
 	{
@@ -4043,9 +4046,17 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
 	// Get a base file location if needed.
-	if ( ! isSnapshotLocSet())		
+//	if ( ! isSnapshotLocSet())		
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	std::string strSnapshotBaseName = gSavedSettings.getString("SnapshotLocalName");
+	std::string strSnapshotDir = (!fPathPrompt) ? gDirUtilp->getSnapshotDir() : LLStringUtil::null;
+	if (strSnapshotDir.empty())
+// [/SL:KB]
 	{
-		std::string proposed_name( sSnapshotBaseName );
+//		std::string proposed_name( sSnapshotBaseName );
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		std::string proposed_name(strSnapshotBaseName);
+// [/SL:KB]
 
 		// getSaveFile will append an appropriate extension to the proposed name, based on the ESaveFilter constant passed in.
 
@@ -4060,8 +4071,17 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
 		// Copy the directory + file name
 		std::string filepath = picker.getFirstFile();
 
-		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
-		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+//		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
+//		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		strSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
+		strSnapshotDir = gDirUtilp->getDirName(filepath);
+		if ( (!fPathPrompt) && (gDirUtilp->getSnapshotDir().empty()) )
+		{
+			gSavedSettings.setString("SnapshotLocalPath", strSnapshotDir);
+			gDirUtilp->setSnapshotDir(strSnapshotDir);
+		}
+// [/SL:KB]
 	}
 
 	// Look for an unused file name
@@ -4071,9 +4091,15 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
 
 	do
 	{
-		filepath = sSnapshotDir;
+//		filepath = sSnapshotDir;
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		filepath = strSnapshotDir;
+// [/SL:KB]
 		filepath += gDirUtilp->getDirDelimiter();
-		filepath += sSnapshotBaseName;
+//		filepath += sSnapshotBaseName;
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		filepath += strSnapshotBaseName;
+// [/SL:KB]
 		filepath += llformat("_%.3d",i);
 		filepath += extension;
 
@@ -4086,10 +4112,10 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image)
 	return image->save(filepath);
 }
 
-void LLViewerWindow::resetSnapshotLoc()
-{
-	sSnapshotDir.clear();
-}
+//void LLViewerWindow::resetSnapshotLoc()
+//{
+//	sSnapshotDir.clear();
+//}
 
 static S32 BORDERHEIGHT = 0;
 static S32 BORDERWIDTH = 0;

@@ -10630,6 +10630,28 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>SnapshotLocalName</key>
+    <map>
+      <key>Comment</key>
+      <string>Base name of saved snapshot files</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>Snapshot</string>
+    </map>
+    <key>SnapshotLocalPath</key>
+    <map>
+      <key>Comment</key>
+      <string>Path to your snapshot files</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>SnapshotPostcardLastResolution</key>
     <map>
       <key>Comment</key>
