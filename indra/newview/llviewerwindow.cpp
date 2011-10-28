@@ -203,6 +203,10 @@
 #include "llviewerwindowlistener.h"
 #include "llpaneltopinfobar.h"
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a)
+#include <boost/algorithm/string/replace.hpp>
+// [/SL:KB]
+
 #if LL_WINDOWS
 #include <tchar.h> // For Unicode conversion methods
 #endif
@@ -4048,7 +4052,41 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool fPathPrompt
 	// Get a base file location if needed.
 //	if ( ! isSnapshotLocSet())		
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	/*
+	 * Process the snapshot base name
+	 */
 	std::string strSnapshotBaseName = gSavedSettings.getString("SnapshotLocalName");
+
+	time_t timeNow;
+	time(&timeNow);
+
+	// %d[ate]   - Current date
+	char strDateBuf[32];
+	strftime(strDateBuf, sizeof(strDateBuf) / sizeof(char), "%Y%m%d", localtime(&timeNow));
+	boost::replace_all(strSnapshotBaseName, "%d", strDateBuf);
+
+	// %t[time]  - Current time
+	char strTimeBuf[32];
+	strftime(strTimeBuf, sizeof(strTimeBuf) / sizeof(char), "%H%M", localtime(&timeNow));
+	boost::replace_all(strSnapshotBaseName, "%t", strDateBuf);
+
+	// %r[egion] - Name of the current region
+	std::string strRegion;
+	if (gAgent.getRegion())
+		strRegion = gAgent.getRegion()->getName();
+	boost::replace_all(strSnapshotBaseName, "%r", strRegion);
+
+	// %p[arcel] - Name of the current parcel
+	std::string strParcel = LLViewerParcelMgr::getInstance()->getAgentParcelName();
+	boost::replace_all(strSnapshotBaseName, "%p", strParcel);
+
+	// Make sure the base name includes a counter placeholder, otherwise add one
+	if (std::string::npos == strSnapshotBaseName.find("%c"))
+		strSnapshotBaseName += "_%c";
+
+	/*
+	 * Process the snapshot path
+	 */
 	std::string strSnapshotDir = (!fPathPrompt) ? gDirUtilp->getSnapshotDir() : LLStringUtil::null;
 	if (strSnapshotDir.empty())
 // [/SL:KB]
@@ -4097,10 +4135,12 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool fPathPrompt
 // [/SL:KB]
 		filepath += gDirUtilp->getDirDelimiter();
 //		filepath += sSnapshotBaseName;
+//		filepath += llformat("_%.3d",i);
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-		filepath += strSnapshotBaseName;
+		std::string filename = strSnapshotBaseName;
+		boost::replace_all(filename, "%c", llformat("%.3d",i));
+		filepath += gDirUtilp->getScrubbedFileName(filename);
 // [/SL:KB]
-		filepath += llformat("_%.3d",i);
 		filepath += extension;
 
 		llstat stat_info;
