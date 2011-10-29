@@ -1,0 +1,4 @@
+[Chat/NearbyToastWidth]
+- added : NearbyToastWidth setting to control the width of the nearby chat toasts (at run-time)
+    -> != 0 : specifies the width of the chat toasts (with an enforced minimum of 350)
+       == 0 : chat toast width will follow the width of the chat bar
