@@ -553,7 +553,7 @@ bool LLIMModel::LLIMSession::isOtherParticipantAvaline()
 	return !mOtherParticipantIsAvatar;
 }
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
 void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name)
 {
 	// Standardize P2P IM session names to "complete name"
@@ -608,7 +608,7 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 //			mHistoryFileName = LLCacheName::buildUsername(mName);
 //		}
 //	}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 	// Not all of the code above is broken but it becomes a bit of a mess otherwise
 	if (isAdHoc())		//ad-hoc requires sophisticated chat history saving schemes
 	{
@@ -823,7 +823,7 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
 {
 	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames");
@@ -2545,7 +2545,7 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 //			gCacheName->getFullName(args["user_id"], session_name);
 //			session_name = LLCacheName::buildUsername(session_name);
 //			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 			std::string strFilename;
 			if (LLIMModel::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
 			{

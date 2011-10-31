@@ -94,7 +94,7 @@ public:
 		bool isGroupSessionType() const { return mSessionType == GROUP_SESSION;}
 		bool isAvalineSessionType() const { return mSessionType == AVALINE_SESSION;}
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
 		void onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name);
 // [/SL:KB]
 
@@ -285,7 +285,7 @@ public:
 
 	void testMessages();
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 	/**
 	 * Attempts to build the correct IM P2P log filename for the specified agent UUID and agent name
 	 */

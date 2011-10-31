@@ -34,7 +34,7 @@
 #include "llurlaction.h"
 
 #include "llagent.h"
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a)
 #include "llavatarnamecache.h"
 // [/SL:KB]
 #include "llimfloater.h"
@@ -262,7 +262,7 @@ bool LLHandlerUtil::isIMFloaterFocused(const LLNotificationPtr& notification)
 // static
 void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 //		const std::string& session_name, const std::string& from_name,
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 		const std::string& file_name, const std::string& from_name,
 // [/SL:KB]
 		const std::string& message, const LLUUID& session_owner_id,
@@ -290,7 +290,7 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 		// to use it for a history log filename.
 //		std::string user_name = LLCacheName::buildUsername(session_name);
 //		LLIMModel::instance().logToFile(user_name, from, from_id, message);
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 		LLIMModel::instance().logToFile(file_name, from, from_id, message);
 // [/SL:KB]
 
@@ -340,7 +340,7 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification)
 //	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
 //					from_id, LLUUID());
 //}
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name,
 					   const std::string& from_name, const std::string& message, const LLUUID& from_id)
 {
@@ -369,14 +369,14 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 		if(to_file_only)
 		{
 //			gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 			LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, "", notification->getMessage(), LLUUID()));
 // [/SL:KB]
 		}
 		else
 		{
 //			gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.6.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
 			LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 // [/SL:KB]
 		}
