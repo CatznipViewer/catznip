@@ -158,7 +158,7 @@ void LLUrlAction::showProfile(std::string url)
 	}
 }
 
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-2.6.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-3.2.0a) | Modified: Catznip-2.5.0a
 void LLUrlAction::startIM(std::string url)
 {
 	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
