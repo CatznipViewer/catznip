@@ -108,7 +108,7 @@ private:
 	void			openEmbeddedTexture( LLInventoryItem* item, llwchar wc );
 	void			openEmbeddedSound( LLInventoryItem* item, llwchar wc );
 	void			openEmbeddedLandmark( LLPointer<LLInventoryItem> item_ptr, llwchar wc );
-// [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 	void			teleportEmbeddedLandmark(LLPointer<LLInventoryItem> item_ptr, llwchar wc);
 // [/SL:KB]
 	void			openEmbeddedNotecard( LLInventoryItem* item, llwchar wc);
@@ -137,7 +137,7 @@ private:
 
 	class TextCmdInsertEmbeddedItem;
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.6.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
 	friend class LLEmbeddedItemSegment;
 // [/SL:KB]
 };

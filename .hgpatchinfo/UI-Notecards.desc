@@ -1,6 +1,6 @@
 [UI/Notecards]
 Notecard Previews
-- added   : "Open" / "Copy to Inventory" context menu for embedded items
+- added   : "Open", "Copy to Inventory" and "Teleport" context menu options for embedded items
 - added   : "Search Up" checkbox on the "Search / Replace" floater
 - added   : Ctrl-F to open the Search/Replace floater for notecards
 - added   : "EmbeddedLandmarkCopyToInventory" to control whether embedded landmarks are copied to inventory before previewing

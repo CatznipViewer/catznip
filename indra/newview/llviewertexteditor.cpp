@@ -83,7 +83,7 @@ public:
 		LLSideTray::getInstance()->showPanel("panel_places", key);
 	}
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 	static void showInfo(const LLVector3d& global_pos)
 	{
 		LLSD key;
@@ -109,7 +109,7 @@ public:
 			showInfo(agent_lanmark->getUUID());
 		}
 //		else
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 		else if (gSavedSettings.getBOOL("EmbeddedLandmarkCopyToInventory"))
 // [/SL:KB]
 		{
@@ -124,7 +124,7 @@ public:
 				copy_inventory_from_notecard(object_id, notecard_inventory_id, item_ptr.get(), gInventoryCallbacks.registerCB(cb));
 			}
 		}
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 		else
 		{
 			showInfo(global_pos);
@@ -187,7 +187,7 @@ public:
 		mLabel(utf8str_to_wstring(inv_item->getName())),
 		mItem(inv_item),
 		mEditor(editor),
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.6.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
 		mContextMenu(NULL),
 // [/SL:KB]
 		mHasMouseHover(false)
@@ -273,7 +273,7 @@ public:
 		return FALSE; 
 	}
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.6.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
 	/*virtual*/ BOOL			handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		if (!mContextMenu)
@@ -335,7 +335,7 @@ private:
 	LLPointer<LLInventoryItem> mItem;
 	LLTextEditor&	mEditor;
 	bool			mHasMouseHover;
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.6.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
 	LLContextMenu*  mContextMenu;
 // [/SL:KB]
 };
@@ -1214,7 +1214,7 @@ void LLViewerTextEditor::openEmbeddedTexture( LLInventoryItem* item, llwchar wc 
 	if (!item)
 		return;
 //	LLPreviewTexture* preview = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID()), TAKE_FOCUS_YES);
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-2.6.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-05 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 	// If there's already a preview of the texture open then we do want it to take focus, otherwise leave it up to the debug setting
 	BOOL fHasInstance = (NULL != LLFloaterReg::findTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item->getAssetUUID())));
 	BOOL fTakeFocus = ( (fHasInstance) || (gSavedSettings.getBOOL("EmbeddedTextureStealsFocus")) ) ? TAKE_FOCUS_YES : TAKE_FOCUS_NO;
@@ -1254,7 +1254,7 @@ void LLViewerTextEditor::openEmbeddedLandmark( LLPointer<LLInventoryItem> item_p
 	}
 }
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
 void teleport_embedded_landmark(LLLandmark* pLandmark)
 {
 	LLVector3d posGlobal;
