@@ -28,6 +28,9 @@
 #include "llpanelmaininventory.h"
 
 #include "llagent.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a)
+#include "llagentcamera.h"
+// [/SL:KB]
 #include "llavataractions.h"
 #include "lldndbutton.h"
 #include "lleconomy.h"
@@ -111,7 +114,10 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
 	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLPanelMainInventory::doCreate, this, _2));
- 	mCommitCallbackRegistrar.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow, this));
+// 	mCommitCallbackRegistrar.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow, this));
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+ 	mCommitCallbackRegistrar.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 	mCommitCallbackRegistrar.add("Inventory.ResetFilters", boost::bind(&LLPanelMainInventory::resetFilters, this));
 	mCommitCallbackRegistrar.add("Inventory.SetSortBy", boost::bind(&LLPanelMainInventory::setSortBy, this, _2));
@@ -292,10 +298,25 @@ void LLPanelMainInventory::closeAllFolders()
 	getPanel()->getRootFolder()->closeAllFolders();
 }
 
-void LLPanelMainInventory::newWindow()
+//void LLPanelMainInventory::newWindow()
+//{
+//	LLFloaterInventory::showAgentInventory();
+//}
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+LLFloater* LLPanelMainInventory::newWindow()
 {
-	LLFloaterInventory::showAgentInventory();
+	// Hack to generate semi-unique key for each inventory floater.
+	static S32 instance_num = 0;
+	instance_num = (instance_num + 1) % S32_MAX;
+
+	LLFloater* iv = NULL;
+	if (!gAgentCamera.cameraMouselook())
+	{
+		iv = LLFloaterReg::showInstance("inventory", LLSD(instance_num));
+	}
+	return iv;
 }
+// [/SL:KB]
 
 void LLPanelMainInventory::doCreate(const LLSD& userdata)
 {
@@ -579,7 +600,10 @@ void LLPanelMainInventory::updateItemcountText()
 
 void LLPanelMainInventory::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (!sidepanel_inventory)
 	{
 		llwarns << "Could not find Inventory Panel in My Inventory floater" << llendl;
@@ -1169,7 +1193,10 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 
 	if (command_name == "share")
 	{
-		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		LLSidepanelInventory *parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLSidepanelInventory *parent = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 		return parent ? parent->canShare() : FALSE;
 	}
 

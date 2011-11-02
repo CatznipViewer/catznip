@@ -42,6 +42,9 @@
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llsidepanelinventory.h"
 #include "llviewerattachmenu.h"
 #include "llviewerfoldertype.h"
@@ -53,10 +56,6 @@ const std::string LLInventoryPanel::DEFAULT_SORT_ORDER = std::string("InventoryS
 const std::string LLInventoryPanel::RECENTITEMS_SORT_ORDER = std::string("RecentItemsSortOrder");
 const std::string LLInventoryPanel::INHERIT_SORT_ORDER = std::string("");
 static const LLInventoryFVBridgeBuilder INVENTORY_BRIDGE_BUILDER;
-
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-06-29 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
-bool LLInventoryPanel::s_fActiveSidebar = false;
-// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLInventoryPanelObserver
@@ -870,10 +869,6 @@ void LLInventoryPanel::onFocusReceived()
 	// inventory now handles cut/copy/paste/delete
 	LLEditMenuHandler::gEditMenuHandler = mFolderRoot;
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-06-29 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
-	s_fActiveSidebar = (LLSideTray::instanceCreated()) && (hasAncestor(LLSideTray::getInstance()->getPanel("sidepanel_inventory")));
-// [/SL:KB]
-
 	LLPanel::onFocusReceived();
 }
 
@@ -1085,70 +1080,92 @@ void LLInventoryPanel::dumpSelectionInformation(void* user_data)
 	iv->mFolderRoot->dumpSelectionInformation();
 }
 
-BOOL is_inventorysp_active()
-{
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
-	return sidepanel_inventory->isMainInventoryPanelActive();
-}
+//BOOL is_inventorysp_active()
+//{
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
+//	return sidepanel_inventory->isMainInventoryPanelActive();
+//}
 
 // static
 LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 {
+//	S32 z_min = S32_MAX;
+//	LLInventoryPanel* res = NULL;
+//	LLFloater* active_inv_floaterp = NULL;
+//
+//	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+//	if (!floater_inventory)
+//	{
+//		llwarns << "Could not find My Inventory floater" << llendl;
+//		return FALSE;
+//	}
+//
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//
+//	// A. If the inventory side panel floater is open, use that preferably.
+//	if (is_inventorysp_active())
+//	{
+//		// Get the floater's z order to compare it to other inventory floaters' order later.
+//		res = sidepanel_inventory->getActivePanel();
+//		z_min = gFloaterView->getZOrder(floater_inventory);
+//		active_inv_floaterp = floater_inventory;
+//	}
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 	S32 z_min = S32_MAX;
-	LLInventoryPanel* res = NULL;
 	LLFloater* active_inv_floaterp = NULL;
-
-	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
-	if (!floater_inventory)
-	{
-		llwarns << "Could not find My Inventory floater" << llendl;
-		return FALSE;
-	}
-
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-
-	// A. If the inventory side panel floater is open, use that preferably.
-	if (is_inventorysp_active())
-	{
-		// Get the floater's z order to compare it to other inventory floaters' order later.
-		res = sidepanel_inventory->getActivePanel();
-		z_min = gFloaterView->getZOrder(floater_inventory);
-		active_inv_floaterp = floater_inventory;
-	}
+// [/SL:KB]
 
 	// B. Iterate through the inventory floaters and return whichever is on top.
 	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
 	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
 	{
-		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter);
+//		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLFloater* iv = *iter;
+// [/SL:KB]
 		if (iv && iv->getVisible())
 		{
 			S32 z_order = gFloaterView->getZOrder(iv);
 			if (z_order < z_min)
 			{
-				res = iv->getPanel();
+//				res = iv->getPanel();
 				z_min = z_order;
 				active_inv_floaterp = iv;
 			}
 		}
 	}
 
-	if (res)
+//	if (res)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if (active_inv_floaterp)
+// [/SL:KB]
 	{
 		// Make sure the floater is not minimized (STORM-438).
 		if (active_inv_floaterp && active_inv_floaterp->isMinimized())
 			active_inv_floaterp->setMinimized(FALSE);
 
-		return res;
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(active_inv_floaterp);
+		return (pInvSP) ? pInvSP->getActivePanel() : NULL;
+// [/SL:KB]
+//		return res;
 	}
 		
 	// C. If no panels are open and we don't want to force open a panel, then just abort out.
 	if (!auto_open) return NULL;
 	
 	// D. Open the inventory side panel floater and use that.
-	floater_inventory->openFloater();
-	return sidepanel_inventory->getActivePanel();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLFloater* floaterp = LLPanelMainInventory::newWindow();
+	if (floaterp)
+	{
+		LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(floaterp);
+		return (pInvSP) ? pInvSP->getActivePanel() : NULL;
+	}
+// [/SL:KB]
+//	floater_inventory->openFloater();
+//	return sidepanel_inventory->getActivePanel();
 
 	return NULL;
 }

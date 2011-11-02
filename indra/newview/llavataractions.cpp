@@ -721,7 +721,11 @@ std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
 
 	if (inventory_selected_uuids.empty())
 	{
-		LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLInventoryPanel* panel_inventory = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+		LLSidepanelInventory *sidepanel_inventory = (panel_inventory) ? panel_inventory->getParentByType<LLSidepanelInventory>() : NULL;
+// [/SL:KB]
 		if (sidepanel_inventory)
 		{
 			inventory_selected_uuids = sidepanel_inventory->getInboxOrOutboxSelectionList();

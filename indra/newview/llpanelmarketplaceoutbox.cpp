@@ -89,7 +89,10 @@ void LLPanelMarketplaceOutbox::handleLoginComplete()
 
 void LLPanelMarketplaceOutbox::onFocusReceived()
 {
-	LLSidepanelInventory * sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory * sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (sidepanel_inventory)
 	{
 		sidepanel_inventory->clearSelections(true, true, false);
@@ -98,7 +101,10 @@ void LLPanelMarketplaceOutbox::onFocusReceived()
 
 void LLPanelMarketplaceOutbox::onSelectionChange()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (sidepanel_inventory)
 	{
 		sidepanel_inventory->updateVerbs();

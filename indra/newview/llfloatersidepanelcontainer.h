@@ -76,6 +76,21 @@ public:
 		}
 		return panel;
 	}
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	static LLPanel* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName);
+
+	template <typename T>
+	static T* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName)
+	{
+		T* panel = dynamic_cast<T*>(getPanel(floaterp, panel_name));
+		if (!panel)
+		{
+			llwarns << "Child named \"" << panel_name << "\" of type " << typeid(T*).name() << " not found" << llendl;
+		}
+		return panel;
+	}
+// [/Sl:KB]
 };
 
 #endif // LL_LLFLOATERSIDEPANELCONTAINER_H

@@ -41,29 +41,29 @@ class LLPanelMainInventory;
 // well as controlling the behavior of the overall object.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-class LLFloaterInventory : public LLFloater
-{
-public:
-	LLFloaterInventory(const LLSD& key);
-	~LLFloaterInventory();
-
-	BOOL postBuild();
-
-	// This method makes sure that an inventory view exists, is
-	// visible, and has focus. The view chosen is returned.
-	static LLFloaterInventory* showAgentInventory();
-
-	// Final cleanup, destroy all open inventory views.
-	static void cleanup();
-
-	// Inherited functionality
-	/*virtual*/ void onOpen(const LLSD& key);
-
-	LLInventoryPanel* getPanel();
-	LLPanelMainInventory* getMainInventoryPanel() { return mPanelMainInventory;}
-private:
-	LLPanelMainInventory* mPanelMainInventory;
-};
+//class LLFloaterInventory : public LLFloater
+//{
+//public:
+//	LLFloaterInventory(const LLSD& key);
+//	~LLFloaterInventory();
+//
+//	BOOL postBuild();
+//
+//	 This method makes sure that an inventory view exists, is
+//	 visible, and has focus. The view chosen is returned.
+//	static LLFloaterInventory* showAgentInventory();
+//
+//	// Final cleanup, destroy all open inventory views.
+//	static void cleanup();
+//
+//	// Inherited functionality
+//	/*virtual*/ void onOpen(const LLSD& key);
+//
+//	LLInventoryPanel* getPanel();
+//	LLPanelMainInventory* getMainInventoryPanel() { return mPanelMainInventory;}
+//private:
+//	LLPanelMainInventory* mPanelMainInventory;
+//};
 
 #endif // LL_LLFLOATERINVENTORY_H
 
