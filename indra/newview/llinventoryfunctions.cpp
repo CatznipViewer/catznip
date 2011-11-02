@@ -470,7 +470,7 @@ void show_item_profile(const LLUUID& item_uuid)
 
 void show_item_original(const LLUUID& item_uuid)
 {
-	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");//
 	if (!floater_inventory)
 	{
 		llwarns << "Could not find My Inventory floater" << llendl;
@@ -521,12 +521,12 @@ void show_item_original(const LLUUID& item_uuid)
 				}
 			}
 		}
-		if(sidepanel_inventory && !floater_inventory_visible)
-		{
-			LLPanelMainInventory* main_inventory = sidepanel_inventory->getMainInventoryPanel();
-
-			main_inventory->onFilterEdit("");
-		}
+//		if(sidepanel_inventory && !floater_inventory_visible)
+//		{
+//			LLPanelMainInventory* main_inventory = sidepanel_inventory->getMainInventoryPanel();
+//
+//			main_inventory->onFilterEdit("");
+//		}
 	}
 }
 
