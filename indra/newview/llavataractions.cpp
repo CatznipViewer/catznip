@@ -329,12 +329,12 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 {
 	if (id.notNull())
 	{
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 		{
 // [/SL:KB]
 			LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
 		}
 		else
 		{
@@ -347,7 +347,7 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 //static 
 bool LLAvatarActions::profileVisible(const LLUUID& id)
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 	{
 // [/SL:KB]
@@ -355,7 +355,7 @@ bool LLAvatarActions::profileVisible(const LLUUID& id)
 		sd["id"] = id;
 		LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*> (LLFloaterReg::findInstance("profile", sd));
 		return browser && browser->isShown();
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	}
 	else
 	{
@@ -368,7 +368,7 @@ bool LLAvatarActions::profileVisible(const LLUUID& id)
 //static 
 void LLAvatarActions::hideProfile(const LLUUID& id)
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 	{
 // [/SL:KB]
@@ -379,7 +379,7 @@ void LLAvatarActions::hideProfile(const LLUUID& id)
 		{
 			browser->closeFloater();
 		}
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	}
 	else
 	{

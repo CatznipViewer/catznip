@@ -131,7 +131,7 @@ private:
  * because the name list item value is not simply an UUID but a map (uuid, is_group).
  */
 //class LLNameListItem : public LLScrollListItem
-// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 class LLNameListItem : public LLScrollListItem, public boost::signals2::trackable
 // [/SL:KB]
 {
@@ -146,7 +146,7 @@ protected:
 	{
 	}
 
-// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	void onAvatarNameCache(S32 idxNameColumn, bool useShortNames, const LLUUID& idAgent, const LLAvatarName& avName);
 // [/SL:KB]
 };

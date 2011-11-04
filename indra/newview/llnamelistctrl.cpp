@@ -338,7 +338,7 @@ LLScrollListItem* LLNameListCtrl::addNameItemRow(
 //				LLAvatarNameCache::get(id,
 //					boost::bind(&LLNameListCtrl::onAvatarNameCache,
 //						this, _1, _2));
-// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 				LLAvatarNameCache::get(id, boost::bind(&LLNameListItem::onAvatarNameCache, item, mNameColumnIndex, mShortNames, _1, _2));
 // [/SL:KB]
 			}
@@ -436,7 +436,7 @@ void LLNameListCtrl::updateColumns()
 	}
 }
 
-// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-2.6.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 void LLNameListItem::onAvatarNameCache(S32 idxNameColumn, bool useShortNames, const LLUUID& idAgent, const LLAvatarName& avName)
 {
 	if (LLScrollListCell* pCell = getColumn(idxNameColumn))
