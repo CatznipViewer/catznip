@@ -368,8 +368,14 @@ bool LLAvatarActions::profileVisible(const LLUUID& id)
 //static
 LLFloater* LLAvatarActions::getProfileFloater(const LLUUID& id)
 {
-	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*> (LLFloaterReg::findInstance("profile", LLSD().with("id", id)));
-	return browser;
+//	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*> (LLFloaterReg::findInstance("profile", LLSD().with("id", id)));
+//	return browser;
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLFloater* pFloater = LLFloaterReg::findInstance("floater_profile_view", LLSD().with("id", id));
+	if (!pFloater)
+		pFloater = LLFloaterReg::findInstance("profile", LLSD().with("id", id));
+	return pFloater;
+// [/SL:KB]
 }
 
 //static 
