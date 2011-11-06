@@ -153,21 +153,22 @@ void LLUpdateChecker::Implementation::completed(U32 status,
 	} else if(!content.asBoolean()) {
 		LL_INFOS("UpdateCheck") << "up to date" << llendl;
 		mClient.upToDate();
-	} else if(content["required"].asBoolean()) {
-		LL_INFOS("UpdateCheck") << "version invalid" << llendl;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+	} else {
+		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" 
+								<< " (" << ((content["required"].asBoolean()) ? "required" : "optional") << ")" << llendl;
+		mClient.checkComplete(content);
+	}
+// [/SL:KB]
+//	} else if(content["required"].asBoolean()) {
+//		LL_INFOS("UpdateCheck") << "version invalid" << llendl;
 //		LLURI uri(content["url"].asString());
 //		mClient.requiredUpdate(content["version"].asString(), uri, content["hash"].asString());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-		mClient.requiredUpdate(content);
-// [/SL:KB]
-	} else {
-		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" << llendl;
+//	} else {
+//		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" << llendl;
 //		LLURI uri(content["url"].asString());
 //		mClient.optionalUpdate(content["version"].asString(), uri, content["hash"].asString());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-		mClient.optionalUpdate(content);
-// [/SL:KB]
-	}
+//	}
 }
 
 

@@ -2703,6 +2703,17 @@ namespace {
 		LLUpdaterService().startChecking(install_if_ready);
 	}
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	void on_update_check(const LLSD& sdData)
+	{
+		LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
+		if (LLUpdaterService::UPDATE_AVAILABLE != pUpdater->getState())
+			return;
+
+		pUpdater->startDownloading();
+	}
+// [/SL:KB]
+
 	void on_update_downloaded(LLSD const & data)
 	{
 		std::string notification_name;
@@ -2789,6 +2800,11 @@ namespace {
 		std::string notification_name;
 		switch (evt["type"].asInteger())
 		{
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+			case LLUpdaterService::CHECK_COMPLETE:
+				on_update_check(evt);
+				break;
+// [/SL:KB]
 			case LLUpdaterService::DOWNLOAD_COMPLETE:
 				on_update_downloaded(evt);
 				break;
