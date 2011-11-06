@@ -12016,6 +12016,17 @@
       <key>Value</key>
       <integer>15</integer>
     </map>
+    <key>UpdaterLastSkippedVersion</key>
+    <map>
+      <key>Comment</key>
+      <string>Used</string>
+      <key>Last update version that the user opted out of installing</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>UpdaterServiceSetting</key>
     <map>
       <key>Comment</key>

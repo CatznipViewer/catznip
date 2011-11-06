@@ -405,6 +405,7 @@ void LLUpdaterServiceImpl::checkComplete(const LLSD& sdData)
 
 	LLSD sdEventData;
 	sdEventData["pump"] = LLUpdaterService::pumpName();
+	sdEventData["payload"] = sdData;
 
 	LLSD& sdPayload = sdEventData["payload"];
 	sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
