@@ -34,6 +34,9 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llhttpclient.h"
@@ -173,20 +176,38 @@ LLSidepanelInventory::~LLSidepanelInventory()
 
 void handleInventoryDisplayInboxChanged()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLFloaterReg::const_instance_list_t& invFloaters = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = invFloaters.begin(); itFloater != invFloaters.end(); ++itFloater)
 	{
-		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+		LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(*itFloater);
+		if (pInvSP)
+			pInvSP->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
 	}
+// [/SL:KB]
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (sidepanel_inventory)
+//	{
+//		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//	}
 }
 
 void handleInventoryDisplayOutboxChanged()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLFloaterReg::const_instance_list_t& invFloaters = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = invFloaters.begin(); itFloater != invFloaters.end(); ++itFloater)
 	{
-		sidepanel_inventory->enableOutbox(gSavedSettings.getBOOL("InventoryDisplayOutbox"));
+		LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(*itFloater);
+		if (pInvSP)
+			pInvSP->enableOutbox(gSavedSettings.getBOOL("InventoryDisplayOutbox"));
 	}
+// [/SL:KB]
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (sidepanel_inventory)
+//	{
+//		sidepanel_inventory->enableOutbox(gSavedSettings.getBOOL("InventoryDisplayOutbox"));
+//	}
 }
 
 BOOL LLSidepanelInventory::postBuild()
