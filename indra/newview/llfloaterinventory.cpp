@@ -99,11 +99,11 @@
 //	//LLFirstUse::useInventory();
 //}
 
-void LLFloaterInventory::onClose(bool app_quitting)
-{
-	LLFloater::onClose(app_quitting);
-	if (mKey.asInteger() > 1)
-	{
-		destroy();
-	}
-}
+//void LLFloaterInventory::onClose(bool app_quitting)
+//{
+//	LLFloater::onClose(app_quitting);
+//	if (mKey.asInteger() > 1)
+//	{
+//		destroy();
+//	}
+//}

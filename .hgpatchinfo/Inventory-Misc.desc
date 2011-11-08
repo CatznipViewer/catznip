@@ -23,6 +23,9 @@
 - fixed : EXP-922 (revision 621882f33b50) causes the entire inventory to be fetched at log-on
     -> hiding the Inbox folder results in LLInventoryFilter::isNotDefault() returning TRUE
     -> LLFolderViewFolder::filter() will then kick off LLInventoryModelBackgroundFetch::instance().start() on the root folder with recursive == true
+- fixed : additional inventory floater instances (beyond the first one) are never destroyed when closed
+    -> introduced by EXP-1423 (revision 0a9821fdd78a)
+    -> LLFloaterInventory is actually dead code
 - fixed : inventory panel scrolls to the current selection whenever the current filter becomes out of date even if the panel currently has the focus
     -> Repro:
          (1) left-click an inventory item to set a selection

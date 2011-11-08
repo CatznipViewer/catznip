@@ -121,3 +121,14 @@ LLPanel* LLFloaterSidePanelContainer::getPanel(const LLFloater* floaterp, const 
 	return NULL;
 }
 // [/Sl:KB]
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLFloaterSidePanelInventoryContainer::onClose(bool app_quitting)
+{
+	LLFloater::onClose(app_quitting);
+	if (mKey.asInteger() >= 1)
+	{
+		destroy();
+	}
+}
+// [/SL:KB]

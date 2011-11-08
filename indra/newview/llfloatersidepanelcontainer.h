@@ -93,4 +93,16 @@ public:
 // [/Sl:KB]
 };
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+class LLFloaterSidePanelInventoryContainer : public LLFloaterSidePanelContainer
+{
+public:
+	LLFloaterSidePanelInventoryContainer(const LLSD& key, const Params& params = getDefaultParams())
+		: LLFloaterSidePanelContainer(key, params) {}
+	/*virtual*/ ~LLFloaterSidePanelInventoryContainer() {}
+
+	/*virtual*/ void onClose(bool app_quitting);
+};
+// [/SL:KB]
+
 #endif // LL_LLFLOATERSIDEPANELCONTAINER_H
