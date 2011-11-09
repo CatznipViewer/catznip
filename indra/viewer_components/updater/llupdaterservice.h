@@ -49,6 +49,9 @@ public:
 	// Type codes for events posted by this service.  Stored the event's 'type' element.
 	enum eUpdaterEvent {
 		INVALID,
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+		CHECK_COMPLETE,
+// [/SL:KB]
 		DOWNLOAD_COMPLETE,
 		DOWNLOAD_ERROR,
 		INSTALL_ERROR,
@@ -63,6 +66,9 @@ public:
 		DOWNLOADING,
 		INSTALLING,
 		UP_TO_DATE,
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+		UPDATE_AVAILABLE,
+// [/SL:KB]
 		TERMINAL,
 		FAILURE
 	};
@@ -83,6 +89,11 @@ public:
 	void stopChecking();
 	bool isChecking();
 	eUpdaterState getState();
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+	void startDownloading();
+	bool isDownloading();
+// [/SL:KB]
 
 	typedef boost::function<void (void)> app_exit_callback_t;
 	template <typename F>

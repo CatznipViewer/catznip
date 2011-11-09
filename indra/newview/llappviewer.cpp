@@ -2697,6 +2697,45 @@ namespace {
 		LLUpdaterService().startChecking(install_if_ready);
 	}
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	bool on_update_check_callback(const LLSD& sdData)
+	{
+		if (sdData["commit"].asBoolean())	// User clicked "Download"
+		{
+			LLLoginInstance::instance().getUpdaterService()->startDownloading();
+		}
+		else								// User clicked "Cancel"
+		{
+			// Save the current update version if the user doesn't want to be reminded
+			if (sdData["skip"].asBoolean())
+				gSavedSettings.setString("UpdaterLastSkippedVersion", sdData["version"].asString());
+
+			LLLoginInstance::instance().getUpdaterService()->stopChecking();
+		}
+		return true;
+	}
+
+	void on_update_check(const LLSD& sdData)
+	{
+		// Don't do anything if we're up to date, or if the user doesn't want to be reminded about this (optional) update
+		if ((LLUpdaterService::UPDATE_AVAILABLE != LLLoginInstance::instance().getUpdaterService()->getState()) ||
+			((!sdData["required"].asBoolean()) && (sdData["version"].asString() == gSavedSettings.getString("UpdaterLastSkippedVersion"))))
+		{
+			return;
+		}
+
+		LLEventPump& pumpUpdate = LLEventPumps::instance().obtain("update_available");
+		pumpUpdate.listen("update_available_callback", &on_update_check_callback);
+
+		LLSD sdUpdateData;
+		sdUpdateData["reply_pump"] = pumpUpdate.getName();
+		sdUpdateData["update_required"] = sdData["required"];
+		sdUpdateData["update_url"] = sdData["more_info"];
+		sdUpdateData["update_version"] = sdData["version"];
+		LLFloaterReg::showInstance("message_update", sdUpdateData);
+	}
+// [/SL:KB]
+
 	void on_update_downloaded(LLSD const & data)
 	{
 		std::string notification_name;
@@ -2740,25 +2779,35 @@ namespace {
 
 		LLSD substitutions;
 		substitutions["VERSION"] = data["version"];
-
-		// truncate version at the rightmost '.' 
-		std::string version_short(data["version"]);
-		size_t short_length = version_short.rfind('.');
-		if (short_length != std::string::npos)
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+		if (data.has("more_info"))
 		{
-			version_short.resize(short_length);
+			substitutions["RELEASE_NOTES_FULL_URL"] = data["more_info"].asString();
 		}
+		else
+		{
+// [/SL:KB]
+			// truncate version at the rightmost '.' 
+			std::string version_short(data["version"]);
+			size_t short_length = version_short.rfind('.');
+			if (short_length != std::string::npos)
+			{
+				version_short.resize(short_length);
+			}
 
-		LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
-		relnotes_url.setArg("[VERSION_SHORT]", version_short);
+			LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
+			relnotes_url.setArg("[VERSION_SHORT]", version_short);
 
-		// *TODO thread the update service's response through to this point
-		std::string const & channel = LLVersionInfo::getChannel();
-		boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
+			// *TODO thread the update service's response through to this point
+			std::string const & channel = LLVersionInfo::getChannel();
+			boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
 
-		relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
-		relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
-		substitutions["RELEASE_NOTES_FULL_URL"] = relnotes_url.getString();
+			relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
+			relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
+			substitutions["RELEASE_NOTES_FULL_URL"] = relnotes_url.getString();
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+		}
+// [/SL:KB]
 
 		LLNotificationsUtil::add(notification_name, substitutions, LLSD(), apply_callback);
 	}
@@ -2773,6 +2822,11 @@ namespace {
 		std::string notification_name;
 		switch (evt["type"].asInteger())
 		{
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+			case LLUpdaterService::CHECK_COMPLETE:
+				on_update_check(evt);
+				break;
+// [/SL:KB]
 			case LLUpdaterService::DOWNLOAD_COMPLETE:
 				on_update_downloaded(evt);
 				break;
@@ -2821,11 +2875,11 @@ void LLAppViewer::initUpdater()
 	mUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
 	gSavedSettings.getControl("UpdaterMaximumBandwidth")->getSignal()->
 		connect(boost::bind(&on_bandwidth_throttle, mUpdater.get(), _2));
-	if(gSavedSettings.getU32("UpdaterServiceSetting"))
-	{
-		bool install_if_ready = true;
-		mUpdater->startChecking(install_if_ready);
-	}
+//	if(gSavedSettings.getU32("UpdaterServiceSetting"))
+//	{
+//		bool install_if_ready = true;
+//		mUpdater->startChecking(install_if_ready);
+//	}
 
     LLEventPump & updater_pump = LLEventPumps::instance().obtain(LLUpdaterService::pumpName());
     updater_pump.listen("notify_update", &notify_update);
