@@ -93,31 +93,41 @@ LLIconDictionary::LLIconDictionary()
 	addEntry(LLInventoryIcon::ICONNAME_NONE, 					new IconEntry("NONE"));
 }
 
-LLUIImagePtr LLInventoryIcon::getIcon(LLAssetType::EType asset_type,
-									  LLInventoryType::EType inventory_type,
-									  U32 misc_flag,
-									  BOOL item_is_multi)
+//LLUIImagePtr LLInventoryIcon::getIcon(LLAssetType::EType asset_type,
+//									  LLInventoryType::EType inventory_type,
+//									  U32 misc_flag,
+//									  BOOL item_is_multi)
+//{
+//	const std::string& icon_name = getIconName(asset_type, inventory_type, misc_flag, item_is_multi);
+//	return LLUI::getUIImage(icon_name);
+//}
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+LLUIImagePtr LLInventoryIcon::getIcon(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag)
 {
-	const std::string& icon_name = getIconName(asset_type, inventory_type, misc_flag, item_is_multi);
+	const std::string& icon_name = getIconName(asset_type, inventory_type, misc_flag);
 	return LLUI::getUIImage(icon_name);
 }
+// [/SL:KB]
 
 LLUIImagePtr LLInventoryIcon::getIcon(EIconName idx)
 {
 	return LLUI::getUIImage(getIconName(idx));
 }
 
-const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type,
-												LLInventoryType::EType inventory_type,
-												U32 misc_flag,
-												BOOL item_is_multi)
+//const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type,
+//												LLInventoryType::EType inventory_type,
+//												U32 misc_flag,
+//												BOOL item_is_multi)
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type, LLInventoryType::EType inventory_type, U32 misc_flag)
+// [/SL:KB]
 {
 	EIconName idx = ICONNAME_OBJECT;
-	if (item_is_multi)
-	{
-		idx = ICONNAME_OBJECT_MULTI;
-		return getIconName(idx);
-	}
+//	if (item_is_multi)
+//	{
+//		idx = ICONNAME_OBJECT_MULTI;
+//		return getIconName(idx);
+//	}
 	
 	switch(asset_type)
 	{
@@ -131,7 +141,10 @@ const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type,
 			idx = (misc_flag != 0) ? ICONNAME_CALLINGCARD_ONLINE : ICONNAME_CALLINGCARD_OFFLINE;
 			break;
 		case LLAssetType::AT_LANDMARK:
-			idx = (misc_flag != 0) ? ICONNAME_LANDMARK_VISITED : ICONNAME_LANDMARK;
+//			idx = (misc_flag != 0) ? ICONNAME_LANDMARK_VISITED : ICONNAME_LANDMARK;
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+			idx = (misc_flag & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED) ? ICONNAME_LANDMARK_VISITED : ICONNAME_LANDMARK;
+// [/SL:KB]
 			break;
 		case LLAssetType::AT_SCRIPT:
 		case LLAssetType::AT_LSL_TEXT:
@@ -158,7 +171,10 @@ const std::string& LLInventoryIcon::getIconName(LLAssetType::EType asset_type,
 			idx = ICONNAME_LINKFOLDER;
 			break;
 		case LLAssetType::AT_OBJECT:
-			idx = ICONNAME_OBJECT;
+//			idx = ICONNAME_OBJECT;
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+			idx = (misc_flag & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS) ? ICONNAME_OBJECT_MULTI : ICONNAME_OBJECT;
+// [/SL:KB]
 			break;
 		case LLAssetType::AT_MESH:
 			idx = ICONNAME_MESH;

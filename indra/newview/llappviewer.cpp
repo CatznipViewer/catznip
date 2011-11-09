@@ -4800,8 +4800,8 @@ void LLAppViewer::disconnectViewer()
 
 	saveNameCache();
 
-	// close inventory interface, close all windows
-	LLFloaterInventory::cleanup();
+//	// close inventory interface, close all windows
+//	LLFloaterInventory::cleanup();
 
 	gAgentWearables.cleanup();
 	gAgentCamera.cleanup();
