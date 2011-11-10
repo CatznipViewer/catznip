@@ -2930,6 +2930,16 @@ bool callback_freeze(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void handle_avatar_copy(const LLSD& sdParam)
+{
+	LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::copyToClipboard(pAvatar->getID(), sdParam);
+	}
+}
+// [/SL:KB]
 
 void handle_avatar_freeze(const LLSD& avatar_id)
 {
@@ -7976,6 +7986,9 @@ void initialize_menus()
 	// Agent
 	commit.add("Agent.toggleFlying", boost::bind(&LLAgent::toggleFlying));
 	enable.add("Agent.enableFlying", boost::bind(&LLAgent::enableFlying));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	commit.add("Avatar.Copy", boost::bind(&handle_avatar_copy, _2));
+// [/SL:KB]
 
 	// File menu
 	init_menu_file();
