@@ -3,6 +3,7 @@
     -> 0 = Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
        1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
        2 = Never show the username as part of the label (will still be visible on the tooltip)
+- added   : "Copy SLurl" menu option to the context menu for the Groups panel
 - changed : don't replace existing cached names with dummies on lookup failure
 - changed : LLAvatarNameCache::get() invokes the callback immediately if a cached entry exists rather than waiting for the look-up
     -> makes the UI feel more responsive
