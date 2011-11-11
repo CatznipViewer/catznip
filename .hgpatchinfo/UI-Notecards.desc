@@ -1,0 +1,17 @@
+[UI/Notecards]
+Notecard Previews
+- added   : "Open", "Copy to Inventory" and "Teleport" context menu options for embedded items
+- added   : "Search Up" checkbox on the "Search / Replace" floater
+- added   : Ctrl-F to open the Search/Replace floater for notecards
+- added   : "EmbeddedLandmarkCopyToInventory" to control whether embedded landmarks are copied to inventory before previewing
+- added   : "EmbeddedTextureStealsFocus" to control whether embedded texture previews take focus when opened
+- fixed   : properly hand off the Search/Replace floater when dependant on a notecard/script preview inside of a multipreview floater
+- fixed   : notecard preview floater doesn't remember its position and size
+
+Texture Previews
+- changed : layout of the texture preview floater
+    -> moved the "Aspect Ratio" combobox to the top-right corner
+    -> rearranged the options in the "Aspect Ration" combobox slight to list the more common ARs at the top
+    -> lined texture dimensions up with the "OK", "Discard" and "Save As" buttons
+    -> adjusted the spacing around the texture for a more pleasing visual look (see llpreviewtexture.cpp)
+- fixed   : embedded texture previews have a blank floater title
