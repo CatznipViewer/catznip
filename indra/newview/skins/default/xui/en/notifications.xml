@@ -3184,7 +3184,7 @@ Download to your Applications folder?
    type="alertmodal">
 An error occurred installing the viewer update.
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
     <usetemplate
      name="okbutton"
      yestext="OK"/>
@@ -3198,7 +3198,7 @@ We were unable to install a required update.
 You will be unable to log in until [APP_NAME] has been updated.
 
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
   <tag>fail</tag>
     <usetemplate
      name="okbutton"
@@ -3211,7 +3211,7 @@ http://secondlife.com/download.
    type="alertmodal">
 There is a required update for your Second Life Installation.
 
-You may download this update from http://www.secondlife.com/downloads
+You may download this update from http://catznip.com/downloads/
 or you can install it now.
     <tag>confirm</tag>
     <usetemplate
