@@ -112,6 +112,10 @@ public:
 	void onProfileBtnClick();
 
 	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void *cargo_data, 
+	                                   EAcceptance *accept, std::string& tooltip_msg);
+// [/SL:KB]
 
 protected:
 	/**

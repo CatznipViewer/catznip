@@ -1874,10 +1874,10 @@ void LLAgent::endAnimationUpdateUI()
 		LLNavigationBar::getInstance()->setVisible(TRUE && gSavedSettings.getBOOL("ShowNavbarNavigationPanel"));
 		gStatusBar->setVisibleForMouselook(true);
 
-		if (gSavedSettings.getBOOL("ShowMiniLocationPanel"))
-		{
-			LLPanelTopInfoBar::getInstance()->setVisible(TRUE);
-		}
+//		if (gSavedSettings.getBOOL("ShowMiniLocationPanel"))
+//		{
+//			LLPanelTopInfoBar::getInstance()->setVisible(TRUE);
+//		}
 
 		LLChicletBar::getInstance()->setVisible(TRUE);
 
@@ -1986,7 +1986,7 @@ void LLAgent::endAnimationUpdateUI()
 		LLNavigationBar::getInstance()->setVisible(FALSE);
 		gStatusBar->setVisibleForMouselook(false);
 
-		LLPanelTopInfoBar::getInstance()->setVisible(FALSE);
+//		LLPanelTopInfoBar::getInstance()->setVisible(FALSE);
 
 		LLChicletBar::getInstance()->setVisible(FALSE);
 
