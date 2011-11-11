@@ -319,8 +319,8 @@ Push $0
 Push $1
 Push $2
 
-    RMDir /r "$TEMP\SecondLifeSettingsBackup"
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup"
+    RMDir /r "$TEMP\${PRODUCT_SHORT}SettingsBackup"
+    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup"
     StrCpy $0 0 ; Index number used to iterate via EnumRegKey
 
   LOOP:
@@ -333,8 +333,8 @@ Push $2
     ; Required since ProfileImagePath is of type REG_EXPAND_SZ
     ExpandEnvStrings $2 $2
 
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup\$0"
-    CopyFiles  "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\$0"
+    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
+    CopyFiles  "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -345,12 +345,12 @@ Pop $2
 Pop $1
 Pop $0
 
-; Copy files in Documents and Settings\All Users\SecondLife
+; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
 Push $0
     ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
     StrCmp $0 "" +2
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup\AllUsers\"
-    CopyFiles "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\AllUsers\"
+    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
+    CopyFiles "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
 Pop $0
 
 FunctionEnd
@@ -376,8 +376,8 @@ Push $2
     ; Required since ProfileImagePath is of type REG_EXPAND_SZ
     ExpandEnvStrings $2 $2
 
-    CreateDirectory "$2\Application Data\SecondLife\"
-    CopyFiles "$TEMP\SecondLifeSettingsBackup\$0\*" "$2\Application Data\SecondLife\" 
+    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0\*" "$2\Application Data\${PRODUCT_SHORT}\" 
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -388,12 +388,12 @@ Pop $2
 Pop $1
 Pop $0
 
-; Copy files in Documents and Settings\All Users\SecondLife
+; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
 Push $0
     ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
     StrCmp $0 "" +2
-    CreateDirectory "$2\Application Data\SecondLife\"
-    CopyFiles "$TEMP\SecondLifeSettingsBackup\AllUsers\*" "$2\Application Data\SecondLife\" 
+    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\*" "$2\Application Data\${PRODUCT_SHORT}\" 
 Pop $0
 
 FunctionEnd
@@ -486,12 +486,12 @@ FunctionEnd
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Delete files in Documents and Settings\<user>\SecondLife
-; Delete files in Documents and Settings\All Users\SecondLife
+; Delete files in Documents and Settings\<user>\${PRODUCT_SHORT}
+; Delete files in Documents and Settings\All Users\${PRODUCT_SHORT}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function un.DocumentsAndSettingsFolder
 
-; Delete files in Documents and Settings\<user>\SecondLife
+; Delete files in Documents and Settings\<user>\${PRODUCT_SHORT}
 Push $0
 Push $1
 Push $2
@@ -511,14 +511,14 @@ Push $2
     ExpandEnvStrings $2 $2
 
         ; Remove all cache and settings files but leave any other .txt files to preserve the chat logs
-;    RMDir /r "$2\Application Data\SecondLife\logs"
-    RMDir /r "$2\Application Data\SecondLife\browser_profile"
-    RMDir /r "$2\Application Data\SecondLife\user_settings"
-    Delete  "$2\Application Data\SecondLife\*.xml"
-    Delete  "$2\Application Data\SecondLife\*.bmp"
-    Delete  "$2\Application Data\SecondLife\search_history.txt"
-    Delete  "$2\Application Data\SecondLife\plugin_cookies.txt"
-    Delete  "$2\Application Data\SecondLife\typed_locations.txt"
+;    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\logs"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\browser_profile"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\user_settings"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\*.xml"
+;    Delete  "$2\Application Data\${PRODUCT_SHORT}\*.bmp"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\search_history.txt"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\plugin_cookies.txt"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\typed_locations.txt"
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -529,17 +529,17 @@ Pop $2
 Pop $1
 Pop $0
 
-; Delete files in Documents and Settings\All Users\SecondLife
+; Delete files in Documents and Settings\All Users\${PRODUCT_SHORT}
 Push $0
   ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
   StrCmp $0 "" +2
-  RMDir /r "$0\SecondLife"
+  RMDir /r "$0\${PRODUCT_SHORT}"
 Pop $0
 
-; Delete files in C:\Windows\Application Data\SecondLife
+; Delete files in C:\Windows\Application Data\${PRODUCT_SHORT}
 ; If the user is running on a pre-NT system, Application Data lives here instead of
 ; in Documents and Settings.
-RMDir /r "$WINDIR\Application Data\SecondLife"
+RMDir /r "$WINDIR\Application Data\${PRODUCT_SHORT}"
 
 FunctionEnd
 
@@ -582,7 +582,7 @@ Function un.RemovePassword
 DetailPrint "Removing Second Life password"
 
 SetShellVarContext current
-Delete "$APPDATA\SecondLife\user_settings\password.dat"
+Delete "$APPDATA\${PRODUCT_SHORT}\user_settings\password.dat"
 SetShellVarContext all
 
 FunctionEnd
@@ -609,8 +609,8 @@ Delete "$INSTDIR\dronesettings.ini"
 Delete "$INSTDIR\message_template.msg"
 Delete "$INSTDIR\newview.pdb"
 Delete "$INSTDIR\newview.map"
-Delete "$INSTDIR\SecondLife.pdb"
-Delete "$INSTDIR\SecondLife.map"
+Delete "$INSTDIR\${PRODUCT_SHORT}.pdb"
+Delete "$INSTDIR\${PRODUCT_SHORT}.map"
 Delete "$INSTDIR\comm.dat"
 Delete "$INSTDIR\*.glsl"
 Delete "$INSTDIR\motions\*.lla"
@@ -952,15 +952,15 @@ WriteRegExpandStr HKEY_CLASSES_ROOT "x-grid-location-info\shell\open\command" ""
 WriteUninstaller "$INSTDIR\uninst.exe"
 
 ; Remove existing "Second Life Viewer 2" install if any.
-StrCmp $INSTDIR "$PROGRAMFILES\SecondLifeViewer2" SLV2_DONE ; unless that's the install directory
-IfFileExists "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" SLV2_FOUND SLV2_DONE
-
-SLV2_FOUND:
-ExecWait '"$PROGRAMFILES\SecondLifeViewer2\uninst.exe" /S _?=$PROGRAMFILES\SecondLifeViewer2'
-Delete "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" ; with _? option above, uninst.exe will be left behind.
-RMDir "$PROGRAMFILES\SecondLifeViewer2" ; will remove only if empty.
-
-SLV2_DONE:
+;StrCmp $INSTDIR "$PROGRAMFILES\SecondLifeViewer2" SLV2_DONE ; unless that's the install directory
+;IfFileExists "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" SLV2_FOUND SLV2_DONE
+;
+;SLV2_FOUND:
+;ExecWait '"$PROGRAMFILES\SecondLifeViewer2\uninst.exe" /S _?=$PROGRAMFILES\SecondLifeViewer2'
+;Delete "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" ; with _? option above, uninst.exe will be left behind.
+;RMDir "$PROGRAMFILES\SecondLifeViewer2" ; will remove only if empty.
+;
+;SLV2_DONE:
 Call RestoreUserFiles
 
 ; end of default section
