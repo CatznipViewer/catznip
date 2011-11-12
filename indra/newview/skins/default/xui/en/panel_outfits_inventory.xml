@@ -33,8 +33,7 @@
      top="8"
      width="315">
          <panel
-           class="outfits_list"
-           filename="panel_outfits_list.xml"
+           class="outfits_tab"
            height="520"
            name="outfitslist_tab"
            background_visible="true"

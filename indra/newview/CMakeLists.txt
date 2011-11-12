@@ -342,6 +342,7 @@ set(viewer_SOURCE_FILES
     llnotificationstorage.cpp
     llnotificationtiphandler.cpp
     lloutfitslist.cpp
+    lloutfitsview.cpp
     lloutfitobserver.cpp
     lloutputmonitorctrl.cpp
     llpanelappearancetab.cpp
@@ -383,6 +384,7 @@ set(viewer_SOURCE_FILES
     llpanelonlinestatus.cpp
     llpaneloutfitedit.cpp
     llpaneloutfitsinventory.cpp
+    llpaneloutfitstab.cpp
     llpanelpeople.cpp
     llpanelpeoplemenus.cpp
     llpanelpermissions.cpp
@@ -910,6 +912,7 @@ set(viewer_HEADER_FILES
     llnotificationmanager.h
     llnotificationstorage.h
     lloutfitslist.h
+    lloutfitsview.h
     lloutfitobserver.h
     lloutputmonitorctrl.h
     llpanelappearancetab.h
@@ -951,6 +954,7 @@ set(viewer_HEADER_FILES
     llpanelonlinestatus.h
     llpaneloutfitedit.h
     llpaneloutfitsinventory.h
+    llpaneloutfitstab.h
     llpanelpeople.h
     llpanelpeoplemenus.h
     llpanelpermissions.h
