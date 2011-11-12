@@ -313,90 +313,90 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Save user files to temp location
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function PreserveUserFiles
-
-Push $0
-Push $1
-Push $2
-
-    RMDir /r "$TEMP\${PRODUCT_SHORT}SettingsBackup"
-    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup"
-    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
-
-  LOOP:
-    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
-    StrCmp $1 "" DONE               ; no more users
-
-    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
-    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
-
-    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
-    ExpandEnvStrings $2 $2
-
-    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
-    CopyFiles  "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
-
-  CONTINUE:
-    IntOp $0 $0 + 1
-    Goto LOOP
-  DONE:
-
-Pop $2
-Pop $1
-Pop $0
-
-; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
-Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-    StrCmp $0 "" +2
-    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
-    CopyFiles "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
-Pop $0
-
-FunctionEnd
+;Function PreserveUserFiles
+;
+;Push $0
+;Push $1
+;Push $2
+;
+;    RMDir /r "$TEMP\${PRODUCT_SHORT}SettingsBackup"
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup"
+;    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
+;
+;  LOOP:
+;    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
+;    StrCmp $1 "" DONE               ; no more users
+;
+;    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
+;    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
+;
+;    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
+;    ExpandEnvStrings $2 $2
+;
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
+;    CopyFiles  "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
+;
+;  CONTINUE:
+;    IntOp $0 $0 + 1
+;    Goto LOOP
+;  DONE:
+;
+;Pop $2
+;Pop $1
+;Pop $0
+;
+;; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
+;Push $0
+;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;    StrCmp $0 "" +2
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
+;    CopyFiles "$2\Application Data\${PRODUCT_SHORT}\*" "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
+;Pop $0
+;
+;FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Restore user files from temp location
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function RestoreUserFiles
-
-Push $0
-Push $1
-Push $2
-
-    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
-
-  LOOP:
-    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
-    StrCmp $1 "" DONE               ; no more users
-
-    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
-    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
-
-    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
-    ExpandEnvStrings $2 $2
-
-    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
-    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0\*" "$2\Application Data\${PRODUCT_SHORT}\" 
-
-  CONTINUE:
-    IntOp $0 $0 + 1
-    Goto LOOP
-  DONE:
-
-Pop $2
-Pop $1
-Pop $0
-
-; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
-Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-    StrCmp $0 "" +2
-    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
-    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\*" "$2\Application Data\${PRODUCT_SHORT}\" 
-Pop $0
-
-FunctionEnd
+;Function RestoreUserFiles
+;
+;Push $0
+;Push $1
+;Push $2
+;
+;    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
+;
+;  LOOP:
+;    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
+;    StrCmp $1 "" DONE               ; no more users
+;
+;    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
+;    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
+;
+;    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
+;    ExpandEnvStrings $2 $2
+;
+;    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+;    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0\*" "$2\Application Data\${PRODUCT_SHORT}\" 
+;
+;  CONTINUE:
+;    IntOp $0 $0 + 1
+;    Goto LOOP
+;  DONE:
+;
+;Pop $2
+;Pop $1
+;Pop $0
+;
+;; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
+;Push $0
+;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;    StrCmp $0 "" +2
+;    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+;    CopyFiles "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\*" "$2\Application Data\${PRODUCT_SHORT}\" 
+;Pop $0
+;
+;FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Clobber user files - TEST ONLY
@@ -511,7 +511,7 @@ Push $2
     ExpandEnvStrings $2 $2
 
         ; Remove all cache and settings files but leave any other .txt files to preserve the chat logs
-;    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\logs"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\logs"
     RMDir /r "$2\Application Data\${PRODUCT_SHORT}\browser_profile"
     RMDir /r "$2\Application Data\${PRODUCT_SHORT}\user_settings"
     Delete  "$2\Application Data\${PRODUCT_SHORT}\*.xml"
@@ -866,7 +866,7 @@ Call CloseSecondLife			; Make sure we're not running
 Call CheckNetworkConnection		; ping secondlife.com
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Call PreserveUserFiles
+;Call PreserveUserFiles
 
 ;;; Don't remove cache files during a regular install, removing the inventory cache on upgrades results in lots of damage to the servers.
 ;Call RemoveCacheFiles			; Installing over removes potentially corrupted
@@ -961,7 +961,7 @@ WriteUninstaller "$INSTDIR\uninst.exe"
 ;RMDir "$PROGRAMFILES\SecondLifeViewer2" ; will remove only if empty.
 ;
 ;SLV2_DONE:
-Call RestoreUserFiles
+;Call RestoreUserFiles
 
 ; end of default section
 SectionEnd
