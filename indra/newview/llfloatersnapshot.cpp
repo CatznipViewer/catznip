@@ -119,7 +119,13 @@ public:
 		SNAPSHOT_LOCAL,
 		SNAPSHOT_WEB
 	};
-
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	enum ESnapshotOption
+	{
+		SNAPSHOT_OPTION_NONE = 0x0,		// Default "none" option
+		SNAPSHOT_LOCAL_PROMPT			// Prompt for path on save
+	};
+// [/SL:KB]
 
 	struct Params : public LLInitParam::Block<Params, LLView::Params>
 	{
@@ -144,6 +150,9 @@ public:
 	S32  getMaxImageSize() {return mMaxImageSize ;}
 	
 	ESnapshotType getSnapshotType() const { return mSnapshotType; }
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	ESnapshotOption getSnapshotOption() const { return mSnapshotOption; }
+// [/SL:KB]
 	LLFloaterSnapshot::ESnapshotFormat getSnapshotFormat() const { return mSnapshotFormat; }
 	BOOL getSnapshotUpToDate() const { return mSnapshotUpToDate; }
 	BOOL isSnapshotActive() { return mSnapshotActive; }
@@ -160,13 +169,19 @@ public:
 	const LLVector3d& getPosTakenGlobal() const { return mPosTakenGlobal; }
 	
 	void setSnapshotType(ESnapshotType type) { mSnapshotType = type; }
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	void setSnapshotOption(ESnapshotOption option) { mSnapshotOption = option; }
+// [/SL:KB]
 	void setSnapshotFormat(LLFloaterSnapshot::ESnapshotFormat type) { mSnapshotFormat = type; }
 	void setSnapshotQuality(S32 quality);
 	void setSnapshotBufferType(LLViewerWindow::ESnapshotType type) { mSnapshotBufferType = type; }
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-	BOOL saveLocal();
+//	BOOL saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	BOOL saveLocal(bool fPathPrompt);
+// [/SL:KB]
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
 	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
@@ -212,6 +227,9 @@ private:
 	S32							mSnapshotQuality;
 	S32							mDataSize;
 	ESnapshotType				mSnapshotType;
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	ESnapshotOption				mSnapshotOption;
+// [/SL:KB]
 	LLFloaterSnapshot::ESnapshotFormat	mSnapshotFormat;
 	BOOL						mSnapshotUpToDate;
 	LLFrameTimer				mFallAnimTimer;
@@ -243,6 +261,9 @@ LLSnapshotLivePreview::LLSnapshotLivePreview (const LLSnapshotLivePreview::Param
 	mSnapshotQuality(gSavedSettings.getS32("SnapshotQuality")),
 	mDataSize(0),
 	mSnapshotType(SNAPSHOT_POSTCARD),
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mSnapshotOption(SNAPSHOT_OPTION_NONE),
+// [/SL:KB]
 	mSnapshotFormat(LLFloaterSnapshot::ESnapshotFormat(gSavedSettings.getS32("SnapshotFormat"))),
 	mSnapshotUpToDate(FALSE),
 	mCameraPos(LLViewerCamera::getInstance()->getOrigin()),
@@ -1001,9 +1022,15 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+//BOOL LLSnapshotLivePreview::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+BOOL LLSnapshotLivePreview::saveLocal(bool fPathPrompt)
+// [/SL:KB]
 {
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, true);
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, true);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, fPathPrompt);
+// [/SL:KB]
 
 	// Relinquish image memory. Save button will be disabled as a side-effect.
 	lldebugs << "resetting formatted image after saving to disk" << llendl;
@@ -1508,6 +1535,10 @@ void LLFloaterSnapshot::Impl::setStatus(EStatus status, bool ok, const std::stri
 	case STATUS_FINISHED:
 		setWorking(floater, false);
 		setFinished(floater, true, ok, msg);
+//			previewp->saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+			previewp->saveLocal(previewp->getSnapshotOption() & LLSnapshotLivePreview::SNAPSHOT_LOCAL_PROMPT);
+// [/SL:KB]
 		break;
 	}
 
