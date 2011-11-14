@@ -91,7 +91,7 @@ public:
 		key["x"] = global_pos.mdV[0];
 		key["y"] = global_pos.mdV[1];
 		key["z"] = global_pos.mdV[2];
-		LLSideTray::getInstance()->showPanel("panel_places", key);
+		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 // [/SL:KB]
 
