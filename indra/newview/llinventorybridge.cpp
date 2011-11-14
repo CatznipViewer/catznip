@@ -55,11 +55,17 @@
 #include "llinventorypanel.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2.0a)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llpreviewanim.h"
 #include "llpreviewgesture.h"
 #include "llpreviewtexture.h"
 #include "llselectmgr.h"
 #include "llsidepanelappearance.h"
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2.0a)
+#include "llsidepanelinventory.h"
+// [/SL:KB]
 #include "lltrans.h"
 #include "llviewerassettype.h"
 #include "llviewerfoldertype.h"
@@ -2377,7 +2383,30 @@ void LLInventoryCopyAndWearObserver::changed(U32 mask)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+bool idle_invpanel_item_select(const LLSD& sdKey, const LLUUID& idItem)
+{
+	LLFloater* pInvFloater = LLFloaterReg::findInstance("inventory", sdKey);
+	LLSidepanelInventory* pInvSP = (pInvFloater) ? LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater) : NULL;
+	if (!pInvSP)
+		return true;	// Nothing to do if the floater no longer exists
 
+	LLInventoryPanel* pInvPanel = pInvSP->getActivePanel();
+	if (!pInvPanel->getIsViewsInitialized())
+		return false;	// Don't do anything until the panel finished initializing 
+
+	LLFolderView* pRootFolderView = pInvPanel->getRootFolder();
+	LLFolderViewItem* pItemView = pRootFolderView->getItemByID(idItem);
+	if (pItemView)
+	{
+		pRootFolderView->setSelection(pItemView, TRUE, FALSE);
+		pItemView->openItem();
+	}
+	pRootFolderView->scrollToShowSelection();
+
+	return true;
+}
+// [/SL:KB]
 
 void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 {
@@ -2391,6 +2420,16 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		
 		return;
 	}
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if ("open_newwindow" == action)
+	{
+		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
+		if (pInvFloater)
+		{
+			doOnIdleRepeating(boost::bind(&idle_invpanel_item_select, pInvFloater->getKey(), mUUID));
+		}
+	}
+// [/SL:KB]
 	else if ("paste" == action)
 	{
 		pasteFromClipboard();
@@ -2972,6 +3011,10 @@ void LLFolderBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			mWearables=TRUE;
 		}
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		mItems.push_back(std::string("Open in New Window"));
+// [/SL:KB]
 	}
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	else if (isLostInventory())
