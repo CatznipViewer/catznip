@@ -1535,10 +1535,6 @@ void LLFloaterSnapshot::Impl::setStatus(EStatus status, bool ok, const std::stri
 	case STATUS_FINISHED:
 		setWorking(floater, false);
 		setFinished(floater, true, ok, msg);
-//			previewp->saveLocal();
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-			previewp->saveLocal(previewp->getSnapshotOption() & LLSnapshotLivePreview::SNAPSHOT_LOCAL_PROMPT);
-// [/SL:KB]
 		break;
 	}
 
@@ -2459,7 +2455,10 @@ void LLFloaterSnapshot::saveLocal()
 		return;
 	}
 
-	previewp->saveLocal();
+//	previewp->saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	previewp->saveLocal(false);
+// [/SL:KB]
 }
 
 // static

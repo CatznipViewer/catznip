@@ -4074,10 +4074,6 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 	std::string strParcel = LLViewerParcelMgr::getInstance()->getAgentParcelName();
 	boost::replace_all(strSnapshotBaseName, "%p", strParcel);
 
-	// Make sure the base name includes a counter placeholder, otherwise add one
-	if (std::string::npos == strSnapshotBaseName.find("%c"))
-		strSnapshotBaseName += "_%c";
-
 	/*
 	 * Process the snapshot path
 	 */
@@ -4087,7 +4083,9 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 	{
 //		std::string proposed_name( sSnapshotBaseName );
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		// Prepare a clean name to show in the file picker dialog
 		std::string proposed_name(strSnapshotBaseName);
+		boost::replace_all(proposed_name, "%c", "");
 // [/SL:KB]
 
 		// getSaveFile will append an appropriate extension to the proposed name, based on the ESaveFilter constant passed in.
@@ -4108,13 +4106,19 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 		strSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
 		strSnapshotDir = gDirUtilp->getDirName(filepath);
-		if ( (!fPathPrompt) && (gDirUtilp->getSnapshotDir().empty()) )
+		if ( (!force_picker) && (gDirUtilp->getSnapshotDir().empty()) )
 		{
 			gSavedSettings.setString("SnapshotLocalPath", strSnapshotDir);
 			gDirUtilp->setSnapshotDir(strSnapshotDir);
 		}
 // [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	// Make sure the base name includes a counter placeholder, otherwise add one
+	if (std::string::npos == strSnapshotBaseName.find("%c"))
+		strSnapshotBaseName += "_%c";
+// [/SL:KB]
 
 	// Look for an unused file name
 	std::string filepath;
