@@ -1,0 +1,7 @@
+[UI/SidepanelInventory]
+- fixed : inventory sidebar button panel doesn't properly handle a selection of more than 1 item
+- fixed : inventory sidebar button panel doesn't properly handle "Wear"
+- fixed : inventory sidebar button panel doesn't provide a "Take Off" option if the selection is worn
+- fixed : inventory sidebar button panel doesn't provide an action for notecards, textures and scripts
+- fixed : inventory sidebar button panel doesn't refresh when switching inventory filters
+- added : "InvAction xxx" in strings.xml to easily handle localisation of common inventory item actions
