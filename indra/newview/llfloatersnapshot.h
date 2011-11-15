@@ -58,7 +58,10 @@ public:
 	// TODO: create a snapshot model instead
 	static LLFloaterSnapshot* getInstance();
 	static void saveTexture();
-	static void saveLocal();
+//	static void saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	static void saveLocal(bool fPathPrompt);
+// [/SL:KB]
 	static void preUpdate();
 	static void postUpdate();
 	static void postSave();

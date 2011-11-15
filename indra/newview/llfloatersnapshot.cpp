@@ -2438,7 +2438,10 @@ void LLFloaterSnapshot::saveTexture()
 }
 
 // static
-void LLFloaterSnapshot::saveLocal()
+//void LLFloaterSnapshot::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLFloaterSnapshot::saveLocal(bool fPathPrompt)
+// [/SL:KB]
 {
 	lldebugs << "saveLocal" << llendl;
 	// FIXME: duplicated code
@@ -2457,7 +2460,7 @@ void LLFloaterSnapshot::saveLocal()
 
 //	previewp->saveLocal();
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	previewp->saveLocal(false);
+	previewp->saveLocal(fPathPrompt);
 // [/SL:KB]
 }
 

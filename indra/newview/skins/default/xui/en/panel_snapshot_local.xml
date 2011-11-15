@@ -176,10 +176,8 @@
      right="-10"
      top="350"
      width="100">
-      <button.commit_callback
-       function="Local.Cancel" />
     </button>
-    <button
+    <flyout_button
      follows="right|bottom"
      height="23"
      label="Save"
@@ -188,7 +186,13 @@
      name="save_btn"
      top_delta="0"
      width="100">
-      <button.commit_callback
-       function="Local.Save" />
-    </button>
+        <flyout_button.item
+         label="Save"
+         name="save_item"
+         value="save" />
+        <flyout_button.item
+         label="Save As..."
+         name="saveas_item"
+         value="save as" />
+    </flyout_button>
 </panel>

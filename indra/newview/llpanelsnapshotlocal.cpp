@@ -58,15 +58,18 @@ private:
 
 	void onFormatComboCommit(LLUICtrl* ctrl);
 	void onQualitySliderCommit(LLUICtrl* ctrl);
-	void onSend();
+//	void onSend();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	void onSend(LLUICtrl* pCtrl);
+// [/SL:KB]
 };
 
 static LLRegisterPanelClassWrapper<LLPanelSnapshotLocal> panel_class("llpanelsnapshotlocal");
 
 LLPanelSnapshotLocal::LLPanelSnapshotLocal()
 {
-	mCommitCallbackRegistrar.add("Local.Save",		boost::bind(&LLPanelSnapshotLocal::onSend,		this));
-	mCommitCallbackRegistrar.add("Local.Cancel",	boost::bind(&LLPanelSnapshotLocal::cancel,		this));
+//	mCommitCallbackRegistrar.add("Local.Save",		boost::bind(&LLPanelSnapshotLocal::onSend,		this));
+//	mCommitCallbackRegistrar.add("Local.Cancel",	boost::bind(&LLPanelSnapshotLocal::cancel,		this));
 }
 
 // virtual
@@ -74,6 +77,10 @@ BOOL LLPanelSnapshotLocal::postBuild()
 {
 	getChild<LLUICtrl>("image_quality_slider")->setCommitCallback(boost::bind(&LLPanelSnapshotLocal::onQualitySliderCommit, this, _1));
 	getChild<LLUICtrl>("local_format_combo")->setCommitCallback(boost::bind(&LLPanelSnapshotLocal::onFormatComboCommit, this, _1));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	getChild<LLUICtrl>("save_btn")->setCommitCallback(boost::bind(&LLPanelSnapshotLocal::onSend, this, _1));
+	getChild<LLUICtrl>("cancel_btn")->setCommitCallback(boost::bind(&LLPanelSnapshotLocal::cancel, this));
+// [/SL:KB]
 
 	return LLPanelSnapshot::postBuild();
 }
@@ -142,12 +149,18 @@ void LLPanelSnapshotLocal::onQualitySliderCommit(LLUICtrl* ctrl)
 	LLFloaterSnapshot::getInstance()->notify(info);
 }
 
-void LLPanelSnapshotLocal::onSend()
+//void LLPanelSnapshotLocal::onSend()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLPanelSnapshotLocal::onSend(LLUICtrl* pCtrl)
+// [/SL:KB]
 {
 	LLFloaterSnapshot* floater = LLFloaterSnapshot::getInstance();
 
 	floater->notify(LLSD().with("set-working", true));
-	LLFloaterSnapshot::saveLocal();
+//	LLFloaterSnapshot::saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLFloaterSnapshot::saveLocal("save as" == pCtrl->getValue().asString());
+// [/SL:KB]
 	LLFloaterSnapshot::postSave();
 	goBack();
 	floater->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
