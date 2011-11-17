@@ -70,10 +70,10 @@
      height="12"
      layout="topleft"
      left="80"
-     name="show_label"
+     name="labelAvailable"
      top_pad="10"
      width="175">
-        Active
+        Available
     </text>
     <text
      type="string"
@@ -82,9 +82,9 @@
      height="12"
      layout="topleft"
      left_pad="45"
-     name="show_label"
+     name="labelActive"
      width="175">
-        Available
+        Active
     </text>
     <scroll_list
      follows="top|left"
@@ -92,14 +92,14 @@
      layout="topleft"
      left="80"
      multi_select="true"
-     name="listActive"
+     name="listAvailable"
      sort_column="0"
      sort_ascending="true" 
      width="175" />
     <button
      follows="top|left"
      height="26"
-     image_overlay="Arrow_Left"
+     image_overlay="Arrow_Right"
      hover_glow_amount="0.15"
      layout="topleft"
      left_pad="10"
@@ -110,7 +110,7 @@
     <button
      follows="top|left"
      height="26"
-     image_overlay="Arrow_Right"
+     image_overlay="Arrow_Left"
      hover_glow_amount="0.15"
      layout="topleft"
      name="btnActiveRemove"
@@ -123,7 +123,7 @@
      layout="topleft"
      left_pad="10"
      multi_select="true"
-     name="listAvailable"
+     name="listActive"
      sort_column="0"
      sort_ascending="true" 
      top_pad="-105"
