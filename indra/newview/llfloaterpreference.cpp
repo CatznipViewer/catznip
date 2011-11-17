@@ -1717,7 +1717,8 @@ BOOL LLPanelPreference::postBuild()
 		// Populate the active dictionary list
 		//
 		std::vector<std::string> dictActiveList;
-		boost::split(dictActiveList, gSavedSettings.getString("SpellCheckDictionarySecondary"), boost::is_any_of(std::string(",")));
+		std::string strSecondaryList = gSavedSettings.getString("SpellCheckDictionarySecondary");
+		boost::split(dictActiveList, strSecondaryList, boost::is_any_of(std::string(",")));
 
 		LLScrollListCtrl* pDictActiveList = findChild<LLScrollListCtrl>("listActive");
 		pDictActiveList->sortByColumnIndex(0, true);

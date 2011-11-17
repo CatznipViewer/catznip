@@ -2533,7 +2533,8 @@ bool LLAppViewer::initConfiguration()
 		LLSpellChecker::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
 
 		std::vector<std::string> dictSecondaryList;
-		boost::split(dictSecondaryList, gSavedSettings.getString("SpellCheckDictionarySecondary"), boost::is_any_of(std::string(",")));
+		std::string strSecondaryList = gSavedSettings.getString("SpellCheckDictionarySecondary");
+		boost::split(dictSecondaryList, strSecondaryList, boost::is_any_of(std::string(",")));
 		LLSpellChecker::instance().setSecondaryDictionaries(dictSecondaryList);
 	}
 // [/SL:KB]
