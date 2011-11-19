@@ -857,7 +857,7 @@ void LLPanelPeople::updateDistances()
 		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(*itItem);
 		if (pItem)
 		{
-			auto itAvatar = posAvatars.find(pItem->getAvatarId());
+			LLAvatarItemDistanceComparator::id_to_pos_map_t::const_iterator itAvatar = posAvatars.find(pItem->getAvatarId());
 			if (posAvatars.end() != itAvatar)
 				pItem->setTextFieldDistance(dist_vec(itAvatar->second, posSelf));
 		}

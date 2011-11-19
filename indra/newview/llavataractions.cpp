@@ -1062,8 +1062,8 @@ bool getRegionAndPosGlobalFromAgentID(const LLUUID& idAgent, const LLViewerRegio
 	}
 
 	// Walk over each region we're connected to and try finding the agent on one of them
-	LLWorld::region_list_t::const_iterator itRegion = LLWorld::getInstance()->getRegionList().cbegin();
-	LLWorld::region_list_t::const_iterator endRegion = LLWorld::getInstance()->getRegionList().cend();
+	LLWorld::region_list_t::const_iterator itRegion = LLWorld::getInstance()->getRegionList().begin();
+	LLWorld::region_list_t::const_iterator endRegion = LLWorld::getInstance()->getRegionList().end();
 	for (; itRegion != endRegion; ++itRegion)
 	{
 		const LLViewerRegion* pRegion = *itRegion;
