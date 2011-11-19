@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llscreenchannel.cpp
  * @brief Class implements a channel on a screen in which appropriate toasts may appear.
  *
@@ -37,6 +37,9 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a)
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llimfloater.h"
@@ -58,10 +61,22 @@ LLRect LLScreenChannelBase::getChannelRect()
 	LLView* floater_snap_region = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	floater_snap_region->localRectToScreen(floater_snap_region->getLocalRect(), &channel_rect);
 
-	LLView* chiclet_region = gViewerWindow->getRootView()->getChildView("chiclet_container");
-	chiclet_region->localRectToScreen(chiclet_region->getLocalRect(), &chiclet_rect);
+//	LLView* chiclet_region = gViewerWindow->getRootView()->getChildView("chiclet_container");
+//	chiclet_region->localRectToScreen(chiclet_region->getLocalRect(), &chiclet_rect);
+//
+//	channel_rect.mTop = chiclet_rect.mBottom;
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if (LLChicletBar::instanceExists())
+	{
+		LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
+		chiclet_bar->localRectToScreen(chiclet_bar->getLocalRect(), &chiclet_rect);
 
-	channel_rect.mTop = chiclet_rect.mBottom;
+		if (LLChicletBar::ALIGN_TOP == chiclet_bar->getAlignment())
+			channel_rect.mTop = chiclet_rect.mBottom;
+		else
+			channel_rect.mBottom = chiclet_rect.mTop;
+	}
+// [/SL:KB]
 	return channel_rect;
 }
 
