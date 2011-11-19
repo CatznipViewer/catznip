@@ -2991,7 +2991,7 @@ void LLAppViewer::cleanupSavedSettings()
 //		if (!maximized)
 // [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 #ifndef LL_WINDOWS
-		if ( (!gViewerWindow->mWindow->getMaximized()) || (!gViewerWindow->mWindow->getFullscreenWindow()) )
+		if ( (!gViewerWindow->getWindow()->getMaximized()) || (!gViewerWindow->getWindow()->getFullscreenWindow()) )
 #endif // !LL_WINDOWS
 // [/SL:KB]
 		{
