@@ -518,8 +518,14 @@ void LLScreenChannel::redrawToasts()
 //--------------------------------------------------------------------------
 void LLScreenChannel::showToastsBottom()
 {
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLRect channel_rect = getChannelRect();
+// [/SL:KB]
 	LLRect	toast_rect;	
-	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
+//	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	S32		bottom = channel_rect.mBottom;
+// [/SL:KB]
 	S32		toast_margin = 0;
 	std::vector<ToastElem>::reverse_iterator it;
 
@@ -555,7 +561,7 @@ void LLScreenChannel::showToastsBottom()
 				(*it).toast->translate(0, shift);
 			}
 
-			LLRect channel_rect = getChannelRect();
+//			LLRect channel_rect = getChannelRect();
 			// don't show toasts if there is not enough space
 			if(toast_rect.mTop > channel_rect.mTop)
 			{
