@@ -6108,6 +6108,17 @@
       <key>Value</key>
       <integer>305</integer>
     </map>
+    <key>NotificationToastAlignment</key>
+    <map>
+      <key>Comment</key>
+      <string>Notification toast's vertical aligment (0 = top; 1 = bottom)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>NotificationToastLifeTime</key>
     <map>
       <key>Comment</key>
