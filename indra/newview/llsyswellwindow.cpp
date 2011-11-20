@@ -209,7 +209,14 @@ void LLSysWellWindow::reshapeWindow()
 		}
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
-		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		// Resize bottom-up if we're docked at the top and top-down if we're docked at the bottom
+		S32 top = curRect.mTop;
+		if ( (getDockControl()) && (LLDockControl::TOP == getDockControl()->getDockAt()) )
+			top += new_window_height - curRect.getHeight();
+		curRect.setLeftTopAndSize(curRect.mLeft, top, newWidth, new_window_height);
+// [/SL:KB]
+//		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
 		reshape(curRect.getWidth(), curRect.getHeight(), TRUE);
 		setRect(curRect);
 	}
