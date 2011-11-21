@@ -3014,6 +3014,17 @@ class LLAvatarDebug : public view_listener_t
 	}
 };
 
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+void handle_avatar_teleport()
+{
+	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::offerTeleport(pAvatar->getID());
+	}
+}
+// [/SL:KB]
+
 //bool callback_eject(const LLSD& notification, const LLSD& response)
 //{
 //	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -8305,6 +8316,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAvatarDebug(), "Avatar.Debug");
 	view_listener_t::addMenu(new LLAvatarVisibleDebug(), "Avatar.VisibleDebug");
 	view_listener_t::addMenu(new LLAvatarInviteToGroup(), "Avatar.InviteToGroup");
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	commit.add("Avatar.Teleport", boost::bind(&handle_avatar_teleport));
+// [/SL:KB]
 	commit.add("Avatar.Eject", boost::bind(&handle_avatar_eject, LLSD()));
 	commit.add("Avatar.ShowInspector", boost::bind(&handle_avatar_show_inspector));
 	view_listener_t::addMenu(new LLAvatarSendIM(), "Avatar.SendIM");
