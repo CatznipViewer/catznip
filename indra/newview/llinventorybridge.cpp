@@ -639,11 +639,18 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 	addDeleteContextMenuOptions(items, disabled_items);
 
-	// If multiple items are selected, disable properties (if it exists).
-	if ((flags & FIRST_SELECTED_ITEM) == 0)
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	// If multiple items are selected, only disable properties if we're not showing them in a multi-floater
+	if ( ((flags & FIRST_SELECTED_ITEM) == 0) && (!gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
 	{
 		disabled_items.push_back(std::string("Properties"));
 	}
+// [/SL:KB]
+//	// If multiple items are selected, disable properties (if it exists).
+//	if ((flags & FIRST_SELECTED_ITEM) == 0)
+//	{
+//		disabled_items.push_back(std::string("Properties"));
+//	}
 }
 
 void LLInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
