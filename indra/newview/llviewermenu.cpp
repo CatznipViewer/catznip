@@ -3210,6 +3210,35 @@ bool enable_freeze_eject(const LLSD& avatar_id)
 //	return new_value;
 }
 
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+bool enable_kick_teleport_home()
+{
+	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		return LLAvatarActions::canEstateKickOrTeleportHome(pAvatar->getID());
+	}
+	return false;
+}
+
+void handle_kick()
+{
+	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::estateKick(pAvatar->getID());
+	}
+}
+
+void handle_teleport_home()
+{
+	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::estateTeleportHome(pAvatar->getID());
+	}
+}
+// [/SL:KB]
 
 void login_done(S32 which, void *user)
 {
@@ -8332,6 +8361,11 @@ void initialize_menus()
 	
 	view_listener_t::addMenu(new LLAvatarEnableAddFriend(), "Avatar.EnableAddFriend");
 	enable.add("Avatar.EnableFreezeEject", boost::bind(&enable_freeze_eject, _2));
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	commit.add("Avatar.Kick", boost::bind(&handle_kick));
+	commit.add("Avatar.TeleportHome", boost::bind(&handle_teleport_home));
+	enable.add("Avatar.CanKickTeleportHome", boost::bind(&enable_kick_teleport_home));
+// [/SL:KB]
 
 	// Object pie menu
 	view_listener_t::addMenu(new LLObjectBuild(), "Object.Build");
