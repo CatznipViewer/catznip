@@ -36,6 +36,12 @@
      function="InspectAvatar.Gear.EnableCall"/>
   </menu_item_call>
   <menu_item_call
+   label="Pay"
+   name="pay">
+    <menu_item_call.on_click
+     function="InspectAvatar.Pay"/>
+  </menu_item_call>
+  <menu_item_call
    label="Teleport"
    name="teleport">
     <menu_item_call.on_click
@@ -43,12 +49,7 @@
     <menu_item_call.on_enable
      function="InspectAvatar.Gear.EnableTeleportOffer"/>
   </menu_item_call>
-  <menu_item_call
-   label="Invite to Group"
-   name="invite_to_group">
-    <menu_item_call.on_click
-     function="InspectAvatar.InviteToGroup"/>
-  </menu_item_call>
+
   <menu_item_separator />
 
   <menu
@@ -127,6 +128,12 @@
      function="InspectAvatar.VisibleFindOnMap"/>
   </menu_item_call>
   <menu_item_call
+   label="Invite to Group"
+   name="invite_to_group">
+    <menu_item_call.on_click
+     function="InspectAvatar.InviteToGroup"/>
+  </menu_item_call>
+  <menu_item_call
    label="Zoom In"
    name="zoom_in">
     <menu_item_call.on_click
@@ -134,10 +141,4 @@
     <menu_item_call.on_visible
      function="InspectAvatar.VisibleZoomIn"/>
   </menu_item_call>  
-  <menu_item_call
-   label="Pay"
-   name="pay">
-    <menu_item_call.on_click
-     function="InspectAvatar.Pay"/>
-  </menu_item_call>
 </toggleable_menu>

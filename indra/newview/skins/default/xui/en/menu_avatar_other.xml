@@ -33,12 +33,16 @@
         <menu_item_call.on_enable
          function="Avatar.EnableCall" />
     </menu_item_call>
-      <menu_item_call
-         label="Invite to Group"
-         name="Invite...">
-      <menu_item_call.on_click
-         function="Avatar.InviteToGroup" />
-      </menu_item_call>
+   <menu_item_call
+     enabled="false"
+     label="Pay"
+     name="Pay...">
+        <menu_item_call.on_click
+         function="PayObject" />
+        <menu_item_call.on_enable
+         function="EnablePayAvatar" />
+    </menu_item_call>
+
    <menu_item_separator />
 
     <context_menu
@@ -85,20 +89,17 @@
             <menu_item_call.on_visible
              function="IsGodCustomerService"/>
         </menu_item_call>
+      <menu_item_call
+         label="Invite to Group"
+         name="Invite...">
+      <menu_item_call.on_click
+         function="Avatar.InviteToGroup" />
+      </menu_item_call>
 	    <menu_item_call
          label="Zoom In"
           name="Zoom In">
         <menu_item_call.on_click
            function="Tools.LookAtSelection"
            parameter="zoom" />
-    </menu_item_call>
-   <menu_item_call
-     enabled="false"
-     label="Pay"
-     name="Pay...">
-        <menu_item_call.on_click
-         function="PayObject" />
-        <menu_item_call.on_enable
-         function="EnablePayAvatar" />
     </menu_item_call>
 </context_menu>
