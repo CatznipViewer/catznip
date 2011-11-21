@@ -3487,7 +3487,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>EnergyFromTop</key>
     <map>
@@ -4510,7 +4510,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>InactiveFloaterTransparency</key>
     <map>
@@ -7057,7 +7057,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>ParticipantListShowIcons</key>
     <map>
@@ -7333,7 +7333,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     
     <key>PluginInstancesLow</key>
@@ -9402,7 +9402,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>NameTagShowDisplayNames</key>
     <map>
@@ -10408,7 +10408,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>NavBarShowParcelProperties</key>
     <map>
@@ -11115,7 +11115,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>ShowTangentBasis</key>
     <map>
@@ -12971,7 +12971,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>UseDefaultColorPicker</key>
     <map>
@@ -14456,7 +14456,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>ShowOfferedInventory</key>
     <map>
