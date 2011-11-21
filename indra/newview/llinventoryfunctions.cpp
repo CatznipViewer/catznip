@@ -471,7 +471,7 @@ void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)
 void show_item_profile(const LLUUID& item_uuid)
 {
 	LLUUID linked_uuid = gInventory.getLinkedItemID(item_uuid);
-	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
+//	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
 // [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
 	if (gSavedSettings.getBOOL("ShowPropertiesFloaters"))
 		LLFloaterReg::showInstance("properties", LLSD().with("item_id", item_uuid));
