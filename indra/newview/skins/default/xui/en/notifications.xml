@@ -5987,10 +5987,12 @@ An object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; owned by [NAME_SLU
        index="1"
        name="Discard"
        text="Discard"/>
+<!--
       <button
        index="2"
        name="Mute"
        text="Block Owner"/>
+-->
     </form>
   </notification>
 
@@ -6352,10 +6354,12 @@ Grant this request?
 [NAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
+<!--
       <button
        index="-2"
        name="Mute"
        text="Block"/>
+-->
       <button
        index="-1"
        name="Ignore"
@@ -6371,10 +6375,12 @@ Grant this request?
 [GROUPNAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
+<!--
       <button
        index="-2"
        name="Mute"
        text="Block"/>
+-->
       <button
        index="-1"
        name="Ignore"
