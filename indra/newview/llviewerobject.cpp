@@ -2944,7 +2944,10 @@ void LLViewerObject::updateInventoryLocal(LLInventoryItem* item, U8 key)
 	doUpdateInventory(task_item, key, is_new);
 }
 
-LLInventoryObject* LLViewerObject::getInventoryObject(const LLUUID& item_id)
+//LLInventoryObject* LLViewerObject::getInventoryObject(const LLUUID& item_id)
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+LLInventoryObject* LLViewerObject::getInventoryObject(const LLUUID& item_id) const
+// [/SL:KB]
 {
 	LLInventoryObject* rv = NULL;
 	if(mInventory)

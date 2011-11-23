@@ -432,7 +432,10 @@ public:
 	// manager until we have better iterators.
 	void updateInventory(LLViewerInventoryItem* item, U8 key, bool is_new);
 	void updateInventoryLocal(LLInventoryItem* item, U8 key); // Update without messaging.
-	LLInventoryObject* getInventoryObject(const LLUUID& item_id);
+//	LLInventoryObject* getInventoryObject(const LLUUID& item_id);
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	LLInventoryObject* getInventoryObject(const LLUUID& item_id) const;
+// [/SL:KB]
 	void getInventoryContents(LLInventoryObject::object_list_t& objects);
 	LLInventoryObject* getInventoryRoot();
 	LLViewerInventoryItem* getInventoryItemByAsset(const LLUUID& asset_id);
