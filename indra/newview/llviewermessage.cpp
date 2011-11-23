@@ -6380,6 +6380,9 @@ void handle_lure(const uuid_vec_t& ids)
 	if (!gAgent.getRegion()) return;
 
 	LLSD edit_args;
+// [SL:KB] - Patch: UI-Notifications | Checked: 2011-11-23 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	edit_args["NAME"] = (1 == ids.size()) ? LLSLURL("agent", ids.front(), "completename").getSLURLString() : LLTrans::getString("AvatarNameMultiple");
+// [/SL:KB]
 	edit_args["REGION"] = gAgent.getRegion()->getName();
 
 	LLSD payload;

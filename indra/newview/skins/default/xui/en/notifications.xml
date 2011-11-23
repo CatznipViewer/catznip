@@ -3721,7 +3721,7 @@ Please try again later.
    icon="alertmodal.tga"
    name="OfferTeleport"
    type="alertmodal">
-Offer a teleport to your location with the following message?
+Offer [NAME] a teleport to your location with the following message?
     <tag>confirm</tag>
     <form name="form">
       <input name="message" type="text">
