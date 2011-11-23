@@ -109,6 +109,13 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 			p.panel = notify_box;	
 			p.on_delete_toast = boost::bind(&LLScriptHandler::onDeleteToast, this, _1);
 
+// [SL:KB] - Patch: UI-Notifications | Checked: 2011-11-23 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+			if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
+			{
+				p.lifetime_secs = gSavedSettings.getS32("ScriptQuestionToastLifeTime");
+			}
+// [/SL:KB]
+
 			LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 			if(channel)
 			{
