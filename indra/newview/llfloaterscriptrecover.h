@@ -17,10 +17,41 @@
 #ifndef LL_FLOATERSCRIPTRECOVER_H
 #define LL_FLOATERSCRIPTRECOVER_H
 
+#include "llfloater.h"
+
 // ============================================================================
+// LLFloaterScriptRecover
+//
+
+class LLFloaterScriptRecover : public LLFloater
+{
+	friend class LLFloaterReg;
+private:
+	LLFloaterScriptRecover(const LLSD& sdKey);
+
+	/*
+	 * LLFloater overrides
+	 */
+public:
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ BOOL postBuild();
+
+	/*
+	 * Member functions
+	 */
+protected:
+	void onBtnCancel();
+	void onBtnRecover();
+};
+
+// ============================================================================
+// LLScriptRecoverQueue
+//
 
 class LLScriptRecoverQueue
 {
+	friend class LLCreateRecoverScriptCallback;
+	friend class LLFloaterScriptRecover;
 protected:
 	LLScriptRecoverQueue(const std::list<std::string>& strFiles);
 
@@ -36,8 +67,6 @@ protected:
 protected:
 	typedef std::map<std::string, LLUUID> filename_queue_t;
 	filename_queue_t m_FileQueue;
-
-	friend class LLCreateRecoverScriptCallback;
 };
 
 // ============================================================================

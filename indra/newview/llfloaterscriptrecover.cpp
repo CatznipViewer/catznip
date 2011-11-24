@@ -18,13 +18,96 @@
 
 #include "llagent.h"
 #include "llassetuploadresponders.h"
+#include "llcheckboxctrl.h"
 #include "lldiriterator.h"
+#include "llfloaterreg.h"
 #include "llinventorymodel.h"
+#include "llscrolllistctrl.h"
 #include "llviewerassettype.h"
 #include "llviewerinventory.h"
 #include "llviewerregion.h"
 
 #include "llfloaterscriptrecover.h"
+
+// ============================================================================
+// LLFloaterScriptRecover
+//
+
+LLFloaterScriptRecover::LLFloaterScriptRecover(const LLSD& sdKey)
+	: LLFloater(sdKey)
+{
+}
+
+void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
+{
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+
+	LLSD sdBhvrRow; LLSD& sdBhvrColumns = sdBhvrRow["columns"];
+	sdBhvrColumns[0] = LLSD().with("column", "script_check").with("type", "checkbox");
+	sdBhvrColumns[1] = LLSD().with("column", "script_name").with("type", "text");
+
+	pListCtrl->clearRows();
+	for (LLSD::array_const_iterator itFile = sdKey["files"].beginArray(), endFile = sdKey["files"].endArray(); itFile != endFile;  ++itFile)
+	{
+		std::string strFile = itFile->asString();
+
+		sdBhvrRow["value"] = strFile;
+		sdBhvrColumns[0]["value"] = true;
+		sdBhvrColumns[1]["value"] = gDirUtilp->getBaseFileName(strFile, true);
+
+		pListCtrl->addElement(sdBhvrRow, ADD_BOTTOM);
+	}
+}
+
+BOOL LLFloaterScriptRecover::postBuild()
+{
+	findChild<LLUICtrl>("recover_btn")->setCommitCallback(boost::bind(&LLFloaterScriptRecover::onBtnRecover, this));
+	findChild<LLUICtrl>("cancel_btn")->setCommitCallback(boost::bind(&LLFloaterScriptRecover::onBtnCancel, this));
+
+	return TRUE;
+}
+
+void LLFloaterScriptRecover::onBtnCancel()
+{
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+
+	// Delete all listed files
+	std::vector<LLScrollListItem*> items = pListCtrl->getAllData();
+	for (std::vector<LLScrollListItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLFile::remove((*itItem)->getValue().asString());
+	}
+
+	closeFloater();
+}
+
+void LLFloaterScriptRecover::onBtnRecover()
+{
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+
+	// Recover all selected, delete any unselected
+	std::vector<LLScrollListItem*> items = pListCtrl->getAllData(); std::list<std::string> strFiles;
+	for (std::vector<LLScrollListItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLScrollListCheck* pCheckColumn = dynamic_cast<LLScrollListCheck*>((*itItem)->getColumn(0));
+		if (!pCheckColumn)
+			continue;
+
+		std::string strFile = (*itItem)->getValue().asString();
+		if (!strFile.empty())
+		{
+			if (pCheckColumn->getCheckBox()->getValue().asBoolean())
+				strFiles.push_back(strFile);
+			else
+				LLFile::remove(strFile);
+		}
+	}
+
+	if (!strFiles.empty())
+		new LLScriptRecoverQueue(strFiles);
+
+	closeFloater();
+}
 
 // ============================================================================
 // LLCreateRecoverScriptCallback
@@ -47,7 +130,6 @@ protected:
 	LLScriptRecoverQueue* mRecoverQueue;
 };
 
-
 // ============================================================================
 // LLScriptRecoverQueue
 //
@@ -55,14 +137,14 @@ protected:
 // static
 void LLScriptRecoverQueue::recoverIfNeeded()
 {
-	std::string strFilename, strPath = LLFile::tmpdir(); std::list<std::string> strFiles;
+	std::string strFilename, strPath = LLFile::tmpdir(); LLSD sdData, &sdFiles = sdData["files"];
 
 	LLDirIterator itFiles(strPath, "*.lslbackup");
 	while (itFiles.next(strFilename))
-		strFiles.push_back(strPath + strFilename);
+		sdFiles.append(strPath + strFilename);
 
-	if (!strFiles.empty())
-		new LLScriptRecoverQueue(strFiles);
+	if (sdFiles.size())
+		LLFloaterReg::showInstance("script_recover", sdData);
 }
 
 LLScriptRecoverQueue::LLScriptRecoverQueue(const std::list<std::string>& strFiles)
