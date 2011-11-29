@@ -288,7 +288,7 @@ void LLStatusBar::refresh()
 
 	mSGBandwidth->setVisible(net_stats_visible);
 	mSGPacketLoss->setVisible(net_stats_visible);
-	getChildView("stat_btn")->setEnabled(net_stats_visible);
+//	getChildView("stat_btn")->setEnabled(net_stats_visible);
 
 	// update the master volume button state
 	bool mute_audio = LLAppViewer::instance()->getMasterSystemAudioMute();

@@ -131,11 +131,13 @@ void LLLayoutPanel::reshape(S32 width, S32 height, BOOL called_from_parent)
 // [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 void LLLayoutPanel::handleReshape(const LLRect& new_rect, bool by_user)
 {
+	const LLRect oldRect = getRect();
+
 	mReshapeSignalFire = false;
 	LLPanel::handleReshape(new_rect, by_user);
 	mReshapeSignalFire = true;
 
-	if (mReshapeSignal)
+	if ( (mReshapeSignal) && (oldRect != getRect()) )
 		(*mReshapeSignal)(this, getRect());
 }
 // [/SL:KB]

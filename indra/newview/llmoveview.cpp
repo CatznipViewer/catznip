@@ -718,7 +718,8 @@ void LLPanelStandStopFlying::updatePosition()
 
 //	if(LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("stand_stop_flying_container"))
 // [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0c) | Added: Catznip-3.2.0c
-	if(LLPanel* panel_ssf_container = findChild<LLPanel>("stand_stop_flying_container"))
+	static LLPanel* panel_ssf_container = NULL;
+	if ( (panel_ssf_container) || (panel_ssf_container = getRootView()->getChild<LLPanel>("stand_stop_flying_container")) )
 // [/SL:KB]
 	{
 		panel_ssf_container->setOrigin(0, y_pos);
