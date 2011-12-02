@@ -47,10 +47,26 @@ class LLAvatarList : public LLFlatListViewEx
 {
 	LOG_CLASS(LLAvatarList);
 public:
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+	struct TextCallbackParam : public LLInitParam::Block<TextCallbackParam, LLUICtrl::CommitCallbackParam>
+	{
+		Optional<F32> refresh_time;
+
+		TextCallbackParam();
+	};
+// [/SL:KB]
+
 	struct Params : public LLInitParam::Block<Params, LLFlatListViewEx::Params>
 	{
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+		Optional<TextCallbackParam> text_callback;
+// [/SL:KB]
+
 		Optional<bool>	ignore_online_status, // show all items as online
-						show_last_interaction_time, // show most recent interaction time. *HACK: move this to a derived class
+//						show_last_interaction_time, // show most recent interaction time. *HACK: move this to a derived class
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+						show_text_field,
+// [/SL:KB]
 						show_info_btn,
 						show_profile_btn,
 						show_speaking_indicator,
@@ -92,6 +108,11 @@ public:
 
 	boost::signals2::connection setItemDoubleClickCallback(const mouse_signal_t::slot_type& cb);
 
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+	boost::signals2::connection setTextFieldCallback(const commit_signal_t::slot_type& cb);
+	void                        setTextFieldRefresh(F32 refresh_time);
+// [/SL:KB]
+
 	virtual S32 notifyParent(const LLSD& info);
 
 	void addAvalineItem(const LLUUID& item_id, const LLUUID& session_id, const std::string& item_name);
@@ -105,17 +126,23 @@ protected:
 		const uuid_vec_t& vnew,
 		uuid_vec_t& vadded,
 		uuid_vec_t& vremoved);
-	void updateLastInteractionTimes();	
+//	void updateLastInteractionTimes();	
 	void rebuildNames();
 	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
 	void updateAvatarNames();
+// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+	LLAvatarListItem::ENameFormat getAvatarNameFormat() const;
+// [/SL:KB]
 
 private:
 
 	bool isAvalineItemSelected();
 
 	bool mIgnoreOnlineStatus;
-	bool mShowLastInteractionTime;
+//	bool mShowLastInteractionTime;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+	bool mShowTextField;
+// [/SL:KB]
 	bool mDirty;
 	bool mNeedUpdateNames;
 	bool mShowIcons;
@@ -124,7 +151,12 @@ private:
 	bool mShowSpeakingIndicator;
 	bool mShowPermissions;
 
-	LLTimer*				mLITUpdateTimer; // last interaction time update timer
+//	LLTimer*				mLITUpdateTimer; // last interaction time update timer
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+	LLTimer*				mTextFieldUpdateTimer;
+	F32						mTextFieldUpdateExpiration;
+	commit_signal_t*		mTextFieldUpdateSignal;
+// [/SL:KB]
 	std::string				mIconParamName;
 	std::string				mNameFilter;
 	uuid_vec_t				mIDs;
