@@ -83,6 +83,9 @@ public:
 	static EObjectType getObjectType(const LLUUID& notification_id);
 
 	static std::string getObjectName(const LLUUID& notification_id);
+// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	static LLUUID getObjectOwner(const LLUUID& notification_id);
+// [/SL:KB]
 
 	typedef boost::signals2::signal<void(const LLSD&)> object_signal_t;
 
