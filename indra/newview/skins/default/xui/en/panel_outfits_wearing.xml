@@ -19,7 +19,7 @@
      standalone="false"
      top="0"
      width="309"
-     worn_indication_enabled="false" />
+     worn_indication_enabled="true" />
     <panel
      background_visible="true"
      follows="bottom|left|right"
