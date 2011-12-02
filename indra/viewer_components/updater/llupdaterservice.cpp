@@ -121,6 +121,11 @@ public:
 	bool isChecking();
 	LLUpdaterService::eUpdaterState getState();
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+	void startDownloading();
+	bool isDownloading()	{ return mIsDownloading; }
+// [/SL:KB]
+
 	void setAppExitCallback(LLUpdaterService::app_exit_callback_t aecb) { mAppExitCallback = aecb;}
 	std::string updatedVersion(void);
 
@@ -129,12 +134,15 @@ public:
 
 	// LLUpdateChecker::Client:
 	virtual void error(std::string const & message);
-	virtual void optionalUpdate(std::string const & newVersion,
-								LLURI const & uri,
-								std::string const & hash);
-	virtual void requiredUpdate(std::string const & newVersion,
-								LLURI const & uri,
-								std::string const & hash);
+//	virtual void optionalUpdate(std::string const & newVersion,
+//								LLURI const & uri,
+//								std::string const & hash);
+//	virtual void requiredUpdate(std::string const & newVersion,
+//								LLURI const & uri,
+//								std::string const & hash);
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	/*virtual*/ void checkComplete(const LLSD& sdData);
+// [/SL:KB]
 	virtual void upToDate(void);
 	
 	// LLUpdateDownloader::Client
@@ -145,6 +153,9 @@ public:
 
 private:
 	std::string mNewVersion;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	LLSD		mNewUpdateData;
+// [/SL:KB]
 	
 	void restartTimer(unsigned int seconds);
 	void setState(LLUpdaterService::eUpdaterState state);
@@ -251,6 +262,22 @@ bool LLUpdaterServiceImpl::isChecking()
 {
 	return mIsChecking;
 }
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+void LLUpdaterServiceImpl::startDownloading()
+{
+	if (!mNewUpdateData.isDefined())
+		return;
+
+	stopTimer();
+	setState(LLUpdaterService::DOWNLOADING);
+
+	mUpdateDownloader.download(mNewUpdateData, mNewUpdateData["required"].asBoolean());
+
+	mIsDownloading = true;
+	mNewUpdateData.clear();
+}
+// [/SL:KB]
 
 LLUpdaterService::eUpdaterState LLUpdaterServiceImpl::getState()
 {
@@ -366,27 +393,50 @@ void LLUpdaterServiceImpl::error(std::string const & message)
 	}
 }
 
-void LLUpdaterServiceImpl::optionalUpdate(std::string const & newVersion,
-										  LLURI const & uri,
-										  std::string const & hash)
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+void LLUpdaterServiceImpl::checkComplete(const LLSD& sdData)
 {
-	stopTimer();
-	mNewVersion = newVersion;
-	mIsDownloading = true;
-	setState(LLUpdaterService::DOWNLOADING);
-	mUpdateDownloader.download(uri, hash, newVersion, false);
-}
+	if (mIsChecking)
+		restartTimer(mCheckPeriod);
+	setState(LLUpdaterService::UPDATE_AVAILABLE);
 
-void LLUpdaterServiceImpl::requiredUpdate(std::string const & newVersion,
-										  LLURI const & uri,
-										  std::string const & hash)
-{
-	stopTimer();
-	mNewVersion = newVersion;
-	mIsDownloading = true;
-	setState(LLUpdaterService::DOWNLOADING);
-	mUpdateDownloader.download(uri, hash, newVersion, true);
+	mNewVersion = sdData["version"].asString();
+	mNewUpdateData = sdData;
+
+	LLSD sdEventData;
+	sdEventData["pump"] = LLUpdaterService::pumpName();
+	sdEventData["payload"] = sdData;
+
+	LLSD& sdPayload = sdEventData["payload"];
+	sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
+	sdPayload["required"] = sdData["required"].asBoolean();
+	sdPayload["version"] = mNewVersion;
+
+	LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
 }
+// [/SL:KB]
+
+//void LLUpdaterServiceImpl::optionalUpdate(std::string const & newVersion,
+//										  LLURI const & uri,
+//										  std::string const & hash)
+//{
+//	stopTimer();
+//	mNewVersion = newVersion;
+//	mIsDownloading = true;
+//	setState(LLUpdaterService::DOWNLOADING);
+//	mUpdateDownloader.download(uri, hash, newVersion, false);
+//}
+
+//void LLUpdaterServiceImpl::requiredUpdate(std::string const & newVersion,
+//										  LLURI const & uri,
+//										  std::string const & hash)
+//{
+//	stopTimer();
+//	mNewVersion = newVersion;
+//	mIsDownloading = true;
+//	setState(LLUpdaterService::DOWNLOADING);
+//	mUpdateDownloader.download(uri, hash, newVersion, true);
+//}
 
 void LLUpdaterServiceImpl::upToDate(void)
 {
@@ -410,6 +460,9 @@ void LLUpdaterServiceImpl::downloadComplete(LLSD const & data)
 	LLSD event;
 	event["pump"] = LLUpdaterService::pumpName();
 	LLSD payload;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	payload = data["update_data"];
+// [/SL:KB]
 	payload["type"] = LLSD(LLUpdaterService::DOWNLOAD_COMPLETE);
 	payload["required"] = data["required"];
 	payload["version"] = mNewVersion;
@@ -587,6 +640,18 @@ bool LLUpdaterService::isChecking()
 {
 	return mImpl->isChecking();
 }
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+void LLUpdaterService::startDownloading()
+{
+	return mImpl->startDownloading();
+}
+
+bool LLUpdaterService::isDownloading()
+{
+	return mImpl->isDownloading();
+}
+// [/SL:KB]
 
 LLUpdaterService::eUpdaterState LLUpdaterService::getState()
 {
