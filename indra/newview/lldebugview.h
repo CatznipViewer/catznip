@@ -55,7 +55,10 @@ public:
 	~LLDebugView();
 
 	void init();
-	void draw();
+//	void draw();
+// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	void onFloaterSnapRegionChanged(LLView* floater_snap_viewp);
+// [/SL:KB]
 
 	void setStatsVisible(BOOL visible);
 	
