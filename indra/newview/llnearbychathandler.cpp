@@ -454,7 +454,10 @@ LLNearbyChatHandler::LLNearbyChatHandler(e_notification_type type, const LLSD& i
 
 	channel->setCreatePanelCallback(callback);
 
-	mChannel = LLChannelManager::getInstance()->addChannel(channel);
+//	mChannel = LLChannelManager::getInstance()->addChannel(channel);
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	mChannelHandle = LLChannelManager::getInstance()->addChannel(channel)->getHandle();
+// [/SL:KB]
 }
 
 LLNearbyChatHandler::~LLNearbyChatHandler()
@@ -568,15 +571,34 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 	sChatWatcher->post(notification);
 
 
+//	if( !chat_bar->isMinimized()
+//		&& nearby_chat->isInVisibleChain() 
+//		|| ( chat_msg.mSourceType == CHAT_SOURCE_AGENT
+//			&& gSavedSettings.getBOOL("UseChatBubbles") )
+//		|| !mChannel->getShowToasts() ) // to prevent toasts in Busy mode
+//		return;//no need in toast if chat is visible or if bubble chat is enabled
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	LLNearbyChatScreenChannel* channel = dynamic_cast<LLNearbyChatScreenChannel*>(mChannelHandle.get());
+	if (!channel)
+	{
+		return;
+	}
+
 	if( !chat_bar->isMinimized()
 		&& nearby_chat->isInVisibleChain() 
 		|| ( chat_msg.mSourceType == CHAT_SOURCE_AGENT
 			&& gSavedSettings.getBOOL("UseChatBubbles") )
-		|| !mChannel->getShowToasts() ) // to prevent toasts in Busy mode
+		|| !channel->getShowToasts() ) // to prevent toasts in Busy mode
+	{
 		return;//no need in toast if chat is visible or if bubble chat is enabled
+	}
+// [/SL:KB]
 
 	// arrange a channel on a screen
-	if(!mChannel->getVisible())
+//	if(!mChannel->getVisible())
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	if (!channel->getVisible())
+// [/SL:KB]
 	{
 		initChannel();
 	}
@@ -593,9 +615,9 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 	}
 	*/
 
-	LLNearbyChatScreenChannel* channel = dynamic_cast<LLNearbyChatScreenChannel*>(mChannel);
-
-	if(channel)
+//	LLNearbyChatScreenChannel* channel = dynamic_cast<LLNearbyChatScreenChannel*>(mChannel);
+//
+//	if(channel)
 	{
 		// Add a nearby chat toast.
 		LLUUID id;
