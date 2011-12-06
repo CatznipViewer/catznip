@@ -347,11 +347,21 @@ LLVector3 LLManip::getSavedPivotPoint() const
 
 LLVector3 LLManip::getPivotPoint()
 {
-	if (mObjectSelection->getFirstObject() && mObjectSelection->getObjectCount() == 1 && mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	static LLCachedControl<bool> fAxisAtRoot(gSavedSettings, "AxisAtRootEnabled");
+
+	const BOOL children_ok = TRUE;
+	if ((mObjectSelection->getFirstRootObject(children_ok)) && ((fAxisAtRoot) || (mObjectSelection->getObjectCount() == 1)) && (mObjectSelection->getSelectType() != SELECT_TYPE_HUD))
 	{
-		return mObjectSelection->getFirstObject()->getPivotPositionAgent();
+		return mObjectSelection->getFirstRootObject(children_ok)->getPivotPositionAgent();
 	}
 	return LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
+// [/SL:KB]
+//	if (mObjectSelection->getFirstObject() && mObjectSelection->getObjectCount() == 1 && mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
+//	{
+//		return mObjectSelection->getFirstObject()->getPivotPositionAgent();
+//	}
+//	return LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
 }
 
 

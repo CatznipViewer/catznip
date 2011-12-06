@@ -3,7 +3,7 @@
  open_positioning="cascading"
  legacy_header_height="18"
  follows="left|top|right"
- height="580"
+ height="600"
  layout="topleft"
  bg_opaque_image="Window_NoTitle_Foreground"
  bg_alpha_image="Window_NoTitle_Background"
@@ -326,18 +326,60 @@
      top_pad="-4"
      follows="left|top"
      width="134" />
-   <check_box
+    <check_box
+     control_name="AxisAtRootEnabled"
+     height="18"
+     initial_value="false"
+     label="Axis at Root"
+     layout="topleft"
+     left="143"
+     top_pad="0"
+     name="checkbox axis at root"
+     width="134" />
+    <button
+     left_pad="0"
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Axis Options..."
+     tool_tip="See more axis options"
+     top_pad="-22"
+     right="-10"
+     width="18"
+     height="23" >
+        <button.commit_callback
+         function="BuildTool.axisOptions"/>
+    </button>
+    <check_box
      control_name="SnapEnabled"
      height="18"
      initial_value="true"
      label="Snap to grid"
      layout="topleft"
+     left="143"
      top_pad="0"
      name="checkbox snap to grid"
      width="134" />
+    <button
+     left_pad="0"
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Grid Options..."
+     tool_tip="See more grid options"
+     top_pad="-22"
+     right="-10"
+     width="18"
+     height="23" >
+	 <button.commit_callback
+	     function="BuildTool.gridOptions"/>
+	</button>
     <combo_box
      height="23"
      layout="topleft"
+     left="162"
      follows="left|top"
      name="combobox grid mode"
      tool_tip="Choose the type of grid ruler for positioning the object"
@@ -358,21 +400,6 @@
 		 <combo_box.commit_callback
 	     function="BuildTool.gridMode"/>
     </combo_box>
-    <button
-     left_pad="0"
-     image_selected="ForwardArrow_Press"
-     image_unselected="ForwardArrow_Off"
-     layout="topleft"
-     follows="top|left"
-     name="Options..."
-     tool_tip="See more grid options"
-     top_pad="-22"
-     right="-10"
-     width="18"
-     height="23" >
-	 <button.commit_callback
-	     function="BuildTool.gridOptions"/>
-	</button>
    <button
      follows="left|top"
      height="20"
@@ -759,7 +786,7 @@
 	  layout="topleft"
 	  left="10"
 	  name="selection_empty"
-	  top_pad="0"
+	  top="155"
 	  width="100">
 		Nothing selected.
 	</text>
@@ -823,7 +850,7 @@
     follows="left|top"
     height="20"
     label="Link"
-    top="155"
+    top="170"
     layout="topleft"
     left="10"
     name="link_btn"
@@ -850,7 +877,7 @@
     layout="topleft"
     left="6"
     name="cost_text_border"
-    top="135"
+    top="150"
     width="282"/>
     <tab_container
      follows="left|top"
@@ -862,7 +889,7 @@
      tab_min_width="40"
      tab_position="top"
      tab_height="25"
-     top="178"
+     top="193"
      width="295">
 	
 <panel

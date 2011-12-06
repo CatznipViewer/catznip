@@ -141,6 +141,10 @@ public:
 	LLButton*		mBtnLink;
 	LLButton*		mBtnUnlink;
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	LLCheckBoxCtrl*	mCheckAxisAtRoot;
+// [/SL:KB]
+
 	LLCheckBoxCtrl*	mCheckSnapToGrid;
 	LLButton*		mBtnGridOptions;
 // [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a

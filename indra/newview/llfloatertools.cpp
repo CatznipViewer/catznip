@@ -252,6 +252,9 @@ BOOL	LLFloaterTools::postBuild()
 	
 	mCheckSelectIndividual	= getChild<LLCheckBoxCtrl>("checkbox edit linked parts");	
 	getChild<LLUICtrl>("checkbox edit linked parts")->setValue((BOOL)gSavedSettings.getBOOL("EditLinkedParts"));
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	mCheckAxisAtRoot		= getChild<LLCheckBoxCtrl>("checkbox axis at root");
+// [/SL:KB]
 	mCheckSnapToGrid		= getChild<LLCheckBoxCtrl>("checkbox snap to grid");
 	getChild<LLUICtrl>("checkbox snap to grid")->setValue((BOOL)gSavedSettings.getBOOL("SnapEnabled"));
 // [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
@@ -336,6 +339,9 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCheckSelectIndividual(NULL),
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	mCheckAxisAtRoot(NULL),
+// [/SL:KB]
 	mCheckSnapToGrid(NULL),
 	mBtnGridOptions(NULL),
 	mTitleMedia(NULL),
@@ -730,6 +736,9 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 		mComboGridMode->setCurrentByIndex(index);
 	}
+// [/SL:KB]
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
 // [/SL:KB]
 	// Snap to grid disabled for grab tool - very confusing
 	if (mCheckSnapToGrid) mCheckSnapToGrid->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
