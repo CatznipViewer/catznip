@@ -99,7 +99,7 @@ SetOverwrite on							; stomp files by default
 AutoCloseWindow true					; after all files install, close window
 
 InstallDir "$PROGRAMFILES\${INSTNAME}"
-InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" ""
+InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 Page directory dirPre
 Page instfiles
@@ -217,7 +217,7 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function CheckIfAlreadyCurrent
     Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version"
     StrCmp $0 ${VERSION_LONG} 0 continue_install
     StrCmp $SKIP_DIALOGS "true" continue_install
     MessageBox MB_OKCANCEL $(CheckIfCurrentMB) /SD IDOK IDOK continue_install
@@ -337,131 +337,131 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Save user files to temp location
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function PreserveUserFiles
-
-Push $0
-Push $1
-Push $2
-
-    RMDir /r "$TEMP\SecondLifeSettingsBackup"
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup"
-    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
-
-  LOOP:
-    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
-    StrCmp $1 "" DONE               ; no more users
-
-    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
-    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
-
-    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
-    ExpandEnvStrings $2 $2
-
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup\$0"
-    CopyFiles /SILENT "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\$0"
-
-  CONTINUE:
-    IntOp $0 $0 + 1
-    Goto LOOP
-  DONE:
-
-Pop $2
-Pop $1
-Pop $0
-
-; Copy files in Documents and Settings\All Users\SecondLife
-Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-    StrCmp $0 "" +2
-    CreateDirectory "$TEMP\SecondLifeSettingsBackup\AllUsers\"
-    CopyFiles /SILENT "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\AllUsers\"
-Pop $0
-
-FunctionEnd
+;Function PreserveUserFiles
+;
+;Push $0
+;Push $1
+;Push $2
+;
+;    RMDir /r "$TEMP\${PRODUCT_SHORT}SettingsBackup"
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup"
+;    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
+;
+;  LOOP:
+;    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
+;    StrCmp $1 "" DONE               ; no more users
+;
+;    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
+;    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
+;
+;    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
+;    ExpandEnvStrings $2 $2
+;
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\$0"
+;    CopyFiles /SILENT "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\$0"
+;
+;  CONTINUE:
+;    IntOp $0 $0 + 1
+;    Goto LOOP
+;  DONE:
+;
+;Pop $2
+;Pop $1
+;Pop $0
+;
+;; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
+;Push $0
+;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;    StrCmp $0 "" +2
+;    CreateDirectory "$TEMP\${PRODUCT_SHORT}SettingsBackup\AllUsers\"
+;    CopyFiles /SILENT "$2\Application Data\SecondLife\*" "$TEMP\SecondLifeSettingsBackup\AllUsers\"
+;Pop $0
+;
+;FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Restore user files from temp location
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function RestoreUserFiles
-
-Push $0
-Push $1
-Push $2
-
-    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
-
-  LOOP:
-    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
-    StrCmp $1 "" DONE               ; no more users
-
-    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
-    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
-
-    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
-    ExpandEnvStrings $2 $2
-
-    CreateDirectory "$2\Application Data\SecondLife\"
-    CopyFiles /SILENT "$TEMP\SecondLifeSettingsBackup\$0\*" "$2\Application Data\SecondLife\" 
-
-  CONTINUE:
-    IntOp $0 $0 + 1
-    Goto LOOP
-  DONE:
-
-Pop $2
-Pop $1
-Pop $0
-
-; Copy files in Documents and Settings\All Users\SecondLife
-Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-    StrCmp $0 "" +2
-    CreateDirectory "$2\Application Data\SecondLife\"
-    CopyFiles /SILENT "$TEMP\SecondLifeSettingsBackup\AllUsers\*" "$2\Application Data\SecondLife\" 
-Pop $0
-
-FunctionEnd
+;Function RestoreUserFiles
+;
+;Push $0
+;Push $1
+;Push $2
+;
+;    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
+;
+;  LOOP:
+;    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
+;    StrCmp $1 "" DONE               ; no more users
+;
+;    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
+;    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
+;
+;    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
+;    ExpandEnvStrings $2 $2
+;
+;    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+;    CopyFiles /SILENT "$TEMP\SecondLifeSettingsBackup\$0\*" "$2\Application Data\SecondLife\" 
+;
+;  CONTINUE:
+;    IntOp $0 $0 + 1
+;    Goto LOOP
+;  DONE:
+;
+;Pop $2
+;Pop $1
+;Pop $0
+;
+;; Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
+;Push $0
+;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;    StrCmp $0 "" +2
+;    CreateDirectory "$2\Application Data\${PRODUCT_SHORT}\"
+;    CopyFiles /SILENT "$TEMP\SecondLifeSettingsBackup\AllUsers\*" "$2\Application Data\SecondLife\" 
+;Pop $0
+;
+;FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Remove temp dirs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function RemoveTempUserFiles
-
-Push $0
-Push $1
-Push $2
-
-    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
-
-  LOOP:
-    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
-    StrCmp $1 "" DONE               ; no more users
-
-    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
-    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
-
-    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
-    ExpandEnvStrings $2 $2
-
-    RMDir /r "$TEMP\SecondLifeSettingsBackup\$0\*"
-
-  CONTINUE:
-    IntOp $0 $0 + 1
-    Goto LOOP
-  DONE:
-
-Pop $2
-Pop $1
-Pop $0
-
-; Copy files in Documents and Settings\All Users\SecondLife
-Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
-    StrCmp $0 "" +2
-    RMDir /r "$TEMP\SecondLifeSettingsBackup\AllUsers\*"
-Pop $0
-
-FunctionEnd
+;Function RemoveTempUserFiles
+;
+;Push $0
+;Push $1
+;Push $2
+;
+;    StrCpy $0 0 ; Index number used to iterate via EnumRegKey
+;
+;  LOOP:
+;    EnumRegKey $1 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList" $0
+;    StrCmp $1 "" DONE               ; no more users
+;
+;    ReadRegStr $2 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\$1" "ProfileImagePath" 
+;    StrCmp $2 "" CONTINUE 0         ; "ProfileImagePath" value is missing
+;
+;    ; Required since ProfileImagePath is of type REG_EXPAND_SZ
+;    ExpandEnvStrings $2 $2
+;
+;    RMDir /r "$TEMP\SecondLifeSettingsBackup\$0\*"
+;
+;  CONTINUE:
+;    IntOp $0 $0 + 1
+;    Goto LOOP
+;  DONE:
+;
+;Pop $2
+;Pop $1
+;Pop $0
+;
+;; Copy files in Documents and Settings\All Users\SecondLife
+;Push $0
+;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
+;    StrCmp $0 "" +2
+;    RMDir /r "$TEMP\SecondLifeSettingsBackup\AllUsers\*"
+;Pop $0
+;
+;FunctionEnd
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -552,12 +552,12 @@ FunctionEnd
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Delete files in Documents and Settings\<user>\SecondLife
-; Delete files in Documents and Settings\All Users\SecondLife
+; Delete files in Documents and Settings\<user>\${PRODUCT_SHORT}
+; Delete files in Documents and Settings\All Users\${PRODUCT_SHORT}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function un.DocumentsAndSettingsFolder
 
-; Delete files in Documents and Settings\<user>\SecondLife
+; Delete files in Documents and Settings\<user>\${PRODUCT_SHORT}
 Push $0
 Push $1
 Push $2
@@ -577,14 +577,14 @@ Push $2
     ExpandEnvStrings $2 $2
 
         ; Remove all cache and settings files but leave any other .txt files to preserve the chat logs
-;    RMDir /r "$2\Application Data\SecondLife\logs"
-    RMDir /r "$2\Application Data\SecondLife\browser_profile"
-    RMDir /r "$2\Application Data\SecondLife\user_settings"
-    Delete  "$2\Application Data\SecondLife\*.xml"
-    Delete  "$2\Application Data\SecondLife\*.bmp"
-    Delete  "$2\Application Data\SecondLife\search_history.txt"
-    Delete  "$2\Application Data\SecondLife\plugin_cookies.txt"
-    Delete  "$2\Application Data\SecondLife\typed_locations.txt"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\logs"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\browser_profile"
+    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\user_settings"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\*.xml"
+;    Delete  "$2\Application Data\${PRODUCT_SHORT}\*.bmp"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\search_history.txt"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\plugin_cookies.txt"
+    Delete  "$2\Application Data\${PRODUCT_SHORT}\typed_locations.txt"
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -595,17 +595,17 @@ Pop $2
 Pop $1
 Pop $0
 
-; Delete files in Documents and Settings\All Users\SecondLife
+; Delete files in Documents and Settings\All Users\${PRODUCT_SHORT}
 Push $0
   ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
   StrCmp $0 "" +2
-  RMDir /r "$0\SecondLife"
+  RMDir /r "$0\${PRODUCT_SHORT}"
 Pop $0
 
-; Delete files in C:\Windows\Application Data\SecondLife
+; Delete files in C:\Windows\Application Data\${PRODUCT_SHORT}
 ; If the user is running on a pre-NT system, Application Data lives here instead of
 ; in Documents and Settings.
-RMDir /r "$WINDIR\Application Data\SecondLife"
+RMDir /r "$WINDIR\Application Data\${PRODUCT_SHORT}"
 
 FunctionEnd
 
@@ -648,7 +648,7 @@ Function un.RemovePassword
 DetailPrint "Removing Second Life password"
 
 SetShellVarContext current
-Delete "$APPDATA\SecondLife\user_settings\password.dat"
+Delete "$APPDATA\${PRODUCT_SHORT}\user_settings\password.dat"
 SetShellVarContext all
 
 FunctionEnd
@@ -675,8 +675,8 @@ Delete "$INSTDIR\dronesettings.ini"
 Delete "$INSTDIR\message_template.msg"
 Delete "$INSTDIR\newview.pdb"
 Delete "$INSTDIR\newview.map"
-Delete "$INSTDIR\SecondLife.pdb"
-Delete "$INSTDIR\SecondLife.map"
+Delete "$INSTDIR\${PRODUCT_SHORT}.pdb"
+Delete "$INSTDIR\${PRODUCT_SHORT}.map"
 Delete "$INSTDIR\comm.dat"
 Delete "$INSTDIR\*.glsl"
 Delete "$INSTDIR\motions\*.lla"
@@ -733,7 +733,7 @@ SetShellVarContext all
 Call un.CloseSecondLife
 
 ; Clean up registry keys and subkeys (these should all be !defines somewhere)
-DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG"
+DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG"
 DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG"
 
 ; Clean up shortcuts
@@ -872,7 +872,7 @@ Function .onInit
 lbl_configure_default_lang:
     ; If we currently have a version of SL installed, default to the language of that install
     ; Otherwise don't change $LANGUAGE and it will default to the OS UI language.
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors +2 0 ; If error skip the copy instruction 
 	StrCpy $LANGUAGE $0
 
@@ -894,7 +894,7 @@ lbl_build_menu:
     StrCpy $LANGUAGE $0
 
 	; save language in registry		
-	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage" $LANGUAGE
+	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage" $LANGUAGE
 lbl_return:
     Pop $0
     Return
@@ -904,7 +904,7 @@ FunctionEnd
 Function un.onInit
 	; read language from registry and set for uninstaller
     ; Key will be removed on successful uninstall
-	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors lbl_end
 	StrCpy $LANGUAGE $0
 lbl_end:
@@ -994,12 +994,16 @@ CreateShortCut "$INSTDIR\Uninstall $INSTSHORTCUT.lnk" \
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Write registry
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "" "$INSTDIR"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version" "${VERSION_LONG}"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Flags" "$INSTFLAGS"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Exe" "$INSTEXE"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "" "$INSTDIR"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version" "${VERSION_LONG}"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Flags" "$INSTFLAGS"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Exe" "$INSTEXE"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayName" "$INSTPROG (remove only)"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayVersion" "${VERSION_LONG}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "Publisher" "${PUBLISHER}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLInfoAbout" "${URL_ABOUT}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLUpdateInfo" "${URL_DOWNLOAD}"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "UninstallString" '"$INSTDIR\uninst.exe"'
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
