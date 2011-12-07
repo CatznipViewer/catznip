@@ -1107,13 +1107,18 @@ void LLFloaterTools::onClickAxisOptions()
 {
 	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
 	if (pAxisFloater)
-		addDependentFloater(pAxisFloater, FALSE);
+		addDependentFloater(pAxisFloater, TRUE);
 }
 // [/SL:KB]
 
 void LLFloaterTools::onClickGridOptions()
 {
-	LLFloaterReg::showInstance("build_options");
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
+	if (pGridFloater)
+		addDependentFloater(pGridFloater, TRUE);
+// [/SL:KB]
+//	LLFloaterReg::showInstance("build_options");
 	// RN: this makes grid options dependent on build tools window
 	//floaterp->addDependentFloater(LLFloaterBuildOptions::getInstance(), FALSE);
 }
