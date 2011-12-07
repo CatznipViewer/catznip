@@ -1550,6 +1550,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ChatTimestampSeconds</key>
+    <map>
+      <key>Comment</key>
+      <string>Include seconds in the timestamps for chat (nearby chat and instant messages)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>ChatVisible</key>
     <map>
       <key>Comment</key>
