@@ -349,13 +349,23 @@ LLVector3 LLManip::getPivotPoint()
 {
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	static LLCachedControl<bool> fAxisAtRoot(gSavedSettings, "AxisAtRootEnabled");
+	static LLCachedControl<LLVector3> vecAxisPosition(gSavedSettings, "AxisPosition");
+	static LLCachedControl<LLVector3> vecAxisOffset(gSavedSettings, "AxisOffset");
 
-	const BOOL children_ok = TRUE;
-	if ((mObjectSelection->getFirstRootObject(children_ok)) && ((fAxisAtRoot) || (mObjectSelection->getObjectCount() == 1)) && (mObjectSelection->getSelectType() != SELECT_TYPE_HUD))
-	{
-		return mObjectSelection->getFirstRootObject(children_ok)->getPivotPositionAgent();
-	}
-	return LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
+	const LLViewerObject* pRootObj = mObjectSelection->getFirstRootObject(TRUE);	// Root object if we have one, but children will do as well
+	bool fUseRoot = (pRootObj) && ((fAxisAtRoot) || (mObjectSelection->getObjectCount() == 1)) && (mObjectSelection->getSelectType() != SELECT_TYPE_HUD);
+
+	LLVector3 posAxis = (fUseRoot) ? pRootObj->getPivotPositionAgent() : LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
+	LLVector3 scaleSelection = (fUseRoot) ? pRootObj->getScale() : LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal();
+	LLQuaternion rotSelection = (fUseRoot) ? pRootObj->getRotation() : LLSelectMgr::getInstance()->getBBoxOfSelection().getRotation();
+
+	// Calculate the position of the axis relative to the center of the root/selection
+	posAxis += vecAxisPosition().scaledVec(scaleSelection / 2) * rotSelection;
+
+	// Offset the position
+	posAxis += vecAxisOffset * rotSelection;
+	
+	return posAxis;
 // [/SL:KB]
 //	if (mObjectSelection->getFirstObject() && mObjectSelection->getObjectCount() == 1 && mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
 //	{

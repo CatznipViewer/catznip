@@ -676,6 +676,36 @@
       <key>Value</key>
       <boolean>0</boolean>
     </map>
+    <key>AxisOffset</key>
+    <map>
+      <key>Comment</key>
+      <string>Offset of the axis (in meters)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Vector3</string>
+      <key>Value</key>
+      <array>
+        <real>0.0</real>
+        <real>0.0</real>
+        <real>0.0</real>
+      </array>
+    </map>
+    <key>AxisPosition</key>
+    <map>
+      <key>Comment</key>
+      <string>Position of the axis relative to the center of the current selection</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Vector3</string>
+      <key>Value</key>
+      <array>
+        <real>0.0</real>
+        <real>0.0</real>
+        <real>0.0</real>
+      </array>
+    </map>
 
     <key>BackgroundYieldTime</key>
     <map>

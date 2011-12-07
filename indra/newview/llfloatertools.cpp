@@ -405,6 +405,9 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 	mCommitCallbackRegistrar.add("BuildTool.commitRadioEdit",	boost::bind(&commit_radio_group_edit,_1));
 
 	mCommitCallbackRegistrar.add("BuildTool.selectComponent",	boost::bind(&commit_select_component, this));
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	mCommitCallbackRegistrar.add("BuildTool.axisOptions",		boost::bind(&LLFloaterTools::onClickAxisOptions,this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("BuildTool.gridOptions",		boost::bind(&LLFloaterTools::onClickGridOptions,this));
 	mCommitCallbackRegistrar.add("BuildTool.applyToSelection",	boost::bind(&click_apply_to_selection, this));
 // [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
@@ -1099,6 +1102,14 @@ void LLFloaterTools::setObjectType( LLPCode pcode )
 	gFocusMgr.setMouseCapture(NULL);
 }
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+void LLFloaterTools::onClickAxisOptions()
+{
+	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
+	if (pAxisFloater)
+		addDependentFloater(pAxisFloater, FALSE);
+}
+// [/SL:KB]
 
 void LLFloaterTools::onClickGridOptions()
 {
