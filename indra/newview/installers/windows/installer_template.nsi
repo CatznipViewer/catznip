@@ -533,6 +533,12 @@ RmDir /r "$INSTDIR\skins\xui"
 RmDir /r "$INSTDIR\skins\textures"
 Delete "$INSTDIR\skins\*.txt"
 
+; Remove the default, starlight and stardust skins since left-over files might 
+; cause crashes or otherwise undesriable behaviour
+RmDir /r "$INSTDIR\skins\default"
+RmDir /r "$INSTDIR\skins\starlight"
+RmDir /r "$INSTDIR\skins\stardust"
+
 FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
