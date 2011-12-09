@@ -253,6 +253,13 @@
          function="ShowAgentProfile"
          parameter="agent" />
     </menu_item_call>
+      <menu_item_call
+       label="My Picks"
+       name="ChangePicks">
+        <menu_item_call.on_click
+         function="Floater.Show"
+         parameter="picks" />
+      </menu_item_call>
     <menu_item_call
 		 label="Debug Textures"
          name="Debug...">
