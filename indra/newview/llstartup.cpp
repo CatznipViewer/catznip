@@ -74,6 +74,9 @@
 #include "llsecondlifeurls.h"
 #include "llstring.h"
 #include "lluserrelations.h"
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1.0a)
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "llversioninfo.h"
 #include "llviewercontrol.h"
 #include "llviewerhelp.h"
@@ -809,6 +812,15 @@ bool idle_startup()
 		}
 #endif
 		timeout.reset();
+
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+		if(gSavedSettings.getU32("UpdaterServiceSetting"))
+		{
+			bool install_if_ready = true;
+			LLLoginInstance::instance().getUpdaterService()->startChecking(install_if_ready);
+		}
+// [/SL:KB]
+
 		return FALSE;
 	}
 
