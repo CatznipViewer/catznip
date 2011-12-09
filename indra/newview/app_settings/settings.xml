@@ -2962,6 +2962,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>DragAndDropCommitDelay</key>
+    <map>
+      <key>Comment</key>
+      <string>Seconds before committing when hovering over a button while performing a drag and drop operation</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.5</real>
+    </map>
     <key>DragAndDropToolTipDelay</key>
     <map>
       <key>Comment</key>
@@ -4049,7 +4060,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>https://my.secondlife.com/[AGENT_NAME]</string>
+      <string>https://my.secondlife.com/[AGENT_NAME]#about_tab</string>
     </map>
 	<key>WebProfileNonProductionURL</key>
 	<map>

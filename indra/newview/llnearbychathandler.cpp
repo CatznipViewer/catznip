@@ -362,10 +362,16 @@ static bool sort_toasts_predicate(LLHandle<LLToast> first, LLHandle<LLToast> sec
 
 void LLNearbyChatScreenChannel::arrangeToasts()
 {
-	if(mStopProcessing || isHovering())
+//	if(mStopProcessing || isHovering())
+//		return;
+//
+//	LLView* floater_snap_region = gViewerWindow->getRootView()->getChildView("floater_snap_region");
+// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if ( (m_active_toasts.empty()) || (mStopProcessing) || (isHovering()) )
 		return;
 
-	LLView* floater_snap_region = gViewerWindow->getRootView()->getChildView("floater_snap_region");
+	LLView* floater_snap_region = gFloaterView->getFloaterSnapView();
+// [/SL:KB]
 
 	if (!getParent())
 	{

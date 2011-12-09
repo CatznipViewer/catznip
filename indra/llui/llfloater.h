@@ -532,7 +532,17 @@ public:
 	// value is not defined.
 	S32 getZOrder(LLFloater* child);
 
-	void setFloaterSnapView(LLHandle<LLView> snap_view) {mSnapView = snap_view; }
+// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+protected:
+	void	onFloaterSnapReshape();
+public:
+	LLView*	getFloaterSnapView()	{ return mSnapView.get(); }
+	void	setFloaterSnapView(LLHandle<LLView> snap_view);
+
+	typedef boost::signals2::signal<void (LLView* view, const LLRect& rect)> snap_changed_signal_t;
+	static boost::signals2::connection setFloaterSnapChangedCallback(const snap_changed_signal_t::slot_type& cb);
+// [/SL:KB]
+//	void setFloaterSnapView(LLHandle<LLView> snap_view) {mSnapView = snap_view; }
 
 private:
 	void hiddenFloaterClosed(LLFloater* floater);
@@ -544,6 +554,10 @@ private:
 	S32				mMinimizePositionVOffset;
 	typedef std::vector<std::pair<LLHandle<LLFloater>, boost::signals2::connection> > hidden_floaters_t;
 	hidden_floaters_t mHiddenFloaters;
+
+// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	static snap_changed_signal_t s_SnapChangedSignal;
+// [/SL:KB]
 };
 
 //
