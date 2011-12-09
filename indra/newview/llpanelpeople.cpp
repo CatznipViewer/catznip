@@ -79,6 +79,127 @@ static const std::string RECENT_TAB_NAME	= "recent_panel";
 
 static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
 
+// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2011-12-05 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+#include "llcombobox.h"
+
+class LLGroupTitleComboCtrl : public LLComboBox, public LLParticularGroupObserver, public LLOldEvents::LLSimpleListener
+{
+	friend class LLUICtrlFactory;
+public:
+	struct Params : public LLInitParam::Block<Params, LLComboBox::Params> {};
+protected:
+	LLGroupTitleComboCtrl(const Params& p);
+public:
+	/*virtual*/ ~LLGroupTitleComboCtrl(); 
+
+	/*virtual*/ void onCommit();
+	/*virtual*/ BOOL postBuild();
+
+	// LLParticularGroupObserver overrides
+	/*virtual*/ void changed(const LLUUID& idGroup, LLGroupChange change);
+	// LLSimpleListener overrides
+	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& sdData);
+
+protected:
+	LLUUID m_idCurGroup;
+};
+
+static LLDefaultChildRegistry::Register<LLGroupTitleComboCtrl> register_grouptitle_combo("grouptitle_combo");
+
+LLGroupTitleComboCtrl::LLGroupTitleComboCtrl(const Params& p) : LLComboBox(p)
+{
+	gAgent.addListener(this, "new group");
+}
+
+LLGroupTitleComboCtrl::~LLGroupTitleComboCtrl()
+{
+	gAgent.removeListener(this);
+}
+
+void LLGroupTitleComboCtrl::onCommit()
+{
+	LLComboBox::onCommit();
+
+	S32 idxCur = getCurrentIndex();
+	if (0 == idxCur)		// "<No Title>"
+	{
+		gSavedSettings.setBOOL("RenderHideGroupTitle", TRUE);
+	}
+	else if (idxCur > 1)	// Group roles (anything past separator)
+	{
+		gSavedSettings.setBOOL("RenderHideGroupTitle", FALSE);
+		LLGroupMgr::getInstance()->sendGroupTitleUpdate(m_idCurGroup, getCurrentID());
+	}
+}
+
+BOOL LLGroupTitleComboCtrl::postBuild()
+{
+	m_idCurGroup = gAgent.getGroupID();
+	if (m_idCurGroup.notNull())
+	{
+		LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
+		LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
+	}
+
+	setEnabled(false);
+
+	return TRUE;
+}
+
+void LLGroupTitleComboCtrl::changed(const LLUUID& idGroup, LLGroupChange change)
+{
+	if ( ((GC_ALL != change) && (GC_TITLES != change)) || (gAgent.getGroupID() != idGroup) )
+		return;
+
+	const LLGroupMgrGroupData* pGroupData = LLGroupMgr::getInstance()->getGroupData(gAgent.getGroupID());
+	if (!pGroupData)
+		return;
+
+	clear();
+	clearRows();
+	setEnabled(true);
+
+	add("<No Title>", LLUUID::generateNewID());
+	addSeparator(ADD_BOTTOM);
+
+	LLUUID idActiveRole;
+	for (std::vector<LLGroupTitle>::const_iterator itGroupTitle = pGroupData->mTitles.begin(); itGroupTitle != pGroupData->mTitles.end(); ++itGroupTitle)
+	{
+		add(itGroupTitle->mTitle, itGroupTitle->mRoleID, ADD_BOTTOM);
+		if (itGroupTitle->mSelected)
+			idActiveRole = itGroupTitle->mRoleID;
+	}
+
+	if (gSavedSettings.getBOOL("RenderHideGroupTitle"))
+		setCurrentByIndex(0);
+	else
+		setCurrentByID(idActiveRole);
+}
+
+bool LLGroupTitleComboCtrl::handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& sdData)
+{
+	if ("new group" == event->desc())
+	{
+		if (m_idCurGroup.notNull())
+			LLGroupMgr::getInstance()->removeObserver(m_idCurGroup, this);
+
+		m_idCurGroup = gAgent.getGroupID();
+		if (m_idCurGroup.notNull())
+		{
+			LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
+			LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
+		}
+
+		clear();
+		clearRows();
+		setEnabled(false);
+
+		return true;
+	}
+	return false;
+}
+// [/SL:KB]
+
 /** Comparator for comparing avatar items by last interaction date */
 class LLAvatarItemRecentComparator : public LLAvatarItemComparator
 {

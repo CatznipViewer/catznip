@@ -513,6 +513,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                  name="activate_btn"
                  tool_tip="Activate selected group"
                  width="31" />
+                <!--
                  <icon
              	 follows="bottom|left|right"
              	 height="25"
@@ -522,6 +523,14 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              	 name="dummy_icon"
              	 width="212"
              />
+                -->
+                <grouptitle_combo
+                 follows="bottom|left|right"
+                 height="25"
+                 layout="topleft"
+                 left_pad="1"
+                 name="active_group_title"
+                 width="212" />
             </panel>
         </panel>
         <panel
