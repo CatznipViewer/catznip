@@ -116,11 +116,18 @@ private:
 	void					onNearbyViewSortMenuItemClicked(const LLSD& userdata);
 	void					onGroupsViewSortMenuItemClicked(const LLSD& userdata);
 	void					onRecentViewSortMenuItemClicked(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	void					onRecentSetExpiration(const LLSD& userdata);
+	void					onRecentClearHistory(const LLSD& userdata);
+// [/SL:KB]
 
 	//returns false only if group is "none"
 	bool					isRealGroup();
 	bool					onFriendsViewSortMenuItemCheck(const LLSD& userdata);
 	bool					onRecentViewSortMenuItemCheck(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	bool					onRecentCheckExpiration(const LLSD& userdata);
+// [/SL:KB]
 	bool					onNearbyViewSortMenuItemCheck(const LLSD& userdata);
 
 	// misc callbacks

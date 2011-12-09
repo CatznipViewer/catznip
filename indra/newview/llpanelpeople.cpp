@@ -667,10 +667,17 @@ BOOL LLPanelPeople::postBuild()
 	registrar.add("People.Nearby.ViewSort.Action",  boost::bind(&LLPanelPeople::onNearbyViewSortMenuItemClicked,  this, _2));
 	registrar.add("People.Groups.ViewSort.Action",  boost::bind(&LLPanelPeople::onGroupsViewSortMenuItemClicked,  this, _2));
 	registrar.add("People.Recent.ViewSort.Action",  boost::bind(&LLPanelPeople::onRecentViewSortMenuItemClicked,  this, _2));
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	registrar.add("People.Recent.Expiration.Set",   boost::bind(&LLPanelPeople::onRecentSetExpiration, this, _2));
+	registrar.add("People.Recent.ClearHistory",     boost::bind(&LLPanelPeople::onRecentClearHistory, this, _2));
+// [/SL:KB]
 
 	enable_registrar.add("People.Group.Minus.Enable",	boost::bind(&LLPanelPeople::isRealGroup,	this));
 	enable_registrar.add("People.Friends.ViewSort.CheckItem",	boost::bind(&LLPanelPeople::onFriendsViewSortMenuItemCheck,	this, _2));
 	enable_registrar.add("People.Recent.ViewSort.CheckItem",	boost::bind(&LLPanelPeople::onRecentViewSortMenuItemCheck,	this, _2));
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	enable_registrar.add("People.Recent.Expiration.Check",		boost::bind(&LLPanelPeople::onRecentCheckExpiration, this, _2));
+// [/SL:KB]
 	enable_registrar.add("People.Nearby.ViewSort.CheckItem",	boost::bind(&LLPanelPeople::onNearbyViewSortMenuItemCheck,	this, _2));
 
 	mNearbyGearButton = getChild<LLMenuButton>("nearby_view_sort_btn");
@@ -1402,6 +1409,19 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	}
 }
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+void LLPanelPeople::onRecentSetExpiration(const LLSD& userdata)
+{
+	gSavedSettings.setU32("RecentPeopleCutOffDays", userdata.asInteger());
+}
+
+void LLPanelPeople::onRecentClearHistory(const LLSD& userdata)
+{
+	LLRecentPeople::getInstance()->purgeItems();
+	LLRecentPeople::getInstance()->save();
+}
+// [/SL:KB]
+
 bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata) 
 {
 	std::string item = userdata.asString();
@@ -1427,6 +1447,13 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 
 	return false;
 }
+
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+bool LLPanelPeople::onRecentCheckExpiration(const LLSD& userdata) 
+{
+	return (userdata.asInteger() == gSavedSettings.getU32("RecentPeopleCutOffDays"));
+}
+// [/SL:KB]
 
 void LLPanelPeople::onCallButtonClicked()
 {
