@@ -39,7 +39,10 @@ bool LLTransUtil::parseStrings(const std::string& xml_filename, const std::set<s
 	BOOL success = LLUICtrlFactory::getLayeredXMLNode(xml_filename, root);
 	if (!success)
 	{
-		llerrs << "Couldn't load string table" << llendl;
+//		llerrs << "Couldn't load string table" << llendl;
+// [SL:KB] - Patch: Viewer-ErrorLogging | Checked: 2011-09-23 (Catznip-2.8.0e) | Added: Catznip-2.4.0a
+		llerrs << "Couldn't load string table" << xml_filename << llendl;
+// [/SL:KB]
 		return false;
 	}
 
