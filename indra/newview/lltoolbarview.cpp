@@ -74,6 +74,9 @@ LLToolBarView::LLToolBarView(const LLToolBarView::Params& p)
 :	LLUICtrl(p),
 	mDragStarted(false),
 	mDragToolbarButton(NULL),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mToolbarsVisible(true),
+// [/SL:KB]
 	mToolbarsLoaded(false)
 {
 	for (S32 i = 0; i < TOOLBAR_COUNT; i++)
@@ -104,8 +107,12 @@ BOOL LLToolBarView::postBuild()
 		mToolbars[i]->setStartDragCallback(boost::bind(LLToolBarView::startDragTool,_1,_2,_3));
 		mToolbars[i]->setHandleDragCallback(boost::bind(LLToolBarView::handleDragTool,_1,_2,_3,_4));
 		mToolbars[i]->setHandleDropCallback(boost::bind(LLToolBarView::handleDropTool,_1,_2,_3,_4));
-		mToolbars[i]->setButtonAddCallback(boost::bind(LLToolBarView::onToolBarButtonAdded,_1));
-		mToolbars[i]->setButtonRemoveCallback(boost::bind(LLToolBarView::onToolBarButtonRemoved,_1));
+//		mToolbars[i]->setButtonAddCallback(boost::bind(LLToolBarView::onToolBarButtonAdded,_1));
+//		mToolbars[i]->setButtonRemoveCallback(boost::bind(LLToolBarView::onToolBarButtonRemoved,_1));
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		mToolbars[i]->setButtonAddCallback(boost::bind(&LLToolBarView::onToolBarButtonAdded, this, (EToolBarLocation)i, _1));
+		mToolbars[i]->setButtonRemoveCallback(boost::bind(&LLToolBarView::onToolBarButtonRemoved, this, (EToolBarLocation)i, _1));
+// [/SL:KB]
 	}
 
 	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&handleLoginToolbarSetup));
@@ -423,7 +430,10 @@ void LLToolBarView::addToToolset(command_id_list_t& command_list, Toolbar& toolb
 	}
 }
 
-void LLToolBarView::onToolBarButtonAdded(LLView* button)
+//void LLToolBarView::onToolBarButtonAdded(LLView* button)
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLToolBarView::onToolBarButtonAdded(EToolBarLocation toolbar, LLView* button)
+// [/SL:KB]
 {
 	llassert(button);
 	
@@ -468,9 +478,16 @@ void LLToolBarView::onToolBarButtonAdded(LLView* button)
 		// to prevent hiding the transient IM floater upon pressing "Voice controls".
 		LLTransientFloaterMgr::getInstance()->addControlView(button);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mToolbars[toolbar]->getParent()->setVisible(mToolbars[toolbar]->hasButtons());
+// [/SL:KB]
 }
 
-void LLToolBarView::onToolBarButtonRemoved(LLView* button)
+//void LLToolBarView::onToolBarButtonRemoved(LLView* button)
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLToolBarView::onToolBarButtonRemoved(EToolBarLocation toolbar, LLView* button)
+// [/SL:KB]
 {
 	llassert(button);
 
@@ -505,6 +522,10 @@ void LLToolBarView::onToolBarButtonRemoved(LLView* button)
 	{
 		LLTransientFloaterMgr::getInstance()->removeControlView(button);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mToolbars[toolbar]->getParent()->setVisible(mToolbars[toolbar]->hasButtons());
+// [/SL:KB]
 }
 
 void LLToolBarView::draw()
@@ -531,7 +552,17 @@ void LLToolBarView::draw()
 	}
 	
 	// Draw drop zones if drop of a tool is active
-	if (isToolDragged())
+//	if (isToolDragged())
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	static bool fPrevDragged = false; bool fCurDragged = isToolDragged();
+
+	// Show/hide the empty toolbars when initiating/stopping a drag operation
+	if (fCurDragged != fPrevDragged)
+		setToolBarsVisible(mToolbarsVisible, fCurDragged);
+	fPrevDragged = fCurDragged;
+
+	if (fCurDragged)
+// [/SL:KB]
 	{
 		LLColor4 drop_color = LLUIColorTable::instance().getColor( "ToolbarDropZoneColor" );
 
@@ -654,13 +685,23 @@ void LLToolBarView::resetDragTool(LLToolBarButton* toolbarButton)
 	gToolBarView->mDragToolbarButton = toolbarButton;
 }
 
-void LLToolBarView::setToolBarsVisible(bool visible)
+//void LLToolBarView::setToolBarsVisible(bool visible)
+//{
+//	for (S32 i = TOOLBAR_FIRST; i <= TOOLBAR_LAST; i++)
+//	{
+//		mToolbars[i]->getParent()->setVisible(visible);
+//	}
+//}
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLToolBarView::setToolBarsVisible(bool visible_global, bool visible_empty)
 {
 	for (S32 i = TOOLBAR_FIRST; i <= TOOLBAR_LAST; i++)
 	{
-		mToolbars[i]->getParent()->setVisible(visible);
+		mToolbars[i]->getParent()->setVisible(visible_global && ((visible_empty) || (mToolbars[i]->hasButtons())));
 	}
+	mToolbarsVisible = visible_global;
 }
+// [/SL:KB]
 
 bool LLToolBarView::isModified() const
 {
