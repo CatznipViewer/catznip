@@ -1869,6 +1869,10 @@ void inventory_offer_handler(LLOfferInfo* info)
 	// Needed by LLScriptFloaterManager to bind original notification with 
 	// faked for toast one.
 	payload["object_id"] = object_id;
+// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	payload["owner_id"] = info->mFromID;
+	payload["owner_is_group"] = info->mFromGroup;
+// [/SL:KB]
 	// Flag indicating that this notification is faked for toast.
 	payload["give_inventory_notification"] = FALSE;
 	args["OBJECTFROMNAME"] = info->mFromName;
@@ -6369,6 +6373,9 @@ void handle_lure(const uuid_vec_t& ids)
 	if (!gAgent.getRegion()) return;
 
 	LLSD edit_args;
+// [SL:KB] - Patch: UI-Notifications | Checked: 2011-11-23 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	edit_args["NAME"] = (1 == ids.size()) ? LLSLURL("agent", ids.front(), "completename").getSLURLString() : LLTrans::getString("AvatarNameMultiple");
+// [/SL:KB]
 	edit_args["REGION"] = gAgent.getRegion()->getName();
 
 	LLSD payload;
@@ -6499,18 +6506,18 @@ bool callback_script_dialog(const LLSD& notification, const LLSD& response)
 	// Button -1 = Ignore - no processing needed for this button
 	// Buttons 0 and above = dialog choices
 
-	if (-2 == button_idx)
-	{
-		std::string object_name = notification["payload"]["object_name"].asString();
-		LLUUID object_id = notification["payload"]["object_id"].asUUID();
-		LLMute mute(object_id, object_name, LLMute::OBJECT);
-		if (LLMuteList::getInstance()->add(mute))
-		{
-			// This call opens the sidebar, displays the block list, and highlights the newly blocked
-			// object in the list so the user can see that their block click has taken effect.
-			LLPanelBlockedList::showPanelAndSelect(object_id);
-		}
-	}
+//	if (-2 == button_idx)
+//	{
+//		std::string object_name = notification["payload"]["object_name"].asString();
+//		LLUUID object_id = notification["payload"]["object_id"].asUUID();
+//		LLMute mute(object_id, object_name, LLMute::OBJECT);
+//		if (LLMuteList::getInstance()->add(mute))
+//		{
+//			// This call opens the sidebar, displays the block list, and highlights the newly blocked
+//			// object in the list so the user can see that their block click has taken effect.
+//			LLPanelBlockedList::showPanelAndSelect(object_id);
+//		}
+//	}
 
 	if (0 <= button_idx)
 	{
@@ -6569,6 +6576,10 @@ void process_script_dialog(LLMessageSystem* msg, void**)
 	msg->getUUID("Data", "ImageID", image_id);
 
 	payload["sender"] = msg->getSender().getIPandPort();
+// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+	payload["owner_id"] = owner_id;
+	payload["owner_is_group"] = first_name.empty();
+// [/SL:KB]
 	payload["object_id"] = object_id;
 	payload["chat_channel"] = chat_channel;
 	payload["object_name"] = object_name;

@@ -42,7 +42,10 @@ LLIMHandler::LLIMHandler(e_notification_type type, const LLSD& id)
 	mType = type;
 
 	// Getting a Channel for our notifications
-	mChannel = LLChannelManager::getInstance()->createNotificationChannel();
+//	mChannel = LLChannelManager::getInstance()->createNotificationChannel();
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	mChannelHandle = LLChannelManager::getInstance()->createNotificationChannel()->getHandle();
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
@@ -55,13 +58,21 @@ void LLIMHandler::initChannel()
 {
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
 	S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
-	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
+//	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	if (LLScreenChannelBase* channel = mChannelHandle.get())
+		channel->init(channel_right_bound - channel_width, channel_right_bound);
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
 bool LLIMHandler::processNotification(const LLSD& notify)
 {
-	if(!mChannel)
+//	if(!mChannel)
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
+	if (!channel)
+// [/SL:KB]
 	{
 		return false;
 	}
@@ -72,7 +83,10 @@ bool LLIMHandler::processNotification(const LLSD& notify)
 		return false;
 
 	// arrange a channel on a screen
-	if(!mChannel->getVisible())
+//	if(!mChannel->getVisible())
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	if (!channel->getVisible())
+// [/SL:KB]
 	{
 		initChannel();
 	}
@@ -104,16 +118,22 @@ bool LLIMHandler::processNotification(const LLSD& notify)
 		p.panel = im_box;
 		p.can_be_stored = false;
 		p.on_delete_toast = boost::bind(&LLIMHandler::onDeleteToast, this, _1);
-		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-		if(channel)
-			channel->addToast(p);
+//		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//		if(channel)
+//			channel->addToast(p);
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		channel->addToast(p);
+// [/SL:KB]
 
 		// send a signal to the counter manager;
 		mNewNotificationSignal();
 	}
 	else if (notify["sigtype"].asString() == "delete")
 	{
-		mChannel->killToastByNotificationID(notification->getID());
+//		mChannel->killToastByNotificationID(notification->getID());
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		channel->killToastByNotificationID(notification->getID());
+// [/SL:KB]
 	}
 	return false;
 }

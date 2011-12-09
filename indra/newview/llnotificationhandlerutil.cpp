@@ -64,7 +64,10 @@ LLSysHandler::LLSysHandler()
 
 void LLSysHandler::removeExclusiveNotifications(const LLNotificationPtr& notif)
 {
-	LLScreenChannel* channel = dynamic_cast<LLScreenChannel *>(mChannel);
+//	LLScreenChannel* channel = dynamic_cast<LLScreenChannel *>(mChannel);
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
+// [/SL:KB]
 	if (channel == NULL)
 	{
 		return;
