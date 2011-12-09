@@ -426,6 +426,14 @@
          parameter="open_original" />
     </menu_item_call>
     <menu_item_call
+     label="Open in New Window"
+     layout="topleft"
+     name="Open in New Window">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="open_newwindow" />
+    </menu_item_call>
+    <menu_item_call
      label="Properties"
      layout="topleft"
      name="Properties">
@@ -494,6 +502,14 @@
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
          parameter="delete" />
+    </menu_item_call>
+    <menu_item_call
+     label="Move to Lost And Found"
+     layout="topleft"
+     name="Move to Lost And Found">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="move_to_lost_and_found" />
     </menu_item_call>
     <menu_item_call
      label="Delete System Folder"
