@@ -76,11 +76,20 @@ protected:
 	LLFloaterBuildAxis(const LLSD& sdKey);
 public:
 	/*virtual*/ ~LLFloaterBuildAxis();
+
+public:
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool fQuiting);
 	/*virtual*/ BOOL postBuild();
+	            void refresh();
 protected:
 	static void onAxisPosChanged(const LLSD& sdValue, U32 idxAxis);
 	static void onAxisPosCenter();
 	static void onAxisOffsetChanged(const LLSD& sdValue, U32 idxAxis);
+
+protected:
+	boost::signals2::connection m_AxisPosConn;
+	boost::signals2::connection m_AxisOffsetConn;
 };
 
 // [/SL:KB]

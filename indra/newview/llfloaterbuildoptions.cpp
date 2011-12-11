@@ -136,6 +136,20 @@ LLFloaterBuildAxis::~LLFloaterBuildAxis()
 {
 }
 
+void LLFloaterBuildAxis::onOpen(const LLSD& sdKey)
+{
+	m_AxisPosConn = gSavedSettings.getControl("AxisPosition")->getSignal()->connect(boost::bind(&LLFloaterBuildAxis::refresh, this));
+	m_AxisOffsetConn = gSavedSettings.getControl("AxisOffset")->getSignal()->connect(boost::bind(&LLFloaterBuildAxis::refresh, this));
+	
+	refresh();
+}
+
+void LLFloaterBuildAxis::onClose(bool fQuiting)
+{
+	m_AxisPosConn.disconnect();
+	m_AxisOffsetConn.disconnect();
+}
+
 BOOL LLFloaterBuildAxis::postBuild()
 {
 	findChild<LLSliderCtrl>("AxisPosX")->setCommitCallback(boost::bind(&LLFloaterBuildAxis::onAxisPosChanged, _2, 0));
@@ -148,6 +162,19 @@ BOOL LLFloaterBuildAxis::postBuild()
 	findChild<LLSpinCtrl>("AxisOffsetZ")->setCommitCallback(boost::bind(&LLFloaterBuildAxis::onAxisOffsetChanged, _2, 2));
 
 	return TRUE;
+}
+
+void LLFloaterBuildAxis::refresh()
+{
+	LLVector3 pos = gSavedSettings.getVector3("AxisPosition");
+	findChild<LLSliderCtrl>("AxisPosX")->setValue(pos.mV[0]);
+	findChild<LLSliderCtrl>("AxisPosY")->setValue(pos.mV[1]);
+	findChild<LLSliderCtrl>("AxisPosZ")->setValue(pos.mV[2]);
+
+	LLVector3 offset = gSavedSettings.getVector3("AxisOffset");
+	findChild<LLSpinCtrl>("AxisOffsetX")->setValue(offset.mV[0]);
+	findChild<LLSpinCtrl>("AxisOffsetY")->setValue(offset.mV[1]);
+	findChild<LLSpinCtrl>("AxisOffsetZ")->setValue(offset.mV[2]);
 }
 
 void LLFloaterBuildAxis::onAxisPosChanged(const LLSD& sdValue, U32 idxAxis)
