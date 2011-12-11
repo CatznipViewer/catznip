@@ -3,7 +3,7 @@
  open_positioning="cascading"
  legacy_header_height="18"
  follows="left|top|right"
- height="580"
+ height="600"
  layout="topleft"
  bg_opaque_image="Window_NoTitle_Foreground"
  bg_alpha_image="Window_NoTitle_Background"
@@ -46,6 +46,26 @@
     <floater.string
      name="status_selectland">
         Click and drag to select land
+    </floater.string>
+    <floater.string
+     name="grid_screen_text">
+        Screen
+    </floater.string>
+    <floater.string
+     name="grid_local_text">
+        Local
+    </floater.string>
+    <floater.string
+     name="grid_world_text">
+        World
+    </floater.string>
+    <floater.string
+     name="grid_reference_text">
+        Reference
+    </floater.string>
+    <floater.string
+     name="grid_attachment_text">
+        Attachment
     </floater.string>
     <floater.string
      name="status_selectcount">
@@ -249,6 +269,7 @@
 			function="BuildTool.selectComponent"/>
 	</check_box>
 
+<!--
    <button
      follows="left|top"
      height="20"
@@ -272,6 +293,7 @@
 	  <button.commit_callback
 	     function="BuildTool.UnlinkObjects"/>
     </button>
+-->
     <check_box
      control_name="ScaleUniform"
      height="19"
@@ -304,29 +326,80 @@
      top_pad="-4"
      follows="left|top"
      width="134" />
-   <check_box
+    <check_box
+     control_name="AxisAtRootEnabled"
+     height="18"
+     initial_value="false"
+     label="Axis at Root"
+     layout="topleft"
+     left="143"
+     top_pad="0"
+     name="checkbox axis at root"
+     width="134" />
+    <button
+     left_pad="0"
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Axis Options..."
+     tool_tip="See more axis options"
+     top_pad="-22"
+     right="-10"
+     width="18"
+     height="23" >
+        <button.commit_callback
+         function="BuildTool.axisOptions"/>
+    </button>
+    <check_box
      control_name="SnapEnabled"
      height="18"
      initial_value="true"
-     label="Snap"
+     label="Snap to grid"
      layout="topleft"
+     left="143"
      top_pad="0"
      name="checkbox snap to grid"
      width="134" />
     <button
      left_pad="0"
-     label="Options..."
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
      layout="topleft"
      follows="top|left"
-     name="Options..."
+     name="Grid Options..."
      tool_tip="See more grid options"
-     top="83"
-     right="-35"
-     width="65"
-     height="21" >
+     top_pad="-22"
+     right="-10"
+     width="18"
+     height="23" >
 	 <button.commit_callback
 	     function="BuildTool.gridOptions"/>
 	</button>
+    <combo_box
+     height="23"
+     layout="topleft"
+     left="162"
+     follows="left|top"
+     name="combobox grid mode"
+     tool_tip="Choose the type of grid ruler for positioning the object"
+     top_pad="0"
+     width="108">
+        <combo_box.item
+         label="World grid"
+         name="World"
+         value="World" />
+        <combo_box.item
+         label="Local grid"
+         name="Local"
+         value="Local" />
+        <combo_box.item
+         label="Reference grid"
+         name="Reference"
+         value="Reference" />
+		 <combo_box.commit_callback
+	     function="BuildTool.gridMode"/>
+    </combo_box>
    <button
      follows="left|top"
      height="20"
@@ -713,7 +786,7 @@
 	  layout="topleft"
 	  left="10"
 	  name="selection_empty"
-	  top_pad="0"
+	  top="155"
 	  width="100">
 		Nothing selected.
 	</text>
@@ -739,12 +812,12 @@
 	  follows="left|top"
 	  font="SansSerifSmall"
 	  layout="topleft"
-	  left="10"
+	  left="235"
 	  name="remaining_capacity"
-	  top_pad="0"
-	  visible="false"
+	  top_delta="0"
+	  visible="true"
 	  width="280">
-	  [CAPACITY_STRING] [secondlife:///app/openfloater/object_weights More info]
+	  [secondlife:///app/openfloater/object_weights More info]
 	</text>
     <!-- <text -->
     <!-- text_color="LtGray_50" -->
@@ -772,14 +845,39 @@
     <!--  width="143"> -->
     <!--     Prims: [COUNT] -->
     <!-- </text> -->
-    <view_border
+ 
+   <button
+    follows="left|top"
+    height="20"
+    label="Link"
+    top="170"
+    layout="topleft"
+    left="10"
+    name="link_btn"
+    width="60">
+	  <button.commit_callback
+	   function="BuildTool.LinkObjects"/>
+   </button>
+   <button
+    follows="left|top"
+    height="20"
+    label="Unlink"
+    layout="topleft"
+    left_pad="2"
+    name="unlink_btn"
+    width="60">
+	  <button.commit_callback
+	   function="BuildTool.UnlinkObjects"/>
+   </button>
+	
+   <view_border
     bevel_style="none"
     follows="top|left"
     height="0"
     layout="topleft"
     left="6"
     name="cost_text_border"
-    top="135"
+    top="150"
     width="282"/>
     <tab_container
      follows="left|top"
@@ -791,7 +889,7 @@
      tab_min_width="40"
      tab_position="top"
      tab_height="25"
-     top="173"
+     top="193"
      width="295">
 	
 <panel
@@ -1315,9 +1413,34 @@ even though the user gets a free copy.
              layout="topleft"
              name="label position"
              top_pad="10"
-             width="121">
-                Position (meters)
+             width="50">
+                Position
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_position_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="position" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_position_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="position" />
+            </button>
             <spinner
              follows="left|top"
              height="19"
@@ -1326,12 +1449,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="512"
              min_val="-256"
              name="Pos X"
              text_enabled_color="1 0 0.3 .7"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              follows="left|top"
@@ -1368,12 +1491,36 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label size"
-             top_pad="6"
-             width="121">
-                Size (meters)
+             top_pad="10"
+             width="50">
+                Size
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_size_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="size" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_size_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="size" />
+            </button>
             <spinner
              follows="left|top"
              height="19"
@@ -1382,12 +1529,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="64"
              min_val="0.01"
              name="Scale X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              follows="left|top"
@@ -1425,12 +1572,36 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label rotation"
              top_pad="10"
-             width="121">
-                Rotation (degrees)
+             width="50">
+                Rotation
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_rotation_btn"
+             top_delta="-2"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="rotation" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="0"
+             name="paste_rotation_btn"
+             width="17">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="rotation" />
+            </button>
             <spinner
              decimal_digits="2"
              follows="left|top"
@@ -1440,12 +1611,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="9999"
              min_val="-9999"
              name="Rot X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="0"
              width="87" />
             <spinner
              decimal_digits="2"

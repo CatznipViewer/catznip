@@ -50,8 +50,8 @@ public:
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/	void onClose(bool app_quitting);
 
-	void setGridMode(EGridMode mode);
-	void updateGridMode();
+//	void setGridMode(EGridMode mode);
+//	void updateGridMode();
 
 private:
 
@@ -60,7 +60,30 @@ private:
 	LLFloaterBuildOptions(const LLSD& key);
 	~LLFloaterBuildOptions();
 
-	LLComboBox*	mComboGridMode;
+//	LLComboBox*	mComboGridMode;
 	LLObjectSelectionHandle	mObjectSelection;
 };
+
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+//
+// LLFloaterBuildAxis
+//
+
+class LLFloaterBuildAxis : public LLFloater
+{
+	friend class LLFloaterReg;
+protected:
+	LLFloaterBuildAxis(const LLSD& sdKey);
+public:
+	/*virtual*/ ~LLFloaterBuildAxis();
+
+public:
+	/*virtual*/ BOOL postBuild();
+protected:
+	void onAxisPosChanged(const LLSD& sdValue, U32 idxAxis);
+	void onAxisOffsetChanged(const LLSD& sdValue, U32 idxAxis);
+};
+
+// [/SL:KB]
+
 #endif
