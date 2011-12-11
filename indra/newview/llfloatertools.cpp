@@ -1108,20 +1108,20 @@ void LLFloaterTools::setObjectType( LLPCode pcode )
 	gFocusMgr.setMouseCapture(NULL);
 }
 
-// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 void LLFloaterTools::onClickAxisOptions()
 {
 	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
-	if (pAxisFloater)
+	if ((pAxisFloater) && (!isDependentFloater(pAxisFloater)))
 		addDependentFloater(pAxisFloater, TRUE);
 }
 // [/SL:KB]
 
 void LLFloaterTools::onClickGridOptions()
 {
-// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
-	if (pGridFloater)
+	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
 		addDependentFloater(pGridFloater, TRUE);
 // [/SL:KB]
 //	LLFloaterReg::showInstance("build_options");
