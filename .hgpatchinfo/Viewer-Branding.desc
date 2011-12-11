@@ -1,0 +1,7 @@
+[Viewer/Branding]
+- changed : basic rebranding from "Second Life" to "Catznip"
+- changed : viewer channel set to "Catznip Internal" by default
+- changed : use a Catznip-specific cache and settings folder
+- changed : release notes point to http://viewer.catznip.com/releasenotes/
+- changed : login page points to http://viewer.catznip.com/login/
+- added   : "Help / Catznip Support Group" menu option to either open the support group profile (if not a member) or start a group chat session

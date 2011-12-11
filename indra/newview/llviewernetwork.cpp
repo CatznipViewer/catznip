@@ -33,9 +33,12 @@
 #include "llsecapi.h"
 #include "lltrans.h"
 #include "llweb.h"
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8.0b) | Modified: Catznip-2.8.0b
+#include "llversioninfo.h"
 
-                                                            
-const char* DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+const char* DEFAULT_LOGIN_PAGE = "http://viewer.catznip.com/login/";
+// [/SL:KB]
+//const char* DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
 
 const char* SYSTEM_GRID_SLURL_BASE = "secondlife://%s/secondlife/";
 const char* MAIN_GRID_SLURL_BASE = "http://maps.secondlife.com/secondlife/";
@@ -564,7 +567,10 @@ std::string LLGridManager::getLoginPage()
 		return cmd_line_login_page;
 	}	
 	
-	return mGridList[mGrid][GRID_LOGIN_PAGE_VALUE];
+//	return mGridList[mGrid][GRID_LOGIN_PAGE_VALUE];
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+	return mGridList[mGrid][GRID_LOGIN_PAGE_VALUE].asString() + LLVersionInfo::getChannel();
+// [/SL:KB]
 }
 
 void LLGridManager::updateIsInProductionGrid()
