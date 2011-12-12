@@ -106,6 +106,9 @@ public:
 	{
 		BUTTON_CLOSE = 0,
 		BUTTON_RESTORE,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		BUTTON_COLLAPSE,
+// [/SL:KB]
 		BUTTON_MINIMIZE,
 		BUTTON_TEAR_OFF,
 		BUTTON_DOCK,
@@ -144,12 +147,18 @@ public:
 		Optional<LLUIImage*>	close_image,
 								restore_image,
 								minimize_image,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+								collapse_image,
+// [/SL:KB]
 								tear_off_image,
 								dock_image,
 								help_image;
 		Optional<LLUIImage*>	close_pressed_image,
 								restore_pressed_image,
 								minimize_pressed_image,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+								collapse_pressed_image,
+// [/SL:KB]
 								tear_off_pressed_image,
 								dock_pressed_image,
 								help_pressed_image;
@@ -310,6 +319,9 @@ public:
 
 	static void		onClickClose(LLFloater* floater);
 	static void		onClickMinimize(LLFloater* floater);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	static void		onClickCollapse(LLFloater* floater);
+// [/SL:KB]
 	static void		onClickTearOff(LLFloater* floater);
 	static void     onClickDock(LLFloater* floater);
 	static void		onClickHelp(LLFloater* floater);
@@ -429,6 +441,9 @@ private:
 	S32				mLegacyHeaderHeight;// HACK see initFloaterXML()
 	
 	BOOL			mMinimized;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	BOOL			mCollapseOnMinimize;
+// [/SL:KB]
 	BOOL			mForeground;
 	LLHandle<LLFloater>	mDependeeHandle;
 	
