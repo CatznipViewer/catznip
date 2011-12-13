@@ -68,6 +68,9 @@
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="displayname" />
+            <menu_item_call.on_enable
+             function="RLV.EnableIfNot"
+             parameter="shownames" />
         </menu_item_call>
         <menu_item_call
          label="Copy Full Name"
@@ -75,6 +78,9 @@
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="fullname" />
+            <menu_item_call.on_enable
+             function="RLV.EnableIfNot"
+             parameter="shownames" />
         </menu_item_call>
         <menu_item_call
          label="Copy SLurl"
@@ -82,6 +88,9 @@
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="slurl" />
+            <menu_item_call.on_enable
+             function="RLV.EnableIfNot"
+             parameter="shownames" />
         </menu_item_call>
     </context_menu>
     <context_menu
