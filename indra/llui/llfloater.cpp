@@ -121,6 +121,10 @@ LLFloater::click_callback LLFloater::sButtonCallbacks[BUTTON_COUNT] =
 	LLFloater::onClickHelp		//BUTTON_HELP
 };
 
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+BOOL LLFloater::sShowCollapseButton = FALSE;
+// [/SL:KB]
+
 LLMultiFloater* LLFloater::sHostp = NULL;
 BOOL			LLFloater::sQuitting = FALSE; // Flag to prevent storing visibility controls while quitting
 LLFloater::handle_map_t	LLFloater::sFloaterMap;
@@ -293,6 +297,20 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mMinimizeSignal(NULL)
 //	mNotificationContext(NULL)
 {
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	static bool sShowCollapseInit = false;
+	if (!sShowCollapseInit)
+	{
+		LLControlVariable* pControl = LLUI::getControlControlGroup("ShowFloaterCollapseButton").getControl("ShowFloaterCollapseButton");
+		if (pControl)
+		{
+			sShowCollapseButton = pControl->getValue().asBoolean();
+			pControl->getSignal()->connect(boost::bind(&LLFloater::handleShowCollapseButtonChanged, _2));
+			sShowCollapseInit = true;
+		}
+	}
+// [/SL:KB]
+
 	mHandle.bind(this);
 //	mNotificationContext = new LLFloaterNotificationContext(getHandle());
 
@@ -337,7 +355,7 @@ void LLFloater::initFloater(const Params& p)
 	{
 		mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-		mButtonsEnabled[BUTTON_COLLAPSE] = TRUE;
+		mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
 // [/SL:KB]
 	}
 
@@ -1261,7 +1279,7 @@ void LLFloater::setMinimized(BOOL minimize)
 		{
 			mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-			mButtonsEnabled[BUTTON_COLLAPSE] = TRUE;
+			mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
 // [/SL:KB]
 			mButtonsEnabled[BUTTON_RESTORE] = FALSE;
 		}
@@ -1730,6 +1748,19 @@ void LLFloater::onClickHelp( LLFloater* self )
 	}
 }
 
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+void LLFloater::handleShowCollapseButtonChanged(const LLSD& sdValue)
+{
+	sShowCollapseButton = sdValue.asBoolean();
+	for (handle_map_t::iterator itFloater = sFloaterMap.begin(); itFloater != sFloaterMap.end(); ++itFloater)
+	{
+		LLFloater* pFloater = itFloater->second;
+		pFloater->mButtonsEnabled[BUTTON_COLLAPSE] = pFloater->mButtonsEnabled[BUTTON_MINIMIZE] && sShowCollapseButton;
+		pFloater->updateTitleButtons();
+	}
+}
+// [/SL:KB]
+
 // static 
 LLFloater* LLFloater::getClosableFloaterFromFocus()
 {
@@ -1965,7 +1996,7 @@ void	LLFloater::setCanMinimize(BOOL can_minimize)
 
 	mButtonsEnabled[BUTTON_MINIMIZE] = can_minimize && !isMinimized();
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-	mButtonsEnabled[BUTTON_COLLAPSE] = can_minimize && !isMinimized();
+	mButtonsEnabled[BUTTON_COLLAPSE] = can_minimize && !isMinimized() && sShowCollapseButton;
 // [/SL:KB]
 	mButtonsEnabled[BUTTON_RESTORE]  = can_minimize &&  isMinimized();
 

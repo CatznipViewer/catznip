@@ -325,6 +325,9 @@ public:
 	static void		onClickTearOff(LLFloater* floater);
 	static void     onClickDock(LLFloater* floater);
 	static void		onClickHelp(LLFloater* floater);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	static void		handleShowCollapseButtonChanged(const LLSD& sdValue);
+// [/SL:KB]
 
 	static void		setFloaterHost(LLMultiFloater* hostp) {sHostp = hostp; }
 	static LLMultiFloater* getFloaterHost() {return sHostp; }
@@ -471,6 +474,9 @@ private:
 	static std::string	sButtonNames[BUTTON_COUNT];
 	static std::string	sButtonToolTips[BUTTON_COUNT];
 	static std::string  sButtonToolTipsIndex[BUTTON_COUNT];
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	static BOOL			sShowCollapseButton;
+// [/SL:KB]
 	
 	typedef void(*click_callback)(LLFloater*);
 	static click_callback sButtonCallbacks[BUTTON_COUNT];
