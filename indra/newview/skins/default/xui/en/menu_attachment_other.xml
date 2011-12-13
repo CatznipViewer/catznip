@@ -90,7 +90,7 @@
           <menu_item_call.on_click
              function="Avatar.Kick"/>
           <menu_item_call.on_visible
-             function="Avatar.VisibleKickTeleportHome"/>
+             function="Avatar.EnableKickTeleportHome"/>
         </menu_item_call>
         <menu_item_call
          label="Teleport Home"
@@ -98,7 +98,7 @@
           <menu_item_call.on_click
              function="Avatar.TeleportHome"/>
           <menu_item_call.on_visible
-             function="Avatar.CanKickTeleportHome"/>
+             function="Avatar.EnableKickTeleportHome"/>
         </menu_item_call>
     </context_menu>
 

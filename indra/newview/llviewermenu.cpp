@@ -8359,7 +8359,7 @@ void initialize_menus()
 // [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
 	commit.add("Avatar.Kick", boost::bind(&handle_kick));
 	commit.add("Avatar.TeleportHome", boost::bind(&handle_teleport_home));
-	enable.add("Avatar.CanKickTeleportHome", boost::bind(&enable_kick_teleport_home));
+	enable.add("Avatar.EnableKickTeleportHome", boost::bind(&enable_kick_teleport_home));
 // [/SL:KB]
 
 	// Object pie menu
