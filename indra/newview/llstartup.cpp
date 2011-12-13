@@ -822,7 +822,7 @@ bool idle_startup()
 		timeout.reset();
 
 // [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-		if(gSavedSettings.getU32("UpdaterServiceSetting"))
+		if ( (gSavedSettings.getU32("UpdaterServiceSetting")) && (!LLLoginInstance::instance().getUpdaterService()->isChecking()) )
 		{
 			bool install_if_ready = true;
 			LLLoginInstance::instance().getUpdaterService()->startChecking(install_if_ready);
