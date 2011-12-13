@@ -176,8 +176,7 @@
         </menu_item_call>
          <menu_item_call
          label="Toolbar buttons..."
-         name="Toolbars"
-         shortcut="control|T">
+         name="Toolbars">
             <menu_item_call.on_click
              function="Floater.Toggle"
              parameter="toybox" />
