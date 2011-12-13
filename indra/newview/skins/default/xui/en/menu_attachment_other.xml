@@ -41,6 +41,9 @@
      name="Teleport...">
         <menu_item_call.on_click
          function="Avatar.Teleport" />
+        <menu_item_call.on_enable
+         function="RLV.EnableIfNot"
+         parameter="shownames" />
     </menu_item_call>
    <menu_item_call
      enabled="false"
