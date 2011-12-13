@@ -245,7 +245,10 @@ BOOL	LLFloaterTools::postBuild()
 	mRadioGroupFocus	= getChild<LLRadioGroup>("focus_radio_group");
 	mRadioGroupMove		= getChild<LLRadioGroup>("move_radio_group");
 	mRadioGroupEdit		= getChild<LLRadioGroup>("edit_radio_group");
-	mBtnGridOptions		= getChild<LLButton>("Options...");
+//	mBtnGridOptions		= getChild<LLButton>("Options...");
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-12-11 (Catznip-3.2.0d) | Added: Caznip-3.2.0d
+	mBtnGridOptions		= getChild<LLButton>("Grid Options...");
+// [/SL:KB]
 	mTitleMedia			= getChild<LLMediaCtrl>("title_media");
 	mBtnLink			= getChild<LLButton>("link_btn");
 	mBtnUnlink			= getChild<LLButton>("unlink_btn");
@@ -254,6 +257,7 @@ BOOL	LLFloaterTools::postBuild()
 	getChild<LLUICtrl>("checkbox edit linked parts")->setValue((BOOL)gSavedSettings.getBOOL("EditLinkedParts"));
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	mCheckAxisAtRoot		= getChild<LLCheckBoxCtrl>("checkbox axis at root");
+	mBtnAxisOptions			= getChild<LLButton>("Axis Options...");
 // [/SL:KB]
 	mCheckSnapToGrid		= getChild<LLCheckBoxCtrl>("checkbox snap to grid");
 	getChild<LLUICtrl>("checkbox snap to grid")->setValue((BOOL)gSavedSettings.getBOOL("SnapEnabled"));
@@ -341,6 +345,7 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	mCheckAxisAtRoot(NULL),
+	mBtnAxisOptions(NULL),
 // [/SL:KB]
 	mCheckSnapToGrid(NULL),
 	mBtnGridOptions(NULL),
@@ -742,6 +747,7 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 // [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
+	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
 // [/SL:KB]
 	// Snap to grid disabled for grab tool - very confusing
 	if (mCheckSnapToGrid) mCheckSnapToGrid->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
@@ -1102,20 +1108,20 @@ void LLFloaterTools::setObjectType( LLPCode pcode )
 	gFocusMgr.setMouseCapture(NULL);
 }
 
-// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 void LLFloaterTools::onClickAxisOptions()
 {
 	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
-	if (pAxisFloater)
+	if ((pAxisFloater) && (!isDependentFloater(pAxisFloater)))
 		addDependentFloater(pAxisFloater, TRUE);
 }
 // [/SL:KB]
 
 void LLFloaterTools::onClickGridOptions()
 {
-// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
-	if (pGridFloater)
+	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
 		addDependentFloater(pGridFloater, TRUE);
 // [/SL:KB]
 //	LLFloaterReg::showInstance("build_options");

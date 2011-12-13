@@ -146,6 +146,7 @@ public:
 
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	LLCheckBoxCtrl*	mCheckAxisAtRoot;
+	LLButton*		mBtnAxisOptions;
 // [/SL:KB]
 
 	LLCheckBoxCtrl*	mCheckSnapToGrid;

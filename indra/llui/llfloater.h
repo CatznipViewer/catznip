@@ -217,6 +217,9 @@ public:
 	void			addDependentFloater(LLHandle<LLFloater> dependent_handle, BOOL reposition = TRUE);
 	LLFloater*		getDependee() { return (LLFloater*)mDependeeHandle.get(); }
 	void		removeDependentFloater(LLFloater* dependent);
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-11 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	bool			isDependentFloater(const LLFloater* dependent) const;
+// [/SL:KB]
 	BOOL			isMinimized() const				{ return mMinimized; }
 	/// isShown() differs from getVisible() in that isShown() also considers
 	/// isMinimized(). isShown() is true only if visible and not minimized.
