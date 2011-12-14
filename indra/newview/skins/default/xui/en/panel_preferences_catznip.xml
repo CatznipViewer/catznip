@@ -1,0 +1,1258 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="408"
+ label="Catznip"
+ layout="topleft"
+ left="102"
+ name="catznip"
+ top="1"
+ width="517">
+	<tab_container
+	 follows="top|left"
+	 halign="center"
+	 height="439"
+	 left="0"
+	 name="catznip_settings_tab"
+	 tab_height="25"
+	 tab_min_width="40"
+	 tab_max_width="130"
+	 tab_position="top"
+	 top="408"
+	 width="540">
+		<panel
+		 border="true"
+		 follows="all"
+		 label="General"
+		 layout="topleft"
+		 mouse_opaque="false"
+		 name="catznip_settings_general">
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="15"
+			 mouse_opaque="false"
+			 name="catznip_general_text"
+			 layout="topleft"
+			 left="35"
+			 top_pad="15"
+			 type="string"
+			 width="350">
+				General
+			</text>
+			<check_box
+			 commit_callback.function="View.ToggleFullscreen"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 label="Fullscreen windowed mode"
+			 left="45"
+			 name="windowedfullscreen_check"
+			 top_pad="3"
+			 width="175" />
+			<check_box
+			 control_name="InspectNearbyRemoteObject"
+			 follows="top|left"
+			 height="20"
+			 label="Show object inspector for nearby objects"
+			 left_delta="0"
+			 layout="topleft"
+			 name="inspectnearbyremote_check"
+			 top_pad="3"
+			 width="350" />
+			<check_box
+			 control_name="ShowLocationInspector"
+			 follows="top|left"
+			 height="20"
+			 label="Show place inspector on the mini-map and world map"
+			 layout="topleft"
+			 name="inspectlocation_check"
+			 top_pad="3"
+			 width="350" />
+			<check_box
+			 control_name="RezUnderLandGroup"
+			 follows="top|left"
+			 height="20"
+			 label="Rez objects under the land group"
+			 layout="topleft"
+			 name="rezlandgroup_check"
+			 top_pad="3"
+			 width="350" />
+			<check_box
+			 commit_callback.function="RLV.ToggleEnabled"
+			 follows="top|left"
+			 height="20"
+			 label="RestrainedLove API support"
+			 layout="topleft"
+			 left_delta="0"
+			 name="rlva_check"
+			 top_pad="3"
+			 width="175" />
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0" 
+			 name="rlva_restart_text"
+			 text_color="White_25"
+			 top_delta="4" 
+			 width="130">
+				(requires restart)
+			</text>
+
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="15"
+			 layout="topleft"
+			 left="30"
+			 mouse_opaque="false"
+			 name="catznip_avatar_text"
+			 top_pad="10"
+			 type="string"
+			 width="350">
+				Avatar
+			</text>
+			<text
+			 follows="top|left"
+			 height="10"
+			 layout="topleft"
+			 left="55"
+			 length="1"
+			 mouse_opaque="false"
+			 name="hover_text"
+			 top_pad="10"
+			 type="string"
+			 width="80">
+				Height offset :
+			</text>
+			<button
+			 commit_callback.function="Pref.ShapeEditHover"
+			 enabled="true"
+			 follows="top|left"
+			 height="23"
+			 label="Edit Hover"
+			 layout="topleft"
+			 left_pad="10"
+			 name="hover_edit_btn"
+			 top_delta="-5"
+			 width="75" />
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="20"
+			 layout="topleft"
+			 left_pad="10" 
+			 name="hover_modifyshape_text"
+			 text_color="White_25"
+			 top_delta="5" 
+			 width="180">
+				(requires modifiable shape)
+			</text>
+
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="15"
+			 layout="topleft"
+			 left="30"
+			 mouse_opaque="false"
+			 name="catznip_snapshot_text"
+			 top_pad="10"
+			 type="string"
+			 width="350">
+				Snapshots
+			</text>
+			<!-- Remember to match any changes to the XUI here with the appropriate Settings patch branch as well -->
+			<text
+			 follows="top|left"
+			 height="10"
+			 layout="topleft"
+			 left="55"
+			 length="1"
+			 mouse_opaque="false"
+			 name="snapshot_path_text"
+			 top_pad="10"
+			 type="string"
+			 width="120">
+				Snapshot location:
+			</text>    
+			<line_editor
+			 control_name="SnapshotLocalPath"
+			 enabled="false"
+			 follows="top|left"
+			 halign="right"
+			 height="23"
+			 layout="topleft"
+			 left_pad="5"
+			 mouse_opaque="false"
+			 name="snapshot_path_editor"
+			 top_delta="-5"
+			 width="240" />
+			<button
+			 commit_callback.function="Pref.SnapshotPath"
+			 enabled="true"
+			 follows="top|left"
+			 height="23"
+			 label="Browse"
+			 label_selected="Browse"
+			 layout="topleft"
+			 left_pad="5"
+			 name="snapshot_path_btn"
+			 top_delta="0"
+			 width="75" />
+
+			<text
+			 follows="top|left"
+			 height="10"
+			 layout="topleft"
+			 left="55"
+			 length="1"
+			 mouse_opaque="false"
+			 name="snapshot_name_text"
+			 top_pad="10"
+			 type="string"
+			 width="120">
+				Snapshot base name:
+			</text>    
+			<line_editor
+			 control_name="SnapshotLocalName"
+			 follows="top|left|right"
+			 halign="right"
+			 height="23"
+			 layout="topleft"
+			 left_pad="5"
+			 mouse_opaque="false"
+			 name="snapshot_name_editor"
+			 top_delta="-5"
+			 width="240" />
+			
+			<text
+			follows="top|left"
+			height="10"
+			layout="topleft"
+			left="175"
+			length="1"
+			mouse_opaque="false"
+			name="legend_text"
+			text_color="LtGray"
+			top_pad="10"
+			type="string"
+			width="120">
+				Legend:
+			</text>    
+			<text
+			follows="top|left"
+			height="10"
+			layout="topleft"
+			left_delta="10"
+			length="1"
+			mouse_opaque="false"
+			name="legend_text_date"
+			text_color="LtGray"
+			top_pad="5"
+			type="string"
+			width="120">
+				- %d : date
+			</text>    
+			<text
+			follows="top|left"
+			height="10"
+			layout="topleft"
+			length="1"
+			mouse_opaque="false"
+			name="legend_text_time"
+			text_color="LtGray"
+			top_pad="5"
+			type="string"
+			width="120">
+				- %t : time
+			</text>    
+			<text
+			follows="top|left"
+			height="10"
+			layout="topleft"
+			length="1"
+			mouse_opaque="false"
+			name="legend_text_region"
+			text_color="LtGray"
+			top_pad="5"
+			type="string"
+			width="120">
+				- %r : region
+			</text>    
+			<text
+			follows="top|left"
+			height="10"
+			layout="topleft"
+			length="1"
+			mouse_opaque="false"
+			name="legend_text_parcel"
+			text_color="LtGray"
+			top_pad="5"
+			type="string"
+			width="120">
+				- %p : parcel
+			</text>    
+		</panel>
+
+		<panel
+		 border="true"
+		 follows="all"
+		 label="Chat"
+		 layout="topleft"
+		 mouse_opaque="false"
+		 name="catznip_settings_chat">
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_chat_text"
+			 font.style="BOLD">
+				Chat
+			</text>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="65"
+			 mouse_opaque="false"
+			 name="showusernames_text"
+			 top_pad="5"
+			 type="string"
+			 width="175">
+				Show username in agent links :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="AgentLinkShowUsernames"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="showusernames_combo"
+			 width="100">
+				<combo_box.item
+				 label="Always"
+				 value="0" />
+				<combo_box.item
+				 label="On Mismatch"
+				 value="1" />
+				<combo_box.item
+				 label="Never"
+				 value="2" />
+			</combo_box>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="65"
+			 mouse_opaque="false"
+			 name="closeonreturn_text"
+			 top_pad="10"
+			 type="string"
+			 width="140">
+				Close on empty return :
+			</text>
+			<check_box
+			 control_name="CloseChatOnEmptyReturn"
+			 follows="top|left"
+			 height="20"
+			 label="Nearby Chat"
+			 layout="topleft"
+			 left_pad="0"
+			 name="closechatonreturn_check"
+			 top_delta="-4"
+			 width="350" />
+			<check_box
+			 control_name="CloseIMOnEmptyReturn"
+			 follows="top|left"
+			 height="20"
+			 label="Instant Messages"
+			 layout="topleft"
+			 left_delta="125"
+			 name="closeimonreturn_check"
+			 top_delta="0"
+			 width="350" />
+			<check_box
+			 control_name="ChatTimestampSeconds"
+			 follows="top|left"
+			 height="20"
+			 label="Show seconds in timestamp"
+			 layout="topleft"
+			 left="45"
+			 name="timestampseconds_check"
+			 top_pad="3"
+			 width="350" />
+
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top_pad="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_nearbychat_text"
+			 font.style="BOLD">
+				Nearby Chat
+			</text>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="65"
+			 mouse_opaque="false"
+			 name="nearbychatbartype_text"
+			 top_pad="5"
+			 type="string"
+			 width="95">
+				Nearby chat bar :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="NearbyChatFloaterBarType"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="nearbychatbartype_combo"
+			 width="100">
+				<combo_box.item
+				 label="Single-line"
+				 value="1" />
+				<combo_box.item
+				 label="Multi-line"
+				 value="2" />
+			</combo_box>
+			<check_box
+			 control_name="NearbyChatFloaterWindow"
+			 follows="top|left"
+			 height="20"
+			 label="Dock nearby chat to the conversations floater"
+			 layout="topleft"
+			 left="45"
+			 name="nearbychatdock_check"
+			 top_pad="4"
+			 width="350"/>
+
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top_pad="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_im_text"
+			 font.style="BOLD">
+				Instant Messages
+			</text>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="65"
+			 name="imorientation_text"
+			 top_pad="7"
+			 width="110">
+				Tab orientation :
+			</text>
+			<radio_group
+			 control_name="IMUseVerticalTabs"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="imorientation_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Horizontal"
+				 layout="topleft"
+				 name="imorientation_horz"
+				 value="0"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="Vertical"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="imorientation_vert"
+				 value="1"
+				 width="150" />
+			</radio_group>
+			<check_box
+			 control_name="RearrangeIMTabs"
+			 follows="top|left"
+			 height="20"
+			 label="Drag-rearrange IM tabs"
+			 layout="topleft"
+			 left="45"
+			 name="imrearrange_check"
+			 top_pad="4"
+			 width="350" />
+			<check_box
+			 control_name="IMShowTabImage"
+			 follows="top|left"
+			 height="20"
+			 label="Show profile icons on tabs"
+			 layout="topleft"
+			 left="45"
+			 name="imshowimage_check"
+			 top_pad="3"
+			 width="350" />
+			<check_box
+			 control_name="UseLegacyIMLogNames"
+			 follows="top|left"
+			 height="20"
+			 label="Use Legacy IM Log Names"
+			 layout="topleft"
+			 left="45"
+			 name="imlegacylog_check"
+			 top_pad="3"
+			 width="350" />
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="65"
+			 mouse_opaque="false"
+			 name="imembedoffer_text"
+			 top_pad="7"
+			 type="string"
+			 width="140">
+				Embed agent offers in IM :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="NotificationCanEmbedInIM"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="imembedoffer_combo"
+			 width="100">
+				<combo_box.item
+				 label="Always"
+				 value="0" />
+				<combo_box.item
+				 label="When Focused"
+				 value="1" />
+				<combo_box.item
+				 label="Never"
+				 value="2" />
+			</combo_box>
+		</panel>
+
+		<panel
+		 border="true"
+		 follows="all"
+		 label="Notifications"
+		 layout="topleft"
+		 mouse_opaque="false"
+		 name="catznip_settings_notifications">
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_notifgeneral_text"
+			 font.style="BOLD">
+				General
+			</text>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="chicletalign_text"
+			 top_pad="5"
+			 type="string"
+			 width="145">
+				Chiclet bar alignment :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="ChicletBarAlignment"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="chicletalign_combo"
+			 width="100">
+				<combo_box.item
+				 label="Top"
+				 value="0" />
+				<combo_box.item
+				 label="Bottom"
+				 value="1" />
+			</combo_box>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="notifalign_text"
+			 top_pad="10"
+			 type="string"
+			 width="145">
+				Notification alignment :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="NotificationToastAlignment"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="notifalign_combo"
+			 width="100">
+				<combo_box.item
+				 label="Top"
+				 value="0" />
+				<combo_box.item
+				 label="Bottom"
+				 value="1" />
+			</combo_box>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="scriptdialog_text"
+			 top_pad="10"
+			 type="string"
+			 width="145">
+				Multiple script dialogs :
+			</text>
+			<combo_box
+			 allow_text_entry="false"
+			 bottom_delta="3"
+			 control_name="ScriptDialogPerObject"
+			 follows="top|left"
+			 height="23"
+			 layout="topleft"
+			 left_pad="10"
+			 mouse_opaque="true"
+			 name="scriptdialog_combo"
+			 width="100">
+				<combo_box.item
+				 label="Never"
+				 value="0" />
+				<combo_box.item
+				 label="Per Channel"
+				 value="1" />
+				<combo_box.item
+				 label="Always"
+				 value="2" />
+			</combo_box>
+			<spinner
+			 control_name="NotificationToastLifeTime"
+			 decimal_digits="0"
+			 follows="top|left"
+			 height="22"
+			 increment="1"
+			 initial_value="0"
+			 label="Notification lifetime :"
+			 label_width="155"
+			 layout="topleft"
+			 left="55"
+			 min_val="1"
+			 max_val="9999"
+			 name="notiflifetime_spinner"
+			 top_pad="6"
+			 width="215" />
+			<spinner
+			 control_name="ScriptQuestionToastLifeTime"
+			 decimal_digits="0"
+			 follows="top|left"
+			 height="22"
+			 increment="11"
+			 initial_value="0"
+			 label="Script permission lifetime:"
+			 label_width="155"
+			 layout="topleft"
+			 left="55"
+			 min_val="1"
+			 max_val="9999"
+			 name="scriptlifetime_spinner"
+			 top_pad="6"
+			 width="215" />
+
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="15"
+			 mouse_opaque="false"
+			 name="catznip_notiflogging_text"
+			 layout="topleft"
+			 left="35"
+			 top_pad="20"
+			 type="string"
+			 width="350">
+				Logging
+			</text>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="friendstatus_text"
+			 top_pad="5"
+			 type="string"
+			 width="145">
+				Friend online/offline :
+			</text>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Nearby Chat"
+			 layout="topleft"
+			 left_pad="0"
+			 name="friendstatus_chat_check"
+			 top_delta="-4"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationChat"
+				 parameter="FriendOnline,FriendOffline" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationChat"
+				 parameter="FriendOnline,FriendOffline" />
+			</check_box>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Instant Messages"
+			 layout="topleft"
+			 left_delta="135"
+			 name="friendstatus_im_check"
+			 top_delta="0"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationIM"
+				 parameter="FriendOnline,FriendOffline" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationIM"
+				 parameter="FriendOnline,FriendOffline" />
+			</check_box>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="paymentreceived_text"
+			 top_pad="5"
+			 type="string"
+			 width="145">
+				Payment received :
+			</text>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Nearby Chat"
+			 layout="topleft"
+			 left_pad="0"
+			 name="paymentreceived_chat_check"
+			 top_delta="-4"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationChat"
+				 parameter="PaymentReceived" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationChat"
+				 parameter="PaymentReceived" />
+			</check_box>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Instant Messages"
+			 layout="topleft"
+			 left_delta="135"
+			 name="paymentreceived_im_check"
+			 top_delta="0"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationIM"
+				 parameter="PaymentReceived" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationIM"
+				 parameter="PaymentReceived" />
+			</check_box>
+			<text
+			 follows="top|left"
+			 height="15"
+			 layout="topleft"
+			 left="55"
+			 mouse_opaque="false"
+			 name="paymentsent_text"
+			 top_pad="5"
+			 type="string"
+			 width="145">
+				Payment sent :
+			</text>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Nearby Chat"
+			 layout="topleft"
+			 left_pad="0"
+			 name="paymentsent_chat_text"
+			 top_delta="-4"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationChat"
+				 parameter="PaymentSent" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationChat"
+				 parameter="PaymentSent" />
+			</check_box>
+			<check_box
+			 follows="top|left"
+			 height="20"
+			 label="Instant Messages"
+			 layout="topleft"
+			 left_delta="135"
+			 name="paymentsent_im_text"
+			 top_delta="0"
+			 width="350">
+				<check_box.init_callback
+				 function="Pref.InitLogNotificationIM"
+				 parameter="PaymentSent" />
+				<check_box.commit_callback
+				 function="Pref.LogNotificationIM"
+				 parameter="PaymentSent" />
+			</check_box>
+		</panel>
+
+		<panel
+		 border="true"
+		 follows="all"
+		 label="Inventory"
+		 layout="topleft"
+		 mouse_opaque="false"
+		 name="catznip_settings_inventory">
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_inventory_text"
+			 font.style="BOLD">
+				Inventory
+			</text>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_delta="30"
+			 name="savescript_text"
+			 width="150"
+			 top_pad="5">
+				Save scripts as :
+			</text>
+			<radio_group
+			 control_name="SaveScriptsAsMono"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="savescript_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="LSL"
+				 layout="topleft"
+				 name="savescript_lsl"
+				 value="0"
+				 width="100" />
+				<radio_item
+				 height="19"
+				 label="Mono"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="savescript_mono"
+				 value="1"
+				 top_delta="0" 
+				 width="100" />
+			</radio_group>
+			<check_box
+			 control_name="DeclineTaskOfferToTrash"
+			 follows="top|left"
+			 height="20"
+			 label="Decline object inventory to trash"
+			 layout="topleft"
+			 left="45"
+			 name="declinetotrash_check"
+			 top_pad="7"
+			 width="350" />
+
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top_pad="15"
+			 left="30"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_doubleclick_text"
+			 font.style="BOLD">
+				Double-click
+			</text>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="65"
+			 name="dblclick_attach_text"
+			 width="150"
+			 top_pad="5">
+				Double-click attachment :
+			</text>
+			<radio_group
+			 control_name="DoubleClickAttachmentAdd"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="dblclick_attach_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Add"
+				 layout="topleft"
+				 name="dblclick_attach_add"
+				 value="1"
+				 width="100" />
+				<radio_item
+				 height="19"
+				 label="Replace"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="dblclick_attach_replace"
+				 value="0"
+				 top_delta="0" 
+				 width="100" />
+			</radio_group>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="65"
+			 name="dblclick_wear_text"
+			 width="150"
+			 top_pad="10">
+				Double-click wearable :
+			</text>
+			<radio_group
+			 control_name="DoubleClickWearableAdd"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="dblclick_wear_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Add"
+				 layout="topleft"
+				 name="dblclick_wear_add"
+				 value="1"
+				 width="100" />
+				<radio_item
+				 height="19"
+				 label="Replace"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="dblclick_wear_replace"
+				 value="0"
+				 top_delta="0" 
+				 width="100" />
+			</radio_group>
+
+			<text
+			 layout="topleft"
+			 follows="top|left"
+			 top_pad="15"
+			 left="35"
+			 width="350"
+			 height="15"
+			 mouse_opaque="false"
+			 type="string"
+			 name="catznip_notecards_text"
+			 font.style="BOLD">
+				Notecards
+			</text>
+			<check_box
+			 control_name="EmbeddedLandmarkCopyToInventory" 
+			 follows="top|left"
+			 height="20"
+			 label="Copy landmark to inventory on preview"
+			 layout="topleft"
+			 left_delta="10"
+			 name="notecard_landmarkcopy_check"
+			 top_pad="0"
+			 width="350" />
+			<check_box
+			 control_name="EmbeddedTextureStealsFocus"
+			 follows="top|left"
+			 height="20"
+			 label="Texture preview steals focus"
+			 layout="topleft"
+			 left_delta="0"
+			 name="notecard_texturefocus_check"
+			 top_pad="3"
+			 width="350" />
+		</panel>
+
+		<panel
+		 border="true"
+		 follows="all"
+		 label="UI"
+		 layout="topleft"
+		 mouse_opaque="false"
+		 name="catznip_settings_ui">
+			<text
+			 follows="top|left"
+			 font.style="BOLD"
+			 height="15"
+			 mouse_opaque="false"
+			 name="text_miscellaneous"
+			 layout="topleft"
+			 left="30"
+			 top="15"
+			 type="string"
+			 width="350">
+				Miscellaneous
+			</text>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="55"
+			 name="groupfloaters_text"
+			 width="110"
+			 top_pad="5">
+				Group information :
+			</text>
+			<radio_group
+			 control_name="ShowGroupFloaters"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="groupfloaters_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Floater"
+				 layout="topleft"
+				 name="groupfloaters_floater"
+				 value="1"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="People sidepanel"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="groupfloaters_sidepanel"
+				 value="0"
+				 top_delta="0" 
+				 width="150" />
+			</radio_group>
+
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="55"
+			 name="profilefloaters_text"
+			 width="110"
+			 top_pad="10">
+				Resident profiles :
+			</text>
+			<radio_group
+			 control_name="ShowProfileFloaters"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="profilefloaters_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Floater"
+				 layout="topleft"
+				 name="profilefloaters_floater"
+				 value="1"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="Web profiles"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="profilefloaters_web"
+				 value="0"
+				 top_delta="0" 
+				 width="150" />
+			</radio_group>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="55"
+			 name="itemproperties_text"
+			 width="110"
+			 top_pad="10">
+				Item properties :
+			</text>
+			<radio_group
+			 control_name="ShowPropertiesFloaters"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="itemproperties_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Floater"
+				 layout="topleft"
+				 name="itemproperties_floater"
+				 value="1"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="Inventory sidepanel"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="itemproperties_sidepanel"
+				 value="0"
+				 top_delta="0" 
+				 width="150" />
+			</radio_group>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="55"
+			 name="placeprofile_text"
+			 top_pad="10"
+			 width="110">
+				Place profile:
+			</text>
+			<radio_group
+			 control_name="ShowPlaceFloater"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="placeprofile_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Floater"
+				 layout="topleft"
+				 name="placeprofile_floater"
+				 value="1"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="Places sidepanel"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="placeprofile_sidepanel"
+				 value="0"
+				 top_delta="0"
+				 width="150" />
+			</radio_group>
+			<text
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left="55"
+			 name="outfitview_text"
+			 width="110"
+			 top_pad="10">
+				My Outfits tab :
+			</text>
+			<radio_group
+			 control_name="UseOutfitInventoryView"
+			 follows="top|left"
+			 height="20"
+			 layout="topleft"
+			 left_pad="0"
+			 name="outfitview_radio"
+			 top_delta="-7"
+			 width="221">
+				<radio_item
+				 height="19"
+				 label="Inventory view"
+				 layout="topleft"
+				 name="outfitview_accordion"
+				 value="1"
+				 width="150" />
+				<radio_item
+				 height="19"
+				 label="Accordion view"
+				 layout="topleft"
+				 left_pad="-16"
+				 name="outfitview_inventory"
+				 value="0"
+				 top_delta="0" 
+				 width="150" />
+			</radio_group>
+			<check_box
+			 control_name="ShowFloaterCollapseButton"
+			 follows="top|left"
+			 height="20"
+			 label="Show floater collapse button"
+			 layout="topleft"
+			 left="55"
+			 name="floatercollapse_check"
+			 top_pad="5"
+			 width="350" />
+		</panel>
+
+	</tab_container>
+</panel>

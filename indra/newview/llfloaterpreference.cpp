@@ -106,6 +106,9 @@
 #include "llpluginclassmedia.h"
 #include "llteleporthistorystorage.h"
 #include "llproxy.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 #include "lllogininstance.h"        // to check if logged in yet
 #include "llsdserialize.h"
@@ -350,6 +353,13 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 //	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 //	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 //	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("Pref.InitLogNotificationChat",boost::bind(&LLFloaterPreference::onInitLogNotification, this, _1, _2, "chat"));
+	mCommitCallbackRegistrar.add("Pref.InitLogNotificationIM",	boost::bind(&LLFloaterPreference::onInitLogNotification, this, _1, _2, "im"));
+	mCommitCallbackRegistrar.add("Pref.LogNotificationChat",	boost::bind(&LLFloaterPreference::onToggleLogNotification, this, _1, _2, "chat"));
+	mCommitCallbackRegistrar.add("Pref.LogNotificationIM",		boost::bind(&LLFloaterPreference::onToggleLogNotification, this, _1, _2, "im"));
+// [/SL:KB]
 
 	sSkin = gSavedSettings.getString("SkinCurrent");
 
@@ -1893,6 +1903,48 @@ void LLFloaterPreference::changed()
 
 }
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+void LLFloaterPreference::onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+{
+#ifdef CATZNIP
+	std::vector<std::string> notifications;
+	boost::split(notifications, sdParam.asString(), boost::is_any_of(std::string(",")));
+
+	for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+	{
+		LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+		if (*itNotif != templ->mName)
+			continue;
+
+		if (0 == strcmp(pstrScope, "chat"))
+			pCtrl->setValue(templ->canLogToNearbyChat());
+		else if (0 == strcmp(pstrScope, "im"))
+			pCtrl->setValue(templ->canLogToIM(true));
+	}
+#endif // CATZNIP
+}
+
+void LLFloaterPreference::onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+{
+#ifdef CATZNIP
+	std::vector<std::string> notifications;
+	boost::split(notifications, sdParam.asString(), boost::is_any_of(std::string(",")));
+
+	for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+	{
+		LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+		if (*itNotif != templ->mName)
+			continue;
+
+		if (0 == strcmp(pstrScope, "chat"))
+			templ->setLogToNearbyChat(pCtrl->getValue().asBoolean());
+		else if (0 == strcmp(pstrScope, "im"))
+			templ->setLogToIM(pCtrl->getValue().asBoolean());
+	}
+#endif // CATZNIP
+}
+// [/SL:KB]
+
 //------------------------------Updater---------------------------------------
 
 static bool handleBandwidthChanged(const LLSD& newvalue)
@@ -2027,6 +2079,21 @@ BOOL LLPanelPreference::postBuild()
 		mBandWidthUpdater = new LLPanelPreference::Updater(boost::bind(&handleBandwidthChanged, _1), BANDWIDTH_UPDATER_TIMEOUT);
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
+
+// [SL:KB] - Checked: 2011-06-27 (Catznip-2.6)
+	//////////////////////PanelCatznip ///////////////////
+	if (hasChild("windowedfullscreen_check", TRUE))
+	{
+#ifdef CATZNIP
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setEnabled( (gViewerWindow) && (gViewerWindow->canFullscreenWindow()) );
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setValue( (gViewerWindow) && (gViewerWindow->getFullscreenWindow()) );
+#endif // CATZNIP
+	}
+	if (hasChild("rlva_check", TRUE))
+	{
+		getChild<LLCheckBoxCtrl>("rlva_check")->setValue(gSavedSettings.getBOOL("RestrainedLove"));
+	}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	LLFloaterPreference* pFloater = getParentByType<LLFloaterPreference>();
