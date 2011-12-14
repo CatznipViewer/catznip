@@ -1928,10 +1928,10 @@ Returns a string with the requested data about the region
 
 
   <!-- Avatar busy/away mode -->
-	<string name="AvatarSetNotAway">Not Away</string>
-	<string name="AvatarSetAway">Away</string>
-	<string name="AvatarSetNotBusy">Not Busy</string>
-	<string name="AvatarSetBusy">Busy</string>
+	<string name="AvatarSetNotAway">Set Not Away</string>
+	<string name="AvatarSetAway">Set Away</string>
+	<string name="AvatarSetNotBusy">Set Not Busy</string>
+	<string name="AvatarSetBusy">Set Busy</string>
 
 	<!-- Wearable Types -->
 	<string name="shape">Shape</string>
