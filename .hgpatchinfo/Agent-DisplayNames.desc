@@ -1,0 +1,17 @@
+[Agent/DisplayNames]
+- added   : "AgentLinkShowUsernames" setting to control when the username is shown as part of an agent app URL label
+    -> 0 = Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
+       1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
+       2 = Never show the username as part of the label (will still be visible on the tooltip)
+- added   : "Copy SLurl" menu option to the context menu for the Groups panel
+- changed : don't replace existing cached names with dummies on lookup failure
+- changed : LLAvatarNameCache::get() invokes the callback immediately if a cached entry exists rather than waiting for the look-up
+    -> makes the UI feel more responsive
+- changed : increased the unrefreshed cache entry timeout to 90 minutes
+- changed : split "Copy Name to Clipboard" SLurl context menu option into "Copy Display Name" and "Copy Fullname" options
+    -> added as a "Copy" submenu to the avatar item context menu, the avatar context menu and the avatar inspect menus
+- changed : show the display name - rather than the complete name - on emotes in IM toasts
+    -> the username is already shown in the header so it's redundant to show it as part of the emote as well (and it doesn't really look very appealing)
+- fixed   : secondlife:///app/agent/<uuid>/completename no longer shows the complete name of the specified agent
+- fixed   : there is no context menu for LLNameListCtrls items
+    -> right-click a name in the group member list => there should be a context menu
