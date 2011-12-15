@@ -43,7 +43,7 @@ class LLRadioGroup;
 class LLTextBox;
 
 class LLPropertiesObserver;
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 class LLObjectPropertiesObserver;
 // [/SL:KB]
 
@@ -51,7 +51,7 @@ class LLFloaterProperties : public LLFloater
 {
 public:
 //	LLFloaterProperties(const LLUUID& item_id);
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	LLFloaterProperties(const LLSD& key);
 // [/SL:KB]
 	/*virtual*/ ~LLFloaterProperties();
@@ -65,7 +65,7 @@ public:
 	
 	static void dirtyAll();
 
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	const LLUUID& getItemID() const		{ return mItemID; }
 	const LLUUID& getObjectID() const	{ return mObjectID; }
 // [/SL:KB]
@@ -98,7 +98,7 @@ protected:
 	BOOL mDirty;
 
 	LLPropertiesObserver* mPropertiesObserver;
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	LLObjectPropertiesObserver* mObjectPropertiesObserver;
 // [/SL:KB]
 };

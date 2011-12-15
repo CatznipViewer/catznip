@@ -639,7 +639,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 	addDeleteContextMenuOptions(items, disabled_items);
 
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.2.0a
 	// If multiple items are selected, only disable properties if we're not showing them in a multi-floater
 	if ( ((flags & FIRST_SELECTED_ITEM) == 0) && (!gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
 	{
@@ -4493,7 +4493,7 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.0.1a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-3.2.1a) | Modified: Catznip-2.0.1a
 class WearAttachmentsCallback : public LLInventoryCallback
 {
 public:
@@ -4613,7 +4613,7 @@ void LLObjectBridge::openItem()
 	// object double-click action is to wear/unwear object
 //	performAction(getInventoryModel(),
 //		      get_is_item_worn(mUUID) ? "detach" : "attach");
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.2.1a) | Added: Catznip-3.0.0a
 	MASK mask = gKeyboard->currentMask(TRUE);
 	const char* pstrAction = 
 		get_is_item_worn(mUUID) ? "detach" 
@@ -5067,12 +5067,12 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-3.2.1a) | Modified: Catznip-2.2.0a
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
 void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
 		                                  LLDynamicArray<LLFolderViewEventListener*>& batch)
 {
-	// For "open" (aka <enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
+	// For "open" (aka <Enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
 	bool fRemoveOpen = true;
 	if ("open" == action)
 	{
@@ -5179,7 +5179,7 @@ void LLWearableBridge::openItem()
 //	{
 //		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
 //	}
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2011-10-04 (Catznip-3.0.0a) | Modified: Catznip-3.0.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2011-10-04 (Catznip-3.2.1a) | Modified: Catznip-3.0.0a
 	if ( (item) && (item->isWearableType()) )
 	{
 		// Wearable double-click action should match attachment double-click action (=wear/unwear but don't attempt to unwear body parts)

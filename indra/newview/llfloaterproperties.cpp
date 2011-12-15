@@ -55,7 +55,7 @@
 #include "llviewercontrol.h"
 #include "llviewerwindow.h"
 #include "llgroupactions.h"
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a)
 #include "llslurl.h"
 // [/SL:KB]
 
@@ -96,8 +96,8 @@ void LLPropertiesObserver::changed(U32 mask)
 //	{
 //		mFloater->dirty();
 //	}
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-//	// if there's a change we're interested in.
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
+	// if there's a change we're interested in.
 	if ((mask & (LLInventoryObserver::LABEL | LLInventoryObserver::INTERNAL | LLInventoryObserver::REMOVE)) != 0)
 	{
 		const std::set<LLUUID>& idItems = gInventory.getChangedIDs();
@@ -110,7 +110,7 @@ void LLPropertiesObserver::changed(U32 mask)
 // [/SL:KB]
 }
 
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLObjectPropertiesObserver
 //
@@ -125,20 +125,20 @@ public:
 	{
 		registerVOInventoryListener(object, NULL);
 	}
+
 	/*virtual*/ ~LLObjectPropertiesObserver()
 	{
 		removeVOInventoryListener();
 	}
-	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
+
+	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data)
+	{
+		mFloater->dirty();
+	}
+
 private:
 	LLFloaterProperties* mFloater;
 };
-
-void LLObjectPropertiesObserver::inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, 
-												 S32 serial_num, void* user_data)
-{
-	mFloater->dirty();
-}
 // [/SL:KB]
 
 ///----------------------------------------------------------------------------
@@ -150,7 +150,7 @@ void LLObjectPropertiesObserver::inventoryChanged(LLViewerObject* object, LLInve
 //  : LLFloater(mItemID),
 //	mItemID(item_id),
 //	mDirty(TRUE)
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 LLFloaterProperties::LLFloaterProperties(const LLSD& key)
 	: LLFloater(key)
 	, mDirty(TRUE)
@@ -158,7 +158,7 @@ LLFloaterProperties::LLFloaterProperties(const LLSD& key)
 	, mObjectPropertiesObserver(NULL)
 // [/SL:KB]
 {
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	if (key.has("item_id"))
 	{
 		mItemID = key["item_id"].asUUID();
@@ -179,7 +179,7 @@ LLFloaterProperties::~LLFloaterProperties()
 {
 //	delete mPropertiesObserver;
 //	mPropertiesObserver = NULL;
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	if (mPropertiesObserver)
 	{
 		delete mPropertiesObserver;
@@ -352,7 +352,7 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 	{
 //		std::string name;
 //		gCacheName->getFullName(item->getCreatorUUID(), name);
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 		LLUUID creator_id = item->getCreatorUUID();
 		std::string name = LLSLURL("agent", creator_id, "inspect").getSLURLString();
 // [/SL:KB]
@@ -377,12 +377,16 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		std::string name;
 		if (perm.isGroupOwned())
 		{
-			gCacheName->getGroupName(perm.getGroup(), name);
+//			gCacheName->getGroupName(perm.getGroup(), name);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+			LLUUID group_id = perm.getGroup();
+			name = LLSLURL("group", group_id, "inspect").getSLURLString();
+// [/SL:KB]
 		}
 		else
 		{
 //			gCacheName->getFullName(perm.getOwner(), name);
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 			LLUUID owner_id = perm.getOwner();
 			name = LLSLURL("agent", owner_id, "inspect").getSLURLString();
 // [/SL:KB]
@@ -400,7 +404,7 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		getChild<LLUICtrl>("LabelOwnerName")->setValue(getString("public"));
 	}
 	
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	////////////
 	// ORIGIN //
 	////////////
@@ -989,7 +993,7 @@ LLMultiProperties::LLMultiProperties()
 	// start with a small rect in the top-left corner ; will get resized
 	LLRect rect;
 //	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 20, 20);
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
 	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 350, 350);
 // [/SL:KB]
 	setRect(rect);
