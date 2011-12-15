@@ -1,0 +1,10 @@
+[Viewer/Skins]
+- added   : concept of "skin themes" where a skin comes in different versions, options and/or colours that all share a common set of (base) files
+    -> i.e. all the different Starlight skins have all of the XUI files in common, along with some of the textures so they work better as a Starlight skin + colour themes
+- added   : per-skin and per-theme (non-persistant) settings overrides
+    -> by default settings will be loaded from the settings.xml file in the current skin and current theme folder
+    -> settings are applied *after* the session specific options
+- added   : minimal functionality "Skins" preference tab for easy skin switching
+- changed : include the theme name in the user agent used by the internal browser
+- changed : don't switch to the "Minimal" skin on the first run after a new install
+- fixed   : the "Minimal" skin is over-reported in the viewer statistics
