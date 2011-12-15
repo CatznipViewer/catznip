@@ -7,6 +7,8 @@
 - changed : routed LLFolderView::openSelectedItems() to LLFolderView::doToSelected(..., "open")
     -> fixes <enter>'ing on a selection resulting in "Attachment pending"
 - added   : "ShowPropertiesFloaters" setting to optionally show item properties in a viewer 1 style (multi-)floater
+- added   : "Wear on Current Outfit" option to the inventory category context menu
+    -> (replace) wears all items in the folder similarly to selecting all items and right-click "Wear"'ing
 
 [Inventory/MultiWear]
 - added   : LLWearableBridge::performActionBatch() wears multiple wearables at once

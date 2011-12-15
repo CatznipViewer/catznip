@@ -2414,6 +2414,13 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		return;
 	}
 #endif
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	else if ("wearonoutfit" == action)
+	{
+		wearItems();
+		return;
+	}
+// [/SL:KB]
 	else if ("addtooutfit" == action)
 	{
 		modifyOutfit(TRUE);
@@ -2795,6 +2802,9 @@ void LLFolderBridge::folderOptionsMenu()
 			// Adding an outfit onto another (versus replacing) doesn't make sense.
 			if (type != LLFolderType::FT_OUTFIT)
 			{
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+				mItems.push_back(std::string("Wear On Outfit"));
+// [/SL:KB]
 				mItems.push_back(std::string("Add To Outfit"));
 			}
 
@@ -3185,6 +3195,84 @@ void LLFolderBridge::modifyOutfit(BOOL append)
 
 	LLAppearanceMgr::instance().wearInventoryCategory( cat, FALSE, append );
 }
+
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+void LLFolderBridge::wearItems()
+{
+	const LLInventoryModel* pModel = getInventoryModel();
+	const LLViewerInventoryCategory* pCat = getCategory();
+	if ( (!pModel) || (pModel != &gInventory) || (!pCat) )
+		return;
+
+	callAfterCategoryFetch(pCat->getUUID(), boost::bind(&LLFolderBridge::wearItemsFinal, pCat->getUUID()));
+}
+
+// static
+void LLFolderBridge::wearItemsFinal(const LLUUID& idFolder)
+{
+	LLPointer<LLInventoryCallback> cb = new ModifiedCOFCallback();
+
+	//
+	// Collect all items in the folder and filter out the ones we need
+	//
+	LLInventoryModel::item_array_t items;
+	LLInventoryModel::cat_array_t cats;
+	gInventory.collectDescendents(idFolder, cats, items, LLInventoryModel::EXCLUDE_TRASH);
+
+	LLInventoryModel::item_array_t wearItems, attachItems, gestItems;
+	for (LLInventoryModel::item_array_t::iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLViewerInventoryItem* pItem = *itItem;
+		if (get_is_item_worn(pItem->getUUID()))
+			continue;
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+				wearItems.push_back(pItem);
+				break;
+			case LLAssetType::AT_OBJECT:
+				attachItems.push_back(pItem);
+				break;
+			case LLAssetType::AT_GESTURE:
+				gestItems.push_back(pItem);
+				break;
+			default:
+				break;
+		}
+	}
+
+	//
+	// Wearables and body parts [see LLWearableBridge::performActionBatch()]
+	//
+	LLAppearanceMgr::filterWearableItems(wearItems, LLAgentWearables::MAX_CLOTHING_PER_TYPE);
+
+	LLAppearanceMgr::wearables_by_type_t wearItemsByType(LLWearableType::WT_COUNT);
+	LLAppearanceMgr::divvyWearablesByType(wearItems, wearItemsByType);
+
+	// Replace the current top wearable for each type but after that just "Wear Add"
+	for (S32 idxType = 0; idxType < LLWearableType::WT_COUNT; idxType++)
+		for (S32 idxItem = 0, cntItem = wearItemsByType[idxType].size(); idxItem < cntItem; idxItem++)
+			LLAppearanceMgr::instance().wearItemOnAvatar(wearItemsByType[idxType][idxItem]->getLinkedUUID(), true, (0 == idxItem), cb);
+
+	//
+	// Attachments
+	//
+	for (LLInventoryModel::item_array_t::iterator itAttachItem = attachItems.begin(); itAttachItem != attachItems.end(); ++itAttachItem)
+		LLAttachmentsMgr::instance().addAttachment((*itAttachItem)->getLinkedUUID(), 0, false);
+
+
+	//
+	// Gestures
+	//
+	const LLUUID idCOF = LLAppearanceMgr::instance().getCOF();
+	for (LLInventoryModel::item_array_t::iterator itGestItem = gestItems.begin(); itGestItem != gestItems.end(); ++itGestItem)
+	{
+		const LLViewerInventoryItem* pItem = *itGestItem;
+		link_inventory_item(gAgent.getID(), pItem->getLinkedUUID(), idCOF, pItem->getName(), pItem->LLInventoryItem::getDescription(), LLAssetType::AT_LINK, cb);
+	}
+}
+// [/SL:KB]
 
 // helper stuff
 bool move_task_inventory_callback(const LLSD& notification, const LLSD& response, LLMoveInv* move_inv)

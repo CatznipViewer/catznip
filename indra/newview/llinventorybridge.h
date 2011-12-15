@@ -300,6 +300,10 @@ protected:
 	BOOL checkFolderForContentsOfType(LLInventoryModel* model, LLInventoryCollectFunctor& typeToCheck);
 
 	void modifyOutfit(BOOL append);
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	void wearItems();
+	static void wearItemsFinal(const LLUUID& idFolder);
+// [/SL:KB]
 	void determineFolderType();
 
 	menuentry_vec_t getMenuItems() { return mItems; } // returns a copy of current menu items
