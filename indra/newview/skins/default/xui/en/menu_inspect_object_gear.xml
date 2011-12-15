@@ -114,6 +114,13 @@
      function="Object.EnableMute" />
   </menu_item_call>
   <menu_item_call
+   label="Derender"
+   layout="topleft"
+   name="derender">
+    <menu_item_call.on_click
+     function="Object.Derender" />
+  </menu_item_call>
+  <menu_item_call
     label="Zoom In"
     layout="topleft"
    name="zoom_in">

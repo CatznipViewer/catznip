@@ -134,6 +134,7 @@ set(viewer_SOURCE_FILES
     lldebugmessagebox.cpp
     lldebugview.cpp
     lldelayedgestureerror.cpp
+    llderenderlist.cpp
     lldirpicker.cpp
     lldndbutton.cpp
     lldrawable.cpp
@@ -707,6 +708,7 @@ set(viewer_HEADER_FILES
     lldebugmessagebox.h
     lldebugview.h
     lldelayedgestureerror.h
+    llderenderlist.h
     lldirpicker.h
     lldndbutton.h
     lldrawable.h

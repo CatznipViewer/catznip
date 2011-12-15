@@ -46,6 +46,9 @@
 #include "llconsole.h"
 #include "lldaycyclemanager.h"
 #include "lldebugview.h"
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+#include "llderenderlist.h"
+// [/SL:KB]
 #include "llenvmanager.h"
 #include "llfilepicker.h"
 #include "llfirstuse.h"
@@ -5018,6 +5021,13 @@ void handle_force_delete(void*)
 	LLSelectMgr::getInstance()->selectForceDelete();
 }
 
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+void handle_object_derender()
+{
+	LLDerenderList::instance().addCurrentSelection();
+}
+// [/SL:KB]
+
 class LLViewEnableJoystickFlycam : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
@@ -8292,6 +8302,9 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	commit.add("Object.Derender", boost::bind(&handle_object_derender));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
 	view_listener_t::addMenu(new LLObjectReturn(), "Object.Return");
