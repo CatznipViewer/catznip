@@ -1266,14 +1266,29 @@ void LLFloater::setMinimized(BOOL minimize)
 	{
 		// If this window has been dragged while minimized (at any time),
 		// remember its position for the next time it's minimized.
-		if (mHasBeenDraggedWhileMinimized)
+//		if (mHasBeenDraggedWhileMinimized)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		if ( (mHasBeenDraggedWhileMinimized) && (!mCollapseOnMinimize) )
+// [/SL:KB]
 		{
 			const LLRect& currentRect = getRect();
 			mPreviousMinimizedLeft = currentRect.mLeft;
 			mPreviousMinimizedBottom = currentRect.mBottom;
 		}
 
-		setOrigin( mExpandedRect.mLeft, mExpandedRect.mBottom );
+//		setOrigin( mExpandedRect.mLeft, mExpandedRect.mBottom );
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		// If the floater was moved while collapsed then expand it in-place rather, otherwise snap back to the position it was in when minimized
+		if (mCollapseOnMinimize)
+		{
+			const LLRect& currentRect = getRect();
+			setOrigin(currentRect.mLeft, currentRect.mTop - mExpandedRect.getHeight());
+		}
+		else
+		{
+			setOrigin(mExpandedRect.mLeft, mExpandedRect.mBottom);
+		}
+// [/SL:KB]
 
 		if (mButtonsEnabled[BUTTON_RESTORE])
 		{
