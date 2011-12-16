@@ -221,7 +221,7 @@ void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD& sdCon
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (pItem)
 	{
-		filename_queue_t::const_iterator itFile = m_FileQueue.begin();
+		filename_queue_t::iterator itFile = m_FileQueue.begin();
 		while ( (itFile != m_FileQueue.end()) && (itFile->second != idItem) )
 			++itFile;
 		if (itFile != m_FileQueue.end())
