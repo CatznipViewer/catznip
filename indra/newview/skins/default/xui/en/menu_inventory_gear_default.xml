@@ -86,9 +86,17 @@
          function="Inventory.GearDefault.Custom.Action"
          parameter="close_folders" />
     </menu_item_call>
-<!--
     <menu_item_separator
      layout="topleft" />
+    <menu_item_call
+     label="Empty Trash"
+     layout="topleft"
+     name="empty_trash">
+        <on_click
+         function="Inventory.GearDefault.Custom.Action"
+         parameter="empty_trash" />
+    </menu_item_call>
+<!--
     <menu_item_call
      label="Empty Lost and Found"
      layout="topleft"
@@ -144,15 +152,4 @@
 			 function="Inventory.GearDefault.Enable"
 			 parameter="find_links" />
         </menu_item_call>
-    <menu_item_separator
-     layout="topleft" />
-
-    <menu_item_call
-     label="Empty Trash"
-     layout="topleft"
-     name="empty_trash">
-        <on_click
-         function="Inventory.GearDefault.Custom.Action"
-         parameter="empty_trash" />
-    </menu_item_call>
 </toggleable_menu>
