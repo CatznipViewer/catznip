@@ -2741,7 +2741,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				query_string["groupowned"] = "true";
 			}	
 
-			chat.mURL = LLSLURL("objectim", session_id, "").getSLURLString();
+//			chat.mURL = LLSLURL("objectim", session_id, "").getSLURLString();
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-02 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+			chat.mURL = LLSLURL("objectim", session_id, LLURI::mapToQueryString(query_string)).getSLURLString();
+// [/SL:KB]
 			chat.mText = message;
 
 			// Note: lie to Nearby Chat, pretending that this is NOT an IM, because
@@ -3238,6 +3241,14 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 
 		is_owned_by_me = chatter->permYouOwner();
 	}
+
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2011-07-25 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+	if ( (!chatter) && (chat.mPosAgent.isExactlyZero()) )
+	{
+		// If we don't know about the object then grab its position from the message
+		msg->getVector3("ChatData", "Position", chat.mPosAgent);
+	}
+// [/SL:KB]
 
 	if (is_audible)
 	{
