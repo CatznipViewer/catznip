@@ -42,6 +42,9 @@
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llsidepanelinventory.h"
 #include "llviewerattachmenu.h"
 #include "llviewerfoldertype.h"
@@ -141,7 +144,7 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	// contex menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLInventoryPanel::doCreate, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.AttachObject", boost::bind(&LLInventoryPanel::attachObject, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.BeginIMSession", boost::bind(&LLInventoryPanel::beginIMSession, this));
@@ -239,6 +242,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	// hide inbox
 	getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
 	getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+	getFilter()->markDefault();
+// [/SL:KB]
 
 	// set the filter for the empty folder if the debug setting is on
 	if (gSavedSettings.getBOOL("DebugHideEmptySystemFolders"))
@@ -1084,56 +1090,66 @@ void LLInventoryPanel::dumpSelectionInformation(void* user_data)
 	iv->mFolderRoot->dumpSelectionInformation();
 }
 
-BOOL is_inventorysp_active()
-{
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
-	return sidepanel_inventory->isMainInventoryPanelActive();
-}
+//BOOL is_inventorysp_active()
+//{
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
+//	return sidepanel_inventory->isMainInventoryPanelActive();
+//}
 
 // static
 LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 {
+//	S32 z_min = S32_MAX;
+//	LLInventoryPanel* res = NULL;
+//	LLFloater* active_inv_floaterp = NULL;
+//
+//	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+//	if (!floater_inventory)
+//	{
+//		llwarns << "Could not find My Inventory floater" << llendl;
+//		return FALSE;
+//	}
+//
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//
+//	// A. If the inventory side panel floater is open, use that preferably.
+//	if (is_inventorysp_active())
+//	{
+//		// Get the floater's z order to compare it to other inventory floaters' order later.
+//		res = sidepanel_inventory->getActivePanel();
+//		z_min = gFloaterView->getZOrder(floater_inventory);
+//		active_inv_floaterp = floater_inventory;
+//	}
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 	S32 z_min = S32_MAX;
-	LLInventoryPanel* res = NULL;
 	LLFloater* active_inv_floaterp = NULL;
-
-	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
-	if (!floater_inventory)
-	{
-		llwarns << "Could not find My Inventory floater" << llendl;
-		return FALSE;
-	}
-
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-
-	// A. If the inventory side panel floater is open, use that preferably.
-	if (is_inventorysp_active())
-	{
-		// Get the floater's z order to compare it to other inventory floaters' order later.
-		res = sidepanel_inventory->getActivePanel();
-		z_min = gFloaterView->getZOrder(floater_inventory);
-		active_inv_floaterp = floater_inventory;
-	}
+// [/SL:KB]
 
 	// B. Iterate through the inventory floaters and return whichever is on top.
 	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
 	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
 	{
-		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter);
+//		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLFloater* iv = *iter;
+// [/SL:KB]
 		if (iv && iv->getVisible())
 		{
 			S32 z_order = gFloaterView->getZOrder(iv);
 			if (z_order < z_min)
 			{
-				res = iv->getPanel();
+//				res = iv->getPanel();
 				z_min = z_order;
 				active_inv_floaterp = iv;
 			}
 		}
 	}
 
-	if (res)
+//	if (res)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if (active_inv_floaterp)
+// [/SL:KB]
 	{
 		// Make sure the floater is not minimized (STORM-438).
 		if (active_inv_floaterp && active_inv_floaterp->isMinimized())
@@ -1143,12 +1159,23 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	}	
 	else if (auto_open)
 	{
-		floater_inventory->openFloater();
-
-		res = sidepanel_inventory->getActivePanel();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		active_inv_floaterp = LLFloaterReg::getInstance("inventory");
+		if (active_inv_floaterp)
+		{
+			active_inv_floaterp->openFloater();
+		}
+// [/SL:KB]
+//		floater_inventory->openFloater();
+//
+//		res = sidepanel_inventory->getActivePanel();
 	}
 
-	return res;
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(active_inv_floaterp);
+	return (pInvSP) ? pInvSP->getActivePanel() : NULL;
+// [/SL:KB]
+//	return res;
 }
 
 //static
@@ -1240,6 +1267,9 @@ public:
 		LLInventoryPanel::initFromParams(p);
 		// turn on inbox for recent items
 		getFilter()->setFilterCategoryTypes(getFilter()->getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+		getFilter()->markDefault();
+// [/SL:KB]
 	}
 
 protected:
