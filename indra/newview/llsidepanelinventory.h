@@ -28,6 +28,9 @@
 #define LL_LLSIDEPANELINVENTORY_H
 
 #include "llpanel.h"
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+#include "llinventorymodel.h"
+// [/SL:KB]
 
 class LLButton;
 class LLFolderViewItem;
@@ -104,6 +107,14 @@ protected:
 
 	bool manageInboxOutboxPanels(LLButton * pressedButton, LLLayoutPanel * pressedPanel, LLButton * otherButton, LLLayoutPanel * otherPanel);
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+	// Returns the action that makes sense for the current selection (or an empty string if none)
+	std::string getSelectionAction() /*const*/;
+
+	void onActivePanelChanged(LLInventoryPanel*);
+	void onModelChanged(U32 mask);
+// [/SL:KB]
+
 	//
 	// UI Elements
 	//
@@ -129,11 +140,10 @@ private:
 	LLButton*					mInfoBtn;
 	LLButton*					mShareBtn;
 	LLButton*					mWearBtn;
-	LLButton*					mPlayBtn;
-	LLButton*					mTeleportBtn;
+//	LLButton*					mPlayBtn;
+//	LLButton*					mTeleportBtn;
 	LLButton*					mOverflowBtn;
-	LLButton*					mShopBtn;
-
+//	LLButton*					mShopBtn;
 	bool						mInboxEnabled;
 	bool						mOutboxEnabled;
 
