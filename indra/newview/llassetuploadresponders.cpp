@@ -512,6 +512,17 @@ LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
 {
 }
 
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
+	const LLSD& post_data,
+	const std::string& file_name,
+	LLAssetType::EType asset_type,
+	asset_upload_callback_t cb)
+	: LLAssetUploadResponder(post_data, file_name, asset_type), mCallback(cb)
+{
+}
+// [/SL:KB]
+
 //virtual 
 void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 {
@@ -534,6 +545,14 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 
 	llinfos << "Inventory item " << item->getName() << " saved into "
 		<< content["new_asset"].asString() << llendl;
+
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	if (!mCallback.empty())
+	{
+		mCallback(item_id, content, true /*success*/);
+		return;
+	}
+// [/SL:KB]
 
 	LLInventoryType::EType inventory_type = new_item->getInventoryType();
 	switch(inventory_type)
@@ -603,6 +622,15 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 	}
 }
 
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+void LLUpdateAgentInventoryResponder::uploadFailure(const LLSD& content)
+{
+	if (!mCallback.empty())
+		mCallback(mPostData["item_id"].asUUID(), content, false /*failure*/);
+	else
+		LLAssetUploadResponder::uploadFailure(content);
+}
+// [/SL:KB]
 
 LLUpdateTaskInventoryResponder::LLUpdateTaskInventoryResponder(const LLSD& post_data,
 																 const LLUUID& vfile_id,
