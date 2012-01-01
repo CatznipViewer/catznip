@@ -38,6 +38,9 @@
 #include "llviewernetwork.h"
 
 static const std::string PANEL_PICKS = "panel_picks";
+// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+static const std::string PANEL_PROFILE = "panel_profile";
+// [/SL:KB]
 
 std::string getProfileURL(const std::string& agent_name)
 {
@@ -297,6 +300,9 @@ BOOL LLPanelProfile::postBuild()
 	panel_picks->setProfilePanel(this);
 
 	getTabContainer()[PANEL_PICKS] = panel_picks;
+// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	getTabContainer()[PANEL_PROFILE] = findChild<LLPanelAvatarProfile>(PANEL_PROFILE);
+// [/SL:KB]
 
 	return TRUE;
 }
