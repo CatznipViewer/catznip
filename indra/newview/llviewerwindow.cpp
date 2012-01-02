@@ -2140,20 +2140,38 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 		sendShapeToSim();
 
 		// store new settings for the mode we are in, regardless
-		BOOL maximized = mWindow->getMaximized();
-		gSavedSettings.setBOOL("WindowMaximized", maximized);
-
-		if (!maximized)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-88-26 (Catznip-3.0.0a) | Modified: Catznip-2.1.1a
+#ifndef LL_WINDOWS
+		if (!gViewerWindow->getFullscreenWindow())
+#endif // LL_WINDOWS
 		{
-			U32 min_window_width=gSavedSettings.getU32("MinWindowWidth");
-			U32 min_window_height=gSavedSettings.getU32("MinWindowHeight");
-			// tell the OS specific window code about min window size
-			mWindow->setMinSize(min_window_width, min_window_height);
+// [/SL:KB]
+			BOOL maximized = mWindow->getMaximized();
+			gSavedSettings.setBOOL("WindowMaximized", maximized);
 
-			// Only save size if not maximized
-			gSavedSettings.setU32("WindowWidth", mWindowRectRaw.getWidth());
-			gSavedSettings.setU32("WindowHeight", mWindowRectRaw.getHeight());
+//			if (!maximized)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+#ifndef LL_WINDOWS
+			LLCoordScreen window_size;
+			if (!maximized)
+#else
+			LLCoordScreen window_size;
+			if (mWindow->getRestoredSize(&window_size))
+#endif // LL_WINDOWS
+// [/SL:KB]
+			{
+				U32 min_window_width=gSavedSettings.getU32("MinWindowWidth");
+				U32 min_window_height=gSavedSettings.getU32("MinWindowHeight");
+				// tell the OS specific window code about min window size
+				mWindow->setMinSize(min_window_width, min_window_height);
+
+				// Only save size if not maximized
+				gSavedSettings.setU32("WindowWidth", mWindowRectRaw.getWidth());
+				gSavedSettings.setU32("WindowHeight", mWindowRectRaw.getHeight());
+			}
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-3.0.0a) | Modified: Catznip-2.1.2a
 		}
+// [/SL:KB]
 
 		LLViewerStats::getInstance()->setStat(LLViewerStats::ST_WINDOW_WIDTH, (F64)width);
 		LLViewerStats::getInstance()->setStat(LLViewerStats::ST_WINDOW_HEIGHT, (F64)height);
@@ -4741,6 +4759,32 @@ void LLViewerWindow::initFonts(F32 zoom_factor)
 	// Force font reloads, which can be very slow
 	LLFontGL::loadDefaultFonts();
 }
+
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
+bool LLViewerWindow::canFullscreenWindow()
+{
+#ifdef LL_WINDOWS
+	return true;
+#else
+	return false;
+#endif // LL_WINDOWS
+}
+
+bool LLViewerWindow::getFullscreenWindow()
+{
+	return (mWindow) && (mWindow->getFullscreenWindow());
+}
+
+void LLViewerWindow::setFullscreenWindow(BOOL fFullscreen)
+{
+	if ( (!canFullscreenWindow()) || (!mWindow) )
+		return;
+
+	if (mWindow->getFullscreenWindow() != fFullscreen)
+		mWindow->setFullscreenWindow(fFullscreen);
+	gSavedSettings.setBOOL("FullScreenWindow", fFullscreen);
+}
+// [/SL:KB]
 
 void LLViewerWindow::requestResolutionUpdate()
 {
