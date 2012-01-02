@@ -33,6 +33,9 @@
 
 class LLButton;
 class LLCheckBoxCtrl;
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a)
+class LLComboBox;
+// [/SL:KB]
 class LLPanelPermissions;
 class LLPanelObject;
 class LLPanelVolume;
@@ -114,6 +117,9 @@ private:
 	static bool deleteMediaConfirm(const LLSD& notification, const LLSD& response);
 	static bool multipleFacesSelectedConfirm(const LLSD& notification, const LLSD& response);
 	static void setObjectType( LLPCode pcode );
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	void onClickAxisOptions();
+// [/SL:KB]
 	void onClickGridOptions();
 
 public:
@@ -138,8 +144,16 @@ public:
 	LLButton*		mBtnLink;
 	LLButton*		mBtnUnlink;
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+	LLCheckBoxCtrl*	mCheckAxisAtRoot;
+	LLButton*		mBtnAxisOptions;
+// [/SL:KB]
+
 	LLCheckBoxCtrl*	mCheckSnapToGrid;
 	LLButton*		mBtnGridOptions;
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
+	LLComboBox*		mComboGridMode;
+// [/SL:KB]
 	LLCheckBoxCtrl*	mCheckStretchUniform;
 	LLCheckBoxCtrl*	mCheckStretchTexture;
 
