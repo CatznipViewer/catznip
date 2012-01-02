@@ -479,17 +479,17 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 	if(chat_msg.mText.empty())
 		return;//don't process empty messages
 
-//	// Handle irc styled messages for toast panel
-//	// HACK ALERT - changes mText, stripping out IRC style "/me" prefixes
-//	LLChat& tmp_chat = const_cast<LLChat&>(chat_msg);
-//	std::string original_message = tmp_chat.mText;			// Save un-modified version of chat text
-//	if (tmp_chat.mChatStyle == CHAT_STYLE_IRC)
-//	{
-//		if(!tmp_chat.mFromName.empty())
-//			tmp_chat.mText = tmp_chat.mFromName + tmp_chat.mText.substr(3);
-//		else
-//			tmp_chat.mText = tmp_chat.mText.substr(3);
-//	}
+	// Handle irc styled messages for toast panel
+	// HACK ALERT - changes mText, stripping out IRC style "/me" prefixes
+	LLChat& tmp_chat = const_cast<LLChat&>(chat_msg);
+	std::string original_message = tmp_chat.mText;			// Save un-modified version of chat text
+	if (tmp_chat.mChatStyle == CHAT_STYLE_IRC)
+	{
+		if(!tmp_chat.mFromName.empty())
+			tmp_chat.mText = tmp_chat.mFromName + tmp_chat.mText.substr(3);
+		else
+			tmp_chat.mText = tmp_chat.mText.substr(3);
+	}
 
 	LLFloater* chat_bar = LLFloaterReg::getInstance("chat_bar");
 
@@ -503,7 +503,7 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 
 	// Build notification data 
 	LLSD notification;
-//	notification["message"] = chat_msg.mText;
+	notification["message"] = chat_msg.mText;
 	notification["from"] = chat_msg.mFromName;
 	notification["from_id"] = chat_msg.mFromID;
 	notification["time"] = chat_msg.mTime;
@@ -512,21 +512,6 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 	notification["chat_style"] = (S32)chat_msg.mChatStyle;
 	// Pass sender info so that it can be rendered properly (STORM-1021).
 	notification["sender_slurl"] = LLViewerChat::getSenderSLURL(chat_msg, args);
-
-// [SL:KB] - Patch: Chat-DuplicateEmote | Checked: 2011-09-15 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
-	// Handle irc styled messages for toast panel
-	if (chat_msg.mChatStyle == CHAT_STYLE_IRC)
-	{
-		if (!chat_msg.mFromName.empty())
-			notification["message"] = chat_msg.mFromName + chat_msg.mText.substr(3);
-		else
-			notification["message"] = chat_msg.mText.substr(3);
-	}
-	else
-	{
-		notification["message"] = chat_msg.mText;
-	}
-// [/SL:KB]
 
 	if (chat_msg.mChatType == CHAT_TYPE_DIRECT &&
 		chat_msg.mText.length() > 0 &&
@@ -558,16 +543,10 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,		// WARNING - not 
 
 			LLViewerChat::getChatColor(chat_msg,txt_color);
 
-//			LLFloaterScriptDebug::addScriptLine(original_message,		// Send full message with "/me" style prefix
-//												chat_msg.mFromName,
-//												txt_color,
-//												chat_msg.mFromID);
-// [SL:KB] - Patch: Chat-DuplicateEmote | Checked: 2011-09-15 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
-			LLFloaterScriptDebug::addScriptLine(chat_msg.mText,
+			LLFloaterScriptDebug::addScriptLine(original_message,		// Send full message with "/me" style prefix
 												chat_msg.mFromName,
 												txt_color,
 												chat_msg.mFromID);
-// [/SL:KB]
 			return;
 		}
 	}
