@@ -34,11 +34,14 @@ class LLTextBox;
 class LLIconCtrl;
 class LLParcelChangeObserver;
 
-class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
+//class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+class LLPanelTopInfoBar : public LLPanel
+// [/SL:KB]
 {
 	LOG_CLASS(LLPanelTopInfoBar);
 
-	friend class LLDestroyClass<LLPanelTopInfoBar>;
+//	friend class LLDestroyClass<LLPanelTopInfoBar>;
 
 public:
 	typedef boost::signals2::signal<void ()> resize_signal_t;
@@ -54,10 +57,10 @@ public:
 	 */
 	void handleLoginComplete();
 
-	/**
-	 * Called when the top info bar gets shown or hidden
-	 */
-	void onVisibilityChange(const LLSD& show);
+//	/**
+//	 * Called when the top info bar gets shown or hidden
+//	 */
+//	void onVisibilityChange(const LLSD& show);
 
 	boost::signals2::connection setResizeCallback( const resize_signal_t::slot_type& cb );
 
@@ -151,16 +154,16 @@ private:
 	 */
 	void setParcelInfoText(const std::string& new_text);
 
-	/**
-	 *  Implementation of LLDestroyClass<T>
-	 */
-	static void destroyClass()
-	{
-		if (LLPanelTopInfoBar::instanceExists())
-		{
-			LLPanelTopInfoBar::getInstance()->setEnabled(FALSE);
-		}
-	}
+//	/**
+//	 *  Implementation of LLDestroyClass<T>
+//	 */
+//	static void destroyClass()
+//	{
+//		if (LLPanelTopInfoBar::instanceExists())
+//		{
+//			LLPanelTopInfoBar::getInstance()->setEnabled(FALSE);
+//		}
+//	}
 
 	LLButton* 				mInfoBtn;
 	LLTextBox* 				mParcelInfoText;

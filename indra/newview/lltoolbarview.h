@@ -97,6 +97,10 @@ public:
 	// Clears all buttons off the toolbars
 	bool clearToolbars();
 	
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0c) | Added: Catznip-3.2.0c
+	LLToolBar* getToolbar(EToolBarLocation eToolbar) const { return (eToolbar < TOOLBAR_COUNT) ? mToolbars[eToolbar] : NULL; }
+// [/SL:KB]
+
 	void setToolBarsVisible(bool visible);
 
 	static bool loadDefaultToolbars();
