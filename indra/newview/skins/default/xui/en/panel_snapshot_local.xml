@@ -211,8 +211,6 @@
      right="-32"
      top="350"
      width="100">
-      <button.commit_callback
-       function="Local.Cancel" />
     </button>
     <flyout_button
      follows="right|bottom"

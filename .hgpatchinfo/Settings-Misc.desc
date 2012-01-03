@@ -1,0 +1,19 @@
+[Settings/Misc]
+- added   : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
+- added   : "InspectNearbyRemoteObject" setting to show the object inspector for "objectim" app URLs for nearby objects
+    -> affects plain text chat where llOwnerSay(), llSay() and llInstantMessage() chat from scripts always opens the "remote object inspector" by default
+- changed : re-added "Save As" option when saving snapshots locally
+- fixed   : "Plain text chat history" reverts to FALSE if the relevant preference tab is opened while not logged on
+- fixed   : remote object inspector isn't passed any parameters for object IMs
+    -> query string is constructed but was never appended to the "objectim" app URL
+- fixed   : llOwnerSay from objects outside draw distance shows 0,0,0 for the object coordinates on the remote object inspector
+
+[Settings/Snapshots]
+- added   : "SnapshotLocalPath" settings to control where snapshots are saved to
+- added   : customization of the snapshot name ("SnapshotLocalName" setting)
+    -> %d - date (YYYYMMDD)
+       %t - time (HHmm)
+       %r - region name
+       %p - parcel name
+       %c - image counter
+- changed : re-added "Save As" option when saving snapshots locally

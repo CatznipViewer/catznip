@@ -334,6 +334,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareSettings",		boost::bind(&LLFloaterPreference::onOpenHardwareSettings, this));
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreference::onVertexShaderEnable, this));
@@ -550,7 +553,7 @@ void LLFloaterPreference::apply()
 //	LLWString busy_response = utf8str_to_wstring(getChild<LLUICtrl>("busy_response")->getValue().asString());
 //	LLWStringUtil::replaceTabsWithSpaces(busy_response, 4);
 
-	gSavedSettings.setBOOL("PlainTextChatHistory", getChild<LLUICtrl>("plain_text_chat_history")->getValue().asBoolean());
+//	gSavedSettings.setBOOL("PlainTextChatHistory", getChild<LLUICtrl>("plain_text_chat_history")->getValue().asBoolean());
 	
 	if (mGotPersonalInfo)
 	{ 
@@ -1387,6 +1390,22 @@ void LLFloaterPreference::onClickLogPath()
 	gSavedPerAccountSettings.setString("InstantMessageLogPath", picker.getDirName());
 }
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLFloaterPreference::onClickSnapshotPath()
+{
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
+	
+	LLDirPicker& picker = LLDirPicker::instance();
+	if (!picker.getDir(&proposed_name))
+	{
+		return; //Canceled!
+	}
+
+	gSavedSettings.setString("SnapshotLocalPath", picker.getDirName());
+	gDirUtilp->setSnapshotDir(picker.getDirName());
+}
+// [/SL:KB]
+
 void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im_via_email, const std::string& email)
 {
 	mGotPersonalInfo = true;
@@ -1419,7 +1438,7 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChildView("send_im_to_email")->setEnabled(TRUE);
 	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("plain_text_chat_history")->setEnabled(TRUE);
-	getChild<LLUICtrl>("plain_text_chat_history")->setValue(gSavedSettings.getBOOL("PlainTextChatHistory"));
+//	getChild<LLUICtrl>("plain_text_chat_history")->setValue(gSavedSettings.getBOOL("PlainTextChatHistory"));
 	getChildView("log_instant_messages")->setEnabled(TRUE);
 //	getChildView("log_chat")->setEnabled(TRUE);
 //	getChildView("busy_response")->setEnabled(TRUE);
