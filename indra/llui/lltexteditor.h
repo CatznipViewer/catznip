@@ -162,6 +162,9 @@ public:
 
 	// inserts text at cursor
 	void			insertText(const std::string &text);
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	void			insertText(const LLWString &text);
+// [/SL:KB]
 
 	void			appendWidget(const LLInlineViewSegment::Params& params, const std::string& text, bool allow_undo);
 	// Non-undoable
@@ -175,6 +178,9 @@ public:
 	BOOL			tryToRevertToPristineState();
 
 	void			setCursorAndScrollToEnd();
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	void 			setSelectionRange(S32 pos, S32 length);
+// [/SL:KB]
 
 	void			getCurrentLineAndColumn( S32* line, S32* col, BOOL include_wordwrap );
 

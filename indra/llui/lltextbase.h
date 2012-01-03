@@ -358,7 +358,7 @@ public:
 
 	// cursor manipulation
 	bool					setCursor(S32 row, S32 column);
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
 	S32						getCursorPos() { return mCursorPos; }
 // [/SL:KB
 	bool					setCursorPos(S32 cursor_pos, bool keep_cursor_offset = false);
@@ -540,6 +540,9 @@ protected:
 	S32							mSelectionEnd;
 	
 	BOOL						mIsSelecting;		// Are we in the middle of a drag-select? 
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	BOOL						mIsSelectDragging;	// Are we in the middle of drag-moving the current selection? 
+// [/SL:KB]
 
 	// configuration
 	S32							mHPad;				// padding on left of text
