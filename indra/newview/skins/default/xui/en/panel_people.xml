@@ -78,7 +78,6 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
      layout="topleft"
      left="3"
      name="tabs"
-     tab_drag_commit="true"
      tab_group="1"
      tab_min_width="70"
      tab_height="30"
