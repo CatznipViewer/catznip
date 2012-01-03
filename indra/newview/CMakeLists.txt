@@ -278,6 +278,7 @@ set(viewer_SOURCE_FILES
     llimfloater.cpp
     llimfloatercontainer.cpp
     llimhandler.cpp
+    llimstorage.cpp
     llimview.cpp
     llinspect.cpp
     llinspectavatar.cpp
@@ -831,6 +832,7 @@ set(viewer_HEADER_FILES
     llhudview.h
     llimfloater.h
     llimfloatercontainer.h
+    llimstorage.h
     llimview.h
     llinspect.h
     llinspectavatar.h
