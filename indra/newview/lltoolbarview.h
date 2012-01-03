@@ -97,10 +97,7 @@ public:
 	// Clears all buttons off the toolbars
 	bool clearToolbars();
 	
-//	void setToolBarsVisible(bool visible);
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	void setToolBarsVisible(bool visible_global, bool visible_empty = false);
-// [/SL:KB]
+	void setToolBarsVisible(bool visible);
 
 	static bool loadDefaultToolbars();
 	static bool clearAllToolbars();
@@ -123,19 +120,12 @@ private:
 	bool	addCommandInternal(const LLCommandId& commandId, LLToolBar*	toolbar);
 	void	addToToolset(command_id_list_t& command_list, Toolbar& toolbar) const;
 
-//	static void	onToolBarButtonAdded(LLView* button);
-//	static void onToolBarButtonRemoved(LLView* button);
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	void	onToolBarButtonAdded(EToolBarLocation toolbar, LLView* button);
-	void	onToolBarButtonRemoved(EToolBarLocation toolbar, LLView* button);
-// [/SL:KB]
+	static void	onToolBarButtonAdded(LLView* button);
+	static void onToolBarButtonRemoved(LLView* button);
 
 	// Pointers to the toolbars handled by the toolbar view
 	LLToolBar*  mToolbars[TOOLBAR_COUNT];
 	bool		mToolbarsLoaded;
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2011-11-20 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	bool		mToolbarsVisible;
-// [/SL:KB]
 	
 	bool				mDragStarted;
 	LLToolBarButton*	mDragToolbarButton;

@@ -36,7 +36,6 @@
                     auto_resize="false"
                     user_resize="false"
                     height="500"
-                    visible="false"
                     width="30"
                     mouse_opaque="false">
         <toolbar follows="left|top|bottom"
@@ -105,7 +104,6 @@
                     auto_resize="false"
                     user_resize="false"
                     height="500"
-                    visible="false"
                     width="30"
                     mouse_opaque="false">
         <toolbar
@@ -136,7 +134,6 @@
                 auto_resize="false"
                 user_resize="false"
                 height="30"
-                visible="false"
                 width="1024"
                 mouse_opaque="false">
     <toolbar layout="topleft"
