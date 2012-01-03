@@ -779,12 +779,21 @@ BOOL LLViewerTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 	{
 		if( allowsEmbeddedItems() )
 		{
-			setCursorAtLocalPos( x, y, FALSE );
+//			setCursorAtLocalPos( x, y, FALSE );
+// [SL:KB] - Patch: Control-TextEditorShiftSelect | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+			S32 posClick = getDocIndexFromLocalCoord(x, y, false);
+// [/SL:KB]
 			llwchar wc = 0;
-			if (mCursorPos < getLength())
+//			if (mCursorPos < getLength())
+//			{
+//				wc = getWText()[mCursorPos];
+//			}
+// [SL:KB] - Patch: Control-TextEditorShiftSelect | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+			if (posClick < getLength())
 			{
-				wc = getWText()[mCursorPos];
+				wc = getWText()[posClick];
 			}
+// [/SL:KB]
 			LLPointer<LLInventoryItem> item_at_pos = LLEmbeddedItems::getEmbeddedItemPtr(wc);
 			if (item_at_pos)
 			{
