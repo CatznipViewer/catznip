@@ -103,7 +103,10 @@ protected:
 	// at the moment, when a handlers creates a channel.
 	virtual void initChannel()=0;
 
-	LLScreenChannelBase*	mChannel;
+//	LLScreenChannelBase*	mChannel;
+// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	LLHandle<LLScreenChannelBase> mChannelHandle;
+// [/SL:KB]
 	e_notification_type		mType;
 
 };

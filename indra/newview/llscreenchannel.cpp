@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llscreenchannel.cpp
  * @brief Class implements a channel on a screen in which appropriate toasts may appear.
  *
@@ -37,6 +37,9 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a)
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llimfloater.h"
@@ -70,7 +73,19 @@ LLRect LLScreenChannelBase::getChannelRect()
 	mFloaterSnapRegion->localRectToScreen(mFloaterSnapRegion->getLocalRect(), &channel_rect);
 	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
 
-	channel_rect.mTop = chiclet_rect.mBottom;
+//	channel_rect.mTop = chiclet_rect.mBottom;
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if (LLChicletBar::instanceExists())
+	{
+		LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
+		chiclet_bar->localRectToScreen(chiclet_bar->getLocalRect(), &chiclet_rect);
+
+		if (LLChicletBar::ALIGN_TOP == chiclet_bar->getAlignment())
+			channel_rect.mTop = chiclet_rect.mBottom;
+		else
+			channel_rect.mBottom = chiclet_rect.mTop;
+	}
+// [/SL:KB]
 	return channel_rect;
 }
 
@@ -527,8 +542,14 @@ void LLScreenChannel::redrawToasts()
 //--------------------------------------------------------------------------
 void LLScreenChannel::showToastsBottom()
 {
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLRect channel_rect = getChannelRect();
+// [/SL:KB]
 	LLRect	toast_rect;	
-	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
+//	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	S32		bottom = channel_rect.mBottom;
+// [/SL:KB]
 	S32		toast_margin = 0;
 	std::vector<ToastElem>::reverse_iterator it;
 
@@ -564,7 +585,7 @@ void LLScreenChannel::showToastsBottom()
 				(*it).toast->translate(0, shift);
 			}
 
-			LLRect channel_rect = getChannelRect();
+//			LLRect channel_rect = getChannelRect();
 			// don't show toasts if there is not enough space
 			if(toast_rect.mTop > channel_rect.mTop)
 			{
