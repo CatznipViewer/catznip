@@ -169,9 +169,6 @@ public:
 	void initFromParams(const Params& p);
 
 	void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	void handleReshape(const LLRect& new_rect, bool by_user);
-// [/SL:KB]
 
 	S32 getMinDim() const { return mMinDim; }
 	void setMinDim(S32 value) { mMinDim = value; if (!mExpandedMinDimSpecified) mExpandedMinDim = value; }
@@ -196,11 +193,6 @@ public:
 
 	void setOrientation(LLLayoutStack::ELayoutOrientation orientation) { mOrientation = orientation; }
 
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	typedef boost::signals2::signal<void (LLUICtrl* ctrl, const LLRect& rect)> reshape_signal_t;
-	boost::signals2::connection setReshapeCallback(const reshape_signal_t::slot_type& cb);
-// [/SL:KB]
-
 protected:
 	LLLayoutPanel(const Params& p);
 	
@@ -219,10 +211,6 @@ protected:
 	F32		mFractionalSize;
 	LLLayoutStack::ELayoutOrientation mOrientation;
 	class LLResizeBar* mResizeBar;
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	reshape_signal_t*	mReshapeSignal;
-	bool				mReshapeSignalFire;
-// [/SL:KB]
 };
 
 

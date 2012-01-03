@@ -56,12 +56,7 @@ static LLDefaultChildRegistry::Register<LLDebugView> r("debug_view");
 
 LLDebugView::LLDebugView(const LLDebugView::Params& p)
 :	LLView(p)
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-{
-	LLFloaterView::setFloaterSnapChangedCallback(boost::bind(&LLDebugView::onFloaterSnapRegionChanged, this, _1));
-}
-// [/SL:KB]
-//{}
+{}
 
 void LLDebugView::init()
 {
@@ -152,20 +147,12 @@ LLDebugView::~LLDebugView()
 	gTextureCategoryView = NULL;
 }
 
-//void LLDebugView::draw()
-//{
-//	LLView* floater_snap_region = getRootView()->getChildView("floater_snap_region");
-//	LLRect debug_rect;
-//	floater_snap_region->localRectToOtherView(floater_snap_region->getLocalRect(), &debug_rect, getParent());
-//
-//	setShape(debug_rect);
-//	LLView::draw();
-//}
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLDebugView::onFloaterSnapRegionChanged(LLView* floater_snap_viewp)
+void LLDebugView::draw()
 {
+	LLView* floater_snap_region = getRootView()->getChildView("floater_snap_region");
 	LLRect debug_rect;
-	floater_snap_viewp->localRectToOtherView(floater_snap_viewp->getLocalRect(), &debug_rect, getParent());
+	floater_snap_region->localRectToOtherView(floater_snap_region->getLocalRect(), &debug_rect, getParent());
+
 	setShape(debug_rect);
+	LLView::draw();
 }
-// [/SL:KB]

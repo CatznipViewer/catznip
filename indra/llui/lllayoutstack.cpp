@@ -62,10 +62,6 @@ LLLayoutPanel::Params::Params()
 
 LLLayoutPanel::LLLayoutPanel(const Params& p)	
 :	LLPanel(p),
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	mReshapeSignal(NULL),
-	mReshapeSignalFire(true),
-// [/SL:KB]
 	mExpandedMinDimSpecified(false),
 	mExpandedMinDim(p.min_dim),
  	mMinDim(p.min_dim), 
@@ -105,9 +101,6 @@ LLLayoutPanel::~LLLayoutPanel()
 	// probably not necessary, but...
 	delete mResizeBar;
 	mResizeBar = NULL;
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	delete mReshapeSignal;
-// [/SL:KB]
 }
 
 void LLLayoutPanel::reshape(S32 width, S32 height, BOOL called_from_parent)
@@ -121,26 +114,7 @@ void LLLayoutPanel::reshape(S32 width, S32 height, BOOL called_from_parent)
 		mFractionalSize += height - llround(mFractionalSize);
 	}
 	LLPanel::reshape(width, height, called_from_parent);
-
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	if ( (mReshapeSignalFire) && (mReshapeSignal) )
-		(*mReshapeSignal)(this, getRect());
-// [/SL:KB]
 }
-
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLLayoutPanel::handleReshape(const LLRect& new_rect, bool by_user)
-{
-	const LLRect oldRect = getRect();
-
-	mReshapeSignalFire = false;
-	LLPanel::handleReshape(new_rect, by_user);
-	mReshapeSignalFire = true;
-
-	if ( (mReshapeSignal) && (oldRect != getRect()) )
-		(*mReshapeSignal)(this, getRect());
-}
-// [/SL:KB]
 
 F32 LLLayoutPanel::getCollapseFactor()
 {
@@ -157,15 +131,6 @@ F32 LLLayoutPanel::getCollapseFactor()
 		return mVisibleAmt * collapse_amt;
 	}
 }
-
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-boost::signals2::connection LLLayoutPanel::setReshapeCallback(const reshape_signal_t::slot_type& cb)
-{
-	if (!mReshapeSignal)
-		mReshapeSignal = new reshape_signal_t();
-	return mReshapeSignal->connect(cb); 
-}
-// [/SL:KB]
 
 //
 // LLLayoutStack

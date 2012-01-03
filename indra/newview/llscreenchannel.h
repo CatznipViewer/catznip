@@ -70,7 +70,7 @@ public:
 
 	LLScreenChannelBase(const Params&);
 
-//	void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
+	void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
 
 	// Channel's outfit-functions
 	// update channel's size and position in the World View
@@ -119,13 +119,7 @@ public:
 
 protected:
 	void	updateRect();
-//	LLRect	getChannelRect();
-// [SL:KB] - Patch: UI-FloaterSnapView | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	const LLRect& getChannelRect() const { return mChannelRect; }
-	void          onFloaterSnapRegionChanged(LLView* floater_snap_viewp);
-
-	LLRect		mChannelRect;
-// [/SL:KB]
+	LLRect	getChannelRect();
 
 	// Channel's flags
 	bool		mControlHovering;
