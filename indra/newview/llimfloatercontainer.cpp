@@ -87,13 +87,35 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 		return;
 	}
 
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLUUID session_id = floaterp->getKey();
+	if (session_id.isNull())
+	{
+		// Re-insert the nearby chat floater at the start
+		insertion_point = LLTabContainer::START;
+	}
+// [/SL:KB]
+
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
-	LLUUID session_id = floaterp->getKey();
+//	LLUUID session_id = floaterp->getKey();
 
 	LLIconCtrl* icon = 0;
 
-	if(gAgent.isInGroup(session_id, TRUE))
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	if (session_id.isNull())
+	{
+		// Don't allow the nearby chat tab to be drag-rearranged
+		mTabContainer->lockTabs(1);
+
+		// Add an icon for the nearby chat floater
+		LLIconCtrl::Params icon_params;
+		icon_params.image = LLUI::getUIImage("Command_Chat_Icon");
+		icon = LLUICtrlFactory::instance().create<LLIconCtrl>(icon_params);
+	}
+	else if (gAgent.isInGroup(session_id, TRUE))
+// [/SL:KB]
+//	if(gAgent.isInGroup(session_id, TRUE))
 	{
 		LLGroupIconCtrl::Params icon_params;
 		icon_params.group_id = session_id;
@@ -115,6 +137,18 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 	}
 	mTabContainer->setTabImage(floaterp, icon);
 }
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-11 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+void LLIMFloaterContainer::removeFloater(LLFloater* floaterp)
+{
+	LLUUID idSession = floaterp->getKey();
+	if (idSession.isNull())
+	{
+		mTabContainer->unlockTabs();
+	}
+	LLMultiFloater::removeFloater(floaterp);
+}
+// [/SL:KB]
 
 void LLIMFloaterContainer::onCloseFloater(LLUUID& id)
 {
