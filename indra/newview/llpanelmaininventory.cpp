@@ -893,6 +893,9 @@ void LLPanelMainInventory::initListCommandsHandlers()
 {
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
 	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-01-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
+// [/SL:KB]
 
 	mTrashButton = getChild<LLDragAndDropButton>("trash_btn");
 	mTrashButton->setDragAndDropHandler(boost::bind(&LLPanelMainInventory::handleDragAndDropToTrash, this
