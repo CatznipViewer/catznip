@@ -239,8 +239,8 @@ void LLNearbyChatBar::onTearOff(const LLSD& sdData)
 
 bool LLNearbyChatBar::applyRectControl()
 {
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	if (isTabbedNearbyChat())
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Modified: Catznip-3.2.1
+	if (getHost())
 	{
 		return true;
 	}
