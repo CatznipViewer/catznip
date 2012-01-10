@@ -35,6 +35,7 @@ public:
 	/*virtual*/ void	  setChatBoxText(const LLStringExplicit& text);
 	/*virtual*/ void	  setChatBoxCursorToEnd()		{ m_pChatEditor->endOfDoc(); }
 protected:
+	void handleChatFontChanged(const LLSD& sdValue);
 	void onChatBoxCommit(EChatType eChatType);
 
 	/*virtual*/ BOOL		handleKeyHere(KEY key, MASK mask);

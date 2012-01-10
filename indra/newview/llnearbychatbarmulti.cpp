@@ -21,18 +21,23 @@
 #include "llgesturemgr.h"
 #include "llkeyboard.h"
 #include "llnearbychatbarmulti.h"
+#include "llviewerchat.h"
 #include "llviewercontrol.h"
 
 LLNearbyChatBarMulti::LLNearbyChatBarMulti()
+	: m_pChatEditor(NULL)
 {
 	// Initialize current history line iterator
 	mCurrentHistoryLine = mLineHistory.begin();
+
+	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLNearbyChatBarMulti::handleChatFontChanged, this, _2));
 }
 
 BOOL LLNearbyChatBarMulti::postBuild()
 {
 	m_pChatEditor = findChild<LLTextEditor>("chat_editor");
 
+	m_pChatEditor->setFont(LLViewerChat::getChatFont());
 	m_pChatEditor->setCommitCallback(boost::bind(&LLNearbyChatBarMulti::onChatBoxCommit, this, CHAT_TYPE_NORMAL));
 	m_pChatEditor->setKeystrokeCallback(boost::bind(&LLNearbyChatBarMulti::onChatBoxKeystroke, this));
 	m_pChatEditor->setFocusLostCallback(boost::bind(&LLNearbyChatBarMulti::onChatBoxFocusLost, this));
@@ -87,6 +92,14 @@ BOOL LLNearbyChatBarMulti::handleKeyHere(KEY key, MASK mask)
 		handled = TRUE;
 	}
 	return handled;
+}
+
+void LLNearbyChatBarMulti::handleChatFontChanged(const LLSD& sdValue)
+{
+	if (m_pChatEditor)
+	{
+		m_pChatEditor->setFont(LLViewerChat::getChatFont());
+	}
 }
 
 void LLNearbyChatBarMulti::onChatBoxCommit(EChatType eChatType)
