@@ -934,28 +934,28 @@ bool LLNearbyChatBar::isTabbedNearbyChat()
 
 void LLNearbyChatBar::processFloaterTypeChanged()
 {
-//	// We only need to do anything if an instance of the nearby chat floater already exists
-//	LLNearbyChat* pNearbyChat = LLFloaterReg::findTypedInstance<LLNearbyChat>("nearby_chat", LLSD());
-//	if (pNearbyChat)
-//	{
-//		bool fVisible = pNearbyChat->getVisible();
-//		std::vector<LLChat> msgArchive = pNearbyChat->mMessageArchive;
-//
-//		// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the nearby chat floater is single instaced
-//		//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
-//		//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
-//		//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
-//		pNearbyChat->closeFloater();
-//		LLFloaterReg::destroyInstance("nearby_chat", LLSD());
-//
-//		if ((pNearbyChat = LLFloaterReg::getTypedInstance<LLNearbyChat>("nearby_chat", LLSD())) != NULL)
-//		{
-//			pNearbyChat->mMessageArchive = msgArchive;
-//			pNearbyChat->updateChatHistoryStyle();
-//			if (fVisible)
-//				pNearbyChat->openFloater(LLSD());
-//		}
-//	}
+	// We only need to do anything if an instance of the nearby chat floater already exists
+	LLNearbyChatBar* pNearbyChat = LLFloaterReg::findTypedInstance<LLNearbyChatBar>("chat_bar");
+	if (pNearbyChat)
+	{
+		bool fVisible = pNearbyChat->getVisible();
+		std::vector<LLChat> msgArchive = pNearbyChat->mNearbyChat->getHistory();
+
+		// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the nearby chat floater is single instanced
+		//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
+		//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
+		//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
+		pNearbyChat->closeFloater();
+		LLFloaterReg::destroyInstance("chat_bar", LLSD());
+
+		if ((pNearbyChat = LLFloaterReg::getTypedInstance<LLNearbyChatBar>("chat_bar", LLSD())) != NULL)
+		{
+			pNearbyChat->mNearbyChat->setHistory(msgArchive);
+			pNearbyChat->mNearbyChat->updateChatHistoryStyle();
+			if (fVisible)
+				pNearbyChat->openFloater(LLSD());
+		}
+	}
 }
 // [/SL:KB]
 
