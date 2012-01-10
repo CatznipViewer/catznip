@@ -20,6 +20,8 @@
 #include "llfloater.h"
 #include "llgesturemgr.h"
 #include "llkeyboard.h"
+#include "llmenugl.h"
+#include "llnearbychat.h"
 #include "llnearbychatbarmulti.h"
 #include "llviewerchat.h"
 #include "llviewercontrol.h"
@@ -35,8 +37,19 @@ LLNearbyChatBarMulti::LLNearbyChatBarMulti()
 
 BOOL LLNearbyChatBarMulti::postBuild()
 {
-	m_pChatEditor = findChild<LLTextEditor>("chat_editor");
+	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatAction, _2));
+	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheck, _2));
+	registrar.add("NearbyChat.SetChatBarType", boost::bind(&LLNearbyChat::onSetChatBarType, _2));
+	enable_registrar.add("NearbyChat.CheckChatBarType", boost::bind(&LLNearbyChat::onCheckChatBarType, _2));
+	registrar.add("NearbyChat.SetFontSize", boost::bind(&LLNearbyChat::onSetFontSize, _2));
+	enable_registrar.add("NearbyChat.CheckFontSize", boost::bind(&LLNearbyChat::onCheckFontSize, _2));
 
+	m_pChatEditor = findChild<LLTextEditor>("chat_editor");
+	m_pChatEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", 
+																							LLMenuGL::sMenuContainer, 
+																							LLMenuHolderGL::child_registry_t::instance()));
 	m_pChatEditor->setFont(LLViewerChat::getChatFont());
 	m_pChatEditor->setCommitCallback(boost::bind(&LLNearbyChatBarMulti::onChatBoxCommit, this, CHAT_TYPE_NORMAL));
 	m_pChatEditor->setKeystrokeCallback(boost::bind(&LLNearbyChatBarMulti::onChatBoxKeystroke, this));

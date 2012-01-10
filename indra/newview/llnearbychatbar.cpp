@@ -52,6 +52,7 @@
 #include "llevents.h"
 #include "llimfloater.h"
 #include "llimfloatercontainer.h"
+#include "llmenugl.h"
 #include "llmultifloater.h"
 #include "llnearbychatbarmulti.h"
 // [/SL:KB]
@@ -119,7 +120,23 @@ LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 BOOL LLNearbyChatBarSingle::postBuild()
 // [/SL:KB]
 {
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatAction, _2));
+	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheck, _2));
+	registrar.add("NearbyChat.SetChatBarType", boost::bind(&LLNearbyChat::onSetChatBarType, _2));
+	enable_registrar.add("NearbyChat.CheckChatBarType", boost::bind(&LLNearbyChat::onCheckChatBarType, _2));
+	registrar.add("NearbyChat.SetFontSize", boost::bind(&LLNearbyChat::onSetFontSize, _2));
+	enable_registrar.add("NearbyChat.CheckFontSize", boost::bind(&LLNearbyChat::onCheckFontSize, _2));
+// [/SL:KB]
+
 	mChatBox = getChild<LLLineEditor>("chat_box");
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mChatBox->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", 
+																					   LLMenuGL::sMenuContainer, 
+																					   LLMenuHolderGL::child_registry_t::instance()));
+// [/SL:KB]
 
 //	mChatBox->setCommitCallback(boost::bind(&LLNearbyChatBar::onChatBoxCommit, this));
 //	mChatBox->setKeystrokeCallback(&onChatBoxKeystroke, this);
