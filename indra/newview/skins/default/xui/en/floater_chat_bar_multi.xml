@@ -13,7 +13,7 @@
  can_close="true"
  can_minimize="false"
  help_topic="chat_bar"
- min_height="84"
+ min_height="225"
  min_width="150"
  can_resize="true"
  default_tab_group="1"
@@ -35,8 +35,10 @@
    auto_resize="true"
    follows="all"
    height="300"
+   min_dim="150"
    name="panel_nearby_chat"
    top="0"
+   user_resize="true"
    visible="true"
    width="300"
    >
@@ -55,7 +57,7 @@
    height="54"
    layout="topleft"
    left="0"
-   min_dim="54"
+   min_dim="44"
    mouse_opaque="false"
    name="panel_nearby_chat_bar"
    user_resize="true"
@@ -67,7 +69,7 @@
            left="0" 
            bottom="-1" 
            filename="panel_nearby_chat_bar_multi.xml"
-           follows="left|right|bottom" 
+           follows="all" 
            name="panel_chat_bar_multi"
            tab_group="1" />
   </layout_panel>

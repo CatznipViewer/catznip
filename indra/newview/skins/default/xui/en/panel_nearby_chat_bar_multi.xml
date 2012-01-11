@@ -3,11 +3,11 @@
            height="54" 
            left="0" 
            bottom="-1" 
-           follows="left|right|bottom" 
+           follows="all" 
            tab_group="1">
 <layout_stack
  animate="false"
- follows="left|right"
+ follows="all"
  height="46"
  layout="topleft"
  left="5"
@@ -17,7 +17,7 @@
  >
   <layout_panel
    auto_resize="true"
-   follows="left|right"
+   follows="all"
    height="46"
    name="panel_nearby_chat_bar"
    user_resize="false"
@@ -26,7 +26,7 @@
    >
     <text_editor
      commit_on_return="true"
-     follows="left|right"
+     follows="all"
      height="46"
      label="Press Enter to say, Ctrl+Enter to shout"
      layout="topleft"
@@ -39,7 +39,7 @@
   </layout_panel>
   <layout_panel
    auto_resize="false"
-   follows="left|right"
+   follows="left|right|top"
    height="46"
    name="panel_nearby_chat_toggle"
    user_resize="false"
@@ -47,7 +47,7 @@
    width="22"
    >
       <button
-        follows="right"
+        follows="right|top"
         is_toggle="true"
         width="20"
         top="0"
@@ -58,7 +58,7 @@
         image_selected="ComboButton_On"
         image_pressed="ComboButton_UpSelected"
         image_pressed_selected="ComboButton_Selected"
-        height="23"
+        height="20"
         chrome="true"
         name="show_nearby_chat"
         tool_tip="Shows/hides nearby chat log">
