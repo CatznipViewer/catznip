@@ -664,7 +664,8 @@ void LLNearbyChatBar::onToggleNearbyChatPanel()
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 BOOL LLNearbyChatBar::canClose()
 {
-	if (getHost())
+	// The added getVisible() check is a little hack for LLNearbyChatBar::processFloaterTypeChanged() to make LLFloater::closeFloater() not skip over clean-up
+	if ( (getHost()) && (getVisible()) )
 		return false;
 	return LLFloater::canClose();
 }
@@ -956,6 +957,8 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 	if (pNearbyChat)
 	{
 		bool fVisible = pNearbyChat->getVisible();
+		if (pNearbyChat->getHost())
+			pNearbyChat->setVisible(FALSE);	// See LLNearbyChatBar::canClose()
 		std::vector<LLChat> msgArchive = pNearbyChat->mNearbyChat->getHistory();
 
 		// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the nearby chat floater is single instanced
