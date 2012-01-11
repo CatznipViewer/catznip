@@ -2,9 +2,9 @@
 <context_menu
  name="Nearby chat context menu">
   <context_menu
-   label="Chat Bar Type"
+   label="Chat Bar"
    layout="topleft"
-   name="Chat Bar Type">
+   name="Chat Bar">
       <menu_item_check
        label="Single-line"
        layout="topleft"
@@ -66,6 +66,17 @@
          parameter="large" />
       </menu_item_check>
   </context_menu>
+  <menu_item_check
+   label="Show Blocked Chat"
+   layout="topleft"
+   name="Show Blocked Chat">
+    <menu_item_check.on_click
+     function="ToggleControl"
+     parameter="ShowBlockedChat" />
+    <menu_item_check.on_check
+     function="CheckControl"
+     parameter="ShowBlockedChat" />
+  </menu_item_check>
  
   <menu_item_separator />
   

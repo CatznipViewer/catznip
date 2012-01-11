@@ -127,7 +127,10 @@ void	LLNearbyChat::addMessage(const LLChat& chat,bool archive,const LLSD &args)
 
 	bool use_plain_text_chat_history = gSavedSettings.getBOOL("PlainTextChatHistory");
 	
-	if (!chat.mMuted)
+//	if (!chat.mMuted)
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if ( (!chat.mMuted) || (gSavedSettings.getBOOL("ShowBlockedChat")) )
+// [/SL:KB]
 	{
 		tmp_chat.mFromName = chat.mFromName;
 		LLSD chat_args = args;
