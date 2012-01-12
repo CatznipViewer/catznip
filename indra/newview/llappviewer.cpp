@@ -104,6 +104,10 @@
 #include "llvfsthread.h"
 #include "llvolumemgr.h"
 #include "llxfermanager.h"
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-13 (Catznip-3.1.0a)
+#include "llhunspell.h"
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
@@ -2494,6 +2498,18 @@ bool LLAppViewer::initConfiguration()
         gDirUtilp->setSkinFolder(skinfolder->getValue().asString());
 		//gDirUtilp->setSkinFolder("default");
     }
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
+	if (gSavedSettings.getBOOL("SpellCheck"))
+	{
+		LLSpellChecker::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
+
+		std::vector<std::string> dictSecondaryList;
+		std::string strSecondaryList = gSavedSettings.getString("SpellCheckDictionarySecondary");
+		boost::split(dictSecondaryList, strSecondaryList, boost::is_any_of(std::string(",")));
+		LLSpellChecker::instance().setSecondaryDictionaries(dictSecondaryList);
+	}
+// [/SL:KB]
 
     mYieldTime = gSavedSettings.getS32("YieldTime");
 

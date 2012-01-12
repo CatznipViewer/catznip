@@ -198,6 +198,9 @@ public:
 	virtual void saveSettings();
 	
 	class Updater;
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	void onBtnActiveDictAddRemove(const char* pstrFrom, const char* pstrTo);
+// [/SL:KB]
 private:
 	//for "Only friends and groups can call or IM me"
 	static void showFriendsOnlyWarning(LLUICtrl*, const LLSD&);
