@@ -108,6 +108,9 @@
 #include "llfloatertoybox.h"
 #include "llfloatertranslationsettings.h"
 #include "llfloateruipreview.h"
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1.0a)
+#include "llfloaterupdate.h"
+// [/SL:KB]
 #include "llfloatervoiceeffect.h"
 #include "llfloaterwhitelistentry.h"
 #include "llfloaterwindowsize.h"
@@ -228,6 +231,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("mem_leaking", "floater_mem_leaking.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterMemLeak>);
 	LLFloaterReg::add("media_settings", "floater_media_settings.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterMediaSettings>);	
 	LLFloaterReg::add("message_critical", "floater_critical.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterTOS>);
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+	LLFloaterReg::add("message_update", "floater_update.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterUpdate>);
+// [/SL:KB]
 	LLFloaterReg::add("message_tos", "floater_tos.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterTOS>);
 	LLFloaterReg::add("moveview", "floater_moveview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterMove>);
 	LLFloaterReg::add("mute_object_by_name", "floater_mute_object.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterGetBlockedObjectName>);
