@@ -2554,12 +2554,20 @@ public:
 			LLFloaterSidePanelContainer::showPanel("appearance", "panel_outfits_inventory", key);
 
 		}
-		LLOutfitsList *outfits_list =
-			dynamic_cast<LLOutfitsList*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
-		if (outfits_list)
+//		LLOutfitsList *outfits_list =
+//			dynamic_cast<LLOutfitsList*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
+//		if (outfits_list)
+//		{
+//			outfits_list->setSelectedOutfitByUUID(mFolderID);
+//		}
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+		LLPanelOutfitsTab *outfits_tab =
+			dynamic_cast<LLPanelOutfitsTab*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
+		if (outfits_tab)
 		{
-			outfits_list->setSelectedOutfitByUUID(mFolderID);
+			outfits_tab->setSelectedOutfitByUUID(mFolderID);
 		}
+// [/SL:KB]
 
 		LLAppearanceMgr::getInstance()->updateIsDirty();
 		gAgentWearables.notifyLoadingFinished(); // New outfit is saved.
