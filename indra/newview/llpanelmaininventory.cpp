@@ -899,6 +899,9 @@ void LLFloaterInventoryFinder::selectNoTypes(void* user_data)
 void LLPanelMainInventory::initListCommandsHandlers()
 {
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
+// [/SL:KB]
 	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-01-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
