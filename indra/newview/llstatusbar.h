@@ -88,6 +88,11 @@ public:
 // [/SL:KB]
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	void onToggleBuyCurrencyButton(const LLSD& sdValue);
+	void onToggleMarketplaceButton(const LLSD& sdValue);
+	void onToggleNetStats(const LLSD& sdValue);
+// [/SL:KB]
 	
 	void onClickBuyCurrency();
 	void onVolumeChanged(const LLSD& newvalue);
@@ -100,6 +105,10 @@ private:
 	static void onClickBalance(void* data);
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLView		*mViewStatus;		// Contains all status bar controls
+// [/SL:KB]
+
 	LLTextBox	*mTextTime;
 
 	LLStatGraph *mSGBandwidth;
