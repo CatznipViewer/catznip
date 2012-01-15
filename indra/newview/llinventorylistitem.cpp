@@ -162,7 +162,10 @@ BOOL LLPanelInventoryListItemBase::postBuild()
 	LLViewerInventoryItem* inv_item = getItem();
 	if (inv_item)
 	{
-		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags(), FALSE);
+//		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags(), FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+// [/SL:KB]
 		updateItem(inv_item->getName());
 	}
 

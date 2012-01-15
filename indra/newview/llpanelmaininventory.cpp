@@ -110,7 +110,7 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLPanelMainInventory::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.CloseAllFolders", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLPanelMainInventory::doCreate, this, _2));
  	//mCommitCallbackRegistrar.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow, this));
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
@@ -293,15 +293,25 @@ void LLPanelMainInventory::closeAllFolders()
 	getPanel()->getRootFolder()->closeAllFolders();
 }
 
-void LLPanelMainInventory::newWindow()
+//void LLPanelMainInventory::newWindow()
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+LLFloater* LLPanelMainInventory::newWindow()
 {
+// [/SL:KB]
 	static S32 instance_num = 0;
 	instance_num = (instance_num + 1) % S32_MAX;
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-01-13 (Catznip-3.2.1) | Modified: Catznip-3.2.1
 	if (!gAgentCamera.cameraMouselook())
 	{
-		LLFloaterReg::showTypedInstance<LLFloaterSidePanelContainer>("inventory", LLSD(instance_num));
+		return LLFloaterReg::showInstance("inventory", LLSD(instance_num));
 	}
+	return NULL;
+// [/SL:KB]
+//	if (!gAgentCamera.cameraMouselook())
+//	{
+//		LLFloaterReg::showTypedInstance<LLFloaterSidePanelContainer>("inventory", LLSD(instance_num));
+//	}
 }
 
 void LLPanelMainInventory::doCreate(const LLSD& userdata)
@@ -586,7 +596,10 @@ void LLPanelMainInventory::updateItemcountText()
 
 void LLPanelMainInventory::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (!sidepanel_inventory)
 	{
 		llwarns << "Could not find Inventory Panel in My Inventory floater" << llendl;
@@ -1027,11 +1040,11 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		const std::string notification = "ConfirmEmptyTrash";
 		gInventory.emptyFolderType(notification, LLFolderType::FT_TRASH);
 	}
-	if (command_name == "empty_lostnfound")
-	{
-		const std::string notification = "ConfirmEmptyLostAndFound";
-		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
-	}
+//	if (command_name == "empty_lostnfound")
+//	{
+//		const std::string notification = "ConfirmEmptyLostAndFound";
+//		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
+//	}
 	if (command_name == "save_texture")
 	{
 		saveTexture(userdata);
@@ -1176,7 +1189,10 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 
 	if (command_name == "share")
 	{
-		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		LLSidepanelInventory *parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLSidepanelInventory *parent = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 		return parent ? parent->canShare() : FALSE;
 	}
 

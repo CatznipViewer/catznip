@@ -141,6 +141,10 @@ protected:
 	BOOL isLinkedObjectMissing() const; // Is this a linked obj whose baseobj is not in inventory?
 
 	BOOL isAgentInventory() const; // false if lost or in the inventory library
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	BOOL isLibraryInventory() const;
+	BOOL isLostInventory() const;
+// [/SL:KB]
 	BOOL isCOFFolder() const; // true if COF or descendent of
 	BOOL isInboxFolder() const; // true if COF or descendent of marketplace inbox
 	BOOL isOutboxFolder() const; // true if COF or descendent of marketplace outbox
@@ -187,10 +191,17 @@ public:
 class LLItemBridge : public LLInvFVBridge
 {
 public:
+//	LLItemBridge(LLInventoryPanel* inventory, 
+//				 LLFolderView* root,
+//				 const LLUUID& uuid) :
+//		LLInvFVBridge(inventory, root, uuid) {}
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
 	LLItemBridge(LLInventoryPanel* inventory, 
 				 LLFolderView* root,
-				 const LLUUID& uuid) :
-		LLInvFVBridge(inventory, root, uuid) {}
+				 const LLUUID& uuid,
+				 U32 flags = 0x0) :
+		LLInvFVBridge(inventory, root, uuid), mFlags(flags) {}
+// [/SL:KB]
 
 	virtual void performAction(LLInventoryModel* model, std::string action);
 	virtual void selectItem();
@@ -221,6 +232,9 @@ protected:
 	static void buildDisplayName(LLInventoryItem* item, std::string& name);
 
 	mutable std::string mDisplayName;
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+	U32 mFlags;
+// [/SL:KB]
 };
 
 class LLFolderBridge : public LLInvFVBridge
@@ -369,7 +383,7 @@ public:
 	virtual LLUIImagePtr getIcon() const;
 	virtual void openItem();
 protected:
-	BOOL mVisited;
+//	BOOL mVisited;
 };
 
 class LLCallingCardBridge : public LLItemBridge
@@ -451,8 +465,8 @@ public:
 	LLInventoryObject* getObject() const;
 protected:
 	static LLUUID sContextMenuItemID;  // Only valid while the context menu is open.
-	U32 mAttachPt;
-	BOOL mIsMultiObject;
+//	U32 mAttachPt;
+//	BOOL mIsMultiObject;
 };
 
 class LLLSLTextBridge : public LLItemBridge

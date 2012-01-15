@@ -341,9 +341,12 @@ time_t LLTaskInvFVBridge::getCreationDate() const
 
 LLUIImagePtr LLTaskInvFVBridge::getIcon() const
 {
-	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
-
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
+//	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
+//
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
 }
 
 void LLTaskInvFVBridge::openItem()
@@ -1253,7 +1256,10 @@ public:
 
 LLUIImagePtr LLTaskWearableBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
 }
 
 ///----------------------------------------------------------------------------
@@ -1284,7 +1290,10 @@ LLTaskMeshBridge::LLTaskMeshBridge(
 
 LLUIImagePtr LLTaskMeshBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-08-24 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, mFlags);
+// [/SL:KB]
 }
 
 void LLTaskMeshBridge::openItem()
@@ -1484,7 +1493,7 @@ LLPanelObjectInventory::LLPanelObjectInventory(const LLPanelObjectInventory::Par
 	// Setup context menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLPanelObjectInventory::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&do_nothing));
 	mCommitCallbackRegistrar.add("Inventory.AttachObject", boost::bind(&do_nothing));
 	mCommitCallbackRegistrar.add("Inventory.BeginIMSession", boost::bind(&do_nothing));
