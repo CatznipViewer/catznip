@@ -6208,6 +6208,17 @@
       <key>Value</key>
       <integer>23</integer>
     </map>
+    <key>NearbyToastOffset</key>
+    <map>
+      <key>Comment</key>
+      <string>Nearby chat toast offset from the bottom of the screen</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
     <key>StartUpToastLifeTime</key>
     <map>
       <key>Comment</key>

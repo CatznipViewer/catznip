@@ -388,7 +388,10 @@ void LLNearbyChatScreenChannel::arrangeToasts()
 
 	S32 channel_bottom = channel_rect.mBottom;
 
-	S32		bottom = channel_bottom + 80;
+//	S32		bottom = channel_bottom + 80;
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	S32		bottom = channel_bottom + gSavedSettings.getS32("NearbyToastOffset");
+// [/SL:KB]
 	S32		margin = gSavedSettings.getS32("ToastGap");
 
 	//sort active toasts
