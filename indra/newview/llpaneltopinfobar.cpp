@@ -74,9 +74,11 @@ static LLRegisterPanelClassWrapper<LLPanelTopInfoBar> t_topinfo_bar("topinfo_bar
 
 LLPanelTopInfoBar::LLPanelTopInfoBar(): mParcelChangedObserver(0)
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	, mInfoBtn(NULL)
+//	, mInfoBtn(NULL)
 	, mParcelInfoText(NULL)
 	, mDamageText(NULL)
+	, mMaturityIcon(NULL)
+	, mIconsPanel(NULL)
 // [/SL:KB]
 {
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
@@ -86,11 +88,11 @@ LLPanelTopInfoBar::LLPanelTopInfoBar(): mParcelChangedObserver(0)
 	LLUICtrl::CommitCallbackRegistry::currentRegistrar()
 			.add("TopInfoBar.Action", boost::bind(&LLPanelTopInfoBar::onContextMenuItemClicked, this, _2));
 
-//	buildFromFile( "panel_topinfo_bar.xml");
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
 	// set a listener function for LoginComplete event
 	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLPanelTopInfoBar::handleLoginComplete, this));
 // [/SL:KB]
+//	buildFromFile( "panel_topinfo_bar.xml");
 }
 
 LLPanelTopInfoBar::~LLPanelTopInfoBar()
@@ -101,20 +103,20 @@ LLPanelTopInfoBar::~LLPanelTopInfoBar()
 		delete mParcelChangedObserver;
 	}
 
-	if (mParcelPropsCtrlConnection.connected())
-	{
-		mParcelPropsCtrlConnection.disconnect();
-	}
+//	if (mParcelPropsCtrlConnection.connected())
+//	{
+//		mParcelPropsCtrlConnection.disconnect();
+//	}
 
 	if (mParcelMgrConnection.connected())
 	{
 		mParcelMgrConnection.disconnect();
 	}
 
-	if (mShowCoordsCtrlConnection.connected())
-	{
-		mShowCoordsCtrlConnection.disconnect();
-	}
+//	if (mShowCoordsCtrlConnection.connected())
+//	{
+//		mShowCoordsCtrlConnection.disconnect();
+//	}
 }
 
 void LLPanelTopInfoBar::initParcelIcons()
@@ -151,6 +153,7 @@ void LLPanelTopInfoBar::handleLoginComplete()
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	gMenuBarView->setResizeCallback(boost::bind(&LLPanelTopInfoBar::handleLayoutChange, this));
 	getParent()->findChild<LLLayoutPanel>("overflow_panel")->setResizeCallback(boost::bind(&LLPanelTopInfoBar::handleLayoutChange, this));
+
 	handleLayoutChange();
 // [/SL:KB]
 
@@ -167,31 +170,35 @@ BOOL LLPanelTopInfoBar::handleRightMouseDown(S32 x, S32 y, MASK mask)
 
 BOOL LLPanelTopInfoBar::postBuild()
 {
-	mInfoBtn = getChild<LLButton>("place_info_btn");
-	mInfoBtn->setClickedCallback(boost::bind(&LLPanelTopInfoBar::onInfoButtonClicked, this));
-	mInfoBtn->setToolTip(LLTrans::getString("LocationCtrlInfoBtnTooltip"));
+//	mInfoBtn = getChild<LLButton>("place_info_btn");
+//	mInfoBtn->setClickedCallback(boost::bind(&LLPanelTopInfoBar::onInfoButtonClicked, this));
+//	mInfoBtn->setToolTip(LLTrans::getString("LocationCtrlInfoBtnTooltip"));
 
 	mParcelInfoText = getChild<LLTextBox>("parcel_info_text");
 	mDamageText = getChild<LLTextBox>("damage_text");
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mMaturityIcon = getChild<LLIconCtrl>("maturity_icon");
+	mIconsPanel = getChild<LLPanel>("icons_panel");
+// [/SL:KB]
 
 	initParcelIcons();
 
 	mParcelChangedObserver = new LLParcelChangeObserver(this);
 	LLViewerParcelMgr::getInstance()->addObserver(mParcelChangedObserver);
 
-	// Connecting signal for updating parcel icons on "Show Parcel Properties" setting change.
-	LLControlVariable* ctrl = gSavedSettings.getControl("NavBarShowParcelProperties").get();
-	if (ctrl)
-	{
-		mParcelPropsCtrlConnection = ctrl->getSignal()->connect(boost::bind(&LLPanelTopInfoBar::updateParcelIcons, this));
-	}
+//	// Connecting signal for updating parcel icons on "Show Parcel Properties" setting change.
+//	LLControlVariable* ctrl = gSavedSettings.getControl("NavBarShowParcelProperties").get();
+//	if (ctrl)
+//	{
+//		mParcelPropsCtrlConnection = ctrl->getSignal()->connect(boost::bind(&LLPanelTopInfoBar::updateParcelIcons, this));
+//	}
 
-	// Connecting signal for updating parcel text on "Show Coordinates" setting change.
-	ctrl = gSavedSettings.getControl("NavBarShowCoordinates").get();
-	if (ctrl)
-	{
-		mShowCoordsCtrlConnection = ctrl->getSignal()->connect(boost::bind(&LLPanelTopInfoBar::onNavBarShowParcelPropertiesCtrlChanged, this));
-	}
+//	// Connecting signal for updating parcel text on "Show Coordinates" setting change.
+//	ctrl = gSavedSettings.getControl("NavBarShowCoordinates").get();
+//	if (ctrl)
+//	{
+//		mShowCoordsCtrlConnection = ctrl->getSignal()->connect(boost::bind(&LLPanelTopInfoBar::onNavBarShowParcelPropertiesCtrlChanged, this));
+//	}
 
 	mParcelMgrConnection = LLViewerParcelMgr::getInstance()->addAgentParcelChangedCallback(
 			boost::bind(&LLPanelTopInfoBar::onAgentParcelChange, this));
@@ -215,17 +222,24 @@ void LLPanelTopInfoBar::handleLayoutChange()
 	rctNew.mRight = rctOverflow.mRight;
 	setShape(rctNew);
 }
+
+void LLPanelTopInfoBar::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLPanel::reshape(width, height, called_from_parent);
+
+	updateLayout();
+}
 // [/SL:KB]
 
-void LLPanelTopInfoBar::onNavBarShowParcelPropertiesCtrlChanged()
-{
-	std::string new_text;
-
-	// don't need to have separate show_coords variable; if user requested the coords to be shown
-	// they will be added during the next call to the draw() method.
-	buildLocationString(new_text, false);
-	setParcelInfoText(new_text);
-}
+//void LLPanelTopInfoBar::onNavBarShowParcelPropertiesCtrlChanged()
+//{
+//	std::string new_text;
+//
+//	// don't need to have separate show_coords variable; if user requested the coords to be shown
+//	// they will be added during the next call to the draw() method.
+//	buildLocationString(new_text, false);
+//	setParcelInfoText(new_text);
+//}
 
 // when panel is shown, all minimized floaters should be shifted downwards to prevent overlapping of
 // PanelTopInfoBar. See EXT-7951.
@@ -268,60 +282,89 @@ void LLPanelTopInfoBar::draw()
 	LLPanel::draw();
 }
 
-void LLPanelTopInfoBar::buildLocationString(std::string& loc_str, bool show_coords)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLPanelTopInfoBar::buildLocationString(std::string& loc_str)
 {
-	LLAgentUI::ELocationFormat format =
-		(show_coords ? LLAgentUI::LOCATION_FORMAT_FULL : LLAgentUI::LOCATION_FORMAT_NO_COORDS);
-
-	if (!LLAgentUI::buildLocationString(loc_str, format))
+	if (!LLAgentUI::buildLocationString(loc_str, LLAgentUI::LOCATION_FORMAT_TOPBAR))
 	{
 		loc_str = "???";
 	}
 }
+// [/SL:KB]
+//void LLPanelTopInfoBar::buildLocationString(std::string& loc_str, bool show_coords)
+//{
+//	LLAgentUI::ELocationFormat format =
+//		(show_coords ? LLAgentUI::LOCATION_FORMAT_FULL : LLAgentUI::LOCATION_FORMAT_NO_COORDS);
+//
+//	if (!LLAgentUI::buildLocationString(loc_str, format))
+//	{
+//		loc_str = "???";
+//	}
+//}
 
-void LLPanelTopInfoBar::setParcelInfoText(const std::string& new_text)
-{
-	LLRect old_rect = getRect();
-	const LLFontGL* font = mParcelInfoText->getDefaultFont();
-	S32 new_text_width = font->getWidth(new_text);
-
-	mParcelInfoText->setText(new_text);
-
-	LLRect rect = mParcelInfoText->getRect();
-	rect.setOriginAndSize(rect.mLeft, rect.mBottom, new_text_width, rect.getHeight());
-
-	mParcelInfoText->reshape(rect.getWidth(), rect.getHeight(), TRUE);
-	mParcelInfoText->setRect(rect);
-	layoutParcelIcons();
-
+//void LLPanelTopInfoBar::setParcelInfoText(const std::string& new_text)
+//{
+//	LLRect old_rect = getRect();
+//	const LLFontGL* font = mParcelInfoText->getDefaultFont();
+//	S32 new_text_width = font->getWidth(new_text);
+//
+//	mParcelInfoText->setText(new_text);
+//
+//	LLRect rect = mParcelInfoText->getRect();
+//	rect.setOriginAndSize(rect.mLeft, rect.mBottom, new_text_width, rect.getHeight());
+//
+//	mParcelInfoText->reshape(rect.getWidth(), rect.getHeight(), TRUE);
+//	mParcelInfoText->setRect(rect);
+//	layoutParcelIcons();
+//
 //	if (old_rect != getRect())
 //	{
 //		mResizeSignal();
 //	}
-}
+//}
 
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
 void LLPanelTopInfoBar::update()
 {
-	std::string new_text;
-
-	// don't need to have separate show_coords variable; if user requested the coords to be shown
-	// they will be added during the next call to the draw() method.
-	buildLocationString(new_text, false);
-	setParcelInfoText(new_text);
-
 	updateParcelIcons();
+	updateParcelInfoText();
+	updateHealth();
 }
+// [/SL:KB]
+//void LLPanelTopInfoBar::update()
+//{
+//	std::string new_text;
+//
+//	// don't need to have separate show_coords variable; if user requested the coords to be shown
+//	// they will be added during the next call to the draw() method.
+//	buildLocationString(new_text, false);
+//	setParcelInfoText(new_text);
+//
+//	updateParcelIcons();
+//}
 
 void LLPanelTopInfoBar::updateParcelInfoText()
 {
-	static LLUICachedControl<bool> show_coords("NavBarShowCoordinates", false);
+//	static LLUICachedControl<bool> show_coords("NavBarShowCoordinates", false);
 
-	if (show_coords)
+//	if (show_coords)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	static LLVector3d sPrevPosGlobal = gAgent.getPositionGlobal();
+	if (sPrevPosGlobal != gAgent.getPositionGlobal())
+// [/SL:KB]
 	{
 		std::string new_text;
 
-		buildLocationString(new_text, show_coords);
-		setParcelInfoText(new_text);
+//		buildLocationString(new_text, show_coords);
+//		setParcelInfoText(new_text);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		buildLocationString(new_text);
+		mParcelInfoText->setText(new_text);
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		sPrevPosGlobal = gAgent.getPositionGlobal();
+// [/SL:KB]
 	}
 }
 
@@ -334,7 +377,11 @@ void LLPanelTopInfoBar::updateParcelIcons()
 	if (!agent_region || !agent_parcel)
 		return;
 
-	if (gSavedSettings.getBOOL("NavBarShowParcelProperties"))
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	updateMaturity();
+// [/SL:KB]
+
+//	if (gSavedSettings.getBOOL("NavBarShowParcelProperties"))
 	{
 		LLParcel* current_parcel;
 		LLViewerRegion* selection_region = vpm->getSelectionRegion();
@@ -373,24 +420,62 @@ void LLPanelTopInfoBar::updateParcelIcons()
 		mDamageText->setVisible(allow_damage);
 		mParcelIcon[SEE_AVATARS_ICON]->setVisible( !see_avs );
 
-		layoutParcelIcons();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		updateLayout();
+// [/SL:KB]
+//		layoutParcelIcons();
 	}
-	else
-	{
-		for (S32 i = 0; i < ICON_COUNT; ++i)
-		{
-			mParcelIcon[i]->setVisible(false);
-		}
-		mDamageText->setVisible(false);
-	}
+//	else
+//	{
+//		for (S32 i = 0; i < ICON_COUNT; ++i)
+//		{
+//			mParcelIcon[i]->setVisible(false);
+//		}
+//		mDamageText->setVisible(false);
+//	}
 }
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLPanelTopInfoBar::updateMaturity()
+{
+	// Updating maturity rating icon.
+	LLViewerRegion* region = gAgent.getRegion();
+	if (!region)
+		return;
+
+	bool fVisible = true;
+	std::string strIconName, strTooltip;
+	switch (region->getSimAccess())
+	{
+		case SIM_ACCESS_PG:
+			strIconName = "Parcel_PG_Light";
+			strTooltip = LLTrans::getString("LocationCtrlGeneralIconTooltip");
+			break;
+		case SIM_ACCESS_ADULT:
+			strIconName = "Parcel_R_Light";
+			strTooltip = LLTrans::getString("LocationCtrlAdultIconTooltip");
+			break;
+		case SIM_ACCESS_MATURE:
+			strIconName = "Parcel_M_Light";
+			strTooltip = LLTrans::getString("LocationCtrlModerateIconTooltip");
+			break;
+		default:
+			fVisible = false;
+			break;
+	}
+
+	mMaturityIcon->setVisible(fVisible);
+	mMaturityIcon->setToolTip(strTooltip);
+	mMaturityIcon->setImage(LLUI::getUIImage(strIconName));
+}
+// [/SL:KB]
 
 void LLPanelTopInfoBar::updateHealth()
 {
-	static LLUICachedControl<bool> show_icons("NavBarShowParcelProperties", false);
+//	static LLUICachedControl<bool> show_icons("NavBarShowParcelProperties", false);
 
 	// *FIXME: Status bar owns health information, should be in agent
-	if (show_icons && gStatusBar)
+//	if (show_icons && gStatusBar)
 	{
 		static S32 last_health = -1;
 		S32 health = gStatusBar->getHealth();
@@ -403,45 +488,75 @@ void LLPanelTopInfoBar::updateHealth()
 	}
 }
 
-void LLPanelTopInfoBar::layoutParcelIcons()
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLPanelTopInfoBar::updateLayout()
 {
-	LLRect old_rect = getRect();
-
-	// TODO: remove hard-coded values and read them as xml parameters
-//	static const int FIRST_ICON_HPAD = 32;
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
 	static const int FIRST_ICON_HPAD = 10;
-// [/SL:KB]
-	static const int LAST_ICON_HPAD = 11;
+	static const int LAST_ICON_HPAD = 5;
 
-	S32 left = mParcelInfoText->getRect().mRight + FIRST_ICON_HPAD;
-
+	// Layout the icons panel
+	S32	left = layoutWidget(mParcelIcon[0], FIRST_ICON_HPAD);
 	left = layoutWidget(mDamageText, left);
-
-	for (int i = ICON_COUNT - 1; i >= 0; --i)
-	{
+	for (int i = 1; i < ICON_COUNT; i++)
 		left = layoutWidget(mParcelIcon[i], left);
+	left += LAST_ICON_HPAD;
+
+	// Resize parcel info text to fill any remaining space
+	if (mParcelInfoText)
+	{
+		S32 max_text_width = getRect().getWidth() - left - mParcelInfoText->getRect().mLeft;
+		LLRect rect = mParcelInfoText->getRect();
+		rect.mRight = rect.mLeft + llmin(mParcelInfoText->getTextPixelWidth(), max_text_width);
+		mParcelInfoText->reshape(rect.getWidth(), rect.getHeight());
+		mParcelInfoText->setRect(rect);
 	}
 
-	LLRect rect = getRect();
-	//rect.set(rect.mLeft, rect.mTop, left + LAST_ICON_HPAD, rect.mBottom);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
-	rect.setOriginAndSize(rect.mLeft, rect.mBottom, left + LAST_ICON_HPAD, rect.getHeight());
+	// Move the icons panel up behind the parcel text
+	if ((mIconsPanel) && (mParcelInfoText))
+	{
+		LLRect rect = mIconsPanel->getRect();
+		rect.mLeft = mParcelInfoText->getRect().mRight;
+		rect.mRight = rect.mLeft + left;
+		mIconsPanel->setRect(rect);
+	}
+}
 // [/SL:KB]
-	setRect(rect);
-
+//void LLPanelTopInfoBar::layoutParcelIcons()
+//{
+//	LLRect old_rect = getRect();
+//
+//	// TODO: remove hard-coded values and read them as xml parameters
+//	static const int FIRST_ICON_HPAD = 32;
+//	static const int LAST_ICON_HPAD = 11;
+//
+//	S32 left = mParcelInfoText->getRect().mRight + FIRST_ICON_HPAD;
+//
+//	left = layoutWidget(mDamageText, left);
+//
+//	for (int i = ICON_COUNT - 1; i >= 0; --i)
+//	{
+//		left = layoutWidget(mParcelIcon[i], left);
+//	}
+//
+//	LLRect rect = getRect();
+//	rect.set(rect.mLeft, rect.mTop, left + LAST_ICON_HPAD, rect.mBottom);
+//	setRect(rect);
+//
 //	if (old_rect != getRect())
 //	{
 //		mResizeSignal();
 //	}
-}
+//}
 
 S32 LLPanelTopInfoBar::layoutWidget(LLUICtrl* ctrl, S32 left)
 {
 	// TODO: remove hard-coded values and read them as xml parameters
 	static const int ICON_HPAD = 2;
 
-	if (ctrl->getVisible())
+//	if (ctrl->getVisible())
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if ( (ctrl) && (ctrl->getVisible()) )
+// [/SL:KB]
 	{
 		LLRect rect = ctrl->getRect();
 		rect.mRight = left + rect.getWidth();

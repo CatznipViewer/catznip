@@ -1,116 +1,122 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <panel
- follows="left|top"
+ follows="left|right|top"
  height="19"
  layout="topleft"
  name="topinfo_bar"
- width="250">
-  <button
+ width="400">
+  <icon
     follows="left|top"
-    height="16"
-    hover_glow_amount="0.15"
-    image_disabled="Info_Off"
-    image_disabled_selected="Info_Off"
-    image_selected="Info_Off"
-    image_unselected="Info_Off"
+    height="18"
+    image_name="Parcel_PG_Dark"
     layout="topleft"
-    left="11"
-    name="place_info_btn"
-    top="1"
-    width="16"/>
+    left="0"
+    name="maturity_icon"
+    top="0"
+    visible="true"
+    width="18"
+    />
    <text
-     follows="left|top|right"
+     follows="left|top"
      font="SansSerifSmall"
      height="18"
      layout="topleft"
-     left_pad="11"
+     left_pad="5"
      length="50"
      name="parcel_info_text"
-     top="3"
+     top="4"
      type="string"
      value="(Unknown)"
      width="200"/>
+  <panel
+   follows="top|left|right"
+   height="19"
+   layout="topleft"
+   left="0"
+   name="icons_panel"
+   top="0"
+   width="176">
   <icon
-    enabled="true"
-    follows="right|top"
-    height="18"
-    layout="topleft"
-    image_name="Parcel_VoiceNo_Dark"
-    name="voice_icon"
-    top="1"
-    visible="false"
-    width="22"
-    />
-  <icon
-    follows="right|top"
-    height="18"
-    image_name="Parcel_FlyNo_Dark"
-    layout="topleft"
-    name="fly_icon"
-    top="1"
-    visible="false"
-    width="22"
-    />
-  <icon
-    follows="right|top"
-    height="18"
-    image_name="Parcel_PushNo_Dark"
-    layout="topleft"
-    name="push_icon"
-    top="1"
-    visible="false"
-    width="22"
-    />
-  <icon
-    follows="right|top"
-    height="18"
-    image_name="Parcel_BuildNo_Dark"
-    layout="topleft"
-    name="build_icon"
-    top="1"
-    visible="false"
-    width="22"
-    />
-  <icon
-    follows="right|top"
-    height="18"
-    image_name="Parcel_ScriptsNo_Dark"
-    layout="topleft"
-    name="scripts_icon"
-    top="1"
-    visible="false"
-    width="22"
-    />
-  <icon
-    follows="right|top"
+    follows="left|top"
     height="13"
     image_name="Parcel_Health_Dark"
-    left="2"
     layout="topleft"
     name="damage_icon"
-    top="3"
-    visible="false"
-    width="14"
-    />
-  <icon
-    follows="right|top"
-    height="13"
-    image_name="Parcel_SeeAVsOff_Light"
-    left="2"
-    name="see_avatars_icon"
-    top="3"
+    top="2"
     visible="false"
     width="14"
     />
   <text
-    follows="right|top"
+    follows="left|top"
     font="SansSerifSmall"
-    halign="right"
+    halign="left"
     height="18"
     layout="topleft"
     name="damage_text"
-    top="5"
+    top="4"
     visible="false"
-    width="35"
+    width="30"
     />
+  <icon
+    enabled="true"
+    follows="left|top"
+    height="18"
+    layout="topleft"
+    image_name="Parcel_VoiceNo_Dark"
+    name="voice_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  <icon
+    follows="left|top"
+    height="18"
+    image_name="Parcel_FlyNo_Dark"
+    layout="topleft"
+    name="fly_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  <icon
+    follows="left|top"
+    height="18"
+    image_name="Parcel_PushNo_Dark"
+    layout="topleft"
+    name="push_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  <icon
+    follows="left|top"
+    height="18"
+    image_name="Parcel_BuildNo_Dark"
+    layout="topleft"
+    name="build_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  <icon
+    follows="left|top"
+    height="18"
+    image_name="Parcel_ScriptsNo_Dark"
+    layout="topleft"
+    name="scripts_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  <icon
+    follows="left|top"
+    height="18"
+    image_name="Parcel_SeeAVsOff_Dark"
+    layout="topleft"
+    name="see_avatars_icon"
+    top="0"
+    visible="false"
+    width="22"
+    />
+  </panel>
 </panel>
