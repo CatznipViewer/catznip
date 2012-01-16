@@ -237,6 +237,9 @@ LLTextEditor::Params::Params()
 	show_line_numbers("show_line_numbers", false),
 	default_color("default_color"),
     commit_on_focus_lost("commit_on_focus_lost", false),
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+    commit_on_return("commit_on_return", false),
+// [/SL:KB]
 	show_context_menu("show_context_menu")
 {
 	addSynonym(prevalidate_callback, "text_type");
@@ -250,12 +253,18 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	mDefaultColor(		p.default_color() ),
 	mShowLineNumbers ( p.show_line_numbers ),
 	mCommitOnFocusLost( p.commit_on_focus_lost),
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+	mCommitOnReturn(p.commit_on_return),
+// [/SL:KB]
 	mAllowEmbeddedItems( p.embedded_items ),
 	mMouseDownX(0),
 	mMouseDownY(0),
 	mTabsToNextField(p.ignore_tab),
 	mPrevalidateFunc(p.prevalidate_callback()),
-	mContextMenu(NULL),
+//	mContextMenu(NULL),
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mContextMenuHandle(),
+// [/SL:KB]
 	mShowContextMenu(p.show_context_menu)
 {
 	mSourceID.generate();
@@ -279,6 +288,14 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	}
 	
 	mParseOnTheFly = TRUE;
+
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLContextMenu* menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>
+		("menu_text_editor.xml",
+		 LLMenuGL::sMenuContainer,
+		 LLMenuHolderGL::child_registry_t::instance());
+	setContextMenu(menu);
+// [/SL:KB]
 }
 
 void LLTextEditor::initFromParams( const LLTextEditor::Params& p)
@@ -1610,11 +1627,22 @@ BOOL LLTextEditor::handleSpecialKey(const KEY key, const MASK mask)
 	case KEY_RETURN:
 		if (mask == MASK_NONE)
 		{
-			if( hasSelection() )
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+			if (!mCommitOnReturn)
 			{
-				deleteSelection(FALSE);
+// [/SL:KB]
+				if( hasSelection() )
+				{
+					deleteSelection(FALSE);
+				}
+				autoIndent(); // TODO: make this optional
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
 			}
-			autoIndent(); // TODO: make this optional
+			else
+			{
+				onCommit();
+			}
+// [/SL:KB]
 		}
 		else
 		{
@@ -1936,14 +1964,34 @@ void LLTextEditor::setEnabled(BOOL enabled)
 	}
 }
 
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+LLContextMenu* LLTextEditor::getContextMenu() const
+{
+	return mContextMenuHandle.get();
+}
+
+void LLTextEditor::setContextMenu(LLContextMenu* pMenu)
+{
+	if (pMenu)
+		mContextMenuHandle = pMenu->getHandle();
+	else
+		mContextMenuHandle.markDead();
+}
+// [/SL:KB]
+
 void LLTextEditor::showContextMenu(S32 x, S32 y)
 {
-	if (!mContextMenu)
-	{
-		mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_text_editor.xml", 
-																				LLMenuGL::sMenuContainer, 
-																				LLMenuHolderGL::child_registry_t::instance());
-	}
+//	if (!mContextMenu)
+//	{
+//		mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_text_editor.xml", 
+//																				LLMenuGL::sMenuContainer, 
+//																				LLMenuHolderGL::child_registry_t::instance());
+//	}
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLContextMenu* menu = mContextMenuHandle.get();
+	if (!menu)
+		return;
+// [/SL:KB]
 
 	// Route menu to this class
 	// previously this was done in ::handleRightMoseDown:
@@ -1961,7 +2009,10 @@ void LLTextEditor::showContextMenu(S32 x, S32 y)
 
 	S32 screen_x, screen_y;
 	localPointToScreen(x, y, &screen_x, &screen_y);
-	mContextMenu->show(screen_x, screen_y);
+//	mContextMenu->show(screen_x, screen_y);
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	menu->show(screen_x, screen_y);
+// [/SL:KB]
 }
 
 

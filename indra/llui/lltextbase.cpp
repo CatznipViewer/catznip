@@ -144,6 +144,9 @@ LLTextBase::Params::Params()
 :	cursor_color("cursor_color"),
 	text_color("text_color"),
 	text_readonly_color("text_readonly_color"),
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
+	text_label_color("text_label_color"),
+// [/SL:KB]
 	bg_visible("bg_visible", false),
 	border_visible("border_visible", false),
 	bg_readonly_color("bg_readonly_color"),
@@ -209,6 +212,10 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mIsSelecting( FALSE ),
 	mPlainText ( p.plain_text ),
 	mWordWrap(p.wrap),
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
+	mLabel(p.label),
+	mLabelColor(p.text_label_color),
+// [/SL:KB]
 	mUseEllipses( p.use_ellipses ),
 	mParseHTML(p.parse_urls),
 	mParseHighlights(p.parse_highlights),
@@ -503,6 +510,14 @@ void LLTextBase::drawText()
 	const S32 text_len = getLength();
 	if( text_len <= 0 )
 	{
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
+		if ( (!hasFocus()) && (mLabel.length()) )
+		{
+			mDefaultFont->render(
+				mLabel.getWString(), 0, mLineInfoList.begin()->mRect.mLeft, mDocumentView->getRect().mBottom, mLabelColor, 
+				LLFontGL::LEFT, LLFontGL::BOTTOM, 0, LLFontGL::NO_SHADOW, S32_MAX, mDocumentView->getRect().getWidth());
+		}
+// [/SL:KB]
 		return;
 	}
 	S32 selection_left = -1;
@@ -1773,6 +1788,26 @@ void LLTextBase::needsReflow(S32 index)
 	mReflowIndex = llmin(mReflowIndex, index);
 }
 
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLTextBase::setFont(const LLFontGL* pFont)
+{
+	for(segment_set_t::iterator itSegment = mSegments.begin(); itSegment != mSegments.end(); ++itSegment)
+	{
+		LLTextSegmentPtr segment = *itSegment;
+
+		LLStyleConstSP curStyle = segment->getStyle();
+		if (curStyle->getFont() == mDefaultFont)
+		{
+			LLStyleSP newStyle(new LLStyle(*curStyle));
+			newStyle->setFont(pFont);
+			LLStyleConstSP newStyleConst(newStyle);
+			segment->setStyle(newStyleConst);
+		}
+	}
+	mDefaultFont = pFont;
+}
+// [/SL:KB]
+
 void LLTextBase::appendLineBreakSegment(const LLStyle::Params& style_params)
 {
 	segment_vec_t segments;
@@ -2470,6 +2505,19 @@ void LLTextBase::endSelection()
 	}
 }
 
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+void LLTextBase::setSelection(S32 start, S32 end)
+{
+	S32 len = getLength();
+
+	mIsSelecting = TRUE;
+	mSelectionStart = llclamp(start, 0, len);
+	mSelectionEnd = llclamp(end, 0, len);
+
+	setCursorPos(mSelectionEnd);
+}
+// [/SL:KB]
+
 // get portion of document that is visible in text editor
 LLRect LLTextBase::getVisibleDocumentRect() const
 {
@@ -2986,6 +3034,12 @@ F32	LLLineBreakTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 se
 {
 	return  draw_rect.mLeft;
 }
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLLineBreakTextSegment::setStyle(LLStyleConstSP style)
+{
+	mFontHeight = llceil(style->getFont()->getLineHeight());
+}
+// [/SL:KB]
 
 LLImageTextSegment::LLImageTextSegment(LLStyleConstSP style,S32 pos,class LLTextBase& editor)
 :	LLTextSegment(pos,pos+1),

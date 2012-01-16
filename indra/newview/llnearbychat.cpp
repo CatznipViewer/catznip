@@ -72,9 +72,16 @@ BOOL LLNearbyChat::postBuild()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheckContextMenuItem, this, _2));
-	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatContextMenuItemClicked, this, _2));
-
+//	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheckContextMenuItem, this, _2));
+//	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatContextMenuItemClicked, this, _2));
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatAction, _2));
+	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheck, _2));
+	registrar.add("NearbyChat.SetChatBarType", boost::bind(&LLNearbyChat::onSetChatBarType, _2));
+	enable_registrar.add("NearbyChat.CheckChatBarType", boost::bind(&LLNearbyChat::onCheckChatBarType, _2));
+	registrar.add("NearbyChat.SetFontSize", boost::bind(&LLNearbyChat::onSetFontSize, _2));
+	enable_registrar.add("NearbyChat.CheckFontSize", boost::bind(&LLNearbyChat::onCheckFontSize, _2));
+// [/SL:KB]
 	
 	LLMenuGL* menu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_nearby_chat.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	if(menu)
@@ -83,6 +90,11 @@ BOOL LLNearbyChat::postBuild()
 	gSavedSettings.declareS32("nearbychat_showicons_and_names",2,"NearByChat header settings",true);
 
 	mChatHistory = getChild<LLChatHistory>("chat_history");
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", 
+																										LLMenuGL::sMenuContainer, 
+																										LLMenuHolderGL::child_registry_t::instance()));
+// [/SL:KB]
 
 	if(!LLPanel::postBuild())
 		return false;
@@ -115,7 +127,10 @@ void	LLNearbyChat::addMessage(const LLChat& chat,bool archive,const LLSD &args)
 
 	bool use_plain_text_chat_history = gSavedSettings.getBOOL("PlainTextChatHistory");
 	
-	if (!chat.mMuted)
+//	if (!chat.mMuted)
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if ( (!chat.mMuted) || (gSavedSettings.getBOOL("ShowBlockedChat")) )
+// [/SL:KB]
 	{
 		tmp_chat.mFromName = chat.mFromName;
 		LLSD chat_args = args;
@@ -163,16 +178,83 @@ void LLNearbyChat::onNearbySpeakers()
 }
 
 
-void	LLNearbyChat::onNearbyChatContextMenuItemClicked(const LLSD& userdata)
+//void	LLNearbyChat::onNearbyChatContextMenuItemClicked(const LLSD& userdata)
+//{
+//}
+//bool	LLNearbyChat::onNearbyChatCheckContextMenuItem(const LLSD& userdata)
+//{
+//	std::string str = userdata.asString();
+//	if(str == "nearby_people")
+//		onNearbySpeakers();	
+//	return false;
+//}
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+void LLNearbyChat::onNearbyChatAction(const LLSD& sdParam)
 {
 }
-bool	LLNearbyChat::onNearbyChatCheckContextMenuItem(const LLSD& userdata)
+
+bool LLNearbyChat::onNearbyChatCheck(const LLSD& sdParam)
 {
-	std::string str = userdata.asString();
-	if(str == "nearby_people")
-		onNearbySpeakers();	
 	return false;
 }
+
+void LLNearbyChat::onSetChatBarType(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nChatBarType = 1;
+	if ("single" == strParam)
+		nChatBarType = 1;
+	else if ("multi" == strParam)
+		nChatBarType = 2;
+	else
+		return;
+	gSavedSettings.setS32("NearbyChatFloaterBarType", nChatBarType);
+}
+
+bool LLNearbyChat::onCheckChatBarType(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nChatBarType = gSavedSettings.getS32("NearbyChatFloaterBarType");
+	if ("single" == strParam)
+		return 1 == nChatBarType;
+	else if ("multi" == strParam)
+		return 2 == nChatBarType;
+	return false;
+}
+
+void LLNearbyChat::onSetFontSize(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nFontSize = 1;
+	if ("small" == strParam)
+		nFontSize = 0;
+	else if ("medium" == strParam)
+		nFontSize = 1;
+	else if ("large" == strParam)
+		nFontSize = 2;
+	else
+		return;
+	gSavedSettings.setS32("ChatFontSize", nFontSize);
+}
+
+bool LLNearbyChat::onCheckFontSize(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nFontSize = gSavedSettings.getS32("ChatFontSize");
+	if ("small" == strParam)
+		return 0 == nFontSize;
+	else if ("medium" == strParam)
+		return 1 == nFontSize;
+	else if ("large" == strParam)
+		return 2 == nFontSize;
+	return false;
+}
+// [/SL:KB]
 
 void LLNearbyChat::removeScreenChat()
 {
