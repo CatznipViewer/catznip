@@ -724,6 +724,10 @@ public:
 
 	void resetMenuTrigger() { mAltKeyTrigger = FALSE; }
 
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	typedef boost::signals2::signal<void()> resize_signal_t;
+	boost::signals2::connection setResizeCallback(const resize_signal_t::slot_type& cb) { return mResizeSignal.connect(cb); }
+// [/SL:KB]
 private:
 	// add a menu - this will create a drop down menu.
 	virtual BOOL appendMenu( LLMenuGL* menu );
@@ -735,6 +739,9 @@ private:
 
 	std::list <LLKeyBinding*>	mAccelerators;
 	BOOL						mAltKeyTrigger;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	resize_signal_t				mResizeSignal;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -72,7 +72,7 @@
 #include "llpanellogin.h"
 #include "llpaneltopinfobar.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1)
 #include "llstatusbar.h"
 // [/SL:KB]
 
@@ -530,7 +530,7 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 
 //	LLPanelTopInfoBar::getInstance()->setVisible(value);
 //	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
 	if (gStatusBar)
 	{
 		gStatusBar->showTopInfoBar(value);

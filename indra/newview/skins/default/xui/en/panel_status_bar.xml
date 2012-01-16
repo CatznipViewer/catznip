@@ -36,7 +36,7 @@
   <panel
     class="topinfo_bar"
     filename="panel_topinfo_bar.xml"
-    follows="top|left"
+    follows="top|left|right"
     height="19"
     layout="topleft"
     left="425"

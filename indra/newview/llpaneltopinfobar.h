@@ -35,7 +35,7 @@ class LLIconCtrl;
 class LLParcelChangeObserver;
 
 //class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
 class LLPanelTopInfoBar : public LLPanel
 // [/SL:KB]
 {
@@ -62,7 +62,7 @@ public:
 //	 */
 //	void onVisibilityChange(const LLSD& show);
 
-	boost::signals2::connection setResizeCallback( const resize_signal_t::slot_type& cb );
+//	boost::signals2::connection setResizeCallback( const resize_signal_t::slot_type& cb );
 
 private:
 	class LLParcelChangeObserver;
@@ -80,6 +80,11 @@ private:
 		SEE_AVATARS_ICON,	// 6
 		ICON_COUNT			// 7 total
 	};
+
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	void handleLayoutChange();
+// [/SL:KB]
 
 	/**
 	 * Initializes parcel icons controls. Called from the constructor.
@@ -175,7 +180,7 @@ private:
 	boost::signals2::connection	mShowCoordsCtrlConnection;
 	boost::signals2::connection	mParcelMgrConnection;
 
-	resize_signal_t mResizeSignal;
+//	resize_signal_t mResizeSignal;
 };
 
 #endif /* LLPANELTOPINFOBAR_H_ */
