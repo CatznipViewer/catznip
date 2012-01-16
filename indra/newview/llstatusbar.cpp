@@ -511,7 +511,7 @@ S32 LLStatusBar::getSquareMetersLeft() const
 	return mSquareMetersCredit - mSquareMetersCommitted;
 }
 
-// [SL:KB] - Patch: UI-StatusBar
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
 void LLStatusBar::onToggleBuyCurrencyButton(const LLSD& sdValue)
 {
 	getChildView("buyL_panel")->setVisible(sdValue.asBoolean());
@@ -539,7 +539,11 @@ void LLStatusBar::onClickBuyCurrency()
 void LLStatusBar::onMouseEnterVolume()
 {
 	LLButton* volbtn =  getChild<LLButton>( "volume_btn" );
-	LLRect vol_btn_rect = volbtn->getRect();
+//	LLRect vol_btn_rect = volbtn->getRect();
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLRect vol_btn_rect;
+	volbtn->localRectToOtherView(volbtn->getLocalRect(), &vol_btn_rect, this);
+// [/SL:KB]
 	LLRect volume_pulldown_rect = mPanelVolumePulldown->getRect();
 	volume_pulldown_rect.setLeftTopAndSize(vol_btn_rect.mLeft -
 	     (volume_pulldown_rect.getWidth() - vol_btn_rect.getWidth())/2,
@@ -562,7 +566,11 @@ void LLStatusBar::onMouseEnterNearbyMedia()
 	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
 	LLRect nearby_media_rect = mPanelNearByMedia->getRect();
 	LLButton* nearby_media_btn =  getChild<LLButton>( "media_toggle_btn" );
-	LLRect nearby_media_btn_rect = nearby_media_btn->getRect();
+//	LLRect nearby_media_btn_rect = nearby_media_btn->getRect();
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLRect nearby_media_btn_rect;
+	nearby_media_btn->localRectToOtherView(nearby_media_btn->getLocalRect(), &nearby_media_btn_rect, this);
+// [/SL:KB]
 	nearby_media_rect.setLeftTopAndSize(nearby_media_btn_rect.mLeft - 
 										(nearby_media_rect.getWidth() - nearby_media_btn_rect.getWidth())/2,
 										nearby_media_btn_rect.mBottom,
