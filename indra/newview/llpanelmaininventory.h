@@ -81,7 +81,7 @@ public:
 	
 	void setSelectCallback(const LLFolderView::signal_t::slot_type& cb);
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
 	typedef boost::signals2::signal<void(LLInventoryPanel*)> activepanel_callback_t;
 	void setActivePanelCallback(const activepanel_callback_t::slot_type& cb) { mActivePanelCallback.connect(cb); }
 
@@ -138,7 +138,7 @@ private:
 	std::string					mFilterText;
 	std::string					mFilterSubString;
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
 	activepanel_callback_t      mActivePanelCallback;
 	modelchanged_callback_t     mModelChangedCallback;
 // [/SL:KB]
