@@ -186,6 +186,9 @@ BOOL LLPanelMainInventory::postBuild()
 	mGearMenuButton = getChild<LLMenuButton>("options_gear_btn");
 
 	initListCommandsHandlers();
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	updateItemcountText();
+// [/SL:KB]
 
 	// *TODO:Get the cost info from the server
 	const std::string upload_cost("10");
@@ -551,7 +554,7 @@ void LLPanelMainInventory::draw()
 		mResortActivePanel = false;
 	}
 	LLPanel::draw();
-	updateItemcountText();
+//	updateItemcountText();
 }
 
 void LLPanelMainInventory::updateItemcountText()
@@ -577,11 +580,28 @@ void LLPanelMainInventory::updateItemcountText()
 	}
 	else
 	{
-		text = getString("ItemcountUnknown");
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		text = getString("ItemcountUnknown", string_args);
+// [/SL:KB]
+//		text = getString("ItemcountUnknown");
 	}
 	
-	// *TODO: Cache the LLUICtrl* for the ItemcountText control
-	getChild<LLUICtrl>("ItemcountText")->setValue(text);
+//	// *TODO: Cache the LLUICtrl* for the ItemcountText control
+//	getChild<LLUICtrl>("ItemcountText")->setValue(text);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	// NOTE: this is a rather bad hack since it usurps the floater's title (and assumes it will never change during its lifetime)
+	LLFloater* pFloater = getParentByType<LLFloater>();
+	if (pFloater)
+	{
+		if (mFloaterTitle.empty())
+			mFloaterTitle = pFloater->getTitle();
+		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), text.c_str()));
+	}
+	else
+	{
+		getChild<LLUICtrl>("ItemcountText")->setValue(text);
+	}
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::onFocusReceived()
@@ -599,6 +619,9 @@ void LLPanelMainInventory::onFocusReceived()
 void LLPanelMainInventory::setFilterTextFromFilter() 
 { 
 	mFilterText = mActivePanel->getFilter()->getFilterText(); 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	updateItemcountText();
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::toggleFindOptions()

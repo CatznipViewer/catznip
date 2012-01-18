@@ -3,7 +3,7 @@
  open_positioning="cascading"
  can_close="true"
  can_resize="true"
- height="570"
+ height="565"
  help_topic="sidebar_inventory"
  min_width="333"
  min_height="440"

@@ -127,7 +127,9 @@ private:
 	LLSaveFolderState*			mSavedFolderState;
 	std::string					mFilterText;
 	std::string					mFilterSubString;
-
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	std::string					mFloaterTitle;
+// [/SL:KB]
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// List Commands                                                                //
