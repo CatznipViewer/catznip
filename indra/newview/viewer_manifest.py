@@ -555,6 +555,7 @@ class WindowsManifest(ViewerManifest):
             'version' : '.'.join(self.args['version']),
             'version_short' : '.'.join(self.args['version'][:-1]),
             'version_dashes' : '-'.join(self.args['version']),
+            'version_release' : 'R' + self.args['version'][-1],
             'final_exe' : self.final_exe(),
             'grid':self.args['grid'],
             'grid_caps':self.args['grid'].upper(),
@@ -575,11 +576,12 @@ class WindowsManifest(ViewerManifest):
         !define VERSION "%(version_short)s"
         !define VERSION_LONG "%(version)s"
         !define VERSION_DASHES "%(version_dashes)s"
+        !define VERSION_RELEASE "%(version_release)s"
         """ % substitution_strings
         if self.default_channel():
             if self.default_grid():
                 # release viewer
-                installer_file = "Catznip_%(version_dashes)s_Setup.exe"
+                installer_file = "Catznip_%(version_release)s_%(version_short)s_Setup.exe"
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
@@ -590,7 +592,7 @@ class WindowsManifest(ViewerManifest):
                 """
             else:
                 # beta grid viewer
-                installer_file = "Catznip_%(version_dashes)s_(%(grid_caps)s)_Setup.exe"
+                installer_file = "Catznip_%(version_release)s_%(version_short)s_(%(grid_caps)s)_Setup.exe"
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
@@ -602,7 +604,7 @@ class WindowsManifest(ViewerManifest):
                 """
         else:
             # some other channel on some grid
-            installer_file = "Catznip_%(version_dashes)s_%(channel_oneword)s_Setup.exe"
+            installer_file = "Catznip_%(version_release)s_%(version_short)s_%(channel_oneword)s_Setup.exe"
             grid_vars_template = """
             OutFile "%(installer_file)s"
             !define INSTFLAGS "%(flags)s"
@@ -986,7 +988,8 @@ class LinuxManifest(ViewerManifest):
             installer_name = self.args['installer_name']
         else:
             installer_name_components = ['Catznip_', self.args.get('arch')]
-            installer_name_components.extend(self.args['version'])
+            installer_name_components.extend('R' + self.args['version'][-1])
+            installer_name_components.extend('-'.join(self.args['version'][:-1]))
             installer_name = "_".join(installer_name_components)
             if self.default_channel():
                 if not self.default_grid():
