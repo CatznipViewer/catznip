@@ -5161,7 +5161,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    name="FriendOnline"
    type="notifytip">
     <tag>friendship</tag>
-&lt;nolink&gt;[NAME]&lt;/nolink&gt; is Online
+[NAME_SLURL] is Online
   </notification>
 
   <notification
@@ -5169,7 +5169,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    name="FriendOffline"
    type="notifytip">
     <tag>friendship</tag>
-&lt;nolink&gt;[NAME]&lt;/nolink&gt; is Offline
+[NAME_SLURL] is Offline
   </notification>
 
   <notification
