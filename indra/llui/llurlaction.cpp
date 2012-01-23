@@ -158,8 +158,8 @@ void LLUrlAction::showProfile(std::string url)
 	}
 }
 
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-3.2.0a) | Modified: Catznip-2.5.0a
-void LLUrlAction::startIM(std::string url)
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-3.2.2) | Modified: Catznip-2.5.0
+void LLUrlAction::startIM(const std::string& url)
 {
 	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
 	LLURI uri(url);
@@ -175,7 +175,7 @@ void LLUrlAction::startIM(std::string url)
 	}
 }
 
-void LLUrlAction::offerTeleport(std::string url)
+void LLUrlAction::offerTeleport(const std::string& url)
 {
 	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
 	LLURI uri(url);
