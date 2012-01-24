@@ -22,6 +22,8 @@
 #include "llmutelist.h"
 #include "llsdserialize.h"
 
+// ============================================================================
+
 LLPersistentUnreadIMStorage::LLPersistentUnreadIMStorage()
 {
 	LLIMModel::instance().addNewMsgCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
@@ -47,12 +49,9 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 		return;
 	}
 
-	if ( (sdData.isUndefined()) || (0 == sdData.size()) )
-		return;
-
 	for (LLSD::array_const_iterator itSession = sdData.beginArray(); itSession != sdData.endArray(); ++itSession)
 	{
-		const LLSD sdSession = *itSession;
+		const LLSD& sdSession = *itSession;
 
 		LLUUID idAgent = sdSession["participant_id"].asUUID();
 		S32 typeSession = sdSession["session_type"].asInteger();
@@ -139,3 +138,5 @@ void LLPersistentUnreadIMStorage::onMessageCountChanged(const LLSD& sdSessionDat
 
 	saveUnreadIMs();
 }
+
+// ============================================================================

@@ -17,6 +17,11 @@
 #ifndef LL_IMSTORAGE_H
 #define LL_IMSTORAGE_H
 
+#include "llsd.h"
+#include "llsingleton.h"
+
+// ============================================================================
+
 class LLPersistentUnreadIMStorage : public LLSingleton<LLPersistentUnreadIMStorage>
 {
 	friend LLSingleton<LLPersistentUnreadIMStorage>;
@@ -34,5 +39,7 @@ protected:
 	uuid_vec_t	m_idUnreadSessions;		// P2P IM sessions with unread messages
 	std::string	m_strFilePath;
 };
+
+// ============================================================================
 
 #endif // LL_IMSTORAGE_H

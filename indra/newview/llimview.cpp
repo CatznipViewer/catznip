@@ -809,7 +809,7 @@ void LLIMModel::getMessages(const LLUUID& session_id, std::list<LLSD>& messages,
 }
 
 //bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text) {
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time)
 {
 // [/SL:KB]
@@ -822,7 +822,7 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 	}
 
 //	session->addMessage(from, from_id, utf8_text, LLLogChat::timestamp(false)); //might want to add date separately
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 	session->addMessage(from, from_id, utf8_text, (time.empty()) ? LLLogChat::timestamp(false) : time); //might want to add date separately
 // [/SL:KB]
 
@@ -900,7 +900,7 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 //bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 //						   const std::string& utf8_text, bool log2file /* = true */) { 
 //	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 						   const std::string& utf8_text, bool log2file, const std::string& time)
 { 
@@ -931,7 +931,7 @@ bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, co
 
 //LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 //													 const std::string& utf8_text, bool log2file /* = true */)
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 													 const std::string& utf8_text, bool log2file, const std::string& time)
 // [/SL:KB]
@@ -952,7 +952,7 @@ LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, 
 	}
 
 //	addToHistory(session_id, from_name, from_id, utf8_text);
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 	addToHistory(session_id, from_name, from_id, utf8_text, time);
 // [/SL:KB]
 	if (log2file)

@@ -199,7 +199,7 @@
 #include "lldrawpoolbump.h"
 #include "llvieweraudio.h"
 #include "llimview.h"
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1)
 #include "llimstorage.h"
 // [/SL:KB]
 #include "llviewerthrottle.h"
@@ -500,7 +500,7 @@ void request_initial_instant_messages()
 		&& LLMuteList::getInstance()->isLoaded()
 		&& isAgentAvatarValid())
 	{
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.2.1) | Added: Catznip-3.0.0
 		LLPersistentUnreadIMStorage::instance().loadUnreadIMs();
 // [/SL:KB]
 
