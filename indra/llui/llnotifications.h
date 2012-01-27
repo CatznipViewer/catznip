@@ -364,6 +364,9 @@ private:
 	bool mRespondedTo; 	// once the notification has been responded to, this becomes true
 	LLSD mResponse;
 	bool mIgnored;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	bool mPersisted;	// true if this notification was loaded from persistent storage
+// [/SL:KB]
 	ENotificationPriority mPriority;
 	LLNotificationFormPtr mForm;
 	void* mResponderObj; // TODO - refactor/remove this field
@@ -480,6 +483,17 @@ public:
 	{
 		return mIgnored;
 	}
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	bool isPersisted() const
+	{
+		return mPersisted;
+	}
+	void setPersisted(bool fPersisted)
+	{
+		mPersisted = fPersisted;
+	}
+// [/SL:KB]
 
 	const std::string& getName() const;
 

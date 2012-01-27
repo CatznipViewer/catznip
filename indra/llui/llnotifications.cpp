@@ -469,6 +469,9 @@ LLNotification::LLNotification(const LLNotification::Params& p) :
 	mPriority(p.priority),
 	mCancelled(false),
 	mIgnored(false),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mPersisted(false),
+// [/SL:KB]
 	mResponderObj(NULL),
 	mIsReusable(false)
 {
@@ -503,6 +506,9 @@ LLNotification::LLNotification(const LLSD& sd) :
 	mRespondedTo(false),
 	mCancelled(false),
 	mIgnored(false),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mPersisted(false),
+// [/SL:KB]
 	mResponderObj(NULL),
 	mIsReusable(false)
 { 
@@ -562,6 +568,9 @@ void LLNotification::updateFrom(LLNotificationPtr other)
 	mExpiresAt = other->mExpiresAt;
 	mCancelled = other->mCancelled;
 	mIgnored = other->mIgnored;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mPersisted = other->mPersisted;
+// [/SL:KB]
 	mPriority = other->mPriority;
 	mForm = other->mForm;
 	mResponseFunctorName = other->mResponseFunctorName;
