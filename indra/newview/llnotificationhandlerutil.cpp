@@ -342,6 +342,14 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 	{
 		LLUUID from_id = notification->getPayload()["from_id"];
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		// If the user triggered the notification, log it to the destination instead
+		if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
+		{
+			from_id = notification->getPayload()["dest_id"];
+		}
+// [/SL:KB]
+
 		if (from_id.isNull())
 		{
 			llwarns << " from_id for notification " << notification->getName() << " is null " << llendl;

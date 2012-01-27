@@ -5346,10 +5346,15 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		}
 		final_args["MESSAGE"] = message;
 
-		// make notification loggable
-		payload["from_id"] = source_id;
+//		// make notification loggable
+//		payload["from_id"] = source_id;
 		notification = "PaymentReceived";
 	}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	// make notification loggable
+	payload["from_id"] = source_id;
+	payload["dest_id"] = dest_id;
+// [/SL:KB]
 
 	// Despite using SLURLs, wait until the name is available before
 	// showing the notification, otherwise the UI layout is strange and

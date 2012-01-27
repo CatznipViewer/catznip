@@ -27,6 +27,9 @@
 
 #include "llviewerprecompiledheaders.h" // must be first include
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1)
+#include "llagentdata.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llnearbychat.h"
 #include "llnearbychatbar.h"
@@ -125,6 +128,13 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 			session_name = name;
 		}
 		LLUUID from_id = notification->getPayload()["from_id"];
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		// If the user triggered the notification, log it to the destination instead
+		if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
+		{
+			from_id = notification->getPayload()["dest_id"];
+		}
+// [/SL:KB]
 		if (LLHandlerUtil::canLogToIM(notification))
 		{
 			LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
