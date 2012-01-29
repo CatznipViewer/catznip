@@ -1851,9 +1851,9 @@ void LLViewerWindow::initWorldUI()
 	chiclet_container->addChild(chiclet_bar);
 	chiclet_container->setVisible(TRUE);
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLChicletBar::EAlignment eAlign = LLChicletBar::ALIGN_TOP;
-	if (1 == gSavedSettings.getS32("ChicletBarAlignment"))
+	if (LLChicletBar::ALIGN_BOTTOM == gSavedSettings.getS32("ChicletBarAlignment"))
 	{
 		eAlign = LLChicletBar::ALIGN_BOTTOM;
 

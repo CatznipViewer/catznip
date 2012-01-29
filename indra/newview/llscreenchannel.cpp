@@ -37,7 +37,7 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a)
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1)
 #include "llchicletbar.h"
 // [/SL:KB]
 #include "lldockablefloater.h"
@@ -62,22 +62,22 @@ LLRect LLScreenChannelBase::getChannelRect()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-	if (mChicletRegion == NULL)
-	{
-		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-	}
+//	if (mChicletRegion == NULL)
+//	{
+//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+//	}
 	
 	LLRect channel_rect;
 	LLRect chiclet_rect;
 
 	mFloaterSnapRegion->localRectToScreen(mFloaterSnapRegion->getLocalRect(), &channel_rect);
-	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
-
+//	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
+//
 //	channel_rect.mTop = chiclet_rect.mBottom;
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (LLChicletBar::instanceExists())
 	{
-		LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
+		const LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
 		chiclet_bar->localRectToScreen(chiclet_bar->getLocalRect(), &chiclet_rect);
 
 		if (LLChicletBar::ALIGN_TOP == chiclet_bar->getAlignment())
@@ -106,8 +106,11 @@ LLScreenChannelBase::LLScreenChannelBase(const Params& p)
 	mID(p.id),
 	mDisplayToastsAlways(p.display_toasts_always),
 	mChannelAlignment(p.channel_align),
-	mFloaterSnapRegion(NULL),
-	mChicletRegion(NULL)
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	mFloaterSnapRegion(NULL)
+// [/SL:KB]
+//	mFloaterSnapRegion(NULL),
+//	mChicletRegion(NULL)
 {
 	mID = p.id;
 
@@ -122,10 +125,10 @@ BOOL LLScreenChannelBase::postBuild()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-	if (mChicletRegion == NULL)
-	{
-		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-	}
+//	if (mChicletRegion == NULL)
+//	{
+//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+//	}
 	
 	return TRUE;
 }
@@ -542,12 +545,12 @@ void LLScreenChannel::redrawToasts()
 //--------------------------------------------------------------------------
 void LLScreenChannel::showToastsBottom()
 {
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLRect channel_rect = getChannelRect();
 // [/SL:KB]
 	LLRect	toast_rect;	
 //	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	S32		bottom = channel_rect.mBottom;
 // [/SL:KB]
 	S32		toast_margin = 0;

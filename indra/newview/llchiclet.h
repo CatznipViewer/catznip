@@ -650,7 +650,7 @@ protected:
 	 */
 	virtual void createPopupMenu();
 
-// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	/**
 	 * Enables chiclet menu items.
 	 */
@@ -705,7 +705,7 @@ protected:
 	 */
 	virtual void createPopupMenu();
 
-// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	/**
 	 * Enables chiclet menu items.
 	 */
@@ -718,7 +718,7 @@ protected:
 	virtual void onMenuItemClicked(const LLSD& user_data);
 
 private:
-// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	bool mIsTaskOffer;
 // [/SL:KB]
 	LLChicletInvOfferIconCtrl* mChicletIconCtrl;

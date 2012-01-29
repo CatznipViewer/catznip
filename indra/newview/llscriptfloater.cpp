@@ -296,7 +296,7 @@ void LLScriptFloater::dockToChiclet(bool dock)
 
 //		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
 //			LLDockControl::BOTTOM));
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
 			(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
 // [/SL:KB]
@@ -523,12 +523,12 @@ std::string LLScriptFloaterManager::getObjectName(const LLUUID& notification_id)
 	return text;
 }
 
-// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
 LLUUID LLScriptFloaterManager::getObjectOwner(const LLUUID& notification_id)
 {
 	using namespace LLNotificationsUI;
 	LLNotificationPtr notification = LLNotifications::getInstance()->find(notification_id);
-	if(!notification)
+	if (!notification)
 	{
 		llwarns << "Invalid notification" << llendl;
 		return LLUUID::null;
@@ -557,7 +557,7 @@ LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMa
 	type_map["ScriptDialogGroup"] = OBJ_SCRIPT;
 	type_map["LoadWebPage"] = OBJ_LOAD_URL;
 	type_map["ObjectGiveItem"] = OBJ_GIVE_INVENTORY;
-// [SL:KB] - Patch: UI-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	type_map["OwnObjectGiveItem"] = OBJ_GIVE_INVENTORY;
 // [/SL:KB]
 	return type_map;

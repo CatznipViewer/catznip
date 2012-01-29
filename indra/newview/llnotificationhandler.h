@@ -104,7 +104,7 @@ protected:
 	virtual void initChannel()=0;
 
 //	LLScreenChannelBase*	mChannel;
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLHandle<LLScreenChannelBase> mChannelHandle;
 // [/SL:KB]
 	e_notification_type		mType;

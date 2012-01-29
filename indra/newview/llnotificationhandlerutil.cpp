@@ -65,7 +65,7 @@ LLSysHandler::LLSysHandler()
 void LLSysHandler::removeExclusiveNotifications(const LLNotificationPtr& notif)
 {
 //	LLScreenChannel* channel = dynamic_cast<LLScreenChannel *>(mChannel);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
 // [/SL:KB]
 	if (channel == NULL)
@@ -128,7 +128,7 @@ const static std::string GRANTED_MODIFY_RIGHTS("GrantedModifyRights"),
 						FRIENDSHIP_OFFERED("FriendshipOffered"),
 						FRIENDSHIP_ACCEPTED_BYME("FriendshipAcceptedByMe"),
 						FRIENDSHIP_DECLINED_BYME("FriendshipDeclinedByMe"),
-//						FRIEND_ONLINE("FriendOnline"), FRIEND_OFFLINE("FriendOffline"),
+						FRIEND_ONLINE("FriendOnline"), FRIEND_OFFLINE("FriendOffline"),
 						SERVER_OBJECT_MESSAGE("ServerObjectMessage"),
 						TELEPORT_OFFERED("TeleportOffered"),
 //						TELEPORT_OFFER_SENT("TeleportOfferSent"),
@@ -177,6 +177,8 @@ bool LLHandlerUtil::canLogToNearbyChat(const LLNotificationPtr& notification)
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	return notification->canLogToNearbyChat()
 			|| (notification->getType() == "notifytip"
+			&&  FRIEND_ONLINE != notification->getName()
+			&& FRIEND_OFFLINE != notification->getName()
 			&& INVENTORY_ACCEPTED != notification->getName()
 			&& INVENTORY_DECLINED != notification->getName()
 			&& IM_SYSTEM_MESSAGE_TIP != notification->getName());

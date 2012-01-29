@@ -723,7 +723,7 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	// Use display name only because this user is your friend
 	LLSD args;
 //	args["NAME"] = av_name.mDisplayName;
-// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2010-06-05 (Catznip-3.2.2) | Added: Catznip-2.0.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2010-06-05 (Catznip-3.2.1) | Added: Catznip-2.0.1
 	args["NAME_SLURL"] = LLSLURL("agent", agent_id, "about").getSLURLString();
 // [/SL:KB]
 

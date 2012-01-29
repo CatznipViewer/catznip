@@ -150,7 +150,7 @@ void LLSysWellWindow::setVisible(BOOL visible)
 //			setDockControl(new LLDockControl(
 //				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
 //				getDockTongue(), LLDockControl::BOTTOM));
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 			setDockControl(new LLDockControl(LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this, getDockTongue(),
 				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
 // [/SL:KB]
@@ -210,7 +210,7 @@ void LLSysWellWindow::reshapeWindow()
 		}
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		// Resize bottom-up if we're docked at the top and top-down if we're docked at the bottom
 		S32 top = curRect.mTop;
 		if ( (getDockControl()) && (LLDockControl::TOP == getDockControl()->getDockAt()) )

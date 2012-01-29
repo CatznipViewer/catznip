@@ -53,7 +53,7 @@ LLScriptHandler::LLScriptHandler(e_notification_type type, const LLSD& id)
 //	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //	if(channel)
 //		channel->setOnRejectToastCallback(boost::bind(&LLScriptHandler::onRejectToast, this, _1));
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = LLChannelManager::getInstance()->createNotificationChannel();
 	channel->setControlHovering(true);
 	channel->setOnRejectToastCallback(boost::bind(&LLScriptHandler::onRejectToast, this, _1));
@@ -73,7 +73,7 @@ void LLScriptHandler::initChannel()
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
 	S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
 //	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (LLScreenChannelBase* channel = mChannelHandle.get())
 		channel->init(channel_right_bound - channel_width, channel_right_bound);
 // [/SL:KB]
@@ -83,7 +83,7 @@ void LLScriptHandler::initChannel()
 bool LLScriptHandler::processNotification(const LLSD& notify)
 {
 //	if(!mChannel)
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
 	if (!channel)
 // [/SL:KB]
@@ -98,7 +98,7 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 
 	// arrange a channel on a screen
 //	if(!mChannel->getVisible())
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (!channel->getVisible())
 // [/SL:KB]
 	{
@@ -142,7 +142,7 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 			p.panel = notify_box;	
 			p.on_delete_toast = boost::bind(&LLScriptHandler::onDeleteToast, this, _1);
 
-// [SL:KB] - Patch: UI-Notifications | Checked: 2011-11-23 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2.1) | Added: Catznip-3.2.0
 			if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
 			{
 				p.lifetime_secs = gSavedSettings.getS32("ScriptQuestionToastLifeTime");
@@ -154,7 +154,7 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 //			{
 //				channel->addToast(p);
 //			}
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 			channel->addToast(p);
 // [/SL:KB]
 
@@ -171,7 +171,7 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 		else
 		{
 //			mChannel->killToastByNotificationID(notification->getID());
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 			channel->killToastByNotificationID(notification->getID());
 // [/SL:KB]
 		}

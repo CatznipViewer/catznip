@@ -75,7 +75,7 @@ LLScreenChannel* LLChannelManager::createNotificationChannel()
 	p.id = LLUUID(gSavedSettings.getString("NotificationChannelUUID"));
 	p.channel_align = CA_RIGHT;
 //	p.toast_align = NA_TOP;
-// [SL:KB] - Patch: UI-Notification| Checked: 2011-11-19 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	p.toast_align = (1 == gSavedSettings.getS32("NotificationToastAlignment")) ? NA_BOTTOM : NA_TOP;
 // [/SL:KB]
 

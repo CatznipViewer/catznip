@@ -459,7 +459,7 @@ LLNearbyChatHandler::LLNearbyChatHandler(e_notification_type type, const LLSD& i
 	channel->setCreatePanelCallback(callback);
 
 //	mChannel = LLChannelManager::getInstance()->addChannel(channel);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	mChannelHandle = LLChannelManager::getInstance()->addChannel(channel)->getHandle();
 // [/SL:KB]
 }
@@ -563,7 +563,7 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,
 //			&& gSavedSettings.getBOOL("UseChatBubbles") )
 //		|| !mChannel->getShowToasts() ) // to prevent toasts in Busy mode
 //		return;//no need in toast if chat is visible or if bubble chat is enabled
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLNearbyChatScreenChannel* channel = dynamic_cast<LLNearbyChatScreenChannel*>(mChannelHandle.get());
 	if (!channel)
 	{
@@ -582,7 +582,7 @@ void LLNearbyChatHandler::processChat(const LLChat& chat_msg,
 
 	// arrange a channel on a screen
 //	if(!mChannel->getVisible())
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (!channel->getVisible())
 // [/SL:KB]
 	{

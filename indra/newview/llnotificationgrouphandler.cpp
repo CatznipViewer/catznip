@@ -46,7 +46,7 @@ LLGroupHandler::LLGroupHandler(e_notification_type type, const LLSD& id)
 //	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //	if(channel)
 //		channel->setOnRejectToastCallback(boost::bind(&LLGroupHandler::onRejectToast, this, _1));
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = LLChannelManager::getInstance()->createNotificationChannel();
 	channel->setOnRejectToastCallback(boost::bind(&LLGroupHandler::onRejectToast, this, _1));
 
@@ -65,7 +65,7 @@ void LLGroupHandler::initChannel()
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
 	S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
 //	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (LLScreenChannelBase* channel = mChannelHandle.get())
 		channel->init(channel_right_bound - channel_width, channel_right_bound);
 // [/SL:KB]
@@ -75,7 +75,7 @@ void LLGroupHandler::initChannel()
 bool LLGroupHandler::processNotification(const LLSD& notify)
 {
 //	if(!mChannel)
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
 	if (!channel)
 // [/SL:KB]
@@ -90,7 +90,7 @@ bool LLGroupHandler::processNotification(const LLSD& notify)
 
 	// arrange a channel on a screen
 //	if(!mChannel->getVisible())
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (!channel->getVisible())
 // [/SL:KB]
 	{
@@ -111,7 +111,7 @@ bool LLGroupHandler::processNotification(const LLSD& notify)
 //		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //		if(channel)
 //			channel->addToast(p);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->addToast(p);
 // [/SL:KB]
 
@@ -123,7 +123,7 @@ bool LLGroupHandler::processNotification(const LLSD& notify)
 	else if (notify["sigtype"].asString() == "delete")
 	{
 //		mChannel->killToastByNotificationID(notification->getID());
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->killToastByNotificationID(notification->getID());
 // [/SL:KB]
 	}

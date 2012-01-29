@@ -53,7 +53,7 @@ LLAlertHandler::LLAlertHandler(e_notification_type type, const LLSD& id) : mIsMo
 	// Getting a Channel for our notifications
 //	mChannel = LLChannelManager::getInstance()->getChannel(p);
 //	mChannel->setCanStoreToasts(false);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannelBase* channel = LLChannelManager::getInstance()->getChannel(p);
 	channel->setCanStoreToasts(false);
 
@@ -71,7 +71,7 @@ void LLAlertHandler::initChannel()
 {
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().getWidth() / 2;
 //	mChannel->init(channel_right_bound, channel_right_bound);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (LLScreenChannelBase* channel = mChannelHandle.get())
 		channel->init(channel_right_bound, channel_right_bound);
 // [/SL:KB]
@@ -81,7 +81,7 @@ void LLAlertHandler::initChannel()
 bool LLAlertHandler::processNotification(const LLSD& notify)
 {
 //	if(!mChannel)
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
 	if (!channel)
 // [/SL:KB]
@@ -96,7 +96,7 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 
 	// arrange a channel on a screen
 //	if(!mChannel->getVisible())
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 	if (!channel->getVisible())
 // [/SL:KB]
 	{
@@ -132,14 +132,14 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 		LLProgressView* progress = gViewerWindow->getProgressView();
 		LLRect rc = progress && progress->getVisible() ? progress->getRect() : gViewerWindow->getWorldViewRectScaled();
 //		mChannel->updatePositionAndSize(rc);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->updatePositionAndSize(rc);
 // [/SL:KB]
 
 //		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //		if(channel)
 //			channel->addToast(p);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->addToast(p);
 // [/SL:KB]
 	}
@@ -149,7 +149,7 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 //		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //		if(channel)
 //			channel->modifyToastByNotificationID(notification->getID(), (LLToastPanel*)alert_dialog);
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->modifyToastByNotificationID(notification->getID(), (LLToastPanel*)alert_dialog);
 // [/SL:KB]
 	}
@@ -158,7 +158,7 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 //		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
 //		if(channel)
 //			channel->killToastByNotificationID(notification->getID());
-// [SL:KB] - Patch: UI-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		channel->killToastByNotificationID(notification->getID());
 // [/SL:KB]
 	}
