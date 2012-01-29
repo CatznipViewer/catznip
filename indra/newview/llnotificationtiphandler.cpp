@@ -126,24 +126,20 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 				}
 			}
 
-			std::string session_name = notification->getPayload()["SESSION_NAME"];
+//			std::string session_name = notification->getPayload()["SESSION_NAME"];
 			const std::string name = notification->getSubstitutions()["NAME"];
-			if (session_name.empty())
-			{
-				session_name = name;
-			}
+//			if (session_name.empty())
+//			{
+//				session_name = name;
+//			}
 			LLUUID from_id = notification->getPayload()["from_id"];
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
-			// If the user triggered the notification, log it to the destination instead
-			if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
-			{
-				from_id = notification->getPayload()["dest_id"];
-			}
-// [/SL:KB]
 			if (LLHandlerUtil::canLogToIM(notification))
 			{
-				LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
-						notification->getMessage(), from_id, from_id);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				LLHandlerUtil::logToIMP2P(notification);
+// [/SL:KB]
+//				LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
+//						notification->getMessage(), from_id, from_id);
 			}
 
 			if (LLHandlerUtil::canSpawnIMSession(notification))

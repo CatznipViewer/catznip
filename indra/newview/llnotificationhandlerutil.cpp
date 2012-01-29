@@ -117,8 +117,8 @@ const static std::string GRANTED_MODIFY_RIGHTS("GrantedModifyRights"),
 		REVOKED_MODIFY_RIGHTS("RevokedModifyRights"),
 		OBJECT_GIVE_ITEM("ObjectGiveItem"),
 		OBJECT_GIVE_ITEM_UNKNOWN_USER("ObjectGiveItemUnknownUser"),
-						PAYMENT_RECEIVED("PaymentReceived"),
-						PAYMENT_SENT("PaymentSent"),
+//						PAYMENT_RECEIVED("PaymentReceived"),
+//						PAYMENT_SENT("PaymentSent"),
 						ADD_FRIEND_WITH_MESSAGE("AddFriendWithMessage"),
 						USER_GIVE_ITEM("UserGiveItem"),
 						INVENTORY_ACCEPTED("InventoryAccepted"),
@@ -128,20 +128,20 @@ const static std::string GRANTED_MODIFY_RIGHTS("GrantedModifyRights"),
 						FRIENDSHIP_OFFERED("FriendshipOffered"),
 						FRIENDSHIP_ACCEPTED_BYME("FriendshipAcceptedByMe"),
 						FRIENDSHIP_DECLINED_BYME("FriendshipDeclinedByMe"),
-						FRIEND_ONLINE("FriendOnline"), FRIEND_OFFLINE("FriendOffline"),
+//						FRIEND_ONLINE("FriendOnline"), FRIEND_OFFLINE("FriendOffline"),
 						SERVER_OBJECT_MESSAGE("ServerObjectMessage"),
 						TELEPORT_OFFERED("TeleportOffered"),
-						TELEPORT_OFFER_SENT("TeleportOfferSent"),
+//						TELEPORT_OFFER_SENT("TeleportOfferSent"),
 						IM_SYSTEM_MESSAGE_TIP("IMSystemMessageTip");
 
 
 // static
 bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
 {
-	return GRANTED_MODIFY_RIGHTS == notification->getName()
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	return notification->canLogToIM(NULL != findIMFloater(notification))
+			|| GRANTED_MODIFY_RIGHTS == notification->getName()
 			|| REVOKED_MODIFY_RIGHTS == notification->getName()
-			|| PAYMENT_RECEIVED == notification->getName()
-			|| PAYMENT_SENT == notification->getName()
 			|| OFFER_FRIENDSHIP == notification->getName()
 			|| FRIENDSHIP_OFFERED == notification->getName()
 			|| FRIENDSHIP_ACCEPTED == notification->getName()
@@ -151,20 +151,42 @@ bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
 			|| INVENTORY_ACCEPTED == notification->getName()
 			|| INVENTORY_DECLINED == notification->getName()
 			|| USER_GIVE_ITEM == notification->getName()
-			|| TELEPORT_OFFERED == notification->getName()
-			|| TELEPORT_OFFER_SENT == notification->getName()
 			|| IM_SYSTEM_MESSAGE_TIP == notification->getName();
+// [/SL:KB]
+//	return GRANTED_MODIFY_RIGHTS == notification->getName()
+//			|| REVOKED_MODIFY_RIGHTS == notification->getName()
+//			|| PAYMENT_RECEIVED == notification->getName()
+//			|| PAYMENT_SENT == notification->getName()
+//			|| OFFER_FRIENDSHIP == notification->getName()
+//			|| FRIENDSHIP_OFFERED == notification->getName()
+//			|| FRIENDSHIP_ACCEPTED == notification->getName()
+//			|| FRIENDSHIP_ACCEPTED_BYME == notification->getName()
+//			|| FRIENDSHIP_DECLINED_BYME == notification->getName()
+//			|| SERVER_OBJECT_MESSAGE == notification->getName()
+//			|| INVENTORY_ACCEPTED == notification->getName()
+//			|| INVENTORY_DECLINED == notification->getName()
+//			|| USER_GIVE_ITEM == notification->getName()
+//			|| TELEPORT_OFFERED == notification->getName()
+//			|| TELEPORT_OFFER_SENT == notification->getName()
+//			|| IM_SYSTEM_MESSAGE_TIP == notification->getName();
 }
 
 // static
 bool LLHandlerUtil::canLogToNearbyChat(const LLNotificationPtr& notification)
 {
-	return notification->getType() == "notifytip"
-			&&  FRIEND_ONLINE != notification->getName()
-			&& FRIEND_OFFLINE != notification->getName()
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	return notification->canLogToNearbyChat()
+			|| (notification->getType() == "notifytip"
 			&& INVENTORY_ACCEPTED != notification->getName()
 			&& INVENTORY_DECLINED != notification->getName()
-			&& IM_SYSTEM_MESSAGE_TIP != notification->getName();
+			&& IM_SYSTEM_MESSAGE_TIP != notification->getName());
+// [/SL:KB]
+//	return notification->getType() == "notifytip"
+//			&&  FRIEND_ONLINE != notification->getName()
+//			&& FRIEND_OFFLINE != notification->getName()
+//			&& INVENTORY_ACCEPTED != notification->getName()
+//			&& INVENTORY_DECLINED != notification->getName()
+//			&& IM_SYSTEM_MESSAGE_TIP != notification->getName();
 }
 
 // static

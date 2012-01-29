@@ -5159,6 +5159,8 @@ Topic: [SUBJECT], Message: [MESSAGE]
   <notification
    icon="notifytip.tga"
    name="FriendOnline"
+   can_logto="chat|openim"
+   logto="openim"
    type="notifytip">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; is Online
@@ -5167,6 +5169,8 @@ Topic: [SUBJECT], Message: [MESSAGE]
   <notification
    icon="notifytip.tga"
    name="FriendOffline"
+   can_logto="chat|openim"
+   logto="openim"
    type="notifytip">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; is Offline
@@ -5502,6 +5506,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentReceived"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -5511,6 +5517,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentSent"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -5520,6 +5528,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentFailure"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -6101,6 +6111,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOfferSent"
+   can_logto="chat|im"
+   logto="im"
    type="offer">
 	Teleport offer sent to [TO_NAME]
   </notification>

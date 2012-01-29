@@ -395,9 +395,56 @@ void LLNotificationForm::setIgnored(bool ignored)
 	}
 }
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// static
+static U32 getLogTypeFromString(const std::string& strText)
+{
+	U32 nRet = 0;
+	if (std::string::npos != strText.find("chat"))
+		nRet |= LLNotificationTemplate::LOG_CHAT;
+
+	if (std::string::npos != strText.find("openim"))
+		nRet |= LLNotificationTemplate::LOG_IM_OPEN;
+	else if (std::string::npos != strText.find("im"))
+		nRet |= LLNotificationTemplate::LOG_IM;
+
+	return nRet;
+}
+
+bool LLNotificationTemplate::canLogToNearbyChat() const
+{
+	return mLogTo & LOG_CHAT;
+}
+
+bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
+{
+	return (mLogTo & LOG_IM) || ((mLogTo & LOG_IM_OPEN) && (fOpenSession));
+}
+
+void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
+{
+	if (fLog)
+		mLogTo |= LOG_CHAT_MASK & mCanLogTo;
+	else
+		mLogTo &= ~LOG_CHAT_MASK;
+}
+
+void LLNotificationTemplate::setLogToIM(bool fLog)
+{
+	if (fLog)
+		mLogTo |= LOG_IM_MASK & mCanLogTo;
+	else
+		mLogTo &= ~LOG_IM_MASK;
+}
+// [/SL:KB]
+
 LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Params& p)
 :	mName(p.name),
 	mType(p.type),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mCanLogTo(getLogTypeFromString(p.can_logto)),
+	mLogTo(p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo),
+// [/SL:KB]
 	mMessage(p.value),
 	mLabel(p.label),
 	mIcon(p.icon),
@@ -411,6 +458,14 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mPersist(p.persist),
 	mDefaultFunctor(p.functor.isProvided() ? p.functor() : p.name())
 {
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (mLogTo)
+	{
+		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, mLogTo, "Specifies where this notification will be logged to");
+		mLogTo = LLUI::sSettingGroups["config"]->getU32("Log" + mName);
+	}
+// [/SL:KB]
+
 	if (p.sound.isProvided()
 		&& LLUI::sSettingGroups["config"]->controlExists(p.sound))
 	{
@@ -711,6 +766,17 @@ const std::string& LLNotification::getIcon() const
 	return mTemplatep->mIcon;
 }
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+bool LLNotification::canLogToNearbyChat() const
+{
+	return mTemplatep->canLogToNearbyChat();
+}
+
+bool LLNotification::canLogToIM(bool fOpenSession) const
+{
+	return mTemplatep->canLogToIM(fOpenSession);
+}
+// [/SL:KB]
 
 bool LLNotification::isPersistent() const
 {

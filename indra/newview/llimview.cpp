@@ -802,13 +802,13 @@ bool LLIMModel::logToFile(const std::string& file_name, const std::string& from,
 	}
 }
 
-bool LLIMModel::proccessOnlineOfflineNotification(
-	const LLUUID& session_id, 
-	const std::string& utf8_text)
-{
-	// Add system message to history
-	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
-}
+//bool LLIMModel::proccessOnlineOfflineNotification(
+//	const LLUUID& session_id, 
+//	const std::string& utf8_text)
+//{
+//	// Add system message to history
+//	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
+//}
 
 bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 						   const std::string& utf8_text, bool log2file /* = true */) { 
