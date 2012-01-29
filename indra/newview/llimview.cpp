@@ -2621,9 +2621,12 @@ LLUUID LLIMMgr::addSession(
 	//we don't need to show notes about online/offline, mute/unmute users' statuses for existing sessions
 	if (!new_session) return session_id;
 	
-	//Per Plan's suggestion commented "explicit offline status warning" out to make Dessie happier (see EXT-3609)
-	//*TODO After February 2010 remove this commented out line if no one will be missing that warning
-	//noteOfflineUsers(session_id, floater, ids);
+//	//Per Plan's suggestion commented "explicit offline status warning" out to make Dessie happier (see EXT-3609)
+//	//*TODO After February 2010 remove this commented out line if no one will be missing that warning
+//	//noteOfflineUsers(session_id, floater, ids);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	noteOfflineUsers(session_id, ids);
+// [/SL:KB]
 
 	// Only warn for regular IMs - not group IMs
 	if( dialog == IM_NOTHING_SPECIAL )
@@ -3003,7 +3006,10 @@ void LLIMMgr::noteOfflineUsers(
 				LLUIString offline = LLTrans::getString("offline_message");
 				// Use display name only because this user is your friend
 				offline.setArg("[NAME]", av_name.mDisplayName);
-				im_model.proccessOnlineOfflineNotification(session_id, offline);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				im_model.addMessage(session_id, SYSTEM_FROM, LLUUID::null, offline);
+// [/SL:KB]
+//				im_model.proccessOnlineOfflineNotification(session_id, offline);
 			}
 		}
 	}

@@ -12,6 +12,7 @@
 - added   : (select) notifications can be (optionally) logged to chat and/or instant message
     -> currently togglable for FriendOnline, FriendOffline, PaymentReceived, PaymentSent and PaymentFailure
 - changed : show the recipient in the teleport offer dialog
+- changed : (re)show "XXX is offline" when opening a new IM session to a friend who's currently offline
 - fixed   : the "PaymentSent" notification isn't logged
 - fixed   : don't log persisted notifications multiple times
     -> Repro:
