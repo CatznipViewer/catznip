@@ -37,6 +37,9 @@
 #include "llbutton.h"
 #include "llhttpclient.h"
 #include "llsdutil_math.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1)
+#include "llslurl.h"
+// [/SL:KB]
 #include "llstring.h"
 #include "lltextutil.h"
 #include "lltrans.h"
@@ -2999,16 +3002,20 @@ void LLIMMgr::noteOfflineUsers(
 		{
 			info = at.getBuddyInfo(ids.get(i));
 			LLAvatarName av_name;
-			if (info
-				&& !info->isOnline()
-				&& LLAvatarNameCache::get(ids.get(i), &av_name))
+//			if (info
+//				&& !info->isOnline()
+//				&& LLAvatarNameCache::get(ids.get(i), &av_name))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			if (info && !info->isOnline())
+// [/SL:KB]
 			{
 				LLUIString offline = LLTrans::getString("offline_message");
 				// Use display name only because this user is your friend
-				offline.setArg("[NAME]", av_name.mDisplayName);
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				offline.setArg("[NAME_SLURL]", LLSLURL("agent", ids.get(i), "about").getSLURLString());
 				im_model.addMessage(session_id, SYSTEM_FROM, LLUUID::null, offline);
 // [/SL:KB]
+//				offline.setArg("[NAME]", av_name.mDisplayName);
 //				im_model.proccessOnlineOfflineNotification(session_id, offline);
 			}
 		}
