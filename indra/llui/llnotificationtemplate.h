@@ -293,7 +293,6 @@ struct LLNotificationTemplate
 		LOG_IM_MASK	 = LOG_IM | LOG_IM_OPEN,
 	};
 	U32 mCanLogTo;
-	U32 mLogTo;
 
 	bool canLogToNearbyChat() const;
 	bool canLogToIM(bool fOpenSession) const;

@@ -413,28 +413,43 @@ static U32 getLogTypeFromString(const std::string& strText)
 
 bool LLNotificationTemplate::canLogToNearbyChat() const
 {
-	return mLogTo & LOG_CHAT;
+	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	return (pControl) && (pControl->get().asInteger() & LOG_CHAT);
 }
 
 bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
 {
-	return (mLogTo & LOG_IM) || ((mLogTo & LOG_IM_OPEN) && (fOpenSession));
+	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
+	return (pControl) && ((nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession)));
 }
 
 void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
 {
-	if (fLog)
-		mLogTo |= LOG_CHAT_MASK & mCanLogTo;
-	else
-		mLogTo &= ~LOG_CHAT_MASK;
+	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	if (pControl)
+	{
+		U32 nLogTo = pControl->get().asInteger();
+		if (fLog)
+			nLogTo |= LOG_CHAT_MASK & mCanLogTo;
+		else
+			nLogTo &= ~LOG_CHAT_MASK;
+		pControl->set(convert_to_llsd(nLogTo));
+	}
 }
 
 void LLNotificationTemplate::setLogToIM(bool fLog)
 {
-	if (fLog)
-		mLogTo |= LOG_IM_MASK & mCanLogTo;
-	else
-		mLogTo &= ~LOG_IM_MASK;
+	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	if (pControl)
+	{
+		U32 nLogTo = pControl->get().asInteger();
+		if (fLog)
+			nLogTo |= LOG_IM_MASK & mCanLogTo;
+		else
+			nLogTo &= ~LOG_IM_MASK;
+		pControl->set(convert_to_llsd(nLogTo));
+	}
 }
 // [/SL:KB]
 
@@ -443,7 +458,6 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mType(p.type),
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	mCanLogTo(getLogTypeFromString(p.can_logto)),
-	mLogTo(p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo),
 // [/SL:KB]
 	mMessage(p.value),
 	mLabel(p.label),
@@ -459,10 +473,10 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mDefaultFunctor(p.functor.isProvided() ? p.functor() : p.name())
 {
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	if (mLogTo)
+	U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
+	if (nLogTo)
 	{
-		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, mLogTo, "Specifies where this notification will be logged to");
-		mLogTo = LLUI::sSettingGroups["config"]->getU32("Log" + mName);
+		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
 	}
 // [/SL:KB]
 
