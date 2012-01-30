@@ -108,6 +108,8 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 	if(notify["sigtype"].asString() == "add" || notify["sigtype"].asString() == "change")
 	{
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		bool fShowToast = true;
+
 		// Don't log persisted notifications a second time
 		if (!notification->isPersisted())
 		{
@@ -122,7 +124,10 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 				LLNearbyChatBar* nearby_chat_bar = LLNearbyChatBar::getInstance();
 				if (!nearby_chat_bar->isMinimized() && nearby_chat_bar->getVisible() && nearby_chat->getVisible())
 				{
-					return false;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+					fShowToast = false;
+// [/SL:KB]
+//					return false;
 				}
 			}
 
@@ -151,7 +156,11 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 // [/SL:KB]
 
 		// don't spawn toast for inventory accepted/declined offers if respective IM window is open (EXT-5909)
-		if (!LLHandlerUtil::canSpawnToast(notification))
+//		if (!LLHandlerUtil::canSpawnToast(notification))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		fShowToast &= LLHandlerUtil::canSpawnToast(notification);
+		if (!fShowToast)
+// [/SL:KB]
 		{
 			return false;
 		}
