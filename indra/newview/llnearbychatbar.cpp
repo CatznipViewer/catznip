@@ -186,8 +186,8 @@ BOOL LLNearbyChatBar::postBuild()
 	mNearbyChatContainer = findChild<LLPanel>("panel_nearby_chat");
 	mNearbyChat = findChild<LLNearbyChat>("nearby_chat");
 
-	gSavedSettings.declareBOOL("nearbychat_history_visibility", mNearbyChat->getVisible(), "Visibility state of nearby chat history", TRUE);
-//	mNearbyChatContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
+	gSavedSettings.declareBOOL("nearbychat_history_visibility", mNearbyChatContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
+	mNearbyChatContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
 
 	mChatBarImpl = (hasChild("panel_chat_bar_multi", TRUE)) ? findChild<LLNearbyChatBarBase>("panel_chat_bar_multi", TRUE) : findChild<LLNearbyChatBarBase>("panel_chat_bar_single", TRUE);
 
@@ -292,7 +292,13 @@ bool LLNearbyChatBar::applyRectControl()
 	if (!mNearbyChatContainer->getVisible())
 // [/SL:KB]
 	{
-		reshape(getRect().getWidth(), getMinHeight());
+//		reshape(getRect().getWidth(), getMinHeight());
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		if (!isMinimized())
+			mExpandedHeight = llmax(EXPANDED_MIN_HEIGHT, getRect().getHeight());
+		setResizeLimits(getMinWidth(), COLLAPSED_HEIGHT);
+		reshape(getRect().getWidth(), COLLAPSED_HEIGHT);
+// [/SL:KB]
 		enableResizeCtrls(true, true, false);
 	}
 	else
@@ -300,9 +306,6 @@ bool LLNearbyChatBar::applyRectControl()
 		enableResizeCtrls(true);
 		setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
 	}
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	mNearbyChatContainer->setVisible(mExpandedHeight > COLLAPSED_HEIGHT);
-// [/SL:KB]
 	
 	return rect_controlled;
 }
