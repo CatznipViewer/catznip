@@ -63,6 +63,10 @@ class ViewerManifest(LLManifest):
 
                 # include the entire shaders directory recursively
                 self.path("shaders")
+                # include the extracted list of Catznip thanks
+                thanks_names = self.extract_names("../../doc/thanks.txt")
+                self.put_in_file(thanks_names, "thanks.txt")
+                self.file_list.append(["../../doc/thanks.txt",self.dst_path_of("thanks.txt")])
                 # include the extracted list of contributors
                 contributor_names = self.extract_names("../../doc/contributions.txt")
                 self.put_in_file(contributor_names, "contributors.txt")
