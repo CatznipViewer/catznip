@@ -746,7 +746,7 @@ BOOL LLTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 
 // [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
 				// Start a new selection unless the user clicked inside the current selection
-				if (fClickInSel)
+				if ( (!mReadOnly) && (fClickInSel) )
 				{
 					mIsSelecting = TRUE;
 					mIsSelectDragging = TRUE;
