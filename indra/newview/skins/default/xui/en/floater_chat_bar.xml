@@ -24,7 +24,7 @@
   <panel
    follows="all"
    height="300"
-   name="panel_nearby_chat"
+   name="nearby_chat_container"
    top="20"
    visible="true"
    width="300"

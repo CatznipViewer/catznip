@@ -104,8 +104,8 @@ LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 	mExpandedHeight(COLLAPSED_HEIGHT + EXPANDED_HEIGHT),
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 	mExpandedHeightMin(EXPANDED_MIN_HEIGHT),
-	mNearbyChatContainer(NULL),
-	mNearbyChat(NULL),
+	mChatHistoryContainer(NULL),
+	mChatHistory(NULL),
 	mChatBarImpl(NULL)
 // [/SL:KB]
 {
@@ -184,14 +184,14 @@ BOOL LLNearbyChatBarSingle::postBuild()
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 BOOL LLNearbyChatBar::postBuild()
 {
-	mNearbyChatContainer = findChild<LLPanel>("panel_nearby_chat");
-	mNearbyChat = findChild<LLNearbyChat>("nearby_chat");
+	mChatHistoryContainer = findChild<LLPanel>("nearby_chat_container");
+	mChatHistory = findChild<LLNearbyChat>("nearby_chat");
 
-	gSavedSettings.declareBOOL("nearbychat_history_visibility", mNearbyChatContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
-	mNearbyChatContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
+	gSavedSettings.declareBOOL("nearbychat_history_visibility", mChatHistoryContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
+	mChatHistoryContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
 
 	// This panel only exists when hosting multi-line chat bar
-	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_holder");
+	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_container");
 	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
 	{
 		const LLRect& rctPanel = pChatBarPanel->getRect();
@@ -206,7 +206,7 @@ BOOL LLNearbyChatBar::postBuild()
 	show_btn->setCommitCallback(boost::bind(&LLNearbyChatBar::onToggleNearbyChatPanel, this));
 
 	// The collpased height differs between single-line and multi-line so dynamically calculate it from the default sizes
-	COLLAPSED_HEIGHT = getRect().getHeight() - mNearbyChatContainer->getRect().getHeight();
+	COLLAPSED_HEIGHT = getRect().getHeight() - mChatHistoryContainer->getRect().getHeight();
 	mExpandedHeightMin = llmax(getMinHeight(), mExpandedHeightMin);
 // [/SL:KB]
 
@@ -224,7 +224,7 @@ BOOL LLNearbyChatBar::postBuild()
 		LLIMFloaterContainer* pConvFloater = LLIMFloaterContainer::getInstance();
 		if (pConvFloater)
 		{
-			if (!mNearbyChatContainer->getVisible())
+			if (!mChatHistoryContainer->getVisible())
 				onToggleNearbyChatPanel();
 			pConvFloater->addFloater(this, TRUE, LLTabContainer::START);
 
@@ -247,9 +247,9 @@ void LLNearbyChatBar::onOpen(const LLSD& key)
 
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 	// When opening the floater with nearby chat visible, go ahead and kill off screen chats
-	if (mNearbyChatContainer->getVisible())
+	if (mChatHistoryContainer->getVisible())
 	{
-		mNearbyChat->removeScreenChat();
+		mChatHistory->removeScreenChat();
 	}
 // [/SL:KB]
 }
@@ -257,7 +257,7 @@ void LLNearbyChatBar::onOpen(const LLSD& key)
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 void LLNearbyChatBar::onChatBarResize()
 {
-	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_holder");
+	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_container");
 	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
 	{
 		gSavedSettings.setU32("nearbychat_chatbar_height", pChatBarPanel->getRect().getHeight());
@@ -310,7 +310,7 @@ bool LLNearbyChatBar::applyRectControl()
 
 //	if (!mNearbyChat->getVisible())
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	if (!mNearbyChatContainer->getVisible())
+	if (!mChatHistoryContainer->getVisible())
 // [/SL:KB]
 	{
 //		reshape(getRect().getWidth(), getMinHeight());
@@ -358,7 +358,7 @@ void LLNearbyChatBar::showHistory()
 
 //	if (!getChildView("nearby_chat")->getVisible())
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	if (!mNearbyChatContainer->getVisible())
+	if (!mChatHistoryContainer->getVisible())
 // [/SL:KB]
 	{
 		onToggleNearbyChatPanel();
@@ -680,7 +680,7 @@ void LLNearbyChatBar::onToggleNearbyChatPanel()
 {
 //	LLView* nearby_chat = getChildView("nearby_chat");
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLView* nearby_chat = mNearbyChatContainer;
+	LLView* nearby_chat = mChatHistoryContainer;
 // [/SL:KB]
 
 	if (nearby_chat->getVisible())
@@ -709,7 +709,7 @@ void LLNearbyChatBar::onToggleNearbyChatPanel()
 
 //	gSavedSettings.setBOOL("nearbychat_history_visibility", mNearbyChat->getVisible());
 // [SL:KB]
-	gSavedSettings.setBOOL("nearbychat_history_visibility", mNearbyChatContainer->getVisible());
+	gSavedSettings.setBOOL("nearbychat_history_visibility", mChatHistoryContainer->getVisible());
 // [/SL:KB]
 }
 
@@ -1012,7 +1012,7 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 		bool fVisible = pNearbyChat->getVisible();
 		if (pNearbyChat->getHost())
 			pNearbyChat->setVisible(FALSE);	// See LLNearbyChatBar::canClose()
-		std::vector<LLChat> msgArchive = pNearbyChat->mNearbyChat->getHistory();
+		std::vector<LLChat> msgArchive = pNearbyChat->mChatHistory->getHistory();
 
 		// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the nearby chat floater is single instanced
 		//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
@@ -1023,8 +1023,8 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 
 		if ((pNearbyChat = LLFloaterReg::getTypedInstance<LLNearbyChatBar>("chat_bar", LLSD())) != NULL)
 		{
-			pNearbyChat->mNearbyChat->setHistory(msgArchive);
-			pNearbyChat->mNearbyChat->updateChatHistoryStyle();
+			pNearbyChat->mChatHistory->setHistory(msgArchive);
+			pNearbyChat->mChatHistory->updateChatHistoryStyle();
 			if (fVisible)
 				pNearbyChat->openFloater(LLSD());
 		}
