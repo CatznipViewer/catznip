@@ -103,6 +103,7 @@ LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 //	mSpeakerMgr(NULL),
 	mExpandedHeight(COLLAPSED_HEIGHT + EXPANDED_HEIGHT),
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mExpandedHeightMin(EXPANDED_MIN_HEIGHT),
 	mNearbyChatContainer(NULL),
 	mNearbyChat(NULL),
 	mChatBarImpl(NULL)
@@ -206,6 +207,7 @@ BOOL LLNearbyChatBar::postBuild()
 
 	// The collpased height differs between single-line and multi-line so dynamically calculate it from the default sizes
 	COLLAPSED_HEIGHT = getRect().getHeight() - mNearbyChatContainer->getRect().getHeight();
+	mExpandedHeightMin = llmax(getMinHeight(), mExpandedHeightMin);
 // [/SL:KB]
 
 	enableResizeCtrls(true, true, false);
@@ -323,7 +325,10 @@ bool LLNearbyChatBar::applyRectControl()
 	else
 	{
 		enableResizeCtrls(true);
-		setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
+//		setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		setResizeLimits(getMinWidth(), mExpandedHeightMin);
+// [/SL:KB]
 	}
 	
 	return rect_controlled;
@@ -693,7 +698,10 @@ void LLNearbyChatBar::onToggleNearbyChatPanel()
 	else
 	{
 		nearby_chat->setVisible(TRUE);
-		setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
+//		setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		setResizeLimits(getMinWidth(), mExpandedHeightMin);
+// [/SL:KB]
 		reshape(getRect().getWidth(), mExpandedHeight);
 		enableResizeCtrls(true);
 		storeRectControl();

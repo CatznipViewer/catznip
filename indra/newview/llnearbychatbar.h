@@ -154,6 +154,9 @@ protected:
 // [/SL:KB]
 
 	S32 mExpandedHeight;
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	S32 mExpandedHeightMin;
+// [/SL:KB]
 };
 
 #endif
