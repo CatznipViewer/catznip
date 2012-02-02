@@ -189,6 +189,16 @@ BOOL LLNearbyChatBar::postBuild()
 	gSavedSettings.declareBOOL("nearbychat_history_visibility", mNearbyChatContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
 	mNearbyChatContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
 
+	// This panel only exists when hosting multi-line chat bar
+	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_holder");
+	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
+	{
+		const LLRect& rctPanel = pChatBarPanel->getRect();
+		gSavedSettings.declareU32("nearbychat_chatbar_height", rctPanel.getHeight(), "Height of the nearby chat bar panel", TRUE);
+		pChatBarPanel->reshape(rctPanel.getWidth(), gSavedSettings.getU32("nearbychat_chatbar_height"));
+		pChatBarPanel->setResizeCallback(boost::bind(&LLNearbyChatBar::onChatBarResize, this));
+	}
+
 	mChatBarImpl = (hasChild("panel_chat_bar_multi", TRUE)) ? findChild<LLNearbyChatBarBase>("panel_chat_bar_multi", TRUE) : findChild<LLNearbyChatBarBase>("panel_chat_bar_single", TRUE);
 
 	LLUICtrl* show_btn = getChild<LLUICtrl>("show_nearby_chat");
@@ -243,6 +253,15 @@ void LLNearbyChatBar::onOpen(const LLSD& key)
 }
 
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLNearbyChatBar::onChatBarResize()
+{
+	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_holder");
+	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
+	{
+		gSavedSettings.setU32("nearbychat_chatbar_height", pChatBarPanel->getRect().getHeight());
+	}
+}
+
 bool LLNearbyChatBar::onNewNearbyChatMsg(const LLSD& sdEvent)
 {
 	if ( (!isTornOff()) && (!isInVisibleChain()) )

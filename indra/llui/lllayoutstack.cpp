@@ -460,6 +460,9 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 		shrink_headroom_total += delta_size;
 
 		LLRect panel_rect;
+// [SL:KB] - Patch: Control-LayoutPanel | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		LLRect panel_rect_old = panelp->getRect();
+// [/SL:KB]
 		if (mOrientation == HORIZONTAL)
 		{
 			panel_rect.setLeftTopAndSize(llround(cur_x), 
@@ -475,6 +478,12 @@ void LLLayoutStack::updateLayout(BOOL force_resize)
 										llround(panelp->mFractionalSize));
 		}
 		panelp->setShape(panel_rect);
+// [SL:KB] - Patch: Control-LayoutPanel | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		if (panel_rect_old != panelp->getRect())
+		{
+			panelp->fireResizeSignal();
+		}
+// [/SL:KB]
 
 		LLRect resize_bar_rect = panel_rect;
 		if (mOrientation == HORIZONTAL)
