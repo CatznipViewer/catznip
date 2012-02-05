@@ -11,7 +11,9 @@
     -> "Find always resets to start page" (WEB-1819)
 - changed : open the "About" tab on web profiles by default (rather than the "Feed" tab)
 - fixed   : update floater snap-dependent rectangles as needed rather than dozens of time per-frame
-
+- fixed   : can't drag-and-drop between inventory tabs
+    -> if the inventory panel is scrolled down, hovering over the other tab just makes it scroll up
+    -> items can not be drag-and-dropped on the revent items tab
 
 [UI/AddContact]
 - changed : "Add Friend" and "Remove Friend" enabler on the avatar list context menu from on_enable to on_visible
