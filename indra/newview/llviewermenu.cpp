@@ -8332,7 +8332,7 @@ void initialize_menus()
 	// Generic actions
 	commit.add("ReportAbuse", boost::bind(&handle_report_abuse));
 	commit.add("BuyCurrency", boost::bind(&handle_buy_currency));
-// [SL:KB] - Patch: UI-Misc | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Misc | Checked: 2010-09-12 (Catznip-3.0.0) | Added: Catznip-2.1.2
 	commit.add("RequestBalance", boost::bind(&LLStatusBar::sendMoneyBalanceRequest));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");

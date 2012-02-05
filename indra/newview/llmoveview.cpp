@@ -699,7 +699,7 @@ void LLPanelStandStopFlying::updatePosition()
 	S32 y_pos = 0;
 	S32 bottom_tb_center = 0;
 //	if (LLToolBar* toolbar_bottom = gToolBarView->getChild<LLToolBar>("toolbar_bottom"))
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0c) | Added: Catznip-3.2.0c
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0) | Added: Catznip-3.2.0
 	if (LLToolBar* toolbar_bottom = gToolBarView->getToolbar(LLToolBarView::TOOLBAR_BOTTOM))
 // [/SL:KB]
 	{
@@ -709,7 +709,7 @@ void LLPanelStandStopFlying::updatePosition()
 
 	S32 left_tb_width = 0;
 //	if (LLToolBar* toolbar_left = gToolBarView->getChild<LLToolBar>("toolbar_left"))
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0c) | Added: Catznip-3.2.0c
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0) | Added: Catznip-3.2.0
 	if (LLToolBar* toolbar_left = gToolBarView->getToolbar(LLToolBarView::TOOLBAR_LEFT))
 // [/SL:KB]
 	{
@@ -717,7 +717,7 @@ void LLPanelStandStopFlying::updatePosition()
 	}
 
 //	if(LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("stand_stop_flying_container"))
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0c) | Added: Catznip-3.2.0c
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2.0) | Added: Catznip-3.2.0
 	static LLPanel* panel_ssf_container = NULL;
 	if ( (panel_ssf_container) || (panel_ssf_container = getRootView()->getChild<LLPanel>("stand_stop_flying_container")) )
 // [/SL:KB]

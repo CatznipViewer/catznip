@@ -1,20 +1,26 @@
 [UI/Misc]
-- added   : added "Refresh L$ Balance" option to the Advanced menu
-- added   : "Inspect" menu item to bring up the old-style Inspect floater (thankies Chloe)
+- added   : "collapse" button to the floater top right controls (between "minimize" and "close")
+    -> collapses the floater in-place rather than moving it to a different part of the screen and changing the width of the title bar
+- added   : "Inspect" menu item to bring up the old-style Inspect floater
     -> added to the context menus for: "attachment self", "attachment other" and "object"
     -> added to the gear menu for object inspectors
+- added   : "Add Contact" option to various context menus
+    -> creates a calling card for that avatar in the "Calling Cards" folder
+- added   : context menu options to the status bar to selectively show/hide UI elements
+    -> "Show Buy L$ Button", "Show Marketplace Button" and "Show Network Statistics"
+- added   : added "Refresh L$ Balance" option to the Advanced menu
+- added   : "Picks" menu option to the self avatar and attachment context menu
 - added   : enable drag-and-drop commit behaviour for main inventory panel, IM container floater, people sidebar panel and avatar picker floater
 - added   : share inventory by drag-and-drop'ing items onto an avatar list item
-- changed : embedded the "Mini-Location" bar into the status bar
-    -> "Mini-Location" bar can also be shown independently of the navigation bar
 - changed : don't reset the URL each time the search floater is opened
     -> "Find always resets to start page" (WEB-1819)
+- changed : "Restart Region" button to a flyout button with 2, 5 and 15 minute restart delay options
+- changed : embedded the "Mini-Location" bar into the status bar
+    -> "Mini-Location" bar can also be shown independently of the navigation bar
 - changed : open the "About" tab on web profiles by default (rather than the "Feed" tab)
-- fixed   : update floater snap-dependent rectangles as needed rather than dozens of time per-frame
+- changed : pulled "Set Away" and "Set Busy" out of their submenu into the main "Me" menu
+- changed : "Add Friend" and "Remove Friend" enabler on the avatar list context menu from on_enable to on_visible
 - fixed   : can't drag-and-drop between inventory tabs
     -> if the inventory panel is scrolled down, hovering over the other tab just makes it scroll up
     -> items can not be drag-and-dropped on the revent items tab
-
-[UI/AddContact]
-- changed : "Add Friend" and "Remove Friend" enabler on the avatar list context menu from on_enable to on_visible
-- added   : "Add Contact" option to various context menus
+- fixed   : minimize repetitive (per-frame) calls to findChild/getChild

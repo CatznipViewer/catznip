@@ -169,7 +169,7 @@ BOOL LLStatusBar::postBuild()
 	gMenuBarView->setRightMouseDownCallback(boost::bind(&show_navbar_context_menu, _1, _2, _3));
 
 // [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	mViewStatus = findChildView("status_panel" );
+	mViewStatus = findChildView("status_panel");
 // [/SL:KB]
 
 	mTextTime = getChild<LLTextBox>("TimeText" );

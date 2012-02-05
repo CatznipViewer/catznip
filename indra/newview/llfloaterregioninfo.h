@@ -207,7 +207,7 @@ protected:
 	static void onClickTopScripts(void*);
 //	static void onClickRestart(void* data);
 //	bool callbackRestart(const LLSD& notification, const LLSD& response);
-// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	void onClickRestart(LLUICtrl* ctrl);
 	bool callbackRestart(const LLSD& notification, const LLSD& response, U32 seconds);
 // [/SL:KB]
