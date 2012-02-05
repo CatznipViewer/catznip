@@ -145,7 +145,7 @@ public:
 	virtual bool	canLoadOrSaveToFile();
 
 //	void			selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap = TRUE);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	void			selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap = TRUE, BOOL search_up = FALSE);
 	BOOL			replaceText(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive, BOOL wrap = TRUE, BOOL search_up = FALSE);
 // [/SL:KB]
@@ -167,7 +167,7 @@ public:
 	// inserts text at cursor
 	void			insertText(const std::string &text);
 //	void			insertText(LLWString &text);
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	void			insertText(const LLWString &text);
 // [/SL:KB]
 
@@ -183,7 +183,7 @@ public:
 	BOOL			tryToRevertToPristineState();
 
 	void			setCursorAndScrollToEnd();
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	void 			setSelectionRange(S32 pos, S32 length);
 // [/SL:KB]
 

@@ -335,7 +335,7 @@ void LLTextEditor::setText(const LLStringExplicit &utf8str, const LLStyle::Param
 }
 
 //void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
 // [/SL:KB]
 {
@@ -360,7 +360,7 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 		{
 //			// We already have this word selected, we are searching for the next.
 //			setCursorPos(mCursorPos + search_text.size());
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 			if (search_up)
 			{
 				// We already have this word selected, we are searching for the previous.
@@ -376,7 +376,7 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	}
 	
 //	S32 loc = text.find(search_text,mCursorPos);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	S32 loc = (search_up) ? text.rfind(search_text, llmax(0, mCursorPos - (S32)search_text.size())) : text.find(search_text,mCursorPos);
 // [/SL:KB]
 
@@ -384,7 +384,7 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	if (wrap && (-1 == loc))
 	{	
 //		loc = text.find(search_text);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 		loc = (search_up) ? text.rfind(search_text) : text.find(search_text);
 // [/SL:KB]
 	}
@@ -399,7 +399,7 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	}
 
 	setCursorPos(loc);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	if (mReadOnly)
 	{
 		updateScrollFromCursor();
@@ -413,7 +413,7 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 
 //BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
 //							   BOOL case_insensitive, BOOL wrap)
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
 							   BOOL case_insensitive, BOOL wrap, BOOL search_up)
 // [/SL:KB]
@@ -445,7 +445,7 @@ BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::str
 	}
 
 //	selectNext(search_text_in, case_insensitive, wrap);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	selectNext(search_text_in, case_insensitive, wrap, search_up);
 // [/SL:KB]
 	return replaced;
@@ -709,7 +709,7 @@ BOOL LLTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 	if( !handled )
 	{
 //		if (!(mask & MASK_SHIFT))
-// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 		S32 posClick = getDocIndexFromLocalCoord(x, y, true);
 		bool fClickInSel = (hasSelection()) && (llmin(mSelectionStart, mSelectionEnd) <= posClick) && (posClick <= llmax(mSelectionStart, mSelectionEnd));
 
@@ -744,7 +744,7 @@ BOOL LLTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 			{
 				setCursorAtLocalPos( x, y, true );
 
-// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 				// Start a new selection unless the user clicked inside the current selection
 				if ( (!mReadOnly) && (fClickInSel) )
 				{
@@ -776,7 +776,7 @@ BOOL LLTextEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		setFocus(TRUE);
 	}
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.0.0a) | Added: Catznip-2.1.2d
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-3.2.1) | Added: Catznip-2.1.2
 	setCursorAtLocalPos(x, y, FALSE);
 // [/SL:KB]
 	// Prefer editor menu if it has selection. See EXT-6806.
@@ -828,7 +828,7 @@ BOOL LLTextEditor::handleHover(S32 x, S32 y, MASK mask)
 			S32 clamped_y = llclamp(y, mVisibleTextRect.mBottom, mVisibleTextRect.mTop);
 			setCursorAtLocalPos( clamped_x, clamped_y, true );
 
-// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 			if (!mIsSelectDragging)
 				mSelectionEnd = mCursorPos;
 // [/SL:KB]
@@ -884,7 +884,7 @@ BOOL LLTextEditor::handleMouseUp(S32 x, S32 y, MASK mask)
 			S32 clamped_y = llclamp(y, mVisibleTextRect.mBottom, mVisibleTextRect.mTop);
 			setCursorAtLocalPos( clamped_x, clamped_y, true );
 
-// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 			if (mIsSelectDragging)
 			{
 				S32 selLeft = llmin(mSelectionStart, mSelectionEnd), selRight = llmax(mSelectionStart, mSelectionEnd);
@@ -1393,7 +1393,7 @@ void LLTextEditor::deleteSelection(BOOL group_with_next_op )
 		S32 pos = llmin( mSelectionStart, mSelectionEnd );
 		S32 length = llabs( mSelectionStart - mSelectionEnd );
 	
-// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 		S32 delta = remove(pos, length, group_with_next_op);
 		if (mCursorPos >= pos + length)
 		{
@@ -2289,7 +2289,7 @@ void LLTextEditor::setCursorAndScrollToEnd()
 	endOfDoc();
 }
 
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 void LLTextEditor::setSelectionRange(S32 pos, S32 length)
 {
 	mSelectionStart = pos;
@@ -2339,13 +2339,13 @@ void LLTextEditor::autoIndent()
 
 // Inserts new text at the cursor position
 void LLTextEditor::insertText(const std::string &new_text)
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 {
 	insertText(utf8str_to_wstring(new_text));
 }
 // [/SL:KB]
 
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 void LLTextEditor::insertText(const LLWString &new_text)
 // [/SL:KB]
 {
@@ -2358,7 +2358,7 @@ void LLTextEditor::insertText(const LLWString &new_text)
 		deleteSelection(TRUE);
 	}
 
-// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	std::basic_string<llwchar>::size_type idxStart = -1, idxBreak = -1; bool fInsertLF = false;
 	do
 	{

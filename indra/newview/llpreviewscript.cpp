@@ -37,7 +37,7 @@
 #include "llexternaleditor.h"
 #include "llfilepicker.h"
 #include "llfloaterreg.h"
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0)
 #include "llfloatersearchreplace.h"
 // [/SL:KB]
 #include "llinventorydefines.h"
@@ -352,7 +352,7 @@ void LLScriptEdCore::initMenu()
 
 	menuItem = getChild<LLMenuItemCallGL>("Search / Replace...");
 //	menuItem->setClickCallback(boost::bind(&LLFloaterScriptSearch::show, this));
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	menuItem->setClickCallback(boost::bind(&LLFloaterSearchReplace::show, mEditor));
 // [/SL:KB]
 
@@ -1245,7 +1245,7 @@ void LLPreviewLSL::onSearchReplace(void* userdata)
 	LLPreviewLSL* self = (LLPreviewLSL*)userdata;
 	LLScriptEdCore* sec = self->mScriptEd; 
 //	LLFloaterScriptSearch::show(sec);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	LLFloaterSearchReplace::show(sec->mEditor);
 // [/SL:KB]
 }
@@ -1917,7 +1917,7 @@ void LLLiveLSLEditor::onSearchReplace(void* userdata)
 
 	LLScriptEdCore* sec = self->mScriptEd; 
 //	LLFloaterScriptSearch::show(sec);
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0) | Added: Catznip-2.3.0
 	LLFloaterSearchReplace::show(sec->mEditor);
 // [/SL:KB]
 }
