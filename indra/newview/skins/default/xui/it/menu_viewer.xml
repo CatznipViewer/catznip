@@ -15,10 +15,8 @@
 			<menu_item_check label="Corri sempre" name="Always Run"/>
 			<menu_item_call label="Ferma animazione" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="Stato" name="Status">
 			<menu_item_call label="Assente" name="Set Away"/>
 			<menu_item_call label="Non disponibile" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="Richiedi diritti Admin" name="Request Admin Options"/>
 		<menu_item_call label="Lascia stato Admin" name="Leave Admin Options"/>
 		<menu_item_call label="Compra L$" name="Buy and Sell L$"/>

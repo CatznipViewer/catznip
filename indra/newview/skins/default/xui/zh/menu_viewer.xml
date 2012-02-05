@@ -16,10 +16,8 @@
 			<menu_item_check label="總是奔跑" name="Always Run"/>
 			<menu_item_call label="停止我身上的動作" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="我的狀態" name="Status">
 			<menu_item_call label="離開" name="Set Away"/>
 			<menu_item_call label="忙碌" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="要求 Admin 狀態" name="Request Admin Options"/>
 		<menu_item_call label="離開 Admin 狀態" name="Leave Admin Options"/>
 		<menu_item_call label="結束退出 [APP_NAME]" name="Quit"/>

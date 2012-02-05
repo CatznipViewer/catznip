@@ -13,10 +13,8 @@
 			<menu_item_check label="Daima Koş" name="Always Run"/>
 			<menu_item_call label="Beni Anime Etmeyi Durdur" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="Durum" name="Status">
 			<menu_item_call label="Uzakta" name="Set Away"/>
 			<menu_item_call label="Meşgul" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="Yönetici Durumu Talep Et" name="Request Admin Options"/>
 		<menu_item_call label="Yönetici Durumundan Ayrıl" name="Leave Admin Options"/>
 		<menu_item_call label="L$ Satın Al" name="Buy and Sell L$"/>
