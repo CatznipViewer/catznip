@@ -1252,6 +1252,27 @@ void LLItemBridge::restoreItem()
 
 void LLItemBridge::restoreToWorld()
 {
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+	const LLViewerInventoryItem* pItem = getItem();
+	if (!pItem)
+	{
+		return;
+	}
+
+	std::string strNotif = (pItem->getPermissions().allowCopyBy(gAgent.getID())) ? "ConfirmObjectRestoreToWorld" : "ConfirmObjectRestoreToWorldNoCopy";
+	LLNotificationsUtil::add(strNotif, LLSD(), LLSD(), boost::bind(&LLItemBridge::confirmRestoreToWorld, this, _1, _2));
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+void LLItemBridge::confirmRestoreToWorld(const LLSD& notification, const LLSD& response)
+{
+	if (0 != LLNotificationsUtil::getSelectedOption(notification, response)) 
+	{
+		return;
+	}
+
+// [/SL:KB]
 	//Similar functionality to the drag and drop rez logic
 	bool remove_from_inventory = false;
 
@@ -4655,8 +4676,17 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 				items.push_back(std::string("Wearable Add"));
 				items.push_back(std::string("Attach To"));
 				items.push_back(std::string("Attach To HUD"));
+
 				// commented out for DEV-32347
 				//items.push_back(std::string("Restore to Last Position"));
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+				items.push_back(std::string("World Restore Separator"));
+				items.push_back(std::string("Restore to Last Position"));
+				if (!(flags & FIRST_SELECTED_ITEM))
+				{
+					disabled_items.push_back(std::string("Restore to Last Position"));
+				}
+// [/SL:KB]
 
 				if (!gAgentAvatarp->canAttachMoreObjects())
 				{
