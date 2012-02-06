@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011, Kitty Barnett
+ * Copyright (c) 2011-2012, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -21,7 +21,9 @@
 #include "llcheckboxctrl.h"
 #include "lldiriterator.h"
 #include "llfloaterreg.h"
+#include "llfolderview.h"
 #include "llinventorymodel.h"
+#include "llinventorypanel.h"
 #include "llscrolllistctrl.h"
 #include "llviewerassettype.h"
 #include "llviewerinventory.h"
@@ -53,7 +55,11 @@ void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
 
 		sdBhvrRow["value"] = strFile;
 		sdBhvrColumns[0]["value"] = true;
-		sdBhvrColumns[1]["value"] = gDirUtilp->getBaseFileName(strFile, true);
+
+		std::string strName = gDirUtilp->getBaseFileName(strFile, true);
+		if (strName.find_last_of("-") == strName.length() - 9)
+			strName.erase(strName.length() - 9);
+		sdBhvrColumns[1]["value"] = strName;
 
 		pListCtrl->addElement(sdBhvrRow, ADD_BOTTOM);
 	}
@@ -150,7 +156,10 @@ void LLScriptRecoverQueue::recoverIfNeeded()
 LLScriptRecoverQueue::LLScriptRecoverQueue(const std::list<std::string>& strFiles)
 {
 	for (std::list<std::string>::const_iterator itFilename = strFiles.begin(); itFilename != strFiles.end(); ++itFilename)
-		m_FileQueue.insert(std::pair<std::string, LLUUID>(*itFilename, LLUUID::null ));
+	{
+		if (LLFile::isfile(*itFilename))
+			m_FileQueue.insert(std::pair<std::string, LLUUID>(*itFilename, LLUUID::null ));
+	}
 	recoverNext();
 }
 
@@ -162,6 +171,7 @@ bool LLScriptRecoverQueue::recoverNext()
 	 *  (2) once we have the item's UUID we can upload the script
 	 *  (3) once the script is uploaded we move on to the next item
 	 */
+	const LLUUID idFNF = gInventory.findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND);
 
 	// Sanity check - if the associated UUID is non-null then this file is already being processed
 	filename_queue_t::const_iterator itFile = m_FileQueue.begin();
@@ -170,15 +180,28 @@ bool LLScriptRecoverQueue::recoverNext()
 
 	if (m_FileQueue.end() == itFile) 
 	{
+		LLInventoryPanel* pInvPanel = LLInventoryPanel::getActiveInventoryPanel(TRUE);
+		if (pInvPanel)
+		{
+			LLFolderViewFolder* pFVF = dynamic_cast<LLFolderViewFolder*>(pInvPanel->getRootFolder()->getItemByID(idFNF));
+			if (pFVF)
+			{
+				pFVF->setOpenArrangeRecursively(TRUE, LLFolderViewFolder::RECURSE_UP);
+				pInvPanel->setSelection(idFNF, TRUE);
+			}
+		}
+
 		delete this;
 		return false;
 	}
 
-	const LLUUID idParent = gInventory.findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND);
-	std::string strItemName = gDirUtilp->getBaseFileName(itFile->first, true), strItemDescr;
+	std::string strItemName = gDirUtilp->getBaseFileName(itFile->first, true);
+	if (strItemName.find_last_of("-") == strItemName.length() - 9)
+		strItemName.erase(strItemName.length() - 9);
+	std::string strItemDescr;
 	LLViewerAssetType::generateDescriptionFor(LLAssetType::AT_LSL_TEXT, strItemDescr);
 
-	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idParent, LLTransactionID::tnull, 
+	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
 	                      strItemName, strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
 	                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverScriptCallback(this));
 	return true;
@@ -196,7 +219,7 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 	std::string strFileName;
 	for (filename_queue_t::iterator itFile = m_FileQueue.begin(); itFile != m_FileQueue.end(); ++itFile)
 	{
-		if (pItem->getName() != gDirUtilp->getBaseFileName(itFile->first, true))
+		if (0 != gDirUtilp->getBaseFileName(itFile->first, true).find(pItem->getName()))
 			continue;
 		strFileName = itFile->first;
 		itFile->second = idItem;
@@ -216,7 +239,7 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 	LLHTTPClient::post(strCapsUrl, sdBody, new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3)));
 }
 
-void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD& sdContent, bool fSuccess)
+void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool fSuccess)
 {
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (pItem)

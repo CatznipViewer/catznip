@@ -4,9 +4,8 @@
   can_minimize="false"
   can_resize="false"
   height="275"
+  open_positioning="centered"
   name="script_recover"
-  save_rect="true"
-  save_visibility="true"
   single_instance="true"
   title="Script Recovery"
   width="350">
