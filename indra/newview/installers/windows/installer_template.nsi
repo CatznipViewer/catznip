@@ -98,6 +98,10 @@ ShowInstDetails nevershow				; no details, no "show" button
 SetOverwrite on							; stomp files by default
 AutoCloseWindow true					; after all files install, close window
 
+LicenseText "Catznip License and Vivox AUP"
+LicenseData "licenses-installer.rtf"
+Page license
+
 InstallDir "$PROGRAMFILES\${INSTNAME}"
 InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)

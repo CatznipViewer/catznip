@@ -412,6 +412,7 @@ class WindowsManifest(ViewerManifest):
 
             self.end_prefix()
 
+        self.path("licenses-installer.rtf")
         self.path(src="licenses-win32.txt", dst="licenses.txt")
         self.path("featuretable.txt")
         self.path("featuretable_xp.txt")
