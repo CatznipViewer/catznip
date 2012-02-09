@@ -66,6 +66,7 @@
 #include "llsky.h"
 #include "llscrolllistctrl.h"
 #include "llscrolllistitem.h"
+#include "llspellcheck.h"
 #include "llsliderctrl.h"
 #include "lltabcontainer.h"
 #include "lltrans.h"
@@ -110,10 +111,7 @@
 #include "lllogininstance.h"        // to check if logged in yet
 #include "llsdserialize.h"
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a)
-#include "llhunspell.h"
 #include <boost/algorithm/string.hpp>
-// [/SL:KB]
 
 const F32 MAX_USER_FAR_CLIP = 512.f;
 const F32 MIN_USER_FAR_CLIP = 64.f;
@@ -450,6 +448,9 @@ BOOL LLFloaterPreference::postBuild()
 
 	getChild<LLComboBox>("language_combobox")->setCommitCallback(boost::bind(&LLFloaterPreference::onLanguageChange, this));
 
+	getChild<LLUICtrl>("btn_spellcheck_moveleft")->setCommitCallback(boost::bind(&LLFloaterPreference::onClickDictMove, this, "list_spellcheck_active", "list_spellcheck_available"));
+	getChild<LLUICtrl>("btn_spellcheck_moveright")->setCommitCallback(boost::bind(&LLFloaterPreference::onClickDictMove, this, "list_spellcheck_available", "list_spellcheck_active"));
+
 	// if floater is opened before login set default localized busy message
 	if (LLStartUp::getStartupState() < STATE_STARTED)
 	{
@@ -582,6 +583,19 @@ void LLFloaterPreference::apply()
 		}
 	}
 
+	if (hasChild("check_spellcheck"), TRUE)
+	{
+		LLScrollListCtrl* list_ctrl = findChild<LLScrollListCtrl>("list_spellcheck_active");
+		std::vector<LLScrollListItem*> list_items = list_ctrl->getAllData();
+
+		std::list<std::string> list_dict;
+		list_dict.push_back(LLSpellChecker::instance().getActiveDictionary());
+		for (std::vector<LLScrollListItem*>::const_iterator item_it = list_items.begin(); item_it != list_items.end(); ++item_it)
+			list_dict.push_back((*item_it)->getColumn(0)->getValue().asString());
+
+		gSavedSettings.setString("SpellCheckDictionary", boost::join(list_dict, ","));
+	}
+
 	saveAvatarProperties();
 
 	if (mClickActionDirty)
@@ -692,6 +706,8 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	// Load (double-)click to walk/teleport settings.
 	updateClickActionControls();
 	
+	buildDictLists();
+
 	// Enabled/disabled popups, might have been changed by user actions
 	// while preferences floater was closed.
 	buildPopupLists();
@@ -870,6 +886,25 @@ void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 	}
 }
 
+void LLFloaterPreference::onClickDictMove(const std::string& from, const std::string& to)
+{
+	LLScrollListCtrl* from_ctrl = findChild<LLScrollListCtrl>(from);
+	LLScrollListCtrl* to_ctrl = findChild<LLScrollListCtrl>(to);
+
+	LLSD row;
+	row["columns"][0]["column"] = "name";
+	row["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
+	row["columns"][0]["font"]["style"] = "NORMAL";
+
+	std::vector<LLScrollListItem*> sel_items = from_ctrl->getAllSelected();
+	for (std::vector<LLScrollListItem*>::const_iterator sel_it = sel_items.begin(); sel_it != sel_items.end(); ++sel_it)
+	{
+		row["columns"][0]["value"] = (*sel_it)->getColumn(0)->getValue();
+		to_ctrl->addElement(row);
+	}
+	from_ctrl->deleteSelectedItems();
+}
+
 void LLFloaterPreference::onClickSetCache()
 {
 	std::string cur_name(gSavedSettings.getString("CacheLocation"));
@@ -935,6 +970,61 @@ void LLFloaterPreference::refreshSkin(void* data)
 	self->getChild<LLRadioGroup>("skin_selection", true)->setValue(sSkin);
 }
 
+void LLFloaterPreference::buildDictLists()
+{
+	LLComboBox* dict_combo = findChild<LLComboBox>("combo_spellcheck_dict");
+	dict_combo->clearRows();
+
+	LLScrollListCtrl* active_ctrl = findChild<LLScrollListCtrl>("list_spellcheck_active");
+	active_ctrl->clearRows();
+
+	LLScrollListCtrl* avail_ctrl = findChild<LLScrollListCtrl>("list_spellcheck_available");
+	avail_ctrl->clearRows();
+
+	if (LLSpellChecker::getUseSpellCheck())
+	{
+		// Populate the main dictionary combobox
+		const LLSD& dict_map = LLSpellChecker::instance().getDictionaryMap();
+		if (dict_map.size())
+		{
+			for (LLSD::array_const_iterator dict_it = dict_map.beginArray(); dict_it != dict_map.endArray(); ++dict_it)
+			{
+				const LLSD& dict = *dict_it;
+				if ( (dict["installed"].asBoolean()) && (dict.has("language")) )
+					dict_combo->add(dict["language"].asString());
+			}
+			dict_combo->selectByValue(LLSpellChecker::instance().getActiveDictionary());
+		}
+
+		LLSD row;
+		row["columns"][0]["column"] = "name";
+		row["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
+		row["columns"][0]["font"]["style"] = "NORMAL";
+
+		// Populate the active dictionary list
+		LLSpellChecker::dict_list_t active_list = LLSpellChecker::instance().getSecondaryDictionaries();
+		active_ctrl->sortByColumnIndex(0, true);
+		for (LLSpellChecker::dict_list_t::const_iterator it = active_list.begin(); it != active_list.end(); ++it)
+		{
+			row["columns"][0]["value"] = *it;
+			active_ctrl->addElement(row);
+		}
+		active_list.push_back(LLSpellChecker::instance().getActiveDictionary());
+
+		// Populate the available dictionary list
+		avail_ctrl->sortByColumnIndex(0, true);
+		for (LLSD::array_const_iterator dict_it = dict_map.beginArray(); dict_it != dict_map.endArray(); ++dict_it)
+		{
+			const LLSD& dict = *dict_it;
+			if ( (dict["installed"].asBoolean()) && (dict.has("language")) && 
+				 (active_list.end() == std::find(active_list.begin(), active_list.end(), dict["language"].asString())) )
+			{
+				row["columns"][0]["value"] = dict["language"].asString();
+				avail_ctrl->addElement(row);
+			}
+		}
+	}
+}
 
 void LLFloaterPreference::buildPopupLists()
 {
@@ -1688,72 +1778,6 @@ BOOL LLPanelPreference::postBuild()
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
-	//////////////////////PanelSpellCheck//////////////////////
-	if (hasChild("checkSpellCheck"))
-	{
-		//
-		// Populate the main dictionary combobox
-		//
-		const LLSD& sdDictionaries = LLSpellChecker::instance().getDictionaryMap();
-		if (sdDictionaries.size())
-		{
-			LLComboBox* pMainDictionaryList = findChild<LLComboBox>("comboDictionaryMain");
-			for (LLSD::array_const_iterator itDict = sdDictionaries.beginArray(); itDict != sdDictionaries.endArray(); ++itDict)
-			{
-				const LLSD& sdDict = *itDict;
-				if ( (sdDict["installed"].asBoolean()) && (sdDict.has("language")) )
-					pMainDictionaryList->add(sdDict["language"].asString());
-			}
-			pMainDictionaryList->setControlName("SpellCheckDictionary");
-		}
-
-		LLSD sdRow;
-		sdRow["columns"][0]["column"] = "name";
-		sdRow["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
-		sdRow["columns"][0]["font"]["style"] = "NORMAL";
-
-		//
-		// Populate the active dictionary list
-		//
-		std::vector<std::string> dictActiveList;
-		std::string strSecondaryList = gSavedSettings.getString("SpellCheckDictionarySecondary");
-		boost::split(dictActiveList, strSecondaryList, boost::is_any_of(std::string(",")));
-
-		LLScrollListCtrl* pDictActiveList = findChild<LLScrollListCtrl>("listActive");
-		pDictActiveList->sortByColumnIndex(0, true);
-		for (std::vector<std::string>::const_iterator itActive = dictActiveList.begin(); itActive != dictActiveList.end(); ++itActive)
-		{
-			sdRow["columns"][0]["value"] = *itActive;
-			pDictActiveList->addElement(sdRow);
-		}
-
-		//
-		// Populate the available dictionary list
-		//
-		dictActiveList.push_back(gSavedSettings.getString("SpellCheckDictionary"));
-
-		LLScrollListCtrl* pDictAvailList = findChild<LLScrollListCtrl>("listAvailable");
-		pDictAvailList->sortByColumnIndex(0, true);
-		for (LLSD::array_const_iterator itDict = sdDictionaries.beginArray(); itDict != sdDictionaries.endArray(); ++itDict)
-		{
-			const LLSD& sdDict = *itDict;
-			if ( (sdDict["installed"].asBoolean()) && (sdDict.has("language")) && 
-				 (dictActiveList.end() == std::find(dictActiveList.begin(), dictActiveList.end(), sdDict["language"].asString())) )
-			{
-				sdRow["columns"][0]["value"] = sdDict["language"].asString();
-				pDictAvailList->addElement(sdRow);
-			}
-		}
-
-		//
-		// Set up the add/remove buttons
-		//
-		findChild<LLButton>("btnActiveAdd")->setCommitCallback(boost::bind(&LLPanelPreference::onBtnActiveDictAddRemove, this, "listAvailable", "listActive"));
-		findChild<LLButton>("btnActiveRemove")->setCommitCallback(boost::bind(&LLPanelPreference::onBtnActiveDictAddRemove, this, "listActive", "listAvailable"));
-	}
-// [/SL:KB]
-
 	apply();
 	return true;
 }
@@ -1767,21 +1791,7 @@ LLPanelPreference::~LLPanelPreference()
 }
 void LLPanelPreference::apply()
 {
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-	//////////////////////PanelSpellCheck//////////////////////
-	if (hasChild("checkSpellCheck"))
-	{
-		std::vector<std::string> dictActiveList;
-
-		LLScrollListCtrl* pDictActiveList = findChild<LLScrollListCtrl>("listActive");
-		std::vector<LLScrollListItem*> selActive = pDictActiveList->getAllData();
-		for (std::vector<LLScrollListItem*>::const_iterator itSel = selActive.begin(); itSel != selActive.end(); ++itSel)
-			dictActiveList.push_back((*itSel)->getColumn(0)->getValue().asString());
-
-		LLSpellChecker::instance().setSecondaryDictionaries(dictActiveList);
-		gSavedSettings.setString("SpellCheckDictionarySecondary", boost::join(dictActiveList, ","));
-	}
-// [/SL:KB]
+	// no-op
 }
 
 void LLPanelPreference::saveSettings()
@@ -1822,27 +1832,6 @@ void LLPanelPreference::saveSettings()
 		}
 	}	
 }
-
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-void LLPanelPreference::onBtnActiveDictAddRemove(const char* pstrFrom, const char* pstrTo)
-{
-	LLScrollListCtrl* pFromList = findChild<LLScrollListCtrl>(pstrFrom);
-	LLScrollListCtrl* pToList = findChild<LLScrollListCtrl>(pstrTo);
-
-	LLSD sdRow;
-	sdRow["columns"][0]["column"] = "name";
-	sdRow["columns"][0]["font"]["name"] = "SANSSERIF_SMALL";
-	sdRow["columns"][0]["font"]["style"] = "NORMAL";
-
-	std::vector<LLScrollListItem*> selActive = pFromList->getAllSelected();
-	for (std::vector<LLScrollListItem*>::const_iterator itSel = selActive.begin(); itSel != selActive.end(); ++itSel)
-	{
-		sdRow["columns"][0]["value"] = (*itSel)->getColumn(0)->getValue();
-		pToList->addElement(sdRow);
-	}
-	pFromList->deleteSelectedItems();
-}
-// [/SL:KB]
 
 void LLPanelPreference::showFriendsOnlyWarning(LLUICtrl* checkbox, const LLSD& value)
 {

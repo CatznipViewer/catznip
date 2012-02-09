@@ -35,9 +35,6 @@
 #include "llinventorypanel.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.5.0a)
-#include "llspellcheckmenuhandler.h"
-// [/SL:KB]
 
 // newview includes
 #include "llagent.h"
@@ -84,6 +81,7 @@
 #include "llrootview.h"
 #include "llsceneview.h"
 #include "llselectmgr.h"
+#include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
 #include "lltextureview.h"
 #include "lltoolcomp.h"
@@ -4987,6 +4985,78 @@ class LLEditDelete : public view_listener_t
 	}
 };
 
+void handle_spellcheck_replace_with_suggestion(const LLUICtrl* ctrl, const LLSD& param)
+{
+	const LLContextMenu* menu = dynamic_cast<const LLContextMenu*>(ctrl->getParent());
+	LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	if ( (!spellcheck_handler) || (!spellcheck_handler->getSpellCheck()) )
+	{
+		return;
+	}
+
+	U32 index = 0;
+	if ( (!LLStringUtil::convertToU32(param.asString(), index)) || (index >= spellcheck_handler->getSuggestionCount()) )
+	{
+		return;
+	}
+
+	spellcheck_handler->replaceWithSuggestion(index);
+}
+
+bool visible_spellcheck_suggestion(LLUICtrl* ctrl, const LLSD& param)
+{
+	LLMenuItemGL* item = dynamic_cast<LLMenuItemGL*>(ctrl);
+	const LLContextMenu* menu = (item) ? dynamic_cast<const LLContextMenu*>(item->getParent()) : NULL;
+	const LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<const LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	if ( (!spellcheck_handler) || (!spellcheck_handler->getSpellCheck()) )
+	{
+		return false;
+	}
+
+	U32 index = 0;
+	if ( (!LLStringUtil::convertToU32(param.asString(), index)) || (index >= spellcheck_handler->getSuggestionCount()) )
+	{
+		return false;
+	}
+
+	item->setLabel(spellcheck_handler->getSuggestion(index));
+	return true;
+}
+
+void handle_spellcheck_add_to_dictionary(const LLUICtrl* ctrl)
+{
+	const LLContextMenu* menu = dynamic_cast<const LLContextMenu*>(ctrl->getParent());
+	LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	if ( (spellcheck_handler) && (spellcheck_handler->canAddToDictionary()) )
+	{
+		spellcheck_handler->addToDictionary();
+	}
+}
+
+bool enable_spellcheck_add_to_dictionary(const LLUICtrl* ctrl)
+{
+	const LLContextMenu* menu = dynamic_cast<const LLContextMenu*>(ctrl->getParent());
+	const LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<const LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	return (spellcheck_handler) && (spellcheck_handler->canAddToDictionary());
+}
+
+void handle_spellcheck_add_to_ignore(const LLUICtrl* ctrl)
+{
+	const LLContextMenu* menu = dynamic_cast<const LLContextMenu*>(ctrl->getParent());
+	LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	if ( (spellcheck_handler) && (spellcheck_handler->canAddToIgnore()) )
+	{
+		spellcheck_handler->addToIgnore();
+	}
+}
+
+bool enable_spellcheck_add_to_ignore(const LLUICtrl* ctrl)
+{
+	const LLContextMenu* menu = dynamic_cast<const LLContextMenu*>(ctrl->getParent());
+	const LLSpellCheckMenuHandler* spellcheck_handler = (menu) ? dynamic_cast<const LLSpellCheckMenuHandler*>(menu->getSpawningView()) : NULL;
+	return (spellcheck_handler) && (spellcheck_handler->canAddToIgnore());
+}
+
 bool enable_object_delete()
 {
 	bool new_value = 
@@ -5042,68 +5112,6 @@ class LLViewEnableLastChatter : public view_listener_t
 		return new_value;
 	}
 };
-
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-void spellCheck_ReplaceWithSuggestion(LLUICtrl* pMenuItemCtrl, const LLSD& sdParam)
-{
-	LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	if ( (!pSpellCheckHandler) || (!pSpellCheckHandler->useSpellCheck()) )
-		return;
-
-	U32 idxSuggestion = 0;
-	if ( (!LLStringUtil::convertToU32(sdParam.asString(), idxSuggestion)) || (idxSuggestion >= pSpellCheckHandler->getSuggestionCount()) )
-		return;
-
-	pSpellCheckHandler->replaceWithSuggestion(idxSuggestion);
-}
-
-bool spellCheck_VisibleSuggestion(LLUICtrl* pMenuItemCtrl, const LLSD& sdParam)
-{
-	LLMenuItemGL* pMenuItem = dynamic_cast<LLMenuItemGL*>(pMenuItemCtrl);
-	const LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	const LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	if ( (!pSpellCheckHandler) || (!pSpellCheckHandler->useSpellCheck()) )
-		return false;
-
-	U32 idxSuggestion = 0;
-	if ( (!LLStringUtil::convertToU32(sdParam.asString(), idxSuggestion)) || (idxSuggestion >= pSpellCheckHandler->getSuggestionCount()) )
-		return false;
-
-	pMenuItem->setLabel(pSpellCheckHandler->getSuggestion(idxSuggestion));
-	return true;
-}
-
-void spellCheck_AddToDictionary(LLUICtrl* pMenuItemCtrl)
-{
-	LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	if ( (pSpellCheckHandler) && (pSpellCheckHandler->canAddToDictionary()) )
-		pSpellCheckHandler->addToDictionary();
-}
-
-bool spellCheck_EnableAddToDictionary(LLUICtrl* pMenuItemCtrl)
-{
-	const LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	const LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	return (pSpellCheckHandler) && (pSpellCheckHandler->canAddToDictionary());
-}
-
-void spellCheck_AddToIgnore(LLUICtrl* pMenuItemCtrl)
-{
-	LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	if ( (pSpellCheckHandler) && (pSpellCheckHandler->canAddToIgnore()) )
-		pSpellCheckHandler->addToIgnore();
-}
-
-bool spellCheck_EnableAddToIgnore(LLUICtrl* pMenuItemCtrl)
-{
-	const LLContextMenu* pMenu = dynamic_cast<LLContextMenu*>(pMenuItemCtrl->getParent());
-	const LLSpellCheckMenuHandler* pSpellCheckHandler = (pMenu) ? dynamic_cast<LLSpellCheckMenuHandler*>(pMenu->getSpawningView()) : NULL;
-	return (pSpellCheckHandler) && (pSpellCheckHandler->canAddToIgnore());
-}
-// [/SL:KB]
 
 class LLEditEnableDeselect : public view_listener_t
 {
@@ -7976,18 +7984,6 @@ void show_topinfobar_context_menu(LLView* ctrl, S32 x, S32 y)
 
 void initialize_edit_menu()
 {
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.5.0a) | Added: Catznip-2.5.0a
-	LLUICtrl::CommitCallbackRegistry::Registrar& commit = LLUICtrl::CommitCallbackRegistry::currentRegistrar();
-	LLUICtrl::EnableCallbackRegistry::Registrar& enable = LLUICtrl::EnableCallbackRegistry::currentRegistrar();
-
-	commit.add("SpellCheck.ReplaceWithSuggestion", boost::bind(&spellCheck_ReplaceWithSuggestion, _1, _2));
-	enable.add("SpellCheck.VisibleSuggestion", boost::bind(&spellCheck_VisibleSuggestion, _1, _2));
-	commit.add("SpellCheck.AddToDictionary", boost::bind(&spellCheck_AddToDictionary, _1));
-	enable.add("SpellCheck.EnableAddToDictionary", boost::bind(&spellCheck_EnableAddToDictionary, _1));
-	commit.add("SpellCheck.AddToIgnore", boost::bind(&spellCheck_AddToIgnore, _1));
-	enable.add("SpellCheck.EnableAddToIgnore", boost::bind(&spellCheck_EnableAddToIgnore, _1));
-// [/SL:KB]
-
 	view_listener_t::addMenu(new LLEditUndo(), "Edit.Undo");
 	view_listener_t::addMenu(new LLEditRedo(), "Edit.Redo");
 	view_listener_t::addMenu(new LLEditCut(), "Edit.Cut");
@@ -8008,6 +8004,19 @@ void initialize_edit_menu()
 	view_listener_t::addMenu(new LLEditEnableDeselect(), "Edit.EnableDeselect");
 	view_listener_t::addMenu(new LLEditEnableDuplicate(), "Edit.EnableDuplicate");
 
+}
+
+void initialize_spellcheck_menu()
+{
+	LLUICtrl::CommitCallbackRegistry::Registrar& commit = LLUICtrl::CommitCallbackRegistry::currentRegistrar();
+	LLUICtrl::EnableCallbackRegistry::Registrar& enable = LLUICtrl::EnableCallbackRegistry::currentRegistrar();
+
+	commit.add("SpellCheck.ReplaceWithSuggestion", boost::bind(&handle_spellcheck_replace_with_suggestion, _1, _2));
+	enable.add("SpellCheck.VisibleSuggestion", boost::bind(&visible_spellcheck_suggestion, _1, _2));
+	commit.add("SpellCheck.AddToDictionary", boost::bind(&handle_spellcheck_add_to_dictionary, _1));
+	enable.add("SpellCheck.EnableAddToDictionary", boost::bind(&enable_spellcheck_add_to_dictionary, _1));
+	commit.add("SpellCheck.AddToIgnore", boost::bind(&handle_spellcheck_add_to_ignore, _1));
+	enable.add("SpellCheck.EnableAddToIgnore", boost::bind(&enable_spellcheck_add_to_ignore, _1));
 }
 
 void initialize_menus()

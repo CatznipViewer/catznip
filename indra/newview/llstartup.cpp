@@ -192,7 +192,7 @@
 #include "llstartuplistener.h"
 #include "lltoolbarview.h"
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.7.0a) | Added: Catznip-2.5.0a
-#include "llhunspell.h"
+#include "llspellcheck.h"
 // [/SL:KB]
 
 #if LL_WINDOWS
@@ -788,6 +788,7 @@ bool idle_startup()
 		{
 			display_startup();
 			initialize_edit_menu();
+			initialize_spellcheck_menu();
 			display_startup();
 			init_menus();
 			display_startup();

@@ -121,6 +121,7 @@ public:
 
 	void setCacheLocation(const LLStringExplicit& location);
 
+	void onClickDictMove(const std::string& from, const std::string& to);
 	void onClickSetCache();
 	void onClickResetCache();
 	void onClickSkin(LLUICtrl* ctrl,const LLSD& userdata);
@@ -160,6 +161,7 @@ public:
 	void applyUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	
+	void buildDictLists();
 	void buildPopupLists();
 	static void refreshSkin(void* data);
 private:
@@ -198,9 +200,6 @@ public:
 	virtual void saveSettings();
 	
 	class Updater;
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-	void onBtnActiveDictAddRemove(const char* pstrFrom, const char* pstrTo);
-// [/SL:KB]
 private:
 	//for "Only friends and groups can call or IM me"
 	static void showFriendsOnlyWarning(LLUICtrl*, const LLSD&);

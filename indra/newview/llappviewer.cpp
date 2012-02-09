@@ -91,6 +91,7 @@
 #include "llsecondlifeurls.h"
 #include "llupdaterservice.h"
 #include "llcallfloater.h"
+#include "llspellcheck.h"
 
 // Linden library includes
 #include "llavatarnamecache.h"
@@ -104,10 +105,6 @@
 #include "llvfsthread.h"
 #include "llvolumemgr.h"
 #include "llxfermanager.h"
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-13 (Catznip-3.1.0a)
-#include "llhunspell.h"
-#include <boost/algorithm/string.hpp>
-// [/SL:KB]
 
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
@@ -116,6 +113,7 @@
 // Third party library includes
 #include <boost/bind.hpp>
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string.hpp>
 
 
 
@@ -2499,17 +2497,17 @@ bool LLAppViewer::initConfiguration()
 		//gDirUtilp->setSkinFolder("default");
     }
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-09-06 (Catznip-2.8.0a) | Modified: Catznip-2.8.0a
 	if (gSavedSettings.getBOOL("SpellCheck"))
 	{
-		LLSpellChecker::setUseSpellCheck(gSavedSettings.getString("SpellCheckDictionary"));
-
-		std::vector<std::string> dictSecondaryList;
-		std::string strSecondaryList = gSavedSettings.getString("SpellCheckDictionarySecondary");
-		boost::split(dictSecondaryList, strSecondaryList, boost::is_any_of(std::string(",")));
-		LLSpellChecker::instance().setSecondaryDictionaries(dictSecondaryList);
+		std::list<std::string> dict_list;
+		boost::split(dict_list, gSavedSettings.getString("SpellCheckDictionary"), boost::is_any_of(std::string(",")));
+		if (!dict_list.empty())
+		{
+			LLSpellChecker::setUseSpellCheck(dict_list.front());
+			dict_list.pop_front();
+			LLSpellChecker::instance().setSecondaryDictionaries(dict_list);
+		}
 	}
-// [/SL:KB]
 
     mYieldTime = gSavedSettings.getS32("YieldTime");
 

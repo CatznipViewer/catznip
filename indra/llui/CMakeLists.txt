@@ -54,7 +54,6 @@ set(llui_SOURCE_FILES
     llflyoutbutton.cpp 
     llfocusmgr.cpp
     llfunctorregistry.cpp
-    llhunspell.cpp
     lliconctrl.cpp
     llkeywords.cpp
     lllayoutstack.cpp
@@ -88,6 +87,7 @@ set(llui_SOURCE_FILES
     llsearcheditor.cpp
     llslider.cpp
     llsliderctrl.cpp
+    llspellcheck.cpp
     llspinctrl.cpp
     llstatbar.cpp
     llstatgraph.cpp
@@ -156,7 +156,6 @@ set(llui_HEADER_FILES
     llfunctorregistry.h
     llhandle.h
     llhelp.h
-    llhunspell.h
     lliconctrl.h
     llkeywords.h
     lllayoutstack.h
@@ -194,6 +193,7 @@ set(llui_HEADER_FILES
     llsdparam.h
     llsliderctrl.h
     llslider.h
+    llspellcheck.h
     llspellcheckmenuhandler.h
     llspinctrl.h
     llstatbar.h

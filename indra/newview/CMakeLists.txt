@@ -13,7 +13,6 @@ include(EXPAT)
 include(FMOD)
 include(OPENAL)
 include(FindOpenGL)
-include(Hunspell)
 include(JsonCpp)
 include(LLAudio)
 include(LLCharacter)
@@ -71,8 +70,8 @@ include_directories(
     ${LSCRIPT_INCLUDE_DIRS}/lscript_compile
     ${LLLOGIN_INCLUDE_DIRS}
     ${UPDATER_INCLUDE_DIRS}
-    ${LIBS_PREBUILD_DIR}/include/hunspell
     ${LIBS_PREBUILT_DIR}/include/collada
+    ${LIBS_PREBUILD_DIR}/include/hunspell
     ${OPENAL_LIB_INCLUDE_DIRS}
     ${LIBS_PREBUILT_DIR}/include/collada/1.4
     )
