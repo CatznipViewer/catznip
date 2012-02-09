@@ -310,6 +310,8 @@ void update_texture_fetch()
 }
 
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+bool handleSpellCheckChanged();
+
 class LLHTTDictionaryListResponder : public LLHTTPClient::Responder
 {
 public:
@@ -333,8 +335,15 @@ public:
 				out.close();
 			}
 
-			if (LLSpellChecker::instanceExists())
+			if ( (gSavedSettings.getBOOL("SpellCheck")) && (!LLSpellChecker::getUseSpellCheck()) )
+			{
+				// It's possible spell check initialization failed due to old dictionaries.xml versions
+				handleSpellCheckChanged();
+			}
+			else if (LLSpellChecker::instanceExists())
+			{
 				LLSpellChecker::instance().refreshDictionaryMap();
+			}
 		}
 	}
 };
