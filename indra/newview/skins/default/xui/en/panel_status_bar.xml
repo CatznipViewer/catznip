@@ -91,7 +91,7 @@
      tool_tip="Click to refresh your L$ balance"
      top="5"
      wrap="false" 
-     value="L$ 20 000 000" 
+     value="L$ -1" 
      width="110" />
     </layout_panel>
     <layout_panel
