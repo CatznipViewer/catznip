@@ -239,7 +239,8 @@
      layout="topleft"
      left_pad="5"
      top_delta="-1" 
-     name="Name_Tag_Preference">
+     name="Name_Tag_Preference"
+     width="225">
         <radio_item
          label="Off"
          name="radio"
@@ -266,7 +267,7 @@
          layout="topleft"
          top_delta="0"
          value="2"
-         width="160" />
+         width="75" />
     </radio_group>
     <check_box
 	 enabled_control="AvatarNameTagMode"
@@ -350,7 +351,8 @@
      layout="topleft"
      left_pad="5"
      top_delta="0" 
-     name="inworld_typing_preference">
+     name="inworld_typing_preference"
+     width="300">
         <radio_item
          label="Starts local chat"
          name="radio_start_chat"
@@ -368,7 +370,7 @@
          height="16" 
          name="radio_move"
          value="0"
-         width="75" />
+         width="150" />
     </radio_group>
     
     <text
