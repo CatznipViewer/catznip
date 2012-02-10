@@ -1516,7 +1516,10 @@ void LLPreviewLSL::onSave(void* userdata, BOOL close_after_save)
 void LLPreviewLSL::saveIfNeeded(bool sync /*= true*/)
 {
 	// llinfos << "LLPreviewLSL::saveIfNeeded()" << llendl;
-	if(!mScriptEd->hasChanged())
+//	if(!mScriptEd->hasChanged())
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if ( (!mScriptEd->hasChanged()) || (!gAgent.getRegion()) )
+// [/SL:KB]
 	{
 		return;
 	}
