@@ -1226,8 +1226,8 @@ LLScriptEdContainer::LLScriptEdContainer(const LLSD& key)
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
 LLScriptEdContainer::~LLScriptEdContainer()
 {
-	// Clean up the backup file
-	if (!mBackupFilename.empty())
+	// Clean up the backup file (unless we've gotten disconnected)
+	if ( (!mBackupFilename.empty()) && (gAgent.getRegion()) )
 		LLFile::remove(mBackupFilename);
 	delete mBackupTimer;
 }
