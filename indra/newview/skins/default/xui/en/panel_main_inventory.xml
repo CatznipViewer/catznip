@@ -147,7 +147,7 @@
            follows="bottom|left"
            height="25"
            image_hover_unselected="Toolbar_Middle_Over"
-           image_overlay="Collapse"
+           image_overlay="Inv_Collapse"
            image_selected="Toolbar_Middle_Selected"
            image_unselected="Toolbar_Middle_Off"
            layout="topleft"
