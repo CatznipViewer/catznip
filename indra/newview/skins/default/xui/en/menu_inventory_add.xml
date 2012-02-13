@@ -5,72 +5,6 @@
  mouse_opaque="false"
  name="menu_inventory_add"
  visible="false">
-            <menu
-             create_jump_keys="true"
-             label="Upload"
-             layout="topleft"
-             name="upload"
-             tear_off="true">
-                <menu_item_call
-                 label="Image (L$[COST])..."
-                 layout="topleft"
-                 name="Upload Image"
-                 shortcut="control|U">
-                    <menu_item_call.on_click
-                     function="File.UploadImage"
-                     parameter="" />
-                    <menu_item_call.on_enable
-                     function="File.EnableUpload" />
-                </menu_item_call>
-                <menu_item_call
-                 label="Sound (L$[COST])..."
-                 layout="topleft"
-                 name="Upload Sound">
-                    <menu_item_call.on_click
-                     function="File.UploadSound"
-                     parameter="" />
-                    <menu_item_call.on_enable
-                     function="File.EnableUpload" />
-                </menu_item_call>
-                <menu_item_call
-                 label="Animation (L$[COST])..."
-                 layout="topleft"
-                 name="Upload Animation">
-                    <menu_item_call.on_click
-                     function="File.UploadAnim"
-                     parameter="" />
-                    <menu_item_call.on_enable
-                     function="File.EnableUpload" />
-                </menu_item_call>
-                <menu_item_call
-                 label="Model..."
-                 layout="topleft"
-                 name="Upload Model">
-                <menu_item_call.on_click
-                 function="File.UploadModel"
-                 parameter="" />
-                <menu_item_call.on_enable
-                 function="File.EnableUploadModel" />
-                <menu_item_call.on_visible
-                function="File.VisibleUploadModel"/>
-                </menu_item_call>
-                <menu_item_call
-                 label="Bulk (L$[COST] per file)..."
-                 layout="topleft"
-                 name="Bulk Upload">
-                    <menu_item_call.on_click
-                     function="File.UploadBulk"
-                     parameter="" />
-                </menu_item_call>
-	            <menu_item_call
-	             label="Set Default Upload Permissions"
-	             name="perm prefs">
-	                <menu_item_call.on_click
-	                 function="Floater.Toggle"
-	                 parameter="perm_prefs" />
-	            </menu_item_call>
-            </menu>
-
             <menu_item_call
              label="New Folder"
              layout="topleft"
@@ -251,4 +185,74 @@
                      parameter="eyes" />
                 </menu_item_call>
             </menu>
+
+            <menu_item_separator />
+
+            <menu
+             create_jump_keys="true"
+             label="Upload"
+             layout="topleft"
+             name="upload"
+             tear_off="true">
+                <menu_item_call
+                 label="Image (L$[COST])..."
+                 layout="topleft"
+                 name="Upload Image"
+                 shortcut="control|U">
+                    <menu_item_call.on_click
+                     function="File.UploadImage"
+                     parameter="" />
+                    <menu_item_call.on_enable
+                     function="File.EnableUpload" />
+                </menu_item_call>
+                <menu_item_call
+                 label="Sound (L$[COST])..."
+                 layout="topleft"
+                 name="Upload Sound">
+                    <menu_item_call.on_click
+                     function="File.UploadSound"
+                     parameter="" />
+                    <menu_item_call.on_enable
+                     function="File.EnableUpload" />
+                </menu_item_call>
+                <menu_item_call
+                 label="Animation (L$[COST])..."
+                 layout="topleft"
+                 name="Upload Animation">
+                    <menu_item_call.on_click
+                     function="File.UploadAnim"
+                     parameter="" />
+                    <menu_item_call.on_enable
+                     function="File.EnableUpload" />
+                </menu_item_call>
+                <menu_item_call
+                 label="Model..."
+                 layout="topleft"
+                 name="Upload Model">
+                <menu_item_call.on_click
+                 function="File.UploadModel"
+                 parameter="" />
+                <menu_item_call.on_enable
+                 function="File.EnableUploadModel" />
+                <menu_item_call.on_visible
+                function="File.VisibleUploadModel"/>
+                </menu_item_call>
+                <menu_item_call
+                 label="Bulk (L$[COST] per file)..."
+                 layout="topleft"
+                 name="Bulk Upload">
+                    <menu_item_call.on_click
+                     function="File.UploadBulk"
+                     parameter="" />
+                </menu_item_call>
+              <menu_item_separator />
+	            <menu_item_call
+	             label="Set Default Upload Permissions"
+	             name="perm prefs">
+	                <menu_item_call.on_click
+	                 function="Floater.Toggle"
+	                 parameter="perm_prefs" />
+	            </menu_item_call>
+            </menu>
+
 </menu>
