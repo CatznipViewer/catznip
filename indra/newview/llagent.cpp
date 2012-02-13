@@ -2015,7 +2015,7 @@ void LLAgent::endAnimationUpdateUI()
 			gMorphView->setVisible(FALSE);
 		}
 
-		gConsole->setVisible( TRUE );
+//		gConsole->setVisible( TRUE );
 
 		if (isAgentAvatarValid())
 		{

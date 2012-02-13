@@ -1791,17 +1791,17 @@ void LLViewerWindow::initBase()
 	gSnapshotFloaterView = main_view->getChild<LLSnapshotFloaterView>("Snapshot Floater View");
 	
 
-	// Console
-	llassert( !gConsole );
-	LLConsole::Params cp;
-	cp.name("console");
-	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
-	cp.rect(getChatConsoleRect());
-	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
-	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
-	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
-	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
-	getRootView()->addChild(gConsole);
+//	// Console
+//	llassert( !gConsole );
+//	LLConsole::Params cp;
+//	cp.name("console");
+//	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
+//	cp.rect(getChatConsoleRect());
+//	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
+//	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
+//	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
+//	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
+//	getRootView()->addChild(gConsole);
 
 	// optionally forward warnings to chat console/chat floater
 	// for qa runs and dev builds
@@ -3040,8 +3040,11 @@ void LLViewerWindow::updateUI()
 					// and blacklist the various containers we don't care about
 					else if (dynamic_cast<LLUICtrl*>(viewp) 
 							&& viewp != gMenuHolder
-							&& viewp != gFloaterView
-							&& viewp != gConsole) 
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+							&& viewp != gFloaterView)
+// [/SL:KB]
+//							&& viewp != gFloaterView
+//							&& viewp != gConsole) 
 					{
 						if (dynamic_cast<LLFloater*>(viewp))
 						{
@@ -3178,13 +3181,13 @@ void LLViewerWindow::updateLayout()
 		build_options_floater->updateGridMode();
 	}
 
-	// Always update console
-	if(gConsole)
-	{
-		LLRect console_rect = getChatConsoleRect();
-		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
-		gConsole->setRect(console_rect);
-	}
+//	// Always update console
+//	if(gConsole)
+//	{
+//		LLRect console_rect = getChatConsoleRect();
+//		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
+//		gConsole->setRect(console_rect);
+//	}
 }
 
 void LLViewerWindow::updateMouseDelta()
@@ -4925,45 +4928,45 @@ LLRect 	LLViewerWindow::calcScaledRect(const LLRect & rect, const LLVector2& dis
 	return res;
 }
 
-S32 LLViewerWindow::getChatConsoleBottomPad()
-{
-	S32 offset = 0;
+//S32 LLViewerWindow::getChatConsoleBottomPad()
+//{
+//	S32 offset = 0;
+//
+//	if(gToolBarView)
+//		offset += gToolBarView->getChild<LLView>("bottom_toolbar_panel")->getRect().getHeight();
+//
+//	return offset;
+//}
 
-	if(gToolBarView)
-		offset += gToolBarView->getChild<LLView>("bottom_toolbar_panel")->getRect().getHeight();
-
-	return offset;
-}
-
-LLRect LLViewerWindow::getChatConsoleRect()
-{
-	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
-	LLRect console_rect = full_window;
-
-	const S32 CONSOLE_PADDING_TOP = 24;
-	const S32 CONSOLE_PADDING_LEFT = 24;
-	const S32 CONSOLE_PADDING_RIGHT = 10;
-
-	console_rect.mTop    -= CONSOLE_PADDING_TOP;
-	console_rect.mBottom += getChatConsoleBottomPad();
-
-	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
-
-	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
-
-	if (CHAT_FULL_WIDTH)
-	{
-		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
-	}
-	else
-	{
-		// Make console rect somewhat narrow so having inventory open is
-		// less of a problem.
-		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
-	}
-
-	return console_rect;
-}
+//LLRect LLViewerWindow::getChatConsoleRect()
+//{
+//	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
+//	LLRect console_rect = full_window;
+//
+//	const S32 CONSOLE_PADDING_TOP = 24;
+//	const S32 CONSOLE_PADDING_LEFT = 24;
+//	const S32 CONSOLE_PADDING_RIGHT = 10;
+//
+//	console_rect.mTop    -= CONSOLE_PADDING_TOP;
+//	console_rect.mBottom += getChatConsoleBottomPad();
+//
+//	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
+//
+//	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
+//
+//	if (CHAT_FULL_WIDTH)
+//	{
+//		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
+//	}
+//	else
+//	{
+//		// Make console rect somewhat narrow so having inventory open is
+//		// less of a problem.
+//		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
+//	}
+//
+//	return console_rect;
+//}
 //----------------------------------------------------------------------------
 
 
