@@ -1704,7 +1704,10 @@ BOOL LLToolPie::handleRightClickPick()
 				mute_msg = LLTrans::getString("MuteObject2");
 			}
 			
-			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+//			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+			gMenuObject->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+// [/SL:KB]
 			gMenuObject->show(x, y);
 
 			showVisualContextMenuEffect();
