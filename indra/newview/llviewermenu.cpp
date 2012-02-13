@@ -309,36 +309,36 @@ BOOL enable_detach(const LLSD& = LLSD());
 void menu_toggle_attached_lights(void* user_data);
 void menu_toggle_attached_particles(void* user_data);
 
-class LLMenuParcelObserver : public LLParcelObserver
-{
-public:
-	LLMenuParcelObserver();
-	~LLMenuParcelObserver();
-	virtual void changed();
-};
+//class LLMenuParcelObserver : public LLParcelObserver
+//{
+//public:
+//	LLMenuParcelObserver();
+//	~LLMenuParcelObserver();
+//	virtual void changed();
+//};
 
-static LLMenuParcelObserver* gMenuParcelObserver = NULL;
+//static LLMenuParcelObserver* gMenuParcelObserver = NULL;
 
 static LLUIListener sUIListener;
 
-LLMenuParcelObserver::LLMenuParcelObserver()
-{
-	LLViewerParcelMgr::getInstance()->addObserver(this);
-}
-
-LLMenuParcelObserver::~LLMenuParcelObserver()
-{
-	LLViewerParcelMgr::getInstance()->removeObserver(this);
-}
-
-void LLMenuParcelObserver::changed()
-{
-	gMenuHolder->childSetEnabled("Land Buy Pass", LLPanelLandGeneral::enableBuyPass(NULL));
-	
-	BOOL buyable = enable_buy_land(NULL);
-	gMenuHolder->childSetEnabled("Land Buy", buyable);
-	gMenuHolder->childSetEnabled("Buy Land...", buyable);
-}
+//LLMenuParcelObserver::LLMenuParcelObserver()
+//{
+//	LLViewerParcelMgr::getInstance()->addObserver(this);
+//}
+//
+//LLMenuParcelObserver::~LLMenuParcelObserver()
+//{
+//	LLViewerParcelMgr::getInstance()->removeObserver(this);
+//}
+//
+//void LLMenuParcelObserver::changed()
+//{
+//	gMenuHolder->childSetEnabled("Land Buy Pass", LLPanelLandGeneral::enableBuyPass(NULL));
+//	
+//	BOOL buyable = enable_buy_land(NULL);
+//	gMenuHolder->childSetEnabled("Land Buy", buyable);
+//	gMenuHolder->childSetEnabled("Buy Land...", buyable);
+//}
 
 
 void initialize_menus();
@@ -478,8 +478,8 @@ void init_menus()
 
 	gMenuBarView->createJumpKeys();
 
-	// Let land based option enable when parcel changes
-	gMenuParcelObserver = new LLMenuParcelObserver();
+//	// Let land based option enable when parcel changes
+//	gMenuParcelObserver = new LLMenuParcelObserver();
 
 	gLoginMenuBarView = LLUICtrlFactory::getInstance()->createFromFile<LLMenuBarGL>("menu_login.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	gLoginMenuBarView->arrangeAndClear();
@@ -2337,8 +2337,8 @@ class LLAdminOnSaveState: public view_listener_t
 //-----------------------------------------------------------------------------
 void cleanup_menus()
 {
-	delete gMenuParcelObserver;
-	gMenuParcelObserver = NULL;
+//	delete gMenuParcelObserver;
+//	gMenuParcelObserver = NULL;
 
 	delete gMenuAvatarSelf;
 	gMenuAvatarSelf = NULL;
@@ -5922,11 +5922,11 @@ class LLWorldEnableBuyLand : public view_listener_t
 	}
 };
 
-BOOL enable_buy_land(void*)
-{
-	return LLViewerParcelMgr::getInstance()->canAgentBuyParcel(
-				LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel(), false);
-}
+//BOOL enable_buy_land(void*)
+//{
+//	return LLViewerParcelMgr::getInstance()->canAgentBuyParcel(
+//				LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel(), false);
+//}
 
 void handle_buy_land()
 {
