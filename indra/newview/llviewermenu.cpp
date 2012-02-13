@@ -2412,20 +2412,36 @@ void handle_object_touch()
 
 
 
-static void init_default_item_label(const std::string& item_name)
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+static void init_default_item_label(const LLUICtrl* pMenuItem)
 {
-	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(item_name);
+	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(pMenuItem->getName());
 	if (it == sDefaultItemLabels.end())
 	{
 		// *NOTE: This will not work for items of type LLMenuItemCheckGL because they return boolean value
 		//       (doesn't seem to matter much ATM).
-		LLStringExplicit default_label = gMenuHolder->childGetValue(item_name).asString();
+		LLStringExplicit default_label = pMenuItem->getValue().asString();
 		if (!default_label.empty())
 		{
-			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(item_name, default_label));
+			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(pMenuItem->getName(), default_label));
 		}
 	}
 }
+// [/SL:KB]
+//static void init_default_item_label(const std::string& item_name)
+//{
+//	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(item_name);
+//	if (it == sDefaultItemLabels.end())
+//	{
+//		// *NOTE: This will not work for items of type LLMenuItemCheckGL because they return boolean value
+//		//       (doesn't seem to matter much ATM).
+//		LLStringExplicit default_label = gMenuHolder->childGetValue(item_name).asString();
+//		if (!default_label.empty())
+//		{
+//			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(item_name, default_label));
+//		}
+//	}
+//}
 
 static LLStringExplicit get_default_item_label(const std::string& item_name)
 {
@@ -2446,8 +2462,12 @@ bool enable_object_touch(LLUICtrl* ctrl)
 
 	bool new_value = obj && obj->flagHandleTouch();
 
-	std::string item_name = ctrl->getName();
-	init_default_item_label(item_name);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	const std::string& item_name = ctrl->getName();
+	init_default_item_label(ctrl);
+// [/SL:KB]
+//	std::string item_name = ctrl->getName();
+//	init_default_item_label(item_name);
 
 	// Update label based on the node touch name if available.
 	LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
@@ -5562,10 +5582,14 @@ bool enable_object_sit(LLUICtrl* ctrl)
 	bool sitting_on_sel = sitting_on_selection();
 	if (!sitting_on_sel)
 	{
-		std::string item_name = ctrl->getName();
+//		std::string item_name = ctrl->getName();
 
 		// init default labels
-		init_default_item_label(item_name);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+		const std::string& item_name = ctrl->getName();
+		init_default_item_label(ctrl);
+// [/SL:KB]
+//		init_default_item_label(item_name);
 
 		// Update label
 		LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
