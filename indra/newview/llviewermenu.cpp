@@ -2453,11 +2453,17 @@ bool enable_object_touch(LLUICtrl* ctrl)
 	LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 	if (node && node->mValid && !node->mTouchName.empty())
 	{
-		gMenuHolder->childSetText(item_name, node->mTouchName);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+		ctrl->setValue(node->mTouchName);
+// [/SL:KB]
+//		gMenuHolder->childSetText(item_name, node->mTouchName);
 	}
 	else
 	{
-		gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+		ctrl->setValue(get_default_item_label(item_name));
+// [/SL:KB]
+//		gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
 	}
 
 	return new_value;
@@ -5565,11 +5571,17 @@ bool enable_object_sit(LLUICtrl* ctrl)
 		LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 		if (node && node->mValid && !node->mSitName.empty())
 		{
-			gMenuHolder->childSetText(item_name, node->mSitName);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+			ctrl->setValue(node->mSitName);
+// [/SL:KB]
+//			gMenuHolder->childSetText(item_name, node->mSitName);
 		}
 		else
 		{
-			gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+			ctrl->setValue(get_default_item_label(item_name));
+// [/SL:KB]
+//			gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
 		}
 	}
 	return !sitting_on_sel && is_object_sittable();
