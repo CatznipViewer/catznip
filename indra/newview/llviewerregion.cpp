@@ -1120,8 +1120,8 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 		{
 			msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id, i);
 
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
-			if (0 == z_pos)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-02-15 (Catznip-3.2.2) | Modified: Catznip-3.2.2
+			if ( (0 == z_pos) || (255 == z_pos) )
 			{
 				const LLViewerObject* pAvatarObj = gObjectList.findObject(agent_id);
 				if (pAvatarObj)
