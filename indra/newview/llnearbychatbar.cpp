@@ -1009,7 +1009,10 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 	LLNearbyChatBar* pNearbyChat = LLFloaterReg::findTypedInstance<LLNearbyChatBar>("chat_bar");
 	if (pNearbyChat)
 	{
-		bool fVisible = pNearbyChat->getVisible();
+		LLIMFloaterContainer* pConvFloater = LLIMFloaterContainer::findInstance();
+		bool fConvVisible = pConvFloater->getVisible();
+
+		bool fNearbyVisible = pNearbyChat->getVisible();
 		if (pNearbyChat->getHost())
 			pNearbyChat->setVisible(FALSE);	// See LLNearbyChatBar::canClose()
 		std::vector<LLChat> msgArchive = pNearbyChat->mChatHistory->getHistory();
@@ -1025,8 +1028,10 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 		{
 			pNearbyChat->mChatHistory->setHistory(msgArchive);
 			pNearbyChat->mChatHistory->updateChatHistoryStyle();
-			if (fVisible)
+			if (fNearbyVisible)
 				pNearbyChat->openFloater(LLSD());
+			if ( (pConvFloater) && (pConvFloater->getVisible()) && (!fConvVisible) )
+				pConvFloater->closeFloater();
 		}
 	}
 }
