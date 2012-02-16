@@ -2516,6 +2516,9 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{
 				payload["subject"] = subj;
 				payload["message"] = mes;
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+				payload["sender_id"] = from_id;
+// [/SL:KB]
 				payload["sender_name"] = name;
 				payload["group_id"] = group_id;
 				payload["inventory_name"] = item_name;
