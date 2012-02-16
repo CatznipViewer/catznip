@@ -69,48 +69,48 @@ static LLRegisterPanelClassWrapper<LLPanelGroupNotices> t_panel_group_notices("p
 // view. It handles drop events, always setting itself to the size of
 // its parent.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class LLGroupDropTarget : public LLView
-{
-public:
-	struct Params : public LLInitParam::Block<Params, LLView::Params>
-	{
-		// *NOTE: These parameters logically Mandatory, but are not
-		// specified in XML files, hence Optional
-		Optional<LLPanelGroupNotices*> panel;
-		Optional<LLUUID>	group_id;
-		Params()
-		:	panel("panel"),
-			group_id("group_id")
-		{
-			changeDefault(mouse_opaque, false);
-			changeDefault(follows.flags, FOLLOWS_ALL);
-		}
-	};
-	LLGroupDropTarget(const Params&);
-	~LLGroupDropTarget() {};
-
-	void doDrop(EDragAndDropType cargo_type, void* cargo_data);
-
-	//
-	// LLView functionality
-	virtual BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
-								   EDragAndDropType cargo_type,
-								   void* cargo_data,
-								   EAcceptance* accept,
-								   std::string& tooltip_msg);
-	void setPanel (LLPanelGroupNotices* panel) {mGroupNoticesPanel = panel;};
-	void setGroup (LLUUID group) {mGroupID = group;};
-
-protected:
-	LLPanelGroupNotices* mGroupNoticesPanel;
-	LLUUID	mGroupID;
-};
+//class LLGroupDropTarget : public LLView
+//{
+//public:
+//	struct Params : public LLInitParam::Block<Params, LLView::Params>
+//	{
+//		// *NOTE: These parameters logically Mandatory, but are not
+//		// specified in XML files, hence Optional
+//		Optional<LLPanelGroupNotices*> panel;
+//		Optional<LLUUID>	group_id;
+//		Params()
+//		:	panel("panel"),
+//			group_id("group_id")
+//		{
+//			changeDefault(mouse_opaque, false);
+//			changeDefault(follows.flags, FOLLOWS_ALL);
+//		}
+//	};
+//	LLGroupDropTarget(const Params&);
+//	~LLGroupDropTarget() {};
+//
+//	void doDrop(EDragAndDropType cargo_type, void* cargo_data);
+//
+//	//
+//	// LLView functionality
+//	virtual BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+//								   EDragAndDropType cargo_type,
+//								   void* cargo_data,
+//								   EAcceptance* accept,
+//								   std::string& tooltip_msg);
+//	void setPanel (LLPanelGroupNotices* panel) {mGroupNoticesPanel = panel;};
+//	void setGroup (LLUUID group) {mGroupID = group;};
+//
+//protected:
+//	LLPanelGroupNotices* mGroupNoticesPanel;
+//	LLUUID	mGroupID;
+//};
 
 static LLDefaultChildRegistry::Register<LLGroupDropTarget> r("group_drop_target");
 
 LLGroupDropTarget::LLGroupDropTarget(const LLGroupDropTarget::Params& p) 
 :	LLView(p),
-	mGroupNoticesPanel(p.panel),
+//	mGroupNoticesPanel(p.panel),
 	mGroupID(p.group_id)
 {}
 
@@ -164,7 +164,10 @@ BOOL LLGroupDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 				*accept = ACCEPT_YES_COPY_SINGLE;
 				if(drop)
 				{
-					mGroupNoticesPanel->setItem(inv_item);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+					getParent()->notifyParent(LLSD().with("item_id", inv_item->getUUID()));
+// [/SL:KB]
+//					mGroupNoticesPanel->setItem(inv_item);
 				}
 			}
 			else
@@ -291,7 +294,7 @@ BOOL LLPanelGroupNotices::postBuild()
 	mPanelViewNotice = getChild<LLPanel>("panel_view_past_notice",recurse);
 
 	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
-	target->setPanel (this);
+//	target->setPanel (this);
 	target->setGroup (mGroupID);
 
 	arrangeNoticeView(VIEW_PAST_NOTICE);
@@ -320,6 +323,18 @@ void LLPanelGroupNotices::activate()
 		onClickRefreshNotices(this);
 	}
 }
+
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+S32 LLPanelGroupNotices::notifyParent(const LLSD& sdInfo)
+{
+	if (sdInfo.has("item_id"))
+	{
+		setItem(gInventory.getItem(sdInfo["item_id"].asUUID()));
+		return 1;
+	}
+	return LLPanelGroupTab::notifyParent(sdInfo);
+}
+// [/SL:KB]
 
 void LLPanelGroupNotices::setItem(LLPointer<LLInventoryItem> inv_item)
 {
@@ -665,7 +680,7 @@ void LLPanelGroupNotices::setGroupID(const LLUUID& id)
 	mBtnNewMessage->setEnabled(gAgent.hasPowerInGroup(mGroupID, GP_NOTICES_SEND));
 
 	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
-	target->setPanel (this);
+//	target->setPanel (this);
 	target->setGroup (mGroupID);
 
 	if(mViewMessage) 
