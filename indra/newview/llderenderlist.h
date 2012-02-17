@@ -28,14 +28,19 @@ class LLSelectNode;
 struct LLDerenderEntry
 {
 	LLDerenderEntry(const LLSelectNode* pNode);
+	LLDerenderEntry(const LLSD& sdData);
+	bool isValid() const { return idObject.notNull(); }
+	LLSD toLLSD() const;
+
+	bool		fPersists;			// TRUE if this entry persist across sessions
 
 	std::string	strObjectName;		// Object name (at the time of adding)
 	LLUUID		idObject;			// Object UUID (at the time of adding)
 
 	std::string	strRegionName;		// Region name
+	LLVector3	posRegion;			// Position of the object on the region
 	U64			idRegion;			// Region handle
 	U32			idObjectLocal;		// Local object ID (region-specific)
-	LLVector3	posRegion;			// Position of the object on the region
 };
 
 // ============================================================================
@@ -50,16 +55,28 @@ protected:
 	LLDerenderList();
 	/*virtual*/ ~LLDerenderList();
 
+	/*
+	 * Member functions
+	 */
 public:
 	void addCurrentSelection();
 	bool isDerendered(const LLUUID& idObject) const { return m_Entries.end() != findEntry(idObject); }
 	void updateObject(const LLUUID& idObject, U64 idRegion, U32 idObjectLocal);
+protected:
+	void load();
+	void save() const;
+
+	/*
+	 * Entry helper functions
+	 */
 protected:
 	entry_list_t::iterator		 findEntry(const LLUUID& idObject);
 	entry_list_t::const_iterator findEntry(const LLUUID& idObject) const;
 
 protected:
 	entry_list_t m_Entries;
+
+	static std::string s_PersistFilename;
 };
 
 // ============================================================================
