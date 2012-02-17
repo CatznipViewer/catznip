@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011, Kitty Barnett
+ * Copyright (c) 2011-2012, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -30,6 +30,7 @@
 //
 
 LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode)
+	: idRegion(0), idObjectLocal(0)
 {
 	//
 	// Fill in all object related information
@@ -42,7 +43,7 @@ LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode)
 	if ( (pNode->mValid) && (!pNode->mName.empty()) )
 		strObjectName = pNode->mName;
 	else
-		strObjectName = idObject.asString();
+		strObjectName = LLTrans::getString("Unknown");
 
 	//
 	// Fill in all region related information
@@ -98,35 +99,23 @@ void LLDerenderList::addCurrentSelection()
 	}
 }
 
-bool LLDerenderList::isDerendered(const LLUUID& idObject) const
+LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(const LLUUID& idObject)
 {
-	for (entry_list_t::const_iterator itEntry = m_Entries.begin(); itEntry != m_Entries.end(); ++itEntry)
-		if (idObject == itEntry->idObject)
-			return true;
-	return false;
+	return std::find_if(m_Entries.begin(), m_Entries.end(), [&idObject](const LLDerenderEntry& e) { return idObject == e.idObject; });
 }
 
-bool LLDerenderList::isDerendered(U64 idRegion, U32 idObjectLocal) const
+LLDerenderList::entry_list_t::const_iterator LLDerenderList::findEntry(const LLUUID& idObject) const
 {
-	for (entry_list_t::const_iterator itEntry = m_Entries.begin(); itEntry != m_Entries.end(); ++itEntry)
-	{
-		const LLDerenderEntry& entry = *itEntry;
-		if ( (idRegion == entry.idRegion) && (idObjectLocal == entry.idObjectLocal) )
-			return true;
-	}
-	return false;
+	return std::find_if(m_Entries.cbegin(), m_Entries.cend(), [&idObject](const LLDerenderEntry& e) { return idObject == e.idObject; });
 }
 
 void LLDerenderList::updateObject(const LLUUID& idObject, U64 idRegion, U32 idObjectLocal)
 {
-	for (entry_list_t::iterator itEntry = m_Entries.begin(); itEntry != m_Entries.end(); ++itEntry)
+	entry_list_t::iterator itEntry = findEntry(idObject);
+	if (m_Entries.end() != itEntry)
 	{
-		LLDerenderEntry& entry = *itEntry;
-		if (idObject == entry.idObject)
-		{
-			entry.idRegion = idRegion;
-			entry.idObjectLocal = idObjectLocal;
-		}
+		itEntry->idRegion = idRegion;
+		itEntry->idObjectLocal = idObjectLocal;
 	}
 }
 

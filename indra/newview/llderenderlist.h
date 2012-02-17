@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011, Kitty Barnett
+ * Copyright (c) 2011-2012, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -45,18 +45,20 @@ struct LLDerenderEntry
 class LLDerenderList : public LLSingleton<LLDerenderList>
 {
 	friend class LLSingleton<LLDerenderList>;
+	typedef std::list<LLDerenderEntry> entry_list_t;
 protected:
 	LLDerenderList();
 	/*virtual*/ ~LLDerenderList();
 
 public:
 	void addCurrentSelection();
-	bool isDerendered(const LLUUID& idObject) const;
-	bool isDerendered(U64 idRegion, U32 idObjectLocal) const;
+	bool isDerendered(const LLUUID& idObject) const { return m_Entries.end() != findEntry(idObject); }
 	void updateObject(const LLUUID& idObject, U64 idRegion, U32 idObjectLocal);
+protected:
+	entry_list_t::iterator		 findEntry(const LLUUID& idObject);
+	entry_list_t::const_iterator findEntry(const LLUUID& idObject) const;
 
 protected:
-	typedef std::list<LLDerenderEntry> entry_list_t;
 	entry_list_t m_Entries;
 };
 
