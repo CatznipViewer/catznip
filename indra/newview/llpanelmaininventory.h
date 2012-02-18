@@ -123,10 +123,17 @@ private:
 	LLTabContainer*				mFilterTabs;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	S32							mActivePanelIndex;
+// [/SL:KB]
 	bool						mResortActivePanel;
 	LLSaveFolderState*			mSavedFolderState;
 	std::string					mFilterText;
-	std::string					mFilterSubString;
+//	std::string					mFilterSubString;
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	bool						mFilterSubStringPerTab;
+	std::vector<std::string>	mFilterSubStrings;
+// [/SL:KB]
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	std::string					mFloaterTitle;
 // [/SL:KB]

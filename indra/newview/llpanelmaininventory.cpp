@@ -99,6 +99,10 @@ private:
 LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	: LLPanel(p),
 	  mActivePanel(NULL),
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	  mActivePanelIndex(-1),
+	  mFilterSubStringPerTab(true),
+// [/SL:KB]
 	  mSavedFolderState(NULL),
 	  mFilterText(""),
 	  mMenuGearDefault(NULL),
@@ -130,6 +134,11 @@ BOOL LLPanelMainInventory::postBuild()
 	mFilterTabs->setCommitCallback(boost::bind(&LLPanelMainInventory::onFilterSelected, this));
 	
 	//panel->getFilter()->markDefault();
+
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mActivePanelIndex = mFilterTabs->getPanelIndexByTitle("All Items");
+	mFilterSubStrings.insert(mFilterSubStrings.end(), mFilterTabs->getTabCount(), LLStringUtil::null);
+// [/SL:KB]
 
 	// Set up the default inv. panel/filter settings.
 	mActivePanel = getChild<LLInventoryPanel>("All Items");
@@ -396,7 +405,10 @@ void LLPanelMainInventory::onClearSearch()
 		mActivePanel->getRootFolder()->applyFunctorRecursively(opener);
 		mActivePanel->getRootFolder()->scrollToShowSelection();
 	}
-	mFilterSubString = "";
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0].clear();
+// [/SL:KB]
+//	mFilterSubString = "";
 }
 
 void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
@@ -412,8 +424,12 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 
 	LLInventoryModelBackgroundFetch::instance().start();
 
-	mFilterSubString = search_string;
-	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
+//	mFilterSubString = search_string;
+//	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = search_string;
+	if (mActivePanel->getFilterSubString().empty() && search_string.empty())
+// [/SL:KB]
 	{
 			// current filter and new filter empty, do nothing
 			return;
@@ -427,7 +443,10 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 	}
 
 	// set new filter string
-	setFilterSubString(mFilterSubString);
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	setFilterSubString(search_string);
+// [/SL:KB]
+//	setFilterSubString(mFilterSubString);
 }
 
 
@@ -474,14 +493,23 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 void LLPanelMainInventory::onFilterSelected()
 {
 	// Find my index
-	mActivePanel = (LLInventoryPanel*)getChild<LLTabContainer>("inventory filter tabs")->getCurrentPanel();
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mActivePanel = (LLInventoryPanel*)mFilterTabs->getCurrentPanel();
+	mActivePanelIndex = mFilterTabs->getCurrentPanelIndex();
+// [/SL:KB]
+//	mActivePanel = (LLInventoryPanel*)getChild<LLTabContainer>("inventory filter tabs")->getCurrentPanel();
 
 	if (!mActivePanel)
 	{
 		return;
 	}
 
-	setFilterSubString(mFilterSubString);
+//	setFilterSubString(mFilterSubString);
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (mFilterEditor)
+		mFilterEditor->setText(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
+	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
+// [/SL:KB]
 	LLInventoryFilter* filter = mActivePanel->getFilter();
 	LLFloaterInventoryFinder *finder = getFinder();
 	if (finder)
@@ -538,10 +566,10 @@ void LLPanelMainInventory::changed(U32)
 // virtual
 void LLPanelMainInventory::draw()
 {
-	if (mActivePanel && mFilterEditor)
-	{
-		mFilterEditor->setText(mFilterSubString);
-	}	
+//	if (mActivePanel && mFilterEditor)
+//	{
+//		mFilterEditor->setText(mFilterSubString);
+//	}	
 	if (mActivePanel && mResortActivePanel)
 	{
 		// EXP-756: Force resorting of the list the first time we draw the list: 
@@ -1101,7 +1129,10 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		}
 		const LLUUID& item_id = current_item->getListener()->getUUID();
 		const std::string &item_name = current_item->getListener()->getName();
-		mFilterSubString = item_name;
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = item_name;
+// [/SL:KB]
+//		mFilterSubString = item_name;
 		LLInventoryFilter *filter = mActivePanel->getFilter();
 		filter->setFilterSubString(item_name);
 		mFilterEditor->setText(item_name);
