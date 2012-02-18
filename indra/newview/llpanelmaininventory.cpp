@@ -137,6 +137,7 @@ BOOL LLPanelMainInventory::postBuild()
 
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	mActivePanelIndex = mFilterTabs->getPanelIndexByTitle("All Items");
+	mFilterSubStringPerTab = gSavedSettings.getBOOL("InventoryFilterStringPerTab");
 	mFilterSubStrings.insert(mFilterSubStrings.end(), mFilterTabs->getTabCount(), LLStringUtil::null);
 // [/SL:KB]
 
@@ -1142,6 +1143,13 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		filter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
 		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
 	}
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (command_name == "filter_string_per_tab")
+	{
+		mFilterSubStringPerTab = !mFilterSubStringPerTab;
+		gSavedSettings.setBOOL("InventoryFilterStringPerTab", mFilterSubStringPerTab);
+	}
+// [/SL:KB]
 }
 
 bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
@@ -1266,6 +1274,13 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 	{
 		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
 	}
+
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (command_name == "filter_string_per_tab")
+	{
+		return mFilterSubStringPerTab;
+	}
+// [/SL:KB]
 
 	return FALSE;
 }
