@@ -102,6 +102,9 @@ LLToolBar::LLToolBar(const LLToolBar::Params& p)
 	mModified(false),
 	mButtonPanel(NULL),
 	mCenteringStack(NULL),
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	mCaret(NULL),
+// [/SL:KB]
 	mPadLeft(p.pad_left),
 	mPadRight(p.pad_right),
 	mPadTop(p.pad_top),
@@ -195,6 +198,10 @@ void LLToolBar::initFromParams(const LLToolBar::Params& p)
 	center_panel_p.mouse_opaque = false;
 	LLLayoutPanel* center_panel = LLUICtrlFactory::create<LLLayoutPanel>(center_panel_p);
 	mCenteringStack->addChild(center_panel);
+
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	mCaret = getChild<LLIconCtrl>("caret");
+// [/SL:KB]
 
 	LLPanel::Params button_panel_p(p.button_panel);
 	button_panel_p.rect = center_panel->getLocalRect();
@@ -823,7 +830,10 @@ void LLToolBar::draw()
 	LLUI::translate((F32)getRect().mLeft, (F32)getRect().mBottom, 0.f);
 
 	// Position the caret 
-	LLIconCtrl* caret = getChild<LLIconCtrl>("caret");
+//	LLIconCtrl* caret = getChild<LLIconCtrl>("caret");
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	LLIconCtrl* caret = mCaret;
+// [/SL:KB]
 	caret->setVisible(FALSE);
 	if (mDragAndDropTarget && !mButtonCommands.empty())
 	{
