@@ -972,6 +972,14 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			|| !existing_inspector->getVisible()
 			|| existing_inspector->getKey()["avatar_id"].asUUID() != hover_object->getID())
 		{
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+			// Don't show an avatar inspector button if a (context) menu is open
+			if (gMenuHolder->hasVisibleMenu())
+			{
+				return TRUE;
+			}
+// [/SL:KB]
+
 			// IDEVO: try to get display name + username
 			std::string final_name;
 			std::string full_name;
@@ -1036,6 +1044,13 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			 || !existing_inspector->getVisible()
 			 || existing_inspector->getKey()["object_id"].asUUID() != hover_object->getID()))
 		{
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+			// Don't show an object inspector button if a (context) menu is open
+			if (gMenuHolder->hasVisibleMenu())
+			{
+				return TRUE;
+			}
+// [/SL:KB]
 
 			// Add price to tooltip for items on sale
 			bool for_sale = for_sale_selection(nodep);
