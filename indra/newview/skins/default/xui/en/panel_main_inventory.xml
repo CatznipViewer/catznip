@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- background_visible="true"
+ background_visible="false"
  default_tab_group="1"
  follows="all"
- height="395"
+ height="396"
  label="Things"
  layout="topleft"
  min_height="300"
@@ -53,10 +53,8 @@
    top="4"
    width="310" />
   <tab_container
-     bg_alpha_color="DkGray"
-     bg_opaque_color="DkGray"
-     background_visible="true"
-     background_opaque="true"
+     background_visible="false"
+     background_opaque="false"
      follows="all"
      halign="center"
      height="339"
@@ -66,14 +64,12 @@
      tab_height="27"
      tab_group="1"
      tab_position="top"
-     tab_min_width="100"
+     tab_min_width="154"
      top_pad="4"
-     width="316">
+     width="318">
     <inventory_panel
-     bg_opaque_color="DkGray2"
-     bg_alpha_color="DkGray2"
-     background_visible="true"
-     background_opaque="true"
+     background_visible="false"
+     background_opaque="false"
      border="false"
      bevel_style="none"
      follows="all"
@@ -85,13 +81,11 @@
      name="All Items"
      sort_order_setting="InventorySortOrder"
      show_item_link_overlays="true"
-     width="316" />
+     width="318" />
     <recent_inventory_panel
      accepts_drag_and_drop="false"
-     bg_opaque_color="DkGray2"
-     bg_alpha_color="DkGray2"
-     background_visible="true"
-     background_opaque="true"
+     background_visible="false"
+     background_opaque="false"
      border="false"
      bevel_style="none"
      follows="all"
@@ -102,7 +96,7 @@
      left_delta="0"
      name="Recent Items"
      show_item_link_overlays="true"
-     width="316" />
+     width="318" />
   </tab_container>
   <layout_stack
    animate="false"

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-	  background_visible="true"
+	  background_visible="false"
 	  follows="all"
-	  height="565"
+	  height="570"
 	  label="Things"
 	  layout="topleft"
 	  min_height="350"
@@ -16,7 +16,7 @@
 		 name="sidepanel__inventory_panel"
 		 top="0"
 		 label=""
-		 height="565"
+		 height="570"
 		 visible="true"
 		 width="330">
          <layout_stack
