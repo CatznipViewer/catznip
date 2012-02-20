@@ -5,7 +5,7 @@
  item_pad="0"
  keep_one_selected="true"
  multi_select="false"
- opaque="true">
+ opaque="false">
     <flat_list_view.no_items_text
      follows="all"
      name="no_items_msg"
