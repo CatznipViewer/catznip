@@ -574,11 +574,11 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
               <combo_box
              	 follows="bottom|left|right"
              	 control_name="RecentPeopleInteractionFilter"
-             	 height="23"
+             	 height="25"
              	 layout="topleft"
-             	 left_pad="5"
+             	 left_pad="1"
              	 name="interaction_type"
-             	 width="241">
+             	 width="244">
                 <combo_box.item
                  label="Any Interaction"
                  name="General"
