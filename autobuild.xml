@@ -1038,9 +1038,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>9c83f881a9007b9f485b72a5fd5dafd7</string>
+              <string>3b8b1872941a8a562e1ccdf3618c10bd</string>
               <key>url</key>
-              <string>http://viewer.catznip.com/downloads/libhunspell-1.3.1-windows-20110624.tar.bz2</string>
+              <string>http://viewer.catznip.com/downloads/libhunspell-1.3.1-windows-20120216.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
