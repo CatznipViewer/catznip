@@ -4049,7 +4049,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>https://my.secondlife.com/[AGENT_NAME]#about_tab</string>
+      <string>https://my.secondlife.com/[AGENT_NAME]</string>
     </map>
 	<key>WebProfileNonProductionURL</key>
 	<map>
