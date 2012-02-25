@@ -344,7 +344,7 @@
              label_width="125"
              layout="topleft"
              left="20"
-             max_val="100"
+             max_val="256"
              name="TexScaleU"
              top_pad="5"
              width="185" />
@@ -364,7 +364,7 @@
              label_width="125"
              layout="topleft"
              left="20"
-             max_val="100"
+             max_val="256"
              name="TexScaleV"
              width="185" />
             <check_box
@@ -399,7 +399,7 @@
              layout="topleft"
 			 label_width="135"
              left="10"
-             max_val="10"
+             max_val="512"
              min_val="0.1"
              name="rptctrl"
              width="195" />
