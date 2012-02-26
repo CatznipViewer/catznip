@@ -2527,7 +2527,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				LLSD args;
 				args["SUBJECT"] = subj;
 				args["MESSAGE"] = mes;
-				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp( (timestamp) ? timestamp : LLDate::now().secondsSinceEpoch() ));;
+// [/SL:KB]
+//				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
 			}
 
 			// Also send down the old path for now.
