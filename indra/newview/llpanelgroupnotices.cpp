@@ -37,6 +37,9 @@
 #include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llfloaterinventory.h"
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llagent.h"
 #include "llagentui.h"
 
@@ -435,18 +438,22 @@ void LLPanelGroupNotices::onClickNewMessage(void* data)
 {
 	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
 
-	self->arrangeNoticeView(CREATE_NEW_NOTICE);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	LLFloaterReg::showInstance("group_create_notice", LLSD().with("group", self->getGroupID()));
+// [/SL:KB]
 
-	if (self->mInventoryOffer)
-	{
-		self->mInventoryOffer->forceResponse(IOR_DECLINE);
-		self->mInventoryOffer = NULL;
-	}
-
-	self->mCreateSubject->clear();
-	self->mCreateMessage->clear();
-	if (self->mInventoryItem) onClickRemoveAttachment(self);
-	self->mNoticesList->deselectAllItems(TRUE); // TRUE == don't commit on chnage
+//	self->arrangeNoticeView(CREATE_NEW_NOTICE);
+//
+//	if (self->mInventoryOffer)
+//	{
+//		self->mInventoryOffer->forceResponse(IOR_DECLINE);
+//		self->mInventoryOffer = NULL;
+//	}
+//
+//	self->mCreateSubject->clear();
+//	self->mCreateMessage->clear();
+//	if (self->mInventoryItem) onClickRemoveAttachment(self);
+//	self->mNoticesList->deselectAllItems(TRUE); // TRUE == don't commit on chnage
 }
 
 void LLPanelGroupNotices::refreshNotices()
