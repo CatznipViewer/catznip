@@ -217,7 +217,7 @@ public:
 
 protected:
 	BOOL confirmRemoveItem(const LLSD& notification, const LLSD& response);
-// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.3.0) | Added: Catznip-3.2.1
 	void confirmRestoreToWorld(const LLSD& notification, const LLSD& response);
 // [/SL:KB]
 	virtual BOOL isItemPermissive() const;

@@ -37,7 +37,7 @@
 #include "llstring.h"
 #include "llvolume.h"
 #include "m3math.h"
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0)
 #include "llsdutil_math.h"
 // [/SL:KB]
 
@@ -125,7 +125,7 @@ BOOL	LLPanelObject::postBuild()
 
 	// Position
 	mLabelPosition = getChild<LLTextBox>("label position");
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopyPosition = findChild<LLButton>("copy_position_btn");
 	mBtnPastePosition = findChild<LLButton>("paste_position_btn");
 // [/SL:KB]
@@ -138,7 +138,7 @@ BOOL	LLPanelObject::postBuild()
 
 	// Scale
 	mLabelSize = getChild<LLTextBox>("label size");
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopySize = findChild<LLButton>("copy_size_btn");
 	mBtnPasteSize = findChild<LLButton>("paste_size_btn");
 // [/SL:KB]
@@ -155,7 +155,7 @@ BOOL	LLPanelObject::postBuild()
 
 	// Rotation
 	mLabelRotation = getChild<LLTextBox>("label rotation");
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopyRotation = findChild<LLButton>("copy_rotation_btn");
 	mBtnPasteRotation = findChild<LLButton>("paste_rotation_btn");
 // [/SL:KB]
@@ -295,7 +295,7 @@ BOOL	LLPanelObject::postBuild()
 
 LLPanelObject::LLPanelObject()
 :	LLPanel(),
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopyPosition(NULL),
 	mBtnPastePosition(NULL),
 	mBtnCopySize(NULL),
@@ -311,7 +311,7 @@ LLPanelObject::LLPanelObject()
 	mSculptTextureRevert(LLUUID::null),
 	mSculptTypeRevert(0)
 {
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mCommitCallbackRegistrar.add("BuildTool.CopyParams", boost::bind(&LLPanelObject::onClickBtnCopyParams, this, _2));
 	mCommitCallbackRegistrar.add("BuildTool.PasteParams", boost::bind(&LLPanelObject::onClickBtnPasteParams, this, _2));
 // [/SL:KB]
@@ -407,7 +407,7 @@ void LLPanelObject::getState( )
 
 
 	mLabelPosition->setEnabled( enable_move );
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopyPosition->setEnabled(enable_move);
 	mBtnPastePosition->setEnabled(enable_move && mObjectClipboard.has("position"));
 // [/SL:KB]
@@ -436,7 +436,7 @@ void LLPanelObject::getState( )
 	}
 
 	mLabelSize->setEnabled( enable_scale );
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopySize->setEnabled(enable_scale);
 	mBtnPasteSize->setEnabled(enable_scale && mObjectClipboard.has("size"));
 // [/SL:KB]
@@ -471,7 +471,7 @@ void LLPanelObject::getState( )
 	}
 
 	mLabelRotation->setEnabled( enable_rotate );
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 	mBtnCopyRotation->setEnabled(enable_rotate);
 	mBtnPasteRotation->setEnabled(enable_rotate && mObjectClipboard.has("rotation"));
 // [/SL:KB]
@@ -2077,10 +2077,10 @@ void LLPanelObject::onCommitSculptType(LLUICtrl *ctrl, void* userdata)
 	self->sendSculpt();
 }
 
-// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
 void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
 {
-	std::string strParam = sdParam.asString();
+	const std::string strParam = sdParam.asString();
 	if ("position" == strParam)
 	{
 		mObjectClipboard["position"] = ll_sd_from_vector3(LLVector3(mCtrlPosX->get(), mCtrlPosY->get(), mCtrlPosZ->get()));
@@ -2103,7 +2103,7 @@ void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
 
 void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 {
-	std::string strParam = sdParam.asString();
+	const std::string strParam = sdParam.asString();
 	if (!mObjectClipboard.has(strParam))
 		return;
 

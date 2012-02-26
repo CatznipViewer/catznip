@@ -33,7 +33,7 @@
 
 class LLButton;
 class LLCheckBoxCtrl;
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a)
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0)
 class LLComboBox;
 // [/SL:KB]
 class LLPanelPermissions;
@@ -151,7 +151,7 @@ public:
 
 	LLCheckBoxCtrl*	mCheckSnapToGrid;
 	LLButton*		mBtnGridOptions;
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
 	LLComboBox*		mComboGridMode;
 // [/SL:KB]
 	LLCheckBoxCtrl*	mCheckStretchUniform;

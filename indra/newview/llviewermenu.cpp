@@ -7255,7 +7255,7 @@ class LLToolsUseSelectionForGrid : public view_listener_t
 		LLSelectMgr::getInstance()->getSelection()->applyToRootObjects(&func);
 		LLSelectMgr::getInstance()->setGridMode(GRID_MODE_REF_OBJECT);
 
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
 		if (gFloaterTools)
 		{
 			gFloaterTools->mComboGridMode->setCurrentByIndex((S32)GRID_MODE_REF_OBJECT);

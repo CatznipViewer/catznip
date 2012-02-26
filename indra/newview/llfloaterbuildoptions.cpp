@@ -52,7 +52,7 @@
 LLFloaterBuildOptions::LLFloaterBuildOptions(const LLSD& key)
 //  : LLFloater(key),
 //    mComboGridMode(NULL)
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.0.0a) | Added: Caznip-3.0.0a
+// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
   : LLFloater(key)
 // [/SL:KB]
 {

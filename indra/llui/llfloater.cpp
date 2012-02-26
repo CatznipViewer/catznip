@@ -1442,7 +1442,7 @@ void LLFloater::removeDependentFloater(LLFloater* floaterp)
 	floaterp->mDependeeHandle = LLHandle<LLFloater>();
 }
 
-// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-11 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-11 (Catznip-3.3.0) | Added: Catznip-3.2.0
 bool LLFloater::isDependentFloater(const LLFloater* dependent) const
 {
 	return (dependent) && (mDependents.end() != std::find(mDependents.begin(), mDependents.end(), dependent->getHandle()));
