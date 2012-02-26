@@ -96,10 +96,10 @@ public:
 	virtual BOOL isVisibleByAgent(LLAgent* agentp);
 
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
-	/*virtual*/ S32 notifyParent(const LLSD& sdInfo);
+//	/*virtual*/ S32 notifyParent(const LLSD& sdInfo);
 // [/SL:KB]
 
-	void setItem(LLPointer<LLInventoryItem> inv_item);
+//	void setItem(LLPointer<LLInventoryItem> inv_item);
 
 	static void processGroupNoticesListReply(LLMessageSystem* msg, void** data);
 
@@ -114,43 +114,43 @@ public:
 	virtual void setGroupID(const LLUUID& id);
 
 private:
-	static void onClickRemoveAttachment(void* data);
+//	static void onClickRemoveAttachment(void* data);
 	static void onClickOpenAttachment(void* data);
-	static void onClickSendMessage(void* data);
+//	static void onClickSendMessage(void* data);
 	static void onClickNewMessage(void* data);
 	static void onClickRefreshNotices(void* data);
 
 	void processNotices(LLMessageSystem* msg);
 	static void onSelectNotice(LLUICtrl* ctrl, void* data);
 
-	enum ENoticeView
-	{
-		VIEW_PAST_NOTICE,
-		CREATE_NEW_NOTICE
-	};
-
-	void arrangeNoticeView(ENoticeView view_type);
+//	enum ENoticeView
+//	{
+//		VIEW_PAST_NOTICE,
+//		CREATE_NEW_NOTICE
+//	};
+//
+//	void arrangeNoticeView(ENoticeView view_type);
 
 	LLPointer<LLInventoryItem>	mInventoryItem;
 	
-	LLLineEditor		*mCreateSubject;
-    LLLineEditor		*mCreateInventoryName;
-	LLTextEditor		*mCreateMessage;
+//	LLLineEditor		*mCreateSubject;
+//    LLLineEditor		*mCreateInventoryName;
+//	LLTextEditor		*mCreateMessage;
 
 	LLLineEditor		*mViewSubject;
     LLLineEditor		*mViewInventoryName;
 	LLTextEditor		*mViewMessage;
 	
-	LLButton			*mBtnSendMessage;
+//	LLButton			*mBtnSendMessage;
 	LLButton			*mBtnNewMessage;
-	LLButton			*mBtnRemoveAttachment;
+//	LLButton			*mBtnRemoveAttachment;
 	LLButton			*mBtnOpenAttachment;
 	LLButton			*mBtnGetPastNotices;
 
-	LLPanel				*mPanelCreateNotice;
+//	LLPanel				*mPanelCreateNotice;
 	LLPanel				*mPanelViewNotice;
 
-	LLIconCtrl		 *mCreateInventoryIcon;
+//	LLIconCtrl		 *mCreateInventoryIcon;
 	LLIconCtrl		 *mViewInventoryIcon;
 	
 	LLScrollListCtrl *mNoticesList;
