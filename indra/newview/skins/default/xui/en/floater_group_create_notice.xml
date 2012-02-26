@@ -108,15 +108,14 @@
          length="1"
          follows="all"
          height="90"
+         label="Type your message here."
          layout="topleft"
          left_pad="0"
          max_length="511"
          name="message_editor"
          right="-5"
          top_delta="-2"
-         word_wrap="true">
-            Type your message here.
-        </text_editor>
+         word_wrap="true" />
         <text
          type="string"
          length="1"
