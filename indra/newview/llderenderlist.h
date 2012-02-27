@@ -32,15 +32,16 @@ struct LLDerenderEntry
 	bool isValid() const { return idObject.notNull(); }
 	LLSD toLLSD() const;
 
-	bool		fPersists;			// TRUE if this entry persist across sessions
+	bool			fPersists;			// TRUE if this entry persist across sessions
 
-	std::string	strObjectName;		// Object name (at the time of adding)
-	LLUUID		idObject;			// Object UUID (at the time of adding)
+	std::string		strObjectName;		// Object name (at the time of adding)
+	LLUUID			idObject;			// Object UUID (at the time of adding)
 
-	std::string	strRegionName;		// Region name
-	LLVector3	posRegion;			// Position of the object on the region
-	U64			idRegion;			// Region handle
-	U32			idObjectLocal;		// Local object ID (region-specific)
+	std::string		strRegionName;		// Region name
+	LLVector3		posRegion;			// Position of the object on the region
+	U64				idRegion;			// Region handle
+	U32				idRootLocal;		// Local object ID of the root (region-specific)
+	std::list<U32>	idsChildLocal;		// Local object ID of all child prims
 };
 
 // ============================================================================
@@ -50,7 +51,6 @@ struct LLDerenderEntry
 class LLDerenderList : public LLSingleton<LLDerenderList>
 {
 	friend class LLSingleton<LLDerenderList>;
-	typedef std::list<LLDerenderEntry> entry_list_t;
 protected:
 	LLDerenderList();
 	/*virtual*/ ~LLDerenderList();
@@ -60,8 +60,11 @@ protected:
 	 */
 public:
 	void addCurrentSelection();
-	bool isDerendered(const LLUUID& idObject) const { return m_Entries.end() != findEntry(idObject); }
-	void updateObject(const LLUUID& idObject, U64 idRegion, U32 idObjectLocal);
+	bool isDerendered(const LLUUID& idObject) const									{ return m_Entries.end() != findEntry(idObject); }
+	bool isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const	{ return m_Entries.end() != findEntry(idRegion, idObject, idRootLocal); }
+	void removeObject(const LLUUID& idObject);
+	void removeObjects(const uuid_vec_t& idsObject);
+	void updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& idObject, U32 idObjectLocal);
 protected:
 	void load();
 	void save() const;
@@ -69,14 +72,27 @@ protected:
 	/*
 	 * Entry helper functions
 	 */
+public:
+	typedef std::list<LLDerenderEntry> entry_list_t;
+	const entry_list_t&			 getEntries() const { return m_Entries; }
 protected:
 	entry_list_t::iterator		 findEntry(const LLUUID& idObject);
 	entry_list_t::const_iterator findEntry(const LLUUID& idObject) const;
+	entry_list_t::iterator		 findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal);
+	entry_list_t::const_iterator findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const;
+
+	/*
+	 * Static member functions
+	 */
+public:
+	typedef boost::signals2::signal<void()> change_signal_t;
+	static boost::signals2::connection setChangeCallback(const change_signal_t::slot_type& cb) { return s_ChangeSignal.connect(cb); }
 
 protected:
 	entry_list_t m_Entries;
 
-	static std::string s_PersistFilename;
+	static change_signal_t	s_ChangeSignal;
+	static std::string		s_PersistFilename;
 };
 
 // ============================================================================

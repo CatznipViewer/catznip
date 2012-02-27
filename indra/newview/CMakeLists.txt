@@ -173,6 +173,7 @@ set(viewer_SOURCE_FILES
     llfloateravatarpicker.cpp
     llfloateravatartextures.cpp
     llfloaterbeacons.cpp
+    llfloaterblocked.cpp
     llfloaterbuildoptions.cpp
     llfloaterbulkpermission.cpp
     llfloaterbump.cpp
@@ -728,6 +729,7 @@ set(viewer_HEADER_FILES
     llfloateravatarpicker.h
     llfloateravatartextures.h
     llfloaterbeacons.h
+    llfloaterblocked.h
     llfloaterbuildoptions.h
     llfloaterbulkpermission.h
     llfloaterbump.h

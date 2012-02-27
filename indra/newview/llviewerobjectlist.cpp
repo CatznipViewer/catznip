@@ -536,10 +536,16 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
 			// Don't recreate derendered objects (update the core object information so we'll have enough information to rerequest it later if needed)
-			if ( (LLDerenderList::instanceExists()) && (LLDerenderList::instance().isDerendered(fullid)) )
+			if ( (OUT_FULL == update_type) && (LLDerenderList::instanceExists()) )
 			{
-				LLDerenderList::instance().updateObject(fullid, regionp->getHandle(), local_id);
-				continue;
+				U32 idRootLocal;
+				mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_ParentID, idRootLocal, i);
+
+				if (LLDerenderList::instance().isDerendered(regionp->getHandle(), fullid, idRootLocal))
+				{
+					LLDerenderList::instance().updateObject(regionp->getHandle(), idRootLocal, fullid, local_id);
+					continue;
+				}
 			}
 // [/SL:KB]
 
