@@ -44,6 +44,10 @@
          label="1920 x 1080 (1080p)"
          name="item3"
          value="1920 x 1080" />
+        <combo_box.item
+         label="Fullscreen"
+         name="itemfullscreen"
+         value="fullscreen" />
     </combo_box>
     <button
      follows="right|bottom"
