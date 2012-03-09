@@ -694,7 +694,7 @@ class DarwinManifest(ViewerManifest):
 
                 icon_path = self.icon_path()
                 if self.prefix(src=icon_path, dst="") :
-                    self.path("secondlife.icns")
+                    self.path("catznip.icns")
                     self.end_prefix(icon_path)
 
                 self.path("SecondLife.nib")
