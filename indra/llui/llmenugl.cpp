@@ -3266,6 +3266,9 @@ void LLMenuBarGL::arrange( void )
 		}
 	}
 	reshape(rect.mRight, rect.getHeight());
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mResizeSignal();
+// [/SL:KB]
 }
 
 

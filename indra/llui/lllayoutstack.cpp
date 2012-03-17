@@ -373,6 +373,9 @@ void LLLayoutStack::updateLayout()
 		F32 panel_visible_dim = panelp->getVisibleDim();
 
 		LLRect panel_rect;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		LLRect panel_rect_old = panelp->getRect();
+// [/SL:KB]
 		if (mOrientation == HORIZONTAL)
 		{
 			panel_rect.setLeftTopAndSize(llround(cur_pos),
@@ -389,6 +392,10 @@ void LLLayoutStack::updateLayout()
 		}
 		panelp->setIgnoreReshape(true);
 		panelp->setShape(panel_rect);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		if (panel_rect_old != panelp->getRect())
+			panelp->fireResizeSignal();
+// [/SL:KB]
 		panelp->setIgnoreReshape(false);
 
 		LLRect resize_bar_rect(panel_rect);

@@ -15,10 +15,8 @@
 			<menu_item_check label="常に走る" name="Always Run"/>
 			<menu_item_call label="私のアニメーションを停止する" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="ログイン" name="Status">
 			<menu_item_call label="一時退席中" name="Set Away"/>
 			<menu_item_call label="取り込み中" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="管理者権限のリクエスト" name="Request Admin Options"/>
 		<menu_item_call label="管理者ステータス解除" name="Leave Admin Options"/>
 		<menu_item_call label="L$ の購入" name="Buy and Sell L$"/>
