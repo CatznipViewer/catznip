@@ -27,6 +27,9 @@
 
 #include "llviewerprecompiledheaders.h" // must be first include
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1)
+#include "llagentdata.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llnearbychat.h"
 #include "llnearbychatbar.h"
@@ -46,11 +49,17 @@ LLTipHandler::LLTipHandler(e_notification_type type, const LLSD& id)
 	mType = type;	
 
 	// Getting a Channel for our notifications
-	mChannel = LLChannelManager::getInstance()->createNotificationChannel();
+//	mChannel = LLChannelManager::getInstance()->createNotificationChannel();
+//
+//	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//	if(channel)
+//		channel->setOnRejectToastCallback(boost::bind(&LLTipHandler::onRejectToast, this, _1));
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	LLScreenChannel* channel = LLChannelManager::getInstance()->createNotificationChannel();
+	channel->setOnRejectToastCallback(boost::bind(&LLTipHandler::onRejectToast, this, _1));
 
-	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-	if(channel)
-		channel->setOnRejectToastCallback(boost::bind(&LLTipHandler::onRejectToast, this, _1));
+	mChannelHandle = channel->getHandle();
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
@@ -63,13 +72,21 @@ void LLTipHandler::initChannel()
 {
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
 	S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
-	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
+//	mChannel->init(channel_right_bound - channel_width, channel_right_bound);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	if (LLScreenChannelBase* channel = mChannelHandle.get())
+		channel->init(channel_right_bound - channel_width, channel_right_bound);
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
 bool LLTipHandler::processNotification(const LLSD& notify)
 {
-	if(!mChannel)
+//	if(!mChannel)
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
+	if (!channel)
+// [/SL:KB]
 	{
 		return false;
 	}
@@ -80,47 +97,70 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 		return false;	
 
 	// arrange a channel on a screen
-	if(!mChannel->getVisible())
+//	if(!mChannel->getVisible())
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	if (!channel->getVisible())
+// [/SL:KB]
 	{
 		initChannel();
 	}
 
 	if(notify["sigtype"].asString() == "add" || notify["sigtype"].asString() == "change")
 	{
-		// archive message in nearby chat
-		if (LLHandlerUtil::canLogToNearbyChat(notification))
-		{
-			LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		bool fShowToast = true;
 
-			// don't show toast if Nearby Chat is opened
-			LLNearbyChat* nearby_chat = LLNearbyChat::getInstance();
-			LLNearbyChatBar* nearby_chat_bar = LLNearbyChatBar::getInstance();
-			if (!nearby_chat_bar->isMinimized() && nearby_chat_bar->getVisible() && nearby_chat->getVisible())
+		// Don't log persisted notifications a second time
+		if (!notification->isPersisted())
+		{
+// [/SL:KB]
+			// archive message in nearby chat
+			if (LLHandlerUtil::canLogToNearbyChat(notification))
 			{
-				return false;
+				LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+
+				// don't show toast if Nearby Chat is opened
+				LLNearbyChat* nearby_chat = LLNearbyChat::getInstance();
+				LLNearbyChatBar* nearby_chat_bar = LLNearbyChatBar::getInstance();
+				if (!nearby_chat_bar->isMinimized() && nearby_chat_bar->getVisible() && nearby_chat->getVisible())
+				{
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+					fShowToast = false;
+// [/SL:KB]
+//					return false;
+				}
 			}
-		}
 
-		std::string session_name = notification->getPayload()["SESSION_NAME"];
-		const std::string name = notification->getSubstitutions()["NAME"];
-		if (session_name.empty())
-		{
-			session_name = name;
-		}
-		LLUUID from_id = notification->getPayload()["from_id"];
-		if (LLHandlerUtil::canLogToIM(notification))
-		{
-			LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
-					notification->getMessage(), from_id, from_id);
-		}
+//			std::string session_name = notification->getPayload()["SESSION_NAME"];
+			const std::string name = notification->getSubstitutions()["NAME"];
+//			if (session_name.empty())
+//			{
+//				session_name = name;
+//			}
+			LLUUID from_id = notification->getPayload()["from_id"];
+			if (LLHandlerUtil::canLogToIM(notification))
+			{
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				LLHandlerUtil::logToIMP2P(notification);
+// [/SL:KB]
+//				LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
+//						notification->getMessage(), from_id, from_id);
+			}
 
-		if (LLHandlerUtil::canSpawnIMSession(notification))
-		{
-			LLHandlerUtil::spawnIMSession(name, from_id);
+			if (LLHandlerUtil::canSpawnIMSession(notification))
+			{
+				LLHandlerUtil::spawnIMSession(name, from_id);
+			}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
 		}
+// [/SL:KB]
 
 		// don't spawn toast for inventory accepted/declined offers if respective IM window is open (EXT-5909)
-		if (!LLHandlerUtil::canSpawnToast(notification))
+//		if (!LLHandlerUtil::canSpawnToast(notification))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		fShowToast &= LLHandlerUtil::canSpawnToast(notification);
+		if (!fShowToast)
+// [/SL:KB]
 		{
 			return false;
 		}
@@ -137,13 +177,19 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 		
 		removeExclusiveNotifications(notification);
 
-		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-		if(channel)
-			channel->addToast(p);
+//		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//		if(channel)
+//			channel->addToast(p);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->addToast(p);
+// [/SL:KB]
 	}
 	else if (notify["sigtype"].asString() == "delete")
 	{
-		mChannel->killToastByNotificationID(notification->getID());
+//		mChannel->killToastByNotificationID(notification->getID());
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->killToastByNotificationID(notification->getID());
+// [/SL:KB]
 	}
 	return false;
 }

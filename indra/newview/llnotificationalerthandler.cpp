@@ -51,8 +51,14 @@ LLAlertHandler::LLAlertHandler(e_notification_type type, const LLSD& id) : mIsMo
 	p.channel_align = CA_CENTRE;
 
 	// Getting a Channel for our notifications
-	mChannel = LLChannelManager::getInstance()->getChannel(p);
-	mChannel->setCanStoreToasts(false);
+//	mChannel = LLChannelManager::getInstance()->getChannel(p);
+//	mChannel->setCanStoreToasts(false);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	LLScreenChannelBase* channel = LLChannelManager::getInstance()->getChannel(p);
+	channel->setCanStoreToasts(false);
+
+	mChannelHandle = channel->getHandle();
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
@@ -64,13 +70,21 @@ LLAlertHandler::~LLAlertHandler()
 void LLAlertHandler::initChannel()
 {
 	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().getWidth() / 2;
-	mChannel->init(channel_right_bound, channel_right_bound);
+//	mChannel->init(channel_right_bound, channel_right_bound);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	if (LLScreenChannelBase* channel = mChannelHandle.get())
+		channel->init(channel_right_bound, channel_right_bound);
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
 bool LLAlertHandler::processNotification(const LLSD& notify)
 {
-	if(!mChannel)
+//	if(!mChannel)
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannelHandle.get());
+	if (!channel)
+// [/SL:KB]
 	{
 		return false;
 	}
@@ -81,7 +95,10 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 		return false;
 
 	// arrange a channel on a screen
-	if(!mChannel->getVisible())
+//	if(!mChannel->getVisible())
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	if (!channel->getVisible())
+// [/SL:KB]
 	{
 		initChannel();
 	}
@@ -114,24 +131,36 @@ bool LLAlertHandler::processNotification(const LLSD& notify)
 		// Show alert in middle of progress view (during teleport) (EXT-1093)
 		LLProgressView* progress = gViewerWindow->getProgressView();
 		LLRect rc = progress && progress->getVisible() ? progress->getRect() : gViewerWindow->getWorldViewRectScaled();
-		mChannel->updatePositionAndSize(rc);
+//		mChannel->updatePositionAndSize(rc);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->updatePositionAndSize(rc);
+// [/SL:KB]
 
-		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-		if(channel)
-			channel->addToast(p);
+//		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//		if(channel)
+//			channel->addToast(p);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->addToast(p);
+// [/SL:KB]
 	}
 	else if (notify["sigtype"].asString() == "change")
 	{
 		LLToastAlertPanel* alert_dialog = new LLToastAlertPanel(notification, mIsModal);
-		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-		if(channel)
-			channel->modifyToastByNotificationID(notification->getID(), (LLToastPanel*)alert_dialog);
+//		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//		if(channel)
+//			channel->modifyToastByNotificationID(notification->getID(), (LLToastPanel*)alert_dialog);
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->modifyToastByNotificationID(notification->getID(), (LLToastPanel*)alert_dialog);
+// [/SL:KB]
 	}
 	else
 	{
-		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
-		if(channel)
-			channel->killToastByNotificationID(notification->getID());
+//		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel);
+//		if(channel)
+//			channel->killToastByNotificationID(notification->getID());
+// [SL:KB] - Patch: Notification-ScreenChannelHandle | Checked: 2011-12-04 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		channel->killToastByNotificationID(notification->getID());
+// [/SL:KB]
 	}
 	return false;
 }
