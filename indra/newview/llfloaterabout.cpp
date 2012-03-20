@@ -256,7 +256,10 @@ LLSD LLFloaterAbout::getInfo()
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
+//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2.3) | Added: Catznip-3.2.3
+	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+// [/SL:KB]
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 	info["CHANNEL"] = LLVersionInfo::getChannel();

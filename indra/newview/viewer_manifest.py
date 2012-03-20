@@ -560,7 +560,7 @@ class WindowsManifest(ViewerManifest):
             'version' : '.'.join(self.args['version']),
             'version_short' : '.'.join(self.args['version'][:-1]),
             'version_dashes' : '-'.join(self.args['version']),
-            'version_release' : 'R' + self.args['version'][-1],
+            'version_release' : 'R' + self.args['version'][0],
             'final_exe' : self.final_exe(),
             'grid':self.args['grid'],
             'grid_caps':self.args['grid'].upper(),
@@ -993,7 +993,7 @@ class LinuxManifest(ViewerManifest):
             installer_name = self.args['installer_name']
         else:
             installer_name_components = ['Catznip_', self.args.get('arch')]
-            installer_name_components.extend('R' + self.args['version'][-1])
+            installer_name_components.extend('R' + self.args['version'][0])
             installer_name_components.extend('-'.join(self.args['version'][:-1]))
             installer_name = "_".join(installer_name_components)
             if self.default_channel():
