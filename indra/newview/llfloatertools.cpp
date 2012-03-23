@@ -245,10 +245,7 @@ BOOL	LLFloaterTools::postBuild()
 	mRadioGroupFocus	= getChild<LLRadioGroup>("focus_radio_group");
 	mRadioGroupMove		= getChild<LLRadioGroup>("move_radio_group");
 	mRadioGroupEdit		= getChild<LLRadioGroup>("edit_radio_group");
-//	mBtnGridOptions		= getChild<LLButton>("Options...");
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-12-11 (Catznip-3.3.0) | Added: Caznip-3.2.0
-	mBtnGridOptions		= getChild<LLButton>("Grid Options...");
-// [/SL:KB]
+	mBtnGridOptions		= getChild<LLButton>("Options...");
 	mTitleMedia			= getChild<LLMediaCtrl>("title_media");
 	mBtnLink			= getChild<LLButton>("link_btn");
 	mBtnUnlink			= getChild<LLButton>("unlink_btn");
