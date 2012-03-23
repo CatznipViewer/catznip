@@ -47,26 +47,6 @@
         Click and drag to select land
     </floater.string>
     <floater.string
-     name="grid_screen_text">
-        Screen
-    </floater.string>
-    <floater.string
-     name="grid_local_text">
-        Local
-    </floater.string>
-    <floater.string
-     name="grid_world_text">
-        World
-    </floater.string>
-    <floater.string
-     name="grid_reference_text">
-        Reference
-    </floater.string>
-    <floater.string
-     name="grid_attachment_text">
-        Attachment
-    </floater.string>
-    <floater.string
      name="status_selectcount">
         [OBJ_COUNT] objects selected, land impact [LAND_IMPACT]
     </floater.string>
@@ -354,7 +334,7 @@
      control_name="SnapEnabled"
      height="18"
      initial_value="true"
-     label="Snap to grid"
+     label="Snap"
      layout="topleft"
      left="143"
      top_pad="0"
@@ -362,43 +342,18 @@
      width="134" />
     <button
      left_pad="0"
-     image_selected="ForwardArrow_Press"
-     image_unselected="ForwardArrow_Off"
+     label="Options..."
      layout="topleft"
      follows="top|left"
-     name="Grid Options..."
+     name="Options..."
      tool_tip="See more grid options"
-     top_pad="-22"
-     right="-10"
-     width="18"
-     height="23" >
+     top="83"
+     right="-35"
+     width="65"
+     height="21" >
 	 <button.commit_callback
 	     function="BuildTool.gridOptions"/>
 	</button>
-    <combo_box
-     height="23"
-     layout="topleft"
-     left="162"
-     follows="left|top"
-     name="combobox grid mode"
-     tool_tip="Choose the type of grid ruler for positioning the object"
-     top_pad="0"
-     width="108">
-        <combo_box.item
-         label="World grid"
-         name="World"
-         value="World" />
-        <combo_box.item
-         label="Local grid"
-         name="Local"
-         value="Local" />
-        <combo_box.item
-         label="Reference grid"
-         name="Reference"
-         value="Reference" />
-		 <combo_box.commit_callback
-	     function="BuildTool.gridMode"/>
-    </combo_box>
    <button
      follows="left|top"
      height="20"

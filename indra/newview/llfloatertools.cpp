@@ -36,9 +36,6 @@
 #include "llagentcamera.h"
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0)
-#include "llcombobox.h"
-// [/SL:KB]
 #include "lldraghandle.h"
 #include "llerror.h"
 #include "llfloaterbuildoptions.h"
@@ -120,9 +117,6 @@ void commit_radio_group_focus(LLUICtrl* ctrl);
 void commit_radio_group_move(LLUICtrl* ctrl);
 void commit_radio_group_edit(LLUICtrl* ctrl);
 void commit_radio_group_land(LLUICtrl* ctrl);
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-void commit_grid_mode(const LLUICtrl*);
-// [/SL:KB]
 void commit_slider_zoom(LLUICtrl *ctrl);
 
 /**
@@ -258,9 +252,6 @@ BOOL	LLFloaterTools::postBuild()
 // [/SL:KB]
 	mCheckSnapToGrid		= getChild<LLCheckBoxCtrl>("checkbox snap to grid");
 	getChild<LLUICtrl>("checkbox snap to grid")->setValue((BOOL)gSavedSettings.getBOOL("SnapEnabled"));
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-	mComboGridMode			= getChild<LLComboBox>("combobox grid mode");
-// [/SL:KB]
 	mCheckStretchUniform	= getChild<LLCheckBoxCtrl>("checkbox uniform");
 	getChild<LLUICtrl>("checkbox uniform")->setValue((BOOL)gSavedSettings.getBOOL("ScaleUniform"));
 	mCheckStretchTexture	= getChild<LLCheckBoxCtrl>("checkbox stretch textures");
@@ -347,9 +338,6 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 	mCheckSnapToGrid(NULL),
 	mBtnGridOptions(NULL),
 	mTitleMedia(NULL),
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-	mComboGridMode(NULL),
-// [/SL:KB]
 	mCheckStretchUniform(NULL),
 	mCheckStretchTexture(NULL),
 	mCheckStretchUniformLabel(NULL),
@@ -412,9 +400,6 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("BuildTool.gridOptions",		boost::bind(&LLFloaterTools::onClickGridOptions,this));
 	mCommitCallbackRegistrar.add("BuildTool.applyToSelection",	boost::bind(&click_apply_to_selection, this));
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-	mCommitCallbackRegistrar.add("BuildTool.gridMode",			boost::bind(&commit_grid_mode, _1));
-// [/SL:KB]
 	mCommitCallbackRegistrar.add("BuildTool.commitRadioLand",	boost::bind(&commit_radio_group_land,_1));
 	mCommitCallbackRegistrar.add("BuildTool.LandBrushForce",	boost::bind(&commit_slider_dozer_force,_1));
 	mCommitCallbackRegistrar.add("BuildTool.AddMedia",			boost::bind(&LLFloaterTools::onClickBtnAddMedia,this));
@@ -713,35 +698,6 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 		mRadioGroupEdit->setValue("radio select face");
 	}
 
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-	if (mComboGridMode) 
-	{
-		mComboGridMode->setVisible(edit_visible);
-		S32 index = mComboGridMode->getCurrentIndex();
-
-		mComboGridMode->removeall();
-		switch (mObjectSelection->getSelectType())
-		{
-			case SELECT_TYPE_HUD:
-				mComboGridMode->add(getString("grid_screen_text"));
-				mComboGridMode->add(getString("grid_local_text"));
-				//mComboGridMode->add(getString("grid_reference_text"));
-				break;
-			case SELECT_TYPE_WORLD:
-				mComboGridMode->add(getString("grid_world_text"));
-				mComboGridMode->add(getString("grid_local_text"));
-				mComboGridMode->add(getString("grid_reference_text"));
-				break;
-			case SELECT_TYPE_ATTACHMENT:
-				mComboGridMode->add(getString("grid_attachment_text"));
-				mComboGridMode->add(getString("grid_local_text"));
-				mComboGridMode->add(getString("grid_reference_text"));
-				break;
-		}
-
-		mComboGridMode->setCurrentByIndex(index);
-	}
-// [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
 	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
@@ -1087,15 +1043,6 @@ void commit_select_component(void *data)
 		LLSelectMgr::getInstance()->promoteSelectionToRoot();
 	}
 }
-
-// [SL:KB] - Patch: Build-GridRuler | Checked: 2011-10-07 (Catznip-3.3.0) | Added: Caznip-3.0.0
-void commit_grid_mode(const LLUICtrl* ctrl)
-{
-	const LLComboBox* pGridCombo = dynamic_cast<const LLComboBox*>(ctrl);
-	if (pGridCombo)
-		LLSelectMgr::getInstance()->setGridMode((EGridMode)pGridCombo->getCurrentIndex());
-}
-// [/SL:KB]
 
 // static 
 void LLFloaterTools::setObjectType( LLPCode pcode )
