@@ -1119,9 +1119,9 @@ void LLFloaterTools::onClickAxisOptions()
 
 void LLFloaterTools::onClickGridOptions()
 {
-// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.3.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
-	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
+	if (pGridFloater)
 		addDependentFloater(pGridFloater, TRUE);
 // [/SL:KB]
 //	LLFloaterReg::showInstance("build_options");
