@@ -76,6 +76,10 @@ public:
 	BOOL     		onDropSculpt(LLInventoryItem* item);
 	static void     onCommitSculptType(    LLUICtrl *ctrl, void* userdata);
 		
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
+	void			onClickBtnCopyParams(const LLSD& sdParam);
+	void			onClickBtnPasteParams(const LLSD& sdParam);
+// [/SL:KB]
 	
 protected:
 	void			getState();
@@ -94,6 +98,10 @@ protected:
 	
 protected:
 	// Per-object options
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.3.0) | Added: Catznip-3.1.0
+	LLButton*		mBtnCopyPrimParams;
+	LLButton*		mBtnPastePrimParams;
+// [/SL:KB]
 	LLComboBox*		mComboBaseType;
 
 	LLTextBox*		mLabelCut;
@@ -135,16 +143,28 @@ protected:
 	LLSpinCtrl*		mSpinRevolutions;
 
 	LLTextBox*		mLabelPosition;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
+	LLButton*		mBtnCopyPosition;
+	LLButton*		mBtnPastePosition;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlPosX;
 	LLSpinCtrl*		mCtrlPosY;
 	LLSpinCtrl*		mCtrlPosZ;
 
 	LLTextBox*		mLabelSize;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
+	LLButton*		mBtnCopySize;
+	LLButton*		mBtnPasteSize;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlScaleX;
 	LLSpinCtrl*		mCtrlScaleY;
 	LLSpinCtrl*		mCtrlScaleZ;
 
 	LLTextBox*		mLabelRotation;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
+	LLButton*		mBtnCopyRotation;
+	LLButton*		mBtnPasteRotation;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlRotX;
 	LLSpinCtrl*		mCtrlRotY;
 	LLSpinCtrl*		mCtrlRotZ;
@@ -167,6 +187,9 @@ protected:
 	BOOL			mIsPhantom;				// to avoid sending "phantom" when not changed
 	BOOL			mCastShadows;			// to avoid sending "cast shadows" when not changed
 	S32				mSelectedType;			// So we know what selected type we last were
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.3.0) | Added: Catznip-3.0.0
+	LLSD			mObjectClipboard;
+// [/SL:KB]
 
 	LLUUID          mSculptTextureRevert;   // so we can revert the sculpt texture on cancel
 	U8              mSculptTypeRevert;      // so we can revert the sculpt type on cancel
