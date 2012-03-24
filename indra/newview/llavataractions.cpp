@@ -90,7 +90,10 @@ void LLAvatarActions::requestFriendshipDialog(const LLUUID& id, const std::strin
     	LLNotificationsUtil::add("AddFriendWithMessage", args, payload, &callbackAddFriendWithMessage);
 
 	// add friend to recent people list
-	LLRecentPeople::instance().add(id);
+//	LLRecentPeople::instance().add(id);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	LLRecentPeople::instance().add(id, LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
 }
 
 void on_avatar_name_friendship(const LLUUID& id, const LLAvatarName av_name)
