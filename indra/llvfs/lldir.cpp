@@ -223,6 +223,13 @@ const std::string &LLDir::getChatLogsDir() const
 	return mChatLogsDir;
 }
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+const std::string &LLDir::getSnapshotDir() const
+{
+	return mSnapshotDir;
+}
+// [/SL:KB]
+
 const std::string &LLDir::getPerAccountChatLogsDir() const
 {
 	return mPerAccountChatLogsDir;
@@ -603,6 +610,20 @@ void LLDir::setChatLogsDir(const std::string &path)
 		llwarns << "Invalid name for LLDir::setChatLogsDir" << llendl;
 	}
 }
+
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLDir::setSnapshotDir(const std::string &path)
+{
+	if (!path.empty())
+	{
+		mSnapshotDir = path;
+	}
+	else
+	{
+		llwarns << "Invalid name for LLDir::setSnapshotDir" << llendl;
+	}
+}
+// [/SL:KB]
 
 void LLDir::setPerAccountChatLogsDir(const std::string &username)
 {
