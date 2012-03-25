@@ -1579,6 +1579,14 @@ void LLWorldMapView::handleClick(S32 x, S32 y, MASK mask,
 		}
 	}
 
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	LLSD sdParams;
+	sdParams["x"] = pos_global.mdV[VX];
+	sdParams["y"] = pos_global.mdV[VY];
+	sdParams["z"] = pos_global.mdV[VZ];
+	LLFloaterReg::showInstance("inspect_location", sdParams);
+// [/SL:KB]
+
 	// If we get here, we haven't clicked on anything
 	gFloaterWorldMap->trackLocation(pos_global);
 	mItemPicked = FALSE;
