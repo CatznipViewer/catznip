@@ -1169,20 +1169,11 @@ LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& regi
 {
 	LLVector3d pos_global;
 	LLVector3 pos_local;
-//	U8 bits;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
-	U16 bits;
-// [/SL:KB]
+	U8 bits;
 
-//	bits = compact_local & 0xFF;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
-	bits = compact_local & 0xFFFF;
-// [/SL:KB]
+	bits = compact_local & 0xFF;
 	pos_local.mV[VZ] = F32(bits) * 4.f;
-//	compact_local >>= 8;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
-	compact_local >>= 16;
-// [/SL:KB]
+	compact_local >>= 8;
 
 	bits = compact_local & 0xFF;
 	pos_local.mV[VY] = (F32)bits;
