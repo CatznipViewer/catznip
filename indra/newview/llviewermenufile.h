@@ -109,12 +109,22 @@ public:
 	static void cleanupClass();
 	static void clearDead();
 
-	std::string mFile; 
+//	std::string mFile; 
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	bool m_fMultiple;
+	std::vector<std::string> mFiles;
+// [/SL:KB]
 
 	LLFilePicker::ELoadFilter mFilter;
 
-	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
+//	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
+// [/SL:KB]
 		: LLThread("file picker"), mFilter(filter)
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		, m_fMultiple(multiple)
+// [/SL:KB]
 	{
 
 	}
@@ -123,7 +133,10 @@ public:
 
 	virtual void run();
 
-	virtual void notify(const std::string& filename) = 0;
+//	virtual void notify(const std::string& filename) = 0;
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	virtual void notify(const std::vector<std::string>& files) = 0;
+// [/SL:KB]
 };
 
 
