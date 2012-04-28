@@ -45,6 +45,8 @@
 #include "llwindow.h"
 #include "llviewerstats.h"
 #include "llviewerstatsrecorder.h"
+#include "llmarketplacefunctions.h"
+#include "llmarketplacenotifications.h"
 #include "llmd5.h"
 #include "llmeshrepository.h"
 #include "llpumpio.h"
@@ -732,7 +734,9 @@ bool LLAppViewer::init()
 
     // *NOTE:Mani - LLCurl::initClass is not thread safe. 
     // Called before threads are created.
-    LLCurl::initClass(gSavedSettings.getBOOL("CurlUseMultipleThreads"));
+    LLCurl::initClass(gSavedSettings.getF32("CurlRequestTimeOut"), 
+						gSavedSettings.getS32("CurlMaximumNumberOfHandles"), 
+						gSavedSettings.getBOOL("CurlUseMultipleThreads"));
 	LL_INFOS("InitInfo") << "LLCurl initialized." << LL_ENDL ;
 
     LLMachineID::init();
@@ -1358,17 +1362,19 @@ bool LLAppViewer::mainLoop()
 				{
 					S32 work_pending = 0;
 					S32 io_pending = 0;
+					F32 max_time = llmin(gFrameIntervalSeconds*10.f, 1.f);
+
 					{
 						LLFastTimer ftm(FTM_TEXTURE_CACHE);
- 						work_pending += LLAppViewer::getTextureCache()->update(1); // unpauses the texture cache thread
+ 						work_pending += LLAppViewer::getTextureCache()->update(max_time); // unpauses the texture cache thread
 					}
 					{
 						LLFastTimer ftm(FTM_DECODE);
-	 					work_pending += LLAppViewer::getImageDecodeThread()->update(1); // unpauses the image thread
+	 					work_pending += LLAppViewer::getImageDecodeThread()->update(max_time); // unpauses the image thread
 					}
 					{
 						LLFastTimer ftm(FTM_DECODE);
-	 					work_pending += LLAppViewer::getTextureFetch()->update(1); // unpauses the texture fetch thread
+	 					work_pending += LLAppViewer::getTextureFetch()->update(max_time); // unpauses the texture fetch thread
 					}
 
 					{
@@ -4524,6 +4530,10 @@ void LLAppViewer::idle()
 
 	// update media focus
 	LLViewerMediaFocus::getInstance()->update();
+	
+	// Update marketplace
+	LLMarketplaceInventoryImporter::update();
+	LLMarketplaceInventoryNotifications::update();
 
 	// objects and camera should be in sync, do LOD calculations now
 	{
