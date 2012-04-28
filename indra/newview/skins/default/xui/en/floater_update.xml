@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="false"
+ can_minimize="false"
+ can_resize="true"
+ height="500"
+ layout="topleft"
+ legacy_header_height="18"
+ name="modal container"
+ width="600">
+    <floater.string
+     name="update_string_optional">
+        An optional update for [APP_NAME] is available.
+Update version [VERSION]
+    </floater.string>
+    <floater.string
+     name="update_string_required">
+        An update for [APP_NAME] is available. This update is mandatory.
+Update version [VERSION]
+    </floater.string>
+    <floater.string
+     name="button_ok_download">
+        Download
+    </floater.string>
+    <floater.string
+     name="button_ok_install">
+        Install
+    </floater.string>
+
+    <text
+     follows="left|top"
+     font="SansSerif"
+     height="30"
+     layout="topleft"
+     left="15"
+     length="1"
+     name="txtUpdateMessage"
+     top="30"
+     type="string"
+     width="552"
+     word_wrap="true">
+        First line of the message goes here
+Second line of the message goes here
+    </text>
+    <web_browser
+     follows="left|right|top|bottom"
+     height="370"
+     layout="topleft"
+     left_delta="0"
+     name="webUpdate"
+     top_pad="5"
+     trusted_content="true" 
+     width="568" />
+
+    <check_box
+     follows="left|bottom"
+     height="16"
+     label="Skip this update"
+     layout="topleft"
+     left_delta="-5"
+     name="chkSkip"
+     top_pad="10"
+     width="55" />
+
+    <button
+     follows="left|bottom"
+     height="20"
+     label="Ok"
+     label_selected="Ok"
+     layout="topleft"
+     left_delta="0"
+     name="btnOk"
+     top_pad="5"
+     width="100" />
+    <button
+     follows="left|bottom"
+     height="20"
+     label="Close"
+     label_selected="Close"
+     layout="topleft"
+     left_pad="10"
+     name="btnCancel"
+     top_delta="0"
+     width="100" />
+</floater>
