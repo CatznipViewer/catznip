@@ -49,17 +49,14 @@ void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
 	sdBhvrColumns[1] = LLSD().with("column", "script_name").with("type", "text");
 
 	pListCtrl->clearRows();
-	for (LLSD::array_const_iterator itFile = sdKey["files"].beginArray(), endFile = sdKey["files"].endArray(); itFile != endFile;  ++itFile)
+	for (LLSD::array_const_iterator itFile = sdKey["files"].beginArray(), endFile = sdKey["files"].endArray(); 
+			itFile != endFile;  ++itFile)
 	{
-		std::string strFile = itFile->asString();
+		const LLSD& sdFile = *itFile;
 
-		sdBhvrRow["value"] = strFile;
+		sdBhvrRow["value"] = sdFile["path"];
 		sdBhvrColumns[0]["value"] = true;
-
-		std::string strName = gDirUtilp->getBaseFileName(strFile, true);
-		if (strName.find_last_of("-") == strName.length() - 9)
-			strName.erase(strName.length() - 9);
-		sdBhvrColumns[1]["value"] = strName;
+		sdBhvrColumns[1]["value"] = sdFile["name"];
 
 		pListCtrl->addElement(sdBhvrRow, ADD_BOTTOM);
 	}
@@ -143,11 +140,24 @@ protected:
 // static
 void LLScriptRecoverQueue::recoverIfNeeded()
 {
-	std::string strFilename, strPath = LLFile::tmpdir(); LLSD sdData, &sdFiles = sdData["files"];
+	const std::string strTempPath = LLFile::tmpdir();
+	LLSD sdData, &sdFiles = sdData["files"];
 
-	LLDirIterator itFiles(strPath, "*.lslbackup");
+	LLDirIterator itFiles(strTempPath, "*.lslbackup"); std::string strFilename;
 	while (itFiles.next(strFilename))
-		sdFiles.append(strPath + strFilename);
+	{
+		// Build a friendly name for the file
+		std::string strName = gDirUtilp->getBaseFileName(strFilename, true);
+		std::string::size_type offset = strName.find_last_of("-");
+		if ( (std::string::npos != offset) && (offset != 0) && (offset == strName.length() - 9))
+			strName.erase(strName.length() - 9);
+
+		LLStringUtil::trim(strName);
+		if (0 == strName.length())
+			strName = "(Unknown script)";
+
+		sdFiles.append(LLSD().with("path", strTempPath + strFilename).with("name", strName));
+	}
 
 	if (sdFiles.size())
 		LLFloaterReg::showInstance("script_recover", sdData);
