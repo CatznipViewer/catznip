@@ -512,13 +512,14 @@ LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
 {
 }
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-04-29 (Catznip-3.3.0) | Modified: Catznip-3.3.0
 LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
 	const LLSD& post_data,
 	const std::string& file_name,
 	LLAssetType::EType asset_type,
-	asset_upload_callback_t cb)
-	: LLAssetUploadResponder(post_data, file_name, asset_type), mCallback(cb)
+	upload_callback_t upload_cb,
+	error_callback_t error_cb)
+	: LLAssetUploadResponder(post_data, file_name, asset_type), mUploadCallback(upload_cb), mErrorCallback(error_cb)
 {
 }
 // [/SL:KB]
@@ -535,9 +536,9 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 		llwarns << "Inventory item for " << mVFileID
 			<< " is no longer in agent inventory." << llendl;
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-06 (Catznip-3.2.1) | Added: Catznip-3.2.1
-		if (!mCallback.empty())
+		if (!mUploadCallback.empty())
 		{
-			mCallback(item_id, content, false /*failure*/);
+			mUploadCallback(item_id, content, false /*failure*/);
 		}
 // [/SL:KB]
 		return;
@@ -553,9 +554,9 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 		<< content["new_asset"].asString() << llendl;
 
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
-	if (!mCallback.empty())
+	if (!mUploadCallback.empty())
 	{
-		mCallback(item_id, content, true /*success*/);
+		mUploadCallback(item_id, content, true /*success*/);
 		return;
 	}
 // [/SL:KB]
@@ -631,10 +632,21 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
 void LLUpdateAgentInventoryResponder::uploadFailure(const LLSD& content)
 {
-	if (!mCallback.empty())
-		mCallback(mPostData["item_id"].asUUID(), content, false /*failure*/);
+	if (!mUploadCallback.empty())
+		mUploadCallback(mPostData["item_id"].asUUID(), content, false /*failure*/);
 	else
 		LLAssetUploadResponder::uploadFailure(content);
+}
+
+void LLUpdateAgentInventoryResponder::error(U32 statusNum, const std::string& reason)
+{
+	LLAssetUploadResponder::error(statusNum, reason);
+	if (!mErrorCallback.empty())
+	{
+		// Clear the filename if the error callback returns false (prevents parent's destructor from deleting the file)
+		if (!mErrorCallback(mFileName, statusNum, reason))
+			mFileName.clear();
+	}
 }
 // [/SL:KB]
 

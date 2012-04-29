@@ -22,6 +22,7 @@
 #include "lldiriterator.h"
 #include "llfloaterreg.h"
 #include "llfolderview.h"
+#include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llinventorypanel.h"
 #include "llscrolllistctrl.h"
@@ -54,7 +55,7 @@ void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
 	{
 		const LLSD& sdFile = *itFile;
 
-		sdBhvrRow["value"] = sdFile["path"];
+		sdBhvrRow["value"] = sdFile;
 		sdBhvrColumns[0]["value"] = true;
 		sdBhvrColumns[1]["value"] = sdFile["name"];
 
@@ -89,25 +90,22 @@ void LLFloaterScriptRecover::onBtnRecover()
 	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
 
 	// Recover all selected, delete any unselected
-	std::vector<LLScrollListItem*> items = pListCtrl->getAllData(); std::list<std::string> strFiles;
+	std::vector<LLScrollListItem*> items = pListCtrl->getAllData(); LLSD sdFiles;
 	for (std::vector<LLScrollListItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
 	{
 		LLScrollListCheck* pCheckColumn = dynamic_cast<LLScrollListCheck*>((*itItem)->getColumn(0));
 		if (!pCheckColumn)
 			continue;
 
-		std::string strFile = (*itItem)->getValue().asString();
-		if (!strFile.empty())
-		{
-			if (pCheckColumn->getCheckBox()->getValue().asBoolean())
-				strFiles.push_back(strFile);
-			else
-				LLFile::remove(strFile);
-		}
+		const LLSD sdFile = (*itItem)->getValue();
+		if (pCheckColumn->getCheckBox()->getValue().asBoolean())
+			sdFiles.append(sdFile);
+		else
+			LLFile::remove(sdFile["path"]);
 	}
 
-	if (!strFiles.empty())
-		new LLScriptRecoverQueue(strFiles);
+	if (!sdFiles.emptyArray())
+		new LLScriptRecoverQueue(sdFiles);
 
 	closeFloater();
 }
@@ -163,12 +161,13 @@ void LLScriptRecoverQueue::recoverIfNeeded()
 		LLFloaterReg::showInstance("script_recover", sdData);
 }
 
-LLScriptRecoverQueue::LLScriptRecoverQueue(const std::list<std::string>& strFiles)
+LLScriptRecoverQueue::LLScriptRecoverQueue(const LLSD& sdFiles)
 {
-	for (std::list<std::string>::const_iterator itFilename = strFiles.begin(); itFilename != strFiles.end(); ++itFilename)
+	for (LLSD::array_const_iterator itFile = sdFiles.beginArray(), endFile = sdFiles.endArray(); itFile != endFile;  ++itFile)
 	{
-		if (LLFile::isfile(*itFilename))
-			m_FileQueue.insert(std::pair<std::string, LLUUID>(*itFilename, LLUUID::null ));
+		const LLSD& sdFile = *itFile;
+		if (LLFile::isfile(sdFile["path"]))
+			m_FileQueue.insert(std::pair<std::string, LLSD>(sdFile["path"], sdFile));
 	}
 	recoverNext();
 }
@@ -185,7 +184,7 @@ bool LLScriptRecoverQueue::recoverNext()
 
 	// Sanity check - if the associated UUID is non-null then this file is already being processed
 	filename_queue_t::const_iterator itFile = m_FileQueue.begin();
-	while ( (itFile != m_FileQueue.end()) && (itFile->second.notNull()) )
+	while ( (itFile != m_FileQueue.end()) && (itFile->second.has("item")) && (itFile->second["item"].asUUID().notNull()) )
 		++itFile;
 
 	if (m_FileQueue.end() == itFile) 
@@ -205,14 +204,11 @@ bool LLScriptRecoverQueue::recoverNext()
 		return false;
 	}
 
-	std::string strItemName = gDirUtilp->getBaseFileName(itFile->first, true);
-	if (strItemName.find_last_of("-") == strItemName.length() - 9)
-		strItemName.erase(strItemName.length() - 9);
 	std::string strItemDescr;
 	LLViewerAssetType::generateDescriptionFor(LLAssetType::AT_LSL_TEXT, strItemDescr);
 
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
-	                      strItemName, strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
+	                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
 	                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverScriptCallback(this));
 	return true;
 }
@@ -229,16 +225,11 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 	std::string strFileName;
 	for (filename_queue_t::iterator itFile = m_FileQueue.begin(); itFile != m_FileQueue.end(); ++itFile)
 	{
-		if (0 != gDirUtilp->getBaseFileName(itFile->first, true).find(pItem->getName()))
+		if (itFile->second["name"].asString() != pItem->getName())
 			continue;
-		strFileName = itFile->first;
-		itFile->second = idItem;
-	}
-
-	if (strFileName.empty())
-	{
-		// TODO: error handling
-		return;
+		strFileName = itFile->second["path"];
+		itFile->second["item"] = idItem;
+		break;
 	}
 
 	LLSD sdBody;
@@ -246,7 +237,10 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 	sdBody["target"] = "lsl2";
 
 	std::string strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
-	LLHTTPClient::post(strCapsUrl, sdBody, new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3)));
+	LLHTTPClient::post(strCapsUrl, sdBody, 
+	                   new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, 
+	                                                       boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3),
+	                                                       boost::bind(&LLScriptRecoverQueue::onUploadError, this, _1)));
 }
 
 void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool fSuccess)
@@ -255,7 +249,7 @@ void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool
 	if (pItem)
 	{
 		filename_queue_t::iterator itFile = m_FileQueue.begin();
-		while ( (itFile != m_FileQueue.end()) && (itFile->second != idItem) )
+		while ( (itFile != m_FileQueue.end()) && ((!itFile->second.has("item")) || (itFile->second["item"].asUUID() != idItem)) )
 			++itFile;
 		if (itFile != m_FileQueue.end())
 		{
@@ -264,6 +258,21 @@ void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool
 		}
 	}
 	recoverNext();
+}
+
+bool LLScriptRecoverQueue::onUploadError(const std::string& strFilename)
+{
+	// Skip over the file when there's an error, we can try again on the next relog
+	filename_queue_t::iterator itFile = m_FileQueue.find(strFilename);
+	if (itFile != m_FileQueue.end())
+	{
+		LLViewerInventoryItem* pItem = gInventory.getItem(itFile->second["item"]);
+		if (pItem)
+			change_item_parent(&gInventory, pItem, gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH), FALSE);
+		m_FileQueue.erase(itFile);
+	}
+	recoverNext();
+	return false;
 }
 
 // ============================================================================

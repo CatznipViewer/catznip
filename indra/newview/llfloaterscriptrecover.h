@@ -53,7 +53,7 @@ class LLScriptRecoverQueue
 	friend class LLCreateRecoverScriptCallback;
 	friend class LLFloaterScriptRecover;
 protected:
-	LLScriptRecoverQueue(const std::list<std::string>& strFiles);
+	LLScriptRecoverQueue(const LLSD& sdFiles);
 
 public:
 	static void recoverIfNeeded();
@@ -63,9 +63,10 @@ protected:
 
 	void onCreateScript(const LLUUID& idItem);
 	void onSavedScript(const LLUUID& idItem, const LLSD& sdContent, bool fSuccess);
+	bool onUploadError(const std::string& strFilename);
 
 protected:
-	typedef std::map<std::string, LLUUID> filename_queue_t;
+	typedef std::map<std::string, LLSD> filename_queue_t;
 	filename_queue_t m_FileQueue;
 };
 
