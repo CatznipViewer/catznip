@@ -2681,7 +2681,7 @@ namespace {
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
 	bool on_update_check_callback(const LLSD& sdData)
 	{
-		if (sdData["commit"].asBoolean())	// User clicked "Download"
+		if (sdData["accept"].asBoolean())	// User clicked "Download"
 		{
 			LLLoginInstance::instance().getUpdaterService()->startDownloading();
 		}
@@ -2710,9 +2710,11 @@ namespace {
 
 		LLSD sdUpdateData;
 		sdUpdateData["reply_pump"] = pumpUpdate.getName();
-		sdUpdateData["update_required"] = sdData["required"];
-		sdUpdateData["update_url"] = sdData["more_info"];
-		sdUpdateData["update_version"] = sdData["version"];
+		sdUpdateData["type"] = "download";
+		sdUpdateData["required"] = sdData["required"];
+		sdUpdateData["version"] = sdData["version"];
+		sdUpdateData["information"] = sdData["more_info"];
+		sdUpdateData["update_url"] = sdData["update_url"];
 		LLFloaterReg::showInstance("message_update", sdUpdateData);
 	}
 // [/SL:KB]
@@ -2760,35 +2762,27 @@ namespace {
 
 		LLSD substitutions;
 		substitutions["VERSION"] = data["version"];
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-		if (data.has("more_info"))
-		{
-			substitutions["RELEASE_NOTES_FULL_URL"] = data["more_info"].asString();
-		}
-		else
-		{
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-04-30 (Catznip-3.3.0) | Modified: Catznip-3.3.0
+		substitutions["UPDATE_URL"] = data["update_url"];
 // [/SL:KB]
-			// truncate version at the rightmost '.' 
-			std::string version_short(data["version"]);
-			size_t short_length = version_short.rfind('.');
-			if (short_length != std::string::npos)
-			{
-				version_short.resize(short_length);
-			}
-
-			LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
-			relnotes_url.setArg("[VERSION_SHORT]", version_short);
-
-			// *TODO thread the update service's response through to this point
-			std::string const & channel = LLVersionInfo::getChannel();
-			boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
-
-			relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
-			relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
-			substitutions["RELEASE_NOTES_FULL_URL"] = relnotes_url.getString();
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-		}
-// [/SL:KB]
+//		// truncate version at the rightmost '.' 
+//		std::string version_short(data["version"]);
+//		size_t short_length = version_short.rfind('.');
+//		if (short_length != std::string::npos)
+//		{
+//			version_short.resize(short_length);
+//		}
+//
+//		LLUIString relnotes_url("[RELEASE_NOTES_BASE_URL][CHANNEL_URL]/[VERSION_SHORT]");
+//		relnotes_url.setArg("[VERSION_SHORT]", version_short);
+//
+//		// *TODO thread the update service's response through to this point
+//		std::string const & channel = LLVersionInfo::getChannel();
+//		boost::shared_ptr<char> channel_escaped(curl_escape(channel.c_str(), channel.size()), &curl_free);
+//
+//		relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
+//		relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
+//		substitutions["RELEASE_NOTES_FULL_URL"] = relnotes_url.getString();
 
 		LLNotificationsUtil::add(notification_name, substitutions, LLSD(), apply_callback);
 	}

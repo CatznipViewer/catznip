@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011, Kitty Barnett
+ * Copyright (c) 2011-2012, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -19,24 +19,42 @@
 
 #include "llmodaldialog.h"
 
+// ====================================================================================
+// LLFloaterUpdate
+// 
+
 class LLFloaterUpdate : public LLModalDialog
 {
 public:
 	LLFloaterUpdate(const LLSD& sdData);
 	/*virtual*/ ~LLFloaterUpdate() {}
 
+	/*
+	 * LLView overrides
+	 */
+public:
 	BOOL postBuild();
 
-	enum EType { TYPE_DOWNLOAD = 0, TYPE_INSTALL = 1 };
+	/*
+	 * Event handlers
+	 */
 protected:
-	void onOkOrCancel(bool fCommit);
+	void onAcceptOrCancel(bool fCommit);
 
+	/*
+	 * Member variables
+	 */
 private:
+	enum EType { TYPE_DOWNLOAD = 0, TYPE_INSTALL = 1 };
+
 	std::string	m_strReplyPumpName;
-	EType		m_eType;
-	bool		m_fUpdateRequired;
-	std::string	m_strUpdateUrl;
-	std::string	m_strUpdateVersion;
+	EType       m_eType;
+	bool        m_fRequired;
+	std::string m_strVersion;
+	std::string m_strInformation;
+	std::string m_strUpdateUrl;
 };
+
+// ====================================================================================
 
 #endif // LL_LLUPDATE_H

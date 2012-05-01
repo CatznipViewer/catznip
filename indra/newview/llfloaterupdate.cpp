@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011, Kitty Barnett
+ * Copyright (c) 2011-2012, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -22,50 +22,51 @@
 #include "llfloaterupdate.h"
 #include "llmediactrl.h"
 
+// ====================================================================================
+
 LLFloaterUpdate::LLFloaterUpdate(const LLSD& sdData)
-	: LLModalDialog(sdData["update_version"])
+	: LLModalDialog(sdData["version"])
 	, m_strReplyPumpName(sdData["reply_pump"].asString())
-	, m_eType((EType)sdData["type"].asInteger())
-	, m_fUpdateRequired(sdData["update_required"].asBoolean())
+	, m_fRequired(sdData["required"].asBoolean())
+	, m_strVersion(sdData["version"].asString())
+	, m_strInformation(sdData["information"].asString())
 	, m_strUpdateUrl(sdData["update_url"].asString())
-	, m_strUpdateVersion(sdData["update_version"].asString())
 {
+	if ("download" == sdData["type"].asString())
+		m_eType = TYPE_DOWNLOAD;
+	else if ("install" == sdData["type"].asString())
+		m_eType = TYPE_INSTALL;
 }
 
 BOOL LLFloaterUpdate::postBuild()
 {
-	LLButton* pBtnOk = getChild<LLButton>("btnOk");
-	pBtnOk->setCommitCallback(boost::bind(&LLFloaterUpdate::onOkOrCancel, this, true));
-	std::string strBtnOk = getString((TYPE_INSTALL == m_eType) ? "button_ok_install" : "button_ok_download");
-	pBtnOk->setLabelSelected(strBtnOk);
-	pBtnOk->setLabelUnselected(strBtnOk);
-
-	LLButton* pBtnCancel = getChild<LLButton>("btnCancel");
-	pBtnCancel->setCommitCallback(boost::bind(&LLFloaterUpdate::onOkOrCancel, this, false));
-	pBtnCancel->setEnabled(!m_fUpdateRequired);
-
-	LLCheckBoxCtrl* pChkSkip = getChild<LLCheckBoxCtrl>("chkSkip");
-	pChkSkip->setEnabled(!m_fUpdateRequired);
+	setTitle(getString((TYPE_INSTALL == m_eType) ? "string_title_install" : "string_title_download"));
 
 	LLStringUtil::format_map_t args;
-	args["VERSION"] = m_strUpdateVersion;
-	childSetValue("txtUpdateMessage", getString((m_fUpdateRequired) ? "update_string_required" : "update_string_optional", args));
+	args["VERSION"] = m_strVersion;
+	getChild<LLUICtrl>("text_version")->setValue(getString((m_fRequired) ? "string_version_required" : "string_version_optional", args));
+	getChild<LLUICtrl>("text_message")->setValue(m_strInformation);
+	getChild<LLUICtrl>("text_website")->setTextArg("UPDATE_URL", m_strUpdateUrl);
 
-	LLMediaCtrl* pWebBrowser = getChild<LLMediaCtrl>("webUpdate");
-	if ( (pWebBrowser) && (!m_strUpdateUrl.empty()) )
-		pWebBrowser->navigateTo(m_strUpdateUrl);
+	LLButton* pAcceptBtn = getChild<LLButton>("button_accept");
+	pAcceptBtn->setCommitCallback(boost::bind(&LLFloaterUpdate::onAcceptOrCancel, this, true));
+	pAcceptBtn->setLabel(getString((TYPE_INSTALL == m_eType) ? "string_button_install" : "string_button_download"));
+
+	LLButton* pCancelBtn = getChild<LLButton>("button_cancel");
+	pCancelBtn->setCommitCallback(boost::bind(&LLFloaterUpdate::onAcceptOrCancel, this, false));
+	pCancelBtn->setEnabled(!m_fRequired);
 
 	return TRUE;
 }
 
-void LLFloaterUpdate::onOkOrCancel(bool fCommit)
+void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 {
 	LLSD sdData;
-	sdData["commit"] = fCommit;
-	sdData["skip"] = findChild<LLCheckBoxCtrl>("chkSkip")->getValue();
-	sdData["version"] = m_strUpdateVersion;
-
+	sdData["accept"] = fAccept;
+	sdData["version"] = m_strVersion;
 	LLEventPumps::instance().obtain(m_strReplyPumpName).post(sdData);
 
 	closeFloater();
 }
+
+// ====================================================================================
