@@ -83,7 +83,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3.0)
 		Optional<bool>						tab_allow_rearrange;
 // [/SL:KB]
 		Optional<S32>						tab_padding_right;
@@ -226,9 +226,12 @@ public:
 	void onJumpFirstBtn( const LLSD& data );
 	void onJumpLastBtn( const LLSD& data );
 
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
 	void setAllowRearrange(BOOL enable)	{ mAllowRearrange = enable; }
 	BOOL getAllowRearrange() const		{ return mAllowRearrange; }
+
+	typedef boost::signals2::signal<void(S32, LLPanel*)> tab_rearrange_signal_t;
+	boost::signals2::connection setRearrangeCallback(const tab_rearrange_signal_t::slot_type& cb);
 // [/SL:KB]
 
 private:
@@ -270,8 +273,9 @@ private:
 	
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
 	BOOL							mAllowRearrange;
+	tab_rearrange_signal_t*			mRearrangeSignal;
 // [/SL:KB]
 
 	BOOL							mScrolled;

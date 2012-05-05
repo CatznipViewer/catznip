@@ -27,6 +27,10 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+#include "llchiclet.h"
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "llimfloatercontainer.h"
 #include "llfloaterreg.h"
 #include "llimview.h"
@@ -34,7 +38,7 @@
 #include "llgroupiconctrl.h"
 #include "llagent.h"
 #include "lltransientfloatermgr.h"
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3.0)
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -59,12 +63,32 @@ BOOL LLIMFloaterContainer::postBuild()
 	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLIMFloaterContainer::onNewMessageReceived, this, _1));
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 	// mTabContainer will be initialized in LLMultiFloater::addChild()
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
 	if (gSavedSettings.getBOOL("RearrangeIMTabs"))
+	{
 		mTabContainer->setAllowRearrange(true);
+		mTabContainer->setRearrangeCallback(boost::bind(&LLIMFloaterContainer::onIMTabRearrange, this, _1, _2));
+	}
 // [/SL:KB]
 	return TRUE;
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+void LLIMFloaterContainer::onIMTabRearrange(S32 tab_index, LLPanel* tab_panel)
+{
+	LLFloater* pIMFloater = dynamic_cast<LLFloater*>(tab_panel);
+	if (!pIMFloater)
+		return;
+
+	const LLUUID& idSession = pIMFloater->getKey().asUUID();
+	if (idSession.isNull())
+		return;
+
+	LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+	LLChiclet* pIMChiclet = pChicletPanel->findChiclet<LLChiclet>(idSession);
+	pChicletPanel->setChicletIndex(pIMChiclet, tab_index);
+}
+// [/SL:KB]
 
 void LLIMFloaterContainer::onOpen(const LLSD& key)
 {
