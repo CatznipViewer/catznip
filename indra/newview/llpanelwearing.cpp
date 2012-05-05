@@ -101,6 +101,7 @@ protected:
 
 //		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
+		registrar.add("Wearing.TouchAttach", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
 		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
 		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 // [/SL:KB]
@@ -151,11 +152,14 @@ protected:
 
 		// Enable/disable some menu items depending on the selection.
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3.0)
+		bool show_touch = !bp_selected && !clothes_selected && attachments_selected;
 		bool show_edit = bp_selected || clothes_selected || attachments_selected;
 		bool show_detach = !clothes_selected && attachments_selected;
 		bool show_take_off = clothes_selected && !attachments_selected;
 		bool show_take_off_or_detach = clothes_selected && attachments_selected;
 
+		menu->setItemVisible("touch_attach",       show_touch);
+		menu->setItemEnabled("touch_attach",       1 == mUUIDs.size() && enable_attachment_touch(mUUIDs.front()));
 		menu->setItemVisible("edit_item",          show_edit);
 		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && enable_item_edit(mUUIDs.front()));
 		menu->setItemVisible("detach",             show_detach);

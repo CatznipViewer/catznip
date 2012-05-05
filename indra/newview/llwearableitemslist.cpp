@@ -810,6 +810,9 @@ LLContextMenu* LLWearableItemsList::ContextMenu::createMenu()
 	// Register handlers for body parts.
 
 	// Register handlers for attachments.
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3.0)
+	registrar.add("Attachment.Touch", boost::bind(handle_attachment_touch, selected_id));
+// [/SL:KB]
 	registrar.add("Attachment.Detach", boost::bind(handleMultiple, take_off, ids));
 	registrar.add("Attachment.Profile", boost::bind(show_item_profile, selected_id));
 	registrar.add("Object.Attach", boost::bind(LLViewerAttachMenu::attachObjects, ids, _2));
@@ -901,6 +904,8 @@ void LLWearableItemsList::ContextMenu::updateItemsVisibility(LLContextMenu* menu
 	//visible only when one item selected and this item is worn
 //	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART) && n_worn == n_items && n_worn == 1);
 // [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
+	setMenuItemVisible(menu, "touch",				mask == MASK_ATTACHMENT && n_worn == n_items);
+	setMenuItemEnabled(menu, "touch",				n_worn == 1 && enable_attachment_touch(mUUIDs.front()));
 	setMenuItemVisible(menu, "edit",				!standalone && mask & (MASK_CLOTHING|MASK_BODYPART|MASK_ATTACHMENT) && n_worn == n_items && n_worn == 1);
 // [/SL:KB]
 	setMenuItemEnabled(menu, "edit",				n_editable == 1 && n_worn == 1 && n_items == 1);

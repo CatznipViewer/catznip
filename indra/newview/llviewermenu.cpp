@@ -2611,6 +2611,41 @@ void handle_attachment_edit(const LLUUID& idItem)
 	handle_object_edit();
 }
 
+void handle_attachment_touch(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (!isAgentAvatarValid()) || (!pItem) )
+		return;
+
+	LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+	if (!pAttachObj)
+		return;
+
+	LLSelectMgr::getInstance()->deselectAll();
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
+	struct SetTransient : public LLSelectedNodeFunctor
+	{
+		bool apply(LLSelectNode* node)
+		{
+			node->setTransient(TRUE);
+			return true;
+		}
+	} f;
+	hSel->applyToNodes(&f);
+
+	handle_object_touch();
+}
+
+bool enable_attachment_touch(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (!isAgentAvatarValid()) || (!pItem) )
+		return false;
+
+	LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+	return (pAttachObj) && (pAttachObj->flagHandleTouch());
+}
+
 void handle_item_edit(const LLUUID& idItem)
 {
 	const LLInventoryItem* pItem = gInventory.getItem(idItem);
