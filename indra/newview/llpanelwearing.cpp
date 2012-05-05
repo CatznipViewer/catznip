@@ -100,13 +100,13 @@ protected:
 		functor_t take_off = boost::bind(&LLAppearanceMgr::removeItemFromAvatar, LLAppearanceMgr::getInstance(), _1);
 
 //		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
 		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
 		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 // [/SL:KB]
 		registrar.add("Wearing.TakeOff", boost::bind(handleMultiple, take_off, mUUIDs));
 		registrar.add("Wearing.Detach", boost::bind(handleMultiple, take_off, mUUIDs));
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
 		registrar.add("Wearing.TakeOffDetach", boost::bind(handleMultiple, take_off, mUUIDs));
 // [/SL:KB]
 
@@ -150,19 +150,29 @@ protected:
 		}
 
 		// Enable/disable some menu items depending on the selection.
-		bool allow_detach = !bp_selected && !clothes_selected && attachments_selected;
-		bool allow_take_off = !bp_selected && clothes_selected && !attachments_selected;
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3.0)
+		bool show_edit = bp_selected || clothes_selected || attachments_selected;
+		bool show_detach = !clothes_selected && attachments_selected;
+		bool show_take_off = clothes_selected && !attachments_selected;
+		bool show_take_off_or_detach = clothes_selected && attachments_selected;
 
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
-		menu->setItemVisible("edit_item",	bp_selected || clothes_selected || attachments_selected);
-		menu->setItemEnabled("edit_item",	1 == mUUIDs.size());
+		menu->setItemVisible("edit_item",          show_edit);
+		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && enable_item_edit(mUUIDs.front()));
+		menu->setItemVisible("detach",             show_detach);
+		menu->setItemEnabled("detach",             !bp_selected);
+		menu->setItemVisible("take_off",           show_take_off);
+		menu->setItemEnabled("take_off",           !bp_selected);
+		menu->setItemVisible("take_off_or_detach", show_take_off_or_detach);
+		menu->setItemEnabled("take_off_or_detach", !bp_selected);
+
+		menu->setItemVisible("edit_outfit_separator", show_edit || show_detach || show_take_off || show_take_off_or_detach);
 // [/SL:KB]
-		menu->setItemVisible("take_off",	allow_take_off);
-		menu->setItemVisible("detach",		allow_detach);
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
-		menu->setItemVisible("take_off_or_detach", (!allow_detach) && (!allow_take_off) && (clothes_selected) && (attachments_selected));
-// [/SL:KB]
-		menu->setItemVisible("edit_outfit_separator", allow_take_off || allow_detach);
+//		bool allow_detach = !bp_selected && !clothes_selected && attachments_selected;
+//		bool allow_take_off = !bp_selected && clothes_selected && !attachments_selected;
+//
+//		menu->setItemVisible("take_off",	allow_take_off);
+//		menu->setItemVisible("detach",		allow_detach);
+//		menu->setItemVisible("edit_outfit_separator", allow_take_off || allow_detach);
 	}
 };
 

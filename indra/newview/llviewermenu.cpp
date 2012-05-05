@@ -2594,7 +2594,7 @@ void handle_object_edit()
 	return;
 }
 
-// [SL:KB] - Patch: Inventory-AttachmentEdit - Checked: 2010-08-25 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-08-25 (Catznip-3.3.0)
 void handle_attachment_edit(const LLUUID& idItem)
 {
 	const LLInventoryItem* pItem = gInventory.getItem(idItem);
@@ -2628,6 +2628,24 @@ void handle_item_edit(const LLUUID& idItem)
 			break;
 		default:
 			break;
+	}
+}
+
+bool enable_item_edit(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if (!pItem)
+		return false;
+
+	switch (pItem->getType())
+	{
+		case LLAssetType::AT_BODYPART:
+		case LLAssetType::AT_CLOTHING:
+			return gAgentWearables.isWearableModifiable(idItem);
+		case LLAssetType::AT_OBJECT:
+			return true;
+		default:
+			return false;
 	}
 }
 // [/SL:KB]
