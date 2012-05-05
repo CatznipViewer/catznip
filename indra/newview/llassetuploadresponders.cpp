@@ -323,21 +323,33 @@ void LLAssetUploadResponder::uploadComplete(const LLSD& content)
 {
 }
 
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
 LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
 	const LLSD& post_data,
 	const LLUUID& vfile_id,
-	LLAssetType::EType asset_type)
+	LLAssetType::EType asset_type,
+	const std::list<std::string> files)
 	: LLAssetUploadResponder(post_data, vfile_id, asset_type)
+	, mFiles(files)
 {
 }
+// [/SL:KB]
 
-LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
-	const LLSD& post_data,
-	const std::string& file_name,
-	LLAssetType::EType asset_type)
-	: LLAssetUploadResponder(post_data, file_name, asset_type)
-{
-}
+//LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
+//	const LLSD& post_data,
+//	const LLUUID& vfile_id,
+//	LLAssetType::EType asset_type)
+//	: LLAssetUploadResponder(post_data, vfile_id, asset_type)
+//{
+//}
+
+//LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
+//	const LLSD& post_data,
+//	const std::string& file_name,
+//	LLAssetType::EType asset_type)
+//	: LLAssetUploadResponder(post_data, file_name, asset_type)
+//{
+//}
 
 // virtual
 void LLNewAgentInventoryResponder::error(U32 statusNum, const std::string& reason)
@@ -394,9 +406,15 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 	// *FIX: This is a pretty big hack. What this does is check the
 	// file picker if there are any more pending uploads. If so,
 	// upload that file.
-	std::string next_file = LLFilePicker::instance().getNextFile();
-	if(!next_file.empty())
+//	std::string next_file = LLFilePicker::instance().getNextFile();
+//	if(!next_file.empty())
+//	{
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	if (!mFiles.empty())
 	{
+		const std::string next_file = mFiles.front();
+		mFiles.pop_front();
+// [/SL:KB]
 		std::string name = gDirUtilp->getBaseFileName(next_file, true);
 
 		std::string asset_name = name;
@@ -424,7 +442,7 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 
 		std::string display_name = LLStringUtil::null;
 		LLAssetStorage::LLStoreAssetCallback callback = NULL;
-		void *userdata = NULL;
+//		void *userdata = NULL;
 
 		upload_new_resource(
 			next_file,
@@ -439,7 +457,10 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 			display_name,
 			callback,
 			LLGlobalEconomy::Singleton::getInstance()->getPriceUpload(),
-			userdata);
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+			(!mFiles.empty()) ? new std::list<std::string>(mFiles) : NULL);
+// [/SL:KB]
+//			userdata);
 	}
 
 	//LLImportColladaAssetCache::getInstance()->assetUploaded(mVFileID, content["new_asset"], TRUE);
