@@ -94,8 +94,13 @@ std::string appendTime()
 {
 	time_t utc_time;
 	utc_time = time_corrected();
-	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
-		+LLTrans::getString("TimeMin")+"]";
+//	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
+//		+LLTrans::getString("TimeMin")+"]";
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	std::string timeStr = "[" + LLTrans::getString("TimeHour") + "]:[" + LLTrans::getString("TimeMin") + "]";
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
+// [/SL:KB]
 
 	LLSD substitution;
 

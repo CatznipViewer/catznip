@@ -18,10 +18,10 @@
      layout="topleft"
      left="1"
      name="im_box_tab_container"
-     tab_position="bottom"
-     tab_width="64"
-     tab_max_width = "134"
-     tab_height="16"
+     tab_position="left"
+     tab_width="115"
+     tab_max_width = "115"
+     tab_height="20"
      use_custom_icon_ctrl="true"
      tab_icon_ctrl_pad="2"
      halign="left"
@@ -29,21 +29,10 @@
      top="0"
      width="394">
       <first_tab
-       tab_bottom_image_flash="Toolbar_Left_Flash"/>
+       tab_left_image_flash="Toolbar_Left_Flash"/>
       <middle_tab
-       tab_bottom_image_flash="Toolbar_Middle_Flash"/>
+       tab_left_image_flash="Toolbar_Middle_Flash"/>
       <last_tab
-       tab_bottom_image_flash="Toolbar_Right_Flash"/>
+       tab_left_image_flash="Toolbar_Right_Flash"/>
     </tab_container>
-    <icon
-     color="DefaultShadowLight"
-     enabled="false"
-     follows="left|right|bottom"
-     height="17"
-     image_name="tabarea.tga"
-     layout="bottomleft"
-     left="1"
-     name="im_box_tab_container_icon"
-     bottom="7"
-     width="394" />
 </multi_floater>
