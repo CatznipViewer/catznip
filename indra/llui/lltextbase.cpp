@@ -207,6 +207,9 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mSelectionStart( 0 ),
 	mSelectionEnd( 0 ),
 	mIsSelecting( FALSE ),
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mIsSelectDragging(FALSE),
+// [/SL:KB]
 	mPlainText ( p.plain_text ),
 	mWordWrap(p.wrap),
 	mUseEllipses( p.use_ellipses ),
@@ -1101,6 +1104,9 @@ void LLTextBase::deselect()
 	mSelectionStart = 0;
 	mSelectionEnd = 0;
 	mIsSelecting = FALSE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mIsSelectDragging = FALSE;
+// [/SL:KB]
 }
 
 
@@ -2505,6 +2511,9 @@ void LLTextBase::startSelection()
 	if( !mIsSelecting )
 	{
 		mIsSelecting = TRUE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		mIsSelectDragging = FALSE;
+// [/SL:KB]
 		mSelectionStart = mCursorPos;
 		mSelectionEnd = mCursorPos;
 	}
@@ -2515,6 +2524,9 @@ void LLTextBase::endSelection()
 	if( mIsSelecting )
 	{
 		mIsSelecting = FALSE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		mIsSelectDragging = FALSE;
+// [/SL:KB]
 		mSelectionEnd = mCursorPos;
 	}
 }
