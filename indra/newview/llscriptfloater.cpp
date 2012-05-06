@@ -294,8 +294,12 @@ void LLScriptFloater::dockToChiclet(bool dock)
 		bool save = getSavePosition();
 		setSavePosition(false);
 
+//		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
+//			LLDockControl::BOTTOM));
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
-			LLDockControl::BOTTOM));
+			(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
 
 		setDocked(dock);
 
@@ -519,6 +523,32 @@ std::string LLScriptFloaterManager::getObjectName(const LLUUID& notification_id)
 	return text;
 }
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+LLUUID LLScriptFloaterManager::getObjectOwner(const LLUUID& notification_id)
+{
+	using namespace LLNotificationsUI;
+	LLNotificationPtr notification = LLNotifications::getInstance()->find(notification_id);
+	if (!notification)
+	{
+		llwarns << "Invalid notification" << llendl;
+		return LLUUID::null;
+	}
+
+	LLUUID owner_id;
+	switch(LLScriptFloaterManager::getObjectType(notification_id))
+	{
+		case LLScriptFloaterManager::OBJ_SCRIPT:
+		case LLScriptFloaterManager::OBJ_LOAD_URL:
+		case LLScriptFloaterManager::OBJ_GIVE_INVENTORY:
+			owner_id = notification->getPayload()["owner_id"].asUUID();
+			break;
+		default:
+			break;
+	}
+	return owner_id;
+}
+// [/SL:KB]
+
 //static
 LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMap()
 {
@@ -527,6 +557,9 @@ LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMa
 	type_map["ScriptDialogGroup"] = OBJ_SCRIPT;
 	type_map["LoadWebPage"] = OBJ_LOAD_URL;
 	type_map["ObjectGiveItem"] = OBJ_GIVE_INVENTORY;
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	type_map["OwnObjectGiveItem"] = OBJ_GIVE_INVENTORY;
+// [/SL:KB]
 	return type_map;
 }
 
