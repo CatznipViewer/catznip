@@ -58,7 +58,12 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+		registrar.add("Gear.TouchAttach", boost::bind(&LLWearingGearMenu::onTouchAttach, this));
+		registrar.add("Gear.EditItem", boost::bind(&LLWearingGearMenu::onEditItem, this));
+		registrar.add("Gear.EditOutfit", boost::bind(&edit_outfit));
+// [/SL:KB]
+//		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
 		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
 		registrar.add("Gear.Copy", boost::bind(&LLPanelWearing::copyToClipboard, mPanelWearing));
 
@@ -72,6 +77,26 @@ public:
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 private:
+
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+	void onTouchAttach()
+	{
+		uuid_vec_t selected_uuids;
+		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
+
+		if (selected_uuids.size() > 0)
+			handle_attachment_touch(selected_uuids.front());
+	}
+
+	void onEditItem()
+	{
+		uuid_vec_t selected_uuids;
+		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
+
+		if (selected_uuids.size() > 0)
+			handle_item_edit(selected_uuids.front());
+	}
+// [/SL:KB]
 
 	void onTakeOff()
 	{
@@ -278,6 +303,21 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 	{
 		return hasItemSelected() && canTakeOffSelected();
 	}
+
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+	uuid_vec_t selected_uuids;
+	getSelectedItemsUUIDs(selected_uuids);
+
+	if (command_name == "touch_attach")
+	{
+		return (1 == selected_uuids.size()) && (enable_attachment_touch(selected_uuids.front()));
+	}
+
+	if (command_name == "edit_item")
+	{
+		return (1 == selected_uuids.size()) && (enable_item_edit(selected_uuids.front()));
+	}
+// [/SL:KB]
 
 	return false;
 }

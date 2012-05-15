@@ -2639,7 +2639,7 @@ void handle_attachment_touch(const LLUUID& idItem)
 bool enable_attachment_touch(const LLUUID& idItem)
 {
 	const LLInventoryItem* pItem = gInventory.getItem(idItem);
-	if ( (!isAgentAvatarValid()) || (!pItem) )
+	if ( (!isAgentAvatarValid()) || (!pItem) || (LLAssetType::AT_OBJECT != pItem->getType()) )
 		return false;
 
 	LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
