@@ -35,6 +35,8 @@ indra/newview/mozilla-theme
 indra/newview/mozilla-universal-darwin.tgz
 indra/newview/res/ll_icon.*
 indra/newview/res-sdl
+indra/newview/skins/stardust
+indra/newview/skins/starlight
 indra/newview/vivox-runtime
 indra/server-linux-*
 indra/temp
