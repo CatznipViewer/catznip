@@ -918,25 +918,25 @@ void LLSidepanelItemInfo::updateSaleInfo()
 		// turn on sale info
 		LLSaleInfo::EForSale sale_type = LLSaleInfo::FS_COPY;
 	
-		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
-		if(RadioSaleType)
-		{
-			switch (RadioSaleType->getSelectedIndex())
-			{
-			case 0:
-				sale_type = LLSaleInfo::FS_ORIGINAL;
-				break;
-			case 1:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			case 2:
-				sale_type = LLSaleInfo::FS_CONTENTS;
-				break;
-			default:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			}
-		}
+//		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
+//		if(RadioSaleType)
+//		{
+//			switch (RadioSaleType->getSelectedIndex())
+//			{
+//			case 0:
+//				sale_type = LLSaleInfo::FS_ORIGINAL;
+//				break;
+//			case 1:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			case 2:
+//				sale_type = LLSaleInfo::FS_CONTENTS;
+//				break;
+//			default:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			}
+//		}
 
 		if (sale_type == LLSaleInfo::FS_COPY 
 			&& !gAgent.allowOperation(PERM_COPY, item->getPermissions(), 
