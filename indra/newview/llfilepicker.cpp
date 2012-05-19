@@ -276,7 +276,10 @@ BOOL LLFilePicker::getOpenFile(ELoadFilter filter, bool blocking)
 	return success;
 }
 
-BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
+//BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
+// [/SL:KB]
 {
 	if( mLocked )
 	{
@@ -304,8 +307,15 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
 
 	reset();
 	
-	// Modal, so pause agent
-	send_agent_pause();
+//	// Modal, so pause agent
+//	send_agent_pause();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	if (blocking)
+	{
+		// Modal, so pause agent
+		send_agent_pause();
+	}
+// [/SL:KB]
 	// NOTA BENE: hitting the file dialog triggers a window focus event, destroying the selection manager!!
 	success = GetOpenFileName(&mOFN); // pauses until ok or cancel.
 	if( success )
@@ -338,10 +348,18 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
 			}
 		}
 	}
-	send_agent_resume();
-
-	// Account for the fact that the app has been stalled.
-	LLFrameTimer::updateFrameTime();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	if (blocking)
+	{
+		send_agent_resume();
+		// Account for the fact that the app has been stalled.
+		LLFrameTimer::updateFrameTime();
+	}
+// [/SL:KB]
+//	send_agent_resume();
+//
+//	// Account for the fact that the app has been stalled.
+//	LLFrameTimer::updateFrameTime();
 	return success;
 }
 
@@ -947,7 +965,10 @@ BOOL LLFilePicker::getOpenFile(ELoadFilter filter, bool blocking)
 	return success;
 }
 
-BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
+//BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
+// [/SL:KB]
 {
 	if( mLocked )
 		return FALSE;
@@ -966,7 +987,14 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
 	
 	mNavOptions.optionFlags |= kNavAllowMultipleFiles;
 	// Modal, so pause agent
-	send_agent_pause();
+//	send_agent_pause();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	if (blocking)
+	{
+		// Modal, so pause agent
+		send_agent_pause();
+	}
+// [/SL:KB]
 	{
 		error = doNavChooseDialog(filter);
 	}
@@ -1390,7 +1418,10 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter, bool blocking )
 	return rtn;
 }
 
-BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+//BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
+// [/SL:KB]
 {
 	BOOL rtn = FALSE;
 
@@ -1474,7 +1505,10 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter )
 	return TRUE;
 }
 
-BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+//BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
+// [/SL:KB]
 {
 	// if local file browsing is turned off, return without opening dialog
 	// (Even though this is a stub, I think we still should not return anything at all)
@@ -1503,7 +1537,10 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter )
 	return FALSE;
 }
 
-BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+//BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking )
+// [/SL:KB]
 {
 	reset();
 	return FALSE;

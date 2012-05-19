@@ -127,17 +127,35 @@ void LLFilePickerThread::getFile()
 void LLFilePickerThread::run()
 {
 	LLFilePicker picker;
-#if LL_WINDOWS
-	if (picker.getOpenFile(mFilter, false))
+//#if LL_WINDOWS
+//	if (picker.getOpenFile(mFilter, false))
+//	{
+//		mFile = picker.getFirstFile();
+//	}
+//#else
+//	if (picker.getOpenFile(mFilter, true))
+//	{
+//		mFile = picker.getFirstFile();
+//	}
+//#endif
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	if (!m_fMultiple)
 	{
-		mFile = picker.getFirstFile();
+		if (picker.getOpenFile(mFilter, false))
+			mFiles.push_back(picker.getFirstFile());
 	}
-#else
-	if (picker.getOpenFile(mFilter, true))
+	else
 	{
-		mFile = picker.getFirstFile();
+		if (picker.getMultipleOpenFiles(mFilter, false))
+		{
+			mFiles.push_back(picker.getFirstFile());
+
+			std::string file;
+			while ((file = picker.getNextFile()) != LLStringUtil::null)
+				mFiles.push_back(file);
+		}
 	}
-#endif
+// [/SL:KB]
 
 	{
 		LLMutexLock lock(sMutex);
@@ -170,7 +188,10 @@ void LLFilePickerThread::clearDead()
 		while (!sDeadQ.empty())
 		{
 			LLFilePickerThread* thread = sDeadQ.front();
-			thread->notify(thread->mFile);
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+			thread->notify(thread->mFiles);
+// [/SL:KB]
+//			thread->notify(thread->mFile);
 			delete thread;
 			sDeadQ.pop();
 		}
@@ -230,123 +251,303 @@ std::string build_extensions_string(LLFilePicker::ELoadFilter filter)
    returns the string to the full path filename, else returns NULL.
    Data is the load filter for the type of file as defined in LLFilePicker.
 **/
-const std::string upload_pick(void* data)
+//const std::string upload_pick(void* data)
+//{
+// 	if( gAgentCamera.cameraMouselook() )
+//	{
+//		gAgentCamera.changeCameraToDefault();
+//		// This doesn't seem necessary. JC
+//		// display();
+//	}
+//
+//	LLFilePicker::ELoadFilter type;
+//	if(data)
+//	{
+//		type = (LLFilePicker::ELoadFilter)((intptr_t)data);
+//	}
+//	else
+//	{
+//		type = LLFilePicker::FFLOAD_ALL;
+//	}
+//
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if (!picker.getOpenFile(type))
+//	{
+//		llinfos << "Couldn't import objects from file" << llendl;
+//		return std::string();
+//	}
+//
+//	
+//	const std::string& filename = picker.getFirstFile();
+//	std::string ext = gDirUtilp->getExtension(filename);
+//
+//	//strincmp doesn't like NULL pointers
+//	if (ext.empty())
+//	{
+//		std::string short_name = gDirUtilp->getBaseFileName(filename);
+//		
+//		// No extension
+//		LLSD args;
+//		args["FILE"] = short_name;
+//		LLNotificationsUtil::add("NoFileExtension", args);
+//		return std::string();
+//	}
+//	else
+//	{
+//		//so there is an extension
+//		//loop over the valid extensions and compare to see
+//		//if the extension is valid
+//
+//		//now grab the set of valid file extensions
+//		std::string valid_extensions = build_extensions_string(type);
+//
+//		BOOL ext_valid = FALSE;
+//		
+//		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+//		boost::char_separator<char> sep(" ");
+//		tokenizer tokens(valid_extensions, sep);
+//		tokenizer::iterator token_iter;
+//
+//		//now loop over all valid file extensions
+//		//and compare them to the extension of the file
+//		//to be uploaded
+//		for( token_iter = tokens.begin();
+//			 token_iter != tokens.end() && ext_valid != TRUE;
+//			 ++token_iter)
+//		{
+//			const std::string& cur_token = *token_iter;
+//
+//			if (cur_token == ext || cur_token == "*.*")
+//			{
+//				//valid extension
+//				//or the acceptable extension is any
+//				ext_valid = TRUE;
+//			}
+//		}//end for (loop over all tokens)
+//
+//		if (ext_valid == FALSE)
+//		{
+//			//should only get here if the extension exists
+//			//but is invalid
+//			LLSD args;
+//			args["EXTENSION"] = ext;
+//			args["VALIDS"] = valid_extensions;
+//			LLNotificationsUtil::add("InvalidFileExtension", args);
+//			return std::string();
+//		}
+//	}//end else (non-null extension)
+//
+//	//valid file extension
+//	
+//	//now we check to see
+//	//if the file is actually a valid image/sound/etc.
+//	if (type == LLFilePicker::FFLOAD_WAV)
+//	{
+//		// pre-qualify wavs to make sure the format is acceptable
+//		std::string error_msg;
+//		if (check_for_invalid_wav_formats(filename,error_msg))
+//		{
+//			llinfos << error_msg << ": " << filename << llendl;
+//			LLSD args;
+//			args["FILE"] = filename;
+//			LLNotificationsUtil::add( error_msg, args );
+//			return std::string();
+//		}
+//	}//end if a wave/sound file
+//
+//	
+//	return filename;
+//}
+
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+class LLSingleUploadFilePicker : public LLFilePickerThread
 {
- 	if( gAgentCamera.cameraMouselook() )
+public:
+	LLSingleUploadFilePicker(LLFilePicker::ELoadFilter eFilter)
+		: LLFilePickerThread(eFilter), m_eFilter(eFilter)
 	{
-		gAgentCamera.changeCameraToDefault();
-		// This doesn't seem necessary. JC
-		// display();
+		if( gAgentCamera.cameraMouselook() )
+			gAgentCamera.changeCameraToDefault();
 	}
 
-	LLFilePicker::ELoadFilter type;
-	if(data)
+	/*virtual*/ void notify(const std::vector<std::string>& files)
 	{
-		type = (LLFilePicker::ELoadFilter)((intptr_t)data);
-	}
-	else
-	{
-		type = LLFilePicker::FFLOAD_ALL;
-	}
+		const std::string& filename = (!files.empty()) ? files.front() : LLStringUtil::null;
+		if (filename.empty())
+			return;
 
-	LLFilePicker& picker = LLFilePicker::instance();
-	if (!picker.getOpenFile(type))
-	{
-		llinfos << "Couldn't import objects from file" << llendl;
-		return std::string();
-	}
+// [/SL:KB]
+		std::string ext = gDirUtilp->getExtension(filename);
 
-	
-	const std::string& filename = picker.getFirstFile();
-	std::string ext = gDirUtilp->getExtension(filename);
-
-	//strincmp doesn't like NULL pointers
-	if (ext.empty())
-	{
-		std::string short_name = gDirUtilp->getBaseFileName(filename);
-		
-		// No extension
-		LLSD args;
-		args["FILE"] = short_name;
-		LLNotificationsUtil::add("NoFileExtension", args);
-		return std::string();
-	}
-	else
-	{
-		//so there is an extension
-		//loop over the valid extensions and compare to see
-		//if the extension is valid
-
-		//now grab the set of valid file extensions
-		std::string valid_extensions = build_extensions_string(type);
-
-		BOOL ext_valid = FALSE;
-		
-		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-		boost::char_separator<char> sep(" ");
-		tokenizer tokens(valid_extensions, sep);
-		tokenizer::iterator token_iter;
-
-		//now loop over all valid file extensions
-		//and compare them to the extension of the file
-		//to be uploaded
-		for( token_iter = tokens.begin();
-			 token_iter != tokens.end() && ext_valid != TRUE;
-			 ++token_iter)
+		//strincmp doesn't like NULL pointers
+		if (ext.empty())
 		{
-			const std::string& cur_token = *token_iter;
+			std::string short_name = gDirUtilp->getBaseFileName(filename);
+		
+			// No extension
+			LLSD args;
+			args["FILE"] = short_name;
+			LLNotificationsUtil::add("NoFileExtension", args);
+			return;
+		}
+		else
+		{
+			//so there is an extension
+			//loop over the valid extensions and compare to see
+			//if the extension is valid
 
-			if (cur_token == ext || cur_token == "*.*")
+			//now grab the set of valid file extensions
+			std::string valid_extensions = build_extensions_string(m_eFilter);
+
+			BOOL ext_valid = FALSE;
+		
+			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+			boost::char_separator<char> sep(" ");
+			tokenizer tokens(valid_extensions, sep);
+			tokenizer::iterator token_iter;
+
+			//now loop over all valid file extensions
+			//and compare them to the extension of the file
+			//to be uploaded
+			for( token_iter = tokens.begin();
+				 token_iter != tokens.end() && ext_valid != TRUE;
+				 ++token_iter)
 			{
-				//valid extension
-				//or the acceptable extension is any
-				ext_valid = TRUE;
+				const std::string& cur_token = *token_iter;
+
+				if (cur_token == ext || cur_token == "*.*")
+				{
+					//valid extension
+					//or the acceptable extension is any
+					ext_valid = TRUE;
+				}
+			}//end for (loop over all tokens)
+
+			if (ext_valid == FALSE)
+			{
+				//should only get here if the extension exists
+				//but is invalid
+				LLSD args;
+				args["EXTENSION"] = ext;
+				args["VALIDS"] = valid_extensions;
+				LLNotificationsUtil::add("InvalidFileExtension", args);
+				return;
 			}
-		}//end for (loop over all tokens)
+		}//end else (non-null extension)
 
-		if (ext_valid == FALSE)
-		{
-			//should only get here if the extension exists
-			//but is invalid
-			LLSD args;
-			args["EXTENSION"] = ext;
-			args["VALIDS"] = valid_extensions;
-			LLNotificationsUtil::add("InvalidFileExtension", args);
-			return std::string();
-		}
-	}//end else (non-null extension)
-
-	//valid file extension
+		//valid file extension
 	
-	//now we check to see
-	//if the file is actually a valid image/sound/etc.
-	if (type == LLFilePicker::FFLOAD_WAV)
+		//now we check to see
+		//if the file is actually a valid image/sound/etc.
+		if (m_eFilter == LLFilePicker::FFLOAD_WAV)
+		{
+			// pre-qualify wavs to make sure the format is acceptable
+			std::string error_msg;
+			if (check_for_invalid_wav_formats(filename,error_msg))
+			{
+				llinfos << error_msg << ": " << filename << llendl;
+				LLSD args;
+				args["FILE"] = filename;
+				LLNotificationsUtil::add( error_msg, args );
+				return;
+			}
+		}//end if a wave/sound file
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+
+		if (!filename.empty())
+		{
+			switch (m_eFilter)
+			{
+				case LLFilePicker::FFLOAD_WAV:
+					LLFloaterReg::showInstance("upload_sound", LLSD(filename));
+					break;
+				case LLFilePicker::FFLOAD_IMAGE:
+					LLFloaterReg::showInstance("upload_image", LLSD(filename));
+					break;
+				case LLFilePicker::FFLOAD_ANIM:
+					if (filename.rfind(".anim") != std::string::npos)
+						LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
+					else
+						LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
+					break;
+				default:
+					break;
+			}
+		}
+	}
+
+protected:
+	LLFilePicker::ELoadFilter m_eFilter;
+};
+
+class LLBulkUploadFilePicker : public LLFilePickerThread
+{
+public:
+	LLBulkUploadFilePicker()
+		: LLFilePickerThread(LLFilePicker::FFLOAD_ALL, true)
 	{
-		// pre-qualify wavs to make sure the format is acceptable
-		std::string error_msg;
-		if (check_for_invalid_wav_formats(filename,error_msg))
-		{
-			llinfos << error_msg << ": " << filename << llendl;
-			LLSD args;
-			args["FILE"] = filename;
-			LLNotificationsUtil::add( error_msg, args );
-			return std::string();
-		}
-	}//end if a wave/sound file
+	}
 
-	
-	return filename;
-}
+	/*virtual*/ void notify(const std::vector<std::string>& files)
+	{
+		if (files.empty())
+			return;
+
+// [/SL:KB]
+		const std::string& filename = files.front();
+		std::string name = gDirUtilp->getBaseFileName(filename, true);
+			
+		std::string asset_name = name;
+		LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
+		LLStringUtil::replaceChar(asset_name, '|', '?');
+		LLStringUtil::stripNonprintable(asset_name);
+		LLStringUtil::trim(asset_name);
+			
+		std::string display_name = LLStringUtil::null;
+		LLAssetStorage::LLStoreAssetCallback callback = NULL;
+		S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		std::list<std::string>* userdata = new std::list<std::string>(files.begin() + 1, files.end());
+// [/SL:KB]
+//		void *userdata = NULL;
+
+		upload_new_resource(
+			filename,
+			asset_name,
+			asset_name,
+			0,
+			LLFolderType::FT_NONE,
+			LLInventoryType::IT_NONE,
+			LLFloaterPerms::getNextOwnerPerms(),
+			LLFloaterPerms::getGroupPerms(),
+			LLFloaterPerms::getEveryonePerms(),
+			display_name,
+			callback,
+			expected_upload_cost,
+			userdata);
+
+		// *NOTE: Ew, we don't iterate over the file list here,
+		// we handle the next files in upload_done_callback()
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	}
+protected:
+	LLFilePicker::ELoadFilter m_eFilter;
+	std::string m_strFloater;
+};
+// [/SL:KB]
 
 class LLFileUploadImage : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		std::string filename = upload_pick((void *)LLFilePicker::FFLOAD_IMAGE);
-		if (!filename.empty())
-		{
-			LLFloaterReg::showInstance("upload_image", LLSD(filename));
-		}
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_IMAGE))->getFile();
+// [/SL:KB]
+//		std::string filename = upload_pick((void *)LLFilePicker::FFLOAD_IMAGE);
+//		if (!filename.empty())
+//		{
+//			LLFloaterReg::showInstance("upload_image", LLSD(filename));
+//		}
 		return TRUE;
 	}
 };
@@ -369,11 +570,14 @@ class LLFileUploadSound : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_WAV);
-		if (!filename.empty())
-		{
-			LLFloaterReg::showInstance("upload_sound", LLSD(filename));
-		}
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_WAV))->getFile();
+// [/SL:KB]
+//		std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_WAV);
+//		if (!filename.empty())
+//		{
+//			LLFloaterReg::showInstance("upload_sound", LLSD(filename));
+//		}
 		return true;
 	}
 };
@@ -382,18 +586,22 @@ class LLFileUploadAnim : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		const std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_ANIM);
-		if (!filename.empty())
-		{
-			if (filename.rfind(".anim") != std::string::npos)
-			{
-				LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
-			}
-			else
-			{
-				LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
-			}
-		}
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_ANIM))->getFile();
+// [/SL:KB]
+//		const std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_ANIM);
+//		if (!filename.empty())
+//		{
+//			if (filename.rfind(".anim") != std::string::npos)
+//			{
+//				LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
+//			}
+//			else
+//			{
+//				LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
+//			}
+//		}
+
 		return true;
 	}
 };
@@ -407,55 +615,59 @@ class LLFileUploadBulk : public view_listener_t
 			gAgentCamera.changeCameraToDefault();
 		}
 
-		// TODO:
-		// Iterate over all files
-		// Check extensions for uploadability, cost
-		// Check user balance for entire cost
-		// Charge user entire cost
-		// Loop, uploading
-		// If an upload fails, refund the user for that one
-		//
-		// Also fix single upload to charge first, then refund
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		(new LLBulkUploadFilePicker())->getFile();
+// [/SL:KB]
 
-		LLFilePicker& picker = LLFilePicker::instance();
-		if (picker.getMultipleOpenFiles())
-		{
-			const std::string& filename = picker.getFirstFile();
-			std::string name = gDirUtilp->getBaseFileName(filename, true);
-			
-			std::string asset_name = name;
-			LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
-			LLStringUtil::replaceChar(asset_name, '|', '?');
-			LLStringUtil::stripNonprintable(asset_name);
-			LLStringUtil::trim(asset_name);
-			
-			std::string display_name = LLStringUtil::null;
-			LLAssetStorage::LLStoreAssetCallback callback = NULL;
-			S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-			void *userdata = NULL;
-
-			upload_new_resource(
-				filename,
-				asset_name,
-				asset_name,
-				0,
-				LLFolderType::FT_NONE,
-				LLInventoryType::IT_NONE,
-				LLFloaterPerms::getNextOwnerPerms(),
-				LLFloaterPerms::getGroupPerms(),
-				LLFloaterPerms::getEveryonePerms(),
-				display_name,
-				callback,
-				expected_upload_cost,
-				userdata);
-
-			// *NOTE: Ew, we don't iterate over the file list here,
-			// we handle the next files in upload_done_callback()
-		}
-		else
-		{
-			llinfos << "Couldn't import objects from file" << llendl;
-		}
+//		// TODO:
+//		// Iterate over all files
+//		// Check extensions for uploadability, cost
+//		// Check user balance for entire cost
+//		// Charge user entire cost
+//		// Loop, uploading
+//		// If an upload fails, refund the user for that one
+//		//
+//		// Also fix single upload to charge first, then refund
+//
+//		LLFilePicker& picker = LLFilePicker::instance();
+//		if (picker.getMultipleOpenFiles())
+//		{
+//			const std::string& filename = picker.getFirstFile();
+//			std::string name = gDirUtilp->getBaseFileName(filename, true);
+//			
+//			std::string asset_name = name;
+//			LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
+//			LLStringUtil::replaceChar(asset_name, '|', '?');
+//			LLStringUtil::stripNonprintable(asset_name);
+//			LLStringUtil::trim(asset_name);
+//			
+//			std::string display_name = LLStringUtil::null;
+//			LLAssetStorage::LLStoreAssetCallback callback = NULL;
+//			S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+//			void *userdata = NULL;
+//
+//			upload_new_resource(
+//				filename,
+//				asset_name,
+//				asset_name,
+//				0,
+//				LLFolderType::FT_NONE,
+//				LLInventoryType::IT_NONE,
+//				LLFloaterPerms::getNextOwnerPerms(),
+//				LLFloaterPerms::getGroupPerms(),
+//				LLFloaterPerms::getEveryonePerms(),
+//				display_name,
+//				callback,
+//				expected_upload_cost,
+//				userdata);
+//
+//			// *NOTE: Ew, we don't iterate over the file list here,
+//			// we handle the next files in upload_done_callback()
+//		}
+//		else
+//		{
+//			llinfos << "Couldn't import objects from file" << llendl;
+//		}
 		return true;
 	}
 };
@@ -894,6 +1106,9 @@ void upload_done_callback(
 	LLExtStat ext_status) // StoreAssetData callback (fixed)
 {
 	LLResourceData* data = (LLResourceData*)user_data;
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	std::list<std::string>* pFiles = (std::list<std::string>*)data->mUserData;;
+// [/SL:KB]
 	S32 expected_upload_cost = data ? data->mExpectedUploadCost : 0;
 	//LLAssetType::EType pref_loc = data->mPreferredLocation;
 	BOOL is_balance_sufficient = TRUE;
@@ -985,7 +1200,21 @@ void upload_done_callback(
 	// *NOTE: This is a pretty big hack. What this does is check the
 	// file picker if there are any more pending uploads. If so,
 	// upload that file.
-	const std::string& next_file = LLFilePicker::instance().getNextFile();
+//	const std::string& next_file = LLFilePicker::instance().getNextFile();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	const std::string next_file;
+	if ( (pFiles) && (!pFiles->empty()) )
+	{
+		pFiles->front();
+		
+		pFiles->pop_front();
+		if (pFiles->empty())
+		{
+			delete pFiles;
+			pFiles = NULL;
+		}
+	}
+// [/SL:KB]
 	if(is_balance_sufficient && !next_file.empty())
 	{
 		std::string asset_name = gDirUtilp->getBaseFileName(next_file, true);
@@ -996,7 +1225,7 @@ void upload_done_callback(
 
 		std::string display_name = LLStringUtil::null;
 		LLAssetStorage::LLStoreAssetCallback callback = NULL;
-		void *userdata = NULL;
+//		void *userdata = NULL;
 		upload_new_resource(
 			next_file,
 			asset_name,
@@ -1010,7 +1239,10 @@ void upload_done_callback(
 			display_name,
 			callback,
 			expected_upload_cost, // assuming next in a group of uploads is of roughly the same type, i.e. same upload cost
-			userdata);
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+			pFiles);
+// [/SL:KB]
+//			userdata);
 	}
 }
 
@@ -1156,13 +1388,21 @@ void upload_new_resource(
 			group_perms,
 			everyone_perms);
 
-		LLHTTPClient::post(
-			url,
-			body,
-			new LLNewAgentInventoryResponder(
-				body,
-				uuid,
-				asset_type));
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+		std::list<std::string>* pFiles = (std::list<std::string>*)userdata;
+		if (pFiles)
+			LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type, *pFiles));
+		else
+			LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type));
+		delete pFiles;
+// [/SL:KB]
+//		LLHTTPClient::post(
+//			url,
+//			body,
+//			new LLNewAgentInventoryResponder(
+//				body,
+//				uuid,
+//				asset_type));
 	}
 	else
 	{
