@@ -3767,7 +3767,7 @@ Please try again later.
    icon="alertmodal.tga"
    name="OfferTeleport"
    type="alertmodal">
-Offer a teleport to your location with the following message?
+Offer [NAME] a teleport to your location with the following message?
     <tag>confirm</tag>
     <form name="form">
       <input name="message" type="text">
@@ -5205,17 +5205,21 @@ Topic: [SUBJECT], Message: [MESSAGE]
   <notification
    icon="notifytip.tga"
    name="FriendOnline"
+   can_logto="chat|openim"
+   logto="openim"
    type="notifytip">
     <tag>friendship</tag>
-&lt;nolink&gt;[NAME]&lt;/nolink&gt; is Online
+[NAME_SLURL] is Online
   </notification>
 
   <notification
    icon="notifytip.tga"
    name="FriendOffline"
+   can_logto="chat|openim"
+   logto="openim"
    type="notifytip">
     <tag>friendship</tag>
-&lt;nolink&gt;[NAME]&lt;/nolink&gt; is Offline
+[NAME_SLURL] is Offline
   </notification>
 
   <notification
@@ -5548,6 +5552,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentReceived"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -5557,6 +5563,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentSent"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -5566,6 +5574,8 @@ Please select at least one type of content to search (General, Moderate, or Adul
    icon="notify.tga"
    name="PaymentFailure"
    persist="true"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>funds</tag>
 [MESSAGE]
@@ -6042,10 +6052,12 @@ An object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; owned by [NAME_SLU
        index="1"
        name="Discard"
        text="Discard"/>
+<!--
       <button
        index="2"
        name="Mute"
        text="Block Owner"/>
+-->
     </form>
   </notification>
 
@@ -6145,6 +6157,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOfferSent"
+   can_logto="chat|im"
+   logto="im"
    type="offer">
 	Teleport offer sent to [TO_NAME]
   </notification>
@@ -6407,10 +6421,12 @@ Grant this request?
 [NAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
+<!--
       <button
        index="-2"
        name="Client_Side_Mute"
        text="Block"/>
+-->
       <button
        index="-1"
        name="Client_Side_Ignore"
@@ -6426,10 +6442,12 @@ Grant this request?
 [GROUPNAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
+<!--
       <button
        index="-2"
        name="Client_Side_Mute"
        text="Block"/>
+-->
       <button
        index="-1"
        name="Client_Side_Ignore"
