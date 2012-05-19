@@ -35,6 +35,9 @@
 #include "llcommandmanager.h"
 #include "llassettype.h"
 
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2)
+class LLIconCtrl;
+// [/SL:KB]
 class LLToolBar;
 class LLToolBarButton;
 
@@ -269,6 +272,9 @@ private:
 
 	// related widgets
 	LLLayoutStack*					mCenteringStack;
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	LLIconCtrl*						mCaret;
+// [/SL:KB]
 	LLPanel*						mButtonPanel;
 	LLHandle<class LLContextMenu>	mPopupMenuHandle;
 	LLHandle<class LLView>			mRemoveButtonHandle;

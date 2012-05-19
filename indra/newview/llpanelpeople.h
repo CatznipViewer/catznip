@@ -80,9 +80,9 @@ private:
 	std::string				getActiveTabName() const;
 	LLUUID					getCurrentItemID() const;
 	void					getCurrentItemIDs(uuid_vec_t& selected_uuids) const;
-	void					buttonSetVisible(std::string btn_name, BOOL visible);
-	void					buttonSetEnabled(const std::string& btn_name, bool enabled);
-	void					buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb);
+//	void					buttonSetVisible(std::string btn_name, BOOL visible);
+//	void					buttonSetEnabled(const std::string& btn_name, bool enabled);
+//	void					buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb);
 	void					showGroupMenu(LLMenuGL* menu);
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);
 
@@ -162,6 +162,17 @@ private:
 
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	LLButton*				mGroupInfoBtn;
+	LLButton*				mGroupChatBtn;
+	LLButton*				mGroupCallBtn;
+	LLButton*				mProfileBtn;
+	LLButton*				mIMBtn;
+	LLButton*				mCallBtn;
+	LLButton*				mTeleportBtn;
+	LLButton*				mShareBtn;
+// [/SL:KB]
 };
 
 #endif //LL_LLPANELPEOPLE_H
