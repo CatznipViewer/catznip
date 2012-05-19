@@ -117,7 +117,6 @@ public:
 		SNAPSHOT_WEB
 	};
 
-
 	struct Params : public LLInitParam::Block<Params, LLView::Params>
 	{
 		Params()
@@ -168,7 +167,10 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-	BOOL saveLocal();
+//	BOOL saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	BOOL saveLocal(bool fPathPrompt);
+// [/SL:KB]
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
 	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
@@ -997,9 +999,15 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+//BOOL LLSnapshotLivePreview::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+BOOL LLSnapshotLivePreview::saveLocal(bool fPathPrompt)
+// [/SL:KB]
 {
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, fPathPrompt);
+// [/SL:KB]
 
 	if(success)
 	{
@@ -2281,7 +2289,10 @@ void LLFloaterSnapshot::saveTexture()
 }
 
 // static
-BOOL LLFloaterSnapshot::saveLocal()
+//BOOL LLFloaterSnapshot::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+BOOL LLFloaterSnapshot::saveLocal(bool fPathPrompt)
+// [/SL:KB]
 {
 	lldebugs << "saveLocal" << llendl;
 	// FIXME: duplicated code
@@ -2298,7 +2309,10 @@ BOOL LLFloaterSnapshot::saveLocal()
 		return FALSE;
 	}
 
-	return previewp->saveLocal();
+//	return previewp->saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	return previewp->saveLocal(fPathPrompt);
+// [/SL:KB]
 }
 
 // static
