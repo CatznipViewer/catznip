@@ -314,6 +314,9 @@ void LLIMFloater::updateSessionName(const std::string& ui_title,
 									const std::string& ui_label)
 {
 	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + ui_label);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-11-13 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	setShortTitle(ui_title);
+// [/SL:KB]
 	setTitle(ui_title);	
 }
 
@@ -342,6 +345,18 @@ void LLIMFloater::draw()
 	LLTransientDockableFloater::draw();
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+BOOL LLIMFloater::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
+{
+	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mInputEditor->hasFocus()) )
+	{
+		// Give focus to the line editor and let it handle the character
+		mInputEditor->setFocus(TRUE);
+		return mInputEditor->handleUnicodeChar(uni_char, called_from_parent);
+	}
+	return LLTransientDockableFloater::handleUnicodeChar(uni_char, called_from_parent);
+}
+// [/SL:KB]
 
 // static
 void* LLIMFloater::createPanelIMControl(void* userdata)
