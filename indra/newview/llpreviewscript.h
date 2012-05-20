@@ -49,6 +49,9 @@ class LLKeywordToken;
 class LLVFS;
 class LLViewerInventoryItem;
 class LLScriptEdContainer;
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0)
+class LLEventTimer;
+// [/SL:KB]
 
 // Inner, implementation class.  LLPreviewScript and LLLiveLSLEditor each own one of these.
 class LLScriptEdCore : public LLPanel
@@ -156,13 +159,27 @@ class LLScriptEdContainer : public LLPreview
 
 public:
 	LLScriptEdContainer(const LLSD& key);
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+	/*virtual*/ ~LLScriptEdContainer();
+
+	/*virtual*/ void refreshFromItem();
+// [/SL:KB]
 
 protected:
 	std::string		getTmpFileName();
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+	virtual std::string getBackupFileName() const;
+	bool			onBackupTimer();
+// [/SL:KB]
+
 	bool			onExternalChange(const std::string& filename);
 	virtual void	saveIfNeeded(bool sync = true) = 0;
 
 	LLScriptEdCore*		mScriptEd;
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+	std::string			mBackupFilename;
+	LLEventTimer*		mBackupTimer;
+// [/SL:KB]
 };
 
 // Used to view and edit a LSL from your inventory.
