@@ -705,7 +705,7 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
 	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
-//	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
+	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
 // [/SL:KB]
 
 	if (mComboGridMode) 
@@ -1103,7 +1103,12 @@ void LLFloaterTools::onClickAxisOptions()
 
 void LLFloaterTools::onClickGridOptions()
 {
-	LLFloaterReg::showInstance("build_options");
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.3.0) | Added: Catznip-3.2.0
+	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
+	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
+		addDependentFloater(pGridFloater, TRUE);
+// [/SL:KB]
+//	LLFloaterReg::showInstance("build_options");
 	// RN: this makes grid options dependent on build tools window
 	//floaterp->addDependentFloater(LLFloaterBuildOptions::getInstance(), FALSE);
 }

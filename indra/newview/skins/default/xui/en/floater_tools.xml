@@ -332,21 +332,20 @@
      label="Axis at Root"
      layout="topleft"
      left="143"
-     top_pad="0"
+     top_pad="-2"
      name="checkbox axis at root"
      width="134" />
     <button
-     left_pad="0"
+     left="259"
      image_selected="ForwardArrow_Press"
      image_unselected="ForwardArrow_Off"
      layout="topleft"
      follows="top|left"
      name="Axis Options..."
      tool_tip="See more axis options"
-     top_pad="-22"
-     right="-10"
-     width="18"
-     height="23" >
+     top_delta="-2"
+     width="25"
+     height="20" >
         <button.commit_callback
          function="BuildTool.axisOptions"/>
     </button>
@@ -354,22 +353,36 @@
      control_name="SnapEnabled"
      height="18"
      initial_value="true"
-     label="Snap"
+     label="Snap to grid"
      layout="topleft"
      left="143"
-     top_pad="0"
+     top_pad="1"
      name="checkbox snap to grid"
      width="134" />
+  <button
+     left="259"
+     label=""
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Options..."
+     tool_tip="See more grid options"
+     top_delta="-2"
+     width="25"
+     height="20" >
+	 <button.commit_callback
+	     function="BuildTool.gridOptions"/>
+	</button>
     <combo_box
       height="20"
       layout="topleft"
       follows="left|top"
       name="combobox grid mode"
       tool_tip="Choose the type of grid ruler for positioning the object"
-      top="83"
-      left="195"
-      top_pad="0"
-      width="60">
+      left="162"
+      top_pad="3"
+      width="90">
       <combo_box.item
       label="World"
       name="World"
@@ -385,22 +398,6 @@
       <combo_box.commit_callback
       function="BuildTool.gridMode"/>
     </combo_box>  
-  
-  <button
-     left="259"
-     label=""
-     image_selected="ForwardArrow_Press"
-     image_unselected="ForwardArrow_Off"
-     layout="topleft"
-     follows="top|left"
-     name="Options..."
-     tool_tip="See more grid options"
-     top="83"
-     width="25"
-     height="20" >
-	 <button.commit_callback
-	     function="BuildTool.gridOptions"/>
-	</button>
   
    <button
      follows="left|top"
