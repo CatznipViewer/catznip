@@ -49,6 +49,9 @@
 #define WATER 2
 const U32	MAX_OBJECT_CACHE_ENTRIES = 50000;
 
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3.0)
+const F64 COARSEUPDATE_MAX_Z = 1020.0f;
+// [/SL:KB]
 
 class LLEventPoll;
 class LLVLComposition;

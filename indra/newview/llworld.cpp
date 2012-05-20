@@ -1169,9 +1169,14 @@ LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& regi
 {
 	LLVector3d pos_local;
 
-	pos_local.mdV[VZ] = (compact_local & 0xFFU) * 4;
-	pos_local.mdV[VY] = (compact_local >> 8) & 0xFFU;
-	pos_local.mdV[VX] = (compact_local >> 16) & 0xFFU;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3.0)
+	pos_local.mdV[VZ] = (compact_local & 0xFFFFU) * 4;
+	pos_local.mdV[VY] = (compact_local >> 16) & 0xFFU;
+	pos_local.mdV[VX] = (compact_local >> 24) & 0xFFU;
+// [/SL:KB]
+//	pos_local.mdV[VZ] = (compact_local & 0xFFU) * 4;
+//	pos_local.mdV[VY] = (compact_local >> 8) & 0xFFU;
+//	pos_local.mdV[VX] = (compact_local >> 16) & 0xFFU;
 
 	return region_origin + pos_local;
 }
