@@ -72,6 +72,7 @@ include_directories(
     ${LLLOGIN_INCLUDE_DIRS}
     ${UPDATER_INCLUDE_DIRS}
     ${LIBS_PREBUILT_DIR}/include/collada
+    ${LIBS_PREBUILD_DIR}/include/hunspell
     ${OPENAL_LIB_INCLUDE_DIRS}
     ${LIBS_PREBUILT_DIR}/include/collada/1.4
     )
@@ -1572,6 +1573,9 @@ if (WINDOWS)
       ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/msvcp100.dll
       ${SHARED_LIB_STAGING_DIR}/Debug/msvcr100d.dll
       ${SHARED_LIB_STAGING_DIR}/Debug/msvcp100d.dll
+      ${SHARED_LIB_STAGING_DIR}/Release/libhunspell.dll
+      ${SHARED_LIB_STAGING_DIR}/RelWithDebInfo/libhunspell.dll
+      ${SHARED_LIB_STAGING_DIR}/Debug/libhunspell.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/SLVoice.exe
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxsdk.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/ortp.dll
@@ -1751,6 +1755,7 @@ target_link_libraries(${VIEWER_BINARY_NAME}
     ${LLMATH_LIBRARIES}
     ${LLCOMMON_LIBRARIES}
     ${NDOF_LIBRARY}
+    ${HUNSPELL_LIBRARY}
     ${viewer_LIBRARIES}
     ${BOOST_PROGRAM_OPTIONS_LIBRARY}
     ${BOOST_REGEX_LIBRARY}
