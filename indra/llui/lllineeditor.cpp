@@ -1720,6 +1720,10 @@ void LLLineEditor::draw()
 	background.stretch( -mBorderThickness );
 
 	S32 lineeditor_v_pad = (background.getHeight() - mGLFont->getLineHeight()) / 2;
+	if (mSpellCheck)
+	{
+		lineeditor_v_pad += 1;
+	}
 
 	drawBackground();
 	
@@ -1794,14 +1798,14 @@ void LLLineEditor::draw()
 	{
 		S32 select_left;
 		S32 select_right;
-		if( mSelectionStart < getCursor() )
+		if (mSelectionStart < mSelectionEnd)
 		{
 			select_left = mSelectionStart;
-			select_right = getCursor();
+			select_right = mSelectionEnd;
 		}
 		else
 		{
-			select_left = getCursor();
+			select_left = mSelectionEnd;
 			select_right = mSelectionStart;
 		}
 		
@@ -1938,12 +1942,15 @@ void LLLineEditor::draw()
 			if (pxEnd > pxWidth)
 				pxEnd = pxWidth;
 
+			S32 pxBottom = (S32)(text_bottom + mGLFont->getDescenderHeight());
+
 			gGL.color4ub(255, 0, 0, 200);
-			while (pxStart < pxEnd)
+			while (pxStart + 1 < pxEnd)
 			{
-				gl_line_2d(pxStart, (S32)text_bottom - 2, pxStart + 3, (S32)text_bottom + 1);
-				gl_line_2d(pxStart + 3, (S32)text_bottom + 1, pxStart + 6, (S32)text_bottom - 2);
-				pxStart += 6;
+				gl_line_2d(pxStart, pxBottom, pxStart + 2, pxBottom - 2);
+				if (pxStart + 3 < pxEnd)
+					gl_line_2d(pxStart + 2, pxBottom - 3, pxStart + 4, pxBottom - 1);
+				pxStart += 4;
 			}
 		}
 	}
