@@ -222,6 +222,24 @@ protected:
 		static void confirmMuteAllCallback(const LLSD& notification, const LLSD& response);
 	};
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+	/**
+	 * Comparator for comparing avatar items by status and then name
+	 */
+	class LLAvatarItemStatusAndNameComparator : public LLAvatarItemAgentOnTopComparator, public LLRefCount
+	{
+		LOG_CLASS(LLAvatarItemStatusAndNameComparator);
+	public:
+		LLAvatarItemStatusAndNameComparator(LLParticipantList& parent, bool exclude_agent) : mParent(parent), mExcludeAgent(exclude_agent) {};
+		virtual ~LLAvatarItemStatusAndNameComparator() {};
+	protected:
+		virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
+	private:
+		LLParticipantList& mParent;
+		bool mExcludeAgent;
+	};
+// [/SL:KB]
+
 	/**
 	 * Comparator for comparing avatar items by last spoken time
 	 */
@@ -280,6 +298,9 @@ private:
 	boost::signals2::connection mAvatarListReturnConnection;
 	boost::signals2::connection mAvatarListToggleIconsConnection;
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+	LLPointer<LLAvatarItemStatusAndNameComparator> mSortByStatusAndName;
+// [/SL:KB]
 	LLPointer<LLAvatarItemRecentSpeakerComparator> mSortByRecentSpeakers;
 	validate_speaker_callback_t mValidateSpeakerCallback;
 	LLAvalineUpdater* mAvalineUpdater;
