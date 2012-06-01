@@ -268,7 +268,7 @@ bool LLScriptRecoverQueue::onUploadError(const std::string& strFilename)
 	{
 		LLViewerInventoryItem* pItem = gInventory.getItem(itFile->second["item"]);
 		if (pItem)
-			change_item_parent(&gInventory, pItem, gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH), FALSE);
+			gInventory.changeItemParent(pItem, gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH), FALSE);
 		m_FileQueue.erase(itFile);
 	}
 	recoverNext();
