@@ -282,8 +282,12 @@ public:
 			// Start with blank so sample data from XUI XML doesn't
 			// flash on the screen
 			user_name->setValue( LLSD() );
-			LLAvatarNameCache::get(mAvatarID,
-				boost::bind(&LLChatHistoryHeader::onAvatarNameCache, this, _1, _2));
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+			EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
+			LLAvatarNameCache::get(mAvatarID, boost::bind(&LLChatHistoryHeader::onAvatarNameCache, this, _1, _2, name_style));
+// [/SL:KB]
+//			LLAvatarNameCache::get(mAvatarID,
+//				boost::bind(&LLChatHistoryHeader::onAvatarNameCache, this, _1, _2));
 		}
 		else if (chat.mChatStyle == CHAT_STYLE_HISTORY ||
 				 mSourceType == CHAT_SOURCE_AGENT)
@@ -310,6 +314,20 @@ public:
 					style_params_name.readonly_color(userNameColor);
 					user_name->appendText("  - " + username, FALSE, style_params_name);
 				}
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+				EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
+				if (CHAT_NAME_MODERATOR == name_style)
+				{
+					LLStyle::Params style_params_name;
+					LLColor4 userNameColor = LLUIColorTable::instance().getColor("EmphasisColor");
+					style_params_name.color(userNameColor);
+					style_params_name.font.name("SansSerifSmall");
+					style_params_name.font.style("NORMAL");
+					style_params_name.readonly_color(userNameColor);
+					user_name->appendText(" " + LLTrans::getString("IM_moderator_label"), FALSE, style_params_name);
+				}
+// [/SL:KB]
 			}
 			else
 			{
@@ -415,7 +433,10 @@ public:
 		}
 	}
 
-	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
+//	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name, EChatNameStyle name_style)
+// [/SL:KB]
 	{
 		mFrom = av_name.mDisplayName;
 
@@ -435,6 +456,20 @@ public:
 			style_params_name.readonly_color(userNameColor);
 			user_name->appendText("  - " + av_name.mUsername, FALSE, style_params_name);
 		}
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+		if (CHAT_NAME_MODERATOR == name_style)
+		{
+			LLStyle::Params style_params_name;
+			LLColor4 userNameColor = LLUIColorTable::instance().getColor("EmphasisColor");
+			style_params_name.color(userNameColor);
+			style_params_name.font.name("SansSerifSmall");
+			style_params_name.font.style("NORMAL");
+			style_params_name.readonly_color(userNameColor);
+			user_name->appendText(" " + LLTrans::getString("IM_moderator_label"), FALSE, style_params_name);
+		}
+// [/SL:KB]
+
 		setToolTip( av_name.mUsername );
 		// name might have changed, update width
 		updateMinUserNameWidth();
@@ -693,6 +728,10 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 {
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+	EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
+// [/SL:KB]
+
 	llassert(mEditor);
 	if (!mEditor)
 	{
@@ -809,6 +848,11 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			{
 				LLStyle::Params link_params(style_params);
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+				U8 font_style = LLFontGL::getStyleFromString(link_params.font.style) | LLViewerChat::getChatNameFontStyle(name_style);
+				link_params.font.style = LLFontGL::getStringFromStyle(font_style);
+				link_params.link_style_override = false;
+// [/SL:KB]
 
 				// Add link to avatar's inspector and delimiter to message.
 				mEditor->appendText(std::string(link_params.link_href) + delimiter, false, link_params);
