@@ -329,7 +329,7 @@ void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const
 
 	// Copy/paste of the "delete" check in LLOutfitsView::isActionEnabled
 	if ( (!mItemSelection) && (mOutfitSelection) && (LLAppearanceMgr::instance().getCanRemoveOutfit(mSelectedCategory)) )
-		remove_category(&gInventory, mSelectedCategory);
+		gInventory.removeCategory(mSelectedCategory);
 }
 
 // virtual
