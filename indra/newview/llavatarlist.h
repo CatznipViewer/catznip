@@ -29,6 +29,9 @@
 
 #include "llflatlistview.h"
 #include "llavatarlistitem.h"
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+#include "llvoiceclient.h"
+// [/SL:KB]
 
 class LLTimer;
 class LLListContextMenu;
@@ -43,7 +46,10 @@ class LLListContextMenu;
  * @see setDirty()
  * @see setNameFilter()
  */
-class LLAvatarList : public LLFlatListViewEx
+//class LLAvatarList : public LLFlatListViewEx
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+class LLAvatarList : public LLFlatListViewEx, public LLVoiceClientStatusObserver
+// [/SL:KB]
 {
 	LOG_CLASS(LLAvatarList);
 public:
@@ -100,6 +106,13 @@ public:
 	bool getIconsVisible() const { return mShowIcons; }
 	const std::string getIconParamName() const{return mIconParamName;}
 	virtual BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+protected:
+	void refreshSpeakingIndicatorsVisibility(bool visible);
+public:
+	// Implements LLVoiceClientStatusObserver
+	/*virtual*/ void onChange(EStatusType status, const std::string& channelURI, bool proximal);
+// [/SL:KB]
 
 	// Return true if filter has at least one match.
 	bool filterHasMatches();

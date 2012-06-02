@@ -386,17 +386,20 @@ void LLAvatarListItem::setShowProfileBtn(bool show)
 
 void LLAvatarListItem::showSpeakingIndicator(bool visible)
 {
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
 	// Already done? Then do nothing.
-	if (mSpeakingIndicator->getVisible() == (BOOL)visible)
+	if (mSpeakingIndicator->getEnabled() == (BOOL)visible)
 		return;
-// Disabled to not contradict with SpeakingIndicatorManager functionality. EXT-3976
-// probably this method should be totally removed.
-//	mSpeakingIndicator->setVisible(visible);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	// Reenable for updateChildren()
 	mSpeakingIndicator->setEnabled(visible);
+	updateChildren();
 // [/SL:KB]
-//	updateChildren();
+//	// Already done? Then do nothing.
+//	if (mSpeakingIndicator->getVisible() == (BOOL)visible)
+//		return;
+//// Disabled to not contradict with SpeakingIndicatorManager functionality. EXT-3976
+//// probably this method should be totally removed.
+////	mSpeakingIndicator->setVisible(visible);
+////	updateChildren();
 }
 
 void LLAvatarListItem::setAvatarIconVisible(bool visible)

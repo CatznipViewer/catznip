@@ -82,6 +82,30 @@ void LLAvatarList::toggleIcons()
 
 void LLAvatarList::setSpeakingIndicatorsVisible(bool visible)
 {
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	if (visible)
+		LLVoiceClient::getInstance()->addObserver(this);
+	else
+		LLVoiceClient::getInstance()->removeObserver(this);
+	refreshSpeakingIndicatorsVisibility(LLVoiceClient::getInstance()->voiceEnabled());
+}
+
+void LLAvatarList::onChange(EStatusType status, const std::string& channelURI, bool proximal)
+{
+	switch (status)
+	{
+		case STATUS_VOICE_ENABLED:
+			refreshSpeakingIndicatorsVisibility(true);
+			break;
+		case STATUS_VOICE_DISABLED:
+			refreshSpeakingIndicatorsVisibility(false);
+			break;
+	}
+}
+
+void LLAvatarList::refreshSpeakingIndicatorsVisibility(bool visible)
+{
+// [/SL:KB]
 	// Save the new value for new items to use.
 	mShowSpeakingIndicator = visible;
 	
@@ -180,6 +204,14 @@ LLAvatarList::LLAvatarList(const Params& p)
 	}
 // [/SL:KB]
 	
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	if (mShowSpeakingIndicator)
+	{
+		mShowSpeakingIndicator = false;
+		LLVoiceClient::getInstance()->addObserver(this);
+	}
+// [/SL:KB]
+
 	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLAvatarList::handleDisplayNamesOptionChanged, this));
 }
 
@@ -196,6 +228,9 @@ LLAvatarList::~LLAvatarList()
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
 	delete mTextFieldUpdateTimer;
 	delete mTextFieldUpdateSignal;
+// [/SL:KB]
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	LLVoiceClient::getInstance()->removeObserver(this);
 // [/SL:KB]
 }
 
