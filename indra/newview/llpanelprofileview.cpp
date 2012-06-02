@@ -210,7 +210,7 @@ void LLPanelProfileView::onBackBtnClick()
 void LLPanelProfileView::onCopyToClipboard()
 {
 	std::string name = getChild<LLUICtrl>("user_name")->getValue().asString() + " (" + getChild<LLUICtrl>("user_slid")->getValue().asString() + ")";
-	gClipboard.copyFromString(utf8str_to_wstring(name));
+	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(name), 0, name.length());
 }
 
 bool LLPanelProfileView::isGrantedToSeeOnlineStatus()
