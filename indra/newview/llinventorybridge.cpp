@@ -3163,9 +3163,6 @@ void LLFolderBridge::staticFolderOptionsMenu()
 	LLFolderBridge* selfp = sSelf.get();
 
 	if (selfp && selfp->mRoot)
-// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-				mItems.push_back(std::string("Wear On Outfit"));
-// [/SL:KB]
 	{
 		selfp->mRoot->updateMenu();
 	}
@@ -3370,6 +3367,9 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags)
 			// Adding an outfit onto another (versus replacing) doesn't make sense.
 			if (type != LLFolderType::FT_OUTFIT)
 			{
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+				mItems.push_back(std::string("Wear On Outfit"));
+// [/SL:KB]
 				mItems.push_back(std::string("Add To Outfit"));
 			}
 
