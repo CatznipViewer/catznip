@@ -38,6 +38,9 @@
 class LLAvatarIconCtrl;
 class LLAvatarName;
 class LLIconCtrl;
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+class LLSliderCtrl;
+// [/SL:KB]
 
 class LLAvatarListItem : public LLPanel, public LLFriendObserver
 {
@@ -121,6 +124,9 @@ public:
 	void setShowProfileBtn(bool show);
 	void setShowInfoBtn(bool show);
 	void showSpeakingIndicator(bool show);
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	void showVolumeSlider(bool show);
+// [/SL:KB]
 //	void setShowPermissions(bool show) { mShowPermissions = show; };
 //	void showLastInteractionTime(bool show);
 // [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
@@ -149,6 +155,9 @@ protected:
 	 * Contains indicator to show voice activity. 
 	 */
 	LLOutputMonitorCtrl* mSpeakingIndicator;
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	LLSliderCtrl* mVolumeSlider;
+// [/SL:KB]
 
 	LLAvatarIconCtrl* mAvatarIcon;
 
@@ -183,6 +192,9 @@ private:
 	 */
 	typedef enum e_avatar_item_child {
 		ALIC_SPEAKER_INDICATOR,
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+		ALIC_VOLUME_SLIDER,
+// [/SL:KB]
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 		ALIC_TEXT_FIELD,
 // [/SL:KB]

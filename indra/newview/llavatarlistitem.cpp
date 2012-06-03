@@ -40,6 +40,7 @@
 #include "lloutputmonitorctrl.h"
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-3.0.0a)
 #include "llnotificationsutil.h"
+#include "llsliderctrl.h"
 #include "llslurl.h"
 // [/SL:KB]
 
@@ -74,6 +75,9 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	mIconPermissionEditMine(NULL),
 	mIconPermissionEditTheirs(NULL),
 	mSpeakingIndicator(NULL),
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	mVolumeSlider(NULL),
+// [/SL:KB]
 	mInfoBtn(NULL),
 	mProfileBtn(NULL),
 	mOnlineStatus(E_UNKNOWN),
@@ -131,6 +135,10 @@ BOOL  LLAvatarListItem::postBuild()
 // [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
 	mSpeakingIndicator->setVisible(false);
 // [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	mVolumeSlider = getChild<LLSliderCtrl>("volume_slider");
+	mVolumeSlider->setVisible(false);
+// [/SL:KB]
 
 	mInfoBtn = getChild<LLButton>("info_btn");
 	mProfileBtn = getChild<LLButton>("profile_btn");
@@ -160,6 +168,7 @@ BOOL  LLAvatarListItem::postBuild()
 	mIconPermissionEditMine->setEnabled(mShowPermissions);
 	mIconPermissionEditTheirs->setEnabled(mShowPermissions);
 	mSpeakingIndicator->setEnabled(false);
+	mVolumeSlider->setEnabled(false);
 	mInfoBtn->setEnabled(mShowInfoBtn);
 	mProfileBtn->setEnabled(mShowProfileBtn);
 	mTextField->LLUICtrl::setEnabled(false);					// Disabled and invisible by default (see above)
@@ -172,6 +181,13 @@ S32 LLAvatarListItem::notifyParent(const LLSD& info)
 {
 	if (info.has("visibility_changed"))
 	{
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+		// Match the volume slider's visibility to the speaking indicator's visibility
+		if (mVolumeSlider->getEnabled())
+		{
+			mVolumeSlider->setVisible(mSpeakingIndicator->getVisible());
+		}
+// [/SL:KB]
 		updateChildren();
 		return 1;
 	}
@@ -419,6 +435,20 @@ void LLAvatarListItem::showSpeakingIndicator(bool visible)
 ////	mSpeakingIndicator->setVisible(visible);
 ////	updateChildren();
 //}
+
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+void LLAvatarListItem::showVolumeSlider(bool visible)
+{
+	// Already done? Then do nothing.
+	if (mVolumeSlider->getEnabled() == (BOOL)visible)
+		return;
+
+	if (!visible)
+		mVolumeSlider->setVisible(false);
+	mVolumeSlider->setEnabled(visible);
+	updateChildren();
+}
+// [/SL:KB]
 
 void LLAvatarListItem::setAvatarIconVisible(bool visible)
 {
@@ -692,9 +722,13 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	//speaking indicator width + padding
 	S32 speaking_indicator_width = avatar_item->getRect().getWidth() - avatar_item->mSpeakingIndicator->getRect().mLeft;
 
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	S32 volume_slider_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mVolumeSlider->getRect().mLeft;
+// [/SL:KB]
+
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	// Text field textbox width + padding
-	S32 text_field_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+	S32 text_field_width = avatar_item->mVolumeSlider->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
 // [/SL:KB]
 
 	//profile btn width + padding
@@ -744,6 +778,9 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	sChildrenWidths[--index] = profile_btn_width;
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	sChildrenWidths[--index] = text_field_width;
+// [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	sChildrenWidths[--index] = volume_slider_width;
 // [/SL:KB]
 	sChildrenWidths[--index] = speaking_indicator_width;
 	llassert(index == 0);
@@ -884,11 +921,17 @@ LLView* LLAvatarListItem::getItemChildView(EAvatarListItemChildIndex child_view_
 		break;
 //	case ALIC_INTERACTION_TIME:
 //		child_view = mLastInteractionTime;
+//		break;
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
 	case ALIC_TEXT_FIELD:
 		child_view = mTextField;
-// [/SL:KB]
 		break;
+// [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+	case ALIC_VOLUME_SLIDER:
+		child_view = mVolumeSlider;
+		break;
+// [/SL:KB]
 	case ALIC_SPEAKER_INDICATOR:
 		child_view = mSpeakingIndicator;
 		break;
