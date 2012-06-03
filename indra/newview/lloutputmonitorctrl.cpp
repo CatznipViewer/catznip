@@ -246,6 +246,9 @@ void LLOutputMonitorCtrl::setSpeakerId(const LLUUID& speaker_id, const LLUUID& s
 	if (speaker_id.isNull() && mSpeakerId.notNull())
 	{
 		LLSpeakingIndicatorManager::unregisterSpeakingIndicator(mSpeakerId, this);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+		mSpeakerId.setNull();
+// [/SL:KB]
 	}
 
 	if (speaker_id.isNull() || speaker_id == mSpeakerId) return;

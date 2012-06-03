@@ -253,6 +253,9 @@ private:
 	LLButton* mProfileBtn;
 
 	LLUUID mAvatarId;
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	LLUUID mSessionId;
+// [/SL:KB]
 	std::string mHighlihtSubstring; // substring to highlight
 	EOnlineStatus mOnlineStatus;
 	//Flag indicating that info/profile button shouldn't be shown at all.

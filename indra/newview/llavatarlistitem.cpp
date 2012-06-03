@@ -128,6 +128,10 @@ BOOL  LLAvatarListItem::postBuild()
 	mIconPermissionEditTheirs->setVisible(false);
 
 	mSpeakingIndicator = getChild<LLOutputMonitorCtrl>("speaking_indicator");
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	mSpeakingIndicator->setVisible(false);
+// [/SL:KB]
+
 	mInfoBtn = getChild<LLButton>("info_btn");
 	mProfileBtn = getChild<LLButton>("profile_btn");
 
@@ -295,7 +299,13 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, E
 		LLAvatarTracker::instance().removeParticularFriendObserver(mAvatarId, this);
 
 	mAvatarId = id;
-	mSpeakingIndicator->setSpeakerId(id, session_id);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	// Only set the speaker if it's currently non-null
+	if (mSpeakingIndicator->getSpeakerId().notNull())
+		mSpeakingIndicator->setSpeakerId(id, session_id);
+	mSessionId = session_id;
+// [/SL:KB]
+//	mSpeakingIndicator->setSpeakerId(id, session_id);
 
 	// We'll be notified on avatar online status changes
 	if (!ignore_status_changes && mAvatarId.notNull())
@@ -384,15 +394,23 @@ void LLAvatarListItem::setShowProfileBtn(bool show)
 // [/SL:KB]
 }
 
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
 void LLAvatarListItem::showSpeakingIndicator(bool visible)
 {
-// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
 	// Already done? Then do nothing.
 	if (mSpeakingIndicator->getEnabled() == (BOOL)visible)
 		return;
+
+	if (visible)
+		mSpeakingIndicator->setSpeakerId(mAvatarId, mSessionId);
+	else
+		mSpeakingIndicator->setSpeakerId(LLUUID::null);
 	mSpeakingIndicator->setEnabled(visible);
 	updateChildren();
+}
 // [/SL:KB]
+//void LLAvatarListItem::showSpeakingIndicator(bool visible)
+//{
 //	// Already done? Then do nothing.
 //	if (mSpeakingIndicator->getVisible() == (BOOL)visible)
 //		return;
@@ -400,7 +418,7 @@ void LLAvatarListItem::showSpeakingIndicator(bool visible)
 //// probably this method should be totally removed.
 ////	mSpeakingIndicator->setVisible(visible);
 ////	updateChildren();
-}
+//}
 
 void LLAvatarListItem::setAvatarIconVisible(bool visible)
 {

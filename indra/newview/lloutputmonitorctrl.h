@@ -90,6 +90,9 @@ public:
 	 *		which has the same session id (EXT-5562).
 	 */
 	void			setSpeakerId(const LLUUID& speaker_id, const LLUUID& session_id = LLUUID::null);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	const LLUUID&	getSpeakerId() { return mSpeakerId; }
+// [/SL:KB]
 
 	//called by mute list
 	virtual void onChange();

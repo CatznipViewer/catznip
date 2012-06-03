@@ -209,6 +209,7 @@ LLAvatarList::LLAvatarList(const Params& p)
 	{
 		mShowSpeakingIndicator = false;
 		LLVoiceClient::getInstance()->addObserver(this);
+		refreshSpeakingIndicatorsVisibility(true);
 	}
 // [/SL:KB]
 
