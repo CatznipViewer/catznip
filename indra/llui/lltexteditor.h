@@ -64,6 +64,9 @@ public:
 								ignore_tab,
 								show_line_numbers,
 								commit_on_focus_lost,
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+								commit_on_return,
+// [/SL:KB]
 								show_context_menu;
 
 		//colors
@@ -202,6 +205,11 @@ public:
 	void			setShowContextMenu(bool show) { mShowContextMenu = show; }
 	bool			getShowContextMenu() const { return mShowContextMenu; }
 
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+public:
+	LLContextMenu*	getContextMenu() const;
+	void			setContextMenu(LLContextMenu* pMenu);
+// [/SL:KB]
 protected:
 	void			showContextMenu(S32 x, S32 y);
 	void			drawPreeditMarker();
@@ -316,6 +324,9 @@ private:
 
 	BOOL			mTabsToNextField;		// if true, tab moves focus to next field, else inserts spaces
 	BOOL			mCommitOnFocusLost;
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
+	BOOL			mCommitOnReturn;
+// [/SL:KB]
 	BOOL			mTakesFocus;
 
 	BOOL			mAllowEmbeddedItems;
@@ -329,7 +340,10 @@ private:
 	keystroke_signal_t mKeystrokeSignal;
 	LLTextValidate::validate_func_t mPrevalidateFunc;
 
-	LLContextMenu* mContextMenu;
+//	LLContextMenu* mContextMenu;
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLHandle<LLContextMenu> mContextMenuHandle;
+// [/SL:KB]
 }; // end class LLTextEditor
 
 // Build time optimization, generate once in .cpp file
