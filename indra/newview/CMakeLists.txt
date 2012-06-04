@@ -1199,7 +1199,7 @@ if (DARWIN)
 
   # Add resource files to the project.
   set(viewer_RESOURCE_FILES
-    secondlife.icns
+    catznip.icns
     macview.r
     gpu_table.txt
     Info-SecondLife.plist
