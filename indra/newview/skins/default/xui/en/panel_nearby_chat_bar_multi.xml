@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+    <panel width="300" 
+           height="54" 
+           left="0" 
+           name="bottom_panel"
+           bottom="-1" 
+           follows="all" 
+           tab_group="1">
+<layout_stack
+ animate="false"
+ follows="all"
+ height="46"
+ layout="topleft"
+ left="5"
+ name="nearby_chat_bar_panels"
+ orientation="horizontal"
+ width="290"
+ >
+  <layout_panel
+   auto_resize="true"
+   follows="all"
+   height="46"
+   name="panel_nearby_chat_bar"
+   user_resize="false"
+   visible="true"
+   width="268"
+   >
+    <text_editor
+     commit_on_return="true"
+     follows="all"
+     height="46"
+     label="Press Enter to say, Ctrl+Enter to shout"
+     layout="topleft"
+     max_length="1024"
+     name="chat_editor"
+     top="0"
+     use_ellipses="false"
+     width="268"
+     word_wrap="true" />
+  </layout_panel>
+  <layout_panel
+   auto_resize="false"
+   follows="left|right|top"
+   height="46"
+   name="panel_nearby_chat_toggle"
+   user_resize="false"
+   visible="true"
+   width="22"
+   >
+      <button
+        follows="right|top"
+        is_toggle="true"
+        width="20"
+        top="0"
+        layout="topleft"
+        left="2"
+        image_disabled="ComboButton_UpOff"
+        image_unselected="ComboButton_UpOff"
+        image_selected="ComboButton_On"
+        image_pressed="ComboButton_UpSelected"
+        image_pressed_selected="ComboButton_Selected"
+        height="20"
+        chrome="true"
+        name="show_nearby_chat"
+        tool_tip="Shows/hides nearby chat log">
+      </button>
+  </layout_panel>
+</layout_stack>
+</panel>
