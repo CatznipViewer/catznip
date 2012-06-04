@@ -22,6 +22,4 @@
        text_readonly_color="ChatHistoryTextColor"
        top="5"
        width="313" />
-    </layout_panel>
-  </layout_stack>
 </panel>
