@@ -5380,7 +5380,10 @@ S32 LLSelectNode::getLastSelectedTE()
 	return mLastTESelected;
 }
 
-LLViewerObject* LLSelectNode::getObject()
+//LLViewerObject* LLSelectNode::getObject()
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+LLViewerObject* LLSelectNode::getObject() const
+// [/SL:KB]
 {
 	if (!mObject)
 	{
