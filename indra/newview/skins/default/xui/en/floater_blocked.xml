@@ -97,6 +97,7 @@
                  name="derender_spacer_icon"
                  width="218" />
                 <button
+                 enabled="false"
                  follows="bottom|right"
                  height="25"
                  image_hover_unselected="Toolbar_Right_Over"

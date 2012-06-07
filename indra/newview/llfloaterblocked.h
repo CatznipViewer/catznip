@@ -18,9 +18,8 @@
 #define LLFLOATERBLOCKED_H
 
 #include "llfloater.h"
-#include "lllineeditor.h"
-#include "lltexteditor.h"
 
+class LLScrollListCtrl;
 class LLTabContainer;
 
 // ============================================================================
@@ -41,14 +40,16 @@ protected:
 	 * Event callbacks
 	 */
 protected:
-	void onBtnRemoveEntry();
+	void onDerenderEntrySelChange();
+	void onDerenderEntryRemove();
 	void onTabSelect(const LLSD& sdParam);
 
 	/*
 	 * Member variables
 	 */
 protected:
-	LLTabContainer*				m_pBlockedTabs;
+	LLTabContainer*             m_pBlockedTabs;
+	LLScrollListCtrl*           m_pDerenderList;
 	boost::signals2::connection m_DerenderChangeConn;
 };
 

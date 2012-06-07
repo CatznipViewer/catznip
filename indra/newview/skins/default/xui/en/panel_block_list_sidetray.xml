@@ -97,6 +97,7 @@
                   name="mute_spacer_icon"
                   width="16"/>
                  <button
+                  enabled="false"
                   follows="bottom|right"
                   height="25"
                   image_hover_unselected="Toolbar_Right_Over"

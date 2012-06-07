@@ -16,8 +16,6 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llagent.h"
-#include "llagentdata.h"
-#include "llappviewer.h"
 #include "llderenderlist.h"
 #include "llsdserialize.h"
 #include "llselectmgr.h"
@@ -156,6 +154,7 @@ LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(U64 idRegion, c
 
 LLDerenderList::entry_list_t::const_iterator LLDerenderList::findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const
 {
+	// NOTE: 'idRootLocal' will be 0 for the root prim itself and is the only time we need to compare against 'idObject'
 	return std::find_if(m_Entries.cbegin(), m_Entries.cend(), 
 						[&idRegion, &idObject, &idRootLocal](const LLDerenderEntry& e)
 						{ return ((idRootLocal) && (idRegion == e.idRegion) && (idRootLocal == e.idRootLocal)) || (idObject == e.idObject); });

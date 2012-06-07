@@ -67,8 +67,10 @@ LLPanelBlockedList::~LLPanelBlockedList()
 BOOL LLPanelBlockedList::postBuild()
 {
 //	mBlockedList = getChild<LLScrollListCtrl>("blocked");
-// [SL:KB] - Patch: World-Derender | Checked: 2012-02-27 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: World-Derender | Checked: 2012-02-27 (Catznip-3.2.3)
 	mBlockedList = getChild<LLScrollListCtrl>("mute_list");
+	mBlockedList->setCommitCallback(boost::bind(&LLPanelBlockedList::updateButtons, this));
+	mBlockedList->setCommitOnDelete(true);
 // [/SL:KB]
 	mBlockedList->setCommitOnSelectionChange(TRUE);
 
@@ -127,11 +129,14 @@ void LLPanelBlockedList::refreshBlockedList()
 	}
 }
 
-//void LLPanelBlockedList::updateButtons()
-//{
-//	bool hasSelected = NULL != mBlockedList->getFirstSelected();
+void LLPanelBlockedList::updateButtons()
+{
+	bool hasSelected = NULL != mBlockedList->getFirstSelected();
+// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.2.3)
+	getChildView("mute_trash_btn")->setEnabled(hasSelected);
+// [/SL:KB]
 //	getChildView("Unblock")->setEnabled(hasSelected);
-//}
+}
 
 
 

@@ -17,15 +17,14 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llderenderlist.h"
+#include "llfloaterblocked.h"
 #include "llscrolllistctrl.h"
 #include "lltabcontainer.h"
-
-#include "llfloaterblocked.h"
 
 // ============================================================================
 
 LLFloaterBlocked::LLFloaterBlocked(const LLSD& sdKey)
-	: LLFloater(sdKey), m_pBlockedTabs(NULL)
+	: LLFloater(sdKey), m_pBlockedTabs(NULL), m_pDerenderList(NULL)
 {
 }
 
@@ -39,8 +38,13 @@ BOOL LLFloaterBlocked::postBuild()
 	m_pBlockedTabs = findChild<LLTabContainer>("blocked_tabs");
 	m_pBlockedTabs->setCommitCallback(boost::bind(&LLFloaterBlocked::onTabSelect, this, _2));
 
+	m_pDerenderList = findChild<LLScrollListCtrl>("derender_list");
+	m_pDerenderList->setCommitCallback(boost::bind(&LLFloaterBlocked::onDerenderEntrySelChange, this));
+	m_pDerenderList->setCommitOnDelete(true);
+	m_pDerenderList->setCommitOnSelectionChange(true);
+
 	m_DerenderChangeConn = LLDerenderList::setChangeCallback(boost::bind(&LLFloaterBlocked::refreshDerender, this));
-	findChild<LLUICtrl>("derender_trash_btn")->setCommitCallback(boost::bind(&LLFloaterBlocked::onBtnRemoveEntry, this));
+	findChild<LLUICtrl>("derender_trash_btn")->setCommitCallback(boost::bind(&LLFloaterBlocked::onDerenderEntryRemove, this));
 
 	return TRUE;
 }
@@ -49,7 +53,13 @@ void LLFloaterBlocked::onOpen(const LLSD& sdKey)
 {
 }
 
-void LLFloaterBlocked::onBtnRemoveEntry()
+void LLFloaterBlocked::onDerenderEntrySelChange()
+{
+	bool hasSelected = NULL != m_pDerenderList->getFirstSelected();
+	getChildView("derender_trash_btn")->setEnabled(hasSelected);
+}
+
+void LLFloaterBlocked::onDerenderEntryRemove()
 {
 	const LLScrollListCtrl* pDerenderList = getChild<LLScrollListCtrl>("derender_list");
 
@@ -74,7 +84,7 @@ void LLFloaterBlocked::onTabSelect(const LLSD& sdParam)
 void LLFloaterBlocked::refreshDerender()
 {
 	// Sanity check - only refresh if we're the active tab
-	if ((m_pBlockedTabs->getCurrentPanel()) && ("derender_tab" == m_pBlockedTabs->getCurrentPanel()->getName()))
+	if ((m_pBlockedTabs->getCurrentPanel()) && ("derender_tab" != m_pBlockedTabs->getCurrentPanel()->getName()))
 		return;
 
 	LLScrollListCtrl* pDerenderList = getChild<LLScrollListCtrl>("derender_list");

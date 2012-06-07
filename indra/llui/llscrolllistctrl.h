@@ -284,6 +284,9 @@ public:
 	S32  getColumnPadding()						{ return mColumnPadding; }
 	void setCommitOnKeyboardMovement(BOOL b)	{ mCommitOnKeyboardMovement = b; }
 	void setCommitOnSelectionChange(BOOL b)		{ mCommitOnSelectionChange = b; }
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	void setCommitOnDelete(BOOL b)				{ mCommitOnDelete = b; }
+// [/SL:KB]
 	void setAllowKeyboardMovement(BOOL b)		{ mAllowKeyboardMovement = b; }
 
 	void			setMaxSelectable(U32 max_selected) { mMaxSelectable = max_selected; }
@@ -442,6 +445,9 @@ private:
 	BOOL			mAllowKeyboardMovement;
 	BOOL			mCommitOnKeyboardMovement;
 	BOOL			mCommitOnSelectionChange;
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	BOOL			mCommitOnDelete;
+// [/SL:KB]
 	BOOL			mSelectionChanged;
 	BOOL			mNeedsScroll;
 	BOOL			mMouseWheelOpaque;

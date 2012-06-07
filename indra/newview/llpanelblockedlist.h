@@ -65,7 +65,7 @@ public:
 	
 private:
 	void refreshBlockedList();
-//	void updateButtons();
+	void updateButtons();
 
 	// UI callbacks
 //	void onBackBtnClick();

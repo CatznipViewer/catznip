@@ -51,7 +51,7 @@
 #include "llconsole.h"
 #include "lldaycyclemanager.h"
 #include "lldebugview.h"
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 #include "llderenderlist.h"
 // [/SL:KB]
 #include "llenvmanager.h"
@@ -5094,7 +5094,7 @@ void handle_force_delete(void*)
 	LLSelectMgr::getInstance()->selectForceDelete();
 }
 
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 void handle_object_derender()
 {
 	LLDerenderList::instance().addCurrentSelection();
@@ -8363,7 +8363,7 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 	commit.add("Object.Derender", boost::bind(&handle_object_derender));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");

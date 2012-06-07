@@ -66,7 +66,7 @@
 #include "u64.h"
 #include "llviewertexturelist.h"
 #include "lldatapacker.h"
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 #include "llderenderlist.h"
 // [/SL:KB]
 #ifdef LL_STANDALONE
@@ -534,7 +534,7 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 			}
 #endif
 
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 			// Don't recreate derendered objects (update the core object information so we'll have enough information to rerequest it later if needed)
 			if ( (OUT_FULL == update_type) && (LLDerenderList::instanceExists()) )
 			{
