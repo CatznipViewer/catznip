@@ -66,7 +66,7 @@ void LLFloaterBlocked::onOpen(const LLSD& sdParam)
 	}
 	else if (sdParam.has(DERENDER_PARAM_NAME))
 	{
-		m_pBlockedTabs->selectTabByName(BLOCKED_TAB_NAME);
+		m_pBlockedTabs->selectTabByName(DERENDER_TAB_NAME);
 		m_pDerenderList->selectByID(sdParam[DERENDER_PARAM_NAME].asUUID());
 	}
 }

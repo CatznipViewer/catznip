@@ -5094,15 +5094,13 @@ void handle_force_delete(void*)
 	LLSelectMgr::getInstance()->selectForceDelete();
 }
 
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3.0)
 void handle_object_derender(const LLSD& sdParam)
 {
-	bool fPersist = false; const std::string strParam = sdParam.asString();
-	if ("persistent" == strParam)
-		fPersist = true;
-	else if ("temporary" == strParam)
-		fPersist = false;
-	LLDerenderList::instance().addCurrentSelection(fPersist);
+	LLDerenderList::instance().addCurrentSelection("persistent" == sdParam.asString());
+
+	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+	LLFloaterReg::showInstance("blocked", LLSD().with("derender_to_select", (pObj) ? pObj->getID() : LLUUID::null));
 }
 // [/SL:KB]
 
