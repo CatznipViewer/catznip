@@ -30,8 +30,8 @@
 // LLDerenderEntry
 //
 
-LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode)
-	: fPersists(false), idRegion(0), idRootLocal(0)
+LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode, bool fPersist)
+	: fPersists(fPersist), idRegion(0), idRootLocal(0)
 {
 	//
 	// Fill in all object related information
@@ -69,8 +69,8 @@ LLDerenderEntry::LLDerenderEntry(const LLSD& sdData)
 	: fPersists(true), idRegion(0), idRootLocal(0)
 {
 	strObjectName = sdData["object_name"];
-	if (strRegionName.empty())
-		strRegionName = LLTrans::getString("Unknown");
+	if (strObjectName.empty())
+		strObjectName = LLTrans::getString("Unknown");
 	idObject = sdData["object_id"].asUUID();
 
 	strRegionName = sdData["region_name"];
@@ -101,13 +101,14 @@ std::string LLDerenderList::s_PersistFilename = "derender_list.xml";
 
 LLDerenderList::LLDerenderList()
 {
+	load();
 }
 
 LLDerenderList::~LLDerenderList()
 {
 }
 
-void LLDerenderList::addCurrentSelection()
+void LLDerenderList::addCurrentSelection(bool fPersist)
 {
 	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
 
@@ -116,7 +117,7 @@ void LLDerenderList::addCurrentSelection()
 	{
 		const LLSelectNode* pNode = *itObj++;
 
-		LLDerenderEntry entry(pNode);
+		LLDerenderEntry entry(pNode, fPersist);
 		if ( (isDerendered(entry.idObject)) || (gAgentID == entry.idObject) )
 			continue;
 		m_Entries.push_back(entry);
@@ -131,6 +132,9 @@ void LLDerenderList::addCurrentSelection()
 			gObjectList.killObject(pObj);
 		}
 	}
+
+	if (fPersist)
+		save();
 	s_ChangeSignal();
 }
 
@@ -169,7 +173,7 @@ void LLDerenderList::removeObject(const LLUUID& idObject)
 
 void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 {
-	std::map<LLViewerRegion*, std::list<U32>> idRegionObjectMap;
+	std::map<LLViewerRegion*, std::list<U32>> idRegionObjectMap; bool fSave = false;
 	for (auto itObject = idsObject.cbegin(); itObject != idsObject.cend(); ++itObject)
 	{
 		entry_list_t::iterator itEntry = findEntry(*itObject);
@@ -185,6 +189,7 @@ void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 			idsLocal.splice(idsLocal.end(), itEntry->idsChildLocal);
 		}
 
+		fSave |= itEntry->fPersists;
 		m_Entries.erase(itEntry);
 	}
 
@@ -221,6 +226,8 @@ void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 			gMessageSystem->sendReliable(pRegion->getHost());
 	}
 
+	if (fSave)
+		save();
 	s_ChangeSignal();
 }
 

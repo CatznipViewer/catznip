@@ -121,10 +121,18 @@
               function="Object.EnableMute" />
    </menu_item_call>
    <menu_item_call
+      label="Block Visually"
+      name="Object Visual Mute">
+         <menu_item_call.on_click
+          function="Object.Derender"
+          parameter="persistent" />
+   </menu_item_call>
+   <menu_item_call
       label="Derender"
       name="Object Derender">
          <menu_item_call.on_click
-          function="Object.Derender" />
+          function="Object.Derender"
+          parameter="temporary" />
    </menu_item_call>
    <menu_item_call
       enabled="false"

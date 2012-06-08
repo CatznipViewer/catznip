@@ -5095,9 +5095,14 @@ void handle_force_delete(void*)
 }
 
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
-void handle_object_derender()
+void handle_object_derender(const LLSD& sdParam)
 {
-	LLDerenderList::instance().addCurrentSelection();
+	bool fPersist = false; const std::string strParam = sdParam.asString();
+	if ("persistent" == strParam)
+		fPersist = true;
+	else if ("temporary" == strParam)
+		fPersist = false;
+	LLDerenderList::instance().addCurrentSelection(fPersist);
 }
 // [/SL:KB]
 
@@ -8364,7 +8369,7 @@ void initialize_menus()
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
-	commit.add("Object.Derender", boost::bind(&handle_object_derender));
+	commit.add("Object.Derender", boost::bind(&handle_object_derender, _2));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
