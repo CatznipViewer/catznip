@@ -8,6 +8,7 @@
  legacy_header_height="18"
  name="blocked"
  open_positioning="cascading"
+ single_instance="true"
  title="Blocked/Derender List"
  width="280">
 

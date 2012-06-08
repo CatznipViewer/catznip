@@ -23,6 +23,14 @@
 
 // ============================================================================
 
+//
+// Constants
+//
+const std::string BLOCKED_PARAM_NAME  = "blocked_to_select";
+const std::string DERENDER_PARAM_NAME = "derender_to_select";
+const std::string BLOCKED_TAB_NAME  = "mute_tab";
+const std::string DERENDER_TAB_NAME = "derender_tab";
+
 LLFloaterBlocked::LLFloaterBlocked(const LLSD& sdKey)
 	: LLFloater(sdKey), m_pBlockedTabs(NULL), m_pDerenderList(NULL)
 {
@@ -49,8 +57,18 @@ BOOL LLFloaterBlocked::postBuild()
 	return TRUE;
 }
 
-void LLFloaterBlocked::onOpen(const LLSD& sdKey)
+void LLFloaterBlocked::onOpen(const LLSD& sdParam)
 {
+	if (sdParam.has(BLOCKED_PARAM_NAME))
+	{
+		m_pBlockedTabs->selectTabByName(BLOCKED_TAB_NAME);
+		m_pBlockedTabs->getCurrentPanel()->onOpen(sdParam);
+	}
+	else if (sdParam.has(DERENDER_PARAM_NAME))
+	{
+		m_pBlockedTabs->selectTabByName(BLOCKED_TAB_NAME);
+		m_pDerenderList->selectByID(sdParam[DERENDER_PARAM_NAME].asUUID());
+	}
 }
 
 void LLFloaterBlocked::onDerenderEntrySelChange()
@@ -72,10 +90,7 @@ void LLFloaterBlocked::onDerenderEntryRemove()
 void LLFloaterBlocked::onTabSelect(const LLSD& sdParam)
 {
 	const std::string strTabName = sdParam.asString();
-	if ("mute_tab" == strTabName)
-	{
-	}
-	else if ("derender_tab" == strTabName)
+	if (DERENDER_TAB_NAME == strTabName)
 	{
 		refreshDerender();
 	}

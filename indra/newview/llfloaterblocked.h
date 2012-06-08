@@ -32,7 +32,7 @@ public:
 
 public:
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onOpen(const LLSD& sdParam);
 protected:
 	void refreshDerender();
 

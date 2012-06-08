@@ -1290,7 +1290,10 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	}
 	else if (chosen_item == "panel_block_list_sidetray")
 	{
-		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+		LLFloaterReg::showInstance("blocked");
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
 	}
 }
 
@@ -1326,7 +1329,10 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	}
 	else if (chosen_item == "panel_block_list_sidetray")
 	{
-		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+		LLFloaterReg::showInstance("blocked");
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
 	}
 }
 
@@ -1363,7 +1369,10 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	}
 	else if (chosen_item == "panel_block_list_sidetray")
 	{
-		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+		LLFloaterReg::showInstance("blocked");
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
 	}
 }
 
