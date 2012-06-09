@@ -70,6 +70,9 @@ public:
 		Optional<bool>			can_apply_immediately;
 		Optional<bool>			no_commit_on_selection; // alternative mode: commit occurs and the widget gets dirty
 														// only on DnD or when OK is pressed in the picker
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+		Optional<bool>			show_label;
+// [/SL:KB]
 		Optional<S32>			label_width;
 		Optional<LLUIColor>		border_color;
 		Optional<LLUIImage*>	fallback_image;
@@ -86,6 +89,9 @@ public:
 			allow_no_texture("allow_no_texture"),
 			can_apply_immediately("can_apply_immediately"),
 			no_commit_on_selection("no_commit_on_selection", false),
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+			show_label("show_label", true),
+// [/SL:KB]
 		    label_width("label_width", -1),
 			border_color("border_color"),
 			fallback_image("fallback_image"),
@@ -205,6 +211,9 @@ private:
 	LLViewBorder*			 	mBorder;
 	BOOL					 	mValid;
 	BOOL					 	mShowLoadingPlaceholder;
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+	bool					 	mShowLabel;
+// [/SL:KB]
 	std::string				 	mLoadingPlaceholderString;
 	S32						 	mLabelWidth;
 };
