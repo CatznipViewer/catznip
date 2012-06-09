@@ -1073,7 +1073,10 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 			{
 				LLStringUtil::format_map_t string_args;
 				string_args["[NUMBER]"] = llformat("%d", agent_count);
-				message += '\n';
+//				message += '\n';
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+				message += " - ";
+// [/SL:KB]
 				message += getString((agent_count == 1 ? "world_map_person" : "world_map_people") , string_args);
 			}
 		}
@@ -1084,8 +1087,13 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 
 		if (!region_flags.empty())
 		{
-			tooltip_msg += '\n';
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+			tooltip_msg += " (";
 			tooltip_msg += region_flags;
+			tooltip_msg += ')';
+// [/SL:KB]
+//			tooltip_msg += '\n';
+//			tooltip_msg += region_flags;
 		}
 					
 		const S32 SLOP = 9;
@@ -1095,9 +1103,36 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 		LLRect sticky_rect_screen;
 		sticky_rect_screen.setCenterAndSize(screen_x, screen_y, SLOP, SLOP);
 
-		LLToolTipMgr::instance().show(LLToolTip::Params()
-			.message(tooltip_msg)
-			.sticky_rect(sticky_rect_screen));
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+		bool fShowToolTip = true;
+
+		LLFloater* pInspector = LLFloaterReg::findInstance("inspect_location");
+		if ( (pInspector) && (pInspector->getVisible()) )
+		{
+			LLVector2 posCur(pos_global.mdV[VX], pos_global.mdV[VY]);
+			LLVector2 posOld(pInspector->getKey()["x"].asReal(), pInspector->getKey()["y"].asReal());
+			
+			fShowToolTip = (dist_vec_squared(posCur, posOld) >= 9.0f);
+		}
+
+		if (fShowToolTip)
+		{
+			LLInspector::Params p;
+			p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
+			p.message(tooltip_msg);
+			p.image.name("Inspector_I");
+			p.click_callback(boost::bind(showInspector, pos_global));
+			p.visible_time_near(6.f);
+			p.visible_time_far(3.f);
+			p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
+			p.wrap(false);
+				
+			LLToolTipMgr::instance().show(p);
+		}
+// [/SL:KB]
+//		LLToolTipMgr::instance().show(LLToolTip::Params()
+//			.message(tooltip_msg)
+//			.sticky_rect(sticky_rect_screen));
 	}
 	return TRUE;
 }
@@ -1590,14 +1625,6 @@ void LLWorldMapView::handleClick(S32 x, S32 y, MASK mask,
 		}
 	}
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
-	LLSD sdParams;
-	sdParams["x"] = pos_global.mdV[VX];
-	sdParams["y"] = pos_global.mdV[VY];
-	sdParams["z"] = pos_global.mdV[VZ];
-	LLFloaterReg::showInstance("inspect_location", sdParams);
-// [/SL:KB]
-
 	// If we get here, we haven't clicked on anything
 	gFloaterWorldMap->trackLocation(pos_global);
 	mItemPicked = FALSE;
@@ -1803,3 +1830,23 @@ BOOL LLWorldMapView::handleDoubleClick( S32 x, S32 y, MASK mask )
 	}
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+void LLWorldMapView::showInspector(const LLVector3d& posGlobal)
+{
+	gFloaterWorldMap->trackLocation(posGlobal);
+
+	LLSD sdParams;
+	sdParams["global"]["x"] = posGlobal.mdV[VX];
+	sdParams["global"]["y"] = posGlobal.mdV[VY];
+	sdParams["global"]["z"] = posGlobal.mdV[VZ];
+	if (LLToolTipMgr::instance().toolTipVisible())
+	{
+		LLRect rct = LLToolTipMgr::instance().getToolTipRect();
+		sdParams["pos"]["x"] = rct.mLeft;
+		sdParams["pos"]["y"] = rct.mTop;
+	}
+	LLFloaterReg::showInstance("inspect_location", sdParams);
+
+}
+// [/SL:KB]

@@ -13258,6 +13258,17 @@
       <key>Value</key>
       <real>0.35</real>
     </map>
+    <key>PlaceInspectorTooltipDelay</key>
+    <map>
+      <key>Comment</key>
+      <string>Seconds before displaying place inspector tooltip</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.35</real>
+    </map>
     <key>SLURLTeleportDirectly</key>
     <map>
       <key>Comment</key>

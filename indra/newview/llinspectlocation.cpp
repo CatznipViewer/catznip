@@ -114,7 +114,7 @@ BOOL LLInspectLocation::postBuild()
 
 void LLInspectLocation::onOpen(const LLSD& sdData)
 {
-	LLVector3d posGlobal(sdData["x"].asReal(), sdData["y"].asReal(), sdData["z"].asReal());
+	LLVector3d posGlobal(sdData["global"]["x"].asReal(), sdData["global"]["y"].asReal(), sdData["global"]["z"].asReal());
 	if (posGlobal.isExactlyZero())
 		return;
 

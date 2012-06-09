@@ -129,6 +129,9 @@ public:
 protected:
 	void			setDirectionPos( LLTextBox* text_box, F32 rotation );
 	void			updateDirections();
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+	static void		showInspector(const LLVector3d& posGlobal);
+// [/SL:KB]
 
 public:
 	LLColor4		mBackgroundColor;
