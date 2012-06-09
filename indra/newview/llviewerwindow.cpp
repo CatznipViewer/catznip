@@ -2156,37 +2156,46 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 		if (!gViewerWindow->getFullscreenWindow())
 #endif // LL_WINDOWS
 		{
-// [/SL:KB]
 			BOOL maximized = mWindow->getMaximized();
 			gSavedSettings.setBOOL("WindowMaximized", maximized);
 
-//			if (!maximized)
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
 #ifndef LL_WINDOWS
-			LLCoordScreen window_size;
-			if (!maximized)
+			LLCoordScreen window_rect;
+			if ( (!maximized) && (mWindow->getSize(&window_rect)) )
 #else
-			LLCoordScreen window_size;
-			if (mWindow->getRestoredSize(&window_size))
+			LLCoordScreen window_rect;
+			if (mWindow->getRestoredSize(&window_rect))
 #endif // LL_WINDOWS
-// [/SL:KB]
 			{
 				U32 min_window_width=gSavedSettings.getU32("MinWindowWidth");
 				U32 min_window_height=gSavedSettings.getU32("MinWindowHeight");
 				// tell the OS specific window code about min window size
 				mWindow->setMinSize(min_window_width, min_window_height);
 
-				LLCoordScreen window_rect;
-				if (mWindow->getSize(&window_rect))
-				{
-					// Only save size if not maximized
-					gSavedSettings.setU32("WindowWidth", window_rect.mX);
-					gSavedSettings.setU32("WindowHeight", window_rect.mY);
-				}
+				// Only save size if not maximized
+				gSavedSettings.setU32("WindowWidth", window_rect.mX);
+				gSavedSettings.setU32("WindowHeight", window_rect.mY);
 			}
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-3.0.0a) | Modified: Catznip-2.1.2a
 		}
 // [/SL:KB]
+//		BOOL maximized = mWindow->getMaximized();
+//		gSavedSettings.setBOOL("WindowMaximized", maximized);
+//
+//		if (!maximized)
+//		{
+//			U32 min_window_width=gSavedSettings.getU32("MinWindowWidth");
+//			U32 min_window_height=gSavedSettings.getU32("MinWindowHeight");
+//			// tell the OS specific window code about min window size
+//			mWindow->setMinSize(min_window_width, min_window_height);
+//
+//			LLCoordScreen window_rect;
+//			if (mWindow->getSize(&window_rect))
+//			{
+//			// Only save size if not maximized
+//				gSavedSettings.setU32("WindowWidth", window_rect.mX);
+//				gSavedSettings.setU32("WindowHeight", window_rect.mY);
+//			}
+//		}
 
 		LLViewerStats::getInstance()->setStat(LLViewerStats::ST_WINDOW_WIDTH, (F64)width);
 		LLViewerStats::getInstance()->setStat(LLViewerStats::ST_WINDOW_HEIGHT, (F64)height);
