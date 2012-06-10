@@ -246,6 +246,9 @@ LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source,
 		mAvatarList->setShowIcons("ParticipantListShowIcons");
 		mAvatarListToggleIconsConnection = gSavedSettings.getControl("ParticipantListShowIcons")->getSignal()->connect(boost::bind(&LLAvatarList::toggleIcons, mAvatarList));
 	}
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	mAvatarListSortOrder = gSavedSettings.getControl("SpeakerParticipantDefaultOrder")->getSignal()->connect(boost::bind(&LLParticipantList::onSortedOrderChanged, this, _2));
+// [/SL:KB]
 
 	//Lets fill avatarList with existing speakers
 	LLSpeakerMgr::speaker_list_t speaker_list;
@@ -273,6 +276,9 @@ LLParticipantList::~LLParticipantList()
 	mAvatarListDoubleClickConnection.disconnect();
 	mAvatarListRefreshConnection.disconnect();
 	mAvatarListReturnConnection.disconnect();
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	mAvatarListSortOrder.disconnect();
+// [/SL:KB]
 	mAvatarListToggleIconsConnection.disconnect();
 
 	// It is possible Participant List will be re-created from LLCallFloater::onCurrentChannelChanged()
@@ -463,6 +469,13 @@ void LLParticipantList::setSortOrder(EParticipantSortOrder order)
 		sort();
 	}
 }
+
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+void LLParticipantList::onSortedOrderChanged(const LLSD& sdOrder)
+{
+	setSortOrder((EParticipantSortOrder)sdOrder.asInteger());
+}
+// [/SL:KB]
 
 const LLParticipantList::EParticipantSortOrder LLParticipantList::getSortOrder() const
 {

@@ -100,6 +100,10 @@ protected:
 	 */
 	void sort();
 
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	void onSortedOrderChanged(const LLSD& sdOrder);
+// [/SL:KB]
+
 	/**
 	 * List of listeners implementing LLOldEvents::LLSimpleListener.
 	 * There is no way to handle all the events in one listener as LLSpeakerMgr registers
@@ -295,6 +299,9 @@ private:
 	boost::signals2::connection mAvatarListDoubleClickConnection;
 	boost::signals2::connection mAvatarListRefreshConnection;
 	boost::signals2::connection mAvatarListReturnConnection;
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	boost::signals2::connection mAvatarListSortOrder;
+// [/SL:KB]
 	boost::signals2::connection mAvatarListToggleIconsConnection;
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
