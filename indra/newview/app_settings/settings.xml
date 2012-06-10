@@ -12168,7 +12168,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>SpeakerParticipantRemoveDelay</key>
     <map>
