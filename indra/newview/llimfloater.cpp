@@ -224,8 +224,10 @@ void LLIMFloater::sendMsg()
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-02 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 		else if (gSavedSettings.getBOOL("CloseIMOnEmptyReturn"))
 		{
-			// Close if we're the child of a floater
-			closeFloater();
+			if (!getHost())
+				setVisible(false);
+			else
+				getHost()->setVisible(false);
 		}
 // [/SL:KB]
 	}
