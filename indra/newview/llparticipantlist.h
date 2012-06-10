@@ -230,13 +230,12 @@ protected:
 	{
 		LOG_CLASS(LLAvatarItemStatusAndNameComparator);
 	public:
-		LLAvatarItemStatusAndNameComparator(LLParticipantList& parent, bool exclude_agent) : mParent(parent), mExcludeAgent(exclude_agent) {};
+		LLAvatarItemStatusAndNameComparator(LLParticipantList& parent) : mParent(parent) {};
 		virtual ~LLAvatarItemStatusAndNameComparator() {};
 	protected:
 		virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 	private:
 		LLParticipantList& mParent;
-		bool mExcludeAgent;
 	};
 // [/SL:KB]
 

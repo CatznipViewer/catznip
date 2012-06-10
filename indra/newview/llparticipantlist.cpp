@@ -578,7 +578,7 @@ void LLParticipantList::sort()
 		case E_SORT_BY_NAME :
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
 			if (mSortByStatusAndName.isNull())
-				mSortByStatusAndName = new LLAvatarItemStatusAndNameComparator(*this, mExcludeAgent);
+				mSortByStatusAndName = new LLAvatarItemStatusAndNameComparator(*this);
 			mAvatarList->setComparator(mSortByStatusAndName.get());
 			mAvatarList->sort();
 			break;
@@ -1038,18 +1038,11 @@ bool LLParticipantList::LLAvatarItemStatusAndNameComparator::doCompare(const LLA
 		{
 			// Sort moderators before non-moderators, then sort by name
 			if (lhs->mIsModerator == rhs->mIsModerator)
-			{
-				return (mExcludeAgent) ? LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2)
-									   : LLAvatarItemAgentOnTopComparator::doCompare(avatar_item1, avatar_item2);
-			}
+				return LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2);
 			else if (lhs->mIsModerator)
-			{
 				return true;
-			}
 			else if (rhs->mIsModerator)
-			{
 				return false;
-			}
 		}
 		else if (lhs.notNull())
 		{
@@ -1063,8 +1056,7 @@ bool LLParticipantList::LLAvatarItemStatusAndNameComparator::doCompare(const LLA
 		}
 	}
 	// By default compare by name.
-	return (mExcludeAgent) ? LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2)
-	                       : LLAvatarItemAgentOnTopComparator::doCompare(avatar_item1, avatar_item2);
+	return LLAvatarItemAgentOnTopComparator::doCompare(avatar_item1, avatar_item2);
 }
 // [/SL:KB]
 
