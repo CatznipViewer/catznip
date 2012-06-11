@@ -23,6 +23,7 @@
 #include "llviewerobject.h"
 #include "llviewerobjectlist.h"
 #include "llviewerregion.h"
+#include "llvoavatarself.h"
 #include "llworld.h"
 #include "pipeline.h"
 
@@ -108,7 +109,7 @@ LLDerenderList::~LLDerenderList()
 {
 }
 
-void LLDerenderList::addCurrentSelection(bool fPersist)
+void LLDerenderList::addSelection(bool fPersist)
 {
 	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
 
@@ -116,6 +117,8 @@ void LLDerenderList::addCurrentSelection(bool fPersist)
 	while (hSel->valid_root_end() != itObj)
 	{
 		const LLSelectNode* pNode = *itObj++;
+		if (!canAdd(pNode->getObject()))
+			continue;
 
 		LLDerenderEntry entry(pNode, fPersist);
 		if ( (isDerendered(entry.idObject)) || (gAgentID == entry.idObject) )
@@ -136,6 +139,26 @@ void LLDerenderList::addCurrentSelection(bool fPersist)
 	if (fPersist)
 		save();
 	s_ChangeSignal();
+}
+
+bool LLDerenderList::canAdd(const LLViewerObject* pObj)
+{
+	// Allow derendering if:
+	//   - the object isn't a child prim
+	//   - the object isn't currently sat on by the user
+	return 
+		(pObj->getRootEdit() == pObj) &&
+		( (isAgentAvatarValid()) && (!pObj->isChild(gAgentAvatarp)) );
+}
+
+bool LLDerenderList::canAddSelection() 
+{
+	struct CanDerender : public LLSelectedObjectFunctor
+	{
+		/*virtual*/ bool apply(LLViewerObject* pObj) { return LLDerenderList::canAdd(pObj); }
+	} f;
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	return (hSel.notNull()) && (0 != hSel->getRootObjectCount()) && (hSel->applyToRootObjects(&f, false));
 }
 
 LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(const LLUUID& idObject)

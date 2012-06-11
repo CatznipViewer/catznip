@@ -5095,9 +5095,14 @@ void handle_force_delete(void*)
 }
 
 // [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3.0)
+bool enable_object_derender()
+{
+	return LLDerenderList::canAddSelection();
+}
+
 void handle_object_derender(const LLSD& sdParam)
 {
-	LLDerenderList::instance().addCurrentSelection("persistent" == sdParam.asString());
+	LLDerenderList::instance().addSelection("persistent" == sdParam.asString());
 
 	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 	LLFloaterReg::showInstance("blocked", LLSD().with("derender_to_select", (pObj) ? pObj->getID() : LLUUID::null));
@@ -8368,6 +8373,7 @@ void initialize_menus()
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
 	commit.add("Object.Derender", boost::bind(&handle_object_derender, _2));
+	enable.add("Object.EnableDerender", boost::bind(&enable_object_derender));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");

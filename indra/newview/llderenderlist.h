@@ -20,6 +20,7 @@
 #include "lluuid.h"
 
 class LLSelectNode;
+class LLViewerObject;
 
 // ============================================================================
 // LLDerenderEntry
@@ -59,12 +60,15 @@ protected:
 	 * Member functions
 	 */
 public:
-	void addCurrentSelection(bool fPersist);
+	void addSelection(bool fPersist);
 	bool isDerendered(const LLUUID& idObject) const									{ return m_Entries.end() != findEntry(idObject); }
 	bool isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const	{ return m_Entries.end() != findEntry(idRegion, idObject, idRootLocal); }
 	void removeObject(const LLUUID& idObject);
 	void removeObjects(const uuid_vec_t& idsObject);
 	void updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& idObject, U32 idObjectLocal);
+
+	static bool canAdd(const LLViewerObject* pObj);
+	static bool canAddSelection();
 protected:
 	void load();
 	void save() const;
