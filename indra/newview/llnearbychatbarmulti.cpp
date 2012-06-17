@@ -21,6 +21,7 @@
 #include "llgesturemgr.h"
 #include "llkeyboard.h"
 #include "llmenugl.h"
+#include "llmultifloater.h"
 #include "llnearbychat.h"
 #include "llnearbychatbarmulti.h"
 #include "llviewerchat.h"
@@ -151,7 +152,12 @@ void LLNearbyChatBarMulti::onChatBoxCommit(EChatType eChatType)
 		// Close if we're the child of a floater
 		LLFloater* pFloater = getParentByType<LLFloater>();
 		if (pFloater)
-			pFloater->closeFloater();
+		{
+			if (!pFloater->getHost())
+				pFloater->setVisible(false);
+			else
+				pFloater->getHost()->setVisible(false);
+		}
 	}
 
 	gAgent.stopTyping();

@@ -748,7 +748,12 @@ void LLNearbyChatBarSingle::onChatBoxCommit()
 		// Close if we're the child of a floater
 		LLFloater* pFloater = getParentByType<LLFloater>();
 		if (pFloater)
-			pFloater->closeFloater();
+		{
+			if (!pFloater->getHost())
+				pFloater->setVisible(false);
+			else
+				pFloater->getHost()->setVisible(false);
+		}
 	}
 // [/SL:KB]
 
