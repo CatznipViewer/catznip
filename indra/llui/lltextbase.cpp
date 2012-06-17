@@ -513,8 +513,9 @@ void LLTextBase::drawText()
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
 		if ( (!hasFocus()) && (mLabel.length()) )
 		{
+			F32 label_y = mDocumentView->getRect().mTop - ( (mDefaultFont->getLineHeight() * mLineSpacingMult) + mVPad );
 			mDefaultFont->render(
-				mLabel.getWString(), 0, mLineInfoList.begin()->mRect.mLeft, mDocumentView->getRect().mBottom, mLabelColor, 
+				mLabel.getWString(), 0, mLineInfoList.begin()->mRect.mLeft, label_y, mLabelColor, 
 				LLFontGL::LEFT, LLFontGL::BOTTOM, 0, LLFontGL::NO_SHADOW, S32_MAX, mDocumentView->getRect().getWidth());
 		}
 // [/SL:KB]
