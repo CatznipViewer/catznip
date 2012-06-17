@@ -2644,12 +2644,30 @@ LLUUID LLIMMgr::addSession(
 	return session_id;
 }
 
-bool LLIMMgr::leaveSession(const LLUUID& session_id)
+//bool LLIMMgr::leaveSession(const LLUUID& session_id)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+bool LLIMMgr::leaveSession(const LLUUID& session_id, ECloseFlag flag)
+// [/SL:KB]
 {
 	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(session_id);
 	if (!im_session) return false;
 
-	LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+	// Only group sessions can be snoozed
+	if ( (CLOSE_SNOOZE == flag) && (im_session->isGroupSessionType()) )
+	{
+		snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
+		if (mSnoozedSessions.end() != itSession)
+			itSession->second = LLTimer::getTotalSeconds();
+		else
+			mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, LLTimer::getTotalSeconds()));
+	}
+	else
+	{
+		LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
+	}
+// [/SL:KB]
+//	LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
 	gIMMgr->removeSession(session_id);
 	return true;
 }
@@ -2802,6 +2820,43 @@ BOOL LLIMMgr::hasSession(const LLUUID& session_id)
 {
 	return LLIMModel::getInstance()->findIMSession(session_id) != NULL;
 }
+
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+bool LLIMMgr::checkSnoozeExpiration(const LLUUID& session_id) const
+{
+	static LLCachedControl<S32> s_nSnoozeTime(gSavedSettings, "GroupSnoozeTime");
+
+	snoozed_sessions_t::const_iterator itSession = mSnoozedSessions.find(session_id);
+	return (mSnoozedSessions.end() != itSession) && (itSession->second + s_nSnoozeTime < LLTimer::getTotalSeconds());
+}
+
+bool LLIMMgr::isSnoozedSession(const LLUUID& session_id) const
+{
+	return (mSnoozedSessions.end() != mSnoozedSessions.find(session_id));
+}
+
+bool LLIMMgr::restoreSnoozedSession(const LLUUID& session_id)
+{
+	snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
+	if (mSnoozedSessions.end() != itSession)
+	{
+		mSnoozedSessions.erase(itSession);
+
+		LLGroupData groupData;
+		if (gAgent.getGroupData(session_id, groupData))
+		{
+			gIMMgr->addSession(groupData.mName, IM_SESSION_INVITE, session_id);
+
+			uuid_vec_t ids;
+			LLIMModel::sendStartSession(session_id, session_id, ids, IM_SESSION_GROUP_START);
+
+			make_ui_sound("UISndStartIM");
+			return true;
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 void LLIMMgr::clearPendingInvitation(const LLUUID& session_id)
 {
