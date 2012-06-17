@@ -271,7 +271,6 @@ void LLDerenderList::updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& i
 			itEntry->idRegion = idRegion;
 			itEntry->idRootLocal = idObjectLocal;
 		}
-		s_ChangeSignal();
 	}
 }
 
