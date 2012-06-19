@@ -49,6 +49,7 @@
              height="254"
              layout="topleft"
              left="0"
+             multi_select="true"
              name="derender_list"
              tool_tip="List of currently derendered objects"
              top="0"
