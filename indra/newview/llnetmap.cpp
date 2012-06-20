@@ -878,17 +878,19 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	//
 	// Draw the north and east region borders
 	//
-	if ( (originY >= 0) && (originY < imgHeight) )
+	const S32 borderY = originY + llround(REGION_WIDTH_METERS * mObjectMapTPM);
+	if ( (borderY >= 0) && (borderY < imgHeight) )
 	{
-		S32 curX = llclamp(originX, 0, imgWidth - 1), endX = llclamp(originX + llround(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgWidth - 1);
+		S32 curX = llclamp(originX, 0, imgWidth), endX = llclamp(originX + llround(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgWidth - 1);
 		for (; curX <= endX; curX++)
-			pTextureData[originY * imgWidth + curX] = clrOverlay.mAll;
+			pTextureData[borderY * imgWidth + curX] = clrOverlay.mAll;
 	}
-	if ( (originX >= 0) && (originX < imgWidth) )
+	const S32 borderX = originX + llround(REGION_WIDTH_METERS * mObjectMapTPM);
+	if ( (borderX >= 0) && (borderX < imgWidth) )
 	{
-		S32 curY = llclamp(originY, 0, imgHeight - 1), endY = llclamp(originY + llround(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgHeight - 1);
+		S32 curY = llclamp(originY, 0, imgHeight), endY = llclamp(originY + llround(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgHeight - 1);
 		for (; curY <= endY; curY++)
-			pTextureData[curY * imgWidth + originX] = clrOverlay.mAll;
+			pTextureData[curY * imgWidth + borderX] = clrOverlay.mAll;
 	}
 
 	//
