@@ -913,10 +913,10 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 			const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
 			if (fCollision)
 			{
-				S32 curY = llclamp(posY, 0, imgHeight - 1), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
+				S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 				for (; curY <= endY; curY++)
 				{
-					S32 curX = llclamp(posX, 0, imgWidth - 1) , endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
+					S32 curX = llclamp(posX, 0, imgWidth) , endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
 						pTextureData[curY * imgWidth + curX] = LLColor4U(255, 128, 128, 192).mAll;
 				}
@@ -925,7 +925,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 			{
 				if ( (posY >= 0) && (posY < imgHeight) )
 				{
-					S32 curX = llclamp(posX, 0, imgWidth - 1), endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
+					S32 curX = llclamp(posX, 0, imgWidth), endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
 						pTextureData[posY * imgWidth + curX] = clrOverlay.mAll;
 				}
@@ -934,7 +934,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 			{
 				if ( (posX >= 0) && (posX < imgWidth) )
 				{
-					S32 curY = llclamp(posY, 0, imgHeight - 1), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
+					S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 					for (; curY <= endY; curY++)
 						pTextureData[curY * imgWidth + posX] = clrOverlay.mAll;
 				}
