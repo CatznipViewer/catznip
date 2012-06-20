@@ -104,6 +104,7 @@ LLNetMap::LLNetMap (const Params & p)
 	mObjectRawImagep(),
 	mObjectImagep(),
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+	mParcelImageCenterGlobal( gAgentCamera.getCameraPositionGlobal() ),
 	mParcelRawImagep(),
 	mParcelImagep(),
 // [/SL:KB]
@@ -343,8 +344,14 @@ void LLNetMap::draw()
 		{
 			mUpdateParcelImage = false;
 
-			U8* default_texture = mParcelRawImagep->getData();
-			memset(default_texture, 0, mParcelImagep->getWidth() * mParcelImagep->getHeight() * mParcelImagep->getComponents());
+			// Locate the center
+			LLVector3 posCenter = globalPosToView(gAgentCamera.getCameraPositionGlobal());
+			posCenter.mV[VX] -= mCurPan.mV[VX];
+			posCenter.mV[VY] -= mCurPan.mV[VY];
+			mParcelImageCenterGlobal = viewPosToGlobal(llfloor(posCenter.mV[VX]), llfloor(posCenter.mV[VY]));
+
+			U8* pTextureData = mParcelRawImagep->getData();
+			memset(pTextureData, 0, mParcelImagep->getWidth() * mParcelImagep->getHeight() * mParcelImagep->getComponents());
 
 			// Process each region
 			for (LLWorld::region_list_t::const_iterator itRegion = LLWorld::getInstance()->getRegionList().begin();
@@ -388,6 +395,10 @@ void LLNetMap::draw()
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 		if (s_fShowPropertyLines)
 		{
+			map_center_agent = gAgent.getPosAgentFromGlobal(mParcelImageCenterGlobal) - camera_position;
+			map_center_agent.mV[VX] *= mScale / region_width;
+			map_center_agent.mV[VY] *= mScale / region_width;
+
 			gGL.getTexUnit(0)->bind(mParcelImagep);
 			gGL.begin(LLRender::QUADS);
 				gGL.texCoord2f(0.f, 1.f);
@@ -858,7 +869,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	const S32 imgWidth = (S32)mParcelImagep->getWidth();
 	const S32 imgHeight = (S32)mParcelImagep->getHeight();
 
-	const LLVector3 originLocal(pRegion->getOriginGlobal() - gAgentCamera.getCameraPositionGlobal());
+	const LLVector3 originLocal(pRegion->getOriginGlobal() - mParcelImageCenterGlobal);
 	const S32 originX = llround(originLocal.mV[VX] * mObjectMapTPM + imgWidth / 2);
 	const S32 originY = llround(originLocal.mV[VY] * mObjectMapTPM + imgHeight / 2);
 

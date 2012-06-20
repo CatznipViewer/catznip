@@ -139,6 +139,7 @@ private:
 	LLPointer<LLImageRaw> mObjectRawImagep;
 	LLPointer<LLViewerTexture>	mObjectImagep;
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+	LLVector3d		mParcelImageCenterGlobal;
 	LLPointer<LLImageRaw> mParcelRawImagep;
 	LLPointer<LLViewerTexture>	mParcelImagep;
 // [/SL:KB]
