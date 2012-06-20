@@ -60,6 +60,7 @@
 #include "llviewermenu.h"
 #include "llviewerobjectlist.h"
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+#include "llviewerparcelmgr.h"
 #include "llviewerparceloverlay.h"
 // [/SL:KB]
 #include "llviewerregion.h"
@@ -128,6 +129,7 @@ BOOL LLNetMap::postBuild()
 	registrar.add("Minimap.Tracker", boost::bind(&LLNetMap::handleStopTracking, this, _2));
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+	LLViewerParcelMgr::instance().setCollisionUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
 	LLViewerParcelOverlay::setUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
 // [/SL:KB]
 
@@ -881,15 +883,31 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	static const S32 GRIDS_PER_EDGE = REGION_WIDTH_METERS / GRID_STEP;
 
 	const U8* pOwnership = pRegion->getParcelOverlay()->getOwnership();
+	const U8* pCollision = (pRegion == gAgent.getRegion()) ? LLViewerParcelMgr::instance().getCollisionBitmap() : NULL;
 	for (S32 idxRow = 0; idxRow < GRIDS_PER_EDGE; idxRow++)
 	{
 		for (S32 idxCol = 0; idxCol < GRIDS_PER_EDGE; idxCol++)
 		{
 			S32 overlay = pOwnership[idxRow * GRIDS_PER_EDGE + idxCol];
+			S32 idxCollision = idxRow * GRIDS_PER_EDGE + idxCol;
+			bool fCollision = (pCollision) && (pCollision[idxCollision / 8] & (1 << (idxCollision % 8)));
+			if ( (!fCollision) && (0 == (overlay & (PARCEL_SOUTH_LINE | PARCEL_WEST_LINE))) )
+				continue;
+
+			const S32 posX = originX + llround(idxCol * GRID_STEP * mObjectMapTPM);
+			const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
+			if (fCollision)
+			{
+				S32 curY = llclamp(posY, 0, imgHeight - 1), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
+				for (; curY <= endY; curY++)
+				{
+					S32 curX = llclamp(posX, 0, imgWidth - 1) , endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
+					for (; curX <= endX; curX++)
+						pTextureData[curY * imgWidth + curX] = LLColor4U(255, 128, 128, 192).mAll;
+				}
+			}
 			if (overlay & PARCEL_SOUTH_LINE)
 			{
-				const S32 posX = originX + llround(idxCol * GRID_STEP * mObjectMapTPM);
-				const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
 				if ( (posY >= 0) && (posY < imgHeight) )
 				{
 					S32 curX = llclamp(posX, 0, imgWidth - 1), endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
@@ -899,8 +917,6 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 			}
 			if (overlay & PARCEL_WEST_LINE)
 			{
-				const S32 posX = originX + llround(idxCol * GRID_STEP * mObjectMapTPM);
-				const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
 				if ( (posX >= 0) && (posX < imgWidth) )
 				{
 					S32 curY = llclamp(posY, 0, imgHeight - 1), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
