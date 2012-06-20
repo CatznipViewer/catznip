@@ -5878,6 +5878,17 @@
       <key>Value</key>
       <real>256.0</real>
     </map>
+    <key>MiniMapPropertyLines</key>
+    <map>
+      <key>Comment</key>
+      <string>Show property boundaries on the minimap</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>MiniMapRotate</key>
     <map>
       <key>Comment</key>
