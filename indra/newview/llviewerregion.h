@@ -130,7 +130,10 @@ public:
 	inline BOOL getRestrictPushObject()		const;
 	inline BOOL getReleaseNotesRequested()		const;
 
-	bool isAlive(); // can become false if circuit disconnects
+//	bool isAlive(); // can become false if circuit disconnects
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+	bool isAlive() const; // can become false if circuit disconnects
+// [/SL:KB]
 
 	void setWaterHeight(F32 water_level);
 	F32 getWaterHeight() const;

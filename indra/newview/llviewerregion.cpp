@@ -964,7 +964,10 @@ F32 LLViewerRegion::getLandHeightRegion(const LLVector3& region_pos)
 	return mImpl->mLandp->resolveHeightRegion( region_pos );
 }
 
-bool LLViewerRegion::isAlive()
+//bool LLViewerRegion::isAlive()
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+bool LLViewerRegion::isAlive() const
+// [/SL:KB]
 {
 	return mAlive;
 }
