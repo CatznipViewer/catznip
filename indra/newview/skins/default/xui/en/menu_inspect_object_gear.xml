@@ -97,6 +97,7 @@
     <menu_item_call.on_visible
      function="Object.EnableWear" />
   </menu_item_call>
+  <menu_item_separator />
   <menu_item_call
    label="Report"
    layout="topleft"
@@ -105,7 +106,7 @@
      function="Object.ReportAbuse" />
   </menu_item_call>
   <menu_item_call
-   label="Block"
+   label="Block (Mute)"
    layout="topleft"
    name="block">
     <menu_item_call.on_click
@@ -123,25 +124,26 @@
      function="Object.EnableUnmute" />
   </menu_item_call>
   <menu_item_call
-   label="Block Visually"
+   label="Session Derender"
    layout="topleft"
-   name="block_visual">
-    <menu_item_call.on_click
-     function="Object.Derender"
-     parameter="persistent" />
-    <menu_item_call.on_enable
-     function="Object.EnableDerender" />
-  </menu_item_call>
-  <menu_item_call
-   label="Derender"
-   layout="topleft"
-   name="derender">
+   name="session_derender">
     <menu_item_call.on_click
      function="Object.Derender"
      parameter="temporary" />
     <menu_item_call.on_enable
      function="Object.EnableDerender" />
   </menu_item_call>
+  <menu_item_call
+   label="Permanent Derender"
+   layout="topleft"
+   name="permanent_derender">
+    <menu_item_call.on_click
+     function="Object.Derender"
+     parameter="persistent" />
+    <menu_item_call.on_enable
+     function="Object.EnableDerender" />
+  </menu_item_call>
+  <menu_item_separator />
   <menu_item_call
     label="Zoom In"
     layout="topleft"
