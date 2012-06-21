@@ -913,7 +913,9 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 
 			const S32 posX = originX + llround(idxCol * GRID_STEP * mObjectMapTPM);
 			const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
-			if (fCollision)
+
+			static LLCachedControl<bool> s_fShowCollisionParcels(gSavedSettings, "MiniMapCollisionParcels") ;
+			if ( (s_fShowCollisionParcels) && (fCollision) )
 			{
 				S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 				for (; curY <= endY; curY++)
