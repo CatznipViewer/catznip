@@ -682,6 +682,9 @@ void LLScreenChannel::showToastsBottom()
 	}
 
 	// Dismiss toasts we don't have space for (STORM-391).
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+	std::vector<LLToast*> toasts_to_hide;
+// [/SL:KB]
 	if(it != mToastList.rend())
 	{
 		mHiddenToastsNum = 0;
@@ -690,10 +693,22 @@ void LLScreenChannel::showToastsBottom()
 			LLToast* toast = it->getToast();
 			if (toast)
 			{
-				toast->hide();
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+				toasts_to_hide.push_back(toast);
+// [/SL:KB]
+//				toast->hide();
 			}
 		}
 	}
+
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+	for (std::vector<LLToast*>::iterator it = toasts_to_hide.begin(), end_it = toasts_to_hide.end();
+		it != end_it;
+		++it)
+	{
+		(*it)->hide();
+	}
+// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------
