@@ -618,7 +618,10 @@ void LLScreenChannel::showToastsBottom()
 		}
 
 		toast_rect = toast->getRect();
-		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
+//		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+		toast_rect.setOriginAndSize(channel_rect.mRight - toast_rect.getWidth(),
+// [/SL:KB]
 				bottom + toast_margin, toast_rect.getWidth(),
 				toast_rect.getHeight());
 		toast->setRect(toast_rect);
