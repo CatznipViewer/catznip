@@ -50,6 +50,9 @@
 #include "llchat.h"
 #include "llimfloater.h"
 #include "llgroupiconctrl.h"
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+#include "llgroupoptions.h"
+// [/SL:KB]
 #include "llmd5.h"
 #include "llmutelist.h"
 #include "llrecentpeople.h"
@@ -3328,6 +3331,17 @@ public:
 			{
 				return;
 			}
+
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+			const LLGroupOptions* pGroupOptions = LLGroupOptionsMgr::getInstance()->getOptions(session_id);
+			if ( (pGroupOptions) && (!pGroupOptions->mReceiveGroupChat) )
+			{
+				std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
+				if (!strUrl.empty())
+					LLHTTPClient::post(strUrl, LLSD().with("method", "decline invitation").with("session-id", session_id), NULL);
+				return;
+			}
+// [/SL:KB]
 
 			// standard message, not from system
 			std::string saved;
