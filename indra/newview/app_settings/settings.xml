@@ -3922,7 +3922,7 @@
     <key>FullScreenWindow</key>
     <map>
       <key>Comment</key>
-      <string>Run SL in a fullscreen window</string>
+      <string>Run the viewer in a fullscreen window</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
