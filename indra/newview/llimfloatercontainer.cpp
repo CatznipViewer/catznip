@@ -30,6 +30,7 @@
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
 #include "llchiclet.h"
 #include "llchicletbar.h"
+#include "llimfloater.h"
 // [/SL:KB]
 #include "llimfloatercontainer.h"
 #include "llfloaterreg.h"
@@ -117,6 +118,37 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 		openFloater(floaterp->getKey());
 		return;
 	}
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+	// If we're redocking a torn off IM floater, return it back to its previous place
+	if ( (floaterp->isTornOff()) && (LLTabContainer::END == insertion_point) )
+	{
+		LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+
+		LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(floaterp->getKey());
+		S32 idxChiclet = pChicletPanel->getChicletIndex(pChiclet);
+		if ( (idxChiclet > 0) && (idxChiclet < pChicletPanel->getChicletCount()) )
+		{
+			// Look for the first IM session to the left of this one
+			while (--idxChiclet >= 0)
+			{
+				if (pChiclet = dynamic_cast<LLIMChiclet*>(pChicletPanel->getChiclet(idxChiclet)))
+				{
+					const LLIMFloater* pFloater = LLIMFloater::findInstance(pChiclet->getSessionId());
+					if (pFloater)
+					{
+						insertion_point = (LLTabContainer::eInsertionPoint)(mTabContainer->getIndexForPanel(pFloater) + 1);
+						break;
+					}
+				}
+			}
+		}
+		else 
+		{
+			insertion_point = (0 == idxChiclet) ? LLTabContainer::START : LLTabContainer::END;
+		}
+	}
+// [/SL:KB]
 
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 

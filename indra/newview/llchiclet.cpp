@@ -1327,7 +1327,7 @@ void LLChicletPanel::setChicletIndex(const LLChiclet* chiclet, S32 index)
 		return;
 
 	S32 cur_index = getChicletIndex(chiclet);
-	if (-1 == cur_index)
+	if ( (-1 == cur_index) && (cur_index != index) )
 		return;
 
 	mChicletList.erase(mChicletList.begin() + cur_index);

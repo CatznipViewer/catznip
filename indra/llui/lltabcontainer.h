@@ -46,10 +46,16 @@ public:
 	};
 	typedef enum e_insertion_point
 	{
-		START,
-		END,
-		LEFT_OF_CURRENT,
-		RIGHT_OF_CURRENT
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+		START = -1,
+		END = -2,
+		LEFT_OF_CURRENT = -3,
+		RIGHT_OF_CURRENT = -4
+// [/SL:KB]
+//		START,
+//		END,
+//		LEFT_OF_CURRENT,
+//		RIGHT_OF_CURRENT
 	} eInsertionPoint;
 
 	struct TabPositions : public LLInitParam::TypeValuesHelper<LLTabContainer::TabPosition, TabPositions>
@@ -183,7 +189,10 @@ public:
 	S32			getCurrentPanelIndex();
 	S32			getTabCount();
 	LLPanel*	getPanelByIndex(S32 index);
-	S32			getIndexForPanel(LLPanel* panel);
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+	S32			getIndexForPanel(const LLPanel* panel);
+// [/SL:KB]
+//	S32			getIndexForPanel(LLPanel* panel);
 	S32			getPanelIndexByTitle(const std::string& title);
 	LLPanel*	getPanelByName(const std::string& name);
 	void		setCurrentTabName(const std::string& name);

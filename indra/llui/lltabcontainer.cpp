@@ -1338,7 +1338,10 @@ LLPanel* LLTabContainer::getPanelByIndex(S32 index)
 	return NULL;
 }
 
-S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+//S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+S32 LLTabContainer::getIndexForPanel(const LLPanel* panel)
+// [/SL:KB]
 {
 	for (S32 index = 0; index < (S32)mTabList.size(); index++)
 	{
@@ -1984,9 +1987,20 @@ void LLTabContainer::insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_p
 		mTabList.insert(current_iter, tuple);
 		}
 		break;
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
 	case END:
-	default:
 		mTabList.push_back( tuple );
+		break;
+	default:
+		S32 idxInsertion = (S32)insertion_point;
+		if ( (idxInsertion >= 0) && (idxInsertion < mTabList.size()) )
+			mTabList.insert(mTabList.begin() + llmax(mLockedTabCount, idxInsertion), tuple);
+		else
+			mTabList.push_back(tuple);
+// [/SL:KB]
+//	case END:
+//	default:
+//		mTabList.push_back( tuple );
 	}
 }
 
