@@ -1331,7 +1331,7 @@ void LLChicletPanel::setChicletIndex(const LLChiclet* chiclet, S32 index)
 		return;
 
 	mChicletList.erase(mChicletList.begin() + cur_index);
-	mChicletList.insert(mChicletList.begin() + index, const_cast<LLChiclet*>(chiclet));
+	mChicletList.insert(mChicletList.begin() + ((cur_index < index) ? --index : index ), const_cast<LLChiclet*>(chiclet));
 	arrange();
 }
 // [/SL:KB]

@@ -74,20 +74,39 @@ BOOL LLIMFloaterContainer::postBuild()
 	return TRUE;
 }
 
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-23 (Catznip-3.3.0)
 void LLIMFloaterContainer::onIMTabRearrange(S32 tab_index, LLPanel* tab_panel)
 {
-	LLFloater* pIMFloater = dynamic_cast<LLFloater*>(tab_panel);
-	if (!pIMFloater)
-		return;
-
-	const LLUUID& idSession = pIMFloater->getKey().asUUID();
-	if (idSession.isNull())
+	LLIMFloater* pFloater = dynamic_cast<LLIMFloater*>(tab_panel);
+	if (!pFloater)
 		return;
 
 	LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
-	LLChiclet* pIMChiclet = pChicletPanel->findChiclet<LLChiclet>(idSession);
-	pChicletPanel->setChicletIndex(pIMChiclet, tab_index);
+	LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(pFloater->getKey());
+	if (!pChiclet)
+		return;
+
+	if ( (tab_index > mTabContainer->getNumLockedTabs()) && (tab_index < mTabContainer->getTabCount()) )
+	{
+		// Look for the first IM session to the left of this one
+		while (--tab_index >= mTabContainer->getNumLockedTabs())
+		{
+			LLFloater* pPrevFloater = dynamic_cast<LLIMFloater*>(mTabContainer->getPanelByIndex(tab_index));
+			if (pPrevFloater)
+			{
+				const LLIMChiclet* pPrevChiclet = pChicletPanel->findChiclet<LLIMChiclet>(pPrevFloater->getKey());
+				if (pPrevChiclet)
+				{
+					pChicletPanel->setChicletIndex(pChiclet, pChicletPanel->getChicletIndex(pPrevChiclet) + 1);
+					break;
+				}
+			}
+		}
+	}
+	else
+	{
+		pChicletPanel->setChicletIndex(pChiclet, (tab_index <= mTabContainer->getNumLockedTabs()) ? 0 : pChicletPanel->getChicletCount() - 1);
+	}
 }
 // [/SL:KB]
 
