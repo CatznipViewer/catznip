@@ -210,7 +210,7 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3.0)
 	tab_allow_rearrange("tab_allow_rearrange", false),
 // [/SL:KB]
 	tab_padding_right("tab_padding_right"),
@@ -228,8 +228,9 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
 	mAllowRearrange(p.tab_allow_rearrange),
+	mRearrangeSignal(NULL),
 // [/SL:KB]
 	mScrolled(FALSE),
 	mScrollPos(0),
@@ -1337,7 +1338,10 @@ LLPanel* LLTabContainer::getPanelByIndex(S32 index)
 	return NULL;
 }
 
-S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+//S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+S32 LLTabContainer::getIndexForPanel(const LLPanel* panel)
+// [/SL:KB]
 {
 	for (S32 index = 0; index < (S32)mTabList.size(); index++)
 	{
@@ -1983,9 +1987,20 @@ void LLTabContainer::insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_p
 		mTabList.insert(current_iter, tuple);
 		}
 		break;
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
 	case END:
-	default:
 		mTabList.push_back( tuple );
+		break;
+	default:
+		S32 idxInsertion = (S32)insertion_point;
+		if ( (idxInsertion >= 0) && (idxInsertion < mTabList.size()) )
+			mTabList.insert(mTabList.begin() + llmax(mLockedTabCount, idxInsertion), tuple);
+		else
+			mTabList.push_back(tuple);
+// [/SL:KB]
+//	case END:
+//	default:
+//		mTabList.push_back( tuple );
 	}
 }
 
@@ -2086,6 +2101,9 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 							mTabList.erase(mTabList.begin() + mCurrentTabIdx);
 							mTabList.insert(mTabList.begin() + idxHover, tuple);
 
+							if (mRearrangeSignal)
+								(*mRearrangeSignal)(idxHover, tuple->mTabPanel);
+
 							tuple->mButton->onCommit();
 							tuple->mButton->setFocus(TRUE);
 						}
@@ -2102,3 +2120,12 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 		}
 	}
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+boost::signals2::connection LLTabContainer::setRearrangeCallback(const tab_rearrange_signal_t::slot_type& cb)
+{
+	if (!mRearrangeSignal)
+		mRearrangeSignal = new tab_rearrange_signal_t();
+	return mRearrangeSignal->connect(cb);
+}
+// [/SL:KB]
