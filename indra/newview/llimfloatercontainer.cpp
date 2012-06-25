@@ -142,7 +142,11 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 void LLIMFloaterContainer::onCloseFloater(LLUUID& id)
 {
 	mSessions.erase(id);
-	setFocus(TRUE);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-06-25 (Catznip-3.3.0)
+	if (getVisible())
+		setFocus(TRUE);
+// [/SL:KB]
+//	setFocus(TRUE);
 }
 
 void LLIMFloaterContainer::onNewMessageReceived(const LLSD& data)
