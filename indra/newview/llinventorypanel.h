@@ -225,7 +225,7 @@ public:
 
 private:
 	std::string					mSortOrderSetting;
-	int							mClipboardState;
+//	int							mClipboardState;
 
 	//--------------------------------------------------------------------
 	// Hidden folders

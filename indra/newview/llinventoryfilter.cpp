@@ -95,15 +95,18 @@ LLInventoryFilter::~LLInventoryFilter()
 
 BOOL LLInventoryFilter::check(const LLFolderViewItem* item) 
 {
-	// Clipboard cut items are *always* filtered so we need this value upfront
-	const LLFolderViewEventListener* listener = item->getListener();
-	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
+//	// Clipboard cut items are *always* filtered so we need this value upfront
+//	const LLFolderViewEventListener* listener = item->getListener();
+//	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
 
 	// If it's a folder and we're showing all folders, return automatically.
 	const BOOL is_folder = (dynamic_cast<const LLFolderViewFolder*>(item) != NULL);
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
 	{
-		return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		return TRUE;
+// [/SL:KB]
+//		return passed_clipboard;
 	}
 
 	mSubStringMatchOffset = mFilterSubString.size() ? item->getSearchableLabel().find(mFilterSubString) : std::string::npos;
@@ -114,7 +117,7 @@ BOOL LLInventoryFilter::check(const LLFolderViewItem* item)
 	const BOOL passed = (passed_filtertype &&
 						 passed_permissions &&
 						 passed_filterlink &&
-						 passed_clipboard &&
+//						 passed_clipboard &&
 						 (mFilterSubString.size() == 0 || mSubStringMatchOffset != std::string::npos));
 
 	return passed;
@@ -131,10 +134,10 @@ bool LLInventoryFilter::check(const LLInventoryItem* item)
 
 	const bool passed_filtertype = checkAgainstFilterType(item);
 	const bool passed_permissions = checkAgainstPermissions(item);
-	const BOOL passed_clipboard = checkAgainstClipboard(item->getUUID());
+//	const BOOL passed_clipboard = checkAgainstClipboard(item->getUUID());
 	const bool passed = (passed_filtertype &&
 						 passed_permissions &&
-						 passed_clipboard &&
+//						 passed_clipboard &&
 						 (mFilterSubString.size() == 0 || mSubStringMatchOffset != std::string::npos));
 
 	return passed;
@@ -164,13 +167,16 @@ bool LLInventoryFilter::checkFolder(const LLFolderViewFolder* folder) const
 
 bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 {
-	// Always check against the clipboard
-	const BOOL passed_clipboard = checkAgainstClipboard(folder_id);
+//	// Always check against the clipboard
+//	const BOOL passed_clipboard = checkAgainstClipboard(folder_id);
 	
 	// we're showing all folders, overriding filter
 	if (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS)
 	{
-		return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		return true;
+// [/SL:KB]
+//		return passed_clipboard;
 	}
 
 	if (mFilterOps.mFilterTypes & FILTERTYPE_CATEGORY)
@@ -185,7 +191,10 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 			return false;
 	}
 
-	return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	return true;
+// [/SL:KB]
+//	return passed_clipboard;
 }
 
 BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) const
@@ -354,28 +363,28 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLInventoryItem* item) cons
 
 // Items and folders that are on the clipboard or, recursively, in a folder which  
 // is on the clipboard must be filtered out if the clipboard is in the "cut" mode.
-bool LLInventoryFilter::checkAgainstClipboard(const LLUUID& object_id) const
-{
-	if (LLClipboard::instance().isCutMode())
-	{
-		LLFastTimer ft(FT_FILTER_CLIPBOARD);
-		LLUUID current_id = object_id;
-		LLInventoryObject *current_object = gInventory.getObject(object_id);
-		while (current_id.notNull() && current_object)
-		{
-			if (LLClipboard::instance().isOnClipboard(current_id))
-			{
-				return false;
-			}
-			current_id = current_object->getParentUUID();
-			if (current_id.notNull())
-			{
-				current_object = gInventory.getObject(current_id);
-			}
-		}
-	}
-	return true;
-}
+//bool LLInventoryFilter::checkAgainstClipboard(const LLUUID& object_id) const
+//{
+//	if (LLClipboard::instance().isCutMode())
+//	{
+//		LLFastTimer ft(FT_FILTER_CLIPBOARD);
+//		LLUUID current_id = object_id;
+//		LLInventoryObject *current_object = gInventory.getObject(object_id);
+//		while (current_id.notNull() && current_object)
+//		{
+//			if (LLClipboard::instance().isOnClipboard(current_id))
+//			{
+//				return false;
+//			}
+//			current_id = current_object->getParentUUID();
+//			if (current_id.notNull())
+//			{
+//				current_object = gInventory.getObject(current_id);
+//			}
+//		}
+//	}
+//	return true;
+//}
 
 BOOL LLInventoryFilter::checkAgainstPermissions(const LLFolderViewItem* item) const
 {
