@@ -144,6 +144,10 @@ protected:
 	LLFolderViewEventListener*	mListener;
 	BOOL						mIsCurSelection;
 	BOOL						mSelectPending;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	int							mClipboardGeneration;
+	bool						mIsClipboardCut;			// Only access this through isClipboardCut()
+// [/SL:KB]
 	LLFontGL::StyleFlags		mLabelStyle;
 	std::string					mLabelSuffix;
 	LLUIImagePtr				mIcon;
@@ -238,6 +242,10 @@ public:
 
 	// Returns true is this object and all of its children can be moved
 	virtual BOOL isMovable();
+
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	bool isClipboardCut();
+// [/SL:KB]
 
 	// destroys this item recursively
 	virtual void destroyView();
