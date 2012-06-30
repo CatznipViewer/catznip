@@ -1370,7 +1370,7 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 	else if ("cut" == action)
 	{
 		cutToClipboard();
-		LLFolderView::removeCutItems();
+//		LLFolderView::removeCutItems();
 		return;
 	}
 	else if ("copy" == action)
@@ -2809,7 +2809,7 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 	else if ("cut" == action)
 	{
 		cutToClipboard();
-		LLFolderView::removeCutItems();
+//		LLFolderView::removeCutItems();
 		return;
 	}
 	else if ("copy" == action)

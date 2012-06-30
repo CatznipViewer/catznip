@@ -1070,22 +1070,22 @@ bool isDescendantOfASelectedItem(LLFolderViewItem* item, const std::vector<LLFol
 }
 
 // static
-void LLFolderView::removeCutItems()
-{
-	// There's no item in "cut" mode on the clipboard -> exit
-	if (!LLClipboard::instance().isCutMode())
-		return;
-
-	// Get the list of clipboard item uuids and iterate through them
-	LLDynamicArray<LLUUID> objects;
-	LLClipboard::instance().pasteFromClipboard(objects);
-	for (LLDynamicArray<LLUUID>::const_iterator iter = objects.begin();
-		 iter != objects.end();
-		 ++iter)
-	{
-		gInventory.removeObject(*iter);
-	}
-}
+//void LLFolderView::removeCutItems()
+//{
+//	// There's no item in "cut" mode on the clipboard -> exit
+//	if (!LLClipboard::instance().isCutMode())
+//		return;
+//
+//	// Get the list of clipboard item uuids and iterate through them
+//	LLDynamicArray<LLUUID> objects;
+//	LLClipboard::instance().pasteFromClipboard(objects);
+//	for (LLDynamicArray<LLUUID>::const_iterator iter = objects.begin();
+//		 iter != objects.end();
+//		 ++iter)
+//	{
+//		gInventory.removeObject(*iter);
+//	}
+//}
 
 void LLFolderView::onItemsRemovalConfirmation(const LLSD& notification, const LLSD& response)
 {
@@ -1421,7 +1421,7 @@ void LLFolderView::cut()
 				listener->cutToClipboard();
 			}
 		}
-		LLFolderView::removeCutItems();
+//		LLFolderView::removeCutItems();
 	}
 	mSearchString.clear();
 }
