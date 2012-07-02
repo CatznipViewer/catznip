@@ -48,6 +48,9 @@
 #include "llappviewer.h" // for gDisconnected
 #include "llcallingcard.h" // LLAvatarTracker
 #include "llfloaterworldmap.h"
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-07-02 (Catznip-3.3.0)
+#include "llinspectlocation.h"
+// [/SL:KB]
 #include "lltracker.h"
 #include "llsurface.h"
 #include "llviewercamera.h"
@@ -625,9 +628,37 @@ BOOL LLNetMap::handleToolTip( S32 x, S32 y, MASK mask )
 	args["[REGION]"] = region_name;
 	std::string msg = mToolTipMsg;
 	LLStringUtil::format(msg, args);
-	LLToolTipMgr::instance().show(LLToolTip::Params()
-		.message(msg)
-		.sticky_rect(sticky_rect));
+
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+	bool fShowToolTip = true; LLVector3d posGlobal(viewPosToGlobal(x, y));
+
+	LLFloater* pInspector = LLFloaterReg::findInstance("inspect_location");
+	if ( (pInspector) && (pInspector->getVisible()) )
+	{
+		LLVector2 posCur(posGlobal.mdV[VX], posGlobal.mdV[VY]);
+		LLVector2 posOld(pInspector->getKey()["x"].asReal(), pInspector->getKey()["y"].asReal());
+		fShowToolTip = (dist_vec_squared(posCur, posOld) >= 9.0f);
+	}
+
+	if (fShowToolTip)
+	{
+		LLInspector::Params p;
+		p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
+		p.message(msg);
+		p.sticky_rect(sticky_rect);
+		p.image.name("Inspector_I");
+		p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, posGlobal));
+		p.visible_time_near(6.f);
+		p.visible_time_far(3.f);
+		p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
+		p.wrap(false);
+				
+		LLToolTipMgr::instance().show(p);
+	}
+// [/SL:KB]
+//	LLToolTipMgr::instance().show(LLToolTip::Params()
+//		.message(msg)
+//		.sticky_rect(sticky_rect));
 		
 	return TRUE;
 }

@@ -19,6 +19,7 @@
 #include "llbutton.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
+#include "llfloaterworldmap.h"
 #include "lliconctrl.h"
 #include "llinspect.h"
 #include "llregionhandle.h"
@@ -28,6 +29,7 @@
 #include "llslurl.h"
 #include "lltextbox.h"
 #include "lltexteditor.h"
+#include "lltooltip.h"
 #include "lltrans.h"
 #include "llviewerregion.h"
 
@@ -297,6 +299,23 @@ void LLInspectLocation::onClickDetails()
 void LLInspectLocationUtil::registerFloater()
 {
 	LLFloaterReg::add("inspect_location", "inspect_location.xml", &LLFloaterReg::build<LLInspectLocation>);
+}
+
+void LLInspectLocationUtil::showInspector(const LLVector3d& posGlobal)
+{
+	gFloaterWorldMap->trackLocation(posGlobal);
+
+	LLSD sdParams;
+	sdParams["global"]["x"] = posGlobal.mdV[VX];
+	sdParams["global"]["y"] = posGlobal.mdV[VY];
+	sdParams["global"]["z"] = posGlobal.mdV[VZ];
+	if (LLToolTipMgr::instance().toolTipVisible())
+	{
+		LLRect rct = LLToolTipMgr::instance().getToolTipRect();
+		sdParams["pos"]["x"] = rct.mLeft;
+		sdParams["pos"]["y"] = rct.mTop;
+	}
+	LLFloaterReg::showInstance("inspect_location", sdParams);
 }
 
 // ============================================================================

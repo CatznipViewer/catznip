@@ -45,6 +45,9 @@
 #include "llfloatermap.h"
 #include "llfloaterworldmap.h"
 #include "llfocusmgr.h"
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
+#include "llinspectlocation.h"
+// [/SL:KB]
 #include "lllocalcliprect.h"
 #include "lltextbox.h"
 #include "lltextureview.h"
@@ -1121,7 +1124,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 			p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
 			p.message(tooltip_msg);
 			p.image.name("Inspector_I");
-			p.click_callback(boost::bind(showInspector, pos_global));
+			p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, pos_global));
 			p.visible_time_near(6.f);
 			p.visible_time_far(3.f);
 			p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
@@ -1831,22 +1834,3 @@ BOOL LLWorldMapView::handleDoubleClick( S32 x, S32 y, MASK mask )
 	return FALSE;
 }
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
-void LLWorldMapView::showInspector(const LLVector3d& posGlobal)
-{
-	gFloaterWorldMap->trackLocation(posGlobal);
-
-	LLSD sdParams;
-	sdParams["global"]["x"] = posGlobal.mdV[VX];
-	sdParams["global"]["y"] = posGlobal.mdV[VY];
-	sdParams["global"]["z"] = posGlobal.mdV[VZ];
-	if (LLToolTipMgr::instance().toolTipVisible())
-	{
-		LLRect rct = LLToolTipMgr::instance().getToolTipRect();
-		sdParams["pos"]["x"] = rct.mLeft;
-		sdParams["pos"]["y"] = rct.mTop;
-	}
-	LLFloaterReg::showInstance("inspect_location", sdParams);
-
-}
-// [/SL:KB]

@@ -18,8 +18,8 @@
 
 namespace LLInspectLocationUtil
 {
-	// Register with LLFloaterReg
 	void registerFloater();
+	void showInspector(const LLVector3d& posGlobal);
 }
 
 #endif
