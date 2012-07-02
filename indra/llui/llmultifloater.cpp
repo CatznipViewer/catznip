@@ -188,6 +188,9 @@ void LLMultiFloater::addFloater(LLFloater* floaterp, BOOL select_added_floater, 
 	floater_data.mHeight = floaterp->getRect().getHeight();
 	floater_data.mCanMinimize = floaterp->isMinimizeable();
 	floater_data.mCanResize = floaterp->isResizable();
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-07-03 (Catznip-3.3.0)
+	floater_data.mReshapeFlags = floaterp->getFollows();
+// [/SL:KB]
 
 	// remove minimize and close buttons
 	floaterp->setCanMinimize(FALSE);
@@ -297,6 +300,9 @@ void LLMultiFloater::removeFloater(LLFloater* floaterp)
 			floaterp->reshape(floater_data.mWidth, floater_data.mHeight);
 		}
 		floaterp->setCanResize(floater_data.mCanResize);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-07-03 (Catznip-3.3.0)
+		floaterp->setFollows(floater_data.mReshapeFlags);
+// [/SL:KB]
 		mFloaterDataMap.erase(found_data_it);
 	}
 	mTabContainer->removeTabPanel(floaterp);
