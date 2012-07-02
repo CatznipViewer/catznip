@@ -1076,10 +1076,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 			{
 				LLStringUtil::format_map_t string_args;
 				string_args["[NUMBER]"] = llformat("%d", agent_count);
-//				message += '\n';
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
-				message += " - ";
-// [/SL:KB]
+				message += '\n';
 				message += getString((agent_count == 1 ? "world_map_person" : "world_map_people") , string_args);
 			}
 		}
