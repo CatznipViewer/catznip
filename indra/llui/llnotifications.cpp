@@ -70,6 +70,16 @@ LLNotificationForm::FormIgnore::FormIgnore()
 	save_option("save_option", false)
 {}
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+LLNotificationForm::FormCheck::FormCheck()
+:	control("control"),
+	text("text"),
+	type("type")
+{
+	type = "check";
+}
+// [/SL:KB]
+
 LLNotificationForm::FormButton::FormButton()
 :	index("index"),
 	text("text"),
@@ -92,6 +102,9 @@ LLNotificationForm::FormInput::FormInput()
 LLNotificationForm::FormElement::FormElement()
 :	button("button"),
 	input("input")
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+,	check("check")
+// [/SL:KB]
 {}
 
 LLNotificationForm::FormElements::FormElements()
