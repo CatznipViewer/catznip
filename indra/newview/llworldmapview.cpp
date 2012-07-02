@@ -1107,35 +1107,43 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 		sticky_rect_screen.setCenterAndSize(screen_x, screen_y, SLOP, SLOP);
 
 // [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
-		bool fShowToolTip = true;
-
-		LLFloater* pInspector = LLFloaterReg::findInstance("inspect_location");
-		if ( (pInspector) && (pInspector->getVisible()) )
+		if (gSavedSettings.getBOOL("ShowLocationInspector"))
 		{
-			LLVector2 posCur(pos_global.mdV[VX], pos_global.mdV[VY]);
-			LLVector2 posOld(pInspector->getKey()["x"].asReal(), pInspector->getKey()["y"].asReal());
+			bool fShowToolTip = true;
+
+			LLFloater* pInspector = LLFloaterReg::findInstance("inspect_location");
+			if ( (pInspector) && (pInspector->getVisible()) )
+			{
+				LLVector2 posCur(pos_global.mdV[VX], pos_global.mdV[VY]);
+				LLVector2 posOld(pInspector->getKey()["x"].asReal(), pInspector->getKey()["y"].asReal());
 			
-			fShowToolTip = (dist_vec_squared(posCur, posOld) >= 9.0f);
-		}
+				fShowToolTip = (dist_vec_squared(posCur, posOld) >= 9.0f);
+			}
 
-		if (fShowToolTip)
-		{
-			LLInspector::Params p;
-			p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
-			p.message(tooltip_msg);
-			p.image.name("Inspector_I");
-			p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, pos_global));
-			p.visible_time_near(6.f);
-			p.visible_time_far(3.f);
-			p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
-			p.wrap(false);
+			if (fShowToolTip)
+			{
+				LLInspector::Params p;
+				p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
+				p.message(tooltip_msg);
+				p.image.name("Inspector_I");
+				p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, pos_global));
+				p.visible_time_near(6.f);
+				p.visible_time_far(3.f);
+				p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
+				p.wrap(false);
 				
-			LLToolTipMgr::instance().show(p);
+				LLToolTipMgr::instance().show(p);
+			}
+		}
+		else
+		{
+// [/SL:KB]
+			LLToolTipMgr::instance().show(LLToolTip::Params()
+				.message(tooltip_msg)
+				.sticky_rect(sticky_rect_screen));
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3.0)
 		}
 // [/SL:KB]
-//		LLToolTipMgr::instance().show(LLToolTip::Params()
-//			.message(tooltip_msg)
-//			.sticky_rect(sticky_rect_screen));
 	}
 	return TRUE;
 }
