@@ -3,83 +3,137 @@
  can_close="false"
  can_minimize="false"
  can_resize="true"
- height="500"
+ height="300"
  layout="topleft"
  legacy_header_height="18"
- name="modal container"
- width="600">
+ open_positioning="centered"
+ name="floater_update"
+ title="Updater"
+ width="582">
     <floater.string
-     name="update_string_optional">
-        An optional update for [APP_NAME] is available.
-Update version [VERSION]
+     name="string_title_download">
+        Update available
     </floater.string>
     <floater.string
-     name="update_string_required">
-        An update for [APP_NAME] is available. This update is mandatory.
-Update version [VERSION]
+     name="string_title_install">
+        Update ready to be installed
     </floater.string>
     <floater.string
-     name="button_ok_download">
-        Download
+     name="string_version_optional">
+        [APP_NAME] [VERSION]
     </floater.string>
     <floater.string
-     name="button_ok_install">
-        Install
+     name="string_version_required">
+        [APP_NAME] [VERSION] (Required)
     </floater.string>
-
+    <floater.string
+     name="string_button_download">
+        Download now
+    </floater.string>
+    <floater.string
+     name="string_button_install">
+        Install now
+    </floater.string>
+    <icon
+     height="256"
+     image_name="Update_256"
+     layout="topleft"
+     left="20"
+     mouse_opaque="true"
+     name="icon_update"
+     top="26"
+     width="256" />
     <text
+     follows="top|left"
+     font="SansSerifLargeBold"
+     height="24"
+     left="290"
+     name="text_version"
+     text_color="white"
+     top="26"
+     width="272">
+Catznip R19.1 (Required update)
+    </text>
+
+    <text_editor
+     bg_readonly_color="Transparent"
+     enabled="false" 
      follows="left|top"
      font="SansSerif"
-     height="30"
+     height="100"
      layout="topleft"
-     left="15"
+     left="290"
      length="1"
-     name="txtUpdateMessage"
-     top="30"
+     max_length="65536"
+     name="text_message"
+     top_pad="0"
      type="string"
-     width="552"
-     word_wrap="true">
-        First line of the message goes here
-Second line of the message goes here
+     width="272"
+     word_wrap="true">       
+This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. 
+    </text_editor>
+    <text
+     follows="top|left"
+     height="24"
+     left="290"
+     name="text_website"
+     text_color="white"
+     top_pad="12"
+     width="272">
+Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
     </text>
-    <web_browser
-     follows="left|right|top|bottom"
-     height="370"
-     layout="topleft"
-     left_delta="0"
-     name="webUpdate"
-     top_pad="5"
-     trusted_content="true" 
-     width="568" />
 
-    <check_box
-     follows="left|bottom"
-     height="16"
-     label="Skip this update"
+    <text
+      type="string"
+      length="1"
+      follows="left|top"
+      height="10"
+      layout="topleft"
+      left="290"
+      name="future_update"
+      mouse_opaque="false"
+      top_pad="12"
+      width="272">
+      For future updates, prompt me ...
+    </text>
+    <combo_box
+     control_name="UpdaterServiceSetting"
+     follows="left|top"
+     height="23"
      layout="topleft"
-     left_delta="-5"
-     name="chkSkip"
-     top_pad="10"
-     width="55" />
+     left="290"
+     top_pad="5"
+     name="combo_update_notifcation"
+     width="272">
+        <combo_box.item
+         label="before installing (recommended)"
+         name="prompt_install"
+         value="2" />
+        <combo_box.item
+         label="before downloading"
+         name="prompt_download"
+         value="3" />
+    </combo_box>
 
     <button
      follows="left|bottom"
-     height="20"
-     label="Ok"
-     label_selected="Ok"
+     height="30"
+     label="Later"
      layout="topleft"
-     left_delta="0"
-     name="btnOk"
-     top_pad="5"
-     width="100" />
+     left_delta="30"
+     name="button_cancel"
+     top_pad="16"
+     width="50" />
     <button
      follows="left|bottom"
-     height="20"
-     label="Close"
-     label_selected="Close"
+     height="30"
+     image_color="Green"
+     label="Accept"
+     label_color="White"
      layout="topleft"
-     left_pad="10"
-     name="btnCancel"
+     left_pad="15"
+     name="button_accept"
      top_delta="0"
-     width="100" />
+     width="140" />
+
 </floater>
