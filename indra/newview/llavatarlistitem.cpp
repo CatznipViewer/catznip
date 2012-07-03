@@ -791,9 +791,13 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << LL_ENDL;
 	LL_DEBUGS("AvatarItemReshape") << "Updating for: " << getAvatarName() << LL_ENDL;
 
-	S32 name_new_width = getRect().getWidth();
-	S32 ctrl_new_left = name_new_width;
+//	S32 name_new_width = getRect().getWidth();
+//	S32 ctrl_new_left = name_new_width;
 	S32 name_new_left = sLeftPadding;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+	S32 name_new_right = getRect().getWidth();
+	S32 ctrl_new_left = name_new_right;
+// [/SL:KB]
 
 	// iterate through all children and set them into correct position depend on each child visibility
 	// assume that child indexes are in back order: the first in Enum is the last (right) in the item
@@ -809,14 +813,15 @@ void LLAvatarListItem::updateChildren()
 		// skip invisible views
 //		if (!control->getVisible()) continue;
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-		if (!control->getEnabled()) continue;
+		if (!control->getEnabled())
+			continue;
 // [/SL:KB]
 
 		S32 ctrl_width = sChildrenWidths[i]; // including space between current & left controls
 
-		// decrease available for 
-		name_new_width -= ctrl_width;
-		LL_DEBUGS("AvatarItemReshape") << "width: " << ctrl_width << ", name_new_width: " << name_new_width << LL_ENDL;
+//		// decrease available for 
+//		name_new_width -= ctrl_width;
+//		LL_DEBUGS("AvatarItemReshape") << "width: " << ctrl_width << ", name_new_width: " << name_new_width << LL_ENDL;
 
 		LLRect control_rect = control->getRect();
 		LL_DEBUGS("AvatarItemReshape") << "rect before: " << control_rect << LL_ENDL;
@@ -831,6 +836,10 @@ void LLAvatarListItem::updateChildren()
 		else
 		{
 			ctrl_new_left -= ctrl_width;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+			if (control->getVisible())
+				name_new_right = ctrl_new_left;
+// [/SL:KB]
 		}
 
 		LL_DEBUGS("AvatarItemReshape") << "ctrl_new_left: " << ctrl_new_left << LL_ENDL;
@@ -851,13 +860,19 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << "name rect before: " << name_view_rect << LL_ENDL;
 
 	// apply paddings
-	name_new_width -= sLeftPadding;
-	name_new_width -= sNameRightPadding;
+//	name_new_width -= sLeftPadding;
+//	name_new_width -= sNameRightPadding;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+	name_new_right -= sNameRightPadding;
+// [/SL:KB]
 
 	name_view_rect.setLeftTopAndSize(
 		name_new_left,
 		name_view_rect.mTop,
-		name_new_width,
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+		name_new_right - name_new_left,
+// [/SL:KB]
+//		name_new_width,
 		name_view_rect.getHeight());
 
 	name_view->setShape(name_view_rect);
