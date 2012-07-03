@@ -146,8 +146,9 @@ protected:
 	void rebuildNames();
 	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
 	void updateAvatarNames();
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-	LLAvatarListItem::ENameFormat getAvatarNameFormat() const;
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+	EAvatarListNameFormat getAvatarNameFormat() const;
+	void                  setAvatarNameFormat(EAvatarListNameFormat name_format);
 // [/SL:KB]
 
 private:
@@ -175,6 +176,9 @@ private:
 	LLTimer*				mTextFieldUpdateTimer;
 	F32						mTextFieldUpdateExpiration;
 	commit_signal_t*		mTextFieldUpdateSignal;
+// [/SL:KB]
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2012-07-04 (Catnzip-3.3.0)
+	EAvatarListNameFormat	mNameFormat;
 // [/SL:KB]
 	std::string				mIconParamName;
 	std::string				mNameFilter;

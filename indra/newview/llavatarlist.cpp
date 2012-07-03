@@ -185,6 +185,9 @@ LLAvatarList::LLAvatarList(const Params& p)
 , mTextFieldUpdateExpiration(p.text_callback.refresh_time)
 , mTextFieldUpdateSignal(NULL)
 // [/SL:KB]
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2012-07-04 (Catnzip-3.3.0)
+, mNameFormat(NF_DISPLAYNAME)
+// [/SL:KB]
 , mShowIcons(true)
 , mShowInfoBtn(p.show_info_btn)
 , mShowProfileBtn(p.show_profile_btn)
@@ -293,7 +296,7 @@ void LLAvatarList::setNameFilter(const std::string& filter)
 {
 	std::string filter_upper = filter;
 	LLStringUtil::toUpper(filter_upper);
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 	mNeedUpdateNames = (mNameFilter.empty() != filter.empty());	// We always want to switch to NF_COMPLETENAME when a filter is active
 // [/SL:KB]
 	if (mNameFilter != filter_upper)
@@ -327,9 +330,9 @@ void LLAvatarList::addAvalineItem(const LLUUID& item_id, const LLUUID& session_i
 	LL_DEBUGS("Avaline") << "Adding avaline item into the list: " << item_name << "|" << item_id << ", session: " << session_id << LL_ENDL;
 	LLAvalineListItem* item = new LLAvalineListItem(/*hide_number=*/false);
 //	item->setAvatarId(item_id, session_id, true, false);
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 	// It doesn't really matter what we add for name format for avaline
-	item->setAvatarId(item_id, session_id, LLAvatarListItem::NF_DISPLAYNAME, true, false);
+	item->setAvatarId(item_id, session_id, NF_DISPLAYNAME, true, false);
 // [/SL:KB]
 	item->setName(item_name);
 //	item->showLastInteractionTime(mShowLastInteractionTime);
@@ -374,7 +377,7 @@ void LLAvatarList::refresh()
 		have_names &= LLAvatarNameCache::get(buddy_id, &av_name);
 
 //		if (!have_filter || findInsensitive(av_name.mDisplayName, mNameFilter))
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 		if (!have_filter || findInsensitive(LLAvatarListItem::formatAvatarName(av_name, getAvatarNameFormat()), mNameFilter))
 // [/SL:KB]
 		{
@@ -397,7 +400,7 @@ void LLAvatarList::refresh()
 //					addNewItem(buddy_id, 
 //						av_name.mDisplayName.empty() ? waiting_str : av_name.mDisplayName, 
 //						LLAvatarTracker::instance().isBuddyOnline(buddy_id));
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 					// NOTE-Catznip: the name parameter isn't currently used, but it might be in the future
 					addNewItem(buddy_id, 
 						av_name.mDisplayName.empty() ? waiting_str : LLAvatarListItem::formatAvatarName(av_name, getAvatarNameFormat()), 
@@ -430,7 +433,7 @@ void LLAvatarList::refresh()
 			LLAvatarName av_name;
 			have_names &= LLAvatarNameCache::get(buddy_id, &av_name);
 //			if (!findInsensitive(av_name.mDisplayName, mNameFilter))
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 			if (!findInsensitive(LLAvatarListItem::formatAvatarName(av_name, getAvatarNameFormat()), mNameFilter))
 // [/SL:KB]
 			{
@@ -487,17 +490,26 @@ void LLAvatarList::updateAvatarNames()
 	{
 		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
 //		item->updateAvatarName();
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 		item->updateAvatarName(getAvatarNameFormat());
 // [/SL:KB]
 	}
 	mNeedUpdateNames = false;
 }
 
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-LLAvatarListItem::ENameFormat LLAvatarList::getAvatarNameFormat() const
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+EAvatarListNameFormat LLAvatarList::getAvatarNameFormat() const
 {
-	return (mNameFilter.empty()) ? LLAvatarListItem::NF_DISPLAYNAME : LLAvatarListItem::NF_COMPLETENAME;
+	return (mNameFilter.empty()) ? mNameFormat : NF_COMPLETENAME;
+}
+
+void LLAvatarList::setAvatarNameFormat(EAvatarListNameFormat name_format)
+{
+	if (mNameFormat == name_format)
+		return;
+
+	mNameFormat = name_format;
+	updateAvatarNames();
 }
 // [/SL:KB]
 
@@ -515,7 +527,7 @@ bool LLAvatarList::filterHasMatches()
 		// When the name will be loaded the filter will be applied again(in refresh()).
 
 //		if (have_name && !findInsensitive(av_name.mDisplayName, mNameFilter))
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 		if (have_name && !findInsensitive(LLAvatarListItem::formatAvatarName(av_name, getAvatarNameFormat()), mNameFilter))
 // [/SL:KB]
 		{
@@ -553,7 +565,7 @@ void LLAvatarList::addNewItem(const LLUUID& id, const std::string& name, BOOL is
 	LLAvatarListItem* item = new LLAvatarListItem();
 	// This sets the name as a side effect
 //	item->setAvatarId(id, mSessionID, mIgnoreOnlineStatus);
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 	item->setAvatarId(id, mSessionID, getAvatarNameFormat(), mIgnoreOnlineStatus);
 // [/SL:KB]
 	item->setOnline(mIgnoreOnlineStatus ? true : is_online);

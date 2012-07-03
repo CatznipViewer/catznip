@@ -307,8 +307,8 @@ void LLAvatarListItem::setState(EItemState item_style)
 }
 
 //void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, ENameFormat name_format, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
 // [/SL:KB]
 {
 	if (mAvatarId.notNull())
@@ -334,7 +334,7 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, E
 		// Set avatar name.
 //		LLAvatarNameCache::get(id,
 //			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 		LLAvatarNameCache::get(id, boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
 // [/SL:KB]
 	}
@@ -590,8 +590,8 @@ std::string LLAvatarListItem::getAvatarToolTip() const
 //	LLAvatarNameCache::get(getAvatarId(),
 //			boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
 //}
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-void LLAvatarListItem::updateAvatarName(ENameFormat name_format)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+void LLAvatarListItem::updateAvatarName(EAvatarListNameFormat name_format)
 {
 	LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
 }
@@ -604,8 +604,8 @@ void LLAvatarListItem::setNameInternal(const std::string& name, const std::strin
 	LLTextUtil::textboxSetHighlightedVal(mAvatarName, mAvatarNameStyle, name, highlight);
 }
 
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, ENameFormat name_format)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format)
 {
 	switch (name_format)
 	{
@@ -621,12 +621,12 @@ std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EName
 // [/SL:KB]
 
 //void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
-void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, ENameFormat name_format)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, EAvatarListNameFormat name_format)
 // [/SL:KB]
 {
 //	setAvatarName(av_name.mDisplayName);
-// [SL:KB] - Patch: UI-AvatarListNameFormat | Checked: 2010-05-30 (Catznip-3.0.0a) | Added: Catnzip-2.6.0b
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 	setAvatarName(formatAvatarName(av_name, name_format));
 // [/SL:KB]
 	setAvatarToolTip(av_name.mUsername);
