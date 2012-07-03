@@ -314,17 +314,27 @@ void LLNetMap::draw()
 //		{
 //			mUpdateNow = false;
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+		// Locate the center
+		LLVector3 posCenter = globalPosToView(gAgentCamera.getCameraPositionGlobal());
+		posCenter.mV[VX] -= mCurPan.mV[VX];
+		posCenter.mV[VY] -= mCurPan.mV[VY];
+		posCenter.mV[VZ] = 0.f;
+		LLVector3d posCenterGlobal = viewPosToGlobal(llfloor(posCenter.mV[VX]), llfloor(posCenter.mV[VY]));
+
 		if (mUpdateObjectImage || (map_timer.getElapsedTimeF32() > 0.5f))
 		{
 			mUpdateObjectImage = false;
 // [/SL:KB]
 
-			// Locate the centre of the object layer, accounting for panning
-			LLVector3 new_center = globalPosToView(gAgentCamera.getCameraPositionGlobal());
-			new_center.mV[VX] -= mCurPan.mV[VX];
-			new_center.mV[VY] -= mCurPan.mV[VY];
-			new_center.mV[VZ] = 0.f;
-			mObjectImageCenterGlobal = viewPosToGlobal(llfloor(new_center.mV[VX]), llfloor(new_center.mV[VY]));
+//			// Locate the centre of the object layer, accounting for panning
+//			LLVector3 new_center = globalPosToView(gAgentCamera.getCameraPositionGlobal());
+//			new_center.mV[VX] -= mCurPan.mV[VX];
+//			new_center.mV[VY] -= mCurPan.mV[VY];
+//			new_center.mV[VZ] = 0.f;
+//			mObjectImageCenterGlobal = viewPosToGlobal(llfloor(new_center.mV[VX]), llfloor(new_center.mV[VY]));
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+			mObjectImageCenterGlobal = posCenterGlobal;
+// [/SL:KB]
 
 			// Create the base texture.
 			U8 *default_texture = mObjectRawImagep->getData();
@@ -340,15 +350,10 @@ void LLNetMap::draw()
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 		static LLCachedControl<bool> s_fShowPropertyLines(gSavedSettings, "MiniMapPropertyLines") ;
-		if ( (s_fShowPropertyLines) && (mUpdateParcelImage) )
+		if ( (s_fShowPropertyLines) && ((mUpdateParcelImage) || (dist_vec_squared2D(mParcelImageCenterGlobal, posCenterGlobal) > 9.0f)) )
 		{
 			mUpdateParcelImage = false;
-
-			// Locate the center
-			LLVector3 posCenter = globalPosToView(gAgentCamera.getCameraPositionGlobal());
-			posCenter.mV[VX] -= mCurPan.mV[VX];
-			posCenter.mV[VY] -= mCurPan.mV[VY];
-			mParcelImageCenterGlobal = viewPosToGlobal(llfloor(posCenter.mV[VX]), llfloor(posCenter.mV[VY]));
+			mParcelImageCenterGlobal = posCenterGlobal;
 
 			U8* pTextureData = mParcelRawImagep->getData();
 			memset(pTextureData, 0, mParcelImagep->getWidth() * mParcelImagep->getHeight() * mParcelImagep->getComponents());
