@@ -6086,6 +6086,10 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
 [NAME_SLURL] has given you this [OBJECTTYPE]:
 [ITEM_SLURL]
     <form name="form">
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
       <button
        index="3"
        name="Show"
