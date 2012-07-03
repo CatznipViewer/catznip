@@ -36,6 +36,9 @@
 #include "llxmlnode.h"
 #include "lluictrl.h"
 #include "lluictrlfactory.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+#include "llurlregistry.h"
+// [/SL:KB]
 #include "lldir.h"
 #include "llsdserialize.h"
 #include "lltrans.h"
@@ -971,6 +974,34 @@ std::string LLNotification::getMessage() const
 	LLStringUtil::format(message, mSubstitutions);
 	return message;
 }
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+std::string LLNotification::getLogMessage() const
+{
+	if (!mTemplatep)
+		return std::string();
+
+	// Iterate over all substitutions and replace any SLURLs we come across with their label
+	LLSD logSubstitutions = mSubstitutions;
+	for (LLSD::map_iterator itSubstitution = logSubstitutions.beginMap(); itSubstitution != logSubstitutions.endMap(); ++itSubstitution)
+	{
+		LLSD& sdSubstitution = itSubstitution->second;
+		if (!sdSubstitution.isString())
+			continue;
+
+		LLUrlMatch urlMatch; std::string strSubstitution = sdSubstitution.asString();
+		if ( (LLUrlRegistry::instance().findUrl(strSubstitution, urlMatch)) &&
+		     (0 == urlMatch.getStart()) && (urlMatch.getEnd() >= strSubstitution.size() - 1) )
+		{
+			sdSubstitution = urlMatch.getLabel();
+		}
+	}
+
+	std::string message = mTemplatep->mMessage;
+	LLStringUtil::format(message, logSubstitutions);
+	return message;
+}
+// [/SL:KB]
 
 std::string LLNotification::getLabel() const
 {

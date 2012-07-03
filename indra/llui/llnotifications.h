@@ -545,6 +545,9 @@ public:
 
 	std::string getType() const;
 	std::string getMessage() const;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+	std::string getLogMessage() const;
+// [/SL:KB]
 	std::string getLabel() const;
 	std::string getURL() const;
 	S32 getURLOption() const;
