@@ -900,7 +900,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	static const S32 GRIDS_PER_EDGE = REGION_WIDTH_METERS / GRID_STEP;
 
 	const U8* pOwnership = pRegion->getParcelOverlay()->getOwnership();
-	const U8* pCollision = (pRegion == gAgent.getRegion()) ? LLViewerParcelMgr::instance().getCollisionBitmap() : NULL;
+	const U8* pCollision = (pRegion->getHandle() == LLViewerParcelMgr::instance().getCollisionRegionHandle()) ? LLViewerParcelMgr::instance().getCollisionBitmap() : NULL;
 	for (S32 idxRow = 0; idxRow < GRIDS_PER_EDGE; idxRow++)
 	{
 		for (S32 idxCol = 0; idxCol < GRIDS_PER_EDGE; idxCol++)

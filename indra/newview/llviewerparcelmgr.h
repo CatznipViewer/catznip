@@ -166,6 +166,7 @@ public:
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 	const U8*	getCollisionBitmap() const { return mCollisionBitmap; }
 	size_t		getCollisionBitmapSize() const { return mParcelsPerEdge * mParcelsPerEdge / 8; }
+	U64			getCollisionRegionHandle() const { return mCollisionRegionHandle; }
  
 	typedef boost::signals2::signal<void (const LLViewerRegion*)> collision_update_signal_t;
 	boost::signals2::connection setCollisionUpdateCallback(const collision_update_signal_t::slot_type & cb);
@@ -369,6 +370,7 @@ private:
 	LLParcel*					mCollisionParcel;
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 	U8*							mCollisionBitmap;
+	U64							mCollisionRegionHandle;
 	collision_update_signal_t*	mCollisionUpdateSignal;
 // [/SL:KB]
 	U8*							mCollisionSegments;

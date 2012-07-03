@@ -124,6 +124,7 @@ LLViewerParcelMgr::LLViewerParcelMgr()
 	mCollisionBanned(0),
 	mCollisionTimer(),
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+	mCollisionRegionHandle(0),
 	mCollisionUpdateSignal(NULL),
 // [/SL:KB]
 	mMediaParcelId(0),
@@ -1731,8 +1732,11 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 //		bitmap = NULL;
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+		LLViewerRegion* pRegion = LLWorld::getInstance()->getRegion(msg->getSender());
+		parcel_mgr.mCollisionRegionHandle = (pRegion) ? pRegion->getHandle() : 0;
+
 		if (parcel_mgr.mCollisionUpdateSignal)
-			(*parcel_mgr.mCollisionUpdateSignal)(LLWorld::getInstance()->getRegion(msg->getSender()));
+			(*parcel_mgr.mCollisionUpdateSignal)(pRegion);
 // [/SL:KB]
 	}
 	else if (sequence_id == HOVERED_PARCEL_SEQ_ID)
