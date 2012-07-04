@@ -831,7 +831,11 @@ void LLAvatarListItem::updateChildren()
 			// assume that this is the last iteration,
 			// so it is not necessary to save "ctrl_new_left" value calculated on previous iterations
 			ctrl_new_left = sLeftPadding;
-			name_new_left = ctrl_new_left + ctrl_width;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+			if (mAvatarIcon->getVisible())
+				name_new_left = ctrl_new_left + ctrl_width;
+// [/SL:KB]
+//			name_new_left = ctrl_new_left + ctrl_width;
 		}
 		else
 		{
