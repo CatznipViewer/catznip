@@ -183,6 +183,21 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              tool_tip="Options"
              top="1"
              width="31" />
+              <button
+                  follows="bottom|left"
+                  height="25"
+                  image_hover_unselected="Toolbar_Middle_Over"
+             	 image_overlay="AddItem_Off"
+                  image_selected="Toolbar_Middle_Selected"
+              	 image_unselected="Toolbar_Middle_Off"
+                  layout="topleft"
+                  left_pad="1"
+                 name="add_friend_btn"
+                 tool_tip="Add selected Resident to your friends List"
+                  width="31">
+                <commit_callback
+                  function="People.addFriend" />
+              </button>
              <button
                  follows="bottom|left"
                  height="25"
@@ -222,14 +237,14 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              layout="topleft"
              left_pad="1"
              name="dummy_icon"
-             width="213"
+             width="185"
              />
              <slider
               follows="bottom|left"
               layout="topleft"
-              left_pad="-200"
+              left_pad="-180"
               top_pad="-19"
-              width="200"
+              width="180"
               height="18"
               control_name="NearMeRange"
               label="Range (m) :"
