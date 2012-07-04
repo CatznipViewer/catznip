@@ -640,7 +640,7 @@ LLPanelPeople::LLPanelPeople()
 	mNearbyListUpdater = new LLNearbyListUpdater(boost::bind(&LLPanelPeople::updateNearbyList,	this));
 	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
 	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
-	mCommitCallbackRegistrar.add("People.addFriend", boost::bind(&LLPanelPeople::onAddFriendButtonClicked, this));
+//	mCommitCallbackRegistrar.add("People.addFriend", boost::bind(&LLPanelPeople::onAddFriendButtonClicked, this));
 }
 
 LLPanelPeople::~LLPanelPeople()
@@ -734,6 +734,12 @@ BOOL LLPanelPeople::postBuild()
 	setSortOrder(mAllFriendList,	(ESortOrder)gSavedSettings.getU32("FriendsSortOrder"),		false);
 	setSortOrder(mNearbyList,		(ESortOrder)gSavedSettings.getU32("NearbyPeopleSortOrder"),	false);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	LLPanel* nearby_panel = getChild<LLPanel>(NEARBY_TAB_NAME);
+	nearby_panel->childSetAction("add_friend_btn",	boost::bind(&LLPanelPeople::onAddFriendButtonClicked,	this));
+	nearby_panel->childSetAction("blocklist_btn",	boost::bind(&LLPanelPeople::onBlockListButtonClicked,	this));
+// [/SL:KB]
+
 	LLPanel* groups_panel = getChild<LLPanel>(GROUP_TAB_NAME);
 	groups_panel->childSetAction("activate_btn", boost::bind(&LLPanelPeople::onActivateButtonClicked,	this));
 	groups_panel->childSetAction("plus_btn",	boost::bind(&LLPanelPeople::onGroupPlusButtonClicked,	this));
@@ -741,6 +747,9 @@ BOOL LLPanelPeople::postBuild()
 	LLPanel* friends_panel = getChild<LLPanel>(FRIENDS_TAB_NAME);
 	friends_panel->childSetAction("add_btn",	boost::bind(&LLPanelPeople::onAddFriendWizButtonClicked,	this));
 	friends_panel->childSetAction("del_btn",	boost::bind(&LLPanelPeople::onDeleteFriendButtonClicked,	this));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	friends_panel->childSetAction("blocklist_btn", boost::bind(&LLPanelPeople::onBlockListButtonClicked,	this));
+// [/SL:KB]
 
 	mOnlineFriendList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onAvatarListDoubleClicked, this, _1));
 	mAllFriendList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onAvatarListDoubleClicked, this, _1));
@@ -1324,6 +1333,13 @@ void LLPanelPeople::onAddFriendButtonClicked()
 		LLAvatarActions::requestFriendshipDialog(id);
 	}
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+void LLPanelPeople::onBlockListButtonClicked()
+{
+	LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
+}
+// [/SL:KB]
 
 bool LLPanelPeople::isItemsFreeOfFriends(const uuid_vec_t& uuids)
 {

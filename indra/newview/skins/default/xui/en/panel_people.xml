@@ -199,22 +199,6 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                   function="People.addFriend" />
               </button>
              <button
-                 follows="bottom|left"
-                 height="25"
-                 image_hover_unselected="Toolbar_Middle_Over"
-                 image_overlay="Command_MiniMap_Icon"
-                 image_selected="Toolbar_Middle_Selected"
-             	 image_unselected="Toolbar_Middle_Off"
-                 layout="topleft"
-                 left_pad="1"
-                 name="map_toggle_btn"
-                 tool_tip="Toggle the mini map"
-                 width="31">
-               <commit_callback
-                  function="ToggleControl"
-                  parameter="NearbyListShowMap" />
-             </button>
-             <button
               follows="bottom|left"
               height="25"
               image_hover_unselected="Toolbar_Middle_Over"
@@ -227,8 +211,23 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
               tool_tip="Show blocked Residents / Objects"
               width="31">
                <commit_callback
-                function="People.Nearby.ViewSort.Action"
-                parameter="panel_block_list_sidetray" />
+                function="People.blockList" />
+             </button>
+             <button
+              control_name="NearbyListShowMap"
+              follows="bottom|left"
+              height="25"
+              image_hover_unselected="Toolbar_Middle_Over"
+              image_overlay="Command_MiniMap_Icon"
+              image_selected="Toolbar_Middle_Selected"
+              image_unselected="Toolbar_Middle_Off"
+              image_bottom_pad="1"
+              layout="topleft"
+              left_pad="1"
+              name="map_toggle_btn"
+              toggle="true"
+              tool_tip="Toggle the mini map"
+              width="31">
              </button>
              <icon
              follows="bottom|left|right"
@@ -380,11 +379,34 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
 				           width="31" />
 				      </layout_panel>
 				      <layout_panel
+				       auto_resize="false"
+				       height="25"
+				       layout="topleft"
+				       name="blocklist_btn_panel"
+				       width="32">
+                  <button
+                   follows="bottom|left"
+                   height="25"
+                   image_hover_unselected="Toolbar_Middle_Over"
+                   image_overlay="Parcel_SeeAVsOff_Dark"
+                   image_selected="Toolbar_Middle_Selected"
+                   image_unselected="Toolbar_Middle_Off"
+                   layout="topleft"
+                   left="0"
+                   name="blocklist_btn"
+                   tool_tip="Show blocked Residents / Objects"
+                   top="0"
+                   width="31">
+                    <commit_callback
+                     function="People.blockList" />
+                  </button>
+				      </layout_panel>
+				      <layout_panel
 				       auto_resize="true"
 				       height="25"
 				       layout="topleft"
 				       name="dummy_panel"
-				       width="210">
+				       width="179">
 				          <icon
 				           follows="bottom|left|right"
 				           height="25"
@@ -393,7 +415,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
 				           left="0"
 				           top="0"
 				           name="dummy_icon"
-				           width="210" />
+				           width="179" />
 				      </layout_panel>
 				      <layout_panel
 				       auto_resize="false"

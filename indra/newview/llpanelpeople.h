@@ -96,6 +96,9 @@ private:
 	void					onViewProfileButtonClicked();
 	void					onAddFriendButtonClicked();
 	void					onAddFriendWizButtonClicked();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	void					onBlockListButtonClicked();
+// [/SL:KB]
 	void					onDeleteFriendButtonClicked();
 	void					onGroupInfoButtonClicked();
 	void					onChatButtonClicked();
