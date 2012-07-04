@@ -730,6 +730,13 @@ BOOL LLPanelPeople::postBuild()
 	mAllFriendList->setContextMenu(&LLPanelPeopleMenus::gNearbyMenu);
 	mOnlineFriendList->setContextMenu(&LLPanelPeopleMenus::gNearbyMenu);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	setNameFormat(mNearbyList,		(EAvatarListNameFormat)gSavedSettings.getU32("NearbyPeopleNameFormat"),	false);
+	setNameFormat(mRecentList,		(EAvatarListNameFormat)gSavedSettings.getU32("RecentPeopleNameFormat"),	false);
+	setNameFormat(mAllFriendList,	(EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),		false);
+	setNameFormat(mOnlineFriendList,(EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),		false);
+// [/SL:KB]
+
 	setSortOrder(mRecentList,		(ESortOrder)gSavedSettings.getU32("RecentPeopleSortOrder"),	false);
 	setSortOrder(mAllFriendList,	(ESortOrder)gSavedSettings.getU32("FriendsSortOrder"),		false);
 	setSortOrder(mNearbyList,		(ESortOrder)gSavedSettings.getU32("NearbyPeopleSortOrder"),	false);
@@ -1179,6 +1186,27 @@ void LLPanelPeople::showGroupMenu(LLMenuGL* menu)
 	LLMenuGL::showPopup(parent_panel, menu, menu_x, menu_y);
 }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+void LLPanelPeople::setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save)
+{
+	list->setAvatarNameFormat(name_format);
+	if (save)
+	{
+		std::string setting;
+
+		if (list == mAllFriendList || list == mOnlineFriendList)
+			setting = "FriendsNameFormat";
+		else if (list == mRecentList)
+			setting = "RecentPeopleNameFormat";
+		else if (list == mNearbyList)
+			setting = "NearbyPeopleNameFormat";
+
+		if (!setting.empty())
+			gSavedSettings.setU32(setting, name_format);
+	}
+}
+// [/SL:KB]
+
 void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save)
 {
 	switch (order)
@@ -1474,6 +1502,23 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_STATUS);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_DISPLAYNAME);
+		setNameFormat(mOnlineFriendList, NF_DISPLAYNAME, false);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_COMPLETENAME);
+		setNameFormat(mOnlineFriendList, NF_COMPLETENAME, false);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_USERNAME);
+		setNameFormat(mOnlineFriendList, NF_USERNAME, false);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mAllFriendList->toggleIcons();
@@ -1515,6 +1560,20 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_NAME);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_DISPLAYNAME);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_COMPLETENAME);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_USERNAME);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mNearbyList->toggleIcons();
@@ -1564,9 +1623,18 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	U32 name_format = gSavedSettings.getU32("NearbyPeopleNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
+
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
 	U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
-
 	if ("show_range" == item)
 		return maskFilter & LLWorld::E_FILTER_BY_DISTANCE;
 	if ("show_current_parcel" == item)
@@ -1590,6 +1658,20 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mRecentList, E_SORT_BY_NAME);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_DISPLAYNAME);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_COMPLETENAME);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_USERNAME);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mRecentList->toggleIcons();
@@ -1610,6 +1692,16 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_status")
 		return sort_order == E_SORT_BY_STATUS;
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	U32 name_format = gSavedSettings.getU32("FriendsNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
+
 	return false;
 }
 
@@ -1622,6 +1714,16 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_MOST_RECENT;
 	if (item == "sort_name") 
 		return sort_order == E_SORT_BY_NAME;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	U32 name_format = gSavedSettings.getU32("RecentPeopleNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
 
 	return false;
 }

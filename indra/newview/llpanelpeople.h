@@ -29,6 +29,9 @@
 
 #include <llpanel.h>
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+#include "llavatarlistitem.h"
+// [/SL:KB]
 #include "llcallingcard.h" // for avatar tracker
 #include "llvoiceclient.h"
 
@@ -88,6 +91,9 @@ private:
 	void					buttonSetEnabled(const std::string& btn_name, bool enabled);
 	void					buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb);
 	void					showGroupMenu(LLMenuGL* menu);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	void					setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save = true);
+// [/SL:KB]
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);
 
 	// UI callbacks

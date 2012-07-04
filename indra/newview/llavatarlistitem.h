@@ -45,9 +45,9 @@ class LLSliderCtrl;
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
 typedef enum
 {
-	NF_DISPLAYNAME,
-	NF_USERNAME,
-	NF_COMPLETENAME
+	NF_DISPLAYNAME = 0,
+	NF_USERNAME = 1,
+	NF_COMPLETENAME = 2
 } EAvatarListNameFormat;
 // [/SL:KB]
 

@@ -128,6 +128,10 @@ public:
 	boost::signals2::connection setTextFieldCallback(const commit_signal_t::slot_type& cb);
 	void                        setTextFieldRefresh(F32 refresh_time);
 // [/SL:KB]
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+	EAvatarListNameFormat getAvatarNameFormat() const;
+	void                  setAvatarNameFormat(EAvatarListNameFormat name_format);
+// [/SL:KB]
 
 	virtual S32 notifyParent(const LLSD& info);
 
@@ -146,10 +150,6 @@ protected:
 	void rebuildNames();
 	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
 	void updateAvatarNames();
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
-	EAvatarListNameFormat getAvatarNameFormat() const;
-	void                  setAvatarNameFormat(EAvatarListNameFormat name_format);
-// [/SL:KB]
 
 private:
 
