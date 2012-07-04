@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
  follows="top|right|left"
- height="22"
+ height="24"
  layout="topleft"
  left="0"
  name="avatar_list_item"
@@ -26,7 +26,7 @@
     -->
     <icon
      follows="top|right|left"
-     height="20"
+     height="24"
      image_name="ListItem_Over"
      layout="topleft"
      left="0"
@@ -35,7 +35,7 @@
      visible="false"
      width="320" />
     <icon
-     height="20"
+     height="24"
      follows="top|right|left"
      image_name="ListItem_Select"
      layout="topleft"
@@ -51,7 +51,7 @@
      layout="topleft"
      left="5"
      mouse_opaque="true"
-     top="0"
+     top="2"
      width="20" />
     <text
      follows="left|right"

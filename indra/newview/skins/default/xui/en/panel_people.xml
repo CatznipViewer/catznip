@@ -81,6 +81,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
      name="tabs"
      tab_group="1"
      tab_min_width="76"
+     tab_height="30"
      tab_position="top"
      top_pad="4"
      halign="center"
@@ -99,7 +100,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
            top_pad="0"
            clip="false"
            follows="all"
-           height="355"
+           height="359"
            layout="topleft"
            mouse_opaque="false"
            orientation="vertical"
@@ -111,34 +112,34 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              mouse_opaque="false"
              user_resize="true"
              visibility_control="NearbyListShowMap"
-             width="319">
+             width="313">
              <net_map
                bg_color="NetMapBackgroundColor"
                follows="all"
-               height="140"
+               height="142"
                layout="topleft"
-               left="7"
+               left="4"
                mouse_opaque="false"
                name="Net Map"
-               top="4"
-               width="309"/>
+               top="2"
+               width="306"/>
              <view_border 
               border_thickness="2"
               follows="all"
-              height="141"
+              height="146"
               highlight_light_color="Black"
               highlight_dark_color="Black"
               layout="topleft"
-              left_delta="0"
+              left="2"
               name="preview_border"
               shadow_light_color="Black"
               shadow_dark_color="Black"
-              top="2"
-              width="311"
+              top="0"
+              width="310"
              />
            </layout_panel>
            <layout_panel
-             height="220"
+             height="213"
              layout="topleft"
              min_dim="22"
              mouse_opaque="false"
@@ -167,7 +168,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              layout="topleft"
              left="2"
              name="bottom_panel"
-             top_pad="6"
+             top_pad="0"
              width="313">
              <menu_button
              follows="bottom|left"
