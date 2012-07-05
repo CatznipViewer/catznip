@@ -73,6 +73,15 @@ public:
 		FAILURE
 	};
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	enum eUpdaterSetting
+	{
+		UPDATER_DISABLED= 0,
+		PROMPT_DOWNLOAD = 1,		// Prompt the user before downloading and prompt before installation
+		PROMPT_INSTALL  = 2			// Download automatically, prompt before installation
+	};
+// [/SL:KB]
+
 	LLUpdaterService();
 	~LLUpdaterService();
 

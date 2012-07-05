@@ -254,7 +254,7 @@ void LLUpdaterServiceImpl::startChecking(bool install_if_ready)
 		}
 	}
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
-	else
+	else if (!install_if_ready)
 	{
 		// Simulate a completed download so the user is informed about the update
 		LLSD update_info;

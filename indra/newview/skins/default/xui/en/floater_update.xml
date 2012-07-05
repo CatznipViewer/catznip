@@ -106,13 +106,13 @@ Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
      name="combo_update_notifcation"
      width="272">
         <combo_box.item
+         label="before downloading"
+         name="prompt_download"
+         value="1" />
+        <combo_box.item
          label="before installing (recommended)"
          name="prompt_install"
          value="2" />
-        <combo_box.item
-         label="before downloading"
-         name="prompt_download"
-         value="3" />
     </combo_box>
 
     <button

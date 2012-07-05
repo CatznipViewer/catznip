@@ -2679,7 +2679,7 @@ namespace {
 	}
 	
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
-	bool on_update_check_callback(const LLSD& sdData)
+	void on_update_check_callback(const LLSD& sdData)
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
 		{
@@ -2690,7 +2690,6 @@ namespace {
 			gSavedSettings.setString("UpdaterLastPopup", LLDate::now().asString());
 			LLLoginInstance::instance().getUpdaterService()->stopChecking();
 		}
-		return true;
 	}
 
 	void on_update_check(const LLSD& sdData)
@@ -2703,17 +2702,50 @@ namespace {
 			return;
 		}
 
-		LLEventPump& pumpUpdate = LLEventPumps::instance().obtain("update_available");
-		pumpUpdate.listen("update_available_callback", &on_update_check_callback);
-
 		LLSD sdUpdateData;
-		sdUpdateData["reply_pump"] = pumpUpdate.getName();
 		sdUpdateData["type"] = "download";
 		sdUpdateData["required"] = sdData["required"];
 		sdUpdateData["version"] = sdData["version"];
 		sdUpdateData["information"] = sdData["more_info"];
 		sdUpdateData["update_url"] = sdData["update_url"];
-		LLFloaterReg::showInstance("update", sdUpdateData);
+		
+		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
+		if (pFloater)
+			pFloater->setCommitCallback(boost::bind(&on_update_check_callback, _2));
+	}
+
+	void on_update_downloaded_prompt_callback(const LLSD& sdData)
+	{
+		if (sdData["accept"].asBoolean())	// User clicked "Install"
+		{
+			static const bool install_if_ready = true;
+			LLLoginInstance::instance().getUpdaterService()->startChecking(install_if_ready);
+		}
+		else								// User clicked "Later"
+		{
+			gSavedSettings.setString("UpdaterLastPopup", LLDate::now().asString());
+		}
+	}
+
+	void on_update_downloaded_prompt(const LLSD& sdData)
+	{
+		// Don't do anything if it's an optional update and the user was only recently notified
+		if ( (!sdData["required"].asBoolean()) && 
+		     (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 4 * 60 * 60) )
+		{
+			return;
+		}
+
+		LLSD sdUpdateData;
+		sdUpdateData["type"] = "install";
+		sdUpdateData["required"] = sdData["required"];
+		sdUpdateData["version"] = sdData["version"];
+		sdUpdateData["information"] = sdData["more_info"];
+		sdUpdateData["update_url"] = sdData["update_url"];
+		
+		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
+		if (pFloater)
+			pFloater->setCommitCallback(boost::bind(&on_update_downloaded_prompt_callback, _2));
 	}
 // [/SL:KB]
 
@@ -2797,11 +2829,29 @@ namespace {
 		{
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 			case LLUpdaterService::CHECK_COMPLETE:
-				on_update_check(evt);
+				if (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting"))
+				{
+					on_update_check(evt);
+				}
+				else
+				{
+					on_update_check_callback(LLSD().with("accept", true));
+				}
 				break;
 // [/SL:KB]
 			case LLUpdaterService::DOWNLOAD_COMPLETE:
-				on_update_downloaded(evt);
+ // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+				if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
+				{
+					on_update_downloaded_prompt(evt);
+				}
+				else
+				{
+					on_update_downloaded(evt);
+				}
+				break;
+// [/SL:KB]
+//				on_update_downloaded(evt);
 				break;
 			case LLUpdaterService::INSTALL_ERROR:
 				if(evt["required"].asBoolean()) {

@@ -61,11 +61,8 @@ BOOL LLFloaterUpdate::postBuild()
 
 void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 {
-	LLSD sdData;
-	sdData["accept"] = fAccept;
-	sdData["version"] = m_strVersion;
-	LLEventPumps::instance().obtain(m_strReplyPumpName).post(sdData);
-
+	if (mCommitSignal)
+		(*mCommitSignal)(this, LLSD().with("accept", fAccept));
 	closeFloater();
 }
 
