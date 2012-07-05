@@ -489,6 +489,16 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 			boost::bind(&LLUrlEntryAgent::onAvatarNameCache,
 				this, _1, _2));
 		addObserver(agent_id_string, url, cb);
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-07-05 (Catznip-3.3)
+		// Display the legacy name if we have it
+		std::string strName;
+		if (gCacheName->getFullName(agent_id, strName))
+		{
+			return strName;
+		}
+// [/SL:KB]
+
 		return LLTrans::getString("LoadingData");
 	}
 }
@@ -587,6 +597,16 @@ std::string LLUrlEntryAgentName::getLabel(const std::string &url, const LLUrlLab
 			boost::bind(&LLUrlEntryAgentCompleteName::onAvatarNameCache,
 				this, _1, _2));
 		addObserver(agent_id_string, url, cb);
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-07-05 (Catznip-3.3)
+		// Display the legacy name if we have it
+		std::string strName;
+		if (gCacheName->getFullName(agent_id, strName))
+		{
+			return strName;
+		}
+// [/SL:KB]
+
 		return LLTrans::getString("LoadingData");
 	}
 }
