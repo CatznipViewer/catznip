@@ -258,8 +258,7 @@ private:
 
 };
 
-
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-10-21 (Catznip-2.2)
 class LLPanelPreferenceCrashReports : public LLPanelPreference
 {
 public:
@@ -270,6 +269,12 @@ public:
 	/*virtual*/ void cancel();
 
 	void refresh();
+
+protected:
+	void onCopySelection();
+	void onClearAll();
+
+	static const std::string s_strLogFile;
 };
 // [/SL:KB]
 

@@ -68,6 +68,33 @@ public:
 
 	virtual void result(const LLSD& content)
 	{
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2012-05-26 (Catznip-3.3.0)
+		LLSD sdCrashLog; std::string strCrashLog = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "crash.log");
+
+		if (gDirUtilp->fileExists(strCrashLog))
+		{
+			llifstream fileCrashLogIn;
+			fileCrashLogIn.open(strCrashLog);
+			if (fileCrashLogIn.is_open())
+				LLSDSerialize::fromXML(sdCrashLog, fileCrashLogIn);
+			fileCrashLogIn.close();
+		}
+
+		while (sdCrashLog.size() > 15)
+			sdCrashLog.erase(0);
+
+		LLSD sdCrash;
+		sdCrash["timestamp"] = LLDate::now();
+		sdCrash["crash_id"] =  (content.has("crash_id")) ? content["crash_id"].asString() : "0";
+		sdCrash["crash_module"] = (content.has("crash_module_name")) ? content["crash_module_name"].asString() : "(Unknown)";
+		sdCrash["crash_offset"] = (content.has("crash_module_offset")) ? content["crash_module_offset"].asString() : "";
+		sdCrashLog.append(sdCrash);
+
+		llofstream fileCrashLogOut;
+		fileCrashLogOut.open(strCrashLog);
+		LLSDSerialize::toPrettyXML(sdCrashLog, fileCrashLogOut);
+// [/SL:KB]
+
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 		if ( (content.has("crash_link")) && (!content["crash_link"].asString().empty()) )
 		{
