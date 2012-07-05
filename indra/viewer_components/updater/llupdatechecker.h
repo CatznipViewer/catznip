@@ -73,7 +73,7 @@ public:
 //	virtual void requiredUpdate(std::string const & newVersion,
 //								LLURI const & uri,
 //								std::string const & hash) = 0;
- // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+ // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	virtual void checkComplete(const LLSD& sdData) = 0;
  // [/SL:KB]
 	

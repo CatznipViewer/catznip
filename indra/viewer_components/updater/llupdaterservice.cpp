@@ -56,6 +56,20 @@ namespace
 											  UPDATE_MARKER_FILENAME);
 	}
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	bool get_update_marker_data(LLSD& update_info)
+	{
+		llifstream update_marker(update_marker_path(), std::ios::in | std::ios::binary);
+		if (!update_marker.is_open())
+			return false;
+
+		// Found an update info - now lets see if its valid.
+		LLSDSerialize::fromXMLDocument(update_info, update_marker);
+		update_marker.close();
+		return true;
+	}
+// [/SL:KB]
+
 	std::string install_script_path(void)
 	{
 #ifdef LL_WINDOWS
@@ -121,7 +135,7 @@ public:
 	bool isChecking();
 	LLUpdaterService::eUpdaterState getState();
 	
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	void startDownloading();
 	bool isDownloading()	{ return mIsDownloading; }
 // [/SL:KB]
@@ -140,7 +154,7 @@ public:
 //	virtual void requiredUpdate(std::string const & newVersion,
 //								LLURI const & uri,
 //								std::string const & hash);
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	/*virtual*/ void checkComplete(const LLSD& sdData);
 // [/SL:KB]
 	virtual void upToDate(void);
@@ -153,8 +167,8 @@ public:
 
 private:
 	std::string mNewVersion;
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-	LLSD		mNewUpdateData;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	LLSD		mNewUpdateData;		// Used by checkComplete() to store data for use by startDownloading()
 // [/SL:KB]
 	
 	void restartTimer(unsigned int seconds);
@@ -239,6 +253,18 @@ void LLUpdaterServiceImpl::startChecking(bool install_if_ready)
 			setState(LLUpdaterService::DOWNLOADING);
 		}
 	}
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	else
+	{
+		// Simulate a completed download so the user is informed about the update
+		LLSD update_info;
+		get_update_marker_data(update_info);
+
+		mNewVersion = update_info["update_version"].asString();
+
+		downloadComplete(update_info);
+	}
+// [/SL:KB]
 }
 
 void LLUpdaterServiceImpl::stopChecking()
@@ -263,7 +289,7 @@ bool LLUpdaterServiceImpl::isChecking()
 	return mIsChecking;
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 void LLUpdaterServiceImpl::startDownloading()
 {
 	if (!mNewUpdateData.isDefined())
@@ -293,16 +319,20 @@ bool LLUpdaterServiceImpl::checkForInstall(bool launchInstaller)
 {
 	bool foundInstall = false; // return true if install is found.
 
-	llifstream update_marker(update_marker_path(), 
-							 std::ios::in | std::ios::binary);
-
-	if(update_marker.is_open())
+//	llifstream update_marker(update_marker_path(), 
+//							 std::ios::in | std::ios::binary);
+//
+//	if(update_marker.is_open())
+//	{
+//		// Found an update info - now lets see if its valid.
+//		LLSD update_info;
+//		LLSDSerialize::fromXMLDocument(update_info, update_marker);
+//		update_marker.close();
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	LLSD update_info;
+	if (get_update_marker_data(update_info))
 	{
-		// Found an update info - now lets see if its valid.
-		LLSD update_info;
-		LLSDSerialize::fromXMLDocument(update_info, update_marker);
-		update_marker.close();
-
+// [/SL:KB]
 		// Get the path to the installer file.
 		LLSD path = update_info.get("path");
 		if(update_info["current_version"].asString() != ll_get_version())
@@ -393,7 +423,7 @@ void LLUpdaterServiceImpl::error(std::string const & message)
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 void LLUpdaterServiceImpl::checkComplete(const LLSD& sdData)
 {
 	if (mIsChecking)
@@ -460,7 +490,7 @@ void LLUpdaterServiceImpl::downloadComplete(LLSD const & data)
 	LLSD event;
 	event["pump"] = LLUpdaterService::pumpName();
 	LLSD payload;
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 	payload = data["update_data"];
 // [/SL:KB]
 	payload["type"] = LLSD(LLUpdaterService::DOWNLOAD_COMPLETE);
@@ -641,7 +671,7 @@ bool LLUpdaterService::isChecking()
 	return mImpl->isChecking();
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 void LLUpdaterService::startDownloading()
 {
 	return mImpl->startDownloading();

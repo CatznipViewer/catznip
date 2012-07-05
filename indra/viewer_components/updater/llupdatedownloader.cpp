@@ -52,7 +52,7 @@ public:
 //				  std::string const & hash,
 //				  std::string const & updateVersion,
 //				  bool required);
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 	void download(const LLSD& sdUpdateData, bool required=false);
 // [/SL:KB]
 	bool isDownloading(void);
@@ -133,7 +133,7 @@ void LLUpdateDownloader::cancel(void)
 //{
 //	mImplementation->download(uri, hash, updateVersion, required);
 //}
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 void LLUpdateDownloader::download(const LLSD& sdUpdateData, bool required)
 {
 	mImplementation->download(sdUpdateData, required);
@@ -233,11 +233,11 @@ void LLUpdateDownloader::Implementation::cancel(void)
 //												  std::string const & hash,
 //												  std::string const & updateVersion,
 //												  bool required)
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData, bool required)
 // [/SL:KB]
 {
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 	const LLURI uri = LLURI(sdUpdateData["url"].asString());
 	const std::string hash = sdUpdateData["hash"].asString();
 	const std::string updateVersion = sdUpdateData["version"].asString();
@@ -247,7 +247,7 @@ void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData, bool
 
 	mDownloadRecordPath = downloadMarkerPath();
 	mDownloadData = LLSD();
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 	mDownloadData["update_data"] = sdUpdateData;
 // [/SL:KB]
 	mDownloadData["required"] = required;
@@ -301,7 +301,7 @@ void LLUpdateDownloader::Implementation::resume(void)
 //						 mDownloadData["hash"].asString(),
 //						 mDownloadData["update_version"].asString(),
 //						 mDownloadData["required"].asBoolean());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 				download(mDownloadData["update_data"], mDownloadData["required"].asBoolean());
 // [/SL:KB]
 			} else {
@@ -312,7 +312,7 @@ void LLUpdateDownloader::Implementation::resume(void)
 //					 mDownloadData["hash"].asString(),
 //					 mDownloadData["update_version"].asString(),
 //					 mDownloadData["required"].asBoolean());
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 				download(mDownloadData["update_data"], mDownloadData["required"].asBoolean());
 // [/SL:KB]
 		}

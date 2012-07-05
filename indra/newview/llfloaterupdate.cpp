@@ -17,12 +17,12 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llbutton.h"
-#include "llcheckboxctrl.h"
 #include "llevents.h"
 #include "llfloaterupdate.h"
-#include "llmediactrl.h"
 
 // ====================================================================================
+// LLFloaterUpdate
+// 
 
 LLFloaterUpdate::LLFloaterUpdate(const LLSD& sdData)
 	: LLModalDialog(sdData["version"])

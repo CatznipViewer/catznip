@@ -2678,19 +2678,16 @@ namespace {
 		LLUpdaterService().startChecking(install_if_ready);
 	}
 	
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
 	bool on_update_check_callback(const LLSD& sdData)
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
 		{
 			LLLoginInstance::instance().getUpdaterService()->startDownloading();
 		}
-		else								// User clicked "Cancel"
+		else								// User clicked "Later"
 		{
-			// Save the current update version if the user doesn't want to be reminded
-			if (sdData["skip"].asBoolean())
-				gSavedSettings.setString("UpdaterLastSkippedVersion", sdData["version"].asString());
-
+			gSavedSettings.setString("UpdaterLastPopup", LLDate::now().asString());
 			LLLoginInstance::instance().getUpdaterService()->stopChecking();
 		}
 		return true;
@@ -2698,9 +2695,10 @@ namespace {
 
 	void on_update_check(const LLSD& sdData)
 	{
-		// Don't do anything if we're up to date, or if the user doesn't want to be reminded about this (optional) update
-		if ((LLUpdaterService::UPDATE_AVAILABLE != LLLoginInstance::instance().getUpdaterService()->getState()) ||
-			((!sdData["required"].asBoolean()) && (sdData["version"].asString() == gSavedSettings.getString("UpdaterLastSkippedVersion"))))
+		// Don't do anything if we're up to date; or if it's an optional update and the user was only recently notified
+		if ( (LLUpdaterService::UPDATE_AVAILABLE != LLLoginInstance::instance().getUpdaterService()->getState()) ||
+		     ((!sdData["required"].asBoolean()) && 
+		      (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 48 * 60 * 60)) )
 		{
 			return;
 		}
@@ -2715,7 +2713,7 @@ namespace {
 		sdUpdateData["version"] = sdData["version"];
 		sdUpdateData["information"] = sdData["more_info"];
 		sdUpdateData["update_url"] = sdData["update_url"];
-		LLFloaterReg::showInstance("message_update", sdUpdateData);
+		LLFloaterReg::showInstance("update", sdUpdateData);
 	}
 // [/SL:KB]
 
@@ -2762,7 +2760,7 @@ namespace {
 
 		LLSD substitutions;
 		substitutions["VERSION"] = data["version"];
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-04-30 (Catznip-3.3.0) | Modified: Catznip-3.3.0
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-04-30 (Catznip-3.3)
 		substitutions["UPDATE_URL"] = data["update_url"];
 // [/SL:KB]
 //		// truncate version at the rightmost '.' 
@@ -2797,7 +2795,7 @@ namespace {
 		std::string notification_name;
 		switch (evt["type"].asInteger())
 		{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 			case LLUpdaterService::CHECK_COMPLETE:
 				on_update_check(evt);
 				break;

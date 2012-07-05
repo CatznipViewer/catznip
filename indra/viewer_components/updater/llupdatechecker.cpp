@@ -153,7 +153,7 @@ void LLUpdateChecker::Implementation::completed(U32 status,
 	} else if(!content.asBoolean()) {
 		LL_INFOS("UpdateCheck") << "up to date" << llendl;
 		mClient.upToDate();
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1.0a) | Modified: Catznip-3.1.0a
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	} else {
 		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" 
 								<< " (" << ((content["required"].asBoolean()) ? "required" : "optional") << ")" << llendl;

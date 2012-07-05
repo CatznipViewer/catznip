@@ -14,8 +14,8 @@
  * 
  */
 
-#ifndef LL_LLUPDATE_H
-#define LL_LLUPDATE_H
+#ifndef LL_LLFLOATERUPDATE_H
+#define LL_LLFLOATERUPDATE_H
 
 #include "llmodaldialog.h"
 
@@ -25,7 +25,8 @@
 
 class LLFloaterUpdate : public LLModalDialog
 {
-public:
+	friend class LLFloaterReg;
+private:
 	LLFloaterUpdate(const LLSD& sdData);
 	/*virtual*/ ~LLFloaterUpdate() {}
 
@@ -33,7 +34,7 @@ public:
 	 * LLView overrides
 	 */
 public:
-	BOOL postBuild();
+	/*virtual*/ BOOL postBuild();
 
 	/*
 	 * Event handlers
@@ -57,4 +58,4 @@ private:
 
 // ====================================================================================
 
-#endif // LL_LLUPDATE_H
+#endif // LL_LLFLOATERUPDATE_H
