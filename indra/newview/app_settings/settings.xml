@@ -5876,7 +5876,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>0</boolean>
     </map>
     <key>MiniMapPrimMaxRadius</key>
     <map>
@@ -5898,7 +5898,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>MiniMapRotate</key>
     <map>
