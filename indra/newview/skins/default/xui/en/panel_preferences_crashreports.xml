@@ -18,45 +18,9 @@
      left="30"
      name="checkSendCrashReports"
      parse_urls="false"
-     top="10"
+     top="25"
      width="275"
     />
-
-    <text
-     follows="top|left"
-     height="10"
-     label="Logs:"
-     layout="topleft"
-     left="80"
-     mouse_opaque="false"
-     name="textSaveMiniDumpType"
-     top_pad="10"
-     type="string"
-     width="90"
-    >
-        Minidump Type :
-    </text>
-    <combo_box
-     control_name="SaveMinidumpType"
-     enabled="false"
-     follows="top|left"
-     height="23"
-     layout="topleft"
-     left_pad="10"
-     name="comboSaveMiniDumpType"
-     top_pad="-15"
-     width="125"
-    >
-        <combo_box.item
-         label="Minimal"
-         value="0" />
-        <combo_box.item
-         label="Default"
-         value="1" />
-        <combo_box.item
-         label="Extended"
-         value="2" />
-    </combo_box>
 
     <check_box
      enabled="false"
@@ -158,7 +122,7 @@
      left="30"
      type="string"
      length="1"
-     height="10"
+     height="15"
      mouse_opaque="false"
      name="textInformation1"
      top_pad="20"
@@ -168,12 +132,13 @@
     </text>
     <text
      follows="top|left"
-     height="10"
+     height="15"
      layout="topleft"
      left="30"
      length="1"
      mouse_opaque="false"
      name="textInformation2"
+     top_pad="10"
      type="string"
      width="475"
     >
