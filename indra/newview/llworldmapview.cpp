@@ -1124,11 +1124,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 				p.message(tooltip_msg);
 				p.image.name("Inspector_I");
 				p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, pos_global));
-				p.visible_time_near(6.f);
-				p.visible_time_far(3.f);
-				p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
 				p.wrap(false);
-				
 				LLToolTipMgr::instance().show(p);
 			}
 		}

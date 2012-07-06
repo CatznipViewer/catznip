@@ -647,14 +647,9 @@ BOOL LLNetMap::handleToolTip( S32 x, S32 y, MASK mask )
 			LLInspector::Params p;
 			p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
 			p.message(msg);
-			p.sticky_rect(sticky_rect);
 			p.image.name("Inspector_I");
 			p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, posGlobal));
-			p.visible_time_near(6.f);
-			p.visible_time_far(3.f);
-			p.delay_time(gSavedSettings.getF32("PlaceInspectorTooltipDelay"));
 			p.wrap(false);
-				
 			LLToolTipMgr::instance().show(p);
 		}
 	}
