@@ -53,6 +53,7 @@ public:
 	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
 
 protected:
+	void highlightBaseOutfit();
 	void onOutfitsRemovalConfirmation(const LLSD& notification, const LLSD& response);
 	void onSelectionChange(const std::deque<LLFolderViewItem*> &selItems, BOOL fUserAction);
 
@@ -62,8 +63,9 @@ protected:
 	LLSaveFolderState*			mSavedFolderState;
 
 	std::string					mFilterSubString;
+	LLUUID						mHighlightedFolder;			// UUID of the last highlighted (outfit) folder
 
-	bool						mFetchStarted;				// TRUE if we started fetching everything under "My Outfits"
+	bool						mInitialized;				// TRUE if we started fetching everything under "My Outfits"
 	bool						mItemSelection;				// TRUE if the selection consists solely of inventory items
 	bool						mOutfitSelection;			// TRUE if mSelectedCategory is of type FT_OUTFIT
 	LLUUID						mSelectedCategory;			// Parent UUID of the currently selected items

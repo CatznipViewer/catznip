@@ -23,6 +23,7 @@
 #include "llinventorypanel.h"
 #include "llmenubutton.h"
 #include "llnotificationsutil.h"
+#include "lloutfitobserver.h"
 #include "lloutfitsview.h"
 #include "lltoggleablemenu.h"
 #include "llviewermenu.h"
@@ -103,7 +104,7 @@ LLOutfitsView::LLOutfitsView()
 	, mInvPanel(NULL)
 	, mGearMenu(NULL)
 	, mSavedFolderState(NULL)
-	, mFetchStarted(false)
+	, mInitialized(false)
 	, mItemSelection(false)
 	, mOutfitSelection(false)
 {
@@ -152,7 +153,7 @@ bool LLOutfitsView::onIdle()
 //virtual
 void LLOutfitsView::onOpen(const LLSD& /*info*/)
 {
-	if ( (!mFetchStarted) && (gInventory.isInventoryUsable()) )
+	if ( (!mInitialized) && (gInventory.isInventoryUsable()) )
 	{
 		const LLUUID idOutfits = gInventory.findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS);
 
@@ -172,7 +173,16 @@ void LLOutfitsView::onOpen(const LLSD& /*info*/)
 		LLInventoryFetchDescendentsObserver fetcher = LLInventoryFetchDescendentsObserver(idFolders);
 		fetcher.startFetch();
 
-		mFetchStarted = true;
+		// Select and open the current base outfit
+		if (mInvPanel)
+		{
+			mInvPanel->getRootFolder()->closeAllFolders();
+			highlightBaseOutfit();
+		}
+		LLOutfitObserver::instance().addBOFChangedCallback(boost::bind(&LLOutfitsView::highlightBaseOutfit, this));
+		LLOutfitObserver::instance().addBOFReplacedCallback(boost::bind(&LLOutfitsView::highlightBaseOutfit, this));
+
+		mInitialized = true;
 	}
 }
 
@@ -280,6 +290,51 @@ void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 	std::set<LLUUID> selItems = mInvPanel->getRootFolder()->getSelectionList();
 	selected_uuids.resize(selItems.size());
 	std::copy(selItems.begin(), selItems.end(), selected_uuids.begin());
+}
+
+//bool get_folder_or_descendent_selected(LLFolderViewFolder* pFolder)
+//{
+//	if (!pFolder)
+//		return false;
+//
+//	if (!pFolder->isSelected())
+//	{
+//		const std::set<LLUUID> selItems = pFolder->getRoot()->getSelectionList();
+//		if (!selItems.empty())
+//		{
+//			const LLFolderViewItem* pItem = pFolder->getRoot()->getItemByID(*selItems.begin());
+//			if ( (pItem) && (pFolder != pItem->getParentFolder()) )
+//				return false;
+//		}
+//	}
+//	return true;
+//}
+
+void LLOutfitsView::highlightBaseOutfit()
+{
+	if ( (!mInvPanel) || ((mInvPanel->getFilter()) && (mInvPanel->getFilter()->hasFilterString())) )
+		return;
+
+	const LLUUID idBOF = LLAppearanceMgr::getInstance()->getBaseOutfitUUID();
+	if ( (idBOF.isNull()) || (mHighlightedFolder == idBOF) )
+		return;
+
+	if (mHighlightedFolder.notNull())
+	{
+		LLFolderViewFolder* pFolder = mInvPanel->getRootFolder()->getFolderByID(mHighlightedFolder);
+		if ( (pFolder) && (pFolder->isOpen()) )
+			pFolder->setOpenArrangeRecursively(FALSE);
+		mHighlightedFolder.setNull();
+	}
+
+	LLFolderViewFolder* pBOFFolder = mInvPanel->getRootFolder()->getFolderByID(idBOF);
+	if (pBOFFolder)
+	{
+	 	pBOFFolder->setOpen(TRUE);
+		mInvPanel->getRootFolder()->setSelection(pBOFFolder, TRUE, TRUE);
+		mInvPanel->getRootFolder()->scrollToShowSelection();
+		mHighlightedFolder = idBOF;
+	}
 }
 
 // virtual
