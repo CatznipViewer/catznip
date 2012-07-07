@@ -47,7 +47,7 @@
 
 //const S32 BOTTOM_PAD = VPAD * 3;
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
-const S32 BOTTOM_PAD = VPAD * 1.5;
+const S32 BOTTOM_PAD = VPAD * 2.5;
 // [/SL:KB]
 const S32 IGNORE_BTN_TOP_DELTA = 3*VPAD;//additional ignore_btn padding
 S32 BUTTON_WIDTH = 90;
