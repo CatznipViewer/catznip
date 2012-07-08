@@ -42,6 +42,7 @@ class LLFloaterMap;
 class LLMenuGL;
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 class LLViewerRegion;
+class LLAvatarName;
 // [/SL:KB]
 
 class LLNetMap : public LLUICtrl
@@ -102,6 +103,10 @@ private:
 								  BOOL draw_arrow = TRUE);
 	BOOL			handleToolTipAgent(const LLUUID& avatar_id);
 	static void		showAvatarInspector(const LLUUID& avatar_id);
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+	void			setAvatarProfileLabel(const LLAvatarName& avName, const std::string& item_name);
+	void			showClosestAvatarProfile() const;
+// [/SL:KB]
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 	bool			createImage(LLPointer<LLImageRaw>& rawimagep) const;
@@ -145,7 +150,10 @@ private:
 // [/SL:KB]
 
 	LLUUID			mClosestAgentToCursor;
-	LLUUID			mClosestAgentAtLastRightClick;
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+	uuid_vec_t		mClosestAgentsToCursor;
+// [/SL:KB]
+//	LLUUID			mClosestAgentAtLastRightClick;
 
 	std::string		mToolTipMsg;
 

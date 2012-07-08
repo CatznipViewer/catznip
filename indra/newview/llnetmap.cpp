@@ -46,6 +46,9 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llappviewer.h" // for gDisconnected
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+#include "llavataractions.h"
+// [/SL:KB]
 #include "llcallingcard.h" // LLAvatarTracker
 #include "llfloaterworldmap.h"
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
@@ -53,6 +56,9 @@
 // [/SL:KB]
 #include "lltracker.h"
 #include "llsurface.h"
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+#include "lltrans.h"
+// [/SL:KB]
 #include "llviewercamera.h"
 #include "llviewercontrol.h"
 #include "llviewertexture.h"
@@ -109,7 +115,7 @@ LLNetMap::LLNetMap (const Params & p)
 	mParcelImagep(),
 // [/SL:KB]
 	mClosestAgentToCursor(),
-	mClosestAgentAtLastRightClick(),
+//	mClosestAgentAtLastRightClick(),
 	mToolTipMsg(),
 	mPopupMenu(NULL)
 {
@@ -128,6 +134,9 @@ BOOL LLNetMap::postBuild()
 	
 	registrar.add("Minimap.Zoom", boost::bind(&LLNetMap::handleZoom, this, _2));
 	registrar.add("Minimap.Tracker", boost::bind(&LLNetMap::handleStopTracking, this, _2));
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+	registrar.add("Minimap.ShowClosestProfile", boost::bind(&LLNetMap::showClosestAvatarProfile, this));
+// [/SL:KB]
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 	LLViewerParcelMgr::instance().setCollisionUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
@@ -425,7 +434,13 @@ void LLNetMap::draw()
 		S32 local_mouse_y;
 		//localMouse(&local_mouse_x, &local_mouse_y);
 		LLUI::getMousePositionLocal(this, &local_mouse_x, &local_mouse_y);
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+		bool local_mouse = this->pointInView(local_mouse_x, local_mouse_y);
+// [/SL:KB]
 		mClosestAgentToCursor.setNull();
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+		mClosestAgentsToCursor.clear();
+// [/SL:KB]
 		F32 closest_dist_squared = F32_MAX; // value will be overridden in the loop
 		F32 min_pick_dist_squared = (mDotRadius * MIN_PICK_SCALE) * (mDotRadius * MIN_PICK_SCALE);
 
@@ -484,13 +499,31 @@ void LLNetMap::draw()
 				}
 			}
 
-			F32	dist_to_cursor_squared = dist_vec_squared(LLVector2(pos_map.mV[VX], pos_map.mV[VY]),
-										  LLVector2(local_mouse_x,local_mouse_y));
-			if(dist_to_cursor_squared < min_pick_dist_squared && dist_to_cursor_squared < closest_dist_squared)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+			if (local_mouse)
 			{
-				closest_dist_squared = dist_to_cursor_squared;
-				mClosestAgentToCursor = uuid;
+// [/SL:KB]
+				F32 dist_to_cursor_squared = dist_vec_squared(LLVector2(pos_map.mV[VX], pos_map.mV[VY]), 
+												LLVector2(local_mouse_x,local_mouse_y));
+				if (dist_to_cursor_squared < min_pick_dist_squared)
+				{
+					if (dist_to_cursor_squared < closest_dist_squared)
+					{
+						closest_dist_squared = dist_to_cursor_squared;
+						mClosestAgentToCursor = uuid;
+					}
+					mClosestAgentsToCursor.push_back(uuid);
+				}
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
 			}
+// [/SL:KB]
+//			F32	dist_to_cursor_squared = dist_vec_squared(LLVector2(pos_map.mV[VX], pos_map.mV[VY]),
+//											LLVector2(local_mouse_x,local_mouse_y));
+//			if(dist_to_cursor_squared < min_pick_dist_squared && dist_to_cursor_squared < closest_dist_squared)
+//			{
+//				closest_dist_squared = dist_to_cursor_squared;
+//				mClosestAgentToCursor = uuid;
+//			}
 		}
 
 		// Draw dot for autopilot target
@@ -1059,10 +1092,60 @@ BOOL LLNetMap::handleMouseUp( S32 x, S32 y, MASK mask )
 	return FALSE;
 }
 
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+void LLNetMap::setAvatarProfileLabel(const LLAvatarName& avName, const std::string& item_name)
+{
+	LLMenuItemGL* pItem = mPopupMenu->findChild<LLMenuItemGL>(item_name, TRUE /*recurse*/);
+	if (pItem)
+	{
+		pItem->setLabel(avName.getCompleteName());
+		pItem->getMenu()->arrange();
+	}
+}
+
+void LLNetMap::showClosestAvatarProfile() const
+{
+	LLAvatarActions::showProfile(mClosestAgentToCursor);
+}
+// [/SL:KB]
+
 BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	if (mPopupMenu)
 	{
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+		mPopupMenu->setItemVisible("View Profile", mClosestAgentsToCursor.size() == 1);
+
+		LLMenuItemBranchGL* pProfilesMenu = mPopupMenu->getChild<LLMenuItemBranchGL>("View Profiles");
+		if (pProfilesMenu)
+		{
+			pProfilesMenu->setVisible(mClosestAgentsToCursor.size() > 1);
+
+			pProfilesMenu->getBranch()->empty();
+			for (uuid_vec_t::const_iterator itAgent = mClosestAgentsToCursor.begin(); itAgent != mClosestAgentsToCursor.end(); ++itAgent)
+			{
+				LLMenuItemCallGL::Params p;
+				p.name = llformat("Profile Item %d", itAgent - mClosestAgentsToCursor.begin());
+
+				LLAvatarName avName; const LLUUID& idAgent = *itAgent;
+				if (LLAvatarNameCache::get(idAgent, &avName))
+				{
+					p.label = avName.getCompleteName();
+				}
+				else
+				{
+					p.label = LLTrans::getString("LoadingData");
+					LLAvatarNameCache::get(idAgent, boost::bind(&LLNetMap::setAvatarProfileLabel, this, _2, p.name.getValue()));
+				}
+				p.on_click.function = boost::bind(&LLAvatarActions::showProfile, _2);
+				p.on_click.parameter = idAgent;
+
+				LLMenuItemCallGL* pMenuItem  = LLUICtrlFactory::create<LLMenuItemCallGL>(p);
+				if (pMenuItem)
+					pProfilesMenu->getBranch()->addChild(pMenuItem);
+			}
+		}
+// [/SL:KB]
 		mPopupMenu->buildDrawLabels();
 		mPopupMenu->updateParent(LLMenuGL::sMenuContainer);
 		mPopupMenu->setItemEnabled("Stop Tracking", LLTracker::isTracking(0));
