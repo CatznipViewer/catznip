@@ -8,34 +8,38 @@
  top="724"
  visible="false"
  width="128">
+  <menu
+   label="Zoom"
+   name="Minimap Zoom">
 	<menu_item_call
-     label="Zoom Close"
+     label="Close"
      name="Zoom Close">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="close" />
     </menu_item_call>
     <menu_item_call
-     label="Zoom Medium"
+     label="Medium"
      name="Zoom Medium">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="medium" />
     </menu_item_call>
     <menu_item_call
-     label="Zoom Far"
+     label="Far"
      name="Zoom Far">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="far" />
     </menu_item_call>
 	<menu_item_call
-     label="Zoom Default"
+     label="Default"
      name="Zoom Default">
 		<menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="default" />
 	</menu_item_call>
+  </menu>
 	<menu_item_separator />
     <menu_item_check
        label="Rotate Map"
