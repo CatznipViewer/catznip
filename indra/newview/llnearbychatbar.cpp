@@ -1015,7 +1015,7 @@ void LLNearbyChatBar::processFloaterTypeChanged()
 	if (pNearbyChat)
 	{
 		LLIMFloaterContainer* pConvFloater = LLIMFloaterContainer::findInstance();
-		bool fConvVisible = pConvFloater->getVisible();
+		bool fConvVisible = (pConvFloater) ? pConvFloater->getVisible() : false;
 
 		bool fNearbyVisible = pNearbyChat->getVisible();
 		if (pNearbyChat->getHost())
