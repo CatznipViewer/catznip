@@ -86,7 +86,8 @@
          function="Minimap.Tracker"
          parameter="task_properties" />
     </menu_item_call>
-    <menu_item_separator />
+    <menu_item_separator
+     name="Stop Tracking Separator" />
     <menu_item_call
      label="World Map"
      name="World Map">

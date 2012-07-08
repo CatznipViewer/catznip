@@ -1148,7 +1148,11 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 // [/SL:KB]
 		mPopupMenu->buildDrawLabels();
 		mPopupMenu->updateParent(LLMenuGL::sMenuContainer);
-		mPopupMenu->setItemEnabled("Stop Tracking", LLTracker::isTracking(0));
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+		mPopupMenu->setItemVisible("Stop Tracking", LLTracker::isTracking(0));
+		mPopupMenu->setItemVisible("Stop Tracking Separator", LLTracker::isTracking(0));
+// [/SL:KB]
+//		mPopupMenu->setItemEnabled("Stop Tracking", LLTracker::isTracking(0));
 		LLMenuGL::showPopup(this, mPopupMenu, x, y);
 	}
 	return TRUE;
