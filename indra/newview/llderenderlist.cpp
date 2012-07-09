@@ -146,9 +146,11 @@ bool LLDerenderList::canAdd(const LLViewerObject* pObj)
 	// Allow derendering if:
 	//   - the object isn't a child prim
 	//   - the object isn't currently sat on by the user
+	//   - the object isn't an attachment
 	return 
-		(pObj->getRootEdit() == pObj) &&
-		( (isAgentAvatarValid()) && (!pObj->isChild(gAgentAvatarp)) );
+		(pObj) && (pObj->getRootEdit() == pObj) &&
+		( (isAgentAvatarValid()) && (!pObj->isChild(gAgentAvatarp)) ) &&
+		(!pObj->isAttachment());
 }
 
 bool LLDerenderList::canAddSelection() 
