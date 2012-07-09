@@ -48,6 +48,7 @@
 #include "llappviewer.h" // for gDisconnected
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
 #include "llavataractions.h"
+#include "llfloatersidepanelcontainer.h"
 // [/SL:KB]
 #include "llcallingcard.h" // LLAvatarTracker
 #include "llfloaterworldmap.h"
@@ -135,7 +136,7 @@ BOOL LLNetMap::postBuild()
 	registrar.add("Minimap.Zoom", boost::bind(&LLNetMap::handleZoom, this, _2));
 	registrar.add("Minimap.Tracker", boost::bind(&LLNetMap::handleStopTracking, this, _2));
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
-	registrar.add("Minimap.ShowClosestProfile", boost::bind(&LLNetMap::showClosestAvatarProfile, this));
+	registrar.add("Minimap.ShowProfile", boost::bind(&LLNetMap::handleShowProfile, this, _2));
 // [/SL:KB]
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
@@ -1103,9 +1104,23 @@ void LLNetMap::setAvatarProfileLabel(const LLAvatarName& avName, const std::stri
 	}
 }
 
-void LLNetMap::showClosestAvatarProfile() const
+void LLNetMap::handleShowProfile(const LLSD& sdParam) const
 {
-	LLAvatarActions::showProfile(mClosestAgentToCursor);
+	const std::string strParam = sdParam.asString();
+	if ("closest" == strParam)
+	{
+		LLAvatarActions::showProfile(mClosestAgentRightClick);
+	}
+	else if ("place" == strParam)
+	{
+		LLSD sdParams;
+		sdParams["type"] = "remote_place";
+		sdParams["x"] = mPosGlobalRightClick.mdV[VX];
+		sdParams["y"] = mPosGlobalRightClick.mdV[VY];
+		sdParams["z"] = mPosGlobalRightClick.mdV[VZ];
+
+		LLFloaterSidePanelContainer::showPanel("places", sdParams);
+	}
 }
 // [/SL:KB]
 
@@ -1114,6 +1129,9 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	if (mPopupMenu)
 	{
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+		mClosestAgentRightClick = mClosestAgentToCursor;
+		mPosGlobalRightClick = viewPosToGlobal(x, y);
+
 		mPopupMenu->setItemVisible("View Profile", mClosestAgentsToCursor.size() == 1);
 
 		LLMenuItemBranchGL* pProfilesMenu = mPopupMenu->getChild<LLMenuItemBranchGL>("View Profiles");

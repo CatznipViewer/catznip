@@ -12,7 +12,8 @@
    label="View Profile"
    name="View Profile">
     <menu_item_call.on_click
-     function="Minimap.ShowClosestProfile" />
+     function="Minimap.ShowProfile"
+     parameter="closest" />
   </menu_item_call>
   <menu
    label="View Profile"
@@ -88,6 +89,13 @@
     </menu_item_call>
     <menu_item_separator
      name="Stop Tracking Separator" />
+    <menu_item_call
+     label="Place Profile"
+     name="Place Profile">
+        <menu_item_call.on_click
+         function="Minimap.ShowProfile"
+         parameter="place" />
+    </menu_item_call>
     <menu_item_call
      label="World Map"
      name="World Map">
