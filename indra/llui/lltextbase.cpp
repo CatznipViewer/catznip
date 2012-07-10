@@ -1835,16 +1835,29 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 	{
 		LLStyle::Params highlight_params(style_params);
 
-		LLSD pieces = LLTextParser::instance().parsePartialLineHighlights(new_text, highlight_params.color(), (LLTextParser::EHighlightPosition)highlight_part);
-		for (S32 i = 0; i < pieces.size(); i++)
+//		LLSD pieces = LLTextParser::instance().parsePartialLineHighlights(new_text, highlight_params.color(), (LLTextParser::EHighlightPosition)highlight_part);
+//		for (S32 i = 0; i < pieces.size(); i++)
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+		LLTextParser::partial_results_t results = LLTextParser::instance().parsePartialLineHighlights(new_text, (LLTextParser::EHighlightPosition)highlight_part);
+		for (LLTextParser::partial_results_t::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult)
+// [/SL:KB]
 		{
-			LLSD color_llsd = pieces[i]["color"];
-			LLColor4 lcolor;
-			lcolor.setValue(color_llsd);
-			highlight_params.color = lcolor;
+//			LLSD color_llsd = pieces[i]["color"];
+//			LLColor4 lcolor;
+//			lcolor.setValue(color_llsd);
+//			highlight_params.color = lcolor;
+//
+//			LLWString wide_text;
+//			wide_text = utf8str_to_wstring(pieces[i]["text"].asString());
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+			const LLHighlightEntry* pEntry = itResult->second;
+			highlight_params.color = (pEntry) ? pEntry->mColor : highlight_params.color();
+			if ( (pEntry) && (pEntry->mColorReadOnly) )
+				highlight_params.readonly_color = pEntry->mColor;
 
 			LLWString wide_text;
-			wide_text = utf8str_to_wstring(pieces[i]["text"].asString());
+			wide_text = utf8str_to_wstring(itResult->first);
+// [/SL:KB]
 
 			S32 cur_length = getLength();
 			LLStyleConstSP sp(new LLStyle(highlight_params));

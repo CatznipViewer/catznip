@@ -71,10 +71,13 @@ public:
 
 	LLTextParser();
 
-	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	typedef std::pair<std::string, const LLHighlightEntry*> partial_result_t;
+	typedef std::list<partial_result_t> partial_results_t;
+	partial_results_t parsePartialLineHighlights(const std::string &text, EHighlightPosition part = WHOLE, S32 index = 0);
 	bool parseFullLineHighlights(const std::string& text, const LLHighlightEntry** ppEntry) const;
 // [/SL:KB]
+//	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
 //	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
 
 private:

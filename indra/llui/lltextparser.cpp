@@ -166,13 +166,16 @@ S32 LLHighlightEntry::findPattern(const std::string& text) const
 //	return found;
 //}
 
-LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLColor4 &color, EHighlightPosition part, S32 index)
+//LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLColor4 &color, EHighlightPosition part, S32 index)
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const std::string &text, EHighlightPosition part, S32 index)
+// [/SL:KB]
 {
 //	loadKeywords();
-
-	//evil recursive string atomizer.
-	LLSD ret_llsd, start_llsd, middle_llsd, end_llsd;
-
+//
+//	//evil recursive string atomizer.
+//	LLSD ret_llsd, start_llsd, middle_llsd, end_llsd;
+//
 //	for (S32 i=index;i<mHighlights.size();i++)
 //	{
 //		S32 condition = mHighlights[i]["condition"];
@@ -187,6 +190,8 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 //				{
 //					S32 end =  std::string(mHighlights[i]["pattern"]).length();
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	partial_results_t resStart, resMiddle, resEnd;
+
 	for (S32 i = index; i < mHighlightEntries.size(); i++)
 	{
 		const LLHighlightEntry& entry = mHighlightEntries[i];
@@ -205,81 +210,102 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 					EHighlightPosition newpart;
 					if (start==0)
 					{
-						start_llsd[0]["text"] =text.substr(0,end);
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-						start_llsd[0]["color"]=entry.mColor.getValue();
+						resStart.push_back(partial_result_t(text.substr(0, end), &entry));
 // [/SL:KB]
+//						start_llsd[0]["text"] =text.substr(0,end);
 //						start_llsd[0]["color"]=mHighlights[i]["color"];
 						
 						if (end < len)
 						{
 							if (part==END   || part==WHOLE) newpart=END; else newpart=MIDDLE;
-							end_llsd=parsePartialLineHighlights(text.substr( end ),color,newpart,i);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+							resEnd = parsePartialLineHighlights(text.substr(end), newpart, i);
+// [/SL:KB]
+//							end_llsd=parsePartialLineHighlights(text.substr( end ),color,newpart,i);
 						}
 					}
 					else
 					{
 						if (part==START || part==WHOLE) newpart=START; else newpart=MIDDLE;
 
-						start_llsd=parsePartialLineHighlights(text.substr(0,start),color,newpart,i+1);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+						resStart = parsePartialLineHighlights(text.substr(0,start), newpart, i+1);
+// [/SL:KB]
+//						start_llsd=parsePartialLineHighlights(text.substr(0,start),color,newpart,i+1);
 						
 						if (end < len)
 						{
-							middle_llsd[0]["text"] =text.substr(start,end);
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-							middle_llsd[0]["color"]=entry.mColor.getValue();
+							resMiddle.push_back(partial_result_t(text.substr(start,end), &entry));
 // [/SL:KB]
+//							middle_llsd[0]["text"] =;
 //							middle_llsd[0]["color"]=mHighlights[i]["color"];
 						
 							if (part==END   || part==WHOLE) newpart=END; else newpart=MIDDLE;
 
-							end_llsd=parsePartialLineHighlights(text.substr( (start+end) ),color,newpart,i);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+							resEnd = parsePartialLineHighlights(text.substr(start + end), newpart, i);
+// [/SL:KB]
+//							end_llsd=parsePartialLineHighlights(text.substr( (start+end) ),color,newpart,i);
 						}
 						else
 						{
-							end_llsd[0]["text"] =text.substr(start,end);
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-							end_llsd[0]["color"]=entry.mColor.getValue();
+							resEnd.push_back(partial_result_t(text.substr(start,end), &entry));
 // [/SL:KB]
+//							end_llsd[0]["text"] =text.substr(start,end);
 //							end_llsd[0]["color"]=mHighlights[i]["color"];
 						}
 					}
 						
-					S32 retcount=0;
-					
-					//FIXME These loops should be wrapped into a subroutine.
-					for (LLSD::array_iterator iter = start_llsd.beginArray();
-						 iter != start_llsd.endArray();++iter)
-					{
-						LLSD highlight = *iter;
-						ret_llsd[retcount++]=highlight;
-					}
-						   
-					for (LLSD::array_iterator iter = middle_llsd.beginArray();
-						 iter != middle_llsd.endArray();++iter)
-					{
-						LLSD highlight = *iter;
-						ret_llsd[retcount++]=highlight;
-					}
-						   
-					for (LLSD::array_iterator iter = end_llsd.beginArray();
-						 iter != end_llsd.endArray();++iter)
-					{
-						LLSD highlight = *iter;
-						ret_llsd[retcount++]=highlight;
-					}
-						   
-					return ret_llsd;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+					partial_results_t resFinal(resStart.size() + resMiddle.size() + resEnd.size());
+					resFinal.splice(resFinal.end(), resStart);
+					resFinal.splice(resFinal.end(), resMiddle);
+					resFinal.splice(resFinal.end(), resEnd);
+					return resFinal;
+// [/SL:KB]
+//					S32 retcount=0;
+//					
+//					//FIXME These loops should be wrapped into a subroutine.
+//					for (LLSD::array_iterator iter = start_llsd.beginArray();
+//						 iter != start_llsd.endArray();++iter)
+//					{
+//						LLSD highlight = *iter;
+//						ret_llsd[retcount++]=highlight;
+//					}
+//						   
+//					for (LLSD::array_iterator iter = middle_llsd.beginArray();
+//						 iter != middle_llsd.endArray();++iter)
+//					{
+//						LLSD highlight = *iter;
+//						ret_llsd[retcount++]=highlight;
+//					}
+//						   
+//					for (LLSD::array_iterator iter = end_llsd.beginArray();
+//						 iter != end_llsd.endArray();++iter)
+//					{
+//						LLSD highlight = *iter;
+//						ret_llsd[retcount++]=highlight;
+//					}
+//						   
+//					return ret_llsd;
 				}
 			}
 		}
 	}
 	
 	//No patterns found.  Just send back what was passed in.
-	ret_llsd[0]["text"] =text;
-	LLSD color_sd = color.getValue();
-	ret_llsd[0]["color"]=color_sd;
-	return ret_llsd;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	partial_results_t resFinal(1);
+	resFinal.push_back(partial_result_t(text, (const LLHighlightEntry*)NULL));
+	return resFinal;
+// [/SL:KB]
+//	ret_llsd[0]["text"] =text;
+//	LLSD color_sd = color.getValue();
+//	ret_llsd[0]["color"]=color_sd;
+//	return ret_llsd;
 }
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
