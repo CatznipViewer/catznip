@@ -50,6 +50,7 @@ LLHighlightEntry::LLHighlightEntry()
 	, mColor(LLColor4::white)
 	, mColorReadOnly(false)
 	, mHighlightType(PART)
+	, mFlashWindow(false)
 {
 }
 
@@ -60,6 +61,7 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 	, mColor(LLColor4::white)
 	, mColorReadOnly(false)
 	, mHighlightType(PART)
+	, mFlashWindow(false)
 {
 	if (sdEntry.has("category_mask"))
 		mCategoryMask = sdEntry["category_mask"].asInteger();
@@ -75,6 +77,10 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 		mColorReadOnly = sdEntry["color_readonly"].asBoolean();
 	if (sdEntry.has("highlight"))
 		mHighlightType = (EHighlightType)sdEntry["highlight"].asInteger();
+	if (sdEntry.has("sound_asset"))
+		mSoundAsset = sdEntry["sound_asset"].asUUID();
+	if (sdEntry.has("flash_window"))
+		mFlashWindow = sdEntry["flash_window"].asBoolean();
 }
 
 LLSD LLHighlightEntry::toLLSD() const
@@ -87,6 +93,8 @@ LLSD LLHighlightEntry::toLLSD() const
 	sdEntry["color"] = mColor.getValue();
 	sdEntry["color_readonly"] = mColorReadOnly;
 	sdEntry["highlight"] = (S32)mHighlightType;
+	sdEntry["sound_asset"] = mSoundAsset;
+	sdEntry["flash_window"] = mFlashWindow;
 	return sdEntry;
 }
 // [/SL:KB]

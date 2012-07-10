@@ -49,9 +49,6 @@
 #include "lllayoutstack.h"
 #include "llagent.h"
 #include "llnotificationsutil.h"
-// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
-#include "lltextparser.h"
-// [/SL:KB]
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
 #include "llviewerregion.h"
@@ -59,6 +56,12 @@
 #include "llworld.h"
 #include "lluiconstants.h"
 #include "llstring.h"
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+#include "llaudioengine.h"
+#include "lltextparser.h"
+#include "llviewerwindow.h"
+#include "llwindow.h"
+// [/SL:KB]
 
 #include "llviewercontrol.h"
 
@@ -595,6 +598,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	editor_params.enabled = false; // read only
 	editor_params.show_context_menu = "true";
 	mEditor = LLUICtrlFactory::create<LLTextEditor>(editor_params, this);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+	mEditor->setHighlightsCallback(boost::bind(&LLChatHistory::onTextHighlight, this, _1, _2));
+// [/SL:KB]
 }
 
 LLChatHistory::~LLChatHistory()
@@ -994,3 +1000,22 @@ void LLChatHistory::draw()
 
 	LLUICtrl::draw();
 }
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+void LLChatHistory::onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry)
+{
+	if (!pEntry)
+		return;
+
+	if ( (pEntry->mSoundAsset.notNull()) && (gAudiop) )
+	{
+		gAudiop->triggerSound(pEntry->mSoundAsset, gAgent.getID(), 1.f, LLAudioEngine::AUDIO_TYPE_UI, gAgent.getPositionGlobal());
+	}
+	if (pEntry->mFlashWindow)
+	{
+		LLWindow* pWindow = gViewerWindow->getWindow();
+		if ( (pWindow) && (pWindow->getMinimized()) )
+			pWindow->flashIcon(5.f);
+	}
+}
+// [/SL:KB]

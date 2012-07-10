@@ -214,6 +214,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mParseHighlights(p.parse_highlights),
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 	mHighlightsMask(LLHighlightEntry::CAT_GENERAL),
+	mHighlightsSignal(NULL),
 // [/SL:KB]
 	mBGVisible(p.bg_visible),
 	mScroller(NULL),
@@ -258,6 +259,9 @@ LLTextBase::~LLTextBase()
 {
 	mSegments.clear();
 	delete mURLClickSignal;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	delete mHighlightsSignal;
+// [/SL:KB]
 }
 
 void LLTextBase::initFromParams(const LLTextBase::Params& p)
@@ -1697,6 +1701,9 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 	const LLHighlightEntry* pEntry = NULL;
 	if (LLTextParser::instance().parseFullLineHighlights(new_text, mHighlightsMask, &pEntry))
 	{
+		if (mHighlightsSignal)
+			(*mHighlightsSignal)(new_text, pEntry);
+
 		style_params.color = pEntry->mColor;
 		if (pEntry->mColorReadOnly)
 			style_params.readonly_color = pEntry->mColor;
@@ -1783,6 +1790,15 @@ void LLTextBase::appendText(const std::string &new_text, bool prepend_newline, c
 	appendTextImpl(new_text,input_params);
 }
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+boost::signals2::connection LLTextBase::setHighlightsCallback(const highlights_signal_t::slot_type& cb)
+{
+	if (!mHighlightsSignal)
+		mHighlightsSignal = new highlights_signal_t();
+	return mHighlightsSignal->connect(cb);
+}
+// [/SL:KB]
+
 void LLTextBase::needsReflow(S32 index)
 {
 	lldebugs << "reflow on object " << (void*)this << " index = " << mReflowIndex << ", new index = " << index << llendl;
@@ -1853,10 +1869,19 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 //			LLWString wide_text;
 //			wide_text = utf8str_to_wstring(pieces[i]["text"].asString());
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+			highlight_params.color = style_params.color();
+			highlight_params.readonly_color = style_params.readonly_color();
+
 			const LLHighlightEntry* pEntry = itResult->second;
-			highlight_params.color = (pEntry) ? pEntry->mColor : highlight_params.color();
-			if ( (pEntry) && (pEntry->mColorReadOnly) )
-				highlight_params.readonly_color = pEntry->mColor;
+			if (pEntry)
+			{
+				if (mHighlightsSignal)
+					(*mHighlightsSignal)(new_text, pEntry);
+
+				highlight_params.color = pEntry->mColor;
+				if (pEntry->mColorReadOnly)
+					highlight_params.readonly_color = pEntry->mColor;
+			}
 
 			LLWString wide_text;
 			wide_text = utf8str_to_wstring(itResult->first);

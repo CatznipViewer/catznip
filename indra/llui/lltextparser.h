@@ -60,6 +60,9 @@ public:
 	LLColor4       mColor;
 	bool           mColorReadOnly;     // If TRUE, the highlight color will also be set as the read-only text color
 	EHighlightType mHighlightType;
+	// Other actions
+	LLUUID         mSoundAsset;
+	bool           mFlashWindow;
 };
 // [/SL:KB]
 
