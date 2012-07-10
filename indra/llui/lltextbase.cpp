@@ -1690,6 +1690,16 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 	LLStyle::Params style_params(input_params);
 	style_params.fillFrom(getDefaultStyleParams());
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	const LLHighlightEntry* pEntry = NULL;
+	if (LLTextParser::instance().parseFullLineHighlights(new_text, &pEntry))
+	{
+		style_params.color = pEntry->mColor;
+		if (pEntry->mColorReadOnly)
+			style_params.readonly_color = pEntry->mColor;
+	}
+// [/SL:KB]
+
 	S32 part = (S32)LLTextParser::WHOLE;
 	if (mParseHTML && !style_params.is_link) // Don't search for URLs inside a link segment (STORM-358).
 	{

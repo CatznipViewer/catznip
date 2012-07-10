@@ -56,6 +56,7 @@ public:
 	std::string    mPattern;
 	bool           mCaseSensitive;
 	LLColor4       mColor;
+	bool           mColorReadOnly;     // If TRUE, the highlight color will also be set as the read-only text color
 	EHighlightType mHighlightType;
 };
 // [/SL:KB]
@@ -72,7 +73,7 @@ public:
 
 	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-	bool parseFullLineHighlights(const std::string& text, LLColor4& color) const;
+	bool parseFullLineHighlights(const std::string& text, const LLHighlightEntry** ppEntry) const;
 // [/SL:KB]
 //	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
 

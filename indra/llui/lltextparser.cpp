@@ -47,6 +47,7 @@ LLHighlightEntry::LLHighlightEntry()
 	: mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
+	, mColorReadOnly(false)
 	, mHighlightType(PART)
 {
 }
@@ -55,18 +56,21 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 	: mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
+	, mColorReadOnly(false)
 	, mHighlightType(PART)
 {
 	if (sdEntry.has("condition"))
 		mCondition = (EConditionType)sdEntry["condition"].asInteger();
-	if (sdEntry.has("color"))
-		mColor.setValue(sdEntry["color"]);
-	if (sdEntry.has("highlight"))
-		mHighlightType = (EHighlightType)sdEntry["highlight"].asInteger();
-	if (sdEntry.has("case_sensitive"))
-		mCaseSensitive = sdEntry["case_sensitive"].asBoolean();
 	if (sdEntry.has("pattern"))
 		mPattern = sdEntry["pattern"].asString();
+	if (sdEntry.has("case_sensitive"))
+		mCaseSensitive = sdEntry["case_sensitive"].asBoolean();
+	if (sdEntry.has("color"))
+		mColor.setValue(sdEntry["color"]);
+	if (sdEntry.has("color_readonly"))
+		mColorReadOnly = sdEntry["color_readonly"].asBoolean();
+	if (sdEntry.has("highlight"))
+		mHighlightType = (EHighlightType)sdEntry["highlight"].asInteger();
 }
 
 LLSD LLHighlightEntry::toLLSD() const
@@ -76,6 +80,7 @@ LLSD LLHighlightEntry::toLLSD() const
 	sdEntry["pattern"] = mPattern;
 	sdEntry["case_sensitive"] = mCaseSensitive;
 	sdEntry["color"] = mColor.getValue();
+	sdEntry["color_readonly"] = mColorReadOnly;
 	sdEntry["highlight"] = (S32)mHighlightType;
 	return sdEntry;
 }
@@ -278,7 +283,7 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 }
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-bool LLTextParser::parseFullLineHighlights(const std::string& text, LLColor4& color) const
+bool LLTextParser::parseFullLineHighlights(const std::string& text, const LLHighlightEntry** ppEntry) const
 {
 	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
 	{
@@ -287,7 +292,8 @@ bool LLTextParser::parseFullLineHighlights(const std::string& text, LLColor4& co
 		{
 			if (std::string::npos != entry.findPattern(text))
 			{
-				color = entry.mColor;
+				if (ppEntry)
+					*ppEntry = &entry;
 				return TRUE;
 			}
 		}
