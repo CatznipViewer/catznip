@@ -4,6 +4,7 @@
  *
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2012, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -30,33 +31,68 @@
 
 #include "llsd.h"
 #include "llsingleton.h"
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+#include "v4color.h"
+// [/SL:KB]
 
 class LLUUID;
 class LLVector3d;
-class LLColor4;
+//class LLColor4;
+
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+class LLHighlightEntry
+{
+public:
+	LLHighlightEntry();
+	LLHighlightEntry(const LLSD& sdEntry);
+
+	S32  findPattern(const std::string& text) const;
+	LLSD toLLSD() const;
+
+public:
+	enum EConditionType { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH };
+	enum EHighlightType { PART, ALL };
+	EConditionType mCondition;
+	std::string    mPattern;
+	bool           mCaseSensitive;
+	LLColor4       mColor;
+	EHighlightType mHighlightType;
+};
+// [/SL:KB]
 
 class LLTextParser : public LLSingleton<LLTextParser>
 {
 public:
-	typedef enum e_condition_type { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH } EConditionType;
-	typedef enum e_highlight_type { PART, ALL } EHighlightType;
+//	typedef enum e_condition_type { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH } EConditionType;
+//	typedef enum e_highlight_type { PART, ALL } EHighlightType;
 	typedef enum e_highlight_position { WHOLE, START, MIDDLE, END } EHighlightPosition;
 	typedef enum e_dialog_action { ACTION_NONE, ACTION_CLOSE, ACTION_ADD, ACTION_COPY, ACTION_UPDATE } EDialogAction;
 
 	LLTextParser();
 
 	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
-	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	bool parseFullLineHighlights(const std::string& text, LLColor4& color) const;
+// [/SL:KB]
+//	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
 
 private:
-	S32  findPattern(const std::string &text, LLSD highlight);
-	std::string getFileName();
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	std::string getFileName() const;
 	void loadKeywords();
-	bool saveToDisk(LLSD highlights);
+	void saveToDisk() const;
+// [/SL:KB]
+//	S32  findPattern(const std::string &text, LLSD highlight);
+//	std::string getFileName();
+//	void loadKeywords();
+//	bool saveToDisk(LLSD highlights);
 
 public:
-	LLSD	mHighlights;
+//	LLSD	mHighlights;
 	bool	mLoaded;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	std::vector<LLHighlightEntry> mHighlightEntries;
+// [/SL:KB]
 };
 
 #endif

@@ -3,6 +3,7 @@
  *
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2012, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -37,6 +38,49 @@
 #include "v4color.h"
 #include "lldir.h"
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+LLHighlightEntry::LLHighlightEntry()
+	: mCondition(CONTAINS)
+	, mCaseSensitive(false)
+	, mColor(LLColor4::white)
+	, mHighlightType(PART)
+{
+}
+
+LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
+	: mCondition(CONTAINS)
+	, mCaseSensitive(false)
+	, mColor(LLColor4::white)
+	, mHighlightType(PART)
+{
+	if (sdEntry.has("condition"))
+		mCondition = (EConditionType)sdEntry["condition"].asInteger();
+	if (sdEntry.has("color"))
+		mColor.setValue(sdEntry["color"]);
+	if (sdEntry.has("highlight"))
+		mHighlightType = (EHighlightType)sdEntry["highlight"].asInteger();
+	if (sdEntry.has("case_sensitive"))
+		mCaseSensitive = sdEntry["case_sensitive"].asBoolean();
+	if (sdEntry.has("pattern"))
+		mPattern = sdEntry["pattern"].asString();
+}
+
+LLSD LLHighlightEntry::toLLSD() const
+{
+	LLSD sdEntry;
+	sdEntry["condition"] = (S32)mCondition;
+	sdEntry["pattern"] = mPattern;
+	sdEntry["case_sensitive"] = mCaseSensitive;
+	sdEntry["color"] = mColor.getValue();
+	sdEntry["highlight"] = (S32)mHighlightType;
+	return sdEntry;
+}
+// [/SL:KB]
+
 //
 // Member Functions
 //
@@ -45,67 +89,122 @@ LLTextParser::LLTextParser()
 :	mLoaded(false)
 {}
 
-
-S32 LLTextParser::findPattern(const std::string &text, LLSD highlight)
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+S32 LLHighlightEntry::findPattern(const std::string& text) const
 {
-	if (!highlight.has("pattern")) return -1;
+	if (mPattern.empty())
+		return -1;
 	
-	std::string pattern=std::string(highlight["pattern"]);
-	std::string ltext=text;
-	
-	if (!(bool)highlight["case_sensitive"])
-	{
-		ltext   = utf8str_tolower(text);
-		pattern= utf8str_tolower(pattern);
-	}
-
-	size_t found=std::string::npos;
-	
-	switch ((S32)highlight["condition"])
+	size_t idxFound = std::string::npos;
+	switch (mCondition)
 	{
 		case CONTAINS:
-			found = ltext.find(pattern); 
+			{
+				auto itRange = (mCaseSensitive) ? boost::find_first(text, mPattern) : boost::ifind_first(text, mPattern);
+				if (!itRange.empty())
+					idxFound = itRange.begin() - text.begin();
+			}
 			break;
 		case MATCHES:
-		    found = (! ltext.compare(pattern) ? 0 : std::string::npos);
+			{
+				if ( ((mCaseSensitive) && (boost::equals(text, mPattern))) || (boost::iequals(text, mPattern)) )
+					idxFound = 0;
+			}
 			break;
 		case STARTS_WITH:
-			found = (! ltext.find(pattern) ? 0 : std::string::npos);
+			{
+				if ( ((mCaseSensitive) && (boost::starts_with(text, mPattern))) || (boost::istarts_with(text, mPattern)) )
+					idxFound = 0;
+			}
 			break;
 		case ENDS_WITH:
-			S32 pos = ltext.rfind(pattern); 
-			if (pos >= 0 && (ltext.length()-pattern.length()==pos)) found = pos;
+			{
+				if ( ((mCaseSensitive) && (boost::ends_with(text, mPattern))) || (boost::iends_with(text, mPattern)) )
+					idxFound = text.length() - mPattern.length();
+			}
 			break;
 	}
-	return found;
+	return idxFound;
 }
+// [/SL:KB]
+//S32 LLTextParser::findPattern(const std::string &text, LLSD highlight)
+//{
+//	if (!highlight.has("pattern")) return -1;
+//	
+//	std::string pattern=std::string(highlight["pattern"]);
+//	std::string ltext=text;
+//	
+//	if (!(bool)highlight["case_sensitive"])
+//	{
+//		ltext   = utf8str_tolower(text);
+//		pattern= utf8str_tolower(pattern);
+//	}
+//
+//	size_t found=std::string::npos;
+//	
+//	switch ((S32)highlight["condition"])
+//	{
+//		case CONTAINS:
+//			found = ltext.find(pattern); 
+//			break;
+//		case MATCHES:
+//		    found = (! ltext.compare(pattern) ? 0 : std::string::npos);
+//			break;
+//		case STARTS_WITH:
+//			found = (! ltext.find(pattern) ? 0 : std::string::npos);
+//			break;
+//		case ENDS_WITH:
+//			S32 pos = ltext.rfind(pattern); 
+//			if (pos >= 0 && (ltext.length()-pattern.length()==pos)) found = pos;
+//			break;
+//	}
+//	return found;
+//}
 
 LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLColor4 &color, EHighlightPosition part, S32 index)
 {
-	loadKeywords();
+//	loadKeywords();
 
 	//evil recursive string atomizer.
 	LLSD ret_llsd, start_llsd, middle_llsd, end_llsd;
 
-	for (S32 i=index;i<mHighlights.size();i++)
+//	for (S32 i=index;i<mHighlights.size();i++)
+//	{
+//		S32 condition = mHighlights[i]["condition"];
+//		if ((S32)mHighlights[i]["highlight"]==PART && condition!=MATCHES)
+//		{
+//			if ( (condition==STARTS_WITH && part==START) ||
+//			     (condition==ENDS_WITH   && part==END)   ||
+//				  condition==CONTAINS    || part==WHOLE )
+//			{
+//				S32 start = findPattern(text,mHighlights[i]);
+//				if (start >= 0 )
+//				{
+//					S32 end =  std::string(mHighlights[i]["pattern"]).length();
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	for (S32 i = index; i < mHighlightEntries.size(); i++)
 	{
-		S32 condition = mHighlights[i]["condition"];
-		if ((S32)mHighlights[i]["highlight"]==PART && condition!=MATCHES)
+		const LLHighlightEntry& entry = mHighlightEntries[i];
+		if ( (entry.mHighlightType == LLHighlightEntry::PART) && (entry.mCondition != LLHighlightEntry::MATCHES) )
 		{
-			if ( (condition==STARTS_WITH && part==START) ||
-			     (condition==ENDS_WITH   && part==END)   ||
-				  condition==CONTAINS    || part==WHOLE )
+			if ( (entry.mCondition == LLHighlightEntry::STARTS_WITH && part == START) || 
+			     (entry.mCondition == LLHighlightEntry::ENDS_WITH   && part == END)   ||
+				  entry.mCondition == LLHighlightEntry::CONTAINS    || part == WHOLE )
 			{
-				S32 start = findPattern(text,mHighlights[i]);
+				S32 start = entry.findPattern(text);
 				if (start >= 0 )
 				{
-					S32 end =  std::string(mHighlights[i]["pattern"]).length();
+					S32 end = entry.mPattern.length();
+// [/SL:KB]
 					S32 len = text.length();
 					EHighlightPosition newpart;
 					if (start==0)
 					{
 						start_llsd[0]["text"] =text.substr(0,end);
-						start_llsd[0]["color"]=mHighlights[i]["color"];
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+						start_llsd[0]["color"]=entry.mColor.getValue();
+// [/SL:KB]
+//						start_llsd[0]["color"]=mHighlights[i]["color"];
 						
 						if (end < len)
 						{
@@ -122,7 +221,10 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 						if (end < len)
 						{
 							middle_llsd[0]["text"] =text.substr(start,end);
-							middle_llsd[0]["color"]=mHighlights[i]["color"];
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+							middle_llsd[0]["color"]=entry.mColor.getValue();
+// [/SL:KB]
+//							middle_llsd[0]["color"]=mHighlights[i]["color"];
 						
 							if (part==END   || part==WHOLE) newpart=END; else newpart=MIDDLE;
 
@@ -131,7 +233,10 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 						else
 						{
 							end_llsd[0]["text"] =text.substr(start,end);
-							end_llsd[0]["color"]=mHighlights[i]["color"];
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+							end_llsd[0]["color"]=entry.mColor.getValue();
+// [/SL:KB]
+//							end_llsd[0]["color"]=mHighlights[i]["color"];
 						}
 					}
 						
@@ -172,26 +277,47 @@ LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLC
 	return ret_llsd;
 }
 
-bool LLTextParser::parseFullLineHighlights(const std::string &text, LLColor4 *color)
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+bool LLTextParser::parseFullLineHighlights(const std::string& text, LLColor4& color) const
 {
-	loadKeywords();
-
-	for (S32 i=0;i<mHighlights.size();i++)
+	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
 	{
-		if ((S32)mHighlights[i]["highlight"]==ALL || (S32)mHighlights[i]["condition"]==MATCHES)
+		const LLHighlightEntry& entry = *itEntry;
+		if ( (entry.mHighlightType == LLHighlightEntry::ALL) || (entry.mCondition == LLHighlightEntry::MATCHES) )
 		{
-			if (findPattern(text,mHighlights[i]) >= 0 )
+			if (std::string::npos != entry.findPattern(text))
 			{
-				LLSD color_llsd = mHighlights[i]["color"];
-				color->setValue(color_llsd);
+				color = entry.mColor;
 				return TRUE;
 			}
 		}
 	}
 	return FALSE;	//No matches found.
 }
+// [/SL:KB]
+//bool LLTextParser::parseFullLineHighlights(const std::string &text, LLColor4 *color)
+//{
+//	loadKeywords();
+//
+//	for (S32 i=0;i<mHighlights.size();i++)
+//	{
+//		if ((S32)mHighlights[i]["highlight"]==ALL || (S32)mHighlights[i]["condition"]==MATCHES)
+//		{
+//			if (findPattern(text,mHighlights[i]) >= 0 )
+//			{
+//				LLSD color_llsd = mHighlights[i]["color"];
+//				color->setValue(color_llsd);
+//				return TRUE;
+//			}
+//		}
+//	}
+//	return FALSE;	//No matches found.
+//}
 
-std::string LLTextParser::getFileName()
+//std::string LLTextParser::getFileName()
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+std::string LLTextParser::getFileName() const
+// [/SL:KB]
 {
 	std::string path=gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "");
 	
@@ -202,38 +328,82 @@ std::string LLTextParser::getFileName()
 	return path;  
 }
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 void LLTextParser::loadKeywords()
 {
-	if (mLoaded)
-	{// keywords already loaded
+	llifstream fileHighlights(getFileName());
+	if (!fileHighlights.is_open())
+	{
+		llwarns << "Can't open highlights file for reading" << llendl;
 		return;
 	}
-	std::string filename=getFileName();
-	if (!filename.empty())
-	{
-		llifstream file;
-		file.open(filename.c_str());
-		if (file.is_open())
-		{
-			LLSDSerialize::fromXML(mHighlights, file);
-		}
-		file.close();
-		mLoaded = true;
-	}
-}
 
-bool LLTextParser::saveToDisk(LLSD highlights)
-{
-	mHighlights=highlights;
-	std::string filename=getFileName();
-	if (filename.empty())
+	mHighlightEntries.clear();
+
+	// The parser's destructor is protected so we cannot create in the stack.
+	LLPointer<LLSDParser> sdParser = new LLSDNotationParser();
+
+	std::string strLine; LLSD sdEntry;
+	while (std::getline(fileHighlights, strLine))
 	{
-		llwarns << "LLTextParser::saveToDisk() no valid user directory." << llendl; 
-		return FALSE;
-	}	
-	llofstream file;
-	file.open(filename.c_str());
-	LLSDSerialize::toPrettyXML(mHighlights, file);
-	file.close();
-	return TRUE;
+		std::istringstream iss(strLine);
+		if (sdParser->parse(iss, sdEntry, strLine.length()) == LLSDParser::PARSE_FAILURE)
+		{
+			llinfos << "Parsing of highlight failed:" << strLine << llendl;
+			continue;
+		}
+		mHighlightEntries.push_back(LLHighlightEntry(sdEntry));
+	}
+	fileHighlights.close();
 }
+// [/SL:KB]
+//void LLTextParser::loadKeywords()
+//{
+//	if (mLoaded)
+//	{// keywords already loaded
+//		return;
+//	}
+//	std::string filename=getFileName();
+//	if (!filename.empty())
+//	{
+//		llifstream file;
+//		file.open(filename.c_str());
+//		if (file.is_open())
+//		{
+//			LLSDSerialize::fromXML(mHighlights, file);
+//		}
+//		file.close();
+//		mLoaded = true;
+//	}
+//}
+
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+void LLTextParser::saveToDisk() const
+{
+	llofstream fileHighlights(getFileName());
+	if (!fileHighlights.is_open())
+	{
+		llwarns << "Can't open highlights file for writing" << llendl;
+		return;
+	}
+
+	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
+		fileHighlights << LLSDOStreamer<LLSDNotationFormatter>(itEntry->toLLSD()) << std::endl;
+	fileHighlights.close();
+}
+// [/SL:KB]
+//bool LLTextParser::saveToDisk(LLSD highlights)
+//{
+//	mHighlights=highlights;
+//	std::string filename=getFileName();
+//	if (filename.empty())
+//	{
+//		llwarns << "LLTextParser::saveToDisk() no valid user directory." << llendl; 
+//		return FALSE;
+//	}	
+//	llofstream file;
+//	file.open(filename.c_str());
+//	LLSDSerialize::toPrettyXML(mHighlights, file);
+//	file.close();
+//	return TRUE;
+//}
