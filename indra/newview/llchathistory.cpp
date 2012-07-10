@@ -49,6 +49,9 @@
 #include "lllayoutstack.h"
 #include "llagent.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+#include "lltextparser.h"
+// [/SL:KB]
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
 #include "llviewerregion.h"
@@ -949,7 +952,27 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			message = chat.mFromName + message;
 		}
 		
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+		if (CHAT_STYLE_HISTORY != chat.mChatStyle)
+		{
+			const LLIMModel::LLIMSession* pSession = NULL;
+			if (chat.mSessionID.isNull())
+			{
+				mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_NEARBYCHAT);
+			}
+			else if (pSession = LLIMModel::getInstance()->findIMSession(chat.mSessionID))
+			{
+				if (pSession->isP2PSessionType())
+					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_IM);
+				else if ( (pSession->isGroupSessionType()) || (pSession->isAdHocSessionType()) )
+					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_GROUP);
+			}
+		}
+// [/SL:KB]
 		mEditor->appendText(message, FALSE, style_params);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+		mEditor->setHighlightsMask(mEditor->getHighlightsMask() & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
+// [/SL:KB]
 	}
 
 	mEditor->blockUndo();
