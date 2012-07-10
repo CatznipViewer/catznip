@@ -212,6 +212,9 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mUseEllipses( p.use_ellipses ),
 	mParseHTML(p.parse_urls),
 	mParseHighlights(p.parse_highlights),
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	mHighlightsMask(LLHighlightEntry::CAT_GENERAL),
+// [/SL:KB]
 	mBGVisible(p.bg_visible),
 	mScroller(NULL),
 	mStyleDirty(true)
@@ -1692,7 +1695,7 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 	const LLHighlightEntry* pEntry = NULL;
-	if (LLTextParser::instance().parseFullLineHighlights(new_text, &pEntry))
+	if (LLTextParser::instance().parseFullLineHighlights(new_text, mHighlightsMask, &pEntry))
 	{
 		style_params.color = pEntry->mColor;
 		if (pEntry->mColorReadOnly)
@@ -1838,7 +1841,7 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 //		LLSD pieces = LLTextParser::instance().parsePartialLineHighlights(new_text, highlight_params.color(), (LLTextParser::EHighlightPosition)highlight_part);
 //		for (S32 i = 0; i < pieces.size(); i++)
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-		LLTextParser::partial_results_t results = LLTextParser::instance().parsePartialLineHighlights(new_text, (LLTextParser::EHighlightPosition)highlight_part);
+		LLTextParser::partial_results_t results = LLTextParser::instance().parsePartialLineHighlights(new_text, mHighlightsMask, (LLTextParser::EHighlightPosition)highlight_part);
 		for (LLTextParser::partial_results_t::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult)
 // [/SL:KB]
 		{

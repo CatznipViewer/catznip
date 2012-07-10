@@ -46,12 +46,14 @@ public:
 	LLHighlightEntry();
 	LLHighlightEntry(const LLSD& sdEntry);
 
-	S32  findPattern(const std::string& text) const;
+	S32  findPattern(const std::string& text, S32 cat_mask) const;
 	LLSD toLLSD() const;
 
 public:
+	enum ECategory      { CAT_GENERAL = 0x01, CAT_NEARBYCHAT = 0x02, CAT_IM = 0x04, CAT_GROUP = 0x08, CAT_ALL = 0xFF };
 	enum EConditionType { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH };
 	enum EHighlightType { PART, ALL };
+	S32            mCategoryMask;
 	EConditionType mCondition;
 	std::string    mPattern;
 	bool           mCaseSensitive;
@@ -74,8 +76,8 @@ public:
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 	typedef std::pair<std::string, const LLHighlightEntry*> partial_result_t;
 	typedef std::list<partial_result_t> partial_results_t;
-	partial_results_t parsePartialLineHighlights(const std::string &text, EHighlightPosition part = WHOLE, S32 index = 0);
-	bool parseFullLineHighlights(const std::string& text, const LLHighlightEntry** ppEntry) const;
+	partial_results_t parsePartialLineHighlights(const std::string &text, S32 cat_mask, EHighlightPosition part, S32 index = 0);
+	bool parseFullLineHighlights(const std::string& text, S32 cat_mask, const LLHighlightEntry** ppEntry = NULL) const;
 // [/SL:KB]
 //	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
 //	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);

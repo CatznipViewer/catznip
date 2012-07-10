@@ -91,6 +91,10 @@ public:
 	void	setKeystrokeCallback(const keystroke_signal_t::slot_type& callback);
 
 	void	setParseHighlights(BOOL parsing) {mParseHighlights=parsing;}
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	S32		getHighlightsMask() const            { return mHighlightsMask;}
+	void	setHighlightsMask(S32 category_mask) { mHighlightsMask = category_mask;}
+// [/SL:KB]
 
 	static S32		spacesPerTab();
 

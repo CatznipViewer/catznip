@@ -44,7 +44,8 @@
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 LLHighlightEntry::LLHighlightEntry()
-	: mCondition(CONTAINS)
+	: mCategoryMask(CAT_GENERAL)
+	, mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
 	, mColorReadOnly(false)
@@ -53,12 +54,15 @@ LLHighlightEntry::LLHighlightEntry()
 }
 
 LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
-	: mCondition(CONTAINS)
+	: mCategoryMask(CAT_GENERAL)
+	, mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
 	, mColorReadOnly(false)
 	, mHighlightType(PART)
 {
+	if (sdEntry.has("category_mask"))
+		mCategoryMask = sdEntry["category_mask"].asInteger();
 	if (sdEntry.has("condition"))
 		mCondition = (EConditionType)sdEntry["condition"].asInteger();
 	if (sdEntry.has("pattern"))
@@ -76,6 +80,7 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 LLSD LLHighlightEntry::toLLSD() const
 {
 	LLSD sdEntry;
+	sdEntry["category_mask"] = mCategoryMask;
 	sdEntry["condition"] = (S32)mCondition;
 	sdEntry["pattern"] = mPattern;
 	sdEntry["case_sensitive"] = mCaseSensitive;
@@ -95,9 +100,9 @@ LLTextParser::LLTextParser()
 {}
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-S32 LLHighlightEntry::findPattern(const std::string& text) const
+S32 LLHighlightEntry::findPattern(const std::string& text, S32 cat_mask) const
 {
-	if (mPattern.empty())
+	if ( (mPattern.empty()) || ((mCategoryMask & cat_mask) == 0) )
 		return -1;
 	
 	size_t idxFound = std::string::npos;
@@ -168,7 +173,7 @@ S32 LLHighlightEntry::findPattern(const std::string& text) const
 
 //LLSD LLTextParser::parsePartialLineHighlights(const std::string &text, const LLColor4 &color, EHighlightPosition part, S32 index)
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const std::string &text, EHighlightPosition part, S32 index)
+LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const std::string &text, S32 cat_mask, EHighlightPosition part, S32 index)
 // [/SL:KB]
 {
 //	loadKeywords();
@@ -201,7 +206,7 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 			     (entry.mCondition == LLHighlightEntry::ENDS_WITH   && part == END)   ||
 				  entry.mCondition == LLHighlightEntry::CONTAINS    || part == WHOLE )
 			{
-				S32 start = entry.findPattern(text);
+				S32 start = entry.findPattern(text, cat_mask);
 				if (start >= 0 )
 				{
 					S32 end = entry.mPattern.length();
@@ -220,7 +225,7 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 						{
 							if (part==END   || part==WHOLE) newpart=END; else newpart=MIDDLE;
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-							resEnd = parsePartialLineHighlights(text.substr(end), newpart, i);
+							resEnd = parsePartialLineHighlights(text.substr(end), cat_mask, newpart, i);
 // [/SL:KB]
 //							end_llsd=parsePartialLineHighlights(text.substr( end ),color,newpart,i);
 						}
@@ -230,7 +235,7 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 						if (part==START || part==WHOLE) newpart=START; else newpart=MIDDLE;
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-						resStart = parsePartialLineHighlights(text.substr(0,start), newpart, i+1);
+						resStart = parsePartialLineHighlights(text.substr(0,start), cat_mask, newpart, i+1);
 // [/SL:KB]
 //						start_llsd=parsePartialLineHighlights(text.substr(0,start),color,newpart,i+1);
 						
@@ -245,7 +250,7 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 							if (part==END   || part==WHOLE) newpart=END; else newpart=MIDDLE;
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-							resEnd = parsePartialLineHighlights(text.substr(start + end), newpart, i);
+							resEnd = parsePartialLineHighlights(text.substr(start + end), cat_mask, newpart, i);
 // [/SL:KB]
 //							end_llsd=parsePartialLineHighlights(text.substr( (start+end) ),color,newpart,i);
 						}
@@ -309,14 +314,14 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 }
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-bool LLTextParser::parseFullLineHighlights(const std::string& text, const LLHighlightEntry** ppEntry) const
+bool LLTextParser::parseFullLineHighlights(const std::string& text, S32 cat_mask, const LLHighlightEntry** ppEntry) const
 {
 	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
 	{
 		const LLHighlightEntry& entry = *itEntry;
 		if ( (entry.mHighlightType == LLHighlightEntry::ALL) || (entry.mCondition == LLHighlightEntry::MATCHES) )
 		{
-			if (std::string::npos != entry.findPattern(text))
+			if (std::string::npos != entry.findPattern(text, cat_mask))
 			{
 				if (ppEntry)
 					*ppEntry = &entry;

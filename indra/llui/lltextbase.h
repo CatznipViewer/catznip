@@ -550,6 +550,9 @@ protected:
 	bool						mBorderVisible;
 	bool                		mParseHTML;			// make URLs interactive
 	bool						mParseHighlights;	// highlight user-defined keywords
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	S32							mHighlightsMask;	// category mask for matching highlights
+// [/SL:KB]
 	bool                		mWordWrap;
 	bool						mUseEllipses;
 	bool						mTrackEnd;			// if true, keeps scroll position at end of document during resize
