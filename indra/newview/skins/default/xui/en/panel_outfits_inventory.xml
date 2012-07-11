@@ -22,7 +22,7 @@
    </panel.string>
    <tab_container
      follows="all"
-     height="539"
+     height="567"
      layout="topleft"
      left="5"
      name="appearance_tabs"
@@ -57,6 +57,7 @@
            width="315" />
    </tab_container>
 
+<!--
    <panel
        background_visible="true"
        follows="bottom|left|right"
@@ -131,4 +132,5 @@
 			    </layout_panel>
 			</layout_stack>
    </panel>
+-->
 </panel>

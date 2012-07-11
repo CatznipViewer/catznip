@@ -64,7 +64,11 @@ protected:
 private:
 	LLTabContainer*			mAppearanceTabs;
 	std::string 			mFilterSubString;
-	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	std::auto_ptr<LLSaveOutfitComboBtn> mOutfitsSaveComboBtn;
+	std::auto_ptr<LLSaveOutfitComboBtn> mWearingSaveComboBtn;
+// [/SL:KB]
+//	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// tab panels                                                                   //
@@ -86,7 +90,7 @@ private:
 protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
-	void onWearButtonClick();
+//	void onWearButtonClick();
 	void showGearMenu();
 	void onTrashButtonClick();
 	bool isActionEnabled(const LLSD& userdata);
@@ -94,7 +98,7 @@ protected:
 	void onWearablesLoaded();
 	void onWearablesLoading();
 private:
-	LLPanel*					mListCommands;
+//	LLPanel*					mListCommands;
 	LLMenuGL*					mMenuAdd;
 	// List Commands                                                                //
 	//////////////////////////////////////////////////////////////////////////////////

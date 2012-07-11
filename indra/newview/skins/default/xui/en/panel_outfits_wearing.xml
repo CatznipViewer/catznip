@@ -42,13 +42,80 @@
          tool_tip="Show additional options"
          top="1"
          width="31" />
+        <menu_button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Sort"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="options_sort_btn"
+         top="1"
+         width="31" />
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Hierarchy_View_On"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         is_toggle="true"
+         layout="topleft"
+         left_pad="1"
+         name="folder_view_btn"
+         top="1"
+         width="31" />
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="List_View_On"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         is_toggle="true"
+         layout="topleft"
+         left_pad="1"
+         name="list_view_btn"
+         top="1"
+         width="31" />
         <icon
          follows="bottom|left|right"
          height="25"
-         image_name="Toolbar_Right_Off"
+         image_name="Toolbar_Middle_Off"
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="274" />
+         width="95" />
+        <button
+         follows="bottom|right"
+         height="25"
+         halign="left"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Snapshot_Inventory"
+         image_overlay_alignment="left"
+         imgoverlay_label_space="5"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         image_bottom_pad="1"
+         label="Save"
+         layout="topleft"
+         left_pad="1"
+         name="save_btn"
+         width="85" />
+        <button
+         follows="bottom|right"
+         height="25"
+         layout="topleft"
+         left_pad="-20"
+         tab_stop="false"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="Arrow_Small_Down"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         name="save_flyout_btn"
+         top="1"
+         width="20" />
     </panel>
 </panel>

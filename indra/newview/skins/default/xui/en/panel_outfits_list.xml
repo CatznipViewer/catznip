@@ -60,7 +60,37 @@
        layout="topleft"
        left_pad="1"
        name="dummy_icon"
-       width="243"/>
+       width="158"/>
+      <button
+       follows="bottom|right"
+       height="25"
+       halign="left"
+       image_hover_unselected="Toolbar_Middle_Over"
+       image_overlay="Snapshot_Inventory"
+       image_overlay_alignment="left"
+       imgoverlay_label_space="5"
+       image_selected="Toolbar_Middle_Selected"
+       image_unselected="Toolbar_Middle_Off"
+       image_bottom_pad="1"
+       label="Save"
+       layout="topleft"
+       left_pad="1"
+       name="save_btn"
+       top="1"
+       width="85" />
+      <button
+       follows="bottom|right"
+       height="25"
+       layout="topleft"
+       left_pad="-20"
+       tab_stop="false"
+       image_hover_unselected="Toolbar_Middle_Over"
+       image_overlay="Arrow_Small_Down"
+       image_selected="Toolbar_Middle_Selected"
+       image_unselected="Toolbar_Middle_Off"
+       name="save_flyout_btn"
+	   top="1"
+       width="20" />
       <button
        follows="bottom|right"
        height="25"
