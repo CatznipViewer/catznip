@@ -83,27 +83,23 @@ private:
 	void LLWearingGearMenu::onChangeSortOrder(const LLSD& sdParam)
 	{
 		const std::string strParam = sdParam.asString();
-		if ("name" == strParam)
-		{
+		if ("appearance" == strParam)
+			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_APPEARANCE);
+		else if ("name" == strParam)
 			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_NAME);
-		}
 		else if ("type_name" == strParam)
-		{
 			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_TYPE_NAME);
-		}
 	}
 
 	bool LLWearingGearMenu::onCheckSortOrder(const LLSD& sdParam)
 	{
 		const std::string strParam = sdParam.asString();
-		if ("name" == strParam)
-		{
+		if ("appearance" == strParam)
+			return LLWearableItemsList::E_SORT_BY_APPEARANCE == mPanelWearing->getCOFItemsList()->getSortOrder();
+		else if ("name" == strParam)
 			return LLWearableItemsList::E_SORT_BY_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
-		}
 		else if ("type_name" == strParam)
-		{
 			return LLWearableItemsList::E_SORT_BY_TYPE_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
-		}
 		return false;
 	}
 // [/SL:KB]

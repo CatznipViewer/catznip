@@ -7,6 +7,16 @@
      label="Sort by"
      name="sort_by" >
       <menu_item_check
+       label="Appearance"
+       name="sort_name">
+          <menu_item_check.on_click
+           function="Gear.Sort"
+           parameter="appearance" />
+          <menu_item_check.on_check
+           function="Gear.CheckSort"
+           parameter="appearance" />
+      </menu_item_check>
+      <menu_item_check
        label="Name"
        name="sort_name">
           <menu_item_check.on_click

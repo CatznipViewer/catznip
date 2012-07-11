@@ -31,6 +31,9 @@
 #include "lliconctrl.h"
 #include "llmenugl.h" // for LLContextMenu
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llagentconstants.h"
+// [/SL:KB]
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
 #include "llinventoryfunctions.h"
@@ -608,6 +611,123 @@ bool LLWearableItemCreationDateComparator::doCompare(const LLPanelInventoryListI
 
 	return date1 > date2;
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// ============================================================================
+// LLWearableItemAppearanceComparator
+//
+
+LLWearableItemAppearanceComparator::sortorder_list_t LLWearableItemAppearanceComparator::sSortOrder;
+
+LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
+{
+	if (sSortOrder.empty())
+	{
+		// Head
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  2)); // Skull
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 15)); // Left Eyeball
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 16)); // Right Eyeball
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 13)); // Left Ear
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 14)); // Right Ear
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 17)); // Nose
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 11)); // Mouth
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 12)); // Chin
+
+		// Torso
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_JACKET));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHIRT));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERSHIRT));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_GLOVES));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  1)); // Chest
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  9)); // Spine
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 39)); // Neck
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 29)); // Left Pec
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 30)); // Right Pec
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  3)); // Left Shoulder
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  4)); // Right Shoulder
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 20)); // L Upper Arm
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 18)); // R Upper Arm
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 21)); // L Forearm
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 19)); // R Forearm
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  5)); // Left Hand
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  6)); // Right Hand
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 25)); // Left Hip
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 22)); // Right Hip
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 28)); // Stomach
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 10)); // Pelvis
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 40)); // Avatar Center
+
+		// Legs
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERPANTS));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PANTS));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SKIRT));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SOCKS));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHOES));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 26)); // L Upper Leg
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 23)); // R Upper Leg
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 27)); // L Lower Leg
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 24)); // R Lower Leg
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  7)); // Left Foot
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  8)); // Right Foot
+
+		// HUD attachments
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 34)); // Top Left
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 33)); // Top
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 32)); // Top Right
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 35)); // Center
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 31)); // Center 2
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 36)); // Bottom Left
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 37)); // Bottom
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 38)); // Bottom Right
+
+		// Misc
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_HAIR));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_EYES));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SHAPE));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PHYSICS));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SKIN));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA));
+	}
+}
+
+LLWearableItemAppearanceComparator::sortorder_pair_t LLWearableItemAppearanceComparator::getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const
+{
+	const LLViewerInventoryItem* pInvItem = pListItem->getItem();
+
+	sortorder_pair_t sortOrder(pInvItem->getType(), -1);
+	switch (pInvItem->getType())
+	{
+		case LLAssetType::AT_BODYPART:
+		case LLAssetType::AT_CLOTHING:
+			{
+				sortOrder.second = pInvItem->getWearableType();
+			}
+			break;
+		case LLAssetType::AT_OBJECT:
+			{
+				LLViewerObject* pAttachObj = NULL;
+				if ( (isAgentAvatarValid()) && (pAttachObj = gAgentAvatarp->getWornAttachment(pListItem->getItemID())) )
+					sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getState());
+			}
+			break;
+		default:
+			break;
+	}
+
+	return sortOrder;
+}
+
+bool LLWearableItemAppearanceComparator::doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const
+{
+	sortorder_list_t::const_iterator sortLHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pLHS));
+	sortorder_list_t::const_iterator sortRHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pRHS));
+	return sortLHS < sortRHS;
+}
+
+// ============================================================================
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -616,6 +736,9 @@ static LLWearableItemTypeNameComparator WEARABLE_TYPE_NAME_COMPARATOR;
 static const LLWearableItemTypeNameComparator WEARABLE_TYPE_LAYER_COMPARATOR;
 static const LLWearableItemNameComparator WEARABLE_NAME_COMPARATOR;
 static const LLWearableItemCreationDateComparator WEARABLE_CREATION_DATE_COMPARATOR;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+static const LLWearableItemAppearanceComparator WEARABLE_APPEARANCE_COMPARATOR;
+// [/SL:KB]
 
 static const LLDefaultChildRegistry::Register<LLWearableItemsList> r("wearable_items_list");
 
@@ -752,6 +875,11 @@ void LLWearableItemsList::setSortOrder(ESortOrder sort_order, bool sort_now)
 		setComparator(&WEARABLE_TYPE_NAME_COMPARATOR);
 		break;
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	case E_SORT_BY_APPEARANCE:
+		setComparator(&WEARABLE_APPEARANCE_COMPARATOR);
+		break;
+// [/SL:KB]
 
 	// No "default:" to raise compiler warning
 	// if we're not handling something

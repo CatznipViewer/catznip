@@ -151,6 +151,9 @@ public:
 
 	/** Get the associated inventory item */
 	LLViewerInventoryItem* getItem() const;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	const LLUUID& getItemID() const { return mInventoryItemUUID; }
+// [/SL:KB]
 
 	void setSeparatorVisible(bool visible) { mSeparatorVisible = visible; }
 
