@@ -66,6 +66,10 @@ public:
 
 	bool hasItemSelected();
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLWearableItemsList* getCOFItemsList() const;
+// [/SL:KB]
+
 private:
 	void onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
 

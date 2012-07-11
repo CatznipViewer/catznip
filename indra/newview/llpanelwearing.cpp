@@ -58,10 +58,16 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		registrar.add("Gear.Sort", boost::bind(&LLWearingGearMenu::onChangeSortOrder, this, _2));
+// [/SL:KB]
 		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
 		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
 		registrar.add("Gear.Copy", boost::bind(&LLPanelWearing::copyToClipboard, mPanelWearing));
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		enable_registrar.add("Gear.CheckSort", boost::bind(&LLWearingGearMenu::onCheckSortOrder, this, _2));
+// [/SL:KB]
 		enable_registrar.add("Gear.OnEnable", boost::bind(&LLPanelWearing::isActionEnabled, mPanelWearing, _2));
 
 		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
@@ -72,6 +78,35 @@ public:
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 private:
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void LLWearingGearMenu::onChangeSortOrder(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ("name" == strParam)
+		{
+			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_NAME);
+		}
+		else if ("type_name" == strParam)
+		{
+			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_TYPE_NAME);
+		}
+	}
+
+	bool LLWearingGearMenu::onCheckSortOrder(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ("name" == strParam)
+		{
+			return LLWearableItemsList::E_SORT_BY_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
+		}
+		else if ("type_name" == strParam)
+		{
+			return LLWearableItemsList::E_SORT_BY_TYPE_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
+		}
+		return false;
+	}
+// [/SL:KB]
 
 	void onTakeOff()
 	{
@@ -282,6 +317,13 @@ void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 {
 	mCOFItemsList->getSelectedUUIDs(selected_uuids);
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+LLWearableItemsList* LLPanelWearing::getCOFItemsList() const
+{
+	return mCOFItemsList;
+}
+// [/SL:KB]
 
 void LLPanelWearing::copyToClipboard()
 {

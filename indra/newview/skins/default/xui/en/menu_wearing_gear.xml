@@ -3,6 +3,31 @@
  layout="topleft"
  visible="false"
  name="Gear Wearing">
+    <menu
+     label="Sort by"
+     name="sort_by" >
+      <menu_item_check
+       label="Name"
+       name="sort_name">
+          <menu_item_check.on_click
+           function="Gear.Sort"
+           parameter="name" />
+          <menu_item_check.on_check
+           function="Gear.CheckSort"
+           parameter="name" />
+      </menu_item_check>
+      <menu_item_check
+       label="Type"
+       name="sort_type">
+          <menu_item_check.on_click
+           function="Gear.Sort"
+           parameter="type_name" />
+          <menu_item_check.on_check
+           function="Gear.CheckSort"
+           parameter="type_name" />
+      </menu_item_check>
+    </menu>
+    <menu_item_separator />
     <menu_item_call
      label="Edit Outfit"
      layout="topleft"
