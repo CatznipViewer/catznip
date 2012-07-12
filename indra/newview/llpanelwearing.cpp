@@ -35,11 +35,17 @@
 #include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llinventorypanel.h"
+// [/SL:KB]
 #include "llmenubutton.h"
 #include "llviewermenu.h"
 #include "llwearableitemslist.h"
 #include "llsdserialize.h"
 #include "llclipboard.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 // Context menu and Gear menu helper.
 static void edit_outfit()
@@ -200,6 +206,9 @@ static LLRegisterPanelClassWrapper<LLPanelWearing> t_panel_wearing("panel_wearin
 LLPanelWearing::LLPanelWearing()
 	:	LLPanelAppearanceTab()
 	,	mCOFItemsList(NULL)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	,	mInvPanel(NULL)
+// [/SL:KB]
 	,	mIsInitialized(false)
 {
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
@@ -232,6 +241,9 @@ BOOL LLPanelWearing::postBuild()
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
 	getChild<LLMenuButton>("options_sort_btn")->setMenu(mSortByMenu->getMenu());
+
+	getChild<LLButton>("folder_view_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, VIEW_INVENTORY));
+	getChild<LLButton>("list_view_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, VIEW_LIST));
 // [/SL:KB]
 //	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
 //
@@ -334,6 +346,44 @@ void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 LLWearableItemsList* LLPanelWearing::getCOFItemsList() const
 {
 	return mCOFItemsList;
+}
+
+void LLPanelWearing::onToggleWearingView(EWearingView eView)
+{
+	if (VIEW_INVENTORY == eView)
+	{
+		if ( (mInvPanel) || (mInvPanel = createInventoryPanel()) )
+		{
+			mCOFItemsList->setVisible(false);
+			mInvPanel->setVisible(true);
+		}
+	}
+	else
+	{
+		mCOFItemsList->setVisible(true);
+		if (mInvPanel)
+			mInvPanel->setVisible(false);
+	}
+}
+
+LLInventoryPanel* LLPanelWearing::createInventoryPanel() const
+{
+	if (mInvPanel)
+		return mInvPanel;
+
+	LLView* pInvPanelPlaceholder = findChild<LLView>("wearing_invpanel_placeholder");
+	
+	LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_wearing_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
+	pInvPanel->setShape(pInvPanelPlaceholder->getRect());
+	pInvPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
+	pInvPanel->setFilterWorn(true);
+	pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+//	pInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+	pInvPanel->getFilter()->markDefault();
+	pInvPanel->openAllFolders();
+//	pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, recent_items_panel, _1, _2));
+
+	return pInvPanel;
 }
 // [/SL:KB]
 

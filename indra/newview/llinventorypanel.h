@@ -150,6 +150,9 @@ public:
 	void setHoursAgo(U32 hours);
 	BOOL getSinceLogoff();
 	void setFilterLinks(U64 filter_links);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void setFilterWorn(bool filter);
+// [/SL:KB]
 
 	void setShowFolderState(LLInventoryFilter::EFolderShow show);
 	LLInventoryFilter::EFolderShow getShowFolderState();

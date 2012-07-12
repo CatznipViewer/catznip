@@ -21,6 +21,15 @@
      width="309"
      worn_indication_enabled="false" />
     <panel
+     follows="all"
+     height="400"
+     layout="topleft"
+     left="3"
+     name="wearing_invpanel_placeholder" 
+     top="0"
+     visible="false"
+     width="309" /> 
+    <panel
      background_visible="true"
      follows="bottom|left|right"
      height="28"

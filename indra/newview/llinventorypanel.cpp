@@ -387,6 +387,13 @@ void LLInventoryPanel::setFilterLinks(U64 filter_links)
 	getFilter()->setFilterLinks(filter_links);
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+void LLInventoryPanel::setFilterWorn(bool filter)
+{
+	getFilter()->setFilterWorn(filter);
+}
+// [/SL:KB]
+
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {
 	getFilter()->setShowFolderState(show);

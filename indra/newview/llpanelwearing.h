@@ -33,6 +33,9 @@
 #include "llpanelappearancetab.h"
 
 class LLInventoryCategoriesObserver;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+class LLInventoryPanel;
+// [/SL:KB]
 class LLListContextMenu;
 class LLWearableItemsList;
 class LLWearingGearMenu;
@@ -68,6 +71,12 @@ public:
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLWearableItemsList* getCOFItemsList() const;
+
+protected:
+	enum EWearingView { VIEW_LIST, VIEW_INVENTORY };
+	void onToggleWearingView(EWearingView eView);
+
+	LLInventoryPanel* createInventoryPanel() const;
 // [/SL:KB]
 
 private:
@@ -75,6 +84,9 @@ private:
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 	LLWearableItemsList* 			mCOFItemsList;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLInventoryPanel*				mInvPanel;
+// [/SL:KB]
 	LLWearingGearMenu*				mGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLWearingGearMenu*				mSortByMenu;

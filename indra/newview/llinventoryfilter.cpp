@@ -31,6 +31,9 @@
 // viewer includes
 #include "llfoldervieweventlistener.h"
 #include "llfolderviewitem.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
 #include "llviewercontrol.h"
@@ -269,6 +272,26 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 		}
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	////////////////////////////////////////////////////////////////////////////////
+	// FILTERTYPE_EMPTYFOLDERS
+	// Pass if this item is currently worn
+	if (filterTypes & FILTERTYPE_WORN)
+	{
+		switch (object->getType())
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+			case LLAssetType::AT_OBJECT:
+				if (!get_is_item_worn(object_id))
+					return FALSE;
+				break;
+			default:
+				return FALSE;
+		}
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -501,6 +524,22 @@ void LLInventoryFilter::setFilterEmptySystemFolders()
 {
 	mFilterOps.mFilterTypes |= FILTERTYPE_EMPTYFOLDERS;
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+void LLInventoryFilter::setFilterWorn(bool filter)
+{
+	if (filter)
+	{
+		setModified(FILTER_MORE_RESTRICTIVE);
+		mFilterOps.mFilterTypes |= FILTERTYPE_WORN;
+	}
+	else
+	{
+		setModified(FILTER_LESS_RESTRICTIVE);
+		mFilterOps.mFilterTypes &= ~FILTERTYPE_WORN;
+	}
+}
+// [/SL:KB]
 
 void LLInventoryFilter::setFilterUUID(const LLUUID& object_id)
 {

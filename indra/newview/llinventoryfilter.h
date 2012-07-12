@@ -59,7 +59,11 @@ public:
 		FILTERTYPE_UUID	= 0x1 << 2,		// find the object with UUID and any links to it
 		FILTERTYPE_DATE = 0x1 << 3,		// search by date range
 		FILTERTYPE_WEARABLE = 0x1 << 4,	// search by wearable type
-		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5	// pass if folder is not a system folder to be hidden if empty
+//		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5	// pass if folder is not a system folder to be hidden if empty
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5,	// pass if folder is not a system folder to be hidden if empty
+		FILTERTYPE_WORN = 0x1 << 6		// filter by worn status
+// [/SL:KB]
 	};
 
 	enum EFilterLink
@@ -91,6 +95,9 @@ public:
 	void 				setFilterUUID(const LLUUID &object_id);
 	void				setFilterWearableTypes(U64 types);
 	void				setFilterEmptySystemFolders();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void				setFilterWorn(bool filter);
+// [/SL:KB]
 	void				updateFilterTypes(U64 types, U64& current_types);
 
 	void 				setFilterSubString(const std::string& string);
