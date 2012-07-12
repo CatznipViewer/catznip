@@ -17,6 +17,14 @@
          function="Wearing.Detach"
          parameter="detach"/>
     </menu_item_call>
+    <menu_item_separator />
+    <menu_item_call
+     label="Find Original"
+     layout="topleft"
+     name="find_original">
+        <on_click
+         function="Wearing.FindOriginal" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft"
      name="edit_outfit_separator" />
