@@ -52,8 +52,12 @@ static void edit_outfit()
 class LLWearingGearMenu
 {
 public:
-	LLWearingGearMenu(LLPanelWearing* panel_wearing)
+//	LLWearingGearMenu(LLPanelWearing* panel_wearing)
+//	:	mMenu(NULL), mPanelWearing(panel_wearing)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLWearingGearMenu(LLPanelWearing* panel_wearing, const std::string& menu_file)
 	:	mMenu(NULL), mPanelWearing(panel_wearing)
+// [/SL:KB]
 	{
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
@@ -70,8 +74,12 @@ public:
 // [/SL:KB]
 		enable_registrar.add("Gear.OnEnable", boost::bind(&LLPanelWearing::isActionEnabled, mPanelWearing, _2));
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
-			"menu_wearing_gear.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+			menu_file, gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [/SL:KB]
+//		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+//			"menu_wearing_gear.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(mMenu);
 	}
 
@@ -196,7 +204,11 @@ LLPanelWearing::LLPanelWearing()
 {
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
 
-	mGearMenu = new LLWearingGearMenu(this);
+//	mGearMenu = new LLWearingGearMenu(this);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	mGearMenu = new LLWearingGearMenu(this, "menu_wearing_gear.xml");
+	mSortByMenu = new LLWearingGearMenu(this, "menu_wearing_sortby.xml");
+// [/SL:KB]
 	mContextMenu = new LLWearingContextMenu();
 }
 
@@ -217,9 +229,13 @@ BOOL LLPanelWearing::postBuild()
 	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
 	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 
-	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
-
-	menu_gear_btn->setMenu(mGearMenu->getMenu());
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
+	getChild<LLMenuButton>("options_sort_btn")->setMenu(mSortByMenu->getMenu());
+// [/SL:KB]
+//	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
+//
+//	menu_gear_btn->setMenu(mGearMenu->getMenu());
 
 	return TRUE;
 }

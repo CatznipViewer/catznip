@@ -91,7 +91,7 @@ protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
 //	void onWearButtonClick();
-	void showGearMenu();
+//	void showGearMenu();
 	void onTrashButtonClick();
 	bool isActionEnabled(const LLSD& userdata);
 	void setWearablesLoading(bool val);

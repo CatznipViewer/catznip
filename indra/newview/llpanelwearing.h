@@ -76,6 +76,9 @@ private:
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 	LLWearableItemsList* 			mCOFItemsList;
 	LLWearingGearMenu*				mGearMenu;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLWearingGearMenu*				mSortByMenu;
+// [/SL:KB]
 	LLListContextMenu*				mContextMenu;
 
 	bool							mIsInitialized;
