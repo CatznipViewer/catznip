@@ -194,6 +194,7 @@ protected:
 		registrar.add("Wearing.Detach", boost::bind(handleMultiple, take_off, mUUIDs));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
 		registrar.add("Wearing.FindOriginal", boost::bind(&LLWearingContextMenu::onFindOriginal, this));
+		registrar.add("Wearing.Properties", boost::bind(&LLWearingContextMenu::onProperties, this));
 // [/SL:KB]
 
 		LLContextMenu* menu = createFromFile("menu_wearing_tab.xml");
@@ -243,6 +244,7 @@ protected:
 		menu->setItemVisible("detach",		allow_detach);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
 		menu->setItemEnabled("find_original", 1 == mUUIDs.size());
+		menu->setItemEnabled("properties", 1 == mUUIDs.size());
 // [/SL:KB]
 		menu->setItemVisible("edit_outfit_separator", allow_take_off || allow_detach);
 	}
@@ -257,6 +259,13 @@ protected:
 			if (pInvPanel)
 				pInvPanel->setSelection(gInventory.getLinkedItemID(idItem), TAKE_FOCUS_YES);
 		}
+	}
+
+	void onProperties()
+	{
+		const LLUUID& idItem = (!mUUIDs.empty()) ? mUUIDs.front() : LLUUID::null;
+		if (idItem.notNull())
+			show_item_profile(gInventory.getLinkedItemID(idItem));
 	}
 // [/SL:KB]
 };

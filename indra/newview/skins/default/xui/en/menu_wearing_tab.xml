@@ -25,6 +25,13 @@
         <on_click
          function="Wearing.FindOriginal" />
     </menu_item_call>
+    <menu_item_call
+     label="Properties"
+     layout="topleft"
+     name="properties">
+        <on_click
+         function="Wearing.Properties" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft"
      name="edit_outfit_separator" />
