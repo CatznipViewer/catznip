@@ -58,66 +58,26 @@ static void edit_outfit()
 class LLWearingGearMenu
 {
 public:
-//	LLWearingGearMenu(LLPanelWearing* panel_wearing)
-//	:	mMenu(NULL), mPanelWearing(panel_wearing)
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLWearingGearMenu(LLPanelWearing* panel_wearing, const std::string& menu_file)
+	LLWearingGearMenu(LLPanelWearing* panel_wearing)
 	:	mMenu(NULL), mPanelWearing(panel_wearing)
-// [/SL:KB]
 	{
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-		registrar.add("Gear.Sort", boost::bind(&LLWearingGearMenu::onChangeSortOrder, this, _2));
-// [/SL:KB]
 		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
 		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
 		registrar.add("Gear.Copy", boost::bind(&LLPanelWearing::copyToClipboard, mPanelWearing));
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-		enable_registrar.add("Gear.CheckSort", boost::bind(&LLWearingGearMenu::onCheckSortOrder, this, _2));
-// [/SL:KB]
 		enable_registrar.add("Gear.OnEnable", boost::bind(&LLPanelWearing::isActionEnabled, mPanelWearing, _2));
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
-			menu_file, gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
-// [/SL:KB]
-//		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
-//			"menu_wearing_gear.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+			"menu_wearing_gear.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(mMenu);
 	}
 
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 private:
-
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	void LLWearingGearMenu::onChangeSortOrder(const LLSD& sdParam)
-	{
-		const std::string strParam = sdParam.asString();
-		if ("appearance" == strParam)
-			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_APPEARANCE);
-		else if ("name" == strParam)
-			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_NAME);
-		else if ("type_name" == strParam)
-			mPanelWearing->getCOFItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_TYPE_NAME);
-	}
-
-	bool LLWearingGearMenu::onCheckSortOrder(const LLSD& sdParam)
-	{
-		const std::string strParam = sdParam.asString();
-		if ("appearance" == strParam)
-			return LLWearableItemsList::E_SORT_BY_APPEARANCE == mPanelWearing->getCOFItemsList()->getSortOrder();
-		else if ("name" == strParam)
-			return LLWearableItemsList::E_SORT_BY_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
-		else if ("type_name" == strParam)
-			return LLWearableItemsList::E_SORT_BY_TYPE_NAME == mPanelWearing->getCOFItemsList()->getSortOrder();
-		return false;
-	}
-// [/SL:KB]
-
 	void onTakeOff()
 	{
 		uuid_vec_t selected_uuids;
@@ -132,6 +92,91 @@ private:
 	LLToggleableMenu*		mMenu;
 	LLPanelWearing* 		mPanelWearing;
 };
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+class LLWearingSortMenu
+{
+public:
+	LLWearingSortMenu(LLPanelWearing* pWearingPanel)
+		: mFolderMenu(NULL), mListMenu(NULL), mWearingPanel(pWearingPanel)
+	{
+		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+		registrar.add("Sort.Folder", boost::bind(&LLWearingSortMenu::onChangeFolderSortOrder, this, _2));
+		registrar.add("Sort.List", boost::bind(&LLWearingSortMenu::onChangeListSortOrder, this, _2));
+
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+		enable_registrar.add("Sort.CheckFolder", boost::bind(&LLWearingSortMenu::onCheckFolderSortOrder, this, _2));
+		enable_registrar.add("Sort.CheckList", boost::bind(&LLWearingSortMenu::onCheckListSortOrder, this, _2));
+
+		mFolderMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+			"menu_wearing_sort_folder.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+		llassert(mFolderMenu);
+		mListMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+			"menu_wearing_sort_list.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+		llassert(mListMenu);
+	}
+
+	LLToggleableMenu* getFolderMenu() { return mFolderMenu; }
+	LLToggleableMenu* getListMenu()    { return mListMenu; }
+
+protected:
+	void onChangeFolderSortOrder(const LLSD& sdParam)
+	{
+		if (mWearingPanel->getInvPanel())
+		{
+			mWearingPanel->getInvPanel()->setSortBy(sdParam);
+			gSavedSettings.setU32("WearingFolderSortOrder", mWearingPanel->getInvPanel()->getSortOrder());
+		}
+	}
+
+	bool onCheckFolderSortOrder(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if (mWearingPanel->getInvPanel())
+		{
+			U32 nSortOderMask = mWearingPanel->getInvPanel()->getSortOrder();
+			if ("name" == strParam)
+				return ~nSortOderMask & LLInventoryFilter::SO_DATE;
+			else if ("date" == strParam)
+				return nSortOderMask & LLInventoryFilter::SO_DATE;
+			else if ("foldersalwaysbyname" == strParam)
+				return nSortOderMask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
+			else if ("systemfolderstotop" == strParam)
+				return nSortOderMask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+		}
+		return false;
+	}
+
+	void onChangeListSortOrder(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ("appearance" == strParam)
+			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_APPEARANCE);
+		else if ("name" == strParam)
+			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_NAME);
+		else if ("type_name" == strParam)
+			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_TYPE_NAME);
+		gSavedSettings.setU32("WearingListSortOrder", mWearingPanel->getItemsList()->getSortOrder());
+	}
+
+	bool onCheckListSortOrder(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ("appearance" == strParam)
+			return LLWearableItemsList::E_SORT_BY_APPEARANCE == mWearingPanel->getItemsList()->getSortOrder();
+		else if ("name" == strParam)
+			return LLWearableItemsList::E_SORT_BY_NAME == mWearingPanel->getItemsList()->getSortOrder();
+		else if ("type_name" == strParam)
+			return LLWearableItemsList::E_SORT_BY_TYPE_NAME == mWearingPanel->getItemsList()->getSortOrder();
+		return false;
+	}
+
+protected:
+	LLToggleableMenu* mFolderMenu;
+	LLToggleableMenu* mListMenu;
+	LLPanelWearing*   mWearingPanel;
+};
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -208,15 +253,17 @@ LLPanelWearing::LLPanelWearing()
 	,	mCOFItemsList(NULL)
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	,	mInvPanel(NULL)
+	,	mSortMenuButton(NULL)
+	,	mToggleFolderView(NULL)
+	,	mToggleListView(NULL)
 // [/SL:KB]
 	,	mIsInitialized(false)
 {
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
 
-//	mGearMenu = new LLWearingGearMenu(this);
+	mGearMenu = new LLWearingGearMenu(this);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	mGearMenu = new LLWearingGearMenu(this, "menu_wearing_gear.xml");
-	mSortByMenu = new LLWearingGearMenu(this, "menu_wearing_sortby.xml");
+	mSortMenu = new LLWearingSortMenu(this);
 // [/SL:KB]
 	mContextMenu = new LLWearingContextMenu();
 }
@@ -237,13 +284,18 @@ BOOL LLPanelWearing::postBuild()
 {
 	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
 	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	mCOFItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
+// [/SL:KB]
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
-	getChild<LLMenuButton>("options_sort_btn")->setMenu(mSortByMenu->getMenu());
+	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
 
-	getChild<LLButton>("folder_view_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, VIEW_INVENTORY));
-	getChild<LLButton>("list_view_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, VIEW_LIST));
+	mToggleFolderView = getChild<LLButton>("folder_view_btn");
+	mToggleFolderView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, FOLDER_VIEW));
+	mToggleListView = getChild<LLButton>("list_view_btn");
+	mToggleListView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, LIST_VIEW));
 // [/SL:KB]
 //	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
 //
@@ -257,6 +309,11 @@ void LLPanelWearing::onOpen(const LLSD& /*info*/)
 {
 	if (!mIsInitialized)
 	{
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		// Delay creating the inventory view until the user actually opens this panel
+		onToggleWearingView((EWearingView)gSavedSettings.getU32("WearingViewType"));
+// [/SL:KB]
+
 		// *TODO: I'm not sure is this check necessary but it never match while developing.
 		if (!gInventory.isInventoryUsable())
 			return;
@@ -343,14 +400,9 @@ void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 }
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-LLWearableItemsList* LLPanelWearing::getCOFItemsList() const
-{
-	return mCOFItemsList;
-}
-
 void LLPanelWearing::onToggleWearingView(EWearingView eView)
 {
-	if (VIEW_INVENTORY == eView)
+	if (FOLDER_VIEW == eView)
 	{
 		if ( (mInvPanel) || (mInvPanel = createInventoryPanel()) )
 		{
@@ -364,6 +416,10 @@ void LLPanelWearing::onToggleWearingView(EWearingView eView)
 		if (mInvPanel)
 			mInvPanel->setVisible(false);
 	}
+	mSortMenuButton->setMenu( (FOLDER_VIEW == eView) ? mSortMenu->getFolderMenu() : mSortMenu->getListMenu());
+	mToggleFolderView->setToggleState(FOLDER_VIEW == eView);
+	mToggleListView->setToggleState(LIST_VIEW == eView);
+	gSavedSettings.setU32("WearingViewType", eView);
 }
 
 LLInventoryPanel* LLPanelWearing::createInventoryPanel() const
@@ -377,7 +433,7 @@ LLInventoryPanel* LLPanelWearing::createInventoryPanel() const
 	pInvPanel->setShape(pInvPanelPlaceholder->getRect());
 	pInvPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
 	pInvPanel->setFilterWorn(true);
-	pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+	pInvPanel->setSortOrder(gSavedSettings.getU32("WearingFolderSortOrder"));
 //	pInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
 	pInvPanel->getFilter()->markDefault();
 	pInvPanel->openAllFolders();

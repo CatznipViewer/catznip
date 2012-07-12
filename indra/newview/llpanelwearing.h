@@ -33,12 +33,14 @@
 #include "llpanelappearancetab.h"
 
 class LLInventoryCategoriesObserver;
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-class LLInventoryPanel;
-// [/SL:KB]
 class LLListContextMenu;
 class LLWearableItemsList;
 class LLWearingGearMenu;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+class LLInventoryPanel;
+class LLMenuButton;
+class LLWearingSortMenu;
+// [/SL:KB]
 
 /**
  * @class LLPanelWearing
@@ -70,10 +72,11 @@ public:
 	bool hasItemSelected();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLWearableItemsList* getCOFItemsList() const;
+	LLInventoryPanel*    getInvPanel() const { return mInvPanel; }
+	LLWearableItemsList* getItemsList() const { return mCOFItemsList; }
 
 protected:
-	enum EWearingView { VIEW_LIST, VIEW_INVENTORY };
+	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
 	void onToggleWearingView(EWearingView eView);
 
 	LLInventoryPanel* createInventoryPanel() const;
@@ -86,10 +89,13 @@ private:
 	LLWearableItemsList* 			mCOFItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLInventoryPanel*				mInvPanel;
+	LLMenuButton*					mSortMenuButton;
+	LLButton*						mToggleFolderView;
+	LLButton*						mToggleListView;
 // [/SL:KB]
 	LLWearingGearMenu*				mGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLWearingGearMenu*				mSortByMenu;
+	LLWearingSortMenu*				mSortMenu;
 // [/SL:KB]
 	LLListContextMenu*				mContextMenu;
 

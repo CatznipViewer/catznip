@@ -470,7 +470,7 @@ public:
 		E_SORT_BY_TYPE_LAYER	= 2,
 		E_SORT_BY_TYPE_NAME 	= 3,
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-		E_SORT_BY_APPEARANCE 	= 101,
+		E_SORT_BY_APPEARANCE 	= 10,
 // [/SL:KB]
 	} ESortOrder;
 
