@@ -722,6 +722,15 @@ bool LLWearableItemAppearanceComparator::doCompare(const LLPanelInventoryListIte
 {
 	sortorder_list_t::const_iterator sortLHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pLHS));
 	sortorder_list_t::const_iterator sortRHS = std::find(sSortOrder.begin(), sSortOrder.end(), getSortOrderPair(pRHS));
+
+	if (sortLHS == sortRHS)
+	{
+		// Sort wearables on the same wearable type from top to bottom
+		if (LLAssetType::AT_CLOTHING == pLHS->getType())
+			return pLHS->getDescription() > pRHS->getDescription();
+		else
+			return pLHS->getName() < pRHS->getName();
+	}
 	return sortLHS < sortRHS;
 }
 

@@ -53,6 +53,179 @@ static void edit_outfit()
 	LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "edit_outfit"));
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+//////////////////////////////////////////////////////////////////////////
+
+class LLWornListItem : public LLPanelClothingListItem
+{
+public:
+	struct Params : public LLInitParam::Block<Params, LLPanelClothingListItem::Params>
+	{
+		Params() {}
+	};
+protected:
+	LLWornListItem(LLViewerInventoryItem* pItem, const Params& p);
+public:
+	/*virtual*/ ~LLWornListItem();
+	/*virtual*/ S32  notify(const LLSD& sdInfo);
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void updateItem(const std::string& strName, EItemState itemState = IS_DEFAULT);
+
+public:
+	bool getShowOrdering() { return mShowOrdering; }
+	void setShowOrdering(bool fShowOrdering);
+	static LLWornListItem* create(LLViewerInventoryItem* pItem);
+protected:
+	void onMoveWearable(bool fDown);
+
+protected:
+	bool                  mShowOrdering;
+	LLAssetType::EType    mAssetType;
+	LLWearableType::EType mWearableType;
+};
+
+LLWornListItem::LLWornListItem(LLViewerInventoryItem* pItem, const Params& p)
+	: LLPanelClothingListItem(pItem, p)
+	, mShowOrdering(true)
+	, mAssetType(pItem->getType())
+	, mWearableType( (LLAssetType::AT_CLOTHING == pItem->getType()) ? pItem->getWearableType() : LLWearableType::WT_INVALID)
+{
+	setReshapeWidgetMask(SIDE_LEFT | getReshapeWidgetMask());
+}
+
+LLWornListItem::~LLWornListItem()
+{
+}
+
+// static
+LLWornListItem* LLWornListItem::create(LLViewerInventoryItem* pItem)
+{
+	LLWornListItem* pListItem = NULL;
+	if (pItem)
+	{
+		const LLWornListItem::Params& params = LLUICtrlFactory::getDefaultParams<LLWornListItem>();
+		pListItem = new LLWornListItem(pItem, params);
+		pListItem->initFromParams(params);
+		pListItem->postBuild();
+	}
+	return pListItem;
+}
+
+void LLWornListItem::onMoveWearable(bool fDown)
+{
+	LLAppearanceMgr::getInstance()->moveWearable(getItem(), fDown);
+}
+
+S32 LLWornListItem::notify(const LLSD& sdInfo)
+{
+	if(sdInfo.has("show_ordering"))
+	{
+		setShowOrdering(sdInfo["show_ordering"].asBoolean());
+		return 0;
+	}
+	return LLPanelClothingListItem::notify(sdInfo);
+}
+
+BOOL LLWornListItem::postBuild()
+{
+	LLPanelClothingListItem::postBuild();
+
+	setShowDeleteButton(false);
+	setShowLockButton(false);
+	setShowEditButton(false);
+
+	setShowMoveUpButton(false);
+	getChild<LLUICtrl>("btn_move_up")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, false));
+	setShowMoveDownButton(false);
+	getChild<LLUICtrl>("btn_move_down")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, true));
+
+	return TRUE;
+}
+
+void LLWornListItem::setShowOrdering(bool fShowOrdering)
+{
+	if (mShowOrdering != fShowOrdering)
+	{
+		mShowOrdering = fShowOrdering;
+		setNeedsRefresh(true);
+	}
+}
+
+void LLWornListItem::updateItem(const std::string& strName, EItemState itemState)
+{
+	LLPanelClothingListItem::updateItem(strName, itemState);
+
+	bool fShowUp = false, fShowDown = false;
+	if ( (mShowOrdering) && (LLAssetType::AT_CLOTHING == mAssetType) )
+	{
+		U32 cntWearable = gAgentWearables.getWearableCount(mWearableType);
+		if (cntWearable > 1)
+		{
+			U32 idxWearable = gAgentWearables.getWearableIndex(gAgentWearables.getWearableFromItemID(mInventoryItemUUID));
+			fShowDown = (idxWearable > 0);
+			fShowUp = (idxWearable < cntWearable - 1);
+		}
+	}
+	setShowMoveUpButton(fShowUp);
+	setShowMoveDownButton(fShowDown);
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+class LLWornItemsList : public LLWearableItemsList
+{
+public:
+	struct Params : public LLInitParam::Block<Params, LLWearableItemsList::Params>
+	{
+		Params() {}
+	};
+protected:
+	friend class LLUICtrlFactory;
+	LLWornItemsList(const LLWornItemsList::Params& p);
+
+public:
+	/*virtual*/ void setSortOrder(ESortOrder sortOrder, bool sortNow = true);
+protected:
+	/*virtual*/ void addNewItem(LLViewerInventoryItem* item, bool rearrange /*= true*/);
+};
+
+static const LLDefaultChildRegistry::Register<LLWornItemsList> r("wearing_items_list");
+
+LLWornItemsList::LLWornItemsList(const LLWornItemsList::Params& p)
+	: LLWearableItemsList(p)
+{
+}
+
+void LLWornItemsList::addNewItem(LLViewerInventoryItem* pItem, bool rearrange)
+{
+	if (!pItem)
+	{
+		llwarns << "No inventory item. Couldn't create new item." << llendl;
+		llassert(pItem != NULL);
+	}
+
+	LLPanelClothingListItem* pListItem = LLWornListItem::create(pItem);
+	if (!pListItem)
+		return;
+
+	bool fAdded = addItem(pListItem, pItem->getUUID(), ADD_BOTTOM, rearrange);
+	if (!fAdded)
+	{
+		llwarns << "Couldn't add new item." << llendl;
+		llassert(fAdded);
+	}
+}
+
+void LLWornItemsList::setSortOrder(ESortOrder sortOrder, bool sortNow)
+{
+	LLWearableItemsList::setSortOrder(sortOrder, sortNow);
+
+	const LLWearableListItemComparator* pComparator = dynamic_cast<const LLWearableListItemComparator*>(mItemComparator);
+	bool fOrdered = (pComparator) && (pComparator->areWearablesOrdered());
+	notifyItems(LLSD().with("show_ordering", fOrdered));
+}
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 
 class LLWearingGearMenu
@@ -310,9 +483,11 @@ LLPanelWearing::~LLPanelWearing()
 
 BOOL LLPanelWearing::postBuild()
 {
-	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
-	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
+//	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
+//	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	mCOFItemsList = getChild<LLWornItemsList>("cof_items_list");
+	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 	mCOFItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
 // [/SL:KB]
 

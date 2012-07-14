@@ -9,7 +9,7 @@
  name="Wearing"
  top="0"
  width="312">
-    <wearable_items_list
+    <wearing_items_list
      follows="all"
      height="400"
      layout="topleft"

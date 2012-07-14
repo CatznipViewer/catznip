@@ -200,6 +200,12 @@ protected:
 
 	const LLUUID mInventoryItemUUID;
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	enum EReshapeWidgetSide { SIDE_LEFT = 0x1, SIDE_MIDDLE = 0x2, SIDE_RIGHT = 0x4 };
+	S32  getReshapeWidgetMask() { return mReshapeWidgetMask; }
+	void setReshapeWidgetMask(S32 mask) { mReshapeWidgetMask = mask; }
+// [/SL:KB]
+
 private:
 
 	/** reshape left side widgets
@@ -235,6 +241,9 @@ private:
 
 	S32				mLeftWidgetsWidth;
 	S32				mRightWidgetsWidth;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	S32				mReshapeWidgetMask;
+// [/SL:KB]
 	bool			mNeedsRefresh;
 };
 

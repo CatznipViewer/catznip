@@ -37,6 +37,7 @@ class LLListContextMenu;
 class LLWearableItemsList;
 class LLWearingGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+class LLWornItemsList;
 class LLInventoryPanel;
 class LLMenuButton;
 class LLWearingSortMenu;
@@ -72,8 +73,8 @@ public:
 	bool hasItemSelected();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLInventoryPanel*    getInvPanel() const { return mInvPanel; }
-	LLWearableItemsList* getItemsList() const { return mCOFItemsList; }
+	LLInventoryPanel*   getInvPanel() const  { return mInvPanel; }
+	LLWornItemsList* getItemsList() const { return mCOFItemsList; }
 
 protected:
 	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
@@ -86,8 +87,9 @@ private:
 	void onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
-	LLWearableItemsList* 			mCOFItemsList;
+//	LLWearableItemsList* 			mCOFItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLWornItemsList* 			mCOFItemsList;
 	LLInventoryPanel*				mInvPanel;
 	LLMenuButton*					mSortMenuButton;
 	LLButton*						mToggleFolderView;
