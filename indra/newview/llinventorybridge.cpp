@@ -1483,15 +1483,18 @@ void LLItemBridge::restoreToWorld()
 
 void LLItemBridge::gotoItem()
 {
-	LLInventoryObject *obj = getInventoryObject();
-	if (obj && obj->getIsLinkType())
-	{
-		LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
-		if (active_panel)
-		{
-			active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
-		}
-	}
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	show_item_original(mUUID);
+// [/SL:KB]
+//	LLInventoryObject *obj = getInventoryObject();
+//	if (obj && obj->getIsLinkType())
+//	{
+//		LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
+//		if (active_panel)
+//		{
+//			active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+//		}
+//	}
 }
 
 LLUIImagePtr LLItemBridge::getIcon() const

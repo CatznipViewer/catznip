@@ -295,6 +295,38 @@ void LLPanelMainInventory::closeAllFolders()
 
 //void LLPanelMainInventory::newWindow()
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+const std::string& get_panel_name(LLPanelMainInventory::EPanelType eType)
+{
+	static const std::string PANEL_ALL    = "All Items";
+	static const std::string PANEL_RECENT = "Recent ITems";
+	switch (eType)
+	{
+		case LLPanelMainInventory::PANEL_ALL:
+			return PANEL_ALL;
+		case LLPanelMainInventory::PANEL_RECENT:
+			return PANEL_RECENT;
+		default:
+			return LLStringUtil::null;
+	}
+}
+
+LLInventoryPanel* LLPanelMainInventory::getPanel(EPanelType eType) const
+{
+	const std::string& strPanelName = get_panel_name(eType);
+	return (!strPanelName.empty()) ? getChild<LLInventoryPanel>(strPanelName) : NULL;
+}
+
+LLInventoryPanel* LLPanelMainInventory::selectPanel(EPanelType eType)
+{
+	const std::string& strPanelName = get_panel_name(eType);
+	if (!strPanelName.empty())
+	{
+		mFilterTabs->selectTabByName(get_panel_name(eType));
+		return dynamic_cast<LLInventoryPanel*>(mFilterTabs->getCurrentPanel());
+	}
+	return NULL;
+}
+
 LLFloater* LLPanelMainInventory::newWindow()
 {
 // [/SL:KB]
