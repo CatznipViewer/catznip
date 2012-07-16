@@ -1172,7 +1172,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 		active_inv_floaterp = LLFloaterReg::getInstance("inventory");
 		if (active_inv_floaterp)
 		{
-			active_inv_floaterp->openFloater();
+			active_inv_floaterp->openFloater(active_inv_floaterp->getKey());
 		}
 // [/SL:KB]
 //		floater_inventory->openFloater();

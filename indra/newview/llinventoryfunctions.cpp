@@ -494,7 +494,7 @@ void show_item_original(const LLUUID& item_uuid)
 		LLFloater* pInvFloater = pActiveInvSidepanel->getParentByType<LLFloater>();
 		if (pInvFloater)
 		{
-			pInvFloater->openFloater();
+			pInvFloater->openFloater(pInvFloater->getKey());
 		}
 
 		// Make sure the inventory panels are visible
