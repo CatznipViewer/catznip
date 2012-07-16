@@ -336,7 +336,10 @@ LLFloater* LLPanelMainInventory::newWindow()
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-01-13 (Catznip-3.2.1) | Modified: Catznip-3.2.1
 	if (!gAgentCamera.cameraMouselook())
 	{
-		return LLFloaterReg::showInstance("inventory", LLSD(instance_num));
+		LLFloater* pInvFloater = LLFloaterReg::showInstance("inventory", LLSD(instance_num));
+		if (pInvFloater)
+			pInvFloater->setReuseInstance(false);
+		return pInvFloater;
 	}
 	return NULL;
 // [/SL:KB]
