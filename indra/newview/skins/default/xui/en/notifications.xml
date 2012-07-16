@@ -3341,6 +3341,19 @@ Deeding this object will cause the group to:
 
   <notification
    icon="alertmodal.tga"
+   name="WebLaunchBlog"
+   type="alertmodal">
+Go to the [APP_NAME] blog, for the latest news and information.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view the blog"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+ 
+  <notification
+   icon="alertmodal.tga"
    name="WebLaunchExternalTarget"
    type="alertmodal">
 Do you want to open your Web browser to view this content?
@@ -3395,10 +3408,10 @@ Visit the [SECOND_LIFE] QA Wiki.
    icon="alertmodal.tga"
    name="WebLaunchPublicIssue"
    type="alertmodal">
-Visit the [SECOND_LIFE] Public Issue Tracker, where you can report bugs and other issues.
+Visit the [APP_NAME] issue tracker, where you can report bugs and other issues.
     <tag>confirm</tag>
     <usetemplate
-     ignoretext="Launch my browser to use the Public Issue Tracker"
+     ignoretext="Launch my browser to use the issue tracker"
      name="okcancelignore"
      notext="Cancel"
      yestext="Go to page"/>
