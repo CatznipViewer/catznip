@@ -5798,15 +5798,15 @@ class LLSidetrayPanelVisible : public view_listener_t
 };
 
 
-bool callback_show_url(const LLSD& notification, const LLSD& response)
-{
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	if (0 == option)
-	{
-		LLWeb::loadURL(notification["payload"]["url"].asString());
-	}
-	return false;
-}
+//bool callback_show_url(const LLSD& notification, const LLSD& response)
+//{
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//	if (0 == option)
+//	{
+//		LLWeb::loadURL(notification["payload"]["url"].asString());
+//	}
+//	return false;
+//}
 
 class LLPromptShowURL : public view_listener_t
 {
@@ -5819,16 +5819,19 @@ class LLPromptShowURL : public view_listener_t
 			std::string alert = param.substr(0, offset);
 			std::string url = param.substr(offset+1);
 
-			if(gSavedSettings.getBOOL("UseExternalBrowser"))
-			{ 
-    			LLSD payload;
-    			payload["url"] = url;
-    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
-			}
-			else
-			{
-		        LLWeb::loadURL(url);
-			}
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+			LLWeb::openURL(LLSD().with("url", url).with("notification", alert));
+// [/SL:KB]
+//			if(gSavedSettings.getBOOL("UseExternalBrowser"))
+//			{ 
+//    			LLSD payload;
+//    			payload["url"] = url;
+//    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
+//			}
+//			else
+//			{
+//		        LLWeb::loadURL(url);
+//			}
 		}
 		else
 		{
