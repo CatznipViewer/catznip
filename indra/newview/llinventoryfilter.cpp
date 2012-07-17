@@ -185,8 +185,8 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 	if (!listener) return FALSE;
 
 	LLInventoryType::EType object_type = listener->getInventoryType();
-	const LLUUID object_id = listener->getUUID();
-	const LLInventoryObject *object = gInventory.getObject(object_id);
+//	const LLUUID object_id = listener->getUUID();
+//	const LLInventoryObject *object = gInventory.getObject(object_id);
 
 	const U32 filterTypes = mFilterOps.mFilterTypes;
 
@@ -198,7 +198,11 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 		// If it has no type, pass it, unless it's a link.
 		if (object_type == LLInventoryType::IT_NONE)
 		{
-			if (object && object->getIsLinkType())
+//			if (object && object->getIsLinkType())
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
+			if ( (bridge) && (bridge->isLink()) )
+// [/SL:KB]
 			{
 				return FALSE;
 			}
@@ -214,10 +218,24 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 	// Pass if this item is the target UUID or if it links to the target UUID
 	if (filterTypes & FILTERTYPE_UUID)
 	{
-		if (!object) return FALSE;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		LLUUID object_id = listener->getUUID();
 
-		if (object->getLinkedUUID() != mFilterOps.mFilterUUID)
+		const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
+		if ( (bridge) && (bridge->isLink()) )
+		{
+			object_id = gInventory.getLinkedItemID(object_id);
+		}
+		
+		if (object_id != mFilterOps.mFilterUUID)
+		{
 			return FALSE;
+		}
+// [/SL:KB]
+//		if (!object) return FALSE;
+//
+//		if (object->getLinkedUUID() != mFilterOps.mFilterUUID)
+//			return FALSE;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +281,10 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 			if (is_hidden_if_empty)
 			{
 				// Force the fetching of those folders so they are hidden iff they really are empty...
-				gInventory.fetchDescendentsOf(object_id);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				gInventory.fetchDescendentsOf(listener->getUUID());
+// [/SL:KB]
+//				gInventory.fetchDescendentsOf(object_id);
 				return FALSE;
 			}
 		}
@@ -349,6 +370,11 @@ bool LLInventoryFilter::checkAgainstClipboard(const LLUUID& object_id) const
 
 BOOL LLInventoryFilter::checkAgainstPermissions(const LLFolderViewItem* item) const
 {
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (PERM_NONE == mFilterOps.mPermissions)
+		return TRUE;
+// [/SL:KB]
+
 	const LLFolderViewEventListener* listener = item->getListener();
 	if (!listener) return FALSE;
 
@@ -377,6 +403,11 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) con
 
 BOOL LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewItem* item) const
 {
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (FILTERLINK_INCLUDE_LINKS == mFilterOps.mFilterLinks)
+		return TRUE;
+// [/SL:KB]
+
 	const LLFolderViewEventListener* listener = item->getListener();
 	if (!listener) return TRUE;
 

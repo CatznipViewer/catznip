@@ -390,8 +390,27 @@ BOOL LLFolderView::addFolder( LLFolderViewFolder* folder)
 
 void LLFolderView::closeAllFolders()
 {
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2.2) | Added: Catznip-3.2.2
+	folders_t openTopLevel;
+	for (auto itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	{
+		LLFolderViewFolder* pFolder = *itFolder;
+		if (pFolder->isOpen())
+			openTopLevel.push_back(pFolder);
+	}
+
+//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
+// [/SL:KB]
+
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2.2) | Added: Catznip-3.2.2
+	for (auto itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	{
+		(*itFolder)->setOpen(TRUE);
+	}
+//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+// [/SL:KB]
 	arrangeAll();
 }
 
