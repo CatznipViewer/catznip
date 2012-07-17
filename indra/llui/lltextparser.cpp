@@ -44,7 +44,8 @@
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 LLHighlightEntry::LLHighlightEntry()
-	: mCategoryMask(CAT_GENERAL)
+	: mId(LLUUID::generateNewID())
+	, mCategoryMask(CAT_GENERAL)
 	, mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
@@ -55,7 +56,8 @@ LLHighlightEntry::LLHighlightEntry()
 }
 
 LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
-	: mCategoryMask(CAT_GENERAL)
+	: mId(LLUUID::generateNewID())
+	, mCategoryMask(CAT_GENERAL)
 	, mCondition(CONTAINS)
 	, mCaseSensitive(false)
 	, mColor(LLColor4::white)
@@ -63,6 +65,8 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 	, mHighlightType(PART)
 	, mFlashWindow(false)
 {
+	if (sdEntry.has("id"))
+		mId = sdEntry["id"].asUUID();
 	if (sdEntry.has("category_mask"))
 		mCategoryMask = sdEntry["category_mask"].asInteger();
 	if (sdEntry.has("condition"))
@@ -86,6 +90,7 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 LLSD LLHighlightEntry::toLLSD() const
 {
 	LLSD sdEntry;
+	sdEntry["id"] = mId;
 	sdEntry["category_mask"] = mCategoryMask;
 	sdEntry["condition"] = (S32)mCondition;
 	sdEntry["pattern"] = mPattern;
@@ -400,6 +405,8 @@ void LLTextParser::loadKeywords()
 		mHighlightEntries.push_back(LLHighlightEntry(sdEntry));
 	}
 	fileHighlights.close();
+
+	saveToDisk();
 }
 // [/SL:KB]
 //void LLTextParser::loadKeywords()
@@ -452,3 +459,40 @@ void LLTextParser::saveToDisk() const
 //	file.close();
 //	return TRUE;
 //}
+
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+void LLTextParser::addHighlight(const LLHighlightEntry& entry)
+{
+	// Make sure we don't already have it added
+	if (NULL != getHighlightById(entry.getId()))
+		return;
+	mHighlightEntries.push_back(entry);
+}
+
+LLHighlightEntry* LLTextParser::getHighlightById(const LLUUID& idEntry)
+{
+	highlight_list_t::iterator itEntry =
+		std::find_if(mHighlightEntries.begin(), mHighlightEntries.end(), boost::bind(&LLHighlightEntry::getId, _1) == idEntry);
+	return (mHighlightEntries.end() != itEntry) ? &(*itEntry) : NULL;
+}
+
+const LLHighlightEntry* LLTextParser::getHighlightById(const LLUUID& idEntry) const
+{
+	highlight_list_t::const_iterator itEntry =
+		std::find_if(mHighlightEntries.begin(), mHighlightEntries.end(), boost::bind(&LLHighlightEntry::getId, _1) == idEntry);
+	return (mHighlightEntries.end() != itEntry) ? &(*itEntry) : NULL;
+}
+
+const LLTextParser::highlight_list_t& LLTextParser::getHighlights() const
+{
+	return mHighlightEntries;
+}
+
+void LLTextParser::removeHighlight(const LLUUID& idEntry)
+{
+	highlight_list_t::iterator itEntry =
+		std::find_if(mHighlightEntries.begin(), mHighlightEntries.end(), boost::bind(&LLHighlightEntry::getId, _1) == idEntry);
+	if (mHighlightEntries.end() != itEntry)
+		mHighlightEntries.erase(itEntry);
+}
+// [/SL:KB]

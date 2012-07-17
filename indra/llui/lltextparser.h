@@ -46,8 +46,9 @@ public:
 	LLHighlightEntry();
 	LLHighlightEntry(const LLSD& sdEntry);
 
-	S32  findPattern(const std::string& text, S32 cat_mask) const;
-	LLSD toLLSD() const;
+	S32           findPattern(const std::string& text, S32 cat_mask) const;
+	const LLUUID& getId() const { return mId; }
+	LLSD          toLLSD() const;
 
 public:
 	enum ECategory      { CAT_GENERAL = 0x01, CAT_NEARBYCHAT = 0x02, CAT_IM = 0x04, CAT_GROUP = 0x08, CAT_ALL = 0xFF };
@@ -63,45 +64,64 @@ public:
 	// Other actions
 	LLUUID         mSoundAsset;
 	bool           mFlashWindow;
+protected:
+	LLUUID         mId;
 };
 // [/SL:KB]
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 class LLTextParser : public LLSingleton<LLTextParser>
 {
-public:
-//	typedef enum e_condition_type { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH } EConditionType;
-//	typedef enum e_highlight_type { PART, ALL } EHighlightType;
-	typedef enum e_highlight_position { WHOLE, START, MIDDLE, END } EHighlightPosition;
-	typedef enum e_dialog_action { ACTION_NONE, ACTION_CLOSE, ACTION_ADD, ACTION_COPY, ACTION_UPDATE } EDialogAction;
-
+	friend class LLSingleton<LLTextParser>;
+protected:
 	LLTextParser();
 
-// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+public:
+	typedef std::vector<LLHighlightEntry> highlight_list_t;
+	void                    addHighlight(const LLHighlightEntry& entry);
+	LLHighlightEntry*       getHighlightById(const LLUUID& idEntry);
+	const LLHighlightEntry* getHighlightById(const LLUUID& idEntry) const;
+	const highlight_list_t& getHighlights() const;
+	void                    removeHighlight(const LLUUID& idEntry);
+
 	typedef std::pair<std::string, const LLHighlightEntry*> partial_result_t;
 	typedef std::list<partial_result_t> partial_results_t;
+	typedef enum e_highlight_position { WHOLE, START, MIDDLE, END } EHighlightPosition;
 	partial_results_t parsePartialLineHighlights(const std::string &text, S32 cat_mask, EHighlightPosition part, S32 index = 0);
 	bool parseFullLineHighlights(const std::string& text, S32 cat_mask, const LLHighlightEntry** ppEntry = NULL) const;
-// [/SL:KB]
-//	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
-//	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
 
-private:
-// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-	std::string getFileName() const;
 	void loadKeywords();
 	void saveToDisk() const;
+protected:
+	std::string getFileName() const;
+
+protected:
+	bool	mLoaded;
+	highlight_list_t mHighlightEntries;
+};
 // [/SL:KB]
+//class LLTextParser : public LLSingleton<LLTextParser>
+//{
+//public:
+//	typedef enum e_condition_type { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH } EConditionType;
+//	typedef enum e_highlight_type { PART, ALL } EHighlightType;
+//	typedef enum e_highlight_position { WHOLE, START, MIDDLE, END } EHighlightPosition;
+//	typedef enum e_dialog_action { ACTION_NONE, ACTION_CLOSE, ACTION_ADD, ACTION_COPY, ACTION_UPDATE } EDialogAction;
+//
+//	LLTextParser();
+//
+//	LLSD parsePartialLineHighlights(const std::string &text,const LLColor4 &color, EHighlightPosition part=WHOLE, S32 index=0);
+//	bool parseFullLineHighlights(const std::string &text, LLColor4 *color);
+//
+//private:
 //	S32  findPattern(const std::string &text, LLSD highlight);
 //	std::string getFileName();
 //	void loadKeywords();
 //	bool saveToDisk(LLSD highlights);
-
-public:
+//
+//public:
 //	LLSD	mHighlights;
-	bool	mLoaded;
-// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-	std::vector<LLHighlightEntry> mHighlightEntries;
-// [/SL:KB]
-};
+//	bool	mLoaded;
+//};
 
 #endif

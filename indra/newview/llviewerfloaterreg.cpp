@@ -50,6 +50,9 @@
 #include "llfloaterbump.h"
 #include "llfloaterbvhpreview.h"
 #include "llfloatercamera.h"
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+#include "llfloaterchatalerts.h"
+// [/SL:KB]
 #include "llfloaterdeleteenvpreset.h"
 #include "llfloaterdisplayname.h"
 #include "llfloatereditdaycycle.h"
@@ -186,6 +189,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("bumps", "floater_bumps.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBump>);
 
 	LLFloaterReg::add("camera", "floater_camera.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCamera>);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+	LLFloaterReg::add("chat_alerts", "floater_chat_alerts.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterChatAlerts>);
+// [/SL:KB]
 	LLFloaterReg::add("chat_bar", "floater_chat_bar.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLNearbyChatBar>);
 
 	LLFloaterReg::add("compile_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCompileQueue>);

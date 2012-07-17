@@ -134,6 +134,9 @@
 #include "llstatview.h"
 #include "llstatusbar.h"		// sendMoneyBalanceRequest(), owns L$ balance
 #include "llsurface.h"
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+#include "lltextparser.h"
+// [/SL:KB]
 #include "lltexturecache.h"
 #include "lltexturefetch.h"
 #include "lltoolmgr.h"
@@ -945,6 +948,10 @@ bool idle_startup()
 		
 		// Load media plugin cookies
 		LLViewerMedia::loadCookieFile();
+
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+		LLTextParser::instance().loadKeywords();
+// [/SL:KB]
 
 		//-------------------------------------------------
 		// Handle startup progress screen
