@@ -681,13 +681,13 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 38)); // Bottom Right
 
 		// Misc
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO));
+		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA));
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_HAIR));
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_EYES));
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SHAPE));
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PHYSICS));
 		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SKIN));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA));
 	}
 }
 
