@@ -321,7 +321,7 @@ void LLPanelMainInventory::resetFilters()
 	setFilterTextFromFilter();
 }
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 {
 	getActivePanel()->setSortBy(userdata.asString());

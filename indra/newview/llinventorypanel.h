@@ -219,7 +219,7 @@ public:
 	static const std::string RECENTITEMS_SORT_ORDER;
 	static const std::string INHERIT_SORT_ORDER;
 	
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 	void setSortBy(const std::string& sort_type);
 // [/SL:KB]
 	void setSortOrder(U32 order);

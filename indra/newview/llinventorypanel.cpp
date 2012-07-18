@@ -350,7 +350,7 @@ const std::string LLInventoryPanel::getFilterSubString()
 	return mFolderRoot->getFilterSubString(); 
 }
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLInventoryPanel::setSortBy(const std::string& sort_type)
 {
 	U32 sort_order_mask = getSortOrder();
