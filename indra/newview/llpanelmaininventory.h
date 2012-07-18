@@ -150,6 +150,10 @@ protected:
 	BOOL isActionEnabled(const LLSD& command_name);
 	BOOL isActionChecked(const LLSD& userdata);
 	void onCustomAction(const LLSD& command_name);
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	void onChangeFolderSortOrder(const LLSD& sdParam);
+	bool onCheckFolderSortOrder(const LLSD& sdParam);
+// [/SL:KB]
 	bool handleDragAndDropToTrash(BOOL drop, EDragAndDropType cargo_type, EAcceptance* accept);
 	/**
 	 * Set upload cost in "Upload" sub menu.
@@ -160,6 +164,10 @@ private:
 	LLToggleableMenu*			mMenuGearDefault;
 	LLMenuGL*					mMenuAdd;
 	LLMenuButton*				mGearMenuButton;
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	LLToggleableMenu*			mMenuSort;
+	LLMenuButton*				mSortMenuButton;
+// [/SL:KB]
 
 	bool						mNeedUploadCost;
 	// List Commands                                                              //

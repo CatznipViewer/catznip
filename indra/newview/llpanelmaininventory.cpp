@@ -106,6 +106,10 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	  mSavedFolderState(NULL),
 	  mFilterText(""),
 	  mMenuGearDefault(NULL),
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	  mMenuSort(NULL),
+	  mSortMenuButton(NULL),
+// [/SL:KB]
 	  mMenuAdd(NULL),
 	  mNeedUploadCost(true)
 {
@@ -194,6 +198,9 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 
 	mGearMenuButton = getChild<LLMenuButton>("options_gear_btn");
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
+// [/SL:KB]
 
 	initListCommandsHandlers();
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
@@ -334,44 +341,51 @@ void LLPanelMainInventory::resetFilters()
 	setFilterTextFromFilter();
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 {
-	U32 sort_order_mask = getActivePanel()->getSortOrder();
-	std::string sort_type = userdata.asString();
-	if (sort_type == "name")
-	{
-		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "date")
-	{
-		sort_order_mask |= LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "foldersalwaysbyname")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-	}
-	else if (sort_type == "systemfolderstotop")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-	}
-
-	getActivePanel()->setSortOrder(sort_order_mask);
-	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+	getActivePanel()->setSortBy(userdata.asString());
+	gSavedSettings.setU32("InventorySortOrder", getActivePanel()->getSortOrder());
 }
+// [/SL:KB]
+//void LLPanelMainInventory::setSortBy(const LLSD& userdata)
+//{
+//	U32 sort_order_mask = getActivePanel()->getSortOrder();
+//	std::string sort_type = userdata.asString();
+//	if (sort_type == "name")
+//	{
+//		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "date")
+//	{
+//		sort_order_mask |= LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "foldersalwaysbyname")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//	}
+//	else if (sort_type == "systemfolderstotop")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//	}
+//
+//	getActivePanel()->setSortOrder(sort_order_mask);
+//	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+//}
 
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
@@ -967,10 +981,20 @@ void LLPanelMainInventory::initListCommandsHandlers()
 			));
 
 	mCommitCallbackRegistrar.add("Inventory.GearDefault.Custom.Action", boost::bind(&LLPanelMainInventory::onCustomAction, this, _2));
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mCommitCallbackRegistrar.add("Inventory.Sort.Folder", boost::bind(&LLPanelMainInventory::onChangeFolderSortOrder, this, _2));
+// [/SL:KB]
 	mEnableCallbackRegistrar.add("Inventory.GearDefault.Check", boost::bind(&LLPanelMainInventory::isActionChecked, this, _2));
 	mEnableCallbackRegistrar.add("Inventory.GearDefault.Enable", boost::bind(&LLPanelMainInventory::isActionEnabled, this, _2));
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mEnableCallbackRegistrar.add("Inventory.Sort.CheckFolder", boost::bind(&LLPanelMainInventory::onCheckFolderSortOrder, this, _2));
+// [/SL:KB]
 	mMenuGearDefault = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_gear_default.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	mGearMenuButton->setMenu(mMenuGearDefault);
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mMenuSort = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_sort.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	mSortMenuButton->setMenu(mMenuSort);
+// [/SL:KB]
 	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 
 	// Update the trash button when selected item(s) get worn or taken off.
@@ -1038,6 +1062,13 @@ void LLPanelMainInventory::saveTexture(const LLSD& userdata)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+void LLPanelMainInventory::onChangeFolderSortOrder(const LLSD& sdParam)
+{
+	setSortBy(sdParam);
+}
+// [/SL:KB]
+
 void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 {
 	if (!isActionEnabled(userdata))
@@ -1048,26 +1079,26 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 	{
 		newWindow();
 	}
-	if (command_name == "sort_by_name")
-	{
-		const LLSD arg = "name";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_by_recent")
-	{
-		const LLSD arg = "date";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_folders_by_name")
-	{
-		const LLSD arg = "foldersalwaysbyname";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_system_folders_to_top")
-	{
-		const LLSD arg = "systemfolderstotop";
-		setSortBy(arg);
-	}
+//	if (command_name == "sort_by_name")
+//	{
+//		const LLSD arg = "name";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_by_recent")
+//	{
+//		const LLSD arg = "date";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_folders_by_name")
+//	{
+//		const LLSD arg = "foldersalwaysbyname";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_system_folders_to_top")
+//	{
+//		const LLSD arg = "systemfolderstotop";
+//		setSortBy(arg);
+//	}
 	if (command_name == "show_filters")
 	{
 		toggleFindOptions();
@@ -1251,31 +1282,49 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 	return TRUE;
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+bool LLPanelMainInventory::onCheckFolderSortOrder(const LLSD& sdParam)
+{
+	U32 nSortOderMask = getActivePanel()->getSortOrder();
+	const std::string strParam = sdParam.asString();
+	if ("name" == strParam)
+		return ~nSortOderMask & LLInventoryFilter::SO_DATE;
+	else if ("date" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_DATE;
+	else if ("foldersalwaysbyname" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
+	else if ("systemfolderstotop" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+	return false;
+}
+// [/SL:KB]
+
 BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 {
-	U32 sort_order_mask = getActivePanel()->getSortOrder();
-	const std::string command_name = userdata.asString();
-	if (command_name == "sort_by_name")
-	{
-		return ~sort_order_mask & LLInventoryFilter::SO_DATE;
-	}
-
-	if (command_name == "sort_by_recent")
-	{
-		return sort_order_mask & LLInventoryFilter::SO_DATE;
-	}
-
-	if (command_name == "sort_folders_by_name")
-	{
-		return sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
-	}
-
-	if (command_name == "sort_system_folders_to_top")
-	{
-		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-	}
-
+//	U32 sort_order_mask = getActivePanel()->getSortOrder();
+//	const std::string command_name = userdata.asString();
+//	if (command_name == "sort_by_name")
+//	{
+//		return ~sort_order_mask & LLInventoryFilter::SO_DATE;
+//	}
+//
+//	if (command_name == "sort_by_recent")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_DATE;
+//	}
+//
+//	if (command_name == "sort_folders_by_name")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//	}
+//
+//	if (command_name == "sort_system_folders_to_top")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//	}
+//
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	const std::string command_name = userdata.asString();
 	if (command_name == "filter_string_per_tab")
 	{
 		return mFilterSubStringPerTab;

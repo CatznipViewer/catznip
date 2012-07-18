@@ -129,6 +129,27 @@
        auto_resize="false"
        height="25"
        layout="topleft"
+       name="options_sort_btn_panel"
+       user_resize="false"
+       width="32">
+        <menu_button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Sort"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left="0"
+         name="options_sort_btn"
+         top="0"
+         tooltip="Show sorting options"          
+         width="31" />
+      </layout_panel>
+      <layout_panel
+       auto_resize="false"
+       height="25"
+       layout="topleft"
        name="collapse_btn_panel"
        user_resize="false"
        width="32">
@@ -192,7 +213,7 @@
        height="25"
        layout="topleft"
        name="dummy_panel"
-       width="148">
+       width="116">
           <icon
            follows="bottom|left|right"
            height="25"
@@ -201,7 +222,7 @@
            left="0"
            top="0"
            name="dummy_icon"
-           width="211" />
+           width="116" />
       </layout_panel>
       <layout_panel
        auto_resize="false"
