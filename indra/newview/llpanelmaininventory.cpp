@@ -124,7 +124,7 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 	mCommitCallbackRegistrar.add("Inventory.ResetFilters", boost::bind(&LLPanelMainInventory::resetFilters, this));
 	mCommitCallbackRegistrar.add("Inventory.SetSortBy", boost::bind(&LLPanelMainInventory::setSortBy, this, _2));
-	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars));
+//	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars));
 
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
 	mEnableCallbackRegistrar.add("Inventory.EnableCreate", boost::bind(&LLPanelMainInventory::checkCreate, this, _2));
@@ -1069,21 +1069,21 @@ void LLPanelMainInventory::onClipboardAction(const LLSD& userdata)
 	getActivePanel()->getRootFolder()->doToSelected(getActivePanel()->getModel(),command_name);
 }
 
-void LLPanelMainInventory::saveTexture(const LLSD& userdata)
-{
-	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-	if (!current_item)
-	{
-		return;
-	}
-	
-	const LLUUID& item_id = current_item->getListener()->getUUID();
-	LLPreviewTexture* preview_texture = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item_id), TAKE_FOCUS_YES);
-	if (preview_texture)
-	{
-		preview_texture->openToSave();
-	}
-}
+//void LLPanelMainInventory::saveTexture(const LLSD& userdata)
+//{
+//	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	if (!current_item)
+//	{
+//		return;
+//	}
+//	
+//	const LLUUID& item_id = current_item->getListener()->getUUID();
+//	LLPreviewTexture* preview_texture = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item_id), TAKE_FOCUS_YES);
+//	if (preview_texture)
+//	{
+//		preview_texture->openToSave();
+//	}
+//}
 
 // [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
 void LLPanelMainInventory::onChangeFolderSortOrder(const LLSD& sdParam)
@@ -1144,10 +1144,10 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		const std::string notification = "ConfirmEmptyLostAndFound";
 		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
 	}
-	if (command_name == "save_texture")
-	{
-		saveTexture(userdata);
-	}
+//	if (command_name == "save_texture")
+//	{
+//		saveTexture(userdata);
+//	}
 	// This doesn't currently work, since the viewer can't change an assetID an item.
 	if (command_name == "regenerate_link")
 	{
@@ -1206,21 +1206,21 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 // [/SL:KB]
 }
 
-bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
-{
-	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-	if (current_item) 
-	{
-		LLViewerInventoryItem *inv_item = current_item->getInventoryItem();
-		if(inv_item)
-		{
-			bool can_save = inv_item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
-			LLInventoryType::EType curr_type = current_item->getListener()->getInventoryType();
-			return can_save && (curr_type == LLInventoryType::IT_TEXTURE || curr_type == LLInventoryType::IT_SNAPSHOT);
-		}
-	}
-	return false;
-}
+//bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
+//{
+//	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	if (current_item) 
+//	{
+//		LLViewerInventoryItem *inv_item = current_item->getInventoryItem();
+//		if(inv_item)
+//		{
+//			bool can_save = inv_item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
+//			LLInventoryType::EType curr_type = current_item->getListener()->getInventoryType();
+//			return can_save && (curr_type == LLInventoryType::IT_TEXTURE || curr_type == LLInventoryType::IT_SNAPSHOT);
+//		}
+//	}
+//	return false;
+//}
 
 BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 {
@@ -1250,10 +1250,10 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 		}
 		return FALSE;
 	}
-	if (command_name == "save_texture")
-	{
-		return isSaveTextureEnabled(userdata);
-	}
+//	if (command_name == "save_texture")
+//	{
+//		return isSaveTextureEnabled(userdata);
+//	}
 	if (command_name == "find_original")
 	{
 		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
@@ -1296,11 +1296,11 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 		return FALSE;
 	}
 
-	if (command_name == "share")
-	{
-		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-		return parent ? parent->canShare() : FALSE;
-	}
+//	if (command_name == "share")
+//	{
+//		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		return parent ? parent->canShare() : FALSE;
+//	}
 
 	return TRUE;
 }
