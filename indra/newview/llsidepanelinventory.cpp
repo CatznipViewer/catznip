@@ -56,7 +56,7 @@
 #include "lltrans.h"
 #include "llviewermedia.h"
 #include "llviewernetwork.h"
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
 #include "lltrans.h"
 // [/SL:KB]
 #include "llweb.h"
@@ -126,6 +126,10 @@ LLSidepanelInventory::LLSidepanelInventory()
 	, mInboxEnabled(false)
 	, mCategoriesObserver(NULL)
 	, mInboxAddedObserver(NULL)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	, mToolbarActionPanel(NULL)
+	, mToolbarActionBtn(NULL)
+// [/SL:KB]
 {
 	//buildFromFile( "panel_inventory.xml"); // Called from LLRegisterPanelClass::defaultPanelClassBuilder()
 }
@@ -165,32 +169,35 @@ BOOL LLSidepanelInventory::postBuild()
 	{
 		mInventoryPanel = getChild<LLPanel>("sidepanel__inventory_panel");
 
-		mInfoBtn = mInventoryPanel->getChild<LLButton>("info_btn");
-		mInfoBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onInfoButtonClicked, this));
-		
-		mShareBtn = mInventoryPanel->getChild<LLButton>("share_btn");
-		mShareBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShareButtonClicked, this));
-		
+//		mInfoBtn = mInventoryPanel->getChild<LLButton>("info_btn");
+//		mInfoBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onInfoButtonClicked, this));
+//		
+//		mShareBtn = mInventoryPanel->getChild<LLButton>("share_btn");
+//		mShareBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShareButtonClicked, this));
+//		
 //		mShopBtn = mInventoryPanel->getChild<LLButton>("shop_btn");
 //		mShopBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShopButtonClicked, this));
-
-		mWearBtn = mInventoryPanel->getChild<LLButton>("wear_btn");
-		mWearBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onWearButtonClicked, this));
-		
+//
+//		mWearBtn = mInventoryPanel->getChild<LLButton>("wear_btn");
+//		mWearBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onWearButtonClicked, this));
+//		
 //		mPlayBtn = mInventoryPanel->getChild<LLButton>("play_btn");
 //		mPlayBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onPlayButtonClicked, this));
-		
+//		
 //		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
 //		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
-		
-		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
-		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
+//		
+//		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
+//		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
 		
 		mPanelMainInventory = mInventoryPanel->getChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
-		mPanelMainInventory->setActivePanelCallback(boost::bind(&LLSidepanelInventory::onActivePanelChanged, this, _1));
-		mPanelMainInventory->setModelChangedCallback(boost::bind(&LLSidepanelInventory::onModelChanged, this, _1));
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+		mToolbarActionPanel = mPanelMainInventory->findChild<LLPanel>("default_action_btn_panel", TRUE);
+		llassert(mToolbarActionPanel);
+		mToolbarActionBtn = mToolbarActionPanel->findChild<LLButton>("default_action_btn", TRUE);
+		mToolbarActionBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarActionClicked, this));
+		llassert(mToolbarActionBtn);
 // [/SL:KB]
 		LLTabContainer* tabs = mPanelMainInventory->getChild<LLTabContainer>("inventory filter tabs");
 		tabs->setCommitCallback(boost::bind(&LLSidepanelInventory::updateVerbs, this));
@@ -442,34 +449,44 @@ void LLSidepanelInventory::onOpen(const LLSD& key)
 	}
 }
 
-void LLSidepanelInventory::onInfoButtonClicked()
-{
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	LLInventoryPanel* pActivePanel = getActivePanel();
-	pActivePanel->getRootFolder()->doToSelected(pActivePanel->getModel(), "properties");
-// [/SL:KB]
-//	LLInventoryItem *item = getSelectedItem();
-//	if (item)
+//void LLSidepanelInventory::onInfoButtonClicked()
+//{
+//// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
+//	LLInventoryPanel* pActivePanel = getActivePanel();
+//	if (pActivePanel)
 //	{
-//		mItemPanel->reset();
-//		mItemPanel->setItemID(item->getUUID());
-//		showItemInfoPanel();
+//		pActivePanel->getRootFolder()->doToSelected(pActivePanel->getModel(), "properties");
 //	}
-}
+//// [/SL:KB]
+////	LLInventoryItem *item = getSelectedItem();
+////	if (item)
+////	{
+////		mItemPanel->reset();
+////		mItemPanel->setItemID(item->getUUID());
+////		showItemInfoPanel();
+////	}
+//}
 
-void LLSidepanelInventory::onShareButtonClicked()
-{
-	LLAvatarActions::shareWithAvatars();
-}
+//void LLSidepanelInventory::onShareButtonClicked()
+//{
+//	LLAvatarActions::shareWithAvatars();
+//}
 
 //void LLSidepanelInventory::onShopButtonClicked()
 //{
 //	LLWeb::loadURLExternal(gSavedSettings.getString("MarketplaceURL"));
 //}
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+void LLSidepanelInventory::onToolbarActionClicked()
+{
+	performActionOnSelection(getSelectionAction());
+}
+// [/SL:KB]
+
 void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 {
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
 	LLInventoryPanel* pPanel = getActivePanel();
 	if ( (!pPanel) || (!pPanel->getRootFolder()) )
 		return;
@@ -494,11 +511,8 @@ void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 //	current_item->getListener()->performAction(mPanelMainInventory->getActivePanel()->getModel(), action);
 }
 
-void LLSidepanelInventory::onWearButtonClicked()
-{
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
-	performActionOnSelection(getSelectionAction());
-// [/SL:KB]
+//void LLSidepanelInventory::onWearButtonClicked()
+//{
 //	// Get selected items set.
 //	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
 //	if (selected_uuids_set.empty()) return; // nothing selected
@@ -512,7 +526,7 @@ void LLSidepanelInventory::onWearButtonClicked()
 //
 //	// Wear all selected items.
 //	wear_multiple(selected_uuids_vec, true);
-}
+//}
 
 //void LLSidepanelInventory::onPlayButtonClicked()
 //{
@@ -538,9 +552,9 @@ void LLSidepanelInventory::onWearButtonClicked()
 //	performActionOnSelection("teleport");
 //}
 
-void LLSidepanelInventory::onOverflowButtonClicked()
-{
-}
+//void LLSidepanelInventory::onOverflowButtonClicked()
+//{
+//}
 
 void LLSidepanelInventory::onBackButtonClicked()
 {
@@ -587,70 +601,61 @@ void LLSidepanelInventory::showInventoryPanel()
 
 void LLSidepanelInventory::updateVerbs()
 {
-	mInfoBtn->setEnabled(FALSE);
-	mShareBtn->setEnabled(FALSE);
-
-	mWearBtn->setVisible(FALSE);
-	mWearBtn->setEnabled(FALSE);
-/*
-	mPlayBtn->setVisible(FALSE);
-	mPlayBtn->setEnabled(FALSE);
- 	mTeleportBtn->setVisible(FALSE);
- 	mTeleportBtn->setEnabled(FALSE);
- 	mShopBtn->setVisible(TRUE);
-*/
-
-	mShareBtn->setEnabled(canShare());
-
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.1.2a) | Added: Catznip-2.0.0a
-	// We usurp the "Wear" button and just make it handle everything
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 	std::string strAction = getSelectionAction();
 	if (!strAction.empty())
 	{
-		mWearBtn->setLabel(LLTrans::getString("InvAction " + strAction));
-		mWearBtn->setVisible(TRUE);
-		mWearBtn->setEnabled(TRUE);
-
-		bool is_single_selection = getSelectedCount() == 1;
-		mInfoBtn->setEnabled(is_single_selection);
-		mShareBtn->setEnabled(is_single_selection);
+		mToolbarActionBtn->setLabel(LLTrans::getString("InvAction " + strAction));
+		mToolbarActionBtn->setVisible(TRUE);
+		mToolbarActionBtn->setEnabled(TRUE);
 	}
+	mToolbarActionPanel->setVisible(!strAction.empty());
 // [/SL:KB]
-
-/*
-	const LLInventoryItem *item = getSelectedItem();
-	if (!item)
-		return;
-
-	bool is_single_selection = getSelectedCount() == 1;
-
-	mInfoBtn->setEnabled(is_single_selection);
-
-	switch(item->getInventoryType())
-	{
-		case LLInventoryType::IT_WEARABLE:
-		case LLInventoryType::IT_OBJECT:
-		case LLInventoryType::IT_ATTACHMENT:
-			mWearBtn->setVisible(TRUE);
-			mWearBtn->setEnabled(canWearSelected());
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		case LLInventoryType::IT_SOUND:
-		case LLInventoryType::IT_GESTURE:
-		case LLInventoryType::IT_ANIMATION:
-			mPlayBtn->setVisible(TRUE);
-			mPlayBtn->setEnabled(TRUE);
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		case LLInventoryType::IT_LANDMARK:
-			mTeleportBtn->setVisible(TRUE);
-			mTeleportBtn->setEnabled(TRUE);
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		default:
-			break;
-	}
-*/
+//	mInfoBtn->setEnabled(FALSE);
+//	mShareBtn->setEnabled(FALSE);
+//
+//	mWearBtn->setVisible(FALSE);
+//	mWearBtn->setEnabled(FALSE);
+//	mPlayBtn->setVisible(FALSE);
+//	mPlayBtn->setEnabled(FALSE);
+// 	mTeleportBtn->setVisible(FALSE);
+// 	mTeleportBtn->setEnabled(FALSE);
+// 	mShopBtn->setVisible(TRUE);
+//
+//	mShareBtn->setEnabled(canShare());
+//
+//	const LLInventoryItem *item = getSelectedItem();
+//	if (!item)
+//		return;
+//
+//	bool is_single_selection = getSelectedCount() == 1;
+//
+//	mInfoBtn->setEnabled(is_single_selection);
+//
+//	switch(item->getInventoryType())
+//	{
+//		case LLInventoryType::IT_WEARABLE:
+//		case LLInventoryType::IT_OBJECT:
+//		case LLInventoryType::IT_ATTACHMENT:
+//			mWearBtn->setVisible(TRUE);
+//			mWearBtn->setEnabled(canWearSelected());
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		case LLInventoryType::IT_SOUND:
+//		case LLInventoryType::IT_GESTURE:
+//		case LLInventoryType::IT_ANIMATION:
+//			mPlayBtn->setVisible(TRUE);
+//			mPlayBtn->setEnabled(TRUE);
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		case LLInventoryType::IT_LANDMARK:
+//			mTeleportBtn->setVisible(TRUE);
+//			mTeleportBtn->setEnabled(TRUE);
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		default:
+//			break;
+//	}
 }
 
 bool LLSidepanelInventory::canShare()
@@ -708,7 +713,7 @@ bool LLSidepanelInventory::canWearSelected()
 //	return item;
 //}
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2.1) | Modified: Catznip-3.2.1
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
 bool LLSidepanelInventory::getSelectedItems(LLInventoryModel::item_array_t& items) const
 {
 	items.clear();
@@ -736,24 +741,21 @@ bool LLSidepanelInventory::getSelectedItems(LLInventoryModel::item_array_t& item
 // [/SL:KB]
 
 //U32 LLSidepanelInventory::getSelectedCount()
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
-U32 LLSidepanelInventory::getSelectedCount() const
-// [/SL:KB]
-{
-	int count = 0;
-
-	std::set<LLUUID> selection_list = mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
-	count += selection_list.size();
-
-	if ((count == 0) && mInboxEnabled && (mInventoryPanelInbox != NULL))
-	{
-		selection_list = mInventoryPanelInbox->getRootFolder()->getSelectionList();
-
-		count += selection_list.size();
-	}
-
-	return count;
-}
+//{
+//	int count = 0;
+//
+//	std::set<LLUUID> selection_list = mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
+//	count += selection_list.size();
+//
+//	if ((count == 0) && mInboxEnabled && (mInventoryPanelInbox != NULL))
+//	{
+//		selection_list = mInventoryPanelInbox->getRootFolder()->getSelectionList();
+//
+//		count += selection_list.size();
+//	}
+//
+//	return count;
+//}
 
 LLInventoryPanel *LLSidepanelInventory::getActivePanel()
 {
@@ -805,7 +807,7 @@ std::set<LLUUID> LLSidepanelInventory::getInboxSelectionList()
 	return inventory_selected_uuids;
 }
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
 
 // Returns IT_XXX if every item has the same inventory type or IT_NONE otherwise
 LLInventoryType::EType get_items_invtype(const LLInventoryModel::item_array_t& items)
@@ -844,25 +846,13 @@ std::string LLSidepanelInventory::getSelectionAction() const
 			return (!get_items_worn(items)) ? "activate" : "deactivate";
 		case LLInventoryType::IT_LANDMARK:
 			// It doesn't make much sense to teleport to more than one landmark
-			return (1 == getSelectedCount()) ? "teleport" : LLStringUtil::null;
+			return (1 == items.size()) ? "teleport" : LLStringUtil::null;
 		case LLInventoryType::IT_NONE:
 			// Mixed selection type
 			return (get_items_wearable(items)) ? ( (!get_items_worn(items)) ? "wear" : "take_off" ) : "open";
 		default:
 			return "open";
 	}
-}
-
-void LLSidepanelInventory::onActivePanelChanged(LLInventoryPanel*)
-{
-	if (isMainInventoryPanelActive())
-		updateVerbs();
-}
-
-void LLSidepanelInventory::onModelChanged(U32 mask)
-{
-	if ( (mask & LLInventoryObserver::LABEL) && (isMainInventoryPanelActive()) )
-		updateVerbs();
 }
 
 // [/SL:KB]

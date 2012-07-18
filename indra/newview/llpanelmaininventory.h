@@ -81,16 +81,6 @@ public:
 	
 	void setSelectCallback(const LLFolderView::signal_t::slot_type& cb);
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
-	typedef boost::signals2::signal<void(LLInventoryPanel*)> activepanel_callback_t;
-	void setActivePanelCallback(const activepanel_callback_t::slot_type& cb) { mActivePanelCallback.connect(cb); }
-
-	// We could (should?) do this with our very own LLInventoryObserver derived class, but that involves setting up a visibility signal
-	// to start/stop it on visibility changes so I'm not sure that would really be all that much more efficient
-	typedef boost::signals2::signal<void(U32)> modelchanged_callback_t;
-	void setModelChangedCallback(const modelchanged_callback_t::slot_type& cb) { mModelChangedCallback.connect(cb); }
-// [/SL:KB]
-
 	void onFilterEdit(const std::string& search_string );
 protected:
 	//
@@ -151,10 +141,6 @@ private:
 	std::string					mFloaterTitle;
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
-	activepanel_callback_t      mActivePanelCallback;
-	modelchanged_callback_t     mModelChangedCallback;
-// [/SL:KB]
 	//////////////////////////////////////////////////////////////////////////////////
 	// List Commands                                                                //
 protected:

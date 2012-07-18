@@ -534,10 +534,6 @@ void LLPanelMainInventory::onFilterSelected()
 // [/SL:KB]
 //	mActivePanel = (LLInventoryPanel*)getChild<LLTabContainer>("inventory filter tabs")->getCurrentPanel();
 
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
-	mActivePanelCallback(mActivePanel);
-// [/SL:KB]
-
 	if (!mActivePanel)
 	{
 		return;
@@ -599,9 +595,6 @@ BOOL LLPanelMainInventory::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 void LLPanelMainInventory::changed(U32 mask)
 {
 	updateItemcountText();
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
-	mModelChangedCallback(mask);
-// [/SL:KB]
 }
 
 

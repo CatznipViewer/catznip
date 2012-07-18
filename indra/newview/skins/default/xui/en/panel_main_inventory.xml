@@ -213,7 +213,7 @@
        height="25"
        layout="topleft"
        name="dummy_panel"
-       width="116">
+       width="46">
           <icon
            follows="bottom|left|right"
            height="25"
@@ -222,7 +222,27 @@
            left="0"
            top="0"
            name="dummy_icon"
-           width="116" />
+           width="46" />
+      </layout_panel>
+      <layout_panel
+       auto_resize="false"
+       height="25"
+       layout="topleft"
+       name="default_action_btn_panel"
+       width="70">
+          <button
+           follows="bottom|left"
+           height="25"
+           halign="center"
+           image_hover_unselected="Toolbar_Middle_Over"
+           image_selected="Toolbar_Middle_Selected"
+           image_unselected="Toolbar_Middle_Off"
+           label="Teleport"
+           layout="topleft"
+           left="0"
+           name="default_action_btn"
+           top="0"
+           width="70" />
       </layout_panel>
       <layout_panel
        auto_resize="false"

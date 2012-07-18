@@ -28,7 +28,7 @@
 #define LL_LLSIDEPANELINVENTORY_H
 
 #include "llpanel.h"
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2)
 #include "llinventorymodel.h"
 // [/SL:KB]
 
@@ -87,11 +87,12 @@ public:
 
 protected:
 	// Tracks highlighted (selected) item in inventory panel.
-//	LLInventoryItem *getSelectedItem();
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2.1) | Modified: Catznip-3.2.1
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
 	bool getSelectedItems(LLInventoryModel::item_array_t& items) const;
-	U32  getSelectedCount() const;
+	// Returns the action that makes sense for the current selection (or an empty string if none)
+	std::string getSelectionAction() const;
 // [/SL:KB]
+//	LLInventoryItem *getSelectedItem();
 //	U32 getSelectedCount();
 	void onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action);
 	// "wear", "teleport", etc.
@@ -100,14 +101,6 @@ protected:
 	bool canWearSelected(); // check whether selected items can be worn
 
 	void onInboxChanged(const LLUUID& inbox_id);
-
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2.1) | Added: Catznip-2.0.0
-	// Returns the action that makes sense for the current selection (or an empty string if none)
-	std::string getSelectionAction() const;
-
-	void onActivePanelChanged(LLInventoryPanel*);
-	void onModelChanged(U32 mask);
-// [/SL:KB]
 
 	//
 	// UI Elements
@@ -120,23 +113,30 @@ private:
 	LLPanelMainInventory*		mPanelMainInventory;
 
 protected:
-	void 						onInfoButtonClicked();
-	void 						onShareButtonClicked();
-	void 						onShopButtonClicked();
-	void 						onWearButtonClicked();
-	void 						onPlayButtonClicked();
-	void 						onTeleportButtonClicked();
-	void 						onOverflowButtonClicked();
+//	void 						onInfoButtonClicked();
+//	void 						onShareButtonClicked();
+//	void 						onShopButtonClicked();
+//	void 						onWearButtonClicked();
+//	void 						onPlayButtonClicked();
+//	void 						onTeleportButtonClicked();
+//	void 						onOverflowButtonClicked();
 	void 						onBackButtonClicked();
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	void 						onToolbarActionClicked();
+// [/SL:KB]
 
 private:
-	LLButton*					mInfoBtn;
-	LLButton*					mShareBtn;
-	LLButton*					mWearBtn;
+//	LLButton*					mInfoBtn;
+//	LLButton*					mShareBtn;
+//	LLButton*					mWearBtn;
 //	LLButton*					mPlayBtn;
 //	LLButton*					mTeleportBtn;
-	LLButton*					mOverflowBtn;
+//	LLButton*					mOverflowBtn;
 //	LLButton*					mShopBtn;
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	LLPanel*					mToolbarActionPanel;
+	LLButton*					mToolbarActionBtn;
+// [/SL:KB]
 	bool						mInboxEnabled;
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;

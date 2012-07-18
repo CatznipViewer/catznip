@@ -133,6 +133,7 @@
                  </panel>
              </layout_panel>
          </layout_stack>
+<!--
 		<panel
 		     follows="bottom|left|right"
 			 height="27"
@@ -202,7 +203,6 @@
                      name="shop_btn_lp"
                      auto_resize="true"
                      width="104">
-<!--
                     <button
                          enabled="true"
                          follows="bottom|left|right"
@@ -214,7 +214,6 @@
                          tool_tip="Open Marketplace webpage"
                          top="0"
                          width="104" />
--->
                     <button
                          enabled="false"
                          follows="bottom|left|right"
@@ -223,10 +222,9 @@
                          layout="topleft"
                          left="2"
                          name="wear_btn"
-                         tool_tip="Wear selected outfit"
+                         tool_tip="Wear seleceted outfit"
                          top="0"
                          width="104" />
-<!--
                     <button
                          enabled="false"
                          follows="bottom|left|right"
@@ -248,11 +246,10 @@
                          tool_tip="Teleport to the selected area"
                          top="0"
                          width="104" />
--->
 			    </layout_panel>
 			</layout_stack>
-
 		</panel>
+-->
 	</panel>
 	<panel
 		 follows="all"
