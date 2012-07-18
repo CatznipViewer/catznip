@@ -25,7 +25,7 @@
               top="0"
               orientation="vertical"
               name="inventory_layout_stack"
-              height="538"
+              height="570"
               width="330">
              <layout_panel
                  name="main_inventory_layout_panel"
@@ -35,7 +35,7 @@
                  min_dim="150"
                  width="330"
                  follows="bottom|left|right"
-                 height="303">
+                 height="335">
                  <panel
                       class="panel_main_inventory"
                       filename="panel_main_inventory.xml"
@@ -45,7 +45,7 @@
                       name="panel_main_inventory"
                       top="0"
                       label=""
-                      height="303"
+                      height="335"
                       width="330" />
              </layout_panel>
 			 <layout_panel
@@ -56,7 +56,7 @@
                  follows="left|right|top"
                  name="inbox_layout_panel"
                  visible="false"
-                 min_dim="35"
+                 min_dim="38"
                  max_dim="235"
                  expanded_min_dim="90"
                  height="235">
@@ -78,7 +78,7 @@
 						font="SansSerifMedium"
                         name="inbox_btn"
                         height="35"
-                        width="308"
+                        width="320"
                         image_unselected="MarketplaceBtn_Off"
                         image_selected="MarketplaceBtn_Selected"
                         halign="left"
@@ -88,7 +88,7 @@
                         tab_stop="false"
                         pad_left="35"
                         top="0"
-                        left="10" />
+                        left="5" />
                      <text
                         type="string"
                         length="1"
@@ -107,12 +107,12 @@
                      <panel
                         name="inbox_inventory_placeholder_panel"
                         follows="all"
-                        left="10"
-                        bottom="235"
-                        width="308"
-                        top="35"
+                        left="5"
+                        bottom="230"
+                        width="320"
+                        top="38"
                         bg_opaque_color="InventoryBackgroundColor"
-                        background_visible="true"
+                        background_visible="false"
                         background_opaque="true"
                         tool_tip="Drag and drop items to your inventory to use them"
                         >
@@ -123,8 +123,8 @@
 							layout="topleft"
 							top="0"
 							left="0"
-							width="308"
-							height="200"
+							width="320"
+							height="192"
 							wrap="true"
 							halign="center">
 							Purchases from the marketplace will be delivered here.

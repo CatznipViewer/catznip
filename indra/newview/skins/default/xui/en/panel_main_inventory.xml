@@ -54,23 +54,23 @@
   <tab_container
      follows="all"
      halign="center"
-     height="339"
+     height="340"
      layout="topleft"
-     left="7"
+     left="5"
      name="inventory filter tabs"
-     tab_height="27"
+     tab_height="30"
      tab_group="1"
      tab_position="top"
-     tab_min_width="154"
+     tab_min_width="155"
      top_pad="4"
-     width="318">
+     width="320">
     <inventory_panel
      background_visible="false"
      background_opaque="false"
      border="false"
      bevel_style="none"
      follows="all"
-     height="312"
+     height="310"
      label="MY INVENTORY"
      help_topic="my_inventory_tab"
      layout="topleft"
@@ -78,21 +78,21 @@
      name="All Items"
      sort_order_setting="InventorySortOrder"
      show_item_link_overlays="true"
-     width="318" />
+     width="320" />
     <recent_inventory_panel
      background_visible="false"
      background_opaque="false"
      border="false"
      bevel_style="none"
      follows="all"
-     height="312"
+     height="310"
      label="RECENT"
      help_topic="recent_inventory_tab"
      layout="topleft"
      left_delta="0"
      name="Recent Items"
      show_item_link_overlays="true"
-     width="318" />
+     width="320" />
   </tab_container>
   <layout_stack
    animate="false"
@@ -102,9 +102,9 @@
    layout="topleft"
    orientation="horizontal"
    top_pad="0"
-   left="10"
+   left="5"
    name="bottom_panel"
-   width="311">
+   width="320">
       <layout_panel
        auto_resize="false"
        height="25"
@@ -213,7 +213,7 @@
        height="25"
        layout="topleft"
        name="dummy_panel"
-       width="36">
+       width="49">
           <icon
            follows="bottom|left|right"
            height="25"
@@ -222,7 +222,7 @@
            left="0"
            top="0"
            name="dummy_icon"
-           width="36" />
+           width="49" />
       </layout_panel>
       <layout_panel
        auto_resize="false"
