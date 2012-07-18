@@ -60,7 +60,7 @@
        layout="topleft"
        left_pad="1"
        name="dummy_icon"
-       width="158"/>
+       width="148"/>
       <button
        follows="bottom|right"
        height="25"
@@ -72,12 +72,12 @@
        image_selected="Toolbar_Middle_Selected"
        image_unselected="Toolbar_Middle_Off"
        image_bottom_pad="1"
-       label="Save"
+       label="Save As"
        layout="topleft"
        left_pad="1"
        name="save_btn"
        top="1"
-       width="85" />
+       width="95" />
       <button
        follows="bottom|right"
        height="25"

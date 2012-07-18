@@ -83,8 +83,8 @@ BOOL LLPanelOutfitsInventory::postBuild()
 	}
 	
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	mOutfitsSaveComboBtn.reset(new LLSaveOutfitComboBtn(mMyOutfitsPanel, false));
-	mWearingSaveComboBtn.reset(new LLSaveOutfitComboBtn(mCurrentOutfitPanel, false));
+	mOutfitsSaveComboBtn.reset(new LLSaveOutfitComboBtn(mMyOutfitsPanel, true));
+	mWearingSaveComboBtn.reset(new LLSaveOutfitComboBtn(mCurrentOutfitPanel, true));
 // [/SL:KB]
 //	mSaveComboBtn.reset(new LLSaveOutfitComboBtn(this, true));
 
