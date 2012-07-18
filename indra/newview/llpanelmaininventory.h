@@ -108,6 +108,9 @@ protected:
 	void closeAllFolders();
 	void newWindow();
 	void doCreate(const LLSD& userdata);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	bool checkCreate(const LLSD& sdParam);
+// [/SL:KB]
 	void resetFilters();
 	void setSortBy(const LLSD& userdata);
 	void saveTexture(const LLSD& userdata);
@@ -143,8 +146,8 @@ private:
 protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
-	void onAddButtonClick();
-	void showActionMenu(LLMenuGL* menu, std::string spawning_view_name);
+//	void onAddButtonClick();
+//	void showActionMenu(LLMenuGL* menu, std::string spawning_view_name);
 	void onTrashButtonClick();
 	void onClipboardAction(const LLSD& userdata);
 	BOOL isActionEnabled(const LLSD& command_name);
@@ -162,8 +165,12 @@ protected:
 private:
 	LLDragAndDropButton*		mTrashButton;
 	LLToggleableMenu*			mMenuGearDefault;
-	LLMenuGL*					mMenuAdd;
+//	LLMenuGL*					mMenuAdd;
 	LLMenuButton*				mGearMenuButton;
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	LLToggleableMenu*			mMenuAdd;
+	LLMenuButton*				mAddMenuButton;
+// [/SL:KB]
 // [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
 	LLToggleableMenu*			mMenuSort;
 	LLMenuButton*				mSortMenuButton;

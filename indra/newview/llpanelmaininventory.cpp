@@ -126,6 +126,10 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.SetSortBy", boost::bind(&LLPanelMainInventory::setSortBy, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars));
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mEnableCallbackRegistrar.add("Inventory.EnableCreate", boost::bind(&LLPanelMainInventory::checkCreate, this, _2));
+// [/SL:KB]
+
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
 }
@@ -198,6 +202,9 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 
 	mGearMenuButton = getChild<LLMenuButton>("options_gear_btn");
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mAddMenuButton = getChild<LLMenuButton>("add_btn");
+// [/SL:KB]
 // [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
 	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
 // [/SL:KB]
@@ -328,6 +335,19 @@ void LLPanelMainInventory::doCreate(const LLSD& userdata)
 {
 	menu_create_inventory_item(getPanel()->getRootFolder(), NULL, userdata);
 }
+
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("category" == strParam)
+	{
+		// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
+		return ("Recent Items" == mActivePanel->getName());
+	}
+	return true;
+}
+// [/SL:KB]
 
 void LLPanelMainInventory::resetFilters()
 {
@@ -967,11 +987,9 @@ void LLPanelMainInventory::initListCommandsHandlers()
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
-// [/SL:KB]
-	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-01-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 // [/SL:KB]
+//	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
 
 	mTrashButton = getChild<LLDragAndDropButton>("trash_btn");
 	mTrashButton->setDragAndDropHandler(boost::bind(&LLPanelMainInventory::handleDragAndDropToTrash, this
@@ -995,7 +1013,12 @@ void LLPanelMainInventory::initListCommandsHandlers()
 	mMenuSort = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_sort.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	mSortMenuButton->setMenu(mMenuSort);
 // [/SL:KB]
-	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+//	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	mAddMenuButton->setMenu(mMenuAdd);
+	mAddMenuButton->setMouseDownCallback(boost::bind(&LLPanelMainInventory::setUploadCostIfNeeded, this));
+// [/SL:KB]
 
 	// Update the trash button when selected item(s) get worn or taken off.
 	LLOutfitObserver::instance().addCOFChangedCallback(boost::bind(&LLPanelMainInventory::updateListCommands, this));
@@ -1008,32 +1031,32 @@ void LLPanelMainInventory::updateListCommands()
 	mTrashButton->setEnabled(trash_enabled);
 }
 
-void LLPanelMainInventory::onAddButtonClick()
-{
-// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
-// unless "Always show folders" is checked in the filter options.
-	bool recent_active = ("Recent Items" == mActivePanel->getName());
-	mMenuAdd->getChild<LLMenuItemGL>("New Folder")->setEnabled(!recent_active);
+//void LLPanelMainInventory::onAddButtonClick()
+//{
+//// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
+//// unless "Always show folders" is checked in the filter options.
+//	bool recent_active = ("Recent Items" == mActivePanel->getName());
+//	mMenuAdd->getChild<LLMenuItemGL>("New Folder")->setEnabled(!recent_active);
+//
+//	setUploadCostIfNeeded();
+//
+//	showActionMenu(mMenuAdd,"add_btn");
+//}
 
-	setUploadCostIfNeeded();
-
-	showActionMenu(mMenuAdd,"add_btn");
-}
-
-void LLPanelMainInventory::showActionMenu(LLMenuGL* menu, std::string spawning_view_name)
-{
-	if (menu)
-	{
-		menu->buildDrawLabels();
-		menu->updateParent(LLMenuGL::sMenuContainer);
-		LLView* spawning_view = getChild<LLView> (spawning_view_name);
-		S32 menu_x, menu_y;
-		//show menu in co-ordinates of panel
-		spawning_view->localPointToOtherView(0, spawning_view->getRect().getHeight(), &menu_x, &menu_y, this);
-		menu_y += menu->getRect().getHeight();
-		LLMenuGL::showPopup(this, menu, menu_x, menu_y);
-	}
-}
+//void LLPanelMainInventory::showActionMenu(LLMenuGL* menu, std::string spawning_view_name)
+//{
+//	if (menu)
+//	{
+//		menu->buildDrawLabels();
+//		menu->updateParent(LLMenuGL::sMenuContainer);
+//		LLView* spawning_view = getChild<LLView> (spawning_view_name);
+//		S32 menu_x, menu_y;
+//		//show menu in co-ordinates of panel
+//		spawning_view->localPointToOtherView(0, spawning_view->getRect().getHeight(), &menu_x, &menu_y, this);
+//		menu_y += menu->getRect().getHeight();
+//		LLMenuGL::showPopup(this, menu, menu_x, menu_y);
+//	}
+//}
 
 void LLPanelMainInventory::onTrashButtonClick()
 {

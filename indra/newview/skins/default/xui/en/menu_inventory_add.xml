@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<menu
+<toggleable_menu
  layout="topleft"
  left="0"
  mouse_opaque="false"
- can_tear_off="true"
+ can_tear_off="false"
  name="menu_inventory_add"
  visible="false">
             <menu_item_call
@@ -12,6 +12,9 @@
              name="New Folder">
                 <menu_item_call.on_click
                  function="Inventory.DoCreate"
+                 parameter="category" />
+                <menu_item_call.on_enable
+                 function="Inventory.EnableCreate"
                  parameter="category" />
             </menu_item_call>
             <menu_item_call
@@ -256,4 +259,4 @@
 	            </menu_item_call>
             </menu>
 
-</menu>
+</toggleable_menu>
