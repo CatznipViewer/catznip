@@ -4,6 +4,7 @@
  *
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2010-2012, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -56,8 +57,10 @@
 #include "lltrans.h"
 #include "llviewermedia.h"
 #include "llviewernetwork.h"
-// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+#include "lltoggleablemenu.h"
 #include "lltrans.h"
+#include "llviewermenu.h"
 // [/SL:KB]
 #include "llweb.h"
 
@@ -114,6 +117,101 @@ private:
 	LLSidepanelInventory * mSidepanelInventory;
 };
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+class LLSidepanelActionHelper
+{
+public:
+	LLSidepanelActionHelper(LLPanelMainInventory* pPanelMainInventory)
+		: mMenu(NULL), mPanelMainInventory(pPanelMainInventory)
+	{
+		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+		registrar.add("Inventory.Action", boost::bind(&LLSidepanelActionHelper::onActionPerform, this, _2));
+
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+		enable_registrar.add("Inventory.VisibleAction", boost::bind(&LLSidepanelActionHelper::onActionVisible, this, _2));
+
+		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+			"menu_inventory_actions.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+		llassert(mMenu);
+	}
+
+	LLToggleableMenu* getMenu() const
+	{
+		return mMenu;
+	}
+
+protected:
+	LLFolderViewEventListener* getSelectedListener()
+	{
+		if ( (mPanelMainInventory) && (mPanelMainInventory->getActivePanel()) )
+		{
+			/*const*/ LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
+			if ( (pInvPanel->getRootFolder()) && (pInvPanel->getRootFolder()->getCurSelectedItem()) )
+			{
+				return pInvPanel->getRootFolder()->getCurSelectedItem()->getListener();
+			}
+		}
+		return NULL;
+	}
+
+	LLViewerInventoryItem* getSelectedItem()
+	{
+		if ( (mPanelMainInventory) && (mPanelMainInventory->getActivePanel()) )
+		{
+			/*const*/ LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
+			if ( (pInvPanel->getRootFolder()) && (pInvPanel->getRootFolder()->getCurSelectedItem()) )
+			{
+				return pInvPanel->getRootFolder()->getCurSelectedItem()->getInventoryItem();
+			}
+		}
+		return NULL;
+	}
+
+	LLAssetType::EType getSelectedType()
+	{
+		LLViewerInventoryItem* pItem = getSelectedItem();
+		return (pItem) ? pItem->getType() : LLAssetType::AT_NONE;
+	}
+
+	void onActionPerform(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ( ("open" == strParam) || ("properties" == strParam) || 
+		     ("playworld" == strParam) || ("playlocal" == strParam) || ("save_as" == strParam) )
+		{
+			if ( (mPanelMainInventory) && (mPanelMainInventory->getActivePanel()) )
+			{
+				LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
+				pInvPanel->getRootFolder()->doToSelected(pInvPanel->getModel(), strParam);
+			}
+		}
+	}
+
+	bool onActionVisible(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ( ("open" == strParam) || ("properties" == strParam) )
+		{
+			return true;
+		}
+		else if ( ("play_inworld" == strParam) || ("play_locally" == strParam) )
+		{
+			return LLAssetType::AT_ANIMATION == getSelectedType();
+		}
+		else if ("save_as" == strParam)
+		{
+			/*const*/ LLTextureBridge* pBridge = dynamic_cast</*const*/ LLTextureBridge*>(getSelectedListener());
+			return (pBridge) && (pBridge->canSaveTexture());
+		}
+		return false;
+	}
+
+protected:
+	LLToggleableMenu*     mMenu;
+	LLPanelMainInventory* mPanelMainInventory;
+};
+// [/SL:KB]
+
 //
 // Implementation
 //
@@ -129,6 +227,10 @@ LLSidepanelInventory::LLSidepanelInventory()
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 	, mToolbarActionPanel(NULL)
 	, mToolbarActionBtn(NULL)
+	, mToolbarActionsPanel(NULL)
+	, mToolbarActionsBtn(NULL)
+	, mToolbarActionsFlyoutBtn(NULL)
+	, mToolbarActionsHelper(NULL)
 // [/SL:KB]
 {
 	//buildFromFile( "panel_inventory.xml"); // Called from LLRegisterPanelClass::defaultPanelClassBuilder()
@@ -195,9 +297,19 @@ BOOL LLSidepanelInventory::postBuild()
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 		mToolbarActionPanel = mPanelMainInventory->findChild<LLPanel>("default_action_btn_panel", TRUE);
 		llassert(mToolbarActionPanel);
-		mToolbarActionBtn = mToolbarActionPanel->findChild<LLButton>("default_action_btn", TRUE);
+		mToolbarActionBtn = mToolbarActionPanel->findChild<LLButton>("default_action_btn");
 		mToolbarActionBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarActionClicked, this));
 		llassert(mToolbarActionBtn);
+
+		mToolbarActionsPanel = mPanelMainInventory->findChild<LLPanel>("actions_btn_panel", TRUE);
+		llassert(mToolbarActionPanel);
+		mToolbarActionsBtn = mToolbarActionsPanel->findChild<LLButton>("actions_btn");
+		mToolbarActionsBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarActionClicked, this));
+		llassert(mToolbarActionBtn);
+		mToolbarActionsFlyoutBtn = mToolbarActionsPanel->findChild<LLButton>("actions_flyout_btn");
+		mToolbarActionsFlyoutBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarFlyoutClicked, this));
+		llassert(mToolbarActionBtn);
+		mToolbarActionsHelper =	new LLSidepanelActionHelper(mPanelMainInventory);
 // [/SL:KB]
 		LLTabContainer* tabs = mPanelMainInventory->getChild<LLTabContainer>("inventory filter tabs");
 		tabs->setCommitCallback(boost::bind(&LLSidepanelInventory::updateVerbs, this));
@@ -482,6 +594,20 @@ void LLSidepanelInventory::onToolbarActionClicked()
 {
 	performActionOnSelection(getSelectionAction());
 }
+
+void LLSidepanelInventory::onToolbarFlyoutClicked()
+{
+	S32 x, y;
+	LLUI::getMousePositionLocal(this, &x, &y);
+
+	LLMenuGL* pMenu = mToolbarActionsHelper->getMenu();
+	if (pMenu)
+	{
+		pMenu->buildDrawLabels();
+		pMenu->updateParent(LLMenuGL::sMenuContainer);
+		LLMenuGL::showPopup(this, pMenu, x, y);
+	}
+}
 // [/SL:KB]
 
 void LLSidepanelInventory::performActionOnSelection(const std::string &action)
@@ -602,14 +728,17 @@ void LLSidepanelInventory::showInventoryPanel()
 void LLSidepanelInventory::updateVerbs()
 {
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
-	std::string strAction = getSelectionAction();
+	S32 cntItems = 0;
+	std::string strAction = getSelectionAction(&cntItems);
 	if (!strAction.empty())
 	{
-		mToolbarActionBtn->setLabel(LLTrans::getString("InvAction " + strAction));
-		mToolbarActionBtn->setVisible(TRUE);
-		mToolbarActionBtn->setEnabled(TRUE);
+		LLButton* pActionBtn = (cntItems > 1) ? mToolbarActionBtn : mToolbarActionsBtn;
+		pActionBtn->setLabel(LLTrans::getString("InvAction " + strAction));
+		pActionBtn->setVisible(TRUE);
+		pActionBtn->setEnabled(TRUE);
 	}
-	mToolbarActionPanel->setVisible(!strAction.empty());
+	mToolbarActionPanel->setVisible( (cntItems > 1) && (!strAction.empty()) );
+	mToolbarActionsPanel->setVisible( (cntItems == 1) && (!strAction.empty()) );;
 // [/SL:KB]
 //	mInfoBtn->setEnabled(FALSE);
 //	mShareBtn->setEnabled(FALSE);
@@ -828,11 +957,20 @@ LLInventoryType::EType get_items_invtype(const LLInventoryModel::item_array_t& i
 	return invType;
 }
 
-std::string LLSidepanelInventory::getSelectionAction() const
+std::string LLSidepanelInventory::getSelectionAction(S32* pSelCount) const
 {
 	LLInventoryModel::item_array_t items;
 	if (!getSelectedItems(items))
+	{
+		if (pSelCount)
+			*pSelCount = 0;
 		return LLStringUtil::null;
+	}
+
+	if (pSelCount)
+	{
+		*pSelCount = items.size();
+	}
 
 	LLInventoryType::EType invType = get_items_invtype(items);
 	switch (invType)

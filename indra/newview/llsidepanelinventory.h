@@ -4,6 +4,7 @@
  *
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2010-2012, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -42,6 +43,9 @@ class LLLayoutPanel;
 class LLPanelMainInventory;
 class LLSidepanelItemInfo;
 class LLSidepanelTaskInfo;
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+class LLSidepanelActionHelper;
+// [/SL:KB]
 
 class LLSidepanelInventory : public LLPanel
 {
@@ -90,7 +94,7 @@ protected:
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
 	bool getSelectedItems(LLInventoryModel::item_array_t& items) const;
 	// Returns the action that makes sense for the current selection (or an empty string if none)
-	std::string getSelectionAction() const;
+	std::string getSelectionAction(S32* pSelCount = NULL) const;
 // [/SL:KB]
 //	LLInventoryItem *getSelectedItem();
 //	U32 getSelectedCount();
@@ -123,6 +127,7 @@ protected:
 	void 						onBackButtonClicked();
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
 	void 						onToolbarActionClicked();
+	void 						onToolbarFlyoutClicked();
 // [/SL:KB]
 
 private:
@@ -134,8 +139,14 @@ private:
 //	LLButton*					mOverflowBtn;
 //	LLButton*					mShopBtn;
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	// Single action button
 	LLPanel*					mToolbarActionPanel;
 	LLButton*					mToolbarActionBtn;
+	// Flyout action button
+	LLPanel*					mToolbarActionsPanel;
+	LLButton*					mToolbarActionsBtn;
+	LLButton*					mToolbarActionsFlyoutBtn;
+	LLSidepanelActionHelper*	mToolbarActionsHelper;
 // [/SL:KB]
 	bool						mInboxEnabled;
 
