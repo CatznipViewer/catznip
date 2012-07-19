@@ -281,12 +281,12 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 	// Pass if this item is currently worn
 	if (filterTypes & FILTERTYPE_WORN)
 	{
-		switch (object->getType())
+		switch (object_type)
 		{
-			case LLAssetType::AT_BODYPART:
-			case LLAssetType::AT_CLOTHING:
-			case LLAssetType::AT_OBJECT:
-				if (!get_is_item_worn(object_id))
+			case LLInventoryType::IT_WEARABLE:
+			case LLInventoryType::IT_ATTACHMENT:
+			case LLInventoryType::IT_OBJECT:
+				if (!get_is_item_worn(listener->getUUID()))
 					return FALSE;
 				break;
 			default:
