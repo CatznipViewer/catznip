@@ -127,12 +127,10 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		registrar.add("Inventory.Action", boost::bind(&LLSidepanelActionHelper::onActionPerform, this, _2));
 
-		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
-		enable_registrar.add("Inventory.VisibleAction", boost::bind(&LLSidepanelActionHelper::onActionVisible, this, _2));
-
 		mMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
 			"menu_inventory_actions.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(mMenu);
+		mMenu->setVisibilityChangeCallback(boost::bind(&LLSidepanelActionHelper::onMenuVisibilityChange, this, _2));
 	}
 
 	LLToggleableMenu* getMenu() const
@@ -175,35 +173,67 @@ protected:
 
 	void onActionPerform(const LLSD& sdParam)
 	{
+		if ( (!mPanelMainInventory) || (!mPanelMainInventory->getActivePanel()) )
+			return;
+
+		LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
 		const std::string strParam = sdParam.asString();
-		if ( ("open" == strParam) || ("properties" == strParam) || 
-		     ("playworld" == strParam) || ("playlocal" == strParam) || ("save_as" == strParam) )
+		if ( ("open" == strParam) || ("properties" == strParam) || ("playworld" == strParam) || ("playlocal" == strParam) || 
+		     ("wear" == strParam) || ("wear_add" == strParam) || ("take_off" == strParam) || ("edit" == strParam) ||
+		     ("activate" == strParam) || ("deactivate" == strParam) || ("about" == strParam) || ("save_as" == strParam) )
 		{
-			if ( (mPanelMainInventory) && (mPanelMainInventory->getActivePanel()) )
-			{
-				LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
-				pInvPanel->getRootFolder()->doToSelected(pInvPanel->getModel(), strParam);
-			}
+			pInvPanel->getRootFolder()->doToSelected(pInvPanel->getModel(), strParam);
+		}
+		else if ("teleport" == strParam)
+		{
+			pInvPanel->getRootFolder()->doToSelected(pInvPanel->getModel(), "open");
 		}
 	}
 
-	bool onActionVisible(const LLSD& sdParam)
+	void onMenuVisibilityChange(const LLSD& sdParam)
 	{
-		const std::string strParam = sdParam.asString();
-		if ( ("open" == strParam) || ("properties" == strParam) )
+		if ( (!sdParam.has("visibility")) || (!sdParam["visibility"].asBoolean()) )
 		{
-			return true;
+			return;
 		}
-		else if ( ("play_inworld" == strParam) || ("play_locally" == strParam) )
+
+		const LLViewerInventoryItem* pItem = getSelectedItem();
+		/*const*/ LLFolderViewEventListener* pListener = getSelectedListener();
+		if ( (!pItem) || (!pListener) )
 		{
-			return LLAssetType::AT_ANIMATION == getSelectedType();
+			return;
 		}
-		else if ("save_as" == strParam)
-		{
-			/*const*/ LLTextureBridge* pBridge = dynamic_cast</*const*/ LLTextureBridge*>(getSelectedListener());
-			return (pBridge) && (pBridge->canSaveTexture());
-		}
-		return false;
+
+		bool fIsBodyPart = (LLAssetType::AT_BODYPART == pItem->getType());
+		bool fIsClothing = (LLAssetType::AT_CLOTHING == pItem->getType());
+		bool fIsGesture = (LLAssetType::AT_GESTURE == pItem->getType());
+		bool fIsObject = (LLAssetType::AT_OBJECT == pItem->getType());
+		bool fIsWearable = (fIsBodyPart) || (fIsClothing) || (fIsObject);
+		bool fIsWorn = ((fIsWearable) || (fIsGesture)) ? get_is_item_worn(pItem->getUUID()) : false;
+
+		// Generic options
+		mMenu->findChildView("open")->setVisible(  (!fIsWearable) && (LLAssetType::AT_LANDMARK != pItem->getType()) );
+		mMenu->findChildView("properties")->setVisible(true);
+		// Animations
+		mMenu->findChildView("playworld")->setVisible( (LLAssetType::AT_ANIMATION == pItem->getType()) );
+		mMenu->findChildView("playlocal")->setVisible( (LLAssetType::AT_ANIMATION == pItem->getType()));
+		// Wearable and attachment options
+		mMenu->findChildView("wear")->setVisible( (fIsBodyPart || fIsClothing) && (!fIsWorn) );
+		mMenu->findChildView("attach")->setVisible( (fIsObject) && (!fIsWorn) );
+		mMenu->findChildView("wear_add")->setVisible( (fIsClothing || fIsObject) && (!fIsWorn) );
+		mMenu->findChildView("take_off")->setVisible( (fIsClothing) && (fIsWorn) );
+		mMenu->findChildView("detach")->setVisible( (fIsObject) && (fIsWorn) );
+		mMenu->findChildView("edit")->setVisible( (fIsWearable) && (fIsWorn) );
+		// Gestures
+		mMenu->findChildView("activate")->setVisible( (fIsGesture) && (!fIsWorn) );
+		mMenu->findChildView("deactivate")->setVisible( (fIsGesture) && (fIsWorn) );
+		// Landmarks
+		mMenu->findChildView("teleport")->setVisible( (LLAssetType::AT_LANDMARK == pItem->getType()) );
+		mMenu->findChildView("about")->setVisible( (LLAssetType::AT_LANDMARK == pItem->getType()) );
+		// Textures and snapshots
+		/*const*/ LLTextureBridge* pTexBridge = dynamic_cast</*const*/ LLTextureBridge*>(pListener);
+		mMenu->findChildView("save_as")->setVisible( (LLAssetType::AT_TEXTURE == pItem->getType()) );
+		mMenu->findChildView("save_as")->setEnabled( (pTexBridge) && (pTexBridge->canSaveTexture()) );
 	}
 
 protected:
