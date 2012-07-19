@@ -997,6 +997,13 @@ std::string LLSidepanelInventory::getSelectionAction(S32* pSelCount) const
 		return LLStringUtil::null;
 	}
 
+	const LLUUID idTrash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+	const LLUUID idParent = get_items_parent(items);
+	if ( (idParent.notNull()) && (gInventory.isObjectDescendentOf(idParent, idTrash)) )
+	{
+		return LLStringUtil::null;
+	}
+
 	if (pSelCount)
 	{
 		*pSelCount = items.size();
