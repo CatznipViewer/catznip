@@ -410,6 +410,11 @@ void LLFolderView::closeAllFolders()
 		(*itFolder)->setOpen(TRUE);
 	}
 //	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
+	mScrollContainer->goToTop();
 // [/SL:KB]
 	arrangeAll();
 }
