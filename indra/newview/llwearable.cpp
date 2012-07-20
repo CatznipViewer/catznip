@@ -30,6 +30,9 @@
 #include "llagentcamera.h"
 #include "llagentwearables.h"
 #include "lldictionary.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "lllocaltextureobject.h"
 #include "llnotificationsutil.h"
@@ -981,11 +984,23 @@ void LLWearable::revertValues()
 	syncImages(mSavedTEMap, mTEMap);
 
 
-	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
-	if( panel )
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
+	if (LLFloaterReg::instanceVisible("appearance"))
 	{
-		panel->updateScrollingPanelList();
+		llinfos << LLTimer::getElapsedSeconds() << llendl;
+		LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
+		if( panel )
+		{
+			panel->updateScrollingPanelList();
+		}
+		llinfos << LLTimer::getElapsedSeconds() << llendl;
 	}
+// [/SL:KB]
+//	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
+//	if( panel )
+//	{
+//		panel->updateScrollingPanelList();
+//	}
 }
 
 BOOL LLWearable::isOnTop() const
