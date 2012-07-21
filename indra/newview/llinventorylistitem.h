@@ -145,6 +145,9 @@ public:
 
 	/** Get the description of a corresponding inventory item */
 	const std::string& getDescription() const;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+	const std::string& getActualDescription() const;
+// [/SL:KB]
 
 	/** Get the creation date of a corresponding inventory item */
 	time_t getCreationDate() const;

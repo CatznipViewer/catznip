@@ -727,7 +727,7 @@ bool LLWearableItemAppearanceComparator::doCompare(const LLPanelInventoryListIte
 	{
 		// Sort wearables on the same wearable type from top to bottom
 		if (LLAssetType::AT_CLOTHING == pLHS->getType())
-			return pLHS->getDescription() > pRHS->getDescription();
+			return pLHS->getActualDescription() > pRHS->getActualDescription();
 		else
 			return pLHS->getName() < pRHS->getName();
 	}

@@ -233,6 +233,18 @@ const std::string& LLPanelInventoryListItemBase::getDescription() const
 	return inv_item->getDescription();
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+const std::string& LLPanelInventoryListItemBase::getActualDescription() const
+{
+	LLViewerInventoryItem* inv_item = getItem();
+	if (NULL == inv_item)
+	{
+		return LLStringUtil::null;
+	}
+	return inv_item->LLInventoryItem::getDescription();
+}
+// [/SL:KB]
+
 time_t LLPanelInventoryListItemBase::getCreationDate() const
 {
 	LLViewerInventoryItem* inv_item = getItem();
