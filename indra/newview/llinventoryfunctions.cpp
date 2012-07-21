@@ -34,6 +34,9 @@
 #include "llagent.h"
 #include "llagentwearables.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+#include "llfiltereditor.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llinventorydefines.h"
 #include "llsdserialize.h"
@@ -563,6 +566,34 @@ void show_item_original(const LLUUID& item_uuid)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void show_item_links(const LLUUID& idItem)
+{
+	LLInventoryPanel* pActivePanel = LLInventoryPanel::getActiveInventoryPanel();
+	LLPanelMainInventory* pPanelMainInventory = (pActivePanel) ? pActivePanel->getParentByType<LLPanelMainInventory>() : NULL;
+	LLFilterEditor* pEditor = (pPanelMainInventory) ? pPanelMainInventory->getFilterEditor() : NULL;
+	if (!pEditor)
+	{
+		return;
+	}
+
+	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(idItem);
+	if ( (!pItem) || (pItem->getIsLinkType()) || (!LLAssetType::lookupCanLink(pItem->getType())) )
+	{
+		return;
+	}
+
+	pEditor->setText(pItem->getName());
+	pEditor->setFocus(TRUE);
+	pEditor->onCommit();	// Calls LLPanelMainInventory::onFilterEdit()
+
+	LLInventoryFilter* pFilter = pActivePanel->getFilter();
+//	pFilter->setFilterSubString(item_name);
+	pFilter->setFilterUUID(pItem->getUUID());
+	pFilter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+	pFilter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+}
+// [/SL:KB]
 
 void open_outbox()
 {

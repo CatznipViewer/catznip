@@ -123,6 +123,22 @@
     </menu_item_call>
     <menu_item_separator />
     <menu_item_call
+     label="Find Original"
+     layout="topleft"
+     name="find_original">
+        <on_click
+         function="Inventory.Action"
+         parameter="goto" />
+    </menu_item_call>
+    <menu_item_call
+     label="Find All Links"
+     layout="topleft"
+     name="find_links">
+        <on_click
+         function="Inventory.Action"
+         parameter="find_links" />
+    </menu_item_call>
+    <menu_item_call
      label="Properties"
      layout="topleft"
      name="properties">

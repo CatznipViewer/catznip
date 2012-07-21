@@ -178,8 +178,9 @@ protected:
 
 		LLInventoryPanel* pInvPanel = mPanelMainInventory->getActivePanel();
 		const std::string strParam = sdParam.asString();
-		if ( ("open" == strParam) || ("properties" == strParam) || ("playworld" == strParam) || ("playlocal" == strParam) || 
-		     ("wear" == strParam) || ("wear_add" == strParam) || ("take_off" == strParam) || ("edit" == strParam) ||
+		if ( ("open" == strParam) || ("goto" == strParam) || ("find_links" == strParam) || ("properties" == strParam) || 
+		     ("playworld" == strParam) || ("playlocal" == strParam) || ("wear" == strParam) || ("attach" == strParam) || 
+		     ("wear_add" == strParam) ||  ("take_off" == strParam) || ("detach" == strParam) || ("edit" == strParam) || 
 		     ("activate" == strParam) || ("deactivate" == strParam) || ("about" == strParam) || ("save_as" == strParam) )
 		{
 			pInvPanel->getRootFolder()->doToSelected(pInvPanel->getModel(), strParam);
@@ -213,6 +214,8 @@ protected:
 
 		// Generic options
 		mMenu->findChildView("open")->setVisible(  (!fIsWearable) && (LLAssetType::AT_LANDMARK != pItem->getType()) );
+		mMenu->findChildView("find_original")->setVisible(pItem->getIsLinkType());
+		mMenu->findChildView("find_links")->setVisible( (!pItem->getIsLinkType()) && (LLAssetType::lookupCanLink(pItem->getType())) );
 		mMenu->findChildView("properties")->setVisible(true);
 		// Animations
 		mMenu->findChildView("playworld")->setVisible( (LLAssetType::AT_ANIMATION == pItem->getType()) );

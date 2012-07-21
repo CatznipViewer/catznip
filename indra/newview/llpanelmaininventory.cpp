@@ -1165,38 +1165,39 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		}
 		active_panel->setSelection(item_id, TAKE_FOCUS_NO);
 	}
-	if (command_name == "find_original")
-	{
-		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-		if (!current_item)
-		{
-			return;
-		}
-		current_item->getListener()->performAction(getActivePanel()->getModel(), "goto");
-	}
+//	if (command_name == "find_original")
+//	{
+//		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//		if (!current_item)
+//		{
+//			return;
+//		}
+//		current_item->getListener()->performAction(getActivePanel()->getModel(), "goto");
+//	}
 
-	if (command_name == "find_links")
-	{
-		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-		if (!current_item)
-		{
-			return;
-		}
-		const LLUUID& item_id = current_item->getListener()->getUUID();
-		const std::string &item_name = current_item->getListener()->getName();
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
-		mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = item_name;
-// [/SL:KB]
-//		mFilterSubString = item_name;
-		LLInventoryFilter *filter = mActivePanel->getFilter();
-		filter->setFilterSubString(item_name);
-		mFilterEditor->setText(item_name);
+//	if (command_name == "find_links")
+//	{
+//		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//		if (!current_item)
+//		{
+//			return;
+//		}
+//		const LLUUID& item_id = current_item->getListener()->getUUID();
+//		const std::string &item_name = current_item->getListener()->getName();
+//// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+//		mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = item_name;
+//// [/SL:KB]
+////		mFilterSubString = item_name;
+//		LLInventoryFilter *filter = mActivePanel->getFilter();
+//		filter->setFilterSubString(item_name);
+//		mFilterEditor->setText(item_name);
+//
+//		mFilterEditor->setFocus(TRUE);
+//		filter->setFilterUUID(item_id);
+//		filter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+//		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+//	}
 
-		mFilterEditor->setFocus(TRUE);
-		filter->setFilterUUID(item_id);
-		filter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
-	}
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	if (command_name == "filter_string_per_tab")
 	{

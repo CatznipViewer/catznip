@@ -1314,6 +1314,12 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 	{
 		gotoItem();
 	}
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	else if ("find_links" == action)
+	{
+		findLinks();
+	}
+// [/SL:KB]
 
 	if ("open" == action || "open_original" == action)
 	{
@@ -1472,6 +1478,13 @@ void LLItemBridge::gotoItem()
 		}
 	}
 }
+
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void LLItemBridge::findLinks()
+{
+	show_item_links(mUUID);
+}
+// [/SL:KB]
 
 LLUIImagePtr LLItemBridge::getIcon() const
 {

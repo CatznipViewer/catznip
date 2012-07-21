@@ -81,6 +81,10 @@ public:
 	
 	void setSelectCallback(const LLFolderView::signal_t::slot_type& cb);
 
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	LLFilterEditor* getFilterEditor() const { return mFilterEditor; }
+// [/SL:KB]
+
 	void onFilterEdit(const std::string& search_string );
 protected:
 	//

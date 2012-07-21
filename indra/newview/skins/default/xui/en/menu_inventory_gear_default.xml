@@ -61,9 +61,9 @@
          function="Inventory.GearDefault.Custom.Action"
          parameter="empty_lostnfound" />
     </menu_item_call>
+<!--
     <menu_item_separator
      layout="topleft" />
-<!--
     <menu_item_call 
          label="Save Texture As"
          layout="topleft"
@@ -86,7 +86,6 @@
          function="Inventory.GearDefault.Enable"
          parameter="share" />
     </menu_item_call>
--->
     <menu_item_call 
          label="Find Original"
          layout="topleft"
@@ -109,6 +108,7 @@
 			 function="Inventory.GearDefault.Enable"
 			 parameter="find_links" />
         </menu_item_call>
+-->
     <menu_item_separator
      layout="topleft" />
 
