@@ -167,7 +167,10 @@ public:
 
 	LLUUID makeNewOutfitLinks(const std::string& new_folder_name,bool show_panel = true);
 
-	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body, bool upload = false);
+// [/SL:KB]
+//	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body);
 
 	static void sortItemsByActualDescription(LLInventoryModel::item_array_t& items);
 

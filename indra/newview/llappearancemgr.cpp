@@ -2644,7 +2644,10 @@ void LLAppearanceMgr::removeItemFromAvatar(const LLUUID& id_to_remove)
 	removeCOFItemLinks(id_to_remove,false);
 }
 
-bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+//bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body, bool upload)
+// [/SL:KB]
 {
 	if (!item || !item->isWearableType()) return false;
 	if (item->getType() != LLAssetType::AT_CLOTHING) return false;
@@ -2688,7 +2691,10 @@ bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_b
 	bool result = false;
 	if (result = gAgentWearables.moveWearable(item, closer_to_body))
 	{
-		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+		gAgentAvatarp->wearableUpdated(item->getWearableType(), upload);
+// [/SL:KB]
+//		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
 	}
 
 	setOutfitDirty(true);

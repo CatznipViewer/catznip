@@ -113,7 +113,7 @@ LLWornListItem* LLWornListItem::create(LLViewerInventoryItem* pItem)
 
 void LLWornListItem::onMoveWearable(bool fDown)
 {
-	LLAppearanceMgr::getInstance()->moveWearable(getItem(), fDown);
+	LLAppearanceMgr::getInstance()->moveWearable(getItem(), fDown, true);
 }
 
 S32 LLWornListItem::notify(const LLSD& sdInfo)
