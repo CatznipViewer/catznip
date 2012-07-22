@@ -61,6 +61,7 @@
          layout="topleft"
          left_pad="1"
          name="options_sort_btn"
+         tool_tip="Show sorting options"
          top="1"
          width="31" />
         <button
@@ -74,6 +75,7 @@
          layout="topleft"
          left_pad="1"
          name="folder_view_btn"
+         tool_tip="Switch to inventory view"
          top="1"
          width="31" />
         <button
@@ -87,6 +89,7 @@
          layout="topleft"
          left_pad="1"
          name="list_view_btn"
+         tool_tip="Switch to list view"
          top="1"
          width="31" />
         <icon
@@ -112,6 +115,7 @@
          layout="topleft"
          left_pad="1"
          name="save_btn"
+         tool_tip="Save the current outfit"
          width="95" />
         <button
          follows="bottom|right"
