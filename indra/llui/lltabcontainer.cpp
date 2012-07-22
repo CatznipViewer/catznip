@@ -1340,6 +1340,20 @@ S32 LLTabContainer::getPanelIndexByTitle(const std::string& title)
 	return -1;
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-07-22 (Catznip-3.3)
+S32 LLTabContainer::getPanelIndexByName(const std::string& name)
+{
+	for (S32 index = 0 ; index < (S32)mTabList.size(); index++)
+	{
+		if (name == mTabList[index]->mTabPanel->getName())
+		{
+			return index;
+		}
+	}
+	return -1;
+}
+// [/SL:KB]
+
 LLPanel* LLTabContainer::getPanelByName(const std::string& name)
 {
 	for (S32 index = 0 ; index < (S32)mTabList.size(); index++)

@@ -182,6 +182,9 @@ public:
 	LLPanel*	getPanelByIndex(S32 index);
 	S32			getIndexForPanel(LLPanel* panel);
 	S32			getPanelIndexByTitle(const std::string& title);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-07-22 (Catznip-3.3)
+	S32			getPanelIndexByName(const std::string& name);
+// [/SL:KB]
 	LLPanel*	getPanelByName(const std::string& name);
 	void		setCurrentTabName(const std::string& name);
 

@@ -144,7 +144,7 @@ BOOL LLPanelMainInventory::postBuild()
 	//panel->getFilter()->markDefault();
 
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	mActivePanelIndex = mFilterTabs->getPanelIndexByTitle("All Items");
+	mActivePanelIndex = mFilterTabs->getPanelIndexByName("All Items");
 	mFilterSubStringPerTab = gSavedSettings.getBOOL("InventoryFilterStringPerTab");
 	mFilterSubStrings.insert(mFilterSubStrings.end(), mFilterTabs->getTabCount(), LLStringUtil::null);
 // [/SL:KB]
