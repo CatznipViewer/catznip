@@ -1024,28 +1024,92 @@ const std::string& LLInventoryFilter::getFilterText()
 
 void LLInventoryFilter::toLLSD(LLSD& data) const
 {
-	data["filter_types"] = (LLSD::Integer)getFilterObjectTypes();
-	data["min_date"] = (LLSD::Integer)getMinDate();
-	data["max_date"] = (LLSD::Integer)getMaxDate();
-	data["hours_ago"] = (LLSD::Integer)getHoursAgo();
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+	// Only save what isn't a default
+	if (mFilterOps.mFilterObjectTypes != mDefaultFilterOps.mFilterObjectTypes)
+		data["filter_object_types"] = (LLSD::Integer)mFilterOps.mFilterObjectTypes;
+	if (mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes)
+		data["filter_wearabe_types"] = (LLSD::Integer)mFilterOps.mFilterWearableTypes;
+	if (mFilterOps.mFilterCategoryTypes != mDefaultFilterOps.mFilterCategoryTypes)
+		data["filter_category_types"] = (LLSD::Integer)mFilterOps.mFilterCategoryTypes;
+	if (mFilterOps.mFilterLinks != mDefaultFilterOps.mFilterLinks)
+		data["filter_links"] = (LLSD::Integer)mFilterOps.mFilterLinks;
+	if (mFilterSubString.size())
+		data["substring"] = (LLSD::String)mFilterSubString;
+	if (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions)
+		data["permissions"] = (LLSD::Integer)mFilterOps.mPermissions;
+
+	if (isSinceLogoff())
+	{
+		data["since_logoff"] = (LLSD::Boolean)true;
+	}
+	else if (0 != mFilterOps.mHoursAgo)
+	{
+		data["hours_ago"] = (LLSD::Integer)mFilterOps.mHoursAgo;
+	}
+	else
+	{
+		if (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate)
+			data["min_date"] = (LLSD::Integer)mFilterOps.mMinDate;
+		if (mFilterOps.mMaxDate != mDefaultFilterOps.mMaxDate)
+			data["max_date"] = (LLSD::Integer)mFilterOps.mMaxDate;
+	}
+
 	data["show_folder_state"] = (LLSD::Integer)getShowFolderState();
-	data["permissions"] = (LLSD::Integer)getFilterPermissions();
-	data["substring"] = (LLSD::String)getFilterSubString();
 	data["sort_order"] = (LLSD::Integer)getSortOrder();
-	data["since_logoff"] = (LLSD::Boolean)isSinceLogoff();
+// [/SL:KB]
+//	data["filter_types"] = (LLSD::Integer)getFilterObjectTypes();
+//	data["min_date"] = (LLSD::Integer)getMinDate();
+//	data["max_date"] = (LLSD::Integer)getMaxDate();
+//	data["hours_ago"] = (LLSD::Integer)getHoursAgo();
+//	data["show_folder_state"] = (LLSD::Integer)getShowFolderState();
+//	data["permissions"] = (LLSD::Integer)getFilterPermissions();
+//	data["substring"] = (LLSD::String)getFilterSubString();
+//	data["sort_order"] = (LLSD::Integer)getSortOrder();
+//	data["since_logoff"] = (LLSD::Boolean)isSinceLogoff();
 }
 
 void LLInventoryFilter::fromLLSD(LLSD& data)
 {
-	if(data.has("filter_types"))
+//	if(data.has("filter_types"))
+//	{
+//		setFilterObjectTypes((U64)data["filter_types"].asInteger());
+//	}
+//
+//	if(data.has("min_date") && data.has("max_date"))
+//	{
+//		setDateRange(data["min_date"].asInteger(), data["max_date"].asInteger());
+//	}
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+	resetDefault();
+
+	if (data.has("filter_object_types"))
 	{
-		setFilterObjectTypes((U64)data["filter_types"].asInteger());
+		setFilterObjectTypes((U64)data["filter_object_types"].asInteger());
 	}
 
-	if(data.has("min_date") && data.has("max_date"))
+	if (data.has("filter_wearable_types"))
 	{
-		setDateRange(data["min_date"].asInteger(), data["max_date"].asInteger());
+		setFilterWearableTypes((U64)data["filter_wearable_types"].asInteger());
 	}
+
+	if (data.has("filter_category_types"))
+	{
+		setFilterCategoryTypes((U64)data["filter_category_types"].asInteger());
+	}
+
+	if (data.has("filter_links"))
+	{
+		setFilterLinks((U64)data["filter_links"].asInteger());
+	}
+
+	if ( (data.has("min_date")) || (data.has("max_date")) )
+	{
+		time_t minDate = (data.has("min_date")) ? data["min_date"].asInteger() : getMinDate();
+		time_t maxDate = (data.has("max_date")) ? data["max_date"].asInteger() : getMaxDate();
+		setDateRange(minDate, maxDate);
+	}
+// [/SL:KB]
 
 	if(data.has("hours_ago"))
 	{
