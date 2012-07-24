@@ -67,6 +67,9 @@ LLInventoryFilter::FilterOps::FilterOps() :
 ///----------------------------------------------------------------------------
 LLInventoryFilter::LLInventoryFilter(const std::string& name)
 :	mName(name),
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	mFilterSubStringResetFilterLinks(true),
+// [/SL:KB]
 	mModified(FALSE),
 	mNeedTextRebuild(TRUE),
 	mEmptyLookupMessage("InventoryNoMatchingItems")
@@ -595,6 +598,9 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 		}
 
 		// Cancel out filter links once the search string is modified
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		if (mFilterSubStringResetFilterLinks)
+// [/SL:KB]
 		{
 			mFilterOps.mFilterLinks = FILTERLINK_INCLUDE_LINKS;
 		}
@@ -726,7 +732,10 @@ void LLInventoryFilter::setHoursAgo(U32 hours)
 	}
 }
 
-void LLInventoryFilter::setFilterLinks(U64 filter_links)
+//void LLInventoryFilter::setFilterLinks(U64 filter_links)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+void LLInventoryFilter::setFilterLinks(U64 filter_links, bool substring_reset)
+// [/SL:KB]
 {
 	if (mFilterOps.mFilterLinks != filter_links)
 	{
@@ -737,6 +746,9 @@ void LLInventoryFilter::setFilterLinks(U64 filter_links)
 			setModified(FILTER_LESS_RESTRICTIVE);
 	}
 	mFilterOps.mFilterLinks = filter_links;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	mFilterSubStringResetFilterLinks = substring_reset;
+// [/SL:KB]
 }
 
 void LLInventoryFilter::setShowFolderState(EFolderShow state)

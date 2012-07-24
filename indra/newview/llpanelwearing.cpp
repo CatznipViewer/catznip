@@ -35,15 +35,14 @@
 #include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-#include "llinventorypanel.h"
-// [/SL:KB]
 #include "llmenubutton.h"
 #include "llviewermenu.h"
 #include "llwearableitemslist.h"
 #include "llsdserialize.h"
 #include "llclipboard.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+#include "llfolderview.h"
+#include "llinventorypanel.h"
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -454,6 +453,7 @@ LLPanelWearing::LLPanelWearing()
 	,	mCOFItemsList(NULL)
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	,	mInvPanel(NULL)
+	,	mSavedFolderState(NULL)
 	,	mSortMenuButton(NULL)
 	,	mToggleFolderView(NULL)
 	,	mToggleListView(NULL)
@@ -473,6 +473,9 @@ LLPanelWearing::~LLPanelWearing()
 {
 	delete mGearMenu;
 	delete mContextMenu;
+// [SL:KB]
+	delete mSavedFolderState;
+// [/SL:KB]
 
 	if (gInventory.containsObserver(mCategoriesObserver))
 	{
@@ -489,6 +492,7 @@ BOOL LLPanelWearing::postBuild()
 	mCOFItemsList = getChild<LLWornItemsList>("cof_items_list");
 	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 	mCOFItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
+	mCOFItemsList->setCommitCallback(boost::bind(&LLPanelWearing::onSelectionChange, this));
 // [/SL:KB]
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -548,8 +552,46 @@ void LLPanelWearing::onOpen(const LLSD& /*info*/)
 // virtual
 void LLPanelWearing::setFilterSubString(const std::string& string)
 {
-	sFilterSubString = string;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	// Selective copy/paste of LLPanelOutfitEdit::onSearchEdit()
+	if (sFilterSubString != string)
+	{
+		sFilterSubString = string;
+	
+		// Searches are case-insensitive
+		LLStringUtil::toUpper(sFilterSubString);
+		LLStringUtil::trimHead(sFilterSubString);
+	}
+	
+	if (sFilterSubString.empty())
+	{
+		mCOFItemsList->setFilterSubString(LLStringUtil::null);
+		if (mInvPanel)
+		{
+			mInvPanel->setFilterSubString(LLStringUtil::null);
+			// Re-open folders that were initially open
+			mSavedFolderState->setApply(TRUE);
+			mInvPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+			LLOpenFoldersWithSelection opener;
+			mInvPanel->getRootFolder()->applyFunctorRecursively(opener);
+			mInvPanel->getRootFolder()->scrollToShowSelection();
+		}
+		return;
+	}
+	else if ( (mInvPanel) && (mInvPanel->getRootFolder()->getFilterSubString().empty()) )
+	{
+		// Save current folder open state if no filter currently applied
+		mSavedFolderState->setApply(FALSE);
+		mInvPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+	}
+	
+	// Set new filter string
+	if (mInvPanel)
+		mInvPanel->setFilterSubString(sFilterSubString);
 	mCOFItemsList->setFilterSubString(sFilterSubString);
+// [/SL:KB]
+//	sFilterSubString = string;
+//	mCOFItemsList->setFilterSubString(sFilterSubString);
 }
 
 // virtual
@@ -573,12 +615,25 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 	return false;
 }
 
-boost::signals2::connection LLPanelWearing::setSelectionChangeCallback(commit_callback_t cb)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+boost::signals2::connection LLPanelWearing::setSelectionChangeCallback(selection_change_signal_t::slot_type cb)
 {
-	if (!mCOFItemsList) return boost::signals2::connection();
-
-	return mCOFItemsList->setCommitCallback(cb);
+	return mSelectionSignal.connect(cb);
 }
+// [/SL:KB]
+//boost::signals2::connection LLPanelWearing::setSelectionChangeCallback(commit_callback_t cb)
+//{
+//	if (!mCOFItemsList) return boost::signals2::connection();
+//
+//	return mCOFItemsList->setCommitCallback(cb);
+//}
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+void LLPanelWearing::onSelectionChange()
+{
+	mSelectionSignal();
+}
+// [/SL:KB]
 
 void LLPanelWearing::onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y)
 {
@@ -594,12 +649,36 @@ void LLPanelWearing::onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y)
 
 bool LLPanelWearing::hasItemSelected()
 {
-	return mCOFItemsList->getSelectedItem() != NULL;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	if (mCOFItemsList->getVisible())
+	{
+		return mCOFItemsList->getSelectedItem() != NULL;
+	}
+	else if (mInvPanel->getVisible())
+	{
+		return mInvPanel->getRootFolder()->getCurSelectedItem() != NULL;
+	}
+	return false;
+// [/SL:KB]
+//	return mCOFItemsList->getSelectedItem() != NULL;
 }
 
 void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 {
-	mCOFItemsList->getSelectedUUIDs(selected_uuids);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	if (mCOFItemsList->getVisible())
+	{
+		mCOFItemsList->getSelectedUUIDs(selected_uuids);
+	}
+	else if ( (mInvPanel) && (mInvPanel->getVisible()) )
+	{
+		std::set<LLUUID> selected_ids = mInvPanel->getRootFolder()->getSelectionList();
+
+		void (uuid_vec_t::* tmp)(LLUUID const&) = &uuid_vec_t::push_back;
+		std::for_each(selected_ids.begin(), selected_ids.end(), boost::bind(tmp, &selected_uuids, _1));
+	}
+// [/SL:KB]
+//	mCOFItemsList->getSelectedUUIDs(selected_uuids);
 }
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -607,7 +686,7 @@ void LLPanelWearing::onToggleWearingView(EWearingView eView)
 {
 	if (FOLDER_VIEW == eView)
 	{
-		if ( (mInvPanel) || (mInvPanel = createInventoryPanel()) )
+		if ( (mInvPanel) || (createInventoryPanel()) )
 		{
 			mCOFItemsList->setVisible(false);
 			mInvPanel->setVisible(true);
@@ -625,24 +704,31 @@ void LLPanelWearing::onToggleWearingView(EWearingView eView)
 	gSavedSettings.setU32("WearingViewType", eView);
 }
 
-LLInventoryPanel* LLPanelWearing::createInventoryPanel() const
+bool LLPanelWearing::createInventoryPanel()
 {
 	if (mInvPanel)
-		return mInvPanel;
+		return true;
 
 	LLView* pInvPanelPlaceholder = findChild<LLView>("wearing_invpanel_placeholder");
 	
-	LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_wearing_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
-	pInvPanel->setShape(pInvPanelPlaceholder->getRect());
-	pInvPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS);
-	pInvPanel->setFilterWorn(true);
-	pInvPanel->setSortOrder(gSavedSettings.getU32("WearingFolderSortOrder"));
-//	pInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-	pInvPanel->getFilter()->markDefault();
-	pInvPanel->openAllFolders();
-//	pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, recent_items_panel, _1, _2));
+	mSavedFolderState = new LLSaveFolderState();
+	mSavedFolderState->setApply(FALSE);
 
-	return pInvPanel;
+	mInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_wearing_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
+	mInvPanel->setShape(pInvPanelPlaceholder->getRect());
+	mInvPanel->setFilterLinks(LLInventoryFilter::FILTERLINK_EXCLUDE_LINKS, false);
+	mInvPanel->setFilterWorn(true);
+	mInvPanel->setSortOrder(gSavedSettings.getU32("WearingFolderSortOrder"));
+//	mInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+	mInvPanel->getFilter()->markDefault();
+	mInvPanel->openAllFolders();
+	mInvPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+	mInvPanel->setSelectCallback(boost::bind(&LLPanelWearing::onSelectionChange, this));
+
+	if (!sFilterSubString.empty())
+		mInvPanel->setFilterSubString(sFilterSubString);
+
+	return (mInvPanel != NULL);
 }
 // [/SL:KB]
 

@@ -116,7 +116,10 @@ public:
 	void 				setHoursAgo(U32 hours);
 	U32 				getHoursAgo() const;
 
-	void 				setFilterLinks(U64 filter_link);
+//	void 				setFilterLinks(U64 filter_link);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	void 				setFilterLinks(U64 filter_link, bool substring_reset);
+// [/SL:KB]
 	U64					getFilterLinks() const;
 
 	// +-------------------------------------------------------------------+
@@ -218,6 +221,9 @@ private:
 	std::string::size_type	mSubStringMatchOffset;
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	bool					mFilterSubStringResetFilterLinks;		// True if a change to the sub string should reset filter links
+// [/SL:KB]
 	const std::string		mName;
 
 	S32						mFilterGeneration;

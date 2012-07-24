@@ -41,6 +41,7 @@ class LLWornItemsList;
 class LLInventoryPanel;
 class LLMenuButton;
 class LLWearingSortMenu;
+class LLSaveFolderState;
 // [/SL:KB]
 
 /**
@@ -68,29 +69,38 @@ public:
 
 	/*virtual*/ void copyToClipboard();
 
-	boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	typedef boost::signals2::signal<void()> selection_change_signal_t;
+	boost::signals2::connection setSelectionChangeCallback(selection_change_signal_t::slot_type cb);
+// [/SL:KB]
+//	boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
 
 	bool hasItemSelected();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLInventoryPanel*   getInvPanel() const  { return mInvPanel; }
-	LLWornItemsList* getItemsList() const { return mCOFItemsList; }
+	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
+	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
 
 protected:
 	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
 	void onToggleWearingView(EWearingView eView);
 
-	LLInventoryPanel* createInventoryPanel() const;
+	bool createInventoryPanel();
 // [/SL:KB]
 
 private:
 	void onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	void onSelectionChange();
+// [/SL:KB]
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 //	LLWearableItemsList* 			mCOFItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLWornItemsList* 			mCOFItemsList;
+	selection_change_signal_t		mSelectionSignal;
+	LLWornItemsList*				mCOFItemsList;
 	LLInventoryPanel*				mInvPanel;
+	LLSaveFolderState*				mSavedFolderState;
 	LLMenuButton*					mSortMenuButton;
 	LLButton*						mToggleFolderView;
 	LLButton*						mToggleListView;

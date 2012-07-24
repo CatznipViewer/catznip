@@ -383,7 +383,10 @@ void LLPanelMainInventory::onClearSearch()
 	{
 		mActivePanel->setFilterSubString(LLStringUtil::null);
 		mActivePanel->setFilterTypes(0xffffffffffffffffULL);
-		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS, true);
+// [/SL:KB]
+//		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS);
 	}
 
 	if (finder)
@@ -1087,7 +1090,10 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		mFilterEditor->setFocus(TRUE);
 		filter->setFilterUUID(item_id);
 		filter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS, true);
+// [/SL:KB]
+//		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
 	}
 }
 

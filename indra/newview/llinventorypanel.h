@@ -149,7 +149,10 @@ public:
 	void setSinceLogoff(BOOL sl);
 	void setHoursAgo(U32 hours);
 	BOOL getSinceLogoff();
-	void setFilterLinks(U64 filter_links);
+//	void setFilterLinks(U64 filter_links);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	void setFilterLinks(U64 filter_links, bool substring_reset);
+// [/SL:KB]
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void setFilterWorn(bool filter);
 // [/SL:KB]
