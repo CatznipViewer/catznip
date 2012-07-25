@@ -1071,7 +1071,10 @@ std::string LLSidepanelInventory::getSelectionAction(S32* pSelCount) const
 	switch (invType)
 	{
 		case LLInventoryType::IT_WEARABLE:
-			return (!get_items_worn(items)) ? "wear" : "take_off";
+			if ( (1 == items.size()) && (LLAssetType::AT_BODYPART == items.front()->getType() ) )
+				return (!get_items_worn(items)) ? "wear" : LLStringUtil::null;
+			else
+				return (!get_items_worn(items)) ? "wear" : "take_off";
 		case LLInventoryType::IT_OBJECT:
 		case LLInventoryType::IT_ATTACHMENT:
 			return (!get_items_worn(items)) ? "attach" : "detach";
