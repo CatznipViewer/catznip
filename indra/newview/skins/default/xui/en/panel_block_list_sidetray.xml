@@ -95,7 +95,7 @@
                   layout="topleft"
                   left_pad="1"
                   name="mute_spacer_icon"
-                  width="16"/>
+                  width="11" />
                  <button
                   enabled="false"
                   follows="bottom|right"
@@ -110,7 +110,7 @@
                   left_pad="1"
                   name="mute_trash_btn"
                   tool_tip="Remove selected items from the blocked list"
-                  width="70">
+                  width="75">
                      <button.commit_callback
                       function="Block.ClickRemove" />
                  </button>

@@ -6,6 +6,8 @@
  help_topic="blocked_list"
  layout="topleft"
  legacy_header_height="18"
+ min_height="300"
+ min_width="320"
  name="blocked"
  open_positioning="cascading"
  single_instance="true"
@@ -97,7 +99,7 @@
                  layout="topleft"
                  left_pad="1"
                  name="derender_spacer_icon"
-                 width="218" />
+                 width="213" />
                 <button
                  enabled="false"
                  follows="bottom|right"
@@ -112,7 +114,7 @@
                  left_pad="1"
                  name="derender_trash_btn"
                  tool_tip="Restore selected objects"
-                 width="70" />
+                 width="75" />
             </panel>
         </panel>
     </tab_container>
