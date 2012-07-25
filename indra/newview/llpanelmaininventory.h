@@ -114,6 +114,7 @@ protected:
 	void doCreate(const LLSD& userdata);
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
 	bool checkCreate(const LLSD& sdParam);
+	void onToggleReceivedItems(const LLSD& sdValue);
 // [/SL:KB]
 	void resetFilters();
 	void setSortBy(const LLSD& userdata);

@@ -104,7 +104,10 @@ public:
 			switch (added_category_type)
 			{
 				case LLFolderType::FT_INBOX:
-					mSidepanelInventory->enableInbox(true);
+//					mSidepanelInventory->enableInbox(true);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+					mSidepanelInventory->refreshInboxVisibility();
+// [/SL:KB]
 					mSidepanelInventory->observeInboxModifications(added_category->getUUID());
 					break;
 				default:
@@ -294,9 +297,23 @@ void handleInventoryDisplayInboxChanged()
 	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
 	if (sidepanel_inventory)
 	{
-		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		sidepanel_inventory->refreshInboxVisibility();
+// [/SL:KB]
+//		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
 	}
 }
+
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+void handleShowReceivedItemsPanelChanged()
+{
+	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+	if (sidepanel_inventory)
+	{
+		sidepanel_inventory->refreshInboxVisibility();
+	}
+}
+// [/SL:KB]
 
 BOOL LLSidepanelInventory::postBuild()
 {
@@ -396,14 +413,20 @@ BOOL LLSidepanelInventory::postBuild()
 			inbox_panel->setTargetDim(gSavedPerAccountSettings.getS32("InventoryInboxHeight"));
 		}
 
-		// Set the inbox visible based on debug settings (final setting comes from http request below)
-		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//		// Set the inbox visible based on debug settings (final setting comes from http request below)
+//		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		refreshInboxVisibility();
+// [/SL:KB]
 
 		// Trigger callback for after login so we can setup to track inbox changes after initial inventory load
 		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
 	}
 
 	gSavedSettings.getControl("InventoryDisplayInbox")->getCommitSignal()->connect(boost::bind(&handleInventoryDisplayInboxChanged));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	gSavedSettings.getControl("ShowReceivedItemsPanel")->getCommitSignal()->connect(boost::bind(&handleShowReceivedItemsPanelChanged));
+// [/SL:KB]
 
 	// Update the verbs buttons state.
 	updateVerbs();
@@ -430,8 +453,11 @@ void LLSidepanelInventory::updateInbox()
 	// Set up observer for inbox changes, if we have an inbox already
 	else 
 	{
-		// Enable the display of the inbox if it exists
-		enableInbox(true);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		refreshInboxVisibility();
+// [/SL:KB]
+//		// Enable the display of the inbox if it exists
+//		enableInbox(true);
 
 		observeInboxModifications(inbox_id);
 	}
@@ -495,13 +521,42 @@ void LLSidepanelInventory::observeInboxModifications(const LLUUID& inboxID)
 	mInventoryPanelInbox = inbox->setupInventoryPanel();
 }
 
-void LLSidepanelInventory::enableInbox(bool enabled)
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+void LLSidepanelInventory::refreshInboxVisibility()
 {
-	mInboxEnabled = enabled;
-	
-	LLLayoutPanel * inbox_layout_panel = getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME);
-	inbox_layout_panel->setVisible(enabled);
+	// Rules for showing the "Received Items" panel:
+	//   - "Received Items" folder exists (and contains items)
+	//   - "ShowReceivedItemsPanel" is set to TRUE
+	// -> "InventoryDisplayInbox" overrides and always shows the panel
+	bool fEnableInbox = false;
+	if (gInventory.isInventoryUsable())
+	{
+		const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false, false);
+		fEnableInbox = idInbox.notNull();
+//		if (fEnableInbox)
+//		{
+//			LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
+//			gInventory.getDirectDescendentsOf(idInbox, cats, items);
+//			fEnableInbox = ((cats) && (!cats->empty())) || ((items) && (!items->empty()));
+//		}
+	}
+
+	if (!gSavedSettings.getBOOL("InventoryDisplayInbox"))
+		fEnableInbox &= (bool)gSavedSettings.getBOOL("ShowReceivedItemsPanel");
+	else
+		fEnableInbox = true;
+
+	mInboxEnabled = fEnableInbox;
+	getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME)->setVisible(fEnableInbox);
 }
+// [/SL:KB]
+//void LLSidepanelInventory::enableInbox(bool enabled)
+//{
+//	mInboxEnabled = enabled;
+//	
+//	LLLayoutPanel * inbox_layout_panel = getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME);
+//	inbox_layout_panel->setVisible(enabled);
+//}
 
 void LLSidepanelInventory::openInbox()
 {

@@ -81,7 +81,10 @@ public:
 
 	void onToggleInboxBtn();
 
-	void enableInbox(bool enabled);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	void refreshInboxVisibility();
+// [/SL:KB]
+//	void enableInbox(bool enabled);
 	
 	void openInbox();
 	

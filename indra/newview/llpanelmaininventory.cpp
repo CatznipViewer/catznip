@@ -154,6 +154,13 @@ BOOL LLPanelMainInventory::postBuild()
 	if (mActivePanel)
 	{
 		// "All Items" is the previous only view, so it gets the InventorySortOrder
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		if (!gSavedSettings.getBOOL("ShowReceivedItemsPanel"))
+		{
+			mActivePanel->getFilter()->setFilterCategoryTypes(mActivePanel->getFilter()->getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		}
+		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, _2));
+// [/SL:KB]
 		mActivePanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
 		mActivePanel->getFilter()->markDefault();
 		mActivePanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
@@ -346,6 +353,41 @@ bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
 		return ("Recent Items" == mActivePanel->getName());
 	}
 	return true;
+}
+
+void LLPanelMainInventory::onToggleReceivedItems(const LLSD& sdValue)
+{
+	LLInventoryPanel* pAllPanel = getChild<LLInventoryPanel>("All Items");
+	if (!pAllPanel)
+		return;
+
+	LLInventoryFilter* pAllFilter = pAllPanel->getFilter();
+	LLSD sdFilter;
+	if (!pAllFilter->isDefault())
+	{
+		pAllFilter->toLLSD(sdFilter);
+		pAllFilter->resetDefault();
+	}
+
+	if (sdValue.asBoolean())
+	{
+		pAllFilter->setFilterCategoryTypes(pAllFilter->getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
+		pAllFilter->markDefault();
+		pAllFilter->setModified(LLInventoryFilter::FILTER_RESTART);
+	}
+	else
+	{
+		pAllFilter->setFilterCategoryTypes(pAllFilter->getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		pAllFilter->markDefault();
+		pAllFilter->setModified(LLInventoryFilter::FILTER_LESS_RESTRICTIVE);
+	}
+
+	if (sdFilter.isMap())
+	{
+		sdFilter.erase("filter_category_types");
+		pAllFilter->fromLLSD(sdFilter);
+		pAllFilter->setModified(LLInventoryFilter::FILTER_RESTART);
+	}
 }
 // [/SL:KB]
 
@@ -1205,6 +1247,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		gSavedSettings.setBOOL("InventoryFilterStringPerTab", mFilterSubStringPerTab);
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	else if (command_name == "show_received_items_panel")
+	{
+		gSavedSettings.setBOOL("ShowReceivedItemsPanel", !gSavedSettings.getBOOL("ShowReceivedItemsPanel"));
+	}
+// [/SL:KB]
 }
 
 //bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
@@ -1352,6 +1400,12 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 	if (command_name == "filter_string_per_tab")
 	{
 		return mFilterSubStringPerTab;
+	}
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	else if (command_name == "show_received_items_panel")
+	{
+		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
 	}
 // [/SL:KB]
 
