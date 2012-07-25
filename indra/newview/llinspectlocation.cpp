@@ -152,6 +152,8 @@ void LLInspectLocation::onOpen(const LLSD& sdData)
 void LLInspectLocation::onClose(bool fAppQuitting)
 {
 	clearObserver();
+
+	LLTracker::stopTracking((void*)(intptr_t)TRUE);
 }
 
 void LLInspectLocation::setParcelID(const LLUUID& idParcel)
@@ -303,7 +305,7 @@ void LLInspectLocationUtil::registerFloater()
 
 void LLInspectLocationUtil::showInspector(const LLVector3d& posGlobal)
 {
-	gFloaterWorldMap->trackLocation(posGlobal);
+	LLTracker::trackLocation(posGlobal, LLStringUtil::null, LLStringUtil::null);
 
 	LLSD sdParams;
 	sdParams["global"]["x"] = posGlobal.mdV[VX];
