@@ -284,26 +284,16 @@ void LLNetMap::draw()
 				gGL.color4f(1.f, 0.5f, 0.5f, 1.f);
 			}
 
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+			static LLCachedControl<bool> s_fUseWorldMapTextures(gSavedSettings, "MiniMapWorldMapTextures") ;
+			bool fRenderTerrain = true;
 
-			// Draw using texture.
-			gGL.getTexUnit(0)->bind(regionp->getLand().getSTexture());
-			gGL.begin(LLRender::QUADS);
-				gGL.texCoord2f(0.f, 1.f);
-				gGL.vertex2f(left, top);
-				gGL.texCoord2f(0.f, 0.f);
-				gGL.vertex2f(left, bottom);
-				gGL.texCoord2f(1.f, 0.f);
-				gGL.vertex2f(right, bottom);
-				gGL.texCoord2f(1.f, 1.f);
-				gGL.vertex2f(right, top);
-			gGL.end();
-
-			// Draw water
-			gGL.setAlphaRejectSettings(LLRender::CF_GREATER, ABOVE_WATERLINE_ALPHA / 255.f);
+			if (s_fUseWorldMapTextures)
 			{
-				if (regionp->getLand().getWaterTexture())
+				LLViewerTexture* pRegionImage = regionp->getWorldMapTile();
+				if ( (pRegionImage) && (pRegionImage->hasGLTexture()) )
 				{
-					gGL.getTexUnit(0)->bind(regionp->getLand().getWaterTexture());
+					gGL.getTexUnit(0)->bind(pRegionImage);
 					gGL.begin(LLRender::QUADS);
 						gGL.texCoord2f(0.f, 1.f);
 						gGL.vertex2f(left, top);
@@ -314,9 +304,52 @@ void LLNetMap::draw()
 						gGL.texCoord2f(1.f, 1.f);
 						gGL.vertex2f(right, top);
 					gGL.end();
+
+					pRegionImage->setBoostLevel(LLViewerTexture::BOOST_MAP_VISIBLE);
+					fRenderTerrain = false;
 				}
 			}
-			gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
+// [/SL:KB]
+
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+			if (fRenderTerrain)
+			{
+// [/SL:KB]
+				// Draw using texture.
+				gGL.getTexUnit(0)->bind(regionp->getLand().getSTexture());
+				gGL.begin(LLRender::QUADS);
+					gGL.texCoord2f(0.f, 1.f);
+					gGL.vertex2f(left, top);
+					gGL.texCoord2f(0.f, 0.f);
+					gGL.vertex2f(left, bottom);
+					gGL.texCoord2f(1.f, 0.f);
+					gGL.vertex2f(right, bottom);
+					gGL.texCoord2f(1.f, 1.f);
+					gGL.vertex2f(right, top);
+				gGL.end();
+
+				// Draw water
+				gGL.setAlphaRejectSettings(LLRender::CF_GREATER, ABOVE_WATERLINE_ALPHA / 255.f);
+				{
+					if (regionp->getLand().getWaterTexture())
+					{
+						gGL.getTexUnit(0)->bind(regionp->getLand().getWaterTexture());
+						gGL.begin(LLRender::QUADS);
+							gGL.texCoord2f(0.f, 1.f);
+							gGL.vertex2f(left, top);
+							gGL.texCoord2f(0.f, 0.f);
+							gGL.vertex2f(left, bottom);
+							gGL.texCoord2f(1.f, 0.f);
+							gGL.vertex2f(right, bottom);
+							gGL.texCoord2f(1.f, 1.f);
+							gGL.vertex2f(right, top);
+						gGL.end();
+					}
+				}
+				gGL.setAlphaRejectSettings(LLRender::CF_DEFAULT);
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+			}
+// [/SL:KB]
 		}
 
 		// Redraw object layer periodically

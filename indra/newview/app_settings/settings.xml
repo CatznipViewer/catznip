@@ -5867,10 +5867,10 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>MiniMapObjects</key>
+    <key>MiniMapCollisionParcels</key>
     <map>
       <key>Comment</key>
-      <string>Show object layers on the mini-map</string>
+      <string>Show collision parcels on the mini-map as they become available</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -5889,10 +5889,10 @@
       <key>Value</key>
       <boolean>0</boolean>
     </map>
-    <key>MiniMapCollisionParcels</key>
+    <key>MiniMapObjects</key>
     <map>
       <key>Comment</key>
-      <string>Show collision parcels on the mini-map as they become available</string>
+      <string>Show object layers on the mini-map</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -5943,6 +5943,17 @@
       <string>F32</string>
       <key>Value</key>
       <real>128.0</real>
+    </map>
+    <key>MiniMapWorldMapTextures</key>
+    <map>
+      <key>Comment</key>
+      <string>Use the world map texture tile on the mini-map rather than the terrain texture</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>MouseSensitivity</key>
     <map>
