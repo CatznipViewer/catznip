@@ -32,6 +32,10 @@
    name="server_update_text">
       Place information not available without server update.
   </string>
+  <string
+   name="location_text">
+      [SLURL] - [AREA]m²
+  </string>
   <!-- Texture names -->
   <string
    name="icon_PG"

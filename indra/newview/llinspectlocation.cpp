@@ -24,6 +24,7 @@
 #include "llinspect.h"
 #include "llregionhandle.h"
 #include "llremoteparcelrequest.h"
+#include "llresmgr.h"
 #include "llsdutil.h"
 #include "llsdutil_math.h"
 #include "llslurl.h"
@@ -34,6 +35,8 @@
 #include "llviewerregion.h"
 
 #include "llinspectlocation.h"
+
+#include <boost/lexical_cast.hpp>
 
 // ============================================================================
 // LLInspectLocation
@@ -260,7 +263,20 @@ void LLInspectLocation::requestRemoteParcel(const LLVector3d& posGlobal)
 void LLInspectLocation::updateFromParcelData()
 {
 	m_pParcelName->setText(m_CurParcelData.name);
-	m_pParcelDescription->setText(m_CurParcelData.desc);
+
+	m_pParcelDescription->setText(LLStringUtil::null);
+	if (m_CurParcelData.sale_price > 0)
+	{
+		LLStringUtil::format_map_t args;
+		args["[AMOUNT]"] = LLResMgr::getInstance()->getMonetaryString(m_CurParcelData.sale_price);
+		std::string strForSale = LLTrans::getString("TooltipForSaleL$", args);
+		strForSale.push_back('\n');
+
+		LLStyle::Params params;
+		params.font.style = "BOLD";
+		m_pParcelDescription->appendText(strForSale, false, params);
+	}
+	m_pParcelDescription->appendText(m_CurParcelData.desc, false);
 
 	// HACK: Flag 0x2 == adult region; 0x1 == mature region; otherwise assume PG
 	if (m_CurParcelData.flags & 0x2)
@@ -273,7 +289,11 @@ void LLInspectLocation::updateFromParcelData()
 	S32 posRegionX = llround(m_CurParcelData.global_x) % REGION_WIDTH_UNITS;
 	S32 posRegionY = llround(m_CurParcelData.global_y) % REGION_WIDTH_UNITS;
 	S32 posRegionZ = llround(m_CurParcelData.global_z);
-	m_pParcelLocation->setText(LLSLURL(m_CurParcelData.sim_name, LLVector3(posRegionX, posRegionY, posRegionZ)).getSLURLString());
+
+	LLStringUtil::format_map_t args;
+	args["[SLURL]"] = LLSLURL(m_CurParcelData.sim_name, LLVector3(posRegionX, posRegionY, posRegionZ)).getSLURLString();
+	args["[AREA]"] = boost::lexical_cast<std::string>(m_CurParcelData.actual_area);
+	m_pParcelLocation->setText(getString("location_text", args));
 
 	m_pTeleportBtn->setEnabled(true);
 	m_pMoreInfoBtn->setEnabled(true);
