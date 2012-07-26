@@ -19,6 +19,8 @@
    label="View Profile"
    name="View Profiles">
   </menu>
+  <menu_item_separator
+   name="Profile Separator" />
   <menu
    label="Zoom"
    name="Minimap Zoom">
@@ -51,7 +53,49 @@
          parameter="default" />
 	</menu_item_call>
   </menu>
-	<menu_item_separator />
+  <menu
+   label="Show"
+   name="Minimap Show">
+    <menu_item_check
+     label="Objects"
+     name="Objects">
+      <menu_item_check.on_click
+       function="ToggleControl"
+       parameter="MiniMapObjects" />
+      <menu_item_check.on_check
+       control="MiniMapObjects" />
+    </menu_item_check>
+    <menu_item_check
+     label="World Map Textures"
+     name="World Map Textures">
+      <menu_item_check.on_click
+       function="ToggleControl"
+       parameter="MiniMapWorldMapTextures" />
+      <menu_item_check.on_check
+       control="MiniMapWorldMapTextures" />
+    </menu_item_check>
+    <menu_item_separator />
+    <menu_item_check
+     label="Property Lines"
+     name="Property Lines">
+      <menu_item_check.on_click
+       function="ToggleControl"
+       parameter="MiniMapPropertyLines" />
+      <menu_item_check.on_check
+       control="MiniMapPropertyLines" />
+    </menu_item_check>
+    <menu_item_check
+     label="Parcels for Sale"
+     name="Parcels for Sale">
+      <menu_item_check.on_click
+       function="ToggleControl"
+       parameter="MiniMapForSaleParcels" />
+      <menu_item_check.on_check
+       control="MiniMapForSaleParcels" />
+      <menu_item_check.on_enable
+       control="MiniMapPropertyLines" />
+    </menu_item_check>
+  </menu>
     <menu_item_check
        label="Rotate Map"
        name="Rotate Map">
@@ -69,15 +113,6 @@
           <menu_item_check.on_click
              function="ToggleControl"
              parameter="MiniMapAutoCenter" />
-    </menu_item_check>
-    <menu_item_check
-       label="Property Lines"
-       name="Property Lines">
-          <menu_item_check.on_check
-             control="MiniMapPropertyLines" />
-          <menu_item_check.on_click
-             function="ToggleControl"
-             parameter="MiniMapPropertyLines" />
     </menu_item_check>
     <menu_item_separator />
     <menu_item_call
