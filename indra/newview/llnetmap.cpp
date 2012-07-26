@@ -685,9 +685,9 @@ BOOL LLNetMap::handleToolTipAgent(const LLUUID& avatar_id)
 		p.message(av_name.getCompleteName());
 		p.image.name("Inspector_I");
 		p.click_callback(boost::bind(showAvatarInspector, avatar_id));
-		p.visible_time_near(6.f);
-		p.visible_time_far(3.f);
-		p.delay_time(0.35f);
+//		p.visible_time_near(6.f);
+//		p.visible_time_far(3.f);
+//		p.delay_time(0.35f);
 		p.wrap(false);
 
 		LLToolTipMgr::instance().show(p);
