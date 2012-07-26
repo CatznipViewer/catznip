@@ -946,22 +946,27 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 		{
 			S32 overlay = pOwnership[idxRow * GRIDS_PER_EDGE + idxCol];
 			S32 idxCollision = idxRow * GRIDS_PER_EDGE + idxCol;
+			bool fForSale = ((overlay & PARCEL_COLOR_MASK) == PARCEL_FOR_SALE);
 			bool fCollision = (pCollision) && (pCollision[idxCollision / 8] & (1 << (idxCollision % 8)));
-			if ( (!fCollision) && (0 == (overlay & (PARCEL_SOUTH_LINE | PARCEL_WEST_LINE))) )
+			if ( (!fForSale) && (!fCollision) && (0 == (overlay & (PARCEL_SOUTH_LINE | PARCEL_WEST_LINE))) )
 				continue;
 
 			const S32 posX = originX + llround(idxCol * GRID_STEP * mObjectMapTPM);
 			const S32 posY = originY + llround(idxRow * GRID_STEP * mObjectMapTPM);
 
-			static LLCachedControl<bool> s_fShowCollisionParcels(gSavedSettings, "MiniMapCollisionParcels") ;
-			if ( (s_fShowCollisionParcels) && (fCollision) )
+			static LLCachedControl<bool> s_fForSaleParcels(gSavedSettings, "MiniMapForSaleParcels");
+			static LLCachedControl<bool> s_fShowCollisionParcels(gSavedSettings, "MiniMapCollisionParcels");
+			if ( ((s_fForSaleParcels) && (fForSale)) || ((s_fShowCollisionParcels) && (fCollision)) )
 			{
 				S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + llround(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 				for (; curY <= endY; curY++)
 				{
 					S32 curX = llclamp(posX, 0, imgWidth) , endX = llclamp(posX + llround(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
-						pTextureData[curY * imgWidth + curX] = LLColor4U(255, 128, 128, 192).mAll;
+					{
+						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).mAll
+						                                                  : LLColor4U(255, 128, 128, 192).mAll;
+					}
 				}
 			}
 			if (overlay & PARCEL_SOUTH_LINE)
