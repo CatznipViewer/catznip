@@ -331,7 +331,8 @@ void LLNetMap::draw()
 		posCenter.mV[VZ] = 0.f;
 		LLVector3d posCenterGlobal = viewPosToGlobal(llfloor(posCenter.mV[VX]), llfloor(posCenter.mV[VY]));
 
-		if (mUpdateObjectImage || (map_timer.getElapsedTimeF32() > 0.5f))
+		static LLCachedControl<bool> s_fShowObjects(gSavedSettings, "MiniMapObjects") ;
+		if ( (s_fShowObjects) && ((mUpdateObjectImage) || ((map_timer.getElapsedTimeF32() > 0.5f))) )
 		{
 			mUpdateObjectImage = false;
 // [/SL:KB]
@@ -392,20 +393,28 @@ void LLNetMap::draw()
 		map_center_agent.mV[VX] *= mScale/region_width;
 		map_center_agent.mV[VY] *= mScale/region_width;
 
-		gGL.getTexUnit(0)->bind(mObjectImagep);
+//		gGL.getTexUnit(0)->bind(mObjectImagep);
 		F32 image_half_width = 0.5f*mObjectMapPixels;
 		F32 image_half_height = 0.5f*mObjectMapPixels;
 
-		gGL.begin(LLRender::QUADS);
-			gGL.texCoord2f(0.f, 1.f);
-			gGL.vertex2f(map_center_agent.mV[VX] - image_half_width, image_half_height + map_center_agent.mV[VY]);
-			gGL.texCoord2f(0.f, 0.f);
-			gGL.vertex2f(map_center_agent.mV[VX] - image_half_width, map_center_agent.mV[VY] - image_half_height);
-			gGL.texCoord2f(1.f, 0.f);
-			gGL.vertex2f(image_half_width + map_center_agent.mV[VX], map_center_agent.mV[VY] - image_half_height);
-			gGL.texCoord2f(1.f, 1.f);
-			gGL.vertex2f(image_half_width + map_center_agent.mV[VX], image_half_height + map_center_agent.mV[VY]);
-		gGL.end();
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+		if (s_fShowObjects)
+		{
+			gGL.getTexUnit(0)->bind(mObjectImagep);
+// [/SL:KB]
+			gGL.begin(LLRender::QUADS);
+				gGL.texCoord2f(0.f, 1.f);
+				gGL.vertex2f(map_center_agent.mV[VX] - image_half_width, image_half_height + map_center_agent.mV[VY]);
+				gGL.texCoord2f(0.f, 0.f);
+				gGL.vertex2f(map_center_agent.mV[VX] - image_half_width, map_center_agent.mV[VY] - image_half_height);
+				gGL.texCoord2f(1.f, 0.f);
+				gGL.vertex2f(image_half_width + map_center_agent.mV[VX], map_center_agent.mV[VY] - image_half_height);
+				gGL.texCoord2f(1.f, 1.f);
+				gGL.vertex2f(image_half_width + map_center_agent.mV[VX], image_half_height + map_center_agent.mV[VY]);
+			gGL.end();
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+		}
+// [/SL:KB]
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
 		if (s_fShowPropertyLines)
