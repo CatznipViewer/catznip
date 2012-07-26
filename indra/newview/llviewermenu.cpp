@@ -87,6 +87,9 @@
 #include "llsceneview.h"
 #include "llselectmgr.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "lltexturecache.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolcomp.h"
 #include "lltoolmgr.h"
@@ -101,6 +104,10 @@
 #include "llviewerobjectlist.h"
 #include "llviewerparcelmgr.h"
 #include "llviewerstats.h"
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "llviewertexturelist.h"
+#include "llvovolume.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 #include "llworldmap.h"
 #include "pipeline.h"
@@ -2650,6 +2657,65 @@ void handle_object_inspect()
 	LLFloaterReg::showInstance("inspect", LLSD());
 	*/
 }
+
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+void handle_texture_refresh()
+{
+	typedef std::pair<LLUUID, bool> texture_pair_t;
+	typedef std::list<texture_pair_t> texture_list_t;
+	texture_list_t idTextures;
+
+	LLObjectSelectionHandle pSel = LLSelectMgr::instance().getSelection();
+	for (LLObjectSelection::iterator itNode = pSel->begin(), endNode = pSel->end(); itNode != endNode; ++itNode)
+	{
+		const LLSelectNode* pNode = *itNode;
+		const LLViewerObject* pObject = (pNode) ? pNode->getObject() : NULL;
+		if (!pObject)
+			continue;
+
+		for (U8 idxTE = 0, cntTE = pObject->getNumTEs(); idxTE < cntTE; idxTE++)
+		{
+			LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
+			if ((pTexture) && (idTextures.end() == std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pTexture->getID())))
+				idTextures.push_back(texture_pair_t(pTexture->getID(), false));
+		}
+
+		if (pObject->isSculpted())
+		{
+			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+			if (pSculptParams)
+			{
+				auto itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
+				if (idTextures.end() == itTexture)
+					idTextures.push_back(texture_pair_t(pSculptParams->getSculptTexture(), true));
+				else
+					itTexture->second = true;
+			}
+		}
+	}
+
+	for (texture_list_t::const_iterator itTexture = idTextures.begin(); itTexture != idTextures.end(); ++itTexture)
+	{
+		LLViewerFetchedTexture* pTexture = gTextureList.findImage(itTexture->first);
+		if (pTexture)
+		{
+			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+			pTexture->clearFetchedResults();
+
+			if (itTexture->second)
+			{
+				const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
+				for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+				{
+					LLVOVolume* pVolume = pVolumeList->at(idxVolume);
+					if (pVolume)
+						pVolume->notifyMeshLoaded();
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 //---------------------------------------------------------------------------
 // Land pie menu
@@ -8389,6 +8455,9 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+	commit.add("Object.TextureRefresh", boost::bind(&handle_texture_refresh));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
 	view_listener_t::addMenu(new LLObjectReturn(), "Object.Return");
