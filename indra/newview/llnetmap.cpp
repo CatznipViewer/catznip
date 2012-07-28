@@ -661,6 +661,9 @@ void LLNetMap::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	LLUICtrl::reshape(width, height, called_from_parent);
 	createObjectImage();
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-28 (Catznip-3.3)
+	createParcelImage();
+// [/SL:KB]
 }
 
 LLVector3 LLNetMap::globalPosToView(const LLVector3d& global_pos)
@@ -1047,7 +1050,10 @@ bool LLNetMap::createImage(LLPointer<LLImageRaw>& rawimagep) const
 
 	// Find the least power of two >= the minimum size.
 	const S32 MIN_SIZE = 64;
-	const S32 MAX_SIZE = 256;
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-28 (Catznip-3.3)
+	const S32 MAX_SIZE = 512;
+// [/SL:KB]
+//	const S32 MAX_SIZE = 256;
 	S32 img_size = MIN_SIZE;
 	while( (img_size*2 < square_size ) && (img_size < MAX_SIZE) )
 	{
