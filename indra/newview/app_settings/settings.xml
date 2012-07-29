@@ -4833,6 +4833,17 @@
       <key>Value</key>
       <integer>512</integer>
     </map>
+    <key>LastTextureSaveFormat</key>
+    <map>
+      <key>Comment</key>
+      <string>The format of the last texture the user saved to disk</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>13</integer>
+    </map>
     <key>LeftClickShowMenu</key>
     <map>
       <key>Comment</key>

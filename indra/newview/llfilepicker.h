@@ -105,6 +105,11 @@ public:
 		FFSAVE_PNG = 13,
 		FFSAVE_JPEG = 14,
 		FFSAVE_SCRIPT = 15,
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#ifdef LL_WINDOWS
+		FFSAVE_IMAGES = 20
+#endif // LL_WINDOWS
+// [/SL:KB]
 	};
 
 	// open the dialog. This is a modal operation
