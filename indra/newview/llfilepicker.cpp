@@ -528,6 +528,17 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 		mOFN.lpstrDefExt = L"txt";
 		mOFN.lpstrFilter = L"LSL Files (*.lsl)\0*.lsl\0" L"\0";
 		break;
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+	case FFSAVE_IMAGES:
+		mOFN.lpstrDefExt = L"png";
+		mOFN.lpstrFilter =
+			L"Bitmap Images (*.bmp)\0*.bmp\0" \
+			L"PNG Images (*.png)\0*.png\0" \
+			L"Targa Images (*.tga)\0*.tga\0" \
+			L"\0";
+		mOFN.nFilterIndex = 2;
+		break;
+// [/SL:KB]
 	default:
 		return FALSE;
 	}
