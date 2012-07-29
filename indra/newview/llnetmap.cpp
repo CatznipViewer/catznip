@@ -137,6 +137,10 @@ BOOL LLNetMap::postBuild()
 	registrar.add("Minimap.Tracker", boost::bind(&LLNetMap::handleStopTracking, this, _2));
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
 	registrar.add("Minimap.ShowProfile", boost::bind(&LLNetMap::handleShowProfile, this, _2));
+	registrar.add("Minimap.TextureType", boost::bind(&LLNetMap::handleTextureType, this, _2));
+
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+	enable_registrar.add("Minimap.CheckTextureType", boost::bind(&LLNetMap::checkTextureType, this, _2));
 // [/SL:KB]
 
 // [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
@@ -1174,6 +1178,23 @@ void LLNetMap::handleShowProfile(const LLSD& sdParam) const
 
 		LLFloaterSidePanelContainer::showPanel("places", sdParams);
 	}
+}
+
+bool LLNetMap::checkTextureType(const LLSD& sdParam) const
+{
+	const std::string strParam = sdParam.asString();
+
+	bool fWorldMapTextures = gSavedSettings.getBOOL("MiniMapWorldMapTextures");
+	if ("maptile" == strParam)
+		return fWorldMapTextures;
+	else if ("terrain" == strParam)
+		return !fWorldMapTextures;
+	return false;
+}
+
+void LLNetMap::handleTextureType(const LLSD& sdParam) const
+{
+	gSavedSettings.setBOOL("MiniMapWorldMapTextures", ("maptile" == sdParam.asString()));
 }
 // [/SL:KB]
 

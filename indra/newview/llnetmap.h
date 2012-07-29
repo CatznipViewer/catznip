@@ -164,6 +164,8 @@ private:
 	void handleStopTracking (const LLSD& userdata);
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
 	void handleShowProfile(const LLSD& sdParam) const;
+	bool checkTextureType(const LLSD& sdParam) const;
+	void handleTextureType(const LLSD& sdParam) const;
 	void setAvatarProfileLabel(const LLAvatarName& avName, const std::string& item_name);
 // [/SL:KB]
 
