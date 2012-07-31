@@ -226,7 +226,7 @@ protected:
 		static void confirmMuteAllCallback(const LLSD& notification, const LLSD& response);
 	};
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 	/**
 	 * Comparator for comparing avatar items by status and then name
 	 */
@@ -235,9 +235,9 @@ protected:
 		LOG_CLASS(LLAvatarItemStatusAndNameComparator);
 	public:
 		LLAvatarItemStatusAndNameComparator(LLParticipantList& parent) : mParent(parent) {};
-		virtual ~LLAvatarItemStatusAndNameComparator() {};
+		/*virtual*/ ~LLAvatarItemStatusAndNameComparator() {};
 	protected:
-		virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
+		/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 	private:
 		LLParticipantList& mParent;
 	};
@@ -304,7 +304,7 @@ private:
 // [/SL:KB]
 	boost::signals2::connection mAvatarListToggleIconsConnection;
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 	LLPointer<LLAvatarItemStatusAndNameComparator> mSortByStatusAndName;
 // [/SL:KB]
 	LLPointer<LLAvatarItemRecentSpeakerComparator> mSortByRecentSpeakers;

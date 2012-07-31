@@ -439,7 +439,7 @@ void LLIMModel::LLIMSession::addMessage(const std::string& from, const LLUUID& f
 	message["time"] = time; 
 	message["index"] = (LLSD::Integer)mMsgs.size(); 
 	message["is_history"] = is_history;
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 	if ( (isGroupSessionType()) && (mSpeakers) )
 	{
 		const LLSpeaker* pSpeaker = mSpeakers->findSpeaker(from_id);

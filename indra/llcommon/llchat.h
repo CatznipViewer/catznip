@@ -67,7 +67,7 @@ typedef enum e_chat_style
 	CHAT_STYLE_HISTORY
 }EChatStyle;
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 typedef enum e_chat_name_style
 {
 	CHAT_NAME_NORMAL,

@@ -282,7 +282,7 @@ public:
 			// Start with blank so sample data from XUI XML doesn't
 			// flash on the screen
 			user_name->setValue( LLSD() );
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 			EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
 			LLAvatarNameCache::get(mAvatarID, boost::bind(&LLChatHistoryHeader::onAvatarNameCache, this, _1, _2, name_style));
 // [/SL:KB]
@@ -315,7 +315,7 @@ public:
 					user_name->appendText("  - " + username, FALSE, style_params_name);
 				}
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 				EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
 				if (CHAT_NAME_MODERATOR == name_style)
 				{
@@ -434,7 +434,7 @@ public:
 	}
 
 //	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name, EChatNameStyle name_style)
 // [/SL:KB]
 	{
@@ -457,7 +457,7 @@ public:
 			user_name->appendText("  - " + av_name.mUsername, FALSE, style_params_name);
 		}
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 		if (CHAT_NAME_MODERATOR == name_style)
 		{
 			LLStyle::Params style_params_name;
@@ -728,7 +728,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 {
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 	EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
 // [/SL:KB]
 
@@ -848,7 +848,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			{
 				LLStyle::Params link_params(style_params);
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 				U8 font_style = LLFontGL::getStyleFromString(link_params.font.style) | LLViewerChat::getChatNameFontStyle(name_style);
 				link_params.font.style = LLFontGL::getStringFromStyle(font_style);
 				link_params.link_style_override = false;

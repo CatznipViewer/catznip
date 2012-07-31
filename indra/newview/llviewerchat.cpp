@@ -283,7 +283,7 @@ void LLViewerChat::signalChatFontChanged()
 	sChatFontChangedSignal(getChatFont());
 }
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 U8 LLViewerChat::getChatNameFontStyle(EChatNameStyle name_style)
 {
 	switch (name_style)

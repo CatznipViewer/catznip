@@ -353,7 +353,7 @@ void LLParticipantList::onAvatarListRefreshed(LLUICtrl* ctrl, const LLSD& param)
 					tooltip.erase(found, moderator_indicator_len);
 					item->setAvatarToolTip(tooltip);
 				}
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 				item->setState(LLAvatarListItem::IS_ONLINE);
 // [/SL:KB]
 			}
@@ -385,7 +385,7 @@ void LLParticipantList::onAvatarListRefreshed(LLUICtrl* ctrl, const LLSD& param)
 					tooltip += moderator_indicator;
 					item->setAvatarToolTip(tooltip);
 				}
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 				item->setState(LLAvatarListItem::IS_MODERATOR);
 // [/SL:KB]
 			}
@@ -589,7 +589,7 @@ void LLParticipantList::sort()
 	switch ( getSortOrder() ) 
 	{
 		case E_SORT_BY_NAME :
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 			if (mSortByStatusAndName.isNull())
 				mSortByStatusAndName = new LLAvatarItemStatusAndNameComparator(*this);
 			mAvatarList->setComparator(mSortByStatusAndName.get());
@@ -1040,7 +1040,7 @@ bool LLParticipantList::LLParticipantListMenu::checkContextMenuItem(const LLSD& 
 	return false;
 }
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 bool LLParticipantList::LLAvatarItemStatusAndNameComparator::doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
 {
 	if (mParent.mSpeakerMgr)
