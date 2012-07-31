@@ -182,6 +182,9 @@ LLIMModel::LLIMSession::LLIMSession(const LLUUID& session_id, const std::string&
 :	mSessionID(session_id),
 	mName(name),
 	mType(type),
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+	mParticipantLastMessageTime(LLDate::now()),
+// [/SL:K]
 	mParticipantUnreadMessageCount(0),
 	mNumUnread(0),
 	mOtherParticipantID(other_participant_id),
@@ -878,6 +881,9 @@ LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, 
 			|| INTERACTIVE_SYSTEM_FROM == from)
 	{
 		++(session->mParticipantUnreadMessageCount);
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+		session->mParticipantLastMessageTime = LLDate::now();
+// [/SL:K]
 	}
 
 	return session;
@@ -2661,9 +2667,9 @@ bool LLIMMgr::leaveSession(const LLUUID& session_id, ECloseFlag flag)
 	{
 		snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
 		if (mSnoozedSessions.end() != itSession)
-			itSession->second = LLTimer::getTotalSeconds();
+			itSession->second = im_session->mParticipantLastMessageTime.secondsSinceEpoch();
 		else
-			mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, LLTimer::getTotalSeconds()));
+			mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, im_session->mParticipantLastMessageTime.secondsSinceEpoch()));
 	}
 	else
 	{
