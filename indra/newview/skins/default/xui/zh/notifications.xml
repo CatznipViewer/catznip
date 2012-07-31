@@ -1335,7 +1335,7 @@ Download to your Applications folder?
 	<notification name="FailedUpdateInstall">
 		An error occurred installing the viewer update.
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1343,7 +1343,7 @@ http://secondlife.com/download.
 You will be unable to log in until [APP_NAME] has been updated.
 
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="結束退出"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
@@ -1396,8 +1396,12 @@ We must restart [APP_NAME] to install the update.
 		<usetemplate ignoretext="開啟我的網頁瀏覽器去察看問與答維基" name="okcancelignore" notext="取消" yestext="確定"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		拜訪 [SECOND_LIFE] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
+		拜訪 [APP_NAME] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
 		<usetemplate ignoretext="開啟我的網頁瀏覽器以使用公共議題追蹤。" name="okcancelignore" notext="取消" yestext="前往頁面"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		前往林登官方部落格，以取得最新的新聞與資訊。
+		<usetemplate ignoretext="開啟我的網頁瀏覽器以察看部落格" name="okcancelignore" notext="取消" yestext="確定"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		前往林登官方部落格，以取得最新的新聞與資訊。
