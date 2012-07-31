@@ -1355,12 +1355,12 @@ or you can install it now.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Information about this update]
+Version [VERSION] [[UPDATE_URL] Information about this update]
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Information about this update]
+Version [VERSION] [[UPDATE_URL] Information about this update]
 		<usetemplate name="okcancelbuttons" notext="梢候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
