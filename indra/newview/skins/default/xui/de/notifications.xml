@@ -1450,6 +1450,10 @@ Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
 		Im [APP_NAME] Fragen-Tracker können Sie Fehler und andere Probleme melden.
 		<usetemplate ignoretext="Meinen Browser starten, um die Datenbank für Fehler und Verbesserungsvorschläge anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="Gehe zu Seite"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		Im offiziellen [APP_NAME] Blog finden Sie die neuesten Nachrichten und Informationen.
+		<usetemplate ignoretext="Meinen Browser starten, um das Blog anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Im offiziellen Linden-Blog finden Sie die neuesten Nachrichten und Informationen.
 		<usetemplate ignoretext="Meinen Browser starten, um das Blog anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>

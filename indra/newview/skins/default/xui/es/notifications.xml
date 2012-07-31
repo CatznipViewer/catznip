@@ -1444,6 +1444,10 @@ Debemos reiniciar [APP_NAME] para instalar la actualización.
 		Visita el Issue Tracker (sistema público de seguimiento de incidencias) de [APP_NAME], donde podrás informar de errores y otros asuntos.
 		<usetemplate ignoretext="Abrir mi navegador para usar el &apos;Issue Tracker&apos;" name="okcancelignore" notext="Cancelar" yestext="Ir a la página"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		Para ver las últimas noticias e informaciones, ¿ir la Blog oficial?
+		<usetemplate ignoretext="Abrir mi navegador para ver el blog" name="okcancelignore" notext="Cancelar" yestext="OK"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Para ver las últimas noticias e informaciones, ¿ir la Blog oficial?
 		<usetemplate ignoretext="Abrir mi navegador para ver el blog" name="okcancelignore" notext="Cancelar" yestext="OK"/>

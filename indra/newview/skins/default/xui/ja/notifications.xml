@@ -1473,6 +1473,10 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 バグやその他の問題を報告できます。
 		<usetemplate ignoretext="ブラウザを起動してパブリック問題トラッカーを使用するとき" name="okcancelignore" notext="キャンセル" yestext="ページへ行く"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		[APP_NAME] 公式ブログで、最新のニュースや情報を入手してください。
+		<usetemplate ignoretext="ブラウザを起動して公式ブログを見るとき" name="okcancelignore" notext="取り消し" yestext="OK"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Linden 公式ブログで、最新のニュースや情報を入手してください。
 		<usetemplate ignoretext="ブラウザを起動して公式ブログを見るとき" name="okcancelignore" notext="取り消し" yestext="OK"/>

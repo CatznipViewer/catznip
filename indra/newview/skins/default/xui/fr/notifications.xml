@@ -1435,6 +1435,10 @@ Version [VERSION]
 		Pour signaler des bugs et autres problèmes, utilisez le JIRA de [APP_NAME].
 		<usetemplate ignoretext="Lancer mon navigateur pour utiliser le Issue Tracker (JIRA)" name="okcancelignore" notext="Annuler" yestext="Aller sur cette page"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		Visitez le blog officiel des [APP_NAME] pour les dernières nouvelles et informations.
+		<usetemplate ignoretext="Lancer mon navigateur web pour consulter le blog" name="okcancelignore" notext="Annuler" yestext="Aller à la page"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Visitez le blog officiel des Lindens pour les dernières nouvelles et informations.
 		<usetemplate ignoretext="Lancer mon navigateur web pour consulter le blog" name="okcancelignore" notext="Annuler" yestext="Aller à la page"/>

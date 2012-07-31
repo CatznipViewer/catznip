@@ -1438,6 +1438,10 @@ Güncellemeyi kurmak için [APP_NAME] uygulamasını yeniden başlatmalısınız
 		Hataları ve diğer sorunları bildirebileceğiniz [APP_NAME] Kamuya Açık Sorun Takip sayfasını ziyaret edin.
 		<usetemplate ignoretext="Kamuya Açık Sorun Takip hizmetini kullanmak için tarayıcımı başlat" name="okcancelignore" notext="İptal Et" yestext="Sayfaya git"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+    En son haberler ve bilgiler için Resmi [APP_NAME] Blog&apos;una git.
+		<usetemplate ignoretext="Blog sayfasını görüntülemek için tarayıcımı başlat" name="okcancelignore" notext="İptal" yestext="Tamam"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		En son haberler ve bilgiler için Resmi Linden Blog&apos;una git.
 		<usetemplate ignoretext="Blog sayfasını görüntülemek için tarayıcımı başlat" name="okcancelignore" notext="İptal" yestext="Tamam"/>

@@ -1438,6 +1438,10 @@ http://secondlife.com/download.
 		Посетите страницу общедоступного средства исследования проблем [APP_NAME], на котором можно сообщить об ошибках и других проблемах.
 		<usetemplate ignoretext="Запустить браузер для использования общедоступного средства исследования проблем" name="okcancelignore" notext="Отмена" yestext="Перейти на страницу"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+    Перейти на официальный блог [APP_NAME] для просмотра свежих новостей и прочей информации.
+    <usetemplate ignoretext="Запустить браузер для просмотра блога" name="okcancelignore" notext="Отмена" yestext="OK"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Перейти на официальный блог Linden для просмотра свежих новостей и прочей информации.
 		<usetemplate ignoretext="Запустить браузер для просмотра блога" name="okcancelignore" notext="Отмена" yestext="OK"/>

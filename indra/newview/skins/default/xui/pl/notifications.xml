@@ -1366,6 +1366,10 @@ W celu instalacji aktualizacji musi zostać wykonany restart [APP_NAME].
 		Odwiedź [APP_NAME] katalog problemów, gdzie możesz zgłaszać błędy i inne problemy.
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by wysłać Błędy klienta" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		Otwórz oficjalny blog [APP_NAME] żeby zobaczyć nowe wiadomości i informacje.
+		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć blog" name="okcancelignore" notext="Anuluj" yestext="OK"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Otwórz oficjalny blog Lindenów żeby zobaczyć nowe wiadomości i informacje.
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć blog" name="okcancelignore" notext="Anuluj" yestext="OK"/>

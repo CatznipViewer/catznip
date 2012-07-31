@@ -1426,6 +1426,10 @@ Para instalar a atualização, será preciso reiniciar o [APP_NAME].
 		Visite o Rastreador de Problemas do [APP_NAME], onde você poderá reportar Bugs e outros Problemas.
 		<usetemplate ignoretext="Abrir o navegador para usar o Monitor de problemas" name="okcancelignore" notext="Cancelar" yestext="Ir para a Página"/>
 	</notification>
+	<notification name="WebLaunchBlog">
+		Ir até o Blog Oficial da [APP_NAME] buscar pelas últimas notícias e informações.
+		<usetemplate ignoretext="Abrir meu navegador para ler o blog" name="okcancelignore" notext="Cancelar" yestext="Ir até a página"/>
+	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Ir até o Blog Oficial da Linden buscar pelas últimas notícias e informações.
 		<usetemplate ignoretext="Abrir meu navegador para ler o blog" name="okcancelignore" notext="Cancelar" yestext="Ir até a página"/>
