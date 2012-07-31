@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>Second Life</string>
 	<key>CFBundleIconFile</key>
-	<string>secondlife.icns</string>
+	<string>catznip.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.secondlife.indra.viewer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -60,7 +60,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>2.1.0.13828</string>
+	<string>7.0.0.0</string>
 	<key>CSResourcesFileMapped</key>
 	<true/>
 </dict>
