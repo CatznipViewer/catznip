@@ -1335,7 +1335,7 @@ Download to your Applications folder?
 	<notification name="FailedUpdateInstall">
 		An error occurred installing the viewer update.
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1343,7 +1343,7 @@ http://secondlife.com/download.
 You will be unable to log in until [APP_NAME] has been updated.
 
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="結束退出"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">

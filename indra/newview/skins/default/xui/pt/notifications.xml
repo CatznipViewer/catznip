@@ -1362,7 +1362,7 @@ Salvar na pasta Aplicativos?
 	<notification name="FailedUpdateInstall">
 		Ocorreu um erro de atualização do visualizador. 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1370,7 +1370,7 @@ http://secondlife.com/download.
 Não será possível acessar a sua conta até que você atualize o [APP_NAME].
 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Sair"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">

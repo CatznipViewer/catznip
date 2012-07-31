@@ -1371,7 +1371,7 @@ Télécharger vers le dossier Applications ?
 	<notification name="FailedUpdateInstall">
 		Une erreur est survenue lors de l&apos;installation de la mise à jour du client.
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1379,7 +1379,7 @@ http://secondlife.com/download.
 Vous ne pourrez pas vous connecter tant que [APP_NAME] ne sera pas mis à jour.
 
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Quitter"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">

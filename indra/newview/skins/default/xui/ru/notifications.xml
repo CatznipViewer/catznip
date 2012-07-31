@@ -1374,7 +1374,7 @@
 	<notification name="FailedUpdateInstall">
 		Произошла ошибка при установке обновления.
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1382,7 +1382,7 @@ http://secondlife.com/download.
 Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
 
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Выйти"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">

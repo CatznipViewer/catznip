@@ -1380,7 +1380,7 @@ Esta actualización no es obligatoria, pero te sugerimos instalarla para mejorar
 	<notification name="FailedUpdateInstall">
 		Se ha producido un error al instalar la actualización del visor.
 Descarga e instala el último visor a través de
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1388,7 +1388,7 @@ http://secondlife.com/download.
 No podrás iniciar sesión hasta que [APP_NAME] se haya actualizado.
 
 Descarga e instala el último visor a través de
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Salir"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
