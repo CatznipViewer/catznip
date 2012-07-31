@@ -650,7 +650,7 @@ Du skal genstarte [APP_NAME] for at installere denne opdatering.
 		<usetemplate ignoretext="Start min browser for at se QA Wiki" name="okcancelignore" notext="Cancel" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		<usetemplate ignoretext="Start min browser for at bruge det Linden Labs sagsstyring" name="okcancelignore" notext="Cancel" yestext="Go to page"/>
+		<usetemplate ignoretext="Start min browser for at bruge det [APP_NAME] sagsstyring" name="okcancelignore" notext="Cancel" yestext="Go to page"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		<usetemplate ignoretext="Start min browser for at se bloggen" name="okcancelignore" notext="Cancel" yestext="OK"/>

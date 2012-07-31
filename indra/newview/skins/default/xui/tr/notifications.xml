@@ -1435,7 +1435,7 @@ Güncellemeyi kurmak için [APP_NAME] uygulamasını yeniden başlatmalısınız
 		<usetemplate ignoretext="Wiki Kalite Güvencesi sayfasını görüntülemek için tarayıcımı başlat" name="okcancelignore" notext="İptal" yestext="Tamam"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Hataları ve diğer sorunları bildirebileceğiniz [SECOND_LIFE] Kamuya Açık Sorun Takip sayfasını ziyaret edin.
+		Hataları ve diğer sorunları bildirebileceğiniz [APP_NAME] Kamuya Açık Sorun Takip sayfasını ziyaret edin.
 		<usetemplate ignoretext="Kamuya Açık Sorun Takip hizmetini kullanmak için tarayıcımı başlat" name="okcancelignore" notext="İptal Et" yestext="Sayfaya git"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">

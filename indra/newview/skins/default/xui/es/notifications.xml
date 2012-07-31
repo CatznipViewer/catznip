@@ -1441,8 +1441,8 @@ Debemos reiniciar [APP_NAME] para instalar la actualización.
 		<usetemplate ignoretext="Abrir mi navegador para el ver el wiki de &apos;QA&apos; (Control de Calidad)" name="okcancelignore" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Visita el Public Issue Tracker (sistema público de seguimiento de incidencias) de [SECOND_LIFE], donde podrás informar de errores y otros asuntos.
-		<usetemplate ignoretext="Abrir mi navegador para usar el &apos;Public Issue Tracker&apos;" name="okcancelignore" notext="Cancelar" yestext="Ir a la página"/>
+		Visita el Issue Tracker (sistema público de seguimiento de incidencias) de [APP_NAME], donde podrás informar de errores y otros asuntos.
+		<usetemplate ignoretext="Abrir mi navegador para usar el &apos;Issue Tracker&apos;" name="okcancelignore" notext="Cancelar" yestext="Ir a la página"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Para ver las últimas noticias e informaciones, ¿ir la Blog oficial?

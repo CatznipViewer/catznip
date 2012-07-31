@@ -1435,7 +1435,7 @@ http://secondlife.com/download.
 		<usetemplate ignoretext="Запустить браузер для просмотра вики-страницы вопросов и ответов" name="okcancelignore" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Посетите страницу общедоступного средства исследования проблем [SECOND_LIFE], на котором можно сообщить об ошибках и других проблемах.
+		Посетите страницу общедоступного средства исследования проблем [APP_NAME], на котором можно сообщить об ошибках и других проблемах.
 		<usetemplate ignoretext="Запустить браузер для использования общедоступного средства исследования проблем" name="okcancelignore" notext="Отмена" yestext="Перейти на страницу"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">

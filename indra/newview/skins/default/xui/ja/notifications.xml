@@ -1469,7 +1469,7 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 		<usetemplate ignoretext="ブラウザを起動して QA Wiki を見るとき" name="okcancelignore" notext="キャンセル" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		[SECOND_LIFE] のパブリック問題トラッカーで、
+		[APP_NAME] のパブリック問題トラッカーで、
 バグやその他の問題を報告できます。
 		<usetemplate ignoretext="ブラウザを起動してパブリック問題トラッカーを使用するとき" name="okcancelignore" notext="キャンセル" yestext="ページへ行く"/>
 	</notification>

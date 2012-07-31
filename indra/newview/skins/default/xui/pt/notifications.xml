@@ -1423,7 +1423,7 @@ Para instalar a atualização, será preciso reiniciar o [APP_NAME].
 		<usetemplate ignoretext="Abrir meu navegador para ver a página Wiki" name="okcancelignore" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Visite o Rastreador Público de Problemas do [SECOND_LIFE], onde você poderá reportar Bugs e outros Problemas.
+		Visite o Rastreador de Problemas do [APP_NAME], onde você poderá reportar Bugs e outros Problemas.
 		<usetemplate ignoretext="Abrir o navegador para usar o Monitor de problemas" name="okcancelignore" notext="Cancelar" yestext="Ir para a Página"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">

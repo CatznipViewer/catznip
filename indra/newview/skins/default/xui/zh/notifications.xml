@@ -1396,7 +1396,7 @@ We must restart [APP_NAME] to install the update.
 		<usetemplate ignoretext="開啟我的網頁瀏覽器去察看問與答維基" name="okcancelignore" notext="取消" yestext="確定"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		拜訪 [SECOND_LIFE] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
+		拜訪 [APP_NAME] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
 		<usetemplate ignoretext="開啟我的網頁瀏覽器以使用公共議題追蹤。" name="okcancelignore" notext="取消" yestext="前往頁面"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">

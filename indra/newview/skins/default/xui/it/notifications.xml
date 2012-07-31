@@ -1436,8 +1436,8 @@ Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
 		<usetemplate ignoretext="Lancia il browser per vedere la pagina Wiki sul controllo di qualità" name="okcancelignore" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Visita il registro pubblico dei problemi di [SECOND_LIFE], dove puoi segnalare bug ed altri problemi.
-		<usetemplate ignoretext="Lancia il browser per vedere il registro pubblico di monitoraggio dei problemi" name="okcancelignore" notext="Annulla" yestext="Vai alla pagina"/>
+		Visita il registro dei problemi di [APP_NAME], dove puoi segnalare bug ed altri problemi.
+		<usetemplate ignoretext="Lancia il browser per vedere il registro di monitoraggio dei problemi" name="okcancelignore" notext="Annulla" yestext="Vai alla pagina"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Vai al blog ufficiale Linden, per le ultime notizie ed informazioni.

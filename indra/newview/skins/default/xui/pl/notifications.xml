@@ -1363,7 +1363,7 @@ W celu instalacji aktualizacji musi zostać wykonany restart [APP_NAME].
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć QA Wiki" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Odwiedź [SECOND_LIFE] katalog publicznych problemów, gdzie możesz zgłaszać błędy i inne problemy.
+		Odwiedź [APP_NAME] katalog problemów, gdzie możesz zgłaszać błędy i inne problemy.
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by wysłać Błędy klienta" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
