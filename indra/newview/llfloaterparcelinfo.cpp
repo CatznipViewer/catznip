@@ -46,9 +46,16 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 	const std::string strType = sdKey["type"].asString();
 	if ("remote_place" == strType)
 	{
-		LLVector3d posGlobal(sdKey["x"].asReal(), sdKey["y"].asReal(), sdKey["z"].asReal());
-		if (!posGlobal.isExactlyZero())
-			m_pParcelInfo->setParcelFromPos(posGlobal);
+		if (sdKey.has("id"))
+		{
+			m_pParcelInfo->setParcelID(sdKey["id"].asUUID());
+		}
+		else
+		{
+			LLVector3d posGlobal(sdKey["x"].asReal(), sdKey["y"].asReal(), sdKey["z"].asReal());
+			if (!posGlobal.isExactlyZero())
+				m_pParcelInfo->setParcelFromPos(posGlobal);
+		}
 	}
 	else
 	{

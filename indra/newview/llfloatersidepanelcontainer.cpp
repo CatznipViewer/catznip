@@ -85,6 +85,21 @@ LLPanel* LLFloaterSidePanelContainer::openChildPanel(const std::string& panel_na
 
 void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, const LLSD& key)
 {
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	// Hack in case we forget a reference somewhere
+	if ( ("places" == floater_name) && (key.has("type")) )
+	{
+		if ("remote_place" == key["type"])
+		{
+			LLFloaterReg::showInstance("parcel_info", key);
+#if !LL_RELEASE_FOR_DOWNLOAD
+			llerrs << "Left-over reference to the 'remote place' places sidepanel" << llendl;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+			return;
+		}
+	}
+// [/SL:KB]
+
 	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::getTypedInstance<LLFloaterSidePanelContainer>(floater_name);
 	if (floaterp)
 	{

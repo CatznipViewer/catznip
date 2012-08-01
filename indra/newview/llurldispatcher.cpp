@@ -246,7 +246,10 @@ void LLURLDispatcherImpl::regionHandleCallback(U64 region_handle, const LLSLURL&
 		key["y"] = global_pos.mdV[VY];
 		key["z"] = global_pos.mdV[VZ];
 
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		LLFloaterReg::showInstance("parcel_info", key);
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 }
 
