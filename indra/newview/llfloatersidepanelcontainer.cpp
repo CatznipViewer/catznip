@@ -89,11 +89,12 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 	// Hack in case we forget a reference somewhere
 	if ( ("places" == floater_name) && (key.has("type")) )
 	{
-		if ("remote_place" == key["type"])
+		const std::string strType = key["type"].asString();
+		if ( ("remote_place" == strType) || ("landmark" == strType) )
 		{
 			LLFloaterReg::showInstance("parcel_info", key);
 #if !LL_RELEASE_FOR_DOWNLOAD
-			llerrs << "Left-over reference to the 'remote place' places sidepanel" << llendl;
+			llerrs << "Left-over reference to the places sidepanel" << llendl;
 #endif // LL_RELEASE_FOR_DOWNLOAD
 			return;
 		}

@@ -8,6 +8,10 @@
  name="panel_parcel_info"
  width="300">
   <string
+   name="no_description">
+      (No Description)
+  </string>
+  <string
    name="not_available">
       (N/A)
   </string>

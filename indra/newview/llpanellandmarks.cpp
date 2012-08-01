@@ -363,11 +363,14 @@ void LLLandmarksPanel::onSelectorButtonClicked()
 	LLFolderViewEventListener* listenerp = cur_item->getListener();
 	if (listenerp->getInventoryType() == LLInventoryType::IT_LANDMARK)
 	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = listenerp->getUUID();
-
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		LLLandmarkActions::showLandmarkInfo(listenerp->getUUID());
+// [/SL:KB]
+//		LLSD key;
+//		key["type"] = "landmark";
+//		key["id"] = listenerp->getUUID();
+//
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 }
 

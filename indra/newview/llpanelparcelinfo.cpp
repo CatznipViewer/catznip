@@ -232,7 +232,7 @@ void LLPanelParcelInfo::updateFromParcelData()
 {
 	m_pParcelSnapshot->setImageAssetID(m_CurParcelData.snapshot_id);
 	m_pParcelName->setText(m_CurParcelData.name);
-	m_pParcelDescription->setText(m_CurParcelData.desc);
+	m_pParcelDescription->setText( (!m_CurParcelData.desc.empty()) ? m_CurParcelData.desc : getString("no_description") );
 
 	// HACK: Flag 0x2 == adult region; 0x1 == mature region; otherwise assume PG
 	if (m_CurParcelData.flags & 0x2)

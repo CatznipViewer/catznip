@@ -29,6 +29,9 @@
 
 #include "roles_constants.h"
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llinventory.h"
 #include "llinventoryfunctions.h"
 #include "lllandmark.h"
@@ -418,3 +421,15 @@ void copy_slurl_to_clipboard_callback(const std::string& slurl)
 	args["SLURL"] = slurl;
 	LLNotificationsUtil::add("CopySLURL", args);
 }
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+void LLLandmarkActions::showLandmarkInfo(const LLUUID& idItem)
+{
+	LLSD key;
+	key["type"] = "landmark";
+	key["id"] = idItem;
+
+	LLFloaterReg::showInstance("parcel_info", key);
+//	LLFloaterSidePanelContainer::showPanel("places", key);
+}
+// [/SL:KB]
