@@ -74,6 +74,7 @@ protected:
 	LLTextBox*     m_pParcelName;
 	LLIconCtrl*    m_pRegionMaturityIcon;
 	LLTextBox*     m_pParcelLocation;
+	LLTextBox*     m_pParcelNumbers;
 	LLTextEditor*  m_pParcelDescription;
 };
 

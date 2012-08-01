@@ -19,6 +19,8 @@
 #include "llpanelparcelinfo.h"
 #include "lliconctrl.h"
 #include "llregionhandle.h"
+#include "llresmgr.h"
+#include "llqueryflags.h"
 #include "llsdutil.h"
 #include "llsdutil_math.h"
 #include "llslurl.h"
@@ -26,6 +28,8 @@
 #include "lltexturectrl.h"
 #include "lltrans.h"
 #include "llviewerregion.h"
+
+#include <boost/lexical_cast.hpp>
 
 // ============================================================================
 // LLPanelParcelInfo class
@@ -35,7 +39,12 @@ static LLRegisterPanelClassWrapper<LLPanelParcelInfo> t_panel_parcel_info("panel
 
 LLPanelParcelInfo::LLPanelParcelInfo()
 	: m_fRequestPending(false)
-	, m_pParcelSnapshot(NULL), m_pParcelName(NULL), m_pRegionMaturityIcon(NULL), m_pParcelLocation(NULL), m_pParcelDescription(NULL)
+	, m_pParcelSnapshot(NULL)
+	, m_pParcelName(NULL)
+	, m_pRegionMaturityIcon(NULL)
+	, m_pParcelLocation(NULL)
+	, m_pParcelNumbers(NULL)
+	, m_pParcelDescription(NULL)
 {
 }
 
@@ -50,6 +59,7 @@ BOOL LLPanelParcelInfo::postBuild()
 	m_pParcelName = getChild<LLTextBox>("parcel_name");
 	m_pRegionMaturityIcon = getChild<LLIconCtrl>("region_maturity");
 	m_pParcelLocation = getChild<LLTextBox>("parcel_location");
+	m_pParcelNumbers = getChild<LLTextBox>("parcel_numbers");
 	m_pParcelDescription = getChild<LLTextEditor>("parcel_description");
 
 	clearControls("", "");
@@ -119,6 +129,7 @@ void LLPanelParcelInfo::clearControls(const std::string& strGeneral, const std::
 	m_pParcelName->setText(strGeneral);
 	m_pRegionMaturityIcon->setValue(LLUUID::null);
 	m_pParcelLocation->setText(LLStringUtil::null);
+	m_pParcelNumbers->setText(LLStringUtil::null);
 	m_pParcelDescription->setText(strDescription);
 }
 
@@ -184,6 +195,12 @@ void LLPanelParcelInfo::updateFromParcelData()
 	S32 posRegionY = llround(m_CurParcelData.global_y) % REGION_WIDTH_UNITS;
 	S32 posRegionZ = llround(m_CurParcelData.global_z);
 	m_pParcelLocation->setText(LLSLURL(m_CurParcelData.sim_name, LLVector3(posRegionX, posRegionY, posRegionZ)).getSLURLString());
+
+	LLStringUtil::format_map_t args;
+	args["[AREA]"] = boost::lexical_cast<std::string>(m_CurParcelData.actual_area);
+	args["[PRICE]"] = LLResMgr::getInstance()->getMonetaryString(m_CurParcelData.sale_price);
+	args["[TRAFFIC]"] = boost::lexical_cast<std::string>(m_CurParcelData.dwell);
+	m_pParcelNumbers->setText(getString( (m_CurParcelData.flags & DFQ_FOR_SALE) ? "area_sale_text" : "area_traffic_text", args));
 }
 
 // ============================================================================
