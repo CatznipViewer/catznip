@@ -57,6 +57,10 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 				m_pParcelInfo->setParcelFromPos(posGlobal);
 		}
 	}
+	else if ("landmark" == strType)
+	{
+		m_pParcelInfo->setParcelFromItem(sdKey["id"].asUUID());
+	}
 	else
 	{
 		m_pParcelInfo->clearLocation();

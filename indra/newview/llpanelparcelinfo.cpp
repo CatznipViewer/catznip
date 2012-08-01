@@ -18,6 +18,9 @@
 #include "llagent.h"
 #include "llpanelparcelinfo.h"
 #include "lliconctrl.h"
+#include "llinventorymodel.h"
+#include "lllandmark.h"
+#include "lllandmarklist.h"
 #include "llregionhandle.h"
 #include "llresmgr.h"
 #include "llqueryflags.h"
@@ -27,6 +30,7 @@
 #include "lltexteditor.h"
 #include "lltexturectrl.h"
 #include "lltrans.h"
+#include "llviewerinventory.h"
 #include "llviewerregion.h"
 
 #include <boost/lexical_cast.hpp>
@@ -152,7 +156,7 @@ void LLPanelParcelInfo::clearPendingRequest()
 	m_posCurRequest.clearVec();
 }
 
-void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal)
+void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion)
 {
 	// Sanity check - don't do anything if we're already waiting for it
 	if ( (REQUEST_PARCEL_ID == m_eRequestType) && (posGlobal == m_posCurRequest) )
@@ -165,7 +169,6 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal)
 	const std::string strUrl = pRegion->getCapability("RemoteParcelRequest");
 	if ( (pRegion) && (!strUrl.empty()) )
 	{
-		U64 hRegion = to_region_handle(posGlobal);
 		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS), 
 							(F32)fmod(posGlobal.mdV[VY], (F64)REGION_WIDTH_METERS),
 							(F32)posGlobal.mdV[VZ]);
@@ -173,7 +176,10 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal)
 		m_posCurRequest = posGlobal;
 
 		LLSD sdBody;
-		sdBody["region_handle"] = ll_sd_from_U64(hRegion);
+		if (idRegion.notNull())
+			sdBody["region_id"] = idRegion;
+		else
+			sdBody["region_handle"] = ll_sd_from_U64(to_region_handle(posGlobal));
 		sdBody["location"] = ll_sd_from_vector3(posRegion);
 		LLHTTPClient::post(strUrl, sdBody, new LLRemoteParcelRequestResponder(getObserverHandle()));
 
@@ -183,6 +189,42 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal)
 	else
 	{
 		clearControls(getString("not_available"), getString("server_update_text"));
+	}
+}
+
+void LLPanelParcelInfo::setParcelFromItem(const LLUUID& idItem)
+{
+	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(idItem);
+	if ( (!pItem) || (LLAssetType::AT_LANDMARK != pItem->getType()) )
+		return;
+
+	clearPendingRequest();
+	clearLocation();
+	const std::string strLoading = LLTrans::getString("LoadingData");
+	clearControls(strLoading, strLoading);
+
+	LLLandmark* pLandmark = gLandmarkList.getAsset(pItem->getAssetUUID(), boost::bind(&onLandmarkLoaded, _1, getHandle()));
+	if (pLandmark)
+	{
+		onLandmarkLoaded(pLandmark, getHandle());
+	}
+}
+
+// static
+void LLPanelParcelInfo::onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel> hPanel)
+{
+	LLPanelParcelInfo* pInstance = (!hPanel.isDead()) ? dynamic_cast<LLPanelParcelInfo*>(hPanel.get()) : NULL;
+	if (pInstance)
+	{
+		LLVector3d posGlobal; LLUUID idRegion;
+		if ( (!pLandmark) || (!pLandmark->getGlobalPos(posGlobal)) || (!pLandmark->getRegionID(idRegion)) )
+		{
+			pInstance->clearPendingRequest();
+			pInstance->clearLocation();
+			pInstance->clearControls(pInstance->getString("not_available"), pInstance->getString("server_error_text"));
+			return;
+		}
+		pInstance->requestRemoteParcel(posGlobal, idRegion);
 	}
 }
 

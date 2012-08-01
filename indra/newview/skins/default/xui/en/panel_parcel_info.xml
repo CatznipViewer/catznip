@@ -8,6 +8,10 @@
  name="panel_parcel_info"
  width="300">
   <string
+   name="not_available">
+      (N/A)
+  </string>
+  <string
    name="server_error_text">
       Information about this location is unavailable at this time, please try again later.
   </string>

@@ -20,6 +20,7 @@
 #include "llremoteparcelrequest.h"
 
 class LLIconCtrl;
+class LLLandmark;
 class LLTextBox;
 class LLTextEditor;
 class LLTextureCtrl;
@@ -54,18 +55,20 @@ public:
 	const LLVector3d    getCurrentParcelPos()	{ return m_posCurGlobal; }
 	void                setParcelFromPos(const LLVector3d posGlobal) { requestRemoteParcel(posGlobal); }
 	void                setParcelFromId(const LLUUID& idParcel) { setParcelID(idParcel); }
+	void                setParcelFromItem(const LLUUID& idItem);
 protected:
 	void clearControls(const std::string& strGeneral, const std::string& strDescription);
 	void clearPendingRequest();
-	void requestRemoteParcel(const LLVector3d& posGlobal);
+	void requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion = LLUUID::null);
 	void updateFromParcelData();
+	static void onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel> hPanel);
 
 	/*
 	 * Member variables
 	 */
 protected:
 	// Request tracking
-	enum ERequestType { REQUEST_NONE, REQUEST_PARCEL_ID, REQUEST_PARCEL_INFO };
+	enum ERequestType { REQUEST_NONE, REQUEST_PARCEL_ID, REQUEST_PARCEL_INFO, REQUEST_LANDMARK };
 	ERequestType m_eRequestType;
 	LLVector3d   m_posCurRequest;
 
