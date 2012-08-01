@@ -38,7 +38,7 @@
 static LLRegisterPanelClassWrapper<LLPanelParcelInfo> t_panel_parcel_info("panel_parcel_info");
 
 LLPanelParcelInfo::LLPanelParcelInfo()
-	: m_fRequestPending(false)
+	: m_eRequestType(REQUEST_NONE)
 	, m_pParcelSnapshot(NULL)
 	, m_pParcelName(NULL)
 	, m_pRegionMaturityIcon(NULL)
@@ -50,7 +50,7 @@ LLPanelParcelInfo::LLPanelParcelInfo()
 
 LLPanelParcelInfo::~LLPanelParcelInfo()
 {
-	clearObserver();
+	clearPendingRequest();
 }
 
 BOOL LLPanelParcelInfo::postBuild()
@@ -69,20 +69,27 @@ BOOL LLPanelParcelInfo::postBuild()
 
 void LLPanelParcelInfo::setParcelID(const LLUUID& idParcel)
 {
-	// Sanity check - just refresh from existing data if it's the same parcel
+	// Sanity check - don't do anything if we're already waiting for it or already have it
 	if (m_idCurParcel == idParcel)
 	{
-		updateFromParcelData();
-		return;
+		if (REQUEST_NONE == m_eRequestType)
+		{
+			updateFromParcelData();
+			return;
+		}
+		else if (REQUEST_PARCEL_INFO == m_eRequestType)
+		{
+			return;
+		}
 	}
 
+	clearPendingRequest();
+	clearLocation();
 	const std::string strLoading = LLTrans::getString("LoadingData");
 	clearControls(strLoading, strLoading);
-	clearObserver();
 
-	m_fRequestPending = true;
+	m_eRequestType = REQUEST_PARCEL_INFO;
 	m_idCurParcel = idParcel;
-	m_posCurGlobal = m_posCurRequest;
 	LLRemoteParcelInfoProcessor::getInstance()->addObserver(m_idCurParcel, this);
 	LLRemoteParcelInfoProcessor::getInstance()->sendParcelInfoRequest(m_idCurParcel);
 }
@@ -90,11 +97,15 @@ void LLPanelParcelInfo::setParcelID(const LLUUID& idParcel)
 void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 {
 	// Sanity check - only process replies for the current parcel
-	if (m_idCurParcel != parcelData.parcel_id)
+	if ( (REQUEST_PARCEL_INFO != m_eRequestType) || (m_idCurParcel != parcelData.parcel_id) )
+	{
 		return;
-	m_CurParcelData = parcelData;
+	}
+	clearPendingRequest();
 
-	clearObserver();
+	m_CurParcelData = parcelData;
+	m_posCurGlobal.setVec(m_CurParcelData.global_x, m_CurParcelData.global_y, m_CurParcelData.global_z);
+						  
 	updateFromParcelData();
 }
 
@@ -109,18 +120,16 @@ void LLPanelParcelInfo::setErrorStatus(U32 nStatus, const std::string& strReason
 	else
 		strErrorText = getString("server_error_text");
 
+	clearPendingRequest();
+	clearLocation();
 	clearControls(strNotAvailable, strErrorText);
-	clearObserver();
 }
 
 void LLPanelParcelInfo::clearLocation()
 {
-	const std::string strNoneFound = LLTrans::getString("NoneFound");
-	clearControls(strNoneFound, strNoneFound);
-	clearObserver();
-
 	m_idCurParcel.setNull();
 	m_posCurGlobal.setZero();
+	m_CurParcelData.clear();
 }
 
 void LLPanelParcelInfo::clearControls(const std::string& strGeneral, const std::string& strDescription)
@@ -133,43 +142,43 @@ void LLPanelParcelInfo::clearControls(const std::string& strGeneral, const std::
 	m_pParcelDescription->setText(strDescription);
 }
 
-void LLPanelParcelInfo::clearObserver()
+void LLPanelParcelInfo::clearPendingRequest()
 {
-	if ( (m_fRequestPending) && (m_idCurParcel.notNull()) )
+	if ( (REQUEST_PARCEL_ID == m_eRequestType) && (m_idCurParcel.notNull()) )
 	{
 		LLRemoteParcelInfoProcessor::getInstance()->removeObserver(m_idCurParcel, this);
-		m_fRequestPending = false;
 	}
+	m_eRequestType = REQUEST_NONE;
+	m_posCurRequest.clearVec();
 }
 
 void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal)
 {
-	// Sanity check - need a region and a position different from the last one
-	const LLViewerRegion* pRegion = gAgent.getRegion();
-	if ( (!pRegion) || (posGlobal.isExactlyZero()) || (dist_vec_squared(m_posCurGlobal, posGlobal) < 9.0f) )
-	{
-		clearObserver();
-		updateFromParcelData();
+	// Sanity check - don't do anything if we're already waiting for it
+	if ( (REQUEST_PARCEL_ID == m_eRequestType) && (posGlobal == m_posCurRequest) )
 		return;
-	}
 
-	const std::string strLoading = LLTrans::getString("LoadingData");
-	clearControls(strLoading, strLoading);
-	clearObserver();
+	clearPendingRequest();
+	clearLocation();
 
+	const LLViewerRegion* pRegion = gAgent.getRegion();
 	const std::string strUrl = pRegion->getCapability("RemoteParcelRequest");
-	if (!strUrl.empty())
+	if ( (pRegion) && (!strUrl.empty()) )
 	{
 		U64 hRegion = to_region_handle(posGlobal);
 		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS), 
 							(F32)fmod(posGlobal.mdV[VY], (F64)REGION_WIDTH_METERS),
 							(F32)posGlobal.mdV[VZ]);
+		m_eRequestType = REQUEST_PARCEL_ID;
 		m_posCurRequest = posGlobal;
 
 		LLSD sdBody;
 		sdBody["region_handle"] = ll_sd_from_U64(hRegion);
 		sdBody["location"] = ll_sd_from_vector3(posRegion);
 		LLHTTPClient::post(strUrl, sdBody, new LLRemoteParcelRequestResponder(getObserverHandle()));
+
+		const std::string strLoading = LLTrans::getString("LoadingData");
+		clearControls(strLoading, strLoading);
 	}
 	else
 	{

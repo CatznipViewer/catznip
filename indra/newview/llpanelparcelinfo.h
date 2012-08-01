@@ -39,9 +39,8 @@ public:
 	/*
 	 * LLRemoteParcelInfoObserver overrides
 	 */
-public:
-	/*virtual*/ void setParcelID(const LLUUID& idParcel);
 protected:
+	/*virtual*/ void setParcelID(const LLUUID& idParcel);
 	/*virtual*/ void processParcelInfo(const LLParcelData& parcelData);
 	/*virtual*/ void setErrorStatus(U32 nStatus, const std::string& strReason);
 
@@ -51,12 +50,13 @@ protected:
 public:
 	void                clearLocation();
 	const LLParcelData& getCurrentParcelData()	{ return m_CurParcelData; }
-	const LLUUID&       getCurrentParcelID()	{ return m_idCurParcel; }
+	const LLUUID&       getCurrentParcelId()	{ return m_idCurParcel; }
 	const LLVector3d    getCurrentParcelPos()	{ return m_posCurGlobal; }
 	void                setParcelFromPos(const LLVector3d posGlobal) { requestRemoteParcel(posGlobal); }
+	void                setParcelFromId(const LLUUID& idParcel) { setParcelID(idParcel); }
 protected:
 	void clearControls(const std::string& strGeneral, const std::string& strDescription);
-	void clearObserver();
+	void clearPendingRequest();
 	void requestRemoteParcel(const LLVector3d& posGlobal);
 	void updateFromParcelData();
 
@@ -64,12 +64,17 @@ protected:
 	 * Member variables
 	 */
 protected:
-	bool         m_fRequestPending;
+	// Request tracking
+	enum ERequestType { REQUEST_NONE, REQUEST_PARCEL_ID, REQUEST_PARCEL_INFO };
+	ERequestType m_eRequestType;
 	LLVector3d   m_posCurRequest;
+
+	// Parcel information
 	LLUUID       m_idCurParcel;
 	LLVector3d   m_posCurGlobal;
 	LLParcelData m_CurParcelData;
 
+	// Controls
 	LLTextureCtrl* m_pParcelSnapshot;
 	LLTextBox*     m_pParcelName;
 	LLIconCtrl*    m_pRegionMaturityIcon;

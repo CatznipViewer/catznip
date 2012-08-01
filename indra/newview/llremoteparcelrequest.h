@@ -67,6 +67,23 @@ struct LLParcelData
 	F32			dwell;
 	S32			sale_price;
 	S32			auction_id;
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	void clear()
+	{
+		parcel_id.setNull();
+		owner_id.setNull();
+		name.clear();
+		desc.clear();
+		actual_area = billable_area = 0;
+		flags = 0;
+		global_x = global_y = global_z = 0.0f;
+		sim_name.clear();
+		snapshot_id.setNull();
+		dwell = 0.0f;
+		sale_price = auction_id = 0;
+	}
+// [/SL:KB]
 };
 
 // An interface class for panels which display parcel information

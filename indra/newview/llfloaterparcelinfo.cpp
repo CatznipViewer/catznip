@@ -48,7 +48,7 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 	{
 		if (sdKey.has("id"))
 		{
-			m_pParcelInfo->setParcelID(sdKey["id"].asUUID());
+			m_pParcelInfo->setParcelFromId(sdKey["id"].asUUID());
 		}
 		else
 		{
