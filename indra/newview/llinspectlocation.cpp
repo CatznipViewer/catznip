@@ -25,6 +25,7 @@
 #include "llregionhandle.h"
 #include "llremoteparcelrequest.h"
 #include "llresmgr.h"
+#include "llqueryflags.h"
 #include "llsdutil.h"
 #include "llsdutil_math.h"
 #include "llslurl.h"
@@ -265,7 +266,7 @@ void LLInspectLocation::updateFromParcelData()
 	m_pParcelName->setText(m_CurParcelData.name);
 
 	m_pParcelDescription->setText(LLStringUtil::null);
-	if (m_CurParcelData.sale_price > 0)
+	if (m_CurParcelData.flags & DFQ_FOR_SALE)
 	{
 		LLStringUtil::format_map_t args;
 		args["[AMOUNT]"] = LLResMgr::getInstance()->getMonetaryString(m_CurParcelData.sale_price);
