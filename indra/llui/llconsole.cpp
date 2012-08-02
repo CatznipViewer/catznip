@@ -179,7 +179,10 @@ void LLConsole::draw()
 	// draw remaining lines
 	F32 y_pos = 0.f;
 
-	LLUIImagePtr imagep = LLUI::getUIImage("transparent");
+//	LLUIImagePtr imagep = LLUI::getUIImage("transparent");
+// [SL:KB]
+	LLUIImagePtr imagep = LLUI::getUIImage("transparent.j2c");
+// [/SL:KB]
 
 	F32 console_opacity = llclamp(LLUI::sSettingGroups["config"]->getF32("ConsoleBackgroundOpacity"), 0.f, 1.f);
 	LLColor4 color = LLUIColorTable::instance().getColor("ConsoleBackground");
