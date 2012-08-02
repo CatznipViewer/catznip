@@ -28,6 +28,69 @@
    select_on_focus="true"
    top="5"
    width="275" />
+  <combo_box
+   height="23"
+   layout="topleft"
+   left_pad="5"
+   name="search_category"
+   width="140">
+      <combo_box.item
+       label="Any Category"
+       name="category_any"
+       value="any" />
+      <combo_box.item
+       label="Linden Location"
+       name="category_linden"
+       value="linden" />
+      <combo_box.item
+       label="Adult"
+       name="category_adult"
+       value="adult" />
+      <combo_box.item
+       label="Arts &amp; Culture"
+       name="category_arts"
+       value="arts" />
+      <combo_box.item
+       label="Business"
+       name="category_store"
+       value="store" />
+      <combo_box.item
+       label="Educational"
+       name="category_educational"
+       value="educational" />
+      <combo_box.item
+       label="Gaming"
+       name="category_game"
+       value="game" />
+      <combo_box.item
+       label="Hangout"
+       name="category_gather"
+       value="gather" />
+      <combo_box.item
+       label="Newcomer Friendly"
+       name="category_newcomer"
+       value="newcomer" />
+      <combo_box.item
+       label="Parks &amp; Nature"
+       name="category_park"
+       value="park" />
+      <combo_box.item
+       label="Residential"
+       name="category_home"
+       value="home" />
+      <combo_box.item
+       label="Shopping"
+       name="category_shopping"
+       value="shopping" />
+      <combo_box.item
+       label="Rental"
+       name="category_rental"
+       value="rental" />
+      <combo_box.item
+       label="Other"
+       name="category_other"
+       value="other" />
+  </combo_box>
   <button
    follows="top|right"
    height="23"
@@ -36,11 +99,75 @@
    left_pad="5"
    name="search_start"
    width="70" />
-	 
+
+  <text
+   follows="top|left"
+   height="16"
+   layout="topleft"
+   left="10"
+   name="search_maturity_label"
+   top_pad="5"
+   value="Maturity: "
+   width="60" />
+  <check_box
+   height="16"
+   label=""
+   layout="topleft"
+   left_pad="0"
+   name="search_pg_check"
+   top_delta="0"
+   value="1"
+   width="16" />
+  <icon
+   follows="top|left"
+   height="16"
+   image_name="Parcel_PG_Dark"
+   layout="topleft"
+   left_pad="5"
+   name="search_pg_icon"
+   top_delta="-1"
+   width="18" />
+  <check_box
+   height="16"
+   label=""
+   layout="topleft"
+   left_pad="10"
+   name="search_mature_check"
+   top_delta="1"
+   value="1"
+   width="16" />
+  <icon
+   follows="top|left"
+   height="16"
+   image_name="Parcel_M_Dark"
+   layout="topleft"
+   left_pad="5"
+   name="search_mature_icon"
+   top_delta="-1"
+   width="18" />
+  <check_box
+   height="16"
+   label=""
+   layout="topleft"
+   left_pad="10"
+   name="search_adult_check"
+   top_delta="1"
+   value="1"
+   width="16" />
+  <icon
+   follows="top|left"
+   height="16"
+   image_name="Parcel_R_Dark"
+   layout="topleft"
+   left_pad="5"
+   name="search_adult_icon"
+   top_delta="-1"
+   width="18" />
+   
   <scroll_list
    draw_heading="true" 
    follows="all"
-   height="355"
+   height="335"
    layout="topleft"
    left="10"
    name="search_results"
@@ -59,7 +186,7 @@
    class="panel_parcel_info"
    filename="panel_parcel_info.xml"
    follows="top|right"
-   height="355"
+   height="335"
    layout="topleft"
    left_pad="10"
    name="search_parcel"

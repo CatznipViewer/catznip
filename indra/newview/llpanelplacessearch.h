@@ -19,6 +19,8 @@
 #include "llpanel.h"
 #include "llsearchdirectory.h"
 
+class LLCheckBoxCtrl;
+class LLComboBox;
 class LLLineEditor;
 class LLPanelParcelInfo;
 class LLScrollListCtrl;
@@ -40,6 +42,7 @@ protected:
 	void onResultSelect();
 	void onSearchStart();
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
+	void onToggleMaturity();
 
 	/*
 	 * Member variables
@@ -49,6 +52,10 @@ protected:
 	S32    m_nCurIndex;
 
 	LLLineEditor*      m_pSearchEditor;
+	LLComboBox*        m_pSearchCategory;
+	LLCheckBoxCtrl*    m_pSearchPG;
+	LLCheckBoxCtrl*    m_pSearchMature;
+	LLCheckBoxCtrl*    m_pSearchAdult;
 	LLPanelParcelInfo* m_pParcelInfo;
 	LLScrollListCtrl*  m_pResultsList;
 };
