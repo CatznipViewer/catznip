@@ -48,8 +48,9 @@ protected:
 	 * Member variables
 	 */
 protected:
-	LLUUID m_idCurQuery;
-	S32    m_nCurIndex;
+	std::string m_strCurQuery;
+	LLUUID      m_idCurQuery;
+	S32         m_nCurIndex;
 
 	LLLineEditor*      m_pSearchEditor;
 	LLComboBox*        m_pSearchCategory;

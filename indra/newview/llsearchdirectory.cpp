@@ -84,7 +84,9 @@ void LLSearchDirectory::processPlacesReply(LLMessageSystem* pMsg, void**)
 		pMsg->getBOOL(_PREHASH_QueryReplies, _PREHASH_Auction, placeResult.mIsAuction, idxReply);
 		pMsg->getF32(_PREHASH_QueryReplies, _PREHASH_Dwell, placeResult.mDwell, idxReply);
 
-		placeResults.push_back(placeResult);
+		// We get a reply even if nothing was found so skip null parcel ids
+		if (placeResult.mParcelId.notNull())
+			placeResults.push_back(placeResult);
 	}
 
 	U32 nStatus = STATUS_SEARCH_PLACES_NONE;

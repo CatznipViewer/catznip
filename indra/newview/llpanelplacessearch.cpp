@@ -114,13 +114,16 @@ void LLPanelPlacesSearch::onResultSelect()
 
 void LLPanelPlacesSearch::onSearchStart()
 {
-	m_pResultsList->clearRows();
-	m_nCurIndex = 0;
+	// Clean up any pending queries
 	if (m_idCurQuery.notNull())
 	{
 		LLSearchDirectory::instance().cancelQuery(m_idCurQuery);
 		m_idCurQuery.setNull();
 	}
+
+	m_pResultsList->clearRows();
+	m_pResultsList->setCommentText(getString("searching"));
+	m_pParcelInfo->setParcelFromId(LLUUID::null);
 
 	U32 nSearchFlags = 0;
 	if (m_pSearchPG->get())
@@ -130,8 +133,10 @@ void LLPanelPlacesSearch::onSearchStart()
 	if (m_pSearchAdult->get())
 		nSearchFlags |= DFQ_INC_ADULT;
 
+	m_nCurIndex = 0;
+	m_strCurQuery = m_pSearchEditor->getText();
 	m_idCurQuery = LLSearchDirectory::instance().queryPlaces(
-		m_pSearchEditor->getText(), getParcelCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
+		m_strCurQuery, getParcelCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
 		nSearchFlags, m_nCurIndex, boost::bind(&LLPanelPlacesSearch::onSearchResult, this, _1, _2, _3));
 }
 
@@ -145,19 +150,31 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 	}
 
 	if (nStatus & STATUS_SEARCH_PLACES_BANNEDWORD)
-		LLNotificationsUtil::add("SearchWordBanned");
-
-	LLSD sdRow; LLSD& sdColumns = sdRow["columns"];
-	sdColumns[0]["column"] = "name";    sdColumns[0]["type"] = "text";
-	sdColumns[1]["column"] = "traffic"; sdColumns[1]["type"] = "text";
-
-	for (LLSearchDirectory::places_results_vec_t::const_iterator itResult = lResults.cbegin(); itResult != lResults.cend(); ++itResult)
 	{
-		sdRow["value"] = itResult->mParcelId;
-		sdColumns[0]["value"] = itResult->mParcelName;
-		sdColumns[1]["value"] = llformat("%.0f", itResult->mDwell);
+		LLNotificationsUtil::add("SearchWordBanned");
+	}
 
-		m_pResultsList->addElement(sdRow, ADD_BOTTOM);
+	m_pResultsList->clearRows();
+	if (!lResults.empty())
+	{
+		LLSD sdRow; LLSD& sdColumns = sdRow["columns"];
+		sdColumns[0]["column"] = "name";    sdColumns[0]["type"] = "text";
+		sdColumns[1]["column"] = "traffic"; sdColumns[1]["type"] = "text";
+
+		for (LLSearchDirectory::places_results_vec_t::const_iterator itResult = lResults.cbegin(); itResult != lResults.cend(); ++itResult)
+		{
+			sdColumns[0]["value"] = itResult->mParcelName;
+			sdColumns[1]["value"] = llformat("%.0f", itResult->mDwell);
+			sdRow["value"] = itResult->mParcelId;
+
+			m_pResultsList->addElement(sdRow, ADD_BOTTOM);
+		}
+	}
+	else
+	{
+		LLStringUtil::format_map_t args;
+		args["TEXT"] = m_strCurQuery;
+		m_pResultsList->setCommentText(getString("not_found", args));
 	}
 }
 

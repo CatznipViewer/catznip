@@ -8,7 +8,7 @@
  width="600">
   <panel.string
    name="not_found">
-      &apos;[TEXT]&apos; not found
+      No results for &apos;[TEXT]&apos;
   </panel.string>
   <panel.string
    name="no_results">
