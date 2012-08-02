@@ -209,7 +209,7 @@ void LLInspectLocation::setErrorStatus(U32 nStatus, const std::string& strReason
 void LLInspectLocation::clearControls(const std::string& strGeneral, const std::string& strDescription)
 {
 	m_pParcelName->setText(strGeneral);
-	m_pRegionMaturityIcon->setValue(LLUUID::null);
+	m_pRegionMaturityIcon->setValue("transparent.j2c");
 	m_pParcelLocation->setText(LLStringUtil::null);
 	m_pParcelDescription->setText(strDescription);
 
