@@ -66,7 +66,7 @@ BOOL LLPanelParcelInfo::postBuild()
 	m_pParcelNumbers = getChild<LLTextBox>("parcel_numbers");
 	m_pParcelDescription = getChild<LLTextEditor>("parcel_description");
 
-	clearControls("", "");
+	clearControls(LLStringUtil::null, LLStringUtil::null);
 
 	return TRUE;
 }
@@ -74,7 +74,14 @@ BOOL LLPanelParcelInfo::postBuild()
 void LLPanelParcelInfo::setParcelID(const LLUUID& idParcel)
 {
 	// Sanity check - don't do anything if we're already waiting for it or already have it
-	if (m_idCurParcel == idParcel)
+	if (idParcel.isNull())
+	{
+		clearPendingRequest();
+		clearLocation();
+		clearControls(LLStringUtil::null, LLStringUtil::null);
+		return;
+	}
+	else if (m_idCurParcel == idParcel)
 	{
 		if (REQUEST_NONE == m_eRequestType)
 		{
@@ -140,7 +147,7 @@ void LLPanelParcelInfo::clearControls(const std::string& strGeneral, const std::
 {
 	m_pParcelSnapshot->setImageAssetID(LLUUID::null);
 	m_pParcelName->setText(strGeneral);
-	m_pRegionMaturityIcon->setValue(LLUUID::null);
+	m_pRegionMaturityIcon->setValue("transparent.j2c");
 	m_pParcelLocation->setText(LLStringUtil::null);
 	m_pParcelNumbers->setText(LLStringUtil::null);
 	m_pParcelDescription->setText(strDescription);

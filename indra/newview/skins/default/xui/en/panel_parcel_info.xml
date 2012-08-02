@@ -98,7 +98,7 @@
       <icon
        follows="top|left"
        height="16"
-       image_name="unknown"
+       image_name="transparent.j2c"
        layout="topleft"
        left="10"
        name="region_maturity"
