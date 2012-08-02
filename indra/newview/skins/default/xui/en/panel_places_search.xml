@@ -18,6 +18,10 @@
    name="searching">
       Searching...
   </panel.string>
+  <panel.string
+   name="all_categories">
+    All Categories
+  </panel.string>
 
   <line_editor
    follows="top|left|right"
@@ -33,64 +37,7 @@
    layout="topleft"
    left_pad="5"
    name="search_category"
-   width="140">
-      <combo_box.item
-       label="Any Category"
-       name="category_any"
-       value="any" />
-      <combo_box.item
-       label="Linden Location"
-       name="category_linden"
-       value="linden" />
-      <combo_box.item
-       label="Adult"
-       name="category_adult"
-       value="adult" />
-      <combo_box.item
-       label="Arts &amp; Culture"
-       name="category_arts"
-       value="arts" />
-      <combo_box.item
-       label="Business"
-       name="category_store"
-       value="store" />
-      <combo_box.item
-       label="Educational"
-       name="category_educational"
-       value="educational" />
-      <combo_box.item
-       label="Gaming"
-       name="category_game"
-       value="game" />
-      <combo_box.item
-       label="Hangout"
-       name="category_gather"
-       value="gather" />
-      <combo_box.item
-       label="Newcomer Friendly"
-       name="category_newcomer"
-       value="newcomer" />
-      <combo_box.item
-       label="Parks &amp; Nature"
-       name="category_park"
-       value="park" />
-      <combo_box.item
-       label="Residential"
-       name="category_home"
-       value="home" />
-      <combo_box.item
-       label="Shopping"
-       name="category_shopping"
-       value="shopping" />
-      <combo_box.item
-       label="Rental"
-       name="category_rental"
-       value="rental" />
-      <combo_box.item
-       label="Other"
-       name="category_other"
-       value="other" />
-  </combo_box>
+   width="140" />
   <button
    follows="top|right"
    height="23"

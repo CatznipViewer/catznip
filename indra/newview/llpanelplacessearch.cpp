@@ -27,37 +27,6 @@
 #include "lltrans.h"
 
 // ============================================================================
-// Helper functions
-//
-
-// NOTE: returns C_ANY for an invalid category since we're only using this for search
-LLParcel::ECategory getParcelCategoryFromString(const std::string& strCategory)
-{
-	typedef std::pair<std::string, LLParcel::ECategory> category_pair_t;
-	typedef std::map<std::string, LLParcel::ECategory> category_map_t;
-	static category_map_t s_Categories;
-	if (s_Categories.empty())
-	{
-		s_Categories.insert(category_pair_t("any", LLParcel::C_ANY));
-		s_Categories.insert(category_pair_t("linden", LLParcel::C_LINDEN));
-		s_Categories.insert(category_pair_t("adult", LLParcel::C_ADULT));
-		s_Categories.insert(category_pair_t("arts", LLParcel::C_ARTS));
-		s_Categories.insert(category_pair_t("store", LLParcel::C_BUSINESS));
-		s_Categories.insert(category_pair_t("educational", LLParcel::C_EDUCATIONAL));
-		s_Categories.insert(category_pair_t("game", LLParcel::C_GAMING));
-		s_Categories.insert(category_pair_t("gather", LLParcel::C_HANGOUT));
-		s_Categories.insert(category_pair_t("newcomer", LLParcel::C_NEWCOMER));
-		s_Categories.insert(category_pair_t("park", LLParcel::C_PARK));
-		s_Categories.insert(category_pair_t("home", LLParcel::C_RESIDENTIAL));
-		s_Categories.insert(category_pair_t("shopping", LLParcel::C_SHOPPING));
-		s_Categories.insert(category_pair_t("rental", LLParcel::C_RENTAL));
-		s_Categories.insert(category_pair_t("other", LLParcel::C_OTHER));
-	}
-	category_map_t::const_iterator itCategory = s_Categories.find(strCategory);
-	return (s_Categories.end() != itCategory) ? itCategory->second : LLParcel::C_ANY;
-}
-
-// ============================================================================
 // LLPanelPlacesSearch
 //
 
@@ -87,8 +56,16 @@ LLPanelPlacesSearch::~LLPanelPlacesSearch()
 BOOL LLPanelPlacesSearch::postBuild()
 {
 	m_pSearchEditor = findChild<LLLineEditor>("search_query");
-	m_pSearchCategory = findChild<LLComboBox>("search_category");
 	findChild<LLUICtrl>("search_start")->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchStart, this));
+
+	m_pSearchCategory = findChild<LLComboBox>("search_category");
+	m_pSearchCategory->add(getString("all_categories"), LLSD("any"));
+	m_pSearchCategory->addSeparator();
+	for (int idxCategory = LLParcel::C_LINDEN; idxCategory < LLParcel::C_COUNT; idxCategory++)
+	{
+		LLParcel::ECategory eCategory = (LLParcel::ECategory)idxCategory;
+		m_pSearchCategory->add(LLParcel::getCategoryUIString(eCategory), LLParcel::getCategoryString(eCategory));
+	}
 
 	m_pSearchPG = findChild<LLCheckBoxCtrl>("search_pg_check");
 	m_pSearchPG->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onToggleMaturity, this));
@@ -136,7 +113,7 @@ void LLPanelPlacesSearch::onSearchStart()
 	m_nCurIndex = 0;
 	m_strCurQuery = m_pSearchEditor->getText();
 	m_idCurQuery = LLSearchDirectory::instance().queryPlaces(
-		m_strCurQuery, getParcelCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
+		m_strCurQuery, LLParcel::getCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
 		nSearchFlags, m_nCurIndex, boost::bind(&LLPanelPlacesSearch::onSearchResult, this, _1, _2, _3));
 }
 
@@ -154,7 +131,6 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 		LLNotificationsUtil::add("SearchWordBanned");
 	}
 
-	m_pResultsList->clearRows();
 	if (!lResults.empty())
 	{
 		LLSD sdRow; LLSD& sdColumns = sdRow["columns"];
