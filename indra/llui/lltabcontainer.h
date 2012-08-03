@@ -46,7 +46,7 @@ public:
 	};
 	typedef enum e_insertion_point
 	{
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 		START = -1,
 		END = -2,
 		LEFT_OF_CURRENT = -3,
@@ -89,7 +89,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3)
 		Optional<bool>						tab_allow_rearrange;
 // [/SL:KB]
 		Optional<S32>						tab_padding_right;
@@ -189,7 +189,7 @@ public:
 	S32			getCurrentPanelIndex();
 	S32			getTabCount();
 	LLPanel*	getPanelByIndex(S32 index);
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 	S32			getIndexForPanel(const LLPanel* panel);
 // [/SL:KB]
 //	S32			getIndexForPanel(LLPanel* panel);
@@ -235,7 +235,7 @@ public:
 	void onJumpFirstBtn( const LLSD& data );
 	void onJumpLastBtn( const LLSD& data );
 
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
 	void setAllowRearrange(BOOL enable)	{ mAllowRearrange = enable; }
 	BOOL getAllowRearrange() const		{ return mAllowRearrange; }
 
@@ -282,7 +282,7 @@ private:
 	
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
 	BOOL							mAllowRearrange;
 	tab_rearrange_signal_t*			mRearrangeSignal;
 // [/SL:KB]

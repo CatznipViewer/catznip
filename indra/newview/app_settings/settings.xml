@@ -12920,7 +12920,7 @@
     <key>RearrangeIMTabs</key>
     <map>
       <key>Comment</key>
-      <string>Toggles drag-rearranging the IM floater tabs</string>
+      <string>Allow IM floater tabs to be dragged and rearranged</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>

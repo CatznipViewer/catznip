@@ -1320,18 +1320,35 @@ S32 LLChicletPanel::getChicletIndex(const LLChiclet* chiclet)
 	return -1;
 }
 
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
-void LLChicletPanel::setChicletIndex(const LLChiclet* chiclet, S32 index)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+void LLChicletPanel::setChicletIndex(const LLChiclet* chiclet, EChicletOrder eOrder, const LLUUID& idSession)
 {
-	if ( (index >= mChicletList.size()) || (index < 0) )
-		return;
+	// Remove it from the list
+	S32 idx = getChicletIndex(chiclet);
+	if (-1 != idx)
+		mChicletList.erase(mChicletList.begin() + idx);
 
-	S32 cur_index = getChicletIndex(chiclet);
-	if ( (-1 == cur_index) && (cur_index != index) )
-		return;
-
-	mChicletList.erase(mChicletList.begin() + cur_index);
-	mChicletList.insert(mChicletList.begin() + ((cur_index < index) ? --index : index ), const_cast<LLChiclet*>(chiclet));
+	switch (eOrder)
+	{
+		case START:
+			mChicletList.insert(mChicletList.begin(), const_cast<LLChiclet*>(chiclet));
+			break;
+		case LEFT_OF_SESSION:
+		case RIGHT_OF_SESSION:
+			idx = (idSession.notNull()) ? getChicletIndex(findChiclet<LLChiclet>(idSession)) : -1;
+			if (-1 != idx)
+			{
+				if (RIGHT_OF_SESSION == eOrder)
+					mChicletList.insert(mChicletList.begin() + idx + 1, const_cast<LLChiclet*>(chiclet));
+				else
+					mChicletList.insert(mChicletList.begin() + idx, const_cast<LLChiclet*>(chiclet));
+			}
+			break;
+		case END:
+		default:
+			mChicletList.push_back(const_cast<LLChiclet*>(chiclet));
+			break;
+	}
 	arrange();
 }
 // [/SL:KB]

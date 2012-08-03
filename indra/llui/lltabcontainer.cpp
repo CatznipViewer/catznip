@@ -210,7 +210,7 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3)
 	tab_allow_rearrange("tab_allow_rearrange", false),
 // [/SL:KB]
 	tab_padding_right("tab_padding_right"),
@@ -228,7 +228,7 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
 	mAllowRearrange(p.tab_allow_rearrange),
 	mRearrangeSignal(NULL),
 // [/SL:KB]
@@ -288,6 +288,10 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 LLTabContainer::~LLTabContainer()
 {
 	std::for_each(mTabList.begin(), mTabList.end(), DeletePointer());
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	delete mRearrangeSignal;
+// [/SL:KB]
 }
 
 //virtual
@@ -583,7 +587,7 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 //			LLButton* tab_button = getTab(index)->mButton;
 			gFocusMgr.setMouseCapture(this);
 //			tab_button->setFocus(TRUE);
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
 			// Only set keyboard focus to the tab button of the active panel (if we have one) if the user actually clicked on it
 			if (mCurrentTabIdx >= 0)
 			{
@@ -743,7 +747,7 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 {
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
 	if ( (mAllowRearrange) && (hasMouseCapture()) )
 	{
 		return FALSE;	// Don't process movement keys while the user might be rearranging tabs
@@ -1339,7 +1343,7 @@ LLPanel* LLTabContainer::getPanelByIndex(S32 index)
 }
 
 //S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 S32 LLTabContainer::getIndexForPanel(const LLPanel* panel)
 // [/SL:KB]
 {
@@ -1987,10 +1991,11 @@ void LLTabContainer::insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_p
 		mTabList.insert(current_iter, tuple);
 		}
 		break;
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 	case END:
 		mTabList.push_back( tuple );
 		break;
+	// All of the pre-defined insertion points are negative so if we encounter a positive number, assume it's an index
 	default:
 		S32 idxInsertion = (S32)insertion_point;
 		if ( (idxInsertion >= 0) && (idxInsertion < mTabList.size()) )
@@ -2078,7 +2083,7 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
 //				tuple->mButton->onCommit();
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.0.0a) | Modified: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5)
 				if ( (mAllowRearrange) && (mCurrentTabIdx >= 0) && (mTabList[mCurrentTabIdx]->mButton->hasFocus()) )
 				{
 					S32 idxHover = iter - mTabList.begin();
@@ -2121,7 +2126,7 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 	}
 }
 
-// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
 boost::signals2::connection LLTabContainer::setRearrangeCallback(const tab_rearrange_signal_t::slot_type& cb)
 {
 	if (!mRearrangeSignal)
