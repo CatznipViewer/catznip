@@ -128,6 +128,9 @@ void LLWatchdogTimeout::start(const std::string& state)
 	// LLWatchdogTimeout::isAlive() will be called asynchronously. 
 	ping(state);
 	mTimer.start(); 
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	mTimer.setTimerExpirySec(mTimeout); 
+// [/SL:KB]
 	LLWatchdogEntry::start();
 }
 
