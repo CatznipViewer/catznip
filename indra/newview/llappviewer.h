@@ -150,8 +150,12 @@ public:
 	void initMainloopTimeout(const std::string& state, F32 secs = -1.0f);
 	void destroyMainloopTimeout();
 	void pauseMainloopTimeout();
-	void resumeMainloopTimeout(const std::string& state = "", F32 secs = -1.0f);
-	void pingMainloopTimeout(const std::string& state, F32 secs = -1.0f);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	void resumeMainloopTimeout();
+	void pingMainloopTimeout(const std::string& state);
+// [/SL:KB]
+//	void resumeMainloopTimeout(const std::string& state = "", F32 secs = -1.0f);
+//	void pingMainloopTimeout(const std::string& state, F32 secs = -1.0f);
 
 	// Handle the 'login completed' event.
 	// *NOTE:Mani Fix this for login abstraction!!
@@ -260,6 +264,9 @@ private:
 	struct SettingsFiles* mSettingsLocationList;
 
 	LLWatchdogTimeout* mMainloopTimeout;
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	std::string mMainloopState;
+// [/SL:KB]
 
 	// For performance and metric gathering
 	LLThread*	mFastTimerLogThread;

@@ -5021,7 +5021,12 @@ void LLAppViewer::initMainloopTimeout(const std::string& state, F32 secs)
 	if(!mMainloopTimeout)
 	{
 		mMainloopTimeout = new LLWatchdogTimeout();
-		resumeMainloopTimeout(state, secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->setTimeout(secs);
+		mMainloopState = state;
+		resumeMainloopTimeout();
+// [/SL:KB]
+//		resumeMainloopTimeout(state, secs);
 	}
 }
 
@@ -5034,17 +5039,23 @@ void LLAppViewer::destroyMainloopTimeout()
 	}
 }
 
-void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::resumeMainloopTimeout()
+// [/SL:KB]
 {
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-		
-		mMainloopTimeout->setTimeout(secs);
-		mMainloopTimeout->start(state);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->start(mMainloopState);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//		
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->start(state);
 	}
 }
 
@@ -5056,7 +5067,10 @@ void LLAppViewer::pauseMainloopTimeout()
 	}
 }
 
-void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::pingMainloopTimeout(const std::string& state)
+// [/SL:KB]
 {
 //	if(!restoreErrorTrap())
 //	{
@@ -5065,20 +5079,27 @@ void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
 	
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-
-		mMainloopTimeout->setTimeout(secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopState = state;
 		mMainloopTimeout->ping(state);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->ping(state);
 	}
 }
 
 void LLAppViewer::handleLoginComplete()
 {
 	gLoggedInTime.start();
-	initMainloopTimeout("Mainloop Init");
+//	initMainloopTimeout("Mainloop Init");
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	initMainloopTimeout("Mainloop Init", gSavedSettings.getF32("MainloopTimeoutDefault"));
+// [/SL:KB]
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
