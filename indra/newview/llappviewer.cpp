@@ -1148,7 +1148,10 @@ static LLFastTimer::DeclareTimer FTM_AGENT_UPDATE("Update");
 bool LLAppViewer::mainLoop()
 {
 	LLMemType mt1(LLMemType::MTYPE_MAIN);
-	mMainloopTimeout = new LLWatchdogTimeout();
+//	mMainloopTimeout = new LLWatchdogTimeout();
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	initMainloopTimeout("Mainloop Init", gSavedSettings.getF32("MainloopTimeoutDefault"));
+// [/SL:KB]
 	
 	//-------------------------------------------
 	// Run main loop until time to quit
@@ -5097,9 +5100,6 @@ void LLAppViewer::handleLoginComplete()
 {
 	gLoggedInTime.start();
 //	initMainloopTimeout("Mainloop Init");
-// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
-	initMainloopTimeout("Mainloop Init", gSavedSettings.getF32("MainloopTimeoutDefault"));
-// [/SL:KB]
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
