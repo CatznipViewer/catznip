@@ -155,6 +155,7 @@ LLWatchdog::LLWatchdog() :
 	mTimer(NULL),
 	mLastClockCount(0),
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	mLastRunFreeze(false),
 	mKillerCallback(NULL),
 	mFreezeCallback(NULL)
 // [/SL:KB]
@@ -248,11 +249,17 @@ void LLWatchdog::run()
 				llinfos << "Watchdog detected error:" << llendl;
 				mKillerCallback();
 			}
-			else if (!mFreezeCallback.empty())
+			else if ( (!mFreezeCallback.empty()) && (!mLastRunFreeze) )
 			{
+				mLastRunFreeze = true;
+
 				llinfos << "Watchdog detected freeze:" << llendl;
 				mFreezeCallback();
 			}
+		}
+		else if (mLastRunFreeze)
+		{
+			mLastRunFreeze = false;
 		}
 	}
 // [/SL:KB]

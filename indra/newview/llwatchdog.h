@@ -104,6 +104,9 @@ private:
 	LLMutex* mSuspectsAccessMutex;
 	LLWatchdogTimerThread* mTimer;
 	U64 mLastClockCount;
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	bool mLastRunFreeze;
+// [/SL:KB]
 
 	killer_event_callback mKillerCallback;
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)

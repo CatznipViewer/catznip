@@ -212,6 +212,13 @@
 #include "llmachineid.h"
 #include "llmainlooprepeater.h"
 
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#ifdef LL_WINDOWS
+#include <TlHelp32.h>
+#include "llwindebug.h"
+#endif // LL_WINDOWS
+// [/SL:KB]
+
 // *FIX: These extern globals should be cleaned up.
 // The globals either represent state/config/resource-storage of either 
 // this app, or another 'component' of the viewer. App globals should be 
@@ -1963,6 +1970,64 @@ void watchdog_killer_callback()
 	llerrs << "Watchdog killer event" << llendl;
 }
 
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+
+void enumerate_process_threads(HANDLE hThreadSnapshot, DWORD (WINAPI* pCallback)(HANDLE))
+{
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		THREADENTRY32 threadEntry;
+		threadEntry.dwSize = sizeof(THREADENTRY32);
+		if (Thread32First(hThreadSnapshot, &threadEntry))
+		{
+			DWORD dwProcessId = GetCurrentProcessId();
+			DWORD dwCurThreadId = GetCurrentThreadId();
+			do
+			{
+				if ( (threadEntry.th32OwnerProcessID == dwProcessId) && (threadEntry.th32ThreadID != dwCurThreadId) )
+				{
+					HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME, false, threadEntry.th32ThreadID);
+					if (hThread)
+					{
+						pCallback(hThread);
+						CloseHandle(hThread);
+					}
+				}
+			} while (Thread32Next(hThreadSnapshot, &threadEntry));
+		}
+	}
+}
+
+void watchdog_freeze_callback()
+{
+	// NOTE: called from the thread the watchdog runs on, not the main thread
+
+	// SuspendThread() increments the thread's suspend count so we can't wake up a thread that was previously suspended
+	HANDLE hThreadSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0); 
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		enumerate_process_threads(hThreadSnapshot, SuspendThread);
+
+		MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory);
+		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
+		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(dumpType, NULL, strFilename);
+
+		std::string strTemp = gDebugInfo["MinidumpPath"].asString();
+		if (!strTemp.empty())
+			strTemp.append(";");
+		gDebugInfo["MinidumpPath"] = strTemp + strMinidumpPath;
+		LLAppViewer::writeDebugInfo();
+
+		enumerate_process_threads(hThreadSnapshot, ResumeThread);
+
+		CloseHandle(hThreadSnapshot);
+	}
+}
+
+#endif // LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
+
 bool LLAppViewer::initThreads()
 {
 #if MEM_TRACK_MEM
@@ -3010,7 +3075,14 @@ bool LLAppViewer::initWindow()
 
 	if (use_watchdog)
 	{
-		LLWatchdog::getInstance()->init(watchdog_killer_callback);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+		LLWatchdog::getInstance()->init(NULL, watchdog_freeze_callback);
+#else
+		LLWatchdog::getInstance()->init(NULL);
+#endif // LL_WINDOWS
+// [/SL:KB]
+//		LLWatchdog::getInstance()->init(watchdog_killer_callback);
 	}
 	LL_INFOS("AppInit") << "watchdog setting is done." << LL_ENDL;
 
@@ -3079,7 +3151,11 @@ bool LLAppViewer::initWindow()
 	return true;
 }
 
+//void LLAppViewer::writeDebugInfo()
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+// static
 void LLAppViewer::writeDebugInfo()
+// [/SL:KB]
 {
 	std::string debug_filename = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"debug_info.log");
 	llinfos << "Opening debug file " << debug_filename << llendl;

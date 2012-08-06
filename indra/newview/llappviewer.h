@@ -78,7 +78,10 @@ public:
     bool quitRequested() { return mQuitRequested; }
     bool logoutRequestSent() { return mLogoutRequestSent; }
 
-	void writeDebugInfo();
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	static void writeDebugInfo();
+// [/SL:KB]
+//	void writeDebugInfo();
 
 	const LLOSInfo& getOSInfo() const { return mSysOSInfo; }
 
