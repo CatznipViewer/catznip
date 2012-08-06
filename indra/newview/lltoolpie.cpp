@@ -126,7 +126,7 @@ BOOL LLToolPie::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	// don't pick transparent so users can't "pay" transparent objects
 //	mPick = gViewerWindow->pickImmediate(x, y, FALSE, TRUE);
 // [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-	mPick = gViewerWindow->pickImmediate(x, y, FALSE, TRUE, TRUE);
+	mPick = gViewerWindow->pickImmediate(x, y, FALSE, gSavedSettings.getBOOL("PickRiggedAttachment"), TRUE);
 // [/SL:KB]
 	mPick.mKeyMask = mask;
 
