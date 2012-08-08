@@ -144,7 +144,12 @@ bool LLOutfitsView::onIdle()
 		mInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
 		mInvPanel->setShape(pInvPanelPlaceholder->getRect());
 		mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
-	
+
+		mInvPanel->getRootFolder()->getFilter()->markDefault();
+		mInvPanel->getRootFolder()->setAutoSelectOverride(true);
+		mInvPanel->getRootFolder()->closeAllFolders();
+		highlightBaseOutfit();
+
 		pInvPanelPlaceholder->setVisible(FALSE);
 	}
 	return (NULL != mInvPanel);
