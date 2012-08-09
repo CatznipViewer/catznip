@@ -90,6 +90,10 @@ private:
 protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	void onWearItemsClick();
+	void onWearOutfitClick();
+// [/SL:KB]
 //	void onWearButtonClick();
 //	void showGearMenu();
 	void onTrashButtonClick();

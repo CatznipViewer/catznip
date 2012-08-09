@@ -13,28 +13,28 @@
      follows="all"
      height="400"
      layout="topleft"
-     left="3"
+     left="0"
      multi_select="true"
      name="cof_items_list"
      standalone="false"
      top="0"
-     width="309"
+     width="312"
      worn_indication_enabled="false" />
     <panel
      follows="all"
      height="400"
      layout="topleft"
-     left="3"
+     left="0"
      name="wearing_invpanel_placeholder" 
      top="0"
      visible="false"
-     width="309" /> 
+     width="312" /> 
     <panel
      background_visible="true"
      follows="bottom|left|right"
      height="28"
      layout="topleft"
-     left="4"
+     left="0"
      name="bottom_panel"
      top_pad="0"
      width="312">
@@ -99,7 +99,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="53" />
+         width="55" />
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"

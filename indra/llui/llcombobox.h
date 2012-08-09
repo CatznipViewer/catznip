@@ -200,6 +200,10 @@ public:
 	void			setTextEntryCallback( commit_callback_t cb ) { mTextEntryCallback = cb; }
 	void			setTextChangedCallback( commit_callback_t cb ) { mTextChangedCallback = cb; }
 
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2012-08-10 (Catznip-3.3)
+	BOOL			getButtonEnabled() const;
+	void			setButtonEnabled(BOOL enabled);
+// [/SL:KB]
 	void			setButtonVisible(BOOL visible);
 
 	void			onButtonMouseDown();
