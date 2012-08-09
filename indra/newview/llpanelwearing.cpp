@@ -237,7 +237,10 @@ public:
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
 		registrar.add("Gear.Edit", boost::bind(&edit_outfit));
-		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
+//		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-09 (Catznip-3.3)
+		registrar.add("Gear.TakeOff", boost::bind(&LLPanelWearing::onTakeOffClicked, mPanelWearing));
+// [/SL:KB]
 		registrar.add("Gear.Copy", boost::bind(&LLPanelWearing::copyToClipboard, mPanelWearing));
 
 		enable_registrar.add("Gear.OnEnable", boost::bind(&LLPanelWearing::isActionEnabled, mPanelWearing, _2));
@@ -250,16 +253,16 @@ public:
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 private:
-	void onTakeOff()
-	{
-		uuid_vec_t selected_uuids;
-		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
-
-		for (uuid_vec_t::const_iterator it=selected_uuids.begin(); it != selected_uuids.end(); ++it)
-		{
-				LLAppearanceMgr::instance().removeItemFromAvatar(*it);
-		}
-	}
+//	void onTakeOff()
+//	{
+//		uuid_vec_t selected_uuids;
+//		mPanelWearing->getSelectedItemsUUIDs(selected_uuids);
+//
+//		for (uuid_vec_t::const_iterator it=selected_uuids.begin(); it != selected_uuids.end(); ++it)
+//		{
+//				LLAppearanceMgr::instance().removeItemFromAvatar(*it);
+//		}
+//	}
 
 	LLToggleableMenu*		mMenu;
 	LLPanelWearing* 		mPanelWearing;
@@ -503,6 +506,8 @@ BOOL LLPanelWearing::postBuild()
 	mToggleFolderView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, FOLDER_VIEW));
 	mToggleListView = getChild<LLButton>("list_view_btn");
 	mToggleListView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, LIST_VIEW));
+
+	getChild<LLUICtrl>("take_off_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onTakeOffClicked, this));
 // [/SL:KB]
 //	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
 //
@@ -682,6 +687,17 @@ void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 }
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+void LLPanelWearing::onTakeOffClicked()
+{
+	uuid_vec_t selected_uuids;
+	getSelectedItemsUUIDs(selected_uuids);
+
+	for (uuid_vec_t::const_iterator it=selected_uuids.begin(); it != selected_uuids.end(); ++it)
+	{
+		LLAppearanceMgr::instance().removeItemFromAvatar(*it);
+	}
+}
+
 void LLPanelWearing::onToggleWearingView(EWearingView eView)
 {
 	if (FOLDER_VIEW == eView)

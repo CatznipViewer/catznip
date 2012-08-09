@@ -250,6 +250,8 @@ void LLPanelOutfitsInventory::updateListCommands()
 //	mListCommands->childSetEnabled("wear_btn", wear_enabled);
 //	mListCommands->childSetVisible("wear_btn", wear_visible);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	mCurrentOutfitPanel->getChild<LLUICtrl>("take_off_btn")->setEnabled(isActionEnabled("take_off"));
+
 	mOutfitsSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
 	mWearingSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
 // [/SL:KB]

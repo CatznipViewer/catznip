@@ -99,7 +99,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="85" />
+         width="53" />
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
@@ -135,5 +135,17 @@
              image_pressed="none" 
              pad_right="-2" />
         </flyout_button>
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="Icon_Close_Toast"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         layout="topleft"
+         left_pad="1"
+         name="take_off_btn"
+         tool_tip="Take off selection"
+         width="31" />
     </panel>
 </panel>

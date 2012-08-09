@@ -81,6 +81,7 @@ public:
 	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
 	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
 
+	void onTakeOffClicked();
 protected:
 	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
 	void onToggleWearingView(EWearingView eView);
