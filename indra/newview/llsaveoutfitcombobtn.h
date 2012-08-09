@@ -47,6 +47,7 @@ public:
 //	void saveOutfit(bool as_new = false);
 // [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
 	void saveOutfit(const LLUICtrl* pBtnCtrl);
+	void setMenuItemLabel(const std::string& item, const std::string& label);
 // [/SL:KB]
 	void setMenuItemEnabled(const std::string& item, bool enabled);
 	void setSaveBtnEnabled(bool enabled);

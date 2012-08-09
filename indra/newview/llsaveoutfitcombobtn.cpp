@@ -27,13 +27,14 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llappearancemgr.h"
-// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
-#include "llflyoutbutton.h"
-// [/SL:KB]
 #include "llpaneloutfitsinventory.h"
 #include "llsidepanelappearance.h"
 #include "llsaveoutfitcombobtn.h"
 #include "llviewermenu.h"
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+#include "llflyoutbutton.h"
+#include "lltrans.h"
+// [/SL:KB]
 
 static const std::string SAVE_BTN("save_btn");
 //static const std::string SAVE_FLYOUT_BTN("save_flyout_btn");
@@ -44,6 +45,9 @@ LLSaveOutfitComboBtn::LLSaveOutfitComboBtn(LLPanel* parent, bool saveAsDefaultAc
 // [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
 	mSaveBtn = mParent->getChild<LLFlyoutButton>(SAVE_BTN);
 	mSaveBtn->setCommitCallback(boost::bind(&LLSaveOutfitComboBtn::saveOutfit, this, _1));
+
+	setMenuItemLabel("save_outfit", LLTrans::getString("SaveOutfit"));
+	setMenuItemLabel("save_as_new_outfit", LLTrans::getString("SaveOutfitAs"));
 // [/SL:KB]
 //	// register action mapping before creating menu
 //	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar save_registar;
@@ -106,6 +110,25 @@ void LLSaveOutfitComboBtn::saveOutfit(const LLUICtrl* pBtnCtrl)
 //
 //	//*TODO how to get to know when base outfit is updated or new outfit is created?
 }
+
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+void LLSaveOutfitComboBtn::setMenuItemLabel(const std::string& item, const std::string& label)
+{
+	LLScrollListCtrl* pListCtrl = mSaveBtn->getListControl();
+	if (pListCtrl)
+	{
+		LLScrollListItem* pItem = pListCtrl->getItem(item);
+		if (pItem)
+		{
+			LLScrollListText* pTextCell = dynamic_cast<LLScrollListText*>(pItem->getColumn(0));
+			if (pTextCell)
+			{
+				pTextCell->setText(label);
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 void LLSaveOutfitComboBtn::setMenuItemEnabled(const std::string& item, bool enabled)
 {
