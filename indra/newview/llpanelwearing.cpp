@@ -387,11 +387,15 @@ protected:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 
 		functor_t take_off = boost::bind(&LLAppearanceMgr::removeItemFromAvatar, LLAppearanceMgr::getInstance(), _1);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+		functor_t take_off_folder = boost::bind(&LLAppearanceMgr::removeFolderFromAvatar, LLAppearanceMgr::getInstance(), _1);
+// [/SL:KB]
 
 		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
 		registrar.add("Wearing.TakeOff", boost::bind(handleMultiple, take_off, mUUIDs));
 		registrar.add("Wearing.Detach", boost::bind(handleMultiple, take_off, mUUIDs));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+		registrar.add("Wearing.TakeOffFolder", boost::bind(handlePerFolder, take_off_folder, mUUIDs));
 		registrar.add("Wearing.FindOriginal", boost::bind(&LLWearingContextMenu::onFindOriginal, this));
 		registrar.add("Wearing.Properties", boost::bind(&LLWearingContextMenu::onProperties, this));
 // [/SL:KB]
@@ -403,11 +407,36 @@ protected:
 		return menu;
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	// static
+	static void handlePerFolder(functor_t functor, const uuid_vec_t& item_ids)
+	{
+		uuid_vec_t folder_ids;
+		for (uuid_vec_t::const_iterator itItem = item_ids.begin(); itItem != item_ids.end(); ++itItem)
+		{
+			LLViewerInventoryItem* pItem = gInventory.getLinkedItem(*itItem);
+			if (pItem)
+			{
+				if (folder_ids.end() == std::find(folder_ids.begin(), folder_ids.end(), pItem->getParentUUID()))
+					folder_ids.push_back(pItem->getParentUUID());
+			}
+		}
+
+		for (uuid_vec_t::const_iterator itFolder = folder_ids.begin(); itFolder != folder_ids.end(); ++itFolder)
+		{
+			functor(*itFolder);
+		}
+	}
+// [/SL:KB]
+
 	void updateMenuItemsVisibility(LLContextMenu* menu)
 	{
 		bool bp_selected			= false;	// true if body parts selected
 		bool clothes_selected		= false;
 		bool attachments_selected	= false;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+		bool can_remove_folder      = false;
+// [/SL:KB]
 
 		// See what types of wearables are selected.
 		for (uuid_vec_t::const_iterator it = mUUIDs.begin(); it != mUUIDs.end(); ++it)
@@ -433,6 +462,12 @@ protected:
 			{
 				attachments_selected = true;
 			}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+			if (!can_remove_folder)
+			{
+				can_remove_folder |= LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(item->getParentUUID());
+			}
+// [/SL:KB]
 		}
 
 		// Enable/disable some menu items depending on the selection.
@@ -442,6 +477,11 @@ protected:
 		menu->setItemVisible("take_off",	allow_take_off);
 		menu->setItemVisible("detach",		allow_detach);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
+		menu->setItemVisible("take_off_folder",	allow_take_off);
+		menu->setItemEnabled("take_off_folder",	can_remove_folder);
+		menu->setItemVisible("detach_folder",	allow_detach);
+		menu->setItemEnabled("detach_folder",	can_remove_folder);
+
 		menu->setItemEnabled("find_original", 1 == mUUIDs.size());
 		menu->setItemEnabled("properties", 1 == mUUIDs.size());
 // [/SL:KB]
