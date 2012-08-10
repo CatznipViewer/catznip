@@ -17,6 +17,13 @@
          function="Wearing.EditItem" />
     </menu_item_call>
     <menu_item_call
+     label="Take Off / Detach"
+     layout="topleft"
+     name="take_off_or_detach">
+        <on_click
+         function="Wearing.TakeOffDetach" />
+    </menu_item_call>
+    <menu_item_call
      label="Take Off"
      layout="topleft"
      name="take_off">
@@ -58,13 +65,6 @@
      name="properties">
         <on_click
          function="Wearing.Properties" />
-    </menu_item_call>
-    <menu_item_call
-     label="Take Off / Detach"
-     layout="topleft"
-     name="take_off_or_detach">
-        <on_click
-         function="Wearing.TakeOffDetach" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft"
