@@ -43,7 +43,9 @@
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 #include "llfolderview.h"
 #include "llinventorypanel.h"
+#include "lltrans.h"
 #include "llviewercontrol.h"
+#include "llvoavatarself.h"
 // [/SL:KB]
 
 // Context menu and Gear menu helper.
@@ -152,7 +154,29 @@ void LLWornListItem::setShowOrdering(bool fShowOrdering)
 
 void LLWornListItem::updateItem(const std::string& strName, EItemState itemState)
 {
-	LLPanelClothingListItem::updateItem(strName, itemState);
+	std::string strItemName = strName;
+	if (LLAssetType::AT_OBJECT == mAssetType)
+	{
+		if (isAgentAvatarValid())
+		{
+			std::string strAttachPt = gAgentAvatarp->getAttachedPointName(mInventoryItemUUID);
+			if (strAttachPt.empty())
+				strAttachPt = "Invalid Attachment";
+
+			LLStringUtil::format_map_t args;
+			args["[ATTACHMENT_POINT]"] = LLTrans::getString(strAttachPt);
+			strAttachPt = LLTrans::getString("WornOnAttachmentPoint", args);
+			LLStringUtil::toLower(strAttachPt);
+			
+			strItemName += strAttachPt;
+		}
+		else
+		{
+			strItemName += LLTrans::getString("worn");
+		}
+	}
+
+	LLPanelClothingListItem::updateItem(strItemName, itemState);
 
 	bool fShowUp = false, fShowDown = false;
 	if ( (mShowOrdering) && (LLAssetType::AT_CLOTHING == mAssetType) )
