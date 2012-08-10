@@ -226,7 +226,15 @@ bool LLOutfitsView::canWearSelected()
 {
 	LLInventoryModel::item_array_t items;
 	if (mInvPanel->getSelectedItems(items))
-		return get_items_wearable(items);
+	{
+		for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+		{
+			const LLViewerInventoryItem* pItem = *itItem;
+			if ( (pItem) && (!get_can_item_be_worn(pItem->getUUID())) )
+				return false;
+		}
+		return true;
+	}
 	return false;
 }
 

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="Outfits">
+	<accordion name="outfits_accordion">
+		<no_matched_tabs_text name="no_matched_outfits_msg" value="Aradığınızı bulamadınız mı? [secondlife:///app/search/all/[SEARCH_TERM] Arama] yapmayı deneyin."/>
+		<no_visible_tabs_text name="no_outfits_msg" value="Henüz herhangi bir dış görünümünüz yok. Try [secondlife:///app/search/all/ Arama] yapmayı deneyin"/>
+	</accordion>
+	<panel name="bottom_panel">
+		<menu_button name="options_gear_btn" tool_tip="İlave seçenekleri göster"/>
+		<icon name="dummy_icon" width="50" />
+		<flyout_button name="wear_outfit_btn" label="Giy" width="70">
+			<flyout_button.item label="Mevcut Dış Görünümü Değiştir" name="outfit_replace" />
+			<flyout_button.item label="Mevcut Dış Görünüme Ekle" name="outfit_add" />
+		</flyout_button>
+		<button name="wear_items_btn" label="" left_pad="-70" width="70" />
+		<flyout_button name="save_btn" label="Farklı Kaydet" width="125" />
+		<button name="trash_btn" tool_tip="Seçili dış görünümü sil"/>
+	</panel>
+</panel>

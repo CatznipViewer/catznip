@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="Outfits">
+	<accordion name="outfits_accordion">
+		<no_matched_tabs_text name="no_matched_outfits_msg" value="¿No encuentras lo que buscas? Inténtalo con [secondlife:///app/search/all/[SEARCH_TERM] Buscar]."/>
+		<no_visible_tabs_text name="no_outfits_msg" value="Todavía no tienes vestuario. Inténtalo con [secondlife:///app/search/all/ Buscar]"/>
+	</accordion>
+	<panel name="bottom_panel">
+		<menu_button name="options_gear_btn" tool_tip="Ver más opciones"/>
+		<icon name="dummy_icon" width="70" />
+		<flyout_button name="wear_outfit_btn" label="" width="45">
+			<flyout_button.item label="Reemplazar el vestuario actual" name="outfit_replace" />
+			<flyout_button.item label="Añadir al vestuario actual" name="outfit_add" />
+		</flyout_button>
+		<button name="wear_items_btn" label="" left_pad="-45" width="45" />
+		<flyout_button name="save_btn"  label="Guardar como" width="130" />
+		<button name="trash_btn" tool_tip="Eliminar el vestuario seleccionado"/>
+	</panel>
+</panel>
