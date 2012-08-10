@@ -1140,7 +1140,10 @@ void LLTabContainer::addTabPanel(const TabPanelParams& panel)
 	
 	if( select )
 	{
-		selectLastTab();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		selectTabPanel(child);
+// [/SL:KB]
+//		selectLastTab();
 	}
 
 	updateMaxScrollPos();
@@ -1599,27 +1602,42 @@ void LLTabContainer::setTabPanelFlashing(LLPanel* child, BOOL state )
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, const LLColor4& color)
+//void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, const LLColor4& color)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, LLFontGL::HAlign alignment, const LLColor4& color)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	if( tuple )
 	{
-		tuple->mButton->setImageOverlay(image_name, LLFontGL::LEFT, color);
+//		tuple->mButton->setImageOverlay(image_name, LLFontGL::LEFT, color);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		tuple->mButton->setImageOverlay(image_name, alignment, color);
+// [/SL:KB]
 		reshapeTuple(tuple);
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, const LLColor4& color)
+//void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, const LLColor4& color)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, LLFontGL::HAlign alignment, const LLColor4& color)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	if( tuple )
 	{
-		tuple->mButton->setImageOverlay(image_id, LLFontGL::LEFT, color);
+//		tuple->mButton->setImageOverlay(image_id, LLFontGL::LEFT, color);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		tuple->mButton->setImageOverlay(image_id, alignment, color);
+// [/SL:KB]
 		reshapeTuple(tuple);
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
+//void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon, LLFontGL::HAlign alignment)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	LLCustomButtonIconCtrl* button;
@@ -1629,7 +1647,10 @@ void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
 		button = dynamic_cast<LLCustomButtonIconCtrl*>(tuple->mButton);
 		if(button)
 		{
-			button->setIcon(icon);
+//			button->setIcon(icon);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+			button->setIcon(icon, alignment);
+// [/SL:KB]
 			reshapeTuple(tuple);
 		}
 	}
@@ -2056,6 +2077,9 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
 				tuple->mButton->onCommit();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+				return;
+// [/SL:KB]
 			}
 		}
 	}

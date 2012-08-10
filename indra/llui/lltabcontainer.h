@@ -198,9 +198,14 @@ public:
 
 	BOOL        getTabPanelFlashing(LLPanel* child);
 	void		setTabPanelFlashing(LLPanel* child, BOOL state);
-	void 		setTabImage(LLPanel* child, std::string img_name, const LLColor4& color = LLColor4::white);
-	void 		setTabImage(LLPanel* child, const LLUUID& img_id, const LLColor4& color = LLColor4::white);
-	void		setTabImage(LLPanel* child, LLIconCtrl* icon);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+	void 		setTabImage(LLPanel* child, std::string img_name, LLFontGL::HAlign alignment = LLFontGL::LEFT, const LLColor4& color = LLColor4::white);
+	void 		setTabImage(LLPanel* child, const LLUUID& img_id, LLFontGL::HAlign alignment = LLFontGL::LEFT, const LLColor4& color = LLColor4::white);
+	void		setTabImage(LLPanel* child, LLIconCtrl* icon, LLFontGL::HAlign alignment = LLFontGL::LEFT);
+// [/SL:KB]
+//	void 		setTabImage(LLPanel* child, std::string img_name, const LLColor4& color = LLColor4::white);
+//	void 		setTabImage(LLPanel* child, const LLUUID& img_id, const LLColor4& color = LLColor4::white);
+//	void		setTabImage(LLPanel* child, LLIconCtrl* icon);
 	void		setTitle( const std::string& title );
 	const std::string getPanelTitle(S32 index);
 
