@@ -109,7 +109,7 @@
          layout="topleft"
          left_pad="1"
          name="save_btn"
-         tool_tip="Wear selected outfit"
+         tool_tip="Save current outfit"
          top="1"
          width="95">
             <flyout_button.item

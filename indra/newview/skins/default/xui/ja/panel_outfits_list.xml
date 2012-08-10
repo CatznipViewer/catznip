@@ -6,6 +6,13 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<menu_button name="options_gear_btn" tool_tip="オプションを表示します"/>
+		<icon name="dummy_icon" width="65" />
+		<flyout_button name="wear_outfit_btn" label="装着" width="75">
+			<flyout_button.item label="着用中のアウトフィットを入れ替える" name="outfit_replace" />
+			<flyout_button.item label="着用中のアウトフィットに追加する" name="outfit_add" />
+		</flyout_button>
+		<button name="wear_items_btn" label="装着" left_pad="-75" width="75" />
+		<flyout_button name="save_btn" label="別名で保存" width="105" />
 		<button name="trash_btn" tool_tip="選択したアウトフィットを削除する"/>
 	</panel>
 </panel>

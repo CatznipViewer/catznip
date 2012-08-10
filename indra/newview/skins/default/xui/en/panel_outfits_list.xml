@@ -73,9 +73,11 @@
          width="80">
             <flyout_button.item
              label="Replace Current Outfit"
+             name="outfit_replace"
              value="outfit_replace" />
             <flyout_button.item
              label="Add to Current Outfit"
+             name="outfit_add"
              value="outfit_add" />
             <flyout_button.action_button
              image_hover_unselected="Toolbar_Middle_Over"
@@ -120,7 +122,7 @@
          layout="topleft"
          left_pad="1"
          name="save_btn"
-         tool_tip="Wear selected outfit"
+         tool_tip="Save current outfit"
          top="1"
          width="95">
             <flyout_button.item
