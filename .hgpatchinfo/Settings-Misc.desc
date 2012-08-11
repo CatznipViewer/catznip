@@ -6,6 +6,7 @@
 - fixed   : remote object inspector isn't passed any parameters for object IMs
     -> query string is constructed but was never appended to the "objectim" app URL
 - fixed   : llOwnerSay from objects outside draw distance shows 0,0,0 for the object coordinates on the remote object inspector
+- fixed   : radio group preferences settings don't work properly when driven by boolean typed settings
 
 [Settings/Snapshots]
 - added   : customization of the snapshot name ("SnapshotLocalName" setting)

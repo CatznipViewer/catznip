@@ -344,7 +344,7 @@ void LLRadioGroup::setValue( const LLSD& value )
 		{
 			setSelectedIndex((S32) value.asInteger(), TRUE);
 		}
-// [SL:KB] - Patch: Settings-Misc | Checked: 2011-09-14 (Catznip-2.8.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-Misc | Checked: 2011-09-14 (Catznip-2.8)
 		else if (value.isBoolean())
 		{
 			setSelectedByValue((value.asBoolean()) ? "1" : "0" , TRUE);
