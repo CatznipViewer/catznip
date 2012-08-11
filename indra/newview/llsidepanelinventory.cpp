@@ -35,7 +35,7 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
-#include "llfloatersidepanelcontainer.h"
+//#include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llhttpclient.h"
 #include "llinventorybridge.h"
@@ -58,6 +58,8 @@
 #include "llviewermedia.h"
 #include "llviewernetwork.h"
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+#include "llfloaterreg.h"
+#include "llstartup.h"
 #include "lltoggleablemenu.h"
 #include "lltrans.h"
 #include "llviewermenu.h"
@@ -294,26 +296,23 @@ LLSidepanelInventory::~LLSidepanelInventory()
 
 void handleInventoryDisplayInboxChanged()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
-	{
 // [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
-		sidepanel_inventory->refreshInboxVisibility();
+	LLFloaterReg::const_instance_list_t& invFloaters = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = invFloaters.begin(); itFloater != invFloaters.end(); ++itFloater)
+	{
+		LLSidepanelInventory* sidepanel_inventory = (*itFloater)->findChild<LLSidepanelInventory>("main_panel");
+		if (sidepanel_inventory)
+		{
+			sidepanel_inventory->refreshInboxVisibility();
+		}
+	}
 // [/SL:KB]
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (sidepanel_inventory)
+//	{
 //		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
-	}
+//	}
 }
-
-// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
-void handleShowReceivedItemsPanelChanged()
-{
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
-	{
-		sidepanel_inventory->refreshInboxVisibility();
-	}
-}
-// [/SL:KB]
 
 BOOL LLSidepanelInventory::postBuild()
 {
@@ -413,19 +412,26 @@ BOOL LLSidepanelInventory::postBuild()
 			inbox_panel->setTargetDim(gSavedPerAccountSettings.getS32("InventoryInboxHeight"));
 		}
 
-//		// Set the inbox visible based on debug settings (final setting comes from http request below)
-//		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
 // [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		// Set the inbox visible based on debug settings (final setting comes from http request below)
 		refreshInboxVisibility();
-// [/SL:KB]
 
 		// Trigger callback for after login so we can setup to track inbox changes after initial inventory load
-		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
+		if (LLStartUp::getStartupState() < STATE_STARTED)
+			LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
+		else
+			updateInbox();
+// [/SL:KB]
+//		// Set the inbox visible based on debug settings (final setting comes from http request below)
+//		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//
+//		// Trigger callback for after login so we can setup to track inbox changes after initial inventory load
+//		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
 	}
 
 	gSavedSettings.getControl("InventoryDisplayInbox")->getCommitSignal()->connect(boost::bind(&handleInventoryDisplayInboxChanged));
 // [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
-	gSavedSettings.getControl("ShowReceivedItemsPanel")->getCommitSignal()->connect(boost::bind(&handleShowReceivedItemsPanelChanged));
+	gSavedSettings.getControl("ShowReceivedItemsPanel")->getCommitSignal()->connect(boost::bind(&handleInventoryDisplayInboxChanged));
 // [/SL:KB]
 
 	// Update the verbs buttons state.
