@@ -117,6 +117,7 @@ public:
 		SNAPSHOT_WEB
 	};
 
+
 	struct Params : public LLInitParam::Block<Params, LLView::Params>
 	{
 		Params()
@@ -167,10 +168,10 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-//	BOOL saveLocal();
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	BOOL saveLocal(bool fPathPrompt);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	BOOL saveLocal(bool prompt_path);
 // [/SL:KB]
+//	BOOL saveLocal();
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
 	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
@@ -1000,13 +1001,13 @@ void LLSnapshotLivePreview::saveTexture()
 }
 
 //BOOL LLSnapshotLivePreview::saveLocal()
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-BOOL LLSnapshotLivePreview::saveLocal(bool fPathPrompt)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+BOOL LLSnapshotLivePreview::saveLocal(bool prompt_path)
 // [/SL:KB]
 {
 //	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, fPathPrompt);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, prompt_path);
 // [/SL:KB]
 
 	if(success)
@@ -2290,8 +2291,8 @@ void LLFloaterSnapshot::saveTexture()
 
 // static
 //BOOL LLFloaterSnapshot::saveLocal()
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-BOOL LLFloaterSnapshot::saveLocal(bool fPathPrompt)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+BOOL LLFloaterSnapshot::saveLocal(bool prompt_path)
 // [/SL:KB]
 {
 	lldebugs << "saveLocal" << llendl;
@@ -2310,8 +2311,8 @@ BOOL LLFloaterSnapshot::saveLocal(bool fPathPrompt)
 	}
 
 //	return previewp->saveLocal();
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	return previewp->saveLocal(fPathPrompt);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	return previewp->saveLocal(prompt_path);
 // [/SL:KB]
 }
 

@@ -223,7 +223,7 @@ const std::string &LLDir::getChatLogsDir() const
 	return mChatLogsDir;
 }
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
 const std::string &LLDir::getSnapshotDir() const
 {
 	return mSnapshotDir;
@@ -611,7 +611,7 @@ void LLDir::setChatLogsDir(const std::string &path)
 	}
 }
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
 void LLDir::setSnapshotDir(const std::string &path)
 {
 	if (!path.empty())

@@ -10510,7 +10510,6 @@
       <key>Value</key>
       <integer>0</integer>
     </map>  
-    </map>
     <key>SnapshotLocalName</key>
     <map>
       <key>Comment</key>
@@ -10532,6 +10531,7 @@
       <string>String</string>
       <key>Value</key>
       <string />
+    </map>
     <key>SnapshotQuality</key>
     <map>
       <key>Comment</key>

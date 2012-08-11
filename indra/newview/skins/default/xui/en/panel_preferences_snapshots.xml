@@ -13,7 +13,6 @@
      layout="topleft"
      left="20"
      length="1"
-     mouse_opaque="false"
      name="text_snapshot_path"
      top_pad="30"
      type="string"
@@ -22,14 +21,13 @@
     </text>    
     <line_editor
      control_name="SnapshotLocalPath"
+     enabled="false"
      follows="top|left|right"
      halign="right"
      height="23"
      layout="topleft"
      left_pad="5"
-     mouse_opaque="false"
      name="line_snapshot_path"
-     read_only="true"
      top_delta="-5"
      width="250" />
     <button
@@ -53,7 +51,6 @@
      layout="topleft"
      left="20"
      length="1"
-     mouse_opaque="false"
      name="text_snapshot_name"
      top_pad="10"
      type="string"
@@ -67,9 +64,7 @@
      height="23"
      layout="topleft"
      left_pad="5"
-     mouse_opaque="false"
      name="line_snapshot_name"
-     read_only="true"
      top_delta="-5"
      width="250" />
 
@@ -79,7 +74,6 @@
      layout="topleft"
      left="145"
      length="1"
-     mouse_opaque="false"
      name="text_legend"
      text_color="LtGray"
      top_pad="10"
@@ -89,56 +83,18 @@
     </text>    
     <text
      follows="left|top"
-     height="10"
+     height="55"
      layout="topleft"
-     left_delta="10"
+     left_delta="15"
      length="1"
-     mouse_opaque="false"
-     name="text_legend_date"
-     text_color="LtGray"
+     name="text_legend_options"
      top_pad="5"
      type="string"
      width="120">
-        - %d : date
-    </text>    
-    <text
-     follows="left|top"
-     height="10"
-     layout="topleft"
-     length="1"
-     mouse_opaque="false"
-     name="text_legend_time"
-     text_color="LtGray"
-     top_pad="5"
-     type="string"
-     width="120">
-        - %t : time
-    </text>    
-    <text
-     follows="left|top"
-     height="10"
-     layout="topleft"
-     length="1"
-     mouse_opaque="false"
-     name="text_legend_region"
-     text_color="LtGray"
-     top_pad="5"
-     type="string"
-     width="120">
-        - %r : region
-    </text>    
-    <text
-     follows="left|top"
-     height="10"
-     layout="topleft"
-     length="1"
-     mouse_opaque="false"
-     name="text_legend_parcel"
-     text_color="LtGray"
-     top_pad="5"
-     type="string"
-     width="120">
-        - %p : parcel
+- %d : date
+- %t : time
+- %r : region
+- %p : parcel
     </text>    
 
 </panel>

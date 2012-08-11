@@ -155,7 +155,7 @@ void LLPanelSnapshotLocal::onSaveFlyoutCommit(LLUICtrl* ctrl)
 
 	floater->notify(LLSD().with("set-working", true));
 //	BOOL saved = LLFloaterSnapshot::saveLocal();
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
 	BOOL saved = LLFloaterSnapshot::saveLocal("save as" == ctrl->getValue().asString());
 // [/SL:KB]
 	if (saved)
