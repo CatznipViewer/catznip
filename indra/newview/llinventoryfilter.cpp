@@ -42,6 +42,10 @@
 #include "llclipboard.h"
 #include "lltrans.h"
 
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
 LLFastTimer::DeclareTimer FT_FILTER_CLIPBOARD("Filter Clipboard");
 
 LLInventoryFilter::FilterOps::FilterOps() :
@@ -118,7 +122,12 @@ BOOL LLInventoryFilter::check(const LLFolderViewItem* item)
 
 bool LLInventoryFilter::check(const LLInventoryItem* item)
 {
-	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
+//	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	auto itRange = boost::ifind_first(item->getName(), mFilterSubString);
+	mSubStringMatchOffset = (!itRange.empty()) ? itRange.begin() - item->getName().begin() : std::string::npos;
+// [/SL:KB]
+//	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
 
 	const bool passed_filtertype = checkAgainstFilterType(item);
 	const bool passed_permissions = checkAgainstPermissions(item);

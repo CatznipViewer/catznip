@@ -4304,6 +4304,17 @@
         <key>Value</key>
         <integer>0</integer>
     </map>
+    <key>InventoryDnDCheckFilter</key>
+    <map>
+        <key>Comment</key>
+        <string>Inventory items and folders need to pass the filter before they can be dropped</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <boolean>0</boolean>
+    </map>
     <key>InventoryFilterStringPerTab</key>
     <map>
         <key>Comment</key>
