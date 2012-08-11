@@ -73,7 +73,6 @@
                      <string name="InboxLabelWithArg">Received items ([NUM])</string>
                      <string name="InboxLabelNoArg">Received items</string>
                      <button
-                        control_name="InventoryInboxToggleState"
                         label="Received items"
 						font="SansSerifMedium"
                         name="inbox_btn"

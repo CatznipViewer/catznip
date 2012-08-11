@@ -35,7 +35,7 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
-//#include "llfloatersidepanelcontainer.h"
+#include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llhttpclient.h"
 #include "llinventorybridge.h"
@@ -596,6 +596,14 @@ void LLSidepanelInventory::onToggleInboxBtn()
 	
 	const bool inbox_expanded = inboxButton->getToggleState();
 	
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+	// Only track the inbox button state on the primary inventory floater
+	if (this == LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory"))
+	{
+		gSavedPerAccountSettings.setBOOL("InventoryInboxToggleState", inbox_expanded);
+	}
+// [/SL:KB]
+
 	// Expand/collapse the indicated panel
 	inv_stack->collapsePanel(inboxPanel, !inbox_expanded);
 
