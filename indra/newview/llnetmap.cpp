@@ -847,7 +847,10 @@ BOOL LLNetMap::handleToolTip( S32 x, S32 y, MASK mask )
 	LLStringUtil::format(msg, args);
 
 // [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
-	if (gSavedSettings.getBOOL("ShowLocationInspector"))
+//	if (gSavedSettings.getBOOL("ShowLocationInspector"))
+// [RLVa:KB] - Checked: RLVa-1.4.7
+	if ( (gSavedSettings.getBOOL("ShowLocationInspector")) && (RlvActions::canShowLocation()) )
+// [/RLVa:KB]
 	{
 		bool fShowToolTip = true; LLVector3d posGlobal(viewPosToGlobal(x, y));
 
@@ -1247,11 +1250,17 @@ void LLNetMap::handleOverlayToggle(const LLSD& sdParam)
 void LLNetMap::handleShowProfile(const LLSD& sdParam) const
 {
 	const std::string strParam = sdParam.asString();
-	if ("closest" == strParam)
+//	if ("closest" == strParam)
+// [RLVa:KB] - Checked: RLVa-1.4.7
+	if ( ("closest" == strParam) && (RlvActions::canShowName(RlvActions::SNC_DEFAULT, mClosestAgentRightClick)) )
+// [/RLVa:KB]
 	{
 		LLAvatarActions::showProfile(mClosestAgentRightClick);
 	}
-	else if ("place" == strParam)
+//	else if ("place" == strParam)
+// [RLVa:KB] - Checked: RLVa-1.4.7
+	else if ( ("place" == strParam) && (RlvActions::canShowLocation()) )
+// [/RLVa:KB]
 	{
 		LLSD sdParams;
 		sdParams["type"] = "remote_place";
@@ -1291,16 +1300,25 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	if (mPopupMenu)
 	{
+// [RLVa:KB] - Checked: RLVa-1.4.7
+		bool fRlvCanShowName = RlvActions::canShowName(RlvActions::SNC_DEFAULT);
+// [/RLVa:KB]
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		mClosestAgentRightClick = mClosestAgentToCursor;
 		mPosGlobalRightClick = viewPosToGlobal(x, y);
 
-		mPopupMenu->setItemVisible("View Profile", mClosestAgentsToCursor.size() == 1);
+//		mPopupMenu->setItemVisible("View Profile", mClosestAgentsToCursor.size() == 1);
+// [RLVa:KB] - Checked: RLVa-1.4.7
+		mPopupMenu->setItemVisible("View Profile", (mClosestAgentsToCursor.size() == 1) && ((fRlvCanShowName) || (RlvActions::canShowName(RlvActions::SNC_DEFAULT, mClosestAgentsToCursor.front()))));
+// [/RLVa:KB]
 
 		LLMenuItemBranchGL* pProfilesMenu = mPopupMenu->getChild<LLMenuItemBranchGL>("View Profiles");
 		if (pProfilesMenu)
 		{
-			pProfilesMenu->setVisible(mClosestAgentsToCursor.size() > 1);
+//			pProfilesMenu->setVisible(mClosestAgentsToCursor.size() > 1);
+// [RLVa:KB] - Checked: RLVa-1.4.7
+			pProfilesMenu->setVisible((mClosestAgentsToCursor.size() > 1) && (fRlvCanShowName));
+// [/RLVa:KB]
 
 			pProfilesMenu->getBranch()->empty();
 			for (uuid_vec_t::const_iterator itAgent = mClosestAgentsToCursor.begin(); itAgent != mClosestAgentsToCursor.end(); ++itAgent)
@@ -1326,7 +1344,11 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 					pProfilesMenu->getBranch()->addChild(pMenuItem);
 			}
 		}
-		mPopupMenu->setItemVisible("Profile Separator", mClosestAgentsToCursor.size() >= 1);
+//		mPopupMenu->setItemVisible("Profile Separator", mClosestAgentsToCursor.size() >= 1);
+// [RLVa:KB] - Checked: RLVa-1.4.7
+		mPopupMenu->setItemVisible("Profile Separator", (mClosestAgentsToCursor.size() >= 1) && (fRlvCanShowName));
+		mPopupMenu->setItemEnabled("Place Profile", RlvActions::canShowLocation());
+// [/RLVa:KB]
 // [/SL:KB]
 		mPopupMenu->buildDrawLabels();
 		mPopupMenu->updateParent(LLMenuGL::sMenuContainer);
