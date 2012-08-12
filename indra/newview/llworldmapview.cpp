@@ -1114,7 +1114,10 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 		sticky_rect_screen.setCenterAndSize(screen_x, screen_y, SLOP, SLOP);
 
 // [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
-		if (gSavedSettings.getBOOL("ShowLocationInspector"))
+//		if (gSavedSettings.getBOOL("ShowLocationInspector"))
+// [RLVa:KB] - Checked: 2012-08-12 (RLVa-1.4.7)
+		if ( (gSavedSettings.getBOOL("ShowLocationInspector")) && (!gRlvHandler.hasBehaviour(RLV_BHVR_SHOWLOC)) )
+// [/RLVa:KB]
 		{
 			bool fShowToolTip = true;
 
