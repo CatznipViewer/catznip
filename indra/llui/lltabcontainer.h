@@ -152,6 +152,10 @@ public:
 		
 		Optional<std::string>		label;
 		Optional<bool>				select_tab,
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+									is_closable,		// Only works if use_custom_icon_ctrl is false on the tab container
+									is_selectable,
+// [/SL:KB]
 									is_placeholder;
 		Optional<S32>				indent;
 		Optional<eInsertionPoint>	insert_at;
@@ -161,6 +165,10 @@ public:
 		:	panel("panel", NULL),
 			label("label"),
 			select_tab("select_tab"),
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			is_closable("is_closable", false),
+			is_selectable("is_selectable", true),
+// [/SL:KB]
 			is_placeholder("is_placeholder"),
 			indent("indent"),
 			insert_at("insert_at", END)
@@ -177,10 +185,15 @@ public:
 	void 		enableTabButton(S32 which, BOOL enable);
 	void 		deleteAllTabs();
 	LLPanel*	getCurrentPanel();
-	S32			getCurrentPanelIndex();
-	S32			getTabCount();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-13 (Catznip-3.3)
+	S32			getCurrentPanelIndex() const;
+	S32			getTabCount() const;
+// [/SL:KB]
 	LLPanel*	getPanelByIndex(S32 index);
 	S32			getIndexForPanel(LLPanel* panel);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	S32			getIndexForButton(LLButton* btn);
+// [/SL:KB]
 	S32			getPanelIndexByTitle(const std::string& title);
 // [SL:KB] - Patch: Control-TabContainer | Checked: 2012-07-22 (Catznip-3.3)
 	S32			getPanelIndexByName(const std::string& name);
@@ -195,6 +208,11 @@ public:
 	BOOL 		selectTabPanel( LLPanel* child );
 	BOOL 		selectTab(S32 which);
 	BOOL 		selectTabByName(const std::string& title);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	bool		canSelectTab(S32 index) const;
+	S32			findSelectableTabIndex(S32 desired_index) const;
+	void		setTabSelectable(LLPanel* child, bool selectable);
+// [/SL:KB]
 
 	BOOL        getTabPanelFlashing(LLPanel* child);
 	void		setTabPanelFlashing(LLPanel* child, BOOL state);
@@ -238,6 +256,9 @@ private:
 	BOOL		setTab(S32 which);
 
 	LLTabTuple* getTab(S32 index) 		{ return mTabList[index]; }
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	const LLTabTuple* getTab(S32 index) const { return mTabList[index]; }
+// [/SL:KB]
 	LLTabTuple* getTabByPanel(LLPanel* child);
 	void insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_point);
 
