@@ -61,7 +61,7 @@
      tab_height="30"
      tab_group="1"
      tab_position="top"
-     tab_min_width="155"
+     tab_min_width="75"
      top_pad="4"
      width="320">
     <inventory_panel
@@ -92,6 +92,13 @@
      left_delta="0"
      name="Recent Items"
      show_item_link_overlays="true"
+     width="320" />
+    <panel
+     follows="all"
+     height="310"
+     label=""
+     layout="topleft"
+     name="New Inv Panel"
      width="320" />
   </tab_container>
   <layout_stack

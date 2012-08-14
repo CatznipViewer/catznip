@@ -140,7 +140,10 @@ BOOL LLPanelMainInventory::postBuild()
 	
 	mFilterTabs = getChild<LLTabContainer>("inventory filter tabs");
 	mFilterTabs->setCommitCallback(boost::bind(&LLPanelMainInventory::onFilterSelected, this));
-	
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	mFilterTabs->setRemoveCallback(boost::bind(&LLPanelMainInventory::onFilterRemoved, this, _1, _3));
+// [/SL:KB]
+
 	//panel->getFilter()->markDefault();
 
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
@@ -176,6 +179,15 @@ BOOL LLPanelMainInventory::postBuild()
 		recent_items_panel->getFilter()->markDefault();
 		recent_items_panel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, recent_items_panel, _1, _2));
 	}
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	LLPanel* pNewTabPanel = mFilterTabs->getPanelByName("New Inv Panel");
+	if (pNewTabPanel)
+	{
+		mFilterTabs->setTabImage(pNewTabPanel, "AddItem_Off", LLFontGL::HCENTER);
+		mFilterTabs->setTabSelectable(pNewTabPanel, false);
+	}
+// [/SL:KB]
 
 	// Now load the stored settings from disk, if available.
 	std::ostringstream filterSaveName;
@@ -569,6 +581,25 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 
 void LLPanelMainInventory::onFilterSelected()
 {
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	if (mFilterTabs->getTabCount() == mFilterTabs->getCurrentPanelIndex() + 1)
+	{
+		LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
+		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+		pInvPanel->getFilter()->markDefault();
+		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
+
+		mFilterTabs->addTabPanel(LLTabContainer::TabPanelParams()
+			.panel(pInvPanel)
+			.is_closable(true)
+			.insert_at(LLTabContainer::LEFT_OF_CURRENT)
+			.select_tab(true));
+
+		llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
+		mFilterSubStrings.push_back(LLStringUtil::null);
+	}
+// [/SL:KB]
+
 	// Find my index
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	mActivePanel = (LLInventoryPanel*)mFilterTabs->getCurrentPanel();
@@ -600,6 +631,16 @@ void LLPanelMainInventory::onFilterSelected()
 	}
 	setFilterTextFromFilter();
 }
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool fDeletePanel)
+{
+	mFilterSubStrings.erase(mFilterSubStrings.begin() + idxTab);
+	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
+
+	fDeletePanel = true;
+}
+// [/SL:KB]
 
 const std::string LLPanelMainInventory::getFilterSubString() 
 { 

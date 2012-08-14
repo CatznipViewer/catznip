@@ -179,6 +179,10 @@ public:
 	void		addTabPanel(const TabPanelParams& panel);
 	void 		addPlaceholder(LLPanel* child, const std::string& label);
 	void 		removeTabPanel( LLPanel* child );
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	typedef boost::signals2::signal<void(S32, LLPanel*, bool&)> tab_remove_signal_t;
+	boost::signals2::connection setRemoveCallback(const tab_remove_signal_t::slot_type& cb);
+// [/SL:KB]
 	void 		lockTabs(S32 num_tabs = 0);
 	void 		unlockTabs();
 	S32 		getNumLockedTabs() { return mLockedTabCount; }
@@ -278,7 +282,10 @@ private:
 	void scrollNext() { mScrollPos = llmin(mScrollPos+1, mMaxScrollPos); } // No wrap
 
 	void updateMaxScrollPos();
-	void commitHoveredButton(S32 x, S32 y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	void commitHoveredButton(S32 x, S32 y, bool drag_commit);
+// [/SL:KB]
+//	void commitHoveredButton(S32 x, S32 y);
 
 	// updates tab button images given the tuple, tab position and the corresponding params
 	void update_images(LLTabTuple* tuple, TabParams params, LLTabContainer::TabPosition pos);
@@ -289,6 +296,10 @@ private:
 	typedef std::vector<LLTabTuple*> tuple_list_t;
 	tuple_list_t					mTabList;
 	
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	tab_remove_signal_t*			mRemoveSignal;
+// [/SL:KB]
+
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
 

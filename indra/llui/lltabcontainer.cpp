@@ -77,7 +77,7 @@ public:
 		mTabContainer(c),
 		mTabPanel(p),
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
-		mCloseable(closable),
+		mClosable(closable),
 		mSelectable(selectable),
 // [/SL:KB]
 		mButton(b),
@@ -89,7 +89,7 @@ public:
 	LLTabContainer*  mTabContainer;
 	LLPanel*		 mTabPanel;
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
-	bool			 mCloseable;
+	bool			 mClosable;
 	bool			 mSelectable;
 // [/SL:KB]
 	LLButton*		 mButton;
@@ -296,6 +296,9 @@ LLTabContainer::Params::Params()
 
 LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	mRemoveSignal(NULL),
+// [/SL:KB]
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
 	mScrolled(FALSE),
@@ -700,7 +703,10 @@ BOOL LLTabContainer::handleHover( S32 x, S32 y, MASK mask )
 		handled = LLPanel::handleHover(x, y, mask);
 	}
 
-	commitHoveredButton(x, y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	commitHoveredButton(x, y, true);
+// [/SL:KB]
+//	commitHoveredButton(x, y);
 	return handled;
 }
 
@@ -742,7 +748,10 @@ BOOL LLTabContainer::handleMouseUp( S32 x, S32 y, MASK mask )
 		handled = LLPanel::handleMouseUp( x, y, mask );
 	}
 
-	commitHoveredButton(x, y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	commitHoveredButton(x, y, false);
+// [/SL:KB]
+//	commitHoveredButton(x, y);
 	LLPanel* cur_panel = getCurrentPanel();
 	if (hasMouseCapture())
 	{
@@ -1230,7 +1239,7 @@ void LLTabContainer::addTabPanel(const TabPanelParams& panel)
 	
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
 	// We don't know the size of the close button until after it's been created so reshape now if necessary
-	if ( (tuple->mCloseable) && (!mIsVertical) )
+	if ( (tuple->mClosable) && (!mIsVertical) )
 	{
 		reshapeTuple(tuple);
 	}
@@ -1300,6 +1309,14 @@ void LLTabContainer::removeTabPanel(LLPanel* child)
 		LLTabTuple* tuple = *iter;
 		if( tuple->mTabPanel == child )
 		{
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+			bool fDeletePanel = false;
+			if (mRemoveSignal)
+			{
+				(*mRemoveSignal)(iter - mTabList.begin(), tuple->mTabPanel, fDeletePanel);
+			}
+// [/SL:KB]
+
 			// update tab button images if removing the first or last tab
 			if ((tuple == mTabList.front()) && (mTabList.size() > 1))
 			{
@@ -1314,6 +1331,12 @@ void LLTabContainer::removeTabPanel(LLPanel* child)
  			delete tuple->mButton;
 
  			removeChild( tuple->mTabPanel );
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+			if (fDeletePanel)
+			{
+				delete tuple->mTabPanel;
+			}
+// [/SL:KB]
 // 			delete tuple->mTabPanel;
 			
 			mTabList.erase( iter );
@@ -1846,7 +1869,7 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 
 		tuple->mPadding = image_overlay_width;
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
-		if (tuple->mCloseable)
+		if (tuple->mClosable)
 			tuple->mPadding += tuple->mButton->getRightHPad();
 
 		S32 nTabWidth = llmin(tab_padding + tuple->mPadding, mMaxTabWidth);
@@ -2251,7 +2274,10 @@ void LLTabContainer::updateMaxScrollPos()
 	}
 }
 
-void LLTabContainer::commitHoveredButton(S32 x, S32 y)
+//void LLTabContainer::commitHoveredButton(S32 x, S32 y)
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+void LLTabContainer::commitHoveredButton(S32 x, S32 y, bool drag_commit)
+// [/SL:KB]
 {
 	if (!getTabsHidden() && hasMouseCapture())
 	{
@@ -2262,8 +2288,9 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
 //			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			// Don't drag-select unselectable tabs
 			if ( (tuple->mButton->pointInView(local_x, local_y)) && (tuple->mButton->getEnabled()) && 
-				 (!tuple->mTabPanel->getVisible()) && (tuple->mSelectable) )
+				 (!tuple->mTabPanel->getVisible()) && ((!drag_commit) || (tuple->mSelectable)) )
 // [/SL:KB]
 			{
 				tuple->mButton->onCommit();
@@ -2274,3 +2301,14 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 		}
 	}
 }
+
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+boost::signals2::connection LLTabContainer::setRemoveCallback(const tab_remove_signal_t::slot_type& cb)
+{
+	if (!mRemoveSignal)
+	{
+		mRemoveSignal = new tab_remove_signal_t();
+	}
+	return mRemoveSignal->connect(cb);
+}
+// [/SL:KB]
