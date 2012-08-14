@@ -58,7 +58,7 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
 		registrar.add("Gear.TouchAttach", boost::bind(&LLWearingGearMenu::onTouchAttach, this));
 		registrar.add("Gear.EditItem", boost::bind(&LLWearingGearMenu::onEditItem, this));
 		registrar.add("Gear.EditOutfit", boost::bind(&edit_outfit));
@@ -78,7 +78,7 @@ public:
 
 private:
 
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
 	void onTouchAttach()
 	{
 		uuid_vec_t selected_uuids;
@@ -125,14 +125,14 @@ protected:
 		functor_t take_off = boost::bind(&LLAppearanceMgr::removeItemFromAvatar, LLAppearanceMgr::getInstance(), _1);
 
 //		registrar.add("Wearing.Edit", boost::bind(&edit_outfit));
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3)
 		registrar.add("Wearing.TouchAttach", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
 		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
 		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
 // [/SL:KB]
 		registrar.add("Wearing.TakeOff", boost::bind(handleMultiple, take_off, mUUIDs));
 		registrar.add("Wearing.Detach", boost::bind(handleMultiple, take_off, mUUIDs));
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-2.1)
 		registrar.add("Wearing.TakeOffDetach", boost::bind(handleMultiple, take_off, mUUIDs));
 // [/SL:KB]
 
@@ -176,7 +176,7 @@ protected:
 		}
 
 		// Enable/disable some menu items depending on the selection.
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
 		bool show_touch = !bp_selected && !clothes_selected && attachments_selected;
 		bool show_edit = bp_selected || clothes_selected || attachments_selected;
 		bool show_detach = !clothes_selected && attachments_selected;
@@ -304,7 +304,7 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 		return hasItemSelected() && canTakeOffSelected();
 	}
 
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
 	uuid_vec_t selected_uuids;
 	getSelectedItemsUUIDs(selected_uuids);
 
