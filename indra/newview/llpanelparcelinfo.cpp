@@ -123,13 +123,13 @@ void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 void LLPanelParcelInfo::setErrorStatus(U32 nStatus, const std::string& strReason)
 {
 	// We only really handle 404 and 499 errors
-	std::string strNotAvailable = getString("not_available"), strErrorText;
+	std::string strNotAvailable = LLTrans::getString("parcel_not_available"), strErrorText;
 	if (nStatus == 404)
-		strErrorText = getString("server_error_text");
+		strErrorText = LLTrans::getString("parcel_server_error_text");
 	else if (nStatus == 499)
-		strErrorText = getString("server_forbidden_text");
+		strErrorText = LLTrans::getString("parcel_server_forbidden_text");
 	else
-		strErrorText = getString("server_error_text");
+		strErrorText = LLTrans::getString("parcel_server_error_text");
 
 	clearPendingRequest();
 	clearLocation();
@@ -195,7 +195,7 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const L
 	}
 	else
 	{
-		clearControls(getString("not_available"), getString("server_update_text"));
+		clearControls(LLTrans::getString("parcel_not_available"), LLTrans::getString("parcel_server_update_text"));
 	}
 }
 
@@ -228,7 +228,7 @@ void LLPanelParcelInfo::onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel
 		{
 			pInstance->clearPendingRequest();
 			pInstance->clearLocation();
-			pInstance->clearControls(pInstance->getString("not_available"), pInstance->getString("server_error_text"));
+			pInstance->clearControls(LLTrans::getString("parcel_not_available"), LLTrans::getString("parcel_server_error_text"));
 			return;
 		}
 		pInstance->requestRemoteParcel(posGlobal, idRegion);
@@ -239,15 +239,15 @@ void LLPanelParcelInfo::updateFromParcelData()
 {
 	m_pParcelSnapshot->setImageAssetID(m_CurParcelData.snapshot_id);
 	m_pParcelName->setText(m_CurParcelData.name);
-	m_pParcelDescription->setText( (!m_CurParcelData.desc.empty()) ? m_CurParcelData.desc : getString("no_description") );
+	m_pParcelDescription->setText( (!m_CurParcelData.desc.empty()) ? m_CurParcelData.desc : LLTrans::getString("parcel_no_description") );
 
 	// HACK: Flag 0x2 == adult region; 0x1 == mature region; otherwise assume PG
 	if (m_CurParcelData.flags & 0x2)
-		m_pRegionMaturityIcon->setValue(getString("icon_R"));
+		m_pRegionMaturityIcon->setValue("Parcel_R_Dark");
 	else if (m_CurParcelData.flags & 0x1)
-		m_pRegionMaturityIcon->setValue(getString("icon_M"));
+		m_pRegionMaturityIcon->setValue("Parcel_M_Dark");
 	else
-		m_pRegionMaturityIcon->setValue(getString("icon_PG"));
+		m_pRegionMaturityIcon->setValue("Parcel_PG_Dark");
 
 	S32 posRegionX = llround(m_CurParcelData.global_x) % REGION_WIDTH_UNITS;
 	S32 posRegionY = llround(m_CurParcelData.global_y) % REGION_WIDTH_UNITS;
