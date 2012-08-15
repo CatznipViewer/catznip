@@ -321,7 +321,7 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 	
 	//No patterns found.  Just send back what was passed in.
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-	partial_results_t resFinal(1);
+	partial_results_t resFinal;
 	resFinal.push_back(partial_result_t(text, (const LLHighlightEntry*)NULL));
 	return resFinal;
 // [/SL:KB]
