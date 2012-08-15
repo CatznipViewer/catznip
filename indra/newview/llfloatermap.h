@@ -47,7 +47,7 @@ public:
 	/*virtual*/ void	draw();
 
 private:
-	void handleZoom(const LLSD& userdata);
+//	void handleZoom(const LLSD& userdata);
 	void setDirectionPos( LLTextBox* text_box, F32 rotation );
 	void updateMinorDirections();
 

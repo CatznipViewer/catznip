@@ -45,6 +45,7 @@
          function="Minimap.Zoom"
          parameter="far" />
     </menu_item_call>
+<!--
 	<menu_item_call
      label="Default"
      name="Zoom Default">
@@ -52,6 +53,7 @@
          function="Minimap.Zoom"
          parameter="default" />
 	</menu_item_call>
+-->
   </menu>
   <menu
    label="Show"
