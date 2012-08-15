@@ -1740,6 +1740,9 @@ bool LLTabContainer::canSelectTab(S32 index) const
 
 S32 LLTabContainer::findSelectableTabIndex(S32 desired_index) const
 {
+	// Sanitize desired_index
+	desired_index = llclamp(desired_index, 0, getTabCount());
+
 	// From the desired index to the end of the list
 	for (S32 idxTab = desired_index, cntTab = getTabCount(); idxTab < cntTab; idxTab++)
 	{
