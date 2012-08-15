@@ -343,7 +343,7 @@ void LLFloaterWorldMap::onClose(bool app_quitting)
 // virtual
 void LLFloaterWorldMap::onOpen(const LLSD& key)
 {
-// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
 	if (key.has("target"))
 	{
 		LLVector3d posTarget(key["target"]["x"].asReal(), key["target"]["y"].asReal(), key["target"]["z"].asReal());

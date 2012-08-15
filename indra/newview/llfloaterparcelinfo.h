@@ -20,6 +20,8 @@
 
 class LLPanelParcelInfo;
 
+// ============================================================================
+
 class LLFloaterParcelInfo : public LLFloater
 {
 	friend class LLFloaterReg;
@@ -47,5 +49,7 @@ protected:
 protected:
 	LLPanelParcelInfo* m_pParcelInfo;
 };
+
+// ============================================================================
 
 #endif // LL_LLFLOATERPARCELINFO_H

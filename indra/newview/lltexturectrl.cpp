@@ -1036,7 +1036,7 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	mNeedsRawImageData( FALSE ),
 	mValid( TRUE ),
 	mShowLoadingPlaceholder( TRUE ),
-// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	mShowLabel(p.show_label),
 // [/SL:KB]
 	mImageAssetID(p.image_id),
@@ -1054,13 +1054,13 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	params.initial_value(p.label());
 	params.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
 	mCaption = LLUICtrlFactory::create<LLTextBox> (params);
-// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	mCaption->setVisible(mShowLabel);
 // [/SL:KB]
 	addChild( mCaption );
 
 	S32 image_top = getRect().getHeight();
-// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	S32 image_bottom = (mShowLabel) ? BTN_HEIGHT_SMALL : 0;
 // [/SL:KB]
 //	S32 image_bottom = BTN_HEIGHT_SMALL;
@@ -1082,7 +1082,7 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	addChild( mTentativeLabel );
 
 	LLRect border_rect = getLocalRect();
-// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	border_rect.mBottom += (mShowLabel) ? BTN_HEIGHT_SMALL : 0;
 // [/SL:KB]
 //	border_rect.mBottom += BTN_HEIGHT_SMALL;
@@ -1427,7 +1427,7 @@ void LLTextureCtrl::draw()
 	
 	// Border
 //	LLRect border( 0, getRect().getHeight(), getRect().getWidth(), BTN_HEIGHT_SMALL );
-// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-TextureCtrl | Checked: 2012-06-09 (Catznip-3.3)
 	LLRect border(0, getRect().getHeight(), getRect().getWidth(), (mShowLabel) ? BTN_HEIGHT_SMALL : 0);
 // [/SL:KB]
 	gl_rect_2d( border, mBorderColor.get(), FALSE );

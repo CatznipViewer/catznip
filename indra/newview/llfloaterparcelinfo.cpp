@@ -21,6 +21,10 @@
 #include "llfloaterworldmap.h"
 #include "llpanelparcelinfo.h"
 
+// ============================================================================
+// LLFloaterParcelInfo class
+//
+
 LLFloaterParcelInfo::LLFloaterParcelInfo(const LLSD& sdKey)
 	: LLFloater(sdKey)
 	, m_pParcelInfo(NULL)
@@ -95,3 +99,5 @@ void LLFloaterParcelInfo::onClickTeleport()
 		}
 	}
 }
+
+// ============================================================================

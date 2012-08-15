@@ -32,6 +32,9 @@
 // newview includes
 #include "llsidetraypanelcontainer.h"
 #include "lltransientfloatermgr.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //static
 const std::string LLFloaterSidePanelContainer::sMainPanelName("main_panel");
@@ -87,7 +90,7 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 {
 // [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
 	// Hack in case we forget a reference somewhere
-	if ( ("places" == floater_name) && (key.has("type")) )
+	if ( ("places" == floater_name) && (key.has("type")) && (gSavedSettings.getBOOL("ShowPlaceFloater")) )
 	{
 		const std::string strType = key["type"].asString();
 		if ( ("remote_place" == strType) || ("landmark" == strType) )
