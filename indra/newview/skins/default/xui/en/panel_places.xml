@@ -17,6 +17,9 @@ background_visible="true"
     <string
      name="teleport_history_tab_title"
      value="TELEPORT HISTORY" />
+    <string
+     name="search_tab_title"
+     value="SEARCH" />
     <filter_editor
      text_pad_left="10"
      follows="left|top|right"
@@ -29,6 +32,23 @@ background_visible="true"
      name="Filter"
      top="3"
      width="303" />
+    <search_editor
+     clear_button_visible="true"
+     text_pad_left="10"
+     follows="left|top|right"
+     font="SansSerifSmall"
+     height="23"
+     layout="topleft"
+     left="10"
+     label="Search places (Press Enter to submit)"
+     max_length_chars="300"
+     name="SearchQuery"
+     top="3"
+     width="303">
+        <search_editor.clear_button
+         image_unselected="Icon_Close_Toast"
+         image_selected="Icon_Close_Toast" />
+    </search_editor>
     <tab_container
      follows="all"
      halign="center"
