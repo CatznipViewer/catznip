@@ -33,14 +33,26 @@ public:
 	LLPanelPlacesSearch();
 	/*virtual*/ ~LLPanelPlacesSearch();
 	
+	/*
+	 * LLView overrides
+	 */
+public:
 	/*virtual*/ BOOL postBuild();
 
 	/*
 	 * Member functions
 	 */
+public:
+	const LLUUID&               getCurrentParcelId() const;
+	const LLVector3d&           getCurrentParcelPos() const;
+	bool                        hasCurrentParcel() const	{ return getCurrentParcelId().notNull(); }
+	boost::signals2::connection setSelectCallback(const commit_signal_t::slot_type& cb);
+
+	void searchStart(const std::string& strQuery);
+
 protected:
 	void onResultSelect();
-	void onSearchStart();
+	void onSearchBtn();
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
 	void onToggleMaturity();
 
@@ -52,7 +64,6 @@ protected:
 	LLUUID      m_idCurQuery;
 	S32         m_nCurIndex;
 
-	LLLineEditor*      m_pSearchEditor;
 	LLComboBox*        m_pSearchCategory;
 	LLCheckBoxCtrl*    m_pSearchPG;
 	LLCheckBoxCtrl*    m_pSearchMature;

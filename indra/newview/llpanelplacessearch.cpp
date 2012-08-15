@@ -35,7 +35,6 @@ static LLRegisterPanelClassWrapper<LLPanelPlacesSearch> t_panel_places_search("p
 LLPanelPlacesSearch::LLPanelPlacesSearch()
 	: LLPanel()
 	, m_nCurIndex(0)
-	, m_pSearchEditor(NULL)
 	, m_pSearchCategory(NULL)
 	, m_pSearchPG(NULL)
 	, m_pSearchMature(NULL)
@@ -55,8 +54,11 @@ LLPanelPlacesSearch::~LLPanelPlacesSearch()
 
 BOOL LLPanelPlacesSearch::postBuild()
 {
-	m_pSearchEditor = findChild<LLLineEditor>("search_query");
-	findChild<LLUICtrl>("search_start")->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchStart, this));
+	LLButton* pSearchBtn = findChild<LLButton>("search_start");
+	if (pSearchBtn)
+	{
+		pSearchBtn->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this));
+	}
 
 	m_pSearchCategory = findChild<LLComboBox>("search_category");
 	m_pSearchCategory->add(getString("all_categories"), LLSD("any"));
@@ -89,7 +91,16 @@ void LLPanelPlacesSearch::onResultSelect()
 	m_pParcelInfo->setParcelFromId(m_pResultsList->getSelectedValue().asUUID());
 }
 
-void LLPanelPlacesSearch::onSearchStart()
+void LLPanelPlacesSearch::onSearchBtn()
+{
+	LLLineEditor* pSearchEditor = findChild<LLLineEditor>("search_query");
+	if (pSearchEditor)
+	{
+		searchStart(pSearchEditor->getText());
+	}
+}
+
+void LLPanelPlacesSearch::searchStart(const std::string& strQuery)
 {
 	// Clean up any pending queries
 	if (m_idCurQuery.notNull())
@@ -99,22 +110,30 @@ void LLPanelPlacesSearch::onSearchStart()
 	}
 
 	m_pResultsList->clearRows();
-	m_pResultsList->setCommentText(getString("searching"));
 	m_pParcelInfo->setParcelFromId(LLUUID::null);
 
-	U32 nSearchFlags = 0;
-	if (m_pSearchPG->get())
-		nSearchFlags |= DFQ_INC_PG;
-	if (m_pSearchMature->get())
-		nSearchFlags |= DFQ_INC_MATURE;
-	if (m_pSearchAdult->get())
-		nSearchFlags |= DFQ_INC_ADULT;
-
 	m_nCurIndex = 0;
-	m_strCurQuery = m_pSearchEditor->getText();
-	m_idCurQuery = LLSearchDirectory::instance().queryPlaces(
-		m_strCurQuery, LLParcel::getCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
-		nSearchFlags, m_nCurIndex, boost::bind(&LLPanelPlacesSearch::onSearchResult, this, _1, _2, _3));
+	m_strCurQuery = strQuery;
+	if (!strQuery.empty())
+	{
+		U32 nSearchFlags = 0;
+		if (m_pSearchPG->get())
+			nSearchFlags |= DFQ_INC_PG;
+		if (m_pSearchMature->get())
+			nSearchFlags |= DFQ_INC_MATURE;
+		if (m_pSearchAdult->get())
+			nSearchFlags |= DFQ_INC_ADULT;
+
+		m_idCurQuery = LLSearchDirectory::instance().queryPlaces(
+			m_strCurQuery, LLParcel::getCategoryFromString(m_pSearchCategory->getSelectedValue().asString()), 
+			nSearchFlags, m_nCurIndex, boost::bind(&LLPanelPlacesSearch::onSearchResult, this, _1, _2, _3));
+		m_pResultsList->setCommentText(getString("searching"));
+	}
+	else
+	{
+		m_idCurQuery.setNull();
+		m_pResultsList->setCommentText(getString("no_results"));
+	}
 }
 
 void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults)
@@ -161,6 +180,21 @@ void LLPanelPlacesSearch::onToggleMaturity()
 	{
 		m_pSearchPG->set(TRUE);
 	}
+}
+
+const LLUUID& LLPanelPlacesSearch::getCurrentParcelId() const
+{
+	return m_pParcelInfo->getCurrentParcelId();
+}
+
+const LLVector3d& LLPanelPlacesSearch::getCurrentParcelPos() const
+{
+	return m_pParcelInfo->getCurrentParcelPos();
+}
+
+boost::signals2::connection LLPanelPlacesSearch::setSelectCallback(const commit_signal_t::slot_type& cb)
+{
+	return m_pResultsList->setCommitCallback(cb);
 }
 
 // ============================================================================
