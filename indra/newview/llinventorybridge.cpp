@@ -5703,12 +5703,18 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 
 		items.push_back(std::string("Wearable Edit"));
 
-		if ((flags & FIRST_SELECTED_ITEM) == 0)
+//		if ((flags & FIRST_SELECTED_ITEM) == 0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+		if ( ((flags & FIRST_SELECTED_ITEM) == 0) || (!gAgentWearables.isWearableModifiable(mUUID)) )
+// [/SL:KB]
 		{
 			disabled_items.push_back(std::string("Wearable Edit"));
 		}
 		// Don't allow items to be worn if their baseobj is in the trash.
-		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
+//		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+		if (isLinkedObjectInTrash() || isLinkedObjectMissing())
+// [/SL:KB]
 		{
 			disabled_items.push_back(std::string("Wearable And Object Wear"));
 			disabled_items.push_back(std::string("Wearable Add"));
