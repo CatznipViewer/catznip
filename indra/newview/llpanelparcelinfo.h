@@ -50,9 +50,9 @@ protected:
 	 */
 public:
 	void                clearLocation();
-	const LLParcelData& getCurrentParcelData()	{ return m_CurParcelData; }
-	const LLUUID&       getCurrentParcelId()	{ return m_idCurParcel; }
-	const LLVector3d    getCurrentParcelPos()	{ return m_posCurGlobal; }
+	const LLParcelData& getCurrentParcelData() const	{ return m_CurParcelData; }
+	const LLUUID&       getCurrentParcelId() const		{ return m_idCurParcel; }
+	const LLVector3d&   getCurrentParcelPos() const		{ return m_posCurGlobal; }
 	void                setParcelFromPos(const LLVector3d posGlobal) { requestRemoteParcel(posGlobal); }
 	void                setParcelFromId(const LLUUID& idParcel) { setParcelID(idParcel); }
 	void                setParcelFromItem(const LLUUID& idItem);
