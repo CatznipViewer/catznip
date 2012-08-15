@@ -633,7 +633,11 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 		}
 		else
 		{
-			if (LLAssetType::lookupCanLink(obj->getType()))
+//			if (LLAssetType::lookupCanLink(obj->getType()))
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+			// Don't show 'Find Links' for folders
+			if ( (LLAssetType::AT_CATEGORY != obj->getType()) && (LLAssetType::lookupCanLink(obj->getType())) )
+// [/SL:KB]
 			{
 				items.push_back(std::string("Find Links"));
 			}
