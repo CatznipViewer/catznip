@@ -221,6 +221,18 @@
              parameter="chat_bar" />
         </menu_item_check>
         <menu_item_check
+         label="Conversations..."
+         name="Conversations"
+         shortcut="control|T"
+         visibility_control="ChatWindow">
+          <menu_item_check.on_check
+           function="Floater.Visible"
+           parameter="im_container" />
+          <menu_item_check.on_click
+           function="Floater.Toggle"
+           parameter="im_container" />
+        </menu_item_check>
+        <menu_item_check
          label="Speak"
          name="Speak">
             <menu_item_check.on_check
@@ -1723,17 +1735,6 @@
          name="Shortcuts"
          tear_off="true"
          visible="false">
-            </menu_item_check>
-            <menu_item_check
-             label="Conversations"
-             name="Conversations"
-             shortcut="control|T">
-              <menu_item_check.on_check
-               function="Floater.Visible"
-               parameter="im_container" />
-              <menu_item_check.on_click
-               function="Floater.Toggle"
-               parameter="im_container" />
             <!-- This second, alternative shortcut for Show Advanced Menu is for backward compatibility.  The main shortcut has been changed so it's Linux-friendly, where the old shortcut is typically eaten by the window manager. -->
             <menu_item_check
                label="Show Advanced Menu - legacy shortcut"
