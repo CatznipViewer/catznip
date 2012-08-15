@@ -157,34 +157,38 @@ void LLOpenFolderByID::doFolder(LLFolderViewFolder* folder)
 class LLLandmarksPanelObserver : public LLInventoryObserver
 {
 public:
+//	LLLandmarksPanelObserver(LLLandmarksPanel* lp)
+//	:	mLP(lp),
+//	 	mIsLibraryLandmarksOpen(false)
+// [SL:KB] - Patch: UI-SidepanelPlacesLandmarks | Checked: 2012-08-12 (Catznip-3.3)
 	LLLandmarksPanelObserver(LLLandmarksPanel* lp)
-	:	mLP(lp),
-	 	mIsLibraryLandmarksOpen(false)
+	:	mLP(lp)
+// [/SL:KB]
 	{}
 	virtual ~LLLandmarksPanelObserver() {}
 	/*virtual*/ void changed(U32 mask);
 
 private:
 	LLLandmarksPanel* mLP;
-	bool mIsLibraryLandmarksOpen;
+//	bool mIsLibraryLandmarksOpen;
 };
 
 void LLLandmarksPanelObserver::changed(U32 mask)
 {
 	mLP->updateShowFolderState();
 
-	LLPlacesInventoryPanel* library = mLP->getLibraryInventoryPanel();
-	if (!mIsLibraryLandmarksOpen && library)
-	{
-		// Search for "Landmarks" folder in the Library and open it once on start up. See EXT-4827.
-		const LLUUID &landmarks_cat = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK, false, true);
-		if (landmarks_cat.notNull())
-		{
-			LLOpenFolderByID opener(landmarks_cat);
-			library->getRootFolder()->applyFunctorRecursively(opener);
-			mIsLibraryLandmarksOpen = opener.isFolderOpen();
-		}
-	}
+//	LLPlacesInventoryPanel* library = mLP->getLibraryInventoryPanel();
+//	if (!mIsLibraryLandmarksOpen && library)
+//	{
+//		// Search for "Landmarks" folder in the Library and open it once on start up. See EXT-4827.
+//		const LLUUID &landmarks_cat = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK, false, true);
+//		if (landmarks_cat.notNull())
+//		{
+//			LLOpenFolderByID opener(landmarks_cat);
+//			library->getRootFolder()->applyFunctorRecursively(opener);
+//			mIsLibraryLandmarksOpen = opener.isFolderOpen();
+//		}
+//	}
 }
 
 LLLandmarksPanel::LLLandmarksPanel()
@@ -192,7 +196,7 @@ LLLandmarksPanel::LLLandmarksPanel()
 	,	mFavoritesInventoryPanel(NULL)
 	,	mLandmarksInventoryPanel(NULL)
 	,	mMyInventoryPanel(NULL)
-	,	mLibraryInventoryPanel(NULL)
+//	,	mLibraryInventoryPanel(NULL)
 	,	mCurrentSelectedList(NULL)
 	,	mListCommands(NULL)
 	,	mGearButton(NULL)
@@ -224,7 +228,7 @@ BOOL LLLandmarksPanel::postBuild()
 	initFavoritesInventoryPanel();
 	initLandmarksInventoryPanel();
 	initMyInventoryPanel();
-	initLibraryInventoryPanel();
+//	initLibraryInventoryPanel();
 
 	return TRUE;
 }
@@ -232,6 +236,10 @@ BOOL LLLandmarksPanel::postBuild()
 // virtual
 void LLLandmarksPanel::onSearchEdit(const std::string& string)
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	setFilterSubString(string);
+// [/SL:KB]
+
 	// give FolderView a chance to be refreshed. So, made all accordions visible
 	for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
 	{
@@ -253,8 +261,8 @@ void LLLandmarksPanel::onSearchEdit(const std::string& string)
 		}
 	}
 
-	if (sFilterSubString != string)
-		sFilterSubString = string;
+//	if (sFilterSubString != string)
+//		sFilterSubString = string;
 
 	// show all folders in Landmarks Accordion for empty filter
 	// only if Landmarks inventory folder is not empty
@@ -408,10 +416,10 @@ void LLLandmarksPanel::setItemSelected(const LLUUID& obj_id, BOOL take_keyboard_
 		return;
 	}
 
-	if (selectItemInAccordionTab(mLibraryInventoryPanel, "tab_library", obj_id, take_keyboard_focus))
-	{
-		return;
-	}
+//	if (selectItemInAccordionTab(mLibraryInventoryPanel, "tab_library", obj_id, take_keyboard_focus))
+//	{
+//		return;
+//	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -579,22 +587,22 @@ void LLLandmarksPanel::initMyInventoryPanel()
 	initAccordion("tab_inventory", mMyInventoryPanel, false);
 }
 
-void LLLandmarksPanel::initLibraryInventoryPanel()
-{
-	mLibraryInventoryPanel = getChild<LLPlacesInventoryPanel>("library_list");
-
-	initLandmarksPanel(mLibraryInventoryPanel);
-
-	// We want to fetch only "Landmarks" category from the library.
-	const LLUUID &landmarks_cat = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK, false, true);
-	if (landmarks_cat.notNull())
-	{
-		LLInventoryModelBackgroundFetch::instance().start(landmarks_cat);
-	}
-
-	// Expanding "Library" tab for new users who have no landmarks in "My Inventory".
-	initAccordion("tab_library", mLibraryInventoryPanel, true);
-}
+//void LLLandmarksPanel::initLibraryInventoryPanel()
+//{
+//	mLibraryInventoryPanel = getChild<LLPlacesInventoryPanel>("library_list");
+//
+//	initLandmarksPanel(mLibraryInventoryPanel);
+//
+//	// We want to fetch only "Landmarks" category from the library.
+//	const LLUUID &landmarks_cat = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK, false, true);
+//	if (landmarks_cat.notNull())
+//	{
+//		LLInventoryModelBackgroundFetch::instance().start(landmarks_cat);
+//	}
+//
+//	// Expanding "Library" tab for new users who have no landmarks in "My Inventory".
+//	initAccordion("tab_library", mLibraryInventoryPanel, true);
+//}
 
 void LLLandmarksPanel::initLandmarksPanel(LLPlacesInventoryPanel* inventory_list)
 {
@@ -660,7 +668,10 @@ void LLLandmarksPanel::onAccordionExpandedCollapsed(const LLSD& param, LLPlacesI
 
 		// Apply filter substring because it might have been changed
 		// while accordion was closed. See EXT-3714.
-		filter_list(inventory_list, sFilterSubString);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+		filter_list(inventory_list, getFilterSubString());
+// [/SL:KB]
+//		filter_list(inventory_list, sFilterSubString);
 	}
 }
 
@@ -679,10 +690,10 @@ void LLLandmarksPanel::deselectOtherThan(const LLPlacesInventoryPanel* inventory
 	{
 		mMyInventoryPanel->getRootFolder()->clearSelection();
 	}
-	if (inventory_list != mLibraryInventoryPanel)
-	{
-		mLibraryInventoryPanel->getRootFolder()->clearSelection();
-	}
+//	if (inventory_list != mLibraryInventoryPanel)
+//	{
+//		mLibraryInventoryPanel->getRootFolder()->clearSelection();
+//	}
 }
 
 // List Commands Handlers
@@ -864,7 +875,7 @@ void LLLandmarksPanel::onFoldingAction(const LLSD& userdata)
 		expand_all_folders(mFavoritesInventoryPanel->getRootFolder());
 		expand_all_folders(mLandmarksInventoryPanel->getRootFolder());
 		expand_all_folders(mMyInventoryPanel->getRootFolder());
-		expand_all_folders(mLibraryInventoryPanel->getRootFolder());
+//		expand_all_folders(mLibraryInventoryPanel->getRootFolder());
 
 		for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
 		{
@@ -876,7 +887,7 @@ void LLLandmarksPanel::onFoldingAction(const LLSD& userdata)
 		collapse_all_folders(mFavoritesInventoryPanel->getRootFolder());
 		collapse_all_folders(mLandmarksInventoryPanel->getRootFolder());
 		collapse_all_folders(mMyInventoryPanel->getRootFolder());
-		collapse_all_folders(mLibraryInventoryPanel->getRootFolder());
+//		collapse_all_folders(mLibraryInventoryPanel->getRootFolder());
 
 		for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
 		{
@@ -890,7 +901,7 @@ void LLLandmarksPanel::onFoldingAction(const LLSD& userdata)
 		gSavedSettings.setBOOL("LandmarksSortedByDate",sorting_order);
 		updateSortOrder(mLandmarksInventoryPanel, sorting_order);
 		updateSortOrder(mMyInventoryPanel, sorting_order);
-		updateSortOrder(mLibraryInventoryPanel, sorting_order);
+//		updateSortOrder(mLibraryInventoryPanel, sorting_order);
 	}
 	else
 	{
@@ -923,10 +934,15 @@ bool LLLandmarksPanel::isActionEnabled(const LLSD& userdata) const
 
 	if ("collapse_all" == command_name)
 	{
+//		bool disable_collapse_all =	!has_expanded_folders(mFavoritesInventoryPanel->getRootFolder())
+//									&& !has_expanded_folders(mLandmarksInventoryPanel->getRootFolder())
+//									&& !has_expanded_folders(mMyInventoryPanel->getRootFolder())
+//									&& !has_expanded_folders(mLibraryInventoryPanel->getRootFolder());
+// [SL:KB] - Patch: UI-SidepanelPlacesLandmarks | Checked: 2012-08-12 (Catznip-3.3)
 		bool disable_collapse_all =	!has_expanded_folders(mFavoritesInventoryPanel->getRootFolder())
 									&& !has_expanded_folders(mLandmarksInventoryPanel->getRootFolder())
-									&& !has_expanded_folders(mMyInventoryPanel->getRootFolder())
-									&& !has_expanded_folders(mLibraryInventoryPanel->getRootFolder());
+									&& !has_expanded_folders(mMyInventoryPanel->getRootFolder());
+// [/SL:KB]
 		if (disable_collapse_all)
 		{
 			for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
@@ -943,10 +959,15 @@ bool LLLandmarksPanel::isActionEnabled(const LLSD& userdata) const
 	}
 	else if ("expand_all" == command_name)
 	{
+//		bool disable_expand_all = !has_collapsed_folders(mFavoritesInventoryPanel->getRootFolder())
+//								  && !has_collapsed_folders(mLandmarksInventoryPanel->getRootFolder())
+//								  && !has_collapsed_folders(mMyInventoryPanel->getRootFolder())
+//								  && !has_collapsed_folders(mLibraryInventoryPanel->getRootFolder());
+// [SL:KB] - Patch: UI-SidepanelPlacesLandmarks | Checked: 2012-08-12 (Catznip-3.3)
 		bool disable_expand_all = !has_collapsed_folders(mFavoritesInventoryPanel->getRootFolder())
 								  && !has_collapsed_folders(mLandmarksInventoryPanel->getRootFolder())
-								  && !has_collapsed_folders(mMyInventoryPanel->getRootFolder())
-								  && !has_collapsed_folders(mLibraryInventoryPanel->getRootFolder());
+								  && !has_collapsed_folders(mMyInventoryPanel->getRootFolder());
+// [/SL:KB]
 		if (disable_expand_all)
 		{
 			for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
@@ -1161,8 +1182,8 @@ bool LLLandmarksPanel::canItemBeModified(const std::string& command_name, LLFold
 
 	if (!item) return false;
 
-	// nothing can be modified in Library
-	if (mLibraryInventoryPanel == mCurrentSelectedList) return false;
+//	// nothing can be modified in Library
+//	if (mLibraryInventoryPanel == mCurrentSelectedList) return false;
 
 	bool can_be_modified = false;
 

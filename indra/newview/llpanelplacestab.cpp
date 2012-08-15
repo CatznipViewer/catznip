@@ -37,7 +37,7 @@
 #include "llslurl.h"
 #include "llworldmap.h"
 
-std::string LLPanelPlacesTab::sFilterSubString = LLStringUtil::null;
+//std::string LLPanelPlacesTab::sFilterSubString = LLStringUtil::null;
 
 bool LLPanelPlacesTab::isTabVisible()
 {

@@ -70,6 +70,7 @@
              start_folder="My Inventory"
              width="307"/>
           </accordion_tab>
+<!--
           <accordion_tab
            layout="topleft"
            name="tab_library"
@@ -86,6 +87,7 @@
              start_folder="LIBRARY"
              width="313"/>
         </accordion_tab>
+-->
     </accordion>
     <panel
        background_visible="true"

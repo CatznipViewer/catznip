@@ -77,7 +77,7 @@ public:
 	 */
 	void setItemSelected(const LLUUID& obj_id, BOOL take_keyboard_focus);
 
-	LLPlacesInventoryPanel* getLibraryInventoryPanel() { return mLibraryInventoryPanel; }
+//	LLPlacesInventoryPanel* getLibraryInventoryPanel() { return mLibraryInventoryPanel; }
 
 protected:
 	/**
@@ -109,7 +109,7 @@ private:
 	void initFavoritesInventoryPanel();
 	void initLandmarksInventoryPanel();
 	void initMyInventoryPanel();
-	void initLibraryInventoryPanel();
+//	void initLibraryInventoryPanel();
 	void initLandmarksPanel(LLPlacesInventoryPanel* inventory_list);
 	LLAccordionCtrlTab* initAccordion(const std::string& accordion_tab_name, LLPlacesInventoryPanel* inventory_list, bool expand_tab);
 	void onAccordionExpandedCollapsed(const LLSD& param, LLPlacesInventoryPanel* inventory_list);
@@ -164,7 +164,7 @@ private:
 	LLPlacesInventoryPanel*		mFavoritesInventoryPanel;
 	LLPlacesInventoryPanel*		mLandmarksInventoryPanel;
 	LLPlacesInventoryPanel*		mMyInventoryPanel;
-	LLPlacesInventoryPanel*		mLibraryInventoryPanel;
+//	LLPlacesInventoryPanel*		mLibraryInventoryPanel;
 	LLMenuButton*				mGearButton;
 	LLToggleableMenu*			mGearLandmarkMenu;
 	LLToggleableMenu*			mGearFolderMenu;
