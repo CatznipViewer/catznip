@@ -2957,7 +2957,10 @@ bool enable_item_edit(const LLUUID& idItem)
 			case LLAssetType::AT_CLOTHING:
 				return gAgentWearables.isWearableModifiable(idItem);
 			case LLAssetType::AT_OBJECT:
-				return true;
+// [RLVa:KB] - Checked: RLVa-1.4.7
+				return (!rlv_handler_t::isEnabled()) || ((isAgentAvatarValid()) && (RlvActions::canEdit(gAgentAvatarp->getWornAttachment(idItem))));
+// [/RLVa:KB]
+//				return true;
 			default:
 				break;
 		}
@@ -3000,7 +3003,12 @@ bool enable_attachment_touch(const LLUUID& idItem)
 	if ( (isAgentAvatarValid()) && (pItem) && (LLAssetType::AT_OBJECT == pItem->getType()) )
 	{
 		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
-		return (pAttachObj) && (pAttachObj->flagHandleTouch());
+// [RLVa:KB] - Checked: 2012-08-15 (RLVa-1.4.7)
+		return (pAttachObj) && (pAttachObj->flagHandleTouch()) &&
+			( (!rlv_handler_t::isEnabled()) ||
+			  ((isAgentAvatarValid()) && (gRlvHandler.canTouch(gAgentAvatarp->getWornAttachment(idItem)))) );
+// [/RLVa:KB]
+//		return (pAttachObj) && (pAttachObj->flagHandleTouch());
 	}
 	return false;
 }
