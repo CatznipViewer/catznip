@@ -79,7 +79,12 @@ void LLSaveOutfitComboBtn::saveOutfit(const LLUICtrl* pBtnCtrl)
 // [/SL:KB]
 {
 // [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
-	bool fSaveAs = (mSaveAsDefaultAction) || ("save_as_new_outfit" == pBtnCtrl->getValue().asString());
+	const std::string strAction = pBtnCtrl->getValue().asString();
+	bool fSaveAs = mSaveAsDefaultAction;
+	if ("save_outfit" == strAction)
+		fSaveAs = false;
+	else if ("save_as_new_outfit" == strAction)
+		fSaveAs = true;
 
 	if ( (!fSaveAs) && (LLAppearanceMgr::getInstance()->updateBaseOutfit()) )
 	{
