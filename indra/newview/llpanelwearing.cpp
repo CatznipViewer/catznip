@@ -264,6 +264,7 @@ public:
 //		registrar.add("Gear.TakeOff", boost::bind(&LLWearingGearMenu::onTakeOff, this));
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-09 (Catznip-3.3)
 		registrar.add("Gear.TakeOff", boost::bind(&LLPanelWearing::onTakeOffClicked, mPanelWearing));
+		registrar.add("Gear.TakeOffFolder", boost::bind(&LLPanelWearing::onTakeOffFolderClicked, mPanelWearing));
 // [/SL:KB]
 		registrar.add("Gear.Copy", boost::bind(&LLPanelWearing::copyToClipboard, mPanelWearing));
 
@@ -681,6 +682,24 @@ bool LLPanelWearing::isActionEnabled(const LLSD& userdata)
 		return hasItemSelected() && canTakeOffSelected();
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-15 (Catznip-3.3)
+	if (command_name == "take_off_folder")
+	{
+		uuid_vec_t selected_uuids;
+		getSelectedItemsUUIDs(selected_uuids);
+
+		for (uuid_vec_t::const_iterator itItem = selected_uuids.begin(); itItem != selected_uuids.end(); ++itItem)
+		{
+			const LLViewerInventoryItem* pItem = gInventory.getItem(*itItem);
+			if ( (!pItem) || (!LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(pItem->getParentUUID())) )
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+// [/SL:KB]
+
 	return false;
 }
 
@@ -759,6 +778,28 @@ void LLPanelWearing::onTakeOffClicked()
 	for (uuid_vec_t::const_iterator it=selected_uuids.begin(); it != selected_uuids.end(); ++it)
 	{
 		LLAppearanceMgr::instance().removeItemFromAvatar(*it);
+	}
+}
+
+void LLPanelWearing::onTakeOffFolderClicked()
+{
+	// Copy/paste of LLWearingContextMenu::handlePerFolder()
+	uuid_vec_t selected_uuids, folder_ids;
+	getSelectedItemsUUIDs(selected_uuids);
+
+	for (uuid_vec_t::const_iterator itItem = selected_uuids.begin(); itItem != selected_uuids.end(); ++itItem)
+	{
+		LLViewerInventoryItem* pItem = gInventory.getLinkedItem(*itItem);
+		if (pItem)
+		{
+			if (folder_ids.end() == std::find(folder_ids.begin(), folder_ids.end(), pItem->getParentUUID()))
+				folder_ids.push_back(pItem->getParentUUID());
+		}
+	}
+
+	for (uuid_vec_t::const_iterator itFolder = folder_ids.begin(); itFolder != folder_ids.end(); ++itFolder)
+	{
+		LLAppearanceMgr::instance().removeFolderFromAvatar(*itFolder);
 	}
 }
 

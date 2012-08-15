@@ -82,6 +82,7 @@ public:
 	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
 
 	void onTakeOffClicked();
+	void onTakeOffFolderClicked();
 protected:
 	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
 	void onToggleWearingView(EWearingView eView);
