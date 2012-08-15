@@ -604,7 +604,10 @@ void LLPanelPlaces::onTabSelected()
 	if (!mActivePanel)
 		return;
 
-	onFilterEdit(mActivePanel->getFilterSubString(), true);
+//	onFilterEdit(mActivePanel->getFilterSubString(), true);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	onFilterEdit(mFilterEditor->getText(), true);
+// [/SL:KB]
 	mActivePanel->updateVerbs();
 }
 

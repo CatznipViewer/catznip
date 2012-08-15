@@ -236,6 +236,10 @@ BOOL LLLandmarksPanel::postBuild()
 // virtual
 void LLLandmarksPanel::onSearchEdit(const std::string& string)
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	setFilterSubString(string);
+// [/SL:KB]
+
 	// give FolderView a chance to be refreshed. So, made all accordions visible
 	for (accordion_tabs_t::const_iterator iter = mAccordionTabs.begin(); iter != mAccordionTabs.end(); ++iter)
 	{
@@ -257,8 +261,8 @@ void LLLandmarksPanel::onSearchEdit(const std::string& string)
 		}
 	}
 
-	if (sFilterSubString != string)
-		sFilterSubString = string;
+//	if (sFilterSubString != string)
+//		sFilterSubString = string;
 
 	// show all folders in Landmarks Accordion for empty filter
 	// only if Landmarks inventory folder is not empty
@@ -664,7 +668,10 @@ void LLLandmarksPanel::onAccordionExpandedCollapsed(const LLSD& param, LLPlacesI
 
 		// Apply filter substring because it might have been changed
 		// while accordion was closed. See EXT-3714.
-		filter_list(inventory_list, sFilterSubString);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+		filter_list(inventory_list, getFilterSubString());
+// [/SL:KB]
+//		filter_list(inventory_list, sFilterSubString);
 	}
 }
 
