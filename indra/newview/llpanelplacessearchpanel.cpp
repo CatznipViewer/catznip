@@ -57,7 +57,17 @@ bool LLPanelPlacesSearchPanel::isSingleItemSelected()
 
 void LLPanelPlacesSearchPanel::onSearchEdit(const std::string& strQuery)
 {
-	m_pSearchPanel->searchStart(strQuery);
+	setFilterSubString(strQuery);
+
+	if (!strQuery.empty())
+	{
+		m_pSearchPanel->searchStart(strQuery);
+	}
+	else
+	{
+		m_pSearchPanel->searchClear();
+		findChild<LLUICtrl>("search_info_panel")->setVisible(false);
+	}
 }
 
 void LLPanelPlacesSearchPanel::onShowOnMap()
