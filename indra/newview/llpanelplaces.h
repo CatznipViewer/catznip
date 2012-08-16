@@ -34,6 +34,9 @@
 class LLInventoryItem;
 class LLFilterEditor;
 class LLLandmark;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+class LLSearchEditor;
+// [/SL:KB]
 
 class LLPanelLandmarkInfo;
 class LLPanelPlaceProfile;
@@ -109,6 +112,9 @@ private:
 	LLPanelPlaceInfo* getCurrentInfoPanel();
 
 	LLFilterEditor*				mFilterEditor;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLSearchEditor*				mSearchEditor;
+// [/SL:KB]
 	LLPanelPlacesTab*			mActivePanel;
 	LLTabContainer*				mTabContainer;
 	LLPanelPlaceProfile*		mPlaceProfile;
@@ -150,6 +156,11 @@ private:
 
 	// Holds info whether "My Landmarks" and "Teleport History" tabs have been created.
 	bool						mTabsCreated;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLPanelPlacesTab*			mLandmarksPanel;
+	LLPanelPlacesTab*			mTeleportHistoryPanel;
+	LLPanelPlacesTab*			mSearchPanel;
+// [/SL:KB]
 
 	LLSafeHandle<LLParcelSelection>	mParcel;
 
