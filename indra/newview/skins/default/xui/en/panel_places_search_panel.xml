@@ -9,7 +9,7 @@
     <panel
      class="panel_places_search"
      follows="all"
-     height="373"
+     height="400"
      layout="topleft"
      left="0"
      name="search_panel"
@@ -22,6 +22,10 @@
         <panel.string
          name="no_results">
             No results
+        </panel.string>
+        <panel.string
+         name="count_results">
+            [FIRST] - [LAST]
         </panel.string>
         <panel.string
          name="searching">
@@ -147,7 +151,7 @@
              height="148"
              layout="topleft"
              name="search_info_panel"
-             visible="true"
+             visible="false"
              width="313">
                 <!-- This needs to match panel_parcel_info.xml -->
                 <panel
@@ -158,7 +162,7 @@
                  left="0"
                  name="search_parcel"
                  top="0"
-                 visible="false"
+                 visible="true"
                  width="313">
                     <!-- Parcel numbers text -->
                     <string
@@ -261,97 +265,99 @@
                 </scroll_list>
             </layout_panel>
         </layout_stack>
-    </panel>
  
-    <panel
-     background_visible="true"
-     follows="left|right|bottom"
-     height="27"
-     label="bottom_panel"
-     layout="topleft"
-     left="0"
-     name="bottom_panel"
-     top_pad="0"
-     width="313">
-        <menu_button
-         follows="bottom|left"
-         height="25"
-         image_hover_unselected="Toolbar_Left_Over"
-         image_overlay="OptionsMenu_Off"
-         image_selected="Toolbar_Left_Selected"
-         image_unselected="Toolbar_Left_Off"
+        <panel
+         background_visible="true"
+         follows="left|right|bottom"
+         height="27"
+         label="bottom_panel"
          layout="topleft"
          left="0"
-         name="gear_btn"
-         tool_tip="Options"
-         top="1"
-         width="31" />
-        <button
-         control_name="PlacesSearchShowOptions"
-         follows="bottom|left"
-         height="25"
-         image_hover_unselected="Toolbar_Middle_Over"
-         image_overlay="Search_Icon"
-         image_selected="Toolbar_Middle_Selected"
-         image_unselected="Toolbar_Middle_Off"
-         layout="topleft"
-         left_pad="1"
-         name="options_btn"
-         toggle="true"
-         width="31" />
-        <icon
-         follows="bottom|left|right"
-         height="25"
-         image_name="Toolbar_Middle_Off"
-         layout="topleft"
-         left_pad="1"
-         name="dummy_icon_1"
-         width="17" />
-        <button
-         follows="bottom|right"
-         height="25"
-         image_hover_unselected="Toolbar_Middle_Over"
-         image_overlay="Arrow_Small_Left"
-         image_overlay_alignment="left"
-         image_selected="Toolbar_Middle_Selected"
-         image_unselected="Toolbar_Middle_Off"
-         label="Previous"
-         layout="topleft"
-         left_pad="1"
-         name="prev_btn"
-         width="75" />
-        <icon
-         follows="bottom|right"
-         height="25"
-         image_name="Toolbar_Middle_Off"
-         layout="topleft"
-         left_pad="1"
-         name="dummy_icon_2"
-         width="80" />
-        <text
-         follows="bottom|right"
-         halign="center"
-         height="24"
-         layout="topleft"
-         name="results_label"
-         top_delta="-1"
-         valign="center"
-         value="No results"
-         width="80" />
-        <button
-         follows="bottom|right"
-         height="25"
-         image_hover_unselected="Toolbar_Right_Over"
-         image_overlay="Arrow_Small_Right"
-         image_overlay_alignment="right"
-         image_selected="Toolbar_Right_Selected"
-         image_unselected="Toolbar_Right_Off"
-         label="Next"
-         layout="topleft"
-         left_pad="1"
-         name="next_btn"
-         top_delta="1"
-         width="75" />
+         name="bottom_panel"
+         top_pad="0"
+         width="313">
+            <menu_button
+             follows="bottom|left"
+             height="25"
+             image_hover_unselected="Toolbar_Left_Over"
+             image_overlay="OptionsMenu_Off"
+             image_selected="Toolbar_Left_Selected"
+             image_unselected="Toolbar_Left_Off"
+             layout="topleft"
+             left="0"
+             name="gear_btn"
+             tool_tip="Options"
+             top="1"
+             width="31" />
+            <button
+             control_name="PlacesSearchShowOptions"
+             follows="bottom|left"
+             height="25"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Search_Icon"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             layout="topleft"
+             left_pad="1"
+             name="options_btn"
+             toggle="true"
+             width="31" />
+            <icon
+             follows="bottom|left|right"
+             height="25"
+             image_name="Toolbar_Middle_Off"
+             layout="topleft"
+             left_pad="1"
+             name="dummy_icon_1"
+             width="17" />
+            <button
+             enabled="false"
+             follows="bottom|right"
+             height="25"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Arrow_Small_Left"
+             image_overlay_alignment="left"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             label="Previous"
+             layout="topleft"
+             left_pad="1"
+             name="search_prev_btn"
+             width="75" />
+            <icon
+             follows="bottom|right"
+             height="25"
+             image_name="Toolbar_Middle_Off"
+             layout="topleft"
+             left_pad="1"
+             name="dummy_icon_2"
+             width="80" />
+            <text
+             follows="bottom|right"
+             halign="center"
+             height="24"
+             layout="topleft"
+             name="search_results_label"
+             top_delta="-1"
+             valign="center"
+             value="No results"
+             width="80" />
+            <button
+             enabled="false"
+             follows="bottom|right"
+             height="25"
+             image_hover_unselected="Toolbar_Right_Over"
+             image_overlay="Arrow_Small_Right"
+             image_overlay_alignment="right"
+             image_selected="Toolbar_Right_Selected"
+             image_unselected="Toolbar_Right_Off"
+             label="Next"
+             layout="topleft"
+             left_pad="1"
+             name="search_next_btn"
+             top_delta="1"
+             width="75" />
+        </panel>
     </panel>
 
 </panel>
