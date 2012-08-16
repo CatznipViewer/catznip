@@ -49,6 +49,7 @@ public:
 	bool                        hasCurrentParcel() const	{ return getCurrentParcelId().notNull(); }
 	boost::signals2::connection setSelectCallback(const commit_signal_t::slot_type& cb);
 
+	void searchClear();
 	void searchStart(std::string strQuery);
 	void searchPrevious();
 	void searchNext();

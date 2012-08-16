@@ -121,6 +121,14 @@ void LLPanelPlacesSearch::onSearchBtn()
 	}
 }
 
+void LLPanelPlacesSearch::searchClear()
+{
+	m_strCurQuery.clear();
+	m_nCurIndex = 0;
+
+	performSearch();
+}
+
 void LLPanelPlacesSearch::searchStart(std::string strQuery)
 {
 	// Sanitize the query
@@ -226,6 +234,12 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 			sdRow["value"] = itResult->mParcelId;
 
 			m_pResultsList->addElement(sdRow, ADD_BOTTOM);
+		}
+
+		// Select the first result if there's no active selection
+		if (-1 == m_pResultsList->getFirstSelectedIndex())
+		{
+			m_pResultsList->selectFirstItem();
 		}
 
 		LLStringUtil::format_map_t args;
