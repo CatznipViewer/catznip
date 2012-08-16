@@ -1326,15 +1326,12 @@ bool LLAppearanceMgr::getCanReplaceCOF(const LLUUID& outfit_cat_id)
 }
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t* removable_items = NULL)
+bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t& removable_items)
 {
 	LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
 	gInventory.getDirectDescendentsOf(folder_id, cats, items);
 
-	if (removable_items)
-	{
-		removable_items->clear();
-	}
+	removable_items.clear();
 	if (items)
 	{
 		for (LLInventoryModel::item_array_t::iterator itItem = items->begin(); itItem != items->end(); ++itItem)
@@ -1342,29 +1339,23 @@ bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t
 			LLViewerInventoryItem* pItem = *itItem;
 			if ( (pItem) && (LLAssetType::AT_BODYPART != pItem->getType()) && (get_is_item_worn(pItem->getUUID())) )
 			{
-				if (removable_items)
-				{
-					removable_items->push_back(pItem);
-				}
-				else
-				{
-					return true;
-				}
+				removable_items.push_back(pItem);
 			}
 		}
 	}
-	return (removable_items) ? !removable_items->empty() : false;
+	return removable_items.size() > 0;
 }
 
 bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
 {
-	return get_removable_items(folder_id);
+	LLInventoryModel::item_array_t removable_items;
+	return (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
 }
 
 void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
 {
 	LLInventoryModel::item_array_t removable_items;
-	if (get_removable_items(folder_id, &removable_items))
+	if (get_removable_items(folder_id, removable_items))
 	{
 		for (LLInventoryModel::item_array_t::iterator itItem = removable_items.begin(); itItem != removable_items.end(); ++itItem)
 		{
