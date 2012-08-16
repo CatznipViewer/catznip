@@ -193,6 +193,9 @@ void LLNetMap::draw()
 	static LLUIColor map_track_disabled_color = LLUIColorTable::instance().getColor("MapTrackDisabledColor", LLColor4::white);
 	static LLUIColor map_frustum_color = LLUIColorTable::instance().getColor("MapFrustumColor", LLColor4::white);
 	static LLUIColor map_frustum_rotating_color = LLUIColorTable::instance().getColor("MapFrustumRotatingColor", LLColor4::white);
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-08-17 (Catznip-3.3.0)
+	static LLUIColor map_property_line = LLUIColorTable::instance().getColor("MiniMapPropertyLine", LLColor4::white);
+// [/SL:KB]
 	
 	if (mObjectImagep.isNull())
 	{
@@ -412,12 +415,10 @@ void LLNetMap::draw()
 					itRegion != LLWorld::getInstance()->getRegionList().end(); ++itRegion)
 			{
 				const LLViewerRegion* pRegion = *itRegion; LLColor4U clrOverlay;
-				if (!pRegion->isAlive())
-					clrOverlay = LLColor4U(255, 128, 128, 255);
-				else if (pRegion == gAgent.getRegion())
-					clrOverlay = LLColor4U(255, 255, 255, 255);
+				if (pRegion->isAlive())
+					clrOverlay = map_property_line.get();
 				else
-					clrOverlay = LLColor4U(204, 204, 204, 255);
+					clrOverlay = LLColor4U(255, 128, 128, 255);
 				renderPropertyLinesForRegion(pRegion, clrOverlay);
 			}
 
