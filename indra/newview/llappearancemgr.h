@@ -88,12 +88,8 @@ public:
 	bool getCanReplaceCOF(const LLUUID& outfit_cat_id);
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-	// Determine whether the item's parent has any worn items in it (NOTE: no recursion)
-	bool getCanRemoveItemFolder(const LLUUID& item_id) const;
 	// Determine whether the folder has any worn items in it (NOTE: no recursion)
 	bool getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const;
-	// Remove all worn items in the item's parent folder (NOTE: no recursion)
-	void removeItemFolder(const LLUUID& item_id);
 	// Remove all worn items from the folder (NOTE: no recursion)
 	void removeFolderFromAvatar(const LLUUID& folder_id);
 // [/SL:KB]

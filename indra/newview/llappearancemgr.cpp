@@ -1356,26 +1356,10 @@ bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t
 	return (removable_items) ? !removable_items->empty() : false;
 }
 
-//bool LLAppearanceMgr::getCanRemoveItemFolder(const LLUUID& item_id) const
-//{
-//	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(item_id);
-//	LLInventoryModel::item_array_t removable_items;
-//	return (pItem) && (get_removable_items(pItem->getParentUUID(), removable_items));
-//}
-
 bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
 {
 	return get_removable_items(folder_id);
 }
-
-//void LLAppearanceMgr::removeItemFolder(const LLUUID& item_id)
-//{
-//	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(item_id);
-//	if (pItem)
-//	{
-//		removeFolderFromAvatar(pItem->getParentUUID());
-//	}
-//}
 
 void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
 {
