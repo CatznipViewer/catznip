@@ -43,6 +43,8 @@ BOOL LLPanelPlacesSearchPanel::postBuild()
 	m_pSearchPanel = findChild<LLPanelPlacesSearch>("search_panel");
 	m_pSearchPanel->setSelectCallback(boost::bind(&LLPanelPlacesSearchPanel::onSearchResultSelect, this));
 
+	updateVerbs();
+
 	return TRUE;
 }
 
@@ -68,6 +70,7 @@ void LLPanelPlacesSearchPanel::onSearchEdit(const std::string& strQuery)
 		m_pSearchPanel->searchClear();
 		findChild<LLUICtrl>("search_info_panel")->setVisible(false);
 	}
+	updateVerbs();
 }
 
 void LLPanelPlacesSearchPanel::onShowOnMap()
@@ -115,6 +118,8 @@ void LLPanelPlacesSearchPanel::updateVerbs()
 void LLPanelPlacesSearchPanel::onSearchResultSelect()
 {
 	findChild<LLUICtrl>("search_info_panel")->setVisible(m_pSearchPanel->getCurrentParcelId().notNull());
+
+	updateVerbs();
 }
 
 // ============================================================================
