@@ -15,6 +15,10 @@
       No results
   </panel.string>
   <panel.string
+   name="count_results">
+      Results [FIRST] - [LAST]
+  </panel.string>
+  <panel.string
    name="searching">
       Searching...
   </panel.string>
@@ -112,32 +116,71 @@
    width="18" />
    
   <scroll_list
+   bottom="-38"
    draw_heading="true" 
    follows="all"
-   height="335"
    layout="topleft"
    left="10"
    name="search_results"
-   top_pad="7"
-   width="305">
+   top="55"
+   width="300">
     <columns
      label="Name"
-     name="name"
-     width="150" />
+     name="name" />
     <columns
      label="Traffic"
      name="traffic"
-     width="150" />
+     width="100" />
   </scroll_list>
+  <button
+   bottom="-10"
+   enabled="false"
+   follows="bottom|left"
+   height="23"
+   image_bottom_pad="2"
+   image_overlay="Arrow_Left_Off"
+   image_overlay_alignment="left"
+   label="Previous"
+   layout="topleft"
+   left="10"
+   name="search_prev_btn"
+   width="80" />
+  <text
+   follows="bottom|left|right"
+   halign="center"
+   height="22"
+   layout="topleft"
+   left_pad="5"
+   name="search_results_label"
+   top_delta="0"
+   valign="center"
+   width="130">
+    Results 990-1000
+  </text>
+  <button
+   enabled="false"
+   follows="bottom|right"
+   height="23"
+   image_bottom_pad="2"
+   image_overlay="Arrow_Right_Off"
+   image_overlay_alignment="right"
+   label="Next"
+   layout="topleft"
+   left_pad="5"
+   name="search_next_btn"
+   top_delta="0"
+   width="80" />
+  
+  
   <panel
+   bottom="-10"
    class="panel_parcel_info"
    filename="panel_parcel_info.xml"
    follows="top|right"
-   height="335"
    layout="topleft"
-   left_pad="10"
+   left="320"
    name="search_parcel"
-   top_delta="0"
+   top="55"
    width="280" />
 
 </panel>

@@ -24,6 +24,7 @@ class LLComboBox;
 class LLLineEditor;
 class LLPanelParcelInfo;
 class LLScrollListCtrl;
+class LLTextBox;
 
 // ============================================================================
 
@@ -48,13 +49,16 @@ public:
 	bool                        hasCurrentParcel() const	{ return getCurrentParcelId().notNull(); }
 	boost::signals2::connection setSelectCallback(const commit_signal_t::slot_type& cb);
 
-	void searchStart(const std::string& strQuery);
+	void searchStart(std::string strQuery);
+	void searchPrevious();
+	void searchNext();
 
 protected:
 	void onResultSelect();
 	void onSearchBtn();
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
 	void onToggleMaturity();
+	void performSearch();
 
 	/*
 	 * Member variables
@@ -62,7 +66,8 @@ protected:
 protected:
 	std::string m_strCurQuery;
 	LLUUID      m_idCurQuery;
-	S32         m_nCurIndex;
+	U32         m_nCurIndex;
+	U32         m_nCurResults;
 
 	LLComboBox*        m_pSearchCategory;
 	LLCheckBoxCtrl*    m_pSearchPG;
@@ -70,6 +75,9 @@ protected:
 	LLCheckBoxCtrl*    m_pSearchAdult;
 	LLPanelParcelInfo* m_pParcelInfo;
 	LLScrollListCtrl*  m_pResultsList;
+	LLTextBox*         m_pResultsCount;
+	LLButton*          m_pResultsPrevious;
+	LLButton*          m_pResultsNext;
 };
 
 // ============================================================================

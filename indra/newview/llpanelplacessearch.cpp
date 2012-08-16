@@ -26,8 +26,11 @@
 #include "llscrolllistctrl.h"
 #include "lltrans.h"
 
+#include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
+
 // ============================================================================
-// LLPanelPlacesSearch
+// LLPanelPlacesSearch class
 //
 
 static LLRegisterPanelClassWrapper<LLPanelPlacesSearch> t_panel_places_search("panel_places_search");
@@ -35,11 +38,15 @@ static LLRegisterPanelClassWrapper<LLPanelPlacesSearch> t_panel_places_search("p
 LLPanelPlacesSearch::LLPanelPlacesSearch()
 	: LLPanel()
 	, m_nCurIndex(0)
+	, m_nCurResults(0)
 	, m_pSearchCategory(NULL)
 	, m_pSearchPG(NULL)
 	, m_pSearchMature(NULL)
 	, m_pSearchAdult(NULL)
 	, m_pResultsList(NULL)
+	, m_pResultsCount(NULL)
+	, m_pResultsPrevious(NULL)
+	, m_pResultsNext(NULL)
 {
 }
 
@@ -54,6 +61,13 @@ LLPanelPlacesSearch::~LLPanelPlacesSearch()
 
 BOOL LLPanelPlacesSearch::postBuild()
 {
+	LLLineEditor* pSearchEditor = findChild<LLLineEditor>("search_query");
+	if (pSearchEditor)
+	{
+		pSearchEditor->setCommitOnFocusLost(false);
+		pSearchEditor->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSearchBtn, this));
+	}
+
 	LLButton* pSearchBtn = findChild<LLButton>("search_start");
 	if (pSearchBtn)
 	{
@@ -81,6 +95,13 @@ BOOL LLPanelPlacesSearch::postBuild()
 	m_pResultsList->setCommitOnKeyboardMovement(true);
 	m_pResultsList->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onResultSelect, this));
 
+	m_pResultsCount = findChild<LLTextBox>("search_results_label");
+	m_pResultsCount->setText(LLStringUtil::null);
+	m_pResultsPrevious = findChild<LLButton>("search_prev_btn");
+	m_pResultsPrevious->setCommitCallback(boost::bind(&LLPanelPlacesSearch::searchPrevious, this));
+	m_pResultsNext = findChild<LLButton>("search_next_btn");
+	m_pResultsNext->setCommitCallback(boost::bind(&LLPanelPlacesSearch::searchNext, this));
+
 	m_pParcelInfo = findChild<LLPanelParcelInfo>("search_parcel");
 
 	return TRUE;
@@ -100,7 +121,47 @@ void LLPanelPlacesSearch::onSearchBtn()
 	}
 }
 
-void LLPanelPlacesSearch::searchStart(const std::string& strQuery)
+void LLPanelPlacesSearch::searchStart(std::string strQuery)
+{
+	// Sanitize the query
+	boost::trim(strQuery);
+	if (strQuery.size() < LLSearchDirectory::MIN_QUERY_LENGTH_PLACES)
+	{
+		LLNotificationsUtil::add("SeachFilteredOnShortWordsEmpty");
+		return;
+	}
+
+	m_strCurQuery = strQuery;
+	m_nCurIndex = 0;
+
+	performSearch();
+}
+
+void LLPanelPlacesSearch::searchPrevious()
+{
+	if ( (!m_strCurQuery.empty()) && (m_nCurIndex > 0) )
+	{
+		if (m_nCurIndex >= LLSearchDirectory::NUM_RESULTS_PAGE_PLACES)
+			m_nCurIndex -= LLSearchDirectory::NUM_RESULTS_PAGE_PLACES;
+		else
+			m_nCurIndex = 0;
+
+		performSearch();
+	}
+}
+
+void LLPanelPlacesSearch::searchNext()
+{
+	// NOTE: 101 results are returned when there are more results pages still
+	if ( (!m_strCurQuery.empty()) && (m_nCurResults > LLSearchDirectory::NUM_RESULTS_PAGE_PLACES) )
+	{
+		m_nCurIndex += LLSearchDirectory::NUM_RESULTS_PAGE_PLACES;
+
+		performSearch();
+	}
+}
+
+void LLPanelPlacesSearch::performSearch()
 {
 	// Clean up any pending queries
 	if (m_idCurQuery.notNull())
@@ -109,12 +170,14 @@ void LLPanelPlacesSearch::searchStart(const std::string& strQuery)
 		m_idCurQuery.setNull();
 	}
 
+	m_nCurResults = 0;
 	m_pResultsList->clearRows();
+	m_pResultsCount->setText(LLStringUtil::null);
+	m_pResultsPrevious->setEnabled(false);
+	m_pResultsNext->setEnabled(false);
 	m_pParcelInfo->setParcelFromId(LLUUID::null);
 
-	m_nCurIndex = 0;
-	m_strCurQuery = strQuery;
-	if (!strQuery.empty())
+	if (!m_strCurQuery.empty())
 	{
 		U32 nSearchFlags = 0;
 		if (m_pSearchPG->get())
@@ -164,13 +227,24 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 
 			m_pResultsList->addElement(sdRow, ADD_BOTTOM);
 		}
+
+		LLStringUtil::format_map_t args;
+		args["[FIRST]"] = boost::lexical_cast<std::string>(m_nCurIndex + 1);
+		args["[LAST]"] = boost::lexical_cast<std::string>(llmin(m_nCurIndex + m_pResultsList->getItemCount(), m_nCurIndex + LLSearchDirectory::NUM_RESULTS_PAGE_PLACES));
+		m_pResultsCount->setText(getString("count_results", args));
 	}
 	else
 	{
 		LLStringUtil::format_map_t args;
 		args["TEXT"] = m_strCurQuery;
 		m_pResultsList->setCommentText(getString("not_found", args));
+		m_pResultsCount->setText(LLStringUtil::null);
 	}
+
+	// NOTE: 101 results are returned when there are more results pages still
+	m_nCurResults += lResults.size();
+	m_pResultsPrevious->setEnabled(m_nCurIndex > 0);
+	m_pResultsNext->setEnabled(m_nCurResults > LLSearchDirectory::NUM_RESULTS_PAGE_PLACES);
 }
 
 void LLPanelPlacesSearch::onToggleMaturity()

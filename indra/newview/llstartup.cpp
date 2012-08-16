@@ -128,7 +128,7 @@
 #include "llpreviewscript.h"
 #include "llproxy.h"
 #include "llproductinforequest.h"
-// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-06-26 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-06-26 (Catznip-3.3)
 #include "llsearchdirectory.h"
 // [/SL:KB]
 #include "llsecondlifeurls.h"
@@ -2473,7 +2473,7 @@ void register_viewer_callbacks(LLMessageSystem* msg)
 	msg->setHandlerFunc("ScriptTeleportRequest", process_script_teleport_request);
 	msg->setHandlerFunc("EstateCovenantReply", process_covenant_reply);
 
-// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-06-26 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-06-26 (Catznip-3.3)
 	msg->setHandlerFunc("DirPlacesReply", LLSearchDirectory::processPlacesReply);
 // [/SL:KB]
 

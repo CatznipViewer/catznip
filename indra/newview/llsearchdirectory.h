@@ -40,9 +40,10 @@ struct LLSearchPlaceResult
 
 class LLSearchDirectory : public LLSingleton<LLSearchDirectory>
 {
-private:
 	friend class LLSingleton<LLSearchDirectory>;
+private:
 	LLSearchDirectory();
+	/*virtual*/ ~LLSearchDirectory();
 
 	/*
 	 * Member functions
@@ -52,12 +53,15 @@ public:
 
 	typedef std::vector<LLSearchPlaceResult> places_results_vec_t;
 	typedef boost::function<void(const LLUUID&, U32, const places_results_vec_t&)> places_callback_t;
-	LLUUID queryPlaces(const std::string& strQuery, S8 nCategory, U32 nFlags, S32 idxStart, places_callback_t cb);
+	LLUUID queryPlaces(std::string strQuery, S8 nCategory, U32 nFlags, S32 idxStart, places_callback_t cb);
 	static void processPlacesReply(LLMessageSystem* pMsg, void**);
 
 	/*
 	 * Member variables
 	 */
+public:
+	static U32 MIN_QUERY_LENGTH_PLACES;
+	static U32 NUM_RESULTS_PAGE_PLACES;
 protected:
 	typedef std::map<LLUUID, places_callback_t> places_callback_map_t;
 	places_callback_map_t mPlacesCallbackMap;

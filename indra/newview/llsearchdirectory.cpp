@@ -20,11 +20,24 @@
 #include "llqueryflags.h"
 #include "llsearchdirectory.h"
 
+#include <boost/algorithm/string.hpp>
+
 // ============================================================================
-// LLSearchDirectory
+// Constants
+//
+
+U32 LLSearchDirectory::MIN_QUERY_LENGTH_PLACES = 3;
+U32 LLSearchDirectory::NUM_RESULTS_PAGE_PLACES = 100;
+
+// ============================================================================
+// LLSearchDirectory class
 //
 
 LLSearchDirectory::LLSearchDirectory()
+{
+}
+
+LLSearchDirectory::~LLSearchDirectory()
 {
 }
 
@@ -38,8 +51,12 @@ void LLSearchDirectory::cancelQuery(const LLUUID& idQuery)
 	}
 }
 
-LLUUID LLSearchDirectory::queryPlaces(const std::string& strQuery, S8 nCategory, U32 nFlags, S32 idxStart, LLSearchDirectory::places_callback_t cb)
+LLUUID LLSearchDirectory::queryPlaces(std::string strQuery, S8 nCategory, U32 nFlags, S32 idxStart, LLSearchDirectory::places_callback_t cb)
 {
+	boost::trim(strQuery);
+	if (strQuery.size() < MIN_QUERY_LENGTH_PLACES)
+		return LLUUID::null;
+
 	LLUUID idQuery = LLUUID::generateNewID();
 
 	nFlags |= DFQ_DWELL_SORT;
@@ -95,6 +112,7 @@ void LLSearchDirectory::processPlacesReply(LLMessageSystem* pMsg, void**)
 		pMsg->getU32(_PREHASH_StatusData, _PREHASH_Status, nStatus);
 	}
 
+	// NOTE: don't cancel the query yet since results will get sent across multiple messages
 	(itCallback->second)(idQuery, nStatus, placeResults);
 }
 
