@@ -163,6 +163,7 @@ private:
 	void handleZoom(const LLSD& userdata);
 	void handleStopTracking (const LLSD& userdata);
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+	void handleOverlayToggle(const LLSD& sdParam);
 	void handleShowProfile(const LLSD& sdParam) const;
 	bool checkTextureType(const LLSD& sdParam) const;
 	void handleTextureType(const LLSD& sdParam) const;

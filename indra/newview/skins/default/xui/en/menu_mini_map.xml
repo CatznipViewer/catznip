@@ -71,7 +71,7 @@
      label="Property Lines"
      name="Property Lines">
       <menu_item_check.on_click
-       function="ToggleControl"
+       function="Minimap.ToggleOverlay"
        parameter="MiniMapPropertyLines" />
       <menu_item_check.on_check
        control="MiniMapPropertyLines" />
@@ -80,7 +80,7 @@
      label="Parcels for Sale"
      name="Parcels for Sale">
       <menu_item_check.on_click
-       function="ToggleControl"
+       function="Minimap.ToggleOverlay"
        parameter="MiniMapForSaleParcels" />
       <menu_item_check.on_check
        control="MiniMapForSaleParcels" />

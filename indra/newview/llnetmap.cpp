@@ -138,6 +138,7 @@ BOOL LLNetMap::postBuild()
 // [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
 	registrar.add("Minimap.ShowProfile", boost::bind(&LLNetMap::handleShowProfile, this, _2));
 	registrar.add("Minimap.TextureType", boost::bind(&LLNetMap::handleTextureType, this, _2));
+	registrar.add("Minimap.ToggleOverlay", boost::bind(&LLNetMap::handleOverlayToggle, this, _2));
 
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 	enable_registrar.add("Minimap.CheckTextureType", boost::bind(&LLNetMap::checkTextureType, this, _2));
@@ -1159,6 +1160,17 @@ void LLNetMap::setAvatarProfileLabel(const LLAvatarName& avName, const std::stri
 		pItem->setLabel(avName.getCompleteName());
 		pItem->getMenu()->arrange();
 	}
+}
+
+void LLNetMap::handleOverlayToggle(const LLSD& sdParam)
+{
+	// Toggle the setting
+	const std::string strControl = sdParam.asString();
+	BOOL fCurValue = gSavedSettings.getBOOL(strControl);
+	gSavedSettings.setBOOL(strControl, !fCurValue);
+
+	// Force an overlay update
+	mUpdateParcelImage = true;
 }
 
 void LLNetMap::handleShowProfile(const LLSD& sdParam) const
