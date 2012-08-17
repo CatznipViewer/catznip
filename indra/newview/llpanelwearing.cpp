@@ -553,7 +553,10 @@ protected:
 		// See what types of wearables are selected.
 		for (uuid_vec_t::const_iterator it = mUUIDs.begin(); it != mUUIDs.end(); ++it)
 		{
-			LLViewerInventoryItem* item = gInventory.getItem(*it);
+//			LLViewerInventoryItem* item = gInventory.getItem(*it);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+			LLViewerInventoryItem* item = gInventory.getLinkedItem(*it);
+// [/SL:KB]
 
 			if (!item)
 			{

@@ -2036,6 +2036,10 @@ bool get_removable_items(const LLUUID& idFolder, LLInventoryModel::item_array_t&
 	LLInventoryModel::cat_array_t cats;
 	LLFindWearablesEx f(/*is_worn*/ true, /*include_body_parts*/ false, idFolder);
 	gInventory.collectDescendentsIf(idFolder, cats, itemsRemove, LLInventoryModel::EXCLUDE_TRASH, f);
+// [RLVa:KB] - Checked: 2012-08-17 (RLVa-1.4.7)
+	if ( (rlv_handler_t::isEnabled()) && ((gRlvWearableLocks.hasLockedWearableType(RLV_LOCK_REMOVE)) || (gRlvAttachmentLocks.hasLockedAttachmentPoint(RLV_LOCK_REMOVE))) )
+		itemsRemove.erase(std::remove_if(itemsRemove.begin(), itemsRemove.end(), RlvPredCanNotRemoveItem()), itemsRemove.end());
+// [/RLVa:KB]
 	return itemsRemove.size() > 0;
 }
 
