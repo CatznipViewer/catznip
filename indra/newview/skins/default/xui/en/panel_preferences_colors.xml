@@ -21,6 +21,18 @@
    width="200">
     My effects (selection beam):
   </text>
+  <text
+   type="string"
+   length="1"
+   follows="left|top"
+   height="15"
+   layout="topleft"
+   left="360"
+   name="minimap_propertylines_color_textbox"
+   top_delta="0"
+   width="200">
+    Mini-map property lines:
+  </text>
   <color_swatch
 	 can_apply_immediately="true"
      follows="left|top"
@@ -37,6 +49,26 @@
     <color_swatch.commit_callback
 		 function="Pref.applyUIColor"
 		 parameter="EffectColor" />
+    <color_swatch.caption_text
+    height="0" />
+  </color_swatch>
+  <color_swatch
+     can_apply_immediately="true"
+     follows="left|top"
+     height="24"
+     label_height="0"
+     layout="topleft"
+     left="360"
+     name="minimap_propertylines_color_swatch"
+     tool_tip="Click to open Color Picker"
+     top_delta="0"
+     width="44">
+    <color_swatch.init_callback
+		 function="Pref.getUIColor"
+		 parameter="MiniMapPropertyLine" />
+    <color_swatch.commit_callback
+		 function="Pref.applyUIColor"
+		 parameter="MiniMapPropertyLine" />
     <color_swatch.caption_text
     height="0" />
   </color_swatch>
