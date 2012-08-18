@@ -1875,13 +1875,13 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 		if (tuple->mClosable)
 			tuple->mPadding += tuple->mButton->getRightHPad();
 
-		S32 nTabWidth = llmin(tab_padding + tuple->mPadding, mMaxTabWidth);
+		S32 nTabWidth = tab_padding + tuple->mPadding;
 		if (!tuple->mButton->getLabelSelected().empty())
 		{
 			// Only clamp to the minimum tab width if there's a title
 			nTabWidth = llmax(nTabWidth + mFont->getWidth(tuple->mButton->getLabelSelected()), mMinTabWidth);
 		}
-		tuple->mButton->reshape(nTabWidth, tuple->mButton->getRect().getHeight());
+		tuple->mButton->reshape(llmin(nTabWidth, mMaxTabWidth), tuple->mButton->getRect().getHeight());
 // [/SL:KB]
 //		tuple->mButton->reshape(llclamp(mFont->getWidth(tuple->mButton->getLabelSelected()) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth),
 //								tuple->mButton->getRect().getHeight());
@@ -1939,13 +1939,13 @@ void LLTabContainer::setPanelTitle(S32 index, const std::string& title)
 		const LLFontGL* fontp = LLFontGL::getFontSansSerifSmall();
 		mTotalTabWidth -= tab_button->getRect().getWidth();
 // [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
-		S32 nTabWidth = llmin(tab_padding + tuple->mPadding, mMaxTabWidth);
+		S32 nTabWidth = tab_padding + tuple->mPadding;
 		if (!title.empty())
 		{
 			// Only clamp to the minimum tab width if there's a title
 			nTabWidth = llmax(nTabWidth + fontp->getWidth(title), mMinTabWidth);
 		}
-		tab_button->reshape(nTabWidth, tab_button->getRect().getHeight());
+		tab_button->reshape(llmin(nTabWidth, mMaxTabWidth), tab_button->getRect().getHeight());
 // [/SL:KB]
 //		tab_button->reshape(llclamp(fontp->getWidth(title) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth), tab_button->getRect().getHeight());
 		mTotalTabWidth += tab_button->getRect().getWidth();
