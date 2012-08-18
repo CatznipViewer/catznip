@@ -90,7 +90,7 @@ bool LLScriptHandler::processNotification(const LLSD& notify)
 	
 	if(notify["sigtype"].asString() == "add")
 	{
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 		// Don't log persisted notifications a second time
 		if (!notification->isPersisted())
 		{

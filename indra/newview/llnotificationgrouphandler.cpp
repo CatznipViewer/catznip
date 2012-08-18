@@ -84,7 +84,14 @@ bool LLGroupHandler::processNotification(const LLSD& notify)
 	
 	if(notify["sigtype"].asString() == "add" || notify["sigtype"].asString() == "change")
 	{
-		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+//		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+		// Don't log persisted notifications a second time
+		if (!notification->isPersisted())
+		{
+			LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+		}
+// [/SL:KB]
 
 		LLPanel* notify_box = new LLToastGroupNotifyPanel(notification);
 		LLToast::Params p;
