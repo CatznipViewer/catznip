@@ -4615,6 +4615,14 @@ bool tools_visible_take_object()
 	return !is_selection_buy_not_take();
 }
 
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-18 (Catznip-3.3)
+bool visible_is_attachment()
+{
+	ESelectType eType = LLSelectMgr::getInstance()->getSelection()->getSelectType();
+	return (SELECT_TYPE_WORLD != eType);
+}
+// [/SL:KB]
+
 bool enable_how_to_visible(const LLSD& param)
 {
 	LLFloaterWebContent::Params p;
@@ -8374,6 +8382,9 @@ void initialize_menus()
 
 	enable.add("Object.VisibleTake", boost::bind(&visible_take_object));
 	enable.add("Object.VisibleBuy", boost::bind(&visible_buy_object));
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-18 (Catznip-3.3)
+	enable.add("Object.IsAttachment", boost::bind(&visible_is_attachment));
+// [/SL:KB]
 
 	commit.add("Object.Buy", boost::bind(&handle_buy));
 	commit.add("Object.Edit", boost::bind(&handle_object_edit));
