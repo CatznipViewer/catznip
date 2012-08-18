@@ -324,6 +324,38 @@ BOOL get_can_item_be_worn(const LLUUID& id)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+BOOL get_is_item_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// Can't move an item that's in the library or in COF
+	if ( (model) && 
+		 (model->isObjectDescendentOf(id, gInventory.getRootFolderID())) &&
+		 (!model->isObjectDescendentOf(id, LLAppearanceMgr::instance().getCOF())) )
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// NOTE: This function doesn't check the folder's children.
+	// See LLFolderBridge for a function that does consider the children.
+
+	// Can't move categories that reside in library
+	if ( (model) && (model->isObjectDescendentOf(id, gInventory.getRootFolderID())) )
+	{
+		// Can't move protected category types
+		const LLInventoryCategory* category = model->getCategory(id);
+		if ( (category) && (!LLFolderType::lookupIsProtectedType(category->getPreferredType())) )
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+// [/SL:KB]
+
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id)
 {
 	if (!model)

@@ -46,6 +46,12 @@ BOOL get_is_item_worn(const LLUUID& id);
 // Could this item be worn (correct type + not already being worn)
 BOOL get_can_item_be_worn(const LLUUID& id);
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+BOOL get_is_item_movable(const LLInventoryModel* model, const LLUUID& id);
+
+BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id);
+// [/SL:KB]
+
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);

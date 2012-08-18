@@ -239,7 +239,10 @@ BOOL LLInvFVBridge::isItemRemovable() const
 // Can be moved to another folder
 BOOL LLInvFVBridge::isItemMovable() const
 {
-	return TRUE;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	return get_is_item_movable(getInventoryModel(), mUUID);
+// [/SL:KB]
+//	return TRUE;
 }
 
 BOOL LLInvFVBridge::isLink() const
@@ -254,7 +257,10 @@ BOOL LLInvFVBridge::isLink() const
 BOOL LLInvFVBridge::cutToClipboard() const
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
-	if (obj && isItemMovable() && isItemRemovable())
+//	if (obj && isItemMovable() && isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	if (obj && isItemMovable())
+// [/SL:KB]
 	{
 		LLClipboard::instance().setCutMode(true);
 		return LLClipboard::instance().addToClipboard(mUUID);
@@ -668,7 +674,10 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 			}
 
 			items.push_back(std::string("Cut"));
-			if (!isItemMovable() || !isItemRemovable())
+//			if (!isItemMovable() || !isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+			if (!isItemMovable())
+// [/SL:KB]
 			{
 				disabled_items.push_back(std::string("Cut"));
 			}
@@ -1782,15 +1791,18 @@ LLHandle<LLFolderBridge> LLFolderBridge::sSelf;
 // Can be moved to another folder
 BOOL LLFolderBridge::isItemMovable() const
 {
-	LLInventoryObject* obj = getInventoryObject();
-	if(obj)
-	{
-		// If it's a protected type folder, we can't move it
-		if (LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
-			return FALSE;
-		return TRUE;
-	}
-	return FALSE;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	return get_is_category_movable(getInventoryModel(), mUUID);
+// [/SL:KB]
+//	LLInventoryObject* obj = getInventoryObject();
+//	if(obj)
+//	{
+//		// If it's a protected type folder, we can't move it
+//		if (LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
+//			return FALSE;
+//		return TRUE;
+//	}
+//	return FALSE;
 }
 
 void LLFolderBridge::selectItem()
