@@ -16,6 +16,24 @@
      function="Object.EnableTouch" />
   </menu_item_call>
   <menu_item_call
+   label="Edit"
+   layout="topleft"
+   name="edit">
+        <menu_item_call.on_click
+         function="Object.Edit" />
+        <menu_item_call.on_enable
+         function="EnableEdit"/>
+  </menu_item_call>  
+  <menu_item_call
+   label="Open"
+   layout="topleft"
+   name="open">
+    <menu_item_call.on_click
+     function="InspectObject.Open"/>
+    <menu_item_call.on_visible
+     function="Object.EnableOpen" />
+  </menu_item_call>
+  <menu_item_call
   label="Sit"
   layout="topleft"
   name="sit">
@@ -23,25 +41,6 @@
      function="InspectObject.Sit"/>
     <menu_item_call.on_visible
      function="Object.EnableSit"/>
-  </menu_item_call>
-  <menu_item_call
-   label="Pay"
-   layout="topleft"
-   name="pay">
-    <menu_item_call.on_click
-     function="InspectObject.Pay"/>
-    <menu_item_call.on_visible
-     function="EnablePayObject" />
-  </menu_item_call>
-  <menu_item_call
-   label="Buy"
-   layout="topleft"
-   enabled="true" 
-   name="buy">
-    <menu_item_call.on_click
-     function="InspectObject.Buy"/>
-    <menu_item_call.on_visible
-     function="Object.VisibleBuy" />
   </menu_item_call>
   <menu_item_call
    label="Take"
@@ -62,23 +61,24 @@
       function="Tools.EnableTakeCopy"/>
   </menu_item_call>
   <menu_item_call
-   label="Open"
+   label="Pay"
    layout="topleft"
-   name="open">
+   name="pay">
     <menu_item_call.on_click
-     function="InspectObject.Open"/>
+     function="InspectObject.Pay"/>
     <menu_item_call.on_visible
-     function="Object.EnableOpen" />
+     function="EnablePayObject" />
   </menu_item_call>
   <menu_item_call
-   label="Edit"
+   label="Buy"
    layout="topleft"
-   name="edit">
-        <menu_item_call.on_click
-         function="Object.Edit" />
-        <menu_item_call.on_enable
-         function="EnableEdit"/>
-  </menu_item_call>  
+   enabled="true" 
+   name="buy">
+    <menu_item_call.on_click
+     function="InspectObject.Buy"/>
+    <menu_item_call.on_visible
+     function="Object.VisibleBuy" />
+  </menu_item_call>
   <menu_item_call
    label="Wear"
    layout="topleft"
