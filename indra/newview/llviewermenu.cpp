@@ -2509,7 +2509,10 @@ bool enable_object_open()
 	LLViewerObject* root = obj->getRootEdit();
 	if (!root) return false;
 
-	return root->allowOpen();
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-18 (Catznip-3.3)
+	return (!root->isAttachment()) && (root->allowOpen());
+// [/SL:KB]
+//	return root->allowOpen();
 }
 
 
@@ -3690,7 +3693,10 @@ bool is_object_sittable()
 {
 	LLViewerObject* object = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 
-	if (object && object->getPCode() == LL_PCODE_VOLUME)
+//	if (object && object->getPCode() == LL_PCODE_VOLUME)
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-13 (Catznip-3.3)
+	if ( (object) && (object->getPCode() == LL_PCODE_VOLUME) && (!object->isAttachment()) )
+// [/SL:KB]
 	{
 		return true;
 	}
@@ -4526,11 +4532,18 @@ BOOL enable_take()
 	{
 		LLSelectNode* node = *iter;
 		LLViewerObject* object = node->getObject();
-		if (object->isAvatar())
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-13 (Catznip-3.3)
+		if ( (object->isAvatar()) || (object->isAttachment()) )
 		{
-			// ...don't acquire avatars
+			// ...don't acquire avatars or attachments
 			continue;
 		}
+// [/SL:KB]
+//		if (object->isAvatar())
+//		{
+//			// ...don't acquire avatars
+//			continue;
+//		}
 
 #ifdef HACKED_GODLIKE_VIEWER
 		return TRUE;

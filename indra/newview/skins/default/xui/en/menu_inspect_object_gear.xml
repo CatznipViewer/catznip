@@ -12,7 +12,7 @@
    name="touch">    
     <menu_item_call.on_click
      function="InspectObject.Touch"/>
-    <menu_item_call.on_visible
+    <menu_item_call.on_enable
      function="Object.EnableTouch" />
   </menu_item_call>
   <menu_item_call
@@ -49,7 +49,7 @@
    name="take">
     <menu_item_call.on_click
      function="Object.Take" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="Object.VisibleTake"/>
   </menu_item_call>
   <menu_item_call
