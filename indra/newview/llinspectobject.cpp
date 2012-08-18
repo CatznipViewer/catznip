@@ -41,6 +41,7 @@
 // [RLVa:KB] - Checked: 2010-02-27 (RLVa-1.2.0c)
 #include "rlvactions.h"
 #include "rlvhandler.h"
+#include "rlvlocks.h"
 #include "lltoolpie.h"
 // [/RLVa:KB]
 
@@ -382,6 +383,9 @@ void LLInspectObject::updateButtons(LLSelectNode* nodep)
 	{
 		// Detach is the default option for attachments
 		getChild<LLUICtrl>("detach_btn")->setVisible(true);
+// [RLVa:KB] - Checked: 2012-08-18 (RLVa-1.4.7)
+		getChild<LLUICtrl>("detach_btn")->setEnabled(!gRlvAttachmentLocks.isLockedAttachment(object));
+// [/RLVa:KB]
 	}
 // [/SL:KB]
 	else
