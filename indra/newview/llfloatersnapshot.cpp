@@ -168,7 +168,10 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-	BOOL saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	BOOL saveLocal(bool prompt_path);
+// [/SL:KB]
+//	BOOL saveLocal();
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
 	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
@@ -997,9 +1000,15 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+//BOOL LLSnapshotLivePreview::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+BOOL LLSnapshotLivePreview::saveLocal(bool prompt_path)
+// [/SL:KB]
 {
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, prompt_path);
+// [/SL:KB]
 
 	if(success)
 	{
@@ -2281,7 +2290,10 @@ void LLFloaterSnapshot::saveTexture()
 }
 
 // static
-BOOL LLFloaterSnapshot::saveLocal()
+//BOOL LLFloaterSnapshot::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+BOOL LLFloaterSnapshot::saveLocal(bool prompt_path)
+// [/SL:KB]
 {
 	lldebugs << "saveLocal" << llendl;
 	// FIXME: duplicated code
@@ -2298,7 +2310,10 @@ BOOL LLFloaterSnapshot::saveLocal()
 		return FALSE;
 	}
 
-	return previewp->saveLocal();
+//	return previewp->saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	return previewp->saveLocal(prompt_path);
+// [/SL:KB]
 }
 
 // static
