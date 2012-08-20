@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ border="true"
+ can_close="true"
+ can_minimize="true"
+ can_resize="false"
+ height="390"
+ name="floater_chat_alerts"
+ title="Chat Keyword Alerts"
+ width="490">
+  <check_box
+   follows="left|top"
+   height="16"
+   label="Enable alerts"
+   layout="topleft"
+   left="20"
+   name="alerts_check"
+   top="10"
+   width="150" />
+
+  <scroll_list
+   draw_heading="true"
+   follows="all"
+   height="150"
+   layout="topleft"
+   left="20"
+   name="alerts_list"
+   top_pad="5"
+   width="450">
+      <scroll_list.columns
+       label="Keyword"
+       name="alert_keyword" />
+  </scroll_list>
+  <button
+   follows="left|bottom"
+   height="22"
+   label="New"
+   layout="topleft"
+   left="20"
+   name="alerts_new"
+   top_pad="5"
+   width="90" />
+  <button
+   follows="left|bottom"
+   height="22"
+   label="Delete"
+   layout="topleft"
+   left_pad="5"
+   name="alerts_delete"
+   top_delta="0"
+   width="90" />
+
+  <view_border
+   bevel_style="none"
+   border_thickness="1"
+   follows="left|bottom"
+   height="0"
+   layout="topleft"
+   left="20"
+   name="divisor"
+   top_pad="10"
+   width="450" />
+
+  <text
+   follows="left|bottom"
+   height="10"
+   layout="topleft"
+   left="35"
+   name="alerts_keyword_label"
+   text_readonly_color="LabelDisabledColor"
+   top_pad="15"
+   type="string"
+   width="100">
+    Keyword :
+  </text>
+  <line_editor
+   follows="left|bottom"
+   height="23"
+   layout="topleft"
+   left_pad="5"
+   name="alerts_keyword"
+   top_delta="-5"
+   width="200" />
+  <check_box
+   follows="left|bottom"
+   height="16"
+   layout="topleft"
+   label="Case-sensitive"
+   left_pad="10"
+   name="alerts_keyword_case"
+   top_delta="3"
+   width="100" />
+
+  <text
+   follows="top|bottom"
+   height="10"
+   layout="topleft"
+   left="35"
+   name="alerts_color_label"
+   text_readonly_color="LabelDisabledColor"
+   top_pad="12"
+   type="string"
+   width="100"
+  >
+    Highlight Color :
+  </text>
+  <color_swatch
+   can_apply_immediately="true"
+   color="Red"
+   follows="left|bottom"
+   height="24"
+   label_height="0"
+   layout="topleft"
+   left_pad="6"
+   name="alerts_highlight_color"
+   top_delta="-5"
+   width="44" >
+  </color_swatch>
+
+  <check_box
+   follows="left|bottom"
+   height="16"
+   label="Play sound :"
+   layout="topleft"
+   left="15"
+   name="alerts_sound_check"
+   width="120"
+   top_pad="10" />
+  <line_editor
+   enabled="false"
+   follows="left|bottom"
+   height="23"
+   layout="topleft"
+   left_pad="5"
+   max_length_bytes="255"
+   name="alerts_sound_name"
+   select_on_focus="true"
+   width="200"
+   top_delta="-5"/>
+  <button
+   follows="left|bottom"
+   height="22"
+   label="Browse"
+   layout="topleft"
+   left_pad="10"
+   name="alerts_sound_browse"
+   top_delta="0"
+   width="60" />
+
+  <text
+   follows="top|bottom"
+   height="10"
+   layout="topleft"
+   left="35"
+   name="alerts_trigger_label"
+   text_readonly_color="LabelDisabledColor"
+   top_pad="7"
+   type="string"
+   width="100">
+    Trigger on :
+  </text>
+  <check_box
+   follows="left|bottom"
+   height="16"
+   label="Chat"
+   layout="topleft"
+   left_pad="5"
+   name="alerts_trigger_chat"
+   width="50"
+   top_delta="0" />
+  <check_box
+   follows="left|bottom"
+   height="16"
+   label="IMs"
+   layout="topleft"
+   left_pad="15"
+   name="alerts_trigger_im"
+   width="50"
+   top_delta="0" />
+  <check_box
+   follows="left|bottom"
+   height="16"
+   label="Groups"
+   layout="topleft"
+   left_pad="15"
+   name="alerts_trigger_group"
+   width="50"
+   top_delta="0" />
+
+  <view_border
+   bevel_style="none"
+   border_thickness="1"
+   follows="left|bottom"
+   height="0"
+   left="20"
+   name="divisor2"
+   top_pad="10"
+   width="450" />
+
+  <button
+   height="22"
+   follows="left|bottom"
+   name="alerts_ok"
+   label="OK"
+   left="20"
+   top_pad="10"
+   width="90" />
+  <button
+   height="22"
+   follows="left|bottom"
+   name="alerts_cancel"
+   label="Cancel"
+   left_pad="10"
+   top_delta="0"
+   width="90" />
+</floater>

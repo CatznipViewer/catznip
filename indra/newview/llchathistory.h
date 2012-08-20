@@ -31,6 +31,10 @@
 #include "lltextbox.h"
 #include "llviewerchat.h"
 
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+class LLHighlightEntry;
+// [/SL:KB]
+
 //Chat log widget allowing addition of a message as a widget 
 class LLChatHistory : public LLUICtrl
 {
@@ -116,6 +120,11 @@ class LLChatHistory : public LLUICtrl
 		 */
 		void appendMessage(const LLChat& chat, const LLSD &args = LLSD(), const LLStyle::Params& input_append_params = LLStyle::Params());
 		/*virtual*/ void clear();
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+	protected:
+		void onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry);
+// [/SL:KB]
 
 	private:
 		std::string mLastFromName;
