@@ -132,7 +132,8 @@ void  LLWinDebug::init()
 
 //void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename)
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
-std::string LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename)
+std::string LLWinDebug::writeDumpToFile(const std::string& filename, MINIDUMP_TYPE type,
+										MINIDUMP_EXCEPTION_INFORMATION* pExceptInfo, MINIDUMP_CALLBACK_INFORMATION* pCallbackInfo)
 // [/SL:KB]
 {
 //	// Temporary fix to switch out the code that writes the DMP file.
@@ -162,13 +163,22 @@ std::string LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_I
 			if (hFile != INVALID_HANDLE_VALUE)
 			{
 				// Write the dump, ignoring the return value
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-20 (Catznip-3.3)
 				f_mdwp(GetCurrentProcess(),
 						GetCurrentProcessId(),
 						hFile,
 						type,
-						ExInfop,
+						pExceptInfo,
 						NULL,
-						NULL);
+						pCallbackInfo);
+// [/SL:KB]
+//				f_mdwp(GetCurrentProcess(),
+//						GetCurrentProcessId(),
+//						hFile,
+//						type,
+//						ExInfop,
+//						NULL,
+//						NULL);
 
 				CloseHandle(hFile);
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)

@@ -1999,6 +1999,61 @@ void enumerate_process_threads(HANDLE hThreadSnapshot, DWORD (WINAPI* pCallback)
 	}
 }
 
+BOOL CALLBACK watchdog_freeze_dump_callback(void* pParam, const MINIDUMP_CALLBACK_INPUT* pCbInput, MINIDUMP_CALLBACK_OUTPUT* pCbOutput)
+{
+	U32 nFreezeDumpType = (pParam) ? *(U32*)pParam : 0;
+	switch (pCbInput->CallbackType)
+	{
+		case IncludeThreadCallback:
+			{
+				// Only include information about the main thread by default
+				if (0 == nFreezeDumpType)
+				{
+					DWORD dwMainThreadId = (DWORD)gDebugInfo["MainloopThreadID"].asInteger();
+					if ( (dwMainThreadId) && (dwMainThreadId != pCbInput->IncludeThread.ThreadId) )
+					{
+						return FALSE;
+					}
+				}
+			}
+			return TRUE;
+		case ThreadCallback:
+		case ThreadExCallback:
+			return TRUE;
+
+		case IncludeModuleCallback:
+			return TRUE;
+		case ModuleCallback:
+			{
+				// Don't include information about modules that aren't referenced
+				if ( (pCbOutput->ModuleWriteFlags & ModuleReferencedByMemory) == 0)
+				{
+					pCbOutput->ModuleWriteFlags &= ~ModuleWriteModule;
+					return TRUE;
+				}
+
+				// We only want the data segments for the executable and llcommon.dll as a start
+				if (pCbOutput->ModuleWriteFlags & ModuleWriteDataSeg)
+				{
+					if ((HMODULE)pCbInput->Module.BaseOfImage != GetModuleHandle(NULL))
+					{
+						// Not the main executable, check DLLs by name
+						TCHAR* pstrModuleName = wcsrchr(pCbInput->Module.FullPath, L'\\');
+						if ( (!pstrModuleName) || (0 != wcsicmp(++pstrModuleName, L"llcommon.dll")) )
+						{
+							pCbOutput->ModuleWriteFlags &= ~ModuleWriteDataSeg;
+						}
+					}
+				}
+			}
+			return TRUE;
+
+		case MemoryCallback:
+			return TRUE;
+	}
+	return FALSE;
+}
+
 void watchdog_freeze_callback()
 {
 	// NOTE: called from the thread the watchdog runs on, not the main thread
@@ -2009,9 +2064,15 @@ void watchdog_freeze_callback()
 	{
 		enumerate_process_threads(hThreadSnapshot, SuspendThread);
 
-		MINIDUMP_TYPE dumpType = (MINIDUMP_TYPE)(MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory);
+		U32 nFreezeDumpType = gSavedSettings.getU32("WatchdogFreezeDumpType");
+		U32 nMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory;
+		if (nFreezeDumpType >= 2)
+			nMiniDumpType |= MiniDumpWithDataSegs;
+		MINIDUMP_CALLBACK_INFORMATION dumpCbInfo;
+		dumpCbInfo.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)watchdog_freeze_dump_callback;
+		dumpCbInfo.CallbackParam = &nFreezeDumpType;
 		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
-		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(dumpType, NULL, strFilename);
+		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(strFilename, (MINIDUMP_TYPE)nMiniDumpType, NULL, &dumpCbInfo);
 
 		std::string strTemp = gDebugInfo["MinidumpPath"].asString();
 		if (!strTemp.empty())
