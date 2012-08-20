@@ -5051,7 +5051,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>60.0</real>
+      <real>30.0</real>
     </map>
     <key>MapOverlayIndex</key>
     <map>
@@ -12680,11 +12680,11 @@
       <key>Comment</key>
       <string>Controls whether the thread watchdog timer is activated. Value is boolean. Set to -1 to defer to built-in default.</string>
       <key>Persist</key>
-      <integer>0</integer>
+      <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>WatchdogFreezeDumpType</key>
     <map>
@@ -12695,7 +12695,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>WaterGLFogDensityScale</key>
     <map>
