@@ -46,7 +46,8 @@
 
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
 #ifdef LL_WINDOWS
-	#include <shellapi.h>
+#include <shellapi.h>
+#include <boost/lexical_cast.hpp>
 #endif // LL_WINDOWS
 // [/SL:KB]
 
@@ -85,7 +86,8 @@ public:
 
 		LLSD sdCrash;
 		sdCrash["timestamp"] = LLDate::now();
-		sdCrash["crash_id"] =  (content.has("crash_id")) ? content["crash_id"].asString() : "0";
+		sdCrash["crash_freeze"] = (content.has("crash_freeze")) ? content["crash_freeze"].asBoolean() : false;
+		sdCrash["crash_id"] =  (content.has("crash_id")) ? content["crash_id"].asUUID() : LLUUID::null;
 		sdCrash["crash_link"] =  (content.has("crash_link")) ? content["crash_link"].asString() : "";
 		sdCrash["crash_module"] = (content.has("crash_module_name")) ? content["crash_module_name"].asString() : "(Unknown)";
 		sdCrash["crash_offset"] = (content.has("crash_module_offset")) ? content["crash_module_offset"].asString() : "";
@@ -464,6 +466,7 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 				strLastExecEvent = "logout_crash";
 				break;
 		}
+		body << getFormDataField("last_exec_freeze", boost::lexical_cast<std::string>(mCrashInPreviousExec), BOUNDARY);
 		body << getFormDataField("last_exec_event", strLastExecEvent, BOUNDARY);
 		if (!strLastExecMsg.empty())
 			body << getFormDataField("last_exec_message", strLastExecMsg, BOUNDARY);

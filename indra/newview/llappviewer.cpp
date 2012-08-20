@@ -2074,10 +2074,7 @@ void watchdog_freeze_callback()
 		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
 		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(strFilename, (MINIDUMP_TYPE)nMiniDumpType, NULL, &dumpCbInfo);
 
-		std::string strTemp = gDebugInfo["MinidumpPath"].asString();
-		if (!strTemp.empty())
-			strTemp.append(";");
-		gDebugInfo["MinidumpPath"] = strTemp + strMinidumpPath;
+		gDebugInfo["MinidumpPath"] = strMinidumpPath;
 		LLAppViewer::writeDebugInfo();
 
 		enumerate_process_threads(hThreadSnapshot, ResumeThread);
