@@ -323,7 +323,7 @@ void LLAssetUploadResponder::uploadComplete(const LLSD& content)
 {
 }
 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
 	const LLSD& post_data,
 	const LLUUID& vfile_id,
@@ -403,13 +403,13 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 
 	// continue uploading for bulk uploads
 
-	// *FIX: This is a pretty big hack. What this does is check the
-	// file picker if there are any more pending uploads. If so,
-	// upload that file.
+//	// *FIX: This is a pretty big hack. What this does is check the
+//	// file picker if there are any more pending uploads. If so,
+//	// upload that file.
 //	std::string next_file = LLFilePicker::instance().getNextFile();
 //	if(!next_file.empty())
 //	{
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	if (!mFiles.empty())
 	{
 		const std::string next_file = mFiles.front();
@@ -457,7 +457,7 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 			display_name,
 			callback,
 			LLGlobalEconomy::Singleton::getInstance()->getPriceUpload(),
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 			(!mFiles.empty()) ? new std::list<std::string>(mFiles) : NULL);
 // [/SL:KB]
 //			userdata);

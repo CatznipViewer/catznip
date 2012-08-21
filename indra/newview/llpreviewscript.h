@@ -101,7 +101,7 @@ public:
 	static void		onBtnInsertFunction(LLUICtrl*, void*);
 	static void		onBtnLoadFromFile(void*);
 	static void		onBtnSaveToFile(void*);
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	void			onFilePickerCallback(const std::vector<std::string>& files);
 // [/SL:KB]
 

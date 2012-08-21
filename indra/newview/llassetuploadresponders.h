@@ -59,7 +59,7 @@ protected:
 class LLNewAgentInventoryResponder : public LLAssetUploadResponder
 {
 public:
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	LLNewAgentInventoryResponder(
 		const LLSD& post_data,
 		const LLUUID& vfile_id,
@@ -78,7 +78,7 @@ public:
 	virtual void uploadComplete(const LLSD& content);
 	virtual void uploadFailure(const LLSD& content);
 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 protected:
 	std::list<std::string> mFiles;
 // [/SL:KB]

@@ -1116,13 +1116,19 @@ void LLScriptEdCore::onBtnLoadFromFile( void* data )
 //		//File picking cancelled by user, so nothing to do.
 //		return;
 //	}
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
 		boost::bind(&LLScriptEdCore::onFilePickerCallback, (LLScriptEdCore*)data, _1));
 }
 
 void LLScriptEdCore::onFilePickerCallback(const std::vector<std::string>& files)
 {
+	if (files.empty())
+	{
+		//File picking cancelled by user, so nothing to do.
+		return;
+	}
+
 	const std::string filename = files.front();
 // [/SL:KB]
 //	std::string filename = file_picker.getFirstFile();
@@ -1146,7 +1152,7 @@ void LLScriptEdCore::onFilePickerCallback(const std::vector<std::string>& files)
 	// Only replace the script if there is something to replace with.
 	if (text.length() > 0)
 	{
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		mEditor->selectAll();
 		LLWString script(utf8str_to_wstring(text));
 		mEditor->insertText(script);

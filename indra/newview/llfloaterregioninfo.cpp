@@ -1280,13 +1280,19 @@ void LLPanelRegionTerrainInfo::onClickUploadRaw(void* data)
 //		llwarns << "No file" << llendl;
 //		return;
 //	}
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_RAW, 
 		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerUploadCallback, (LLPanelRegionTerrainInfo*)data, _1));
 }
 
 void LLPanelRegionTerrainInfo::onFilePickerUploadCallback(const std::vector<std::string>& files)
 {
+	if (files.empty())
+	{
+		llwarns << "No file" << llendl;
+		return;
+	}
+
 	std::string filepath = files.front();
 // [/SL:KB]
 //	std::string filepath = picker.getFirstFile();
@@ -1297,7 +1303,7 @@ void LLPanelRegionTerrainInfo::onFilePickerUploadCallback(const std::vector<std:
 	strings.push_back("upload filename");
 	strings.push_back(filepath);
 	LLUUID invoice(LLFloaterRegionInfo::getLastInvoice());
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
 // [/SL:KB]
 //	self->sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
