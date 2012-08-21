@@ -191,6 +191,18 @@ void LLFilePicker::reset()
 	mCurrentFile = 0;
 }
 
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_callback_t& cb)
+{
+	(new LLFilePickerCallbackThread(filter, false, cb))->getFile();
+}
+
+void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb)
+{
+	(new LLFilePickerCallbackThread(filter, true, cb))->getFile();
+}
+// [/SL:KB]
+
 #if LL_WINDOWS
 
 BOOL LLFilePicker::setupFilter(ELoadFilter filter)
@@ -304,13 +316,6 @@ BOOL LLFilePicker::getOpenFile(ELoadFilter filter, bool blocking)
 	
 	return success;
 }
-
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb)
-{
-	(new LLFilePickerCallbackThread(filter, true, cb))->getFile();
-}
-// [/SL:KB]
 
 //BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
 // [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
