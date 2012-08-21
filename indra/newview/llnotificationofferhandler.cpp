@@ -147,6 +147,12 @@ bool LLOfferHandler::processNotification(const LLSD& notify)
 				}
 			}
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			if (LLHandlerUtil::canLogToNearbyChat(notification))
+			{
+				LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+			}
+// [/SL:KB]
 			if (LLHandlerUtil::canLogToIM(notification))
 			{
 				// log only to file if notif panel can be embedded to IM and IM is opened

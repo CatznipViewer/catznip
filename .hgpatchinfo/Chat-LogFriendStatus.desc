@@ -1,0 +1,6 @@
+[Chat/LogFriendStatus]
+- changed : "FriendOnline"/"FriendOffline" notifications (optionally) log to the nearby chat history
+- changed : toast notification set to "plain_text" to inhibit the SLURL icon since it already displays the avatar's profile icon
+- added   : "Send Instant Message" option to the agent SLURL context menu
+- added   : "Show Group Chat" option to the group SLURL context menu
+- added   : "Offer Teleport" option to the agent SLURL context menu for agents

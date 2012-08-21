@@ -448,8 +448,12 @@ LLIMFloater* LLIMFloater::show(const LLUUID& session_id)
 				LLChicletBar::getInstance()->getChicletPanel()->scrollToChiclet(chiclet);
 			}
 
+//			floater->setDockControl(new LLDockControl(chiclet, floater, floater->getDockTongue(),
+//					LLDockControl::BOTTOM));
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 			floater->setDockControl(new LLDockControl(chiclet, floater, floater->getDockTongue(),
-					LLDockControl::BOTTOM));
+				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
 		}
 
 		// window is positioned, now we can show it.

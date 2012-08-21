@@ -2160,10 +2160,10 @@ Cette opération lancera votre navigateur Web.
 		Sujet : [SUBJECT], Message : [MESSAGE]
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; est en ligne
+		[NAME_SLURL] est en ligne
 	</notification>
 	<notification name="FriendOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; est hors ligne
+		[NAME_SLURL] est hors ligne
 	</notification>
 	<notification name="AddSelfFriend">
 		Même si vous êtes extrêmement sympathique, vous ne pouvez pas devenir ami avec vous-même.

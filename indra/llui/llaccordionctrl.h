@@ -117,6 +117,9 @@ public:
 
 	void	reset		();
 	void	expandDefaultTab();
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	void	expandTab(const std::string& tab_name);
+// [/SL:KB]
 
 	void	setComparator(const LLTabComparator* comp) { mTabComparator = comp; }
 	void	sort();

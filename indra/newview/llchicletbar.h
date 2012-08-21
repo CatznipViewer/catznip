@@ -71,6 +71,12 @@ public:
 	 */
 	void showWellButton(const std::string& well_name, bool visible);
 
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	enum EAlignment { ALIGN_TOP = 0, ALIGN_BOTTOM = 1 };
+
+	EAlignment	getAlignment() const				{ return mAlignment; }
+	void		setAlignment(EAlignment eAlignment)	{ mAlignment = eAlignment; }
+// [/SL:KB]
 private:
 	/**
 	 * Updates child controls size and visibility when it is necessary to reduce total width.
@@ -98,6 +104,9 @@ private:
 protected:
 	LLChicletBar(const LLSD& key = LLSD());
 
+// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	EAlignment			mAlignment;
+// [/SL:KB]
 	LLChicletPanel* 	mChicletPanel;
 	LLLayoutStack*		mToolbarStack;
 };

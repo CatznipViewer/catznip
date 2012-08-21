@@ -3694,7 +3694,7 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 		You are the only user in this session.
 	</string>
 	<string name="offline_message">
-		[NAME] 離線。
+		[NAME_SLURL] 離線。
 	</string>
 	<string name="invite_message">
 		Click the [BUTTON NAME] button to accept/connect to this voice chat.
