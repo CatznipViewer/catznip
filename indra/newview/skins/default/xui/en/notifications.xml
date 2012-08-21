@@ -6098,6 +6098,10 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        index="2"
        name="Mute"
        text="Block"/>
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
     </form>
   </notification>
 

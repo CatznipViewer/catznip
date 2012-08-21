@@ -36,6 +36,9 @@
 #include "llxmlnode.h"
 #include "lluictrl.h"
 #include "lluictrlfactory.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+#include "llurlregistry.h"
+// [/SL:KB]
 #include "lldir.h"
 #include "llsdserialize.h"
 #include "lltrans.h"
@@ -70,6 +73,16 @@ LLNotificationForm::FormIgnore::FormIgnore()
 	save_option("save_option", false)
 {}
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+LLNotificationForm::FormCheck::FormCheck()
+:	control("control"),
+	text("text"),
+	type("type")
+{
+	type = "check";
+}
+// [/SL:KB]
+
 LLNotificationForm::FormButton::FormButton()
 :	index("index"),
 	text("text"),
@@ -92,6 +105,9 @@ LLNotificationForm::FormInput::FormInput()
 LLNotificationForm::FormElement::FormElement()
 :	button("button"),
 	input("input")
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+,	check("check")
+// [/SL:KB]
 {}
 
 LLNotificationForm::FormElements::FormElements()
@@ -538,7 +554,7 @@ LLNotification::LLNotification(const LLNotification::Params& p) :
 	mPriority(p.priority),
 	mCancelled(false),
 	mIgnored(false),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 	mPersisted(false),
 // [/SL:KB]
 	mResponderObj(NULL),
@@ -575,7 +591,7 @@ LLNotification::LLNotification(const LLSD& sd) :
 	mRespondedTo(false),
 	mCancelled(false),
 	mIgnored(false),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 	mPersisted(false),
 // [/SL:KB]
 	mResponderObj(NULL),
@@ -637,7 +653,7 @@ void LLNotification::updateFrom(LLNotificationPtr other)
 	mExpiresAt = other->mExpiresAt;
 	mCancelled = other->mCancelled;
 	mIgnored = other->mIgnored;
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 	mPersisted = other->mPersisted;
 // [/SL:KB]
 	mPriority = other->mPriority;
@@ -958,6 +974,34 @@ std::string LLNotification::getMessage() const
 	LLStringUtil::format(message, mSubstitutions);
 	return message;
 }
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+std::string LLNotification::getLogMessage() const
+{
+	if (!mTemplatep)
+		return std::string();
+
+	// Iterate over all substitutions and replace any SLURLs we come across with their label
+	LLSD logSubstitutions = mSubstitutions;
+	for (LLSD::map_iterator itSubstitution = logSubstitutions.beginMap(); itSubstitution != logSubstitutions.endMap(); ++itSubstitution)
+	{
+		LLSD& sdSubstitution = itSubstitution->second;
+		if (!sdSubstitution.isString())
+			continue;
+
+		LLUrlMatch urlMatch; std::string strSubstitution = sdSubstitution.asString();
+		if ( (LLUrlRegistry::instance().findUrl(strSubstitution, urlMatch)) &&
+		     (0 == urlMatch.getStart()) && (urlMatch.getEnd() >= strSubstitution.size() - 1) )
+		{
+			sdSubstitution = urlMatch.getLabel();
+		}
+	}
+
+	std::string message = mTemplatep->mMessage;
+	LLStringUtil::format(message, logSubstitutions);
+	return message;
+}
+// [/SL:KB]
 
 std::string LLNotification::getLabel() const
 {

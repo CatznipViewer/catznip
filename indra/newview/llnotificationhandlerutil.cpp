@@ -424,7 +424,13 @@ void LLHandlerUtil::logToNearbyChat(const LLNotificationPtr& notification, EChat
 		chat_msg.mSourceType = type;
 		chat_msg.mFromName = SYSTEM_FROM;
 		chat_msg.mFromID = LLUUID::null;
-		nearby_chat->addMessage(chat_msg);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+		nearby_chat->addMessage(chat_msg, true, LLSD().with("do_not_log", true));
+
+		chat_msg.mText = notification->getLogMessage();
+		nearby_chat->logMessage(chat_msg);
+// [/SL:KB]
+//		nearby_chat->addMessage(chat_msg);
 	}
 }
 

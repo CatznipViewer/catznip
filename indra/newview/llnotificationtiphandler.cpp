@@ -93,7 +93,9 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 	{
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
 		bool fShowToast = true;
+// [/SL:KB]
 
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 		// Don't log persisted notifications a second time
 		if (!notification->isPersisted())
 		{
@@ -135,7 +137,7 @@ bool LLTipHandler::processNotification(const LLSD& notify)
 			{
 				LLHandlerUtil::spawnIMSession(name, from_id);
 			}
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 		}
 // [/SL:KB]
 
