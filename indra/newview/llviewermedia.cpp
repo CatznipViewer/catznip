@@ -3364,9 +3364,9 @@ void LLViewerMediaImpl::handleMediaEvent(LLPluginClassMedia* plugin, LLPluginCla
 }
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLViewerMediaImpl::onFilePickerCallback(LLPluginClassMedia* plugin, const std::vector<std::string>& files)
+void LLViewerMediaImpl::onFilePickerCallback(LLPluginClassMedia* plugin, const std::string& filename)
 {
-	plugin->sendPickFileResponse( (!files.empty()) ? files.front() : LLStringUtil::null );
+	plugin->sendPickFileResponse(filename);
 }
 // [/SL:KB]
 

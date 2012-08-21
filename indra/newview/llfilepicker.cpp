@@ -68,25 +68,43 @@ LLFilePicker LLFilePicker::sInstance;
 class LLFilePickerCallbackThread : public LLFilePickerThread
 {
 public:
-	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, bool multiple, const LLFilePicker::picker_callback_t& cb)
-		: LLFilePickerThread(filter, multiple)
-		, mCallback(cb)
+	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_single_callback_t& cb)
+		: LLFilePickerThread(filter, false)
+		, mSingleCb(cb)
 	{
 	}
 
-	LLFilePickerCallbackThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file, const LLFilePicker::picker_callback_t& cb)
+	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, const LLFilePicker::picker_multi_callback_t& cb)
+		: LLFilePickerThread(filter, true)
+		, mMultiCb(cb)
+	{
+	}
+
+	LLFilePickerCallbackThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file, const LLFilePicker::picker_single_callback_t& cb)
 		: LLFilePickerThread(filter, initial_file)
-		, mCallback(cb)
+		, mSingleCb(cb)
 	{
 	}
 
 	/*virtual*/ void notify(const std::vector<std::string>& files)
 	{
-		mCallback(files);
+		switch (mPickerType)
+		{
+			case OPEN_SINGLE:
+			case SAVE_SINGLE:
+				mSingleCb( (!files.empty()) ? files.front() : LLStringUtil::null);
+				break;
+			case OPEN_MULTIPLE:
+				mMultiCb(files);
+				break;
+			default:
+				break;
+		}
 	}
 
 protected:
-	LLFilePicker::picker_callback_t mCallback;
+	LLFilePicker::picker_single_callback_t mSingleCb;
+	LLFilePicker::picker_multi_callback_t mMultiCb;
 };
 // [/SL:KB]
 
@@ -192,14 +210,19 @@ void LLFilePicker::reset()
 }
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_callback_t& cb)
+void LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb)
 {
-	(new LLFilePickerCallbackThread(filter, false, cb))->getFile();
+	(new LLFilePickerCallbackThread(filter, filename, cb))->getFile();
 }
 
-void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb)
+void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb)
 {
-	(new LLFilePickerCallbackThread(filter, true, cb))->getFile();
+	(new LLFilePickerCallbackThread(filter, cb))->getFile();
+}
+
+void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb)
+{
+	(new LLFilePickerCallbackThread(filter, cb))->getFile();
 }
 // [/SL:KB]
 
@@ -405,7 +428,10 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 	return success;
 }
 
-BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
+//BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking)
+// [/SL:KB]
 {
 	if( mLocked )
 	{
@@ -591,8 +617,15 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 
 	reset();
 
-	// Modal, so pause agent
-	send_agent_pause();
+//	// Modal, so pause agent
+//	send_agent_pause();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	if (blocking)
+	{
+		// Modal, so pause agent
+		send_agent_pause();
+	}
+// [/SL:KB]
 	{
 		// NOTA BENE: hitting the file dialog triggers a window focus event, destroying the selection manager!!
 		success = GetSaveFileName(&mOFN);
@@ -603,10 +636,19 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 		}
 		gKeyboard->resetKeys();
 	}
-	send_agent_resume();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	if (blocking)
+	{
+		send_agent_resume();
 
-	// Account for the fact that the app has been stalled.
-	LLFrameTimer::updateFrameTime();
+		// Account for the fact that the app has been stalled.
+		LLFrameTimer::updateFrameTime();
+	}
+// [/SL:KB]
+//	send_agent_resume();
+//
+//	// Account for the fact that the app has been stalled.
+//	LLFrameTimer::updateFrameTime();
 	return success;
 }
 
@@ -1074,7 +1116,10 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 	return success;
 }
 
-BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
+//BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking)
+// [/SL:KB]
 {
 	if( mLocked )
 		return FALSE;
@@ -1091,20 +1136,36 @@ BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename)
 	
 	mNavOptions.optionFlags &= ~kNavAllowMultipleFiles;
 
-	// Modal, so pause agent
-	send_agent_pause();
+//	// Modal, so pause agent
+//	send_agent_pause();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	if (blocking)
+	{
+		// Modal, so pause agent
+		send_agent_pause();
+	}
+// [/SL:KB]
 	{
 		error = doNavSaveDialog(filter, filename);
 	}
-	send_agent_resume();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	if (blocking)
+	{
+		send_agent_resume();
+
+		// Account for the fact that the app has been stalled.
+		LLFrameTimer::updateFrameTime();
+	}
+// [/SL:KB]
+//	send_agent_resume();
 	if (error == noErr)
 	{
 		if (getFileCount())
 			success = true;
 	}
 
-	// Account for the fact that the app has been stalled.
-	LLFrameTimer::updateFrameTime();
+//	// Account for the fact that the app has been stalled.
+//	LLFrameTimer::updateFrameTime();
 	return success;
 }
 
@@ -1325,7 +1386,10 @@ static std::string add_script_filter_to_gtkchooser(GtkWindow *picker)
 							LLTrans::getString("script_files") + " (*.lsl)");
 }
 
-BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+//BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking)
+// [/SL:KB]
 {
 	BOOL rtn = FALSE;
 
@@ -1521,7 +1585,10 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 // Hacky stubs designed to facilitate fake getSaveFile and getOpenFile with
 // static results, when we don't have a real filepicker.
 
-BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+//BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking)
+// [/SL:KB]
 {
 	// if local file browsing is turned off, return without opening dialog
 	// (Even though this is a stub, I think we still should not return anything at all)
@@ -1587,7 +1654,10 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 
 #else // not implemented
 
-BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+//BOOL LLFilePicker::getSaveFile( ESaveFilter filter, const std::string& filename )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+BOOL LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking)
+// [/SL:KB]
 {
 	reset();	
 	return FALSE;

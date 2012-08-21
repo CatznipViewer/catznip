@@ -318,18 +318,33 @@ void LLPreviewTexture::saveAs(LLFilePicker::ESaveFilter filter)
 	if( mLoadingFullImage )
 		return;
 
-	LLFilePicker& file_picker = LLFilePicker::instance();
+//	LLFilePicker& file_picker = LLFilePicker::instance();
 	const LLInventoryItem* item = getItem() ;
-//	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TGA, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
-// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
-	if( !file_picker.getSaveFile(filter, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
-// [/SL:KB]
+////	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TGA, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
+//// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+//	if( !file_picker.getSaveFile(filter, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
+//// [/SL:KB]
+//	{
+//		// User canceled or we failed to acquire save file.
+//		return;
+//	}
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_TGA, (item) ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null,
+		boost::bind(&LLPreviewTexture::save, this, _1));
+}
+
+void LLPreviewTexture::save(const std::string& filename)
+{
+	if(filename.empty())
 	{
 		// User canceled or we failed to acquire save file.
 		return;
 	}
-	// remember the user-approved/edited file name.
-	mSaveFileName = file_picker.getFirstFile();
+
+	mSaveFileName = filename;
+// [/SL:KB]
+//	// remember the user-approved/edited file name.
+//	mSaveFileName = file_picker.getFirstFile();
 	mLoadingFullImage = TRUE;
 	getWindow()->incBusyCount();
 

@@ -128,15 +128,16 @@ public:
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
 		: LLThread("file picker")
-		, mFilter(filter)
 		, mPickerType( (multiple) ? OPEN_MULTIPLE : OPEN_SINGLE )
+		, mFilter(filter)
 	{
 	}
 
 	LLFilePickerThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file)
 		: LLThread("file picker")
-		, mFilter(filter)
 		, mPickerType(SAVE_SINGLE)
+		, mFilter(filter)
+		, mInitialFile(initial_file)
 	{
 	}
 // [/SL:KB]

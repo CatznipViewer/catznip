@@ -1118,18 +1118,16 @@ void LLScriptEdCore::onBtnLoadFromFile( void* data )
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
-		boost::bind(&LLScriptEdCore::onFilePickerCallback, (LLScriptEdCore*)data, _1));
+		boost::bind(&LLScriptEdCore::onFilePickerLoadCallback, (LLScriptEdCore*)data, _1));
 }
 
-void LLScriptEdCore::onFilePickerCallback(const std::vector<std::string>& files)
+void LLScriptEdCore::onFilePickerLoadCallback(const std::string& filename)
 {
-	if (files.empty())
+	if (filename.empty())
 	{
 		//File picking cancelled by user, so nothing to do.
 		return;
 	}
-
-	const std::string filename = files.front();
 // [/SL:KB]
 //	std::string filename = file_picker.getFirstFile();
 
@@ -1168,22 +1166,41 @@ void LLScriptEdCore::onBtnSaveToFile( void* userdata )
 
 	LLViewerStats::getInstance()->incStat( LLViewerStats::ST_LSL_SAVE_COUNT );
 
-	LLScriptEdCore* self = (LLScriptEdCore*) userdata;
+//	LLScriptEdCore* self = (LLScriptEdCore*) userdata;
+//
+//	if( self->mSaveCallback )
+//	{
+//		LLFilePicker& file_picker = LLFilePicker::instance();
+//		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT ) )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_SCRIPT, LLStringUtil::null,
+		boost::bind(&LLScriptEdCore::onFilePickerSaveCallback, (LLScriptEdCore*)userdata, _1));
+}
 
-	if( self->mSaveCallback )
+void LLScriptEdCore::onFilePickerSaveCallback(const std::string& filename)
+{
+	if ( (mSaveCallback) && (!filename.empty()) )
 	{
-		LLFilePicker& file_picker = LLFilePicker::instance();
-		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT ) )
 		{
-			std::string filename = file_picker.getFirstFile();
-			std::string scriptText=self->mEditor->getText();
+			std::string scriptText= mEditor->getText();
 			std::ofstream fout(filename.c_str());
 			fout<<(scriptText);
 			fout.close();
-			self->mSaveCallback( self->mUserdata, FALSE );
+			mSaveCallback( mUserdata, FALSE );
 		}
 	}
 }
+// [/SL:KB]
+//		{
+//			std::string filename = file_picker.getFirstFile();
+//			std::string scriptText=self->mEditor->getText();
+//			std::ofstream fout(filename.c_str());
+//			fout<<(scriptText);
+//			fout.close();
+//			self->mSaveCallback( self->mUserdata, FALSE );
+//		}
+//	}
+//}
 
 bool LLScriptEdCore::canLoadOrSaveToFile( void* userdata )
 {

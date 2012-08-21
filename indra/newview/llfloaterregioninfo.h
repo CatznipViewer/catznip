@@ -238,7 +238,8 @@ public:
 	static void onClickDownloadRaw(void*);
 	static void onClickUploadRaw(void*);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	void		onFilePickerUploadCallback(const std::vector<std::string>& files);
+	void		onFilePickerDownloadCallback(const std::string& filename);
+	void		onFilePickerUploadCallback(const std::string& filename);
 // [/SL:KB]
 	static void onClickBakeTerrain(void*);
 	bool callbackBakeTerrain(const LLSD& notification, const LLSD& response);
