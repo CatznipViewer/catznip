@@ -66,6 +66,9 @@ class LLFilePicker
 	friend class LLDirPicker;
 	friend void chooser_responder(GtkWidget *, gint, gpointer);
 #endif // LL_GTK
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	friend class LLFilePickerThread;
+// [/SL:KB]
 public:
 	// calling this before main() is undefined
 	static LLFilePicker& instance( void ) { return sInstance; }
@@ -113,11 +116,18 @@ public:
 	};
 
 	// open the dialog. This is a modal operation
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+protected:
+	BOOL getMultipleOpenFiles(ELoadFilter filter, bool blocking);
+public:
+	typedef boost::function<void(const std::vector<std::string>&)> picker_callback_t;
+
 	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
 	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	BOOL getMultipleOpenFiles(ELoadFilter filter = FFLOAD_ALL, bool blocking = true);
+	void getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb);
 // [/SL:KB]
+//	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
+//	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
 //	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
 
 	// Get the filename(s) found. getFirstFile() sets the pointer to
