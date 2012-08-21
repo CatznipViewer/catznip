@@ -110,31 +110,42 @@ public:
 	static void clearDead();
 
 //	std::string mFile; 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	bool m_fMultiple;
+//
+//	LLFilePicker::ELoadFilter mFilter;
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	enum EPickerType { OPEN_SINGLE, OPEN_MULTIPLE, SAVE_SINGLE } mPickerType;
 	std::vector<std::string> mFiles;
+	S32 mFilter;
+	std::string mInitialFile;
 // [/SL:KB]
 
-	LLFilePicker::ELoadFilter mFilter;
-
-//	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
-// [/SL:KB]
-		: LLThread("file picker"), mFilter(filter)
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		, m_fMultiple(multiple)
-// [/SL:KB]
+		: LLThread("file picker")
+		, mFilter(filter)
+		, mPickerType( (multiple) ? OPEN_MULTIPLE : OPEN_SINGLE )
 	{
-
 	}
+
+	LLFilePickerThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file)
+		: LLThread("file picker")
+		, mFilter(filter)
+		, mPickerType(SAVE_SINGLE)
+	{
+	}
+// [/SL:KB]
+//	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
+//		: LLThread("file picker"), mFilter(filter)
+//	{
+//
+//	}
 
 	void getFile();
 
 	virtual void run();
 
 //	virtual void notify(const std::string& filename) = 0;
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	virtual void notify(const std::vector<std::string>& files) = 0;
 // [/SL:KB]
 };

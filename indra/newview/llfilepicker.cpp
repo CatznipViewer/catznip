@@ -34,6 +34,9 @@
 #include "llframetimer.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+#include "llviewermenufile.h"
+// [/SL:KB]
 #include "llwindow.h"	// beforeDialog()
 
 #if LL_SDL
@@ -60,6 +63,32 @@ LLFilePicker LLFilePicker::sInstance;
 #define MODEL_FILTER L"Model files (*.dae)\0*.dae\0"
 #define SCRIPT_FILTER L"Script files (*.lsl)\0*.lsl\0"
 #endif
+
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+class LLFilePickerCallbackThread : public LLFilePickerThread
+{
+public:
+	LLFilePickerCallbackThread(LLFilePicker::ELoadFilter filter, bool multiple, const LLFilePicker::picker_callback_t& cb)
+		: LLFilePickerThread(filter, multiple)
+		, mCallback(cb)
+	{
+	}
+
+	LLFilePickerCallbackThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file, const LLFilePicker::picker_callback_t& cb)
+		: LLFilePickerThread(filter, initial_file)
+		, mCallback(cb)
+	{
+	}
+
+	/*virtual*/ void notify(const std::vector<std::string>& files)
+	{
+		mCallback(files);
+	}
+
+protected:
+	LLFilePicker::picker_callback_t mCallback;
+};
+// [/SL:KB]
 
 //
 // Implementation
@@ -276,8 +305,15 @@ BOOL LLFilePicker::getOpenFile(ELoadFilter filter, bool blocking)
 	return success;
 }
 
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb)
+{
+	(new LLFilePickerCallbackThread(filter, true, cb))->getFile();
+}
+// [/SL:KB]
+
 //BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 // [/SL:KB]
 {
@@ -309,7 +345,7 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 	
 //	// Modal, so pause agent
 //	send_agent_pause();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	if (blocking)
 	{
 		// Modal, so pause agent
@@ -348,10 +384,11 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 			}
 		}
 	}
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	if (blocking)
 	{
 		send_agent_resume();
+
 		// Account for the fact that the app has been stalled.
 		LLFrameTimer::updateFrameTime();
 	}
@@ -977,7 +1014,7 @@ BOOL LLFilePicker::getOpenFile(ELoadFilter filter, bool blocking)
 }
 
 //BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter)
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 // [/SL:KB]
 {
@@ -997,9 +1034,9 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 	reset();
 	
 	mNavOptions.optionFlags |= kNavAllowMultipleFiles;
-	// Modal, so pause agent
+//	// Modal, so pause agent
 //	send_agent_pause();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	if (blocking)
 	{
 		// Modal, so pause agent
@@ -1009,7 +1046,16 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 	{
 		error = doNavChooseDialog(filter);
 	}
-	send_agent_resume();
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	if (blocking)
+	{
+		send_agent_resume();
+
+		// Account for the fact that the app has been stalled.
+		LLFrameTimer::updateFrameTime();
+	}
+// [/SL:KB]
+//	send_agent_resume();
 	if (error == noErr)
 	{
 		if (getFileCount())
@@ -1018,8 +1064,8 @@ BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 			mLocked = true;
 	}
 
-	// Account for the fact that the app has been stalled.
-	LLFrameTimer::updateFrameTime();
+//	// Account for the fact that the app has been stalled.
+//	LLFrameTimer::updateFrameTime();
 	return success;
 }
 
@@ -1430,7 +1476,7 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter, bool blocking )
 }
 
 //BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 // [/SL:KB]
 {
@@ -1517,7 +1563,7 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter )
 }
 
 //BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking)
 // [/SL:KB]
 {
@@ -1549,7 +1595,7 @@ BOOL LLFilePicker::getOpenFile( ELoadFilter filter )
 }
 
 //BOOL LLFilePicker::getMultipleOpenFiles( ELoadFilter filter )
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 BOOL LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, bool blocking )
 // [/SL:KB]
 {

@@ -138,22 +138,41 @@ void LLFilePickerThread::run()
 //		mFile = picker.getFirstFile();
 //	}
 //#endif
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	if (!m_fMultiple)
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	switch (mPickerType)
 	{
-		if (picker.getOpenFile(mFilter, false))
-			mFiles.push_back(picker.getFirstFile());
-	}
-	else
-	{
-		if (picker.getMultipleOpenFiles(mFilter, false))
-		{
-			mFiles.push_back(picker.getFirstFile());
+		case OPEN_SINGLE:
+			{
+				if (picker.getOpenFile((LLFilePicker::ELoadFilter)mFilter, false))
+				{
+					mFiles.push_back(picker.getFirstFile());
+				}
+			}
+			break;
+		case OPEN_MULTIPLE:
+			{
+				if (picker.getMultipleOpenFiles((LLFilePicker::ELoadFilter)mFilter, false))
+				{
+					mFiles.push_back(picker.getFirstFile());
 
-			std::string file;
-			while ((file = picker.getNextFile()) != LLStringUtil::null)
-				mFiles.push_back(file);
-		}
+					std::string file;
+					while (!(file = picker.getNextFile()).empty())
+					{
+						mFiles.push_back(file);
+					}
+				}
+			}
+			break;
+		case SAVE_SINGLE:
+			{
+				if (picker.getSaveFile((LLFilePicker::ESaveFilter)mFilter, mInitialFile))
+				{
+					mFiles.push_back(picker.getFirstFile());
+				}
+			}
+			break;
+		default:
+			break;
 	}
 // [/SL:KB]
 
@@ -479,61 +498,6 @@ public:
 protected:
 	LLFilePicker::ELoadFilter m_eFilter;
 };
-
-class LLBulkUploadFilePicker : public LLFilePickerThread
-{
-public:
-	LLBulkUploadFilePicker()
-		: LLFilePickerThread(LLFilePicker::FFLOAD_ALL, true)
-	{
-	}
-
-	/*virtual*/ void notify(const std::vector<std::string>& files)
-	{
-		if (files.empty())
-			return;
-
-// [/SL:KB]
-		const std::string& filename = files.front();
-		std::string name = gDirUtilp->getBaseFileName(filename, true);
-			
-		std::string asset_name = name;
-		LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
-		LLStringUtil::replaceChar(asset_name, '|', '?');
-		LLStringUtil::stripNonprintable(asset_name);
-		LLStringUtil::trim(asset_name);
-			
-		std::string display_name = LLStringUtil::null;
-		LLAssetStorage::LLStoreAssetCallback callback = NULL;
-		S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		std::list<std::string>* userdata = new std::list<std::string>(files.begin() + 1, files.end());
-// [/SL:KB]
-//		void *userdata = NULL;
-
-		upload_new_resource(
-			filename,
-			asset_name,
-			asset_name,
-			0,
-			LLFolderType::FT_NONE,
-			LLInventoryType::IT_NONE,
-			LLFloaterPerms::getNextOwnerPerms(),
-			LLFloaterPerms::getGroupPerms(),
-			LLFloaterPerms::getEveryonePerms(),
-			display_name,
-			callback,
-			expected_upload_cost,
-			userdata);
-
-		// *NOTE: Ew, we don't iterate over the file list here,
-		// we handle the next files in upload_done_callback()
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	}
-protected:
-	LLFilePicker::ELoadFilter m_eFilter;
-	std::string m_strFloater;
-};
 // [/SL:KB]
 
 class LLFileUploadImage : public view_listener_t
@@ -615,60 +579,72 @@ class LLFileUploadBulk : public view_listener_t
 			gAgentCamera.changeCameraToDefault();
 		}
 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		(new LLBulkUploadFilePicker())->getFile();
-// [/SL:KB]
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, 
+			boost::bind(&LLFileUploadBulk::onFilePickerCallback, this, _1));
 
-//		// TODO:
-//		// Iterate over all files
-//		// Check extensions for uploadability, cost
-//		// Check user balance for entire cost
-//		// Charge user entire cost
-//		// Loop, uploading
-//		// If an upload fails, refund the user for that one
-//		//
-//		// Also fix single upload to charge first, then refund
-//
+		return true;
+	}
+
+	void onFilePickerCallback(const std::vector<std::string>& files)
+	{
+// [/SL:KB]
+		// TODO:
+		// Iterate over all files
+		// Check extensions for uploadability, cost
+		// Check user balance for entire cost
+		// Charge user entire cost
+		// Loop, uploading
+		// If an upload fails, refund the user for that one
+		//
+		// Also fix single upload to charge first, then refund
+
 //		LLFilePicker& picker = LLFilePicker::instance();
 //		if (picker.getMultipleOpenFiles())
 //		{
 //			const std::string& filename = picker.getFirstFile();
-//			std::string name = gDirUtilp->getBaseFileName(filename, true);
-//			
-//			std::string asset_name = name;
-//			LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
-//			LLStringUtil::replaceChar(asset_name, '|', '?');
-//			LLStringUtil::stripNonprintable(asset_name);
-//			LLStringUtil::trim(asset_name);
-//			
-//			std::string display_name = LLStringUtil::null;
-//			LLAssetStorage::LLStoreAssetCallback callback = NULL;
-//			S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+			const std::string& filename = files.front();
+// [/SL:KB]
+			std::string name = gDirUtilp->getBaseFileName(filename, true);
+			
+			std::string asset_name = name;
+			LLStringUtil::replaceNonstandardASCII( asset_name, '?' );
+			LLStringUtil::replaceChar(asset_name, '|', '?');
+			LLStringUtil::stripNonprintable(asset_name);
+			LLStringUtil::trim(asset_name);
+			
+			std::string display_name = LLStringUtil::null;
+			LLAssetStorage::LLStoreAssetCallback callback = NULL;
+			S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+			std::list<std::string>* userdata = new std::list<std::string>(files.begin() + 1, files.end());
+// [/SL:KB]
 //			void *userdata = NULL;
-//
-//			upload_new_resource(
-//				filename,
-//				asset_name,
-//				asset_name,
-//				0,
-//				LLFolderType::FT_NONE,
-//				LLInventoryType::IT_NONE,
-//				LLFloaterPerms::getNextOwnerPerms(),
-//				LLFloaterPerms::getGroupPerms(),
-//				LLFloaterPerms::getEveryonePerms(),
-//				display_name,
-//				callback,
-//				expected_upload_cost,
-//				userdata);
-//
-//			// *NOTE: Ew, we don't iterate over the file list here,
-//			// we handle the next files in upload_done_callback()
+
+			upload_new_resource(
+				filename,
+				asset_name,
+				asset_name,
+				0,
+				LLFolderType::FT_NONE,
+				LLInventoryType::IT_NONE,
+				LLFloaterPerms::getNextOwnerPerms(),
+				LLFloaterPerms::getGroupPerms(),
+				LLFloaterPerms::getEveryonePerms(),
+				display_name,
+				callback,
+				expected_upload_cost,
+				userdata);
+
+			// *NOTE: Ew, we don't iterate over the file list here,
+			// we handle the next files in upload_done_callback()
 //		}
 //		else
 //		{
 //			llinfos << "Couldn't import objects from file" << llendl;
 //		}
-		return true;
+//		return true;
 	}
 };
 
@@ -781,14 +757,22 @@ class LLFileQuit : public view_listener_t
 };
 
 
-void handle_compress_image(void*)
+//void handle_compress_image(void*)
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void handle_compress_image(const std::vector<std::string>& files)
+// [/SL:KB]
 {
-	LLFilePicker& picker = LLFilePicker::instance();
-	if (picker.getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE))
-	{
-		std::string infile = picker.getFirstFile();
-		while (!infile.empty())
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if (picker.getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE))
+//	{
+//		std::string infile = picker.getFirstFile();
+//		while (!infile.empty())
+//		{
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		for (auto itFile = files.begin(); itFile != files.end(); ++itFile)
 		{
+			const std::string& infile = *itFile;
+// [/SL:KB]
 			std::string outfile = infile + ".j2c";
 
 			llinfos << "Input:  " << infile << llendl;
@@ -807,9 +791,9 @@ void handle_compress_image(void*)
 				llinfos << "Compression failed: " << LLImage::getLastError() << llendl;
 			}
 
-			infile = picker.getNextFile();
+//			infile = picker.getNextFile();
 		}
-	}
+//	}
 }
 
 LLUUID upload_new_resource(
