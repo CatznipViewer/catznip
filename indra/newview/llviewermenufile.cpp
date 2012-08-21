@@ -271,14 +271,17 @@ std::string build_extensions_string(LLFilePicker::ELoadFilter filter)
    Data is the load filter for the type of file as defined in LLFilePicker.
 **/
 //const std::string upload_pick(void* data)
-//{
-// 	if( gAgentCamera.cameraMouselook() )
-//	{
-//		gAgentCamera.changeCameraToDefault();
-//		// This doesn't seem necessary. JC
-//		// display();
-//	}
-//
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void upload_pick(LLFilePicker::ELoadFilter filter)
+// [/SL:KB]
+{
+ 	if( gAgentCamera.cameraMouselook() )
+	{
+		gAgentCamera.changeCameraToDefault();
+		// This doesn't seem necessary. JC
+		// display();
+	}
+
 //	LLFilePicker::ELoadFilter type;
 //	if(data)
 //	{
@@ -295,224 +298,130 @@ std::string build_extensions_string(LLFilePicker::ELoadFilter filter)
 //		llinfos << "Couldn't import objects from file" << llendl;
 //		return std::string();
 //	}
-//
-//	
-//	const std::string& filename = picker.getFirstFile();
-//	std::string ext = gDirUtilp->getExtension(filename);
-//
-//	//strincmp doesn't like NULL pointers
-//	if (ext.empty())
-//	{
-//		std::string short_name = gDirUtilp->getBaseFileName(filename);
-//		
-//		// No extension
-//		LLSD args;
-//		args["FILE"] = short_name;
-//		LLNotificationsUtil::add("NoFileExtension", args);
-//		return std::string();
-//	}
-//	else
-//	{
-//		//so there is an extension
-//		//loop over the valid extensions and compare to see
-//		//if the extension is valid
-//
-//		//now grab the set of valid file extensions
-//		std::string valid_extensions = build_extensions_string(type);
-//
-//		BOOL ext_valid = FALSE;
-//		
-//		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-//		boost::char_separator<char> sep(" ");
-//		tokenizer tokens(valid_extensions, sep);
-//		tokenizer::iterator token_iter;
-//
-//		//now loop over all valid file extensions
-//		//and compare them to the extension of the file
-//		//to be uploaded
-//		for( token_iter = tokens.begin();
-//			 token_iter != tokens.end() && ext_valid != TRUE;
-//			 ++token_iter)
-//		{
-//			const std::string& cur_token = *token_iter;
-//
-//			if (cur_token == ext || cur_token == "*.*")
-//			{
-//				//valid extension
-//				//or the acceptable extension is any
-//				ext_valid = TRUE;
-//			}
-//		}//end for (loop over all tokens)
-//
-//		if (ext_valid == FALSE)
-//		{
-//			//should only get here if the extension exists
-//			//but is invalid
-//			LLSD args;
-//			args["EXTENSION"] = ext;
-//			args["VALIDS"] = valid_extensions;
-//			LLNotificationsUtil::add("InvalidFileExtension", args);
-//			return std::string();
-//		}
-//	}//end else (non-null extension)
-//
-//	//valid file extension
-//	
-//	//now we check to see
-//	//if the file is actually a valid image/sound/etc.
-//	if (type == LLFilePicker::FFLOAD_WAV)
-//	{
-//		// pre-qualify wavs to make sure the format is acceptable
-//		std::string error_msg;
-//		if (check_for_invalid_wav_formats(filename,error_msg))
-//		{
-//			llinfos << error_msg << ": " << filename << llendl;
-//			LLSD args;
-//			args["FILE"] = filename;
-//			LLNotificationsUtil::add( error_msg, args );
-//			return std::string();
-//		}
-//	}//end if a wave/sound file
-//
-//	
-//	return filename;
-//}
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
+}
 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-class LLSingleUploadFilePicker : public LLFilePickerThread
+void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::vector<std::string>& files)
 {
-public:
-	LLSingleUploadFilePicker(LLFilePicker::ELoadFilter eFilter)
-		: LLFilePickerThread(eFilter), m_eFilter(eFilter)
-	{
-		if( gAgentCamera.cameraMouselook() )
-			gAgentCamera.changeCameraToDefault();
-	}
-
-	/*virtual*/ void notify(const std::vector<std::string>& files)
-	{
-		const std::string& filename = (!files.empty()) ? files.front() : LLStringUtil::null;
-		if (filename.empty())
-			return;
-
+	const std::string& filename = files.front();
 // [/SL:KB]
-		std::string ext = gDirUtilp->getExtension(filename);
+//	const std::string& filename = picker.getFirstFile();
+	std::string ext = gDirUtilp->getExtension(filename);
 
-		//strincmp doesn't like NULL pointers
-		if (ext.empty())
-		{
-			std::string short_name = gDirUtilp->getBaseFileName(filename);
+	//strincmp doesn't like NULL pointers
+	if (ext.empty())
+	{
+		std::string short_name = gDirUtilp->getBaseFileName(filename);
 		
-			// No extension
+		// No extension
+		LLSD args;
+		args["FILE"] = short_name;
+		LLNotificationsUtil::add("NoFileExtension", args);
+//		return std::string();
+	}
+	else
+	{
+		//so there is an extension
+		//loop over the valid extensions and compare to see
+		//if the extension is valid
+
+		//now grab the set of valid file extensions
+		std::string valid_extensions = build_extensions_string(type);
+
+		BOOL ext_valid = FALSE;
+		
+		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+		boost::char_separator<char> sep(" ");
+		tokenizer tokens(valid_extensions, sep);
+		tokenizer::iterator token_iter;
+
+		//now loop over all valid file extensions
+		//and compare them to the extension of the file
+		//to be uploaded
+		for( token_iter = tokens.begin();
+			 token_iter != tokens.end() && ext_valid != TRUE;
+			 ++token_iter)
+		{
+			const std::string& cur_token = *token_iter;
+
+			if (cur_token == ext || cur_token == "*.*")
+			{
+				//valid extension
+				//or the acceptable extension is any
+				ext_valid = TRUE;
+			}
+		}//end for (loop over all tokens)
+
+		if (ext_valid == FALSE)
+		{
+			//should only get here if the extension exists
+			//but is invalid
 			LLSD args;
-			args["FILE"] = short_name;
-			LLNotificationsUtil::add("NoFileExtension", args);
-			return;
+			args["EXTENSION"] = ext;
+			args["VALIDS"] = valid_extensions;
+			LLNotificationsUtil::add("InvalidFileExtension", args);
+//			return std::string();
 		}
-		else
-		{
-			//so there is an extension
-			//loop over the valid extensions and compare to see
-			//if the extension is valid
+	}//end else (non-null extension)
 
-			//now grab the set of valid file extensions
-			std::string valid_extensions = build_extensions_string(m_eFilter);
-
-			BOOL ext_valid = FALSE;
-		
-			typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-			boost::char_separator<char> sep(" ");
-			tokenizer tokens(valid_extensions, sep);
-			tokenizer::iterator token_iter;
-
-			//now loop over all valid file extensions
-			//and compare them to the extension of the file
-			//to be uploaded
-			for( token_iter = tokens.begin();
-				 token_iter != tokens.end() && ext_valid != TRUE;
-				 ++token_iter)
-			{
-				const std::string& cur_token = *token_iter;
-
-				if (cur_token == ext || cur_token == "*.*")
-				{
-					//valid extension
-					//or the acceptable extension is any
-					ext_valid = TRUE;
-				}
-			}//end for (loop over all tokens)
-
-			if (ext_valid == FALSE)
-			{
-				//should only get here if the extension exists
-				//but is invalid
-				LLSD args;
-				args["EXTENSION"] = ext;
-				args["VALIDS"] = valid_extensions;
-				LLNotificationsUtil::add("InvalidFileExtension", args);
-				return;
-			}
-		}//end else (non-null extension)
-
-		//valid file extension
+	//valid file extension
 	
-		//now we check to see
-		//if the file is actually a valid image/sound/etc.
-		if (m_eFilter == LLFilePicker::FFLOAD_WAV)
+	//now we check to see
+	//if the file is actually a valid image/sound/etc.
+	if (type == LLFilePicker::FFLOAD_WAV)
+	{
+		// pre-qualify wavs to make sure the format is acceptable
+		std::string error_msg;
+		if (check_for_invalid_wav_formats(filename,error_msg))
 		{
-			// pre-qualify wavs to make sure the format is acceptable
-			std::string error_msg;
-			if (check_for_invalid_wav_formats(filename,error_msg))
-			{
-				llinfos << error_msg << ": " << filename << llendl;
-				LLSD args;
-				args["FILE"] = filename;
-				LLNotificationsUtil::add( error_msg, args );
-				return;
-			}
-		}//end if a wave/sound file
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-
-		if (!filename.empty())
-		{
-			switch (m_eFilter)
-			{
-				case LLFilePicker::FFLOAD_WAV:
-					LLFloaterReg::showInstance("upload_sound", LLSD(filename));
-					break;
-				case LLFilePicker::FFLOAD_IMAGE:
-					LLFloaterReg::showInstance("upload_image", LLSD(filename));
-					break;
-				case LLFilePicker::FFLOAD_ANIM:
-					if (filename.rfind(".anim") != std::string::npos)
-						LLFloaterReg::showInstance("upload_anim_anim", LLSD(filename));
-					else
-						LLFloaterReg::showInstance("upload_anim_bvh", LLSD(filename));
-					break;
-				default:
-					break;
-			}
+			llinfos << error_msg << ": " << filename << llendl;
+			LLSD args;
+			args["FILE"] = filename;
+			LLNotificationsUtil::add( error_msg, args );
+//			return std::string();
 		}
+	}//end if a wave/sound file
+
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::string strFloater;
+	switch (type)
+	{
+		case LLFilePicker::FFLOAD_ANIM:
+			strFloater = (filename.rfind(".anim") != std::string::npos) ? "upload_anim_anim" : "upload_anim_bvh";
+			break;
+		case LLFilePicker::FFLOAD_IMAGE:
+			strFloater = "upload_image";
+			break;
+		case LLFilePicker::FFLOAD_WAV:
+			strFloater = "upload_sound";
+			break;
+		default:
+			break;
 	}
 
-protected:
-	LLFilePicker::ELoadFilter m_eFilter;
-};
+	if (!strFloater.empty())
+	{
+		LLFloaterReg::showInstance(strFloater, LLSD(filename));
+	}
 // [/SL:KB]
+//	return filename;
+}
 
 class LLFileUploadImage : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
 // [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_IMAGE))->getFile();
+		upload_pick(LLFilePicker::FFLOAD_IMAGE);
+		return true;
 // [/SL:KB]
 //		std::string filename = upload_pick((void *)LLFilePicker::FFLOAD_IMAGE);
 //		if (!filename.empty())
 //		{
 //			LLFloaterReg::showInstance("upload_image", LLSD(filename));
 //		}
-		return TRUE;
+//		return TRUE;
 	}
 };
 
@@ -535,7 +444,7 @@ class LLFileUploadSound : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 // [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_WAV))->getFile();
+		upload_pick(LLFilePicker::FFLOAD_WAV);
 // [/SL:KB]
 //		std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_WAV);
 //		if (!filename.empty())
@@ -551,7 +460,7 @@ class LLFileUploadAnim : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 // [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		(new LLSingleUploadFilePicker(LLFilePicker::FFLOAD_ANIM))->getFile();
+		upload_pick(LLFilePicker::FFLOAD_ANIM);
 // [/SL:KB]
 //		const std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_ANIM);
 //		if (!filename.empty())

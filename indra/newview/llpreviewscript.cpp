@@ -1107,17 +1107,25 @@ BOOL LLScriptEdCore::handleKeyHere(KEY key, MASK mask)
 
 void LLScriptEdCore::onBtnLoadFromFile( void* data )
 {
-	LLScriptEdCore* self = (LLScriptEdCore*) data;
+//	LLScriptEdCore* self = (LLScriptEdCore*) data;
+//
+//	// TODO Maybe add a dialogue warning here if the current file has unsaved changes.
+//	LLFilePicker& file_picker = LLFilePicker::instance();
+//	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_SCRIPT ) )
+//	{
+//		//File picking cancelled by user, so nothing to do.
+//		return;
+//	}
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
+		boost::bind(&LLScriptEdCore::onFilePickerCallback, (LLScriptEdCore*)data, _1));
+}
 
-	// TODO Maybe add a dialogue warning here if the current file has unsaved changes.
-	LLFilePicker& file_picker = LLFilePicker::instance();
-	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_SCRIPT ) )
-	{
-		//File picking cancelled by user, so nothing to do.
-		return;
-	}
-
-	std::string filename = file_picker.getFirstFile();
+void LLScriptEdCore::onFilePickerCallback(const std::vector<std::string>& files)
+{
+	const std::string filename = files.front();
+// [/SL:KB]
+//	std::string filename = file_picker.getFirstFile();
 
 	std::ifstream fin(filename.c_str());
 
@@ -1138,9 +1146,14 @@ void LLScriptEdCore::onBtnLoadFromFile( void* data )
 	// Only replace the script if there is something to replace with.
 	if (text.length() > 0)
 	{
-		self->mEditor->selectAll();
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		mEditor->selectAll();
 		LLWString script(utf8str_to_wstring(text));
-		self->mEditor->insertText(script);
+		mEditor->insertText(script);
+// [/SL:KB]
+//		self->mEditor->selectAll();
+//		LLWString script(utf8str_to_wstring(text));
+//		self->mEditor->insertText(script);
 	}
 }
 

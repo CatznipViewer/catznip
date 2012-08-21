@@ -118,12 +118,13 @@ public:
 	// open the dialog. This is a modal operation
 // [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 protected:
+	BOOL getOpenFile(ELoadFilter filter, bool blocking);
 	BOOL getMultipleOpenFiles(ELoadFilter filter, bool blocking);
 public:
 	typedef boost::function<void(const std::vector<std::string>&)> picker_callback_t;
 
 	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
-	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
+	void getOpenFile(ELoadFilter filter, const picker_callback_t& cb);
 	void getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb);
 // [/SL:KB]
 //	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
@@ -212,6 +213,10 @@ public:
 	~LLFilePicker();
 };
 
-const std::string upload_pick(void* data);
+//const std::string upload_pick(void* data);
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void upload_pick(LLFilePicker::ELoadFilter filter);
+void upload_pick_callback(LLFilePicker::ELoadFilter filter, const std::vector<std::string>& files);
+// [/SL:KB]
 
 #endif

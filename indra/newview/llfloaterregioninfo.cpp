@@ -1274,21 +1274,33 @@ void LLPanelRegionTerrainInfo::onClickDownloadRaw(void* data)
 // static
 void LLPanelRegionTerrainInfo::onClickUploadRaw(void* data)
 {
-	LLFilePicker& picker = LLFilePicker::instance();
-	if (!picker.getOpenFile(LLFilePicker::FFLOAD_RAW))
-	{
-		llwarns << "No file" << llendl;
-		return;
-	}
-	std::string filepath = picker.getFirstFile();
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if (!picker.getOpenFile(LLFilePicker::FFLOAD_RAW))
+//	{
+//		llwarns << "No file" << llendl;
+//		return;
+//	}
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_RAW, 
+		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerUploadCallback, (LLPanelRegionTerrainInfo*)data, _1));
+}
+
+void LLPanelRegionTerrainInfo::onFilePickerUploadCallback(const std::vector<std::string>& files)
+{
+	std::string filepath = files.front();
+// [/SL:KB]
+//	std::string filepath = picker.getFirstFile();
 	gXferManager->expectFileForTransfer(filepath);
 
-	LLPanelRegionTerrainInfo* self = (LLPanelRegionTerrainInfo*)data;
+//	LLPanelRegionTerrainInfo* self = (LLPanelRegionTerrainInfo*)data;
 	strings_t strings;
 	strings.push_back("upload filename");
 	strings.push_back(filepath);
 	LLUUID invoice(LLFloaterRegionInfo::getLastInvoice());
-	self->sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
+// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
+// [/SL:KB]
+//	self->sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
 
 	LLNotificationsUtil::add("RawUploadStarted");
 }
