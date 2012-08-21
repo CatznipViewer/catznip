@@ -208,7 +208,7 @@ private:
 	void onClickEditFloater();
 	void onClickBrowseForEditor();
 	void onClickBrowseForDiffs();
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	void onFilePickerEditorCallback(const std::vector<std::string>& files);
 	void onFilePickerDiffsCallback(const std::vector<std::string>& files);
 // [/SL:KB]
@@ -1092,13 +1092,18 @@ void LLFloaterUIPreview::onClickBrowseForEditor()
 //	{
 //		return;
 //	}
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_ALL, 
 		boost::bind(&LLFloaterUIPreview::onFilePickerEditorCallback, this, _1));
 }
 
 void LLFloaterUIPreview::onFilePickerEditorCallback(const std::vector<std::string>& files)
 {
+	if (files.empty())	// User cancelled -- do nothing
+	{
+		return;
+	}
+
 	const std::string chosen_path = files.front();
 // [/SL:KB]
 //	// put the selected path into text field
@@ -1156,13 +1161,18 @@ void LLFloaterUIPreview::onClickBrowseForDiffs()
 //	{
 //		return;
 //	}
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_XML, 
 		boost::bind(&LLFloaterUIPreview::onFilePickerDiffsCallback, this, _1));
 }
 
 void LLFloaterUIPreview::onFilePickerDiffsCallback(const std::vector<std::string>& files)
 {
+	if (files.empty())	// User cancelled -- do nothing
+	{
+		return;
+	}
+
 	const std::string chosen_path = files.front();
 // [/SL:KB]
 //	// put the selected path into text field

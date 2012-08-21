@@ -787,7 +787,7 @@ LLLocalBitmapMgr::~LLLocalBitmapMgr()
 }
 
 //bool LLLocalBitmapMgr::addUnit()
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 bool LLLocalBitmapMgr::addUnit(const std::string& filename)
 // [/SL:KB]
 {

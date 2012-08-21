@@ -36,7 +36,7 @@
 #include "llcombobox.h"
 #include "llbutton.h"
 #include "lldraghandle.h"
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 #include "llfilepicker.h"
 // [/SL:KB]
 #include "llfocusmgr.h"
@@ -155,7 +155,7 @@ public:
 	static void		onBtnRemove(void* userdata);
 	static void		onBtnUpload(void* userdata);
 	static void		onLocalScrollCommit(LLUICtrl* ctrl, void* userdata);
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		   void		onFilePickerCallback(const std::vector<std::string>& files);
 // [/SL:KB]
 
@@ -850,7 +850,7 @@ void LLFloaterTexturePicker::onModeSelect(LLUICtrl* ctrl, void *userdata)
 // static
 void LLFloaterTexturePicker::onBtnAdd(void* userdata)
 {
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, 
 		boost::bind(&LLFloaterTexturePicker::onFilePickerCallback, (LLFloaterTexturePicker*)userdata, _1));
 // [/SL:KB]
@@ -861,7 +861,7 @@ void LLFloaterTexturePicker::onBtnAdd(void* userdata)
 //	}
 }
 
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterTexturePicker::onFilePickerCallback(const std::vector<std::string>& files)
 {
 	bool add_successful = false;

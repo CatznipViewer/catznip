@@ -50,7 +50,10 @@ LLUUID upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList = NULL);
+// [/SL:KB]
+//	void *userdata);
 
 void upload_new_resource(
 	const LLTransactionID &tid, 
@@ -66,7 +69,10 @@ void upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList = NULL);
+// [/SL:KB]
+//	void *userdata);
 
 
 LLAssetID generate_asset_id_for_new_upload(const LLTransactionID& tid);
@@ -112,14 +118,14 @@ public:
 //	std::string mFile; 
 //
 //	LLFilePicker::ELoadFilter mFilter;
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	enum EPickerType { OPEN_SINGLE, OPEN_MULTIPLE, SAVE_SINGLE } mPickerType;
 	std::vector<std::string> mFiles;
 	S32 mFilter;
 	std::string mInitialFile;
 // [/SL:KB]
 
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
 		: LLThread("file picker")
 		, mFilter(filter)
@@ -145,7 +151,7 @@ public:
 	virtual void run();
 
 //	virtual void notify(const std::string& filename) = 0;
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	virtual void notify(const std::vector<std::string>& files) = 0;
 // [/SL:KB]
 };

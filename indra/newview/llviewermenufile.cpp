@@ -138,7 +138,7 @@ void LLFilePickerThread::run()
 //		mFile = picker.getFirstFile();
 //	}
 //#endif
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	switch (mPickerType)
 	{
 		case OPEN_SINGLE:
@@ -207,7 +207,7 @@ void LLFilePickerThread::clearDead()
 		while (!sDeadQ.empty())
 		{
 			LLFilePickerThread* thread = sDeadQ.front();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 			thread->notify(thread->mFiles);
 // [/SL:KB]
 //			thread->notify(thread->mFile);
@@ -271,7 +271,7 @@ std::string build_extensions_string(LLFilePicker::ELoadFilter filter)
    Data is the load filter for the type of file as defined in LLFilePicker.
 **/
 //const std::string upload_pick(void* data)
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void upload_pick(LLFilePicker::ELoadFilter filter)
 // [/SL:KB]
 {
@@ -298,12 +298,17 @@ void upload_pick(LLFilePicker::ELoadFilter filter)
 //		llinfos << "Couldn't import objects from file" << llendl;
 //		return std::string();
 //	}
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	LLFilePicker::instance().getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
 }
 
 void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::vector<std::string>& files)
 {
+	if (files.empty())
+	{
+		return;
+	}
+
 	const std::string& filename = files.front();
 // [/SL:KB]
 //	const std::string& filename = picker.getFirstFile();
@@ -383,7 +388,7 @@ void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::vector<std:
 		}
 	}//end if a wave/sound file
 
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	std::string strFloater;
 	switch (type)
 	{
@@ -412,7 +417,7 @@ class LLFileUploadImage : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 		upload_pick(LLFilePicker::FFLOAD_IMAGE);
 		return true;
 // [/SL:KB]
@@ -443,7 +448,7 @@ class LLFileUploadSound : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 		upload_pick(LLFilePicker::FFLOAD_WAV);
 // [/SL:KB]
 //		std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_WAV);
@@ -459,7 +464,7 @@ class LLFileUploadAnim : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 		upload_pick(LLFilePicker::FFLOAD_ANIM);
 // [/SL:KB]
 //		const std::string filename = upload_pick((void*)LLFilePicker::FFLOAD_ANIM);
@@ -488,7 +493,7 @@ class LLFileUploadBulk : public view_listener_t
 			gAgentCamera.changeCameraToDefault();
 		}
 
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, 
 			boost::bind(&LLFileUploadBulk::onFilePickerCallback, this, _1));
 
@@ -512,7 +517,9 @@ class LLFileUploadBulk : public view_listener_t
 //		if (picker.getMultipleOpenFiles())
 //		{
 //			const std::string& filename = picker.getFirstFile();
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		if (!files.empty())
+		{
 			const std::string& filename = files.front();
 // [/SL:KB]
 			std::string name = gDirUtilp->getBaseFileName(filename, true);
@@ -526,7 +533,7 @@ class LLFileUploadBulk : public view_listener_t
 			std::string display_name = LLStringUtil::null;
 			LLAssetStorage::LLStoreAssetCallback callback = NULL;
 			S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 			std::list<std::string>* userdata = new std::list<std::string>(files.begin() + 1, files.end());
 // [/SL:KB]
 //			void *userdata = NULL;
@@ -548,11 +555,11 @@ class LLFileUploadBulk : public view_listener_t
 
 			// *NOTE: Ew, we don't iterate over the file list here,
 			// we handle the next files in upload_done_callback()
-//		}
-//		else
-//		{
-//			llinfos << "Couldn't import objects from file" << llendl;
-//		}
+		}
+		else
+		{
+			llinfos << "Couldn't import objects from file" << llendl;
+		}
 //		return true;
 	}
 };
@@ -667,7 +674,7 @@ class LLFileQuit : public view_listener_t
 
 
 //void handle_compress_image(void*)
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void handle_compress_image(const std::vector<std::string>& files)
 // [/SL:KB]
 {
@@ -677,7 +684,7 @@ void handle_compress_image(const std::vector<std::string>& files)
 //		std::string infile = picker.getFirstFile();
 //		while (!infile.empty())
 //		{
-// [SL:KB] - Patch: Inventory-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		for (auto itFile = files.begin(); itFile != files.end(); ++itFile)
 		{
 			const std::string& infile = *itFile;
@@ -718,7 +725,10 @@ LLUUID upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList)
+// [/SL:KB]
+//	void *userdata)
 {	
 	// Generate the temporary UUID.
 	std::string filename = gDirUtilp->getTempFilename();
@@ -974,7 +984,10 @@ LLUUID upload_new_resource(
 			display_name,
 			callback,
 			expected_upload_cost,
-			userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+			pFileList);
+// [/SL:KB]
+//			userdata);
 	}
 	else
 	{
@@ -999,8 +1012,8 @@ void upload_done_callback(
 	LLExtStat ext_status) // StoreAssetData callback (fixed)
 {
 	LLResourceData* data = (LLResourceData*)user_data;
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	std::list<std::string>* pFiles = (std::list<std::string>*)data->mUserData;;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	std::list<std::string>* pFileList = (std::list<std::string>*)data->mUserData;;
 // [/SL:KB]
 	S32 expected_upload_cost = data ? data->mExpectedUploadCost : 0;
 	//LLAssetType::EType pref_loc = data->mPreferredLocation;
@@ -1094,17 +1107,17 @@ void upload_done_callback(
 	// file picker if there are any more pending uploads. If so,
 	// upload that file.
 //	const std::string& next_file = LLFilePicker::instance().getNextFile();
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-	const std::string next_file;
-	if ( (pFiles) && (!pFiles->empty()) )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	std::string next_file;
+	if ( (pFileList) && (!pFileList->empty()) )
 	{
-		pFiles->front();
+		next_file = pFileList->front();
 		
-		pFiles->pop_front();
-		if (pFiles->empty())
+		pFileList->pop_front();
+		if (pFileList->empty())
 		{
-			delete pFiles;
-			pFiles = NULL;
+			delete pFileList;
+			pFileList = NULL;
 		}
 	}
 // [/SL:KB]
@@ -1132,8 +1145,8 @@ void upload_done_callback(
 			display_name,
 			callback,
 			expected_upload_cost, // assuming next in a group of uploads is of roughly the same type, i.e. same upload cost
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-			pFiles);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+			pFileList);
 // [/SL:KB]
 //			userdata);
 	}
@@ -1203,7 +1216,10 @@ void upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList)
+// [/SL:KB]
+//	void *userdata)
 {
 	if(gDisconnected)
 	{
@@ -1281,13 +1297,14 @@ void upload_new_resource(
 			group_perms,
 			everyone_perms);
 
-// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
-		std::list<std::string>* pFiles = (std::list<std::string>*)userdata;
-		if (pFiles)
-			LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type, *pFiles));
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+		if (pFileList)
+			LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type, *pFileList));
 		else
 			LLHTTPClient::post(url, body, new LLNewAgentInventoryResponder(body, uuid, asset_type));
-		delete pFiles;
+
+		delete pFileList;
+		pFileList = NULL;
 // [/SL:KB]
 //		LLHTTPClient::post(
 //			url,
@@ -1326,7 +1343,10 @@ void upload_new_resource(
 		data->mInventoryType = inv_type;
 		data->mNextOwnerPerm = next_owner_perms;
 		data->mExpectedUploadCost = expected_upload_cost;
-		data->mUserData = userdata;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		data->mUserData = (void*)pFileList;
+// [/SL:KB]
+//		data->mUserData = userdata;
 		data->mAssetInfo.setName(name);
 		data->mAssetInfo.setDescription(desc);
 		data->mPreferredLocation = destination_folder_type;
