@@ -165,7 +165,7 @@ void LLFilePickerThread::run()
 			break;
 		case SAVE_SINGLE:
 			{
-				if (picker.getSaveFile((LLFilePicker::ESaveFilter)mFilter, mInitialFile))
+				if (picker.getSaveFile((LLFilePicker::ESaveFilter)mFilter, mInitialFile, false))
 				{
 					mFiles.push_back(picker.getFirstFile());
 				}
@@ -302,14 +302,12 @@ void upload_pick(LLFilePicker::ELoadFilter filter)
 	LLFilePicker::instance().getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
 }
 
-void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::vector<std::string>& files)
+void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& filename)
 {
-	if (files.empty())
+	if (filename.empty())
 	{
 		return;
 	}
-
-	const std::string& filename = files.front();
 // [/SL:KB]
 //	const std::string& filename = picker.getFirstFile();
 	std::string ext = gDirUtilp->getExtension(filename);
@@ -657,7 +655,10 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 			formatted->enableOverSize() ;
 			formatted->encode(raw, 0);
 			formatted->disableOverSize() ;
-			gViewerWindow->saveImageNumbered(formatted);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+			gViewerWindow->saveImage(formatted, NULL);
+// [/SL:KB]
+//			gViewerWindow->saveImageNumbered(formatted);
 		}
 		return true;
 	}

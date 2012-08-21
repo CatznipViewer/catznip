@@ -46,6 +46,9 @@ public:
 
 	virtual void		draw();
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	        void		save(const std::string& filename);
+// [/SL:KB]
 	virtual BOOL		canSaveAs() const;
 	virtual void		saveAs();
 // [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)

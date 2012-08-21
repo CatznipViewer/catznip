@@ -209,8 +209,8 @@ private:
 	void onClickBrowseForEditor();
 	void onClickBrowseForDiffs();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	void onFilePickerEditorCallback(const std::vector<std::string>& files);
-	void onFilePickerDiffsCallback(const std::vector<std::string>& files);
+	void onFilePickerEditorCallback(const std::string& filename);
+	void onFilePickerDiffsCallback(const std::string& filename);
 // [/SL:KB]
 	void onClickToggleDiffHighlighting();
 	void onClickToggleOverlapping();
@@ -1097,14 +1097,12 @@ void LLFloaterUIPreview::onClickBrowseForEditor()
 		boost::bind(&LLFloaterUIPreview::onFilePickerEditorCallback, this, _1));
 }
 
-void LLFloaterUIPreview::onFilePickerEditorCallback(const std::vector<std::string>& files)
+void LLFloaterUIPreview::onFilePickerEditorCallback(const std::string& chosen_path)
 {
-	if (files.empty())	// User cancelled -- do nothing
+	if (chosen_path.empty())	// User cancelled -- do nothing
 	{
 		return;
 	}
-
-	const std::string chosen_path = files.front();
 // [/SL:KB]
 //	// put the selected path into text field
 //	const std::string chosen_path = picker.getFirstFile();
@@ -1166,14 +1164,12 @@ void LLFloaterUIPreview::onClickBrowseForDiffs()
 		boost::bind(&LLFloaterUIPreview::onFilePickerDiffsCallback, this, _1));
 }
 
-void LLFloaterUIPreview::onFilePickerDiffsCallback(const std::vector<std::string>& files)
+void LLFloaterUIPreview::onFilePickerDiffsCallback(const std::string& chosen_path)
 {
-	if (files.empty())	// User cancelled -- do nothing
+	if (chosen_path.empty())	// User cancelled -- do nothing
 	{
 		return;
 	}
-
-	const std::string chosen_path = files.front();
 // [/SL:KB]
 //	// put the selected path into text field
 //	const std::string chosen_path = picker.getFirstFile();

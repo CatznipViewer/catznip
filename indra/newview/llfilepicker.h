@@ -118,14 +118,16 @@ public:
 	// open the dialog. This is a modal operation
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 protected:
+	BOOL getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking);
 	BOOL getOpenFile(ELoadFilter filter, bool blocking);
 	BOOL getMultipleOpenFiles(ELoadFilter filter, bool blocking);
 public:
-	typedef boost::function<void(const std::vector<std::string>&)> picker_callback_t;
+	typedef boost::function<void(const std::string&)> picker_single_callback_t;
+	typedef boost::function<void(const std::vector<std::string>&)> picker_multi_callback_t;
 
-	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
-	void getOpenFile(ELoadFilter filter, const picker_callback_t& cb);
-	void getMultipleOpenFiles(ELoadFilter filter, const picker_callback_t& cb);
+	void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
+	void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
+	void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
 // [/SL:KB]
 //	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
 //	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
@@ -216,7 +218,7 @@ public:
 //const std::string upload_pick(void* data);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void upload_pick(LLFilePicker::ELoadFilter filter);
-void upload_pick_callback(LLFilePicker::ELoadFilter filter, const std::vector<std::string>& files);
+void upload_pick_callback(LLFilePicker::ELoadFilter filter, const std::string& filename);
 // [/SL:KB]
 
 #endif

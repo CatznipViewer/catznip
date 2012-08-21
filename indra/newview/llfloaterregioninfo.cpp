@@ -1254,21 +1254,37 @@ BOOL LLPanelRegionTerrainInfo::sendUpdate()
 // static
 void LLPanelRegionTerrainInfo::onClickDownloadRaw(void* data)
 {
-	LLFilePicker& picker = LLFilePicker::instance();
-	if (!picker.getSaveFile(LLFilePicker::FFSAVE_RAW, "terrain.raw"))
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if (!picker.getSaveFile(LLFilePicker::FFSAVE_RAW, "terrain.raw"))
+//	{
+//		llwarns << "No file" << llendl;
+//		return;
+//	}
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_RAW, "terrain.raw", 
+		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerDownloadCallback, (LLPanelRegionTerrainInfo*)data, _1));
+}
+
+void LLPanelRegionTerrainInfo::onFilePickerDownloadCallback(const std::string& filepath)
+{
+	if (filepath.empty())
 	{
 		llwarns << "No file" << llendl;
 		return;
 	}
-	std::string filepath = picker.getFirstFile();
+// [/SL:KB]
+//	std::string filepath = picker.getFirstFile();
 	gXferManager->expectFileForRequest(filepath);
 
-	LLPanelRegionTerrainInfo* self = (LLPanelRegionTerrainInfo*)data;
+//	LLPanelRegionTerrainInfo* self = (LLPanelRegionTerrainInfo*)data;
 	strings_t strings;
 	strings.push_back("download filename");
 	strings.push_back(filepath);
 	LLUUID invoice(LLFloaterRegionInfo::getLastInvoice());
-	self->sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
+// [/SL:KB]
+//	self->sendEstateOwnerMessage(gMessageSystem, "terrain", invoice, strings);
 }
 
 // static
@@ -1285,15 +1301,13 @@ void LLPanelRegionTerrainInfo::onClickUploadRaw(void* data)
 		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerUploadCallback, (LLPanelRegionTerrainInfo*)data, _1));
 }
 
-void LLPanelRegionTerrainInfo::onFilePickerUploadCallback(const std::vector<std::string>& files)
+void LLPanelRegionTerrainInfo::onFilePickerUploadCallback(const std::string& filepath)
 {
-	if (files.empty())
+	if (filepath.empty())
 	{
 		llwarns << "No file" << llendl;
 		return;
 	}
-
-	std::string filepath = files.front();
 // [/SL:KB]
 //	std::string filepath = picker.getFirstFile();
 	gXferManager->expectFileForTransfer(filepath);
