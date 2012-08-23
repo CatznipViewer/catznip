@@ -6137,6 +6137,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOffered"
+   can_logto="chat|im"
+   logto="im"
    type="offer">
 [NAME_SLURL] has offered to teleport you to their location:
 
