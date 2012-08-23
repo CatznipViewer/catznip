@@ -323,6 +323,21 @@
 			<check_box.commit_callback
 		     function="Pref.VertexShaderEnable" />
 		</check_box>
+		
+		<check_box
+		 control_name="RenderGlow"
+		 disabled_control="RenderDeferred"
+		 height="16"
+		 initial_value="true"
+		 label="Glow / Bloom Effect"
+		 layout="topleft"
+		 left_delta="0"
+		 name="UseGlow"
+		 tool_tip="Render object bloom / glow"
+		 top_pad="1"
+		 width="120">
+		</check_box>
+		
 		<check_box
 		 control_name="WindLightUseAtmosShaders"
 		 height="16"
