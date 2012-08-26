@@ -797,7 +797,7 @@ bool LLLocalBitmapMgr::addUnit(const std::string& filename)
 		sTimer.stopTimer();
 
 //		std::string filename = picker.getFirstFile();
-		while(!filename.empty())
+//		while(!filename.empty())
 		{
 			LLLocalBitmap* unit = new LLLocalBitmap(filename);
 
