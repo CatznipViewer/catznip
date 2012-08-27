@@ -580,6 +580,9 @@ LLUICtrl* LLChatHistoryHeader::sInfoCtrl = NULL;
 
 LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 :	LLUICtrl(p),
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mParseHighlightTypeMask(PARSE_ALL),
+// [/SL:KB]
 	mMessageHeaderFilename(p.message_header),
 	mMessageSeparatorFilename(p.message_separator),
 	mLeftTextPad(p.left_text_pad),
@@ -959,6 +962,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 		}
 		
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+		S32 nHighlightMask = mEditor->getHighlightsMask();
 		if (CHAT_STYLE_HISTORY != chat.mChatStyle)
 		{
 			const LLIMModel::LLIMSession* pSession = NULL;
@@ -974,10 +978,14 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_GROUP);
 			}
 		}
+		else
+		{
+			mEditor->setHighlightsMask(LLHighlightEntry::CAT_NONE);
+		}
 // [/SL:KB]
 		mEditor->appendText(message, FALSE, style_params);
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
-		mEditor->setHighlightsMask(mEditor->getHighlightsMask() & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
+		mEditor->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
 // [/SL:KB]
 	}
 
@@ -1001,17 +1009,19 @@ void LLChatHistory::draw()
 	LLUICtrl::draw();
 }
 
-// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
 void LLChatHistory::onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry)
 {
 	if (!pEntry)
+	{
 		return;
+	}
 
-	if ( (pEntry->mSoundAsset.notNull()) && (gAudiop) )
+	if ( (mParseHighlightTypeMask && PARSE_SOUND) && (pEntry->mSoundAsset.notNull()) && (gAudiop) )
 	{
 		gAudiop->triggerSound(pEntry->mSoundAsset, gAgent.getID(), 1.f, LLAudioEngine::AUDIO_TYPE_UI, gAgent.getPositionGlobal());
 	}
-	if (pEntry->mFlashWindow)
+	if ( (mParseHighlightTypeMask && PARSE_FLASH) && (pEntry->mFlashWindow) )
 	{
 		LLWindow* pWindow = gViewerWindow->getWindow();
 		if ( (pWindow) && (pWindow->getMinimized()) )

@@ -719,7 +719,14 @@ void LLIMFloater::reloadMessages()
 {
 	mChatHistory->clear();
 	mLastMessageIndex = -1;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 	updateMessages();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 // static
@@ -853,7 +860,14 @@ void LLIMFloater::updateChatHistoryStyle()
 {
 	mChatHistory->clear();
 	mLastMessageIndex = -1;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 	updateMessages();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 void LLIMFloater::processChatHistoryStyleUpdate(const LLSD& newvalue)

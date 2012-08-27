@@ -207,6 +207,10 @@ void LLNearbyChat::getAllowedRect(LLRect& rect)
 void LLNearbyChat::updateChatHistoryStyle()
 {
 	mChatHistory->clear();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 
 	LLSD do_not_log;
 	do_not_log["do_not_log"] = true;
@@ -215,6 +219,10 @@ void LLNearbyChat::updateChatHistoryStyle()
 		// Update the messages without re-writing them to a log file.
 		addMessage(*it,false, do_not_log);
 	}
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 //static 

@@ -51,7 +51,7 @@ public:
 	LLSD          toLLSD() const;
 
 public:
-	enum ECategory      { CAT_GENERAL = 0x01, CAT_NEARBYCHAT = 0x02, CAT_IM = 0x04, CAT_GROUP = 0x08, CAT_ALL = 0xFF };
+	enum ECategory      { CAT_NONE = 0x00, CAT_GENERAL = 0x01, CAT_NEARBYCHAT = 0x02, CAT_IM = 0x04, CAT_GROUP = 0x08, CAT_ALL = 0xFF };
 	enum EConditionType { CONTAINS, MATCHES, STARTS_WITH, ENDS_WITH };
 	enum EHighlightType { PART, ALL };
 	S32            mCategoryMask;
