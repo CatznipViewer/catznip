@@ -963,7 +963,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 		
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
 		S32 nHighlightMask = mEditor->getHighlightsMask();
-		if (CHAT_STYLE_HISTORY != chat.mChatStyle)
+		if ( (CHAT_STYLE_HISTORY != chat.mChatStyle) && (gAgentID != chat.mFromID) )
 		{
 			const LLIMModel::LLIMSession* pSession = NULL;
 			if (chat.mSessionID.isNull())
