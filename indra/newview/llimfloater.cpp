@@ -155,8 +155,9 @@ void LLIMFloater::newIMCallback(const LLSD& data){
 		LLIMFloater* floater = LLFloaterReg::findTypedInstance<LLIMFloater>("impanel", session_id);
 		if (floater == NULL) return;
 
-        // update if visible, otherwise will be updated when opened
-		if (floater->getVisible())
+//        // update if visible, otherwise will be updated when opened
+//		if (floater->getVisible())
+// [SL:KB] - Add messages as they come in (otherwise keyword alerts only trigger when the IM is opened)
 		{
 			floater->updateMessages();
 		}
