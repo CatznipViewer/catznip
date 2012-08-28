@@ -4,8 +4,9 @@
  can_close="true"
  can_minimize="true"
  can_resize="false"
- height="390"
+ height="370"
  name="floater_chat_alerts"
+ positioning="centered"
  title="Chat Keyword Alerts"
  width="490">
   <check_box
@@ -188,29 +189,19 @@
    width="50"
    top_delta="0" />
 
-  <view_border
-   bevel_style="none"
-   border_thickness="1"
-   follows="left|bottom"
-   height="0"
-   left="20"
-   name="divisor2"
-   top_pad="10"
-   width="450" />
-
   <button
    height="22"
    follows="left|bottom"
-   name="alerts_ok"
-   label="OK"
+   name="alerts_save_btn"
+   label="Save Entry"
    left="20"
    top_pad="10"
    width="90" />
   <button
    height="22"
    follows="left|bottom"
-   name="alerts_cancel"
-   label="Cancel"
+   name="alerts_revert_btn"
+   label="Revert Entry"
    left_pad="10"
    top_delta="0"
    width="90" />

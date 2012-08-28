@@ -15,14 +15,19 @@
  */
 #include "llviewerprecompiledheaders.h"
 
+#include "llappviewer.h"
 #include "llbutton.h"
+#include "llcallbacklist.h"
 #include "llcheckboxctrl.h"
 #include "llcolorswatch.h"
 #include "llfloaterchatalerts.h"
 #include "lllineeditor.h"
+#include "llnotificationsutil.h"
 #include "llscrolllistctrl.h"
 #include "lltextparser.h"
 #include "llviewercontrol.h"
+
+#include <boost/algorithm/string.hpp>
 
 // ============================================================================
 // LLFloaterChatAlerts
@@ -42,6 +47,7 @@ LLFloaterChatAlerts::LLFloaterChatAlerts(const LLSD& sdKey)
 	, m_pTriggerIM(NULL)
 	, m_pTriggerGroup(NULL)
 	, m_fChatAlertsEnabled(false)
+	, m_fPendingSave(false)
 {
 }
 
@@ -50,15 +56,38 @@ LLFloaterChatAlerts::~LLFloaterChatAlerts()
 	mChatAlertsConnection.disconnect();
 }
 
+BOOL LLFloaterChatAlerts::canClose()
+{
+	if (isEntryDirty())
+	{
+		m_fPendingSave = true;
+		onEntrySaveChanges(LLUUID::null, true);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+void LLFloaterChatAlerts::onOpen(const LLSD& sdKey)
+{
+	refresh();
+}
+
+void LLFloaterChatAlerts::onClose(bool app_quitting)
+{
+	LLTextParser::instance().saveToDisk();
+}
+
 BOOL LLFloaterChatAlerts::postBuild(void)
 {
 	m_pAlertList = findChild<LLScrollListCtrl>("alerts_list");
-	m_pAlertList->setCommitOnKeyboardMovement(TRUE);
-	m_pAlertList->setCommitOnSelectionChange(TRUE);
-	m_pAlertList->setCommitCallback(boost::bind(&LLFloaterChatAlerts::refreshEntry, this, false));
+	m_pAlertList->setCommitOnKeyboardMovement(true);
+	m_pAlertList->setCommitOnSelectionChange(true);
+	m_pAlertList->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onEntrySelect, this));
 
 	findChild<LLButton>("alerts_new_btn")->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onEntryNew, this));
 	findChild<LLButton>("alerts_delete_btn")->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onEntryDelete, this));
+	findChild<LLButton>("alerts_save_btn")->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onEntrySave, this));
+	findChild<LLButton>("alerts_revert_btn")->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onEntryRevert, this));
 
 	m_pKeywordEditor = findChild<LLLineEditor>("alerts_keyword");
 	m_pKeywordCase = findChild<LLCheckBoxCtrl>("alerts_keyword_case");
@@ -81,15 +110,27 @@ BOOL LLFloaterChatAlerts::postBuild(void)
 	return TRUE;
 }
 
-void LLFloaterChatAlerts::onOpen(const LLSD& sdKey)
+bool LLFloaterChatAlerts::isEntryDirty() const
 {
-	refresh();
+	return
+		(m_pKeywordEditor->isDirty()) || (m_pKeywordCase->isDirty()) || 
+		(m_pColorCtrl->isDirty()) || (m_pSoundCheck->isDirty()) || (m_pSoundEditor->isDirty()) || 
+		(m_pTriggerChat->isDirty()) || (m_pTriggerIM->isDirty()) || (m_pTriggerGroup->isDirty());
 }
 
 void LLFloaterChatAlerts::onEntryNew()
 {
-	m_pAlertList->deselectAllItems(TRUE);
-	refreshEntry(true);
+	if (isEntryDirty())
+	{
+		m_fPendingSave = true;
+		onEntrySaveChanges(LLUUID::null, false);
+	}
+	else
+	{
+		m_pAlertList->deselectAllItems(true);
+		refreshEntry(true);
+		m_pKeywordEditor->setFocus(true);
+	}
 }
 
 void LLFloaterChatAlerts::onEntryDelete()
@@ -100,6 +141,159 @@ void LLFloaterChatAlerts::onEntryDelete()
 		LLTextParser::instance().removeHighlight(idEntry);
 	}
 	refreshList();
+}
+
+void LLFloaterChatAlerts::onEntrySave()
+{
+	LLHighlightEntry* pEntry = (m_idCurEntry.notNull()) ? LLTextParser::instance().getHighlightById(m_idCurEntry) 
+	                                                    : (m_fNewEntry) ? new LLHighlightEntry() : NULL;
+	if ( (pEntry) && (m_pKeywordEditor->getLength() > 0) )
+	{
+		if ( (m_pKeywordEditor->isDirty()) || (m_fNewEntry) )
+		{
+			pEntry->mPattern = m_pKeywordEditor->getText();
+			boost::trim(pEntry->mPattern);
+		}
+		if ( (m_pKeywordCase->isDirty()) || (m_fNewEntry) )
+		{
+			pEntry->mCaseSensitive = m_pKeywordCase->get();
+		}
+		if ( (m_pColorCtrl->isDirty()) || (m_fNewEntry) )
+		{
+			pEntry->mColor.set(m_pColorCtrl->get());
+		}
+
+		if ( (m_pSoundCheck->isDirty()) || (m_pSoundEditor->isDirty()) || (m_fNewEntry) )
+		{
+			if (m_pSoundCheck->get())
+				pEntry->mSoundAsset.set(m_pSoundEditor->getText());
+			else
+				pEntry->mSoundAsset.setNull();
+		}
+
+		if ( (m_pTriggerChat->isDirty()) || (m_fNewEntry) )
+		{
+			if (m_pTriggerChat->get())
+				pEntry->mCategoryMask |= LLHighlightEntry::CAT_NEARBYCHAT;
+			else
+				pEntry->mCategoryMask &= ~LLHighlightEntry::CAT_NEARBYCHAT;
+		}
+		if ( (m_pTriggerIM->isDirty()) || (m_fNewEntry) )
+		{
+			if (m_pTriggerIM->get())
+				pEntry->mCategoryMask |= LLHighlightEntry::CAT_IM;
+			else
+				pEntry->mCategoryMask &= ~LLHighlightEntry::CAT_IM;
+		}
+		if ( (m_pTriggerGroup->isDirty()) || (m_fNewEntry) )
+		{
+			if (m_pTriggerGroup->get())
+				pEntry->mCategoryMask |= LLHighlightEntry::CAT_GROUP;
+			else
+				pEntry->mCategoryMask &= ~LLHighlightEntry::CAT_GROUP;
+		}
+
+		if (m_fNewEntry)
+		{
+			LLTextParser::instance().addHighlight(*pEntry);
+
+			refreshList();
+			m_pAlertList->setSelectedByValue(pEntry->getId(), true);
+
+			delete pEntry;
+		}
+		else
+		{
+			refreshEntry(false);
+		}
+	}
+}
+
+void LLFloaterChatAlerts::onEntrySaveChanges(const LLUUID& idNewEntry, bool fCloseFloater)
+{
+	// HACK: the scroll list control seems to trigger the commit callback multiple times over different mouse events
+	//       so we try and get rid of duplicate notifcations by delaying showing them slightly
+	if (m_fPendingSave)
+	{
+		m_fPendingSave = false;
+
+		// We don't want to trigger the commit callback
+		m_pAlertList->setCommitOnSelectionChange(false);
+		m_pAlertList->setSelectedByValue(m_idCurEntry, true);
+		m_pAlertList->setCommitOnSelectionChange(true);
+
+		LLNotificationsUtil::add("SaveChanges", LLSD(), LLSD().with("cur_sel", m_idCurEntry).with("new_sel", idNewEntry).with("close", fCloseFloater),  
+			boost::bind(&LLFloaterChatAlerts::onEntrySaveChangesCallback, this, _1, _2));
+	}
+}
+
+void LLFloaterChatAlerts::onEntrySaveChangesCallback(const LLSD& notification, const LLSD& response)
+{
+	const LLUUID idCurSel = notification["payload"]["cur_sel"].asUUID();
+	const LLUUID idNewSel = notification["payload"]["new_sel"].asUUID();
+
+	// Only process if the current item still matches
+	if (idCurSel == m_idCurEntry)
+	{
+		S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
+		switch(idxOption)
+		{
+			case 0:   // "Yes"
+				onEntrySave();
+			case 1:   // "No"
+				if (idNewSel.notNull())
+				{
+					// Select existing
+					m_pAlertList->setCommitOnSelectionChange(false);
+					m_pAlertList->setSelectedByValue(idNewSel, true);
+					m_pAlertList->setCommitOnSelectionChange(true);
+					refreshEntry(false);
+				}
+				else
+				{
+					// Create new
+					m_pAlertList->deselectAllItems(true);
+					refreshEntry(true);
+					m_pKeywordEditor->setFocus(true);
+				}
+
+				if (notification["payload"]["close"].asBoolean())
+				{
+					closeFloater();
+				}
+
+				break;
+			case 2:   // "Cancel"
+			default:
+		        LLAppViewer::instance()->abortQuit();
+				break;
+		}
+	}
+}
+
+void LLFloaterChatAlerts::onEntryRevert()
+{
+	refreshEntry(false);
+}
+
+void LLFloaterChatAlerts::onEntrySelect()
+{
+	// Don't do anything if the user clicked on the current entry a second time
+	if (m_idCurEntry == m_pAlertList->getSelectedValue().asUUID())
+	{
+		return;
+	}
+
+	if (isEntryDirty())
+	{
+		m_fPendingSave = true;
+		doOnIdleOneTime(boost::bind(&LLFloaterChatAlerts::onEntrySaveChanges, this, m_pAlertList->getSelectedValue().asUUID(), false));
+	}
+	else
+	{
+		refreshEntry(false);
+		m_pKeywordEditor->setFocus(true);
+	}
 }
 
 void LLFloaterChatAlerts::onToggleChatAlerts(const LLSD& sdValue)
@@ -159,41 +353,51 @@ void LLFloaterChatAlerts::refreshList()
 		}
 	}
 
-	refreshEntry();
+	refreshEntry(false);
 }
 
 void LLFloaterChatAlerts::refreshEntry(bool fNewEntry)
 {
-	const LLUUID idEntry = m_pAlertList->getSelectedValue().asUUID();
-	const LLHighlightEntry* pEntry = (idEntry.notNull()) ? LLTextParser::instance().getHighlightById(idEntry) : NULL;
+	m_fNewEntry = fNewEntry;
+	m_idCurEntry = m_pAlertList->getSelectedValue().asUUID();;
+	const LLHighlightEntry* pEntry = (m_idCurEntry.notNull()) ? LLTextParser::instance().getHighlightById(m_idCurEntry) : NULL;
 	bool fEnable = (NULL != pEntry) || (fNewEntry);
 
-	findChild<LLButton>("alerts_delete_btn")->setEnabled(fEnable);
-	m_fNewEntry = fNewEntry;
+	findChild<LLButton>("alerts_delete_btn")->setEnabled(m_idCurEntry.notNull());
+	findChild<LLButton>("alerts_save_btn")->setEnabled(fEnable);
+	findChild<LLButton>("alerts_revert_btn")->setEnabled(m_idCurEntry.notNull());
 
 	findChild<LLUICtrl>("alerts_keyword_label")->setEnabled(fEnable);
 	m_pKeywordEditor->setEnabled(fEnable);
 	m_pKeywordEditor->setText( (pEntry) ? pEntry->mPattern : "" );
+	m_pKeywordEditor->resetDirty();
 	m_pKeywordCase->setEnabled(fEnable);
 	m_pKeywordCase->set( (pEntry) ? pEntry->mCaseSensitive : false );
+	m_pKeywordCase->resetDirty();
 	findChild<LLUICtrl>("alerts_color_label")->setEnabled(fEnable);
 	m_pColorCtrl->setEnabled(fEnable);
 	m_pColorCtrl->set( (pEntry) ? pEntry->mColor : LLColor4::white );
+	m_pColorCtrl->resetDirty();
 
 	bool fEnableSound = (fEnable) && ((pEntry) ? pEntry->mSoundAsset.notNull() : false);
 	m_pSoundCheck->setEnabled(fEnable);
 	m_pSoundCheck->set( (fEnable) ? fEnableSound : false );
+	m_pSoundCheck->resetDirty();
 	m_pSoundEditor->setEnabled(fEnableSound);
 	m_pSoundEditor->setText( (fEnableSound) ? pEntry->mSoundAsset.asString() : "" );
+	m_pSoundEditor->resetDirty();
 	m_pSoundBrowseBtn->setEnabled(fEnableSound);
 
 	findChild<LLUICtrl>("alerts_trigger_label")->setEnabled(fEnable);
 	m_pTriggerChat->setEnabled(fEnable);
 	m_pTriggerChat->set( (pEntry) ? pEntry->mCategoryMask & LLHighlightEntry::CAT_NEARBYCHAT: fNewEntry );
+	m_pTriggerChat->resetDirty();
 	m_pTriggerIM->setEnabled(fEnable);
 	m_pTriggerIM->set( (pEntry) ? pEntry->mCategoryMask & LLHighlightEntry::CAT_IM : fNewEntry );
+	m_pTriggerIM->resetDirty();
 	m_pTriggerGroup->setEnabled(fEnable);
 	m_pTriggerGroup->set( (pEntry) ? pEntry->mCategoryMask & LLHighlightEntry::CAT_GROUP : fNewEntry );
+	m_pTriggerGroup->resetDirty();
 }
 
 // ============================================================================

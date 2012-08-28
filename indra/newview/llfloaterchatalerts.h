@@ -33,22 +33,32 @@ private:
 	LLFloaterChatAlerts(const LLSD& sdKey);
 public:
 	/*virtual*/ ~LLFloaterChatAlerts();
+	/*virtual*/ BOOL canClose();
 	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool app_quitting);
 	/*virtual*/ BOOL postBuild();
 
+public:
+	bool isEntryDirty() const;
 protected:
 	void onEntryNew();
 	void onEntryDelete();
+	void onEntrySave();
+	void onEntrySaveChanges(const LLUUID& idNewEntry, bool fCloseFloater);
+	void onEntrySaveChangesCallback(const LLSD& notification, const LLSD& response);
+	void onEntryRevert();
+	void onEntrySelect();
 	void onToggleChatAlerts(const LLSD& sdValue);
 	void onToggleSoundAlert();
 	void onToggleTriggerType();
 	void refresh();
 	void refreshList();
-	void refreshEntry(bool fRefreshEntry = false);
+	void refreshEntry(bool fNewEntry);
 
 protected:
 	LLScrollListCtrl*  m_pAlertList;
 	bool               m_fNewEntry;
+	LLUUID             m_idCurEntry;
 	LLLineEditor*      m_pKeywordEditor;
 	LLCheckBoxCtrl*    m_pKeywordCase;
 	LLColorSwatchCtrl* m_pColorCtrl;
@@ -58,6 +68,7 @@ protected:
 	LLCheckBoxCtrl*    m_pTriggerChat;
 	LLCheckBoxCtrl*    m_pTriggerIM;
 	LLCheckBoxCtrl*    m_pTriggerGroup;
+	bool               m_fPendingSave;
 
 	bool m_fChatAlertsEnabled;
 	boost::signals2::connection mChatAlertsConnection;
