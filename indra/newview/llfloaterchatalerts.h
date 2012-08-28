@@ -24,31 +24,45 @@ class LLColorSwatchCtrl;
 class LLLineEditor;
 class LLScrollListCtrl;
 
+// ============================================================================
+
 class LLFloaterChatAlerts : public LLFloater
 {
 	friend class LLFloaterReg;
 private:
 	LLFloaterChatAlerts(const LLSD& sdKey);
 public:
-	/*virtual*/ ~LLFloaterChatAlerts() {}
+	/*virtual*/ ~LLFloaterChatAlerts();
+	/*virtual*/ void onOpen(const LLSD& sdKey);
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& key);
 
 protected:
+	void onEntryNew();
+	void onEntryDelete();
+	void onToggleChatAlerts(const LLSD& sdValue);
+	void onToggleSoundAlert();
+	void onToggleTriggerType();
+	void refresh();
 	void refreshList();
-	void refreshEntry();
+	void refreshEntry(bool fRefreshEntry = false);
 
 protected:
 	LLScrollListCtrl*  m_pAlertList;
+	bool               m_fNewEntry;
 	LLLineEditor*      m_pKeywordEditor;
 	LLCheckBoxCtrl*    m_pKeywordCase;
 	LLColorSwatchCtrl* m_pColorCtrl;
 	LLCheckBoxCtrl*    m_pSoundCheck;
 	LLLineEditor*      m_pSoundEditor;
-	LLButton*          m_pSoundButton;
+	LLButton*          m_pSoundBrowseBtn;
 	LLCheckBoxCtrl*    m_pTriggerChat;
 	LLCheckBoxCtrl*    m_pTriggerIM;
 	LLCheckBoxCtrl*    m_pTriggerGroup;
+
+	bool m_fChatAlertsEnabled;
+	boost::signals2::connection mChatAlertsConnection;
 };
+
+// ============================================================================
 
 #endif  // LLFLOATERCHATALERTS_H

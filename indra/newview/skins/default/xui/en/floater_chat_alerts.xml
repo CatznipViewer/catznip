@@ -9,6 +9,7 @@
  title="Chat Keyword Alerts"
  width="490">
   <check_box
+   control_name="ChatAlerts"
    follows="left|top"
    height="16"
    label="Enable alerts"
@@ -37,7 +38,7 @@
    label="New"
    layout="topleft"
    left="20"
-   name="alerts_new"
+   name="alerts_new_btn"
    top_pad="5"
    width="90" />
   <button
@@ -46,7 +47,7 @@
    label="Delete"
    layout="topleft"
    left_pad="5"
-   name="alerts_delete"
+   name="alerts_delete_btn"
    top_delta="0"
    width="90" />
 
@@ -143,7 +144,7 @@
    label="Browse"
    layout="topleft"
    left_pad="10"
-   name="alerts_sound_browse"
+   name="alerts_sound_browse_btn"
    top_delta="0"
    width="60" />
 

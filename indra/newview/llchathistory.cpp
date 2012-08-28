@@ -962,31 +962,39 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 		}
 		
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
-		S32 nHighlightMask = mEditor->getHighlightsMask();
-		if ( (CHAT_STYLE_HISTORY != chat.mChatStyle) && (gAgentID != chat.mFromID) )
+		static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts");
+		if (sEnableChatAlerts)
 		{
-			const LLIMModel::LLIMSession* pSession = NULL;
-			if (chat.mSessionID.isNull())
+			S32 nHighlightMask = mEditor->getHighlightsMask();
+			if ( (CHAT_STYLE_HISTORY != chat.mChatStyle) && (gAgentID != chat.mFromID) )
 			{
-				mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_NEARBYCHAT);
+				const LLIMModel::LLIMSession* pSession = NULL;
+				if (chat.mSessionID.isNull())
+				{
+					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_NEARBYCHAT);
+				}
+				else if (pSession = LLIMModel::getInstance()->findIMSession(chat.mSessionID))
+				{
+					if (pSession->isP2PSessionType())
+						mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_IM);
+					else if ( (pSession->isGroupSessionType()) || (pSession->isAdHocSessionType()) )
+						mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_GROUP);
+				}
 			}
-			else if (pSession = LLIMModel::getInstance()->findIMSession(chat.mSessionID))
+			else
 			{
-				if (pSession->isP2PSessionType())
-					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_IM);
-				else if ( (pSession->isGroupSessionType()) || (pSession->isAdHocSessionType()) )
-					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_GROUP);
+				mEditor->setHighlightsMask(LLHighlightEntry::CAT_GENERAL);
 			}
+
+			mEditor->appendText(message, FALSE, style_params);
+			mEditor->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
 		}
 		else
 		{
-			mEditor->setHighlightsMask(LLHighlightEntry::CAT_NONE);
+			mEditor->appendText(message, FALSE, style_params);
 		}
 // [/SL:KB]
-		mEditor->appendText(message, FALSE, style_params);
-// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
-		mEditor->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
-// [/SL:KB]
+//		mEditor->appendText(message, FALSE, style_params);
 	}
 
 	mEditor->blockUndo();
