@@ -1699,7 +1699,7 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 	const LLHighlightEntry* pEntry = NULL;
-	if (LLTextParser::instance().parseFullLineHighlights(new_text, mHighlightsMask, &pEntry))
+	if ( (mParseHighlights) && (LLTextParser::instance().parseFullLineHighlights(new_text, mHighlightsMask, &pEntry)) )
 	{
 		if (mHighlightsSignal)
 			(*mHighlightsSignal)(new_text, pEntry);
