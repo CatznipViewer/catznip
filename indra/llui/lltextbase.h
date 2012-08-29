@@ -380,8 +380,12 @@ public:
 	boost::signals2::connection setURLClickedCallback(const commit_signal_t::slot_type& cb);
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	void setParseHighlights(BOOL parsing)     { mParseHighlights = parsing; }
+	S32  getHighlightsMask() const            { return mHighlightsMask; }
+	void setHighlightsMask(S32 category_mask) { mHighlightsMask = category_mask; }
+
 	typedef boost::signals2::signal<void(const std::string&, const LLHighlightEntry*)> highlights_signal_t;
-	boost::signals2::connection		setHighlightsCallback(const highlights_signal_t::slot_type& cb);
+	boost::signals2::connection	setHighlightsCallback(const highlights_signal_t::slot_type& cb);
 // [/SL:KB]
 protected:
 	// helper structs
