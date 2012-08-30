@@ -83,6 +83,8 @@ LLHighlightEntry::LLHighlightEntry(const LLSD& sdEntry)
 		mHighlightType = (EHighlightType)sdEntry["highlight"].asInteger();
 	if (sdEntry.has("sound_asset"))
 		mSoundAsset = sdEntry["sound_asset"].asUUID();
+	if (sdEntry.has("sound_item"))
+		mSoundItem = sdEntry["sound_item"].asUUID();
 	if (sdEntry.has("flash_window"))
 		mFlashWindow = sdEntry["flash_window"].asBoolean();
 }
@@ -98,7 +100,10 @@ LLSD LLHighlightEntry::toLLSD() const
 	sdEntry["color"] = mColor.getValue();
 	sdEntry["color_readonly"] = mColorReadOnly;
 	sdEntry["highlight"] = (S32)mHighlightType;
-	sdEntry["sound_asset"] = mSoundAsset;
+	if (mSoundAsset.notNull())
+		sdEntry["sound_asset"] = mSoundAsset;
+	if (mSoundItem.notNull())
+		sdEntry["sound_item"] = mSoundItem;
 	sdEntry["flash_window"] = mFlashWindow;
 	return sdEntry;
 }

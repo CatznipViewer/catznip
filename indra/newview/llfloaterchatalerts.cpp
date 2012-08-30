@@ -21,13 +21,87 @@
 #include "llcheckboxctrl.h"
 #include "llcolorswatch.h"
 #include "llfloaterchatalerts.h"
+#include "lliconctrl.h"
+#include "llinventorymodel.h"
 #include "lllineeditor.h"
 #include "llnotificationsutil.h"
 #include "llscrolllistctrl.h"
 #include "lltextparser.h"
 #include "llviewercontrol.h"
+#include "llviewerinventory.h"
 
 #include <boost/algorithm/string.hpp>
+
+// ============================================================================
+// LLSoundDropTarget helper class
+//
+
+class LLSoundDropTarget : public LLView
+{
+public:
+	struct Params : public LLInitParam::Block<Params, LLView::Params>
+	{
+		Params()
+		{
+			changeDefault(mouse_opaque, false);
+			changeDefault(follows.flags, FOLLOWS_ALL);
+		}
+	};
+
+public:
+	LLSoundDropTarget(const Params&);
+	/*virtual*/ ~LLSoundDropTarget();
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
+	                                   EAcceptance* accept, std::string& tooltip_msg);
+};
+
+static LLDefaultChildRegistry::Register<LLSoundDropTarget> r("sound_drop_target");
+
+LLSoundDropTarget::LLSoundDropTarget(const LLSoundDropTarget::Params& p) 
+	: LLView(p)
+{
+}
+
+LLSoundDropTarget::~LLSoundDropTarget()
+{
+}
+
+BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
+                                         EAcceptance* accept, std::string& tooltip_msg)
+{
+	BOOL fHandled = FALSE;
+	if (getParent())
+	{
+		fHandled = TRUE;
+
+		switch (cargo_type)
+		{
+			case DAD_SOUND:
+				{
+					const LLViewerInventoryItem* pItem = (LLViewerInventoryItem*)cargo_data;
+					if (gInventory.getItem(pItem->getUUID()))
+					{
+						*accept = ACCEPT_YES_COPY_SINGLE;
+
+						if (drop)
+						{
+							getParent()->notifyParent(LLSD().with("item_id", pItem->getUUID()));
+						}
+					}
+					else
+					{
+						// It's not in the user's inventory
+						*accept = ACCEPT_NO;
+					}
+				}
+				break;
+			default:
+				*accept = ACCEPT_NO;
+				break;
+		}
+	}
+	return fHandled;
+}
 
 // ============================================================================
 // LLFloaterChatAlerts
@@ -40,9 +114,10 @@ LLFloaterChatAlerts::LLFloaterChatAlerts(const LLSD& sdKey)
 	, m_pKeywordEditor(NULL)
 	, m_pKeywordCase(NULL)
 	, m_pColorCtrl(NULL)
-	, m_pSoundCheck(NULL)
+	, m_fSoundChanged(false)
+	, m_pSoundIconCtrl(NULL)
 	, m_pSoundEditor(NULL)
-	, m_pSoundBrowseBtn(NULL)
+	, m_pSoundClearBtn(NULL)
 	, m_pTriggerChat(NULL)
 	, m_pTriggerIM(NULL)
 	, m_pTriggerGroup(NULL)
@@ -92,10 +167,12 @@ BOOL LLFloaterChatAlerts::postBuild(void)
 	m_pKeywordEditor = findChild<LLLineEditor>("alerts_keyword");
 	m_pKeywordCase = findChild<LLCheckBoxCtrl>("alerts_keyword_case");
 	m_pColorCtrl = findChild<LLColorSwatchCtrl>("alerts_highlight_color");
-	m_pSoundCheck = findChild<LLCheckBoxCtrl>("alerts_sound_check");
-	m_pSoundCheck->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onToggleSoundAlert, this));
+
+	m_pSoundIconCtrl = findChild<LLIconCtrl>("alerts_sound_icon");
 	m_pSoundEditor = findChild<LLLineEditor>("alerts_sound_name");
-	m_pSoundBrowseBtn = findChild<LLButton>("alerts_sound_browse_btn");
+	m_pSoundClearBtn = findChild<LLButton>("alerts_sound_clear_btn");
+	m_pSoundClearBtn->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onSoundClearItem, this));
+
 	m_pTriggerChat = findChild<LLCheckBoxCtrl>("alerts_trigger_chat");
 	m_pTriggerChat->setCommitCallback(boost::bind(&LLFloaterChatAlerts::onToggleTriggerType, this));
 	m_pTriggerIM = findChild<LLCheckBoxCtrl>("alerts_trigger_im");
@@ -110,11 +187,22 @@ BOOL LLFloaterChatAlerts::postBuild(void)
 	return TRUE;
 }
 
+S32 LLFloaterChatAlerts::notifyParent(const LLSD& sdInfo)
+{
+	if (sdInfo.has("item_id"))
+	{
+		m_fSoundChanged = true;
+		m_idSoundItem = sdInfo["item_id"].asUUID();
+		refreshSound();
+		return 1;
+	}
+	return LLFloater::notifyParent(sdInfo);
+}
+
 bool LLFloaterChatAlerts::isEntryDirty() const
 {
 	return
-		(m_pKeywordEditor->isDirty()) || (m_pKeywordCase->isDirty()) || 
-		(m_pColorCtrl->isDirty()) || (m_pSoundCheck->isDirty()) || (m_pSoundEditor->isDirty()) || 
+		(m_pKeywordEditor->isDirty()) || (m_pKeywordCase->isDirty()) || (m_pColorCtrl->isDirty()) || (m_fSoundChanged) || 
 		(m_pTriggerChat->isDirty()) || (m_pTriggerIM->isDirty()) || (m_pTriggerGroup->isDirty());
 }
 
@@ -163,12 +251,12 @@ void LLFloaterChatAlerts::onEntrySave()
 			pEntry->mColor.set(m_pColorCtrl->get());
 		}
 
-		if ( (m_pSoundCheck->isDirty()) || (m_pSoundEditor->isDirty()) || (m_fNewEntry) )
+		if (m_fSoundChanged)
 		{
-			if (m_pSoundCheck->get())
-				pEntry->mSoundAsset.set(m_pSoundEditor->getText());
-			else
-				pEntry->mSoundAsset.setNull();
+			// Store both the item and asset UUID for now
+			const LLViewerInventoryItem* pItem = gInventory.getItem(m_idSoundItem);
+			pEntry->mSoundAsset = (pItem) ? pItem->getAssetUUID() : LLUUID::null;
+			pEntry->mSoundItem = m_idSoundItem;
 		}
 
 		if ( (m_pTriggerChat->isDirty()) || (m_fNewEntry) )
@@ -296,17 +384,17 @@ void LLFloaterChatAlerts::onEntrySelect()
 	}
 }
 
+void LLFloaterChatAlerts::onSoundClearItem()
+{
+	m_fSoundChanged = true;
+	m_idSoundItem.setNull();
+	refreshSound();
+}
+
 void LLFloaterChatAlerts::onToggleChatAlerts(const LLSD& sdValue)
 {
 	m_fChatAlertsEnabled = sdValue.asBoolean();
 	refresh();
-}
-
-void LLFloaterChatAlerts::onToggleSoundAlert()
-{
-	bool fEnableSound = m_pSoundCheck->get();
-	m_pSoundEditor->setEnabled(fEnableSound);
-	m_pSoundBrowseBtn->setEnabled(fEnableSound);
 }
 
 void LLFloaterChatAlerts::onToggleTriggerType()
@@ -351,6 +439,7 @@ void LLFloaterChatAlerts::refreshList()
 
 			m_pAlertList->addElement(sdRow, ADD_BOTTOM);
 		}
+		m_pAlertList->sortByColumnIndex(0, true);
 	}
 
 	refreshEntry(false);
@@ -379,14 +468,11 @@ void LLFloaterChatAlerts::refreshEntry(bool fNewEntry)
 	m_pColorCtrl->set( (pEntry) ? pEntry->mColor : LLColor4::white );
 	m_pColorCtrl->resetDirty();
 
-	bool fEnableSound = (fEnable) && ((pEntry) ? pEntry->mSoundAsset.notNull() : false);
-	m_pSoundCheck->setEnabled(fEnable);
-	m_pSoundCheck->set( (fEnable) ? fEnableSound : false );
-	m_pSoundCheck->resetDirty();
-	m_pSoundEditor->setEnabled(fEnableSound);
-	m_pSoundEditor->setText( (fEnableSound) ? pEntry->mSoundAsset.asString() : "" );
-	m_pSoundEditor->resetDirty();
-	m_pSoundBrowseBtn->setEnabled(fEnableSound);
+	findChild<LLView>("sound_drop_target")->setEnabled(fEnable);
+	findChild<LLUICtrl>("alerts_sound_label")->setEnabled(fEnable);
+	m_fSoundChanged = false;
+	m_idSoundItem = (pEntry) ? pEntry->mSoundItem : LLUUID::null;
+	refreshSound();
 
 	findChild<LLUICtrl>("alerts_trigger_label")->setEnabled(fEnable);
 	m_pTriggerChat->setEnabled(fEnable);
@@ -398,6 +484,27 @@ void LLFloaterChatAlerts::refreshEntry(bool fNewEntry)
 	m_pTriggerGroup->setEnabled(fEnable);
 	m_pTriggerGroup->set( (pEntry) ? pEntry->mCategoryMask & LLHighlightEntry::CAT_GROUP : fNewEntry );
 	m_pTriggerGroup->resetDirty();
+}
+
+void LLFloaterChatAlerts::refreshSound()
+{
+	const LLViewerInventoryItem* pItem = gInventory.getItem(m_idSoundItem);
+	if (pItem)
+	{
+		std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags());
+
+		m_idSoundItem = pItem->getUUID();
+		m_pSoundIconCtrl->setValue(strIconName);
+		m_pSoundIconCtrl->setVisible(true);
+		m_pSoundEditor->setText(pItem->getName());
+		m_pSoundClearBtn->setVisible(true);
+	}
+	else
+	{
+		m_pSoundIconCtrl->setVisible(false);
+		m_pSoundEditor->setText( (m_idSoundItem.notNull()) ? m_idSoundItem.asString() : LLStringUtil::null );
+		m_pSoundClearBtn->setVisible(false);
+	}
 }
 
 // ============================================================================

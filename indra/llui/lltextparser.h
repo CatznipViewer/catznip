@@ -62,7 +62,8 @@ public:
 	bool           mColorReadOnly;     // If TRUE, the highlight color will also be set as the read-only text color
 	EHighlightType mHighlightType;
 	// Other actions
-	LLUUID         mSoundAsset;
+	LLUUID         mSoundAsset;        // Asset UUID of the sound
+	LLUUID         mSoundItem;         // Item UUID of the sound
 	bool           mFlashWindow;
 protected:
 	LLUUID         mId;

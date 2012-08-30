@@ -21,6 +21,7 @@
 class LLButton;
 class LLCheckBoxCtrl;
 class LLColorSwatchCtrl;
+class LLIconCtrl;
 class LLLineEditor;
 class LLScrollListCtrl;
 
@@ -37,6 +38,7 @@ public:
 	/*virtual*/ void onOpen(const LLSD& sdKey);
 	/*virtual*/ void onClose(bool app_quitting);
 	/*virtual*/ BOOL postBuild();
+	/*virtual*/ S32  notifyParent(const LLSD& sdInfo);
 
 public:
 	bool isEntryDirty() const;
@@ -48,12 +50,13 @@ protected:
 	void onEntrySaveChangesCallback(const LLSD& notification, const LLSD& response);
 	void onEntryRevert();
 	void onEntrySelect();
+	void onSoundClearItem();
 	void onToggleChatAlerts(const LLSD& sdValue);
-	void onToggleSoundAlert();
 	void onToggleTriggerType();
 	void refresh();
 	void refreshList();
 	void refreshEntry(bool fNewEntry);
+	void refreshSound();
 
 protected:
 	LLScrollListCtrl*  m_pAlertList;
@@ -62,9 +65,13 @@ protected:
 	LLLineEditor*      m_pKeywordEditor;
 	LLCheckBoxCtrl*    m_pKeywordCase;
 	LLColorSwatchCtrl* m_pColorCtrl;
-	LLCheckBoxCtrl*    m_pSoundCheck;
+
+	bool               m_fSoundChanged;
+	LLUUID             m_idSoundItem;
+	LLIconCtrl*        m_pSoundIconCtrl;
 	LLLineEditor*      m_pSoundEditor;
-	LLButton*          m_pSoundBrowseBtn;
+	LLButton*          m_pSoundClearBtn;
+
 	LLCheckBoxCtrl*    m_pTriggerChat;
 	LLCheckBoxCtrl*    m_pTriggerIM;
 	LLCheckBoxCtrl*    m_pTriggerGroup;
