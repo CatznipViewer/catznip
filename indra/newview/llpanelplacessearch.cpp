@@ -40,6 +40,8 @@ static LLRegisterPanelClassWrapper<LLPanelPlacesSearch> t_panel_places_search("p
 
 LLPanelPlacesSearch::LLPanelPlacesSearch()
 	: LLPanel()
+	, m_fRefreshOnCategory(false)
+	, m_fRefreshOnMaturity(false)
 	, m_nCurIndex(0)
 	, m_nCurResults(0)
 	, m_pSearchCategory(NULL)
@@ -79,6 +81,7 @@ BOOL LLPanelPlacesSearch::postBuild()
 	}
 
 	m_pSearchCategory = findChild<LLComboBox>("search_category");
+	m_pSearchCategory->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onSelectCategory, this));
 	m_pSearchCategory->add(getString("all_categories"), LLSD("any"));
 	m_pSearchCategory->addSeparator();
 	for (int idxCategory = LLParcel::C_LINDEN; idxCategory < LLParcel::C_COUNT; idxCategory++)
@@ -146,13 +149,16 @@ void LLPanelPlacesSearch::searchClear()
 	performSearch();
 }
 
-void LLPanelPlacesSearch::searchStart(std::string strQuery)
+void LLPanelPlacesSearch::searchStart(std::string strQuery, bool fQuiet)
 {
 	// Sanitize the query
 	boost::trim(strQuery);
 	if (strQuery.size() < LLSearchDirectory::MIN_QUERY_LENGTH_PLACES)
 	{
-		LLNotificationsUtil::add("SeachFilteredOnShortWordsEmpty");
+		if (!fQuiet)
+		{
+			LLNotificationsUtil::add("SeachFilteredOnShortWordsEmpty");
+		}
 		return;
 	}
 
@@ -298,12 +304,25 @@ void LLPanelPlacesSearch::onTeleportBtn()
 	}
 }
 
+void LLPanelPlacesSearch::onSelectCategory()
+{
+	if (m_fRefreshOnCategory)
+	{
+		searchStart(m_strCurQuery, true);
+	}
+}
+
 void LLPanelPlacesSearch::onToggleMaturity()
 {
 	// Make sure at least one of the checkboxes is always checked
 	if ( (!m_pSearchPG->get()) && (!m_pSearchMature->get()) && (!m_pSearchAdult->get()) )
 	{
 		m_pSearchPG->set(TRUE);
+	}
+
+	if (m_fRefreshOnMaturity)
+	{
+		searchStart(m_strCurQuery, true);
 	}
 }
 
