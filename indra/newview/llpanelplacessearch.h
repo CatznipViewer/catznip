@@ -47,10 +47,12 @@ public:
 	const LLUUID&               getCurrentParcelId() const;
 	const LLVector3d&           getCurrentParcelPos() const;
 	bool                        hasCurrentParcel() const	{ return getCurrentParcelId().notNull(); }
+	void                        setRefreshOnCategoryChange(bool refresh) { m_fRefreshOnCategory = refresh; }
+	void                        setRefreshOnMaturityToggle(bool refresh) { m_fRefreshOnMaturity = refresh; }
 	boost::signals2::connection setSelectCallback(const commit_signal_t::slot_type& cb);
 
 	void searchClear();
-	void searchStart(std::string strQuery);
+	void searchStart(std::string strQuery, bool fQuiet = false);
 	void searchPrevious();
 	void searchNext();
 
@@ -58,6 +60,7 @@ protected:
 	void onResultSelect();
 	void onSearchBtn();
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
+	void onSelectCategory();
 	void onToggleMaturity();
 	void performSearch();
 
@@ -65,6 +68,9 @@ protected:
 	 * Member variables
 	 */
 protected:
+	bool        m_fRefreshOnCategory;
+	bool        m_fRefreshOnMaturity;
+
 	std::string m_strCurQuery;
 	LLUUID      m_idCurQuery;
 	U32         m_nCurIndex;

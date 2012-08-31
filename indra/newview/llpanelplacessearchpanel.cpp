@@ -42,6 +42,8 @@ BOOL LLPanelPlacesSearchPanel::postBuild()
 {
 	m_pSearchPanel = findChild<LLPanelPlacesSearch>("search_panel");
 	m_pSearchPanel->setSelectCallback(boost::bind(&LLPanelPlacesSearchPanel::onSearchResultSelect, this));
+	m_pSearchPanel->setRefreshOnCategoryChange(true);
+	m_pSearchPanel->setRefreshOnMaturityToggle(true);
 
 	updateVerbs();
 
