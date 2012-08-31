@@ -154,6 +154,18 @@ void LLSearchEditor::setFocus( BOOL b )
 	}
 }
 
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+BOOL LLSearchEditor::isDirty() const
+{
+	return mSearchEditor->isDirty();
+}
+
+void LLSearchEditor::resetDirty()
+{
+	mSearchEditor->resetDirty();
+}
+// [/SL:KB]
+
 void LLSearchEditor::onClearButtonClick(const LLSD& data)
 {
 	setText(LLStringUtil::null);

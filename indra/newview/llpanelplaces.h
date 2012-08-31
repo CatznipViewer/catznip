@@ -86,7 +86,10 @@ public:
 
 private:
 	void onLandmarkLoaded(LLLandmark* landmark);
-	void onFilterEdit(const std::string& search_string, bool force_filter);
+//	void onFilterEdit(const std::string& search_string, bool force_filter);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+	void onFilterEdit(LLUICtrl* ctrl_editor, const std::string& search_string, bool force_filter);
+// [/SL:KB]
 	void onTabSelected();
 
 	void onTeleportButtonClicked();

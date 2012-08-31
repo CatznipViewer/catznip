@@ -349,13 +349,16 @@ BOOL LLPanelPlaces::postBuild()
 		//BUT a detached list item cannot be made selected and must not be clicked onto
 		mFilterEditor->setCommitOnFocusLost(false);
 
-		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, false));
+// [/SL:KB]
+//		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
 	}
 
 // [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
 	mSearchEditor = findChild<LLSearchEditor>("SearchQuery");
-	mSearchEditor->setCommitOnFocusLost(false);
-	mSearchEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
+	mSearchEditor->setCommitOnFocusLost(true);
+	mSearchEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, true));
 // [/SL:KB]
 
 	mPlaceProfile = findChild<LLPanelPlaceProfile>("panel_place_profile");
@@ -411,7 +414,10 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 		else
 		{
 			mFilterEditor->clear();
-			onFilterEdit("", false);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+			onFilterEdit(mFilterEditor, "", false);
+// [/SL:KB]
+//			onFilterEdit("", false);
 
 			mPlaceInfoType = key_type;
 			mPosGlobal.setZero();
@@ -603,7 +609,10 @@ void LLPanelPlaces::onLandmarkLoaded(LLLandmark* landmark)
 	updateVerbs();
 }
 
-void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+//void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+void LLPanelPlaces::onFilterEdit(LLUICtrl* ctrl_editor, const std::string& search_string, bool force_filter)
+// [/SL:KB]
 {
 	if (!mActivePanel)
 		return;
@@ -616,6 +625,9 @@ void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_fi
 		// but we don't convert the typed string to upper-case so that it can be fed to the web search as-is.
 
 		mActivePanel->onSearchEdit(string);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		ctrl_editor->resetDirty();
+// [/SL:KB]
 	}
 }
 
@@ -630,7 +642,7 @@ void LLPanelPlaces::onTabSelected()
 	if (!fSearchPanelActive)
 	{
 // [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
-		onFilterEdit(mFilterEditor->getText(), true);
+		onFilterEdit(mFilterEditor, mFilterEditor->getText(), true);
 // [/SL:KB]
 	}
 	mFilterEditor->setVisible(!fSearchPanelActive);
