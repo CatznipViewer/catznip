@@ -579,24 +579,38 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
  	return FALSE;
  }
 
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+LLInventoryPanel* LLPanelMainInventory::addNewTab(S32 insert_at)
+{
+	static int s_cntPanel = 0;
+
+	LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
+	pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
+	pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+	pInvPanel->getFilter()->markDefault();
+	pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
+
+	mFilterTabs->addTabPanel(LLTabContainer::TabPanelParams()
+		.panel(pInvPanel)
+		.is_closable(true)
+		.insert_at((LLTabContainer::eInsertionPoint)insert_at)
+		.select_tab(true));
+
+	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
+	S32 idxTab = mFilterTabs->getIndexForPanel(pInvPanel);
+	mFilterSubStrings.insert(mFilterSubStrings.begin() + idxTab, LLStringUtil::null);
+
+	return pInvPanel;
+}
+// [/SL:KB]
+
 void LLPanelMainInventory::onFilterSelected()
 {
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
-	if (mFilterTabs->getTabCount() == mFilterTabs->getCurrentPanelIndex() + 1)
+	if ( (mFilterTabs->getTabCount() == mFilterTabs->getCurrentPanelIndex() + 1) && 
+		 ("New Inv Panel" == mFilterTabs->getCurrentPanel()->getName()) )
 	{
-		LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
-		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
-		pInvPanel->getFilter()->markDefault();
-		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
-
-		mFilterTabs->addTabPanel(LLTabContainer::TabPanelParams()
-			.panel(pInvPanel)
-			.is_closable(true)
-			.insert_at(LLTabContainer::LEFT_OF_CURRENT)
-			.select_tab(true));
-
-		llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
-		mFilterSubStrings.push_back(LLStringUtil::null);
+		addNewTab(LLTabContainer::LEFT_OF_CURRENT);
 	}
 // [/SL:KB]
 

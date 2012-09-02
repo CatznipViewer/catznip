@@ -10,7 +10,7 @@
  help_topic="my_inventory_tab"
  layout="topleft"
  left="0"
- name="Tab #"
+ name="custom"
  sort_order_setting="InventorySortOrder"
  show_item_link_overlays="true"
  width="320"

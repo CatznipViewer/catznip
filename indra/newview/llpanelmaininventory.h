@@ -105,6 +105,8 @@ protected:
 	void onFilterSelected();
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
 	void onFilterRemoved(S32 idxTab, bool fDeletePanel);
+
+	LLInventoryPanel* addNewTab(S32 insert_at);
 // [/SL:KB]
 
 	const std::string getFilterSubString();
