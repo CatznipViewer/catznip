@@ -84,6 +84,10 @@ public:
 // [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
 	LLFilterEditor* getFilterEditor() const { return mFilterEditor; }
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	LLInventoryPanel* addNewPanel(S32 insert_at);
+	S32               getPanelCount() const;
+// [/SL:KB]
 
 	void onFilterEdit(const std::string& search_string );
 
@@ -108,8 +112,6 @@ protected:
 	void onFilterSelected();
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
 	void onFilterRemoved(S32 idxTab, bool& fDeletePanel);
-
-	LLInventoryPanel* addNewPanel(S32 insert_at);
 // [/SL:KB]
 
 	const std::string getFilterSubString();

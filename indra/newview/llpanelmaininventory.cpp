@@ -639,13 +639,20 @@ LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 		.panel(pInvPanel)
 		.is_closable(true)
 		.insert_at((LLTabContainer::eInsertionPoint)insert_at)
-		.select_tab(true));
+		.select_tab(false));	// Don't select the tab since onFilterSelected() will trigger before we inserted into mFilterSubStrings
 
 	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
 	S32 idxTab = mFilterTabs->getIndexForPanel(pInvPanel);
 	mFilterSubStrings.insert(mFilterSubStrings.begin() + idxTab, LLStringUtil::null);
+	
+	mFilterTabs->selectTabPanel(pInvPanel);
 
 	return pInvPanel;
+}
+
+S32 LLPanelMainInventory::getPanelCount() const
+{
+	return mFilterTabs->getTabCount();
 }
 // [/SL:KB]
 

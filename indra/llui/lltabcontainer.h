@@ -46,10 +46,16 @@ public:
 	};
 	typedef enum e_insertion_point
 	{
-		START,
-		END,
-		LEFT_OF_CURRENT,
-		RIGHT_OF_CURRENT
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+		START = -1,
+		END = -2,
+		LEFT_OF_CURRENT = -3,
+		RIGHT_OF_CURRENT = -4
+// [/SL:KB]
+//		START,
+//		END,
+//		LEFT_OF_CURRENT,
+//		RIGHT_OF_CURRENT
 	} eInsertionPoint;
 
 	struct TabPositions : public LLInitParam::TypeValuesHelper<LLTabContainer::TabPosition, TabPositions>

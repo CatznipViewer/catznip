@@ -58,6 +58,9 @@
 #include "llmarketplacefunctions.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llpreviewanim.h"
 #include "llpreviewgesture.h"
 #include "llpreviewtexture.h"
@@ -3019,6 +3022,26 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		
 		return;
 	}
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	else if ("open_newtab" == action)
+	{
+		LLPanelMainInventory* pMainInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : NULL;
+		if (pMainInvPanel)
+		{
+			LLInventoryPanel* pInvPanel = pMainInvPanel->addNewPanel(pMainInvPanel->getPanelCount() - 1);
+			if (pInvPanel)
+			{
+				LLFolderViewItem* pFVItem = pInvPanel->getItemByID(mUUID);
+				if (pFVItem)
+				{
+				 	pFVItem->setOpen(TRUE);
+					pInvPanel->getRootFolder()->setSelection(pFVItem, TRUE, TRUE);
+					pInvPanel->getRootFolder()->scrollToShowSelection();
+				}
+			}
+ 		}
+ 	}
+// [/SL:KB]
 	else if ("paste" == action)
 	{
 		pasteFromClipboard();
@@ -3630,6 +3653,11 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		{
 			mWearables=TRUE;
 		}
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+		items.push_back(std::string("Outfit Separator"));
+		items.push_back(std::string("Open in XXX"));
+// [/SL:KB]
 	}
 
 	// Preemptively disable system folder removal if more than one item selected.
