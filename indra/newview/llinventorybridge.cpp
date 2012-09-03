@@ -1545,6 +1545,19 @@ void LLItemBridge::restoreToWorld()
 void LLItemBridge::gotoItem()
 {
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	// Prefer the current inventory panel if possible
+	if (!mInventoryPanel.isDead())
+	{
+		const LLUUID& idTarget = gInventory.getLinkedItemID(mUUID);
+
+		LLInventoryPanel* inv_panel = mInventoryPanel.get();
+		LLFolderViewItem* view_item = inv_panel->getItemByID(idTarget);
+		if ( (view_item) && (view_item->passedFilter()) )
+		{
+			inv_panel->setSelection(idTarget, TAKE_FOCUS_NO);
+			return;
+		}
+	}
 	show_item_original(mUUID);
 // [/SL:KB]
 //	LLInventoryObject *obj = getInventoryObject();
