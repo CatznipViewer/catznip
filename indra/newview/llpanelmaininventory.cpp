@@ -103,6 +103,9 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	  mActivePanelIndex(-1),
 	  mFilterSubStringPerTab(true),
 // [/SL:KB]
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	  mSpareInvPanel(NULL),
+// [/SL:KB]
 	  mSavedFolderState(NULL),
 	  mFilterText(""),
 	  mMenuGearDefault(NULL),
@@ -287,6 +290,13 @@ LLPanelMainInventory::~LLPanelMainInventory( void )
 
 	gInventory.removeObserver(this);
 	delete mSavedFolderState;
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	if (mSpareInvPanel)
+	{
+		delete mSpareInvPanel;
+	}
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::startSearch()
@@ -580,15 +590,24 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
  }
 
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
-LLInventoryPanel* LLPanelMainInventory::addNewTab(S32 insert_at)
+LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 {
 	static int s_cntPanel = 0;
 
-	LLInventoryPanel* pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
-	pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
-	pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
-	pInvPanel->getFilter()->markDefault();
-	pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
+	LLInventoryPanel* pInvPanel = NULL;
+	if (!mSpareInvPanel)
+	{
+		pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
+		pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
+		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+		pInvPanel->getFilter()->markDefault();
+		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
+	}
+	else
+	{
+		pInvPanel = mSpareInvPanel;
+		mSpareInvPanel = NULL;
+	}
 
 	mFilterTabs->addTabPanel(LLTabContainer::TabPanelParams()
 		.panel(pInvPanel)
@@ -610,7 +629,7 @@ void LLPanelMainInventory::onFilterSelected()
 	if ( (mFilterTabs->getTabCount() == mFilterTabs->getCurrentPanelIndex() + 1) && 
 		 ("New Inv Panel" == mFilterTabs->getCurrentPanel()->getName()) )
 	{
-		addNewTab(LLTabContainer::LEFT_OF_CURRENT);
+		addNewPanel(LLTabContainer::LEFT_OF_CURRENT);
 	}
 // [/SL:KB]
 
@@ -652,7 +671,17 @@ void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool& fDeletePanel)
 	mFilterSubStrings.erase(mFilterSubStrings.begin() + idxTab);
 	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
 
-	fDeletePanel = true;
+	if ( (gSavedSettings.getBOOL("InventoryReuseUserTab")) && (!mSpareInvPanel) )
+	{
+		mSpareInvPanel = dynamic_cast<LLInventoryPanel*>(mFilterTabs->getPanelByIndex(idxTab));
+		llassert(mSpareInvPanel);
+
+		fDeletePanel = false;
+	}
+	else
+	{
+		fDeletePanel = true;
+	}
 }
 // [/SL:KB]
 

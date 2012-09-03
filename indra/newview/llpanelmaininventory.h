@@ -106,7 +106,7 @@ protected:
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
 	void onFilterRemoved(S32 idxTab, bool& fDeletePanel);
 
-	LLInventoryPanel* addNewTab(S32 insert_at);
+	LLInventoryPanel* addNewPanel(S32 insert_at);
 // [/SL:KB]
 
 	const std::string getFilterSubString();
@@ -149,6 +149,9 @@ private:
 // [/SL:KB]
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	std::string					mFloaterTitle;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	LLInventoryPanel*			mSpareInvPanel;
 // [/SL:KB]
 
 	//////////////////////////////////////////////////////////////////////////////////
