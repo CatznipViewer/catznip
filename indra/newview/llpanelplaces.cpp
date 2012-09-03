@@ -63,6 +63,9 @@
 #include "llpanellandmarks.h"
 #include "llpanelpick.h"
 #include "llpanelplaceprofile.h"
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+#include "llpanelplacessearchpanel.h"
+// [/SL:KB]
 #include "llpanelteleporthistory.h"
 #include "llremoteparcelrequest.h"
 #include "llteleporthistorystorage.h"
@@ -241,6 +244,9 @@ LLPanelPlaces::LLPanelPlaces()
 	:	LLPanel(),
 		mActivePanel(NULL),
 		mFilterEditor(NULL),
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+		mSearchEditor(NULL),
+// [/SL:KB]
 		mPlaceProfile(NULL),
 		mLandmarkInfo(NULL),
 		mPickPanel(NULL),
@@ -249,7 +255,13 @@ LLPanelPlaces::LLPanelPlaces()
 		mLandmarkMenu(NULL),
 		mPosGlobal(),
 		isLandmarkEditModeOn(false),
-		mTabsCreated(false)
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+		mTabsCreated(false),
+		mLandmarksPanel(NULL),
+		mTeleportHistoryPanel(NULL),
+		mSearchPanel(NULL)
+// [/SL:KB]
+//		mTabsCreated(false)
 {
 	mParcelObserver = new LLPlacesParcelObserver(this);
 	mInventoryObserver = new LLPlacesInventoryObserver(this);
@@ -337,8 +349,17 @@ BOOL LLPanelPlaces::postBuild()
 		//BUT a detached list item cannot be made selected and must not be clicked onto
 		mFilterEditor->setCommitOnFocusLost(false);
 
-		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, false));
+// [/SL:KB]
+//		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
 	}
+
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mSearchEditor = findChild<LLSearchEditor>("SearchQuery");
+	mSearchEditor->setCommitOnFocusLost(true);
+	mSearchEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, true));
+// [/SL:KB]
 
 	mPlaceProfile = findChild<LLPanelPlaceProfile>("panel_place_profile");
 	mLandmarkInfo = findChild<LLPanelLandmarkInfo>("panel_landmark_info");
@@ -393,7 +414,10 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 		else
 		{
 			mFilterEditor->clear();
-			onFilterEdit("", false);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+			onFilterEdit(mFilterEditor, "", false);
+// [/SL:KB]
+//			onFilterEdit("", false);
 
 			mPlaceInfoType = key_type;
 			mPosGlobal.setZero();
@@ -585,7 +609,10 @@ void LLPanelPlaces::onLandmarkLoaded(LLLandmark* landmark)
 	updateVerbs();
 }
 
-void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+//void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+void LLPanelPlaces::onFilterEdit(LLUICtrl* ctrl_editor, const std::string& search_string, bool force_filter)
+// [/SL:KB]
 {
 	if (!mActivePanel)
 		return;
@@ -598,6 +625,9 @@ void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_fi
 		// but we don't convert the typed string to upper-case so that it can be fed to the web search as-is.
 
 		mActivePanel->onSearchEdit(string);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		ctrl_editor->resetDirty();
+// [/SL:KB]
 	}
 }
 
@@ -607,7 +637,18 @@ void LLPanelPlaces::onTabSelected()
 	if (!mActivePanel)
 		return;
 
-	onFilterEdit(mActivePanel->getFilterSubString(), true);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	bool fSearchPanelActive = (mSearchPanel == mActivePanel);
+	if (!fSearchPanelActive)
+	{
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+		onFilterEdit(mFilterEditor, mFilterEditor->getText(), true);
+// [/SL:KB]
+	}
+	mFilterEditor->setVisible(!fSearchPanelActive);
+	mSearchEditor->setVisible(fSearchPanelActive);
+// [/SL:KB]
+//	onFilterEdit(mActivePanel->getFilterSubString(), true);
 	mActivePanel->updateVerbs();
 }
 
@@ -938,6 +979,9 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 		return;
 
 	mFilterEditor->setVisible(!visible);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mSearchEditor->setVisible(!visible);
+// [/SL:KB]
 	mTabContainer->setVisible(!visible);
 
 	if (mPlaceInfoType == AGENT_INFO_TYPE ||
@@ -1089,6 +1133,21 @@ void LLPanelPlaces::createTabs()
 			insert_at(LLTabContainer::END));
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLPanelPlacesSearchPanel* search_panel = new LLPanelPlacesSearchPanel();
+	if (search_panel)
+	{
+		search_panel->setPanelPlacesButtons(this);
+
+		mTabContainer->addTabPanel(
+			LLTabContainer::TabPanelParams().
+			panel(search_panel).
+			label("SEARCH").
+			label(getString("search_tab_title")).
+			insert_at(LLTabContainer::END));
+	}
+// [/SL:KB]
+
 	mTabContainer->selectFirstTab();
 
 	mActivePanel = dynamic_cast<LLPanelPlacesTab*>(mTabContainer->getCurrentPanel());
@@ -1098,6 +1157,11 @@ void LLPanelPlaces::createTabs()
 		mActivePanel->onSearchEdit(mActivePanel->getFilterSubString());
 
 	mTabsCreated = true;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mLandmarksPanel = landmarks_panel;
+	mTeleportHistoryPanel = teleport_history_panel;
+	mSearchPanel = search_panel;
+// [/SL:KB]
 }
 
 void LLPanelPlaces::changedGlobalPos(const LLVector3d &global_pos)

@@ -53,16 +53,24 @@ public:
 										const LLUUID& snapshot_id,
 										bool teleport);
 
-	const std::string& getFilterSubString() { return sFilterSubString; }
-	void setFilterSubString(const std::string& string) { sFilterSubString = string; }
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	const std::string& getFilterSubString() const		{ return mFilterSubString; }
+	bool hasFilterSubString() const						{ return !mFilterSubString.empty(); }
+	void setFilterSubString(const std::string& string)	{ mFilterSubString = string; }
+// [/SL:KB]
+//	const std::string& getFilterSubString() { return sFilterSubString; }
+//	void setFilterSubString(const std::string& string) { sFilterSubString = string; }
 
 protected:
 	LLButton*				mTeleportBtn;
 	LLButton*				mShowOnMapBtn;
 	LLButton*				mShowProfile;
 
-	// Search string for filtering landmarks and teleport history locations
-	static std::string		sFilterSubString;
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	std::string				mFilterSubString;
+// [/SL:KB]
+//	// Search string for filtering landmarks and teleport history locations
+//	static std::string		sFilterSubString;
 };
 
 #endif //LL_LLPANELPLACESTAB_H
