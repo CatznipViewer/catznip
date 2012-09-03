@@ -647,7 +647,7 @@ void LLPanelMainInventory::onFilterSelected()
 }
 
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
-void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool fDeletePanel)
+void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool& fDeletePanel)
 {
 	mFilterSubStrings.erase(mFilterSubStrings.begin() + idxTab);
 	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
