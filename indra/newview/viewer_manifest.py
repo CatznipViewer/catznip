@@ -673,7 +673,7 @@ class DarwinManifest(ViewerManifest):
         self.path(self.args['configuration'] + "/Catznip.app", dst="")
 
         if self.prefix(src="", dst="Contents"):  # everything goes in Contents
-            self.path("Info-SecondLife.plist", dst="Info.plist")
+            self.path("Info-Catznip.plist", dst="Info.plist")
 
             # copy additional libs in <bundle>/Contents/MacOS/
             self.path("../packages/lib/release/libndofdev.dylib", dst="Resources/libndofdev.dylib")
@@ -690,14 +690,14 @@ class DarwinManifest(ViewerManifest):
 
                 self.path("licenses-mac.txt", dst="licenses.txt")
                 self.path("featuretable_mac.txt")
-                self.path("SecondLife.nib")
+                self.path("Catznip.nib")
 
                 icon_path = self.icon_path()
                 if self.prefix(src=icon_path, dst="") :
                     self.path("catznip.icns")
                     self.end_prefix(icon_path)
 
-                self.path("SecondLife.nib")
+                self.path("Catznip.nib")
                 
                 # Translations
                 self.path("English.lproj")
@@ -813,7 +813,7 @@ class DarwinManifest(ViewerManifest):
         if ("package" in self.args['actions'] or 
             "unpacked" in self.args['actions']):
             self.run_command('strip -S %(viewer_binary)r' %
-                             { 'viewer_binary' : self.dst_path_of('Contents/MacOS/Second Life')})
+                             { 'viewer_binary' : self.dst_path_of('Contents/MacOS/Catznip')})
 
 
     def copy_finish(self):

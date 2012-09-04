@@ -1202,8 +1202,8 @@ if (DARWIN)
     catznip.icns
     macview.r
     gpu_table.txt
-    Info-SecondLife.plist
-    SecondLife.nib/
+    Info-Catznip.plist
+    Catznip.nib/
     # CMake doesn't seem to support Xcode language variants well just yet
     English.lproj/InfoPlist.strings
     English.lproj/language.txt
