@@ -114,9 +114,6 @@ void LLAvatarList::refreshSpeakingIndicatorsVisibility(bool visible)
 	getItems(items);
 	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
 	{
-// [SL:KB] - Control-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
-		static_cast<LLAvatarListItem*>(*it)->showVolumeSlider(mShowVolumeSlider && mShowSpeakingIndicator);
-// [/SL:KB]
 		static_cast<LLAvatarListItem*>(*it)->showSpeakingIndicator(mShowSpeakingIndicator);
 	}
 }
@@ -162,7 +159,7 @@ LLAvatarList::Params::Params()
 , show_info_btn("show_info_btn", true)
 , show_profile_btn("show_profile_btn", true)
 , show_speaking_indicator("show_speaking_indicator", true)
-// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 , show_volume_slider("show_volume_slider", false)
 // [/SL:KB]
 , show_permissions_granted("show_permissions_granted", false)
@@ -192,7 +189,7 @@ LLAvatarList::LLAvatarList(const Params& p)
 , mShowInfoBtn(p.show_info_btn)
 , mShowProfileBtn(p.show_profile_btn)
 , mShowSpeakingIndicator(p.show_speaking_indicator)
-// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 , mShowVolumeSlider(p.show_volume_slider)
 // [/SL:KB]
 , mShowPermissions(p.show_permissions_granted)
@@ -577,10 +574,10 @@ void LLAvatarList::addNewItem(const LLUUID& id, const std::string& name, BOOL is
 	item->setAvatarIconVisible(mShowIcons);
 	item->setShowInfoBtn(mShowInfoBtn);
 	item->setShowProfileBtn(mShowProfileBtn);
-// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
-	item->showVolumeSlider(mShowVolumeSlider);	// Bit hacky since this needs to come before showSpeakingIndicator()
-// [/SL:KB]
 	item->showSpeakingIndicator(mShowSpeakingIndicator);
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
+	item->showVolumeSlider(mShowVolumeSlider);
+// [/SL:KB]
 	item->setShowPermissions(mShowPermissions);
 
 	item->setDoubleClickCallback(boost::bind(&LLAvatarList::onItemDoubleClicked, this, _1, _2, _3, _4));

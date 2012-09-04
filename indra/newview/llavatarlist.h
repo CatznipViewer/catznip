@@ -76,7 +76,7 @@ public:
 						show_info_btn,
 						show_profile_btn,
 						show_speaking_indicator,
-// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 						show_volume_slider,
 // [/SL:KB]
 						show_permissions_granted;
@@ -160,7 +160,7 @@ private:
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
 	bool mShowTextField;
 // [/SL:KB]
-// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 	bool mShowVolumeSlider;
 // [/SL:KB]
 	bool mDirty;
