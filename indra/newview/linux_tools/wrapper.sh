@@ -111,7 +111,7 @@ export SAVED_LD_LIBRARY_PATH="${LD_LIBRARY_PATH}"
 #fi
 
 export SL_ENV='LD_LIBRARY_PATH="`pwd`"/lib:"${LD_LIBRARY_PATH}"'
-export SL_CMD='$LL_WRAPPER bin/catznip-do-not-directly-run-bin'
+export SL_CMD='$LL_WRAPPER bin/do-not-directly-run-catznip-bin'
 export SL_OPT="`cat etc/gridargs.dat` $@"
 
 # Run the program
