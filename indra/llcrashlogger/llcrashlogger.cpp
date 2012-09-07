@@ -47,8 +47,9 @@
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
 #ifdef LL_WINDOWS
 #include <shellapi.h>
+#endif 
 #include <boost/lexical_cast.hpp>
-#endif // LL_WINDOWS
+// LL_WINDOWS
 // [/SL:KB]
 
 LLPumpIO* gServicePump;
