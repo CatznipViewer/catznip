@@ -5206,7 +5206,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    icon="notifytip.tga"
    name="FriendOnline"
    can_logto="chat|openim"
-   logto="openim"
+   logto="chat|openim"
    type="notifytip">
     <tag>friendship</tag>
 [NAME_SLURL] is Online
@@ -5216,7 +5216,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    icon="notifytip.tga"
    name="FriendOffline"
    can_logto="chat|openim"
-   logto="openim"
+   logto="chat|openim"
    type="notifytip">
     <tag>friendship</tag>
 [NAME_SLURL] is Offline
