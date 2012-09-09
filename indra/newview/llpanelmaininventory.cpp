@@ -629,6 +629,9 @@ LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
 	else
 	{
 		pInvPanel = mSpareInvPanel;
+		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+		pInvPanel->getFilter().resetDefault();
+		pInvPanel->getRootFolder()->closeAllFolders();
 		mSpareInvPanel = NULL;
 	}
 
