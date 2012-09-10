@@ -31,24 +31,44 @@
              tool_tip="Click to choose a picture"
              top="8"
              width="64" />
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_delta="24"
+             name="texture_pipette"
+             top_delta="75"
+             width="16" />
             <color_swatch
              can_apply_immediately="true"
              follows="left|top"
              height="80"
              label="Color"
              layout="topleft"
-             left_pad="15"
+             left_pad="39"
              name="colorswatch"
              tool_tip="Click to open color picker"
-             top_delta="0"
+             top_delta="-75"
              width="64" />
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_delta="24"
+             name="color_pipette"
+             top_delta="75"
+             width="16" />
             <text
              type="string"
              length="1"
              follows="left|top"
              height="10"
              layout="topleft"
-             left_pad="15"
+             left_pad="39"
              name="color trans"
              text_readonly_color="LabelDisabledColor"
              top="6"

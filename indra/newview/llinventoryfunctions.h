@@ -37,6 +37,11 @@
  **                    MISCELLANEOUS GLOBAL FUNCTIONS
  **/
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+// Implemented in lltexturectrl.cpp
+const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only);
+// [/SL:KB]
+
 // Is this a parent folder to a worn item
 BOOL get_is_parent_to_worn_item(const LLUUID& id);
 

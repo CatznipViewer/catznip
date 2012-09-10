@@ -108,7 +108,10 @@ void LLToolPipette::setTextureEntry(const LLTextureEntry* entry)
 	if (entry)
 	{
 		mTextureEntry = *entry;
-		mSignal(mTextureEntry);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mSignal(mPipetteType, mTextureEntry);
+// [/SL:KB]
+//		mSignal(mTextureEntry);
 	}
 }
 
