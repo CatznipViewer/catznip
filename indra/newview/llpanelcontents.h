@@ -53,7 +53,7 @@ public:
 
 	static void		onClickNewScript(void*);
 	static void		onClickPermissions(void*);
-// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.3.0) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
 	void			onClickRefresh();
 // [/SL:KB]
 	

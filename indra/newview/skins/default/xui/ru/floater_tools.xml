@@ -128,7 +128,7 @@
 		Не выбрано.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights Дополнительная информация]
+		[secondlife:///app/openfloater/object_weights Дополнительная информация]
 	</text>
 	<tab_container name="Object Info Tabs">
 		<panel label="Общие" name="General">
@@ -247,19 +247,19 @@
 			<check_box label="Временный" name="Temporary Checkbox Ctrl" tool_tip="Приводит к автоматическому удалению объекта через минуту после создания."/>
 			<check_box label="Фантомный" name="Phantom Checkbox Ctrl" tool_tip="Предотвращает столкновение объекта с другими объектами или аватарами."/>
 			<text name="label position">
-				Позиция (метры)
+				Позиция
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Размер (метры)
+				Размер
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Поворот (градусы)
+				Поворот
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

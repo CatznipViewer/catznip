@@ -347,7 +347,7 @@ LLVector3 LLManip::getSavedPivotPoint() const
 
 LLVector3 LLManip::getPivotPoint()
 {
-// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 	static LLCachedControl<bool> fAxisAtRoot(gSavedSettings, "AxisAtRootEnabled");
 	static LLCachedControl<LLVector3> vecAxisPosition(gSavedSettings, "AxisPosition");
 	static LLCachedControl<LLVector3> vecAxisOffset(gSavedSettings, "AxisOffset");

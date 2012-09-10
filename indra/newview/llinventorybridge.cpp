@@ -1422,7 +1422,7 @@ void LLItemBridge::restoreItem()
 
 void LLItemBridge::restoreToWorld()
 {
-// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.3.0) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2)
 	const LLViewerInventoryItem* pItem = getItem();
 	if (!pItem)
 	{
@@ -1434,7 +1434,7 @@ void LLItemBridge::restoreToWorld()
 }
 // [/SL:KB]
 
-// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.3.0) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2)
 void LLItemBridge::confirmRestoreToWorld(const LLSD& notification, const LLSD& response)
 {
 	if (0 != LLNotificationsUtil::getSelectedOption(notification, response)) 
@@ -5270,7 +5270,7 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 
 				// commented out for DEV-32347
 				//items.push_back(std::string("Restore to Last Position"));
-// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.3.0) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2)
 				items.push_back(std::string("World Restore Separator"));
 				items.push_back(std::string("Restore to Last Position"));
 				if (!(flags & FIRST_SELECTED_ITEM))

@@ -37,7 +37,7 @@
 #include "llcombobox.h"
 #include "llselectmgr.h"
 
-// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 #include "llsliderctrl.h"
 #include "llspinctrl.h"
 #include "llviewercontrol.h"
@@ -73,7 +73,7 @@ void LLFloaterBuildOptions::onClose(bool app_quitting)
 }
 
 
-// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2.0d) | Added: 3.2.0d
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 //
 // LLFloaterBuildAxis
 //
@@ -128,6 +128,7 @@ void LLFloaterBuildAxis::refresh()
 	findChild<LLSpinCtrl>("AxisOffsetZ")->setValue(offset.mV[2]);
 }
 
+// static
 void LLFloaterBuildAxis::onAxisPosChanged(const LLSD& sdValue, U32 idxAxis)
 {
 	if (idxAxis > 2)
@@ -138,11 +139,13 @@ void LLFloaterBuildAxis::onAxisPosChanged(const LLSD& sdValue, U32 idxAxis)
 	gSavedSettings.setVector3("AxisPosition", pos);
 }
 
+// static
 void LLFloaterBuildAxis::onAxisPosCenter()
 {
 	gSavedSettings.setVector3("AxisPosition", LLVector3::zero);
 }
 
+// static
 void LLFloaterBuildAxis::onAxisOffsetChanged(const LLSD& sdValue, U32 idxAxis)
 {
 	if (idxAxis > 2)

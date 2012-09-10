@@ -251,19 +251,19 @@
 			<check_box label="Temporær" name="Temporary Checkbox Ctrl" tool_tip="Medfører at objekt slettes 1 minut efter skabelse"/>
 			<check_box label="Uden masse" name="Phantom Checkbox Ctrl" tool_tip="Får objektet til ikke at kollidere med andre objekter eller personer"/>
 			<text name="label position">
-				Position (meter)
+				Position
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Størrelse (meter)
+				Størrelse
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Rotation (grader)
+				Rotation
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

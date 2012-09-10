@@ -128,7 +128,7 @@
 		Seçilen bir şey yok.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights Ek bilgi]
+		[secondlife:///app/openfloater/object_weights Ek bilgi]
 	</text>
 	<tab_container name="Object Info Tabs">
 		<panel label="Genel" name="General">
@@ -247,19 +247,19 @@
 			<check_box label="Geçici" name="Temporary Checkbox Ctrl" tool_tip="Nesnenin oluşturulduktan 1 dakika sonra silinmesine neden olur"/>
 			<check_box label="Fantom" name="Phantom Checkbox Ctrl" tool_tip="Nesnenin diğer nesneler veya avatarlarla çarpışmamasına neden olur"/>
 			<text name="label position">
-				Konum (metre)
+				Konum
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Büyüklük (metre)
+				Büyüklük
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Dönüş (derece)
+				Dönüş
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

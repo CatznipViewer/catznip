@@ -245,19 +245,19 @@
 			<check_box label="Tymczasowy" name="Temporary Checkbox Ctrl" tool_tip="Umożliwia usunięcie obiektu po 1 minucie od jego stworzenia."/>
 			<check_box label="Fantom" name="Phantom Checkbox Ctrl" tool_tip="Umożliwia zanik kolizji pomiędzy obiektami a awatarami."/>
 			<text name="label position">
-				Pozycja (metry)
+				Pozycja
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Rozmiar (metry)
+				Rozmiar
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Obrót (stopnie)
+				Obrót
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

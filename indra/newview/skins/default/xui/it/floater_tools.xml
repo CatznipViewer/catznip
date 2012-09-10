@@ -127,7 +127,7 @@
 		Nessuna selezione.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights Maggiori informazioni]
+		[secondlife:///app/openfloater/object_weights Maggiori informazioni]
 	</text>
 	<tab_container name="Object Info Tabs">
 		<panel label="Generale" name="General">
@@ -252,19 +252,19 @@
 			<check_box label="Temporaneo" name="Temporary Checkbox Ctrl" tool_tip="Determina la cancellazione dell&apos;oggetto 1 minuto dopo la sua creazione"/>
 			<check_box label="Fantasma" name="Phantom Checkbox Ctrl" tool_tip="Rende l&apos;oggetto penetrabile dagli altri oggetti e dagli avatars"/>
 			<text name="label position">
-				Posizione (metri)
+				Posizione
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Dimensioni (metri)
+				Dimensioni
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Rotazione (gradi)
+				Rotazione
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

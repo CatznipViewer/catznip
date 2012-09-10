@@ -1424,7 +1424,7 @@ even though the user gets a free copy.
              layout="topleft"
              left_pad="5"
              name="copy_position_btn"
-             top_delta="-2"
+             top_delta="-1"
              width="17">
               <button.commit_callback
                function="BuildTool.CopyParams"
@@ -1455,7 +1455,7 @@ even though the user gets a free copy.
              min_val="-256"
              name="Pos X"
              text_enabled_color="1 0 0.3 .7"
-             top_pad="0"
+             top_pad="3"
              width="87" />
             <spinner
              follows="left|top"
@@ -1504,7 +1504,7 @@ even though the user gets a free copy.
              layout="topleft"
              left_pad="5"
              name="copy_size_btn"
-             top_delta="-2"
+             top_delta="-1"
              width="17">
               <button.commit_callback
                function="BuildTool.CopyParams"
@@ -1535,7 +1535,7 @@ even though the user gets a free copy.
              min_val="0.01"
              name="Scale X"
              text_enabled_color="1 1 1 1"
-             top_pad="0"
+             top_pad="3"
              width="87" />
             <spinner
              follows="left|top"
@@ -1585,7 +1585,7 @@ even though the user gets a free copy.
              layout="topleft"
              left_pad="5"
              name="copy_rotation_btn"
-             top_delta="-2"
+             top_delta="-1"
              width="17">
               <button.commit_callback
                function="BuildTool.CopyParams"
@@ -1617,7 +1617,7 @@ even though the user gets a free copy.
              min_val="-9999"
              name="Rot X"
              text_enabled_color="1 1 1 1"
-             top_pad="0"
+             top_pad="3"
              width="87" />
             <spinner
              decimal_digits="2"
@@ -1672,17 +1672,17 @@ even though the user gets a free copy.
              left="125"
              name="label rotation"
              top="5"
-             width="75">
-                Prim Params
+             width="105">
+                Prim Parameters
             </text>
             <button
              follows="left|top"
              height="16"
              label="C"
              layout="topleft"
-             left_pad="38"
+             left_pad="8"
              name="copy_primparams_btn"
-             top_delta="-2"
+             top_delta="-1"
              width="17">
               <button.commit_callback
                function="BuildTool.CopyParams"
@@ -1704,7 +1704,7 @@ even though the user gets a free copy.
              height="19"
              layout="topleft"
              name="comboBaseType"
-             top_pad="0"
+             top_pad="3"
              left="125"
              width="150">
                 <combo_box.item
