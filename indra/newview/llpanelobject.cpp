@@ -59,6 +59,9 @@
 #include "lltool.h"
 #include "lltoolcomp.h"
 #include "lltoolmgr.h"
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1)
+#include "lltoolpipette.h"
+// [/SL:KB]
 #include "llui.h"
 #include "llviewerobject.h"
 #include "llviewerregion.h"
@@ -128,6 +131,8 @@ BOOL	LLPanelObject::postBuild()
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopyPosition = findChild<LLButton>("copy_position_btn");
 	mBtnPastePosition = findChild<LLButton>("paste_position_btn");
+	mBtnPipettePosition = findChild<LLButton>("pipette_position_btn");
+	mBtnPipettePosition->setCommitCallback(boost::bind(&LLPanelObject::onClickPipette, this, LLToolPipette::TYPE_POSITION));
 // [/SL:KB]
 	mCtrlPosX = getChild<LLSpinCtrl>("Pos X");
 	childSetCommitCallback("Pos X",onCommitPosition,this);
@@ -141,6 +146,8 @@ BOOL	LLPanelObject::postBuild()
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopySize = findChild<LLButton>("copy_size_btn");
 	mBtnPasteSize = findChild<LLButton>("paste_size_btn");
+	mBtnPipetteSize = findChild<LLButton>("pipette_size_btn");
+	mBtnPipetteSize->setCommitCallback(boost::bind(&LLPanelObject::onClickPipette, this, LLToolPipette::TYPE_SIZE));
 // [/SL:KB]
 	mCtrlScaleX = getChild<LLSpinCtrl>("Scale X");
 	childSetCommitCallback("Scale X",onCommitScale,this);
@@ -158,6 +165,8 @@ BOOL	LLPanelObject::postBuild()
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopyRotation = findChild<LLButton>("copy_rotation_btn");
 	mBtnPasteRotation = findChild<LLButton>("paste_rotation_btn");
+	mBtnPipetteRotation = findChild<LLButton>("pipette_rotation_btn");
+	mBtnPipetteRotation->setCommitCallback(boost::bind(&LLPanelObject::onClickPipette, this, LLToolPipette::TYPE_ROTATION));
 // [/SL:KB]
 	mCtrlRotX = getChild<LLSpinCtrl>("Rot X");
 	childSetCommitCallback("Rot X",onCommitRotation,this);
@@ -172,6 +181,8 @@ BOOL	LLPanelObject::postBuild()
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1)
 	mBtnCopyPrimParams = findChild<LLButton>("copy_primparams_btn");
 	mBtnPastePrimParams = findChild<LLButton>("paste_primparams_btn");
+	mBtnPipettePrimParams = findChild<LLButton>("pipette_primparams_btn");
+	mBtnPipettePrimParams->setCommitCallback(boost::bind(&LLPanelObject::onClickPipette, this, LLToolPipette::TYPE_PARAMS));
 // [/SL:KB]
 	mComboBaseType = getChild<LLComboBox>("comboBaseType");
 	childSetCommitCallback("comboBaseType",onCommitParametric,this);
@@ -294,6 +305,10 @@ BOOL	LLPanelObject::postBuild()
 	// Start with everyone disabled
 	clearCtrls();
 
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelObject::onSelectPipette, this, _1, _2));
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -302,12 +317,16 @@ LLPanelObject::LLPanelObject()
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopyPosition(NULL),
 	mBtnPastePosition(NULL),
+	mBtnPipettePosition(NULL),
 	mBtnCopySize(NULL),
 	mBtnPasteSize(NULL),
+	mBtnPipetteSize(NULL),
 	mBtnCopyRotation(NULL),
 	mBtnPasteRotation(NULL),
+	mBtnPipetteRotation(NULL),
 	mBtnCopyPrimParams(NULL),
 	mBtnPastePrimParams(NULL),
+	mBtnPipettePrimParams(NULL),
 // [/SL:KB]
 	mIsPhysical(FALSE),
 	mIsTemporary(FALSE),
@@ -416,6 +435,7 @@ void LLPanelObject::getState( )
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopyPosition->setEnabled(enable_move);
 	mBtnPastePosition->setEnabled(enable_move && mObjectClipboard.has("position"));
+	mBtnPipettePosition->setEnabled(enable_move);
 // [/SL:KB]
 	mCtrlPosX->setEnabled(enable_move);
 	mCtrlPosY->setEnabled(enable_move);
@@ -445,6 +465,7 @@ void LLPanelObject::getState( )
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopySize->setEnabled(enable_scale);
 	mBtnPasteSize->setEnabled(enable_scale && mObjectClipboard.has("size"));
+	mBtnPipetteSize->setEnabled(enable_scale);
 // [/SL:KB]
 	mCtrlScaleX->setEnabled( enable_scale );
 	mCtrlScaleY->setEnabled( enable_scale );
@@ -480,6 +501,7 @@ void LLPanelObject::getState( )
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	mBtnCopyRotation->setEnabled(enable_rotate);
 	mBtnPasteRotation->setEnabled(enable_rotate && mObjectClipboard.has("rotation"));
+	mBtnPipetteRotation->setEnabled(enable_rotate);
 // [/SL:KB]
 	mCtrlRotX->setEnabled( enable_rotate );
 	mCtrlRotY->setEnabled( enable_rotate );
@@ -996,6 +1018,7 @@ void LLPanelObject::getState( )
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1)
 	mBtnCopyPrimParams->setEnabled(enabled);
 	mBtnPastePrimParams->setEnabled(enabled && mObjectClipboard.has("prim_params"));
+	mBtnPipettePrimParams->setEnabled(enabled);
 // [/SL:KB]
 	mComboBaseType	->setEnabled( enabled );
 
@@ -1918,6 +1941,15 @@ void LLPanelObject::draw()
 		mCtrlRotZ	->setLabelColor(white);
 	}
 
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::EType pipetteType = 
+		(tool == LLToolPipette::getInstance()) ? LLToolPipette::getInstance()->getPipetteType() : LLToolPipette::TYPE_NONE;
+	mBtnPipettePosition->setValue(LLToolPipette::TYPE_POSITION == pipetteType);
+	mBtnPipetteSize->setValue(LLToolPipette::TYPE_SIZE == pipetteType);
+	mBtnPipetteRotation->setValue(LLToolPipette::TYPE_ROTATION == pipetteType);
+	mBtnPipettePrimParams->setValue(LLToolPipette::TYPE_PARAMS == pipetteType);
+// [/SL:KB]
+
 	LLPanel::draw();
 }
 
@@ -2099,52 +2131,112 @@ void LLPanelObject::onCommitSculptType(LLUICtrl *ctrl, void* userdata)
 }
 
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.0)
+void LLPanelObject::onClickPipette(LLToolPipette::EType type)
+{
+	bool fEnabled = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance()) &&
+		(type == LLToolPipette::getInstance()->getPipetteType());
+	if (!fEnabled)
+	{
+		LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
+		LLToolPipette::getInstance()->setPippetType(type);
+	}
+	else
+	{
+		LLToolMgr::getInstance()->clearTransientTool();
+	}
+}
+
+void LLPanelObject::onSelectPipette(LLToolPipette::EType type, LLViewerObject* pObj)
+{
+	std::string strParamType;
+	switch (type)
+	{
+		case LLToolPipette::TYPE_POSITION:
+			if ( (pObj->isAttachment() == mObject->isAttachment()) && (mObject->permMove()) )
+				strParamType = "position";
+			break;
+		case LLToolPipette::TYPE_SIZE:
+			if ( (pObj->permModify()) && (mObject->permModify()) )
+				strParamType = "size";
+			break;
+		case LLToolPipette::TYPE_ROTATION:
+			if ( (pObj->isAttachment() == mObject->isAttachment()) && (mObject->permMove()) )
+				strParamType = "rotation";
+			break;
+		case LLToolPipette::TYPE_PARAMS:
+			if ( (pObj->permModify()) && (mObject->permModify()) )
+				strParamType = "prim_params";
+			break;
+		default:
+			break;
+	}
+
+	if (!strParamType.empty())
+	{
+		LLSD sdData;
+		sdData[strParamType] = objectToLLSD(strParamType, pObj);
+		objectFromLLSD(strParamType, sdData);
+	}
+}
+
+LLSD LLPanelObject::objectToLLSD(const std::string& strParamType, const LLViewerObject* pObj)
+{
+	LLSD sdParams;
+	if ("position" == strParamType)
+	{
+		sdParams = ll_sd_from_vector3(pObj->getPositionEdit());
+	}
+	else if ("size" == strParamType)
+	{
+		sdParams = ll_sd_from_vector3(pObj->getScale());
+	}
+	else if ("rotation" == strParamType)
+	{
+		sdParams = ll_sd_from_quaternion(pObj->getRotationEdit());
+	}
+	else if ("prim_params" == strParamType)
+	{
+		if (LL_PCODE_VOLUME == pObj->getPCode())
+		{
+			if (pObj->getParameterEntryInUse(LLNetworkData::PARAMS_SCULPT))
+				sdParams["sculpt"] = ((LLSculptParams*)pObj->getParameterEntry(LLNetworkData::PARAMS_SCULPT))->asLLSD();
+			sdParams["volume"] = pObj->getVolume()->getParams().asLLSD();
+		}
+	}
+	return sdParams;
+}
+
 void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
 {
-	const std::string strParam = sdParam.asString();
-	if ("position" == strParam)
-	{
-		mObjectClipboard["position"] = ll_sd_from_vector3(mObject->getPositionEdit());
-		if (!mBtnPastePosition->getEnabled())
-			refresh();
-	}
-	else if ("size" == strParam)
-	{
-		mObjectClipboard["size"] = ll_sd_from_vector3(mObject->getScale());
-		if (!mBtnPasteSize->getEnabled())
-			refresh();
-	}
-	else if ("rotation" == strParam)
-	{
-		mObjectClipboard["rotation"] = ll_sd_from_quaternion(mObject->getRotationEdit());
-		if (!mBtnPasteRotation->getEnabled())
-			refresh();
-	}
-	else if ("prim_params" == strParam)
-	{
-		if (LL_PCODE_VOLUME != mObject->getPCode())
-			return;
+	const std::string strParamType = sdParam.asString();
 
-		if (mObject->getParameterEntryInUse(LLNetworkData::PARAMS_SCULPT))
-			mObjectClipboard["prim_params"]["sculpt"] = ((LLSculptParams*)mObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT))->asLLSD();
-		else
-			mObjectClipboard["prim_params"].erase("sculpt");
+	LLButton* pButton = NULL;
+	if ("position" == strParamType)
+		pButton = mBtnPastePosition;
+	else if ("size" == strParamType)
+		pButton = mBtnPasteSize;
+	else if ("rotation" == strParamType)
+		pButton = mBtnPasteRotation;
+	else if ("prim_params" == strParamType)
+		pButton = mBtnPastePrimParams;
 
-		mObjectClipboard["prim_params"]["volume"] = mObject->getVolume()->getParams().asLLSD();
-		if (!mBtnPastePrimParams->getEnabled())
+	if (pButton)
+	{
+		mObjectClipboard[strParamType] = objectToLLSD(strParamType, mObject);
+
+		if (!pButton->getEnabled())
 			refresh();
 	}
 }
 
-void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
+void LLPanelObject::objectFromLLSD(const std::string& strParamType, const LLSD& sdParams)
 {
-	const std::string strParam = sdParam.asString();
-	if (!mObjectClipboard.has(strParam))
+	if (!sdParams.has(strParamType))
 		return;
 
-	if ("position" == strParam)
+	if ("position" == strParamType)
 	{
-		LLVector3 pos = ll_vector3_from_sd(mObjectClipboard["position"]);
+		LLVector3 pos = ll_vector3_from_sd(sdParams["position"]);
 		mCtrlPosX->set(pos.mV[VX]);
 		mCtrlPosY->set(pos.mV[VY]);
 		mCtrlPosZ->set(pos.mV[VZ]);
@@ -2156,9 +2248,9 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 
 		sendPosition(FALSE);
 	}
-	else if ("size" == strParam)
+	else if ("size" == strParamType)
 	{
-		LLVector3 size = ll_vector3_from_sd(mObjectClipboard["size"]);
+		LLVector3 size = ll_vector3_from_sd(sdParams["size"]);
 		mCtrlScaleX->set(size.mV[VX]);
 		mCtrlScaleY->set(size.mV[VY]);
 		mCtrlScaleZ->set(size.mV[VZ]);
@@ -2170,9 +2262,9 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 
 		sendScale(FALSE);
 	}
-	else if ("rotation" == strParam)
+	else if ("rotation" == strParamType)
 	{
-		LLQuaternion rot = ll_quaternion_from_sd(mObjectClipboard["rotation"]); LLVector3 rotEuler;
+		LLQuaternion rot = ll_quaternion_from_sd(sdParams["rotation"]); LLVector3 rotEuler;
 		rot.getEulerAngles(&(rotEuler.mV[VX]), &(rotEuler.mV[VY]), &(rotEuler.mV[VZ]));
 		rotEuler *= RAD_TO_DEG;
 		rotEuler.mV[VX] = fmod(llround(rotEuler.mV[VX], OBJECT_ROTATION_PRECISION) + 360.f, 360.f);
@@ -2190,15 +2282,15 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 
 		sendRotation(FALSE);
 	}
-	else if ("prim_params" == strParam)
+	else if ("prim_params" == strParamType)
 	{
 		if (LL_PCODE_VOLUME != mObject->getPCode())
 			return;
 
-		if (mObjectClipboard["prim_params"].has("sculpt"))
+		if (sdParams["prim_params"].has("sculpt"))
 		{
 			LLSculptParams sculpt_params;
-			sculpt_params.fromLLSD(mObjectClipboard["prim_params"]["sculpt"]);
+			sculpt_params.fromLLSD(sdParams["prim_params"]["sculpt"]);
 			mObject->setParameterEntry(LLNetworkData::PARAMS_SCULPT, sculpt_params, TRUE);
 		}
 		else
@@ -2207,10 +2299,15 @@ void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
 		}
 
 		LLVolumeParams volume_params;
-		volume_params.fromLLSD(mObjectClipboard["prim_params"]["volume"]);
+		volume_params.fromLLSD(sdParams["prim_params"]["volume"]);
 		mObject->updateVolume(volume_params);
 		
 		refresh();
 	}
+}
+
+void LLPanelObject::onClickBtnPasteParams(const LLSD& sdParam)
+{
+	objectFromLLSD(sdParam.asString(), mObjectClipboard);
 }
 // [/SL:KB]

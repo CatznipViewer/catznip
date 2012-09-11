@@ -30,6 +30,9 @@
 #include "v3math.h"
 #include "llpanel.h"
 #include "llpointer.h"
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 #include "llvolume.h"
 
 class LLSpinCtrl;
@@ -77,8 +80,13 @@ public:
 	static void     onCommitSculptType(    LLUICtrl *ctrl, void* userdata);
 		
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	void			onClickPipette(LLToolPipette::EType type);
+	void			onSelectPipette(LLToolPipette::EType type, LLViewerObject* pObj);
+
 	void			onClickBtnCopyParams(const LLSD& sdParam);
 	void			onClickBtnPasteParams(const LLSD& sdParam);
+	static LLSD		objectToLLSD(const std::string& strParamType, const LLViewerObject* pObj);
+	       void		objectFromLLSD(const std::string& strParamType, const LLSD& sdParams);
 // [/SL:KB]
 	
 protected:
@@ -101,6 +109,7 @@ protected:
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1)
 	LLButton*		mBtnCopyPrimParams;
 	LLButton*		mBtnPastePrimParams;
+	LLButton*		mBtnPipettePrimParams;
 // [/SL:KB]
 	LLComboBox*		mComboBaseType;
 
@@ -146,6 +155,7 @@ protected:
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	LLButton*		mBtnCopyPosition;
 	LLButton*		mBtnPastePosition;
+	LLButton*		mBtnPipettePosition;
 // [/SL:KB]
 	LLSpinCtrl*		mCtrlPosX;
 	LLSpinCtrl*		mCtrlPosY;
@@ -155,6 +165,7 @@ protected:
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	LLButton*		mBtnCopySize;
 	LLButton*		mBtnPasteSize;
+	LLButton*		mBtnPipetteSize;
 // [/SL:KB]
 	LLSpinCtrl*		mCtrlScaleX;
 	LLSpinCtrl*		mCtrlScaleY;
@@ -164,6 +175,7 @@ protected:
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 	LLButton*		mBtnCopyRotation;
 	LLButton*		mBtnPasteRotation;
+	LLButton*		mBtnPipetteRotation;
 // [/SL:KB]
 	LLSpinCtrl*		mCtrlRotX;
 	LLSpinCtrl*		mCtrlRotY;

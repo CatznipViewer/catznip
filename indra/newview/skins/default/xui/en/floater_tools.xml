@@ -1425,7 +1425,7 @@ even though the user gets a free copy.
              left_pad="5"
              name="copy_position_btn"
              top_delta="-1"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.CopyParams"
                parameter="position" />
@@ -1435,13 +1435,22 @@ even though the user gets a free copy.
              height="16"
              label="P"
              layout="topleft"
-             left_pad="0"
+             left_pad="1"
              name="paste_position_btn"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.PasteParams"
                parameter="position" />
             </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_position_btn"
+             width="16" />
             <spinner
              follows="left|top"
              height="19"
@@ -1505,7 +1514,7 @@ even though the user gets a free copy.
              left_pad="5"
              name="copy_size_btn"
              top_delta="-1"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.CopyParams"
                parameter="size" />
@@ -1515,13 +1524,22 @@ even though the user gets a free copy.
              height="16"
              label="P"
              layout="topleft"
-             left_pad="0"
+             left_pad="1"
              name="paste_size_btn"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.PasteParams"
                parameter="size" />
             </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_size_btn"
+             width="16" />
             <spinner
              follows="left|top"
              height="19"
@@ -1586,7 +1604,7 @@ even though the user gets a free copy.
              left_pad="5"
              name="copy_rotation_btn"
              top_delta="-1"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.CopyParams"
                parameter="rotation" />
@@ -1596,13 +1614,22 @@ even though the user gets a free copy.
              height="16"
              label="P"
              layout="topleft"
-             left_pad="0"
+             left_pad="1"
              name="paste_rotation_btn"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.PasteParams"
                parameter="rotation" />
             </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_rotation_btn"
+             width="16" />
             <spinner
              decimal_digits="2"
              follows="left|top"
@@ -1683,7 +1710,7 @@ even though the user gets a free copy.
              left_pad="8"
              name="copy_primparams_btn"
              top_delta="-1"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.CopyParams"
                parameter="prim_params" />
@@ -1693,13 +1720,22 @@ even though the user gets a free copy.
              height="16"
              label="P"
              layout="topleft"
-             left_pad="0"
+             left_pad="1"
              name="paste_primparams_btn"
-             width="17">
+             width="16">
               <button.commit_callback
                function="BuildTool.PasteParams"
                parameter="prim_params" />
             </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.tga"
+             image_unselected="eye_button_inactive.tga"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_primparams_btn"
+             width="16" />
             <combo_box
              height="19"
              layout="topleft"

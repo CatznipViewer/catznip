@@ -252,7 +252,10 @@ public:
 
 	LLSD asLLSD() const;
 	operator LLSD() const { return asLLSD(); }
-	bool fromLLSD(LLSD& sd);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+	bool fromLLSD(const LLSD& sd);
+// [/SL:KB]
+//	bool fromLLSD(LLSD& sd);
 
 	const F32&  getBegin () const				{ return mBegin; }
 	const F32&  getEnd   () const				{ return mEnd;   }
@@ -388,7 +391,10 @@ public:
 
 	LLSD asLLSD() const;
 	operator LLSD() const { return asLLSD(); }
-	bool fromLLSD(LLSD& sd);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+	bool fromLLSD(const LLSD& sd);
+// [/SL:KB]
+//	bool fromLLSD(LLSD& sd);
 
 	const F32& getBegin() const			{ return mBegin; }
 	const F32& getEnd() const			{ return mEnd; }
@@ -579,11 +585,17 @@ public:
 	BOOL exportLegacyStream(std::ostream& output_stream) const;
 
 	LLSD sculptAsLLSD() const;
-	bool sculptFromLLSD(LLSD& sd);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+	bool sculptFromLLSD(const LLSD& sd);
+// [/SL:KB]
+//	bool sculptFromLLSD(LLSD& sd);
 	
 	LLSD asLLSD() const;
 	operator LLSD() const { return asLLSD(); }
-	bool fromLLSD(LLSD& sd);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+	bool fromLLSD(const LLSD& sd);
+// [/SL:KB]
+//	bool fromLLSD(LLSD& sd);
 
 	bool setType(U8 profile, U8 path);
 

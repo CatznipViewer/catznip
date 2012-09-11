@@ -53,7 +53,7 @@ public:
 	virtual BOOL	handleToolTip(S32 x, S32 y, MASK mask);
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	enum EType { TYPE_TEXTURE, TYPE_COLOR };
+	enum EType { TYPE_NONE, TYPE_POSITION, TYPE_SIZE, TYPE_ROTATION, TYPE_PARAMS, TYPE_TEXTURE, TYPE_COLOR };
 	EType getPipetteType() const    { return mPipetteType; }
 	void  setPippetType(EType type) { mPipetteType = type; }
 // [/SL:KB]
@@ -61,12 +61,12 @@ public:
 	// Note: Don't return connection; use boost::bind + boost::signals2::trackable to disconnect slots
 //	typedef boost::signals2::signal<void (const LLTextureEntry& te)> signal_t;
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	typedef boost::signals2::signal<void (EType type, const LLTextureEntry& te)> signal_t;
+	typedef boost::signals2::signal<void (EType type, LLViewerObject* objp, const LLTextureEntry& te)> signal_t;
 // [/SL:KB]
 	void setToolSelectCallback(const signal_t::slot_type& cb) { mSignal.connect(cb); }
 	void setResult(BOOL success, const std::string& msg);
 	
-	void setTextureEntry(const LLTextureEntry* entry);
+//	void setTextureEntry(const LLTextureEntry* entry);
 	static void pickCallback(const LLPickInfo& pick_info);
 
 protected:

@@ -138,7 +138,7 @@ BOOL	LLPanelFace::postBuild()
 	}
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _2));
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _3));
 
 	mTexturePipette = findChild<LLButton>("texture_pipette");
 	mTexturePipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, LLToolPipette::TYPE_TEXTURE));
@@ -1183,6 +1183,8 @@ void LLPanelFace::onSelectPipette(LLToolPipette::EType type, const LLTextureEntr
 					onSelectColor(LLSD());
 				}
 			}
+			break;
+		default:
 			break;
 	}
 }

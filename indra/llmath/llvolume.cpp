@@ -1286,7 +1286,10 @@ LLSD LLProfileParams::asLLSD() const
 	return sd;
 }
 
-bool LLProfileParams::fromLLSD(LLSD& sd)
+//bool LLProfileParams::fromLLSD(LLSD& sd)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+bool LLProfileParams::fromLLSD(const LLSD& sd)
+// [/SL:KB]
 {
 	setCurveType(sd["curve"].asInteger());
 	setBegin((F32)sd["begin"].asReal());
@@ -2023,7 +2026,10 @@ LLSD LLPathParams::asLLSD() const
 	return sd;
 }
 
-bool LLPathParams::fromLLSD(LLSD& sd)
+//bool LLPathParams::fromLLSD(LLSD& sd)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+bool LLPathParams::fromLLSD(const LLSD& sd)
+// [/SL:KB]
 {
 	setCurveType(sd["curve"].asInteger());
 	setBegin((F32)sd["begin"].asReal());
@@ -5153,7 +5159,10 @@ LLSD LLVolumeParams::sculptAsLLSD() const
 	return sd;
 }
 
-bool LLVolumeParams::sculptFromLLSD(LLSD& sd)
+//bool LLVolumeParams::sculptFromLLSD(LLSD& sd)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+bool LLVolumeParams::sculptFromLLSD(const LLSD& sd)
+// [/SL:KB]
 {
 	setSculptID(sd["id"].asUUID(), (U8)sd["type"].asInteger());
 	return true;
@@ -5169,7 +5178,10 @@ LLSD LLVolumeParams::asLLSD() const
 	return sd;
 }
 
-bool LLVolumeParams::fromLLSD(LLSD& sd)
+//bool LLVolumeParams::fromLLSD(LLSD& sd)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+bool LLVolumeParams::fromLLSD(const LLSD& sd)
+// [/SL:KB]
 {
 	mPathParams.fromLLSD(sd["path"]);
 	mProfileParams.fromLLSD(sd["profile"]);
