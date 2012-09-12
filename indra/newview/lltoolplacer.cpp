@@ -54,6 +54,10 @@
 #include "llaudioengine.h"
 #include "llhudeffecttrail.h"
 #include "llviewerobjectlist.h"
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+#include "llparcel.h"
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewercamera.h"
 #include "llviewerstats.h"
 #include "llvoavatarself.h"
@@ -231,7 +235,29 @@ BOOL LLToolPlacer::addObject( LLPCode pcode, S32 x, S32 y, U8 use_physics )
 	gMessageSystem->nextBlockFast(_PREHASH_AgentData);
 	gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
 	gMessageSystem->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-	gMessageSystem->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+//	gMessageSystem->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
+		{
+			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+			if (pAgentParcel)
+				idGroup = pAgentParcel->getGroupID();
+		}
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
+		{
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
+			if (pHoverParcel)
+				idGroup = pHoverParcel->getGroupID();
+		}
+
+		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
+			idGroup = gAgent.getGroupID();
+	}
+	gMessageSystem->addUUIDFast(_PREHASH_GroupID, idGroup);
+// [/SL:KB]
 	gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
 	gMessageSystem->addU8Fast(_PREHASH_Material,	material);
 
@@ -475,6 +501,28 @@ BOOL LLToolPlacer::addDuplicate(S32 x, S32 y)
 		ray_target_id.setNull();
 	}
 
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
+		{
+			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+			if (pAgentParcel)
+				idGroup = pAgentParcel->getGroupID();
+		}
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
+		{
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
+			if (pHoverParcel)
+				idGroup = pHoverParcel->getGroupID();
+		}
+
+		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
+			idGroup = gAgent.getGroupID();
+	}
+// [/SL:KB]
+
 	LLSelectMgr::getInstance()->selectDuplicateOnRay(ray_start_region,
 										ray_end_region,
 										b_hit_land,			// suppress raycast
@@ -482,6 +530,9 @@ BOOL LLToolPlacer::addDuplicate(S32 x, S32 y)
 										ray_target_id,
 										gSavedSettings.getBOOL("CreateToolCopyCenters"),
 										gSavedSettings.getBOOL("CreateToolCopyRotates"),
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+										idGroup,
+// [/SL:KB]
 										FALSE);				// select copy
 
 	if (regionp
@@ -520,6 +571,21 @@ BOOL LLToolPlacer::handleHover(S32 x, S32 y, MASK mask)
 {
 	lldebugst(LLERR_USER_INPUT) << "hover handled by LLToolPlacer" << llendl;		
 	gViewerWindow->setCursor(UI_CURSOR_TOOLCREATE);
+
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		LLPickInfo pick = gViewerWindow->pickImmediate(x, y, FALSE);
+		mLastHitPos = pick.mPosGlobal;
+
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		{
+			LLViewerParcelMgr::getInstance()->setHoverParcel(pick.mPosGlobal, true);
+		}
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
