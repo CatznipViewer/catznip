@@ -2662,6 +2662,25 @@ bool LLAppViewer::initConfiguration()
 	}
 	loadSettingsFromDirectory("UserSession");
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
+	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
+	{
+		const char* pstrSettings[] =
+			{ 
+				"MeshMaxConcurrentRequests"
+			};
+		for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+		{
+			LLControlVariable* pSetting = gSavedSettings.getControl(pstrSettings[idxSetting]);
+			if (pSetting)
+			{
+				pSetting->resetToDefault();
+			}
+		}
+	}
+// [/SL:KB]
+
 	// - apply command line settings 
 	if (! clp.notify())
 	{
