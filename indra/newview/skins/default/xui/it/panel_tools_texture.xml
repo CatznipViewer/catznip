@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="Texture" name="Texture">
+			<panel.string name="string repeats per meter">
+				Ripetizioni per metro
+			</panel.string>
+			<panel.string name="string repeats per face">
+				Ripetizioni per faccia
+			</panel.string>
+			<texture_picker label="Texture" name="texture control" tool_tip="Clicca per scegliere un&apos;immagine"/>
+			<color_swatch label="Colore" name="colorswatch" tool_tip="Clicca per aprire il selettore dei colori"/>
+			<text name="color trans">
+				Trasparenza %
+			</text>
+			<text name="glow label">
+				Bagliore
+			</text>
+			<check_box label="Massima luminosità" name="checkbox fullbright"/>
+			<text name="tex gen">
+				Applicazione
+			</text>
+			<combo_box name="combobox texgen">
+				<combo_box.item label="Default" name="Default"/>
+				<combo_box.item label="Planare" name="Planar"/>
+			</combo_box>
+			<text name="label shininess">
+				Brillantezza
+			</text>
+			<combo_box name="combobox shininess">
+				<combo_box.item label="Nessuna" name="None"/>
+				<combo_box.item label="Bassa" name="Low"/>
+				<combo_box.item label="Media" name="Medium"/>
+				<combo_box.item label="Alta" name="High"/>
+			</combo_box>
+			<text name="label bumpiness">
+				Rilievo
+			</text>
+			<combo_box name="combobox bumpiness">
+				<combo_box.item label="Nessuna" name="None"/>
+				<combo_box.item label="Luminoso" name="Brightness"/>
+				<combo_box.item label="Scuro" name="Darkness"/>
+				<combo_box.item label="Venature del legno" name="woodgrain"/>
+				<combo_box.item label="Corteccia" name="bark"/>
+				<combo_box.item label="Mattoni" name="bricks"/>
+				<combo_box.item label="Scacchi" name="checker"/>
+				<combo_box.item label="Cemento" name="concrete"/>
+				<combo_box.item label="Mattonella incrostata" name="crustytile"/>
+				<combo_box.item label="Mosaico in pietra" name="cutstone"/>
+				<combo_box.item label="Dischi" name="discs"/>
+				<combo_box.item label="Ghiaia" name="gravel"/>
+				<combo_box.item label="Sassi" name="petridish"/>
+				<combo_box.item label="Listoni" name="siding"/>
+				<combo_box.item label="Mattonelle in pietra" name="stonetile"/>
+				<combo_box.item label="Stucco" name="stucco"/>
+				<combo_box.item label="Cerchi rialzati" name="suction"/>
+				<combo_box.item label="Trama" name="weave"/>
+			</combo_box>
+			<check_box initial_value="falso" label="Allinea facce planari" name="checkbox planar align" tool_tip="Allinea le texture su tutte le facce selezionate con l’ultima faccia selezionata. È richiesta la mappatura planare delle texture."/>
+			<text name="rpt">
+				Ripetizioni / Faccia
+			</text>
+			<spinner label="Orizzontale (U)" name="TexScaleU"/>
+			<check_box label="Inverti" name="checkbox flip s"/>
+			<spinner label="Verticale (V)" name="TexScaleV"/>
+			<check_box label="Inverti" name="checkbox flip t"/>
+			<spinner label="Rotazione˚" name="TexRot"/>
+			<spinner label="Ripetizioni / Metro" name="rptctrl"/>
+			<button label="Applica" label_selected="Applica" name="button apply"/>
+			<text name="tex offset">
+				Bilanciamento della texture
+			</text>
+			<spinner label="Orizzontale (U)" name="TexOffsetU"/>
+			<spinner label="Verticale (V)" name="TexOffsetV"/>
+			<panel name="Add_Media">
+				<text name="media_tex">
+					Multimediale
+				</text>
+				<button name="add_media" tool_tip="Aggiungi media"/>
+				<button name="delete_media" tool_tip="Cancella questa media texture"/>
+				<button name="edit_media" tool_tip="Modifica questo media"/>
+				<button label="Alllinea" label_selected="Allinea media" name="button align" tool_tip="Allinea texture del media (il caricamento deve prima essere completato)"/>
+			</panel>
+		</panel>
