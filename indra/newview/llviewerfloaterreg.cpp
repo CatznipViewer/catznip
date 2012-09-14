@@ -120,6 +120,9 @@
 #include "llimfloatercontainer.h"
 #include "llinspectavatar.h"
 #include "llinspectgroup.h"
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+#include "llinspectlocation.h"
+// [/SL:KB]
 #include "llinspectobject.h"
 #include "llinspectremoteobject.h"
 #include "llinspecttoast.h"
@@ -222,6 +225,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("inspect", "floater_inspect.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterInspect>);
 	LLInspectAvatarUtil::registerFloater();
 	LLInspectGroupUtil::registerFloater();
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	LLInspectLocationUtil::registerFloater();
+// [/SL:KB]
 	LLInspectObjectUtil::registerFloater();
 	LLInspectRemoteObjectUtil::registerFloater();
 	LLNotificationsUI::registerFloater();
