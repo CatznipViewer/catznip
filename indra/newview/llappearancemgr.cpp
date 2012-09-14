@@ -1360,6 +1360,46 @@ bool LLAppearanceMgr::getCanReplaceCOF(const LLUUID& outfit_cat_id)
 	return items.size() > 0;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t& removable_items)
+{
+	LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
+	gInventory.getDirectDescendentsOf(folder_id, cats, items);
+
+	removable_items.clear();
+	if (items)
+	{
+		for (LLInventoryModel::item_array_t::iterator itItem = items->begin(); itItem != items->end(); ++itItem)
+		{
+			LLViewerInventoryItem* pItem = *itItem;
+			if ( (pItem) && (LLAssetType::AT_BODYPART != pItem->getType()) && (get_is_item_worn(pItem->getUUID())) )
+			{
+				removable_items.push_back(pItem);
+			}
+		}
+	}
+	return removable_items.size() > 0;
+}
+
+bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
+{
+	LLInventoryModel::item_array_t removable_items;
+	return (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
+}
+
+void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
+{
+	LLInventoryModel::item_array_t removable_items;
+	if (get_removable_items(folder_id, removable_items))
+	{
+		for (LLInventoryModel::item_array_t::iterator itItem = removable_items.begin(); itItem != removable_items.end(); ++itItem)
+		{
+			removeItemFromAvatar((*itItem)->getUUID());
+		}
+	}
+}
+// [/SL:KB]
+
 void LLAppearanceMgr::purgeBaseOutfitLink(const LLUUID& category)
 {
 	LLInventoryModel::cat_array_t cats;
@@ -2689,7 +2729,10 @@ void LLAppearanceMgr::removeItemFromAvatar(const LLUUID& id_to_remove)
 	removeCOFItemLinks(id_to_remove,false);
 }
 
-bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+//bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body, bool upload)
+// [/SL:KB]
 {
 	if (!item || !item->isWearableType()) return false;
 	if (item->getType() != LLAssetType::AT_CLOTHING) return false;
@@ -2733,7 +2776,10 @@ bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_b
 	bool result = false;
 	if (result = gAgentWearables.moveWearable(item, closer_to_body))
 	{
-		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+		gAgentAvatarp->wearableUpdated(item->getWearableType(), upload);
+// [/SL:KB]
+//		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
 	}
 
 	setOutfitDirty(true);

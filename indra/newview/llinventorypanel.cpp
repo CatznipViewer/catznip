@@ -350,6 +350,43 @@ const std::string LLInventoryPanel::getFilterSubString()
 	return mFolderRoot->getFilterSubString(); 
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
+void LLInventoryPanel::setSortBy(const std::string& sort_type)
+{
+	U32 sort_order_mask = getSortOrder();
+	if (sort_type == "name")
+	{
+		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
+	}
+	else if (sort_type == "date")
+	{
+		sort_order_mask |= LLInventoryFilter::SO_DATE;
+	}
+	else if (sort_type == "foldersalwaysbyname")
+	{
+		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
+		{
+			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
+		}
+		else
+		{
+			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
+		}
+	}
+	else if (sort_type == "systemfolderstotop")
+	{
+		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
+		{
+			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+		}
+		else
+		{
+			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+		}
+	}
+	setSortOrder(sort_order_mask);
+}
+// [/SL:KB]
 
 void LLInventoryPanel::setSortOrder(U32 order)
 {
@@ -382,10 +419,23 @@ void LLInventoryPanel::setHoursAgo(U32 hours)
 	getFilter()->setHoursAgo(hours);
 }
 
-void LLInventoryPanel::setFilterLinks(U64 filter_links)
+//void LLInventoryPanel::setFilterLinks(U64 filter_links)
+//{
+//	getFilter()->setFilterLinks(filter_links);
+//}
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
 {
-	getFilter()->setFilterLinks(filter_links);
+	getFilter()->setFilterLinks(filter_links, substring_reset);
 }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+void LLInventoryPanel::setFilterWorn(bool filter)
+{
+	getFilter()->setFilterWorn(filter);
+}
+// [/SL:KB]
 
 void LLInventoryPanel::setShowFolderState(LLInventoryFilter::EFolderShow show)
 {

@@ -4136,6 +4136,12 @@ Krænkelsesanmeldelse
 	<string name="EmptyOutfitText">
 		Der er ingen genstande i dette sæt
 	</string>
+	<string name="SaveOutfit">
+		Gem
+	</string>
+	<string name="SaveOutfitAs">
+		Gem som
+	</string>
 	<string name="ExternalEditorNotSet">
 		Vælg en editor via opsætningen for Ekstern editor.
 	</string>
