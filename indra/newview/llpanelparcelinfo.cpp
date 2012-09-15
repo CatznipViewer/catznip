@@ -173,8 +173,8 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const L
 	clearLocation();
 
 	const LLViewerRegion* pRegion = gAgent.getRegion();
-	const std::string strUrl = pRegion->getCapability("RemoteParcelRequest");
-	if ( (pRegion) && (!strUrl.empty()) )
+	const std::string strUrl = (pRegion) ? pRegion->getCapability("RemoteParcelRequest") : LLStringUtil::null;
+	if  (!strUrl.empty())
 	{
 		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS), 
 							(F32)fmod(posGlobal.mdV[VY], (F64)REGION_WIDTH_METERS),
