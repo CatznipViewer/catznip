@@ -1259,7 +1259,13 @@ void LLNetMap::handleShowProfile(const LLSD& sdParam) const
 		sdParams["y"] = mPosGlobalRightClick.mdV[VY];
 		sdParams["z"] = mPosGlobalRightClick.mdV[VZ];
 
-		LLFloaterSidePanelContainer::showPanel("places", sdParams);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+			LLFloaterReg::showInstance("parcel_info", sdParams);
+		else
+			LLFloaterSidePanelContainer::showPanel("places", sdParams);
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("places", sdParams);
 	}
 }
 
