@@ -1437,7 +1437,7 @@ void LLItemBridge::restoreToWorld()
 // [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2)
 void LLItemBridge::confirmRestoreToWorld(const LLSD& notification, const LLSD& response)
 {
-	if (0 != LLNotificationsUtil::getSelectedOption(notification, response)) 
+	if ( (0 != LLNotificationsUtil::getSelectedOption(notification, response)) || (!gAgent.getRegion()) )
 	{
 		return;
 	}
