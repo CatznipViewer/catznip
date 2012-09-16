@@ -111,7 +111,10 @@ BOOL LLFloaterScriptLimits::postBuild()
 	}
 
 	// contruct the panels
-	std::string land_url = gAgent.getRegion()->getCapability("LandResources");
+//	std::string land_url = gAgent.getRegion()->getCapability("LandResources");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string land_url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("LandResources") : LLStringUtil::null;
+// [/SL:KB]
 	if (!land_url.empty())
 	{
 		LLPanelScriptLimitsRegionMemory* panel_memory;
@@ -121,7 +124,10 @@ BOOL LLFloaterScriptLimits::postBuild()
 		mTab->addTabPanel(panel_memory);
 	}
 	
-	std::string attachment_url = gAgent.getRegion()->getCapability("AttachmentResources");
+//	std::string attachment_url = gAgent.getRegion()->getCapability("AttachmentResources");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string attachment_url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("AttachmentResources") : LLStringUtil::null;
+// [/SL:KB]
 	if (!attachment_url.empty())
 	{
 		LLPanelScriptLimitsAttachment* panel_attachments = new LLPanelScriptLimitsAttachment;
