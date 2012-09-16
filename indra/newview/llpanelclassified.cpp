@@ -227,8 +227,11 @@ void LLPanelClassifiedInfo::onOpen(const LLSD& key)
 
 	// While we're at it let's get the stats from the new table if that
 	// capability exists.
-	std::string url = gAgent.getRegion()->getCapability("SearchStatRequest");
-	if (!url.empty())
+//	std::string url = gAgent.getRegion()->getCapability("SearchStatRequest");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SearchStatRequest") : LLStringUtil::null;
+// [/SL:KB]
+ 	if (!url.empty())
 	{
 		llinfos << "Classified stat request via capability" << llendl;
 		LLSD body;
@@ -548,10 +551,19 @@ void LLPanelClassifiedInfo::sendClickMessage(
 	body["dest_pos_global"]	= global_pos.getValue();
 	body["region_name"]		= sim_name;
 
-	std::string url = gAgent.getRegion()->getCapability("SearchStatTracking");
-	llinfos << "Sending click msg via capability (url=" << url << ")" << llendl;
-	llinfos << "body: [" << body << "]" << llendl;
-	LLHTTPClient::post(url, body, new LLClassifiedClickMessageResponder());
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SearchStatTracking") : LLStringUtil::null;
+	if (!url.empty())
+	{
+		llinfos << "Sending click msg via capability (url=" << url << ")" << llendl;
+		llinfos << "body: [" << body << "]" << llendl;
+		LLHTTPClient::post(url, body, new LLClassifiedClickMessageResponder());
+	}
+// [/SL:KB]
+//	std::string url = gAgent.getRegion()->getCapability("SearchStatTracking");
+//	llinfos << "Sending click msg via capability (url=" << url << ")" << llendl;
+//	llinfos << "body: [" << body << "]" << llendl;
+//	LLHTTPClient::post(url, body, new LLClassifiedClickMessageResponder());
 }
 
 void LLPanelClassifiedInfo::sendClickMessage(const std::string& type)
