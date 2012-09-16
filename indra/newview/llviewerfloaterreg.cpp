@@ -296,10 +296,11 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("start_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterRunQueue>);
 	LLFloaterReg::add("stop_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotRunQueue>);
 	LLFloaterReg::add("snapshot", "floater_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSnapshot>);
-	LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
+//	LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
 // [SL:KB] - Patch: UI-Search | Checked: 2012-09-03 (Catznip-3.3)
-	LLFloaterReg::add("search_container", "floater_search_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchContainer>);
+	LLFloaterReg::add("search", "floater_search_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchContainer>);
 	LLFloaterReg::add("search_places", "floater_search_places.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloater>);
+	LLFloaterReg::add("search_web", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
 // [/SL:KB]
 	LLFloaterReg::add("my_profile", "floater_my_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
 	LLFloaterReg::add("profile", "floater_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
