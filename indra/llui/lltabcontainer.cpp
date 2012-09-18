@@ -950,6 +950,9 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 					if (tuple->mButton->pointInView(local_x, local_y) &&  tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 					{
 						tuple->mButton->onCommit();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-09-19 (Catznip-3.3)
+						break;
+// [/SL:KB]
 					}
 				}
 				// Stop the timer whether successful or not. Don't let it run forever.
