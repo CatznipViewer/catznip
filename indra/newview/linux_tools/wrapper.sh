@@ -5,7 +5,7 @@
 ## testing phase; you should not usually need to touch them.
 
 ## - Avoids using any OpenAL audio driver.
-#export LL_BAD_OPENAL_DRIVER=x
+export LL_BAD_OPENAL_DRIVER=x
 ## - Avoids using any FMOD audio driver.
 #export LL_BAD_FMOD_DRIVER=x
 
