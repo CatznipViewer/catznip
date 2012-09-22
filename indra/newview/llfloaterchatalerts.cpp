@@ -16,6 +16,7 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llappviewer.h"
+#include "llaudioengine.h"
 #include "llbutton.h"
 #include "llcallbacklist.h"
 #include "llcheckboxctrl.h"
@@ -498,6 +499,11 @@ void LLFloaterChatAlerts::refreshSound()
 		m_pSoundIconCtrl->setVisible(true);
 		m_pSoundEditor->setText(pItem->getName());
 		m_pSoundClearBtn->setVisible(true);
+
+		if ( (gAssetStorage) && (!gAssetStorage->hasLocalAsset(pItem->getAssetUUID(), LLAssetType::AT_SOUND)) && (gAudiop) )
+		{
+			gAssetStorage->getAssetData(pItem->getAssetUUID(), LLAssetType::AT_SOUND, LLAudioEngine::assetCallback, NULL);
+		}
 	}
 	else
 	{
