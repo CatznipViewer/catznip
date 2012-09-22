@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- border="true"
+ border="false"
  can_close="true"
  can_minimize="true"
  can_resize="false"
