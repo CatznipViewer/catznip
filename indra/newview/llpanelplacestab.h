@@ -34,7 +34,7 @@ class LLPanelPlaces;
 class LLPanelPlacesTab : public LLPanel
 {
 public:
-	LLPanelPlacesTab() : LLPanel() {}
+//	LLPanelPlacesTab() : LLPanel() {}
 	virtual ~LLPanelPlacesTab() {}
 
 	virtual void onSearchEdit(const std::string& string) = 0;
@@ -46,7 +46,10 @@ public:
 
 	bool isTabVisible(); // Check if parent TabContainer is visible.
 
-	void setPanelPlacesButtons(LLPanelPlaces* panel);
+//	void setPanelPlacesButtons(LLPanelPlaces* panel);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	void setPanelPlacesButtons();
+// [/SL:KB]
 	void onRegionResponse(const LLVector3d& landmark_global_pos,
 										U64 region_handle,
 										const std::string& url,

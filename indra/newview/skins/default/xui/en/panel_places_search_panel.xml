@@ -48,46 +48,27 @@
          width="313">
             <layout_panel
              auto_resize="false"
-             height="65"
+             height="40"
              layout="topleft"
              name="search_options_panel"
              visibility_control="PlacesSearchShowOptions"
              width="313">
-                <text
-                 follows="top|left"
-                 halign="right"
-                 height="16"
-                 layout="topleft"
-                 left="30"
-                 name="search_category_label"
-                 top="10"
-                 value="Category : "
-                 width="70" />
                 <combo_box
                  follows="top|left"
                  height="23"
                  layout="topleft"
+                 left="5"
                  left_pad="10"
                  name="search_category"
-                 top_delta="-4"
-                 width="160" />
-                <text
-                 follows="top|left"
-                 halign="right"
-                 height="16"
-                 layout="topleft"
-                 left="30"
-                 name="search_maturity_label"
-                 top_pad="8"
-                 value="Maturity: "
-                 width="70" />
+                 top="5" 
+                 width="140" />
                 <check_box
                  height="16"
                  label=""
                  layout="topleft"
-                 left_pad="10"
+                 left_pad="25"
                  name="search_pg_check"
-                 top_delta="0"
+                 top_delta="4"
                  value="1"
                  width="16" />
                 <icon
@@ -95,7 +76,7 @@
                  height="16"
                  image_name="Parcel_PG_Dark"
                  layout="topleft"
-                 left_pad="5"
+                 left_pad="4"
                  name="search_pg_icon"
                  top_delta="-1"
                  width="18" />
@@ -103,7 +84,7 @@
                  height="16"
                  label=""
                  layout="topleft"
-                 left_pad="20"
+                 left_pad="8"
                  name="search_mature_check"
                  top_delta="1"
                  value="1"
@@ -113,7 +94,7 @@
                  height="16"
                  image_name="Parcel_M_Dark"
                  layout="topleft"
-                 left_pad="5"
+                 left_pad="4"
                  name="search_mature_icon"
                  top_delta="-1"
                  width="18" />
@@ -121,7 +102,7 @@
                  height="16"
                  label=""
                  layout="topleft"
-                 left_pad="20"
+                 left_pad="8"
                  name="search_adult_check"
                  top_delta="1"
                  value="1"
@@ -131,10 +112,11 @@
                  height="16"
                  image_name="Parcel_R_Dark"
                  layout="topleft"
-                 left_pad="5"
+                 left_pad="4"
                  name="search_adult_icon"
                  top_delta="-1"
                  width="18" />
+
                 <view_border 
                  bevel_style="in"
                  follows="left|top|right" 
@@ -145,6 +127,7 @@
                  right="-5"
                  top_pad="7"
                  />
+	
             </layout_panel>
             <layout_panel
              auto_resize="false"
@@ -242,18 +225,54 @@
             </layout_panel>
             <layout_panel
              auto_resize="auto"
-             height="160"
+             height="185"
              layout="topleft"
              name="search_list_panel"
              width="313">
+                <button
+                 enabled="false"
+                 follows="top|left"
+                 height="25"
+                 image_overlay="Arrow_Small_Left"
+                 image_overlay_alignment="left"
+                 label="Previous"
+                 layout="topleft"
+                 left="5"
+                 name="search_prev_btn"
+                 top="0"
+                 width="75" />
+                <text
+                 follows="top|left|right"
+                 halign="center"
+                 height="24"
+                 left="85"
+                 layout="topleft"
+                 name="search_results_label"
+                 right="-85"
+                 top_delta="-1"
+                 valign="center"
+                 value="No results" />
+                <button
+                 enabled="false"
+                 follows="top|right"
+                 height="25"
+                 image_overlay="Arrow_Small_Right"
+                 image_overlay_alignment="right"
+                 label="Next"
+                 layout="topleft"
+                 right="-5"
+                 name="search_next_btn"
+                 top_delta="1"
+                 width="75" />
+
                 <scroll_list
                  draw_heading="true" 
                  follows="all"
-                 height="160"
+                 height="157"
                  layout="topleft"
                  left="0"
                  name="search_results"
-                 top_pad="0"
+                 top_pad="3"
                  width="313">
                   <columns
                    label="Name"
@@ -272,91 +291,61 @@
          height="27"
          label="bottom_panel"
          layout="topleft"
-         left="0"
+         left="3"
          name="bottom_panel"
          top_pad="0"
-         width="313">
-            <menu_button
-             follows="bottom|left"
-             height="25"
-             image_hover_unselected="Toolbar_Left_Over"
-             image_overlay="OptionsMenu_Off"
-             image_selected="Toolbar_Left_Selected"
-             image_unselected="Toolbar_Left_Off"
-             layout="topleft"
-             left="0"
-             name="gear_btn"
-             tool_tip="Options"
-             top="1"
-             width="31" />
-            <button
-             control_name="PlacesSearchShowOptions"
-             follows="bottom|left"
-             height="25"
-             image_hover_unselected="Toolbar_Middle_Over"
-             image_overlay="Search_Icon"
-             image_selected="Toolbar_Middle_Selected"
-             image_unselected="Toolbar_Middle_Off"
-             layout="topleft"
-             left_pad="1"
-             name="options_btn"
-             toggle="true"
-             width="31" />
+         width="307">
             <icon
              follows="bottom|left|right"
              height="25"
-             image_name="Toolbar_Middle_Off"
+             image_name="Toolbar_Left_Off"
              layout="topleft"
-             left_pad="1"
-             name="dummy_icon_1"
-             width="17" />
+             left="0"
+             name="dummy_icon"
+             top="1"
+             width="140"
+            />
             <button
-             enabled="false"
              follows="bottom|right"
              height="25"
              image_hover_unselected="Toolbar_Middle_Over"
-             image_overlay="Arrow_Small_Left"
+             image_overlay="Move_Run_Off"
              image_overlay_alignment="left"
              image_selected="Toolbar_Middle_Selected"
              image_unselected="Toolbar_Middle_Off"
-             label="Previous"
              layout="topleft"
+             label="Teleport"
              left_pad="1"
-             name="search_prev_btn"
-             width="75" />
-            <icon
+             name="teleport_btn"
+             tool_tip="Teleport to the selected area"
+             width="74" />
+            <button
              follows="bottom|right"
              height="25"
-             image_name="Toolbar_Middle_Off"
+             image_bottom_pad="1"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Command_Map_Icon"
+             image_overlay_alignment="left"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
              layout="topleft"
+             label="Map"
              left_pad="1"
-             name="dummy_icon_2"
-             width="80" />
-            <text
-             follows="bottom|right"
-             halign="center"
-             height="24"
-             layout="topleft"
-             name="search_results_label"
-             top_delta="-1"
-             valign="center"
-             value="No results"
-             width="80" />
+             name="map_btn"
+             tool_tip="Show the corresponding area on the World Map"
+             width="59" />
             <button
-             enabled="false"
              follows="bottom|right"
              height="25"
              image_hover_unselected="Toolbar_Right_Over"
-             image_overlay="Arrow_Small_Right"
-             image_overlay_alignment="right"
+             image_overlay="Web_Profile_Off"
              image_selected="Toolbar_Right_Selected"
              image_unselected="Toolbar_Right_Off"
-             label="Next"
              layout="topleft"
              left_pad="1"
-             name="search_next_btn"
-             top_delta="1"
-             width="75" />
+             name="profile_btn"
+             tool_tip="Show place profile"
+             width="31" />
         </panel>
     </panel>
 

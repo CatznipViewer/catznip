@@ -156,7 +156,7 @@
      layout="bottomleft"
      left="3"
      name="bottom_panel"
-     width="313">
+     width="307">
         <menu_button
          follows="bottom|left"
          tool_tip="Show additional options"
@@ -173,11 +173,52 @@
         <icon
          follows="bottom|left|right"
          height="25"
-         image_name="Toolbar_Right_Off"
+         image_name="Toolbar_Middle_Off"
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="273"
+         width="108"
         />
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Move_Run_Off"
+         image_overlay_alignment="left"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         label="Teleport"
+         left_pad="1"
+         name="teleport_btn"
+         tool_tip="Teleport to the selected area"
+         width="74" />
+        <button
+         follows="bottom|right"
+         height="25"
+         image_bottom_pad="1"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Command_Map_Icon"
+         image_overlay_alignment="left"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         label="Map"
+         left_pad="1"
+         name="map_btn"
+         tool_tip="Show the corresponding area on the World Map"
+         width="59" />
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="Web_Profile_Off"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         layout="topleft"
+         left_pad="1"
+         name="profile_btn"
+         tool_tip="Show place profile"
+         width="31" />
     </panel>
 </panel>

@@ -242,6 +242,19 @@ static LLRegisterPanelClassWrapper<LLPanelPlaces> t_places("panel_places");
 
 LLPanelPlaces::LLPanelPlaces()
 	:	LLPanel(),
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		mTabContainer(NULL),
+		mPlaceProfileBackBtn(NULL),
+		mButtonPanel(NULL),
+		mTeleportBtn(NULL),
+		mShowOnMapBtn(NULL),
+		mEditBtn(NULL),
+		mSaveBtn(NULL),
+		mCancelBtn(NULL),
+		mCloseBtn(NULL),
+		mOverflowBtn(NULL),
+		mPlaceInfoBtn(NULL),
+// [/SL:KB]
 		mActivePanel(NULL),
 		mFilterEditor(NULL),
 // [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
@@ -294,6 +307,10 @@ LLPanelPlaces::~LLPanelPlaces()
 
 BOOL LLPanelPlaces::postBuild()
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	mButtonPanel = getChild<LLPanel>("button_panel");
+// [/SL:KB]
+
 	mTeleportBtn = getChild<LLButton>("teleport_btn");
 	mTeleportBtn->setClickedCallback(boost::bind(&LLPanelPlaces::onTeleportButtonClicked, this));
 	
@@ -684,11 +701,11 @@ void LLPanelPlaces::onTeleportButtonClicked()
 			}
 		}
 	}
-	else
-	{
-		if (mActivePanel)
-			mActivePanel->onTeleport();
-	}
+//	else
+//	{
+//		if (mActivePanel)
+//			mActivePanel->onTeleport();
+//	}
 }
 
 void LLPanelPlaces::onShowOnMapButtonClicked()
@@ -728,24 +745,24 @@ void LLPanelPlaces::onShowOnMapButtonClicked()
 			}
 		}
 	}
-	else
-	{
-		if (mActivePanel && mActivePanel->isSingleItemSelected())
-		{
-			mActivePanel->onShowOnMap();
-		}
-		else
-		{
-			LLFloaterWorldMap* worldmap_instance = LLFloaterWorldMap::getInstance();
-			LLVector3d global_pos = gAgent.getPositionGlobal();
-
-			if (!global_pos.isExactlyZero() && worldmap_instance)
-			{
-				worldmap_instance->trackLocation(global_pos);
-				LLFloaterReg::showInstance("world_map", "center");
-			}
-		}
-	}
+//	else
+//	{
+//		if (mActivePanel && mActivePanel->isSingleItemSelected())
+//		{
+//			mActivePanel->onShowOnMap();
+//		}
+//		else
+//		{
+//			LLFloaterWorldMap* worldmap_instance = LLFloaterWorldMap::getInstance();
+//			LLVector3d global_pos = gAgent.getPositionGlobal();
+//
+//			if (!global_pos.isExactlyZero() && worldmap_instance)
+//			{
+//				worldmap_instance->trackLocation(global_pos);
+//				LLFloaterReg::showInstance("world_map", "center");
+//			}
+//		}
+//	}
 }
 
 void LLPanelPlaces::onEditButtonClicked()
@@ -873,10 +890,10 @@ void LLPanelPlaces::onOverflowButtonClicked()
 
 void LLPanelPlaces::onProfileButtonClicked()
 {
-	if (!mActivePanel)
-		return;
-
-	mActivePanel->onShowProfile();
+//	if (!mActivePanel)
+//		return;
+//
+//	mActivePanel->onShowProfile();
 }
 
 bool LLPanelPlaces::onOverflowMenuItemEnable(const LLSD& param)
@@ -998,8 +1015,12 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			// to avoid text blinking.
 			mResetInfoTimer.setTimerExpirySec(PLACE_INFO_UPDATE_INTERVAL);
 
+//			LLRect rect = getRect();
+//			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
 			LLRect rect = getRect();
-			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom + mButtonPanel->getRect().getHeight());
+// [/SL:KB]
 			mPlaceProfile->reshape(new_rect.getWidth(), new_rect.getHeight());
 
 			mLandmarkInfo->setVisible(FALSE);
@@ -1023,8 +1044,12 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 		{
 			mLandmarkInfo->resetLocation();
 
+//			LLRect rect = getRect();
+//			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
 			LLRect rect = getRect();
-			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom + mButtonPanel->getRect().getHeight());
+// [/SL:KB]
 			mLandmarkInfo->reshape(new_rect.getWidth(), new_rect.getHeight());
 
 			mPlaceProfile->setVisible(FALSE);
@@ -1112,7 +1137,10 @@ void LLPanelPlaces::createTabs()
 	LLLandmarksPanel* landmarks_panel = new LLLandmarksPanel();
 	if (landmarks_panel)
 	{
-		landmarks_panel->setPanelPlacesButtons(this);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		landmarks_panel->setPanelPlacesButtons();
+// [/SL:KB]
+//		landmarks_panel->setPanelPlacesButtons(this);
 
 		mTabContainer->addTabPanel(
 			LLTabContainer::TabPanelParams().
@@ -1124,7 +1152,10 @@ void LLPanelPlaces::createTabs()
 	LLTeleportHistoryPanel* teleport_history_panel = new LLTeleportHistoryPanel();
 	if (teleport_history_panel)
 	{
-		teleport_history_panel->setPanelPlacesButtons(this);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		teleport_history_panel->setPanelPlacesButtons();
+// [/SL:KB]
+//		teleport_history_panel->setPanelPlacesButtons(this);
 
 		mTabContainer->addTabPanel(
 			LLTabContainer::TabPanelParams().
@@ -1137,7 +1168,7 @@ void LLPanelPlaces::createTabs()
 	LLPanelPlacesSearchPanel* search_panel = new LLPanelPlacesSearchPanel();
 	if (search_panel)
 	{
-		search_panel->setPanelPlacesButtons(this);
+		search_panel->setPanelPlacesButtons();
 
 		mTabContainer->addTabPanel(
 			LLTabContainer::TabPanelParams().
@@ -1199,6 +1230,15 @@ void LLPanelPlaces::showAddedLandmarkInfo(const uuid_vec_t& items)
 
 void LLPanelPlaces::updateVerbs()
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	// Only show the bottom button bar if the tab controls aren't visible
+	if ( (mTabContainer->getVisible()) && (mActivePanel) )
+	{
+		mActivePanel->updateVerbs();
+	}
+	mButtonPanel->setVisible(!mTabContainer->getVisible());
+// [/SL:KB]
+
 	bool is_place_info_visible;
 
 	LLPanelPlaceInfo* panel = getCurrentInfoPanel();
@@ -1242,11 +1282,11 @@ void LLPanelPlaces::updateVerbs()
 			mTeleportBtn->setEnabled(have_3d_pos);
 		}
 	}
-	else
-	{
-		if (mActivePanel)
-			mActivePanel->updateVerbs();
-	}
+//	else
+//	{
+//		if (mActivePanel)
+//			mActivePanel->updateVerbs();
+//	}
 }
 
 LLPanelPlaceInfo* LLPanelPlaces::getCurrentInfoPanel()

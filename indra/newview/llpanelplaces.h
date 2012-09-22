@@ -128,6 +128,9 @@ private:
 	LLToggleableMenu*			mLandmarkMenu;
 
 	LLButton*					mPlaceProfileBackBtn;
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	LLPanel*					mButtonPanel;
+// [/SL:KB]
 	LLButton*					mTeleportBtn;
 	LLButton*					mShowOnMapBtn;
 	LLButton*					mEditBtn;

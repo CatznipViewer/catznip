@@ -52,7 +52,7 @@ background_visible="true"
     <tab_container
      follows="all"
      halign="center"
-     height="503"
+     height="526"
      layout="topleft"
      left="6"
      name="Places Tabs"
