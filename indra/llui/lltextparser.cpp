@@ -384,13 +384,13 @@ std::string LLTextParser::getFileName() const
 }
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-void LLTextParser::loadKeywords()
+bool LLTextParser::loadKeywords()
 {
 	llifstream fileHighlights(getFileName());
 	if (!fileHighlights.is_open())
 	{
 		llwarns << "Can't open highlights file for reading" << llendl;
-		return;
+		return false;
 	}
 
 	mHighlightEntries.clear();
@@ -411,7 +411,7 @@ void LLTextParser::loadKeywords()
 	}
 	fileHighlights.close();
 
-	saveToDisk();
+	return true;
 }
 // [/SL:KB]
 //void LLTextParser::loadKeywords()

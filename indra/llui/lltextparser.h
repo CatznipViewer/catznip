@@ -82,6 +82,7 @@ public:
 	void                    addHighlight(const LLHighlightEntry& entry);
 	LLHighlightEntry*       getHighlightById(const LLUUID& idEntry);
 	const LLHighlightEntry* getHighlightById(const LLUUID& idEntry) const;
+	S32                     getHighlightCount() const { return mHighlightEntries.size(); }
 	const highlight_list_t& getHighlights() const;
 	void                    removeHighlight(const LLUUID& idEntry);
 
@@ -91,7 +92,7 @@ public:
 	partial_results_t parsePartialLineHighlights(const std::string &text, S32 cat_mask, EHighlightPosition part, S32 index = 0);
 	bool parseFullLineHighlights(const std::string& text, S32 cat_mask, const LLHighlightEntry** ppEntry = NULL) const;
 
-	void loadKeywords();
+	bool loadKeywords();
 	void saveToDisk() const;
 protected:
 	std::string getFileName() const;
