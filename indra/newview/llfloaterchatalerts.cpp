@@ -421,27 +421,25 @@ void LLFloaterChatAlerts::refreshList()
 {
 	m_pAlertList->clearRows();
 
-	if (m_fChatAlertsEnabled)
+	// Set-up a row we can just reuse
+	LLSD sdRow; 
+	LLSD& sdColumns = sdRow["columns"];
+	sdColumns[0]["column"] = "alert_keyword";
+	sdColumns[0]["type"] = "text";
+
+	const LLTextParser::highlight_list_t& highlights = LLTextParser::instance().getHighlights();
+	for (LLTextParser::highlight_list_t::const_iterator itHighlight = highlights.begin(); 
+			itHighlight != highlights.end(); ++itHighlight)
 	{
-		// Set-up a row we can just reuse
-		LLSD sdRow; 
-		LLSD& sdColumns = sdRow["columns"];
-		sdColumns[0]["column"] = "alert_keyword";
-		sdColumns[0]["type"] = "text";
+		const LLHighlightEntry& entry = *itHighlight;
 
-		const LLTextParser::highlight_list_t& highlights = LLTextParser::instance().getHighlights();
-		for (LLTextParser::highlight_list_t::const_iterator itHighlight = highlights.begin(); 
-				itHighlight != highlights.end(); ++itHighlight)
-		{
-			const LLHighlightEntry& entry = *itHighlight;
+		sdColumns[0]["value"] = entry.mPattern;
+		sdRow["value"] = entry.getId();
 
-			sdColumns[0]["value"] = entry.mPattern;
-			sdRow["value"] = entry.getId();
-
-			m_pAlertList->addElement(sdRow, ADD_BOTTOM);
-		}
-		m_pAlertList->sortByColumnIndex(0, true);
+		m_pAlertList->addElement(sdRow, ADD_BOTTOM);
 	}
+	m_pAlertList->sortByColumnIndex(0, true);
+	m_pAlertList->setEnabled(m_fChatAlertsEnabled);
 
 	refreshEntry(false);
 }
