@@ -15,5 +15,8 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<menu_button name="gear_btn" tool_tip="İlave seçenekleri göster"/>
+		<button label="Işınla" name="teleport_btn" tool_tip="Seçilen alana ışınla"/>
+		<button label="Harita" name="map_btn" tool_tip="İlişkili alanı Dünya Haritasında göster"/>
+		<button name="profile_btn" tool_tip="Yer profilini göster"/>
 	</panel>
 </panel>

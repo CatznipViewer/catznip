@@ -131,7 +131,7 @@
 		           layout="topleft"
 		           left_pad="1"
 		           name="dummy_icon"
-		           width="45" />
+		           width="25" />
 		          <button
 		           follows="bottom|right"
 		           height="25"
@@ -145,7 +145,7 @@
 		           left_pad="1"
 		           name="teleport_btn"
 		           tool_tip="Teleport to the selected area"
-		           width="74" />
+		           width="84" />
 		          <button
 		           follows="bottom|right"
 		           height="25"
@@ -159,8 +159,9 @@
 		           label="Map"
 		           left_pad="1"
 		           name="map_btn"
+		           pad_left="5"
 		           tool_tip="Show the corresponding area on the World Map"
-		           width="59" />
+		           width="69" />
 		          <button
 		           follows="bottom|right"
 		           height="25"
