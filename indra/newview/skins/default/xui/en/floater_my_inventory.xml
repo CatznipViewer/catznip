@@ -15,8 +15,9 @@
  width="333" >
    <panel
     class="sidepanel_inventory"
+    height="562"
     name="main_panel"
     filename="sidepanel_inventory.xml"
     follows="all"
-    top="0"/>
+    top="4"/>
 </floater>

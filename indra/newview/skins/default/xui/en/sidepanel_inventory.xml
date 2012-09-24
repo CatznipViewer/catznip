@@ -107,7 +107,7 @@
                         name="inbox_inventory_placeholder_panel"
                         follows="all"
                         left="5"
-                        bottom="230"
+                        bottom="235"
                         width="320"
                         top="38"
                         bg_opaque_color="InventoryBackgroundColor"
@@ -123,7 +123,7 @@
 							top="0"
 							left="0"
 							width="320"
-							height="192"
+							height="197"
 							wrap="true"
 							halign="center">
 							Purchases from the marketplace will be delivered here.

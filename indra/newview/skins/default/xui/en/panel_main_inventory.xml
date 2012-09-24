@@ -49,21 +49,21 @@
    left="10"
    max_length_chars="300"
    name="inventory search editor"
-   top="4"
+   top="0"
    width="310" />
   <tab_container
      follows="all"
      halign="center"
-     height="340"
+     height="344"
      layout="topleft"
-     left="5"
+     left="4"
      name="inventory filter tabs"
-     tab_height="30"
+     tab_height="25"
      tab_group="1"
      tab_position="top"
      tab_min_width="75"
      top_pad="4"
-     width="320">
+     width="322">
     <inventory_panel
      background_visible="false"
      background_opaque="false"
@@ -78,7 +78,7 @@
      name="All Items"
      sort_order_setting="InventorySortOrder"
      show_item_link_overlays="true"
-     width="320" />
+     width="322" />
     <recent_inventory_panel
      background_visible="false"
      background_opaque="false"
@@ -92,14 +92,14 @@
      left_delta="0"
      name="Recent Items"
      show_item_link_overlays="true"
-     width="320" />
+     width="322" />
     <panel
      follows="all"
      height="310"
      label=""
      layout="topleft"
      name="New Inv Panel"
-     width="320" />
+     width="322" />
   </tab_container>
   <layout_stack
    animate="false"
@@ -109,14 +109,15 @@
    layout="topleft"
    orientation="horizontal"
    top_pad="0"
-   left="5"
+   left="4"
    name="bottom_panel"
-   width="320">
+   width="322">
       <layout_panel
        auto_resize="false"
        height="25"
        layout="topleft"
        name="options_gear_btn_panel"
+       top="0"
        width="32">
           <menu_button
            follows="bottom|left"
@@ -220,7 +221,7 @@
        height="25"
        layout="topleft"
        name="dummy_panel"
-       width="39">
+       width="40">
           <icon
            follows="bottom|left|right"
            height="25"
@@ -229,7 +230,7 @@
            left="0"
            top="0"
            name="dummy_icon"
-           width="39" />
+           width="40" />
       </layout_panel>
       <layout_panel
        auto_resize="false"
