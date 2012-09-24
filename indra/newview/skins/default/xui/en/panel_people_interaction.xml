@@ -12,7 +12,7 @@
          help_topic="people_recent_tab"
          name="recent_panel"
          top="0"
-         width="313">
+         width="324">
             <avatar_list
              allow_select="true"
              follows="all"
@@ -24,7 +24,7 @@
              show_speaking_indicator="false"
              show_text_field="true"
              top="0"
-             width="307" />
+             width="318" />
             <panel
              background_visible="false"
              follows="left|right|bottom"
@@ -34,7 +34,7 @@
              left="3"
              name="bottom_panel"
              top_pad="0"
-             width="313">
+             width="318">
                <menu_button
                follows="bottom|left"
                tool_tip="Options"
@@ -44,6 +44,7 @@
                image_selected="Toolbar_Left_Selected"
                image_unselected="Toolbar_Left_Off"
                layout="topleft"
+               left="1"
                name="recent_viewsort_btn"
                top="1"
                width="31" />
@@ -69,7 +70,7 @@
              	 layout="topleft"
              	 left_pad="1"
              	 name="dummy_icon"
-             	 width="244"
+             	 width="254"
              />
             </panel>
         </panel>
