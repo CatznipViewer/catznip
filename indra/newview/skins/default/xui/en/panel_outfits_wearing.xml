@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- background_visible="true"
+ background_visible="false"
  bg_alpha_color="DkGray"
  follows="all"
- height="430"
+ height="425"
  layout="topleft"
  left="0"
  name="Wearing"
  top="0"
- width="312">
+ width="300">
     <wearing_items_list
      follows="all"
      height="400"
@@ -18,7 +18,7 @@
      name="cof_items_list"
      standalone="false"
      top="0"
-     width="312"
+     width="300"
      worn_indication_enabled="false" />
     <panel
      follows="all"
@@ -28,16 +28,16 @@
      name="wearing_invpanel_placeholder" 
      top="0"
      visible="false"
-     width="312" /> 
+     width="300" /> 
     <panel
-     background_visible="true"
+     background_visible="false"
      follows="bottom|left|right"
-     height="28"
+     height="25"
      layout="topleft"
      left="0"
      name="bottom_panel"
      top_pad="0"
-     width="312">
+     width="300">
         <menu_button
          follows="bottom|left"
          height="25"
@@ -46,10 +46,10 @@
          image_selected="Toolbar_Left_Selected"
          image_unselected="Toolbar_Left_Off"
          layout="topleft"
-         left="0"
+         left="1"
          name="options_gear_btn"
          tool_tip="Show additional options"
-         top="1"
+         top="0"
          width="31" />
         <menu_button
          follows="bottom|left"
@@ -62,7 +62,6 @@
          left_pad="1"
          name="options_sort_btn"
          tool_tip="Show sorting options"
-         top="1"
          width="31" />
         <button
          follows="bottom|left"
@@ -76,7 +75,6 @@
          left_pad="1"
          name="folder_view_btn"
          tool_tip="Switch to inventory view"
-         top="1"
          width="31" />
         <button
          follows="bottom|left"
@@ -90,7 +88,6 @@
          left_pad="1"
          name="list_view_btn"
          tool_tip="Switch to list view"
-         top="1"
          width="31" />
         <icon
          follows="bottom|left|right"
@@ -99,7 +96,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="55" />
+         width="44" />
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
@@ -110,8 +107,7 @@
          left_pad="1"
          name="save_btn"
          tool_tip="Save current outfit"
-         top="1"
-         width="95">
+         width="94">
             <flyout_button.item
              label="Save"
              value="save_outfit" />

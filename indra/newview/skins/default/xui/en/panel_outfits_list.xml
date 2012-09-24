@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-   background_visible="true"
+   background_visible="false"
    bg_alpha_color="DkGray"
    border="false"
    follows="all"
-   height="430"
+   height="425"
    name="Outfits"
    layout="topleft"
    left="0"
    top="0"
-   width="312">
+   width="300">
     <accordion
-     background_visible="true"
+     background_visible="false"
      bg_alpha_color="DkGray2"
      bg_opaque_color="DkGray2"
      follows="all"
@@ -20,7 +20,7 @@
      left="0"
      name="outfits_accordion"
      top="0"
-     width="312">
+     width="300">
        <no_matched_tabs_text
          name="no_matched_outfits_msg"
          value="Didn't find what you're looking for? Try [secondlife:///app/search/all/[SEARCH_TERM] Search]."
@@ -30,15 +30,15 @@
          value="You don't have any outfits yet. Try [secondlife:///app/search/all/ Search]"/>
     </accordion>
     <panel
-     background_visible="true"
+     background_visible="false"
 	 follows="bottom|left|right"
-	 height="28"
+	 height="25"
 	 layout="topleft"
 	 left="0"
 	 name="bottom_panel"
 	 top_pad="0"
 	 visible="true"
-	 width="312">
+	 width="300">
         <menu_button
          follows="bottom|left"
          tool_tip="Show additional options"
@@ -48,9 +48,9 @@
          image_selected="Toolbar_Left_Selected"
          image_unselected="Toolbar_Left_Off"
          layout="topleft"
-         left="0"
+         left="1"
          name="options_gear_btn"
-         top="1"
+         top="0"
          width="31" />
         <icon
          follows="bottom|left|right"
@@ -59,7 +59,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="70"/>
+         width="60"/>
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
@@ -69,8 +69,7 @@
          layout="topleft"
          left_pad="1"
          name="wear_outfit_btn"
-         top="1"
-         width="80">
+         width="79">
             <flyout_button.item
              label="Replace Current Outfit"
              name="outfit_replace"
@@ -109,10 +108,10 @@
          image_unselected="Toolbar_Middle_Off"
          label="Wear"
          layout="topleft"
-         left_pad="-80"
+         left_pad="-79"
          name="wear_items_btn"
          visible="false"
-         width="80" />
+         width="79" />
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
@@ -123,8 +122,7 @@
          left_pad="1"
          name="save_btn"
          tool_tip="Save current outfit"
-         top="1"
-         width="95">
+         width="94">
             <flyout_button.item
              label="Save"
              value="save_outfit" />
