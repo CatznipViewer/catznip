@@ -5,7 +5,7 @@
          bg_alpha_color="DkGray"
          bg_opaque_color="DkGray"
          follows="all"
-         height="383"
+         height="386"
          label="RECENT"
          layout="topleft"
          left="0"
@@ -16,7 +16,7 @@
             <avatar_list
              allow_select="true"
              follows="all"
-             height="356"
+             height="361"
              layout="topleft"
              left="3"
              multi_select="true"
@@ -28,7 +28,7 @@
             <panel
              background_visible="false"
              follows="left|right|bottom"
-             height="27"
+             height="25"
              label="bottom_panel"
              layout="topleft"
              left="3"
@@ -46,7 +46,7 @@
                layout="topleft"
                left="1"
                name="recent_viewsort_btn"
-               top="1"
+               top="0"
                width="31" />
               <button
                  follows="bottom|left"

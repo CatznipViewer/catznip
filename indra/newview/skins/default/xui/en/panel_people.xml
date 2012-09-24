@@ -75,7 +75,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
      width="310" />
     <tab_container
      follows="all"
-     height="400"
+     height="403"
      layout="topleft"
      left="3"
      name="tabs"
@@ -100,7 +100,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
            top_pad="0"
            clip="false"
            follows="all"
-           height="359"
+           height="361"
            left="3"
            layout="topleft"
            mouse_opaque="false"
@@ -140,7 +140,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              />
            </layout_panel>
            <layout_panel
-             height="213"
+             height="215"
              layout="topleft"
              min_dim="22"
              mouse_opaque="false"
@@ -149,7 +149,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              <avatar_list
                allow_select="true"
                follows="all"
-               height="220"
+               height="215"
                ignore_online_status="true"
                layout="topleft"
                left="0"
@@ -164,7 +164,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
          <panel
              background_visible="false"
              follows="left|right|bottom"
-             height="27"
+             height="25"
              label="bottom_panel"
              layout="topleft"
              left="3"
@@ -182,7 +182,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
              left="1"
              name="nearby_view_sort_btn"
              tool_tip="Options"
-             top="1"
+             top="0"
              width="31" />
               <button
                   follows="bottom|left"
@@ -269,7 +269,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
             <accordion
              background_visible="false"
              follows="all"
-             height="359"
+             height="361"
              layout="topleft"
              left="3"
              name="friends_accordion"
@@ -318,7 +318,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
             <panel
              background_visible="false"
              follows="left|right|bottom"
-             height="27"
+             height="25"
              label="bottom_panel"
              layout="topleft"
              left="3"
@@ -333,7 +333,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
 				   height="25"
 				   layout="topleft"
 				   orientation="horizontal"
-				   top_pad="1"
+				   top_pad="0"
 				   background_visible="false"
 				   left="0"
 				   name="bottom_panel"
@@ -514,7 +514,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
             <group_list
              allow_select="true" 
              follows="all"
-             height="359"
+             height="361"
              layout="topleft"
              left="3"
              name="group_list"
@@ -523,7 +523,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
             <panel
              background_visible="false"
              follows="left|right|bottom"
-             height="27"
+             height="25"
              label="bottom_panel"
              layout="topleft"
              left="3"
@@ -541,7 +541,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                layout="topleft"
                left="1"
                name="groups_viewsort_btn"
-               top="1"
+               top="0"
                width="31" />
                 <button
                  follows="bottom|left"
@@ -587,7 +587,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
         </panel>
         <panel
          filename="panel_people_interaction.xml"
-         height="383"
+         height="386"
          label="RECENT"
          layout="topleft"
          left="0"

@@ -18,9 +18,9 @@
       default_panel_name="panel_people"
       follows="all"
       left="0" 
-      height="567"
+      height="562"
       name="main_panel"
-      top="3" 
+      top="4" 
       width="330">
       <panel
         class="panel_people"
