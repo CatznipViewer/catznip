@@ -1,70 +1,53 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- background_visible="true"
- border="none"
- height="280"
- label="Derendered List"
+ follows="all"
+ height="300"
+ label="DERENDERED LIST"
  layout="topleft"
- left="6"
- name="derender_tab"
- top="80"
- width="320">
+ left="0"
+ top="0"
+ width="350" >
     <scroll_list
+     draw_border="false"
      draw_heading="true"
+     draw_stripes="true"
      follows="all"
-     height="254"
+     height="275"
      layout="topleft"
-     left="0"
-     multi_select="true"
+     multi_select="false"
      name="derender_list"
-     tool_tip="List of currently derendered objects"
-     top="0"
-     width="320">
+     tool_tip="List of currently derendered objects."
+     top="0" >
         <scroll_list.columns
          label="Object Name"
-         name="object_name" />
+         name="object_name"
+         width="100" />
         <scroll_list.columns
          label="Location"
          name="location" />
         <scroll_list.columns
          label="Type"
          name="derender_type"
-         width="96" />
+         width="80" />
     </scroll_list>
-
     <panel
-     background_visible="true"
-     follows="bottom|left|right"
-     height="28"
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left="0"
-     top_pad="0"
-     visible="true"
-     name="derender_toolbar"
-     width="320">
-        <menu_button
-         enabled="false"
-         follows="bottom|left"
-         height="25"
-         image_hover_unselected="Toolbar_Left_Over"
-         image_overlay="OptionsMenu_Off"
-         image_selected="Toolbar_Left_Selected"
-         image_unselected="Toolbar_Left_Off"
-         layout="topleft"
-         left="0"
-         name="derender_gear_btn"
-         tool_tip="Show additional options"
-         top="1"
-         width="30" />
-        <icon
+     name="bottom_panel"
+     top_pad="0" >
+        <icon  
          follows="bottom|left|right"
          height="25"
-         image_name="Toolbar_Middle_Off"
-         layout="topleft"
-         left_pad="1"
+         image_name="Toolbar_Left_Off"
+         width="472"
+         left="1"
          name="derender_spacer_icon"
-         width="213" />
-        <button
+         right="-80"
+         top="0" />
+        <button 
          enabled="false"
          follows="bottom|right"
          height="25"
@@ -74,10 +57,9 @@
          image_selected="Toolbar_Right_Selected"
          image_unselected="Toolbar_Right_Off"
          label="Restore"
-         layout="topleft"
          left_pad="1"
          name="derender_trash_btn"
-         tool_tip="Restore selected objects"
-         width="75" />
+         tool_tip="Restore selected objects."
+         width="79" />
     </panel>
 </panel>
