@@ -2,18 +2,18 @@
 <panel name="Teleport History" bottom="0" height="400" left="0" width="313"
      help_topic="panel_teleport_history"
      border="false" follows="left|top|right|bottom"
-     background_visible="true"
+     background_visible="false"
      bg_alpha_color="DkGray">     
     <accordion
      follows="left|top|right|bottom"
-     height="373"
+     height="375"
      layout="topleft"
      left="3"
      top="0"
      name="history_accordion"
-     background_visible="true"
+     background_visible="false"
      bg_alpha_color="DkGray2"
-     width="307">
+     width="313">
         <no_matched_tabs_text
          name="no_matched_teleports_msg"
          value="Didn't find what you're looking for? Try [secondlife:///app/search/places/[SEARCH_TERM] Search]." />
@@ -31,7 +31,7 @@
              left="0"
              name="today_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -45,7 +45,7 @@
              left="0"
              name="yesterday_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -59,7 +59,7 @@
              left="0"
              name="2_days_ago"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -73,7 +73,7 @@
              left="0"
              name="3_days_ago"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -87,7 +87,7 @@
              left="0"
              name="4_days_ago"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -101,7 +101,7 @@
              left="0"
              name="5_days_ago_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -115,7 +115,7 @@
              left="0"
              name="6_days_and_older_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -129,7 +129,7 @@
              left="0"
              name="1_month_and_older_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
         <accordion_tab
@@ -143,20 +143,20 @@
              left="0"
              name="6_months_and_older_items"
              top="0"
-             width="307">
+             width="313">
 	        </flat_list_view>
 	    </accordion_tab>
     </accordion>
     <panel
-     background_visible="true"
+     background_visible="false"
      bevel_style="none"
      bottom="0"
      follows="left|right|bottom"
-     height="27"
+     height="25"
      layout="bottomleft"
-     left="3"
+     left="0"
      name="bottom_panel"
-     width="307">
+     width="313">
         <menu_button
          follows="bottom|left"
          tool_tip="Show additional options"
@@ -168,7 +168,7 @@
          layout="topleft"
          left="0"
          name="gear_btn"
-         top="1"
+         top="0"
          width="31" />
         <icon
          follows="bottom|left|right"
@@ -177,7 +177,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="88"
+         width="94"
         />
         <button
          follows="bottom|right"

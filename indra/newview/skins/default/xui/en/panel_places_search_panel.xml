@@ -39,7 +39,7 @@
          animate="false"
          border_size="0"
          follows="all"
-         height="373"
+         height="375"
          layout="topleft"
          left="0"
          name="search_stack"
@@ -51,7 +51,6 @@
              height="40"
              layout="topleft"
              name="search_options_panel"
-             visibility_control="PlacesSearchShowOptions"
              width="313">
                 <combo_box
                  follows="top|left"
@@ -225,7 +224,7 @@
             </layout_panel>
             <layout_panel
              auto_resize="auto"
-             height="185"
+             height="187"
              layout="topleft"
              name="search_list_panel"
              width="313">
@@ -268,7 +267,7 @@
                 <scroll_list
                  draw_heading="true" 
                  follows="all"
-                 height="157"
+                 height="159"
                  layout="topleft"
                  left="0"
                  name="search_results"
@@ -286,15 +285,15 @@
         </layout_stack>
  
         <panel
-         background_visible="true"
+         background_visible="false"
+         bottom="0"
          follows="left|right|bottom"
-         height="27"
+         height="25"
          label="bottom_panel"
-         layout="topleft"
-         left="3"
+         layout="bottomleft"
+         left="0"
          name="bottom_panel"
-         top_pad="0"
-         width="307">
+         width="313">
             <icon
              follows="bottom|left|right"
              height="25"
@@ -302,8 +301,8 @@
              layout="topleft"
              left="0"
              name="dummy_icon"
-             top="1"
-             width="120"
+             top="0"
+             width="126"
             />
             <button
              follows="bottom|right"
