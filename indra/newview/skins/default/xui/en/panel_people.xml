@@ -81,7 +81,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
      name="tabs"
      tab_group="1"
      tab_min_width="76"
-     tab_height="30"
+     tab_height="25"
      tab_position="top"
      top_pad="4"
      halign="center"
@@ -230,14 +230,13 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
               width="31">
              </button>
              <icon
-             follows="bottom|left|right"
-             height="25"
-             image_name="Toolbar_Right_Off"
-             layout="topleft"
-             left_pad="1"
-             name="dummy_icon"
-             width="185"
-             />
+              follows="bottom|left|right"
+              height="25"
+              image_name="Toolbar_Right_Off"
+              layout="topleft"
+              left_pad="1"
+              name="dummy_icon"
+              width="185" />
              <slider
               follows="bottom|left"
               layout="topleft"
@@ -588,11 +587,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
             </panel>
         </panel>
         <panel
-         background_opaque="false"
-         background_visible="false"
-         bg_alpha_color="DkGray"
-         bg_opaque_color="DkGray"
-         follows="all"
+         filename="panel_people_interaction.xml"
          height="383"
          label="RECENT"
          layout="topleft"
@@ -600,68 +595,9 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
          help_topic="people_recent_tab"
          name="recent_panel"
          top="0"
-         width="313">
-            <avatar_list
-             allow_select="true"
-             follows="all"
-             height="356"
-             layout="topleft"
-             left="3"
-             multi_select="true"
-             name="avatar_list"
-             show_speaking_indicator="false"
-             show_text_field="true"
-             top="0"
-             width="307" />
-            <panel
-             background_visible="false"
-             follows="left|right|bottom"
-             height="27"
-             label="bottom_panel"
-             layout="topleft"
-             left="3"
-             name="bottom_panel"
-             top_pad="0"
-             width="313">
-               <menu_button
-               follows="bottom|left"
-               tool_tip="Options"
-               height="25"
-               image_hover_unselected="Toolbar_Left_Over"
-               image_overlay="OptionsMenu_Off"
-               image_selected="Toolbar_Left_Selected"
-               image_unselected="Toolbar_Left_Off"
-               layout="topleft"
-               name="recent_viewsort_btn"
-               top="1"
-               width="31" />
-              <button
-                 follows="bottom|left"
-                 height="25"
-                 image_hover_unselected="Toolbar_Middle_Over"
-                 image_overlay="AddItem_Off"
-                 image_selected="Toolbar_Middle_Selected"
-                 image_unselected="Toolbar_Middle_Off"
-                 layout="topleft"
-                 left_pad="1"
-                 name="add_friend_btn"
-                 tool_tip="Add selected Resident to your friends List"
-                 width="31">
-                <commit_callback
-                   function="People.addFriend" />
-              </button>
-              <icon
-             	 follows="bottom|left|right"
-             	 height="25"
-             	 image_name="Toolbar_Right_Off"
-             	 layout="topleft"
-             	 left_pad="1"
-             	 name="dummy_icon"
-             	 width="244"
-             />
-            </panel>
-        </panel>
+         width="313" />
     </tab_container>
+<!--
     <panel
      follows="bottom|left|right"
      height="23"
@@ -671,7 +607,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
      name="button_bar"
      width="313">
 
-<!--********************************Profile; IM; Call, Share, Teleport********************************	
+    ********************************Profile; IM; Call, Share, Teleport********************************	
      	<layout_stack
      	follows="bottom|left|right"
 		height="23"
@@ -783,7 +719,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
 			</layout_panel>
 		</layout_stack>
 		
-********************************Group Profile; Group Chat; Group Call buttons************************			
+    ********************************Group Profile; Group Chat; Group Call buttons************************			
 		<layout_stack
      	follows="bottom|left|right"
 		height="23"
@@ -860,6 +796,6 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
          		width="95" />			
 			</layout_panel>		
 		</layout_stack>
--->
     </panel>
+-->
 </panel>
