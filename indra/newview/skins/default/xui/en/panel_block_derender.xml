@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ background_visible="true"
+ border="none"
+ height="280"
+ label="Derendered List"
+ layout="topleft"
+ left="6"
+ name="derender_tab"
+ top="80"
+ width="320">
+    <scroll_list
+     draw_heading="true"
+     follows="all"
+     height="254"
+     layout="topleft"
+     left="0"
+     multi_select="true"
+     name="derender_list"
+     tool_tip="List of currently derendered objects"
+     top="0"
+     width="320">
+        <scroll_list.columns
+         label="Object Name"
+         name="object_name" />
+        <scroll_list.columns
+         label="Location"
+         name="location" />
+        <scroll_list.columns
+         label="Type"
+         name="derender_type"
+         width="96" />
+    </scroll_list>
+
+    <panel
+     background_visible="true"
+     follows="bottom|left|right"
+     height="28"
+     layout="topleft"
+     left="0"
+     top_pad="0"
+     visible="true"
+     name="derender_toolbar"
+     width="320">
+        <menu_button
+         enabled="false"
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Left_Over"
+         image_overlay="OptionsMenu_Off"
+         image_selected="Toolbar_Left_Selected"
+         image_unselected="Toolbar_Left_Off"
+         layout="topleft"
+         left="0"
+         name="derender_gear_btn"
+         tool_tip="Show additional options"
+         top="1"
+         width="30" />
+        <icon
+         follows="bottom|left|right"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="derender_spacer_icon"
+         width="213" />
+        <button
+         enabled="false"
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="TrashItem_Off"
+         image_overlay_alignment="left"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         label="Restore"
+         layout="topleft"
+         left_pad="1"
+         name="derender_trash_btn"
+         tool_tip="Restore selected objects"
+         width="75" />
+    </panel>
+</panel>

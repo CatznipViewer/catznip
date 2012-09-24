@@ -11,109 +11,109 @@
  min_height="350"
  min_width="240"
  width="320">
-            <scroll_list
-             draw_heading="true"
-             follows="all"
-             height="274"
-             layout="topleft"
-             left="0"
-             name="mute_list"
-             tool_tip="List of currently blocked Residents"
-             top="0"
-             width="320">
-                <scroll_list.columns
-                 label="Name"
-                 name="item_name" />
-                <scroll_list.columns
-                 label="Block Type"
-                 name="item_type"
-                 width="96" />
-            </scroll_list>
-
-            <panel
-             background_visible="true"
-             follows="bottom|left|right"
-             height="28"
-             layout="topleft"
-             left="0"
-             top_pad="0"
-             visible="true"
-             name="mute_toolbar"
-             width="320">
-                <menu_button
-                  enabled="false"
-                  follows="bottom|left"
-                  height="25"
-                  image_hover_unselected="Toolbar_Left_Over"
-                  image_overlay="OptionsMenu_Off"
-                  image_selected="Toolbar_Left_Selected"
-                  image_unselected="Toolbar_Left_Off"
-                  layout="topleft"
-                  left="0"
-                  name="mute_gear_btn"
-                  tool_tip="Show additional options"
-                  top="1"
-                  width="30" />
-                 <button
-                  follows="bottom|left"
-                  height="25"
-                  image_hover_unselected="Toolbar_Middle_Over"
-                  image_overlay="AddItem_Off"
-                  image_overlay_alignment="left"
-                  image_selected="Toolbar_Middle_Selected"
-                  image_unselected="Toolbar_Middle_Off"
-                  label="Block person"
-                  layout="topleft"
-                  left_pad="1"
-                  name="mute_resident_btn"
-                  tool_tip="Pick a resident to block"
-                  width="100">
-                     <button.commit_callback
-                      function="Block.ClickPick" />
-                 </button>
-                 <button
-                  follows="bottom|left"
-                  height="25"
-                  image_hover_unselected="Toolbar_Middle_Over"
-                  image_overlay="AddItem_Off"
-                  image_overlay_alignment="left"
-                  image_selected="Toolbar_Middle_Selected"
-                  image_unselected="Toolbar_Middle_Off"
-                  label="Block object"
-                  layout="topleft"
-                  left_pad="1"
-                  name="mute_object_btn"
-                  tool_tip="Pick an object to block by name"
-                  width="100">
-                    <button.commit_callback
-                     function="Block.ClickBlockByName" />
-                 </button>
-                 <icon
-                  follows="bottom|left|right"
-                  height="25"
-                  image_name="Toolbar_Middle_Off"
-                  layout="topleft"
-                  left_pad="1"
-                  name="mute_spacer_icon"
-                  width="11" />
-                 <button
-                  enabled="false"
-                  follows="bottom|right"
-                  height="25"
-                  image_hover_unselected="Toolbar_Right_Over"
-                  image_overlay="TrashItem_Off"
-                  image_overlay_alignment="left"
-                  image_selected="Toolbar_Right_Selected"
-                  image_unselected="Toolbar_Right_Off"
-                  label="Unblock"
-                  layout="topleft"
-                  left_pad="1"
-                  name="mute_trash_btn"
-                  tool_tip="Remove selected items from the blocked list"
-                  width="75">
-                     <button.commit_callback
-                      function="Block.ClickRemove" />
-                 </button>
-
-            </panel>
+    <scroll_list
+     draw_heading="true"
+     follows="all"
+     height="274"
+     layout="topleft"
+     left="0"
+     name="mute_list"
+     tool_tip="List of currently blocked Residents"
+     top="0"
+     width="320">
+        <scroll_list.columns
+         label="Name"
+         name="item_name" />
+        <scroll_list.columns
+         label="Block Type"
+         name="item_type"
+         width="96" />
+    </scroll_list>
+    
+    <panel
+     background_visible="true"
+     follows="bottom|left|right"
+     height="28"
+     layout="topleft"
+     left="0"
+     top_pad="0"
+     visible="true"
+     name="mute_toolbar"
+     width="320">
+        <menu_button
+          enabled="false"
+          follows="bottom|left"
+          height="25"
+          image_hover_unselected="Toolbar_Left_Over"
+          image_overlay="OptionsMenu_Off"
+          image_selected="Toolbar_Left_Selected"
+          image_unselected="Toolbar_Left_Off"
+          layout="topleft"
+          left="0"
+          name="mute_gear_btn"
+          tool_tip="Show additional options"
+          top="1"
+          width="30" />
+         <button
+          follows="bottom|left"
+          height="25"
+          image_hover_unselected="Toolbar_Middle_Over"
+          image_overlay="AddItem_Off"
+          image_overlay_alignment="left"
+          image_selected="Toolbar_Middle_Selected"
+          image_unselected="Toolbar_Middle_Off"
+          label="Block person"
+          layout="topleft"
+          left_pad="1"
+          name="mute_resident_btn"
+          tool_tip="Pick a resident to block"
+          width="100">
+             <button.commit_callback
+              function="Block.ClickPick" />
+         </button>
+         <button
+          follows="bottom|left"
+          height="25"
+          image_hover_unselected="Toolbar_Middle_Over"
+          image_overlay="AddItem_Off"
+          image_overlay_alignment="left"
+          image_selected="Toolbar_Middle_Selected"
+          image_unselected="Toolbar_Middle_Off"
+          label="Block object"
+          layout="topleft"
+          left_pad="1"
+          name="mute_object_btn"
+          tool_tip="Pick an object to block by name"
+          width="100">
+            <button.commit_callback
+             function="Block.ClickBlockByName" />
+         </button>
+         <icon
+          follows="bottom|left|right"
+          height="25"
+          image_name="Toolbar_Middle_Off"
+          layout="topleft"
+          left_pad="1"
+          name="mute_spacer_icon"
+          width="11" />
+         <button
+          enabled="false"
+          follows="bottom|right"
+          height="25"
+          image_hover_unselected="Toolbar_Right_Over"
+          image_overlay="TrashItem_Off"
+          image_overlay_alignment="left"
+          image_selected="Toolbar_Right_Selected"
+          image_unselected="Toolbar_Right_Off"
+          label="Unblock"
+          layout="topleft"
+          left_pad="1"
+          name="mute_trash_btn"
+          tool_tip="Remove selected items from the blocked list"
+          width="75">
+             <button.commit_callback
+              function="Block.ClickRemove" />
+         </button>
+    
+    </panel>
 </panel>
