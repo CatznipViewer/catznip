@@ -128,6 +128,9 @@ public:
 	void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
 	void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
 	void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
+
+	static const std::string& getExtension(ESaveFilter filter);
+	static bool               hasExtension(ESaveFilter filter);
 // [/SL:KB]
 //	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
 //	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
@@ -202,6 +205,10 @@ private:
 	bool mLocked;
 
 	static LLFilePicker sInstance;
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
+	static std::map<ESaveFilter, std::string> sSaveFilterExtensions;
+// [/SL:KB]
 	
 protected:
 #if LL_GTK
