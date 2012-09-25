@@ -49,6 +49,10 @@
 
 LLFilePicker LLFilePicker::sInstance;
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
+std::map<LLFilePicker::ESaveFilter, std::string> LLFilePicker::sSaveFilterExtensions;
+// [/SL:KB]
+
 #if LL_WINDOWS
 #define SOUND_FILTER L"Sounds (*.wav)\0*.wav\0"
 #define IMAGE_FILTER L"Images (*.tga; *.bmp; *.jpg; *.jpeg; *.png)\0*.tga;*.bmp;*.jpg;*.jpeg;*.png\0"
@@ -119,6 +123,27 @@ LLFilePicker::LLFilePicker()
 {
 	reset();
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
+	static bool s_fInitialized = false;
+	if (!s_fInitialized)
+	{
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_WAV, ".wav"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_TGA, ".tga"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_BMP, ".bmp"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_AVI, ".avi"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_ANIM, ".bhv"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_XML, ".xml"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_COLLADA, ".dae"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_RAW, ".raw"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_J2C, ".j2c"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_PNG, ".png"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_JPEG, ".jpg"));
+		sSaveFilterExtensions.insert(std::pair<ESaveFilter, std::string>(FFSAVE_SCRIPT, ".lsl"));
+
+		s_fInitialized = true;
+	}
+// [/SL:KB]
+
 #if LL_WINDOWS
 	mOFN.lStructSize = sizeof(OPENFILENAMEW);
 	mOFN.hwndOwner = NULL;  // Set later
@@ -155,6 +180,19 @@ LLFilePicker::~LLFilePicker()
 {
 	// nothing
 }
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
+const std::string& LLFilePicker::getExtension(LLFilePicker::ESaveFilter filter)
+{
+	auto itExt = sSaveFilterExtensions.find(filter);
+	return (sSaveFilterExtensions.end() != itExt) ? itExt->second : LLStringUtil::null;
+}
+
+bool LLFilePicker::hasExtension(LLFilePicker::ESaveFilter filter)
+{
+	return sSaveFilterExtensions.end() != sSaveFilterExtensions.find(filter);
+}
+// [/SL:KB]
 
 // utility function to check if access to local file system via file browser 
 // is enabled and if not, tidy up and indicate we're not allowed to do this.

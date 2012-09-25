@@ -168,7 +168,15 @@ void LLFilePickerThread::run()
 			{
 				if (picker.getSaveFile((LLFilePicker::ESaveFilter)mFilter, mInitialFile, false))
 				{
-					mFiles.push_back(picker.getFirstFile());
+					std::string filename = picker.getFirstFile();
+
+					// Linux doesn't seem to want to append the file extension so make sure there always is one
+					if ( (gDirUtilp->getExtension(filename).empty()) && (LLFilePicker::hasExtension((LLFilePicker::ESaveFilter)mFilter)) )
+					{
+						filename += LLFilePicker::getExtension((LLFilePicker::ESaveFilter)mFilter);
+					}
+
+					mFiles.push_back(filename);
 				}
 			}
 			break;
