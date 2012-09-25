@@ -2057,7 +2057,7 @@ class LLAdvancedCompressImage : public view_listener_t
 	bool handleEvent(const LLSD& userdata)
 	{
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, boost::bind(handle_compress_image, _1));
+		LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, boost::bind(handle_compress_image, _1));
 // [/SL:KB]
 //		handle_compress_image(NULL);
 		return true;

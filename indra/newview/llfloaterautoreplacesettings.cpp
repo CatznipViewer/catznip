@@ -353,7 +353,7 @@ void LLFloaterAutoReplaceSettings::onImportList()
 //	LLFilePicker& picker = LLFilePicker::instance();
 //	if( picker.getOpenFile( LLFilePicker::FFLOAD_XML) )
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_XML, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
 		boost::bind(&LLFloaterAutoReplaceSettings::onImportListCallback, this, _1));
 }
 
@@ -557,7 +557,7 @@ void LLFloaterAutoReplaceSettings::onExportList()
 //	LLFilePicker& picker = LLFilePicker::instance();
 //	if( picker.getSaveFile( LLFilePicker::FFSAVE_XML, listFileName) )
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_XML, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
 		boost::bind(&LLFloaterAutoReplaceSettings::onExportListCallback, this, listName, _1));
 }
 

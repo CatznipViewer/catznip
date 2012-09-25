@@ -70,8 +70,8 @@ class LLFilePicker
 	friend class LLFilePickerThread;
 // [/SL:KB]
 public:
-	// calling this before main() is undefined
-	static LLFilePicker& instance( void ) { return sInstance; }
+//	// calling this before main() is undefined
+//	static LLFilePicker& instance( void ) { return sInstance; }
 
 	enum ELoadFilter
 	{
@@ -126,9 +126,9 @@ public:
 	typedef boost::function<void(const std::string&)> picker_single_callback_t;
 	typedef boost::function<void(const std::vector<std::string>&)> picker_multi_callback_t;
 
-	void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
-	void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
-	void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
+	static void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
+	static void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
+	static void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
 
 	static const std::string& getExtension(ESaveFilter filter);
 	static bool               hasExtension(ESaveFilter filter);
@@ -205,7 +205,7 @@ private:
 	S32 mCurrentFile;
 	bool mLocked;
 
-	static LLFilePicker sInstance;
+//	static LLFilePicker sInstance;
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
 	static std::map<ESaveFilter, std::string> sSaveFilterExtensions;

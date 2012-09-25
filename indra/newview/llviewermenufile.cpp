@@ -308,7 +308,7 @@ void upload_pick(LLFilePicker::ELoadFilter filter)
 //		return std::string();
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
+	LLFilePicker::getOpenFile(filter, boost::bind(&upload_pick_callback, filter, _1));
 }
 
 void upload_pick_callback(LLFilePicker::ELoadFilter type, const std::string& filename)
@@ -501,7 +501,7 @@ class LLFileUploadBulk : public view_listener_t
 		}
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, 
+		LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, 
 			boost::bind(&LLFileUploadBulk::onFilePickerCallback, this, _1));
 
 		return true;
@@ -579,7 +579,7 @@ void upload_error(const std::string& error_message, const std::string& label, co
 	{
 		lldebugs << "unable to remove temp file" << llendl;
 	}
-	LLFilePicker::instance().reset();						
+//	LLFilePicker::instance().reset();						
 }
 
 class LLFileEnableCloseWindow : public view_listener_t
@@ -1008,7 +1008,7 @@ LLUUID upload_new_resource(
 		{
 			lldebugs << "unable to remove temp file" << llendl;
 		}
-		LLFilePicker::instance().reset();
+//		LLFilePicker::instance().reset();
 	}
 
 	return uuid;

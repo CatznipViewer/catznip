@@ -1260,7 +1260,7 @@ void LLPanelRegionTerrainInfo::onClickDownloadRaw(void* data)
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_RAW, "terrain.raw", 
+	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_RAW, "terrain.raw", 
 		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerDownloadCallback, (LLPanelRegionTerrainInfo*)data, _1));
 }
 
@@ -1296,7 +1296,7 @@ void LLPanelRegionTerrainInfo::onClickUploadRaw(void* data)
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_RAW, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_RAW, 
 		boost::bind(&LLPanelRegionTerrainInfo::onFilePickerUploadCallback, (LLPanelRegionTerrainInfo*)data, _1));
 }
 

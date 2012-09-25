@@ -3276,7 +3276,7 @@ void LLViewerMediaImpl::handleMediaEvent(LLPluginClassMedia* plugin, LLPluginCla
 		case LLViewerMediaObserver::MEDIA_EVENT_PICK_FILE_REQUEST:
 		{
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-			LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_ALL, 
+			LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_ALL, 
 				boost::bind(&LLViewerMediaImpl::onFilePickerCallback, plugin, _1));
 // [/SL:KB]
 //			// Display a file picker

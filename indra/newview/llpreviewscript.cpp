@@ -1117,7 +1117,7 @@ void LLScriptEdCore::onBtnLoadFromFile( void* data )
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
 		boost::bind(&LLScriptEdCore::onFilePickerLoadCallback, (LLScriptEdCore*)data, _1));
 }
 
@@ -1173,7 +1173,7 @@ void LLScriptEdCore::onBtnSaveToFile( void* userdata )
 //		LLFilePicker& file_picker = LLFilePicker::instance();
 //		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT ) )
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_SCRIPT, LLStringUtil::null,
+	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_SCRIPT, LLStringUtil::null,
 		boost::bind(&LLScriptEdCore::onFilePickerSaveCallback, (LLScriptEdCore*)userdata, _1));
 }
 
