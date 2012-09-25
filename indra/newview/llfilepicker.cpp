@@ -47,7 +47,7 @@
 // Globals
 //
 
-LLFilePicker LLFilePicker::sInstance;
+//LLFilePicker LLFilePicker::sInstance;
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
 std::map<LLFilePicker::ESaveFilter, std::string> LLFilePicker::sSaveFilterExtensions;
@@ -249,16 +249,19 @@ void LLFilePicker::reset()
 }
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// static
 void LLFilePicker::getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb)
 {
 	(new LLFilePickerCallbackThread(filter, filename, cb))->getFile();
 }
 
+// static
 void LLFilePicker::getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb)
 {
 	(new LLFilePickerCallbackThread(filter, cb))->getFile();
 }
 
+// static
 void LLFilePicker::getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb)
 {
 	(new LLFilePickerCallbackThread(filter, cb))->getFile();

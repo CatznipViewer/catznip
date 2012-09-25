@@ -1093,7 +1093,7 @@ void LLFloaterUIPreview::onClickBrowseForEditor()
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_ALL, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_ALL, 
 		boost::bind(&LLFloaterUIPreview::onFilePickerEditorCallback, this, _1));
 }
 
@@ -1160,7 +1160,7 @@ void LLFloaterUIPreview::onClickBrowseForDiffs()
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_XML, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
 		boost::bind(&LLFloaterUIPreview::onFilePickerDiffsCallback, this, _1));
 }
 

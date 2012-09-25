@@ -870,7 +870,7 @@ void LLFloaterTexturePicker::onModeSelect(LLUICtrl* ctrl, void *userdata)
 void LLFloaterTexturePicker::onBtnAdd(void* userdata)
 {
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, 
+	LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, 
 		boost::bind(&LLFloaterTexturePicker::onFilePickerCallback, (LLFloaterTexturePicker*)userdata, _1));
 // [/SL:KB]
 //	if (LLLocalBitmapMgr::addUnit() == true)

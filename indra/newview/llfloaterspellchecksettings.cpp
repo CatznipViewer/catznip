@@ -264,7 +264,7 @@ void LLFloaterSpellCheckerImport::onBtnBrowse()
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::instance().getOpenFile(LLFilePicker::FFLOAD_DICTIONARY, 
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_DICTIONARY, 
 		boost::bind(&LLFloaterSpellCheckerImport::onBtnBrowseCallback, this, _1));
 }
 

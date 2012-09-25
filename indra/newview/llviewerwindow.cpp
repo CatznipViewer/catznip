@@ -4088,7 +4088,7 @@ void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callbac
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	if (force_picker || !isSnapshotLocSet())
 	{
-		LLFilePicker::instance().getSaveFile(pick_type, sSnapshotBaseName,
+		LLFilePicker::getSaveFile(pick_type, sSnapshotBaseName, 
 			boost::bind(&LLViewerWindow::saveImageCallback, this, image, _1, cb));
 	}
 	else

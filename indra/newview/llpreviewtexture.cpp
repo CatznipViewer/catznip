@@ -329,7 +329,7 @@ void LLPreviewTexture::saveAs(LLFilePicker::ESaveFilter filter)
 //		return;
 //	}
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::instance().getSaveFile(LLFilePicker::FFSAVE_TGA, (item) ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null,
+	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_TGA, (item) ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null,
 		boost::bind(&LLPreviewTexture::save, this, _1));
 }
 
