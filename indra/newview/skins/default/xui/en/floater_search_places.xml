@@ -16,7 +16,7 @@
     <panel
      class="panel_places_search"
      filename="panel_places_search.xml"
-     height="750"
+     height="775"
      layout="topleft"
      name="display"
      width="780"
