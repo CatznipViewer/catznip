@@ -1445,8 +1445,8 @@ even though the user gets a free copy.
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_pad="1"
              name="pipette_position_btn"
@@ -1534,8 +1534,8 @@ even though the user gets a free copy.
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_pad="1"
              name="pipette_size_btn"
@@ -1624,8 +1624,8 @@ even though the user gets a free copy.
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_pad="1"
              name="pipette_rotation_btn"
@@ -1730,8 +1730,8 @@ even though the user gets a free copy.
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_pad="1"
              name="pipette_primparams_btn"

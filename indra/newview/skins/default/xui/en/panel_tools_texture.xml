@@ -35,8 +35,8 @@
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_delta="24"
              name="texture_pipette"
@@ -56,8 +56,8 @@
             <button
              follows="left|top"
              height="16"
-             image_selected="eye_button_active.tga"
-             image_unselected="eye_button_inactive.tga"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
              layout="topleft"
              left_delta="24"
              name="color_pipette"
