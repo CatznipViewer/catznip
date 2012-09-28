@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
  follows="all"
- height="400"
+ height="460"
  label="Search"
  layout="topleft"
  name="panel_places_search"
@@ -34,43 +34,26 @@
    left="10"
    name="search_query"
    select_on_focus="true"
-   top="5"
-   width="275" />
+   top="0"
+   width="230" />
   <combo_box
    height="23"
    layout="topleft"
    left_pad="5"
    name="search_category"
    width="140" />
-  <button
-   follows="top|right"
-   height="23"
-   label="Search"
-   layout="topleft"
-   left_pad="5"
-   name="search_start"
-   width="70" />
-
-  <text
-   follows="top|left"
-   height="16"
-   layout="topleft"
-   left="10"
-   name="search_maturity_label"
-   top_pad="5"
-   value="Maturity: "
-   width="60" />
   <check_box
+   follows="top|right"
    height="16"
    label=""
    layout="topleft"
-   left_pad="0"
+   left_pad="5"
    name="search_pg_check"
-   top_delta="0"
+   top_delta="4"
    value="1"
    width="16" />
   <icon
-   follows="top|left"
+   follows="top|right"
    height="16"
    image_name="Parcel_PG_Dark"
    layout="topleft"
@@ -79,16 +62,17 @@
    top_delta="-1"
    width="18" />
   <check_box
+   follows="top|right"
    height="16"
    label=""
    layout="topleft"
-   left_pad="10"
+   left_pad="5"
    name="search_mature_check"
    top_delta="1"
    value="1"
    width="16" />
   <icon
-   follows="top|left"
+   follows="top|right"
    height="16"
    image_name="Parcel_M_Dark"
    layout="topleft"
@@ -97,90 +81,171 @@
    top_delta="-1"
    width="18" />
   <check_box
+   follows="top|right"
    height="16"
    label=""
    layout="topleft"
-   left_pad="10"
+   left_pad="5"
    name="search_adult_check"
    top_delta="1"
    value="1"
    width="16" />
   <icon
-   follows="top|left"
+   follows="top|right"
    height="16"
    image_name="Parcel_R_Dark"
    layout="topleft"
    left_pad="5"
    name="search_adult_icon"
    top_delta="-1"
-   width="18" />
-   
+   width="18" /> 
+  <button
+   follows="top|right"
+   height="23"
+   label="Search"
+   layout="topleft"
+   left_pad="5"
+   top_delta="-3"
+   name="search_start"
+   width="70" />
+
   <scroll_list
    bottom="-38"
    draw_heading="true" 
    follows="all"
    layout="topleft"
-   left="10"
+   left="6"
    name="search_results"
-   top="55"
-   width="300">
+   top="25"
+   width="296">
     <columns
      label="Name"
      name="name" />
     <columns
      label="Traffic"
      name="traffic"
-     width="100" />
+     width="80" />
   </scroll_list>
-  <button
-   bottom="-10"
-   enabled="false"
-   follows="bottom|left"
-   height="23"
-   image_bottom_pad="2"
-   image_overlay="Arrow_Left_Off"
-   image_overlay_alignment="left"
-   label="Previous"
-   layout="topleft"
-   left="10"
-   name="search_prev_btn"
-   width="80" />
-  <text
-   follows="bottom|left|right"
-   halign="center"
-   height="22"
-   layout="topleft"
-   left_pad="5"
-   name="search_results_label"
-   top_delta="0"
-   valign="center"
-   width="130">
-    Results 990-1000
-  </text>
-  <button
-   enabled="false"
-   follows="bottom|right"
-   height="23"
-   image_bottom_pad="2"
-   image_overlay="Arrow_Right_Off"
-   image_overlay_alignment="right"
-   label="Next"
-   layout="topleft"
-   left_pad="5"
-   name="search_next_btn"
-   top_delta="0"
-   width="80" />
-  
   
   <panel
-   bottom="-10"
+    background_visible="false"
+    follows="left|bottom|right"
+    height="25"
+    label="bottom_panel"
+    layout="topleft"
+    left="6"
+    name="bottom_panel"
+    top_pad="4" >
+    <button
+      height="25"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_overlay="Arrow_Left_Off"
+      image_overlay_alignment="left"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      label="Previous"
+      left="0"
+      left_pad="0"
+      name="search_prev_btn"
+      tool_tip="Teleport to the selected area"
+      top="0"
+      width="80" />
+    <icon  
+      follows="bottom|left|right"
+      height="25"
+      image_name="Toolbar_Middle_Off"
+      width="134"
+      left_pad="1"
+      name="spacer_icon"
+      top="0" />
+    <text
+      follows="bottom|left|right"
+      halign="center"
+      height="22"
+      layout="topleft"
+      name="search_results_label"
+      top_delta="-1"
+      valign="center"
+      width="134">
+      Results 990-1000
+    </text>
+    <button
+      enabled="false"
+      follows="bottom|right"
+      height="25"
+      image_bottom_pad="2"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_overlay="Arrow_Right_Off"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      image_overlay_alignment="right"
+      label="Next"
+      layout="topleft"
+      left_pad="1"
+      name="search_next_btn"
+      top_delta="1"
+      width="80" />
+    <icon  
+      follows="bottom|right"
+      height="25"
+      image_name="Toolbar_Middle_Off"
+      width="20"
+      left_pad="1"
+      name="spacer_icon2"
+      top="0" />
+    <button
+      follows="bottom|right"
+      height="25"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_overlay="Move_Run_Off"
+      image_overlay_alignment="left"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      label="Teleport"
+      left_pad="1"
+      name="teleport_btn"
+      tool_tip="Teleport to the selected area"
+      width="115" />
+    <icon  
+      follows="bottom|right"
+      height="25"
+      image_name="Toolbar_Middle_Off"
+      width="20"
+      left_pad="1"
+      name="derender_spacer_icon"
+      top="0" />
+    <button
+      follows="bottom|right"
+      height="25"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_overlay="Command_Map_Icon"
+      image_overlay_alignment="left"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      label="Show on Map"
+      layout="topleft"
+      left_pad="1"
+      name="map_btn"
+      tool_tip="Show the corresponding area on the World Map"
+      width="115" />
+    <icon  
+      follows="bottom|right"
+      height="25"
+      image_name="Toolbar_Right_Off"
+      width="18"
+      left_pad="1"
+      name="derender_spacer_icon"
+      top="0" />    
+  </panel>
+  <panel
+   bottom="-40"
    class="panel_parcel_info"
    filename="panel_parcel_info.xml"
-   follows="top|right"
-   layout="topleft"
-   left="320"
-   name="search_parcel"
-   top="55"
-   width="280" />
+   follows="top|right|bottom"
 
+   layout="topleft"
+   left="300"
+   name="search_parcel"
+   top="25"
+   width="300" />
 </panel>
