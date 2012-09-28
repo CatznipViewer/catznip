@@ -17,28 +17,10 @@
       Area: [AREA]m² - For sale: [PRICE]
   </string>
 
-  <layout_stack
-   animate="false"
-   follows="all"
-   height="370"
-   layout="topleft"
-   left="0"
-   name="parcel_info_stack"
-   orientation="vertical"
-   top="0"
-   width="300">
-    <layout_panel
-     auto_resize="true"
-     height="195"
-     layout="topleft"
-     left="0"
-     name="parcel_snapshot_panel"
-     width="300">
       <!-- Currently set to 4:3 -->
       <texture_picker
        enabled="false"
        fallback_image="default_land_picture.j2c"
-       follows="all"
        height="195"
        layout="topleft"
        left="10"
@@ -46,16 +28,9 @@
        show_label="false"
        top="0"
        width="280" />
-    </layout_panel>
-    <layout_panel
-     auto_resize="true"
-     height="175"
-     layout="topleft"
-     left="0"
-     name="parcel_info_panel"
-     width="300">
+
       <text
-       follows="top|left|right"
+       follows="top|left"
        font="SansSerifLarge"
        height="20"
        layout="topleft"
@@ -63,7 +38,7 @@
        name="parcel_name"
        right="-10"
        text_color="white"
-       top="0"
+       top="200"
        use_ellipses="true"
        value="Parcel name goes here" />
       <line_editor
@@ -88,7 +63,7 @@
        top_pad="2"
        width="18" />
       <text
-       follows="top|left|right"
+       follows="top|left"
        height="14"
        layout="topleft"
        left_pad="5"
@@ -98,7 +73,7 @@
        value="Region (128, 128, 20)"
        width="257" />
       <text
-       follows="top|left|right"
+       follows="top|left"
        height="15"
        layout="topleft"
        left="10"
@@ -109,7 +84,7 @@
       <text_editor
        bg_readonly_color="Transparent"
        enabled="false" 
-       follows="all"
+       follows="top|bottom"
        height="105"
        layout="topleft"
        left="10"
@@ -145,6 +120,4 @@
        top_pad="-105"
        visible="false"
        word_wrap="true" />
-    </layout_panel>
-  </layout_stack>
 </panel>
