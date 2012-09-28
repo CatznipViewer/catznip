@@ -150,6 +150,10 @@ public:
 
 	static void initClass(F32 screen_dpi, F32 x_scale, F32 y_scale, const std::string& app_dir, const std::vector<std::string>& xui_paths, bool create_gl_textures = true);
 
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+	static void setFontFiles(const std::vector<std::string>& files);
+// [/SL:KB]
+
 	// Load sans-serif, sans-serif-small, etc.
 	// Slow, requires multiple seconds to load fonts.
 	static bool loadDefaultFonts();
@@ -215,6 +219,10 @@ private:
 
 	// Registry holds all instantiated fonts.
 	static LLFontRegistry* sFontRegistry;
+
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+	static std::vector<std::string> sFontFiles;
+// [/SL:KB]
 };
 
 #endif

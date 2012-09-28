@@ -55,6 +55,9 @@ std::string LLFontGL::sAppDir;
 
 LLColor4 LLFontGL::sShadowColor(0.f, 0.f, 0.f, 1.f);
 LLFontRegistry* LLFontGL::sFontRegistry = NULL;
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+std::vector<std::string> LLFontGL::sFontFiles;
+// [/SL:KB]
 
 LLCoordGL LLFontGL::sCurOrigin;
 F32 LLFontGL::sCurDepth;
@@ -791,13 +794,27 @@ void LLFontGL::initClass(F32 screen_dpi, F32 x_scale, F32 y_scale, const std::st
 	if (!sFontRegistry)
 	{
 		sFontRegistry = new LLFontRegistry(xui_paths, create_gl_textures);
-		sFontRegistry->parseFontInfo("fonts.xml");
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+		for (auto itFontFile = sFontFiles.begin(); itFontFile != sFontFiles.end(); ++itFontFile)
+		{
+			sFontRegistry->parseFontInfo(*itFontFile);
+		}
+// [/SL:KB]
+//		sFontRegistry->parseFontInfo("fonts.xml");
 	}
 	else
 	{
 		sFontRegistry->reset();
 	}
 }
+
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+// static
+void LLFontGL::setFontFiles(const std::vector<std::string>& files)
+{
+	sFontFiles = files;
+}
+// [/SL:KB]
 
 // Force standard fonts to get generated up front.
 // This is primarily for error detection purposes.
