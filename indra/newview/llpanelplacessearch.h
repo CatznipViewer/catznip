@@ -57,8 +57,11 @@ protected:
 	void onResultSelect();
 	void onSearchBtn();
 	void onSearchResult(const LLUUID& idQuery, U32 nStatus, const LLSearchDirectory::places_results_vec_t& lResults);
+	void onShowOnMapBtn();
+	void onTeleportBtn();
 	void onToggleMaturity();
 	void performSearch();
+	void updateButtons();
 
 	/*
 	 * Member variables

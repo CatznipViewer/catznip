@@ -15,8 +15,11 @@
  */
 #include "llviewerprecompiledheaders.h"
 
+#include "llagent.h"
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
+#include "llfloaterreg.h"
+#include "llfloaterworldmap.h"
 #include "lllineeditor.h"
 #include "llnotificationsutil.h"
 #include "llpanelparcelinfo.h"
@@ -104,12 +107,25 @@ BOOL LLPanelPlacesSearch::postBuild()
 
 	m_pParcelInfo = findChild<LLPanelParcelInfo>("search_parcel");
 
+	LLButton* pTeleportBtn = findChild<LLButton>("teleport_btn");
+	if (pTeleportBtn)
+	{
+		pTeleportBtn->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onTeleportBtn, this));
+	}
+
+	LLButton* pShowOnMapBtn = findChild<LLButton>("map_btn");
+	if (pShowOnMapBtn)
+	{
+		pShowOnMapBtn->setCommitCallback(boost::bind(&LLPanelPlacesSearch::onShowOnMapBtn, this));
+	}
+
 	return TRUE;
 }
 
 void LLPanelPlacesSearch::onResultSelect()
 {
 	m_pParcelInfo->setParcelFromId(m_pResultsList->getSelectedValue().asUUID());
+	updateButtons();
 }
 
 void LLPanelPlacesSearch::onSearchBtn()
@@ -176,6 +192,7 @@ void LLPanelPlacesSearch::performSearch()
 	m_pResultsPrevious->setEnabled(false);
 	m_pResultsNext->setEnabled(false);
 	m_pParcelInfo->setParcelFromId(LLUUID::null);
+	updateButtons();
 
 	if (!m_strCurQuery.empty())
 	{
@@ -247,6 +264,25 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 	m_pResultsNext->setEnabled(m_nCurResults > LLSearchDirectory::NUM_RESULTS_PAGE_PLACES);
 }
 
+void LLPanelPlacesSearch::onShowOnMapBtn()
+{
+	LLVector3d posGlobal = getCurrentParcelPos();
+	if (!posGlobal.isExactlyZero())
+	{
+		LLFloaterWorldMap::getInstance()->trackLocation(posGlobal);
+		LLFloaterReg::showInstance("world_map", "center");
+	}
+}
+
+void LLPanelPlacesSearch::onTeleportBtn()
+{
+	LLVector3d posGlobal = getCurrentParcelPos();
+	if (!posGlobal.isExactlyZero())
+	{
+		gAgent.teleportViaLocation(posGlobal);
+	}
+}
+
 void LLPanelPlacesSearch::onToggleMaturity()
 {
 	// Make sure at least one of the checkboxes is always checked
@@ -269,6 +305,21 @@ const LLVector3d& LLPanelPlacesSearch::getCurrentParcelPos() const
 boost::signals2::connection LLPanelPlacesSearch::setSelectCallback(const commit_signal_t::slot_type& cb)
 {
 	return m_pResultsList->setCommitCallback(cb);
+}
+
+void LLPanelPlacesSearch::updateButtons()
+{
+	LLButton* pTeleportBtn = findChild<LLButton>("teleport_btn");
+	if (pTeleportBtn)
+	{
+		pTeleportBtn->setEnabled(hasCurrentParcel());
+	}
+
+	LLButton* pShowOnMapBtn = findChild<LLButton>("map_btn");
+	if (pShowOnMapBtn)
+	{
+		pShowOnMapBtn->setEnabled(hasCurrentParcel());
+	}
 }
 
 // ============================================================================
