@@ -111,7 +111,7 @@ public:
 		 * Space between image_overlay and label
 		 */
 		Optional<S32>			imgoverlay_label_space;
-// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Added: Catznip-2.5.0b
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.5)
 		Optional<bool>			imgoverlay_label_align;
 // [/SL:KB]
 
@@ -367,7 +367,7 @@ protected:
 	 * Space between image_overlay and label
 	 */
 	S32							mImgOverlayLabelSpace;
-// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.6.0b) | Added: Catznip-2.5.0b
+// [SL:KB] - Patch: Control-Button | Checked: 2011-06-05 (Catznip-2.5)
 	bool						mImgOverlayLabelAlign;
 // [/SL:KB]
 
