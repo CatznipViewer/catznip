@@ -18,6 +18,7 @@
 
 #include "llmultifloater.h"
 
+class LLFloaterSearch;
 class LLTabContainer;
 
 // ============================================================================
@@ -41,8 +42,8 @@ public:
 	 * Member variables
 	 */
 protected:
-	LLFloater*	m_pWebSearch;
-	LLFloater*	m_pPlacesSearch;
+	LLFloaterSearch* m_pWebSearch;
+	LLFloater*       m_pPlacesSearch;
 };
 
 // ============================================================================
