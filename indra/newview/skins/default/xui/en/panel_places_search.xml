@@ -116,7 +116,7 @@
    layout="topleft"
    left="6"
    name="search_results"
-   top="25"
+   top="30"
    width="296">
     <columns
      label="Name"
@@ -126,6 +126,16 @@
      name="traffic"
      width="80" />
   </scroll_list>
+  <panel
+   bottom="-38"
+   class="panel_parcel_info"
+   filename="panel_parcel_info.xml"
+   follows="top|right|bottom"
+   layout="topleft"
+   left="300"
+   name="search_parcel"
+   top="30"
+   width="300" />
   
   <panel
     background_visible="false"
@@ -134,9 +144,11 @@
     label="bottom_panel"
     layout="topleft"
     left="6"
+    right="-6"
     name="bottom_panel"
-    top_pad="4" >
+    top_pad="4">
     <button
+      enabled="false"
       height="25"
       image_hover_unselected="Toolbar_Middle_Over"
       image_overlay="Arrow_Left_Off"
@@ -194,13 +206,16 @@
       name="spacer_icon2"
       top="0" />
     <button
+      enabled="false"
       follows="bottom|right"
       height="25"
       image_hover_unselected="Toolbar_Middle_Over"
       image_overlay="Move_Run_Off"
-      image_overlay_alignment="left"
+      image_overlay_alignment="center"
       image_selected="Toolbar_Middle_Selected"
       image_unselected="Toolbar_Middle_Off"
+      imgoverlay_label_align="true"
+      imgoverlay_label_space="5"
       label="Teleport"
       left_pad="1"
       name="teleport_btn"
@@ -215,13 +230,16 @@
       name="derender_spacer_icon"
       top="0" />
     <button
+      enabled="false"
       follows="bottom|right"
       height="25"
       image_hover_unselected="Toolbar_Middle_Over"
       image_overlay="Command_Map_Icon"
-      image_overlay_alignment="left"
+      image_overlay_alignment="center"
       image_selected="Toolbar_Middle_Selected"
       image_unselected="Toolbar_Middle_Off"
+      imgoverlay_label_align="true"
+      imgoverlay_label_space="5"
       label="Show on Map"
       layout="topleft"
       left_pad="1"
@@ -237,15 +255,4 @@
       name="derender_spacer_icon"
       top="0" />    
   </panel>
-  <panel
-   bottom="-40"
-   class="panel_parcel_info"
-   filename="panel_parcel_info.xml"
-   follows="top|right|bottom"
-
-   layout="topleft"
-   left="300"
-   name="search_parcel"
-   top="25"
-   width="300" />
 </panel>
