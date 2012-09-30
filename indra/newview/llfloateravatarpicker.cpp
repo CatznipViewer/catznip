@@ -50,6 +50,9 @@
 #include "lltabcontainer.h"
 #include "lluictrlfactory.h"
 #include "message.h"
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-09-30 (Catznip-3.3)
+#include <boost/regex.hpp>
+// [/SL:KB]
 
 //#include "llsdserialize.h"
 
@@ -417,6 +420,19 @@ void LLFloaterAvatarPicker::find()
 	sAvatarNameMap.clear();
 
 	std::string text = getChild<LLUICtrl>("Edit")->getValue().asString();
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-09-30 (Catznip-3.3)
+	// Allow copy/pasting of a full name
+	text = LLCacheName::buildLegacyName(text);
+
+	// Allow copy/pasting of a (legacy) username
+	boost::regex complete_name_regex("^[a-z0-9]+\\.[a-z]+$");
+	boost::match_results<std::string::const_iterator> name_results;
+	if (boost::regex_match(text, complete_name_regex))
+	{
+		std::replace(text.begin(), text.end(), '.', ' ');
+	}
+// [/SL:KB]
 
 	mQueryID.generate();
 
