@@ -79,6 +79,9 @@ public:
 	LLUUID findObjectId(const LLUUID& notification_id);
 
 	LLUUID findNotificationId(const LLUUID& object_id);
+// [SL:KB] - Patch: Notification-ScriptDialog | Checked: 2012-09-30 (Catznip-3.3)
+	bool findNotificationIds(const LLUUID& object_id, EObjectType object_type, uuid_vec_t& notif_ids);
+// [/SL:KB]
 
 	static EObjectType getObjectType(const LLUUID& notification_id);
 

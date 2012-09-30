@@ -39,4 +39,15 @@
          function="ScriptChiclet.Action"
          parameter="end" />
     </menu_item_call>
+    <menu_item_call
+     label="Close All"
+     layout="topleft"
+     name="Close All">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="end_all" />
+        <menu_item_call.on_visible
+         function="ScriptChiclet.EnableItem"
+         parameter="end_all" />
+    </menu_item_call>
 </menu>

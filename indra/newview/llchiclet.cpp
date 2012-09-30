@@ -1943,6 +1943,12 @@ bool LLScriptChiclet::enableMenuItem(const LLSD& user_data, const LLUUID& idSess
 	{
 		return LLScriptFloaterManager::instance().getObjectOwner(idSession).notNull();
 	}
+	else if ("end_all" == action)
+	{
+		uuid_vec_t idNotifs;
+		LLScriptFloaterManager* pFloaterMgr = LLScriptFloaterManager::getInstance();
+		return (pFloaterMgr->findNotificationIds(pFloaterMgr->findObjectId(idSession), LLScriptFloaterManager::OBJ_SCRIPT, idNotifs)) && (idNotifs.size() > 1);
+	}
 
 	return true;
 }
@@ -1982,6 +1988,15 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 		}
 
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("end_all" == action)
+	{
+		uuid_vec_t idNotifs;
+		if (LLScriptFloaterManager::instance().findNotificationIds(LLScriptFloaterManager::instance().findObjectId(getSessionId()), LLScriptFloaterManager::OBJ_SCRIPT, idNotifs))
+		{
+			for (auto itNotif = idNotifs.cbegin(); itNotif != idNotifs.end(); ++itNotif)
+				LLScriptFloaterManager::instance().removeNotification(*itNotif);
+		}
 	}
 // [/SL:KB]
 }

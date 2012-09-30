@@ -469,6 +469,23 @@ LLUUID LLScriptFloaterManager::findNotificationId(const LLUUID& object_id)
 	return LLUUID::null;
 }
 
+// [SL:KB] - Patch: Notification-ScriptDialog | Checked: 2012-09-30 (Catznip-3.3)
+bool LLScriptFloaterManager::findNotificationIds(const LLUUID& object_id, EObjectType object_type, uuid_vec_t& notif_ids)
+{
+	notif_ids.clear();
+	if (object_id.notNull())
+	{
+		for (auto itNotif = mNotifications.cbegin(); mNotifications.cend() != itNotif; ++itNotif)
+		{
+			if ( (object_id == itNotif->second) && (object_type == getObjectType(itNotif->first)) )
+				notif_ids.push_back(itNotif->first);
+		}
+		return !notif_ids.empty();
+	}
+	return false;
+}
+// [/SL:KB]
+
 // static
 LLScriptFloaterManager::EObjectType LLScriptFloaterManager::getObjectType(const LLUUID& notification_id)
 {
