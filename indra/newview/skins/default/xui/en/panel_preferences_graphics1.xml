@@ -326,7 +326,6 @@
 		
 		<check_box
 		 control_name="RenderGlow"
-		 disabled_control="RenderDeferred"
 		 height="16"
 		 initial_value="true"
 		 label="Glow / Bloom Effect"
