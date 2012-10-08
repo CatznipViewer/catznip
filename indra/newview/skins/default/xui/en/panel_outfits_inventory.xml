@@ -39,7 +39,7 @@
            background_visible="false"
            help_topic="my_outfits_tab"
            follows="all"
-           label="MY OUTFITS"
+           label="OUTFITS"
            layout="topleft"
            width="324" />
          <panel

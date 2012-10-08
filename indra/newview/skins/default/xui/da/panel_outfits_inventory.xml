@@ -7,7 +7,7 @@
 		Bær valgte genstande
 	</panel.string>
 	<tab_container name="appearance_tabs">
-		<panel label="MINE SÆT" name="outfitslist_tab"/>
+		<panel label="SÆT" name="outfitslist_tab"/>
 		<panel label="HAR PÅ" name="cof_tab"/>
 	</tab_container>
 </panel>

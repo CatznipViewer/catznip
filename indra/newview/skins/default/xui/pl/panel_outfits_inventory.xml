@@ -7,7 +7,7 @@
 		Załóż wybrane obiekty
 	</panel.string>
 	<tab_container name="appearance_tabs">
-		<panel label="MOJE UBRANIA" name="outfitslist_tab"/>
+		<panel label="UBRANIA" name="outfitslist_tab"/>
 		<panel label="ZAŁOŻONE" name="cof_tab"/>
 	</tab_container>
 </panel>
