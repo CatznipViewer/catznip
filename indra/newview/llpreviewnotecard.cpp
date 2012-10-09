@@ -79,6 +79,9 @@ LLPreviewNotecard::~LLPreviewNotecard()
 BOOL LLPreviewNotecard::postBuild()
 {
 	LLViewerTextEditor *ed = getChild<LLViewerTextEditor>("Notecard Editor");
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	ed->setFont(LLFontGL::getFontEditor());
+// [/SL:KB]
 	ed->setNotecardInfo(mItemUUID, mObjectID, getKey());
 	ed->makePristine();
 

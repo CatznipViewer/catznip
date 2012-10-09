@@ -55,8 +55,9 @@ std::string LLFontGL::sAppDir;
 
 LLColor4 LLFontGL::sShadowColor(0.f, 0.f, 0.f, 1.f);
 LLFontRegistry* LLFontGL::sFontRegistry = NULL;
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
 std::vector<std::string> LLFontGL::sFontFiles;
+bool LLFontGL::sUseEditorFont = false;
 // [/SL:KB]
 
 LLCoordGL LLFontGL::sCurOrigin;
@@ -794,7 +795,7 @@ void LLFontGL::initClass(F32 screen_dpi, F32 x_scale, F32 y_scale, const std::st
 	if (!sFontRegistry)
 	{
 		sFontRegistry = new LLFontRegistry(xui_paths, create_gl_textures);
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
 		for (auto itFontFile = sFontFiles.begin(); itFontFile != sFontFiles.end(); ++itFontFile)
 		{
 			sFontRegistry->parseFontInfo(*itFontFile);
@@ -808,7 +809,13 @@ void LLFontGL::initClass(F32 screen_dpi, F32 x_scale, F32 y_scale, const std::st
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-09-27 (Catznip-3.3)
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
+// static
+void LLFontGL::dumpFonts()
+{
+	sFontRegistry->dump();
+}
+
 // static
 void LLFontGL::setFontFiles(const std::vector<std::string>& files)
 {
@@ -972,6 +979,35 @@ LLFontGL::VAlign LLFontGL::vAlignFromName(const std::string& name)
 	//else leave baseline
 	return gl_vfont_align;
 }
+
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+//static
+LLFontGL* LLFontGL::getFontEditorSmall()
+{
+	static LLFontGL* fontp = (sUseEditorFont) ? getFont(LLFontDescriptor("EditorFont", "Small", 0)) : getFontSansSerifSmall();
+	return fontp;
+}
+
+//static
+LLFontGL* LLFontGL::getFontEditor()
+{
+	static LLFontGL* fontp = (sUseEditorFont) ? getFont(LLFontDescriptor("EditorFont", "Medium", 0)) : getFontSansSerif();
+	return fontp;
+}
+
+//static
+LLFontGL* LLFontGL::getFontEditorLarge()
+{
+	static LLFontGL* fontp = (sUseEditorFont) ? getFont(LLFontDescriptor("EditorFont", "Large", 0)) : getFontSansSerifBig();
+	return fontp;
+}
+
+// static
+void LLFontGL::setUseEditorFont(bool use_editor_font)
+{
+	sUseEditorFont = use_editor_font;
+}
+// [/SL:KB]
 
 //static
 LLFontGL* LLFontGL::getFontMonospace()
