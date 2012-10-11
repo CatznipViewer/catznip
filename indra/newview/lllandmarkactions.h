@@ -122,6 +122,10 @@ public:
      */
     static void copySLURLtoClipboard(const LLUUID& landmarkInventoryItemID);
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+    static void showLandmarkInfo(const LLUUID& idItem);
+// [/SL:KB]
+
 private:
     LLLandmarkActions();
     LLLandmarkActions(const LLLandmarkActions&);
