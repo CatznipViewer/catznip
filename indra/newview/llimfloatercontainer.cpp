@@ -27,6 +27,11 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+#include "llchiclet.h"
+#include "llchicletbar.h"
+#include "llimfloater.h"
+// [/SL:KB]
 #include "llimfloatercontainer.h"
 #include "llfloaterreg.h"
 #include "llimview.h"
@@ -34,6 +39,9 @@
 #include "llgroupiconctrl.h"
 #include "llagent.h"
 #include "lltransientfloatermgr.h"
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //
 // LLIMFloaterContainer
@@ -56,8 +64,47 @@ BOOL LLIMFloaterContainer::postBuild()
 	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLIMFloaterContainer::onNewMessageReceived, this, _1));
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 	// mTabContainer will be initialized in LLMultiFloater::addChild()
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("RearrangeIMTabs"))
+	{
+		mTabContainer->setAllowRearrange(true);
+		mTabContainer->setRearrangeCallback(boost::bind(&LLIMFloaterContainer::onIMTabRearrange, this, _1, _2));
+	}
+// [/SL:KB]
 	return TRUE;
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-23 (Catznip-3.3)
+void LLIMFloaterContainer::onIMTabRearrange(S32 tab_index, LLPanel* tab_panel)
+{
+	LLIMFloater* pFloater = dynamic_cast<LLIMFloater*>(tab_panel);
+	if (!pFloater)
+		return;
+
+	LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+	LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(pFloater->getKey());
+	if (!pChiclet)
+		return;
+
+	if ( (tab_index > mTabContainer->getNumLockedTabs()) && (tab_index < mTabContainer->getTabCount() - 1) )
+	{
+		// Look for the first IM session to the left of this one
+		while (--tab_index >= mTabContainer->getNumLockedTabs())
+		{
+			LLIMFloater* pPrevFloater = dynamic_cast<LLIMFloater*>(mTabContainer->getPanelByIndex(tab_index));
+			if (pPrevFloater)
+			{
+				pChicletPanel->setChicletIndex(pChiclet, LLChicletPanel::RIGHT_OF_SESSION, pPrevFloater->getKey().asUUID());
+				break;
+			}
+		}
+	}
+	else
+	{
+		pChicletPanel->setChicletIndex(pChiclet, (tab_index <= mTabContainer->getNumLockedTabs()) ? LLChicletPanel::START : LLChicletPanel::END);
+	}
+}
+// [/SL:KB]
 
 void LLIMFloaterContainer::onOpen(const LLSD& key)
 {
@@ -86,6 +133,37 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 		openFloater(floaterp->getKey());
 		return;
 	}
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
+	// If we're redocking a torn off IM floater, return it back to its previous place
+	if ( (floaterp->isTornOff()) && (LLTabContainer::END == insertion_point) )
+	{
+		LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+
+		LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(floaterp->getKey());
+		S32 idxChiclet = pChicletPanel->getChicletIndex(pChiclet);
+		if ( (idxChiclet > 0) && (idxChiclet < pChicletPanel->getChicletCount() - 1) )
+		{
+			// Look for the first IM session to the left of this one
+			while (--idxChiclet >= 0)
+			{
+				if (pChiclet = dynamic_cast<LLIMChiclet*>(pChicletPanel->getChiclet(idxChiclet)))
+				{
+					const LLIMFloater* pFloater = LLIMFloater::findInstance(pChiclet->getSessionId());
+					if (pFloater)
+					{
+						insertion_point = (LLTabContainer::eInsertionPoint)(mTabContainer->getIndexForPanel(pFloater) + 1);
+						break;
+					}
+				}
+			}
+		}
+		else 
+		{
+			insertion_point = (0 == idxChiclet) ? LLTabContainer::START : LLTabContainer::END;
+		}
+	}
+// [/SL:KB]
 
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
