@@ -46,6 +46,8 @@
          function="Object.SitOrStand" />
         <menu_item_call.on_enable
          function="Object.EnableSit" />
+        <menu_item_call.on_visible
+         function="Object.VisibleSit" />
    </menu_item_call>
    <menu_item_call
      enabled="false"
@@ -55,6 +57,8 @@
          function="Object.SitOrStand" />
         <menu_item_call.on_enable
          function="Object.EnableStandUp" />
+        <menu_item_call.on_visible
+         function="Object.VisibleStandUp" />
    </menu_item_call>
    <menu_item_call
        label="Object Profile"

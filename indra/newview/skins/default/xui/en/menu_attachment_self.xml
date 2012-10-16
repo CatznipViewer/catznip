@@ -55,6 +55,8 @@
          parameter="" />
         <menu_item_call.on_enable
          function="Self.EnableSitDown" />
+        <menu_item_call.on_visible
+         function="Self.VisibleSitDown" />
     </menu_item_call>
 
   <menu_item_call
@@ -66,6 +68,8 @@ name="Stand Up">
      parameter="" />
     <menu_item_call.on_enable
      function="Self.EnableStandUp" />
+    <menu_item_call.on_visible
+     function="Self.VisibleStandUp" />
   </menu_item_call>
   <menu_item_call
   label="My Appearance"
