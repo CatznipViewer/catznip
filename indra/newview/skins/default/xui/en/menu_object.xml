@@ -39,21 +39,21 @@
          function="Object.EnableOpen" />
    </menu_item_call>
    <menu_item_call
-     enabled="true"
+     enabled="false"
      label="Sit Here"
      name="Object Sit">
         <menu_item_call.on_click
          function="Object.SitOrStand" />
-        <menu_item_call.on_visible
+        <menu_item_call.on_enable
          function="Object.EnableSit" />
    </menu_item_call>
    <menu_item_call
-     enabled="true"
+     enabled="false"
      label="Stand Up"
      name="Object Stand Up">
         <menu_item_call.on_click
          function="Object.SitOrStand" />
-        <menu_item_call.on_visible
+        <menu_item_call.on_enable
          function="Object.EnableStandUp" />
    </menu_item_call>
    <menu_item_call
