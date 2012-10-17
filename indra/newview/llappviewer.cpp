@@ -2666,17 +2666,39 @@ bool LLAppViewer::initConfiguration()
 	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
 	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
 	{
-		const char* pstrSettings[] =
-			{ 
-				"MeshMaxConcurrentRequests"
-			};
-		for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+		// setings.xml
 		{
-			LLControlVariable* pSetting = gSavedSettings.getControl(pstrSettings[idxSetting]);
-			if (pSetting)
+			const char* pstrSettings[] =
+				{ 
+					"MeshMaxConcurrentRequests"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
 			{
-				pSetting->resetToDefault();
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
 			}
+		}
+
+		// settings_crash_behavior.xml
+		{
+			const char* pstrDbgSettings[] =
+				{ 
+					"CrashSubmitBehavior",
+					"CrashSubmitName",
+					"CrashSubmitSettings"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrDbgSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrDbgSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
+			}
+			gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
 		}
 	}
 // [/SL:KB]
