@@ -71,6 +71,19 @@ BOOL LLPanelParcelInfo::postBuild()
 	return TRUE;
 }
 
+void LLPanelParcelInfo::setParcelFromPos(const LLVector3d posGlobal)
+{
+	requestRemoteParcel(posGlobal);
+}
+
+void LLPanelParcelInfo::setParcelFromId(const LLUUID& idParcel)
+{
+	m_posGlobalRequest.setZero();
+	m_posRegionRequest.setZero();
+
+	setParcelID(idParcel);
+}
+
 void LLPanelParcelInfo::setParcelID(const LLUUID& idParcel)
 {
 	// Sanity check - don't do anything if we're already waiting for it or already have it
@@ -115,7 +128,26 @@ void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 	clearPendingRequest();
 
 	m_CurParcelData = parcelData;
-	m_posCurGlobal.setVec(m_CurParcelData.global_x, m_CurParcelData.global_y, m_CurParcelData.global_z);
+
+	if (!m_posGlobalRequest.isExactlyZero())
+	{
+		m_posCurGlobal = m_posGlobalRequest;
+	}
+	else
+	{
+		if (!m_posRegionRequest.isExactlyZero())
+		{
+			m_posCurGlobal.setVec(llfloor(m_CurParcelData.global_x / 256) * 256 + m_posRegionRequest.mV[VX], 
+								  llfloor(m_CurParcelData.global_y / 256) * 256 + m_posRegionRequest.mV[VY],
+								  m_posRegionRequest.mV[VZ]);
+		}
+		else
+		{
+			m_posCurGlobal.setVec(m_CurParcelData.global_x, m_CurParcelData.global_y, m_CurParcelData.global_z);
+		}
+	}
+	m_posGlobalRequest.setZero();
+	m_posRegionRequest.setZero();
 						  
 	updateFromParcelData();
 }
@@ -177,6 +209,9 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const L
 			sdBody["region_handle"] = ll_sd_from_U64(to_region_handle(posGlobal));
 		sdBody["location"] = ll_sd_from_vector3(posRegion);
 
+		m_posGlobalRequest = posGlobal;
+		m_posRegionRequest = posRegion;
+
 		requestRemoteParcel(sdBody);
 	}
 }
@@ -188,6 +223,9 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLUUID& idRegion, const LLVect
 		LLSD sdBody;
 		sdBody["region_id"] = idRegion;
 		sdBody["location"] = ll_sd_from_vector3(posRegion);
+
+		m_posGlobalRequest.setZero();
+		m_posRegionRequest = posRegion;
 
 		requestRemoteParcel(sdBody);
 	}
