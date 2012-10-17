@@ -1348,8 +1348,9 @@ bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t
 
 bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
 {
+	LLViewerInventoryCategory* pCat = gInventory.getCategory(folder_id);
 	LLInventoryModel::item_array_t removable_items;
-	return (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
+	return (pCat) && (LLFolderType::FT_NONE == pCat->getPreferredType()) && (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
 }
 
 void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
