@@ -2,6 +2,8 @@
 
 <floater
   positioning="cascading"
+  can_close="true"
+  can_minimize="true"
   can_resize="true"
   height="570"
   layout="topleft"
@@ -11,10 +13,11 @@
   single_instance="true"
   reuse_instance="true"
   title="APPEARANCE"
-  min_height="440"
+  min_height="430"
   min_width="330"
   width="330">
     <panel
+      follows="all"
       height="562"
       top="4"
       class="sidepanel_appearance"
