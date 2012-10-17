@@ -2291,8 +2291,21 @@ bool LLAppViewer::initConfiguration()
 #endif
 
 #ifndef	LL_RELEASE_FOR_DOWNLOAD
-	gSavedSettings.setBOOL("QAMode", TRUE );
-	gSavedSettings.setS32("WatchdogEnabled", 0);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2012-10-18 (Catznip-3.3)
+	LLControlVariable* pCtrl = gSavedSettings.getControl("QAMode");
+	if (pCtrl)
+	{
+		pCtrl->setValue(true, false);
+	}
+
+	pCtrl = gSavedSettings.getControl("WatchdogEnabled");
+	if (pCtrl)
+	{
+		pCtrl->setValue(0, false);
+	}
+// [/SL:KB]
+//	gSavedSettings.setBOOL("QAMode", TRUE );
+//	gSavedSettings.setS32("WatchdogEnabled", 0);
 #endif
 	
 	// These are warnings that appear on the first experience of that condition.
