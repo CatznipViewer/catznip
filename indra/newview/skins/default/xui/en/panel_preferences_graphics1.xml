@@ -218,6 +218,21 @@
 			<check_box.commit_callback
 		     function="Pref.VertexShaderEnable" />
 		</check_box>
+		
+		<check_box
+		 control_name="RenderGlow"
+		 disabled_control="RenderDeferred"
+		 height="16"
+		 initial_value="true"
+		 label="Glow / Bloom Effect"
+		 layout="topleft"
+		 left_delta="0"
+		 name="UseGlow"
+		 tool_tip="Render object bloom / glow"
+		 top_pad="1"
+		 width="120">
+		</check_box>
+		
 		<check_box
 		 control_name="WindLightUseAtmosShaders"
 		 height="16"
@@ -274,22 +289,22 @@
         <text
          type="string"
          length="1"
-         top_pad="8"
+         top_pad="4"
          follows="top|left"
-         height="23"
+         height="12"
          width="110"
          word_wrap="true"
          layout="topleft"
-         left="10"
+         left="5"
          name="shadows_label">
          	Shadows:
         </text>
         <combo_box
          control_name="RenderShadowDetail"
-         height="23"
+         height="22"
          layout="topleft"
          left="10"
-         top_pad="0" 
+         top_pad="3" 
          name="ShadowDetail"
          width="150">
            <combo_box.item
@@ -309,7 +324,7 @@
         <text
          type="string"
          length="1"
-         top_pad="8"
+         top_pad="4"
          follows="top|left"
          height="12"
          width="110"
@@ -321,9 +336,9 @@
         </text>
         <combo_box
          control_name="RenderReflectionDetail"
-         height="18"
+         height="22"
          layout="topleft"
-         left_delta="10"
+         left="10"
          top_pad ="3"
          name="Reflections"
          width="150">
@@ -358,10 +373,10 @@
         label="  Avatar Physics:"
         label_width="85"
         layout="topleft"
-        left_delta="-16"
+        left="5"
         name="AvatarPhysicsDetail"
         show_text="false"
-        top_pad="12"
+        top_pad="8"
         width="160">
            <slider.commit_callback
             function="Pref.UpdateSliderText"
@@ -385,14 +400,14 @@
 		 decimal_digits="0"
 		 follows="left|top"
 		 height="16"
-		 increment="8"
+		 increment="32"
 		 initial_value="160"
 		 label="Draw distance:"
 		 label_width="185"
 		 layout="topleft"
 		 left="200"
 		 max_val="512"
-		 min_val="64"
+		 min_val="32"
 		 name="DrawDistance"
 		 top="3"
 		 width="296" />
