@@ -44,7 +44,7 @@ public:
 	virtual void cancel();	// Cancel the changed values.
 	virtual void draw();
 	static  void setSNDefaults();
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 	static  void setXBDefaults();
 // [/SL:TD]
 
@@ -57,7 +57,7 @@ private:
 	
 	static void onCommitJoystickEnabled(LLUICtrl*, void*);
 	static void onClickRestoreSNDefaults(void*);
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 	static void onClickRestoreXBDefaults(void*);
 // [/SL:TD]
 	static void onClickCancel(void*);

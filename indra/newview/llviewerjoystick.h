@@ -68,7 +68,7 @@ public:
 	void setOverrideCamera(bool val);
 	bool toggleFlycam();
 	void setSNDefaults();
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 	void setXBDefaults();
 // [/SL:TD]
 	std::string getDescription();

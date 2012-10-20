@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Chat écrit" name="chat">
 	<text name="font_size">
-		Taille de la police :
+		Taille de la police
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="Petite" name="radio" value="0"/>

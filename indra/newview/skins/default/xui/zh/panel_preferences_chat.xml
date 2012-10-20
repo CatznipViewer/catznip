@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="文字聊天" name="chat">
 	<text name="font_size">
-		字型尺寸：
+		字型尺寸
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="小" name="radio" value="0"/>

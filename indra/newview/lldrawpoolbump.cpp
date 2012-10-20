@@ -1555,7 +1555,7 @@ void LLDrawPoolInvisible::render(S32 pass)
 { //render invisiprims
 	LLFastTimer t(FTM_RENDER_INVISIBLE);
   
-// [SL:KB] - Patch: Settings-Misc | Checked: 2012-09-05 (Catznip-3.3)
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
 	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisible");
 	if (!s_fRenderInvisible)
 	{
@@ -1603,7 +1603,7 @@ void LLDrawPoolInvisible::renderDeferred( S32 pass )
 //#if 0 
 	LLFastTimer t(FTM_RENDER_INVISIBLE);
   
-// [SL:KB] - Patch: Settings-Misc | Checked: 2012-09-05 (Catznip-3.3)
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
 	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisibleDeferred");
 	if (!s_fRenderInvisible)
 	{

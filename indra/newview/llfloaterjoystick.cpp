@@ -99,7 +99,7 @@ BOOL LLFloaterJoystick::postBuild()
 	childSetCommitCallback("JoystickFlycamEnabled",onCommitJoystickEnabled,this);
 
 	childSetAction("SpaceNavigatorDefaults", onClickRestoreSNDefaults, this);
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 	childSetAction("Xbox360Defaults", onClickRestoreXBDefaults, this);
 // [/SL:TD]
 	childSetAction("cancel_btn", onClickCancel, this);
@@ -284,7 +284,8 @@ void LLFloaterJoystick::onClickRestoreSNDefaults(void *joy_panel)
 {
 	setSNDefaults();
 }
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 void LLFloaterJoystick::onClickRestoreXBDefaults(void *joy_panel)
 {
 	setXBDefaults();
@@ -323,7 +324,7 @@ void LLFloaterJoystick::setSNDefaults()
 	LLViewerJoystick::getInstance()->setSNDefaults();
 }
 
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 void LLFloaterJoystick::setXBDefaults()
 {
 	LLViewerJoystick::getInstance()->setXBDefaults();

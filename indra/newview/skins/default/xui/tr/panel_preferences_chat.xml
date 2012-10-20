@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Metin Sohbeti" name="chat">
 	<text name="font_size">
-		Font büyüklüğü:
+		Font büyüklüğü
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="Küçük" name="radio" value="0"/>

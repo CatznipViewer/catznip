@@ -705,9 +705,10 @@ bool LLAppViewer::init()
 
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
 	// Don't set the snapshot directory if it doesn't exist; the user will be asked for a location the first time they try to save one
-	if (gDirUtilp->fileExists(gSavedSettings.getString("SnapshotLocalPath")))
+	const std::string strSnapshotPath = gSavedSettings.getString("SnapshotLocalPath");
+	if (gDirUtilp->fileExists(strSnapshotPath))
 	{
-		gDirUtilp->setSnapshotDir(gSavedSettings.getString("SnapshotLocalPath"));
+		gDirUtilp->setSnapshotDir(strSnapshotPath);
 	}
 // [/SL:KB]
 
@@ -2291,7 +2292,7 @@ bool LLAppViewer::initConfiguration()
 #endif
 
 #ifndef	LL_RELEASE_FOR_DOWNLOAD
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2012-10-18 (Catznip-3.3)
+// [SL:KB] - Patch: Settings-Misc | Checked: 2012-10-18 (Catznip-3.3)
 	LLControlVariable* pCtrl = gSavedSettings.getControl("QAMode");
 	if (pCtrl)
 	{

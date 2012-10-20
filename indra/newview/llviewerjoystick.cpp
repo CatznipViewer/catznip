@@ -1160,7 +1160,7 @@ void LLViewerJoystick::setSNDefaults()
 	gSavedSettings.setF32("FlycamFeathering", 5.f);
 }
 
-// [SL:TD] - Patch: Settings-Misc | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
 void LLViewerJoystick::setXBDefaults()
 { 
 	llinfos << "restoring Xbox 360 defaults..." << llendl;
@@ -1193,16 +1193,15 @@ void LLViewerJoystick::setXBDefaults()
 	gSavedSettings.setF32("AvatarAxisScale0",    .34f);
 	gSavedSettings.setF32("BuildAxisScale0",    1.0f);
 	gSavedSettings.setF32("FlycamAxisScale0",   4.0f);
+
 	// Pitch Scale
 	gSavedSettings.setF32("AvatarAxisScale4",  -1.5f);
 	gSavedSettings.setF32("BuildAxisScale4",    1.0f);
 	gSavedSettings.setF32("FlycamAxisScale4",  -1.5f);
-	
 	// Yaw Scale
 	gSavedSettings.setF32("AvatarAxisScale5",   5.f);
 	gSavedSettings.setF32("BuildAxisScale5",    1.f);
 	gSavedSettings.setF32("FlycamAxisScale5",   3.5f);
-	
 	//Roll Scale
 	gSavedSettings.setF32("BuildAxisScale3",    1.f);
 	gSavedSettings.setF32("FlycamAxisScale3",    .1f);
@@ -1219,7 +1218,8 @@ void LLViewerJoystick::setXBDefaults()
 	gSavedSettings.setF32("AvatarAxisDeadZone0", .25f);
 	gSavedSettings.setF32("BuildAxisDeadZone0",  .1f);
 	gSavedSettings.setF32("FlycamAxisDeadZone0", .1f);
-	// PItch Dead Zone
+
+	// Pitch Dead Zone
 	gSavedSettings.setF32("AvatarAxisDeadZone4", .25f);
 	gSavedSettings.setF32("BuildAxisDeadZone4",  .1f);
 	gSavedSettings.setF32("FlycamAxisDeadZone4", .1f);
@@ -1230,6 +1230,7 @@ void LLViewerJoystick::setXBDefaults()
 	// Roll Dead Zone
 	gSavedSettings.setF32("BuildAxisDeadZone3",  .1f);
 	gSavedSettings.setF32("FlycamAxisDeadZone3", .05f);
+
 	// Feathering
 	gSavedSettings.setF32("AvatarFeathering",  32.0f);
 	gSavedSettings.setF32("BuildFeathering",   16.0f);
