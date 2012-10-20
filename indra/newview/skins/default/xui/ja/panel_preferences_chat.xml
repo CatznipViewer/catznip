@@ -5,7 +5,7 @@
 		<check_box label="オフライン時に受け取った IM をメールで受信" name="send_im_to_email"/>
 		<check_box label="フレンドとグループ以外からはコールと IM を受信しない" name="voice_call_friends_only_check"/>
 		<text name="font_size">
-			文字の大きさ：
+			文字の大きさ
 		</text>
 		<combo_box name="chat_font_size">
 			<item label="小規模" name="Small" value="0"/>

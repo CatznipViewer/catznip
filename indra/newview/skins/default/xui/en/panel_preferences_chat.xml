@@ -57,7 +57,7 @@
         name="font_size"
         width="120"
         top="0">
-      Font size:
+      Font size
     </text>
 
     <combo_box

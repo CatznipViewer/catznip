@@ -5,7 +5,7 @@
 		<check_box label="Отправлять мне сообщения по почте, когда меня нет в сети" name="send_im_to_email"/>
 		<check_box label="Только друзья и группы могут звонить мне и отправлять IM" name="voice_call_friends_only_check"/>
 		<text name="font_size">
-			Размер шрифта:
+			Размер шрифта
 		</text>
 		<combo_box name="chat_font_size">
 			<item label="Мелкий" name="Small" value="0"/>

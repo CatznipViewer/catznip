@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Opsætning" name="Input panel">
 	<text name="Network:">
-		Netværk:
+		Netværk
 	</text>
 	<text name="Maximum bandwidth">
 		Maksimum båndbredde
@@ -23,7 +23,7 @@
 	<button label="Vælg" label_selected="Vælg" name="set_cache"/>
 	<button label="Nulstil" label_selected="Nulstil" name="reset_cache"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="use_external_browser">
 		<radio_item label="Benyt min browser(IE, Firefox, Safari)" name="external" tool_tip="Brug systemets standard web browser til hjælp, web links, m.v. Ikke anbefalet hvis du kører i fuld-skærm." value="true"/>
@@ -39,7 +39,7 @@
 	<line_editor name="web_proxy_editor" tool_tip="Angiv navn eller IP addresse på den proxy du ønsker at anvende"/>
 	<spinner label="Port nummer:" name="web_proxy_port"/>
 	<text name="Software updates:">
-		Software opdateringer:
+		Software opdateringer
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Installér automatisk" name="Install_automatically"/>

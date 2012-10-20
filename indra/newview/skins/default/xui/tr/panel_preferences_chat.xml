@@ -5,7 +5,7 @@
 		<check_box label="Çevrimdışı olduğunda Aİ&apos;ler e-posta ile bana gönderilsin" name="send_im_to_email"/>
 		<check_box label="Sadece arkadaşlar ve gruplar beni arasın veya Aİ göndersin" name="voice_call_friends_only_check"/>
 		<text name="font_size">
-			Font büyüklüğü:
+			Font büyüklüğü
 		</text>
 		<combo_box name="chat_font_size">
 			<item label="Küçük" name="Small" value="0"/>

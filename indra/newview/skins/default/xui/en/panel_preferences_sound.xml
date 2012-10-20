@@ -365,7 +365,7 @@
      follows="left|top"
      layout="topleft"
 	   left="46"
-	   top_delta="16"
+	   top_pad="0"
      name="Listen from"
      width="112">
         Listen from:
@@ -380,7 +380,7 @@
 		visible="true"
 		width="18"
 		left_pad="-4"
-		top_delta="-5"/>
+		top_delta="-4"/>
 	<icon
 		follows="left|top"
 		height="18"
