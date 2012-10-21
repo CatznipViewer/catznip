@@ -8453,6 +8453,9 @@ void initialize_menus()
 
 	// Land pie menu
 	view_listener_t::addMenu(new LLLandBuild(), "Land.Build");
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2012-10-21 (Catznip-3.3)
+	enable.add("Land.EnableBuild", boost::bind(&enable_land_build));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLLandSit(), "Land.Sit");
 	view_listener_t::addMenu(new LLLandBuyPass(), "Land.BuyPass");
 	view_listener_t::addMenu(new LLLandEdit(), "Land.Edit");
