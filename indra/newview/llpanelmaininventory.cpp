@@ -384,7 +384,7 @@ bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
 	if ("category" == strParam)
 	{
 		// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
-		return ("Recent Items" == mActivePanel->getName());
+		return ("Recent Items" != mActivePanel->getName());
 	}
 	return true;
 }
