@@ -855,23 +855,45 @@ bool LLPanelWearing::createInventoryPanel()
 
 void LLPanelWearing::copyToClipboard()
 {
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
 	std::string text;
-	std::vector<LLSD> data;
-	mCOFItemsList->getValues(data);
 
-	for(std::vector<LLSD>::const_iterator iter = data.begin(); iter != data.end();)
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
+	LLFindCOFValidItems f(/*include_gestures=*/ false, /*include_folders=*/ false);
+
+	gInventory.collectDescendentsIf(LLAppearanceMgr::instance().getCOF(), cats, items, FALSE, f);	
+	for (LLInventoryModel::item_array_t::const_iterator iter = items.begin(); iter != items.end();)
 	{
-		LLSD uuid = (*iter);
-		LLViewerInventoryItem* item = gInventory.getItem(uuid);
+		const LLViewerInventoryItem* item = *iter;
 
 		iter++;
 		if (item != NULL)
 		{
 			// Append a newline to all but the last line
-			text += iter != data.end() ? item->getName() + "\n" : item->getName();
+			text += (iter != items.end()) ? item->getName() + "\n" : item->getName();
 		}
 	}
 
 	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(text),0,text.size());
+// [/SL:KB]
+//	std::string text;
+//	std::vector<LLSD> data;
+//	mCOFItemsList->getValues(data);
+//
+//	for(std::vector<LLSD>::const_iterator iter = data.begin(); iter != data.end();)
+//	{
+//		LLSD uuid = (*iter);
+//		LLViewerInventoryItem* item = gInventory.getItem(uuid);
+//
+//		iter++;
+//		if (item != NULL)
+//		{
+//			// Append a newline to all but the last line
+//			text += iter != data.end() ? item->getName() + "\n" : item->getName();
+//		}
+//	}
+//
+//	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(text),0,text.size());
 }
 // EOF

@@ -810,6 +810,14 @@ bool LLNameCategoryCollector::operator()(
 	return false;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+LLFindCOFValidItems::LLFindCOFValidItems(bool include_gestures, bool include_folders)
+	: mIncludeGestures(include_gestures)
+	, mIncludeFolders(include_folders)
+{
+}
+// [/SL:KB]
+
 bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 									 LLInventoryItem* item)
 {
@@ -824,10 +832,16 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 		LLAssetType::EType type = linked_item->getType();
 		return (type == LLAssetType::AT_CLOTHING ||
 				type == LLAssetType::AT_BODYPART ||
-				type == LLAssetType::AT_GESTURE ||
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+				( (mIncludeGestures) && (type == LLAssetType::AT_GESTURE) ) ||
+// [/SL:KB]
+//				type == LLAssetType::AT_GESTURE ||
 				type == LLAssetType::AT_OBJECT);
 	}
-	else
+//	else
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	else if (mIncludeFolders)
+// [/SL:KB]
 	{
 		LLViewerInventoryCategory *linked_category = ((LLViewerInventoryItem*)item)->getLinkedCategory();
 		// BAP remove AT_NONE support after ensembles are fully working?
@@ -835,6 +849,9 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 				((linked_category->getPreferredType() == LLFolderType::FT_NONE) ||
 				 (LLFolderType::lookupIsEnsembleType(linked_category->getPreferredType()))));
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	return false;
+// [/SL:KB]
 }
 
 bool LLFindWearables::operator()(LLInventoryCategory* cat,

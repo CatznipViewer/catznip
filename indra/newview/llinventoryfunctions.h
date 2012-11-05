@@ -274,11 +274,19 @@ protected:
 class LLFindCOFValidItems : public LLInventoryCollectFunctor
 {
 public:
-	LLFindCOFValidItems() {}
+//	LLFindCOFValidItems() {}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	LLFindCOFValidItems(bool include_gestures, bool include_folders);
+// [/SL:KB]
 	virtual ~LLFindCOFValidItems() {}
 	virtual bool operator()(LLInventoryCategory* cat,
 							LLInventoryItem* item);
 	
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+protected:
+	bool mIncludeGestures;
+	bool mIncludeFolders;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
