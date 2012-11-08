@@ -66,6 +66,9 @@ LLToolBarView::Toolbar::Toolbar()
 LLToolBarView::ToolbarSet::ToolbarSet()
 :	left_toolbar("left_toolbar"),
 	right_toolbar("right_toolbar"),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	top_toolbar("top_toolbar"),
+// [/SL:KB]
 	bottom_toolbar("bottom_toolbar")
 {}
 
@@ -99,6 +102,9 @@ BOOL LLToolBarView::postBuild()
 {
 	mToolbars[TOOLBAR_LEFT]   = getChild<LLToolBar>("toolbar_left");
 	mToolbars[TOOLBAR_RIGHT]  = getChild<LLToolBar>("toolbar_right");
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	mToolbars[TOOLBAR_TOP] = getChild<LLToolBar>("toolbar_top");
+// [/SL:KB]
 	mToolbars[TOOLBAR_BOTTOM] = getChild<LLToolBar>("toolbar_bottom");
 
 	for (int i = TOOLBAR_FIRST; i <= TOOLBAR_LAST; i++)
@@ -298,6 +304,23 @@ bool LLToolBarView::loadToolbars(bool force_default)
 			}
 		}
 	}
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	if (toolbar_set.top_toolbar.isProvided() && mToolbars[TOOLBAR_TOP])
+	{
+		if (toolbar_set.top_toolbar.button_display_mode.isProvided())
+		{
+			LLToolBarEnums::ButtonType button_type = toolbar_set.top_toolbar.button_display_mode;
+			mToolbars[TOOLBAR_TOP]->setButtonType(button_type);
+		}
+		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.top_toolbar.commands)
+		{
+			if (addCommandInternal(LLCommandId(command_params), mToolbars[TOOLBAR_TOP]))
+			{
+				llwarns << "Error adding command '" << command_params.name() << "' to top toolbar." << llendl;
+			}
+		}
+	}
+// [/SL:KB]
 	if (toolbar_set.bottom_toolbar.isProvided() && mToolbars[TOOLBAR_BOTTOM])
 	{
 		if (toolbar_set.bottom_toolbar.button_display_mode.isProvided())
@@ -381,6 +404,13 @@ void LLToolBarView::saveToolbars() const
 		toolbar_set.right_toolbar.button_display_mode = mToolbars[TOOLBAR_RIGHT]->getButtonType();
 		addToToolset(mToolbars[TOOLBAR_RIGHT]->getCommandsList(), toolbar_set.right_toolbar);
 	}
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	if (mToolbars[TOOLBAR_TOP])
+	{
+		toolbar_set.top_toolbar.button_display_mode = mToolbars[TOOLBAR_TOP]->getButtonType();
+		addToToolset(mToolbars[TOOLBAR_TOP]->getCommandsList(), toolbar_set.top_toolbar);
+	}
+// [/SL:KB]
 	if (mToolbars[TOOLBAR_BOTTOM])
 	{
 		toolbar_set.bottom_toolbar.button_display_mode = mToolbars[TOOLBAR_BOTTOM]->getButtonType();

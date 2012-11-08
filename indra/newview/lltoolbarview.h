@@ -45,6 +45,9 @@ public:
 		TOOLBAR_NONE = 0,
 		TOOLBAR_LEFT,
 		TOOLBAR_RIGHT,
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		TOOLBAR_TOP,
+// [/SL:KB]
 		TOOLBAR_BOTTOM,
 
 		TOOLBAR_COUNT,
@@ -73,6 +76,9 @@ public:
 	{
 		Optional<Toolbar>	left_toolbar,
 							right_toolbar,
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+							top_toolbar,
+// [/SL:KB]
 							bottom_toolbar;
 
 		ToolbarSet();
