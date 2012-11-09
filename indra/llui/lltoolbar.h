@@ -127,11 +127,9 @@ namespace LLToolBarEnums
 // [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
 	enum AlignmentType
 	{
-		ALIGN_LEFT,
-		ALIGN_TOP = ALIGN_LEFT,
+		ALIGN_TOPLEFT,
 		ALIGN_CENTER,
-		ALIGN_RIGHT,
-		ALIGN_BOTTOM = ALIGN_RIGHT
+		ALIGN_BOTTOMRIGHT,
 	};
 // [/SL:KB]
 
@@ -152,6 +150,14 @@ namespace LLInitParam
 	{
 		static void declareValues();
 	};
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	template<>
+	struct TypeValues<LLToolBarEnums::AlignmentType> : public TypeValuesHelper<LLToolBarEnums::AlignmentType>
+	{
+		static void declareValues();
+	};
+// [/SL:KB]
 }
 
 
@@ -164,6 +170,9 @@ public:
 	{
 		Mandatory<LLToolBarEnums::ButtonType>	button_display_mode;
 		Mandatory<LLToolBarEnums::SideType>		side;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		Optional<LLToolBarEnums::AlignmentType>	button_alignment;
+// [/SL:KB]
 
 		Optional<LLToolBarButton::Params>		button_icon,
 												button_icon_and_text;

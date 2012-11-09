@@ -33,6 +33,7 @@
              side="top"
              follows="left|right|top"
              button_display_mode="icons_with_text"
+             button_alignment="center"
              visible="true">
              <icon layout="topleft"
 	            height="28"
@@ -73,7 +74,8 @@
                  top="10"
                  bottom="-10"
                  side="left"
-                 button_display_mode="icons_only">
+                 button_display_mode="icons_only"
+                 button_alignment="center">
 	             <icon layout="topleft"
 	                   height="15"
 	                   width="28"
@@ -140,7 +142,8 @@
           top="10"
           bottom="-10"
           side="right"
-          button_display_mode="icons_only">
+          button_display_mode="icons_only"
+          button_alignment="center">
 	      <icon layout="topleft"
 	            height="15"
 	            width="28"
@@ -170,6 +173,7 @@
              side="bottom"
              follows="left|right|bottom"
              button_display_mode="icons_with_text"
+             button_alignment="center"
              visible="true">
              <icon layout="topleft"
 	            height="28"

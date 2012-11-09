@@ -68,6 +68,9 @@ public:
 	struct Toolbar : public LLInitParam::Block<Toolbar>
 	{
 		Mandatory<LLToolBarEnums::ButtonType>	button_display_mode;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		Optional<LLToolBarEnums::AlignmentType>	button_alignment;
+// [/SL:KB]
 		Multiple<LLCommandId::Params>	commands;
 
 		Toolbar();

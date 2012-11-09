@@ -73,10 +73,22 @@ namespace LLInitParam
 		declare("right",	SIDE_RIGHT);
 		declare("top",		SIDE_TOP);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	void TypeValues<AlignmentType>::declareValues()
+	{
+		declare("topleft",		ALIGN_TOPLEFT);
+		declare("center",		ALIGN_CENTER);
+		declare("bottomright",	ALIGN_BOTTOMRIGHT);
+	}
+// [/SL:KB]
 }
 
 LLToolBar::Params::Params()
 :	button_display_mode("button_display_mode"),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	button_alignment("button_alignment", LLToolBarEnums::ALIGN_CENTER),
+// [/SL:KB]
 	commands("command"),
 	side("side", SIDE_TOP),
 	button_icon("button_icon"),
@@ -240,6 +252,10 @@ void LLToolBar::initFromParams(const LLToolBar::Params& p)
 	{
 		addCommand(id);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	setButtonAlignment(p.button_alignment);
+// [/SL:KB]
 
 	mNeedsLayout = true;
 }
@@ -518,13 +534,13 @@ void LLToolBar::setButtonAlignment(LLToolBarEnums::AlignmentType alignment)
 	LLLayoutPanel* pLeftBorder = mCenteringStack->findChild<LLLayoutPanel>("border_panel_left", FALSE);
 	if (pLeftBorder)
 	{
-		pLeftBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_RIGHT == alignment) );
+		pLeftBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_BOTTOMRIGHT == alignment) );
 	}
 
 	LLLayoutPanel* pRightBorder = mCenteringStack->findChild<LLLayoutPanel>("border_panel_right", FALSE);
 	if (pRightBorder)
 	{
-		pRightBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_LEFT == alignment) );
+		pRightBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_TOPLEFT == alignment) );
 	}
 
 	mCenteringStack->updateLayout();
@@ -536,7 +552,7 @@ void LLToolBar::onChangeButtonAlignment(const LLSD& sdParam)
 	const std::string strParam = sdParam.asString();
 	if ("topleft" == strParam)
 	{
-		setButtonAlignment(LLToolBarEnums::ALIGN_LEFT);
+		setButtonAlignment(LLToolBarEnums::ALIGN_TOPLEFT);
 	}
 	else if ("center" == strParam)
 	{
@@ -544,7 +560,7 @@ void LLToolBar::onChangeButtonAlignment(const LLSD& sdParam)
 	}
 	else if ("bottomright" == strParam)
 	{
-		setButtonAlignment(LLToolBarEnums::ALIGN_RIGHT);
+		setButtonAlignment(LLToolBarEnums::ALIGN_BOTTOMRIGHT);
 	}
 }
 
@@ -553,7 +569,7 @@ bool LLToolBar::onCheckButtonAlignment(const LLSD& sdParam)
 	const std::string strParam = sdParam.asString();
 	if ("topleft" == strParam)
 	{
-		return LLToolBarEnums::ALIGN_LEFT == getButtonAlignment();
+		return LLToolBarEnums::ALIGN_TOPLEFT == getButtonAlignment();
 	}
 	else if ("center" == strParam)
 	{
@@ -561,7 +577,7 @@ bool LLToolBar::onCheckButtonAlignment(const LLSD& sdParam)
 	}
 	else if ("bottomright" == strParam)
 	{
-		return LLToolBarEnums::ALIGN_RIGHT == getButtonAlignment();
+		return LLToolBarEnums::ALIGN_BOTTOMRIGHT == getButtonAlignment();
 	}
 	return false;
 }
