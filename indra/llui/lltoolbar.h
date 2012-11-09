@@ -124,6 +124,17 @@ namespace LLToolBarEnums
 		SIDE_TOP,
 	};
 
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	enum AlignmentType
+	{
+		ALIGN_LEFT,
+		ALIGN_TOP = ALIGN_LEFT,
+		ALIGN_CENTER,
+		ALIGN_RIGHT,
+		ALIGN_BOTTOM = ALIGN_RIGHT
+	};
+// [/SL:KB]
+
 	LLLayoutStack::ELayoutOrientation getOrientation(SideType sideType);
 }
 
@@ -216,6 +227,11 @@ public:
 	int  getRankFromPosition(S32 x, S32 y);	
 	int  getRankFromPosition(const LLCommandId& id);	
 
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	LLToolBarEnums::AlignmentType getButtonAlignment() const;
+	void setButtonAlignment(LLToolBarEnums::AlignmentType alignment);
+// [/SL:KB]
+
 	// Methods used in loading and saving toolbar settings
 	void setButtonType(LLToolBarEnums::ButtonType button_type);
 	LLToolBarEnums::ButtonType getButtonType() { return mButtonType; }
@@ -233,12 +249,19 @@ private:
 	void createButtons();
 	void resizeButtonsInRow(std::vector<LLToolBarButton*>& buttons_in_row, S32 max_row_girth);
 	BOOL isSettingChecked(const LLSD& userdata);
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	void onChangeButtonAlignment(const LLSD& sdParam);
+	bool onCheckButtonAlignment(const LLSD& sdParam);
+// [/SL:KB]
 	void onSettingEnable(const LLSD& userdata);
 	void onRemoveSelectedCommand();
 
 private:
 	// static layout state
 	const bool						mReadOnly;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	LLToolBarEnums::AlignmentType	mAlignment;
+// [/SL:KB]
 	const LLToolBarEnums::SideType	mSideType;
 	const bool						mWrap;
 	const S32						mPadLeft,
