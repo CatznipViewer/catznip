@@ -19,7 +19,6 @@ include(LLUI)
 include(LLVFS)        # ugh, needed for LLDir
 include(LLXML)
 include(Hunspell)
-include(Hunspell)
 include(Linking)
 # include(Tut)
 
@@ -33,7 +32,6 @@ include_directories(
     ${LLVFS_INCLUDE_DIRS}
     ${LLWINDOW_INCLUDE_DIRS}
     ${LLXML_INCLUDE_DIRS}
-    ${LIBS_PREBUILD_DIR}/include/hunspell
     ${LIBS_PREBUILD_DIR}/include/hunspell
     )
 

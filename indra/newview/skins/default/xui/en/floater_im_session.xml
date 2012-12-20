@@ -83,7 +83,6 @@
          height="20"
          label="To"
          layout="bottomleft"
-         spellcheck="true"
          name="chat_editor"
          spellcheck="true"
          tab_group="3"
