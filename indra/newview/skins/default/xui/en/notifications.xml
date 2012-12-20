@@ -2758,6 +2758,35 @@ Are you sure you want to delete these items?
 
   <notification
    icon="alertmodal.tga"
+   name="ConfirmObjectRestoreToWorld"
+   type="alertmodal">
+    <unique/>
+Are you sure you want to restore this item to its last in-world position?
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Confirm before restoring copyable items to world"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmObjectRestoreToWorldNoCopy"
+   type="alertmodal">
+    <unique/>
+The item you have selected is not copyable.
+
+Are you sure you want to restore this item to its last in-world position?
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Confirm before restoring non-copyable items to world"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="ConfirmObjectTakeLock"
    type="alertmodal">
 At least one object is locked.

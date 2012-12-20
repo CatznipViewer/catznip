@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+			<panel.string name="text modify info 5">
+				Questo oggetto non può essere modificato attraverso il confine di una regione
+			</panel.string>
+			<panel.string name="text modify info 6">
+				Questi oggetti non possono essere modificati attraverso il confine di una regione
+			</panel.string>
+			<spinner label="L$" name="Edit Cost"/>
+				</text>
+			</panel>
+			<panel name="pathfinding_attrs_panel">
+				<text name="pathfinding_attributes_label">
+					Attributi pathfinding:
+		<panel label="Contenuto" name="Contents">
+			<button label="Nuovo Script" label_selected="Nuovo script" name="button new script"/>
+			<button label="Permessi" name="button permissions"/>
+		</panel>
