@@ -2758,7 +2758,15 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 		// should happen after you get an "invitation"
 		if ( !gIMMgr->hasSession(session_id) )
 		{
-			return;
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+			// Check if this is a snoozed group session which needs to be restored
+			if ( (!gAgent.isInGroup(session_id)) || 
+				 (!gIMMgr->checkSnoozeExpiration(session_id)) || (!gIMMgr->restoreSnoozedSession(session_id)) )
+			{
+				return;
+			}
+// [/SL:KB]
+//			return;
 		}
 
 		// standard message, not from system

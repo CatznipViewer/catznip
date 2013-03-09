@@ -682,6 +682,9 @@ void LLIMFloater::updateMessages()
 				chat.mText = message;
 			}
 			
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+			chat_args["name_style"] = (msg.has("name_style")) ? msg["name_style"].asInteger() : CHAT_NAME_NORMAL;
+// [/SL:KB]
 			mChatHistory->appendMessage(chat, chat_args);
 			mLastMessageIndex = msg["index"].asInteger();
 

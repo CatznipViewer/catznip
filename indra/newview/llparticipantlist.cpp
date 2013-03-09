@@ -44,7 +44,7 @@
 #pragma warning (disable : 4355) // 'this' used in initializer list: yes, intentionally
 #endif
 
-static const LLAvatarItemAgentOnTopComparator AGENT_ON_TOP_NAME_COMPARATOR;
+//static const LLAvatarItemAgentOnTopComparator AGENT_ON_TOP_NAME_COMPARATOR;
 
 // helper function to update AvatarList Item's indicator in the voice participant list
 static void update_speaker_indicator(const LLAvatarList* const avatar_list, const LLUUID& avatar_uuid, bool is_muted)
@@ -246,6 +246,9 @@ LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source,
 		mAvatarList->setShowIcons("ParticipantListShowIcons");
 		mAvatarListToggleIconsConnection = gSavedSettings.getControl("ParticipantListShowIcons")->getSignal()->connect(boost::bind(&LLAvatarList::toggleIcons, mAvatarList));
 	}
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	mAvatarListSortOrder = gSavedSettings.getControl("SpeakerParticipantDefaultOrder")->getSignal()->connect(boost::bind(&LLParticipantList::onSortedOrderChanged, this, _2));
+// [/SL:KB]
 
 	//Lets fill avatarList with existing speakers
 	LLSpeakerMgr::speaker_list_t speaker_list;
@@ -273,6 +276,9 @@ LLParticipantList::~LLParticipantList()
 	mAvatarListDoubleClickConnection.disconnect();
 	mAvatarListRefreshConnection.disconnect();
 	mAvatarListReturnConnection.disconnect();
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	mAvatarListSortOrder.disconnect();
+// [/SL:KB]
 	mAvatarListToggleIconsConnection.disconnect();
 
 	// It is possible Participant List will be re-created from LLCallFloater::onCurrentChannelChanged()
@@ -347,6 +353,9 @@ void LLParticipantList::onAvatarListRefreshed(LLUICtrl* ctrl, const LLSD& param)
 					tooltip.erase(found, moderator_indicator_len);
 					item->setAvatarToolTip(tooltip);
 				}
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+				item->setState(LLAvatarListItem::IS_ONLINE);
+// [/SL:KB]
 			}
 		}
 
@@ -376,6 +385,9 @@ void LLParticipantList::onAvatarListRefreshed(LLUICtrl* ctrl, const LLSD& param)
 					tooltip += moderator_indicator;
 					item->setAvatarToolTip(tooltip);
 				}
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+				item->setState(LLAvatarListItem::IS_MODERATOR);
+// [/SL:KB]
 			}
 		}
 
@@ -457,6 +469,13 @@ void LLParticipantList::setSortOrder(EParticipantSortOrder order)
 		sort();
 	}
 }
+
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+void LLParticipantList::onSortedOrderChanged(const LLSD& sdOrder)
+{
+	setSortOrder((EParticipantSortOrder)sdOrder.asInteger());
+}
+// [/SL:KB]
 
 const LLParticipantList::EParticipantSortOrder LLParticipantList::getSortOrder() const
 {
@@ -570,17 +589,24 @@ void LLParticipantList::sort()
 	switch ( getSortOrder() ) 
 	{
 		case E_SORT_BY_NAME :
-			// if mExcludeAgent == true , then no need to keep agent on top of the list
-			if(mExcludeAgent)
-			{
-				mAvatarList->sortByName();
-			}
-			else
-			{
-				mAvatarList->setComparator(&AGENT_ON_TOP_NAME_COMPARATOR);
-				mAvatarList->sort();
-			}
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+			if (mSortByStatusAndName.isNull())
+				mSortByStatusAndName = new LLAvatarItemStatusAndNameComparator(*this);
+			mAvatarList->setComparator(mSortByStatusAndName.get());
+			mAvatarList->sort();
 			break;
+// [/SL:KB]
+//			// if mExcludeAgent == true , then no need to keep agent on top of the list
+//			if(mExcludeAgent)
+//			{
+//				mAvatarList->sortByName();
+//			}
+//			else
+//			{
+//				mAvatarList->setComparator(&AGENT_ON_TOP_NAME_COMPARATOR);
+//				mAvatarList->sort();
+//			}
+//			break;
 		case E_SORT_BY_RECENT_SPEAKERS:
 			if (mSortByRecentSpeakers.isNull())
 				mSortByRecentSpeakers = new LLAvatarItemRecentSpeakerComparator(*this);
@@ -1013,6 +1039,39 @@ bool LLParticipantList::LLParticipantListMenu::checkContextMenuItem(const LLSD& 
 
 	return false;
 }
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+bool LLParticipantList::LLAvatarItemStatusAndNameComparator::doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
+{
+	if (mParent.mSpeakerMgr)
+	{
+		LLPointer<LLSpeaker> lhs = mParent.mSpeakerMgr->findSpeaker(avatar_item1->getAvatarId());
+		LLPointer<LLSpeaker> rhs = mParent.mSpeakerMgr->findSpeaker(avatar_item2->getAvatarId());
+		if ( (lhs.notNull()) && (rhs.notNull()) )
+		{
+			// Sort moderators before non-moderators, then sort by name
+			if (lhs->mIsModerator == rhs->mIsModerator)
+				return LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2);
+			else if (lhs->mIsModerator)
+				return true;
+			else if (rhs->mIsModerator)
+				return false;
+		}
+		else if (lhs.notNull())
+		{
+			// True if only avatar_item1 speaker info available
+			return true;
+		}
+		else if (rhs.notNull())
+		{
+			// False if only avatar_item2 speaker info available
+			return false;
+		}
+	}
+	// By default compare by name.
+	return LLAvatarItemAgentOnTopComparator::doCompare(avatar_item1, avatar_item2);
+}
+// [/SL:KB]
 
 bool LLParticipantList::LLAvatarItemRecentSpeakerComparator::doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
 {
