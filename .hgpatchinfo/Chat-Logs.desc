@@ -1,0 +1,19 @@
+[Chat/Logs]
+- changed : LLCacheName::buildUsername() will properly extract the username if the passed name is a "complete name"
+    -> "Catznip Catnap" => "catznip.catnap"
+    -> "Catznip Tester (catznip.catnap)" => "catznip.catnap"
+- fixed   : P2P IM session names are inconsistent (chiclet hover tip shows the legacy name rather than the complete name for incoming IM sessions)
+    -> incoming IM session would have a session name of "Catznip Catnap" (legacy name)
+    -> outgoing IM session would have a session name of "Catznip Tester (catznip.catnap)" (complete name)
+    -> standarized P2P IM session names to "complete name"
+- added   : LLIMModel::buildIMP2PLogFilename() to have one single function to construct log filenames for P2P IMs
+- fixed   : teleport offers to another avie are logged to the wrong file when no IM session is open for that avie
+    -> open IM session => logged to "catznip_catnap.txt"
+    -> no open IM session => logged to "Catznip Catnap.txt"
+- fixed   : inventory offers to another avie are logged to the wrong file when no IM session is open for that avie
+    -> no open IM session => logged to "Catznip Catnap.txt"
+- fixed   : inventory accepted/declined notifications are logged to the wrong file
+    -> no open IM session => logged to secondlife____app_agent_<uuid>_completename.txt
+- added   : "UseLegacyIMLogNames" setting to use "old-style" log filenames for P2P IM sessions (TRUE by default)
+    -> needed for people who mix older and newer viewers
+    -> side-steps any other remaining bugs due to log filename change
