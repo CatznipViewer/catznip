@@ -5285,22 +5285,55 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			if (!isAgentAvatarValid()) return;
 
-			if( get_is_item_worn( mUUID ) )
-			{
-				items.push_back(std::string("Wearable And Object Separator"));
-				items.push_back(std::string("Detach From Yourself"));
-			}
-			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
-			{
-				items.push_back(std::string("Wearable And Object Separator"));
-				items.push_back(std::string("Wearable And Object Wear"));
-				items.push_back(std::string("Wearable Add"));
-				items.push_back(std::string("Attach To"));
-				items.push_back(std::string("Attach To HUD"));
-				// commented out for DEV-32347
-				//items.push_back(std::string("Restore to Last Position"));
+//			if( get_is_item_worn( mUUID ) )
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Detach From Yourself"));
+//			}
+//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Wearable And Object Wear"));
+//				items.push_back(std::string("Wearable Add"));
+//				items.push_back(std::string("Attach To"));
+//				items.push_back(std::string("Attach To HUD"));
+//				// commented out for DEV-32347
+//				//items.push_back(std::string("Restore to Last Position"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
+			items.push_back(std::string("Wearable And Object Separator"));
 
-				if (!gAgentAvatarp->canAttachMoreObjects())
+			// Show "Detach" for a selection where some of the selected items are worn
+			if (flags & WORN_SELECTION_MASK)
+			{
+				// Show "Take Off / Detach" instead of "Detach From Yourself" if the selection contains a mix of wearables and attachments
+				if (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))
+					items.push_back(std::string("Wearable And Object Take Off"));
+				else
+					items.push_back(std::string("Detach From Yourself"));
+			}
+
+			if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+			{
+				// Show "Wear" and "Add" for a selection where not all wearable items are currently worn
+				if ((flags & WORN_SELECTION) == 0)
+				{
+					items.push_back(std::string("Wearable And Object Wear"));
+					items.push_back(std::string("Wearable Add"));
+
+					// Show the "Attach To" submenus if only attachments are selected and none of them are worn
+					if ( ((flags & (BODYPART_SELECTION | CLOTHING_SELECTION | NONWEARABLE_SELECTION)) == 0) &&
+						 ((flags & PARTIAL_WORN_SELECTION) == 0) )
+					{
+						items.push_back(std::string("Attach To"));
+						items.push_back(std::string("Attach To HUD"));
+					}
+				}
+// [/SL:KB]
+
+//				if (!gAgentAvatarp->canAttachMoreObjects())
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+				if ( (!gAgentAvatarp->canAttachMoreObjects()) && (0 == (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))) )
+// [/SL:KB]
 				{
 					disabled_items.push_back(std::string("Wearable And Object Wear"));
 					disabled_items.push_back(std::string("Wearable Add"));
@@ -5655,39 +5688,75 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 
 		// Disable wear and take off based on whether the item is worn.
-		if(item)
-		{
-			switch (item->getType())
-			{
-				case LLAssetType::AT_CLOTHING:
-					items.push_back(std::string("Take Off"));
-					// Fallthrough since clothing and bodypart share wear options
-				case LLAssetType::AT_BODYPART:
-					if (get_is_item_worn(item->getUUID()))
-					{
-						disabled_items.push_back(std::string("Wearable And Object Wear"));
-						disabled_items.push_back(std::string("Wearable Add"));
-					}
-					else
-					{
-						items.push_back(std::string("Wearable And Object Wear"));
-						disabled_items.push_back(std::string("Take Off"));
-						disabled_items.push_back(std::string("Wearable Edit"));
-					}
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-05-29 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+		bool fIsWorn = get_is_item_worn(item->getUUID());
 
-					if (LLWearableType::getAllowMultiwear(mWearableType))
-					{
-						items.push_back(std::string("Wearable Add"));
-						if (gAgentWearables.getWearableCount(mWearableType) >= LLAgentWearables::MAX_CLOTHING_PER_TYPE)
-						{
-							disabled_items.push_back(std::string("Wearable Add"));
-						}
-					}
-					break;
-				default:
-					break;
+		// Show "Wear" and "Add" for a selection where not all wearable items are currently worn
+		if ((flags & WORN_SELECTION) == 0)
+		{
+			items.push_back(std::string("Wearable And Object Wear"));
+			items.push_back(std::string("Wearable Add"));
+
+			// Disable "Add" if at least one unworn wearable already has MAX_CLOTHING_PER_TYPE worn, or does not allow for multi-wearables
+			if ( (!fIsWorn) &&
+				 ( (!LLWearableType::getAllowMultiwear(mWearableType)) || 
+				   (gAgentWearables.getWearableCount(mWearableType) >= LLAgentWearables::MAX_CLOTHING_PER_TYPE) ) )
+			{
+					disabled_items.push_back(std::string("Wearable Add"));
 			}
 		}
+
+		// Show "Take Off" for a selection where some of the selected items are worn
+		// (but disable it below if at least one of the worn items is a bodypart)
+		if (flags & WORN_SELECTION_MASK)
+		{
+			// Show "Take Off / Detach" instead of "Take Off" if the selection contains a mix of wearables and attachments
+			if (flags & ATTACHMENT_SELECTION)
+				items.push_back(std::string("Wearable And Object Take Off"));
+			else
+				items.push_back(std::string("Take Off"));
+
+			// Disable "Take Off / Detach" if at least one of the worn items is a bodypart
+			if ( (fIsWorn) && (item) && (LLAssetType::AT_BODYPART == item->getType()) )
+			{
+				disabled_items.push_back(std::string("Take Off"));
+				disabled_items.push_back(std::string("Wearable And Object Take Off"));
+			}
+		}
+// [/SL:KB]
+//		if(item)
+//		{
+//			switch (item->getType())
+//			{
+//				case LLAssetType::AT_CLOTHING:
+//					items.push_back(std::string("Take Off"));
+//					// Fallthrough since clothing and bodypart share wear options
+//				case LLAssetType::AT_BODYPART:
+//					if (get_is_item_worn(item->getUUID()))
+//					{
+//						disabled_items.push_back(std::string("Wearable And Object Wear"));
+//						disabled_items.push_back(std::string("Wearable Add"));
+//					}
+//					else
+//					{
+//						items.push_back(std::string("Wearable And Object Wear"));
+//						disabled_items.push_back(std::string("Take Off"));
+//						disabled_items.push_back(std::string("Wearable Edit"));
+//					}
+//					break;
+//
+//					if (LLWearableType::getAllowMultiwear(mWearableType))
+//					{
+//						items.push_back(std::string("Wearable Add"));
+//						if (gAgentWearables.getWearableCount(mWearableType) > 0)
+//						{
+//							disabled_items.push_back(std::string("Wearable Add"));
+//						}
+//					}
+//				default:
+//					break;
+//			}
+//		}
 	}
 	hide_context_entries(menu, items, disabled_items);
 }
