@@ -1174,6 +1174,17 @@ void LLFolderView::openSelectedItems( void )
 {
 	if(getVisible() && getEnabled())
 	{
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-04-15 (Catznip-3.2.1a) | Added: Catznip-2.0.0a
+		LLInventoryPanel* pInvPanel = dynamic_cast<LLInventoryPanel*>(mParentPanel);
+		if (pInvPanel)
+		{
+			// NOTE: [SL-2.6.0] This is only called in response to the <enter> key being pressed on a folderview selection
+			//   -> since LLFolderView::doToSelected() has all the preview/properties logic in place diverting it there *should* be safe
+			doToSelected(pInvPanel->getModel(), "open");
+			return;
+		}
+// [/SL:KB]
+
 		if (mSelectedItems.size() == 1)
 		{
 			mSelectedItems.front()->openItem();
@@ -1521,7 +1532,10 @@ BOOL LLFolderView::handleKeyHere( KEY key, MASK mask )
 		break;
 
 	case KEY_RETURN:
-		if (mask == MASK_NONE)
+//		if (mask == MASK_NONE)
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2011-10-04 (Catznip-3.2.1a) | Added: Catznip-3.0.0a
+		if ( (MASK_NONE == mask) || (MASK_CONTROL == mask) )
+// [/SL:KB]
 		{
 			if( mRenameItem && mRenamer->getVisible() )
 			{
@@ -2180,7 +2194,11 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 		LLFloater::setFloaterHost(multi_previewp);
 	
 	}
-	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+//	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.1.0a
+	else if ( ("task_properties" == action || "properties" == action) && (selected_items.size() > 1) && 
+		      (gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
+// [/SL:KB]
 	{
 		multi_propertiesp = new LLMultiProperties();
 		gFloaterView->addChild(multi_propertiesp);
@@ -2188,16 +2206,40 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 		LLFloater::setFloaterHost(multi_propertiesp);
 	}
 
-	std::set<LLUUID>::iterator set_iter;
-
-	for (set_iter = selected_items.begin(); set_iter != selected_items.end(); ++set_iter)
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-3.2.1a) | Added: Catznip-2.0.0a
+	// If we group the selected items together per type then each LLFolderViewEventListener derived class can support batched actions
+	typedef std::map<const std::type_info*, LLDynamicArray<LLFolderViewEventListener*>, LLCompareTypeID> type_batch_map_t;
+	type_batch_map_t mapTypeBatch;
+// [/SL:KB]
+	for (std::set<LLUUID>::iterator set_iter = selected_items.begin(); set_iter != selected_items.end(); ++set_iter)
 	{
 		LLFolderViewItem* folder_item = getItemByID(*set_iter);
 		if(!folder_item) continue;
 		LLInvFVBridge* bridge = (LLInvFVBridge*)folder_item->getListener();
 		if(!bridge) continue;
-		bridge->performAction(model, action);
+//		bridge->performAction(model, action);
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-3.2.1a) | Modified: Catznip-2.0.0g
+		const std::type_info* typeBridge = &typeid(*bridge);
+		type_batch_map_t::iterator itTypeBatch = mapTypeBatch.find(typeBridge);
+		if (itTypeBatch == mapTypeBatch.end())
+		{
+			mapTypeBatch.insert(std::make_pair(typeBridge, LLDynamicArray<LLFolderViewEventListener*>()));
+			itTypeBatch = mapTypeBatch.find(typeBridge);
+		}
+		itTypeBatch->second.push_back(bridge);
+// [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-3.2.1a) | Modified: Catznip-2.0.0g
+	for (type_batch_map_t::iterator itTypeBatch = mapTypeBatch.begin(); itTypeBatch != mapTypeBatch.end(); ++itTypeBatch)
+	{
+		LLDynamicArray<LLFolderViewEventListener*>& batch_items = itTypeBatch->second;
+		if (1 == batch_items.count())
+			(*batch_items.begin())->performAction(model, action);
+		else
+			(*batch_items.begin())->performActionBatch(model, action, batch_items);
+	}
+// [/SL:KB]
 
 	LLFloater::setFloaterHost(NULL);
 	if (multi_previewp)
