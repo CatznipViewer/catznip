@@ -29,6 +29,9 @@
 
 #include "v4color.h"
 #include "llpanel.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 
 class LLButton;
 class LLCheckBoxCtrl;
@@ -49,6 +52,9 @@ public:
 	virtual BOOL	postBuild();
 	LLPanelFace();
 	virtual ~LLPanelFace();
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	/*virtual*/ void draw();
+// [/SL:KB]
 
 	void			refresh();
 	void			setMediaURL(const std::string& url);
@@ -78,6 +84,10 @@ protected:
 	void 	onCommitAlpha(const LLSD& data);
 	void 	onCancelColor(const LLSD& data);
 	void 	onSelectColor(const LLSD& data);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	void	onClickPipette(LLToolPipette::EType type);
+	void	onSelectPipette(LLToolPipette::EType type, const LLTextureEntry& te);
+// [/SL:KB]
 	
 	static 	void onCommitTextureInfo( 		LLUICtrl* ctrl, void* userdata);
 	static void		onCommitBump(			LLUICtrl* ctrl, void* userdata);
@@ -100,6 +110,11 @@ private:
 	 */
 	void onTextureSelectionChanged(LLInventoryItem* itemp);
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+protected:
+	LLButton*		mTexturePipette;
+	LLButton*		mColorPipette;
+// [/SL:KB]
 };
 
 #endif

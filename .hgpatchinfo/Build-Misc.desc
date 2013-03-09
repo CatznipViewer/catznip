@@ -1,0 +1,10 @@
+[Build/Misc]
+- added   : "Axis at Root" checkbox to the build floater to position the axis on the first (root) object of the selection
+- added   : axis options floater to change the position of the axis relative to the current prim (or linkset)
+- added   : copy/paste buttons to the build floater for position, size and rotation
+- added   : 'Refresh' button to the build tools' 'Contents' panel
+    -> split the 'Contents' tab off into panel_tools_contents.xml
+- changed : moved the "Link" and "Unlink" buttons down on the build floater to just above the tab container
+- changed : grid options floater is a dependent of the buid floater
+- changed : uncommented the "Restore to Last Position" option in the inventory context menu
+    -> added two (ignorable) notifications: one for copyable and one for non-copyable objects to prevent accidental usage

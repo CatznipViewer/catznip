@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="Indhold" name="Contents">
+			<button label="Nyt script" label_selected="Nyt script" name="button new script"/>
+			<button label="Rettigheder" name="button permissions"/>
+		</panel>
