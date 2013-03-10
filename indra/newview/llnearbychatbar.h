@@ -44,12 +44,23 @@ class LLNearbyChatBar :	public LLFloater
 public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
 	LLNearbyChatBar(const LLSD& key);
-	~LLNearbyChatBar() {}
+//	~LLNearbyChatBar() {}
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	~LLNearbyChatBar();
+// [/SL:KB]
 
 	virtual BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 
 	static LLNearbyChatBar* getInstance();
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	// TODO-Catznip: find a better way to do this?
+	virtual void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
+
+	typedef boost::signals2::signal<void (LLUICtrl* ctrl, S32 width, S32 height)> reshape_signal_t;
+	boost::signals2::connection setReshapeCallback(const reshape_signal_t::slot_type& cb);
+// [/SL:KB]
 
 	LLLineEditor* getChatBox() { return mChatBox; }
 
@@ -97,6 +108,9 @@ protected:
 	LLLocalSpeakerMgr*		mSpeakerMgr;
 
 	S32 mExpandedHeight;
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	reshape_signal_t*	mReshapeSignal;
+// [/SL:KB]
 
 	boost::shared_ptr<LLNearbyChatBarListener> mListener;
 };
