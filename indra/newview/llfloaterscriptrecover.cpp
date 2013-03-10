@@ -222,25 +222,33 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 		return;
 	}
 
-	std::string strFileName;
-	for (filename_queue_t::iterator itFile = m_FileQueue.begin(); itFile != m_FileQueue.end(); ++itFile)
+	// Viewer will localize 'New Script' so we have to undo that
+	std::string strItemName = pItem->getName();
+	LLViewerInventoryItem::lookupSystemName(strItemName);
+
+	filename_queue_t::iterator itFile = m_FileQueue.begin();
+	while (itFile != m_FileQueue.end())
 	{
-		if (itFile->second["name"].asString() != pItem->getName())
-			continue;
-		strFileName = itFile->second["path"];
-		itFile->second["item"] = idItem;
-		break;
+		if (itFile->second["name"].asString() == strItemName)
+			break;
+		++itFile;
 	}
 
-	LLSD sdBody;
-	sdBody["item_id"] = idItem;
-	sdBody["target"] = "lsl2";
+	if (m_FileQueue.end() != itFile)
+	{
+		std::string strFileName = itFile->second["path"];
+		itFile->second["item"] = idItem;
 
-	std::string strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
-	LLHTTPClient::post(strCapsUrl, sdBody, 
-	                   new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, 
-	                                                       boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3),
-	                                                       boost::bind(&LLScriptRecoverQueue::onUploadError, this, _1)));
+		LLSD sdBody;
+		sdBody["item_id"] = idItem;
+		sdBody["target"] = "lsl2";
+
+		std::string strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
+		LLHTTPClient::post(strCapsUrl, sdBody, 
+						   new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, 
+															   boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3),
+															   boost::bind(&LLScriptRecoverQueue::onUploadError, this, _1)));
+	}
 }
 
 void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool fSuccess)
