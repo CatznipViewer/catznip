@@ -318,6 +318,9 @@ BOOL gPeriodicSlowFrame = FALSE;
 
 BOOL gCrashOnStartup = FALSE;
 BOOL gLLErrorActivated = FALSE;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+std::string gLLErrorLastMessage;
+// [/SL:KB]
 BOOL gLogoutInProgress = FALSE;
 
 ////////////////////////////////////////////////////////////
@@ -651,7 +654,13 @@ LLAppViewer::LLAppViewer() :
 		llerrs << "Oh no! An instance of LLAppViewer already exists! LLAppViewer is sort of like a singleton." << llendl;
 	}
 
-	setupErrorHandling();
+//	setupErrorHandling();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	EMiniDumpType minidump_type = MINIDUMP_NORMAL;
+	if (gSavedSettings.controlExists("SaveMiniDumpType"))
+		minidump_type = (LLApp::EMiniDumpType)gSavedSettings.getU32("SaveMiniDumpType"); 
+	setupErrorHandling(minidump_type);
+// [/SL:KB]
 	sInstance = this;
 	gLoggedInTime.stop();
 	
@@ -1578,12 +1587,12 @@ bool LLAppViewer::cleanup()
 	}
 	LLMetricPerformanceTesterBasic::cleanClass();
 
-	// remove any old breakpad minidump files from the log directory
-	if (! isError())
-	{
-		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
-		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
-	}
+//	// remove any old breakpad minidump files from the log directory
+//	if (! isError())
+//	{
+//		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+//		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+//	}
 
 	{
 		// Kill off LLLeap objects. We can find them all because LLLeap is derived
@@ -1835,6 +1844,11 @@ bool LLAppViewer::cleanup()
 		llinfos << "Saved settings" << llendflush;
 	}
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
+	gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+// [/SL:KB]
+
 	std::string warnings_settings_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Warnings"));
 	gWarningSettings.saveToFile(warnings_settings_filename, TRUE);
 
@@ -2017,6 +2031,9 @@ bool LLAppViewer::cleanup()
 void watchdog_llerrs_callback(const std::string &error_string)
 {
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 
 #ifdef LL_WINDOWS
 	RaiseException(0,0,0,0);
@@ -2077,6 +2094,9 @@ void errorCallback(const std::string &error_string)
 
 	//Set the ErrorActivated global so we know to create a marker file
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 	
 //	LLError::crashAndLoop(error_string);
 // [SL:KB] - Patch: Viewer-Build | Checked: 2010-12-04 (Catznip-2.4)
@@ -2274,6 +2294,10 @@ bool LLAppViewer::initConfiguration()
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
 	gSavedSettings.setString("ClientSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	gSavedSettings.setString("CrashSettingsFile", 
+        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
+// [/SL:KB]
 
 	gSavedSettings.setString("VersionChannelName", LLVersionInfo::getChannel());
 
@@ -3074,6 +3098,11 @@ void LLAppViewer::checkForCrash(void)
 		handleCrashReporting(report_freeze);
     }
 #endif // LL_SEND_CRASH_REPORTS    
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// Remove any old breakpad minidump files from the log directory
+	std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+	gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+// [/SL:KB]
 }
 
 //
@@ -3258,15 +3287,19 @@ void LLAppViewer::removeCacheFiles(const std::string& file_mask)
 
 void LLAppViewer::writeSystemInfo()
 {
-	gDebugInfo["SLLog"] = LLError::logFileName();
+//	gDebugInfo["SLLog"] = LLError::logFileName();
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 
 	gDebugInfo["CPUInfo"]["CPUString"] = gSysCPU.getCPUString();
 	gDebugInfo["CPUInfo"]["CPUFamily"] = gSysCPU.getFamily();
@@ -3366,27 +3399,36 @@ void LLAppViewer::handleViewerCrash()
 	//We already do this in writeSystemInfo(), but we do it again here to make /sure/ we have a version
 	//to check against no matter what
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
-
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if ( parcel && parcel->getMusicURL()[0])
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if ( parcel && parcel->getMusicURL()[0])
+//	{
+//		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
+//	}	
+//	if ( parcel && parcel->getMediaURL()[0])
+//	{
+//		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
+//	}
+	
+//	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-3.0.0a) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitSettings"))
 	{
-		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
-	}	
-	if ( parcel && parcel->getMediaURL()[0])
-	{
-		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
+		// Only include settings.xml if the user consented
+		gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
 	}
-	
-	
-	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
-	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
-	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
+// [/SL:KB]
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
+//	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
 	gDebugInfo["SessionLength"] = F32(LLFrameTimer::getElapsedSeconds());
 	gDebugInfo["StartupState"] = LLStartUp::getStartupStateString();
 	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer) LLMemory::getCurrentRSS() >> 10;
@@ -3405,19 +3447,34 @@ void LLAppViewer::handleViewerCrash()
 	}
 	else
 	{
-		gDebugInfo["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+//		gDebugInfo["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+		if (gLLErrorActivated)
+		{
+			gDebugInfo["LastExecEvent"] = LAST_EXEC_LLERROR_CRASH;
+			gDebugInfo["LastErrorMessage"] = gLLErrorLastMessage;
+		}
+		else
+		{
+			gDebugInfo["LastExecEvent"] = LAST_EXEC_OTHER_CRASH;
+		}
+// [/SL:KB]
 	}
 
-	if(gAgent.getRegion())
-	{
-		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
-		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
-		
-		const LLVector3& loc = gAgent.getPositionAgent();
-		gDebugInfo["CurrentLocationX"] = loc.mV[0];
-		gDebugInfo["CurrentLocationY"] = loc.mV[1];
-		gDebugInfo["CurrentLocationZ"] = loc.mV[2];
-	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+//	if(gAgent.getRegion())
+//	{
+//		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
+//		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+//		
+//		const LLVector3& loc = gAgent.getPositionAgent();
+//		gDebugInfo["CurrentLocationX"] = loc.mV[0];
+//		gDebugInfo["CurrentLocationY"] = loc.mV[1];
+//		gDebugInfo["CurrentLocationZ"] = loc.mV[2];
+//	}
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{
@@ -3469,7 +3526,7 @@ void LLAppViewer::handleViewerCrash()
 		gMessageSystem->stopLogging();
 	}
 
-	if (LLWorld::instanceExists()) LLWorld::getInstance()->getInfo(gDebugInfo);
+//	if (LLWorld::instanceExists()) LLWorld::getInstance()->getInfo(gDebugInfo);
 
 	// Close the debug file
 	pApp->writeDebugInfo();
@@ -5177,32 +5234,46 @@ void LLAppViewer::handleLoginComplete()
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
-
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if ( parcel && parcel->getMusicURL()[0])
-	{
-		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
-	}	
-	if ( parcel && parcel->getMediaURL()[0])
-	{
-		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
-	}
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if ( parcel && parcel->getMusicURL()[0])
+//	{
+//		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
+//	}	
+//	if ( parcel && parcel->getMediaURL()[0])
+//	{
+//		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
+//	}
 	
-	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
-	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
-	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
-
-	if(gAgent.getRegion())
+//	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-3.0.0a) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitSettings"))
 	{
-		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
-		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+		// Only include settings.xml if the user consented
+		gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
 	}
+// [/SL:KB]
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
+//	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+//	if(gAgent.getRegion())
+//	{
+//		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
+//		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+//	}
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{
