@@ -219,6 +219,12 @@
 #include "llmachineid.h"
 #include "llmainlooprepeater.h"
 
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#ifdef LL_WINDOWS
+#include <TlHelp32.h>
+#include "llwindebug.h"
+#endif // LL_WINDOWS
+// [/SL:KB]
 
 // *FIX: These extern globals should be cleaned up.
 // The globals either represent state/config/resource-storage of either 
@@ -1211,7 +1217,10 @@ LLFastTimer::DeclareTimer FTM_FRAME("Frame", true);
 
 bool LLAppViewer::mainLoop()
 {
-	mMainloopTimeout = new LLWatchdogTimeout();
+//	mMainloopTimeout = new LLWatchdogTimeout();
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	initMainloopTimeout("Mainloop Init", gSavedSettings.getF32("MainloopTimeoutDefault"));
+// [/SL:KB]
 	
 	//-------------------------------------------
 	// Run main loop until time to quit
@@ -2048,6 +2057,122 @@ void watchdog_killer_callback()
 	LLError::setFatalFunction(watchdog_llerrs_callback);
 	llerrs << "Watchdog killer event" << llendl;
 }
+
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+
+void enumerate_process_threads(HANDLE hThreadSnapshot, DWORD (WINAPI* pCallback)(HANDLE))
+{
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		THREADENTRY32 threadEntry;
+		threadEntry.dwSize = sizeof(THREADENTRY32);
+		if (Thread32First(hThreadSnapshot, &threadEntry))
+		{
+			DWORD dwProcessId = GetCurrentProcessId();
+			DWORD dwCurThreadId = GetCurrentThreadId();
+			do
+			{
+				if ( (threadEntry.th32OwnerProcessID == dwProcessId) && (threadEntry.th32ThreadID != dwCurThreadId) )
+				{
+					HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME, false, threadEntry.th32ThreadID);
+					if (hThread)
+					{
+						pCallback(hThread);
+						CloseHandle(hThread);
+					}
+				}
+			} while (Thread32Next(hThreadSnapshot, &threadEntry));
+		}
+	}
+}
+
+BOOL CALLBACK watchdog_freeze_dump_callback(void* pParam, const MINIDUMP_CALLBACK_INPUT* pCbInput, MINIDUMP_CALLBACK_OUTPUT* pCbOutput)
+{
+	U32 nFreezeDumpType = (pParam) ? *(U32*)pParam : 0;
+	switch (pCbInput->CallbackType)
+	{
+		case IncludeThreadCallback:
+			{
+				// Only include information about the main thread by default
+				if (0 == nFreezeDumpType)
+				{
+					DWORD dwMainThreadId = (DWORD)gDebugInfo["MainloopThreadID"].asInteger();
+					if ( (dwMainThreadId) && (dwMainThreadId != pCbInput->IncludeThread.ThreadId) )
+					{
+						return FALSE;
+					}
+				}
+			}
+			return TRUE;
+		case ThreadCallback:
+		case ThreadExCallback:
+			return TRUE;
+
+		case IncludeModuleCallback:
+			return TRUE;
+		case ModuleCallback:
+			{
+				// Don't include information about modules that aren't referenced
+				if ( (pCbOutput->ModuleWriteFlags & ModuleReferencedByMemory) == 0)
+				{
+					pCbOutput->ModuleWriteFlags &= ~ModuleWriteModule;
+					return TRUE;
+				}
+
+				// We only want the data segments for the executable and llcommon.dll as a start
+				if (pCbOutput->ModuleWriteFlags & ModuleWriteDataSeg)
+				{
+					if ((HMODULE)pCbInput->Module.BaseOfImage != GetModuleHandle(NULL))
+					{
+						// Not the main executable, check DLLs by name
+						TCHAR* pstrModuleName = wcsrchr(pCbInput->Module.FullPath, L'\\');
+						if ( (!pstrModuleName) || (0 != wcsicmp(++pstrModuleName, L"llcommon.dll")) )
+						{
+							pCbOutput->ModuleWriteFlags &= ~ModuleWriteDataSeg;
+						}
+					}
+				}
+			}
+			return TRUE;
+
+		case MemoryCallback:
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void watchdog_freeze_callback()
+{
+	// NOTE: called from the thread the watchdog runs on, not the main thread
+
+	// SuspendThread() increments the thread's suspend count so we can't wake up a thread that was previously suspended
+	HANDLE hThreadSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0); 
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		enumerate_process_threads(hThreadSnapshot, SuspendThread);
+
+		U32 nFreezeDumpType = gSavedSettings.getU32("WatchdogFreezeDumpType");
+		U32 nMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory;
+		if (nFreezeDumpType >= 2)
+			nMiniDumpType |= MiniDumpWithDataSegs;
+		MINIDUMP_CALLBACK_INFORMATION dumpCbInfo;
+		dumpCbInfo.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)watchdog_freeze_dump_callback;
+		dumpCbInfo.CallbackParam = &nFreezeDumpType;
+		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
+		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(strFilename, (MINIDUMP_TYPE)nMiniDumpType, NULL, &dumpCbInfo);
+
+		gDebugInfo["MinidumpPath"] = strMinidumpPath;
+		LLAppViewer::writeDebugInfo();
+
+		enumerate_process_threads(hThreadSnapshot, ResumeThread);
+
+		CloseHandle(hThreadSnapshot);
+	}
+}
+
+#endif // LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
 
 bool LLAppViewer::initThreads()
 {
@@ -3161,7 +3286,14 @@ bool LLAppViewer::initWindow()
 
 	if (use_watchdog)
 	{
-		LLWatchdog::getInstance()->init(watchdog_killer_callback);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+		LLWatchdog::getInstance()->init(NULL, watchdog_freeze_callback);
+#else
+		LLWatchdog::getInstance()->init(NULL);
+#endif // LL_WINDOWS
+// [/SL:KB]
+//		LLWatchdog::getInstance()->init(watchdog_killer_callback);
 	}
 	LL_INFOS("AppInit") << "watchdog setting is done." << LL_ENDL;
 
@@ -3230,7 +3362,11 @@ bool LLAppViewer::initWindow()
 	return true;
 }
 
+//void LLAppViewer::writeDebugInfo()
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+// static
 void LLAppViewer::writeDebugInfo()
+// [/SL:KB]
 {
 	std::string debug_filename = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"debug_info.log");
 	llinfos << "Opening debug file " << debug_filename << llendl;
@@ -5173,7 +5309,12 @@ void LLAppViewer::initMainloopTimeout(const std::string& state, F32 secs)
 	if(!mMainloopTimeout)
 	{
 		mMainloopTimeout = new LLWatchdogTimeout();
-		resumeMainloopTimeout(state, secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->setTimeout(secs);
+		mMainloopState = state;
+		resumeMainloopTimeout();
+// [/SL:KB]
+//		resumeMainloopTimeout(state, secs);
 	}
 }
 
@@ -5186,17 +5327,23 @@ void LLAppViewer::destroyMainloopTimeout()
 	}
 }
 
-void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::resumeMainloopTimeout()
+// [/SL:KB]
 {
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-		
-		mMainloopTimeout->setTimeout(secs);
-		mMainloopTimeout->start(state);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->start(mMainloopState);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//		
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->start(state);
 	}
 }
 
@@ -5208,7 +5355,10 @@ void LLAppViewer::pauseMainloopTimeout()
 	}
 }
 
-void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::pingMainloopTimeout(const std::string& state)
+// [/SL:KB]
 {
 //	if(!restoreErrorTrap())
 //	{
@@ -5217,20 +5367,24 @@ void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
 	
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-
-		mMainloopTimeout->setTimeout(secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopState = state;
 		mMainloopTimeout->ping(state);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->ping(state);
 	}
 }
 
 void LLAppViewer::handleLoginComplete()
 {
 	gLoggedInTime.start();
-	initMainloopTimeout("Mainloop Init");
+//	initMainloopTimeout("Mainloop Init");
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();

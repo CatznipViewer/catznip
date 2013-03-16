@@ -2216,7 +2216,10 @@ BOOL LLPanelPreferenceCrashReports::postBuild()
 		const LLSD& sdCrash = *itCrash;
 		sdRow["value"] = sdCrash;
 		sdColumns[0]["value"] = sdCrash["timestamp"].asDate().toHTTPDateString(std::string ("%Y-%m-%d %H:%M GMT"));
-		sdColumns[1]["value"] = sdCrash["crash_module"].asString() + "!" + sdCrash["crash_offset"].asString();
+		if (!sdCrash["crash_freeze"].asBoolean())
+			sdColumns[1]["value"] = sdCrash["crash_module"].asString() + "!" + sdCrash["crash_offset"].asString();
+		else
+			sdColumns[1]["value"] = "(freeze)";
 		sdColumns[2]["value"] = sdCrash["crash_id"];
 		pCrashList->addElement(sdRow, ADD_BOTTOM);
 	}
