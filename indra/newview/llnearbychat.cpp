@@ -94,8 +94,13 @@ std::string appendTime()
 {
 	time_t utc_time;
 	utc_time = time_corrected();
-	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
-		+LLTrans::getString("TimeMin")+"]";
+//	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
+//		+LLTrans::getString("TimeMin")+"]";
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	std::string timeStr = "[" + LLTrans::getString("TimeHour") + "]:[" + LLTrans::getString("TimeMin") + "]";
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
+// [/SL:KB]
 
 	LLSD substitution;
 
@@ -202,6 +207,10 @@ void LLNearbyChat::getAllowedRect(LLRect& rect)
 void LLNearbyChat::updateChatHistoryStyle()
 {
 	mChatHistory->clear();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 
 	LLSD do_not_log;
 	do_not_log["do_not_log"] = true;
@@ -210,6 +219,10 @@ void LLNearbyChat::updateChatHistoryStyle()
 		// Update the messages without re-writing them to a log file.
 		addMessage(*it,false, do_not_log);
 	}
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 //static 

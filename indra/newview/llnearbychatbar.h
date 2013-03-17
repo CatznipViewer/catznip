@@ -57,6 +57,9 @@ public:
 
 	std::string getCurrentChat();
 	virtual BOOL handleKeyHere( KEY key, MASK mask );
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	/*virtual*/ BOOL handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
+// [/SL:KB]
 
 	static void startChat(const char* line);
 	static void stopChat();

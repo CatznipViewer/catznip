@@ -9,7 +9,7 @@
      height="105"
      left_delta="20"
      name="avatar_icon"
-     top="-5"
+     top="-2"
      width="114"/>
     <layout_stack
      mouse_opaque="false"

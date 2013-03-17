@@ -155,8 +155,9 @@ void LLIMFloater::newIMCallback(const LLSD& data){
 		LLIMFloater* floater = LLFloaterReg::findTypedInstance<LLIMFloater>("impanel", session_id);
 		if (floater == NULL) return;
 
-        // update if visible, otherwise will be updated when opened
-		if (floater->getVisible())
+//        // update if visible, otherwise will be updated when opened
+//		if (floater->getVisible())
+// [SL:KB] - Add messages as they come in (otherwise keyword alerts only trigger when the IM is opened)
 		{
 			floater->updateMessages();
 		}
@@ -316,6 +317,9 @@ void LLIMFloater::updateSessionName(const std::string& ui_title,
 									const std::string& ui_label)
 {
 	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + ui_label);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2010-11-13 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	setShortTitle(ui_title);
+// [/SL:KB]
 	setTitle(ui_title);	
 }
 
@@ -344,6 +348,18 @@ void LLIMFloater::draw()
 	LLTransientDockableFloater::draw();
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+BOOL LLIMFloater::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
+{
+	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mInputEditor->hasFocus()) )
+	{
+		// Give focus to the line editor and let it handle the character
+		mInputEditor->setFocus(TRUE);
+		return mInputEditor->handleUnicodeChar(uni_char, called_from_parent);
+	}
+	return LLTransientDockableFloater::handleUnicodeChar(uni_char, called_from_parent);
+}
+// [/SL:KB]
 
 // static
 void* LLIMFloater::createPanelIMControl(void* userdata)
@@ -705,7 +721,14 @@ void LLIMFloater::reloadMessages()
 {
 	mChatHistory->clear();
 	mLastMessageIndex = -1;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 	updateMessages();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 // static
@@ -839,7 +862,14 @@ void LLIMFloater::updateChatHistoryStyle()
 {
 	mChatHistory->clear();
 	mLastMessageIndex = -1;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 	updateMessages();
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 void LLIMFloater::processChatHistoryStyleUpdate(const LLSD& newvalue)

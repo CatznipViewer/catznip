@@ -50,6 +50,9 @@
 #include "llfloaterbump.h"
 #include "llfloaterbvhpreview.h"
 #include "llfloatercamera.h"
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+#include "llfloaterchatalerts.h"
+// [/SL:KB]
 #include "llfloaterdeleteenvpreset.h"
 #include "llfloaterdisplayname.h"
 #include "llfloatereditdaycycle.h"
@@ -190,6 +193,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("bumps", "floater_bumps.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBump>);
 
 	LLFloaterReg::add("camera", "floater_camera.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCamera>);
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-17 (Catznip-3.3)
+	LLFloaterReg::add("chat_alerts", "floater_chat_alerts.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterChatAlerts>);
+// [/SL:KB]
 	LLFloaterReg::add("chat_bar", "floater_chat_bar.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLNearbyChatBar>);
 
 	LLFloaterReg::add("compile_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCompileQueue>);
@@ -215,7 +221,10 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("hud", "floater_hud.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterHUD>);
 
 	LLFloaterReg::add("impanel", "floater_im_session.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloater>);
-	LLFloaterReg::add("im_container", "floater_im_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloaterContainer>);
+//	LLFloaterReg::add("im_container", "floater_im_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloaterContainer>);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a) | Added: Catznip-2.4.0g
+	LLFloaterReg::addWithFileCallback("im_container", &LLIMFloaterContainer::getFloaterXMLFile, (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMFloaterContainer>);
+// [/SL:KB]
 	LLFloaterReg::add("im_well_window", "floater_sys_well.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMWellWindow>);
 	LLFloaterReg::add("incoming_call", "floater_incoming_call.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIncomingCallDialog>);
 	LLFloaterReg::add("inventory", "floater_my_inventory.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSidePanelContainer>);

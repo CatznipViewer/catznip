@@ -43,6 +43,9 @@
 
 class LLContextMenu;
 class LLUrlMatch;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+class LLHighlightEntry;
+// [/SL:KB]
 
 ///
 /// A text segment is used to specify a subsection of a text string
@@ -397,6 +400,14 @@ public:
 	virtual void			appendWidget(const LLInlineViewSegment::Params& params, const std::string& text, bool allow_undo);
 	boost::signals2::connection setURLClickedCallback(const commit_signal_t::slot_type& cb);
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	void setParseHighlights(BOOL parsing)     { mParseHighlights = parsing; }
+	S32  getHighlightsMask() const            { return mHighlightsMask; }
+	void setHighlightsMask(S32 category_mask) { mHighlightsMask = category_mask; }
+
+	typedef boost::signals2::signal<void(const std::string&, const LLHighlightEntry*)> highlights_signal_t;
+	boost::signals2::connection	setHighlightsCallback(const highlights_signal_t::slot_type& cb);
+// [/SL:KB]
 protected:
 	// helper structs
 	struct compare_bottom;
@@ -579,6 +590,10 @@ protected:
 	bool						mBorderVisible;
 	bool                		mParseHTML;			// make URLs interactive
 	bool						mParseHighlights;	// highlight user-defined keywords
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	S32							mHighlightsMask;	// category mask for matching highlights
+	highlights_signal_t* 		mHighlightsSignal;	// signal fires whenever a highlighted segment is appended
+// [/SL:KB]
 	bool                		mWordWrap;
 	bool						mUseEllipses;
 	bool						mTrackEnd;			// if true, keeps scroll position at end of document during resize
