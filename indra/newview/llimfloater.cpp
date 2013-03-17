@@ -221,6 +221,15 @@ void LLIMFloater::sendMsg()
 
 			updateMessages();
 		}
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-02 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+		else if (gSavedSettings.getBOOL("CloseIMOnEmptyReturn"))
+		{
+			if (!getHost())
+				setVisible(false);
+			else
+				getHost()->setVisible(false);
+		}
+// [/SL:KB]
 	}
 }
 

@@ -43,8 +43,17 @@ public:
 
 	/** @param archive true - to save a message to the chat history log */
 	void	addMessage			(const LLChat& message,bool archive = true, const LLSD &args = LLSD());	
-	void	onNearbyChatContextMenuItemClicked(const LLSD& userdata);
-	bool	onNearbyChatCheckContextMenuItem(const LLSD& userdata);
+//	void	onNearbyChatContextMenuItemClicked(const LLSD& userdata);
+//	bool	onNearbyChatCheckContextMenuItem(const LLSD& userdata);
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	static void onNearbyChatAction(const LLSD& sdParam);
+	static bool onNearbyChatCheck(const LLSD& sdParam);
+	static void onSetChatBarType(const LLSD& sdParam);
+	static bool onCheckChatBarType(const LLSD& sdParam);
+	static void onSetFontSize(const LLSD& sdParam);
+	static bool onCheckFontSize(const LLSD& sdParam);
+// [/SL:KB]
 
 	virtual BOOL	handleMouseDown(S32 x, S32 y, MASK mask);
 	virtual void	draw();
@@ -60,6 +69,10 @@ public:
 	static void processChatHistoryStyleUpdate(const LLSD& newvalue);
 
 	void loadHistory();
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	const std::vector<LLChat>& getHistory() const							{ return mMessageArchive; }
+	void                       setHistory(const std::vector<LLChat>& msgs)	{ mMessageArchive = msgs; }
+// [/SL:KB]
 
 	static LLNearbyChat* getInstance();
 	void removeScreenChat();
