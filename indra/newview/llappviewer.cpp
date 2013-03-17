@@ -692,7 +692,10 @@ bool LLAppViewer::init()
 	gDirUtilp->initAppDirs("SecondLife");
 	// set skin search path to default, will be overridden later
 	// this allows simple skinned file lookups to work
-	gDirUtilp->setSkinFolder("default", "en");
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-12-26 (Catznip-3.4)
+	gDirUtilp->setSkinFolder("default", "", "en");
+// [/SL:KB]
+//	gDirUtilp->setSkinFolder("default", "en");
 
 	initLogging();
 	
@@ -779,7 +782,10 @@ bool LLAppViewer::init()
 	// NOW LLUI::getLanguage() should work. gDirUtilp must know the language
 	// for this session ASAP so all the file-loading commands that follow,
 	// that use findSkinnedFilenames(), will include the localized files.
-	gDirUtilp->setSkinFolder(gDirUtilp->getSkinFolder(), LLUI::getLanguage());
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-12-26 (Catznip-3.4)
+	gDirUtilp->setSkinFolder(gDirUtilp->getSkinFolder(), gDirUtilp->getSkinThemeFolder(),LLUI::getLanguage());
+// [/SL:KB]
+//	gDirUtilp->setSkinFolder(gDirUtilp->getSkinFolder(), LLUI::getLanguage());
 
 	// Setup LLTrans after LLUI::initClass has been called.
 	initStrings();
@@ -2589,8 +2595,14 @@ bool LLAppViewer::initConfiguration()
 		// Examining "Language" may not suffice -- see LLUI::getLanguage()
 		// logic. Unfortunately LLUI::getLanguage() doesn't yet do us much
 		// good because we haven't yet called LLUI::initClass().
-		gDirUtilp->setSkinFolder(skinfolder->getValue().asString(),
-								 gSavedSettings.getString("Language"));
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2012-12-26 (Catznip-3.4)
+ 		gDirUtilp->setSkinFolder(skinfolder->getValue().asString(),
+								 gSavedSettings.getString("SkinCurrentTheme"),
+ 								 gSavedSettings.getString("Language"));
+// [/SL:KB]
+//		gDirUtilp->setSkinFolder(skinfolder->getValue().asString(),
+//								 gSavedSettings.getString("Language"));
+
 	}
 
 	if (gSavedSettings.getBOOL("SpellCheck"))
