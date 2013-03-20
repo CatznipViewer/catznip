@@ -13032,6 +13032,39 @@
       <key>Value</key>
       <real>50.0</real>
     </map>
+    <key>WearingFolderSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the sort order for the wearing folder view</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>6</integer>
+    </map>
+    <key>WearingListSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the sort order for the wearing list view</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
+    <key>WearingViewType</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the wearing panel as a folder view (0) or a list view (1)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>WellIconFlashCount</key>
     <map>
       <key>Comment</key>

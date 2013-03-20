@@ -234,6 +234,18 @@ const std::string& LLPanelInventoryListItemBase::getDescription() const
 	return inv_item->getActualDescription();
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+const std::string& LLPanelInventoryListItemBase::getActualDescription() const
+{
+	LLViewerInventoryItem* inv_item = getItem();
+	if (NULL == inv_item)
+	{
+		return LLStringUtil::null;
+	}
+	return inv_item->LLInventoryItem::getDescription();
+}
+// [/SL:KB]
+
 time_t LLPanelInventoryListItemBase::getCreationDate() const
 {
 	LLViewerInventoryItem* inv_item = getItem();
@@ -286,6 +298,9 @@ LLPanelInventoryListItemBase::LLPanelInventoryListItemBase(LLViewerInventoryItem
 	mWidgetSpacing(WIDGET_SPACING),
 	mLeftWidgetsWidth(0),
 	mRightWidgetsWidth(0),
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	mReshapeWidgetMask(SIDE_MIDDLE | SIDE_RIGHT),
+// [/SL:KB]
 	mNeedsRefresh(false),
 	mHovered(false),
 	mSelected(false),
@@ -346,10 +361,18 @@ void LLPanelInventoryListItemBase::setWidgetsVisible(bool visible)
 
 void LLPanelInventoryListItemBase::reshapeWidgets()
 {
-	// disabled reshape left for now to reserve space for 'delete' button in LLPanelClothingListItem
-	/*reshapeLeftWidgets();*/
-	reshapeRightWidgets();
-	reshapeMiddleWidgets();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	if (SIDE_LEFT & mReshapeWidgetMask)
+		reshapeLeftWidgets();
+	if (SIDE_MIDDLE & mReshapeWidgetMask)
+		reshapeRightWidgets();
+	if (SIDE_RIGHT & mReshapeWidgetMask)
+		reshapeMiddleWidgets();
+// [/SL:KB]
+//	// disabled reshape left for now to reserve space for 'delete' button in LLPanelClothingListItem
+//	/*reshapeLeftWidgets();*/
+//	reshapeRightWidgets();
+//	reshapeMiddleWidgets();
 }
 
 void LLPanelInventoryListItemBase::setIconImage(const LLUIImagePtr& image)
