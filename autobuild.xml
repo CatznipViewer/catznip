@@ -1733,6 +1733,30 @@
           </map>
         </map>
       </map>
+      <key>dbghelp</key>
+      <map>
+        <key>license</key>
+        <string>dbghelp</string>
+        <key>license_file</key>
+        <string>LICENSES/dbghelp.txt</string>
+        <key>name</key>
+        <string>dbghelp</string>
+        <key>platforms</key>
+        <map>
+          <key>windows</key>
+          <map>
+            <key>archive</key>
+            <map>
+              <key>hash</key>
+              <string>dca0d29e37a65a24ff6a129e0f18e666</string>
+              <key>url</key>
+              <string>http://viewer.catznip.com/downloads/dbghelp-6.12.2.633-windows-20110618.tar.bz2</string>
+            </map>
+            <key>name</key>
+            <string>windows</string>
+          </map>
+        </map>
+      </map>
       <key>pcre</key>
       <map>
         <key>license</key>
