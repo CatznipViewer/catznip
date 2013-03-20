@@ -367,6 +367,9 @@ void LLPanelMainInventory::resetFilters()
 	}
 
 	setFilterTextFromFilter();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
+	onFilterEdit("");
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
