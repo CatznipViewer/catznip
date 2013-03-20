@@ -151,7 +151,7 @@ fi
 # Don't quote $LL_WRAPPER because, if empty, it should simply vanish from the
 # command line. But DO quote "$@": preserve separate args as individually
 # quoted. Similar remarks about the contents of gridargs.
-$LL_WRAPPER bin/do-not-directly-run-secondlife-bin "${gridargs[@]}" "${ARGS[@]}"
+$LL_WRAPPER bin/catznip-do-not-directly-run-bin "${gridargs[@]}" "$@"
 LL_RUN_ERR=$?
 
 # Handle any resulting errors
@@ -161,9 +161,9 @@ if [ $LL_RUN_ERR -ne 0 ]; then
 	if [ "$(uname -m)" = "x86_64" ]; then
 		echo
 		cat << EOFMARKER
-You are running the Second Life Viewer on a x86_64 platform.  The
+You are running the Catznip Viewer on a x86_64 platform.  The
 most common problems when launching the Viewer (particularly
-'bin/do-not-directly-run-secondlife-bin: not found' and 'error while
+'bin/do-not-directly-run-catznip-bin: not found' and 'error while
 loading shared libraries') may be solved by installing your Linux
 distribution's 32-bit compatibility packages.
 For example, on Ubuntu and other Debian-based Linuxes you might run:

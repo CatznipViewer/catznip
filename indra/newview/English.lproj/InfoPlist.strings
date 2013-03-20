@@ -1,7 +1,7 @@
 /* Localized versions of Info.plist keys */
 
-CFBundleName = "Second Life";
+CFBundleName = "Catznip";
 
-CFBundleShortVersionString = "Second Life version 3.4.1.264760";
-CFBundleGetInfoString = "Second Life version 3.4.1.264760, Copyright 2004-2009 Linden Research, Inc.";
+CFBundleShortVersionString = "Catznip version 8.0.0.0";
+CFBundleGetInfoString = "Catznip version 8.0.0.0, Copyright 2010-2013 Kitty Barnett, Inc.";
 

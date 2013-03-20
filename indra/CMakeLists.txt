@@ -12,8 +12,8 @@ if (COMMAND cmake_policy)
   cmake_policy(SET CMP0003 OLD)
 endif (COMMAND cmake_policy)
 
-set(ROOT_PROJECT_NAME "SecondLife" CACHE STRING
-    "The root project/makefile/solution name. Defaults to SecondLife.")
+set(ROOT_PROJECT_NAME "Catznip" CACHE STRING
+    "The root project/makefile/solution name. Defaults to Catznip.")
 project(${ROOT_PROJECT_NAME})
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
@@ -107,7 +107,7 @@ elseif (SOLARIS)
 endif (LINUX)
 
 add_subdirectory(${VIEWER_PREFIX}newview)
-add_dependencies(viewer secondlife-bin)
+add_dependencies(viewer catznip-bin)
 
 if (LL_TESTS)
   # Define after the custom targets are created so
