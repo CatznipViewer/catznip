@@ -379,10 +379,17 @@ LLMeshFilePicker::LLMeshFilePicker(LLModelPreview* mp, S32 lod)
 		mLOD = lod;
 	}
 
-void LLMeshFilePicker::notify(const std::string& filename)
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+void LLMeshFilePicker::notify(const std::vector<std::string>& files)
 {
-	mMP->loadModel(mFile, mLOD);
+	if (!files.empty())
+		mMP->loadModel(files.front(), mLOD);
 }
+// [/SL:KB]
+//void LLMeshFilePicker::notify(const std::string& filename)
+//{
+//	mMP->loadModel(mFile, mLOD);
+//}
 
 
 //-----------------------------------------------------------------------------

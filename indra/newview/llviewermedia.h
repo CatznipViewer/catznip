@@ -410,6 +410,9 @@ private:
 	bool shouldShowBasedOnClass() const;
 	static bool isObjectAttachedToAnotherAvatar(LLVOVolume *obj);
 	static bool isObjectInAgentParcel(LLVOVolume *obj);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	static void onFilePickerCallback(LLPluginClassMedia* plugin, const std::string& filename);
+// [/SL:KB]
 	
 private:
 	// a single media url with some data and an impl.

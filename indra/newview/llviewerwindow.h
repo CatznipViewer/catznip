@@ -340,7 +340,11 @@ public:
 	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, ESnapshotType type) ;
 	BOOL			isSnapshotLocSet() const { return ! sSnapshotDir.empty(); }
 	void			resetSnapshotLoc() const { sSnapshotDir.clear(); }
-	BOOL		    saveImageNumbered(LLImageFormatted *image, bool force_picker = false);
+//	BOOL		    saveImageNumbered(LLImageFormatted *image, bool force_picker = false);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	typedef boost::function<void(bool)> save_image_callback_t;
+	void		    saveImage(LLImageFormatted* image, const save_image_callback_t& cb, bool force_picker = false);
+// [/SL:KB]
 
 	// Reset the directory where snapshots are saved.
 	// Client will open directory picker on next snapshot save.
@@ -401,6 +405,11 @@ public:
 private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
 	static bool onAlert(const LLSD& notify);
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	void		    saveImageCallback(LLImageFormatted* image, const std::string& filename, const save_image_callback_t& cb);
+	static void		saveImageNumbered(LLImageFormatted* image, const std::string& path, const std::string& base_name, const save_image_callback_t& cb);
+// [/SL:KB]
 
 	void			switchToolByMask(MASK mask);
 	void			destroyWindow();
