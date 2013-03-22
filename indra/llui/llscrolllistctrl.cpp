@@ -162,6 +162,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mAllowKeyboardMovement(true),
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
 	mCommitOnSelectionChange(false),
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	mCommitOnDelete(false),
+// [/SL:KB]
 	mSelectionChanged(false),
 	mNeedsScroll(false),
 	mCanSelect(true),
@@ -357,6 +360,13 @@ void LLScrollListCtrl::clearRows()
 	mLastSelected = NULL;
 	updateLayout();
 	mDirty = false; 
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 
@@ -924,6 +934,13 @@ void LLScrollListCtrl::deleteSingleItem(S32 target_index)
 	delete itemp;
 	mItemList.erase(mItemList.begin() + target_index);
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 //FIXME: refactor item deletion
@@ -949,6 +966,13 @@ void LLScrollListCtrl::deleteItems(const LLSD& sd)
 	}
 
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 void LLScrollListCtrl::deleteSelectedItems()
@@ -969,6 +993,13 @@ void LLScrollListCtrl::deleteSelectedItems()
 	}
 	mLastSelected = NULL;
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3.0)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 void LLScrollListCtrl::clearHighlightedItems()

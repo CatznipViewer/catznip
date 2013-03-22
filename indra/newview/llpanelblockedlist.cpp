@@ -66,10 +66,15 @@ LLPanelBlockedList::~LLPanelBlockedList()
 
 BOOL LLPanelBlockedList::postBuild()
 {
-	mBlockedList = getChild<LLScrollListCtrl>("blocked");
+//	mBlockedList = getChild<LLScrollListCtrl>("blocked");
+// [SL:KB] - Patch: World-Derender | Checked: 2012-02-27 (Catznip-3.2.3)
+	mBlockedList = getChild<LLScrollListCtrl>("mute_list");
+	mBlockedList->setCommitCallback(boost::bind(&LLPanelBlockedList::updateButtons, this));
+	mBlockedList->setCommitOnDelete(true);
+// [/SL:KB]
 	mBlockedList->setCommitOnSelectionChange(TRUE);
 
-	childSetCommitCallback("back", boost::bind(&LLPanelBlockedList::onBackBtnClick, this), NULL);
+//	childSetCommitCallback("back", boost::bind(&LLPanelBlockedList::onBackBtnClick, this), NULL);
 
 	LLMuteList::getInstance()->addObserver(this);
 	
@@ -78,11 +83,11 @@ BOOL LLPanelBlockedList::postBuild()
 	return LLPanel::postBuild();
 }
 
-void LLPanelBlockedList::draw()
-{
-	updateButtons();
-	LLPanel::draw();
-}
+//void LLPanelBlockedList::draw()
+//{
+//	updateButtons();
+//	LLPanel::draw();
+//}
 
 void LLPanelBlockedList::onOpen(const LLSD& key)
 {
@@ -99,7 +104,10 @@ void LLPanelBlockedList::selectBlocked(const LLUUID& mute_id)
 
 void LLPanelBlockedList::showPanelAndSelect(const LLUUID& idToSelect)
 {
-	LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD().with(BLOCKED_PARAM_NAME, idToSelect));
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+	LLFloaterReg::showInstance("blocked", LLSD().with(BLOCKED_PARAM_NAME, idToSelect));
+// [/SL:KB]
+//	LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD().with(BLOCKED_PARAM_NAME, idToSelect));
 }
 
 
@@ -127,19 +135,22 @@ void LLPanelBlockedList::refreshBlockedList()
 void LLPanelBlockedList::updateButtons()
 {
 	bool hasSelected = NULL != mBlockedList->getFirstSelected();
-	getChildView("Unblock")->setEnabled(hasSelected);
+// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.2.3)
+	getChildView("mute_trash_btn")->setEnabled(hasSelected);
+// [/SL:KB]
+//	getChildView("Unblock")->setEnabled(hasSelected);
 }
 
 
 
-void LLPanelBlockedList::onBackBtnClick()
-{
-	LLSideTrayPanelContainer* parent = dynamic_cast<LLSideTrayPanelContainer*>(getParent());
-	if(parent)
-	{
-		parent->openPreviousPanel();
-	}
-}
+//void LLPanelBlockedList::onBackBtnClick()
+//{
+//	LLSideTrayPanelContainer* parent = dynamic_cast<LLSideTrayPanelContainer*>(getParent());
+//	if(parent)
+//	{
+//		parent->openPreviousPanel();
+//	}
+//}
 
 void LLPanelBlockedList::onRemoveBtnClick()
 {
