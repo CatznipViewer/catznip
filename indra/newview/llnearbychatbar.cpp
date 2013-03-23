@@ -139,6 +139,8 @@ BOOL LLNearbyChatBarSingle::postBuild()
 	mChatBox = getChild<LLLineEditor>("chat_box");
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	mChatBox->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", 
+																					   LLMenuGL::sMenuContainer, 
+																					   LLMenuHolderGL::child_registry_t::instance()));
 // [/SL:KB]
 
 	mChatBox->setAutoreplaceCallback(boost::bind(&LLAutoReplace::autoreplaceCallback, LLAutoReplace::getInstance(), _1, _2));
@@ -192,7 +194,8 @@ BOOL LLNearbyChatBar::postBuild()
 	mChatHistory = findChild<LLNearbyChat>("nearby_chat");
 
 	gSavedSettings.declareBOOL("nearbychat_history_visibility", mChatHistoryContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
-	mChatHistoryContainer->setVisible(gSavedSettings.getBOOL("nearbychat_history_visibility"));
+	BOOL show_nearby_chat = gSavedSettings.getBOOL("nearbychat_history_visibility");
+	mChatHistoryContainer->setVisible(show_nearby_chat);
 
 	// This panel only exists when hosting multi-line chat bar
 	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_container");
@@ -206,7 +209,7 @@ BOOL LLNearbyChatBar::postBuild()
 
 	mChatBarImpl = (hasChild("panel_chat_bar_multi", TRUE)) ? findChild<LLNearbyChatBarBase>("panel_chat_bar_multi", TRUE) : findChild<LLNearbyChatBarBase>("panel_chat_bar_single", TRUE);
 
-	LLUICtrl* show_btn = getChild<LLUICtrl>("show_nearby_chat");
+	LLButton* show_btn = getChild<LLButton>("show_nearby_chat");
 	show_btn->setCommitCallback(boost::bind(&LLNearbyChatBar::onToggleNearbyChatPanel, this));
 	show_btn->setToggleState(show_nearby_chat);
 
@@ -401,16 +404,19 @@ BOOL LLNearbyChatBar::handleKeyHere( KEY key, MASK mask )
 	if( KEY_RETURN == key && mask == MASK_CONTROL)
 	{
 		// shout
-//		sendChat(CHAT_TYPE_SHOUT);
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
 		mChatBarImpl->sendChat(CHAT_TYPE_SHOUT);
 // [/SL:KB]
+//		sendChat(CHAT_TYPE_SHOUT);
 		handled = TRUE;
 	}
 	else if (KEY_RETURN == key && mask == MASK_SHIFT)
 	{
 		// whisper
-		sendChat(CHAT_TYPE_WHISPER);
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
+		mChatBarImpl->sendChat(CHAT_TYPE_WHISPER);
+// [/SL:KB]
+//		sendChat(CHAT_TYPE_WHISPER);
 		handled = TRUE;
 	}
 	return handled;
@@ -713,7 +719,10 @@ void LLNearbyChatBar::showNearbyChatPanel(bool show)
 
 void LLNearbyChatBar::onToggleNearbyChatPanel()
 {
-	showNearbyChatPanel(!mNearbyChat->getVisible());
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	showNearbyChatPanel(!mChatHistoryContainer->getVisible());
+// [/SL:KB]
+//	showNearbyChatPanel(!mNearbyChat->getVisible());
 }
 
 //void LLNearbyChatBar::setMinimized(BOOL b)

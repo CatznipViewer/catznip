@@ -2078,11 +2078,18 @@ void LLTextEditor::showContextMenu(S32 x, S32 y)
 		}
 	}
 
-	mContextMenu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
-	mContextMenu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
-	mContextMenu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
-	mContextMenu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
-	mContextMenu->show(screen_x, screen_y, this);
+// [SL:KB] - Patch: Control-TextEditorContextMenu | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+	menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+	menu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+	menu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+	menu->show(screen_x, screen_y, this);
+// [/SL:KB]
+//	mContextMenu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+//	mContextMenu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->show(screen_x, screen_y, this);
 }
 
 
