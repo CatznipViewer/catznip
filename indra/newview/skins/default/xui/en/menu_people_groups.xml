@@ -43,6 +43,23 @@
      function="People.Groups.Enable"
      parameter="activate" />
   </menu_item_call>
+  <menu_item_call
+   label="Create Notice"
+   name="Create Notice">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="create_notice" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="create_notice" />
+  </menu_item_call>
+  <menu_item_call
+   label="View Notices"
+   name="View Notices">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="view_notices" />
+  </menu_item_call>
   <menu_item_separator />
   <menu_item_call
    label="Leave"

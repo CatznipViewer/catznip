@@ -135,6 +135,13 @@ void	LLNearbyChat::addMessage(const LLChat& chat,bool archive,const LLSD &args)
 		return;
 	}
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+	logMessage(chat);
+}
+
+void LLNearbyChat::logMessage(const LLChat& chat)
+{
+// [/SL:KB]
 	if (gSavedPerAccountSettings.getBOOL("LogNearbyChat"))
 	{
 		std::string from_name = chat.mFromName;

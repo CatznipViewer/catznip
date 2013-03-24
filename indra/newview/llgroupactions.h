@@ -59,6 +59,13 @@ public:
 	 */
 	static void show(const LLUUID& group_id);
 
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	/**
+	 * Show group information panel.
+	 */
+	static void showNotices(const LLUUID& group_id);
+// [/SL:KB]
+
 	/**
 	 * Show group inspector floater.
 	 */
@@ -96,6 +103,11 @@ public:
 
 	/// Returns if the current user is a member of the group
 	static bool isInGroup(const LLUUID& group_id);
+
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	/// Returns true if the current user has the specified power in the group
+	static bool hasPowerInGroup(const LLUUID& group_id, U64 power);
+// [/SL:KB]
 
 	/**
 	 * Start a group voice call.

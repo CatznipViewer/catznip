@@ -178,6 +178,17 @@ public:
 		FormIgnore();
 	};
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+	struct FormCheck : public LLInitParam::Block<FormCheck, FormElementBase>
+	{
+		Mandatory<std::string>	type;
+		Optional<std::string>	text;
+		Optional<std::string>	control;
+
+		FormCheck();
+	};
+// [/SL:KB]
+
 	struct FormButton : public LLInitParam::Block<FormButton, FormElementBase>
 	{
 		Mandatory<S32>			index;
@@ -205,6 +216,9 @@ public:
 	{
 		Alternative<FormButton> button;
 		Alternative<FormInput>	input;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+		Alternative<FormCheck>	check;
+// [/SL:KB]
 
 		FormElement();
 	};
@@ -364,6 +378,9 @@ private:
 	bool mRespondedTo; 	// once the notification has been responded to, this becomes true
 	LLSD mResponse;
 	bool mIgnored;
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	bool mPersisted;	// true if this notification was loaded from persistent storage
+// [/SL:KB]
 	ENotificationPriority mPriority;
 	LLNotificationFormPtr mForm;
 	void* mResponderObj; // TODO - refactor/remove this field
@@ -396,7 +413,10 @@ private:
 
 	// this is just for making it easy to look things up in a set organized by UUID -- DON'T USE IT
 	// for anything real!
- LLNotification(LLUUID uuid) : mId(uuid), mCancelled(false), mRespondedTo(false), mIgnored(false), mPriority(NOTIFICATION_PRIORITY_UNSPECIFIED), mTemporaryResponder(false) {}
+// LLNotification(LLUUID uuid) : mId(uuid), mCancelled(false), mRespondedTo(false), mIgnored(false), mPriority(NOTIFICATION_PRIORITY_UNSPECIFIED), mTemporaryResponder(false) {}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLNotification(LLUUID uuid) : mId(uuid), mCancelled(false), mRespondedTo(false), mIgnored(false), mPersisted(false), mPriority(NOTIFICATION_PRIORITY_UNSPECIFIED), mTemporaryResponder(false) {}
+// [/SL:KB]
 
 	void cancel();
 
@@ -485,7 +505,23 @@ public:
 
 	const std::string& getIcon() const;
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	bool canLogToNearbyChat() const;
+	bool canLogToIM(bool fOpenSession) const;
+// [/SL:KB]
+
 	bool isPersistent() const;
+
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	bool isPersisted() const
+	{
+		return mPersisted;
+	}
+	void setPersisted(bool fPersisted)
+	{
+		mPersisted = fPersisted;
+	}
+// [/SL:KB]
 
 	const LLUUID& id() const
 	{
@@ -509,6 +545,9 @@ public:
 
 	std::string getType() const;
 	std::string getMessage() const;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+	std::string getLogMessage() const;
+// [/SL:KB]
 	std::string getFooter() const;
 	std::string getLabel() const;
 	std::string getURL() const;

@@ -2241,10 +2241,10 @@ SHA1 指紋：[MD5_DIGEST]
 		主旨：[SUBJECT]，訊息：[MESSAGE]
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; 目前在線上
+		[NAME_SLURL] 目前在線上
 	</notification>
 	<notification name="FriendOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; 目前離線
+		[NAME_SLURL] 目前離線
 	</notification>
 	<notification name="AddSelfFriend">
 		雖然你人很好，你還是不能把自己加為朋友。

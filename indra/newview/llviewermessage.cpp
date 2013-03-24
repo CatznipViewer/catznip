@@ -1889,6 +1889,10 @@ void inventory_offer_handler(LLOfferInfo* info)
 	// Needed by LLScriptFloaterManager to bind original notification with 
 	// faked for toast one.
 	payload["object_id"] = object_id;
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	payload["owner_id"] = info->mFromID;
+	payload["owner_is_group"] = info->mFromGroup;
+// [/SL:KB]
 	// Flag indicating that this notification is faked for toast.
 	payload["give_inventory_notification"] = FALSE;
 	args["OBJECTFROMNAME"] = info->mFromName;
@@ -2579,6 +2583,9 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{
 				payload["subject"] = subj;
 				payload["message"] = mes;
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+				payload["sender_id"] = from_id;
+// [/SL:KB]
 				payload["sender_name"] = name;
 				payload["group_id"] = group_id;
 				payload["inventory_name"] = item_name;
@@ -2587,7 +2594,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				LLSD args;
 				args["SUBJECT"] = subj;
 				args["MESSAGE"] = mes;
-				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp( (timestamp) ? timestamp : LLDate::now().secondsSinceEpoch() ));;
+// [/SL:KB]
+//				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
 			}
 
 			// Also send down the old path for now.
@@ -5599,10 +5609,15 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		}
 		final_args["MESSAGE"] = message;
 
-		// make notification loggable
-		payload["from_id"] = source_id;
+//		// make notification loggable
+//		payload["from_id"] = source_id;
 		notification = "PaymentReceived";
 	}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	// make notification loggable
+	payload["from_id"] = source_id;
+	payload["dest_id"] = dest_id;
+// [/SL:KB]
 
 	// Despite using SLURLs, wait until the name is available before
 	// showing the notification, otherwise the UI layout is strange and
@@ -6822,6 +6837,9 @@ void handle_lure(const uuid_vec_t& ids)
 	if (!gAgent.getRegion()) return;
 
 	LLSD edit_args;
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	edit_args["NAME"] = (1 == ids.size()) ? LLSLURL("agent", ids.front(), "completename").getSLURLString() : LLTrans::getString("AvatarNameMultiple");
+// [/SL:KB]
 	edit_args["REGION"] = gAgent.getRegion()->getName();
 
 	LLSD payload;
@@ -6952,18 +6970,18 @@ bool callback_script_dialog(const LLSD& notification, const LLSD& response)
 	// Button -1 = Ignore - no processing needed for this button
 	// Buttons 0 and above = dialog choices
 
-	if (-2 == button_idx)
-	{
-		std::string object_name = notification["payload"]["object_name"].asString();
-		LLUUID object_id = notification["payload"]["object_id"].asUUID();
-		LLMute mute(object_id, object_name, LLMute::OBJECT);
-		if (LLMuteList::getInstance()->add(mute))
-		{
-			// This call opens the sidebar, displays the block list, and highlights the newly blocked
-			// object in the list so the user can see that their block click has taken effect.
-			LLPanelBlockedList::showPanelAndSelect(object_id);
-		}
-	}
+//	if (-2 == button_idx)
+//	{
+//		std::string object_name = notification["payload"]["object_name"].asString();
+//		LLUUID object_id = notification["payload"]["object_id"].asUUID();
+//		LLMute mute(object_id, object_name, LLMute::OBJECT);
+//		if (LLMuteList::getInstance()->add(mute))
+//		{
+//			// This call opens the sidebar, displays the block list, and highlights the newly blocked
+//			// object in the list so the user can see that their block click has taken effect.
+//			LLPanelBlockedList::showPanelAndSelect(object_id);
+//		}
+//	}
 
 	if (0 <= button_idx)
 	{
@@ -7022,6 +7040,10 @@ void process_script_dialog(LLMessageSystem* msg, void**)
 	msg->getUUID("Data", "ImageID", image_id);
 
 	payload["sender"] = msg->getSender().getIPandPort();
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+	payload["owner_id"] = owner_id;
+	payload["owner_is_group"] = first_name.empty();
+// [/SL:KB]
 	payload["object_id"] = object_id;
 	payload["chat_channel"] = chat_channel;
 	payload["object_name"] = object_name;

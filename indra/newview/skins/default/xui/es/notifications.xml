@@ -2259,10 +2259,10 @@ Publícala en una página web para que otros puedan acceder fácilmente a esta p
 		Asunto: [SUBJECT], Mensaje: [MESSAGE]
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; está conectado
+		[NAME_SLURL] está conectado
 	</notification>
 	<notification name="FriendOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; está desconectado
+		[NAME_SLURL] está desconectado
 	</notification>
 	<notification name="AddSelfFriend">
 		Aunque eres muy agradable, no puedes añadirte como amigo a ti mismo.
