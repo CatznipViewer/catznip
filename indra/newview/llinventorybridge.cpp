@@ -3688,7 +3688,7 @@ void LLFolderBridge::wearItems()
 // static
 void LLFolderBridge::wearItemsFinal(const LLUUID& idFolder)
 {
-	LLPointer<LLInventoryCallback> cb = new ModifiedCOFCallback();
+	LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy(true);
 
 	//
 	// Collect all items in the folder and filter out the ones we need
@@ -3731,7 +3731,7 @@ void LLFolderBridge::wearItemsFinal(const LLUUID& idFolder)
 	// Replace the current top wearable for each type but after that just "Wear Add"
 	for (S32 idxType = 0; idxType < LLWearableType::WT_COUNT; idxType++)
 		for (S32 idxItem = 0, cntItem = wearItemsByType[idxType].size(); idxItem < cntItem; idxItem++)
-			LLAppearanceMgr::instance().wearItemOnAvatar(wearItemsByType[idxType][idxItem]->getLinkedUUID(), true, (0 == idxItem), cb);
+			LLAppearanceMgr::instance().wearItemOnAvatar(wearItemsByType[idxType][idxItem]->getLinkedUUID(), false, (0 == idxItem), cb);
 
 	//
 	// Attachments
@@ -5748,13 +5748,13 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			LLAppearanceMgr::divvyWearablesByType(items, itemsByType);
 
 			// Replace the current top wearable for each type but after that just "Wear Add"
-			LLPointer<LLInventoryCallback> cb = new ModifiedCOFCallback();
+			LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy(true);
 			for (S32 type = 0; type < LLWearableType::WT_COUNT; type++)
 			{
 				for (S32 idxItem = 0, cntItem = itemsByType[type].size(); idxItem < cntItem; idxItem++)
 				{
 					bool fWearAdd = ("wear_add" == action) || (("open" == action) && (mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickWearableAdd")));
-					LLAppearanceMgr::instance().wearItemOnAvatar(itemsByType[type][idxItem]->getUUID(), true, !fWearAdd && (0 == idxItem), cb);
+					LLAppearanceMgr::instance().wearItemOnAvatar(itemsByType[type][idxItem]->getUUID(), false, !fWearAdd && (0 == idxItem), cb);
 				}
 			}
 		}
