@@ -2208,7 +2208,7 @@ bool LLFolderView::doToSelected(LLInventoryModel* model, const LLSD& userdata)
 
 // [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-3.2.1a) | Added: Catznip-2.0.0a
 	// If we group the selected items together per type then each LLFolderViewEventListener derived class can support batched actions
-	typedef std::map<const std::type_info*, LLDynamicArray<LLFolderViewEventListener*>, LLCompareTypeID> type_batch_map_t;
+	typedef std::map<const std::type_info*, LLDynamicArray<LLFolderViewEventListener*>> type_batch_map_t;
 	type_batch_map_t mapTypeBatch;
 // [/SL:KB]
 	for (std::set<LLUUID>::iterator set_iter = selected_items.begin(); set_iter != selected_items.end(); ++set_iter)
