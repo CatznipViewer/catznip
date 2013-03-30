@@ -3720,7 +3720,7 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 				else
 				{
 					if (items[idxAt])
-						pAppearanceMgr->removeCOFItemLinks(items[idxAt]->getLinkedUUID(), false);
+						pAppearanceMgr->removeCOFItemLinks(items[idxAt]->getLinkedUUID());
 					items[idxAt] = pItem;
 				}
 
