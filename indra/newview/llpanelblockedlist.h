@@ -47,7 +47,7 @@ public:
 	~LLPanelBlockedList();
 
 	virtual BOOL postBuild();
-	virtual void draw();
+//	virtual void draw();
 	virtual void onOpen(const LLSD& key);
 	
 	void selectBlocked(const LLUUID& id);
@@ -68,7 +68,7 @@ private:
 	void updateButtons();
 
 	// UI callbacks
-	void onBackBtnClick();
+//	void onBackBtnClick();
 	void onRemoveBtnClick();
 	void onPickBtnClick();
 	void onBlockByNameClick();
