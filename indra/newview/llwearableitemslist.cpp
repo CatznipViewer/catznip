@@ -125,7 +125,31 @@ void LLPanelWearableOutfitItem::updateItem(const std::string& name,
 	// worn status of a linked item may still remain unchanged.
 	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkInCOF(mInventoryItemUUID))
 	{
-		search_label += LLTrans::getString("worn");
+//		search_label += LLTrans::getString("worn");
+// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+		switch (mInventoryItemAssetType)
+		{
+			case LLAssetType::AT_OBJECT:
+				if (isAgentAvatarValid())
+				{
+					std::string strAttachPt = gAgentAvatarp->getAttachedPointName(mInventoryItemUUID);
+					if (strAttachPt.empty())
+						strAttachPt = "Invalid Attachment";
+
+					LLStringUtil::format_map_t args;
+					args["[ATTACHMENT_POINT]"] = LLTrans::getString(strAttachPt);
+					search_label += LLTrans::getString("WornOnAttachmentPoint", args);
+				}
+				else
+				{
+					search_label += LLTrans::getString("worn");
+				}
+				break;
+			default:
+				search_label += LLTrans::getString("worn");
+				break;
+		}
+// [/SL:KB]
 		item_state = IS_WORN;
 	}
 

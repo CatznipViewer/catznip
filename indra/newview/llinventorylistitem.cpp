@@ -279,6 +279,9 @@ S32 LLPanelInventoryListItemBase::notify(const LLSD& info)
 
 LLPanelInventoryListItemBase::LLPanelInventoryListItemBase(LLViewerInventoryItem* item, const LLPanelInventoryListItemBase::Params& params)
 :	LLPanel(params),
+// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+	mInventoryItemAssetType((item) ? item->getType() : LLAssetType::AT_NONE),
+// [/SL:KB]
 	mInventoryItemUUID(item ? item->getUUID() : LLUUID::null),
 	mIconCtrl(NULL),
 	mTitleCtrl(NULL),
