@@ -47,6 +47,10 @@ public:
 	static boost::signals2::connection setFontChangedCallback(const font_change_signal_t::slot_type& cb);
 	static void signalChatFontChanged();
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+	static U8 getChatNameFontStyle(EChatNameStyle name_style);
+// [/SL:KB]
+
 private:
 	static std::string getObjectImSLURL(const LLChat& chat, const LLSD& args);
 	static font_change_signal_t sChatFontChangedSignal;

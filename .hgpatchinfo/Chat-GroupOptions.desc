@@ -1,0 +1,19 @@
+[Chat-GroupModerator]
+- added   : show moderators in bold in the group participant list
+    -> also changes the sorting by status first and then by name
+- added   : moderators' names show in bold in group chat
+    -> for header style chat "(Moderator)" is added to the username
+- changed : default sort order for participant list set to "By name"
+- changed : don't sort the user's own name at the top of the participant list
+- fixed   : group participant list doesn't resort itself when an avatar name resolves
+    -> since names tend to resolve at the same time the list will only resort once per frame
+- fixed   : changing the sort order for one participant list doesn't change it for all others
+    -> right-click menu will show the new option as active
+
+[Chat-GroupSnooze]
+- added   : "Snooze Session" menu option on the group chiclet context menu to temporarily snooze a group chat session
+    -> duration of the snooze is controlled by "GroupSnoozeTime"
+- changed : base the snooze start time on the last received message
+
+[Chat-GroupOptions]
+- added : "Receive chat" in the general group profile panel to control whether incoming group chat sessions will spawn

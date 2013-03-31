@@ -284,6 +284,7 @@ set(viewer_SOURCE_FILES
     llgroupactions.cpp
     llgroupiconctrl.cpp
     llgrouplist.cpp
+    llgroupoptions.cpp
     llgroupmgr.cpp
     llhints.cpp
     llhomelocationresponder.cpp
@@ -852,6 +853,7 @@ set(viewer_HEADER_FILES
     llgroupactions.h
     llgroupiconctrl.h
     llgrouplist.h
+    llgroupoptions.h
     llgroupmgr.h
     llhints.h
     llhomelocationresponder.h

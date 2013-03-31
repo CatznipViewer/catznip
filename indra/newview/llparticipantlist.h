@@ -100,6 +100,10 @@ protected:
 	 */
 	void sort();
 
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	void onSortedOrderChanged(const LLSD& sdOrder);
+// [/SL:KB]
+
 	/**
 	 * List of listeners implementing LLOldEvents::LLSimpleListener.
 	 * There is no way to handle all the events in one listener as LLSpeakerMgr registers
@@ -222,6 +226,23 @@ protected:
 		static void confirmMuteAllCallback(const LLSD& notification, const LLSD& response);
 	};
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+	/**
+	 * Comparator for comparing avatar items by status and then name
+	 */
+	class LLAvatarItemStatusAndNameComparator : public LLAvatarItemAgentOnTopComparator, public LLRefCount
+	{
+		LOG_CLASS(LLAvatarItemStatusAndNameComparator);
+	public:
+		LLAvatarItemStatusAndNameComparator(LLParticipantList& parent) : mParent(parent) {};
+		/*virtual*/ ~LLAvatarItemStatusAndNameComparator() {};
+	protected:
+		/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
+	private:
+		LLParticipantList& mParent;
+	};
+// [/SL:KB]
+
 	/**
 	 * Comparator for comparing avatar items by last spoken time
 	 */
@@ -278,8 +299,14 @@ private:
 	boost::signals2::connection mAvatarListDoubleClickConnection;
 	boost::signals2::connection mAvatarListRefreshConnection;
 	boost::signals2::connection mAvatarListReturnConnection;
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3.0)
+	boost::signals2::connection mAvatarListSortOrder;
+// [/SL:KB]
 	boost::signals2::connection mAvatarListToggleIconsConnection;
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+	LLPointer<LLAvatarItemStatusAndNameComparator> mSortByStatusAndName;
+// [/SL:KB]
 	LLPointer<LLAvatarItemRecentSpeakerComparator> mSortByRecentSpeakers;
 	validate_speaker_callback_t mValidateSpeakerCallback;
 	LLAvalineUpdater* mAvalineUpdater;

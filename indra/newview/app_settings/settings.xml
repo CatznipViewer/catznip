@@ -4106,6 +4106,17 @@
       <key>Value</key>
       <integer>305</integer>
     </map>
+    <key>GroupSnoozeTime</key>
+    <map>
+      <key>Comment</key>
+      <string>Amount of time (in seconds) group chat will be snoozed for</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>900</integer>
+    </map>
     <key>HelpURLFormat</key>
     <map>
       <key>Comment</key>
@@ -12492,7 +12503,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>SpeakerParticipantRemoveDelay</key>
     <map>
