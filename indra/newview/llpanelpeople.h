@@ -29,6 +29,9 @@
 
 #include <llpanel.h>
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+#include "llavatarlistitem.h"
+// [/SL:KB]
 #include "llcallingcard.h" // for avatar tracker
 #include "llvoiceclient.h"
 
@@ -73,6 +76,10 @@ private:
 	void					updateFriendList();
 	void					updateNearbyList();
 	void					updateRecentList();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+	void					updateDistances();
+	void					updateLastInteractionTimes();
+// [/SL:KB]
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
 
@@ -84,6 +91,9 @@ private:
 	void					buttonSetEnabled(const std::string& btn_name, bool enabled);
 	void					buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb);
 	void					showGroupMenu(LLMenuGL* menu);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	void					setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save = true);
+// [/SL:KB]
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);
 
 	// UI callbacks
@@ -92,6 +102,9 @@ private:
 	void					onViewProfileButtonClicked();
 	void					onAddFriendButtonClicked();
 	void					onAddFriendWizButtonClicked();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	void					onBlockListButtonClicked();
+// [/SL:KB]
 	void					onDeleteFriendButtonClicked();
 	void					onGroupInfoButtonClicked();
 	void					onChatButtonClicked();

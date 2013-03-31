@@ -1,41 +1,48 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
-
 <floater
   positioning="cascading"
   can_close="true"
   can_resize="true"
   height="570"
   help_topic="sidebar_people"
-  min_height="440"
-  min_width="333"
+  min_height="300"
+  min_width="330"
   layout="topleft"
   name="floater_people"
   save_rect="true"
   single_instance="true"
   reuse_instance="true"
   title="PEOPLE"
-  width="333">
+  width="330">
     <panel_container
       default_panel_name="panel_people"
       follows="all"
-      height="570"
+      left="0" 
+      height="562"
       name="main_panel"
-      width="333">
+      top="4" 
+      width="330">
       <panel
         class="panel_people"
         name="panel_people"
-        filename="panel_people.xml"/>
+        filename="panel_people.xml"
+        follows="all"
+        top="0"/>
       <panel
         class="panel_group_info_sidetray"
         name="panel_group_info_sidetray"
         filename="panel_group_info_sidetray.xml"
         label="Group Profile"
-        font="SansSerifBold"/>
+        font="SansSerifBold"
+        follows="all"
+        top="0"/>
       <panel
         class="panel_block_list_sidetray"
         name="panel_block_list_sidetray"
         filename="panel_block_list_sidetray.xml"
         label="Blocked Residents &amp; Objects"
-        font="SansSerifBold"/>
+        font="SansSerifBold"
+        follows="all"
+        top="0"/>
     </panel_container>
 </floater>

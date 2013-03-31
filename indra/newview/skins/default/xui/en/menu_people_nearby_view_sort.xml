@@ -3,35 +3,104 @@
      name="menu_group_plus"
      left="0" bottom="0" visible="false"
      mouse_opaque="false">
+  <menu
+   label="Show names as"
+   name="People Nearby Names" >
+    <menu_item_check
+       label="Display name"
+       name="name_displayname">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="name_displayname"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="name_displayname"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Full name"
+       name="name_fullname">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="name_fullname"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="name_fullname"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Username"
+       name="name_username">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="name_username"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="name_username"/>
+    </menu_item_check>
+  </menu>
+  <menu
+   label="Sort by"
+   name="People Nearby Sort" >
+    <menu_item_check
+       label="Recent Speakers"
+       name="sort_by_recent_speakers">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="sort_by_recent_speakers"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="sort_by_recent_speakers"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Name"
+       name="sort_name">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="sort_name"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="sort_name"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Distance"
+       name="sort_distance">
+      <menu_item_check.on_click
+         function="People.Nearby.ViewSort.Action"
+         parameter="sort_distance"/>
+      <menu_item_check.on_check
+         function="People.Nearby.ViewSort.CheckItem"
+         parameter="sort_distance"/>
+    </menu_item_check>
+  </menu>
+  <menu_item_separator layout="topleft" />
   <menu_item_check
-     label="Sort by Recent Speakers"
-     name="sort_by_recent_speakers">
+     label="Show People within Range"
+     name="show_range">
     <menu_item_check.on_click
        function="People.Nearby.ViewSort.Action"
-       parameter="sort_by_recent_speakers"/>
+       parameter="show_range"/>
     <menu_item_check.on_check
        function="People.Nearby.ViewSort.CheckItem"
-       parameter="sort_by_recent_speakers"/>
+       parameter="show_range"/>
   </menu_item_check>
   <menu_item_check
-     label="Sort by Name"
-     name="sort_name">
+     label="Show People on Current Parcel"
+     name="show_current_parcel">
     <menu_item_check.on_click
        function="People.Nearby.ViewSort.Action"
-       parameter="sort_name"/>
+       parameter="show_current_parcel"/>
     <menu_item_check.on_check
        function="People.Nearby.ViewSort.CheckItem"
-       parameter="sort_name"/>
+       parameter="show_current_parcel"/>
   </menu_item_check>
   <menu_item_check
-     label="Sort by Distance"
-     name="sort_distance">
+     label="Show People on Current Region"
+     name="show_current_region">
     <menu_item_check.on_click
        function="People.Nearby.ViewSort.Action"
-       parameter="sort_distance"/>
+       parameter="show_current_region"/>
     <menu_item_check.on_check
        function="People.Nearby.ViewSort.CheckItem"
-       parameter="sort_distance"/>
+       parameter="show_current_region"/>
   </menu_item_check>
   <menu_item_separator layout="topleft" />
   <menu_item_check name="view_icons" label="View People Icons">
