@@ -75,6 +75,9 @@ static LLChatTypeTrigger sChatTypeTriggers[] = {
 
 LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 :	LLFloater(key),
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	mReshapeSignal(NULL),
+// [/SL:KB]
 	mChatBox(NULL),
 	mNearbyChat(NULL),
 	mOutputMonitor(NULL),
@@ -84,6 +87,13 @@ LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 	mListener.reset(new LLNearbyChatBarListener(*this));
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+LLNearbyChatBar::~LLNearbyChatBar()
+{
+	delete mReshapeSignal;
+}
+// [/SL:KB]
 
 //virtual
 BOOL LLNearbyChatBar::postBuild()
@@ -165,6 +175,24 @@ LLNearbyChatBar* LLNearbyChatBar::getInstance()
 {
 	return LLFloaterReg::getTypedInstance<LLNearbyChatBar>("chat_bar");
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+// virtual
+void LLNearbyChatBar::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLFloater::reshape(width, height, called_from_parent);
+
+	if (mReshapeSignal)
+		(*mReshapeSignal)(this, width, height);
+}
+
+boost::signals2::connection LLNearbyChatBar::setReshapeCallback(const reshape_signal_t::slot_type& cb)
+{
+	if (!mReshapeSignal)
+		mReshapeSignal = new reshape_signal_t();
+	return mReshapeSignal->connect(cb); 
+}
+// [/SL:KB]
 
 void LLNearbyChatBar::showHistory()
 {

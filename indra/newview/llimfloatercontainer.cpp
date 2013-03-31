@@ -148,18 +148,24 @@ LLIMFloaterContainer* LLIMFloaterContainer::getInstance()
 
 void LLIMFloaterContainer::setMinimized(BOOL b)
 {
-	if (isMinimized() == b) return;
-	
-	LLMultiFloater::setMinimized(b);
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-2.4.0a
+	if (getVisible() == !b) return;
+
 	// Hide minimized floater (see EXT-5315)
 	setVisible(!b);
-
-	if (isMinimized()) return;
-
-	if (getActiveFloater())
-	{
-		getActiveFloater()->setVisible(TRUE);
-	}
+// [/SL:KB]
+//	if (isMinimized() == b) return;
+//	
+//	LLMultiFloater::setMinimized(b);
+//	// Hide minimized floater (see EXT-5315)
+//	setVisible(!b);
+//
+//	if (isMinimized()) return;
+//
+//	if (getActiveFloater())
+//	{
+//		getActiveFloater()->setVisible(TRUE);
+//	}
 }
 
 // EOF
