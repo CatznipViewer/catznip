@@ -356,6 +356,7 @@ set(viewer_SOURCE_FILES
     llnearbychatbar.cpp
     llnearbychathandler.cpp
     llnearbychatbarlistener.cpp
+    llnearbychatbarmulti.cpp
     llnetmap.cpp
     llnotificationalerthandler.cpp
     llnotificationgrouphandler.cpp
@@ -922,8 +923,10 @@ set(viewer_HEADER_FILES
     llnavigationbar.h
     llnearbychat.h
     llnearbychatbar.h
+    llnearbychatbarbase.h
     llnearbychathandler.h
     llnearbychatbarlistener.h
+    llnearbychatbarmulti.h
     llnetmap.h
     llnotificationhandler.h
     llnotificationmanager.h
