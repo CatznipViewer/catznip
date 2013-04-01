@@ -12118,7 +12118,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>3</integer>
+      <integer>1</integer>
     </map>
     <key>UpdaterServiceCheckPeriod</key>
     <map>
@@ -12140,7 +12140,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer.catznip.com/</string>
+      <string>http://viewer.catznip.com</string>
     </map>
     <key>UpdaterServicePath</key>
     <map>
