@@ -152,6 +152,11 @@ public:
 
 	static void initClass(F32 screen_dpi, F32 x_scale, F32 y_scale, const std::string& app_dir, bool create_gl_textures = true);
 
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
+	static void dumpFonts();
+	static void setFontFiles(const std::vector<std::string>& files);
+// [/SL:KB]
+
 	// Load sans-serif, sans-serif-small, etc.
 	// Slow, requires multiple seconds to load fonts.
 	static bool loadDefaultFonts();
@@ -173,6 +178,12 @@ public:
 
 	static void setFontDisplay(BOOL flag) { sDisplayFont = flag; }
 		
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	static LLFontGL* getFontEditorSmall();
+	static LLFontGL* getFontEditor();
+	static LLFontGL* getFontEditorLarge();
+	static void      setUseEditorFont(bool use_editor_font);
+// [/SL:KB]
 	static LLFontGL* getFontMonospace();
 	static LLFontGL* getFontSansSerifSmall();
 	static LLFontGL* getFontSansSerif();
@@ -217,6 +228,11 @@ private:
 
 	// Registry holds all instantiated fonts.
 	static LLFontRegistry* sFontRegistry;
+
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
+	static std::vector<std::string> sFontFiles;
+	static bool sUseEditorFont;
+// [/SL:KB]
 };
 
 #endif
