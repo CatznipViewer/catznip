@@ -3192,7 +3192,10 @@ void LLAppViewer::initUpdater()
 	std::string service_path = gSavedSettings.getString("UpdaterServicePath");
 	U32 check_period = gSavedSettings.getU32("UpdaterServiceCheckPeriod");
 
-	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::forceQuit, this));
+//	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::forceQuit, this));
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-09-19 (Catznip-3.3)
+	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::requestQuit, this));
+// [/SL:KB]
 	mUpdater->initialize(protocol_version, 
 						 url, 
 						 service_path, 
