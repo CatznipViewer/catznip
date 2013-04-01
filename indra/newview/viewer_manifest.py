@@ -984,7 +984,7 @@ class LinuxManifest(ViewerManifest):
         self.put_in_file(self.flags_list(), 'etc/gridargs.dat')
 
         if self.prefix(src="", dst="bin"):
-            self.path("catznip-bin","bin/catznip-do-not-directly-run-bin")
+            self.path("catznip-bin","bin/do-not-directly-run-catznip-bin")
             self.path("../linux_crash_logger/linux-crash-logger","linux-crash-logger.bin")
             self.path2basename("../llplugin/slplugin", "SLPlugin")
             self.path2basename("../viewer_components/updater/scripts/linux", "update_install")

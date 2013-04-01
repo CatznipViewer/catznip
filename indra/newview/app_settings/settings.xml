@@ -3356,7 +3356,7 @@
         <key>Type</key>
         <string>String</string>
         <key>Value</key>
-        <string>http://viewer-settings.secondlife.com</string>
+        <string>http://viewer.catznip.com/data/settings</string>
     </map>
     <key>FPSLogFrequency</key>
         <map>
@@ -4126,7 +4126,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.2.0.0/[TOPIC][DEBUG_MODE]</string>
+      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.3.4.0/[TOPIC][DEBUG_MODE]</string>
     </map>
     <key>HowToHelpURL</key>
     <map>
@@ -12239,7 +12239,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>3</integer>
+      <integer>1</integer>
     </map>
     <key>UpdaterServiceCheckPeriod</key>
     <map>
@@ -12261,7 +12261,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer.catznip.com/</string>
+      <string>http://viewer.catznip.com</string>
     </map>
     <key>UpdaterServicePath</key>
     <map>

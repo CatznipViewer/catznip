@@ -49,6 +49,13 @@
              function="PromptShowURL"
              parameter="WebLaunchBlog,http://catznip.com/" />
         </menu_item_call>
+        <menu_item_call
+         label="[APP_NAME] Wiki"
+         name="Show Wiki">
+            <menu_item_call.on_click
+             function="PromptShowURL"
+             parameter="WebLaunchWiki,http://wiki.catznip.com" />
+        </menu_item_call>
         <menu_item_separator />
         <menu_item_call
              label="Report Bug"
