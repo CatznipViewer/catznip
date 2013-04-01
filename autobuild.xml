@@ -510,9 +510,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>0c61d643db54d2e5999be8254569d8b3</string>
+              <string>37e18bddbed033f9acb4a1268973890f</string>
               <key>url</key>
-              <string>http://s3-proxy.lindenlab.com/private-builds-secondlife-com/hg/repo/3p-fmod-private/rev/221852/arch/Linux/installer/fmod-3.75-linux-20110223.tar.bz2</string>
+              <string>http://viewer.catznip.com/downloads/packages/fmod-3.75-linux-20110802.tar.bz2</string>
             </map>
             <key>name</key>
             <string>linux</string>

@@ -3535,6 +3535,19 @@ Go to the [APP_NAME] blog, for the latest news and information.
  
   <notification
    icon="alertmodal.tga"
+   name="WebLaunchWiki"
+   type="alertmodal">
+Go to the [APP_NAME] wiki for documentation and support information.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view the wiki"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+ 
+  <notification
+   icon="alertmodal.tga"
    name="WebLaunchExternalTarget"
    type="alertmodal">
 Do you want to open your Web browser to view this content?
