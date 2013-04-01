@@ -54,7 +54,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_LL_ICON             ICON                    "ll_icon.ico"
+IDI_LL_ICON             ICON                    "catznip.ico"
 IDI_LCD_LL_ICON         ICON                    "icon1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -135,8 +135,8 @@ TOOLNO                  CURSOR                  "llno.cur"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,1,0
- PRODUCTVERSION 2,1,1,0
+ FILEVERSION 7,0,0,0
+ PRODUCTVERSION 7,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -151,14 +151,14 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Linden Lab"
-            VALUE "FileDescription", "Second Life"
-            VALUE "FileVersion", "2.1.1.0"
-            VALUE "InternalName", "Second Life"
-            VALUE "LegalCopyright", "Copyright � 2001-2010, Linden Research, Inc."
-            VALUE "OriginalFilename", "SecondLife.exe"
-            VALUE "ProductName", "Second Life"
-            VALUE "ProductVersion", "2.1.1.0"
+            VALUE "CompanyName", "Catznip"
+            VALUE "FileDescription", "Catznip"
+            VALUE "FileVersion", "7.0.0.0"
+            VALUE "InternalName", "Catznip.exe"
+            VALUE "LegalCopyright", "Copyright (C)2001-2011, portions by Linden Research, Inc, portions by Kitty Barnett"
+            VALUE "OriginalFilename", "catznip-bin.exe"
+            VALUE "ProductName", "Catznip"
+            VALUE "ProductVersion", "7.0.0.0"
         END
     END
     BLOCK "VarFileInfo"

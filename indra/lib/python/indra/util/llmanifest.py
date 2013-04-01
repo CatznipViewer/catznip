@@ -107,7 +107,7 @@ def get_channel(srctree):
     
 
 DEFAULT_SRCTREE = os.path.dirname(sys.argv[0])
-DEFAULT_CHANNEL = 'Second Life Release'
+DEFAULT_CHANNEL = 'Catznip Release'
 
 ARGUMENTS=[
     dict(name='actions',

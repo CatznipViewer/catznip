@@ -3301,7 +3301,7 @@
         <key>Type</key>
         <string>String</string>
         <key>Value</key>
-        <string>http://viewer-settings.secondlife.com</string>
+        <string>http://viewer.catznip.com/data/settings</string>
     </map>
     <key>FPSLogFrequency</key>
         <map>
@@ -4071,7 +4071,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer-help.secondlife.com/[LANGUAGE]/[CHANNEL]/[VERSION]/[TOPIC][DEBUG_MODE]</string>
+      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.3.4.0/[TOPIC][DEBUG_MODE]</string>
     </map>
     <key>HowToHelpURL</key>
     <map>
@@ -12603,6 +12603,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ViewerDataURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer data service (supplies custom MOTD, blocked viewer versions, etc))</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+    </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
       <key>Comment</key>
@@ -12930,6 +12941,17 @@
       <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>WatchdogFreezeDumpType</key>
+    <map>
+      <key>Comment</key>
+      <string>Type of freeze minidump that is created (0 - minimal [default], 1 - normal [default], 2 - extended)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
       <key>Value</key>
       <integer>1</integer>
     </map>
