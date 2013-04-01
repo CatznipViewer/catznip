@@ -47,8 +47,7 @@
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
 #ifdef LL_WINDOWS
 #include <shellapi.h>
-#endif 
-// LL_WINDOWS
+#endif // LL_WINDOWS
 #include <boost/lexical_cast.hpp>
 // [/SL:KB]
 

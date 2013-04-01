@@ -128,7 +128,7 @@ eval gridargs=("$(<etc/gridargs.dat)")
 # Don't quote $LL_WRAPPER because, if empty, it should simply vanish from the
 # command line. But DO quote "$@": preserve separate args as individually
 # quoted. Similar remarks about the contents of gridargs.
-$LL_WRAPPER bin/catznip-do-not-directly-run-bin "${gridargs[@]}" "$@"
+$LL_WRAPPER bin/do-not-directly-run-catznip-bin "${gridargs[@]}" "$@"
 LL_RUN_ERR=$?
 
 # Handle any resulting errors
