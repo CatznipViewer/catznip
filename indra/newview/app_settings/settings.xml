@@ -4844,6 +4844,17 @@
       <key>Value</key>
       <integer>512</integer>
     </map>
+    <key>LastTextureSaveFormat</key>
+    <map>
+      <key>Comment</key>
+      <string>The format of the last texture the user saved to disk</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>13</integer>
+    </map>
     <key>LeftClickShowMenu</key>
     <map>
       <key>Comment</key>
@@ -10510,27 +10521,6 @@
       <key>Value</key>
       <integer>0</integer>
     </map>  
-    <key>SnapshotLocalName</key>
-    <map>
-      <key>Comment</key>
-      <string>Base name of saved snapshot files</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>Snapshot</string>
-    </map>
-    <key>SnapshotLocalPath</key>
-    <map>
-      <key>Comment</key>
-      <string>Path to your snapshot files</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string />
     </map>
     <key>SnapshotQuality</key>
     <map>
