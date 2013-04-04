@@ -31,6 +31,9 @@
 #include "llbutton.h"
 #include "llframetimer.h"
 #include "llviewertexture.h"
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#include "llfilepicker.h"
+// [/SL:KB]
 
 class LLComboBox;
 class LLImageRaw;
@@ -43,8 +46,14 @@ public:
 
 	virtual void		draw();
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	        void		save(const std::string& filename);
+// [/SL:KB]
 	virtual BOOL		canSaveAs() const;
 	virtual void		saveAs();
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+	        void		saveAs(LLFilePicker::ESaveFilter filter);
+// [/SL:KB]
 
 	virtual void		loadAsset();
 	virtual EAssetStatus	getAssetStatus();
@@ -62,7 +71,10 @@ public:
 							void* userdata );
 	void 				openToSave();
 	
-	static void			onSaveAsBtn(void* data);
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+	void				onSaveAsBtn(LLUICtrl* ctrl);
+// [/SL:KB]
+//	static void			onSaveAsBtn(void* data);
 
 	/*virtual*/ void setObjectID(const LLUUID& object_id);
 protected:

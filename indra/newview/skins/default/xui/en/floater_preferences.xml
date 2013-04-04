@@ -47,7 +47,7 @@
      tab_group="1"
      tab_position="left"
      tab_width="140"
-     tab_padding_right="0"
+     tab_padding_right="2"
      top="21"
      width="658">
         <panel
@@ -106,6 +106,13 @@
          layout="topleft"
          help_topic="preferences_im_tab"
          name="im" />
+        <panel
+		 class="panel_preference"
+         filename="panel_preferences_snapshots.xml"
+         label="Snapshots"
+         layout="topleft"
+         help_topic="preferences_snapshots_tab"
+         name="snapshots" />
         <panel
 		 class="panel_preference"
          filename="panel_preferences_setup.xml"

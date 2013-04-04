@@ -4043,12 +4043,19 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 }
 
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
-BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picker)
+//BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picker)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callback_t& cb, bool force_picker)
+// [/SL:KB]
 {
 	if (!image)
 	{
 		llwarns << "No image to save" << llendl;
-		return FALSE;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		cb(false);
+		return;
+// [/SL:KB]
+//		return FALSE;
 	}
 
 	LLFilePicker::ESaveFilter pick_type;
@@ -4067,26 +4074,62 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
 	// Get a base file location if needed.
+//	if (force_picker || !isSnapshotLocSet())
+//	{
+//		std::string proposed_name( sSnapshotBaseName );
+//
+//		// getSaveFile will append an appropriate extension to the proposed name, based on the ESaveFilter constant passed in.
+//
+//		// pick a directory in which to save
+//		LLFilePicker& picker = LLFilePicker::instance();
+//		if (!picker.getSaveFile(pick_type, proposed_name))
+//		{
+//			// Clicked cancel
+//			return FALSE;
+//		}
+//
+//		// Copy the directory + file name
+//		std::string filepath = picker.getFirstFile();
+//
+//		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
+//		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	if (force_picker || !isSnapshotLocSet())
 	{
-		std::string proposed_name( sSnapshotBaseName );
+		LLFilePicker::getSaveFile(pick_type, sSnapshotBaseName, 
+			boost::bind(&LLViewerWindow::saveImageCallback, this, image, _1, cb));
+	}
+	else
+	{
+		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
+	}
+}
 
-		// getSaveFile will append an appropriate extension to the proposed name, based on the ESaveFilter constant passed in.
-
-		// pick a directory in which to save
-		LLFilePicker& picker = LLFilePicker::instance();
-		if (!picker.getSaveFile(pick_type, proposed_name))
-		{
-			// Clicked cancel
-			return FALSE;
-		}
-
-		// Copy the directory + file name
-		std::string filepath = picker.getFirstFile();
-
+void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, const save_image_callback_t& cb)
+{
+	if (!filepath.empty())
+	{
 		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
 		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+
+		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
 	}
+	else
+	{
+		cb(false);
+	}
+}
+
+// static
+void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::string& path, const std::string& base_name, const save_image_callback_t& cb)
+{
+	if (!image)
+	{
+		llwarns << "No image to save" << llendl;
+		cb(false);
+		return;
+	}
+// [/SL:KB]
 
 	// Look for an unused file name
 	std::string filepath;
@@ -4095,11 +4138,18 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 
 	do
 	{
-		filepath = sSnapshotDir;
+//		filepath = sSnapshotDir;
+//		filepath += gDirUtilp->getDirDelimiter();
+//		filepath += sSnapshotBaseName;
+//		filepath += llformat("_%.3d",i);
+//		filepath += extension;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		filepath = path;
 		filepath += gDirUtilp->getDirDelimiter();
-		filepath += sSnapshotBaseName;
+		filepath += base_name;
 		filepath += llformat("_%.3d",i);
-		filepath += extension;
+		filepath += image->getExtension();
+// [/SL:KB]
 
 		llstat stat_info;
 		err = LLFile::stat( filepath, &stat_info );
@@ -4108,7 +4158,11 @@ BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picke
 	while( -1 != err );  // search until the file is not found (i.e., stat() gives an error).
 
 	llinfos << "Saving snapshot to " << filepath << llendl;
-	return image->save(filepath);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	bool fSuccess = image->save(filepath);
+	cb(fSuccess);
+// [/SL:KB]
+//	return image->save(filepath);
 }
 
 void LLViewerWindow::resetSnapshotLoc()

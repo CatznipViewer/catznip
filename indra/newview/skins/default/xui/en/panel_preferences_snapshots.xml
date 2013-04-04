@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="left|top|right|bottom"
+ height="408"
+ label="Snapshots"
+ layout="topleft"
+ name="snapshots"
+ width="517">
+    <text
+     follows="left|top"
+     height="10"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="text_snapshot_path"
+     top_pad="30"
+     type="string"
+     width="120">
+        Snapshot location:
+    </text>    
+    <line_editor
+     control_name="SnapshotLocalPath"
+     enabled="false"
+     follows="top|left|right"
+     halign="right"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="line_snapshot_path"
+     top_delta="-5"
+     width="250" />
+    <button
+     enabled="true"
+     follows="right|bottom"
+     height="23"
+     label="Browse"
+     label_selected="Browse"
+     layout="topleft"
+     left_pad="5"
+     name="btn_snapshot_path"
+     top_delta="0"
+     width="75">
+        <button.commit_callback
+         function="Pref.SnapshotPath" />
+    </button>
+
+    <text
+     follows="left|top"
+     height="10"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="text_snapshot_name"
+     top_pad="10"
+     type="string"
+     width="120">
+        Snapshot base name:
+    </text>    
+    <line_editor
+     control_name="SnapshotLocalName"
+     follows="top|left|right"
+     halign="right"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="line_snapshot_name"
+     top_delta="-5"
+     width="250" />
+
+    <text
+     follows="left|top"
+     height="10"
+     layout="topleft"
+     left="145"
+     length="1"
+     name="text_legend"
+     text_color="LtGray"
+     top_pad="10"
+     type="string"
+     width="120">
+        Legend:
+    </text>    
+    <text
+     follows="left|top"
+     height="55"
+     layout="topleft"
+     left_delta="15"
+     length="1"
+     name="text_legend_options"
+     top_pad="5"
+     type="string"
+     width="120">
+- %d : date
+- %t : time
+- %r : region
+- %p : parcel
+    </text>    
+
+</panel>

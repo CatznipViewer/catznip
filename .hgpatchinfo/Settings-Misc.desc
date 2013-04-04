@@ -1,0 +1,30 @@
+[Settings/Misc]
+- added   : "InspectNearbyRemoteObject" setting to show the object inspector for "objectim" app URLs for nearby objects
+    -> affects plain text chat where llOwnerSay(), llSay() and llInstantMessage() chat from scripts always opens the "remote object inspector" by default
+- added   : "Render Glow" graphics preferences checkbox	
+- added   : "RenderDrawPoolInvisible" and "RenderDrawPoolInvisibleDeferred" to toggle rendering of invisiprims
+    -> "RenderDrawPoolInvisibleDeferred" is tentative since it causes numerous graphical glicthes
+- added   : Xbox 360 joystick preset to the "Joystick configuration" floater
+- added   : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
+- changed : [CATZ-1] Remember last used debug setting (per session only)
+- changed : preferences panel clean-up
+    -> sound
+    -> move
+    -> setup
+- changed : draw distance minimum to 32m with increments of 32m (previously 8m)	
+- changed : never enable texture compression on cards with 512Mb VRAM or less by default
+- changed : don't show the destination guide on first run
+- fixed   : "Plain text chat history" reverts to FALSE if the relevant preference tab is opened while not logged on
+- fixed   : remote object inspector isn't passed any parameters for object IMs
+- fixed   : llOwnerSay from objects outside draw distance shows 0,0,0 for the object coordinates on the remote object inspector
+- fixed   : radio group preferences settings don't work properly when driven by boolean typed settings
+- fixed   : enabling QAMode and disabling WatchDog on debug builds shouldn't persist to settings.xml
+
+[Settings/Snapshots]
+- added   : customization of the snapshot name ("SnapshotLocalName" setting)
+    -> %d - date (YYYYMMDD)
+       %t - time (HHmm)
+       %r - region name
+       %p - parcel name
+       %c - image counter
+- added   : "SnapshotLocalPath" setting to control where snapshots are saved to

@@ -168,7 +168,10 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-	BOOL saveLocal();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	void saveLocal(const LLViewerWindow::save_image_callback_t& cb);
+// [/SL:KB]
+//	BOOL saveLocal();
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
 	LLPointer<LLImageRaw>		getEncodedImage() const { return mPreviewImageEncoded; }
@@ -971,7 +974,7 @@ void LLSnapshotLivePreview::saveTexture()
 		LLAgentUI::buildFullname(who_took_it);
 		LLAssetStorage::LLStoreAssetCallback callback = NULL;
 		S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-		void *userdata = NULL;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		upload_new_resource(tid,	// tid
 				    LLAssetType::AT_TEXTURE,
 				    "Snapshot : " + pos_string,
@@ -983,7 +986,21 @@ void LLSnapshotLivePreview::saveTexture()
 				    LLFloaterPerms::getGroupPerms(), // that is more permissive than other uploads
 				    LLFloaterPerms::getEveryonePerms(),
 				    "Snapshot : " + pos_string,
-				    callback, expected_upload_cost, userdata);
+				    callback, expected_upload_cost);
+// [/SL:KB]
+//		void *userdata = NULL;
+//		upload_new_resource(tid,	// tid
+//				    LLAssetType::AT_TEXTURE,
+//				    "Snapshot : " + pos_string,
+//				    "Taken by " + who_took_it + " at " + pos_string,
+//				    0,
+//				    LLFolderType::FT_SNAPSHOT_CATEGORY,
+//				    LLInventoryType::IT_SNAPSHOT,
+//				    PERM_ALL,  // Note: Snapshots to inventory is a special case of content upload
+//				    LLFloaterPerms::getGroupPerms(), // that is more permissive than other uploads
+//				    LLFloaterPerms::getEveryonePerms(),
+//				    "Snapshot : " + pos_string,
+//				    callback, expected_upload_cost, userdata);
 		gViewerWindow->playSnapshotAnimAndSound();
 	}
 	else
@@ -997,16 +1014,23 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLSnapshotLivePreview::saveLocal(const LLViewerWindow::save_image_callback_t& cb)
 {
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
-
-	if(success)
-	{
-		gViewerWindow->playSnapshotAnimAndSound();
-	}
-	return success;
+	gViewerWindow->saveImage(mFormattedImage, cb);
+	gViewerWindow->playSnapshotAnimAndSound();
 }
+// [/SL:KB]
+//BOOL LLSnapshotLivePreview::saveLocal()
+//{
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+//
+//	if(success)
+//	{
+//		gViewerWindow->playSnapshotAnimAndSound();
+//	}
+//	return success;
+//}
 
 void LLSnapshotLivePreview::saveWeb()
 {
@@ -2281,7 +2305,8 @@ void LLFloaterSnapshot::saveTexture()
 }
 
 // static
-BOOL LLFloaterSnapshot::saveLocal()
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLFloaterSnapshot::saveLocal(const save_image_callback_t& cb)
 {
 	lldebugs << "saveLocal" << llendl;
 	// FIXME: duplicated code
@@ -2289,17 +2314,39 @@ BOOL LLFloaterSnapshot::saveLocal()
 	if (!instance)
 	{
 		llassert(instance != NULL);
-		return FALSE;
+		cb(false);
+		return;
 	}
 	LLSnapshotLivePreview* previewp = Impl::getPreviewView(instance);
 	if (!previewp)
 	{
 		llassert(previewp != NULL);
-		return FALSE;
+		cb(false);
+		return;
 	}
 
-	return previewp->saveLocal();
+	previewp->saveLocal(cb);
 }
+// [/SL:KB]
+//BOOL LLFloaterSnapshot::saveLocal()
+//{
+//	lldebugs << "saveLocal" << llendl;
+//	// FIXME: duplicated code
+//	LLFloaterSnapshot* instance = LLFloaterReg::findTypedInstance<LLFloaterSnapshot>("snapshot");
+//	if (!instance)
+//	{
+//		llassert(instance != NULL);
+//		return FALSE;
+//	}
+//	LLSnapshotLivePreview* previewp = Impl::getPreviewView(instance);
+//	if (!previewp)
+//	{
+//		llassert(previewp != NULL);
+//		return FALSE;
+//	}
+//
+//	return previewp->saveLocal();
+//}
 
 // static
 void LLFloaterSnapshot::preUpdate()
