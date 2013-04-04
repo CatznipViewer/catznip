@@ -4641,8 +4641,12 @@ void process_sound_trigger(LLMessageSystem *msg, void **)
 		return;
 	}
 		
-	// Don't play sounds from gestures if they are not enabled.
-	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+//	// Don't play sounds from gestures if they are not enabled.
+//	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [SL:KB] - Patch: Settings-Misc | Checked: 2012-08-30 (Catznip-3.3)
+	// Don't play sounds from gestures if they are not enabled (unless the user is playing them).
+	if (object_id == owner_id && gAgentID != owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [/SL:KB]
 	{
 		return;
 	}
