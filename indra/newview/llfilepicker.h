@@ -110,7 +110,10 @@ public:
 	// open the dialog. This is a modal operation
 	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
 	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
-	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	BOOL getMultipleOpenFiles(ELoadFilter filter = FFLOAD_ALL, bool blocking = true);
+// [/SL:KB]
+//	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
 
 	// Get the filename(s) found. getFirstFile() sets the pointer to
 	// the start of the structure and allows the start of iteration.
