@@ -136,6 +136,9 @@ public:
 	void resetAllIgnored();
 	void setAllIgnored();
 	void onClickLogPath();	
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	void onClickSnapshotPath();	
+// [/SL:KB]
 	void enableHistory();
 	void setPersonalInfo(const std::string& visibility, bool im_via_email, const std::string& email);
 	void refreshEnabledState();

@@ -60,7 +60,10 @@ public:
 	static void saveTexture();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	typedef boost::function<void(bool)> save_image_callback_t;
-	static void saveLocal(const save_image_callback_t& cb);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	static void saveLocal(bool prompt_path, const save_image_callback_t& cb);
+// [/SL:KB]
+//	static void saveLocal(const save_image_callback_t& cb);
 // [/SL:KB]
 //	static BOOL saveLocal();
 	static void preUpdate();

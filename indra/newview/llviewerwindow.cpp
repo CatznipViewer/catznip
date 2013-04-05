@@ -203,6 +203,10 @@
 #include "llviewerwindowlistener.h"
 #include "llpaneltopinfobar.h"
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+#include <boost/algorithm/string/replace.hpp>
+// [/SL:KB]
+
 #if LL_WINDOWS
 #include <tchar.h> // For Unicode conversion methods
 #endif
@@ -244,8 +248,8 @@ BOOL gQuietSnapshot = FALSE;
 
 static const F32 MIN_DISPLAY_SCALE = 0.75f;
 
-std::string	LLViewerWindow::sSnapshotBaseName;
-std::string	LLViewerWindow::sSnapshotDir;
+//std::string	LLViewerWindow::sSnapshotBaseName;
+//std::string	LLViewerWindow::sSnapshotDir;
 
 std::string	LLViewerWindow::sMovieBaseName;
 
@@ -1565,9 +1569,9 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	}
 
 	// Default to application directory.
-	LLViewerWindow::sSnapshotBaseName = "Snapshot";
+//	LLViewerWindow::sSnapshotBaseName = "Snapshot";
 	LLViewerWindow::sMovieBaseName = "SLmovie";
-	resetSnapshotLoc();
+//	resetSnapshotLoc();
 
 	// create window
 	mWindow = LLWindowManager::createWindow(this,
@@ -4074,6 +4078,35 @@ void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callbac
 		pick_type = LLFilePicker::FFSAVE_ALL; // ???
 	
 	// Get a base file location if needed.
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	/*
+	 * Process the snapshot base name
+	 */
+	std::string strSnapshotBaseName = gSavedSettings.getString("SnapshotLocalName");
+
+	time_t timeNow;
+	time(&timeNow);
+
+	// %d[ate]   - Current date
+	char strDateBuf[32];
+	strftime(strDateBuf, sizeof(strDateBuf) / sizeof(char), "%Y%m%d", localtime(&timeNow));
+	boost::replace_all(strSnapshotBaseName, "%d", strDateBuf);
+
+	// %t[ime]  - Current time
+	char strTimeBuf[32];
+	strftime(strTimeBuf, sizeof(strTimeBuf) / sizeof(char), "%H%M", localtime(&timeNow));
+	boost::replace_all(strSnapshotBaseName, "%t", strTimeBuf);
+
+	// %r[egion] - Name of the current region
+	std::string strRegion;
+	if (gAgent.getRegion())
+		strRegion = gAgent.getRegion()->getName();
+	boost::replace_all(strSnapshotBaseName, "%r", strRegion);
+
+	// %p[arcel] - Name of the current parcel
+	std::string strParcel = LLViewerParcelMgr::getInstance()->getAgentParcelName();
+	boost::replace_all(strSnapshotBaseName, "%p", strParcel);
+// [/SL:KB]
 //	if (force_picker || !isSnapshotLocSet())
 //	{
 //		std::string proposed_name( sSnapshotBaseName );
@@ -4093,26 +4126,59 @@ void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callbac
 //
 //		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
 //		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	if (force_picker || !isSnapshotLocSet())
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	/*
+	 * Process the snapshot path
+	 */
+	std::string strSnapshotDir = (!force_picker) ? gDirUtilp->getSnapshotDir() : LLStringUtil::null;
+	if (strSnapshotDir.empty())
 	{
-		LLFilePicker::getSaveFile(pick_type, sSnapshotBaseName, 
-			boost::bind(&LLViewerWindow::saveImageCallback, this, image, _1, cb));
+		// Prepare a clean name to show in the file picker dialog
+		std::string proposed_name(strSnapshotBaseName);
+		boost::replace_all(proposed_name, "%c", "");
+
+		LLFilePicker::getSaveFile(pick_type, strSnapshotBaseName, 
+			boost::bind(&LLViewerWindow::saveImageCallback, this, image, _1, force_picker, cb));
 	}
 	else
 	{
-		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
+		saveImageNumbered(image, strSnapshotDir, strSnapshotBaseName, cb);
 	}
 }
+// [/SL:KB]
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//	if (force_picker || !isSnapshotLocSet())
+//	{
+//		LLFilePicker::getSaveFile(pick_type, sSnapshotBaseName, 
+//			boost::bind(&LLViewerWindow::saveImageCallback, this, image, _1, cb));
+//	}
+//	else
+//	{
+//		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
+//	}
+//}
 
-void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, const save_image_callback_t& cb)
+//void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, const save_image_callback_t& cb)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, bool force_picker, const save_image_callback_t& cb)
+// [/SL:KB]
 {
 	if (!filepath.empty())
 	{
-		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
-		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+//		LLViewerWindow::sSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
+//		LLViewerWindow::sSnapshotDir = gDirUtilp->getDirName(filepath);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+		const std::string strSnapshotBaseName = gDirUtilp->getBaseFileName(filepath, true);
+		const std::string strSnapshotDir = gDirUtilp->getDirName(filepath);
+		if ( (!force_picker) && (gDirUtilp->getSnapshotDir().empty()) )
+		{
+			gSavedSettings.setString("SnapshotLocalPath", strSnapshotDir);
+			gDirUtilp->setSnapshotDir(strSnapshotDir);
+		}
 
-		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
+		saveImageNumbered(image, strSnapshotDir, strSnapshotBaseName, cb);
+// [/SL:KB]
+//		saveImageNumbered(image, sSnapshotDir, sSnapshotBaseName, cb);
 	}
 	else
 	{
@@ -4121,7 +4187,7 @@ void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::strin
 }
 
 // static
-void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::string& path, const std::string& base_name, const save_image_callback_t& cb)
+void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::string& path, std::string base_name, const save_image_callback_t& cb)
 {
 	if (!image)
 	{
@@ -4129,6 +4195,12 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 		cb(false);
 		return;
 	}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	// Make sure the base name includes a counter placeholder, otherwise add one
+	if (std::string::npos == base_name.find("%c"))
+		base_name += "_%c";
 // [/SL:KB]
 
 	// Look for an unused file name
@@ -4146,8 +4218,14 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		filepath = path;
 		filepath += gDirUtilp->getDirDelimiter();
-		filepath += base_name;
-		filepath += llformat("_%.3d",i);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+		std::string filename = base_name;
+		boost::replace_all(filename, "%c", llformat("%.3d", i));
+		filepath += gDirUtilp->getScrubbedFileName(filename);
+		filepath += ".";
+// [/SL:KB]
+//		filepath += base_name;
+//		filepath += llformat("_%.3d",i);
 		filepath += image->getExtension();
 // [/SL:KB]
 
@@ -4165,10 +4243,10 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 //	return image->save(filepath);
 }
 
-void LLViewerWindow::resetSnapshotLoc()
-{
-	sSnapshotDir.clear();
-}
+//void LLViewerWindow::resetSnapshotLoc()
+//{
+//	sSnapshotDir.clear();
+//}
 
 // static
 void LLViewerWindow::movieSize(S32 new_width, S32 new_height)

@@ -663,8 +663,12 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 			formatted->enableOverSize() ;
 			formatted->encode(raw, 0);
 			formatted->disableOverSize() ;
+//			gViewerWindow->saveImageNumbered(formatted);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+			gViewerWindow->saveImage(formatted, NULL, false);
+// [/SL:KB]
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-			gViewerWindow->saveImage(formatted, NULL);
+//			gViewerWindow->saveImage(formatted, NULL);
 // [/SL:KB]
 //			gViewerWindow->saveImageNumbered(formatted);
 		}

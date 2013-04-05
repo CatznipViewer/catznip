@@ -149,17 +149,20 @@ void LLPanelSnapshotLocal::onQualitySliderCommit(LLUICtrl* ctrl)
 
 void LLPanelSnapshotLocal::onSaveFlyoutCommit(LLUICtrl* ctrl)
 {
-	if (ctrl->getValue().asString() == "save as")
-	{
-		gViewerWindow->resetSnapshotLoc();
-	}
+//	if (ctrl->getValue().asString() == "save as")
+//	{
+//		gViewerWindow->resetSnapshotLoc();
+//	}
 
 	LLFloaterSnapshot* floater = LLFloaterSnapshot::getInstance();
 
 	floater->notify(LLSD().with("set-working", true));
 //	BOOL saved = LLFloaterSnapshot::saveLocal();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFloaterSnapshot::saveLocal(boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this, _1));
+//	LLFloaterSnapshot::saveLocal(boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this, _1));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	LLFloaterSnapshot::saveLocal("save as" == ctrl->getValue().asString(), boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this, _1));
+// [/SL:KB]
 }
 
 void LLPanelSnapshotLocal::onSaveCallback(bool saved)

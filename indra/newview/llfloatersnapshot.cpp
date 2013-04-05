@@ -168,9 +168,12 @@ public:
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveWeb();
 	void saveTexture();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	void saveLocal(const LLViewerWindow::save_image_callback_t& cb);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	void saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb);
 // [/SL:KB]
+//// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//	void saveLocal(const LLViewerWindow::save_image_callback_t& cb);
+//// [/SL:KB]
 //	BOOL saveLocal();
 
 	LLPointer<LLImageFormatted>	getFormattedImage() const { return mFormattedImage; }
@@ -1014,13 +1017,19 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLSnapshotLivePreview::saveLocal(const LLViewerWindow::save_image_callback_t& cb)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLSnapshotLivePreview::saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb)
 {
-	gViewerWindow->saveImage(mFormattedImage, cb);
+	gViewerWindow->saveImage(mFormattedImage, cb, prompt_path);
 	gViewerWindow->playSnapshotAnimAndSound();
 }
-// [/SL:KB]
+//// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//void LLSnapshotLivePreview::saveLocal(const LLViewerWindow::save_image_callback_t& cb)
+//{
+//	gViewerWindow->saveImage(mFormattedImage, cb);
+//	gViewerWindow->playSnapshotAnimAndSound();
+//}
+//// [/SL:KB]
 //BOOL LLSnapshotLivePreview::saveLocal()
 //{
 //	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
@@ -2306,7 +2315,10 @@ void LLFloaterSnapshot::saveTexture()
 
 // static
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLFloaterSnapshot::saveLocal(const save_image_callback_t& cb)
+//void LLFloaterSnapshot::saveLocal(const save_image_callback_t& cb)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+void LLFloaterSnapshot::saveLocal(bool prompt_path, const save_image_callback_t& cb)
+// [/SL:KB]
 {
 	lldebugs << "saveLocal" << llendl;
 	// FIXME: duplicated code
@@ -2325,7 +2337,10 @@ void LLFloaterSnapshot::saveLocal(const save_image_callback_t& cb)
 		return;
 	}
 
-	previewp->saveLocal(cb);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	previewp->saveLocal(prompt_path, cb);
+// [/SL:KB]
+//	previewp->saveLocal(cb);
 }
 // [/SL:KB]
 //BOOL LLFloaterSnapshot::saveLocal()

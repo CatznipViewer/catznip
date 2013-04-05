@@ -707,6 +707,15 @@ bool LLAppViewer::init()
 
 	LL_INFOS("InitInfo") << "Configuration initialized." << LL_ENDL ;
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	// Don't set the snapshot directory if it doesn't exist; the user will be asked for a location the first time they try to save one
+	const std::string strSnapshotPath = gSavedSettings.getString("SnapshotLocalPath");
+	if (gDirUtilp->fileExists(strSnapshotPath))
+	{
+		gDirUtilp->setSnapshotDir(strSnapshotPath);
+	}
+// [/SL:KB]
+
 	//set the max heap size.
 	initMaxHeapSize() ;
 
