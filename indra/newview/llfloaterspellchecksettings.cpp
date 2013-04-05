@@ -258,25 +258,13 @@ BOOL LLFloaterSpellCheckerImport::postBuild(void)
 
 void LLFloaterSpellCheckerImport::onBtnBrowse()
 {
-//	LLFilePicker& file_picker = LLFilePicker::instance();
-//	if (!file_picker.getOpenFile(LLFilePicker::FFLOAD_DICTIONARY))
-//	{
-//		return;
-//	}
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_DICTIONARY, 
-		boost::bind(&LLFloaterSpellCheckerImport::onBtnBrowseCallback, this, _1));
-}
-
-void LLFloaterSpellCheckerImport::onBtnBrowseCallback(std::string filepath)
-{
-	if (filepath.empty())
+	LLFilePicker& file_picker = LLFilePicker::instance();
+	if (!file_picker.getOpenFile(LLFilePicker::FFLOAD_DICTIONARY))
 	{
 		return;
 	}
-// [/SL:KB]
 
-//	std::string filepath = file_picker.getFirstFile();
+	std::string filepath = file_picker.getFirstFile();
 
 	const std::string extension = gDirUtilp->getExtension(filepath);
 	if ("xcu" == extension)

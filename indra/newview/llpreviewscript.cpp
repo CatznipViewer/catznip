@@ -1107,29 +1107,17 @@ BOOL LLScriptEdCore::handleKeyHere(KEY key, MASK mask)
 
 void LLScriptEdCore::onBtnLoadFromFile( void* data )
 {
-//	LLScriptEdCore* self = (LLScriptEdCore*) data;
-//
-//	// TODO Maybe add a dialogue warning here if the current file has unsaved changes.
-//	LLFilePicker& file_picker = LLFilePicker::instance();
-//	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_SCRIPT ) )
-//	{
-//		//File picking cancelled by user, so nothing to do.
-//		return;
-//	}
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_SCRIPT, 
-		boost::bind(&LLScriptEdCore::onFilePickerLoadCallback, (LLScriptEdCore*)data, _1));
-}
+	LLScriptEdCore* self = (LLScriptEdCore*) data;
 
-void LLScriptEdCore::onFilePickerLoadCallback(const std::string& filename)
-{
-	if (filename.empty())
+	// TODO Maybe add a dialogue warning here if the current file has unsaved changes.
+	LLFilePicker& file_picker = LLFilePicker::instance();
+	if( !file_picker.getOpenFile( LLFilePicker::FFLOAD_SCRIPT ) )
 	{
 		//File picking cancelled by user, so nothing to do.
 		return;
 	}
-// [/SL:KB]
-//	std::string filename = file_picker.getFirstFile();
+
+	std::string filename = file_picker.getFirstFile();
 
 	std::ifstream fin(filename.c_str());
 
@@ -1150,14 +1138,9 @@ void LLScriptEdCore::onFilePickerLoadCallback(const std::string& filename)
 	// Only replace the script if there is something to replace with.
 	if (text.length() > 0)
 	{
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		mEditor->selectAll();
+		self->mEditor->selectAll();
 		LLWString script(utf8str_to_wstring(text));
-		mEditor->insertText(script);
-// [/SL:KB]
-//		self->mEditor->selectAll();
-//		LLWString script(utf8str_to_wstring(text));
-//		self->mEditor->insertText(script);
+		self->mEditor->insertText(script);
 	}
 }
 
@@ -1166,41 +1149,22 @@ void LLScriptEdCore::onBtnSaveToFile( void* userdata )
 
 	LLViewerStats::getInstance()->incStat( LLViewerStats::ST_LSL_SAVE_COUNT );
 
-//	LLScriptEdCore* self = (LLScriptEdCore*) userdata;
-//
-//	if( self->mSaveCallback )
-//	{
-//		LLFilePicker& file_picker = LLFilePicker::instance();
-//		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT ) )
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_SCRIPT, LLStringUtil::null,
-		boost::bind(&LLScriptEdCore::onFilePickerSaveCallback, (LLScriptEdCore*)userdata, _1));
-}
+	LLScriptEdCore* self = (LLScriptEdCore*) userdata;
 
-void LLScriptEdCore::onFilePickerSaveCallback(const std::string& filename)
-{
-	if ( (mSaveCallback) && (!filename.empty()) )
+	if( self->mSaveCallback )
 	{
+		LLFilePicker& file_picker = LLFilePicker::instance();
+		if( file_picker.getSaveFile( LLFilePicker::FFSAVE_SCRIPT ) )
 		{
-			std::string scriptText= mEditor->getText();
+			std::string filename = file_picker.getFirstFile();
+			std::string scriptText=self->mEditor->getText();
 			std::ofstream fout(filename.c_str());
 			fout<<(scriptText);
 			fout.close();
-			mSaveCallback( mUserdata, FALSE );
+			self->mSaveCallback( self->mUserdata, FALSE );
 		}
 	}
 }
-// [/SL:KB]
-//		{
-//			std::string filename = file_picker.getFirstFile();
-//			std::string scriptText=self->mEditor->getText();
-//			std::ofstream fout(filename.c_str());
-//			fout<<(scriptText);
-//			fout.close();
-//			self->mSaveCallback( self->mUserdata, FALSE );
-//		}
-//	}
-//}
 
 bool LLScriptEdCore::canLoadOrSaveToFile( void* userdata )
 {

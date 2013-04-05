@@ -61,9 +61,6 @@ private:
 	void onFormatComboCommit(LLUICtrl* ctrl);
 	void onQualitySliderCommit(LLUICtrl* ctrl);
 	void onSaveFlyoutCommit(LLUICtrl* ctrl);
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	void onSaveCallback(bool success);
-// [/SL:KB]
 };
 
 static LLRegisterPanelClassWrapper<LLPanelSnapshotLocal> panel_class("llpanelsnapshotlocal");
@@ -157,22 +154,12 @@ void LLPanelSnapshotLocal::onSaveFlyoutCommit(LLUICtrl* ctrl)
 	LLFloaterSnapshot* floater = LLFloaterSnapshot::getInstance();
 
 	floater->notify(LLSD().with("set-working", true));
-//	BOOL saved = LLFloaterSnapshot::saveLocal();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	LLFloaterSnapshot::saveLocal(boost::bind(&LLPanelSnapshotLocal::onSaveCallback, this, _1));
-}
-
-void LLPanelSnapshotLocal::onSaveCallback(bool saved)
-{
-// [/SL:KB]
+	BOOL saved = LLFloaterSnapshot::saveLocal();
 	if (saved)
 	{
 		LLFloaterSnapshot::postSave();
 		goBack();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
-// [/SL:KB]
-//		floater->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
+		floater->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
 	}
 	else
 	{

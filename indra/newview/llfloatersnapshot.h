@@ -58,11 +58,7 @@ public:
 	// TODO: create a snapshot model instead
 	static LLFloaterSnapshot* getInstance();
 	static void saveTexture();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	typedef boost::function<void(bool)> save_image_callback_t;
-	static void saveLocal(const save_image_callback_t& cb);
-// [/SL:KB]
-//	static BOOL saveLocal();
+	static BOOL saveLocal();
 	static void preUpdate();
 	static void postUpdate();
 	static void postSave();
