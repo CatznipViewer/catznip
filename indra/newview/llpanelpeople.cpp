@@ -505,6 +505,16 @@ LLPanelPeople::LLPanelPeople()
 		mFriendsGearButton(NULL),
 		mGroupsGearButton(NULL),
 		mRecentGearButton(NULL),
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+		mGroupInfoBtn(NULL),
+		mGroupChatBtn(NULL),
+		mGroupCallBtn(NULL),
+		mProfileBtn(NULL),
+		mIMBtn(NULL),
+		mCallBtn(NULL),
+		mTeleportBtn(NULL),
+		mShareBtn(NULL),
+// [/SL:KB]
 		mMiniMap(NULL)
 {
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));
@@ -637,14 +647,34 @@ BOOL LLPanelPeople::postBuild()
 	accordion_tab->setDropDownStateChangedCallback(
 		boost::bind(&LLPanelPeople::onFriendsAccordionExpandedCollapsed, this, _1, _2, mOnlineFriendList));
 
-	buttonSetAction("view_profile_btn",	boost::bind(&LLPanelPeople::onViewProfileButtonClicked,	this));
-	buttonSetAction("group_info_btn",	boost::bind(&LLPanelPeople::onGroupInfoButtonClicked,	this));
-	buttonSetAction("chat_btn",			boost::bind(&LLPanelPeople::onChatButtonClicked,		this));
-	buttonSetAction("im_btn",			boost::bind(&LLPanelPeople::onImButtonClicked,			this));
-	buttonSetAction("call_btn",			boost::bind(&LLPanelPeople::onCallButtonClicked,		this));
-	buttonSetAction("group_call_btn",	boost::bind(&LLPanelPeople::onGroupCallButtonClicked,	this));
-	buttonSetAction("teleport_btn",		boost::bind(&LLPanelPeople::onTeleportButtonClicked,	this));
-	buttonSetAction("share_btn",		boost::bind(&LLPanelPeople::onShareButtonClicked,		this));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	LLUICtrl* pButtonBar = getChild<LLUICtrl>("button_bar");
+
+	mGroupInfoBtn = pButtonBar->getChild<LLButton>("group_info_btn");
+	mGroupInfoBtn->setCommitCallback(boost::bind(&LLPanelPeople::onGroupInfoButtonClicked, this));
+	mGroupChatBtn = pButtonBar->getChild<LLButton>("chat_btn");
+	mGroupChatBtn->setCommitCallback(boost::bind(&LLPanelPeople::onChatButtonClicked, this));
+	mGroupCallBtn = pButtonBar->getChild<LLButton>("group_call_btn");
+	mGroupCallBtn->setCommitCallback(boost::bind(&LLPanelPeople::onGroupCallButtonClicked, this));
+	mProfileBtn = pButtonBar->getChild<LLButton>("view_profile_btn");
+	mProfileBtn->setCommitCallback(boost::bind(&LLPanelPeople::onViewProfileButtonClicked, this));
+	mIMBtn = pButtonBar->getChild<LLButton>("im_btn");
+	mIMBtn->setCommitCallback(boost::bind(&LLPanelPeople::onImButtonClicked, this));
+	mCallBtn = pButtonBar->getChild<LLButton>("call_btn");
+	mCallBtn->setCommitCallback(boost::bind(&LLPanelPeople::onCallButtonClicked, this));
+	mTeleportBtn = pButtonBar->getChild<LLButton>("teleport_btn");
+	mTeleportBtn->setCommitCallback(boost::bind(&LLPanelPeople::onTeleportButtonClicked, this));
+	mShareBtn = pButtonBar->getChild<LLButton>("share_btn");
+	mShareBtn->setCommitCallback(boost::bind(&LLPanelPeople::onShareButtonClicked, this));
+// [/SL:KB]
+//	buttonSetAction("view_profile_btn",	boost::bind(&LLPanelPeople::onViewProfileButtonClicked,	this));
+//	buttonSetAction("group_info_btn",	boost::bind(&LLPanelPeople::onGroupInfoButtonClicked,	this));
+//	buttonSetAction("chat_btn",			boost::bind(&LLPanelPeople::onChatButtonClicked,		this));
+//	buttonSetAction("im_btn",			boost::bind(&LLPanelPeople::onImButtonClicked,			this));
+//	buttonSetAction("call_btn",			boost::bind(&LLPanelPeople::onCallButtonClicked,		this));
+//	buttonSetAction("group_call_btn",	boost::bind(&LLPanelPeople::onGroupCallButtonClicked,	this));
+//	buttonSetAction("teleport_btn",		boost::bind(&LLPanelPeople::onTeleportButtonClicked,	this));
+//	buttonSetAction("share_btn",		boost::bind(&LLPanelPeople::onShareButtonClicked,		this));
 
 	// Must go after setting commit callback and initializing all pointers to children.
 	mTabContainer->selectTabByName(NEARBY_TAB_NAME);
@@ -821,26 +851,26 @@ void LLPanelPeople::updateRecentList()
 	mRecentList->setDirty();
 }
 
-void LLPanelPeople::buttonSetVisible(std::string btn_name, BOOL visible)
-{
-	// To make sure we're referencing the right widget (a child of the button bar).
-	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
-	button->setVisible(visible);
-}
+//void LLPanelPeople::buttonSetVisible(std::string btn_name, BOOL visible)
+//{
+//	// To make sure we're referencing the right widget (a child of the button bar).
+//	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
+//	button->setVisible(visible);
+//}
 
-void LLPanelPeople::buttonSetEnabled(const std::string& btn_name, bool enabled)
-{
-	// To make sure we're referencing the right widget (a child of the button bar).
-	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
-	button->setEnabled(enabled);
-}
+//void LLPanelPeople::buttonSetEnabled(const std::string& btn_name, bool enabled)
+//{
+//	// To make sure we're referencing the right widget (a child of the button bar).
+//	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
+//	button->setEnabled(enabled);
+//}
 
-void LLPanelPeople::buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb)
-{
-	// To make sure we're referencing the right widget (a child of the button bar).
-	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
-	button->setClickedCallback(cb);
-}
+//void LLPanelPeople::buttonSetAction(const std::string& btn_name, const commit_signal_t::slot_type& cb)
+//{
+//	// To make sure we're referencing the right widget (a child of the button bar).
+//	LLButton* button = getChild<LLView>("button_bar")->getChild<LLButton>(btn_name);
+//	button->setClickedCallback(cb);
+//}
 
 void LLPanelPeople::updateButtons()
 {
@@ -856,14 +886,24 @@ void LLPanelPeople::updateButtons()
 	bool item_selected = (selected_uuids.size() == 1);
 	bool multiple_selected = (selected_uuids.size() >= 1);
 
-	buttonSetVisible("group_info_btn",		group_tab_active);
-	buttonSetVisible("chat_btn",			group_tab_active);
-	buttonSetVisible("view_profile_btn",	!group_tab_active);
-	buttonSetVisible("im_btn",				!group_tab_active);
-	buttonSetVisible("call_btn",			!group_tab_active);
-	buttonSetVisible("group_call_btn",		group_tab_active);
-	buttonSetVisible("teleport_btn",		friends_tab_active);
-	buttonSetVisible("share_btn",			nearby_tab_active || friends_tab_active);
+//	buttonSetVisible("group_info_btn",		group_tab_active);
+//	buttonSetVisible("chat_btn",			group_tab_active);
+//	buttonSetVisible("view_profile_btn",	!group_tab_active);
+//	buttonSetVisible("im_btn",				!group_tab_active);
+//	buttonSetVisible("call_btn",			!group_tab_active);
+//	buttonSetVisible("group_call_btn",		group_tab_active);
+//	buttonSetVisible("teleport_btn",		friends_tab_active);
+//	buttonSetVisible("share_btn",			nearby_tab_active || friends_tab_active);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	mGroupInfoBtn->setVisible(group_tab_active);
+	mGroupChatBtn->setVisible(group_tab_active);
+	mGroupCallBtn->setVisible(group_tab_active);
+	mProfileBtn->setVisible(!group_tab_active);
+	mIMBtn->setVisible(!group_tab_active);
+	mCallBtn->setVisible(!group_tab_active);
+	mTeleportBtn->setVisible(friends_tab_active);
+	mShareBtn->setVisible(nearby_tab_active || friends_tab_active);
+// [/SL:KB]
 
 	if (group_tab_active)
 	{
@@ -903,16 +943,28 @@ void LLPanelPeople::updateButtons()
 
 	bool enable_calls = LLVoiceClient::getInstance()->isVoiceWorking() && LLVoiceClient::getInstance()->voiceEnabled();
 
-	buttonSetEnabled("view_profile_btn",item_selected);
-	buttonSetEnabled("share_btn",		item_selected);
-	buttonSetEnabled("im_btn",			multiple_selected); // allow starting the friends conference for multiple selection
-	buttonSetEnabled("call_btn",		multiple_selected && enable_calls);
-	buttonSetEnabled("teleport_btn",	multiple_selected && LLAvatarActions::canOfferTeleport(selected_uuids));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	mProfileBtn->setEnabled(item_selected);
+	mShareBtn->setEnabled(item_selected);
+	mIMBtn->setEnabled(multiple_selected); // allow starting the friends conference for multiple selection
+	mCallBtn->setEnabled(multiple_selected && enable_calls);
+	mTeleportBtn->setEnabled(multiple_selected && LLAvatarActions::canOfferTeleport(selected_uuids));
+// [/SL:KB]
+//	buttonSetEnabled("view_profile_btn",item_selected);
+//	buttonSetEnabled("share_btn",		item_selected);
+//	buttonSetEnabled("im_btn",			multiple_selected); // allow starting the friends conference for multiple selection
+//	buttonSetEnabled("call_btn",		multiple_selected && enable_calls);
+//	buttonSetEnabled("teleport_btn",	multiple_selected && LLAvatarActions::canOfferTeleport(selected_uuids));
 
 	bool none_group_selected = item_selected && selected_id.isNull();
-	buttonSetEnabled("group_info_btn", !none_group_selected);
-	buttonSetEnabled("group_call_btn", !none_group_selected && enable_calls);
-	buttonSetEnabled("chat_btn", !none_group_selected);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	mGroupInfoBtn->setEnabled(!none_group_selected);
+	mGroupCallBtn->setEnabled(!none_group_selected && enable_calls);
+	mGroupChatBtn->setEnabled(!none_group_selected);
+// [/SL:KB]
+//	buttonSetEnabled("group_info_btn", !none_group_selected);
+//	buttonSetEnabled("group_call_btn", !none_group_selected && enable_calls);
+//	buttonSetEnabled("chat_btn", !none_group_selected);
 }
 
 std::string LLPanelPeople::getActiveTabName() const

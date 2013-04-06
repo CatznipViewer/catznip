@@ -16,10 +16,8 @@
 			<menu_item_call label="Arrêter mon animation" name="Stop Animating My Avatar"/>
 			<menu_item_call label="Marcher / Courir / Voler..." name="Walk / run / fly"/>
 		</menu>
-		<menu label="Statut" name="Status">
 			<menu_item_call label="Absent" name="Set Away"/>
 			<menu_item_call label="Occupé" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="Acheter des L$..." name="Buy and Sell L$"/>
 		<menu_item_call label="Boîte d&apos;envoi vendeur..." name="MerchantOutbox"/>
 		<menu_item_call label="Page d&apos;accueil du compte..." name="Manage My Account">
@@ -165,6 +163,7 @@
 	</menu>
 	<menu label="Avancé" name="Advanced">
 		<menu_item_call label="Refixer les textures" name="Rebake Texture"/>
+		<menu_item_call label="Actualiser solde en L$" name="Refresh Balance"/>
 		<menu_item_call label="Taille de l&apos;interface par défaut" name="Set UI Size to Default"/>
 		<menu_item_call label="Définir la taille de la fenêtre…" name="Set Window Size..."/>
 		<menu_item_check label="Limiter la distance de sélection" name="Limit Select Distance"/>

@@ -9,7 +9,7 @@
     <menu_item_call.on_click
      function="Self.SitDown"
      parameter="" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="Self.EnableSitDown" />
   </menu_item_call>
   <menu_item_call
@@ -19,7 +19,7 @@
     <menu_item_call.on_click
      function="Self.StandUp"
      parameter="" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="Self.EnableStandUp" />
   </menu_item_call>
   <context_menu
