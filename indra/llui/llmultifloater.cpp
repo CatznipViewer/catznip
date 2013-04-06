@@ -41,6 +41,9 @@ LLMultiFloater::LLMultiFloater(const LLSD& key, const LLFloater::Params& params)
 	  mTabContainer(NULL),
 	  mTabPos(LLTabContainer::TOP),
 	  mAutoResize(TRUE),
+// [SL:KB] - Patch: Control-MultiFloater | Checked: 2012-09-03 (Catznip-3.3)
+	  mCloseFloaters(true),
+// [/SL:KB]
 	  mOrigMinWidth(0),
 	  mOrigMinHeight(0)
 {
@@ -450,7 +453,13 @@ void LLMultiFloater::setCanResize(BOOL can_resize)
 
 BOOL LLMultiFloater::postBuild()
 {
-	mCloseSignal.connect(boost::bind(&LLMultiFloater::closeAllFloaters, this));
+// [SL:KB] - Patch: Control-MultiFloater | Checked: 2012-09-03 (Catznip-3.3)
+	if (mCloseFloaters)
+	{
+		mCloseSignal.connect(boost::bind(&LLMultiFloater::closeAllFloaters, this));
+	}
+// [/SL:KB]
+//	mCloseSignal.connect(boost::bind(&LLMultiFloater::closeAllFloaters, this));
 		
 	// remember any original xml minimum size
 	getResizeLimits(&mOrigMinWidth, &mOrigMinHeight);
