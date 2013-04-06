@@ -81,6 +81,10 @@ public:
 	
 	void setSelectCallback(const LLFolderView::signal_t::slot_type& cb);
 
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	LLFilterEditor* getFilterEditor() const { return mFilterEditor; }
+// [/SL:KB]
+
 	void onFilterEdit(const std::string& search_string );
 protected:
 	//
@@ -99,6 +103,11 @@ protected:
 	
 	static BOOL incrementalFind(LLFolderViewItem* first_item, const char *find_text, BOOL backward);
 	void onFilterSelected();
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	void onFilterRemoved(S32 idxTab, bool& fDeletePanel);
+
+	LLInventoryPanel* addNewPanel(S32 insert_at);
+// [/SL:KB]
 
 	const std::string getFilterSubString();
 	void setFilterSubString(const std::string& string);
@@ -108,10 +117,14 @@ protected:
 	void closeAllFolders();
 	void newWindow();
 	void doCreate(const LLSD& userdata);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	bool checkCreate(const LLSD& sdParam);
+	void onToggleReceivedItems(const LLSD& sdValue);
+// [/SL:KB]
 	void resetFilters();
 	void setSortBy(const LLSD& userdata);
-	void saveTexture(const LLSD& userdata);
-	bool isSaveTextureEnabled(const LLSD& userdata);
+//	void saveTexture(const LLSD& userdata);
+//	bool isSaveTextureEnabled(const LLSD& userdata);
 	void updateItemcountText();
 
 	void onFocusReceived();
@@ -123,24 +136,40 @@ private:
 	LLTabContainer*				mFilterTabs;
 	LLHandle<LLFloater>			mFinderHandle;
 	LLInventoryPanel*			mActivePanel;
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	S32							mActivePanelIndex;
+// [/SL:KB]
 	bool						mResortActivePanel;
 	LLSaveFolderState*			mSavedFolderState;
 	std::string					mFilterText;
-	std::string					mFilterSubString;
-
+//	std::string					mFilterSubString;
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	bool						mFilterSubStringPerTab;
+	std::vector<std::string>	mFilterSubStrings;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	std::string					mFloaterTitle;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	LLInventoryPanel*			mSpareInvPanel;
+// [/SL:KB]
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// List Commands                                                                //
 protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
-	void onAddButtonClick();
-	void showActionMenu(LLMenuGL* menu, std::string spawning_view_name);
+//	void onAddButtonClick();
+//	void showActionMenu(LLMenuGL* menu, std::string spawning_view_name);
 	void onTrashButtonClick();
 	void onClipboardAction(const LLSD& userdata);
 	BOOL isActionEnabled(const LLSD& command_name);
 	BOOL isActionChecked(const LLSD& userdata);
 	void onCustomAction(const LLSD& command_name);
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	void onChangeFolderSortOrder(const LLSD& sdParam);
+	bool onCheckFolderSortOrder(const LLSD& sdParam);
+// [/SL:KB]
 	bool handleDragAndDropToTrash(BOOL drop, EDragAndDropType cargo_type, EAcceptance* accept);
 	/**
 	 * Set upload cost in "Upload" sub menu.
@@ -149,8 +178,16 @@ protected:
 private:
 	LLDragAndDropButton*		mTrashButton;
 	LLToggleableMenu*			mMenuGearDefault;
-	LLMenuGL*					mMenuAdd;
+//	LLMenuGL*					mMenuAdd;
 	LLMenuButton*				mGearMenuButton;
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	LLToggleableMenu*			mMenuAdd;
+	LLMenuButton*				mAddMenuButton;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	LLToggleableMenu*			mMenuSort;
+	LLMenuButton*				mSortMenuButton;
+// [/SL:KB]
 
 	bool						mNeedUploadCost;
 	// List Commands                                                              //

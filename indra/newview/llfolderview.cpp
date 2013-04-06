@@ -390,8 +390,32 @@ BOOL LLFolderView::addFolder( LLFolderViewFolder* folder)
 
 void LLFolderView::closeAllFolders()
 {
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2.2) | Added: Catznip-3.2.2
+	folders_t openTopLevel;
+	for (auto itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	{
+		LLFolderViewFolder* pFolder = *itFolder;
+		if (pFolder->isOpen())
+			openTopLevel.push_back(pFolder);
+	}
+
+//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
+// [/SL:KB]
+
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2.2) | Added: Catznip-3.2.2
+	for (auto itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	{
+		(*itFolder)->setOpen(TRUE);
+	}
+//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
+	mScrollContainer->goToTop();
+// [/SL:KB]
 	arrangeAll();
 }
 
@@ -1045,22 +1069,22 @@ bool isDescendantOfASelectedItem(LLFolderViewItem* item, const std::vector<LLFol
 }
 
 // static
-void LLFolderView::removeCutItems()
-{
-	// There's no item in "cut" mode on the clipboard -> exit
-	if (!LLClipboard::instance().isCutMode())
-		return;
-
-	// Get the list of clipboard item uuids and iterate through them
-	LLDynamicArray<LLUUID> objects;
-	LLClipboard::instance().pasteFromClipboard(objects);
-	for (LLDynamicArray<LLUUID>::const_iterator iter = objects.begin();
-		 iter != objects.end();
-		 ++iter)
-	{
-		gInventory.removeObject(*iter);
-	}
-}
+//void LLFolderView::removeCutItems()
+//{
+//	// There's no item in "cut" mode on the clipboard -> exit
+//	if (!LLClipboard::instance().isCutMode())
+//		return;
+//
+//	// Get the list of clipboard item uuids and iterate through them
+//	LLDynamicArray<LLUUID> objects;
+//	LLClipboard::instance().pasteFromClipboard(objects);
+//	for (LLDynamicArray<LLUUID>::const_iterator iter = objects.begin();
+//		 iter != objects.end();
+//		 ++iter)
+//	{
+//		gInventory.removeObject(*iter);
+//	}
+//}
 
 void LLFolderView::onItemsRemovalConfirmation(const LLSD& notification, const LLSD& response)
 {
@@ -1396,7 +1420,7 @@ void LLFolderView::cut()
 				listener->cutToClipboard();
 			}
 		}
-		LLFolderView::removeCutItems();
+//		LLFolderView::removeCutItems();
 	}
 	mSearchString.clear();
 }

@@ -216,13 +216,16 @@ public:
 	static const std::string RECENTITEMS_SORT_ORDER;
 	static const std::string INHERIT_SORT_ORDER;
 	
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
+	void setSortBy(const std::string& sort_type);
+// [/SL:KB]
 	void setSortOrder(U32 order);
 	U32 getSortOrder() const;
 	void requestSort();
 
 private:
 	std::string					mSortOrderSetting;
-	int							mClipboardState;
+//	int							mClipboardState;
 
 	//--------------------------------------------------------------------
 	// Hidden folders

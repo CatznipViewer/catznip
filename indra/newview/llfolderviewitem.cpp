@@ -113,6 +113,10 @@ LLFolderViewItem::LLFolderViewItem(const LLFolderViewItem::Params& p)
 	mIsSelected( FALSE ),
 	mIsCurSelection( FALSE ),
 	mSelectPending(FALSE),
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	mClipboardGeneration(-1),
+	mIsClipboardCut(false),
+// [/SL:KB]
 	mLabelStyle( LLFontGL::NORMAL ),
 	mHasVisibleChildren(FALSE),
 	mIndentation(0),
@@ -561,6 +565,27 @@ BOOL LLFolderViewItem::isRemovable()
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+bool LLFolderViewItem::isClipboardCut()
+{
+	LLClipboard* pClipboard = LLClipboard::getInstance();
+	if (mClipboardGeneration != pClipboard->getGeneration())
+	{
+		mClipboardGeneration = pClipboard->getGeneration();
+		mIsClipboardCut = false;
+
+		if (LLClipboard::instance().isCutMode())
+		{
+			if (getListener())
+				mIsClipboardCut |= pClipboard->isOnClipboard(getListener()->getUUID());
+			if (getParentFolder())
+				mIsClipboardCut |= getParentFolder()->isClipboardCut();
+		}
+	}
+	return mIsClipboardCut;
+}
+// [/SL:KB]
+
 void LLFolderViewItem::destroyView()
 {
 	if (mParentFolder)
@@ -874,6 +899,11 @@ void LLFolderViewItem::draw()
 	const BOOL in_inventory = getListener() && gInventory.isObjectDescendentOf(getListener()->getUUID(), gInventory.getRootFolderID());
 	const BOOL in_library = getListener() && gInventory.isObjectDescendentOf(getListener()->getUUID(), gInventory.getLibraryRootFolderID());
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	const bool is_clipboard_cut = isClipboardCut();
+	const F32 label_alpha = (is_clipboard_cut) ? 0.6f : 1.0f;
+// [/SL:KB]
+
 	//--------------------------------------------------------------------------------//
 	// Draw open folder arrow
 	//
@@ -985,16 +1015,25 @@ void LLFolderViewItem::draw()
 	const S32 icon_x = mIndentation + ARROW_SIZE + TEXT_PAD;
 	if (!mIconOpen.isNull() && (llabs(mControlLabelRotation) > 80)) // For open folders
  	{
-		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
 	}
 	else if (mIcon)
 	{
- 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+ 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+// 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
  	}
 
 	if (highlight_link)
 	{
-		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
 	}
 
 	//--------------------------------------------------------------------------------//
@@ -1009,6 +1048,10 @@ void LLFolderViewItem::draw()
 	if (highlight_link) color = sLinkColor;
 	if (in_library) color = sLibraryColor;
 	
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	color.setAlpha(label_alpha);
+// [/SL:KB]
+
 	F32 right_x  = 0;
 	F32 y = (F32)getRect().getHeight() - font->getLineHeight() - (F32)TEXT_PAD - (F32)TOP_PAD;
 	F32 text_left = (F32)(ARROW_SIZE + TEXT_PAD + ICON_WIDTH + ICON_PAD + mIndentation);
@@ -1351,7 +1394,7 @@ void LLFolderViewFolder::requestSort()
 
 void LLFolderViewFolder::setCompletedFilterGeneration(S32 generation, BOOL recurse_up)
 {
-	//mMostFilteredDescendantGeneration = llmin(mMostFilteredDescendantGeneration, generation);
+	mMostFilteredDescendantGeneration = llmin(mMostFilteredDescendantGeneration, generation);
 	mCompletedFilterGeneration = generation;
 	// only aggregate up if we are a lower (older) value
 	if (recurse_up

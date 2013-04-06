@@ -204,6 +204,9 @@ public:
 	virtual void restoreItem();
 	virtual void restoreToWorld();
 	virtual void gotoItem();
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	virtual void findLinks();
+// [/SL:KB]
 	virtual LLUIImagePtr getIcon() const;
 	virtual const std::string& getDisplayName() const;
 	virtual std::string getLabelSuffix() const;
