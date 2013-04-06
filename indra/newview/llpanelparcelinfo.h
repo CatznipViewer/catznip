@@ -53,13 +53,15 @@ public:
 	const LLParcelData& getCurrentParcelData() const	{ return m_CurParcelData; }
 	const LLUUID&       getCurrentParcelId() const		{ return m_idCurParcel; }
 	const LLVector3d&   getCurrentParcelPos() const		{ return m_posCurGlobal; }
-	void                setParcelFromPos(const LLVector3d posGlobal) { requestRemoteParcel(posGlobal); }
-	void                setParcelFromId(const LLUUID& idParcel) { setParcelID(idParcel); }
+	void                setParcelFromPos(const LLVector3d posGlobal);
+	void                setParcelFromId(const LLUUID& idParcel);
 	void                setParcelFromItem(const LLUUID& idItem);
 protected:
 	void clearControls(const std::string& strGeneral, const std::string& strDescription);
 	void clearPendingRequest();
+	void requestRemoteParcel(const LLSD& sdBody);
 	void requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion = LLUUID::null);
+	void requestRemoteParcel(const LLUUID& idRegion, const LLVector3& posRegion);
 	void updateFromParcelData();
 	static void onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel> hPanel);
 
@@ -70,7 +72,8 @@ protected:
 	// Request tracking
 	enum ERequestType { REQUEST_NONE, REQUEST_PARCEL_ID, REQUEST_PARCEL_INFO, REQUEST_LANDMARK };
 	ERequestType m_eRequestType;
-	LLVector3d   m_posCurRequest;
+	LLVector3d   m_posGlobalRequest;
+	LLVector3    m_posRegionRequest;
 
 	// Parcel information
 	LLUUID       m_idCurParcel;

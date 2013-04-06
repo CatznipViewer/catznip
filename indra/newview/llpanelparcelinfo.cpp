@@ -71,6 +71,19 @@ BOOL LLPanelParcelInfo::postBuild()
 	return TRUE;
 }
 
+void LLPanelParcelInfo::setParcelFromPos(const LLVector3d posGlobal)
+{
+	requestRemoteParcel(posGlobal);
+}
+
+void LLPanelParcelInfo::setParcelFromId(const LLUUID& idParcel)
+{
+	m_posGlobalRequest.setZero();
+	m_posRegionRequest.setZero();
+
+	setParcelID(idParcel);
+}
+
 void LLPanelParcelInfo::setParcelID(const LLUUID& idParcel)
 {
 	// Sanity check - don't do anything if we're already waiting for it or already have it
@@ -115,7 +128,26 @@ void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 	clearPendingRequest();
 
 	m_CurParcelData = parcelData;
-	m_posCurGlobal.setVec(m_CurParcelData.global_x, m_CurParcelData.global_y, m_CurParcelData.global_z);
+
+	if (!m_posGlobalRequest.isExactlyZero())
+	{
+		m_posCurGlobal = m_posGlobalRequest;
+	}
+	else
+	{
+		if (!m_posRegionRequest.isExactlyZero())
+		{
+			m_posCurGlobal.setVec(llfloor(m_CurParcelData.global_x / 256) * 256 + m_posRegionRequest.mV[VX], 
+								  llfloor(m_CurParcelData.global_y / 256) * 256 + m_posRegionRequest.mV[VY],
+								  m_posRegionRequest.mV[VZ]);
+		}
+		else
+		{
+			m_posCurGlobal.setVec(m_CurParcelData.global_x, m_CurParcelData.global_y, m_CurParcelData.global_z);
+		}
+	}
+	m_posGlobalRequest.setZero();
+	m_posRegionRequest.setZero();
 						  
 	updateFromParcelData();
 }
@@ -160,27 +192,15 @@ void LLPanelParcelInfo::clearPendingRequest()
 		LLRemoteParcelInfoProcessor::getInstance()->removeObserver(m_idCurParcel, this);
 	}
 	m_eRequestType = REQUEST_NONE;
-	m_posCurRequest.clearVec();
 }
 
 void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion)
 {
-	// Sanity check - don't do anything if we're already waiting for it
-	if ( (REQUEST_PARCEL_ID == m_eRequestType) && (posGlobal == m_posCurRequest) )
-		return;
-
-	clearPendingRequest();
-	clearLocation();
-
-	const LLViewerRegion* pRegion = gAgent.getRegion();
-	const std::string strUrl = pRegion->getCapability("RemoteParcelRequest");
-	if ( (pRegion) && (!strUrl.empty()) )
+	if (!posGlobal.isExactlyZero())
 	{
 		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS), 
 							(F32)fmod(posGlobal.mdV[VY], (F64)REGION_WIDTH_METERS),
 							(F32)posGlobal.mdV[VZ]);
-		m_eRequestType = REQUEST_PARCEL_ID;
-		m_posCurRequest = posGlobal;
 
 		LLSD sdBody;
 		if (idRegion.notNull())
@@ -188,6 +208,40 @@ void LLPanelParcelInfo::requestRemoteParcel(const LLVector3d& posGlobal, const L
 		else
 			sdBody["region_handle"] = ll_sd_from_U64(to_region_handle(posGlobal));
 		sdBody["location"] = ll_sd_from_vector3(posRegion);
+
+		m_posGlobalRequest = posGlobal;
+		m_posRegionRequest = posRegion;
+
+		requestRemoteParcel(sdBody);
+	}
+}
+
+void LLPanelParcelInfo::requestRemoteParcel(const LLUUID& idRegion, const LLVector3& posRegion)
+{
+	if (idRegion.notNull())
+	{
+		LLSD sdBody;
+		sdBody["region_id"] = idRegion;
+		sdBody["location"] = ll_sd_from_vector3(posRegion);
+
+		m_posGlobalRequest.setZero();
+		m_posRegionRequest = posRegion;
+
+		requestRemoteParcel(sdBody);
+	}
+}
+
+void LLPanelParcelInfo::requestRemoteParcel(const LLSD& sdBody)
+{
+	clearPendingRequest();
+	clearLocation();
+
+	const LLViewerRegion* pRegion = gAgent.getRegion();
+	const std::string strUrl = (pRegion) ? pRegion->getCapability("RemoteParcelRequest") : LLStringUtil::null;
+	if  (!strUrl.empty())
+	{
+		m_eRequestType = REQUEST_PARCEL_ID;
+
 		LLHTTPClient::post(strUrl, sdBody, new LLRemoteParcelRequestResponder(getObserverHandle()));
 
 		const std::string strLoading = LLTrans::getString("LoadingData");
@@ -223,15 +277,32 @@ void LLPanelParcelInfo::onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel
 	LLPanelParcelInfo* pInstance = (!hPanel.isDead()) ? dynamic_cast<LLPanelParcelInfo*>(hPanel.get()) : NULL;
 	if (pInstance)
 	{
-		LLVector3d posGlobal; LLUUID idRegion;
-		if ( (!pLandmark) || (!pLandmark->getGlobalPos(posGlobal)) || (!pLandmark->getRegionID(idRegion)) )
+		// We need the region id and local coordinates *or* a global position (and optionally a region id)
+		bool fRequested = false;
+		if (pLandmark)
+		{
+			LLUUID idRegion;
+			pLandmark->getRegionID(idRegion);
+
+			LLVector3d posGlobal; 
+			if (pLandmark->getGlobalPos(posGlobal))
+			{
+				pInstance->requestRemoteParcel(posGlobal, idRegion);
+				fRequested = true;
+			}
+			else if (idRegion.notNull())
+			{
+				pInstance->requestRemoteParcel(idRegion, pLandmark->getRegionPos());
+				fRequested = true;
+			}
+		}
+
+		if (!fRequested)
 		{
 			pInstance->clearPendingRequest();
 			pInstance->clearLocation();
 			pInstance->clearControls(LLTrans::getString("parcel_not_available"), LLTrans::getString("parcel_server_error_text"));
-			return;
 		}
-		pInstance->requestRemoteParcel(posGlobal, idRegion);
 	}
 }
 
