@@ -460,7 +460,10 @@ void LLPanelTopInfoBar::onContextMenuItemClicked(const LLSD::String& item)
 		}
 		else
 		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+			LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
 		}
 	}
 	else if (item == "copy")

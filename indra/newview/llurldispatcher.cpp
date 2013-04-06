@@ -41,6 +41,9 @@
 #include "llweb.h"
 #include "llworldmapmessage.h"
 #include "llurldispatcherlistener.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewernetwork.h"
 
 // library includes
@@ -246,7 +249,13 @@ void LLURLDispatcherImpl::regionHandleCallback(U64 region_handle, const LLSLURL&
 		key["y"] = global_pos.mdV[VY];
 		key["z"] = global_pos.mdV[VZ];
 
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+			LLFloaterReg::showInstance("parcel_info", key);
+		else
+			LLFloaterSidePanelContainer::showPanel("places", key);
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 }
 
