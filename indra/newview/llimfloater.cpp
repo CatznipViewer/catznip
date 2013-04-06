@@ -157,7 +157,10 @@ void LLIMFloater::newIMCallback(const LLSD& data){
 
 //        // update if visible, otherwise will be updated when opened
 //		if (floater->getVisible())
-// [SL:KB] - Add messages as they come in (otherwise keyword alerts only trigger when the IM is opened)
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-09-18 (Catznip-3.3)
+		// Add messages (but not notifications) as they come in (otherwise keyword alerts only trigger when the IM is opened)
+		if ( (floater->getVisible()) || (!data.has("notification_id")) || (LLNotificationsUtil::find(data["notification_id"].asUUID()) == NULL) )
+// [/SL:KB]
 		{
 			floater->updateMessages();
 		}
