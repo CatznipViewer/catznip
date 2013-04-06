@@ -276,11 +276,23 @@ void LLGroupActions::showNotices(const LLUUID& group_id)
 		return;
 
 	LLSD sdParams;
-	sdParams["open_tab_name"] = "panel_group_info_sidetray";
 	sdParams["group_id"] = group_id;
 	sdParams["action"] = "view_notices";
 
-	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", sdParams);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+// [/SL:KB]
+		sdParams["open_tab_name"] = "panel_group_info_sidetray";
+
+		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", sdParams);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+	}
+	else
+	{
+		LLFloaterReg::showInstance("floater_group_info", sdParams);
+	}
+// [/SL:KB]
 }
 // [/SL:KB]
 

@@ -5546,7 +5546,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    icon="notifytip.tga"
    name="FriendOnline"
    can_logto="chat|openim"
-   logto="openim"
+   logto="chat|openim"
    type="notifytip">
     <tag>friendship</tag>
 [NAME_SLURL] is Online
@@ -5556,7 +5556,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
    icon="notifytip.tga"
    name="FriendOffline"
    can_logto="chat|openim"
-   logto="openim"
+   logto="chat|openim"
    type="notifytip">
     <tag>friendship</tag>
 [NAME_SLURL] is Offline
@@ -6509,6 +6509,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOffered"
+   can_logto="chat|im"
+   logto="im"
    type="offer">
 [NAME_SLURL] has offered to teleport you to their location:
 
