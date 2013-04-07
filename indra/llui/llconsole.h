@@ -150,6 +150,6 @@ private:
 
 };
 
-extern LLConsole* gConsole;
+//extern LLConsole* gConsole;
 
 #endif

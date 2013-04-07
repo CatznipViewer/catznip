@@ -426,6 +426,18 @@ S32 LLAvatarList::notifyParent(const LLSD& info)
 		sort();
 		return 1;
 	}
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-3.2.1) | Added: Catznip-2.6.0
+	else if ( (info.has("select")) && (info["select"].isUUID()) )
+	{
+		const LLSD& sdValue = getSelectedValue();
+		const LLUUID idItem = info["select"].asUUID();
+		if ( (!sdValue.isDefined()) || ((sdValue.isUUID()) && (sdValue.asUUID() != idItem)) )
+		{
+			resetSelection();
+			selectItemByUUID(idItem);
+		}
+	}
+// [/SL:KB]
 	return LLFlatListViewEx::notifyParent(info);
 }
 
