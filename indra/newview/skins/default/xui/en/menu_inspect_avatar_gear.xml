@@ -50,6 +50,31 @@
      function="InspectAvatar.InviteToGroup"/>
   </menu_item_call>
   <menu_item_separator />
+  <menu
+   label="Copy"
+   name="Avatar Copy">
+      <menu_item_call
+       label="Copy Display Name"
+       name="Avatar Copy Displayname">
+          <menu_item_call.on_click
+           function="InspectAvatar.Copy"
+           parameter="displayname" />
+      </menu_item_call>
+      <menu_item_call
+       label="Copy Full Name"
+       name="Avatar Copy Fullname">
+          <menu_item_call.on_click
+           function="InspectAvatar.Copy"
+           parameter="fullname" />
+      </menu_item_call>
+      <menu_item_call
+       label="Copy SLurl"
+       name="Avatar Copy SLurl">
+          <menu_item_call.on_click
+           function="InspectAvatar.Copy"
+           parameter="slurl" />
+      </menu_item_call>
+  </menu>
   <menu_item_call
    label="Block"
    name="block">

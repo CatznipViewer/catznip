@@ -123,6 +123,9 @@ private:
 	void onClickInviteToGroup();
 	void onClickPay();
 	void onClickShare();
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	void onClickCopy(const LLSD& sdParam);
+// [/SL:KB]
 	void onToggleMute();
 	void onClickReport();
 	void onClickFreeze();
@@ -218,6 +221,9 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mCommitCallbackRegistrar.add("InspectAvatar.InviteToGroup",	boost::bind(&LLInspectAvatar::onClickInviteToGroup, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Pay",	boost::bind(&LLInspectAvatar::onClickPay, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Share",	boost::bind(&LLInspectAvatar::onClickShare, this));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mCommitCallbackRegistrar.add("InspectAvatar.Copy", boost::bind(&LLInspectAvatar::onClickCopy, this, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("InspectAvatar.ToggleMute",	boost::bind(&LLInspectAvatar::onToggleMute, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Freeze", boost::bind(&LLInspectAvatar::onClickFreeze, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Eject", boost::bind(&LLInspectAvatar::onClickEject, this));	
@@ -714,6 +720,14 @@ void LLInspectAvatar::onClickShare()
 	LLAvatarActions::share(mAvatarID);
 	closeFloater();
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLInspectAvatar::onClickCopy(const LLSD& sdParam)
+{
+	LLAvatarActions::copyToClipboard(mAvatarID, sdParam);
+	closeFloater();
+}
+// [/SL:KB]
 
 void LLInspectAvatar::onToggleMute()
 {
