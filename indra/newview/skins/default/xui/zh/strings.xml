@@ -1001,6 +1001,24 @@ http://secondlife.com/viewer-access-faq
 	<string name="dictionary_files">
 		字典
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Information about this location is unavailable at this time, please try again later.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Information about this location is unavailable due to access restrictions. Please check your permissions with the parcel owner.
+	</string>
+	<string name="parcel_server_update_text">
+		Place information not available without server update.
+	</string>
+
 	<string name="AvatarSetNotAway">
 		非離開
 	</string>

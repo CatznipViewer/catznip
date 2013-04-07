@@ -642,11 +642,14 @@ void LLLocationInputCtrl::onAddLandmarkButtonClicked()
 	// Landmark exists, open it for preview and edit
 	if(landmark && landmark->getUUID().notNull())
 	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = landmark->getUUID();
-
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//		LLSD key;
+//		key["type"] = "landmark";
+//		key["id"] = landmark->getUUID();
+//
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 	else
 	{
@@ -1134,7 +1137,10 @@ void LLLocationInputCtrl::onLocationContextMenuItemClicked(const LLSD& userdata)
 		}
 		else
 		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+			LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
 
 		}
 	}

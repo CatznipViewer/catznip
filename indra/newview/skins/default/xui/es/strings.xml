@@ -991,6 +991,24 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="dictionary_files">
 		Diccionarios
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Los datos de este lugar no están disponibles por el momento. Por favor, prueba más tarde.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Por restricciones en el acceso, los datos de esta localización no están disponibles.  Por favor, revisa tus permisos con el propietario de la parcela.
+	</string>
+	<string name="parcel_server_update_text">
+		Los datos de este lugar no están disponibles sin una actualización del servidor.
+	</string>
+
 	<string name="AvatarSetNotAway">
 		Salir del estado ausente
 	</string>

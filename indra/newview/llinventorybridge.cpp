@@ -54,6 +54,9 @@
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
 #include "llinventorypanel.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "lllandmarkactions.h"
+// [/SL:KB]
 #include "llmarketplacefunctions.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
@@ -4486,11 +4489,14 @@ void LLLandmarkBridge::performAction(LLInventoryModel* model, std::string action
 		LLViewerInventoryItem* item = getItem();
 		if(item)
 		{
-			LLSD key;
-			key["type"] = "landmark";
-			key["id"] = item->getUUID();
-
-			LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+			LLLandmarkActions::showLandmarkInfo(item->getUUID());
+// [/SL:KB]
+//			LLSD key;
+//			key["type"] = "landmark";
+//			key["id"] = item->getUUID();
+//
+//			LLFloaterSidePanelContainer::showPanel("places", key);
 		}
 	}
 	else

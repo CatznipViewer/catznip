@@ -1006,6 +1006,24 @@ support@secondlife.com.
 	<string name="dictionary_files">
 		Словари
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Информация об этом месте сейчас недоступна. Повторите попытку позже.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Информация об этом месте недоступна, поскольку у вас нет прав на ее просмотр.  Узнайте о своих правах, связавшись с владельцем участка.
+	</string>
+	<string name="parcel_server_update_text">
+		Необходимо обновление сервера, чтобы информация стала доступна.
+	</string>
+
 	<string name="AvatarSetNotAway">
 		На месте
 	</string>
