@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ legacy_header_height="18"
+ follows="left"
+ height="180"
+ layout="topleft"
+ name="build axis floater"
+ help_topic="build_axis_floater"
+ save_rect="true"
+ title="AXIS OPTIONS"
+ width="270">
+
+    <text
+     height="19"
+     follows="left|top"
+     layout="topleft"
+     left="10"
+     name="AxisPosText"
+     top="25"
+     type="string"
+     use_ellipses="true"
+     width="285"
+     word_wrap="true">
+        Relative axis position
+    </text>
+ 
+    <slider
+     can_edit_text="true"
+     decimal_digits="2"
+     follows="left|top"
+     height="16"
+     increment="0.05"
+     initial_value="0.0"
+     label="X-axis :"
+     label_width="40"
+     layout="topleft"
+     left_delta="10"
+     max_val="1.0"
+     min_val="-1.0"
+     name="AxisPosX"
+     show_text="true"
+     top_pad="0"
+     width="240" />
+    <slider
+     can_edit_text="true"
+     decimal_digits="2"
+     follows="left|top"
+     height="16"
+     increment="0.05"
+     initial_value="0.0"
+     label="Y-axis :"
+     label_width="40"
+     layout="topleft"
+     left_delta="0"
+     max_val="1.0"
+     min_val="-1.0"
+     name="AxisPosY"
+     show_text="true"
+     top_pad="3"
+     width="240" />
+    <slider
+     can_edit_text="true"
+     decimal_digits="2"
+     follows="left|top"
+     height="16"
+     increment="0.05"
+     initial_value="0.0"
+     label="Z-axis :"
+     label_width="40"
+     layout="topleft"
+     left_delta="0"
+     max_val="1.0"
+     min_val="-1.0"
+     name="AxisPosZ"
+     show_text="true"
+     top_pad="3"
+     width="240" />
+    <button
+     follows="left|top"
+     height="20"
+     label="Center"
+     layout="topleft"
+     left_delta="90"
+     name="AxisPosCenter"
+     tool_tip="Center the axis"
+     top_pad="3"
+     width="60" />
+ 
+    <text
+     follows="left|top"
+     height="19"
+     layout="topleft"
+     left="10"
+     name="AxisOffsetText"
+     top_pad="10"
+     type="string"
+     use_ellipses="true"
+     width="285"
+     word_wrap="true">
+        Axis offset (in meters)
+    </text>
+    <spinner
+     decimal_digits="2"
+     follows="left|top"
+     height="23"
+     increment="0.5"
+     initial_value="0"
+     label="X :"
+     label_width="15"
+     layout="topleft"
+     left_delta="10"
+     max_val="64"
+     min_val="-64"
+     name="AxisOffsetX"
+     top_pad="0"
+     width="75" />
+    <spinner
+     decimal_digits="2"
+     follows="left|top"
+     height="23"
+     increment="0.5"
+     initial_value="0"
+     label="Y :"
+     label_width="15"
+     layout="topleft"
+     left_pad="7"
+     max_val="64"
+     min_val="-64"
+     name="AxisOffsetY"
+     width="75" />
+    <spinner
+     decimal_digits="2"
+     follows="left|top"
+     height="23"
+     increment="0.5"
+     initial_value="0"
+     label="Z :"
+     label_width="15"
+     layout="topleft"
+     left_pad="7"
+     max_val="64"
+     min_val="-64"
+     name="AxisOffsetZ"
+     width="75" />
+</floater>

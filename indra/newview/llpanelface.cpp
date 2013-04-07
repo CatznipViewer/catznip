@@ -45,6 +45,10 @@
 #include "llcombobox.h"
 #include "lldrawpoolbump.h"
 #include "llface.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "llinventoryfunctions.h"
+#include "llinventorymodel.h"
+// [/SL:KB]
 #include "lllineeditor.h"
 #include "llmediaentry.h"
 #include "llnotificationsutil.h"
@@ -55,6 +59,9 @@
 #include "lltexturectrl.h"
 #include "lltextureentry.h"
 #include "lltooldraganddrop.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolmgr.h"
+// [/SL:KB]
 #include "llui.h"
 #include "llviewercontrol.h"
 #include "llviewermedia.h"
@@ -112,6 +119,13 @@ BOOL	LLPanelFace::postBuild()
 		mTextureCtrl->setDnDFilterPermMask(PERM_COPY | PERM_TRANSFER);
 	}
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _3));
+
+	mTexturePipette = findChild<LLButton>("texture_pipette");
+	mTexturePipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, LLToolPipette::TYPE_TEXTURE));
+// [/SL:KB]
+
 	mColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
 	if(mColorSwatch)
 	{
@@ -122,6 +136,11 @@ BOOL	LLPanelFace::postBuild()
 		mColorSwatch->setFollowsLeft();
 		mColorSwatch->setCanApplyImmediately(TRUE);
 	}
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mColorPipette = findChild<LLButton>("color_pipette");
+	mColorPipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, LLToolPipette::TYPE_COLOR));
+// [/SL:KB]
 
 	mLabelColorTransp = getChild<LLTextBox>("color trans");
 	if(mLabelColorTransp)
@@ -166,6 +185,10 @@ BOOL	LLPanelFace::postBuild()
 
 LLPanelFace::LLPanelFace()
 :	LLPanel()
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+,	mTexturePipette(NULL)
+,	mColorPipette(NULL)
+// [/SL:KB]
 {
 }
 
@@ -175,6 +198,17 @@ LLPanelFace::~LLPanelFace()
 	// Children all cleaned up by default view destructor.
 }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLPanelFace::draw()
+{
+	bool fPipetteActive = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+	bool fPipetteTexture = (fPipetteActive) && (LLToolPipette::TYPE_TEXTURE == LLToolPipette::getInstance()->getPipetteType());
+	mTexturePipette->setValue(fPipetteActive && fPipetteTexture);
+	mColorPipette->setValue(fPipetteActive && !fPipetteTexture);
+
+	LLPanel::draw();
+}
+// [/SL:KB]
 
 void LLPanelFace::sendTexture()
 {
@@ -579,6 +613,10 @@ void LLPanelFace::getState()
 			}
 		}
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mTexturePipette->setEnabled(editable);
+		mColorPipette->setEnabled(editable);
+// [/SL:KB]
 		
 		// planar align
 		bool align_planar = false;
@@ -1063,6 +1101,54 @@ void LLPanelFace::onSelectTexture(const LLSD& data)
 	sendTexture();
 }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLPanelFace::onClickPipette(LLToolPipette::EType type)
+{
+	const LLButton* pPipetteBtn = ( (LLToolPipette::TYPE_TEXTURE == type) ? mTexturePipette : mColorPipette );
+	if (!pPipetteBtn->getToggleState())
+	{
+		LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
+		LLToolPipette::getInstance()->setPippetType(type);
+	}
+	else
+	{
+		LLToolMgr::getInstance()->clearTransientTool();
+	}
+}
+
+void LLPanelFace::onSelectPipette(LLToolPipette::EType type, const LLTextureEntry& te)
+{
+	switch (type)
+	{
+		case LLToolPipette::TYPE_TEXTURE:
+			{
+				LLTextureCtrl* pTextureCtrl = getChild<LLTextureCtrl>("texture control");
+				if (!pTextureCtrl->getPickerVisible())
+				{
+					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
+					if (idItem.notNull())
+					{
+						pTextureCtrl->setImageItemID(idItem);
+						onSelectTexture(LLSD());
+					}
+				}
+			}
+			break;
+		case LLToolPipette::TYPE_COLOR:
+			{
+				LLColorSwatchCtrl* pColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
+				if (!pColorSwatch->getPickerVisible())
+				{
+					pColorSwatch->set(LLColor4(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE], 1.0));
+					onSelectColor(LLSD());
+				}
+			}
+			break;
+		default:
+			break;
+	}
+}
+// [/SL:KB]
 
 // static
 void LLPanelFace::onCommitTextureInfo( LLUICtrl* ctrl, void* userdata )

@@ -245,6 +245,10 @@ BOOL	LLFloaterTools::postBuild()
 	
 	mCheckSelectIndividual	= getChild<LLCheckBoxCtrl>("checkbox edit linked parts");	
 	getChild<LLUICtrl>("checkbox edit linked parts")->setValue((BOOL)gSavedSettings.getBOOL("EditLinkedParts"));
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	mCheckAxisAtRoot		= getChild<LLCheckBoxCtrl>("checkbox axis at root");
+	mBtnAxisOptions			= getChild<LLButton>("Axis Options...");
+// [/SL:KB]
 	mCheckSnapToGrid		= getChild<LLCheckBoxCtrl>("checkbox snap to grid");
 	getChild<LLUICtrl>("checkbox snap to grid")->setValue((BOOL)gSavedSettings.getBOOL("SnapEnabled"));
 	mCheckStretchUniform	= getChild<LLCheckBoxCtrl>("checkbox uniform");
@@ -327,6 +331,10 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCheckSelectIndividual(NULL),
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	mCheckAxisAtRoot(NULL),
+	mBtnAxisOptions(NULL),
+// [/SL:KB]
 	mCheckSnapToGrid(NULL),
 	mBtnGridOptions(NULL),
 	mTitleMedia(NULL),
@@ -389,6 +397,9 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCommitCallbackRegistrar.add("BuildTool.gridMode",			boost::bind(&commit_grid_mode,_1));
 	mCommitCallbackRegistrar.add("BuildTool.selectComponent",	boost::bind(&commit_select_component, this));
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("BuildTool.axisOptions",		boost::bind(&LLFloaterTools::onClickAxisOptions,this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("BuildTool.gridOptions",		boost::bind(&LLFloaterTools::onClickGridOptions,this));
 	mCommitCallbackRegistrar.add("BuildTool.applyToSelection",	boost::bind(&click_apply_to_selection, this));
 	mCommitCallbackRegistrar.add("BuildTool.commitRadioLand",	boost::bind(&commit_radio_group_land,_1));
@@ -688,6 +699,11 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 	{
 		mRadioGroupEdit->setValue("radio select face");
 	}
+
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
+	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
+// [/SL:KB]
 
 	if (mComboGridMode) 
 	{
@@ -1067,9 +1083,27 @@ void LLFloaterTools::setGridMode(S32 mode)
 	tools_floater->mComboGridMode->setCurrentByIndex(mode);
 }
 
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+void LLFloaterTools::onClickAxisOptions()
+{
+	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
+	if ( (pAxisFloater) && (!isDependentFloater(pAxisFloater)) )
+	{
+		addDependentFloater(pAxisFloater, TRUE);
+	}
+}
+// [/SL:KB]
+
 void LLFloaterTools::onClickGridOptions()
 {
-	LLFloaterReg::showInstance("build_options");
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2)
+	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
+	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
+	{
+		addDependentFloater(pGridFloater, TRUE);
+	}
+// [/SL:KB]
+//	LLFloaterReg::showInstance("build_options");
 	// RN: this makes grid options dependent on build tools window
 	//floaterp->addDependentFloater(LLFloaterBuildOptions::getInstance(), FALSE);
 }
