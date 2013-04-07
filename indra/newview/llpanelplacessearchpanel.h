@@ -13,38 +13,51 @@
  * abide by those obligations.
  * 
  */
-#ifndef LL_LLFLOATERSEARCHCONTAINER_H
-#define LL_LLFLOATERSEARCHCONTAINER_H
+#ifndef LLPANELPLACESSEARCHPANEL_H
+#define LLPANELPLACESSEARCHPANEL_H
 
-#include "llmultifloater.h"
+#include "llpanelplacestab.h"
 
-class LLFloaterSearch;
-class LLTabContainer;
+class LLPanelPlacesSearch;
 
 // ============================================================================
 
-class LLFloaterSearchContainer : public LLMultiFloater
+class LLPanelPlacesSearchPanel : public LLPanelPlacesTab
 {
 public:
-	LLFloaterSearchContainer(const LLSD& sdKey);
-	/*virtual*/ ~LLFloaterSearchContainer();
+	LLPanelPlacesSearchPanel();
+	virtual ~LLPanelPlacesSearchPanel();
 
 	/*
-	 * Base class overrides
+	 * LLView overrides
 	 */
 public:
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& key);
-	/*virtual*/ void addFloater(LLFloater* pFloater, BOOL fSelect, LLTabContainer::eInsertionPoint eInsert = LLTabContainer::END);
+
+	/*
+	 * LLPanelPlacesTab overrides
+	 */
+public:
+	/*virtual*/ bool isSingleItemSelected();
+	/*virtual*/ void onSearchEdit(const std::string& strQuery);
+	/*virtual*/ void onShowOnMap();
+	/*virtual*/ void onShowProfile();
+	/*virtual*/ void onTeleport();
+	/*virtual*/ void updateVerbs();
+
+	/*
+	 * Member functions
+	 */
+protected:
+	void onSearchResultSelect();
 
 	/*
 	 * Member variables
 	 */
 protected:
-	LLFloaterSearch* m_pWebSearch;
-	LLFloater*       m_pPlacesSearch;
+	LLPanelPlacesSearch* m_pSearchPanel;
 };
 
 // ============================================================================
 
-#endif // LL_LLFLOATERSEARCHCONTAINER_H
+#endif // LLPANELPLACESSEARCHPANEL_H

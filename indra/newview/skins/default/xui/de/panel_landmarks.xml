@@ -7,16 +7,12 @@
 		<accordion_tab name="tab_library" title="Bibliothek"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<button name="options_gear_btn" tool_tip="Zusätzliche Optionen anzeigen"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="Neue Landmarke hinzufügen"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<icon name="dummy_icon" width="10" />
+				<button label="Teleportieren" name="teleport_btn" tool_tip="Zu ausgewähltem Standort teleportieren" width="99" />
+				<button label="Karte" name="map_btn" tool_tip="Den entsprechenden Standort auf der Karte anzeigen"/>
+				<button name="profile_btn" tool_tip="Ortsprofil anzeigen"/>
 				<dnd_button name="trash_btn" tool_tip="Ausgewählte Landmarke hinzufügen"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>

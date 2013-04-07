@@ -41,6 +41,7 @@ BOOL LLFloaterSearchContainer::postBuild()
 	mTabContainer = getChild<LLTabContainer>("search_container");
 
 	m_pWebSearch = LLFloaterReg::getTypedInstance<LLFloaterSearch>("search_web");
+	m_pWebSearch->setShowPageTitle(false);
 	addFloater(m_pWebSearch, true);
 
 	m_pPlacesSearch = LLFloaterReg::getTypedInstance<LLFloater>("search_places");

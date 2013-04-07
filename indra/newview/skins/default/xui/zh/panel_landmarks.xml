@@ -7,16 +7,12 @@
 		<accordion_tab name="tab_library" title="資源庫"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<menu_button name="options_gear_btn" tool_tip="顯示額外選項"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="添加新地標"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<icon name="dummy_icon" width="10" />
+				<button label="瞬間傳送" name="teleport_btn" tool_tip="瞬間傳送到所選擇的區域" width="99" />
+				<button label="地圖" name="map_btn" tool_tip="在世界地圖上顯示相對應的區域"/>
+				<button name="profile_btn" tool_tip="顯示地點檔案"/>
 				<dnd_button name="trash_btn" tool_tip="移除所選擇的地標"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>
