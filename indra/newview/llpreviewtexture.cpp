@@ -283,13 +283,19 @@ void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
 
 	LLRect dim_rect(getChildView("dimensions")->getRect());
 
-	S32 horiz_pad = 2 * (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
+//	S32 horiz_pad = 2 * (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
+// [SL:KB] - Patch: UI-Notecards | Checked: 2011-06-07 (Catznip-3.2.1) | Added: Catznip-2.6.0
+	S32 horiz_pad = (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
+// [/SL:KB]
 
 	// add space for dimensions and aspect ratio
 	S32 info_height = dim_rect.mTop + CLIENT_RECT_VPAD;
 
 	LLRect client_rect(horiz_pad, getRect().getHeight(), getRect().getWidth() - horiz_pad, 0);
-	client_rect.mTop -= (PREVIEW_HEADER_SIZE + CLIENT_RECT_VPAD);
+//	client_rect.mTop -= (PREVIEW_HEADER_SIZE + CLIENT_RECT_VPAD);
+// [SL:KB] - Patch: UI-Notecards | Checked: 2011-06-07 (Catznip-3.2.1) | Added: Catznip-2.6.0
+	client_rect.mTop -= (PREVIEW_HEADER_SIZE + 2 * CLIENT_RECT_VPAD);
+// [/SL:KB]
 	client_rect.mBottom += PREVIEW_BORDER + CLIENT_RECT_VPAD + info_height ;
 
 	S32 client_width = client_rect.getWidth();
