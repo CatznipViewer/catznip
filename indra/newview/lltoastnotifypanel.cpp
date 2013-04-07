@@ -41,8 +41,14 @@
 #include "llnotificationsutil.h"
 #include "llviewermessage.h"
 #include "llimfloater.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+#include "llcheckboxctrl.h"
+// [/SL:KB]
 
-const S32 BOTTOM_PAD = VPAD * 3;
+//const S32 BOTTOM_PAD = VPAD * 3;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+const S32 BOTTOM_PAD = VPAD * 2.5;
+// [/SL:KB]
 const S32 IGNORE_BTN_TOP_DELTA = 3*VPAD;//additional ignore_btn padding
 S32 BUTTON_WIDTH = 90;
 
@@ -201,6 +207,19 @@ mCloseNotificationOnDestroy(true)
 			// save buttons for later use in disableButtons()
 			mButtons.assign(buttons.begin(), buttons.end());
 		}
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+		// Create control checkboxes
+		for (S32 idxOption = 0; idxOption < mNumOptions; idxOption++)
+		{
+			LLSD sdElement = form->getElement(idxOption);
+			if ("check" != sdElement["type"].asString())
+				continue;
+			LLCheckBoxCtrl* pCheckCtrl = createCheckBox(sdElement["text"].asString(), sdElement["control"].asString());
+			if (pCheckCtrl)
+				mCheckBoxes.push_back(pCheckCtrl);
+		}
+// [/SL:KB]
 	}
 	// adjust panel's height to the text size
 	mInfoPanel->setFollowsAll();
@@ -481,6 +500,16 @@ void LLToastNotifyPanel::disableButtons(const std::string& notification_name, co
 	}
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+void LLToastNotifyPanel::disableCheckBoxes()
+{
+	for (auto itCheckBox = mCheckBoxes.begin(); itCheckBox != mCheckBoxes.end(); ++itCheckBox)
+	{
+		(*itCheckBox)->setEnabled(false);
+	}
+}
+// [/SL:KB]
+
 // static
 void LLToastNotifyPanel::onClickButton(void* data)
 {
@@ -523,6 +552,9 @@ void LLToastNotifyPanel::onToastPanelButtonClicked(const LLUUID& notification_id
 	if(mNotification->getID() == notification_id)
 	{
 		disableButtons(mNotification->getName(), btn_name);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+		disableCheckBoxes();
+// [/SL:KB]
 	}
 }
 
@@ -537,10 +569,52 @@ void LLToastNotifyPanel::disableRespondedOptions(const LLNotificationPtr& notifi
 			// that after multiple responses there can be many pressed buttons
 			// need to process them all
 			disableButtons(notification->getName(), response_it->first);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+			disableCheckBoxes();
+// [/SL:KB]
 		}
 	}
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+LLCheckBoxCtrl* LLToastNotifyPanel::createCheckBox(const std::string& strMessage, const std::string& strControl)
+{
+	LLControlVariable* pControl = gSavedSettings.getControl(strControl);
+	if ( (!pControl) || (!pControl->isType(TYPE_BOOLEAN)) )
+		return NULL;
+
+	LLCheckBoxCtrl::Params paramsCheck;
+	paramsCheck.follows.flags = FOLLOWS_LEFT | FOLLOWS_BOTTOM;
+	paramsCheck.label = strMessage;
+	paramsCheck.name = "check";
+
+	LLCheckBoxCtrl* pCheckCtrl = LLUICtrlFactory::create<LLCheckBoxCtrl>(paramsCheck);
+	if (!pCheckCtrl)
+		return NULL;
+
+	const S32 LINE_HEIGHT = pCheckCtrl->getFont()->getLineHeight();
+
+	// Extend the height of the toast panel
+	S32 nToastHeight = LLToastPanel::getRect().getHeight() + LINE_HEIGHT + LINE_HEIGHT * 2/3;
+	LLToastPanel::reshape(getRect().getWidth(), nToastHeight, FALSE);
+
+	// Squeeze the checkbox in above the buttons
+	LLRect check_rect;
+	S32 nCheckBottom = ((!mButtons.empty()) ? mButtons.back().second->getRect().mTop : VPAD + BTN_HEIGHT) + LINE_HEIGHT * 2/3;
+	pCheckCtrl->setRect(check_rect.setOriginAndSize(2 * HPAD, nCheckBottom, LLToastPanel::getRect().getWidth() - 3 * HPAD, LINE_HEIGHT));
+	pCheckCtrl->set(pControl->getValue().asBoolean());
+	pCheckCtrl->setCommitCallback(boost::bind(&LLToastNotifyPanel::onToggleCheck, this, pCheckCtrl, pControl));
+	
+	addChild(pCheckCtrl);
+
+	return pCheckCtrl;
+}
+
+void LLToastNotifyPanel::onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl) const
+{
+	pControl->setValue(pCheckCtrl->get());
+}
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////
 

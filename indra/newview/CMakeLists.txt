@@ -212,6 +212,7 @@ set(viewer_SOURCE_FILES
     llfloaterfonttest.cpp
     llfloatergesture.cpp
     llfloatergodtools.cpp
+    llfloatergroupactions.cpp
     llfloatergroupinvite.cpp
     llfloatergroups.cpp
     llfloaterhandler.cpp
@@ -780,6 +781,7 @@ set(viewer_HEADER_FILES
     llfloaterfonttest.h
     llfloatergesture.h
     llfloatergodtools.h
+    llfloatergroupactions.h
     llfloatergroupinvite.h
     llfloatergroups.h
     llfloaterhandler.h

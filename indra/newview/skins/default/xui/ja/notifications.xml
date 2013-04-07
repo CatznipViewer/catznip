@@ -2297,10 +2297,10 @@ Web ページにリンクすると、他人がこの場所に簡単にアクセ�
 		件名： [SUBJECT]、メッセージ： [MESSAGE]
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; はオンラインです
+		[NAME_SLURL] はオンラインです
 	</notification>
 	<notification name="FriendOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; はオフラインです
+		[NAME_SLURL] はオフラインです
 	</notification>
 	<notification name="AddSelfFriend">
 		残念ながら自分自身をフレンド登録することはできません。

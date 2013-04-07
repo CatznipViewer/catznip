@@ -177,6 +177,9 @@ void LLPersistentNotificationStorage::loadNotifications()
 		if (instance.templateExists(notification_params["name"].asString()))
 		{
 			LLNotificationPtr notification(new LLNotification(notification_params));
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+		notification->setPersisted(true);
+// [/SL:KB]
 
 			LLNotificationResponderPtr responder(LLResponderRegistry::
 				createResponder(notification_params["name"], notification_params["responder"]));

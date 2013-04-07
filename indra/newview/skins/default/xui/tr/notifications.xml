@@ -2250,10 +2250,10 @@ Diğer kişilerin bu konuma kolayca erişmesini sağlamak için bu adrese bir we
 		Konu: [SUBJECT], İleti: [MESSAGE]
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; çevrimiçi
+		[NAME_SLURL] çevrimiçi
 	</notification>
 	<notification name="FriendOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; çevrimdışı
+		[NAME_SLURL] çevrimdışı
 	</notification>
 	<notification name="AddSelfFriend">
 		Çok iyi biri olduğunuza eminiz fakat kendinizi arkadaş olarak ekleyemezsiniz.
