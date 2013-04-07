@@ -42,6 +42,10 @@
 #include "llclipboard.h"
 #include "lltrans.h"
 
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
 LLFastTimer::DeclareTimer FT_FILTER_CLIPBOARD("Filter Clipboard");
 
 LLInventoryFilter::FilterOps::FilterOps() :
@@ -91,15 +95,18 @@ LLInventoryFilter::~LLInventoryFilter()
 
 BOOL LLInventoryFilter::check(const LLFolderViewItem* item) 
 {
-	// Clipboard cut items are *always* filtered so we need this value upfront
-	const LLFolderViewEventListener* listener = item->getListener();
-	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
+//	// Clipboard cut items are *always* filtered so we need this value upfront
+//	const LLFolderViewEventListener* listener = item->getListener();
+//	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
 
 	// If it's a folder and we're showing all folders, return automatically.
 	const BOOL is_folder = (dynamic_cast<const LLFolderViewFolder*>(item) != NULL);
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
 	{
-		return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		return TRUE;
+// [/SL:KB]
+//		return passed_clipboard;
 	}
 
 	mSubStringMatchOffset = mFilterSubString.size() ? item->getSearchableLabel().find(mFilterSubString) : std::string::npos;
@@ -110,7 +117,7 @@ BOOL LLInventoryFilter::check(const LLFolderViewItem* item)
 	const BOOL passed = (passed_filtertype &&
 						 passed_permissions &&
 						 passed_filterlink &&
-						 passed_clipboard &&
+//						 passed_clipboard &&
 						 (mFilterSubString.size() == 0 || mSubStringMatchOffset != std::string::npos));
 
 	return passed;
@@ -118,14 +125,19 @@ BOOL LLInventoryFilter::check(const LLFolderViewItem* item)
 
 bool LLInventoryFilter::check(const LLInventoryItem* item)
 {
-	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
+//	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	auto itRange = boost::ifind_first(item->getName(), mFilterSubString);
+	mSubStringMatchOffset = (!itRange.empty()) ? itRange.begin() - item->getName().begin() : std::string::npos;
+// [/SL:KB]
+//	mSubStringMatchOffset = mFilterSubString.size() ? item->getName().find(mFilterSubString) : std::string::npos;
 
 	const bool passed_filtertype = checkAgainstFilterType(item);
 	const bool passed_permissions = checkAgainstPermissions(item);
-	const BOOL passed_clipboard = checkAgainstClipboard(item->getUUID());
+//	const BOOL passed_clipboard = checkAgainstClipboard(item->getUUID());
 	const bool passed = (passed_filtertype &&
 						 passed_permissions &&
-						 passed_clipboard &&
+//						 passed_clipboard &&
 						 (mFilterSubString.size() == 0 || mSubStringMatchOffset != std::string::npos));
 
 	return passed;
@@ -155,13 +167,16 @@ bool LLInventoryFilter::checkFolder(const LLFolderViewFolder* folder) const
 
 bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 {
-	// Always check against the clipboard
-	const BOOL passed_clipboard = checkAgainstClipboard(folder_id);
+//	// Always check against the clipboard
+//	const BOOL passed_clipboard = checkAgainstClipboard(folder_id);
 	
 	// we're showing all folders, overriding filter
 	if (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS)
 	{
-		return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+		return true;
+// [/SL:KB]
+//		return passed_clipboard;
 	}
 
 	if (mFilterOps.mFilterTypes & FILTERTYPE_CATEGORY)
@@ -176,7 +191,10 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 			return false;
 	}
 
-	return passed_clipboard;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+	return true;
+// [/SL:KB]
+//	return passed_clipboard;
 }
 
 BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) const
@@ -185,8 +203,8 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 	if (!listener) return FALSE;
 
 	LLInventoryType::EType object_type = listener->getInventoryType();
-	const LLUUID object_id = listener->getUUID();
-	const LLInventoryObject *object = gInventory.getObject(object_id);
+//	const LLUUID object_id = listener->getUUID();
+//	const LLInventoryObject *object = gInventory.getObject(object_id);
 
 	const U32 filterTypes = mFilterOps.mFilterTypes;
 
@@ -198,7 +216,11 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 		// If it has no type, pass it, unless it's a link.
 		if (object_type == LLInventoryType::IT_NONE)
 		{
-			if (object && object->getIsLinkType())
+//			if (object && object->getIsLinkType())
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
+			if ( (bridge) && (bridge->isLink()) )
+// [/SL:KB]
 			{
 				return FALSE;
 			}
@@ -214,10 +236,24 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 	// Pass if this item is the target UUID or if it links to the target UUID
 	if (filterTypes & FILTERTYPE_UUID)
 	{
-		if (!object) return FALSE;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		LLUUID object_id = listener->getUUID();
 
-		if (object->getLinkedUUID() != mFilterOps.mFilterUUID)
+		const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
+		if ( (bridge) && (bridge->isLink()) )
+		{
+			object_id = gInventory.getLinkedItemID(object_id);
+		}
+		
+		if (object_id != mFilterOps.mFilterUUID)
+		{
 			return FALSE;
+		}
+// [/SL:KB]
+//		if (!object) return FALSE;
+//
+//		if (object->getLinkedUUID() != mFilterOps.mFilterUUID)
+//			return FALSE;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -263,7 +299,10 @@ BOOL LLInventoryFilter::checkAgainstFilterType(const LLFolderViewItem* item) con
 			if (is_hidden_if_empty)
 			{
 				// Force the fetching of those folders so they are hidden iff they really are empty...
-				gInventory.fetchDescendentsOf(object_id);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				gInventory.fetchDescendentsOf(listener->getUUID());
+// [/SL:KB]
+//				gInventory.fetchDescendentsOf(object_id);
 				return FALSE;
 			}
 		}
@@ -324,31 +363,36 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLInventoryItem* item) cons
 
 // Items and folders that are on the clipboard or, recursively, in a folder which  
 // is on the clipboard must be filtered out if the clipboard is in the "cut" mode.
-bool LLInventoryFilter::checkAgainstClipboard(const LLUUID& object_id) const
-{
-	if (LLClipboard::instance().isCutMode())
-	{
-		LLFastTimer ft(FT_FILTER_CLIPBOARD);
-		LLUUID current_id = object_id;
-		LLInventoryObject *current_object = gInventory.getObject(object_id);
-		while (current_id.notNull() && current_object)
-		{
-			if (LLClipboard::instance().isOnClipboard(current_id))
-			{
-				return false;
-			}
-			current_id = current_object->getParentUUID();
-			if (current_id.notNull())
-			{
-				current_object = gInventory.getObject(current_id);
-			}
-		}
-	}
-	return true;
-}
+//bool LLInventoryFilter::checkAgainstClipboard(const LLUUID& object_id) const
+//{
+//	if (LLClipboard::instance().isCutMode())
+//	{
+//		LLFastTimer ft(FT_FILTER_CLIPBOARD);
+//		LLUUID current_id = object_id;
+//		LLInventoryObject *current_object = gInventory.getObject(object_id);
+//		while (current_id.notNull() && current_object)
+//		{
+//			if (LLClipboard::instance().isOnClipboard(current_id))
+//			{
+//				return false;
+//			}
+//			current_id = current_object->getParentUUID();
+//			if (current_id.notNull())
+//			{
+//				current_object = gInventory.getObject(current_id);
+//			}
+//		}
+//	}
+//	return true;
+//}
 
 BOOL LLInventoryFilter::checkAgainstPermissions(const LLFolderViewItem* item) const
 {
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (PERM_NONE == mFilterOps.mPermissions)
+		return TRUE;
+// [/SL:KB]
+
 	const LLFolderViewEventListener* listener = item->getListener();
 	if (!listener) return FALSE;
 
@@ -377,6 +421,11 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) con
 
 BOOL LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewItem* item) const
 {
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	if (FILTERLINK_INCLUDE_LINKS == mFilterOps.mFilterLinks)
+		return TRUE;
+// [/SL:KB]
+
 	const LLFolderViewEventListener* listener = item->getListener();
 	if (!listener) return TRUE;
 
@@ -993,28 +1042,92 @@ const std::string& LLInventoryFilter::getFilterText()
 
 void LLInventoryFilter::toLLSD(LLSD& data) const
 {
-	data["filter_types"] = (LLSD::Integer)getFilterObjectTypes();
-	data["min_date"] = (LLSD::Integer)getMinDate();
-	data["max_date"] = (LLSD::Integer)getMaxDate();
-	data["hours_ago"] = (LLSD::Integer)getHoursAgo();
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+	// Only save what isn't a default
+	if (mFilterOps.mFilterObjectTypes != mDefaultFilterOps.mFilterObjectTypes)
+		data["filter_object_types"] = (LLSD::Integer)mFilterOps.mFilterObjectTypes;
+	if (mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes)
+		data["filter_wearabe_types"] = (LLSD::Integer)mFilterOps.mFilterWearableTypes;
+	if (mFilterOps.mFilterCategoryTypes != mDefaultFilterOps.mFilterCategoryTypes)
+		data["filter_category_types"] = (LLSD::Integer)mFilterOps.mFilterCategoryTypes;
+	if (mFilterOps.mFilterLinks != mDefaultFilterOps.mFilterLinks)
+		data["filter_links"] = (LLSD::Integer)mFilterOps.mFilterLinks;
+	if (mFilterSubString.size())
+		data["substring"] = (LLSD::String)mFilterSubString;
+	if (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions)
+		data["permissions"] = (LLSD::Integer)mFilterOps.mPermissions;
+
+	if (isSinceLogoff())
+	{
+		data["since_logoff"] = (LLSD::Boolean)true;
+	}
+	else if (0 != mFilterOps.mHoursAgo)
+	{
+		data["hours_ago"] = (LLSD::Integer)mFilterOps.mHoursAgo;
+	}
+	else
+	{
+		if (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate)
+			data["min_date"] = (LLSD::Integer)mFilterOps.mMinDate;
+		if (mFilterOps.mMaxDate != mDefaultFilterOps.mMaxDate)
+			data["max_date"] = (LLSD::Integer)mFilterOps.mMaxDate;
+	}
+
 	data["show_folder_state"] = (LLSD::Integer)getShowFolderState();
-	data["permissions"] = (LLSD::Integer)getFilterPermissions();
-	data["substring"] = (LLSD::String)getFilterSubString();
 	data["sort_order"] = (LLSD::Integer)getSortOrder();
-	data["since_logoff"] = (LLSD::Boolean)isSinceLogoff();
+// [/SL:KB]
+//	data["filter_types"] = (LLSD::Integer)getFilterObjectTypes();
+//	data["min_date"] = (LLSD::Integer)getMinDate();
+//	data["max_date"] = (LLSD::Integer)getMaxDate();
+//	data["hours_ago"] = (LLSD::Integer)getHoursAgo();
+//	data["show_folder_state"] = (LLSD::Integer)getShowFolderState();
+//	data["permissions"] = (LLSD::Integer)getFilterPermissions();
+//	data["substring"] = (LLSD::String)getFilterSubString();
+//	data["sort_order"] = (LLSD::Integer)getSortOrder();
+//	data["since_logoff"] = (LLSD::Boolean)isSinceLogoff();
 }
 
 void LLInventoryFilter::fromLLSD(LLSD& data)
 {
-	if(data.has("filter_types"))
+//	if(data.has("filter_types"))
+//	{
+//		setFilterObjectTypes((U64)data["filter_types"].asInteger());
+//	}
+//
+//	if(data.has("min_date") && data.has("max_date"))
+//	{
+//		setDateRange(data["min_date"].asInteger(), data["max_date"].asInteger());
+//	}
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+	resetDefault();
+
+	if (data.has("filter_object_types"))
 	{
-		setFilterObjectTypes((U64)data["filter_types"].asInteger());
+		setFilterObjectTypes((U64)data["filter_object_types"].asInteger());
 	}
 
-	if(data.has("min_date") && data.has("max_date"))
+	if (data.has("filter_wearable_types"))
 	{
-		setDateRange(data["min_date"].asInteger(), data["max_date"].asInteger());
+		setFilterWearableTypes((U64)data["filter_wearable_types"].asInteger());
 	}
+
+	if (data.has("filter_category_types"))
+	{
+		setFilterCategoryTypes((U64)data["filter_category_types"].asInteger());
+	}
+
+	if (data.has("filter_links"))
+	{
+		setFilterLinks((U64)data["filter_links"].asInteger());
+	}
+
+	if ( (data.has("min_date")) || (data.has("max_date")) )
+	{
+		time_t minDate = (data.has("min_date")) ? data["min_date"].asInteger() : getMinDate();
+		time_t maxDate = (data.has("max_date")) ? data["max_date"].asInteger() : getMaxDate();
+		setDateRange(minDate, maxDate);
+	}
+// [/SL:KB]
 
 	if(data.has("hours_ago"))
 	{
