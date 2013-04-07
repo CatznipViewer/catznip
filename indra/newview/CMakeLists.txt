@@ -200,6 +200,7 @@ set(viewer_SOURCE_FILES
     llfloaterbuycurrencyhtml.cpp
     llfloaterbuyland.cpp
     llfloatercamera.cpp
+    llfloaterchatalerts.cpp
     llfloatercolorpicker.cpp
     llfloaterdeleteenvpreset.cpp
     llfloaterdestinations.cpp
@@ -768,6 +769,7 @@ set(viewer_HEADER_FILES
     llfloaterbuycurrencyhtml.h
     llfloaterbuyland.h
     llfloatercamera.h
+    llfloaterchatalerts.h
     llfloatercolorpicker.h
     llfloaterdeleteenvpreset.h
     llfloaterdestinations.h

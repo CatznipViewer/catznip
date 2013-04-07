@@ -34,6 +34,9 @@
 #include "llgroupiconctrl.h"
 #include "llagent.h"
 #include "lltransientfloatermgr.h"
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //
 // LLIMFloaterContainer
@@ -95,31 +98,55 @@ void LLIMFloaterContainer::addFloater(LLFloater* floaterp,
 
 	if(gAgent.isInGroup(session_id, TRUE))
 	{
-		LLGroupIconCtrl::Params icon_params;
-		icon_params.group_id = session_id;
-		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-3.2.0a) | Added: Catznip-2.4.0h
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLGroupIconCtrl::Params icon_params;
+			icon_params.group_id = session_id;
+			icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-3.2.0a) | Added: Catznip-2.4.0h
+		}
+// [/SL:KB]
 
 		mSessions[session_id] = floaterp;
 		floaterp->mCloseSignal.connect(boost::bind(&LLIMFloaterContainer::onCloseFloater, this, session_id));
 	}
 	else
 	{
-		LLUUID avatar_id = LLIMModel::getInstance()->getOtherParticipantID(session_id);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-3.2.0a) | Added: Catznip-2.4.0h
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLUUID avatar_id = LLIMModel::getInstance()->getOtherParticipantID(session_id);
 
-		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = avatar_id;
-		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+			LLAvatarIconCtrl::Params icon_params;
+			icon_params.avatar_id = avatar_id;
+			icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-3.2.0a) | Added: Catznip-2.4.0h
+		}
+// [/SL:KB]
 
 		mSessions[session_id] = floaterp;
 		floaterp->mCloseSignal.connect(boost::bind(&LLIMFloaterContainer::onCloseFloater, this, session_id));
 	}
-	mTabContainer->setTabImage(floaterp, icon);
+//	mTabContainer->setTabImage(floaterp, icon);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-3.2.0a) | Added: Catznip-2.4.0h
+	if (icon)
+	{
+		mTabContainer->setTabImage(floaterp, icon);
+	}
+// [/SL:KB]
 }
 
 void LLIMFloaterContainer::onCloseFloater(LLUUID& id)
 {
 	mSessions.erase(id);
-	setFocus(TRUE);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-06-25 (Catznip-3.3.0)
+	if (getVisible())
+		setFocus(TRUE);
+// [/SL:KB]
+//	setFocus(TRUE);
 }
 
 void LLIMFloaterContainer::onNewMessageReceived(const LLSD& data)
@@ -145,6 +172,15 @@ LLIMFloaterContainer* LLIMFloaterContainer::getInstance()
 {
 	return LLFloaterReg::getTypedInstance<LLIMFloaterContainer>("im_container");
 }
+
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a) | Added: Catznip-2.4.0g
+const std::string& LLIMFloaterContainer::getFloaterXMLFile()
+{
+	static const std::string strFile = 
+		(!gSavedSettings.getBOOL("IMUseVerticalTabs")) ? "floater_im_container.xml" : "floater_im_container_vert.xml";
+	return strFile;
+}
+// [/SL:KB]
 
 void LLIMFloaterContainer::setMinimized(BOOL b)
 {

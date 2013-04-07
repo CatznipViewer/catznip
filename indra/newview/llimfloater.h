@@ -57,6 +57,9 @@ public:
 	/*virtual*/ BOOL getVisible();
 	// Check typing timeout timer.
 	/*virtual*/ void draw();
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+	/*virtual*/ BOOL handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
+// [/SL:KB]
 
 	// LLFloater overrides
 	/*virtual*/ void onClose(bool app_quitting);

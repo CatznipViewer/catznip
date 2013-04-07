@@ -56,6 +56,12 @@
 #include "llworld.h"
 #include "lluiconstants.h"
 #include "llstring.h"
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+#include "llaudioengine.h"
+#include "lltextparser.h"
+#include "llviewerwindow.h"
+#include "llwindow.h"
+// [/SL:KB]
 
 #include "llviewercontrol.h"
 
@@ -581,6 +587,9 @@ LLUICtrl* LLChatHistoryHeader::sInfoCtrl = NULL;
 
 LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 :	LLUICtrl(p),
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mParseHighlightTypeMask(PARSE_ALL),
+// [/SL:KB]
 	mMessageHeaderFilename(p.message_header),
 	mMessageSeparatorFilename(p.message_separator),
 	mLeftTextPad(p.left_text_pad),
@@ -599,6 +608,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	editor_params.enabled = false; // read only
 	editor_params.show_context_menu = "true";
 	mEditor = LLUICtrlFactory::create<LLTextEditor>(editor_params, this);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+	mEditor->setHighlightsCallback(boost::bind(&LLChatHistory::onTextHighlight, this, _1, _2));
+// [/SL:KB]
 }
 
 LLChatHistory::~LLChatHistory()
@@ -821,7 +833,13 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
 
 				// Add link to avatar's inspector and delimiter to message.
-				mEditor->appendText(std::string(link_params.link_href) + delimiter, false, link_params);
+//				mEditor->appendText(std::string(link_params.link_href) + delimiter, false, link_params);
+// [SL:KB] - Patch: DisplayName-Misc | Checked: 2011-10-09 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+				mEditor->appendText(std::string(link_params.link_href), false, link_params);
+
+				link_params.link_href = LLStringUtil::null;
+				mEditor->appendText(delimiter, false, link_params);
+// [/SL:KB]
 			}
 			else
 			{
@@ -953,7 +971,40 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			message = chat.mFromName + message;
 		}
 		
-		mEditor->appendText(message, FALSE, style_params);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+		static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts");
+		if (sEnableChatAlerts)
+		{
+			S32 nHighlightMask = mEditor->getHighlightsMask();
+			if ( (CHAT_STYLE_HISTORY != chat.mChatStyle) && (gAgentID != chat.mFromID) )
+			{
+				const LLIMModel::LLIMSession* pSession = NULL;
+				if (chat.mSessionID.isNull())
+				{
+					mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_NEARBYCHAT);
+				}
+				else if (pSession = LLIMModel::getInstance()->findIMSession(chat.mSessionID))
+				{
+					if (pSession->isP2PSessionType())
+						mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_IM);
+					else if ( (pSession->isGroupSessionType()) || (pSession->isAdHocSessionType()) )
+						mEditor->setHighlightsMask(mEditor->getHighlightsMask() | LLHighlightEntry::CAT_GROUP);
+				}
+			}
+			else
+			{
+				mEditor->setHighlightsMask(LLHighlightEntry::CAT_GENERAL);
+			}
+
+			mEditor->appendText(message, FALSE, style_params);
+			mEditor->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
+		}
+		else
+		{
+			mEditor->appendText(message, FALSE, style_params);
+		}
+// [/SL:KB]
+//		mEditor->appendText(message, FALSE, style_params);
 	}
 
 	mEditor->blockUndo();
@@ -975,3 +1026,24 @@ void LLChatHistory::draw()
 
 	LLUICtrl::draw();
 }
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+void LLChatHistory::onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry)
+{
+	if (!pEntry)
+	{
+		return;
+	}
+
+	if ( (mParseHighlightTypeMask && PARSE_SOUND) && (pEntry->mSoundAsset.notNull()) && (gAudiop) )
+	{
+		gAudiop->triggerSound(pEntry->mSoundAsset, gAgent.getID(), 1.f, LLAudioEngine::AUDIO_TYPE_UI, gAgent.getPositionGlobal());
+	}
+	if ( (mParseHighlightTypeMask && PARSE_FLASH) && (pEntry->mFlashWindow) )
+	{
+		LLWindow* pWindow = gViewerWindow->getWindow();
+		if ( (pWindow) && (pWindow->getMinimized()) )
+			pWindow->flashIcon(5.f);
+	}
+}
+// [/SL:KB]

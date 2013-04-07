@@ -19,19 +19,19 @@
    animate="true" 
    default_tab_group="2"
   follows="all"
-  height="320"
+  height="335"
   width="394"
   layout="topleft"
   orientation="horizontal"
   name="im_panels"
   tab_group="1"
-  top="20"
+  top="15"
   left="0">
     <layout_panel
       name="im_control_panel_holder"
       min_width="115"
       width="150" 
-      height="320" 
+      height="335" 
       auto_resize="false">
       <panel
         name="panel_im_control_panel"
@@ -45,13 +45,24 @@
        left="0"
        tab_group="2"
        top="0"
-       height="200"
+       height="335"
 	     width="244"
        user_resize="true">
+        <chat_history
+	 font="SansSerifSmall"
+         follows="left|right|top|bottom"
+         top="4"
+         height="300"
+         name="chat_history"
+         parse_highlights="true"
+         parse_urls="true"
+        left="2"
+         width="237">
+        </chat_history>
         <button
           height="20"
-          follows="left|top"
-          top="0"
+          follows="left|bottom"
+          top_pad="4"
           left="2"
           image_overlay="TabIcon_Open_Off"
           layout="topleft"
@@ -59,34 +70,25 @@
           name="slide_left_btn" />
          <button
           height="20"
-          follows="left|top"
-          top="0"
-          left="2"
+          follows="left|bottom"
+          left_delta="0"
           image_overlay="TabIcon_Close_Off"
+          layout="topleft"
           width="25"
           name="slide_right_btn" />
-        <chat_history
-	 font="SansSerifSmall"
-         follows="left|right|top|bottom"
-         height="150"
-         name="chat_history"
-         parse_highlights="true"
-         parse_urls="true"
-        left="1"
-         width="238">
-        </chat_history>
         <line_editor
-         bottom="0"
+         top_delta="0"
          left="3"
          follows="left|right|bottom"
-	 font="SansSerifSmall"
+         font="SansSerifSmall"
+         left_delta="27"
          height="20"
          label="To"
-         layout="bottomleft"
+         layout="topleft"
          name="chat_editor"
          spellcheck="true"
          tab_group="3"
-         width="236">
+         width="210">
         </line_editor>
     </layout_panel>
   </layout_stack>

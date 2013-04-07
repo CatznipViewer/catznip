@@ -620,6 +620,9 @@ LLVOAvatar::LLVOAvatar(const LLUUID& id,
 	mNameMute(false),
 	mNameAppearance(false),
 	mNameFriend(false),
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mNameTyping(FALSE),
+// [/SL:KB]
 	mNameAlpha(0.f),
 	mRenderGroupTitles(sRenderGroupTitles),
 	mNameCloud(false),
@@ -2540,6 +2543,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 	// Avatars must have a first and last name
 	if (!firstname || !lastname) return;
 
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	static LLUICachedControl<bool> show_typing("NameTagShowTyping");
+// [/SL:KB]
+
 	bool is_away = mSignaledAnimations.find(ANIM_AGENT_AWAY)  != mSignaledAnimations.end();
 	bool is_busy = mSignaledAnimations.find(ANIM_AGENT_BUSY) != mSignaledAnimations.end();
 	bool is_appearance = mSignaledAnimations.find(ANIM_AGENT_CUSTOMIZE) != mSignaledAnimations.end();
@@ -2576,6 +2583,9 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		|| is_busy != mNameBusy 
 		|| is_muted != mNameMute
 		|| is_appearance != mNameAppearance 
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		|| ( (show_typing) && (!mVisibleChat) && (mTyping != mNameTyping) )
+// [/SL:KB]
 		|| is_friend != mNameFriend
 		|| is_cloud != mNameCloud)
 	{
@@ -2583,7 +2593,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 
 		clearNameTag();
 
-		if (is_away || is_muted || is_busy || is_appearance)
+//		if (is_away || is_muted || is_busy || is_appearance)
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		if (is_away || is_muted || is_busy || is_appearance || mTyping)
+// [/SL:KB]
 		{
 			std::string line;
 			if (is_away)
@@ -2606,6 +2619,13 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 				line += LLTrans::getString("AvatarEditingAppearance");
 				line += ", ";
 			}
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			if (mTyping)
+			{
+				line += LLTrans::getString("AvatarTyping");
+				line += ", ";
+			}
+// [/SL:KB]
 			if (is_cloud)
 			{
 				line += LLTrans::getString("LoadingData");
@@ -2667,6 +2687,9 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		mNameBusy = is_busy;
 		mNameMute = is_muted;
 		mNameAppearance = is_appearance;
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+				mNameTyping = mTyping;
+// [/SL:KB]
 		mNameFriend = is_friend;
 		mNameCloud = is_cloud;
 		mTitle = title ? title->getString() : "";

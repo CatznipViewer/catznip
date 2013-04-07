@@ -212,6 +212,19 @@ BOOL LLNearbyChatBar::handleKeyHere( KEY key, MASK mask )
 	return handled;
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+BOOL LLNearbyChatBar::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
+{
+	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mChatBox->hasFocus()) )
+	{
+		// Give focus to the line editor and let it handle the character
+		mChatBox->setFocus(TRUE);
+		return mChatBox->handleUnicodeChar(uni_char, called_from_parent);
+	}
+	return LLFloater::handleUnicodeChar(uni_char, called_from_parent);
+}
+// [/SL:KB]
+
 BOOL LLNearbyChatBar::matchChatTypeTrigger(const std::string& in_str, std::string* out_str)
 {
 	U32 in_len = in_str.length();

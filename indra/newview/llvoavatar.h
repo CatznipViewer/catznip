@@ -860,6 +860,9 @@ private:
 	bool      		mNameAppearance;
 	bool			mNameFriend;
 	bool			mNameCloud;
+// [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	BOOL	  		mNameTyping;		// BOOL because mTyping is BOOL
+// [/SL:KB]
 	F32				mNameAlpha;
 	BOOL      		mRenderGroupTitles;
 
