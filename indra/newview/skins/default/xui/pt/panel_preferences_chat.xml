@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Chat" name="chat">
 	<text name="font_size">
-		Tamanho da fonte:
+		Tamanho da fonte
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="Pequeno" name="radio" value="0"/>

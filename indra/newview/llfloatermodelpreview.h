@@ -296,7 +296,10 @@ class LLMeshFilePicker : public LLFilePickerThread
 {
 public:
 	LLMeshFilePicker(LLModelPreview* mp, S32 lod);
-	virtual void notify(const std::string& filename);
+// [SL:KB] - Patch: Inventory-Upload | Checked: 2012-04-01 (Catznip-3.3.0) | Added: Catznip-3.3.0
+	/*virtual*/ void notify(const std::vector<std::string>& files);
+// [/SL:KB]
+//	virtual void notify(const std::string& filename);
 
 private:
 	LLModelPreview* mMP;

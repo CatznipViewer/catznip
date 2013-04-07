@@ -4,7 +4,7 @@
 		[NUM]:[DEN]
 	</panel.string>
 	<text name="Cache:">
-		Cache:
+		Cache
 	</text>
 	<spinner label="Cache-Größe (64 – 9.984 MB)" name="cachesizespinner"/>
 	<text name="text_box5">

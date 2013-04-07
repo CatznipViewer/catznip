@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Hardware/Internet" name="Input panel">
 	<text name="Network:">
-		Netzwerk:
+		Netzwerk
 	</text>
 	<text name="Maximum bandwidth">
 		Maximale Bandbreite
@@ -12,7 +12,7 @@
 	<check_box label="Eigener Port" name="connection_port_enabled"/>
 	<spinner label="Port-Nummer:" name="connection_port"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="use_external_browser">
 		<radio_item label="Meinen Browser verwenden (IE, Firefox, Safari)" name="external" tool_tip="Standard Webbrowser des Systems verwenden, um die Hilfe, Weblinks usw. anzuzeigen. Bei Vollbildmodus nicht empfohlen." value="true"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Javascript aktivieren" name="browser_javascript_enabled"/>
 	<check_box initial_value="false" label="Medienbrowser-Popups aktivieren" name="media_popup_enabled"/>
 	<text name="Software updates:">
-		Softwareupdates:
+		Software updates
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Automatisch installieren" name="Install_automatically"/>

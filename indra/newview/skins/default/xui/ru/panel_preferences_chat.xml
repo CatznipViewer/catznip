@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Текстовый чат" name="chat">
 	<text name="font_size">
-		Размер шрифта:
+		Размер шрифта
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="Мелкий" name="radio" value="0"/>

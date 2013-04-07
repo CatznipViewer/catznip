@@ -117,7 +117,10 @@ class LLLocalBitmapMgr
 		~LLLocalBitmapMgr();
 
 	public:
-		static bool         addUnit();
+//		static bool         addUnit();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		static bool         addUnit(const std::string& filename);
+// [/SL:KB]
 		static void         delUnit(LLUUID tracking_id);
 
 		static LLUUID       getWorldID(LLUUID tracking_id);
