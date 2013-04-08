@@ -487,12 +487,9 @@ protected:
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
 	void onFindOriginal()
 	{
-		const LLUUID& idItem = (!mUUIDs.empty()) ? mUUIDs.front() : LLUUID::null;
-		if (idItem.notNull())
+		if (!mUUIDs.empty())
 		{
-			LLInventoryPanel* pInvPanel = LLInventoryPanel::getActiveInventoryPanel();
-			if (pInvPanel)
-				pInvPanel->setSelection(gInventory.getLinkedItemID(idItem), TAKE_FOCUS_YES);
+			show_item_original(mUUIDs.front());
 		}
 	}
 

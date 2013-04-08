@@ -718,26 +718,30 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 
 LLWearableItemAppearanceComparator::sortorder_pair_t LLWearableItemAppearanceComparator::getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const
 {
-	const LLViewerInventoryItem* pInvItem = pListItem->getItem();
+	sortorder_pair_t sortOrder(LLAssetType::AT_NONE, -1);
 
-	sortorder_pair_t sortOrder(pInvItem->getType(), -1);
-	switch (pInvItem->getType())
+	const LLViewerInventoryItem* pInvItem = pListItem->getItem();
+	if (pInvItem)
 	{
-		case LLAssetType::AT_BODYPART:
-		case LLAssetType::AT_CLOTHING:
-			{
-				sortOrder.second = pInvItem->getWearableType();
-			}
-			break;
-		case LLAssetType::AT_OBJECT:
-			{
-				LLViewerObject* pAttachObj = NULL;
-				if ( (isAgentAvatarValid()) && (pAttachObj = gAgentAvatarp->getWornAttachment(pListItem->getItemID())) )
-					sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getState());
-			}
-			break;
-		default:
-			break;
+		sortOrder.first = pInvItem->getType();
+		switch (sortOrder.first)
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+				{
+					sortOrder.second = pInvItem->getWearableType();
+				}
+				break;
+			case LLAssetType::AT_OBJECT:
+				{
+					LLViewerObject* pAttachObj = NULL;
+					if ( (isAgentAvatarValid()) && (pAttachObj = gAgentAvatarp->getWornAttachment(pListItem->getItemID())) )
+						sortOrder.second = ATTACHMENT_ID_FROM_STATE(pAttachObj->getState());
+				}
+				break;
+			default:
+				break;
+		}
 	}
 
 	return sortOrder;

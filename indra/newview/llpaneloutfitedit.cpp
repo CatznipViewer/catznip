@@ -220,20 +220,30 @@ private:
 class LLAddWearablesGearMenu : public LLInitClass<LLAddWearablesGearMenu>
 {
 public:
-	static LLToggleableMenu* create(LLWearableItemsList* flat_list, LLInventoryPanel* inventory_panel)
+//	static LLToggleableMenu* create(LLWearableItemsList* flat_list, LLInventoryPanel* inventory_panel)
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	static LLToggleableMenu* create(LLPanelOutfitEdit* panel_outfit_edit)
+// [/SL:KB]
 	{
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-		llassert(flat_list);
-		llassert(inventory_panel);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		LLHandle<LLPanel> handle_outfit_edit = panel_outfit_edit->getHandle();
 
-		LLHandle<LLView> flat_list_handle = flat_list->getHandle();
-		LLHandle<LLPanel> inventory_panel_handle = inventory_panel->getHandle();
-
-		registrar.add("AddWearable.Gear.Sort", boost::bind(onSort, flat_list_handle, inventory_panel_handle, _2));
-		enable_registrar.add("AddWearable.Gear.Check", boost::bind(onCheck, flat_list_handle, inventory_panel_handle, _2));
-		enable_registrar.add("AddWearable.Gear.Visible", boost::bind(onVisible, inventory_panel_handle, _2));
+		registrar.add("AddWearable.Gear.Sort", boost::bind(onSort, handle_outfit_edit, _2));
+		enable_registrar.add("AddWearable.Gear.Check", boost::bind(onCheck, handle_outfit_edit, _2));
+		enable_registrar.add("AddWearable.Gear.Visible", boost::bind(onVisible, handle_outfit_edit, _2));
+// [/SL:KB]
+//		llassert(flat_list);
+//		llassert(inventory_panel);
+//
+//		LLHandle<LLView> flat_list_handle = flat_list->getHandle();
+//		LLHandle<LLPanel> inventory_panel_handle = inventory_panel->getHandle();
+//
+//		registrar.add("AddWearable.Gear.Sort", boost::bind(onSort, flat_list_handle, inventory_panel_handle, _2));
+//		enable_registrar.add("AddWearable.Gear.Check", boost::bind(onCheck, flat_list_handle, inventory_panel_handle, _2));
+//		enable_registrar.add("AddWearable.Gear.Visible", boost::bind(onVisible, inventory_panel_handle, _2));
 
 		LLToggleableMenu* menu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
 			"menu_add_wearable_gear.xml",
@@ -243,16 +253,27 @@ public:
 	}
 
 private:
-	static void onSort(LLHandle<LLView> flat_list_handle,
-					   LLHandle<LLPanel> inventory_panel_handle,
-					   LLSD::String sort_order_str)
+//	static void onSort(LLHandle<LLView> flat_list_handle,
+//					   LLHandle<LLPanel> inventory_panel_handle,
+//					   LLSD::String sort_order_str)
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	static void onSort(LLHandle<LLPanel> handle_outfit_edit, LLSD::String sort_order_str)
+// [/SL:KB]
 	{
-		if (flat_list_handle.isDead() || inventory_panel_handle.isDead()) return;
+//		if (flat_list_handle.isDead() || inventory_panel_handle.isDead()) return;
+//
+//		LLWearableItemsList* flat_list = dynamic_cast<LLWearableItemsList*>(flat_list_handle.get());
+//		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
+//
+//		if (!flat_list || !inventory_panel) return;
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		LLPanelOutfitEdit* panel_outfit_edit = (!handle_outfit_edit.isDead()) ? dynamic_cast<LLPanelOutfitEdit*>(handle_outfit_edit.get()) : NULL;
+		if (!panel_outfit_edit)
+			return;
 
-		LLWearableItemsList* flat_list = dynamic_cast<LLWearableItemsList*>(flat_list_handle.get());
-		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
-
-		if (!flat_list || !inventory_panel) return;
+		LLWearableItemsList* flat_list = panel_outfit_edit->getWearableList();
+		LLInventoryPanel* inventory_panel = panel_outfit_edit->getInventoryPanel();
+// [/SL:KB]
 
 		LLWearableItemsList::ESortOrder	sort_order;
 
@@ -274,7 +295,10 @@ private:
 			return;
 		}
 
-		if (inventory_panel->getVisible())
+//		if (inventory_panel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if ( (inventory_panel) && (inventory_panel->getVisible()) )
+// [/SL:KB]
 		{
 			inventory_panel->setSortOrder(sort_order);
 		}
@@ -284,21 +308,37 @@ private:
 		}
 	}
 
-	static bool onCheck(LLHandle<LLView> flat_list_handle,
-						LLHandle<LLPanel> inventory_panel_handle,
-						LLSD::String sort_order_str)
+//	static bool onCheck(LLHandle<LLView> flat_list_handle,
+//						LLHandle<LLPanel> inventory_panel_handle,
+//						LLSD::String sort_order_str)
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	static bool onCheck(LLHandle<LLPanel> handle_outfit_edit, LLSD::String sort_order_str)
+// [/SL:KB]
 	{
-		if (flat_list_handle.isDead() || inventory_panel_handle.isDead()) return false;
+//		if (flat_list_handle.isDead() || inventory_panel_handle.isDead()) return false;
+//
+//		LLWearableItemsList* flat_list = dynamic_cast<LLWearableItemsList*>(flat_list_handle.get());
+//		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
+//
+//		if (!inventory_panel || !flat_list) return false;
+//
+//		// Inventory panel uses its own sort order independent from
+//		// flat list view so this flag is used to distinguish between
+//		// currently visible "tree" or "flat" representation of inventory.
+//		bool inventory_tree_visible = inventory_panel->getVisible();
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		LLPanelOutfitEdit* panel_outfit_edit = (!handle_outfit_edit.isDead()) ? dynamic_cast<LLPanelOutfitEdit*>(handle_outfit_edit.get()) : NULL;
+		if (!panel_outfit_edit)
+			return false;
 
-		LLWearableItemsList* flat_list = dynamic_cast<LLWearableItemsList*>(flat_list_handle.get());
-		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
-
-		if (!inventory_panel || !flat_list) return false;
+		LLWearableItemsList* flat_list = panel_outfit_edit->getWearableList();
+		LLInventoryPanel* inventory_panel = panel_outfit_edit->getInventoryPanel();
 
 		// Inventory panel uses its own sort order independent from
 		// flat list view so this flag is used to distinguish between
 		// currently visible "tree" or "flat" representation of inventory.
-		bool inventory_tree_visible = inventory_panel->getVisible();
+		bool inventory_tree_visible = (inventory_panel) && (inventory_panel->getVisible());
+// [/SL:KB]
 
 		if (inventory_tree_visible)
 		{
@@ -336,12 +376,22 @@ private:
 		return false;
 	}
 
-	static bool onVisible(LLHandle<LLPanel> inventory_panel_handle,
-						  LLSD::String sort_order_str)
+//	static bool onVisible(LLHandle<LLPanel> inventory_panel_handle,
+//						  LLSD::String sort_order_str)
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	static bool onVisible(LLHandle<LLPanel> handle_outfit_edit, LLSD::String sort_order_str)
+// [/SL:KB]
 	{
-		if (inventory_panel_handle.isDead()) return false;
+//		if (inventory_panel_handle.isDead()) return false;
+//
+//		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		LLPanelOutfitEdit* panel_outfit_edit = (!handle_outfit_edit.isDead()) ? dynamic_cast<LLPanelOutfitEdit*>(handle_outfit_edit.get()) : NULL;
+		if (!panel_outfit_edit)
+			return false;
 
-		LLInventoryPanel* inventory_panel = dynamic_cast<LLInventoryPanel*>(inventory_panel_handle.get());
+		LLInventoryPanel* inventory_panel = panel_outfit_edit->getInventoryPanel();
+// [/SL:KB]
 
 		// Enable sorting by type only for the flat list of items
 		// because inventory panel doesn't support this kind of sorting.
@@ -397,7 +447,10 @@ LLPanelOutfitEdit::LLPanelOutfitEdit()
 :	LLPanel(), 
 	mSearchFilter(NULL),
 	mCOFWearables(NULL),
-	mInventoryItemsPanel(NULL),
+//	mInventoryItemsPanel(NULL),
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	mItemsPanel(NULL),
+// [/SL:KB]
 	mGearMenu(NULL),
 	mAddWearablesGearMenu(NULL),
 	mCOFDragAndDropObserver(NULL),
@@ -482,9 +535,9 @@ BOOL LLPanelOutfitEdit::postBuild()
 
 	childSetCommitCallback("filter_button", boost::bind(&LLPanelOutfitEdit::showWearablesFilter, this), NULL);
 	childSetCommitCallback("folder_view_btn", boost::bind(&LLPanelOutfitEdit::showWearablesFolderView, this), NULL);
-	childSetCommitCallback("folder_view_btn", boost::bind(&LLPanelOutfitEdit::saveListSelection, this), NULL);
+//	childSetCommitCallback("folder_view_btn", boost::bind(&LLPanelOutfitEdit::saveListSelection, this), NULL);
 	childSetCommitCallback("list_view_btn", boost::bind(&LLPanelOutfitEdit::showWearablesListView, this), NULL);
-	childSetCommitCallback("list_view_btn", boost::bind(&LLPanelOutfitEdit::saveListSelection, this), NULL);
+//	childSetCommitCallback("list_view_btn", boost::bind(&LLPanelOutfitEdit::saveListSelection, this), NULL);
 	childSetCommitCallback("shop_btn_1", boost::bind(&LLPanelOutfitEdit::onShopButtonClicked, this), NULL);
 	childSetCommitCallback("shop_btn_2", boost::bind(&LLPanelOutfitEdit::onShopButtonClicked, this), NULL);
 
@@ -504,13 +557,16 @@ BOOL LLPanelOutfitEdit::postBuild()
 
 	mAddWearablesPanel = getChild<LLPanel>("add_wearables_panel");
 
-	mInventoryItemsPanel = getChild<LLInventoryPanel>("folder_view");
-	mInventoryItemsPanel->setFilterTypes(ALL_ITEMS_MASK);
-	mInventoryItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-	mInventoryItemsPanel->setSelectCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
-	mInventoryItemsPanel->getRootFolder()->setReshapeCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
+//	mInventoryItemsPanel = getChild<LLInventoryPanel>("folder_view");
+//	mInventoryItemsPanel->setFilterTypes(ALL_ITEMS_MASK);
+//	mInventoryItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+//	mInventoryItemsPanel->setSelectCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
+//	mInventoryItemsPanel->getRootFolder()->setReshapeCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
 
-	mCOFDragAndDropObserver = new LLCOFDragAndDropObserver(mInventoryItemsPanel->getModel());
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	mCOFDragAndDropObserver = new LLCOFDragAndDropObserver(&gInventory);
+// [/SL:KB]
+//	mCOFDragAndDropObserver = new LLCOFDragAndDropObserver(mInventoryItemsPanel->getModel());
 
 	mFolderViewFilterCmbBox = getChild<LLComboBox>("folder_view_filter_combobox");
 	mFolderViewFilterCmbBox->setCommitCallback(boost::bind(&LLPanelOutfitEdit::onFolderViewFilterCommitted, this, _1));
@@ -566,7 +622,10 @@ BOOL LLPanelOutfitEdit::postBuild()
 	mWearableItemsList->setComparator(mWearableListViewItemsComparator);
 
 	// Creating "Add Wearables" panel gear menu after initialization of mWearableItemsList and mInventoryItemsPanel.
-	mAddWearablesGearMenu = LLAddWearablesGearMenu::create(mWearableItemsList, mInventoryItemsPanel);
+//	mAddWearablesGearMenu = LLAddWearablesGearMenu::create(mWearableItemsList, mInventoryItemsPanel);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	mAddWearablesGearMenu = LLAddWearablesGearMenu::create(this);
+// [/SL:KB]
 	mWearablesGearMenuBtn->setMenu(mAddWearablesGearMenu);
 
 	mGearMenu = LLPanelOutfitEditGearMenu::create();
@@ -575,6 +634,21 @@ BOOL LLPanelOutfitEdit::postBuild()
 	mSaveComboBtn.reset(new LLSaveOutfitComboBtn(this));
 	return TRUE;
 }
+
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+bool LLPanelOutfitEdit::createItemsPanel()
+{
+	if (!mItemsPanel)
+	{
+		mItemsPanel = getChild<LLInventoryPanel>("folder_view");
+		mItemsPanel->setFilterTypes(ALL_ITEMS_MASK);
+		mItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+		mItemsPanel->setSelectCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
+		mItemsPanel->getRootFolder()->setReshapeCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
+	}
+	return NULL != mItemsPanel;
+}
+// [/SL:KB]
 
 // virtual
 void LLPanelOutfitEdit::onOpen(const LLSD& key)
@@ -663,45 +737,80 @@ void LLPanelOutfitEdit::showWearablesFilter()
 
 void LLPanelOutfitEdit::showWearablesListView()
 {
-	if(switchPanels(mInventoryItemsPanel, mWearablesListViewPanel))
+//	if(switchPanels(mInventoryItemsPanel, mWearablesListViewPanel))
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	createItemsPanel();
+	if (switchPanels(mItemsPanel, mWearablesListViewPanel))
+// [/SL:KB]
 	{
 		updateWearablesPanelVerbButtons();
 		updateFiltersVisibility();
 	}
 	mListViewBtn->setToggleState(TRUE);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	saveListSelection();
+// [/SL:KB]
 }
 
 void LLPanelOutfitEdit::showWearablesFolderView()
 {
-	if(switchPanels(mWearablesListViewPanel, mInventoryItemsPanel))
+//	if(switchPanels(mWearablesListViewPanel, mInventoryItemsPanel))
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	createItemsPanel();
+	if (switchPanels(mWearablesListViewPanel, mItemsPanel))
+// [/SL:KB]
 	{
 		updateWearablesPanelVerbButtons();
 		updateFiltersVisibility();
 	}
 	mFolderViewBtn->setToggleState(TRUE);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	saveListSelection();
+// [/SL:KB]
 }
 
 void LLPanelOutfitEdit::updateFiltersVisibility()
 {
 	mListViewFilterCmbBox->setVisible(mWearablesListViewPanel->getVisible());
-	mFolderViewFilterCmbBox->setVisible(mInventoryItemsPanel->getVisible());
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	mFolderViewFilterCmbBox->setVisible( (mItemsPanel) && (mItemsPanel->getVisible()) );
+// [/SL:KB]
+//	mFolderViewFilterCmbBox->setVisible(mInventoryItemsPanel->getVisible());
 }
 
 void LLPanelOutfitEdit::onFolderViewFilterCommitted(LLUICtrl* ctrl)
 {
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if (!mItemsPanel)
+		return;
+
 	S32 curr_filter_type = mFolderViewFilterCmbBox->getCurrentIndex();
 	if (curr_filter_type < 0) return;
 
-	mInventoryItemsPanel->setFilterTypes(mFolderViewItemTypes[curr_filter_type].inventoryMask);
+	mItemsPanel->setFilterTypes(mFolderViewItemTypes[curr_filter_type].inventoryMask);
 
 	mSavedFolderState->setApply(TRUE);
-	mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+	mItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
 	
 	LLOpenFoldersWithSelection opener;
-	mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
-	mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
+	mItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
+	mItemsPanel->getRootFolder()->scrollToShowSelection();
 	
 	LLInventoryModelBackgroundFetch::instance().start();
+// [/SL:KB]
+//	S32 curr_filter_type = mFolderViewFilterCmbBox->getCurrentIndex();
+//	if (curr_filter_type < 0) return;
+//
+//	mInventoryItemsPanel->setFilterTypes(mFolderViewItemTypes[curr_filter_type].inventoryMask);
+//
+//	mSavedFolderState->setApply(TRUE);
+//	mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+//	
+//	LLOpenFoldersWithSelection opener;
+//	mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
+//	mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
+//	
+//	LLInventoryModelBackgroundFetch::instance().start();
 }
 
 void LLPanelOutfitEdit::onListViewFilterCommitted(LLUICtrl* ctrl)
@@ -725,34 +834,62 @@ void LLPanelOutfitEdit::onSearchEdit(const std::string& string)
 	
 	if (mSearchString == "")
 	{
-		mInventoryItemsPanel->setFilterSubString(LLStringUtil::null);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 		mWearableItemsList->setFilterSubString(LLStringUtil::null);
-		// re-open folders that were initially open
-		mSavedFolderState->setApply(TRUE);
-		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
-		LLOpenFoldersWithSelection opener;
-		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
-		mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
+		if (mItemsPanel)
+		{
+			mItemsPanel->setFilterSubString(LLStringUtil::null);
+			// re-open folders that were initially open
+			mSavedFolderState->setApply(TRUE);
+			mItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+			LLOpenFoldersWithSelection opener;
+			mItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
+			mItemsPanel->getRootFolder()->scrollToShowSelection();
+		}
+// [/SL:KB]
+//		mInventoryItemsPanel->setFilterSubString(LLStringUtil::null);
+//		mWearableItemsList->setFilterSubString(LLStringUtil::null);
+//		// re-open folders that were initially open
+//		mSavedFolderState->setApply(TRUE);
+//		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+//		LLOpenFoldersWithSelection opener;
+//		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(opener);
+//		mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
 	}
 	
 	LLInventoryModelBackgroundFetch::instance().start();
 	
-	if (mInventoryItemsPanel->getFilterSubString().empty() && mSearchString.empty())
+//	if (mInventoryItemsPanel->getFilterSubString().empty() && mSearchString.empty())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if (mWearableItemsList->getFilterSubString().empty() && mSearchString.empty())
+// [/SL:KB]
 	{
 		// current filter and new filter empty, do nothing
 		return;
 	}
 	
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 	// save current folder open state if no filter currently applied
-	if (mInventoryItemsPanel->getRootFolder()->getFilterSubString().empty())
+	if ( (mItemsPanel) && (mItemsPanel->getRootFolder()->getFilterSubString().empty()) )
 	{
 		mSavedFolderState->setApply(FALSE);
-		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+		mItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
 	}
 	
 	// set new filter string
-	mInventoryItemsPanel->setFilterSubString(mSearchString);
+	mItemsPanel->setFilterSubString(mSearchString);
 	mWearableItemsList->setFilterSubString(mSearchString);
+// [/SL:KB]
+//	// save current folder open state if no filter currently applied
+//	if (mInventoryItemsPanel->getRootFolder()->getFilterSubString().empty())
+//	{
+//		mSavedFolderState->setApply(FALSE);
+//		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
+//	}
+//	
+//	// set new filter string
+//	mInventoryItemsPanel->setFilterSubString(mSearchString);
+//	mWearableItemsList->setFilterSubString(mSearchString);
 
 }
 
@@ -778,7 +915,11 @@ void LLPanelOutfitEdit::onVisibilityChange(const LLSD &in_visible_chain)
 {
 	showAddWearablesPanel(false);
 	mWearableItemsList->resetSelection();
-	mInventoryItemsPanel->clearSelection();
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if (mItemsPanel)
+		mItemsPanel->clearSelection();
+// [/SL:KB]
+//	mInventoryItemsPanel->clearSelection();
 
 	if (in_visible_chain.asBoolean())
 	{
@@ -889,9 +1030,21 @@ LLPanelOutfitEdit::selection_info_t LLPanelOutfitEdit::getAddMorePanelSelectionT
 
 	if (mAddWearablesPanel != NULL && mAddWearablesPanel->getVisible())
 	{
-		if (mInventoryItemsPanel != NULL && mInventoryItemsPanel->getVisible())
+//		if (mInventoryItemsPanel != NULL && mInventoryItemsPanel->getVisible())
+//		{
+//			std::set<LLUUID> selected_uuids = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+//
+//			result.second = selected_uuids.size();
+//
+//			if (result.second == 1)
+//			{
+//				result.first = getWearableTypeByItemUUID(*(selected_uuids.begin()));
+//			}
+//		}
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if (mItemsPanel != NULL && mItemsPanel->getVisible())
 		{
-			std::set<LLUUID> selected_uuids = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+			std::set<LLUUID> selected_uuids = mItemsPanel->getRootFolder()->getSelectionList();
 
 			result.second = selected_uuids.size();
 
@@ -900,6 +1053,7 @@ LLPanelOutfitEdit::selection_info_t LLPanelOutfitEdit::getAddMorePanelSelectionT
 				result.first = getWearableTypeByItemUUID(*(selected_uuids.begin()));
 			}
 		}
+// [/SL:KB]
 		else if (mWearableItemsList != NULL && mWearableItemsList->getVisible())
 		{
 			std::vector<LLUUID> selected_uuids;
@@ -1028,7 +1182,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 	//                                                        |      filter_type = expanded accordion_type
 	if (nothing_selected)
 	{
-		if (mInventoryItemsPanel->getVisible())
+//		if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 		{
 			return;
 		}
@@ -1076,7 +1233,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 	//resetting selection if more than one item is selected
 	if (more_than_one_selected)
 	{
-		if (mInventoryItemsPanel->getVisible())
+//		if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 		{
 			applyFolderViewFilter(FVIT_ALL);
 			return;
@@ -1091,7 +1251,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 	//filter wearables by a type represented by a dummy item
 	if (one_selected && is_dummy_item)
 	{
-		if (mInventoryItemsPanel->getVisible())
+//		if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 		{
 			applyFolderViewFilter(FVIT_WEARABLE);
 			return;
@@ -1104,7 +1267,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 	LLViewerInventoryItem* item = gInventory.getItem(ids[0]);
 	if (!item && ids[0].notNull())
 	{
-		if (mInventoryItemsPanel->getVisible())
+//		if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+		if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 		{
 			applyFolderViewFilter(FVIT_ALL);
 			return;
@@ -1119,7 +1285,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 	{
 		if (item->isWearableType())
 		{
-			if (mInventoryItemsPanel->getVisible())
+//			if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+			if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 			{
 				applyFolderViewFilter(FVIT_WEARABLE);
 				return;
@@ -1130,7 +1299,10 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 		}
 		else
 		{
-			if (mInventoryItemsPanel->getVisible())
+//			if (mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+			if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 			{
 				applyFolderViewFilter(FVIT_ATTACHMENT);
 				return;
@@ -1311,9 +1483,20 @@ void LLPanelOutfitEdit::onOutfitChanging(bool started)
 
 void LLPanelOutfitEdit::getCurrentItemUUID(LLUUID& selected_id)
 {
-	if (mInventoryItemsPanel->getVisible())
+//	if (mInventoryItemsPanel->getVisible())
+//	{
+//		LLFolderViewItem* curr_item = mInventoryItemsPanel->getRootFolder()->getCurSelectedItem();
+//		if (!curr_item) return;
+//
+//		LLFolderViewEventListener* listenerp  = curr_item->getListener();
+//		if (!listenerp) return;
+//
+//		selected_id = listenerp->getUUID();
+//	}
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
 	{
-		LLFolderViewItem* curr_item = mInventoryItemsPanel->getRootFolder()->getCurSelectedItem();
+		LLFolderViewItem* curr_item = mItemsPanel->getRootFolder()->getCurSelectedItem();
 		if (!curr_item) return;
 
 		LLFolderViewEventListener* listenerp  = curr_item->getListener();
@@ -1321,6 +1504,7 @@ void LLPanelOutfitEdit::getCurrentItemUUID(LLUUID& selected_id)
 
 		selected_id = listenerp->getUUID();
 	}
+// [/SL:KB]
 	else if (mWearablesListViewPanel->getVisible())
 	{
 		selected_id = mWearableItemsList->getSelectedUUID();
@@ -1331,12 +1515,20 @@ void LLPanelOutfitEdit::getCurrentItemUUID(LLUUID& selected_id)
 void LLPanelOutfitEdit::getSelectedItemsUUID(uuid_vec_t& uuid_list)
 {
 	void (uuid_vec_t::* tmp)(LLUUID const &) = &uuid_vec_t::push_back;
-	if (mInventoryItemsPanel->getVisible())
+//	if (mInventoryItemsPanel->getVisible())
+//	{
+//		std::set<LLUUID> item_set = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+//
+//		std::for_each(item_set.begin(), item_set.end(), boost::bind( tmp, &uuid_list, _1));
+//	}
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
 	{
-		std::set<LLUUID> item_set = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+		std::set<LLUUID> item_set = mItemsPanel->getRootFolder()->getSelectionList();
 
 		std::for_each(item_set.begin(), item_set.end(), boost::bind( tmp, &uuid_list, _1));
 	}
+// [/SL:KB]
 	else if (mWearablesListViewPanel->getVisible())
 	{
 		std::vector<LLSD> item_set;
@@ -1368,7 +1560,10 @@ void LLPanelOutfitEdit::updateWearablesPanelVerbButtons()
 		mFolderViewBtn->setImageOverlay(getString("folder_view_off"), mFolderViewBtn->getImageOverlayHAlign());
 		mListViewBtn->setImageOverlay(getString("list_view_on"), mListViewBtn->getImageOverlayHAlign());
 	}
-	else if(mInventoryItemsPanel->getVisible())
+//	else if(mInventoryItemsPanel->getVisible())
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	else if ( (mItemsPanel) && (mItemsPanel->getVisible()) )
+// [/SL:KB]
 	{
 		mListViewBtn->setToggleState(FALSE);
 		mListViewBtn->setImageOverlay(getString("list_view_off"), mListViewBtn->getImageOverlayHAlign());
@@ -1378,9 +1573,15 @@ void LLPanelOutfitEdit::updateWearablesPanelVerbButtons()
 
 void LLPanelOutfitEdit::saveListSelection()
 {
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	if (!mItemsPanel)
+	{
+		return;
+	}
+
 	if(mWearablesListViewPanel->getVisible())
 	{
-		std::set<LLUUID> selected_ids = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+		std::set<LLUUID> selected_ids = mItemsPanel->getRootFolder()->getSelectionList();
 
 		if(!selected_ids.size()) return;
 
@@ -1390,15 +1591,15 @@ void LLPanelOutfitEdit::saveListSelection()
 		}
 		mWearableItemsList->scrollToShowFirstSelectedItem();
 	}
-	else if(mInventoryItemsPanel->getVisible())
+	else if (mItemsPanel->getVisible())
 	{
 		std::vector<LLUUID> selected_ids;
 		mWearableItemsList->getSelectedUUIDs(selected_ids);
 
 		if(!selected_ids.size()) return;
 
-		mInventoryItemsPanel->clearSelection();
-		LLFolderView* root = mInventoryItemsPanel->getRootFolder();
+		mItemsPanel->clearSelection();
+		LLFolderView* root = mItemsPanel->getRootFolder();
 
 		if(!root) return;
 
@@ -1412,10 +1613,49 @@ void LLPanelOutfitEdit::saveListSelection()
 			{
 				parent->setOpenArrangeRecursively(TRUE, LLFolderViewFolder::RECURSE_UP);
 			}
-			mInventoryItemsPanel->getRootFolder()->changeSelection(item, TRUE);
+			mItemsPanel->getRootFolder()->changeSelection(item, TRUE);
 		}
-		mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
+		mItemsPanel->getRootFolder()->scrollToShowSelection();
 	}
+// [/SL:KB]
+//	if(mWearablesListViewPanel->getVisible())
+//	{
+//		std::set<LLUUID> selected_ids = mInventoryItemsPanel->getRootFolder()->getSelectionList();
+//
+//		if(!selected_ids.size()) return;
+//
+//		for (std::set<LLUUID>::const_iterator item_id = selected_ids.begin(); item_id != selected_ids.end(); ++item_id)
+//		{
+//			mWearableItemsList->selectItemByUUID(*item_id, true);
+//		}
+//		mWearableItemsList->scrollToShowFirstSelectedItem();
+//	}
+//	else if(mInventoryItemsPanel->getVisible())
+//	{
+//		std::vector<LLUUID> selected_ids;
+//		mWearableItemsList->getSelectedUUIDs(selected_ids);
+//
+//		if(!selected_ids.size()) return;
+//
+//		mInventoryItemsPanel->clearSelection();
+//		LLFolderView* root = mInventoryItemsPanel->getRootFolder();
+//
+//		if(!root) return;
+//
+//		for(std::vector<LLUUID>::const_iterator item_id = selected_ids.begin(); item_id != selected_ids.end(); ++item_id)
+//		{
+//			LLFolderViewItem* item = root->getItemByID(*item_id);
+//			if (!item) continue;
+//
+//			LLFolderViewFolder* parent = item->getParentFolder();
+//			if(parent)
+//			{
+//				parent->setOpenArrangeRecursively(TRUE, LLFolderViewFolder::RECURSE_UP);
+//			}
+//			mInventoryItemsPanel->getRootFolder()->changeSelection(item, TRUE);
+//		}
+//		mInventoryItemsPanel->getRootFolder()->scrollToShowSelection();
+//	}
 }
 
 // EOF
