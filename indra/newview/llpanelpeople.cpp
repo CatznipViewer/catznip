@@ -58,6 +58,9 @@
 #include "llnetmap.h"
 #include "llpanelpeoplemenus.h"
 #include "llsidetraypanelcontainer.h"
+// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2012-07-30 (Catznip-3.3)
+#include "llstartup.h"
+// [/SL:KB]
 #include "llrecentpeople.h"
 #include "llviewercontrol.h"		// for gSavedSettings
 #include "llviewermenu.h"			// for gMenuHolder
@@ -94,7 +97,10 @@ public:
 
 	/*virtual*/ void onCommit();
 	/*virtual*/ BOOL postBuild();
+protected:
+	void requestTitles();
 
+public:
 	// LLParticularGroupObserver overrides
 	/*virtual*/ void changed(const LLUUID& idGroup, LLGroupChange change);
 	// LLSimpleListener overrides
@@ -132,17 +138,33 @@ void LLGroupTitleComboCtrl::onCommit()
 	}
 }
 
+void LLGroupTitleComboCtrl::requestTitles()
+{
+	// Only refresh titles if the active group changed
+	if (gAgent.getGroupID() != m_idCurGroup)
+	{
+		clear();
+		clearRows();
+		setEnabled(false);
+
+		if (m_idCurGroup.notNull())
+			LLGroupMgr::getInstance()->removeObserver(m_idCurGroup, this);
+
+		m_idCurGroup = gAgent.getGroupID();
+		if (m_idCurGroup.notNull())
+		{
+			LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
+			LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
+		}
+	}
+}
+
 BOOL LLGroupTitleComboCtrl::postBuild()
 {
-	m_idCurGroup = gAgent.getGroupID();
-	if (m_idCurGroup.notNull())
-	{
-		LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
-		LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
-	}
-
-	setEnabled(false);
-
+	if (LLStartUp::getStartupState() >= STATE_STARTED)
+		requestTitles();
+	else
+		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLGroupTitleComboCtrl::requestTitles, this));
 	return TRUE;
 }
 
@@ -180,20 +202,8 @@ bool LLGroupTitleComboCtrl::handleEvent(LLPointer<LLOldEvents::LLEvent> event, c
 {
 	if ("new group" == event->desc())
 	{
-		if (m_idCurGroup.notNull())
-			LLGroupMgr::getInstance()->removeObserver(m_idCurGroup, this);
-
-		m_idCurGroup = gAgent.getGroupID();
-		if (m_idCurGroup.notNull())
-		{
-			LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
-			LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
-		}
-
-		clear();
-		clearRows();
-		setEnabled(false);
-
+		if (LLStartUp::getStartupState() >= STATE_STARTED)
+			requestTitles();
 		return true;
 	}
 	return false;
