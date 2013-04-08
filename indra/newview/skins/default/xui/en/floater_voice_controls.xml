@@ -140,6 +140,9 @@
          layout="topleft"
          multi_select="true"
          name="speakers_list"
+         show_profile_btn="false"
+         show_speaking_indicator="true"
+         show_volume_slider="true"
          width="280" />
         <panel
          filename="panel_avatar_list_item.xml"
