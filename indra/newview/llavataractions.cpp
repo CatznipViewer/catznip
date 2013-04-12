@@ -465,31 +465,31 @@ void LLAvatarActions::share(const LLUUID& id)
 
 namespace action_give_inventory
 {
-	/**
-	 * Returns a pointer to 'Add More' inventory panel of Edit Outfit SP.
-	 */
-	static LLInventoryPanel* get_outfit_editor_inventory_panel()
-	{
-		LLPanelOutfitEdit* panel_outfit_edit = dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
-		if (NULL == panel_outfit_edit) return NULL;
-
-		LLInventoryPanel* inventory_panel = panel_outfit_edit->findChild<LLInventoryPanel>("folder_view");
-		return inventory_panel;
-	}
-
-	/**
-	 * @return active inventory panel, or NULL if there's no such panel
-	 */
-	static LLInventoryPanel* get_active_inventory_panel()
-	{
-		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-		if (!active_panel)
-		{
-			active_panel = get_outfit_editor_inventory_panel();
-		}
-
-		return active_panel;
-	}
+//	/**
+//	 * Returns a pointer to 'Add More' inventory panel of Edit Outfit SP.
+//	 */
+//	static LLInventoryPanel* get_outfit_editor_inventory_panel()
+//	{
+//		LLPanelOutfitEdit* panel_outfit_edit = dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
+//		if (NULL == panel_outfit_edit) return NULL;
+//
+//		LLInventoryPanel* inventory_panel = panel_outfit_edit->findChild<LLInventoryPanel>("folder_view");
+//		return inventory_panel;
+//	}
+//
+//	/**
+//	 * @return active inventory panel, or NULL if there's no such panel
+//	 */
+//	static LLInventoryPanel* get_active_inventory_panel()
+//	{
+//		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//		if (!active_panel)
+//		{
+//			active_panel = get_outfit_editor_inventory_panel();
+//		}
+//
+//		return active_panel;
+//	}
 
 	/**
 	 * Checks My Inventory visibility.
@@ -738,7 +738,10 @@ std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
 {
 	std::set<LLUUID> inventory_selected_uuids;
 
-	LLInventoryPanel* active_panel = action_give_inventory::get_active_inventory_panel();
+//	LLInventoryPanel* active_panel = action_give_inventory::get_active_inventory_panel();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+	LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+// [/SL:KB]
 	if (active_panel)
 	{
 		inventory_selected_uuids = active_panel->getRootFolder()->getSelectionList();
@@ -789,14 +792,24 @@ void LLAvatarActions::shareWithAvatars()
 // static
 bool LLAvatarActions::canShareSelectedItems(LLInventoryPanel* inv_panel /* = NULL*/)
 {
-	using namespace action_give_inventory;
-
+//	using namespace action_give_inventory;
+//
+//	if (!inv_panel)
+//	{
+//		LLInventoryPanel* active_panel = get_active_inventory_panel();
+//		if (!active_panel) return false;
+//		inv_panel = active_panel;
+//	}
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
 	if (!inv_panel)
 	{
-		LLInventoryPanel* active_panel = get_active_inventory_panel();
-		if (!active_panel) return false;
-		inv_panel = active_panel;
+		inv_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+		if (!inv_panel)
+		{
+			return false;
+		}
 	}
+// [/SL:KB]
 
 	// check selection in the panel
 	LLFolderView* root_folder = inv_panel->getRootFolder();
