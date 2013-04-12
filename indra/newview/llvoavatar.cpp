@@ -1327,6 +1327,9 @@ void LLVOAvatar::renderCollisionVolumes()
 BOOL LLVOAvatar::lineSegmentIntersect(const LLVector3& start, const LLVector3& end,
 									  S32 face,
 									  BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+									  BOOL pick_rigged,
+// [/SL:KB]
 									  S32* face_hit,
 									  LLVector3* intersection,
 									  LLVector2* tex_coord,
@@ -1426,6 +1429,9 @@ BOOL LLVOAvatar::lineSegmentIntersect(const LLVector3& start, const LLVector3& e
 LLViewerObject* LLVOAvatar::lineSegmentIntersectRiggedAttachments(const LLVector3& start, const LLVector3& end,
 									  S32 face,
 									  BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+									  BOOL pick_rigged,
+// [/SL:KB]
 									  S32* face_hit,
 									  LLVector3* intersection,
 									  LLVector2* tex_coord,
@@ -1456,7 +1462,10 @@ LLViewerObject* LLVOAvatar::lineSegmentIntersectRiggedAttachments(const LLVector
 			{
 				LLViewerObject* attached_object = (*attachment_iter);
 					
-				if (attached_object->lineSegmentIntersect(start, local_end, face, pick_transparent, face_hit, &local_intersection, tex_coord, normal, bi_normal))
+//				if (attached_object->lineSegmentIntersect(start, local_end, face, pick_transparent, face_hit, &local_intersection, tex_coord, normal, bi_normal))
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+				if (attached_object->lineSegmentIntersect(start, local_end, face, pick_transparent, pick_rigged, face_hit, &local_intersection, tex_coord, normal, bi_normal))
+// [/SL:KB]
 				{
 					local_end = local_intersection;
 					if (intersection)

@@ -181,7 +181,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mMaxTextByteLength( p.max_text_length ),
 	mDefaultFont(p.font),
 	mFontShadow(p.font_shadow),
-	mPopupMenu(NULL),
+//	mPopupMenu(NULL),
 	mReadOnly(p.read_only),
 	mSpellCheck(p.spellcheck),
 	mSpellCheckStart(-1),
@@ -264,6 +264,11 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 
 LLTextBase::~LLTextBase()
 {
+// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3.0)
+	if (!mUrlContextMenuHandle.isDead())
+		mUrlContextMenuHandle.get()->die();
+// [/SL:KB]
+
 	mSegments.clear();
 	delete mURLClickSignal;
 }
@@ -1215,10 +1220,16 @@ void LLTextBase::setReadOnlyColor(const LLColor4 &c)
 //virtual
 void LLTextBase::handleVisibilityChange( BOOL new_visibility )
 {
-	if(!new_visibility && mPopupMenu)
+//	if(!new_visibility && mPopupMenu)
+//	{
+//		mPopupMenu->hide();
+//	}
+// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3.0)
+	if ( (!new_visibility) && (!mUrlContextMenuHandle.isDead()) )
 	{
-		mPopupMenu->hide();
+		mUrlContextMenuHandle.get()->hide();
 	}
+// [/SL:KB]
 	LLUICtrl::handleVisibilityChange(new_visibility);
 }
 
@@ -1863,14 +1874,33 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
 
 	// create and return the context menu from the XUI file
-	delete mPopupMenu;
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
-																		 LLMenuHolderGL::child_registry_t::instance());	
-	if (mPopupMenu)
+// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3.0)
+	LLContextMenu* pUrlMenu = mUrlContextMenuHandle.get();
+	if (pUrlMenu)
 	{
-		mPopupMenu->show(x, y);
-		LLMenuGL::showPopup(this, mPopupMenu, x, y);
+		LLView* pParent = pUrlMenu->getParent();
+		if (pParent)
+			pParent->removeChild(pUrlMenu);
+		delete pUrlMenu;
 	}
+	pUrlMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
+																		 LLMenuHolderGL::child_registry_t::instance());
+	mUrlContextMenuHandle = pUrlMenu->getHandle();
+
+	if (pUrlMenu)
+	{
+		pUrlMenu->show(x, y);
+		LLMenuGL::showPopup(this, pUrlMenu, x, y);
+	}
+// [/SL:KB]
+//	delete mPopupMenu;
+//	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
+//																		 LLMenuHolderGL::child_registry_t::instance());	
+//	if (mPopupMenu)
+//	{
+//		mPopupMenu->show(x, y);
+//		LLMenuGL::showPopup(this, mPopupMenu, x, y);
+//	}
 }
 
 void LLTextBase::setText(const LLStringExplicit &utf8str, const LLStyle::Params& input_params)
