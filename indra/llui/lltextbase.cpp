@@ -2031,6 +2031,7 @@ void LLTextBase::setFont(const LLFontGL* pFont)
 		}
 	}
 	mDefaultFont = pFont;
+	mStyleDirty = true;
 }
 // [/SL:KB]
 
