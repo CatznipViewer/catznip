@@ -2,11 +2,11 @@
 <floater
  legacy_header_height="18"
  default_tab_group="1"
- height="120"
+ height="110"
  layout="topleft"
  name="search replace"
  help_topic="search_replace"
- title="Search / Replace"
+ title="SEARCH / REPLACE"
  width="300">
     <check_box
      control_name="LSLFindCaseInsensitivity"
@@ -26,33 +26,43 @@
      name="find_previous"
      top="61"
      width="120" />
-    <button
-     height="24"
-     label="Search"
-     label_selected="Search"
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left="10"
-     name="search_btn"
-     top="84"
-     width="90" />
-    <button
-     height="24"
-     label="Replace"
-     label_selected="Replace"
-     layout="topleft"
-     left_pad="5"
-     name="replace_btn"
-     top_delta="0"
-     width="90" />
-    <button
-     height="24"
-     label="Replace All"
-     label_selected="Replace All"
-     layout="topleft"
-     left_pad="5"
-     name="replace_all_btn"
-     top_delta="0"
-     width="90" />
+     left="6"
+     name="bottom_panel"
+     top_pad="2" >
+        <button
+         image_hover_unselected="Toolbar_Left_Over"
+         image_selected="Toolbar_Left_Selected"
+         image_unselected="Toolbar_Left_Off"
+         label="Search"
+         left="0"
+         name="search_btn"
+         top="1"
+         width="95" />
+        <button
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         label="Replace"
+         left_pad="1"
+         name="replace_btn"
+         top="1"
+         width="95" />
+        <button
+         image_hover_unselected="Toolbar_Right_Over"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         label="Replace All"
+         left_pad="1"
+         name="replace_all_btn"
+         top="1"
+         width="95" />
+    </panel> 
     <text
      type="string"
      length="1"
