@@ -3582,6 +3582,13 @@ class LLSelfStandUp : public view_listener_t
 	}
 };
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_standup_self()
+{
+	return isAgentAvatarValid() && gAgentAvatarp->isSitting();
+}
+// [/SL:KB]
+
 bool enable_standup_self()
 {
     return isAgentAvatarValid() && gAgentAvatarp->isSitting();
@@ -3595,6 +3602,13 @@ class LLSelfSitDown : public view_listener_t
             return true;
         }
     };
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_sitdown_self()
+{
+    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
+}
+// [/SL:KB]
 
 bool enable_sitdown_self()
 {
@@ -5997,6 +6011,18 @@ bool enable_pay_object()
 	}
 	return false;
 }
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_object_sit()
+{
+	return (is_object_sittable()) && (!sitting_on_selection());
+}
+
+bool visible_object_stand_up()
+{
+	return sitting_on_selection();
+}
+// [/SL:KB]
 
 bool enable_object_stand_up()
 {
@@ -8682,8 +8708,14 @@ void initialize_menus()
 
 	// Self context menu
 	view_listener_t::addMenu(new LLSelfStandUp(), "Self.StandUp");
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Self.VisibleStandUp", boost::bind(&visible_standup_self));
+// [/SL:KB]
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Self.VisibleSitDown", boost::bind(&visible_sitdown_self));
+// [/SL:KB]
 	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");
 
@@ -8745,6 +8777,10 @@ void initialize_menus()
 
 	enable.add("Object.EnableStandUp", boost::bind(&enable_object_stand_up));
 	enable.add("Object.EnableSit", boost::bind(&enable_object_sit, _1));
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Object.VisibleStandUp", boost::bind(&visible_object_stand_up));
+	enable.add("Object.VisibleSit", boost::bind(&visible_object_sit));
+// [/SL:KB]
 
 	view_listener_t::addMenu(new LLObjectEnableReturn(), "Object.EnableReturn");
 	view_listener_t::addMenu(new LLObjectEnableReportAbuse(), "Object.EnableReportAbuse");
