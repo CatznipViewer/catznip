@@ -92,34 +92,38 @@
         <layout_stack
          clip="true"
          follows="left|top|right"
-         height="26"
+         height="25"
          layout="topleft"
          mouse_opaque="false"
          name="voice_effect_and_leave_call_stack"
          orientation="horizontal"
+         top_pad="0"
          width="262">
           <layout_panel
-            height="26"
+            height="25"
             width="200">
             <panel
              class="panel_voice_effect"
              name="panel_voice_effect"
              visiblity_control="VoiceMorphingEnabled"
+             top_pad="-4"
              filename="panel_voice_effect.xml" />
           </layout_panel>
           <layout_panel
            auto_resize="false"
            follows="top|right"
-           height="23"
+           height="25"
            visible="true"
            layout="topleft"
            name="leave_call_btn_panel"
+           top_pad="0"
            width="100">
             <button
              follows="right|top"
-             height="23"
+             height="25"
              label="Leave Call"
              name="leave_call_btn"
+             top_pad="0"
              width="100" />
           </layout_panel>
         </layout_stack>
@@ -129,7 +133,7 @@
           layout="topleft"
           left="2"
           top_pad="0"
-          height="132"
+          height="136"
           name="callers_panel"
           auto_resize="true"
           width="280">

@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
  follows="all"
- height="26"
+ height="25"
  layout="topleft"
  name="panel_voice_effect"
+ top_pad="0"
  width="200">
   <string name="no_voice_effect">
     Voice Morphing Off
@@ -17,7 +18,7 @@
   <combo_box
    enabled="false"
    follows="left|top|right"
-   height="23"
+   height="25"
    name="voice_effect"
    tool_tip="Select a Voice Morph to change your voice"
    top_pad="0"
