@@ -159,6 +159,11 @@ public:
 	void updateSliderText(LLSliderCtrl* ctrl, LLTextBox* text_box);
 	void onUpdateSliderText(LLUICtrl* ctrl, const LLSD& name);
 //	void fractionFromDecimal(F32 decimal_val, S32& numerator, S32& denominator);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	void onInitEditorFont(LLUICtrl* pCheckCtrl);
+	void onToggleEditorFont(LLUICtrl* pCheckCtrl);
+	void onCommitEditorFont();
+// [/SL:KB]
 
 	void onCommitParcelMediaAutoPlayEnable();
 	void onCommitMediaEnabled();

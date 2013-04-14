@@ -127,6 +127,13 @@
          layout="topleft"
          help_topic="preferences_skins_tab"
          name="skins" />
+        <panel
+		 class="panel_preference_fonts"
+         filename="panel_preferences_fonts.xml"
+         label="Fonts"
+         layout="topleft"
+         help_topic="panel_preferences_fonts"
+         name="fonts" />
     </tab_container>
 
 </floater>

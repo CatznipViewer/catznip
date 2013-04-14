@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="left|top|right|bottom"
+ height="408"
+ label="Fonts"
+ layout="topleft"
+ name="fonts"
+ width="517">
+    
+    <text
+     follows="left|top"
+     font.style="BOLD"
+     height="15"
+     mouse_opaque="false"
+     name="text_miscellaneous"
+     layout="topleft"
+     left="35"
+     top="20"
+     type="string"
+     width="350"
+    >
+    	Viewer Fonts
+    </text>
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="70"
+     length="1"
+     name="label_font_main"
+     top_pad="10"
+     type="string"
+     width="110">
+        User Interface :
+    </text>
+    <combo_box
+     control_name="FontOverrideMain"
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left_pad="0"
+     name="combo_font_main"
+     top_delta="-5"
+     width="175">
+        <combo_box.item
+         label="DejaVu Sans (Default)"
+         name="font_main_0"
+         value="" />
+        <combo_box.item
+         label="Open Dyslexic"
+         name="font_main_1"
+         value="font_main_opendyslexic.xml" />
+         <combo_box.item
+         label="PT Sans"
+         name="font_main_2"
+         value="font_main_ptsans.xml" />
+        <combo_box.item
+         label="Source Sans Pro"
+         name="font_main_3"
+         value="font_main_sourcesanspro.xml" />
+        <combo_box.item
+         label="Ubuntu"
+         name="font_main_4"
+         value="font_main_ubuntu.xml" />
+    </combo_box>
+    <text
+     follows="top|left"
+     font="SansSerifSmall"
+     height="15"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="label_font_main_restart"
+     text_color="White_50"
+     type="string"
+     top_delta="5"
+     width="200">
+        (Requires restart)
+    </text>
+    
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="70"
+     length="1"
+     name="label_font_mono"
+     top_pad="15"
+     type="string"
+     width="110">
+        Monospace :
+    </text>
+    <combo_box
+     control_name="FontOverrideMonospace"
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left_pad="0"
+     name="combo_font_mono"
+     top_delta="-5"
+     width="175">
+        <combo_box.item
+         label="DejaVu Mono (Default)"
+         name="font_mono_0"
+         value="" />
+        <combo_box.item
+         label="PT Mono"
+         name="font_mono_1"
+         value="font_mono_pt.xml" />
+        <combo_box.item
+         label="Source Code Pro"
+         name="font_mono_2"
+         value="font_mono_sourcecodepro.xml" />
+        <combo_box.item
+         label="Ubuntu Mono"
+         name="font_mono_3"
+         value="font_mono_ubuntu.xml" />
+    </combo_box>
+    <text
+     follows="top|left"
+     font="SansSerifSmall"
+     height="15"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="label_font_mono_restart"
+     text_color="White_50"
+     top_delta="5"
+     type="string"
+     width="200">
+        (Requires restart)
+    </text>
+
+    <check_box
+     follows="left|top"
+     height="20"
+     layout="topleft"
+     label="Chat / Notecards :"
+     left="50"
+     name="check_font_edtior"
+     top_pad="10"
+     width="130">
+        <check_box.init_callback
+         function="Pref.InitEditorFont" />
+        <check_box.commit_callback
+         function="Pref.ToggleEditorFont" />
+    </check_box>
+    <combo_box
+     enabled="false"
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left_pad="0"
+     name="combo_font_editor"
+     top_delta="0"
+     width="175">
+        <combo_box.item
+         label="DejaVu Sans (Default)"
+         name="font_editor_0"
+         value="font_editor_dejavusans.xml" />
+        <combo_box.item
+         label="Open Dyslexic"
+         name="font_editor_1"
+         value="font_editor_opendyslexic.xml" />
+        <combo_box.item
+         label="PT Sans"
+         name="font_editor_2"
+         value="font_editor_ptsans.xml" />
+        <combo_box.item
+         label="Source Sans Pro"
+         name="font_editor_3"
+         value="font_editor_sourcesanspro.xml" />
+        <combo_box.item
+         label="Ubuntu"
+         name="font_editor_4"
+         value="font_editor_ubuntu.xml" />
+        <combo_box.init_callback
+         function="Pref.InitEditorFont" />
+        <combo_box.commit_callback
+         function="Pref.CommitEditorFont" />
+    </combo_box>
+    <text
+     follows="top|left"
+     font="SansSerifSmall"
+     height="15"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="label_font_editor_restart"
+     text_color="White_50"
+     type="string"
+     top_delta="5"
+     width="200">
+        (Requires restart)
+    </text>
+    
+</panel>

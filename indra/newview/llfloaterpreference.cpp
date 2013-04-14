@@ -350,6 +350,11 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	mCommitCallbackRegistrar.add("Pref.InitEditorFont",			boost::bind(&LLFloaterPreference::onInitEditorFont, this, _1));
+	mCommitCallbackRegistrar.add("Pref.ToggleEditorFont",		boost::bind(&LLFloaterPreference::onToggleEditorFont, this, _1));
+	mCommitCallbackRegistrar.add("Pref.CommitEditorFont",		boost::bind(&LLFloaterPreference::onCommitEditorFont, this));
+// [/SL:KB]
 
 //	sSkin = gSavedSettings.getString("SkinCurrent");
 
@@ -1764,6 +1769,69 @@ void LLFloaterPreference::changed()
 	updateDeleteTranscriptsButton();
 
 }
+
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+void LLFloaterPreference::onInitEditorFont(LLUICtrl* pCtrl)
+{
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+
+	LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(pCtrl);
+	if (pCheckCtrl)
+	{
+		pCheckCtrl->set(!pControl->isDefault());
+	}
+
+	LLComboBox* pComboCtrl = dynamic_cast<LLComboBox*>(pCtrl);
+	if (pComboCtrl)
+	{
+		if (pControl->isDefault())
+		{
+			pComboCtrl->setEnabled(false);
+			pComboCtrl->clear();
+		}
+		else
+		{
+			pComboCtrl->setEnabled(true);
+			pComboCtrl->setValue(pControl->getValue());
+		}
+	}
+}
+
+void LLFloaterPreference::onToggleEditorFont(LLUICtrl* pCheckCtrl)
+{
+	LLComboBox* pMainCombo = findChild<LLComboBox>("combo_font_main");
+	LLComboBox* pEditorCombo = findChild<LLComboBox>("combo_font_editor");
+
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+	if (!pCheckCtrl->getValue().asBoolean())
+	{
+		pEditorCombo->setEnabled(false);
+		pEditorCombo->clear();
+		pControl->resetToDefault();
+	}
+	else
+	{
+		pEditorCombo->setEnabled(true);
+		if (pControl->isDefault())
+			pEditorCombo->setSimple(pMainCombo->getSimple());
+		else
+			pEditorCombo->setValue(pControl->getValue());
+		pControl->setValue(pEditorCombo->getValue().asString());
+	}
+}
+
+void LLFloaterPreference::onCommitEditorFont()
+{
+	LLComboBox* pMainCombo = findChild<LLComboBox>("combo_font_main");
+	LLComboBox* pEditorCombo = findChild<LLComboBox>("combo_font_editor");
+
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+	if (pMainCombo->getSimple() == pEditorCombo->getSimple())
+		pControl->resetToDefault();
+	else
+		pControl->setValue(pEditorCombo->getValue().asString());
+}
+// [/SL:KB]
 
 //------------------------------Updater---------------------------------------
 
