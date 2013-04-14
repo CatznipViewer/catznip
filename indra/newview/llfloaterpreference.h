@@ -46,6 +46,9 @@ class LLScrollListCtrl;
 class LLSliderCtrl;
 class LLSD;
 class LLTextBox;
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+class LLComboBox;
+// [/SL:KB]
 
 typedef std::map<std::string, std::string> notifications_map;
 
@@ -132,8 +135,8 @@ public:
 
 	void onClickSetCache();
 	void onClickResetCache();
-	void onClickSkin(LLUICtrl* ctrl,const LLSD& userdata);
-	void onSelectSkin();
+//	void onClickSkin(LLUICtrl* ctrl,const LLSD& userdata);
+//	void onSelectSkin();
 	void onClickSetKey();
 	void setKey(KEY key);
 	void onClickSetMiddleMouse();
@@ -171,7 +174,7 @@ public:
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void onLogChatHistorySaved();	
 	void buildPopupLists();
-	static void refreshSkin(void* data);
+//	static void refreshSkin(void* data);
 	void selectPanel(const LLSD& name);
 
 private:
@@ -180,7 +183,7 @@ private:
 	void onDeleteTranscriptsResponse(const LLSD& notification, const LLSD& response);
 	void updateDeleteTranscriptsButton();
 
-	static std::string sSkin;
+//	static std::string sSkin;
 	notifications_map mNotificationOptions;
 	bool mClickActionDirty; ///< Set to true when the click/double-click options get changed by user.
 	bool mGotPersonalInfo;
@@ -277,5 +280,28 @@ private:
 
 };
 
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+class LLPanelPreferenceSkins : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceSkins();
+
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void apply();
+	/*virtual*/ void cancel();
+protected:
+	void onSkinChanged();
+	void onSkinThemeChanged();
+	void refreshSkinList();
+	void refreshSkinThemeList();
+
+protected:
+	std::string m_Skin;
+	LLComboBox* m_pSkinCombo;
+	std::string m_SkinTheme;
+	LLComboBox* m_pSkinThemeCombo;
+	LLSD        m_SkinsInfo;
+};
+// [/SL:KB]
 
 #endif  // LL_LLPREFERENCEFLOATER_H
