@@ -1784,9 +1784,9 @@
             <key>archive</key>
             <map>
               <key>hash</key>
-              <string>dca0d29e37a65a24ff6a129e0f18e666</string>
+              <string>4dc3aa35c14ee0036390636bb5308a13</string>
               <key>url</key>
-              <string>http://viewer.catznip.com/downloads/dbghelp-6.12.2.633-windows-20110618.tar.bz2</string>
+              <string>http://viewer.catznip.com/downloads/packages/dbghelp-6.2.9200.20512-windows-20130416.tar.bz2</string>
             </map>
             <key>name</key>
             <string>windows</string>
