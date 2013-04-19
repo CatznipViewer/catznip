@@ -1940,7 +1940,10 @@ void LLMeshLODResponder::completedRaw(U32 status, const std::string& reason,
 
 	if (data_size < mRequestedBytes)
 	{
-		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+//		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2013-04-17 (Catznip-3.4)
+		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE || status == HTTP_REQUEST_TIME_OUT)
+// [/SL:KB]
 		{ //timeout or service unavailable, try again
 			llwarns << "Timeout or service unavailable, retrying." << llendl;
 			LLMeshRepository::sHTTPRetryCount++;
@@ -2004,7 +2007,10 @@ void LLMeshSkinInfoResponder::completedRaw(U32 status, const std::string& reason
 
 	if (data_size < mRequestedBytes)
 	{
-		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+//		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2013-04-17 (Catznip-3.4)
+		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE || status == HTTP_REQUEST_TIME_OUT)
+// [/SL:KB]
 		{ //timeout or service unavailable, try again
 			llwarns << "Timeout or service unavailable, retrying loadMeshSkinInfo() for " << mMeshID << llendl;
 			LLMeshRepository::sHTTPRetryCount++;
@@ -2067,7 +2073,10 @@ void LLMeshDecompositionResponder::completedRaw(U32 status, const std::string& r
 
 	if (data_size < mRequestedBytes)
 	{
-		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+//		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2013-04-17 (Catznip-3.4)
+		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE || status == HTTP_REQUEST_TIME_OUT)
+// [/SL:KB]
 		{ //timeout or service unavailable, try again
 			llwarns << "Timeout or service unavailable, retrying loadMeshDecomposition() for " << mMeshID << llendl;
 			LLMeshRepository::sHTTPRetryCount++;
@@ -2131,7 +2140,10 @@ void LLMeshPhysicsShapeResponder::completedRaw(U32 status, const std::string& re
 
 	if (data_size < mRequestedBytes)
 	{
-		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+//		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE)
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2013-04-17 (Catznip-3.4)
+		if (status == HTTP_INTERNAL_ERROR || status == HTTP_SERVICE_UNAVAILABLE || status == HTTP_REQUEST_TIME_OUT)
+// [/SL:KB]
 		{ //timeout or service unavailable, try again
 			llwarns << "Timeout or service unavailable, retrying loadMeshPhysicsShape() for " << mMeshID << llendl;
 			LLMeshRepository::sHTTPRetryCount++;
