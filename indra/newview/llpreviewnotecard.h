@@ -30,6 +30,9 @@
 #include "llpreview.h"
 #include "llassetstorage.h"
 #include "lliconctrl.h"
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+#include "llvoinventorylistener.h"
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLPreviewNotecard
@@ -43,7 +46,10 @@ class LLButton;
 class LLTextEditor;
 // [/SL:KB]
 
-class LLPreviewNotecard : public LLPreview
+//class LLPreviewNotecard : public LLPreview
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+class LLPreviewNotecard : public LLPreview, public LLVOInventoryListener
+// [/SL:KB]
 {
 public:
 	LLPreviewNotecard(const LLSD& key);
@@ -79,6 +85,10 @@ public:
 	// change the asset, therefore, we need to re-fetch it from the
 	// asset system. :(
 	void refreshFromInventory(const LLUUID& item_id = LLUUID::null);
+
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
+// [/SL:KB]
 
 protected:
 
