@@ -3026,6 +3026,15 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 	else if ("open_newtab" == action)
 	{
 		LLPanelMainInventory* pMainInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : NULL;
+		if (!pMainInvPanel)
+		{
+			// User picked this menu option on a different inventory panel than the main inventory floater (i.e. "My Outfits" panel)
+			LLInventoryPanel* pInvPanel = LLInventoryPanel::getActiveInventoryPanel(true);
+			if (pInvPanel)
+			{
+				pMainInvPanel = pInvPanel->getParentByType<LLPanelMainInventory>();
+			}
+		}
 		if (pMainInvPanel)
 		{
 			LLInventoryPanel* pInvPanel = pMainInvPanel->addNewPanel(pMainInvPanel->getPanelCount() - 1);
