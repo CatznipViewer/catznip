@@ -64,7 +64,7 @@ public:
 		const LLSD& post_data,
 		const LLUUID& vfile_id,
 		LLAssetType::EType asset_type,
-		const std::list<std::string> files = std::list<std::string>());
+		const std::list<std::string>& files = std::list<std::string>());
 // [/SL:KB]
 //	LLNewAgentInventoryResponder(
 //		const LLSD& post_data,

@@ -137,6 +137,10 @@ public:
 //	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
 //	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	// We refactored the entire class to work exclusively with callbacks so there isn't any need for outside access to these functions
+protected:
+// [/SL:KB]
 	// Get the filename(s) found. getFirstFile() sets the pointer to
 	// the start of the structure and allows the start of iteration.
 	const std::string getFirstFile();

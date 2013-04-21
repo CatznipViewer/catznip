@@ -328,7 +328,7 @@ LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
 	const LLSD& post_data,
 	const LLUUID& vfile_id,
 	LLAssetType::EType asset_type,
-	const std::list<std::string> files)
+	const std::list<std::string>& files)
 	: LLAssetUploadResponder(post_data, vfile_id, asset_type)
 	, mFiles(files)
 {

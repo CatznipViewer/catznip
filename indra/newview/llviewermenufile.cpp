@@ -698,7 +698,7 @@ void handle_compress_image(const std::vector<std::string>& files)
 //		while (!infile.empty())
 //		{
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		for (auto itFile = files.begin(); itFile != files.end(); ++itFile)
+		for (auto itFile = files.cbegin(); itFile != files.cend(); ++itFile)
 		{
 			const std::string& infile = *itFile;
 // [/SL:KB]
@@ -1026,7 +1026,7 @@ void upload_done_callback(
 {
 	LLResourceData* data = (LLResourceData*)user_data;
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
-	std::list<std::string>* pFileList = (std::list<std::string>*)data->mUserData;;
+	std::list<std::string>* pFileList = (std::list<std::string>*)data->mUserData;
 // [/SL:KB]
 	S32 expected_upload_cost = data ? data->mExpectedUploadCost : 0;
 	//LLAssetType::EType pref_loc = data->mPreferredLocation;
@@ -1125,7 +1125,6 @@ void upload_done_callback(
 	if ( (pFileList) && (!pFileList->empty()) )
 	{
 		next_file = pFileList->front();
-		
 		pFileList->pop_front();
 		if (pFileList->empty())
 		{
