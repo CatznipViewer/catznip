@@ -744,31 +744,31 @@ void LLFloaterIMSession::setFocus(BOOL focus)
 }
 
 //static
-bool LLFloaterIMSession::toggle(const LLUUID& session_id)
-{
-	if(!isChatMultiTab())
-	{
-		LLFloaterIMSession* floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>(
-				"impanel", session_id);
-		if (floater && floater->getVisible() && floater->hasFocus())
-		{
-			// clicking on chiclet to close floater just hides it to maintain existing
-			// scroll/text entry state
-			floater->setVisible(false);
-			return false;
-		}
-		else if(floater && (!floater->isDocked() || floater->getVisible() && !floater->hasFocus()))
-		{
-			floater->setVisible(TRUE);
-			floater->setFocus(TRUE);
-			return true;
-		}
-	}
-
-	// ensure the list of messages is updated when floater is made visible
-	show(session_id);
-	return true;
-}
+//bool LLFloaterIMSession::toggle(const LLUUID& session_id)
+//{
+//	if(!isChatMultiTab())
+//	{
+//		LLFloaterIMSession* floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>(
+//				"impanel", session_id);
+//		if (floater && floater->getVisible() && floater->hasFocus())
+//		{
+//			// clicking on chiclet to close floater just hides it to maintain existing
+//			// scroll/text entry state
+//			floater->setVisible(false);
+//			return false;
+//		}
+//		else if(floater && (!floater->isDocked() || floater->getVisible() && !floater->hasFocus()))
+//		{
+//			floater->setVisible(TRUE);
+//			floater->setFocus(TRUE);
+//			return true;
+//		}
+//	}
+//
+//	// ensure the list of messages is updated when floater is made visible
+//	show(session_id);
+//	return true;
+//}
 
 void LLFloaterIMSession::sessionInitReplyReceived(const LLUUID& im_session_id)
 {

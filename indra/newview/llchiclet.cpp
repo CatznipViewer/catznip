@@ -466,8 +466,9 @@ bool LLIMChiclet::getShowNewMessagesIcon()
 
 void LLIMChiclet::onMouseDown()
 {
-	LLFloaterIMSession::toggle(getSessionId());
+//	LLFloaterIMSession::toggle(getSessionId());
 // [SL:KB]
+	LLFloaterIMContainer::getInstance()->showConversation(getSessionId());
 	setCounter(0);
 // [/SL:KB]
 }
