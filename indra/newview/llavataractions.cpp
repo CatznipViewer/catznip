@@ -208,7 +208,15 @@ void LLAvatarActions::endIM(const LLUUID& id)
 	LLUUID session_id = gIMMgr->computeSessionID(IM_NOTHING_SPECIAL, id);
 	if (session_id != LLUUID::null)
 	{
-		gIMMgr->leaveSession(session_id);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-04-24 (Catznip-3.4)
+		LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(session_id);
+		if (pIMSession)
+		{
+			// See LLFloaterIMContainer::doToSelectedConversation()
+			LLFloater::onClickClose(pIMSession);
+		}
+// [/SL:KB]
+//		gIMMgr->leaveSession(session_id);
 	}
 }
 

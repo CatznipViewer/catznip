@@ -37,6 +37,9 @@
 #include "llfloatersidepanelcontainer.h"
 #include "llgroupmgr.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-04-24 (Catznip-3.4)
+#include "llfloaterimsession.h"
+// [/SL:KB]
 #include "llimview.h" // for gIMMgr
 #include "llnotificationsutil.h"
 #include "llstatusbar.h"	// can_afford_transaction()
@@ -358,7 +361,15 @@ void LLGroupActions::endIM(const LLUUID& group_id)
 	LLUUID session_id = gIMMgr->computeSessionID(IM_SESSION_GROUP_START, group_id);
 	if (session_id != LLUUID::null)
 	{
-		gIMMgr->leaveSession(session_id);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-04-24 (Catznip-3.4)
+		LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(session_id);
+		if (pIMSession)
+		{
+			// See LLFloaterIMContainer::doToSelectedConversation()
+			LLFloater::onClickClose(pIMSession);
+		}
+// [/SL:KB]
+//		gIMMgr->leaveSession(session_id);
 	}
 }
 
