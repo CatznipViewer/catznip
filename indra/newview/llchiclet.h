@@ -351,7 +351,7 @@ public:
 	/**
 	 * Gets id of person/group user is chatting with.
 	 */
-	virtual LLUUID getOtherParticipantId() { return mOtherParticipantId; }
+	virtual const LLUUID& getOtherParticipantId() const { return mOtherParticipantId; }
 
 	/**
 	 * Init Speaker Control with speaker's ID

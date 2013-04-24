@@ -642,22 +642,23 @@ void LLIMP2PChiclet::createPopupMenu()
 
 void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
 {
-	std::string level = user_data.asString();
-	LLUUID other_participant_id = getOtherParticipantId();
+	const LLUUID& other_participant_id = getOtherParticipantId();
+	const LLUUID& session_id = getSessionId();
 
-	if("profile" == level)
+	const std::string param = user_data.asString();
+	if("profile" == param)
 	{
 		LLAvatarActions::showProfile(other_participant_id);
 	}
-	else if("im" == level)
+	else if("show" == param)
 	{
-		LLAvatarActions::startIM(other_participant_id);
+		LLFloaterIMContainer::getInstance()->showConversation(session_id);
 	}
-	else if("add" == level)
+	else if("add" == param)
 	{
 		LLAvatarActions::requestFriendshipDialog(other_participant_id);
 	}
-	else if("end" == level)
+	else if("end" == param)
 	{
 		LLAvatarActions::endIM(other_participant_id);
 	}
@@ -764,12 +765,12 @@ void LLAdHocChiclet::createPopupMenu()
 
 void LLAdHocChiclet::onMenuItemClicked(const LLSD& user_data)
 {
-	std::string level = user_data.asString();
-	LLUUID group_id = getSessionId();
+	const LLUUID& session_id = getSessionId();
 
-	if("end" == level)
+	const std::string param = user_data.asString();
+	if("end" == param)
 	{
-		LLGroupActions::endIM(group_id);
+		LLGroupActions::endIM(session_id);
 	}
 }
 // [/SL:KB]
@@ -919,18 +920,18 @@ void LLIMGroupChiclet::createPopupMenu()
 
 void LLIMGroupChiclet::onMenuItemClicked(const LLSD& user_data)
 {
-	std::string level = user_data.asString();
-	LLUUID group_id = getSessionId();
+	const LLUUID& group_id = getSessionId();
 
-	if("group chat" == level)
+	const std::string param = user_data.asString();
+	if("show" == param)
 	{
-		LLGroupActions::startIM(group_id);
+		LLFloaterIMContainer::getInstance()->showConversation(group_id);
 	}
-	else if("info" == level)
+	else if("profile" == param)
 	{
 		LLGroupActions::show(group_id);
 	}
-	else if("end" == level)
+	else if("end" == param)
 	{
 		LLGroupActions::endIM(group_id);
 	}
