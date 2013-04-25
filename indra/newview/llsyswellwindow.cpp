@@ -706,7 +706,14 @@ void LLIMWellWindow::addIMRow(const LLUUID& sessionId, S32 chicletCounter,
 							   const std::string& name, const LLUUID& otherParticipantId)
 {
 	RowPanel* item = new RowPanel(this, sessionId, chicletCounter, name, otherParticipantId);
-	if (!mMessageList->addItem(item, sessionId))
+//	if (!mMessageList->addItem(item, sessionId))
+// [SL:KB]
+	if (mMessageList->addItem(item, sessionId))
+	{
+		mSysWellChiclet->updateWidget(isWindowEmpty());
+	}
+	else
+// [/SL:KB]
 	{
 		llwarns << "Unable to add IM Row into the list, sessionID: " << sessionId
 			<< ", name: " << name
@@ -727,7 +734,14 @@ void LLIMWellWindow::delIMRow(const LLUUID& sessionId)
 	//But I didn't find why this happen..
 	gFocusMgr.clearLastFocusForGroup(this);
 
-	if (!mMessageList->removeItemByValue(sessionId))
+//	if (!mMessageList->removeItemByValue(sessionId))
+// [SL:KB]
+	if (mMessageList->removeItemByValue(sessionId))
+	{
+		mSysWellChiclet->updateWidget(isWindowEmpty());
+	}
+	else
+// [/SL:KB]
 	{
 		llwarns << "Unable to remove IM Row from the list, sessionID: " << sessionId
 			<< llendl;
@@ -754,7 +768,14 @@ void LLIMWellWindow::addObjectRow(const LLUUID& notification_id, bool new_messag
 	if (mMessageList->getItemByValue(notification_id) == NULL)
 	{
 		ObjectRowPanel* item = new ObjectRowPanel(notification_id, new_message);
-		if (!mMessageList->addItem(item, notification_id))
+//		if (!mMessageList->addItem(item, notification_id))
+// [SL:KB]
+		if (mMessageList->addItem(item, notification_id))
+		{
+			mSysWellChiclet->updateWidget(isWindowEmpty());
+		}
+		else
+// [/SL:KB]
 		{
 			llwarns << "Unable to add Object Row into the list, notificationID: " << notification_id << llendl;
 			item->die();
@@ -765,7 +786,17 @@ void LLIMWellWindow::addObjectRow(const LLUUID& notification_id, bool new_messag
 
 void LLIMWellWindow::removeObjectRow(const LLUUID& notification_id)
 {
-	if (!mMessageList->removeItemByValue(notification_id))
+//	if (!mMessageList->removeItemByValue(notification_id))
+// [SL:KB]
+	if (mMessageList->removeItemByValue(notification_id))
+	{
+		if (mSysWellChiclet)
+		{
+			mSysWellChiclet->updateWidget(isWindowEmpty());
+		}
+	}
+	else
+// [/SL:KB]
 	{
 		llwarns << "Unable to remove Object Row from the list, notificationID: " << notification_id << llendl;
 	}
