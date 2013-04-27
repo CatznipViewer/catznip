@@ -131,7 +131,10 @@ void LLFloaterIMSessionTab::setVisible(BOOL visible)
 		mHasVisibleBeenInitialized = true;
 		if(!gAgentCamera.cameraMouselook())
 		{
-			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container")->setVisible(true);
+// [/SL:KB]
+//			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
 		}
 		LLFloaterIMSessionTab::addToHost(mSessionID);
 		LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(mSessionID);
@@ -176,7 +179,10 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 	LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(session_id);
 	if (conversp)
 	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 
 		// Do not add again existing floaters
 		if (floater_container && !conversp->isHostAttached())
@@ -340,7 +346,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 
 LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 {
-	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainerBase::getInstance()->getSessionModel(mSessionID));
+// [/SL:KB]
+//	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
 
 void LLFloaterIMSessionTab::draw()
@@ -418,7 +427,10 @@ void LLFloaterIMSessionTab::appendMessage(const LLChat& chat, const LLSD &args)
 {
 
 	// Update the participant activity time
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 	if (im_box)
 	{
 		im_box->setTimeNow(mSessionID,chat.mFromID);
@@ -691,7 +703,10 @@ void LLFloaterIMSessionTab::hideAllStandardButtons()
 void LLFloaterIMSessionTab::updateHeaderAndToolbar()
 {
 	// prevent start conversation before its container
-    LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+    LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
+//    LLFloaterIMContainer::getInstance();
 
 	bool is_not_torn_off = !checkIfTornOff();
 	if (is_not_torn_off)
@@ -818,7 +833,10 @@ void LLFloaterIMSessionTab::updateCallBtnState(bool callIsActive)
 
 void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 {
-	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+//	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
+// [/SL:KB]
 	if (host_floater)
 	{
 		// Hide the messages pane if a floater is hosted in the Conversations
@@ -845,7 +863,10 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 
 void LLFloaterIMSessionTab::onCollapseToLine(LLFloaterIMSessionTab* self)
 {
-	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+//	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
+// [/SL:KB]
 	if (!host_floater)
 	{
 		bool expand = self->isMessagePaneExpanded();
@@ -907,7 +928,10 @@ void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 {
 	if (!checkIfTornOff())
 	{
-		LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(getHost());
+//		LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(getHost());
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(getHost());
+// [/SL:KB]
 		// Show the messages pane when opening a floater hosted in the Conversations
 		host_floater->collapseMessagesPane(false);
 	}
@@ -923,7 +947,10 @@ void LLFloaterIMSessionTab::onTearOffClicked()
     mSaveRect = isTornOff();
     initRectControl();
 	LLFloater::onClickTearOff(this);
-	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
+//	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:BK]
+	LLFloaterIMContainerBase* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainerBase>("im_container");
+// [/SL:KB]
 
 	if (isTornOff())
 	{
@@ -1016,7 +1043,10 @@ void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 		
 	// Perform the command (IM, profile, etc...) on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	// Note: By construction, those can only be participants so we can call doToParticipants() directly
 	floater_container->doToParticipants(command, selected_uuids);
 }
@@ -1029,7 +1059,10 @@ bool LLFloaterIMSessionTab::enableContextMenuItem(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 	
 	// Perform the item enable test on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->enableContextMenuItem(command, selected_uuids);
 }
 
@@ -1041,7 +1074,10 @@ bool LLFloaterIMSessionTab::checkContextMenuItem(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 	
 	// Perform the item check on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
 
@@ -1085,7 +1121,10 @@ BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 {
 	if(mask == MASK_ALT)
 	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 		if (KEY_RETURN == key && !isTornOff())
 		{
 			floater_container->expandConversation();

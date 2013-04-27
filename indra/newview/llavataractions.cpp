@@ -185,7 +185,10 @@ static void on_avatar_name_cache_start_im(const LLUUID& agent_id,
 	LLUUID session_id = gIMMgr->addSession(name, IM_NOTHING_SPECIAL, agent_id);
 	if (session_id != LLUUID::null)
 	{
-		LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance()->showConversation(session_id);
 	}
 	make_ui_sound("UISndStartIM");
 }
@@ -309,7 +312,10 @@ void LLAvatarActions::startConference(const uuid_vec_t& ids, const LLUUID& float
 		return;
 	}
 	
-	LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//	LLFloaterIMContainer::getInstance()->showConversation(session_id);
 	
 	make_ui_sound("UISndStartIM");
 }

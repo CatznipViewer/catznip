@@ -338,7 +338,10 @@ LLUUID LLGroupActions::startIM(const LLUUID& group_id)
 			group_id);
 		if (session_id != LLUUID::null)
 		{
-			LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//			LLFloaterIMContainer::getInstance()->showConversation(session_id);
 		}
 		make_ui_sound("UISndStartIM");
 		return session_id;

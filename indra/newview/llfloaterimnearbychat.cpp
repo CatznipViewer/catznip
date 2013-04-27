@@ -139,7 +139,10 @@ BOOL LLFloaterIMNearbyChat::postBuild()
 void LLFloaterIMNearbyChat::closeHostedFloater()
 {
 	// Should check how many conversations are ongoing. Close all if 1 only (the Nearby Chat), select next one otherwise
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	if (floater_container->getConversationListItemSize() == 1)
 	{
 		floater_container->closeFloater();
@@ -264,7 +267,10 @@ void LLFloaterIMNearbyChat::setVisibleAndFrontmost(BOOL take_focus, const LLSD& 
 
 	if(!isTornOff() && matchesKey(key))
 	{
-		LLFloaterIMContainer::getInstance()->selectConversationPair(mSessionID, true, take_focus);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase::getInstance()->selectConversationPair(mSessionID, true, take_focus);
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance()->selectConversationPair(mSessionID, true, take_focus);
 	}
 }
 
@@ -308,7 +314,10 @@ void LLFloaterIMNearbyChat::onClickCloseBtn()
 	}
 	LLFloaterIMSessionTab::onTearOffClicked();
 	
-	LLFloaterIMContainer *im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer *im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 	if (im_box)
 	{
 		im_box->onNearbyChatClosed();
@@ -333,7 +342,10 @@ void LLFloaterIMNearbyChat::show()
 bool LLFloaterIMNearbyChat::isChatVisible() const
 {
 	bool isVisible = false;
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	// Is the IM floater container ever null?
 	llassert(im_box != NULL);
 	if (im_box != NULL)
@@ -384,7 +396,10 @@ BOOL LLFloaterIMNearbyChat::handleKeyHere( KEY key, MASK mask )
 
 	if((mask == MASK_ALT) && isTornOff())
 	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 		if ((KEY_UP == key) || (KEY_LEFT == key))
 		{
 			floater_container->selectNextorPreviousConversation(false);
@@ -427,7 +442,10 @@ BOOL LLFloaterIMNearbyChat::matchChatTypeTrigger(const std::string& in_str, std:
 
 void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 {
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 	if (im_box)
 	{
 		im_box->flashConversationItemWidget(mSessionID,false);
@@ -746,7 +764,10 @@ void LLFloaterIMNearbyChat::startChat(const char* line)
 	{
 		if(!nearby_chat->isTornOff())
 		{
-			LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterIMContainerBase::getInstance()->selectConversation(LLUUID::null);
+// [/SL:KB]
+//			LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
 		}
 		if(nearby_chat->isMinimized())
 		{

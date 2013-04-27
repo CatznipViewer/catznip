@@ -1,0 +1,95 @@
+/** 
+ * @file llfloaterimcontainerbase.h
+ * @brief Multifloater containing active IM sessions in separate tab container tabs
+ *
+ * $LicenseInfo:firstyear=2009&license=viewerlgpl$
+ * Second Life Viewer Source Code
+ * Copyright (C) 2010, Linden Research, Inc.
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation;
+ * version 2.1 of the License only.
+ * 
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * 
+ * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
+ * $/LicenseInfo$
+ */
+
+#ifndef LL_LLFLOATERIMCONTAINERBASE_H
+#define LL_LLFLOATERIMCONTAINERBASE_H
+
+#include <map>
+#include <vector>
+
+#include "llimview.h"
+#include "llevents.h"
+#include "../llui/llfloater.h"
+#include "../llui/llmultifloater.h"
+#include "llavatarpropertiesprocessor.h"
+#include "llgroupmgr.h"
+#include "../llui/lltrans.h"
+#include "llconversationmodel.h"
+#include "llconversationview.h"
+
+class LLButton;
+class LLConversationSort;
+class LLLayoutPanel;
+class LLLayoutStack;
+class LLTabContainer;
+class LLSpeaker;
+class LLSpeakerMgr;
+
+class LLFloaterIMContainerBase
+	: public LLMultiFloater
+{
+public:
+	LLFloaterIMContainerBase(const LLSD& seed, const Params& params = getDefaultParams());
+	virtual ~LLFloaterIMContainerBase();
+
+	virtual void showConversation(const LLUUID& session_id) = 0;
+    virtual void selectConversation(const LLUUID& session_id) = 0;
+	virtual void selectNextConversationByID(const LLUUID& session_id) = 0;
+	virtual BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
+	virtual bool selectAdjacentConversation(bool focus_selected) = 0;
+	virtual bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true) = 0;
+	virtual void expandConversation() = 0;
+
+	static LLFloaterIMContainerBase* findInstance();
+	static LLFloaterIMContainerBase* getInstance();
+
+	static void onCurrentChannelChanged(const LLUUID& session_id);
+
+	virtual void collapseMessagesPane(bool collapse) = 0;
+
+	virtual LLUUID getSelectedSession() const = 0;
+	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) = 0;
+	virtual LLConversationSort& getSortOrder() = 0;
+
+	virtual void onNearbyChatClosed() = 0;
+
+	// Handling of lists of participants is public so to be common with llfloatersessiontab
+	// *TODO : Find a better place for this.
+	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS) = 0;
+	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS) = 0;
+    virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS) = 0;
+
+private:
+    /*virtual*/ void doToSelected(const LLSD& userdata);
+
+public:
+	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
+	static bool isConversationLoggingAllowed();
+	virtual void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes) = 0;
+	virtual S32 getConversationListItemSize() const = 0;
+};
+
+#endif // LL_LLFLOATERIMCONTAINERBASE_H

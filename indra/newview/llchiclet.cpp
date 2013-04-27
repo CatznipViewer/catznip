@@ -570,7 +570,7 @@ void LLIMChiclet::onMouseDown()
 {
 //	LLFloaterIMSession::toggle(getSessionId());
 // [SL:KB]
-	LLFloaterIMContainer::getInstance()->showConversation(getSessionId());
+	LLFloaterIMContainerBase::getInstance()->showConversation(getSessionId());
 	setCounter(0);
 // [/SL:KB]
 }
@@ -755,7 +755,7 @@ void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
 	}
 	else if("show" == param)
 	{
-		LLFloaterIMContainer::getInstance()->showConversation(session_id);
+		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
 	}
 	else if("add" == param)
 	{
@@ -1028,7 +1028,7 @@ void LLIMGroupChiclet::onMenuItemClicked(const LLSD& user_data)
 	const std::string param = user_data.asString();
 	if("show" == param)
 	{
-		LLFloaterIMContainer::getInstance()->showConversation(group_id);
+		LLFloaterIMContainerBase::getInstance()->showConversation(group_id);
 	}
 	else if("profile" == param)
 	{
@@ -1186,7 +1186,10 @@ void LLChicletPanel::onCurrentVoiceChannelChanged(const LLUUID& session_id)
 // [/SL:KB]
 			if (gSavedSettings.getBOOL("OpenIMOnVoice"))
 			{
-				LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+				LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//				LLFloaterIMContainer::getInstance()->showConversation(session_id);
 			}
 		}
 	}

@@ -200,7 +200,10 @@ bool LLFloaterIMSession::enableGearMenuItem(const LLSD& userdata)
     uuid_vec_t selected_uuids;
     selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->enableContextMenuItem(command, selected_uuids);
 }
 
@@ -210,7 +213,10 @@ void LLFloaterIMSession::GearDoToSelected(const LLSD& userdata)
     uuid_vec_t selected_uuids;
     selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	floater_container->doToParticipants(command, selected_uuids);
 }
 
@@ -220,7 +226,10 @@ bool LLFloaterIMSession::checkGearMenuItem(const LLSD& userdata)
 	uuid_vec_t selected_uuids;
 	selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
 
@@ -572,7 +581,10 @@ LLFloaterIMSession* LLFloaterIMSession::show(const LLUUID& session_id)
 	if (!floater)
 		return NULL;
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 
 	// Do not add again existing floaters
 	if (!exist)
@@ -705,8 +717,11 @@ BOOL LLFloaterIMSession::getVisible()
 
 	if(isChatMultiTab())
 	{
-		LLFloaterIMContainer* im_container =
-				LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* im_container =
+//				LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* im_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 		
 		// Treat inactive floater as invisible.
 		bool is_active = im_container->getActiveFloater() == this;
@@ -924,7 +939,10 @@ void LLFloaterIMSession::onInputEditorFocusLost(LLFocusableElement* caller, void
 void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* userdata)
 {
 	LLFloaterIMSession* self = (LLFloaterIMSession*)userdata;
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 	if (im_box)
 	{
 		im_box->flashConversationItemWidget(self->mSessionID,false);
