@@ -66,21 +66,21 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ void draw();
-	/*virtual*/ void setMinimized(BOOL b);
+//	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setVisibleAndFrontmost(BOOL take_focus=TRUE, const LLSD& key = LLSD());
 	/*virtual*/ void updateResizeLimits();
-	void onCloseFloater(LLUUID& id);
+//	void onCloseFloater(LLUUID& id);
 
-	/*virtual*/ void addFloater(LLFloater* floaterp, 
-								BOOL select_added_floater, 
-								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+//	/*virtual*/ void addFloater(LLFloater* floaterp, 
+//								BOOL select_added_floater, 
+//								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	void returnFloaterToHost();
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	/*virtual*/ void showConversation(const LLUUID& session_id);
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ void selectNextConversationByID(const LLUUID& session_id);
-	/*virtual*/ BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
+	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ bool selectAdjacentConversation(bool focus_selected);
 	/*virtual*/ bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
 	/*virtual*/ void expandConversation();
@@ -119,9 +119,9 @@ public:
 	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ LLUUID getSelectedSession() const { return mSelectedSession; }
-	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) { return get_ptr_in_map(mConversationsItems,session_id); }
-	/*virtual*/ LLConversationSort& getSortOrder() { return mConversationViewModel.getSorter(); }
+	/*virtual*/ const LLUUID& getSelectedSession() const { return mSelectedSession; }
+	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const { return get_ptr_in_map(mConversationsItems,session_id); }
+	/*virtual*/ const LLConversationSort& getSortOrder() const { return mConversationViewModel.getSorter(); }
 // [/SL:KB]
 	LLConversationViewModel& getRootViewModel() { return mConversationViewModel; }
 //    LLUUID getSelectedSession() { return mSelectedSession; }
@@ -150,13 +150,13 @@ public:
 	/*virtual*/ void closeFloater(bool app_quitting = false);
 
 private:
-	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
-	avatarID_panel_map_t mSessions;
-	boost::signals2::connection mNewMessageConnection;
+//	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
+//	avatarID_panel_map_t mSessions;
+//	boost::signals2::connection mNewMessageConnection;
 
 	/*virtual*/ void computeResizeLimits(S32& new_min_width, S32& new_min_height) {}
 
-	void onNewMessageReceived(const LLSD& data);
+//	void onNewMessageReceived(const LLSD& data);
 
 	void onExpandCollapseButtonClicked();
 	void onStubCollapseButtonClicked();

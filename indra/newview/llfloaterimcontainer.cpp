@@ -81,8 +81,8 @@ LLFloaterIMContainerView::LLFloaterIMContainerView(const LLSD& seed, const Param
 	// Firstly add our self to IMSession observers, so we catch session events
     LLIMMgr::getInstance()->addSessionObserver(this);
 
-	mAutoResize = FALSE;
-	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
+//	mAutoResize = FALSE;
+//	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
 }
 
 LLFloaterIMContainerView::~LLFloaterIMContainerView()
@@ -91,8 +91,8 @@ LLFloaterIMContainerView::~LLFloaterIMContainerView()
 
 	gIdleCallbacks.deleteFunction(idle, this);
 
-	mNewMessageConnection.disconnect();
-	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
+//	mNewMessageConnection.disconnect();
+//	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
 
 	if (mMicroChangedSignal.connected())
 	{
@@ -134,7 +134,10 @@ void LLFloaterIMContainerView::sessionIDUpdated(const LLUUID& old_session_id, co
 	// and do not need to be deleted and recreated (trying this creates loads of problems). We do need however to suppress 
 	// its related mSessions record as it's indexed with the wrong id.
 	// Grabbing the updated LLFloaterIMSession and readding it in mSessions will eventually be done by addConversationListItem().
-	mSessions.erase(old_session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	getSessionMap().erase(old_session_id);
+// [/SL:KB]
+//	mSessions.erase(old_session_id);
 
 	// Delete the model and participants related to the old session
 	bool change_focus = removeConversationListItem(old_session_id);
@@ -160,14 +163,18 @@ void LLFloaterIMContainerView::sessionRemoved(const LLUUID& session_id)
 
 BOOL LLFloaterIMContainerView::postBuild()
 {
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::postBuild();
+// [/SL:KB]
+
 	mOrigMinWidth = getMinWidth();
 	mOrigMinHeight = getMinHeight();
 
-	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLFloaterIMContainerView::onNewMessageReceived, this, _1));
-	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
-	// mTabContainer will be initialized in LLMultiFloater::addChild()
-	
-	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
+//	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLFloaterIMContainerView::onNewMessageReceived, this, _1));
+//	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
+//	// mTabContainer will be initialized in LLMultiFloater::addChild()
+//	
+//	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
 	mStubPanel = getChild<LLPanel>("stub_panel");
     mStubTextBox = getChild<LLTextBox>("stub_textbox");
     mStubTextBox->setURLClickedCallback(boost::bind(&LLFloaterIMContainerView::returnFloaterToHost, this));
@@ -260,83 +267,85 @@ BOOL LLFloaterIMContainerView::postBuild()
 
 void LLFloaterIMContainerView::onOpen(const LLSD& key)
 {
-	LLMultiFloater::onOpen(key);
+//	LLMultiFloater::onOpen(key);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::onOpen(key);
+// [/SL:KB]
 	openNearbyChat();
 	reSelectConversation();
 	assignResizeLimits();
 }
 
-// virtual
-void LLFloaterIMContainerView::addFloater(LLFloater* floaterp,
-									  BOOL select_added_floater,
-									  LLTabContainer::eInsertionPoint insertion_point)
-{
-	if(!floaterp) return;
+//// virtual
+//void LLFloaterIMContainerView::addFloater(LLFloater* floaterp,
+//									  BOOL select_added_floater,
+//									  LLTabContainer::eInsertionPoint insertion_point)
+//{
+//	if(!floaterp) return;
+//
+//	// already here
+//	if (floaterp->getHost() == this)
+//	{
+//		openFloater(floaterp->getKey());
+//		return;
+//	}
+//
+//	LLUUID session_id = floaterp->getKey();
+//	
+//	// Add the floater
+//	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
+//
+//
+//	
+//	LLIconCtrl* icon = 0;
+//
+//	if(gAgent.isInGroup(session_id, TRUE))
+//	{
+//		LLGroupIconCtrl::Params icon_params;
+//		icon_params.group_id = session_id;
+//		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+//
+//		mSessions[session_id] = floaterp;
+//		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerView::onCloseFloater, this, session_id));
+//	}
+//	else
+//	{   LLUUID avatar_id = session_id.notNull()?
+//		    LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
+//
+//		LLAvatarIconCtrl::Params icon_params;
+//		icon_params.avatar_id = avatar_id;
+//		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+//
+//		mSessions[session_id] = floaterp;
+//		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerView::onCloseFloater, this, session_id));
+//	}
+//
+//	// forced resize of the floater
+//	LLRect wrapper_rect = this->mTabContainer->getLocalRect();
+//	floaterp->setRect(wrapper_rect);
+//
+//	mTabContainer->setTabImage(floaterp, icon);
+//}
 
-	// already here
-	if (floaterp->getHost() == this)
-	{
-		openFloater(floaterp->getKey());
-		return;
-	}
+//void LLFloaterIMContainerView::onCloseFloater(LLUUID& id)
+//{
+//	mSessions.erase(id);
+//	setFocus(TRUE);
+//}
 
-	LLUUID session_id = floaterp->getKey();
-	
-	// Add the floater
-	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
-
-
-	
-	LLIconCtrl* icon = 0;
-
-	if(gAgent.isInGroup(session_id, TRUE))
-	{
-		LLGroupIconCtrl::Params icon_params;
-		icon_params.group_id = session_id;
-		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
-
-		mSessions[session_id] = floaterp;
-		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerView::onCloseFloater, this, session_id));
-	}
-	else
-	{   LLUUID avatar_id = session_id.notNull()?
-		    LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
-
-		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = avatar_id;
-		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
-
-		mSessions[session_id] = floaterp;
-		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerView::onCloseFloater, this, session_id));
-	}
-
-	// forced resize of the floater
-	LLRect wrapper_rect = this->mTabContainer->getLocalRect();
-	floaterp->setRect(wrapper_rect);
-
-	mTabContainer->setTabImage(floaterp, icon);
-}
-
-
-void LLFloaterIMContainerView::onCloseFloater(LLUUID& id)
-{
-	mSessions.erase(id);
-	setFocus(TRUE);
-}
-
-void LLFloaterIMContainerView::onNewMessageReceived(const LLSD& data)
-{
-	LLUUID session_id = data["session_id"].asUUID();
-	LLFloater* floaterp = get_ptr_in_map(mSessions, session_id);
-	LLFloater* current_floater = LLMultiFloater::getActiveFloater();
-
-	if(floaterp && current_floater && floaterp != current_floater)
-	{
-		if(LLMultiFloater::isFloaterFlashing(floaterp))
-			LLMultiFloater::setFloaterFlashing(floaterp, FALSE);
-		LLMultiFloater::setFloaterFlashing(floaterp, TRUE);
-	}
-}
+//void LLFloaterIMContainerView::onNewMessageReceived(const LLSD& data)
+//{
+//	LLUUID session_id = data["session_id"].asUUID();
+//	LLFloater* floaterp = get_ptr_in_map(mSessions, session_id);
+//	LLFloater* current_floater = LLMultiFloater::getActiveFloater();
+//
+//	if(floaterp && current_floater && floaterp != current_floater)
+//	{
+//		if(LLMultiFloater::isFloaterFlashing(floaterp))
+//			LLMultiFloater::setFloaterFlashing(floaterp, FALSE);
+//		LLMultiFloater::setFloaterFlashing(floaterp, TRUE);
+//	}
+//}
 
 void LLFloaterIMContainerView::onStubCollapseButtonClicked()
 {
@@ -588,27 +597,27 @@ void LLFloaterIMContainerView::returnFloaterToHost()
 	floater->onTearOffClicked();
 }
 
-void LLFloaterIMContainerView::setMinimized(BOOL b)
-{
-	bool was_minimized = isMinimized();
-	LLMultiFloater::setMinimized(b);
-
-	//Switching from minimized to un-minimized
-	if(was_minimized && !b)
-	{
-		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(mSelectedSession);
-
-		if(session_floater && !session_floater->isTornOff())
-		{
-			//When in DND mode, remove stored IM notifications
-			//Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
-			if(gAgent.isDoNotDisturb() && mSelectedSession.notNull())
-			{
-				LLDoNotDisturbNotificationStorage::getInstance()->removeNotification(LLDoNotDisturbNotificationStorage::toastName, mSelectedSession);
-			}
-		}
-	}
-}
+//void LLFloaterIMContainerView::setMinimized(BOOL b)
+//{
+//	bool was_minimized = isMinimized();
+//	LLMultiFloater::setMinimized(b);
+//
+//	//Switching from minimized to un-minimized
+//	if(was_minimized && !b)
+//	{
+//		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(mSelectedSession);
+//
+//		if(session_floater && !session_floater->isTornOff())
+//		{
+//			//When in DND mode, remove stored IM notifications
+//			//Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
+//			if(gAgent.isDoNotDisturb() && mSelectedSession.notNull())
+//			{
+//				LLDoNotDisturbNotificationStorage::getInstance()->removeNotification(LLDoNotDisturbNotificationStorage::toastName, mSelectedSession);
+//			}
+//		}
+//	}
+//}
 
 void LLFloaterIMContainerView::setVisible(BOOL visible)
 {	LLFloaterIMNearbyChat* nearby_chat;
@@ -659,18 +668,27 @@ void LLFloaterIMContainerView::setVisible(BOOL visible)
 	}
 	
 	// Now, do the normal multifloater show/hide
-	LLMultiFloater::setVisible(visible);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::setVisible(visible);
+// [/SL:KB]
+//	LLMultiFloater::setVisible(visible);
 }
 
 void LLFloaterIMContainerView::setVisibleAndFrontmost(BOOL take_focus, const LLSD& key)
 {
-	LLMultiFloater::setVisibleAndFrontmost(take_focus, key);
+//	LLMultiFloater::setVisibleAndFrontmost(take_focus, key);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::setVisibleAndFrontmost(take_focus, key);
+// [/SL:KB]
     selectConversationPair(getSelectedSession(), false, take_focus);
 }
 
 void LLFloaterIMContainerView::updateResizeLimits()
 {
-	LLMultiFloater::updateResizeLimits();
+//	LLMultiFloater::updateResizeLimits();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::updateResizeLimits();
+// [/SL:KB]
 	assignResizeLimits();
 }
 
@@ -1411,7 +1429,10 @@ void LLFloaterIMContainerView::selectNextConversationByID(const LLUUID& uuid)
 }
 
 // Synchronous select the conversation item and the conversation floater
-BOOL LLFloaterIMContainerView::selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater/*=true*/)
+//BOOL LLFloaterIMContainerView::selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater/*=true*/)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+bool LLFloaterIMContainerView::selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater/*=true*/)
+// [/SL:KB]
 {
     BOOL handled = TRUE;
     LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
@@ -2022,7 +2043,10 @@ void LLFloaterIMContainerView::closeFloater(bool app_quitting/* = false*/)
 	// Most of the time the user will never see this state.
 	if(isMinimized())
 	{
-		LLMultiFloater::setMinimized(FALSE);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+		LLFloaterIMContainerBase::setMinimized(FALSE);
+// [/SL:KB]
+//		LLMultiFloater::setMinimized(FALSE);
 	}
 	
 	LLFloater::closeFloater(app_quitting);

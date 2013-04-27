@@ -55,10 +55,18 @@ public:
 	LLFloaterIMContainerBase(const LLSD& seed, const Params& params = getDefaultParams());
 	virtual ~LLFloaterIMContainerBase();
 
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void setMinimized(BOOL b);
+	            void onCloseFloater(LLUUID& id);
+
+	/*virtual*/ void addFloater(LLFloater* floaterp, 
+								BOOL select_added_floater, 
+								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+
 	virtual void showConversation(const LLUUID& session_id) = 0;
     virtual void selectConversation(const LLUUID& session_id) = 0;
 	virtual void selectNextConversationByID(const LLUUID& session_id) = 0;
-	virtual BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
+	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual bool selectAdjacentConversation(bool focus_selected) = 0;
 	virtual bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true) = 0;
 	virtual void expandConversation() = 0;
@@ -70,9 +78,9 @@ public:
 
 	virtual void collapseMessagesPane(bool collapse) = 0;
 
-	virtual LLUUID getSelectedSession() const = 0;
-	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) = 0;
-	virtual LLConversationSort& getSortOrder() = 0;
+	virtual const LLUUID& getSelectedSession() const = 0;
+	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) const = 0;
+	virtual const LLConversationSort& getSortOrder() const = 0;
 
 	virtual void onNearbyChatClosed() = 0;
 
@@ -83,7 +91,13 @@ public:
     virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS) = 0;
 
 private:
-    /*virtual*/ void doToSelected(const LLSD& userdata);
+	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
+	avatarID_panel_map_t mSessions;
+	boost::signals2::connection mNewMessageConnection;
+
+	void onNewMessageReceived(const LLSD& data);
+protected:
+	avatarID_panel_map_t& getSessionMap() { return mSessions; }
 
 public:
 	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
