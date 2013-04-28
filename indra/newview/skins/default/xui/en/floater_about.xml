@@ -9,7 +9,6 @@
  positioning="centered"
  save_rect="true"
  save_visibility="false"
- single_instance="true"
  title="ABOUT [CAPITALIZED_APP_NAME]"
  width="580">
   <floater.string
