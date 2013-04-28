@@ -4093,7 +4093,7 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
 //BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picker)
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callback_t& cb, bool force_picker)
+void LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker)
 // [/SL:KB]
 {
 	if (!image)
@@ -4207,7 +4207,7 @@ void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callbac
 
 //void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, const save_image_callback_t& cb)
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
-void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::string& filepath, bool force_picker, const save_image_callback_t& cb)
+void LLViewerWindow::saveImageCallback(LLPointer<LLImageFormatted> image, const std::string& filepath, bool force_picker, const save_image_callback_t& cb)
 // [/SL:KB]
 {
 	if (!filepath.empty())

@@ -345,7 +345,7 @@ public:
 //	BOOL		    saveImageNumbered(LLImageFormatted *image, bool force_picker = false);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	typedef boost::function<void(bool)> save_image_callback_t;
-	void		    saveImage(LLImageFormatted* image, const save_image_callback_t& cb, bool force_picker = false);
+	void		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker = false);
 // [/SL:KB]
 
 //	// Reset the directory where snapshots are saved.
@@ -408,7 +408,7 @@ private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	void		    saveImageCallback(LLImageFormatted* image, const std::string& filename, bool force_picker, const save_image_callback_t& cb);
+	void		    saveImageCallback(LLPointer<LLImageFormatted> image, const std::string& filename, bool force_picker, const save_image_callback_t& cb);
 	static void		saveImageNumbered(LLImageFormatted* image, const std::string& path, std::string base_name, const save_image_callback_t& cb);
 // [/SL:KB]
 
