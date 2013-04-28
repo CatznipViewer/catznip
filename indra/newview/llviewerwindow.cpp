@@ -4099,8 +4099,11 @@ void LLViewerWindow::saveImage(LLImageFormatted* image, const save_image_callbac
 	if (!image)
 	{
 		llwarns << "No image to save" << llendl;
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		cb(false);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-04-28 (Catznip-3.4)
+		if (!cb.empty())
+		{
+			cb(false);
+		}
 		return;
 // [/SL:KB]
 //		return FALSE;
@@ -4226,7 +4229,13 @@ void LLViewerWindow::saveImageCallback(LLImageFormatted* image, const std::strin
 	}
 	else
 	{
-		cb(false);
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2013-04-28 (Catznip-3.4)
+		if (!cb.empty())
+		{
+			cb(false);
+		}
+// [/SL:KB]
+//		cb(false);
 	}
 }
 
@@ -4236,7 +4245,10 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 	if (!image)
 	{
 		llwarns << "No image to save" << llendl;
-		cb(false);
+		if (!cb.empty())
+		{
+			cb(false);
+		}
 		return;
 	}
 // [/SL:KB]
@@ -4282,7 +4294,10 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 	llinfos << "Saving snapshot to " << filepath << llendl;
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	bool fSuccess = image->save(filepath);
-	cb(fSuccess);
+	if (!cb.empty())
+	{
+		cb(fSuccess);
+	}
 // [/SL:KB]
 //	return image->save(filepath);
 }
