@@ -74,6 +74,9 @@ public:
 	// show/hide the translation check box
 	void showTranslationCheckbox(const BOOL visible = FALSE);
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	const LLUUID& getSessionID() const { return mSessionID; }
+// [/SL:KB]
 	bool isNearbyChat() {return mIsNearbyChat;}
 
 	// LLFloater overrides

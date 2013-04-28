@@ -276,11 +276,14 @@ void LLFloaterIMContainerView::onOpen(const LLSD& key)
 	assignResizeLimits();
 }
 
-//// virtual
-//void LLFloaterIMContainerView::addFloater(LLFloater* floaterp,
-//									  BOOL select_added_floater,
-//									  LLTabContainer::eInsertionPoint insertion_point)
-//{
+// virtual
+void LLFloaterIMContainerView::addFloater(LLFloater* floaterp,
+									  BOOL select_added_floater,
+									  LLTabContainer::eInsertionPoint insertion_point)
+{
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::addFloater(floaterp, select_added_floater, insertion_point);
+// [/SL:KB]
 //	if(!floaterp) return;
 //
 //	// already here
@@ -319,13 +322,13 @@ void LLFloaterIMContainerView::onOpen(const LLSD& key)
 //		mSessions[session_id] = floaterp;
 //		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerView::onCloseFloater, this, session_id));
 //	}
-//
-//	// forced resize of the floater
-//	LLRect wrapper_rect = this->mTabContainer->getLocalRect();
-//	floaterp->setRect(wrapper_rect);
-//
+
+	// forced resize of the floater
+	LLRect wrapper_rect = this->mTabContainer->getLocalRect();
+	floaterp->setRect(wrapper_rect);
+
 //	mTabContainer->setTabImage(floaterp, icon);
-//}
+}
 
 //void LLFloaterIMContainerView::onCloseFloater(LLUUID& id)
 //{

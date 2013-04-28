@@ -72,9 +72,9 @@ public:
 	/*virtual*/ void updateResizeLimits();
 //	void onCloseFloater(LLUUID& id);
 
-//	/*virtual*/ void addFloater(LLFloater* floaterp, 
-//								BOOL select_added_floater, 
-//								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+	/*virtual*/ void addFloater(LLFloater* floaterp, 
+								BOOL select_added_floater, 
+								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	void returnFloaterToHost();
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	/*virtual*/ void showConversation(const LLUUID& session_id);

@@ -27,26 +27,10 @@
 #ifndef LL_LLFLOATERIMCONTAINERBASE_H
 #define LL_LLFLOATERIMCONTAINERBASE_H
 
-#include <map>
-#include <vector>
+#include "llmultifloater.h"
 
-#include "llimview.h"
-#include "llevents.h"
-#include "../llui/llfloater.h"
-#include "../llui/llmultifloater.h"
-#include "llavatarpropertiesprocessor.h"
-#include "llgroupmgr.h"
-#include "../llui/lltrans.h"
-#include "llconversationmodel.h"
-#include "llconversationview.h"
-
-class LLButton;
+class LLConversationItem;
 class LLConversationSort;
-class LLLayoutPanel;
-class LLLayoutStack;
-class LLTabContainer;
-class LLSpeaker;
-class LLSpeakerMgr;
 
 class LLFloaterIMContainerBase
 	: public LLMultiFloater
