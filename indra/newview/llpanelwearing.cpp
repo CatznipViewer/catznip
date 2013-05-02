@@ -30,6 +30,9 @@
 
 #include "lltoggleablemenu.h"
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-05-01 (Catznip-3.4)
+#include "llagent.h"
+// [/SL:KB]
 #include "llappearancemgr.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llinventoryfunctions.h"
@@ -45,6 +48,7 @@
 #include "llinventorypanel.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
+#include "llviewerregion.h"
 #include "llviewerwearable.h"
 #include "llvoavatarself.h"
 // [/SL:KB]
@@ -115,7 +119,19 @@ LLWornListItem* LLWornListItem::create(LLViewerInventoryItem* pItem)
 
 void LLWornListItem::onMoveWearable(bool fDown)
 {
+	bool fCentralBaking = (gAgent.getRegion()) && (gAgent.getRegion()->getCentralBakeVersion());
+	if ( (fCentralBaking) && (isAgentAvatarValid()) )
+	{
+		gAgentAvatarp->setUsingLocalAppearance();
+	}
+
 	LLAppearanceMgr::getInstance()->moveWearable(getItem(), fDown, true);
+	LLAppearanceMgr::getInstance()->updateIsDirty();
+	
+	if (fCentralBaking)
+	{
+		LLAppearanceMgr::getInstance()->requestServerAppearanceUpdate();
+	}
 }
 
 S32 LLWornListItem::notify(const LLSD& sdInfo)
