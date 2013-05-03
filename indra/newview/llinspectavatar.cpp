@@ -141,13 +141,9 @@ private:
 	bool onVisibleEject();
 	bool onVisibleFreeze();
 	bool onVisibleZoomIn();
-	bool enableMute();
-	bool enableUnmute();
-	bool enableTeleportOffer();
-	bool godModeEnabled();
-	
-	// Is used to determine if "Add friend" option should be enabled in gear menu
-	bool isNotFriend();
+	bool enableAddFriend() const;
+	bool enableMute(bool fCheckMute) const;
+	bool enableTeleportOffer() const;
 // [/SL:KB]
 	
 	void onAvatarNameCache(const LLUUID& agent_id,
@@ -234,15 +230,15 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mCommitCallbackRegistrar.add("InspectAvatar.DisableVoice",  boost::bind(&LLInspectAvatar::toggleSelectedVoice, this, false));
 	mCommitCallbackRegistrar.add("InspectAvatar.EnableVoice",   boost::bind(&LLInspectAvatar::toggleSelectedVoice, this, true));
 	
+	mEnableCallbackRegistrar.add("InspectAvatar.VisibleAddFriend", boost::bind(&LLInspectAvatar::enableAddFriend, this));
+	mEnableCallbackRegistrar.add("InspectAvatar.VisibleCall",   boost::bind(&LLAvatarActions::canCall));
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFindOnMap", boost::bind(&LLInspectAvatar::onVisibleFindOnMap, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleEject",  boost::bind(&LLInspectAvatar::onVisibleEject, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFreeze", boost::bind(&LLInspectAvatar::onVisibleFreeze, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleZoomIn", boost::bind(&LLInspectAvatar::onVisibleZoomIn, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.Gear.Enable",   boost::bind(&LLInspectAvatar::isNotFriend, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.Gear.EnableCall", boost::bind(&LLAvatarActions::canCall));
-	mEnableCallbackRegistrar.add("InspectAvatar.Gear.EnableTeleportOffer", boost::bind(&LLInspectAvatar::enableTeleportOffer, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableMute",    boost::bind(&LLInspectAvatar::enableMute, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableUnmute",  boost::bind(&LLInspectAvatar::enableUnmute, this));
+	mEnableCallbackRegistrar.add("InspectAvatar.EnableTeleport",boost::bind(&LLInspectAvatar::enableTeleportOffer, this));
+	mEnableCallbackRegistrar.add("InspectAvatar.EnableMute",    boost::bind(&LLInspectAvatar::enableMute, this, true));
+	mEnableCallbackRegistrar.add("InspectAvatar.EnableUnmute",  boost::bind(&LLInspectAvatar::enableMute, this, false));
 // [/SL:KB]
 
 	// can't make the properties request until the widgets are constructed
@@ -331,6 +327,7 @@ void LLInspectAvatar::onOpen(const LLSD& data)
 // virtual
 void LLInspectAvatar::onClose(bool app_quitting)
 {  
+	getChild<LLMenuButton>("gear_self_btn")->hideMenu();
 	getChild<LLMenuButton>("gear_btn")->hideMenu();
 }	
 // [/SL:KB]
@@ -438,13 +435,13 @@ void LLInspectAvatar::onMouseLeave(S32 x, S32 y, MASK mask)
 {
 	LLToggleableMenu* gear_menu = getChild<LLMenuButton>("gear_btn")->getMenu();
 	LLToggleableMenu* gear_menu_self = getChild<LLMenuButton>("gear_self_btn")->getMenu();
-	if ( gear_menu && gear_menu->getVisible() &&
-		 gear_menu_self && gear_menu_self->getVisible() )
+
+	if ( (gear_menu) && (gear_menu->getVisible()) || (gear_menu_self) && (gear_menu_self->getVisible()) )
 	{
 		return;
 	}
 
-	if(childHasVisiblePopupMenu())
+	if (childHasVisiblePopupMenu())
 	{
 		return;
 	}
@@ -456,8 +453,7 @@ void LLInspectAvatar::updateModeratorPanel()
 {
 	bool enable_moderator_panel = false;
 
-    if (LLVoiceChannel::getCurrentVoiceChannel() &&
-		mAvatarID != gAgent.getID())
+    if ( (LLVoiceChannel::getCurrentVoiceChannel()) && (mAvatarID != gAgent.getID()) )
     {
 		LLUUID session_id = LLVoiceChannel::getCurrentVoiceChannel()->getSessionID();
 
@@ -672,7 +668,7 @@ void LLInspectAvatar::onAvatarNameCache(
 // [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
 void LLInspectAvatar::onClickAddFriend()
 {
-	LLAvatarActions::requestFriendshipDialog(mAvatarID, mAvatarName.getLegacyName());
+	LLAvatarActions::requestFriendshipDialog(mAvatarID, mAvatarName.getCompleteName());
 	closeFloater();
 }
 
@@ -682,26 +678,24 @@ void LLInspectAvatar::onClickViewProfile()
 	closeFloater();
 }
 
-bool LLInspectAvatar::isNotFriend()
+bool LLInspectAvatar::enableAddFriend() const
 {
 	return !LLAvatarActions::isFriend(mAvatarID);
 }
 
 bool LLInspectAvatar::onVisibleFindOnMap()
 {
-	return gAgent.isGodlike() || is_agent_mappable(mAvatarID);
+	return is_agent_mappable(mAvatarID);
 }
 
 bool LLInspectAvatar::onVisibleEject()
 {
-	return enable_freeze_eject( LLSD(mAvatarID) );
+	return enable_freeze_eject(LLSD(mAvatarID));
 }
 
 bool LLInspectAvatar::onVisibleFreeze()
 {
-	// either user is a god and can do long distance freeze
-	// or check for target proximity and permissions
-	return gAgent.isGodlike() || enable_freeze_eject(LLSD(mAvatarID));
+	return enable_freeze_eject(LLSD(mAvatarID));
 }
 
 bool LLInspectAvatar::onVisibleZoomIn()
@@ -747,18 +741,8 @@ void LLInspectAvatar::onClickShare()
 
 void LLInspectAvatar::onToggleMute()
 {
-	LLMute mute(mAvatarID, mAvatarName.getDisplayName(), LLMute::AGENT);
-
-	if (LLMuteList::getInstance()->isMuted(mute.mID, mute.mName))
-	{
-		LLMuteList::getInstance()->remove(mute);
-	}
-	else
-	{
-		LLMuteList::getInstance()->add(mute);
-	}
-
-	LLPanelBlockedList::showPanelAndSelect(mute.mID);
+	LLAvatarActions::toggleBlock(mAvatarID);
+	LLPanelBlockedList::showPanelAndSelect(mAvatarID);
 	closeFloater();
 }
 
@@ -768,41 +752,9 @@ void LLInspectAvatar::onClickReport()
 	closeFloater();
 }
 
-bool godlike_freeze(const LLSD& notification, const LLSD& response)
-{
-	LLUUID avatar_id = notification["payload"]["avatar_id"].asUUID();
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-
-	switch (option)
-	{
-	case 0:
-		LLAvatarActions::freeze(avatar_id);
-		break;
-	case 1:
-		LLAvatarActions::unfreeze(avatar_id);
-		break;
-	default:
-		break;
-	}
-
-	return false;
-}
-
 void LLInspectAvatar::onClickFreeze()
 {
-	if (gAgent.isGodlike())
-	{
-		// use godlike freeze-at-a-distance, with confirmation
-		LLNotificationsUtil::add("FreezeAvatar",
-			LLSD(),
-			LLSD().with("avatar_id", mAvatarID),
-			godlike_freeze);
-	}
-	else
-	{
-		// use default "local" version of freezing that requires avatar to be in range
-		handle_avatar_freeze( LLSD(mAvatarID) );
-	}
+	handle_avatar_freeze(LLSD(mAvatarID));
 	closeFloater();
 }
 
@@ -824,44 +776,14 @@ void LLInspectAvatar::onClickFindOnMap()
 	LLFloaterReg::showInstance("world_map");
 }
 
-bool LLInspectAvatar::enableMute()
+bool LLInspectAvatar::enableMute(bool fCheckMute) const
 {
-		bool is_linden = LLStringUtil::endsWith(mAvatarName.getLegacyName(), " Linden");
-		bool is_self = mAvatarID == gAgent.getID();
-
-		if (!is_linden && !is_self && !LLMuteList::getInstance()->isMuted(mAvatarID, mAvatarName.getLegacyName()))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+	return (fCheckMute) ? LLAvatarActions::canBlock(mAvatarID) : LLAvatarActions::isBlocked(mAvatarID);
 }
 
-bool LLInspectAvatar::enableUnmute()
-{
-		bool is_linden = LLStringUtil::endsWith(mAvatarName.getLegacyName(), " Linden");
-		bool is_self = mAvatarID == gAgent.getID();
-
-		if (!is_linden && !is_self && LLMuteList::getInstance()->isMuted(mAvatarID, mAvatarName.getLegacyName()))
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-}
-
-bool LLInspectAvatar::enableTeleportOffer()
+bool LLInspectAvatar::enableTeleportOffer() const
 {
 	return LLAvatarActions::canOfferTeleport(mAvatarID);
-}
-
-bool LLInspectAvatar::godModeEnabled()
-{
-	return gAgent.isGodlike();
 }
 // [/SL:KB]
 

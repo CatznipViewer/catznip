@@ -17,8 +17,8 @@
      name="add_friend">
         <menu_item_call.on_click
          function="InspectAvatar.AddFriend"/>
-        <menu_item_call.on_enable
-         function="InspectAvatar.Gear.Enable"/>
+        <menu_item_call.on_visible
+         function="InspectAvatar.VisibleAddFriend"/>
     </menu_item_call>
     <menu_item_call
      label="IM"
@@ -32,8 +32,14 @@
      name="call">
         <menu_item_call.on_click
          function="InspectAvatar.Call"/>
-        <menu_item_call.on_enable
-         function="InspectAvatar.Gear.EnableCall"/>
+        <menu_item_call.on_visible
+         function="InspectAvatar.VisibleCall"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Pay"
+     name="pay">
+        <menu_item_call.on_click
+         function="InspectAvatar.Pay"/>
     </menu_item_call>
     <menu_item_call
      label="Teleport"
@@ -41,7 +47,59 @@
         <menu_item_call.on_click
          function="InspectAvatar.Teleport"/>
         <menu_item_call.on_enable
-         function="InspectAvatar.Gear.EnableTeleportOffer"/>
+         function="InspectAvatar.EnableTeleport"/>
+    </menu_item_call>
+    <menu_item_separator />
+    <context_menu
+     label="Manage"
+     layout="topleft"
+     name="Manage &gt;">
+        <menu_item_call
+         label="Block"
+         name="block">
+            <menu_item_call.on_click
+             function="InspectAvatar.ToggleMute"/>
+            <menu_item_call.on_visible
+             function="InspectAvatar.EnableMute" />
+        </menu_item_call>
+        <menu_item_call
+         label="Unblock"
+         name="unblock">
+            <menu_item_call.on_click
+             function="InspectAvatar.ToggleMute"/>
+            <menu_item_call.on_visible
+             function="InspectAvatar.EnableUnmute" />
+        </menu_item_call>
+        <menu_item_call
+         label="Report"
+         name="report">
+            <menu_item_call.on_click
+             function="InspectAvatar.Report"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Freeze"
+         name="freeze">
+            <menu_item_call.on_click
+             function="InspectAvatar.Freeze"/>
+            <menu_item_call.on_visible
+             function="InspectAvatar.VisibleFreeze"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Eject"
+         name="eject">
+            <menu_item_call.on_click
+             function="InspectAvatar.Eject"/>
+            <menu_item_call.on_visible
+             function="InspectAvatar.VisibleEject"/>
+        </menu_item_call>
+    </context_menu>
+    <menu_item_call
+     label="Find On Map"
+     name="find_on_map">
+        <menu_item_call.on_click
+         function="InspectAvatar.FindOnMap"/>
+        <menu_item_call.on_visible
+         function="InspectAvatar.VisibleFindOnMap"/>
     </menu_item_call>
     <menu_item_call
      label="Invite to Group"
@@ -49,45 +107,14 @@
         <menu_item_call.on_click
          function="InspectAvatar.InviteToGroup"/>
     </menu_item_call>
-    <menu_item_separator />
     <menu_item_call
-     label="Block"
-     name="block">
+     label="Zoom In"
+     name="zoom_in">
         <menu_item_call.on_click
-         function="InspectAvatar.ToggleMute"/>
+         function="InspectAvatar.ZoomIn"/>
         <menu_item_call.on_visible
-         function="InspectAvatar.EnableMute" />
-    </menu_item_call>
-    <menu_item_call
-     label="Unblock"
-     name="unblock">
-        <menu_item_call.on_click
-         function="InspectAvatar.ToggleMute"/>
-        <menu_item_call.on_visible
-         function="InspectAvatar.EnableUnmute" />
-    </menu_item_call>
-    <menu_item_call
-     label="Report"
-     name="report">
-        <menu_item_call.on_click
-         function="InspectAvatar.Report"/>
+         function="InspectAvatar.VisibleZoomIn"/>
     </menu_item_call>  
-    <menu_item_call
-     label="Freeze"
-     name="freeze">
-        <menu_item_call.on_click
-         function="InspectAvatar.Freeze"/>
-        <menu_item_call.on_visible
-         function="InspectAvatar.VisibleFreeze"/>
-    </menu_item_call>
-    <menu_item_call
-     label="Eject"
-     name="eject">
-        <menu_item_call.on_click
-         function="InspectAvatar.Eject"/>
-        <menu_item_call.on_visible
-         function="InspectAvatar.VisibleEject"/>
-    </menu_item_call>
     <menu_item_call
      label="Debug Textures"
      name="debug">
@@ -103,33 +130,5 @@
          function="Advanced.AppearanceToXML" />
         <menu_item_call.on_visible
          function="Advanced.EnableAppearanceToXML"/>
-    </menu_item_call>
-    <menu_item_call
-     label="Find On Map"
-     name="find_on_map">
-        <menu_item_call.on_click
-         function="InspectAvatar.FindOnMap"/>
-        <menu_item_call.on_visible
-         function="InspectAvatar.VisibleFindOnMap"/>
-    </menu_item_call>
-    <menu_item_call
-     label="Zoom In"
-     name="zoom_in">
-        <menu_item_call.on_click
-         function="InspectAvatar.ZoomIn"/>
-        <menu_item_call.on_visible
-         function="InspectAvatar.VisibleZoomIn"/>
-    </menu_item_call>  
-    <menu_item_call
-     label="Pay"
-     name="pay">
-        <menu_item_call.on_click
-         function="InspectAvatar.Pay"/>
-    </menu_item_call>
-    <menu_item_call
-     label="Share"
-     name="share">
-        <menu_item_call.on_click
-         function="InspectAvatar.Share"/>
     </menu_item_call>
 </toggleable_menu>
