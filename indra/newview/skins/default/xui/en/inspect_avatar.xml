@@ -180,33 +180,4 @@
      right="-5"
      top_delta="0"
      width="35" />
-    <panel 
-     background_opaque="true" 
-     background_visible="true"
-     bg_opaque_color="MouseGray"
-     follows="top|left" 
-     height="60" 
-     left="0" 
-     name="moderator_panel"
-     top="164" 
-     visible="false"
-     width="228">
-        <button
-         commit_callback.function="InspectAvatar.DisableVoice"
-         height="20"
-         label="Disable Voice"
-         left="10"
-         name="disable_voice"
-         top="20"
-         width="95" />
-        <button
-         commit_callback.function="InspectAvatar.EnableVoice"
-         height="20"
-         label="Enable Voice"
-         left="10"
-         name="enable_voice"
-         top="20"
-         visible="false" 
-         width="95" />
-    </panel>
 </floater>
