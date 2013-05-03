@@ -83,9 +83,6 @@
 #include "llerror.h"
 #include "llfontgl.h"
 #include "llrect.h"
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a)
-#include "llsdserialize.h"
-// [/SL:KB]
 #include "llstring.h"
 
 // project includes
@@ -2416,11 +2413,15 @@ BOOL LLPanelPreferenceSkins::postBuild()
 {
 	m_pSkinCombo = getChild<LLComboBox>("skin_combobox");
 	if (m_pSkinCombo)
+	{
 		m_pSkinCombo->setCommitCallback(boost::bind(&LLPanelPreferenceSkins::onSkinChanged, this));
+	}
 
 	m_pSkinThemeCombo = getChild<LLComboBox>("theme_combobox");
 	if (m_pSkinThemeCombo)
+	{
 		m_pSkinThemeCombo->setCommitCallback(boost::bind(&LLPanelPreferenceSkins::onSkinThemeChanged, this));
+	}
 
 	refreshSkinList();
 

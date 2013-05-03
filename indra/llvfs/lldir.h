@@ -53,7 +53,7 @@ typedef enum ELLPath
 	LL_PATH_EXECUTABLE = 16,
 	LL_PATH_DEFAULT_SKIN = 17,
 	LL_PATH_FONTS = 18,
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.4)
 	LL_PATH_TOP_SKINTHEME = 19,
 // [/SL:KB]
 	LL_PATH_LAST
@@ -103,7 +103,7 @@ class LLDir
 	const std::string &getDirDelimiter() const;	// directory separator for platform (ie. '\' or '/' or ':')
 	const std::string &getDefaultSkinDir() const;	// folder for default skin. e.g. c:\program files\second life\skins\default
 	const std::string &getSkinDir() const;		// User-specified skin folder.
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2)
 	const std::string &getSkinThemeDir() const;		// User-specified skin theme override folder.
 // [/SL:KB]
 	const std::string &getUserDefaultSkinDir() const; // dir with user modifications to default skin
@@ -251,7 +251,7 @@ protected:
 	std::string mSkinBaseDir;			// Base for skins paths.
 	std::string mDefaultSkinDir;			// Location for default skin info.
 	std::string mSkinDir;			// Location for current skin info.
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-2.2)
 	std::string mSkinThemeDir;		// Location for current skin theme override
 // [/SL:KB]
 	std::string mUserDefaultSkinDir;		// Location for default skin info.

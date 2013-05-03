@@ -2103,7 +2103,7 @@ bool LLTextBase::useLabel()
 
 void LLTextBase::setFont(const LLFontGL* font)
 {
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2)
 	for(segment_set_t::iterator itSegment = mSegments.begin(); itSegment != mSegments.end(); ++itSegment)
 	{
 		LLTextSegmentPtr segment = *itSegment;
@@ -3434,7 +3434,8 @@ F32	LLLineBreakTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 se
 {
 	return  draw_rect.mLeft;
 }
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2)
 void LLLineBreakTextSegment::setStyle(LLStyleConstSP style)
 {
 	mFontHeight = llceil(style->getFont()->getLineHeight());

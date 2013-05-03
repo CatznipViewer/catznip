@@ -100,7 +100,7 @@ private:
 	LLFontGL *createFont(const LLFontDescriptor& desc);
 	typedef std::map<LLFontDescriptor,LLFontGL*> font_reg_map_t;
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
-	typedef std::map<std::pair<std::string,std::string>, F32> font_size_map_t;
+	typedef std::map<std::pair<std::string, std::string>, F32> font_size_map_t;
 // [/SL:KB]
 //	typedef std::map<std::string,F32> font_size_map_t;
 

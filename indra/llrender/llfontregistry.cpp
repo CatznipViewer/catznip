@@ -320,6 +320,7 @@ bool LLFontRegistry::initFromXML(LLXMLNodePtr node)
 			{
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
 				std::string font_name;
+				// The default font size will be stored under an empty string; named fonts can specify their own custom sizes
 				if ( (!child->hasAttribute("font")) || (child->getAttributeString("font", font_name)) )
 				{
 					mFontSizes[std::pair<std::string, std::string>(font_name, size_name)] = size_value;

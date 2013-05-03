@@ -471,7 +471,7 @@ std::string LLDir::getExpandedFilename(ELLPath location, const std::string& subd
 		prefix = getSkinDir();
 		break;
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-19 (Catznip-2.4)
 	case LL_PATH_TOP_SKINTHEME:
 		prefix = getSkinThemeDir();
 		break;
@@ -986,7 +986,7 @@ void LLDir::dumpCurrentDirectories()
 	LL_DEBUGS2("AppInit","Directories") << "  CAFile:				 " << getCAFile() << LL_ENDL;
 	LL_DEBUGS2("AppInit","Directories") << "  SkinBaseDir:           " << getSkinBaseDir() << LL_ENDL;
 	LL_DEBUGS2("AppInit","Directories") << "  SkinDir:               " << getSkinDir() << LL_ENDL;
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2011-02-14 (Catznip-2.5)
 	LL_DEBUGS2("AppInit","Directories") << "  SkinThemeDir:          " << getSkinThemeDir() << LL_ENDL;
 // [/SL:KB]
 }

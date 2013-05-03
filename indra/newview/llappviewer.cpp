@@ -2633,9 +2633,15 @@ bool LLAppViewer::initConfiguration()
 		// logic. Unfortunately LLUI::getLanguage() doesn't yet do us much
 		// good because we haven't yet called LLUI::initClass().
 // [SL:KB] - Patch: Viewer-Skins | Checked: 2012-12-26 (Catznip-3.4)
+		const LLControlVariable* themefolder = gSavedSettings.getControl("SkinCurrentTheme");
  		gDirUtilp->setSkinFolder(skinfolder->getValue().asString(),
-								 gSavedSettings.getString("SkinCurrentTheme"),
+								 (themefolder) ? themefolder->getValue().asString() : "",
  								 gSavedSettings.getString("Language"));
+		loadSettingsFromDirectory("CurrentSkin");
+		if ( (themefolder) && (LLStringUtil::null != themefolder->getValue().asString()) )
+		{
+			loadSettingsFromDirectory("CurrentSkinTheme");
+		}
 // [/SL:KB]
 //		gDirUtilp->setSkinFolder(skinfolder->getValue().asString(),
 //								 gSavedSettings.getString("Language"));

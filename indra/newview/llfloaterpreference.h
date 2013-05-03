@@ -46,7 +46,7 @@ class LLScrollListCtrl;
 class LLSliderCtrl;
 class LLSD;
 class LLTextBox;
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2)
 class LLComboBox;
 // [/SL:KB]
 
@@ -285,7 +285,7 @@ private:
 
 };
 
-// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-3.0.0a) | Added: Catznip-2.2.0c
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2)
 class LLPanelPreferenceSkins : public LLPanelPreference
 {
 public:
