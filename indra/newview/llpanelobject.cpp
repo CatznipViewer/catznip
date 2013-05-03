@@ -49,6 +49,9 @@
 #include "llcolorswatch.h"
 #include "llcombobox.h"
 #include "llfocusmgr.h"
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2013-05-02 (Catznip-3.4)
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llmanipscale.h"
 #include "llpreviewscript.h"
 #include "llresmgr.h"
@@ -2173,7 +2176,12 @@ LLSD LLPanelObject::objectToLLSD(const std::string& strParamType, const LLViewer
 		if (LL_PCODE_VOLUME == pObj->getPCode())
 		{
 			if (pObj->getParameterEntryInUse(LLNetworkData::PARAMS_SCULPT))
-				sdParams["sculpt"] = ((LLSculptParams*)pObj->getParameterEntry(LLNetworkData::PARAMS_SCULPT))->asLLSD();
+			{
+				const LLSculptParams* pSculptParams = (LLSculptParams*)pObj->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+				if ( (!pSculptParams) || (find_item_from_asset(pSculptParams->getSculptTexture(), TRUE).isNull()) )
+					return LLSD();
+				sdParams["sculpt"] = pSculptParams->asLLSD();
+			}
 			sdParams["volume"] = pObj->getVolume()->getParams().asLLSD();
 		}
 	}
@@ -2205,7 +2213,7 @@ void LLPanelObject::onClickBtnCopyParams(const LLSD& sdParam)
 
 void LLPanelObject::objectFromLLSD(const std::string& strParamType, const LLSD& sdParams)
 {
-	if (!sdParams.has(strParamType))
+	if ( (!sdParams.has(strParamType)) || (sdParams[strParamType].isUndefined()) )
 		return;
 
 	if ("position" == strParamType)
