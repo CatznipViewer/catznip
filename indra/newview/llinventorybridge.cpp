@@ -176,12 +176,24 @@ LLInvFVBridge::LLInvFVBridge(LLInventoryPanel* inventory,
 	mUUID(uuid), 
 	mRoot(root),
 	mInvType(LLInventoryType::IT_NONE),
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	mFolderType(LLFolderType::FT_INVALID),
+// [/SL:KB]
 	mIsLink(FALSE),
 	LLFolderViewModelItemInventory(inventory->getRootViewModel())
 {
 	mInventoryPanel = inventory->getInventoryPanelHandle();
 	const LLInventoryObject* obj = getInventoryObject();
 	mIsLink = obj && obj->getIsLinkType();
+
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	if ( (obj) && (LLAssetType::AT_CATEGORY == obj->getType()) )
+	{
+		const LLInventoryCategory* cat = dynamic_cast<const LLInventoryCategory*>(obj);
+		if (cat)
+			mFolderType = cat->getPreferredType();
+	}
+// [/SL:KB]
 }
 
 const std::string& LLInvFVBridge::getName() const
@@ -3020,15 +3032,51 @@ void LLFolderBridge::restoreItem()
 
 LLFolderType::EType LLFolderBridge::getPreferredType() const
 {
-	LLFolderType::EType preferred_type = LLFolderType::FT_NONE;
-	LLViewerInventoryCategory* cat = getCategory();
-	if(cat)
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	if (LLFolderType::FT_INVALID == mFolderType)
 	{
-		preferred_type = cat->getPreferredType();
+		const LLViewerInventoryCategory* pCat = getCategory();
+		if (pCat)
+		{
+			mFolderType = pCat->getPreferredType();
+		}
+		else
+		{
+			return LLFolderType::FT_NONE;
+		}
 	}
-
-	return preferred_type;
+	return mFolderType;
+// [/SL:KB]
+//	LLFolderType::EType preferred_type = LLFolderType::FT_NONE;
+//	LLViewerInventoryCategory* cat = getCategory();
+//	if(cat)
+//	{
+//		preferred_type = cat->getPreferredType();
+//	}
+//
+//	return preferred_type;
 }
+
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+std::string LLFolderBridge::getLabelSuffix() const
+{
+	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
+	{
+		// e.g. "(worn)" 
+		return LLInvFVBridge::getLabelSuffix() + LLTrans::getString("worn");
+	}
+	return LLInvFVBridge::getLabelSuffix();
+}
+
+LLFontGL::StyleFlags LLFolderBridge::getLabelStyle() const
+{
+	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
+	{
+		return LLFontGL::BOLD;
+	}
+	return LLInvFVBridge::getLabelStyle();
+}
+// [/SL:KB]
 
 // Icons for folders are based on the preferred type
 LLUIImagePtr LLFolderBridge::getIcon() const
