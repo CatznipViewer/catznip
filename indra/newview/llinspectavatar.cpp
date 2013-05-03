@@ -135,8 +135,6 @@ private:
 	void onClickReport();
 	void onClickFreeze();
 	void onClickEject();
-	void onClickKick();
-	void onClickCSR();
 	void onClickZoomIn();  
 	void onClickFindOnMap();
 	bool onVisibleFindOnMap();
@@ -230,15 +228,12 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mCommitCallbackRegistrar.add("InspectAvatar.ToggleMute",    boost::bind(&LLInspectAvatar::onToggleMute, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Freeze",        boost::bind(&LLInspectAvatar::onClickFreeze, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Eject",         boost::bind(&LLInspectAvatar::onClickEject, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Kick",          boost::bind(&LLInspectAvatar::onClickKick, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.CSR",           boost::bind(&LLInspectAvatar::onClickCSR, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.Report",        boost::bind(&LLInspectAvatar::onClickReport, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.FindOnMap",     boost::bind(&LLInspectAvatar::onClickFindOnMap, this));	
 	mCommitCallbackRegistrar.add("InspectAvatar.ZoomIn",        boost::bind(&LLInspectAvatar::onClickZoomIn, this));
 	mCommitCallbackRegistrar.add("InspectAvatar.DisableVoice",  boost::bind(&LLInspectAvatar::toggleSelectedVoice, this, false));
 	mCommitCallbackRegistrar.add("InspectAvatar.EnableVoice",   boost::bind(&LLInspectAvatar::toggleSelectedVoice, this, true));
 	
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableGod",     boost::bind(&LLInspectAvatar::godModeEnabled, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFindOnMap", boost::bind(&LLInspectAvatar::onVisibleFindOnMap, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleEject",  boost::bind(&LLInspectAvatar::onVisibleEject, this));	
 	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFreeze", boost::bind(&LLInspectAvatar::onVisibleFreeze, this));	
@@ -814,20 +809,6 @@ void LLInspectAvatar::onClickFreeze()
 void LLInspectAvatar::onClickEject()
 {
 	handle_avatar_eject( LLSD(mAvatarID) );
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickKick()
-{
-	LLAvatarActions::kick(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickCSR()
-{
-	std::string name;
-	gCacheName->getFullName(mAvatarID, name);
-	LLAvatarActions::csr(mAvatarID, name);
 	closeFloater();
 }
 
