@@ -1,8 +1,14 @@
 #List of people to thank
 
+Aya Mactavish
+	Bugs
+	Feedback
 Arrehn Oberlander
 	Linux issues
 Batche Manen
+	Bugs
+	Feedback
+Camille Serpentine
 	Bugs
 	Feedback
 Chloe Constantine
@@ -25,3 +31,9 @@ Razeldine Wirefly
 	Feedback
 Satomi Ahn
 	RLVa
+Trix Braveheart
+	Bugs
+	Feedback
+Vanilla Meili
+	Bugs
+	Feedback
