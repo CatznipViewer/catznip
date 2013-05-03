@@ -15,6 +15,9 @@ Chloe Constantine
 	Bugs
 	Feedback
 	RLVa
+Ebonaku Dragova
+	Bugs
+	Feedback
 Inhandra Birdsong
 	Bugs
 	Feedback
@@ -35,5 +38,8 @@ Trix Braveheart
 	Bugs
 	Feedback
 Vanilla Meili
+	Bugs
+	Feedback
+Whirly Fizzle
 	Bugs
 	Feedback
