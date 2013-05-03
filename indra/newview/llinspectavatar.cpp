@@ -142,6 +142,10 @@ private:
 	LLUUID				mAvatarID;
 	// Need avatar name information to spawn friend add request
 	LLAvatarName		mAvatarName;
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	S32					mDescriptionHeight;
+	S32					mDescriptionHeightExpanded;
+// [/SL:KB]
 	// an in-flight request for avatar properties from LLAvatarPropertiesProcessor
 	// is represented by this object
 	LLFetchAvatarData*	mPropertiesRequest;
@@ -198,6 +202,10 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 :	LLInspect( LLSD() ),	// single_instance, doesn't really need key
 	mAvatarID(),			// set in onOpen()  *Note: we used to show partner's name but we dont anymore --angela 3rd Dec* 
 	mAvatarName(),
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	mDescriptionHeight(-1),
+	mDescriptionHeightExpanded(-1),
+// [/SL:KB]
 	mPropertiesRequest(NULL),
 	mAvatarNameCacheConnection()
 {
@@ -253,6 +261,11 @@ LLInspectAvatar::~LLInspectAvatar()
 BOOL LLInspectAvatar::postBuild(void)
 {
 // [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	const LLRect rctDescription = getChild<LLUICtrl>("user_details")->getRect();
+	const LLRect rctVolume = getChild<LLUICtrl>("volume_slider")->getRect();
+	mDescriptionHeight = rctDescription.getHeight();
+	mDescriptionHeightExpanded = mDescriptionHeight + (rctDescription.mBottom - rctVolume.mBottom);
+
 	getChild<LLUICtrl>("add_friend_btn")->setCommitCallback(
 		boost::bind(&LLInspectAvatar::onClickAddFriend, this) );
 
@@ -444,12 +457,28 @@ void LLInspectAvatar::updateVolumeSlider()
 	{
 		getChild<LLUICtrl>("mute_btn")->setVisible(false);
 		getChild<LLUICtrl>("volume_slider")->setVisible(false);
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+		// TODO-Catznip: find a better way?
+		LLUICtrl* pDescription = getChild<LLUICtrl>("user_details");
+		const LLRect rctDescription = pDescription->getRect();
+		pDescription->reshape(rctDescription.getWidth(), mDescriptionHeightExpanded);
+		pDescription->translate(0, rctDescription.getHeight() - mDescriptionHeightExpanded);
+// [/SL:KB]
 	}
 
 	else 
 	{
 		getChild<LLUICtrl>("mute_btn")->setVisible(true);
 		getChild<LLUICtrl>("volume_slider")->setVisible(true);
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+		// TODO-Catznip: find a better way?
+		LLUICtrl* pDescription = getChild<LLUICtrl>("user_details");
+		const LLRect rctDescription = pDescription->getRect();
+		pDescription->reshape(rctDescription.getWidth(), mDescriptionHeight);
+		pDescription->translate(0, rctDescription.getHeight() - mDescriptionHeight);
+// [/SL:KB]
 
 		// By convention, we only display and toggle voice mutes, not all mutes
 		bool is_muted = LLAvatarActions::isVoiceMuted(mAvatarID);

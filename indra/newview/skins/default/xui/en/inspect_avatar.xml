@@ -35,11 +35,11 @@
   <text
      follows="top|left"
      font="SansSerif"
-     height="20"
+     height="16"
      left="8"
      name="user_name_small"
      parse_urls="false"
-     top="7"
+     top="10"
      text_color="White"
      translate="false"
      use_ellipses="true"
@@ -50,11 +50,11 @@
    <text
     follows="top|left"
     font="SansSerifBigLarge"
-    height="21"
+    height="16"
     left="8"
     name="user_name"
     parse_urls="false"
-    top="10"
+    top="7"
     text_color="White"
     translate="false"
     use_ellipses="true"
@@ -62,35 +62,38 @@
     width="190" />
    <text
      follows="top|left"
-     height="16"
+     height="15"
      left="8"
      name="user_slid"
      font="SansSerifSmallBold"
      parse_urls="false"
      text_color="EmphasisColor"
+     top_pad="2" 
      translate="false"
      value="teststring.pleaseignore"
+     valign="center"
      width="185"
      use_ellipses="true" />
     <text
      follows="top|left"
-     height="16"
+     height="15"
      left="8"
      name="user_subtitle"
      font="SansSerifSmall"
      text_color="White"
      top_pad="0" 
+     valign="center"
      value="11 Months, 3 days old"
      width="175"
      use_ellipses="true" />
      <text
      follows="left|top|right"
-     height="35"
+     height="46"
      left="8"
      name="user_details"
      right="-10"
      word_wrap="true"
-     top_pad="4"
+     top_pad="2"
      use_ellipses="true"
      width="220">This is my second life description and I really think it is great. But for some reason my description is super extra long because I like to talk a whole lot
     </text>
@@ -139,7 +142,7 @@
      label="Add Friend"
      left="8"
      name="add_friend_btn"
-     top="135"
+     top="139"
      width="90" />
     <button
      commit_callback.function="InspectAvatar.IM"
