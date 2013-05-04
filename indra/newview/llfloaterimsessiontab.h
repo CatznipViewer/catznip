@@ -182,8 +182,8 @@ protected:
 	
 	LLButton* mExpandCollapseLineBtn;
 	LLButton* mExpandCollapseBtn;
-	LLButton* mTearOffBtn;
-	LLButton* mCloseBtn;
+//	LLButton* mTearOffBtn;
+//	LLButton* mCloseBtn;
 	LLButton* mGearBtn;
 
 private:

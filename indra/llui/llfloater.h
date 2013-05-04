@@ -344,9 +344,17 @@ public:
 
 	static void		onClickClose(LLFloater* floater);
 	static void		onClickMinimize(LLFloater* floater);
-	static void		onClickTearOff(LLFloater* floater);
+//	static void		onClickTearOff(LLFloater* floater);
 	static void     onClickDock(LLFloater* floater);
 	static void		onClickHelp(LLFloater* floater);
+// [SL:KB] - Patch: Control-FloaterTearOff |  Checked: 2013-05-03 (Catznip-3.5)
+private:
+	// Keep this as protected to catch all outside calls to this function
+	static void		onClickTearOff(LLFloater* floater);
+public:
+	// Naming decided mostly by LLFloaterIMSessionTab to reduce the amount of LL code changes
+	virtual void	onTearOffClicked();
+// [/SL:KB]
 
 	static void		setFloaterHost(LLMultiFloater* hostp) {sHostp = hostp; }
 	static LLMultiFloater* getFloaterHost() {return sHostp; }

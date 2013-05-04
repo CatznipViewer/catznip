@@ -1701,53 +1701,108 @@ void LLFloater::onClickMinimize(LLFloater* self)
 	self->setMinimized( !self->isMinimized() );
 }
 
+// [SL:KB] - Patch: Control-FloaterTearOff |  Checked: 2013-05-03 (Catznip-3.5)
 void LLFloater::onClickTearOff(LLFloater* self)
 {
-	if (!self)
-		return;
-	S32 floater_header_size = self->mHeaderHeight;
-	LLMultiFloater* host_floater = self->getHost();
+	if (self)
+	{
+		self->onTearOffClicked();
+	}
+}
+
+void LLFloater::onTearOffClicked()
+{
+	S32 floater_header_size = mHeaderHeight;
+	LLMultiFloater* host_floater = getHost();
 	if (host_floater) //Tear off
 	{
 		LLRect new_rect;
-		host_floater->removeFloater(self);
+		host_floater->removeFloater(this);
 		// reparent to floater view
-		gFloaterView->addChild(self);
+		gFloaterView->addChild(this);
 
-		self->openFloater(self->getKey());
-		if (self->mSaveRect && !self->mRectControl.empty())
+		openFloater(getKey());
+		if (mSaveRect && !mRectControl.empty())
 		{
-			self->applyRectControl();
+			applyRectControl();
 		}
 		else
 		{   // only force position for floaters that don't have that data saved
-			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, self->getRect().getWidth(), self->getRect().getHeight());
-			self->setRect(new_rect);
+			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, getRect().getWidth(), getRect().getHeight());
+			setRect(new_rect);
 		}
-		gFloaterView->adjustToFitScreen(self, FALSE);
+		gFloaterView->adjustToFitScreen(this, FALSE);
 		// give focus to new window to keep continuity for the user
-		self->setFocus(TRUE);
-		self->setTornOff(true);
+		setFocus(TRUE);
+		setTornOff(true);
 	}
 	else  //Attach to parent.
 	{
-		LLMultiFloater* new_host = (LLMultiFloater*)self->mLastHostHandle.get();
+		LLMultiFloater* new_host = (LLMultiFloater*)mLastHostHandle.get();
 		if (new_host)
 		{
-			if (self->mSaveRect)
+			if (mSaveRect)
 			{
-				self->storeRectControl();
+				storeRectControl();
 			}
-			self->setMinimized(FALSE); // to reenable minimize button if it was minimized
-			new_host->showFloater(self);
+			setMinimized(FALSE); // to reenable minimize button if it was minimized
+			new_host->showFloater(this);
 			// make sure host is visible
 			new_host->openFloater(new_host->getKey());
 		}
-		self->setTornOff(false);
+		setTornOff(false);
 	}
-	self->updateTitleButtons();
-    self->setOpenPositioning(LLFloaterEnums::POSITIONING_RELATIVE);
+	updateTitleButtons();
+    setOpenPositioning(LLFloaterEnums::POSITIONING_RELATIVE);
 }
+// [/SL:KB]
+//void LLFloater::onClickTearOff(LLFloater* self)
+//{
+//	if (!self)
+//		return;
+//	S32 floater_header_size = self->mHeaderHeight;
+//	LLMultiFloater* host_floater = self->getHost();
+//	if (host_floater) //Tear off
+//	{
+//		LLRect new_rect;
+//		host_floater->removeFloater(self);
+//		// reparent to floater view
+//		gFloaterView->addChild(self);
+//
+//		self->openFloater(self->getKey());
+//		if (self->mSaveRect && !self->mRectControl.empty())
+//		{
+//			self->applyRectControl();
+//		}
+//		else
+//		{   // only force position for floaters that don't have that data saved
+//			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, self->getRect().getWidth(), self->getRect().getHeight());
+//			self->setRect(new_rect);
+//		}
+//		gFloaterView->adjustToFitScreen(self, FALSE);
+//		// give focus to new window to keep continuity for the user
+//		self->setFocus(TRUE);
+//		self->setTornOff(true);
+//	}
+//	else  //Attach to parent.
+//	{
+//		LLMultiFloater* new_host = (LLMultiFloater*)self->mLastHostHandle.get();
+//		if (new_host)
+//		{
+//			if (self->mSaveRect)
+//			{
+//				self->storeRectControl();
+//			}
+//			self->setMinimized(FALSE); // to reenable minimize button if it was minimized
+//			new_host->showFloater(self);
+//			// make sure host is visible
+//			new_host->openFloater(new_host->getKey());
+//		}
+//		self->setTornOff(false);
+//	}
+//	self->updateTitleButtons();
+//    self->setOpenPositioning(LLFloaterEnums::POSITIONING_RELATIVE);
+//}
 
 // static
 void LLFloater::onClickDock(LLFloater* self)

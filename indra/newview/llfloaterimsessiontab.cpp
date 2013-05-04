@@ -50,8 +50,8 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   : LLTransientDockableFloater(NULL, true, session_id)
   ,  mIsP2PChat(false)
   ,  mExpandCollapseBtn(NULL)
-  ,  mTearOffBtn(NULL)
-  ,  mCloseBtn(NULL)
+//  ,  mTearOffBtn(NULL)
+//  ,  mCloseBtn(NULL)
   ,  mSessionID(session_id.asUUID())
   , mConversationsRoot(NULL)
   , mScroller(NULL)
@@ -234,8 +234,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mBodyStack = getChild<LLLayoutStack>("main_stack");
     mParticipantListAndHistoryStack = getChild<LLLayoutStack>("im_panels");
 
-	mCloseBtn = getChild<LLButton>("close_btn");
-	mCloseBtn->setCommitCallback(boost::bind(&LLFloater::onClickClose, this));
+//	mCloseBtn = getChild<LLButton>("close_btn");
+//	mCloseBtn->setCommitCallback(boost::bind(&LLFloater::onClickClose, this));
 
 	mExpandCollapseBtn = getChild<LLButton>("expand_collapse_btn");
 	mExpandCollapseBtn->setClickedCallback(boost::bind(&LLFloaterIMSessionTab::onSlide, this));
@@ -243,8 +243,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mExpandCollapseLineBtn = getChild<LLButton>("minz_btn");
 	mExpandCollapseLineBtn->setClickedCallback(boost::bind(&LLFloaterIMSessionTab::onCollapseToLine, this));
 
-	mTearOffBtn = getChild<LLButton>("tear_off_btn");
-	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
+//	mTearOffBtn = getChild<LLButton>("tear_off_btn");
+//	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
 
 	mGearBtn = getChild<LLButton>("gear_btn");
 
@@ -709,10 +709,10 @@ void LLFloaterIMSessionTab::updateHeaderAndToolbar()
 //    LLFloaterIMContainer::getInstance();
 
 	bool is_not_torn_off = !checkIfTornOff();
-	if (is_not_torn_off)
-	{
-		hideAllStandardButtons();
-	}
+//	if (is_not_torn_off)
+//	{
+//		hideAllStandardButtons();
+//	}
 
 	hideOrShowTitle();
 
@@ -746,11 +746,11 @@ void LLFloaterIMSessionTab::updateHeaderAndToolbar()
 	// The button (>>) should be disabled for torn off P2P conversations.
 	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
 
-	mTearOffBtn->setImageOverlay(getString(is_not_torn_off? "tear_off_icon" : "return_icon"));
-	mTearOffBtn->setToolTip(getString(is_not_torn_off? "tooltip_to_separate_window" : "tooltip_to_main_window"));
+//	mTearOffBtn->setImageOverlay(getString(is_not_torn_off? "tear_off_icon" : "return_icon"));
+//	mTearOffBtn->setToolTip(getString(is_not_torn_off? "tooltip_to_separate_window" : "tooltip_to_main_window"));
 
 
-	mCloseBtn->setVisible(is_not_torn_off && !mIsNearbyChat);
+//	mCloseBtn->setVisible(is_not_torn_off && !mIsNearbyChat);
 
 	enableDisableCallBtn();
 
@@ -946,7 +946,10 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 	setFollows(isTornOff()? FOLLOWS_ALL : FOLLOWS_NONE);
     mSaveRect = isTornOff();
     initRectControl();
-	LLFloater::onClickTearOff(this);
+// [SL:KB] - Patch: Control-FloaterTearOff |  Checked: 2013-05-03 (Catznip-3.5)
+	LLFloater::onTearOffClicked();
+// [/SL:KB]
+//	LLFloater::onClickTearOff(this);
 //	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
 // [SL:BK]
 	LLFloaterIMContainerBase* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainerBase>("im_container");
