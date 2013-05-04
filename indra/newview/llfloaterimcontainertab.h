@@ -38,12 +38,10 @@ public:
 
 	/*virtual*/ void setVisible(BOOL visible);
 
+	/*virtual*/ bool isTabbedContainer() const { return true; }
 	/*virtual*/ void showConversation(const LLUUID& session_id);
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
-	/*virtual*/ void selectNextConversationByID(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
-	/*virtual*/ bool selectAdjacentConversation(bool focus_selected);
-	/*virtual*/ bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
 	/*virtual*/ void expandConversation();
 
 	/*virtual*/ void collapseMessagesPane(bool collapse);
@@ -63,7 +61,6 @@ public:
 public:
 	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
 	/*virtual*/ void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
-	/*virtual*/ S32 getConversationListItemSize() const;
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

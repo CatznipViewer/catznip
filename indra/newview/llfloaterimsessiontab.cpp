@@ -951,21 +951,33 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 // [/SL:KB]
 //	LLFloater::onClickTearOff(this);
 //	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
-// [SL:BK]
-	LLFloaterIMContainerBase* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainerBase>("im_container");
-// [/SL:KB]
 
-	if (isTornOff())
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+	if (!isInTabbedContainer())
 	{
-		container->selectAdjacentConversation(false);
-		forceReshape();
+		LLFloaterIMContainerView* container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
+		if (isTornOff())
+		{
+			container->selectAdjacentConversation(false);
+			forceReshape();
+		}
+		//Upon re-docking the torn off floater, select the corresponding conversation line item
+		else
+		{
+			container->selectConversation(mSessionID);
+
+		}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
 	}
-	//Upon re-docking the torn off floater, select the corresponding conversation line item
 	else
 	{
-		container->selectConversation(mSessionID);
-
+		if (isTornOff())
+		{
+			forceReshape();
+		}
 	}
+// [/SL:KB]
 	mInputButtonPanel->setVisible(isTornOff());
 
 	refreshConversation();
@@ -1024,6 +1036,23 @@ bool LLFloaterIMSessionTab::isChatMultiTab()
 	// Restart is required in order to change chat window type.
 	return true;
 }
+
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+bool LLFloaterIMSessionTab::isInTabbedContainer()
+{
+	static bool s_fInitialized = false, s_fInTabbedContainer = false;
+	if (!s_fInitialized)
+	{
+		const LLFloaterIMContainerBase* pIMContainer = LLFloaterIMContainerBase::getInstance();
+		if (pIMContainer)
+		{
+			s_fInitialized = true;
+			s_fInTabbedContainer = pIMContainer->isTabbedContainer();
+		}
+	}
+	return s_fInTabbedContainer;
+}
+// [/SL:KB]
 
 bool LLFloaterIMSessionTab::checkIfTornOff()
 {
@@ -1122,24 +1151,47 @@ void LLFloaterIMSessionTab::saveCollapsedState()
 }
 BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 {
-	if(mask == MASK_ALT)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+	if (!isInTabbedContainer())
 	{
-//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
-// [/SL:KB]
-		if (KEY_RETURN == key && !isTornOff())
+		// LLFloaterIMContainerView needs custom handling of the navigaion keys
+		if (mask == MASK_ALT)
 		{
-			floater_container->expandConversation();
+			LLFloaterIMContainerView* floater_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+			if (KEY_RETURN == key && isTornOff())
+			{
+				floater_container->expandConversation();
+			}
+			if ((KEY_UP == key) || (KEY_LEFT == key) && !isTornOff())
+			{
+				floater_container->selectNextorPreviousConversation(false);
+			}
+			if ((KEY_DOWN == key ) || (KEY_RIGHT == key) && !isTornOff())
+			{
+				floater_container->selectNextorPreviousConversation(true);
+			}
 		}
-		if ((KEY_UP == key) || (KEY_LEFT == key))
-		{
-			floater_container->selectNextorPreviousConversation(false);
-		}
-		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
-		{
-			floater_container->selectNextorPreviousConversation(true);
-		}
+		return TRUE;
 	}
-	return TRUE;
+
+	// The LLTabContainer parent will handle the navigation keys
+	return LLTransientDockableFloater::handleKeyHere(key, mask);
+// [/SL:KB]
+//	if(mask == MASK_ALT)
+//	{
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		if (KEY_RETURN == key && !isTornOff())
+//		{
+//			floater_container->expandConversation();
+//		}
+//		if ((KEY_UP == key) || (KEY_LEFT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(false);
+//		}
+//		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(true);
+//		}
+//	}
+//	return TRUE;
 }

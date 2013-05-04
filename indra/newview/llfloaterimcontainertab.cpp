@@ -83,10 +83,6 @@ void LLFloaterIMContainerTab::selectConversation(const LLUUID& session_id)
 	selectConversationPair(session_id, true);
 }
 
-void LLFloaterIMContainerTab::selectNextConversationByID(const LLUUID& session_id)
-{
-}
-
 bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, bool /*select_widget*/, bool focus_floater /*=true*/)
 {
 	LLFloaterIMSession* pConvFloater = LLFloaterIMSession::findInstance(session_id);
@@ -103,16 +99,6 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 		}
 	}
 	return true;
-}
-
-bool LLFloaterIMContainerTab::selectAdjacentConversation(bool focus_selected)
-{
-	return false;
-}
-
-bool LLFloaterIMContainerTab::selectNextorPreviousConversation(bool select_next, bool focus_selected /*=true*/)
-{
-	return false;
 }
 
 void LLFloaterIMContainerTab::expandConversation()
@@ -164,11 +150,6 @@ void LLFloaterIMContainerTab::setTimeNow(const LLUUID& session_id, const LLUUID&
 
 void LLFloaterIMContainerTab::flashConversationItemWidget(const LLUUID& session_id, bool is_flashes)
 {
-}
-
-S32 LLFloaterIMContainerTab::getConversationListItemSize() const
-{
-	return 1;
 }
 
 // EOF

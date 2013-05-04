@@ -77,21 +77,19 @@ public:
 								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	void returnFloaterToHost();
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	/*virtual*/ bool isTabbedContainer() const { return false; }
 	/*virtual*/ void showConversation(const LLUUID& session_id);
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
-	/*virtual*/ void selectNextConversationByID(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
-	/*virtual*/ bool selectAdjacentConversation(bool focus_selected);
-	/*virtual*/ bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
 	/*virtual*/ void expandConversation();
 // [/SL:KB]
 //    void showConversation(const LLUUID& session_id);
 //    void selectConversation(const LLUUID& session_id);
-//	void selectNextConversationByID(const LLUUID& session_id);
+	void selectNextConversationByID(const LLUUID& session_id);
 //    BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
     void clearAllFlashStates();
-//	bool selectAdjacentConversation(bool focus_selected);
-//    bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
+	bool selectAdjacentConversation(bool focus_selected);
+    bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
 //    void expandConversation();
 
 	/*virtual*/ void tabClose();

@@ -47,12 +47,10 @@ public:
 								BOOL select_added_floater, 
 								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 
+	virtual bool isTabbedContainer() const = 0;
 	virtual void showConversation(const LLUUID& session_id) = 0;
-    virtual void selectConversation(const LLUUID& session_id) = 0;
-	virtual void selectNextConversationByID(const LLUUID& session_id) = 0;
+	virtual void selectConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
-	virtual bool selectAdjacentConversation(bool focus_selected) = 0;
-	virtual bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true) = 0;
 	virtual void expandConversation() = 0;
 
 	static LLFloaterIMContainerBase* findInstance();
@@ -87,7 +85,6 @@ public:
 	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
 	static bool isConversationLoggingAllowed();
 	virtual void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes) = 0;
-	virtual S32 getConversationListItemSize() const = 0;
 };
 
 #endif // LL_LLFLOATERIMCONTAINERBASE_H
