@@ -90,8 +90,14 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 	{
 		if (!pConvFloater->isTornOff())
 		{
-			setVisibleAndFrontmost(true);
+			setVisibleAndFrontmost(false);
 			mTabContainer->selectTabPanel(pConvFloater);
+
+			// Set the focus on the selected floater
+			if ( (!pConvFloater->hasFocus()) && (!pConvFloater->isMinimized()) )
+			{
+				pConvFloater->setFocus(focus_floater);
+			}
 		}
 		else
 		{
