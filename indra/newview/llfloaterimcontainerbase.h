@@ -55,6 +55,8 @@ public:
 
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
+	static LLFloater*                buildFloater(const LLSD& sdKey);
+	static const std::string&        getFloaterXMLFile();
 
 	static void onCurrentChannelChanged(const LLUUID& session_id);
 

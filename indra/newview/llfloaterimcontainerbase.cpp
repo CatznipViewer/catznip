@@ -32,7 +32,9 @@
 #include "llgroupiconctrl.h"
 #include "llfloaterimsessiontab.h"
 #include "llfloaterreg.h"
+#include "llfloaterimcontainer.h"
 #include "llfloaterimcontainerbase.h"
+#include "llfloaterimcontainertab.h"
 #include "lltransientfloatermgr.h"
 #include "llviewercontrol.h"
 
@@ -146,6 +148,27 @@ LLFloaterIMContainerBase* LLFloaterIMContainerBase::findInstance()
 LLFloaterIMContainerBase* LLFloaterIMContainerBase::getInstance()
 {
 	return LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container");
+}
+
+// static
+LLFloater* LLFloaterIMContainerBase::buildFloater(const LLSD& sdKey)
+{
+	LLFloater* pIMContainer = NULL;
+	if (gSavedSettings.getBOOL("IMUseTabbedContainer"))
+		pIMContainer = new LLFloaterIMContainerTab(sdKey);
+	else
+		pIMContainer = new LLFloaterIMContainerView(sdKey);
+	return pIMContainer;
+}
+
+// static
+const std::string& LLFloaterIMContainerBase::getFloaterXMLFile()
+{
+	static const std::string strFile = 
+		(gSavedSettings.getBOOL("IMUseTabbedContainer")) 
+			? (!gSavedSettings.getBOOL("IMUseVerticalTabs")) ? "floater_im_container_tab_horiz.xml" : "floater_im_container_tab_vert.xml"
+			: "floater_im_container.xml";
+	return strFile;
 }
 
 void LLFloaterIMContainerBase::setMinimized(BOOL b)
