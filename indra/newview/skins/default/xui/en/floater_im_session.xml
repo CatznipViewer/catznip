@@ -66,6 +66,7 @@
     <view
      follows="all"
      layout="topleft"
+     mouse_opaque="false"
      name="contents_view"
      top="0"
      left="0"
@@ -80,12 +81,14 @@
          top="0"
          left="5"
          border_size="0"
+         mouse_opaque="false"
          layout="topleft"
          orientation="vertical"
          name="main_stack"
          tab_group="1">
             <layout_panel
              auto_resize="false"
+             mouse_opaque="false"
              name="toolbar_panel"
              height="35"
              right="-1"
