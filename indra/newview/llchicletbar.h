@@ -28,6 +28,9 @@
 #define LL_LLCHICLETBAR_H
 
 #include "llpanel.h"
+// [SL:KB]
+#include "llimview.h"
+// [/SL:KB]
 
 class LLChicletPanel;
 class LLIMChiclet;
@@ -37,17 +40,40 @@ class LLLayoutStack;
 class LLChicletBar
 	: public LLSingleton<LLChicletBar>
 	, public LLPanel
+// [SL:KB]
+	, public LLIMSessionObserver
+// [/SL:KB]
 {
 	LOG_CLASS(LLChicletBar);
 	friend class LLSingleton<LLChicletBar>;
 public:
+// [SL:KB]
+	~LLChicletBar();
+// [/SL:KB]
 
 	BOOL postBuild();
 
 	LLChicletPanel*	getChicletPanel() { return mChicletPanel; }
 
+// [SL:KB]
+	// LLIMSessionObserver observe triggers
+	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
+    /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {};
+	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id) {};
+	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
+	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
+
+	S32 getTotalUnreadIMCount();
+// [/SL:KB]
+
 	/*virtual*/ void reshape(S32 width, S32 height, BOOL called_from_parent);
 
+// [SL:KB]
+	/**
+	 * Creates IM Chiclet based on session type (IM chat or Group chat)
+	 */
+	LLIMChiclet* createIMChiclet(const LLUUID& session_id);
+// [/SL:KB]
 
 	/**
 	 * Shows/hides panel with specified well button (IM or Notification)
