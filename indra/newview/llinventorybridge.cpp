@@ -743,7 +743,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 		items.push_back(std::string("Copy Separator"));
 
 		items.push_back(std::string("Cut"));
-		if (!isItemMovable())
+		if ( (!isItemMovable()) || (isLibraryItem()) )
 		{
 			disabled_items.push_back(std::string("Cut"));
 		}
