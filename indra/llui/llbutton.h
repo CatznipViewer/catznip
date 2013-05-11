@@ -376,7 +376,7 @@ protected:
 	bool						mForcePressedState;
 	bool						mDisplayPressedState;
 
-	LLFrameTimer				mFrameTimer;
+//	LLFrameTimer				mFrameTimer;
 	LLFlashTimer *				mFlashingTimer;
 
 	bool						mHandleRightMouse;
