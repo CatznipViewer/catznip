@@ -41,7 +41,7 @@ public:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-		registrar.add("OutfitsView.Gear.CloseFolders", boost::bind(&LLOutfitsViewGearMenu::onCloseFolders, this));
+		registrar.add("OutfitsView.Gear.CloseFolders", boost::bind(&LLOutfitsView::closeAllFolders, mOutfitsView));
 		registrar.add("OutfitsView.Gear.OnAction", boost::bind(&LLOutfitsViewGearMenu::onAction, this, _2));
 
 		enable_registrar.add("OutfitsView.Gear.OnEnable", boost::bind(&LLOutfitsViewGearMenu::onEnable, this, _2));
@@ -54,26 +54,6 @@ public:
 	LLToggleableMenu* getMenu() { return mMenu; }
 
 protected:
-	void onCloseFolders()
-	{
-		LLInventoryPanel* pInvPanel = mOutfitsView->getInventoryPanel();
-		if (!pInvPanel)
-			return;
-
-		LLFolderView* pRootFolder = pInvPanel->getRootFolder();
-		if (!pRootFolder)
-			return;
-
-		LLFolderViewFolder* pStartFolder = pInvPanel->getFolderByID(pInvPanel->getRootFolderID());
-		if (!pStartFolder)
-			return;
-
-		// Close all the folders except the start folder
-		pStartFolder->setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
-		pStartFolder->setOpen(TRUE);
-		pRootFolder->arrangeAll();
-	}
-
 	void onAction(LLSD::String sdParam)
 	{
 		mOutfitsView->performAction(sdParam);
@@ -128,8 +108,8 @@ BOOL LLOutfitsView::postBuild()
 	// the inventory panel after the inventory has reached a usuable state
 	doOnIdleRepeating(boost::bind(&LLOutfitsView::onIdle, this));
 
-	LLMenuButton* pGearBtn = getChild<LLMenuButton>("options_gear_btn");
-	pGearBtn->setMenu(mGearMenu->getMenu());
+	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
+	getChild<LLUICtrl>("collapse_btn")->setCommitCallback(boost::bind(&LLOutfitsView::closeAllFolders, this));
 
 	return TRUE;
 }
@@ -482,6 +462,26 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 boost::signals2::connection LLOutfitsView::setSelectionChangeCallback(selection_change_callback_t cb)
 {
 	return mSelectionChangeSignal.connect(cb);
+}
+
+void LLOutfitsView::closeAllFolders()
+{
+	LLInventoryPanel* pInvPanel = getInventoryPanel();
+	if (!pInvPanel)
+		return;
+
+	LLFolderView* pRootFolder = pInvPanel->getRootFolder();
+	if (!pRootFolder)
+		return;
+
+	LLFolderViewFolder* pStartFolder = pInvPanel->getRootFolder();
+	if (!pStartFolder)
+		return;
+
+	// Close all the folders except the start folder
+	pStartFolder->setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+	pStartFolder->setOpen(TRUE);
+	pRootFolder->arrangeAll();
 }
 
 // ============================================================================

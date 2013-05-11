@@ -32,6 +32,7 @@ public:
 	virtual ~LLOutfitsView();
 
 	bool				canWearSelected();
+	void				closeAllFolders();
 	LLInventoryPanel*	getInventoryPanel()	{ return mInvPanel; }
 
 				bool onIdle();

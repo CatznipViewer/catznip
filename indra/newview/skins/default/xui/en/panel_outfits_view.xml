@@ -45,6 +45,19 @@
          name="options_gear_btn"
          top="0"
          width="31" />
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Inv_Collapse"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="collapse_btn"
+         tool_tip="Close All Folders"
+         top="0"
+         width="31" />
         <icon
          follows="bottom|left|right"
          height="25"
@@ -52,7 +65,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="62"/>
+         width="30"/>
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
