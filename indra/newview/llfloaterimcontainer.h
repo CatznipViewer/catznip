@@ -79,19 +79,17 @@ public:
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	/*virtual*/ bool isTabbedContainer() const { return false; }
 	/*virtual*/ void showConversation(const LLUUID& session_id);
-	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
-	/*virtual*/ void expandConversation();
 	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
 // [/SL:KB]
 //    void showConversation(const LLUUID& session_id);
-//    void selectConversation(const LLUUID& session_id);
+    void selectConversation(const LLUUID& session_id);
 	void selectNextConversationByID(const LLUUID& session_id);
 //    BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
     void clearAllFlashStates();
 	bool selectAdjacentConversation(bool focus_selected);
     bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
-//    void expandConversation();
+    void expandConversation();
 
 	/*virtual*/ void tabClose();
 	void showStub(bool visible);
@@ -102,10 +100,7 @@ public:
 //
 //	static void onCurrentChannelChanged(const LLUUID& session_id);
 
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ void collapseMessagesPane(bool collapse);
-// [/SL:KB]
-//	void collapseMessagesPane(bool collapse);
+	void collapseMessagesPane(bool collapse);
 	
 	// Callbacks
 	static void idle(void* user_data);

@@ -254,7 +254,13 @@ void on_new_message(const LLSD& msg)
         {
 			// Open conversations floater
 			LLFloaterReg::showInstance("im_container");
-			im_box->collapseMessagesPane(false);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+			if (!im_box->isTabbedContainer())
+			{
+				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
+			}
+// [/SL:KB]
+//			im_box->collapseMessagesPane(false);
 			if (session_floater)
 			{
 				if (session_floater->getHost())

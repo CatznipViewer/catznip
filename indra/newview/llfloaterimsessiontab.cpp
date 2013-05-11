@@ -839,8 +839,15 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 // [/SL:KB]
 	if (host_floater)
 	{
-		// Hide the messages pane if a floater is hosted in the Conversations
-		host_floater->collapseMessagesPane(true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+		if (!isInTabbedContainer())
+		{
+			// Hide the messages pane if a floater is hosted in the Conversations
+			dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
+		}
+// [/SL:KB]
+//		// Hide the messages pane if a floater is hosted in the Conversations
+//		host_floater->collapseMessagesPane(true);
 	}
 	else ///< floater is torn off
 	{
@@ -926,15 +933,20 @@ void LLFloaterIMSessionTab::restoreFloater()
 /*virtual*/
 void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 {
-	if (!checkIfTornOff())
-	{
+//	if (!checkIfTornOff())
+//	{
 //		LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(getHost());
+//		// Show the messages pane when opening a floater hosted in the Conversations
+//		host_floater->collapseMessagesPane(false);
+//	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-		LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(getHost());
-// [/SL:KB]
+	if ( (!isInTabbedContainer()) && (!checkIfTornOff()) )
+	{
+		LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(getHost());
 		// Show the messages pane when opening a floater hosted in the Conversations
 		host_floater->collapseMessagesPane(false);
 	}
+// [/SL:KB]
 
 	mInputButtonPanel->setVisible(isTornOff());
 }

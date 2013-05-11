@@ -78,11 +78,6 @@ void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id)
 	selectConversationPair(session_id, true);
 }
 
-void LLFloaterIMContainerTab::selectConversation(const LLUUID& session_id)
-{
-	selectConversationPair(session_id, true);
-}
-
 bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, bool /*select_widget*/, bool focus_floater /*=true*/)
 {
 	LLFloaterIMSession* pConvFloater = LLFloaterIMSession::findInstance(session_id);
@@ -107,10 +102,6 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 	return true;
 }
 
-void LLFloaterIMContainerTab::expandConversation()
-{
-}
-
 // Checked: 2013-05-11 (Catznip-3.5)
 void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, bool flashing)
 {
@@ -131,10 +122,7 @@ void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, 
 	}
 }
 
-void LLFloaterIMContainerTab::collapseMessagesPane(bool collapse)
-{
-}
-
+// Checked: 2013-05-11 (Catznip-3.5)
 const LLUUID& LLFloaterIMContainerTab::getSelectedSession() const
 {
 	const LLFloaterIMSession* pConvFloater = dynamic_cast<const LLFloaterIMSession*>(mTabContainer->getCurrentPanel());
@@ -167,10 +155,6 @@ void LLFloaterIMContainerTab::doToParticipants(const std::string& item, uuid_vec
 }
 
 void LLFloaterIMContainerTab::setTimeNow(const LLUUID& session_id, const LLUUID& participant_id)
-{
-}
-
-void LLFloaterIMContainerTab::flashConversationItemWidget(const LLUUID& session_id, bool is_flashes)
 {
 }
 

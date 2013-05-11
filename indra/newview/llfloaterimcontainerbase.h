@@ -47,25 +47,22 @@ public:
 								BOOL select_added_floater, 
 								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 
+	virtual const LLUUID& getSelectedSession() const = 0;
 	virtual bool isTabbedContainer() const = 0;
 	virtual void showConversation(const LLUUID& session_id) = 0;
-	virtual void selectConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
-	virtual void expandConversation() = 0;
 	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
 
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
 	static LLFloater*                buildFloater(const LLSD& sdKey);
 	static const std::string&        getFloaterXMLFile();
+	static bool                      isConversationLoggingAllowed();
+	static void                      onCurrentChannelChanged(const LLUUID& session_id);
 
-	static void onCurrentChannelChanged(const LLUUID& session_id);
-
-	virtual void collapseMessagesPane(bool collapse) = 0;
-
-	virtual const LLUUID& getSelectedSession() const = 0;
 	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) const = 0;
 	virtual const LLConversationSort& getSortOrder() const = 0;
+	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab
 	// *TODO : Find a better place for this.
@@ -73,16 +70,12 @@ public:
 	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS) = 0;
     virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS) = 0;
 
-private:
-	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
-	avatarID_panel_map_t mSessions;
-
 protected:
+	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 	avatarID_panel_map_t& getSessionMap() { return mSessions; }
 
-public:
-	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
-	static bool isConversationLoggingAllowed();
+private:
+	avatarID_panel_map_t mSessions;
 };
 
 #endif // LL_LLFLOATERIMCONTAINERBASE_H

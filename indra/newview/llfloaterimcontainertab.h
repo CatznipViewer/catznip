@@ -38,28 +38,21 @@ public:
 
 	/*virtual*/ void setVisible(BOOL visible);
 
+	/*virtual*/ const LLUUID& getSelectedSession() const;
 	/*virtual*/ bool isTabbedContainer() const { return true; }
 	/*virtual*/ void showConversation(const LLUUID& session_id);
-	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
-	/*virtual*/ void expandConversation();
 	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
 
-	/*virtual*/ void collapseMessagesPane(bool collapse);
-
-	/*virtual*/ const LLUUID& getSelectedSession() const;
 	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const;
 	/*virtual*/ const LLConversationSort& getSortOrder() const;
+	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab
 	// *TODO : Find a better place for this.
 	/*virtual*/ bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	/*virtual*/ bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	/*virtual*/ void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
-
-public:
-	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
-	/*virtual*/ void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

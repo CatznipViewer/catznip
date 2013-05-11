@@ -803,7 +803,7 @@ void LLFloaterIMNearbyChat::startChat(const char* line)
 		if(!nearby_chat->isTornOff())
 		{
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-			LLFloaterIMContainerBase::getInstance()->selectConversation(LLUUID::null);
+			LLFloaterIMContainerBase::getInstance()->selectConversationPair(LLUUID::null, true);
 // [/SL:KB]
 //			LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
 		}
