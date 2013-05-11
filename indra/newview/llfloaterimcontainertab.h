@@ -43,7 +43,6 @@ public:
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ void expandConversation();
-	/*virtual*/ int  getConversationCount() { return getFloaterCount(); }
 
 	/*virtual*/ void collapseMessagesPane(bool collapse);
 

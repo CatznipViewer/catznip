@@ -151,7 +151,7 @@ void LLFloaterIMNearbyChat::closeHostedFloater()
 	{
 		// Nearby chat is currently docked to the conversations floater
 		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
-		if (1 == floater_container->getConversationCount())
+		if (1 == floater_container->getFloaterCount())
 		{
 			// If nearby chat is the only conversation in the conversation floater, just close it
 			floater_container->closeFloater();

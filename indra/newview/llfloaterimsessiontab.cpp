@@ -959,7 +959,18 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 // [/SL:KB]
 		if (isTornOff())
 		{
-			container->selectAdjacentConversation(false);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			// If the torn off session was the last hosted conversation in the conversation floater, just close it
+			if (1 == container->getFloaterCount())
+			{
+				container->closeFloater();
+			}
+			else
+			{
+				container->selectAdjacentConversation(false);
+			}
+// [/SL:KB]
+//			container->selectAdjacentConversation(false);
 			forceReshape();
 		}
 		//Upon re-docking the torn off floater, select the corresponding conversation line item
