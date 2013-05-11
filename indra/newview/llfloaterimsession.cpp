@@ -940,13 +940,21 @@ void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* user
 {
 	LLFloaterIMSession* self = (LLFloaterIMSession*)userdata;
 //	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(self->mSessionID,false);
+//	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
-// [/SL:KB]
-	if (im_box)
+	if (!isInTabbedContainer())
 	{
-		im_box->flashConversationItemWidget(self->mSessionID,false);
+		// This is only needed on CHUI
+		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());
+		if (im_box)
+		{
+			im_box->flashConversationItemWidget(self->mSessionID, false);
+		}
 	}
+// [/SL:KB]
 	std::string text = self->mInputEditor->getText();
 
 		// Deleting all text counts as stopping typing.

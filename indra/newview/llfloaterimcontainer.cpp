@@ -1941,6 +1941,13 @@ void LLFloaterIMContainerView::updateSpeakBtnState()
 //	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
 //}
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+void LLFloaterIMContainerView::setConversationFlashing(const LLUUID& session_id, bool flashing)
+{
+	flashConversationItemWidget(session_id, flashing);
+}
+// [/SL:KB]
+
 void LLFloaterIMContainerView::flashConversationItemWidget(const LLUUID& session_id, bool is_flashes)
 {
     //Finds the conversation line item to flash using the session_id

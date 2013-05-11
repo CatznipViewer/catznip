@@ -52,6 +52,7 @@ public:
 	virtual void selectConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void expandConversation() = 0;
+	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
 
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
@@ -75,16 +76,13 @@ public:
 private:
 	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 	avatarID_panel_map_t mSessions;
-	boost::signals2::connection mNewMessageConnection;
 
-	void onNewMessageReceived(const LLSD& data);
 protected:
 	avatarID_panel_map_t& getSessionMap() { return mSessions; }
 
 public:
 	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
 	static bool isConversationLoggingAllowed();
-	virtual void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes) = 0;
 };
 
 #endif // LL_LLFLOATERIMCONTAINERBASE_H

@@ -473,13 +473,21 @@ BOOL LLFloaterIMNearbyChat::matchChatTypeTrigger(const std::string& in_str, std:
 void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 {
 //	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(mSessionID,false);
+//	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
-// [/SL:KB]
-	if (im_box)
+	if (!isInTabbedContainer())
 	{
-		im_box->flashConversationItemWidget(mSessionID,false);
+		// This is only needed on CHUI
+		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());
+		if (im_box)
+		{
+			im_box->flashConversationItemWidget(mSessionID, false);
+		}
 	}
+// [/SL:KB]
 
 	LLFirstUse::otherAvatarChatFirst(false);
 

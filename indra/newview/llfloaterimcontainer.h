@@ -82,6 +82,7 @@ public:
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ void expandConversation();
+	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
 // [/SL:KB]
 //    void showConversation(const LLUUID& session_id);
 //    void selectConversation(const LLUUID& session_id);
@@ -218,17 +219,11 @@ public:
 	void setNearbyDistances();
 	void reSelectConversation();
 	void updateSpeakBtnState();
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
-// [/SL:KB]
 //	static bool isConversationLoggingAllowed();
-//	void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
+	void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
 	bool isScrolledOutOfSight(LLConversationViewSession* conversation_item_widget);
 	boost::signals2::connection mMicroChangedSignal;
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ S32 getConversationListItemSize() const { return mConversationsWidgets.size(); }
-// [/SL:KB]
-//	S32 getConversationListItemSize() { return mConversationsWidgets.size(); }
+	S32 getConversationListItemSize() { return mConversationsWidgets.size(); }
 
 private:
 	LLConversationViewSession* createConversationItemWidget(LLConversationItem* item);

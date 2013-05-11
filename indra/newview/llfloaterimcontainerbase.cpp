@@ -50,7 +50,6 @@ LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Param
 
 LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 {
-	mNewMessageConnection.disconnect();
 	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
 }
 
@@ -65,7 +64,6 @@ void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)
 
 BOOL LLFloaterIMContainerBase::postBuild()
 {
-	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLFloaterIMContainerBase::onNewMessageReceived, this, _1));
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 	// mTabContainer will be initialized in LLMultiFloater::addChild()
 	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
@@ -122,20 +120,6 @@ void LLFloaterIMContainerBase::onCloseFloater(LLUUID& id)
 {
 	mSessions.erase(id);
 	setFocus(TRUE);
-}
-
-void LLFloaterIMContainerBase::onNewMessageReceived(const LLSD& data)
-{
-	LLUUID session_id = data["session_id"].asUUID();
-	LLFloater* floaterp = get_ptr_in_map(mSessions, session_id);
-	LLFloater* current_floater = LLMultiFloater::getActiveFloater();
-
-	if(floaterp && current_floater && floaterp != current_floater)
-	{
-		if(LLMultiFloater::isFloaterFlashing(floaterp))
-			LLMultiFloater::setFloaterFlashing(floaterp, FALSE);
-		LLMultiFloater::setFloaterFlashing(floaterp, TRUE);
-	}
 }
 
 // static

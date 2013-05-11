@@ -111,6 +111,26 @@ void LLFloaterIMContainerTab::expandConversation()
 {
 }
 
+// Checked: 2013-05-11 (Catznip-3.5)
+void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, bool flashing)
+{
+	LLFloater* pIMSession = get_ptr_in_map(getSessionMap(), session_id);
+	LLFloater* pCurSession = LLMultiFloater::getActiveFloater();
+	if( (pIMSession) && (pCurSession) )
+	{
+		if (!flashing)
+		{
+			setFloaterFlashing(pIMSession, FALSE);
+		}
+		else if (pIMSession != pCurSession)
+		{
+			if (isFloaterFlashing(pIMSession))
+				setFloaterFlashing(pIMSession, FALSE);
+			setFloaterFlashing(pIMSession, TRUE);
+		}
+	}
+}
+
 void LLFloaterIMContainerTab::collapseMessagesPane(bool collapse)
 {
 }

@@ -130,14 +130,18 @@ void process_dnd_im(const LLSD& notification)
             false, 
             false); //will need slight refactor to retrieve whether offline message or not (assume online for now)
 
-//		LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 		LLFloaterIMContainerBase* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container");
-// [/SL:KB]
 		if (im_box)
 		{
-			im_box->flashConversationItemWidget(sessionID, true);
+			im_box->setConversationFlashing(sessionID, true);
 		}
+// [/SL:KB]
+//		LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//		if (im_box)
+//		{
+//			im_box->flashConversationItemWidget(sessionID, true);
+//		}
 
     }
 }
@@ -290,7 +294,10 @@ void on_new_message(const LLSD& msg)
     {
     	if(!LLMuteList::getInstance()->isMuted(participant_id))
     	{
-    		im_box->flashConversationItemWidget(session_id, true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+    		im_box->setConversationFlashing(session_id, true);
+// [/SL:KB]
+//    		im_box->flashConversationItemWidget(session_id, true);
     	}
     }
 
@@ -2676,8 +2683,7 @@ void LLIMMgr::addMessage(
     {
         LLFloaterReg::showInstance("im_container");
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-		LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container")->
-				flashConversationItemWidget(new_session_id, true);
+		LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container")->setConversationFlashing(new_session_id, true);
 // [/SL:KB]
 //	    LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->
 //	    		flashConversationItemWidget(new_session_id, true);
