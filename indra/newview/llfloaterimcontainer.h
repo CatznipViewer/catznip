@@ -82,6 +82,7 @@ public:
 	/*virtual*/ void selectConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ void expandConversation();
+	/*virtual*/ int  getConversationCount() { return getConversationListItemSize(); }
 // [/SL:KB]
 //    void showConversation(const LLUUID& session_id);
 //    void selectConversation(const LLUUID& session_id);
@@ -127,9 +128,6 @@ public:
 //	LLConversationItem* getSessionModel(const LLUUID& session_id) { return get_ptr_in_map(mConversationsItems,session_id); }
 //	LLConversationSort& getSortOrder() { return mConversationViewModel.getSorter(); }
 
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ void onNearbyChatClosed();
-// [/SL:KB]
 //	void onNearbyChatClosed();
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab

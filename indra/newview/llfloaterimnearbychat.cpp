@@ -34,6 +34,9 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+#include "llfloaterimcontainertab.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfocusmgr.h"
 #include "lllogchat.h"
@@ -138,40 +141,44 @@ BOOL LLFloaterIMNearbyChat::postBuild()
 // virtual
 void LLFloaterIMNearbyChat::closeHostedFloater()
 {
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	if (!isInTabbedContainer())
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+	if (!getHost())
 	{
-		LLFloaterIMContainerView* floater_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
-// [/SL:KB]
-//		// Should check how many conversations are ongoing. Close all if 1 only (the Nearby Chat), select next one otherwise
-//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-		if (floater_container->getConversationListItemSize() == 1)
+		// If nearby chat is currently torn off hide only the nearby chat floater
+		setVisible(FALSE);
+	}
+	else
+	{
+		// Nearby chat is currently docked to the conversations floater
+		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+		if (1 == floater_container->getConversationCount())
 		{
+			// If nearby chat is the only conversation in the conversation floater, just close it
 			floater_container->closeFloater();
 		}
 		else
 		{
-			if (!getHost())
-			{
-				setVisible(FALSE);
-			}
-			floater_container->selectNextConversationByID(LLUUID());
-		}
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	}
-	else
-	{
-		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
-		if (!getHost())
-		{
-			setVisible(FALSE);
-		}
-		else if (1 == floater_container->getFloaterCount())
-		{
-			floater_container->closeFloater();
+			if (!isInTabbedContainer())
+				dynamic_cast<LLFloaterIMContainerView*>(floater_container)->selectNextConversationByID(LLUUID());
+			else
+				dynamic_cast<LLFloaterIMContainerTab*>(floater_container)->selectNextFloater();
 		}
 	}
 // [/SL:KB]
+//	// Should check how many conversations are ongoing. Close all if 1 only (the Nearby Chat), select next one otherwise
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	if (floater_container->getConversationListItemSize() == 1)
+//	{
+//		floater_container->closeFloater();
+//	}
+//	else
+//	{
+//		if (!getHost())
+//		{
+//			setVisible(FALSE);
+//		}
+//		floater_container->selectNextConversationByID(LLUUID());
+//	}
 }
 
 // virtual
@@ -325,20 +332,27 @@ void LLFloaterIMNearbyChat::onClose(bool app_quitting)
 // virtual
 void LLFloaterIMNearbyChat::onClickCloseBtn()
 {
-	if (!isTornOff())
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+	if (!getHost())
 	{
-		return;
+		// If nearby chat is currently torn off just hide the floater when closing it
+		setVisible(FALSE);
 	}
-	LLFloaterIMSessionTab::onTearOffClicked();
-	
-//	LLFloaterIMContainer *im_box = LLFloaterIMContainer::findInstance();
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 // [/SL:KB]
-	if (im_box)
-	{
-		im_box->onNearbyChatClosed();
-	}
+//	// Should check how many conversations are ongoing. Close all if 1 only (the Nearby Chat), select next one otherwise
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	if (floater_container->getConversationListItemSize() == 1)
+//	{
+//		floater_container->closeFloater();
+//	}
+//	else
+//	{
+//		if (!getHost())
+//		{
+//			setVisible(FALSE);
+//		}
+//		floater_container->selectNextConversationByID(LLUUID());
+//	}
 }
 
 void LLFloaterIMNearbyChat::onChatFontChange(LLFontGL* fontp)

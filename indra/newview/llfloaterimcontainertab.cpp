@@ -132,10 +132,6 @@ const LLConversationSort& LLFloaterIMContainerTab::getSortOrder() const
 	return sort;
 }
 
-void LLFloaterIMContainerTab::onNearbyChatClosed()
-{
-}
-
 bool LLFloaterIMContainerTab::checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS)
 {
 	return false;

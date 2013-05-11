@@ -52,6 +52,7 @@ public:
 	virtual void selectConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void expandConversation() = 0;
+	virtual int  getConversationCount() = 0;
 
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
@@ -65,8 +66,6 @@ public:
 	virtual const LLUUID& getSelectedSession() const = 0;
 	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) const = 0;
 	virtual const LLConversationSort& getSortOrder() const = 0;
-
-	virtual void onNearbyChatClosed() = 0;
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab
 	// *TODO : Find a better place for this.

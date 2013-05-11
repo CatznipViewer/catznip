@@ -1913,12 +1913,12 @@ void LLFloaterIMContainerView::openNearbyChat()
 	}
 }
 
-void LLFloaterIMContainerView::onNearbyChatClosed()
-{
-	// If nearby chat is the only remaining conversation and it is closed, close whole conversation floater as well
-	if (mConversationsItems.size() == 1)
-		closeFloater();
-}
+//void LLFloaterIMContainerView::onNearbyChatClosed()
+//{
+//	// If nearby chat is the only remaining conversation and it is closed, close whole conversation floater as well
+//	if (mConversationsItems.size() == 1)
+//		closeFloater();
+//}
 
 void LLFloaterIMContainerView::reSelectConversation()
 {
