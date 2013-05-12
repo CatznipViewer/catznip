@@ -160,6 +160,13 @@ public:
 	:	mFrameState(&timer.mFrameState)
 	{
 #if FAST_TIMER_ON
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+		if (!sRunTimers)
+		{
+			return;
+		}
+// [/SL:KB]
+
 		LLFastTimer::FrameState* frame_state = mFrameState;
 		mStartTime = getCPUClockCount32();
 
@@ -184,6 +191,13 @@ public:
 	LL_FORCE_INLINE ~LLFastTimer()
 	{
 #if FAST_TIMER_ON
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+		if (!sRunTimers)
+		{
+			return;
+		}
+// [/SL:KB]
+
 		LLFastTimer::FrameState* frame_state = mFrameState;
 		U32 total_time = getCPUClockCount32() - mStartTime;
 
@@ -209,6 +223,10 @@ public:
 	static std::string		sLogName;
 	static bool 			sPauseHistory;
 	static bool 			sResetHistory;
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+	static bool				sRunTimers;
+	static bool				sToggleRun;
+// [/SL:KB]
 
 	// call this once a frame to reset timers
 	static void nextFrame();
