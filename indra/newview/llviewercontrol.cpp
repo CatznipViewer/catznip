@@ -492,6 +492,14 @@ bool handleVoiceClientPrefsChanged(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: UI-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+bool handleRunFastTimersChanged(const LLSD& sdValue)
+{
+	LLFastTimer::sToggleRun = (LLFastTimer::sRunTimers != sdValue.asBoolean());
+	return true;
+}
+// [/SL:KB]
+
 bool handleVelocityInterpolate(const LLSD& newvalue)
 {
 	LLMessageSystem* msg = gMessageSystem;
@@ -751,6 +759,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("PTTCurrentlyEnabled")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("PushToTalkButton")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("PushToTalkToggle")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
+// [SL:KB] - Patch: UI-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+	gSavedSettings.getControl("RunFastTimers")->getSignal()->connect(boost::bind(&handleRunFastTimersChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("VoiceEarLocation")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("VoiceInputAudioDevice")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("VoiceOutputAudioDevice")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
