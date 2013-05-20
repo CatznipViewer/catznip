@@ -1064,7 +1064,10 @@ BOOL LLFolderView::handleKeyHere( KEY key, MASK mask )
 		break;
 
 	case KEY_RETURN:
-		if (mask == MASK_NONE)
+//		if (mask == MASK_NONE)
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2011-10-04 (Catznip-3.2.1a) | Added: Catznip-3.0.0a
+		if ( (MASK_NONE == mask) || (MASK_CONTROL == mask) )
+// [/SL:KB]
 		{
 			if( mRenameItem && mRenamer->getVisible() )
 			{
