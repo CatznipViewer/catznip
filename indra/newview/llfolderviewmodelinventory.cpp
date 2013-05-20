@@ -307,8 +307,15 @@ bool LLInventorySort::operator()(const LLFolderViewModelItemInventory* const& a,
 	}
 }
 
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
 LLFolderViewModelItemInventory::LLFolderViewModelItemInventory( class LLFolderViewModelInventory& root_view_model ) 
-	:	LLFolderViewModelItemCommon(root_view_model),
+	:	LLFolderViewModelItemInventoryCommon(root_view_model),
 	mPrevPassedAllFilters(false)
 {
 }
+// [/SL:KB]
+//LLFolderViewModelItemInventory::LLFolderViewModelItemInventory( class LLFolderViewModelInventory& root_view_model ) 
+//	:	LLFolderViewModelItemCommon(root_view_model),
+//	mPrevPassedAllFilters(false)
+//{
+//}

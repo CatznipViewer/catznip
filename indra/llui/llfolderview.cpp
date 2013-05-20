@@ -28,6 +28,9 @@
 
 #include "llfolderview.h"
 #include "llfolderviewmodel.h"
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+#include "llfolderviewmodelinventorycommon.h"
+// [/SL:KB]
 #include "llclipboard.h" // *TODO: remove this once hack below gone.
 #include "llkeyboard.h"
 #include "lllineeditor.h"
@@ -1799,11 +1802,11 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 	U32 cntWearable = 0, cntWorn = 0;
 	for (selected_items_t::const_iterator itSel = mSelectedItems.begin(); itSel != mSelectedItems.end(); ++itSel)
 	{
-		const LLViewerInventoryItem* pItem = (*itSel)->getInventoryItem();
-		if (!pItem)
+		const LLFolderViewModelItemInventoryCommon* pFVInvItem = dynamic_cast<const LLFolderViewModelItemInventoryCommon*>(*itSel);
+		if (!pFVInvItem)
 			continue;
 
-		LLAssetType::EType typeItem = pItem->getType();
+		LLAssetType::EType typeItem = pFVInvItem->getAssetType();
 		if ( (LLAssetType::AT_BODYPART == typeItem) || (LLAssetType::AT_CLOTHING == typeItem) || (LLAssetType::AT_OBJECT == typeItem) )
 		{
 			if (LLAssetType::AT_BODYPART == typeItem)
@@ -1814,7 +1817,7 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 				flags |= ATTACHMENT_SELECTION;
 
 			cntWearable++;
-			if (get_is_item_worn(pItem->getLinkedUUID()))
+			if (pFVInvItem->isItemWorn())
 				cntWorn++;
 		}
 		else
