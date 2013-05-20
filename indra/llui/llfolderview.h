@@ -395,7 +395,7 @@ public:
 const U32 SUPPRESS_OPEN_ITEM = 0x1;
 const U32 FIRST_SELECTED_ITEM = 0x2;
 const U32 ITEM_IN_MULTI_SELECTION = 0x4;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
 const U32 BODYPART_SELECTION = 0x10;			// Selection contains AT_BODYPART items (at least one)
 const U32 CLOTHING_SELECTION = 0x20;			// Selection contains AT_CLOTHING items (at least one)
 const U32 ATTACHMENT_SELECTION = 0x40;			// Selection contains AT_OBJECT items (at least one)

@@ -1797,7 +1797,7 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 
 	U32 multi_select_flag = (mSelectedItems.size() > 1 ? ITEM_IN_MULTI_SELECTION : 0x0);
 	U32 flags = multi_select_flag | FIRST_SELECTED_ITEM;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
 	// NOTE-Catznip: this is really a bad hack but I can't really think of a better way short of just rewriting all menu item handling
 	U32 cntWearable = 0, cntWorn = 0;
 	for (selected_items_t::const_iterator itSel = mSelectedItems.begin(); itSel != mSelectedItems.end(); ++itSel)
@@ -1839,7 +1839,7 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 		LLFolderViewItem* selected_item = (*item_itor);
 		selected_item->buildContextMenu(*menu, flags);
 //		flags = multi_select_flag;
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-3.0.0a) | Added: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
 		flags &= ~FIRST_SELECTED_ITEM;
 // [/SL:KB]
 	}
