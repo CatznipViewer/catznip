@@ -226,7 +226,10 @@ public:
 	void setAutoSelectOverride(BOOL val) { mAutoSelectOverride = val; }
 
 	bool showItemLinkOverlays() { return mShowItemLinkOverlays; }
-
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+	void setEnableCallbackRegistrar(LLUICtrl::EnableCallbackRegistry::ScopedRegistrar* registrar) { mEnableCallbackRegistrar = registrar; }
+// [/SL:KB]
+ 
 	void setCallbackRegistrar(LLUICtrl::CommitCallbackRegistry::ScopedRegistrar* registrar) { mCallbackRegistrar = registrar; }
 
 	LLPanel* getParentPanel() { return mParentPanel; }
@@ -311,6 +314,9 @@ protected:
 	LLFolderViewItem*				mDraggingOverItem; // See EXT-719
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar* mCallbackRegistrar;
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar* mEnableCallbackRegistrar;
+// [/SL:KB]
 	
 public:
 	static F32 sAutoOpenTime;
