@@ -667,7 +667,7 @@ set(viewer_SOURCE_FILES
     pipeline.cpp
     )
 
-set(VIEWER_BINARY_NAME "secondlife-bin" CACHE STRING
+set(VIEWER_BINARY_NAME "catznip-bin" CACHE STRING
     "The name of the viewer executable to create.")
 
 set(viewer_HEADER_FILES
@@ -1262,11 +1262,11 @@ if (DARWIN)
 
   # Add resource files to the project.
   set(viewer_RESOURCE_FILES
-    secondlife.icns
+    catznip.icns
     macview.r
     gpu_table.txt
-    Info-SecondLife.plist
-    SecondLife.nib/
+    Info-Catznip.plist
+    Catznip.nib/
     # CMake doesn't seem to support Xcode language variants well just yet
     English.lproj/InfoPlist.strings
     English.lproj/language.txt
@@ -1334,17 +1334,17 @@ if (WINDOWS)
     message("Copying icons for ${ICON_PATH}")
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/secondlife.ico"
+        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/catznip.ico"
         "${CMAKE_CURRENT_SOURCE_DIR}/res/ll_icon.ico"
       )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/secondlife_256.BMP"
+        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/catznip_64.BMP"
         "${CMAKE_CURRENT_SOURCE_DIR}/res/ll_icon.BMP"
       )
     execute_process(
       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/secondlife_256.BMP"
+        "${CMAKE_CURRENT_SOURCE_DIR}/icons/${ICON_PATH}/catznip_64.BMP"
         "${CMAKE_CURRENT_SOURCE_DIR}/res-sdl/ll_icon.BMP"
       )
 
@@ -1661,6 +1661,7 @@ if (WINDOWS)
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxplatform.dll
       ${SHARED_LIB_STAGING_DIR}/${CMAKE_CFG_INTDIR}/vivoxoal.dll
       ${GOOGLE_PERF_TOOLS_SOURCE}
+      ${CMAKE_CURRENT_SOURCE_DIR}/licenses-installer.rtf
       ${CMAKE_CURRENT_SOURCE_DIR}/licenses-win32.txt
       ${CMAKE_CURRENT_SOURCE_DIR}/featuretable.txt
       ${CMAKE_CURRENT_SOURCE_DIR}/featuretable_xp.txt
@@ -1876,7 +1877,7 @@ set(ARTWORK_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH
 
 
 if (LINUX)
-  set(product SecondLife-${ARCH}-${viewer_VERSION})
+  set(product Catznip-${ARCH}-${viewer_VERSION})
 
   # These are the generated targets that are copied to package/
   set(COPY_INPUT_DEPENDENCIES
@@ -1943,19 +1944,19 @@ if (LINUX)
 endif (LINUX)
 
 if (DARWIN)
-  set(product "Second Life")
+  set(product "Catznip")
   set_target_properties(
     ${VIEWER_BINARY_NAME}
     PROPERTIES
     OUTPUT_NAME "${product}"
     MACOSX_BUNDLE_INFO_STRING "info string - localize me"
-    MACOSX_BUNDLE_ICON_FILE "secondlife.icns"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "Second Life"
+    MACOSX_BUNDLE_ICON_FILE "catznip.icns"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "Catznip"
     MACOSX_BUNDLE_LONG_VERSION_STRING "ververver"
-    MACOSX_BUNDLE_BUNDLE_NAME "Second Life"
+    MACOSX_BUNDLE_BUNDLE_NAME "Catznip"
     MACOSX_BUNDLE_SHORT_VERSION_STRING "asdf"
     MACOSX_BUNDLE_BUNDLE_VERSION "asdf"
-    MACOSX_BUNDLE_COPYRIGHT "copyright linden lab 2007 - localize me and run me through a legal wringer"
+    MACOSX_BUNDLE_COPYRIGHT "Copyright (c) 2009-2010, Kitty Barnett"
     )
 
   add_custom_command(
@@ -2038,7 +2039,7 @@ if (PACKAGE)
   if (LINUX)
     list(APPEND SYMBOL_SEARCH_DIRS "${CMAKE_CURRENT_BINARY_DIR}/packaged")
     set(VIEWER_SYMBOL_FILE "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/secondlife-symbols-linux.tar.bz2")
-    set(VIEWER_EXE_GLOBS "do-not-directly-run-secondlife-bin SLPlugin")
+    set(VIEWER_EXE_GLOBS "do-not-directly-run-catznip-bin SLPlugin")
     set(VIEWER_LIB_GLOB "*${CMAKE_SHARED_MODULE_SUFFIX}*")
     set(VIEWER_COPY_MANIFEST copy_l_viewer_manifest)
   endif (LINUX)

@@ -27,12 +27,12 @@
 #ifndef LL_LLVERSIONVIEWER_H
 #define LL_LLVERSIONVIEWER_H
 
-const S32 LL_VERSION_MAJOR = 3;
-const S32 LL_VERSION_MINOR = 5;
-const S32 LL_VERSION_PATCH = 1;
+const S32 LL_VERSION_MAJOR = 9;
+const S32 LL_VERSION_MINOR = 0;
+const S32 LL_VERSION_PATCH = 0;
 const S32 LL_VERSION_BUILD = 264760;
 
-const char * const LL_CHANNEL = "Second Life Developer";
+const char * const LL_CHANNEL = "Catznip Internal";
 
 #if LL_DARWIN
 const char * const LL_VERSION_BUNDLE_ID = "com.secondlife.indra.viewer";
