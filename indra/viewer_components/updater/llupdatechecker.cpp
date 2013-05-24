@@ -118,15 +118,22 @@ void LLUpdateChecker::Implementation::completed(U32 status,
 	} else if(!content.asBoolean()) {
 		LL_INFOS("UpdateCheck") << "up to date" << llendl;
 		mClient.upToDate();
-	} else if(content["required"].asBoolean()) {
-		LL_INFOS("UpdateCheck") << "version invalid" << llendl;
-		LLURI uri(content["url"].asString());
-		mClient.requiredUpdate(content["version"].asString(), uri, content["hash"].asString());
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	} else {
-		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" << llendl;
-		LLURI uri(content["url"].asString());
-		mClient.optionalUpdate(content["version"].asString(), uri, content["hash"].asString());
+		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" 
+								<< " (" << ((content["required"].asBoolean()) ? "required" : "optional") << ")" << llendl;
+		mClient.checkComplete(content);
 	}
+// [/SL:KB]
+//	} else if(content["required"].asBoolean()) {
+//		LL_INFOS("UpdateCheck") << "version invalid" << llendl;
+//		LLURI uri(content["url"].asString());
+//		mClient.requiredUpdate(content["version"].asString(), uri, content["hash"].asString());
+//	} else {
+//		LL_INFOS("UpdateCheck") << "newer version " << content["version"].asString() << " available" << llendl;
+//		LLURI uri(content["url"].asString());
+//		mClient.optionalUpdate(content["version"].asString(), uri, content["hash"].asString());
+//	}
 }
 
 
