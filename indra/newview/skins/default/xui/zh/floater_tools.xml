@@ -258,19 +258,19 @@
 			<check_box label="暫時性" name="Temporary Checkbox Ctrl" tool_tip="使物件在建造後的一分鐘自動刪除"/>
 			<check_box label="幻影性" name="Phantom Checkbox Ctrl" tool_tip="使物件不會與其他物件或化身產生碰撞"/>
 			<text name="label position">
-				位置（公尺）
+				位置
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				尺寸（公尺）
+				尺寸
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				旋轉（角度）
+				旋轉
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>

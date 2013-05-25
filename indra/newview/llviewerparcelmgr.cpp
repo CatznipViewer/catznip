@@ -870,6 +870,27 @@ bool LLViewerParcelMgr::inParcelOverlay(const U8* overlay, const LLVector3& pos_
 
 	return (overlay[row*mParcelsPerEdge + column]);
 }
+
+bool LLViewerParcelMgr::getLandGroup(const LLVector3d& posGlobal, LLUUID& idGroup) const
+{
+	if (inAgentParcel(posGlobal))
+	{
+		if (mAgentParcel)
+		{
+			idGroup = mAgentParcel->getGroupID();
+			return true;
+		}
+	}
+	else if (inHoverParcel(posGlobal))
+	{
+		if (mHoverParcel)
+		{
+			idGroup = mHoverParcel->getGroupID();
+			return true;
+		}
+	}
+	return false;
+}
 // [/SL:KB]
 
 // Returns NULL when there is no valid data.

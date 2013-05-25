@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-			<panel.string name="text modify info 5">
-				Não é possível modificar este objeto através de uma demarcação da região
-			</panel.string>
-			<panel.string name="text modify info 6">
-				Não é possível modificar estes objetos através de uma demarcação da região
-			</panel.string>
-			<spinner label="L$" name="Edit Cost"/>
-				</text>
-			</panel>
-			<panel name="pathfinding_attrs_panel">
-				<text name="pathfinding_attributes_label">
-					Atributos do pathfinding:
 		<panel label="Conteúdo" name="Contents">
 			<button label="Novo script" label_selected="Novo script" name="button new script"/>
 			<button label="Autorizações" name="button permissions"/>

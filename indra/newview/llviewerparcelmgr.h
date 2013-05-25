@@ -169,8 +169,10 @@ public:
 protected:
 	bool	inParcelOverlay(const U8* overlay, const LLVector3& pos_region) const;
 public:
-	bool	inAgentParcel(const LLVector3d &pos_global) const;
-	bool	inHoverParcel(const LLVector3d &pos_global) const;
+	bool	inAgentParcel(const LLVector3d& pos_global) const;
+	bool	inHoverParcel(const LLVector3d& pos_global) const;
+
+	bool	getLandGroup(const LLVector3d& pos_global, LLUUID& idGroup) const;
 // [/SL:KB]
 
 	// Returns a pointer only when it has valid data.

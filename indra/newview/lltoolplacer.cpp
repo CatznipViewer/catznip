@@ -240,21 +240,10 @@ BOOL LLToolPlacer::addObject( LLPCode pcode, S32 x, S32 y, U8 use_physics )
 	LLUUID idGroup = gAgent.getGroupID();
 	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
 	{
-		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
+		if ( (!LLViewerParcelMgr::getInstance()->getLandGroup(mLastHitPos, idGroup)) || (!gAgent.isInGroup(idGroup)) )
 		{
-			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-			if (pAgentParcel)
-				idGroup = pAgentParcel->getGroupID();
-		}
-		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
-		{
-			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
-			if (pHoverParcel)
-				idGroup = pHoverParcel->getGroupID();
-		}
-
-		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 			idGroup = gAgent.getGroupID();
+		}
 	}
 	gMessageSystem->addUUIDFast(_PREHASH_GroupID, idGroup);
 // [/SL:KB]
@@ -505,21 +494,10 @@ BOOL LLToolPlacer::addDuplicate(S32 x, S32 y)
 	LLUUID idGroup = gAgent.getGroupID();
 	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
 	{
-		if (LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos))
+		if ( (!LLViewerParcelMgr::getInstance()->getLandGroup(mLastHitPos, idGroup)) || (!gAgent.isInGroup(idGroup)) )
 		{
-			const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-			if (pAgentParcel)
-				idGroup = pAgentParcel->getGroupID();
-		}
-		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos))
-		{
-			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
-			if (pHoverParcel)
-				idGroup = pHoverParcel->getGroupID();
-		}
-
-		if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 			idGroup = gAgent.getGroupID();
+		}
 	}
 // [/SL:KB]
 

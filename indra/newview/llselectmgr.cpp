@@ -3617,22 +3617,11 @@ void LLSelectMgr::selectDuplicate(const LLVector3& offset, BOOL select_copy)
 		const LLViewerObject* pObj = getSelection()->getFirstRootObject(FALSE);
 		if (pObj)
 		{
-			const LLVector3d posGlobal = pObj->getPositionGlobal() + LLVector3d(offset);
-			if (LLViewerParcelMgr::getInstance()->inAgentParcel(posGlobal))
+			if ( (!LLViewerParcelMgr::getInstance()->getLandGroup(pObj->getPositionGlobal() + LLVector3d(offset), idGroup)) ||
+			     (!gAgent.isInGroup(idGroup)) )
 			{
-				const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-				if (pAgentParcel)
-					idGroup = pAgentParcel->getGroupID();
-			}
-			else if (LLViewerParcelMgr::getInstance()->inHoverParcel(posGlobal))
-			{
-				const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
-				if (pHoverParcel)
-					idGroup = pHoverParcel->getGroupID();
-			}
-
-			if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
 				idGroup = gAgent.getGroupID();
+			}
 		}
 	}
 	data.group_id = idGroup;

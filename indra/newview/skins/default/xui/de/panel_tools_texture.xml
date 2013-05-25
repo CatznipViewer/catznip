@@ -1,16 +1,4 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-			<panel.string name="text modify info 5">
-				Dieses Objekt kann nicht über eine Regionsgrenze hinweg geändert werden
-			</panel.string>
-			<panel.string name="text modify info 6">
-				Diese Objekte können nicht über eine Regionsgrenze hinweg geändert werden
-			</panel.string>
-			<spinner label="L$" name="Edit Cost"/>
-				</text>
-			</panel>
-			<panel name="pathfinding_attrs_panel">
-				<text name="pathfinding_attributes_label">
-					Pathfinding-Attribute:
 		<panel label="Textur" name="Texture">
 			<panel.string name="string repeats per meter">
 				Kacheln pro Meter
