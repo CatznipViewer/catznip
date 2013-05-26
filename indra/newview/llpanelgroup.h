@@ -136,7 +136,13 @@ public:
 	{
 		LLPanel* pPanel = findChild<LLPanel>("panel_group_info_sidetray");
 		if (pPanel)
+		{
 			pPanel->onOpen(sdKey);
+		}
+		if (sdKey.isMap())
+		{
+			setKey(sdKey["group_id"]);
+		}
 	}
 
 };

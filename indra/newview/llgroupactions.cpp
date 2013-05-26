@@ -358,7 +358,7 @@ void LLGroupActions::activate(const LLUUID& group_id)
 static bool isGroupVisible(const LLUUID& idGroup)
 {
 	// Check if we have this group open as a floater
-	if (NULL != LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", idGroup)))
+	if (NULL != LLFloaterReg::findInstance("floater_group_info", idGroup))
 		return true;
 
 	// Check for *a* visible group in the sidebar
@@ -396,7 +396,11 @@ void LLGroupActions::show(const LLUUID& group_id)
 	}
 	else
 	{
-		LLFloaterReg::showInstance("floater_group_info", LLSD().with("group_id", group_id));
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
+		if (pFloater)
+		{
+			pFloater->openFloater(LLSD().with("group_id", group_id));
+		}
 	}
 // [/SL:KB]
 }
@@ -429,9 +433,11 @@ void LLGroupActions::refresh_notices(const LLUUID& group_id)
 	}
 	else
 	{
-		LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
 		if (pFloater)
-			pFloater->onOpen(params);
+		{
+			pFloater->openFloater(params);
+		}
 	}
 // [/SL:KB]
 }
@@ -459,9 +465,11 @@ void LLGroupActions::refresh(const LLUUID& group_id)
 	}
 	else
 	{
-		LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
 		if (pFloater)
-			pFloater->onOpen(params);
+		{
+			pFloater->openFloater(params);
+		}
 	}
 // [/SL:KB]
 }
@@ -495,7 +503,7 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	LLFloaterReg::hideInstance("floater_group_info", LLSD().with("group_id", group_id));
+	LLFloaterReg::hideInstance("floater_group_info", group_id);
 // [/SL:KB]
 }
 

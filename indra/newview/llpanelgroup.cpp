@@ -639,7 +639,7 @@ void LLPanelGroup::showNotice(const std::string& subject,
 	if (panel->getID() != group_id)
 	{
 		// Group isn't open in the sidebar, check for a floater
-		const LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", LLSD().with("group_id", group_id));
+		const LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", group_id);
 		panel = (pFloater) ? pFloater->findChild<LLPanelGroup>("panel_group_info_sidetray") : NULL;
 		if ( (!panel) || (panel->getID() != group_id) )
 			return;
