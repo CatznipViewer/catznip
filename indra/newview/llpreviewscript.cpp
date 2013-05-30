@@ -1782,7 +1782,10 @@ void LLPreviewLSL::onLoadComplete( LLVFS *vfs, const LLUUID& asset_uuid, LLAsset
 
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 			// Start the timer which will perform regular backup saves
-			preview->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLPreviewLSL::onBackupTimer, preview));
+			if (!preview->mBackupTimer)
+			{
+				preview->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLPreviewLSL::onBackupTimer, preview));
+			}
 // [/SL:KB]
 		}
 		else
@@ -2039,7 +2042,10 @@ void LLLiveLSLEditor::onLoadComplete(LLVFS *vfs, const LLUUID& asset_id,
 
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 			// Start the timer which will perform regular backup saves
-			instance->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLLiveLSLEditor::onBackupTimer, instance));
+			if (!instance->mBackupTimer)
+			{
+				instance->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLLiveLSLEditor::onBackupTimer, instance));
+			}
 // [/SL:KB]
 		}
 		else
