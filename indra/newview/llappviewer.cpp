@@ -3610,8 +3610,23 @@ void LLAppViewer::writeSystemInfo()
 	gDebugInfo["CPUInfo"]["CPUSSE"] = gSysCPU.hasSSE();
 	gDebugInfo["CPUInfo"]["CPUSSE2"] = gSysCPU.hasSSE2();
 	
-	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
-	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated>>10); // MB -> KB
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
+	LLMemory::updateMemoryInfo();
+	gDebugInfo["RAMInfo"]["ProcessWorkingSet"] = (LLSD::Integer)LLMemory::getAllocatedMemKB();
+#if LL_WINDOWS
+	MEMORYSTATUSEX memStatus;
+	memStatus.dwLength = sizeof(memStatus);
+	if (GlobalMemoryStatusEx(&memStatus))
+	{
+		gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(memStatus.ullTotalPhys >> 10);
+		gDebugInfo["RAMInfo"]["VirtualTotal"] = (LLSD::Integer)(memStatus.ullTotalVirtual >> 10);
+	}
+#else
+	gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
+#endif // LL_WINDOWS
+// [/SL:KB]
+//	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
+//	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated>>10); // MB -> KB
 	gDebugInfo["OSInfo"] = getOSInfo().getOSStringSimple();
 
 	// The user is not logged on yet, but record the current grid choice login url
@@ -3733,7 +3748,22 @@ void LLAppViewer::handleViewerCrash()
 //	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
 	gDebugInfo["SessionLength"] = F32(LLFrameTimer::getElapsedSeconds());
 	gDebugInfo["StartupState"] = LLStartUp::getStartupStateString();
-	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer) LLMemory::getCurrentRSS() >> 10;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
+	gDebugInfo["RAMInfo"]["ProcessWorkingSet"] = (LLSD::Integer)LLMemory::getAllocatedMemKB();
+	gDebugInfo["RAMInfo"]["ProcessCommitCharge"] = (LLSD::Integer)LLMemory::getAllocatedPageSizeKB();
+#if LL_WINDOWS
+	MEMORYSTATUSEX memStatus;
+	memStatus.dwLength = sizeof(memStatus);
+	if (GlobalMemoryStatusEx(&memStatus))
+	{
+		gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(memStatus.ullTotalPhys >> 10);
+		gDebugInfo["RAMInfo"]["PhysicalFree"] = (LLSD::Integer)(memStatus.ullAvailPhys >> 10);
+		gDebugInfo["RAMInfo"]["VirtualTotal"] = (LLSD::Integer)(memStatus.ullTotalVirtual >> 10);
+		gDebugInfo["RAMInfo"]["VirtualFree"] = (LLSD::Integer)(memStatus.ullAvailVirtual >> 10);
+	}
+#endif // LL_WINDOWS
+// [/SL:KB]
+//	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer) LLMemory::getCurrentRSS() >> 10;
 	gDebugInfo["FirstLogin"] = (LLSD::Boolean) gAgent.isFirstLogin();
 	gDebugInfo["FirstRunThisInstall"] = gSavedSettings.getBOOL("FirstRunThisInstall");
 
