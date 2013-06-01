@@ -2,7 +2,7 @@
 * @file llcrashlookupwindows.cpp
 * @brief Basic Windows crash analysis
 * 
-* Copyright (C) 2011, Kitty Barnett
+* Copyright (C) 2011-2013, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -44,10 +44,20 @@ LLCrashLookupWindows::LLCrashLookupWindows()
 	{
 		hRes = m_pDbgClient->QueryInterface(__uuidof(IDebugControl4), (void**)&m_pDbgControl);
 		if (FAILED(hRes))
+		{
+			m_strErrorMessage = "Unable to query for IDebugControl4";
 			return;
+		}
 		hRes = m_pDbgClient->QueryInterface(__uuidof(IDebugSymbols2), (void**)&m_pDbgSymbols);
 		if (FAILED(hRes))
+		{
+			m_strErrorMessage = "Unable to query for IDebugSymbols2";
 			return;
+		}
+	}
+	else
+	{
+		m_strErrorMessage = "Unable to instantiate IDebugClient";
 	}
 }
 
@@ -86,7 +96,10 @@ bool LLCrashLookupWindows::initFromDump(const std::string& strDumpPath)
 	// Open the minidump and wait to finish processing
 	HRESULT hRes = m_pDbgClient->OpenDumpFile(strDumpPath.c_str());
 	if (FAILED(hRes))
+	{
+		m_strErrorMessage = "Unable to open dump " + strDumpPath;
 		return false;
+	}
 	m_pDbgControl->WaitForEvent(DEBUG_WAIT_DEFAULT, INFINITE);
 
 	// Try to find an event that describes an exception
@@ -95,7 +108,10 @@ bool LLCrashLookupWindows::initFromDump(const std::string& strDumpPath)
 	hRes = m_pDbgControl->GetStoredEventInformation(
 		&nEventType, &nProcessId, &nThreadId, bufContext, sizeof(bufContext), &szContext, NULL, 0, 0);
 	if ( (FAILED(hRes)) || (DEBUG_EVENT_EXCEPTION != nEventType) )
+	{
+		m_strErrorMessage = "GetStoredEventInformation failed to find an exception event";
 		return false;
+	}
 
 	// Get the stack trace for the exception
 	DEBUG_STACK_FRAME dbgStackFrames[MAX_STACK_FRAMES]; ULONG cntStackFrames = 0;
@@ -104,21 +120,30 @@ bool LLCrashLookupWindows::initFromDump(const std::string& strDumpPath)
 		bufContext, szContext, dbgStackFrames, ARRAYSIZE(dbgStackFrames), 
 		pbufStackFrameContexts, MAX_STACK_FRAMES * szContext, szContext, &cntStackFrames);
 	if ( (FAILED(hRes)) || (cntStackFrames < 1) )
+	{
+		m_strErrorMessage = "Failed to get a stack strace";
 		return false;
+	}
 
 	// Since the user won't have any debug symbols present we're really only interested in the top stack frame
 	m_nInstructionAddr = dbgStackFrames[0].InstructionOffset;
 	ULONG idxModule = 0;
 	hRes = m_pDbgSymbols->GetModuleByOffset(m_nInstructionAddr, 0, &idxModule, &m_nModuleBaseAddr);
 	if (FAILED(hRes))
+	{
+		m_strErrorMessage = "Failed to get crash module";
 		return false;
+	}
 
 	// Lookup the name of the module where the crash occurred
 	CHAR strModule[MAX_PATH] = {0}; 
 	hRes = m_pDbgSymbols->GetModuleNameString(
 		DEBUG_MODNAME_MODULE, DEBUG_ANY_ID, m_nModuleBaseAddr, strModule, ARRAYSIZE(strModule) - 1, NULL);
 	if (FAILED(hRes))
+	{
+		m_strErrorMessage = "Failed to get crash module name";
 		return false;
+	}
 	m_strModule = strModule;
 
 	// Grab some basic properties we use for verification of the image
@@ -137,6 +162,10 @@ bool LLCrashLookupWindows::initFromDump(const std::string& strDumpPath)
 	{
 		VS_FIXEDFILEINFO* pFileInfo = (VS_FIXEDFILEINFO*)bufVersionInfo;
 		m_nModuleVersion = ((U64)pFileInfo->dwFileVersionMS << 32) + pFileInfo->dwFileVersionLS;
+	}
+	else
+	{
+		m_strErrorMessage = "Failed to get crash module version information";
 	}
 
 	return true;

@@ -318,10 +318,24 @@ void LLCrashLogger::gatherFiles()
 		{
 			mFileMap["Minidump"] = minidump_path;
 			if (mCrashLookup)
+			{
 				mCrashLookup->initFromDump(minidump_path);
+				if (mCrashLookup->hasErorrMessage())
+				{
+					mDebugLog["DbgDumpLookup"] = mCrashLookup->getErrorMessage();
+				}
+			}
+		}
+		else
+		{
+			mDebugLog["DbgDump"] = "Minidump path does not exist";
 		}
 		// Remove the minidump path after we've retrieved it since it could contain the OS user name
 		mDebugLog.erase("MinidumpPath");
+	}
+	else
+	{
+		mDebugLog["DbgDump"] = "Minidump path is empty";
 	}
 
 	// Include debug_info.log as part of CrashReport.log

@@ -2,7 +2,7 @@
 * @file llcrashlookupwindows.h
 * @brief Basic Windows crash analysis
 * 
-* Copyright (C) 2011, Kitty Barnett
+* Copyright (C) 2011-2013, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
