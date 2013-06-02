@@ -77,7 +77,7 @@
      draw_stripes="true"
      follows="top|left|bottom|right"
      height="150"
-     multi_select="false"
+     multi_select="true"
      name="crashes_list"
      layout="topleft"
      left="30"
