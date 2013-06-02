@@ -2456,13 +2456,24 @@ void LLPanelPreferenceCrashReports::cancel()
 void LLPanelPreferenceCrashReports::onCopySelection()
 {
 	const LLScrollListCtrl* pCrashList = getChild<LLScrollListCtrl>("crashes_list");
-	const LLScrollListItem* pSelectedRow = pCrashList->getFirstSelected();
-
-	const std::string strCrash = llformat("%s - %s - %s", 
-		pSelectedRow->getColumn(0)->getValue().asString().c_str(), 
-		pSelectedRow->getColumn(1)->getValue().asString().c_str(),
-		pSelectedRow->getColumn(2)->getValue().asString().c_str());
-	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(strCrash), 0, strCrash.length());
+	if (pCrashList)
+	{
+		const LLScrollListItem* pSelectedRow = pCrashList->getFirstSelected();
+		if (pSelectedRow)
+		{
+			LLSD sdValues[3];
+			for (int idxValue = 0; idxValue < 3; idxValue++)
+			{
+				const LLScrollListCell* pColumn = pSelectedRow->getColumn(0);
+				if (pColumn)
+				{
+					sdValues[idxValue] = pSelectedRow->getColumn(2)->getValue();
+				}
+			}
+			const std::string strCrash = llformat("%s - %s - %s", sdValues[0].asString().c_str(), sdValues[1].asString().c_str(), sdValues[2].asString().c_str());
+			LLClipboard::instance().copyToClipboard(utf8str_to_wstring(strCrash), 0, strCrash.length());
+		}
+	}
 }
 
 void LLPanelPreferenceCrashReports::onClearAll()
