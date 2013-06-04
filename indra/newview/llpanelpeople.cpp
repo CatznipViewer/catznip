@@ -747,10 +747,17 @@ BOOL LLPanelPeople::postBuild()
 	mSuggestedFriends = friends_tab->getChild<LLAvatarList>("suggested_friends");
 	mOnlineFriendList->setNoItemsCommentText(getString("no_friends_online"));
 	mOnlineFriendList->setShowIcons("FriendsListShowIcons");
-	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
+//	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
 	mAllFriendList->setNoItemsCommentText(getString("no_friends"));
 	mAllFriendList->setShowIcons("FriendsListShowIcons");
-	mAllFriendList->showPermissions("FriendsListShowPermissions");
+//	mAllFriendList->showPermissions("FriendsListShowPermissions");
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-26 (Catznip-3.4)
+	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
+	if (spType >= SP_COUNT)
+		spType = SP_NEVER;
+	mOnlineFriendList->showPermissions(spType);
+	mAllFriendList->showPermissions(spType);
+// [/SL:KB]
 
 	LLPanel* nearby_tab = getChild<LLPanel>(NEARBY_TAB_NAME);
 	nearby_tab->setVisibleCallback(boost::bind(&Updater::setActive, mNearbyListUpdater, _2));
@@ -1585,14 +1592,30 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 		mAllFriendList->toggleIcons();
 		mOnlineFriendList->toggleIcons();
 	}
-	else if (chosen_item == "view_permissions")
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	else if ( ("view_permissions_never" == chosen_item) || 
+	          ("view_permissions_hover" == chosen_item) ||
+	          ("view_permissions_nondefault" == chosen_item) )
 	{
-		bool show_permissions = !gSavedSettings.getBOOL("FriendsListShowPermissions");
-		gSavedSettings.setBOOL("FriendsListShowPermissions", show_permissions);
-
-		mAllFriendList->showPermissions(show_permissions);
-		mOnlineFriendList->showPermissions(show_permissions);
+		EShowPermissionType spType = SP_NEVER;
+		if ("view_permissions_hover" == chosen_item)
+			spType = SP_HOVER;
+		else if ("view_permissions_nondefault" == chosen_item)
+			spType = SP_NONDEFAULT;
+		gSavedSettings.setU32("FriendsListShowPermissions", (U32)spType);
+		
+		mAllFriendList->showPermissions(spType);
+		mOnlineFriendList->showPermissions(spType);
 	}
+// [/SL:KB]
+//	else if (chosen_item == "view_permissions")
+//	{
+//		bool show_permissions = !gSavedSettings.getBOOL("FriendsListShowPermissions");
+//		gSavedSettings.setBOOL("FriendsListShowPermissions", show_permissions);
+//
+//		mAllFriendList->showPermissions(show_permissions);
+//		mOnlineFriendList->showPermissions(show_permissions);
+//	}
 	}
 
 void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
@@ -1778,6 +1801,15 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return name_format == NF_COMPLETENAME;
 	if ("name_username" == item)
 		return name_format == NF_USERNAME;
+// [/SL:KB]
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
+	if ("view_permissions_never" == item)
+		return SP_NEVER == spType;
+	if ("view_permissions_hover" == item)
+		return SP_HOVER == spType;
+	if ("view_permissions_nondefault" == item)
+		return SP_NONDEFAULT == spType;
 // [/SL:KB]
 
 	return false;

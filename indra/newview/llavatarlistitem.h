@@ -50,6 +50,16 @@ typedef enum
 } EAvatarListNameFormat;
 // [/SL:KB]
 
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+typedef enum
+{
+	SP_NEVER = 0,			// Never show permission icons
+	SP_HOVER = 1,			// Only show permission icons on hover
+	SP_NONDEFAULT = 2,		// Show permissions different from default
+	SP_COUNT
+} EShowPermissionType;
+// [/SL:KB]
+
 class LLAvatarListItem : public LLPanel, public LLFriendObserver
 {
 public:
@@ -127,8 +137,8 @@ public:
 // [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 	void showVolumeSlider(bool show);
 // [/SL:KB]
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.3)
-	void setShowPermissions(bool show);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	void setShowPermissions(EShowPermissionType spType);
 // [/SL:KB]
 //	void setShowPermissions(bool show) { mShowPermissions = show; };
 //	void showLastInteractionTime(bool show);
@@ -143,7 +153,7 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-11-04 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-11-04 (Catznip-2.3)
 	void onPermissionBtnToggle(S32 toggleRight);
 	void onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant);
 // [/SL:KB]
@@ -166,7 +176,7 @@ protected:
 //	LLIconCtrl* mIconPermissionEditMine;
 	/// Indicator for permission to edit their objects.
 	LLIconCtrl* mIconPermissionEditTheirs;
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
 	LLButton* mIconPermissionOnline;
 	LLButton* mIconPermissionMap;
 	LLButton* mIconPermissionEditMine;
@@ -236,7 +246,7 @@ private:
 	 * Need to call updateChildren() afterwards to sort out their layout.
 	 */
 //	bool showPermissions(bool visible);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
 	bool refreshPermissions();
 // [/SL:KB]
 
@@ -270,7 +280,10 @@ private:
 	bool mShowProfileBtn;
 
 	/// indicates whether to show icons representing permissions granted
-	bool mShowPermissions;
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType mShowPermissions;
+// [/SL:KB]
+//	bool mShowPermissions;
 
 	/// true when the mouse pointer is hovering over this item
 	bool mHovered;

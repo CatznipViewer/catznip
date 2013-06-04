@@ -63,6 +63,15 @@ static const F32 TEXT_UPDATE_PERIOD = 5;
 // Used to limit time spent for avatar list update per frame.
 static const unsigned ADD_LIMIT = 50;
 
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+void LLAvatarList::ShowPermissionTypeNames::declareValues()
+{
+	declare("never", SP_NEVER);
+	declare("hover", SP_HOVER);
+	declare("nondefault", SP_NONDEFAULT);
+}
+// [/SL:KB]
+
 bool LLAvatarList::contains(const LLUUID& id)
 {
 	const uuid_vec_t& ids = getIDs();
@@ -122,10 +131,11 @@ void LLAvatarList::refreshSpeakingIndicatorsVisibility(bool visible)
 	}
 }
 
-void LLAvatarList::showPermissions(bool visible)
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+void LLAvatarList::showPermissions(EShowPermissionType spType)
 {
 	// Save the value for new items to use.
-	mShowPermissions = visible;
+	mShowPermissions = spType;
 
 	// Enable or disable showing permissions icons for all existing items.
 	std::vector<LLPanel*> items;
@@ -135,6 +145,20 @@ void LLAvatarList::showPermissions(bool visible)
 		static_cast<LLAvatarListItem*>(*it)->setShowPermissions(mShowPermissions);
 	}
 }
+// [/SL:KB]
+//void LLAvatarList::showPermissions(bool visible)
+//{
+//	// Save the value for new items to use.
+//	mShowPermissions = visible;
+//
+//	// Enable or disable showing permissions icons for all existing items.
+//	std::vector<LLPanel*> items;
+//	getItems(items);
+//	for(std::vector<LLPanel*>::const_iterator it = items.begin(), end_it = items.end(); it != end_it; ++it)
+//	{
+//		static_cast<LLAvatarListItem*>(*it)->setShowPermissions(mShowPermissions);
+//	}
+//}
 
 //static bool findInsensitive(std::string haystack, const std::string& needle_upper)
 //{
@@ -166,7 +190,10 @@ LLAvatarList::Params::Params()
 // [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 , show_volume_slider("show_volume_slider", false)
 // [/SL:KB]
-, show_permissions_granted("show_permissions_granted", false)
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+, show_permissions_granted("show_permissions_granted", SP_NEVER)
+// [/SL:KB]
+//, show_permissions_granted("show_permissions_granted", false)
 {
 }
 

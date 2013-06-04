@@ -62,6 +62,13 @@ public:
 	};
 // [/SL:KB]
 
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	struct ShowPermissionTypeNames : public LLInitParam::TypeValuesHelper<EShowPermissionType, ShowPermissionTypeNames>
+	{
+		static void declareValues();
+	};
+// [/SL:KB]
+
 	struct Params : public LLInitParam::Block<Params, LLFlatListViewEx::Params>
 	{
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
@@ -77,9 +84,12 @@ public:
 						show_profile_btn,
 						show_speaking_indicator,
 // [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
-						show_volume_slider,
+						show_volume_slider;
 // [/SL:KB]
-						show_permissions_granted;
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+		Optional<EShowPermissionType, ShowPermissionTypeNames> show_permissions_granted;
+// [/SL:KB]
+//						show_permissions_granted;
 		Params();
 	};
 
@@ -103,7 +113,10 @@ public:
 
 	void toggleIcons();
 	void setSpeakingIndicatorsVisible(bool visible);
-	void showPermissions(bool visible);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	void showPermissions(EShowPermissionType spType);
+// [/SL:KB]
+//	void showPermissions(bool visible);
 	void sortByName();
 	void setShowIcons(std::string param_name);
 	bool getIconsVisible() const { return mShowIcons; }
@@ -172,7 +185,10 @@ private:
 	bool mShowInfoBtn;
 	bool mShowProfileBtn;
 	bool mShowSpeakingIndicator;
-	bool mShowPermissions;
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType mShowPermissions;
+// [/SL:KB]
+//	bool mShowPermissions;
 
 //	LLTimer*				mLITUpdateTimer; // last interaction time update timer
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
