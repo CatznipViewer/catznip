@@ -37,6 +37,9 @@
 #include "message.h"
 #include "llfloaterautoreplacesettings.h"
 #include "llagent.h"
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+#include "llagentwearables.h"
+// [/SL:KB]
 #include "llavatarconstants.h"
 #include "llcheckboxctrl.h"
 #include "llcolorswatch.h"
@@ -1195,6 +1198,14 @@ void LLFloaterPreference::refreshEnabledState()
 	disableUnavailableSettings();
 
 	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	LLButton* pEditHoverBtn = getChild<LLButton>("hover_edit_btn");
+	if (pEditHoverBtn)
+	{
+		pEditHoverBtn->setEnabled( (LLStartUp::getStartupState() >= STATE_STARTED) && (gAgentWearables.isWearableModifiable(LLWearableType::WT_SHAPE, 0)) );
+	}
+// [/SL:KB]
 }
 
 void LLFloaterPreference::disableUnavailableSettings()
@@ -1807,6 +1818,18 @@ void LLFloaterPreference::changed()
 	updateDeleteTranscriptsButton();
 
 }
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLFloaterPreference::onClickShapeEditHover()
+{
+	if ( (LLStartUp::getStartupState() >= STATE_STARTED) && (gAgentWearables.isWearableModifiable(LLWearableType::WT_SHAPE, 0)) )
+	{
+		onBtnOK();
+
+		LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "edit_shape").with("wearable_param", "Hover"));
+	}
+}
+// [/SL:KB]
 
 //------------------------------Updater---------------------------------------
 

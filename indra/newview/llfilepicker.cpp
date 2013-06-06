@@ -181,7 +181,7 @@ LLFilePicker::~LLFilePicker()
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
 const std::string& LLFilePicker::getExtension(LLFilePicker::ESaveFilter filter)
 {
-	auto itExt = sSaveFilterExtensions.find(filter);
+	std::map<LLFilePicker::ESaveFilter, std::string>::const_iterator itExt = sSaveFilterExtensions.find(filter);
 	return (sSaveFilterExtensions.end() != itExt) ? itExt->second : LLStringUtil::null;
 }
 

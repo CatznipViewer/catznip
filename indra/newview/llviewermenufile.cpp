@@ -698,7 +698,7 @@ void handle_compress_image(const std::vector<std::string>& files)
 //		while (!infile.empty())
 //		{
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-		for (auto itFile = files.cbegin(); itFile != files.cend(); ++itFile)
+		for (std::vector<std::string>::const_iterator itFile = files.begin(); itFile != files.end(); ++itFile)
 		{
 			const std::string& infile = *itFile;
 // [/SL:KB]

@@ -172,6 +172,10 @@ public:
 
 	virtual bool addChild(LLView* child, S32 tab_group = 0 );
 
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	void scrollToShowRect(const LLRect& rctScreen);
+// [/SL:KB]
+
 	bool isExpanded() const { return mDisplayChildren; }
 
 	S32 getHeaderHeight();
@@ -200,7 +204,10 @@ protected:
 	void adjustContainerPanel	();
 	S32	 getChildViewHeight		();
 
-	void onScrollPosChangeCallback(S32, LLScrollbar*);
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	void onScrollPosChangeCallback();
+// [/SL:KB]
+//	void onScrollPosChangeCallback(S32, LLScrollbar*);
 
 	void show_hide_scrollbar	(const LLRect& child_rect);
 	void showScrollbar			(const LLRect& child_rect);
