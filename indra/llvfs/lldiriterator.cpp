@@ -128,7 +128,22 @@ bool LLDirIterator::Impl::next(std::string &fname)
 			fname = name;
 		}
 
-		++mIter;
+//		++mIter;
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2013-06-27 (Catznip-3.4.1)
+		try
+		{
+			// FindNextFile is failing with ERROR_FILE_CORRUPT for some users for some reason *confuzzled*
+			// (we should find out whether gracefully failing here is actually the right way, or whether it's indicative
+			// of a disk corruption issue or some other problem the user needs to look into)
+			++mIter;
+		}
+		catch (const fs::filesystem_error& e)
+		{
+			mIsValid = false;
+			llwarns << e.what() << llendl;
+			return false;
+		}
+// [/SL:KB]
 	}
 
 	return found;
