@@ -52,6 +52,10 @@
 // LL_WINDOWS
 // [/SL:KB]
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+const std::ifstream::pos_type LOG_TRUNC_SIZE = 16384;
+// [/SL:KB]
+
 LLPumpIO* gServicePump;
 BOOL gBreak = false;
 BOOL gSent = false;
@@ -130,32 +134,67 @@ LLCrashLogger::~LLCrashLogger()
 
 }
 
-// TRIM_SIZE must remain larger than LINE_SEARCH_SIZE.
-const int TRIM_SIZE = 128000;
-const int LINE_SEARCH_DIST = 500;
-const std::string SKIP_TEXT = "\n ...Skipping... \n";
-void trimSLLog(std::string& sllog)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+bool getSLLog(const std::string& strLogPath, std::string& strLogFile)
 {
-	if(sllog.length() > TRIM_SIZE * 2)
+	std::ifstream inLogFile(strLogPath, std::ios::ate);
+	if (inLogFile.is_open())
 	{
-		std::string::iterator head = sllog.begin() + TRIM_SIZE;
-		std::string::iterator tail = sllog.begin() + sllog.length() - TRIM_SIZE;
-		std::string::iterator new_head = std::find(head, head - LINE_SEARCH_DIST, '\n');
-		if(new_head != head - LINE_SEARCH_DIST)
+		std::ifstream::pos_type szLogFile = inLogFile.tellg();
+		std::ifstream::pos_type posTruncLog = 0;
+		if (szLogFile > LOG_TRUNC_SIZE)
 		{
-			head = new_head;
+			posTruncLog = szLogFile - LOG_TRUNC_SIZE;
+			szLogFile = LOG_TRUNC_SIZE;
+		}
+		inLogFile.seekg(posTruncLog);
+
+		std::stringstream s;
+		s << inLogFile.rdbuf();
+
+		strLogFile = s.str();
+		if (0 != posTruncLog)
+		{
+			std::string::size_type posLR = strLogFile.find('\n');
+			if (std::string::npos != posLR)
+			{
+				strLogFile.erase(0, posLR);
+			}
 		}
 
-		std::string::iterator new_tail = std::find(tail, tail + LINE_SEARCH_DIST, '\n');
-		if(new_tail != tail + LINE_SEARCH_DIST)
-		{
-			tail = new_tail;
-		}
-
-		sllog.erase(head, tail);
-		sllog.insert(head, SKIP_TEXT.begin(), SKIP_TEXT.end());
+		inLogFile.close();
+		return true;
 	}
+	return false;
 }
+// [/SL:KB]
+
+//// TRIM_SIZE must remain larger than LINE_SEARCH_SIZE.
+//const int TRIM_SIZE = 128000;
+//const int LINE_SEARCH_DIST = 500;
+//const std::string SKIP_TEXT = "\n ...Skipping... \n";
+//void trimSLLog(std::string& sllog)
+//{
+//	if(sllog.length() > TRIM_SIZE * 2)
+//	{
+//		std::string::iterator head = sllog.begin() + TRIM_SIZE;
+//		std::string::iterator tail = sllog.begin() + sllog.length() - TRIM_SIZE;
+//		std::string::iterator new_head = std::find(head, head - LINE_SEARCH_DIST, '\n');
+//		if(new_head != head - LINE_SEARCH_DIST)
+//		{
+//			head = new_head;
+//		}
+//
+//		std::string::iterator new_tail = std::find(tail, tail + LINE_SEARCH_DIST, '\n');
+//		if(new_tail != tail + LINE_SEARCH_DIST)
+//		{
+//			tail = new_tail;
+//		}
+//
+//		sllog.erase(head, tail);
+//		sllog.insert(head, SKIP_TEXT.begin(), SKIP_TEXT.end());
+//	}
+//}
 
 std::string getStartupStateFromLog(std::string& sllog)
 {
@@ -199,10 +238,13 @@ void LLCrashLogger::gatherFiles()
 
 		mCrashInPreviousExec = mDebugLog["CrashNotHandled"].asBoolean();
 
-		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
+//		mFileMap["SecondLifeLog"] = mDebugLog["SLLog"].asString();
 		mFileMap["SettingsXml"] = mDebugLog["SettingsFilename"].asString();
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-27 (Catznip-2.4)
-		// Remove the settings.xml path after we've retrieved it since it could contain the OS user name
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+		mLogFile = mDebugLog["SLLog"].asString();
+
+		// Remove the log and settings path after we've retrieved it since it could contain the OS user name
+		mDebugLog.erase("SLLog");
 		mDebugLog.erase("SettingsFilename");
 // [/SL:KB]
 		if(mDebugLog.has("CAFilename"))
@@ -214,7 +256,10 @@ void LLCrashLogger::gatherFiles()
 			LLCurl::setCAFile(gDirUtilp->getCAFile());
 		}
 
-		llinfos << "Using log file from debug log " << mFileMap["SecondLifeLog"] << llendl;
+//		llinfos << "Using log file from debug log " << mFileMap["SecondLifeLog"] << llendl;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+		llinfos << "Using log file from debug log " << mLogFile << llendl;
+// [/SL:KB]
 		llinfos << "Using settings file from debug log " << mFileMap["SettingsXml"] << llendl;
 	}
 //	else
@@ -231,16 +276,15 @@ void LLCrashLogger::gatherFiles()
 		// Replace the log file ext with .old, since the 
 		// instance that launched this process has overwritten
 		// SecondLife.log
-		std::string log_filename = mFileMap["SecondLifeLog"];
-//		log_filename.replace(log_filename.size() - 4, 4, ".old");
-//		mFileMap["SecondLifeLog"] = log_filename;
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-2.6)
-		if (!log_filename.empty())
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+		if (mLogFile.length() > 4)
 		{
-			log_filename.replace(log_filename.size() - 4, 4, ".old");
-			mFileMap["SecondLifeLog"] = log_filename;
+			mLogFile.replace(mLogFile.length() - 4, 4, ".old");
 		}
 // [/SL:KB]
+//		std::string log_filename = mFileMap["SecondLifeLog"];
+//		log_filename.replace(log_filename.size() - 4, 4, ".old");
+//		mFileMap["SecondLifeLog"] = log_filename;
 	}
 
 	gatherPlatformSpecificFiles();
@@ -416,6 +460,8 @@ bool LLCrashLogger::saveCrashBehaviorSetting(S32 crash_behavior)
 }
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6)
+static const std::string BOUNDARY("------------abcdef012345xyZ");
+
 std::string getFormDataField(const std::string& strFieldName, const std::string& strFieldValue, const std::string& strBoundary)
 {
 	std::ostringstream streamFormPart;
@@ -425,6 +471,18 @@ std::string getFormDataField(const std::string& strFieldName, const std::string&
 		<< strFieldValue << "\r\n";
 
 	return streamFormPart.str();
+}
+
+void addFormFile(std::ostringstream& body, const std::string strFileName, const char* pBuffer, unsigned int szBuffer)
+{
+	body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szBuffer), BOUNDARY);
+	body << "--" << BOUNDARY << "\r\n"
+			<<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
+			<< "filename=\"" << strFileName << "\"\r\n"
+			<< "Content-Type: application/octet-stream"
+			<< "\r\n\r\n";
+	body.write(pBuffer, szBuffer);
+	body <<	"\r\n";
 }
 // [/SL:KB]
 
@@ -436,7 +494,6 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 		updateApplication(llformat("%s, try %d...", msg.c_str(), i+1));
 //		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6)
-		static const std::string BOUNDARY("------------abcdef012345xyZ");
 
 		LLSD headers = LLSD::emptyMap();
 
@@ -516,22 +573,26 @@ bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg
 
 			fstream.seekg(0, std::ios::end);
 			U32 szFile = fstream.tellg();
-			body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szFile), BOUNDARY);
 			fstream.seekg(0, std::ios::beg);
 
-			body << "--" << BOUNDARY << "\r\n"
-				 <<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
-				 << "filename=\"" << strFileName << "\"\r\n"
-				 << "Content-Type: application/octet-stream"
-				 << "\r\n\r\n";
+			char* pBuffer = new char[szFile];
+			fstream.read(pBuffer, szFile);
 
-			std::vector<char> fileBuffer(szFile);
-			fstream.read(&fileBuffer[0], szFile);
-			body.write(&fileBuffer[0], szFile);
+			addFormFile(body, strFileName, pBuffer, szFile);
 
+			delete[] pBuffer;
 			fstream.close();
 
 			body <<	"\r\n";
+		}
+
+		/*
+		 * Add the - or a portion of - log file
+		 */
+		std::string strLogFile;
+		if ( (!mLogFile.empty()) && (getSLLog(mLogFile, strLogFile)) )
+		{
+			addFormFile(body, "Catznip.log", strLogFile.c_str(), strLogFile.length());
 		}
 
 		/*

@@ -3590,6 +3590,13 @@ void LLAppViewer::removeCacheFiles(const std::string& file_mask)
 void LLAppViewer::writeSystemInfo()
 {
 //	gDebugInfo["SLLog"] = LLError::logFileName();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-29 (Catznip-3.4.1)
+	if (gCrashSettings.getBOOL("CrashSubmitLog"))
+	{
+		// Only include the log if the user consented
+		gDebugInfo["SLLog"] = LLError::logFileName();
+	}
+// [/SL:KB]
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a

@@ -46,6 +46,9 @@
 #include "llcombobox.h"
 #include "llcommandhandler.h"
 #include "lldirpicker.h"
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+#include "llerrorcontrol.h"
+// [/SL:KB]
 #include "lleventtimer.h"
 #include "llfeaturemanager.h"
 #include "llfocusmgr.h"
@@ -2375,8 +2378,9 @@ BOOL LLPanelPreferenceCrashReports::postBuild()
 	pSendCrashReports->setCommitCallback(boost::bind(&LLPanelPreferenceCrashReports::refresh, this));
 
 	getChild<LLCheckBoxCtrl>("checkSendCrashReportsAlwaysAsk")->set(CRASH_BEHAVIOR_ASK == nCrashSubmitBehavior);
-	getChild<LLCheckBoxCtrl>("checkSendSettings")->set(gCrashSettings.getBOOL("CrashSubmitSettings"));
 	getChild<LLCheckBoxCtrl>("checkSendName")->set(gCrashSettings.getBOOL("CrashSubmitName"));
+	getChild<LLCheckBoxCtrl>("checkSendSettings")->set(gCrashSettings.getBOOL("CrashSubmitSettings"));
+	getChild<LLCheckBoxCtrl>("checkSendLog")->set(gCrashSettings.getBOOL("CrashSubmitLog"));
 
 	refresh();
 
@@ -2429,8 +2433,9 @@ void LLPanelPreferenceCrashReports::refresh()
 	bool fEnable = getChild<LLCheckBoxCtrl>("checkSendCrashReports")->get();
 	getChild<LLUICtrl>("comboSaveMiniDumpType")->setEnabled(fEnable);
 	getChild<LLUICtrl>("checkSendCrashReportsAlwaysAsk")->setEnabled(fEnable);
-	getChild<LLUICtrl>("checkSendSettings")->setEnabled(fEnable);
 	getChild<LLUICtrl>("checkSendName")->setEnabled(fEnable);
+	getChild<LLUICtrl>("checkSendSettings")->setEnabled(fEnable);
+	getChild<LLUICtrl>("checkSendLog")->setEnabled(fEnable);
 }
 
 void LLPanelPreferenceCrashReports::apply()
@@ -2442,11 +2447,22 @@ void LLPanelPreferenceCrashReports::apply()
 	else
 		gCrashSettings.setS32("CrashSubmitBehavior", CRASH_BEHAVIOR_NEVER_SEND);
 
+	LLCheckBoxCtrl* pSendName = getChild<LLCheckBoxCtrl>("checkSendName");
+	gCrashSettings.setBOOL("CrashSubmitName", pSendName->get());
+
 	LLCheckBoxCtrl* pSendSettings = getChild<LLCheckBoxCtrl>("checkSendSettings");
 	gCrashSettings.setBOOL("CrashSubmitSettings", pSendSettings->get());
 
-	LLCheckBoxCtrl* pSendName = getChild<LLCheckBoxCtrl>("checkSendName");
-	gCrashSettings.setBOOL("CrashSubmitName", pSendName->get());
+	LLCheckBoxCtrl* pSendLog = getChild<LLCheckBoxCtrl>("checkSendLog");
+	bool fSendLog = pSendLog->get();
+	gCrashSettings.setBOOL("CrashSubmitLog", fSendLog);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-29 (Catznip-3.4.1)
+	// Only include the log if the user consented
+	if (fSendLog)
+		gDebugInfo["SLLog"] = LLError::logFileName();
+	else
+		gDebugInfo.erase("SLLog");
+// [/SL:KB]
 }
 
 void LLPanelPreferenceCrashReports::cancel()

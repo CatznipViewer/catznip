@@ -57,6 +57,17 @@
      width="160"
     />
 
+    <check_box
+     enabled="false"
+     follows="top|left"
+     height="16"
+     label="Include partial log"
+     layout="topleft"
+     name="checkSendLog"
+     top_pad="5"
+     width="130"
+    />
+
     <text
      follows="top|left"
      height="10"
@@ -65,7 +76,7 @@
      length="1"
      mouse_opaque="false"
      name="crashes_text"
-     top_pad="15"
+     top_pad="10"
      type="string"
      width="475"
     >

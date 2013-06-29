@@ -74,7 +74,7 @@ BEGIN
     DEFPUSHBUTTON   "Send",IDOK,198,104,45,15,WS_GROUP
     PUSHBUTTON      "Don't Send",IDCANCEL,247,104,45,15,WS_GROUP
     LTEXT           "%s appears to have crashed.",IDC_STATIC_HEADER,4,4,288,14
-    LTEXT           "This crash reporter collects information about your computer's hardware configuration and operating system which is used only for debugging purposes.\r\nSecondLife logs are not collected.",IDC_STATIC_WHATINFO,4,23,288,29,NOT WS_GROUP
+    LTEXT           "This crash reporter collects information about your computer's hardware configuration and operating system which is used only for debugging purposes.",IDC_STATIC_WHATINFO,4,23,288,29,NOT WS_GROUP
     CONTROL         "Remember this choice",IDC_CHECK_AUTO,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,4,106,89,13
     LTEXT           "Sending crash reports is the best way to help us improve the quality of %s.",IDC_STATIC_MOTIVATION,4,54,288,8
     CONTROL         "This report will be sent to catznip.com, NOT Linden Lab.\r\nPlease review the privacy policy at http://catznip.com/privacy for more information.",IDC_STATIC,
@@ -93,7 +93,7 @@ BEGIN
     LTEXT           "%s appears to have crashed or frozen the last time it ran.",IDC_STATIC_HEADER,4,4,214,8
     LTEXT           "This crash reporter collects information about your computer's",IDC_STATIC,4,17,201,8
     LTEXT           "hardware configuration and operating system which is used only",IDC_STATIC_MSG,4,25,212,8
-    LTEXT           "for debugging purposes. SecondLife logs are not collected.",IDC_STATIC,4,33,210,8
+    LTEXT           "for debugging purposes.",IDC_STATIC,4,33,210,8
     LTEXT           "In the space below, please briefly describe what you were doing",IDC_STATIC,3,48,208,8
     LTEXT           "or trying to do just prior to the crash.",IDC_STATIC,3,56,204,8
     LTEXT           "If you don't wish to send a crash report, press Don't Send.",IDC_STATIC,3,90,223,8

@@ -64,6 +64,9 @@ protected:
 	S32 mCrashBehavior;
 	BOOL mCrashInPreviousExec;
 	std::map<std::string, std::string> mFileMap;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+	std::string mLogFile;
+// [/SL:KB]
 	std::string mGridName;
 	LLControlGroup mCrashSettings;
 	std::string mProductName;
