@@ -24,7 +24,7 @@
   <menu
    label="Zoom"
    name="Minimap Zoom">
-	<menu_item_call
+    <menu_item_call
      label="Close"
      name="Zoom Close">
         <menu_item_call.on_click

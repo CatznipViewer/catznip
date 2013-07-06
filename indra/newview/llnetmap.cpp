@@ -46,18 +46,18 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llappviewer.h" // for gDisconnected
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 #include "llavataractions.h"
 #include "llfloatersidepanelcontainer.h"
 // [/SL:KB]
 #include "llcallingcard.h" // LLAvatarTracker
 #include "llfloaterworldmap.h"
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 #include "llparcel.h"
 // [/SL:KB]
 #include "lltracker.h"
 #include "llsurface.h"
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 #include "lltrans.h"
 // [/SL:KB]
 #include "llviewercamera.h"
@@ -66,7 +66,7 @@
 #include "llviewertexturelist.h"
 #include "llviewermenu.h"
 #include "llviewerobjectlist.h"
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 #include "llviewerparcelmgr.h"
 #include "llviewerparceloverlay.h"
 // [/SL:KB]
@@ -103,14 +103,14 @@ LLNetMap::LLNetMap (const Params & p)
 	mMouseDown(0, 0),
 	mPanning(false),
 //	mUpdateNow(false),
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 	mUpdateObjectImage(false),
 	mUpdateParcelImage(false),
 // [/SL:KB]
 	mObjectImageCenterGlobal( gAgentCamera.getCameraPositionGlobal() ),
 	mObjectRawImagep(),
 	mObjectImagep(),
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 	mParcelImageCenterGlobal( gAgentCamera.getCameraPositionGlobal() ),
 	mParcelRawImagep(),
 	mParcelImagep(),
@@ -127,6 +127,17 @@ LLNetMap::LLNetMap (const Params & p)
 LLNetMap::~LLNetMap()
 {
 	gSavedSettings.setF32("MiniMapScale", mScale);
+
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	if (mParcelMgrConn.connected())
+	{
+		mParcelMgrConn.disconnect();
+	}
+	if (mParcelOverlayConn.connected())
+	{
+		mParcelMgrConn.disconnect();
+	}
+// [/SL:KB]
 }
 
 BOOL LLNetMap::postBuild()
@@ -135,7 +146,7 @@ BOOL LLNetMap::postBuild()
 	
 	registrar.add("Minimap.Zoom", boost::bind(&LLNetMap::handleZoom, this, _2));
 	registrar.add("Minimap.Tracker", boost::bind(&LLNetMap::handleStopTracking, this, _2));
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 	registrar.add("Minimap.ShowProfile", boost::bind(&LLNetMap::handleShowProfile, this, _2));
 	registrar.add("Minimap.TextureType", boost::bind(&LLNetMap::handleTextureType, this, _2));
 	registrar.add("Minimap.ToggleOverlay", boost::bind(&LLNetMap::handleOverlayToggle, this, _2));
@@ -144,9 +155,9 @@ BOOL LLNetMap::postBuild()
 	enable_registrar.add("Minimap.CheckTextureType", boost::bind(&LLNetMap::checkTextureType, this, _2));
 // [/SL:KB]
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
-	LLViewerParcelMgr::instance().setCollisionUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
-	LLViewerParcelOverlay::setUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	mParcelMgrConn = LLViewerParcelMgr::instance().setCollisionUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
+	mParcelOverlayConn = LLViewerParcelOverlay::setUpdateCallback(boost::bind(&LLNetMap::refreshParcelOverlay, this));
 // [/SL:KB]
 
 	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_mini_map.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
@@ -174,7 +185,7 @@ void LLNetMap::setScale( F32 scale )
 	mPixelsPerMeter = mScale / REGION_WIDTH_METERS;
 	mDotRadius = llmax(DOT_SCALE * mPixelsPerMeter, MIN_DOT_RADIUS);
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 	mUpdateObjectImage = true;
 	mUpdateParcelImage = true;
 // [/SL:KB]
@@ -193,7 +204,7 @@ void LLNetMap::draw()
 	//static LLUIColor map_track_disabled_color = LLUIColorTable::instance().getColor("MapTrackDisabledColor", LLColor4::white);
 	static LLUIColor map_frustum_color = LLUIColorTable::instance().getColor("MapFrustumColor", LLColor4::white);
 	static LLUIColor map_frustum_rotating_color = LLUIColorTable::instance().getColor("MapFrustumRotatingColor", LLColor4::white);
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-08-17 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-08-17 (Catznip-3.3)
 	static LLUIColor map_property_line = LLUIColorTable::instance().getColor("MiniMapPropertyLine", LLColor4::white);
 // [/SL:KB]
 	
@@ -202,7 +213,7 @@ void LLNetMap::draw()
 		createObjectImage();
 	}
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 	if (mParcelImagep.isNull())
 	{
 		createParcelImage();
@@ -364,7 +375,7 @@ void LLNetMap::draw()
 //		if (mUpdateNow || (map_timer.getElapsedTimeF32() > 0.5f))
 //		{
 //			mUpdateNow = false;
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 		// Locate the center
 		LLVector3 posCenter = globalPosToView(gAgentCamera.getCameraPositionGlobal());
 		posCenter.mV[VX] -= mCurPan.mV[VX];
@@ -373,7 +384,7 @@ void LLNetMap::draw()
 		LLVector3d posCenterGlobal = viewPosToGlobal(llfloor(posCenter.mV[VX]), llfloor(posCenter.mV[VY]));
 
 		static LLCachedControl<bool> s_fShowObjects(gSavedSettings, "MiniMapObjects") ;
-		if ( (s_fShowObjects) && ((mUpdateObjectImage) || ((map_timer.getElapsedTimeF32() > 0.5f))) )
+		if ( (s_fShowObjects) && ((mUpdateObjectImage) || (map_timer.getElapsedTimeF32() > 0.5f)) )
 		{
 			mUpdateObjectImage = false;
 // [/SL:KB]
@@ -384,7 +395,7 @@ void LLNetMap::draw()
 //			new_center.mV[VY] -= mCurPan.mV[VY];
 //			new_center.mV[VZ] = 0.f;
 //			mObjectImageCenterGlobal = viewPosToGlobal(llfloor(new_center.mV[VX]), llfloor(new_center.mV[VY]));
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 			mObjectImageCenterGlobal = posCenterGlobal;
 // [/SL:KB]
 
@@ -400,7 +411,7 @@ void LLNetMap::draw()
 			map_timer.reset();
 		}
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 		static LLCachedControl<bool> s_fShowPropertyLines(gSavedSettings, "MiniMapPropertyLines") ;
 		if ( (s_fShowPropertyLines) && ((mUpdateParcelImage) || (dist_vec_squared2D(mParcelImageCenterGlobal, posCenterGlobal) > 9.0f)) )
 		{
@@ -456,7 +467,7 @@ void LLNetMap::draw()
 		}
 // [/SL:KB]
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 		if (s_fShowPropertyLines)
 		{
 			map_center_agent = gAgent.getPosAgentFromGlobal(mParcelImageCenterGlobal) - camera_position;
@@ -485,11 +496,11 @@ void LLNetMap::draw()
 		S32 local_mouse_y;
 		//localMouse(&local_mouse_x, &local_mouse_y);
 		LLUI::getMousePositionLocal(this, &local_mouse_x, &local_mouse_y);
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		bool local_mouse = this->pointInView(local_mouse_x, local_mouse_y);
 // [/SL:KB]
 		mClosestAgentToCursor.setNull();
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		mClosestAgentsToCursor.clear();
 // [/SL:KB]
 		F32 closest_dist_squared = F32_MAX; // value will be overridden in the loop
@@ -550,7 +561,7 @@ void LLNetMap::draw()
 				}
 			}
 
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 			if (local_mouse)
 			{
 // [/SL:KB]
@@ -565,7 +576,7 @@ void LLNetMap::draw()
 					}
 					mClosestAgentsToCursor.push_back(uuid);
 				}
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 			}
 // [/SL:KB]
 //			F32	dist_to_cursor_squared = dist_vec_squared(LLVector2(pos_map.mV[VX], pos_map.mV[VY]),
@@ -955,7 +966,7 @@ void LLNetMap::renderPoint(const LLVector3 &pos_local, const LLColor4U &color,
 	}
 }
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const LLColor4U& clrOverlay)
 {
 	const S32 imgWidth = (S32)mParcelImagep->getWidth();
@@ -1046,7 +1057,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 // [/SL:KB]
 
 //void LLNetMap::createObjectImage()
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 bool LLNetMap::createImage(LLPointer<LLImageRaw>& rawimagep) const
 // [/SL:KB]
 {
@@ -1068,7 +1079,7 @@ bool LLNetMap::createImage(LLPointer<LLImageRaw>& rawimagep) const
 		img_size <<= 1;
 	}
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 	if( rawimagep.isNull() || (rawimagep->getWidth() != img_size) || (rawimagep->getHeight() != img_size) )
 	{
 		rawimagep = new LLImageRaw(img_size, img_size, 4);
@@ -1091,7 +1102,7 @@ bool LLNetMap::createImage(LLPointer<LLImageRaw>& rawimagep) const
 //	mUpdateNow = true;
 }
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 void LLNetMap::createObjectImage()
 {
 	if (createImage(mObjectRawImagep))
@@ -1154,7 +1165,7 @@ BOOL LLNetMap::handleMouseUp( S32 x, S32 y, MASK mask )
 	return FALSE;
 }
 
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 void LLNetMap::setAvatarProfileLabel(const LLAvatarName& avName, const std::string& item_name)
 {
 	LLMenuItemGL* pItem = mPopupMenu->findChild<LLMenuItemGL>(item_name, TRUE /*recurse*/);
@@ -1217,7 +1228,7 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	if (mPopupMenu)
 	{
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		mClosestAgentRightClick = mClosestAgentToCursor;
 		mPosGlobalRightClick = viewPosToGlobal(x, y);
 
@@ -1256,7 +1267,7 @@ BOOL LLNetMap::handleRightMouseDown(S32 x, S32 y, MASK mask)
 // [/SL:KB]
 		mPopupMenu->buildDrawLabels();
 		mPopupMenu->updateParent(LLMenuGL::sMenuContainer);
-// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
 		mPopupMenu->setItemVisible("Stop Tracking", LLTracker::isTracking(0));
 		mPopupMenu->setItemVisible("Stop Tracking Separator", LLTracker::isTracking(0));
 // [/SL:KB]

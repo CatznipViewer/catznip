@@ -1043,7 +1043,7 @@ F32 LLViewerRegion::getLandHeightRegion(const LLVector3& region_pos)
 	return mImpl->mLandp->resolveHeightRegion( region_pos );
 }
 
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 LLViewerTexture* LLViewerRegion::getWorldMapTile() const
 {
 	if (!mWorldMapTile)
@@ -1060,7 +1060,7 @@ LLViewerTexture* LLViewerRegion::getWorldMapTile() const
 // [/SL:KB]
 
 //bool LLViewerRegion::isAlive()
-// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
 bool LLViewerRegion::isAlive() const
 // [/SL:KB]
 {
