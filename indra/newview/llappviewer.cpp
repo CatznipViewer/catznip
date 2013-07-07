@@ -723,9 +723,6 @@ bool LLAppViewer::init()
 	// into the log files during normal startup until AFTER
 	// we run the "program crashed last time" error handler below.
 	//
-// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-	LLFastTimer::sToggleRun = gSavedSettings.getBOOL("RunFastTimers");
-// [/SL:KB]
 	LLFastTimer::reset();
 
 	// initialize LLWearableType translation bridge.
@@ -1297,6 +1294,10 @@ bool LLAppViewer::mainLoop()
 	//LLPrivateMemoryPoolTester::getInstance()->run(false) ;
 	//LLPrivateMemoryPoolTester::getInstance()->run(true) ;
 	//LLPrivateMemoryPoolTester::destroy() ;
+
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+	LLFastTimer::sToggleRun = gSavedSettings.getBOOL("RunFastTimers");
+// [/SL:KB]
 
 	// Handle messages
 	while (!LLApp::isExiting())
