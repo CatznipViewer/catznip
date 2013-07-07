@@ -42,6 +42,7 @@
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "groupchatlistener.h"
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a)
+#include "llpanelgroup.h"
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -354,20 +355,31 @@ void LLGroupActions::activate(const LLUUID& group_id)
 //		return false;
 //	return panel->isInVisibleChain();
 //}
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-static bool isGroupVisible(const LLUUID& idGroup)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+typedef enum
 {
-	// Check if we have this group open as a floater
-	if (NULL != LLFloaterReg::findInstance("floater_group_info", idGroup))
-		return true;
+	GV_FLOATER,   // Group is visible as a floater
+	GV_SIDEPANEL, // Group is visible in the people sidepanel
+	GV_NONE       // Group is not visible
+} EGroupVisibility; 
 
-	// Check for *a* visible group in the sidebar
-	static LLPanel* panel = 0;
+static EGroupVisibility getGroupVisible(const LLUUID& idGroup)
+{
+	// Sanity check
+	if (idGroup.isNull())
+		return GV_NONE;
+
+	// Check if we have the group open as a floater
+	if (NULL != LLFloaterReg::findInstance("floater_group_info", idGroup))
+		return GV_FLOATER;
+
+	// Check if we have the group open in the people sidepanel
+	static LLPanelGroup* panel = NULL;
 	if (!panel)
-		panel = LLFloaterSidePanelContainer::getPanel("people", "panel_group_info_sidetray");
-	if (!panel)
-		return false;
-	return panel->isInVisibleChain();
+	{
+		panel = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
+	}
+	return ( (panel) && (panel->isInVisibleChain()) && (idGroup == panel->getID()) ) ? GV_SIDEPANEL : GV_NONE;
 }
 // [/SL:KB]
 
@@ -412,8 +424,9 @@ void LLGroupActions::refresh_notices(const LLUUID& group_id)
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	if (!isGroupVisible(group_id))
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
 // [/SL:KB]
 
@@ -427,7 +440,7 @@ void LLGroupActions::refresh_notices(const LLUUID& group_id)
 
 //	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
 	{
 		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 	}
@@ -447,8 +460,9 @@ void LLGroupActions::refresh(const LLUUID& group_id)
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	if (!isGroupVisible(group_id))
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
 // [/SL:KB]
 
@@ -459,7 +473,7 @@ void LLGroupActions::refresh(const LLUUID& group_id)
 
 //	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 // [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
 	{
 		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 	}
@@ -490,8 +504,9 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	if (!isGroupVisible(group_id))
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
 // [/SL:KB]
 

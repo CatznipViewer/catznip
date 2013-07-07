@@ -54,6 +54,9 @@
 #include "llaccordionctrl.h"
 
 #include "lltrans.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 static LLRegisterPanelClassWrapper<LLPanelGroup> t_panel_group("panel_group_info_sidetray");
 
@@ -617,7 +620,19 @@ void LLPanelGroup::refreshCreatedGroup(const LLUUID& group_id)
 	LLPanelGroup* panel = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
 	if(!panel)
 		return;
-	panel->setGroupID(group_id);
+//	panel->setGroupID(group_id);
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+	if (gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+		panel->onBackBtnClick();
+		LLGroupActions::show(group_id);
+	}
+	else
+	{
+		panel->setGroupID(group_id);
+	}
+// [/SL:KB]
 }
 
 //static
