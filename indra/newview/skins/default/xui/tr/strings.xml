@@ -1990,19 +1990,19 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 		İleti gönderdiğiniz Sakin &apos;meşgul modu&apos;nda, bu da rahatsız edilmek istemediği anlamına geliyor.  İletiniz daha sonra incelenmesi için kendisine ait Aİ panelinde gösterilecektir.
 	</string>
 	<string name="MuteByName">
-		(Adına göre)
+		Adına göre
 	</string>
 	<string name="MuteAgent">
-		(Sakin)
+		Sakin
 	</string>
 	<string name="MuteObject">
-		(Nesne)
+		Nesne
 	</string>
 	<string name="MuteGroup">
-		(Grup)
+		Grup
 	</string>
 	<string name="MuteExternal">
-		(Harici)
+		Harici
 	</string>
 	<string name="RegionNoCovenant">
 		Bu Gayrimenkul için Sözleşmesi yok.

@@ -139,7 +139,7 @@ public:
 	void setTransient(BOOL transient) { mTransient = transient; }
 	BOOL isTransient() { return mTransient; }
 //	LLViewerObject* getObject();
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 	LLViewerObject* getObject() const;
 // [/SL:KB]
 	void setObject(LLViewerObject* object);
@@ -189,7 +189,7 @@ public:
 
 protected:
 //	LLPointer<LLViewerObject>	mObject;
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 	mutable LLPointer<LLViewerObject> mObject;
 // [/SL:KB]
 	S32				mTESelectMask;

@@ -1993,19 +1993,19 @@ support@secondlife.com にお問い合わせください。
 		メッセージを送った住人は、誰にも邪魔をされたくないため現在「取り込み中」モードです。  あなたのメッセージは、あとで確認できるように IM パネルに表示されます。
 	</string>
 	<string name="MuteByName">
-		（名称別）
+		名称別
 	</string>
 	<string name="MuteAgent">
-		（住人）
+		住人
 	</string>
 	<string name="MuteObject">
-		（オブジェクト）
+		オブジェクト
 	</string>
 	<string name="MuteGroup">
-		（グループ）
+		グループ
 	</string>
 	<string name="MuteExternal">
-		（外部）
+		外部
 	</string>
 	<string name="RegionNoCovenant">
 		この不動産には約款がありません。

@@ -153,7 +153,7 @@ public:
 		{
 			LLMuteList::getInstance()->add(LLMute(getAvatarId(), mFrom, LLMute::OBJECT));
 
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 			LLFloaterReg::showInstance("blocked", LLSD().with("blocked_to_select", getAvatarId()));
 // [/SL:KB]
 //			LLFloaterSidePanelContainer::showPanel("people", "panel_people",

@@ -1927,19 +1927,19 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		O residente para o qual escreveu está no modo &apos;ocupado&apos;, ou seja, ele prefere não receber nada no momento. Sua mensagem será exibida como uma MI mais tarde.
 	</string>
 	<string name="MuteByName">
-		(por nome)
+		Por nome
 	</string>
 	<string name="MuteAgent">
-		(residente)
+		Residente
 	</string>
 	<string name="MuteObject">
-		(objeto)
+		Objeto
 	</string>
 	<string name="MuteGroup">
-		(grupo)
+		Grupo
 	</string>
 	<string name="MuteExternal">
-		(Externo)
+		Externo
 	</string>
 	<string name="RegionNoCovenant">
 		Não foi definido um contrato para essa região.

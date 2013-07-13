@@ -51,7 +51,7 @@
 #include "llconsole.h"
 #include "lldaycyclemanager.h"
 #include "lldebugview.h"
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 #include "llderenderlist.h"
 // [/SL:KB]
 #include "llenvmanager.h"
@@ -86,7 +86,10 @@
 #include "llinventorydefines.h"
 #include "llinventoryfunctions.h"
 #include "llpanellogin.h"
-#include "llpanelblockedlist.h"
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+#include "llfloaterblocked.h"
+// [/SL:KB]
+//#include "llpanelblockedlist.h"
 #include "llmenuoptionpathfindingrebakenavmesh.h"
 #include "llmoveview.h"
 #include "llparcel.h"
@@ -2985,7 +2988,10 @@ class LLObjectMute : public view_listener_t
 		else
 		{
 			LLMuteList::getInstance()->add(mute);
-			LLPanelBlockedList::showPanelAndSelect(mute.mID);
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+			LLFloaterBlocked::showMuteAndSelect(mute.mID);
+// [/SL:KB]
+//			LLPanelBlockedList::showPanelAndSelect(mute.mID);
 		}
 		
 		return true;
@@ -3525,10 +3531,15 @@ class LLTogglePanelPeopleTab : public view_listener_t
 		LLSD param;
 		param["people_panel_tab_name"] = panel_name;
 
+//		if (   panel_name == "friends_panel"
+//			|| panel_name == "groups_panel"
+//			|| panel_name == "nearby_panel"
+//			|| panel_name == "blocked_panel")
+// [SL:KB] - Patch: World-Derender | Checked: 2013-07-08 (Catznip-3.5)
 		if (   panel_name == "friends_panel"
 			|| panel_name == "groups_panel"
-			|| panel_name == "nearby_panel"
-			|| panel_name == "blocked_panel")
+			|| panel_name == "nearby_panel")
+// [/SL:KB]
 		{
 			return togglePeoplePanel(panel_name, param);
 		}
@@ -5368,18 +5379,18 @@ void handle_force_delete(void*)
 	LLSelectMgr::getInstance()->selectForceDelete();
 }
 
-// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3.0)
-bool enable_object_derender()
-{
-	return LLDerenderList::canAddSelection();
-}
-
+// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3)
 void handle_object_derender(const LLSD& sdParam)
 {
 	LLDerenderList::instance().addSelection("persistent" == sdParam.asString());
 
 	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
 	LLFloaterReg::showInstance("blocked", LLSD().with("derender_to_select", (pObj) ? pObj->getID() : LLUUID::null));
+}
+
+bool enable_object_derender()
+{
+	return LLDerenderList::canAddSelection();
 }
 // [/SL:KB]
 
@@ -8654,7 +8665,7 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 	commit.add("Object.Derender", boost::bind(&handle_object_derender, _2));
 	enable.add("Object.EnableDerender", boost::bind(&enable_object_derender));
 // [/SL:KB]
