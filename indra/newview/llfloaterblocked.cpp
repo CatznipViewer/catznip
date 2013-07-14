@@ -314,7 +314,7 @@ void LLPanelDerenderList::refresh()
 		sdColumns[2]["column"] = "derender_type"; sdColumns[2]["type"] = "text";
 
 		const LLDerenderList::entry_list_t& entries = LLDerenderList::instance().getEntries();
-		for (auto itEntry = entries.cbegin(); itEntry != entries.cend(); ++itEntry)
+		for (LLDerenderList::entry_list_t::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry)
 		{
 			sdRow["value"] = itEntry->idObject;
 			sdColumns[0]["value"] = itEntry->strObjectName;

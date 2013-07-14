@@ -48,7 +48,7 @@ LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode, bool fPersist)
 		strObjectName = LLTrans::getString("Unknown");
 
 	idRootLocal = pObj->getLocalID();
-	for (auto itChild = pObj->getChildren().cbegin(), endChild = pObj->getChildren().cend(); itChild != endChild; ++itChild)
+	for (LLViewerObject::const_child_list_t::const_iterator itChild = pObj->getChildren().begin(), endChild = pObj->getChildren().end(); itChild != endChild; ++itChild)
 		idsChildLocal.push_back((*itChild)->getLocalID());
 
 	//
@@ -181,7 +181,7 @@ LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(const LLUUID& i
 
 LLDerenderList::entry_list_t::const_iterator LLDerenderList::findEntry(const LLUUID& idObject) const
 {
-	return std::find_if(m_Entries.cbegin(), m_Entries.cend(), [&idObject](const LLDerenderEntry& e) { return idObject == e.idObject; });
+	return std::find_if(m_Entries.begin(), m_Entries.end(), [&idObject](const LLDerenderEntry& e) { return idObject == e.idObject; });
 }
 
 LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal)
@@ -195,7 +195,7 @@ LLDerenderList::entry_list_t::iterator LLDerenderList::findEntry(U64 idRegion, c
 LLDerenderList::entry_list_t::const_iterator LLDerenderList::findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const
 {
 	// NOTE: 'idRootLocal' will be 0 for the root prim itself and is the only time we need to compare against 'idObject'
-	return std::find_if(m_Entries.cbegin(), m_Entries.cend(), 
+	return std::find_if(m_Entries.begin(), m_Entries.end(), 
 						[&idRegion, &idObject, &idRootLocal](const LLDerenderEntry& e)
 						{ return ((idRootLocal) && (idRegion == e.idRegion) && (idRootLocal == e.idRootLocal)) || (idObject == e.idObject); });
 }
@@ -210,7 +210,7 @@ void LLDerenderList::removeObject(const LLUUID& idObject)
 void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 {
 	std::map<LLViewerRegion*, std::list<U32>> idRegionObjectMap; bool fSave = false;
-	for (auto itObject = idsObject.cbegin(); itObject != idsObject.cend(); ++itObject)
+	for (uuid_vec_t::const_iterator itObject = idsObject.begin(); itObject != idsObject.end(); ++itObject)
 	{
 		entry_list_t::iterator itEntry = findEntry(*itObject);
 		if (m_Entries.end() == itEntry)
@@ -230,10 +230,10 @@ void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 	}
 
 	bool fNewMsg = true; int nBlockCount = 0;
-	for (auto itRegionMap = idRegionObjectMap.cbegin(); itRegionMap != idRegionObjectMap.cend(); ++itRegionMap)
+	for (std::map<LLViewerRegion*, std::list<U32> >::const_iterator itRegionMap = idRegionObjectMap.begin(); itRegionMap != idRegionObjectMap.end(); ++itRegionMap)
 	{
 		LLViewerRegion* pRegion = itRegionMap->first;
-		for (auto itObject = itRegionMap->second.cbegin(); itObject != itRegionMap->second.cend(); ++itObject)
+		for (std::list<U32>::const_iterator itObject = itRegionMap->second.begin(); itObject != itRegionMap->second.end(); ++itObject)
 		{
 			if (fNewMsg)
 			{
@@ -275,7 +275,7 @@ void LLDerenderList::updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& i
 		if (0 != idRootLocal)
 		{
 			// We're updating a child prim
-			if (itEntry->idsChildLocal.cend() == std::find(itEntry->idsChildLocal.cbegin(), itEntry->idsChildLocal.cend(), idRootLocal))
+			if (itEntry->idsChildLocal.end() == std::find(itEntry->idsChildLocal.begin(), itEntry->idsChildLocal.end(), idRootLocal))
 				itEntry->idsChildLocal.push_back(idObjectLocal);
 		}
 		else
@@ -328,7 +328,7 @@ void LLDerenderList::save() const
 		return;
 	}
 
-	for (auto itEntry = m_Entries.cbegin(); itEntry != m_Entries.cend(); ++itEntry)
+	for (entry_list_t::const_iterator itEntry = m_Entries.begin(); itEntry != m_Entries.end(); ++itEntry)
 	{
 		if (itEntry->fPersists)
 			fileDerender << LLSDOStreamer<LLSDNotationFormatter>(itEntry->toLLSD()) << std::endl;
