@@ -5382,10 +5382,11 @@ void handle_force_delete(void*)
 // [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3)
 void handle_object_derender(const LLSD& sdParam)
 {
-	LLDerenderList::instance().addSelection("persistent" == sdParam.asString());
-
-	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
-	LLFloaterReg::showInstance("blocked", LLSD().with("derender_to_select", (pObj) ? pObj->getID() : LLUUID::null));
+	std::vector<LLUUID> idList;
+	if (LLDerenderList::instance().addSelection("persistent" == sdParam.asString(), &idList))
+	{
+		LLFloaterReg::showInstance("blocked", LLSD().with("derender_to_select", idList.front()));
+	}
 }
 
 bool enable_object_derender()

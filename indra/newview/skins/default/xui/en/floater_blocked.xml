@@ -25,14 +25,15 @@
      tab_height="25"
      tab_min_width="120"
      tab_position="top"
-     top="3" >
+     top="4" >
         <panel
-         class="panel_block_list_sidetray"
-         filename="panel_block_list_sidetray.xml"
+         class="panel_block_list"
+         filename="panel_block_list.xml"
          label="BLOCKED"
          layout="topleft"
          name="mute_tab" />
         <panel
+         class="panel_derender_list"
          filename="panel_block_derender.xml"
          label="DERENDERED"
          layout="topleft"

@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -17,12 +17,104 @@
 #ifndef LLFLOATERBLOCKED_H
 #define LLFLOATERBLOCKED_H
 
+#include "llavatarname.h"
 #include "llfloater.h"
+#include "llmutelist.h"
 
 class LLScrollListCtrl;
 class LLTabContainer;
 
 // ============================================================================
+// LLPanelBlockList
+//
+
+class LLPanelBlockList : public LLPanel, public LLMuteListObserver
+{
+public:
+	LLPanelBlockList();
+	/*virtual*/ ~LLPanelBlockList();
+
+	/*
+	 * LLPanel overrides
+	 */
+public:
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onOpen(const LLSD& sdParam);
+
+	/*
+	 * Member functions
+	 */
+protected:
+	void refresh();
+	void removePicker();
+	void updateButtons();
+
+	/*
+	 * Event handlers
+	 */
+public:
+	/*virtual*/ void onChange();
+protected:
+	       void onClickAddAvatar(LLUICtrl* pCtrl);
+	static void onClickAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents);
+	static void onClickAddByName();
+	static void onClickAddByNameCallback(const std::string& strBlockName);
+	       void onClickRemoveSelection();
+		   void onColumnSortChange();
+	       void onSelectionChange();
+
+	/*
+	 * Member variables
+	 */
+protected:
+	bool                m_fRefreshOnChange;
+	LLScrollListCtrl*   m_pBlockList;
+	LLButton*           m_pTrashBtn;
+    LLHandle<LLFloater> m_hPicker;
+};
+
+// ============================================================================
+// LLPanelDerenderList
+//
+
+class LLPanelDerenderList : public LLPanel
+{
+public:
+	LLPanelDerenderList();
+	/*virtual*/ ~LLPanelDerenderList();
+
+	/*
+	 * LLPanel overrides
+	 */
+public:
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onOpen(const LLSD& sdParam);
+
+	/*
+	 * Member functions
+	 */
+protected:
+	void refresh();
+
+	/*
+	 * Event handlers
+	 */
+protected:
+	void onColumnSortChange();
+	void onSelectionChange();
+	void onSelectionRemove();
+
+	/*
+	 * Member variables
+	 */
+protected:
+	LLScrollListCtrl*           m_pDerenderList;
+	boost::signals2::connection m_DerenderChangeConn;
+};
+
+// ============================================================================
+// LLFloaterBlocked
+//
 
 class LLFloaterBlocked : public LLFloater
 {
@@ -33,24 +125,25 @@ public:
 public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& sdParam);
-protected:
-	void refreshDerender();
 
 	/*
-	 * Event callbacks
+	 * Event handlers
 	 */
 protected:
-	void onDerenderEntrySelChange();
-	void onDerenderEntryRemove();
 	void onTabSelect(const LLSD& sdParam);
+
+	/*
+	 * Member functions
+	 */
+public:
+	static void showMuteAndSelect(const LLUUID& idMute);
+	static void showDerenderAndSelect(const LLUUID& idEntry);
 
 	/*
 	 * Member variables
 	 */
 protected:
 	LLTabContainer*             m_pBlockedTabs;
-	LLScrollListCtrl*           m_pDerenderList;
-	boost::signals2::connection m_DerenderChangeConn;
 };
 
 // ============================================================================

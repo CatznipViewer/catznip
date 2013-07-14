@@ -209,6 +209,9 @@ public:
 	BOOL			selectItemAt(S32 x, S32 y, MASK mask);
 	
 	void			deleteSingleItem( S32 index );
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-08 (Catznip-3.5)
+	void			deleteSingleItem(LLScrollListItem* itemp);
+// [/SL:KB]
 	void			deleteItems(const LLSD& sd);
 	void 			deleteSelectedItems();
 	void			deselectAllItems(BOOL no_commit_on_change = FALSE);	// by default, go ahead and commit on selection change
@@ -375,6 +378,9 @@ public:
 	S32 getTotalStaticColumnWidth() { return mTotalStaticColumnWidth; }
 
 	std::string     getSortColumnName();
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-13 (Catznip-3.5)
+	S32				getSortColumnIndex() const;
+// [/SL:KB]
 	BOOL			getSortAscending() { return mSortColumns.empty() ? TRUE : mSortColumns.back().second; }
 	BOOL			hasSortOrder() const;
 	void			clearSortOrder();

@@ -4,9 +4,7 @@
  height="300"
  label="DERENDERED LIST"
  layout="topleft"
- left="0"
- top="0"
- width="350" >
+ width="350">
     <scroll_list
      draw_border="false"
      draw_heading="true"
@@ -14,8 +12,10 @@
      follows="all"
      height="275"
      layout="topleft"
-     multi_select="false"
+     left="1"
+     multi_select="true"
      name="derender_list"
+     right="-1"
      tool_tip="List of currently derendered objects."
      top="0" >
         <scroll_list.columns
@@ -31,12 +31,12 @@
          width="80" />
     </scroll_list>
     <panel
-     background_visible="false"
      follows="left|right|bottom"
      height="25"
-     label="bottom_panel"
+     left="1"
      layout="topleft"
      name="bottom_panel"
+     right="-1"
      top_pad="0" >
         <icon  
          follows="bottom|left|right"

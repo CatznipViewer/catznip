@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2011-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -60,7 +60,7 @@ protected:
 	 * Member functions
 	 */
 public:
-	void addSelection(bool fPersist);
+	bool addSelection(bool fPersist, std::vector<LLUUID>* pIdList = NULL);
 	bool isDerendered(const LLUUID& idObject) const									{ return m_Entries.end() != findEntry(idObject); }
 	bool isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const	{ return m_Entries.end() != findEntry(idRegion, idObject, idRootLocal); }
 	void removeObject(const LLUUID& idObject);

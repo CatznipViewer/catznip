@@ -1,0 +1,17 @@
+[World/Derender]
+- added   : basic derender functionality ("Derender" option on the object context, object gear and inspector menus)
+    -> "Session Derender" will not persist across logon sessions, but "Permanent Derender" will
+    -> derender will prevent the object from rerezzing even after a teleport away/back
+    -> restored derendered object will reappear automatically without needing a teleport or active group change
+    -> attachments can not be derendered (by design)
+- added   : "Blocked" floater containing the mute list and derender list
+    -> accessible through Communicate / Blocked/Derender List
+    -> column sort and sort order is remembered between sessions
+    -> multiple entries can be selected at the same time
+- fixed   : LLMuteList::remove() doesn't return TRUE if the mute-list entry was successfully removed
+
+
+[Control/ScrollListCtrl]
+- added : "commit on delete" option to fire the commit signal whenever an item is deleted from the scroll list's item list
+- added : LLScrollListCtrl::deleteSingleItem(LLScrollListItem*) to delete a single row
+- added : LLScrollListCtrl::getSortColumnIndex() to get the current (primary) sort column

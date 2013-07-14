@@ -943,6 +943,30 @@ void LLScrollListCtrl::deleteSingleItem(S32 target_index)
 // [/SL:KB]
 }
 
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-08 (Catznip-3.5)
+void LLScrollListCtrl::deleteSingleItem(LLScrollListItem* itemp)
+{
+	item_list::iterator itItem = std::find(mItemList.begin(), mItemList.end(), itemp);
+	if (mItemList.end() == itItem)
+	{
+		return;
+	}
+
+	if (mLastSelected == itemp)
+	{
+		mLastSelected = NULL;
+	}
+	delete itemp;
+	mItemList.erase(itItem);
+	dirtyColumns();
+
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+}
+// [/SL:KB]
+
 //FIXME: refactor item deletion
 void LLScrollListCtrl::deleteItems(const LLSD& sd)
 {
@@ -2807,6 +2831,13 @@ std::string LLScrollListCtrl::getSortColumnName()
 	if (column) return column->mName;
 	else return "";
 }
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-13 (Catznip-3.5)
+S32 LLScrollListCtrl::getSortColumnIndex() const
+{
+	return (!mSortColumns.empty()) ? mSortColumns.back().first : -1;
+}
+// [/SL:KB]
 
 BOOL LLScrollListCtrl::hasSortOrder() const
 {

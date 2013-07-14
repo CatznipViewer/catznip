@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2011-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -109,8 +109,13 @@ LLDerenderList::~LLDerenderList()
 {
 }
 
-void LLDerenderList::addSelection(bool fPersist)
+bool LLDerenderList::addSelection(bool fPersist, std::vector<LLUUID>* pIdList)
 {
+	if (pIdList)
+	{
+		pIdList->clear();
+	}
+
 	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
 
 	LLObjectSelection::valid_root_iterator itObj = hSel->valid_root_begin();
@@ -124,6 +129,11 @@ void LLDerenderList::addSelection(bool fPersist)
 		if ( (isDerendered(entry.idObject)) || (gAgentID == entry.idObject) )
 			continue;
 		m_Entries.push_back(entry);
+		
+		if (pIdList)
+		{
+			pIdList->push_back(entry.idObject);
+		}
 
 		LLViewerObject* pObj = pNode->getObject();
 		if (pObj)
@@ -139,6 +149,7 @@ void LLDerenderList::addSelection(bool fPersist)
 	if (fPersist)
 		save();
 	s_ChangeSignal();
+	return (!pIdList) || (!pIdList->empty());
 }
 
 bool LLDerenderList::canAdd(const LLViewerObject* pObj)
