@@ -1972,19 +1972,19 @@ Prova ad accedere nuovamente tra un minuto.
 		Il residente al quale hai inviato un messaggio è in modalità &apos;occupato&apos;, ovvero ha chiesto di non essere disturbato.  Il tuo messaggio comparirà nel suo pannello IM, dove potrà essere letto in un secondo momento.
 	</string>
 	<string name="MuteByName">
-		(In base al nome)
+		In base al nome
 	</string>
 	<string name="MuteAgent">
-		(Residente)
+		Residente
 	</string>
 	<string name="MuteObject">
-		(Oggetto)
+		Oggetto
 	</string>
 	<string name="MuteGroup">
-		(Gruppo)
+		Gruppo
 	</string>
 	<string name="MuteExternal">
-		(esterno)
+		Esterno
 	</string>
 	<string name="RegionNoCovenant">
 		Non esiste alcun regolamento per questa proprietà.

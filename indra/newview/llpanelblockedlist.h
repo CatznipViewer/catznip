@@ -34,53 +34,53 @@
 class LLAvatarName;
 class LLBlockList;
 
-class LLPanelBlockedList : public LLPanel
-{
-public:
-	LLPanelBlockedList();
-	~LLPanelBlockedList(){};
-
-	virtual BOOL postBuild();
-	virtual void draw();
-	virtual void onOpen(const LLSD& key);
-	
-	void selectBlocked(const LLUUID& id);
-
-	/**
-	 *	Shows current Panel in side tray and select passed blocked item.
-	 * 
-	 *	@param idToSelect - LLUUID of blocked Resident or Object to be selected. 
-	 *			If it is LLUUID::null, nothing will be selected.
-	 */
-	static void showPanelAndSelect(const LLUUID& idToSelect);
-	
-private:
-
-	typedef enum e_sort_oder{
-		E_SORT_BY_NAME = 0,
-		E_SORT_BY_TYPE = 1,
-	} ESortOrder;
-
-    void removePicker();
-	void updateButtons();
-
-	// UI callbacks
-	void unblockItem();
-	void blockResidentByName();
-	void blockObjectByName();
-	void onFilterEdit(const std::string& search_string);
-
-	// List commnads
-	void onCustomAction(const LLSD& userdata);
-	BOOL isActionChecked(const LLSD& userdata);
-
-	void callbackBlockPicked(const uuid_vec_t& ids, const std::vector<LLAvatarName> names);
-	static void callbackBlockByName(const std::string& text);
-
-private:
-	LLBlockList* mBlockedList;
-    LLHandle<LLFloater> mPicker;
-};
+//class LLPanelBlockedList : public LLPanel
+//{
+//public:
+//	LLPanelBlockedList();
+//	~LLPanelBlockedList(){};
+//
+//	virtual BOOL postBuild();
+//	virtual void draw();
+//	virtual void onOpen(const LLSD& key);
+//	
+//	void selectBlocked(const LLUUID& id);
+//
+//	/**
+//	 *	Shows current Panel in side tray and select passed blocked item.
+//	 * 
+//	 *	@param idToSelect - LLUUID of blocked Resident or Object to be selected. 
+//	 *			If it is LLUUID::null, nothing will be selected.
+//	 */
+//	static void showPanelAndSelect(const LLUUID& idToSelect);
+//	
+//private:
+//
+//	typedef enum e_sort_oder{
+//		E_SORT_BY_NAME = 0,
+//		E_SORT_BY_TYPE = 1,
+//	} ESortOrder;
+//
+//    void removePicker();
+//	void updateButtons();
+//
+//	// UI callbacks
+//	void unblockItem();
+//	void blockResidentByName();
+//	void blockObjectByName();
+//	void onFilterEdit(const std::string& search_string);
+//
+//	// List commnads
+//	void onCustomAction(const LLSD& userdata);
+//	BOOL isActionChecked(const LLSD& userdata);
+//
+//	void callbackBlockPicked(const uuid_vec_t& ids, const std::vector<LLAvatarName> names);
+//	static void callbackBlockByName(const std::string& text);
+//
+//private:
+//	LLBlockList* mBlockedList;
+//    LLHandle<LLFloater> mPicker;
+//};
 
 //-----------------------------------------------------------------------------
 // LLFloaterGetBlockedObjectName()

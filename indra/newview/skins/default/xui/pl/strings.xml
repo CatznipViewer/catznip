@@ -1678,19 +1678,19 @@
 		Rezydent, do którego wysłałeś wiadomość prywatną znajduje się w trybie pracy. Oznacza to, iż Twoja wiadomość zostanie zapisana do przejrzenia poźniej.
 	</string>
 	<string name="MuteByName">
-		(Nazwa)
+		Nazwa
 	</string>
 	<string name="MuteAgent">
-		(Rezydent)
+		Rezydent
 	</string>
 	<string name="MuteObject">
-		(Obiekt)
+		Obiekt
 	</string>
 	<string name="MuteGroup">
-		(Grupę)
+		Grupę
 	</string>
 	<string name="MuteExternal">
-		(Zewnętrzne)
+		Zewnętrzne
 	</string>
 	<string name="RegionNoCovenant">
 		Brak umowy dla tego majątku.
