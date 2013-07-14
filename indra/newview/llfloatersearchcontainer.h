@@ -33,6 +33,7 @@ public:
 	 */
 public:
 	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onClose(bool fAppQuitting);
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ void addFloater(LLFloater* pFloater, BOOL fSelect, LLTabContainer::eInsertionPoint eInsert = LLTabContainer::END);
 

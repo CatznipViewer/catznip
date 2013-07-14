@@ -18,6 +18,7 @@
 #include "llfloaterreg.h"
 #include "llfloatersearch.h"
 #include "llfloatersearchcontainer.h"
+#include "llviewercontrol.h"
 
 // ============================================================================
 // LLFloaterSearchContainer class
@@ -46,7 +47,17 @@ BOOL LLFloaterSearchContainer::postBuild()
 	m_pPlacesSearch = LLFloaterReg::getTypedInstance<LLFloater>("search_places");
 	addFloater(m_pPlacesSearch, false);
 
+	if (!mTabContainer->selectTab(gSavedSettings.getS32("LastSearchTab")))
+	{
+		mTabContainer->selectFirstTab();
+	}
+
 	return LLMultiFloater::postBuild();
+}
+
+void LLFloaterSearchContainer::onClose(bool fAppQuitting)
+{
+	gSavedSettings.setS32("LastSearchTab", getChild<LLTabContainer>("search_container")->getCurrentPanelIndex());
 }
 
 void LLFloaterSearchContainer::onOpen(const LLSD& sdKey)
