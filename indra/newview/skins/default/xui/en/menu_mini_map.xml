@@ -9,34 +9,106 @@
  visible="false"
  width="128">
 	<menu_item_call
-     label="Zoom Close"
+   label="View Profile"
+   name="View Profile">
+    <menu_item_call.on_click
+     function="Minimap.ShowProfile"
+     parameter="closest" />
+  </menu_item_call>
+  <menu
+   label="View Profile"
+   name="View Profiles">
+  </menu>
+  <menu_item_separator
+   name="Profile Separator" />
+  <menu
+   label="Zoom"
+   name="Minimap Zoom">
+    <menu_item_call
+     label="Close"
      name="Zoom Close">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="close" />
     </menu_item_call>
     <menu_item_call
-     label="Zoom Medium"
+     label="Medium"
      name="Zoom Medium">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="medium" />
     </menu_item_call>
     <menu_item_call
-     label="Zoom Far"
+     label="Far"
      name="Zoom Far">
         <menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="far" />
     </menu_item_call>
+<!--
 	<menu_item_call
-     label="Zoom Default"
+     label="Default"
      name="Zoom Default">
 		<menu_item_call.on_click
          function="Minimap.Zoom"
          parameter="default" />
 	</menu_item_call>
-	<menu_item_separator />
+-->
+  </menu>
+  <menu
+   label="Show"
+   name="Minimap Show">
+    <menu_item_check
+     label="Objects"
+     name="Objects">
+      <menu_item_check.on_click
+       function="ToggleControl"
+       parameter="MiniMapObjects" />
+      <menu_item_check.on_check
+       control="MiniMapObjects" />
+    </menu_item_check>
+    <menu_item_check
+     label="Property Lines"
+     name="Property Lines">
+      <menu_item_check.on_click
+       function="Minimap.ToggleOverlay"
+       parameter="MiniMapPropertyLines" />
+      <menu_item_check.on_check
+       control="MiniMapPropertyLines" />
+    </menu_item_check>
+    <menu_item_check
+     label="Parcels for Sale"
+     name="Parcels for Sale">
+      <menu_item_check.on_click
+       function="Minimap.ToggleOverlay"
+       parameter="MiniMapForSaleParcels" />
+      <menu_item_check.on_check
+       control="MiniMapForSaleParcels" />
+      <menu_item_check.on_enable
+       control="MiniMapPropertyLines" />
+    </menu_item_check>
+    <menu_item_separator />
+    <menu_item_check
+     label="Terrain Textures"
+     name="Terrain Textures">
+      <menu_item_check.on_click
+       function="Minimap.TextureType"
+       parameter="terrain" />
+      <menu_item_check.on_check
+       function="Minimap.CheckTextureType"
+       parameter="terrain" />
+    </menu_item_check>
+    <menu_item_check
+     label="World Map Textures"
+     name="World Map Textures">
+      <menu_item_check.on_click
+       function="Minimap.TextureType"
+       parameter="maptile" />
+      <menu_item_check.on_check
+       function="Minimap.CheckTextureType"
+       parameter="maptile" />
+    </menu_item_check>
+  </menu>
     <menu_item_check
        label="Rotate Map"
        name="Rotate Map">
@@ -63,7 +135,15 @@
          function="Minimap.Tracker"
          parameter="task_properties" />
     </menu_item_call>
-    <menu_item_separator />
+    <menu_item_separator
+     name="Stop Tracking Separator" />
+    <menu_item_call
+     label="Place Profile"
+     name="Place Profile">
+        <menu_item_call.on_click
+         function="Minimap.ShowProfile"
+         parameter="place" />
+    </menu_item_call>
     <menu_item_call
      label="World Map"
      name="World Map">
