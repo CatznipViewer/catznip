@@ -187,6 +187,9 @@ public:
 	typedef boost::function<void(LLView*)> add_popup_t;
 	typedef boost::function<void(LLView*)> remove_popup_t;
 	typedef boost::function<void(void)> clear_popups_t;
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	typedef boost::function<LLView*()> top_popup_t;
+// [/SL:KB]
 
 	static void initClass(const settings_map_t& settings,
 						  LLImageProviderInterface* image_provider,
@@ -195,7 +198,10 @@ public:
 						  const LLVector2 *scale_factor = NULL,
 						  const std::string& language = LLStringUtil::null);
 	static void cleanupClass();
-	static void setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t&, const clear_popups_t& );
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	static void setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t&, const clear_popups_t&, const top_popup_t& );
+// [/SL:KB]
+//	static void setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t&, const clear_popups_t& );
 
 	static void pushMatrix() { LLRender2D::pushMatrix(); }
 	static void popMatrix() { LLRender2D::popMatrix(); }
@@ -266,6 +272,9 @@ public:
 	static void addPopup(LLView*);
 	static void removePopup(LLView*);
 	static void clearPopups();
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	static LLView* getTopPopup();
+// [/SL:KB]
 
 	static void reportBadKeystroke();
 
@@ -290,6 +299,9 @@ private:
 	static add_popup_t		sAddPopupFunc;
 	static remove_popup_t	sRemovePopupFunc;
 	static clear_popups_t	sClearPopupsFunc;
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	static top_popup_t		sTopPopupsFunc;
+// [/SL:KB]
 };
 
 
