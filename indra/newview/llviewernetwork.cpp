@@ -33,7 +33,9 @@
 #include "llsecapi.h"
 #include "lltrans.h"
 #include "llweb.h"
-
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8.0b) | Modified: Catznip-2.8.0b
+#include "llversioninfo.h"
+// [/SL:KB]
 
 /// key used to store the grid, and the name attribute in the grid data
 const std::string  GRID_VALUE = "keyname";
@@ -59,7 +61,10 @@ const std::string  GRID_LOGIN_IDENTIFIER_TYPES = "login_identifier_types";
 const std::string GRID_SLURL_BASE = "slurl_base";
 const std::string GRID_APP_SLURL_BASE = "app_slurl_base";
 
-const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8.0b) | Modified: Catznip-2.8.0b
+const std::string DEFAULT_LOGIN_PAGE = "http://viewer.catznip.com/login/";
+// [/SL:KB]
+//const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
 
 const std::string MAIN_GRID_LOGIN_URI = "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
 
@@ -523,6 +528,9 @@ std::string LLGridManager::getLoginPage(const std::string& grid)
 std::string LLGridManager::getLoginPage()
 {
 	std::string login_page = mGridList[mGrid][GRID_LOGIN_PAGE_VALUE].asString();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8.0b) | Added: Catznip-2.8.0b
+	login_page.append(LLVersionInfo::getChannel());
+// [/SL:KB]
 	LL_DEBUGS("GridManager")<<"returning "<<login_page<<LL_ENDL;
 	return login_page;
 }
