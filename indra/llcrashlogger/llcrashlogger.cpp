@@ -47,8 +47,7 @@
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
 #ifdef LL_WINDOWS
 #include <shellapi.h>
-#endif 
-// LL_WINDOWS
+#endif // LL_WINDOWS
 #include <boost/lexical_cast.hpp>
 // [/SL:KB]
 
@@ -624,10 +623,10 @@ bool LLCrashLogger::init()
 	LLCurl::initClass(false);
 
 	// We assume that all the logs we're looking for reside on the current drive
-//	gDirUtilp->initAppDirs("SecondLife");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
 	gDirUtilp->initAppDirs("Catznip");
 // [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 
 	LLError::initForApplication(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 

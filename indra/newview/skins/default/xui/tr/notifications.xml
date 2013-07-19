@@ -1464,7 +1464,7 @@ http://catznip.com/downloads/.
 	<notification name="UpdaterServiceNotRunning">
 		Second Life kurulumunuz için gerekli bir güncelleme var.
 
-Bu güncellemeyi http://www.secondlife.com/downloads adresinden karşıdan yükleyebilir
+Bu güncellemeyi http://catznip.com/downloads/ adresinden karşıdan yükleyebilir
 veya şimdi kurabilirsiniz.
 		<usetemplate name="okcancelbuttons" notext="Second Life&apos;tan çık" yestext="Karşıdan yükle ve şimdi kur"/>
 	</notification>

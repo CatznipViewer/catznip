@@ -44,7 +44,7 @@ BEGIN
             VALUE "FileDescription", "Catznip Common Library"
             VALUE "FileVersion", "7.0.0.0"
             VALUE "InternalName", "llcommon.dll"
-            VALUE "LegalCopyright", "Copyright (C)2001-2011, portions by Linden Research, Inc, portions by Kitty Barnett"
+            VALUE "LegalCopyright", "Copyright (C)2001-2013, portions by Kitty Barnett, portions by Linden Research, Inc"
             VALUE "OriginalFilename", "llcommon.dll"
             VALUE "ProductName", "Catznip"
             VALUE "ProductVersion", "7.0.0.0"

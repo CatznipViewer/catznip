@@ -131,7 +131,7 @@ BOOL LLFloaterAbout::postBuild()
 	LLViewerTextEditor *support_widget = 
 		getChild<LLViewerTextEditor>("support_editor", true);
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
 	LLViewerTextEditor *thanks_names_widget = 
 		getChild<LLViewerTextEditor>("catznip_thanks_names", true);
 // [/SL:KB]
@@ -183,7 +183,7 @@ BOOL LLFloaterAbout::postBuild()
 	linden_names_widget->setEnabled(FALSE);
 	linden_names_widget->startOfDoc();
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
 	// Get the names of people to thank, extracted from .../doc/thanks.txt by viewer_manifest.py at build time
 	std::string thanks_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "thanks.txt");
 	llifstream thank_file;
@@ -256,10 +256,10 @@ LLSD LLFloaterAbout::getInfo()
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
 	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
 // [/SL:KB]
+//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 	info["CHANNEL"] = LLVersionInfo::getChannel();

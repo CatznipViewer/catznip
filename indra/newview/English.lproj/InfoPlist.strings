@@ -3,4 +3,4 @@
 CFBundleName = "Catznip";
 
 CFBundleShortVersionString = "Catznip version %%VERSION%%";
-CFBundleGetInfoString = "Catznip version %%VERSION%%, Copyright 2004 Linden Research, Inc.";
+CFBundleGetInfoString = "Catznip version %%VERSION%%, Copyright (C)2001-2013, portions by Kitty Barnett, portions by Linden Research, Inc";

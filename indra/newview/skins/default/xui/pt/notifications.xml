@@ -1452,7 +1452,7 @@ http://catznip.com/downloads/.
 	<notification name="UpdaterServiceNotRunning">
 		A instalação do Second Life requer uma atualização.
 
-Baixe a atualização em http://www.secondlife.com/downloads
+Baixe a atualização em http://catznip.com/downloads/
 ou você pode instalar a instalação agora.
 		<usetemplate name="okcancelbuttons" notext="Sair do Second Life" yestext="Baixar e instalar agora"/>
 	</notification>

@@ -1316,7 +1316,7 @@ Pobrać i zapisać w folderze Aplikacji?
 		<usetemplate name="okbutton" yestext="Rezygnuj"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
-		Istnieje obowiązkowa aktualizacja dla Second Life. Możesz ją pobrać z http://www.secondlife.com/downloads lub zainstalować teraz.
+		Istnieje obowiązkowa aktualizacja dla Second Life. Możesz ją pobrać z http://catznip.com/downloads/ lub zainstalować teraz.
 		<usetemplate name="okcancelbuttons" notext="Opuść Second Life" yestext="Pobierz i zainstaluj teraz"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">

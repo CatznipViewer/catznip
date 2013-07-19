@@ -1498,7 +1498,7 @@ http://catznip.com/downloads/ から最新バージョンをダウンロード�
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、http://www.secondlife.com/downloads からダウンロードして、今すぐインストールできます。
+このアップデートは、http://catznip.com/downloads/ からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">

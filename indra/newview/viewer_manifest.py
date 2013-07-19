@@ -566,7 +566,7 @@ class WindowsManifest(ViewerManifest):
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
-                !define INSTNAME   "Catznip Viewer"
+                !define INSTNAME   "CatznipViewer"
                 !define SHORTCUT   "Catznip Viewer"
                 !define URLNAME   "secondlife"
                 Caption "Catznip"
@@ -577,7 +577,7 @@ class WindowsManifest(ViewerManifest):
                 grid_vars_template = """
                 OutFile "%(installer_file)s"
                 !define INSTFLAGS "%(flags)s"
-                !define INSTNAME   "Catznip %(grid_caps)s"
+                !define INSTNAME   "Catznip%(grid_caps)s"
                 !define SHORTCUT   "Catznip (%(grid_caps)s)"
                 !define URLNAME   "secondlife%(grid)s"
                 !define UNINSTALL_SETTINGS 1
@@ -589,7 +589,7 @@ class WindowsManifest(ViewerManifest):
             grid_vars_template = """
             OutFile "%(installer_file)s"
             !define INSTFLAGS "%(flags)s"
-            !define INSTNAME   "Catznip %(channel_oneword)s"
+            !define INSTNAME   "Catznip%(channel_oneword)s"
             !define SHORTCUT   "%(channel)s"
             !define URLNAME   "secondlife"
             !define UNINSTALL_SETTINGS 1

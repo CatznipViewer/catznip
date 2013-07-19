@@ -74,7 +74,7 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
 #include "llgroupactions.h"
 // [/SL:KB]
 #include "lltooltip.h"
@@ -6196,7 +6196,7 @@ class LLToggleAgentProfile : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
 void handle_show_support_group()
 {
 	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
@@ -8739,7 +8739,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
 	view_listener_t::addMenu(new LLToggleSpeak(), "ToggleSpeak");
-// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-3.0.0a) | Added: Catznip-2.1.2a
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
 	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
 // [/SL:KB]
 
