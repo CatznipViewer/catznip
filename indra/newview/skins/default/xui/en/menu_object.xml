@@ -26,8 +26,10 @@
       name="Build">
     <menu_item_call.on_click
         function="Object.Build" />
+        <!-- <menu_item_call.on_enable
+         function="EnableEdit"/> -->
     <menu_item_call.on_enable
-        function="EnableEdit"/>
+         function="Object.EnableBuild"/>
   </menu_item_call>
   <menu_item_call
       enabled="false"

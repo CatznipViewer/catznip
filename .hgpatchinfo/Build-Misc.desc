@@ -1,0 +1,19 @@
+[Build/Tools]
+- added   : "Axis at Root" checkbox to the build floater to position the axis on the first (root) object of the selection
+- added   : axis options floater to change the position of the axis relative to the current prim (or linkset)
+- added   : copy/paste buttons to the build floater for position, size, rotation, primitive parameters, texture and colour
+- added   : pipette pickers for position, size, rotation, prim parameters, texture and colour
+- added   : 'Refresh' button to the build tools' 'Contents' panel
+- changed : moved the "Link" and "Unlink" buttons down on the build floater to just above the tab container
+- changed : grid options floater is a dependent of the buid floater
+- changed : clamp the maximum value of texture repeats to 256 (up from 100)
+
+[Build/Misc]
+- added : "RezUnderLandGroup" setting to rez prims under the land group rather than the avatar's active group
+    -> rezzing a prim across parcel borders will rez it with the proper parcel's group
+    -> works when rezzing from inventory, newly rezzed prims and prim duplication
+- changed : uncommented the "Restore to Last Position" option in the inventory context menu
+    -> added two (ignorable) notifications: one for copyable and one for non-copyable objects to prevent accidental usage
+- fixed   : "Edit" and "Build" should not be mutually exclusive on the object context menu
+- fixed   : enable "Build" on the land context menu only if the user has build permissions for the parcel
+- fixed   : enable "Build" on the object context menu only if the user has build permissions for the parcel the object resides on
