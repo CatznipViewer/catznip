@@ -318,7 +318,15 @@ bool LLFontRegistry::initFromXML(LLXMLNodePtr node)
 			if (child->getAttributeString("name",size_name) &&
 				child->getAttributeF32("size",size_value))
 			{
-				mFontSizes[size_name] = size_value;
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+				std::string font_name;
+				// The default font size will be stored under an empty string; named fonts can specify their own custom sizes
+				if ( (!child->hasAttribute("font")) || (child->getAttributeString("font", font_name)) )
+				{
+					mFontSizes[std::pair<std::string, std::string>(font_name, size_name)] = size_value;
+				}
+// [/SL:KB]
+//				mFontSizes[size_name] = size_value;
 			}
 
 		}
@@ -326,14 +334,26 @@ bool LLFontRegistry::initFromXML(LLXMLNodePtr node)
 	return true;
 }
 
-bool LLFontRegistry::nameToSize(const std::string& size_name, F32& size)
+//bool LLFontRegistry::nameToSize(const std::string& size_name, F32& size)
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+bool LLFontRegistry::nameToSize(const std::string& font_name, const std::string& size_name, F32& size)
+// [/SL:KB]
 {
-	font_size_map_t::iterator it = mFontSizes.find(size_name);
+//	font_size_map_t::iterator it = mFontSizes.find(size_name);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	font_size_map_t::iterator it = mFontSizes.find(std::pair<std::string, std::string>(font_name, size_name));
+// [/SL:KB]
 	if (it != mFontSizes.end())
 	{
 		size = it->second;
 		return true;
 	}
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	if (!font_name.empty())
+	{
+		return nameToSize(LLStringUtil::null, size_name, size);
+	}
+// [/SL:KB]
 	return false;
 }
 
@@ -348,7 +368,10 @@ LLFontGL *LLFontRegistry::createFont(const LLFontDescriptor& desc)
 	// First decipher the requested size.
 	LLFontDescriptor norm_desc = desc.normalize();
 	F32 point_size;
-	bool found_size = nameToSize(norm_desc.getSize(),point_size);
+//	bool found_size = nameToSize(norm_desc.getSize(),point_size);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	bool found_size = nameToSize(norm_desc.getName(), norm_desc.getSize(), point_size);
+// [/SL:KB]
 	if (!found_size)
 	{
 		llwarns << "createFont unrecognized size " << norm_desc.getSize() << llendl;
@@ -641,7 +664,10 @@ void LLFontRegistry::dump()
 		 size_it != mFontSizes.end();
 		 ++size_it)
 	{
-		llinfos << "Size: " << size_it->first << " => " << size_it->second << llendl;
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-08 (Catznip-3.3)
+		llinfos << "Size: <" << size_it->first.first << "," << size_it->first.second << "> => " << size_it->second << llendl;
+// [/SL:KB]
+//		llinfos << "Size: " << size_it->first << " => " << size_it->second << llendl;
 	}
 	for (font_reg_map_t::iterator font_it = mFontMap.begin();
 		 font_it != mFontMap.end();
