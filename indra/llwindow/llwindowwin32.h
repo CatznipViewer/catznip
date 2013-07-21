@@ -53,17 +53,17 @@ public:
 	/*virtual*/ void minimize();
 	/*virtual*/ void restore();
 	/*virtual*/ BOOL getFullscreen();
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0.0)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0)
 	/*virtual*/ BOOL getFullscreenWindow();
 	/*virtual*/ void setFullscreenWindow(BOOL fFullscreen);
 // [/SL:KB]
 	/*virtual*/ BOOL getPosition(LLCoordScreen *position);
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1.2)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
 	/*virtual*/ BOOL getRestoredPosition(LLCoordScreen *position);
 // [/SL:KB]
 	/*virtual*/ BOOL getSize(LLCoordScreen *size);
 	/*virtual*/ BOOL getSize(LLCoordWindow *size);
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1.2)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
 	/*virtual*/ BOOL getRestoredSize(LLCoordScreen *size);
 // [/SL:KB]
 	/*virtual*/ BOOL setPosition(LLCoordScreen position);
@@ -220,7 +220,7 @@ protected:
 	U32				mKeyScanCode;
 	U32				mKeyVirtualKey;
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1.2)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
 	WINDOWPLACEMENT mRestoredPlacement;				// Only valid when the window is "fullscreen" sized [see setFullscreenWindow()]
 // [/SL:KB];
 

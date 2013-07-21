@@ -3927,7 +3927,7 @@ class LLViewMouselook : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1.1)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1)
 void handle_toggle_fullscreen()
 {
 	if ( (gViewerWindow) && (gViewerWindow->canFullscreenWindow()) )
@@ -8370,7 +8370,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLZoomer(1.2f), "View.ZoomOut");
 	view_listener_t::addMenu(new LLZoomer(1/1.2f), "View.ZoomIn");
 	view_listener_t::addMenu(new LLZoomer(DEFAULT_FIELD_OF_VIEW, false), "View.ZoomDefault");
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1.1)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1)
 	commit.add("View.ToggleFullscreen", boost::bind(&handle_toggle_fullscreen));
 	enable.add("View.EnableToggleFullscreen", boost::bind(&enable_toggle_fullscreen));
 // [/SL:KB]

@@ -2182,7 +2182,7 @@ void LLViewerWindow::reshape(S32 width, S32 height)
 		sendShapeToSim();
 
 		// store new settings for the mode we are in, regardless
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-88-26 (Catznip-2.1.1)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-88-26 (Catznip-2.1)
 #ifndef LL_WINDOWS
 		if (!gViewerWindow->getFullscreenWindow())
 #endif // LL_WINDOWS
@@ -4884,7 +4884,7 @@ void LLViewerWindow::initFonts(F32 zoom_factor)
 	LLFontGL::loadDefaultFonts();
 }
 
-// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1.1)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1)
 bool LLViewerWindow::canFullscreenWindow()
 {
 #ifdef LL_WINDOWS
