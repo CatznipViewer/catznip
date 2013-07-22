@@ -207,6 +207,10 @@
 #include "llviewerwindowlistener.h"
 #include "llpaneltopinfobar.h"
 
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
 #if LL_WINDOWS
 #include <tchar.h> // For Unicode conversion methods
 #endif
@@ -1037,7 +1041,33 @@ BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MAS
 	return TRUE;
 }
 
-LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+void dnd_upload_nop(const std::vector<std::string>& paths)
+{
+}
+
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+                                                                   LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
+{
+	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
+	switch (type)
+	{
+		case LLWindowCallbacks::DNDT_FILE:
+			result = handleDragNDropFile(window, pos, mask, action, type, data);
+			break;
+		case LLWindowCallbacks::DNDT_DEFAULT:
+		default:
+			result = handleDragNDropDefault(window, pos, mask, action, (!data.empty()) ? data.front() : LLStringUtil::null);
+			break;
+	}
+	return result;
+}
+// [/SL:KB]
+
+//LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [/SL:KB]
 {
 	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
 
@@ -1181,6 +1211,70 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 	return result;
 }
   
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action,
+                                                                       LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
+{
+	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
+
+	bool fDrop = (LLWindowCallbacks::DNDA_DROPPED == action);
+	switch(action)
+	{
+		case LLWindowCallbacks::DNDA_START_TRACKING:
+		case LLWindowCallbacks::DNDA_TRACK:
+		case LLWindowCallbacks::DNDA_DROPPED:
+			{
+				bool fAccept = gLoggedInTime.getStarted();
+
+				// Accept only if all files are texture files
+				for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
+				{
+					EImageCodec imgCodec = LLImageBase::getCodecFromExtension(gDirUtilp->getExtension(*itFile));
+					switch (imgCodec)
+					{
+						case IMG_CODEC_BMP:
+						case IMG_CODEC_TGA:
+						case IMG_CODEC_JPEG:
+						case IMG_CODEC_PNG:
+							if (fDrop)
+								fAccept &= gDirUtilp->fileExists(*itFile);
+							else
+								fAccept &= true;
+							break;
+						default:
+							fAccept = false;
+							break;
+					}
+				}
+
+				if (fAccept)
+				{
+					if (fDrop)
+					{
+						std::string strFileList;
+						for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
+						{
+							strFileList += gDirUtilp->getBaseFileName(*itFile, false);
+							strFileList += "\n";
+						}
+
+						LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("FILELIST", strFileList), LLSD(), boost::bind(dnd_upload_nop, data));
+					}
+					result = DND_COPY;
+				}
+			}
+			break;
+
+		case LLWindowCallbacks::DNDA_STOP_TRACKING:
+			{
+			}
+			break;
+	}
+
+	return result;
+}
+// [/SL:KB]
+
 BOOL LLViewerWindow::handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;

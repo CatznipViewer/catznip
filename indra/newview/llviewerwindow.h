@@ -182,7 +182,14 @@ public:
 	/*virtual*/ BOOL handleRightMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ BOOL handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ BOOL handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask);
-	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+                                                                   LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data);
+	            LLWindowCallbacks::DragNDropResult handleDragNDropDefault(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
+	            LLWindowCallbacks::DragNDropResult handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+                                                                       LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data);
+// [/SL:KB]
+//	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
 				void handleMouseMove(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ void handleMouseLeave(LLWindow *window);
 	/*virtual*/ void handleResize(LLWindow *window,  S32 x,  S32 y);

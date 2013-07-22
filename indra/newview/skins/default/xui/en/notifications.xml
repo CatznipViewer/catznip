@@ -7507,6 +7507,20 @@ This upload will cost L$[PRICE], do you wish to continue with the upload?
 
   <notification
    icon="alertmodal.tga"
+   name="UploadDnDConfirmation"
+   type="alertmodal">
+    This will upload the following file(s): 
+
+[FILELIST]
+    Do you wish to continue with the upload?
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="Upload"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="ConfirmClearTeleportHistory"
    type="alertmodal">
 Are you sure you want to delete your teleport history?
