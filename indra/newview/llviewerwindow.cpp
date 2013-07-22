@@ -1212,13 +1212,39 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWind
 }
   
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
+{
+	static struct ExtLookup
+	{
+		const char*        pstrExtension;
+		LLAssetType::EType eAssetType;
+	}
+	// This really should be standardized somewhere instead of having extensions duplicated all over the code
+	s_ExtLookup[] =
+		{
+			{ "tga", LLAssetType::AT_TEXTURE },
+			{ "bmp", LLAssetType::AT_TEXTURE },
+			{ "jpg", LLAssetType::AT_TEXTURE },
+			{ "jpeg", LLAssetType::AT_TEXTURE },
+			{ "png", LLAssetType::AT_TEXTURE }
+		};
+
+	const std::string& strExt = gDirUtilp->getExtension(strFilename);
+	for (int idxExt = 0, cntExt = sizeof(s_ExtLookup) / sizeof(ExtLookup); idxExt < cntExt; idxExt++)
+	{
+		if (strExt == s_ExtLookup[idxExt].pstrExtension)
+			return s_ExtLookup[idxExt].eAssetType;
+	}
+	return LLAssetType::AT_NONE;
+}
+
 LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action,
                                                                        LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
 {
 	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
 
 	bool fDrop = (LLWindowCallbacks::DNDA_DROPPED == action);
-	switch(action)
+	switch (action)
 	{
 		case LLWindowCallbacks::DNDA_START_TRACKING:
 		case LLWindowCallbacks::DNDA_TRACK:
@@ -1226,51 +1252,81 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 			{
 				bool fAccept = gLoggedInTime.getStarted();
 
-				// Accept only if all files are texture files
-				for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
+				if (!LLToolMgr::getInstance()->inBuildMode())
 				{
-					EImageCodec imgCodec = LLImageBase::getCodecFromExtension(gDirUtilp->getExtension(*itFile));
-					switch (imgCodec)
+					// Accept only if all files are texture files
+					for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
 					{
-						case IMG_CODEC_BMP:
-						case IMG_CODEC_TGA:
-						case IMG_CODEC_JPEG:
-						case IMG_CODEC_PNG:
-							if (fDrop)
-								fAccept &= gDirUtilp->fileExists(*itFile);
-							else
-								fAccept &= true;
-							break;
-						default:
-							fAccept = false;
-							break;
+						fAccept &= (LLAssetType::AT_NONE != getAssetTypeFromFilename(*itFile));
+					}
+
+					if (fAccept)
+					{
+						if (fDrop)
+						{
+							std::string strFileList;
+							for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
+							{
+								strFileList += gDirUtilp->getBaseFileName(*itFile, false);
+								strFileList += "\n";
+							}
+
+							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("FILELIST", strFileList), LLSD(), boost::bind(dnd_upload_nop, data));
+						}
+						result = DND_COPY;
 					}
 				}
-
-				if (fAccept)
+				else
 				{
-					if (fDrop)
+					// Accept only if a single file was dropped and it's a texture file
+					fAccept &= (1 == data.size()) && (LLAssetType::AT_TEXTURE == getAssetTypeFromFilename(data.front()));
+					if (fAccept)
 					{
-						std::string strFileList;
-						for (std::vector<std::string>::const_iterator itFile = data.begin(); (fAccept) && (data.end() != itFile); ++itFile)
-						{
-							strFileList += gDirUtilp->getBaseFileName(*itFile, false);
-							strFileList += "\n";
-						}
+						LLPickInfo pick = pickImmediate(pos.mX, pos.mY, TRUE);
 
-						LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("FILELIST", strFileList), LLSD(), boost::bind(dnd_upload_nop, data));
+						LLViewerObject* pObj = pick.getObject();
+						if ( (pObj) && (pObj->permModify()) )
+						{
+							result = LLWindowCallbacks::DND_LINK;
+							if (!fDrop)
+							{
+								if (pObj != mDragHoveredObject)
+								{
+									LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+									mDragHoveredObject = pObj;
+									LLSelectMgr::getInstance()->highlightObjectOnly(mDragHoveredObject);
+								}
+							}
+							else 
+							{
+								LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+								mDragHoveredObject = NULL;
+
+								const std::string& strFilename = data.front(); LLUUID idLocalBitmap;
+								if (!LLLocalBitmapMgr::hasUnit(strFilename, &idLocalBitmap))
+								{
+									LLLocalBitmapMgr::addUnit(strFilename, &idLocalBitmap);
+								}
+
+								if (idLocalBitmap.notNull())
+								{
+									pObj->setTETexture(pick.mObjectFace, LLLocalBitmapMgr::getWorldID(idLocalBitmap));
+								}
+							}
+						}
 					}
-					result = DND_COPY;
 				}
 			}
 			break;
-
 		case LLWindowCallbacks::DNDA_STOP_TRACKING:
-			{
-			}
 			break;
 	}
 
+	if ( (LLWindowCallbacks::DND_NONE == result) && (mDragHoveredObject.notNull()) )
+	{
+		LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+		mDragHoveredObject = NULL;
+	}
 	return result;
 }
 // [/SL:KB]
