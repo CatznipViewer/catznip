@@ -328,10 +328,9 @@ LLPanelFace::~LLPanelFace()
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 void LLPanelFace::draw()
 {
-	bool fPipetteActive = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
-	bool fPipetteTexture = (fPipetteActive) && (LLToolPipette::TYPE_TEXTURE == LLToolPipette::getInstance()->getPipetteType());
-	mTexturePipette->setValue(fPipetteActive && fPipetteTexture);
-	mColorPipette->setValue(fPipetteActive && !fPipetteTexture);
+	LLToolPipette::EType typePipette = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance()) ? LLToolPipette::getInstance()->getPipetteType() : LLToolPipette::TYPE_NONE;
+	mColorPipette->setValue(LLToolPipette::TYPE_COLOR == typePipette);
+	mTexturePipette->setValue(LLToolPipette::TYPE_TEXTURE == typePipette);
 
 	LLPanel::draw();
 }
@@ -746,6 +745,9 @@ void LLPanelFace::updateUI()
 			mColorSwatch->setEnabled( editable );
 			mColorSwatch->setCanApplyImmediately( editable );
 		}
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mColorPipette->setEnabled(editable);
+// [/SL:KB]
 
 		// Color transparency
 		getChildView("color trans")->setEnabled(editable);
@@ -921,6 +923,9 @@ void LLPanelFace::updateUI()
 					getChildView("label maskcutoff")->setEnabled(editable && mIsAlpha);
 				}
 			}
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mTexturePipette->setEnabled(editable);
+// [/SL:KB]
             
          if (shinytexture_ctrl)
          {
@@ -943,11 +948,6 @@ void LLPanelFace::updateUI()
 					shinytexture_ctrl->setImageAssetID( specmap_id );
 				}
          }
-
-// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-		mTexturePipette->setEnabled(editable);
-		mColorPipette->setEnabled(editable);
-// [/SL:KB]
 
          if (bumpytexture_ctrl)
          {
@@ -1549,6 +1549,9 @@ void LLPanelFace::updateVisibility()
 
 	// Diffuse texture controls
 	getChildView("texture control")->setVisible(show_texture && !show_media);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mTexturePipette->setVisible( (show_texture) && (!show_media) );
+// [/SL:KB]
 	getChildView("label alphamode")->setVisible(show_texture && !show_media);
 	getChildView("combobox alphamode")->setVisible(show_texture && !show_media);
 	getChildView("label maskcutoff")->setVisible(false);
@@ -1893,8 +1896,8 @@ void LLPanelFace::onSelectPipette(LLToolPipette::EType type, const LLTextureEntr
 	{
 		case LLToolPipette::TYPE_TEXTURE:
 			{
-				LLTextureCtrl* pTextureCtrl = getChild<LLTextureCtrl>("texture control");
-				if (!pTextureCtrl->getPickerVisible())
+				LLTextureCtrl* pTextureCtrl = findChild<LLTextureCtrl>("texture control");
+				if ( (pTextureCtrl) && (!pTextureCtrl->getPickerVisible()) )
 				{
 					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
 					if (idItem.notNull())
