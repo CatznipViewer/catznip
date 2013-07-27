@@ -7,9 +7,10 @@
 				Repetir por Face
 			</panel.string>
 			<texture_picker label="Textura" name="texture control" tool_tip="Clique para escolher uma imagem"/>
-			<color_swatch label="Cor" name="colorswatch" tool_tip="Selecionar a cor"/>
-			<text name="color trans" width="100">
-				Transparência %
+			<text name="color label">Cor</text>
+			<color_swatch name="colorswatch" tool_tip="Selecionar a cor"/>
+			<text name="color trans">
+				Alpha %
 			</text>
 			<text name="glow label">
 				Brilho

@@ -7,16 +7,17 @@
 				Gentagelser pr. overflade
 			</panel.string>
 			<texture_picker label="Tekstur" name="texture control" tool_tip="Klik for at vælge billede"/>
-			<color_swatch label="Farve" name="colorswatch" tool_tip="Klik for at åbne farvevælger"/>
-			<text left="170" name="color trans" width="105">
-				Gennemsigtighed%
+			<text name="color label">Farve</text>
+			<color_swatch name="colorswatch" tool_tip="Klik for at åbne farvevælger"/>
+			<text name="color trans">
+				Alpha %
 			</text>
 			<spinner left="171" name="ColorTrans"/>
 			<text left="170" name="glow label">
 				Glød
 			</text>
 			<spinner left="170" name="glow"/>
-			<check_box label="Selvlysende" left="170" name="checkbox fullbright"/>
+			<check_box label="Selvlysende" name="checkbox fullbright"/>
 			<text name="tex gen">
 				Afbildning
 			</text>

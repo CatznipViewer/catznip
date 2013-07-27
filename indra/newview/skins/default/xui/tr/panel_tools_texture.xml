@@ -7,9 +7,10 @@
 				Bir Yüzde Kaç Kez Tekrarlandığı
 			</panel.string>
 			<texture_picker label="Doku" name="texture control" tool_tip="Bir resim seçmek için tıklayın"/>
-			<color_swatch label="Renk" name="colorswatch" tool_tip="Renk seçiciyi açmak için tıklayın"/>
+			<text name="color label">Renk</text>
+			<color_swatch name="colorswatch" tool_tip="Renk seçiciyi açmak için tıklayın"/>
 			<text name="color trans">
-				Saydamlık %
+				Alpha %
 			</text>
 			<text name="glow label">
 				Parıltı

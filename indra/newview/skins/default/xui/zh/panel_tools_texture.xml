@@ -7,7 +7,8 @@
 				每一面重覆次數
 			</panel.string>
 			<texture_picker label="材質" name="texture control" tool_tip="點按以挑選圖片"/>
-			<color_swatch label="顏色" name="colorswatch" tool_tip="點按以開啟顏色挑選器"/>
+			<text name="color label">顏色</text>
+			<color_swatch name="colorswatch" tool_tip="點按以開啟顏色挑選器"/>
 			<text name="color trans">
 				透明度 %
 			</text>

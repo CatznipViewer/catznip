@@ -7,9 +7,10 @@
 				Повторений на грань
 			</panel.string>
 			<texture_picker label="Текстура" name="texture control" tool_tip="Щелкните для выбора изображения"/>
-			<color_swatch label="Цвет" name="colorswatch" tool_tip="Щелкните для выбора цвета"/>
+			<text name="color label">Цвет</text>
+			<color_swatch name="colorswatch" tool_tip="Щелкните для выбора цвета"/>
 			<text name="color trans">
-				Прозрачность %
+				Alpha %
 			</text>
 			<text name="glow label">
 				Свечение

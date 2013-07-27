@@ -7,9 +7,10 @@
 				Ripetizioni per faccia
 			</panel.string>
 			<texture_picker label="Texture" name="texture control" tool_tip="Clicca per scegliere un&apos;immagine"/>
-			<color_swatch label="Colore" name="colorswatch" tool_tip="Clicca per aprire il selettore dei colori"/>
+			<text name="color label">Colore</text>
+			<color_swatch name="colorswatch" tool_tip="Clicca per aprire il selettore dei colori"/>
 			<text name="color trans">
-				Trasparenza %
+				Alpha %
 			</text>
 			<text name="glow label">
 				Bagliore

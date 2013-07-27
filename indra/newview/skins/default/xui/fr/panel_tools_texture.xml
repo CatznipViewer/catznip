@@ -7,9 +7,10 @@
 				Répétitions par face
 			</panel.string>
 			<texture_picker label="Texture" name="texture control" tool_tip="Cliquez pour sélectionner une image"/>
-			<color_swatch label="Couleur" name="colorswatch" tool_tip="Cliquez pour ouvrir le sélecteur de couleurs"/>
-			<text name="color trans" width="88">
-				Transparence
+			<text name="color label">Couleur</text>
+			<color_swatch name="colorswatch" tool_tip="Cliquez pour ouvrir le sélecteur de couleurs"/>
+			<text name="color trans">
+				Alpha %
 			</text>
 			<text name="glow label">
 				Rayonnement

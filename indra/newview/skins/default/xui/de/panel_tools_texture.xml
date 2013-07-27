@@ -7,9 +7,10 @@
 				Wiederholungen pro Fläche
 			</panel.string>
 			<texture_picker label="Textur" name="texture control" tool_tip="Klicken, um ein Bild zu wählen"/>
-			<color_swatch label="Farbe" name="colorswatch" tool_tip="Klicken Sie hier, um die Farbauswahl zu öffnen"/>
+			<text name="color label">Farbe</text>
+			<color_swatch name="colorswatch" tool_tip="Klicken Sie hier, um die Farbauswahl zu öffnen"/>
 			<text name="color trans">
-				Transparenz %
+				Alpha %
 			</text>
 			<text name="glow label">
 				Leuchten

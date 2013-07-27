@@ -7,16 +7,17 @@
 				Powtórzenia
 			</panel.string>
 			<texture_picker label="Tekstura" name="texture control" tool_tip="Kliknij by wybrać obraz"/>
-			<color_swatch label="Kolor" name="colorswatch" tool_tip="Kliknij aby wybrać kolor"/>
-			<text left="170" name="color trans" width="99">
-				Przezroczystość %
+			<text name="color label">Kolor</text>
+			<color_swatch name="colorswatch" tool_tip="Kliknij aby wybrać kolor"/>
+			<text name="color trans">
+				Alpha %
 			</text>
 			<spinner left="170" name="ColorTrans"/>
 			<text left="170" name="glow label">
 				Blask
 			</text>
 			<spinner left="170" name="glow"/>
-			<check_box label="Jaskrawość" left="170" name="checkbox fullbright"/>
+			<check_box label="Jaskrawość" name="checkbox fullbright"/>
 			<text name="tex gen">
 				Mapowanie
 			</text>

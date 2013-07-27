@@ -23,15 +23,25 @@
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
              left="10"
              name="color label"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="64">
+             width="48">
                 Color
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="0"
+             name="color_pipette"
+             top_delta="-1"
+             width="16" />
             <!-- label is blank because control places it below the box -->
             <color_swatch
              can_apply_immediately="true"
@@ -42,20 +52,20 @@
              left="10"
              name="colorswatch"
              tool_tip="Click to open color picker"
-             top="20"
+             top_pad="2"
              width="64" />
             <text
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
-             left_pad="15"
+             left="140"
              name="color trans"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="110">
-                Transparency %
+             width="60">
+                Alpha %
             </text>
             <spinner
              decimal_digits="0"
@@ -68,18 +78,18 @@
              max_val="100"
              name="ColorTrans"
              top_pad="4"
-             width="80" />
+             width="60" />
             <text
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
-             left_pad="15"
+             left_pad="10"
              name="glow label"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="80">
+             width="60">
                 Glow
             </text>
             <spinner
@@ -91,14 +101,14 @@
              left_delta="0"
              name="glow"
              top_pad="4"
-             width="80" />
+             width="60" />
             <check_box
              height="19"
              label="Full Bright"
              layout="topleft"
              left="7"
              name="checkbox fullbright"
-             top_pad="4"
+             top_pad="2"
              width="81" />
             <combo_box
              height="23"
