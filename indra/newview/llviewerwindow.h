@@ -64,6 +64,9 @@ class LLHUDIcon;
 class LLWindow;
 class LLRootView;
 class LLWindowListener;
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-27 (Catznip-3.6)
+class LLViewerInventoryItem;
+// [/SL:KB]
 class LLViewerWindowListener;
 class LLPopupView;
 
@@ -495,6 +498,9 @@ private:
 	
 	// Object temporarily hovered over while dragging
 	LLPointer<LLViewerObject>	mDragHoveredObject;
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-27 (Catznip-3.6)
+	std::vector<LLViewerInventoryItem*> mDragItems;
+// [/SL:KB]
 };
 
 //

@@ -2691,6 +2691,7 @@ even though the user gets a free copy.
          help_topic="toolbox_texture_tab"
          name="Texture"
          filename="panel_tools_texture.xml">
+	   </panel>
        <panel
          filename="panel_tools_contents.xml"
          label="Content"
