@@ -484,6 +484,8 @@ void LLPreview::startBackupTimer(F32 nInterval)
 {
 	if (nInterval > 0.0f)
 	{
+		if (mBackupTimer)
+			delete mBackupTimer;
 		mBackupTimer = new LLPreviewBackupTimer(nInterval, this);
 	}
 	else

@@ -529,42 +529,45 @@ void LLScriptEdCore::setScriptText(const std::string& text, BOOL is_valid)
 
 bool LLScriptEdCore::loadScriptText(const std::string& filename)
 {
-	if (filename.empty())
-	{
-		llwarns << "Empty file name" << llendl;
-		return false;
-	}
-
-	LLFILE* file = LLFile::fopen(filename, "rb");		/*Flawfinder: ignore*/
-	if (!file)
-	{
-		llwarns << "Error opening " << filename << llendl;
-		return false;
-	}
-
-	// read in the whole file
-	fseek(file, 0L, SEEK_END);
-	size_t file_length = (size_t) ftell(file);
-	fseek(file, 0L, SEEK_SET);
-	char* buffer = new char[file_length+1];
-	size_t nread = fread(buffer, 1, file_length, file);
-	if (nread < file_length)
-	{
-		llwarns << "Short read" << llendl;
-	}
-	buffer[nread] = '\0';
-	fclose(file);
-
-	mEditor->setText(LLStringExplicit(buffer));
-	delete[] buffer;
-
-	return true;
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+	return mEditor->loadFromFile(filename);
+// [/SL:KB]
+//	if (filename.empty())
+//	{
+//		llwarns << "Empty file name" << llendl;
+//		return false;
+//	}
+//
+//	LLFILE* file = LLFile::fopen(filename, "rb");		/*Flawfinder: ignore*/
+//	if (!file)
+//	{
+//		llwarns << "Error opening " << filename << llendl;
+//		return false;
+//	}
+//
+//	// read in the whole file
+//	fseek(file, 0L, SEEK_END);
+//	size_t file_length = (size_t) ftell(file);
+//	fseek(file, 0L, SEEK_SET);
+//	char* buffer = new char[file_length+1];
+//	size_t nread = fread(buffer, 1, file_length, file);
+//	if (nread < file_length)
+//	{
+//		llwarns << "Short read" << llendl;
+//	}
+//	buffer[nread] = '\0';
+//	fclose(file);
+//
+//	mEditor->setText(LLStringExplicit(buffer));
+//	delete[] buffer;
+//
+//	return true;
 }
 
 bool LLScriptEdCore::writeToFile(const std::string& filename)
 {
-	LLFILE* fp = LLFile::fopen(filename, "wb");
-	if (!fp)
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+	if (!mEditor->writeToFile(filename))
 	{
 		llwarns << "Unable to write to " << filename << llendl;
 
@@ -574,18 +577,31 @@ bool LLScriptEdCore::writeToFile(const std::string& filename)
 		mErrorList->addElement(row);
 		return false;
 	}
-
-	std::string utf8text = mEditor->getText();
-
-	// Special case for a completely empty script - stuff in one space so it can store properly.  See SL-46889
-	if (utf8text.size() == 0)
-	{
-		utf8text = " ";
-	}
-
-	fputs(utf8text.c_str(), fp);
-	fclose(fp);
 	return true;
+// [/SL:KB]
+//	LLFILE* fp = LLFile::fopen(filename, "wb");
+//	if (!fp)
+//	{
+//		llwarns << "Unable to write to " << filename << llendl;
+//
+//		LLSD row;
+//		row["columns"][0]["value"] = "Error writing to local file. Is your hard drive full?";
+//		row["columns"][0]["font"] = "SANSSERIF_SMALL";
+//		mErrorList->addElement(row);
+//		return false;
+//	}
+//
+//	std::string utf8text = mEditor->getText();
+//
+//	// Special case for a completely empty script - stuff in one space so it can store properly.  See SL-46889
+//	if (utf8text.size() == 0)
+//	{
+//		utf8text = " ";
+//	}
+//
+//	fputs(utf8text.c_str(), fp);
+//	fclose(fp);
+//	return true;
 }
 
 void LLScriptEdCore::sync()

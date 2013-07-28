@@ -581,6 +581,9 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 			  {
 				  gVFS->removeFile(content["new_asset"].asUUID(), LLAssetType::AT_NOTECARD);
 			  }
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+			  nc->callbackSaveComplete();
+// [/SL:KB]
 			  nc->refreshFromInventory(new_item->getUUID());
 		  }
 		  break;
@@ -702,6 +705,9 @@ void LLUpdateTaskInventoryResponder::uploadComplete(const LLSD& content)
 								   LLAssetType::AT_NOTECARD);
 			  }
 			  nc->setAssetId(content["new_asset"].asUUID());
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+			  nc->callbackSaveComplete();
+// [/SL:KB]
 			  nc->refreshFromInventory();
 		  }
 		  break;

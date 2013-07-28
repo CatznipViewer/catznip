@@ -358,6 +358,14 @@ void LLPreviewNotecard::onLoadComplete(LLVFS *vfs,
 			llwarns << "Problem loading notecard: " << status << llendl;
 			preview->mAssetStatus = PREVIEW_ASSET_ERROR;
 		}
+
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+		// Start the timer which will perform regular backup saves
+		if (!preview->isBackupRunning())
+		{
+			preview->startBackupTimer(60.0f);
+		}
+// [/SL:KB]
 	}
 	delete item_id;
 }
@@ -498,6 +506,29 @@ void LLPreviewNotecard::deleteNotecard()
 
 	closeFloater();
 }
+
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+void LLPreviewNotecard::onBackupTimer()
+{
+	LLViewerTextEditor* pEditor = findChild<LLViewerTextEditor>("Notecard Editor");
+	if ( (pEditor) && (!pEditor->isPristine()) )
+	{
+		if (mBackupFilename.empty())
+			mBackupFilename = getBackupFileName();
+		pEditor->writeToFile(mBackupFilename);
+	}
+}
+
+void LLPreviewNotecard::callbackSaveComplete()
+{
+	// Notecard was successfully saved so delete our backup copy if we have one and the editor is still pristine
+	LLViewerTextEditor* pEditor = findChild<LLViewerTextEditor>("Notecard Editor");
+	if ( (pEditor) && (pEditor->isPristine()) && (hasBackupFile()) )
+	{
+		removeBackupFile();
+	}
+}
+// [/SL:KB]
 
 // static
 void LLPreviewNotecard::onSaveComplete(const LLUUID& asset_uuid, void* user_data, S32 status, LLExtStat ext_status) // StoreAssetData callback (fixed)

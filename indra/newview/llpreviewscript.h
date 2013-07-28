@@ -157,10 +157,6 @@ class LLScriptEdContainer : public LLPreview
 public:
 	LLScriptEdContainer(const LLSD& key);
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
-	/*virtual*/ void refreshFromItem();
-// [/SL:KB]
-
 protected:
 	std::string		getTmpFileName();
 // [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
