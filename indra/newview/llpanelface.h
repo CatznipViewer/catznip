@@ -138,8 +138,13 @@ protected:
 	void 	onCancelColor(const LLSD& data);
 	void 	onSelectColor(const LLSD& data);
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	void	onClickPipette(LLToolPipette::EType type);
-	void	onSelectPipette(LLToolPipette::EType type, const LLTextureEntry& te);
+	void	onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette);
+	void	onSelectPipette(LLToolPipette::EType typePipette, const LLTextureEntry& te);
+
+	void	onClickBtnCopyParams(const LLSD& sdParam);
+	void	onClickBtnPasteParams(const LLSD& sdParam);
+	LLSD	objectToLLSD(const std::string& strParamType);
+	void	objectFromLLSD(const std::string& strParamType, const LLSD& sdParams);
 // [/SL:KB]
 
 	void 	onCloseTexturePicker(const LLSD& data);
@@ -359,10 +364,17 @@ private:
 	 */
 	void onTextureSelectionChanged(LLInventoryItem* itemp);
 
-// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
 protected:
-	LLButton*		mTexturePipette;
-	LLButton*		mColorPipette;
+	LLButton*		mBtnColorPipette;
+
+	LLButton*		mBtnCopyMaterialTypeParams;
+	LLButton*		mBtnPasteMaterialTypeParams;
+	LLButton*		mBtnMaterialTypePipette;
+
+	LLButton*		mBtnTexturePipette;
+
+	LLSD			mObjectClipboard;
 // [/SL:KB]
 	bool mIsAlpha;
 	

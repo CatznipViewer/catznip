@@ -116,7 +116,7 @@
              left="10"
              name="combobox matmedia"
              top_pad="5"
-             width="100">
+             width="80">
                 <combo_box.item
                  label="Materials"
                  name="Materials"
@@ -129,23 +129,57 @@
             <combo_box
              height="23"
              layout="topleft"
-             left_pad="10"
+             left_pad="5"
              name="combobox mattype"
              top_delta="0"
-             width="155">
+             width="140">
                 <combo_box.item
                  label="Texture (diffuse)"
                  name="Texture (diffuse)"
-                 value="Texture (diffuse)" />
+                 value="diffuse" />
                 <combo_box.item
                  label="Bumpiness (normal)"
                  name="Bumpiness (normal)"
-                 value="Bumpiness (normal)" />
+                 value="normal" />
                 <combo_box.item
                  label="Shininess (specular)"
                  name="Shininess (specular)"
-                 value="Shininess (specular)" />
+                 value="specular" />
             </combo_box>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="2"
+             name="copy_mattype_btn"
+             top_delta="3"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="mattype" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_mattype_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="mattype" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_mattype_btn"
+             width="16" />
             <texture_picker
              can_apply_immediately="true"
              default_image_name="Default"
