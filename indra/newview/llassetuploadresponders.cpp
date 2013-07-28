@@ -513,7 +513,7 @@ LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
 {
 }
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-04-29 (Catznip-3.3.0) | Modified: Catznip-3.3.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-04-29 (Catznip-3.3)
 LLUpdateAgentInventoryResponder::LLUpdateAgentInventoryResponder(
 	const LLSD& post_data,
 	const std::string& file_name,
@@ -536,7 +536,7 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 	{
 		llwarns << "Inventory item for " << mVFileID
 			<< " is no longer in agent inventory." << llendl;
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-06 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-06 (Catznip-3.2)
 		if (!mUploadCallback.empty())
 		{
 			mUploadCallback(item_id, content, false /*failure*/);
@@ -554,7 +554,7 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 	llinfos << "Inventory item " << item->getName() << " saved into "
 		<< content["new_asset"].asString() << llendl;
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2)
 	if (!mUploadCallback.empty())
 	{
 		mUploadCallback(item_id, content, true /*success*/);
@@ -630,7 +630,7 @@ void LLUpdateAgentInventoryResponder::uploadComplete(const LLSD& content)
 	}
 }
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2)
 void LLUpdateAgentInventoryResponder::uploadFailure(const LLSD& content)
 {
 	if (!mUploadCallback.empty())

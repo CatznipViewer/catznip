@@ -197,7 +197,7 @@ public:
 		return found;
 	}
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2013-03-10 (Catznip-3.4 )
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2013-03-10 (Catznip-3.4)
 	bool revertInventoryObjectName(std::string& object_name)
 	{
 		LL_DEBUGS("InventoryLocalize") << "Searching for localization: " << object_name << LL_ENDL;

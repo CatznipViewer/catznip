@@ -118,7 +118,7 @@ static bool have_script_upload_cap(LLUUID& object_id)
 	return object && (! object->getRegion()->getCapability("UpdateScriptTask").empty());
 }
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 #include "lleventtimer.h"
 
 /// ---------------------------------------------------------------------------
@@ -1221,13 +1221,13 @@ bool LLScriptEdCore::enableLoadFromFileMenu(void* userdata)
 LLScriptEdContainer::LLScriptEdContainer(const LLSD& key)
 :	LLPreview(key)
 ,	mScriptEd(NULL)
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 ,	mBackupTimer(NULL)
 // [/SL:KB]
 {
 }
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 LLScriptEdContainer::~LLScriptEdContainer()
 {
 	// Clean up the backup file (unless we've gotten disconnected)
@@ -1379,7 +1379,7 @@ void LLPreviewLSL::callbackLSLCompileSucceeded()
 	mScriptEd->mErrorList->setCommentText(LLTrans::getString("CompileSuccessful"));
 	mScriptEd->mErrorList->setCommentText(LLTrans::getString("SaveComplete"));
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	// Script was successfully saved so delete our backup copy if we have one and the editor is still pristine
 	if ( (!mBackupFilename.empty()) && (!mScriptEd->hasChanged()) )
 	{
@@ -1409,7 +1409,7 @@ void LLPreviewLSL::callbackLSLCompileFailed(const LLSD& compile_errors)
 	}
 	mScriptEd->selectFirstError();
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	// Script was successfully saved so delete our backup copy if we have one and the editor is still pristine
 	if ( (!mBackupFilename.empty()) && (!mScriptEd->hasChanged()) )
 	{
@@ -1521,7 +1521,7 @@ void LLPreviewLSL::saveIfNeeded(bool sync /*= true*/)
 {
 	// llinfos << "LLPreviewLSL::saveIfNeeded()" << llendl;
 //	if(!mScriptEd->hasChanged())
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-10 (Catznip-3.2)
 	if ( (!mScriptEd->hasChanged()) || (!gAgent.getRegion()) )
 // [/SL:KB]
 	{
@@ -1780,7 +1780,7 @@ void LLPreviewLSL::onLoadComplete( LLVFS *vfs, const LLUUID& asset_uuid, LLAsset
 			preview->mScriptEd->setEnableEditing(is_modifiable);
 			preview->mAssetStatus = PREVIEW_ASSET_LOADED;
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 			// Start the timer which will perform regular backup saves
 			preview->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLPreviewLSL::onBackupTimer, preview));
 // [/SL:KB]
@@ -1875,7 +1875,7 @@ void LLLiveLSLEditor::callbackLSLCompileSucceeded(const LLUUID& task_id,
 	mScriptEd->mErrorList->setCommentText(LLTrans::getString("CompileSuccessful"));
 	mScriptEd->mErrorList->setCommentText(LLTrans::getString("SaveComplete"));
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	// Script was successfully saved so delete our backup copy if we have one and the editor is still pristine
 	if ( (!mBackupFilename.empty()) && (!mScriptEd->hasChanged()) )
 	{
@@ -1905,7 +1905,7 @@ void LLLiveLSLEditor::callbackLSLCompileFailed(const LLSD& compile_errors)
 	}
 	mScriptEd->selectFirstError();
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	// Script was successfully saved so delete our backup copy if we have one and the editor is still pristine
 	if ( (!mBackupFilename.empty()) && (!mScriptEd->hasChanged()) )
 	{
@@ -2037,7 +2037,7 @@ void LLLiveLSLEditor::onLoadComplete(LLVFS *vfs, const LLUUID& asset_id,
 			instance->mScriptEd->setEnableEditing(TRUE);
 			instance->mAssetStatus = PREVIEW_ASSET_LOADED;
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 			// Start the timer which will perform regular backup saves
 			instance->mBackupTimer = setupCallbackTimer(60.0f, boost::bind(&LLLiveLSLEditor::onBackupTimer, instance));
 // [/SL:KB]

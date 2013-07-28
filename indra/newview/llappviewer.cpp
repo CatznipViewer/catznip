@@ -89,7 +89,7 @@
 #include "lltextutil.h"
 #include "lllogininstance.h"
 #include "llprogressview.h"
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0)
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2)
 #include "llfloaterscriptrecover.h"
 // [/SL:KB]
 #include "llvocache.h"
@@ -5393,7 +5393,7 @@ void LLAppViewer::handleLoginComplete()
 
 	mOnLoginCompleted();
 
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-24 (Catznip-3.2)
 	LLScriptRecoverQueue::recoverIfNeeded();
 // [/SL:KB]
 

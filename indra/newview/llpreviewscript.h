@@ -49,7 +49,7 @@ class LLKeywordToken;
 class LLVFS;
 class LLViewerInventoryItem;
 class LLScriptEdContainer;
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0)
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 class LLEventTimer;
 // [/SL:KB]
 
@@ -159,7 +159,7 @@ class LLScriptEdContainer : public LLPreview
 
 public:
 	LLScriptEdContainer(const LLSD& key);
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	/*virtual*/ ~LLScriptEdContainer();
 
 	/*virtual*/ void refreshFromItem();
@@ -167,7 +167,7 @@ public:
 
 protected:
 	std::string		getTmpFileName();
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	virtual std::string getBackupFileName() const;
 	bool			onBackupTimer();
 // [/SL:KB]
@@ -176,7 +176,7 @@ protected:
 	virtual void	saveIfNeeded(bool sync = true) = 0;
 
 	LLScriptEdCore*		mScriptEd;
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2.0) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
 	std::string			mBackupFilename;
 	LLEventTimer*		mBackupTimer;
 // [/SL:KB]

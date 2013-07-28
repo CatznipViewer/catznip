@@ -104,10 +104,10 @@ public:
 
 	// llview
 	/*virtual*/ void draw();
-//	void refreshFromItem();
-// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-06 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2012-02-06 (Catznip-3.2)
 	virtual void refreshFromItem();
 // [/SL:KB]
+//	void refreshFromItem();
 	
 protected:
 	virtual void onCommit();
