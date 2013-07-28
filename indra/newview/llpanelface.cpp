@@ -316,7 +316,7 @@ BOOL	LLPanelFace::postBuild()
 	clearCtrls();
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _3));
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _2, _3));
 // [/SL:KB]
 
 	return TRUE;
@@ -1909,56 +1909,6 @@ void LLPanelFace::onCommitNormalTexture( const LLSD& data )
 }
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-void LLPanelFace::onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette)
-{
-	LLButton* pPipetteBtn = dynamic_cast<LLButton*>(pCtrl);
-	if (pCtrl)
-	{
-		if (!pPipetteBtn->getToggleState())
-		{
-			LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
-			LLToolPipette::getInstance()->setPippetType(typePipette);
-		}
-		else
-		{
-			LLToolMgr::getInstance()->clearTransientTool();
-		}
-	}
-}
-
-void LLPanelFace::onSelectPipette(LLToolPipette::EType typePipette, const LLTextureEntry& te)
-{
-	switch (typePipette)
-	{
-		case LLToolPipette::TYPE_TEXTURE:
-			{
-				LLTextureCtrl* pTextureCtrl = findChild<LLTextureCtrl>("texture control");
-				if ( (pTextureCtrl) && (!pTextureCtrl->getPickerVisible()) )
-				{
-					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
-					if (idItem.notNull())
-					{
-						pTextureCtrl->setImageItemID(idItem);
-						onSelectTexture(LLSD());
-					}
-				}
-			}
-			break;
-		case LLToolPipette::TYPE_COLOR:
-			{
-				LLColorSwatchCtrl* pColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
-				if (!pColorSwatch->getPickerVisible())
-				{
-					pColorSwatch->set(LLColor4(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE], 1.0));
-					onSelectColor(LLSD());
-				}
-			}
-			break;
-		default:
-			break;
-	}
-}
-
 struct LLSelectedLLSDFunctorHelper
 {
 	static U8 getDefaultDiffuseMode(const LLViewerObject* pObj, S32 idxTE)
@@ -2095,7 +2045,7 @@ LLSD LLPanelFace::objectToLLSD(const std::string& strParamType)
 		LLSelectedTEMaterial::getSpecularID(idNormal, fIdentical);
 		pFunc = new LLSelectedNormalTEGetLLSDFunctor(fIdentical);
 	}
-	if ("specular" == strParamType)
+	else if ("specular" == strParamType)
 	{
 		LLUUID idSpecular;
 		LLSelectedTEMaterial::getSpecularID(idSpecular, fIdentical);
@@ -2280,6 +2230,83 @@ void LLPanelFace::onClickBtnPasteParams(const LLSD& sdParam)
 			strParamType = pComboMatType->getValue().asString();
 	}
 	objectFromLLSD(strParamType, mObjectClipboard);
+}
+
+void LLPanelFace::onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette)
+{
+	LLButton* pPipetteBtn = dynamic_cast<LLButton*>(pCtrl);
+	if (pCtrl)
+	{
+		if (!pPipetteBtn->getToggleState())
+		{
+			LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
+			LLToolPipette::getInstance()->setPippetType(typePipette);
+		}
+		else
+		{
+			LLToolMgr::getInstance()->clearTransientTool();
+		}
+	}
+}
+
+void LLPanelFace::onSelectPipette(LLToolPipette::EType typePipette, LLViewerObject* pObj, const LLTextureEntry& te)
+{
+	switch (typePipette)
+	{
+		case LLToolPipette::TYPE_TEXTURE:
+			{
+				LLTextureCtrl* pTextureCtrl = findChild<LLTextureCtrl>("texture control");
+				if ( (pTextureCtrl) && (!pTextureCtrl->getPickerVisible()) )
+				{
+					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
+					if (idItem.notNull())
+					{
+						pTextureCtrl->setImageItemID(idItem);
+						onSelectTexture(LLSD());
+					}
+				}
+			}
+			break;
+		case LLToolPipette::TYPE_COLOR:
+			{
+				LLColorSwatchCtrl* pColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
+				if (!pColorSwatch->getPickerVisible())
+				{
+					pColorSwatch->set(LLColor4(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE], 1.0));
+					onSelectColor(LLSD());
+				}
+			}
+			break;
+		case LLToolPipette::TYPE_MATERIAL_TYPE:
+			{
+				const LLComboBox* pComboMatType = findChild<LLComboBox>("combobox mattype");
+				if (pComboMatType)
+				{
+					const std::string strParamType = pComboMatType->getValue().asString();
+
+					LLSelectedTEGetLLSDFunctor* pFunc = NULL;
+					if ("diffuse" == strParamType)
+						pFunc = new LLSelectedDiffuseTEGetLLSDFunctor(false);
+					else if ("normal" == strParamType)
+						pFunc = new LLSelectedNormalTEGetLLSDFunctor(false);
+					else if ("specular" == strParamType)
+						pFunc = new LLSelectedSpecularTEGetLLSDFunctor(false);
+
+					if (pFunc)
+					{
+						for (int idxTE = 0, cntTE = llmin((int)pObj->getNumTEs(), (int)pObj->getNumFaces()); idxTE < cntTE; idxTE++)
+							pFunc->apply(pObj, idxTE);
+
+						LLSD sdParams;
+						sdParams[strParamType] = pFunc->getParams();
+						objectFromLLSD(strParamType, sdParams);
+					}
+				}
+			}
+			break;
+		default:
+			break;
+	}
 }
 // [/SL:KB]
 

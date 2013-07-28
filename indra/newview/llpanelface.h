@@ -139,7 +139,7 @@ protected:
 	void 	onSelectColor(const LLSD& data);
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 	void	onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette);
-	void	onSelectPipette(LLToolPipette::EType typePipette, const LLTextureEntry& te);
+	void	onSelectPipette(LLToolPipette::EType typePipette, LLViewerObject* pObj, const LLTextureEntry& te);
 
 	void	onClickBtnCopyParams(const LLSD& sdParam);
 	void	onClickBtnPasteParams(const LLSD& sdParam);

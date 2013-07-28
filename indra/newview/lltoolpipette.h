@@ -53,7 +53,7 @@ public:
 	virtual BOOL	handleToolTip(S32 x, S32 y, MASK mask);
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-	enum EType { TYPE_NONE, TYPE_POSITION, TYPE_SIZE, TYPE_ROTATION, TYPE_PARAMS, TYPE_TEXTURE, TYPE_COLOR };
+	enum EType { TYPE_NONE, TYPE_POSITION, TYPE_SIZE, TYPE_ROTATION, TYPE_PARAMS, TYPE_TEXTURE, TYPE_COLOR, TYPE_MATERIAL_TYPE };
 	EType getPipetteType() const    { return mPipetteType; }
 	void  setPippetType(EType type) { mPipetteType = type; }
 // [/SL:KB]
