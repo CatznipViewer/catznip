@@ -79,7 +79,7 @@ void LLFloaterScriptRecover::onBtnCancel()
 	std::vector<LLScrollListItem*> items = pListCtrl->getAllData();
 	for (std::vector<LLScrollListItem*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
 	{
-		LLFile::remove((*itItem)->getValue().asString());
+		LLFile::remove((*itItem)->getValue()["path"].asString());
 	}
 
 	closeFloater();
