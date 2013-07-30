@@ -39,6 +39,9 @@
 #include "llinventorydefines.h"
 #include "llinventorymodel.h"
 #include "lllineeditor.h"
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+#include "llnotecard.h"
+// [/SL:KB]
 #include "llnotificationsutil.h"
 #include "llresmgr.h"
 #include "roles_constants.h"
@@ -515,7 +518,22 @@ void LLPreviewNotecard::onBackupTimer()
 	{
 		if (mBackupFilename.empty())
 			mBackupFilename = getBackupFileName();
-		pEditor->writeToFile(mBackupFilename);
+
+		if (!mBackupFilename.empty())
+		{
+			LLNotecard notecard(LLNotecard::MAX_SIZE);
+			notecard.setText(pEditor->getText());
+
+			std::stringstream strmNotecard;
+			notecard.exportStream(strmNotecard);
+
+			std::ofstream outNotecardFile(mBackupFilename, std::ios::out | std::ios::binary | std::ios::trunc);
+			if (outNotecardFile.is_open())
+			{
+				outNotecardFile << strmNotecard.rdbuf();
+				outNotecardFile.close();
+			}
+		}
 	}
 }
 

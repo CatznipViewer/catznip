@@ -198,6 +198,7 @@ set(viewer_SOURCE_FILES
     llfirstuse.cpp
     llflexibleobject.cpp
     llfloaterabout.cpp
+    llfloaterassetrecovery.cpp
     llfloaterbvhpreview.cpp
     llfloaterauction.cpp
     llfloaterautoreplacesettings.cpp
@@ -266,7 +267,6 @@ set(viewer_SOURCE_FILES
     llfloaterreporter.cpp
     llfloaterscriptdebug.cpp
     llfloaterscriptlimits.cpp
-    llfloaterscriptrecover.cpp
     llfloatersearch.cpp
     llfloatersellland.cpp
     llfloatersettingsdebug.cpp
@@ -782,6 +782,7 @@ set(viewer_HEADER_FILES
     llfirstuse.h
     llflexibleobject.h
     llfloaterabout.h
+    llfloaterassetrecovery.h
     llfloaterbvhpreview.h
     llfloaterauction.h
     llfloaterautoreplacesettings.h
@@ -850,7 +851,6 @@ set(viewer_HEADER_FILES
     llfloaterreporter.h
     llfloaterscriptdebug.h
     llfloaterscriptlimits.h
-    llfloaterscriptrecover.h
     llfloatersearch.h
     llfloatersellland.h
     llfloatersettingsdebug.h

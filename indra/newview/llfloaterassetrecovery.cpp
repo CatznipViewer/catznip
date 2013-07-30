@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2011-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -30,24 +30,25 @@
 #include "llviewerinventory.h"
 #include "llviewerregion.h"
 
-#include "llfloaterscriptrecover.h"
+#include "llfloaterassetrecovery.h"
 
 // ============================================================================
-// LLFloaterScriptRecover
+// LLFloaterAssetRecovery
 //
 
-LLFloaterScriptRecover::LLFloaterScriptRecover(const LLSD& sdKey)
+LLFloaterAssetRecovery::LLFloaterAssetRecovery(const LLSD& sdKey)
 	: LLFloater(sdKey)
 {
 }
 
-void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
+void LLFloaterAssetRecovery::onOpen(const LLSD& sdKey)
 {
-	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("item_list");
 
 	LLSD sdBhvrRow; LLSD& sdBhvrColumns = sdBhvrRow["columns"];
-	sdBhvrColumns[0] = LLSD().with("column", "script_check").with("type", "checkbox");
-	sdBhvrColumns[1] = LLSD().with("column", "script_name").with("type", "text");
+	sdBhvrColumns[0] = LLSD().with("column", "item_check").with("type", "checkbox");
+	sdBhvrColumns[1] = LLSD().with("column", "item_name").with("type", "text");
+	sdBhvrColumns[2] = LLSD().with("column", "item_type").with("type", "text");
 
 	pListCtrl->clearRows();
 	for (LLSD::array_const_iterator itFile = sdKey["files"].beginArray(), endFile = sdKey["files"].endArray(); 
@@ -58,22 +59,23 @@ void LLFloaterScriptRecover::onOpen(const LLSD& sdKey)
 		sdBhvrRow["value"] = sdFile;
 		sdBhvrColumns[0]["value"] = true;
 		sdBhvrColumns[1]["value"] = sdFile["name"];
+		sdBhvrColumns[2]["value"] = sdFile["type"];
 
 		pListCtrl->addElement(sdBhvrRow, ADD_BOTTOM);
 	}
 }
 
-BOOL LLFloaterScriptRecover::postBuild()
+BOOL LLFloaterAssetRecovery::postBuild()
 {
-	findChild<LLUICtrl>("recover_btn")->setCommitCallback(boost::bind(&LLFloaterScriptRecover::onBtnRecover, this));
-	findChild<LLUICtrl>("cancel_btn")->setCommitCallback(boost::bind(&LLFloaterScriptRecover::onBtnCancel, this));
+	findChild<LLUICtrl>("recover_btn")->setCommitCallback(boost::bind(&LLFloaterAssetRecovery::onBtnRecover, this));
+	findChild<LLUICtrl>("cancel_btn")->setCommitCallback(boost::bind(&LLFloaterAssetRecovery::onBtnCancel, this));
 
 	return TRUE;
 }
 
-void LLFloaterScriptRecover::onBtnCancel()
+void LLFloaterAssetRecovery::onBtnCancel()
 {
-	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("item_list");
 
 	// Delete all listed files
 	std::vector<LLScrollListItem*> items = pListCtrl->getAllData();
@@ -85,9 +87,9 @@ void LLFloaterScriptRecover::onBtnCancel()
 	closeFloater();
 }
 
-void LLFloaterScriptRecover::onBtnRecover()
+void LLFloaterAssetRecovery::onBtnRecover()
 {
-	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("script_list");
+	LLScrollListCtrl* pListCtrl = findChild<LLScrollListCtrl>("item_list");
 
 	// Recover all selected, delete any unselected
 	std::vector<LLScrollListItem*> items = pListCtrl->getAllData(); LLSD sdFiles;
@@ -105,43 +107,81 @@ void LLFloaterScriptRecover::onBtnRecover()
 	}
 
 	if (!sdFiles.emptyArray())
-		new LLScriptRecoverQueue(sdFiles);
+		new LLAssetRecoverQueue(sdFiles);
 
 	closeFloater();
 }
 
 // ============================================================================
-// LLCreateRecoverScriptCallback
+// LLCreateRecoverAssetCallback
 //
 
-class LLCreateRecoverScriptCallback : public LLInventoryCallback
+class LLCreateRecoverAssetCallback : public LLInventoryCallback
 {
 public:
-	LLCreateRecoverScriptCallback(LLScriptRecoverQueue* pRecoverQueue)
+	LLCreateRecoverAssetCallback(LLAssetRecoverQueue* pRecoverQueue)
 		: LLInventoryCallback(), mRecoverQueue(pRecoverQueue)
 	{
 	}
 
 	void fire(const LLUUID& idItem)
 	{
-		mRecoverQueue->onCreateScript(idItem);
+		mRecoverQueue->onCreateItem(idItem);
 	}
 
 protected:
-	LLScriptRecoverQueue* mRecoverQueue;
+	LLAssetRecoverQueue* mRecoverQueue;
 };
 
 // ============================================================================
-// LLScriptRecoverQueue
+// Helper functions
 //
 
 // static
-void LLScriptRecoverQueue::recoverIfNeeded()
+static bool removeEmbeddedMarkers(const std::string& strFilename)
 {
-	const std::string strTempPath = LLFile::tmpdir();
-	LLSD sdData, &sdFiles = sdData["files"];
+	std::ifstream inNotecardFile(strFilename, std::ios::in | std::ios::binary);
+	if (!inNotecardFile.is_open())
+		return false;
 
-	LLDirIterator itFiles(strTempPath, "*.lslbackup"); std::string strFilename;
+	std::string strText((std::istreambuf_iterator<char>(inNotecardFile)), std::istreambuf_iterator<char>());
+	inNotecardFile.close();
+
+	std::string::size_type idxText = strText.find((char)'\xF4', 0), lenText = strText.length();
+	while ( (std::string::npos != idxText) && (idxText + 4 <= lenText) )
+	{
+		// In UTF-8 we're looking for F4808080-F48FBFBF
+		char chByte2 = strText[idxText + 1];
+		char chByte3 = strText[idxText + 2];
+		char chByte4 = strText[idxText + 3];
+		if ( ((chByte2 >= '\x80') && (chByte2 <= '\x8F')) &&
+		     ((chByte3 >= '\x80') && (chByte3 <= '\xBF')) &&
+		     ((chByte4 >= '\x80') && (chByte4 <= '\xBF')) )
+		{
+			// We're being lazy and replacing embedded markers with spaces since we don't want to adjust the notecard length field
+			strText.replace(idxText, 4, 4, ' ');
+			continue;
+		}
+		idxText = strText.find('\xF4', idxText + 1);
+	}
+
+	std::ofstream outNotecardFile(strFilename, std::ios::out | std::ios::binary | std::ios::trunc);
+	if (!outNotecardFile.is_open())
+		return false;
+
+	outNotecardFile.write(strText.c_str(), strText.length());
+	outNotecardFile.close();
+
+	return true;
+}
+
+// ============================================================================
+// LLAssetRecoverQueue
+//
+
+static void findRecoverFiles(LLSD& sdFiles, const std::string& strPath, const std::string& strMask, const std::string& strType)
+{
+	LLDirIterator itFiles(strPath, strMask); std::string strFilename;
 	while (itFiles.next(strFilename))
 	{
 		// Build a friendly name for the file
@@ -152,27 +192,41 @@ void LLScriptRecoverQueue::recoverIfNeeded()
 
 		LLStringUtil::trim(strName);
 		if (0 == strName.length())
-			strName = "(Unknown script)";
+			strName = llformat("(Unknown %s)", strType.c_str());
 
-		sdFiles.append(LLSD().with("path", strTempPath + strFilename).with("name", strName));
+		sdFiles.append(LLSD().with("path", strPath + strFilename).with("name", strName).with("type", strType));
 	}
-
-	if (sdFiles.size())
-		LLFloaterReg::showInstance("script_recover", sdData);
 }
 
-LLScriptRecoverQueue::LLScriptRecoverQueue(const LLSD& sdFiles)
+// static
+void LLAssetRecoverQueue::recoverIfNeeded()
+{
+	const std::string strTempPath = LLFile::tmpdir();
+	LLSD sdData, &sdFiles = sdData["files"];
+
+	findRecoverFiles(sdFiles, strTempPath, "*.lslbackup", "script");
+	findRecoverFiles(sdFiles, strTempPath, "*.ncbackup", "notecard");
+
+	if (sdFiles.size())
+	{
+		LLFloaterReg::showInstance("asset_recovery", sdData);
+	}
+}
+
+LLAssetRecoverQueue::LLAssetRecoverQueue(const LLSD& sdFiles)
 {
 	for (LLSD::array_const_iterator itFile = sdFiles.beginArray(), endFile = sdFiles.endArray(); itFile != endFile;  ++itFile)
 	{
 		const LLSD& sdFile = *itFile;
 		if (LLFile::isfile(sdFile["path"]))
+		{
 			m_FileQueue.insert(std::pair<std::string, LLSD>(sdFile["path"], sdFile));
+		}
 	}
 	recoverNext();
 }
 
-bool LLScriptRecoverQueue::recoverNext()
+bool LLAssetRecoverQueue::recoverNext()
 {
 	/**
 	 * Steps:
@@ -207,13 +261,23 @@ bool LLScriptRecoverQueue::recoverNext()
 	std::string strItemDescr;
 	LLViewerAssetType::generateDescriptionFor(LLAssetType::AT_LSL_TEXT, strItemDescr);
 
-	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
-	                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
-	                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverScriptCallback(this));
+	if ("script" == itFile->second["type"].asString())
+	{
+		create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
+		                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
+		                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverAssetCallback(this));
+	}
+	else if ("notecard" == itFile->second["type"].asString())
+	{
+		removeEmbeddedMarkers(itFile->first);
+		create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
+		                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_NOTECARD, LLInventoryType::IT_NOTECARD,
+		                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverAssetCallback(this));
+	}
 	return true;
 }
 
-void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
+void LLAssetRecoverQueue::onCreateItem(const LLUUID& idItem)
 {
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (!pItem)
@@ -239,19 +303,31 @@ void LLScriptRecoverQueue::onCreateScript(const LLUUID& idItem)
 		std::string strFileName = itFile->second["path"];
 		itFile->second["item"] = idItem;
 
-		LLSD sdBody;
-		sdBody["item_id"] = idItem;
-		sdBody["target"] = "lsl2";
+		std::string strCapsUrl; LLSD sdBody; 
 
-		std::string strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
-		LLHTTPClient::post(strCapsUrl, sdBody, 
-						   new LLUpdateAgentInventoryResponder(sdBody, strFileName, LLAssetType::AT_LSL_TEXT, 
-															   boost::bind(&LLScriptRecoverQueue::onSavedScript, this, _1, _2, _3),
-															   boost::bind(&LLScriptRecoverQueue::onUploadError, this, _1)));
+		if (LLAssetType::AT_LSL_TEXT == pItem->getType())
+		{
+			strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
+			sdBody["item_id"] = idItem;
+			sdBody["target"] = "lsl2";
+		}
+		else if (LLAssetType::AT_NOTECARD == pItem->getType())
+		{
+			strCapsUrl = gAgent.getRegion()->getCapability("UpdateNotecardAgentInventory");
+			sdBody["item_id"] = idItem;
+		}
+
+		if (!strCapsUrl.empty())
+		{
+			LLHTTPClient::post(strCapsUrl, sdBody, 
+			                   new LLUpdateAgentInventoryResponder(sdBody, strFileName, pItem->getType(), 
+			                                                       boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _2, _3),
+			                                                       boost::bind(&LLAssetRecoverQueue::onUploadError, this, _1)));
+		}
 	}
 }
 
-void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool fSuccess)
+void LLAssetRecoverQueue::onSavedAsset(const LLUUID& idItem, const LLSD&, bool fSuccess)
 {
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (pItem)
@@ -268,7 +344,7 @@ void LLScriptRecoverQueue::onSavedScript(const LLUUID& idItem, const LLSD&, bool
 	recoverNext();
 }
 
-bool LLScriptRecoverQueue::onUploadError(const std::string& strFilename)
+bool LLAssetRecoverQueue::onUploadError(const std::string& strFilename)
 {
 	// Skip over the file when there's an error, we can try again on the next relog
 	filename_queue_t::iterator itFile = m_FileQueue.find(strFilename);

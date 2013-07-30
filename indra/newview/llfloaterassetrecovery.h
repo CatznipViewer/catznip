@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2011-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -20,14 +20,14 @@
 #include "llfloater.h"
 
 // ============================================================================
-// LLFloaterScriptRecover
+// LLFloaterAssetRecovery
 //
 
-class LLFloaterScriptRecover : public LLFloater
+class LLFloaterAssetRecovery : public LLFloater
 {
 	friend class LLFloaterReg;
 private:
-	LLFloaterScriptRecover(const LLSD& sdKey);
+	LLFloaterAssetRecovery(const LLSD& sdKey);
 
 	/*
 	 * LLFloater overrides
@@ -45,15 +45,15 @@ protected:
 };
 
 // ============================================================================
-// LLScriptRecoverQueue
+// LLAssetRecoverQueue
 //
 
-class LLScriptRecoverQueue
+class LLAssetRecoverQueue
 {
-	friend class LLCreateRecoverScriptCallback;
-	friend class LLFloaterScriptRecover;
+	friend class LLCreateRecoverAssetCallback;
+	friend class LLFloaterAssetRecovery;
 protected:
-	LLScriptRecoverQueue(const LLSD& sdFiles);
+	LLAssetRecoverQueue(const LLSD& sdFiles);
 
 public:
 	static void recoverIfNeeded();
@@ -61,8 +61,8 @@ public:
 protected:
 	bool recoverNext();
 
-	void onCreateScript(const LLUUID& idItem);
-	void onSavedScript(const LLUUID& idItem, const LLSD& sdContent, bool fSuccess);
+	void onCreateItem(const LLUUID& idItem);
+	void onSavedAsset(const LLUUID& idItem, const LLSD& sdContent, bool fSuccess);
 	bool onUploadError(const std::string& strFilename);
 
 protected:

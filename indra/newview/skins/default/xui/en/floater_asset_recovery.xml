@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
-  can_close="false"
-  can_minimize="false"
-  can_resize="false"
-  height="266"
-  open_positioning="centered"
-  name="script_recover"
-  single_instance="true"
-  title="SCRIPT RECOVERY"
-  width="350">
+ can_close="false"
+ can_minimize="false"
+ can_resize="false"
+ height="266"
+ positioning="centered"
+ name="asset_recovery"
+ single_instance="true"
+ title="ASSET RECOVERY"
+ width="350">
 
   <text
    follows="top|left|right"
@@ -22,9 +22,9 @@
    type="string"
    word_wrap="true"
    width="330">
-      [APP_NAME] has detected recoverable scripts that may have been left over from a recent viewer crash.
+      [APP_NAME] has detected recoverable items that may have been left over from a recent viewer crash.
   
-Recovered scripts will be placed in the 'Lost and Found' inventory folder.
+Recovered items will be placed in the 'Lost and Found' inventory folder.
   </text>
 
   <scroll_list
@@ -36,17 +36,21 @@ Recovered scripts will be placed in the 'Lost and Found' inventory folder.
    layout="topleft"
    left="8"
    multi_select="false"
-   name="script_list"
+   name="item_list"
    top_pad="5"
    width="334">
     <scroll_list.columns
-      label=""
-      name="script_check"
-      width="20" />
+     label=""
+     name="item_check"
+     width="20" />
     <scroll_list.columns
-      label="Script Name"
-      name="script_name"
-      width="170" />
+     label="Item Name"
+     name="item_name"
+     width="170" />
+    <scroll_list.columns
+     label="Item Type"
+     name="item_type"
+     width="70" />
   </scroll_list>
   <panel
    background_visible="false"
