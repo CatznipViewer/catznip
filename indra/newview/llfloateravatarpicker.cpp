@@ -312,7 +312,10 @@ void LLFloaterAvatarPicker::populateNearMe()
 			element["columns"][0]["column"] = "name";
 			element["columns"][0]["value"] = av_name.getDisplayName();
 			element["columns"][1]["column"] = "username";
-			element["columns"][1]["value"] = av_name.getUserName();
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+			element["columns"][1]["value"] = av_name.getAccountName();
+// [/SL:KB]
+//			element["columns"][1]["value"] = av_name.getUserName();
 
 			sAvatarNameMap[av] = av_name;
 		}

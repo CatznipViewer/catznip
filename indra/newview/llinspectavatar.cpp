@@ -386,7 +386,10 @@ void LLInspectAvatar::onAvatarNameCache(
 	{
 		getChild<LLUICtrl>("user_name")->setValue(av_name.getDisplayName());
 		getChild<LLUICtrl>("user_name_small")->setValue(av_name.getDisplayName());
-		getChild<LLUICtrl>("user_slid")->setValue(av_name.getUserName());
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		getChild<LLUICtrl>("user_slid")->setValue(av_name.getAccountName());
+// [/SL:KB]
+//		getChild<LLUICtrl>("user_slid")->setValue(av_name.getUserName());
 		mAvatarName = av_name;
 		
 		// show smaller display name if too long to display in regular size
