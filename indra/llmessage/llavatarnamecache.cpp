@@ -82,7 +82,10 @@ namespace LLAvatarNameCache
 	LLFrameTimer sRequestTimer;
 
     // Maximum time an unrefreshed cache entry is allowed.
-    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
+//    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+    const F64 MAX_UNREFRESHED_TIME = 90.0 * 60.0;
+// [/SL:KB]
 
     // Time when unrefreshed cached names were checked last.
     static F64 sLastExpireCheck;
@@ -191,7 +194,10 @@ public:
 		F64 expires = LLAvatarNameCache::nameExpirationFromHeaders(mHeaders);
 		F64 now = LLFrameTimer::getTotalSeconds();
 
-		LLSD agents = content["agents"];
+//		LLSD agents = content["agents"];
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+		const LLSD& agents = content["agents"];
+// [/SL:KB]
 		LLSD::array_const_iterator it = agents.beginArray();
 		for ( ; it != agents.endArray(); ++it)
 		{
@@ -212,7 +218,10 @@ public:
 		}
 
 		// Same logic as error response case
-		LLSD unresolved_agents = content["bad_ids"];
+//		LLSD unresolved_agents = content["bad_ids"];
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+		const LLSD& unresolved_agents = content["bad_ids"];
+// [/SL:KB]
 		S32  num_unresolved = unresolved_agents.size();
 		if (num_unresolved > 0)
 		{
@@ -636,12 +645,22 @@ LLAvatarNameCache::callback_connection_t LLAvatarNameCache::get(const LLUUID& ag
 		{
 			const LLAvatarName& av_name = it->second;
 			
-			if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+				// Don't wait for the lookup before firing the callback if we have a valid cached entry
+			if ( (!av_name.isTemporaryName()) && (av_name.mExpires > (LLFrameTimer::getTotalSeconds() - MAX_UNREFRESHED_TIME)) )
 			{
 				// ...name already exists in cache, fire callback now
+				sAskQueue.insert(agent_id);
 				fireSignal(agent_id, slot, av_name);
 				return connection;
 			}
+// [/SL:KB]
+//			if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+//			{
+//				// ...name already exists in cache, fire callback now
+//				fireSignal(agent_id, slot, av_name);
+//				return connection;
+//			}
 		}
 	}
 

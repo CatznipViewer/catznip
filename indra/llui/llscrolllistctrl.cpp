@@ -1794,7 +1794,14 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		// check to see if we have a UUID for this row
 		std::string id = item->getValue().asString();
-		LLUUID uuid(id);
+//		LLUUID uuid(id);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+		LLUUID uuid; const LLSD& sdValue = item->getValue();
+		if (sdValue.has("uuid"))
+			uuid = sdValue["uuid"].asUUID();
+		else
+			uuid = sdValue.asUUID(); // <- Original code but since mContextMenuType is only used on LLNameListCtrls it won't do anything
+// [/SL:KB]
 		if (! uuid.isNull() && mContextMenuType != MENU_NONE)
 		{
 			// set up the callbacks for all of the avatar/group menu items

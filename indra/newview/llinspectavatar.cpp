@@ -89,6 +89,9 @@ private:
 	void updateVolumeSlider();
 
 	// Button callbacks
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	void onClickCopy(const LLSD& sdParam);
+// [/SL:KB]
 	void onClickMuteVolume();
 	void onVolumeChange(const LLSD& data);
 	
@@ -158,6 +161,9 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mPropertiesRequest(NULL),
 	mAvatarNameCacheConnection()
 {
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	mCommitCallbackRegistrar.add("InspectAvatar.Copy", boost::bind(&LLInspectAvatar::onClickCopy, this, _2));
+// [/SL:KB]
 	// can't make the properties request until the widgets are constructed
 	// as it might return immediately, so do it in onOpen.
 
@@ -399,6 +405,14 @@ void LLInspectAvatar::onAvatarNameCache(
 	}
 }
 
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+void LLInspectAvatar::onClickCopy(const LLSD& sdParam)
+{
+	LLAvatarActions::copyToClipboard(mAvatarID, sdParam);
+	closeFloater();
+}
+// [/SL:KB]
 //////////////////////////////////////////////////////////////////////////////
 // LLInspectAvatarUtil
 //////////////////////////////////////////////////////////////////////////////
