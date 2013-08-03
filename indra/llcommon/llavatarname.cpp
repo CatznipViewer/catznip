@@ -43,7 +43,7 @@ static const std::string IS_DISPLAY_NAME_DEFAULT("is_display_name_default");
 static const std::string DISPLAY_NAME_EXPIRES("display_name_expires");
 static const std::string DISPLAY_NAME_NEXT_UPDATE("display_name_next_update");
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 LLAvatarName::EShowUsername LLAvatarName::s_eShowUsername = LLAvatarName::SHOW_ALWAYS;
 // [/SL:KB]
 
@@ -160,7 +160,7 @@ void LLAvatarName::setExpires(F64 expires)
 }
 
 //std::string LLAvatarName::getCompleteName() const
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 std::string LLAvatarName::getCompleteName(EShowUsername eShowUsername) const
 // [/SL:KB]
 {
@@ -168,7 +168,7 @@ std::string LLAvatarName::getCompleteName(EShowUsername eShowUsername) const
 	if (sUseDisplayNames)
 	{
 //		if (mUsername.empty() || mIsDisplayNameDefault)
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 		if ( (mUsername.empty()) || ((SHOW_NEVER == s_eShowUsername) || ((SHOW_MISMATCH == s_eShowUsername) && (mIsDisplayNameDefault))) )
 // [/SL:KB]
 		{

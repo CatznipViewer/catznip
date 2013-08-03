@@ -850,7 +850,7 @@ void LLAvatarActions::toggleBlock(const LLUUID& id)
 	}
 }
 
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
 void LLAvatarActions::copyToClipboard(const LLUUID& id, const LLSD& param)
 {
 	LLAvatarName avName;

@@ -68,7 +68,7 @@ public:
 	/// perform the appropriate action for left-clicking on a Url
 	static void clickAction(std::string url);
 
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.5)
 	/// perform the specified copy to clipboard action on a Url 
 	static void copyToClipboard(std::string strURL, const LLSD& sdAction);
 // [/SL:KB]

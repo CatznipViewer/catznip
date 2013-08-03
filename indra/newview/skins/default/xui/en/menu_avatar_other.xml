@@ -42,24 +42,24 @@
    <menu_item_separator />
     <context_menu
      label="Copy"
-     name="Avatar Copy">
+     name="avatar_copy">
         <menu_item_call
          label="Copy Display Name"
-         name="Avatar Copy Displayname">
+         name="avatar_copy_displayname">
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="displayname" />
         </menu_item_call>
         <menu_item_call
          label="Copy Full Name"
-         name="Avatar Copy Fullname">
+         name="avatar_copy_fullname">
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="fullname" />
         </menu_item_call>
         <menu_item_call
          label="Copy SLurl"
-         name="Avatar Copy SLurl">
+         name="avatar_copy_slurl">
             <menu_item_call.on_click
              function="Avatar.Copy"
              parameter="slurl" />

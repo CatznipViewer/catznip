@@ -31,7 +31,7 @@
 
 // Library includes
 #include "llwindow.h"	// getGamma()
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-3.0.0a)
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
 #include "llavatarname.h"
 // [/SL:KB]
 
@@ -566,7 +566,7 @@ bool toggle_agent_pause(const LLSD& newvalue)
 	return true;
 }
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 bool handleAgentLinkUsernamesChanged(const LLSD& sdValue)
 {
 	U32 nValue = sdValue.asInteger();
@@ -761,7 +761,7 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("QAMode")->getSignal()->connect(boost::bind(&show_debug_menus));
 	gSavedSettings.getControl("UseDebugMenus")->getSignal()->connect(boost::bind(&show_debug_menus));
 	gSavedSettings.getControl("AgentPause")->getSignal()->connect(boost::bind(&toggle_agent_pause, _2));
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2010-11-08 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
 	gSavedSettings.getControl("AgentLinkShowUsernames")->getSignal()->connect(boost::bind(&handleAgentLinkUsernamesChanged, _2));
 // [/SL:KB]
 	gSavedSettings.getControl("ShowNavbarNavigationPanel")->getSignal()->connect(boost::bind(&toggle_show_navigation_panel, _2));

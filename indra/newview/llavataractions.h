@@ -125,7 +125,7 @@ public:
 	 */
 	static void toggleBlock(const LLUUID& id);
 
-// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
 	/**
 	 * Copy certain avatar details to the clipboard
 	 *   -> "displayname", "fullname", "username" or "slurl".

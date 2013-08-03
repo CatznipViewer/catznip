@@ -60,10 +60,11 @@ public:
 	// Return true if the name is made up from legacy or temporary data
 	bool isDisplayNameDefault() const { return mIsDisplayNameDefault; }
 	
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
-public:
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
 	bool isTemporaryName() const { return mIsTemporaryName; }
+// [/SL:KB]
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 	typedef enum e_show_username_type
 	{
 		SHOW_ALWAYS = 0,		// Always show the username, i.e. "Kitty Barnett (kitty.barnett)"
@@ -71,16 +72,16 @@ public:
 		SHOW_NEVER = 2			// Never show the username
 	} EShowUsername;
 
-	static EShowUsername	getShowUsername()								{ return s_eShowUsername; }
-	static void				setShowUsername(EShowUsername eShowUsername)	{ s_eShowUsername = eShowUsername; }
+	static EShowUsername	getShowUsername()                            { return s_eShowUsername; }
+	static void				setShowUsername(EShowUsername eShowUsername) { s_eShowUsername = eShowUsername; }
 // [/SL:KB]
 
 	// For normal names, returns "James Linden (james.linden)"
 	// When display names are disabled returns just "James Linden"
-//	std::string getCompleteName() const;
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 	std::string getCompleteName(EShowUsername eShowUsername = s_eShowUsername) const;
 // [/SL:KB]
+//	std::string getCompleteName() const;
 	
 	// Returns "James Linden" or "bobsmith123 Resident" for backwards
 	// compatibility with systems like voice and muting
@@ -147,7 +148,7 @@ private:
 	// This will affect the output of the high level "get" methods
 	static bool sUseDisplayNames;
 
-// [SL:KB] - Patch: DisplayNames-AgentLinkShowUsernames | Checked: 2011-04-17 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 	static EShowUsername s_eShowUsername;
 // [/SL:KB]
 };
