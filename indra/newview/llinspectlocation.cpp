@@ -105,6 +105,7 @@ protected:
 
 LLInspectLocation::LLInspectLocation(const LLSD& sdKey)
 	: LLInspect(LLSD())	// single_instance, doesn't really need key
+	, LLRemoteParcelInfoObserver()
 	, m_fRequestPending(false)
 	, m_pParcelName(NULL), m_pRegionMaturityIcon(NULL), m_pParcelLocation(NULL), m_pParcelDescription(NULL)
 	, m_pTeleportBtn(NULL), m_pMoreInfoBtn(NULL)

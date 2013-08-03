@@ -88,9 +88,8 @@ public:
 	// When closing they should close their gear menu 
 	/*virtual*/ void onClose(bool app_quitting);
 
-	// override the inspector mouse leave so timer is only paused if 
-	// gear menu is not open
-	/* virtual */ void onMouseLeave(S32 x, S32 y, MASK mask);
+	// override the inspector mouse leave so timer is only paused if gear menu is not open
+	/*virtual*/ void onMouseLeave(S32 x, S32 y, MASK mask);
 // [/SL:KB]
 
 	// Update view based on information from avatar properties processor
@@ -112,27 +111,8 @@ private:
 	void onVolumeChange(const LLSD& data);
 // [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
 	// Button callbacks
-	void onClickAddFriend();
-	void onClickViewProfile();
-	void onClickIM();
-	void onClickCall();
-	void onClickTeleport();
-	void onClickInviteToGroup();
-	void onClickPay();
-	void onClickShare();
-	void onToggleMute();
-	void onClickReport();
-	void onClickFreeze();
-	void onClickEject();
-	void onClickZoomIn();  
-	void onClickFindOnMap();
-	bool onVisibleFindOnMap();
-	bool onVisibleEject();
-	bool onVisibleFreeze();
-	bool onVisibleZoomIn();
-	bool enableAddFriend() const;
-	bool enableMute(bool fCheckMute) const;
-	bool enableTeleportOffer() const;
+	void onAvatarAction(const LLSD& sdParam);
+	bool onAvatarEnableAction(const LLSD& sdParam) const;
 // [/SL:KB]
 	
 	void onAvatarNameCache(const LLUUID& agent_id,
@@ -210,30 +190,8 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mAvatarNameCacheConnection()
 {
 // [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
-	mCommitCallbackRegistrar.add("InspectAvatar.ViewProfile",   boost::bind(&LLInspectAvatar::onClickViewProfile, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.AddFriend",     boost::bind(&LLInspectAvatar::onClickAddFriend, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.IM",            boost::bind(&LLInspectAvatar::onClickIM, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Call",          boost::bind(&LLInspectAvatar::onClickCall, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Teleport",      boost::bind(&LLInspectAvatar::onClickTeleport, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.InviteToGroup", boost::bind(&LLInspectAvatar::onClickInviteToGroup, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Pay",           boost::bind(&LLInspectAvatar::onClickPay, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Share",         boost::bind(&LLInspectAvatar::onClickShare, this));
-	mCommitCallbackRegistrar.add("InspectAvatar.ToggleMute",    boost::bind(&LLInspectAvatar::onToggleMute, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Freeze",        boost::bind(&LLInspectAvatar::onClickFreeze, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Eject",         boost::bind(&LLInspectAvatar::onClickEject, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.Report",        boost::bind(&LLInspectAvatar::onClickReport, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.FindOnMap",     boost::bind(&LLInspectAvatar::onClickFindOnMap, this));	
-	mCommitCallbackRegistrar.add("InspectAvatar.ZoomIn",        boost::bind(&LLInspectAvatar::onClickZoomIn, this));
-	
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleAddFriend", boost::bind(&LLInspectAvatar::enableAddFriend, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleCall",   boost::bind(&LLAvatarActions::canCall));
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFindOnMap", boost::bind(&LLInspectAvatar::onVisibleFindOnMap, this));	
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleEject",  boost::bind(&LLInspectAvatar::onVisibleEject, this));	
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleFreeze", boost::bind(&LLInspectAvatar::onVisibleFreeze, this));	
-	mEnableCallbackRegistrar.add("InspectAvatar.VisibleZoomIn", boost::bind(&LLInspectAvatar::onVisibleZoomIn, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableTeleport",boost::bind(&LLInspectAvatar::enableTeleportOffer, this));
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableMute",    boost::bind(&LLInspectAvatar::enableMute, this, true));
-	mEnableCallbackRegistrar.add("InspectAvatar.EnableUnmute",  boost::bind(&LLInspectAvatar::enableMute, this, false));
+	mCommitCallbackRegistrar.add("InspectAvatar.Action",      boost::bind(&LLInspectAvatar::onAvatarAction, this, _2));	
+	mEnableCallbackRegistrar.add("InspectAvatar.CheckAction", boost::bind(&LLInspectAvatar::onAvatarEnableAction, this, _2));
 // [/SL:KB]
 
 	// can't make the properties request until the widgets are constructed
@@ -266,11 +224,9 @@ BOOL LLInspectAvatar::postBuild(void)
 	mDescriptionHeight = rctDescription.getHeight();
 	mDescriptionHeightExpanded = mDescriptionHeight + (rctDescription.mBottom - rctVolume.mBottom);
 
-	getChild<LLUICtrl>("add_friend_btn")->setCommitCallback(
-		boost::bind(&LLInspectAvatar::onClickAddFriend, this) );
-
-	getChild<LLUICtrl>("view_profile_btn")->setCommitCallback(
-		boost::bind(&LLInspectAvatar::onClickViewProfile, this) );
+	getChild<LLUICtrl>("view_profile_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "profile"));
+	getChild<LLUICtrl>("add_friend_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "friend_add"));
+	getChild<LLUICtrl>("im_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "send_im"));
 // [/SL:KB]
 
 	getChild<LLUICtrl>("mute_btn")->setCommitCallback(
@@ -565,124 +521,109 @@ void LLInspectAvatar::onAvatarNameCache(
 }
 
 // [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
-void LLInspectAvatar::onClickAddFriend()
+void LLInspectAvatar::onAvatarAction(const LLSD& sdParam)
 {
-	LLAvatarActions::requestFriendshipDialog(mAvatarID, mAvatarName.getCompleteName());
+	const std::string strAction = sdParam.asString();
+
+	if ("profile" == strAction)
+	{
+		LLAvatarActions::showProfile(mAvatarID);
+	}
+	else if ("friend_add" == strAction)
+	{
+		LLAvatarActions::requestFriendshipDialog(mAvatarID, mAvatarName.getCompleteName());
+	}
+	else if ("send_im" == strAction)
+	{
+		LLAvatarActions::startIM(mAvatarID);
+	}
+	else if ("call" == strAction)
+	{
+		LLAvatarActions::startCall(mAvatarID);
+	}
+	else if ("teleport" == strAction)
+	{
+		LLAvatarActions::offerTeleport(mAvatarID);
+	}
+	else if ("invite_group" == strAction)
+	{
+		LLAvatarActions::inviteToGroup(mAvatarID);
+	}
+	else if ("pay" == strAction)
+	{
+		LLAvatarActions::pay(mAvatarID);
+	}
+	else if ("share" == strAction)
+	{
+		LLAvatarActions::share(mAvatarID);
+	}
+	else if ("toggle_mute" == strAction)
+	{
+		LLAvatarActions::toggleBlock(mAvatarID);
+		LLPanelBlockedList::showPanelAndSelect(mAvatarID);
+	}
+	else if ("freeze" == strAction)
+	{
+		handle_avatar_freeze(LLSD(mAvatarID));
+	}
+	else if ("eject" == strAction)
+	{
+		handle_avatar_eject( LLSD(mAvatarID) );
+	}
+	else if ("report" == strAction)
+	{
+		LLFloaterReporter::showFromAvatar(mAvatarID, mAvatarName.getCompleteName());
+	}
+	else if ("find_map" == strAction)
+	{
+		gFloaterWorldMap->trackAvatar(mAvatarID, mAvatarName.getDisplayName());
+		LLFloaterReg::showInstance("world_map");
+	}
+	else if ("zoom_in" == strAction)
+	{
+		handle_zoom_to_object(mAvatarID);
+	}
+
 	closeFloater();
 }
 
-void LLInspectAvatar::onClickViewProfile()
+bool LLInspectAvatar::onAvatarEnableAction(const LLSD& sdParam) const
 {
-	LLAvatarActions::showProfile(mAvatarID);
-	closeFloater();
-}
+	const std::string strAction = sdParam.asString();
 
-bool LLInspectAvatar::enableAddFriend() const
-{
-	return !LLAvatarActions::isFriend(mAvatarID);
-}
-
-bool LLInspectAvatar::onVisibleFindOnMap()
-{
-	return is_agent_mappable(mAvatarID);
-}
-
-bool LLInspectAvatar::onVisibleEject()
-{
-	return enable_freeze_eject(LLSD(mAvatarID));
-}
-
-bool LLInspectAvatar::onVisibleFreeze()
-{
-	return enable_freeze_eject(LLSD(mAvatarID));
-}
-
-bool LLInspectAvatar::onVisibleZoomIn()
-{
-	return gObjectList.findObject(mAvatarID);
-}
-
-void LLInspectAvatar::onClickIM()
-{ 
-	LLAvatarActions::startIM(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickCall()
-{ 
-	LLAvatarActions::startCall(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickTeleport()
-{
-	LLAvatarActions::offerTeleport(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickInviteToGroup()
-{
-	LLAvatarActions::inviteToGroup(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickPay()
-{
-	LLAvatarActions::pay(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickShare()
-{
-	LLAvatarActions::share(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onToggleMute()
-{
-	LLAvatarActions::toggleBlock(mAvatarID);
-	LLPanelBlockedList::showPanelAndSelect(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickReport()
-{
-	LLFloaterReporter::showFromAvatar(mAvatarID, mAvatarName.getCompleteName());
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickFreeze()
-{
-	handle_avatar_freeze(LLSD(mAvatarID));
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickEject()
-{
-	handle_avatar_eject( LLSD(mAvatarID) );
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickZoomIn() 
-{
-	handle_zoom_to_object(mAvatarID);
-	closeFloater();
-}
-
-void LLInspectAvatar::onClickFindOnMap()
-{
-	gFloaterWorldMap->trackAvatar(mAvatarID, mAvatarName.getDisplayName());
-	LLFloaterReg::showInstance("world_map");
-}
-
-bool LLInspectAvatar::enableMute(bool fCheckMute) const
-{
-	return (fCheckMute) ? (!LLAvatarActions::isBlocked(mAvatarID)) && (LLAvatarActions::canBlock(mAvatarID)) : (LLAvatarActions::isBlocked(mAvatarID));
-}
-
-bool LLInspectAvatar::enableTeleportOffer() const
-{
-	return LLAvatarActions::canOfferTeleport(mAvatarID);
+	if ("friend_add" == strAction)
+	{
+		return !LLAvatarActions::isFriend(mAvatarID);
+	}
+	else if ("teleport" == strAction)
+	{
+		return LLAvatarActions::canOfferTeleport(mAvatarID);
+	}
+	else if ("check_mute" == strAction)
+	{
+		return (!LLAvatarActions::isBlocked(mAvatarID)) && (LLAvatarActions::canBlock(mAvatarID));
+	}
+	else if ("check_unmute" == strAction)
+	{
+		return LLAvatarActions::isBlocked(mAvatarID);
+	}
+	else if ("freeze" == strAction)
+	{
+		return enable_freeze_eject(LLSD(mAvatarID));
+	}
+	else if ("eject" == strAction)
+	{
+		return enable_freeze_eject(LLSD(mAvatarID));
+	}
+	else if ("find_map" == strAction)
+	{
+		return is_agent_mappable(mAvatarID);
+	}
+	else if ("zoom_in" == strAction)
+	{
+		return gObjectList.findObject(mAvatarID);
+	}
+	return false;
 }
 // [/SL:KB]
 

@@ -7,8 +7,7 @@
      layout="topleft"
      name="Sit Down Here">
         <menu_item_call.on_click
-         function="Self.SitDown"
-         parameter="" />
+         function="Self.SitDown" />
         <menu_item_call.on_enable
          function="Self.EnableSitDown" />
     </menu_item_call>
@@ -17,11 +16,12 @@
      layout="topleft"
      name="Stand Up">
         <menu_item_call.on_click
-         function="Self.StandUp"
-         parameter="" />
+         function="Self.StandUp" />
         <menu_item_call.on_enable
          function="Self.EnableStandUp" />
     </menu_item_call>
+    <menu_item_separator
+     layout="topleft" />
     <context_menu
      label="Take Off"
      layout="topleft"
@@ -186,8 +186,7 @@
          layout="topleft"
          name="Detach All">
             <menu_item_call.on_click
-             function="Self.RemoveAllAttachments"
-             parameter="" />
+             function="Self.RemoveAllAttachments" />
             <menu_item_call.on_enable
              function="Self.EnableRemoveAllAttachments" />
         </menu_item_call>
@@ -219,6 +218,8 @@
         <menu_item_call.on_enable
          function="Edit.EnableEditShape" />
     </menu_item_call>
+    <menu_item_separator
+     layout="topleft" />
     <menu_item_call
      label="My Friends"
      layout="topleft"

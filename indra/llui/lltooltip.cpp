@@ -307,7 +307,7 @@ void LLToolTip::initFromParams(const LLToolTip::Params& p)
 
 	mTextBox->reshape(mTextBox->getRect().getWidth(), llmax(mTextBox->getRect().getHeight(), tooltip_rect.getHeight() - 2 * mPadding));
 
-// [SL:KB] - Patch: Control-ToolTip | Checked: 2012-07-02 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2012-07-02 (Catznip-3.3)
 	if (mInfoButton)
 	{
 		LLRect text_rect = mTextBox->getRect();

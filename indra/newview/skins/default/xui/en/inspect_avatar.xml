@@ -145,7 +145,6 @@
      top="139"
      width="90" />
     <button
-     commit_callback.function="InspectAvatar.IM"
      follows="top|left"
      height="20"
      label="IM"
