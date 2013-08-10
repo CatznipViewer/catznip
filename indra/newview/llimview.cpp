@@ -992,7 +992,7 @@ bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, co
 	//other places may be called from message history.
 	if( !from_id.isNull() &&
 		( session->isP2PSessionType() || session->isAdHocSessionType() ) )
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	{
 		LLRecentPeople::instance().add(from_id, LLRecentPeople::IT_IM);
 	}
@@ -1279,10 +1279,10 @@ void LLIMModel::sendMessage(const std::string& utf8_text,
 		LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(im_session_id);
 		if( session == 0)//??? shouldn't really happen
 		{
-//			LLRecentPeople::instance().add(other_participant_id);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 			LLRecentPeople::instance().add(other_participant_id, LLRecentPeople::IT_IM);
 // [/SL:KB]
+//			LLRecentPeople::instance().add(other_participant_id);
 			return;
 		}
 		// IM_SESSION_INVITE means that this is an Ad-hoc incoming chat
@@ -1302,10 +1302,10 @@ void LLIMModel::sendMessage(const std::string& utf8_text,
 			// Add the recepient of the session.
 			if (!session->mInitialTargetIDs.empty())
 			{
-//				LLRecentPeople::instance().add(*(session->mInitialTargetIDs.begin()));
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 				LLRecentPeople::instance().add(*(session->mInitialTargetIDs.begin()), LLRecentPeople::IT_IM);
 // [/SL:KB]
+//				LLRecentPeople::instance().add(*(session->mInitialTargetIDs.begin()));
 			}
 		}
 	}
@@ -1322,10 +1322,10 @@ void LLIMModel::addSpeakersToRecent(const LLUUID& im_session_id)
 	for(LLSpeakerMgr::speaker_list_t::iterator it = speaker_list.begin(); it != speaker_list.end(); it++)
 	{
 		const LLPointer<LLSpeaker>& speakerp = *it;
-//		LLRecentPeople::instance().add(speakerp->mID);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 		LLRecentPeople::instance().add(speakerp->mID, LLRecentPeople::IT_IM);
 // [/SL:KB]
+//		LLRecentPeople::instance().add(speakerp->mID);
 	}
 }
 
@@ -3018,7 +3018,7 @@ void LLIMMgr::inviteToSession(
 		// the call, the caller should be added to the recent list
 		// anyway. STORM-507.
 		if(type == IM_SESSION_P2P_INVITE)
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 		{
 			LLRecentPeople::instance().add(caller_id, LLRecentPeople::IT_IM);
 		}

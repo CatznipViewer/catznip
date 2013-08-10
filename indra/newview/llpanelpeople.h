@@ -74,11 +74,11 @@ private:
 	void					updateFriendListHelpText();
 	void					updateFriendList();
 	void					updateNearbyList();
-//	void					updateRecentList();
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	void					refreshRecentList();
 	void					updateRecentList(bool fForceUpdate);
 // [/SL:KB]
+//	void					updateRecentList();
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
 
@@ -109,15 +109,15 @@ private:
 	void					onNearbyViewSortMenuItemClicked(const LLSD& userdata);
 	void					onGroupsViewSortMenuItemClicked(const LLSD& userdata);
 	void					onRecentViewSortMenuItemClicked(const LLSD& userdata);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-	void					onRecentSetExpiration(const LLSD& userdata);
-	void					onRecentClearHistory(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2)
+	void					onRecentSetExpiration(const LLSD& sdParam);
+	void					onRecentClearHistory();
 // [/SL:KB]
 
 	bool					onFriendsViewSortMenuItemCheck(const LLSD& userdata);
 	bool					onRecentViewSortMenuItemCheck(const LLSD& userdata);
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
-	bool					onRecentCheckExpiration(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2)
+	bool					onRecentCheckExpiration(const LLSD& sdParam);
 // [/SL:KB]
 	bool					onNearbyViewSortMenuItemCheck(const LLSD& userdata);
 

@@ -26,7 +26,7 @@
 
 #include "llviewerprecompiledheaders.h"
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-01 (Catznip-3.0.0a) | Modified: Catznip-3.0.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-01 (Catznip-2.8)
 #include "llsd.h"
 #include "llsdserialize.h"
 #include "llviewercontrol.h"
@@ -39,7 +39,7 @@
 
 using namespace LLOldEvents;
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLUUID& idAgent, LLRecentPeople::EInteractionType itType, const LLSD& sdUserdata)
 	: m_idAgent(idAgent)
 {
@@ -63,7 +63,7 @@ LLRecentPeoplePersistentItem::LLRecentPeoplePersistentItem(const LLSD& sdItem)
 				setLastInteraction(eInteraction, tsInteraction);
 		}
 	}
-	m_sdUserdata = sdItem["userdata"];
+	setUserdata(sdItem["userdata"]);
 }
 
 LLDate LLRecentPeoplePersistentItem::getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const
@@ -105,7 +105,10 @@ LLSD LLRecentPeoplePersistentItem::toLLSD() const
 }
 // [/SL:KB]
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
+static const char* RECENT_PEOPLE_FILENAME        = "recent_people.xml";
+static const char* RECENT_PEOPLE_FILENAME_LEGACY = "recent_people.txt";
+
 const std::string LLRecentPeople::s_itTypeNames[] = 
 {
 	"general",
@@ -132,54 +135,118 @@ LLRecentPeople::EInteractionType LLRecentPeople::getTypeFromTypeName(const std::
 }
 
 LLRecentPeople::LLRecentPeople()
-	: mPersistentFilename("recent_people.txt")
 {
 	load();
 }
 
 void LLRecentPeople::load()
 {
-	llifstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
-	if (!fileRecentPeople.is_open())
+	// Try to load the new file format if it exists, otherwise attempt to load the legacy file
+	const std::string strPath = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME);
+	if (gDirUtilp->fileExists(strPath))
 	{
-		llwarns << "Can't open recent people persistent file \"" << mPersistentFilename << "\" for reading" << llendl;
-		return;
-	}
+		LLSD sdRecentPeople;
 
-	mPeople.clear();
-
-	// The parser's destructor is protected so we cannot create in the stack.
-	LLPointer<LLSDParser> sdParser = new LLSDNotationParser();
-
-	std::string strLine; LLSD sdItem;
-	while (std::getline(fileRecentPeople, strLine))
-	{
-		std::istringstream iss(strLine);
-		if (sdParser->parse(iss, sdItem, strLine.length()) == LLSDParser::PARSE_FAILURE)
+		llifstream fileRecentPeople(strPath);
+		if (!fileRecentPeople.is_open())
 		{
-			llinfos << "Parsing recent people failed" << llendl;
-			break;
+			llwarns << "Can't open recent people persistent file \"" << RECENT_PEOPLE_FILENAME << "\" for reading" << llendl;
+			return;
+		}
+		LLSDSerialize::fromXMLDocument(sdRecentPeople, fileRecentPeople);
+		fileRecentPeople.close();
+
+		mPeople.clear();
+		for (LLSD::array_const_iterator itPerson = sdRecentPeople.beginArray(), endPerson = sdRecentPeople.endArray();
+				itPerson != endPerson; ++itPerson)
+		{
+			LLRecentPeoplePersistentItem persistentItem(*itPerson);
+			if (!persistentItem.isDefault())
+			{
+				mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
+			}
+		}
+	}
+	else
+	{
+		loadLegacy();
+	}
+}
+
+void LLRecentPeople::loadLegacy()
+{
+	const std::string strPath = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME_LEGACY);
+	if (gDirUtilp->fileExists(strPath))
+	{
+		llifstream fileRecentPeople(strPath);
+		if (!fileRecentPeople.is_open())
+		{
+			llwarns << "Can't open recent people persistent file \"" << RECENT_PEOPLE_FILENAME_LEGACY << "\" for reading" << llendl;
+			return;
 		}
 
-		LLRecentPeoplePersistentItem persistentItem(sdItem);
-		if (!persistentItem.isDefault())
-			mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
-	}
+		mPeople.clear();
 
-	fileRecentPeople.close();
+		// The parser's destructor is protected so we cannot create in the stack.
+		LLPointer<LLSDParser> sdParser = new LLSDNotationParser();
+
+		std::string strLine; LLSD sdItem;
+		while (std::getline(fileRecentPeople, strLine))
+		{
+			std::istringstream iss(strLine);
+			if (sdParser->parse(iss, sdItem, strLine.length()) == LLSDParser::PARSE_FAILURE)
+			{
+				llinfos << "Parsing recent people failed" << llendl;
+				break;
+			}
+
+			LLRecentPeoplePersistentItem persistentItem(sdItem);
+			if (!persistentItem.isDefault())
+			{
+				mPeople.insert(std::pair<LLUUID, LLRecentPeoplePersistentItem>(persistentItem.getAgentId(), persistentItem));
+			}
+		}
+		fileRecentPeople.close();
+
+		// Remove the legacy file and save in the new format
+		LLFile::remove(strPath);
+		save();
+	}
 }
 
 void LLRecentPeople::save() const
 {
-	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, mPersistentFilename));
+	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME));
 	if (!fileRecentPeople.is_open())
 	{
-		llwarns << "Can't open people history file \"" << mPersistentFilename << "\" for writing" << llendl;
+		llwarns << "Can't open people history file \"" << RECENT_PEOPLE_FILENAME << "\" for writing" << llendl;
+		return;
+	}
+
+	LLSD sdRecentPeople;
+	for (recent_people_t::const_iterator itPerson = mPeople.begin(); itPerson != mPeople.end(); ++itPerson)
+	{
+		sdRecentPeople.append(itPerson->second.toLLSD());
+	}
+	LLSDSerialize::toPrettyXML(sdRecentPeople, fileRecentPeople);
+
+	fileRecentPeople.close();
+}
+
+void LLRecentPeople::saveLegacy() const
+{
+	llofstream fileRecentPeople(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, RECENT_PEOPLE_FILENAME_LEGACY));
+	if (!fileRecentPeople.is_open())
+	{
+		llwarns << "Can't open people history file \"" << RECENT_PEOPLE_FILENAME_LEGACY << "\" for writing" << llendl;
 		return;
 	}
 
 	for (recent_people_t::const_iterator itItem = mPeople.begin(); itItem != mPeople.end(); ++itItem)
+	{
 		fileRecentPeople << LLSDOStreamer<LLSDNotationFormatter>(itItem->second.toLLSD()) << std::endl;
+	}
+
 	fileRecentPeople.close();
 }
 
@@ -198,7 +265,7 @@ void LLRecentPeople::reloadItems()
 // [/SL:KB]
 
 //bool LLRecentPeople::add(const LLUUID& id, const LLSD& userdata)
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 bool LLRecentPeople::add(const LLUUID& id, EInteractionType interaction, const LLSD& userdata)
 // [/SL:KB]
 {
@@ -219,7 +286,7 @@ bool LLRecentPeople::add(const LLUUID& id, EInteractionType interaction, const L
 
 //		//[] instead of insert to replace existing id->llsd["date"] with new date value
 //		mPeople[id] = userdata;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 		// Update the timestamp and userdata if the person already exists, otherwise insert a new item
 		recent_people_t::iterator itItem = mPeople.find(id);
 		if (mPeople.end() != itItem)
@@ -247,13 +314,13 @@ bool LLRecentPeople::contains(const LLUUID& id) const
 }
 
 //void LLRecentPeople::get(uuid_vec_t& result) const
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 void LLRecentPeople::get(uuid_vec_t& result, EInteractionType interaction) const
 // [/SL:KB]
 {
 	result.clear();
 	for (recent_people_t::const_iterator pos = mPeople.begin(); pos != mPeople.end(); ++pos)
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	{
 		if ((*pos).second.getLastInteraction(interaction).notNull())
 			result.push_back((*pos).first);
@@ -263,15 +330,15 @@ void LLRecentPeople::get(uuid_vec_t& result, EInteractionType interaction) const
 }
 
 //const LLDate LLRecentPeople::getDate(const LLUUID& id) const
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 const LLDate LLRecentPeople::getDate(const LLUUID& id, EInteractionType interaction) const
 // [/SL:KB]
 {
 	recent_people_t::const_iterator it = mPeople.find(id);
-//	if (it!= mPeople.end()) return it->second["date"].asDate();
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	if (it!= mPeople.end()) return it->second.getLastInteraction(interaction);
 // [/SL:KB]
+//	if (it!= mPeople.end()) return it->second["date"].asDate();
 
 	static LLDate no_date = LLDate();
 	return no_date;
@@ -281,12 +348,12 @@ const LLSD& LLRecentPeople::getData(const LLUUID& id) const
 {
 	recent_people_t::const_iterator it = mPeople.find(id);
 
-//	if (it != mPeople.end())
-//		return it->second;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-2.6)
 	if (it != mPeople.end()) 
 		return it->second.getUserdata();
 // [/SL:KB]
+//	if (it != mPeople.end())
+//		return it->second;
 
 	static LLSD no_data = LLSD();
 	return no_data;
@@ -294,6 +361,10 @@ const LLSD& LLRecentPeople::getData(const LLUUID& id) const
 
 bool LLRecentPeople::isAvalineCaller(const LLUUID& id) const
 {
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-2.6)
+	const LLSD& sdData = getData(id);
+	return (sdData.has("avaline_call")) && (sdData["avaline_call"].asBoolean());
+// [/SL:KB]
 //	recent_people_t::const_iterator it = mPeople.find(id);
 //
 //	if (it != mPeople.end())
@@ -303,10 +374,6 @@ bool LLRecentPeople::isAvalineCaller(const LLUUID& id) const
 //	}
 //
 //	return false;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	const LLSD& sdData = getData(id);
-	return (sdData.has("avaline_call")) && (sdData["avaline_call"].asBoolean());
-// [/SL:KB]
 }
 
 const LLUUID& LLRecentPeople::getIDByPhoneNumber(const LLSD& userdata)
@@ -317,7 +384,7 @@ const LLUUID& LLRecentPeople::getIDByPhoneNumber(const LLSD& userdata)
 	for (recent_people_t::const_iterator it = mPeople.begin(); it != mPeople.end(); ++it)
 	{
 //		const LLSD& user_info = it->second;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-04-12 (Catznip-2.6)
 		const LLSD& user_info = it->second.getUserdata();
 // [/SL:KB]
 		

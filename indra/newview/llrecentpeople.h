@@ -36,7 +36,7 @@
 #include <boost/signals2.hpp>
 
 class LLDate;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 class LLRecentPeoplePersistentItem;
 // [/SL:KB]
 
@@ -52,20 +52,20 @@ class LLRecentPeoplePersistentItem;
  *TODO: purge least recently added items? 
  */
 //class LLRecentPeople: public LLSingleton<LLRecentPeople>, public LLOldEvents::LLSimpleListener
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 class LLRecentPeople : public LLSingleton<LLRecentPeople>
 // [/SL:KB]
 {
 	LOG_CLASS(LLRecentPeople);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 	friend class LLSingleton<LLRecentPeople>;
 protected:
 	LLRecentPeople();
 // [/SL:KB]
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 public:
 	enum EInteractionType
 	{
@@ -84,10 +84,11 @@ public:
 	static EInteractionType   getTypeFromTypeName(const std::string& strInteraction);
 // [/SL:KB]
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	void dump() const;
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 	void load();
+	void loadLegacy();
 	void save() const;
+	void saveLegacy() const;
 
 	void purgeItems();
 	void reloadItems();
@@ -106,7 +107,7 @@ public:
 	 * @return false if the avatar is in the list already, true otherwise
 	 */
 //	bool add(const LLUUID& id, const LLSD& userdata = LLSD().with("date", LLDate::now()));
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	bool add(const LLUUID& id, EInteractionType interaction, const LLSD& userdata = LLSD().with("date", LLDate::now()));
 // [/SL:KB]
 
@@ -122,7 +123,7 @@ public:
 	 * @param result where to put the result.
 	 */
 //	void get(uuid_vec_t& result) const;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	void get(uuid_vec_t& result, EInteractionType interaction) const;
 // [/SL:KB]
 
@@ -131,7 +132,7 @@ public:
 	 *
 	 */
 //	const LLDate getDate(const LLUUID& id) const;
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	const LLDate getDate(const LLUUID& id, EInteractionType interaction) const;
 // [/SL:KB]
 
@@ -167,31 +168,30 @@ private:
 
 	const LLUUID& getIDByPhoneNumber(const LLSD& userdata);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
-	std::string			mPersistentFilename;
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
 	typedef std::map<LLUUID, LLRecentPeoplePersistentItem> recent_people_t;
-	recent_people_t		mPeople;
+	recent_people_t     mPeople;
 // [/SL:KB]
 //	typedef std::map<LLUUID, LLDate> recent_people_t;
 //	recent_people_t		mPeople;
 	signal_t			mChangedSignal;
 };
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Modified: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 class LLRecentPeoplePersistentItem
 {
 public:
 	LLRecentPeoplePersistentItem(const LLUUID& idAgent, LLRecentPeople::EInteractionType itType, const LLSD& sdUserdata = LLSD());
 	LLRecentPeoplePersistentItem(const LLSD& sdItem);
 
-	const LLUUID&	getAgentId() const					{ return m_idAgent; }
-	LLDate			getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const;
-	const LLSD&		getUserdata() const					{ return m_sdUserdata; }
-	bool			isDefault() const;
-	void			setLastInteraction(LLRecentPeople::EInteractionType eInteraction, LLDate timestamp = LLDate::now());
-	void			setUserdata(const LLSD& sdUserdate)	{ m_sdUserdata = sdUserdate; }
+	const LLUUID& getAgentId() const                     { return m_idAgent; }
+	LLDate        getLastInteraction(LLRecentPeople::EInteractionType eInteraction) const;
+	const LLSD&   getUserdata() const                    { return m_sdUserdata; }
+	bool          isDefault() const;
+	void          setLastInteraction(LLRecentPeople::EInteractionType eInteraction, LLDate timestamp = LLDate::now());
+	void          setUserdata(const LLSD& sdUserdate)    { m_sdUserdata = sdUserdate; }
+	LLSD          toLLSD() const;
 
-	LLSD toLLSD() const;
 protected:
 	LLUUID	m_idAgent;
 	LLDate	m_InteractionTimes[LLRecentPeople::IT_COUNT];

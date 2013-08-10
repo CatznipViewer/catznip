@@ -100,7 +100,7 @@ public:
 	void addAvalineItem(const LLUUID& item_id, const LLUUID& session_id, const std::string& item_name);
 	void handleDisplayNamesOptionChanged();
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
 	void updateLastInteractionTimes();
 // [/SL:KB]
 
