@@ -564,11 +564,18 @@ void LLAvatarList::updateLastInteractionTimes()
 	std::vector<LLPanel*> items;
 	getItems(items);
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+	static LLCachedControl<U32> INTERACTION_FILTER(gSavedSettings, "RecentPeopleInteractionFilter");
+// [/SL:KB]
+
 	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
 	{
 		// *TODO: error handling
 		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
-		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
+//		S32 secs_since = now - (S32) LLRecentPeople::instance().getDate(item->getAvatarId()).secondsSinceEpoch();
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-3.0.0a) | Added: Catznip-2.8.0a
+		S32 secs_since = now - (S32)LLRecentPeople::instance().getDate(item->getAvatarId(), (LLRecentPeople::EInteractionType)(U32)INTERACTION_FILTER).secondsSinceEpoch();
+// [/SL:KB]
 		if (secs_since >= 0)
 			item->setLastInteractionTime(secs_since);
 	}

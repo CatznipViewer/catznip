@@ -101,6 +101,9 @@ protected:
 	void		onLanguageChange();
 	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-3.0.0a) | Added: Catznip-2.1.1a
+	void		onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam);
+// [/SL:KB]
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
 	// string differs from default after user changes.
@@ -193,6 +196,11 @@ private:
 	std::string mDirectoryVisibility;
 	
 	LLAvatarData mAvatarProperties;
+
+// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
+	control_values_map_t mSavedValues;
+// [/SL:KB]
 };
 
 class LLPanelPreference : public LLPanel
@@ -205,6 +213,9 @@ public:
 
 	virtual void apply();
 	virtual void cancel();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+	virtual void refresh();
+// [/SL:KB]
 	void setControlFalse(const LLSD& user_data);
 	virtual void setHardwareDefaults(){};
 
