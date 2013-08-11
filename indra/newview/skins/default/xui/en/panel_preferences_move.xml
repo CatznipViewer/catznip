@@ -99,6 +99,7 @@
    left="30" />
   <text
    follows="left|top"
+   font.style="BOLD"
    type="string"
    length="1"
    height="10"
@@ -107,7 +108,7 @@
    name="keyboard_lbl"
    width="270"
    top_delta="2">
-    Keyboard:
+    Keyboard
   </text>
   <check_box
    control_name="ArrowKeysAlwaysMove"
@@ -131,6 +132,7 @@
    top_pad="0"/>
   <text
    follows="left|top"
+   font.style="BOLD"
    type="string"
    length="1"
    height="10"
@@ -139,7 +141,7 @@
    name="mouse_lbl"
    width="270"
    top_pad="15">
-    Mouse:
+    Mouse
   </text>
   <check_box
    control_name="FirstPersonAvatarVisible"
@@ -251,11 +253,11 @@
   </combo_box>
   <button
    height="23"
-   label="Other Devices"
+   label="Joystick / Other Devices Setup"
    left="30"
    name="joystick_setup_button"
    top="30"
-   width="155">
+   width="255">
     <button.commit_callback
      function="Floater.Show"
      parameter="pref_joystick" />

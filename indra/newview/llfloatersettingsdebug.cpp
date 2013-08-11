@@ -35,11 +35,17 @@
 #include "llviewercontrol.h"
 #include "lltexteditor.h"
 
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+std::string LLFloaterSettingsDebug::g_strLastUsedSetting;
+// [/SL:KB]
 
 LLFloaterSettingsDebug::LLFloaterSettingsDebug(const LLSD& key) 
 :	LLFloater(key)
 {
-	mCommitCallbackRegistrar.add("SettingSelect",	boost::bind(&LLFloaterSettingsDebug::onSettingSelect, this,_1));
+//	mCommitCallbackRegistrar.add("SettingSelect",	boost::bind(&LLFloaterSettingsDebug::onSettingSelect, this,_1));
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+	mCommitCallbackRegistrar.add("SettingSelect",	boost::bind(&LLFloaterSettingsDebug::onSettingSelect, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("CommitSettings",	boost::bind(&LLFloaterSettingsDebug::onCommitSettings, this));
 	mCommitCallbackRegistrar.add("ClickDefault",	boost::bind(&LLFloaterSettingsDebug::onClickDefault, this));
 
@@ -51,6 +57,9 @@ LLFloaterSettingsDebug::~LLFloaterSettingsDebug()
 BOOL LLFloaterSettingsDebug::postBuild()
 {
 	LLComboBox* settings_combo = getChild<LLComboBox>("settings_combo");
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+	settings_combo->setTextChangedCallback(boost::bind(&LLFloaterSettingsDebug::onSettingSelect, this));
+// [/SL:KB]
 
 	struct f : public LLControlGroup::ApplyFunctor
 	{
@@ -90,14 +99,24 @@ void LLFloaterSettingsDebug::draw()
 	LLFloater::draw();
 }
 
-//static 
-void LLFloaterSettingsDebug::onSettingSelect(LLUICtrl* ctrl)
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+void LLFloaterSettingsDebug::onSettingSelect()
 {
-	LLComboBox* combo_box = (LLComboBox*)ctrl;
+	LLComboBox* combo_box = getChild<LLComboBox>("settings_combo");
 	LLControlVariable* controlp = (LLControlVariable*)combo_box->getCurrentUserdata();
-
 	updateControl(controlp);
+
+	g_strLastUsedSetting = (controlp) ? controlp->getName() : LLStringUtil::null;
 }
+// [/SL:KB]
+////static 
+//void LLFloaterSettingsDebug::onSettingSelect(LLUICtrl* ctrl)
+//{
+//	LLComboBox* combo_box = (LLComboBox*)ctrl;
+//	LLControlVariable* controlp = (LLControlVariable*)combo_box->getCurrentUserdata();
+//
+//	updateControl(controlp);
+//}
 
 void LLFloaterSettingsDebug::onCommitSettings()
 {
@@ -169,6 +188,17 @@ void LLFloaterSettingsDebug::onCommitSettings()
 		break;
 	}
 }
+
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+void LLFloaterSettingsDebug::onOpen(const LLSD& sdKey)
+{
+	if (!g_strLastUsedSetting.empty())
+	{
+		LLComboBox* pComboCtrl = getChild<LLComboBox>("settings_combo");
+		pComboCtrl->setTextEntry(g_strLastUsedSetting);
+	}
+}
+// [/SL:KB]
 
 // static
 void LLFloaterSettingsDebug::onClickDefault()

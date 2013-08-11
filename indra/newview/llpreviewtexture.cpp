@@ -35,6 +35,10 @@
 #include "llcombobox.h"
 #include "llfilepicker.h"
 #include "llfloaterreg.h"
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#include "llimagebmp.h"
+#include "llimagepng.h"
+// [/SL:KB]
 #include "llimagetga.h"
 #include "llinventory.h"
 #include "llnotificationsutil.h"
@@ -43,6 +47,9 @@
 #include "lltextbox.h"
 #include "lltextureview.h"
 #include "llui.h"
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerinventory.h"
 #include "llviewertexture.h"
 #include "llviewertexturelist.h"
@@ -111,9 +118,15 @@ BOOL LLPreviewTexture::postBuild()
 		getChildView("Discard")->setVisible( false);
 	}
 	
-	childSetAction("save_tex_btn", LLPreviewTexture::onSaveAsBtn, this);
-	getChildView("save_tex_btn")->setVisible( true);
-	getChildView("save_tex_btn")->setEnabled(canSaveAs());
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+	LLUICtrl* pSaveTexCtrl = getChild<LLUICtrl>("save_tex_btn");
+	pSaveTexCtrl->setCommitCallback(boost::bind(&LLPreviewTexture::onSaveAsBtn, this, _1));
+	pSaveTexCtrl->setVisible(true);
+	pSaveTexCtrl->setEnabled(canSaveAs());
+// [/SL:KB]
+//	childSetAction("save_tex_btn", LLPreviewTexture::onSaveAsBtn, this);
+//	getChildView("save_tex_btn")->setVisible( true);
+//	getChildView("save_tex_btn")->setEnabled(canSaveAs());
 	
 	if (!mCopyToInv) 
 	{
@@ -134,12 +147,45 @@ BOOL LLPreviewTexture::postBuild()
 	return LLPreview::postBuild();
 }
 
-// static
-void LLPreviewTexture::onSaveAsBtn(void* data)
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+void LLPreviewTexture::onSaveAsBtn(LLUICtrl* ctrl)
 {
-	LLPreviewTexture* self = (LLPreviewTexture*)data;
-	self->saveAs();
+	const std::string strValue = ctrl->getValue().asString();
+
+	LLFilePicker::ESaveFilter filter = LLFilePicker::FFSAVE_PNG;
+	if ("save_tex_png" == strValue)
+	{
+		filter = LLFilePicker::FFSAVE_PNG;
+	}
+	else if ("save_tex_tga" == strValue)
+	{
+		filter = LLFilePicker::FFSAVE_TGA;
+	}
+	else if ("save_tex_bmp" == strValue)
+	{
+		filter = LLFilePicker::FFSAVE_BMP;
+	}
+	else
+	{
+#ifdef LL_WINDOWS
+		filter = LLFilePicker::FFSAVE_IMAGES;
+#else
+		filter = (LLFilePicker::ESaveFilter)gSavedSettings.getS32("LastTextureSaveFormat");
+#endif // LL_WINDOWS
+	}
+
+	saveAs(filter);
+#ifndef LL_WINDOWS
+	gSavedSettings.setS32("LastTextureSaveFormat", filter);
+#endif // LL_WINDOWS
 }
+// [/SL:KB]
+//// static
+//void LLPreviewTexture::onSaveAsBtn(void* data)
+//{
+//	LLPreviewTexture* self = (LLPreviewTexture*)data;
+//	self->saveAs();
+//}
 
 void LLPreviewTexture::draw()
 {
@@ -256,18 +302,49 @@ BOOL LLPreviewTexture::canSaveAs() const
 // virtual
 void LLPreviewTexture::saveAs()
 {
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#ifdef LL_WINDOWS
+	saveAs(LLFilePicker::FFSAVE_IMAGES);
+#else
+	saveAs((LLFilePicker::ESaveFilter)gSavedSettings.getS32("LastTextureSaveFormat"));
+#endif // LL_WINDOWS
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+void LLPreviewTexture::saveAs(LLFilePicker::ESaveFilter filter)
+{
+// [/SL:KB]
 	if( mLoadingFullImage )
 		return;
 
-	LLFilePicker& file_picker = LLFilePicker::instance();
+//	LLFilePicker& file_picker = LLFilePicker::instance();
 	const LLInventoryItem* item = getItem() ;
-	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TGA, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
+////	if( !file_picker.getSaveFile( LLFilePicker::FFSAVE_TGA, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
+//// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+//	if( !file_picker.getSaveFile(filter, item ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null) )
+//// [/SL:KB]
+//	{
+//		// User canceled or we failed to acquire save file.
+//		return;
+//	}
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePicker::getSaveFile(filter, (item) ? LLDir::getScrubbedFileName(item->getName()) : LLStringUtil::null,
+		boost::bind(&LLPreviewTexture::save, this, _1));
+}
+
+void LLPreviewTexture::save(const std::string& filename)
+{
+	if(filename.empty())
 	{
 		// User canceled or we failed to acquire save file.
 		return;
 	}
-	// remember the user-approved/edited file name.
-	mSaveFileName = file_picker.getFirstFile();
+
+	mSaveFileName = filename;
+// [/SL:KB]
+//	// remember the user-approved/edited file name.
+//	mSaveFileName = file_picker.getFirstFile();
 	mLoadingFullImage = TRUE;
 	getWindow()->incBusyCount();
 
@@ -358,14 +435,30 @@ void LLPreviewTexture::onFileLoadedForSave(BOOL success,
 
 	if( self && final && success )
 	{
-		LLPointer<LLImageTGA> image_tga = new LLImageTGA;
-		if( !image_tga->encode( src ) )
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+		LLPointer<LLImageFormatted> image;
+
+		const std::string strExtension = gDirUtilp->getExtension(self->mSaveFileName);
+		if ("bmp" == strExtension)
+		{
+			image = new LLImageBMP();
+		}
+		else if ("png" == strExtension)
+		{
+			image = new LLImagePNG();
+		}
+		else if ("tga" == strExtension)
+		{
+			image = new LLImageTGA();
+		}
+
+		if ( (image.isNull()) || (!image->encode(src, 0.0)) )
 		{
 			LLSD args;
 			args["FILE"] = self->mSaveFileName;
 			LLNotificationsUtil::add("CannotEncodeFile", args);
 		}
-		else if( !image_tga->save( self->mSaveFileName ) )
+		else if (!image->save(self->mSaveFileName))
 		{
 			LLSD args;
 			args["FILE"] = self->mSaveFileName;
@@ -376,6 +469,25 @@ void LLPreviewTexture::onFileLoadedForSave(BOOL success,
 			self->mSavedFileTimer.reset();
 			self->mSavedFileTimer.setTimerExpirySec( SECONDS_TO_SHOW_FILE_SAVED_MSG );
 		}
+// [/SL:KB]
+//		LLPointer<LLImageTGA> image_tga = new LLImageTGA;
+//		if( !image_tga->encode( src ) )
+//		{
+//			LLSD args;
+//			args["FILE"] = self->mSaveFileName;
+//			LLNotificationsUtil::add("CannotEncodeFile", args);
+//		}
+//		else if( !image_tga->save( self->mSaveFileName ) )
+//		{
+//			LLSD args;
+//			args["FILE"] = self->mSaveFileName;
+//			LLNotificationsUtil::add("CannotWriteFile", args);
+//		}
+//		else
+//		{
+//			self->mSavedFileTimer.reset();
+//			self->mSavedFileTimer.setTimerExpirySec( SECONDS_TO_SHOW_FILE_SAVED_MSG );
+//		}
 
 		self->mSaveFileName.clear();
 	}
