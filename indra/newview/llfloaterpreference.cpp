@@ -374,6 +374,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.ClearSettings",			boost::bind(&LLFloaterPreference::onClickClearSettings, this, _2));
+// [/SL:KB]
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2)
 	mCommitCallbackRegistrar.add("Clear.SettingsCheck",			boost::bind(&LLFloaterPreference::onClearSettingsCheck, this, _1, _2));
 // [/SL:KB]
@@ -890,6 +893,9 @@ void LLFloaterPreference::onBtnOK()
 
 		LLUIColorTable::instance().saveUserSettings();
 		gSavedSettings.saveToFile(gSavedSettings.getString("ClientSettingsFile"), TRUE);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+		gStartupSettings.saveToFile(gSavedSettings.getString("StartupSettingsFile"), TRUE);
+// [/SL:KB]
 		
 		//Only save once logged in and loaded per account settings
 		if(mGotPersonalInfo)
@@ -1021,6 +1027,21 @@ void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 		color_swatch->set( new_color.setAlpha(newvalue.asReal()) );
 	}
 }
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+void LLFloaterPreference::onClickClearSettings(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("user" == strParam)
+	{
+		gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
+	}
+	else if ("account" == strParam)
+	{
+		gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+	}
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
 void LLFloaterPreference::onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam)

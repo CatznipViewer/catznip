@@ -101,6 +101,9 @@ protected:
 	void		onLanguageChange();
 	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	void		onClickClearSettings(const LLSD& sdParam);
+// [/SL:KB]
 // [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
 	void		onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam);
 // [/SL:KB]

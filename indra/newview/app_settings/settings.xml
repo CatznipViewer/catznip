@@ -10985,6 +10985,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>StartupSettingsFile</key>
+    <map>
+      <key>Comment</key>
+      <string>Startup settings file name (per install)</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>StatsAutoRun</key>
     <map>
       <key>Comment</key>
