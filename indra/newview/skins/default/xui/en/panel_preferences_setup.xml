@@ -19,7 +19,7 @@
      left="30"
      name="Network:"
      mouse_opaque="false"
-     top="10"
+     top="15"
      width="300">
     Network
   </text>
@@ -29,10 +29,10 @@
    follows="left|top"
    height="10"
    layout="topleft"
-   left_delta="50"
+   left="60"
    name="Maximum bandwidth"
    mouse_opaque="false"
-   top_pad="15"
+   top_pad="10"
    width="200">
     Maximum bandwidth
   </text>
@@ -70,7 +70,7 @@
  height="16"
    label="Custom port"
    layout="topleft"
-   left="77"
+   left="60"
    name="connection_port_enabled"
    top_pad="13"
    width="256">
@@ -100,10 +100,10 @@
    height="23"
    label="Adjust proxy settings"
    label_selected="Browse"
-   left="140"
+   left="60"
    layout="topleft"
    name="set_proxy"
-   top_pad="5"
+   top_pad="0"
    width="140">
     <button.commit_callback
      function="Pref.Proxy" />
@@ -117,7 +117,7 @@
          layout="topleft"
          left="30"
          name="Web:"
-         top_pad="20"
+         top_pad="25"
          width="300">
     Web Browsing
   </text>
@@ -127,9 +127,9 @@
    follows="top|left"
    height="40"
    layout="topleft"
-   left_delta="50"
+   left="60"
    name="use_external_browser"
-   top_pad="15"
+   top_pad="10"
    width="480">
     <radio_item
       height="20"
@@ -220,7 +220,7 @@
      left="30"
      name="Software updates:"
      mouse_opaque="false"
-     top_pad="20"
+     top_pad="25"
      width="300">
     Software updates
   </text>
@@ -229,8 +229,8 @@
      follows="left|top"
      height="23"
      layout="topleft"
-     left_delta="50"
-     top_pad="15"
+     left="60"
+     top_pad="10"
      name="updater_service_combobox"
      width="300">
         <combo_box.item
@@ -248,6 +248,7 @@
          name="Install_manual"
          value="0" />
   </combo_box>
+<!--
   <check_box
     top_delta="4"
     enabled="true"
@@ -260,4 +261,5 @@
     name="update_willing_to_test"
     width="400"           
     top_pad="5"/>
+-->
 </panel>
