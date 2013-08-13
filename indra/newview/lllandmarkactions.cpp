@@ -29,6 +29,10 @@
 
 #include "roles_constants.h"
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llfloaterreg.h"
+#include "llfloatersidepanelcontainer.h"
+// [/SL:KB]
 #include "llinventory.h"
 #include "llinventoryfunctions.h"
 #include "lllandmark.h"
@@ -43,6 +47,9 @@
 #include "lllandmarklist.h"
 #include "llslurl.h"
 #include "llstring.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerinventory.h"
 #include "llviewerparcelmgr.h"
 #include "llworldmapmessage.h"
@@ -418,3 +425,17 @@ void copy_slurl_to_clipboard_callback(const std::string& slurl)
 	args["SLURL"] = slurl;
 	LLNotificationsUtil::add("CopySLURL", args);
 }
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+void LLLandmarkActions::showLandmarkInfo(const LLUUID& idItem)
+{
+	LLSD sdKey;
+	sdKey["type"] = "landmark";
+	sdKey["id"] = idItem;
+
+	if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+		LLFloaterReg::showInstance("parcel_info", sdKey);
+	else
+		LLFloaterSidePanelContainer::showPanel("places", sdKey);
+}
+// [/SL:KB]
