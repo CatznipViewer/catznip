@@ -807,13 +807,13 @@
 		(N/A)
 	</string>
 	<string name="parcel_server_error_text">
-		Informacje o miejscu nie są dostępne w tej chwili. Prosimy sprobować później.
+		Informacje o tym miejscu są obecnie niedostępne, spróbuj później.
 	</string>
 	<string name="parcel_server_forbidden_text">
-		Informacje o miejscu są niedostępne z powodu braku dostępu. Prosimy sprawdzić swoje prawa z właścicielem posiadłości.
+		Dostęp do informacji o tym miejscu jest ograniczony. Zweryfikuj swoje przywileje z właścicielem posiadłości.
 	</string>
 	<string name="parcel_server_update_text">
-		Informacje o miejscu nie są dostępne bez aktualizacji serwera.
+		Informacje o tym miejscu nie będą dostępne bez aktualizacji serwera.
 	</string>
 
 	<string name="AvatarSetNotAway">

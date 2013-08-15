@@ -973,13 +973,13 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		(N/A)
 	</string>
 	<string name="parcel_server_error_text">
-		No momento não há informações sobre este lugar; por favor tente novamente mais tarde.
+		Dados sobre o local não disponíveis no momento. Favor tentar mais tarde.
 	</string>
 	<string name="parcel_server_forbidden_text">
-		Os dados deste lugar não estão indisponíveis devido a restrições de acesso. Verifique as permissões com o proprietário do terreno ou parcela.
+		Dados sobre o local controlados por lista de acesso. Verifique se você está autorizado a acessá-los com o dono do lote.
 	</string>
 	<string name="parcel_server_update_text">
-		Informação do lugar não disponível sem atualização do servidor.
+		Dados sobre o local requerem atualização do servidor.
 	</string>
 
 	<string name="shape">

@@ -1030,7 +1030,7 @@ Veuillez réessayer de vous connecter dans une minute.
 		Aucune information sur ce lieu n&apos;est disponible actuellement, veuillez réessayer ultérieurement.
 	</string>
 	<string name="parcel_server_forbidden_text">
-		Les informations sur ce lieu ne sont pas disponibles car l&apos;accès y est restreint.  Veuillez vérifier vos droits avec le propriétaire de la parcelle.
+		Les informations sur ce lieu ne sont pas disponibles car l&apos;accès y est restreint.  Veuillez vérifier vos droits auprès du propriétaire de la parcelle.
 	</string>
 	<string name="parcel_server_update_text">
 		Les informations sur le lieu ne sont pas disponibles sans mise à jour du serveur.
