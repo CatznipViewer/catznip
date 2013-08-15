@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -21,6 +21,7 @@
 
 class LLIconCtrl;
 class LLLandmark;
+class LLLineEditor;
 class LLTextBox;
 class LLTextEditor;
 class LLTextureCtrl;
@@ -53,6 +54,10 @@ public:
 	const LLParcelData& getCurrentParcelData() const	{ return m_CurParcelData; }
 	const LLUUID&       getCurrentParcelId() const		{ return m_idCurParcel; }
 	const LLVector3d&   getCurrentParcelPos() const		{ return m_posCurGlobal; }
+	bool                getEditMode() const				{ return m_fEditMode; }
+	const std::string&  getEditName() const;
+	const std::string   getEditDescription() const;
+	void                setEditMode(bool fEditMode);
 	void                setParcelFromPos(const LLVector3d posGlobal);
 	void                setParcelFromId(const LLUUID& idParcel);
 	void                setParcelFromItem(const LLUUID& idItem);
@@ -62,6 +67,7 @@ protected:
 	void requestRemoteParcel(const LLSD& sdBody);
 	void requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion = LLUUID::null);
 	void requestRemoteParcel(const LLUUID& idRegion, const LLVector3& posRegion);
+	void updateFromInventoryItem();
 	void updateFromParcelData();
 	static void onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel> hPanel);
 
@@ -76,17 +82,21 @@ protected:
 	LLVector3    m_posRegionRequest;
 
 	// Parcel information
+	LLUUID       m_idItem;
 	LLUUID       m_idCurParcel;
 	LLVector3d   m_posCurGlobal;
 	LLParcelData m_CurParcelData;
 
 	// Controls
+	bool           m_fEditMode;
 	LLTextureCtrl* m_pParcelSnapshot;
 	LLTextBox*     m_pParcelName;
+	LLLineEditor*  m_pParcelNameEdit;
 	LLIconCtrl*    m_pRegionMaturityIcon;
 	LLTextBox*     m_pParcelLocation;
 	LLTextBox*     m_pParcelNumbers;
 	LLTextEditor*  m_pParcelDescription;
+	LLTextEditor*  m_pParcelDescriptionEdit;
 };
 
 #endif // LL_LLPANELPARCELINFO_H

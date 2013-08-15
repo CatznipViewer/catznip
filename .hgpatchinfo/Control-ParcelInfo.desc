@@ -7,3 +7,5 @@
     -> controlled by "ShowPlaceFloater" to switch between new floater and old places sidepanel
     -> show when clicking "More Info" in the web search
     -> show to display landmark information
+- added   : "Landmark This Place" shows the new place floater to edit the name and/or description
+    -> controlled by "ShowPlaceFloater"

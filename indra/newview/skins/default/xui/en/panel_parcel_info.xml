@@ -34,7 +34,7 @@
      left="0"
      name="parcel_snapshot_panel"
      width="300">
-	  <!-- Currently set to 4:3 -->
+      <!-- Currently set to 4:3 -->
       <texture_picker
        enabled="false"
        fallback_image="default_land_picture.j2c"
@@ -43,7 +43,7 @@
        layout="topleft"
        left="10"
        name="parcel_snapshot"
-	   show_label="false"
+       show_label="false"
        top="0"
        width="280" />
     </layout_panel>
@@ -57,15 +57,27 @@
       <text
        follows="top|left|right"
        font="SansSerifLarge"
-       height="14"
+       height="20"
        layout="topleft"
        left="10"
        name="parcel_name"
+       right="-10"
        text_color="white"
        top="0"
        use_ellipses="true"
-       value="Parcel name goes here"
-       width="280" />
+       value="Parcel name goes here" />
+      <line_editor
+       follows="top|left|right"
+       height="20"
+       layout="topleft"
+       left="10"
+       max_length_bytes="63"
+       name="parcel_name_edit"
+       prevalidate_callback="ascii"
+       right="-10"
+       text_readonly_color="white"
+       top_pad="-20"
+       visible="false" />
       <icon
        follows="top|left"
        height="16"
@@ -73,7 +85,7 @@
        layout="topleft"
        left="10"
        name="region_maturity"
-       top_pad="7"
+       top_pad="2"
        width="18" />
       <text
        follows="top|left|right"
@@ -99,12 +111,13 @@
        enabled="false" 
        follows="all"
        height="105"
-       max_length="65536"
+       layout="topleft"
        left="10"
-       text_color="LtGray"
+       max_length="65536"
        name="parcel_description"
+       right="-10"
+       text_color="LtGray"
        top_pad="5"
-       width="280"
        word_wrap="true">
           Dummy text replaced with the parcel description at run time
           Dummy text replaced with the parcel description at run time
@@ -119,6 +132,19 @@
           Dummy text replaced with the parcel description at run time
           Dummy text replaced with the parcel description at run time
       </text_editor>
+      <text_editor
+       enabled="true" 
+       follows="all"
+       height="105"
+       layout="topleft"
+       left="10"
+       max_length="127"
+       name="parcel_description_edit"
+       right="-10"
+       text_type="ascii_with_newline"
+       top_pad="-105"
+       visible="false"
+       word_wrap="true" />
     </layout_panel>
   </layout_stack>
 </panel>

@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -18,6 +18,7 @@
 
 #include "llfloater.h"
 
+class LLButton;
 class LLPanelParcelInfo;
 
 // ============================================================================
@@ -40,14 +41,24 @@ public:
 	 * Member functions
 	 */
 protected:
-	void onClickShowOnMap();
-	void onClickTeleport();
+	const LLUUID getItemId() /*const*/;
+	void         refreshControls();
+	// Parcel/landmark information
+	void         onClickShowOnMap();
+	void         onClickTeleport();
+	// Landmark editing
+	void         onClickSave();
+	void         onClickDiscard();
 
 	/*
 	 * Member variables
 	 */
 protected:
 	LLPanelParcelInfo* m_pParcelInfo;
+	LLButton*          m_pTeleportBtn;
+	LLButton*          m_pMapBtn;
+	LLButton*          m_pSaveBtn;
+	LLButton*          m_pDiscardBtn;
 };
 
 // ============================================================================

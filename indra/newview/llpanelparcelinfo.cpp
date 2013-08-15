@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -21,6 +21,7 @@
 #include "llinventorymodel.h"
 #include "lllandmark.h"
 #include "lllandmarklist.h"
+#include "lllineeditor.h"
 #include "llregionhandle.h"
 #include "llresmgr.h"
 #include "llqueryflags.h"
@@ -43,12 +44,15 @@ static LLRegisterPanelClassWrapper<LLPanelParcelInfo> t_panel_parcel_info("panel
 
 LLPanelParcelInfo::LLPanelParcelInfo()
 	: m_eRequestType(REQUEST_NONE)
+	, m_fEditMode(false)
 	, m_pParcelSnapshot(NULL)
 	, m_pParcelName(NULL)
+	, m_pParcelNameEdit(NULL)
 	, m_pRegionMaturityIcon(NULL)
 	, m_pParcelLocation(NULL)
 	, m_pParcelNumbers(NULL)
 	, m_pParcelDescription(NULL)
+	, m_pParcelDescriptionEdit(NULL)
 {
 }
 
@@ -61,10 +65,12 @@ BOOL LLPanelParcelInfo::postBuild()
 {
 	m_pParcelSnapshot = getChild<LLTextureCtrl>("parcel_snapshot");
 	m_pParcelName = getChild<LLTextBox>("parcel_name");
+	m_pParcelNameEdit = getChild<LLLineEditor>("parcel_name_edit");
 	m_pRegionMaturityIcon = getChild<LLIconCtrl>("region_maturity");
 	m_pParcelLocation = getChild<LLTextBox>("parcel_location");
 	m_pParcelNumbers = getChild<LLTextBox>("parcel_numbers");
 	m_pParcelDescription = getChild<LLTextEditor>("parcel_description");
+	m_pParcelDescriptionEdit = getChild<LLTextEditor>("parcel_description_edit");
 
 	clearControls(LLStringUtil::null, LLStringUtil::null);
 
@@ -73,11 +79,13 @@ BOOL LLPanelParcelInfo::postBuild()
 
 void LLPanelParcelInfo::setParcelFromPos(const LLVector3d posGlobal)
 {
+	setEditMode(false);
 	requestRemoteParcel(posGlobal);
 }
 
 void LLPanelParcelInfo::setParcelFromId(const LLUUID& idParcel)
 {
+	setEditMode(false);
 	m_posGlobalRequest.setZero();
 	m_posRegionRequest.setZero();
 
@@ -170,6 +178,7 @@ void LLPanelParcelInfo::setErrorStatus(U32 nStatus, const std::string& strReason
 
 void LLPanelParcelInfo::clearLocation()
 {
+	m_idItem.setNull();
 	m_idCurParcel.setNull();
 	m_posCurGlobal.setZero();
 	m_CurParcelData.clear();
@@ -264,6 +273,12 @@ void LLPanelParcelInfo::setParcelFromItem(const LLUUID& idItem)
 	const std::string strLoading = LLTrans::getString("LoadingData");
 	clearControls(strLoading, strLoading);
 
+	m_idItem = idItem;
+	if (m_fEditMode)
+	{
+		updateFromInventoryItem();
+	}
+
 	LLLandmark* pLandmark = gLandmarkList.getAsset(pItem->getAssetUUID(), boost::bind(&onLandmarkLoaded, _1, getHandle()));
 	if (pLandmark)
 	{
@@ -330,6 +345,53 @@ void LLPanelParcelInfo::updateFromParcelData()
 	args["[PRICE]"] = LLResMgr::getInstance()->getMonetaryString(m_CurParcelData.sale_price);
 	args["[TRAFFIC]"] = boost::lexical_cast<std::string>(m_CurParcelData.dwell);
 	m_pParcelNumbers->setText(getString( (m_CurParcelData.flags & DFQ_FOR_SALE) ? "area_sale_text" : "area_traffic_text", args));
+}
+
+const std::string& LLPanelParcelInfo::getEditName() const
+{
+	return (m_fEditMode) ? m_pParcelNameEdit->getText() : LLStringUtil::null;
+}
+
+const std::string LLPanelParcelInfo::getEditDescription() const
+{
+	return (m_fEditMode) ? m_pParcelDescriptionEdit->getText() : LLStringUtil::null;
+}
+
+void LLPanelParcelInfo::setEditMode(bool fEditMode)
+{
+	if (m_fEditMode == fEditMode)
+		return;
+
+	const LLViewerInventoryItem* pItem = (fEditMode) ? gInventory.getItem(m_idItem) : NULL;
+	if ( (!pItem) || (LLAssetType::AT_LANDMARK != pItem->getType()) )
+	{
+		m_fEditMode = false;
+		return;
+	}
+	m_fEditMode = true;
+
+	m_pParcelName->setVisible(!m_fEditMode);
+	m_pParcelNameEdit->setVisible(m_fEditMode);
+	m_pParcelNameEdit->setEnabled(m_fEditMode);
+	m_pParcelNameEdit->setText(LLStringUtil::null);
+	m_pParcelNameEdit->setFocus(TRUE);
+
+	m_pParcelDescription->setVisible(!m_fEditMode);
+	m_pParcelDescriptionEdit->setVisible(m_fEditMode);
+	m_pParcelDescriptionEdit->setEnabled(m_fEditMode);
+	m_pParcelDescriptionEdit->setText(LLStringUtil::null);
+
+	updateFromInventoryItem();
+}
+
+void LLPanelParcelInfo::updateFromInventoryItem()
+{
+	const LLViewerInventoryItem* pItem = (m_fEditMode) ? gInventory.getItem(m_idItem) : NULL;
+	if ( (!pItem) || (LLAssetType::AT_LANDMARK != pItem->getType()) )
+		return;
+
+	m_pParcelNameEdit->setText(pItem->getName());
+	m_pParcelDescriptionEdit->setText(pItem->getDescription());
 }
 
 // ============================================================================

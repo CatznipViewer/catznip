@@ -7,8 +7,11 @@
  name="floater_parcel_info"
  positioning="cascading"
  save_rect="true"
- title="Parcel Information"
+ title=""
  width="300">
+    <string name="title_parcel">Parcel Information</string>
+    <string name="title_landmark">Landmark Information</string>
+
     <panel
      class="panel_parcel_info"
      filename="panel_parcel_info.xml"
@@ -19,7 +22,8 @@
      name="panel_parcel_info"
      top="5"
      width="300" />
-    
+
+    <!-- Parcel/landmark information -->
     <button
      follows="bottom|left"
      height="20"
@@ -38,6 +42,28 @@
      left_pad="20"
      name="map_btn"
      tool_tip="Show the corresponding area on the World Map"
+     top_delta="0"
+     width="125" />
+
+    <!-- Landmark editing -->
+    <button
+     follows="bottom|left"
+     height="20"
+     label="Save"
+     layout="topleft"
+     left="15"
+     name="save_btn"
+     tool_tip="Save changes and close"
+     top_pad="-20"
+     width="125" />
+    <button
+     follows="bottom|left"
+     height="20"
+     label="Discard"
+     layout="topleft"
+     left_pad="20"
+     name="discard_btn"
+     tool_tip="Delete the landmark from inventory"
      top_delta="0"
      width="125" />
 </floater>

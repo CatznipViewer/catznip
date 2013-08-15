@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -16,10 +16,13 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llagent.h"
+#include "llbutton.h"
 #include "llfloaterparcelinfo.h"
 #include "llfloaterreg.h"
 #include "llfloaterworldmap.h"
+#include "llinventorymodel.h"
 #include "llpanelparcelinfo.h"
+#include "llviewerinventory.h"
 
 // ============================================================================
 // LLFloaterParcelInfo class
@@ -28,6 +31,10 @@
 LLFloaterParcelInfo::LLFloaterParcelInfo(const LLSD& sdKey)
 	: LLFloater(sdKey)
 	, m_pParcelInfo(NULL)
+	, m_pTeleportBtn(NULL)
+	, m_pMapBtn(NULL)
+	, m_pSaveBtn(NULL)
+	, m_pDiscardBtn(NULL)
 {
 }
 
@@ -39,10 +46,28 @@ BOOL LLFloaterParcelInfo::postBuild()
 {
 	m_pParcelInfo = findChild<LLPanelParcelInfo>("panel_parcel_info");
 
-	findChild<LLUICtrl>("teleport_btn")->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickTeleport, this));
-	findChild<LLUICtrl>("map_btn")->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickShowOnMap, this));
+	m_pTeleportBtn = findChild<LLButton>("teleport_btn");
+	m_pTeleportBtn->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickTeleport, this));
+
+	m_pMapBtn = findChild<LLButton>("map_btn");
+	m_pMapBtn->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickShowOnMap, this));
+
+	m_pSaveBtn = findChild<LLButton>("save_btn");
+	m_pSaveBtn->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickSave, this));
+
+	m_pDiscardBtn = findChild<LLButton>("discard_btn");
+	m_pDiscardBtn->setCommitCallback(boost::bind(&LLFloaterParcelInfo::onClickDiscard, this));
 
 	return TRUE;
+}
+
+void LLFloaterParcelInfo::refreshControls()
+{
+	bool fEditMode = m_pParcelInfo->getEditMode();
+	m_pTeleportBtn->setVisible(!fEditMode);
+	m_pMapBtn->setVisible(!fEditMode);
+	m_pSaveBtn->setVisible(fEditMode);
+	m_pDiscardBtn->setVisible(fEditMode);
 }
 
 void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
@@ -60,15 +85,21 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 			if (!posGlobal.isExactlyZero())
 				m_pParcelInfo->setParcelFromPos(posGlobal);
 		}
+
+		setTitle(getString("title_parcel"));
 	}
 	else if ("landmark" == strType)
 	{
 		m_pParcelInfo->setParcelFromItem(sdKey["id"].asUUID());
+		m_pParcelInfo->setEditMode( (sdKey.has("action")) && ("edit" == sdKey["action"].asString()) );
+
+		setTitle(getString("title_landmark"));
 	}
 	else
 	{
 		m_pParcelInfo->clearLocation();
 	}
+	refreshControls();
 }
 
 void LLFloaterParcelInfo::onClickShowOnMap()
@@ -98,6 +129,52 @@ void LLFloaterParcelInfo::onClickTeleport()
 			pWorldMap->trackLocation(posGlobal);
 		}
 	}
+}
+
+const LLUUID LLFloaterParcelInfo::getItemId() /*const*/
+{
+	const LLSD& sdKey = getKey();
+	return ("landmark" == sdKey["type"].asString()) ? sdKey["id"].asUUID() : LLUUID::null;
+}
+
+void LLFloaterParcelInfo::onClickSave()
+{
+	const LLViewerInventoryItem* pItem = gInventory.getItem(getItemId());
+	if ( (pItem) && (LLAssetType::AT_LANDMARK == pItem->getType()) && (m_pParcelInfo->getEditMode()) )
+	{
+		std::string strName = m_pParcelInfo->getEditName();
+		LLStringUtil::trim(strName);
+		std::string strDescription = m_pParcelInfo->getEditDescription();
+		LLStringUtil::trim(strDescription);
+
+		if ( (!strName.empty()) && ((strName != pItem->getName()) || (strDescription != pItem->getDescription())) )
+		{
+			LLPointer<LLViewerInventoryItem> pNewItem = new LLViewerInventoryItem(pItem);
+			pNewItem->rename(strName);
+			pNewItem->setDescription(strDescription);
+			pNewItem->updateServer(FALSE);
+
+			gInventory.updateItem(pNewItem);
+			gInventory.notifyObservers();
+		}
+	}
+
+	closeFloater();
+}
+
+void LLFloaterParcelInfo::onClickDiscard()
+{
+	LLViewerInventoryItem* pItem = gInventory.getItem(getItemId());
+	if ( (pItem) && (LLAssetType::AT_LANDMARK == pItem->getType()) )
+	{
+		const LLUUID idTrash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+		if (idTrash.notNull())
+		{
+			gInventory.changeItemParent(pItem, idTrash, TRUE);
+		}
+	}
+
+	closeFloater();
 }
 
 // ============================================================================
