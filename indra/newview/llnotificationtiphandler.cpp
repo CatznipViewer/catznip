@@ -101,16 +101,19 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 	LLUUID from_id = notification->getPayload()["from_id"];
 	if (notification->canLogToIM())
 	{
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLHandlerUtil::logToIMP2P(notification, false);
+// [/SL:KB]
 //		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
 //				notification->getMessage(), from_id, from_id);
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
-			LLHandlerUtil::logToIMP2P(notification, false);
-// [/SL:KB]
 	}
 
 	if (notification->canLogToIM() && notification->hasFormElements())
 	{
-		LLHandlerUtil::spawnIMSession(name, from_id);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+		LLHandlerUtil::spawnIMSession(session_name, from_id);
+// [/SL:KB]
+//		LLHandlerUtil::spawnIMSession(name, from_id);
 	}
 
 	if (notification->canLogToIM() && LLHandlerUtil::isIMFloaterOpened(notification))

@@ -534,7 +534,7 @@ std::string LLCacheName::buildUsername(const std::string& full_name)
 		return "(\?\?\?)";
 	}
 	
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-3.2.0a) | Added: Catznip-2.4.0c
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
 	// regexp doesn't play nice with unicode, chop off the display name
 	S32 open_paren = full_name.rfind(" (");
 	if (std::string::npos != open_paren)
