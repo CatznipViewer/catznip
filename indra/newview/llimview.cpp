@@ -116,11 +116,11 @@ void process_dnd_im(const LLSD& notification)
     {
         //reconstruct session using data from the notification
         std::string name = data["FROM"];
-        LLAvatarName av_name;
-        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
-        {
-            name = av_name.getDisplayName();
-        }
+//        LLAvatarName av_name;
+//        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
+//        {
+//            name = av_name.getDisplayName();
+//        }
 		
         
         LLIMModel::getInstance()->newSession(sessionID, 
@@ -2682,11 +2682,11 @@ void LLIMMgr::addMessage(
 	bool new_session = !hasSession(new_session_id);
 	if (new_session)
 	{
-		LLAvatarName av_name;
-		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
-		{
-			fixed_session_name = av_name.getDisplayName();
-		}
+//		LLAvatarName av_name;
+//		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
+//		{
+//			fixed_session_name = av_name.getDisplayName();
+//		}
 		LLIMModel::getInstance()->newSession(new_session_id, fixed_session_name, dialog, other_participant_id, false, is_offline_msg);
 
 		// When we get a new IM, and if you are a god, display a bit
