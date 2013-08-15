@@ -282,7 +282,10 @@ void LLConversationViewSession::selectConversationItem()
 		LLConversationItem* item = dynamic_cast<LLConversationItem *>(getViewModelItem());
 		LLUUID session_id = item? item->getUUID() : LLUUID();
 
-		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerView* im_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
 		im_container->flashConversationItemWidget(session_id,false);
 		im_container->selectConversationPair(session_id, false);
 		im_container->collapseMessagesPane(false);
@@ -586,7 +589,10 @@ BOOL LLConversationViewParticipant::handleMouseDown( S32 x, S32 y, MASK mask )
     		LLConversationItem* vmi = getParentFolder() ? dynamic_cast<LLConversationItem*>(getParentFolder()->getViewModelItem()) : NULL;
     		LLUUID session_id = vmi? vmi->getUUID() : LLUUID();
 
-    		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//    		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterIMContainerView* im_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
     		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
 			im_container->setSelectedSession(session_id);
 			im_container->flashConversationItemWidget(session_id,false);

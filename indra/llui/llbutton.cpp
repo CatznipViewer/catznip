@@ -174,21 +174,33 @@ LLButton::LLButton(const LLButton::Params& p)
 	mHandleRightMouse(p.handle_right_mouse),
 	mFlashingTimer(NULL)
 {
+// [SL:KB] - Patch: Controls-Button | Checked: 2013-05-11 (Catznip-3.5)
+	mButtonFlashCount = p.button_flash_count.isProvided()? p.button_flash_count : 0;
+	mButtonFlashRate = p.button_flash_rate.isProvided()? p.button_flash_rate : 0.0;
 	if (p.button_flash_enable)
 	{
 		// If optional parameter "p.button_flash_count" is not provided, LLFlashTimer will be
 		// used instead it a "default" value from gSavedSettings.getS32("FlashCount")).
 		// Likewise, missing "p.button_flash_rate" is replaced by gSavedSettings.getF32("FlashPeriod").
 		// Note: flashing should be allowed in settings.xml (boolean key "EnableButtonFlashing").
-		S32 flash_count = p.button_flash_count.isProvided()? p.button_flash_count : 0;
-		F32 flash_rate = p.button_flash_rate.isProvided()? p.button_flash_rate : 0.0;
-		mFlashingTimer = new LLFlashTimer ((LLFlashTimer::callback_t)NULL, flash_count, flash_rate);
+		mFlashingTimer = new LLFlashTimer ((LLFlashTimer::callback_t)NULL, mButtonFlashCount, mButtonFlashRate);
 	}
-	else
-	{
-		mButtonFlashCount = p.button_flash_count;
-		mButtonFlashRate = p.button_flash_rate;
-	}
+// [/SL:KB]
+//	if (p.button_flash_enable)
+//	{
+//		// If optional parameter "p.button_flash_count" is not provided, LLFlashTimer will be
+//		// used instead it a "default" value from gSavedSettings.getS32("FlashCount")).
+//		// Likewise, missing "p.button_flash_rate" is replaced by gSavedSettings.getF32("FlashPeriod").
+//		// Note: flashing should be allowed in settings.xml (boolean key "EnableButtonFlashing").
+//		S32 flash_count = p.button_flash_count.isProvided()? p.button_flash_count : 0;
+//		F32 flash_rate = p.button_flash_rate.isProvided()? p.button_flash_rate : 0.0;
+//		mFlashingTimer = new LLFlashTimer ((LLFlashTimer::callback_t)NULL, flash_count, flash_rate);
+//	}
+//	else
+//	{
+//		mButtonFlashCount = p.button_flash_count;
+//		mButtonFlashRate = p.button_flash_rate;
+//	}
 
 	static LLUICachedControl<S32> llbutton_orig_h_pad ("UIButtonOrigHPad", 0);
 	static Params default_params(LLUICtrlFactory::getDefaultParams<LLButton>());
@@ -973,16 +985,24 @@ void LLButton::setToggleState(BOOL b)
 
 void LLButton::setFlashing(bool b)	
 { 
+// [SL:KB] - Patch: Controls-Button | Checked: 2013-05-11 (Catznip-3.5)
+	if ( (b) && (!mFlashingTimer) )
+	{
+		// Tab buttons (and others) use flashing but don't necessary set button_flash_enable
+		mFlashingTimer = new LLFlashTimer((LLFlashTimer::callback_t)NULL, mButtonFlashCount, mButtonFlashRate);
+	}
+// [/SL:KB]
+
 	if (mFlashingTimer)
 	{
 		mFlashing = b; 
 		(b ? mFlashingTimer->startFlashing() : mFlashingTimer->stopFlashing());
 	}
-	else if (b != mFlashing)
-	{
-		mFlashing = b; 
-		mFrameTimer.reset();
-	}
+//	else if (b != mFlashing)
+//	{
+//		mFlashing = b; 
+//		mFrameTimer.reset();
+//	}
 }
 
 BOOL LLButton::toggleState()			

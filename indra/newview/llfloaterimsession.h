@@ -87,9 +87,9 @@ public:
 	// Make IM conversion visible and update the message history
 	static LLFloaterIMSession* show(const LLUUID& session_id);
 
-	// Toggle panel specified by session_id
-	// Returns true iff panel became visible
-	static bool toggle(const LLUUID& session_id);
+//	// Toggle panel specified by session_id
+//	// Returns true iff panel became visible
+//	static bool toggle(const LLUUID& session_id);
 
 	void sessionInitReplyReceived(const LLUUID& im_session_id);
 
