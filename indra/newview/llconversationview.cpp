@@ -109,7 +109,18 @@ void LLConversationViewSession::setFlashState(bool flash_state)
 		// flash chat toolbar button if scrolled out of sight (because flashing will not be visible)
 		if (mContainer->isScrolledOutOfSight(this))
 		{
-			gToolBarView->flashCommand(LLCommandId("chat"), true);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-16 (Catznip-3.6)
+			LLConversationItem* pItem = dynamic_cast<LLConversationItem*>(getViewModelItem());
+			if (pItem)
+			{
+				const LLUUID& idSession = pItem->getUUID();
+				if (idSession.notNull())
+					gToolBarView->flashCommand(LLCommandId("conversations"), true);
+				else
+					gToolBarView->flashCommand(LLCommandId("chat"), true);
+			}
+// [/SL:KB]
+//			gToolBarView->flashCommand(LLCommandId("chat"), true);
 		}
 	}
 

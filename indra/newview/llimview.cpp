@@ -315,7 +315,10 @@ void on_new_message(const LLSD& msg)
     	if(!LLMuteList::getInstance()->isMuted(participant_id)
             && !gAgent.isDoNotDisturb())
     	{
-    		gToolBarView->flashCommand(LLCommandId("chat"), true);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-16 (Catznip-3.6)
+			gToolBarView->flashCommand(LLCommandId("conversations"), true);
+// [/SL:KB]
+//    		gToolBarView->flashCommand(LLCommandId("chat"), true);
     	}
     }
 
