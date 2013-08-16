@@ -53,6 +53,13 @@ public:
 	/*virtual*/ bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	/*virtual*/ bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	/*virtual*/ void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+public:
+	/*virtual*/ BOOL postBuild();
+protected:
+	void onIMTabRearrange(S32 tab_index, LLPanel* tab_panel);
+// [/SL:KB]
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

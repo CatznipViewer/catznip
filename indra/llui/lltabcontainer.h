@@ -237,8 +237,8 @@ public:
 	void onJumpLastBtn( const LLSD& data );
 
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
-	void setAllowRearrange(BOOL enable)	{ mAllowRearrange = enable; }
-	BOOL getAllowRearrange() const		{ return mAllowRearrange; }
+	void setAllowRearrange(bool enable) { mAllowRearrange = enable; }
+	bool getAllowRearrange() const      { return mAllowRearrange; }
 
 	typedef boost::signals2::signal<void(S32, LLPanel*)> tab_rearrange_signal_t;
 	boost::signals2::connection setRearrangeCallback(const tab_rearrange_signal_t::slot_type& cb);
@@ -282,7 +282,7 @@ private:
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
-	BOOL							mAllowRearrange;
+	bool							mAllowRearrange;
 	tab_rearrange_signal_t*			mRearrangeSignal;
 // [/SL:KB]
 
