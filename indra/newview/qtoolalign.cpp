@@ -212,10 +212,8 @@ void setup_transforms_bbox(LLBBox bbox)
 	LLQuaternion rotation = bbox.getRotation();
 	F32 angle_radians, x, y, z;
 	rotation.getAngleAxis(&angle_radians, &x, &y, &z);
-	// gGL has no rotate method (despite having translate and scale) presumably because
-	// its authors smoke crack.  so we hack.
 	gGL.flush();
-	glRotatef(angle_radians * RAD_TO_DEG, x, y, z); 
+	gGL.rotatef(angle_radians * RAD_TO_DEG, x, y, z); 
 
 	// scale
 	LLVector3 scale = bbox.getMaxLocal() - bbox.getMinLocal();
@@ -225,7 +223,7 @@ void setup_transforms_bbox(LLBBox bbox)
 
 void render_bbox(LLBBox bbox)
 {
-	glMatrixMode(GL_MODELVIEW);
+	gGL.matrixMode(LLRender::MM_MODELVIEW);
 	gGL.pushMatrix();
 
 	setup_transforms_bbox(bbox);
@@ -238,7 +236,7 @@ void render_bbox(LLBBox bbox)
 
 void render_cone_bbox(LLBBox bbox)
 {
-	glMatrixMode(GL_MODELVIEW);
+	gGL.matrixMode(LLRender::MM_MODELVIEW);
 	gGL.pushMatrix();
 
 	setup_transforms_bbox(bbox);
@@ -356,9 +354,7 @@ void QToolAlign::renderManipulators()
 				manipulator_bbox.addPointLocal(LLVector3(1, 1, 0.75) * size * 0.5);
 			
 				gGL.color4fv(color.mV);
-				// sadly, gCone doesn't use gGL like gBox does (presumably because its author smokes crack) so we
-				// also set the raw GL color.  hopefully this won't screw-up later rendering.
-				glColor4fv(color.mV);
+				gGL.color4fv(color.mV);
 
 				render_cone_bbox(manipulator_bbox);
 			}
