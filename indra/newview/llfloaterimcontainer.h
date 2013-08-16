@@ -140,6 +140,11 @@ public:
 	virtual BOOL handleKeyHere(KEY key, MASK mask );
 	/*virtual*/ void closeFloater(bool app_quitting = false);
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+protected:
+	void onIMTabRearrange(S32 tab_index, LLPanel* tab_panel);
+// [/SL:KB]
+
 private:
 //	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 //	avatarID_panel_map_t mSessions;

@@ -328,6 +328,9 @@ public:
 	bool            isDocked() const { return mDocked; }
 	virtual void    setDocked(bool docked, bool pop_on_undock = true);
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
+	bool            isTornOff() const { return mTornOff; }
+// [/SL:KB]
 	virtual void    setTornOff(bool torn_off) { mTornOff = torn_off; }
 	bool isTornOff() {return mTornOff;}
 	void setOpenPositioning(LLFloaterEnums::EOpenPositioning pos) {mPositioning = pos;}
