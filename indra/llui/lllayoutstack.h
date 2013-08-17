@@ -184,14 +184,6 @@ public:
 
 	void setIgnoreReshape(bool ignore) { mIgnoreReshape = ignore; }
 
-// [SL:KB] - Patch: Control-LayoutPanel | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	bool canAutoResize() const { return mAutoResize; }
-	bool canUserResize() const { return mUserResize; }
-
-	typedef boost::signals2::signal<void()> resize_signal_t;
-	void						fireResizeSignal()										{ mResizeSignal(); }
-	boost::signals2::connection	setResizeCallback(const resize_signal_t::slot_type& cb)	{ return mResizeSignal.connect(cb); }
-// [/SL:KB]
 protected:
 	LLLayoutPanel(const Params& p);
 	
@@ -208,9 +200,6 @@ protected:
 	bool	mIgnoreReshape;
 	LLLayoutStack::ELayoutOrientation mOrientation;
 	class LLResizeBar* mResizeBar;
-// [SL:KB] - Patch: Control-LayoutPanel | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	resize_signal_t mResizeSignal;
-// [/SL:KB]
 };
 
 
