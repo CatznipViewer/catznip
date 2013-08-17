@@ -115,10 +115,7 @@ public:
 	/*virtual*/ bool				canEdit() const { return true; }
 	/*virtual*/ const LLColor4&		getColor() const					{ return mStyle->getColor(); }
 	/*virtual*/ LLStyleConstSP		getStyle() const					{ return mStyle; }
-//	/*virtual*/ void 				setStyle(LLStyleConstSP style)	{ mStyle = style; }
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	/*virtual*/ void 				setStyle(LLStyleConstSP style)	{ mStyle = style; mFontHeight = llceil(style->getFont()->getLineHeight());}
-// [/SL:KB]
+	/*virtual*/ void 				setStyle(LLStyleConstSP style)	{ mStyle = style; }
 	/*virtual*/ void				setToken( LLKeywordToken* token )	{ mToken = token; }
 	/*virtual*/ LLKeywordToken*		getToken() const					{ return mToken; }
 	/*virtual*/ BOOL				getToolTip( std::string& msg ) const;
@@ -206,9 +203,6 @@ public:
 	bool		getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const;
 	S32			getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const;
 	F32			draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRect& draw_rect);
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	void		setStyle(LLStyleConstSP style);
-// [/SL:KB]
 
 private:
 	S32			mFontHeight;
@@ -257,9 +251,6 @@ public:
 		Optional<LLUIColor>		cursor_color,
 								text_color,
 								text_readonly_color,
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
-								text_label_color,
-// [/SL:KB]
 								bg_readonly_color,
 								bg_writeable_color,
 								bg_focus_color,
@@ -404,9 +395,6 @@ public:
 	bool					scrolledToEnd();
 
 	const LLFontGL*			getDefaultFont() const					{ return mDefaultFont; }
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	void					setFont(const LLFontGL* pFont);
-// [/SL:KB]
 
 	virtual void			appendLineBreakSegment(const LLStyle::Params& style_params);
 	virtual void			appendImageSegment(const LLStyle::Params& style_params);
@@ -553,10 +541,7 @@ protected:
 	// default text style
 	LLStyle::Params				mDefaultStyle;
 	bool						mStyleDirty;
-//	const LLFontGL* const		mDefaultFont;		// font that is used when none specified, can only be set by constructor
-// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	const LLFontGL* 			mDefaultFont;		// font that is used when none specified
-// [/SL:KB]
+	const LLFontGL* const		mDefaultFont;		// font that is used when none specified, can only be set by constructor
 	const LLFontGL::ShadowType	mFontShadow;		// shadow style, can only be set by constructor
 
 	// colors
@@ -617,11 +602,6 @@ protected:
 	S32							mReflowIndex;		// index at which to start reflow.  S32_MAX indicates no reflow needed.
 	bool						mScrollNeeded;		// need to change scroll region because of change to cursor position
 	S32							mScrollIndex;		// index of first character to keep visible in scroll region
-
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-05 (Catznip-3.2.0a) | Added: Catznip-2.8.0b
-	LLUIString					mLabel;
-	LLUIColor					mLabelColor;
-// [/SL:KB]
 
 	// Fired when a URL link is clicked
 	commit_signal_t*			mURLClickSignal;
