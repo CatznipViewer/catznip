@@ -67,10 +67,6 @@ public:
 	static void processChatHistoryStyleUpdate(const LLSD& newvalue);
 
 	void loadHistory();
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	const std::vector<LLChat>& getHistory() const							{ return mMessageArchive; }
-	void                       setHistory(const std::vector<LLChat>& msgs)	{ mMessageArchive = msgs; }
-// [/SL:KB]
 
 	static LLNearbyChat* getInstance();
 	void removeScreenChat();

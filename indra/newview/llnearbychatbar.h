@@ -34,9 +34,6 @@
 #include "llvoiceclient.h"
 #include "lloutputmonitorctrl.h"
 #include "llspeakers.h"
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a)
-class LLNearbyChat;
-// [/SL:KB]
 
 class LLNearbyChatBarListener;
 
@@ -70,9 +67,6 @@ public:
 	void showHistory();
 	void showTranslationCheckbox(BOOL show);
 //	/*virtual*/void setMinimized(BOOL b);
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	/*virtual*/ BOOL canClose();
-// [/SL:KB]
 
 protected:
 	static BOOL matchChatTypeTrigger(const std::string& in_str, std::string* out_str);
@@ -80,7 +74,6 @@ protected:
 	static void onChatBoxFocusLost(LLFocusableElement* caller, void* userdata);
 	void onChatBoxFocusReceived();
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	bool onNewNearbyChatMsg(const LLSD& sdEvent);
 	void onTearOff(const LLSD& sdData);
 // [/SL:KB]
 
@@ -102,18 +95,11 @@ protected:
 	static S32 sLastSpecialChatChannel;
 
 	LLLineEditor*			mChatBox;
-//	LLView*					mNearbyChat;
+	LLView*					mNearbyChat;
 	LLOutputMonitorCtrl*	mOutputMonitor;
 	LLLocalSpeakerMgr*		mSpeakerMgr;
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLPanel*			 mChatHistoryContainer;		// "nearby_chat_container" is the parent panel containing "nearby_chat"
-	LLNearbyChat*		 mChatHistory;				// "nearby_chat"
-// [/SL:KB]
 
 	S32 mExpandedHeight;
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-02-02 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	S32 mExpandedHeightMin;
-// [/SL:KB]
 
 	boost::shared_ptr<LLNearbyChatBarListener> mListener;
 };
