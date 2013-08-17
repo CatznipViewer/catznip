@@ -45,7 +45,10 @@ void LLViewerChat::getChatColor(const LLChat& chat, LLColor4& r_color)
 {
 	if(chat.mMuted)
 	{
-		r_color= LLUIColorTable::instance().getColor("LtGray");
+//		r_color= LLUIColorTable::instance().getColor("LtGray");
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		r_color= LLUIColorTable::instance().getColor("LtGray_50");
+// [/SL:KB]
 	}
 	else
 	{
@@ -113,7 +116,10 @@ void LLViewerChat::getChatColor(const LLChat& chat, std::string& r_color_name, F
 {
 	if(chat.mMuted)
 	{
-		r_color_name = "LtGray";
+//		r_color_name = "LtGray";
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		r_color_name = "LtGray_50";
+// [/SL:KB]
 	}
 	else
 	{
