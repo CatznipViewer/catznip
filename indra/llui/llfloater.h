@@ -205,9 +205,6 @@ public:
 	bool buildFromFile(const std::string &filename);
 
 	boost::signals2::connection setMinimizeCallback( const commit_signal_t::slot_type& cb );
-// [SL:KB] - Patch: UI-FloaterTearOffSignal | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	boost::signals2::connection setTearOffCallback( const commit_signal_t::slot_type& cb );
-// [/SL:KB]
 	boost::signals2::connection setOpenCallback( const commit_signal_t::slot_type& cb );
 	boost::signals2::connection setCloseCallback( const commit_signal_t::slot_type& cb );
 
@@ -326,11 +323,7 @@ public:
 	bool            isDocked() const { return mDocked; }
 	virtual void    setDocked(bool docked, bool pop_on_undock = true);
 
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	bool            isTornOff() const { return mTornOff; }
-	virtual void    setTornOff(bool torn_off);
-// [/SL:KB]
-//	virtual void    setTornOff(bool torn_off) { mTornOff = torn_off; }
+	virtual void    setTornOff(bool torn_off) { mTornOff = torn_off; }
 
 
 	// Close the floater returned by getFrontmostClosableFloater() and 
@@ -427,9 +420,6 @@ public:
 	commit_signal_t mCloseSignal;		
 
 	commit_signal_t* mMinimizeSignal;
-// [SL:KB] - Patch: UI-FloaterTearOffSignal | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	commit_signal_t* mTearOffSignal;
-// [/SL:KB]
 
 protected:
 	bool			mSaveRect;

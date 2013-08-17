@@ -454,6 +454,7 @@ std::string LLFloaterReg::getDockStateControlName(const std::string& name)
 	return res;
 }
 
+
 //static
 void LLFloaterReg::registerControlVariables()
 {

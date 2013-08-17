@@ -263,9 +263,6 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mHasBeenDraggedWhileMinimized(FALSE),
 	mPreviousMinimizedBottom(0),
 	mPreviousMinimizedLeft(0),
-// [SL:KB] - Patch: UI-FloaterTearOffSignal | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	mTearOffSignal(NULL),
-// [/SL:KB]
 	mMinimizeSignal(NULL)
 //	mNotificationContext(NULL)
 {
@@ -542,9 +539,6 @@ LLFloater::~LLFloater()
 	storeDockStateControl();
 
 	delete mMinimizeSignal;
-// [SL:KB] - Patch: UI-FloaterTearOffSignal | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	delete mTearOffSignal;
-// [/SL:KB]
 }
 
 void LLFloater::storeRectControl()
@@ -1662,106 +1656,46 @@ void LLFloater::onClickMinimize(LLFloater* self)
 	self->setMinimized( !self->isMinimized() );
 }
 
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-void LLFloater::setTornOff(bool torn_off)
+void LLFloater::onClickTearOff(LLFloater* self)
 {
-	if ( (!mCanTearOff) || (mTornOff == torn_off) )
+	if (!self)
 		return;
-
-	LLMultiFloater* host_floater = getHost();
-	if ( (torn_off) && (host_floater) )		// Tear off
+	S32 floater_header_size = self->mHeaderHeight;
+	LLMultiFloater* host_floater = self->getHost();
+	if (host_floater) //Tear off
 	{
-// [SL:KB] - Patch: UI-FloaterTearSignal | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-		if (mTearOffSignal)
-			(*mTearOffSignal)(this, LLSD(true));
-// [/SL:KB]
-
 		LLRect new_rect;
-		host_floater->removeFloater(this);
+		host_floater->removeFloater(self);
 		// reparent to floater view
-		gFloaterView->addChild(this);
+		gFloaterView->addChild(self);
 
-		openFloater(getKey());
+		self->openFloater(self->getKey());
 		
 		// only force position for floaters that don't have that data saved
-		if (mRectControl.empty())
+		if (self->mRectControl.empty())
 		{
-			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - mHeaderHeight - 5, getRect().getWidth(), getRect().getHeight());
-			setRect(new_rect);
+			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, self->getRect().getWidth(), self->getRect().getHeight());
+			self->setRect(new_rect);
 		}
-		gFloaterView->adjustToFitScreen(this, FALSE);
+		gFloaterView->adjustToFitScreen(self, FALSE);
 		// give focus to new window to keep continuity for the user
-		setFocus(TRUE);
-		mTornOff = true;;
+		self->setFocus(TRUE);
+		self->setTornOff(true);
 	}
-	else if (!torn_off)						// Attach to parent.
+	else  //Attach to parent.
 	{
-		LLMultiFloater* new_host = (LLMultiFloater*)mLastHostHandle.get();
+		LLMultiFloater* new_host = (LLMultiFloater*)self->mLastHostHandle.get();
 		if (new_host)
 		{
-// [SL:KB] - Patch: UI-FloaterTearSignal | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-			if (mTearOffSignal)
-				(*mTearOffSignal)(this, LLSD(false));
-// [/SL:KB]
-
-			setMinimized(FALSE); // to reenable minimize button if it was minimized
-			new_host->showFloater(this);
+			self->setMinimized(FALSE); // to reenable minimize button if it was minimized
+			new_host->showFloater(self);
 			// make sure host is visible
 			new_host->openFloater(new_host->getKey());
 		}
-		mTornOff = false;
+		self->setTornOff(false);
 	}
-	updateTitleButtons();
+	self->updateTitleButtons();
 }
-
-void LLFloater::onClickTearOff(LLFloater* self)
-{
-	if ( (self) && (self->mCanTearOff) )
-	{
-		self->setTornOff(!self->mTornOff);
-	}
-}
-// [/SL:KB]
-//void LLFloater::onClickTearOff(LLFloater* self)
-//{
-//	if (!self)
-//		return;
-//	S32 floater_header_size = self->mHeaderHeight;
-//	LLMultiFloater* host_floater = self->getHost();
-//	if (host_floater) //Tear off
-//	{
-//		LLRect new_rect;
-//		host_floater->removeFloater(self);
-//		// reparent to floater view
-//		gFloaterView->addChild(self);
-//
-//		self->openFloater(self->getKey());
-//		
-//		// only force position for floaters that don't have that data saved
-//		if (self->mRectControl.size() <= 1)
-//		{
-//			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, self->getRect().getWidth(), self->getRect().getHeight());
-//			self->setRect(new_rect);
-//		}
-//		gFloaterView->adjustToFitScreen(self, FALSE);
-//		// give focus to new window to keep continuity for the user
-//		self->setFocus(TRUE);
-//		self->setTornOff(true);
-//	}
-//	else  //Attach to parent.
-//	{
-//		LLMultiFloater* new_host = (LLMultiFloater*)self->mLastHostHandle.get();
-//		if (new_host)
-//		{
-//			self->setMinimized(FALSE); // to reenable minimize button if it was minimized
-//			new_host->showFloater(self);
-//			// make sure host is visible
-//			new_host->openFloater(new_host->getKey());
-//		}
-//		self->setTornOff(false);
-//	}
-//	self->updateTitleButtons();
-//}
 
 // static
 void LLFloater::onClickDock(LLFloater* self)
@@ -3092,7 +3026,7 @@ void LLFloater::initFromParams(const LLFloater::Params& p)
 	{
 		mDocStateControl = "t"; // flag to build mDocStateControl name once mInstanceName is set
 	}
-
+	
 	// open callback 
 	if (p.open_callback.isProvided())
 	{
@@ -3115,14 +3049,6 @@ boost::signals2::connection LLFloater::setMinimizeCallback( const commit_signal_
 	if (!mMinimizeSignal) mMinimizeSignal = new commit_signal_t();
 	return mMinimizeSignal->connect(cb); 
 }
-
-// [SL:KB] - Patch: UI-FloaterTearOffSignal | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-boost::signals2::connection LLFloater::setTearOffCallback( const commit_signal_t::slot_type& cb ) 
-{ 
-	if (!mTearOffSignal) mTearOffSignal = new commit_signal_t();
-	return mTearOffSignal->connect(cb); 
-}
-// [/SL:KB]
 
 boost::signals2::connection LLFloater::setOpenCallback( const commit_signal_t::slot_type& cb )
 {
