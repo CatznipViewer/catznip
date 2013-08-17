@@ -1,27 +1,18 @@
 /** 
- * @file llfloaterimcontainerbase.cpp
- * @brief Multifloater containing active IM sessions in separate tab container tabs
  *
- * $LicenseInfo:firstyear=2009&license=viewerlgpl$
- * Second Life Viewer Source Code
- * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (c) 2013, Kitty Barnett
+ * Copyright (C) 2010-2013, Linden Research, Inc.
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * version 2.1 of the License only.
+ * The source code in this file is provided to you under the terms of the 
+ * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
  * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * By copying, modifying or distributing this software, you acknowledge that
+ * you have read and understood your obligations described above, and agree to 
+ * abide by those obligations.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
- * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
- * $/LicenseInfo$
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -42,7 +33,7 @@
 // LLFloaterIMContainerBase
 //
 LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
-:	LLMultiFloater(seed, params)
+	: LLMultiFloater(seed, params)
 {
 	mAutoResize = FALSE;
 	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
@@ -56,10 +47,10 @@ LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 // static
 void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)
 {
-    if (session_id != LLUUID::null)
-    {
-    	LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
-    }
+	if (session_id != LLUUID::null)
+	{
+		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+	}
 }
 
 BOOL LLFloaterIMContainerBase::postBuild()
@@ -72,11 +63,10 @@ BOOL LLFloaterIMContainerBase::postBuild()
 }
 
 // virtual
-void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp,
-									  BOOL select_added_floater,
-									  LLTabContainer::eInsertionPoint insertion_point)
+void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point)
 {
-	if(!floaterp) return;
+	if (!floaterp)
+		return;
 
 	// already here
 	if (floaterp->getHost() == this)
@@ -86,39 +76,32 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp,
 	}
 
 	LLUUID session_id = floaterp->getKey();
-	
+
 	// Add the floater
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
 	LLIconCtrl* icon = 0;
-
-	if(gAgent.isInGroup(session_id, TRUE))
+	if (gAgent.isInGroup(session_id, TRUE))
 	{
 		LLGroupIconCtrl::Params icon_params;
 		icon_params.group_id = session_id;
 		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
-
-		mSessions[session_id] = floaterp;
-		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
 	}
 	else
-	{   LLUUID avatar_id = session_id.notNull()?
-		    LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
-
+	{
 		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = avatar_id;
+		icon_params.avatar_id = session_id.notNull() ? LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
 		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
-
-		mSessions[session_id] = floaterp;
-		floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
 	}
 	mTabContainer->setTabImage(floaterp, icon);
+
+	mSessions[session_id] = floaterp;
+	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
 }
 
-
-void LLFloaterIMContainerBase::onCloseFloater(LLUUID& id)
+void LLFloaterIMContainerBase::onCloseFloater(const LLUUID& session_id)
 {
-	mSessions.erase(id);
+	mSessions.erase(session_id);
 	setFocus(TRUE);
 }
 
@@ -160,17 +143,17 @@ void LLFloaterIMContainerBase::setMinimized(BOOL b)
 	bool was_minimized = isMinimized();
 	LLMultiFloater::setMinimized(b);
 
-	//Switching from minimized to un-minimized
-	if(was_minimized && !b)
+	// Switching from minimized to un-minimized
+	if (was_minimized && !b)
 	{
 		const LLUUID& session_id = getSelectedSession();
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
 
-		if(session_floater && !session_floater->isTornOff())
+		if (session_floater && !session_floater->isTornOff())
 		{
-			//When in DND mode, remove stored IM notifications
-			//Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
-			if(gAgent.isDoNotDisturb() && session_id.notNull())
+			// When in DND mode, remove stored IM notifications
+			// Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
+			if (gAgent.isDoNotDisturb() && session_id.notNull())
 			{
 				LLDoNotDisturbNotificationStorage::getInstance()->removeNotification(LLDoNotDisturbNotificationStorage::toastName, session_id);
 			}

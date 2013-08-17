@@ -106,8 +106,12 @@ LLButton::Params::Params()
 	handle_right_mouse("handle_right_mouse"),
 	held_down_delay("held_down_delay"),
 	button_flash_enable("button_flash_enable", false),
-	button_flash_count("button_flash_count"),
-	button_flash_rate("button_flash_rate")
+// [SL:KB] - Patch: Control-Button | Checked: 2013-05-11 (Catznip-3.5)
+	button_flash_count("button_flash_count", 0),
+	button_flash_rate("button_flash_rate", 0)
+// [/SL:KB]
+//	button_flash_count("button_flash_count"),
+//	button_flash_rate("button_flash_rate")
 {
 	addSynonym(is_toggle, "toggle");
 	changeDefault(initial_value, LLSD(false));
@@ -172,11 +176,13 @@ LLButton::LLButton(const LLButton::Params& p)
 	mHeldDownSignal(NULL),
 	mUseDrawContextAlpha(p.use_draw_context_alpha),
 	mHandleRightMouse(p.handle_right_mouse),
+// [SL:KB] - Patch: Control-Button | Checked: 2013-05-11 (Catznip-3.5)
+	mButtonFlashCount(p.button_flash_count),
+	mButtonFlashRate(p.button_flash_rate),
+// [/SL:KB]
 	mFlashingTimer(NULL)
 {
-// [SL:KB] - Patch: Controls-Button | Checked: 2013-05-11 (Catznip-3.5)
-	mButtonFlashCount = p.button_flash_count.isProvided()? p.button_flash_count : 0;
-	mButtonFlashRate = p.button_flash_rate.isProvided()? p.button_flash_rate : 0.0;
+// [SL:KB] - Patch: Control-Button | Checked: 2013-05-11 (Catznip-3.5)
 	if (p.button_flash_enable)
 	{
 		// If optional parameter "p.button_flash_count" is not provided, LLFlashTimer will be
@@ -985,7 +991,7 @@ void LLButton::setToggleState(BOOL b)
 
 void LLButton::setFlashing(bool b)	
 { 
-// [SL:KB] - Patch: Controls-Button | Checked: 2013-05-11 (Catznip-3.5)
+// [SL:KB] - Patch: Control-Button | Checked: 2013-05-11 (Catznip-3.5)
 	if ( (b) && (!mFlashingTimer) )
 	{
 		// Tab buttons (and others) use flashing but don't necessary set button_flash_enable

@@ -1,27 +1,18 @@
 /** 
- * @file llfloaterimcontainerbase.h
- * @brief Multifloater containing active IM sessions in separate tab container tabs
  *
- * $LicenseInfo:firstyear=2009&license=viewerlgpl$
- * Second Life Viewer Source Code
- * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (c) 2013, Kitty Barnett
+ * Copyright (C) 2010-2013, Linden Research, Inc.
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * version 2.1 of the License only.
+ * The source code in this file is provided to you under the terms of the 
+ * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
  * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * By copying, modifying or distributing this software, you acknowledge that
+ * you have read and understood your obligations described above, and agree to 
+ * abide by those obligations.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
- * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
- * $/LicenseInfo$
  */
 
 #ifndef LL_LLFLOATERIMCONTAINERBASE_H
@@ -39,26 +30,42 @@ public:
 	LLFloaterIMContainerBase(const LLSD& seed, const Params& params = getDefaultParams());
 	virtual ~LLFloaterIMContainerBase();
 
+	/*
+	 * LLView/LLMultiFloater overrides
+	 */
+public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setMinimized(BOOL b);
-	            void onCloseFloater(LLUUID& id);
+	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 
-	/*virtual*/ void addFloater(LLFloater* floaterp, 
-								BOOL select_added_floater, 
-								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+	/*
+	 * Member functions
+	 */
+public:
+	static LLFloaterIMContainerBase* findInstance();
+	static LLFloaterIMContainerBase* getInstance();
+	static LLFloater*                buildFloater(const LLSD& sdKey);
+	static const std::string&        getFloaterXMLFile();
 
+	/*
+	 * Event handlers
+	 */
+public:
+	static void onCurrentChannelChanged(const LLUUID& session_id);
+protected:
+	       void onCloseFloater(const LLUUID& session_id);
+
+	/*
+	 * Misc
+	 */
+public:
 	virtual const LLUUID& getSelectedSession() const = 0;
 	virtual bool isTabbedContainer() const = 0;
 	virtual void showConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
 
-	static LLFloaterIMContainerBase* findInstance();
-	static LLFloaterIMContainerBase* getInstance();
-	static LLFloater*                buildFloater(const LLSD& sdKey);
-	static const std::string&        getFloaterXMLFile();
 	static bool                      isConversationLoggingAllowed();
-	static void                      onCurrentChannelChanged(const LLUUID& session_id);
 
 	virtual LLConversationItem* getSessionModel(const LLUUID& session_id) const = 0;
 	virtual const LLConversationSort& getSortOrder() const = 0;
