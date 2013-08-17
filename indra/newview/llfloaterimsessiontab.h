@@ -211,7 +211,7 @@ private:
 	 */
 	void reshapeChatLayoutPanel();
 
-	bool checkIfTornOff();
+//	bool checkIfTornOff();
     bool mIsHostAttached;
     bool mHasVisibleBeenInitialized;
 

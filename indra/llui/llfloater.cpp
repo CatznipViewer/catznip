@@ -261,11 +261,12 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mAutoFocus(TRUE), // automatically take focus when opened
 	mCanDock(false),
 	mDocked(false),
-	mTornOff(false),
+//	mTornOff(false),
 	mHasBeenDraggedWhileMinimized(FALSE),
 	mPreviousMinimizedBottom(0),
 	mPreviousMinimizedLeft(0),
 // [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+	mTornOff(true),
 	mTearOffSignal(NULL),
 // [/SL:KB]
 	mMinimizeSignal(NULL)
@@ -1469,6 +1470,9 @@ void LLFloater::setHost(LLMultiFloater* host)
 	{
 		mHostHandle.markDead();
 	}
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2013-08-17 (Catznip-3.6)
+	mTornOff = (NULL == host);
+// [/SL:KB]
     
 	updateTitleButtons();
 }

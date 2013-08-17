@@ -708,7 +708,10 @@ void LLFloaterIMSessionTab::updateHeaderAndToolbar()
 // [/SL:KB]
 //    LLFloaterIMContainer::getInstance();
 
-	bool is_not_torn_off = !checkIfTornOff();
+//	bool is_not_torn_off = !checkIfTornOff();
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
+	bool is_not_torn_off = !isTornOff();
+// [/SL:KB]
 //	if (is_not_torn_off)
 //	{
 //		hideAllStandardButtons();
@@ -940,7 +943,7 @@ void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 //		host_floater->collapseMessagesPane(false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if ( (!isInTabbedContainer()) && (!checkIfTornOff()) )
+	if ( (!isInTabbedContainer()) && (!isTornOff()) )
 	{
 		LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(getHost());
 		// Show the messages pane when opening a floater hosted in the Conversations
@@ -1011,7 +1014,10 @@ void LLFloaterIMSessionTab::updateGearBtn()
 {
 
 	BOOL prevVisibility = mGearBtn->getVisible();
-	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
+	mGearBtn->setVisible(isTornOff() && mIsP2PChat);
+// [/SL:KB]
+//	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
 
 
 	// Move buttons if Gear button changed visibility
@@ -1077,18 +1083,18 @@ bool LLFloaterIMSessionTab::isInTabbedContainer()
 }
 // [/SL:KB]
 
-bool LLFloaterIMSessionTab::checkIfTornOff()
-{
-	bool isTorn = !getHost();
-	
-	if (isTorn != isTornOff())
-	{
-		setTornOff(isTorn);
-		refreshConversation();
-	}
-
-	return isTorn;
-}
+//bool LLFloaterIMSessionTab::checkIfTornOff()
+//{
+//	bool isTorn = !getHost();
+//	
+//	if (isTorn != isTornOff())
+//	{
+//		setTornOff(isTorn);
+//		refreshConversation();
+//	}
+//
+//	return isTorn;
+//}
 
 void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 {
