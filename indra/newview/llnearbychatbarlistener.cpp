@@ -36,15 +36,10 @@
 
 
 
-//LLNearbyChatBarListener::LLNearbyChatBarListener(LLNearbyChatBar & chatbar)
-//  : LLEventAPI("LLChatBar",
-//               "LLChatBar listener to (e.g.) sendChat, etc."),
-//	mChatbar(chatbar)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-LLNearbyChatBarListener::LLNearbyChatBarListener(LLNearbyChatBar& chatbar)
+LLNearbyChatBarListener::LLNearbyChatBarListener(LLNearbyChatBar & chatbar)
   : LLEventAPI("LLChatBar",
-               "LLChatBar listener to (e.g.) sendChat, etc.")
-// [/SL:KB]
+               "LLChatBar listener to (e.g.) sendChat, etc."),
+	mChatbar(chatbar)
 {
     add("sendChat",
         "Send chat to the simulator:\n"
@@ -100,9 +95,6 @@ void LLNearbyChatBarListener::sendChat(LLSD const & chat_data) const
 	}
 
 	// Send it as if it was typed in
-//	mChatbar.sendChatFromViewer(chat_to_send, type_o_chat, (BOOL)(channel == 0));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLNearbyChatBarBase::sendChatFromViewer(chat_to_send, type_o_chat, (BOOL)(channel == 0));
-// [/SL:KB]
+	mChatbar.sendChatFromViewer(chat_to_send, type_o_chat, (BOOL)(channel == 0));
 }
 

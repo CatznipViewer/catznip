@@ -54,18 +54,15 @@
 #include "llevents.h"
 #include "llimfloater.h"
 #include "llimfloatercontainer.h"
+#include "lllayoutstack.h"
 #include "llmenugl.h"
 #include "llmultifloater.h"
-#include "llnearbychatbarmulti.h"
 // [/SL:KB]
 
 #include "llresizehandle.h"
 #include "llautoreplace.h"
 
-//S32 LLNearbyChatBar::sLastSpecialChatChannel = 0;
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-S32 LLNearbyChatBarBase::sLastSpecialChatChannel = 0;
-// [/SL:KB]
+S32 LLNearbyChatBar::sLastSpecialChatChannel = 0;
 
 const S32 EXPANDED_HEIGHT = 300;
 //const S32 COLLAPSED_HEIGHT = 60;
@@ -87,51 +84,31 @@ static LLChatTypeTrigger sChatTypeTriggers[] = {
 	{ "/shout"	, CHAT_TYPE_SHOUT}
 };
 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-LLNearbyChatBarSingle::LLNearbyChatBarSingle() 
-	: LLPanel()
-	, mChatBox(NULL)
-	, mOutputMonitor(NULL)
-	, mSpeakerMgr(LLLocalSpeakerMgr::getInstance())
-{
-}
-// [/SL:KB]
-
 LLNearbyChatBar::LLNearbyChatBar(const LLSD& key)
 :	LLFloater(key),
-//	mChatBox(NULL),
+	mChatBox(NULL),
 //	mNearbyChat(NULL),
-//	mOutputMonitor(NULL),
-//	mSpeakerMgr(NULL),
+	mOutputMonitor(NULL),
+	mSpeakerMgr(NULL),
 	mExpandedHeight(COLLAPSED_HEIGHT + EXPANDED_HEIGHT),
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 	mExpandedHeightMin(EXPANDED_MIN_HEIGHT),
 	mChatHistoryContainer(NULL),
-	mChatHistory(NULL),
-	mChatBarImpl(NULL)
+	mChatHistory(NULL)
 // [/SL:KB]
 {
 //	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 	mListener.reset(new LLNearbyChatBarListener(*this));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-	mFactoryMap["panel_chat_bar_single"] = LLCallbackMap(createChatBarSingle, NULL);
-	mFactoryMap["panel_chat_bar_multi"] = LLCallbackMap(createChatBarMulti, NULL);
-// [/SL:KB]
 }
 
 //virtual
-//BOOL LLNearbyChatBar::postBuild()
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-BOOL LLNearbyChatBarSingle::postBuild()
-// [/SL:KB]
+BOOL LLNearbyChatBar::postBuild()
 {
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatAction, _2));
 	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheck, _2));
-	registrar.add("NearbyChat.SetChatBarType", boost::bind(&LLNearbyChat::onSetChatBarType, _2));
-	enable_registrar.add("NearbyChat.CheckChatBarType", boost::bind(&LLNearbyChat::onCheckChatBarType, _2));
 	registrar.add("NearbyChat.SetFontSize", boost::bind(&LLNearbyChat::onSetFontSize, _2));
 	enable_registrar.add("NearbyChat.CheckFontSize", boost::bind(&LLNearbyChat::onCheckFontSize, _2));
 // [/SL:KB]
@@ -144,16 +121,10 @@ BOOL LLNearbyChatBarSingle::postBuild()
 // [/SL:KB]
 
 	mChatBox->setAutoreplaceCallback(boost::bind(&LLAutoReplace::autoreplaceCallback, LLAutoReplace::getInstance(), _1, _2));
-//	mChatBox->setCommitCallback(boost::bind(&LLNearbyChatBar::onChatBoxCommit, this));
-//	mChatBox->setKeystrokeCallback(&onChatBoxKeystroke, this);
-//	mChatBox->setFocusLostCallback(boost::bind(&onChatBoxFocusLost, _1, this));
-//	mChatBox->setFocusReceivedCallback(boost::bind(&LLNearbyChatBar::onChatBoxFocusReceived, this));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-	mChatBox->setCommitCallback(boost::bind(&LLNearbyChatBarSingle::onChatBoxCommit, this));
-	mChatBox->setKeystrokeCallback(boost::bind(&LLNearbyChatBarSingle::onChatBoxKeystroke, this), NULL);
-	mChatBox->setFocusLostCallback(boost::bind(&LLNearbyChatBarSingle::onChatBoxFocusLost, this));
-	mChatBox->setFocusReceivedCallback(boost::bind(&LLNearbyChatBarSingle::onChatBoxFocusReceived, this));
-// [/SL:KB]
+	mChatBox->setCommitCallback(boost::bind(&LLNearbyChatBar::onChatBoxCommit, this));
+	mChatBox->setKeystrokeCallback(&onChatBoxKeystroke, this);
+	mChatBox->setFocusLostCallback(boost::bind(&onChatBoxFocusLost, _1, this));
+	mChatBox->setFocusReceivedCallback(boost::bind(&LLNearbyChatBar::onChatBoxFocusReceived, this));
 
 	mChatBox->setIgnoreArrowKeys( FALSE ); 
 	mChatBox->setCommitOnFocusLost( FALSE );
@@ -179,35 +150,15 @@ BOOL LLNearbyChatBarSingle::postBuild()
 //	showNearbyChatPanel(show_nearby_chat);
 
 	// Register for font change notifications
-//	LLViewerChat::setFontChangedCallback(boost::bind(&LLNearbyChatBar::onChatFontChange, this, _1));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLViewerChat::setFontChangedCallback(boost::bind(&LLNearbyChatBarSingle::onChatFontChange, this, _1));
-
-	return TRUE;
-}
-// [/SL:KB]
+	LLViewerChat::setFontChangedCallback(boost::bind(&LLNearbyChatBar::onChatFontChange, this, _1));
 
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-BOOL LLNearbyChatBar::postBuild()
-{
 	mChatHistoryContainer = findChild<LLPanel>("nearby_chat_container");
 	mChatHistory = findChild<LLNearbyChat>("nearby_chat");
 
 	gSavedSettings.declareBOOL("nearbychat_history_visibility", mChatHistoryContainer->getVisible(), "Visibility state of nearby chat history", TRUE);
 	BOOL show_nearby_chat = gSavedSettings.getBOOL("nearbychat_history_visibility");
 	mChatHistoryContainer->setVisible(show_nearby_chat);
-
-	// This panel only exists when hosting multi-line chat bar
-	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_container");
-	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
-	{
-		const LLRect& rctPanel = pChatBarPanel->getRect();
-		gSavedSettings.declareU32("nearbychat_chatbar_height", rctPanel.getHeight(), "Height of the nearby chat bar panel", TRUE);
-		pChatBarPanel->reshape(rctPanel.getWidth(), gSavedSettings.getU32("nearbychat_chatbar_height"));
-		pChatBarPanel->setResizeCallback(boost::bind(&LLNearbyChatBar::onChatBarResize, this));
-	}
-
-	mChatBarImpl = (hasChild("panel_chat_bar_multi", TRUE)) ? findChild<LLNearbyChatBarBase>("panel_chat_bar_multi", TRUE) : findChild<LLNearbyChatBarBase>("panel_chat_bar_single", TRUE);
 
 	LLButton* show_btn = getChild<LLButton>("show_nearby_chat");
 	show_btn->setCommitCallback(boost::bind(&LLNearbyChatBar::onToggleNearbyChatPanel, this));
@@ -219,31 +170,6 @@ BOOL LLNearbyChatBar::postBuild()
 // [/SL:KB]
 
 	enableResizeCtrls(true, true, false);
-
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-	// Initalize certain parameters depending on default vs embedded state
-	bool fTabbedNearbyChat = isTabbedNearbyChat();
-//	setCanClose(!fTabbedNearbyChat);
-//	setCanMinimize(fTabbedNearbyChat);
-	setCanTearOff(fTabbedNearbyChat);
-
-	if (fTabbedNearbyChat)
-	{
-		LLIMFloaterContainer* pConvFloater = LLIMFloaterContainer::getInstance();
-		if (pConvFloater)
-		{
-			if (!mChatHistoryContainer->getVisible())
-				onToggleNearbyChatPanel();
-			pConvFloater->addFloater(this, TRUE, LLTabContainer::START);
-
-			LLEventPump& pumpNearbyChat = LLEventPumps::instance().obtain("LLChat");
-			pumpNearbyChat.listen("nearby_chat_bar", boost::bind(&LLNearbyChatBar::onNewNearbyChatMsg, this, _1));
-		}
-
-		onTearOff(LLSD(isTornOff()));
-		setTearOffCallback(boost::bind(&LLNearbyChatBar::onTearOff, this, _2));
-	}
-// [/SL:KB]
 
 	return TRUE;
 }
@@ -263,15 +189,6 @@ void LLNearbyChatBar::onOpen(const LLSD& key)
 }
 
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-12 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBar::onChatBarResize()
-{
-	LLLayoutPanel* pChatBarPanel = findChild<LLLayoutPanel>("chat_bar_container");
-	if ( (pChatBarPanel) && (pChatBarPanel->canUserResize()) )
-	{
-		gSavedSettings.setU32("nearbychat_chatbar_height", pChatBarPanel->getRect().getHeight());
-	}
-}
-
 bool LLNearbyChatBar::onNewNearbyChatMsg(const LLSD& sdEvent)
 {
 	if ( (!isTornOff()) && (!isInVisibleChain()) )
@@ -342,10 +259,7 @@ bool LLNearbyChatBar::applyRectControl()
 	return rect_controlled;
 }
 
-//void LLNearbyChatBar::onChatFontChange(LLFontGL* fontp)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBarSingle::onChatFontChange(LLFontGL* fontp)
-// [/SL:KB]
+void LLNearbyChatBar::onChatFontChange(LLFontGL* fontp)
 {
 	// Update things with the new font whohoo
 	if (mChatBox)
@@ -378,23 +292,16 @@ void LLNearbyChatBar::showTranslationCheckbox(BOOL show)
 	getChild<LLUICtrl>("translate_chat_checkbox_lp")->setVisible(show);
 }
 
-//void LLNearbyChatBar::draw()
-//{
-//	displaySpeakingIndicator();
-//	LLFloater::draw();
-//}
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBarSingle::draw()
+void LLNearbyChatBar::draw()
 {
 	displaySpeakingIndicator();
-	LLPanel::draw();
+	LLFloater::draw();
 }
-// [/SL:KB]
 
-//std::string LLNearbyChatBar::getCurrentChat()
-//{
-//	return mChatBox ? mChatBox->getText() : LLStringUtil::null;
-//}
+std::string LLNearbyChatBar::getCurrentChat()
+{
+	return mChatBox ? mChatBox->getText() : LLStringUtil::null;
+}
 
 // virtual
 BOOL LLNearbyChatBar::handleKeyHere( KEY key, MASK mask )
@@ -404,28 +311,19 @@ BOOL LLNearbyChatBar::handleKeyHere( KEY key, MASK mask )
 	if( KEY_RETURN == key && mask == MASK_CONTROL)
 	{
 		// shout
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-		mChatBarImpl->sendChat(CHAT_TYPE_SHOUT);
-// [/SL:KB]
-//		sendChat(CHAT_TYPE_SHOUT);
+		sendChat(CHAT_TYPE_SHOUT);
 		handled = TRUE;
 	}
 	else if (KEY_RETURN == key && mask == MASK_SHIFT)
 	{
 		// whisper
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-		mChatBarImpl->sendChat(CHAT_TYPE_WHISPER);
-// [/SL:KB]
-//		sendChat(CHAT_TYPE_WHISPER);
+		sendChat(CHAT_TYPE_WHISPER);
 		handled = TRUE;
 	}
 	return handled;
 }
 
-//BOOL LLNearbyChatBar::matchChatTypeTrigger(const std::string& in_str, std::string* out_str)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-BOOL LLNearbyChatBarBase::matchChatTypeTrigger(const std::string& in_str, std::string* out_str)
-// [/SL:KB]
+BOOL LLNearbyChatBar::matchChatTypeTrigger(const std::string& in_str, std::string* out_str)
 {
 	U32 in_len = in_str.length();
 	S32 cnt = sizeof(sChatTypeTriggers) / sizeof(*sChatTypeTriggers);
@@ -448,22 +346,13 @@ BOOL LLNearbyChatBarBase::matchChatTypeTrigger(const std::string& in_str, std::s
 	return FALSE;
 }
 
-//void LLNearbyChatBar::onChatBoxKeystroke(LLLineEditor* caller, void* userdata)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBarBase::onChatBoxKeystroke()
-// [/SL:KB]
+void LLNearbyChatBar::onChatBoxKeystroke(LLLineEditor* caller, void* userdata)
 {
 	LLFirstUse::otherAvatarChatFirst(false);
 
-//	LLNearbyChatBar* self = (LLNearbyChatBar *)userdata;
-//
-//	LLWString raw_text = self->mChatBox->getWText();
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLLineEditor* pLineEditor = dynamic_cast<LLLineEditor*>(getChatBoxCtrl());
-	LLTextEditor* pTextEditor = dynamic_cast<LLTextEditor*>(getChatBoxCtrl());
+	LLNearbyChatBar* self = (LLNearbyChatBar *)userdata;
 
-	LLWString raw_text = (pLineEditor) ? pLineEditor->getWText() : pTextEditor->getWText();
-// [/SL:KB]
+	LLWString raw_text = self->mChatBox->getWText();
 
 	// Can't trim the end, because that will cause autocompletion
 	// to eat trailing spaces that might be part of a gesture.
@@ -510,42 +399,18 @@ void LLNearbyChatBarBase::onChatBoxKeystroke()
 		if (LLGestureMgr::instance().matchPrefix(utf8_trigger, &utf8_out_str))
 		{
 			std::string rest_of_match = utf8_out_str.substr(utf8_trigger.size());
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-			if (pLineEditor)
-			{
-				pLineEditor->setText(utf8_trigger + rest_of_match);
-				pLineEditor->setSelection(length, pLineEditor->getLength());
-			}
-			else
-			{
-				pTextEditor->setText(utf8_trigger + rest_of_match);
-				pTextEditor->setSelection(length, pTextEditor->getLength());
-			}
-// [/SL:KB]
-//			self->mChatBox->setText(utf8_trigger + rest_of_match); // keep original capitalization for user-entered part
-//			S32 outlength = self->mChatBox->getLength(); // in characters
-//
-//			// Select to end of line, starting from the character
-//			// after the last one the user typed.
-//			self->mChatBox->setSelection(length, outlength);
+			self->mChatBox->setText(utf8_trigger + rest_of_match); // keep original capitalization for user-entered part
+			S32 outlength = self->mChatBox->getLength(); // in characters
+
+			// Select to end of line, starting from the character
+			// after the last one the user typed.
+			self->mChatBox->setSelection(length, outlength);
 		}
 		else if (matchChatTypeTrigger(utf8_trigger, &utf8_out_str))
 		{
 			std::string rest_of_match = utf8_out_str.substr(utf8_trigger.size());
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-			if (pLineEditor)
-			{
-				pLineEditor->setText(utf8_trigger + rest_of_match + " ");
-				pLineEditor->setCursorToEnd();
-			}
-			else
-			{
-				pTextEditor->setText(utf8_trigger + rest_of_match + " ");
-				pTextEditor->endOfDoc();
-			}
-// [/SL:KB]
-//			self->mChatBox->setText(utf8_trigger + rest_of_match + " "); // keep original capitalization for user-entered part
-//			self->mChatBox->setCursorToEnd();
+			self->mChatBox->setText(utf8_trigger + rest_of_match + " "); // keep original capitalization for user-entered part
+			self->mChatBox->setCursorToEnd();
 		}
 
 		//llinfos << "GESTUREDEBUG " << trigger 
@@ -556,30 +421,18 @@ void LLNearbyChatBarBase::onChatBoxKeystroke()
 }
 
 // static
-//void LLNearbyChatBar::onChatBoxFocusLost(LLFocusableElement* caller, void* userdata)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-void LLNearbyChatBarBase::onChatBoxFocusLost()
-// [/SL:KB]
+void LLNearbyChatBar::onChatBoxFocusLost(LLFocusableElement* caller, void* userdata)
 {
 	// stop typing animation
 	gAgent.stopTyping();
 }
 
-//void LLNearbyChatBar::onChatBoxFocusReceived()
-//{
-//	mChatBox->setEnabled(!gDisconnected);
-//}
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-void LLNearbyChatBarBase::onChatBoxFocusReceived()
+void LLNearbyChatBar::onChatBoxFocusReceived()
 {
-	getChatBoxCtrl()->setEnabled(!gDisconnected);
+	mChatBox->setEnabled(!gDisconnected);
 }
-// [/SL:KB]
 
-//EChatType LLNearbyChatBar::processChatTypeTriggers(EChatType type, std::string &str)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-EChatType LLNearbyChatBarBase::processChatTypeTriggers(EChatType type, std::string &str)
-// [/SL:KB]
+EChatType LLNearbyChatBar::processChatTypeTriggers(EChatType type, std::string &str)
 {
 	U32 length = str.length();
 	S32 cnt = sizeof(sChatTypeTriggers) / sizeof(*sChatTypeTriggers);
@@ -611,31 +464,15 @@ EChatType LLNearbyChatBarBase::processChatTypeTriggers(EChatType type, std::stri
 	return type;
 }
 
-//void LLNearbyChatBar::sendChat( EChatType type )
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-void LLNearbyChatBarBase::sendChat(EChatType type)
-// [/SL:KB]
+void LLNearbyChatBar::sendChat( EChatType type )
 {
-//	if (mChatBox)
-//	{
-//		LLWString text = mChatBox->getConvertedText();
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-	LLLineEditor* pLineEditor = dynamic_cast<LLLineEditor*>(getChatBoxCtrl());
-	LLTextEditor* pTextEditor = dynamic_cast<LLTextEditor*>(getChatBoxCtrl());
-	if ( (pLineEditor) || (pTextEditor) )
+	if (mChatBox)
 	{
-		LLWString text = getChatBoxText();
-		LLWStringUtil::trim(text);
-// [/SL:KB]
+		LLWString text = mChatBox->getConvertedText();
 		if (!text.empty())
 		{
 			// store sent line in history, duplicates will get filtered
-//			mChatBox->updateHistory();
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-			// The multi-line chat bar history is updated in LLNearbyChatBarMulti::onChatBoxCommit()
-			if (pLineEditor)
-				pLineEditor->updateHistory();
-// [/SL:KB]
+			mChatBox->updateHistory();
 			// Check if this is destined for another channel
 			S32 channel = 0;
 			stripChannelNumber(text, &channel);
@@ -664,10 +501,7 @@ void LLNearbyChatBarBase::sendChat(EChatType type)
 			}
 		}
 
-//		mChatBox->setText(LLStringExplicit(""));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-		setChatBoxText(LLStringExplicit(""));
-// [/SL:KB]
+		mChatBox->setText(LLStringExplicit(""));
 	}
 
 	gAgent.stopTyping();
@@ -745,10 +579,7 @@ BOOL LLNearbyChatBar::canClose()
 }
 // [/SL:KB]
 
-//void LLNearbyChatBar::onChatBoxCommit()
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBarSingle::onChatBoxCommit()
-// [/SL:KB]
+void LLNearbyChatBar::onChatBoxCommit()
 {
 	if (mChatBox->getText().length() > 0)
 	{
@@ -773,19 +604,13 @@ void LLNearbyChatBarSingle::onChatBoxCommit()
 	// and go out of chat mode.
 	if (gSavedSettings.getBOOL("CloseChatOnReturn"))
 	{
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-		getChatBoxCtrl()->setFocus(FALSE);
-// [/SL:KB]
-//		stopChat();
+		stopChat();
 	}
 
 	gAgent.stopTyping();
 }
 
-//void LLNearbyChatBar::displaySpeakingIndicator()
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-void LLNearbyChatBarSingle::displaySpeakingIndicator()
-// [/SL:KB]
+void LLNearbyChatBar::displaySpeakingIndicator()
 {
 	LLSpeakerMgr::speaker_list_t speaker_list;
 	LLUUID id;
@@ -815,18 +640,12 @@ void LLNearbyChatBarSingle::displaySpeakingIndicator()
 	}
 }
 
-//void LLNearbyChatBar::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-void LLNearbyChatBarBase::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)
-// [/SL:KB]
+void LLNearbyChatBar::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)
 {
 	sendChatFromViewer(utf8str_to_wstring(utf8text), type, animate);
 }
 
-//void LLNearbyChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL animate)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-void LLNearbyChatBarBase::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL animate)
-// [/SL:KB]
+void LLNearbyChatBar::sendChatFromViewer(const LLWString &wtext, EChatType type, BOOL animate)
 {
 	// Look for "/20 foo" channel chats.
 	S32 channel = 0;
@@ -876,80 +695,44 @@ void LLNearbyChatBarBase::sendChatFromViewer(const LLWString &wtext, EChatType t
 }
 
 // static 
-//void LLNearbyChatBar::startChat(const char* line)
-//{
-//	LLNearbyChatBar* cb = LLNearbyChatBar::getInstance();
-//
-//	if (!cb )
-//		return;
-//
-//	cb->setVisible(TRUE);
-//	cb->setFocus(TRUE);
-//	cb->mChatBox->setFocus(TRUE);
-//
-//	if (line)
-//	{
-//		std::string line_string(line);
-//		cb->mChatBox->setText(line_string);
-//	}
-//
-//	cb->mChatBox->setCursorToEnd();
-//}
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
 void LLNearbyChatBar::startChat(const char* line)
 {
-	LLNearbyChatBar* pSelf = getInstance();
-	if (!pSelf)
+	LLNearbyChatBar* cb = LLNearbyChatBar::getInstance();
+
+	if (!cb )
 		return;
 
-	pSelf->openFloater(LLSD());
-	pSelf->setFocus(TRUE);
-	pSelf->mChatBarImpl->getChatBoxCtrl()->setFocus(TRUE);
+	cb->setVisible(TRUE);
+	cb->setFocus(TRUE);
+	cb->mChatBox->setFocus(TRUE);
 
 	if (line)
 	{
-		LLStringExplicit line_string(line);
-		pSelf->mChatBarImpl->setChatBoxText(line_string);
+		std::string line_string(line);
+		cb->mChatBox->setText(line_string);
 	}
 
-	pSelf->mChatBarImpl->setChatBoxCursorToEnd();
+	cb->mChatBox->setCursorToEnd();
 }
-// [/SL:KB]
 
 // Exit "chat mode" and do the appropriate focus changes
 // static
-//void LLNearbyChatBar::stopChat()
-//{
-//	LLNearbyChatBar* cb = LLNearbyChatBar::getInstance();
-//
-//	if (!cb)
-//		return;
-//
-//	cb->mChatBox->setFocus(FALSE);
-//
-// 	// stop typing animation
-// 	gAgent.stopTyping();
-//}
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
 void LLNearbyChatBar::stopChat()
 {
-	LLNearbyChatBar* pSelf = getInstance();
-	if (!pSelf)
+	LLNearbyChatBar* cb = LLNearbyChatBar::getInstance();
+
+	if (!cb)
 		return;
 
-	pSelf->getChatBarImpl()->getChatBoxCtrl()->setFocus(FALSE);
+	cb->mChatBox->setFocus(FALSE);
 
  	// stop typing animation
  	gAgent.stopTyping();
 }
-// [/SL:KB]
 
 // If input of the form "/20foo" or "/20 foo", returns "foo" and channel 20.
 // Otherwise returns input and channel 0.
-//LLWString LLNearbyChatBar::stripChannelNumber(const LLWString &mesg, S32* channel)
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-LLWString LLNearbyChatBarBase::stripChannelNumber(const LLWString &mesg, S32* channel)
-// [/SL:KB]
+LLWString LLNearbyChatBar::stripChannelNumber(const LLWString &mesg, S32* channel)
 {
 	if (mesg[0] == '/'
 		&& mesg[1] == '/')
@@ -996,73 +779,6 @@ LLWString LLNearbyChatBarBase::stripChannelNumber(const LLWString &mesg, S32* ch
 		return mesg;
 	}
 }
-
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-26 (Catznip-3.2.0a) | Modified: Catznip-3.2.0a
-void* LLNearbyChatBar::createChatBarSingle(void*)
-{
-	return new LLNearbyChatBarSingle();
-}
-
-void* LLNearbyChatBar::createChatBarMulti(void*)
-{
-	return new LLNearbyChatBarMulti();
-}
-
-const std::string& LLNearbyChatBar::getFloaterXMLFile()
-{
-	static std::string strFile;
-	switch (gSavedSettings.getS32("NearbyChatFloaterBarType"))
-	{
-		case 2:		// Multi-line
-			strFile = "floater_chat_bar_multi.xml";
-			break;
-		case 0:		// None (default)
-		case 1:		// Single-line
-		default:
-			strFile = "floater_chat_bar.xml";
-			break;
-	}
-	return strFile;
-}
-
-bool LLNearbyChatBar::isTabbedNearbyChat()
-{
-	return (LLIMFloater::isChatMultiTab()) && (gSavedSettings.getBOOL("NearbyChatFloaterWindow"));
-}
-
-void LLNearbyChatBar::processFloaterTypeChanged()
-{
-	// We only need to do anything if an instance of the nearby chat floater already exists
-	LLNearbyChatBar* pNearbyChat = LLFloaterReg::findTypedInstance<LLNearbyChatBar>("chat_bar");
-	if (pNearbyChat)
-	{
-		LLIMFloaterContainer* pConvFloater = LLIMFloaterContainer::findInstance();
-		bool fConvVisible = (pConvFloater) ? pConvFloater->getVisible() : false;
-
-		bool fNearbyVisible = pNearbyChat->getVisible();
-		if (pNearbyChat->getHost())
-			pNearbyChat->setVisible(FALSE);	// See LLNearbyChatBar::canClose()
-		std::vector<LLChat> msgArchive = pNearbyChat->mChatHistory->getHistory();
-
-		// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the nearby chat floater is single instanced
-		//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
-		//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
-		//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
-		pNearbyChat->closeFloater();
-		LLFloaterReg::destroyInstance("chat_bar", LLSD());
-
-		if ((pNearbyChat = LLFloaterReg::getTypedInstance<LLNearbyChatBar>("chat_bar", LLSD())) != NULL)
-		{
-			pNearbyChat->mChatHistory->setHistory(msgArchive);
-			pNearbyChat->mChatHistory->updateChatHistoryStyle();
-			if (fNearbyVisible)
-				pNearbyChat->openFloater(LLSD());
-			if ( (pConvFloater) && (pConvFloater->getVisible()) && (!fConvVisible) )
-				pConvFloater->closeFloater();
-		}
-	}
-}
-// [/SL:KB]
 
 void send_chat_from_viewer(const std::string& utf8_out_text, EChatType type, S32 channel)
 {

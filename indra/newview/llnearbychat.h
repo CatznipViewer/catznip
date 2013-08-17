@@ -49,8 +49,6 @@ public:
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	static void onNearbyChatAction(const LLSD& sdParam);
 	static bool onNearbyChatCheck(const LLSD& sdParam);
-	static void onSetChatBarType(const LLSD& sdParam);
-	static bool onCheckChatBarType(const LLSD& sdParam);
 	static void onSetFontSize(const LLSD& sdParam);
 	static bool onCheckFontSize(const LLSD& sdParam);
 // [/SL:KB]

@@ -77,8 +77,6 @@ BOOL LLNearbyChat::postBuild()
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	registrar.add("NearbyChat.Action", boost::bind(&LLNearbyChat::onNearbyChatAction, _2));
 	enable_registrar.add("NearbyChat.Check", boost::bind(&LLNearbyChat::onNearbyChatCheck, _2));
-	registrar.add("NearbyChat.SetChatBarType", boost::bind(&LLNearbyChat::onSetChatBarType, _2));
-	enable_registrar.add("NearbyChat.CheckChatBarType", boost::bind(&LLNearbyChat::onCheckChatBarType, _2));
 	registrar.add("NearbyChat.SetFontSize", boost::bind(&LLNearbyChat::onSetFontSize, _2));
 	enable_registrar.add("NearbyChat.CheckFontSize", boost::bind(&LLNearbyChat::onCheckFontSize, _2));
 // [/SL:KB]
@@ -196,32 +194,6 @@ void LLNearbyChat::onNearbyChatAction(const LLSD& sdParam)
 
 bool LLNearbyChat::onNearbyChatCheck(const LLSD& sdParam)
 {
-	return false;
-}
-
-void LLNearbyChat::onSetChatBarType(const LLSD& sdParam)
-{
-	const std::string strParam = sdParam.asString();
-
-	S32 nChatBarType = 1;
-	if ("single" == strParam)
-		nChatBarType = 1;
-	else if ("multi" == strParam)
-		nChatBarType = 2;
-	else
-		return;
-	gSavedSettings.setS32("NearbyChatFloaterBarType", nChatBarType);
-}
-
-bool LLNearbyChat::onCheckChatBarType(const LLSD& sdParam)
-{
-	const std::string strParam = sdParam.asString();
-
-	S32 nChatBarType = gSavedSettings.getS32("NearbyChatFloaterBarType");
-	if ("single" == strParam)
-		return 1 == nChatBarType;
-	else if ("multi" == strParam)
-		return 2 == nChatBarType;
 	return false;
 }
 
