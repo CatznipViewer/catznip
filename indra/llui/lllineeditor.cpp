@@ -157,6 +157,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mHighlightColor(p.highlight_color()),
 	mPreeditBgColor(p.preedit_bg_color()),
 	mGLFont(p.font),
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2012-02-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mDefaultMenuHandle(),
+// [/SL:KB]
 	mContextMenuHandle()
 {
 	llassert( mMaxLengthBytes > 0 );
@@ -197,6 +200,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 		 LLMenuGL::sMenuContainer,
 		 LLMenuHolderGL::child_registry_t::instance());
 	setContextMenu(menu);
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2012-02-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mDefaultMenuHandle = menu->getHandle();
+// [/SL:KB]
 }
  
 LLLineEditor::~LLLineEditor()
@@ -2626,6 +2632,14 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 				LLSpellChecker::instance().getSuggestions(misspelled_word, mSuggestionList);
 			}
 		}
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2012-02-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		// Use the default editor context menu when offering spelling suggestions to avoid clutter
+		if ( (use_spellcheck) && (!mSuggestionList.empty()) && (!mDefaultMenuHandle.isDead()) )
+		{
+			menu = mDefaultMenuHandle.get();
+		}
+// [/SL:KB]
 
 		menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
 		menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
