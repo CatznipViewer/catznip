@@ -265,6 +265,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mHasBeenDraggedWhileMinimized(FALSE),
 	mPreviousMinimizedBottom(0),
 	mPreviousMinimizedLeft(0),
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+	mTearOffSignal(NULL),
+// [/SL:KB]
 	mMinimizeSignal(NULL)
 //	mNotificationContext(NULL)
 {
@@ -541,6 +544,9 @@ LLFloater::~LLFloater()
 	storeDockStateControl();
 
 	delete mMinimizeSignal;
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+	delete mTearOffSignal;
+// [/SL:KB]
 }
 
 void LLFloater::storeRectControl()
@@ -1712,10 +1718,20 @@ void LLFloater::onClickTearOff(LLFloater* self)
 
 void LLFloater::onTearOffClicked()
 {
-	S32 floater_header_size = mHeaderHeight;
+	setTornOff(!mTornOff);
+}
+
+void LLFloater::setTornOff(bool torn_off)
+{
+	if ( (!mCanTearOff) || (mTornOff == torn_off) )
+		return;
+
 	LLMultiFloater* host_floater = getHost();
-	if (host_floater) //Tear off
+	if ( (torn_off) && (host_floater) )		// Tear off
 	{
+		if (mTearOffSignal)
+			(*mTearOffSignal)(this, LLSD(true));
+
 		LLRect new_rect;
 		host_floater->removeFloater(this);
 		// reparent to floater view
@@ -1728,19 +1744,22 @@ void LLFloater::onTearOffClicked()
 		}
 		else
 		{   // only force position for floaters that don't have that data saved
-			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - floater_header_size - 5, getRect().getWidth(), getRect().getHeight());
+			new_rect.setLeftTopAndSize(host_floater->getRect().mLeft + 5, host_floater->getRect().mTop - mHeaderHeight - 5, getRect().getWidth(), getRect().getHeight());
 			setRect(new_rect);
 		}
 		gFloaterView->adjustToFitScreen(this, FALSE);
 		// give focus to new window to keep continuity for the user
 		setFocus(TRUE);
-		setTornOff(true);
+		mTornOff = true;;
 	}
-	else  //Attach to parent.
+	else if (!torn_off)						// Attach to parent.
 	{
 		LLMultiFloater* new_host = (LLMultiFloater*)mLastHostHandle.get();
 		if (new_host)
 		{
+			if (mTearOffSignal)
+				(*mTearOffSignal)(this, LLSD(false));
+
 			if (mSaveRect)
 			{
 				storeRectControl();
@@ -1750,7 +1769,7 @@ void LLFloater::onTearOffClicked()
 			// make sure host is visible
 			new_host->openFloater(new_host->getKey());
 		}
-		setTornOff(false);
+		mTornOff = false;
 	}
 	updateTitleButtons();
     setOpenPositioning(LLFloaterEnums::POSITIONING_RELATIVE);
@@ -3168,6 +3187,14 @@ boost::signals2::connection LLFloater::setMinimizeCallback( const commit_signal_
 	if (!mMinimizeSignal) mMinimizeSignal = new commit_signal_t();
 	return mMinimizeSignal->connect(cb); 
 }
+
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+boost::signals2::connection LLFloater::setTearOffCallback( const commit_signal_t::slot_type& cb ) 
+{ 
+	if (!mTearOffSignal) mTearOffSignal = new commit_signal_t();
+	return mTearOffSignal->connect(cb); 
+}
+// [/SL:KB]
 
 boost::signals2::connection LLFloater::setOpenCallback( const commit_signal_t::slot_type& cb )
 {
