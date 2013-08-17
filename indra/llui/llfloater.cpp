@@ -175,9 +175,6 @@ LLFloater::Params::Params()
 	save_dock_state("save_dock_state", false),
 	save_rect("save_rect", false),
 	save_visibility("save_visibility", false),
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	save_tearoff_state("save_tearoff_state", false),
-// [/SL:KB]
 	can_dock("can_dock", false),
 	show_title("show_title", true),
 	positioning("positioning", LLFloaterEnums::POSITIONING_RELATIVE),
@@ -582,16 +579,6 @@ void LLFloater::storeDockStateControl()
 	}
 }
 
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-void LLFloater::storeTearOffStateControl()
-{
-	if ( (!sQuitting) && (mCanTearOff) && (mTearOffStateControl.size() > 1) )
-	{
-		getControlGroup()->setBOOL(mTearOffStateControl, isTornOff());
-	}
-}
-// [/SL:KB]
-
 // static
 std::string LLFloater::getControlName(const std::string& name, const LLSD& key)
 {
@@ -871,21 +858,11 @@ void LLFloater::applyControlsAndPosition(LLFloater* other)
 {
 	if (!applyDockState())
 	{
-//		if (!applyRectControl())
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-10-27 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-		if ( (!applyRectControl()) && ((!getHost()) || (mTornOff)) )
-// [/SL:KB]
+		if (!applyRectControl())
 		{
 			applyPositioning(other, true);
 		}
 	}
-
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	if (getHost())
-	{
-		applyTearOffState();
-	}
-// [/SL:KB]
 }
 
 bool LLFloater::applyRectControl()
@@ -1025,17 +1002,6 @@ void LLFloater::applyPositioning(LLFloater* other, bool on_open)
 		break;
 	}
 }
-
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-void LLFloater::applyTearOffState()
-{
-	if ( (mCanTearOff) && (mTearOffStateControl.size() > 1) )
-	{
-		bool tearoffState = getControlGroup()->getBOOL(mTearOffStateControl);
-		setTornOff(tearoffState);
-	}
-}
-// [/SL:KB]
 
 void LLFloater::applyTitle()
 {
@@ -1746,8 +1712,6 @@ void LLFloater::setTornOff(bool torn_off)
 		mTornOff = false;
 	}
 	updateTitleButtons();
-
-	storeTearOffStateControl();
 }
 
 void LLFloater::onClickTearOff(LLFloater* self)
@@ -3048,12 +3012,6 @@ void LLFloater::setInstanceName(const std::string& name)
 		{
 			mDocStateControl = LLFloaterReg::declareDockStateControl(ctrl_name);
 		}
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-		if(!mTearOffStateControl.empty())
-		{
-			mTearOffStateControl = LLFloaterReg::declareTearOffStateControl(ctrl_name);
-		}
-// [/SL:KB]
 	}
 }
 
@@ -3134,13 +3092,6 @@ void LLFloater::initFromParams(const LLFloater::Params& p)
 	{
 		mDocStateControl = "t"; // flag to build mDocStateControl name once mInstanceName is set
 	}
-
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	if (p.save_tearoff_state)
-	{
-		mTearOffStateControl = "t"; // flag to build mTearOffStateControl name once mInstanceName is set
-	}
-// [/SL:KB]
 
 	// open callback 
 	if (p.open_callback.isProvided())

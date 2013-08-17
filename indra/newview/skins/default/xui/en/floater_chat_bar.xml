@@ -10,7 +10,6 @@
  title="Nearby Chat"
  save_rect="true"
  save_visibility="true"
- save_tearoff_state="true"
  can_close="true"
  can_minimize="false"
  help_topic="chat_bar"

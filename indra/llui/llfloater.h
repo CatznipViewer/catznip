@@ -160,9 +160,6 @@ public:
 								save_rect,
 								save_visibility,
 								save_dock_state,
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-								save_tearoff_state,
-// [/SL:KB]
 								can_dock,
 								show_title;
 		
@@ -368,16 +365,10 @@ protected:
 	bool			applyDockState();
 	void			applyPositioning(LLFloater* other, bool on_open);
 	void			applyRelativePosition();
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	void			applyTearOffState();
-// [/SL:KB]
 
 	void			storeRectControl();
 	void			storeVisibilityControl();
 	void			storeDockStateControl();
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	void			storeTearOffStateControl();
-// [/SL:KB]
 
 	void		 	setKey(const LLSD& key);
 	void		 	setInstanceName(const std::string& name);
@@ -447,9 +438,6 @@ protected:
 	std::string		mPosYControl;
 	std::string		mVisibilityControl;
 	std::string		mDocStateControl;
-// [SL:KB] - Patch: UI-FloaterTearOffState | Checked: 2011-09-30 (Catznip-3.2.0a) | Added: Catznip-3.0.0a
-	std::string		mTearOffStateControl;
-// [/SL:KB]
 	LLSD			mKey;				// Key used for retrieving instances; set (for now) by LLFLoaterReg
 
 	LLDragHandle*	mDragHandle;
