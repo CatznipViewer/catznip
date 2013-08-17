@@ -843,7 +843,7 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 	if (host_floater)
 	{
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-		if (!isInTabbedContainer())
+		if (!LLFloaterIMContainerBase::isTabbedContainer())
 		{
 			// Hide the messages pane if a floater is hosted in the Conversations
 			dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
@@ -943,7 +943,7 @@ void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 //		host_floater->collapseMessagesPane(false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if ( (!isInTabbedContainer()) && (!isTornOff()) )
+	if ( (!LLFloaterIMContainerBase::isTabbedContainer()) && (!isTornOff()) )
 	{
 		LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(getHost());
 		// Show the messages pane when opening a floater hosted in the Conversations
@@ -968,7 +968,7 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 //	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	if (!isInTabbedContainer())
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		LLFloaterIMContainerView* container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
 // [/SL:KB]
@@ -1065,23 +1065,6 @@ bool LLFloaterIMSessionTab::isChatMultiTab()
 	// Restart is required in order to change chat window type.
 	return true;
 }
-
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-bool LLFloaterIMSessionTab::isInTabbedContainer()
-{
-	static bool s_fInitialized = false, s_fInTabbedContainer = false;
-	if (!s_fInitialized)
-	{
-		const LLFloaterIMContainerBase* pIMContainer = LLFloaterIMContainerBase::getInstance();
-		if (pIMContainer)
-		{
-			s_fInitialized = true;
-			s_fInTabbedContainer = pIMContainer->isTabbedContainer();
-		}
-	}
-	return s_fInTabbedContainer;
-}
-// [/SL:KB]
 
 //bool LLFloaterIMSessionTab::checkIfTornOff()
 //{
@@ -1181,7 +1164,7 @@ void LLFloaterIMSessionTab::saveCollapsedState()
 BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 {
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	if (!isInTabbedContainer())
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		// LLFloaterIMContainerView needs custom handling of the navigaion keys
 		if (mask == MASK_ALT)

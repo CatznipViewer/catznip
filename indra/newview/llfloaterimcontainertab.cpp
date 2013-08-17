@@ -27,6 +27,7 @@
 LLFloaterIMContainerTab::LLFloaterIMContainerTab(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
 	: LLFloaterIMContainerBase(seed, params)
 {
+	sTabbedContainer = true;
 }
 
 LLFloaterIMContainerTab::~LLFloaterIMContainerTab()

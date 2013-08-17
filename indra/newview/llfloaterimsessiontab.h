@@ -62,13 +62,6 @@ public:
 	 */
 	static bool isChatMultiTab();
 
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	/**
-	 * Returns tue if hosted in LLFloaterIMContainerTab, or false if hosted in LLFloaterIMContainerView
-	 */
-	static bool isInTabbedContainer();
-// [/SL:KB]
-
 	// add conversation to container
 	static void addToHost(const LLUUID& session_id);
 

@@ -30,7 +30,6 @@ public:
 	/*virtual*/ void setVisible(BOOL visible);
 
 	/*virtual*/ const LLUUID& getSelectedSession() const;
-	/*virtual*/ bool isTabbedContainer() const { return true; }
 	/*virtual*/ void showConversation(const LLUUID& session_id);
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);

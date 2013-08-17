@@ -81,6 +81,9 @@ LLFloaterIMContainerView::LLFloaterIMContainerView(const LLSD& seed, const Param
 	// Firstly add our self to IMSession observers, so we catch session events
     LLIMMgr::getInstance()->addSessionObserver(this);
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	sTabbedContainer = false;
+// [/SL:KB]
 //	mAutoResize = FALSE;
 //	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
 }

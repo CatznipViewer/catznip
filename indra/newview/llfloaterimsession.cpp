@@ -945,7 +945,7 @@ void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* user
 //		im_box->flashConversationItemWidget(self->mSessionID,false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if (!isInTabbedContainer())
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		// This is only needed on CHUI
 		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());

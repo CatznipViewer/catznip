@@ -44,6 +44,7 @@ public:
 public:
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
+	static bool                      isTabbedContainer() { return sTabbedContainer; }
 	static LLFloater*                buildFloater(const LLSD& sdKey);
 	static const std::string&        getFloaterXMLFile();
 
@@ -52,6 +53,8 @@ public:
 	 */
 public:
 	static void onCurrentChannelChanged(const LLUUID& session_id);
+	static void onToggleTabbedContainer();
+	static void onToggleVerticalTabs();
 protected:
 	       void onCloseFloater(const LLUUID& session_id);
 
@@ -60,7 +63,6 @@ protected:
 	 */
 public:
 	virtual const LLUUID& getSelectedSession() const = 0;
-	virtual bool isTabbedContainer() const = 0;
 	virtual void showConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
@@ -81,6 +83,7 @@ protected:
 	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 	avatarID_panel_map_t& getSessionMap() { return mSessions; }
 
+	static bool sTabbedContainer;
 private:
 	avatarID_panel_map_t mSessions;
 };
