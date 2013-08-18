@@ -316,7 +316,10 @@ void on_new_message(const LLSD& msg)
             && !gAgent.isDoNotDisturb())
     	{
 // [SL:KB] - Patch: Chat-Base | Checked: 2013-08-16 (Catznip-3.6)
-			gToolBarView->flashCommand(LLCommandId("conversations"), true);
+			if (session_id.notNull())
+				gToolBarView->flashCommand(LLCommandId("conversations"), true);
+			else
+				gToolBarView->flashCommand(LLCommandId("chat"), true);
 // [/SL:KB]
 //    		gToolBarView->flashCommand(LLCommandId("chat"), true);
     	}
