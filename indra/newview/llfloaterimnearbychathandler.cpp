@@ -394,7 +394,7 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 	S32 channel_bottom = channel_rect.mBottom;
 
 //	S32		bottom = channel_bottom + 80;
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-17 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-17 (Catznip-3.2)
 	S32		bottom = channel_bottom + gSavedSettings.getS32("NearbyToastOffset");
 // [/SL:KB]
 	S32		margin = gSavedSettings.getS32("ToastGap");
@@ -487,7 +487,7 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 {
 //	if(chat_msg.mMuted == TRUE)
 //		return;
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
 	if ( (chat_msg.mMuted) && (!gSavedSettings.getBOOL("ShowBlockedChat")) )
 		return;
 // [/SL:KB]
@@ -552,7 +552,7 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 
 	if(chat_msg.mSourceType == CHAT_SOURCE_AGENT 
 		&& chat_msg.mFromID.notNull() 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
 		&& !chat_msg.mMuted	
 // [/SL:KB]
 		&& chat_msg.mFromID != gAgentID)
@@ -579,6 +579,13 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 		&& nearby_chat->isMessagePaneExpanded())
 		// to prevent toasts in Do Not Disturb mode
 		return;//no need in toast if chat is visible or if bubble chat is enabled
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
+	if (chat_msg.mMuted)
+	{
+		return;		// Don't show toasts for blocked chat
+	}
+// [/SL:KB]
 
 	// arrange a channel on a screen
 	if(!mChannel.get()->getVisible())

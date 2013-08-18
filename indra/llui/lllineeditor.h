@@ -380,7 +380,7 @@ protected:
 	std::vector<S32> mPreeditPositions;
 	LLPreeditor::standouts_t mPreeditStandouts;
 
-// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2012-02-09 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
 	LLHandle<LLContextMenu> mDefaultMenuHandle;
 // [/SL:KB]
 	LLHandle<LLContextMenu> mContextMenuHandle;

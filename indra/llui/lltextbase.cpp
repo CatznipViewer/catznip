@@ -2855,19 +2855,6 @@ void LLTextBase::endSelection()
 	}
 }
 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-08-20 (Catznip-3.2.0a) | Added: Catznip-2.8.0a
-void LLTextBase::setSelection(S32 start, S32 end)
-{
-	S32 len = getLength();
-
-	mIsSelecting = TRUE;
-	mSelectionStart = llclamp(start, 0, len);
-	mSelectionEnd = llclamp(end, 0, len);
-
-	setCursorPos(mSelectionEnd);
-}
-// [/SL:KB]
-
 // get portion of document that is visible in text editor
 LLRect LLTextBase::getVisibleDocumentRect() const
 {

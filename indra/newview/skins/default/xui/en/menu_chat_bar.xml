@@ -1,70 +1,43 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <context_menu
- name="Nearby chat context menu">
-  <context_menu
-   label="Chat Bar"
-   layout="topleft"
-   name="Chat Bar">
-      <menu_item_check
-       label="Single-line"
-       layout="topleft"
-       name="Single-line">
-        <menu_item_check.on_click
-         function="NearbyChat.SetChatBarType"
-         parameter="single" />
-        <menu_item_check.on_check
-         function="NearbyChat.CheckChatBarType"
-         parameter="single" />
-      </menu_item_check>
-      <menu_item_check
-       label="Multi-line"
-       layout="topleft"
-       name="Multi-line">
-        <menu_item_check.on_click
-         function="NearbyChat.SetChatBarType"
-         parameter="multi" />
-        <menu_item_check.on_check
-         function="NearbyChat.CheckChatBarType"
-         parameter="multi" />
-      </menu_item_check>
-  </context_menu>
+ name="IM session context menu">
   <context_menu
    label="Font Size"
    layout="topleft"
    name="Font Size">
-      <menu_item_check
-       label="Small"
-       layout="topleft"
-       name="Small">
-        <menu_item_check.on_click
-         function="NearbyChat.SetFontSize"
-         parameter="small" />
-        <menu_item_check.on_check
-         function="NearbyChat.CheckFontSize"
-         parameter="small" />
-      </menu_item_check>
-      <menu_item_check
-       label="Medium"
-       layout="topleft"
-       name="Medium">
-        <menu_item_check.on_click
-         function="NearbyChat.SetFontSize"
-         parameter="medium" />
-        <menu_item_check.on_check
-         function="NearbyChat.CheckFontSize"
-         parameter="medium" />
-      </menu_item_check>
-      <menu_item_check
-       label="Large"
-       layout="topleft"
-       name="Large">
-        <menu_item_check.on_click
-         function="NearbyChat.SetFontSize"
-         parameter="large" />
-        <menu_item_check.on_check
-         function="NearbyChat.CheckFontSize"
-         parameter="large" />
-      </menu_item_check>
+    <menu_item_check
+     label="Small"
+     layout="topleft"
+     name="Small">
+      <menu_item_check.on_click
+       function="IMSession.Menu.SetFontSize"
+       parameter="small" />
+      <menu_item_check.on_check
+       function="IMSession.Menu.CheckFontSize"
+       parameter="small" />
+    </menu_item_check>
+    <menu_item_check
+     label="Medium"
+     layout="topleft"
+     name="Medium">
+      <menu_item_check.on_click
+       function="IMSession.Menu.SetFontSize"
+       parameter="medium" />
+      <menu_item_check.on_check
+       function="IMSession.Menu.CheckFontSize"
+       parameter="medium" />
+    </menu_item_check>
+    <menu_item_check
+     label="Large"
+     layout="topleft"
+     name="Large">
+      <menu_item_check.on_click
+       function="IMSession.Menu.SetFontSize"
+       parameter="large" />
+      <menu_item_check.on_check
+       function="IMSession.Menu.CheckFontSize"
+       parameter="large" />
+    </menu_item_check>
   </context_menu>
   <menu_item_check
    label="Show Blocked Chat"

@@ -120,7 +120,7 @@ class LLChatHistory : public LLUICtrl
 		void appendMessage(const LLChat& chat, const LLSD &args = LLSD(), const LLStyle::Params& input_append_params = LLStyle::Params());
 		/*virtual*/ void clear();
 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
 		LLTextEditor* getEditor() const { return mEditor; }
 // [/SL:KB]
 
