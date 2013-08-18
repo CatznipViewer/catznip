@@ -142,27 +142,14 @@ BOOL LLFloaterIMNearbyChat::postBuild()
 void LLFloaterIMNearbyChat::closeHostedFloater()
 {
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+	// If nearby chat is torn off hide the floater since closing it would result in redocking to the container
 	if (!getHost())
 	{
-		// If nearby chat is currently torn off hide only the nearby chat floater
-		setVisible(FALSE);
+		setVisible(false);
 	}
 	else
 	{
-		// Nearby chat is currently docked to the conversations floater
-		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
-		if (1 == floater_container->getFloaterCount())
-		{
-			// If nearby chat is the only conversation in the conversation floater, just close it
-			floater_container->closeFloater();
-		}
-		else
-		{
-			if (!LLFloaterIMContainerBase::isTabbedContainer())
-				dynamic_cast<LLFloaterIMContainerView*>(floater_container)->selectNextConversationByID(LLUUID());
-			else
-				dynamic_cast<LLFloaterIMContainerTab*>(floater_container)->selectNextFloater();
-		}
+		getHost()->closeFloater();
 	}
 // [/SL:KB]
 //	// Should check how many conversations are ongoing. Close all if 1 only (the Nearby Chat), select next one otherwise
