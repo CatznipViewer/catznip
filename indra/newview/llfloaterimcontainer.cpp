@@ -51,9 +51,6 @@
 #include "llviewercontrol.h"
 #include "llconversationview.h"
 #include "llcallbacklist.h"
-// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a)
-#include "llviewercontrol.h"
-// [/SL:KB]
 #include "llworld.h"
 #include "llsdserialize.h"
 #include "llviewerobjectlist.h"
@@ -257,8 +254,8 @@ BOOL LLFloaterIMContainerView::postBuild()
 	// Init the sort order now that the root had been created
 	setSortOrder(LLConversationSort(gSavedSettings.getU32("ConversationSortOrder")));
 	
-	// Keep the xml set title around for when we have to overwrite it
-	mGeneralTitle = getTitle();
+//	// Keep the xml set title around for when we have to overwrite it
+//	mGeneralTitle = getTitle();
 	
 	mInitialized = true;
 
@@ -544,9 +541,9 @@ void LLFloaterIMContainerView::draw()
 
 			current_participant_model++;
 		}
-		// Update floater's title as required by the currently selected session or use the default title
-		LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
-		setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
+//		// Update floater's title as required by the currently selected session or use the default title
+//		LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
+//		setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
 	}
 
     // "Manually" resize of mConversationsPane: same as temporarity cancellation of the flag "auto_resize=false" for it

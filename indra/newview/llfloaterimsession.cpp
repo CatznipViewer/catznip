@@ -71,7 +71,7 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
 	mShouldSendTypingState(false),
 	mMeTyping(false),
 	mOtherTyping(false),
-	mSessionNameUpdatedForTyping(false),
+//	mSessionNameUpdatedForTyping(false),
 	mTypingTimer(),
 	mTypingTimeoutTimer(),
 	mPositioned(false),
@@ -565,7 +565,7 @@ void LLFloaterIMSession::updateSessionName(const std::string& name)
 		LLFloaterIMSessionTab::updateSessionName(name);
 		mTypingStart.setArg("[NAME]", name);
 		setTitle (mOtherTyping ? mTypingStart.getString() : name);
-		mSessionNameUpdatedForTyping = mOtherTyping;
+//		mSessionNameUpdatedForTyping = mOtherTyping;
 	}
 }
 
@@ -1261,6 +1261,9 @@ void LLFloaterIMSession::addTypingIndicator(const LLIMInfo* im_info)
 		{
 			speaker_mgr->setSpeakerTyping(im_info->mFromID, TRUE);
 		}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+		refreshConversation();
+// [/SL:KB]
 	}
 }
 
@@ -1279,6 +1282,9 @@ void LLFloaterIMSession::removeTypingIndicator(const LLIMInfo* im_info)
 				speaker_mgr->setSpeakerTyping(im_info->mFromID, FALSE);
 			}
 		}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+		refreshConversation();
+// [/SL:KB]
 	}
 }
 
