@@ -104,6 +104,10 @@ public:
 	// Callbacks
 	static void idle(void* user_data);
 
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a) | Added: Catznip-2.4.0g
+	static const std::string& getFloaterXMLFile();
+// [/SL:KB]
+
 	// LLIMSessionObserver observe triggers
 	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
     /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id);

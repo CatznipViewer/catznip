@@ -84,6 +84,9 @@ protected:
 		BOOL	    mCanMinimize;
 		BOOL	    mCanResize;
 		BOOL        mSaveRect;
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-07-03 (Catznip-3.3.0)
+		U32		mReshapeFlags;
+// [/SL:KB]
 	};
 
 	LLTabContainer*		mTabContainer;

@@ -51,6 +51,9 @@
 #include "llviewercontrol.h"
 #include "llconversationview.h"
 #include "llcallbacklist.h"
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2010-12-01 (Catznip-3.2.0a)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llworld.h"
 #include "llsdserialize.h"
 #include "llviewerobjectlist.h"

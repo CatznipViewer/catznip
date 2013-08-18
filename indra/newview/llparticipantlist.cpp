@@ -27,6 +27,9 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llavatarnamecache.h"
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2.1)
+#include "llgroupactions.h"
+// [/SL:KB]
 #include "llimview.h"
 #include "llfloaterimcontainer.h"
 #include "llparticipantlist.h"
