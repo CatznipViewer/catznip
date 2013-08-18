@@ -1658,6 +1658,11 @@ void LLTextBase::clearSegments()
 {
 	mSegments.clear();
 	createDefaultSegment();
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2013-08-18 (Catznip-3.6)
+	mMisspellRanges.clear();
+	mSpellCheckStart = mSpellCheckEnd = -1;
+// [/SL:KB]
 }
 
 S32 LLTextBase::getLineStart( S32 line ) const
