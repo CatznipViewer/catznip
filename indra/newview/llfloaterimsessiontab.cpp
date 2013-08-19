@@ -132,7 +132,17 @@ void LLFloaterIMSessionTab::setVisible(BOOL visible)
 		if(!gAgentCamera.cameraMouselook())
 		{
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-			LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container")->setVisible(true);
+			// Don't show the container if there are no hosted conversations
+			LLFloaterIMContainerBase* pContainer = LLFloaterIMContainerBase::findInstance();
+			if (pContainer)
+			{
+				// NOTE: LLFloaterIMContainerView will always contain the "Redock this conversation" tab panel so we need to check for cnt > 1
+				bool fTabbedContainer = LLFloaterIMContainerBase::isTabbedContainer();
+				if ( ((!fTabbedContainer) && (pContainer->getFloaterCount() > 1)) || ((fTabbedContainer) && (pContainer->getFloaterCount() > 0)) )
+				{
+					pContainer->setVisible(true);
+				}
+			}
 // [/SL:KB]
 //			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
 		}
