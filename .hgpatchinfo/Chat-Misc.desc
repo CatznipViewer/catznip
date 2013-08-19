@@ -1,6 +1,16 @@
 [Control/TabContainer]
 - fixed   : vertical tabs containers don't show their tab icon
 
+[UI/TimeFormat]
+- changed : normalized display of time in the viewers to SLT (PDT/PST)
+    -> offline IMs show SLT rather than local time
+    -> convenant modify timestamp shown as SLT rather than local time
+    -> group notice toasts shown as SLT rather than UTC time
+    -> group notice times in the group floater shown as SLT rather than local time
+    -> timezone indicator was added to help point out the difference to new Catznip users:
+        Before: Saved Mon Aug 19 14:50:10 2013
+        After : Saved Mon Aug 19 2013 05:50:10 PDT
+
 [Chat/Misc]
 - added   : "Teleport" option on the chiclet context menu
     -> added a separator between session type specific options and the shared "Show Session" and "End Session" options
