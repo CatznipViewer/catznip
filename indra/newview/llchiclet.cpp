@@ -730,7 +730,7 @@ void LLIMP2PChiclet::updateMenuItems()
 	bool is_friend = LLAvatarActions::isFriend(getOtherParticipantId());
 	mPopupMenu->getChild<LLUICtrl>("Add Friend")->setEnabled(!is_friend);
 
-// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2010-12-01 (Catznip-3.2.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2010-12-01 (Catznip-2.4)
 	bool can_teleport = LLAvatarActions::canOfferTeleport(getOtherParticipantId());
 	mPopupMenu->getChild<LLUICtrl>("Teleport")->setEnabled(can_teleport);
 // [/SL:KB]
@@ -766,7 +766,7 @@ void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLAvatarActions::requestFriendshipDialog(other_participant_id);
 	}
-// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2010-12-01 (Catznip-3.2.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2010-12-01 (Catznip-2.4)
 	else if ("teleport" == param)
 	{
 		LLAvatarActions::offerTeleport(other_participant_id);

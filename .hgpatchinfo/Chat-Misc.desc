@@ -1,13 +1,18 @@
+[Control/TabContainer]
+- fixed   : vertical tabs containers don't show their tab icon
+
 [Chat/Misc]
-- dependency : UI-Base patch branch
-- changed : prevent the IM tab's name from changing to "XXX is typing" when the other party is typing
-- fixed   : Ctrl-Up or Ctrl-Down in a line editor should set the cursor to the end of the history line (not the beginning)
-- added   : Ctrl-T shortcut to toggle the conversations floater
-- changed : moved the "slide left" and "slide right" buttons in front of the line editor on the IM session floater
-    -> aligned the top of the avatar icon with the top of the chat history control on the IM control panel
-- added   : "IMUseVerticalTabs" setting to use vertical tabs on the IM container floater
-- added   : "IMShowTabImage" setting to toggle showing an avatar/group image on the IM tab
-- fixed   : vertical IM tabs don't show an avatar/group image
-    -> bug in LLTabContainer control
 - added   : "Teleport" option on the chiclet context menu
     -> added a separator between session type specific options and the shared "Show Session" and "End Session" options
+- added   : "Eject from Group" option on the participant context menu
+    -> if group membership isn't currently available, it will enable if the proper ability is set from the group
+    -> if group membership is available, it will enable as long as the selected avatar is only a member of "Everyone"
+    -> if the agent doesn't appear to be a member of the group the active group session is checked since group membership might be stale
+- added   : "IMShowTabImage" debug setting to toggle showing an avatar/group image on legacy IM tabs
+- added   : "NameTagShowTyping" debug setting to show an avatar's typing status in their name tag
+- added   : "ChatTimestampSeconds" debug setting to show and log seconds in the chat history and chat logs timestamp
+- changed : show the name of the currently selected conversation in the conversations floater's title
+- fixed   : typing an (unhandled) printable character anywhere in the nearby chat or IM floater should set focus to the chat editor
+- fixed   : don't open the conversations floater when closing an IM from the chiclet context menu
+- fixed   : Ctrl-Up or Ctrl-Down in a line editor should set the cursor to the end of the history line (not the beginning)
+    -> in CHUI LLChatEntry is used, but the region debug console still has a line editor with history enabled so we keep the fix

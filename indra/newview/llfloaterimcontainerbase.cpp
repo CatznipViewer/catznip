@@ -156,17 +156,38 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	LLIconCtrl* icon = 0;
 	if (gAgent.isInGroup(session_id, TRUE))
 	{
-		LLGroupIconCtrl::Params icon_params;
-		icon_params.group_id = session_id;
-		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLGroupIconCtrl::Params icon_params;
+			icon_params.group_id = session_id;
+			icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		}
+// [/SL:KB]
 	}
 	else
 	{
-		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = session_id.notNull() ? LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
-		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLAvatarIconCtrl::Params icon_params;
+			icon_params.avatar_id = LLIMModel::getInstance()->getOtherParticipantID(session_id);
+			icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		}
+// [/SL:KB]
 	}
-	mTabContainer->setTabImage(floaterp, icon);
+
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+	if (icon)
+	{
+		mTabContainer->setTabImage(floaterp, icon);
+	}
+// [/SL:KB]
+//	mTabContainer->setTabImage(floaterp, icon);
 
 	mSessions[session_id] = floaterp;
 	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));

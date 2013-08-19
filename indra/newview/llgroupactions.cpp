@@ -42,6 +42,9 @@
 // [/SL:KB]
 #include "llimview.h" // for gIMMgr
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+#include "llspeakers.h"
+// [/SL:KB]
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "groupchatlistener.h"
 
@@ -406,7 +409,7 @@ bool LLGroupActions::isAvatarMemberOfGroup(const LLUUID& group_id, const LLUUID&
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
 bool LLGroupActions::canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent)
 {
 	if (gAgent.isGodlike())
@@ -442,17 +445,30 @@ bool LLGroupActions::canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAg
 			// Owners can never be ejected
 			return (itMember->second) && (!itMember->second->isOwner());
 		}
+		else
+		{
+			// Group member information may be out of date, check for presence in an active group session
+			LLIMSpeakerMgr* pSpeakerMgr = LLIMModel::instance().getSpeakerManager(LLIMMgr::computeSessionID(IM_SESSION_GROUP_START, idGroup));
+			return (pSpeakerMgr) && (pSpeakerMgr->findSpeaker(idAgent).notNull());
+		}
 	}
 	return false;
 }
 
 void LLGroupActions::ejectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent)
 {
-	if (!canEjectFromGroup(idGroup, idAgent))
-		return;
+	uuid_vec_t idAgents(1, idAgent);
+	ejectFromGroup(idGroup, idAgents);
+}
 
-	uuid_vec_t idAgents;
-	idAgents.push_back(idAgent);
+void LLGroupActions::ejectFromGroup(const LLUUID& idGroup, const uuid_vec_t& idAgents)
+{
+	for (uuid_vec_t::const_iterator itAgent = idAgents.begin(); itAgent != idAgents.end(); ++itAgent)
+	{
+		if (!canEjectFromGroup(idGroup, *itAgent))
+			return;
+	}
+
 	LLGroupMgr::instance().sendGroupMemberEjects(idGroup, idAgents);
 }
 // [/SL:KB]

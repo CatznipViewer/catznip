@@ -131,12 +131,10 @@
      layout="topleft"
      name="EjectSelected">
         <on_click
-         function="ParticipantList.Eject"
-        />
+         function="ParticipantList.Eject" />
         <on_enable
          function="ParticipantList.EnableItem"
-         parameter="can_eject"
-        />
+         parameter="can_eject" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft" 

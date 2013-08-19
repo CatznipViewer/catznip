@@ -87,11 +87,12 @@ const static std::string MULTI_LINE_PREFIX(" ");
  *
  * Note: "You" was used as an avatar names in viewers of previous versions
  */
-//const static boost::regex TIMESTAMP_AND_STUFF("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}\\]\\s+|\\[\\d{1,2}:\\d{2}\\]\\s+)?(.*)$");
-const static boost::regex TIMESTAMP("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}\\]|\\[\\d{1,2}:\\d{2}\\]).*");
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 const static boost::regex TIMESTAMP_AND_STUFF("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}(:\\d{2})?\\]\\s+|\\[\\d{1,2}:\\d{2}(:\\d{2})?\\]\\s+)?(.*)$");
+const static boost::regex TIMESTAMP("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}(:\\d{2})?\\]|\\[\\d{1,2}:\\d{2}(:\\d{2})?\\]).*");
 // [/SL:KB]
+//const static boost::regex TIMESTAMP_AND_STUFF("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}\\]\\s+|\\[\\d{1,2}:\\d{2}\\]\\s+)?(.*)$");
+//const static boost::regex TIMESTAMP("^(\\[\\d{4}/\\d{1,2}/\\d{1,2}\\s+\\d{1,2}:\\d{2}\\]|\\[\\d{1,2}:\\d{2}\\]).*");
 
 /**
  *  Regular expression suitable to match names like
@@ -115,14 +116,14 @@ const static std::string NAME_TEXT_DIVIDER(": ");
 // is used for timestamps adjusting
 const static char* DATE_FORMAT("%Y/%m/%d %H:%M");
 const static char* TIME_FORMAT("%H:%M");
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 const static char* DATE_FORMAT_SEC("%Y/%m/%d %H:%M:%S");
 const static char* TIME_FORMAT_SEC("%H:%M:%S");
 // [/SL:KB]
 
 //const static int IDX_TIMESTAMP = 1;
 //const static int IDX_STUFF = 2;
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 const static int IDX_TIMESTAMP = 1;
 const static int IDX_SECONDS = 2;
 const static int IDX_STUFF = 4;
@@ -151,7 +152,7 @@ public:
 //		mDateStream.imbue(std::locale(mDateStream.getloc(), new date_input_facet(DATE_FORMAT)));
 //		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_facet(TIME_FORMAT)));
 //		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_input_facet(DATE_FORMAT)));
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 		mDateInputFacet = new date_input_facet();
 		mDateStream.imbue(std::locale(mDateStream.getloc(), mDateInputFacet));
 
@@ -175,11 +176,11 @@ public:
 	}
 
 //	void checkAndCutOffDate(std::string& time_str)
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 	void checkAndCutOffDate(std::string& time_str, bool fHasSeconds)
 // [/SL:KB]
 	{
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 		mDateInputFacet->format( (fHasSeconds) ? DATE_FORMAT_SEC : DATE_FORMAT);
 		mTimeInputFacet->format( (fHasSeconds) ? DATE_FORMAT_SEC : DATE_FORMAT);
 		mTimeOutputFacet->format( (fHasSeconds) ? TIME_FORMAT_SEC : TIME_FORMAT);
@@ -233,7 +234,7 @@ public:
 private:
 	std::stringstream mDateStream;
 	std::stringstream mTimeStream;
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 	date_input_facet* mDateInputFacet;
 	time_input_facet* mTimeInputFacet;
 	time_facet*       mTimeOutputFacet;
@@ -294,19 +295,30 @@ std::string LLLogChat::cleanFileName(std::string filename)
 std::string LLLogChat::timestamp(bool withdate)
 {
 	std::string timeStr;
+//	if (withdate)
+//	{
+//		timeStr = "[" + LLTrans::getString ("TimeYear") + "]/["
+//				  + LLTrans::getString ("TimeMonth") + "]/["
+//				  + LLTrans::getString ("TimeDay") + "] ["
+//				  + LLTrans::getString ("TimeHour") + "]:["
+//				  + LLTrans::getString ("TimeMin") + "]";
+//	}
+//	else
+//	{
+//		timeStr = "[" + LLTrans::getString("TimeHour") + "]:["
+//				  + LLTrans::getString ("TimeMin")+"]";
+//	}
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 	if (withdate)
 	{
-		timeStr = "[" + LLTrans::getString ("TimeYear") + "]/["
-				  + LLTrans::getString ("TimeMonth") + "]/["
-				  + LLTrans::getString ("TimeDay") + "] ["
-				  + LLTrans::getString ("TimeHour") + "]:["
-				  + LLTrans::getString ("TimeMin") + "]";
+		timeStr = "["+ LLTrans::getString("TimeYear") + "]/[" + LLTrans::getString("TimeMonth") + "]/[" + LLTrans::getString("TimeDay") +"] ";
 	}
-	else
+	timeStr += "[" + LLTrans::getString("TimeHour") + "]:[" + LLTrans::getString("TimeMin") + "]";
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
 	{
-		timeStr = "[" + LLTrans::getString("TimeHour") + "]:["
-				  + LLTrans::getString ("TimeMin")+"]";
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
 	}
+// [/SL:KB]
 
 	LLSD substitution;
 	substitution["datetime"] = (S32)time_corrected();
@@ -753,7 +765,7 @@ bool LLChatLogParser::parse(std::string& raw, LLSD& im, const LLSD& parse_params
 
 		if (cut_off_todays_date)
 		{
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
 			LLLogChatTimeScanner::instance().checkAndCutOffDate(timestamp, matches[IDX_SECONDS].matched);
 // [/SL:KB]
 //			LLLogChatTimeScanner::instance().checkAndCutOffDate(timestamp);

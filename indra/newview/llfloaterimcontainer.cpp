@@ -1125,7 +1125,13 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 		{
 			toggleAllowTextChat(userID);
 		}
-	}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+		else if ("eject_from_group" == command)
+		{
+			LLGroupActions::ejectFromGroup(mSelectedSession, userID);
+		}
+// [/SL:KB]
+ 	}
 	else if (selectedIDS.size() > 1)
 	{
 		if ("im" == command)
@@ -1144,6 +1150,12 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 		{
 			LLAvatarActions::removeFriendsDialog(selectedIDS);
 		}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+		else if ("eject_from_group" == command)
+		{
+			LLGroupActions::ejectFromGroup(mSelectedSession, selectedIDS);
+		}
+// [/SL:KB]
 	}
 }
 
@@ -1335,6 +1347,17 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uu
 		// *TODO : get that out of here...
 		return enableModerateContextMenuItem(item);
 	}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+	else if ("eject_from_group" == item)
+	{
+		bool fRet = true;
+		for (uuid_vec_t::const_iterator itId = uuids.begin(); itId != uuids.end(); ++itId)
+		{
+			fRet &= LLGroupActions::canEjectFromGroup(mSelectedSession, *itId);
+		}
+		return fRet;
+	}
+// [/SL:KB]
 
 	// By default, options that not explicitely disabled are enabled
     return true;
@@ -1387,6 +1410,15 @@ bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 	{
 		return isMuted(getCurSelectedViewModelItem()->getUUID());
 	}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+	else if ("eject_from_group" == item)
+	{
+		// Show if we have a group member selection (not when the group itself is selected)
+		const LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(getSelectedSession());
+		const LLConversationItem* pConvItem = getCurSelectedViewModelItem();
+		return (pIMSession) && (pIMSession->isGroupSessionType()) && (pConvItem) && (pConvItem->getType() == LLConversationItem::CONV_PARTICIPANT);
+	}
+// [/SL:KB]
 
 	return true;
 }

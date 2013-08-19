@@ -72,7 +72,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 	std::string message = p.message;
 	if (prefix == "/me " || prefix == "/me'")
 	{
-		style_params.font.style ="ITALIC";
+		style_params.font.style = "ITALIC";
 		mMessage->appendText(p.from, FALSE, style_params);
 
 		style_params.font.style = "ITALIC";
@@ -80,7 +80,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 	}
 	else
 	{
-		style_params.font.style =  "NORMAL";
+		style_params.font.style = "NORMAL";
 	}
 
 	static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts");
@@ -127,7 +127,7 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 //	{
 //		style_params.font.style =  "NORMAL";
 //		mMessage->setText(p.message, style_params);
-//	}
+// 	}
 
 	mAvatarName->setValue(p.from);
 	mTime->setValue(p.time);

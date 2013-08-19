@@ -379,7 +379,7 @@ void LLFloaterIMSessionTab::draw()
 	LLTransientDockableFloater::draw();
 }
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2)
 BOOL LLFloaterIMSessionTab::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
 {
 	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mInputEditor->hasFocus()) )
@@ -427,6 +427,10 @@ std::string LLFloaterIMSessionTab::appendTime()
 	utc_time = time_corrected();
 	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
 		+LLTrans::getString("TimeMin")+"]";
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
+// [/SL:KB]
 
 	LLSD substitution;
 

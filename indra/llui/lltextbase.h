@@ -442,7 +442,7 @@ public:
 	LLScrollContainer*		getScrollContainer() const { return mScroller; }
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
-	void setParseHighlights(BOOL parsing)     { mParseHighlights = parsing; }
+	void setParseHighlights(bool parse)       { mParseHighlights = parse; }
 	S32  getHighlightsMask() const            { return mHighlightsMask; }
 	void setHighlightsMask(S32 category_mask) { mHighlightsMask = category_mask; }
 
