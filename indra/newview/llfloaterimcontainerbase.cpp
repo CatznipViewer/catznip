@@ -125,6 +125,12 @@ BOOL LLFloaterIMContainerBase::postBuild()
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 	// mTabContainer will be initialized in LLMultiFloater::addChild()
 	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+	mTabContainer->setCommitCallback(boost::bind(&LLFloaterIMContainerBase::onSelectConversation, this));
+
+	// Save the title so we can refer back to it whenever a session is selected
+	setShortTitle(getTitle());
+// [/SL:KB]
 
 	return TRUE;
 }
@@ -150,17 +156,38 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	LLIconCtrl* icon = 0;
 	if (gAgent.isInGroup(session_id, TRUE))
 	{
-		LLGroupIconCtrl::Params icon_params;
-		icon_params.group_id = session_id;
-		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLGroupIconCtrl::Params icon_params;
+			icon_params.group_id = session_id;
+			icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		}
+// [/SL:KB]
 	}
 	else
 	{
-		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = session_id.notNull() ? LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
-		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		if (gSavedSettings.getBOOL("IMShowTabImage"))
+		{
+// [/SL:KB]
+			LLAvatarIconCtrl::Params icon_params;
+			icon_params.avatar_id = LLIMModel::getInstance()->getOtherParticipantID(session_id);
+			icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+		}
+// [/SL:KB]
 	}
-	mTabContainer->setTabImage(floaterp, icon);
+
+// [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
+	if (icon)
+	{
+		mTabContainer->setTabImage(floaterp, icon);
+	}
+// [/SL:KB]
+//	mTabContainer->setTabImage(floaterp, icon);
 
 	mSessions[session_id] = floaterp;
 	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
@@ -171,6 +198,32 @@ void LLFloaterIMContainerBase::onCloseFloater(const LLUUID& session_id)
 	mSessions.erase(session_id);
 	setFocus(TRUE);
 }
+
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+void LLFloaterIMContainerBase::updateFloaterTitle(LLFloater* floaterp)
+{
+	LLMultiFloater::updateFloaterTitle(floaterp);
+	if (mTabContainer->getCurrentPanel() == (LLPanel*)floaterp)
+	{
+		// Update the container's title
+		onSelectConversation();
+	}
+}
+
+void LLFloaterIMContainerBase::onSelectConversation()
+{
+	const LLFloater* pIMFloater = (mTabContainer) ? dynamic_cast<const LLFloater*>(mTabContainer->getCurrentPanel()) : NULL;
+	if (pIMFloater)
+	{
+		const std::string strTitle = llformat("%s - %s", getShortTitle().c_str(), pIMFloater->getTitle().c_str());
+		setTitle(strTitle);
+	}
+	else
+	{
+		setTitle(getShortTitle());
+	}
+}
+// [/SL:KB]
 
 // static
 LLFloaterIMContainerBase* LLFloaterIMContainerBase::findInstance()
