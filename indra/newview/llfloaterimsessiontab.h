@@ -107,6 +107,10 @@ public:
 	void saveCollapsedState();
 
 protected:
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2013-08-18 (Catznip-3.6)
+	static void onIMSetFontSize(const LLSD& sdParam);
+	static bool onIMCheckFontSize(const LLSD& sdParam);
+// [/SL:KB]
 
 	// callback for click on any items of the visual states menu
 	void onIMSessionMenuItemClicked(const LLSD& userdata);

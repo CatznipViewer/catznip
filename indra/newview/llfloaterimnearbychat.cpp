@@ -683,6 +683,16 @@ void LLFloaterIMNearbyChat::onChatBoxCommit()
 	{
 		sendChat(CHAT_TYPE_NORMAL);
 	}
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-02 (Catznip-3.2)
+	else if (gSavedSettings.getBOOL("CloseChatOnEmptyReturn"))
+	{
+		// We don't want to close the floater if we're torn off since that would redock with the conversations floater
+		if (!getHost())
+			setVisible(false);
+		else
+			getHost()->closeFloater();
+	}
+// [/SL:KB]
 
 	gAgent.stopTyping();
 }
