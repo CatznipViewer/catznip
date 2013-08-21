@@ -29,13 +29,10 @@
 
 #include "llavatariconctrl.h"
 #include "llbutton.h"
-// [SL:KB]
-#include "llflashtimer.h"
-#include "llpanel.h"
-#include "lltextbox.h"
-#include "lloutputmonitorctrl.h"
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 #include "llgroupmgr.h"
 #include "llimview.h"
+#include "lloutputmonitorctrl.h"
 // [/SL:KB]
 #include "llnotifications.h"
 #include "lltextbox.h"
@@ -124,33 +121,32 @@ protected:
 	friend class LLUICtrlFactory;
 };
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
  * Class for displaying group's icon in Group chiclet.
  */
 class LLChicletGroupIconCtrl : public LLIconCtrl
 {
+	friend class LLUICtrlFactory;
 public:
-
 	struct Params :	public LLInitParam::Block<Params, LLIconCtrl::Params>
 	{
 		Optional<std::string> default_icon;
 
 		Params()
-		:	default_icon("default_icon", "Generic_Group")
+			: default_icon("default_icon", "Generic_Group")
 		{}
 	};
 
 	/**
 	 * Sets icon, if value is LLUUID::null - default icon will be set.
 	 */
-	virtual void setValue(const LLSD& value );
+	/*virtual*/ void setValue(const LLSD& value);
 
 protected:
-
 	LLChicletGroupIconCtrl(const Params& p);
-	friend class LLUICtrlFactory;
 
+private:
 	std::string mDefaultIcon;
 };
 // [/SL:KB]
@@ -912,14 +908,14 @@ protected:
 	S32 mUreadSystemNotifications;
 };
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
  * Implements Group chat chiclet.
  */
 class LLIMGroupChiclet : public LLIMChiclet, public LLGroupMgrObserver
 {
+	friend class LLUICtrlFactory;
 public:
-
 	struct Params : public LLInitParam::Block<Params, LLIMChiclet::Params>
 	{
 		Optional<LLButton::Params> chiclet_button;
@@ -936,6 +932,11 @@ public:
 
 		Params();
 	};
+
+protected:
+	LLIMGroupChiclet(const Params& p);
+public:
+	/*virtual*/ ~LLIMGroupChiclet();
 
 	/**
 	 * Sets session id.
@@ -964,12 +965,6 @@ public:
 	 */
 	/*virtual*/ S32 getCounter() { return mCounterCtrl->getCounter(); }
 
-	~LLIMGroupChiclet();
-
-protected:
-	LLIMGroupChiclet(const Params& p);
-	friend class LLUICtrlFactory;
-
 	/**
 	 * Finds a current speaker and resets the SpeakerControl with speaker's ID
 	 */
@@ -979,20 +974,19 @@ protected:
 	 * Creates chiclet popup menu. Will create P2P or Group IM Chat menu 
 	 * based on other participant's id.
 	 */
-	virtual void createPopupMenu();
+	/*virtual*/ void createPopupMenu();
 
 	/**
 	 * Processes clicks on chiclet popup menu.
 	 */
-	virtual void onMenuItemClicked(const LLSD& user_data);
+	/*virtual*/ void onMenuItemClicked(const LLSD& user_data);
 
 	/**
 	 * Enables/disables "show session" menu item depending on visible IM floater existence.
 	 */
-	virtual void updateMenuItems();
+	/*virtual*/ void updateMenuItems();
 
 private:
-
 	LLChicletGroupIconCtrl* mChicletIconCtrl;
 };
 // [/SL:KB]

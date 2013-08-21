@@ -35,22 +35,11 @@
 #include "llscriptfloater.h"
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 #include "llagent.h"
 #include "llavataractions.h"
-#include "lleventtimer.h"
 #include "llgroupactions.h"
-#include "lliconctrl.h"
-#include "llimview.h"
-#include "llmenugl.h"
-#include "llnotificationsutil.h"
-#include "lloutputmonitorctrl.h"
 #include "llspeakers.h"
-#include "lltextbox.h"
-#include "llvoiceclient.h"
-#include "llgroupmgr.h"
-#include "llnotificationmanager.h"
-#include "lltransientfloatermgr.h"
 // [/SL:KB]
 
 static LLDefaultChildRegistry::Register<LLChicletPanel> t1("chiclet_panel");
@@ -882,21 +871,21 @@ void LLAdHocChiclet::onMenuItemClicked(const LLSD& user_data)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLIMGroupChiclet::Params::Params()
-: group_icon("group_icon")
-, chiclet_button("chiclet_button")
-, unread_notifications("unread_notifications")
-, speaker("speaker")
-, new_message_icon("new_message_icon")
-, show_speaker("show_speaker")
+	: chiclet_button("chiclet_button")
+	, group_icon("group_icon")
+	, unread_notifications("unread_notifications")
+	, speaker("speaker")
+	, new_message_icon("new_message_icon")
+	, show_speaker("show_speaker")
 {
 }
 
 LLIMGroupChiclet::LLIMGroupChiclet(const Params& p)
-: LLIMChiclet(p)
-, LLGroupMgrObserver(LLUUID::null)
-, mChicletIconCtrl(NULL)
+	: LLIMChiclet(p)
+	, LLGroupMgrObserver(LLUUID::null)
+	, mChicletIconCtrl(NULL)
 {
 	LLButton::Params button_params = p.chiclet_button;
 	mChicletButton = LLUICtrlFactory::create<LLButton>(button_params);
@@ -932,7 +921,7 @@ LLIMGroupChiclet::~LLIMGroupChiclet()
 
 void LLIMGroupChiclet::draw()
 {
-	if(getShowSpeaker())
+	if (getShowSpeaker())
 	{
 		switchToCurrentSpeaker();
 	}
@@ -965,7 +954,7 @@ void LLIMGroupChiclet::switchToCurrentSpeaker()
 
 void LLIMGroupChiclet::setSessionId(const LLUUID& session_id)
 {
-	LLChiclet::setSessionId(session_id);
+	LLIMChiclet::setSessionId(session_id);
 
 	LLGroupMgr* grp_mgr = LLGroupMgr::getInstance();
 	LLGroupMgrGroupData* group_data = grp_mgr->getGroupData(session_id);
@@ -1790,15 +1779,15 @@ LLChicletAvatarIconCtrl::LLChicletAvatarIconCtrl(const Params& p)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLChicletGroupIconCtrl::LLChicletGroupIconCtrl(const Params& p)
-: LLIconCtrl(p)
-, mDefaultIcon(p.default_icon)
+	: LLIconCtrl(p)
+	, mDefaultIcon(p.default_icon)
 {
 	setValue(LLUUID::null);
 }
 
-void LLChicletGroupIconCtrl::setValue(const LLSD& value )
+void LLChicletGroupIconCtrl::setValue(const LLSD& value)
 {
 	if(value.asUUID().isNull())
 	{
