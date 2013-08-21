@@ -567,9 +567,6 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 	// Send event on to LLEventStream
 	sChatWatcher->post(chat);
 
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container");
-// [/SL:KB]
 //    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 
 	if((  ( chat_msg.mSourceType == CHAT_SOURCE_AGENT
@@ -624,17 +621,25 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 			toast_msg = chat_msg.mText;
 		}
 
-		//Don't show nearby toast, if conversation is visible and selected
-		if ((nearby_chat->hasFocus()) ||
-		    ((im_box->getSelectedSession().isNull() &&
-				((LLFloater::isVisible(im_box) && !im_box->isMinimized() && im_box->isFrontmost())
-						|| (LLFloater::isVisible(nearby_chat) && !nearby_chat->isMinimized() && nearby_chat->isFrontmost())))))
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-21 (Catznip-3.6)
+		// Don't show nearby toasts if the nearby chat floater is currently visible and not minimized
+		if ( (nearby_chat->isMessagePaneExpanded()) && (nearby_chat->isInVisibleChain()) && 
+			 ( (nearby_chat->getHost()) ? !nearby_chat->getHost()->isMinimized() : !nearby_chat->isMinimized() ) )
 		{
-			if(nearby_chat->isMessagePaneExpanded())
-			{
-				return;
-			}
+			return;
 		}
+// [/SL:KB]
+//		//Don't show nearby toast, if conversation is visible and selected
+//		if ((nearby_chat->hasFocus()) ||
+//		    ((im_box->getSelectedSession().isNull() &&
+//				((LLFloater::isVisible(im_box) && !im_box->isMinimized() && im_box->isFrontmost())
+//						|| (LLFloater::isVisible(nearby_chat) && !nearby_chat->isMinimized() && nearby_chat->isFrontmost())))))
+//		{
+//			if(nearby_chat->isMessagePaneExpanded())
+//			{
+//				return;
+//			}
+//		}
 
         //Will show toast when chat preference is set        
         if((gSavedSettings.getString("NotificationNearbyChatOptions") == "toast") || !nearby_chat->isMessagePaneExpanded())

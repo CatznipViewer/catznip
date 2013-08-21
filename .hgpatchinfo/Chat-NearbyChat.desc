@@ -11,6 +11,7 @@
     -> Catznip default is 10px ; LL default is 80px
 - changed : re-add the nearby chat floater as the very first tab when using a legacy tabbed IM container
 - changed : don't allow the nearby chat tab to be drag-rearranged
+- changed : only show nearby chat toasts if the nearby chat floater is not currently visible, is minimized, or the message pane is collapsed
 
 [Control/LineEditor]
 - changed : separated the default context menu from a custom context menu for a line editor control
