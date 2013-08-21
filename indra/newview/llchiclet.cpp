@@ -415,12 +415,22 @@ LLIMChiclet::LLIMChiclet(const LLIMChiclet::Params& p)
 , mCounterCtrl(NULL)
 // [/SL:KB]
 , mChicletButton(NULL)
-, mPopupMenu(NULL)
+//, mPopupMenu(NULL)
 {
 // [SL:KB]
 	enableCounterControl(p.enable_counter);
 // [/SL:KB]
 }
+
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+LLIMChiclet::~LLIMChiclet()
+{
+	if (!mContextMenuHandle.isDead())
+	{
+		mContextMenuHandle.get()->die();
+	}
+}
+// [/SL:KB]
 
 /* virtual*/
 BOOL LLIMChiclet::postBuild()
@@ -619,28 +629,54 @@ LLIMChiclet::EType LLIMChiclet::getIMSessionType(const LLUUID& session_id)
 
 BOOL LLIMChiclet::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
-	if(!mPopupMenu)
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	if (!mContextMenuHandle.get())
 	{
 		createPopupMenu();
 	}
 
-	if (mPopupMenu)
+	LLContextMenu* popup_menu = mContextMenuHandle.get();
+	if (popup_menu)
 	{
 		updateMenuItems();
-		mPopupMenu->arrangeAndClear();
-		LLMenuGL::showPopup(this, mPopupMenu, x, y);
+
+		S32 screen_x, screen_y;
+		localPointToScreen(x, y, &screen_x, &screen_y);
+
+		popup_menu->show(screen_x, screen_y, this);
 	}
 
 	return TRUE;
+// [/SL:KB]
+//	if(!mPopupMenu)
+//	{
+//		createPopupMenu();
+//	}
+//
+//	if (mPopupMenu)
+//	{
+//		updateMenuItems();
+//		mPopupMenu->arrangeAndClear();
+//		LLMenuGL::showPopup(this, mPopupMenu, x, y);
+//	}
+//
+//	return TRUE;
 }
 
 bool LLIMChiclet::canCreateMenu()
 {
-	if(mPopupMenu)
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	if (mContextMenuHandle.get())
 	{
 		llwarns << "Menu already exists" << llendl;
 		return false;
 	}
+// [/SL:KB]
+//	if(mPopupMenu)
+//	{
+//		llwarns << "Menu already exists" << llendl;
+//		return false;
+//	}
 	if(getSessionId().isNull())
 	{
 		return false;
@@ -707,29 +743,33 @@ void LLIMP2PChiclet::setOtherParticipantId(const LLUUID& other_participant_id)
 
 void LLIMP2PChiclet::updateMenuItems()
 {
-	if(!mPopupMenu)
+	LLContextMenu* popup_menu = mContextMenuHandle.get();
+	if (!popup_menu )
 		return;
-	if(getSessionId().isNull())
+	if (getSessionId().isNull())
 		return;
 
 	LLFloaterIMSession* open_im_floater = LLFloaterIMSession::findInstance(getSessionId());
 	bool open_window_exists = open_im_floater && open_im_floater->getVisible();
-	mPopupMenu->getChild<LLUICtrl>("Send IM")->setEnabled(!open_window_exists);
+	popup_menu->getChild<LLUICtrl>("Send IM")->setEnabled(!open_window_exists);
 	
 	bool is_friend = LLAvatarActions::isFriend(getOtherParticipantId());
-	mPopupMenu->getChild<LLUICtrl>("Add Friend")->setEnabled(!is_friend);
+	popup_menu->getChild<LLUICtrl>("Add Friend")->setEnabled(!is_friend);
 }
 
 void LLIMP2PChiclet::createPopupMenu()
 {
-	if(!canCreateMenu())
+	if (!canCreateMenu())
 		return;
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("IMChicletMenu.Action", boost::bind(&LLIMP2PChiclet::onMenuItemClicked, this, _2));
 
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
-		("menu_imchiclet_p2p.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+		("menu_imchiclet_p2p.xml",
+		LLMenuGL::sMenuContainer,
+		LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
 }
 
 void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
@@ -845,14 +885,17 @@ void LLAdHocChiclet::switchToCurrentSpeaker()
 
 void LLAdHocChiclet::createPopupMenu()
 {
-	if(!canCreateMenu())
+	if (!canCreateMenu())
 		return;
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("IMChicletMenu.Action", boost::bind(&LLAdHocChiclet::onMenuItemClicked, this, _2));
 
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
-		("menu_imchiclet_adhoc.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+		("menu_imchiclet_adhoc.xml", 
+		LLMenuGL::sMenuContainer,
+		LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
 }
 
 void LLAdHocChiclet::onMenuItemClicked(const LLSD& user_data)
@@ -988,26 +1031,30 @@ void LLIMGroupChiclet::changed(LLGroupChange gc)
 
 void LLIMGroupChiclet::updateMenuItems()
 {
-	if(!mPopupMenu)
+	LLContextMenu* popup_menu = mContextMenuHandle.get();
+	if (!popup_menu)
 		return;
-	if(getSessionId().isNull())
+	if (getSessionId().isNull())
 		return;
 
 	LLFloaterIMSession* open_im_floater = LLFloaterIMSession::findInstance(getSessionId());
 	bool open_window_exists = open_im_floater && open_im_floater->getVisible();
-	mPopupMenu->getChild<LLUICtrl>("Chat")->setEnabled(!open_window_exists);
+	popup_menu->getChild<LLUICtrl>("Chat")->setEnabled(!open_window_exists);
 }
 
 void LLIMGroupChiclet::createPopupMenu()
 {
-	if(!canCreateMenu())
+	if (!canCreateMenu())
 		return;
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("IMChicletMenu.Action", boost::bind(&LLIMGroupChiclet::onMenuItemClicked, this, _2));
 
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
-		("menu_imchiclet_group.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+		("menu_imchiclet_group.xml", 
+		LLMenuGL::sMenuContainer,
+		LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
 }
 
 void LLIMGroupChiclet::onMenuItemClicked(const LLSD& user_data)
@@ -1902,8 +1949,15 @@ void LLScriptChiclet::createPopupMenu()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("ScriptChiclet.Action", boost::bind(&LLScriptChiclet::onMenuItemClicked, this, _2));
 
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
-		("menu_script_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+		("menu_script_chiclet.xml", 
+		LLMenuGL::sMenuContainer,
+		LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+//	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
+//		("menu_script_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -1987,8 +2041,15 @@ void LLInvOfferChiclet::createPopupMenu()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("InvOfferChiclet.Action", boost::bind(&LLInvOfferChiclet::onMenuItemClicked, this, _2));
 
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
-		("menu_inv_offer_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+		("menu_inv_offer_chiclet.xml", 
+		LLMenuGL::sMenuContainer,
+		LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
+// [/SL:KB]
+//	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
+//		("menu_inv_offer_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 }
 
 // EOF

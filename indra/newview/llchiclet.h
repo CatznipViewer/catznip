@@ -325,7 +325,10 @@ public:
 	{};
 
 	
-	virtual ~LLIMChiclet() {};
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	/*virtual*/ ~LLIMChiclet();
+// [/SL:KB]
+//	virtual ~LLIMChiclet() {};
 
 	/**
 	 * It is used for default setting up of chicklet:click handler, etc.  
@@ -458,7 +461,10 @@ protected:
 
 	bool canCreateMenu();
 
-	LLMenuGL* mPopupMenu;
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	LLHandle<LLContextMenu> mContextMenuHandle;
+// [/SL:KB]
+//	LLMenuGL* mPopupMenu;
 
 	bool mShowSpeaker;
 	bool mCounterEnabled;
