@@ -15,6 +15,7 @@
 - changed : behaviour of arrow keys when focus is on the conversations container, nearby chat or IM conversation
     -> CHUI default: arrow keys never move unless "ArrowKeysAlwaysMove" is set to TRUE
     -> additionally: arrow keys move the avatar if focus is on a conversation floater and no text has been entered (legacy behaviour)
+- changed : show the user's own name in nearby chat and IMs rather than showing "(You)"
 
 [Control/LineEditor]
 - changed : separated the default context menu from a custom context menu for a line editor control
