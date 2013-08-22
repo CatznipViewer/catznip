@@ -1135,6 +1135,13 @@ bool LLFloaterIMSessionTab::isChatMultiTab()
 //	return isTorn;
 //}
 
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+bool LLFloaterIMSessionTab::hasInputText() const
+{
+	return (mInputEditor->getLength() > 0);
+}
+// [/SL:KB]
+
 void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 {
 	// Get the list of selected items in the tab
