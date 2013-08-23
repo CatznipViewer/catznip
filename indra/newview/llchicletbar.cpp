@@ -55,9 +55,6 @@ namespace
 
 LLChicletBar::LLChicletBar(const LLSD&)
 :	mChicletPanel(NULL),
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
-	mAlignment(ALIGN_TOP),
-// [/SL:KB]
 	mToolbarStack(NULL)
 {
 	// Firstly add our self to IMSession observers, so we catch session events

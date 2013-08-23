@@ -140,7 +140,7 @@ protected:
 	LLUUID	mID;
 	
 	LLView*	mFloaterSnapRegion;
-//	LLView* mChicletRegion;
+	LLView* mChicletRegion;
 };
 
 

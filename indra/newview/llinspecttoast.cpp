@@ -26,9 +26,6 @@
 
 #include "llviewerprecompiledheaders.h" // must be first include
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2.2)
-#include "llchicletbar.h"
-// [/SL:KB]
 #include "llinspecttoast.h"
 #include "llinspect.h"
 #include "llfloaterreg.h"
@@ -107,28 +104,7 @@ void LLInspectToast::onOpen(const LLSD& notification_id)
 	panel_rect = panel->getRect();
 	reshape(panel_rect.getWidth(), panel_rect.getHeight());
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
-	static LLView* pFloaterSnapRegion = NULL;
-	if (!pFloaterSnapRegion)
-		pFloaterSnapRegion = getRootView()->findChildView("floater_snap_region");
-
-	// We want to constrain it to the floater snap region (minus the chiclet bar) rather than the entire available screen
-	LLRect rctConstrain = getParent()->getLocalRect();
-	if (pFloaterSnapRegion)
-	{
-		pFloaterSnapRegion->localRectToOtherView(pFloaterSnapRegion->getLocalRect(), &rctConstrain, getParent());
-		if (LLChicletBar::instanceExists())
-		{
-			const LLChicletBar* pChicletBar = LLChicletBar::getInstance();
-			if (LLChicletBar::ALIGN_TOP == pChicletBar->getAlignment())
-				rctConstrain.mTop -= pChicletBar->getRect().getHeight();
-			else
-				rctConstrain.mBottom += pChicletBar->getRect().getHeight();
-		}
-	}
-	LLUI::positionViewNearMouse(this, rctConstrain);
-// [/SL:KB]
-//	LLUI::positionViewNearMouse(this);
+	LLUI::positionViewNearMouse(this);
 }
 
 // virtual

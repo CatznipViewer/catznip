@@ -37,9 +37,6 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1)
-#include "llchicletbar.h"
-// [/SL:KB]
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llimfloater.h"
@@ -62,30 +59,18 @@ LLRect LLScreenChannelBase::getChannelRect()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-//	if (mChicletRegion == NULL)
-//	{
-//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-//	}
+	if (mChicletRegion == NULL)
+	{
+		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+	}
 	
 	LLRect channel_rect;
 	LLRect chiclet_rect;
 
 	mFloaterSnapRegion->localRectToScreen(mFloaterSnapRegion->getLocalRect(), &channel_rect);
-//	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
-//
-//	channel_rect.mTop = chiclet_rect.mBottom;
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
-	if (LLChicletBar::instanceExists())
-	{
-		const LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
-		chiclet_bar->localRectToScreen(chiclet_bar->getLocalRect(), &chiclet_rect);
+	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
 
-		if (LLChicletBar::ALIGN_TOP == chiclet_bar->getAlignment())
-			channel_rect.mTop = chiclet_rect.mBottom;
-		else
-			channel_rect.mBottom = chiclet_rect.mTop;
-	}
-// [/SL:KB]
+	channel_rect.mTop = chiclet_rect.mBottom;
 	return channel_rect;
 }
 
@@ -106,11 +91,8 @@ LLScreenChannelBase::LLScreenChannelBase(const Params& p)
 	mID(p.id),
 	mDisplayToastsAlways(p.display_toasts_always),
 	mChannelAlignment(p.channel_align),
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
-	mFloaterSnapRegion(NULL)
-// [/SL:KB]
-//	mFloaterSnapRegion(NULL),
-//	mChicletRegion(NULL)
+	mFloaterSnapRegion(NULL),
+	mChicletRegion(NULL)
 {
 	mID = p.id;
 
@@ -125,10 +107,10 @@ BOOL LLScreenChannelBase::postBuild()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-//	if (mChicletRegion == NULL)
-//	{
-//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-//	}
+	if (mChicletRegion == NULL)
+	{
+		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+	}
 	
 	return TRUE;
 }
@@ -580,14 +562,8 @@ void LLScreenChannel::redrawToasts()
 //--------------------------------------------------------------------------
 void LLScreenChannel::showToastsBottom()
 {
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
-	LLRect channel_rect = getChannelRect();
-// [/SL:KB]
 	LLRect	toast_rect;	
-//	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
-	S32		bottom = channel_rect.mBottom;
-// [/SL:KB]
+	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
 	S32		toast_margin = 0;
 	std::vector<ToastElem>::reverse_iterator it;
 
@@ -622,10 +598,7 @@ void LLScreenChannel::showToastsBottom()
 		}
 
 		toast_rect = toast->getRect();
-//		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
-// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
-		toast_rect.setOriginAndSize(channel_rect.mRight - toast_rect.getWidth(),
-// [/SL:KB]
+		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
 				bottom + toast_margin, toast_rect.getWidth(),
 				toast_rect.getHeight());
 		toast->setRect(toast_rect);
@@ -643,7 +616,7 @@ void LLScreenChannel::showToastsBottom()
 				toast->translate(0, shift);
 			}
 
-//			LLRect channel_rect = getChannelRect();
+			LLRect channel_rect = getChannelRect();
 			// don't show toasts if there is not enough space
 			if(toast_rect.mTop > channel_rect.mTop)
 			{
@@ -687,9 +660,6 @@ void LLScreenChannel::showToastsBottom()
 	}
 
 	// Dismiss toasts we don't have space for (STORM-391).
-// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
-	std::vector<LLToast*> toasts_to_hide;
-// [/SL:KB]
 	if(it != vToastList.rend())
 	{
 		mHiddenToastsNum = 0;
@@ -699,22 +669,10 @@ void LLScreenChannel::showToastsBottom()
 			LLToast* toast = it->getToast();
 			if (toast)
 			{
-// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
-				toasts_to_hide.push_back(toast);
-// [/SL:KB]
-//				toast->hide();
+				toast->hide();
 			}
 		}
 	}
-
-// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
-	for (std::vector<LLToast*>::iterator it = toasts_to_hide.begin(), end_it = toasts_to_hide.end();
-		it != end_it;
-		++it)
-	{
-		(*it)->hide();
-	}
-// [/SL:KB]
 }
 
 //--------------------------------------------------------------------------

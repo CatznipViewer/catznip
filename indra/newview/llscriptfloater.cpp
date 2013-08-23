@@ -294,12 +294,8 @@ void LLScriptFloater::dockToChiclet(bool dock)
 		bool save = getSavePosition();
 		setSavePosition(false);
 
-//		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
-//			LLDockControl::BOTTOM));
-// [SL:KB] - Patch: UI-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2.1) | Added: Catznip-3.2.0
 		setDockControl(new LLDockControl(chiclet, this, getDockTongue(),
-			(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
-// [/SL:KB]
+			LLDockControl::BOTTOM));
 
 		setDocked(dock);
 
