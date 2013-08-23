@@ -155,9 +155,13 @@ void LLSysWellWindow::setVisible(BOOL visible)
 	{
 		if (NULL == getDockControl() && getDockTongue().notNull())
 		{
-			setDockControl(new LLDockControl(
-				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
-				getDockTongue(), LLDockControl::BOTTOM));
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+			setDockControl(new LLDockControl(LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this, getDockTongue(),
+				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
+//			setDockControl(new LLDockControl(
+//				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
+//				getDockTongue(), LLDockControl::BOTTOM));
 		}
 	}
 
@@ -216,7 +220,14 @@ void LLSysWellWindow::reshapeWindow()
 		}
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
-		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+		// Resize bottom-up if we're docked at the top and top-down if we're docked at the bottom
+		S32 top = curRect.mTop;
+		if ( (getDockControl()) && (LLDockControl::TOP == getDockControl()->getDockAt()) )
+			top += new_window_height - curRect.getHeight();
+		curRect.setLeftTopAndSize(curRect.mLeft, top, newWidth, new_window_height);
+// [/SL:KB]
+//		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
 		reshape(curRect.getWidth(), curRect.getHeight(), TRUE);
 		setRect(curRect);
 	}
