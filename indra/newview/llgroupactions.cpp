@@ -41,6 +41,9 @@
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "llimfloater.h"
 #include "groupchatlistener.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //
 // Globals

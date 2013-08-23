@@ -20,6 +20,7 @@
 #include "llgroupactions.h"
 #include "lliconctrl.h"
 #include "llinventorydefines.h"
+#include "llinventoryicon.h"
 #include "llinventorymodel.h"
 #include "llnotificationsutil.h"
 #include "llpanelgroupnotices.h"
