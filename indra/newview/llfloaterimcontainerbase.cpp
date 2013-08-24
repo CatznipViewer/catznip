@@ -40,12 +40,20 @@ bool LLFloaterIMContainerBase::sTabbedContainer = false;
 LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
 	: LLMultiFloater(seed, params)
 {
+	// Firstly add our self to IMSession observers, so we catch session events
+	LLIMMgr::getInstance()->addSessionObserver(this);
+
 	mAutoResize = FALSE;
 	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
 }
 
 LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 {
+	if (!LLSingleton<LLIMMgr>::destroyed())
+	{
+		LLIMMgr::getInstance()->removeSessionObserver(this);
+	}
+
 	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
 }
 
@@ -170,6 +178,38 @@ void LLFloaterIMContainerBase::onCloseFloater(const LLUUID& session_id)
 {
 	mSessions.erase(session_id);
 	setFocus(TRUE);
+}
+
+void LLFloaterIMContainerBase::sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
+{
+	LLFloaterIMSessionTab::addToHost(session_id);
+}
+
+void LLFloaterIMContainerBase::sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id)
+{
+	selectConversationPair(session_id, true);
+}
+
+void LLFloaterIMContainerBase::sessionVoiceOrIMStarted(const LLUUID& session_id)
+{
+	LLFloaterIMSessionTab::addToHost(session_id);
+}
+
+void LLFloaterIMContainerBase::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
+{
+	// The general strategy when a session id is modified is to delete all related objects and create them anew.
+	
+	// Note however that the LLFloaterIMSession has its session id updated through a call to sessionInitReplyReceived() 
+	// and do not need to be deleted and recreated (trying this creates loads of problems). We do need however to suppress 
+	// its related mSessions record as it's indexed with the wrong id.
+	// Grabbing the updated LLFloaterIMSession and readding it in mSessions will eventually be done by addConversationListItem().
+	mSessions.erase(old_session_id);
+
+	LLFloaterIMSessionTab::addToHost(new_session_id);
+}
+
+void LLFloaterIMContainerBase::sessionRemoved(const LLUUID& session_id)
+{
 }
 
 // static

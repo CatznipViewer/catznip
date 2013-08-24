@@ -78,12 +78,12 @@ LLFloaterIMContainerView::LLFloaterIMContainerView(const LLSD& seed, const Param
     
     mCommitCallbackRegistrar.add("Group.DoToSelected", boost::bind(&LLFloaterIMContainerView::doToSelectedGroup, this, _2));
 
-	// Firstly add our self to IMSession observers, so we catch session events
-    LLIMMgr::getInstance()->addSessionObserver(this);
-
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	sTabbedContainer = false;
 // [/SL:KB]
+//	// Firstly add our self to IMSession observers, so we catch session events
+//    LLIMMgr::getInstance()->addSessionObserver(this);
+//
 //	mAutoResize = FALSE;
 //	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
 }
@@ -105,41 +105,47 @@ LLFloaterIMContainerView::~LLFloaterIMContainerView()
 	gSavedPerAccountSettings.setBOOL("ConversationsListPaneCollapsed", mConversationsPane->isCollapsed());
 	gSavedPerAccountSettings.setBOOL("ConversationsMessagePaneCollapsed", mMessagesPane->isCollapsed());
 
-	if (!LLSingleton<LLIMMgr>::destroyed())
-	{
-		LLIMMgr::getInstance()->removeSessionObserver(this);
-	}
+//	if (!LLSingleton<LLIMMgr>::destroyed())
+//	{
+//		LLIMMgr::getInstance()->removeSessionObserver(this);
+//	}
 }
 
 void LLFloaterIMContainerView::sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
 {
 	addConversationListItem(session_id);
-	LLFloaterIMSessionTab::addToHost(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::sessionAdded(session_id, name, other_participant_id, has_offline_msg);
+// [/SL:KB]
+//	LLFloaterIMSessionTab::addToHost(session_id);
 }
 
 void LLFloaterIMContainerView::sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id)
 {
-	selectConversationPair(session_id, true);
+//	selectConversationPair(session_id, true);
 	collapseMessagesPane(false);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::sessionActivated(session_id, name, other_participant_id);
+// [/SL:KB]
 }
 
 void LLFloaterIMContainerView::sessionVoiceOrIMStarted(const LLUUID& session_id)
 {
 	addConversationListItem(session_id);
-	LLFloaterIMSessionTab::addToHost(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::sessionVoiceOrIMStarted(session_id);
+// [/SL:KB]
+//	LLFloaterIMSessionTab::addToHost(session_id);
 }
 
 void LLFloaterIMContainerView::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
 {
-	// The general strategy when a session id is modified is to delete all related objects and create them anew.
-	
-	// Note however that the LLFloaterIMSession has its session id updated through a call to sessionInitReplyReceived() 
-	// and do not need to be deleted and recreated (trying this creates loads of problems). We do need however to suppress 
-	// its related mSessions record as it's indexed with the wrong id.
-	// Grabbing the updated LLFloaterIMSession and readding it in mSessions will eventually be done by addConversationListItem().
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
-	getSessionMap().erase(old_session_id);
-// [/SL:KB]
+//	// The general strategy when a session id is modified is to delete all related objects and create them anew.
+//	
+//	// Note however that the LLFloaterIMSession has its session id updated through a call to sessionInitReplyReceived() 
+//	// and do not need to be deleted and recreated (trying this creates loads of problems). We do need however to suppress 
+//	// its related mSessions record as it's indexed with the wrong id.
+//	// Grabbing the updated LLFloaterIMSession and readding it in mSessions will eventually be done by addConversationListItem().
 //	mSessions.erase(old_session_id);
 
 	// Delete the model and participants related to the old session
@@ -147,12 +153,18 @@ void LLFloaterIMContainerView::sessionIDUpdated(const LLUUID& old_session_id, co
 
 	// Create a new conversation with the new id
 	addConversationListItem(new_session_id, change_focus);
-	LLFloaterIMSessionTab::addToHost(new_session_id);
+//	LLFloaterIMSessionTab::addToHost(new_session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::sessionIDUpdated(old_session_id, new_session_id);
+// [/SL:KB]
 }
 
 void LLFloaterIMContainerView::sessionRemoved(const LLUUID& session_id)
 {
 	removeConversationListItem(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::sessionRemoved(session_id);
+// [/SL:KB]
 }
 
 //// static

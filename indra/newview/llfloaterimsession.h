@@ -128,7 +128,7 @@ public:
 
 	//used as a callback on receiving new IM message
 	static void sRemoveTypingIndicator(const LLSD& data);
-	static void onIMChicletCreated(const LLUUID& session_id);
+//	static void onIMChicletCreated(const LLUUID& session_id);
     const LLUUID& getOtherParticipantUUID() {return mOtherParticipantUUID;}
 
 	static boost::signals2::connection setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb);

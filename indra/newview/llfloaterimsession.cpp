@@ -1321,11 +1321,11 @@ void LLFloaterIMSession::sRemoveTypingIndicator(const LLSD& data)
 	floater->removeTypingIndicator();
 }
 
-// static
-void LLFloaterIMSession::onIMChicletCreated( const LLUUID& session_id )
-{
-	LLFloaterIMSession::addToHost(session_id);
-}
+//// static
+//void LLFloaterIMSession::onIMChicletCreated( const LLUUID& session_id )
+//{
+//	LLFloaterIMSession::addToHost(session_id);
+//}
 
 boost::signals2::connection LLFloaterIMSession::setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb)
 {

@@ -18,6 +18,7 @@
 #ifndef LL_LLFLOATERIMCONTAINERBASE_H
 #define LL_LLFLOATERIMCONTAINERBASE_H
 
+#include "llimview.h"
 #include "llmultifloater.h"
 
 class LLConversationItem;
@@ -25,6 +26,7 @@ class LLConversationSort;
 
 class LLFloaterIMContainerBase
 	: public LLMultiFloater
+	, public LLIMSessionObserver
 {
 public:
 	LLFloaterIMContainerBase(const LLSD& seed, const Params& params = getDefaultParams());
@@ -37,6 +39,13 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+
+	// LLIMSessionObserver overrides
+	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
+	/*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id);
+	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id);
+	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
+	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
 
 	/*
 	 * Member functions

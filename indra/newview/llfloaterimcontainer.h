@@ -30,7 +30,7 @@
 #include <map>
 #include <vector>
 
-#include "llimview.h"
+//#include "llimview.h"
 #include "llevents.h"
 #include "../llui/llfloater.h"
 #include "../llui/llmultifloater.h"
@@ -53,11 +53,11 @@ class LLSpeaker;
 class LLSpeakerMgr;
 
 class LLFloaterIMContainerView
-//	: public LLMultiFloater
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	: public LLFloaterIMContainerBase
 // [/SL:KB]
-	, public LLIMSessionObserver
+//	: public LLMultiFloater
+//	, public LLIMSessionObserver
 {
 public:
 	LLFloaterIMContainerView(const LLSD& seed, const Params& params = getDefaultParams());
