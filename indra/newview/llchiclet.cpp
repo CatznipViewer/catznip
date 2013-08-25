@@ -641,7 +641,7 @@ BOOL LLIMChiclet::handleRightMouseDown(S32 x, S32 y, MASK mask)
 		updateMenuItems();
 
 		S32 screen_x, screen_y;
-		localPointToScreen(x, y, &screen_x, &screen_y);
+		LLUI::getMousePositionLocal(popup_menu->getParent(), &screen_x, &screen_y);
 
 		popup_menu->show(screen_x, screen_y, this);
 	}
