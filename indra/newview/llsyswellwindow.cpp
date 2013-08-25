@@ -26,6 +26,11 @@
 #include "llviewerprecompiledheaders.h" // must be first include
 #include "llsyswellwindow.h"
 
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+#include "llavataractions.h"
+#include "llavatarnamecache.h"
+#include "llgroupactions.h"
+// [/SL:KB]
 #include "llchiclet.h"
 #include "llchicletbar.h"
 #include "llflatlistview.h"
@@ -35,17 +40,6 @@
 #include "llscriptfloater.h"
 #include "llspeakers.h"
 #include "lltoastpanel.h"
-// [SL:KB]
-#include "llagent.h"
-#include "llavatarnamecache.h"
-#include "llflatlistview.h"
-#include "llfloaterreg.h"
-#include "llnotifications.h"
-#include "llscriptfloater.h"
-#include "lltoolbarview.h"
-#include "llviewercontrol.h"
-#include "llviewerwindow.h"
-// [/SL:KB]
 
 //---------------------------------------------------------------------------------
 LLSysWellWindow::LLSysWellWindow(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
@@ -232,12 +226,10 @@ void LLSysWellWindow::reshapeWindow()
 // [SL:KB]
 void LLSysWellWindow::releaseNewMessagesState()
 {
-	if (NULL != mSysWellChiclet)
-	{
+	if (mSysWellChiclet)
 		mSysWellChiclet->setNewMessagesState(false);
-	}
 }
-// [SL:KB]
+// [/SL:KB]
 
 //---------------------------------------------------------------------------------
 bool LLSysWellWindow::isWindowEmpty()
@@ -245,34 +237,32 @@ bool LLSysWellWindow::isWindowEmpty()
 	return mMessageList->size() == 0;
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /************************************************************************/
 /*         RowPanel implementation                                      */
 /************************************************************************/
 
 //---------------------------------------------------------------------------------
-LLIMWellWindow::RowPanel::RowPanel(const LLSysWellWindow* parent, const LLUUID& sessionId,
-		S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId) :
-		LLPanel(LLPanel::Params()), mChiclet(NULL), mParent(parent)
+LLIMWellWindow::RowPanel::RowPanel(const LLUUID& sessionId,S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId)
+	: LLPanel(LLPanel::Params())
+	, mChiclet(NULL)
 {
-	buildFromFile( "panel_activeim_row.xml");
-
-	// Choose which of the pre-created chiclets (IM/group) to use.
-	// The other one gets hidden.
-
 	LLIMChiclet::EType im_chiclet_type = LLIMChiclet::getIMSessionType(sessionId);
 	switch (im_chiclet_type)
 	{
-	case LLIMChiclet::TYPE_GROUP:
-		mChiclet = getChild<LLIMGroupChiclet>("group_chiclet");
-		break;
-	case LLIMChiclet::TYPE_AD_HOC:
-		mChiclet = getChild<LLAdHocChiclet>("adhoc_chiclet");		
-		break;
-	case LLIMChiclet::TYPE_UNKNOWN: // assign mChiclet a non-null value anyway
-	case LLIMChiclet::TYPE_IM:
-		mChiclet = getChild<LLIMP2PChiclet>("p2p_chiclet");
-		break;
+		case LLIMChiclet::TYPE_GROUP:
+			buildFromFile( "panel_activeim_row_group.xml");
+			mChiclet = getChild<LLIMGroupChiclet>("group_chiclet");
+			break;
+		case LLIMChiclet::TYPE_AD_HOC:
+			buildFromFile( "panel_activeim_row_adhoc.xml");
+			mChiclet = getChild<LLAdHocChiclet>("adhoc_chiclet");		
+			break;
+		case LLIMChiclet::TYPE_UNKNOWN: // assign mChiclet a non-null value anyway
+		case LLIMChiclet::TYPE_IM:
+			buildFromFile( "panel_activeim_row_p2p.xml");
+			mChiclet = getChild<LLIMP2PChiclet>("p2p_chiclet");
+			break;
 	}
 
 	// Initialize chiclet.
@@ -284,11 +274,9 @@ LLIMWellWindow::RowPanel::RowPanel(const LLSysWellWindow* parent, const LLUUID& 
 	mChiclet->setOtherParticipantId(otherParticipantId);
 	mChiclet->setVisible(true);
 
-	if (im_chiclet_type == LLIMChiclet::TYPE_IM)
+	if (LLIMChiclet::TYPE_IM == im_chiclet_type)
 	{
-		LLAvatarNameCache::get(otherParticipantId,
-			boost::bind(&LLIMWellWindow::RowPanel::onAvatarNameCache,
-				this, _1, _2));
+		LLAvatarNameCache::get(otherParticipantId, boost::bind(&LLIMWellWindow::RowPanel::onAvatarNameCache, this, _1, _2));
 	}
 	else
 	{
@@ -297,15 +285,19 @@ LLIMWellWindow::RowPanel::RowPanel(const LLSysWellWindow* parent, const LLUUID& 
 	}
 
 	mCloseBtn = getChild<LLButton>("hide_btn");
-	mCloseBtn->setCommitCallback(boost::bind(&LLIMWellWindow::RowPanel::onClosePanel, this));
+	mCloseBtn->setCommitCallback(boost::bind(&LLIMWellWindow::RowPanel::closeConversation, this));
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onAvatarNameCache(const LLUUID& agent_id,
-												 const LLAvatarName& av_name)
+LLIMWellWindow::RowPanel::~RowPanel()
+{
+}
+
+//---------------------------------------------------------------------------------
+void LLIMWellWindow::RowPanel::onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
 {
 	LLTextBox* contactName = getChild<LLTextBox>("contact_name");
-	contactName->setValue( av_name.getCompleteName() );
+	contactName->setValue(av_name.getCompleteName());
 }
 
 //---------------------------------------------------------------------------------
@@ -319,14 +311,18 @@ void LLIMWellWindow::RowPanel::onChicletSizeChanged(LLChiclet* ctrl, const LLSD&
 }
 
 //---------------------------------------------------------------------------------
-LLIMWellWindow::RowPanel::~RowPanel()
+void LLIMWellWindow::RowPanel::closeConversation()
 {
-}
-
-//---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onClosePanel()
-{
-	gIMMgr->leaveSession(mChiclet->getSessionId());
+	switch (LLIMChiclet::getIMSessionType(mChiclet->getSessionId()))
+	{
+		case LLIMChiclet::TYPE_IM:
+			LLAvatarActions::endIM(mChiclet->getOtherParticipantId());
+			break;
+		case LLIMChiclet::TYPE_GROUP:
+		case LLIMChiclet::TYPE_AD_HOC:
+			LLGroupActions::endIM(mChiclet->getSessionId());
+			break;
+	}
 	// This row panel will be removed from the list in LLSysWellWindow::sessionRemoved().
 }
 
@@ -347,12 +343,11 @@ void LLIMWellWindow::RowPanel::onMouseLeave(S32 x, S32 y, MASK mask)
 BOOL LLIMWellWindow::RowPanel::handleMouseDown(S32 x, S32 y, MASK mask)
 {
 	// Pass the mouse down event to the chiclet (EXT-596).
-	if (!mChiclet->pointInView(x, y) && !mCloseBtn->getRect().pointInRect(x, y)) // prevent double call of LLIMChiclet::onMouseDown()
+	if ( (!mChiclet->pointInView(x, y)) && (!mCloseBtn->getRect().pointInRect(x, y)) ) // prevent double call of LLIMChiclet::onMouseDown()
 	{
 		mChiclet->onMouseDown();
 		return TRUE;
 	}
-
 	return LLPanel::handleMouseDown(x, y, mask);
 }
 
@@ -594,15 +589,18 @@ void LLNotificationWellWindow::onAdd( LLNotificationPtr notify )
 LLIMWellWindow::LLIMWellWindow(const LLSD& key)
 : LLSysWellWindow(key)
 {
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLIMMgr::getInstance()->addSessionObserver(this);
 // [/SL:KB]
 }
 
 LLIMWellWindow::~LLIMWellWindow()
 {
-// [SL:KB]
-	LLIMMgr::getInstance()->removeSessionObserver(this);
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	if (!LLSingleton<LLIMMgr>::destroyed())
+	{
+		LLIMMgr::getInstance()->removeSessionObserver(this);
+	}
 // [/SL:KB]
 }
 
@@ -632,40 +630,35 @@ BOOL LLIMWellWindow::postBuild()
 	return rv;
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 //virtual
-void LLIMWellWindow::sessionAdded(const LLUUID& session_id,
-								   const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
+void LLIMWellWindow::sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
 {
 	LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(session_id);
-	if (!session) return;
+	if (!session) 
+		return;
 
-	// no need to spawn chiclets for participants in P2P calls called through Avaline
-	if (session->isP2P() && session->isOtherParticipantAvaline()) return;
+	// No need to add a row for participants in P2P calls called through Avaline
+	if ( (session->isP2P()) && (session->isOtherParticipantAvaline()) )
+		return;
 
-	if (mMessageList->getItemByValue(session_id)) return;
+	// No need to add a row if one already exists for the session
+	if (mMessageList->getItemByValue(session_id))
+		return;
 
 	addIMRow(session_id, 0, name, other_participant_id);	
-	reshapeWindow();
 }
 
 //virtual
 void LLIMWellWindow::sessionRemoved(const LLUUID& sessionId)
 {
 	delIMRow(sessionId);
-	reshapeWindow();
 }
 
 //virtual
 void LLIMWellWindow::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
 {
-	//for outgoing ad-hoc and group im sessions only
-	LLChiclet* chiclet = findIMChiclet(old_session_id);
-	if (chiclet)
-	{
-		chiclet->setSessionId(new_session_id);
-		mMessageList->updateValue(old_session_id, new_session_id);
-	}
+	mMessageList->updateValue(old_session_id, new_session_id);
 }
 // [/SL:KB]
 
@@ -686,42 +679,31 @@ LLChiclet* LLIMWellWindow::findObjectChiclet(const LLUUID& notification_id)
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLChiclet* LLIMWellWindow::findIMChiclet(const LLUUID& sessionId)
 {
-	if (!mMessageList) return NULL;
+	if (!mMessageList)
+		return NULL;
 
-	LLChiclet* res = NULL;
 	RowPanel* panel = mMessageList->getTypedItemByValue<RowPanel>(sessionId);
-	if (panel != NULL)
-	{
-		res = panel->mChiclet;
-	}
-
-	return res;
+	return (panel != NULL) ? panel->mChiclet : NULL;
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::addIMRow(const LLUUID& sessionId, S32 chicletCounter,
-							   const std::string& name, const LLUUID& otherParticipantId)
+void LLIMWellWindow::addIMRow(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId)
 {
-	RowPanel* item = new RowPanel(this, sessionId, chicletCounter, name, otherParticipantId);
-//	if (!mMessageList->addItem(item, sessionId))
-// [SL:KB]
+	RowPanel* item = new RowPanel(sessionId, chicletCounter, name, otherParticipantId);
 	if (mMessageList->addItem(item, sessionId))
 	{
-		mSysWellChiclet->updateWidget(isWindowEmpty());
+		if (mSysWellChiclet)
+			mSysWellChiclet->updateWidget(isWindowEmpty());
 	}
 	else
-// [/SL:KB]
 	{
-		llwarns << "Unable to add IM Row into the list, sessionID: " << sessionId
-			<< ", name: " << name
-			<< ", other participant ID: " << otherParticipantId
-			<< llendl;
-
+		llwarns << "Unable to add IM Row into the list, sessionID: " << sessionId << ", name: " << name << llendl;
 		item->die();
 	}
+	reshapeWindow();
 }
 
 //---------------------------------------------------------------------------------
@@ -734,32 +716,26 @@ void LLIMWellWindow::delIMRow(const LLUUID& sessionId)
 	//But I didn't find why this happen..
 	gFocusMgr.clearLastFocusForGroup(this);
 
-//	if (!mMessageList->removeItemByValue(sessionId))
-// [SL:KB]
 	if (mMessageList->removeItemByValue(sessionId))
 	{
-		mSysWellChiclet->updateWidget(isWindowEmpty());
+		if (mSysWellChiclet)
+			mSysWellChiclet->updateWidget(isWindowEmpty());
 	}
 	else
-// [/SL:KB]
 	{
-		llwarns << "Unable to remove IM Row from the list, sessionID: " << sessionId
-			<< llendl;
+		llwarns << "Unable to remove IM Row from the list, sessionID: " << sessionId << llendl;
 	}
+	reshapeWindow();
 
-	// remove all toasts that belong to this session from a screen
-	if(mChannel)
+	// Remove all toasts that belong to this session from a screen
+	if (mChannel)
 		mChannel->removeToastsBySessionID(sessionId);
 
-	// hide chiclet window if there are no items left
-	if(isWindowEmpty())
-	{
+	// Hide chiclet window if there are no items left
+	if (isWindowEmpty())
 		setVisible(FALSE);
-	}
 	else
-	{
 		setFocus(true);
-	}
 }
 // [/SL:KB]
 
@@ -769,10 +745,11 @@ void LLIMWellWindow::addObjectRow(const LLUUID& notification_id, bool new_messag
 	{
 		ObjectRowPanel* item = new ObjectRowPanel(notification_id, new_message);
 //		if (!mMessageList->addItem(item, notification_id))
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 		if (mMessageList->addItem(item, notification_id))
 		{
-			mSysWellChiclet->updateWidget(isWindowEmpty());
+			if (mSysWellChiclet)
+				mSysWellChiclet->updateWidget(isWindowEmpty());
 		}
 		else
 // [/SL:KB]
@@ -787,13 +764,11 @@ void LLIMWellWindow::addObjectRow(const LLUUID& notification_id, bool new_messag
 void LLIMWellWindow::removeObjectRow(const LLUUID& notification_id)
 {
 //	if (!mMessageList->removeItemByValue(notification_id))
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	if (mMessageList->removeItemByValue(notification_id))
 	{
 		if (mSysWellChiclet)
-		{
 			mSysWellChiclet->updateWidget(isWindowEmpty());
-		}
 	}
 	else
 // [/SL:KB]
@@ -808,22 +783,6 @@ void LLIMWellWindow::removeObjectRow(const LLUUID& notification_id)
 		setVisible(FALSE);
 	}
 }
-
-// [SL:KB]
-void LLIMWellWindow::addIMRow(const LLUUID& session_id)
-{
-	if (hasIMRow(session_id)) return;
-
-	LLIMModel* im_model = LLIMModel::getInstance();
-	addIMRow(session_id, 0, im_model->getName(session_id), im_model->getOtherParticipantID(session_id));
-	reshapeWindow();
-}
-
-bool LLIMWellWindow::hasIMRow(const LLUUID& session_id)
-{
-	return mMessageList->getItemByValue(session_id);
-}
-// [/SL:KB]
 
 void LLIMWellWindow::closeAll()
 {
@@ -869,11 +828,11 @@ void LLIMWellWindow::closeAllImpl()
 	{
 		LLPanel* panel = mMessageList->getItemByValue(*iter);
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 		RowPanel* im_panel = dynamic_cast <RowPanel*> (panel);
 		if (im_panel)
 		{
-			gIMMgr->leaveSession(*iter);
+			im_panel->closeConversation();
 			continue;
 		}
 // [/SL:KB]

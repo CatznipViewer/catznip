@@ -32,12 +32,6 @@
 #include "llscreenchannel.h"
 #include "llsyswellitem.h"
 #include "lltransientdockablefloater.h"
-// [SL:KB]
-#include "llbutton.h"
-#include "llscrollcontainer.h"
-
-#include "boost/shared_ptr.hpp"
-// [/SL:KB]
 
 class LLAvatarName;
 class LLChiclet;
@@ -160,7 +154,7 @@ private:
  * It contains a list list of all active IM sessions.
  */
 //class LLIMWellWindow : public LLSysWellWindow, LLInitClass<LLIMWellWindow>
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 class LLIMWellWindow : public LLSysWellWindow, LLInitClass<LLIMWellWindow>, LLIMSessionObserver
 // [/SL:KB]
 {
@@ -174,7 +168,7 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	// LLIMSessionObserver observe triggers
 	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
     /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {}
@@ -185,11 +179,6 @@ public:
 
 	void addObjectRow(const LLUUID& notification_id, bool new_message = false);
 	void removeObjectRow(const LLUUID& notification_id);
-
-// [SL:KB]
-	void addIMRow(const LLUUID& session_id);
-	bool hasIMRow(const LLUUID& session_id);
-// [/SL:KB]
 
 	void closeAll();
 
@@ -216,24 +205,24 @@ private:
 	class RowPanel: public LLPanel
 	{
 	public:
-		RowPanel(const LLSysWellWindow* parent, const LLUUID& sessionId, S32 chicletCounter,
-				const std::string& name, const LLUUID& otherParticipantId);
-		virtual ~RowPanel();
+		RowPanel(const LLUUID& sessionId, S32 chicletCounter,
+		         const std::string& name, const LLUUID& otherParticipantId);
+		/*virtual*/ ~RowPanel();
 		void onMouseEnter(S32 x, S32 y, MASK mask);
 		void onMouseLeave(S32 x, S32 y, MASK mask);
 		BOOL handleMouseDown(S32 x, S32 y, MASK mask);
 		BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
 
+		void closeConversation();
 	private:
 		static const S32 CHICLET_HPAD = 10;
 		void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name);
 		void onChicletSizeChanged(LLChiclet* ctrl, const LLSD& param);
-		void onClosePanel();
+
 	public:
 		LLIMChiclet* mChiclet;
 	private:
-		LLButton*	mCloseBtn;
-		const LLSysWellWindow* mParent;
+		LLButton*    mCloseBtn;
 	};
 // [/SL:KB]
 
