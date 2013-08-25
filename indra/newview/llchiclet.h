@@ -138,13 +138,14 @@ public:
 		{}
 	};
 
+protected:
+	LLChicletGroupIconCtrl(const Params& p);
+
+public:
 	/**
 	 * Sets icon, if value is LLUUID::null - default icon will be set.
 	 */
 	/*virtual*/ void setValue(const LLSD& value);
-
-protected:
-	LLChicletGroupIconCtrl(const Params& p);
 
 private:
 	std::string mDefaultIcon;
@@ -184,22 +185,21 @@ private:
 	std::string mDefaultIcon;
 };
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
  * Class for displaying of speaker's voice indicator 
  */
 class LLChicletSpeakerCtrl : public LLOutputMonitorCtrl
 {
+	friend class LLUICtrlFactory;
 public:
-
 	struct Params : public LLInitParam::Block<Params, LLOutputMonitorCtrl::Params>
 	{
 		Params(){};
 	};
-protected:
 
+protected:
 	LLChicletSpeakerCtrl(const Params&p);
-	friend class LLUICtrlFactory;
 };
 // [/SL:KB]
 
@@ -230,7 +230,7 @@ public:
 	 */
 	virtual const LLUUID& getSessionId() const { return mSessionId; }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/*
 	 * Sets number of unread notifications.
 	 */
@@ -239,7 +239,7 @@ public:
 	/**
 	 * Returns number of unread notifications.
 	 */
-	virtual S32 getCounter() = 0;
+	virtual S32 getCounter() const = 0;
 // [/SL:KB]
 
 	/**
@@ -247,11 +247,11 @@ public:
 	 */
 	virtual void setShowCounter(bool show) { mShowCounter = show; }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/**
 	 * Returns show counter state.
 	 */
-	virtual bool getShowCounter() {return mShowCounter;};
+	virtual bool getShowCounter() const { return mShowCounter; };
 // [/SL:KB]
 
 	/**
@@ -346,7 +346,7 @@ public:
 	 */
 	virtual void setOtherParticipantId(const LLUUID& other_participant_id) { mOtherParticipantId = other_participant_id; }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/**
 	 * Gets id of person/group user is chatting with.
 	 */
@@ -365,7 +365,7 @@ public:
 	/**
 	 * Returns voice chat status control visibility.
 	 */
-	virtual bool getShowSpeaker() {return mShowSpeaker;};
+	virtual bool getShowSpeaker() { return mShowSpeaker; }
 
 	/**
 	 * Shows/Hides for voice control for a chiclet.
@@ -376,7 +376,7 @@ public:
 	* Sets number of unread messages. Will update chiclet's width if number text 
 	* exceeds size of counter and notify it's parent about size change.
 	*/
-	virtual void setCounter(S32);
+	/*virtual*/ void setCounter(S32);
 // [/SL:KB]
 
 	/**
@@ -384,7 +384,7 @@ public:
 	*/
 	virtual void enableCounterControl(bool enable);
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/**
 	* Sets show counter state.
 	*/
@@ -411,9 +411,7 @@ public:
 	 */
 	virtual bool getShowNewMessagesIcon();
 
-// [SL:KB]
-	virtual void draw();
-
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/**
 	 * Determine whether given ID refers to a group or an IM chat session.
 	 * 
@@ -472,11 +470,11 @@ protected:
 	S32 mDefaultWidth;
 
 	LLIconCtrl* mNewMessagesIcon;
-// [SL:KB]
+	LLButton* mChicletButton;
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLChicletNotificationCounterCtrl* mCounterCtrl;
 	LLChicletSpeakerCtrl* mSpeakerCtrl;
 // [/SL:KB]
-	LLButton* mChicletButton;
 
 	/** the id of another participant, either an avatar id or a group id*/
 	LLUUID mOtherParticipantId;
@@ -503,12 +501,13 @@ public:
 			sFindChicletsSignal;
 };
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
  * Implements P2P chiclet.
  */
 class LLIMP2PChiclet : public LLIMChiclet
 {
+	friend class LLUICtrlFactory;
 public:
 	struct Params : public LLInitParam::Block<Params, LLIMChiclet::Params>
 	{
@@ -527,7 +526,11 @@ public:
 		Params();
 	};
 
-	/* virtual */ void setOtherParticipantId(const LLUUID& other_participant_id);
+protected:
+	LLIMP2PChiclet(const Params& p);
+
+public:
+	/*virtual*/ void setOtherParticipantId(const LLUUID& other_participant_id);
 
 	/**
 	 * Init Speaker Control with speaker's ID
@@ -537,41 +540,37 @@ public:
 	/**
 	 * Returns number of unread messages.
 	 */
-	/*virtual*/ S32 getCounter() { return mCounterCtrl->getCounter(); }
-
-protected:
-	LLIMP2PChiclet(const Params& p);
-	friend class LLUICtrlFactory;
+	/*virtual*/ S32 getCounter() const { return mCounterCtrl->getCounter(); }
 
 	/**
 	 * Creates chiclet popup menu. Will create P2P or Group IM Chat menu 
 	 * based on other participant's id.
 	 */
-	virtual void createPopupMenu();
+	/*virtual*/ void createPopupMenu();
 
 	/**
 	 * Processes clicks on chiclet popup menu.
 	 */
-	virtual void onMenuItemClicked(const LLSD& user_data);
+	/*virtual*/ void onMenuItemClicked(const LLSD& user_data);
 
 	/** 
 	 * Enables/disables menus based on relationship with other participant.
 	 * Enables/disables "show session" menu item depending on visible IM floater existence.
 	 */
-	virtual void updateMenuItems();
+	/*virtual*/ void updateMenuItems();
 
 private:
-
 	LLChicletAvatarIconCtrl* mChicletIconCtrl;
 };
 // [/SL:KB]
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
- * Implements AD-HOC chiclet.
+ * Implements ad-hoc chiclet.
  */
 class LLAdHocChiclet : public LLIMChiclet
 {
+	friend class LLUICtrlFactory;
 public:
 	struct Params : public LLInitParam::Block<Params, LLIMChiclet::Params>
 	{
@@ -592,6 +591,10 @@ public:
 		Params();
 	};
 
+protected:
+	LLAdHocChiclet(const Params& p);
+
+public:
 	/**
 	 * Sets session id.
 	 * Session ID for group chat is actually Group ID.
@@ -611,11 +614,7 @@ public:
 	/**
 	 * Returns number of unread messages.
 	 */
-	/*virtual*/ S32 getCounter() { return mCounterCtrl->getCounter(); }
-
-protected:
-	LLAdHocChiclet(const Params& p);
-	friend class LLUICtrlFactory;
+	/*virtual*/ S32 getCounter() const { return mCounterCtrl->getCounter(); }
 
 	/**
 	 * Creates chiclet popup menu. Will create AdHoc Chat menu 
@@ -634,7 +633,6 @@ protected:
 	/*virtual*/ void switchToCurrentSpeaker();
 
 private:
-
 	LLChicletAvatarIconCtrl* mChicletIconCtrl;
 };
 // [/SL:KB]
@@ -659,10 +657,10 @@ public:
 
 	/*virtual*/ void setSessionId(const LLUUID& session_id);
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/*virtual*/ void setCounter(S32 counter);
 
-	/*virtual*/ S32 getCounter() { return 0; }
+	/*virtual*/ S32 getCounter() const { return 0; }
 // [/SL:KB]
 
 	/**
@@ -710,10 +708,10 @@ public:
 
 	/*virtual*/ void setSessionId(const LLUUID& session_id);
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/*virtual*/ void setCounter(S32 counter);
 
-	/*virtual*/ S32 getCounter() { return 0; }
+	/*virtual*/ S32 getCounter() const { return 0; }
 // [/SL:KB]
 
 	/**
@@ -769,7 +767,10 @@ public:
 	// *TODO: mantipov: seems getCounter is not necessary for LLNotificationChiclet
 	// but inherited interface requires it to implement. 
 	// Probably it can be safe removed.
-	/*virtual*/S32 getCounter() { return mCounter; }
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	/*virtual*/ S32 getCounter() const { return mCounter; }
+// [/SL:KB]
+//	/*virtual*/S32 getCounter() { return mCounter; }
 
 	boost::signals2::connection setClickCallback(const commit_callback_t& cb);
 
@@ -809,10 +810,13 @@ protected:
 	bool mIsNewMessagesState;
 
 	LLFlashTimer* mFlashToLitTimer;
-	LLContextMenu* mContextMenu;
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	LLHandle<LLContextMenu> mContextMenuHandle;
+// [/SL:KB]
+//	LLContextMenu* mContextMenu;
 };
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
  * Class represented a chiclet for IM Well Icon.
  *
@@ -821,16 +825,17 @@ protected:
 class LLIMWellChiclet : public LLSysWellChiclet, LLIMSessionObserver
 {
 	friend class LLUICtrlFactory;
+protected:
+	LLIMWellChiclet(const Params& p);
 public:
+	~LLIMWellChiclet();
+
+	// LLIMSessionObserver observe triggers
 	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg) {}
-    /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {}
+	/*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {}
 	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id) {};
 	/*virtual*/ void sessionRemoved(const LLUUID& session_id) { messageCountChanged(LLSD()); }
 	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id) {}
-
-	~LLIMWellChiclet();
-protected:
-	LLIMWellChiclet(const Params& p);
 
 	/**
 	 * Processes clicks on chiclet popup menu.
@@ -969,7 +974,7 @@ public:
 	/**
 	 * Returns number of unread messages.
 	 */
-	/*virtual*/ S32 getCounter() { return mCounterCtrl->getCounter(); }
+	/*virtual*/ S32 getCounter() const { return mCounterCtrl->getCounter(); }
 
 	/**
 	 * Finds a current speaker and resets the SpeakerControl with speaker's ID
@@ -1098,7 +1103,7 @@ public:
 
 	S32 getMinWidth() const { return mMinWidth; }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	S32 getTotalUnreadIMCount();
 // [/SL:KB]
 

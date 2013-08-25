@@ -43,11 +43,11 @@
 // [/SL:KB]
 
 static LLDefaultChildRegistry::Register<LLChicletPanel> t1("chiclet_panel");
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 static LLDefaultChildRegistry::Register<LLIMWellChiclet> t2_0("chiclet_im_well");
 // [/SL:KB]
 static LLDefaultChildRegistry::Register<LLNotificationChiclet> t2("chiclet_notification");
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 static LLDefaultChildRegistry::Register<LLIMP2PChiclet> t3("chiclet_im_p2p");
 static LLDefaultChildRegistry::Register<LLIMGroupChiclet> t4("chiclet_im_group");
 static LLDefaultChildRegistry::Register<LLAdHocChiclet> t5("chiclet_im_adhoc");
@@ -79,7 +79,7 @@ LLSysWellChiclet::LLSysWellChiclet(const Params& p)
 	, mMaxDisplayedCount(p.max_displayed_count)
 	, mIsNewMessagesState(false)
 	, mFlashToLitTimer(NULL)
-	, mContextMenu(NULL)
+//	, mContextMenu(NULL)
 {
 	LLButton::Params button_params = p.button;
 	mButton = LLUICtrlFactory::create<LLButton>(button_params);
@@ -90,6 +90,13 @@ LLSysWellChiclet::LLSysWellChiclet(const Params& p)
 
 LLSysWellChiclet::~LLSysWellChiclet()
 {
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	if (!mContextMenuHandle.isDead())
+	{
+		mContextMenuHandle.get()->die();
+	}
+// [/SL:KB]
+
 	mFlashToLitTimer->unset();
 }
 
@@ -157,24 +164,39 @@ void LLSysWellChiclet::updateWidget(bool is_window_empty)
 // virtual
 BOOL LLSysWellChiclet::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
-	if(!mContextMenu)
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	if (!mContextMenuHandle.get())
 	{
 		createMenu();
 	}
-	if (mContextMenu)
+
+	LLContextMenu* popup_menu = mContextMenuHandle.get();
+	if (popup_menu)
 	{
-		mContextMenu->show(x, y);
-		LLMenuGL::showPopup(this, mContextMenu, x, y);
+		S32 screen_x, screen_y;
+		localPointToScreen(x, y, &screen_x, &screen_y);
+
+		popup_menu->show(screen_x, screen_y, this);
 	}
+// [/SL:KB]
+//	if(!mContextMenu)
+//	{
+//		createMenu();
+//	}
+//	if (mContextMenu)
+//	{
+//		mContextMenu->show(x, y);
+//		LLMenuGL::showPopup(this, mContextMenu, x, y);
+//	}
 	return TRUE;
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /************************************************************************/
 /*               LLIMWellChiclet implementation                         */
 /************************************************************************/
 LLIMWellChiclet::LLIMWellChiclet(const Params& p)
-: LLSysWellChiclet(p)
+	: LLSysWellChiclet(p)
 {
 	LLIMModel::instance().addNewMsgCallback(boost::bind(&LLIMWellChiclet::messageCountChanged, this, _1));
 	LLIMModel::instance().addNoUnreadMsgsCallback(boost::bind(&LLIMWellChiclet::messageCountChanged, this, _1));
@@ -186,19 +208,22 @@ LLIMWellChiclet::LLIMWellChiclet(const Params& p)
 
 LLIMWellChiclet::~LLIMWellChiclet()
 {
+	if (!LLSingleton<LLIMMgr>::destroyed())
+	{
+		LLIMMgr::getInstance()->removeSessionObserver(this);
+	}
+
 	LLIMWellWindow* im_well_window = LLIMWellWindow::findInstance();
 	if (im_well_window)
 	{
 		im_well_window->setSysWellChiclet(NULL);
 	}
-
-	LLIMMgr::getInstance()->removeSessionObserver(this);
 }
 
 void LLIMWellChiclet::onMenuItemClicked(const LLSD& user_data)
 {
-	std::string action = user_data.asString();
-	if("close all" == action)
+	const std::string action = user_data.asString();
+	if ("close all" == action)
 	{
 		LLIMWellWindow::getInstance()->closeAll();
 	}
@@ -206,7 +231,7 @@ void LLIMWellChiclet::onMenuItemClicked(const LLSD& user_data)
 
 bool LLIMWellChiclet::enableMenuItem(const LLSD& user_data)
 {
-	std::string item = user_data.asString();
+	const std::string item = user_data.asString();
 	if (item == "can close all")
 	{
 		return !LLIMWellWindow::getInstance()->isWindowEmpty();
@@ -216,50 +241,45 @@ bool LLIMWellChiclet::enableMenuItem(const LLSD& user_data)
 
 void LLIMWellChiclet::createMenu()
 {
-	if(mContextMenu)
+	if (mContextMenuHandle.get())
 	{
 		llwarns << "Menu already exists" << llendl;
 		return;
 	}
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
-	registrar.add("IMWellChicletMenu.Action",
-		boost::bind(&LLIMWellChiclet::onMenuItemClicked, this, _2));
+	registrar.add("IMWellChicletMenu.Action", boost::bind(&LLIMWellChiclet::onMenuItemClicked, this, _2));
 
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
-	enable_registrar.add("IMWellChicletMenu.EnableItem",
-		boost::bind(&LLIMWellChiclet::enableMenuItem, this, _2));
+	enable_registrar.add("IMWellChicletMenu.EnableItem", boost::bind(&LLIMWellChiclet::enableMenuItem, this, _2));
 
-	mContextMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
 		("menu_im_well_button.xml",
 		 LLMenuGL::sMenuContainer,
 		 LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
 }
 
 void LLIMWellChiclet::messageCountChanged(const LLSD& session_data)
 {
-	// The singleton class LLChicletBar instance might be already deleted
-	// so don't create a new one.
+	// The singleton class LLChicletBar instance might be already deleted so don't create a new one.
 	if (!LLChicletBar::instanceExists())
 	{
 		return;
 	}
 
-	const LLUUID& session_id = session_data["session_id"];
-	const S32 counter = LLChicletBar::getInstance()->getTotalUnreadIMCount();
-	const bool im_not_visible = !LLFloaterReg::instanceVisible("im_container")
-		&& !LLFloaterReg::instanceVisible("impanel", session_id);
+	S32 counter = LLChicletBar::getInstance()->getTotalUnreadIMCount();
+	setNewMessagesState(counter > 0);
 
-	setNewMessagesState(counter > mCounter	&& im_not_visible);
-
-	// we have to flash to 'Lit' state each time new unread message is coming.
-	if (counter > mCounter && im_not_visible)
+	// We have to flash to 'Lit' state each time new unread message is coming.
+	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_data["session_id"]);
+	if ( (counter > mCounter) && ((!im_floater) || (!im_floater->isInVisibleChain()) || (!im_floater->hasFocus())) )
 	{
 		mFlashToLitTimer->startFlashing();
 	}
 	else if (counter == 0)
 	{
-		// if notification is resolved while well is flashing it can leave in the 'Lit' state
+		// If notification is resolved while well is flashing it can leave in the 'Lit' state
 		// when flashing finishes itself. Let break flashing here.
 		mFlashToLitTimer->stopFlashing();
 	}
@@ -303,7 +323,10 @@ bool LLNotificationChiclet::enableMenuItem(const LLSD& user_data)
 
 void LLNotificationChiclet::createMenu()
 {
-	if(mContextMenu)
+//	if(mContextMenu)
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	if (mContextMenuHandle.get())
+// [/SL:KB]
 	{
 		llwarns << "Menu already exists" << llendl;
 		return;
@@ -317,10 +340,17 @@ void LLNotificationChiclet::createMenu()
 	enable_registrar.add("NotificationWellChicletMenu.EnableItem",
 		boost::bind(&LLNotificationChiclet::enableMenuItem, this, _2));
 
-	mContextMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2013-08-21 (Catznip-3.6)
+	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
 		("menu_notification_well_button.xml",
 		 LLMenuGL::sMenuContainer,
 		 LLViewerMenuHolderGL::child_registry_t::instance());
+	mContextMenuHandle = popup_menu->getHandle();
+// [/SL:KB]
+//	mContextMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+//		("menu_notification_well_button.xml",
+//		 LLMenuGL::sMenuContainer,
+//		 LLViewerMenuHolderGL::child_registry_t::instance());
 }
 
 /*virtual*/
@@ -410,14 +440,14 @@ LLIMChiclet::LLIMChiclet(const LLIMChiclet::Params& p)
 , mShowSpeaker(false)
 , mDefaultWidth(p.rect().getWidth())
 , mNewMessagesIcon(NULL)
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 , mSpeakerCtrl(NULL)
 , mCounterCtrl(NULL)
 // [/SL:KB]
 , mChicletButton(NULL)
 //, mPopupMenu(NULL)
 {
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	enableCounterControl(p.enable_counter);
 // [/SL:KB]
 }
@@ -441,11 +471,11 @@ BOOL LLIMChiclet::postBuild()
 	return TRUE;
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLIMChiclet::setShowSpeaker(bool show)
 {
-	bool needs_resize = getShowSpeaker() != show;
-	if(needs_resize)
+	bool needs_resize = (getShowSpeaker() != show);
+	if (needs_resize)
 	{		
 		mShowSpeaker = show;
 	}
@@ -463,42 +493,38 @@ void LLIMChiclet::enableCounterControl(bool enable)
 	}
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLIMChiclet::setShowCounter(bool show)
 {
-	if(!mCounterEnabled)
+	if (!mCounterEnabled)
 	{
 		return;
 	}
 
-	bool needs_resize = getShowCounter() != show;
-	if(needs_resize)
+	bool needs_resize = (getShowCounter() != show);
+	if (needs_resize)
 	{		
 		LLChiclet::setShowCounter(show);
 		toggleCounterControl();
 	}
 }
 
+// virtual
 void LLIMChiclet::initSpeakerControl()
 {
-	// virtual
 }
 // [/SL:KB]
 
 void LLIMChiclet::setRequiredWidth()
 {
-// [SL:KB]
-	bool show_speaker = getShowSpeaker();
-	bool show_counter = getShowCounter();
-// [/SL:KB]
 	S32 required_width = mDefaultWidth;
 
-// [SL:KB]
-	if (show_counter)
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	if (getShowCounter())
 	{
 		required_width += mCounterCtrl->getRect().getWidth();
 	}
-	if (show_speaker)
+	if (getShowSpeaker())
 	{
 		required_width += mSpeakerCtrl->getRect().getWidth();
 	} 
@@ -508,19 +534,19 @@ void LLIMChiclet::setRequiredWidth()
 	onChicletSizeChanged();
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLIMChiclet::toggleSpeakerControl()
 {
 	if(getShowSpeaker())
 	{
-		// move speaker to the right of chiclet icon
+		// Move speaker to the right of chiclet icon
 		LLRect speaker_rc = mSpeakerCtrl->getRect();
 		speaker_rc.setLeftTopAndSize(mDefaultWidth, speaker_rc.mTop, speaker_rc.getWidth(), speaker_rc.getHeight());
 		mSpeakerCtrl->setRect(speaker_rc);
 
 		if(getShowCounter())
 		{
-			// move speaker to the right of counter
+			// Move speaker to the right of counter
 			mSpeakerCtrl->translate(mCounterCtrl->getRect().getWidth(), 0);
 		}
 
@@ -540,8 +566,8 @@ void LLIMChiclet::setCounter(S32 counter)
 	}
 
 	mCounterCtrl->setCounter(counter);
-	setShowCounter(counter);
-	setShowNewMessagesIcon(counter);
+	setShowCounter(counter > 0);
+	setShowNewMessagesIcon(counter > 0);
 }
 
 void LLIMChiclet::toggleCounterControl()
@@ -567,11 +593,11 @@ bool LLIMChiclet::getShowNewMessagesIcon()
 
 void LLIMChiclet::onMouseDown()
 {
-//	LLFloaterIMSession::toggle(getSessionId());
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLFloaterIMContainerBase::getInstance()->showConversation(getSessionId());
 	setCounter(0);
 // [/SL:KB]
+//	LLFloaterIMSession::toggle(getSessionId());
 }
 
 void LLIMChiclet::setToggleState(bool toggle)
@@ -579,16 +605,11 @@ void LLIMChiclet::setToggleState(bool toggle)
 	mChicletButton->setToggleState(toggle);
 }
 
-// [SL:KB]
-void LLIMChiclet::draw()
-{
-	LLUICtrl::draw();
-}
-
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 // static
 LLIMChiclet::EType LLIMChiclet::getIMSessionType(const LLUUID& session_id)
 {
-	EType				type	= TYPE_UNKNOWN;
+	EType type = TYPE_UNKNOWN;
 
 	if(session_id.isNull())
 		return type;
@@ -600,27 +621,23 @@ LLIMChiclet::EType LLIMChiclet::getIMSessionType(const LLUUID& session_id)
 		return type;
 	}
 
-	switch(im_type)
+	switch (im_type)
 	{
-	case IM_NOTHING_SPECIAL:
-	case IM_SESSION_P2P_INVITE:
-		type = TYPE_IM;
-		break;
-	case IM_SESSION_GROUP_START:
-	case IM_SESSION_INVITE:
-		if (gAgent.isInGroup(session_id))
-		{
-			type = TYPE_GROUP;
-		}
-		else
-		{
+		case IM_NOTHING_SPECIAL:
+		case IM_SESSION_P2P_INVITE:
+			type = TYPE_IM;
+			break;
+		case IM_SESSION_GROUP_START:
+		case IM_SESSION_INVITE:
+			if (gAgent.isInGroup(session_id))
+				type = TYPE_GROUP;
+			else
+				type = TYPE_AD_HOC;
+			break;
+		case IM_SESSION_CONFERENCE_START:
 			type = TYPE_AD_HOC;
-		}
-		break;
-	case IM_SESSION_CONFERENCE_START:
-		type = TYPE_AD_HOC;
-	default:
-		break;
+		default:
+			break;
 	}
 
 	return type;
@@ -688,20 +705,20 @@ bool LLIMChiclet::canCreateMenu()
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLIMP2PChiclet::Params::Params()
-: avatar_icon("avatar_icon")
-, chiclet_button("chiclet_button")
-, unread_notifications("unread_notifications")
-, speaker("speaker")
-, new_message_icon("new_message_icon")
-, show_speaker("show_speaker")
+	: avatar_icon("avatar_icon")
+	, chiclet_button("chiclet_button")
+	, unread_notifications("unread_notifications")
+	, speaker("speaker")
+	, new_message_icon("new_message_icon")
+	, show_speaker("show_speaker")
 {
 }
 
 LLIMP2PChiclet::LLIMP2PChiclet(const Params& p)
-: LLIMChiclet(p)
-, mChicletIconCtrl(NULL)
+	: LLIMChiclet(p)
+	, mChicletIconCtrl(NULL)
 {
 	LLButton::Params button_params = p.chiclet_button;
 	mChicletButton = LLUICtrlFactory::create<LLButton>(button_params);
@@ -801,21 +818,21 @@ void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLAdHocChiclet::Params::Params()
-: avatar_icon("avatar_icon")
-, chiclet_button("chiclet_button")
-, unread_notifications("unread_notifications")
-, speaker("speaker")
-, new_message_icon("new_message_icon")
-, show_speaker("show_speaker")
-, avatar_icon_color("avatar_icon_color", LLColor4::green)
+	: avatar_icon("avatar_icon")
+	, chiclet_button("chiclet_button")
+	, unread_notifications("unread_notifications")
+	, speaker("speaker")
+	, new_message_icon("new_message_icon")
+	, show_speaker("show_speaker")
+	, avatar_icon_color("avatar_icon_color", LLColor4::green)
 {
 }
 
 LLAdHocChiclet::LLAdHocChiclet(const Params& p)
-: LLIMChiclet(p)
-, mChicletIconCtrl(NULL)
+	: LLIMChiclet(p)
+	, mChicletIconCtrl(NULL)
 {
 	LLButton::Params button_params = p.chiclet_button;
 	mChicletButton = LLUICtrlFactory::create<LLButton>(button_params);
@@ -855,7 +872,10 @@ void LLAdHocChiclet::setSessionId(const LLUUID& session_id)
 
 void LLAdHocChiclet::draw()
 {
-	switchToCurrentSpeaker();
+	if (getShowSpeaker())
+	{
+		switchToCurrentSpeaker();
+	}
 	LLIMChiclet::draw();
 }
 
@@ -866,10 +886,14 @@ void LLAdHocChiclet::initSpeakerControl()
 
 void LLAdHocChiclet::switchToCurrentSpeaker()
 {
-	LLUUID speaker_id;
-	LLSpeakerMgr::speaker_list_t speaker_list;
+	LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(getSessionId());
+	if (!session)
+		return;
 
-	LLIMModel::getInstance()->findIMSession(getSessionId())->mSpeakers->getSpeakerList(&speaker_list, FALSE);
+	LLSpeakerMgr::speaker_list_t speaker_list;
+	session->mSpeakers->getSpeakerList(&speaker_list, FALSE);
+
+	LLUUID speaker_id;
 	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
 	{
 		LLPointer<LLSpeaker> s = *i;
@@ -879,7 +903,6 @@ void LLAdHocChiclet::switchToCurrentSpeaker()
 			break;
 		}
 	}
-
 	mSpeakerCtrl->setSpeakerId(speaker_id);
 }
 
@@ -903,7 +926,7 @@ void LLAdHocChiclet::onMenuItemClicked(const LLSD& user_data)
 	const LLUUID& session_id = getSessionId();
 
 	const std::string param = user_data.asString();
-	if("end" == param)
+	if ("end" == param)
 	{
 		LLGroupActions::endIM(session_id);
 	}
@@ -978,10 +1001,14 @@ void LLIMGroupChiclet::initSpeakerControl()
 
 void LLIMGroupChiclet::switchToCurrentSpeaker()
 {
-	LLUUID speaker_id;
-	LLSpeakerMgr::speaker_list_t speaker_list;
+	LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(getSessionId());
+	if (!session)
+		return;
 
-	LLIMModel::getInstance()->findIMSession(getSessionId())->mSpeakers->getSpeakerList(&speaker_list, FALSE);
+	LLSpeakerMgr::speaker_list_t speaker_list;
+	session->mSpeakers->getSpeakerList(&speaker_list, FALSE);
+
+	LLUUID speaker_id;
 	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
 	{
 		LLPointer<LLSpeaker> s = *i;
@@ -991,7 +1018,6 @@ void LLIMGroupChiclet::switchToCurrentSpeaker()
 			break;
 		}
 	}
-
 	mSpeakerCtrl->setSpeakerId(speaker_id);
 }
 
@@ -1123,28 +1149,24 @@ LLChicletPanel::~LLChicletPanel()
 
 void LLChicletPanel::onMessageCountChanged(const LLSD& data)
 {
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLUUID session_id = data["session_id"].asUUID();
 	S32 unread = data["participant_unread"].asInteger();
 
 	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_id);
-	if (im_floater && im_floater->getVisible() && im_floater->hasFocus())
+	if ( (im_floater) && (im_floater->getVisible()) && (im_floater->hasFocus()) )
 	{
 		unread = 0;
 	}
 
 	std::list<LLChiclet*> chiclets = LLIMChiclet::sFindChicletsSignal(session_id);
-	std::list<LLChiclet *>::iterator iter;
-	for (iter = chiclets.begin(); iter != chiclets.end(); iter++) {
+	for (std::list<LLChiclet *>::iterator iter = chiclets.begin(); iter != chiclets.end(); ++iter)
+	{
 		LLChiclet* chiclet = *iter;
-		if (chiclet != NULL)
+		if (chiclet)
 		{
 			chiclet->setCounter(unread);
 		}
-	    else
-	    {
-	    	llwarns << "Unable to set counter for chiclet " << session_id << llendl;
-	    }
 	}
 // [/SL:KB]
 //    // *TODO : we either suppress this method or return a value. Right now, it servers no purpose.
@@ -1170,8 +1192,8 @@ void LLChicletPanel::objectChicletCallback(const LLSD& data)
 		LLIMChiclet* chiclet = dynamic_cast<LLIMChiclet*>(*iter);
 		if (chiclet != NULL)
 		{
-// [SL:KB]
-			if(data.has("unread"))
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+			if (data.has("unread"))
 			{
 				chiclet->setCounter(data["unread"]);
 			}
@@ -1217,7 +1239,7 @@ void LLChicletPanel::onCurrentVoiceChannelChanged(const LLUUID& session_id)
 		LLIMChiclet* chiclet = dynamic_cast<LLIMChiclet*>(*it);
 		if(chiclet)
 		{
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 			chiclet->setShowSpeaker(true);
 // [/SL:KB]
 			if (gSavedSettings.getBOOL("OpenIMOnVoice"))
@@ -1230,12 +1252,11 @@ void LLChicletPanel::onCurrentVoiceChannelChanged(const LLUUID& session_id)
 		}
 	}
 
-// [SL:KB]
-	if(!s_previous_active_voice_session_id.isNull() && s_previous_active_voice_session_id != session_id)
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	if ( (!s_previous_active_voice_session_id.isNull()) && (s_previous_active_voice_session_id != session_id) )
 	{
 		chiclets = LLIMChiclet::sFindChicletsSignal(s_previous_active_voice_session_id);
-
-		for(std::list<LLChiclet *>::iterator it = chiclets.begin(); it != chiclets.end(); ++it)
+		for (std::list<LLChiclet*>::iterator it = chiclets.begin(); it != chiclets.end(); ++it)
 		{
 			LLIMChiclet* chiclet = dynamic_cast<LLIMChiclet*>(*it);
 			if(chiclet)
@@ -1731,15 +1752,14 @@ bool LLChicletPanel::isAnyIMFloaterDoked()
 	return res;
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 S32 LLChicletPanel::getTotalUnreadIMCount()
 {
 	S32 count = 0;
-	chiclet_list_t::const_iterator it = mChicletList.begin();
-	for( ; mChicletList.end() != it; ++it)
+	for (chiclet_list_t::const_iterator it = mChicletList.begin(); mChicletList.end() != it; ++it)
 	{
 		LLIMChiclet* chiclet = dynamic_cast<LLIMChiclet*>(*it);
-		if(chiclet)
+		if (chiclet)
 		{
 			count += chiclet->getCounter();
 		}
@@ -1756,12 +1776,12 @@ LLChicletNotificationCounterCtrl::Params::Params()
 {
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLChicletNotificationCounterCtrl::LLChicletNotificationCounterCtrl(const Params& p)
- : LLTextBox(p)
- , mCounter(0)
- , mInitialWidth(0)
- , mMaxDisplayedCount(p.max_displayed_count)
+	: LLTextBox(p)
+	, mCounter(0)
+	, mInitialWidth(0)
+	, mMaxDisplayedCount(p.max_displayed_count)
 {
 	mInitialWidth = getRect().getWidth();
 }
@@ -1770,9 +1790,9 @@ void LLChicletNotificationCounterCtrl::setCounter(S32 counter)
 {
 	mCounter = counter;
 
-	// note same code in LLSysWellChiclet::setCounter(S32 counter)
+	// Note same code in LLSysWellChiclet::setCounter(S32 counter)
 	std::string s_count;
-	if(counter != 0)
+	if (counter != 0)
 	{
 		static std::string more_messages_exist("+");
 		std::string more_messages(counter > mMaxDisplayedCount ? more_messages_exist : "");
@@ -1782,14 +1802,10 @@ void LLChicletNotificationCounterCtrl::setCounter(S32 counter)
 			);
 	}
 
-	if(mCounter != 0)
-	{
+	if (mCounter != 0)
 		setText(s_count);
-	}
 	else
-	{
 		setText(std::string(""));
-	}
 }
 
 LLRect LLChicletNotificationCounterCtrl::getRequiredRect()
@@ -1805,7 +1821,9 @@ LLRect LLChicletNotificationCounterCtrl::getRequiredRect()
 void LLChicletNotificationCounterCtrl::setValue(const LLSD& value)
 {
 	if(value.isInteger())
+	{
 		setCounter(value.asInteger());
+	}
 }
 
 LLSD LLChicletNotificationCounterCtrl::getValue() const
@@ -1873,9 +1891,9 @@ void LLChicletInvOfferIconCtrl::setValue(const LLSD& value )
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB]
-LLChicletSpeakerCtrl::LLChicletSpeakerCtrl(const Params&p)
- : LLOutputMonitorCtrl(p)
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+LLChicletSpeakerCtrl::LLChicletSpeakerCtrl(const Params& p)
+	: LLOutputMonitorCtrl(p)
 {
 }
 // [/SL:KB]
@@ -1919,10 +1937,10 @@ void LLScriptChiclet::setSessionId(const LLUUID& session_id)
 	setToolTip(LLScriptFloaterManager::getObjectName(session_id));
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLScriptChiclet::setCounter(S32 counter)
 {
-	setShowNewMessagesIcon( counter > 0 );
+	setShowNewMessagesIcon(counter > 0);
 }
 // [/SL:KB]
 
@@ -2011,10 +2029,10 @@ void LLInvOfferChiclet::setSessionId(const LLUUID& session_id)
 	}
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLInvOfferChiclet::setCounter(S32 counter)
 {
-	setShowNewMessagesIcon( counter > 0 );
+	setShowNewMessagesIcon(counter > 0);
 }
 // [/SL:KB]
 
