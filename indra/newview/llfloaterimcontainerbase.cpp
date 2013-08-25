@@ -57,77 +57,6 @@ LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
 }
 
-// static
-void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)
-{
-	if (session_id != LLUUID::null)
-	{
-		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
-	}
-}
-
-// static
-void LLFloaterIMContainerBase::onToggleTabbedContainer()
-{
-	// Don't do anything if there isn't actually an instance yet
-	if (!findInstance())
-		return;
-
-	// Build a collection of P2P and group IMs (conference chats won't/can't be restored)
-	uuid_vec_t idsAvatars, idsGroup;
-
-	std::map<LLUUID, LLIMModel::LLIMSession*>::const_iterator itEntry = LLIMModel::instance().mId2SessionMap.begin();
-	while (itEntry != LLIMModel::instance().mId2SessionMap.end())
-	{
-		const LLIMModel::LLIMSession* pSession = itEntry->second;
-		switch (pSession->mSessionType)
-		{
-			case LLIMModel::LLIMSession::P2P_SESSION:
-				idsAvatars.push_back(pSession->mOtherParticipantID);
-				break;
-			case LLIMModel::LLIMSession::GROUP_SESSION:
-				idsAvatars.push_back(pSession->mSessionID);
-				break;
-			default:
-				// Not something we can (currently) restore
-				break;
-		}
-
-		++itEntry;
-
-		LLFloaterIMSession* pFloater = LLFloaterIMSession::findInstance(pSession->mSessionID);
-		if (pFloater)
-		{
-            LLFloater::onClickClose(pFloater);
-		}
-	}
-
-	// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the floater is single instanced
-	//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
-	//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
-	//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
-	LLFloaterIMContainerBase* pInstance = getInstance();
-	bool fInstanceVisible = pInstance->isInVisibleChain();
-	pInstance->closeFloater();
-	LLFloaterReg::destroyInstance("im_container", LLSD());
-
-	// Call getInstance() to instantiate the new IM container
-	pInstance = getInstance();
-	if (fInstanceVisible)
-		pInstance->openFloater();
-
-	// Restore all P2P chat sessions
-	for (uuid_vec_t::const_iterator itAvatar = idsAvatars.begin(); itAvatar != idsAvatars.end(); ++itAvatar)
-	{
-		LLAvatarActions::startIM(*itAvatar);
-	}
-}
-
-// static
-void LLFloaterIMContainerBase::onToggleVerticalTabs()
-{
-}
-
 BOOL LLFloaterIMContainerBase::postBuild()
 {
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
@@ -135,6 +64,29 @@ BOOL LLFloaterIMContainerBase::postBuild()
 	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
 
 	return TRUE;
+}
+
+void LLFloaterIMContainerBase::setMinimized(BOOL b)
+{
+	bool was_minimized = isMinimized();
+	LLMultiFloater::setMinimized(b);
+
+	// Switching from minimized to un-minimized
+	if (was_minimized && !b)
+	{
+		const LLUUID& session_id = getSelectedSession();
+		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
+
+		if (session_floater && !session_floater->isTornOff())
+		{
+			// When in DND mode, remove stored IM notifications
+			// Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
+			if (gAgent.isDoNotDisturb() && session_id.notNull())
+			{
+				LLDoNotDisturbNotificationStorage::getInstance()->removeNotification(LLDoNotDisturbNotificationStorage::toastName, session_id);
+			}
+		}
+	}
 }
 
 // virtual
@@ -172,6 +124,21 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 
 	mSessions[session_id] = floaterp;
 	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
+}
+
+// static
+bool LLFloaterIMContainerBase::isConversationLoggingAllowed()
+{
+	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
+}
+
+// static
+void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)
+{
+	if (session_id != LLUUID::null)
+	{
+		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+	}
 }
 
 void LLFloaterIMContainerBase::onCloseFloater(const LLUUID& session_id)
@@ -246,33 +213,66 @@ const std::string& LLFloaterIMContainerBase::getFloaterXMLFile()
 	return strFile;
 }
 
-void LLFloaterIMContainerBase::setMinimized(BOOL b)
+// static
+void LLFloaterIMContainerBase::onToggleTabbedContainer()
 {
-	bool was_minimized = isMinimized();
-	LLMultiFloater::setMinimized(b);
+	// Don't do anything if there isn't actually an instance yet
+	if (!findInstance())
+		return;
 
-	// Switching from minimized to un-minimized
-	if (was_minimized && !b)
+	// Build a collection of P2P and group IMs (conference chats won't/can't be restored)
+	uuid_vec_t idsAvatars, idsGroup;
+
+	std::map<LLUUID, LLIMModel::LLIMSession*>::const_iterator itEntry = LLIMModel::instance().mId2SessionMap.begin();
+	while (itEntry != LLIMModel::instance().mId2SessionMap.end())
 	{
-		const LLUUID& session_id = getSelectedSession();
-		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
-
-		if (session_floater && !session_floater->isTornOff())
+		const LLIMModel::LLIMSession* pSession = itEntry->second;
+		switch (pSession->mSessionType)
 		{
-			// When in DND mode, remove stored IM notifications
-			// Nearby chat (Null) IMs are not stored while in DND mode, so can ignore removal
-			if (gAgent.isDoNotDisturb() && session_id.notNull())
-			{
-				LLDoNotDisturbNotificationStorage::getInstance()->removeNotification(LLDoNotDisturbNotificationStorage::toastName, session_id);
-			}
+			case LLIMModel::LLIMSession::P2P_SESSION:
+				idsAvatars.push_back(pSession->mOtherParticipantID);
+				break;
+			case LLIMModel::LLIMSession::GROUP_SESSION:
+				idsAvatars.push_back(pSession->mSessionID);
+				break;
+			default:
+				// Not something we can (currently) restore
+				break;
 		}
+
+		++itEntry;
+
+		LLFloaterIMSession* pFloater = LLFloaterIMSession::findInstance(pSession->mSessionID);
+		if (pFloater)
+		{
+            LLFloater::onClickClose(pFloater);
+		}
+	}
+
+	// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the floater is single instanced
+	//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
+	//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
+	//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
+	LLFloaterIMContainerBase* pInstance = getInstance();
+	bool fInstanceVisible = pInstance->isInVisibleChain();
+	pInstance->closeFloater();
+	LLFloaterReg::destroyInstance("im_container", LLSD());
+
+	// Call getInstance() to instantiate the new IM container
+	pInstance = getInstance();
+	if (fInstanceVisible)
+		pInstance->openFloater();
+
+	// Restore all P2P chat sessions
+	for (uuid_vec_t::const_iterator itAvatar = idsAvatars.begin(); itAvatar != idsAvatars.end(); ++itAvatar)
+	{
+		LLAvatarActions::startIM(*itAvatar);
 	}
 }
 
 // static
-bool LLFloaterIMContainerBase::isConversationLoggingAllowed()
+void LLFloaterIMContainerBase::onToggleVerticalTabs()
 {
-	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
 }
 
 // EOF
