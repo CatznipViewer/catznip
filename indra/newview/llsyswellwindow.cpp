@@ -62,9 +62,8 @@ BOOL LLSysWellWindow::postBuild()
 	// get a corresponding channel
 	initChannel();
 
-// [SL:KB]
-	// click on SysWell Window should clear "new message" state (and 'Lit' status). EXT-3147.
-	// mouse up callback is not called in this case.
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	// Clicking on the syswell window should clear "new message" state (and 'lit' status)
 	setMouseDownCallback(boost::bind(&LLSysWellWindow::releaseNewMessagesState, this));
 // [/SL:KB]
 
@@ -168,7 +167,7 @@ void LLSysWellWindow::setVisible(BOOL visible)
 		mChannel->redrawToasts();
 	}
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	if (visible)
 	{
 		releaseNewMessagesState();
@@ -223,7 +222,7 @@ void LLSysWellWindow::reshapeWindow()
 	}
 }
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 void LLSysWellWindow::releaseNewMessagesState()
 {
 	if (mSysWellChiclet)
@@ -239,11 +238,11 @@ bool LLSysWellWindow::isWindowEmpty()
 
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /************************************************************************/
-/*         RowPanel implementation                                      */
+/*         IMRowPanel implementation                                    */
 /************************************************************************/
 
 //---------------------------------------------------------------------------------
-LLIMWellWindow::RowPanel::RowPanel(const LLUUID& sessionId,S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId)
+LLIMWellWindow::IMRowPanel::IMRowPanel(const LLUUID& sessionId,S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId)
 	: LLPanel(LLPanel::Params())
 	, mChiclet(NULL)
 {
@@ -251,22 +250,22 @@ LLIMWellWindow::RowPanel::RowPanel(const LLUUID& sessionId,S32 chicletCounter, c
 	switch (im_chiclet_type)
 	{
 		case LLIMChiclet::TYPE_GROUP:
-			buildFromFile( "panel_activeim_row_group.xml");
+			buildFromFile("panel_activeim_row_group.xml");
 			mChiclet = getChild<LLIMGroupChiclet>("group_chiclet");
 			break;
 		case LLIMChiclet::TYPE_AD_HOC:
-			buildFromFile( "panel_activeim_row_adhoc.xml");
-			mChiclet = getChild<LLAdHocChiclet>("adhoc_chiclet");		
+			buildFromFile("panel_activeim_row_adhoc.xml");
+			mChiclet = getChild<LLAdHocChiclet>("adhoc_chiclet");
 			break;
 		case LLIMChiclet::TYPE_UNKNOWN: // assign mChiclet a non-null value anyway
 		case LLIMChiclet::TYPE_IM:
-			buildFromFile( "panel_activeim_row_p2p.xml");
+			buildFromFile("panel_activeim_row_p2p.xml");
 			mChiclet = getChild<LLIMP2PChiclet>("p2p_chiclet");
 			break;
 	}
 
 	// Initialize chiclet.
-	mChiclet->setChicletSizeChangedCallback(boost::bind(&LLIMWellWindow::RowPanel::onChicletSizeChanged, this, mChiclet, _2));
+	mChiclet->setChicletSizeChangedCallback(boost::bind(&LLIMWellWindow::IMRowPanel::onChicletSizeChanged, this, mChiclet, _2));
 	mChiclet->enableCounterControl(true);
 	mChiclet->setCounter(chicletCounter);
 	mChiclet->setSessionId(sessionId);
@@ -276,7 +275,7 @@ LLIMWellWindow::RowPanel::RowPanel(const LLUUID& sessionId,S32 chicletCounter, c
 
 	if (LLIMChiclet::TYPE_IM == im_chiclet_type)
 	{
-		LLAvatarNameCache::get(otherParticipantId, boost::bind(&LLIMWellWindow::RowPanel::onAvatarNameCache, this, _1, _2));
+		LLAvatarNameCache::get(otherParticipantId, boost::bind(&LLIMWellWindow::IMRowPanel::onAvatarNameCache, this, _1, _2));
 	}
 	else
 	{
@@ -285,23 +284,23 @@ LLIMWellWindow::RowPanel::RowPanel(const LLUUID& sessionId,S32 chicletCounter, c
 	}
 
 	mCloseBtn = getChild<LLButton>("hide_btn");
-	mCloseBtn->setCommitCallback(boost::bind(&LLIMWellWindow::RowPanel::closeConversation, this));
+	mCloseBtn->setCommitCallback(boost::bind(&LLIMWellWindow::IMRowPanel::closeConversation, this));
 }
 
 //---------------------------------------------------------------------------------
-LLIMWellWindow::RowPanel::~RowPanel()
+LLIMWellWindow::IMRowPanel::~IMRowPanel()
 {
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
+void LLIMWellWindow::IMRowPanel::onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
 {
 	LLTextBox* contactName = getChild<LLTextBox>("contact_name");
 	contactName->setValue(av_name.getCompleteName());
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onChicletSizeChanged(LLChiclet* ctrl, const LLSD& param)
+void LLIMWellWindow::IMRowPanel::onChicletSizeChanged(LLChiclet* ctrl, const LLSD& param)
 {
 	LLTextBox* text = getChild<LLTextBox>("contact_name");
 	S32 new_text_left = mChiclet->getRect().mRight + CHICLET_HPAD;
@@ -311,7 +310,7 @@ void LLIMWellWindow::RowPanel::onChicletSizeChanged(LLChiclet* ctrl, const LLSD&
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::closeConversation()
+void LLIMWellWindow::IMRowPanel::closeConversation()
 {
 	switch (LLIMChiclet::getIMSessionType(mChiclet->getSessionId()))
 	{
@@ -327,20 +326,20 @@ void LLIMWellWindow::RowPanel::closeConversation()
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onMouseEnter(S32 x, S32 y, MASK mask)
+void LLIMWellWindow::IMRowPanel::onMouseEnter(S32 x, S32 y, MASK mask)
 {
 	setTransparentColor(LLUIColorTable::instance().getColor("SysWellItemSelected"));
 }
 
 //---------------------------------------------------------------------------------
-void LLIMWellWindow::RowPanel::onMouseLeave(S32 x, S32 y, MASK mask)
+void LLIMWellWindow::IMRowPanel::onMouseLeave(S32 x, S32 y, MASK mask)
 {
 	setTransparentColor(LLUIColorTable::instance().getColor("SysWellItemUnselected"));
 }
 
 //---------------------------------------------------------------------------------
 // virtual
-BOOL LLIMWellWindow::RowPanel::handleMouseDown(S32 x, S32 y, MASK mask)
+BOOL LLIMWellWindow::IMRowPanel::handleMouseDown(S32 x, S32 y, MASK mask)
 {
 	// Pass the mouse down event to the chiclet (EXT-596).
 	if ( (!mChiclet->pointInView(x, y)) && (!mCloseBtn->getRect().pointInRect(x, y)) ) // prevent double call of LLIMChiclet::onMouseDown()
@@ -352,7 +351,7 @@ BOOL LLIMWellWindow::RowPanel::handleMouseDown(S32 x, S32 y, MASK mask)
 }
 
 // virtual
-BOOL LLIMWellWindow::RowPanel::handleRightMouseDown(S32 x, S32 y, MASK mask)
+BOOL LLIMWellWindow::IMRowPanel::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	return mChiclet->handleRightMouseDown(x, y, mask);
 }
@@ -622,7 +621,7 @@ BOOL LLIMWellWindow::postBuild()
 	BOOL rv = LLSysWellWindow::postBuild();
 	setTitle(getString("title_im_well_window"));
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLIMChiclet::sFindChicletsSignal.connect(boost::bind(&LLIMWellWindow::findIMChiclet, this, _1));
 // [/SL:KB]
 	LLIMChiclet::sFindChicletsSignal.connect(boost::bind(&LLIMWellWindow::findObjectChiclet, this, _1));
@@ -685,14 +684,14 @@ LLChiclet* LLIMWellWindow::findIMChiclet(const LLUUID& sessionId)
 	if (!mMessageList)
 		return NULL;
 
-	RowPanel* panel = mMessageList->getTypedItemByValue<RowPanel>(sessionId);
+	IMRowPanel* panel = mMessageList->getTypedItemByValue<IMRowPanel>(sessionId);
 	return (panel != NULL) ? panel->mChiclet : NULL;
 }
 
 //---------------------------------------------------------------------------------
 void LLIMWellWindow::addIMRow(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId)
 {
-	RowPanel* item = new RowPanel(sessionId, chicletCounter, name, otherParticipantId);
+	IMRowPanel* item = new IMRowPanel(sessionId, chicletCounter, name, otherParticipantId);
 	if (mMessageList->addItem(item, sessionId))
 	{
 		if (mSysWellChiclet)
@@ -829,7 +828,7 @@ void LLIMWellWindow::closeAllImpl()
 		LLPanel* panel = mMessageList->getItemByValue(*iter);
 
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
-		RowPanel* im_panel = dynamic_cast <RowPanel*> (panel);
+		IMRowPanel* im_panel = dynamic_cast <IMRowPanel*> (panel);
 		if (im_panel)
 		{
 			im_panel->closeConversation();

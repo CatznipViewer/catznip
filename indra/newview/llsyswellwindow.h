@@ -81,7 +81,7 @@ protected:
 	virtual const std::string& getAnchorViewName() = 0;
 
 	void reshapeWindow();
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	void releaseNewMessagesState();
 // [/SL:KB]
 
@@ -179,35 +179,33 @@ public:
 
 	void addObjectRow(const LLUUID& notification_id, bool new_message = false);
 	void removeObjectRow(const LLUUID& notification_id);
-
 	void closeAll();
 
 protected:
 	/*virtual*/ const std::string& getAnchorViewName() { return IM_WELL_ANCHOR_NAME; }
 
 private:
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	LLChiclet* findIMChiclet(const LLUUID& sessionId);
 // [/SL:KB]
 	LLChiclet* findObjectChiclet(const LLUUID& notification_id);
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	void addIMRow(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId);
 	void delIMRow(const LLUUID& sessionId);
 // [/SL:KB]
 	bool confirmCloseAll(const LLSD& notification, const LLSD& response);
 	void closeAllImpl();
 
-// [SL:KB]
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	/**
 	 * Scrolling row panel.
 	 */
-	class RowPanel: public LLPanel
+	class IMRowPanel: public LLPanel
 	{
 	public:
-		RowPanel(const LLUUID& sessionId, S32 chicletCounter,
-		         const std::string& name, const LLUUID& otherParticipantId);
-		/*virtual*/ ~RowPanel();
+		IMRowPanel(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId);
+		/*virtual*/ ~IMRowPanel();
 		void onMouseEnter(S32 x, S32 y, MASK mask);
 		void onMouseLeave(S32 x, S32 y, MASK mask);
 		BOOL handleMouseDown(S32 x, S32 y, MASK mask);
