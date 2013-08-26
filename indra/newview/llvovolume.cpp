@@ -3832,7 +3832,7 @@ void LLVOVolume::clearRiggedVolume()
 }
 
 //void LLVOVolume::updateRiggedVolume()
-// [SL:KB]
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 void LLVOVolume::updateRiggedVolume(bool force_update)
 // [/SL:KB]
 {
@@ -3840,7 +3840,7 @@ void LLVOVolume::updateRiggedVolume(bool force_update)
 	//Also update position/size in octree.  
 
 //	if (!treatAsRigged())
-// [SL:KB]
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 	if ( (!force_update) && (!treatAsRigged()) )
 // [/SL:KB]
 	{

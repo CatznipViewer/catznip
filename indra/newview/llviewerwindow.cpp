@@ -1073,7 +1073,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 				{
 //					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/ );
 // [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/, FALSE);
+					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*pick_transparent*/, FALSE /*pick_rigged*/);
 // [/SL:KB]
 
 					LLUUID object_id = pick_info.getObjectID();
@@ -2857,7 +2857,7 @@ void LLViewerWindow::updateUI()
 //											  &gDebugRaycastIntersection,
 //											  &gDebugRaycastTexCoord,
 //											  &gDebugRaycastNormal,
-//											  &gDebugRaycastBinormal,
+//											  &gDebugRaycastTangent,
 //											  &gDebugRaycastStart,
 //											  &gDebugRaycastEnd);
 	}
@@ -5235,6 +5235,7 @@ void LLPickInfo::fetchResults()
 		delta.setSub(intersection, origin);
 		icon_dist = delta.getLength3().getF32();
 	}
+
 // [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 	LLViewerObject* hit_object = gViewerWindow->cursorIntersect(mMousePt.mX, mMousePt.mY, 512.f,
 									NULL, -1, mPickTransparent, mPickRigged, &face_hit,

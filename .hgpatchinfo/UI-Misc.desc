@@ -1,6 +1,7 @@
 [UI/Misc]
 - added   : "collapse" button to the floater top right controls (between "minimize" and "close")
     -> collapses the floater in-place rather than moving it to a different part of the screen and changing the width of the title bar
+- added   : ability to right-click rigged mesh attachments to detach them and to right-click other avatar's rigged mesh attachments
 - added   : "Inspect" menu item to bring up the old-style Inspect floater
     -> added to the context menus for: "attachment self", "attachment other" and "object"
     -> added to the gear menu for object inspectors
