@@ -133,7 +133,7 @@ LLPanelClassifiedInfo::LLPanelClassifiedInfo()
 LLPanelClassifiedInfo::~LLPanelClassifiedInfo()
 {
 	sAllPanels.remove(this);
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-2.4)
 	if(getAvatarId().notNull())
 	{
 		LLAvatarPropertiesProcessor::getInstance()->removeObserver(getAvatarId(), this);

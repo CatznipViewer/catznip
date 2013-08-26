@@ -327,12 +327,12 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 {
 	if (id.notNull())
 	{
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
 		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
 		{
 // [/SL:KB]
 			LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Modified: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
 		}
 		else
 		{
@@ -345,57 +345,35 @@ void LLAvatarActions::showProfile(const LLUUID& id)
 //static 
 bool LLAvatarActions::profileVisible(const LLUUID& id)
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
-	{
-// [/SL:KB]
-		LLSD sd;
-		sd["id"] = id;
-		LLFloater* browser = getProfileFloater(id);
-		return browser && browser->isShown();
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	}
-	else
-	{
-		return LLFloaterReg::findInstance("floater_profile_view", LLSD().with("id", id));
-	}
-// [/SL:KB]
+	LLSD sd;
+	sd["id"] = id;
+	LLFloater* browser = getProfileFloater(id);
+	return browser && browser->isShown();
 }
 
 //static
 LLFloater* LLAvatarActions::getProfileFloater(const LLUUID& id)
 {
-//	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*>
-//		(LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id)));
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
 	LLFloater* pFloater = LLFloaterReg::findInstance("floater_profile_view", LLSD().with("id", id));
 	if (!pFloater)
 		pFloater = LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id));
 	return pFloater;
 // [/SL:KB]
+//	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*>
+//		(LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id)));
 }
 
 //static 
 void LLAvatarActions::hideProfile(const LLUUID& id)
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
+	LLSD sd;
+	sd["id"] = id;
+	LLFloater* browser = getProfileFloater(id);
+	if (browser)
 	{
-// [/SL:KB]
-		LLSD sd;
-		sd["id"] = id;
-		LLFloater* browser = getProfileFloater(id);
-		if (browser)
-		{
-			browser->closeFloater();
-		}
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+		browser->closeFloater();
 	}
-	else
-	{
-		LLFloaterReg::hideInstance("floater_profile_view", LLSD().with("id", id));
-	}
-// [/SL:KB]
 }
 
 // static

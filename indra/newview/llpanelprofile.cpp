@@ -38,7 +38,7 @@
 #include "llviewernetwork.h"
 
 static const std::string PANEL_PICKS = "panel_picks";
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
 static const std::string PANEL_PROFILE = "panel_profile";
 // [/SL:KB]
 
@@ -280,7 +280,7 @@ void LLPanelProfile::ChildStack::dump()
 
 LLPanelProfile::LLPanelProfile()
  : LLPanel()
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
  , mTabCtrl(NULL)
 // [/SL:KB]
  , mAvatarId(LLUUID::null)
@@ -290,19 +290,21 @@ LLPanelProfile::LLPanelProfile()
 
 BOOL LLPanelProfile::postBuild()
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
 	mTabCtrl = findChild<LLTabContainer>("tabs");
 	if (mTabCtrl)
+	{
 		mTabCtrl->setCommitCallback(boost::bind(&LLPanelProfile::onTabSelected, this, _2));
+	}
 // [/SL:KB]
 
 	LLPanelPicks* panel_picks = findChild<LLPanelPicks>(PANEL_PICKS);
 	panel_picks->setProfilePanel(this);
 
-	getTabContainer()[PANEL_PICKS] = panel_picks;
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
 	getTabContainer()[PANEL_PROFILE] = findChild<LLPanelAvatarProfile>(PANEL_PROFILE);
 // [/SL:KB]
+	getTabContainer()[PANEL_PICKS] = panel_picks;
 
 	return TRUE;
 }
@@ -318,7 +320,7 @@ void LLPanelProfile::reshape(S32 width, S32 height, BOOL called_from_parent)
 
 void LLPanelProfile::onOpen(const LLSD& key)
 {
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
 	if (gAgent.getID() == getAvatarId())
 	{
 		getTabContainer()[PANEL_PICKS]->onOpen(getAvatarId());

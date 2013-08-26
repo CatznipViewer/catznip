@@ -26,29 +26,21 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llpanelprofileview.h"
-
 #include "llavatarconstants.h"
-#include "llavatarnamecache.h"	// IDEVO
 #include "llclipboard.h"
-#include "lluserrelations.h"
-
-#include "llavatarpropertiesprocessor.h"
-#include "llcallingcard.h"
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-3.0.0a)
-#include "llfloater.h"
-// [/SL:KB]
-#include "llpanelavatar.h"
-#include "llpanelpicks.h"
-#include "llpanelprofile.h"
-#include "llsidetraypanelcontainer.h"
+#include "llpanelprofileview.h"
+#include "lltextbox.h"
+#include "lltooldraganddrop.h"
 
 static LLRegisterPanelClassWrapper<LLPanelProfileView> t_panel_target_profile("panel_profile_view");
 
-static std::string PANEL_NOTES = "panel_notes";
+static const std::string PANEL_NOTES = "panel_notes";
 static const std::string PANEL_PROFILE = "panel_profile";
 static const std::string PANEL_PICKS = "panel_picks";
 
+// ----------------------------------------------------------------------------
+// AvatarStatusObserver helper class
+//
 
 class AvatarStatusObserver : public LLAvatarPropertiesObserver
 {
@@ -58,7 +50,7 @@ public:
 		mProfileView = profile_view;
 	}
 
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-2.4)
 	~AvatarStatusObserver()
 	{
 		if (mAvatarId.notNull())
@@ -68,15 +60,17 @@ public:
 
 	void processProperties(void* data, EAvatarProcessorType type)
 	{
-		if(APT_PROPERTIES != type) return;
+		if (APT_PROPERTIES != type)
+			return;
+
 		const LLAvatarData* avatar_data = static_cast<const LLAvatarData*>(data);
-		if(avatar_data && mProfileView->getAvatarId() == avatar_data->avatar_id)
+		if ( (avatar_data) && (mProfileView->getAvatarId() == avatar_data->avatar_id) )
 		{
 			mProfileView->processOnlineStatus(avatar_data->flags & AVATAR_ONLINE);
 //			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
 		}
 
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-2.4)
 		// Profile view may have switched to a new avatar already so this needs to be outside the check above
 		LLAvatarPropertiesProcessor::instance().removeObserver(mAvatarId, this);
 		mAvatarId.setNull();
@@ -85,26 +79,30 @@ public:
 
 	void subscribe()
 	{
-//		LLAvatarPropertiesProcessor::instance().addObserver(mProfileView->getAvatarId(), this);
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-2.4)
 		if (mAvatarId.notNull())
 			LLAvatarPropertiesProcessor::instance().removeObserver(mProfileView->getAvatarId(), this);
 		mAvatarId = mProfileView->getAvatarId();
 		LLAvatarPropertiesProcessor::instance().addObserver(mAvatarId, this);
 // [/SL:KB]
+//		LLAvatarPropertiesProcessor::instance().addObserver(mProfileView->getAvatarId(), this);
 	}
 
 private:
 	LLPanelProfileView* mProfileView;
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-11-28 (Catznip-2.4)
 	LLUUID				mAvatarId;
 // [/SL:KB]
 };
 
+// ----------------------------------------------------------------------------
+// LLPanelProfileView class
+//
+
 LLPanelProfileView::LLPanelProfileView()
-:	LLPanelProfile()
-,	mStatusText(NULL)
-,	mAvatarStatusObserver(NULL)
+	: LLPanelProfile()
+	, mStatusText(NULL)
+	, mAvatarStatusObserver(NULL)
 {
 	mAvatarStatusObserver = new AvatarStatusObserver(this);
 }
@@ -115,96 +113,61 @@ LLPanelProfileView::~LLPanelProfileView(void)
 }
 
 /*virtual*/ 
-void LLPanelProfileView::onOpen(const LLSD& key)
-{
-	LLUUID id;
-	if(key.has("id"))
-	{
-		id = key["id"];
-	}
-
-	if(id.notNull() && getAvatarId() != id)
-	{
-		setAvatarId(id);
-
-		// clear name fields, which might have old data
-		getChild<LLUICtrl>("user_name")->setValue( LLSD() );
-		getChild<LLUICtrl>("user_slid")->setValue( LLSD() );
-	}
-
-	// Update the avatar name.
-	LLAvatarNameCache::get(getAvatarId(),
-		boost::bind(&LLPanelProfileView::onAvatarNameCache, this, _1, _2));
-
-	updateOnlineStatus();
-
-
-	LLPanelProfile::onOpen(key);
-}
-
 BOOL LLPanelProfileView::postBuild()
 {
 	LLPanelProfile::postBuild();
 
 	getTabContainer()[PANEL_NOTES] = findChild<LLPanelAvatarNotes>(PANEL_NOTES);
 	
-	//*TODO remove this, according to style guide we don't use status combobox
-	getTabContainer()[PANEL_PROFILE]->getChildView("online_me_status_text")->setVisible( FALSE);
-	getTabContainer()[PANEL_PROFILE]->getChildView("status_combo")->setVisible( FALSE);
-
 	mStatusText = getChild<LLTextBox>("status");
 	mStatusText->setVisible(false);
 
-//	childSetCommitCallback("back",boost::bind(&LLPanelProfileView::onBackBtnClick,this),NULL);
-	childSetCommitCallback("copy_to_clipboard",boost::bind(&LLPanelProfileView::onCopyToClipboard,this),NULL);
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-3.0.0a) | Added: Catznip-2.1.2c
-	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
-	if (!pParentView)
-	{
-		childSetCommitCallback("back", boost::bind(&LLPanelProfileView::onBackBtnClick, this), NULL);
-	}
-	else
-	{
+	getChild<LLUICtrl>("copy_to_clipboard")->setCommitCallback(boost::bind(&LLPanelProfileView::onCopyToClipboard, this));
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.1)
+	LLFloater* pParentView = getParentByType<LLFloater>();
+	if (pParentView)
 		pParentView->setTitle(getLabel());
-
-		childSetVisible("back", false);
-
-		// HACK-Catznip: we got rid of the back button so we want to line up the name controls with the rest
-		LLUICtrl* pCtrls[] = 
-			{
-				getChild<LLUICtrl>("user_name", FALSE),
-				getChild<LLUICtrl>("display_name_label", FALSE),
-				getChild<LLUICtrl>("solo_username_label", FALSE),
-				getChild<LLUICtrl>("user_name_small", FALSE),
-				getChild<LLUICtrl>("user_label", FALSE),
-				getChild<LLUICtrl>("user_slid", FALSE)
-			};
-		int dX = (NULL != pCtrls[0]) ? 10 - pCtrls[0]->getRect().mLeft : 0;
-		for (int idxCtrl = 0; idxCtrl < sizeof(pCtrls) / sizeof(LLUICtrl*); idxCtrl++)
-		{
-			if (pCtrls[idxCtrl])
-				pCtrls[idxCtrl]->translate(dX, 0);
-		}
-	}
 // [/SL:KB]
 
 	return TRUE;
 }
 
-
-//private
-
-void LLPanelProfileView::onBackBtnClick()
+/*virtual*/ 
+void LLPanelProfileView::onOpen(const LLSD& key)
 {
-	// Set dummy value to make picks panel dirty, 
-	// This will make Picks reload on next open.
-	getTabContainer()[PANEL_PICKS]->setValue(LLSD());
-
-	LLSideTrayPanelContainer* parent = dynamic_cast<LLSideTrayPanelContainer*>(getParent());
-	if(parent)
+	LLUUID id;
+	if (key.has("id"))
 	{
-		parent->openPreviousPanel();
+		id = key["id"];
 	}
+
+	if ( (id.notNull()) && (getAvatarId() != id) )
+	{
+		setAvatarId(id);
+
+		// clear name fields, which might have old data
+		getChild<LLUICtrl>("user_name")->setValue(LLSD());
+		getChild<LLUICtrl>("user_slid")->setValue(LLSD());
+	}
+
+	// Update the avatar name.
+	LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLPanelProfileView::onAvatarNameCache, this, _1, _2));
+
+	updateOnlineStatus();
+
+	LLPanelProfile::onOpen(key);
+}
+
+BOOL LLPanelProfileView::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type,
+                                           void *cargo_data, EAcceptance *accept, std::string& tooltip_msg)
+{
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.1)
+	LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), LLUUID::null, drop, cargo_type, cargo_data, accept);
+// [/SL:KB]
+//	LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), gAgent.getSessionID(), drop, cargo_type, cargo_data, accept);
+
+	return TRUE;
 }
 
 void LLPanelProfileView::onCopyToClipboard()
@@ -261,23 +224,25 @@ void LLPanelProfileView::processOnlineStatus(bool online)
 	mStatusText->setValue(status);
 }
 
-void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id,
-										   const LLAvatarName& av_name)
+void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
 {
-	getChild<LLUICtrl>("user_name")->setValue( av_name.getDisplayName() );
-	getChild<LLUICtrl>("user_name_small")->setValue( av_name.getDisplayName() );
+	LLTextBox* agent_name = getChild<LLTextBox>("user_name");
+	LLTextBox* agent_name_small = getChild<LLTextBox>("user_name_small");
+
+	agent_name->setValue( av_name.getDisplayName() );
+	agent_name_small->setValue( av_name.getDisplayName() );
 	getChild<LLUICtrl>("user_slid")->setValue( av_name.getAccountName() );
 
-	// show smaller display name if too long to display in regular size
-	if (getChild<LLTextBox>("user_name")->getTextPixelWidth() > getChild<LLTextBox>("user_name")->getRect().getWidth())
+	// Show smaller display name if too long to display in regular size
+	if (agent_name->getTextPixelWidth() > agent_name->getRect().getWidth())
 	{
-		getChild<LLUICtrl>("user_name_small")->setVisible( true );
-		getChild<LLUICtrl>("user_name")->setVisible( false );
+		agent_name_small->setVisible(true);
+		agent_name->setVisible(false);
 	}
 	else
 	{
-		getChild<LLUICtrl>("user_name_small")->setVisible( false );
-		getChild<LLUICtrl>("user_name")->setVisible( true );
+		agent_name_small->setVisible(false);
+		agent_name->setVisible(true);
 	}
 
 	if (LLAvatarName::useDisplayNames())
@@ -299,11 +264,11 @@ void LLPanelProfileView::onAvatarNameCache(const LLUUID& agent_id,
 		getChild<LLUICtrl>("solo_username_label")->setVisible( true );
 	}
 
-// [SL:KB] - Patch: UI-ProfileFloaters | Modified: 2010-11-07 (Catznip-3.0.0a) | Modified: Catznip-2.3.0a
-	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+// [SL:KB] - Patch: UI-ProfileFloaters | Modified: 2010-11-07 (Catznip-2.3)
+	LLFloater* pParentView = getParentByType<LLFloater>();
 	if (pParentView)
 		pParentView->setTitle(av_name.getCompleteName() + " - " + getLabel());
 // [/SL:KB]
 }
 
-// EOF
+// ----------------------------------------------------------------------------

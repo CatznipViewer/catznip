@@ -120,12 +120,12 @@ BOOL LLDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 
 static LLDefaultChildRegistry::Register<LLDropTarget> r("drop_target");
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2)
 static LLRegisterPanelClassWrapper<LLPanelAvatarProfile> t_panel_profile("panel_profile");
 static LLRegisterPanelClassWrapper<LLPanelAvatarNotes> t_panel_notes("panel_notes");
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2)
 //-----------------------------------------------------------------------------
 // LLPanelAvatarNotes()
 //-----------------------------------------------------------------------------
@@ -457,7 +457,7 @@ void LLPanelProfileTab::updateButtons()
 	getChildView("show_on_map_btn")->setEnabled(enable_map_btn);
 }
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2)
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

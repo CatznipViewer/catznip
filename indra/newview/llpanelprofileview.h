@@ -27,59 +27,35 @@
 #ifndef LL_LLPANELPROFILEVIEW_H
 #define LL_LLPANELPROFILEVIEW_H
 
-#include "llpanel.h"
-#include "llpanelprofile.h"
-#include "llavatarpropertiesprocessor.h"
-#include "llagent.h"
-#include "lltooldraganddrop.h"
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.1)
 #include "llfloater.h"
 // [/SL:KB]
+#include "llpanelprofile.h"
 
-class LLAvatarName;
-class LLPanelProfile;
-class LLPanelProfileTab;
 class LLTextBox;
 class AvatarStatusObserver;
 
 /**
-* Panel for displaying Avatar's profile. It consists of three sub panels - Profile,
-* Picks and Notes.
-*/
+ * Panel for displaying Avatar's profile. It consists of three sub panels - Profile,
+ * Picks and Notes.
+ */
 class LLPanelProfileView : public LLPanelProfile
 {
 	LOG_CLASS(LLPanelProfileView);
-	friend class LLUICtrlFactory;
 	friend class AvatarStatusObserver;
 
 public:
-
 	LLPanelProfileView();
-
 	/*virtual*/ ~LLPanelProfileView();
 
-	/*virtual*/ void onOpen(const LLSD& key);
-	
+public:
 	/*virtual*/ BOOL postBuild();
-
-	BOOL handleDragAndDrop(S32 x, S32 y, MASK mask,
-						   BOOL drop, EDragAndDropType cargo_type,
-						   void *cargo_data, EAcceptance *accept,
-						   std::string& tooltip_msg)
-	{
-//		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), gAgent.getSessionID(), drop,
-//				 cargo_type, cargo_data, accept);
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-3.0.0a) | Added: Catznip-2.1.2c
-		LLToolDragAndDrop::handleGiveDragAndDrop(getAvatarId(), LLUUID::null, drop, cargo_type, cargo_data, accept);
-// [/SL:KB]
-
-		return TRUE;
-	}
+	/*virtual*/ void onOpen(const LLSD& key);
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type,
+	                                   void *cargo_data, EAcceptance *accept, std::string& tooltip_msg);
 
 
 protected:
-
-	void onBackBtnClick();
 	void onCopyToClipboard();
 	bool isGrantedToSeeOnlineStatus();
 
@@ -101,17 +77,14 @@ protected:
 private:
 	// LLCacheName will call this function when avatar name is loaded from server.
 	// This is required to display names that have not been cached yet.
-//	void onNameCache(
-//		const LLUUID& id, 
-//		const std::string& full_name,
-//		bool is_group);
 	void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name);
 
+protected:
 	LLTextBox* mStatusText;
 	AvatarStatusObserver* mAvatarStatusObserver;
 };
 
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-3.0.0a) | Added: Catznip-2.1.2c
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.1)
 class LLFloaterProfileView : public LLFloater
 {
 public:

@@ -105,10 +105,10 @@ private:
 	LLUUID mAvatarId;
 };
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
 /**
-* Panel for displaying Avatar's first and second life related info.
-*/
+ * Panel for displaying Avatar's first and second life related info.
+ */
 class LLPanelAvatarProfile
 	: public LLPanelProfileTab
 	, public LLFriendObserver
@@ -211,7 +211,7 @@ private:
 };
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2.1a) | Added: Catznip-3.2.1a
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
 /**
  * Panel for displaying Avatar's notes and modifying friend's rights.
  */

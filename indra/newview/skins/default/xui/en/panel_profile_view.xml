@@ -2,52 +2,33 @@
 <panel
  background_visible="true"
  follows="all"
- height="570"
+ height="600"
  layout="topleft"
- min_height="350"
  name="panel_target_profile"
  label="Profile View"
  left="0"
- width="333">
-  <string
-   name="status_online">
-    Online
-  </string>
-  <string
-   name="status_offline">
-    Offline
-  </string>
-  <button
-   follows="top|left"
-   height="24"
-   image_hover_unselected="BackButton_Over"
-   image_pressed="BackButton_Press"
-   image_unselected="BackButton_Off"
-   layout="topleft"
-   name="back"
-   left="10"
-   tab_stop="false"
-   top="2"
-   width="30"
-   use_draw_context_alpha="false" />
+ width="343">
+  <string name="status_online">Online</string>
+  <string name="status_offline">Offline</string>
+
   <text
-   top="10"
    follows="top|left"
    height="13"
    layout="topleft"
-   left="45"
+   left="15"
    name="display_name_label"
    text_color="LtGray"
+   top="10"
    value="Display Name:"
    width="80" />
   <text
-   top_delta="0"
    follows="top|left"
    height="13"
    layout="topleft"
-   left="45"
+   left="15"
    name="solo_username_label"
    text_color="LtGray"
+   top_delta="0"
    value="Username:"
    visible="false" 
    width="80" />
@@ -56,8 +37,8 @@
    halign="right"
    height="13"
    layout="topleft"
-   right="-15"
    name="status"
+   right="-15"
    text_color="LtGray_50"
    top_delta="0"
    value="Online"
@@ -65,61 +46,61 @@
   <text
    follows="top|left|right"
    font="SansSerifBigBold"
-   height="29"
+   height="28"
    layout="topleft"
-   left="45"
+   left="15"
    name="user_name_small"
+   right="-40"
    text_color="LtGray"
    top="22"
    value="Jack oh look at me this is a super duper long name"
    use_ellipses="true"
    word_wrap="true"
-   visible="false"
-   width="255" />
+   visible="false" />
   <text
    follows="top|left|right"
    font="SansSerifHugeBold"
-   height="27"
+   height="22"
    layout="topleft"
-   left="45"
+   left="15"
    name="user_name"
+   right="-40"
    text_color="LtGray"
    translate="false"
-   top="25"
+   top="28"
    value="TestString PleaseIgnore"
    visible="true"
-   use_ellipses="true"
-   width="258" /> 
+   use_ellipses="true" /> 
   <button
-         name="copy_to_clipboard"
-         layout="topleft"
-         follows="top|right"
-         image_overlay="Copy"
-         top_delta="0"
-         right="-15"
-         height="21"
-         width="21"
-         tab_stop="false" 
-         tool_tip="Copy to Clipboard"/>
+   follows="top|right"
+   height="21"
+   image_overlay="Copy"
+   layout="topleft"
+   name="copy_to_clipboard"
+   right="-15"
+   tab_stop="false" 
+   top_delta="3"
+   tool_tip="Copy to Clipboard"
+   width="21" />
   <text
    follows="top|left"
    height="13"
    layout="topleft"
-   left="45"
+   left="15"
    name="user_label"
    text_color="LtGray"
-   top_pad="10" 
+   top_pad="7"
    value="Username:"
    width="70" />
   <text
    follows="top|left"
-   height="20"
+   font="SansSerifBold"
+   height="13"
    layout="topleft"
    left_pad="0"
    name="user_slid"
    text_color="EmphasisColor"
-   font="SansSerifBold"
-   top_delta="-2"
+   top_delta="0"
    translate="false"
    use_ellipses="true"
    value="teststring.pleaseignore"
@@ -127,37 +108,37 @@
    wrap="true "/>
   <tab_container
    follows="all"
-   height="489"
+   height="515"
    halign="center"
    layout="topleft"
    left="5"
    min_width="333"
    name="tabs"
+   right="-10"
    tab_min_width="80"
    tab_height="30"
    tab_position="top"
-   top_pad="5"
-   width="317">
+   top_pad="7">
     <panel
      class="panel_profile"
      filename="panel_profile.xml"
+     help_topic="profile_profile_tab"
      label="PROFILE"
      layout="topleft"
-     help_topic="profile_profile_tab"
      name="panel_profile" />
     <panel
      class="panel_picks"
      filename="panel_picks.xml"
+     help_topic="profile_picks_tab"
      label="PICKS"
      layout="topleft"
-     help_topic="profile_picks_tab"
      name="panel_picks" />
     <panel
      class="panel_notes"
      filename="panel_notes.xml"
+     help_topic="profile_notes_tab"
      label="NOTES &amp; PRIVACY"
      layout="topleft"
-     help_topic="profile_notes_tab"
      name="panel_notes" />
   </tab_container>
 </panel>
