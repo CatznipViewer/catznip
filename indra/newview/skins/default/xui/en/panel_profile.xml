@@ -49,10 +49,10 @@
      layout="topleft"
      left="0"
      top="0"
-     height="400"
+     height="430"
      width="317"
      border_size="0">
-      <layout_panel
+        <layout_panel
          name="profile_stack"
          follows="all"
          layout="topleft"
@@ -312,20 +312,7 @@
           </panel>
         </scroll_container>
       </layout_panel>
-           
-</layout_stack>
-
-	<layout_stack
-     name="layout_verb_buttons"
-     orientation="horizontal"
-     follows="bottom|left|right"
-     layout="topleft"
-     left="2"
-     top_pad="1"
-     height="30"
-     width="315"
-     border_size="0">
-     	<layout_panel
+        <layout_panel
          follows="bottom|left"
          height="30"
          layout="topleft"
@@ -333,126 +320,82 @@
          top="0"
          auto_resize="false"
          width="317">
-         	
-           <layout_stack
-	     	follows="bottom|left|right"
-			height="23"
-			layout="topleft"
-			name="bottom_bar_ls"
-			left="0"
-			orientation="horizontal"
-			top_pad="5"
-			width="317">
-	
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left="0"
-				name="add_friend_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="121">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Add Friend"
-			         layout="topleft"
-			         left="1"
-			         mouse_opaque="false"
-			         name="add_friend"
-			         tool_tip="Offer friendship to the Resident"
-			         top="0"
-			         width="120" />	
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="im_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="22">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="IM"
-			         layout="topleft"
-			         name="im"
-			         tool_tip="Open instant message session"
-			         top="0"
-			         left="1"
-			         width="21" />		
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="call_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="52">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Call"
-			         layout="topleft"
-			         name="call"
-			         tool_tip="Call this Resident"
-			         left="1"
-			         top="0"
-			         use_ellipses="true"
-			         width="51" />		
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="chat_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="93">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Teleport"
-			         layout="topleft"
-			         name="teleport"
-			         tool_tip="Offer teleport"
-			         left="1"
-			         top="0"
-			         use_ellipses="true"
-			         width="92" />
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="overflow_btn_lp"
-			    user_resize="false" 
-			    auto_resize="false"
-				width="24">
-					<menu_button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="▼"
-			         layout="topleft"
-			         name="overflow_btn"
-			         tool_tip="Pay money to or share inventory with the Resident"
-			         left="1"
-			         top="0"
-			         width="23" />		
-				</layout_panel>
-		</layout_stack>
-      </layout_panel>
-     </layout_stack>
+
+            <button
+             follows="bottom|left"
+             height="23"
+             label="IM"
+             layout="topleft"
+             left="1"
+             name="im"
+             tool_tip="Open instant message session"
+             width="34">
+                <button.commit_callback
+                 function="Profile.IM" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Call"
+             layout="topleft"
+             left_pad="3"
+             name="call"
+             tool_tip="Call this Resident"
+             use_ellipses="true"
+             width="60">
+                <button.commit_callback
+                 function="Profile.Call" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Teleport"
+             layout="topleft"
+             left_pad="3"
+             name="teleport"
+             tool_tip="Offer teleport"
+             use_ellipses="true"
+             width="85">
+                <button.commit_callback
+                 function="Profile.OfferTeleport" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Pay"
+             layout="topleft"
+             left_pad="3"
+             mouse_opaque="false"
+             name="pay"
+             width="60">
+                <button.commit_callback
+                 function="Profile.Pay" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             image_overlay="Command_Profile_Icon"
+             layout="topleft"
+             left_pad="3"
+             name="webprofile"
+             tool_tip="View the resident's web profile"
+             width="31">
+                <button.commit_callback
+                 function="Profile.ShowWebProfile" />
+            </button>
+            <menu_button
+             follows="bottom|left"
+             height="23"
+             image_overlay="OptionsMenu_Off"
+             menu_filename="menu_profile_overflow.xml"
+             menu_position="bottomleft"
+             layout="topleft"
+             left_pad="3"
+             name="gear_btn"
+             tool_tip="Actions on selected person"
+             width="31" />
+
+        </layout_panel>
+    </layout_stack>
 
 </panel>

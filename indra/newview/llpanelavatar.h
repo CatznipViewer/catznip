@@ -100,6 +100,17 @@ protected:
 
 	virtual void updateButtons();
 
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+	typedef boost::function<void (const LLUUID&)> functor_t;
+
+	void onAvatarAction(functor_t functor);
+	bool onEnableAddFriend();
+	bool onEnableRemoveFriend();
+	bool onEnableShowOnMap();
+	bool onEnableBlock();
+	bool onEnableUnblock();
+// [/SL:KB]
+
 private:
 
 	LLUUID mAvatarId;
@@ -118,6 +129,7 @@ public:
 	LLPanelAvatarProfile();
 	/*virtual*/ ~LLPanelAvatarProfile();
 
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 
 	/**
@@ -136,8 +148,6 @@ public:
 	 */
 	/*virtual*/ void processProperties(void* data, EAvatarProcessorType type);
 
-	/*virtual*/ BOOL postBuild();
-
 	/*virtual*/ void updateData();
 
 	/*virtual*/ void resetControls();
@@ -145,7 +155,6 @@ public:
 	/*virtual*/ void resetData();
 
 protected:
-
 	/**
 	 * Process profile related data received from server.
 	 */
@@ -170,38 +179,6 @@ protected:
 	 * Fills account status.
 	 */
 	virtual void fillAccountStatus(const LLAvatarData* avatar_data);
-
-	/**
-	 * Opens "Pay Resident" dialog.
-	 */
-	void pay();
-
-	/**
-	 * opens inventory and IM for sharing items
-	 */
-	void share();
-
-	/**
-	 * Add/remove resident to/from your block list.
-	 */
-	void toggleBlock();
-
-	void kick();
-	void freeze();
-	void unfreeze();
-	void csr();
-	
-	bool enableShowOnMap();
-	bool enableBlock();
-	bool enableUnblock();
-	bool enableGod();
-
-	void onSeeProfileBtnClick();
-	void onAddFriendButtonClick();
-	void onIMButtonClick();
-	void onCallButtonClick();
-	void onTeleportButtonClick();
-	void onShareButtonClick();
 
 private:
 	void onNameCache(const LLUUID& agent_id, const LLAvatarName& av_name);
@@ -260,11 +237,6 @@ protected:
 	void onCommitRights();
 	void onCommitNotes();
 
-	void onAddFriendButtonClick();
-	void onIMButtonClick();
-	void onCallButtonClick();
-	void onTeleportButtonClick();
-	void onShareButtonClick();
 	void enableCheckboxes(bool enable);
 };
 // [/SL:KB]

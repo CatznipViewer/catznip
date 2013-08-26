@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
  follows="all"
- height="515"
+ height="430"
  label="Notes &amp; Privacy"
  layout="topleft"
  left="0"
  name="panel_notes"
  top="0"
- width="313"
->
+ width="317">
     <layout_stack
      name="layout"
      orientation="vertical"
@@ -16,17 +15,15 @@
      layout="topleft"
      left="0"
      top="0"
-     height="517"
-     width="313"
+     height="430"
+     width="317"
      border_size="0">
-      <layout_panel
-       name="notes_stack"
-       follows="all"
-       layout="topleft"
-       top="0"
-       left="0"
-       height="450"
-       width="313">
+        <layout_panel
+         name="notes_stack"
+         follows="all"
+         layout="topleft"
+         height="400"
+         width="317">
         <scroll_container
          color="DkGray2"
          follows="all"
@@ -34,16 +31,16 @@
          left="0"
          name="profile_scroll"
          opaque="true"
-         height="450"
-         width="313"
+         height="400"
+         width="317"
          top="0">
           <panel
-           height="450"
+           height="400"
            layout="topleft"
            name="profile_scroll_panel"
            top="0"
            left="0"
-           width="303">
+           width="317">
             <text
              follows="left|top"
          font.style="BOLD"
@@ -104,133 +101,89 @@
           </panel>
         </scroll_container>
       </layout_panel>
-      <layout_panel
-       follows="bottom|left"
-       height="30"
+        <layout_panel
+         follows="bottom|left"
+         height="30"
          layout="topleft"
          left="0"
          name="notes_buttons_panel"
          auto_resize="false"
-         width="313">
+         width="317">
          
-         <layout_stack
-	     	follows="bottom|left|right"
-			height="23"
-			layout="topleft"
-			name="bottom_bar_ls"
-			left="2"
-			orientation="horizontal"
-			top_pad="5"
-			width="309">
-	
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left="0"
-				name="add_friend_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="118">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Add Friend"
-			         layout="topleft"
-			         left="1"
-			         mouse_opaque="false"
-			         name="add_friend"
-			         tool_tip="Offer friendship to the Resident"
-			         top="0"
-			         width="117" />	
+            <button
+             follows="bottom|left"
+             height="23"
+             label="IM"
+             layout="topleft"
+             left="1"
+             name="im"
+             tool_tip="Open instant message session"
+             width="34">
+                <button.commit_callback
+                 function="Profile.IM" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Call"
+             layout="topleft"
+             left_pad="3"
+             name="call"
+             tool_tip="Call this Resident"
+             use_ellipses="true"
+             width="60">
+                <button.commit_callback
+                 function="Profile.Call" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Teleport"
+             layout="topleft"
+             left_pad="3"
+             name="teleport"
+             tool_tip="Offer teleport"
+             use_ellipses="true"
+             width="85">
+                <button.commit_callback
+                 function="Profile.OfferTeleport" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             label="Pay"
+             layout="topleft"
+             left_pad="3"
+             mouse_opaque="false"
+             name="pay"
+             width="60">
+                <button.commit_callback
+                 function="Profile.Pay" />
+            </button>
+            <button
+             follows="bottom|left"
+             height="23"
+             image_overlay="Command_Profile_Icon"
+             layout="topleft"
+             left_pad="3"
+             name="webprofile"
+             tool_tip="View the resident's web profile"
+             width="31">
+                <button.commit_callback
+                 function="Profile.ShowWebProfile" />
+            </button>
+            <menu_button
+             follows="bottom|left"
+             height="23"
+             image_overlay="OptionsMenu_Off"
+             menu_filename="menu_profile_overflow.xml"
+             menu_position="bottomleft"
+             layout="topleft"
+             left_pad="3"
+             name="gear_btn"
+             tool_tip="Actions on selected person"
+             width="31" />
+
 				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="im_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="22">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="IM"
-			         layout="topleft"
-			         name="im"
-			         tool_tip="Open instant message session"
-			         top="0"
-			         left="1"
-			         width="21" />		
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="call_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="52">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Call"
-			         layout="topleft"
-			         name="call"
-			         tool_tip="Call this Resident"
-			         left="1"
-			         top="0"
-			         use_ellipses="true"
-			         width="51" />		
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="show_on_map_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="46">
-					<button
-			         enabled="false"
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Map"
-			         layout="topleft"
-			         name="show_on_map_btn"
-			         tool_tip="Show the Resident on the map"
-			         top="0"
-			         left="1"
-			         width="45" />
-				</layout_panel>
-				
-				<layout_panel
-				follows="bottom|left|right"
-				height="23"
-				layout="bottomleft"
-				left_pad="3"
-				name="teleport_btn_lp"
-			    user_resize="false" 
-			    auto_resize="true"
-				width="81">
-					<button
-			         follows="bottom|left|right"
-			         height="23"
-			         label="Teleport"
-			         layout="topleft"
-			         name="teleport"
-			         tool_tip="Offer teleport"
-			         left="1"
-			         top="0"
-			         width="80" />	
-				</layout_panel>
-		</layout_stack>     
-        </layout_panel>
-    </layout_stack>
+    </layout_stack>     
 </panel>

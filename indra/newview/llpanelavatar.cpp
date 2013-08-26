@@ -145,13 +145,6 @@ BOOL LLPanelAvatarNotes::postBuild()
 	childSetCommitCallback("map_check", boost::bind(&LLPanelAvatarNotes::onCommitRights, this), NULL);
 	childSetCommitCallback("objects_check", boost::bind(&LLPanelAvatarNotes::onCommitRights, this), NULL);
 
-	childSetCommitCallback("add_friend", boost::bind(&LLPanelAvatarNotes::onAddFriendButtonClick, this),NULL);
-	childSetCommitCallback("im", boost::bind(&LLPanelAvatarNotes::onIMButtonClick, this), NULL);
-	childSetCommitCallback("call", boost::bind(&LLPanelAvatarNotes::onCallButtonClick, this), NULL);
-	childSetCommitCallback("teleport", boost::bind(&LLPanelAvatarNotes::onTeleportButtonClick, this), NULL);
-	childSetCommitCallback("share", boost::bind(&LLPanelAvatarNotes::onShareButtonClick, this), NULL);
-	childSetCommitCallback("show_on_map_btn", (boost::bind(&LLPanelAvatarNotes::onMapButtonClick, this)), NULL);
-
 	LLTextEditor* te = getChild<LLTextEditor>("notes_edit");
 	te->setCommitCallback(boost::bind(&LLPanelAvatarNotes::onCommitNotes,this));
 	te->setCommitOnFocusLost(TRUE);
@@ -169,9 +162,6 @@ void LLPanelAvatarNotes::onOpen(const LLSD& key)
 	LLPanelProfileTab::onOpen(key);
 
 	fillRightsData();
-
-	//Disable "Add Friend" button for friends.
-	getChildView("add_friend")->setEnabled(!LLAvatarActions::isFriend(getAvatarId()));
 }
 
 void LLPanelAvatarNotes::fillRightsData()
@@ -293,35 +283,7 @@ void LLPanelAvatarNotes::resetData()
 
 void LLPanelAvatarNotes::resetControls()
 {
-	//Disable "Add Friend" button for friends.
-	getChildView("add_friend")->setEnabled(TRUE);
-
 	enableCheckboxes(false);
-}
-
-void LLPanelAvatarNotes::onAddFriendButtonClick()
-{
-	LLAvatarActions::requestFriendshipDialog(getAvatarId());
-}
-
-void LLPanelAvatarNotes::onIMButtonClick()
-{
-	LLAvatarActions::startIM(getAvatarId());
-}
-
-void LLPanelAvatarNotes::onTeleportButtonClick()
-{
-	LLAvatarActions::offerTeleport(getAvatarId());
-}
-
-void LLPanelAvatarNotes::onCallButtonClick()
-{
-	LLAvatarActions::startCall(getAvatarId());
-}
-
-void LLPanelAvatarNotes::onShareButtonClick()
-{
-	//*TODO not implemented.
 }
 
 void LLPanelAvatarNotes::enableCheckboxes(bool enable)
@@ -386,6 +348,24 @@ LLPanelProfileTab::LLPanelProfileTab()
 : LLPanel()
 , mAvatarId(LLUUID::null)
 {
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Profile.AddFriend", boost::bind(&LLPanelProfileTab::onAvatarAction, this, static_cast<void (*)(const LLUUID&)>(&LLAvatarActions::requestFriendshipDialog)));
+	mCommitCallbackRegistrar.add("Profile.RemoveFriend", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::removeFriendDialog));
+	mCommitCallbackRegistrar.add("Profile.IM", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::startIM));
+	mCommitCallbackRegistrar.add("Profile.Call", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::startCall));
+	mCommitCallbackRegistrar.add("Profile.OfferTeleport", boost::bind(&LLPanelProfileTab::onAvatarAction, this, static_cast<void (*)(const LLUUID&)>(&LLAvatarActions::offerTeleport)));
+	mCommitCallbackRegistrar.add("Profile.ShowWebProfile", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::showWebProfile));
+	mCommitCallbackRegistrar.add("Profile.ShowOnMap", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::showOnMap));
+	mCommitCallbackRegistrar.add("Profile.Pay", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::pay));
+	mCommitCallbackRegistrar.add("Profile.Share", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::share));
+	mCommitCallbackRegistrar.add("Profile.BlockUnblock", boost::bind(&LLPanelProfileTab::onAvatarAction, this, LLAvatarActions::toggleBlock));
+
+	mEnableCallbackRegistrar.add("Profile.EnableAddFriend", boost::bind(&LLPanelProfileTab::onEnableAddFriend, this));
+	mEnableCallbackRegistrar.add("Profile.EnableRemoveFriend", boost::bind(&LLPanelProfileTab::onEnableRemoveFriend, this));
+	mEnableCallbackRegistrar.add("Profile.EnableShowOnMap", boost::bind(&LLPanelProfileTab::onEnableShowOnMap, this));
+	mEnableCallbackRegistrar.add("Profile.EnableBlock", boost::bind(&LLPanelProfileTab::onEnableBlock, this));
+	mEnableCallbackRegistrar.add("Profile.EnableUnblock", boost::bind(&LLPanelProfileTab::onEnableUnblock, this));
+// [/SL:KB]
 }
 
 LLPanelProfileTab::~LLPanelProfileTab()
@@ -450,22 +430,48 @@ void LLPanelProfileTab::updateButtons()
 	{
 		getChildView("teleport")->setEnabled(true);
 	}
-
-	bool enable_map_btn = (is_buddy_online &&
-			       is_agent_mappable(getAvatarId()))
-		|| gAgent.isGodlike();
-	getChildView("show_on_map_btn")->setEnabled(enable_map_btn);
 }
 
-// [SL:KB] - Patch: UI-ProfileFloaters (Legacy) | Checked: 2012-01-01 (Catznip-3.2)
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-bool enable_god()
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+void LLPanelProfileTab::onAvatarAction(functor_t functor)
 {
-	return gAgent.isGodlike();
+	functor(getAvatarId());
 }
+
+bool LLPanelProfileTab::onEnableAddFriend()
+{
+	return !LLAvatarActions::isFriend(getAvatarId());
+}
+
+bool LLPanelProfileTab::onEnableRemoveFriend()
+{
+	return LLAvatarActions::isFriend(getAvatarId());
+}
+
+bool LLPanelProfileTab::onEnableShowOnMap()
+{
+	bool is_buddy_online = LLAvatarTracker::instance().isBuddyOnline(getAvatarId());
+
+	bool enable_map_btn = (is_buddy_online && is_agent_mappable(getAvatarId())) || gAgent.isGodlike();
+	return enable_map_btn;
+}
+
+bool LLPanelProfileTab::onEnableBlock()
+{
+	return LLAvatarActions::canBlock(getAvatarId()) && !LLAvatarActions::isBlocked(getAvatarId());
+}
+
+bool LLPanelProfileTab::onEnableUnblock()
+{
+	return LLAvatarActions::isBlocked(getAvatarId());
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
+
+// ----------------------------------------------------------------------------
+// LLPanelAvatarProfile class
+//
 
 LLPanelAvatarProfile::LLPanelAvatarProfile()
 	: LLPanelProfileTab()
@@ -474,33 +480,6 @@ LLPanelAvatarProfile::LLPanelAvatarProfile()
 
 BOOL LLPanelAvatarProfile::postBuild()
 {
-	childSetCommitCallback("see_profile_btn",(boost::bind(&LLPanelAvatarProfile::onSeeProfileBtnClick,this)), NULL);
-	childSetCommitCallback("add_friend",(boost::bind(&LLPanelAvatarProfile::onAddFriendButtonClick,this)), NULL);
-	childSetCommitCallback("im",(boost::bind(&LLPanelAvatarProfile::onIMButtonClick,this)), NULL);
-	childSetCommitCallback("call",(boost::bind(&LLPanelAvatarProfile::onCallButtonClick,this)), NULL);
-	childSetCommitCallback("teleport",(boost::bind(&LLPanelAvatarProfile::onTeleportButtonClick,this)), NULL);
-	childSetCommitCallback("share",(boost::bind(&LLPanelAvatarProfile::onShareButtonClick,this)), NULL);
-	childSetCommitCallback("show_on_map_btn", (boost::bind(&LLPanelAvatarProfile::onMapButtonClick, this)), NULL);
-
-	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
-	registrar.add("Profile.ShowOnMap",  boost::bind(&LLPanelAvatarProfile::onMapButtonClick, this));
-	registrar.add("Profile.Pay",  boost::bind(&LLPanelAvatarProfile::pay, this));
-	registrar.add("Profile.Share", boost::bind(&LLPanelAvatarProfile::share, this));
-	registrar.add("Profile.BlockUnblock", boost::bind(&LLPanelAvatarProfile::toggleBlock, this));
-	registrar.add("Profile.Kick", boost::bind(&LLPanelAvatarProfile::kick, this));
-	registrar.add("Profile.Freeze", boost::bind(&LLPanelAvatarProfile::freeze, this));
-	registrar.add("Profile.Unfreeze", boost::bind(&LLPanelAvatarProfile::unfreeze, this));
-	registrar.add("Profile.CSR", boost::bind(&LLPanelAvatarProfile::csr, this));
-
-	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable;
-	enable.add("Profile.EnableShowOnMap", boost::bind(&LLPanelAvatarProfile::enableShowOnMap, this));
-	enable.add("Profile.EnableGod", boost::bind(&enable_god));
-	enable.add("Profile.EnableBlock", boost::bind(&LLPanelAvatarProfile::enableBlock, this));
-	enable.add("Profile.EnableUnblock", boost::bind(&LLPanelAvatarProfile::enableUnblock, this));
-
-	LLToggleableMenu* profile_menu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_profile_overflow.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
-	getChild<LLMenuButton>("overflow_btn")->setMenu(profile_menu, LLMenuButton::MP_TOP_RIGHT);
-
 	LLVoiceClient::getInstance()->addObserver((LLVoiceClientStatusObserver*)this);
 
 	resetControls();
@@ -513,10 +492,9 @@ void LLPanelAvatarProfile::onOpen(const LLSD& key)
 {
 	LLPanelProfileTab::onOpen(key);
 
-	mGroups.clear();
+	getChildView("call")->setEnabled(LLVoiceClient::getInstance()->voiceEnabled() && LLVoiceClient::getInstance()->isVoiceWorking());
 
-	//Disable "Add Friend" button for friends.
-	getChildView("add_friend")->setEnabled(!LLAvatarActions::isFriend(getAvatarId()));
+	mGroups.clear();
 }
 
 void LLPanelAvatarProfile::updateData()
@@ -530,15 +508,14 @@ void LLPanelAvatarProfile::updateData()
 
 void LLPanelAvatarProfile::resetControls()
 {
-	getChildView("status_panel")->setVisible( true);
+	getChildView("status_panel")->setVisible(true);
 	getChildView("profile_buttons_panel")->setVisible( true);
-	getChildView("title_groups_text")->setVisible( true);
-	getChildView("sl_groups")->setVisible( true);
-	getChildView("add_friend")->setEnabled(true);
+	getChildView("title_groups_text")->setVisible(true);
+	getChildView("sl_groups")->setVisible(true);
 
-	getChildView("status_me_panel")->setVisible( false);
-	getChildView("profile_me_buttons_panel")->setVisible( false);
-	getChildView("account_actions_panel")->setVisible( false);
+	getChildView("status_me_panel")->setVisible(false);
+	getChildView("profile_me_buttons_panel")->setVisible(false);
+	getChildView("account_actions_panel")->setVisible(false);
 }
 
 void LLPanelAvatarProfile::resetData()
@@ -720,91 +697,6 @@ void LLPanelAvatarProfile::fillAccountStatus(const LLAvatarData* avatar_data)
 	getChild<LLUICtrl>("acc_status_text")->setValue(caption_text);
 }
 
-void LLPanelAvatarProfile::pay()
-{
-	LLAvatarActions::pay(getAvatarId());
-}
-
-void LLPanelAvatarProfile::share()
-{
-	LLAvatarActions::share(getAvatarId());
-}
-
-void LLPanelAvatarProfile::toggleBlock()
-{
-	LLAvatarActions::toggleBlock(getAvatarId());
-}
-
-bool LLPanelAvatarProfile::enableShowOnMap()
-{
-	bool is_buddy_online = LLAvatarTracker::instance().isBuddyOnline(getAvatarId());
-
-	bool enable_map_btn = (is_buddy_online && is_agent_mappable(getAvatarId())) || gAgent.isGodlike();
-	return enable_map_btn;
-}
-
-bool LLPanelAvatarProfile::enableBlock()
-{
-	return LLAvatarActions::canBlock(getAvatarId()) && !LLAvatarActions::isBlocked(getAvatarId());
-}
-
-bool LLPanelAvatarProfile::enableUnblock()
-{
-	return LLAvatarActions::isBlocked(getAvatarId());
-}
-
-void LLPanelAvatarProfile::kick()
-{
-	LLAvatarActions::kick(getAvatarId());
-}
-
-void LLPanelAvatarProfile::freeze()
-{
-	LLAvatarActions::freeze(getAvatarId());
-}
-
-void LLPanelAvatarProfile::unfreeze()
-{
-	LLAvatarActions::unfreeze(getAvatarId());
-}
-
-void LLPanelAvatarProfile::csr()
-{
-	std::string name;
-	gCacheName->getFullName(getAvatarId(), name);
-	LLAvatarActions::csr(getAvatarId(), name);
-}
-
-void LLPanelAvatarProfile::onAddFriendButtonClick()
-{
-	LLAvatarActions::requestFriendshipDialog(getAvatarId());
-}
-
-void LLPanelAvatarProfile::onSeeProfileBtnClick()
-{
-	LLAvatarActions::showProfile(getAvatarId());
-}
-
-void LLPanelAvatarProfile::onIMButtonClick()
-{
-	LLAvatarActions::startIM(getAvatarId());
-}
-
-void LLPanelAvatarProfile::onTeleportButtonClick()
-{
-	LLAvatarActions::offerTeleport(getAvatarId());
-}
-
-void LLPanelAvatarProfile::onCallButtonClick()
-{
-	LLAvatarActions::startCall(getAvatarId());
-}
-
-void LLPanelAvatarProfile::onShareButtonClick()
-{
-	//*TODO not implemented
-}
-
 LLPanelAvatarProfile::~LLPanelAvatarProfile()
 {
 	if(getAvatarId().notNull())
@@ -827,7 +719,7 @@ void LLPanelAvatarProfile::changed(U32 mask)
 // virtual
 void LLPanelAvatarProfile::onChange(EStatusType status, const std::string &channelURI, bool proximal)
 {
-	if(status == STATUS_JOINING || status == STATUS_LEFT_CHANNEL)
+	if ( (status == STATUS_JOINING) || (status == STATUS_LEFT_CHANNEL) )
 	{
 		return;
 	}

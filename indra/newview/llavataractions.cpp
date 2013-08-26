@@ -325,22 +325,40 @@ static void on_avatar_name_show_profile(const LLUUID& agent_id, const LLAvatarNa
 // static
 void LLAvatarActions::showProfile(const LLUUID& id)
 {
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
+	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
+		showWebProfile(id);
+	else
+		showLegacyProfile(id);
+// [/SL:KB]
+}
+//void LLAvatarActions::showProfile(const LLUUID& id)
+//{
+//	if (id.notNull())
+//	{
+//		LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
+//	}
+//}
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
+// static
+void LLAvatarActions::showLegacyProfile(const LLUUID& id)
+{
 	if (id.notNull())
 	{
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
-		if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
-		{
-// [/SL:KB]
-			LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
-// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
-		}
-		else
-		{
-			LLFloaterReg::showInstance("floater_profile_view", LLSD().with("id", id));
-		}
-// [/SL:KB]
+		LLFloaterReg::showInstance("floater_profile_view", LLSD().with("id", id));
 	}
 }
+
+// static
+void LLAvatarActions::showWebProfile(const LLUUID& id)
+{
+	if (id.notNull())
+	{
+		LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
+	}
+}
+// [/SL:KB]
 
 //static 
 bool LLAvatarActions::profileVisible(const LLUUID& id)
