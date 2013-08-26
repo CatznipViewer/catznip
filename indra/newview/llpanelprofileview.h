@@ -56,7 +56,11 @@ public:
 
 
 protected:
-	void onCopyToClipboard();
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+	void onCopyToClipboard(LLUICtrl* ctrl);
+// [/SL:KB]
+//	void onCopyToClipboard();
+
 	bool isGrantedToSeeOnlineStatus();
 
 	/**

@@ -27,6 +27,9 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llavatarconstants.h"
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+#include "llavataractions.h"
+// [/SL:KB]
 #include "llclipboard.h"
 #include "llpanelprofileview.h"
 #include "lltextbox.h"
@@ -122,7 +125,10 @@ BOOL LLPanelProfileView::postBuild()
 	mStatusText = getChild<LLTextBox>("status");
 	mStatusText->setVisible(false);
 
-	getChild<LLUICtrl>("copy_to_clipboard")->setCommitCallback(boost::bind(&LLPanelProfileView::onCopyToClipboard, this));
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+	getChild<LLUICtrl>("copy_to_clipboard")->setCommitCallback(boost::bind(&LLPanelProfileView::onCopyToClipboard, this, _1));
+// [/SL:KB]
+//	childSetCommitCallback("copy_to_clipboard",boost::bind(&LLPanelProfileView::onCopyToClipboard,this),NULL);
 
 // [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2010-09-08 (Catznip-2.1)
 	LLFloater* pParentView = getParentByType<LLFloater>();
@@ -170,11 +176,17 @@ BOOL LLPanelProfileView::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, E
 	return TRUE;
 }
 
-void LLPanelProfileView::onCopyToClipboard()
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+void LLPanelProfileView::onCopyToClipboard(LLUICtrl* ctrl)
 {
-	std::string name = getChild<LLUICtrl>("user_name")->getValue().asString() + " (" + getChild<LLUICtrl>("user_slid")->getValue().asString() + ")";
-	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(name), 0, name.length());
+	LLAvatarActions::copyToClipboard(getAvatarId(), ctrl->getValue());
 }
+// [/SL:KB]
+//void LLPanelProfileView::onCopyToClipboard()
+//{
+//	std::string name = getChild<LLUICtrl>("user_name")->getValue().asString() + " (" + getChild<LLUICtrl>("user_slid")->getValue().asString() + ")";
+//	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(name), 0, name.length());
+//}
 
 bool LLPanelProfileView::isGrantedToSeeOnlineStatus()
 {

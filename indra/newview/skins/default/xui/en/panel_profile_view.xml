@@ -55,6 +55,7 @@
    top="22"
    value="Jack oh look at me this is a super duper long name"
    use_ellipses="true"
+   valign="center"
    word_wrap="true"
    visible="false" />
   <text
@@ -64,24 +65,41 @@
    layout="topleft"
    left="15"
    name="user_name"
-   right="-40"
+   right="-60"
    text_color="LtGray"
    translate="false"
    top="28"
    value="TestString PleaseIgnore"
    visible="true"
    use_ellipses="true" /> 
-  <button
+  <flyout_button
    follows="top|right"
    height="21"
-   image_overlay="Copy"
    layout="topleft"
    name="copy_to_clipboard"
    right="-15"
    tab_stop="false" 
-   top_delta="3"
    tool_tip="Copy to Clipboard"
-   width="21" />
+   top_delta="1"
+   width="45"
+   action_button.image_overlay="Copy">
+    <flyout_button.item
+     label="Copy display name"
+     name="displayname"
+     value="displayname" />
+    <flyout_button.item
+     label="Copy full name"
+     name="fullname"
+     value="fullname" />
+    <flyout_button.item
+     label="Copy SLurl"
+     name="slurl"
+     value="slurl" />
+    <flyout_button.item
+     label="Copy avatar UUID"
+     name="uuid"
+     value="uuid" />
+  </flyout_button>
   <text
    follows="top|left"
    height="13"
@@ -89,7 +107,7 @@
    left="15"
    name="user_label"
    text_color="LtGray"
-   top_pad="7"
+   top_pad="9"
    value="Username:"
    width="70" />
   <text
