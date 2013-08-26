@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Descrizione:
 	</text>
+	<panel name="bottom_panel">
 	<button label="Riproduci in Second Life" label_selected="Riproduci in Second Life" name="Sound play btn" tool_tip="Riproduci questo suono in modo che anche gli altri possano udirlo"/>
 	<button label="Avvia localmente" label_selected="Avvia localmente" name="Sound audition btn" tool_tip="Riproduci questo suono in modo che solo tu possa udirlo"/>
+	</panel>
 </floater>

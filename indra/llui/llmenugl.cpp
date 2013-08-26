@@ -89,7 +89,7 @@ const U32 SEPARATOR_HEIGHT_PIXELS = 8;
 const S32 TEAROFF_SEPARATOR_HEIGHT_PIXELS = 10;
 const S32 MENU_ITEM_PADDING = 4;
 
-const std::string SEPARATOR_NAME("separator");
+//const std::string SEPARATOR_NAME("separator");
 const std::string VERTICAL_SEPARATOR_LABEL( "|" );
 
 const std::string LLMenuGL::BOOLEAN_TRUE_PREFIX( "\xE2\x9C\x94" ); // U+2714 HEAVY CHECK MARK
@@ -1539,8 +1539,13 @@ void LLMenuItemBranchDownGL::draw( void )
 	{
 		color = mDisabledColor.get();
 	}
-	getFont()->render( mLabel.getWString(), 0, (F32)getRect().getWidth() / 2.f, (F32)LABEL_BOTTOM_PAD_PIXELS, color,
-				   LLFontGL::HCENTER, LLFontGL::BOTTOM, LLFontGL::NORMAL);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-08 (Catznip-3.3)
+	getFont()->render(mLabel.getWString(), 0, 
+					  (F32)getRect().getWidth() / 2.f, (getRect().getHeight() - getFont()->getLineHeight()) / 2, color,
+					  LLFontGL::HCENTER, LLFontGL::BOTTOM, LLFontGL::NORMAL);
+// [/SL:KB]
+//	getFont()->render( mLabel.getWString(), 0, (F32)getRect().getWidth() / 2.f, (F32)LABEL_BOTTOM_PAD_PIXELS, color,
+//				   LLFontGL::HCENTER, LLFontGL::BOTTOM, LLFontGL::NORMAL);
 
 
 	// underline navigation key only when keyboard navigation has been initiated
@@ -2778,21 +2783,35 @@ LLMenuItemGL* LLMenuGL::highlightNextItem(LLMenuItemGL* cur_item, BOOL skip_disa
 	while(1)
 	{
 		// skip separators and disabled/invisible items
-		if ((*next_item_iter)->getEnabled() && (*next_item_iter)->getVisible() && !dynamic_cast<LLMenuItemSeparatorGL*>(*next_item_iter))
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-08-03 (Catznip-3.3)
+		bool fCanHighlight = ((*next_item_iter)->getVisible()) && (!dynamic_cast<LLMenuItemSeparatorGL*>(*next_item_iter));
+		if ( (fCanHighlight) && ((*next_item_iter)->getEnabled()) )
 		{
-			if (cur_item)
-			{
-				cur_item->setHighlight(FALSE);
-			}
 			(*next_item_iter)->setHighlight(TRUE);
 			return (*next_item_iter);
 		}
 
-
-		if (!skip_disabled || next_item_iter == cur_item_iter)
+		// We always want to skip invisible items and separators so only break if it was actually disabled
+		if ( ((!skip_disabled) && (fCanHighlight)) || (next_item_iter == cur_item_iter) )
 		{
 			break;
 		}
+// [/SL:KB]
+//		if ((*next_item_iter)->getEnabled() && (*next_item_iter)->getVisible() && !dynamic_cast<LLMenuItemSeparatorGL*>(*next_item_iter))
+//		{
+//			if (cur_item)
+//			{
+//				cur_item->setHighlight(FALSE);
+//			}
+//			(*next_item_iter)->setHighlight(TRUE);
+//			return (*next_item_iter);
+//		}
+//
+//
+//		if (!skip_disabled || next_item_iter == cur_item_iter)
+//		{
+//			break;
+//		}
 
 		next_item_iter++;
 		if (next_item_iter == mItems.end())
@@ -2868,16 +2887,30 @@ LLMenuItemGL* LLMenuGL::highlightPrevItem(LLMenuItemGL* cur_item, BOOL skip_disa
 	while(1)
 	{
 		// skip separators and disabled/invisible items
-		if ((*prev_item_iter)->getEnabled() && (*prev_item_iter)->getVisible() && (*prev_item_iter)->getName() != SEPARATOR_NAME)
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-08-03 (Catznip-3.3)
+		bool fCanHighlight = ((*prev_item_iter)->getVisible()) && (!dynamic_cast<LLMenuItemSeparatorGL*>(*prev_item_iter));
+		if ( (fCanHighlight) && ((*prev_item_iter)->getEnabled()) )
 		{
 			(*prev_item_iter)->setHighlight(TRUE);
 			return (*prev_item_iter);
 		}
 
-		if (!skip_disabled || prev_item_iter == cur_item_iter)
+		// We always want to skip invisible items and separators (unless the iterator round-tripped)
+		if ( ((!skip_disabled) && (fCanHighlight)) || (prev_item_iter == cur_item_iter) )
 		{
 			break;
 		}
+// [/SL:KB]
+//		if ((*prev_item_iter)->getEnabled() && (*prev_item_iter)->getVisible() && (*prev_item_iter)->getName() != SEPARATOR_NAME)
+//		{
+//			(*prev_item_iter)->setHighlight(TRUE);
+//			return (*prev_item_iter);
+//		}
+//
+//		if (!skip_disabled || prev_item_iter == cur_item_iter)
+//		{
+//			break;
+//		}
 
 		prev_item_iter++;
 		if (prev_item_iter == mItems.rend())
@@ -3385,6 +3418,9 @@ void LLMenuBarGL::arrange( void )
 		}
 	}
 	reshape(rect.mRight, rect.getHeight());
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mResizeSignal();
+// [/SL:KB]
 }
 
 

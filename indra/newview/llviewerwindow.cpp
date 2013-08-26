@@ -1071,7 +1071,10 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 
 				if (prim_media_dnd_enabled)
 				{
-					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/ );
+//					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/ );
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+					LLPickInfo pick_info = pickImmediate( pos.mX, pos.mY,  TRUE /*BOOL pick_transparent*/, FALSE);
+// [/SL:KB]
 
 					LLUUID object_id = pick_info.getObjectID();
 					S32 object_face = pick_info.mObjectFace;
@@ -1813,17 +1816,17 @@ void LLViewerWindow::initBase()
 	gSnapshotFloaterView = main_view->getChild<LLSnapshotFloaterView>("Snapshot Floater View");
 	
 
-	// Console
-	llassert( !gConsole );
-	LLConsole::Params cp;
-	cp.name("console");
-	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
-	cp.rect(getChatConsoleRect());
-	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
-	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
-	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
-	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
-	getRootView()->addChild(gConsole);
+//	// Console
+//	llassert( !gConsole );
+//	LLConsole::Params cp;
+//	cp.name("console");
+//	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
+//	cp.rect(getChatConsoleRect());
+//	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
+//	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
+//	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
+//	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
+//	getRootView()->addChild(gConsole);
 
 	// optionally forward warnings to chat console/chat floater
 	// for qa runs and dev builds
@@ -1916,18 +1919,21 @@ void LLViewerWindow::initWorldUI()
 		navbar->setVisible(FALSE);
 	}
 
-	// Top Info bar
-	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
-	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
-
-	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
-
-	topinfo_bar_container->addChild(topinfo_bar);
-	topinfo_bar_container->setVisible(TRUE);
-
+//	// Top Info bar
+//	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
+//	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
+//
+//	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
+//
+//	topinfo_bar_container->addChild(topinfo_bar);
+//	topinfo_bar_container->setVisible(TRUE);
+//
 	if (!gSavedSettings.getBOOL("ShowMiniLocationPanel"))
 	{
-		topinfo_bar->setVisible(FALSE);
+//		topinfo_bar->setVisible(FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+		gStatusBar->showTopInfoBar(FALSE);
+// [/SL:KB]
 	}
 
 	if ( gHUDView == NULL )
@@ -1959,22 +1965,22 @@ void LLViewerWindow::initWorldUI()
 		gToolBarView->setVisible(TRUE);
 	}
 
-	LLMediaCtrl* destinations = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
-	if (destinations)
-	{
-		destinations->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
-		std::string url = gSavedSettings.getString("DestinationGuideURL");
-		url = LLWeb::expandURLSubstitutions(url, LLSD());
-		destinations->navigateTo(url, "text/html");
-	}
-	LLMediaCtrl* avatar_picker = LLFloaterReg::getInstance("avatar")->findChild<LLMediaCtrl>("avatar_picker_contents");
-	if (avatar_picker)
-	{
-		avatar_picker->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
-		std::string url = gSavedSettings.getString("AvatarPickerURL");
-		url = LLWeb::expandURLSubstitutions(url, LLSD());
-		avatar_picker->navigateTo(url, "text/html");
-	}
+//	LLMediaCtrl* destinations = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
+//	if (destinations)
+//	{
+//		destinations->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
+//		std::string url = gSavedSettings.getString("DestinationGuideURL");
+//		url = LLWeb::expandURLSubstitutions(url, LLSD());
+//		destinations->navigateTo(url, "text/html");
+//	}
+//	LLMediaCtrl* avatar_picker = LLFloaterReg::getInstance("avatar")->findChild<LLMediaCtrl>("avatar_picker_contents");
+//	if (avatar_picker)
+//	{
+//		avatar_picker->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
+//		std::string url = gSavedSettings.getString("AvatarPickerURL");
+//		url = LLWeb::expandURLSubstitutions(url, LLSD());
+//		avatar_picker->navigateTo(url, "text/html");
+//	}
 }
 
 // Destroy the UI
@@ -2836,7 +2842,8 @@ void LLViewerWindow::updateUI()
 	if (gPipeline.hasRenderDebugMask(LLPipeline::RENDER_DEBUG_RAYCAST))
 	{
 		gDebugRaycastFaceHit = -1;
-		gDebugRaycastObject = cursorIntersect(-1, -1, 512.f, NULL, -1, FALSE,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+		gDebugRaycastObject = cursorIntersect(-1, -1, 512.f, NULL, -1, FALSE, FALSE,
 											  &gDebugRaycastFaceHit,
 											  &gDebugRaycastIntersection,
 											  &gDebugRaycastTexCoord,
@@ -2844,6 +2851,15 @@ void LLViewerWindow::updateUI()
 											  &gDebugRaycastTangent,
 											  &gDebugRaycastStart,
 											  &gDebugRaycastEnd);
+// [/SL:KB]
+//		gDebugRaycastObject = cursorIntersect(-1, -1, 512.f, NULL, -1, FALSE,
+//											  &gDebugRaycastFaceHit,
+//											  &gDebugRaycastIntersection,
+//											  &gDebugRaycastTexCoord,
+//											  &gDebugRaycastNormal,
+//											  &gDebugRaycastBinormal,
+//											  &gDebugRaycastStart,
+//											  &gDebugRaycastEnd);
 	}
 
 	updateMouseDelta();
@@ -3100,8 +3116,11 @@ void LLViewerWindow::updateUI()
 					// and blacklist the various containers we don't care about
 					else if (dynamic_cast<LLUICtrl*>(viewp) 
 							&& viewp != gMenuHolder
-							&& viewp != gFloaterView
-							&& viewp != gConsole) 
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+							&& viewp != gFloaterView)
+// [/SL:KB]
+//							&& viewp != gFloaterView
+//							&& viewp != gConsole) 
 					{
 						if (dynamic_cast<LLFloater*>(viewp))
 						{
@@ -3231,13 +3250,13 @@ void LLViewerWindow::updateLayout()
 		//gMenuBarView->setItemVisible("BuildTools", gFloaterTools->getVisible());
 	}
 
-	// Always update console
-	if(gConsole)
-	{
-		LLRect console_rect = getChatConsoleRect();
-		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
-		gConsole->setRect(console_rect);
-	}
+//	// Always update console
+//	if(gConsole)
+//	{
+//		LLRect console_rect = getChatConsoleRect();
+//		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
+//		gConsole->setRect(console_rect);
+//	}
 }
 
 void LLViewerWindow::updateMouseDelta()
@@ -3654,7 +3673,10 @@ BOOL LLViewerWindow::clickPointOnSurfaceGlobal(const S32 x, const S32 y, LLViewe
 	return intersect;
 }
 
-void LLViewerWindow::pickAsync(S32 x, S32 y_from_bot, MASK mask, void (*callback)(const LLPickInfo& info), BOOL pick_transparent)
+//void LLViewerWindow::pickAsync(S32 x, S32 y_from_bot, MASK mask, void (*callback)(const LLPickInfo& info), BOOL pick_transparent)
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+void LLViewerWindow::pickAsync(S32 x, S32 y_from_bot, MASK mask, void (*callback)(const LLPickInfo& info), BOOL pick_transparent, BOOL pick_rigged)
+// [/SL:KB]
 {
 	BOOL in_build_mode = LLFloaterReg::instanceVisible("build");
 	if (in_build_mode || LLDrawPoolAlpha::sShowDebugAlpha)
@@ -3664,7 +3686,10 @@ void LLViewerWindow::pickAsync(S32 x, S32 y_from_bot, MASK mask, void (*callback
 		pick_transparent = TRUE;
 	}
 
-	LLPickInfo pick_info(LLCoordGL(x, y_from_bot), mask, pick_transparent, TRUE, callback);
+//	LLPickInfo pick_info(LLCoordGL(x, y_from_bot), mask, pick_transparent, TRUE, callback);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	LLPickInfo pick_info(LLCoordGL(x, y_from_bot), mask, pick_transparent, pick_rigged, TRUE, callback);
+// [/SL:KB]
 	schedulePick(pick_info);
 }
 
@@ -3720,7 +3745,10 @@ void LLViewerWindow::returnEmptyPicks()
 }
 
 // Performs the GL object/land pick.
-LLPickInfo LLViewerWindow::pickImmediate(S32 x, S32 y_from_bot,  BOOL pick_transparent)
+//LLPickInfo LLViewerWindow::pickImmediate(S32 x, S32 y_from_bot,  BOOL pick_transparent)
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+LLPickInfo LLViewerWindow::pickImmediate(S32 x, S32 y_from_bot,  BOOL pick_transparent, BOOL pick_rigged)
+// [/SL:KB]
 {
 	BOOL in_build_mode = LLFloaterReg::instanceVisible("build");
 	if (in_build_mode || LLDrawPoolAlpha::sShowDebugAlpha)
@@ -3732,7 +3760,10 @@ LLPickInfo LLViewerWindow::pickImmediate(S32 x, S32 y_from_bot,  BOOL pick_trans
 
 	// shortcut queueing in mPicks and just update mLastPick in place
 	MASK	key_mask = gKeyboard->currentMask(TRUE);
-	mLastPick = LLPickInfo(LLCoordGL(x, y_from_bot), key_mask, pick_transparent, TRUE, NULL);
+//	mLastPick = LLPickInfo(LLCoordGL(x, y_from_bot), key_mask, pick_transparent, TRUE, NULL);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	mLastPick = LLPickInfo(LLCoordGL(x, y_from_bot), key_mask, pick_transparent, pick_rigged, TRUE, NULL);
+// [/SL:KB]
 	mLastPick.fetchResults();
 
 	return mLastPick;
@@ -3768,6 +3799,9 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 												LLViewerObject *this_object,
 												S32 this_face,
 												BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+												BOOL pick_rigged,
+// [/SL:KB]
 												S32* face_hit,
 												LLVector4a *intersection,
 												LLVector2 *uv,
@@ -3838,16 +3872,25 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 	{
 		if (this_object->isHUDAttachment()) // is a HUD object?
 		{
-			if (this_object->lineSegmentIntersect(mh_start, mh_end, this_face, pick_transparent,
+//			if (this_object->lineSegmentIntersect(mh_start, mh_end, this_face, pick_transparent,
+//												  face_hit, intersection, uv, normal, tangent))
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+			if (this_object->lineSegmentIntersect(mh_start, mh_end, this_face, pick_transparent, pick_rigged,
 												  face_hit, intersection, uv, normal, tangent))
+
+// [/SL:KB]
 			{
 				found = this_object;
 			}
 		}
 		else // is a world object
 		{
-			if (this_object->lineSegmentIntersect(mw_start, mw_end, this_face, pick_transparent,
+//			if (this_object->lineSegmentIntersect(mw_start, mw_end, this_face, pick_transparent,
+//												  face_hit, intersection, uv, normal, tangent))
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+			if (this_object->lineSegmentIntersect(mw_start, mw_end, this_face, pick_transparent, pick_rigged,
 												  face_hit, intersection, uv, normal, tangent))
+// [/SL:KB]
 			{
 				found = this_object;
 			}
@@ -3860,8 +3903,12 @@ LLViewerObject* LLViewerWindow::cursorIntersect(S32 mouse_x, S32 mouse_y, F32 de
 
 		if (!found) // if not found in HUD, look in world:
 		{
-			found = gPipeline.lineSegmentIntersectInWorld(mw_start, mw_end, pick_transparent,
+//			found = gPipeline.lineSegmentIntersectInWorld(mw_start, mw_end, pick_transparent,
+//														  face_hit, intersection, uv, normal, tangent);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+			found = gPipeline.lineSegmentIntersectInWorld(mw_start, mw_end, pick_transparent, pick_rigged,
 														  face_hit, intersection, uv, normal, tangent);
+// [/SL:KB]
 			if (found && !pick_transparent)
 			{
 				gDebugRaycastIntersection = *intersection;
@@ -5039,45 +5086,45 @@ LLRect 	LLViewerWindow::calcScaledRect(const LLRect & rect, const LLVector2& dis
 	return res;
 }
 
-S32 LLViewerWindow::getChatConsoleBottomPad()
-{
-	S32 offset = 0;
+//S32 LLViewerWindow::getChatConsoleBottomPad()
+//{
+//	S32 offset = 0;
+//
+//	if(gToolBarView)
+//		offset += gToolBarView->getBottomToolbar()->getRect().getHeight();
+//
+//	return offset;
+//}
 
-	if(gToolBarView)
-		offset += gToolBarView->getBottomToolbar()->getRect().getHeight();
-
-	return offset;
-}
-
-LLRect LLViewerWindow::getChatConsoleRect()
-{
-	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
-	LLRect console_rect = full_window;
-
-	const S32 CONSOLE_PADDING_TOP = 24;
-	const S32 CONSOLE_PADDING_LEFT = 24;
-	const S32 CONSOLE_PADDING_RIGHT = 10;
-
-	console_rect.mTop    -= CONSOLE_PADDING_TOP;
-	console_rect.mBottom += getChatConsoleBottomPad();
-
-	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
-
-	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
-
-	if (CHAT_FULL_WIDTH)
-	{
-		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
-	}
-	else
-	{
-		// Make console rect somewhat narrow so having inventory open is
-		// less of a problem.
-		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
-	}
-
-	return console_rect;
-}
+//LLRect LLViewerWindow::getChatConsoleRect()
+//{
+//	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
+//	LLRect console_rect = full_window;
+//
+//	const S32 CONSOLE_PADDING_TOP = 24;
+//	const S32 CONSOLE_PADDING_LEFT = 24;
+//	const S32 CONSOLE_PADDING_RIGHT = 10;
+//
+//	console_rect.mTop    -= CONSOLE_PADDING_TOP;
+//	console_rect.mBottom += getChatConsoleBottomPad();
+//
+//	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
+//
+//	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
+//
+//	if (CHAT_FULL_WIDTH)
+//	{
+//		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
+//	}
+//	else
+//	{
+//		// Make console rect somewhat narrow so having inventory open is
+//		// less of a problem.
+//		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
+//	}
+//
+//	return console_rect;
+//}
 //----------------------------------------------------------------------------
 
 
@@ -5101,7 +5148,10 @@ void LLViewerWindow::setUIVisibility(bool visible)
 	}
 
 	LLNavigationBar::getInstance()->setVisible(visible ? gSavedSettings.getBOOL("ShowNavbarNavigationPanel") : FALSE);
-	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	gStatusBar->showTopInfoBar(visible ? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+// [/SL:KB]
+//	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
 	mRootView->getChildView("status_bar_container")->setVisible(visible);
 }
 
@@ -5128,13 +5178,20 @@ LLPickInfo::LLPickInfo()
 	  mTangent(),
 	  mBinormal(),
 	  mHUDIcon(NULL),
-	  mPickTransparent(FALSE)
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	  mPickTransparent(FALSE),
+	  mPickRigged(FALSE)
+// [/SL:KB]
+//	  mPickTransparent(FALSE)
 {
 }
 
 LLPickInfo::LLPickInfo(const LLCoordGL& mouse_pos, 
 		       MASK keyboard_mask, 
 		       BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+		       BOOL pick_rigged,
+// [/SL:KB]
 		       BOOL pick_uv_coords,
 		       void (*pick_callback)(const LLPickInfo& pick_info))
 	: mMousePt(mouse_pos),
@@ -5150,7 +5207,11 @@ LLPickInfo::LLPickInfo(const LLCoordGL& mouse_pos,
 	  mTangent(),
 	  mBinormal(),
 	  mHUDIcon(NULL),
-	  mPickTransparent(pick_transparent)
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	  mPickTransparent(pick_transparent),
+	  mPickRigged(pick_rigged)
+// [/SL:KB]
+//	  mPickTransparent(pick_transparent)
 {
 }
 
@@ -5174,10 +5235,14 @@ void LLPickInfo::fetchResults()
 		delta.setSub(intersection, origin);
 		icon_dist = delta.getLength3().getF32();
 	}
-
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 	LLViewerObject* hit_object = gViewerWindow->cursorIntersect(mMousePt.mX, mMousePt.mY, 512.f,
-									NULL, -1, mPickTransparent, &face_hit,
+									NULL, -1, mPickTransparent, mPickRigged, &face_hit,
 									&intersection, &uv, &normal, &tangent);
+// [/SL:KB]
+//	LLViewerObject* hit_object = gViewerWindow->cursorIntersect(mMousePt.mX, mMousePt.mY, 512.f,
+//									NULL, -1, mPickTransparent, &face_hit,
+//									&intersection, &uv, &normal, &tangent);
 	
 	mPickPt = mMousePt;
 
@@ -5297,13 +5362,22 @@ void LLPickInfo::getSurfaceInfo()
 
 	if (objectp)
 	{
+//		if (gViewerWindow->cursorIntersect(llround((F32)mMousePt.mX), llround((F32)mMousePt.mY), 1024.f,
+//										   objectp, -1, mPickTransparent,
+//										   &mObjectFace,
+//										   &mIntersection,
+//										   &mSTCoords,
+//										   &mNormal,
+//										   &mBinormal))
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 		if (gViewerWindow->cursorIntersect(llround((F32)mMousePt.mX), llround((F32)mMousePt.mY), 1024.f,
-										   objectp, -1, mPickTransparent,
+										   objectp, -1, mPickTransparent, mPickRigged,
 										   &mObjectFace,
 										   &intersection,
 										   &mSTCoords,
 										   &normal,
 										   &tangent))
+// [/SL:KB]
 		{
 			// if we succeeded with the intersect above, compute the texture coordinates:
 

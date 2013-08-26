@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Açıklama:
 	</text>
+	<panel name="bottom_panel">
 	<button label="SL Dünyasında Oynat" label_selected="SL Dünyasında Oynat" name="Sound play btn" tool_tip="Bu ses başkaların işitebileceği bir şekilde çalınsın"/>
 	<button label="Yerel Olarak Oynat" label_selected="Yerel Olarak Oynat" name="Sound audition btn" tool_tip="Bu ses sadece sizin işitebileceğiniz bir şekilde çalınsın"/>
+	</panel>
 </floater>

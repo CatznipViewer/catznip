@@ -64,7 +64,10 @@ public:
 	BOOL isAssetInLoadedCallbackMap(const LLUUID& asset_uuid);
 
 protected:
-	void onRegionHandle(const LLUUID& landmark_id);
+//	void onRegionHandle(const LLUUID& landmark_id);
+// [SL:KB] - Patch: World-LandmarkList | Checked: 2012-07-30 (Catznip-3.3)
+	void onRegionHandle(const LLUUID& landmark_id, const U64& region_handle);
+// [/SL:KB]
 	void makeCallbacks(const LLUUID& landmark_id);
 
 	typedef std::map<LLUUID, LLLandmark*> landmark_list_t;
