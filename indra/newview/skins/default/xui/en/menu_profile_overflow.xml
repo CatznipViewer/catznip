@@ -38,6 +38,7 @@
     </menu_item_call>
     <menu_item_call
      label="Block"
+     layout="topleft"
      name="block">
         <menu_item_call.on_click
          function="Profile.BlockUnblock"/>
@@ -46,6 +47,7 @@
     </menu_item_call>
     <menu_item_call
      label="Unblock"
+     layout="topleft"
      name="unblock">
         <menu_item_call.on_click
          function="Profile.BlockUnblock"/>
