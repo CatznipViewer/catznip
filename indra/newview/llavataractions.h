@@ -131,6 +131,11 @@ public:
 	 */
 	static void toggleBlock(const LLUUID& id);
 
+	/**
+	 * Block/unblock the avatar voice.
+	 */
+	static void toggleMuteVoice(const LLUUID& id);
+
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
 	/**
 	 * Copy certain avatar details to the clipboard
@@ -138,11 +143,6 @@ public:
 	 */
 	static void copyToClipboard(const LLUUID& id, const LLSD& param);
 // [/SL:KB]
-
-	/**
-	 * Block/unblock the avatar voice.
-	 */
-	static void toggleMuteVoice(const LLUUID& id);
 
 	/**
 	 * Return true if avatar with "id" is a friend
