@@ -181,8 +181,6 @@ protected:
 	virtual void fillAccountStatus(const LLAvatarData* avatar_data);
 
 private:
-	void onNameCache(const LLUUID& agent_id, const LLAvatarName& av_name);
-
 	typedef std::map< std::string,LLUUID>	group_map_t;
 	group_map_t 			mGroups;
 };

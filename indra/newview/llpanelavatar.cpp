@@ -267,7 +267,7 @@ void LLPanelAvatarNotes::processProperties(void* data, EAvatarProcessorType type
 		if(avatar_notes && getAvatarId() == avatar_notes->target_id)
 		{
 			getChild<LLUICtrl>("notes_edit")->setValue(avatar_notes->notes);
-			getChildView("notes edit")->setEnabled(true);
+			getChildView("notes_edit")->setEnabled(true);
 
 			LLAvatarPropertiesProcessor::getInstance()->removeObserver(getAvatarId(),this);
 		}
@@ -508,14 +508,9 @@ void LLPanelAvatarProfile::updateData()
 
 void LLPanelAvatarProfile::resetControls()
 {
-	getChildView("status_panel")->setVisible(true);
 	getChildView("profile_buttons_panel")->setVisible( true);
 	getChildView("title_groups_text")->setVisible(true);
 	getChildView("sl_groups")->setVisible(true);
-
-	getChildView("status_me_panel")->setVisible(false);
-	getChildView("profile_me_buttons_panel")->setVisible(false);
-	getChildView("account_actions_panel")->setVisible(false);
 }
 
 void LLPanelAvatarProfile::resetData()
@@ -523,8 +518,6 @@ void LLPanelAvatarProfile::resetData()
 	mGroups.clear();
 	getChild<LLUICtrl>("2nd_life_pic")->setValue(LLUUID::null);
 	getChild<LLUICtrl>("real_world_pic")->setValue(LLUUID::null);
-	getChild<LLUICtrl>("online_status")->setValue(LLStringUtil::null);
-	getChild<LLUICtrl>("status_message")->setValue(LLStringUtil::null);
 	getChild<LLUICtrl>("sl_description_edit")->setValue(LLStringUtil::null);
 	getChild<LLUICtrl>("fl_description_edit")->setValue(LLStringUtil::null);
 	getChild<LLUICtrl>("sl_groups")->setValue(LLStringUtil::null);
@@ -596,40 +589,6 @@ void LLPanelAvatarProfile::processGroupProperties(const LLAvatarGroups* avatar_g
 	getChild<LLUICtrl>("sl_groups")->setValue(groups);
 }
 
-static void got_full_name_callback( LLHandle<LLPanel> profile_panel_handle, const std::string& full_name )
-{
-	if (profile_panel_handle.isDead() ) return;
-
-	LLPanelAvatarProfile* profile_panel = dynamic_cast<LLPanelAvatarProfile*>(profile_panel_handle.get());
-	if ( ! profile_panel ) return;
-
-	LLStringUtil::format_map_t args;
-
-	std::string name;
-	if (LLAvatarName::useDisplayNames())
-	{
-		name = LLCacheName::buildUsername(full_name);
-	}
-	else
-	{
-		name = full_name;
-	}
-
-	args["[NAME]"] = name;
-
-	std::string linden_name = profile_panel->getString("name_text_args", args);
-	profile_panel->getChild<LLUICtrl>("name_descr_text")->setValue(linden_name);
-}
-
-void LLPanelAvatarProfile::onNameCache(const LLUUID& agent_id, const LLAvatarName& av_name)
-{
-	LLStringUtil::format_map_t args;
-	args["[DISPLAY_NAME]"] = av_name.getDisplayName();
-
-	std::string display_name = getString("display_name_text_args", args);
-	getChild<LLUICtrl>("display_name_descr_text")->setValue(display_name);
-}
-
 void LLPanelAvatarProfile::fillCommonData(const LLAvatarData* avatar_data)
 {
 	//remove avatar id from cache to get fresh info
@@ -641,23 +600,6 @@ void LLPanelAvatarProfile::fillCommonData(const LLAvatarData* avatar_data)
 		LLStringUtil::format(birth_date, LLSD().with("datetime", (S32) avatar_data->born_on.secondsSinceEpoch()));
 		args["[REG_DATE]"] = birth_date;
 	}
-
-	// ask (asynchronously) for the avatar name
-	LLHandle<LLPanel> profile_panel_handle = getHandle();
-	std::string full_name;
-	if (gCacheName->getFullName(avatar_data->agent_id, full_name))
-	{
-		// name in cache, call callback directly
-		got_full_name_callback( profile_panel_handle, full_name );
-	}
-	else
-	{
-		// not in cache, lookup name 
-		gCacheName->get(avatar_data->agent_id, false, boost::bind( got_full_name_callback, profile_panel_handle, _2 ));
-	}
-
-	// get display name
-	LLAvatarNameCache::get(avatar_data->avatar_id, boost::bind(&LLPanelAvatarProfile::onNameCache, this, _1, _2));
 
 	args["[AGE]"] = LLDateUtil::ageFromDate( avatar_data->born_on, LLDate::now());
 	std::string register_date = getString("RegisterDateFormat", args);
