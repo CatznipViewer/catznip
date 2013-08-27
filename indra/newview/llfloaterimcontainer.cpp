@@ -254,6 +254,9 @@ BOOL LLFloaterIMContainerView::postBuild()
 	collapseConversationsPane(gSavedPerAccountSettings.getBOOL("ConversationsListPaneCollapsed"), false);
 	LLAvatarNameCache::addUseDisplayNamesCallback(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
 	mMicroChangedSignal = LLVoiceClient::getInstance()->MicroChangedCallback(boost::bind(&LLFloaterIMContainerView::updateSpeakBtnState, this));
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+	gAgent.setVoiceConnectedChangeCallback(boost::bind(&LLFloaterIMContainerView::updateSpeakBtnState, this));
+// [/SL:KB]
 
 	if (! mMessagesPane->isCollapsed() && ! mConversationsPane->isCollapsed())
 	{

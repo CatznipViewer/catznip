@@ -264,6 +264,22 @@ void LLAgent::parcelChangedCallback()
 	gAgent.mCanEditParcel = can_edit;
 }
 
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+void LLAgent::setVoiceConnected(const bool b)
+{
+	if (mVoiceConnected != b)
+	{
+		mVoiceConnected = b;
+		mVoiceConnectedChangeSignal(b);
+	}
+}
+
+boost::signals2::connection LLAgent::setVoiceConnectedChangeCallback(const voice_connected_change_signal_t::slot_type& cb)
+{
+	return mVoiceConnectedChangeSignal.connect(cb);
+}
+// [/SL:KB]
+
 // static
 bool LLAgent::isActionAllowed(const LLSD& sdname)
 {
