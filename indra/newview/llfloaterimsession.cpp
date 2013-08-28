@@ -798,6 +798,9 @@ void LLFloaterIMSession::sessionInitReplyReceived(const LLUUID& im_session_id)
 
 	initIMFloater();
 	LLFloaterIMSessionTab::updateGearBtn();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	enableDisableCallBtn();
+// [/SL:KB]
 	//*TODO here we should remove "starting session..." warning message if we added it in postBuild() (IB)
 
 	//need to send delayed messages collected while waiting for session initialization

@@ -66,6 +66,17 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mChatLayoutPanel(NULL)
   , mInputPanels(NULL)
   , mChatLayoutPanelHeight(0)
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+  , mBodyStack(NULL)
+  , mParticipantListAndHistoryStack(NULL)
+  , mParticipantListPanel(NULL)
+  , mRightPartPanel(NULL)
+  , mContentPanel(NULL)
+  , mToolbarPanel(NULL)
+  , mInputButtonPanel(NULL)
+  , mExpandCollapseLineBtn(NULL)
+  , mGearBtn(NULL)
+// [/SL:KB]
 {
     setAutoFocus(FALSE);
 	mSession = LLIMModel::getInstance()->findIMSession(mSessionID);
@@ -216,6 +227,11 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 			}
 			// Added floaters share some state (like sort order) with their host
 			conversp->setSortOrder(floater_container->getSortOrder());
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+			conversp->updateShowParticipantList();
+			conversp->updateExpandCollapseBtn();
+			conversp->hideOrShowTitle();
+// [/SL:KB]
 		}
 	}
 }
@@ -341,6 +357,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	{
 		LLFloaterIMSessionTab::onSlide(this);
 	}
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	updateShowParticipantList();
+	updateExpandCollapseBtn();
+// [/SL:KB]
 
 	// The resize limits for LLFloaterIMSessionTab should be updated, based on current values of width of conversation and message panels
 	mParticipantListPanel->getResizeBar()->setResizeListener(boost::bind(&LLFloaterIMSessionTab::assignResizeLimits, this));
@@ -611,7 +631,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 		mConversationsRoot->arrangeAll();
 		mConversationsRoot->update();
 	}
-	updateHeaderAndToolbar();
+//	updateHeaderAndToolbar();
 	refresh();
 }
 
@@ -710,65 +730,86 @@ void LLFloaterIMSessionTab::hideAllStandardButtons()
 	}
 }
 
-void LLFloaterIMSessionTab::updateHeaderAndToolbar()
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 {
-	// prevent start conversation before its container
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-    LLFloaterIMContainerBase::getInstance();
-// [/SL:KB]
-//    LLFloaterIMContainer::getInstance();
-
-//	bool is_not_torn_off = !checkIfTornOff();
-// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
+	// Display collapse image (<<) if the floater is hosted
+	// or if it is torn off but has an open control panel.
 	bool is_not_torn_off = !isTornOff();
+	bool is_expanded = is_not_torn_off || mParticipantListPanel->getVisible();
+   
+	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
+	mExpandCollapseBtn->setToolTip(
+			is_not_torn_off ? getString("expcol_button_not_tearoff_tooltip")
+			                : (is_expanded ? getString("expcol_button_tearoff_and_expanded_tooltip") :
+			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
+
+	// The button (>>) should be disabled for torn off P2P conversations.
+	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
+}
+
+void LLFloaterIMSessionTab::updateShowParticipantList()
+{
+	// Participant list should be visible only in torn off floaters.
+	bool is_participant_list_visible = isTornOff() && mIsParticipantListExpanded && !mIsP2PChat;
+	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
+    mParticipantListPanel->setVisible(is_participant_list_visible);
+}
 // [/SL:KB]
+
+//void LLFloaterIMSessionTab::updateHeaderAndToolbar()
+//{
+//	// prevent start conversation before its container
+//    LLFloaterIMContainer::getInstance();
+//
+//	bool is_not_torn_off = !checkIfTornOff();
 //	if (is_not_torn_off)
 //	{
 //		hideAllStandardButtons();
 //	}
-
-	hideOrShowTitle();
-
-	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible =
-			!is_not_torn_off
-			&& mIsParticipantListExpanded
-			&& !mIsP2PChat;
-
-	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
-    mParticipantListPanel->setVisible(is_participant_list_visible);
-
-	// Display collapse image (<<) if the floater is hosted
-	// or if it is torn off but has an open control panel.
-	bool is_expanded = is_not_torn_off || is_participant_list_visible;
-    
-	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
-	mExpandCollapseBtn->setToolTip(
-			is_not_torn_off?
-				getString("expcol_button_not_tearoff_tooltip") :
-				(is_expanded?
-					getString("expcol_button_tearoff_and_expanded_tooltip") :
-					getString("expcol_button_tearoff_and_collapsed_tooltip")));
-
-	// toggle floater's drag handle and title visibility
-	if (mDragHandle)
-	{
-		mDragHandle->setTitleVisible(!is_not_torn_off);
-	}
-
-	// The button (>>) should be disabled for torn off P2P conversations.
-	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
-
+//
+//	hideOrShowTitle();
+//
+//	// Participant list should be visible only in torn off floaters.
+//	bool is_participant_list_visible =
+//			!is_not_torn_off
+//			&& mIsParticipantListExpanded
+//			&& !mIsP2PChat;
+//
+//	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
+//    mParticipantListPanel->setVisible(is_participant_list_visible);
+//
+//	// Display collapse image (<<) if the floater is hosted
+//	// or if it is torn off but has an open control panel.
+//	bool is_expanded = is_not_torn_off || is_participant_list_visible;
+//    
+//	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
+//	mExpandCollapseBtn->setToolTip(
+//			is_not_torn_off?
+//				getString("expcol_button_not_tearoff_tooltip") :
+//				(is_expanded?
+//					getString("expcol_button_tearoff_and_expanded_tooltip") :
+//					getString("expcol_button_tearoff_and_collapsed_tooltip")));
+//
+//	// toggle floater's drag handle and title visibility
+//	if (mDragHandle)
+//	{
+//		mDragHandle->setTitleVisible(!is_not_torn_off);
+//	}
+//
+//	// The button (>>) should be disabled for torn off P2P conversations.
+//	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
+//
 //	mTearOffBtn->setImageOverlay(getString(is_not_torn_off? "tear_off_icon" : "return_icon"));
 //	mTearOffBtn->setToolTip(getString(is_not_torn_off? "tooltip_to_separate_window" : "tooltip_to_main_window"));
-
-
+//
+//
 //	mCloseBtn->setVisible(is_not_torn_off && !mIsNearbyChat);
-
-	enableDisableCallBtn();
-
-	showTranslationCheckbox();
-}
+//
+//	enableDisableCallBtn();
+//
+//	showTranslationCheckbox();
+//}
  
 void LLFloaterIMSessionTab::forceReshape()
 {
@@ -879,6 +920,10 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 	}
 
 	self->assignResizeLimits();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	self->updateShowParticipantList();
+	self->updateExpandCollapseBtn();
+// [/SL:KB]
 }
 
 void LLFloaterIMSessionTab::onCollapseToLine(LLFloaterIMSessionTab* self)
@@ -1018,6 +1063,11 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 
 	refreshConversation();
 	updateGearBtn();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	updateShowParticipantList();
+	updateExpandCollapseBtn();
+	hideOrShowTitle();
+// [/SL:KB]
 }
 
 void LLFloaterIMSessionTab::updateGearBtn()
