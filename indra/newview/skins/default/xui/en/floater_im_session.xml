@@ -150,6 +150,7 @@
                  tool_tip="Add someone to this conversation"
                  width="31"/>
                 <button
+                 enabled="false"
                  follows="top|left"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"

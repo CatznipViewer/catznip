@@ -172,7 +172,7 @@ void LLFloaterIMNearbyChat::closeHostedFloater()
 void LLFloaterIMNearbyChat::refresh()
 {
 	displaySpeakingIndicator();
-	updateCallBtnState(LLVoiceClient::getInstance()->getUserPTTState());
+//	updateCallBtnState(LLVoiceClient::getInstance()->getUserPTTState());
 
 	// *HACK: Update transparency type depending on whether our children have focus.
 	// This is needed because this floater is chrome and thus cannot accept focus, so
@@ -689,22 +689,22 @@ void LLFloaterIMNearbyChat::onChatBoxCommit()
 
 void LLFloaterIMNearbyChat::displaySpeakingIndicator()
 {
-	LLSpeakerMgr::speaker_list_t speaker_list;
-	LLUUID id;
+//	LLSpeakerMgr::speaker_list_t speaker_list;
+//	LLUUID id;
 
-	id.setNull();
+//	id.setNull();
 	mSpeakerMgr->update(FALSE);
-	mSpeakerMgr->getSpeakerList(&speaker_list, FALSE);
-
-	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
-	{
-		LLPointer<LLSpeaker> s = *i;
-		if (s->mSpeechVolume > 0 || s->mStatus == LLSpeaker::STATUS_SPEAKING)
-		{
-			id = s->mID;
-			break;
-		}
-	}
+//	mSpeakerMgr->getSpeakerList(&speaker_list, FALSE);
+//
+//	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
+//	{
+//		LLPointer<LLSpeaker> s = *i;
+//		if (s->mSpeechVolume > 0 || s->mStatus == LLSpeaker::STATUS_SPEAKING)
+//		{
+//			id = s->mID;
+//			break;
+//		}
+//	}
 }
 
 void LLFloaterIMNearbyChat::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)
