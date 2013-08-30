@@ -128,7 +128,7 @@ S32 LLHighlightEntry::findPattern(const std::string& text, S32 cat_mask) const
 	{
 		case CONTAINS:
 			{
-				auto itRange = (mCaseSensitive) ? boost::find_first(text, mPattern) : boost::ifind_first(text, mPattern);
+				boost::iterator_range<std::string::const_iterator> itRange = (mCaseSensitive) ? boost::find_first(text, mPattern) : boost::ifind_first(text, mPattern);
 				if (!itRange.empty())
 					idxFound = itRange.begin() - text.begin();
 			}
@@ -334,7 +334,8 @@ LLTextParser::partial_results_t LLTextParser::parsePartialLineHighlights(const s
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 bool LLTextParser::parseFullLineHighlights(const std::string& text, S32 cat_mask, const LLHighlightEntry** ppEntry) const
 {
-	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
+	for (highlight_list_t::const_iterator itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
+	
 	{
 		const LLHighlightEntry& entry = *itEntry;
 		if ( (entry.mHighlightType == LLHighlightEntry::ALL) || (entry.mCondition == LLHighlightEntry::MATCHES) )
@@ -444,7 +445,7 @@ void LLTextParser::saveToDisk() const
 		return;
 	}
 
-	for (auto itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
+	for (highlight_list_t::const_iterator itEntry = mHighlightEntries.begin(); itEntry != mHighlightEntries.end(); ++itEntry)
 		fileHighlights << LLSDOStreamer<LLSDNotationFormatter>(itEntry->toLLSD()) << std::endl;
 	fileHighlights.close();
 }

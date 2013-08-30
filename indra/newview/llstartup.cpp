@@ -3539,7 +3539,7 @@ void handleLoadChatAlertSounds()
 	const LLTextParser::highlight_list_t& highlights = LLTextParser::instance().getHighlights();
 
 	uuid_vec_t assetIDs;
-	for (auto itHighlight = highlights.cbegin(); itHighlight != highlights.cend(); ++itHighlight)
+	for (LLTextParser::highlight_list_t::const_iterator itHighlight = highlights.begin(); itHighlight != highlights.end(); ++itHighlight)
 	{
 		const LLHighlightEntry& entry = *itHighlight;
 		if ( (entry.mSoundAsset.notNull()) && (assetIDs.end() == std::find(assetIDs.begin(), assetIDs.end(), entry.mSoundAsset)) )
@@ -3548,7 +3548,7 @@ void handleLoadChatAlertSounds()
 		}
 	}
 
-	for (auto itAssetID = assetIDs.begin(); itAssetID != assetIDs.end(); ++itAssetID)
+	for (uuid_vec_t::const_iterator itAssetID = assetIDs.begin(); itAssetID != assetIDs.end(); ++itAssetID)
 	{
 		if ( (gAssetStorage) && (!gAssetStorage->hasLocalAsset(*itAssetID, LLAssetType::AT_SOUND)) && (gAudiop) )
 		{
