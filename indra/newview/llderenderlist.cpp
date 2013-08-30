@@ -69,12 +69,12 @@ LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode, bool fPersist)
 LLDerenderEntry::LLDerenderEntry(const LLSD& sdData)
 	: fPersists(true), idRegion(0), idRootLocal(0)
 {
-	strObjectName = sdData["object_name"];
+	strObjectName = sdData["object_name"].asString();
 	if (strObjectName.empty())
 		strObjectName = LLTrans::getString("Unknown");
 	idObject = sdData["object_id"].asUUID();
 
-	strRegionName = sdData["region_name"];
+	strRegionName = sdData["region_name"].asString();
 	if (strRegionName.empty())
 		strRegionName = LLTrans::getString("Unknown");
 	posRegion.setValue(sdData["region_pos"]);
@@ -209,7 +209,7 @@ void LLDerenderList::removeObject(const LLUUID& idObject)
 
 void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 {
-	std::map<LLViewerRegion*, std::list<U32>> idRegionObjectMap; bool fSave = false;
+	std::map<LLViewerRegion*, std::list<U32> > idRegionObjectMap; bool fSave = false;
 	for (uuid_vec_t::const_iterator itObject = idsObject.begin(); itObject != idsObject.end(); ++itObject)
 	{
 		entry_list_t::iterator itEntry = findEntry(*itObject);
