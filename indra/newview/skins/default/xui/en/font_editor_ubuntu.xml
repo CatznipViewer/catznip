@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<fonts>
+  <font name="EditorFont">
+    <file>Ubuntu.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="BOLD">
+    <file>Ubuntu-Bold.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="ITALIC">
+    <file>Ubuntu-Italic.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="BOLD|ITALIC">
+    <file>Ubuntu-BoldItalic.ttf</file>
+  </font>
+
+  <font_size name="Large" font="EditorFont" size="11.6" />
+  <font_size name="Medium" font="EditorFont" size="9.6" />
+  <font_size name="Small" font="EditorFont" size="8.6" />
+</fonts>
