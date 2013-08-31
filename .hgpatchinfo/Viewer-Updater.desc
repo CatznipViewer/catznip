@@ -1,0 +1,4 @@
+[Viewer/Updater]
+- changed : point the updater service to catznip.com
+- changed : keep the full set of update information available (see LLUpdateDownloader::Implementation::mDownloadData["update_data"])
+- changed : use the "more_info" URL for an update's release notes (only fall-back to the RELEASE_NOTES_BASE_URL release notes if unspecified)
