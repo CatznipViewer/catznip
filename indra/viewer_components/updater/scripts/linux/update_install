@@ -217,4 +217,4 @@ rm -f "$tarball"
 
 # Launch the updated viewer. Restore original stderr from file descriptor 3,
 # though -- otherwise updater.log gets cluttered with the viewer log!
-"$INSTALL_DIR/secondlife" 2>&3- &
+"$INSTALL_DIR/catznip" 2>&3- &
