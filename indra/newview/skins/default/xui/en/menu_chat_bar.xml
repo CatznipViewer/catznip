@@ -50,6 +50,19 @@
      function="CheckControl"
      parameter="ShowBlockedChat" />
   </menu_item_check>
+  <menu_item_check
+   label="Translate Nearby Chat"
+   layout="topleft"
+   name="Translate Nearby Chat">
+    <menu_item_check.on_click
+     function="ToggleControl"
+     parameter="TranslateChat" />
+    <menu_item_check.on_check
+     function="CheckControl"
+     parameter="TranslateChat" />
+    <menu_item_check.on_enable
+     function="Translate.IsConfigured" />
+  </menu_item_check>
  
   <menu_item_separator />
   

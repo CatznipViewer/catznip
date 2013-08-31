@@ -71,8 +71,8 @@ public:
     static LLFloaterIMSessionTab* findConversation(const LLUUID& uuid);
     static LLFloaterIMSessionTab* getConversation(const LLUUID& uuid);
 
-	// show/hide the translation check box
-	void showTranslationCheckbox(const BOOL visible = FALSE);
+//	// show/hide the translation check box
+//	void showTranslationCheckbox(const BOOL visible = FALSE);
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	const LLUUID& getSessionID() const { return mSessionID; }

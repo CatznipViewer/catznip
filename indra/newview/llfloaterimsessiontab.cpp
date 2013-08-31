@@ -894,10 +894,10 @@ void LLFloaterIMSessionTab::reshapeChatLayoutPanel()
 	mChatLayoutPanel->reshape(mChatLayoutPanel->getRect().getWidth(), mInputEditor->getRect().getHeight() + mInputEditorPad, FALSE);
 }
 
-void LLFloaterIMSessionTab::showTranslationCheckbox(BOOL show)
-{
-	mTranslationCheckBox->setVisible(mIsNearbyChat && show);
-}
+//void LLFloaterIMSessionTab::showTranslationCheckbox(BOOL show)
+//{
+//	mTranslationCheckBox->setVisible(mIsNearbyChat && show);
+//}
 
 // static
 void LLFloaterIMSessionTab::processChatHistoryStyleUpdate(bool clean_messages/* = false*/)
