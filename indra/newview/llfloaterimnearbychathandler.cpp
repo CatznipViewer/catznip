@@ -558,7 +558,7 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 	sChatWatcher->post(chat);
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container");
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
 // [/SL:KB]
 //    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 

@@ -129,6 +129,7 @@ void LLFloaterIMContainerView::sessionActivated(const LLUUID& session_id, const 
 	{
 		setVisibleAndFrontmost(false);
 	}
+//	selectConversationPair(session_id, true);
 	collapseMessagesPane(false);
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	LLFloaterIMContainerBase::sessionActivated(session_id, name, other_participant_id);
@@ -138,10 +139,10 @@ void LLFloaterIMContainerView::sessionActivated(const LLUUID& session_id, const 
 void LLFloaterIMContainerView::sessionVoiceOrIMStarted(const LLUUID& session_id)
 {
 	addConversationListItem(session_id);
+//	LLFloaterIMSessionTab::addToHost(session_id);
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	LLFloaterIMContainerBase::sessionVoiceOrIMStarted(session_id);
 // [/SL:KB]
-//	LLFloaterIMSessionTab::addToHost(session_id);
 }
 
 void LLFloaterIMContainerView::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
@@ -2233,7 +2234,10 @@ void LLFloaterIMContainerView::closeFloater(bool app_quitting/* = false*/)
 
 void LLFloaterIMContainerView::handleReshape(const LLRect& rect, bool by_user)
 {
-	LLMultiFloater::handleReshape(rect, by_user);
+//	LLMultiFloater::handleReshape(rect, by_user);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	LLFloaterIMContainerBase::handleReshape(rect, by_user);
+// [/SL:KB]
 	storeRectControl();
 }
 

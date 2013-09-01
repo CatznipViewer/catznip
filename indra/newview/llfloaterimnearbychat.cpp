@@ -327,18 +327,11 @@ void LLFloaterIMNearbyChat::onClose(bool app_quitting)
 // virtual
 void LLFloaterIMNearbyChat::onClickCloseBtn()
 {
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-	if (!getHost())
+	if (!isTornOff())
 	{
-		// If nearby chat is currently torn off just hide the floater when closing it
-		setVisible(FALSE);
+		return;
 	}
-// [/SL:KB]
-//	if (!isTornOff())
-//	{
-//		return;
-//	}
-//	closeHostedFloater();
+	closeHostedFloater();
 }
 
 void LLFloaterIMNearbyChat::onChatFontChange(LLFontGL* fontp)
@@ -423,7 +416,7 @@ BOOL LLFloaterIMNearbyChat::handleKeyHere( KEY key, MASK mask )
 	}
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	return LLFloaterIMSessionTab::handleKeyHere(key, mask);
+	return (!handled) ? LLFloaterIMSessionTab::handleKeyHere(key, mask) : TRUE;
 // [/SL:KB]
 //	if((mask == MASK_ALT) && isTornOff())
 //	{
@@ -478,11 +471,11 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		// This is only needed on CHUI
-		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());
+		// NOTE: this is only needed on CHUI
+		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 		if (im_box)
 		{
-			im_box->flashConversationItemWidget(mSessionID, false);
+			im_box->setConversationFlashing(mSessionID, false);
 		}
 	}
 // [/SL:KB]

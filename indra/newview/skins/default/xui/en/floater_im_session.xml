@@ -91,7 +91,7 @@
              name="toolbar_panel"
              height="25">
                 <button
-                 follows="right|top"
+                 follows="top|left"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"
                  image_overlay="Conv_toolbar_collapse"

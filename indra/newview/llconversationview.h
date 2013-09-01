@@ -133,10 +133,10 @@ public:
 
 	struct Params : public LLInitParam::Block<Params, LLFolderViewItem::Params>
 	{
+//        Optional<LLFloaterIMContainer*>			container;
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
         Optional<LLFloaterIMContainerView*>			container;
 // [/SL:KB]
-//        Optional<LLFloaterIMContainer*>			container;
 		Optional<LLUUID>	                    participant_id;
         Optional<LLAvatarIconCtrl::Params>	    avatar_icon;
 		Optional<LLButton::Params>				info_button;

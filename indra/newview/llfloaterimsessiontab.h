@@ -125,13 +125,12 @@ protected:
 	void updateCallBtnState(bool callIsActive);
 
 	void hideOrShowTitle(); // toggle the floater's drag handle
-	void hideAllStandardButtons();
+//	void hideAllStandardButtons();
 
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
 	void updateExpandCollapseBtn();
 	void updateShowParticipantList();
 // [/SL:KB]
-
 //	/// Update floater header and toolbar buttons when hosted/torn off state is toggled.
 //	void updateHeaderAndToolbar();
 

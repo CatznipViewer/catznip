@@ -98,7 +98,7 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, bool flashing)
 {
 	LLFloater* pIMSession = get_ptr_in_map(getSessionMap(), session_id);
-	LLFloater* pCurSession = LLMultiFloater::getActiveFloater();
+	LLFloater* pCurSession = getActiveFloater();
 	if( (pIMSession) && (pCurSession) )
 	{
 		if (!flashing)

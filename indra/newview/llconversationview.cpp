@@ -139,7 +139,7 @@ void LLConversationViewSession::setHighlightState(bool hihglight_state)
 void LLConversationViewSession::startFlashing()
 {
 //	LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-31 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
 // [/SL:KB]
 

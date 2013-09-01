@@ -37,6 +37,7 @@
 
 bool LLFloaterIMContainerBase::sTabbedContainer = false;
 
+// Checked: 2013-09-01 (Catznip-3.6)
 LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
 	: LLMultiFloater(seed, params)
 {
@@ -47,6 +48,7 @@ LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Param
 	LLTransientFloaterMgr::getInstance()->addControlView(LLTransientFloaterMgr::IM, this);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 {
 	if (!LLSingleton<LLIMMgr>::destroyed())
@@ -57,6 +59,7 @@ LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 	LLTransientFloaterMgr::getInstance()->removeControlView(LLTransientFloaterMgr::IM, this);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 BOOL LLFloaterIMContainerBase::postBuild()
 {
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
@@ -66,6 +69,7 @@ BOOL LLFloaterIMContainerBase::postBuild()
 	return TRUE;
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::setMinimized(BOOL b)
 {
 	bool was_minimized = isMinimized();
@@ -74,9 +78,10 @@ void LLFloaterIMContainerBase::setMinimized(BOOL b)
 	// Switching from minimized to un-minimized
 	if (was_minimized && !b)
 	{
+//		gToolBarView->flashCommand(LLCommandId("chat"), false);
+
 		const LLUUID& session_id = getSelectedSession();
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
-
 		if (session_floater && !session_floater->isTornOff())
 		{
 			// When in DND mode, remove stored IM notifications
@@ -89,7 +94,7 @@ void LLFloaterIMContainerBase::setMinimized(BOOL b)
 	}
 }
 
-// virtual
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point)
 {
 	if (!floaterp)
@@ -107,7 +112,7 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	// Add the floater
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
-	LLIconCtrl* icon = 0;
+	LLIconCtrl* icon = NULL;
 	if (gAgent.isInGroup(session_id, TRUE))
 	{
 		LLGroupIconCtrl::Params icon_params;
@@ -141,27 +146,32 @@ void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)
 	}
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::onCloseFloater(const LLUUID& session_id)
 {
 	mSessions.erase(session_id);
 	setFocus(TRUE);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
 {
 	LLFloaterIMSessionTab::addToHost(session_id);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id)
 {
 	selectConversationPair(session_id, true);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::sessionVoiceOrIMStarted(const LLUUID& session_id)
 {
 	LLFloaterIMSessionTab::addToHost(session_id);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
 {
 	// The general strategy when a session id is modified is to delete all related objects and create them anew.
@@ -175,6 +185,7 @@ void LLFloaterIMContainerBase::sessionIDUpdated(const LLUUID& old_session_id, co
 	LLFloaterIMSessionTab::addToHost(new_session_id);
 }
 
+// Checked: 2013-09-01 (Catznip-3.6)
 void LLFloaterIMContainerBase::sessionRemoved(const LLUUID& session_id)
 {
 }

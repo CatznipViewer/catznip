@@ -441,19 +441,24 @@ void LLFloaterIMSessionTab::onFocusLost()
 
 void LLFloaterIMSessionTab::onInputEditorClicked()
 {
-//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
-//	if (im_box)
-//	{
-//		im_box->flashConversationItemWidget(mSessionID,false);
-//	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 	if (im_box)
 	{
 		im_box->setConversationFlashing(mSessionID, false);
 	}
+
+	if (getSessionID().isNull())
+		gToolBarView->flashCommand(LLCommandId("chat"), false);
+	else
+		gToolBarView->flashCommand(LLCommandId("conversations"), false);
 // [/SL:KB]
-	gToolBarView->flashCommand(LLCommandId("chat"), false);
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(mSessionID,false);
+//	}
+//	gToolBarView->flashCommand(LLCommandId("chat"), false);
 }
 
 std::string LLFloaterIMSessionTab::appendTime()
@@ -736,17 +741,17 @@ void LLFloaterIMSessionTab::updateSessionName(const std::string& name)
 	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + name);
 }
 
-void LLFloaterIMSessionTab::hideAllStandardButtons()
-{
-	for (S32 i = 0; i < BUTTON_COUNT; i++)
-	{
-		if (mButtons[i])
-		{
-			// Hide the standard header buttons in a docked IM floater.
-			mButtons[i]->setVisible(false);
-		}
-	}
-}
+//void LLFloaterIMSessionTab::hideAllStandardButtons()
+//{
+//	for (S32 i = 0; i < BUTTON_COUNT; i++)
+//	{
+//		if (mButtons[i])
+//		{
+//			// Hide the standard header buttons in a docked IM floater.
+//			mButtons[i]->setVisible(false);
+//		}
+//	}
+//}
 
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
 void LLFloaterIMSessionTab::updateExpandCollapseBtn()
@@ -1241,23 +1246,27 @@ BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		// LLFloaterIMContainerView needs custom handling of the navigaion keys
+		BOOL handled = FALSE;
 		if (mask == MASK_ALT)
 		{
 			LLFloaterIMContainerView* floater_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
-			if (KEY_RETURN == key && isTornOff())
+			if (KEY_RETURN == key && !isTornOff())
 			{
 				floater_container->expandConversation();
+				handled = TRUE;
 			}
 			if ((KEY_UP == key) || (KEY_LEFT == key) && !isTornOff())
 			{
 				floater_container->selectNextorPreviousConversation(false);
+				handled = TRUE;
 			}
 			if ((KEY_DOWN == key ) || (KEY_RIGHT == key) && !isTornOff())
 			{
 				floater_container->selectNextorPreviousConversation(true);
+				handled = TRUE;
 			}
 		}
-		return TRUE;
+		return handled;
 	}
 
 	// The LLTabContainer parent will handle the navigation keys

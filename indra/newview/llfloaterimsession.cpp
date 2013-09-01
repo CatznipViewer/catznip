@@ -946,11 +946,11 @@ void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* user
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		// This is only needed on CHUI
-		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());
+		// NOTE: this is only needed on CHUI
+		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 		if (im_box)
 		{
-			im_box->flashConversationItemWidget(self->mSessionID, false);
+			im_box->setConversationFlashing(self->mSessionID, false);
 		}
 	}
 // [/SL:KB]
