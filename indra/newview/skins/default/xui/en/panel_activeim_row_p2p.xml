@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ background_opaque="false"
+ background_visible="true"
+ bg_alpha_color="0.0 0.0 0.0 0.0"
+ follows="left|right"
+ height="35"
+ layout="topleft"
+ left="0"
+ name="panel_activeim_row"
+ top="0"
+ width="318">
+  <chiclet_im_p2p
+   follows="left"
+   height="25"
+   layout="topleft"
+   left="5"
+   name="p2p_chiclet"
+   top="5"
+   width="25"
+   speaker.auto_update="true"
+   speaker.draw_border="false"
+   speaker.height="25"
+   speaker.left="25"
+   speaker.name="speaker_p2p"
+   speaker.top="25"
+   speaker.visible="false"
+   speaker.width="20" />
+  <text
+   font="SansSerifBold"
+   follows="right|left"
+   height="15"
+   layout="topleft"
+   left_pad="10"
+   length="1"
+   name="contact_name"
+   parse_urls="false"
+   top="10"
+   translate="false"
+   type="string"
+   use_ellipses="true"
+   valign="center"
+   width="250">
+    TestString PleaseIgnore
+  </text>
+  <button
+   follows="right"
+   height="17"
+   image_selected="Toast_CloseBtn"
+   image_unselected="Toast_CloseBtn"
+   label=""
+   layout="topleft"
+   mouse_opaque="true"
+   name="hide_btn"
+   right="-5"
+   tab_stop="false"
+   top="9"
+   width="17" />
+</panel>

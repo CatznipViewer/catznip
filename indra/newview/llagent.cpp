@@ -266,6 +266,22 @@ void LLAgent::parcelChangedCallback()
 	gAgent.mCanEditParcel = can_edit;
 }
 
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+void LLAgent::setVoiceConnected(const bool b)
+{
+	if (mVoiceConnected != b)
+	{
+		mVoiceConnected = b;
+		mVoiceConnectedChangeSignal(b);
+	}
+}
+
+boost::signals2::connection LLAgent::setVoiceConnectedChangeCallback(const voice_connected_change_signal_t::slot_type& cb)
+{
+	return mVoiceConnectedChangeSignal.connect(cb);
+}
+// [/SL:KB]
+
 // static
 bool LLAgent::isActionAllowed(const LLSD& sdname)
 {
@@ -2040,14 +2056,32 @@ void LLAgent::endAnimationUpdateUI()
 				skip_list.insert(LLFloaterReg::findInstance("mini_map"));
 			}
 
-			LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
-			LLFloaterIMContainer::floater_list_t conversations;
-			im_box->getDetachedConversationFloaters(conversations);
-			BOOST_FOREACH(LLFloater* conversation, conversations)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-31 (Catznip-3.6)
+			LLFloater* nearbychat_floater = LLFloaterReg::findInstance("nearby_chat");
+			if ( (nearbychat_floater) && (nearbychat_floater->isDetachedAndNotMinimized()) )
 			{
-				llinfos << "skip_list.insert(session_floater): " << conversation->getTitle() << llendl;
-				skip_list.insert(conversation);
+				skip_list.insert(nearbychat_floater);
 			}
+
+			LLFloaterReg::const_instance_list_t& session_list = LLFloaterReg::getFloaterList("impanel");
+			for (LLFloaterReg::const_instance_list_t::const_iterator itSession = session_list.begin(); itSession != session_list.end(); ++itSession)
+			{
+				LLFloater* session_floater = *itSession;
+				if (session_floater->isDetachedAndNotMinimized())
+				{
+					llinfos << "skip_list.insert(session_floater): " << session_floater->getTitle() << llendl;
+					skip_list.insert(session_floater);
+				}
+			}
+// [/SL:KB]
+//			LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//			LLFloaterIMContainer::floater_list_t conversations;
+//			im_box->getDetachedConversationFloaters(conversations);
+//			BOOST_FOREACH(LLFloater* conversation, conversations)
+//			{
+//				llinfos << "skip_list.insert(session_floater): " << conversation->getTitle() << llendl;
+//				skip_list.insert(conversation);
+//			}
 
 			gFloaterView->popVisibleAll(skip_list);
 #endif

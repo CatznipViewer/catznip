@@ -188,7 +188,10 @@ bool LLFloaterIMSession::enableGearMenuItem(const LLSD& userdata)
     uuid_vec_t selected_uuids;
     selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->enableContextMenuItem(command, selected_uuids);
 }
 
@@ -198,7 +201,10 @@ void LLFloaterIMSession::GearDoToSelected(const LLSD& userdata)
     uuid_vec_t selected_uuids;
     selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	floater_container->doToParticipants(command, selected_uuids);
 }
 
@@ -208,7 +214,10 @@ bool LLFloaterIMSession::checkGearMenuItem(const LLSD& userdata)
 	uuid_vec_t selected_uuids;
 	selected_uuids.push_back(mOtherParticipantUUID);
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
 
@@ -568,7 +577,10 @@ LLFloaterIMSession* LLFloaterIMSession::show(const LLUUID& session_id)
 	if (!floater)
 		return NULL;
 
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 
 	// Do not add again existing floaters
 	if (!exist)
@@ -701,8 +713,11 @@ BOOL LLFloaterIMSession::getVisible()
 
 	if(isChatMultiTab())
 	{
-		LLFloaterIMContainer* im_container =
-				LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* im_container =
+//				LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* im_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 		
 		// Treat inactive floater as invisible.
 		bool is_active = im_container->getActiveFloater() == this;
@@ -740,31 +755,31 @@ void LLFloaterIMSession::setFocus(BOOL focus)
 }
 
 //static
-bool LLFloaterIMSession::toggle(const LLUUID& session_id)
-{
-	if(!isChatMultiTab())
-	{
-		LLFloaterIMSession* floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>(
-				"impanel", session_id);
-		if (floater && floater->getVisible() && floater->hasFocus())
-		{
-			// clicking on chiclet to close floater just hides it to maintain existing
-			// scroll/text entry state
-			floater->setVisible(false);
-			return false;
-		}
-		else if(floater && (!floater->isDocked() || floater->getVisible() && !floater->hasFocus()))
-		{
-			floater->setVisible(TRUE);
-			floater->setFocus(TRUE);
-			return true;
-		}
-	}
-
-	// ensure the list of messages is updated when floater is made visible
-	show(session_id);
-	return true;
-}
+//bool LLFloaterIMSession::toggle(const LLUUID& session_id)
+//{
+//	if(!isChatMultiTab())
+//	{
+//		LLFloaterIMSession* floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>(
+//				"impanel", session_id);
+//		if (floater && floater->getVisible() && floater->hasFocus())
+//		{
+//			// clicking on chiclet to close floater just hides it to maintain existing
+//			// scroll/text entry state
+//			floater->setVisible(false);
+//			return false;
+//		}
+//		else if(floater && (!floater->isDocked() || floater->getVisible() && !floater->hasFocus()))
+//		{
+//			floater->setVisible(TRUE);
+//			floater->setFocus(TRUE);
+//			return true;
+//		}
+//	}
+//
+//	// ensure the list of messages is updated when floater is made visible
+//	show(session_id);
+//	return true;
+//}
 
 void LLFloaterIMSession::sessionInitReplyReceived(const LLUUID& im_session_id)
 {
@@ -779,6 +794,9 @@ void LLFloaterIMSession::sessionInitReplyReceived(const LLUUID& im_session_id)
 
 	initIMFloater();
 	LLFloaterIMSessionTab::updateGearBtn();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	enableDisableCallBtn();
+// [/SL:KB]
 	//*TODO here we should remove "starting session..." warning message if we added it in postBuild() (IB)
 
 	//need to send delayed messages collected while waiting for session initialization
@@ -920,11 +938,22 @@ void LLFloaterIMSession::onInputEditorFocusLost(LLFocusableElement* caller, void
 void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* userdata)
 {
 	LLFloaterIMSession* self = (LLFloaterIMSession*)userdata;
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
-	if (im_box)
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(self->mSessionID,false);
+//	}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		im_box->flashConversationItemWidget(self->mSessionID,false);
+		// This is only needed on CHUI
+		LLFloaterIMContainerView* im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::findInstance());
+		if (im_box)
+		{
+			im_box->flashConversationItemWidget(self->mSessionID, false);
+		}
 	}
+// [/SL:KB]
 	std::string text = self->mInputEditor->getText();
 
 		// Deleting all text counts as stopping typing.
@@ -1291,11 +1320,11 @@ void LLFloaterIMSession::sRemoveTypingIndicator(const LLSD& data)
 	floater->removeTypingIndicator();
 }
 
-// static
-void LLFloaterIMSession::onIMChicletCreated( const LLUUID& session_id )
-{
-	LLFloaterIMSession::addToHost(session_id);
-}
+//// static
+//void LLFloaterIMSession::onIMChicletCreated( const LLUUID& session_id )
+//{
+//	LLFloaterIMSession::addToHost(session_id);
+//}
 
 boost::signals2::connection LLFloaterIMSession::setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb)
 {

@@ -74,6 +74,9 @@ public:
 	// show/hide the translation check box
 	void showTranslationCheckbox(const BOOL visible = FALSE);
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	const LLUUID& getSessionID() const { return mSessionID; }
+// [/SL:KB]
 	bool isNearbyChat() {return mIsNearbyChat;}
 
 	// LLFloater overrides
@@ -124,8 +127,13 @@ protected:
 	void hideOrShowTitle(); // toggle the floater's drag handle
 	void hideAllStandardButtons();
 
-	/// Update floater header and toolbar buttons when hosted/torn off state is toggled.
-	void updateHeaderAndToolbar();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	void updateExpandCollapseBtn();
+	void updateShowParticipantList();
+// [/SL:KB]
+
+//	/// Update floater header and toolbar buttons when hosted/torn off state is toggled.
+//	void updateHeaderAndToolbar();
 
 	// Update the input field help text and other places that need the session name
 	virtual void updateSessionName(const std::string& name);
@@ -178,8 +186,8 @@ protected:
 	
 	LLButton* mExpandCollapseLineBtn;
 	LLButton* mExpandCollapseBtn;
-	LLButton* mTearOffBtn;
-	LLButton* mCloseBtn;
+//	LLButton* mTearOffBtn;
+//	LLButton* mCloseBtn;
 	LLButton* mGearBtn;
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;
@@ -205,7 +213,7 @@ private:
 
 	void onInputEditorClicked();
 
-	bool checkIfTornOff();
+//	bool checkIfTornOff();
     bool mIsHostAttached;
     bool mHasVisibleBeenInitialized;
 

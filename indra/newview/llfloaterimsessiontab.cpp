@@ -50,8 +50,8 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   : LLTransientDockableFloater(NULL, true, session_id)
   ,  mIsP2PChat(false)
   ,  mExpandCollapseBtn(NULL)
-  ,  mTearOffBtn(NULL)
-  ,  mCloseBtn(NULL)
+//  ,  mTearOffBtn(NULL)
+//  ,  mCloseBtn(NULL)
   ,  mSessionID(session_id.asUUID())
   , mConversationsRoot(NULL)
   , mScroller(NULL)
@@ -65,6 +65,17 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mChatLayoutPanel(NULL)
   , mInputPanels(NULL)
   , mChatLayoutPanelHeight(0)
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+  , mBodyStack(NULL)
+  , mParticipantListAndHistoryStack(NULL)
+  , mParticipantListPanel(NULL)
+  , mRightPartPanel(NULL)
+  , mContentPanel(NULL)
+  , mToolbarPanel(NULL)
+  , mInputButtonPanel(NULL)
+  , mExpandCollapseLineBtn(NULL)
+  , mGearBtn(NULL)
+// [/SL:KB]
 {
     setAutoFocus(FALSE);
 	mSession = LLIMModel::getInstance()->findIMSession(mSessionID);
@@ -130,7 +141,20 @@ void LLFloaterIMSessionTab::setVisible(BOOL visible)
 		mHasVisibleBeenInitialized = true;
 		if(!gAgentCamera.cameraMouselook())
 		{
-			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			// Don't show the container if there are no hosted conversations
+			LLFloaterIMContainerBase* pContainer = LLFloaterIMContainerBase::findInstance();
+			if (pContainer)
+			{
+				// NOTE: LLFloaterIMContainerView will always contain the "Redock this conversation" tab panel so we need to check for cnt > 1
+				bool fTabbedContainer = LLFloaterIMContainerBase::isTabbedContainer();
+				if ( ((!fTabbedContainer) && (pContainer->getFloaterCount() > 1)) || ((fTabbedContainer) && (pContainer->getFloaterCount() > 0)) )
+				{
+					pContainer->setVisible(true);
+				}
+			}
+// [/SL:KB]
+//			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
 		}
 		LLFloaterIMSessionTab::addToHost(mSessionID);
 		LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(mSessionID);
@@ -175,7 +199,10 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 	LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(session_id);
 	if (conversp)
 	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 
 		// Do not add again existing floaters
 		if (floater_container && !conversp->isHostAttached())
@@ -199,6 +226,11 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 			}
 			// Added floaters share some state (like sort order) with their host
 			conversp->setSortOrder(floater_container->getSortOrder());
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+			conversp->updateShowParticipantList();
+			conversp->updateExpandCollapseBtn();
+			conversp->hideOrShowTitle();
+// [/SL:KB]
 		}
 	}
 }
@@ -227,8 +259,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mBodyStack = getChild<LLLayoutStack>("main_stack");
     mParticipantListAndHistoryStack = getChild<LLLayoutStack>("im_panels");
 
-	mCloseBtn = getChild<LLButton>("close_btn");
-	mCloseBtn->setCommitCallback(boost::bind(&LLFloater::onClickClose, this));
+//	mCloseBtn = getChild<LLButton>("close_btn");
+//	mCloseBtn->setCommitCallback(boost::bind(&LLFloater::onClickClose, this));
 
 	mExpandCollapseBtn = getChild<LLButton>("expand_collapse_btn");
 	mExpandCollapseBtn->setClickedCallback(boost::bind(&LLFloaterIMSessionTab::onSlide, this));
@@ -236,8 +268,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mExpandCollapseLineBtn = getChild<LLButton>("minz_btn");
 	mExpandCollapseLineBtn->setClickedCallback(boost::bind(&LLFloaterIMSessionTab::onCollapseToLine, this));
 
-	mTearOffBtn = getChild<LLButton>("tear_off_btn");
-	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
+//	mTearOffBtn = getChild<LLButton>("tear_off_btn");
+//	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
 
 	mGearBtn = getChild<LLButton>("gear_btn");
     mAddBtn = getChild<LLButton>("add_btn");
@@ -326,6 +358,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	{
 		LLFloaterIMSessionTab::onSlide(this);
 	}
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	updateShowParticipantList();
+	updateExpandCollapseBtn();
+// [/SL:KB]
 
 	// The resize limits for LLFloaterIMSessionTab should be updated, based on current values of width of conversation and message panels
 	mParticipantListPanel->getResizeBar()->setResizeListener(boost::bind(&LLFloaterIMSessionTab::assignResizeLimits, this));
@@ -341,7 +377,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 
 LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 {
-	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainerBase::getInstance()->getSessionModel(mSessionID));
+// [/SL:KB]
+//	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
 
 void LLFloaterIMSessionTab::draw()
@@ -402,11 +441,18 @@ void LLFloaterIMSessionTab::onFocusLost()
 
 void LLFloaterIMSessionTab::onInputEditorClicked()
 {
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(mSessionID,false);
+//	}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 	if (im_box)
 	{
-		im_box->flashConversationItemWidget(mSessionID,false);
+		im_box->setConversationFlashing(mSessionID, false);
 	}
+// [/SL:KB]
 	gToolBarView->flashCommand(LLCommandId("chat"), false);
 }
 
@@ -429,7 +475,10 @@ void LLFloaterIMSessionTab::appendMessage(const LLChat& chat, const LLSD &args)
 {
 
 	// Update the participant activity time
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 	if (im_box)
 	{
 		im_box->setTimeNow(mSessionID,chat.mFromID);
@@ -600,7 +649,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 		mConversationsRoot->arrangeAll();
 		mConversationsRoot->update();
 	}
-	updateHeaderAndToolbar();
+//	updateHeaderAndToolbar();
 	refresh();
 }
 
@@ -699,59 +748,86 @@ void LLFloaterIMSessionTab::hideAllStandardButtons()
 	}
 }
 
-void LLFloaterIMSessionTab::updateHeaderAndToolbar()
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 {
-	// prevent start conversation before its container
-    LLFloaterIMContainer::getInstance();
-
-	bool is_not_torn_off = !checkIfTornOff();
-	if (is_not_torn_off)
-	{
-		hideAllStandardButtons();
-	}
-
-	hideOrShowTitle();
-
-	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible =
-			!is_not_torn_off
-			&& mIsParticipantListExpanded
-			&& !mIsP2PChat;
-
-	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
-    mParticipantListPanel->setVisible(is_participant_list_visible);
-
 	// Display collapse image (<<) if the floater is hosted
 	// or if it is torn off but has an open control panel.
-	bool is_expanded = is_not_torn_off || is_participant_list_visible;
-    
+	bool is_not_torn_off = !isTornOff();
+	bool is_expanded = is_not_torn_off || mParticipantListPanel->getVisible();
+   
 	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
 	mExpandCollapseBtn->setToolTip(
-			is_not_torn_off?
-				getString("expcol_button_not_tearoff_tooltip") :
-				(is_expanded?
-					getString("expcol_button_tearoff_and_expanded_tooltip") :
-					getString("expcol_button_tearoff_and_collapsed_tooltip")));
-
-	// toggle floater's drag handle and title visibility
-	if (mDragHandle)
-	{
-		mDragHandle->setTitleVisible(!is_not_torn_off);
-	}
+			is_not_torn_off ? getString("expcol_button_not_tearoff_tooltip")
+			                : (is_expanded ? getString("expcol_button_tearoff_and_expanded_tooltip") :
+			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
 	// The button (>>) should be disabled for torn off P2P conversations.
 	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
-
-	mTearOffBtn->setImageOverlay(getString(is_not_torn_off? "tear_off_icon" : "return_icon"));
-	mTearOffBtn->setToolTip(getString(is_not_torn_off? "tooltip_to_separate_window" : "tooltip_to_main_window"));
-
-
-	mCloseBtn->setVisible(is_not_torn_off && !mIsNearbyChat);
-
-	enableDisableCallBtn();
-
-	showTranslationCheckbox();
 }
+
+void LLFloaterIMSessionTab::updateShowParticipantList()
+{
+	// Participant list should be visible only in torn off floaters.
+	bool is_participant_list_visible = isTornOff() && mIsParticipantListExpanded && !mIsP2PChat;
+	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
+    mParticipantListPanel->setVisible(is_participant_list_visible);
+}
+// [/SL:KB]
+
+//void LLFloaterIMSessionTab::updateHeaderAndToolbar()
+//{
+//	// prevent start conversation before its container
+//    LLFloaterIMContainer::getInstance();
+//
+//	bool is_not_torn_off = !checkIfTornOff();
+//	if (is_not_torn_off)
+//	{
+//		hideAllStandardButtons();
+//	}
+//
+//	hideOrShowTitle();
+//
+//	// Participant list should be visible only in torn off floaters.
+//	bool is_participant_list_visible =
+//			!is_not_torn_off
+//			&& mIsParticipantListExpanded
+//			&& !mIsP2PChat;
+//
+//	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
+//    mParticipantListPanel->setVisible(is_participant_list_visible);
+//
+//	// Display collapse image (<<) if the floater is hosted
+//	// or if it is torn off but has an open control panel.
+//	bool is_expanded = is_not_torn_off || is_participant_list_visible;
+//    
+//	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
+//	mExpandCollapseBtn->setToolTip(
+//			is_not_torn_off?
+//				getString("expcol_button_not_tearoff_tooltip") :
+//				(is_expanded?
+//					getString("expcol_button_tearoff_and_expanded_tooltip") :
+//					getString("expcol_button_tearoff_and_collapsed_tooltip")));
+//
+//	// toggle floater's drag handle and title visibility
+//	if (mDragHandle)
+//	{
+//		mDragHandle->setTitleVisible(!is_not_torn_off);
+//	}
+//
+//	// The button (>>) should be disabled for torn off P2P conversations.
+//	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
+//
+//	mTearOffBtn->setImageOverlay(getString(is_not_torn_off? "tear_off_icon" : "return_icon"));
+//	mTearOffBtn->setToolTip(getString(is_not_torn_off? "tooltip_to_separate_window" : "tooltip_to_main_window"));
+//
+//
+//	mCloseBtn->setVisible(is_not_torn_off && !mIsNearbyChat);
+//
+//	enableDisableCallBtn();
+//
+//	showTranslationCheckbox();
+//}
  
 void LLFloaterIMSessionTab::forceReshape()
 {
@@ -824,11 +900,21 @@ void LLFloaterIMSessionTab::updateCallBtnState(bool callIsActive)
 
 void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 {
-	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+//	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
+// [/SL:KB]
 	if (host_floater)
 	{
-		// Hide the messages pane if a floater is hosted in the Conversations
-		host_floater->collapseMessagesPane(true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+		if (!LLFloaterIMContainerBase::isTabbedContainer())
+		{
+			// Hide the messages pane if a floater is hosted in the Conversations
+			dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
+		}
+// [/SL:KB]
+//		// Hide the messages pane if a floater is hosted in the Conversations
+//		host_floater->collapseMessagesPane(true);
 	}
 	else ///< floater is torn off
 	{
@@ -847,11 +933,18 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 	}
 
 	self->assignResizeLimits();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	self->updateShowParticipantList();
+	self->updateExpandCollapseBtn();
+// [/SL:KB]
 }
 
 void LLFloaterIMSessionTab::onCollapseToLine(LLFloaterIMSessionTab* self)
 {
-	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+//	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
+// [/SL:KB]
 	if (!host_floater)
 	{
 		bool expand = self->isMessagePaneExpanded();
@@ -912,12 +1005,20 @@ void LLFloaterIMSessionTab::restoreFloater()
 /*virtual*/
 void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 {
-	if (!checkIfTornOff())
+//	if (!checkIfTornOff())
+//	{
+//		LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(getHost());
+//		// Show the messages pane when opening a floater hosted in the Conversations
+//		host_floater->collapseMessagesPane(false);
+//	}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	if ( (!LLFloaterIMContainerBase::isTabbedContainer()) && (!isTornOff()) )
 	{
-		LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(getHost());
+		LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(getHost());
 		// Show the messages pane when opening a floater hosted in the Conversations
 		host_floater->collapseMessagesPane(false);
 	}
+// [/SL:KB]
 
 	mInputButtonPanel->setVisible(isTornOff());
 }
@@ -929,31 +1030,68 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 	setFollows(isTornOff()? FOLLOWS_ALL : FOLLOWS_NONE);
     mSaveRect = isTornOff();
     initRectControl();
-	LLFloater::onClickTearOff(this);
-	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Control-FloaterTearOff |  Checked: 2013-05-03 (Catznip-3.5)
+	LLFloater::onTearOffClicked();
+// [/SL:KB]
+//	LLFloater::onClickTearOff(this);
+//	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
 
-	if (isTornOff())
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		container->selectAdjacentConversation(false);
-		forceReshape();
+		LLFloaterIMContainerView* container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
+		if (isTornOff())
+		{
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			// If the torn off session was the last hosted conversation in the conversation floater, just close it
+			if (1 == container->getFloaterCount())
+			{
+				container->closeFloater();
+			}
+			else
+			{
+				container->selectAdjacentConversation(false);
+			}
+// [/SL:KB]
+//			container->selectAdjacentConversation(false);
+			forceReshape();
+		}
+		//Upon re-docking the torn off floater, select the corresponding conversation line item
+		else
+		{
+			container->selectConversation(mSessionID);
+
+		}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
 	}
-	//Upon re-docking the torn off floater, select the corresponding conversation line item
 	else
 	{
-		container->selectConversation(mSessionID);
-
+		if (isTornOff())
+		{
+			forceReshape();
+		}
 	}
+// [/SL:KB]
 	mInputButtonPanel->setVisible(isTornOff());
 
 	refreshConversation();
 	updateGearBtn();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	updateShowParticipantList();
+	updateExpandCollapseBtn();
+	hideOrShowTitle();
+// [/SL:KB]
 }
 
 void LLFloaterIMSessionTab::updateGearBtn()
 {
 
 	BOOL prevVisibility = mGearBtn->getVisible();
-	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
+	mGearBtn->setVisible(isTornOff() && mIsP2PChat);
+// [/SL:KB]
+//	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
 
 
 	// Move buttons if Gear button changed visibility
@@ -1002,18 +1140,18 @@ bool LLFloaterIMSessionTab::isChatMultiTab()
 	return true;
 }
 
-bool LLFloaterIMSessionTab::checkIfTornOff()
-{
-	bool isTorn = !getHost();
-	
-	if (isTorn != isTornOff())
-	{
-		setTornOff(isTorn);
-		refreshConversation();
-	}
-
-	return isTorn;
-}
+//bool LLFloaterIMSessionTab::checkIfTornOff()
+//{
+//	bool isTorn = !getHost();
+//	
+//	if (isTorn != isTornOff())
+//	{
+//		setTornOff(isTorn);
+//		refreshConversation();
+//	}
+//
+//	return isTorn;
+//}
 
 void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 {
@@ -1023,7 +1161,10 @@ void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 		
 	// Perform the command (IM, profile, etc...) on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	// Note: By construction, those can only be participants so we can call doToParticipants() directly
 	floater_container->doToParticipants(command, selected_uuids);
 }
@@ -1036,7 +1177,10 @@ bool LLFloaterIMSessionTab::enableContextMenuItem(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 	
 	// Perform the item enable test on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->enableContextMenuItem(command, selected_uuids);
 }
 
@@ -1048,7 +1192,10 @@ bool LLFloaterIMSessionTab::checkContextMenuItem(const LLSD& userdata)
 	getSelectedUUIDs(selected_uuids);
 	
 	// Perform the item check on the list using the general conversation container method
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
 
@@ -1090,26 +1237,52 @@ void LLFloaterIMSessionTab::saveCollapsedState()
 }
 BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 {
-	BOOL handled = FALSE;
-
-	if(mask == MASK_ALT)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-		if (KEY_RETURN == key && !isTornOff())
+		// LLFloaterIMContainerView needs custom handling of the navigaion keys
+		if (mask == MASK_ALT)
 		{
-			floater_container->expandConversation();
-			handled = TRUE;
+			LLFloaterIMContainerView* floater_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+			if (KEY_RETURN == key && isTornOff())
+			{
+				floater_container->expandConversation();
+			}
+			if ((KEY_UP == key) || (KEY_LEFT == key) && !isTornOff())
+			{
+				floater_container->selectNextorPreviousConversation(false);
+			}
+			if ((KEY_DOWN == key ) || (KEY_RIGHT == key) && !isTornOff())
+			{
+				floater_container->selectNextorPreviousConversation(true);
+			}
 		}
-		if ((KEY_UP == key) || (KEY_LEFT == key))
-		{
-			floater_container->selectNextorPreviousConversation(false);
-			handled = TRUE;
-		}
-		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
-		{
-			floater_container->selectNextorPreviousConversation(true);
-			handled = TRUE;
-		}
+		return TRUE;
 	}
-	return handled;
+
+	// The LLTabContainer parent will handle the navigation keys
+	return LLTransientDockableFloater::handleKeyHere(key, mask);
+// [/SL:KB]
+//	BOOL handled = FALSE;
+//
+//	if(mask == MASK_ALT)
+//	{
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		if (KEY_RETURN == key && !isTornOff())
+//		{
+//			floater_container->expandConversation();
+//			handled = TRUE;
+//		}
+//		if ((KEY_UP == key) || (KEY_LEFT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(false);
+//			handled = TRUE;
+//		}
+//		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(true);
+//			handled = TRUE;
+//		}
+//	}
+//	return handled;
 }
