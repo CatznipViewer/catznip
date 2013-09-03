@@ -28,8 +28,11 @@
 #define LL_LLSAVEOUTFITCOMBOBTN_H
 
 class LLButton;
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+class LLFlyoutButton;
+// [/SL:KB]
 
-#include "lltoggleablemenu.h"
+//#include "lltoggleablemenu.h"
 
 /**
  * Represents outfit Save/Save As combo button.
@@ -40,15 +43,22 @@ class LLSaveOutfitComboBtn
 public:
 	LLSaveOutfitComboBtn(LLPanel* parent, bool saveAsDefaultAction = false);
 
-	void showSaveMenu();
-	void saveOutfit(bool as_new = false);
+//	void showSaveMenu();
+//	void saveOutfit(bool as_new = false);
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+	void saveOutfit(const LLUICtrl* pBtnCtrl);
+	void setMenuItemLabel(const std::string& item, const std::string& label);
+// [/SL:KB]
 	void setMenuItemEnabled(const std::string& item, bool enabled);
 	void setSaveBtnEnabled(bool enabled);
 
 private:
 	bool mSaveAsDefaultAction;
 	LLPanel* mParent;
-	LLToggleableMenu* mSaveMenu;
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+	LLFlyoutButton* mSaveBtn;
+// [/SL:KB]
+//	LLToggleableMenu* mSaveMenu;
 };
 
 #endif // LL_LLSAVEOUTFITCOMBOBTN_H

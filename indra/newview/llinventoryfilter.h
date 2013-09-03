@@ -52,7 +52,11 @@ public:
 		FILTERTYPE_UUID	= 0x1 << 2,		// find the object with UUID and any links to it
 		FILTERTYPE_DATE = 0x1 << 3,		// search by date range
 		FILTERTYPE_WEARABLE = 0x1 << 4,	// search by wearable type
-		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5		// pass if folder is not a system   folder to be hidden if
+//		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5		// pass if folder is not a system   folder to be hidden if
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		FILTERTYPE_EMPTYFOLDERS = 0x1 << 5,	// pass if folder is not a system folder to be hidden if empty
+		FILTERTYPE_WORN = 0x1 << 6		// filter by worn status
+// [/SL:KB]
 	};
 
 	enum EFilterLink
@@ -160,6 +164,9 @@ public:
 	void 				setFilterUUID(const LLUUID &object_id);
 	void				setFilterWearableTypes(U64 types);
 	void				setFilterEmptySystemFolders();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void				setFilterWorn(bool filter);
+// [/SL:KB]
 	void				updateFilterTypes(U64 types, U64& current_types);
 
 	void 				setFilterSubString(const std::string& string);
@@ -178,7 +185,10 @@ public:
 	void 				setHoursAgo(U32 hours);
 	U32 				getHoursAgo() const;
 
-	void 				setFilterLinks(U64 filter_link);
+//	void 				setFilterLinks(U64 filter_link);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	void 				setFilterLinks(U64 filter_link, bool substring_reset);
+// [/SL:KB]
 	U64					getFilterLinks() const;
 
 	// +-------------------------------------------------------------------+
@@ -258,6 +268,9 @@ private:
 
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	bool					mFilterSubStringResetFilterLinks;		// True if a change to the sub string should reset filter links
+// [/SL:KB]
 	const std::string		mName;
 
 	S32						mCurrentGeneration;
