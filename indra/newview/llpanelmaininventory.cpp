@@ -111,7 +111,7 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLPanelMainInventory::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.CloseAllFolders", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLPanelMainInventory::doCreate, this, _2));
  	//mCommitCallbackRegistrar.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow, this));
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
@@ -303,20 +303,68 @@ void LLPanelMainInventory::closeAllFolders()
 	getPanel()->getRootFolder()->closeAllFolders();
 }
 
-void LLPanelMainInventory::newWindow()
+//void LLPanelMainInventory::newWindow()
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+const std::string& get_panel_name(LLPanelMainInventory::EPanelType eType)
 {
+	static const std::string PANEL_ALL    = "All Items";
+	static const std::string PANEL_RECENT = "Recent ITems";
+	switch (eType)
+	{
+		case LLPanelMainInventory::PANEL_ALL:
+			return PANEL_ALL;
+		case LLPanelMainInventory::PANEL_RECENT:
+			return PANEL_RECENT;
+		default:
+			return LLStringUtil::null;
+	}
+}
+
+LLInventoryPanel* LLPanelMainInventory::getPanel(EPanelType eType) const
+{
+	const std::string& strPanelName = get_panel_name(eType);
+	return (!strPanelName.empty()) ? getChild<LLInventoryPanel>(strPanelName) : NULL;
+}
+
+LLInventoryPanel* LLPanelMainInventory::selectPanel(EPanelType eType)
+{
+	const std::string& strPanelName = get_panel_name(eType);
+	if (!strPanelName.empty())
+	{
+		mFilterTabs->selectTabByName(get_panel_name(eType));
+		return dynamic_cast<LLInventoryPanel*>(mFilterTabs->getCurrentPanel());
+	}
+	return NULL;
+}
+
+LLFloater* LLPanelMainInventory::newWindow()
+{
+// [/SL:KB]
 	static S32 instance_num = 0;
 	instance_num = (instance_num + 1) % S32_MAX;
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-01-13 (Catznip-3.2.1) | Modified: Catznip-3.2.1
 	if (!gAgentCamera.cameraMouselook())
 	{
-		LLFloaterReg::showTypedInstance<LLFloaterSidePanelContainer>("inventory", LLSD(instance_num));
+		LLFloater* pInvFloater = LLFloaterReg::showInstance("inventory", LLSD(instance_num));
+		if (pInvFloater)
+			pInvFloater->setReuseInstance(false);
+		return pInvFloater;
 	}
+	return NULL;
+// [/SL:KB]
+//	if (!gAgentCamera.cameraMouselook())
+//	{
+//		LLFloaterReg::showTypedInstance<LLFloaterSidePanelContainer>("inventory", LLSD(instance_num));
+//	}
 }
 
 void LLPanelMainInventory::doCreate(const LLSD& userdata)
 {
-	reset_inventory_filter();
+//	reset_inventory_filter();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
+	resetFilters();
+// [/SL:KB]
 	menu_create_inventory_item(getPanel(), NULL, userdata);
 }
 
@@ -330,6 +378,9 @@ void LLPanelMainInventory::resetFilters()
 	}
 
 	setFilterTextFromFilter();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
+	onFilterEdit("");
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
@@ -596,7 +647,10 @@ void LLPanelMainInventory::updateItemcountText()
 
 void LLPanelMainInventory::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (!sidepanel_inventory)
 	{
 		llwarns << "Could not find Inventory Panel in My Inventory floater" << llendl;
@@ -1035,11 +1089,11 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		const std::string notification = "ConfirmEmptyTrash";
 		gInventory.emptyFolderType(notification, LLFolderType::FT_TRASH);
 	}
-	if (command_name == "empty_lostnfound")
-	{
-		const std::string notification = "ConfirmEmptyLostAndFound";
-		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
-	}
+//	if (command_name == "empty_lostnfound")
+//	{
+//		const std::string notification = "ConfirmEmptyLostAndFound";
+//		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
+//	}
 	if (command_name == "save_texture")
 	{
 		saveTexture(userdata);
@@ -1165,7 +1219,10 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 	{
 		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
 		if (!current_item) return FALSE;
-		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		LLSidepanelInventory *parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+		LLSidepanelInventory *parent = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 		return parent ? parent->canShare() : FALSE;
 	}
 
