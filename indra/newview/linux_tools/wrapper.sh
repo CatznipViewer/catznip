@@ -150,15 +150,13 @@ most common problems when launching the Viewer (particularly
 'bin/do-not-directly-run-catznip-bin: not found' and 'error while
 loading shared libraries') may be solved by installing your Linux
 distribution's 32-bit compatibility packages.
-For example, on Ubuntu and other Debian-based Linuxes you might run:
-$ sudo apt-get install ia32-libs ia32-libs-gtk ia32-libs-kde ia32-libs-sdl
+
+For example, on Ubuntu you might run:
+
+$ sudo apt-get install ia32-libs 
+
 EOFMARKER
 	fi
 fi
 
-echo
-echo '*******************************************************'
-echo 'This is a BETA release of the Second Life linux client.'
-echo 'Thank you for testing!'
-echo 'Please see README-linux.txt before reporting problems.'
-echo
+
