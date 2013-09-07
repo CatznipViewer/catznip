@@ -336,3 +336,10 @@ std::istream& operator>>(std::istream& s, LLDate& date)
 	return s;
 }
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-01 (Catznip-3.0)
+F64 operator-(const LLDate& lhs, const LLDate& rhs)
+{
+	return lhs.secondsSinceEpoch() - rhs.secondsSinceEpoch();
+}
+// [/SL:KB]
+
