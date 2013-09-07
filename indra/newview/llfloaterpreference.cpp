@@ -333,6 +333,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareSettings",		boost::bind(&LLFloaterPreference::onOpenHardwareSettings, this));
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreference::onVertexShaderEnable, this));
@@ -1175,6 +1178,11 @@ void LLFloaterPreference::refreshEnabledState()
 
 	ctrl_shadow->setEnabled(enabled);
 	
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Setting should be disabled when basic shaders is unchecked or deferred rendering is enabled
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+	ctrl_glow->setEnabled((ctrl_shader_enable->get()) && (!ctrl_deferred->get()));
+// [/SL:TD]
 
 	// now turn off any features that are unavailable
 	disableUnavailableSettings();
@@ -1188,6 +1196,9 @@ void LLFloaterPreference::disableUnavailableSettings()
 	LLCheckBoxCtrl* ctrl_avatar_vp     = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
 	LLCheckBoxCtrl* ctrl_avatar_cloth  = getChild<LLCheckBoxCtrl>("AvatarCloth");
 	LLCheckBoxCtrl* ctrl_shader_enable = getChild<LLCheckBoxCtrl>("BasicShaders");
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+// [/SL:TD]
 	LLCheckBoxCtrl* ctrl_wind_light    = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
 	LLCheckBoxCtrl* ctrl_avatar_impostors = getChild<LLCheckBoxCtrl>("AvatarImpostors");
 	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
@@ -1201,6 +1212,11 @@ void LLFloaterPreference::disableUnavailableSettings()
 		ctrl_shader_enable->setEnabled(FALSE);
 		ctrl_shader_enable->setValue(FALSE);
 		
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+		ctrl_glow->setEnabled(FALSE);
+		ctrl_glow->setValue(FALSE);
+// [/SL:TD]
+
 		ctrl_wind_light->setEnabled(FALSE);
 		ctrl_wind_light->setValue(FALSE);
 		
@@ -1487,6 +1503,22 @@ void LLFloaterPreference::onClickLogPath()
 	updateDeleteTranscriptsButton();
 }
 }
+
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLFloaterPreference::onClickSnapshotPath()
+{
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
+	
+	LLDirPicker& picker = LLDirPicker::instance();
+	if (!picker.getDir(&proposed_name))
+	{
+		return; //Canceled!
+	}
+
+	gSavedSettings.setString("SnapshotLocalPath", picker.getDirName());
+	gDirUtilp->setSnapshotDir(picker.getDirName());
+}
+// [/SL:KB]
 
 bool LLFloaterPreference::moveTranscriptsAndLog()
 {

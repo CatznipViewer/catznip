@@ -387,6 +387,14 @@ static bool handleRenderLocalLightsChanged(const LLSD& newvalue)
 
 static bool handleRenderDeferredChanged(const LLSD& newvalue)
 {
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Force RenderGlow to TRUE for deferred rendering if it's currently disabled
+	if ( (newvalue.asBoolean()) && (!gSavedSettings.getBOOL("RenderGlow")) )
+	{
+		gSavedSettings.setBOOL("RenderGlow", TRUE);
+	}
+// [/SL:TD]
+
 	LLRenderTarget::sUseFBO = newvalue.asBoolean();
 	if (gPipeline.isInit())
 	{
@@ -488,6 +496,14 @@ bool handleVoiceClientPrefsChanged(const LLSD& newvalue)
 	LLVoiceClient::getInstance()->updateSettings();
 	return true;
 }
+
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+bool handleRunFastTimersChanged(const LLSD& sdValue)
+{
+	LLFastTimer::sToggleRun = (LLFastTimer::sRunTimers != sdValue.asBoolean());
+	return true;
+}
+// [/SL:KB]
 
 bool handleVelocityInterpolate(const LLSD& newvalue)
 {
@@ -742,6 +758,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("PTTCurrentlyEnabled")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("PushToTalkButton")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("PushToTalkToggle")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+	gSavedSettings.getControl("RunFastTimers")->getSignal()->connect(boost::bind(&handleRunFastTimersChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("VoiceEarLocation")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("VoiceInputAudioDevice")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
 	gSavedSettings.getControl("VoiceOutputAudioDevice")->getSignal()->connect(boost::bind(&handleVoiceClientPrefsChanged, _2));
