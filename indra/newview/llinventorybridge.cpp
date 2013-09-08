@@ -5469,15 +5469,16 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 void LLObjectBridge::openItem()
 {
 	// object double-click action is to wear/unwear object
-//	performAction(getInventoryModel(),
-//		      get_is_item_worn(mUUID) ? "detach" : "attach");
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.2.1a) | Added: Catznip-3.0.0a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.0)
 	MASK mask = gKeyboard->currentMask(TRUE);
-	const char* pstrAction = 
-		get_is_item_worn(mUUID) ? "detach" 
-		                        : ((mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickAttachmentAdd"))) ? "wear_add" : "attach";
+	bool fCtrlDown = (mask & MASK_CONTROL);
+	bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickAttachmentAdd");
+
+	const char* pstrAction = get_is_item_worn(mUUID) ? "detach" : ((fCtrlDown ^ fOpenAdd) ? "wear_add" : "attach");
 	performAction(getInventoryModel(), pstrAction);
 // [/SL:KB]
+//	performAction(getInventoryModel(),
+//		      get_is_item_worn(mUUID) ? "detach" : "attach");
 }
 
 std::string LLObjectBridge::getLabelSuffix() const
@@ -5919,27 +5920,26 @@ void LLWearableBridge::openItem()
 {
 	LLViewerInventoryItem* item = getItem();
 
-//	if (item)
-//	{
-//		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
-//	}
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2011-10-04 (Catznip-3.2.1a) | Modified: Catznip-3.0.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2011-10-04 (Catznip-3.0)
 	if ( (item) && (item->isWearableType()) )
 	{
 		// Wearable double-click action should match attachment double-click action (=wear/unwear but don't attempt to unwear body parts)
 		bool fIsWorn = get_is_item_worn(mUUID);
 		if ( (!fIsWorn) || (LLAssetType::AT_BODYPART != item->getType()) )
 		{
-			const char* pstrAction = (fIsWorn) ? "take_off" : "wear";
-
 			MASK mask = gKeyboard->currentMask(TRUE); 
-			if ( (!fIsWorn) && (LLAssetType::AT_BODYPART != item->getType()) )
-				pstrAction = ((mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickWearableAdd"))) ? "wear_add" : "wear";
+			bool fCtrlDown = (mask & MASK_CONTROL);
+			bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickWearableAdd");
 
+			const char* pstrAction = (fIsWorn) ? "take_off" : ((fCtrlDown ^ fOpenAdd) || (LLAssetType::AT_BODYPART == item->getType())) ? "wear_add" : "wear";
 			performAction(getInventoryModel(), pstrAction);
 		}
 	}
 // [/SL:KB]
+//	if (item)
+//	{
+//		LLInvFVBridgeAction::doAction(item->getType(),mUUID,getInventoryModel());
+//	}
 }
 
 void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
