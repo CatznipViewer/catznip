@@ -65,7 +65,7 @@
 //	return NULL;
 //}
 
-//// static
+// static
 //LLFloaterInventory* LLFloaterInventory::showAgentInventory()
 //{
 //	// Hack to generate semi-unique key for each inventory floater.
@@ -80,7 +80,7 @@
 //	return iv;
 //}
 
-//// static
+// static
 //void LLFloaterInventory::cleanup()
 //{
 //	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");

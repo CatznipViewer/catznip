@@ -331,7 +331,7 @@ const std::string upload_pick(void* data)
 			LLSD args;
 			args["FILE"] = filename;
 			LLNotificationsUtil::add( error_msg, args );
-//			return std::string();
+			return std::string();
 		}
 	}//end if a wave/sound file
 

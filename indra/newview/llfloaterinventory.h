@@ -49,8 +49,8 @@ class LLPanelMainInventory;
 //
 //	BOOL postBuild();
 //
-//	 This method makes sure that an inventory view exists, is
-//	 visible, and has focus. The view chosen is returned.
+//	// This method makes sure that an inventory view exists, is
+//	// visible, and has focus. The view chosen is returned.
 //	static LLFloaterInventory* showAgentInventory();
 //
 //	// Final cleanup, destroy all open inventory views.

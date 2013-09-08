@@ -196,7 +196,7 @@
 #include "llfloatermemleak.h"
 #include "llfloaterreg.h"
 #include "llfloatersnapshot.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 
 // includes for idle() idleShutdown()
 #include "llviewercontrol.h"

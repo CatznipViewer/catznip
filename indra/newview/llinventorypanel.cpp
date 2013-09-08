@@ -34,7 +34,7 @@
 #include "llappearancemgr.h"
 #include "llavataractions.h"
 #include "llclipboard.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfolderview.h"
@@ -45,7 +45,7 @@
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
 #include "llpreview.h"
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 #include "llpanelmaininventory.h"
 // [/SL:KB]
 #include "llsidepanelinventory.h"
@@ -264,7 +264,7 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	// hide inbox
 	getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
 	getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
 	getFilter().markDefault();
 // [/SL:KB]
 
@@ -1179,8 +1179,8 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 //	}
 //
 //	LLSidepanelInventory *inventory_panel =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-//
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	S32 z_min = S32_MAX;
 	LLFloater* active_inv_floaterp = NULL;
 // [/SL:KB]
@@ -1191,8 +1191,9 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	{
 //		LLFloaterSidePanelContainer* inventory_floater = dynamic_cast<LLFloaterSidePanelContainer*>(*iter);
 //		inventory_panel = inventory_floater->findChild<LLSidepanelInventory>("main_panel");
+//
 //		if (inventory_floater && inventory_panel && inventory_floater->getVisible())
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 		LLFloater* inventory_floater = *iter;
 		if (inventory_floater && inventory_floater->getVisible())
 // [/SL:KB]
@@ -1208,7 +1209,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	}
 
 //	if (res)
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	if (active_inv_floaterp)
 // [/SL:KB]
 	{
@@ -1220,7 +1221,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	}	
 	else if (auto_open)
 	{
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 		active_inv_floaterp = LLFloaterReg::getInstance("inventory");
 		if (active_inv_floaterp)
 		{
@@ -1232,7 +1233,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 //		res = inventory_panel->getActivePanel();
 	}
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(active_inv_floaterp);
 	return (pInvSP) ? pInvSP->getActivePanel() : NULL;
 // [/SL:KB]
@@ -1457,7 +1458,7 @@ public:
 		LLInventoryPanel::initFromParams(p);
 		// turn on inbox for recent items
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-3.0.0a) | Added: Catznip-2.8.0b
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
 		getFilter().markDefault();
 // [/SL:KB]
 	}

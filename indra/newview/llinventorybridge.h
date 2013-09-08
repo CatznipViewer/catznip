@@ -158,7 +158,7 @@ protected:
 	BOOL isCOFFolder() const;       // true if COF or descendant of
 	BOOL isInboxFolder() const;     // true if COF or descendant of   marketplace inbox
 	BOOL isOutboxFolder() const;    // true if COF or descendant of   marketplace outbox
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
 	BOOL isLibraryInventory() const;
 	BOOL isLostInventory() const;
 // [/SL:KB]
@@ -216,12 +216,9 @@ public:
 //				 LLFolderView* root,
 //				 const LLUUID& uuid) :
 //		LLInvFVBridge(inventory, root, uuid) {}
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
-	LLItemBridge(LLInventoryPanel* inventory, 
-				 LLFolderView* root,
-				 const LLUUID& uuid,
-				 U32 flags = 0x0) :
-		LLInvFVBridge(inventory, root, uuid), mFlags(flags) {}
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	LLItemBridge(LLInventoryPanel* inventory, LLFolderView* root, const LLUUID& uuid, U32 flags = 0x0)
+		: LLInvFVBridge(inventory, root, uuid), mFlags(flags) {}
 // [/SL:KB]
 
 	typedef boost::function<void(std::string& slurl)> slurl_callback_t;
@@ -251,7 +248,7 @@ protected:
 	virtual BOOL isItemPermissive() const;
 	virtual void buildDisplayName() const;
 
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
 	U32 mFlags;
 // [/SL:KB]
 };

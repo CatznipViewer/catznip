@@ -250,7 +250,7 @@ void LLFloaterBuy::inventoryChanged(LLViewerObject* obj,
 //							 inv_item->getInventoryType(),
 //							 inv_item->getFlags(),
 //							 item_is_multi);
-// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-3.0.0a) | Added: Catznip-2.6.0b
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
 		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
 // [/SL:KB]
 		row["columns"][0]["column"] = "icon";

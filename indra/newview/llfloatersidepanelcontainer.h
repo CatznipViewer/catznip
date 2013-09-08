@@ -79,7 +79,7 @@ public:
 		return panel;
 	}
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	static LLPanel* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName);
 
 	template <typename T>
@@ -95,7 +95,7 @@ public:
 // [/Sl:KB]
 };
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
 class LLFloaterSidePanelInventoryContainer : public LLFloaterSidePanelContainer
 {
 public:

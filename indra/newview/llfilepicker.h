@@ -181,7 +181,7 @@ private:
 	S32 mCurrentFile;
 	bool mLocked;
 
- 	static LLFilePicker sInstance;
+	static LLFilePicker sInstance;
 	
 protected:
 #if LL_GTK

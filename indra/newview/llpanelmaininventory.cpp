@@ -33,7 +33,7 @@
 #include "lldndbutton.h"
 #include "lleconomy.h"
 #include "llfilepicker.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -117,7 +117,10 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 	mCommitCallbackRegistrar.add("Inventory.ResetFilters", boost::bind(&LLPanelMainInventory::resetFilters, this));
 	mCommitCallbackRegistrar.add("Inventory.SetSortBy", boost::bind(&LLPanelMainInventory::setSortBy, this, _2));
-	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLPanelMainInventory::shareWithAvatars, this));
+// [/SL:KB]
+//	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
 
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
@@ -304,8 +307,8 @@ void LLPanelMainInventory::closeAllFolders()
 }
 
 //void LLPanelMainInventory::newWindow()
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-const std::string& get_panel_name(LLPanelMainInventory::EPanelType eType)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+static const std::string& get_panel_name(LLPanelMainInventory::EPanelType eType)
 {
 	static const std::string PANEL_ALL    = "All Items";
 	static const std::string PANEL_RECENT = "Recent ITems";
@@ -336,14 +339,17 @@ LLInventoryPanel* LLPanelMainInventory::selectPanel(EPanelType eType)
 	}
 	return NULL;
 }
-
-LLFloater* LLPanelMainInventory::newWindow()
-{
 // [/SL:KB]
+
+//void LLPanelMainInventory::newWindow()
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+LLFloater* LLPanelMainInventory::newWindow()
+// [/SL:KB]
+{
 	static S32 instance_num = 0;
 	instance_num = (instance_num + 1) % S32_MAX;
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-01-13 (Catznip-3.2.1) | Modified: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-01-13 (Catznip-3.2)
 	if (!gAgentCamera.cameraMouselook())
 	{
 		LLFloater* pInvFloater = LLFloaterReg::showInstance("inventory", LLSD(instance_num));
@@ -421,6 +427,13 @@ void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 	getActivePanel()->setSortOrder(sort_order_mask);
 	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
 }
+
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+void LLPanelMainInventory::shareWithAvatars()
+{
+	LLAvatarActions::shareWithAvatars(getPanel());
+}
+// [/SL:KB]
 
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
@@ -648,8 +661,8 @@ void LLPanelMainInventory::updateItemcountText()
 void LLPanelMainInventory::onFocusReceived()
 {
 //	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-	LLSidepanelInventory *sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
 // [/SL:KB]
 	if (!sidepanel_inventory)
 	{
@@ -1220,8 +1233,8 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
 		if (!current_item) return FALSE;
 //		LLSidepanelInventory *parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
-		LLSidepanelInventory *parent = getParentByType<LLSidepanelInventory>();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+		LLSidepanelInventory* parent = getParentByType<LLSidepanelInventory>();
 // [/SL:KB]
 		return parent ? parent->canShare() : FALSE;
 	}

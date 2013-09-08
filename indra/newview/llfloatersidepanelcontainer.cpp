@@ -134,7 +134,7 @@ LLPanel* LLFloaterSidePanelContainer::getPanel(const std::string& floater_name, 
 	return NULL;
 }
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 LLPanel* LLFloaterSidePanelContainer::getPanel(const LLFloater* floaterp, const std::string& panel_name)
 {
 	const LLFloaterSidePanelContainer* floaterp_sp = dynamic_cast<const LLFloaterSidePanelContainer*>(floaterp);
@@ -146,7 +146,7 @@ LLPanel* LLFloaterSidePanelContainer::getPanel(const LLFloater* floaterp, const 
 }
 // [/Sl:KB]
 
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2.0a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
 void LLFloaterSidePanelInventoryContainer::onClose(bool app_quitting)
 {
 	LLFloater::onClose(app_quitting);

@@ -47,7 +47,7 @@
 #include "llappviewer.h"
 #include "llclipboard.h"
 #include "lldonotdisturbnotificationstorage.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfocusmgr.h"
 #include "llfolderview.h"
@@ -456,8 +456,7 @@ void show_item_original(const LLUUID& item_uuid)
 
 		// Check the filter
 		LLSidepanelInventory* inv_sp = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(inv_floater);
-		LLPanelMainInventory* inv_main = (inv_sp) ? inv_sp->getMainInventoryPanel() : NULL;
-		LLInventoryPanel* inv_panel = (inv_main) ? inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL) : NULL;
+		LLInventoryPanel* inv_panel = (inv_sp) ? inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL) : NULL;
 		if (!inv_panel)
 			continue;
 		if (!inv_panel->getFilter().isDefault())
@@ -551,8 +550,8 @@ void show_item_original(const LLUUID& item_uuid)
 //		reset_inventory_filter();
 //	}
 //}
-//
-//
+
+
 //void reset_inventory_filter()
 //{
 //	//inventory floater
