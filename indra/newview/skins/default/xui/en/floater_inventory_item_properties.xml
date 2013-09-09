@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- height="285"
+ height="260"
  layout="topleft"
  name="item properties"
  help_topic="item_properties"
  save_rect="true"
- title="INVENTORY ITEM PROPERTIES"
+ title="ITEM PROPERTIES"
  width="350">
     <floater.string
      name="unknown">
@@ -29,11 +29,11 @@
         [wkday,datetime,local] [mth,datetime,local] [day,datetime,local] [hour,datetime,local]:[min,datetime,local]:[second,datetime,local] [year,datetime,local]
     </floater.string>
     <floater.string
-		 name="origin_inventory">
+     name="origin_inventory">
         (Inventory)
     </floater.string>
     <floater.string
-		 name="origin_inworld">
+     name="origin_inworld">
         (Inworld)
     </floater.string>
     <icon
@@ -367,38 +367,42 @@
      layout="topleft"
      left="20"
      name="CheckPurchase"
-     top_pad="10"
+     top_pad="12"
      width="70" />
-     <combo_box
-     height="19"
-     left_pad="5"
-     layout="topleft"
-     follows="left|top"
-     name="combobox sale copy"
-     width="148">
-        <combo_box.item
-         label="Copy"
-         name="Copy"
-         value="Copy" />
-        <combo_box.item
-         label="Original"
-         name="Original"
-         value="Original" />
-    </combo_box>
     <spinner
         follows="left|top"
         decimal_digits="0"
         increment="1"
         control_name="Edit Cost"
         name="Edit Cost"
-        label="Price: L$"
-        label_width="60"
+        label="L$"
+        label_width="15"
         left="98"
-        width="140"
+        width="100"
         min_val="1"
         height="19"
         max_val="999999999"
-        top_pad="10"/>
+        top_delta="-2"/>
+     <combo_box
+     height="19"
+     left_pad="5"
+     layout="topleft"
+     follows="left|top"
+     name="combobox sale copy"
+     width="80">
+        <combo_box.item
+         label="Copy"
+         name="Copy"
+         value="2" />
+        <combo_box.item
+         label="Contents"
+         name="Contents"
+         value="3" />
+        <combo_box.item
+         label="Original"
+         name="Original"
+         value="1" />
+    </combo_box>
 <!--
     <text
         type="string"
