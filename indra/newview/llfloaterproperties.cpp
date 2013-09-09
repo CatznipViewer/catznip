@@ -1006,7 +1006,7 @@ LLMultiProperties::LLMultiProperties()
 	LLRect rect;
 //	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 20, 20);
 // [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
-	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 350, 350);
+	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 350, 300);
 // [/SL:KB]
 	setRect(rect);
 	LLFloater* last_floater = LLFloaterReg::getLastFloaterInGroup("properties");

@@ -473,9 +473,8 @@ public:
 				   U32 flags);
 	virtual LLUIImagePtr	getIcon() const;
 	virtual void			performAction(LLInventoryModel* model, std::string action);
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-03-29 (Catznip-3.2.1a) | Modified: Catznip-2.0.0g
-	/*virtual*/ void            performActionBatch(LLInventoryModel* model, std::string action,
-							                       std::list<LLFolderViewModelItemInventory*>& batch);
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void            performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
 // [/SL:KB]
 	virtual void			openItem();
 	virtual std::string getLabelSuffix() const;
@@ -509,9 +508,8 @@ public:
 					 LLWearableType::EType wearable_type);
 	virtual LLUIImagePtr getIcon() const;
 	virtual void	performAction(LLInventoryModel* model, std::string action);
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-03-29 (Catznip-3.2.1a) | Modified: Catznip-2.0.0g
-	/*virtual*/ void    performActionBatch(LLInventoryModel* model, std::string action, 
-						                   std::list<LLFolderViewModelItemInventory*>& batch);
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void    performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
 // [/SL:KB]
 	virtual void	openItem();
 	virtual void	buildContextMenu(LLMenuGL& menu, U32 flags);

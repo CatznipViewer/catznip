@@ -723,7 +723,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 	addDeleteContextMenuOptions(items, disabled_items);
 
-// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2.1a) | Added: Catznip-3.2.0a
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
 	// If multiple items are selected, only disable properties if we're not showing them in a multi-floater
 	if ( ((flags & FIRST_SELECTED_ITEM) == 0) && (!gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
 	{
@@ -3824,7 +3824,7 @@ void LLFolderBridge::modifyOutfit(BOOL append)
 	LLAppearanceMgr::instance().wearInventoryCategory( cat, FALSE, append );
 }
 
-// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2)
 void LLFolderBridge::wearItems()
 {
 	const LLInventoryModel* pModel = getInventoryModel();
@@ -3853,6 +3853,7 @@ void LLFolderBridge::wearItemsFinal(const LLUUID& idFolder)
 		LLViewerInventoryItem* pItem = *itItem;
 		if (get_is_item_worn(pItem->getUUID()))
 			continue;
+
 		switch (pItem->getType())
 		{
 			case LLAssetType::AT_BODYPART:
@@ -5351,7 +5352,7 @@ void LLObjectBridge::performAction(LLInventoryModel* model, std::string action)
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-3.2.1a) | Modified: Catznip-2.0.1a
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-10-02 (Catznip-2.0)
 class WearAttachmentsCallback : public LLInventoryCallback
 {
 public:
@@ -5361,7 +5362,7 @@ public:
 		mItemIds.push_back(idItem);
 	}
 protected:
-	~WearAttachmentsCallback()
+	/*virtual*/ ~WearAttachmentsCallback()
 	{
 		if (LLInventoryCallbackManager::is_instantiated())
 		{
@@ -5385,14 +5386,13 @@ private:
 };
 
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
-void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string action, 
-		                                std::list<LLFolderViewModelItemInventory*>& batch)
+void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch)
 {
 	// For "open" (aka <enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
 	bool fRemoveOpen = true;
 	if ("open" == action)
 	{
-		for (auto itItem = batch.cbegin(); (itItem != batch.cend()) && (fRemoveOpen); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); (itItem != batch.end()) && (fRemoveOpen); ++itItem)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(*itItem);
 			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
@@ -5414,7 +5414,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 	{
 		MASK mask = gKeyboard->currentMask(TRUE);
 		LLInventoryCallback* pCallback = NULL;
-		for (auto itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(*itItem);
 			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
@@ -5426,7 +5426,9 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 
 			if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getRootFolderID()))
 			{
-				bool fWearAdd = ("wear_add" == action) || (("open" == action) && (mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickAttachmentAdd")));
+				bool fCtrlDown = (MASK_CONTROL == mask);
+				bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickWearableAdd");
+				bool fWearAdd = ("wear_add" == action) || (("open" == action) && (fCtrlDown ^ fOpenAdd));
 				LLAttachmentsMgr::instance().addAttachment(pItem->getUUID(), 0, fWearAdd);
 			}
 			else if (gInventory.isObjectDescendentOf(pItem->getUUID(), gInventory.getLibraryRootFolderID()))
@@ -5440,7 +5442,7 @@ void LLObjectBridge::performActionBatch(LLInventoryModel* model, std::string act
 	else if ( (isRemoveAction(action)) || (("open" == action) && (fRemoveOpen)) )
 	{
 		LLAgentWearables::llvo_vec_t itemsRem; 
-		for (auto itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
 		{
 			const LLObjectBridge* pObjBridge = dynamic_cast<const LLObjectBridge*>(*itItem);
 			llassert(pObjBridge);			// batch should only contain LLObjectBridge instances
@@ -5471,7 +5473,7 @@ void LLObjectBridge::openItem()
 	// object double-click action is to wear/unwear object
 // [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2011-10-04 (Catznip-3.0)
 	MASK mask = gKeyboard->currentMask(TRUE);
-	bool fCtrlDown = (mask & MASK_CONTROL);
+	bool fCtrlDown = (MASK_CONTROL == mask);
 	bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickAttachmentAdd");
 
 	const char* pstrAction = get_is_item_worn(mUUID) ? "detach" : ((fCtrlDown ^ fOpenAdd) ? "wear_add" : "attach");
@@ -5812,16 +5814,15 @@ void LLWearableBridge::performAction(LLInventoryModel* model, std::string action
 	else LLItemBridge::performAction(model, action);
 }
 
-// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-3.2.1a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-10-02 (Catznip-2.2)
 // This function isn't static because it's called through a LLFolderViewEventListener pointer but it should be treated as if it were
-void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, 
-		                                  std::list<LLFolderViewModelItemInventory*>& batch)
+void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch)
 {
-	// For "open" (aka <Enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
+	// For "open" (aka <enter>'ing) we wear if at least one item is unworn and we remove if all items are worn
 	bool fRemoveOpen = true;
 	if ("open" == action)
 	{
-		for (auto itItem = batch.cbegin(); (itItem != batch.cend()) && (fRemoveOpen); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); (itItem != batch.end()) && (fRemoveOpen); ++itItem)
 		{
 			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(*itItem);
 			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
@@ -5848,7 +5849,7 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 		}
 
 		LLInventoryModel::item_array_t items; bool fWarningTrash = false;
-		for (auto itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
 		{
 			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(*itItem);
 			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
@@ -5889,7 +5890,10 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 			{
 				for (S32 idxItem = 0, cntItem = itemsByType[type].size(); idxItem < cntItem; idxItem++)
 				{
-					bool fWearAdd = ("wear_add" == action) || (("open" == action) && (mask & MASK_CONTROL) ^ (gSavedSettings.getBOOL("DoubleClickWearableAdd")));
+					bool fCtrlDown = (MASK_CONTROL == mask);
+					bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickWearableAdd");
+					bool fWearAdd = ("wear_add" == action) || (("open" == action) && (fCtrlDown ^ fOpenAdd));
+
 					LLAppearanceMgr::instance().wearItemOnAvatar(itemsByType[type][idxItem]->getUUID(), false, !fWearAdd && (0 == idxItem), cb);
 				}
 			}
@@ -5897,7 +5901,7 @@ void LLWearableBridge::performActionBatch(LLInventoryModel* model, std::string a
 	}
 	else if ( (isRemoveAction(action)) || (("open" == action) && (fRemoveOpen)) )
 	{
-		for (auto itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
 		{
 			const LLWearableBridge* pWearableBridge = dynamic_cast<LLWearableBridge*>(*itItem);
 			llassert(pWearableBridge);		// batch should only contain LLWearableBridge instances
@@ -5928,7 +5932,7 @@ void LLWearableBridge::openItem()
 		if ( (!fIsWorn) || (LLAssetType::AT_BODYPART != item->getType()) )
 		{
 			MASK mask = gKeyboard->currentMask(TRUE); 
-			bool fCtrlDown = (mask & MASK_CONTROL);
+			bool fCtrlDown = (MASK_CONTROL == mask);
 			bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickWearableAdd");
 
 			const char* pstrAction = (fIsWorn) ? "take_off" : ((fCtrlDown ^ fOpenAdd) || (LLAssetType::AT_BODYPART == item->getType())) ? "wear_add" : "wear";

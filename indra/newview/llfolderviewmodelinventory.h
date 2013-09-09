@@ -55,10 +55,10 @@ public:
 //	virtual bool hasChildren() const = 0;
 //	virtual LLInventoryType::EType getInventoryType() const = 0;
 //	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
-// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-3.2.1a) | Modified: Catznip-2.0.0g
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.0)
 	virtual void performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch)
 	{
-		for (auto itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
 		{
 			LLFolderViewModelItemInventory* listener = *itItem;
 			if (listener)

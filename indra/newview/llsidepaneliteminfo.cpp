@@ -32,6 +32,9 @@
 #include "llagent.h"
 #include "llavataractions.h"
 #include "llbutton.h"
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+#include "llcombobox.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llgroupactions.h"
 #include "llinventorydefines.h"
@@ -918,6 +921,10 @@ void LLSidepanelItemInfo::updateSaleInfo()
 		// turn on sale info
 		LLSaleInfo::EForSale sale_type = LLSaleInfo::FS_COPY;
 	
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+		LLComboBox* combo_sale_type = getChild<LLComboBox>("combobox sale copy");
+		sale_type = (LLSaleInfo::EForSale)combo_sale_type->getValue().asInteger();
+// [/SL:KB]
 //		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
 //		if(RadioSaleType)
 //		{
