@@ -394,6 +394,14 @@
          parameter="goto" />
     </menu_item_call>
     <menu_item_call
+     label="Find All Links"
+     layout="topleft"
+     name="Find Links">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="find_links" />
+    </menu_item_call>
+    <menu_item_call
      label="Purge Item"
      layout="topleft"
      name="Purge Item">
