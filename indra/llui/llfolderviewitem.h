@@ -241,7 +241,7 @@ public:
 // [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-21 (Catznip-3.5)
 	template <class T> const T* getViewModelItem() const
 	{
-		return dynamic_cast<T*>(getViewModelItem());
+		return dynamic_cast<const T*>(getViewModelItem());
 	}
 	template <class T> T* getViewModelItem()
 	{
