@@ -910,21 +910,21 @@ LLTrans::LLTrans()
 		Pair("UpdaterFailStartTitle",
 			 "Failed to start viewer"),
 		Pair("UpdaterFailUpdateDescriptive",
-			 "An error occurred while updating Second Life. "
-			 "Please download the latest version from www.secondlife.com."),
+			 "An error occurred while updating Catznip. "
+			 "Please download the latest version from catznip.com."),
 		Pair("UpdaterNowInstalling",
-			 "Installing Second Life..."),
+			 "Installing Catznip..."),
 		Pair("UpdaterNowUpdating",
-			 "Now updating Second Life..."),
+			 "Now updating Catznip..."),
 		Pair("UpdaterProgressBarText",
 			 "Downloading update"),
 		Pair("UpdaterProgressBarTextWithEllipses",
 			 "Downloading update..."),
 		Pair("UpdaterUpdatingDescriptive",
-			 "Your Second Life Viewer is being updated to the latest release. "
+			 "Your Catznip Viewer is being updated to the latest release. "
 			 "This may take some time, so please be patient."),
 		Pair("UpdaterWindowTitle",
-			 "Second Life Update")
+			 "Catznip Update")
 	};
 
 	BOOST_FOREACH(Pair pair, data)
