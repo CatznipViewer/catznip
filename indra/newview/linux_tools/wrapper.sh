@@ -7,7 +7,7 @@
 ## - Avoids using any FMOD Ex audio driver.
 #export LL_BAD_FMODEX_DRIVER=x
 ## - Avoids using any OpenAL audio driver.
-#export LL_BAD_OPENAL_DRIVER=x
+export LL_BAD_OPENAL_DRIVER=x
 
 ## - Avoids using the FMOD Ex PulseAudio audio driver.
 #export LL_BAD_FMOD_PULSEAUDIO=x
@@ -135,7 +135,7 @@ done
 # Don't quote $LL_WRAPPER because, if empty, it should simply vanish from the
 # command line. But DO quote "${ARGS[@]}": preserve separate args as
 # individually quoted.
-$LL_WRAPPER bin/do-not-directly-run-secondlife-bin "${ARGS[@]}"
+$LL_WRAPPER bin/do-not-directly-run-catznip-bin "${ARGS[@]}"
 LL_RUN_ERR=$?
 
 # Handle any resulting errors
@@ -145,9 +145,9 @@ if [ $LL_RUN_ERR -ne 0 ]; then
 	if [ "$(uname -m)" = "x86_64" ]; then
 		echo
 		cat << EOFMARKER
-You are running the Second Life Viewer on a x86_64 platform.  The
+You are running the Catznip Viewer on a x86_64 platform.  The
 most common problems when launching the Viewer (particularly
-'bin/do-not-directly-run-secondlife-bin: not found' and 'error while
+'bin/do-not-directly-run-catznip-bin: not found' and 'error while
 loading shared libraries') may be solved by installing your Linux
 distribution's 32-bit compatibility packages.
 For example, on Ubuntu and other Debian-based Linuxes you might run:

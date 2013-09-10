@@ -29,9 +29,9 @@ from janitor import Janitor
 from messageframe import MessageFrame
 import Tkinter, tkMessageBox
 
-TITLE = "Second Life Viewer Updater"
+TITLE = "Catznip Viewer Updater"
 # Magic bundle identifier used by all Second Life viewer bundles
-BUNDLE_IDENTIFIER = "com.secondlife.indra.viewer"
+BUNDLE_IDENTIFIER = "com.catznip.indra.viewer"
 
 # Global handle to the MessageFrame so we can update message
 FRAME = None
@@ -83,9 +83,9 @@ def fail(message):
     # least WARNING has an exclamation in a yellow triangle, even though
     # overlaid by a smaller image of the rocket ship.
     tkMessageBox.showerror(TITLE,
-"""An error occurred while updating Second Life:
+"""An error occurred while updating Catznip:
 %s
-Please download the latest viewer from www.secondlife.com.""" % message,
+Please download the latest viewer from www.catznip.com.""" % message,
                            icon=tkMessageBox.WARNING)
     sys.exit(1)
 
@@ -257,7 +257,7 @@ def main(dmgfile, markerfile, markertext):
                 log("unrecognized CFBundleIdentifier: " + CFBundleIdentifier)
 
             else:
-                fail("Could not find Second Life viewer in " + dmgfile)
+                fail("Could not find Catznip viewer in " + dmgfile)
 
             # Here 'candidate' is the new viewer to install
             log("Found " + candidate)

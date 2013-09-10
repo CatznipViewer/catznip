@@ -259,7 +259,7 @@ static LLAppViewerListener sAppViewerListener(LLAppViewer::instance);
 // viewer.cpp - these are only used in viewer, should be easily moved.
 
 #if LL_DARWIN
-const char * const LL_VERSION_BUNDLE_ID = "com.secondlife.indra.viewer";
+const char * const LL_VERSION_BUNDLE_ID = "com.catznip.indra.viewer";
 extern void init_apple_menu(const char* product);
 #endif // LL_DARWIN
 
@@ -756,7 +756,10 @@ bool LLAppViewer::init()
 
 	// Need to do this initialization before we do anything else, since anything
 	// that touches files should really go through the lldir API
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 	// set skin search path to default, will be overridden later
 	// this allows simple skinned file lookups to work
 	gDirUtilp->setSkinFolder("default", "en");
@@ -3794,7 +3797,7 @@ void LLAppViewer::handleViewerCrash()
 
 	if (gMessageSystem)
 	{
-		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
+//		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
 		gMessageSystem->stopLogging();
 	}
 
