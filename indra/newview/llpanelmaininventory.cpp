@@ -168,7 +168,8 @@ BOOL LLPanelMainInventory::postBuild()
 		{
 			mActivePanel->getFilter().setFilterCategoryTypes(mActivePanel->getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
 		}
-		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, _2));
+		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, mActivePanel));
+		mActivePanel->getRootFolder()->setFilterStateChangedCallback(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, mActivePanel));
 // [/SL:KB]
 		mActivePanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
 		mActivePanel->getFilter().markDefault();
@@ -388,13 +389,24 @@ bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
 	return true;
 }
 
-void LLPanelMainInventory::onToggleReceivedItems(const LLSD& sdValue)
+void LLPanelMainInventory::onToggleReceivedItems(LLInventoryPanel* pInvPanel)
 {
-	LLInventoryPanel* pAllPanel = getChild<LLInventoryPanel>("All Items");
-	if (!pAllPanel)
+	if (!pInvPanel)
 		return;
 
-	LLInventoryFilter& filter_all = pAllPanel->getFilter();
+	LLInventoryFilter& filter_all = pInvPanel->getFilter();
+
+	// Determine whether the "Received Items" folder should be visible or hidden
+	bool fShow = (!gSavedSettings.getBOOL("ShowReceivedItemsPanel")) || (pInvPanel->getFilter().isNotDefault());
+	bool fShown = (filter_all.getFilterCategoryTypes() & (1ULL << LLFolderType::FT_INBOX));
+
+	if (fShow == fShown)
+	{
+		// Do nothing if we already have the desired visibility
+		return;
+	}
+
+	// Set visibility of the folder, preserving current filter options if present
 	LLInventoryFilter::Params filter_params; bool filter_default = filter_all.isDefault();
 	if (!filter_default)
 	{
@@ -402,17 +414,17 @@ void LLPanelMainInventory::onToggleReceivedItems(const LLSD& sdValue)
 		filter_all.resetDefault();
 	}
 
-	if (sdValue.asBoolean())
-	{
-		filter_all.setFilterCategoryTypes(filter_all.getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
-		filter_all.markDefault();
-		filter_all.setModified(LLInventoryFilter::FILTER_RESTART);
-	}
-	else
+	if (fShow)
 	{
 		filter_all.setFilterCategoryTypes(filter_all.getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
 		filter_all.markDefault();
 		filter_all.setModified(LLInventoryFilter::FILTER_LESS_RESTRICTIVE);
+	}
+	else
+	{
+		filter_all.setFilterCategoryTypes(filter_all.getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
+		filter_all.markDefault();
+		filter_all.setModified(LLInventoryFilter::FILTER_RESTART);
 	}
 
 	if (!filter_default)
