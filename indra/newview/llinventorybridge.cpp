@@ -177,7 +177,7 @@ LLInvFVBridge::LLInvFVBridge(LLInventoryPanel* inventory,
 	mRoot(root),
 	mInvType(LLInventoryType::IT_NONE),
 	mIsLink(FALSE),
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	mClipboardGeneration(-1),
 	mIsClipboardCut(false),
 // [/SL:KB]
@@ -479,15 +479,15 @@ void  LLInvFVBridge::removeBatchNoCheck(std::vector<LLFolderViewModelItem*>&  ba
 	model->notifyObservers();
 }
 
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 bool LLInvFVBridge::isClipboardCut() const
 {
 	LLClipboard* pClipboard = LLClipboard::getInstance();
 	if (mClipboardGeneration != pClipboard->getGeneration())
 	{
 		mClipboardGeneration = pClipboard->getGeneration();
-		mIsClipboardCut = false;
 
+		mIsClipboardCut = false;
 		if (LLClipboard::instance().isCutMode())
 		{
 			mIsClipboardCut |= pClipboard->isOnClipboard(mUUID);
@@ -2473,7 +2473,7 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 			}
 			else
 			{
-				LLFolderViewFolder* folder_view = dynamic_cast<LLFolderViewFolder*>(inv_dest_panel->getItemByID(inv_cat->getUUID()));
+				LLFolderViewFolder* folder_view = inv_dest_panel->getFolderByID(inv_cat->getUUID());
 				if (folder_view)
 				{
 					is_movable = (folder_view->passedFilter()) || (folder_view->descendantsPassedFilter());
@@ -2510,7 +2510,7 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 //				{
 //					// Check whether the folder being dragged from active inventory panel
 //					// passes the filter of the destination panel.
-//					is_movable = check_category(model, cat_id, active_folder_view, filter);
+//					is_movable = check_category(model, cat_id, active_panel, filter);
 //				}
 //			}
 //		}
@@ -4172,13 +4172,10 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 // [/SL:KB]
 //		if (accept && active_panel)
 //		{
-//			LLFolderView* active_folder_view = active_panel->getRootFolder();
-//			if (!active_folder_view) return false;
-//
-//			LLFolderViewItem* fv_item = active_folder_view->getItemByID(inv_item->getUUID());
+//			LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
 //			if (!fv_item) return false;
 //
-//			accept = filter->check(fv_item);
+//			accept = filter->check(fv_item->getViewModelItem());
 //		}
 
 		if (accept && drop)
@@ -4195,7 +4192,7 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 //			if (active_panel && (destination_panel != active_panel))
 // [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
 			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-			if (active_panel && (inv_dest_panel != active_panel))
+			if ( (active_panel) && (inv_dest_panel != active_panel) )
 // [/SL:KB]
 				{
 					active_panel->unSelectAll();
@@ -4426,14 +4423,11 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 // [/SL:KB]
 //			if (accept && active_panel)
 //			{
-//				LLFolderView* active_folder_view = active_panel->getRootFolder();
-//				if (!active_folder_view) return false;
-//
-//				LLFolderViewItem* fv_item = active_folder_view->getItemByID(inv_item->getUUID());
+//				LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
 //				if (!fv_item) return false;
 //
-//				accept = filter->check(fv_item);
-//			}
+//				accept = filter->check(fv_item->getViewModelItem());
+// 			}
 
 			if (accept && drop)
 			{
@@ -4469,7 +4463,7 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 	return accept;
 }
 
-//// static
+// static
 //bool check_category(LLInventoryModel* model,
 //					const LLUUID& cat_id,
 //					LLInventoryPanel* active_panel,
@@ -4518,8 +4512,8 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 //
 //	return true;
 //}
-//
-//// static
+
+// static
 //bool check_item(const LLUUID& item_id,
 //				LLInventoryPanel* active_panel,
 //				LLInventoryFilter* filter)

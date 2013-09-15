@@ -114,7 +114,7 @@ public:
 	virtual BOOL isItemCopyable() const { return FALSE; }
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard() const;
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	/*virtual*/ bool isClipboardCut() const;
 // [/SL:KB]
 	virtual BOOL isClipboardPasteable() const;
@@ -181,7 +181,7 @@ protected:
 	LLInventoryType::EType mInvType;
 	bool						mIsLink;
 	LLTimer						mTimeSinceRequestStart;
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	mutable int					mClipboardGeneration;
 	mutable bool				mIsClipboardCut;			// Only access this through isClipboardCut()
 // [/SL:KB]

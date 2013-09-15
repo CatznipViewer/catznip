@@ -39,14 +39,14 @@
 #include "llviewerfoldertype.h"
 
 // linden library includes
-#include "llclipboard.h"
+//#include "llclipboard.h"
 #include "lltrans.h"
 
 // [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
 #include <boost/algorithm/string.hpp>
 // [/SL:KB]
 
-LLFastTimer::DeclareTimer FT_FILTER_CLIPBOARD("Filter Clipboard");
+//LLFastTimer::DeclareTimer FT_FILTER_CLIPBOARD("Filter Clipboard");
 
 LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 :	mFilterObjectTypes(p.object_types),
@@ -90,7 +90,7 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
 	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 		return TRUE;
 // [/SL:KB]
 //		return passed_clipboard;
@@ -107,17 +107,16 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 
 bool LLInventoryFilter::check(const LLInventoryItem* item)
 {
-	const bool passed_string = (mFilterSubString.size() ? item->getName().find(mFilterSubString) != std::string::npos : true);
+//	const bool passed_string = (mFilterSubString.size() ? item->getName().find(mFilterSubString) != std::string::npos : true);
 // [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
-//	auto itRange = boost::ifind_first(item->getName(), mFilterSubString);
-//	std::string::size_type string_offset = (!itRange.empty()) ? itRange.begin() - item->getName().begin() : std::string::npos;
+	const bool passed_string = !boost::ifind_first(item->getName(), mFilterSubString).empty();
 // [/SL:KB]
 
 	const bool passed_filtertype = checkAgainstFilterType(item);
 	const bool passed_permissions = checkAgainstPermissions(item);
 //	const bool passed_clipboard = checkAgainstClipboard(item->getUUID());
 
-// [SL:KB]
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	return passed_filtertype && passed_permissions && passed_string;
 // [/SL:KB]
 //	return passed_filtertype && passed_permissions && passed_clipboard && passed_string;
@@ -152,7 +151,7 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 	// we're showing all folders, overriding filter
 	if (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS)
 	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 		return true;
 // [/SL:KB]
 //		return passed_clipboard;
@@ -170,7 +169,7 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
 			return false;
 	}
 
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	return true;
 // [/SL:KB]
 //	return passed_clipboard;
@@ -195,7 +194,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		if (object_type == LLInventoryType::IT_NONE)
 		{
 //			if (object && object->getIsLinkType())
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
 			const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
 			if ( (bridge) && (bridge->isLink()) )
 // [/SL:KB]
@@ -214,7 +213,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 	// Pass if this item is the target UUID or if it links to the target UUID
 	if (filterTypes & FILTERTYPE_UUID)
 	{
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
 		LLUUID object_id = listener->getUUID();
 
 		const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
@@ -277,7 +276,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 			if (is_hidden_if_empty)
 			{
 				// Force the fetching of those folders so they are hidden iff they really are empty...
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
 				gInventory.fetchDescendentsOf(listener->getUUID());
 // [/SL:KB]
 //				gInventory.fetchDescendentsOf(object_id);
@@ -366,7 +365,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLInventoryItem* item) cons
 
 bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInventory* listener) const
 {
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
 	if (PERM_NONE == mFilterOps.mPermissions)
 		return TRUE;
 // [/SL:KB]
@@ -398,7 +397,7 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) con
 
 bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInventory* listener) const
 {
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
 	if (FILTERLINK_INCLUDE_LINKS == mFilterOps.mFilterLinks)
 		return TRUE;
 // [/SL:KB]
@@ -994,6 +993,8 @@ void LLInventoryFilter::toParams(Params& params) const
 		params.filter_ops.category_types = getFilterCategoryTypes();
 	if (mFilterOps.mFilterLinks != mDefaultFilterOps.mFilterLinks)
 		params.filter_ops.links = getFilterLinks();
+	if (mFilterOps.mFilterUUID != mDefaultFilterOps.mFilterUUID)
+		params.filter_ops.uuid = mFilterOps.mFilterUUID;
 	if (mFilterSubString.size())
 		params.substring = getFilterSubString();
 	if (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions)
@@ -1059,6 +1060,11 @@ void LLInventoryFilter::fromParams(const Params& params)
 		setFilterLinks(params.filter_ops.links);
 	}
 
+	if (params.filter_ops.uuid.isProvided())
+	{
+		setFilterUUID(params.filter_ops.uuid);
+	}
+
 	if (params.substring.isProvided())
 	{
 		setFilterSubString(params.substring);
@@ -1083,7 +1089,6 @@ void LLInventoryFilter::fromParams(const Params& params)
 
 	if (params.filter_ops.hours_ago.isProvided())
 	{
-		setShowFolderState(params.filter_ops.show_folder_state);
 		setHoursAgo(params.filter_ops.hours_ago);
 	}
 

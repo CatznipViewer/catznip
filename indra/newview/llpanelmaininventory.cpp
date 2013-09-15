@@ -101,7 +101,7 @@ private:
 LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	: LLPanel(p),
 	  mActivePanel(NULL),
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	  mActivePanelIndex(-1),
 	  mFilterSubStringPerTab(true),
 // [/SL:KB]
@@ -152,7 +152,7 @@ BOOL LLPanelMainInventory::postBuild()
     
 	//panel->getFilter().markDefault();
 
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mActivePanelIndex = mFilterTabs->getPanelIndexByName("All Items");
 	mFilterSubStringPerTab = gSavedSettings.getBOOL("InventoryFilterStringPerTab");
 	mFilterSubStrings.insert(mFilterSubStrings.end(), mFilterTabs->getTabCount(), LLStringUtil::null);
@@ -239,7 +239,7 @@ BOOL LLPanelMainInventory::postBuild()
 // [/SL:KB]
 
 	initListCommandsHandlers();
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	updateItemcountText();
 // [/SL:KB]
 
@@ -527,7 +527,7 @@ void LLPanelMainInventory::onClearSearch()
 		mActivePanel->getRootFolder()->applyFunctorRecursively(opener);
 		mActivePanel->getRootFolder()->scrollToShowSelection();
 	}
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0].clear();
 // [/SL:KB]
 //	mFilterSubString = "";
@@ -548,7 +548,7 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 
 //	mFilterSubString = search_string;
 //	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = search_string;
 	if (mActivePanel->getFilterSubString().empty() && search_string.empty())
 // [/SL:KB]
@@ -565,7 +565,7 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 	}
 
 	// set new filter string
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	setFilterSubString(search_string);
 // [/SL:KB]
 //	setFilterSubString(mFilterSubString);
@@ -657,7 +657,7 @@ void LLPanelMainInventory::onFilterSelected()
 // [/SL:KB]
 
 	// Find my index
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mActivePanel = (LLInventoryPanel*)mFilterTabs->getCurrentPanel();
 	mActivePanelIndex = mFilterTabs->getCurrentPanelIndex();
 // [/SL:KB]
@@ -669,7 +669,7 @@ void LLPanelMainInventory::onFilterSelected()
 	}
 
 //	setFilterSubString(mFilterSubString);
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	if (mFilterEditor)
 		mFilterEditor->setText(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
 	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
@@ -741,7 +741,7 @@ BOOL LLPanelMainInventory::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 }
 
 // virtual
-void LLPanelMainInventory::changed(U32 mask)
+void LLPanelMainInventory::changed(U32)
 {
 	updateItemcountText();
 }
@@ -792,14 +792,13 @@ void LLPanelMainInventory::updateItemcountText()
 	}
 	else
 	{
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 		text = getString("ItemcountUnknown", string_args);
 // [/SL:KB]
 //		text = getString("ItemcountUnknown");
 	}
 	
-//    mCounterCtrl->setValue(text);
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	// NOTE: this is a rather bad hack since it usurps the floater's title (and assumes it will never change during its lifetime)
 	LLFloater* pFloater = getParentByType<LLFloater>();
 	if (pFloater)
@@ -813,6 +812,7 @@ void LLPanelMainInventory::updateItemcountText()
 		mCounterCtrl->setValue(text);
 	}
 // [/SL:KB]
+//    mCounterCtrl->setValue(text);
 }
 
 void LLPanelMainInventory::onFocusReceived()
@@ -833,7 +833,7 @@ void LLPanelMainInventory::onFocusReceived()
 void LLPanelMainInventory::setFilterTextFromFilter() 
 { 
 	mFilterText = mActivePanel->getFilter().getFilterText(); 
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
 	updateItemcountText();
 // [/SL:KB]
 }
@@ -1134,7 +1134,7 @@ void LLFloaterInventoryFinder::selectNoTypes(void* user_data)
 void LLPanelMainInventory::initListCommandsHandlers()
 {
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2)
 	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
 	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 // [/SL:KB]
@@ -1325,7 +1325,7 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 //	}
 
 //	if (command_name == "find_links")
-//	{
+// 	{
 //		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
 //		if (!current_item)
 //		{
@@ -1333,21 +1333,18 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 //		}
 //		const LLUUID& item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
 //		const std::string &item_name = current_item->getViewModelItem()->getName();
-//// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+//		mFilterSubString = item_name;
 //		LLInventoryFilter &filter = mActivePanel->getFilter();
 //		filter.setFilterSubString(item_name);
-////		mFilterSubString = item_name;
-//		LLInventoryFilter *filter = mActivePanel->getFilter();
-//		filter->setFilterSubString(item_name);
+//		mFilterEditor->setText(item_name);
+//
+//		mFilterEditor->setFocus(TRUE);
 //		filter.setFilterUUID(item_id);
 //		filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
 //		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
-//		filter->setFilterUUID(item_id);
-//		filter->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-//		filter->setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
-//	}
+// 	}
 
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	if (command_name == "filter_string_per_tab")
 	{
 		mFilterSubStringPerTab = !mFilterSubStringPerTab;
@@ -1461,6 +1458,19 @@ bool LLPanelMainInventory::onCheckFolderSortOrder(const LLSD& sdParam)
 
 BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 {
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	const std::string command_name = userdata.asString();
+	if (command_name == "filter_string_per_tab")
+	{
+		return mFilterSubStringPerTab;
+	}
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	else if (command_name == "show_received_items_panel")
+	{
+		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
+	}
+// [/SL:KB]
 //	U32 sort_order_mask = getActivePanel()->getSortOrder();
 //	const std::string command_name = userdata.asString();
 //	if (command_name == "sort_by_name")
@@ -1482,20 +1492,6 @@ BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 //	{
 //		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
 //	}
-//
-// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	const std::string command_name = userdata.asString();
-	if (command_name == "filter_string_per_tab")
-	{
-		return mFilterSubStringPerTab;
-	}
-// [/SL:KB]
-// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
-	else if (command_name == "show_received_items_panel")
-	{
-		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
-	}
-// [/SL:KB]
 
 	return FALSE;
 }

@@ -809,19 +809,19 @@ void LLFolderViewItem::draw()
 	// Draw open icon
 	//
 	const S32 icon_x = mIndentation + mArrowSize + mTextPad;
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	const F32 label_alpha = (mViewModelItem->isClipboardCut()) ? 0.6f : 1.0f;
 // [/SL:KB]
 	if (!mIconOpen.isNull() && (llabs(mControlLabelRotation) > 80)) // For open folders
  	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
 // [/SL:KB]
 //		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
 	}
 	else if (mIcon)
 	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
  		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
 // [/SL:KB]
 // 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
@@ -829,7 +829,7 @@ void LLFolderViewItem::draw()
 
 	if (mIconOverlay && getRoot()->showItemLinkOverlays())
 	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
 // [/SL:KB]
 //		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
@@ -844,7 +844,6 @@ void LLFolderViewItem::draw()
 	}
 
 	std::string::size_type filter_string_length = mViewModelItem->hasFilterStringMatch() ? mViewModelItem->getFilterStringSize() : 0;
-
 	F32 right_x  = 0;
 	F32 y = (F32)getRect().getHeight() - font->getLineHeight() - (F32)mTextPad - (F32)TOP_PAD;
 	F32 text_left = (F32)getLabelXPos();
@@ -863,7 +862,7 @@ void LLFolderViewItem::draw()
     }
 
     LLColor4 color = (mIsSelected && filled) ? mFontHighlightColor : mFontColor;
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 	color.setAlpha(label_alpha);
 // [/SL:KB]
     drawLabel(font, text_left, y, color, right_x);
