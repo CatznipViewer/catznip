@@ -2754,16 +2754,20 @@ void handle_attachment_touch(const LLUUID& idItem)
 		if (pAttachObj)
 		{
 			LLSelectMgr::getInstance()->deselectAll();
+
 			LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
-			struct SetTransient : public LLSelectedNodeFunctor
+			if (!LLToolMgr::getInstance()->inBuildMode())
 			{
-				bool apply(LLSelectNode* node)
+				struct SetTransient : public LLSelectedNodeFunctor
 				{
-					node->setTransient(TRUE);
-					return true;
-				}
-			} f;
-			hSel->applyToNodes(&f);
+					bool apply(LLSelectNode* node)
+					{
+						node->setTransient(TRUE);
+						return true;
+					}
+				} f;
+				hSel->applyToNodes(&f);
+			}
 
 			handle_object_touch();
 		}

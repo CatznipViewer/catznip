@@ -127,8 +127,6 @@ protected:
 		registrar.add("Wearing.TouchAttach", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
 		registrar.add("Wearing.EditItem", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
 		registrar.add("Wearing.EditOutfit", boost::bind(&edit_outfit));
-// [/SL:KB]
-// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2010-09-04 (Catznip-2.1)
 		registrar.add("Wearing.TakeOffDetach", boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), mUUIDs));
 // [/SL:KB]
 		LLContextMenu* menu = createFromFile("menu_wearing_tab.xml");
