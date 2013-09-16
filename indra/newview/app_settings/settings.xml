@@ -1959,6 +1959,7 @@
       <string>S32</string>
       <key>Value</key>
       <integer>262144</integer>
+    </map>
     <key>CrashSettingsFile</key>
     <map>
       <key>Comment</key>
