@@ -32,6 +32,9 @@
 #include "llagent.h"
 #include "llavataractions.h"
 #include "llbutton.h"
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+#include "llcombobox.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llgroupactions.h"
 #include "llinventorydefines.h"
@@ -918,25 +921,29 @@ void LLSidepanelItemInfo::updateSaleInfo()
 		// turn on sale info
 		LLSaleInfo::EForSale sale_type = LLSaleInfo::FS_COPY;
 	
-		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
-		if(RadioSaleType)
-		{
-			switch (RadioSaleType->getSelectedIndex())
-			{
-			case 0:
-				sale_type = LLSaleInfo::FS_ORIGINAL;
-				break;
-			case 1:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			case 2:
-				sale_type = LLSaleInfo::FS_CONTENTS;
-				break;
-			default:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			}
-		}
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+		LLComboBox* combo_sale_type = getChild<LLComboBox>("combobox sale copy");
+		sale_type = (LLSaleInfo::EForSale)combo_sale_type->getValue().asInteger();
+// [/SL:KB]
+//		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
+//		if(RadioSaleType)
+//		{
+//			switch (RadioSaleType->getSelectedIndex())
+//			{
+//			case 0:
+//				sale_type = LLSaleInfo::FS_ORIGINAL;
+//				break;
+//			case 1:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			case 2:
+//				sale_type = LLSaleInfo::FS_CONTENTS;
+//				break;
+//			default:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			}
+//		}
 
 		if (sale_type == LLSaleInfo::FS_COPY 
 			&& !gAgent.allowOperation(PERM_COPY, item->getPermissions(), 
