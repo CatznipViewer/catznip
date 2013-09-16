@@ -3656,7 +3656,7 @@ BOOL LLAppearanceMgr::getIsProtectedCOFItem(const LLUUID& obj_id) const
 	*/
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2)
 LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 {
 	if (!LLApp::isExiting())
@@ -3711,7 +3711,7 @@ LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
 						continue;
 
 					std::string strOrder = build_order_string(pItem->getWearableType(), itTemp - items.begin());
-					if (strOrder == pItem->LLInventoryItem::getDescription())
+					if (strOrder == pItem->getActualDescription())
 						continue;
 
 					pItem->setDescription(strOrder);

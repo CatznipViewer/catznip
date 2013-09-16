@@ -170,7 +170,7 @@ LLFolderView::LLFolderView(const Params& p)
 	mMinWidth(0),
 	mDragAndDropThisFrame(FALSE),
 	mCallbackRegistrar(NULL),
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 	mEnableCallbackRegistrar(NULL),
 // [/SL:KB]
 	mParentPanel(p.parent_panel),
@@ -1425,7 +1425,7 @@ BOOL LLFolderView::handleRightMouseDown( S32 x, S32 y, MASK mask )
         {
 			mCallbackRegistrar->pushScope();
         }
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 		if (mEnableCallbackRegistrar)
 		{
 			mEnableCallbackRegistrar->pushScope();
@@ -1440,7 +1440,7 @@ BOOL LLFolderView::handleRightMouseDown( S32 x, S32 y, MASK mask )
         {
 			mCallbackRegistrar->popScope();
 	}
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 		if (mEnableCallbackRegistrar)
 		{
 			mEnableCallbackRegistrar->popScope();

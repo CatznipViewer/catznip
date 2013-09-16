@@ -265,7 +265,7 @@ private:
 	bool mUpdateBaseOrder;
 };
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2)
 class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
 {
 public:
@@ -274,7 +274,7 @@ public:
 	{
 		addReorderItem(idItem, index, do_replace);
 	}
-	virtual ~LLReorderAndUpdateAppearanceOnDestroy();
+	/*virtual*/ ~LLReorderAndUpdateAppearanceOnDestroy();
 
 	void addReorderItem(const LLUUID& idItem, U32 index, bool do_replace)
 	{

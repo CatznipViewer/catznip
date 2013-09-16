@@ -5738,7 +5738,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			{
 					disabled_items.push_back(std::string("Wearable Add"));
 			}
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-10-02 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-10-02 (Catznip-2.2)
 			// Show the "Wear On" submenus if multiple clothing items are selected and none of them are worn
 			// (or if it's a single clothing item then only show it if its wearable type already has a current wearable
 			if ( ( (flags & ITEM_IN_MULTI_SELECTION) && ((flags & PARTIAL_WORN_SELECTION) == 0) &&
@@ -5770,7 +5770,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}
 // [/SL:KB]
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-3.0.0a) | Added: Catznip-2.0.0d
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 		if (item)
 		{
 			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", TRUE);
@@ -5822,7 +5822,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 //				case LLAssetType::AT_CLOTHING:
 //					items.push_back(std::string("Take Off"));
 //
-//// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.1.2a) | Added: Catznip-2.0.0d
+//// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 //					// Only show "Wear On" for unworn clothing items whose wearable type already has a current wearable
 //					if ( (gAgentWearables.getWearableCount(item->getWearableType())) && (!get_is_item_worn(item->getUUID())) )
 //					{
@@ -5863,7 +5863,7 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	hide_context_entries(menu, items, disabled_items);
 }
 
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-3.0.0a) | Modified: Catznip-2.2.0a
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2)
 bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
 {
 	if ( (!pPanel) || (!pPanel->getRootFolder()) || (!sdParam.has("action")) || (!sdParam.has("index")) )
@@ -5872,7 +5872,7 @@ bool LLWearableBridge::doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam)
 	LLPointer<LLReorderAndUpdateAppearanceOnDestroy> cb = NULL;
 
 	std::set<LLFolderViewItem*> selItems = pPanel->getRootFolder()->getSelectionList();
-	for (auto itSel = selItems.cbegin(); itSel != selItems.cend(); ++itSel)
+	for (std::set<LLFolderViewItem*>::const_iterator itSel = selItems.begin(); itSel != selItems.end(); ++itSel)
 	{
 		const LLFolderViewModelItemInventory* pVMItem = (*itSel) ? (*itSel)->getViewModelItem<LLFolderViewModelItemInventory>() : NULL;
 		const LLViewerInventoryItem* pItem = (pVMItem) ? pVMItem->getInventoryObject<LLViewerInventoryItem>() : NULL;
