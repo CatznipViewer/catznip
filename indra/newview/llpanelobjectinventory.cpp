@@ -132,6 +132,9 @@ public:
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard() const;
 	virtual BOOL isClipboardPasteable() const;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+	/*virtual*/ bool isClipboardCut() const;
+// [/SL:KB]
 	virtual void pasteFromClipboard();
 	virtual void pasteLinkFromClipboard();
 	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
@@ -551,6 +554,13 @@ BOOL LLTaskInvFVBridge::isClipboardPasteable() const
 {
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+bool LLTaskInvFVBridge::isClipboardCut() const
+{
+	return false;
+}
+// [/SL:KB]
 
 void LLTaskInvFVBridge::pasteFromClipboard()
 {
