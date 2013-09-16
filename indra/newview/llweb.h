@@ -42,6 +42,13 @@ class LLWeb
 public:
 	static void initClass();
 	
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+	// We need a unique name because std::string implicitly casts to LLSD and confuses the compiler
+	static void openURL(const LLSD& sdData);
+	static void openURLExternal(const LLSD& sdData);
+	static void openURLInternal(const LLSD& sdData);
+// [/SL:KB]
+
 	/// Load the given url in the operating system's web browser, async if we want to return immediately
 	/// before browser has spawned
 	static void loadURLExternal(const std::string& url) {loadURLExternal(url, LLStringUtil::null);}
