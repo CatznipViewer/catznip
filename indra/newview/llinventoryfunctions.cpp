@@ -47,7 +47,7 @@
 #include "llappviewer.h"
 #include "llclipboard.h"
 #include "lldonotdisturbnotificationstorage.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfocusmgr.h"
 #include "llfolderview.h"
@@ -431,80 +431,162 @@ void show_item_profile(const LLUUID& item_uuid)
 	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
 }
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
 void show_item_original(const LLUUID& item_uuid)
 {
-	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
-	if (!floater_inventory)
-	{
-		llwarns << "Could not find My Inventory floater" << llendl;
-		return;
-	}
+	// We'd like the behaviour of "Find Original" to be:
+	//   - always switch to the "All Items" tab
+	//       -> "Find Original" when picked on the "Recent" tab did not work
+	//       -> "Find Original" picked elsewhere when "Recent" tab was the last used tab on the inventory floater did not work
+	//   - prefer the active (topmost) inventory floater over all others but only if the item can be selected
+	//       -> "Find Original" with the topmost "All Items" tab unfiltered => item selection happens here
+	//       -> "Find Original" on the topmost with a filter applied => item selection happens here only if 
+	const LLUUID& idItemTarget = gInventory.getLinkedItemID(item_uuid);
 
-	//sidetray inventory panel
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+	S32 z_min = S32_MAX;
+	LLSidepanelInventory* pActiveInvSidepanel = NULL;
 
-	bool do_reset_inventory_filter = !floater_inventory->isInVisibleChain();
-
-	LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel();
-	if (!active_panel) 
-	{
-		//this may happen when there is no floatera and other panel is active in inventory tab
-
-		if	(sidepanel_inventory)
-		{
-			sidepanel_inventory->showInventoryPanel();
-		}
-	}
-	
-	active_panel = LLInventoryPanel::getActiveInventoryPanel();
-	if (!active_panel) 
-	{
-		return;
-	}
-	active_panel->setSelection(gInventory.getLinkedItemID(item_uuid), TAKE_FOCUS_NO);
-	
-	if(do_reset_inventory_filter)
-	{
-		reset_inventory_filter();
-	}
-}
-
-
-void reset_inventory_filter()
-{
-	//inventory floater
-	bool floater_inventory_visible = false;
-
+	// See LLInventoryPanel::getActiveInventoryPanel()
 	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
 	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
 	{
-		LLFloaterInventory* floater_inventory = dynamic_cast<LLFloaterInventory*>(*iter);
-		if (floater_inventory)
+		LLFloater* inv_floater = *iter;
+		if (!inv_floater)
+			continue;
+
+		// Check the filter
+		LLSidepanelInventory* inv_sp = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(inv_floater);
+		LLInventoryPanel* inv_panel = (inv_sp) ? inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL) : NULL;
+		if (!inv_panel)
+			continue;
+		if (!inv_panel->getFilter().isDefault())
 		{
-			LLPanelMainInventory* main_inventory = floater_inventory->getMainInventoryPanel();
+			// Check the actual item as fall-back
+			LLFolderViewItem* view_item = (inv_panel->getRootFolder()) ? inv_panel->getItemByID(idItemTarget) : NULL;
+			if ( (!view_item) || (!view_item->passedFilter()) )
+				continue;
+		}
 
-			main_inventory->onFilterEdit("");
-
-			if(floater_inventory->getVisible())
+		// Check z-order
+		if (inv_floater->getVisible())
+		{
+			S32 z_order = gFloaterView->getZOrder(inv_floater);
+			if (z_order < z_min)
 			{
-				floater_inventory_visible = true;
+				z_min = z_order;
+				pActiveInvSidepanel = inv_sp;
 			}
+		}
+		else if (NULL == pActiveInvSidepanel)
+		{
+			pActiveInvSidepanel = inv_sp;
 		}
 	}
 
-	if(!floater_inventory_visible)
+	if (!pActiveInvSidepanel)
 	{
-		LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-		if (sidepanel_inventory)
+		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
+		if (pInvFloater)
+			pActiveInvSidepanel = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater);
+	}
+
+	if (pActiveInvSidepanel)
+	{
+		// Make sure the floater is visible
+		LLFloater* pInvFloater = pActiveInvSidepanel->getParentByType<LLFloater>();
+		if (pInvFloater)
 		{
-			LLPanelMainInventory* main_inventory = sidepanel_inventory->getMainInventoryPanel();
-			if (main_inventory)
-			{
-				main_inventory->onFilterEdit("");
-			}
+			pInvFloater->openFloater(pInvFloater->getKey());
+		}
+
+		// Make sure the inventory panels are visible
+		pActiveInvSidepanel->showInventoryPanel();
+
+		// Select the item in the "All Items" inventory panel
+		LLPanelMainInventory* pMainPanel = pActiveInvSidepanel->getMainInventoryPanel();
+		if (pMainPanel)
+		{
+			LLInventoryPanel* pAllItemsPanel = pMainPanel->selectPanel(LLPanelMainInventory::PANEL_ALL);
+			if (pAllItemsPanel)
+				pMainPanel->getActivePanel()->setSelection(idItemTarget, TAKE_FOCUS_NO);
 		}
 	}
 }
+// [/SL:KB]
+//void show_item_original(const LLUUID& item_uuid)
+//{
+//	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+//	if (!floater_inventory)
+//	{
+//		llwarns << "Could not find My Inventory floater" << llendl;
+//		return;
+//	}
+//
+//	//sidetray inventory panel
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//
+//	bool do_reset_inventory_filter = !floater_inventory->isInVisibleChain();
+//
+//	LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel();
+//	if (!active_panel) 
+//	{
+//		//this may happen when there is no floatera and other panel is active in inventory tab
+//
+//		if	(sidepanel_inventory)
+//		{
+//			sidepanel_inventory->showInventoryPanel();
+//		}
+//	}
+//	
+//	active_panel = LLInventoryPanel::getActiveInventoryPanel();
+//	if (!active_panel) 
+//	{
+//		return;
+//	}
+//	active_panel->setSelection(gInventory.getLinkedItemID(item_uuid), TAKE_FOCUS_NO);
+//	
+//	if(do_reset_inventory_filter)
+//	{
+//		reset_inventory_filter();
+//	}
+//}
+
+
+//void reset_inventory_filter()
+//{
+//	//inventory floater
+//	bool floater_inventory_visible = false;
+//
+//	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
+//	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
+//	{
+//		LLFloaterInventory* floater_inventory = dynamic_cast<LLFloaterInventory*>(*iter);
+//		if (floater_inventory)
+//		{
+//			LLPanelMainInventory* main_inventory = floater_inventory->getMainInventoryPanel();
+//
+//			main_inventory->onFilterEdit("");
+//
+//			if(floater_inventory->getVisible())
+//			{
+//				floater_inventory_visible = true;
+//			}
+//		}
+//	}
+//
+//	if(!floater_inventory_visible)
+//	{
+//		LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		if (sidepanel_inventory)
+//		{
+//			LLPanelMainInventory* main_inventory = sidepanel_inventory->getMainInventoryPanel();
+//			if (main_inventory)
+//			{
+//				main_inventory->onFilterEdit("");
+//			}
+//		}
+//	}
+//}
 
 void open_outbox()
 {
