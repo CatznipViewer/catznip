@@ -28,30 +28,36 @@
 #ifndef LL_LLFOLDERVIEWMODELINVENTORY_H
 #define LL_LLFOLDERVIEWMODELINVENTORY_H
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-20 (Catznip-3.5)
+#include "llfolderviewmodelinventorycommon.h"
+// [/SL:KB]
 #include "llinventoryfilter.h"
 #include "llinventory.h"
 #include "llwearabletype.h"
 #include "lltooldraganddrop.h"
 
-class LLFolderViewModelItemInventory
-	:	public LLFolderViewModelItemCommon
+//class LLFolderViewModelItemInventory
+//	:	public LLFolderViewModelItemCommon
+// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-20 (Catznip-3.5)
+class LLFolderViewModelItemInventory : public LLFolderViewModelItemInventoryCommon
+// [/SL:KB]
 {
 public:
 	LLFolderViewModelItemInventory(class LLFolderViewModelInventory& root_view_model);
-	virtual const LLUUID& getUUID() const = 0;
-	virtual time_t getCreationDate() const = 0;	// UTC seconds
-	virtual void setCreationDate(time_t creation_date_utc) = 0;
-	virtual PermissionMask getPermissionMask() const = 0;
-	virtual LLFolderType::EType getPreferredType() const = 0;
-	virtual void showProperties(void) = 0;
-	virtual BOOL isItemInTrash( void) const { return FALSE; } // TODO: make   into pure virtual.
-	virtual BOOL isUpToDate() const = 0;
-	virtual bool hasChildren() const = 0;
-	virtual LLInventoryType::EType getInventoryType() const = 0;
-	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
+//	virtual const LLUUID& getUUID() const = 0;
+//	virtual time_t getCreationDate() const = 0;	// UTC seconds
+//	virtual void setCreationDate(time_t creation_date_utc) = 0;
+//	virtual PermissionMask getPermissionMask() const = 0;
+//	virtual LLFolderType::EType getPreferredType() const = 0;
+//	virtual void showProperties(void) = 0;
+//	virtual BOOL isItemInTrash( void) const { return FALSE; } // TODO: make   into pure virtual.
+//	virtual BOOL isUpToDate() const = 0;
+//	virtual bool hasChildren() const = 0;
+//	virtual LLInventoryType::EType getInventoryType() const = 0;
+//	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
 	virtual LLWearableType::EType getWearableType() const = 0;
-	virtual EInventorySortGroup getSortGroup() const = 0;
-	virtual LLInventoryObject* getInventoryObject() const = 0;
+//	virtual EInventorySortGroup getSortGroup() const = 0;
+//	virtual LLInventoryObject* getInventoryObject() const = 0;
 	virtual void requestSort();
 	virtual void setPassedFilter(bool filtered, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0);
 	virtual bool filter( LLFolderViewFilter& filter);

@@ -1,0 +1,5 @@
+[Inventory/Base]
+- added   : LLFolderViewItem::getViewModelItem<T>() and LLFolderViewItem::getViewModelItem<T>() const
+    -> NOTE: uses dynamic_cast rather than static_cast
+- added   : LLFolderViewModelItemInventoryCommon::getInventoryObject<T>()
+- changed : pull the pure virtual functions from LLFolderViewModelItemInventory into llui so we can get to them from LLFolderView

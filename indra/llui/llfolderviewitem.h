@@ -238,6 +238,17 @@ public:
 	const LLFolderViewModelItem* getViewModelItem( void ) const { return mViewModelItem; }
 	LLFolderViewModelItem* getViewModelItem( void ) { return mViewModelItem; }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-21 (Catznip-3.5)
+	template <class T> const T* getViewModelItem() const
+	{
+		return dynamic_cast<const T*>(getViewModelItem());
+	}
+	template <class T> T* getViewModelItem()
+	{
+		return dynamic_cast<T*>(getViewModelItem());
+	}
+// [/SL:KB]
+
 	const LLFolderViewModelInterface* getFolderViewModel( void ) const;
 	LLFolderViewModelInterface* getFolderViewModel( void );
 
