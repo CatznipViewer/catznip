@@ -5429,20 +5429,6 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			if (!isAgentAvatarValid()) return;
 
-//			if( get_is_item_worn( mUUID ) )
-//			{
-//				items.push_back(std::string("Wearable And Object Separator"));
-//				items.push_back(std::string("Detach From Yourself"));
-//			}
-//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
-//			{
-//				items.push_back(std::string("Wearable And Object Separator"));
-//				items.push_back(std::string("Wearable And Object Wear"));
-//				items.push_back(std::string("Wearable Add"));
-//				items.push_back(std::string("Attach To"));
-//				items.push_back(std::string("Attach To HUD"));
-//				// commented out for DEV-32347
-//				//items.push_back(std::string("Restore to Last Position"));
 // [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
 			items.push_back(std::string("Wearable And Object Separator"));
 
@@ -5456,7 +5442,7 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 					items.push_back(std::string("Detach From Yourself"));
 			}
 
-			if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+			if ( (!isItemInTrash()) && (!isLinkedObjectInTrash()) && (!isLinkedObjectMissing()) && (!isCOFFolder()) )
 			{
 				// Show "Wear" and "Add" for a selection where not all wearable items are currently worn
 				if ((flags & WORN_SELECTION) == 0)
@@ -5473,14 +5459,32 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 					}
 				}
 // [/SL:KB]
+//			if( get_is_item_worn( mUUID ) )
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Detach From Yourself"));
+//			}
+//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Wearable And Object Wear"));
+//				items.push_back(std::string("Wearable Add"));
+//				items.push_back(std::string("Attach To"));
+//				items.push_back(std::string("Attach To HUD"));
+//				// commented out for DEV-32347
+//				//items.push_back(std::string("Restore to Last Position"));
 
-//				if (!gAgentAvatarp->canAttachMoreObjects())
-// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6)
-				if ( (!gAgentAvatarp->canAttachMoreObjects()) && (0 == (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))) )
-// [/SL:KB]
+				if (!gAgentAvatarp->canAttachMoreObjects())
 				{
-					disabled_items.push_back(std::string("Wearable And Object Wear"));
-					disabled_items.push_back(std::string("Wearable Add"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6)
+					if ( (!gAgentAvatarp->canAttachMoreObjects()) && (0 == (flags & (BODYPART_SELECTION | CLOTHING_SELECTION))) )
+					{
+// [/SL:KB]
+						disabled_items.push_back(std::string("Wearable And Object Wear"));
+						disabled_items.push_back(std::string("Wearable Add"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6)
+					}
+// [/SL:KB]
 					disabled_items.push_back(std::string("Attach To"));
 					disabled_items.push_back(std::string("Attach To HUD"));
 				}
@@ -5773,16 +5777,16 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 //						disabled_items.push_back(std::string("Take Off"));
 //						disabled_items.push_back(std::string("Wearable Edit"));
 //					}
-//					break;
 //
 //					if (LLWearableType::getAllowMultiwear(mWearableType))
 //					{
 //						items.push_back(std::string("Wearable Add"));
-//						if (gAgentWearables.getWearableCount(mWearableType) > 0)
+//						if (gAgentWearables.getWearableCount(mWearableType) >= LLAgentWearables::MAX_CLOTHING_PER_TYPE)
 //						{
 //							disabled_items.push_back(std::string("Wearable Add"));
 //						}
 //					}
+//					break;
 //				default:
 //					break;
 //			}
