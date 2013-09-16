@@ -1,4 +1,6 @@
 [Viewer/Branding]
+- added   : "ClientSettingsFileOverride" setting to override the default user settings filename
+    -> non-release channels will auto-fill the override with settings_<channel>.xml to mimic the legacy behaviour
 - changed : basic rebranding from "Second Life" to "Catznip"
     -> per-type Catznip icons (thankies Raz!)
     -> use a Catznip-specific app folder and Catznip-specific cache folder

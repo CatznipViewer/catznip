@@ -2544,8 +2544,14 @@ bool LLAppViewer::initConfiguration()
 	initStrings(); // setup paths for LLTrans based on settings files only
 	// - set procedural settings
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
-	gSavedSettings.setString("ClientSettingsFile", 
-        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+	std::string strSettingsFile = gSavedSettings.getString("ClientSettingsFileOverride");
+	if (strSettingsFile.empty())
+		strSettingsFile = getSettingsFilename("Default", "Global");
+	gSavedSettings.setString("ClientSettingsFile", gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, strSettingsFile));
+// [/SL:KB]
+//	gSavedSettings.setString("ClientSettingsFile", 
+//        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
 	gSavedSettings.setString("CrashSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));

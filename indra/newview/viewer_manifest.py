@@ -129,6 +129,24 @@ class ViewerManifest(LLManifest):
                                                             src="environment")
                         print "Put sourceid '%s' in %s" % (sourceid, settings_install)
 
+# [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+                # Figure out if the channel requires a settings file override
+                settings_file = ''
+                if not self.default_channel():
+                    settings_file = 'settings_%s.xml' % self.channel_lowerword()
+                
+                # Store the override in settings_install.xml
+                if settings_file:
+                    content = dict(ClientSettingsFileOverride=dict(Comment='Client settings file name (per install).',
+                                                 Persist=0,
+                                                 Type='String',
+                                                 Value=settings_file))
+                    settings_install = self.put_in_file(llsd.format_pretty_xml(content),
+                                                        "settings_install.xml",
+                                                        src="environment")
+                    print "Put ClientSettingsFileOverride override '%s' in %s" % (settings_install, settings_install)
+# [/SL:KB]
+
                 self.end_prefix("app_settings")
 
             if self.prefix(src="character"):

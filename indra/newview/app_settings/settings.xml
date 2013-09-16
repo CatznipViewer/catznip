@@ -1683,6 +1683,17 @@
       <key>Value</key>
       <string />
     </map>
+    <key>ClientSettingsFileOverride</key>
+    <map>
+      <key>Comment</key>
+      <string>Overrides the filename of the client settings file</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>ContextConeInAlpha</key>
     <map>
       <key>Comment</key>
