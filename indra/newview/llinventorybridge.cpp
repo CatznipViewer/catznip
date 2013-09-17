@@ -715,14 +715,14 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 //				disabled_items.push_back(std::string("Copy"));
 //			}
 
-			items.push_back(std::string("Cut"));
-//			if (!isItemMovable() || !isItemRemovable())
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
-			if (!isItemMovable())
-// [/SL:KB]
-			{
-				disabled_items.push_back(std::string("Cut"));
-			}
+//			items.push_back(std::string("Cut"));
+////			if (!isItemMovable() || !isItemRemovable())
+//// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+//			if (!isItemMovable())
+//// [/SL:KB]
+//			{
+//				disabled_items.push_back(std::string("Cut"));
+//			}
 
 			if (canListOnMarketplace())
 			{
@@ -738,6 +738,12 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
 		items.push_back(std::string("Copy Separator"));
+
+		items.push_back(std::string("Cut"));
+		if (!isItemMovable())
+		{
+			disabled_items.push_back(std::string("Cut"));
+		}
 	
 		items.push_back(std::string("Copy"));
 		if (!isItemCopyable())

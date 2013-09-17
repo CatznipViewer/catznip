@@ -6,5 +6,6 @@
     - the item is a link and its target is available
 - changed : enabled "Copy"/"Paste"’ing of item or folder links (unless it's a folder link which points to the folder it would get pasted into)
 - changed : enabled "Copy"/"Paste"’ing and "Copy"/"Paste as Link"’ing of currently worn items
-- fixed   : "Copy Separator" isn’t shown on the context menu for inventory links
 - changed : show "ConfirmItemDeleteHasLinks" notification even when "InventoryLinking" is set to TRUE
+- fixed   : "Copy Separator" isn’t shown on the context menu for inventory links
+- fixed   : "Cut" isn't shown for inventory links
