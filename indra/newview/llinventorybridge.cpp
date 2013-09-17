@@ -798,11 +798,18 @@ void LLInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -4630,11 +4637,18 @@ void LLTextureBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -4703,11 +4717,18 @@ void LLSoundBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
 			items.push_back(std::string("Sound Open"));
 			items.push_back(std::string("Properties"));
 
@@ -4761,11 +4782,19 @@ void LLLandmarkBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
+
 			items.push_back(std::string("Landmark Open"));
 			items.push_back(std::string("Properties"));
 
@@ -4994,11 +5023,18 @@ void LLCallingCardBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		if ((flags & FIRST_SELECTED_ITEM) == 0)
 		{
 		disabled_items.push_back(std::string("Open"));
@@ -5259,11 +5295,18 @@ void LLGestureBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -5319,11 +5362,18 @@ void LLAnimationBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
 			items.push_back(std::string("Animation Open"));
 			items.push_back(std::string("Properties"));
 
@@ -5592,11 +5642,18 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		items.push_back(std::string("Properties"));
 
@@ -5827,11 +5884,18 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			can_open = FALSE;
 		}
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		
 		if (can_open)
 		{
