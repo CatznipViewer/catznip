@@ -125,6 +125,9 @@ public:
 	virtual LLSD	getValue() const;
 
 	// LLTextureCtrl interface
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	bool			getPickerVisible() const;
+// [/SL:KB]
 	void			showPicker(BOOL take_focus);
 	bool			isPickerShown() { return !mFloaterHandle.isDead(); }
 	void			setLabel(const std::string& label);
@@ -134,6 +137,9 @@ public:
 	void			setAllowNoTexture( BOOL b )					{ mAllowNoTexture = b; }
 	bool			getAllowNoTexture() const					{ return mAllowNoTexture; }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	void			setImageItemID(const LLUUID& item_id);
+// [/SL:KB]
 	const LLUUID&	getImageItemID() { return mImageItemID; }
 
 	virtual void	setImageAssetName(const std::string& name);

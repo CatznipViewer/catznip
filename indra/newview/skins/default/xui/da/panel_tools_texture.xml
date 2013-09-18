@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="Tekstur" name="Texture">
+			<panel.string name="string repeats per meter">
+				Gentagelser pr. meter
+			</panel.string>
+			<panel.string name="string repeats per face">
+				Gentagelser pr. overflade
+			</panel.string>
+			<texture_picker label="Tekstur" name="texture control" tool_tip="Klik for at vælge billede"/>
+			<text name="color label">Farve</text>
+			<color_swatch name="colorswatch" tool_tip="Klik for at åbne farvevælger"/>
+			<text name="color trans">
+				Alpha %
+			</text>
+			<spinner left="171" name="ColorTrans"/>
+			<text left="170" name="glow label">
+				Glød
+			</text>
+			<spinner left="170" name="glow"/>
+			<check_box label="Selvlysende" name="checkbox fullbright"/>
+			<text name="tex gen">
+				Afbildning
+			</text>
+			<combo_box name="combobox texgen">
+				<combo_box.item label="Standard" name="Default"/>
+				<combo_box.item label="Plan" name="Planar"/>
+			</combo_box>
+			<text name="label shininess">
+				Blankhed
+			</text>
+			<combo_box name="combobox shininess">
+				<combo_box.item label="Ingen" name="None"/>
+				<combo_box.item label="Lav" name="Low"/>
+				<combo_box.item label="Mellem" name="Medium"/>
+				<combo_box.item label="Høj" name="High"/>
+			</combo_box>
+			<text name="label bumpiness">
+				Struktur
+			</text>
+			<combo_box name="combobox bumpiness">
+				<combo_box.item label="Ingen" name="None"/>
+				<combo_box.item label="Lysintensitet" name="Brightness"/>
+				<combo_box.item label="Mørke" name="Darkness"/>
+				<combo_box.item label="Træårer" name="woodgrain"/>
+				<combo_box.item label="Bark" name="bark"/>
+				<combo_box.item label="Mursten" name="bricks"/>
+				<combo_box.item label="Tern" name="checker"/>
+				<combo_box.item label="Beton" name="concrete"/>
+				<combo_box.item label="Rustik flise" name="crustytile"/>
+				<combo_box.item label="Skåret sten" name="cutstone"/>
+				<combo_box.item label="Plader" name="discs"/>
+				<combo_box.item label="Grus" name="gravel"/>
+				<combo_box.item label="Petriskål" name="petridish"/>
+				<combo_box.item label="Udvendig beklædning" name="siding"/>
+				<combo_box.item label="Stenflise" name="stonetile"/>
+				<combo_box.item label="Puds" name="stucco"/>
+				<combo_box.item label="Rør" name="suction"/>
+				<combo_box.item label="Væv" name="weave"/>
+			</combo_box>
+			<check_box initial_value="falsk" label="Flugt planare overflader" name="checkbox planar align" tool_tip="Flugt teksuter på alle valgte overflader med den sidst valgte overflade. Kræver at planar tekstur-mapning er valgt."/>
+			<text name="rpt">
+				Gentagelser / overflade
+			</text>
+			<spinner label="Vandret (U)" name="TexScaleU"/>
+			<check_box label="Vend" name="checkbox flip s"/>
+			<spinner label="Lodret (V)" name="TexScaleV"/>
+			<check_box label="Vend" name="checkbox flip t"/>
+			<button label="Gem" label_selected="Gem" left_delta="62" name="button apply"/>
+			<text name="tex offset">
+				Tekstur offset
+			</text>
+			<spinner label="Vandret (U)" name="TexOffsetU"/>
+			<spinner label="Lodret (V)" name="TexOffsetV"/>
+			<panel name="Add_Media">
+				<text name="media_tex">
+					Media
+				</text>
+				<button name="add_media" tool_tip="Tilføj media"/>
+				<button name="delete_media" tool_tip="Slet denne media tekstur"/>
+				<button name="edit_media" tool_tip="Redigér dette media"/>
+				<button label="Flugt" label_selected="Flugt Media" name="button align" tool_tip="Flugt media tekstur (skal hentes først)"/>
+			</panel>
+		</panel>

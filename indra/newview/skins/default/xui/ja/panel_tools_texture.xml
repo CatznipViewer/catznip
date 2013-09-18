@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="材質" name="Texture">
+			<panel.string name="string repeats per meter">
+				メートルごとに繰り返す
+			</panel.string>
+			<panel.string name="string repeats per face">
+				面ごとに繰り返す
+			</panel.string>
+			<texture_picker label="テクスチャ" name="texture control" tool_tip="写真をクリックして選択します"/>
+			<text name="color label">色</text>
+			<color_swatch name="colorswatch" tool_tip="クリックしてカラーピッカーを開きます"/>
+			<text name="color trans">
+				透過度 %
+			</text>
+			<text name="glow label">
+				グロー
+			</text>
+			<check_box label="明るさ全開" name="checkbox fullbright"/>
+			<text name="tex gen">
+				マッピング
+			</text>
+			<combo_box name="combobox texgen">
+				<combo_box.item label="デフォルト" name="Default"/>
+				<combo_box.item label="平面" name="Planar"/>
+			</combo_box>
+			<text name="label shininess">
+				輝き
+			</text>
+			<combo_box name="combobox shininess">
+				<combo_box.item label="なし" name="None"/>
+				<combo_box.item label="低" name="Low"/>
+				<combo_box.item label="中" name="Medium"/>
+				<combo_box.item label="高" name="High"/>
+			</combo_box>
+			<text name="label bumpiness">
+				凹凸
+			</text>
+			<combo_box name="combobox bumpiness">
+				<combo_box.item label="なし" name="None"/>
+				<combo_box.item label="明るさ" name="Brightness"/>
+				<combo_box.item label="暗さ" name="Darkness"/>
+				<combo_box.item label="木目調" name="woodgrain"/>
+				<combo_box.item label="木の皮" name="bark"/>
+				<combo_box.item label="レンガ" name="bricks"/>
+				<combo_box.item label="チェッカー" name="checker"/>
+				<combo_box.item label="コンクリート" name="concrete"/>
+				<combo_box.item label="クラスティ・タイル" name="crustytile"/>
+				<combo_box.item label="カットストーン" name="cutstone"/>
+				<combo_box.item label="ディスク" name="discs"/>
+				<combo_box.item label="砂利" name="gravel"/>
+				<combo_box.item label="ペトリ" name="petridish"/>
+				<combo_box.item label="羽目板" name="siding"/>
+				<combo_box.item label="ストーン・タイル" name="stonetile"/>
+				<combo_box.item label="しっくい" name="stucco"/>
+				<combo_box.item label="吸い込み" name="suction"/>
+				<combo_box.item label="織目" name="weave"/>
+			</combo_box>
+			<check_box initial_value="false" label="平面を揃える" name="checkbox planar align" tool_tip="選択面全てのテクスチャを、最後に選択された面に揃えます。 平面テクスチャのマッピングが必要です。"/>
+			<text name="rpt">
+				反復 / 面
+			</text>
+			<spinner label="水平（U）" name="TexScaleU"/>
+			<check_box label="反転" name="checkbox flip s"/>
+			<spinner label="垂直（V）" name="TexScaleV"/>
+			<check_box label="反転" name="checkbox flip t"/>
+			<spinner label="回転˚" name="TexRot"/>
+			<spinner label="反復 / メーター" name="rptctrl"/>
+			<button label="適用" label_selected="適用" name="button apply"/>
+			<text name="tex offset">
+				テクスチャのズレ
+			</text>
+			<spinner label="水平（U）" name="TexOffsetU"/>
+			<spinner label="垂直（V）" name="TexOffsetV"/>
+			<panel name="Add_Media">
+				<text name="media_tex">
+					メディア
+				</text>
+				<button name="add_media" tool_tip="メディアを追加します"/>
+				<button name="delete_media" tool_tip="このメディアテクスチャを削除します"/>
+				<button name="edit_media" tool_tip="このメディアを編集します"/>
+				<button label="揃える" label_selected="メディアを一列に揃えます" name="button align" tool_tip="メディアテクスチャを一列に揃えます（最初に読み込む必要があります）"/>
+			</panel>
+		</panel>

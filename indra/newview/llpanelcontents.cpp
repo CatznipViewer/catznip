@@ -56,6 +56,9 @@
 #include "llviewerassettype.h"
 #include "llviewerinventory.h"
 #include "llviewerobject.h"
+// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+#include "llviewerobjectlist.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewerwindow.h"
 #include "llworld.h"
@@ -82,6 +85,9 @@ BOOL LLPanelContents::postBuild()
 
 	childSetAction("button new script",&LLPanelContents::onClickNewScript, this);
 	childSetAction("button permissions",&LLPanelContents::onClickPermissions, this);
+// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+	getChild<LLUICtrl>("button refresh")->setCommitCallback(boost::bind(&LLPanelContents::onClickRefresh, this));
+// [/SL:KB]
 
 	mPanelInventoryObject = getChild<LLPanelObjectInventory>("contents_inventory");
 
@@ -141,7 +147,20 @@ void LLPanelContents::refresh()
 	}	
 }
 
-
+// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+void LLPanelContents::onClickRefresh()
+{
+	if ( (mPanelInventoryObject) && (mPanelInventoryObject->getTaskUUID().notNull()) )
+	{
+		LLViewerObject* pObj = gObjectList.findObject(mPanelInventoryObject->getTaskUUID());
+		if (pObj)
+		{
+			pObj->dirtyInventory();
+		}
+		mPanelInventoryObject->refresh();
+	}	
+}
+// [/SL:KB]
 
 //
 // Static functions
