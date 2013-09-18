@@ -5450,11 +5450,14 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 				// commented out for DEV-32347
 				//items.push_back(std::string("Restore to Last Position"));
 // [SL:KB] - Patch: Build-RestoreToWorld | Checked: 2011-12-22 (Catznip-3.2)
-				items.push_back(std::string("World Restore Separator"));
-				items.push_back(std::string("Restore to Last Position"));
-				if (!(flags & FIRST_SELECTED_ITEM))
+				if (!isLink())
 				{
-					disabled_items.push_back(std::string("Restore to Last Position"));
+					items.push_back(std::string("World Restore Separator"));
+					items.push_back(std::string("Restore to Last Position"));
+					if (!(flags & FIRST_SELECTED_ITEM))
+					{
+						disabled_items.push_back(std::string("Restore to Last Position"));
+					}
 				}
 // [/SL:KB]
 
