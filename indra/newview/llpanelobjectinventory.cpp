@@ -129,6 +129,9 @@ public:
 	virtual void removeBatch(std::vector<LLFolderViewModelItem*>& batch);
 	virtual void move(LLFolderViewModelItem* parent_listener);	
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ BOOL isLink() const;
+// [/SL:KB]
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard() const;
 	virtual BOOL isClipboardPasteable() const;
@@ -539,6 +542,13 @@ BOOL LLTaskInvFVBridge::isItemCopyable() const
 	return gAgent.allowOperation(PERM_COPY, item->getPermissions(),
 								GP_OBJECT_MANIPULATE);
 }
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+BOOL LLTaskInvFVBridge::isLink() const
+{
+	return FALSE;
+}
+// [/SL:KB]
 
 BOOL LLTaskInvFVBridge::copyToClipboard() const
 {

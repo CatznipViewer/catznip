@@ -201,7 +201,10 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 	}
      */
     
-	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+//	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	const bool passed_filter_folder = ((getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink())) ? filter.checkFolder(this) : true;
+// [/SL:KB]
 	setPassedFolderFilter(passed_filter_folder, filter_generation);
 
 	bool continue_filtering = true;

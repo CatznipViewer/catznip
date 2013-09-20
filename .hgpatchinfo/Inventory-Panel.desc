@@ -37,3 +37,5 @@
 - fixed   : "Edit" option on the inventory context menu doesn't enable/disable properly for wearable items
     -> always disabled for items in COF
     -> always enabled for items outside of COF
+- fixed : folder links aren't visible
+    -> since they have the inentory type of LLInventoryType::IT_CATEGORY they were being treated as folders

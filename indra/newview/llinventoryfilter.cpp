@@ -87,7 +87,10 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 //	const BOOL passed_clipboard = (listener ? checkAgainstClipboard(listener->getUUID()) : TRUE);
 
 	// If it's a folder and we're showing all folders, return automatically.
-	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+//	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	const BOOL is_folder = (listener->getInventoryType() == LLInventoryType::IT_CATEGORY) && (!listener->isLink());
+// [/SL:KB]
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
 	{
 // [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
