@@ -287,7 +287,10 @@ BOOL LLInvFVBridge::cutToClipboard() const
 BOOL LLInvFVBridge::copyToClipboard() const
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
-	if (obj && isItemCopyable())
+//	if (obj && isItemCopyable())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	if ( (obj) && (isItemCopyable()) || (isItemLinkable()) )
+// [/SL:KB]
 	{
 		return LLClipboard::instance().addToClipboard(mUUID);
 	}
@@ -746,7 +749,7 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 		}
 	
 		items.push_back(std::string("Copy"));
-		if (!isItemCopyable())
+		if ( (!isItemCopyable()) && (!isItemLinkable()) )
 		{
 			disabled_items.push_back(std::string("Copy"));
 		}
@@ -1886,17 +1889,21 @@ BOOL LLItemBridge::isItemCopyable() const
 		}
 
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
-		// User can copy the item if:
-		//   - the item (or its target in the case of a link) is "copy"
-		//   - and/or if the item (or its target in the case of a link) has a linkable asset type
-		// NOTE: we do *not* want to return TRUE on everything like LL seems to do in SL-2.1 because not all types are "linkable"
-		return (item->getPermissions().allowCopyBy(gAgent.getID())) || (LLAssetType::lookupCanLink(item->getType()));
+		return (item->getPermissions().allowCopyBy(gAgent.getID()));
 // [/SL:KB]
 //		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
 
 	}
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+bool LLItemBridge::isItemLinkable() const
+{
+	LLViewerInventoryItem* item = getItem();
+	return (item) && (LLAssetType::lookupCanLink(item->getType()));
+}
+// [/SL:KB]
 
 LLViewerInventoryItem* LLItemBridge::getItem() const
 {
@@ -2125,6 +2132,14 @@ BOOL LLFolderBridge::isItemCopyable() const
 	
 		return TRUE;
 	}
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+bool LLFolderBridge::isItemLinkable() const
+{
+	LLFolderType::EType ftType = getPreferredType();
+	return (LLFolderType::FT_NONE == ftType) || (LLFolderType::FT_OUTFIT == ftType);
+}
+// [/SL:KB]
 
 BOOL LLFolderBridge::isClipboardPasteable() const
 {
