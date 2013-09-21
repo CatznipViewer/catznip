@@ -392,6 +392,19 @@ const S32 CRASH_BEHAVIOR_ASK = 0;
 const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
 const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-17 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+// Moved here from llappviewer.h so that it can be shared with llcrashlogger.cpp
+typedef enum 
+{
+	LAST_EXEC_NORMAL = 0,
+	LAST_EXEC_FROZE,
+	LAST_EXEC_LLERROR_CRASH,
+	LAST_EXEC_OTHER_CRASH,
+	LAST_EXEC_LOGOUT_FROZE,
+	LAST_EXEC_LOGOUT_CRASH
+} eLastExecEvent;
+// [/SL:KB]
+
 // Export/Import return values
 const S32 EXPORT_SUCCESS = 0;
 const S32 EXPORT_ERROR_PERMISSIONS = -1;
