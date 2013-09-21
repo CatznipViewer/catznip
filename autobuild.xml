@@ -2013,7 +2013,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=Debug</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=TRUE</string>
                 </array>
               </map>
@@ -2034,7 +2034,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=Debug</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=FALSE</string>
                 </array>
               </map>
@@ -2054,7 +2054,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=TRUE</string>
                 </array>
               </map>
@@ -2075,7 +2075,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=RelWithDebInfo</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=FALSE</string>
                 </array>
               </map>
@@ -2095,7 +2095,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=Release</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=TRUE</string>
                 </array>
               </map>
@@ -2116,7 +2116,7 @@
                 <array>
                   <string>-DCMAKE_BUILD_TYPE:STRING=Release</string>
                   <string>-DWORD_SIZE:STRING=32</string>
-                  <string>-DROOT_PROJECT_NAME:STRING=SecondLife</string>
+                  <string>-DROOT_PROJECT_NAME:STRING=Catznip</string>
                   <string>-DINSTALL_PROPRIETARY=FALSE</string>
                 </array>
               </map>
@@ -2146,7 +2146,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration Debug</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                 </array>
               </map>
               <key>configure</key>
@@ -2173,7 +2173,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration Debug</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                 </array>
               </map>
               <key>configure</key>
@@ -2200,7 +2200,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration RelWithDebInfo</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                 </array>
               </map>
               <key>configure</key>
@@ -2229,7 +2229,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration RelWithDebInfo</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                 </array>
               </map>
               <key>configure</key>
@@ -2256,7 +2256,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration Release</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                   <string>-DENABLE_SIGNING:BOOL=YES</string>
                   <string>-DSIGNING_IDENTITY:STRING="Developer ID Application: Linden Research, Inc."</string>
                 </array>
@@ -2285,7 +2285,7 @@
                 <key>options</key>
                 <array>
                   <string>-configuration Release</string>
-                  <string>-project SecondLife.xcodeproj</string>
+                  <string>-project Catznip.xcodeproj</string>
                   <string>-DENABLE_SIGNING:BOOL=YES</string>
                   <string>-DSIGNING_IDENTITY:STRING="Developer ID Application: Linden Research, Inc."</string>
                 </array>
@@ -2481,7 +2481,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>BuildConsole</string>
@@ -2499,11 +2499,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Debug</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2520,7 +2520,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>msbuild.exe</string>
@@ -2543,11 +2543,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Debug</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2566,7 +2566,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>BuildConsole</string>
@@ -2584,11 +2584,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>RelWithDebInfo</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2607,7 +2607,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>msbuild.exe</string>
@@ -2630,11 +2630,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>RelWithDebInfo</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2654,7 +2654,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>BuildConsole</string>
@@ -2672,11 +2672,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Release</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>
@@ -2693,7 +2693,7 @@
               <map>
                 <key>arguments</key>
                 <array>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                 </array>
                 <key>command</key>
                 <string>msbuild.exe</string>
@@ -2716,11 +2716,11 @@
                   <string>&amp;&amp;</string>
                   <string>..\indra\tools\vstool\VSTool.exe</string>
                   <string>--solution</string>
-                  <string>SecondLife.sln</string>
+                  <string>Catznip.sln</string>
                   <string>--config</string>
                   <string>Release</string>
                   <string>--startup</string>
-                  <string>secondlife-bin</string>
+                  <string>catznip-bin</string>
                 </array>
                 <key>options</key>
                 <array>

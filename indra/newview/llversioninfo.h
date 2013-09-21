@@ -56,6 +56,11 @@ public:
 	/// return the full viewer version as a string like "2.0.0.200030"
 	static const std::string &getVersion();
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+	/// return the release viewer version as a string like "R7" or "R7.1"
+	static const std::string &getReleaseVersion();
+// [/SL:KB]
+
 	/// return the viewer version as a string like "2.0.0"
 	static const std::string &getShortVersion();
 
@@ -69,7 +74,7 @@ public:
 	/// reset the channel name used by the viewer.
 	static void resetChannel(const std::string& channel);
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 	/// Return the platform the viewer was built for
 	static const std::string& getBuildPlatform();
 // [/SL:KB]
