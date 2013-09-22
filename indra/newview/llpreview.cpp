@@ -35,7 +35,7 @@
 #include "llresmgr.h"
 #include "lltextbox.h"
 #include "llfloaterreg.h"
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0)
 #include "llfloatersearchreplace.h"
 #include "llpreviewnotecard.h"
 #include "llpreviewscript.h"
@@ -117,13 +117,13 @@ const LLInventoryItem *LLPreview::getItem() const
 	else if (mObjectUUID.isNull())
 	{
 		// it's an inventory item, so get the item.
-//		item = gInventory.getItem(mItemUUID);
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-11 (Catznip-3.2.1) | Added: Catznip-2.1.2
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-11 (Catznip-2.1)
 		if (LLInventoryType::IT_NONE == mAuxItem->getInventoryType())
 			item = gInventory.getItem(mItemUUID);
 		else
 			item = mAuxItem;
 // [/SL:KB]
+//		item = gInventory.getItem(mItemUUID);
 	}
 	else
 	{
@@ -512,7 +512,7 @@ void LLMultiPreview::tabOpen(LLFloater* opened_floater, bool from_click)
 		opened_preview->loadAsset();
 	}
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	LLFloaterSearchReplace* pSearchFloater = LLFloaterReg::getTypedInstance<LLFloaterSearchReplace>("search_replace");
 	if ( (pSearchFloater) && (pSearchFloater->getDependee() == this) )
 	{

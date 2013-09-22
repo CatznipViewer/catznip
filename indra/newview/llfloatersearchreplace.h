@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2010, Kitty Barnett
+ * Copyright (c) 2010-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -18,8 +18,9 @@
 #define LL_FLOATERSEARCHREPLACE_H
 
 #include "llfloater.h"
-#include "llfloaterreg.h"
 
+class LLCheckBoxCtrl;
+class LLLineEditor;
 class LLTextEditor;
 
 class LLFloaterSearchReplace : public LLFloater
@@ -33,8 +34,6 @@ public:
 	/*virtual*/	BOOL postBuild();
 
 public:
-	LLTextEditor* getEditor() { return mEditor; }
-
 	static void show(LLTextEditor* pEditor);
 
 protected:
@@ -43,8 +42,11 @@ protected:
 	void onBtnReplaceAll();
 
 private:
-	LLTextEditor* mEditor;
+	LLLineEditor*      mSearchEditor;
+	LLLineEditor*      mReplaceEditor;
+	LLCheckBoxCtrl*    mCaseInsensitiveCheck;
+	LLCheckBoxCtrl*    mSearchUpCheck;
+	LLHandle<LLUICtrl> mEditorHandle;
 };
 
 #endif // LL_FLOATERSEARCHREPLACE_H
-

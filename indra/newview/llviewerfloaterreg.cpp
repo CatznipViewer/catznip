@@ -99,7 +99,7 @@
 #include "llfloaterscriptdebug.h"
 #include "llfloaterscriptlimits.h"
 #include "llfloatersearch.h"
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
 #include "llfloatersearchreplace.h"
 // [/SL:KB]
 #include "llfloatersellland.h"
@@ -315,8 +315,8 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("profile", "floater_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
 	LLFloaterReg::add("how_to", "floater_how_to.xml", (LLFloaterBuildFunc)&LLFloaterWebContent::create);	
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-3.0.0) | Added: Catznip-2.3.0
-	LLFloaterReg::add("search_replace", "floater_search_replace.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchReplace>);	
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+	LLFloaterReg::add("search_replace", "floater_search_replace.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchReplace>);
 // [/SL:KB]
 	
 	LLFloaterUIPreviewUtil::registerFloater();

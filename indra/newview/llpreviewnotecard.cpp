@@ -36,7 +36,7 @@
 #include "llviewerwindow.h"
 #include "llbutton.h"
 #include "llfloaterreg.h"
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 #include "llfloatersearchreplace.h"
 // [/SL:KB]
 #include "llinventorydefines.h"
@@ -141,7 +141,7 @@ BOOL LLPreviewNotecard::handleKeyHere(KEY key, MASK mask)
 		return TRUE;
 	}
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	if(('F' == key) && (MASK_CONTROL == (mask & MASK_CONTROL)))
 	{
 		LLFloaterSearchReplace::show(getEditor());
@@ -181,7 +181,7 @@ const LLInventoryItem* LLPreviewNotecard::getDragItem()
 	return NULL;
 }
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 LLTextEditor* LLPreviewNotecard::getEditor()
 {
 	return getChild<LLViewerTextEditor>("Notecard Editor");
@@ -212,7 +212,7 @@ void LLPreviewNotecard::inventoryChanged(LLViewerObject* object, LLInventoryObje
 {
 	removeVOInventoryListener();
 
-	for (auto itItem = inventory->cbegin(); itItem != inventory->cend(); ++itItem)
+	for (LLInventoryObject::object_list_t::const_iterator itItem = inventory->begin(); itItem != inventory->end(); ++itItem)
 	{
 		const LLInventoryObject* pInvObj = *itItem;
 		if (pInvObj->getUUID() == mItemUUID)

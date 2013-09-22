@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2010, Kitty Barnett
+ * Copyright (c) 2010-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -16,14 +16,19 @@
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llfloatersearchreplace.h"
-
 #include "llcheckboxctrl.h"
+#include "llfloaterreg.h"
+#include "llfloatersearchreplace.h"
+#include "lllineeditor.h"
 #include "llmultifloater.h"
 #include "lltexteditor.h"
 
 LLFloaterSearchReplace::LLFloaterSearchReplace(const LLSD& sdKey)
-	: LLFloater(sdKey), mEditor(NULL)
+	: LLFloater(sdKey)
+	, mSearchEditor(NULL)
+	, mReplaceEditor(NULL)
+	, mCaseInsensitiveCheck(NULL)
+	, mSearchUpCheck(NULL)
 {
 }
 
@@ -35,10 +40,10 @@ LLFloaterSearchReplace::~LLFloaterSearchReplace()
 void LLFloaterSearchReplace::show(LLTextEditor* pEditor)
 {
 	LLFloaterSearchReplace* pSelf = LLFloaterReg::getTypedInstance<LLFloaterSearchReplace>("search_replace");
-	if (!pSelf)
+	if ( (!pSelf) || (!pEditor) )
 		return;
 
-	pSelf->mEditor = pEditor;
+	pSelf->mEditorHandle = pEditor->getHandle();
 	if (pEditor)
 	{
 		LLFloater *pDependeeNew = NULL, *pDependeeOld = pSelf->getDependee();
@@ -68,6 +73,7 @@ void LLFloaterSearchReplace::show(LLTextEditor* pEditor)
 		pSelf->getChildView("replace_all_btn")->setEnabled(!pEditor->getReadOnly());
 
 		pSelf->openFloater();
+		pSelf->mSearchEditor->setFocus(TRUE);
 	}
 }
 
@@ -79,33 +85,46 @@ BOOL LLFloaterSearchReplace::postBuild()
 
 	setDefaultBtn("search_btn");
 
+	mSearchEditor = getChild<LLLineEditor>("search_text");
+	mSearchEditor->setCommitCallback(boost::bind(&LLFloaterSearchReplace::onBtnSearch, this));
+	mSearchEditor->setCommitOnFocusLost(false);
+	mReplaceEditor = getChild<LLLineEditor>("replace_text");
+	mCaseInsensitiveCheck = getChild<LLCheckBoxCtrl>("case_text");
+	mSearchUpCheck = getChild<LLCheckBoxCtrl>("find_previous");
+
 	return TRUE;
 }
 
 void LLFloaterSearchReplace::onBtnSearch()
 {
-	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	/*const*/ LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
-	mEditor->selectNext(getChild<LLUICtrl>("search_text")->getValue().asString(), caseChk->get(), TRUE, prevChk->get());
+	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(mEditorHandle.get());
+	if (pEditor)
+	{
+		pEditor->selectNext(mSearchEditor->getText(), mCaseInsensitiveCheck->get(), TRUE, mSearchUpCheck->get());
+	}
 }
 
 void LLFloaterSearchReplace::onBtnReplace()
 {
-	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	/*const*/ LLCheckBoxCtrl* prevChk = getChild<LLCheckBoxCtrl>("find_previous");
-	mEditor->replaceText(
-		getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get(), TRUE, prevChk->get());
+	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(mEditorHandle.get());
+	if (pEditor)
+	{
+		pEditor->replaceText(mSearchEditor->getText(), mReplaceEditor->getText(), mCaseInsensitiveCheck->get(), TRUE, mSearchUpCheck->get());
+	}
 }
 
 void LLFloaterSearchReplace::onBtnReplaceAll()
 {
-	/*const*/ LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	mEditor->replaceTextAll(getChild<LLUICtrl>("search_text")->getValue().asString(), getChild<LLUICtrl>("replace_text")->getValue().asString(), caseChk->get());
+	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(mEditorHandle.get());
+	if (pEditor)
+	{
+		pEditor->replaceTextAll(mSearchEditor->getText(), mReplaceEditor->getText(), mCaseInsensitiveCheck->get());
+	}
 }
 
 bool LLFloaterSearchReplace::hasAccelerators() const
 {
-	const LLView* pView = (LLView*)mEditor;
+	const LLView* pView = dynamic_cast<LLTextEditor*>(mEditorHandle.get());
 	while (pView)
 	{
 		if (pView->hasAccelerators())
@@ -121,7 +140,7 @@ BOOL LLFloaterSearchReplace::handleKeyHere(KEY key, MASK mask)
 	// (allows Ctrl-F to work when the floater itself has focus - see changeset 0c8947e5f433)
 	if (!LLFloater::handleKeyHere(key, mask))
 	{
-		LLView* pView = (LLView*)mEditor;
+		LLView* pView = mEditorHandle.get();
 		while (pView)
 		{
 			if ( (pView->hasAccelerators()) && (pView->handleKeyHere(key, mask)) )

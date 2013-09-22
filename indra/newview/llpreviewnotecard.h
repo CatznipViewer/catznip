@@ -42,7 +42,7 @@
 
 class LLViewerTextEditor;
 class LLButton;
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 class LLTextEditor;
 // [/SL:KB]
 
@@ -59,7 +59,7 @@ public:
 
 	// llview
 	virtual void draw();
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	virtual bool hasAccelerators() const { return true; }
 // [/SL:KB]
 	virtual BOOL handleKeyHere(KEY key, MASK mask);
@@ -74,7 +74,7 @@ public:
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
 
-// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-3.0.0) | Added: Catznip-2.3.0
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
 	LLTextEditor* getEditor();
 // [/SL:KB]
 
@@ -114,7 +114,7 @@ protected:
 	bool handleSaveChangesDialog(const LLSD& notification, const LLSD& response);
 
 protected:
-	LLViewerTextEditor* mEditor;
+//	LLViewerTextEditor* mEditor;
 	LLButton* mSaveBtn;
 
 	LLUUID mAssetID;
