@@ -36,16 +36,16 @@
              button_alignment="center"
              visible="true">
              <icon layout="topleft"
-	            height="28"
-	            width="15"
-	            follows="left|top"
-	            top="20"
-	            left="10"
-	            tab_stop="false" 
-	            visible="false"
-	            use_draw_context_alpha="false"
-	            image_name="Caret_Bottom_Icon"
-	            name="caret" />
+                height="28"
+                width="15"
+                follows="left|top"
+                top="20"
+                left="10"
+                tab_stop="false" 
+                visible="false"
+                use_draw_context_alpha="false"
+                image_name="Caret_Bottom_Icon"
+                name="caret" />
     </toolbar>
   </layout_panel>
   <layout_panel name="vertical_toolbar_panel"

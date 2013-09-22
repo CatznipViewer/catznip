@@ -105,7 +105,7 @@ BOOL LLToolBarView::postBuild()
 	mToolbars[TOOLBAR_LEFT]   = getChild<LLToolBar>("toolbar_left");
 	mToolbars[TOOLBAR_RIGHT]  = getChild<LLToolBar>("toolbar_right");
 // [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
-	mToolbars[TOOLBAR_TOP] = getChild<LLToolBar>("toolbar_top");
+	mToolbars[TOOLBAR_TOP]    = getChild<LLToolBar>("toolbar_top");
 // [/SL:KB]
 	mToolbars[TOOLBAR_BOTTOM] = getChild<LLToolBar>("toolbar_bottom");
 	mBottomToolbarPanel = getChild<LLView>("bottom_toolbar_panel");
