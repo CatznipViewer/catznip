@@ -136,7 +136,7 @@ BOOL LLPreviewTexture::postBuild()
 	
 // [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
 	mTexturePlaceholder = getChild<LLView>("texture_placeholder");
-	calcClientRect();
+	mClientRect = calcClientRect();
 // [/SL:KB]
 
 	return LLPreview::postBuild();
@@ -303,16 +303,18 @@ void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
 // [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
 	if (mTexturePlaceholder)
 	{
-		calcClientRect();
+		mClientRect = calcClientRect();
 	}
 }
 
-void LLPreviewTexture::calcClientRect()
+LLRect LLPreviewTexture::calcClientRect(S32 nWidth, S32 nHeight) const
 {
 	LLRect client_rect = mTexturePlaceholder->getRect();
+	S32 client_width = (nWidth > 0) ? nWidth : client_rect.getWidth();
+	S32 client_height = (nHeight > 0) ? nHeight : client_rect.getHeight();
 // [/SL:KB]
-	S32 client_width = client_rect.getWidth();
-	S32 client_height = client_rect.getHeight();
+//	S32 client_width = client_rect.getWidth();
+//	S32 client_height = client_rect.getHeight();
 
 	if (mAspectRatio > 0.f)
 	{
@@ -336,7 +338,12 @@ void LLPreviewTexture::calcClientRect()
 		}
 	}
 
-	mClientRect.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	LLRect rctClient;
+	rctClient.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
+	return rctClient;
+// [/SL:KB]
+//	mClientRect.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
 
 }
 
@@ -429,8 +436,27 @@ void LLPreviewTexture::updateDimensions()
 	{
 		mUpdateDimensions = FALSE;
 		
-		//reshape floater
-		reshape(getRect().getWidth(), getRect().getHeight());
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+		// Calculate shrink/expand deltas to show the texture at its full resolution
+		LLRect rctTexture = mTexturePlaceholder->getRect();
+		rctTexture.stretch(-PREVIEW_BORDER_WIDTH);
+
+		S32 deltaWidth = mImage->getFullWidth() - rctTexture.getWidth();
+		S32 deltaHeight = mImage->getFullHeight() - rctTexture.getHeight();
+		if (mAspectRatio > 0.0f)
+		{
+			// Recalculate shrink/expand deltas taking the aspect ratio into account
+			LLRect rctTextureNew = calcClientRect(mTexturePlaceholder->getRect().getWidth() + deltaWidth, mTexturePlaceholder->getRect().getHeight() + deltaHeight);
+			rctTextureNew.stretch(-PREVIEW_BORDER_WIDTH);
+	
+			deltaWidth = rctTextureNew.getWidth() - rctTexture.getWidth();
+			deltaHeight = rctTextureNew.getHeight() - rctTexture.getHeight();
+		}
+
+		reshape(llmax(getRect().getWidth() + deltaWidth, getMinWidth()), llmax(getRect().getHeight() + deltaHeight, getMinHeight()));
+// [/SL:KB]
+//		//reshape floater
+//		reshape(getRect().getWidth(), getRect().getHeight());
 
 		gFloaterView->adjustToFitScreen(this, FALSE);
 

@@ -69,7 +69,7 @@ protected:
 	void				init();
 	/* virtual */ BOOL	postBuild();
 // [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
-	void				calcClientRect();
+	LLRect				calcClientRect(S32 nWidth = -1, S32 nHeight = -1) const;
 // [/SL:KB]
 	bool				setAspectRatio(const F32 width, const F32 height);
 	static void			onAspectRatioCommit(LLUICtrl*,void* userdata);
