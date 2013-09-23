@@ -157,6 +157,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mHighlightColor(p.highlight_color()),
 	mPreeditBgColor(p.preedit_bg_color()),
 	mGLFont(p.font),
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	mDefaultMenuHandle(),
+// [/SL:KB]
 	mContextMenuHandle()
 {
 	llassert( mMaxLengthBytes > 0 );
@@ -192,24 +195,34 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	setPrevalidateInput(p.prevalidate_input_callback());
 	setPrevalidate(p.prevalidate_callback());
 
-	LLContextMenu* menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>
-		("menu_text_editor.xml",
-		 LLMenuGL::sMenuContainer,
-		 LLMenuHolderGL::child_registry_t::instance());
-	setContextMenu(menu);
+//	LLContextMenu* menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>
+//		("menu_text_editor.xml",
+//		 LLMenuGL::sMenuContainer,
+//		 LLMenuHolderGL::child_registry_t::instance());
+//	setContextMenu(menu);
 }
  
 LLLineEditor::~LLLineEditor()
 {
 	mCommitOnFocusLost = FALSE;
     
-    // Make sure no context menu linger around once the widget is deleted
-	LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
-	if (menu)
+//    // Make sure no context menu linger around once the widget is deleted
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2013-08-18 (Catznip-3.6)
+	if (!mDefaultMenuHandle.isDead())
 	{
-        menu->hide();
-    }
-	setContextMenu(NULL);
+		mDefaultMenuHandle.get()->die();
+	}
+	if (!mContextMenuHandle.isDead())
+	{
+		mContextMenuHandle.get()->die();
+	}
+// [/SL:KB]
+//	LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
+//	if (menu)
+//	{
+//        menu->hide();
+//    }
+//	setContextMenu(NULL);
 
 	// calls onCommit() while LLLineEditor still valid
 	gFocusMgr.releaseFocusIfNeeded( this );
@@ -2592,9 +2605,9 @@ LLWString LLLineEditor::getConvertedText() const
 
 void LLLineEditor::showContextMenu(S32 x, S32 y)
 {
-	LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
-
-	if (menu)
+//	LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
+//
+//	if (menu)
 	{
 		gEditMenuHandler = this;
 
@@ -2627,11 +2640,36 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 			}
 		}
 
-		menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
-		menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
-		menu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
-		menu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
-		menu->show(screen_x, screen_y, this);
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+		// Use the default editor context menu when offering spelling suggestions to avoid clutter
+		LLContextMenu* menu = mContextMenuHandle.get();
+		if ( ((use_spellcheck) && (!mSuggestionList.empty())) || (!menu) )
+		{
+			menu = mDefaultMenuHandle.get();
+			if (!menu)
+			{
+				menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>(
+							"menu_text_editor.xml", 
+							LLMenuGL::sMenuContainer,
+							LLMenuHolderGL::child_registry_t::instance());
+				mDefaultMenuHandle = menu->getHandle();
+			}
+		}
+
+		if (menu)
+		{
+			menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+			menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+			menu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+			menu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+			menu->show(screen_x, screen_y, this);
+		}
+// [/SL:KB]
+//		menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+//		menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+//		menu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+//		menu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+//		menu->show(screen_x, screen_y, this);
 	}
 }
 
