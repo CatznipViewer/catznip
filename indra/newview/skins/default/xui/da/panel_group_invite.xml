@@ -19,8 +19,10 @@
 		Vælg hvilken rolle, du vil tildele dem:
 	</text>
 	<combo_box name="role_name" tool_tip="Vælg fra en liste med roller du har ret til at tildele medlemmer"/>
+	<panel name="bottom_panel">
 	<button label="Send invitationer" name="ok_button"/>
 	<button label="Annullér" name="cancel_button"/>
+	</panel>
 	<string name="GroupInvitation">
 		Gruppe invitation
 	</string>

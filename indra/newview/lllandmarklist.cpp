@@ -124,11 +124,18 @@ void LLLandmarkList::processGetAssetReply(
 				LLUUID region_id;
 				if(landmark->getRegionID(region_id))
 				{
+// [SL:KB] - Patch: World-LandmarkList | Checked: 2012-07-30 (Catznip-3.3)
 					LLLandmark::requestRegionHandle(
 						gMessageSystem,
 						gAgent.getRegionHost(),
 						region_id,
-						boost::bind(&LLLandmarkList::onRegionHandle, &gLandmarkList, uuid));
+						boost::bind(&LLLandmarkList::onRegionHandle, &gLandmarkList, uuid, _2));
+// [/SL:KB]
+//					LLLandmark::requestRegionHandle(
+//						gMessageSystem,
+//						gAgent.getRegionHost(),
+//						region_id,
+//						boost::bind(&LLLandmarkList::onRegionHandle, &gLandmarkList, uuid));
 				}
 
 				// the callback will be called when we get the region handle.
@@ -169,8 +176,19 @@ BOOL LLLandmarkList::assetExists(const LLUUID& asset_uuid)
 	return mList.count(asset_uuid) != 0 || mBadList.count(asset_uuid) != 0;
 }
 
-void LLLandmarkList::onRegionHandle(const LLUUID& landmark_id)
+//void LLLandmarkList::onRegionHandle(const LLUUID& landmark_id)
+// [SL:KB] - Patch: World-LandmarkList | Checked: 2012-07-30 (Catznip-3.3)
+void LLLandmarkList::onRegionHandle(const LLUUID& landmark_id, const U64& region_handle)
+// [/SL:KB]
 {
+// [SL:KB] - Patch: World-LandmarkList | Checked: 2012-07-30 (Catznip-3.3)
+	if (0 == region_handle)
+	{
+		// TODO-Catznip: we should probably delete all callbacks and put this landmark in the bad list?
+		return;
+	}
+// [/SL:KB]
+
 	LLLandmark* landmark = getAsset(landmark_id);
 
 	if (!landmark)

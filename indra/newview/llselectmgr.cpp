@@ -5844,7 +5844,10 @@ S32 LLSelectNode::getLastSelectedTE()
 	return mLastTESelected;
 }
 
-LLViewerObject* LLSelectNode::getObject()
+//LLViewerObject* LLSelectNode::getObject()
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+LLViewerObject* LLSelectNode::getObject() const
+// [/SL:KB]
 {
 	if (!mObject)
 	{
