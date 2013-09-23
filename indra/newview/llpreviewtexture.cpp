@@ -50,7 +50,7 @@
 #include "llviewerwindow.h"
 #include "lllineeditor.h"
 
-const S32 CLIENT_RECT_VPAD = 4;
+//const S32 CLIENT_RECT_VPAD = 4;
 
 const F32 SECONDS_TO_SHOW_FILE_SAVED_MSG = 8.f;
 
@@ -60,6 +60,9 @@ const F32 PREVIEW_TEXTURE_MIN_ASPECT = 0.005f;
 
 LLPreviewTexture::LLPreviewTexture(const LLSD& key)
 	: LLPreview(key),
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	  mTexturePlaceholder(NULL),
+// [/SL:KB]
 	  mLoadingFullImage( FALSE ),
 	  mShowKeepDiscard(FALSE),
 	  mCopyToInv(FALSE),
@@ -131,6 +134,11 @@ BOOL LLPreviewTexture::postBuild()
 	LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
 	combo->setCurrentByIndex(0);
 	
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	mTexturePlaceholder = getChild<LLView>("texture_placeholder");
+	calcClientRect();
+// [/SL:KB]
+
 	return LLPreview::postBuild();
 }
 
@@ -281,23 +289,28 @@ void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	LLPreview::reshape(width, height, called_from_parent);
 
-	LLRect dim_rect(getChildView("dimensions")->getRect());
-
+//	LLRect dim_rect(getChildView("dimensions")->getRect());
+//
 //	S32 horiz_pad = 2 * (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
-// [SL:KB] - Patch: UI-Notecards | Checked: 2011-06-07 (Catznip-2.6)
-	S32 horiz_pad = (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
-// [/SL:KB]
-
-	// add space for dimensions and aspect ratio
-	S32 info_height = dim_rect.mTop + CLIENT_RECT_VPAD;
-
-	LLRect client_rect(horiz_pad, getRect().getHeight(), getRect().getWidth() - horiz_pad, 0);
+//
+//	// add space for dimensions and aspect ratio
+//	S32 info_height = dim_rect.mTop + CLIENT_RECT_VPAD;
+//
+//	LLRect client_rect(horiz_pad, getRect().getHeight(), getRect().getWidth() - horiz_pad, 0);
 //	client_rect.mTop -= (PREVIEW_HEADER_SIZE + CLIENT_RECT_VPAD);
-// [SL:KB] - Patch: UI-Notecards | Checked: 2011-06-07 (Catznip-2.6)
-	client_rect.mTop -= (PREVIEW_HEADER_SIZE + 2 * CLIENT_RECT_VPAD);
-// [/SL:KB]
-	client_rect.mBottom += PREVIEW_BORDER + CLIENT_RECT_VPAD + info_height ;
+//	client_rect.mBottom += PREVIEW_BORDER + CLIENT_RECT_VPAD + info_height ;
 
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	if (mTexturePlaceholder)
+	{
+		calcClientRect();
+	}
+}
+
+void LLPreviewTexture::calcClientRect()
+{
+	LLRect client_rect = mTexturePlaceholder->getRect();
+// [/SL:KB]
 	S32 client_width = client_rect.getWidth();
 	S32 client_height = client_rect.getHeight();
 
