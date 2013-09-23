@@ -88,6 +88,11 @@ public:
 	// Converts a standard legacy name to a username
 	// "bobsmith123 Resident" -> "bobsmith"
 	// "Random Linden" -> "random.linden"
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+	// Additionally, converts a complete display name to a username
+	// "bobsmith123 Resident (bobsmith123)" -> "bobsmith123"
+	// "Alias (random.linden)" -> "random.linden"
+// [/SL:KB]
 	static std::string buildUsername(const std::string& name);
 	
 	// Converts a complete display name to a legacy name
