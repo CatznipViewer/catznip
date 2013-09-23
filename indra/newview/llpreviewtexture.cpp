@@ -441,17 +441,25 @@ void LLPreviewTexture::updateDimensions()
 		LLRect rctTexture = mTexturePlaceholder->getRect();
 		rctTexture.stretch(-PREVIEW_BORDER_WIDTH);
 
-		S32 deltaWidth = mImage->getFullWidth() - rctTexture.getWidth();
-		S32 deltaHeight = mImage->getFullHeight() - rctTexture.getHeight();
-		if (mAspectRatio > 0.0f)
+		S32 imgWidth = mImage->getFullWidth(), imgHeight = mImage->getFullHeight(); F32 fMult = 1.0;
+		LLRect rctSnap = gFloaterView->getSnapRect();
+
+		S32 deltaWidth = 0, deltaHeight =  0;
+		do
 		{
-			// Recalculate shrink/expand deltas taking the aspect ratio into account
-			LLRect rctTextureNew = calcClientRect(mTexturePlaceholder->getRect().getWidth() + deltaWidth, mTexturePlaceholder->getRect().getHeight() + deltaHeight);
-			rctTextureNew.stretch(-PREVIEW_BORDER_WIDTH);
+			deltaWidth = imgWidth * fMult - rctTexture.getWidth();
+			deltaHeight = imgHeight * fMult - rctTexture.getHeight();
+			if (mAspectRatio > 0.0f)
+			{
+				// Recalculate shrink/expand deltas taking the aspect ratio into account
+				LLRect rctTextureNew = calcClientRect(mTexturePlaceholder->getRect().getWidth() + deltaWidth, mTexturePlaceholder->getRect().getHeight() + deltaHeight);
+				rctTextureNew.stretch(-PREVIEW_BORDER_WIDTH);
 	
-			deltaWidth = rctTextureNew.getWidth() - rctTexture.getWidth();
-			deltaHeight = rctTextureNew.getHeight() - rctTexture.getHeight();
-		}
+				deltaWidth = rctTextureNew.getWidth() - rctTexture.getWidth();
+				deltaHeight = rctTextureNew.getHeight() - rctTexture.getHeight();
+			}
+			fMult -= 0.25;
+		} while( (getRect().getWidth() + deltaWidth >= rctSnap.getWidth()) || (getRect().getHeight() + deltaHeight >= rctSnap.getHeight()) );
 
 		reshape(llmax(getRect().getWidth() + deltaWidth, getMinWidth()), llmax(getRect().getHeight() + deltaHeight, getMinHeight()));
 // [/SL:KB]

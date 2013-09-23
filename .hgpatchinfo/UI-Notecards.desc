@@ -14,6 +14,8 @@
 - fixed   : properly hand off the Search/Replace floater when dependant on a notecard/script preview inside of a multipreview floater
 
 [UI/Textures]
+- changed : restore the legacy behaviour of showing a texture preview at full resolution (if possible)
+- changed : changing the aspect ratio will resize the texture preview to show the texture with 1 dimension at full resolution
 - changed : layout of the texture preview floater
     -> moved the "Aspect Ratio" combobox to the top-right corner
     -> rearranged the options in the "Aspect Ration" combobox slight to list the more common ARs at the top
