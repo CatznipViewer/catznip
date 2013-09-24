@@ -1,0 +1,27 @@
+[Control/Inspectors]
+- added : parcel/location inspector for the world map
+    -> accessed through an inspector tooltip rather than showing it directly
+- added : location inspector tooltip to the minimap
+    -> accessed through an inspector tooltip rather than showing it directly
+
+[Control/AvatarInspector]
+- internal : revert the avatar inspector to its pre-CHUI state
+    -> backout of CHUI-80 (changesets f7f554b39c25 and d6e24c3ba460)
+    -> remove god options from the legacy inspect avatar menu
+    -> moved Block/Unblock/Freeze/Eject to the a "Manage" submenu (used to be done in UI-SidepanelPeople)
+    -> made the names of callbacks more consistant
+    -> simplified the code by hooking into existing functions whenever possible
+- changed : rearrange the avatar inspector to add extra lines to the profile description
+    -> one extra line added by default through layout changes
+    -> two extra lines are added by expanding the textbox to fill the volume slider space if voice is disabled
+- changed : removed the moderator panel from the avatar inspector
+
+[Control/ObjectInspector]
+- added   : "Detach" as an option to the object inspector drop-down menu
+    -> also shown as the default action for attachments
+- changed : visibility of object inspector drop-down menu
+    -> always show "Touch" but disable if not available
+    -> only show "Take" when it's available (and don't show it for attachments)
+    -> don't show "Open" for attachments
+    -> don't show "Sit Here" for attachments
+- changed : match the order of the object inspector drop-down menu items to the object context menu

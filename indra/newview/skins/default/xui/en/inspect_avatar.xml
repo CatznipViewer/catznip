@@ -9,7 +9,7 @@
  bg_opaque_image="Inspector_Background"
  can_close="false"
  can_minimize="false"
- height="160"
+ height="164"
  layout="topleft"
  name="inspect_avatar"
  single_instance="true"
@@ -35,11 +35,11 @@
   <text
      follows="top|left"
      font="SansSerif"
-     height="20"
+     height="16"
      left="8"
      name="user_name_small"
      parse_urls="false"
-     top="7"
+     top="10"
      text_color="White"
      translate="false"
      use_ellipses="true"
@@ -50,11 +50,11 @@
    <text
     follows="top|left"
     font="SansSerifBigLarge"
-    height="21"
+    height="16"
     left="8"
     name="user_name"
     parse_urls="false"
-    top="10"
+    top="7"
     text_color="White"
     translate="false"
     use_ellipses="true"
@@ -62,35 +62,38 @@
     width="190" />
    <text
      follows="top|left"
-     height="16"
+     height="15"
      left="8"
      name="user_slid"
      font="SansSerifSmallBold"
      parse_urls="false"
      text_color="EmphasisColor"
+     top_pad="2" 
      translate="false"
      value="teststring.pleaseignore"
+     valign="center"
      width="185"
      use_ellipses="true" />
     <text
      follows="top|left"
-     height="16"
+     height="15"
      left="8"
      name="user_subtitle"
      font="SansSerifSmall"
      text_color="White"
      top_pad="0" 
+     valign="center"
      value="11 Months, 3 days old"
      width="175"
      use_ellipses="true" />
      <text
      follows="left|top|right"
-     height="35"
+     height="46"
      left="8"
      name="user_details"
      right="-10"
      word_wrap="true"
-     top_pad="4"
+     top_pad="2"
      use_ellipses="true"
      width="220">This is my second life description and I really think it is great. But for some reason my description is super extra long because I like to talk a whole lot
     </text>
@@ -120,17 +123,6 @@
      top_delta="4"
      name="mute_btn"
      width="16" />
-    <text
-     follows="top|left"
-     height="16"
-     left="8"
-     name="avatar_profile_link"
-     font="SansSerifSmall"
-     text_color="White"
-     top_pad="5"
-     translate="false"
-     value="[[LINK] View full profile]"
-     width="175" />
     <avatar_icon
      follows="top|left"
      height="38"
@@ -141,4 +133,53 @@
      name="avatar_icon"
      top="10"
      width="38" />
+<!-- Overlapping buttons for default actions
+    llinspectavatar.cpp makes visible the most likely default action 
+-->
+    <button
+     follows="top|left"
+     height="20"
+     label="Add Friend"
+     left="8"
+     name="add_friend_btn"
+     top="139"
+     width="90" />
+    <button
+     follows="top|left"
+     height="20"
+     label="IM"
+     left_delta="0"
+     name="im_btn"
+     top_delta="0"
+     width="80" />
+    <button
+     follows="top|left"
+     height="20"
+     label="Profile"
+     layout="topleft"
+     left_delta="96"
+     name="view_profile_btn"
+     tab_stop="false"
+     top_delta="0"
+     width="80" />
+    <!--  gear buttons here -->
+    <menu_button
+     follows="top|left"
+     height="20"
+     image_overlay="OptionsMenu_Off"
+     layout="topleft"
+     menu_filename="menu_inspect_avatar_gear.xml"
+     name="gear_btn"
+     right="-5"
+     top_delta="0"
+     width="35" />
+    <menu_button
+     follows="top|left"
+     height="20"
+     image_overlay="OptionsMenu_Off"
+     menu_filename="menu_inspect_self_gear.xml"
+     name="gear_self_btn"
+     right="-5"
+     top_delta="0"
+     width="35" />
 </floater>

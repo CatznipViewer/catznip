@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<toggleable_menu
+ create_jump_keys="true"
+ layout="topleft"
+ mouse_opaque="false"
+ visible="false"
+ name="Gear Menu">
+    <menu_item_call
+     label="View Profile"
+     name="view_profile">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="profile" />
+    </menu_item_call>
+    <menu_item_call
+     label="Add Friend"
+     name="add_friend">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="friend_add" />
+        <menu_item_call.on_visible
+         function="InspectAvatar.CheckAction"
+         parameter="friend_add" />
+    </menu_item_call>
+    <menu_item_call
+     label="IM"
+     name="im">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="send_im" />
+    </menu_item_call>
+    <menu_item_call
+     label="Call"
+     name="call">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="call" />
+        <menu_item_call.on_visible
+         function="InspectAvatar.CheckAction"
+         parameter="call" />
+    </menu_item_call>
+    <menu_item_call
+     label="Pay"
+     name="pay">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="pay" />
+    </menu_item_call>
+    <menu_item_call
+     label="Teleport"
+     name="teleport">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="teleport" />
+        <menu_item_call.on_enable
+         function="InspectAvatar.CheckAction"
+         parameter="teleport" />
+    </menu_item_call>
+    <menu_item_separator />
+    <context_menu
+     label="Manage"
+     layout="topleft"
+     name="Manage &gt;">
+        <menu_item_call
+         label="Block"
+         name="block">
+            <menu_item_call.on_click
+             function="InspectAvatar.Action"
+             parameter="toggle_mute" />
+            <menu_item_call.on_visible
+             function="InspectAvatar.CheckAction"
+             parameter="check_mute" />
+        </menu_item_call>
+        <menu_item_call
+         label="Unblock"
+         name="unblock">
+            <menu_item_call.on_click
+             function="InspectAvatar.Action"
+             parameter="toggle_mute" />
+            <menu_item_call.on_visible
+             function="InspectAvatar.CheckAction" 
+             parameter="check_unmute" />
+        </menu_item_call>
+        <menu_item_call
+         label="Report"
+         name="report">
+            <menu_item_call.on_click
+             function="InspectAvatar.Action"
+             parameter="report" />
+        </menu_item_call>
+        <menu_item_call
+         label="Freeze"
+         name="freeze">
+            <menu_item_call.on_click
+             function="InspectAvatar.Action"
+             parameter="freeze" />
+            <menu_item_call.on_visible
+             function="InspectAvatar.CheckAction"
+             parameter="freeze" />
+        </menu_item_call>
+        <menu_item_call
+         label="Eject"
+         name="eject">
+            <menu_item_call.on_click
+             function="InspectAvatar.Action"
+             parameter="eject" />
+            <menu_item_call.on_visible
+             function="InspectAvatar.CheckAction"
+             parameter="eject" />
+        </menu_item_call>
+    </context_menu>
+    <menu_item_call
+     label="Find On Map"
+     name="find_on_map">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="find_map" />
+        <menu_item_call.on_visible
+         function="InspectAvatar.CheckAction"
+         parameter="find_map" />
+    </menu_item_call>
+    <menu_item_call
+     label="Invite to Group"
+     name="invite_to_group">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="invite_group" />
+    </menu_item_call>
+    <menu_item_call
+     label="Zoom In"
+     name="zoom_in">
+        <menu_item_call.on_click
+         function="InspectAvatar.Action"
+         parameter="zoom_in" />
+        <menu_item_call.on_visible
+         function="InspectAvatar.CheckAction"
+         parameter="zoom_in" />
+    </menu_item_call>  
+    <menu_item_call
+     label="Debug Textures"
+     name="debug">
+        <menu_item_call.on_click
+         function="Avatar.Debug"/>
+        <menu_item_call.on_visible
+         function="IsGodCustomerService"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Dump XML"
+     name="Dump XML">
+        <menu_item_call.on_click
+         function="Advanced.AppearanceToXML" />
+        <menu_item_call.on_visible
+         function="Advanced.EnableAppearanceToXML"/>
+    </menu_item_call>
+</toggleable_menu>
