@@ -233,7 +233,7 @@ public:
 
 	static std::set<LLUUID> getInventorySelectedUUIDs();
 
-// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-3.0.0) | Added: Catznip-2.0.1
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
 	static void addContact(const LLUUID& id);
 // [/SL:KB]
 
