@@ -1238,6 +1238,19 @@ void LLFloater::handleReshape(const LLRect& new_rect, bool by_user)
 	}
 }
 
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
+void LLFloater::setCollapsed(BOOL collapsed)
+{
+	// (mMinimized == true) && (collapse == true)   => currently minimized, can not collapse
+	// (mMinimized == false) && (collapse == false) => currently not minimized, can not restore
+	if (mMinimized == collapsed)
+		return;
+
+	mCollapseOnMinimize = collapsed;
+	setMinimized(collapsed);
+}
+// [/SL:KB]
+
 void LLFloater::setMinimized(BOOL minimize)
 {
 	const LLFloater::Params& default_params = LLFloater::getDefaultParams();
@@ -1658,9 +1671,25 @@ BOOL LLFloater::handleMiddleMouseDown(S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLFloater::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
-	BOOL was_minimized = mMinimized;
-	setMinimized(FALSE);
-	return was_minimized || LLPanel::handleDoubleClick(x, y, mask);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
+	// If currently minimized double-click always restores; otherwise, check for double-click in the header area
+	if (mMinimized)
+	{
+		setMinimized(FALSE);
+		return TRUE;
+	}
+	else if ( (mHeaderHeight > 0) && (mDragHandle) && (mButtons[BUTTON_COLLAPSE]) && (mButtons[BUTTON_COLLAPSE]->getVisible()) && (mButtons[BUTTON_COLLAPSE]->getEnabled()) && 
+	          ( ((!mDragOnLeft) && (mDragHandle->getRect().mTop >= y) && (mDragHandle->getRect().mTop - mHeaderHeight <= y)) ||
+	            (mDragOnLeft) && (mDragHandle->getRect().pointInRect(x,y))) )
+	{
+		setCollapsed(TRUE);
+		return TRUE;
+	}
+	return LLPanel::handleDoubleClick(x, y, mask);
+// [/SL:KB]
+//	BOOL was_minimized = mMinimized;
+//	setMinimized(FALSE);
+//	return was_minimized || LLPanel::handleDoubleClick(x, y, mask);
 }
 
 void LLFloater::bringToFront( S32 x, S32 y )
@@ -1770,8 +1799,7 @@ void LLFloater::onClickCollapse(LLFloater* self)
 {
 	if (!self)
 		return;
-	self->mCollapseOnMinimize = !self->isMinimized();
-	self->setMinimized(!self->isMinimized());
+	self->setCollapsed(!self->isMinimized());
 }
 // [/SL:KB]
 
