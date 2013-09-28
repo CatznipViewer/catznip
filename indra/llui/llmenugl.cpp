@@ -595,7 +595,7 @@ BOOL LLMenuItemSeparatorGL::handleMouseDown(S32 x, S32 y, MASK mask)
 	{
 		return menu_item->handleMouseDown(x, y, mask);
 	}
-	return LLMenuItemGL::handleMouseDown(x, y, mask);
+	return FALSE;
 // [/SL:KB]
 //	if (y > getRect().getHeight() / 2)
 //	{
@@ -619,7 +619,7 @@ BOOL LLMenuItemSeparatorGL::handleMouseUp(S32 x, S32 y, MASK mask)
 	{
 		return menu_item->handleMouseUp(x, y, mask);
 	}
-	return LLMenuItemGL::handleMouseUp(x, y, mask);
+	return FALSE;
 // [/SL:KB]
 //	if (y > getRect().getHeight() / 2)
 //	{
