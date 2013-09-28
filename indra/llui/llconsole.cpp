@@ -379,7 +379,7 @@ void LLConsole::updateClass()
 
 void LLConsole::update()
 {
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 	if (!mLines.empty())
 // [/SL:KB]
 	{

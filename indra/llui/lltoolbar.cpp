@@ -102,7 +102,7 @@ LLToolBar::LLToolBar(const LLToolBar::Params& p)
 	mModified(false),
 	mButtonPanel(NULL),
 	mCenteringStack(NULL),
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2)
 	mCaret(NULL),
 // [/SL:KB]
 	mPadLeft(p.pad_left),
@@ -206,7 +206,7 @@ void LLToolBar::initFromParams(const LLToolBar::Params& p)
 	LLLayoutPanel* center_panel = LLUICtrlFactory::create<LLLayoutPanel>(center_panel_p);
 	mCenteringStack->addChild(center_panel);
 
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2)
 	mCaret = getChild<LLIconCtrl>("caret");
 // [/SL:KB]
 

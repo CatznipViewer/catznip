@@ -97,7 +97,7 @@ void LLDockControl::setDock(LLView* dockWidget)
 
 void LLDockControl::getAllowedRect(LLRect& rect)
 {
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2)
 	static LLView* s_pNonToolbarPanel = NULL;
 	if (!s_pNonToolbarPanel)
 		s_pNonToolbarPanel = mDockableFloater->getRootView()->findChild<LLView>("non_toolbar_panel");

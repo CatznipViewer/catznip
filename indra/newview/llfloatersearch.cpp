@@ -113,7 +113,7 @@ BOOL LLFloaterSearch::postBuild()
 
 void LLFloaterSearch::onOpen(const LLSD& key)
 {
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-3.2.1) | Added: Catznip-2.1.0
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.1)
 	if ( (key.has("category")) || (mWebBrowser->getCurrentNavUrl().empty()))
 	{
 		// New search triggered - blank the page while loading, instead of temporarily showing stale results
@@ -125,23 +125,23 @@ void LLFloaterSearch::onOpen(const LLSD& key)
 
 		LLFloaterWebContent::onOpen(p);
 		search(p.search);
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-3.2.1) | Added: Catznip-2.1.0
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.1)
 	}
 // [/SL:KB]
 }
 
 void LLFloaterSearch::onClose(bool app_quitting)
 {
-//	LLFloaterWebContent::onClose(app_quitting);
-//	// tear down the web view so we don't show the previous search
-//	// result when the floater is opened next time
-//	destroy();
-// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-3.2.1) | Added: Catznip-2.8.0
+// [SL:KB] - Patch: UI-FloaterSearch | Checked: 2011-08-25 (Catznip-2.8)
 	if (!app_quitting)
 		setVisible(FALSE);
 	else
 		LLFloaterWebContent::onClose(app_quitting);
 // [/SL:KB]
+//	LLFloaterWebContent::onClose(app_quitting);
+//	// tear down the web view so we don't show the previous search
+//	// result when the floater is opened next time
+//	destroy();
 }
 
 void LLFloaterSearch::godLevelChanged(U8 godlevel)

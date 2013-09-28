@@ -33,26 +33,16 @@
      name="buycurrencylabel">
         L$ [AMT]
     </panel.string>
-  <panel
-    class="topinfo_bar"
-    filename="panel_topinfo_bar.xml"
-    follows="top|left|right"
-    height="18"
-    layout="topleft"
-    left="425"
-    name="topinfo_bar"
-    top="1"
-    width="250" />
   <layout_stack
    animate="false" 
    layout="topleft"
    orientation="horizontal"
    height="18"
-   left="-390"
-   width="390"
+   left="-815"
+   width="815"
    right_pad="0"
    top="1"
-   follows="right|top" 
+   follows="left|right|top" 
    name="status_panel">
     <layout_panel
      auto_resize="true"
@@ -62,7 +52,19 @@
      visible="true"
      layout="topleft"
      name="overflow_panel"
-     width="1" />
+     width="1">
+        <panel
+         class="topinfo_bar"
+         filename="panel_topinfo_bar.xml"
+         follows="all"
+         height="18"
+         layout="topleft"
+         left="1"
+         name="topinfo_bar"
+         right="-1"
+         top="0"
+         width="250" />
+    </layout_panel>
     <layout_panel
      auto_resize="false"
      user_resize="false"

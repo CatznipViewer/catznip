@@ -2517,7 +2517,7 @@ void handle_object_touch()
 
 
 
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 static void init_default_item_label(const LLUICtrl* pMenuItem)
 {
 	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(pMenuItem->getName());
@@ -2567,7 +2567,7 @@ bool enable_object_touch(LLUICtrl* ctrl)
 
 	bool new_value = obj && obj->flagHandleTouch();
 
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 	const std::string& item_name = ctrl->getName();
 	init_default_item_label(ctrl);
 // [/SL:KB]
@@ -2578,14 +2578,14 @@ bool enable_object_touch(LLUICtrl* ctrl)
 	LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 	if (node && node->mValid && !node->mTouchName.empty())
 	{
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 		ctrl->setValue(node->mTouchName);
 // [/SL:KB]
 //		gMenuHolder->childSetText(item_name, node->mTouchName);
 	}
 	else
 	{
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 		ctrl->setValue(get_default_item_label(item_name));
 // [/SL:KB]
 //		gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
@@ -2760,12 +2760,12 @@ void handle_texture_refresh()
 				idTextures.push_back(texture_pair_t(pTexture->getID(), false));
 		}
 
-		if (pObject->isSculpted())
+		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
 		{
 			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
-			if (pSculptParams)
+			if ( (pSculptParams) && (0 == (pSculptParams->getSculptType() & LL_SCULPT_TYPE_MESH)) )
 			{
-				auto itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
+				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
 				if (idTextures.end() == itTexture)
 					idTextures.push_back(texture_pair_t(pSculptParams->getSculptTexture(), true));
 				else
@@ -6013,7 +6013,7 @@ bool enable_object_sit(LLUICtrl* ctrl)
 //		std::string item_name = ctrl->getName();
 
 		// init default labels
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 		const std::string& item_name = ctrl->getName();
 		init_default_item_label(ctrl);
 // [/SL:KB]
@@ -6023,14 +6023,14 @@ bool enable_object_sit(LLUICtrl* ctrl)
 		LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 		if (node && node->mValid && !node->mSitName.empty())
 		{
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 			ctrl->setValue(node->mSitName);
 // [/SL:KB]
 //			gMenuHolder->childSetText(item_name, node->mSitName);
 		}
 		else
 		{
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 			ctrl->setValue(get_default_item_label(item_name));
 // [/SL:KB]
 //			gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
@@ -8903,7 +8903,7 @@ void initialize_menus()
 	// Generic actions
 	commit.add("ReportAbuse", boost::bind(&handle_report_abuse));
 	commit.add("BuyCurrency", boost::bind(&handle_buy_currency));
-// [SL:KB] - Patch: UI-Misc | Checked: 2010-09-12 (Catznip-3.0.0) | Added: Catznip-2.1.2
+// [SL:KB] - Patch: UI-Misc | Checked: 2010-09-12 (Catznip-2.1)
 	commit.add("RequestBalance", boost::bind(&LLStatusBar::sendMoneyBalanceRequest));
 // [/SL:KB]
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");

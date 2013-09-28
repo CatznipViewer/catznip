@@ -1990,8 +1990,8 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 
 			if (addFriendButton && removeFriendButton)
 			{
-				addFriendButton->setEnabled(!isFriend);
-				removeFriendButton->setEnabled(isFriend);
+				addFriendButton->setVisible(!isFriend);
+				removeFriendButton->setVisible(isFriend);
 			}
 		}
 	

@@ -10310,7 +10310,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <boolean>1</boolean>
     </map>
     <key>ShowCameraButton</key>
     <map>
@@ -10563,7 +10563,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <boolean>1</boolean>
     </map>
     <key>ShowMiniLocationPanel</key>
     <map>
@@ -11050,7 +11050,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <boolean>1</boolean>
     </map>
     <key>ShowSelectionBeam</key>
     <map>

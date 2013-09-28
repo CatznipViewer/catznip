@@ -273,7 +273,7 @@ private:
 
 	// related widgets
 	LLLayoutStack*					mCenteringStack;
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2)
 	LLIconCtrl*						mCaret;
 // [/SL:KB]
 	LLPanel*						mButtonPanel;

@@ -1932,7 +1932,7 @@ void LLViewerWindow::initWorldUI()
 	if (!gSavedSettings.getBOOL("ShowMiniLocationPanel"))
 	{
 //		topinfo_bar->setVisible(FALSE);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 		gStatusBar->showTopInfoBar(FALSE);
 // [/SL:KB]
 	}
@@ -3119,7 +3119,7 @@ void LLViewerWindow::updateUI()
 					// and blacklist the various containers we don't care about
 					else if (dynamic_cast<LLUICtrl*>(viewp) 
 							&& viewp != gMenuHolder
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 							&& viewp != gFloaterView)
 // [/SL:KB]
 //							&& viewp != gFloaterView
@@ -5156,7 +5156,7 @@ void LLViewerWindow::setUIVisibility(bool visible)
 	}
 
 	LLNavigationBar::getInstance()->setVisible(visible ? gSavedSettings.getBOOL("ShowNavbarNavigationPanel") : FALSE);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	gStatusBar->showTopInfoBar(visible ? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
 // [/SL:KB]
 //	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);

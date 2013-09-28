@@ -924,7 +924,7 @@ bool LLFlatListView::selectNextItemPair(bool is_up_direction, bool reset_selecti
 			if ( reset_selection )
 			{
 				// Reset current selection if we were asked about it
-// [SL:KB] - Patch: Control-FlatListView | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Control-FlatListView | Checked: 2012-02-18 (Catznip-3.2)
 				resetSelection(true);
 // [/SL:KB]
 //				resetSelection();

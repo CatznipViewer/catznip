@@ -142,17 +142,6 @@ private:
 	Updater*				mRecentListUpdater;
 	Updater*				mButtonsUpdater;
     LLHandle< LLFloater >	mPicker;
-
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
-	LLButton*				mGroupInfoBtn;
-	LLButton*				mGroupChatBtn;
-	LLButton*				mGroupCallBtn;
-	LLButton*				mProfileBtn;
-	LLButton*				mIMBtn;
-	LLButton*				mCallBtn;
-	LLButton*				mTeleportBtn;
-	LLButton*				mShareBtn;
-// [/SL:KB]
 };
 
 #endif //LL_LLPANELPEOPLE_H

@@ -590,14 +590,14 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
 
-//	LLPanelTopInfoBar::getInstance()->setVisible(value);
-//	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 	if (gStatusBar)
 	{
 		gStatusBar->showTopInfoBar(value);
 	}
 // [/SL:KB]
+//	LLPanelTopInfoBar::getInstance()->setVisible(value);
+//	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
 
 	return true;
 }

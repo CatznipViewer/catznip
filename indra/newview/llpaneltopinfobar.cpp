@@ -30,13 +30,13 @@
 
 #include "llagent.h"
 #include "llagentui.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 #include "llappviewer.h"
 // [/SL:KB]
 #include "llclipboard.h"
 #include "llfloatersidepanelcontainer.h"
 #include "lllandmarkactions.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 #include "lllayoutstack.h"
 // [/SL:KB]
 #include "lllocationinputctrl.h"
@@ -62,30 +62,33 @@ private:
 		if (mTopInfoBar)
 		{
 			mTopInfoBar->updateParcelIcons();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+			mTopInfoBar->updateLayout();
+// [/SL:KB]
 		}
 	}
 
 	LLPanelTopInfoBar* mTopInfoBar;
 };
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 static LLRegisterPanelClassWrapper<LLPanelTopInfoBar> t_topinfo_bar("topinfo_bar");
 // [/SL:KB]
 
 LLPanelTopInfoBar::LLPanelTopInfoBar(): mParcelChangedObserver(0)
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
-//	, mInfoBtn(NULL)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	, mParcelInfoText(NULL)
 	, mDamageText(NULL)
 	, mMaturityIcon(NULL)
 	, mIconsPanel(NULL)
 // [/SL:KB]
+//	, mInfoBtn(NULL)
 {
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	memset(&mParcelIcon, 0, sizeof(mParcelIcon));
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 	// set a listener function for LoginComplete event
 	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLPanelTopInfoBar::handleLoginComplete, this));
 // [/SL:KB]
@@ -147,10 +150,8 @@ void LLPanelTopInfoBar::initParcelIcons()
 
 void LLPanelTopInfoBar::handleLoginComplete()
 {
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	gMenuBarView->setResizeCallback(boost::bind(&LLPanelTopInfoBar::handleLayoutChange, this));
-	getParent()->findChild<LLLayoutPanel>("overflow_panel")->setResizeCallback(boost::bind(&LLPanelTopInfoBar::handleLayoutChange, this));
-
 	handleLayoutChange();
 // [/SL:KB]
 
@@ -178,7 +179,7 @@ BOOL LLPanelTopInfoBar::postBuild()
 
 	mParcelInfoText = getChild<LLTextBox>("parcel_info_text");
 	mDamageText = getChild<LLTextBox>("damage_text");
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	mMaturityIcon = getChild<LLIconCtrl>("maturity_icon");
 	mIconsPanel = getChild<LLPanel>("icons_panel");
 // [/SL:KB]
@@ -210,25 +211,22 @@ BOOL LLPanelTopInfoBar::postBuild()
 	return TRUE;
 }
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 void LLPanelTopInfoBar::handleLayoutChange()
 {
-	LLRect rctMenu = gMenuBarView->getRect();
-
-	LLRect rctOverflow;
-	LLView* pOverflow = gStatusBar->findChildView("overflow_panel");
-	pOverflow->localRectToOtherView(pOverflow->getRect(), &rctOverflow, getParent());
-
-	LLRect rctNew = getRect();
-	rctNew.mLeft = rctMenu.getWidth();
-	rctNew.mRight = rctOverflow.mRight;
-	setShape(rctNew);
+	LLView* pStatus = gStatusBar->findChildView("status_panel");
+	if (pStatus)
+	{
+		LLRect rctStatus = pStatus->getRect();
+		rctStatus.mLeft = gMenuBarView->getRect().getWidth() + 10;
+		rctStatus.mRight = rctStatus.mRight;
+		pStatus->setShape(rctStatus);
+	}
 }
 
 void LLPanelTopInfoBar::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	LLPanel::reshape(width, height, called_from_parent);
-
 	updateLayout();
 }
 // [/SL:KB]
@@ -271,20 +269,20 @@ void LLPanelTopInfoBar::reshape(S32 width, S32 height, BOOL called_from_parent)
 
 void LLPanelTopInfoBar::draw()
 {
-//	updateParcelInfoText();
-//	updateHealth();
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 	if (getVisible())
 	{
-		updateParcelInfoText();
+		updateParcelInfoText(true);
 		updateHealth();
 	}
 // [/SL:KB]
+//	updateParcelInfoText();
+//	updateHealth();
 
 	LLPanel::draw();
 }
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 void LLPanelTopInfoBar::buildLocationString(std::string& loc_str)
 {
 	if (!LLAgentUI::buildLocationString(loc_str, LLAgentUI::LOCATION_FORMAT_TOPBAR))
@@ -325,12 +323,13 @@ void LLPanelTopInfoBar::buildLocationString(std::string& loc_str)
 //	}
 //}
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 void LLPanelTopInfoBar::update()
 {
-	updateParcelIcons();
 	updateParcelInfoText();
 	updateHealth();
+	updateParcelIcons();
+	updateLayout();
 }
 // [/SL:KB]
 //void LLPanelTopInfoBar::update()
@@ -345,32 +344,43 @@ void LLPanelTopInfoBar::update()
 //	updateParcelIcons();
 //}
 
-void LLPanelTopInfoBar::updateParcelInfoText()
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
+void LLPanelTopInfoBar::updateParcelInfoText(bool fUpdateLayout)
 {
-//	static LLUICachedControl<bool> show_coords("NavBarShowCoordinates", false);
-
-//	if (show_coords)
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	static LLVector3d sPrevPosGlobal = gAgent.getPositionGlobal();
-	if (sPrevPosGlobal != gAgent.getPositionGlobal())
-// [/SL:KB]
+	if (dist_vec_squared(sPrevPosGlobal, gAgent.getPositionGlobal()) > 1.0f)
 	{
-		std::string new_text;
+		std::string strLocation;
+		buildLocationString(strLocation);
 
-//		buildLocationString(new_text, show_coords);
-//		setParcelInfoText(new_text);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
-		buildLocationString(new_text);
-		mParcelInfoText->setText(new_text);
-// [/SL:KB]
+		mParcelInfoText->setText(strLocation);
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		if (fUpdateLayout)
+		{
+			updateLayout();
+		}
+
 		sPrevPosGlobal = gAgent.getPositionGlobal();
-// [/SL:KB]
 	}
 }
+// [/SL:KB]
+//void LLPanelTopInfoBar::updateParcelInfoText()
+//{
+//	static LLUICachedControl<bool> show_coords("NavBarShowCoordinates", false);
+//
+//	if (show_coords)
+//	{
+//		std::string new_text;
+//
+//		buildLocationString(new_text, show_coords);
+//		setParcelInfoText(new_text);
+//	}
+//}
 
-void LLPanelTopInfoBar::updateParcelIcons()
+//void LLPanelTopInfoBar::updateParcelIcons()
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
+void LLPanelTopInfoBar::updateParcelIcons(bool fUpdateLayout)
+// [/SL:KB]
 {
 	LLViewerParcelMgr* vpm = LLViewerParcelMgr::getInstance();
 
@@ -379,7 +389,7 @@ void LLPanelTopInfoBar::updateParcelIcons()
 	if (!agent_region || !agent_parcel)
 		return;
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	updateMaturity();
 // [/SL:KB]
 
@@ -422,11 +432,15 @@ void LLPanelTopInfoBar::updateParcelIcons()
 		mDamageText->setVisible(allow_damage);
 		mParcelIcon[SEE_AVATARS_ICON]->setVisible( !see_avs );
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
-		updateLayout();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
+		if (fUpdateLayout)
+		{
+			updateLayout();
+		}
+	}
 // [/SL:KB]
 //		layoutParcelIcons();
-	}
+//	}
 //	else
 //	{
 //		for (S32 i = 0; i < ICON_COUNT; ++i)
@@ -437,7 +451,7 @@ void LLPanelTopInfoBar::updateParcelIcons()
 //	}
 }
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 void LLPanelTopInfoBar::updateMaturity()
 {
 	// Updating maturity rating icon.
@@ -478,6 +492,9 @@ void LLPanelTopInfoBar::updateHealth()
 
 	// *FIXME: Status bar owns health information, should be in agent
 //	if (show_icons && gStatusBar)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
+	if (gStatusBar)
+// [/SL:KB]
 	{
 		static S32 last_health = -1;
 		S32 health = gStatusBar->getHealth();
@@ -490,7 +507,7 @@ void LLPanelTopInfoBar::updateHealth()
 	}
 }
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 void LLPanelTopInfoBar::updateLayout()
 {
 	static const int FIRST_ICON_HPAD = 10;
@@ -508,6 +525,7 @@ void LLPanelTopInfoBar::updateLayout()
 	{
 		S32 max_text_width = getRect().getWidth() - left - mParcelInfoText->getRect().mLeft;
 		LLRect rect = mParcelInfoText->getRect();
+//		rect.mRight = rect.mLeft + llmin(mParcelInfoText->getFont()->getWidth(mParcelInfoText->getWText().c_str()), max_text_width);
 		rect.mRight = rect.mLeft + llmin(mParcelInfoText->getTextPixelWidth(), max_text_width);
 		mParcelInfoText->reshape(rect.getWidth(), rect.getHeight());
 		mParcelInfoText->setRect(rect);
@@ -556,7 +574,7 @@ S32 LLPanelTopInfoBar::layoutWidget(LLUICtrl* ctrl, S32 left)
 	static const int ICON_HPAD = 2;
 
 //	if (ctrl->getVisible())
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	if ( (ctrl) && (ctrl->getVisible()) )
 // [/SL:KB]
 	{

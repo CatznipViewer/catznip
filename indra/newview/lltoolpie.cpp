@@ -981,7 +981,7 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			|| !existing_inspector->getVisible()
 			|| existing_inspector->getKey()["avatar_id"].asUUID() != hover_object->getID())
 		{
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2)
 			// Don't show an avatar inspector button if a (context) menu is open
 			if (gMenuHolder->hasVisibleMenu())
 			{
@@ -1036,7 +1036,7 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			 || !existing_inspector->getVisible()
 			 || existing_inspector->getKey()["object_id"].asUUID() != hover_object->getID()))
 		{
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2)
 			// Don't show an object inspector button if a (context) menu is open
 			if (gMenuHolder->hasVisibleMenu())
 			{
@@ -1709,7 +1709,7 @@ BOOL LLToolPie::handleRightClickPick()
 			}
 			
 //			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
 			gMenuObject->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
 // [/SL:KB]
 			gMenuObject->show(x, y);

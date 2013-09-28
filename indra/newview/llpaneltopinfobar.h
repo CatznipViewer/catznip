@@ -35,7 +35,7 @@ class LLIconCtrl;
 class LLParcelChangeObserver;
 
 //class LLPanelTopInfoBar : public LLPanel, public LLSingleton<LLPanelTopInfoBar>, private LLDestroyClass<LLPanelTopInfoBar>
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 class LLPanelTopInfoBar : public LLPanel
 // [/SL:KB]
 {
@@ -51,7 +51,7 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	/*virtual*/ void reshape(S32 width, S32 height, BOOL called_from_parent);
 // [/SL:KB]
 
@@ -74,7 +74,7 @@ private:
 
 	enum EParcelIcon
 	{
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 		DAMAGE_ICON = 0,	// 0
 		VOICE_ICON,			// 1
 		FLY_ICON,			// 2
@@ -94,7 +94,7 @@ private:
 //		ICON_COUNT			// 7 total
 	};
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
 	void handleLayoutChange();
 // [/SL:KB]
 
@@ -138,14 +138,20 @@ private:
 	/**
 	 * Updates parcel info text (mParcelInfoText).
 	 */
-	void updateParcelInfoText();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
+	void updateParcelInfoText(bool fUpdateLayout = false);
+// [/SL:KB]
+//	void updateParcelInfoText();
 
 	/**
 	 * Updates parcel icons (mParcelIcon[]).
 	 */
-	void updateParcelIcons();
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
+	void updateParcelIcons(bool fUpdateLayout = false);
+// [/SL:KB]
+//	void updateParcelIcons();
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	/**
 	 * Updates region maturity (mMaturityButton).
 	 */
@@ -161,10 +167,10 @@ private:
 	 * Lays out all parcel icons starting from right edge of the mParcelInfoText + 11px
 	 * (see screenshots in EXT-5808 for details).
 	 */
-//	void layoutParcelIcons();
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	void updateLayout();
 // [/SL:KB]
+//	void layoutParcelIcons();
 
 	/**
 	 * Lays out a widget. Widget's rect mLeft becomes equal to the 'left' argument.
@@ -174,7 +180,7 @@ private:
 	/**
 	 * Generates location string and returns it in the loc_str parameter.
 	 */
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	void buildLocationString(std::string& loc_str);
 // [/SL:KB]
 //	void buildLocationString(std::string& loc_str, bool show_coords);
@@ -198,7 +204,7 @@ private:
 //	LLButton* 				mInfoBtn;
 	LLTextBox* 				mParcelInfoText;
 	LLTextBox* 				mDamageText;
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 	LLIconCtrl*				mMaturityIcon;
 	LLPanel*				mIconsPanel;
 // [/SL:KB]

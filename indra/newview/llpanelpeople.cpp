@@ -501,16 +501,6 @@ LLPanelPeople::LLPanelPeople()
 		mNearbyList(NULL),
 		mRecentList(NULL),
 		mGroupList(NULL),
-// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2) | Added: Catznip-3.2.2
-		mGroupInfoBtn(NULL),
-		mGroupChatBtn(NULL),
-		mGroupCallBtn(NULL),
-		mProfileBtn(NULL),
-		mIMBtn(NULL),
-		mCallBtn(NULL),
-		mTeleportBtn(NULL),
-		mShareBtn(NULL),
-// [/SL:KB]
 		mMiniMap(NULL)
 {
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));

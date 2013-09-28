@@ -530,7 +530,7 @@ BOOL LLPanelMainInventory::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 //			mFilterTabs->startDragAndDropDelayTimer();
 //		}
 //	}
-// [SL:KB] - Checked: UI-InvPanelDnD | Checked: 2011-06-16 (Catznip-3.2.1) | Added: Catznip-2.6.0
+// [SL:KB] - Checked: UI-InvPanelDnD | Checked: 2011-06-16 (Catznip-2.6)
 	LLInventoryPanel* pInvPanel = getActivePanel();
 	if ( (pInvPanel) && (pInvPanel->pointInView(x - pInvPanel->getRect().mLeft, y - pInvPanel->getRect().mBottom)) )
 	{

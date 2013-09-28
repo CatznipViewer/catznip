@@ -441,7 +441,6 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 LLLocationInputCtrl::~LLLocationInputCtrl()
 {
 // [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
-	// Don't start observing the inventory until after login has successfully completed to avoid stalling
 	if (mLandmarkAddObserver)
 	{
 		gInventory.removeObserver(mLandmarkAddObserver);

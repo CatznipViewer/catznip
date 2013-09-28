@@ -130,7 +130,7 @@ BOOL LLAgentUI::buildLocationString(std::string& str, ELocationFormat fmt,const 
 				sim_access_string.empty() ? "" : " - ",
 				sim_access_string.c_str());
 			break;
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 		case LOCATION_FORMAT_TOPBAR:
 			buffer = llformat("%s (%d, %d, %d)",
 				region_name.c_str(),
@@ -171,7 +171,7 @@ BOOL LLAgentUI::buildLocationString(std::string& str, ELocationFormat fmt,const 
 				sim_access_string.empty() ? "" : " - ",
 				sim_access_string.c_str());
 			break;
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 		case LOCATION_FORMAT_TOPBAR:
 			buffer = llformat("%s (%d, %d, %d) - %s",
 				region_name.c_str(),
