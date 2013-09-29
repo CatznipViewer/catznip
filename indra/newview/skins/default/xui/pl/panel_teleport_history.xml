@@ -15,5 +15,8 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<button name="gear_btn" tool_tip="Pokaż dodatkowe opcje"/>
+		<button label="Teleportuj" name="teleport_btn" tool_tip="Teleportuj się w wybrane miejsce"/>
+		<button label="Mapa" name="map_btn" tool_tip="Pokaż odpowiadające miejsce na Mapie Świata"/>
+		<button name="profile_btn" tool_tip="Pokaż profil miejsca"/>
 	</panel>
 </panel>
