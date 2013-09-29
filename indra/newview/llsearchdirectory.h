@@ -19,6 +19,8 @@
 #include "llsingleton.h"
 
 // ============================================================================
+// LLSearchPlaceResult helper struct
+//
 
 struct LLSearchPlaceResult
 {
@@ -37,6 +39,8 @@ struct LLSearchPlaceResult
 };
 
 // ============================================================================
+// LLSearchDirectory class
+//
 
 class LLSearchDirectory : public LLSingleton<LLSearchDirectory>
 {

@@ -22,6 +22,8 @@ class LLFloaterSearch;
 class LLTabContainer;
 
 // ============================================================================
+// LLFloaterSearchContainer class
+//
 
 class LLFloaterSearchContainer : public LLMultiFloater
 {

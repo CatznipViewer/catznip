@@ -27,6 +27,8 @@ class LLScrollListCtrl;
 class LLTextBox;
 
 // ============================================================================
+// LLPanelPlacesSearch class
+//
 
 class LLPanelPlacesSearch : public LLPanel
 {
