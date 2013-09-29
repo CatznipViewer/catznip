@@ -285,6 +285,14 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 	m_pResultsNext->setEnabled(m_nCurResults > LLSearchDirectory::NUM_RESULTS_PAGE_PLACES);
 }
 
+void LLPanelPlacesSearch::onSelectCategory()
+{
+	if (m_fRefreshOnCategory)
+	{
+		searchStart(m_strCurQuery, true);
+	}
+}
+
 void LLPanelPlacesSearch::onShowOnMapBtn()
 {
 	LLVector3d posGlobal = getCurrentParcelPos();
@@ -301,14 +309,6 @@ void LLPanelPlacesSearch::onTeleportBtn()
 	if (!posGlobal.isExactlyZero())
 	{
 		gAgent.teleportViaLocation(posGlobal);
-	}
-}
-
-void LLPanelPlacesSearch::onSelectCategory()
-{
-	if (m_fRefreshOnCategory)
-	{
-		searchStart(m_strCurQuery, true);
 	}
 }
 
