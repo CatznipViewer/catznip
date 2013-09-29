@@ -15,6 +15,8 @@ Chloe Constantine
 	Bugs
 	Feedback
 	RLVa
+Cinder Roxley
+	General Mac OS X and installer issues 
 Ebonaku Dragova
 	Bugs
 	Feedback
