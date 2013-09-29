@@ -685,12 +685,15 @@ void LLPanelGroupGeneral::update(LLGroupChange gc)
 			std::stringstream pending;
 			pending << "Retrieving member list (" << gdatap->mMembers.size() << "\\" << gdatap->mMemberCount  << ")";
 
-			LLSD row;
-			row["columns"][0]["value"] = pending.str();
-			row["columns"][0]["column"] = "name";
+//			LLSD row;
+//			row["columns"][0]["value"] = pending.str();
+//			row["columns"][0]["column"] = "name";
 
 			mListVisibleMembers->setEnabled(FALSE);
-			mListVisibleMembers->addElement(row);
+//			mListVisibleMembers->addElement(row);
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+			mListVisibleMembers->setCommentText(pending.str());
+// [/SL:KB]
 		}
 	}
 

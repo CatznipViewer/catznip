@@ -94,6 +94,9 @@ private:
 	};
 	//-- ChildStack ends ------------------------------------------------------
 
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
+	LLTabContainer* mTabCtrl;	
+// [/SL:KB]
 	profile_tabs_t mTabContainer;
 	ChildStack		mChildStack;
 	LLUUID mAvatarId;
