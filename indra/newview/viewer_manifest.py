@@ -225,7 +225,7 @@ class ViewerManifest(LLManifest):
             app_suffix='Viewer'
         elif re.match('^(beta|project).*',channel_type) :
             app_suffix=self.channel_unique()
-        return "Second Life "+app_suffix
+        return "Catznip "+app_suffix
         
     def icon_path(self):
         icon_path="icons/"
@@ -872,7 +872,7 @@ class DarwinManifest(ViewerManifest):
         # MBW -- If the mounted volume name changes, it breaks the .DS_Store's background image and icon positioning.
         #  If we really need differently named volumes, we'll need to create multiple DS_Store file images, or use some other trick.
 
-        volname="Second Life Installer"  # DO NOT CHANGE without understanding comment above
+        volname="Catznip Installer"  # DO NOT CHANGE without understanding comment above
 
         if self.default_channel():
             if not self.default_grid():
