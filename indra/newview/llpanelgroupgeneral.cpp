@@ -691,7 +691,7 @@ void LLPanelGroupGeneral::update(LLGroupChange gc)
 
 			mListVisibleMembers->setEnabled(FALSE);
 //			mListVisibleMembers->addElement(row);
-// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-GroupPanel | Checked: 2011-05-30 (Catznip-2.6)
 			mListVisibleMembers->setCommentText(pending.str());
 // [/SL:KB]
 		}

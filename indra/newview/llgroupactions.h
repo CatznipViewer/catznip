@@ -72,10 +72,10 @@ public:
 	/**
 	 * Refresh group notices panel.
 	 */
-//	static void refresh_notices();
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	static void refresh_notices(const LLUUID& group_id);
 // [/SL:KB]
+//	static void refresh_notices();
 
 	/**
 	 * Refresh group information panel.

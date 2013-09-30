@@ -41,7 +41,7 @@
 #include "llnotificationsutil.h"
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "groupchatlistener.h"
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0)
 #include "llpanelgroup.h"
 #include "llviewercontrol.h"
 // [/SL:KB]
@@ -355,7 +355,7 @@ void LLGroupActions::activate(const LLUUID& group_id)
 //		return false;
 //	return panel->isInVisibleChain();
 //}
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 typedef enum
 {
 	GV_FLOATER,   // Group is visible as a floater
@@ -367,19 +367,23 @@ static EGroupVisibility getGroupVisible(const LLUUID& idGroup)
 {
 	// Sanity check
 	if (idGroup.isNull())
+	{
 		return GV_NONE;
+	}
 
 	// Check if we have the group open as a floater
 	if (NULL != LLFloaterReg::findInstance("floater_group_info", idGroup))
+	{
 		return GV_FLOATER;
+	}
 
 	// Check if we have the group open in the people sidepanel
-	static LLPanelGroup* panel = NULL;
-	if (!panel)
+	static LLPanelGroup* s_pPanelGroupInfo = NULL;
+	if (!s_pPanelGroupInfo)
 	{
-		panel = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
+		s_pPanelGroupInfo = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
 	}
-	return ( (panel) && (panel->isInVisibleChain()) && (idGroup == panel->getID()) ) ? GV_SIDEPANEL : GV_NONE;
+	return ( (s_pPanelGroupInfo) && (s_pPanelGroupInfo->isInVisibleChain()) && (idGroup == s_pPanelGroupInfo->getID()) ) ? GV_SIDEPANEL : GV_NONE;
 }
 // [/SL:KB]
 
@@ -395,7 +399,7 @@ void LLGroupActions::show(const LLUUID& group_id)
 	if (group_id.isNull())
 		return;
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
 	{
 // [/SL:KB]
@@ -404,7 +408,7 @@ void LLGroupActions::show(const LLUUID& group_id)
 		params["open_tab_name"] = "panel_group_info_sidetray";
 
 		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	}
 	else
 	{
@@ -418,13 +422,13 @@ void LLGroupActions::show(const LLUUID& group_id)
 }
 
 //void LLGroupActions::refresh_notices()
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 void LLGroupActions::refresh_notices(const LLUUID& group_id)
 // [/SL:KB]
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
 	if (GV_NONE == eGroupVisibility)
 		return;
@@ -432,14 +436,14 @@ void LLGroupActions::refresh_notices(const LLUUID& group_id)
 
 	LLSD params;
 //	params["group_id"] = LLUUID::null;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	params["group_id"] = group_id;
 // [/SL:KB]
 	params["open_tab_name"] = "panel_group_info_sidetray";
 	params["action"] = "refresh_notices";
 
 //	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
 	{
 		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
@@ -460,7 +464,7 @@ void LLGroupActions::refresh(const LLUUID& group_id)
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
 	if (GV_NONE == eGroupVisibility)
 		return;
@@ -472,7 +476,7 @@ void LLGroupActions::refresh(const LLUUID& group_id)
 	params["action"] = "refresh";
 
 //	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
 	{
 		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
@@ -504,7 +508,7 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 {
 //	if(!isGroupUIVisible())
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
 	if (GV_NONE == eGroupVisibility)
 		return;
@@ -517,7 +521,7 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 
 	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	LLFloaterReg::hideInstance("floater_group_info", group_id);
 // [/SL:KB]
 }

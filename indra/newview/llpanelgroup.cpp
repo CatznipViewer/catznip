@@ -54,7 +54,7 @@
 #include "llaccordionctrl.h"
 
 #include "lltrans.h"
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -170,7 +170,7 @@ BOOL LLPanelGroup::postBuild()
 	getChild<LLButton>("btn_create")->setVisible(false);
 
 //	childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
 	if (!pParentView)
 	{
@@ -622,7 +622,7 @@ void LLPanelGroup::refreshCreatedGroup(const LLUUID& group_id)
 		return;
 //	panel->setGroupID(group_id);
 
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4.1)
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
 	if (gSavedSettings.getBOOL("ShowGroupFloaters"))
 	{
 		panel->onBackBtnClick();
@@ -650,7 +650,7 @@ void LLPanelGroup::showNotice(const std::string& subject,
 
 //	if(panel->getID() != group_id)//???? only for current group_id or switch panels? FIXME
 //		return;
-// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
 	if (panel->getID() != group_id)
 	{
 		// Group isn't open in the sidebar, check for a floater
