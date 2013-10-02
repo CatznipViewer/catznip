@@ -35,6 +35,9 @@
 
 class LLTextBox;
 class LLUICtrlFactory;
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+class LLSliderCtrl;
+// [/SL:KB]
 
 //
 // Classes
@@ -54,6 +57,9 @@ public:
 								image_level_2,
 								image_level_3;
 		Optional<bool>		auto_update;
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+		Optional<bool>		show_volume_slider;
+// [/SL:KB]
 		Optional<LLUUID>	speaker_id;
 
 		Params();
@@ -90,6 +96,9 @@ public:
 	 *		which has the same session id (EXT-5562).
 	 */
 	void			setSpeakerId(const LLUUID& speaker_id, const LLUUID& session_id = LLUUID::null, bool show_other_participants_speaking = false);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	const LLUUID&	getSpeakerId() { return mSpeakerId; }
+// [/SL:KB]
 
 	//called by mute list
 	virtual void onChange();
@@ -107,6 +116,14 @@ public:
 	virtual void	switchIndicator(bool switch_on);
     bool getIndicatorToggled() { return mIndicatorToggled;}
     void setIndicatorToggled(bool value) { mIndicatorToggled = value;}
+
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+public:
+	bool getShowVolumeSlider() const	{ return mShowVolumeSlider; }
+	void showVolumeSlider(bool show_slider);
+protected:
+	void onVolumeChange(const LLSD& sdValue);
+// [/SL:KB]
 
 private:
 
@@ -140,6 +157,11 @@ private:
 	LLPointer<LLUIImage> mImageLevel1;
 	LLPointer<LLUIImage> mImageLevel2;
 	LLPointer<LLUIImage> mImageLevel3;
+
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	bool			mShowVolumeSlider;
+	LLSliderCtrl*	mVolumeCtrl;
+// [/SL:KB]
 
 	/** whether to deal with LLVoiceClient::getInstance() directly */
 	bool			mAutoUpdate;
