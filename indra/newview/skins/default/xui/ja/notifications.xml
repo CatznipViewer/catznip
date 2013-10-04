@@ -2010,7 +2010,7 @@ L$ [AMOUNT] で、このクラシファイド広告を今すぐ公開します�
 		<usetemplate canceltext="キャンセル" name="yesnocancelbuttons" notext="いいえ" yestext="はい"/>
 	</notification>
 	<notification label="再起動を確認" name="ConfirmRestart">
-		このリージョンを 2 分後に再起動しようとしています。
+		このリージョンを [MINUTES] 分後に再起動しようとしています。
 続けますか？
 		<usetemplate name="okcancelbuttons" notext="取り消し" yestext="OK"/>
 	</notification>

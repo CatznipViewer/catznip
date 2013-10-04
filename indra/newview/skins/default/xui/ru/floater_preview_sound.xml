@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Описание:
 	</text>
+	<panel name="bottom_panel">
 	<button label="Проиграть для всех" label_selected="Проиграть для всех" name="Sound play btn" tool_tip="Воспроизведение этого звука могут слышать другие участники"/>
 	<button label="Проиграть для себя" label_selected="Проиграть для себя" name="Sound audition btn" tool_tip="Воспроизведение этого звука могу слышать только я"/>
+	</panel>
 </floater>

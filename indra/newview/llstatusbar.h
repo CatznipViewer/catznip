@@ -83,8 +83,16 @@ public:
 	S32 getSquareMetersLeft() const;
 
 	LLPanelNearByMedia* getNearbyMediaPanel() { return mPanelNearByMedia; }
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+	void				showTopInfoBar(bool fVisible);
+// [/SL:KB]
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	void onToggleBuyCurrencyButton(const LLSD& sdValue);
+	void onToggleMarketplaceButton(const LLSD& sdValue);
+	void onToggleNetStats(const LLSD& sdValue);
+// [/SL:KB]
 	
 	void onClickBuyCurrency();
 	void onVolumeChanged(const LLSD& newvalue);
@@ -97,6 +105,10 @@ private:
 	static void onClickBalance(void* data);
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	LLView		*mViewStatus;		// Contains all status bar controls
+// [/SL:KB]
+
 	LLTextBox	*mTextTime;
 
 	LLStatGraph *mSGBandwidth;

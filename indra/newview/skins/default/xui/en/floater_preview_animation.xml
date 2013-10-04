@@ -1,66 +1,76 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- height="85"
+ height="75"
  layout="topleft"
  name="preview_anim"
  help_topic="preview_anim"
  width="280">
     <floater.string
      name="Title">
-        Animation: [NAME]
+        ANIMATION : [NAME]
     </floater.string>
     <text
      type="string"
      length="1"
      follows="left|top"
-     font="SansSerif"
      height="19"
      layout="topleft"
-     left="10"
+     left="8"
+     top="22"
      name="desc txt"
-     top="25"
-     width="80">
+     width="70">
         Description:
     </text>
     <line_editor
-     border_style="line"
-     border_thickness="1"
      follows="left|top|right"
-     font="SansSerifSmall"
      height="19"
      layout="topleft"
-     left_delta="95"
+     left_pad="0"
      max_length_bytes="127"
+     top="20"
      name="desc"
-     top="19"
-     width="170" />
+     width="194" />
+  <panel
+   background_visible="false"
+   follows="left|right|bottom"
+   height="25"
+   label="bottom_panel"
+   layout="topleft"
+   left="6"
+   name="bottom_panel"
+   top_pad="4" >
     <button
-     height="20"
+     height="25"
+     image_hover_unselected="Toolbar_Left_Over"
+     image_selected="Toolbar_Left_Selected"
+     image_unselected="Toolbar_Left_Off"
      label="Play Inworld"
      label_selected="Stop"
-     layout="topleft"
-     left="10"
+     left="0"
      name="Inworld"
      tool_tip="Play this animation so that others can see it"
-     top="47"
-     width="125">
+     top="1"
+     width="133">
        <button.commit_callback
         function="PreviewAnim.Play"
         parameter="Inworld" /> 
     </button>
     <button
-     height="20"
+     height="25"
+     image_hover_unselected="Toolbar_Right_Over"
+     image_selected="Toolbar_Right_Selected"
+     image_unselected="Toolbar_Right_Off"
      label="Play Locally"
      label_selected="Stop"
-     layout="topleft"
-     left_pad="5"
+     left_pad="1"
      name="Locally"
      tool_tip="Play this animation so that only you can see it"
-     top_delta="0"
-     width="125">
+     top="1"
+     width="133">
        <button.commit_callback
         function="PreviewAnim.Play"
         parameter="Locally" /> 
     </button>
+  </panel>
 </floater>

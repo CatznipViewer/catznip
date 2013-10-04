@@ -34,7 +34,11 @@
 
 #include "llfloaterdestinations.h"
 #include "lluictrlfactory.h"
-
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-07-30 (Catznip-3.3)
+#include "llmediactrl.h"
+#include "llviewercontrol.h"
+#include "llweb.h"
+// [/SL:KB]
 
 LLFloaterDestinations::LLFloaterDestinations(const LLSD& key)
 	:	LLFloater(key)
@@ -48,6 +52,16 @@ LLFloaterDestinations::~LLFloaterDestinations()
 BOOL LLFloaterDestinations::postBuild()
 {
 	enableResizeCtrls(true, true, false);
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-07-30 (Catznip-3.3)
+	// Moved here from LLViewerWindow::initWorldUI()
+	LLMediaCtrl* pMediaCtrl = getChild<LLMediaCtrl>("destination_guide_contents");
+	pMediaCtrl->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
+	std::string url = gSavedSettings.getString("DestinationGuideURL");
+	url = LLWeb::expandURLSubstitutions(url, LLSD());
+	pMediaCtrl->navigateTo(url, "text/html");
+// [/SL:KB]
+
 	return TRUE;
 }
 

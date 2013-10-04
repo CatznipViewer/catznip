@@ -14,14 +14,21 @@
      layout="topleft"
      name="Add Friend">
         <on_click function="Avatar.GearDoToSelected" parameter="add_friend" />
-        <on_enable function="Avatar.EnableGearItem" parameter="can_add" />
+        <on_visible function="Avatar.EnableGearItem" parameter="can_add" />
     </menu_item_call>
     <menu_item_call
      label="Remove friend"
      layout="topleft"
      name="remove_friend">
         <on_click function="Avatar.GearDoToSelected" parameter="remove_friend" />
-        <on_enable function="Avatar.EnableGearItem" parameter="can_delete" />
+        <on_visible function="Avatar.EnableGearItem" parameter="can_delete" />
+    </menu_item_call>
+    <menu_item_call
+     label="Add Contact"
+     layout="topleft"
+     name="Add Contact">
+        <on_click function="Avatar.GearDoToSelected" parameter="add_contact" />
+        <on_visible function="Avatar.EnableGearItem" parameter="can_add" />
     </menu_item_call>
     <menu_item_call
      label="Offer teleport"

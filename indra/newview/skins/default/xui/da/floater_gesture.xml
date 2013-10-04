@@ -20,8 +20,8 @@
 		<button name="new_gesture_btn" tool_tip="Lav ny bevægelse"/>
 		<button name="activate_btn" tool_tip="Aktivér/Deaktivér valgte bevægelse"/>
 		<button name="del_btn" tool_tip="Slet denne bevægelse"/>
+		<button label="Redigér" name="edit_btn"/>
+		<button label="Afspil" name="play_btn"/>
+		<button label="Stop" name="stop_btn"/>
 	</panel>
-	<button label="Redigér" name="edit_btn"/>
-	<button label="Afspil" name="play_btn"/>
-	<button label="Stop" name="stop_btn"/>
 </floater>

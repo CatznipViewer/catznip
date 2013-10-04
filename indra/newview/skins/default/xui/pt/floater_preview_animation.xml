@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Descrição:
 	</text>
+	<panel name="bottom_panel">
 	<button label="Tocar inworld" label_selected="Parar" name="Inworld" tool_tip="Executar essa animação de forma que outros possam ver"/>
 	<button label="Tocar localmente" label_selected="Parar" name="Locally" tool_tip="Executar animação de forma que apenas você possa ver"/>
+	</panel>
 </floater>

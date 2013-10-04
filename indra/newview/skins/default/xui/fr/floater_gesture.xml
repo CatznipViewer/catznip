@@ -20,8 +20,8 @@
 		<button name="new_gesture_btn" tool_tip="Faire un nouveau geste"/>
 		<button name="activate_btn" tool_tip="Activer/désactiver le geste sélectionné"/>
 		<button name="del_btn" tool_tip="Supprimer ce geste"/>
+		<button label="Modifier" name="edit_btn"/>
+		<button label="Lire" name="play_btn"/>
+		<button label="Stop" name="stop_btn"/>
 	</panel>
-	<button label="Modifier" name="edit_btn"/>
-	<button label="Lire" name="play_btn"/>
-	<button label="Stop" name="stop_btn"/>
 </floater>

@@ -19,8 +19,8 @@
 		<button name="new_gesture_btn" tool_tip="Создать новый жест"/>
 		<button name="activate_btn" tool_tip="Активировать/деактивировать выбранный жест"/>
 		<button name="del_btn" tool_tip="Удалить этот жест"/>
+		<button label="Изменить" name="edit_btn"/>
+		<button label="Проиграть" name="play_btn"/>
+		<button label="Стоп" name="stop_btn"/>
 	</panel>
-	<button label="Изменить" name="edit_btn"/>
-	<button label="Проиграть" name="play_btn"/>
-	<button label="Стоп" name="stop_btn"/>
 </floater>

@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Beskrivelse:
 	</text>
+	<panel name="bottom_panel">
 	<button label="Afspil i verden" label_selected="Afspil i verden" name="Sound play btn" tool_tip="Afspil denne lyd så alle kan høre den"/>
 	<button label="Afspil lokalt" label_selected="Afspil lokalt" name="Sound audition btn" tool_tip="Afspil denne lyd så kun du kan høre den"/>
+	</panel>
 </floater>

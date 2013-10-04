@@ -1066,7 +1066,10 @@ void LLFavoritesBarCtrl::positionAndShowMenu(LLToggleableMenu* menu)
 
 	// the menu should be offset of the right edge of the window
 	// so it's no covered by buttons in the right-side toolbar.
-	LLToolBar* right_toolbar = gToolBarView->getChild<LLToolBar>("toolbar_right");
+//	LLToolBar* right_toolbar = gToolBarView->getChild<LLToolBar>("toolbar_right");
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2)
+	LLToolBar* right_toolbar = gToolBarView->getToolbar(LLToolBarView::TOOLBAR_RIGHT);
+// [/SL:KB]
 	if (right_toolbar && right_toolbar->hasButtons())
 	{
 		S32 toolbar_top = 0;
