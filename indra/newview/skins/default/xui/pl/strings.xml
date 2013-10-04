@@ -798,6 +798,24 @@
 	<string name="choose_the_directory">
 		Wybierz katalog
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Informacje o tym miejscu są obecnie niedostępne, spróbuj później.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Dostęp do informacji o tym miejscu jest ograniczony. Zweryfikuj swoje przywileje z właścicielem posiadłości.
+	</string>
+	<string name="parcel_server_update_text">
+		Informacje o tym miejscu nie będą dostępne bez aktualizacji serwera.
+	</string>
+
 	<string name="AvatarSetNotAway">
 		Ustaw Nie Śpij
 	</string>

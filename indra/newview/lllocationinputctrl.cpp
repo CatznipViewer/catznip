@@ -640,18 +640,24 @@ void LLLocationInputCtrl::onAddLandmarkButtonClicked()
 {
 	LLViewerInventoryItem* landmark = LLLandmarkActions::findLandmarkForAgentPos();
 	// Landmark exists, open it for preview and edit
-	if(landmark && landmark->getUUID().notNull())
-	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = landmark->getUUID();
-
-		LLFloaterSidePanelContainer::showPanel("places", key);
-	}
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+	if (landmark && landmark->getUUID().notNull())
+		LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
 	else
-	{
-		LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
-	}
+		LLLandmarkActions::showCreateLandmark();
+// [/SL:KB]
+//	if(landmark && landmark->getUUID().notNull())
+//	{
+//		LLSD key;
+//		key["type"] = "landmark";
+//		key["id"] = landmark->getUUID();
+//
+//		LLFloaterSidePanelContainer::showPanel("places", key);
+//	}
+//	else
+//	{
+//		LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+//	}
 }
 
 void LLLocationInputCtrl::onAgentParcelChange()
@@ -1128,15 +1134,20 @@ void LLLocationInputCtrl::onLocationContextMenuItemClicked(const LLSD& userdata)
 	{
 		LLViewerInventoryItem* landmark = LLLandmarkActions::findLandmarkForAgentPos();
 		
-		if(!landmark)
-		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
-		}
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+		if (!landmark)
+			LLLandmarkActions::showCreateLandmark();
 		else
-		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
-
-		}
+			LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//		if(!landmark)
+//		{
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+//		}
+//		else
+//		{
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
+//		}
 	}
 	else if (item == "cut")
 	{

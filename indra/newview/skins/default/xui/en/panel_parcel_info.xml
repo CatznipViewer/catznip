@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ background_visible="false"
+ follows="all"
+ height="370"
+ layout="topleft"
+ min_height="350"
+ name="panel_parcel_info"
+ width="300">
+  <!-- Parcel numbers text -->
+  <string
+   name="area_traffic_text">
+      Area: [AREA]m² - Traffic: [TRAFFIC]
+  </string>
+  <string
+   name="area_sale_text">
+      Area: [AREA]m² - For sale: [PRICE]
+  </string>
+
+      <!-- Currently set to 4:3 -->
+      <texture_picker
+       enabled="false"
+       fallback_image="default_land_picture.j2c"
+       height="195"
+       layout="topleft"
+       left="10"
+       name="parcel_snapshot"
+       show_label="false"
+       top="0"
+       width="280" />
+
+      <text
+       follows="top|left"
+       font="SansSerifLarge"
+       height="20"
+       layout="topleft"
+       left="10"
+       name="parcel_name"
+       right="-10"
+       text_color="white"
+       top="200"
+       use_ellipses="true"
+       value="Parcel name goes here" />
+      <line_editor
+       follows="top|left|right"
+       height="20"
+       layout="topleft"
+       left="10"
+       max_length_bytes="63"
+       name="parcel_name_edit"
+       prevalidate_callback="ascii"
+       right="-10"
+       text_readonly_color="white"
+       top_pad="-20"
+       visible="false" />
+      <icon
+       follows="top|left"
+       height="16"
+       image_name="transparent.j2c"
+       layout="topleft"
+       left="10"
+       name="region_maturity"
+       top_pad="2"
+       width="18" />
+      <text
+       follows="top|left"
+       height="14"
+       layout="topleft"
+       left_pad="5"
+       name="parcel_location"
+       top_delta="3"
+       use_ellipses="true"
+       value="Region (128, 128, 20)"
+       width="257" />
+      <text
+       follows="top|left"
+       height="15"
+       layout="topleft"
+       left="10"
+       name="parcel_numbers"
+       top_pad="5"
+       value="Area: 4096m² - For sale: L$5,000,000"
+       width="280" />
+      <text_editor
+       bg_readonly_color="Transparent"
+       enabled="false" 
+       follows="top|bottom"
+       height="105"
+       layout="topleft"
+       left="10"
+       max_length="65536"
+       name="parcel_description"
+       right="-10"
+       text_color="LtGray"
+       top_pad="5"
+       word_wrap="true">
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+          Dummy text replaced with the parcel description at run time
+      </text_editor>
+      <text_editor
+       enabled="true" 
+       follows="all"
+       height="105"
+       layout="topleft"
+       left="10"
+       max_length="127"
+       name="parcel_description_edit"
+       right="-10"
+       text_type="ascii_with_newline"
+       top_pad="-105"
+       visible="false"
+       word_wrap="true" />
+</panel>

@@ -1,0 +1,11 @@
+[Control/ParcelInfo]
+- added   : "show_label" parameter to the texture picker control
+- added   : parcel information control (see LLPanelParcelInfo class)
+
+[UI/ParcelInfoFloater]
+- added   : new parcel information floater to replace LL's default places information sidebar panel
+    -> controlled by "ShowPlaceFloater" to switch between new floater and old places sidepanel
+    -> show when clicking "More Info" in the web search
+    -> show to display landmark information
+- added   : "Landmark This Place" shows the new place floater to edit the name and/or description
+    -> controlled by "ShowPlaceFloater"
