@@ -133,6 +133,11 @@ BOOL LLFloaterAbout::postBuild()
 	LLViewerTextEditor *support_widget = 
 		getChild<LLViewerTextEditor>("support_editor", true);
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
+	LLViewerTextEditor *thanks_names_widget = 
+		getChild<LLViewerTextEditor>("catznip_thanks_names", true);
+// [/SL:KB]
+
 	LLViewerTextEditor *linden_names_widget = 
 		getChild<LLViewerTextEditor>("linden_names", true);
 
@@ -179,6 +184,26 @@ BOOL LLFloaterAbout::postBuild()
 	}
 	linden_names_widget->setEnabled(FALSE);
 	linden_names_widget->startOfDoc();
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-02-01 (Catznip-3.2)
+	// Get the names of people to thank, extracted from .../doc/thanks.txt by viewer_manifest.py at build time
+	std::string thanks_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, "thanks.txt");
+	llifstream thank_file;
+	std::string thanks_names;
+	thank_file.open(thanks_path);		/* Flawfinder: ignore */
+	if (thank_file.is_open())
+	{
+		std::getline(thank_file, thanks_names); // all names are on a single line
+		thank_file.close();
+	}
+	else
+	{
+		LL_WARNS("AboutInit") << "Could not read thanks file at " << thanks_path << LL_ENDL;
+	}
+	thanks_names_widget->setText(thanks_names);
+	thanks_names_widget->setEnabled(FALSE);
+	thanks_names_widget->startOfDoc();
+// [/SL:KB]
 
 	// Get the names of contributors, extracted from .../doc/contributions.txt by viewer_manifest.py at build time
 	std::string contributors_path = gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS,"contributors.txt");
@@ -233,7 +258,10 @@ LLSD LLFloaterAbout::getInfo()
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+// [/SL:KB]
+//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 	info["CHANNEL"] = LLVersionInfo::getChannel();

@@ -82,6 +82,25 @@ const std::string &LLVersionInfo::getVersion()
 	return version;
 }
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+const std::string &LLVersionInfo::getReleaseVersion()
+{
+	static std::string version("");
+
+	if (version.empty())
+	{
+		// cache the version string
+		std::ostringstream stream;
+		stream << "R" << LL_VIEWER_VERSION_MAJOR;
+		if (LL_VIEWER_VERSION_MINOR > 0)
+			stream << "." << LL_VIEWER_VERSION_MINOR;
+		version = stream.str();
+	}
+
+	return version;
+}
+// [/SL:KB]
+
 //static
 const std::string &LLVersionInfo::getShortVersion()
 {
@@ -134,7 +153,7 @@ void LLVersionInfo::resetChannel(const std::string& channel)
 	sVersionChannel.clear(); // Reset version and channel string til next use.
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 const char* getBuildPlatformString()
 {
 #if LL_WINDOWS

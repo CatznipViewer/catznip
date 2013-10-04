@@ -1307,16 +1307,16 @@ Pobrać i zapisać w folderze Aplikacji?
 		<usetemplate name="okcancelbuttons" notext="Kontynuuj" yestext="Załaduj"/>
 	</notification>
 	<notification name="FailedUpdateInstall">
-		Podczas aktualizacji pojawił się błąd. Proszę pobrać i zainstalować najnowszego klienta z http://secondlife.com/download.
+		Podczas aktualizacji pojawił się błąd. Proszę pobrać i zainstalować najnowszego klienta z http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		Nie można zainstalować wymaganej aktualizacji. Nie będzie można zalogować się dopóki [APP_NAME] nie zostanie zaktualizowana.
-				Proszę pobrać i zainstalować najnowszą wersję z http://secondlife.com/download.
+				Proszę pobrać i zainstalować najnowszą wersję z http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Rezygnuj"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
-		Istnieje obowiązkowa aktualizacja dla Second Life. Możesz ją pobrać z http://www.secondlife.com/downloads lub zainstalować teraz.
+		Istnieje obowiązkowa aktualizacja dla Second Life. Możesz ją pobrać z http://catznip.com/downloads/ lub zainstalować teraz.
 		<usetemplate name="okcancelbuttons" notext="Opuść Second Life" yestext="Pobierz i zainstaluj teraz"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -1362,8 +1362,12 @@ W celu instalacji aktualizacji musi zostać wykonany restart [APP_NAME].
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć QA Wiki" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Odwiedź [SECOND_LIFE] katalog publicznych problemów, gdzie możesz zgłaszać błędy i inne problemy.
+		Odwiedź [APP_NAME] katalog problemów, gdzie możesz zgłaszać błędy i inne problemy.
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by wysłać Błędy klienta" name="okcancelignore" notext="Anuluj" yestext="OK"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		Otwórz oficjalny blog [APP_NAME] żeby zobaczyć nowe wiadomości i informacje.
+		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć blog" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Otwórz oficjalny blog Lindenów żeby zobaczyć nowe wiadomości i informacje.
