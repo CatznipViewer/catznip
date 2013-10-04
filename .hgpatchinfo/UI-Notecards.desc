@@ -1,0 +1,24 @@
+[Control/TextEditor]
+- added   : drag-moving of the current selection in a text editor control
+- fixed   : shift-selecting text in a notecard doesn't actually select any text
+
+[UI/Notecards]
+- added   : Ctrl-F to open the Search/Replace floater for notecards
+- added   : "Search Up" checkbox on the "Search / Replace" floater
+- added   : "Open", "Copy to Inventory" and "Teleport" context menu options for embedded items
+- added   : "EmbeddedLandmarkCopyToInventory" to control whether embedded landmarks are copied to inventory before previewing
+- added   : "EmbeddedTextureStealsFocus" to control whether embedded texture previews take focus when opened
+- fixed : embedded notecards are silently copied to inventory rather than opened when 'ShowNewInventory' is set to TRUE
+- fixed   : saving a notecard in object inventory shows an empty notecard after the save completes
+- fixed   : notecard preview floater doesn't remember its position and size
+- fixed   : properly hand off the Search/Replace floater when dependant on a notecard/script preview inside of a multipreview floater
+
+[UI/Textures]
+- changed : restore the legacy behaviour of showing a texture preview at full resolution (if possible)
+- changed : changing the aspect ratio will resize the texture preview to show the texture with 1 dimension at full resolution
+- changed : layout of the texture preview floater
+    -> moved the "Aspect Ratio" combobox to the top-right corner
+    -> rearranged the options in the "Aspect Ration" combobox slight to list the more common ARs at the top
+    -> lined texture dimensions up with the "OK", "Discard" and "Save As" buttons
+    -> adjusted the spacing around the texture for a more pleasing visual look (see llpreviewtexture.cpp)
+- fixed   : embedded texture previews have a blank floater title

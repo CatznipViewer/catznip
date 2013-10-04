@@ -30,6 +30,9 @@
 #include "llpreview.h"
 #include "llassetstorage.h"
 #include "lliconctrl.h"
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+#include "llvoinventorylistener.h"
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLPreviewNotecard
@@ -39,8 +42,14 @@
 
 class LLViewerTextEditor;
 class LLButton;
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+class LLTextEditor;
+// [/SL:KB]
 
-class LLPreviewNotecard : public LLPreview
+//class LLPreviewNotecard : public LLPreview
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+class LLPreviewNotecard : public LLPreview, public LLVOInventoryListener
+// [/SL:KB]
 {
 public:
 	LLPreviewNotecard(const LLSD& key);
@@ -50,6 +59,9 @@ public:
 
 	// llview
 	virtual void draw();
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	virtual bool hasAccelerators() const { return true; }
+// [/SL:KB]
 	virtual BOOL handleKeyHere(KEY key, MASK mask);
 	virtual void setEnabled( BOOL enabled );
 
@@ -62,6 +74,9 @@ public:
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	LLTextEditor* getEditor();
+// [/SL:KB]
 
 	// return true if there is any embedded inventory.
 	bool hasEmbeddedInventory();
@@ -70,6 +85,10 @@ public:
 	// change the asset, therefore, we need to re-fetch it from the
 	// asset system. :(
 	void refreshFromInventory(const LLUUID& item_id = LLUUID::null);
+
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data);
+// [/SL:KB]
 
 protected:
 
@@ -95,7 +114,7 @@ protected:
 	bool handleSaveChangesDialog(const LLSD& notification, const LLSD& response);
 
 protected:
-	LLViewerTextEditor* mEditor;
+//	LLViewerTextEditor* mEditor;
 	LLButton* mSaveBtn;
 
 	LLUUID mAssetID;
