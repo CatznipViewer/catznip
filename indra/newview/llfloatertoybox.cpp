@@ -175,6 +175,9 @@ void LLFloaterToybox::onToolBarButtonEnter(LLView* button)
 
 		switch(command_loc)
 		{
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		case LLToolBarView::TOOLBAR_TOP:	suffix = LLTrans::getString("Toolbar_Top_Tooltip"); 	break;
+// [/SL:KB]
 		case LLToolBarView::TOOLBAR_BOTTOM:	suffix = LLTrans::getString("Toolbar_Bottom_Tooltip");	break;
 		case LLToolBarView::TOOLBAR_LEFT:	suffix = LLTrans::getString("Toolbar_Left_Tooltip");	break;
 		case LLToolBarView::TOOLBAR_RIGHT:	suffix = LLTrans::getString("Toolbar_Right_Tooltip");	break;
