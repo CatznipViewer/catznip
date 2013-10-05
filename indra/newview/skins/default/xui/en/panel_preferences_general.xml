@@ -15,10 +15,10 @@
      follows="left|top"
      height="15"
      layout="topleft"
-     left="30"
+     left="25"
      name="language_textbox"
-     top="10"
-     width="400">
+     top="20"
+     width="125">
         Language:
     </text>
     <combo_box
@@ -26,9 +26,10 @@
      follows="left|top"
      height="23"
      layout="topleft"
-     left="50"
+     left_pad="5"
      max_chars="135"
      name="language_combobox"
+     top_delta="-6"
      width="200">
         <combo_box.item
          enabled="true"
@@ -115,29 +116,20 @@
      follows="left|top"
      height="15"
      layout="topleft"
-     left="30"
-     top_pad="8"
+     left="25"
+     top_pad="12"
      name="maturity_desired_prompt"
-     width="200">
-        I want to access content rated:
-    </text>
-	<text
-     type="string"
-     length="1"
-     follows="left|top"
-     height="15"
-     layout="topleft"
-     left_pad="5"
-     name="maturity_desired_textbox"
-     width="200">
+     width="125">
+        Access content rated:
     </text>
     <combo_box
      control_name="PreferredMaturity"
      follows="left|top"
      height="23"
      layout="topleft"
-     left="50"
+     left_pad="5"
      name="maturity_desired_combobox"
+     top_delta="-6"
      width="200">
         <combo_box.item
          label="General, Moderate, Adult"
@@ -185,10 +177,10 @@
      follows="left|top"
      height="15"
      layout="topleft"
-     left="30"
+     left="25"
      name="start_location_textbox"
-     top_pad="8"
-     width="394">
+     top_pad="20"
+     width="125">
         Start location:
     </text>
     <combo_box
@@ -197,7 +189,8 @@
      height="23"
      layout="topleft"
      name="start_location_combo"
-     left="50"
+     left_pad="5"
+     top_delta="-6"
      width="200">
         <combo_box.item
          label="My Last Location"
@@ -218,25 +211,36 @@
      name="show_location_checkbox"
      top_delta="5"
      width="256" />
-   <text
+    <check_box
+     control_name="ShowFavoritesOnLogin"
+     enabled="false" 
+     height="16"
+     label="Show my Favorite Landmarks on login"
+     layout="topleft"
+     left="155"
+     name="favorites_on_login_check"
+     top_pad="7"
+     width="350" />
+	<text
     type="string"
     length="1"
     follows="left|top"
     height="15"
     layout="topleft"
-    left="30"
+    left="25"
     name="name_tags_textbox"
-    top_pad="10"
-    width="400">
+    top_pad="20"
+    width="125">
        Name tags:
    </text>
    <radio_group
      control_name="AvatarNameTagMode"
      height="20"
      layout="topleft"
-     left="35"
-     top_pad="0" 
-     name="Name_Tag_Preference">
+     left_pad="5"
+     top_delta="-1" 
+     name="Name_Tag_Preference"
+     width="225">
         <radio_item
          label="Off"
          name="radio"
@@ -263,35 +267,25 @@
          layout="topleft"
          top_delta="0"
          value="2"
-         width="160" />
+         width="75" />
     </radio_group>
     <check_box
 	 enabled_control="AvatarNameTagMode"
      control_name="RenderNameShowSelf"
      height="16"
-     label="My name"
+     label="Show my name"
      layout="topleft"
-     left="35"
+     left="155"
      name="show_my_name_checkbox1"
-	 top_pad="2"
+	 top_pad="0"
      width="100" />
-   <check_box
-     control_name="NameTagShowUsernames"
-	 enabled_control="AvatarNameTagMode"
-     height="16"
-     label="Usernames"
-     layout="topleft"
-     left_pad="50"
-     name="show_slids"
-     tool_tip="Show username, like bobsmith123"
-     top_delta="0" />
     <check_box
      control_name="NameTagShowGroupTitles"
 	 enabled_control="AvatarNameTagMode"
      height="16"
-     label="Group titles"
+     label="Show group titles"
      layout="topleft"
-     left="35"
+     left="155"
      width="100" 
      name="show_all_title_checkbox1"
 	 tool_tip="Show group titles, like Officer or Member"
@@ -305,17 +299,39 @@
      left_pad="50"
      name="show_friends"
      tool_tip="Highlight the name tags of your friends"/>     
+ 	<text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="15"
+     layout="topleft"
+     left="25"
+     name="names_textbox"
+     top_pad="3"
+     width="125">
+        Names:
+    </text>
     <check_box
 	 control_name="UseDisplayNames"
 	 follows="top|left"
 	 height="16"
 	 label="View Display Names"
 	 layout="topleft"
-	 left="35"
+	 left="155"
 	 name="display_names_check"
-	 width="237"
+	 width="100"
 	 tool_tip="Check to use display names in chat, IM, name tags, etc."
-	 top_pad="3"/>
+	 top_delta="0"/>
+   <check_box
+     control_name="NameTagShowUsernames"
+     enabled_control="AvatarNameTagMode"
+     height="16"
+     label="View Usernames"
+     layout="topleft"
+     left_pad="50"
+     name="show_slids"
+     tool_tip="Show username, like bobsmith123"
+     top_delta="0" />
 	 
 	<text
 	 type="string"
@@ -323,19 +339,20 @@
 	 follows="left|top"
 	 height="15"
 	 layout="topleft"
-	 left="30"
+	 left="25"
 	 name="inworld_typing_rg_label"
-	 top_pad="1"
-	 width="400">
+	 top_pad="20"
+	 width="125">
        Pressing letter keys:
    </text>
    <radio_group
      control_name="LetterKeysFocusChatBar" 
      height="34"
      layout="topleft"
-     left="35"
-     top_pad="0" 
-     name="inworld_typing_preference">
+     left_pad="5"
+     top_delta="0" 
+     name="inworld_typing_preference"
+     width="300">
         <radio_item
          label="Starts local chat"
          name="radio_start_chat"
@@ -347,13 +364,13 @@
          width="150" />
         <radio_item
          label="Affects movement (i.e. WASD)"
-         left="0"
+         left_pad="0"
          layout="topleft"
-         top="18" 
+         top_delta="0" 
          height="16" 
          name="radio_move"
          value="0"
-         width="75" />
+         width="150" />
     </radio_group>
     
     <text
@@ -362,19 +379,19 @@
      follows="left|top"
      height="13"
      layout="topleft"
-     left="30"
+     left="25"
      name="title_afk_text"
-     top_pad="5" 
-     width="190">
+     top_pad="10" 
+     width="125">
     	Away timeout:
     </text>
   <combo_box
+     follows="left|top"
      height="23"
      layout="topleft"
      control_name="AFKTimeout"
-     left="30"
-     label="Away timeout:"
-     top_pad="2"
+     left_pad="5"
+     top_delta="-6"
      name="afk"
      width="130">
     <combo_box.item
@@ -404,10 +421,10 @@
      follows="left|top"
      height="13"
      layout="topleft"
-     left="30"
+     left="25"
      mouse_opaque="false"
      name="text_box3"
-     top_pad="3"
+     top_pad="20"
      width="240">
        Do Not Disturb response:
     </text>
@@ -418,9 +435,9 @@
       use_ellipses="false"
      commit_on_focus_lost = "true"
      follows="left|top"
-     height="29"
+     height="45"
      layout="topleft"
-     left="30"
+     left="25"
      name="do_not_disturb_response"
      width="470"
      word_wrap="true">
