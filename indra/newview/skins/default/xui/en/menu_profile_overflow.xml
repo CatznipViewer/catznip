@@ -1,12 +1,27 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <toggleable_menu
- height="50"
  layout="topleft"
- mouse_opaque="false"
- name="profile_overflow_menu"
- width="120">
+ name="profile_overflow_menu">
     <menu_item_call
-     label="Map"
+     label="Add Friend"
+     layout="topleft"
+     name="add_friend">
+        <menu_item_call.on_click
+         function="Profile.AddFriend" />
+        <menu_item_call.on_visible
+         function="Profile.EnableAddFriend" />
+    </menu_item_call>
+    <menu_item_call
+     label="Remove Friend"
+     layout="topleft"
+     name="remove_friend">
+        <menu_item_call.on_click
+         function="Profile.RemoveFriend" />
+        <menu_item_call.on_visible
+         function="Profile.EnableRemoveFriend" />
+    </menu_item_call>
+    <menu_item_call
+     label="Show on Map"
      layout="topleft"
      name="show_on_map">
         <menu_item_call.on_click
@@ -15,69 +30,28 @@
          function="Profile.EnableShowOnMap" />
     </menu_item_call>
     <menu_item_call
-     label="Pay"
-     layout="topleft"
-     name="pay">
-        <menu_item_call.on_click
-         function="Profile.Pay" />
-    </menu_item_call>
-    <menu_item_call
      label="Share"
      layout="topleft"
      name="share">
         <menu_item_call.on_click
          function="Profile.Share" />
     </menu_item_call>
-   <menu_item_call
-   label="Block"
-   name="block">
-    <menu_item_call.on_click
-     function="Profile.BlockUnblock"/>
-    <menu_item_call.on_visible
-     function="Profile.EnableBlock" />
-  </menu_item_call>
-  <menu_item_call
-   label="Unblock"
-   name="unblock">
-    <menu_item_call.on_click
-     function="Profile.BlockUnblock"/>
-    <menu_item_call.on_visible
-     function="Profile.EnableUnblock" />
-  </menu_item_call>
-  <menu_item_call
-   label="Kick"
-   layout="topleft"
-   name="kick">
-    <menu_item_call.on_click
-     function="Profile.Kick" />
-    <menu_item_call.on_visible
-     function="Profile.EnableGod" />
-  </menu_item_call>
-  <menu_item_call
-   label="Freeze"
-   layout="topleft"
-   name="freeze">
-    <menu_item_call.on_click
-     function="Profile.Freeze" />
-    <menu_item_call.on_visible
-     function="Profile.EnableGod" />
-  </menu_item_call>
-  <menu_item_call
-   label="Unfreeze"
-   layout="topleft"
-   name="unfreeze">
-    <menu_item_call.on_click
-     function="Profile.Unfreeze" />
-    <menu_item_call.on_visible
-     function="Profile.EnableGod" />
-  </menu_item_call>
-  <menu_item_call
-   label="CSR"
-   layout="topleft"
-   name="csr">
-    <menu_item_call.on_click
-     function="Profile.CSR" />
-    <menu_item_call.on_visible
-     function="Profile.EnableGod" />
-  </menu_item_call>
+    <menu_item_call
+     label="Block"
+     layout="topleft"
+     name="block">
+        <menu_item_call.on_click
+         function="Profile.BlockUnblock"/>
+        <menu_item_call.on_visible
+         function="Profile.EnableBlock" />
+    </menu_item_call>
+    <menu_item_call
+     label="Unblock"
+     layout="topleft"
+     name="unblock">
+        <menu_item_call.on_click
+         function="Profile.BlockUnblock"/>
+        <menu_item_call.on_visible
+         function="Profile.EnableUnblock" />
+    </menu_item_call>
 </toggleable_menu>
