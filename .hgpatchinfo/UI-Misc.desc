@@ -14,7 +14,6 @@
 - added   : "Picks" menu option to the self avatar and attachment context menu
 - added   : enable drag-and-drop commit behaviour for main inventory panel, IM container floater, people sidebar panel and avatar picker floater
 - added   : share inventory by drag-and-drop'ing items onto an avatar list item (i.e. drag drop inventory on a friend in the People floater)
-- added   : [CATZ-1] Remember last used debug setting (per session only)
 - changed : don't reset the URL each time the search floater is opened
     -> "Find always resets to start page" (WEB-1819)
 - changed : "Restart Region" button to a flyout button with 2, 5 and 15 minute restart delay options
