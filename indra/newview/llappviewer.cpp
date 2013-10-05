@@ -1304,10 +1304,6 @@ bool LLAppViewer::mainLoop()
 	//LLPrivateMemoryPoolTester::getInstance()->run(true) ;
 	//LLPrivateMemoryPoolTester::destroy() ;
 
-// [SL:KB] - Patch: UI-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-	LLFastTimer::sToggleRun = gSavedSettings.getBOOL("RunFastTimers");
-// [/SL:KB]
-
 	// Handle messages
 #ifdef LL_DARWIN
 	if (!LLApp::isExiting())
@@ -1315,26 +1311,8 @@ bool LLAppViewer::mainLoop()
 	while (!LLApp::isExiting())
 #endif
 	{
-// [SL:KB] - Patch: UI-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-		if (LLFastTimer::sToggleRun)
-		{
-			LLFastTimer::sToggleRun = false;
-			LLFastTimer::sRunTimers = !LLFastTimer::sRunTimers;
-			if (LLFastTimer::sRunTimers)
-			{
-				LLFastTimer::reset();
-			}
-		}
-// [/SL:KB]
-
 		LLFastTimer _(FTM_FRAME);
-// [SL:KB] - Patch: UI-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-		if (LLFastTimer::sRunTimers)
-		{
-			LLFastTimer::nextFrame(); 
-		}
-// [/SL:KB]
-//		LLFastTimer::nextFrame(); 
+		LLFastTimer::nextFrame(); 
 
 		//clear call stack records
 		llclearcallstacks;
