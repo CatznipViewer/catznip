@@ -10664,10 +10664,32 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>FriendsNameFormat</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies name format for the friends people panel</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>FriendsSortOrder</key>
     <map>
       <key>Comment</key>
       <string>Specifies sort order for friends (0 = by name, 1 = by online status)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>NearbyPeopleNameFormat</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies name format for the nearby people panel</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -10684,7 +10706,29 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>4</integer>
+      <integer>3</integer>
+    </map>
+    <key>NearbyPeopleViewMask</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies criteria for nearby people (0x1 = range, 0x2 = current parcel, 0x4 = current region)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>7</integer>
+    </map>
+    <key>RecentPeopleNameFormat</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies name format for the recent people panel</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
     <key>RecentPeopleSortOrder</key>
     <map>
