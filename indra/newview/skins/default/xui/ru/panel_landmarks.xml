@@ -7,16 +7,12 @@
 		<accordion_tab name="tab_library" title="Библиотека"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<menu_button name="options_gear_btn" tool_tip="Показать дополнительные параметры"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="Добавить новую закладку"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<icon name="dummy_icon" width="10" />
+				<button label="Телепортация" name="teleport_btn" tool_tip="Телепортироваться в выбранную область" width="99" />
+				<button label="Карта" name="map_btn" tool_tip="Показать соответствующую область на карте мира"/>
+				<button name="profile_btn" tool_tip="Показать профиль места"/>
 				<dnd_button name="trash_btn" tool_tip="Удалить выбранную закладку"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>
