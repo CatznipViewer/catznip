@@ -1570,6 +1570,14 @@ void LLDrawPoolInvisible::render(S32 pass)
 { //render invisiprims
 	LLFastTimer t(FTM_RENDER_INVISIBLE);
   
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
+	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisible");
+	if (!s_fRenderInvisible)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	if (gPipeline.canUseVertexShaders())
 	{
 		gOcclusionProgram.bind();
@@ -1607,9 +1615,17 @@ void LLDrawPoolInvisible::endDeferredPass( S32 pass )
 
 void LLDrawPoolInvisible::renderDeferred( S32 pass )
 { //render invisiprims; this doesn't work becaue it also blocks all the post-deferred stuff
-#if 0 
+//#if 0 
 	LLFastTimer t(FTM_RENDER_INVISIBLE);
   
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
+	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisibleDeferred");
+	if (!s_fRenderInvisible)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	U32 invisi_mask = LLVertexBuffer::MAP_VERTEX;
 	glStencilMask(0);
 	glStencilOp(GL_ZERO, GL_KEEP, GL_REPLACE);
@@ -1625,5 +1641,5 @@ void LLDrawPoolInvisible::renderDeferred( S32 pass )
 		renderShiny(true);
 		endShiny(true);
 	}
-#endif
+//#endif
 }

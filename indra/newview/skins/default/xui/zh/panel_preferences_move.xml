@@ -13,7 +13,7 @@
 	<check_box label="總是使用方向鍵移動" name="arrow_keys_move_avatar_check"/>
 	<check_box label="連點按住後跑步" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		滑鼠：
+		滑鼠
 	</text>
 	<check_box label="將我顯示於第一人稱視角中" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">
