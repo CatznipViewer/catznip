@@ -188,6 +188,30 @@ public:
 public:
 	F32 mMaxWindGain; // Hack.  Public to set before fade in?
 
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	static void updateCachedSettings();
+
+	static bool s_fMuteAudio;
+	static F32  s_nLevelMaster;
+	static bool s_fMuteAmbient;
+	static F32  s_nLevelAmbient;
+	static bool s_fMuteMedia;
+	static F32  s_nLevelMedia;
+	static bool s_fMuteMusic;
+	static F32  s_nLevelMusic;
+	static bool s_fMuteSounds;
+	static F32  s_nLevelSounds;
+	static bool s_fMuteUI;
+	static F32  s_nLevelUI;
+	static bool s_fMuteVoice;
+	static F32 s_nLevelVoice;
+	static F32 s_nLevelMic;
+
+	static F32 s_nLevelDoppler;
+	static F32 s_nLevelRolloff;
+	static F32 s_nLevelUnderwaterRolloff;
+// [/SL:KB]
+
 protected:
 	virtual LLAudioBuffer *createBuffer() = 0;
 	virtual LLAudioChannel *createChannel() = 0;

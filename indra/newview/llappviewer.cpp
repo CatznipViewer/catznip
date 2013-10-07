@@ -598,6 +598,10 @@ static void settings_to_globals()
 	gDebugWindowProc = gSavedSettings.getBOOL("DebugWindowProc");
 	gShowObjectUpdates = gSavedSettings.getBOOL("ShowObjectUpdates");
 	LLWorldMapView::sMapScale = gSavedSettings.getF32("MapScale");
+
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	audio_update_settings();
+// [/SL:KB]
 }
 
 static void settings_modify()
@@ -5577,7 +5581,10 @@ void LLAppViewer::setMasterSystemAudioMute(bool mute)
 //virtual
 bool LLAppViewer::getMasterSystemAudioMute()
 {
-	return gSavedSettings.getBOOL("MuteAudio");
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	return LLAudioEngine::s_fMuteAudio;
+// [/SL:KB]
+//	return gSavedSettings.getBOOL("MuteAudio");
 }
 
 //----------------------------------------------------------------------------
