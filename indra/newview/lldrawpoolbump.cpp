@@ -199,7 +199,10 @@ void LLDrawPoolBump::prerender()
 // static
 S32 LLDrawPoolBump::numBumpPasses()
 {
-	if (gSavedSettings.getBOOL("RenderObjectBump"))
+//	if (gSavedSettings.getBOOL("RenderObjectBump"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::sRenderBump)
+// [/SL:KB]
 	{
 		if (mVertexShaderLevel > 1)
 		{
@@ -807,7 +810,10 @@ void LLDrawPoolBump::endBump(U32 pass)
 
 S32 LLDrawPoolBump::getNumDeferredPasses()
 { 
-	if (gSavedSettings.getBOOL("RenderObjectBump"))
+//	if (gSavedSettings.getBOOL("RenderObjectBump"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::sRenderBump)
+// [/SL:KB]
 	{
 		return 1;
 	}
