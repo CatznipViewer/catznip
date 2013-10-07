@@ -365,6 +365,10 @@ static bool handleResetVertexBuffersChanged(const LLSD&)
 
 static bool handleRepartition(const LLSD&)
 {
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	LLVOVolume::updateCachedSettings();
+// [/SL:KB]
+
 	if (gPipeline.isInit())
 	{
 		gOctreeMaxCapacity = gSavedSettings.getU32("OctreeMaxNodeCapacity");
