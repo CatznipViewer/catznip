@@ -2386,7 +2386,10 @@ void LLViewerWindow::draw()
 
 	//S32 screen_x, screen_y;
 
-	if (!gSavedSettings.getBOOL("RenderUIBuffer"))
+//	if (!gSavedSettings.getBOOL("RenderUIBuffer"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (!LLPipeline::RenderUIBuffer)
+// [/SL:KB]
 	{
 		LLUI::sDirtyRect = getWindowRectScaled();
 	}
@@ -2851,17 +2854,17 @@ void LLViewerWindow::updateUI()
 
 	static std::string last_handle_msg;
 
-	if (gLoggedInTime.getStarted())
-	{
-		if (gLoggedInTime.getElapsedTimeF32() > gSavedSettings.getF32("DestinationGuideHintTimeout"))
-		{
-			LLFirstUse::notUsingDestinationGuide();
-		}
-		if (gLoggedInTime.getElapsedTimeF32() > gSavedSettings.getF32("SidePanelHintTimeout"))
-		{
-			LLFirstUse::notUsingSidePanel();
-		}
-	}
+//	if (gLoggedInTime.getStarted())
+//	{
+//		if (gLoggedInTime.getElapsedTimeF32() > gSavedSettings.getF32("DestinationGuideHintTimeout"))
+//		{
+//			LLFirstUse::notUsingDestinationGuide();
+//		}
+//		if (gLoggedInTime.getElapsedTimeF32() > gSavedSettings.getF32("SidePanelHintTimeout"))
+//		{
+//			LLFirstUse::notUsingSidePanel();
+//		}
+//	}
 
 	LLConsole::updateClass();
 
@@ -3272,7 +3275,10 @@ void LLViewerWindow::updateLayout()
 			MASK	mask = gKeyboard->currentMask(TRUE);
 			gFloaterTools->updatePopup( select_center_screen, mask );
 		}
-		else
+//		else
+// [SL:KB]
+		else if (gFloaterTools->getVisible())
+// [/SL:KB]
 		{
 			gFloaterTools->setVisible(FALSE);
 		}

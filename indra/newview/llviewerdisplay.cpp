@@ -1470,7 +1470,10 @@ void render_ui_2d()
 	}
 	
 
-	if (gSavedSettings.getBOOL("RenderUIBuffer"))
+//	if (gSavedSettings.getBOOL("RenderUIBuffer"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::RenderUIBuffer)
+// [/SL:KB]
 	{
 		if (LLUI::sDirty)
 		{

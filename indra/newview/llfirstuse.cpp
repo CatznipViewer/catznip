@@ -103,18 +103,18 @@ void LLFirstUse::useSandbox()
 }
 
 // static
-void LLFirstUse::notUsingDestinationGuide(bool enable)
-{
-	// not doing this yet
-	firstUseNotification("FirstNotUseDestinationGuide", enable, "HintDestinationGuide", LLSD(), LLSD().with("target", "dest_guide_btn").with("direction", "top"));
-}
+//void LLFirstUse::notUsingDestinationGuide(bool enable)
+//{
+//	// not doing this yet
+//	firstUseNotification("FirstNotUseDestinationGuide", enable, "HintDestinationGuide", LLSD(), LLSD().with("target", "dest_guide_btn").with("direction", "top"));
+//}
 
 // static
-void LLFirstUse::notUsingSidePanel(bool enable)
-{
-	// not doing this yet
-	//firstUseNotification("FirstNotUseSidePanel", enable, "HintSidePanel", LLSD(), LLSD().with("target", "side_panel_btn").with("direction", "left"));
-}
+//void LLFirstUse::notUsingSidePanel(bool enable)
+//{
+//	// not doing this yet
+//	//firstUseNotification("FirstNotUseSidePanel", enable, "HintSidePanel", LLSD(), LLSD().with("target", "side_panel_btn").with("direction", "left"));
+//}
 
 // static
 void LLFirstUse::notMoving(bool enable)
