@@ -59,9 +59,19 @@ public:
 	/*virtual*/ void minimize();
 	/*virtual*/ void restore();
 	/*virtual*/ BOOL getFullscreen();
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-04-13 (Catznip-2.0)
+	/*virtual*/ BOOL getFullscreenWindow() { return FALSE; }
+	/*virtual*/ void setFullscreenWindow(BOOL fFullscreen) {}
+// [/SL:KB]
 	/*virtual*/ BOOL getPosition(LLCoordScreen *position);
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
+	/*virtual*/ BOOL getRestoredPosition(LLCoordScreen *position) { return getPosition(position); }
+// [/SL:KB]
 	/*virtual*/ BOOL getSize(LLCoordScreen *size);
 	/*virtual*/ BOOL getSize(LLCoordWindow *size);
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
+	/*virtual*/ BOOL getRestoredSize(LLCoordScreen *size) { return getSize(size); }
+// [/SL:KB]
 	/*virtual*/ BOOL setPosition(LLCoordScreen position);
 	/*virtual*/ BOOL setSizeImpl(LLCoordScreen size);
 	/*virtual*/ BOOL setSizeImpl(LLCoordWindow size);
