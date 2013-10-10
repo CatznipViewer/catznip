@@ -201,9 +201,16 @@ std::string build_notice_date(const U32& the_time)
 		time(&t);
 	}
 	
-	std::string dateStr = "["+LLTrans::getString("LTimeMthNum")+"]/["
-								+LLTrans::getString("LTimeDay")+"]/["
-								+LLTrans::getString("LTimeYear")+"]";
+//	std::string dateStr = "["+LLTrans::getString("LTimeMthNum")+"]/["
+//								+LLTrans::getString("LTimeDay")+"]/["
+//								+LLTrans::getString("LTimeYear")+"]";
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+	std::string dateStr = "["+LLTrans::getString("TimeMonth")+"]/["
+								+LLTrans::getString("TimeDay")+"]/["
+								+LLTrans::getString("TimeYear")+"] ["
+								+LLTrans::getString("TimeHour")+"]:["
+								+LLTrans::getString("TimeMin")+"]";
+// [/SL:KB]
 	LLSD substitution;
 	substitution["datetime"] = (S32) t;
 	LLStringUtil::format (dateStr, substitution);

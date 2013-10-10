@@ -134,7 +134,7 @@ public:
 	static boost::signals2::connection setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb);
 	static floater_showed_signal_t sIMFloaterShowedSignal;
 
-	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
+//	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
 	S32 getLastChatMessageIndex() {return mLastMessageIndex;}
 private:
 
@@ -186,7 +186,7 @@ private:
 	bool mShouldSendTypingState;
 	LLFrameTimer mTypingTimer;
 	LLFrameTimer mTypingTimeoutTimer;
-	bool mSessionNameUpdatedForTyping;
+//	bool mSessionNameUpdatedForTyping;
 
 	bool mSessionInitialized;
 	LLSD mQueuedMsgsForInit;
