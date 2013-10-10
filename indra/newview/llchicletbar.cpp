@@ -53,6 +53,9 @@ namespace
 
 LLChicletBar::LLChicletBar(const LLSD&)
 :	mChicletPanel(NULL),
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	mAlignment(ALIGN_TOP),
+// [/SL:KB]
 	mToolbarStack(NULL)
 {
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)

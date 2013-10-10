@@ -107,9 +107,15 @@ public:
 	std::vector<ChannelElem>& getChannelList() { return mChannelList;}
 private:
 
-	LLScreenChannel* createChannel(LLScreenChannelBase::Params& p);
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	template <class T> T* createChannel(LLScreenChannelBase::Params& p);
+// [/SL:KB]
+//	LLScreenChannel* createChannel(LLScreenChannelBase::Params& p);
 
-	LLScreenChannel*			mStartUpChannel;
+//	LLScreenChannel*			mStartUpChannel;
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	LLHandle<LLScreenChannelBase> mStartUpChannel;
+// [/SL:KB]
 	std::vector<ChannelElem>	mChannelList;
 };
 
