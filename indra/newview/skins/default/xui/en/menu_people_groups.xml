@@ -42,6 +42,16 @@
      function="People.Groups.Enable"
      parameter="call" />
   </menu_item_call>
+  <menu_item_call
+   label="Copy SLurl"
+   name="Copy SLurl">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="copy_slurl" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="copy_slurl" />
+  </menu_item_call>
   <menu_item_separator />
   <menu_item_call
    label="Leave"

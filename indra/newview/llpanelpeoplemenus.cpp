@@ -72,6 +72,9 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.ShowOnMap",		boost::bind(&LLAvatarActions::showOnMap,				id));
 		registrar.add("Avatar.Share",			boost::bind(&LLAvatarActions::share,					id));
 		registrar.add("Avatar.Pay",				boost::bind(&LLAvatarActions::pay,						id));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+		registrar.add("Avatar.Copy",			boost::bind(&LLAvatarActions::copyToClipboard,			id, _2));
+// [/SL:KB]
 		registrar.add("Avatar.BlockUnblock",	boost::bind(&LLAvatarActions::toggleBlock,				id));
 		registrar.add("Avatar.InviteToGroup",	boost::bind(&LLAvatarActions::inviteToGroup,			id));
 		registrar.add("Avatar.Calllog",			boost::bind(&LLAvatarActions::viewChatHistory,			id));
@@ -136,6 +139,9 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("share"));
 		items.push_back(std::string("pay"));
 		items.push_back(std::string("block_unblock"));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		items.push_back("avatar_copy");
+// [/SL:KB]
 	}
 
     hide_context_entries(menu, items, disabled_items);
@@ -296,6 +302,9 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("share"));
 		items.push_back(std::string("pay"));
 		items.push_back(std::string("block_unblock"));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		items.push_back("avatar_copy");
+// [/SL:KB]
 	}
 
     hide_context_entries(menu, items, disabled_items);

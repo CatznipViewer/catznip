@@ -82,7 +82,10 @@ namespace LLAvatarNameCache
 	LLFrameTimer sRequestTimer;
 
     // Maximum time an unrefreshed cache entry is allowed.
-    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6)
+    const F64 MAX_UNREFRESHED_TIME = 90.0 * 60.0;
+// [/SL:KB]
+//    const F64 MAX_UNREFRESHED_TIME = 20.0 * 60.0;
 
     // Time when unrefreshed cached names were checked last.
     static F64 sLastExpireCheck;
@@ -191,7 +194,10 @@ public:
 		F64 expires = LLAvatarNameCache::nameExpirationFromHeaders(mHeaders);
 		F64 now = LLFrameTimer::getTotalSeconds();
 
-		LLSD agents = content["agents"];
+//		LLSD agents = content["agents"];
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6)
+		const LLSD& agents = content["agents"];
+// [/SL:KB]
 		LLSD::array_const_iterator it = agents.beginArray();
 		for ( ; it != agents.endArray(); ++it)
 		{
@@ -212,7 +218,10 @@ public:
 		}
 
 		// Same logic as error response case
-		LLSD unresolved_agents = content["bad_ids"];
+//		LLSD unresolved_agents = content["bad_ids"];
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6)
+		const LLSD& unresolved_agents = content["bad_ids"];
+// [/SL:KB]
 		S32  num_unresolved = unresolved_agents.size();
 		if (num_unresolved > 0)
 		{
@@ -287,7 +296,15 @@ void LLAvatarNameCache::handleAgentError(const LLUUID& agent_id)
 void LLAvatarNameCache::processName(const LLUUID& agent_id, const LLAvatarName& av_name)
 {
 	// Add to the cache
-	sCache[agent_id] = av_name;
+//	sCache[agent_id] = av_name;
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2010-12-28 (Catznip-2.4)
+	// Don't replace existing entries with dummies
+	cache_t::iterator itName = (av_name.isTemporaryName()) ? sCache.find(agent_id) : sCache.end();
+	if (sCache.end() != itName)
+		itName->second.mExpires = av_name.mExpires;
+	else
+		sCache[agent_id] = av_name;
+// [/SL:KB]
 
 	// Suppress request from the queue
 	sPendingQueue.erase(agent_id);
@@ -636,12 +653,22 @@ LLAvatarNameCache::callback_connection_t LLAvatarNameCache::get(const LLUUID& ag
 		{
 			const LLAvatarName& av_name = it->second;
 			
-			if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2011-05-31 (Catznip-2.6)
+			// Don't wait for the lookup before firing the callback if we have a valid cached entry
+			if ( (!av_name.isTemporaryName()) && (av_name.mExpires > (LLFrameTimer::getTotalSeconds() - MAX_UNREFRESHED_TIME)) )
 			{
-				// ...name already exists in cache, fire callback now
+				if ( (av_name.mExpires < LLFrameTimer::getTotalSeconds()) && (!isRequestPending(agent_id)) )
+					sAskQueue.insert(agent_id);
 				fireSignal(agent_id, slot, av_name);
 				return connection;
 			}
+// [/SL:KB]
+//			if (av_name.mExpires > LLFrameTimer::getTotalSeconds())
+//			{
+//				// ...name already exists in cache, fire callback now
+//				fireSignal(agent_id, slot, av_name);
+//				return connection;
+//			}
 		}
 	}
 

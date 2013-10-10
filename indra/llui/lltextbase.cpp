@@ -1948,6 +1948,9 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, url));
 	registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, url));
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
+	registrar.add("Url.Copy", boost::bind(&LLUrlAction::copyToClipboard, url, _2));
+// [/SL:KB]
 	registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, url));
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
 
