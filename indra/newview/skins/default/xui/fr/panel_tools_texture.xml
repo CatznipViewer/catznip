@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Cliquez pour ouvrir le sélecteur de couleurs"/>
 	<text name="color trans">
-		% de transparence
+		Alpha %
 	</text>
 	<text name="glow label">
 		Rayonnement
