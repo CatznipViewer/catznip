@@ -3,6 +3,7 @@
   <bottom_toolbar
     button_display_mode="icons_with_text">
     <command name="chat"/>
+    <command name="conversations"/>
     <command name="speak"/>
     <command name="destinations"/>
     <command name="people"/>
