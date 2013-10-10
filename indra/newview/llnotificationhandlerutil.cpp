@@ -35,6 +35,9 @@
 
 #include "llagent.h"
 #include "llfloaterimsession.h"
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+#include "llavatarnamecache.h"
+// [/SL:KB]
 #include "llimview.h"
 #include "llfloaterimnearbychat.h"
 #include "llnotificationhandler.h"
@@ -72,7 +75,10 @@ bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
 
 // static
 void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
-		const std::string& session_name, const std::string& from_name,
+//		const std::string& session_name, const std::string& from_name,
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		const std::string& file_name, const std::string& from_name,
+// [/SL:KB]
 		const std::string& message, const LLUUID& session_owner_id,
 		const LLUUID& from_id)
 {
@@ -96,8 +102,12 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 
 		// Build a new format username or firstname_lastname for legacy names
 		// to use it for a history log filename.
-		std::string user_name = LLCacheName::buildUsername(session_name);
-		LLIMModel::instance().logToFile(user_name, from, from_id, message);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLIMModel::instance().logToFile(file_name, from, from_id, message);
+// [/SL:KB]
+//		std::string user_name = LLCacheName::buildUsername(session_name);
+//		LLIMModel::instance().logToFile(user_name, from, from_id, message);
+
 	}
 	else
 	{
@@ -114,13 +124,24 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 	}
 }
 
-void log_name_callback(const std::string& full_name, const std::string& from_name, 
-					   const std::string& message, const LLUUID& from_id)
-
+//void log_name_callback(const std::string& full_name, const std::string& from_name, 
+//					   const std::string& message, const LLUUID& from_id)
+//
+//{
+//	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
+//					from_id, LLUUID());
+//}
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name,
+					   const std::string& from_name, const std::string& message, const LLUUID& from_id)
 {
-	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
-					from_id, LLUUID());
+	std::string strFilename;
+	if (LLIMModel::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(), strFilename))
+	{
+		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, strFilename, from_name, message, from_id, LLUUID());
+	}
 }
+// [/SL:KB]
 
 // static
 void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_file_only)
@@ -141,11 +162,17 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	if(to_file_only)
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, "", notification->getMessage(), LLUUID()));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
 	}
 	else
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 	}
 }
 
