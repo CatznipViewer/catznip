@@ -213,7 +213,7 @@ public:
 
 // [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
 public:
-	void			setContextMenu(LLContextMenu* pMenu);
+	void			setContextMenu(LLContextMenu* pMenu, bool fTakeOwnership);
 // [/SL:KB]
 protected:
 	void			showContextMenu(S32 x, S32 y);
@@ -350,6 +350,7 @@ private:
 
 // [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
 	LLHandle<LLContextMenu> mDefaultMenuHandle;
+	bool                    mContextMenuOwned;		// TRUE if this instance owns the context menu handle
 	LLHandle<LLContextMenu> mContextMenuHandle;
 // [/SL:KB]
 //	LLContextMenu* mContextMenu;

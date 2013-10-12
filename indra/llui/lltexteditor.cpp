@@ -262,8 +262,7 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	mTabsToNextField(p.ignore_tab),
 	mPrevalidateFunc(p.prevalidate_callback()),
 // [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
-	mDefaultMenuHandle(),
-	mContextMenuHandle(),
+	mContextMenuOwned(false),
 // [/SL:KB]
 //	mContextMenu(NULL),
 	mShowContextMenu(p.show_context_menu),
@@ -321,7 +320,7 @@ LLTextEditor::~LLTextEditor()
 	{
 		mDefaultMenuHandle.get()->die();
 	}
-	if (!mContextMenuHandle.isDead())
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
 	{
 		mContextMenuHandle.get()->die();
 	}
@@ -2031,12 +2030,22 @@ void LLTextEditor::setEnabled(BOOL enabled)
 }
 
 // [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
-void LLTextEditor::setContextMenu(LLContextMenu* pMenu)
+void LLTextEditor::setContextMenu(LLContextMenu* pMenu, bool fTakeOwnership)
 {
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
+	{
+		mContextMenuHandle.get()->die();
+	}
+
 	if (pMenu)
+	{
 		mContextMenuHandle = pMenu->getHandle();
+		mContextMenuOwned = fTakeOwnership;
+	}
 	else
+	{
 		mContextMenuHandle.markDead();
+	}
 }
 // [/SL:KB]
 

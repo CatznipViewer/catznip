@@ -158,9 +158,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mPreeditBgColor(p.preedit_bg_color()),
 	mGLFont(p.font),
 // [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
-	mDefaultMenuHandle(),
+	mContextMenuOwned(false)
 // [/SL:KB]
-	mContextMenuHandle()
+//	mContextMenuHandle()
 {
 	llassert( mMaxLengthBytes > 0 );
 
@@ -212,7 +212,7 @@ LLLineEditor::~LLLineEditor()
 	{
 		mDefaultMenuHandle.get()->die();
 	}
-	if (!mContextMenuHandle.isDead())
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
 	{
 		mContextMenuHandle.get()->die();
 	}
@@ -2673,13 +2673,32 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 	}
 }
 
-void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu)
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu, bool fTakeOwnership)
 {
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
+	{
+		mContextMenuHandle.get()->die();
+	}
+
 	if (new_context_menu)
+	{
 		mContextMenuHandle = new_context_menu->getHandle();
+		mContextMenuOwned = fTakeOwnership;
+	}
 	else
+	{
 		mContextMenuHandle.markDead();
+	}
 }
+// [/SL:KB]
+//void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu)
+//{
+//	if (new_context_menu)
+//		mContextMenuHandle = new_context_menu->getHandle();
+//	else
+//		mContextMenuHandle.markDead();
+//}
 
 void LLLineEditor::setFont(const LLFontGL* font)
 {
