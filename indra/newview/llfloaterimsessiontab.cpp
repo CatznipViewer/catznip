@@ -301,12 +301,18 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	
 	mChatHistory = getChild<LLChatHistory>("chat_history");
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
-	mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()));
+	if (isNearbyChat())
+	{
+		mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()));
+	}
 // [/SL:KB]
 
 	mInputEditor = getChild<LLChatEntry>("chat_editor");
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
-	mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()));
+	if (isNearbyChat())
+	{
+		mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()));
+	}
 // [/SL:KB]
 
 	mChatLayoutPanel = getChild<LLLayoutPanel>("chat_layout_panel");
