@@ -59,6 +59,16 @@ public:
 
 	static void showPanel(const std::string& floater_name, const std::string& panel_name, const LLSD& key);
 	
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-10-13 (Catznip-3.4)
+	static LLPanel* findPanel(const std::string& floater_name, const std::string& panel_name = sMainPanelName);
+
+	template <typename T>
+	static T* findPanel(const std::string& floater_name, const std::string& panel_name = sMainPanelName)
+	{
+		return dynamic_cast<T*>(findPanel(floater_name, panel_name));
+	}
+// [/SL:KB]
+
 	static LLPanel* getPanel(const std::string& floater_name, const std::string& panel_name = sMainPanelName);
 	
 	/**
