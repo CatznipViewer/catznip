@@ -381,7 +381,7 @@ static EGroupVisibility getGroupVisible(const LLUUID& idGroup)
 	static LLPanelGroup* s_pPanelGroupInfo = NULL;
 	if (!s_pPanelGroupInfo)
 	{
-		s_pPanelGroupInfo = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
+		s_pPanelGroupInfo = LLFloaterSidePanelContainer::findPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
 	}
 	return ( (s_pPanelGroupInfo) && (s_pPanelGroupInfo->isInVisibleChain()) && (idGroup == s_pPanelGroupInfo->getID()) ) ? GV_SIDEPANEL : GV_NONE;
 }

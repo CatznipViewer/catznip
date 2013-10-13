@@ -122,6 +122,14 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 	}
 }
 
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-10-13 (Catznip-3.4)
+LLPanel* LLFloaterSidePanelContainer::findPanel(const std::string& floater_name, const std::string& panel_name)
+{
+	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::findTypedInstance<LLFloaterSidePanelContainer>(floater_name);
+	return (floaterp) ? floaterp->findChild<LLPanel>(panel_name, true) : NULL;
+}
+// [/SL:KB]
+
 LLPanel* LLFloaterSidePanelContainer::getPanel(const std::string& floater_name, const std::string& panel_name)
 {
 	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::getTypedInstance<LLFloaterSidePanelContainer>(floater_name);
