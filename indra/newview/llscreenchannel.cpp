@@ -615,6 +615,9 @@ void LLScreenChannel::showToastsBottom()
 	updateRect();
 
 	LLDockableFloater* floater = dynamic_cast<LLDockableFloater*>(LLDockableFloater::getInstanceHandle().get());
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+	LLDockControl::DocAt dock_side = (floater) && (floater->getDockControl()) ? floater->getDockControl()->getDockAt() : LLDockControl::TOP;
+// [/SL:KB]
 
 	// Use a local variable instead of mToastList.
 	// mToastList can be modified during recursive calls and then all iteratos will be invalidated.
@@ -651,7 +654,10 @@ void LLScreenChannel::showToastsBottom()
 				toast_rect.getHeight());
 		toast->setRect(toast_rect);
 
-		if(floater && floater->overlapsScreenChannel())
+//		if(floater && floater->overlapsScreenChannel())
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (floater) && (floater->overlapsScreenChannel()) && (LLDockControl::TOP == dock_side) )
+// [/SL:KB]
 		{
 			if(it == vToastList.rbegin())
 			{
@@ -781,6 +787,9 @@ void LLScreenChannel::showToastsTop()
 	updateRect();
 
 	LLDockableFloater* floater = dynamic_cast<LLDockableFloater*>(LLDockableFloater::getInstanceHandle().get());
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+	LLDockControl::DocAt dock_side = (floater) && (floater->getDockControl()) ? floater->getDockControl()->getDockAt() : LLDockControl::BOTTOM;
+// [/SL:KB]
 
 	// Use a local variable instead of mToastList.
 	// mToastList can be modified during recursive calls and then all iteratos will be invalidated.
@@ -814,7 +823,10 @@ void LLScreenChannel::showToastsTop()
 			toast_rect.getHeight());
 		toast->setRect(toast_rect);
 
-		if(floater && floater->overlapsScreenChannel())
+//		if(floater && floater->overlapsScreenChannel())
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (floater) && (floater->overlapsScreenChannel()) && (LLDockControl::BOTTOM == dock_side) )
+// [/SL:KB]
 		{
 			if(it == vToastList.rbegin())
 			{
