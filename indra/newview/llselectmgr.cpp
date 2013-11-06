@@ -979,8 +979,13 @@ void LLSelectMgr::highlightObjectOnly(LLViewerObject* objectp)
 		return;
 	}
 	
-	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) 
-		|| (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())))
+//	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) 
+//		|| (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())))
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+	if ( (gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) || 
+	     (gSavedSettings.getBOOL("SelectCopiableOnly") && !objectp->permCopy()) || 
+	     (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())) )
+// [/SL:KB]
 	{
 		// only select my own objects
 		return;
@@ -6775,8 +6780,13 @@ BOOL LLSelectMgr::canSelectObject(LLViewerObject* object)
 		return TRUE;
 	}
 
-	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
-		(gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())))
+//	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
+//		(gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())))
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+	if ( (gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
+	     (gSavedSettings.getBOOL("SelectCopiableOnly") && !object->permCopy()) || 
+	     (gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())) )
+// [/SL:KB]
 	{
 		// only select my own objects
 		return FALSE;
