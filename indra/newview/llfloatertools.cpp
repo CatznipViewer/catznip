@@ -245,6 +245,10 @@ BOOL	LLFloaterTools::postBuild()
 	
 	mCheckSelectIndividual	= getChild<LLCheckBoxCtrl>("checkbox edit linked parts");	
 	getChild<LLUICtrl>("checkbox edit linked parts")->setValue((BOOL)gSavedSettings.getBOOL("EditLinkedParts"));
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	mTextSelection      = getChild<LLTextBox>("selection options");
+	mBtnSelectionOptions= getChild<LLButton>("selection options button");
+// [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 	mCheckAxisAtRoot		= getChild<LLCheckBoxCtrl>("checkbox axis at root");
 	mBtnAxisOptions			= getChild<LLButton>("Axis Options...");
@@ -331,6 +335,10 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCheckSelectIndividual(NULL),
 
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	mTextSelection(NULL),
+	mBtnSelectionOptions(NULL),
+// [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 	mCheckAxisAtRoot(NULL),
 	mBtnAxisOptions(NULL),
@@ -397,6 +405,9 @@ LLFloaterTools::LLFloaterTools(const LLSD& key)
 
 	mCommitCallbackRegistrar.add("BuildTool.gridMode",			boost::bind(&commit_grid_mode,_1));
 	mCommitCallbackRegistrar.add("BuildTool.selectComponent",	boost::bind(&commit_select_component, this));
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("BuildTool.selectOptions",		boost::bind(&LLFloaterTools::onClickSelectOptions,this));
+// [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 	mCommitCallbackRegistrar.add("BuildTool.axisOptions",		boost::bind(&LLFloaterTools::onClickAxisOptions,this));
 // [/SL:KB]
@@ -700,9 +711,17 @@ void LLFloaterTools::updatePopup(LLCoordGL center, MASK mask)
 		mRadioGroupEdit->setValue("radio select face");
 	}
 
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	if (mTextSelection)
+		mTextSelection->setVisible(edit_visible /*|| tool == LLToolGrab::getInstance()*/);
+	if (mBtnSelectionOptions)
+		mBtnSelectionOptions->setVisible(edit_visible /*|| tool == LLToolGrab::getInstance()*/);
+// [/SL:KB]
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
-	if (mCheckAxisAtRoot) mCheckAxisAtRoot->setVisible(edit_visible /* || tool == LLToolGrab::getInstance() */);
-	if (mBtnAxisOptions) mBtnAxisOptions->setVisible( edit_visible /* || tool == LLToolGrab::getInstance() */ );
+	if (mCheckAxisAtRoot)
+		mCheckAxisAtRoot->setVisible(edit_visible /*|| tool == LLToolGrab::getInstance()*/);
+	if (mBtnAxisOptions)
+		mBtnAxisOptions->setVisible(edit_visible /*|| tool == LLToolGrab::getInstance()*/);
 // [/SL:KB]
 
 	if (mComboGridMode) 
@@ -1082,6 +1101,17 @@ void LLFloaterTools::setGridMode(S32 mode)
 
 	tools_floater->mComboGridMode->setCurrentByIndex(mode);
 }
+
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+void LLFloaterTools::onClickSelectOptions()
+{
+	LLFloater* pSelectionFloater = LLFloaterReg::showInstance("build_options_selection");
+	if ( (pSelectionFloater) && (!isDependentFloater(pSelectionFloater)) )
+	{
+		addDependentFloater(pSelectionFloater, TRUE);
+	}
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 void LLFloaterTools::onClickAxisOptions()

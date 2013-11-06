@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  positioning="cascading"
- legacy_header_height="18"
+ header_height="0"
  height="600"
  layout="topleft"
  bg_opaque_image="Window_NoTitle_Foreground"
@@ -84,6 +84,7 @@
      left="10"
      name="button focus"
      tool_tip="Focus"
+     top="5"
      width="35">
 	  <button.commit_callback
 	     function="BuildTool.setTool"
@@ -293,27 +294,41 @@
 	     function="BuildTool.UnlinkObjects"/>
     </button>
 -->
-    <check_box
-     control_name="ScaleUniform"
-     height="19"
-     label=""
-     layout="topleft"
-     left="143"
-     name="checkbox uniform"
-     top="48"
-     width="20" />
     <text
      height="19"
-     label="Stretch Both Sides"
-     left_delta="20"
-     name="checkbox uniform label"
-     top_delta="2"
+     left="164"
+     name="selection options"
+     top="47"
      width="120"
      layout="topleft"
      follows="top|left"
      wrap="true">
-     	Stretch Both Sides
+        Selection options
     </text>
+    <button
+     left="259"
+     label=""
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="selection options button"
+     tool_tip="See more selection options"
+     top_delta="-3"
+     width="25"
+     height="19">
+        <button.commit_callback
+         function="BuildTool.selectOptions"/>
+    </button>
+    <check_box
+     control_name="ScaleUniform"
+     height="19"
+     label="Stretch Both Sides"
+     layout="topleft"
+     left="143"
+     name="checkbox uniform"
+     top_pad="-3"
+     width="20" />
     <check_box
      control_name="ScaleStretchTextures"
      height="19"
@@ -322,17 +337,17 @@
      layout="topleft"
      left="143"
      name="checkbox stretch textures"
-     top_pad="-4"
+     top_pad="-3"
      follows="left|top"
      width="134" />
     <check_box
      control_name="AxisAtRootEnabled"
-     height="18"
+     height="19"
      initial_value="false"
      label="Axis at Root"
      layout="topleft"
      left="143"
-     top_pad="-2"
+     top_pad="-3"
      name="checkbox axis at root"
      width="134" />
     <button
@@ -343,20 +358,20 @@
      follows="top|left"
      name="Axis Options..."
      tool_tip="See more axis options"
-     top_delta="-2"
+     top_delta="0"
      width="25"
-     height="20" >
+     height="19" >
         <button.commit_callback
          function="BuildTool.axisOptions"/>
     </button>
     <check_box
      control_name="SnapEnabled"
-     height="18"
+     height="19"
      initial_value="true"
      label="Snap to grid"
      layout="topleft"
      left="143"
-     top_pad="1"
+     top_pad="-3"
      name="checkbox snap to grid"
      width="134" />
   <button
@@ -368,9 +383,9 @@
      follows="top|left"
      name="Options..."
      tool_tip="See more grid options"
-     top_delta="-2"
+     top_delta="0"
      width="25"
-     height="20" >
+     height="19" >
 	 <button.commit_callback
 	     function="BuildTool.gridOptions"/>
 	</button>
@@ -381,7 +396,7 @@
       name="combobox grid mode"
       tool_tip="Choose the type of grid ruler for positioning the object"
       left="162"
-      top_pad="3"
+      top_pad="0"
       width="90">
       <combo_box.item
       label="World"

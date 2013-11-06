@@ -57,6 +57,32 @@ private:
 	LLObjectSelectionHandle	mObjectSelection;
 };
 
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+//
+// LLFloaterSelectionOptions
+//
+
+class LLFloaterSelectionOptions : public LLFloater
+{
+	friend class LLFloaterReg;
+protected:
+	LLFloaterSelectionOptions(const LLSD& sdKey);
+public:
+	/*virtual*/ ~LLFloaterSelectionOptions();
+
+public:
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool fQuiting);
+	/*virtual*/ BOOL postBuild();
+	            void refresh();
+protected:
+	void onToggleHiddenSelection(const LLSD& sdValue);
+
+protected:
+	boost::signals2::connection m_HiddenSelConn;
+};
+// [/SL:KB]
+
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 //
 // LLFloaterBuildAxis

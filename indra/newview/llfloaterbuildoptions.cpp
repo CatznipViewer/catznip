@@ -72,6 +72,50 @@ void LLFloaterBuildOptions::onClose(bool app_quitting)
 	mObjectSelection = NULL;
 }
 
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+//
+// LLFloaterSelectionOptions
+//
+
+LLFloaterSelectionOptions::LLFloaterSelectionOptions(const LLSD& sdKey)
+	: LLFloater(sdKey)
+{
+}
+
+LLFloaterSelectionOptions::~LLFloaterSelectionOptions()
+{
+}
+
+BOOL LLFloaterSelectionOptions::postBuild()
+{
+	findChild<LLUICtrl>("RenderHiddenSelections")->setCommitCallback(boost::bind(&LLFloaterSelectionOptions::onToggleHiddenSelection, this, _2));
+
+	return TRUE;
+}
+
+void LLFloaterSelectionOptions::onOpen(const LLSD& sdKey)
+{
+	m_HiddenSelConn = gSavedSettings.getControl("RenderHiddenSelections")->getSignal()->connect(boost::bind(&LLFloaterSelectionOptions::refresh, this));
+
+	refresh();
+}
+
+void LLFloaterSelectionOptions::onClose(bool fQuiting)
+{
+	m_HiddenSelConn.disconnect();
+}
+
+void LLFloaterSelectionOptions::refresh()
+{
+	findChild<LLUICtrl>("RenderHiddenSelections")->setValue(gSavedSettings.getBOOL("RenderHiddenSelections"));
+}
+
+void LLFloaterSelectionOptions::onToggleHiddenSelection(const LLSD& sdValue)
+{
+	LLSelectMgr::sRenderHiddenSelections = sdValue.asBoolean();
+	gSavedSettings.setBOOL("RenderHiddenSelections", LLSelectMgr::sRenderHiddenSelections);
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 //

@@ -192,6 +192,9 @@ void LLViewerFloaterReg::registerFloaters()
 // [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
 	LLFloaterReg::add("build_options_axis", "floater_build_axis.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBuildAxis>);
 // [/SL:KB]
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	LLFloaterReg::add("build_options_selection", "floater_build_selection.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSelectionOptions>);
+// [/SL:KB]
 	LLFloaterReg::add("bumps", "floater_bumps.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBump>);
 
 	LLFloaterReg::add("camera", "floater_camera.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCamera>);
