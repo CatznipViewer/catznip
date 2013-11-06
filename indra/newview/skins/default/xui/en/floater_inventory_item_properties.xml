@@ -7,7 +7,7 @@
  help_topic="item_properties"
  save_rect="true"
  title="ITEM PROPERTIES"
- width="350">
+ width="375">
     <floater.string
      name="unknown">
         (unknown)
@@ -55,7 +55,7 @@
      left="10"
      name="LabelItemNameTitle"
      top="25"
-     width="78">
+     width="80">
         Name:
     </text>
     <line_editor
@@ -64,11 +64,11 @@
      follows="left|top|right"
      height="18"
      layout="topleft"
-     left_delta="78"
+     left_pad="0"
      max_length_bytes="63"
      name="LabelItemName"
-     top_delta="-2"
-     width="252" />
+     right="-10"
+     top_delta="-2" />
     <text
      type="string"
      length="1"
@@ -78,7 +78,7 @@
      left="10"
      name="LabelItemDescTitle"
      top="45"
-     width="78">
+     width="80">
         Description:
     </text>
     <line_editor
@@ -87,11 +87,11 @@
      follows="left|top|right"
      height="18"
      layout="topleft"
-     left_delta="78"
+     left_pad="0"
      max_length_bytes="127"
      name="LabelItemDesc"
-     top_delta="-2"
-     width="252" />
+     right="-10"
+     top_delta="-2" />
     <text
      type="string"
      length="1"
@@ -101,7 +101,7 @@
      left="10"
      name="LabelCreatorTitle"
      top="65"
-     width="78">
+     width="80">
         Creator:
     </text>
     <text
@@ -110,12 +110,12 @@
      follows="left|top"
      height="16"
      layout="topleft"
-     left_delta="78"
+     left_pad="0"
      name="LabelCreatorName"
+     right="-10"
      top_delta="0"
      translate="false"
-     use_ellipses="true" 
-     width="170">
+     use_ellipses="true">
         TestString PleaseIgnore
     </text>
 <!--
@@ -138,7 +138,7 @@
      left="10"
      name="LabelOwnerTitle"
      top="85"
-     width="78">
+     width="80">
         Owner:
     </text>
     <text
@@ -147,12 +147,12 @@
      follows="left|top"
      height="16"
      layout="topleft"
-     left_delta="78"
+     left_pad="0"
      name="LabelOwnerName"
+     right="-10"
      top_delta="0"
      translate="false"
-     use_ellipses="true"
-     width="170">
+     use_ellipses="true">
       TestString PleaseIgnore
     </text>
 <!--
@@ -175,7 +175,7 @@
      left="10"
      name="LabelAcquiredTitle"
      top="105"
-     width="78">
+     width="80">
         Acquired:
     </text>
     <text
@@ -184,10 +184,10 @@
      follows="left|top"
      height="16"
      layout="topleft"
-     left_delta="78"
+     left_pad="0"
      name="LabelAcquiredDate"
-     top_delta="0"
-     width="252">
+     right="-10"
+     top_delta="0">
         Wed May 24 12:50:46 2006
     </text>
     <text
@@ -199,31 +199,31 @@
      left="10"
      name="OwnerLabel"
      top="125"
-     width="78">
+     width="80">
         You:
     </text>
     <check_box
      height="16"
      label="Modify"
      layout="topleft"
-     left_pad="5"
+     left_pad="0"
      name="CheckOwnerModify"
      top_delta="0"
-     width="70" />
+     width="80" />
     <check_box
      height="16"
      label="Copy"
      layout="topleft"
      left_pad="5"
      name="CheckOwnerCopy"
-     width="70" />
+     width="80" />
     <check_box
      height="16"
      label="Transfer"
      layout="topleft"
      left_pad="5"
      name="CheckOwnerTransfer"
-     width="70" />
+     width="80" />
     <text
      type="string"
      length="1"
@@ -233,14 +233,14 @@
      left="10"
      name="AnyoneLabel"
      top_pad="5"
-     width="78">
+     width="80">
         Anyone:
     </text>
     <check_box
      height="16"
      label="Copy"
      layout="topleft"
-     left_pad="5"
+     left_pad="0"
      name="CheckEveryoneCopy"
      top_delta="0"
      width="130" />
@@ -253,14 +253,14 @@
      left="10"
      name="GroupLabel"
      top_pad="5"
-     width="78">
+     width="80">
         Group:
     </text>
     <check_box
      height="16"
      label="Share"
      layout="topleft"
-     left_pad="5"
+     left_pad="0"
      name="CheckShareWithGroup"
      top_delta="0"
      width="106" />
@@ -273,7 +273,7 @@
      left="10"
      name="NextOwnerLabel"
      top_pad="5"
-     width="78"
+     width="80"
      word_wrap="true">
         Next owner:
     </text>
@@ -281,24 +281,24 @@
      height="16"
      label="Modify"
      layout="topleft"
-     left_pad="5"
+     left_pad="0"
      name="CheckNextOwnerModify"
      top_delta="0"
-     width="70" />
+     width="80" />
     <check_box
      height="16"
      label="Copy"
      layout="topleft"
      left_pad="5"
      name="CheckNextOwnerCopy"
-     width="70" />
+     width="80" />
     <check_box
      height="16"
      label="Transfer"
      layout="topleft"
      left_pad="5"
      name="CheckNextOwnerTransfer"
-     width="70" />
+     width="80" />
 
     <text
      type="string"
@@ -368,7 +368,7 @@
      left="20"
      name="CheckPurchase"
      top_pad="12"
-     width="70" />
+     width="100" />
     <spinner
         follows="left|top"
         decimal_digits="0"
@@ -377,7 +377,7 @@
         name="Edit Cost"
         label="L$"
         label_width="15"
-        left="98"
+        left_pad="10"
         width="100"
         min_val="1"
         height="19"
