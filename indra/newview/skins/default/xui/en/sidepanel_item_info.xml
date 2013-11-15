@@ -400,11 +400,15 @@
                 <combo_box.item
                      label="Copy"
                      name="Copy"
-                     value="Copy" />
+                     value="2" />
+                <combo_box.item
+                     label="Contents"
+                     name="Contents"
+                     value="3" />
                 <combo_box.item
                      label="Original"
                      name="Original"
-                     value="Original" />
+                     value="1" />
             </combo_box>
             <spinner
                     follows="left|top"
