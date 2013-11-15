@@ -114,6 +114,12 @@ public:
 	LLFolderViewModelInterface* getFolderViewModel() { return mViewModel; }
 	const LLFolderViewModelInterface* getFolderViewModel() const { return mViewModel; }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	enum EFilterState { FILTER_STOPPED /* Filter isn't running */, FILTER_DEFAULT, FILTER_NONDEFAULT /* Filter is running and marked as default or non-default respectively */ };
+	typedef boost::signals2::signal<void (LLFolderView*, EFilterState)> filterstate_changed_signal_t;
+	boost::signals2::connection setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb);
+// [/SL:KB]
+
 	typedef boost::signals2::signal<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)> signal_t;
 	void setSelectCallback(const signal_t::slot_type& cb) { mSelectSignal.connect(cb); }
 	void setReshapeCallback(const signal_t::slot_type& cb) { mReshapeSignal.connect(cb); }
@@ -298,6 +304,11 @@ protected:
 	LLPanel*						mParentPanel;
 	
 	LLFolderViewModelInterface*		mViewModel;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	EFilterState					mFilterState;
+	filterstate_changed_signal_t*	mFilterStateChanged;
+// [/SL:KB]
 
 	/**
 	 * Is used to determine if we need to cut text In LLFolderViewItem to avoid horizontal scroll.

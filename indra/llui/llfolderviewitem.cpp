@@ -814,18 +814,30 @@ void LLFolderViewItem::draw()
 	// Draw open icon
 	//
 	const S32 icon_x = mIndentation + mArrowSize + mTextPad;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	const F32 label_alpha = (mViewModelItem->isClipboardCut()) ? 0.6f : 1.0f;
+// [/SL:KB]
 	if (!mIconOpen.isNull() && (llabs(mControlLabelRotation) > 80)) // For open folders
  	{
-		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
 	}
 	else if (mIcon)
 	{
- 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+ 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+// 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
  	}
 
 	if (mIconOverlay && getRoot()->showItemLinkOverlays())
 	{
-		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
 	}
 
 	//--------------------------------------------------------------------------------//
@@ -855,6 +867,9 @@ void LLFolderViewItem::draw()
     }
 
     LLColor4 color = (mIsSelected && filled) ? mFontHighlightColor : mFontColor;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	color.setAlpha(label_alpha);
+// [/SL:KB]
     drawLabel(font, text_left, y, color, right_x);
 
 	//--------------------------------------------------------------------------------//
@@ -1121,6 +1136,13 @@ BOOL LLFolderViewFolder::needsArrange()
 {
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
 }
+
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2013-05-19 (Catznip-3.5)
+bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
+{
+	return getViewModelItem()->descendantsPassedFilter(filter_generation);
+}
+// [/SL:KB]
 
 // Passes selection information on to children and record selection
 // information if necessary.

@@ -168,6 +168,10 @@ LLFolderView::LLFolderView(const Params& p)
 	mDragAndDropThisFrame(FALSE),
 	mCallbackRegistrar(NULL),
 	mParentPanel(p.parent_panel),
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	mFilterState(FILTER_STOPPED),
+	mFilterStateChanged(NULL),
+// [/SL:KB]
 	mUseEllipses(p.use_ellipses),
 	mDraggingOverItem(NULL),
 	mStatusTextBox(NULL),
@@ -265,6 +269,10 @@ LLFolderView::~LLFolderView( void )
 	mFolders.clear();
 
 	mViewModel = NULL;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	delete mFilterStateChanged;
+// [/SL:KB]
 }
 
 BOOL LLFolderView::canFocusChildren() const
@@ -277,12 +285,39 @@ void LLFolderView::addFolder( LLFolderViewFolder* folder)
 	LLFolderViewFolder::addFolder(folder);
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2)
 void LLFolderView::closeAllFolders()
 {
+	folders_t openTopLevel;
+	for (folders_t::const_iterator itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	{
+		LLFolderViewFolder* pFolder = *itFolder;
+		if (pFolder->isOpen())
+			openTopLevel.push_back(pFolder);
+	}
+//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
+
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+	for (folders_t::const_iterator itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	{
+		(*itFolder)->setOpen(TRUE);
+	}
+//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
+	mScrollContainer->goToTop();
 	arrangeAll();
 }
+// [/SL:KB]
+//void LLFolderView::closeAllFolders()
+//{
+//	// Close all the folders
+//	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+//	arrangeAll();
+//}
 
 void LLFolderView::openTopLevelFolders()
 {
@@ -942,7 +977,7 @@ void LLFolderView::cut()
 			if (listener)
 			{
 				listener->cutToClipboard();
-				listener->removeItem();
+//				listener->removeItem();
 			}
 		}
 		
@@ -1589,6 +1624,15 @@ void LLFolderView::setShowSingleSelection(BOOL show)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+boost::signals2::connection LLFolderView::setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb)
+{
+	if (!mFilterStateChanged)
+		mFilterStateChanged = new filterstate_changed_signal_t();
+	return mFilterStateChanged->connect(cb);
+}
+// [/SL:KB]
+
 static LLFastTimer::DeclareTimer FTM_AUTO_SELECT("Open and Select");
 static LLFastTimer::DeclareTimer FTM_INVENTORY("Inventory");
 
@@ -1599,10 +1643,30 @@ void LLFolderView::update()
 	// until that inventory is loaded up.
 	LLFastTimer t2(FTM_INVENTORY);
 
-	if (getFolderViewModel()->getFilter().isModified() && getFolderViewModel()->getFilter().isNotDefault())
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	if (getFolderViewModel()->getFilter().isModified())
 	{
-		mNeedsAutoSelect = TRUE;
+		bool fNotDefault = getFolderViewModel()->getFilter().isNotDefault();
+		if (fNotDefault)
+		{
+			mNeedsAutoSelect = TRUE;
+		}
+
+		EFilterState filter_state = (fNotDefault) ? FILTER_NONDEFAULT : FILTER_DEFAULT;
+		if (mFilterState != filter_state)
+		{
+			mFilterState = filter_state;
+			if (mFilterStateChanged)
+			{
+				(*mFilterStateChanged)(this, mFilterState);
+			}
+		}
 	}
+// [/SL:KB]
+//	if (getFolderViewModel()->getFilter().isModified() && getFolderViewModel()->getFilter().isNotDefault())
+//	{
+//		mNeedsAutoSelect = TRUE;
+//	}
     
 	// Filter to determine visibility before arranging
 	filter(getFolderViewModel()->getFilter());
@@ -1612,6 +1676,14 @@ void LLFolderView::update()
     if (getFolderViewModel()->getFilter().isModified() && (!getFolderViewModel()->getFilter().isTimedOut()))
 	{
 		getFolderViewModel()->getFilter().clearModified();
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+		mFilterState = FILTER_STOPPED;
+		if (mFilterStateChanged)
+		{
+			(*mFilterStateChanged)(this, mFilterState);
+		}
+// [/SL:KB]
 	}
 
 	// automatically show matching items, and select first one if we had a selection

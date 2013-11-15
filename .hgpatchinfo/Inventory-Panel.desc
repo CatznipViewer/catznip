@@ -1,0 +1,41 @@
+[Inventory/Panel]
+- added   : user-add'able inventory panels to the inventory floater by clicking on the "+" tab
+    -> don't delete the last user-added inventory panel so it can be reused (controlled by InventoryReuseUserTab)
+- added   : sort button to the inventory floater's toolbar panel
+    -> sort options were removed from the main gear menu and moved to the sort menu
+- added   : "Collapse All" button to the inventory floater toolbar
+    -> will not collapse top-level folders (= My Inventory of Library) if they are currently open
+- added   : "Show Filter" button to the main inventory floater
+- added   : "InventoryDnDCheckFilter" setting to keep current drag-and-drop inventory behaviour or restore "legacy" behaviour
+    -> behaviour changed as a result of EXP-1335
+    -> if we're dragging from agent inventory to agent inventory we can simply check if the item is filtered in the destionation panel
+    -> allow moving an object's folder as long as one item passes the filter when "InventoryDnDCheckFilter" is TRUE
+    -> LLInventoryFilter::check(const LLInventoryItem* item) didn't correctly match the filter substring
+- added   : "Show Received Items Panel" option to the inventory floater gear menu
+- added   : "Separate Text Filters" inventory gear menu option
+    -> LLPanelMainInventory can have the text filter shared among all tabs, or separate per tab
+- added   : "Default action" button to the inventory toolbar to replace the three button row
+    -> additionally, added an action fly-out button to offer multiple actions for the current selection
+- changed : behaviour of "Cut" inventory items
+    -> don't hide/filter inventory items that have been "Cut"
+    -> don't move "Cut" inventory items to the trash
+    -> "Cut" inventory items now have a distinct visual look
+- changed : tighted the inventory floater layout
+    -> moved item count to the floater title
+    -> reduced vertical whitespace
+    -> tightened the received items panel
+- changed : always show the "Received Items" folder if the inventory's panel contents are filtered (with a non-default filter)
+- changed : moved "Find All Links" from the gear menu to the inventory item context menu and the fly-out actions menu
+- changed : only show "Find All Links" for inventory items and don't show it for folders
+- changed : removed "Save Texture As" and "Share" menu options from the inventory gear menu
+- changed : moved the "Upload" sub-menu from the top to the bottom of the inventory add toolbar menu
+- fixed   : saving an inventory filter and then restoring it results in all items being hidden
+    -> date filters are set back all wrong
+- fixed   : don't show the "Upload" submenu as being tear-off
+- fixed   : "Received Items" panels on secondary inventory floaters are non-functional
+- fixed   : empty folders remain visible in the "Recent" tab
+- fixed   : "Edit" option on the inventory context menu doesn't enable/disable properly for wearable items
+    -> always disabled for items in COF
+    -> always enabled for items outside of COF
+- fixed : folder links aren't visible
+    -> since they have the inentory type of LLInventoryType::IT_CATEGORY they were being treated as folders

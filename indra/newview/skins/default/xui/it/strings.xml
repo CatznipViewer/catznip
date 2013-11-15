@@ -1354,6 +1354,17 @@ Prova ad accedere nuovamente tra un minuto.
 	<string name="Snapshots" value="Fotografie,"/>
 	<string name="No Filters" value="No"/>
 	<string name="Since Logoff" value="- Dall&apos;uscita"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Indossa</string>
+	<string name="InvAction take_off">Togli</string>
+	<string name="InvAction attach">Indossa</string>
+	<string name="InvAction detach">Togli</string>
+	<string name="InvAction activate">Attiva</string>
+	<string name="InvAction deactivate">Disattiva</string>
+	<string name="InvAction teleport">Teletrasportati</string>
+	<string name="InvAction open">Apri</string>
+
 	<string name="InvFolder My Inventory">
 		Il mio inventario
 	</string>
