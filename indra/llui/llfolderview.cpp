@@ -28,6 +28,9 @@
 
 #include "llfolderview.h"
 #include "llfolderviewmodel.h"
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+#include "llfolderviewmodelinventorycommon.h"
+// [/SL:KB]
 #include "llclipboard.h" // *TODO: remove this once hack below gone.
 #include "llkeyboard.h"
 #include "lllineeditor.h"
@@ -1800,13 +1803,60 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 
 	U32 multi_select_flag = (mSelectedItems.size() > 1 ? ITEM_IN_MULTI_SELECTION : 0x0);
 	U32 flags = multi_select_flag | FIRST_SELECTED_ITEM;
-	for (selected_items_t::iterator item_itor = mSelectedItems.begin();
-			item_itor != mSelectedItems.end();
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
+	// NOTE-Catznip: this is really a bad hack but I can't really think of a better way short of just rewriting all menu item handling
+	U32 cntWearable = 0, cntWorn = 0;
+	for (selected_items_t::const_iterator itSel = mSelectedItems.begin(); itSel != mSelectedItems.end(); ++itSel)
+	{
+		const LLFolderViewModelItemInventoryCommon* pFVInvItem = (*itSel)->getViewModelItem<LLFolderViewModelItemInventoryCommon>();
+		if (!pFVInvItem)
+			continue;
+
+		LLAssetType::EType typeItem = pFVInvItem->getAssetType(); bool fWearable = false;
+		if (LLAssetType::AT_OBJECT == typeItem)
+		{
+			flags |= ATTACHMENT_SELECTION;
+			fWearable = true;
+		}
+		else if (LLAssetType::AT_CLOTHING == typeItem)
+		{
+			flags |= CLOTHING_SELECTION;
+			fWearable = true;
+		}
+		else if (LLAssetType::AT_BODYPART == typeItem)
+		{
+			flags |= BODYPART_SELECTION;
+			fWearable = true;
+		}
+
+		if (fWearable)
+		{
+			if (pFVInvItem->isItemWorn())
+				cntWorn++;
+			cntWearable++;
+		}
+		else
+		{
+			flags |= NONWEARABLE_SELECTION;
+		}
+	}
+
+	if ( (cntWearable) && (cntWorn) )
+	{
+		flags |= (cntWearable == cntWorn) ? WORN_SELECTION : PARTIAL_WORN_SELECTION;
+	}
+// [/SL:KB]
+
+	for (selected_items_t::iterator item_itor = mSelectedItems.begin(); 
+			item_itor != mSelectedItems.end(); 
 			++item_itor)
 	{
 		LLFolderViewItem* selected_item = (*item_itor);
 		selected_item->buildContextMenu(*menu, flags);
-		flags = multi_select_flag;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
+		flags &= ~FIRST_SELECTED_ITEM;
+// [/SL:KB]
+//		flags = multi_select_flag;
 	}
 
 	addNoOptions(menu);
