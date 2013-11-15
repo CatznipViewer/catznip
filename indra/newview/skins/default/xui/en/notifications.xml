@@ -3480,36 +3480,43 @@ or you can install it now.
    icon="notify.tga"
    name="DownloadBackgroundTip"
    type="notify">
-We have downloaded an update to your [APP_NAME] installation.
-Version [VERSION] [[INFO_URL] Information about this update]
+The [APP_NAME] [VERSION] update has finished downloading.
+
+Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton about this update.
+
+Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
     <usetemplate
      name="okcancelbuttons"
      notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
+     yestext="Install now"/>
   </notification>
 
   <notification
  icon="alertmodal.tga"
  name="DownloadBackgroundDialog"
  type="alertmodal">
-    We have downloaded an update to your [APP_NAME] installation.
-    Version [VERSION] [[INFO_URL] Information about this update]
+The [APP_NAME] [VERSION] update has finished downloading.
+
+Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton about this update.
+
+Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
     <usetemplate
      name="okcancelbuttons"
      notext="Later..."
-     yestext="Install now and restart [APP_NAME]"/>
+     yestext="Install now"/>
   </notification>
   
   <notification
  icon="alertmodal.tga"
  name="RequiredUpdateDownloadedVerboseDialog"
  type="alertmodal">
-We have downloaded a required software update.
-Version [VERSION] [[INFO_URL] Information about this update]
+The [APP_NAME] [VERSION] update has finished downloading. This is a required update.
 
-We must restart [APP_NAME] to install the update.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
+
+[APP_NAME] will restart to install the update now.
     <tag>confirm</tag>
     <usetemplate
      name="okbutton"

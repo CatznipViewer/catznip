@@ -87,6 +87,9 @@ std::list<std::string> gUntranslated;
 /*static*/ LLUI::add_popup_t	LLUI::sAddPopupFunc;
 /*static*/ LLUI::remove_popup_t	LLUI::sRemovePopupFunc;
 /*static*/ LLUI::clear_popups_t	LLUI::sClearPopupsFunc;
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+/*static*/ LLUI::top_popup_t LLUI::sTopPopupsFunc;
+// [/SL:KB]
 
 // register filter editor here
 static LLDefaultChildRegistry::Register<LLFilterEditor> register_filter_editor("filter_editor");
@@ -211,11 +214,17 @@ void LLUI::cleanupClass()
 	LLRender2D::cleanupClass();
 }
 
-void LLUI::setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t& remove_popup,  const clear_popups_t& clear_popups)
+//void LLUI::setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t& remove_popup,  const clear_popups_t& clear_popups)
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+void LLUI::setPopupFuncs(const add_popup_t& add_popup, const remove_popup_t& remove_popup, const clear_popups_t& clear_popups, const top_popup_t& top_popups)
+// [/SL:KB]
 {
 	sAddPopupFunc = add_popup;
 	sRemovePopupFunc = remove_popup;
 	sClearPopupsFunc = clear_popups;
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	sTopPopupsFunc = top_popups;
+// [/SL:KB]
 }
 
 //static
@@ -437,6 +446,18 @@ void LLUI::clearPopups()
 		sClearPopupsFunc();
 	}
 }
+
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+//static
+LLView* LLUI::getTopPopup()
+{
+	if (sTopPopupsFunc)
+	{
+		return sTopPopupsFunc();
+	}
+	return NULL;
+}
+// [/SL:KB]
 
 //static
 void LLUI::reportBadKeystroke()
