@@ -168,6 +168,7 @@ set(llui_HEADER_FILES
     llfolderview.h
     llfolderviewitem.h
     llfolderviewmodel.h
+    llfolderviewmodelinventorycommon.h
     llfunctorregistry.h
     llhelp.h
     lliconctrl.h
