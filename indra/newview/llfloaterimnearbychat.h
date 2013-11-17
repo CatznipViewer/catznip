@@ -46,7 +46,10 @@ class LLFloaterIMNearbyChat
 public:
 	// constructor for inline chat-bars (e.g. hosted in chat history window)
 	LLFloaterIMNearbyChat(const LLSD& key = LLSD(LLUUID()));
-	~LLFloaterIMNearbyChat() {}
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+	~LLFloaterIMNearbyChat();
+// [/SL:KB]
+//	~LLFloaterIMNearbyChat() {}
 
 	static LLFloaterIMNearbyChat* buildFloater(const LLSD& key);
 
@@ -82,6 +85,13 @@ public:
 
 	static bool isWordsName(const std::string& name);
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+	/*virtual*/ void reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
+
+	typedef boost::signals2::signal<void (LLUICtrl* ctrl, S32 width, S32 height)> reshape_signal_t;
+	boost::signals2::connection setReshapeCallback(const reshape_signal_t::slot_type& cb);
+// [/SL:KB]
+
 	void showHistory();
 
 protected:
@@ -108,6 +118,9 @@ protected:
 	LLOutputMonitorCtrl*	mOutputMonitor;
 	LLLocalSpeakerMgr*		mSpeakerMgr;
 
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+	reshape_signal_t*		mReshapeSignal;
+// [/SL:KB]
 	S32 mExpandedHeight;
 
 private:
