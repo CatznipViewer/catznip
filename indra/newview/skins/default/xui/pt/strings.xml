@@ -5,7 +5,7 @@
      that are returned from one component and may appear in many places-->
 <strings>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SUPPORT_SITE">
 		Portal de Supporte Second Life
@@ -134,7 +134,7 @@
 		http://secondlife.com/download
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
-		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: http://secondlife.com/download
+		O visualizador utilizado já não é compatível com o Second Life.  Visite a página abaixo para baixar uma versão atual: http://catznip.com/downloads/
 
 Para saber mais, visite as perguntas frequentes abaixo: http://secondlife.com/viewer-access-faq
 	</string>

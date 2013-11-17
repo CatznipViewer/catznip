@@ -311,8 +311,12 @@ gpointer worker_thread_cb(gpointer data)
 		{
 			char* tmp_local_filename = NULL;
 			// create temporary file to store the package.
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-07-17 (Catznip-3.6)
 			fd = g_file_open_tmp
-				("secondlife-update-XXXXXX", &tmp_local_filename, &error);
+				("catznip-update-XXXXXX", &tmp_local_filename, &error);
+// [/SL:KB]
+//			fd = g_file_open_tmp
+//				("secondlife-update-XXXXXX", &tmp_local_filename, &error);
 			if (error != NULL)
 			{
 				llerrs << "Unable to create temporary file: "
@@ -727,7 +731,10 @@ BOOL spawn_viewer(UpdaterAppState *app_state)
 {
 	llassert(app_state != NULL);
 
-	std::string cmd = app_state->dest_dir + "/secondlife";
+//	std::string cmd = app_state->dest_dir + "/secondlife";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-07-17 (Catznip-3.6)
+	std::string cmd = app_state->dest_dir + "/catznip";
+// [/SL:KB]
 	GError *error = NULL;
 
 	// We want to spawn the Viewer on the same display as the updater app
@@ -816,7 +823,10 @@ int main(int argc, char **argv)
 	parse_args_and_init(argc, argv, app_state);
 
 	// Initialize logger, and rename old log file
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-07-17 (Catznip-3.6)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 	LLError::initForApplication
 		(gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 	std::string old_log_file = gDirUtilp->getExpandedFilename
@@ -900,21 +910,21 @@ LLTrans::LLTrans()
 		Pair("UpdaterFailStartTitle",
 			 "Failed to start viewer"),
 		Pair("UpdaterFailUpdateDescriptive",
-			 "An error occurred while updating Second Life. "
-			 "Please download the latest version from www.secondlife.com."),
+			 "An error occurred while updating Catznip. "
+			 "Please download the latest version from catznip.com."),
 		Pair("UpdaterNowInstalling",
-			 "Installing Second Life..."),
+			 "Installing Catznip..."),
 		Pair("UpdaterNowUpdating",
-			 "Now updating Second Life..."),
+			 "Now updating Catznip..."),
 		Pair("UpdaterProgressBarText",
 			 "Downloading update"),
 		Pair("UpdaterProgressBarTextWithEllipses",
 			 "Downloading update..."),
 		Pair("UpdaterUpdatingDescriptive",
-			 "Your Second Life Viewer is being updated to the latest release. "
+			 "Your Catznip Viewer is being updated to the latest release. "
 			 "This may take some time, so please be patient."),
 		Pair("UpdaterWindowTitle",
-			 "Second Life Update")
+			 "Catznip Update")
 	};
 
 	BOOST_FOREACH(Pair pair, data)
