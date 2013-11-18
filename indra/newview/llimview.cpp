@@ -1069,7 +1069,7 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 // [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
 bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
 {
-	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames");
+	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames", true);
 
 	// If we have the name cached then we can simply return the username
 	LLAvatarName avName;
