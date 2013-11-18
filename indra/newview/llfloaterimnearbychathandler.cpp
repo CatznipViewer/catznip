@@ -477,7 +477,7 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 // [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
 S32 LLFloaterIMNearbyChatScreenChannel::getToastWidth()
 {
-	static LLCachedControl<S32> s_nToastWidth(gSavedSettings, "NearbyToastWidth");
+	static LLCachedControl<S32> s_nToastWidth(gSavedSettings, "NearbyToastWidth", 0);
 	if (0 == s_nToastWidth)					// Follow the width of the nearby chat bar
 	{
 		LLFloaterIMNearbyChat* pNearbyChat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
