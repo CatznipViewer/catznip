@@ -65,15 +65,15 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 	style_params.font.name(font_name);
 	style_params.font.size(font_size);
 	
-	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(p.session_id);
-	mIsGroupMsg = (im_session && im_session->mSessionType == LLIMModel::LLIMSession::GROUP_SESSION);
-	if(mIsGroupMsg)
-	{
-		mAvatarName->setValue(im_session->mName);
-		LLAvatarName avatar_name;
-		LLAvatarNameCache::get(p.avatar_id, &avatar_name);
-		p.message = "[From " + avatar_name.getDisplayName() + "]\n" + p.message;
-	}
+//	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(p.session_id);
+//	mIsGroupMsg = (im_session && im_session->mSessionType == LLIMModel::LLIMSession::GROUP_SESSION);
+//	if(mIsGroupMsg)
+//	{
+//		mAvatarName->setValue(im_session->mName);
+//		LLAvatarName avatar_name;
+//		LLAvatarNameCache::get(p.avatar_id, &avatar_name);
+//		p.message = "[From " + avatar_name.getDisplayName() + "]\n" + p.message;
+//	}
 
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-29 (Catznip-3.3)
 	mMessage->clear();
@@ -140,10 +140,10 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 //		mMessage->setText(p.message, style_params);
 // 	}
 
-	if(!mIsGroupMsg)
-	{
+//	if(!mIsGroupMsg)
+//	{
 	mAvatarName->setValue(p.from);
-	}
+//	}
 	mTime->setValue(p.time);
 	mSessionID = p.session_id;
 	mAvatarID = p.avatar_id;
@@ -211,14 +211,14 @@ void LLToastIMPanel::spawnNameToolTip()
 
 	LLToolTip::Params params;
 	params.background_visible(false);
-	if(!mIsGroupMsg)
-	{
+//	if(!mIsGroupMsg)
+//	{
 	params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_avatar", LLSD().with("avatar_id", mAvatarID), FALSE));
-	}
-	else
-	{
-		params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_group", LLSD().with("group_id", mSessionID), FALSE));
-	}
+//	}
+//	else
+//	{
+//		params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_group", LLSD().with("group_id", mSessionID), FALSE));
+//	}
 	params.delay_time(0.0f);		// spawn instantly on hover
 	params.image(LLUI::getUIImage("Info_Small"));
 	params.message("");
