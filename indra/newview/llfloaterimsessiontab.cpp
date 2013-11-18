@@ -212,7 +212,10 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 			if (!conversp->isNearbyChat()
 					|| gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff"))
 			{
-				floater_container->addFloater(conversp, false, LLTabContainer::RIGHT_OF_CURRENT);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-18 (Catznip-3.6)
+				floater_container->addFloater(conversp, false, LLTabContainer::END);
+// [/SL:KB]
+//				floater_container->addFloater(conversp, false, LLTabContainer::RIGHT_OF_CURRENT);
 			}
 			else
 			{
