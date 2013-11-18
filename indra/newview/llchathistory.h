@@ -124,6 +124,10 @@ class LLChatHistory : public LLUICtrl
 		void appendMessage(const LLChat& chat, const LLSD &args = LLSD(), const LLStyle::Params& input_append_params = LLStyle::Params());
 		/*virtual*/ void clear();
 
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		void showTypingIndicator(bool fShow, const LLUUID& idAgent = LLUUID::null);
+// [/SL:KB]
+
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
 	public:
 		enum EParseHighlightType
@@ -147,6 +151,10 @@ class LLChatHistory : public LLUICtrl
 		std::string mLastFromName;
 		LLUUID mLastFromID;
 		LLDate mLastMessageTime;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		bool   mShowTypingIndicator;
+		LLUUID mTypingFromID;
+// [/SL:KB]
 		bool mIsLastMessageFromLog;
 		bool mNotifyAboutUnreadMsg;
 		//std::string mLastMessageTimeStr;

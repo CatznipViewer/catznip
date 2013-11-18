@@ -1253,6 +1253,9 @@ void LLFloaterIMSession::addTypingIndicator(const LLIMInfo* im_info)
 	if (im_info && !mOtherTyping)
 	{
 		mOtherTyping = true;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		mChatHistory->showTypingIndicator(true, im_info->mFromID);
+// [/SL:KB]
 
 		// Update speaker
 		LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
@@ -1271,6 +1274,9 @@ void LLFloaterIMSession::removeTypingIndicator(const LLIMInfo* im_info)
 	if (mOtherTyping)
 	{
 		mOtherTyping = false;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		mChatHistory->showTypingIndicator(false);
+// [/SL:KB]
 
 		if (im_info)
 		{

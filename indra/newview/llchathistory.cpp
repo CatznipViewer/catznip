@@ -725,6 +725,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	mBottomSeparatorPad(p.bottom_separator_pad),
 	mTopHeaderPad(p.top_header_pad),
 	mBottomHeaderPad(p.bottom_header_pad),
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	mShowTypingIndicator(false),
+// [/SL:KB]
 	mIsLastMessageFromLog(false),
 	mNotifyAboutUnreadMsg(p.notify_unread_msg)
 {
@@ -841,6 +844,10 @@ void LLChatHistory::clear()
 	mLastFromName.clear();
 	mEditor->clear();
 	mLastFromID = LLUUID::null;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	mShowTypingIndicator = false;
+	mTypingFromID.setNull();
+// [/SL:KB]
 }
 
 static LLFastTimer::DeclareTimer FTM_APPEND_MESSAGE("Append Chat Message");
@@ -849,6 +856,13 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 {
 	LLFastTimer _(FTM_APPEND_MESSAGE);
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	bool is_typing_indicator = (chat.mChatType == CHAT_TYPE_START);
+	bool show_typing_indicator = mShowTypingIndicator;
+	LLUUID typing_from = mTypingFromID;
+	if (mShowTypingIndicator)
+		showTypingIndicator(false);
+// [/SL:KB]
 //	bool square_brackets = false; // square brackets necessary for a system messages
 
 	llassert(mEditor);
@@ -860,7 +874,10 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	bool from_me = chat.mFromID == gAgent.getID();
 	mEditor->setPlainText(use_plain_text_chat_history);
 
-	if (mNotifyAboutUnreadMsg && !mEditor->scrolledToEnd() && !from_me && !chat.mFromName.empty())
+//	if (mNotifyAboutUnreadMsg && !mEditor->scrolledToEnd() && !from_me && !chat.mFromName.empty())
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	if ( (mNotifyAboutUnreadMsg) && (!mEditor->scrolledToEnd()) && (!from_me) && (!chat.mFromName.empty()) && (!is_typing_indicator) )
+// [/SL:KB]
 	{
 		mUnreadChatSources.insert(chat.mFromName);
 		mMoreChatPanel->setVisible(TRUE);
@@ -940,6 +957,14 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	{
 		body_message_params.font.style = "BOLD";
 	}
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	else if (is_typing_indicator)
+	{
+		txt_color = LLColor4::grey1;
+		body_message_params.color(txt_color);
+		body_message_params.readonly_color(txt_color);
+	}
+// [/SL:KB]
 
 	bool message_from_log = chat.mChatStyle == CHAT_STYLE_HISTORY;
 	// We graying out chat history by graying out messages that contains full date in a time string
@@ -1188,7 +1213,43 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	{
 		mEditor->setCursorAndScrollToEnd();
 	}
+
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	if ( (show_typing_indicator) && (!is_typing_indicator) )
+		showTypingIndicator(true, typing_from);
+// [/SL:KB]
 }
+
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+void LLChatHistory::showTypingIndicator(bool fShow, const LLUUID& idAgent)
+{
+	if (fShow == mShowTypingIndicator)
+		return;
+
+	if (fShow)
+	{
+		LLChat chatType(LLTrans::getString("IM_typing_start_message"));
+		chatType.mChatType = CHAT_TYPE_START;
+		chatType.mFromID = idAgent;
+		chatType.mFromName = LLSLURL("agent", idAgent, "about").getSLURLString();
+		chatType.mTimeStr = LLLogChat::timestamp();
+
+		appendMessage(chatType, LLSD().with("use_plain_text_chat_history", true).with("show_time", true).with("show_names_for_p2p_conv", true));
+		mTypingFromID = idAgent;
+	}
+	else
+	{
+		const LLWString& wstrText = mEditor->getWText();
+		LLWString::size_type idxNewLine = wstrText.rfind(L'\n');
+		if (LLWString::npos != idxNewLine)
+		{
+			mEditor->removeTextFromEnd(wstrText.length() - idxNewLine);
+		}
+	}
+
+	mShowTypingIndicator = fShow;
+}
+// [/SL:KB]
 
 void LLChatHistory::draw()
 {
