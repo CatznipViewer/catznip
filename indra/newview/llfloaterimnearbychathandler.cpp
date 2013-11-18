@@ -554,7 +554,10 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 	// Send event on to LLEventStream
 	sChatWatcher->post(chat);
 
-    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
+//    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 
 	if((  ( chat_msg.mSourceType == CHAT_SOURCE_AGENT
 			&& gSavedSettings.getBOOL("UseChatBubbles") )

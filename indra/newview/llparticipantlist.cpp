@@ -317,7 +317,10 @@ bool LLParticipantList::onSpeakerUpdateEvent(LLPointer<LLOldEvents::LLEvent> eve
 	if ( evt_data.has("id") )
 	{
 		LLUUID participant_id = evt_data["id"];
-		LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//		LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 		if (im_box)
 		{
 			im_box->setTimeNow(mUUID,participant_id);
