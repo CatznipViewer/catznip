@@ -849,7 +849,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 {
 	LLFastTimer _(FTM_APPEND_MESSAGE);
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
-	bool square_brackets = false; // square brackets necessary for a system messages
+//	bool square_brackets = false; // square brackets necessary for a system messages
 
 	llassert(mEditor);
 	if (!mEditor)
@@ -957,7 +957,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	// compact mode: show a timestamp and name
 	if (use_plain_text_chat_history)
 	{
-		square_brackets = chat.mFromName == SYSTEM_FROM;
+//		square_brackets = chat.mFromName == SYSTEM_FROM;
 
 		LLStyle::Params timestamp_style(body_message_params);
 
@@ -974,12 +974,12 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			prependNewLineState = false;
 		}
 
-        // out the opening square bracket (if need)
-		if (square_brackets)
-		{
-			mEditor->appendText("[", prependNewLineState, body_message_params);
-			prependNewLineState = false;
-		}
+//        // out the opening square bracket (if need)
+//		if (square_brackets)
+//		{
+//			mEditor->appendText("[", prependNewLineState, body_message_params);
+//			prependNewLineState = false;
+//		}
 
 		// names showing
 		if (args["show_names_for_p2p_conv"].asBoolean() && utf8str_trim(chat.mFromName).size() != 0)
@@ -1139,10 +1139,10 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			message = chat.mFromName + message;
 		}
 		
-		if (square_brackets)
-		{
-			message += "]";
-		}
+//		if (square_brackets)
+//		{
+//			message += "]";
+//		}
 
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
 		static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts", false);
