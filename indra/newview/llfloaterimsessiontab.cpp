@@ -93,6 +93,11 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
     mEnableCallbackRegistrar.add("Avatar.CheckItem",  boost::bind(&LLFloaterIMSessionTab::checkContextMenuItem,	this, _2));
     mEnableCallbackRegistrar.add("Avatar.EnableItem", boost::bind(&LLFloaterIMSessionTab::enableContextMenuItem, this, _2));
     mCommitCallbackRegistrar.add("Avatar.DoToSelected", boost::bind(&LLFloaterIMSessionTab::doToSelected, this, _2));
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2013-08-18 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("IMSession.Menu.SetFontSize", boost::bind(&LLFloaterIMSessionTab::onIMSetFontSize, _2));
+	mEnableCallbackRegistrar.add("IMSession.Menu.CheckFontSize", boost::bind(&LLFloaterIMSessionTab::onIMCheckFontSize, _2));
+// [/SL:KB]
 }
 
 LLFloaterIMSessionTab::~LLFloaterIMSessionTab()
@@ -295,8 +300,20 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mParticipantListPanel->addChild(mScroller);	
 	
 	mChatHistory = getChild<LLChatHistory>("chat_history");
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
+	if (isNearbyChat())
+	{
+		mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
+	}
+// [/SL:KB]
 
 	mInputEditor = getChild<LLChatEntry>("chat_editor");
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
+	if (isNearbyChat())
+	{
+		mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
+	}
+// [/SL:KB]
 
 	mChatLayoutPanel = getChild<LLLayoutPanel>("chat_layout_panel");
 	mInputPanels = getChild<LLLayoutStack>("input_panels");
@@ -495,7 +512,10 @@ void LLFloaterIMSessionTab::appendMessage(const LLChat& chat, const LLSD &args)
 	if(tmp_chat.mTimeStr.empty())
 		tmp_chat.mTimeStr = appendTime();
 
-	if (!chat.mMuted)
+//	if (!chat.mMuted)
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
+	if ( (!chat.mMuted) || ((isNearbyChat()) && (gSavedSettings.getBOOL("ShowBlockedChat"))) )
+// [/SL:KB]
 	{
 		tmp_chat.mFromName = chat.mFromName;
 		LLSD chat_args;
@@ -681,6 +701,38 @@ void LLFloaterIMSessionTab::setSortOrder(const LLConversationSort& order)
 	refreshConversation();
 }
 
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
+void LLFloaterIMSessionTab::onIMSetFontSize(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nFontSize = 1;
+	if ("small" == strParam)
+		nFontSize = 0;
+	else if ("medium" == strParam)
+		nFontSize = 1;
+	else if ("large" == strParam)
+		nFontSize = 2;
+	else
+		return;
+	gSavedSettings.setS32("ChatFontSize", nFontSize);
+}
+
+bool LLFloaterIMSessionTab::onIMCheckFontSize(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	S32 nFontSize = gSavedSettings.getS32("ChatFontSize");
+	if ("small" == strParam)
+		return 0 == nFontSize;
+	else if ("medium" == strParam)
+		return 1 == nFontSize;
+	else if ("large" == strParam)
+		return 2 == nFontSize;
+	return false;
+}
+// [/SL:KB]
+
 void LLFloaterIMSessionTab::onIMSessionMenuItemClicked(const LLSD& userdata)
 {
 	std::string item = userdata.asString();
@@ -848,10 +900,10 @@ void LLFloaterIMSessionTab::reshapeChatLayoutPanel()
 	mChatLayoutPanel->reshape(mChatLayoutPanel->getRect().getWidth(), mInputEditor->getRect().getHeight() + mInputEditorPad, FALSE);
 }
 
-void LLFloaterIMSessionTab::showTranslationCheckbox(BOOL show)
-{
-	mTranslationCheckBox->setVisible(mIsNearbyChat && show);
-}
+//void LLFloaterIMSessionTab::showTranslationCheckbox(BOOL show)
+//{
+//	mTranslationCheckBox->setVisible(mIsNearbyChat && show);
+//}
 
 // static
 void LLFloaterIMSessionTab::processChatHistoryStyleUpdate(bool clean_messages/* = false*/)
@@ -1157,6 +1209,13 @@ bool LLFloaterIMSessionTab::isChatMultiTab()
 //
 //	return isTorn;
 //}
+
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+bool LLFloaterIMSessionTab::hasInputText() const
+{
+	return (mInputEditor->getLength() > 0);
+}
+// [/SL:KB]
 
 void LLFloaterIMSessionTab::doToSelected(const LLSD& userdata)
 {
