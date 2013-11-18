@@ -36,6 +36,13 @@
 //static
 const S32 LLToastPanel::MIN_PANEL_HEIGHT = 40; // VPAD(4)*2 + ICON_HEIGHT(32)
 
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+LLToastPanel::LLToastPanel()
+	: LLPanel()
+{
+}
+// [/SL:KB]
+
 LLToastPanel::LLToastPanel(const LLNotificationPtr& notification)
 {
 	mNotification = notification;
@@ -49,7 +56,11 @@ LLToastPanel::~LLToastPanel()
 std::string LLToastPanel::getTitle()
 {
 	// *TODO: create Title and localize it. If it will be required.
-	return mNotification->getMessage();
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	const LLNotification* notifp = mNotification.get();
+	return (notifp) ? notifp->getMessage() : LLStringUtil::null;
+// [/SL:KB]
+//	return mNotification->getMessage();
 }
 
 //virtual
@@ -61,7 +72,11 @@ const std::string& LLToastPanel::getNotificationName()
 //virtual
 const LLUUID& LLToastPanel::getID()
 {
-	return mNotification->id();
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	const LLNotification* notifp = mNotification.get();
+	return (notifp) ? notifp->id() : LLUUID::null;
+// [/SL:KB]
+//	return mNotification->id();
 }
 
 S32 LLToastPanel::computeSnappedToMessageHeight(LLTextBase* message, S32 maxLineCount)

@@ -87,7 +87,10 @@ protected:
 // [/SL:KB]
 
 	// pointer to a corresponding channel's instance
-	LLNotificationsUI::LLScreenChannel*	mChannel;
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLHandle<LLNotificationsUI::LLScreenChannelBase> mChannel;
+// [/SL:KB]
+//	LLNotificationsUI::LLScreenChannel*	mChannel;
 	LLFlatListView*	mMessageList;
 
 	/**

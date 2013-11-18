@@ -141,7 +141,7 @@ protected:
 	LLUUID	mID;
 	
 	LLView*	mFloaterSnapRegion;
-	LLView* mChicletRegion;
+//	LLView* mChicletRegion;
 };
 
 
@@ -201,8 +201,8 @@ public:
 	void		removeToastsBySessionID(LLUUID id);
 	// remove all storable toasts from screen and store them
 	void		removeAndStoreAllStorableToasts();
-	// close the StartUp Toast
-	void		closeStartUpToast();
+//	// close the StartUp Toast
+//	void		closeStartUpToast();
 
 
 	/** Stop fading given toast */
@@ -219,9 +219,9 @@ public:
 	void updateShowToastsState();
 
 
-	// Channel's other interface functions functions
-	// update number of notifications in the StartUp Toast
-	void	updateStartUpString(S32 num);
+//	// Channel's other interface functions functions
+//	// update number of notifications in the StartUp Toast
+//	void	updateStartUpString(S32 num);
 
 	LLToast* getToastByNotificationID(LLUUID id);
 
@@ -230,7 +230,10 @@ public:
 	typedef boost::signals2::signal<void (LLPanel* info_panel, const LLUUID id)> store_toast_signal_t;
 	boost::signals2::connection addOnStoreToastCallback(store_toast_signal_t::slot_type cb) { return mOnStoreToast.connect(cb); }
 
-private:
+//private:
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+protected:
+// [/SL:KB]
 	store_toast_signal_t mOnStoreToast;	
 
 	class ToastElem
@@ -269,10 +272,16 @@ private:
 	};
 
 	// Channel's handlers
-	void	onToastHover(LLToast* toast, bool mouse_enter);
-	void	onToastFade(LLToast* toast);
-	void	onToastDestroyed(LLToast* toast);
-	void	onStartUpToastHide();
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	// Channel's handlers
+	virtual void onToastHover(LLToast* toast, bool mouse_enter);
+	virtual void onToastFade(LLToast* toast);
+	virtual void onToastDestroyed(LLToast* toast);
+// [/SL:KB]
+//	void	onToastHover(LLToast* toast, bool mouse_enter);
+//	void	onToastFade(LLToast* toast);
+//	void	onToastDestroyed(LLToast* toast);
+//	void	onStartUpToastHide();
 
 	//
 	void	storeToast(ToastElem& toast_elem);
@@ -284,8 +293,8 @@ private:
 	void	showToastsCentre();
 	void	showToastsTop();
 	
-	// create the StartUp Toast
-	void	createStartUpToast(S32 notif_num, F32 timer);
+//	// create the StartUp Toast
+//	void	createStartUpToast(S32 notif_num, F32 timer);
 
 	/**
 	 * Notification channel and World View ratio(0.0 - always show 1 notification, 1.0 - max ratio).
@@ -295,13 +304,26 @@ private:
 	// Channel's flags
 	static bool	mWasStartUpToastShown;
 
-	// attributes for the StartUp Toast	
-	LLToast* mStartUpToastPanel;
+//	// attributes for the StartUp Toast	
+//	LLToast* mStartUpToastPanel;
 
 
 	std::vector<ToastElem>		mToastList;
 	std::vector<ToastElem>		mStoredToastList;
 };
+
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+class LLScreenChannelStartup : public LLScreenChannel
+{
+	friend class LLChannelManager;
+public:
+	LLScreenChannelStartup(const Params&);
+	/*virtual*/ ~LLScreenChannelStartup();
+
+private:
+	/*virtual*/ void onToastDestroyed(LLToast* toast);
+};
+// [/SL:KB]
 
 }
 #endif
