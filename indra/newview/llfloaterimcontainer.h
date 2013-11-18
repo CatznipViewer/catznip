@@ -212,7 +212,7 @@ private:
 	bool mIsFirstLaunch;
 
 	LLUUID mSelectedSession;
-	std::string mGeneralTitle;
+//	std::string mGeneralTitle;
 
 	// Conversation list implementation
 public:
