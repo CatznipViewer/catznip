@@ -67,7 +67,7 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
   : LLFloaterIMSessionTab(session_id),
 	mLastMessageIndex(-1),
 	mDialog(IM_NOTHING_SPECIAL),
-	mTypingStart(),
+//	mTypingStart(),
 	mShouldSendTypingState(false),
 	mMeTyping(false),
 	mOtherTyping(false),
@@ -309,7 +309,7 @@ void LLFloaterIMSession::initIMFloater()
 
 	boundVoiceChannel();
 
-	mTypingStart = LLTrans::getString("IM_typing_start_string");
+//	mTypingStart = LLTrans::getString("IM_typing_start_string");
 
 	// Show control panel in torn off floaters only.
 	mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
@@ -559,8 +559,11 @@ void LLFloaterIMSession::updateSessionName(const std::string& name)
 	if (!name.empty())
 	{
 		LLFloaterIMSessionTab::updateSessionName(name);
-		mTypingStart.setArg("[NAME]", name);
-		setTitle (mOtherTyping ? mTypingStart.getString() : name);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		setTitle(name);
+// [/SL:KB]
+//		mTypingStart.setArg("[NAME]", name);
+//		setTitle (mOtherTyping ? mTypingStart.getString() : name);
 //		mSessionNameUpdatedForTyping = mOtherTyping;
 	}
 }

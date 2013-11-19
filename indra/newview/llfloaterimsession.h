@@ -180,7 +180,7 @@ private:
 	LLUUID mOtherParticipantUUID;
 	bool mPositioned;
 
-	LLUIString mTypingStart;
+//	LLUIString mTypingStart;
 	bool mMeTyping;
 	bool mOtherTyping;
 	bool mShouldSendTypingState;
