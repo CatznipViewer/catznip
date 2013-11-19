@@ -94,6 +94,9 @@
 #include "llweb.h"
 #include "llsecondlifeurls.h"
 #include "llupdaterservice.h"
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2011-11-24 (Catznip-3.2)
+#include "llfloaterassetrecovery.h"
+// [/SL:KB]
 #include "llfloatertexturefetchdebugger.h"
 #include "llspellcheck.h"
 #include "llavatarrenderinfoaccountant.h"
@@ -5399,6 +5402,10 @@ void LLAppViewer::handleLoginComplete()
 	}
 
 	mOnLoginCompleted();
+
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2011-11-24 (Catznip-3.2)
+	LLAssetRecoverQueue::recoverIfNeeded();
+// [/SL:KB]
 
 	writeDebugInfo();
 
