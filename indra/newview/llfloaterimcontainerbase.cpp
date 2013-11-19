@@ -65,6 +65,12 @@ BOOL LLFloaterIMContainerBase::postBuild()
 	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 	// mTabContainer will be initialized in LLMultiFloater::addChild()
 	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+	mTabContainer->setCommitCallback(boost::bind(&LLFloaterIMContainerBase::onSelectConversation, this));
+
+	// Save the title so we can refer back to it whenever a session is selected
+	setShortTitle(getTitle());
+// [/SL:KB]
 
 	return TRUE;
 }
@@ -92,12 +98,6 @@ void LLFloaterIMContainerBase::setMinimized(BOOL b)
 			}
 		}
 	}
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
-	mTabContainer->setCommitCallback(boost::bind(&LLFloaterIMContainerBase::onSelectConversation, this));
-
-	// Save the title so we can refer back to it whenever a session is selected
-	setShortTitle(getTitle());
-// [/SL:KB]
 }
 
 // Checked: 2013-09-01 (Catznip-3.6)
