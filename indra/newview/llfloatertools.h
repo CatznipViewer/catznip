@@ -119,6 +119,12 @@ private:
 	static bool deleteMediaConfirm(const LLSD& notification, const LLSD& response);
 	static bool multipleFacesSelectedConfirm(const LLSD& notification, const LLSD& response);
 	static void setObjectType( LLPCode pcode );
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	void onClickSelectOptions();
+// [/SL:KB]
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	void onClickAxisOptions();
+// [/SL:KB]
 	void onClickGridOptions();
 
 public:
@@ -142,6 +148,16 @@ public:
 	LLCheckBoxCtrl	*mCheckSelectIndividual;
 	LLButton*		mBtnLink;
 	LLButton*		mBtnUnlink;
+
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+	LLTextBox*		mTextSelection;
+	LLButton*		mBtnSelectionOptions;
+// [/SL:KB]
+
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	LLCheckBoxCtrl*	mCheckAxisAtRoot;
+	LLButton*		mBtnAxisOptions;
+// [/SL:KB]
 
 	LLCheckBoxCtrl*	mCheckSnapToGrid;
 	LLButton*		mBtnGridOptions;

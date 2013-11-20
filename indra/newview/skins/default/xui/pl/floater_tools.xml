@@ -245,19 +245,19 @@
 			<check_box label="Tymczasowy" name="Temporary Checkbox Ctrl" tool_tip="Umożliwia usunięcie obiektu po 1 minucie od jego stworzenia."/>
 			<check_box label="Fantom" name="Phantom Checkbox Ctrl" tool_tip="Umożliwia zanik kolizji pomiędzy obiektami a awatarami."/>
 			<text name="label position">
-				Pozycja (metry)
+				Pozycja
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Rozmiar (metry)
+				Rozmiar
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Obrót (stopnie)
+				Obrót
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>
@@ -385,88 +385,8 @@
 			<spinner label="Spadek" name="Light Falloff"/>
 			<spinner label="Otoczenie/Nastrój" name="Light Ambiance"/>
 		</panel>
-		<panel label="Tekstura" name="Texture">
-			<panel.string name="string repeats per meter">
-				Powtórzenia / m
-			</panel.string>
-			<panel.string name="string repeats per face">
-				Powtórzenia
-			</panel.string>
-			<texture_picker label="Tekstura" name="texture control" tool_tip="Kliknij by wybrać obraz"/>
-			<color_swatch label="Kolor" name="colorswatch" tool_tip="Kliknij aby wybrać kolor"/>
-			<text left="170" name="color trans" width="99">
-				Przezroczystość %
-			</text>
-			<spinner left="170" name="ColorTrans"/>
-			<text left="170" name="glow label">
-				Blask
-			</text>
-			<spinner left="170" name="glow"/>
-			<check_box label="Jaskrawość" left="170" name="checkbox fullbright"/>
-			<text name="tex gen">
-				Mapowanie
-			</text>
-			<combo_box name="combobox texgen">
-				<combo_box.item label="Domyślne" name="Default"/>
-				<combo_box.item label="Planarne" name="Planar"/>
-			</combo_box>
-			<text name="label shininess">
-				Połysk
-			</text>
-			<combo_box name="combobox shininess">
-				<combo_box.item label="Żadny" name="None"/>
-				<combo_box.item label="Niski" name="Low"/>
-				<combo_box.item label="Średni" name="Medium"/>
-				<combo_box.item label="Wysoki" name="High"/>
-			</combo_box>
-			<text name="label bumpiness">
-				Powierzchnia
-			</text>
-			<combo_box name="combobox bumpiness">
-				<combo_box.item label="Żadna" name="None"/>
-				<combo_box.item label="Najjaśniejsza" name="Brightness"/>
-				<combo_box.item label="Najciemniejsza" name="Darkness"/>
-				<combo_box.item label="Drewniano-ziarnista" name="woodgrain"/>
-				<combo_box.item label="Kory drzewa" name="bark"/>
-				<combo_box.item label="Cegieł" name="bricks"/>
-				<combo_box.item label="Planszy szachowej" name="checker"/>
-				<combo_box.item label="Betonu" name="concrete"/>
-				<combo_box.item label="Płytki/Kafelki" name="crustytile"/>
-				<combo_box.item label="Kamienia" name="cutstone"/>
-				<combo_box.item label="Dysku CD" name="discs"/>
-				<combo_box.item label="Żwiru" name="gravel"/>
-				<combo_box.item label="Skamieliny" name="petridish"/>
-				<combo_box.item label="Brzegu" name="siding"/>
-				<combo_box.item label="Płytki kamiennej" name="stonetile"/>
-				<combo_box.item label="Stucco" name="stucco"/>
-				<combo_box.item label="Suction" name="suction"/>
-				<combo_box.item label="Fali" name="weave"/>
-			</combo_box>
-			<spinner label="Poziomo (U)" name="TexScaleU"/>
-			<check_box label="Odwróć" name="checkbox flip s"/>
-			<spinner label="Pionowo (V)" name="TexScaleV"/>
-			<check_box label="Odwróć" name="checkbox flip t"/>
-			<spinner label="Powtórzenia˚" name="TexRot"/>
-			<button label="Zastosuj" label_selected="Zastosuj" name="button apply"/>
-			<text name="tex offset">
-				Wyrównanie tekstury
-			</text>
-			<spinner label="Poziome (U)" name="TexOffsetU"/>
-			<spinner label="Pionowe (V)" name="TexOffsetV"/>
-			<panel name="Add_Media">
-				<text name="media_tex">
-					Media
-				</text>
-				<button name="add_media" tool_tip="Dodaj media"/>
-				<button name="delete_media" tool_tip="Usuń tą teksturę mediów"/>
-				<button name="edit_media" tool_tip="Edytuj media"/>
-				<button label="Dodaj" label_selected="Dopasuj teksturę mediów" name="button align" tool_tip="Dodaj teksturę mediów (musi się najpierw załadować)"/>
-			</panel>
-		</panel>
-		<panel label="Treść" name="Contents">
-			<button label="Nowy skrypt" label_selected="Nowy skrypt" name="button new script"/>
-			<button label="Prawa" name="button permissions"/>
-		</panel>
+		<panel label="Tekstura" name="Texture" />
+		<panel label="Treść" name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">

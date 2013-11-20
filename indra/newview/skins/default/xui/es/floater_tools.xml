@@ -106,7 +106,7 @@
 		No está seleccionado nada.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights Más información]
+		[secondlife:///app/openfloater/object_weights Más información]
 	</text>
 	<tab_container name="Object Info Tabs" tab_max_width="62" tab_min_width="30" width="288">
 		<panel label="General" name="General">
@@ -236,19 +236,19 @@
 			<check_box label="Temporal" name="Temporary Checkbox Ctrl" tool_tip="Provoca que el objeto desaparezca 1 minuto después de ser creado"/>
 			<check_box label="Inmaterial" name="Phantom Checkbox Ctrl" tool_tip="Hace que el objeto no colisiones con otros objetos o avatares."/>
 			<text name="label position">
-				Posición (metros)
+				Posición
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Tamaño (metros)
+				Tamaño
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Rotación (grados)
+				Rotación
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>
@@ -388,86 +388,8 @@
 			<spinner label="Densidad en 100 kg/m^3" name="Physics Density"/>
 			<spinner label="Reemplazo" name="Physics Restitution"/>
 		</panel>
-		<panel label="Textura" name="Texture">
-			<panel.string name="string repeats per meter">
-				Repeticiones por m.
-			</panel.string>
-			<panel.string name="string repeats per face">
-				Repeticiones por cara
-			</panel.string>
-			<texture_picker label="Textura" name="texture control" tool_tip="Pulse para elegir una imagen"/>
-			<color_swatch label="Color" name="colorswatch" tool_tip="Pulsa para abrir el selector de color"/>
-			<text name="color trans">
-				Transparencia %
-			</text>
-			<text name="glow label">
-				Resplandor
-			</text>
-			<check_box bottom_delta="-21" label="Brillo al  máximo" name="checkbox fullbright"/>
-			<text name="tex gen">
-				Detallado
-			</text>
-			<combo_box name="combobox texgen">
-				<combo_box.item label="Por defecto" name="Default"/>
-				<combo_box.item label="Plano" name="Planar"/>
-			</combo_box>
-			<text name="label shininess">
-				Brillantez
-			</text>
-			<combo_box name="combobox shininess">
-				<combo_box.item label="Ninguna" name="None"/>
-				<combo_box.item label="Baja" name="Low"/>
-				<combo_box.item label="Media" name="Medium"/>
-				<combo_box.item label="Alta" name="High"/>
-			</combo_box>
-			<text name="label bumpiness">
-				Relieve
-			</text>
-			<combo_box name="combobox bumpiness">
-				<combo_box.item label="Ninguno" name="None"/>
-				<combo_box.item label="Brillo" name="Brightness"/>
-				<combo_box.item label="Oscuro" name="Darkness"/>
-				<combo_box.item label="grano de madera" name="woodgrain"/>
-				<combo_box.item label="corteza" name="bark"/>
-				<combo_box.item label="ladrillos" name="bricks"/>
-				<combo_box.item label="cajero" name="checker"/>
-				<combo_box.item label="cemento" name="concrete"/>
-				<combo_box.item label="azulejería" name="crustytile"/>
-				<combo_box.item label="piedra cortada" name="cutstone"/>
-				<combo_box.item label="discos" name="discs"/>
-				<combo_box.item label="grava" name="gravel"/>
-				<combo_box.item label="placa de Petri" name="petridish"/>
-				<combo_box.item label="revestimiento" name="siding"/>
-				<combo_box.item label="baldosa de piedra" name="stonetile"/>
-				<combo_box.item label="estuco" name="stucco"/>
-				<combo_box.item label="succión" name="suction"/>
-				<combo_box.item label="tejido" name="weave"/>
-			</combo_box>
-			<spinner label="Horizontal (U)" name="TexScaleU"/>
-			<check_box label="Voltear" name="checkbox flip s"/>
-			<spinner label="Vertical (V)" name="TexScaleV"/>
-			<check_box label="Voltear" name="checkbox flip t"/>
-			<spinner label="Rotación" name="TexRot"/>
-			<button label="Aplicar" label_selected="Aplicar" name="button apply"/>
-			<text name="tex offset">
-				Desplazar
-			</text>
-			<spinner label="Horizontal (U)" name="TexOffsetU"/>
-			<spinner label="Vertical (V)" name="TexOffsetV"/>
-			<panel name="Add_Media">
-				<text name="media_tex">
-					Media
-				</text>
-				<button name="add_media" tool_tip="Añadir un media"/>
-				<button name="delete_media" tool_tip="Borrar esta textura para media"/>
-				<button name="edit_media" tool_tip="Editar este media"/>
-				<button label="Centrar" label_selected="Centrar los media" name="button align" tool_tip="Centrar esta textura para media (primero debe cargarse)"/>
-			</panel>
-		</panel>
-		<panel label="Contenido " name="Contents">
-			<button label="Script nuevo" label_selected="Script nuevo" name="button new script"/>
-			<button label="Permisos" name="button permissions"/>
-		</panel>
+		<panel label="Textura" name="Texture" />
+		<panel label="Contenido " name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">

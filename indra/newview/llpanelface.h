@@ -32,6 +32,9 @@
 #include "llmaterial.h"
 #include "llmaterialmgr.h"
 #include "lltextureentry.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 #include "llselectmgr.h"
 
 class LLButton;
@@ -95,6 +98,9 @@ public:
 	virtual BOOL	postBuild();
 	LLPanelFace();
 	virtual ~LLPanelFace();
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	/*virtual*/ void draw();
+// [/SL:KB]
 
 	void			refresh();
 	void			setMediaURL(const std::string& url);
@@ -144,6 +150,15 @@ protected:
 	void 	onCommitAlpha(const LLSD& data);
 	void 	onCancelColor(const LLSD& data);
 	void 	onSelectColor(const LLSD& data);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	void	onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette);
+	void	onSelectPipette(LLToolPipette::EType typePipette, LLViewerObject* pObj, const LLTextureEntry& te);
+
+	void	onClickBtnCopyParams(const LLSD& sdParam);
+	void	onClickBtnPasteParams(const LLSD& sdParam);
+	LLSD	objectToLLSD(const std::string& strParamType);
+	void	objectFromLLSD(const std::string& strParamType, const LLSD& sdParams);
+// [/SL:KB]
 
 	void 	onCloseTexturePicker(const LLSD& data);
 
@@ -385,6 +400,18 @@ private:
 	 */
 	void onTextureSelectionChanged(LLInventoryItem* itemp);
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
+protected:
+	LLButton*		mBtnColorPipette;
+
+	LLButton*		mBtnCopyMaterialTypeParams;
+	LLButton*		mBtnPasteMaterialTypeParams;
+	LLButton*		mBtnMaterialTypePipette;
+
+	LLButton*		mBtnTexturePipette;
+
+	LLSD			mObjectClipboard;
+// [/SL:KB]
 	bool mIsAlpha;
 	
 	/* These variables interlock processing of materials updates sent to

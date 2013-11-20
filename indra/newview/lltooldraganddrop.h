@@ -68,6 +68,9 @@ public:
 		SOURCE_NOTECARD,
 		SOURCE_LIBRARY,
 		SOURCE_VIEWER,
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-27 (Catznip-3.6)
+		SOURCE_DND,
+// [/SL:KB]
 		SOURCE_PEOPLE
 	};
 

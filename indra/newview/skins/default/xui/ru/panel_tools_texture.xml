@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Щелкните для выбора цвета"/>
 	<text name="color trans">
-		Прозрачность %
+		Alpha %
 	</text>
 	<text name="glow label">
 		Свечение

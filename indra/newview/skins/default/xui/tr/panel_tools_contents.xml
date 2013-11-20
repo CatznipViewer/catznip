@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="İçerik" name="Contents">
+			<button label="Yeni Komut Dosyası" label_selected="Yeni Komut Dosyası" name="button new script"/>
+			<button label="İzinler" name="button permissions"/>
+		</panel>
