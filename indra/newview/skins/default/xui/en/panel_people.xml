@@ -530,7 +530,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
          bg_opaque_color="DkGray"
          follows="all"
          height="383"
-         label="RECENT"
+         label="HISTORY"
          layout="topleft"
          left="0"
          help_topic="people_recent_tab"
@@ -620,6 +620,35 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                     <commit_callback
                      function="People.DelFriend" />
                  </dnd_button>
+              <combo_box
+             	 follows="bottom|left|right"
+             	 control_name="RecentPeopleInteractionFilter"
+             	 height="25"
+             	 layout="topleft"
+             	 left_pad="1"
+             	 name="interaction_type"
+             	 width="244">
+                <combo_box.item
+                 label="Any Interaction"
+                 name="General"
+                 value="0" />
+                <combo_box.item
+                 label="Public Chat"
+                 name="Chat"
+                 value="1" />
+                <combo_box.item
+                 label="Instant Messages"
+                 name="IM"
+                 value="2" />
+                <combo_box.item
+                 label="Inventory"
+                 name="Inventory"
+                 value="3" />
+                <combo_box.item
+                 label="Avaline"
+                 name="Avaline"
+                 value="4" />
+             </combo_box>
             </panel>
             <avatar_list
              allow_select="true"
