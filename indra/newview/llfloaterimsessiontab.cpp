@@ -365,6 +365,9 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	updateShowParticipantList();
 	updateExpandCollapseBtn();
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
+	updateGearBtn();
+// [/SL:KB]
 
 	// The resize limits for LLFloaterIMSessionTab should be updated, based on current values of width of conversation and message panels
 	mParticipantListPanel->getResizeBar()->setResizeListener(boost::bind(&LLFloaterIMSessionTab::assignResizeLimits, this));
@@ -1084,7 +1087,7 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 	mInputButtonPanel->setVisible(isTornOff());
 
 	refreshConversation();
-	updateGearBtn();
+//	updateGearBtn();
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
 	updateShowParticipantList();
 	updateExpandCollapseBtn();
@@ -1097,7 +1100,7 @@ void LLFloaterIMSessionTab::updateGearBtn()
 
 	BOOL prevVisibility = mGearBtn->getVisible();
 // [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
-	mGearBtn->setVisible(isTornOff() && mIsP2PChat);
+	mGearBtn->setVisible(mIsP2PChat);
 // [/SL:KB]
 //	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
 
