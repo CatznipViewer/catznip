@@ -95,7 +95,5 @@
         <on_click function="Avatar.GearDoToSelected" parameter="mute_unmute" />
         <on_enable function="Avatar.EnableGearItem" parameter="can_block" />
     </menu_item_check>
-    <menu_item_separator
-     layout="topleft"/>
 </toggleable_menu>
 

@@ -138,20 +138,6 @@ const LLConversationSort& LLFloaterIMContainerTab::getSortOrder() const
 	return sort;
 }
 
-bool LLFloaterIMContainerTab::checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS)
-{
-	return false;
-}
-
-bool LLFloaterIMContainerTab::enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS)
-{
-	return false;
-}
-
-void LLFloaterIMContainerTab::doToParticipants(const std::string& item, uuid_vec_t& selectedIDS)
-{
-}
-
 void LLFloaterIMContainerTab::setTimeNow(const LLUUID& session_id, const LLUUID& participant_id)
 {
 }

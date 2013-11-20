@@ -195,7 +195,7 @@ private:
 	void moderateVoiceAllParticipants(bool unmute);
 	void moderateVoiceParticipant(const LLUUID& avatar_id, bool unmute);
 	void toggleAllowTextChat(const LLUUID& participant_uuid);
-	void toggleMute(const LLUUID& participant_id, U32 flags);
+//	void toggleMute(const LLUUID& participant_id, U32 flags);
 	void openNearbyChat();
 	bool isParticipantListExpanded();
 

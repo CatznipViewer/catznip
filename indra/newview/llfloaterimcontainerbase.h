@@ -85,9 +85,15 @@ public:
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab
 	// *TODO : Find a better place for this.
-	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS) = 0;
-	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS) = 0;
-    virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS) = 0;
+	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+	
+	/*
+	 * Moved over from LLFloaterIMContainerView
+	 */
+protected:
+	void toggleMute(const LLUUID& participant_id, U32 flags);
 
 protected:
 	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;

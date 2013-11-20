@@ -38,12 +38,6 @@ public:
 	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const;
 	/*virtual*/ const LLConversationSort& getSortOrder() const;
 	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
-
-	// Handling of lists of participants is public so to be common with llfloatersessiontab
-	// *TODO : Find a better place for this.
-	/*virtual*/ bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-	/*virtual*/ bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-	/*virtual*/ void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

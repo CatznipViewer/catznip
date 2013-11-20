@@ -1118,7 +1118,7 @@ void LLFloaterIMContainerView::getParticipantUUIDs(uuid_vec_t& selected_uuids)
 	getSelectedUUIDs(selected_uuids);  
 }
 
-void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid_vec_t& selectedIDS)
+void LLFloaterIMContainerBase::doToParticipants(const std::string& command, uuid_vec_t& selectedIDS)
 {
 	if (selectedIDS.size() == 1)
 	{
@@ -1186,14 +1186,14 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 		{
 			toggleMute(userID, LLMute::flagTextChat);
 		}
-		else if ("selected" == command || "mute_all" == command || "unmute_all" == command)
-		{
-			moderateVoice(command, userID);
-		}
-		else if ("toggle_allow_text_chat" == command)
-		{
-			toggleAllowTextChat(userID);
-		}
+//		else if ("selected" == command || "mute_all" == command || "unmute_all" == command)
+//		{
+//			moderateVoice(command, userID);
+//		}
+//		else if ("toggle_allow_text_chat" == command)
+//		{
+//			toggleAllowTextChat(userID);
+//		}
 	}
 	else if (selectedIDS.size() > 1)
 	{
@@ -1215,6 +1215,28 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 		}
 	}
 }
+
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
+void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid_vec_t& selectedIDS)
+{
+	if (selectedIDS.size() == 1)
+	{
+		const LLUUID& userID = selectedIDS.front();
+		if ("selected" == command || "mute_all" == command || "unmute_all" == command)
+		{
+			moderateVoice(command, userID);
+		}
+		else if ("toggle_allow_text_chat" == command)
+		{
+			toggleAllowTextChat(userID);
+		}
+	}
+	else
+	{
+		LLFloaterIMContainerBase::doToParticipants(command, selectedIDS);
+	}
+}
+// [/SL:KB]
 
 void LLFloaterIMContainerView::doToSelectedConversation(const std::string& command, uuid_vec_t& selectedIDS)
 {
@@ -1357,7 +1379,7 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const LLSD& userdata)
 	return enableContextMenuItem(item, uuids);
 }
 
-bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uuid_vec_t& uuids)
+bool LLFloaterIMContainerBase::enableContextMenuItem(const std::string& item, uuid_vec_t& uuids)
 {
 	// Extract the single select info
 	bool is_single_select = (uuids.size() == 1);
@@ -1427,15 +1449,27 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uu
     {
 		return LLAvatarActions::canOfferTeleport(uuids);
     }
-	else if (("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item))
-	{
-		// *TODO : get that out of here...
-		return enableModerateContextMenuItem(item);
-	}
+//	else if (("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item))
+//	{
+//		// *TODO : get that out of here...
+//		return enableModerateContextMenuItem(item);
+//	}
 
 	// By default, options that not explicitely disabled are enabled
     return true;
 }
+
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
+bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uuid_vec_t& uuids)
+{
+	if (("can_moderate_voice" == item) || ("can_allow_text_chat" == item) || ("can_mute" == item) || ("can_unmute" == item))
+	{
+		// *TODO : get that out of here...
+		return enableModerateContextMenuItem(item);
+	}
+	return LLFloaterIMContainerBase::enableContextMenuItem(item, uuids);
+}
+// [/SL:KB]
 
 bool LLFloaterIMContainerView::checkContextMenuItem(const LLSD& userdata)
 {
@@ -1446,7 +1480,7 @@ bool LLFloaterIMContainerView::checkContextMenuItem(const LLSD& userdata)
 	return checkContextMenuItem(item, uuids);
 }
 
-bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uuid_vec_t& uuids)
+bool LLFloaterIMContainerBase::checkContextMenuItem(const std::string& item, uuid_vec_t& uuids)
 {
     if (uuids.size() == 1)
     {
@@ -1458,19 +1492,37 @@ bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uui
 		{
 		    return LLMuteList::getInstance()->isMuted(uuids.front(), LLMute::flagTextChat);
 	    }
-		else if ("is_allowed_text_chat" == item)
+//		else if ("is_allowed_text_chat" == item)
+//		{
+//			const LLSpeaker * speakerp = getSpeakerOfSelectedParticipant(getSpeakerMgrForSelectedParticipant());
+//
+//			if (NULL != speakerp)
+//			{
+//				return !speakerp->mModeratorMutedText;
+//			}
+//		}
+    }
+
+    return false;
+}
+
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
+bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uuid_vec_t& uuids)
+{
+	if (uuids.size() == 1)
+	{
+		if ("is_allowed_text_chat" == item)
 		{
 			const LLSpeaker * speakerp = getSpeakerOfSelectedParticipant(getSpeakerMgrForSelectedParticipant());
-
 			if (NULL != speakerp)
 			{
 				return !speakerp->mModeratorMutedText;
 			}
 		}
-    }
-
-    return false;
+	}
+	return LLFloaterIMContainerBase::checkContextMenuItem(item, uuids);
 }
+// [/SL:KB]
 
 bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 {
@@ -1981,7 +2033,7 @@ void LLFloaterIMContainerView::toggleAllowTextChat(const LLUUID& participant_uui
 	}
 }
 
-void LLFloaterIMContainerView::toggleMute(const LLUUID& participant_id, U32 flags)
+void LLFloaterIMContainerBase::toggleMute(const LLUUID& participant_id, U32 flags)
 {
         BOOL is_muted = LLMuteList::getInstance()->isMuted(participant_id, flags);
         std::string name;
