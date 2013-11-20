@@ -82,5 +82,34 @@ protected:
 };
 
 // ============================================================================
+// LLSoundDropTarget helper class
+//
+
+class LLSoundDropTarget : public LLView
+{
+public:
+	struct Params : public LLInitParam::Block<Params, LLView::Params>
+	{
+		Params()
+		{
+			changeDefault(mouse_opaque, false);
+			changeDefault(follows.flags, FOLLOWS_ALL);
+		}
+	};
+
+public:
+	LLSoundDropTarget(const Params&);
+	/*virtual*/ ~LLSoundDropTarget();
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
+	                                   EAcceptance* accept, std::string& tooltip_msg);
+
+	typedef boost::signals2::signal<void (const LLUUID&)> drop_signal_t;
+	boost::signals2::connection setDropCallback(const drop_signal_t::slot_type& cb);
+
+protected:
+	drop_signal_t* m_pDropSignal;
+};
+
+// ============================================================================
 
 #endif  // LLFLOATERCHATALERTS_H

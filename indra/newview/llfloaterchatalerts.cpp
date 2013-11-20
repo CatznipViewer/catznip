@@ -38,38 +38,21 @@
 // LLSoundDropTarget helper class
 //
 
-class LLSoundDropTarget : public LLView
-{
-public:
-	struct Params : public LLInitParam::Block<Params, LLView::Params>
-	{
-		Params()
-		{
-			changeDefault(mouse_opaque, false);
-			changeDefault(follows.flags, FOLLOWS_ALL);
-		}
-	};
-
-public:
-	LLSoundDropTarget(const Params&);
-	/*virtual*/ ~LLSoundDropTarget();
-	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
-	                                   EAcceptance* accept, std::string& tooltip_msg);
-};
-
 static LLDefaultChildRegistry::Register<LLSoundDropTarget> r("sound_drop_target");
 
 LLSoundDropTarget::LLSoundDropTarget(const LLSoundDropTarget::Params& p) 
 	: LLView(p)
+	, m_pDropSignal(NULL)
 {
 }
 
 LLSoundDropTarget::~LLSoundDropTarget()
 {
+	delete m_pDropSignal;
 }
 
 BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
-                                         EAcceptance* accept, std::string& tooltip_msg)
+                                          EAcceptance* accept, std::string& tooltip_msg)
 {
 	BOOL fHandled = FALSE;
 	if (getParent())
@@ -87,7 +70,10 @@ BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, ED
 
 						if (drop)
 						{
-							getParent()->notifyParent(LLSD().with("item_id", pItem->getUUID()));
+							if (m_pDropSignal)
+								(*m_pDropSignal)(pItem->getUUID());
+							else
+								getParent()->notifyParent(LLSD().with("item_id", pItem->getUUID()));;
 						}
 					}
 					else
@@ -103,6 +89,13 @@ BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, ED
 		}
 	}
 	return fHandled;
+}
+
+boost::signals2::connection LLSoundDropTarget::setDropCallback(const drop_signal_t::slot_type& cb) 
+{ 
+	if (!m_pDropSignal)
+		m_pDropSignal = new drop_signal_t();
+	return m_pDropSignal->connect(cb); 
 }
 
 // ============================================================================
