@@ -47,6 +47,9 @@
 #include "llfloaterpreference.h"
 #include "llimview.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llparticipantlist.h"
+// [/SL:KB]
 #include "lltoolbarview.h"
 #include "lltransientfloatermgr.h"
 #include "llviewercontrol.h"
@@ -1702,7 +1705,10 @@ LLConversationItem* LLFloaterIMContainerView::addConversationListItem(const LLUU
 	LLSpeakerMgr* speaker_manager = (is_nearby_chat ? (LLSpeakerMgr*)(LLLocalSpeakerMgr::getInstance()) : LLIMModel::getInstance()->getSpeakerManager(uuid));
 	if (speaker_manager)
 	{
-		item = new LLParticipantList(speaker_manager, getRootViewModel());
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+		item = new LLParticipantListModel(speaker_manager, getRootViewModel());
+// [/SL:KB]
+//		item = new LLParticipantList(speaker_manager, getRootViewModel());
 	}
 	if (!item)
 	{

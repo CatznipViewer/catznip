@@ -41,6 +41,9 @@
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h" // to replace separate IM Floaters with multifloater container
 #include "lllayoutstack.h"
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llparticipantlist.h"
+// [/SL:KB]
 #include "lltoolbarview.h"
 #include "llfloaterimnearbychat.h"
 
@@ -423,7 +426,10 @@ void LLFloaterIMSessionTab::draw()
 {
 	if (mRefreshTimer->hasExpired())
 	{
-		LLParticipantList* item = getParticipantList();
+//		LLParticipantList* item = getParticipantList();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+		LLParticipantListModel* item = dynamic_cast<LLParticipantListModel*>(getParticipantList());
+// [/SL:KB]
 		if (item)
 		{
 			// Update all model items
@@ -566,7 +572,10 @@ void LLFloaterIMSessionTab::buildConversationViewParticipant()
 	}
 	
 	// Get the model list
-	LLParticipantList* item = getParticipantList();
+//	LLParticipantList* item = getParticipantList();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	LLParticipantListModel* item = dynamic_cast<LLParticipantListModel*>(getParticipantList());
+// [/SL:KB]
 	if (!item)
 	{
 		// Nothing to do if the model list is inexistent
@@ -689,7 +698,10 @@ void LLFloaterIMSessionTab::refreshConversation()
 // [/SL:KB]
 		if (mSessionID.notNull())
 		{
-			LLParticipantList* participant_list = getParticipantList();
+//			LLParticipantList* participant_list = getParticipantList();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+			LLParticipantListModel* participant_list = dynamic_cast<LLParticipantListModel*>(getParticipantList());
+// [/SL:KB]
 			if (participant_list)
 			{
 				LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = participant_list->getChildrenBegin();
