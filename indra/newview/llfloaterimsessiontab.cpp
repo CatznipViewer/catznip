@@ -32,6 +32,9 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llavataractions.h"
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llavatarlist.h"
+// [/SL:KB]
 #include "llchatentry.h"
 #include "llchathistory.h"
 #include "llchiclet.h"
@@ -68,6 +71,9 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mChatLayoutPanel(NULL)
   , mInputPanels(NULL)
   , mChatLayoutPanelHeight(0)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+  ,	mParticipantList(NULL)
+// [/SL:KB]
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
   , mBodyStack(NULL)
   , mParticipantListAndHistoryStack(NULL)
@@ -416,33 +422,46 @@ BOOL LLFloaterIMSessionTab::postBuild()
 
 LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 {
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainerBase::getInstance()->getSessionModel(mSessionID));
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	return (mParticipantList) ? mParticipantList : dynamic_cast<LLParticipantList*>(LLFloaterIMContainerBase::getInstance()->getSessionModel(mSessionID));
 // [/SL:KB]
 //	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+void LLFloaterIMSessionTab::setParticipantList(LLParticipantList* participant_list)
+{
+	mParticipantList = participant_list;
+}
+// [/SL:KB]
 
 void LLFloaterIMSessionTab::draw()
 {
 	if (mRefreshTimer->hasExpired())
 	{
-//		LLParticipantList* item = getParticipantList();
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-		LLParticipantListModel* item = dynamic_cast<LLParticipantListModel*>(getParticipantList());
-// [/SL:KB]
+		LLParticipantList* item = getParticipantList();
 		if (item)
 		{
 			// Update all model items
 			item->update();
-			// If the model and view list diverge in count, rebuild
-			// Note: this happens sometimes right around init (add participant events fire but get dropped) and is the cause
-			// of missing participants, often, the user agent itself. As there will be no other event fired, there's
-			// no other choice but get those inconsistencies regularly (and lightly) checked and scrubbed.
-			if (item->getChildrenCount() != mConversationsWidgets.size())
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+			LLParticipantModelList* item= dynamic_cast<LLParticipantModelList*>(getParticipantList());
+			if (item)
 			{
-				buildConversationViewParticipant();
+// [/SL:KB]
+				// If the model and view list diverge in count, rebuild
+				// Note: this happens sometimes right around init (add participant events fire but get dropped) and is the cause
+				// of missing participants, often, the user agent itself. As there will be no other event fired, there's
+				// no other choice but get those inconsistencies regularly (and lightly) checked and scrubbed.
+				if (item->getChildrenCount() != mConversationsWidgets.size())
+				{
+					buildConversationViewParticipant();
+				}
+				refreshConversation();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 			}
-			refreshConversation();
+// [/SL:KB]
 		}
 
 		// Restart the refresh timer
@@ -574,7 +593,7 @@ void LLFloaterIMSessionTab::buildConversationViewParticipant()
 	// Get the model list
 //	LLParticipantList* item = getParticipantList();
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	LLParticipantListModel* item = dynamic_cast<LLParticipantListModel*>(getParticipantList());
+	LLParticipantModelList* item = dynamic_cast<LLParticipantModelList*>(getParticipantList());
 // [/SL:KB]
 	if (!item)
 	{
@@ -700,7 +719,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 		{
 //			LLParticipantList* participant_list = getParticipantList();
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-			LLParticipantListModel* participant_list = dynamic_cast<LLParticipantListModel*>(getParticipantList());
+			LLParticipantModelList* participant_list = dynamic_cast<LLParticipantModelList*>(getParticipantList());
 // [/SL:KB]
 			if (participant_list)
 			{
@@ -731,6 +750,17 @@ void LLFloaterIMSessionTab::refreshConversation()
 			mConversationsRoot->update();
 		}
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+	else
+	{
+		if (mSessionID.notNull())
+		{
+			LLParticipantAvatarList* participant_list = dynamic_cast<LLParticipantAvatarList*>(getParticipantList());
+			if (participant_list)
+			{
+				participant_list->onAvatarListRefreshed();
+			}
+		}
 	}
 // [/SL:KB]
 //	updateHeaderAndToolbar();

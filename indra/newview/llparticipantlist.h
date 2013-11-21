@@ -33,6 +33,9 @@
 class LLSpeakerMgr;
 class LLUICtrl;
 class LLAvalineUpdater;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLAvatarList;
+// [/SL:KB]
 
 //class LLParticipantList : public LLConversationItemSession
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
@@ -84,6 +87,9 @@ protected:
 	bool onSpeakerMuteEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	std::set<LLUUID>& getModeratorList()          { return mModeratorList; }
+	std::set<LLUUID>& getModeratorToRemoveList() { return mModeratorToRemoveList; }
+
 	virtual const LLUUID& getSessionID() const = 0;
 
 	virtual void addAvatarParticipant(const LLUUID& particpant_id) = 0;
@@ -178,12 +184,12 @@ private:
 };
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-class LLParticipantListModel : public LLConversationItemSession, public LLParticipantList
+class LLParticipantModelList : public LLConversationItemSession, public LLParticipantList
 {
-	LOG_CLASS(LLParticipantListModel);
+	LOG_CLASS(LLParticipantModelList);
 public:
-	LLParticipantListModel(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model);
-	/*virtual*/ ~LLParticipantListModel();
+	LLParticipantModelList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model);
+	/*virtual*/ ~LLParticipantModelList();
 
 public:
 	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
@@ -197,6 +203,34 @@ protected:
 	/*virtual*/ bool isParticipant(const LLUUID& particpant_id)     { return NULL != LLConversationItemSession::findParticipant(particpant_id); }
 	/*virtual*/ void removeParticipant(const LLUUID& particpant_id) { LLConversationItemSession::removeParticipant(particpant_id); }
 	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) { LLConversationItemSession::setParticipantIsMuted(particpant_id, is_muted); }
+};
+
+class LLParticipantAvatarList : public LLParticipantList
+{
+	LOG_CLASS(LLParticipantAvatarList);
+public:
+	LLParticipantAvatarList(LLSpeakerMgr* pDataSource, LLAvatarList* pAvatarList);
+	/*virtual*/ ~LLParticipantAvatarList();
+
+public:
+	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
+	/*virtual*/ void update() { LLParticipantList::update(); }
+
+	void onAvatarListRefreshed();
+protected:
+	/*virtual*/ const LLUUID& getSessionID() const;
+
+	/*virtual*/ void addAvatarParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void addAvalineParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void clearParticipants();
+	/*virtual*/ bool isParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void removeParticipant(const LLUUID& particpant_id);
+	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted);
+
+protected:
+	LLAvatarList* m_pAvatarList;
+
+	boost::signals2::connection m_AvatarListRefreshConn;
 };
 // [/SL:KB]
 

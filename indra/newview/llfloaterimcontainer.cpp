@@ -1701,12 +1701,15 @@ LLConversationItem* LLFloaterIMContainerView::addConversationListItem(const LLUU
 	}
 
 	// Create a conversation session model
-	LLConversationItemSession* item = NULL;
+//	LLConversationItemSession* item = NULL;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	LLParticipantModelList* item = NULL;
+// [/SL:KB]
 	LLSpeakerMgr* speaker_manager = (is_nearby_chat ? (LLSpeakerMgr*)(LLLocalSpeakerMgr::getInstance()) : LLIMModel::getInstance()->getSpeakerManager(uuid));
 	if (speaker_manager)
 	{
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-		item = new LLParticipantListModel(speaker_manager, getRootViewModel());
+		item = new LLParticipantModelList(speaker_manager, getRootViewModel());
 // [/SL:KB]
 //		item = new LLParticipantList(speaker_manager, getRootViewModel());
 	}
@@ -1755,6 +1758,9 @@ LLConversationItem* LLFloaterIMContainerView::addConversationListItem(const LLUU
 	if (conversation_floater)
 	{
 		conversation_floater->buildConversationViewParticipant();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+		conversation_floater->setParticipantList(item);
+// [/SL:KB]
 	}
 
 	// set the widget to minimized mode if conversations pane is collapsed

@@ -71,6 +71,10 @@ public:
 	bool isHostAttached() {return mIsHostAttached;}
 	void setHostAttached(bool is_attached) {mIsHostAttached = is_attached;}
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	void setParticipantList(LLParticipantList* participant_list);
+// [/SL:KB]
+
     static LLFloaterIMSessionTab* findConversation(const LLUUID& uuid);
     static LLFloaterIMSessionTab* getConversation(const LLUUID& uuid);
 
@@ -220,6 +224,9 @@ private:
     bool mHasVisibleBeenInitialized;
 
 	LLTimer* mRefreshTimer; ///< Defines the rate at which refresh() is called.
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	LLParticipantList* mParticipantList;
+// [/SL:KB]
 
 	S32 mInputEditorPad;
 	S32 mChatLayoutPanelHeight;

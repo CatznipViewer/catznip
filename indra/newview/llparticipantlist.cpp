@@ -26,6 +26,9 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llavatarlist.h"
+// [/SL:KB]
 #include "llavatarnamecache.h"
 #include "llerror.h"
 #include "llimview.h"
@@ -498,7 +501,11 @@ bool LLParticipantList::SpeakerMuteListener::handleEvent(LLPointer<LLOldEvents::
 }
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-LLParticipantListModel::LLParticipantListModel(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model)
+
+//
+// LLParticipantModelList class
+//
+LLParticipantModelList::LLParticipantModelList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model)
 	: LLConversationItemSession(data_source->getSessionID(), root_view_model)
 	, LLParticipantList(data_source)
 {
@@ -526,11 +533,11 @@ LLParticipantListModel::LLParticipantListModel(LLSpeakerMgr* data_source, LLFold
 	}
 }
 
-LLParticipantListModel::~LLParticipantListModel()
+LLParticipantModelList::~LLParticipantModelList()
 {
 }
 
-void LLParticipantListModel::addAvatarParticipant(const LLUUID& particpant_id)
+void LLParticipantModelList::addAvatarParticipant(const LLUUID& particpant_id)
 {
 	// Create a participant view model instance
 	LLAvatarName avatar_name;
@@ -541,12 +548,137 @@ void LLParticipantListModel::addAvatarParticipant(const LLUUID& particpant_id)
 	LLConversationItemSession::addParticipant(participant);
 }
 
-void LLParticipantListModel::addAvalineParticipant(const LLUUID& particpant_id)
+void LLParticipantModelList::addAvalineParticipant(const LLUUID& particpant_id)
 {
 	// Create a participant view model instance
 	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
 	LLConversationItemParticipant* participant = new LLConversationItemParticipant(display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name, particpant_id, mRootViewModel);
 	LLConversationItemSession::addParticipant(participant);
+}
+
+//
+// LLParticipantAvatarList class
+//
+
+LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAvatarList* pAvatarList)
+	: LLParticipantList(data_source)
+	, m_pAvatarList(pAvatarList)
+{
+	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
+	m_pAvatarList->setSessionID(data_source->getSessionID());
+	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
+}
+
+LLParticipantAvatarList::~LLParticipantAvatarList()
+{
+	m_AvatarListRefreshConn.disconnect();
+}
+
+const LLUUID& LLParticipantAvatarList::getSessionID() const
+{
+	return m_pAvatarList->getSessionID();
+}
+
+void LLParticipantAvatarList::addAvatarParticipant(const LLUUID& particpant_id)
+{
+	m_pAvatarList->getIDs().push_back(particpant_id);
+	m_pAvatarList->setDirty();
+
+	//sort();
+}
+
+void LLParticipantAvatarList::addAvalineParticipant(const LLUUID& particpant_id)
+{
+	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
+	m_pAvatarList->addAvalineItem(particpant_id, m_pAvatarList->getSessionID(), display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name);
+
+	//sort();
+}
+
+void LLParticipantAvatarList::clearParticipants()
+{
+	m_pAvatarList->getIDs().clear();
+	m_pAvatarList->setDirty();
+}
+
+bool LLParticipantAvatarList::isParticipant(const LLUUID& particpant_id)
+{
+	return m_pAvatarList->contains(particpant_id);
+}
+
+void LLParticipantAvatarList::removeParticipant(const LLUUID& particpant_id)
+{
+	uuid_vec_t& lParticipantIds = m_pAvatarList->getIDs();
+
+	uuid_vec_t::iterator itParticipant = std::find(lParticipantIds.begin(), lParticipantIds.end(), particpant_id);
+	if (lParticipantIds.end() != itParticipant)
+	{
+		lParticipantIds.erase(itParticipant);
+		m_pAvatarList->setDirty();
+	}
+}
+
+void LLParticipantAvatarList::setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted)
+{
+}
+
+void LLParticipantAvatarList::onAvatarListRefreshed()
+{
+	static const std::string s_strModIndicator(LLTrans::getString("IM_moderator_label")); 
+	static const std::size_t s_lenModIndicator = s_strModIndicator.length();
+
+	// Firstly remove moderators indicator
+	std::set<LLUUID>& lModeratorsToRemove = getModeratorToRemoveList();
+	for (std::set<LLUUID>::const_iterator itModRemove = lModeratorsToRemove.begin(); itModRemove != lModeratorsToRemove.end(); ++itModRemove)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(m_pAvatarList->getItemByValue(*itModRemove));
+		if (pItem)
+		{
+			std::string strName = pItem->getAvatarName();
+			size_t idxModIndicator = strName.find(s_strModIndicator);
+			if (std::string::npos != idxModIndicator)
+			{
+				strName.erase(idxModIndicator, s_lenModIndicator);
+				pItem->setAvatarName(strName);
+			}
+
+			std::string strTooltip = pItem->getAvatarToolTip();
+			idxModIndicator = strTooltip.find(s_strModIndicator);
+			if (std::string::npos != idxModIndicator)
+			{
+				strTooltip.erase(idxModIndicator, s_lenModIndicator);
+				pItem->setAvatarToolTip(strTooltip);
+			}
+		}
+	}
+	lModeratorsToRemove.clear();
+
+	// Add moderators indicator
+	std::set<LLUUID>& lModerators = getModeratorList();
+	for (std::set<LLUUID>::const_iterator itMod = lModerators.begin(); itMod != lModerators.end(); ++itMod)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(m_pAvatarList->getItemByValue(*itMod));
+		if (pItem)
+		{
+			std::string strName = pItem->getAvatarName();
+			size_t idxModIndicator = strName.find(s_strModIndicator);
+			if (std::string::npos == idxModIndicator)
+			{
+				strName += " ";
+				strName += s_strModIndicator;
+				pItem->setAvatarName(strName);
+			}
+
+			std::string strTooltip = pItem->getAvatarToolTip();
+			idxModIndicator = strTooltip.find(s_strModIndicator);
+			if (std::string::npos == idxModIndicator)
+			{
+				strTooltip += " ";
+				strTooltip += s_strModIndicator;
+				pItem->setAvatarToolTip(strTooltip);
+			}
+		}
+	}
 }
 // [/SL:KB]
 
