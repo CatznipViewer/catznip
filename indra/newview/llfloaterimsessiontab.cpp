@@ -286,16 +286,24 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mContentPanel = getChild<LLLayoutPanel>("body_panel");
 	mInputButtonPanel = getChild<LLLayoutPanel>("input_button_layout_panel");
 	mInputButtonPanel->setVisible(false);
-	// Add a scroller for the folder (participant) view
-	LLRect scroller_view_rect = mParticipantListPanel->getRect();
-	scroller_view_rect.translate(-scroller_view_rect.mLeft, -scroller_view_rect.mBottom);
-	LLScrollContainer::Params scroller_params(LLUICtrlFactory::getDefaultParams<LLFolderViewScrollContainer>());
-	scroller_params.rect(scroller_view_rect);
-	mScroller = LLUICtrlFactory::create<LLFolderViewScrollContainer>(scroller_params);
-	mScroller->setFollowsAll();
 
-	// Insert that scroller into the panel widgets hierarchy
-	mParticipantListPanel->addChild(mScroller);	
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+// [/SL:KB]
+		// Add a scroller for the folder (participant) view
+		LLRect scroller_view_rect = mParticipantListPanel->getRect();
+		scroller_view_rect.translate(-scroller_view_rect.mLeft, -scroller_view_rect.mBottom);
+		LLScrollContainer::Params scroller_params(LLUICtrlFactory::getDefaultParams<LLFolderViewScrollContainer>());
+		scroller_params.rect(scroller_view_rect);
+		mScroller = LLUICtrlFactory::create<LLFolderViewScrollContainer>(scroller_params);
+		mScroller->setFollowsAll();
+
+		// Insert that scroller into the panel widgets hierarchy
+		mParticipantListPanel->addChild(mScroller);	
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+// [/SL:KB]
 	
 	mChatHistory = getChild<LLChatHistory>("chat_history");
 
@@ -328,33 +336,55 @@ BOOL LLFloaterIMSessionTab::postBuild()
 		result = LLDockableFloater::postBuild();
 	}
 
-	// Create the root using an ad-hoc base item
-	LLConversationItem* base_item = new LLConversationItem(mSessionID, mConversationViewModel);
-    LLFolderView::Params p(LLUICtrlFactory::getDefaultParams<LLFolderView>());
-    p.rect = LLRect(0, 0, getRect().getWidth(), 0);
-    p.parent_panel = mParticipantListPanel;
-    p.listener = base_item;
-    p.view_model = &mConversationViewModel;
-    p.root = NULL;
-    p.use_ellipses = true;
-    p.options_menu = "menu_conversation.xml";
-    p.name = "root";
-	mConversationsRoot = LLUICtrlFactory::create<LLFolderView>(p);
-    mConversationsRoot->setCallbackRegistrar(&mCommitCallbackRegistrar);
-	// Attach that root to the scroller
-	mScroller->addChild(mConversationsRoot);
-	mConversationsRoot->setScrollContainer(mScroller);
-	mConversationsRoot->setFollowsAll();
-	mConversationsRoot->addChild(mConversationsRoot->mStatusTextBox);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+// [/SL:KB]
+		// Create the root using an ad-hoc base item
+		LLConversationItem* base_item = new LLConversationItem(mSessionID, mConversationViewModel);
+		LLFolderView::Params p(LLUICtrlFactory::getDefaultParams<LLFolderView>());
+		p.rect = LLRect(0, 0, getRect().getWidth(), 0);
+		p.parent_panel = mParticipantListPanel;
+		p.listener = base_item;
+		p.view_model = &mConversationViewModel;
+		p.root = NULL;
+		p.use_ellipses = true;
+		p.options_menu = "menu_conversation.xml";
+		p.name = "root";
+		mConversationsRoot = LLUICtrlFactory::create<LLFolderView>(p);
+		mConversationsRoot->setCallbackRegistrar(&mCommitCallbackRegistrar);
+		// Attach that root to the scroller
+		mScroller->addChild(mConversationsRoot);
+		mConversationsRoot->setScrollContainer(mScroller);
+		mConversationsRoot->setFollowsAll();
+		mConversationsRoot->addChild(mConversationsRoot->mStatusTextBox);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+// [/SL:KB]
 
 	setMessagePaneExpanded(true);
 
-	buildConversationViewParticipant();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+// [/SL:KB]
+		buildConversationViewParticipant();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+// [/SL:KB]
 	refreshConversation();
 
-	// Zero expiry time is set only once to allow initial update.
-	mRefreshTimer->setTimerExpirySec(0);
-	mRefreshTimer->start();
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+// [/SL:KB]
+		// Zero expiry time is set only once to allow initial update.
+		mRefreshTimer->setTimerExpirySec(0);
+		mRefreshTimer->start();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+// [/SL:KB]
 	initBtns();
 
 	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
@@ -522,6 +552,10 @@ void LLFloaterIMSessionTab::appendMessage(const LLChat& chat, const LLSD &args)
 
 void LLFloaterIMSessionTab::buildConversationViewParticipant()
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
 	// Clear the widget list since we are rebuilding afresh from the model
 	conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
 	while (widget_it != mConversationsWidgets.end())
@@ -552,6 +586,10 @@ void LLFloaterIMSessionTab::buildConversationViewParticipant()
 
 void LLFloaterIMSessionTab::addConversationViewParticipant(LLConversationItem* participant_model)
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
 	// Check if the model already has an associated view
 	LLUUID uuid = participant_model->getUUID();
 	LLFolderViewItem* widget = get_ptr_in_map(mConversationsWidgets,uuid);
@@ -573,6 +611,10 @@ void LLFloaterIMSessionTab::addConversationViewParticipant(LLConversationItem* p
 
 void LLFloaterIMSessionTab::removeConversationViewParticipant(const LLUUID& participant_id)
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
 	LLFolderViewItem* widget = get_ptr_in_map(mConversationsWidgets,participant_id);
 	if (widget)
 	{
@@ -584,6 +626,10 @@ void LLFloaterIMSessionTab::removeConversationViewParticipant(const LLUUID& part
 
 void LLFloaterIMSessionTab::updateConversationViewParticipant(const LLUUID& participant_id)
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
 	LLFolderViewItem* widget = get_ptr_in_map(mConversationsWidgets,participant_id);
 	if (widget)
 	{
@@ -602,18 +648,26 @@ void LLFloaterIMSessionTab::refreshConversation()
 		participants_uuids.push_back(mSession->mOtherParticipantID);
 	}
 
-	conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
-	while (widget_it != mConversationsWidgets.end())
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		// Add the participant to the list except if it's the agent itself (redundant)
-		if (is_ad_hoc && (widget_it->first != gAgentID))
+// [/SL:KB]
+		conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
+		while (widget_it != mConversationsWidgets.end())
 		{
-			participants_uuids.push_back(widget_it->first);
+			// Add the participant to the list except if it's the agent itself (redundant)
+			if (is_ad_hoc && (widget_it->first != gAgentID))
+			{
+				participants_uuids.push_back(widget_it->first);
+			}
+			widget_it->second->refresh();
+			widget_it->second->setVisible(TRUE);
+			++widget_it;
 		}
-		widget_it->second->refresh();
-		widget_it->second->setVisible(TRUE);
-		++widget_it;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	}
+// [/SL:KB]
+
 	if (is_ad_hoc || mIsP2PChat)
 	{
 		// Build the session name and update it
@@ -629,37 +683,44 @@ void LLFloaterIMSessionTab::refreshConversation()
 		updateSessionName(session_name);
 	}
 
-	if (mSessionID.notNull())
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
-		LLParticipantList* participant_list = getParticipantList();
-		if (participant_list)
+// [/SL:KB]
+		if (mSessionID.notNull())
 		{
-			LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = participant_list->getChildrenBegin();
-			LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = participant_list->getChildrenEnd();
-			LLIMSpeakerMgr *speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
-			while (current_participant_model != end_participant_model)
+			LLParticipantList* participant_list = getParticipantList();
+			if (participant_list)
 			{
-				LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
-				if (speaker_mgr && participant_model)
+				LLFolderViewModelItemCommon::child_list_t::const_iterator current_participant_model = participant_list->getChildrenBegin();
+				LLFolderViewModelItemCommon::child_list_t::const_iterator end_participant_model = participant_list->getChildrenEnd();
+				LLIMSpeakerMgr *speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+				while (current_participant_model != end_participant_model)
 				{
-					LLSpeaker *participant_speaker = speaker_mgr->findSpeaker(participant_model->getUUID());
-					LLSpeaker *agent_speaker = speaker_mgr->findSpeaker(gAgentID);
-					if (participant_speaker && agent_speaker)
+					LLConversationItemParticipant* participant_model = dynamic_cast<LLConversationItemParticipant*>(*current_participant_model);
+					if (speaker_mgr && participant_model)
 					{
-						participant_model->setDisplayModeratorRole(agent_speaker->mIsModerator && participant_speaker->mIsModerator);
+						LLSpeaker *participant_speaker = speaker_mgr->findSpeaker(participant_model->getUUID());
+						LLSpeaker *agent_speaker = speaker_mgr->findSpeaker(gAgentID);
+						if (participant_speaker && agent_speaker)
+						{
+							participant_model->setDisplayModeratorRole(agent_speaker->mIsModerator && participant_speaker->mIsModerator);
+						}
 					}
+					current_participant_model++;
 				}
-				current_participant_model++;
 			}
 		}
-	}
 	
-	mConversationViewModel.requestSortAll();
-	if(mConversationsRoot != NULL)
-	{
-		mConversationsRoot->arrangeAll();
-		mConversationsRoot->update();
+		mConversationViewModel.requestSortAll();
+		if(mConversationsRoot != NULL)
+		{
+			mConversationsRoot->arrangeAll();
+			mConversationsRoot->update();
+		}
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	}
+// [/SL:KB]
 //	updateHeaderAndToolbar();
 	refresh();
 }
@@ -667,6 +728,10 @@ void LLFloaterIMSessionTab::refreshConversation()
 // Copied from LLFloaterIMContainer::createConversationViewParticipant(). Refactor opportunity!
 LLConversationViewParticipant* LLFloaterIMSessionTab::createConversationViewParticipant(LLConversationItem* item)
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
     LLRect panel_rect = mParticipantListPanel->getRect();
 	
 	LLConversationViewParticipant::Params params;
@@ -682,9 +747,16 @@ LLConversationViewParticipant* LLFloaterIMSessionTab::createConversationViewPart
 
 void LLFloaterIMSessionTab::setSortOrder(const LLConversationSort& order)
 {
-	mConversationViewModel.setSorter(order);
-	mConversationsRoot->arrangeAll();
-	refreshConversation();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if(!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+// [/SL:KB]
+		mConversationViewModel.setSorter(order);
+		mConversationsRoot->arrangeAll();
+		refreshConversation();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	}
+// [/SL:KB]
 }
 
 void LLFloaterIMSessionTab::onIMSessionMenuItemClicked(const LLSD& userdata)
@@ -1212,6 +1284,10 @@ bool LLFloaterIMSessionTab::checkContextMenuItem(const LLSD& userdata)
 
 void LLFloaterIMSessionTab::getSelectedUUIDs(uuid_vec_t& selected_uuids)
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
     const std::set<LLFolderViewItem*> selected_items = mConversationsRoot->getSelectionList();
 	
     std::set<LLFolderViewItem*>::const_iterator it = selected_items.begin();
@@ -1226,6 +1302,10 @@ void LLFloaterIMSessionTab::getSelectedUUIDs(uuid_vec_t& selected_uuids)
 
 LLConversationItem* LLFloaterIMSessionTab::getCurSelectedViewModelItem()
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+// [/SL:KB]
+
 	LLConversationItem *conversationItem = NULL;
 
 	if(mConversationsRoot && 
