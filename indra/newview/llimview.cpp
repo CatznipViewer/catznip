@@ -354,10 +354,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 			if(!gAgent.isDoNotDisturb())
     	{
 // [SL:KB] - Patch: Chat-Base | Checked: 2013-08-16 (Catznip-3.6)
-				if (session_id.notNull())
-					gToolBarView->flashCommand(LLCommandId("conversations"), true, im_box->isMinimized());
-				else
-					gToolBarView->flashCommand(LLCommandId("chat"), true, im_box->isMinimized());
+				gToolBarView->flashCommand(LLCommandId((session_id.notNull()) ? "conversations" : "chat"), true, im_box->isMinimized());
 // [/SL:KB]
 //				gToolBarView->flashCommand(LLCommandId("chat"), true, im_box->isMinimized());
     	}

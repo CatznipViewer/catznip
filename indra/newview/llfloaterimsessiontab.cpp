@@ -32,9 +32,6 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llavataractions.h"
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-#include "llavatarlist.h"
-// [/SL:KB]
 #include "llchatentry.h"
 #include "llchathistory.h"
 #include "llchiclet.h"
@@ -44,11 +41,16 @@
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h" // to replace separate IM Floaters with multifloater container
 #include "lllayoutstack.h"
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-#include "llparticipantlist.h"
-// [/SL:KB]
 #include "lltoolbarview.h"
 #include "llfloaterimnearbychat.h"
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llavatarlist.h"
+#include "llconversationview.h"
+#include "llparticipantlist.h"
+#include "lltrans.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 const F32 REFRESH_INTERVAL = 1.0f;
 
@@ -407,16 +409,9 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	refreshConversation();
 
 
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
-	{
-// [/SL:KB]
-		// Zero expiry time is set only once to allow initial update.
-		mRefreshTimer->setTimerExpirySec(0);
-		mRefreshTimer->start();
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	}
-// [/SL:KB]
+	// Zero expiry time is set only once to allow initial update.
+	mRefreshTimer->setTimerExpirySec(0);
+	mRefreshTimer->start();
 	initBtns();
 
 	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
@@ -531,11 +526,7 @@ void LLFloaterIMSessionTab::onInputEditorClicked()
 	{
 		im_box->setConversationFlashing(mSessionID, false);
 	}
-
-	if (getSessionID().isNull())
-		gToolBarView->flashCommand(LLCommandId("chat"), false);
-	else
-		gToolBarView->flashCommand(LLCommandId("conversations"), false);
+	gToolBarView->flashCommand(LLCommandId((getSessionID().notNull()) ? "conversations" : "chat"), false);
 // [/SL:KB]
 //	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
 //	if (im_box)

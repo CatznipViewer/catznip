@@ -114,10 +114,7 @@ void LLConversationViewSession::setFlashState(bool flash_state)
 			if (pItem)
 			{
 				const LLUUID& idSession = pItem->getUUID();
-				if (idSession.notNull())
-					gToolBarView->flashCommand(LLCommandId("conversations"), true);
-				else
-					gToolBarView->flashCommand(LLCommandId("chat"), true);
+				gToolBarView->flashCommand(LLCommandId((idSession.notNull()) ? "conversations" : "chat"), true);
 			}
 // [/SL:KB]
 //			gToolBarView->flashCommand(LLCommandId("chat"), true);

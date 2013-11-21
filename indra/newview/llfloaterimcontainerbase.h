@@ -62,8 +62,6 @@ public:
 	 */
 public:
 	static void onCurrentChannelChanged(const LLUUID& session_id);
-	static void onToggleTabbedContainer();
-	static void onToggleVerticalTabs();
 protected:
 	       void onCloseFloater(const LLUUID& session_id);
 

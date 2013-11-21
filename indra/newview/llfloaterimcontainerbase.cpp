@@ -18,17 +18,14 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llagent.h"
-#include "llavataractions.h"
 #include "llavatariconctrl.h"
 #include "lldonotdisturbnotificationstorage.h"
 #include "llgroupiconctrl.h"
 #include "llfloaterimsession.h"
-#include "llfloaterimsessiontab.h"
 #include "llfloaterreg.h"
 #include "llfloaterimcontainer.h"
 #include "llfloaterimcontainerbase.h"
 #include "llfloaterimcontainertab.h"
-#include "lltransientfloatermgr.h"
 #include "llviewercontrol.h"
 
 //
@@ -100,41 +97,35 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	if (!floaterp)
 		return;
 
-	// already here
+	// Check if we're already hosting this floater
 	if (floaterp->getHost() == this)
 	{
 		openFloater(floaterp->getKey());
 		return;
 	}
 
-	LLUUID session_id = floaterp->getKey();
+	const LLUUID idSession = floaterp->getKey();
 
 	// Add the floater
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
 	LLIconCtrl* icon = NULL;
-	if (gAgent.isInGroup(session_id, TRUE))
+	if (gAgent.isInGroup(idSession, TRUE))
 	{
 		LLGroupIconCtrl::Params icon_params;
-		icon_params.group_id = session_id;
+		icon_params.group_id = idSession;
 		icon = LLUICtrlFactory::instance().create<LLGroupIconCtrl>(icon_params);
 	}
 	else
 	{
 		LLAvatarIconCtrl::Params icon_params;
-		icon_params.avatar_id = session_id.notNull() ? LLIMModel::getInstance()->getOtherParticipantID(session_id) : LLUUID();
+		icon_params.avatar_id = idSession.notNull() ? LLIMModel::getInstance()->getOtherParticipantID(idSession) : LLUUID();
 		icon = LLUICtrlFactory::instance().create<LLAvatarIconCtrl>(icon_params);
 	}
 	mTabContainer->setTabImage(floaterp, icon);
 
-	mSessions[session_id] = floaterp;
-	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, session_id));
-}
-
-// static
-bool LLFloaterIMContainerBase::isConversationLoggingAllowed()
-{
-	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
+	mSessions[idSession] = floaterp;
+	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, idSession));
 }
 
 // static
@@ -222,68 +213,6 @@ const std::string& LLFloaterIMContainerBase::getFloaterXMLFile()
 			? (!gSavedSettings.getBOOL("IMUseVerticalTabs")) ? "floater_im_container_tab_horiz.xml" : "floater_im_container_tab_vert.xml"
 			: "floater_im_container.xml";
 	return strFile;
-}
-
-// static
-void LLFloaterIMContainerBase::onToggleTabbedContainer()
-{
-	// Don't do anything if there isn't actually an instance yet
-	if (!findInstance())
-		return;
-
-	// Build a collection of P2P and group IMs (conference chats won't/can't be restored)
-	uuid_vec_t idsAvatars, idsGroup;
-
-	std::map<LLUUID, LLIMModel::LLIMSession*>::const_iterator itEntry = LLIMModel::instance().mId2SessionMap.begin();
-	while (itEntry != LLIMModel::instance().mId2SessionMap.end())
-	{
-		const LLIMModel::LLIMSession* pSession = itEntry->second;
-		switch (pSession->mSessionType)
-		{
-			case LLIMModel::LLIMSession::P2P_SESSION:
-				idsAvatars.push_back(pSession->mOtherParticipantID);
-				break;
-			case LLIMModel::LLIMSession::GROUP_SESSION:
-				idsAvatars.push_back(pSession->mSessionID);
-				break;
-			default:
-				// Not something we can (currently) restore
-				break;
-		}
-
-		++itEntry;
-
-		LLFloaterIMSession* pFloater = LLFloaterIMSession::findInstance(pSession->mSessionID);
-		if (pFloater)
-		{
-            LLFloater::onClickClose(pFloater);
-		}
-	}
-
-	// NOTE: * LLFloater::closeFloater() won't call LLFloater::destroy() since the floater is single instanced
-	//       * we can't call LLFloater::destroy() since it will call LLMortician::die() which defers destruction until a later time
-	//   => we'll have created a new instance and the delayed destructor calling LLFloaterReg::removeInstance() will make all future
-	//      LLFloaterReg::getTypedInstance() calls return NULL so we need to destruct manually [see LLFloaterReg::destroyInstance()]
-	LLFloaterIMContainerBase* pInstance = getInstance();
-	bool fInstanceVisible = pInstance->isInVisibleChain();
-	pInstance->closeFloater();
-	LLFloaterReg::destroyInstance("im_container", LLSD());
-
-	// Call getInstance() to instantiate the new IM container
-	pInstance = getInstance();
-	if (fInstanceVisible)
-		pInstance->openFloater();
-
-	// Restore all P2P chat sessions
-	for (uuid_vec_t::const_iterator itAvatar = idsAvatars.begin(); itAvatar != idsAvatars.end(); ++itAvatar)
-	{
-		LLAvatarActions::startIM(*itAvatar);
-	}
-}
-
-// static
-void LLFloaterIMContainerBase::onToggleVerticalTabs()
-{
 }
 
 // EOF

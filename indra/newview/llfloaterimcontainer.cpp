@@ -49,6 +49,7 @@
 #include "llnotificationsutil.h"
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 #include "llparticipantlist.h"
+#include "lltrans.h"
 // [/SL:KB]
 #include "lltoolbarview.h"
 #include "lltransientfloatermgr.h"
@@ -199,8 +200,8 @@ BOOL LLFloaterIMContainerView::postBuild()
 //	mNewMessageConnection = LLIMModel::instance().mNewMsgSignal.connect(boost::bind(&LLFloaterIMContainerView::onNewMessageReceived, this, _1));
 //	// Do not call base postBuild to not connect to mCloseSignal to not close all floaters via Close button
 //	// mTabContainer will be initialized in LLMultiFloater::addChild()
-//	
 //	setTabContainer(getChild<LLTabContainer>("im_box_tab_container"));
+
 	mStubPanel = getChild<LLPanel>("stub_panel");
     mStubTextBox = getChild<LLTextBox>("stub_textbox");
     mStubTextBox->setURLClickedCallback(boost::bind(&LLFloaterIMContainerView::returnFloaterToHost, this));
@@ -1222,19 +1223,25 @@ void LLFloaterIMContainerBase::doToParticipants(const std::string& command, uuid
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
 void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid_vec_t& selectedIDS)
 {
+	bool fHandled = true;
 	if (selectedIDS.size() == 1)
 	{
 		const LLUUID& userID = selectedIDS.front();
 		if ("selected" == command || "mute_all" == command || "unmute_all" == command)
 		{
 			moderateVoice(command, userID);
+
+			fHandled = true;
 		}
 		else if ("toggle_allow_text_chat" == command)
 		{
 			toggleAllowTextChat(userID);
+
+			fHandled = true;
 		}
 	}
-	else
+
+	if (!fHandled)
 	{
 		LLFloaterIMContainerBase::doToParticipants(command, selectedIDS);
 	}
@@ -2092,10 +2099,10 @@ void LLFloaterIMContainerView::updateSpeakBtnState()
 	mSpeakBtn->setEnabled(LLAgent::isActionAllowed("speak"));
 }
 
-//bool LLFloaterIMContainerView::isConversationLoggingAllowed()
-//{
-//	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
-//}
+bool LLFloaterIMContainerBase::isConversationLoggingAllowed()
+{
+	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
+}
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 void LLFloaterIMContainerView::setConversationFlashing(const LLUUID& session_id, bool flashing)

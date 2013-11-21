@@ -75,9 +75,6 @@
 #include "llslurl.h"
 #include "llstartup.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-17 (Catznip-3.6)
-#include "llfloaterimcontainerbase.h"
-// [/SL:KB]
 
 // Third party library includes
 #include <boost/algorithm/string.hpp>
@@ -763,10 +760,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("SpellCheckDictionary")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("LoginLocation")->getSignal()->connect(boost::bind(&handleLoginLocationChanged));
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-17 (Catznip-3.6)
-	gSavedSettings.getControl("IMUseTabbedContainer")->getSignal()->connect(boost::bind(&LLFloaterIMContainerBase::onToggleTabbedContainer));
-	gSavedSettings.getControl("IMUseVerticalTabs")->getSignal()->connect(boost::bind(&LLFloaterIMContainerBase::onToggleVerticalTabs));
-// [/SL:KB]
 }
 
 #if TEST_CACHED_CONTROL
