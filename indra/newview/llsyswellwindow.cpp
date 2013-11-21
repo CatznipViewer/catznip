@@ -43,7 +43,7 @@
 
 //---------------------------------------------------------------------------------
 LLSysWellWindow::LLSysWellWindow(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
-													mChannel(NULL),
+//													mChannel(NULL),
 													mMessageList(NULL),
 													mSysWellChiclet(NULL),
 													NOTIFICATION_WELL_ANCHOR_NAME("notification_well_panel"),
@@ -139,11 +139,17 @@ void LLSysWellWindow::initChannel()
 {
 	LLNotificationsUI::LLScreenChannelBase* channel = LLNotificationsUI::LLChannelManager::getInstance()->findChannelByID(
 																LLUUID(gSavedSettings.getString("NotificationChannelUUID")));
-	mChannel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(channel);
-	if(NULL == mChannel)
-	{
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	if (channel)
+		mChannel = channel->getHandle();
+	else
 		llwarns << "LLSysWellWindow::initChannel() - could not get a requested screen channel" << llendl;
-	}
+// [/SL:KB]
+//	mChannel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(channel);
+//	if(NULL == mChannel)
+//	{
+//		llwarns << "LLSysWellWindow::initChannel() - could not get a requested screen channel" << llendl;
+//	}
 }
 
 //---------------------------------------------------------------------------------
@@ -153,9 +159,13 @@ void LLSysWellWindow::setVisible(BOOL visible)
 	{
 		if (NULL == getDockControl() && getDockTongue().notNull())
 		{
-			setDockControl(new LLDockControl(
-				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
-				getDockTongue(), LLDockControl::BOTTOM));
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+			setDockControl(new LLDockControl(LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this, getDockTongue(),
+				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
+//			setDockControl(new LLDockControl(
+//				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
+//				getDockTongue(), LLDockControl::BOTTOM));
 		}
 	}
 
@@ -166,11 +176,19 @@ void LLSysWellWindow::setVisible(BOOL visible)
 
 	// update notification channel state	
 	initChannel(); // make sure the channel still exists
-	if(mChannel)
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
 	{
-		mChannel->updateShowToastsState();
-		mChannel->redrawToasts();
+		channel->updateShowToastsState();
+		channel->redrawToasts();
 	}
+// [/SL:KB]
+//	if(mChannel)
+//	{
+//		mChannel->updateShowToastsState();
+//		mChannel->redrawToasts();
+//	}
 
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	if (visible)
@@ -186,11 +204,19 @@ void LLSysWellWindow::setDocked(bool docked, bool pop_on_undock)
 	LLTransientDockableFloater::setDocked(docked, pop_on_undock);
 
 	// update notification channel state
-	if(mChannel)
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
 	{
-		mChannel->updateShowToastsState();
-		mChannel->redrawToasts();
+		channel->updateShowToastsState();
+		channel->redrawToasts();
 	}
+// [/SL:KB]
+//	if(mChannel)
+//	{
+//		mChannel->updateShowToastsState();
+//		mChannel->redrawToasts();
+//	}
 }
 
 //---------------------------------------------------------------------------------
@@ -214,17 +240,31 @@ void LLSysWellWindow::reshapeWindow()
 		}
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
-		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+		// Resize bottom-up if we're docked at the top and top-down if we're docked at the bottom
+		S32 top = curRect.mTop;
+		if ( (getDockControl()) && (LLDockControl::TOP == getDockControl()->getDockAt()) )
+			top += new_window_height - curRect.getHeight();
+		curRect.setLeftTopAndSize(curRect.mLeft, top, newWidth, new_window_height);
+// [/SL:KB]
+//		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
 		reshape(curRect.getWidth(), curRect.getHeight(), TRUE);
 		setRect(curRect);
 	}
 
 	// update notification channel state
 	// update on a window reshape is important only when a window is visible and docked
-	if(mChannel && getVisible() && isDocked())
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if ( (channel) && (getVisible()) && (isDocked()) )
 	{
-		mChannel->updateShowToastsState();
+		channel->updateShowToastsState();
 	}
+// [/SL:KB]
+//	if(mChannel && getVisible() && isDocked())
+//	{
+//		mChannel->updateShowToastsState();
+//	}
 }
 
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
@@ -536,10 +576,17 @@ void LLNotificationWellWindow::closeAll()
 void LLNotificationWellWindow::initChannel() 
 {
 	LLSysWellWindow::initChannel();
-	if(mChannel)
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
 	{
-		mChannel->addOnStoreToastCallback(boost::bind(&LLNotificationWellWindow::onStoreToast, this, _1, _2));
+		channel->addOnStoreToastCallback(boost::bind(&LLNotificationWellWindow::onStoreToast, this, _1, _2));
 	}
+// [/SL:KB]
+//	if(mChannel)
+//	{
+//		mChannel->addOnStoreToastCallback(boost::bind(&LLNotificationWellWindow::onStoreToast, this, _1, _2));
+//	}
 }
 
 void LLNotificationWellWindow::clearScreenChannels()
@@ -551,10 +598,17 @@ void LLNotificationWellWindow::clearScreenChannels()
 	}
 
 	// 2 - remove toasts in Notification channel
-	if(mChannel)
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
 	{
-		mChannel->removeAndStoreAllStorableToasts();
+		channel->removeAndStoreAllStorableToasts();
 	}
+// [/SL:KB]
+//	if(mChannel)
+//	{
+//		mChannel->removeAndStoreAllStorableToasts();
+//	}
 }
 
 void LLNotificationWellWindow::onStoreToast(LLPanel* info_panel, LLUUID id)
@@ -575,11 +629,19 @@ void LLNotificationWellWindow::onItemClose(LLSysWellItem* item)
 {
 	LLUUID id = item->getID();
 	
-	if(mChannel)
+//	if(mChannel)
+//	{
+//		// removeItemByID() is invoked from killToastByNotificationID() and item will removed;
+//		mChannel->killToastByNotificationID(id);
+//	}
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if(channel)
 	{
 		// removeItemByID() is invoked from killToastByNotificationID() and item will removed;
-		mChannel->killToastByNotificationID(id);
+		channel->killToastByNotificationID(id);
 	}
+// [/SL:KB]
 	else
 	{
 		// removeItemByID() should be called one time for each item to remove it from notification well
@@ -741,9 +803,15 @@ void LLIMWellWindow::delIMRow(const LLUUID& sessionId)
 	reshapeWindow();
 
 	// Remove all toasts that belong to this session from a screen
-	if (mChannel)
-		mChannel->removeToastsBySessionID(sessionId);
-
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
+	{
+		channel->removeToastsBySessionID(sessionId);
+	}
+// [/SL:KB]
+//	if (mChannel)
+//		mChannel->removeToastsBySessionID(sessionId);
 	// Hide chiclet window if there are no items left
 	if (isWindowEmpty())
 		setVisible(FALSE);

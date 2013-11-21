@@ -47,24 +47,6 @@
   follows="all" 
   translate="false"
   width="305">
-  <!-- Don't remove this wiget! It is needed for Overflow and Start-Up toasts!-->
-  <text
-    clip_partial="true" 
-   visible="false"
-   follows="left|top|right|bottom"
-   font="SansSerif"
-   height="20"
-   layout="topleft"
-   left="20"
-   name="toast_text"
-   word_wrap="true"
-   text_color="White"
-   top="5"
-   translate="false"
-   use_ellipses="true"
-   width="260">
-    Toast text;
-  </text>
  </panel>
   <button
     layout="topleft"
