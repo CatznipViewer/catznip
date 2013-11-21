@@ -32,6 +32,9 @@
 #include "llgroupactions.h"
 #include "llconversationloglist.h"
 #include "llconversationloglistitem.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewermenu.h"
 #include "lltrans.h"
 

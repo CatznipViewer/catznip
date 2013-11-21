@@ -30,6 +30,9 @@
 #include "llfloaterconversationlog.h"
 #include "llfloaterreg.h"
 #include "llmenubutton.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 LLFloaterConversationLog::LLFloaterConversationLog(const LLSD& key)
 :	LLFloater(key),

@@ -28,6 +28,7 @@
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 #include "llavatarlist.h"
+#include "lltrans.h"
 // [/SL:KB]
 #include "llavatarnamecache.h"
 #include "llerror.h"

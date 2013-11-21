@@ -27,12 +27,12 @@
 #ifndef LL_FLOATERIMSESSION_H
 #define LL_FLOATERIMSESSION_H
 
-#include "llimview.h"
+//#include "llimview.h"
 #include "llfloaterimsessiontab.h"
-#include "llinstantmessage.h"
-#include "lllogchat.h"
-#include "lltooldraganddrop.h"
-#include "llvoicechannel.h"
+//#include "llinstantmessage.h"
+//#include "lllogchat.h"
+//#include "lltooldraganddrop.h"
+//#include "llvoicechannel.h"
 #include "llvoiceclient.h"
 
 class LLAvatarName;

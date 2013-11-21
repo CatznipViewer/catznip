@@ -60,6 +60,10 @@
 #include "llviewerchat.h"
 #include "llnotificationmanager.h"
 #include "llautoreplace.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "lllayoutstack.h"
+#include "lltooldraganddrop.h"
+// [/SL:KB]
 
 floater_showed_signal_t LLFloaterIMSession::sIMFloaterShowedSignal;
 

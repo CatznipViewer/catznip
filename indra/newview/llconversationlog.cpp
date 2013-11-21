@@ -31,6 +31,9 @@
 #include "lldiriterator.h"
 #include "llnotificationsutil.h"
 #include "lltrans.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 #include <boost/foreach.hpp>
 #include "boost/lexical_cast.hpp"

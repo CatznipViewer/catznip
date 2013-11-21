@@ -32,19 +32,23 @@
 
 //#include "llimview.h"
 #include "llevents.h"
-#include "../llui/llfloater.h"
-#include "../llui/llmultifloater.h"
-#include "llavatarpropertiesprocessor.h"
-#include "llgroupmgr.h"
-#include "../llui/lltrans.h"
+//#include "../llui/llfloater.h"
+//#include "../llui/llmultifloater.h"
+//#include "llavatarpropertiesprocessor.h"
+//#include "llgroupmgr.h"
+//#include "../llui/lltrans.h"
 #include "llconversationmodel.h"
-#include "llconversationview.h"
+//#include "llconversationview.h"
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 #include "llfloaterimcontainerbase.h"
 // [/SL:KB]
 
 class LLButton;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+class LLConversationViewParticipant;
+class LLConversationViewSession;
+// [/SL:KB]
 class LLLayoutPanel;
 class LLLayoutStack;
 class LLTabContainer;

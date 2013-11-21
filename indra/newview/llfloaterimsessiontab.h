@@ -28,21 +28,26 @@
 #ifndef LL_FLOATERIMSESSIONTAB_H
 #define LL_FLOATERIMSESSIONTAB_H
 
-#include "lllayoutstack.h"
+//#include "lllayoutstack.h"
 //#include "llparticipantlist.h"
 #include "lltransientdockablefloater.h"
-#include "llviewercontrol.h"
-#include "lleventtimer.h"
+//#include "llviewercontrol.h"
+//#include "lleventtimer.h"
 #include "llimview.h"
 #include "llconversationmodel.h"
-#include "llconversationview.h"
-#include "lltexteditor.h"
+//#include "llconversationview.h"
+//#include "lltexteditor.h"
 
 class LLPanelChatControlPanel;
 class LLChatEntry;
 class LLChatHistory;
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLConversationItem;
+class LLConversationViewParticipant;
 class LLParticipantList;
+class LLLayoutPanel;
+class LLLayoutStack;
+class LLTimer;
 // [/SL:KB]
 
 class LLFloaterIMSessionTab
