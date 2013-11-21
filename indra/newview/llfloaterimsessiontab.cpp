@@ -312,6 +312,29 @@ BOOL LLFloaterIMSessionTab::postBuild()
 		mParticipantListPanel->addChild(mScroller);	
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	}
+	else
+	{
+		if (!mIsP2PChat)
+		{
+			LLAvatarList::Params p(LLUICtrlFactory::getDefaultParams<LLAvatarList>());
+
+			p.name("speakers_list");
+			LLRect rect = mParticipantListPanel->getRect();
+			rect.translate(-rect.mLeft, -rect.mBottom);
+			p.rect = rect;
+			p.ignore_online_status(true);
+			p.show_info_btn(true);
+			p.show_profile_btn(false);
+			p.show_speaking_indicator(false);
+
+			LLAvatarList* pAvatarList = LLUICtrlFactory::create<LLAvatarList>(p);
+			pAvatarList->setFollowsAll();
+			mParticipantListPanel->addChild(pAvatarList);
+
+			LLSpeakerMgr* pSpeakerMgr = (mIsNearbyChat) ? (LLSpeakerMgr*)LLLocalSpeakerMgr::getInstance() : LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			mParticipantList = new LLParticipantAvatarList(pSpeakerMgr, pAvatarList);
+		}
+	}
 // [/SL:KB]
 	
 	mChatHistory = getChild<LLChatHistory>("chat_history");
@@ -879,7 +902,7 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 	// Display collapse image (<<) if the floater is hosted
 	// or if it is torn off but has an open control panel.
 	bool is_not_torn_off = !isTornOff();
-	bool is_expanded = is_not_torn_off || mParticipantListPanel->getVisible();
+	bool is_expanded = ((!LLFloaterIMContainerBase::isTabbedContainer()) && (is_not_torn_off)) || mParticipantListPanel->getVisible();
    
 	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
 	mExpandCollapseBtn->setToolTip(
@@ -894,7 +917,7 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 void LLFloaterIMSessionTab::updateShowParticipantList()
 {
 	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible = isTornOff() && mIsParticipantListExpanded && !mIsP2PChat;
+	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
 	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
     mParticipantListPanel->setVisible(is_participant_list_visible);
 }
@@ -1028,17 +1051,14 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 //	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
+	if ( (host_floater) && (!LLFloaterIMContainerBase::isTabbedContainer()) )
 // [/SL:KB]
-	if (host_floater)
+//	if (host_floater)
 	{
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-		if (!LLFloaterIMContainerBase::isTabbedContainer())
-		{
-			// Hide the messages pane if a floater is hosted in the Conversations
-			dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
-		}
-// [/SL:KB]
 //		// Hide the messages pane if a floater is hosted in the Conversations
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+		dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
+// [/SL:KB]
 //		host_floater->collapseMessagesPane(true);
 	}
 	else ///< floater is torn off
