@@ -835,7 +835,7 @@ bool idle_startup()
 #endif
 		timeout.reset();
 
-// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 		if ( (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting")) && 
 		     (!LLLoginInstance::instance().getUpdaterService()->isChecking()) )
 		{

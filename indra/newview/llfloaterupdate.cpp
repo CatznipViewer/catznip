@@ -21,15 +21,14 @@
 #include "llfloaterupdate.h"
 
 // ====================================================================================
-// LLFloaterUpdate
+// LLFloaterUpdate class
 // 
 
 LLFloaterUpdate::LLFloaterUpdate(const LLSD& sdData)
 	: LLModalDialog(sdData["version"])
-	, m_strReplyPumpName(sdData["reply_pump"].asString())
 	, m_fRequired(sdData["required"].asBoolean())
 	, m_strVersion(sdData["version"].asString())
-	, m_strInformation(sdData["information"].asString())
+	, m_strInformation(sdData["more_info"].asString())
 	, m_strUpdateUrl(sdData["update_url"].asString())
 {
 	if ("download" == sdData["type"].asString())

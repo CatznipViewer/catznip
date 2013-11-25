@@ -258,7 +258,8 @@ void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData, bool
 	mDownloadData["required"] = required;
 	mDownloadData["update_channel"] = sdUpdateData["channel"].asString();
 	mDownloadData["update_version"] = sdUpdateData["version"].asString();
-	mDownloadData["info_url"] = sdUpdateData["more_info"].asString();
+	mDownloadData["more_info"] = sdUpdateData["more_info"].asString();
+	mDownloadData["update_url"] = sdUpdateData["update_url"].asString();
 // [/SL:KB]
 //	mDownloadData["required"] = required;
 //	mDownloadData["update_channel"] = updateChannel;

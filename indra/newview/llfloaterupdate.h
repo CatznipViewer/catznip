@@ -48,7 +48,6 @@ protected:
 private:
 	enum EType { TYPE_DOWNLOAD = 0, TYPE_INSTALL = 1 };
 
-	std::string	m_strReplyPumpName;
 	EType       m_eType;
 	bool        m_fRequired;
 	std::string m_strVersion;

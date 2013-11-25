@@ -2954,7 +2954,7 @@ namespace {
 		sdUpdateData["type"] = "download";
 		sdUpdateData["required"] = sdData["required"];
 		sdUpdateData["version"] = sdData["version"];
-		sdUpdateData["information"] = sdData["more_info"];
+		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["update_url"] = sdData["update_url"];
 		
 		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
@@ -2968,8 +2968,7 @@ namespace {
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Install"
 		{
-			static const bool install_if_ready = true;
-			LLLoginInstance::instance().getUpdaterService()->startChecking(install_if_ready);
+			LLLoginInstance::instance().getUpdaterService()->startChecking(true /*install_if_ready*/);
 		}
 		else								// User clicked "Later"
 		{
@@ -2990,7 +2989,7 @@ namespace {
 		sdUpdateData["type"] = "install";
 		sdUpdateData["required"] = sdData["required"];
 		sdUpdateData["version"] = sdData["version"];
-		sdUpdateData["information"] = sdData["more_info"];
+		sdUpdateData["more_info"] = sdData["more_info"];
 		sdUpdateData["update_url"] = sdData["update_url"];
 		
 		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
@@ -3067,11 +3066,18 @@ namespace {
 		substitutions["VERSION"] = data["version"];
 		std::string new_channel = data["channel"].asString();
 		substitutions["NEW_CHANNEL"] = new_channel;
-		std::string info_url    = data["info_url"].asString();
-		if ( !info_url.empty() )
+//		std::string info_url    = data["info_url"].asString();
+//		if ( !info_url.empty() )
+//		{
+//			substitutions["INFO_URL"] = info_url;
+//		}
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
+		std::string update_url = data["update_url"].asString();
+		if ( !update_url.empty() )
 		{
-			substitutions["INFO_URL"] = info_url;
+			substitutions["UPDATE_URL"] = update_url;
 		}
+// [/SL:KB]
 		else
 		{
 			LL_WARNS("UpdaterService") << "no info url supplied - defaulting to hard coded release notes pattern" << LL_ENDL;
@@ -3093,7 +3099,10 @@ namespace {
 
 		relnotes_url.setArg("[CHANNEL_URL]", channel_escaped.get());
 		relnotes_url.setArg("[RELEASE_NOTES_BASE_URL]", LLTrans::getString("RELEASE_NOTES_BASE_URL"));
-			substitutions["INFO_URL"] = relnotes_url.getString();
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
+			substitutions["UPDATE_URL"] = relnotes_url.getString();
+// [/SL:KB]
+//			substitutions["INFO_URL"] = relnotes_url.getString();
 		}
 
 		LLNotificationsUtil::add(notification_name, substitutions, LLSD(), apply_callback);
