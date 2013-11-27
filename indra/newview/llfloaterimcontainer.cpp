@@ -1223,7 +1223,7 @@ void LLFloaterIMContainerBase::doToParticipants(const std::string& command, uuid
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
 void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid_vec_t& selectedIDS)
 {
-	bool fHandled = true;
+	bool fHandled = false;
 	if (selectedIDS.size() == 1)
 	{
 		const LLUUID& userID = selectedIDS.front();
