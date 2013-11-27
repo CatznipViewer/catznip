@@ -1191,7 +1191,9 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 			// If the torn off session was the last hosted conversation in the conversation floater, just close it
 			if (1 == container->getFloaterCount())
 			{
-				container->closeFloater();
+				// NOTE: * don't use LLFloaterIMContainerView::closeFloater() because that closes the IM session and not the conversations floater
+				//       * we want LLFloaterIMContainerView::onClickCloseBtn() instead but it's private so we need to use the static LLFloater::onClickClose() to get at it
+				LLFloater::onClickClose(container);
 			}
 			else
 			{

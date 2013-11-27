@@ -2339,7 +2339,10 @@ void LLFloaterIMContainerView::closeFloater(bool app_quitting/* = false*/)
 		// Check for currently active session
 		LLUUID session_id = getSelectedSession();
 		// If current session is Nearby Chat or there is only one session remaining, close the floater
-		if (mConversationsItems.size() == 1 || session_id == LLUUID() || app_quitting)
+//		if (mConversationsItems.size() == 1 || session_id == LLUUID() || app_quitting)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		if ( (mConversationsItems.size() == 1) || (1 == getFloaterCount()) || (session_id == LLUUID()) || (app_quitting) )
+// [/SL:KB]
 		{
 			onClickCloseBtn();
 		}
