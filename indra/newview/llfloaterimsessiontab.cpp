@@ -527,7 +527,7 @@ void LLFloaterIMSessionTab::onFocusLost()
 
 void LLFloaterIMSessionTab::onInputEditorClicked()
 {
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-04-25 (Catznip-3.5)
 	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
 	if (im_box)
 	{

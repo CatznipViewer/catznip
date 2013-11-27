@@ -353,8 +353,14 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     {
 			if(!gAgent.isDoNotDisturb())
     	{
-// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-16 (Catznip-3.6)
-				gToolBarView->flashCommand(LLCommandId((session_id.notNull()) ? "conversations" : "chat"), true, im_box->isMinimized());
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-08-16 (Catznip-3.6)
+				// The behaviour we're aiming for is:
+				//   * with IM sessions we should look at the minimized state of the conversations floater
+				//   * with nearby chat we should look at the minimized state of the conversations floater if it's attached; otherwise the floater itself
+				// im_box is the conversations floater, which isn't what we want to look at if nearby chat is torn off
+				bool fIsNearby = session_id.isNull();
+				bool fSessionMinimized = ((!fIsNearby) || (!session_floater) || (!session_floater->isTornOff())) ? im_box->isMinimized() : session_floater->isMinimized();
+				gToolBarView->flashCommand(LLCommandId((!fIsNearby) ? "conversations" : "chat"), true, fSessionMinimized);
 // [/SL:KB]
 //				gToolBarView->flashCommand(LLCommandId("chat"), true, im_box->isMinimized());
     	}

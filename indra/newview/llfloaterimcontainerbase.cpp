@@ -26,6 +26,7 @@
 #include "llfloaterimcontainer.h"
 #include "llfloaterimcontainerbase.h"
 #include "llfloaterimcontainertab.h"
+#include "lltoolbarview.h"
 #include "llviewercontrol.h"
 
 //
@@ -75,7 +76,10 @@ void LLFloaterIMContainerBase::setMinimized(BOOL b)
 	// Switching from minimized to un-minimized
 	if (was_minimized && !b)
 	{
-//		gToolBarView->flashCommand(LLCommandId("chat"), false);
+		LLFloaterIMSessionTab* pNearbyChat = LLFloaterIMSessionTab::getConversation(LLUUID::null);
+		if ( (pNearbyChat) && (!pNearbyChat->isTornOff()) )
+			gToolBarView->flashCommand(LLCommandId("chat"), false);
+		gToolBarView->flashCommand(LLCommandId("conversations"), false);
 
 		const LLUUID& session_id = getSelectedSession();
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);

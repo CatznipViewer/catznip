@@ -70,6 +70,9 @@
 #include "llviewerchat.h"
 #include "lltranslate.h"
 #include "llautoreplace.h"
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
+#include "lltoolbarview.h"
+// [/SL:KB]
 
 S32 LLFloaterIMNearbyChat::sLastSpecialChatChannel = 0;
 
@@ -269,6 +272,19 @@ void LLFloaterIMNearbyChat::removeScreenChat()
 	}
 }
 
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
+void LLFloaterIMNearbyChat::setMinimized(BOOL b)
+{
+	bool fMinimized = isMinimized();
+	LLFloaterIMSessionTab::setMinimized(b);
+
+	// Switching from minimized to un-minimized
+	if ( (fMinimized) && (!b) )
+	{
+		gToolBarView->flashCommand(LLCommandId("chat"), false);
+	}
+}
+// [/SL:KB]
 
 void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 {
