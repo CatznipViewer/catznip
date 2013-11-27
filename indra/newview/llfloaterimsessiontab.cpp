@@ -1426,17 +1426,17 @@ BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 		if (mask == MASK_ALT)
 		{
 			LLFloaterIMContainerView* floater_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
-			if (KEY_RETURN == key && !isTornOff())
-			{
-				floater_container->expandConversation();
-				handled = TRUE;
-			}
-			if ((KEY_UP == key) || (KEY_LEFT == key) && !isTornOff())
+//			if ( (KEY_RETURN == key) && (isTornOff()) )
+//			{
+//				floater_container->expandConversation();
+//				handled = TRUE;
+//			}
+			if ( ((KEY_UP == key) || (KEY_LEFT == key)) && (!isTornOff()) )
 			{
 				floater_container->selectNextorPreviousConversation(false);
 				handled = TRUE;
 			}
-			if ((KEY_DOWN == key ) || (KEY_RIGHT == key) && !isTornOff())
+			if ( ((KEY_DOWN == key ) || (KEY_RIGHT == key)) && (!isTornOff()) )
 			{
 				floater_container->selectNextorPreviousConversation(true);
 				handled = TRUE;
