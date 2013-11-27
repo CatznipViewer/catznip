@@ -899,8 +899,9 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 {
 	// Display collapse image (<<) if the floater is hosted
 	// or if it is torn off but has an open control panel.
+	bool is_tabbed = LLFloaterIMContainerBase::isTabbedContainer();
 	bool is_not_torn_off = !isTornOff();
-	bool is_expanded = ((!LLFloaterIMContainerBase::isTabbedContainer()) && (is_not_torn_off)) || mParticipantListPanel->getVisible();
+	bool is_expanded = ((!is_tabbed) && (is_not_torn_off)) || mParticipantListPanel->getVisible();
    
 	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
 	mExpandCollapseBtn->setToolTip(
@@ -909,7 +910,7 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
 	// The button (>>) should be disabled for torn off P2P conversations.
-	mExpandCollapseBtn->setEnabled(is_not_torn_off || !mIsP2PChat);
+	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
 }
 
 void LLFloaterIMSessionTab::updateShowParticipantList()
