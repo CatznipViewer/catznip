@@ -575,6 +575,14 @@ LLParticipantAvatarList::~LLParticipantAvatarList()
 	m_AvatarListRefreshConn.disconnect();
 }
 
+void LLParticipantAvatarList::getSelectedUUIDs(uuid_vec_t& idsSelected)
+{
+	if (m_pAvatarList)
+	{
+		m_pAvatarList->getSelectedUUIDs(idsSelected);
+	}
+}
+
 const LLUUID& LLParticipantAvatarList::getSessionID() const
 {
 	return m_pAvatarList->getSessionID();

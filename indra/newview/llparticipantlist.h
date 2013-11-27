@@ -213,6 +213,7 @@ public:
 	/*virtual*/ ~LLParticipantAvatarList();
 
 public:
+	void getSelectedUUIDs(uuid_vec_t& idsSelected);
 	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
 	/*virtual*/ void update() { LLParticipantList::update(); }
 

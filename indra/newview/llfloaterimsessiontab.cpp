@@ -1338,7 +1338,15 @@ bool LLFloaterIMSessionTab::checkContextMenuItem(const LLSD& userdata)
 void LLFloaterIMSessionTab::getSelectedUUIDs(uuid_vec_t& selected_uuids)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	if (LLFloaterIMContainerBase::isTabbedContainer())
+	{
+		LLParticipantAvatarList* pParticipantList = dynamic_cast<LLParticipantAvatarList*>(mParticipantList);
+		if (pParticipantList)
+		{
+			pParticipantList ->getSelectedUUIDs(selected_uuids);
+		}
+		return;
+	}
 // [/SL:KB]
 
     const std::set<LLFolderViewItem*> selected_items = mConversationsRoot->getSelectionList();
