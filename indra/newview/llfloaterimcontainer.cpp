@@ -1552,10 +1552,23 @@ bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 
 void LLFloaterIMContainerView::showConversation(const LLUUID& session_id)
 {
-    setVisibleAndFrontmost(false);
-    selectConversationPair(session_id, true);
-
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-11-27 (Catznip-3.6)
     LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
+	if ( (!session_floater) || (session_floater->getHost()) )
+	{
+		setVisibleAndFrontmost(false);
+		selectConversationPair(session_id, true);
+	}
+	else
+	{
+		session_floater->setVisibleAndFrontmost(true);
+		flashConversationItemWidget(session_id, false);
+	}
+// [/SL:KB]
+//    setVisibleAndFrontmost(false);
+//    selectConversationPair(session_id, true);
+
+//    LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
     if (session_floater)
     {
         session_floater->restoreFloater();
