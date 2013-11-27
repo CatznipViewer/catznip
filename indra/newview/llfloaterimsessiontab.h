@@ -200,6 +200,9 @@ protected:
 //	LLButton* mTearOffBtn;
 //	LLButton* mCloseBtn;
 	LLButton* mGearBtn;
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	LLButton* mViewBtn;
+// [/SL:KB]
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;
     LLUICtrl* mTranslationCheckBox;

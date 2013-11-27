@@ -86,6 +86,10 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mInputButtonPanel(NULL)
   , mExpandCollapseLineBtn(NULL)
   , mGearBtn(NULL)
+  , mViewBtn(NULL)
+  , mAddBtn(NULL)
+  , mVoiceButton(NULL)
+  , mTranslationCheckBox(NULL)
 // [/SL:KB]
 {
     setAutoFocus(FALSE);
@@ -286,6 +290,9 @@ BOOL LLFloaterIMSessionTab::postBuild()
 //	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
 
 	mGearBtn = getChild<LLButton>("gear_btn");
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	mViewBtn = getChild<LLButton>("view_options_btn");
+// [/SL:KB]
     mAddBtn = getChild<LLButton>("add_btn");
 	mVoiceButton = getChild<LLButton>("voice_call_btn");
     mTranslationCheckBox = getChild<LLUICtrl>("translate_chat_checkbox_lp");
@@ -1224,7 +1231,7 @@ void LLFloaterIMSessionTab::updateGearBtn()
 {
 
 	BOOL prevVisibility = mGearBtn->getVisible();
-// [SL:KB] - Patch: Chat-Base | Checked: 2013-08-17 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-08-17 (Catznip-3.6)
 	mGearBtn->setVisible(mIsP2PChat);
 // [/SL:KB]
 //	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
@@ -1234,6 +1241,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 	if(prevVisibility != mGearBtn->getVisible())
 	{
 		LLRect gear_btn_rect =  mGearBtn->getRect();
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+		LLRect view_btn_rect = mViewBtn->getRect();
+// [/SL:KB]
 		LLRect add_btn_rect = mAddBtn->getRect();
 		LLRect call_btn_rect = mVoiceButton->getRect();
 		S32 gap_width = call_btn_rect.mLeft - add_btn_rect.mRight;
@@ -1241,14 +1251,23 @@ void LLFloaterIMSessionTab::updateGearBtn()
 		if(mGearBtn->getVisible())
 		{
 			// Move buttons to the right to give space for Gear button
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+			view_btn_rect.translate(right_shift,0);
+// [/SL:KB]
 			add_btn_rect.translate(right_shift,0);
 			call_btn_rect.translate(right_shift,0);
 		}
 		else
 		{
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+			view_btn_rect.translate(-right_shift,0);
+// [/SL:KB]
 			add_btn_rect.translate(-right_shift,0);
 			call_btn_rect.translate(-right_shift,0);
 		}
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+		mViewBtn->setRect(view_btn_rect);
+// [/SL:KB]
 		mAddBtn->setRect(add_btn_rect);
 		mVoiceButton->setRect(call_btn_rect);
 	}
@@ -1257,14 +1276,23 @@ void LLFloaterIMSessionTab::updateGearBtn()
 void LLFloaterIMSessionTab::initBtns()
 {
 	LLRect gear_btn_rect =  mGearBtn->getRect();
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	LLRect view_btn_rect = mViewBtn->getRect();
+// [/SL:KB]
 	LLRect add_btn_rect = mAddBtn->getRect();
 	LLRect call_btn_rect = mVoiceButton->getRect();
 	S32 gap_width = call_btn_rect.mLeft - add_btn_rect.mRight;
 	S32 right_shift = gear_btn_rect.getWidth() + gap_width;
 
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	view_btn_rect.translate(-right_shift,0);
+// [/SL:KB]
 	add_btn_rect.translate(-right_shift,0);
 	call_btn_rect.translate(-right_shift,0);
 
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	mViewBtn->setRect(view_btn_rect);
+// [/SL:KB]
 	mAddBtn->setRect(add_btn_rect);
 	mVoiceButton->setRect(call_btn_rect);
 }

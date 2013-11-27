@@ -104,20 +104,6 @@
                  tool_tip="Collapse/Expand this pane"
                  width="31" />
                 <menu_button
-                 menu_filename="menu_im_session_showmodes.xml"
-                 follows="top|left"
-                 height="25"
-                 image_hover_unselected="Toolbar_Middle_Over"
-                 image_overlay="Conv_toolbar_sort"
-                 image_selected="Toolbar_Middle_Selected"
-                 image_unselected="Toolbar_Middle_Off"
-                 layout="topleft"
-                 left_pad="2"
-                 name="view_options_btn"
-                 tool_tip="View/sort options"
-                 top="1"
-                 width="31" />
-                <menu_button
                  menu_filename="menu_im_conversation.xml"
                  follows="top|left"
                  height="25"
@@ -132,6 +118,20 @@
                  visible="false"
                  tool_tip="Actions on selected person"
                  width="31"/>
+                <menu_button
+                 menu_filename="menu_im_session_showmodes.xml"
+                 follows="top|left"
+                 height="25"
+                 image_hover_unselected="Toolbar_Middle_Over"
+                 image_overlay="Conv_toolbar_sort"
+                 image_selected="Toolbar_Middle_Selected"
+                 image_unselected="Toolbar_Middle_Off"
+                 layout="topleft"
+                 left_pad="2"
+                 name="view_options_btn"
+                 tool_tip="View/sort options"
+                 top="1"
+                 width="31" />
                 <button
                  enabled="false"
                  follows="top|left"
