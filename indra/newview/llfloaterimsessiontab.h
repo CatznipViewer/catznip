@@ -93,6 +93,9 @@ public:
 	bool hasInputText() const;
 // [/SL:KB]
 	bool isNearbyChat() {return mIsNearbyChat;}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+	LLChatEntry* getChatBox() { return mInputEditor; }
+// [/SL:KB]
 
 	// LLFloater overrides
 	/*virtual*/ void onOpen(const LLSD& key);

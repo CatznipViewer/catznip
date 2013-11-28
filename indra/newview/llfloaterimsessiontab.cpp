@@ -370,6 +370,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 		mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+	if (!gSavedSettings.getBOOL("ChatMultiLine"))
+		mInputEditor->enableSingleLineMode(true);
+// [/SL:KB]
 
 	mChatLayoutPanel = getChild<LLLayoutPanel>("chat_layout_panel");
 	mInputPanels = getChild<LLLayoutStack>("input_panels");
