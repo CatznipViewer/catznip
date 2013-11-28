@@ -33,21 +33,6 @@ public:
 	virtual ~LLFloaterIMContainerBase();
 
 	/*
-	 * LLView/LLMultiFloater overrides
-	 */
-public:
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void setMinimized(BOOL b);
-	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
-
-	// LLIMSessionObserver overrides
-	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
-	/*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id);
-	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id);
-	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
-	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
-
-	/*
 	 * Member functions
 	 */
 public:
@@ -56,6 +41,27 @@ public:
 	static bool                      isTabbedContainer() { return sTabbedContainer; }
 	static LLFloater*                buildFloater(const LLSD& sdKey);
 	static const std::string&        getFloaterXMLFile();
+protected:
+	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
+	avatarID_panel_map_t&            getSessionMap() { return mSessions; }
+
+	/*
+	 * LLView/LLMultiFloater overrides
+	 */
+public:
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void setMinimized(BOOL b);
+	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+
+	/*
+	 * LLIMSessionObserver overrides
+	 */
+public:
+	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
+	/*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id);
+	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id);
+	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
+	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
 
 	/*
 	 * Event handlers
@@ -81,22 +87,21 @@ public:
 	virtual const LLConversationSort& getSortOrder() const = 0;
 	virtual void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id) = 0;
 
-	// Handling of lists of participants is public so to be common with llfloatersessiontab
-	// *TODO : Find a better place for this.
-	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-	virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
-	
 	/*
 	 * Moved over from LLFloaterIMContainerView
 	 */
+public:
+	// Handling of lists of participants is public so to be common with llfloatersessiontab
+	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
 protected:
 	void toggleMute(const LLUUID& participant_id, U32 flags);
 
+	/*
+	 * Member variables
+	 */
 protected:
-	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
-	avatarID_panel_map_t& getSessionMap() { return mSessions; }
-
 	static bool sTabbedContainer;
 private:
 	avatarID_panel_map_t mSessions;

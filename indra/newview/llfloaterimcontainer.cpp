@@ -1523,11 +1523,8 @@ bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uui
 	{
 		if ("is_allowed_text_chat" == item)
 		{
-			const LLSpeaker * speakerp = getSpeakerOfSelectedParticipant(getSpeakerMgrForSelectedParticipant());
-			if (NULL != speakerp)
-			{
-				return !speakerp->mModeratorMutedText;
-			}
+			const LLSpeaker* speakerp = getSpeakerOfSelectedParticipant(getSpeakerMgrForSelectedParticipant());
+			return (NULL != speakerp) && (!speakerp->mModeratorMutedText);
 		}
 	}
 	return LLFloaterIMContainerBase::checkContextMenuItem(item, uuids);
@@ -2170,11 +2167,11 @@ BOOL LLFloaterIMContainerView::handleKeyHere(KEY key, MASK mask )
 
 	if(mask == MASK_ALT)
 	{
-		if (KEY_RETURN == key )
-		{
-			expandConversation();
-			handled = TRUE;
-		}
+//		if (KEY_RETURN == key )
+//		{
+//			expandConversation();
+//			handled = TRUE;
+//		}
 
 		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
 		{

@@ -74,7 +74,7 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mInputPanels(NULL)
   , mChatLayoutPanelHeight(0)
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-  ,	mParticipantList(NULL)
+  , mParticipantList(NULL)
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
   , mBodyStack(NULL)
@@ -429,7 +429,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	updateShowParticipantList();
 	updateExpandCollapseBtn();
 // [/SL:KB]
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-20 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-20 (Catznip-3.6)
 	updateGearBtn();
 // [/SL:KB]
 
@@ -918,7 +918,7 @@ void LLFloaterIMSessionTab::updateShowParticipantList()
 	// Participant list should be visible only in torn off floaters.
 	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
 	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
-    mParticipantListPanel->setVisible(is_participant_list_visible);
+	mParticipantListPanel->setVisible(is_participant_list_visible);
 }
 // [/SL:KB]
 
