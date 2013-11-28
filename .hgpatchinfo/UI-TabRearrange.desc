@@ -1,0 +1,10 @@
+[UI/TabRearrange]
+- added   : drag-arranging of the tab buttons on an LLTabContainer
+    -> see tab_allow_rearrange XUI parameter or LLTabContainer::setAllowRearrange
+- added   : insertion of a tab panel at a specific index
+    -> call LLTabContainer::insertTuple with a positive number corresponding to the desired tab index
+- added   : rearrange signal that fires every time the user rearranges the order of the tabs
+    -> see LLTabContainer::setRearrangeCallback
+- added   : allow drag-rearranging of legacy IM tab buttons (changes the order of the chiclets to match the new order of IM tabs)
+    -> controlled by 'RearrangeIMTabs' setting
+- changed : redocking a torn off legacy IM floater will insert the IM tab at its previous position rather than the end
