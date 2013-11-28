@@ -274,6 +274,9 @@ public:
 	// Optionally override the view's default X/Y, which are relative to the
 	// view's parent.
 	static void positionViewNearMouse(LLView* view,	S32 spawn_x = S32_MAX, S32 spawn_y = S32_MAX);
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+	static void positionViewNearMouse(LLView* view,	const LLRect& rctConstrain, S32 spawn_x = S32_MAX, S32 spawn_y = S32_MAX);
+// [/SL:KB]
 
 	//
 	// Data
