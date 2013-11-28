@@ -2456,7 +2456,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			if(offline == IM_OFFLINE)
 			{
 				LLStringUtil::format_map_t args;
-				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+				args["[LONG_TIMESTAMP]"] = formatted_longtime(timestamp);
+// [/SL:KB]
+//				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
 				saved = LLTrans::getString("Saved_message", args);
 			}
 			buffer = saved + message;
@@ -2942,7 +2945,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			std::string saved;
 			if(offline == IM_OFFLINE)
 			{
-				saved = llformat("(Saved %s) ", formatted_time(timestamp).c_str());
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+				saved = llformat("(Saved %s) ", formatted_longtime(timestamp).c_str());
+// [/SL:KB]
+//				saved = llformat("(Saved %s) ", formatted_time(timestamp).c_str());
 			}
 
 			buffer = saved + message;
@@ -6656,21 +6662,39 @@ void container_inventory_arrived(LLViewerObject* object,
 }
 
 // method to format the time.
-std::string formatted_time(const time_t& the_time)
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+std::string formatted_longtime(const time_t& the_time)
 {
-	std::string dateStr = "["+LLTrans::getString("LTimeWeek")+"] ["
-						+LLTrans::getString("LTimeMonth")+"] ["
-						+LLTrans::getString("LTimeDay")+"] ["
-						+LLTrans::getString("LTimeHour")+"]:["
-						+LLTrans::getString("LTimeMin")+"]:["
-						+LLTrans::getString("LTimeSec")+"] ["
-						+LLTrans::getString("LTimeYear")+"]";
+	std::string dateStr = "["+LLTrans::getString("TimeWeek")+"] ["
+						+LLTrans::getString("TimeMonthName")+"] ["
+						+LLTrans::getString("TimeDay")+"] ["
+						+LLTrans::getString("TimeYear")+"] ["
+						+LLTrans::getString("TimeHour")+"]:["
+						+LLTrans::getString("TimeMin")+"]:["
+						+LLTrans::getString("TimeSec")+"] ["
+						+LLTrans::getString("TimeTimezone")+"]";
 
 	LLSD substitution;
 	substitution["datetime"] = (S32) the_time;
 	LLStringUtil::format (dateStr, substitution);
 	return dateStr;
 }
+// [/SL:KB]
+//std::string formatted_time(const time_t& the_time)
+//{
+//	std::string dateStr = "["+LLTrans::getString("LTimeWeek")+"] ["
+//						+LLTrans::getString("LTimeMonth")+"] ["
+//						+LLTrans::getString("LTimeDay")+"] ["
+//						+LLTrans::getString("LTimeHour")+"]:["
+//						+LLTrans::getString("LTimeMin")+"]:["
+//						+LLTrans::getString("LTimeSec")+"] ["
+//						+LLTrans::getString("LTimeYear")+"]";
+//
+//	LLSD substitution;
+//	substitution["datetime"] = (S32) the_time;
+//	LLStringUtil::format (dateStr, substitution);
+//	return dateStr;
+//}
 
 
 void process_teleport_failed(LLMessageSystem *msg, void**)
@@ -7464,17 +7488,20 @@ void process_covenant_reply(LLMessageSystem* msg, void**)
 	}
 	else
 	{
-		last_modified = LLTrans::getString("covenant_last_modified")+"["
-						+LLTrans::getString("LTimeWeek")+"] ["
-						+LLTrans::getString("LTimeMonth")+"] ["
-						+LLTrans::getString("LTimeDay")+"] ["
-						+LLTrans::getString("LTimeHour")+"]:["
-						+LLTrans::getString("LTimeMin")+"]:["
-						+LLTrans::getString("LTimeSec")+"] ["
-						+LLTrans::getString("LTimeYear")+"]";
-		LLSD substitution;
-		substitution["datetime"] = (S32) covenant_timestamp;
-		LLStringUtil::format (last_modified, substitution);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+		last_modified = LLTrans::getString("covenant_last_modified") + formatted_longtime(covenant_timestamp);
+// [/SL:KB]
+//		last_modified = LLTrans::getString("covenant_last_modified")+"["
+//						+LLTrans::getString("LTimeWeek")+"] ["
+//						+LLTrans::getString("LTimeMonth")+"] ["
+//						+LLTrans::getString("LTimeDay")+"] ["
+//						+LLTrans::getString("LTimeHour")+"]:["
+//						+LLTrans::getString("LTimeMin")+"]:["
+//						+LLTrans::getString("LTimeSec")+"] ["
+//						+LLTrans::getString("LTimeYear")+"]";
+//		LLSD substitution;
+//		substitution["datetime"] = (S32) covenant_timestamp;
+//		LLStringUtil::format (last_modified, substitution);
 	}
 
 	LLPanelEstateCovenant::updateLastModified(last_modified);
