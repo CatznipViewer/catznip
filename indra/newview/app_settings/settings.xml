@@ -6719,6 +6719,17 @@
       <key>Value</key>
       <integer>23</integer>
     </map>
+    <key>NearbyToastWidth</key>
+    <map>
+      <key>Comment</key>
+      <string>Width of the nearby chat toasts (or 0 to have the toasts follow the width of the chat bar)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>StartUpToastLifeTime</key>
     <map>
       <key>Comment</key>
