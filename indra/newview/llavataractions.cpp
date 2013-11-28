@@ -183,7 +183,10 @@ void LLAvatarActions::offerTeleport(const uuid_vec_t& ids)
 static void on_avatar_name_cache_start_im(const LLUUID& agent_id,
 										  const LLAvatarName& av_name)
 {
-	std::string name = av_name.getDisplayName();
+//	std::string name = av_name.getDisplayName();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+	std::string name = av_name.getUserName();
+// [/SL:KB]
 	LLUUID session_id = gIMMgr->addSession(name, IM_NOTHING_SPECIAL, agent_id);
 	if (session_id != LLUUID::null)
 	{
@@ -217,7 +220,10 @@ void LLAvatarActions::endIM(const LLUUID& id)
 static void on_avatar_name_cache_start_call(const LLUUID& agent_id,
 											const LLAvatarName& av_name)
 {
-	std::string name = av_name.getDisplayName();
+//	std::string name = av_name.getDisplayName();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+	std::string name = av_name.getUserName();
+// [/SL:KB]
 	LLUUID session_id = gIMMgr->addSession(name, IM_NOTHING_SPECIAL, agent_id, true);
 	if (session_id != LLUUID::null)
 	{

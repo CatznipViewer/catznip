@@ -117,11 +117,11 @@ void process_dnd_im(const LLSD& notification)
     {
         //reconstruct session using data from the notification
         std::string name = data["FROM"];
-        LLAvatarName av_name;
-        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
-        {
-            name = av_name.getDisplayName();
-        }
+//        LLAvatarName av_name;
+//        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
+//        {
+//            name = av_name.getDisplayName();
+//        }
 		
         
         LLIMModel::getInstance()->newSession(sessionID, 
@@ -797,12 +797,19 @@ LLUUID LLIMModel::LLIMSession::generateOutgouigAdHocHash() const
 	return hash;
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8)
+void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name)
+{
+	// Standardize P2P IM session names to "complete name"
+	mName = av_name.getCompleteName();
+}
+// [/SL:KB]
+
 void LLIMModel::LLIMSession::buildHistoryFileName()
 {
-	mHistoryFileName = mName;
-
-	//ad-hoc requires sophisticated chat history saving schemes
-	if (isAdHoc())
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+	// Not all of the code above is broken but it becomes a bit of a mess otherwise
+	if (isAdHoc())		//ad-hoc requires sophisticated chat history saving schemes
 	{
 		/* in case of outgoing ad-hoc sessions we need to make specilized names
 		* if this naming system is ever changed then the filtering definitions in 
@@ -821,21 +828,58 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 			mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
 		}
 	}
-	else if (isP2P()) // look up username to use as the log name
+	else if (isP2P())	// look up username to use as the log name
 	{
-		LLAvatarName av_name;
-		// For outgoing sessions we already have a cached name
-		// so no need for a callback in LLAvatarNameCache::get()
-		if (LLAvatarNameCache::get(mOtherParticipantID, &av_name))
-		{
-			mHistoryFileName = LLCacheName::buildUsername(av_name.getUserName());
-		}
-		else
-		{
-			// Incoming P2P sessions include a name that we can use to build a history file name
-			mHistoryFileName = LLCacheName::buildUsername(mName);
-		}
+		// NOTE-Catznip: [SL-2.6] mName will be:
+		//   - the "complete name" if display names are enabled and it's an outgoing IM
+		//   - the "legacy name" if display names are disabled or if it's an incoming IM
+		LLIMModel::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
+
+		// If it's an incoming IM session we may not have the display name yet 
+ 		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
 	}
+	else
+	{
+		mHistoryFileName = mName;
+	}
+// [/SL:KB]
+//	mHistoryFileName = mName;
+//
+//	//ad-hoc requires sophisticated chat history saving schemes
+//	if (isAdHoc())
+//	{
+//		/* in case of outgoing ad-hoc sessions we need to make specilized names
+//		* if this naming system is ever changed then the filtering definitions in 
+//		* lllogchat.cpp need to be change acordingly so that the filtering for the
+//		* date stamp code introduced in STORM-102 will work properly and not add
+//		* a date stamp to the Ad-hoc conferences.
+//		*/
+//		if (mInitialTargetIDs.size())
+//		{
+//			std::set<LLUUID> sorted_uuids(mInitialTargetIDs.begin(), mInitialTargetIDs.end());
+//			mHistoryFileName = mName + " hash" + generateHash(sorted_uuids).asString();
+//		}
+//		else
+//		{
+//			//in case of incoming ad-hoc sessions
+//			mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
+//		}
+//	}
+//	else if (isP2P()) // look up username to use as the log name
+//	{
+//		LLAvatarName av_name;
+//		// For outgoing sessions we already have a cached name
+//		// so no need for a callback in LLAvatarNameCache::get()
+//		if (LLAvatarNameCache::get(mOtherParticipantID, &av_name))
+//		{
+//			mHistoryFileName = LLCacheName::buildUsername(av_name.getUserName());
+//		}
+//		else
+//		{
+//			// Incoming P2P sessions include a name that we can use to build a history file name
+//			mHistoryFileName = LLCacheName::buildUsername(mName);
+//		}
+//	}
 }
 
 //static
@@ -1021,6 +1065,48 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 
 	return true;
 }
+
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
+{
+	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames", true);
+
+	// If we have the name cached then we can simply return the username
+	LLAvatarName avName;
+	if (LLAvatarNameCache::get(idAgent, &avName))
+	{
+		if (!fLegacyFilenames)
+		{
+			strFilename = avName.getUserName();
+		}
+		else
+		{
+			strFilename = LLCacheName::cleanFullName(avName.getLegacyName());
+		}
+		return true;
+	}
+	else
+	{
+		// Try and get it from the legacy cache if we can
+		std::string strLegacyName;
+		if (gCacheName->getFullName(idAgent, strLegacyName))
+			strLegacyName = strName;
+
+		if (!fLegacyFilenames)
+		{
+			// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
+			strFilename = LLCacheName::buildUsername(strName);
+			return strName != strFilename;	// If the assumption above was wrong then the two will match which signals failure
+		}
+		else
+		{
+			// Strip any possible mention of a username
+			strFilename = LLCacheName::buildLegacyName(strName);
+			return (!strFilename.empty());	// Assume success as long as the filename isn't an empty string
+		}
+	}
+}
+// [/SL:KB]
 
 bool LLIMModel::logToFile(const std::string& file_name, const std::string& from, const LLUUID& from_id, const std::string& utf8_text)
 {
@@ -2681,11 +2767,11 @@ void LLIMMgr::addMessage(
 	bool new_session = !hasSession(new_session_id);
 	if (new_session)
 	{
-		LLAvatarName av_name;
-		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
-		{
-			fixed_session_name = av_name.getDisplayName();
-		}
+//		LLAvatarName av_name;
+//		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
+//		{
+//			fixed_session_name = av_name.getDisplayName();
+//		}
 		LLIMModel::getInstance()->newSession(new_session_id, fixed_session_name, dialog, other_participant_id, false, is_offline_msg);
 
 		LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(new_session_id);
@@ -2779,11 +2865,18 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 
 		else
 		{
-			std::string session_name;
-			// since we select user to share item with - his name is already in cache
-			gCacheName->getFullName(args["user_id"], session_name);
-			session_name = LLCacheName::buildUsername(session_name);
-			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+			std::string strFilename;
+			if (LLIMModel::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
+			{
+				LLIMModel::instance().logToFile(strFilename, SYSTEM_FROM, LLUUID::null, message.getString());
+			}
+// [/SL:KB]
+//			std::string session_name;
+//			// since we select user to share item with - his name is already in cache
+//			gCacheName->getFullName(args["user_id"], session_name);
+//			session_name = LLCacheName::buildUsername(session_name);
+//			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
 		}
 	}
 }
