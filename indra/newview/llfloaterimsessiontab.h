@@ -97,6 +97,9 @@ public:
 	/*virtual*/ void draw();
 	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setFocus(BOOL focus);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2)
+	/*virtual*/ BOOL handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
+// [/SL:KB]
 	
 	// Handle the left hand participant list widgets
 	void addConversationViewParticipant(LLConversationItem* item);

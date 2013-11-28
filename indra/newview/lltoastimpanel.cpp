@@ -36,7 +36,10 @@
 #include "llnotifications.h"
 #include "llinstantmessage.h"
 #include "lltooltip.h"
-
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-29 (Catznip-3.3)
+#include "lltextparser.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerchat.h"
 
 const S32 LLToastIMPanel::DEFAULT_MESSAGE_MAX_LINE_COUNT	= 6;
@@ -62,39 +65,85 @@ LLToastIMPanel::LLToastIMPanel(LLToastIMPanel::Params &p) :	LLToastPanel(p.notif
 	style_params.font.name(font_name);
 	style_params.font.size(font_size);
 	
-	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(p.session_id);
-	mIsGroupMsg = (im_session && im_session->mSessionType == LLIMModel::LLIMSession::GROUP_SESSION);
-	if(mIsGroupMsg)
-	{
-		mAvatarName->setValue(im_session->mName);
-		LLAvatarName avatar_name;
-		LLAvatarNameCache::get(p.avatar_id, &avatar_name);
-		p.message = "[From " + avatar_name.getDisplayName() + "]\n" + p.message;
-	}
-	
+//	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(p.session_id);
+//	mIsGroupMsg = (im_session && im_session->mSessionType == LLIMModel::LLIMSession::GROUP_SESSION);
+//	if(mIsGroupMsg)
+//	{
+//		mAvatarName->setValue(im_session->mName);
+//		LLAvatarName avatar_name;
+//		LLAvatarNameCache::get(p.avatar_id, &avatar_name);
+//		p.message = "[From " + avatar_name.getDisplayName() + "]\n" + p.message;
+//	}
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-29 (Catznip-3.3)
+	mMessage->clear();
+
 	//Handle IRC styled /me messages.
 	std::string prefix = p.message.substr(0, 4);
+	std::string message = p.message;
 	if (prefix == "/me " || prefix == "/me'")
 	{
-		//style_params.font.style = "UNDERLINE";
-		mMessage->clear();
-		
-		style_params.font.style ="ITALIC";
+		style_params.font.style = "ITALIC";
 		mMessage->appendText(p.from, FALSE, style_params);
 
 		style_params.font.style = "ITALIC";
-		mMessage->appendText(p.message.substr(3), FALSE, style_params);
+		message = p.message.erase(0, 3);
 	}
 	else
 	{
-		style_params.font.style =  "NORMAL";
-		mMessage->setText(p.message, style_params);
+		style_params.font.style = "NORMAL";
 	}
 
-	if(!mIsGroupMsg)
+	static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts", false);
+	LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(p.session_id);
+	if ( (sEnableChatAlerts) && (pIMSession) )
 	{
-	mAvatarName->setValue(p.from);
+		S32 nHighlightMask = mMessage->getHighlightsMask();
+
+		switch (pIMSession->mSessionType)
+		{
+			case LLIMModel::LLIMSession::P2P_SESSION:
+				mMessage->setHighlightsMask(nHighlightMask | LLHighlightEntry::CAT_IM);
+				break;
+			case LLIMModel::LLIMSession::GROUP_SESSION:
+			case LLIMModel::LLIMSession::ADHOC_SESSION:
+				mMessage->setHighlightsMask(nHighlightMask | LLHighlightEntry::CAT_GROUP);
+				break;
+			default:
+				break;
+		}
+
+		mMessage->appendText(message, FALSE, style_params);
+		mMessage->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
 	}
+	else
+	{
+		mMessage->appendText(message, FALSE, style_params);
+	}
+// [/SL:KB]
+//	//Handle IRC styled /me messages.
+//	std::string prefix = p.message.substr(0, 4);
+//	if (prefix == "/me " || prefix == "/me'")
+//	{
+//		//style_params.font.style = "UNDERLINE";
+//		mMessage->clear();
+//		
+//		style_params.font.style ="ITALIC";
+//		mMessage->appendText(p.from, FALSE, style_params);
+//
+//		style_params.font.style = "ITALIC";
+//		mMessage->appendText(p.message.substr(3), FALSE, style_params);
+//	}
+//	else
+//	{
+//		style_params.font.style =  "NORMAL";
+//		mMessage->setText(p.message, style_params);
+// 	}
+
+//	if(!mIsGroupMsg)
+//	{
+	mAvatarName->setValue(p.from);
+//	}
 	mTime->setValue(p.time);
 	mSessionID = p.session_id;
 	mAvatarID = p.avatar_id;
@@ -162,14 +211,14 @@ void LLToastIMPanel::spawnNameToolTip()
 
 	LLToolTip::Params params;
 	params.background_visible(false);
-	if(!mIsGroupMsg)
-	{
+//	if(!mIsGroupMsg)
+//	{
 	params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_avatar", LLSD().with("avatar_id", mAvatarID), FALSE));
-	}
-	else
-	{
-		params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_group", LLSD().with("group_id", mSessionID), FALSE));
-	}
+//	}
+//	else
+//	{
+//		params.click_callback(boost::bind(&LLFloaterReg::showInstance, "inspect_group", LLSD().with("group_id", mSessionID), FALSE));
+//	}
 	params.delay_time(0.0f);		// spawn instantly on hover
 	params.image(LLUI::getUIImage("Info_Small"));
 	params.message("");
