@@ -1414,7 +1414,10 @@ bool idle_startup()
 
 		// create a container's instance for start a controlling conversation windows
 		// by the voice's events
-		LLFloaterIMContainer::getInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance();
 
 		// *Note: this is where gWorldMap used to be initialized.
 

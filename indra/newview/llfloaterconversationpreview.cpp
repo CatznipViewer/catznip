@@ -32,6 +32,9 @@
 #include "llfloaterimnearbychat.h"
 #include "llspinctrl.h"
 #include "lltrans.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 const std::string LL_FCP_COMPLETE_NAME("complete_name");
 const std::string LL_FCP_ACCOUNT_NAME("user_name");

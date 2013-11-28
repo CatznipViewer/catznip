@@ -28,19 +28,27 @@
 #ifndef LL_FLOATERIMSESSIONTAB_H
 #define LL_FLOATERIMSESSIONTAB_H
 
-#include "lllayoutstack.h"
-#include "llparticipantlist.h"
+//#include "lllayoutstack.h"
+//#include "llparticipantlist.h"
 #include "lltransientdockablefloater.h"
-#include "llviewercontrol.h"
-#include "lleventtimer.h"
+//#include "llviewercontrol.h"
+//#include "lleventtimer.h"
 #include "llimview.h"
 #include "llconversationmodel.h"
-#include "llconversationview.h"
-#include "lltexteditor.h"
+//#include "llconversationview.h"
+//#include "lltexteditor.h"
 
 class LLPanelChatControlPanel;
 class LLChatEntry;
 class LLChatHistory;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+class LLConversationItem;
+class LLConversationViewParticipant;
+class LLParticipantList;
+class LLLayoutPanel;
+class LLLayoutStack;
+class LLTimer;
+// [/SL:KB]
 
 class LLFloaterIMSessionTab
 	: public LLTransientDockableFloater
@@ -68,12 +76,19 @@ public:
 	bool isHostAttached() {return mIsHostAttached;}
 	void setHostAttached(bool is_attached) {mIsHostAttached = is_attached;}
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	void setParticipantList(LLParticipantList* participant_list);
+// [/SL:KB]
+
     static LLFloaterIMSessionTab* findConversation(const LLUUID& uuid);
     static LLFloaterIMSessionTab* getConversation(const LLUUID& uuid);
 
 	// show/hide the translation check box
 	void showTranslationCheckbox(const BOOL visible = FALSE);
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+	const LLUUID& getSessionID() const { return mSessionID; }
+// [/SL:KB]
 	bool isNearbyChat() {return mIsNearbyChat;}
 
 	// LLFloater overrides
@@ -122,10 +137,14 @@ protected:
 	void updateCallBtnState(bool callIsActive);
 
 	void hideOrShowTitle(); // toggle the floater's drag handle
-	void hideAllStandardButtons();
+//	void hideAllStandardButtons();
 
-	/// Update floater header and toolbar buttons when hosted/torn off state is toggled.
-	void updateHeaderAndToolbar();
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+	void updateExpandCollapseBtn();
+	void updateShowParticipantList();
+// [/SL:KB]
+//	/// Update floater header and toolbar buttons when hosted/torn off state is toggled.
+//	void updateHeaderAndToolbar();
 
 	// Update the input field help text and other places that need the session name
 	virtual void updateSessionName(const std::string& name);
@@ -178,9 +197,12 @@ protected:
 	
 	LLButton* mExpandCollapseLineBtn;
 	LLButton* mExpandCollapseBtn;
-	LLButton* mTearOffBtn;
-	LLButton* mCloseBtn;
+//	LLButton* mTearOffBtn;
+//	LLButton* mCloseBtn;
 	LLButton* mGearBtn;
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	LLButton* mViewBtn;
+// [/SL:KB]
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;
     LLUICtrl* mTranslationCheckBox;
@@ -205,11 +227,14 @@ private:
 
 	void onInputEditorClicked();
 
-	bool checkIfTornOff();
+//	bool checkIfTornOff();
     bool mIsHostAttached;
     bool mHasVisibleBeenInitialized;
 
 	LLTimer* mRefreshTimer; ///< Defines the rate at which refresh() is called.
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	LLParticipantList* mParticipantList;
+// [/SL:KB]
 
 	S32 mInputEditorPad;
 	S32 mChatLayoutPanelHeight;

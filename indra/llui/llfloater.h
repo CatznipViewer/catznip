@@ -208,6 +208,9 @@ public:
 	bool buildFromFile(const std::string &filename);
 
 	boost::signals2::connection setMinimizeCallback( const commit_signal_t::slot_type& cb );
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+	boost::signals2::connection setTearOffCallback( const commit_signal_t::slot_type& cb );
+// [/SL:KB]
 	boost::signals2::connection setOpenCallback( const commit_signal_t::slot_type& cb );
 	boost::signals2::connection setCloseCallback( const commit_signal_t::slot_type& cb );
 
@@ -333,7 +336,10 @@ public:
 	bool            isDocked() const { return mDocked; }
 	virtual void    setDocked(bool docked, bool pop_on_undock = true);
 
-	virtual void    setTornOff(bool torn_off) { mTornOff = torn_off; }
+//	virtual void    setTornOff(bool torn_off) { mTornOff = torn_off; }
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-09-30 (Catznip-3.0)
+	virtual void    setTornOff(bool torn_off);
+// [/SL:KB]
 	bool isTornOff() {return mTornOff;}
 	void setOpenPositioning(LLFloaterEnums::EOpenPositioning pos) {mPositioning = pos;}
 
@@ -349,9 +355,17 @@ public:
 
 	static void		onClickClose(LLFloater* floater);
 	static void		onClickMinimize(LLFloater* floater);
-	static void		onClickTearOff(LLFloater* floater);
+//	static void		onClickTearOff(LLFloater* floater);
 	static void     onClickDock(LLFloater* floater);
 	static void		onClickHelp(LLFloater* floater);
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2013-05-03 (Catznip-3.5)
+private:
+	// Keep this as protected to catch all outside calls to this function
+	static void		onClickTearOff(LLFloater* floater);
+public:
+	// Naming decided mostly by LLFloaterIMSessionTab to reduce the amount of LL code changes
+	virtual void	onTearOffClicked();
+// [/SL:KB]
 
 	static void		setFloaterHost(LLMultiFloater* hostp) {sHostp = hostp; }
 	static LLMultiFloater* getFloaterHost() {return sHostp; }
@@ -432,6 +446,9 @@ public:
 	commit_signal_t mCloseSignal;		
 
 	commit_signal_t* mMinimizeSignal;
+// [SL:KB] - Patch: Control-FloaterTearOff | Checked: 2011-11-12 (Catznip-3.2)
+	commit_signal_t* mTearOffSignal;
+// [/SL:KB]
 
 protected:
 	bool			mSaveRect;
