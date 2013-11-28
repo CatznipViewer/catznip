@@ -540,14 +540,25 @@ void LLTextBase::drawText()
 {
 	S32 text_len = getLength();
 
-	if (text_len <= 0 && mLabel.empty())
-	{
-		return;
-	}
-	else if (useLabel())
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2013-11-28 (Catznip-3.6)
+	if (useLabel())
 	{
 		text_len = mLabel.getWString().length();
 	}
+
+	if (text_len <= 0)
+	{
+		return;
+	}
+// [/SL:KB]
+//	if (text_len <= 0 && mLabel.empty())
+//	{
+//		return;
+//	}
+//	else if (useLabel())
+//	{
+//		text_len = mLabel.getWString().length();
+//	}
 
 	S32 selection_left = -1;
 	S32 selection_right = -1;
