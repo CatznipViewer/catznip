@@ -1923,6 +1923,19 @@ void LLViewerWindow::initWorldUI()
 	chiclet_container->addChild(chiclet_bar);
 	chiclet_container->setVisible(TRUE);
 
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	LLChicletBar::EAlignment eAlign = LLChicletBar::ALIGN_TOP;
+	if (LLChicletBar::ALIGN_BOTTOM == gSavedSettings.getS32("ChicletBarAlignment"))
+	{
+		eAlign = LLChicletBar::ALIGN_BOTTOM;
+
+		LLPanel* pMoveBtnContainer = getRootView()->getChild<LLPanel>("stand_stop_flying_container");
+		chiclet_container->translate(0, pMoveBtnContainer->getRect().mBottom - chiclet_container->getRect().mBottom);
+		chiclet_container->setFollows((chiclet_container->getFollows() & ~FOLLOWS_TOP) | FOLLOWS_BOTTOM);
+	}
+	chiclet_bar->setAlignment(eAlign);
+// [/SL:KB]
+
 	LLRect morph_view_rect = full_window;
 	morph_view_rect.stretch( -STATUS_BAR_HEIGHT );
 	morph_view_rect.mTop = full_window.mTop - 32;
