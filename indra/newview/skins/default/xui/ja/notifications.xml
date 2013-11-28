@@ -1511,45 +1511,45 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[UPDATE_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[UPDATE_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		必要なソフトウェアのアップデートをダウンロードしました。
-バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
+バージョン [VERSION] [[UPDATE_URL] このアップデートに関する情報]
 
 アップデートをインストールするには [APP_NAME] を再起動する必要があります。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		アップデートをインストールするには [APP_NAME] を再起動する必要があります。
-[[INFO_URL] このアップデートに関する情報]
+[[UPDATE_URL] このアップデートに関する情報]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
 バージョン [VERSION] 
 この試験的なビューアが [NEW_CHANNEL] ビューアに置き換えられています;
-このアップデートの詳細については、[[INFO_URL] を参照してください]
+このアップデートの詳細については、[[UPDATE_URL] を参照してください]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
 バージョン [VERSION]
 この試験的なビューアが [NEW_CHANNEL] ビューアに置き換えられています;
-[[INFO_URL] このアップデートに関する情報] を参照
+[[UPDATE_URL] このアップデートに関する情報] を参照
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		必要なソフトウェアのアップデートをダウンロードしました。
 バージョン [VERSION]
 この試験的なビューアが [NEW_CHANNEL] ビューアに置き換えられています;
-[[INFO_URL] このアップデートに関する情報] を参照
+[[UPDATE_URL] このアップデートに関する情報] を参照
 
 アップデートをインストールするには [APP_NAME] を再起動する必要があります。
 		<usetemplate name="okbutton" yestext="OK"/>
@@ -1557,7 +1557,7 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		アップデートをインストールするには [APP_NAME] を再起動する必要があります。
 この試験的なビューアが [NEW_CHANNEL] ビューアに置き換えられています;
-[[INFO_URL] このアップデートに関する情報] を参照
+[[UPDATE_URL] このアップデートに関する情報] を参照
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

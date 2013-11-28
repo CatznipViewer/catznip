@@ -78,6 +78,9 @@
 #include "llsecondlifeurls.h"
 #include "llstring.h"
 #include "lluserrelations.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "llversioninfo.h"
 #include "llviewercontrol.h"
 #include "llviewerhelp.h"
@@ -831,6 +834,15 @@ bool idle_startup()
 		display_startup();
 #endif
 		timeout.reset();
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+		if ( (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting")) && 
+		     (!LLLoginInstance::instance().getUpdaterService()->isChecking()) )
+		{
+			LLLoginInstance::instance().getUpdaterService()->startChecking();
+		}
+// [/SL:KB]
+
 		return FALSE;
 	}
 

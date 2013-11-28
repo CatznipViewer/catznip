@@ -62,6 +62,20 @@ namespace
 											  UPDATE_MARKER_FILENAME);
 	}
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	bool get_update_marker_data(LLSD& update_info)
+	{
+		llifstream update_marker(update_marker_path(), std::ios::in | std::ios::binary);
+		if (!update_marker.is_open())
+			return false;
+
+		// Found an update info - now lets see if its valid.
+		LLSDSerialize::fromXMLDocument(update_info, update_marker);
+		update_marker.close();
+		return true;
+	}
+// [/SL:KB]
+
 	std::string install_script_path(void)
 	{
 #ifdef LL_WINDOWS
@@ -135,6 +149,11 @@ public:
 	bool isChecking();
 	LLUpdaterService::eUpdaterState getState();
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	bool isDownloading()	{ return mIsDownloading; }
+	void startDownloading();
+// [/SL:KB]
+
 	void setAppExitCallback(LLUpdaterService::app_exit_callback_t aecb) { mAppExitCallback = aecb;}
 	std::string updatedVersion(void);
 
@@ -146,6 +165,10 @@ public:
 	
 	// A successful response was received from the viewer version manager
 	virtual void response(LLSD const & content);
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	/*virtual*/ void checkComplete(const LLSD& sdData);
+// [/SL:KB]
 	
 	// LLUpdateDownloader::Client
 	void downloadComplete(LLSD const & data);
@@ -156,6 +179,9 @@ public:
 private:
 	std::string mNewChannel;
 	std::string mNewVersion;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	LLSD        mNewUpdateData;		// Used by checkComplete() to store data for use by startDownloading()
+// [/SL:KB]
 	
 	void restartTimer(unsigned int seconds);
 	void setState(LLUpdaterService::eUpdaterState state);
@@ -247,6 +273,19 @@ void LLUpdaterServiceImpl::startChecking(bool install_if_ready)
 			setState(LLUpdaterService::DOWNLOADING);
 		}
 	}
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	else if (!install_if_ready)
+	{
+		// Simulate a completed download so the user is informed about the update
+		LLSD update_info;
+		get_update_marker_data(update_info);
+
+		mNewVersion = update_info["update_version"].asString();
+		mNewChannel = update_info["update_channel"].asString();
+
+		downloadComplete(update_info);
+	}
+// [/SL:KB]
 }
 
 void LLUpdaterServiceImpl::stopChecking()
@@ -271,6 +310,22 @@ bool LLUpdaterServiceImpl::isChecking()
 	return mIsChecking;
 }
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+void LLUpdaterServiceImpl::startDownloading()
+{
+	if (!mNewUpdateData.isDefined())
+		return;
+
+	stopTimer();
+	mIsDownloading = true;
+	setState(LLUpdaterService::DOWNLOADING);
+
+	mUpdateDownloader.download(mNewUpdateData, mNewUpdateData["required"].asBoolean());
+
+	mNewUpdateData.clear();
+}
+// [/SL:KB]
+
 LLUpdaterService::eUpdaterState LLUpdaterServiceImpl::getState()
 {
 	return mState;
@@ -285,16 +340,20 @@ bool LLUpdaterServiceImpl::checkForInstall(bool launchInstaller)
 {
 	bool foundInstall = false; // return true if install is found.
 
-	llifstream update_marker(update_marker_path(), 
-							 std::ios::in | std::ios::binary);
-
-	if(update_marker.is_open())
+//	llifstream update_marker(update_marker_path(), 
+//							 std::ios::in | std::ios::binary);
+//
+//	if(update_marker.is_open())
+//	{
+//		// Found an update info - now lets see if its valid.
+//		LLSD update_info;
+//		LLSDSerialize::fromXMLDocument(update_info, update_marker);
+//		update_marker.close();
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+	LLSD update_info;
+	if (get_update_marker_data(update_info))
 	{
-		// Found an update info - now lets see if its valid.
-		LLSD update_info;
-		LLSDSerialize::fromXMLDocument(update_info, update_marker);
-		update_marker.close();
-
+// [/SL:KB]
 		// Get the path to the installer file.
 		LLSD path = update_info.get("path");
 		if(update_info["current_version"].asString() != ll_get_version())
@@ -408,8 +467,11 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 	}
 	else if ( content.isMap() && content.has("url") )
 	{
-		// there is an update available...
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-07-15 (Catznip-3.5)
+		// There is an update available...
 		stopTimer();
+		setState(LLUpdaterService::UPDATE_AVAILABLE);
+
 		mNewChannel = content["channel"].asString();
 		if (mNewChannel.empty())
 		{
@@ -417,18 +479,41 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 			mNewChannel = mChannel;
 		}
 		mNewVersion = content["version"].asString();
-		mIsDownloading = true;
-		setState(LLUpdaterService::DOWNLOADING);
-		BOOL required = content["required"].asBoolean();
-		LLURI url(content["url"].asString());
-		std::string more_info = content["more_info"].asString();
-		LL_DEBUGS("UpdaterService")
-			<< "Starting download of "
-			<< ( required ? "required" : "optional" ) << " update"
-			<< " to channel '" << mNewChannel << "' version " << mNewVersion
-			<< " more info '" << more_info << "'"
-			<< LL_ENDL;
-		mUpdateDownloader.download(url, content["hash"].asString(), mNewChannel, mNewVersion, more_info, required);
+		mNewUpdateData = content;
+
+		LLSD sdEventData;
+		sdEventData["pump"] = LLUpdaterService::pumpName();
+		sdEventData["payload"] = content;
+
+		LLSD& sdPayload = sdEventData["payload"];
+		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
+		sdPayload["required"] = content["required"].asBoolean();
+		sdPayload["channel"] = mNewChannel;
+		sdPayload["version"] = mNewVersion;
+
+		LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+// [/SL:KB]
+//		// there is an update available...
+//		stopTimer();
+//		mNewChannel = content["channel"].asString();
+//		if (mNewChannel.empty())
+//		{
+//			LL_INFOS("UpdaterService") << "no channel supplied, assuming current channel" << LL_ENDL;
+//			mNewChannel = mChannel;
+//		}
+//		mNewVersion = content["version"].asString();
+//		mIsDownloading = true;
+//		setState(LLUpdaterService::DOWNLOADING);
+//		BOOL required = content["required"].asBoolean();
+//		LLURI url(content["url"].asString());
+//		std::string more_info = content["more_info"].asString();
+//		LL_DEBUGS("UpdaterService")
+//			<< "Starting download of "
+//			<< ( required ? "required" : "optional" ) << " update"
+//			<< " to channel '" << mNewChannel << "' version " << mNewVersion
+//			<< " more info '" << more_info << "'"
+//			<< LL_ENDL;
+//		mUpdateDownloader.download(url, content["hash"].asString(), mNewChannel, mNewVersion, more_info, required);
 	}
 	else
 	{
@@ -450,18 +535,29 @@ void LLUpdaterServiceImpl::downloadComplete(LLSD const & data)
 	LLSD event;
 	event["pump"] = LLUpdaterService::pumpName();
 	LLSD payload;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+	payload = data["update_data"];
+// [/SL:KB]
 	payload["type"] = LLSD(LLUpdaterService::DOWNLOAD_COMPLETE);
 	payload["required"] = data["required"];
 	payload["version"] = mNewVersion;
 	payload["channel"] = mNewChannel;
-	payload["info_url"] = data["info_url"];
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
+	payload["more_info"] = data["more_info"];
+	payload["update_url"] = data["update_url"];
+// [/SL:KB]
+//	payload["info_url"] = data["info_url"];
 	event["payload"] = payload;
 	LL_DEBUGS("UpdaterService")
 		<< "Download complete "
 		<< ( data["required"].asBoolean() ? "required" : "optional" )
 		<< " channel " << mNewChannel
 		<< " version " << mNewVersion
-		<< " info " << data["info_url"].asString()
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
+		<< " more_info " << data["more_info"].asString()
+		<< " update_url " << data["update_url"].asString()
+// [/SL:KB]
+//		<< " info " << data["info_url"].asString()
 		<< LL_ENDL;
 
 	LLEventPumps::instance().obtain("mainlooprepeater").post(event);
@@ -660,6 +756,18 @@ bool LLUpdaterService::isChecking()
 {
 	return mImpl->isChecking();
 }
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+bool LLUpdaterService::isDownloading()
+{
+	return mImpl->isDownloading();
+}
+
+void LLUpdaterService::startDownloading()
+{
+	return mImpl->startDownloading();
+}
+// [/SL:KB]
 
 LLUpdaterService::eUpdaterState LLUpdaterService::getState()
 {

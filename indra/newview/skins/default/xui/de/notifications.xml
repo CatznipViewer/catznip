@@ -1490,45 +1490,45 @@ Sie können dieses Update von http://www.secondlife.com/downloads herunterladen 
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[UPDATE_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[UPDATE_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		Ein erforderliches Softwareupdate wurde heruntergeladen.
-Version [VERSION] [[INFO_URL] Infos zu diesem Update]
+Version [VERSION] [[UPDATE_URL] Infos zu diesem Update]
 
 Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
-[[INFO_URL] Infos zu diesem Update]
+[[UPDATE_URL] Infos zu diesem Update]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
 Version [VERSION] 
 Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Details zu diesem Update finden Sie [[INFO_URL] hier].
+weitere Details zu diesem Update finden Sie [[UPDATE_URL] hier].
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
 Version [VERSION]
 Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
+weitere Infos zu diesem Update finden Sie [[UPDATE_URL] hier].
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		Ein erforderliches Softwareupdate wurde heruntergeladen.
 Version [VERSION]
 Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
+weitere Infos zu diesem Update finden Sie [[UPDATE_URL] hier].
 
 Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
 		<usetemplate name="okbutton" yestext="OK"/>
@@ -1536,7 +1536,7 @@ Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		Zur Installation des Updates muss [APP_NAME] neu gestartet werden.
 Dieser experimentelle Viewer wurde durch einen [NEW_CHANNEL] Viewer ersetzt;
-weitere Infos zu diesem Update finden Sie [[INFO_URL] hier].
+weitere Infos zu diesem Update finden Sie [[UPDATE_URL] hier].
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

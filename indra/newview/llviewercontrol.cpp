@@ -593,7 +593,10 @@ bool toggle_show_object_render_cost(const LLSD& newvalue)
 
 void toggle_updater_service_active(const LLSD& new_value)
 {
-    if(new_value.asInteger())
+//    if(new_value.asInteger())
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-22 (Catznip-3.6)
+	if (LLUpdaterService::UPDATER_DISABLED != new_value.asInteger())
+// [/SL:KB]
     {
 		LLUpdaterService update_service;
 		if(!update_service.isChecking()) update_service.startChecking();
