@@ -1638,6 +1638,47 @@ bool LLAppearanceMgr::getCanReplaceCOF(const LLUUID& outfit_cat_id)
 	return items.size() > 0;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t& removable_items)
+{
+	LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
+	gInventory.getDirectDescendentsOf(folder_id, cats, items);
+
+	removable_items.clear();
+	if (items)
+	{
+		for (LLInventoryModel::item_array_t::iterator itItem = items->begin(); itItem != items->end(); ++itItem)
+		{
+			LLViewerInventoryItem* pItem = *itItem;
+			if ( (pItem) && (LLAssetType::AT_BODYPART != pItem->getType()) && (get_is_item_worn(pItem->getUUID())) )
+			{
+				removable_items.push_back(pItem);
+			}
+		}
+	}
+	return removable_items.size() > 0;
+}
+
+bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
+{
+	LLViewerInventoryCategory* pCat = gInventory.getCategory(folder_id);
+	LLInventoryModel::item_array_t removable_items;
+	return (pCat) && (LLFolderType::FT_NONE == pCat->getPreferredType()) && (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
+}
+
+void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
+{
+	LLInventoryModel::item_array_t removable_items;
+	if (get_removable_items(folder_id, removable_items))
+	{
+		for (LLInventoryModel::item_array_t::iterator itItem = removable_items.begin(); itItem != removable_items.end(); ++itItem)
+		{
+			removeItemFromAvatar((*itItem)->getUUID());
+		}
+	}
+}
+// [/SL:KB]
+
 void LLAppearanceMgr::purgeBaseOutfitLink(const LLUUID& category)
 {
 	LLInventoryModel::cat_array_t cats;
@@ -3363,12 +3404,20 @@ void show_created_outfit(LLUUID& folder_id, bool show_panel = true)
 			LLFloaterSidePanelContainer::showPanel("appearance", "panel_outfits_inventory", key);
 
 		}
-		LLOutfitsList *outfits_list =
-			dynamic_cast<LLOutfitsList*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
-		if (outfits_list)
+//		LLOutfitsList *outfits_list =
+//			dynamic_cast<LLOutfitsList*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
+//		if (outfits_list)
+//	{
+//		outfits_list->setSelectedOutfitByUUID(folder_id);
+//	}
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+		LLPanelOutfitsTab *outfits_tab =
+			dynamic_cast<LLPanelOutfitsTab*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
+		if (outfits_tab)
 		{
-		outfits_list->setSelectedOutfitByUUID(folder_id);
+		outfits_tab->setSelectedOutfitByUUID(folder_id);
 		}
+// [/SL:KB]
 
 		LLAppearanceMgr::getInstance()->updateIsDirty();
 		gAgentWearables.notifyLoadingFinished(); // New outfit is saved.
@@ -3459,7 +3508,10 @@ bool LLAppearanceMgr::shouldRemoveTempAttachment(const LLUUID& item_id)
 }
 
 
-bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+//bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_body, bool upload)
+// [/SL:KB]
 {
 	if (!item || !item->isWearableType()) return false;
 	if (item->getType() != LLAssetType::AT_CLOTHING) return false;
@@ -3503,7 +3555,10 @@ bool LLAppearanceMgr::moveWearable(LLViewerInventoryItem* item, bool closer_to_b
 	bool result = false;
 	if (result = gAgentWearables.moveWearable(item, closer_to_body))
 	{
-		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+		gAgentAvatarp->wearableUpdated(item->getWearableType(), upload);
+// [/SL:KB]
+//		gAgentAvatarp->wearableUpdated(item->getWearableType(), FALSE);
 	}
 
 	setOutfitDirty(true);

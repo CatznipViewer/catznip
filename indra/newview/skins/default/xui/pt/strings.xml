@@ -4400,6 +4400,12 @@ Denunciar abuso
 	<string name="EmptyOutfitText">
 		Este look não possui nenhuma peça
 	</string>
+	<string name="SaveOutfit">
+		Salvar
+	</string>
+	<string name="SaveOutfitAs">
+		Salvar como
+	</string>
 	<string name="ExternalEditorNotSet">
 		Selecione um editor utilizando a configuração ExternalEditor.
 	</string>

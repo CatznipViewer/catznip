@@ -21,6 +21,16 @@
          parameter="take_off" />
     </menu_item_call>
     <menu_item_call
+     label="Take Off Folder"
+     layout="topleft"
+     name="takeofffolder">
+        <on_click
+         function="Gear.TakeOffFolder" />
+        <on_enable
+         function="Gear.OnEnable"
+         parameter="take_off_folder" />
+    </menu_item_call>
+    <menu_item_call
      label="Copy outfit list to clipboard"
      layout="topleft"
      name="copy">

@@ -4525,6 +4525,12 @@ Bu iletiyi almaya devam ederseniz, lütfen [SUPPORT_SITE] bölümüne başvurun.
 	<string name="EmptyOutfitText">
 		Bu dış görünümde herhangi bir öğe yok
 	</string>
+	<string name="SaveOutfit">
+		Kaydet
+	</string>
+	<string name="SaveOutfitAs">
+		Farklı Kaydet
+	</string>
 	<string name="ExternalEditorNotSet">
 		ExternalEditor ayarını kullanarak bir düzenleyici seçin.
 	</string>

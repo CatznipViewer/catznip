@@ -420,6 +420,79 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+
+// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
+LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)
+{
+	LLUUID idParent;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		if (idParent.isNull())
+			idParent = pItem->getParentUUID();
+		else if (idParent != pItem->getParentUUID())
+			return LLUUID::null;
+	}
+	return idParent;
+}
+
+// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
+bool get_item_wearable(const LLInventoryItem* pItem)
+{
+	if (pItem)
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_OBJECT:
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+			case LLAssetType::AT_GESTURE:
+				return true;
+			default:
+				return false;
+		}
+	}
+	return false;
+}
+
+bool get_item_wearable(const LLUUID& idItem)
+{
+	return get_item_wearable(gInventory.getItem(idItem));
+}
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items)
+{
+	bool fWearable = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWearable = get_item_wearable(pItem);
+	}
+	return fWearable;
+}
+
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items)
+{
+	bool fWorn = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWorn = get_is_item_worn(pItem->getUUID());
+	}
+	return fWorn;
+}
+
+// [/SL:KB]
+
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)
 {
 	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
@@ -825,6 +898,14 @@ bool LLNameCategoryCollector::operator()(
 	return false;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+LLFindCOFValidItems::LLFindCOFValidItems(bool include_gestures, bool include_folders)
+	: mIncludeGestures(include_gestures)
+	, mIncludeFolders(include_folders)
+{
+}
+// [/SL:KB]
+
 bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 									 LLInventoryItem* item)
 {
@@ -839,10 +920,16 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 		LLAssetType::EType type = linked_item->getType();
 		return (type == LLAssetType::AT_CLOTHING ||
 				type == LLAssetType::AT_BODYPART ||
-				type == LLAssetType::AT_GESTURE ||
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+				( (mIncludeGestures) && (type == LLAssetType::AT_GESTURE) ) ||
+// [/SL:KB]
+//				type == LLAssetType::AT_GESTURE ||
 				type == LLAssetType::AT_OBJECT);
 	}
-	else
+//	else
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	else if (mIncludeFolders)
+// [/SL:KB]
 	{
 		LLViewerInventoryCategory *linked_category = ((LLViewerInventoryItem*)item)->getLinkedCategory();
 		// BAP remove AT_NONE support after ensembles are fully working?
@@ -850,6 +937,9 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 				((linked_category->getPreferredType() == LLFolderType::FT_NONE) ||
 				 (LLFolderType::lookupIsEnsembleType(linked_category->getPreferredType()))));
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	return false;
+// [/SL:KB]
 }
 
 bool LLFindWearables::operator()(LLInventoryCategory* cat,
