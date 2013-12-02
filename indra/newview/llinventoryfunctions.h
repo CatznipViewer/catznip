@@ -386,10 +386,17 @@ class LLFindWearablesEx : public LLInventoryCollectFunctor
 {
 public:
 	LLFindWearablesEx(bool is_worn, bool include_body_parts = true);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	LLFindWearablesEx(bool is_worn, bool include_body_parts, const LLUUID& folder_id);
+// [/SL:KB]
 	virtual bool operator()(LLInventoryCategory* cat, LLInventoryItem* item);
 private:
 	bool mIncludeBodyParts;
 	bool mIsWorn;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	bool mIncludeSubfolders;
+	LLUUID mFolderId;
+// [/SL:KB]
 };
 
 //Inventory collect functor collecting wearables of a specific wearable type

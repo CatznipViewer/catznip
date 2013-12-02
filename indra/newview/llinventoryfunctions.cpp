@@ -959,12 +959,33 @@ bool LLFindWearables::operator()(LLInventoryCategory* cat,
 LLFindWearablesEx::LLFindWearablesEx(bool is_worn, bool include_body_parts)
 :	mIsWorn(is_worn)
 ,	mIncludeBodyParts(include_body_parts)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+,	mIncludeSubfolders(true)
+// [/SL:KB]
 {}
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+LLFindWearablesEx::LLFindWearablesEx(bool is_worn, bool include_body_parts, const LLUUID& folder_id)
+	: mIsWorn(is_worn)
+	, mIncludeBodyParts(include_body_parts)
+{
+	mFolderId = folder_id;
+	mIncludeSubfolders = mFolderId.isNull();
+}
+// [/SL:KB]
 
 bool LLFindWearablesEx::operator()(LLInventoryCategory* cat, LLInventoryItem* item)
 {
 	LLViewerInventoryItem *vitem = dynamic_cast<LLViewerInventoryItem*>(item);
 	if (!vitem) return false;
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	// Skip subfolders, unless requested to include them
+	if ( (!mIncludeSubfolders) && (item->getParentUUID() != mFolderId) )
+	{
+		return false;
+	}
+// [/SL:KB]
 
 	// Skip non-wearables.
 	if (!vitem->isWearableType() && vitem->getType() != LLAssetType::AT_OBJECT)

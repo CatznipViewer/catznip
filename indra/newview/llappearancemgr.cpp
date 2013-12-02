@@ -1639,42 +1639,32 @@ bool LLAppearanceMgr::getCanReplaceCOF(const LLUUID& outfit_cat_id)
 }
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
-bool get_removable_items(const LLUUID& folder_id, LLInventoryModel::item_array_t& removable_items)
+bool get_removable_items(const LLUUID& idFolder, LLInventoryModel::item_array_t& itemsRemove)
 {
-	LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
-	gInventory.getDirectDescendentsOf(folder_id, cats, items);
-
-	removable_items.clear();
-	if (items)
-	{
-		for (LLInventoryModel::item_array_t::iterator itItem = items->begin(); itItem != items->end(); ++itItem)
-		{
-			LLViewerInventoryItem* pItem = *itItem;
-			if ( (pItem) && (LLAssetType::AT_BODYPART != pItem->getType()) && (get_is_item_worn(pItem->getUUID())) )
-			{
-				removable_items.push_back(pItem);
-			}
-		}
-	}
-	return removable_items.size() > 0;
+	LLInventoryModel::cat_array_t cats;
+	LLFindWearablesEx f(/*is_worn*/ true, /*include_body_parts*/ false, idFolder);
+	gInventory.collectDescendentsIf(idFolder, cats, itemsRemove, LLInventoryModel::EXCLUDE_TRASH, f);
+	return itemsRemove.size() > 0;
 }
 
 bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const
 {
-	LLViewerInventoryCategory* pCat = gInventory.getCategory(folder_id);
-	LLInventoryModel::item_array_t removable_items;
-	return (pCat) && (LLFolderType::FT_NONE == pCat->getPreferredType()) && (get_removable_items(folder_id, removable_items)) && (removable_items.size() >= 2);
+	const LLViewerInventoryCategory* pCat = gInventory.getCategory(folder_id);
+	LLInventoryModel::item_array_t itemsRemove;
+	return (pCat) && (LLFolderType::FT_NONE == pCat->getPreferredType()) && (get_removable_items(folder_id, itemsRemove)) && (itemsRemove.size() >= 2);
 }
 
 void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
 {
-	LLInventoryModel::item_array_t removable_items;
-	if (get_removable_items(folder_id, removable_items))
+	LLInventoryModel::item_array_t itemsRemove;
+	if (get_removable_items(folder_id, itemsRemove))
 	{
-		for (LLInventoryModel::item_array_t::iterator itItem = removable_items.begin(); itItem != removable_items.end(); ++itItem)
+		uuid_vec_t idsRemove;
+		for (LLInventoryModel::item_array_t::const_iterator itItem = itemsRemove.begin(); itItem != itemsRemove.end(); ++itItem)
 		{
-			removeItemFromAvatar((*itItem)->getUUID());
+			idsRemove.push_back((*itItem)->getUUID());
 		}
+		removeItemsFromAvatar(idsRemove);
 	}
 }
 // [/SL:KB]
