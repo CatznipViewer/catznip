@@ -18,7 +18,6 @@
 
 #include "llappearancemgr.h"
 #include "llfolderview.h"
-#include "llfoldervieweventlistener.h"
 #include "llinventoryfunctions.h"
 #include "llinventorypanel.h"
 #include "llmenubutton.h"
@@ -65,7 +64,7 @@ protected:
 		if (!pRootFolder)
 			return;
 
-		LLFolderViewFolder* pStartFolder = pRootFolder->getFolderByID(pInvPanel->getRootFolderID());
+		LLFolderViewFolder* pStartFolder = pInvPanel->getFolderByID(pInvPanel->getRootFolderID());
 		if (!pStartFolder)
 			return;
 
@@ -145,7 +144,7 @@ bool LLOutfitsView::onIdle()
 		mInvPanel->setShape(pInvPanelPlaceholder->getRect());
 		mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
 
-		mInvPanel->getRootFolder()->getFilter()->markDefault();
+		mInvPanel->getFilter().markDefault();
 		mInvPanel->getRootFolder()->setAutoSelectOverride(true);
 		mInvPanel->getRootFolder()->closeAllFolders();
 		highlightBaseOutfit();
@@ -200,7 +199,7 @@ void LLOutfitsView::setFilterSubString(const std::string& strFilter)
 	if (!strFilter.empty())
 	{
 		// Save folder open state if no filter currently applied
-		if (!mInvPanel->getRootFolder()->isFilterModified())
+		if (!mInvPanel->getFilter().isNotDefault())
 		{
 			mSavedFolderState->setApply(FALSE);
 			mInvPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
@@ -300,9 +299,15 @@ bool LLOutfitsView::isActionEnabled(const LLSD& sdParam)
 // virtual
 void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 {
-	std::set<LLUUID> selItems = mInvPanel->getRootFolder()->getSelectionList();
-	selected_uuids.resize(selItems.size());
-	std::copy(selItems.begin(), selItems.end(), selected_uuids.begin());
+	std::set<LLFolderViewItem*> selected_items = mInvPanel->getRootFolder()->getSelectionList();
+	for (std::set<LLFolderViewItem*>::const_iterator itItem = selected_items.begin(); itItem != selected_items.end(); ++itItem)
+	{
+		const LLFolderViewItem* pItem = *itItem;
+		if ( (pItem) && (pItem->getViewModelItem()) )
+		{
+			selected_uuids.push_back(static_cast<const LLFolderViewModelItemInventory*>(pItem->getViewModelItem())->getUUID());
+		}
+	}
 }
 
 //bool get_folder_or_descendent_selected(LLFolderViewFolder* pFolder)
@@ -325,7 +330,7 @@ void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 
 void LLOutfitsView::highlightBaseOutfit()
 {
-	if ( (!mInvPanel) || ((mInvPanel->getFilter()) && (mInvPanel->getFilter()->hasFilterString())) )
+	if ( (!mInvPanel) || (mInvPanel->getFilter().hasFilterString()) )
 		return;
 
 	const LLUUID idBOF = LLAppearanceMgr::getInstance()->getBaseOutfitUUID();
@@ -334,13 +339,13 @@ void LLOutfitsView::highlightBaseOutfit()
 
 	if (mHighlightedFolder.notNull())
 	{
-		LLFolderViewFolder* pFolder = mInvPanel->getRootFolder()->getFolderByID(mHighlightedFolder);
+		LLFolderViewFolder* pFolder = mInvPanel->getFolderByID(mHighlightedFolder);
 		if ( (pFolder) && (pFolder->isOpen()) )
 			pFolder->setOpenArrangeRecursively(FALSE);
 		mHighlightedFolder.setNull();
 	}
 
-	LLFolderViewFolder* pBOFFolder = mInvPanel->getRootFolder()->getFolderByID(idBOF);
+	LLFolderViewFolder* pBOFFolder = mInvPanel->getFolderByID(idBOF);
 	if (pBOFFolder)
 	{
 	 	pBOFFolder->setOpen(TRUE);
@@ -404,11 +409,11 @@ void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const
 void LLOutfitsView::setSelectedOutfitByUUID(const LLUUID& idOutfit)
 {
 	LLFolderView* pRootFolder = mInvPanel->getRootFolder();
-	LLFolderViewItem *pOutfitFolder = pRootFolder->getItemByID(idOutfit);
+	LLFolderViewItem *pOutfitFolder = mInvPanel->getItemByID(idOutfit);
 	if (pOutfitFolder)
 	{
 		pOutfitFolder->setOpen(!pOutfitFolder->isOpen());
-		pRootFolder->setSelectionFromRoot(pOutfitFolder, TRUE);
+		pRootFolder->setSelection(pOutfitFolder, TRUE);
 		pRootFolder->scrollToShowSelection();
 	}
 }
@@ -439,14 +444,16 @@ void LLOutfitsView::onSelectionChange(const std::deque<LLFolderViewItem*> &selIt
 		const LLFolderViewFolder* pFolder = dynamic_cast<const LLFolderViewFolder*>(*selItems.begin());
 		if (pFolder)
 		{
-			mSelectedCategory = pFolder->getListener()->getUUID();
+			mSelectedCategory = static_cast<const LLFolderViewModelItemInventory*>(pFolder->getViewModelItem())->getUUID();
 		}
 		else
 		{
 			mItemSelection = true;
 			const LLFolderViewFolder* pFolder = (*selItems.begin())->getParentFolder();
 			if (pFolder)
-				mSelectedCategory = pFolder->getListener()->getUUID();
+			{
+				mSelectedCategory = static_cast<const LLFolderViewModelItemInventory*>(pFolder->getViewModelItem())->getUUID();
+			}
 		}
 	}
 	else

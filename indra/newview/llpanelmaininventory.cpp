@@ -1108,7 +1108,7 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
 		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS, true);
 // [/SL:KB]
-		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+//		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
 	}
 }
 

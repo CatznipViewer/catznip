@@ -1602,7 +1602,7 @@ void LLPanelOutfitEdit::saveListSelection()
 
 		for(std::vector<LLUUID>::const_iterator item_id = selected_ids.begin(); item_id != selected_ids.end(); ++item_id)
 		{
-			LLFolderViewItem* item = mInventoryItemsPanel->getItemByID(*item_id);
+			LLFolderViewItem* item = mItemsPanel->getItemByID(*item_id);
 			if (!item) continue;
 
 			LLFolderViewFolder* parent = item->getParentFolder();

@@ -420,7 +420,7 @@ void LLInventoryPanel::setHoursAgo(U32 hours)
 
 //void LLInventoryPanel::setFilterLinks(U64 filter_links)
 //{
-	getFilter().setFilterLinks(filter_links);
+//	getFilter().setFilterLinks(filter_links);
 //}
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
 void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
@@ -432,7 +432,7 @@ void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 void LLInventoryPanel::setFilterWorn(bool filter)
 {
-	getFilter()->setFilterWorn(filter);
+	getFilter().setFilterWorn(filter);
 }
 // [/SL:KB]
 
@@ -1019,24 +1019,28 @@ bool LLInventoryPanel::getSelectedItems(LLInventoryModel::item_array_t& items) c
 
 	if ( (!mFolderRoot) || (!mInventory) )
 		return false;
-	std::set<LLUUID> selItems = mFolderRoot->getSelectionList();
+	std::set<LLFolderViewItem*> selItems = mFolderRoot->getSelectionList();
 	if (selItems.empty())
 		return false;
 
-	for (std::set<LLUUID>::const_iterator itItem = selItems.begin(); itItem != selItems.end(); itItem++)
+	for (std::set<LLFolderViewItem*>::const_iterator itFVItem = selItems.begin(); itFVItem != selItems.end(); ++itFVItem)
 	{
-		LLViewerInventoryItem* pItem = mInventory->getItem(*itItem);
-		if (!pItem)
+		const LLFolderViewItem* pFVItem = *itFVItem;
+		if ( (pFVItem) && (pFVItem->getViewModelItem()) )
 		{
 			// Bit of a hack but if there are categories selected then we don't want to show any actions so we return an empty selection
-			if (mInventory->getCategory(*itItem))
+			if (dynamic_cast<const LLFolderViewFolder*>(pFVItem))
 			{
 				items.clear();
 				return false;
 			}
-			continue;
+
+			LLViewerInventoryItem* pItem = mInventory->getItem(static_cast<const LLFolderViewModelItemInventory*>(pFVItem->getViewModelItem())->getUUID());
+			if (pItem)
+			{
+				items.push_back(pItem);
+			}
 		}
-		items.push_back(pItem);
 	}
 	return !items.empty();
 }

@@ -640,7 +640,7 @@ void LLPanelWearing::setFilterSubString(const std::string& string)
 		}
 		return;
 	}
-	else if ( (mInvPanel) && (mInvPanel->getRootFolder()->getFilterSubString().empty()) )
+	else if ( (mInvPanel) && (mInvPanel->getFilterSubString().empty()) )
 	{
 		// Save current folder open state if no filter currently applied
 		mSavedFolderState->setApply(FALSE);
@@ -752,10 +752,15 @@ void LLPanelWearing::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 	}
 	else if ( (mInvPanel) && (mInvPanel->getVisible()) )
 	{
-		std::set<LLUUID> selected_ids = mInvPanel->getRootFolder()->getSelectionList();
-
-		void (uuid_vec_t::* tmp)(LLUUID const&) = &uuid_vec_t::push_back;
-		std::for_each(selected_ids.begin(), selected_ids.end(), boost::bind(tmp, &selected_uuids, _1));
+		std::set<LLFolderViewItem*> selected_items = mInvPanel->getRootFolder()->getSelectionList();
+		for (std::set<LLFolderViewItem*>::const_iterator itItem = selected_items.begin(); itItem != selected_items.end(); ++itItem)
+		{
+			const LLFolderViewItem* pItem = *itItem;
+			if ( (pItem) && (pItem->getViewModelItem()) )
+			{
+				selected_uuids.push_back(static_cast<const LLFolderViewModelItemInventory*>(pItem->getViewModelItem())->getUUID());
+			}
+		}
 	}
 // [/SL:KB]
 //	mCOFItemsList->getSelectedUUIDs(selected_uuids);
@@ -829,7 +834,7 @@ bool LLPanelWearing::createInventoryPanel()
 	mInvPanel->setFilterWorn(true);
 	mInvPanel->setSortOrder(gSavedSettings.getU32("WearingFolderSortOrder"));
 //	mInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-	mInvPanel->getFilter()->markDefault();
+	mInvPanel->getFilter().markDefault();
 	mInvPanel->openAllFolders();
 	mInvPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
 	mInvPanel->setSelectCallback(boost::bind(&LLPanelWearing::onSelectionChange, this));
