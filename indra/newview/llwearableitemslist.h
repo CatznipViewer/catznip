@@ -91,7 +91,7 @@ protected:
 
 private:
 	bool	mWornIndicationEnabled;
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6)
 	bool	mWornTargetIndicationEnabled;
 // [/SL:KB]
 };
@@ -501,7 +501,7 @@ public:
 
 	ESortOrder getSortOrder() const { return mSortOrder; }
 
-// [SL:KB] - Patch: Appearance-Wearing
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	virtual void setSortOrder(ESortOrder sort_order, bool sort_now = true);
 // [/SL:KB]
 //	void setSortOrder(ESortOrder sort_order, bool sort_now = true);

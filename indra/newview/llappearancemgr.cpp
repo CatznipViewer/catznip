@@ -3400,7 +3400,7 @@ void show_created_outfit(LLUUID& folder_id, bool show_panel = true)
 //	{
 //		outfits_list->setSelectedOutfitByUUID(folder_id);
 //	}
-// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
 		LLPanelOutfitsTab *outfits_tab =
 			dynamic_cast<LLPanelOutfitsTab*>(LLFloaterSidePanelContainer::getPanel("appearance", "outfitslist_tab"));
 		if (outfits_tab)

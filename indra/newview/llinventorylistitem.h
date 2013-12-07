@@ -201,7 +201,7 @@ protected:
 	 */
 	virtual BOOL handleToolTip( S32 x, S32 y, MASK mask);
 
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-3.0.0a) | Added: Catznip-2.6.0e
+// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6)
 	LLAssetType::EType mInventoryItemAssetType;
 // [/SL:KB]
 	const LLUUID mInventoryItemUUID;

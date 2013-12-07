@@ -347,7 +347,7 @@ private:
 
 LLOutfitsList::LLOutfitsList()
 //	:	LLPanelAppearanceTab()
-// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
 	:	LLPanelOutfitsTab()
 // [/SL:KB]
 	,	mAccordion(NULL)
@@ -355,7 +355,7 @@ LLOutfitsList::LLOutfitsList()
 	,	mIsInitialized(false)
 	,	mItemSelected(false)
 {
-// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-12-01 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-12-01 (Catznip-2.4)
 	setXMLFilename("panel_outfits_list.xml");
 // [/SL:KB]
 

@@ -549,7 +549,7 @@ LLPanelWearing::~LLPanelWearing()
 {
 	delete mGearMenu;
 	delete mContextMenu;
-// [SL:KB]
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	delete mSavedFolderState;
 // [/SL:KB]
 
