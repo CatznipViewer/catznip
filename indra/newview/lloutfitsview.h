@@ -25,6 +25,10 @@ class LLInventoryPanel;
 class LLOutfitsViewGearMenu;
 class LLSaveFolderState;
 
+// ============================================================================
+// LLOutfitsView - Inventory panel based outfit view
+//
+
 class LLOutfitsView : public LLPanelOutfitsTab
 {
 public:
@@ -45,11 +49,11 @@ public:
 	/*virtual*/ void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const;
 
 	// LLPanelOutfitsTab overrides
+	/*virtual*/ bool hasItemSelected();
 	/*virtual*/ void performAction(std::string action);
 	/*virtual*/ void removeSelected();
 	/*virtual*/ void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
 	/*virtual*/ void wearSelectedItems();
-	/*virtual*/ bool hasItemSelected();
 
 	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
 

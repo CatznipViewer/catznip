@@ -13,37 +13,32 @@
  * abide by those obligations.
  * 
  */
-
 #ifndef LL_LLPANELOUTFITSTAB_H
 #define LL_LLPANELOUTFITSTAB_H
 
 #include "llpanelappearancetab.h"
 
+// ============================================================================
+// LLPanelOutfitsTab - Pure virtual base class for the different outfit views
+//
+
 class LLPanelOutfitsTab : public LLPanelAppearanceTab
 {
 public:
 	LLPanelOutfitsTab() : LLPanelAppearanceTab() {}
-	virtual ~LLPanelOutfitsTab() {}
+	/*virtual*/ ~LLPanelOutfitsTab() {}
 
-public:
 	typedef boost::function<void (const LLUUID&)> selection_change_callback_t;
 	typedef boost::signals2::signal<void (const LLUUID&)> selection_change_signal_t;
 
-	virtual boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb) = 0;
-
-	virtual void performAction(std::string action) = 0;
-
-	virtual void removeSelected() = 0;
-
-	virtual void setSelectedOutfitByUUID(const LLUUID& outfit_uuid) = 0;
-
-	// Collects selected items from all selected lists and wears them(if possible- adds, else replaces)
-	virtual void wearSelectedItems() = 0;
-
-	/**
-	 * Returns true if there is a selection inside currently selected outfit
-	 */
 	virtual bool hasItemSelected() = 0;
+	virtual void performAction(std::string action) = 0;
+	virtual void removeSelected() = 0;
+	virtual void setSelectedOutfitByUUID(const LLUUID& outfit_uuid) = 0;
+	virtual void wearSelectedItems() = 0;
+	virtual boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb) = 0;
 };
+
+// ============================================================================
 
 #endif // LL_LLPANELOUTFITSTAB_H

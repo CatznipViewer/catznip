@@ -500,14 +500,9 @@ void LLViewerWearable::revertValues()
 		{
 			panel->updateScrollingPanelList();
 		}
-		llinfos << LLTimer::getElapsedSeconds() << llendl;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
 	}
 // [/SL:KB]
-//	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
-//	if( panel )
-//	{
-//		panel->updateScrollingPanelList();
-//	}
 }
 
 void LLViewerWearable::saveValues()
