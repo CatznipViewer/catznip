@@ -11,7 +11,7 @@
  left="3"
  mouse_opaque="true"
  name="outfits_invpanel"
- start_folder="My Outfits" 
+ start_folder.name="My Outfits" 
  top="0"
  width="309"
  /> 

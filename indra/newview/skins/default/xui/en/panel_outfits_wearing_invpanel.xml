@@ -10,7 +10,7 @@
  layout="topleft"
  mouse_opaque="true"
  name="wearing_invpanel"
- start_folder="My Inventory"
+ start_folder.name="My Inventory"
  width="300"
  /> 
 
