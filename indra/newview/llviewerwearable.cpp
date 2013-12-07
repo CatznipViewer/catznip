@@ -494,7 +494,7 @@ void LLViewerWearable::revertValues()
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
 	if (LLFloaterReg::instanceVisible("appearance"))
 	{
-		llinfos << LLTimer::getElapsedSeconds() << llendl;
+// [/SL:KB]
 		LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
 		if( panel )
 		{

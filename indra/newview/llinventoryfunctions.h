@@ -52,7 +52,7 @@ BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id);
 
-// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
 // These functions are shared betwen UI-SidepanelInventory and UI-SidepanelOutfitsView
 
 // Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)

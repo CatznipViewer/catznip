@@ -440,10 +440,10 @@ LLPanelOutfitEdit::LLPanelOutfitEdit()
 :	LLPanel(), 
 	mSearchFilter(NULL),
 	mCOFWearables(NULL),
-//	mInventoryItemsPanel(NULL),
 // [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 	mItemsPanel(NULL),
 // [/SL:KB]
+//	mInventoryItemsPanel(NULL),
 	mGearMenu(NULL),
 	mAddWearablesGearMenu(NULL),
 	mCOFDragAndDropObserver(NULL),

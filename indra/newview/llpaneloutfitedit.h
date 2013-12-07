@@ -219,10 +219,10 @@ private:
 
 	LLTextBox*			mCurrentOutfitName;
 	LLTextBox*			mStatus;
-//	LLInventoryPanel*	mInventoryItemsPanel;
 // [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 	LLInventoryPanel*	mItemsPanel;			// Renamed to catch each occurance
 // [/SL:KB]
+//	LLInventoryPanel*	mInventoryItemsPanel;
 	LLFilterEditor*		mSearchFilter;
 	LLSaveFolderState*	mSavedFolderState;
 	std::string			mSearchString;

@@ -252,7 +252,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 	
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	////////////////////////////////////////////////////////////////////////////////
-	// FILTERTYPE_EMPTYFOLDERS
+	// FILTERTYPE_WORN
 	// Pass if this item is currently worn
 	if (filterTypes & FILTERTYPE_WORN)
 	{

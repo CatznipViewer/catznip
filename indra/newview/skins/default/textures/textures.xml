@@ -576,8 +576,6 @@ with the same filename but different name
   <texture name="Snapshot_Profile" file_name="toolbar_icons/profile.png" preload="false" />
   <texture name="Snapshot_Facebook" file_name="toolbar_icons/facebook.png" preload="false" />
 
-  <texture name="Sort" file_name="icons/Sort.png" preload="false" />
-
   <texture name="startup_logo"  file_name="windows/startup_logo.png" preload="true" />
 
   <texture name="Stepper_Down_Off" file_name="widgets/Stepper_Down_Off.png" preload="false" />

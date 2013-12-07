@@ -290,24 +290,6 @@ void LLOutfitsView::getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const
 	}
 }
 
-//bool get_folder_or_descendent_selected(LLFolderViewFolder* pFolder)
-//{
-//	if (!pFolder)
-//		return false;
-//
-//	if (!pFolder->isSelected())
-//	{
-//		const std::set<LLUUID> selItems = pFolder->getRoot()->getSelectionList();
-//		if (!selItems.empty())
-//		{
-//			const LLFolderViewItem* pItem = pFolder->getRoot()->getItemByID(*selItems.begin());
-//			if ( (pItem) && (pFolder != pItem->getParentFolder()) )
-//				return false;
-//		}
-//	}
-//	return true;
-//}
-
 void LLOutfitsView::highlightBaseOutfit()
 {
 	if ( (!mInvPanel) || (mInvPanel->getFilter().hasFilterString()) )

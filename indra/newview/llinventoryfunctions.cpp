@@ -420,7 +420,7 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 	return FALSE;
 }
 
-// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
 
 // Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
 LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)

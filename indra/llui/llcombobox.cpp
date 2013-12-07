@@ -446,18 +446,6 @@ void LLComboBox::onFocusLost()
 	LLUICtrl::onFocusLost();
 }
 
-// [SL:KB] - Patch: Control-ComboBox | Checked: 2012-08-10 (Catznip-3.3)
-BOOL LLComboBox::getButtonEnabled() const
-{
-	return mButton->getEnabled();
-}
-
-void LLComboBox::setButtonEnabled(BOOL enabled)
-{
-	mButton->setEnabled(enabled);
-}
-// [/SL:KB]
-
 void LLComboBox::setButtonVisible(BOOL visible)
 {
 	static LLUICachedControl<S32> drop_shadow_button ("DropShadowButton", 0);
