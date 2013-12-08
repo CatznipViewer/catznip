@@ -67,6 +67,9 @@ bool get_items_wearable(const LLInventoryModel::item_array_t& items);
 
 // Returns TRUE if every item is worn (wearables, attachments and gestures)
 bool get_items_worn(const LLInventoryModel::item_array_t& items);
+
+// Copies the name of items in a folder to the clipboard (intended to be used for COF and FT_OUTFIT folders)
+void copy_folder_to_clipboard(const LLUUID& idFolder);
 // [/SL:KB]
 
 void show_item_profile(const LLUUID& item_uuid);

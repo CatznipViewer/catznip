@@ -491,6 +491,28 @@ bool get_items_worn(const LLInventoryModel::item_array_t& items)
 	return fWorn;
 }
 
+// Copies the name of items in a folder to the clipboard (intended to be used for COF and FT_OUTFIT folders)
+void copy_folder_to_clipboard(const LLUUID& idFolder)
+{
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
+	LLFindCOFValidItems f(/*include_gestures=*/ false, /*include_folders=*/ false);
+	gInventory.collectDescendentsIf(idFolder, cats, items, FALSE, f);	
+
+	std::string strText;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end();)
+	{
+		const LLViewerInventoryItem* pItem = *itItem++;
+		if (pItem)
+		{
+			strText += pItem->getName();
+			if (items.end() != itItem)
+				strText.push_back('\n');
+		}
+	}
+
+	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(strText), 0, strText.size());
+}
 // [/SL:KB]
 
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)

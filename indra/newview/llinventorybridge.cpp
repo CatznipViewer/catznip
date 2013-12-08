@@ -2976,6 +2976,12 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		send_to_marketplace(cat);
 	}
 #endif // ENABLE_MERCHANT_SEND_TO_MARKETPLACE_CONTEXT_MENU
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+	else if ("copyoutfittoclipboard" == action)
+	{
+		copy_folder_to_clipboard(mUUID);
+	}
+// [/SL:BK]
 }
 
 void LLFolderBridge::openItem()
@@ -3646,6 +3652,12 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags,   menuentry_vec_t&
 		{
 			disabled_items.push_back(std::string("Replace Outfit"));
 		}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+		if (LLFolderType::FT_OUTFIT == type)
+		{
+			items.push_back(std::string("Copy Outfit To Clipboard"));
+		}
+// [/SL:BK]
 		items.push_back(std::string("Outfit Separator"));
 	}
 }

@@ -864,27 +864,8 @@ bool LLPanelWearing::createInventoryPanel()
 
 void LLPanelWearing::copyToClipboard()
 {
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
-	std::string text;
-
-	LLInventoryModel::cat_array_t cats;
-	LLInventoryModel::item_array_t items;
-	LLFindCOFValidItems f(/*include_gestures=*/ false, /*include_folders=*/ false);
-
-	gInventory.collectDescendentsIf(LLAppearanceMgr::instance().getCOF(), cats, items, FALSE, f);	
-	for (LLInventoryModel::item_array_t::const_iterator iter = items.begin(); iter != items.end();)
-	{
-		const LLViewerInventoryItem* item = *iter;
-
-		iter++;
-		if (item != NULL)
-		{
-			// Append a newline to all but the last line
-			text += (iter != items.end()) ? item->getName() + "\n" : item->getName();
-		}
-	}
-
-	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(text),0,text.size());
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+	copy_folder_to_clipboard(LLAppearanceMgr::instance().getCOF());
 // [/SL:KB]
 //	std::string text;
 //	std::vector<LLSD> data;
