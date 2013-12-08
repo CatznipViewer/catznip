@@ -3519,18 +3519,30 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		disabled_items.push_back(std::string("Delete System Folder"));
 	}
 
-	if (!isOutboxFolder())
-	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
-		{
-			disabled_items.push_back(std::string("Share"));
-		}
-	}
+//	if (!isOutboxFolder())
+//	{
+//		items.push_back(std::string("Share"));
+//		if (!canShare())
+//		{
+//			disabled_items.push_back(std::string("Share"));
+//		}
+//	}
 	// Add menu items that are dependent on the contents of the folder.
 	LLViewerInventoryCategory* category = (LLViewerInventoryCategory *) model->getCategory(mUUID);
 	if (category)
 	{
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+		// Don't show share except on user created folders
+		if (LLFolderType::FT_NONE == category->getPreferredType())
+		{
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+		}
+// [/SL:KB]
+
 		uuid_vec_t folders;
 		folders.push_back(category->getUUID());
 
