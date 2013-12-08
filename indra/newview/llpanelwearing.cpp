@@ -802,14 +802,13 @@ void LLPanelWearing::onTakeOffFolderClicked()
 		if (pItem)
 		{
 			if (folder_ids.end() == std::find(folder_ids.begin(), folder_ids.end(), pItem->getParentUUID()))
+			{
 				folder_ids.push_back(pItem->getParentUUID());
+			}
 		}
 	}
 
-	for (uuid_vec_t::const_iterator itFolder = folder_ids.begin(); itFolder != folder_ids.end(); ++itFolder)
-	{
-		LLAppearanceMgr::instance().removeFolderFromAvatar(*itFolder);
-	}
+	LLAppearanceMgr::instance().removeFoldersFromAvatar(folder_ids);
 }
 
 void LLPanelWearing::onToggleWearingView(EWearingView eView)

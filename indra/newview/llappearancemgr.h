@@ -91,6 +91,7 @@ public:
 	bool getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const;
 	// Remove all worn items from the folder (NOTE: no recursion)
 	void removeFolderFromAvatar(const LLUUID& folder_id);
+	void removeFoldersFromAvatar(const uuid_vec_t& folder_ids);
 // [/SL:KB]
 
 	// Copy all items in a category.

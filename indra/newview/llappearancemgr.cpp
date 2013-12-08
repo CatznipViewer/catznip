@@ -1656,16 +1656,28 @@ bool LLAppearanceMgr::getCanRemoveFolderFromAvatar(const LLUUID& folder_id) cons
 
 void LLAppearanceMgr::removeFolderFromAvatar(const LLUUID& folder_id)
 {
-	LLInventoryModel::item_array_t itemsRemove;
-	if (get_removable_items(folder_id, itemsRemove))
+	uuid_vec_t folder_ids(1, folder_id);
+	removeFoldersFromAvatar(folder_ids);
+}
+
+void LLAppearanceMgr::removeFoldersFromAvatar(const uuid_vec_t& folder_ids)
+{
+	uuid_vec_t idsRemove;
+
+	for (uuid_vec_t::const_iterator itFolder = folder_ids.begin(); itFolder != folder_ids.end(); ++itFolder)
 	{
-		uuid_vec_t idsRemove;
-		for (LLInventoryModel::item_array_t::const_iterator itItem = itemsRemove.begin(); itItem != itemsRemove.end(); ++itItem)
+		LLInventoryModel::item_array_t itemsRemove;
+		if (get_removable_items(*itFolder, itemsRemove))
 		{
-			idsRemove.push_back((*itItem)->getUUID());
+			for (LLInventoryModel::item_array_t::const_iterator itItem = itemsRemove.begin(); itItem != itemsRemove.end(); ++itItem)
+			{
+				idsRemove.push_back((*itItem)->getUUID());
+			}
 		}
-		removeItemsFromAvatar(idsRemove);
 	}
+
+	// Remove all worn items in all passed folders in one single operation
+	removeItemsFromAvatar(idsRemove);
 }
 // [/SL:KB]
 
