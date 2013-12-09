@@ -676,6 +676,7 @@ set(viewer_SOURCE_FILES
     llxmlrpctransaction.cpp
     noise.cpp
     pipeline.cpp
+    qtoolalign.cpp
     )
 
 set(VIEWER_BINARY_NAME "secondlife-bin" CACHE STRING
@@ -1256,6 +1257,7 @@ set(viewer_HEADER_FILES
     macmain.h
     noise.h
     pipeline.h
+    qtoolalign.h
     VertexCache.h
     VorbisFramework.h
     )
