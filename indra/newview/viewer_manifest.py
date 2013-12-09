@@ -411,6 +411,9 @@ class WindowsManifest(ViewerManifest):
             self.path("ssleay32.dll")
             self.path("libeay32.dll")
 
+            # Debug Helper API
+            self.path("dbghelp.dll")
+
             # Hunspell
             self.path("libhunspell.dll")
 
