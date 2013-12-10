@@ -48,6 +48,9 @@
 
 LLToolPipette::LLToolPipette()
 :	LLTool(std::string("Pipette")),
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mPipetteType(TYPE_NONE),
+// [/SL:KB]
 	mSuccess(TRUE)
 { 
 }
@@ -103,14 +106,14 @@ BOOL LLToolPipette::handleToolTip(S32 x, S32 y, MASK mask)
 	return TRUE;
 }
 
-void LLToolPipette::setTextureEntry(const LLTextureEntry* entry)
-{
-	if (entry)
-	{
-		mTextureEntry = *entry;
-		mSignal(mTextureEntry);
-	}
-}
+//void LLToolPipette::setTextureEntry(const LLTextureEntry* entry)
+//{
+//	if (entry)
+//	{
+//		mTextureEntry = *entry;
+//		mSignal(mTextureEntry);
+//	}
+//}
 
 void LLToolPipette::pickCallback(const LLPickInfo& pick_info)
 {
@@ -125,7 +128,15 @@ void LLToolPipette::pickCallback(const LLPickInfo& pick_info)
 		//TODO: this should highlight the selected face only
 		LLSelectMgr::getInstance()->highlightObjectOnly(hit_obj);
 		const LLTextureEntry* entry = hit_obj->getTE(pick_info.mObjectFace);
-		LLToolPipette::getInstance()->setTextureEntry(entry);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		if (entry)
+		{
+			LLToolPipette* pSelf = LLToolPipette::getInstance();
+			pSelf->mTextureEntry = *entry;
+			pSelf->mSignal(pSelf->mPipetteType, hit_obj, pSelf->mTextureEntry);
+		}
+// [/SL:KB]
+//		LLToolPipette::getInstance()->setTextureEntry(entry);
 	}
 }
 

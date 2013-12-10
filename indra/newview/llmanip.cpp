@@ -354,11 +354,31 @@ LLVector3 LLManip::getSavedPivotPoint() const
 
 LLVector3 LLManip::getPivotPoint()
 {
-	if (mObjectSelection->getFirstObject() && mObjectSelection->getObjectCount() == 1 && mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
-	{
-		return mObjectSelection->getFirstObject()->getPivotPositionAgent();
-	}
-	return LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+	static LLCachedControl<bool> fAxisAtRoot(gSavedSettings, "AxisAtRootEnabled", 0);
+	static LLCachedControl<LLVector3> vecAxisPosition(gSavedSettings, "AxisPosition", LLVector3(0.f, 0.f, 0.f));
+	static LLCachedControl<LLVector3> vecAxisOffset(gSavedSettings, "AxisOffset", LLVector3(0.f, 0.f, 0.f));
+
+	const LLViewerObject* pRootObj = mObjectSelection->getFirstRootObject(TRUE);	// Root object if we have one, but children will do as well
+	bool fUseRoot = (pRootObj) && ((fAxisAtRoot) || (mObjectSelection->getObjectCount() == 1)) && (mObjectSelection->getSelectType() != SELECT_TYPE_HUD);
+
+	LLVector3 posAxis = (fUseRoot) ? pRootObj->getPivotPositionAgent() : LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
+	LLVector3 scaleSelection = (fUseRoot) ? pRootObj->getScale() : LLSelectMgr::getInstance()->getBBoxOfSelection().getExtentLocal();
+	LLQuaternion rotSelection = (fUseRoot) ? pRootObj->getRotation() : LLSelectMgr::getInstance()->getBBoxOfSelection().getRotation();
+
+	// Calculate the position of the axis relative to the center of the root/selection
+	posAxis += vecAxisPosition().scaledVec(scaleSelection / 2) * rotSelection;
+
+	// Offset the position
+	posAxis += vecAxisOffset * rotSelection;
+	
+	return posAxis;
+// [/SL:KB]
+//	if (mObjectSelection->getFirstObject() && mObjectSelection->getObjectCount() == 1 && mObjectSelection->getSelectType() != SELECT_TYPE_HUD)
+//	{
+//		return mObjectSelection->getFirstObject()->getPivotPositionAgent();
+//	}
+//	return LLSelectMgr::getInstance()->getBBoxOfSelection().getCenterAgent();
 }
 
 

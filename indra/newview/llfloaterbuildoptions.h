@@ -56,4 +56,60 @@ private:
 
 	LLObjectSelectionHandle	mObjectSelection;
 };
+
+// [SL:KB] - Patch: Build-SelectionOptions | Checked: 2013-11-06 (Catznip-3.6)
+//
+// LLFloaterSelectionOptions
+//
+
+class LLFloaterSelectionOptions : public LLFloater
+{
+	friend class LLFloaterReg;
+protected:
+	LLFloaterSelectionOptions(const LLSD& sdKey);
+public:
+	/*virtual*/ ~LLFloaterSelectionOptions();
+
+public:
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool fQuiting);
+	/*virtual*/ BOOL postBuild();
+	            void refresh();
+protected:
+	void onToggleHiddenSelection(const LLSD& sdValue);
+
+protected:
+	boost::signals2::connection m_HiddenSelConn;
+};
+// [/SL:KB]
+
+// [SL:KB] - Patch: Build-AxisAtRoot | Checked: 2011-12-06 (Catznip-3.2)
+//
+// LLFloaterBuildAxis
+//
+
+class LLFloaterBuildAxis : public LLFloater
+{
+	friend class LLFloaterReg;
+protected:
+	LLFloaterBuildAxis(const LLSD& sdKey);
+public:
+	/*virtual*/ ~LLFloaterBuildAxis();
+
+public:
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool fQuiting);
+	/*virtual*/ BOOL postBuild();
+	            void refresh();
+protected:
+	static void onAxisPosChanged(const LLSD& sdValue, U32 idxAxis);
+	static void onAxisPosCenter();
+	static void onAxisOffsetChanged(const LLSD& sdValue, U32 idxAxis);
+
+protected:
+	boost::signals2::connection m_AxisPosConn;
+	boost::signals2::connection m_AxisOffsetConn;
+};
+// [/SL:KB]
+
 #endif
