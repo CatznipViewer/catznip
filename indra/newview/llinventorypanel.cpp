@@ -167,6 +167,10 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	mCommitCallbackRegistrar.add("Inventory.AttachObject", boost::bind(&LLInventoryPanel::attachObject, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.BeginIMSession", boost::bind(&LLInventoryPanel::beginIMSession, this));
 	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mCommitCallbackRegistrar.add("Inventory.WearOn",  boost::bind(&LLWearableBridge::doWearOn, this, _2));
+	mEnableCallbackRegistrar.add("Inventory.WearOnLabel",  boost::bind(&LLWearableBridge::getWearOnLabel, this, _1, _2));
+// [/SL:KB]
 
 }
 
@@ -211,6 +215,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	}
 
 	mCommitCallbackRegistrar.pushScope(); // registered as a widget; need to push callback scope ourselves
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mEnableCallbackRegistrar.pushScope();
+// [/SL:KB]
 	{
 		// Determine the root folder in case specified, and
 		// build the views starting with that folder.
@@ -219,7 +226,13 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 		addItemID(root_id, mFolderRoot);
 	}
 	mCommitCallbackRegistrar.popScope();
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mEnableCallbackRegistrar.popScope();
+// [/SL:KB]
 	mFolderRoot->setCallbackRegistrar(&mCommitCallbackRegistrar);
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mFolderRoot->setEnableCallbackRegistrar(&mEnableCallbackRegistrar);
+// [/SL:KB]
 	
 	// Scroller
 		LLRect scroller_view_rect = getRect();
