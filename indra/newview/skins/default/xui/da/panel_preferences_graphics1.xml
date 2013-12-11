@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Grafik" name="Display panel">
 	<text name="QualitySpeed">
-		Kvalitet og hastighed:
+		Kvalitet og hastighed
 	</text>
 	<text name="FasterText">
 		Hurtigere
@@ -24,7 +24,7 @@
 	</text>
 	<panel label="CustomGraphics" name="CustomGraphics Panel">
 		<text name="ShadersText">
-			Overflader:
+			Overflader
 		</text>
 		<check_box initial_value="true" label="Gennemsigtig vand" name="TransparentWater"/>
 		<check_box initial_value="true" label="Glatte flader og skin" name="BumpShiny"/>
@@ -35,7 +35,7 @@
 		<check_box initial_value="true" label="&quot;Ambient Occlusion&quot;" name="UseSSAO"/>
 		<check_box initial_value="true" label="Skarphedsdybde" name="UseDoF"/>
 		<text name="shadows_label">
-			Skygger:
+			Skygger
 		</text>
 		<combo_box name="ShadowDetail">
 			<combo_box.item label="Ingen" name="0"/>
@@ -43,7 +43,7 @@
 			<combo_box.item label="Sol/Måne + Projektorer" name="2"/>
 		</combo_box>
 		<text name="reflection_label">
-			Reflektioner i vand:
+			Reflektioner i vand
 		</text>
 		<combo_box initial_value="true" label="Reflektioner i vand" name="Reflections">
 			<combo_box.item label="Minimum" name="0"/>
@@ -64,7 +64,7 @@
 		<slider label="Maks. antal mini-avatarer:" name="MaxNumberAvatarDrawn"/>
 		<slider label="Efterbehandlingskvalitet:" name="RenderPostProcess"/>
 		<text name="MeshDetailText">
-			Netmaske detaljer:
+			Netmaske detaljer
 		</text>
 		<slider label="  Objekter:" name="ObjectMeshDetail"/>
 		<slider label="  Flexiprims:" name="FlexibleMeshDetail"/>
@@ -94,13 +94,13 @@
 			Lav
 		</text>
 		<text name="AvatarRenderingText">
-			Avatar rendering:
+			Avatar rendering
 		</text>
 		<check_box initial_value="true" label="Mini-figurer på lang afstand" name="AvatarImpostors"/>
 		<check_box initial_value="true" label="Hardware Skinning" name="AvatarVertexProgram"/>
 		<check_box initial_value="true" label="Avatar tøj" name="AvatarCloth"/>
 		<text name="TerrainDetailText">
-			Terræn detaljer:
+			Terræn detaljer
 		</text>
 		<radio_group name="TerrainDetailRadio">
 			<radio_item label="Lav" name="0"/>

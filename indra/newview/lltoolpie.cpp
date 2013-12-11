@@ -1310,7 +1310,11 @@ void LLToolPie::handleDeselect()
 
 LLTool* LLToolPie::getOverrideTool(MASK mask)
 {
-	if (gSavedSettings.getBOOL("EnableGrab"))
+//	if (gSavedSettings.getBOOL("EnableGrab"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	static LLCachedControl<bool> s_fEnableGrab(gSavedSettings, "EnableGrab", true);
+	if (s_fEnableGrab)
+// [/SL:KB]
 	{
 		if (mask == MASK_CONTROL)
 		{
