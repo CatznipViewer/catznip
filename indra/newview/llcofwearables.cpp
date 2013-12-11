@@ -140,9 +140,35 @@ protected:
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 
 		registrar.add("Attachment.Detach", boost::bind(&LLAppearanceMgr::removeItemsFromAvatar, LLAppearanceMgr::getInstance(), mUUIDs));
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
+		registrar.add("Attachment.Touch", boost::bind(handleMultiple, handle_attachment_touch, mUUIDs));
+		registrar.add("Attachment.Edit", boost::bind(handleMultiple, handle_item_edit, mUUIDs));
+// [/SL:KB]
+
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+		enable_registrar.add("Attachment.OnEnable", boost::bind(&CofAttachmentContextMenu::onEnable, this, _2));
+// [/SL:KB]
 
 		return createFromFile("menu_cof_attachment.xml");
 	}
+
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-15 (Catznip-3.3)
+	bool onEnable(const LLSD& sdParam)
+	{
+		std::string strParam = sdParam.asString();
+		if ("touch_attach" == strParam)
+		{
+			return (1 == mUUIDs.size()) && (enable_attachment_touch(mUUIDs.front()));
+		}
+		else if ("edit_item" == strParam)
+		{
+			return (1 == mUUIDs.size()) && (enable_item_edit(mUUIDs.front()));
+		}
+		return true;
+	}
+// [/SL:KB]
+
 };
 
 //////////////////////////////////////////////////////////////////////////
