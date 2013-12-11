@@ -1459,7 +1459,7 @@ Scaricare nella cartella Applicazioni?
 	<notification name="FailedUpdateInstall">
 		Si è verificato un errore durante l&apos;aggiornamento del viewer.
 Scarica e installa la versione più recente del viewer da
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1467,13 +1467,13 @@ http://secondlife.com/download.
 Non potrai accedere fino a quando non verrà aggiornato [APP_NAME].
 
 Scarica e installa la versione più recente del viewer da
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Esci"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		È disponibile un aggiornamento obbligatorio per l&apos;installazione di Second Life.
 
-Puoi scaricare questo aggiornamento da http://www.secondlife.com/downloads
+Puoi scaricare questo aggiornamento da http://catznip.com/downloads/
 oppure puoi installarlo adesso.
 		<usetemplate name="okcancelbuttons" notext="Esci da Second Life" yestext="Scarica e aggiorna adesso"/>
 	</notification>
@@ -1550,8 +1550,12 @@ vedi [[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate ignoretext="Lancia il browser per vedere la pagina Wiki sul controllo di qualità" name="okcancelignore" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Visita il registro pubblico dei problemi di [SECOND_LIFE], dove puoi segnalare bug ed altri problemi.
-		<usetemplate ignoretext="Lancia il browser per vedere il registro pubblico di monitoraggio dei problemi" name="okcancelignore" notext="Annulla" yestext="Vai alla pagina"/>
+		Visita il registro dei problemi di [APP_NAME], dove puoi segnalare bug ed altri problemi.
+		<usetemplate ignoretext="Lancia il browser per vedere il registro di monitoraggio dei problemi" name="okcancelignore" notext="Annulla" yestext="Vai alla pagina"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		Vai al blog ufficiale [APP_NAME], per le ultime notizie ed informazioni.
+		<usetemplate ignoretext="Lancia il browser per vedere il blog" name="okcancelignore" notext="Annulla" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Vai al blog ufficiale Linden, per le ultime notizie ed informazioni.
