@@ -34,7 +34,6 @@ if(WINDOWS)
 
     set(debug_src_dir "${ARCH_PREBUILT_DIRS_DEBUG}")
     set(debug_files
-        dbghelp.dll
         openjpegd.dll
         libapr-1.dll
         libaprutil-1.dll
@@ -48,7 +47,6 @@ if(WINDOWS)
 
     set(release_src_dir "${ARCH_PREBUILT_DIRS_RELEASE}")
     set(release_files
-        dbghelp.dll
         openjpeg.dll
         libapr-1.dll
         libaprutil-1.dll

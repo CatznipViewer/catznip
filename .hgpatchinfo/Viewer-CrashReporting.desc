@@ -9,8 +9,6 @@
     -> hidden if crash reporting isn't enabled for the build configuration
 - added   : ability to display more information to the user about their most recent crash when submitting a crash report
     -> crash analysis is Windows-only
-- added   : version information to llcommon.dll [Windows-only]
-- added   : autobuild package for dbghelp.dll [Windows-only]
 - changed : crash logger will send crash reports to catznip.com if crash reporting is enabled
     -> pruned some of the information that's normally saved to debug_info.log
 - fixed   : "CrashSubmitBehavior" shouldn't be auto-set to CRASH_BEHAVIOR_ALWAYS_SEND when "IgnoreAllNotifications" is set to TRUE
