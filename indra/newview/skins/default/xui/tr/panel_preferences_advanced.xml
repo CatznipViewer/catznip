@@ -4,7 +4,7 @@
 		[NUM]:[DEN]
 	</panel.string>
 	<text name="Cache:">
-		Önbellek:
+		Önbellek
 	</text>
 	<spinner label="Önbellek boyutu (64-9984 MB)" name="cachesizespinner"/>
 	<text name="text_box5">

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Графика" name="Display panel">
 	<text name="QualitySpeed">
-		Качество и скорость:
+		Качество и скорость
 	</text>
 	<text name="FasterText">
 		Быстрее
@@ -23,7 +23,7 @@
 	</text>
 	<panel label="Выбор графики" name="CustomGraphics Panel">
 		<text name="ShadersText">
-			Шейдеры:
+			Шейдеры
 		</text>
 		<check_box initial_value="true" label="Прозрачность воды" name="TransparentWater"/>
 		<check_box initial_value="true" label="Рельефность и сияние" name="BumpShiny"/>
@@ -34,7 +34,7 @@
 		<check_box initial_value="true" label="Объемный свет" name="UseSSAO"/>
 		<check_box initial_value="true" label="Глубина поля" name="UseDoF"/>
 		<text name="shadows_label">
-			Тени:
+			Тени
 		</text>
 		<combo_box name="ShadowDetail">
 			<combo_box.item label="Нет" name="0"/>
@@ -42,7 +42,7 @@
 			<combo_box.item label="Солнце/луна + осветители" name="2"/>
 		</combo_box>
 		<text name="reflection_label">
-			Вода отражает:
+			Вода отражает
 		</text>
 		<combo_box name="Reflections">
 			<combo_box.item label="Минимум" name="0"/>
@@ -63,7 +63,7 @@
 		<slider label="Макс. количество 3D-аватаров:" name="MaxNumberAvatarDrawn"/>
 		<slider label="Качество постобработки:" name="RenderPostProcess"/>
 		<text name="MeshDetailText">
-			Детализация меша:
+			Детализация меша
 		</text>
 		<slider label="Объекты:" name="ObjectMeshDetail"/>
 		<slider label="Гибкие примитивы:" name="FlexibleMeshDetail"/>
@@ -93,13 +93,13 @@
 			Низко
 		</text>
 		<text name="AvatarRenderingText">
-			Отрисовка аватара:
+			Отрисовка аватара
 		</text>
 		<check_box initial_value="true" label="Плоские аватары" name="AvatarImpostors"/>
 		<check_box initial_value="true" label="Аппаратная отрисовка" name="AvatarVertexProgram"/>
 		<check_box initial_value="true" label="Одежда аватара" name="AvatarCloth"/>
 		<text name="TerrainDetailText">
-			Ландшафт:
+			Ландшафт
 		</text>
 		<radio_group name="TerrainDetailRadio">
 			<radio_item label="Грубо" name="0"/>

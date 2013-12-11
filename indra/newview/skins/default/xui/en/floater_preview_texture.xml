@@ -122,7 +122,7 @@
      name="Discard"
      top_delta="0"
      width="110" />
-    <button
+    <flyout_button
      follows="right|bottom"
      height="22"
      label="Save As"
@@ -130,5 +130,18 @@
      left_pad="5"
      name="save_tex_btn"
      top_delta="0"
-     width="110" />
+     width="90">
+      <flyout_button.item
+       label="Save as PNG"
+       name="save_tex_png"
+       value="save_tex_png" />
+      <flyout_button.item
+       label="Save as TGA"
+       name="save_tex_tga"
+       value="save_tex_tga" />
+      <flyout_button.item
+       label="Save as BMP"
+       name="save_tex_bmp"
+       value="save_tex_bmp" />
+    </flyout_button> />
 </floater>

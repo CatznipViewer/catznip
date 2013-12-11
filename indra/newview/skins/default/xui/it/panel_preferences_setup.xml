@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Impostazione" name="Input panel">
 	<text name="Network:">
-		Rete:
+		Rete
 	</text>
 	<text name="Maximum bandwidth">
 		Capacità massima di banda
@@ -12,7 +12,7 @@
 	<check_box label="Porta personalizzata" name="connection_port_enabled"/>
 	<spinner label="Numero porta:" name="connection_port"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="use_external_browser">
 		<radio_item label="Usa il mio browser (IE, Firefox, Safari)" name="external" tool_tip="Utilizza il browser Web predefinito di sistema per l&apos;aiuto, per i link Web e così via. Sconsigliato durante l&apos;esecuzione a tutto schermo." value="true"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Abilita Javascript" name="browser_javascript_enabled"/>
 	<check_box initial_value="false" label="Consenti pop-up nel browser media" name="media_popup_enabled"/>
 	<text name="Software updates:">
-		Aggiornamenti software:
+		Aggiornamenti software
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Installa automaticamente" name="Install_automatically"/>

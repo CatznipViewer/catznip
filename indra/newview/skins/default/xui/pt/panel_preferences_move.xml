@@ -8,12 +8,12 @@
 	<check_box label="Construir/Editar" name="edit_camera_movement" tool_tip="Use o posicionamento automático da câmera quando entrar e sair do modo de edição"/>
 	<check_box label="Aparência" name="appearance_camera_movement" tool_tip="Use o posicionamento automático da câmera quando em modo de edição"/>
 	<text name="keyboard_lbl">
-		Teclado:
+		Teclado
 	</text>
 	<check_box label="Teclas de seta sempre me movem" name="arrow_keys_move_avatar_check"/>
 	<check_box label="Dê dois toques e pressione para correr" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		Mouse:
+		Mouse
 	</text>
 	<check_box label="Mostre-me em visão de mouse" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">

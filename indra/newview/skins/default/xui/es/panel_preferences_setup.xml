@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Configurar" name="Input panel">
 	<text name="Network:">
-		Red:
+		Red
 	</text>
 	<text name="Maximum bandwidth">
 		Ancho de banda máximo
@@ -12,7 +12,7 @@
 	<check_box label="Personalizar el puerto" name="connection_port_enabled"/>
 	<spinner label="Nº del puerto:" name="connection_port"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="use_external_browser">
 		<radio_item label="Usar mi navegador (IE, Firefox, Safari)" name="external" tool_tip="Usa tu navegador por defecto para ayuda, enlaces web, etc. No es aconsejable si estás a pantalla completa." value="true"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Activar Javascript" name="browser_javascript_enabled"/>
 	<check_box initial_value="false" label="Permitir las ventanas emergentes en el navegador" name="media_popup_enabled"/>
 	<text name="Software updates:">
-		Actualizaciones de software:
+		Actualizaciones de software
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Instalar automáticamente" name="Install_automatically"/>
