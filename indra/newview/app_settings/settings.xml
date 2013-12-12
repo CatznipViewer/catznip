@@ -13171,6 +13171,17 @@
       <key>Value</key>
       <string>English (United States),Second Life Glossary</string>
     </map>
+    <key>SpellCheckHTTPList</key>
+    <map>
+        <key>Comment</key>
+        <string>Base HTTP URL for the server-side dictionary list</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>String</string>
+        <key>Value</key>
+        <string>http://viewer.catznip.com/data/spellcheck/</string>
+    </map>
     <key>UseNewWalkRun</key>
     <map>
       <key>Comment</key>

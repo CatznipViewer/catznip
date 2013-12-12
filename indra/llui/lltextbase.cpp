@@ -1317,7 +1317,11 @@ void LLTextBase::replaceWithSuggestion(U32 index)
 
 			// Insert the suggestion in its place
 			LLWString suggestion = utf8str_to_wstring(mSuggestionList[index]);
-			insertStringNoUndo(it->first, utf8str_to_wstring(mSuggestionList[index]));
+			LLStyleConstSP sp(new LLStyle(getStyleParams()));
+			LLTextSegmentPtr segmentp = new LLNormalTextSegment(sp, it->first, it->first + suggestion.size(), *this);
+			segment_vec_t segments(1, segmentp);
+			insertStringNoUndo(it->first, suggestion, &segments);
+
 			setCursorPos(it->first + (S32)suggestion.length());
 
 			break;
@@ -1659,6 +1663,11 @@ void LLTextBase::clearSegments()
 {
 	mSegments.clear();
 	createDefaultSegment();
+
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2013-08-18 (Catznip-3.6)
+	mMisspellRanges.clear();
+	mSpellCheckStart = mSpellCheckEnd = -1;
+// [/SL:KB]
 }
 
 S32 LLTextBase::getLineStart( S32 line ) const
