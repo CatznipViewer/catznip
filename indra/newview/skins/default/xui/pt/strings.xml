@@ -1954,19 +1954,19 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 		Este residente ativou o &quot;Não perturbe&quot; e verá sua mensagem mais tarde.
 	</string>
 	<string name="MuteByName">
-		(por nome)
+		Por nome
 	</string>
 	<string name="MuteAgent">
-		(residente)
+		Residente
 	</string>
 	<string name="MuteObject">
-		(objeto)
+		Objeto
 	</string>
 	<string name="MuteGroup">
-		(grupo)
+		Grupo
 	</string>
 	<string name="MuteExternal">
-		(Externo)
+		Externo
 	</string>
 	<string name="RegionNoCovenant">
 		Não foi definido um contrato para essa região.
