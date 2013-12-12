@@ -1361,6 +1361,17 @@ http://secondlife.com/viewer-access-faq
 	<string name="Snapshots" value="快照，"/>
 	<string name="No Filters" value="否"/>
 	<string name="Since Logoff" value="- 自上次登出"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">穿上</string>
+	<string name="InvAction take_off">附著到</string>
+	<string name="InvAction attach">穿上</string>
+	<string name="InvAction detach">附著到</string>
+	<string name="InvAction activate">啟動</string>
+	<string name="InvAction deactivate">停用</string>
+	<string name="InvAction teleport">瞬間傳送</string>
+	<string name="InvAction open">打開</string>
+
 	<string name="InvFolder My Inventory">
 		我的收納區
 	</string>
