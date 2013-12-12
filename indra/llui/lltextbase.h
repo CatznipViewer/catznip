@@ -419,6 +419,9 @@ public:
 
 	// cursor manipulation
 	bool					setCursor(S32 row, S32 column);
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2010-09-12 (Catznip-2.1)
+	S32						getCursorPos() { return mCursorPos; }
+// [/SL:KB
 	bool					setCursorPos(S32 cursor_pos, bool keep_cursor_offset = false);
 	void					startOfLine();
 	void					endOfLine();
@@ -608,6 +611,9 @@ protected:
 	LLTimer		                mTripleClickTimer;
 
 	BOOL						mIsSelecting;		// Are we in the middle of a drag-select? 
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+	BOOL						mIsSelectDragging;	// Are we in the middle of drag-moving the current selection? 
+// [/SL:KB]
 
 	// spell checking
 	bool						mSpellCheck;
