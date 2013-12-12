@@ -29,6 +29,10 @@
 
 #include "roles_constants.h"
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llfloaterreg.h"
+#include "llfloatersidepanelcontainer.h"
+// [/SL:KB]
 #include "llinventory.h"
 #include "llinventoryfunctions.h"
 #include "lllandmark.h"
@@ -43,6 +47,9 @@
 #include "lllandmarklist.h"
 #include "llslurl.h"
 #include "llstring.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerinventory.h"
 #include "llviewerparcelmgr.h"
 #include "llworldmapmessage.h"
@@ -245,10 +252,17 @@ bool LLLandmarkActions::canCreateLandmarkHere()
 	return false;
 }
 
+//void LLLandmarkActions::createLandmarkHere(
+//	const std::string& name, 
+//	const std::string& desc, 
+//	const LLUUID& folder_id)
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
 void LLLandmarkActions::createLandmarkHere(
 	const std::string& name, 
 	const std::string& desc, 
-	const LLUUID& folder_id)
+	const LLUUID& folder_id,
+	LLPointer<LLInventoryCallback> cb)
+// [/SL:KB]
 {
 	if(!gAgent.getRegion())
 	{
@@ -267,16 +281,28 @@ void LLLandmarkActions::createLandmarkHere(
 		return;
 	}
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
 		folder_id, LLTransactionID::tnull,
 		name, desc,
 		LLAssetType::AT_LANDMARK,
 		LLInventoryType::IT_LANDMARK,
 		NOT_WEARABLE, PERM_ALL, 
-		NULL);
+		cb);
+// [/SL:KB]
+//	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
+//		folder_id, LLTransactionID::tnull,
+//		name, desc,
+//		LLAssetType::AT_LANDMARK,
+//		LLInventoryType::IT_LANDMARK,
+//		NOT_WEARABLE, PERM_ALL, 
+//		NULL);
 }
 
-void LLLandmarkActions::createLandmarkHere()
+//void LLLandmarkActions::createLandmarkHere()
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+void LLLandmarkActions::createLandmarkHere(LLPointer<LLInventoryCallback> cb)
+// [/SL:KB]
 {
 	std::string landmark_name, landmark_desc;
 
@@ -284,7 +310,10 @@ void LLLandmarkActions::createLandmarkHere()
 	LLAgentUI::buildLocationString(landmark_desc, LLAgentUI::LOCATION_FORMAT_FULL);
 	const LLUUID folder_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK);
 
-	createLandmarkHere(landmark_name, landmark_desc, folder_id);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+	createLandmarkHere(landmark_name, landmark_desc, folder_id, cb);
+// [/SL:KB]
+//	createLandmarkHere(landmark_name, landmark_desc, folder_id);
 }
 
 void LLLandmarkActions::getSLURLfromPosGlobal(const LLVector3d& global_pos, slurl_callback_t cb, bool escaped /* = true */)
@@ -418,3 +447,37 @@ void copy_slurl_to_clipboard_callback(const std::string& slurl)
 	args["SLURL"] = slurl;
 	LLNotificationsUtil::add("CopySLURL", args);
 }
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+class LLShowCreatedLandmark : public LLInventoryCallback
+{
+public:
+	LLShowCreatedLandmark() { }
+	/*virtual*/ ~LLShowCreatedLandmark() { }
+
+	/*virtual*/ void fire(const LLUUID& idItem)
+	{
+		LLFloaterReg::showInstance("parcel_info", LLSD().with("type", "landmark").with("id", idItem).with("action", "edit"));
+	}
+};
+
+void LLLandmarkActions::showCreateLandmark()
+{
+	if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+		createLandmarkHere(new LLShowCreatedLandmark());
+	else
+		LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+}
+
+void LLLandmarkActions::showLandmarkInfo(const LLUUID& idItem)
+{
+	LLSD sdKey;
+	sdKey["type"] = "landmark";
+	sdKey["id"] = idItem;
+
+	if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+		LLFloaterReg::showInstance("parcel_info", sdKey);
+	else
+		LLFloaterSidePanelContainer::showPanel("places", sdKey);
+}
+// [/SL:KB]

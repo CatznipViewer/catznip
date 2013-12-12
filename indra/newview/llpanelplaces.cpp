@@ -116,7 +116,13 @@ public:
 				LLSD key;
 				key["type"] = "remote_place";
 				key["id"] = parcel_id;
-				LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+				if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+					LLFloaterReg::showInstance("parcel_info", key);
+				else
+					LLFloaterSidePanelContainer::showPanel("places", key);
+// [/SL:KB]
+//				LLFloaterSidePanelContainer::showPanel("places", key);
 				return true;
 			}
 		}

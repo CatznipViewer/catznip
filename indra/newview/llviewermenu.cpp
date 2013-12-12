@@ -5760,7 +5760,10 @@ class LLWorldCreateLandmark : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+		LLLandmarkActions::showCreateLandmark();
+// [/SL:KB]
+//		LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
 
 		return true;
 	}
