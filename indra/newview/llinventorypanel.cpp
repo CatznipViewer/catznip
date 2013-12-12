@@ -1355,7 +1355,11 @@ BOOL LLInventoryPanel::handleKeyHere( KEY key, MASK mask )
 	{
 	case KEY_RETURN:
 		// Open selected items if enter key hit on the inventory panel
-		if (mask == MASK_NONE)
+//		if (mask == MASK_NONE)
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+		// (ctrl can be used as a modifier on wearable items
+		if ( (mask == MASK_NONE) || ((isSelectionWearable()) && (mask == MASK_CONTROL)) )
+// [/SL:KB]
 		{
 			LLInventoryAction::doToSelected(mInventory, mFolderRoot, "open");
 			handled = TRUE;
@@ -1403,6 +1407,27 @@ bool LLInventoryPanel::isSelectionRemovable()
 	}
 	return can_delete;
 }
+
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+bool LLInventoryPanel::isSelectionWearable()
+{
+	bool fCanWear = false;
+	if (mFolderRoot)
+	{
+		std::set<LLFolderViewItem*> lSelItems = mFolderRoot->getSelectionList();
+		if (!lSelItems.empty()) 
+		{
+			fCanWear = true;
+			for (std::set<LLFolderViewItem*>::const_iterator itItem = lSelItems.begin(); itItem != lSelItems.end(); ++itItem)
+			{
+				const LLFolderViewModelItemInventory* pFVMItem = (*itItem) ? (*itItem)->getViewModelItem<LLFolderViewModelItemInventory>() : NULL;
+				fCanWear &= (pFVMItem) && (get_can_item_be_worn(pFVMItem->getUUID()));
+			}
+		}
+	}
+	return fCanWear;
+}
+// [/SL:KB]
 
 /************************************************************************/
 /* Recent Inventory Panel related class                                 */

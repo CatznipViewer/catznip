@@ -37,6 +37,9 @@
 #include "llbutton.h"
 #include "llcheckboxctrl.h"
 #include "llavataractions.h"
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+#include "llcombobox.h"
+// [/SL:KB]
 #include "llinventorydefines.h"
 #include "llinventoryobserver.h"
 #include "llinventorymodel.h"
@@ -55,6 +58,9 @@
 #include "llviewercontrol.h"
 #include "llviewerwindow.h"
 #include "llgroupactions.h"
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
+#include "llslurl.h"
+// [/SL:KB]
 
 #include "lluictrlfactory.h"
 
@@ -88,33 +94,107 @@ private:
 
 void LLPropertiesObserver::changed(U32 mask)
 {
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
 	// if there's a change we're interested in.
-	if((mask & (LLInventoryObserver::LABEL | LLInventoryObserver::INTERNAL | LLInventoryObserver::REMOVE)) != 0)
+	if ((mask & (LLInventoryObserver::LABEL | LLInventoryObserver::INTERNAL | LLInventoryObserver::REMOVE)) != 0)
+	{
+		const std::set<LLUUID>& idItems = gInventory.getChangedIDs();
+		for (std::set<LLUUID>::const_iterator itItem = idItems.begin(); itItem != idItems.end(); ++itItem)
+		{
+			if (mFloater->getItemID() == *itItem)
+				mFloater->dirty();
+		}
+	}
+// [/SL:KB]
+//	// if there's a change we're interested in.
+//	if((mask & (LLInventoryObserver::LABEL | LLInventoryObserver::INTERNAL | LLInventoryObserver::REMOVE)) != 0)
+//	{
+//		mFloater->dirty();
+//	}
+}
+
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// Class LLObjectPropertiesObserver
+//
+// Helper class to watch for changes in an object inventory.
+// Used to update item properties in LLFloaterProperties.
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+class LLObjectPropertiesObserver : public LLVOInventoryListener
+{
+public:
+	LLObjectPropertiesObserver(LLFloaterProperties* floater, LLViewerObject* object)
+		: mFloater(floater)
+	{
+		registerVOInventoryListener(object, NULL);
+	}
+
+	/*virtual*/ ~LLObjectPropertiesObserver()
+	{
+		removeVOInventoryListener();
+	}
+
+	/*virtual*/ void inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data)
 	{
 		mFloater->dirty();
 	}
-}
 
-
+private:
+	LLFloaterProperties* mFloater;
+};
+// [/SL:KB]
 
 ///----------------------------------------------------------------------------
 /// Class LLFloaterProperties
 ///----------------------------------------------------------------------------
 
 // Default constructor
-LLFloaterProperties::LLFloaterProperties(const LLUUID& item_id)
-  : LLFloater(mItemID),
-	mItemID(item_id),
-	mDirty(TRUE)
+//LLFloaterProperties::LLFloaterProperties(const LLUUID& item_id)
+//  : LLFloater(mItemID),
+//	mItemID(item_id),
+//	mDirty(TRUE)
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+LLFloaterProperties::LLFloaterProperties(const LLSD& key)
+	: LLFloater(key)
+	, mDirty(TRUE)
+	, mPropertiesObserver(NULL)
+	, mObjectPropertiesObserver(NULL)
+// [/SL:KB]
 {
-	mPropertiesObserver = new LLPropertiesObserver(this);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	if (key.has("item_id"))
+	{
+		mItemID = key["item_id"].asUUID();
+		if (key.has("object_id"))
+			mObjectID = key["object_id"].asUUID();
+	}
+
+	if (mObjectID.isNull())
+		mPropertiesObserver = new LLPropertiesObserver(this);
+	else
+		mObjectPropertiesObserver = new LLObjectPropertiesObserver(this, gObjectList.findObject(mObjectID));
+// [/SL:KB]
+//	mPropertiesObserver = new LLPropertiesObserver(this);
 }
 
 // Destroys the object
 LLFloaterProperties::~LLFloaterProperties()
 {
-	delete mPropertiesObserver;
-	mPropertiesObserver = NULL;
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	if (mPropertiesObserver)
+	{
+		delete mPropertiesObserver;
+		mPropertiesObserver = NULL;
+	}
+
+	if (mObjectPropertiesObserver)
+	{
+		delete mObjectPropertiesObserver;
+		mObjectPropertiesObserver = NULL;
+	}
+// [/SL:KB]
+//	delete mPropertiesObserver;
+//	mPropertiesObserver = NULL;
 }
 
 // virtual
@@ -126,10 +206,10 @@ BOOL LLFloaterProperties::postBuild()
 	getChild<LLUICtrl>("LabelItemName")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitName,this));
 	getChild<LLLineEditor>("LabelItemDesc")->setPrevalidate(&LLTextValidate::validateASCIIPrintableNoPipe);
 	getChild<LLUICtrl>("LabelItemDesc")->setCommitCallback(boost::bind(&LLFloaterProperties:: onCommitDescription, this));
-	// Creator information
-	getChild<LLUICtrl>("BtnCreator")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickCreator,this));
-	// owner information
-	getChild<LLUICtrl>("BtnOwner")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickOwner,this));
+//	// Creator information
+//	getChild<LLUICtrl>("BtnCreator")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickCreator,this));
+//	// owner information
+//	getChild<LLUICtrl>("BtnOwner")->setCommitCallback(boost::bind(&LLFloaterProperties::onClickOwner,this));
 	// acquired date
 	// owner permissions
 	// Permissions debug text
@@ -143,11 +223,18 @@ BOOL LLFloaterProperties::postBuild()
 	getChild<LLUICtrl>("CheckNextOwnerTransfer")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitPermissions, this));
 	// Mark for sale or not, and sale info
 	getChild<LLUICtrl>("CheckPurchase")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitSaleInfo, this));
-	getChild<LLUICtrl>("RadioSaleType")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitSaleType, this));
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+	getChild<LLUICtrl>("combobox sale copy")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitSaleType, this));
+// [/SL:KB]
+//	getChild<LLUICtrl>("RadioSaleType")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitSaleType, this));
 	// "Price" label for edit
 	getChild<LLUICtrl>("Edit Cost")->setCommitCallback(boost::bind(&LLFloaterProperties::onCommitSaleInfo, this));
 	// The UI has been built, now fill in all the values
 	refresh();
+
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+	setTitle(llformat("%s %s", getTitle().c_str(), getString( (mObjectID.notNull()) ? "origin_inworld" : "origin_inventory").c_str()));
+// [/SL:KB]
 
 	return TRUE;
 }
@@ -176,9 +263,9 @@ void LLFloaterProperties::refresh()
 			"LabelItemName",
 			"LabelItemDesc",
 			"LabelCreatorName",
-			"BtnCreator",
+//			"BtnCreator",
 			"LabelOwnerName",
-			"BtnOwner",
+//			"BtnOwner",
 			"CheckOwnerModify",
 			"CheckOwnerCopy",
 			"CheckOwnerTransfer",
@@ -188,7 +275,10 @@ void LLFloaterProperties::refresh()
 			"CheckNextOwnerCopy",
 			"CheckNextOwnerTransfer",
 			"CheckPurchase",
-			"RadioSaleType",
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+			"combobox sale copy",
+// [/SL:KB]
+//			"RadioSaleType",
 			"Edit Cost"
 		};
 		for(size_t t=0; t<LL_ARRAY_SIZE(enableNames); ++t)
@@ -273,16 +363,20 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 
 	if (item->getCreatorUUID().notNull())
 	{
-		std::string name;
-		gCacheName->getFullName(item->getCreatorUUID(), name);
-		getChildView("BtnCreator")->setEnabled(TRUE);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
+		const LLUUID& creator_id = item->getCreatorUUID();
+		std::string name = LLSLURL("agent", creator_id, "inspect").getSLURLString();
+// [/SL:KB]
+//		std::string name;
+//		gCacheName->getFullName(item->getCreatorUUID(), name);
+//		getChildView("BtnCreator")->setEnabled(TRUE);
 		getChildView("LabelCreatorTitle")->setEnabled(TRUE);
 		getChildView("LabelCreatorName")->setEnabled(TRUE);
 		getChild<LLUICtrl>("LabelCreatorName")->setValue(name);
 	}
 	else
 	{
-		getChildView("BtnCreator")->setEnabled(FALSE);
+//		getChildView("BtnCreator")->setEnabled(FALSE);
 		getChildView("LabelCreatorTitle")->setEnabled(FALSE);
 		getChildView("LabelCreatorName")->setEnabled(FALSE);
 		getChild<LLUICtrl>("LabelCreatorName")->setValue(getString("unknown"));
@@ -296,20 +390,28 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		std::string name;
 		if (perm.isGroupOwned())
 		{
-			gCacheName->getGroupName(perm.getGroup(), name);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-12-15 (Catznip-3.2)
+			const LLUUID& group_id = perm.getGroup();
+			name = LLSLURL("group", group_id, "inspect").getSLURLString();
+// [/SL:KB]
+//			gCacheName->getGroupName(perm.getGroup(), name);
 		}
 		else
 		{
-			gCacheName->getFullName(perm.getOwner(), name);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
+			const LLUUID& owner_id = perm.getOwner();
+			name = LLSLURL("agent", owner_id, "inspect").getSLURLString();
+// [/SL:KB]
+//			gCacheName->getFullName(perm.getOwner(), name);
 		}
-		getChildView("BtnOwner")->setEnabled(TRUE);
+//		getChildView("BtnOwner")->setEnabled(TRUE);
 		getChildView("LabelOwnerTitle")->setEnabled(TRUE);
 		getChildView("LabelOwnerName")->setEnabled(TRUE);
 		getChild<LLUICtrl>("LabelOwnerName")->setValue(name);
 	}
 	else
 	{
-		getChildView("BtnOwner")->setEnabled(FALSE);
+//		getChildView("BtnOwner")->setEnabled(FALSE);
 		getChildView("LabelOwnerTitle")->setEnabled(FALSE);
 		getChildView("LabelOwnerName")->setEnabled(FALSE);
 		getChild<LLUICtrl>("LabelOwnerName")->setValue(getString("public"));
@@ -483,7 +585,7 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 	if (is_obj_modify && can_agent_sell 
 		&& gAgent.allowOperation(PERM_TRANSFER, perm, GP_OBJECT_MANIPULATE))
 	{
-		getChildView("SaleLabel")->setEnabled(is_complete);
+//		getChildView("SaleLabel")->setEnabled(is_complete);
 		getChildView("CheckPurchase")->setEnabled(is_complete);
 
 		getChildView("NextOwnerLabel")->setEnabled(TRUE);
@@ -491,13 +593,13 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled((base_mask & PERM_COPY) && !cannot_restrict_permissions);
 		getChildView("CheckNextOwnerTransfer")->setEnabled((next_owner_mask & PERM_COPY) && !cannot_restrict_permissions);
 
-		getChildView("RadioSaleType")->setEnabled(is_complete && is_for_sale);
-		getChildView("TextPrice")->setEnabled(is_complete && is_for_sale);
+//		getChildView("RadioSaleType")->setEnabled(is_complete && is_for_sale);
+//		getChildView("TextPrice")->setEnabled(is_complete && is_for_sale);
 		getChildView("Edit Cost")->setEnabled(is_complete && is_for_sale);
 	}
 	else
 	{
-		getChildView("SaleLabel")->setEnabled(FALSE);
+//		getChildView("SaleLabel")->setEnabled(FALSE);
 		getChildView("CheckPurchase")->setEnabled(FALSE);
 
 		getChildView("NextOwnerLabel")->setEnabled(FALSE);
@@ -505,8 +607,8 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		getChildView("CheckNextOwnerCopy")->setEnabled(FALSE);
 		getChildView("CheckNextOwnerTransfer")->setEnabled(FALSE);
 
-		getChildView("RadioSaleType")->setEnabled(FALSE);
-		getChildView("TextPrice")->setEnabled(FALSE);
+//		getChildView("RadioSaleType")->setEnabled(FALSE);
+//		getChildView("TextPrice")->setEnabled(FALSE);
 		getChildView("Edit Cost")->setEnabled(FALSE);
 	}
 
@@ -518,45 +620,54 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 	getChild<LLUICtrl>("CheckNextOwnerCopy")->setValue(LLSD(BOOL(next_owner_mask & PERM_COPY)));
 	getChild<LLUICtrl>("CheckNextOwnerTransfer")->setValue(LLSD(BOOL(next_owner_mask & PERM_TRANSFER)));
 
-	LLRadioGroup* radioSaleType = getChild<LLRadioGroup>("RadioSaleType");
+//	LLRadioGroup* radioSaleType = getChild<LLRadioGroup>("RadioSaleType");
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+	LLComboBox* combo_sale_type = getChild<LLComboBox>("combobox sale copy");
+// [/SL:KB]
 	if (is_for_sale)
 	{
-		radioSaleType->setSelectedIndex((S32)sale_info.getSaleType() - 1);
+//		radioSaleType->setSelectedIndex((S32)sale_info.getSaleType() - 1);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+		combo_sale_type->setValue(sale_info.getSaleType());
+// [/SL:KB]
 		S32 numerical_price;
 		numerical_price = sale_info.getSalePrice();
 		getChild<LLUICtrl>("Edit Cost")->setValue(llformat("%d",numerical_price));
 	}
 	else
 	{
-		radioSaleType->setSelectedIndex(-1);
+//		radioSaleType->setSelectedIndex(-1);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+		combo_sale_type->selectNthItem(-1);
+// [/SL:KB]
 		getChild<LLUICtrl>("Edit Cost")->setValue(llformat("%d",0));
 	}
 }
 
-void LLFloaterProperties::onClickCreator()
-{
-	LLInventoryItem* item = findItem();
-	if(!item) return;
-	if(!item->getCreatorUUID().isNull())
-	{
-		LLAvatarActions::showProfile(item->getCreatorUUID());
-	}
-}
+//void LLFloaterProperties::onClickCreator()
+//{
+//	LLInventoryItem* item = findItem();
+//	if(!item) return;
+//	if(!item->getCreatorUUID().isNull())
+//	{
+//		LLAvatarActions::showProfile(item->getCreatorUUID());
+//	}
+//}
 
-// static
-void LLFloaterProperties::onClickOwner()
-{
-	LLInventoryItem* item = findItem();
-	if(!item) return;
-	if(item->getPermissions().isGroupOwned())
-	{
-		LLGroupActions::show(item->getPermissions().getGroup());
-	}
-	else
-	{
-		LLAvatarActions::showProfile(item->getPermissions().getOwner());
-	}
-}
+//// static
+//void LLFloaterProperties::onClickOwner()
+//{
+//	LLInventoryItem* item = findItem();
+//	if(!item) return;
+//	if(item->getPermissions().isGroupOwned())
+//	{
+//		LLGroupActions::show(item->getPermissions().getGroup());
+//	}
+//	else
+//	{
+//		LLAvatarActions::showProfile(item->getPermissions().getOwner());
+//	}
+//}
 
 // static
 void LLFloaterProperties::onCommitName()
@@ -758,25 +869,29 @@ void LLFloaterProperties::updateSaleInfo()
 		// turn on sale info
 		LLSaleInfo::EForSale sale_type = LLSaleInfo::FS_COPY;
 	
-		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
-		if(RadioSaleType)
-		{
-			switch (RadioSaleType->getSelectedIndex())
-			{
-			case 0:
-				sale_type = LLSaleInfo::FS_ORIGINAL;
-				break;
-			case 1:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			case 2:
-				sale_type = LLSaleInfo::FS_CONTENTS;
-				break;
-			default:
-				sale_type = LLSaleInfo::FS_COPY;
-				break;
-			}
-		}
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2013-09-09 (Catznip-3.6)
+		LLComboBox* combo_sale_type = getChild<LLComboBox>("combobox sale copy");
+		sale_type = (LLSaleInfo::EForSale)combo_sale_type->getValue().asInteger();
+// [/SL:KB]
+//		LLRadioGroup* RadioSaleType = getChild<LLRadioGroup>("RadioSaleType");
+//		if(RadioSaleType)
+//		{
+//			switch (RadioSaleType->getSelectedIndex())
+//			{
+//			case 0:
+//				sale_type = LLSaleInfo::FS_ORIGINAL;
+//				break;
+//			case 1:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			case 2:
+//				sale_type = LLSaleInfo::FS_CONTENTS;
+//				break;
+//			default:
+//				sale_type = LLSaleInfo::FS_COPY;
+//				break;
+//			}
+//		}
 
 		if (sale_type == LLSaleInfo::FS_COPY 
 			&& !gAgent.allowOperation(PERM_COPY, item->getPermissions(), 
@@ -889,7 +1004,10 @@ LLMultiProperties::LLMultiProperties()
 {
 	// start with a small rect in the top-left corner ; will get resized
 	LLRect rect;
-	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 20, 20);
+//	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 20, 20);
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	rect.setLeftTopAndSize(0, gViewerWindow->getWindowHeightScaled(), 350, 300);
+// [/SL:KB]
 	setRect(rect);
 	LLFloater* last_floater = LLFloaterReg::getLastFloaterInGroup("properties");
 	if (last_floater)

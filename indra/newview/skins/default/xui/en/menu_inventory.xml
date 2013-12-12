@@ -359,6 +359,22 @@
      layout="topleft"
      name="Folder Wearables Separator" />
     <menu_item_call
+     label="Wear on Current Outfit"
+     layout="topleft"
+     name="Wear On Outfit">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="wearonoutfit" />
+    </menu_item_call>
+    <menu_item_call
+     label="Add to Current Outfit"
+     layout="topleft"
+     name="Add To Outfit">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="addtooutfit" />
+    </menu_item_call>
+    <menu_item_call
      label="Replace Current Outfit"
      layout="topleft"
      name="Replace Outfit">
@@ -367,15 +383,7 @@
          parameter="replaceoutfit" />
     </menu_item_call>
     <menu_item_call
-     label="Add To Current Outfit"
-     layout="topleft"
-     name="Add To Outfit">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="addtooutfit" />
-    </menu_item_call>
-    <menu_item_call
-     label="Remove From Current Outfit"
+     label="Remove from Current Outfit"
      layout="topleft"
      name="Remove From Outfit">
         <menu_item_call.on_click
