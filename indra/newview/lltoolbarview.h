@@ -45,6 +45,9 @@ public:
 		TOOLBAR_NONE = 0,
 		TOOLBAR_LEFT,
 		TOOLBAR_RIGHT,
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		TOOLBAR_TOP,
+// [/SL:KB]
 		TOOLBAR_BOTTOM,
 
 		TOOLBAR_COUNT,
@@ -65,6 +68,9 @@ public:
 	struct Toolbar : public LLInitParam::Block<Toolbar>
 	{
 		Mandatory<LLToolBarEnums::ButtonType>	button_display_mode;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		Optional<LLToolBarEnums::AlignmentType>	button_alignment;
+// [/SL:KB]
 		Multiple<LLCommandId::Params>	commands;
 
 		Toolbar();
@@ -73,6 +79,9 @@ public:
 	{
 		Optional<Toolbar>	left_toolbar,
 							right_toolbar,
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+							top_toolbar,
+// [/SL:KB]
 							bottom_toolbar;
 
 		ToolbarSet();

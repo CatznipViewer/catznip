@@ -4126,3 +4126,20 @@ bool LLContextMenu::addChild(LLView* view, S32 tab_group)
 	return addContextChild(view, tab_group);
 }
 
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+LLMenuGL* LLContextMenu::findChildMenuByName(const std::string& name, BOOL recurse) const
+{
+	LLView* view = findChildView(name, recurse);
+	if (view)
+	{
+		LLContextMenuBranch* branch = dynamic_cast<LLContextMenuBranch*>(view);
+		if (branch)
+		{
+			return branch->getBranch();
+		}
+		return LLMenuGL::findChildMenuByName(name, recurse);
+	}
+	llwarns << "Child Menu " << name << " not found in menu " << getName() << llendl;
+	return NULL;
+}
+// [/SL:KB]
