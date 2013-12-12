@@ -291,12 +291,12 @@ void LLToolTip::initFromParams(const LLToolTip::Params& p)
 	S32 text_width = llmin(p.max_width(), mTextBox->getTextPixelWidth() + 1);
 	S32 text_height = mTextBox->getTextPixelHeight();
 	mTextBox->reshape(text_width, text_height);
-	if (mInfoButton)
-	{
-		LLRect text_rect = mTextBox->getRect();
-		LLRect icon_rect = mInfoButton->getRect();
-		mTextBox->translate(0, icon_rect.getCenterY() - text_rect.getCenterY());
-	}
+//	if (mInfoButton)
+//	{
+//		LLRect text_rect = mTextBox->getRect();
+//		LLRect icon_rect = mInfoButton->getRect();
+//		mTextBox->translate(0, icon_rect.getCenterY() - text_rect.getCenterY());
+//	}
 
 	// reshape tooltip panel to fit text box
 	LLRect tooltip_rect = calcBoundingRect();
@@ -306,6 +306,15 @@ void LLToolTip::initFromParams(const LLToolTip::Params& p)
 	tooltip_rect.mLeft = 0;
 
 	mTextBox->reshape(mTextBox->getRect().getWidth(), llmax(mTextBox->getRect().getHeight(), tooltip_rect.getHeight() - 2 * mPadding));
+
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2012-07-02 (Catznip-3.3)
+	if (mInfoButton)
+	{
+		LLRect text_rect = mTextBox->getRect();
+		LLRect icon_rect = mInfoButton->getRect();
+		mInfoButton->translate(0, text_rect.getCenterY() - icon_rect.getCenterY());
+	}
+// [/SL:KB]
 
 	setShape(tooltip_rect);
 }
