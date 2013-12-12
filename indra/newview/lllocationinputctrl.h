@@ -181,8 +181,13 @@ private:
 	LLIconCtrl*	mParcelIcon[ICON_COUNT];
 	LLTextBox* mDamageText;
 
-	LLAddLandmarkObserver*		mAddLandmarkObserver;
-	LLRemoveLandmarkObserver*	mRemoveLandmarkObserver;
+//	LLAddLandmarkObserver*		mAddLandmarkObserver;
+//	LLRemoveLandmarkObserver*	mRemoveLandmarkObserver;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	// NOTE: name change to catch all occurances
+	LLAddLandmarkObserver*		mLandmarkAddObserver;
+	LLRemoveLandmarkObserver*	mLandmarkRemoveObserver;
+// [/SL:KB]
 	LLParcelChangeObserver*		mParcelChangeObserver;
 
 	boost::signals2::connection	mCoordinatesControlConnection;

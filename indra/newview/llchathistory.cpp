@@ -199,6 +199,12 @@ public:
 		{
 			LLAvatarActions::requestFriendshipDialog(getAvatarId(), mFrom);
 		}
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		else if (level == "add_contact")
+		{
+			LLAvatarActions::addContact(getAvatarId());
+		}
+// [/SL:KB]
 		else if (level == "remove")
 		{
 			LLAvatarActions::removeFriendDialog(getAvatarId());
@@ -241,10 +247,20 @@ public:
 		{
 			return LLMuteList::getInstance()->isMuted(getAvatarId(), LLMute::flagVoiceChat);
 		}
-		if (level == "is_muted")
+		else if (level == "is_muted")
 		{
 			return LLMuteList::getInstance()->isMuted(getAvatarId(), LLMute::flagTextChat);
 		}
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		else if (level" == is_friend")
+		{
+			return LLAvatarActions::isFriend(getAvatarId());
+		}
+		else if (level == "is_not_friend")
+		{
+			return !LLAvatarActions::isFriend(getAvatarId());
+		}
+// [/SL:KB]
 		return false;
 	}
 
@@ -264,6 +280,7 @@ public:
 			LLMuteList::getInstance()->remove(mute, flags);
 		}
 	}
+// [/SL:KB]
 
 	BOOL postBuild()
 	{
@@ -273,6 +290,12 @@ public:
 		registrar.add("AvatarIcon.Action", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("AvatarIcon.Check", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemChecked, this, _2));
 		registrar.add("ObjectIcon.Action", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemClicked, this, _2));
+
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+
+		enable_registrar.add("AvatarIcon.EnableAction", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemEnabled, this, _2));
+// [/SL:KB]
 
 		LLMenuGL* menu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_avatar_icon.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		mPopupMenuHandleAvatar = menu->getHandle();

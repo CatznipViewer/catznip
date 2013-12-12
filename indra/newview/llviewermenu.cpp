@@ -95,6 +95,9 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "lltexturecache.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolcomp.h"
 #include "lltoolmgr.h"
@@ -110,6 +113,10 @@
 #include "llviewerobjectlist.h"
 #include "llviewerparcelmgr.h"
 #include "llviewerstats.h"
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+#include "llviewertexturelist.h"
+#include "llvovolume.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 #include "llvoicevivox.h"
 #include "llworldmap.h"
@@ -322,37 +329,36 @@ BOOL enable_detach(const LLSD& = LLSD());
 void menu_toggle_attached_lights(void* user_data);
 void menu_toggle_attached_particles(void* user_data);
 
-class LLMenuParcelObserver : public LLParcelObserver
-{
-public:
-	LLMenuParcelObserver();
-	~LLMenuParcelObserver();
-	virtual void changed();
-};
+//class LLMenuParcelObserver : public LLParcelObserver
+//{
+//public:
+//	LLMenuParcelObserver();
+//	~LLMenuParcelObserver();
+//	virtual void changed();
+//};
 
-static LLMenuParcelObserver* gMenuParcelObserver = NULL;
+//static LLMenuParcelObserver* gMenuParcelObserver = NULL;
 
 static LLUIListener sUIListener;
 
-LLMenuParcelObserver::LLMenuParcelObserver()
-{
-	LLViewerParcelMgr::getInstance()->addObserver(this);
-}
-
-LLMenuParcelObserver::~LLMenuParcelObserver()
-{
-	LLViewerParcelMgr::getInstance()->removeObserver(this);
-}
-
-void LLMenuParcelObserver::changed()
-{
-	LLParcel *parcel = LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
-	gMenuHolder->childSetEnabled("Land Buy Pass", LLPanelLandGeneral::enableBuyPass(NULL) && !(parcel->getOwnerID()== gAgent.getID()));
-	
-	BOOL buyable = enable_buy_land(NULL);
-	gMenuHolder->childSetEnabled("Land Buy", buyable);
-	gMenuHolder->childSetEnabled("Buy Land...", buyable);
-}
+//LLMenuParcelObserver::LLMenuParcelObserver()
+//{
+//	LLViewerParcelMgr::getInstance()->addObserver(this);
+//}
+//
+//LLMenuParcelObserver::~LLMenuParcelObserver()
+//{
+//	LLViewerParcelMgr::getInstance()->removeObserver(this);
+//}
+//
+//void LLMenuParcelObserver::changed()
+//{
+//	LLParcel *parcel = LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel();
+//	gMenuHolder->childSetEnabled("Land Buy Pass", LLPanelLandGeneral::enableBuyPass(NULL) && !(parcel->getOwnerID()== gAgent.getID()));
+//	BOOL buyable = enable_buy_land(NULL);
+//	gMenuHolder->childSetEnabled("Land Buy", buyable);
+//	gMenuHolder->childSetEnabled("Buy Land...", buyable);
+//}
 
 
 void initialize_menus();
@@ -493,8 +499,8 @@ void init_menus()
 
 	gMenuBarView->createJumpKeys();
 
-	// Let land based option enable when parcel changes
-	gMenuParcelObserver = new LLMenuParcelObserver();
+//	// Let land based option enable when parcel changes
+//	gMenuParcelObserver = new LLMenuParcelObserver();
 
 	gLoginMenuBarView = LLUICtrlFactory::getInstance()->createFromFile<LLMenuBarGL>("menu_login.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	gLoginMenuBarView->arrangeAndClear();
@@ -2471,8 +2477,8 @@ class LLAdminOnSaveState: public view_listener_t
 //-----------------------------------------------------------------------------
 void cleanup_menus()
 {
-	delete gMenuParcelObserver;
-	gMenuParcelObserver = NULL;
+//	delete gMenuParcelObserver;
+//	gMenuParcelObserver = NULL;
 
 	delete gMenuAvatarSelf;
 	gMenuAvatarSelf = NULL;
@@ -2549,20 +2555,36 @@ void handle_object_touch()
 
 
 
-static void init_default_item_label(const std::string& item_name)
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+static void init_default_item_label(const LLUICtrl* pMenuItem)
 {
-	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(item_name);
+	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(pMenuItem->getName());
 	if (it == sDefaultItemLabels.end())
 	{
 		// *NOTE: This will not work for items of type LLMenuItemCheckGL because they return boolean value
 		//       (doesn't seem to matter much ATM).
-		LLStringExplicit default_label = gMenuHolder->childGetValue(item_name).asString();
+		LLStringExplicit default_label = pMenuItem->getValue().asString();
 		if (!default_label.empty())
 		{
-			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(item_name, default_label));
+			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(pMenuItem->getName(), default_label));
 		}
 	}
 }
+// [/SL:KB]
+//static void init_default_item_label(const std::string& item_name)
+//{
+//	boost::unordered_map<std::string, LLStringExplicit>::iterator it = sDefaultItemLabels.find(item_name);
+//	if (it == sDefaultItemLabels.end())
+//	{
+//		// *NOTE: This will not work for items of type LLMenuItemCheckGL because they return boolean value
+//		//       (doesn't seem to matter much ATM).
+//		LLStringExplicit default_label = gMenuHolder->childGetValue(item_name).asString();
+//		if (!default_label.empty())
+//		{
+//			sDefaultItemLabels.insert(std::pair<std::string, LLStringExplicit>(item_name, default_label));
+//		}
+//	}
+//}
 
 static LLStringExplicit get_default_item_label(const std::string& item_name)
 {
@@ -2583,18 +2605,28 @@ bool enable_object_touch(LLUICtrl* ctrl)
 
 	bool new_value = obj && obj->flagHandleTouch();
 
-	std::string item_name = ctrl->getName();
-	init_default_item_label(item_name);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+	const std::string& item_name = ctrl->getName();
+	init_default_item_label(ctrl);
+// [/SL:KB]
+//	std::string item_name = ctrl->getName();
+//	init_default_item_label(item_name);
 
 	// Update label based on the node touch name if available.
 	LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 	if (node && node->mValid && !node->mTouchName.empty())
 	{
-		gMenuHolder->childSetText(item_name, node->mTouchName);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+		ctrl->setValue(node->mTouchName);
+// [/SL:KB]
+//		gMenuHolder->childSetText(item_name, node->mTouchName);
 	}
 	else
 	{
-		gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+		ctrl->setValue(get_default_item_label(item_name));
+// [/SL:KB]
+//		gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
 	}
 
 	return new_value;
@@ -2743,6 +2775,65 @@ void handle_object_inspect()
 	LLFloaterReg::showInstance("inspect", LLSD());
 	*/
 }
+
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+void handle_texture_refresh()
+{
+	typedef std::pair<LLUUID, bool> texture_pair_t;
+	typedef std::list<texture_pair_t> texture_list_t;
+	texture_list_t idTextures;
+
+	LLObjectSelectionHandle pSel = LLSelectMgr::instance().getSelection();
+	for (LLObjectSelection::iterator itNode = pSel->begin(), endNode = pSel->end(); itNode != endNode; ++itNode)
+	{
+		const LLSelectNode* pNode = *itNode;
+		const LLViewerObject* pObject = (pNode) ? pNode->getObject() : NULL;
+		if (!pObject)
+			continue;
+
+		for (U8 idxTE = 0, cntTE = pObject->getNumTEs(); idxTE < cntTE; idxTE++)
+		{
+			LLViewerTexture* pTexture = pObject->getTEImage(idxTE);
+			if ((pTexture) && (idTextures.end() == std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pTexture->getID())))
+				idTextures.push_back(texture_pair_t(pTexture->getID(), false));
+		}
+
+		if ( (pObject->isSculpted()) && (!pObject->isMesh()) )
+		{
+			LLSculptParams* pSculptParams = (LLSculptParams*)pObject->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
+			if ( (pSculptParams) && (0 == (pSculptParams->getSculptType() & LL_SCULPT_TYPE_MESH)) )
+			{
+				texture_list_t::iterator itTexture = std::find_if(idTextures.begin(), idTextures.end(), boost::bind(&std::pair<LLUUID, bool>::first, _1) == pSculptParams->getSculptTexture());
+				if (idTextures.end() == itTexture)
+					idTextures.push_back(texture_pair_t(pSculptParams->getSculptTexture(), true));
+				else
+					itTexture->second = true;
+			}
+		}
+	}
+
+	for (texture_list_t::const_iterator itTexture = idTextures.begin(); itTexture != idTextures.end(); ++itTexture)
+	{
+		LLViewerFetchedTexture* pTexture = gTextureList.findImage(itTexture->first);
+		if (pTexture)
+		{
+			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+			pTexture->clearFetchedResults();
+
+			if (itTexture->second)
+			{
+				const LLViewerTexture::ll_volume_list_t* pVolumeList = pTexture->getVolumeList();
+				for (S32 idxVolume = 0; idxVolume < pTexture->getNumVolumes(); ++idxVolume)
+				{
+					LLVOVolume* pVolume = pVolumeList->at(idxVolume);
+					if (pVolume)
+						pVolume->notifyMeshLoaded();
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 //---------------------------------------------------------------------------
 // Land pie menu
@@ -3573,6 +3664,13 @@ class LLSelfStandUp : public view_listener_t
 	}
 };
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_standup_self()
+{
+	return isAgentAvatarValid() && gAgentAvatarp->isSitting();
+}
+// [/SL:KB]
+
 bool enable_standup_self()
 {
     return isAgentAvatarValid() && gAgentAvatarp->isSitting();
@@ -3586,6 +3684,13 @@ class LLSelfSitDown : public view_listener_t
             return true;
         }
     };
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_sitdown_self()
+{
+    return isAgentAvatarValid() && !gAgentAvatarp->isSitting() && !gAgent.getFlying();
+}
+// [/SL:KB]
 
 bool enable_sitdown_self()
 {
@@ -5980,6 +6085,18 @@ bool enable_pay_object()
 	return false;
 }
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+bool visible_object_sit()
+{
+	return (is_object_sittable()) && (!sitting_on_selection());
+}
+
+bool visible_object_stand_up()
+{
+	return sitting_on_selection();
+}
+// [/SL:KB]
+
 bool enable_object_stand_up()
 {
 	// 'Object Stand Up' menu item is enabled when agent is sitting on selection
@@ -5992,20 +6109,30 @@ bool enable_object_sit(LLUICtrl* ctrl)
 	bool sitting_on_sel = sitting_on_selection();
 	if (!sitting_on_sel)
 	{
-		std::string item_name = ctrl->getName();
+//		std::string item_name = ctrl->getName();
 
 		// init default labels
-		init_default_item_label(item_name);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+		const std::string& item_name = ctrl->getName();
+		init_default_item_label(ctrl);
+// [/SL:KB]
+//		init_default_item_label(item_name);
 
 		// Update label
 		LLSelectNode* node = LLSelectMgr::getInstance()->getSelection()->getFirstRootNode();
 		if (node && node->mValid && !node->mSitName.empty())
 		{
-			gMenuHolder->childSetText(item_name, node->mSitName);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+			ctrl->setValue(node->mSitName);
+// [/SL:KB]
+//			gMenuHolder->childSetText(item_name, node->mSitName);
 		}
 		else
 		{
-			gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+			ctrl->setValue(get_default_item_label(item_name));
+// [/SL:KB]
+//			gMenuHolder->childSetText(item_name, get_default_item_label(item_name));
 		}
 	}
 	return !sitting_on_sel && is_object_sittable();
@@ -6373,11 +6500,11 @@ class LLWorldEnableBuyLand : public view_listener_t
 	}
 };
 
-BOOL enable_buy_land(void*)
-{
-	return LLViewerParcelMgr::getInstance()->canAgentBuyParcel(
-				LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel(), false);
-}
+//BOOL enable_buy_land(void*)
+//{
+//	return LLViewerParcelMgr::getInstance()->canAgentBuyParcel(
+//				LLViewerParcelMgr::getInstance()->getParcelSelection()->getParcel(), false);
+//}
 
 void handle_buy_land()
 {
@@ -8771,8 +8898,14 @@ void initialize_menus()
 
 	// Self context menu
 	view_listener_t::addMenu(new LLSelfStandUp(), "Self.StandUp");
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Self.VisibleStandUp", boost::bind(&visible_standup_self));
+// [/SL:KB]
 	enable.add("Self.EnableStandUp", boost::bind(&enable_standup_self));
 	view_listener_t::addMenu(new LLSelfSitDown(), "Self.SitDown");
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Self.VisibleSitDown", boost::bind(&visible_sitdown_self));
+// [/SL:KB]
 	enable.add("Self.EnableSitDown", boost::bind(&enable_sitdown_self));
 	view_listener_t::addMenu(new LLSelfRemoveAllAttachments(), "Self.RemoveAllAttachments");
 
@@ -8811,6 +8944,9 @@ void initialize_menus()
 	commit.add("Object.Touch", boost::bind(&handle_object_touch));
 	commit.add("Object.SitOrStand", boost::bind(&handle_object_sit_or_stand));
 	commit.add("Object.Delete", boost::bind(&handle_object_delete));
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+	commit.add("Object.TextureRefresh", boost::bind(&handle_texture_refresh));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(true), "Object.AttachToAvatar");
 	view_listener_t::addMenu(new LLObjectAttachToAvatar(false), "Object.AttachAddToAvatar");
 	view_listener_t::addMenu(new LLObjectReturn(), "Object.Return");
@@ -8833,6 +8969,10 @@ void initialize_menus()
 
 	enable.add("Object.EnableStandUp", boost::bind(&enable_object_stand_up));
 	enable.add("Object.EnableSit", boost::bind(&enable_object_sit, _1));
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-10-16 (Catznip-3.3)
+	enable.add("Object.VisibleStandUp", boost::bind(&visible_object_stand_up));
+	enable.add("Object.VisibleSit", boost::bind(&visible_object_sit));
+// [/SL:KB]
 
 	view_listener_t::addMenu(new LLObjectEnableReturn(), "Object.EnableReturn");
 	view_listener_t::addMenu(new LLObjectEnableReportAbuse(), "Object.EnableReportAbuse");
@@ -8867,6 +9007,9 @@ void initialize_menus()
 	// Generic actions
 	commit.add("ReportAbuse", boost::bind(&handle_report_abuse));
 	commit.add("BuyCurrency", boost::bind(&handle_buy_currency));
+// [SL:KB] - Patch: UI-Misc | Checked: 2010-09-12 (Catznip-2.1)
+	commit.add("RequestBalance", boost::bind(&LLStatusBar::sendMoneyBalanceRequest));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
 	view_listener_t::addMenu(new LLToggleSpeak(), "ToggleSpeak");

@@ -40,6 +40,9 @@ public:
 		LOCATION_FORMAT_NO_MATURITY,	// Parcel, Region (x, y, z)
 		LOCATION_FORMAT_NO_COORDS,		// Parcel, Region - Maturity
 		LOCATION_FORMAT_FULL,			// Parcel, Region (x, y, z) - Maturity
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
+		LOCATION_FORMAT_TOPBAR			// Region (x, y, z) - Parcel
+// [/SL:KB]
 	};
 
 	static void buildFullname(std::string &name);

@@ -142,7 +142,10 @@ public:
 private:
 	/*virtual*/ void changed(U32 mask)
 	{
-		if (mask & (~(LLInventoryObserver::LABEL|LLInventoryObserver::INTERNAL|LLInventoryObserver::ADD)))
+//		if (mask & (~(LLInventoryObserver::LABEL|LLInventoryObserver::INTERNAL|LLInventoryObserver::ADD)))
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+		if (mask & LLInventoryObserver::REMOVE)
+// [/SL:KB]
 		{
 			mInput->updateAddLandmarkButton();
 		}
@@ -205,6 +208,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 :	LLComboBox(p),
 	mIconHPad(p.icon_hpad),
 	mAddLandmarkHPad(p.add_landmark_hpad),
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	mLandmarkAddObserver(NULL),
+	mLandmarkRemoveObserver(NULL),
+// [/SL:KB]
 	mLocationContextMenu(NULL),
 	mAddLandmarkBtn(NULL),
 	mForSaleBtn(NULL),
@@ -417,10 +424,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	mRegionCrossingSlot = LLEnvManagerNew::getInstance()->setRegionChangeCallback(boost::bind(&LLLocationInputCtrl::onRegionBoundaryCrossed, this));
 	createNavMeshStatusListenerForCurrentRegion();
 
-	mRemoveLandmarkObserver	= new LLRemoveLandmarkObserver(this);
-	mAddLandmarkObserver	= new LLAddLandmarkObserver(this);
-	gInventory.addObserver(mRemoveLandmarkObserver);
-	gInventory.addObserver(mAddLandmarkObserver);
+//	mRemoveLandmarkObserver	= new LLRemoveLandmarkObserver(this);
+//	mAddLandmarkObserver	= new LLAddLandmarkObserver(this);
+//	gInventory.addObserver(mRemoveLandmarkObserver);
+//	gInventory.addObserver(mAddLandmarkObserver);
 
 	mParcelChangeObserver = new LLParcelChangeObserver(this);
 	LLViewerParcelMgr::getInstance()->addObserver(mParcelChangeObserver);
@@ -433,10 +440,22 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 
 LLLocationInputCtrl::~LLLocationInputCtrl()
 {
-	gInventory.removeObserver(mRemoveLandmarkObserver);
-	gInventory.removeObserver(mAddLandmarkObserver);
-	delete mRemoveLandmarkObserver;
-	delete mAddLandmarkObserver;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	if (mLandmarkAddObserver)
+	{
+		gInventory.removeObserver(mLandmarkAddObserver);
+		delete mLandmarkAddObserver;
+	}
+	if (mLandmarkRemoveObserver)
+	{
+		gInventory.removeObserver(mLandmarkRemoveObserver);
+		delete mLandmarkRemoveObserver;
+	}
+// [/SL:KB]
+//	gInventory.removeObserver(mRemoveLandmarkObserver);
+//	gInventory.removeObserver(mAddLandmarkObserver);
+//	delete mRemoveLandmarkObserver;
+//	delete mAddLandmarkObserver;
 
 	LLViewerParcelMgr::getInstance()->removeObserver(mParcelChangeObserver);
 	delete mParcelChangeObserver;
@@ -566,6 +585,13 @@ void LLLocationInputCtrl::setFocus(BOOL b)
 
 void LLLocationInputCtrl::handleLoginComplete()
 {
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	// Don't start observing the inventory until after login has successfully completed to avoid stalling
+	mLandmarkAddObserver = new LLAddLandmarkObserver(this);
+	gInventory.addObserver(mLandmarkAddObserver);
+	mLandmarkRemoveObserver	= new LLRemoveLandmarkObserver(this);
+	gInventory.addObserver(mLandmarkRemoveObserver);
+// [/SL:KB]
 	// An agent parcel update hasn't occurred yet, so we have to
 	// manually set location and the appropriate "Add landmark" icon.
 	refresh();

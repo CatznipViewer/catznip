@@ -50,6 +50,9 @@
         <menu_item_call.on_click
          function="AvatarIcon.Action"
          parameter="add" />
+        <menu_item_call.on_visible
+         function="AvatarIcon.EnableAction"
+         parameter="is_not_friend" />
     </menu_item_call>
     <menu_item_call
      label="Remove friend"
@@ -58,7 +61,21 @@
         <menu_item_call.on_click
          function="AvatarIcon.Action"
          parameter="remove" />
+        <menu_item_call.on_visible
+         function="AvatarIcon.EnableAction"
+         parameter="is_friend" />
     </menu_item_call>
+    <menu_item_call
+     label="Add Contact..."
+     layout="topleft"
+     name="Add Contact">
+        <menu_item_call.on_click
+         function="AvatarIcon.Action"
+         parameter="add_contact" />
+         <menu_item_call.on_visible
+         function="AvatarIcon.EnableAction"
+         parameter="is_not_friend" />
+   </menu_item_call>
     <menu_item_call
      label="Invite to group..."
      layout="topleft"
