@@ -110,6 +110,9 @@
 #include "llfloatermap.h"
 #include "llfloaternamedesc.h"
 #include "llfloaterpreference.h"
+// [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
+#include "llfloatersearch.h"
+// [/SL:KB]
 #include "llfloatersnapshot.h"
 #include "llfloatertools.h"
 #include "llfloaterworldmap.h"
@@ -2025,6 +2028,17 @@ void LLViewerWindow::initWorldUI()
 		url = LLWeb::expandURLSubstitutions(url, LLSD());
 		avatar_picker->navigateTo(url, "text/html");
 	}
+
+// [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("PreInitSearch"))
+	{
+		LLFloaterSearch* pSearchFloater = LLFloaterReg::getInstance("search")->findChild<LLFloaterSearch>("floater_search");
+		if (pSearchFloater)
+		{
+			pSearchFloater->search(LLFloaterSearch::SearchQuery());
+		}
+	}
+// [/SL:KB]
 }
 
 // Destroy the UI

@@ -56,7 +56,10 @@ static const std::string PARCEL_OWNERSHIP_STATUS_STRING[LLParcel::OS_COUNT+1] =
 // * Web site "create event" tools
 // DO NOT DELETE ITEMS FROM THIS LIST WITHOUT DEEPLY UNDERSTANDING WHAT YOU'RE DOING.
 //
-static const std::string PARCEL_CATEGORY_STRING[LLParcel::C_COUNT] =
+//static const std::string PARCEL_CATEGORY_STRING[LLParcel::C_COUNT] =
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-08-02 (Catznip-3.3)
+static const std::string PARCEL_CATEGORY_STRING[LLParcel::C_COUNT + 1] =
+// [/SL:KB]
 {
     "none",
     "linden",
@@ -72,7 +75,11 @@ static const std::string PARCEL_CATEGORY_STRING[LLParcel::C_COUNT] =
     "shopping",
     "stage",
     "other",
-	"rental"
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-08-02 (Catznip-3.3)
+	"rental",
+	"any"
+// [/SL:KB]
+//	"rental"
 };
 static const std::string PARCEL_CATEGORY_UI_STRING[LLParcel::C_COUNT + 1] =
 {
@@ -1151,6 +1158,13 @@ const std::string& category_to_string(LLParcel::ECategory category)
     {
         index = category;
     }
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-08-02 (Catznip-3.3)
+    else if (category == LLParcel::C_ANY)
+    {
+        // C_ANY = -1 , but the "Any" string is at the end of the list
+        index = ((S32) LLParcel::C_COUNT);
+    }
+// [/SL:KB]
     return PARCEL_CATEGORY_STRING[index];
 }
 
@@ -1178,6 +1192,12 @@ LLParcel::ECategory category_string_to_category(const std::string& s)
             return (LLParcel::ECategory)i;
         }
     }
+// [SL:KB] - Patch: UI-SearchDirectory | Checked: 2012-08-02 (Catznip-3.3)
+    if (s == PARCEL_CATEGORY_STRING[LLParcel::C_COUNT])
+    {
+        return LLParcel::C_ANY;
+    }
+// [/SL:KB]
     llwarns << "Parcel category outside of possibilities " << s << llendl;
     return LLParcel::C_NONE;
 }
