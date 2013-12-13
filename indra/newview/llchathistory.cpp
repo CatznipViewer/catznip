@@ -251,18 +251,24 @@ public:
 		{
 			return LLMuteList::getInstance()->isMuted(getAvatarId(), LLMute::flagTextChat);
 		}
+		return false;
+	}
+
 // [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
-		else if (level" == is_friend")
+	bool onAvatarIconContextMenuItemEnabled(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if (strParam == "is_friend")
 		{
 			return LLAvatarActions::isFriend(getAvatarId());
 		}
-		else if (level == "is_not_friend")
+		else if (strParam == "is_not_friend")
 		{
 			return !LLAvatarActions::isFriend(getAvatarId());
 		}
-// [/SL:KB]
 		return false;
 	}
+// [/SL:KB]
 
 	void mute(const LLUUID& participant_id, U32 flags)
 	{
@@ -289,13 +295,10 @@ public:
 
 		registrar.add("AvatarIcon.Action", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("AvatarIcon.Check", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemChecked, this, _2));
-		registrar.add("ObjectIcon.Action", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemClicked, this, _2));
-
 // [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
-		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
-
-		enable_registrar.add("AvatarIcon.EnableAction", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemEnabled, this, _2));
+		registrar_enable.add("AvatarIcon.Enable", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemEnabled, this, _2));
 // [/SL:KB]
+		registrar.add("ObjectIcon.Action", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemClicked, this, _2));
 
 		LLMenuGL* menu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_avatar_icon.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		mPopupMenuHandleAvatar = menu->getHandle();

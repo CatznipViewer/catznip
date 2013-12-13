@@ -6006,7 +6006,10 @@ class LLAvatarAddContact : public view_listener_t
 		LLVOAvatar* avatar = find_avatar_from_object( LLSelectMgr::getInstance()->getSelection()->getPrimaryObject() );
 		if(avatar)
 		{
-			create_inventory_callingcard(avatar->getID());
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-12-12 (Catznip-3.6)
+			LLAvatarActions::addContact(avatar->getID());
+// [/SL:KB]
+//			create_inventory_callingcard(avatar->getID());
 		}
 		return true;
 	}

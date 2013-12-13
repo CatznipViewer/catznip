@@ -984,12 +984,12 @@ void LLAvatarActions::inviteToGroup(const LLUUID& id)
 	}
 }
 
-// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-12-12 (Catznip-3.6)
 void LLAvatarActions::addContact(const LLUUID& id)
 {
 	if (id.notNull())
 	{
-		create_inventory_callingcard(id);
+		create_inventory_callingcard(id, gInventory.findCategoryUUIDForType(LLFolderType::FT_CALLINGCARD));
 	}
 }
 // [/SL:KB]
