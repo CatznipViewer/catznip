@@ -34,6 +34,9 @@
 class LLInventoryItem;
 class LLFilterEditor;
 class LLLandmark;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+class LLSearchEditor;
+// [/SL:KB]
 
 class LLPanelLandmarkInfo;
 class LLPanelPlaceProfile;
@@ -83,7 +86,10 @@ public:
 
 private:
 	void onLandmarkLoaded(LLLandmark* landmark);
-	void onFilterEdit(const std::string& search_string, bool force_filter);
+//	void onFilterEdit(const std::string& search_string, bool force_filter);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+	void onFilterEdit(LLUICtrl* ctrl_editor, const std::string& search_string, bool force_filter);
+// [/SL:KB]
 	void onTabSelected();
 
 	void onTeleportButtonClicked();
@@ -109,6 +115,9 @@ private:
 	LLPanelPlaceInfo* getCurrentInfoPanel();
 
 	LLFilterEditor*				mFilterEditor;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLSearchEditor*				mSearchEditor;
+// [/SL:KB]
 	LLPanelPlacesTab*			mActivePanel;
 	LLTabContainer*				mTabContainer;
 	LLPanelPlaceProfile*		mPlaceProfile;
@@ -119,6 +128,9 @@ private:
 	LLToggleableMenu*			mLandmarkMenu;
 
 	LLButton*					mPlaceProfileBackBtn;
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	LLPanel*					mButtonPanel;
+// [/SL:KB]
 	LLButton*					mTeleportBtn;
 	LLButton*					mShowOnMapBtn;
 	LLButton*					mEditBtn;
@@ -150,6 +162,11 @@ private:
 
 	// Holds info whether "My Landmarks" and "Teleport History" tabs have been created.
 	bool						mTabsCreated;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLPanelPlacesTab*			mLandmarksPanel;
+	LLPanelPlacesTab*			mTeleportHistoryPanel;
+	LLPanelPlacesTab*			mSearchPanel;
+// [/SL:KB]
 
 	LLSafeHandle<LLParcelSelection>	mParcel;
 

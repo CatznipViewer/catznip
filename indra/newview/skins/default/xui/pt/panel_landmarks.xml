@@ -7,16 +7,12 @@
 		<accordion_tab name="tab_library" title="Biblioteca"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<button name="options_gear_btn" tool_tip="Mostrar opções adicionais"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="Adicionar marco"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<icon name="dummy_icon" width="10" />
+				<button label="Teletransportar" name="teleport_btn" tool_tip="Teletransportar para a área selecionada" width="99" />
+				<button label="Mapa" name="map_btn" tool_tip="Exibir a área correspondente no Mapa Mundi"/>
+				<button name="profile_btn" tool_tip="Mostrar perfil do lugar"/>
 				<dnd_button name="trash_btn" tool_tip="Excluir marco selecionado"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>
