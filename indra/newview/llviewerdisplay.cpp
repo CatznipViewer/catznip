@@ -1547,8 +1547,11 @@ void render_disconnected_background()
 	{
 		llinfos << "Loading last bitmap..." << llendl;
 
-		std::string temp_str;
-		temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter() + SCREEN_LAST_FILENAME;
+//		std::string temp_str;
+//		temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter() + SCREEN_LAST_FILENAME;
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+		const std::string temp_str = getLastScreenPath();
+// [/SL:KB]
 
 		LLPointer<LLImageBMP> image_bmp = new LLImageBMP;
 		if( !image_bmp->load(temp_str) )
