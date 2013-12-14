@@ -1826,8 +1826,11 @@ void LLAppearanceMgr::updateCOF(const LLUUID& category, bool append)
 
 void LLAppearanceMgr::updatePanelOutfitName(const std::string& name)
 {
-	LLSidepanelAppearance* panel_appearance =
-		dynamic_cast<LLSidepanelAppearance *>(LLFloaterSidePanelContainer::getPanel("appearance"));
+//	LLSidepanelAppearance* panel_appearance =
+//		dynamic_cast<LLSidepanelAppearance *>(LLFloaterSidePanelContainer::getPanel("appearance"));
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+	LLSidepanelAppearance* panel_appearance = dynamic_cast<LLSidepanelAppearance *>(LLFloaterSidePanelContainer::findPanel("appearance"));
+// [/SL:KB]
 	if (panel_appearance)
 	{
 		panel_appearance->refreshCurrentOutfitName(name);

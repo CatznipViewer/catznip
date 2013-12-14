@@ -59,9 +59,14 @@ void LLFloaterSidePanelContainer::onOpen(const LLSD& key)
 
 void LLFloaterSidePanelContainer::onClickCloseBtn(bool)
 {
+//	LLPanelOutfitEdit* panel_outfit_edit =
+//		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
+//	if (panel_outfit_edit)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
 	LLPanelOutfitEdit* panel_outfit_edit =
-		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
-	if (panel_outfit_edit)
+		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::findPanel("appearance", "panel_outfit_edit"));
+	if ( (panel_outfit_edit) && (panel_outfit_edit->isInVisibleChain()) )
+// [/SL:KB]
 	{
 		LLFloater *parent = gFloaterView->getParentFloater(panel_outfit_edit);
 		if (parent == this )
