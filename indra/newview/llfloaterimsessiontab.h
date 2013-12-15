@@ -153,7 +153,10 @@ protected:
 //	void updateHeaderAndToolbar();
 
 	// Update the input field help text and other places that need the session name
-	virtual void updateSessionName(const std::string& name);
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+	/*virtual*/ void updateSessionName();
+// [/Sl:KB]
+//	virtual void updateSessionName(const std::string& name);
 
 	// set the enable/disable state for the Call button
 	virtual void enableDisableCallBtn();

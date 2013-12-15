@@ -143,8 +143,14 @@ private:
     /*virtual*/ void onTearOffClicked();
 	/*virtual*/ void onClickCloseBtn(bool app_qutting);
 
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
 	// Update the window title and input field help text
-	/*virtual*/ void updateSessionName(const std::string& name);
+	/*virtual*/ void updateSessionName();
+
+	static void onAvatarNameCache(const LLUUID& idAvatar, const LLAvatarName avName);
+// [/Sl:KB]
+//	// Update the window title and input field help text
+//	/*virtual*/ void updateSessionName(const std::string& name);
 
 	bool dropPerson(LLUUID* person_id, bool drop);
 

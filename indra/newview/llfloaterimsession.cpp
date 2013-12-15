@@ -325,11 +325,14 @@ void LLFloaterIMSession::initIMFloater()
 		mInputEditor->setLabel(LLTrans::getString("IM_unavailable_text_label"));
 	}
 
-	if (!mIsP2PChat)
-	{
-		std::string session_name(LLIMModel::instance().getName(mSessionID));
-		updateSessionName(session_name);
-	}
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+	updateSessionName();
+// [/SL:KB]
+//	if (!mIsP2PChat)
+//	{
+//		std::string session_name(LLIMModel::instance().getName(mSessionID));
+//		updateSessionName(session_name);
+//	}
 }
 
 //virtual
@@ -558,19 +561,61 @@ void LLFloaterIMSession::onVoiceChannelStateChanged(
 	updateCallBtnState(callIsActive);
 }
 
-void LLFloaterIMSession::updateSessionName(const std::string& name)
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+void LLFloaterIMSession::updateSessionName()
 {
-	if (!name.empty())
+	std::string strTitle;
+	std::string strShortTitle;
+
+	if (mIsP2PChat)
 	{
-		LLFloaterIMSessionTab::updateSessionName(name);
-// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
-		setTitle(name);
-// [/SL:KB]
-//		mTypingStart.setArg("[NAME]", name);
-//		setTitle (mOtherTyping ? mTypingStart.getString() : name);
-//		mSessionNameUpdatedForTyping = mOtherTyping;
+		LLAvatarName avName;
+		if ( (LLAvatarNameCache::get(mOtherParticipantUUID, &avName)) && (avName.isValidName()) )
+		{
+			strTitle = avName.getCompleteName();
+			strShortTitle = avName.getDisplayName();
+		}
+		else
+		{
+			strTitle = LLIMModel::instance().getName(mSessionID);
+			if (strTitle.empty())
+				strTitle = LLTrans::getString("LoadingData");
+			LLAvatarNameCache::get(mSessionID, boost::bind(&LLFloaterIMSession::onAvatarNameCache, mOtherParticipantUUID, _2));
+		}
+	}
+	else
+	{
+		strTitle = LLIMModel::instance().getName(mSessionID);
+	}
+
+	setTitle(strTitle);
+	setShortTitle(strShortTitle);
+
+	LLFloaterIMSessionTab::updateSessionName();
+}
+
+void LLFloaterIMSession::onAvatarNameCache(const LLUUID& idAvatar, const LLAvatarName avName)
+{
+	LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(idAvatar);
+	if ( (pIMSession) && (avName.isValidName()) )
+	{
+		pIMSession->updateSessionName();
 	}
 }
+// [/Sl:KB]
+//void LLFloaterIMSession::updateSessionName(const std::string& name)
+//{
+//	if (!name.empty())
+//	{
+//		LLFloaterIMSessionTab::updateSessionName(name);
+//// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+//		setTitle(name);
+//// [/SL:KB]
+////		mTypingStart.setArg("[NAME]", name);
+////		setTitle (mOtherTyping ? mTypingStart.getString() : name);
+////		mSessionNameUpdatedForTyping = mOtherTyping;
+//	}
+//}
 
 //static
 LLFloaterIMSession* LLFloaterIMSession::show(const LLUUID& session_id)
