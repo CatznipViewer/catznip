@@ -27,6 +27,11 @@ public:
 	LLFloaterIMContainerTab(const LLSD& seed, const Params& params = getDefaultParams());
 	virtual ~LLFloaterIMContainerTab();
 
+	/*
+	 * LLView/LLMultiFloater overrides
+	 */
+public:
+	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	/*virtual*/ void setVisible(BOOL visible);
 
 	/*virtual*/ const LLUUID& getSelectedSession() const;

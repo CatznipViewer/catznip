@@ -34,6 +34,17 @@ LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
 {
 }
 
+void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point)
+{
+	// NOTE: this function is a no-op, but dependent patch branched add code here and it saves us merging headaches to define it in the base patch
+	if (!floaterp)
+	{
+		return;
+	}
+
+	LLFloaterIMContainerBase::addFloater(floaterp, select_added_floater, insertion_point);
+}
+
 void LLFloaterIMContainerTab::setVisible(BOOL visible)
 {
 //	if (visible)
