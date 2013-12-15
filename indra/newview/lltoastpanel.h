@@ -40,6 +40,10 @@
  * on the parent view.
  */
 class LLToastPanel : public LLPanel {
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+protected:
+	LLToastPanel();
+// [/SL:KB]
 public:
 	LLToastPanel(const LLNotificationPtr&);
 	virtual ~LLToastPanel() = 0;

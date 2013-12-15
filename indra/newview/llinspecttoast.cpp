@@ -26,6 +26,9 @@
 
 #include "llviewerprecompiledheaders.h" // must be first include
 
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "llinspecttoast.h"
 #include "llinspect.h"
 #include "llfloaterreg.h"
@@ -52,7 +55,10 @@ private:
 
 	boost::signals2::scoped_connection mConnection;
 	LLPanel* mPanel;
-	LLScreenChannel* mScreenChannel;
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLHandle<LLScreenChannelBase> mScreenChannel;
+// [/SL:KB]
+//	LLScreenChannel* mScreenChannel;
 };
 
 LLInspectToast::LLInspectToast(const LLSD& notification_id) :
@@ -60,12 +66,18 @@ LLInspectToast::LLInspectToast(const LLSD& notification_id) :
 {
 	LLScreenChannelBase* channel = LLChannelManager::getInstance()->findChannelByID(
 																LLUUID(gSavedSettings.getString("NotificationChannelUUID")));
-	mScreenChannel = dynamic_cast<LLScreenChannel*>(channel);
-	if(NULL == mScreenChannel)
-	{
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	if (channel)
+		mScreenChannel = channel->getHandle();
+	else
 		llwarns << "Could not get requested screen channel." << llendl;
-		return;
-	}
+// [/SL:KB]
+//	mScreenChannel = dynamic_cast<LLScreenChannel*>(channel);
+//	if(NULL == mScreenChannel)
+//	{
+//		llwarns << "Could not get requested screen channel." << llendl;
+//		return;
+//	}
 
 	LLTransientFloaterMgr::getInstance()->addControlView(this);
 }
@@ -80,7 +92,11 @@ LLInspectToast::~LLInspectToast()
 void LLInspectToast::onOpen(const LLSD& notification_id)
 {
 	LLInspect::onOpen(notification_id);
-	LLToast* toast = mScreenChannel->getToastByNotificationID(notification_id);
+//	LLToast* toast = mScreenChannel->getToastByNotificationID(notification_id);
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mScreenChannel.get());
+	LLToast* toast = (channel) ? channel->getToastByNotificationID(notification_id) : NULL;
+// [/SL:KB]
 	if (toast == NULL)
 	{
 		llwarns << "Could not get requested toast  from screen channel." << llendl;
@@ -104,7 +120,28 @@ void LLInspectToast::onOpen(const LLSD& notification_id)
 	panel_rect = panel->getRect();
 	reshape(panel_rect.getWidth(), panel_rect.getHeight());
 
-	LLUI::positionViewNearMouse(this);
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+	static LLView* pFloaterSnapRegion = NULL;
+	if (!pFloaterSnapRegion)
+		pFloaterSnapRegion = getRootView()->findChildView("floater_snap_region");
+
+	// We want to constrain it to the floater snap region (minus the chiclet bar) rather than the entire available screen
+	LLRect rctConstrain = getParent()->getLocalRect();
+	if (pFloaterSnapRegion)
+	{
+		pFloaterSnapRegion->localRectToOtherView(pFloaterSnapRegion->getLocalRect(), &rctConstrain, getParent());
+		if (LLChicletBar::instanceExists())
+		{
+			const LLChicletBar* pChicletBar = LLChicletBar::getInstance();
+			if (LLChicletBar::ALIGN_TOP == pChicletBar->getAlignment())
+				rctConstrain.mTop -= pChicletBar->getRect().getHeight();
+			else
+				rctConstrain.mBottom += pChicletBar->getRect().getHeight();
+		}
+	}
+	LLUI::positionViewNearMouse(this, rctConstrain);
+// [/SL:KB]
+//	LLUI::positionViewNearMouse(this);
 }
 
 // virtual
