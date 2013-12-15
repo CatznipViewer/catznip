@@ -109,13 +109,6 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	}
 
 	const LLUUID idSession = floaterp->getKey();
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2)
-	if (idSession.isNull())
-	{
-		// Re-insert the nearby chat floater at the start
-		insertion_point = LLTabContainer::START;
-	}
-// [/SL:KB]
 
 	// Add the floater
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
