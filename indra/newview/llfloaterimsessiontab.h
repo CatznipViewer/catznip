@@ -95,7 +95,7 @@ public:
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
-	/*virtual*/ void setVisible(BOOL visible);
+//	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setFocus(BOOL focus);
 	
 	// Handle the left hand participant list widgets

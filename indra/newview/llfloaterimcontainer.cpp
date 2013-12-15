@@ -660,19 +660,28 @@ void LLFloaterIMContainerView::returnFloaterToHost()
 //}
 
 void LLFloaterIMContainerView::setVisible(BOOL visible)
-{	LLFloaterIMNearbyChat* nearby_chat;
+{//	LLFloaterIMNearbyChat* nearby_chat;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-13-15 (Catznip-3.6)
+	LLFloaterIMNearbyChat* nearby_chat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
+// [/SL:KB]
 	if (visible)
 	{
 		// Make sure we have the Nearby Chat present when showing the conversation container
-		nearby_chat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
-		if (nearby_chat == NULL)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-13-15 (Catznip-3.6)
+		if (!nearby_chat)
 		{
-			// If not found, force the creation of the nearby chat conversation panel
-			// *TODO: find a way to move this to XML as a default panel or something like that
-			LLSD name("nearby_chat");
-			LLFloaterReg::toggleInstanceOrBringToFront(name);
-            selectConversationPair(LLUUID(NULL), false, false);
+			nearby_chat = LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
 		}
+// [/SL:KB]
+//		nearby_chat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
+//		if (nearby_chat == NULL)
+//		{
+//			// If not found, force the creation of the nearby chat conversation panel
+//			// *TODO: find a way to move this to XML as a default panel or something like that
+//			LLSD name("nearby_chat");
+//			LLFloaterReg::toggleInstanceOrBringToFront(name);
+//            selectConversationPair(LLUUID(NULL), false, false);
+//		}
 		flashConversationItemWidget(mSelectedSession,false);
 
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(mSelectedSession);
@@ -687,8 +696,11 @@ void LLFloaterIMContainerView::setVisible(BOOL visible)
 		}
 	}
 
-	nearby_chat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
-	if (nearby_chat)
+//	nearby_chat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
+//	if (nearby_chat)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-13-15 (Catznip-3.6)
+	if ( (nearby_chat) && (!nearby_chat->isHostAttached()) )
+// [/SL:KB]
 	{
 		LLFloaterIMSessionTab::addToHost(LLUUID());
 	}

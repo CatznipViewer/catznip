@@ -292,6 +292,21 @@ void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 
 	if(visible)
 	{
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-13-15 (Catznip-3.6)
+		// Two things can happen:
+		//   (1) user opens the conversations floater before opening us => addToHost() will be called and nearby chat will be embedded, or detached from the floater as need be
+		//   (2) user opens the nearby chat floater first => nearby chat will always be "detached" without a host until the user opens the conversations floater
+		//   => if we're opened first, attach us to the conversations floater and show it if need be
+		if (!isHostAttached())
+		{
+			addToHost(LLUUID());
+			if (getHost())
+			{
+				getHost()->setVisible(visible);
+			}
+		}
+// [/SL:KB]
+
 		removeScreenChat();
 	}
 }

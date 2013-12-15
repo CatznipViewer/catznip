@@ -149,40 +149,40 @@ LLFloaterIMSessionTab* LLFloaterIMSessionTab::getConversation(const LLUUID& uuid
 	return conv;
 };
 
-void LLFloaterIMSessionTab::setVisible(BOOL visible)
-{
-	if(visible && !mHasVisibleBeenInitialized)
-	{
-		mHasVisibleBeenInitialized = true;
-		if(!gAgentCamera.cameraMouselook())
-		{
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-			// Don't show the container if there are no hosted conversations
-			LLFloaterIMContainerBase* pContainer = LLFloaterIMContainerBase::findInstance();
-			if (pContainer)
-			{
-				// NOTE: LLFloaterIMContainerView will always contain the "Redock this conversation" tab panel so we need to check for cnt > 1
-				bool fTabbedContainer = LLFloaterIMContainerBase::isTabbedContainer();
-				if ( ((!fTabbedContainer) && (pContainer->getFloaterCount() > 1)) || ((fTabbedContainer) && (pContainer->getFloaterCount() > 0)) )
-				{
-					pContainer->setVisible(true);
-				}
-			}
-// [/SL:KB]
-//			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
-		}
-		LLFloaterIMSessionTab::addToHost(mSessionID);
-		LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(mSessionID);
-
-		if (conversp && conversp->isNearbyChat() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotCollapsed"))
-		{
-			onCollapseToLine(this);
-		}
-		mInputButtonPanel->setVisible(isTornOff());
-	}
-
-	LLTransientDockableFloater::setVisible(visible);
-}
+//void LLFloaterIMSessionTab::setVisible(BOOL visible)
+//{
+//	if(visible && !mHasVisibleBeenInitialized)
+//	{
+//		mHasVisibleBeenInitialized = true;
+//		if(!gAgentCamera.cameraMouselook())
+//		{
+//// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+//			// Don't show the container if there are no hosted conversations
+//			LLFloaterIMContainerBase* pContainer = LLFloaterIMContainerBase::findInstance();
+//			if (pContainer)
+//			{
+//				// NOTE: LLFloaterIMContainerView will always contain the "Redock this conversation" tab panel so we need to check for cnt > 1
+//				bool fTabbedContainer = LLFloaterIMContainerBase::isTabbedContainer();
+//				if ( ((!fTabbedContainer) && (pContainer->getFloaterCount() > 1)) || ((fTabbedContainer) && (pContainer->getFloaterCount() > 0)) )
+//				{
+//					pContainer->setVisible(true);
+//				}
+//			}
+//// [/SL:KB]
+////			LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->setVisible(true);
+//		}
+//		LLFloaterIMSessionTab::addToHost(mSessionID);
+//		LLFloaterIMSessionTab* conversp = LLFloaterIMSessionTab::getConversation(mSessionID);
+//
+//		if (conversp && conversp->isNearbyChat() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotCollapsed"))
+//		{
+//			onCollapseToLine(this);
+//		}
+//		mInputButtonPanel->setVisible(isTornOff());
+//	}
+//
+//	LLTransientDockableFloater::setVisible(visible);
+//}
 
 /*virtual*/
 void LLFloaterIMSessionTab::setFocus(BOOL focus)
@@ -237,6 +237,10 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 				// setting of the "potential" host for Nearby Chat: this sequence sets
 				// LLFloater::mHostHandle = NULL (a current host), but
 				// LLFloater::mLastHostHandle = floater_container (a "future" host)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-12-15 (Catznip-3.6)
+				// Code at the end of LLFloater::draw() will set "can tear off" to false if the nearby floater existed before this was called
+				conversp->setCanTearOff(TRUE);
+// [/SL:KB]
 				conversp->setHost(floater_container);
 				conversp->setHost(NULL);
 
