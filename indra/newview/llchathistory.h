@@ -31,6 +31,10 @@
 #include "lltextbox.h"
 #include "llviewerchat.h"
 
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+class LLHighlightEntry;
+// [/SL:KB]
+
 //Chat log widget allowing addition of a message as a widget 
 class LLChatHistory : public LLUICtrl
 {
@@ -120,10 +124,37 @@ class LLChatHistory : public LLUICtrl
 		void appendMessage(const LLChat& chat, const LLSD &args = LLSD(), const LLStyle::Params& input_append_params = LLStyle::Params());
 		/*virtual*/ void clear();
 
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		void showTypingIndicator(bool fShow, const LLUUID& idAgent = LLUUID::null);
+// [/SL:KB]
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	public:
+		enum EParseHighlightType
+		{ 
+			PARSE_NONE  = 0x00, 
+			PARSE_FLASH = 0x01, 
+			PARSE_SOUND = 0x02, 
+			PARSE_ALL   = 0xFF
+		};
+
+		U32  getParseHighlightTypeMask() const        { return mParseHighlightTypeMask; }
+		void setParseHighlightTypeMask(U32 type_mask) { mParseHighlightTypeMask = type_mask; }
+	protected:
+		void onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry);
+// [/SL:KB]
+
 	private:
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+		U32 mParseHighlightTypeMask;
+// [/SL:KB]
 		std::string mLastFromName;
 		LLUUID mLastFromID;
 		LLDate mLastMessageTime;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		bool   mShowTypingIndicator;
+		LLUUID mTypingFromID;
+// [/SL:KB]
 		bool mIsLastMessageFromLog;
 		bool mNotifyAboutUnreadMsg;
 		//std::string mLastMessageTimeStr;

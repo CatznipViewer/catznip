@@ -353,6 +353,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mChatHistory = getChild<LLChatHistory>("chat_history");
 
 	mInputEditor = getChild<LLChatEntry>("chat_editor");
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+	if (!gSavedSettings.getBOOL("ChatMultiLine"))
+		mInputEditor->enableSingleLineMode(true);
+// [/SL:KB]
 
 	mChatLayoutPanel = getChild<LLLayoutPanel>("chat_layout_panel");
 	mInputPanels = getChild<LLLayoutStack>("input_panels");
@@ -500,6 +504,19 @@ void LLFloaterIMSessionTab::draw()
 	LLTransientDockableFloater::draw();
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2)
+BOOL LLFloaterIMSessionTab::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
+{
+	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mInputEditor->hasFocus()) )
+	{
+		// Give focus to the line editor and let it handle the character
+		mInputEditor->setFocus(TRUE);
+		return mInputEditor->handleUnicodeChar(uni_char, called_from_parent);
+	}
+	return LLTransientDockableFloater::handleUnicodeChar(uni_char, called_from_parent);
+}
+// [/SL:KB]
+ 
 void LLFloaterIMSessionTab::enableDisableCallBtn()
 {
     mVoiceButton->setEnabled(
@@ -553,6 +570,10 @@ std::string LLFloaterIMSessionTab::appendTime()
 	utc_time = time_corrected();
 	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
 		+LLTrans::getString("TimeMin")+"]";
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
+// [/SL:KB]
 
 	LLSD substitution;
 
