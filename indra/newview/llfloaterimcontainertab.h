@@ -32,6 +32,9 @@ public:
 	 */
 public:
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	/*virtual*/ BOOL postBuild();
+// [/SL:KB]
 	/*virtual*/ void setVisible(BOOL visible);
 
 	/*virtual*/ const LLUUID& getSelectedSession() const;
@@ -43,6 +46,11 @@ public:
 	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const;
 	/*virtual*/ const LLConversationSort& getSortOrder() const;
 	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+protected:
+	void onIMTabRearrange(S32 tab_index, LLPanel* tab_panel);
+// [/SL:KB]
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

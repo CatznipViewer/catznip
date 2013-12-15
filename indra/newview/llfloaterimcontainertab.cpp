@@ -17,6 +17,11 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+#include "llchiclet.h"
+#include "llchicletbar.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llfloaterimcontainertab.h"
 #include "llfloaterimsession.h"
 #include "llfloaterreg.h"
@@ -33,6 +38,21 @@ LLFloaterIMContainerTab::LLFloaterIMContainerTab(const LLSD& seed, const Params&
 LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
 {
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+BOOL LLFloaterIMContainerTab::postBuild()
+{
+	BOOL fRet = LLFloaterIMContainerBase::postBuild();
+
+	if (gSavedSettings.getBOOL("RearrangeIMTabs"))
+	{
+		mTabContainer->setAllowRearrange(true);
+		mTabContainer->setRearrangeCallback(boost::bind(&LLFloaterIMContainerTab::onIMTabRearrange, this, _1, _2));
+	}
+
+	return fRet;
+}
+// [/SL:KB]
 
 void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point)
 {
@@ -152,5 +172,40 @@ const LLConversationSort& LLFloaterIMContainerTab::getSortOrder() const
 void LLFloaterIMContainerTab::setTimeNow(const LLUUID& session_id, const LLUUID& participant_id)
 {
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-23 (Catznip-3.3)
+void LLFloaterIMContainerTab::onIMTabRearrange(S32 tab_index, LLPanel* tab_panel)
+{
+	LLFloaterIMSession* pFloater = dynamic_cast<LLFloaterIMSession*>(tab_panel);
+	if (!pFloater)
+		return;
+
+	if (LLChicletBar::instanceExists())
+	{
+		LLChicletPanel* pChicletPanel = LLChicletBar::instance().getChicletPanel();
+		LLIMChiclet* pChiclet = pChicletPanel->findChiclet<LLIMChiclet>(pFloater->getKey());
+		if (!pChiclet)
+			return;
+
+		if ( (tab_index > mTabContainer->getNumLockedTabs()) && (tab_index < mTabContainer->getTabCount() - 1) )
+		{
+			// Look for the first IM session to the left of this one
+			while (--tab_index >= mTabContainer->getNumLockedTabs())
+			{
+				LLFloaterIMSession* pPrevFloater = dynamic_cast<LLFloaterIMSession*>(mTabContainer->getPanelByIndex(tab_index));
+				if (pPrevFloater)
+				{
+					pChicletPanel->setChicletIndex(pChiclet, LLChicletPanel::RIGHT_OF_SESSION, pPrevFloater->getKey().asUUID());
+					break;
+				}
+			}
+		}
+		else
+		{
+			pChicletPanel->setChicletIndex(pChiclet, (tab_index <= mTabContainer->getNumLockedTabs()) ? LLChicletPanel::START : LLChicletPanel::END);
+		}
+	}
+}
+// [/SL:KB]
 
 // EOF
