@@ -163,6 +163,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
 	mCommitOnSelectionChange(false),
 	mSelectionChanged(false),
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	mItemRemoved(false),
+// [/SL:KB]
 	mNeedsScroll(false),
 	mCanSelect(true),
 	mColumnsDirty(false),
@@ -171,6 +174,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mOnDoubleClickCallback( NULL ),
 	mOnMaximumSelectCallback( NULL ),
 	mOnSortChangedCallback( NULL ),
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	mOnUserRemoveCallback(NULL),
+// [/SL:KB]
 	mHighlightedItem(-1),
 	mBorder(NULL),
 	mSortCallback(NULL),
@@ -1521,6 +1527,14 @@ void LLScrollListCtrl::drawItems()
 
 				item->draw(item_rect, fg_color % alpha, bg_color% alpha, highlight_color % alpha, mColumnPadding);
 
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+				if (item->getUserRemovable())
+				{
+					if (mRemoveIcon.isNull())
+						mRemoveIcon = LLUI::getUIImage("Icon_Close_Foreground");
+					mRemoveIcon->draw(item_rect.mRight - mRemoveIcon->getWidth() - 5, item_rect.mTop - 2 - mLineHeight);
+				}
+// [/SL:KB]
 				cur_y -= mLineHeight;
 			}
 		}
@@ -1767,25 +1781,33 @@ BOOL LLScrollListCtrl::handleMouseDown(S32 x, S32 y, MASK mask)
 
 BOOL LLScrollListCtrl::handleMouseUp(S32 x, S32 y, MASK mask)
 {	
-	if (hasMouseCapture())
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	if (!mItemRemoved)
 	{
-		// release mouse capture immediately so 
-		// scroll to show selected logic will work
-		gFocusMgr.setMouseCapture(NULL);
-		if(mask == MASK_NONE)
+// [/SL:KB]
+		if (hasMouseCapture())
 		{
-			selectItemAt(x, y, mask);
-			mNeedsScroll = true;
+			// release mouse capture immediately so 
+			// scroll to show selected logic will work
+			gFocusMgr.setMouseCapture(NULL);
+			if(mask == MASK_NONE)
+			{
+				selectItemAt(x, y, mask);
+				mNeedsScroll = true;
+			}
 		}
-	}
 
-	// always commit when mouse operation is completed inside list
-	if (mItemListRect.pointInRect(x,y))
-	{
-		mDirty = mDirty || mSelectionChanged;
-		mSelectionChanged = false;
-		onCommit();
+		// always commit when mouse operation is completed inside list
+		if (mItemListRect.pointInRect(x,y))
+		{
+			mDirty = mDirty || mSelectionChanged;
+			mSelectionChanged = false;
+			onCommit();
+		}
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
 	}
+	mItemRemoved = false;
+// [/SL:KB]
 
 	return LLUICtrl::handleMouseUp(x, y, mask);
 }
@@ -1910,6 +1932,31 @@ BOOL LLScrollListCtrl::handleClick(S32 x, S32 y, MASK mask)
 	// which row was clicked on?
 	LLScrollListItem* hit_item = hitItem(x, y);
 	if (!hit_item) return FALSE;
+
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	// Check if the user hit the user-remove area
+	if (hit_item->getUserRemovable())
+	{
+		S32 dX = mItemListRect.mRight - x - 5;
+		if ( (mRemoveIcon) && (dX >= 0) && (dX <= mRemoveIcon->getWidth()) )
+		{
+			if ( (!mOnUserRemoveCallback) || (mOnUserRemoveCallback(hit_item)) )
+			{
+				item_list::iterator it = std::find(mItemList.begin(), mItemList.end(), hit_item);
+				if (mItemList.end() != it)
+					mItemList.erase(it);
+				if (hit_item == mLastSelected)
+					mLastSelected = NULL;
+				delete hit_item;
+
+				dirtyColumns();
+			}
+
+			mItemRemoved = true;
+			return TRUE;
+		}
+	}
+// [/SL:KB]
 
 	// get appropriate cell from that row
 	S32 column_index = getColumnIndexFromOffset(x);

@@ -1474,77 +1474,194 @@ LLPointer<LLCredential> LLSecAPIBasicHandler::createCredential(const std::string
 }
 
 // Load a credential from the credential store, given the grid
-LLPointer<LLCredential> LLSecAPIBasicHandler::loadCredential(const std::string& grid)
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+LLPointer<LLCredential> LLSecAPIBasicHandler::loadCredential(const std::string& grid, const std::string& user_id)
 {
-	LLSD credential = getProtectedData("credential", grid);
+	const LLSD sdCredentials = getProtectedData("credentials", grid);
 	LLPointer<LLSecAPIBasicCredential> result = new LLSecAPIBasicCredential(grid);
-	if(credential.isMap() && 
-	   credential.has("identifier"))
+	if (sdCredentials.isArray())
 	{
-
-		LLSD identifier = credential["identifier"];
-		LLSD authenticator;
-		if (credential.has("authenticator"))
+		for (LLSD::array_const_iterator itCred = sdCredentials.beginArray(); itCred != sdCredentials.endArray(); ++itCred)
 		{
-			authenticator = credential["authenticator"];
-		}
-		result->setCredentialData(identifier, authenticator);
-	}
-	else
-	{
-		// credential was not in protected storage, so pull the credential
-		// from the legacy store.
-		std::string first_name = gSavedSettings.getString("FirstName");
-		std::string last_name = gSavedSettings.getString("LastName");
-		
-		if ((first_name != "") &&
-			(last_name != ""))
-		{
-			LLSD identifier = LLSD::emptyMap();
-			LLSD authenticator;
-			identifier["type"] = "agent";
-			identifier["first_name"] = first_name;
-			identifier["last_name"] = last_name;
-			
-			std::string legacy_password = _legacyLoadPassword();
-			if (legacy_password.length() > 0)
+			const LLSD& sdCredential = *itCred;
+			if ( (sdCredential.isMap()) && (sdCredential.has("identifier")) )
 			{
-				authenticator = LLSD::emptyMap();
-				authenticator["type"] = "hash";
-				authenticator["algorithm"] = "md5";
-				authenticator["secret"] = legacy_password;
+				const LLSD& sdIdentifier = sdCredential["identifier"];
+				if ( (user_id.empty()) || (LLSecAPIBasicCredential::userIDFromIdentifier(sdIdentifier) == user_id) )
+				{
+					LLSD sdAuthenticator;
+					if (sdCredential.has("authenticator"))
+						sdAuthenticator = sdCredential["authenticator"];
+					result->setCredentialData(sdIdentifier, sdAuthenticator);
+					break;
+				}
 			}
-			result->setCredentialData(identifier, authenticator);
-		}		
+		}
 	}
 	return result;
 }
 
+LLPointer<LLCredential> LLSecAPIBasicHandler::loadCredential(const std::string& grid, const LLSD& identifier)
+{
+	return loadCredential(grid, LLSecAPIBasicCredential::userIDFromIdentifier(identifier));
+}
+// [/SL:KB]
+//LLPointer<LLCredential> LLSecAPIBasicHandler::loadCredential(const std::string& grid)
+//{
+//	LLSD credential = getProtectedData("credential", grid);
+//	LLPointer<LLSecAPIBasicCredential> result = new LLSecAPIBasicCredential(grid);
+//	if(credential.isMap() && 
+//	   credential.has("identifier"))
+//	{
+//
+//		LLSD identifier = credential["identifier"];
+//		LLSD authenticator;
+//		if (credential.has("authenticator"))
+//		{
+//			authenticator = credential["authenticator"];
+//		}
+//		result->setCredentialData(identifier, authenticator);
+//	}
+//	else
+//	{
+//		// credential was not in protected storage, so pull the credential
+//		// from the legacy store.
+//		std::string first_name = gSavedSettings.getString("FirstName");
+//		std::string last_name = gSavedSettings.getString("LastName");
+//		
+//		if ((first_name != "") &&
+//			(last_name != ""))
+//		{
+//			LLSD identifier = LLSD::emptyMap();
+//			LLSD authenticator;
+//			identifier["type"] = "agent";
+//			identifier["first_name"] = first_name;
+//			identifier["last_name"] = last_name;
+//			
+//			std::string legacy_password = _legacyLoadPassword();
+//			if (legacy_password.length() > 0)
+//			{
+//				authenticator = LLSD::emptyMap();
+//				authenticator["type"] = "hash";
+//				authenticator["algorithm"] = "md5";
+//				authenticator["secret"] = legacy_password;
+//			}
+//			result->setCredentialData(identifier, authenticator);
+//		}		
+//	}
+//	return result;
+//}
+
 // Save the credential to the credential store.  Save the authenticator also if requested.
 // That feature is used to implement the 'remember password' functionality.
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 void LLSecAPIBasicHandler::saveCredential(LLPointer<LLCredential> cred, bool save_authenticator)
 {
-	LLSD credential = LLSD::emptyMap();
-	credential["identifier"] = cred->getIdentifier(); 
-	if (save_authenticator) 
+	LLSD sdCredentials = getProtectedData("credentials", cred->getGrid());
+	if (!sdCredentials.isArray())
 	{
-		credential["authenticator"] = cred->getAuthenticator();
+		sdCredentials = LLSD::emptyArray();
 	}
+
+	// Try and update the existing credential first if one exists
+	bool fFound = false;
+	for (LLSD::array_iterator itCred = sdCredentials.beginArray(); itCred != sdCredentials.endArray(); ++itCred)
+	{
+		LLSD& sdCredential = *itCred;
+		if ( (sdCredential.has("identifier")) && (LLSecAPIBasicCredential::userIDFromIdentifier(sdCredential["identifier"]) == cred->userID()) )
+		{
+			fFound = true;
+			sdCredential = cred->asLLSD(save_authenticator);
+			break;
+		}
+	}
+
+	// No existing stored credential found, add a new one
+	if (!fFound)
+	{
+		sdCredentials.append(cred->asLLSD(save_authenticator));
+	}
+
 	LL_DEBUGS("SECAPI") << "Saving Credential " << cred->getGrid() << ":" << cred->userID() << " " << save_authenticator << LL_ENDL;
-	setProtectedData("credential", cred->getGrid(), credential);
-	//*TODO: If we're saving Agni credentials, should we write the
-	// credentials to the legacy password.dat/etc?
+	setProtectedData("credentials", cred->getGrid(), sdCredentials);
+	_writeProtectedData();
+}
+// [/SL:KB]
+//void LLSecAPIBasicHandler::saveCredential(LLPointer<LLCredential> cred, bool save_authenticator)
+//{
+//	LLSD credential = LLSD::emptyMap();
+//	credential["identifier"] = cred->getIdentifier(); 
+//	if (save_authenticator) 
+//	{
+//		credential["authenticator"] = cred->getAuthenticator();
+//	}
+//	LL_DEBUGS("SECAPI") << "Saving Credential " << cred->getGrid() << ":" << cred->userID() << " " << save_authenticator << LL_ENDL;
+//	setProtectedData("credential", cred->getGrid(), credential);
+//	//*TODO: If we're saving Agni credentials, should we write the
+//	// credentials to the legacy password.dat/etc?
+//	_writeProtectedData();
+//}
+
+// Remove a credential from the credential store.
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+void LLSecAPIBasicHandler::deleteCredential(const std::string& grid, const LLSD& identifier)
+{
+	const std::string strUserId = LLSecAPIBasicCredential::userIDFromIdentifier(identifier);
+
+	LLSD sdCredentials = getProtectedData("credentials", grid);
+	if (sdCredentials.isArray())
+	{
+		for (LLSD::array_const_iterator itCred = sdCredentials.beginArray(); itCred != sdCredentials.endArray(); ++itCred)
+		{
+			const LLSD& sdCredential = *itCred;
+			if ( (sdCredential.has("identifier")) && (LLSecAPIBasicCredential::userIDFromIdentifier(sdCredential["identifier"]) == strUserId) )
+			{
+				sdCredentials.erase(sdCredentials.beginArray() - itCred);
+				break;
+			}
+		}
+
+		if (sdCredentials.size() > 0)
+			setProtectedData("credentials", grid, sdCredentials);
+		else
+			deleteProtectedData("credentials", grid);
+	}
 	_writeProtectedData();
 }
 
-// Remove a credential from the credential store.
 void LLSecAPIBasicHandler::deleteCredential(LLPointer<LLCredential> cred)
 {
-	LLSD undefVal;
-	deleteProtectedData("credential", cred->getGrid());
-	cred->setCredentialData(undefVal, undefVal);
-	_writeProtectedData();
+	deleteCredential(cred->getGrid(), cred->getIdentifier());
+	cred->setCredentialData(LLSD(), LLSD());
 }
+// [/SL:KB]
+//void LLSecAPIBasicHandler::deleteCredential(LLPointer<LLCredential> cred)
+//{
+//	LLSD undefVal;
+//	deleteProtectedData("credential", cred->getGrid());
+//	cred->setCredentialData(undefVal, undefVal);
+//	_writeProtectedData();
+//}
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+bool LLSecAPIBasicHandler::getCredentialIdentifierList(const std::string& grid, std::vector<LLSD>& identifiers)
+{
+	identifiers.clear();
+
+	const LLSD sdCredentials = getProtectedData("credentials", grid);
+	if (sdCredentials.isArray())
+	{
+		for (LLSD::array_const_iterator itCred = sdCredentials.beginArray(); itCred != sdCredentials.endArray(); ++itCred)
+		{
+			const LLSD& sdCredential = *itCred;
+			if ( (sdCredential.isMap()) && (sdCredential.has("identifier")) )
+				identifiers.push_back(sdCredential["identifier"]);
+		}
+	}
+
+	return !identifiers.empty();
+}
+// [/SL:KB]
 
 // load the legacy hash for agni, and decrypt it given the 
 // mac address
@@ -1574,26 +1691,75 @@ std::string LLSecAPIBasicHandler::_legacyLoadPassword()
 	return std::string((const char*)&buffer[0], buffer.size());
 }
 
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+std::string LLSecAPIBasicCredential::userIDFromIdentifier(const LLSD& sdIdentifier)
+{
+	if (!sdIdentifier.isMap())
+	{
+		return "(null)";
+	}
+	else if (sdIdentifier["type"].asString() == "agent")
+	{
+		return sdIdentifier["first_name"].asString() + "_" + sdIdentifier["last_name"].asString();
+	}
+	else if (sdIdentifier["type"].asString() == "account")
+	{
+		return sdIdentifier["account_name"].asString();
+	}
+	return "unknown";
+}
 
-// return an identifier for the user
+std::string LLSecAPIBasicCredential::userName() const
+{
+	return userIDFromIdentifier(mIdentifier);
+}
+
+std::string LLSecAPIBasicCredential::userNameFromIdentifier(const LLSD& sdIdentifier)
+{
+	if (!sdIdentifier.isMap())
+	{
+		return "(null)";
+	}
+	else if (sdIdentifier["type"].asString() == "agent")
+	{
+		const std::string strFirstName = sdIdentifier["first_name"].asString();
+		const std::string strLastName = sdIdentifier["last_name"].asString();
+	    if ( (!strLastName.empty()) && (strLastName != "Resident") )
+			return strFirstName + " " + strLastName;
+		return strFirstName;
+	}
+	else if (sdIdentifier["type"].asString() == "account")
+	{
+		return sdIdentifier["account_name"].asString();
+	}
+	return "unknown";
+}
+
 std::string LLSecAPIBasicCredential::userID() const
 {
-	if (!mIdentifier.isMap())
-	{
-		return mGrid + "(null)";
-	}
-	else if ((std::string)mIdentifier["type"] == "agent")
-	{
-		return  (std::string)mIdentifier["first_name"] + "_" + (std::string)mIdentifier["last_name"];
-	}
-	else if ((std::string)mIdentifier["type"] == "account")
-	{
-		return (std::string)mIdentifier["account_name"];
-	}
-
-	return "unknown";
-
+	return userIDFromIdentifier(mIdentifier);
 }
+// [/SL:KB]
+
+//// return an identifier for the user
+//std::string LLSecAPIBasicCredential::userID() const
+//{
+//	if (!mIdentifier.isMap())
+//	{
+//		return mGrid + "(null)";
+//	}
+//	else if ((std::string)mIdentifier["type"] == "agent")
+//	{
+//		return  (std::string)mIdentifier["first_name"] + "_" + (std::string)mIdentifier["last_name"];
+//	}
+//	else if ((std::string)mIdentifier["type"] == "account")
+//	{
+//		return (std::string)mIdentifier["account_name"];
+//	}
+//
+//	return "unknown";
+//
+//}
 
 // return a printable user identifier
 std::string LLSecAPIBasicCredential::asString() const

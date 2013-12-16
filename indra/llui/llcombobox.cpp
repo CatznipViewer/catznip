@@ -285,6 +285,16 @@ LLScrollListItem* LLComboBox::add(const std::string& name, LLSD value, EAddPosit
 	return item;
 }
 
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+LLScrollListItem* LLComboBox::addRemovable(const std::string& name, LLSD value, EAddPosition pos, BOOL enabled )
+{
+	LLScrollListItem* item = mList->addSimpleElement(name, pos, value);
+	if (item)
+		item->setUserRemovable(true);
+	return item;
+}
+// [/SL:KB]
+
 LLScrollListItem* LLComboBox::addSeparator(EAddPosition pos)
 {
 	return mList->addSeparator(pos);

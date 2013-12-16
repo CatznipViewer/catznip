@@ -210,8 +210,17 @@ class LLSecAPIBasicCredential : public LLCredential
 public:
 	LLSecAPIBasicCredential(const std::string& grid) : LLCredential(grid) {} 
 	virtual ~LLSecAPIBasicCredential() {}
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	static std::string userIDFromIdentifier(const LLSD& sdIdentifier);
+	static std::string userNameFromIdentifier(const LLSD& sdIdentifier);
+// [/SL:KB]
+
 	// return a value representing the user id, (could be guid, name, whatever)
 	virtual std::string userID() const;	
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual std::string userName() const;	
+// [/SL:KB]
 	
 	// printible string identifying the credential.
 	virtual std::string asString() const;
@@ -265,12 +274,23 @@ public:
 													 const LLSD& identifier, 
 													 const LLSD& authenticator);
 	
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid);
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const std::string& user_id);
+	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const LLSD& identifier);
+// [/SL:KB]
+//	virtual LLPointer<LLCredential> loadCredential(const std::string& grid);
 
 	virtual void saveCredential(LLPointer<LLCredential> cred, bool save_authenticator);
 	
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual void deleteCredential(const std::string& grid, const LLSD& identifier);
+// [/SL:KB]
 	virtual void deleteCredential(LLPointer<LLCredential> cred);
-	
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual bool getCredentialIdentifierList(const std::string& grid, std::vector<LLSD>& identifiers);
+// [/SL:KB]
+
 protected:
 	void _readProtectedData();
 	void _writeProtectedData();
