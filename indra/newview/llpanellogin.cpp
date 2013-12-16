@@ -1187,17 +1187,39 @@ void LLPanelLogin::onSelectUser()
 
 bool LLPanelLogin::onRemoveUser(LLScrollListItem* itemp)
 {
-	// Clear the username and password field if we're about to remove the last user
-	LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
-	if (1 == pUserCombo->getItemCount())
+	// Cancel the removal and ask the user for confirmation
+	sInstance->getChild<LLComboBox>("username_combo")->hideList();
+	LLNotificationsUtil::add("RemoveLoginCredential", LLSD().with("NAME", itemp->getColumn(0)->getValue()), itemp->getValue(), boost::bind(&LLPanelLogin::onRemoveUserResponse, this, _1, _2));
+	return false;
+}
+
+void LLPanelLogin::onRemoveUserResponse(const LLSD& sdNotification, const LLSD& sdResponse)
+{
+	if (0 == LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse))
 	{
-		sInstance->getChild<LLComboBox>("username_combo")->clear();
-		sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);
+		const LLSD& sdIdentifier = sdNotification["payload"];
+		const std::string strUsername = LLSecAPIBasicCredential::userNameFromIdentifier(sdIdentifier);
+
+		LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
+
+		LLScrollListItem* pItem = pUserCombo->getListCtrl()->getItemByLabel(strUsername);
+		if (pItem)
+		{
+			S32 idxCur = pUserCombo->getListCtrl()->getItemIndex(pItem);
+			pUserCombo->remove(idxCur);
+			if (pUserCombo->getItemCount() > 0)
+			{
+				pUserCombo->selectNthItem(llmin(idxCur, pUserCombo->getItemCount() - 1));
+			}
+			else
+			{
+				pUserCombo->clear();
+				sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);
+			}
+		}
+
+		gSecAPIHandler->deleteCredential(LLGridManager::getInstance()->getGrid(), sdIdentifier);
 	}
-
-	gSecAPIHandler->deleteCredential(LLGridManager::getInstance()->getGrid(), itemp->getValue());
-
-	return true;
 }
 // [/SL:KB]
 

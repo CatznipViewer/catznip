@@ -101,6 +101,7 @@ private:
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 	void onSelectUser();
 	bool onRemoveUser(LLScrollListItem* itemp);
+	void onRemoveUserResponse(const LLSD& sdNotification, const LLSD& sdResponse);
 // [/SL:KB]
 	void onLocationSLURL();
 
