@@ -1709,7 +1709,7 @@ std::string LLSecAPIBasicCredential::userIDFromIdentifier(const LLSD& sdIdentifi
 	return "unknown";
 }
 
-std::string LLSecAPIBasicCredential::userName() const
+std::string LLSecAPIBasicCredential::userID() const
 {
 	return userIDFromIdentifier(mIdentifier);
 }
@@ -1735,9 +1735,9 @@ std::string LLSecAPIBasicCredential::userNameFromIdentifier(const LLSD& sdIdenti
 	return "unknown";
 }
 
-std::string LLSecAPIBasicCredential::userID() const
+std::string LLSecAPIBasicCredential::userName() const
 {
-	return userIDFromIdentifier(mIdentifier);
+	return userNameFromIdentifier(mIdentifier);
 }
 // [/SL:KB]
 
