@@ -945,6 +945,9 @@ void LLComboBox::updateSelection()
 	{
 		mTextEntry->setTentative(FALSE);
 		mLastSelectedIndex = mList->getFirstSelectedIndex();
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2013-12-16 (Catznip-3.6)
+		mTextEntry->setCursorToEnd(); // Cancels the "select all" done by selectItemByLabel()
+// [/SL:KB]
 	}
 	else if (mList->selectItemByPrefix(left_wstring, FALSE))
 	{
