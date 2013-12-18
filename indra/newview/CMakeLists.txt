@@ -255,6 +255,7 @@ set(viewer_SOURCE_FILES
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
     llfloateroutbox.cpp
+    llfloaterownedobjects.cpp
     llfloaterpathfindingcharacters.cpp
     llfloaterpathfindingconsole.cpp
     llfloaterpathfindinglinksets.cpp
@@ -843,6 +844,7 @@ set(viewer_HEADER_FILES
     llfloaterobjectweights.h
     llfloateropenobject.h
     llfloateroutbox.h
+    llfloaterownedobjects.h
     llfloaterpathfindingcharacters.h
     llfloaterpathfindingconsole.h
     llfloaterpathfindinglinksets.h

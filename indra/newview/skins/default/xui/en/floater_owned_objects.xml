@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_resize="true"
+ height="370"
+ width="800"
+ min_height="370"
+ min_width="625"
+ layout="topleft"
+ name="floater_owned_objects"
+ reuse_instance="true"
+ save_rect="false"
+ single_instance="true"
+ title="My Objects">
+  <floater.string name="messaging_initial"></floater.string>
+  <floater.string name="messaging_get_inprogress">Querying for objects ...</floater.string>
+  <floater.string name="messaging_get_error">Error detected while querying for objects.</floater.string>
+  <floater.string name="messaging_set_inprogress"></floater.string>
+  <floater.string name="messaging_set_error"></floater.string>
+  <floater.string name="messaging_complete_none_found">No objects found..</floater.string>
+  <floater.string name="messaging_complete_available">[NUM_SELECTED] objects selected out of [NUM_TOTAL].</floater.string>
+  <floater.string name="messaging_not_enabled">This region doesn't support the object query cap.</floater.string>
+
+  <scroll_list
+   column_padding="0"
+   draw_heading="true"
+   follows="all"
+   height="135"
+   layout="topleft"
+   left="10"
+   multi_select="true"
+   name="objects_scroll_list"
+   right="-10"
+   top_pad="3"
+   tab_stop="false">
+    <scroll_list.columns
+     label="Name (root prim)"
+     name="name"
+     dynamic_width="true" />
+    <scroll_list.columns
+     label="Description"
+     name="description"
+     width="200" />
+    <scroll_list.columns
+     label="LI"
+     name="land_impact"
+     width="55" />
+    <scroll_list.columns
+     label="Distance"
+     name="dist_from_you"
+     width="65" />
+  </scroll_list>
+
+  <button
+   follows="left|bottom"
+   height="21"
+   label="Teleport"
+   layout="topleft"
+   left="10"
+   name="teleport_me_to_object"
+   top_pad="5"
+   width="90"/>
+  <button
+   follows="left|bottom"
+   height="21"
+   label="Take"
+   layout="topleft"
+   left_pad="3"
+   name="take_objects"
+   top_delta="0"
+   width="90"/>
+  <button
+   follows="left|bottom"
+   height="21"
+   label="Take copy"
+   layout="topleft"
+   left_delta="0"
+   name="take_copy_objects"
+   top_delta="0"
+   visible="false"
+   width="90"/>
+  <button
+   follows="left|bottom"
+   height="21"
+   label="Return"
+   layout="topleft"
+   left_pad="3"
+   name="return_objects"
+   top_delta="0"
+   width="90"/>
+  <button
+   follows="left|bottom"
+   height="21"
+   label="Delete"
+   layout="topleft"
+   left_pad="3"
+   name="delete_objects"
+   top_delta="0"
+   width="90"/>
+   
+  <button
+   follows="right|bottom"
+   height="21"
+   image_overlay="Refresh_Off"
+   layout="topleft"
+   right="-216"
+   name="refresh_objects_list"
+   tool_tip="Refresh the object list"
+   top_delta="0"
+   width="23" />
+  <button
+   follows="right|bottom"
+   height="21"
+   label="Select all"
+   layout="topleft"
+   left_pad="3"
+   name="select_all_objects"
+   top_delta="0"
+   width="100" />
+  <button
+   follows="right|bottom"
+   height="21"
+   label="Select none"
+   layout="topleft"
+   left_pad="3"
+   name="select_none_objects"
+   top_delta="0"
+   width="100" />
+
+  <check_box
+   follows="left|bottom"
+   height="19"
+   label="Show beacon"
+   layout="topleft"
+   name="show_beacon"
+   left="10"
+   top_pad="3"
+   width="90" />
+  <check_box
+   follows="left|bottom"
+   height="19"
+   label="Show only objects on the current parcel"
+   layout="topleft"
+   name="show_agent_parcel"
+   left="10"
+   top_pad="0"
+   width="90" />
+
+  <view_border
+   bevel_style="none"
+   follows="left|bottom|right"
+   height="0"
+   layout="topleft"
+   name="horiz_separator"
+   top_pad="5"
+   left="15"
+   right="-15" />
+
+  <check_box
+   follows="left|bottom"
+   height="19"
+   label="Filter objects"
+   layout="topleft"
+   name="filter_objects"
+   left="10"
+   top_pad="5"
+   width="90" />
+
+  <panel
+   follows="left|bottom"
+   height="100"
+   layout="topleft"
+   left="1"
+   name="filter_panel"
+   right="-1"
+   >
+    <text
+     height="13"
+     length="1"
+     enabled="false"
+     follows="left|bottom"
+     layout="topleft"
+     left="40"
+     text_color="LabelTextColor"
+     top_pad="5"
+     type="string"
+     use_ellipses="false"
+     width="100"
+     word_wrap="false">
+      Name contains :
+    </text>
+    <line_editor
+     border_style="line"
+     border_thickness="1"
+     enabled="false"
+     follows="left|bottom"
+     height="20"
+     max_length_chars="255"
+     name="filter_by_name"
+     layout="topleft"
+     left_pad="0"
+     top_delta="-3"
+     width="200" />
+  
+    <text
+     enabled="false"
+     follows="left|bottom"
+     height="13"
+     layout="topleft"
+     left="40"
+     length="1"
+     text_color="LabelTextColor"
+     top_pad="8"
+     type="string"
+     use_ellipses="false"
+     width="100"
+     word_wrap="false">
+      Description :
+    </text>
+    <line_editor
+     border_style="line"
+     border_thickness="1"
+     enabled="false"
+     follows="left|bottom"
+     height="20"
+     max_length_chars="255"
+     name="filter_by_description"
+     layout="topleft"
+     left_pad="0"
+     top_delta="-3"
+     width="200" />
+  
+    <check_box
+     enabled="false"
+     follows="left|bottom"
+     height="19"
+     label="Height between"
+     layout="topleft"
+     name="filter_height"
+     left="40"
+     top_pad="5"
+     width="100" />
+    <spinner
+     decimal_digits="0"
+     enabled="false"
+     follows="left|bottom"
+     height="23"
+     increment="32"
+     initial_value="0"
+     layout="topleft"
+     left_pad="10"
+     max_val="4096"
+     name="filter_height_min"
+     top_delta="0"
+     width="64" />
+    <text
+     enabled="false"
+     follows="left|bottom"
+     height="19"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     text_color="LabelTextColor"
+     top_delta="3"
+     type="string"
+     use_ellipses="false"
+     width="20"
+     word_wrap="false">
+      and
+    </text>
+    <spinner
+     enabled="false"
+     decimal_digits="0"
+     follows="left|bottom"
+     height="23"
+     increment="32"
+     initial_value="4096"
+     layout="topleft"
+     left_pad="10"
+     max_val="4096"
+     name="filter_height_max"
+     top_delta="-3"
+     width="64" />
+  
+    <button
+     enabled="false"
+     follows="left|bottom"
+     height="21"
+     label="Apply"
+     layout="topleft"
+     left="40"
+     name="apply_filters"
+     top_pad="3"
+     width="73"/>
+    <button
+     enabled="false"
+     follows="left|bottom"
+     height="21"
+     label="Clear"
+     layout="topleft"
+     name="clear_filters"
+     top_pad="-21"
+     left_pad="8"
+     width="73"/>
+  </panel>
+
+  <view_border
+   bevel_style="none"
+   follows="left|bottom|right"
+   height="0"
+   layout="topleft"
+   name="horiz_separator2"
+   top_pad="5"
+   left="15"
+   right="-15" />
+
+  <text
+   follows="left|bottom|right"
+   height="13"
+   layout="topleft"
+   length="1"
+   name="messaging_status"
+   text_color="LabelTextColor"
+   top_pad="8"
+   type="string"
+   use_ellipses="false"
+   word_wrap="false"
+   width="679">
+    Status :
+  </text>
+
+</floater>
