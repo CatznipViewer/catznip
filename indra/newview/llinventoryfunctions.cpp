@@ -156,13 +156,31 @@ void copy_inventory_category(LLInventoryModel* model,
 	for (LLInventoryModel::item_array_t::iterator iter = item_array_copy.begin(); iter != item_array_copy.end(); iter++)
 	{
 		LLInventoryItem* item = *iter;
-		copy_inventory_item(
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		if (!item->getIsLinkType())
+		{
+// [/SL:KB]
+			copy_inventory_item(
 							gAgent.getID(),
 							item->getPermissions().getOwner(),
 							item->getUUID(),
 							new_cat_uuid,
 							std::string(),
 							LLPointer<LLInventoryCallback>(NULL));
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		}
+		else
+		{
+			link_inventory_item(
+				gAgent.getID(),
+				item->getLinkedUUID(),
+				new_cat_uuid,
+				item->getName(),
+				item->getActualDescription(),
+				item->getActualType(),
+				LLPointer<LLInventoryCallback>(NULL));
+		}
+// [/SL:KB]
 	}
 	
 	// Copy all the folders
