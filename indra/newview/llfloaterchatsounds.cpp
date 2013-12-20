@@ -20,6 +20,9 @@
 #include "llfloaterchatsounds.h"
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
+#include "llsdserialize.h"
+#include "llviewerchat.h"
+#include "llviewercontrol.h"
 #include "llviewerinventory.h"
 
 // ============================================================================
@@ -29,6 +32,18 @@
 LLFloaterChatSounds::LLFloaterChatSounds(const LLSD& sdKey)
 	: LLFloater(sdKey)
 {
+	std::vector<std::string> strFiles = gDirUtilp->findSkinnedFilenames(LLDir::XUI, "sounds.xml", LLDir::ALL_SKINS);
+	if (!strFiles.empty())
+	{
+		llifstream fileStream(strFiles.front(), std::ios::binary);
+		if (fileStream.is_open())
+		{
+			LLSDSerialize::fromXMLDocument(m_sdSounds, fileStream);
+			fileStream.close();
+		}
+	}
+
+	mCommitCallbackRegistrar.add("InitSoundsCombo", boost::bind(&LLFloaterChatSounds::onInitSoundsCombo, this, _1, _2));
 }
 
 LLFloaterChatSounds::~LLFloaterChatSounds()
@@ -53,31 +68,37 @@ BOOL LLFloaterChatSounds::postBuild(void)
 	findChild<LLSoundDropTarget>("drop_im_group")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pIMGroupSound));
 	findChild<LLButton>("preview_sound_im_group")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pIMGroupSound));
 
-	LLComboBox* pChatNearbySound = findChild<LLComboBox>("sound_chat_nearby");
-	findChild<LLSoundDropTarget>("drop_chat_nearby")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pChatNearbySound));
-	findChild<LLButton>("preview_sound_chat_nearby")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pChatNearbySound));
-
-	LLComboBox* pChatObjectSound = findChild<LLComboBox>("sound_chat_object");
-	findChild<LLSoundDropTarget>("drop_chat_object")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pChatObjectSound));
-	findChild<LLButton>("preview_sound_chat_object")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pChatObjectSound));
-
-	LLComboBox* pConversationStartSound = findChild<LLComboBox>("sound_new_conversation");
-	findChild<LLSoundDropTarget>("drop_new_conversation")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pConversationStartSound));
-	findChild<LLButton>("preview_sound_new_conversation")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pConversationStartSound));
-
-	LLComboBox* pVoiceCallSound = findChild<LLComboBox>("sound_voice_call");
-	findChild<LLSoundDropTarget>("drop_voice_call")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pVoiceCallSound));
-	findChild<LLButton>("preview_sound_voice_call")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pVoiceCallSound));
-
-	LLComboBox* pTeleportOfferSound = findChild<LLComboBox>("sound_teleport_offer");
-	findChild<LLSoundDropTarget>("drop_teleport_offer")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pTeleportOfferSound));
-	findChild<LLButton>("preview_sound_teleport_offer")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pTeleportOfferSound));
-
-	LLComboBox* pInventoryOfferSound = findChild<LLComboBox>("sound_inventory_offer");
-	findChild<LLSoundDropTarget>("drop_inventory_offer")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pInventoryOfferSound));
-	findChild<LLButton>("preview_sound_inventory_offer")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pInventoryOfferSound));
-
 	return TRUE;
+}
+
+LLSD LLFloaterChatSounds::getSelectedSound(LLComboBox* pCombo)
+{
+	if (pCombo)
+	{
+		const LLSD& sdValue = pCombo->getSelectedValue();
+		if (sdValue.isString())
+		{
+			// There are three possibilities:
+			//   * i|<uuid> => inventory item specified by UUID
+			//   * a|<uuid> => sound identified by asset UUID
+			//   * <other>  => sound identified by string name
+			// (The reason for this hackery is that selectByValue will use LLSD::asString to select by value)
+			const std::string strValue = sdValue.asString();
+			if ( (strValue.length() > 2) && ('|' == strValue[1]) )
+			{
+				const LLUUID idSound(strValue.substr(2));
+				if ('a' == strValue[0])
+					return LLSD().with("type", 0).with("asset_id", idSound);
+				else if ('i' == strValue[0])
+					return LLSD().with("type", 1).with("item_id", idSound);
+			}
+			else 
+			{
+				return sdValue;
+			}
+		}
+	}
+	return LLSD();
 }
 
 void LLFloaterChatSounds::onDropSound(const LLUUID& idSound, LLComboBox* pCombo)
@@ -85,40 +106,64 @@ void LLFloaterChatSounds::onDropSound(const LLUUID& idSound, LLComboBox* pCombo)
 	const LLInventoryItem* pItem = gInventory.getItem(idSound);
 	if ( (pItem) && (pCombo) && (pCombo->getEnabled()) )
 	{
-		if (!pCombo->selectByValue(pItem->getUUID()))
+		const std::string& strValue = "i|" + pItem->getUUID().asString();
+		if (!pCombo->selectByValue(strValue))
 		{
-			LLScrollListItem* pNewItem = pCombo->add(pItem->getName(), pItem->getUUID());
+			LLScrollListItem* pNewItem = pCombo->add(pItem->getName(), strValue);
 			if (pNewItem)
 			{
 				LLScrollListText* pCell = dynamic_cast<LLScrollListText*>(pNewItem->getColumn(0));
 				if (pCell)
-				{
 					pCell->setIcon(LLInventoryIcon::getIconName(LLInventoryType::ICONNAME_SOUND));
-				}
 			}
-			pCombo->selectByValue(pItem->getUUID());
+			pCombo->selectByValue(strValue);
 		}
 	}
+}
+
+void LLFloaterChatSounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam)
+{
+	LLComboBox* pCombo = dynamic_cast<LLComboBox*>(pCtrl);
+	if (!pCombo)
+		return;
+
+	//
+	// Save the debug setting this combobox controls and add it as the default option
+	//
+	LLControlVariablePtr pControl = gSavedSettings.getControl(sdParam.asString());
+	if (pControl.isNull())
+		return;
+
+	m_SettingsMap[pCombo->getName()] = pControl->getName();
+	pCombo->add("Default", pControl->getDefault().asString());
+
+	//
+	// Add sounds from sounds.xml
+	//
+	if ( (m_sdSounds.isMap()) && (m_sdSounds.size() > 0) )
+	{
+		pCombo->addSeparator();
+		for (LLSD::map_const_iterator itSound = m_sdSounds.beginMap(); itSound != m_sdSounds.endMap(); ++itSound)
+		{
+			const LLSD& sdSound = itSound->second;
+			if (!sdSound.has("asset_uuid"))
+				continue;
+			pCombo->add(itSound->first, "a|" + sdSound["asset_uuid"].asString());
+		}
+	}
+
+	//
+	// Add the custom option
+	//
+	pCombo->addSeparator();
+	pCombo->add("Custom (Drag and drop sound here)", pControl->getDefault().asString());
 }
 
 void LLFloaterChatSounds::onPreviewSound(LLComboBox* pCombo)
 {
 	if (!pCombo)
 		return;
-
-	const LLSD& sdValue = pCombo->getSelectedValue();
-	if (sdValue.isUUID())
-	{
-		LLViewerInventoryItem* pItem = gInventory.getItem(sdValue.asUUID());
-		if (pItem)
-		{
-			make_ui_sound(pItem->getAssetUUID());
-		}
-	}
-	else if (sdValue.isString())
-	{
-		make_ui_sound(sdValue.asString().c_str());
-	}
+	make_ui_sound(LLViewerChat::getUISoundFromLLSD(getSelectedSound(pCombo)));
 }
 
 // ============================================================================

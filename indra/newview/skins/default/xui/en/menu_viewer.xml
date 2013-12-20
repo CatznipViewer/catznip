@@ -285,6 +285,16 @@
              parameter="chat_alerts" />
         </menu_item_check>
         <menu_item_check
+         label="Chat Sounds..."
+         name="Chat Sounds">
+            <menu_item_check.on_check
+             function="Floater.Visible"
+             parameter="chat_sounds" />
+            <menu_item_check.on_click
+             function="Floater.Toggle"
+             parameter="chat_sounds" />
+        </menu_item_check>
+        <menu_item_check
          label="Speak"
          name="Speak">
             <menu_item_check.on_check

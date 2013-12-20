@@ -55,12 +55,9 @@
      name="sound_im_friend"
      top_delta="-2"
      width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventIMFriend" />
     </combo_box>
     <button
      enabled_control="PlaySoundFriendIM"
@@ -114,12 +111,9 @@
      name="sound_im_nonfriend"
      top_delta="-2"
      width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventIMNonFriend" />
     </combo_box>
     <button
      enabled_control="PlaySoundNonFriendIM"
@@ -173,12 +167,9 @@
      name="sound_im_conference"
      top_delta="-2"
      width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventIMConference" />
     </combo_box>
     <button
      enabled_control="PlaySoundConferenceIM"
@@ -232,12 +223,9 @@
      name="sound_im_group"
      top_delta="-2"
      width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventIMGroup" />
     </combo_box>
     <button
      enabled_control="PlaySoundGroupChatIM"
@@ -260,6 +248,7 @@
      top_delta="0"
      width="385" />
 
+<!--
     <button
      control_name="PlaySoundNearbyChatIM"
      follows="top|left"
@@ -627,5 +616,6 @@
      name="drop_inventory_offer"
      top_delta="0"
      width="385" />
+-->
 
 </floater>

@@ -36,6 +36,11 @@
 #include "llviewerregion.h"
 #include "llworld.h"
 #include "llinstantmessage.h" //SYSTEM_FROM
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+#include "llinventorymodel.h"
+#include "llui.h"
+#include "llviewerinventory.h"
+// [/SL:KB]
 
 // LLViewerChat
 LLViewerChat::font_change_signal_t LLViewerChat::sChatFontChangedSignal;
@@ -246,6 +251,56 @@ std::string LLViewerChat::getSenderSLURL(const LLChat& chat, const LLSD& args)
 
 	return LLStringUtil::null;
 }
+
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
+{
+	"UISndEventIMFriend",      // SND_IM_FRIEND
+	"UISndEventIMNonFriend",   // SND_IM_NONFRIEND
+	"UISndEventIMConference",  // SND_IM_CONFERENCE
+	"UISndEventIMGroup"        // SND_IM_GROUP
+};
+
+// static
+LLUUID LLViewerChat::getUISoundFromLLSD(const LLSD& sdParam)
+{
+	if (sdParam.isString())
+	{
+		// Value refers to a debug setting that stores the asset UUID (=viewer default)
+		return find_ui_sound(sdParam.asString().c_str());
+	}
+	else if ( (sdParam.isMap()) && (sdParam.has("type")) )
+	{
+		switch (sdParam["type"].asInteger())
+		{
+			case 0:
+				{
+					// Value refers to an asset UUID
+					return sdParam["asset_id"].asUUID();
+				}
+				break;
+			case 1:
+				{
+					// Value refers to an inventory item in the user's inventory
+					LLViewerInventoryItem* pItem = gInventory.getItem(sdParam["item_id"].asUUID());
+					return (pItem) ? pItem->getAssetUUID() : LLUUID();
+				}
+				break;
+			default:
+				break;
+		}
+	}
+	return LLUUID();
+}
+
+// static
+LLUUID LLViewerChat::getUISoundFromEvent(EChatEvent eEvent)
+{
+	if ( (eEvent >= SND_IM_FRIEND) && (eEvent < SND_COUNT) )
+		return getUISoundFromLLSD(gSavedSettings.getLLSD(SOUND_LOOKUP_SETTINGS[eEvent]));
+	return LLUUID();
+}
+// [/SL:KB]
 
 //static
 std::string LLViewerChat::getObjectImSLURL(const LLChat& chat, const LLSD& args)

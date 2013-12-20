@@ -27,16 +27,33 @@ class LLComboBox;
 class LLFloaterChatSounds : public LLFloater
 {
 	friend class LLFloaterReg;
-private:
+protected:
 	LLFloaterChatSounds(const LLSD& sdKey);
-public:
 	/*virtual*/ ~LLFloaterChatSounds();
 
+	/*
+	 * LLView overrides
+	 */
+public:
 	/*virtual*/ BOOL postBuild();
 
+	/*
+	 * Member functions/Event handlers
+	 */
 protected:
+	LLSD getSelectedSound(LLComboBox* pCombo);
 	void onDropSound(const LLUUID& idSound, LLComboBox* pCombo);
+	void onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam);
 	void onPreviewSound(LLComboBox* pCombo);
+
+	/*
+	 * Member variables
+	 */
+protected:
+	LLSD m_sdSounds;
+
+	typedef std::map<std::string, std::string> setttings_map_t;
+	setttings_map_t m_SettingsMap;
 };
 
 // ============================================================================

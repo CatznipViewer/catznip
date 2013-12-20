@@ -12775,6 +12775,50 @@
       <key>Value</key>
       <string>c80260ba-41fd-8a46-768a-6bf236360e3a</string>
     </map>
+    <key>UISndEventIMFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventIMNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a non-friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventIMConference</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a conference</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventIMGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a group</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
     <key>UISpinctrlBtnHeight</key>
     <map>
       <key>Comment</key>
