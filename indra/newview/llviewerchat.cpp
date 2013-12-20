@@ -262,42 +262,35 @@ std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
 };
 
 // static
-LLUUID LLViewerChat::getUISoundFromLLSD(const LLSD& sdParam)
+LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 {
-	if (sdParam.isString())
+	// There are three possibilities:
+	//   * i|<uuid> => inventory item specified by UUID
+	//   * a|<uuid> => sound identified by asset UUID
+	//   * <other>  => sound identified by string name
+	// (The reason for this hackery is that selectByValue will use LLSD::asString to select by value)
+	if ( (strSetting.length() > 2) && ('|' == strSetting[1]) )
 	{
-		// Value refers to a debug setting that stores the asset UUID (=viewer default)
-		return find_ui_sound(sdParam.asString().c_str());
-	}
-	else if ( (sdParam.isMap()) && (sdParam.has("type")) )
-	{
-		switch (sdParam["type"].asInteger())
+		const LLUUID idSound(strSetting.substr(2));
+		if ('a' == strSetting[0])
 		{
-			case 0:
-				{
-					// Value refers to an asset UUID
-					return sdParam["asset_id"].asUUID();
-				}
-				break;
-			case 1:
-				{
-					// Value refers to an inventory item in the user's inventory
-					LLViewerInventoryItem* pItem = gInventory.getItem(sdParam["item_id"].asUUID());
-					return (pItem) ? pItem->getAssetUUID() : LLUUID();
-				}
-				break;
-			default:
-				break;
+			return idSound;
 		}
+		else if ('i' == strSetting[0])
+		{
+			const LLViewerInventoryItem* pItem = gInventory.getItem(idSound);
+			return (pItem) ? pItem->getAssetUUID() : LLUUID();
+		}
+		return LLUUID();
 	}
-	return LLUUID();
+	return find_ui_sound(strSetting.c_str());
 }
 
 // static
 LLUUID LLViewerChat::getUISoundFromEvent(EChatEvent eEvent)
 {
 	if ( (eEvent >= SND_IM_FRIEND) && (eEvent < SND_COUNT) )
-		return getUISoundFromLLSD(gSavedSettings.getLLSD(SOUND_LOOKUP_SETTINGS[eEvent]));
+		return getUISoundFromSettingsString(gSavedSettings.getString(SOUND_LOOKUP_SETTINGS[eEvent]));
 	return LLUUID();
 }
 // [/SL:KB]

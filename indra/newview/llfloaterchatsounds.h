@@ -41,10 +41,11 @@ public:
 	 * Member functions/Event handlers
 	 */
 protected:
-	LLSD getSelectedSound(LLComboBox* pCombo);
+	void initComboCallbacks(const std::string& strComboName);
 	void onDropSound(const LLUUID& idSound, LLComboBox* pCombo);
 	void onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam);
 	void onPreviewSound(LLComboBox* pCombo);
+	void onSelectSound(const LLUICtrl* pCtrl);
 
 	/*
 	 * Member variables

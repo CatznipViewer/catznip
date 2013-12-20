@@ -57,8 +57,8 @@ public:
 		SND_COUNT,
 		SND_NONE = -1
 	};
-	static LLUUID getUISoundFromLLSD(const LLSD& sdParam);
 	static LLUUID getUISoundFromEvent(EChatEvent eEvent);
+	static LLUUID getUISoundFromSettingsString(const std::string& strSetting);
 // [/SL:KB]
 
 private:
