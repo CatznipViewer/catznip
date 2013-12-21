@@ -226,7 +226,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
         	user_preferences = gSavedSettings.getString("NotificationFriendIMOptions");
 			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
 			{
-				make_ui_sound("UISndNewIncomingIMSession");
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_FRIEND));
+// [/SL:KB]
+//				make_ui_sound("UISndNewIncomingIMSession");
 			}
         }
         else
@@ -234,7 +237,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
         	user_preferences = gSavedSettings.getString("NotificationNonFriendIMOptions");
 			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
 			{
-				make_ui_sound("UISndNewIncomingIMSession");
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_NONFRIEND));
+// [/SL:KB]
+//				make_ui_sound("UISndNewIncomingIMSession");
         }
     }
 	}
@@ -243,7 +249,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     	user_preferences = gSavedSettings.getString("NotificationConferenceIMOptions");
 		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
 		{
-			make_ui_sound("UISndNewIncomingIMSession");
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_CONFERENCE));
+// [/SL:KB]
+//			make_ui_sound("UISndNewIncomingIMSession");
     }
 	}
     else if(session->isGroupSessionType())
@@ -251,7 +260,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     	user_preferences = gSavedSettings.getString("NotificationGroupChatOptions");
 		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
 		{
-			make_ui_sound("UISndNewIncomingIMSession");
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_GROUP));
+// [/SL:KB]
+//			make_ui_sound("UISndNewIncomingIMSession");
 		}
     }
 
@@ -2757,7 +2769,26 @@ void LLIMMgr::addMessage(
         //Play sound for new conversations
 		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
         {
-            make_ui_sound("UISndNewIncomingIMSession");
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			// NOTE: if the PlayXXX debug setting is TRUE then the sound will play in notify_of_message instead
+			LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
+			if (session->isP2PSessionType())
+			{
+				if (LLAvatarTracker::instance().isBuddy(other_participant_id))
+					eEvent = (!gSavedSettings.getBOOL("PlaySoundFriendIM")) ? LLViewerChat::SND_IM_FRIEND : LLViewerChat::SND_NONE;
+				else
+					eEvent = (!gSavedSettings.getBOOL("PlaySoundNonFriendIM")) ? LLViewerChat::SND_IM_NONFRIEND : LLViewerChat::SND_NONE;
+			}
+			else if (session->isAdHocSessionType())
+			{
+				eEvent = (!gSavedSettings.getBOOL("PlaySoundConferenceIM")) ? LLViewerChat::SND_IM_CONFERENCE : LLViewerChat::SND_NONE;
+			}
+			else if(session->isGroupSessionType())
+			{
+				eEvent = (!gSavedSettings.getBOOL("PlaySoundGroupChatIM")) ? LLViewerChat::SND_IM_GROUP : LLViewerChat::SND_NONE;
+			}
+// [/SL:KB]
+//			make_ui_sound("UISndNewIncomingIMSession");
         }
 	}
 
