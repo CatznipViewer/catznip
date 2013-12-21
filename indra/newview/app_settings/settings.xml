@@ -12775,6 +12775,50 @@
       <key>Value</key>
       <string>c80260ba-41fd-8a46-768a-6bf236360e3a</string>
     </map>
+    <key>UISndEventConvFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New non-friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvConference</key>
+    <map>
+      <key>Comment</key>
+      <string>New conference conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>New group conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
     <key>UISndEventIMFriend</key>
     <map>
       <key>Comment</key>
@@ -12784,7 +12828,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>UISndNewIncomingIMSession</string>
+      <string/>
     </map>
     <key>UISndEventIMNonFriend</key>
     <map>
@@ -12795,7 +12839,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>UISndNewIncomingIMSession</string>
+      <string/>
     </map>
     <key>UISndEventIMConference</key>
     <map>
@@ -12806,7 +12850,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>UISndNewIncomingIMSession</string>
+      <string/>
     </map>
     <key>UISndEventIMGroup</key>
     <map>
@@ -12817,7 +12861,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>UISndNewIncomingIMSession</string>
+      <string/>
     </map>
     <key>UISpinctrlBtnHeight</key>
     <map>

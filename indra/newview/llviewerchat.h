@@ -50,6 +50,10 @@ public:
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
 	enum EChatEvent
 	{
+		SND_CONV_FRIEND = 0, // New friend conversation
+		SND_CONV_NONFRIEND,  // New non-friend conversation
+		SND_CONV_CONFERENCE, // New conference conversation
+		SND_CONV_GROUP,      // New group conversation
 		SND_IM_FRIEND,       // Incoming IM from a friend
 		SND_IM_NONFRIEND,    // Incoming IM from a non-friend
 		SND_IM_CONFERENCE,   // Incoming IM from a conference

@@ -255,10 +255,14 @@ std::string LLViewerChat::getSenderSLURL(const LLChat& chat, const LLSD& args)
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
 std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
 {
-	"UISndEventIMFriend",      // SND_IM_FRIEND
-	"UISndEventIMNonFriend",   // SND_IM_NONFRIEND
-	"UISndEventIMConference",  // SND_IM_CONFERENCE
-	"UISndEventIMGroup"        // SND_IM_GROUP
+	"UISndEventConvFriend",     // SND_CONV_FRIEND
+	"UISndEventConvNonFriend",  // SND_CONV_NONFRIEND
+	"UISndEventConvConference", // SND_CONV_CONFERENCE
+	"UISndEventConvGroup",      // SND_CONV_GROUP
+	"UISndEventIMFriend",       // SND_IM_FRIEND
+	"UISndEventIMNonFriend",    // SND_IM_NONFRIEND
+	"UISndEventIMConference",   // SND_IM_CONFERENCE
+	"UISndEventIMGroup"         // SND_IM_GROUP
 };
 
 // static
@@ -289,7 +293,7 @@ LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 // static
 LLUUID LLViewerChat::getUISoundFromEvent(EChatEvent eEvent)
 {
-	if ( (eEvent >= SND_IM_FRIEND) && (eEvent < SND_COUNT) )
+	if ( (eEvent >= SND_CONV_FRIEND) && (eEvent < SND_COUNT) )
 		return getUISoundFromSettingsString(gSavedSettings.getString(SOUND_LOOKUP_SETTINGS[eEvent]));
 	return LLUUID();
 }

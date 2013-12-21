@@ -52,10 +52,14 @@ LLFloaterChatSounds::~LLFloaterChatSounds()
 
 BOOL LLFloaterChatSounds::postBuild(void)
 {
-	initComboCallbacks("sound_im_friend");
-	initComboCallbacks("sound_im_nonfriend");
-	initComboCallbacks("sound_im_conference");
-	initComboCallbacks("sound_im_group");
+	initComboCallbacks("sound_friend_conv");
+	initComboCallbacks("sound_friend_im");
+	initComboCallbacks("sound_nonfriend_conv");
+	initComboCallbacks("sound_nonfriend_im");
+	initComboCallbacks("sound_conference_conv");
+	initComboCallbacks("sound_conference_im");
+	initComboCallbacks("sound_group_conv");
+	initComboCallbacks("sound_group_im");
 	return TRUE;
 }
 
@@ -128,7 +132,7 @@ void LLFloaterChatSounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam
 
 	// Add the custom option
 	pCombo->addSeparator();
-	pCombo->add("Custom (Drag and drop sound here)", pControl->getDefault().asString());
+	pCombo->add("Custom (Drop sound here)", pControl->getDefault().asString());
 }
 
 void LLFloaterChatSounds::onPreviewSound(LLComboBox* pCombo)

@@ -2767,29 +2767,32 @@ void LLIMMgr::addMessage(
 		}
 
         //Play sound for new conversations
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
-        {
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-			// NOTE: if the PlayXXX debug setting is TRUE then the sound will play in notify_of_message instead
+		if (!gAgent.isDoNotDisturb())
+		{
 			LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
 			if (session->isP2PSessionType())
 			{
 				if (LLAvatarTracker::instance().isBuddy(other_participant_id))
-					eEvent = (!gSavedSettings.getBOOL("PlaySoundFriendIM")) ? LLViewerChat::SND_IM_FRIEND : LLViewerChat::SND_NONE;
+					eEvent = (gSavedSettings.getBOOL("PlaySoundFriendIM")) ? LLViewerChat::SND_CONV_FRIEND : LLViewerChat::SND_NONE;
 				else
-					eEvent = (!gSavedSettings.getBOOL("PlaySoundNonFriendIM")) ? LLViewerChat::SND_IM_NONFRIEND : LLViewerChat::SND_NONE;
+					eEvent = (gSavedSettings.getBOOL("PlaySoundNonFriendIM")) ? LLViewerChat::SND_CONV_NONFRIEND : LLViewerChat::SND_NONE;
 			}
 			else if (session->isAdHocSessionType())
 			{
-				eEvent = (!gSavedSettings.getBOOL("PlaySoundConferenceIM")) ? LLViewerChat::SND_IM_CONFERENCE : LLViewerChat::SND_NONE;
+				eEvent = (gSavedSettings.getBOOL("PlaySoundConferenceIM")) ? LLViewerChat::SND_CONV_CONFERENCE : LLViewerChat::SND_NONE;
 			}
 			else if(session->isGroupSessionType())
 			{
-				eEvent = (!gSavedSettings.getBOOL("PlaySoundGroupChatIM")) ? LLViewerChat::SND_IM_GROUP : LLViewerChat::SND_NONE;
+				eEvent = (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) ? LLViewerChat::SND_CONV_GROUP : LLViewerChat::SND_NONE;
 			}
+			make_ui_sound(LLViewerChat::getUISoundFromEvent(eEvent));
+		}
 // [/SL:KB]
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
+//        {
 //			make_ui_sound("UISndNewIncomingIMSession");
-        }
+//        }
 	}
 
 	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat) && !skip_message)
