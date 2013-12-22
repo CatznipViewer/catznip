@@ -82,6 +82,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_friend_conv_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -114,6 +115,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_friend_im_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -170,6 +172,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_nonfriend_conv_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -202,6 +205,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_nonfriend_im_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -258,6 +262,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_conference_conv_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -290,6 +295,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_conference_im_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -346,6 +352,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_group_conv_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
@@ -378,6 +385,7 @@
      left_pad="1"
      top_delta="1"
      name="sound_group_im_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
