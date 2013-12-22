@@ -179,7 +179,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [/SL:KB]
 	LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::getConversation(session_id);
 	bool store_dnd_message = false; // flag storage of a dnd message
-	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-22 (Catznip-3.6)
+	bool is_session_focused = (gFocusMgr.getAppHasFocus()) && (session_floater->hasFocus());
+// [/SL:KB]
+//	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
 	if (!LLFloater::isVisible(im_box) || im_box->isMinimized())
 	{
 		conversations_floater_status = CLOSED;
@@ -224,47 +227,59 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
         if (LLAvatarTracker::instance().isBuddy(participant_id))
         {
         	user_preferences = gSavedSettings.getString("NotificationFriendIMOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
-			{
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && ((gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE)) )
+			{
 				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_FRIEND));
-// [/SL:KB]
-//				make_ui_sound("UISndNewIncomingIMSession");
 			}
+// [/SL:KB]
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
+//			{
+//				make_ui_sound("UISndNewIncomingIMSession");
+//			}
         }
         else
         {
         	user_preferences = gSavedSettings.getString("NotificationNonFriendIMOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
-			{
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE) )
+			{
 				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_NONFRIEND));
+			}
 // [/SL:KB]
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
+//			{
 //				make_ui_sound("UISndNewIncomingIMSession");
-        }
+//        }
     }
 	}
     else if(session->isAdHocSessionType())
     {
     	user_preferences = gSavedSettings.getString("NotificationConferenceIMOptions");
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
-		{
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE) )
+		{
 			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_CONFERENCE));
+		}
 // [/SL:KB]
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
+//		{
 //			make_ui_sound("UISndNewIncomingIMSession");
-    }
+//    }
 	}
     else if(session->isGroupSessionType())
     {
     	user_preferences = gSavedSettings.getString("NotificationGroupChatOptions");
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
-		{
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE) )
+		{
 			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_GROUP));
-// [/SL:KB]
-//			make_ui_sound("UISndNewIncomingIMSession");
 		}
+// [/SL:KB]
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
+//		{
+//			make_ui_sound("UISndNewIncomingIMSession");
+//		}
     }
 
     // actions:
