@@ -38,6 +38,7 @@
 #include "llinstantmessage.h" //SYSTEM_FROM
 // [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
 #include "llinventorymodel.h"
+#include "llinventoryobserver.h"
 #include "llui.h"
 #include "llviewerinventory.h"
 // [/SL:KB]
@@ -283,7 +284,16 @@ LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 		else if ('i' == strSetting[0])
 		{
 			const LLViewerInventoryItem* pItem = gInventory.getItem(idSound);
-			return (pItem) ? pItem->getAssetUUID() : LLUUID();
+			if (!pItem)
+			{
+				// NOTE: we're not hooking this up to a callback since there's no real way to tell how long it will take
+				//       so if the item isn't currently fetched, we'll likely miss the first play but manage the second
+				LLInventoryFetchItemsObserver* pItemFetch = new LLInventoryFetchItemsObserver(idSound);
+				pItemFetch->startFetch();
+				delete pItemFetch;
+				return LLUUID();
+			}
+			return pItem->getAssetUUID();
 		}
 		return LLUUID();
 	}
