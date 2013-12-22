@@ -7288,7 +7288,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNonFriendIM</key>
     <map>
@@ -7299,7 +7299,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundConferenceIM</key>
     <map>
@@ -7310,7 +7310,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundGroupChatIM</key>
     <map>
@@ -7321,7 +7321,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNearbyChatIM</key>
     <map>
