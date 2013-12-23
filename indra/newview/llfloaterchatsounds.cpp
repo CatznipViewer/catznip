@@ -52,24 +52,25 @@ LLFloaterChatSounds::~LLFloaterChatSounds()
 
 BOOL LLFloaterChatSounds::postBuild(void)
 {
-	initComboCallbacks("sound_friend_conv");
-	initComboCallbacks("sound_friend_im");
-	initComboCallbacks("sound_nonfriend_conv");
-	initComboCallbacks("sound_nonfriend_im");
-	initComboCallbacks("sound_conference_conv");
-	initComboCallbacks("sound_conference_im");
-	initComboCallbacks("sound_group_conv");
-	initComboCallbacks("sound_group_im");
+	const char* pstrComboNames[] =
+	{
+		"sound_friend_conv", "sound_friend_im",
+		"sound_nonfriend_conv", "sound_nonfriend_im",
+		"sound_conference_conv", "sound_conference_im",
+		"sound_group_conv", "sound_group_im"
+	};
+
+	for (int idxComboName = 0, cntComboName = sizeof(pstrComboNames) / sizeof(char*); idxComboName < cntComboName; idxComboName++)
+		initComboCallbacks(findChild<LLComboBox>(pstrComboNames[idxComboName]));
 	return TRUE;
 }
 
-void LLFloaterChatSounds::initComboCallbacks(const std::string& strComboName)
+void LLFloaterChatSounds::initComboCallbacks(LLComboBox* pCombo)
 {
-	LLComboBox* pCombo = findChild<LLComboBox>(strComboName);
 	pCombo->setCommitCallback(boost::bind(&LLFloaterChatSounds::onSelectSound, this, _1));
 	pCombo->getListControl()->setCommitOnSelectionChange(true);
-	findChild<LLButton>(strComboName + "_preview")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pCombo));
-	findChild<LLSoundDropTarget>(strComboName + "_drop")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pCombo));
+	findChild<LLButton>(pCombo->getName() + "_preview")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pCombo));
+	findChild<LLSoundDropTarget>(pCombo->getName() + "_drop")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pCombo));
 
 	// Select the current setting
 	setttings_map_t::const_iterator itSetting = m_SettingsMap.find(pCombo->getName());
