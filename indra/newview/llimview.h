@@ -30,6 +30,9 @@
 #include "../llui/lldockablefloater.h"
 #include "lleventtimer.h"
 #include "llinstantmessage.h"
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+#include "llstring.h"
+// [/SL:KB]
 
 #include "lllogchat.h"
 #include "llvoicechannel.h"
@@ -211,13 +214,21 @@ public:
 	 * and also saved into a file if log2file is specified.
 	 * It sends new message signal for each added message.
 	 */
-	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true,
+	                const std::string& time = LLStringUtil::null);
+// [/SL:KB]
+//	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
 
 	/**
 	 * Similar to addMessage(...) above but won't send a signal about a new message added
 	 */
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
 	LLIMModel::LLIMSession* addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
-		const std::string& utf8_text, bool log2file = true);
+		const std::string& utf8_text, bool log2file = true, const std::string& time = LLStringUtil::null);
+// [/SL:KB]
+//	LLIMModel::LLIMSession* addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//		const std::string& utf8_text, bool log2file = true);
 
 	/**
 	 * Add a system message to an IM Model
@@ -302,7 +313,10 @@ private:
 	/**
 	 * Add message to a list of message associated with session specified by session_id
 	 */
-	bool addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text);
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0.0a) | Added: Catznip-3.0.0a
+	bool addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time);
+// [/SL:KB]
+//	bool addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text);
 };
 
 class LLIMSessionObserver
