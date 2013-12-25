@@ -72,7 +72,10 @@ public:
 	static void getListOfTranscriptFiles(std::vector<std::string>& list);
 	static void getListOfTranscriptBackupFiles(std::vector<std::string>& list_of_transcriptions);
 
-	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+	static bool loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+// [/SL:KB]
+//	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
 	static void startChatHistoryThread(const std::string& file_name, const LLSD& load_params);
 
 	typedef boost::signals2::signal<void ()> save_history_signal_t;
