@@ -52,6 +52,9 @@ protected:
 	LLSD          m_PersistedData; // Persisted P2P IM sessions with unread messages
 	typedef std::map<LLUUID, LLSD> session_map_t;
 	session_map_t m_SessionLookup; // Active P2P IM sessions with unread messages
+
+	boost::signals2::connection m_NewMsgConn;
+	boost::signals2::connection m_NoUnreadMsgConn;
 };
 
 // ============================================================================

@@ -30,9 +30,6 @@
 #include "../llui/lldockablefloater.h"
 #include "lleventtimer.h"
 #include "llinstantmessage.h"
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
-#include "llstring.h"
-// [/SL:KB]
 
 #include "lllogchat.h"
 #include "llvoicechannel.h"

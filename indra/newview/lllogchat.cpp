@@ -334,18 +334,13 @@ void LLLogChat::saveHistory(const std::string& filename,
 }
 
 // static
-//void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 bool LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
-// [/SL:KB]
 {
 	if (file_name.empty())
 				{
 					LL_WARNS("LLLogChat::loadChatHistory") << "Session name is Empty!" << LL_ENDL;
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 					return false;
-// [/SL:KB]
-//					return ;
 				}
 
 				bool load_all_history = load_params.has("load_all_history") ? load_params["load_all_history"].asBoolean() : false;
@@ -356,48 +351,30 @@ bool LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& m
 					fptr = LLFile::fopen(LLLogChat::oldLogFileName(file_name), "r");/*Flawfinder: ignore*/
 					if (!fptr)
 					{
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 						return false;
-// [/SL:KB]
-//						return;						//No previous conversation with this name.
 					}
 				}
 
-//				char buffer[LOG_RECALL_SIZE];		/*Flawfinder: ignore*/
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 				const S32 recall_size = (load_params.has("recall_size")) ? load_params["recall_size"].asInteger() : LOG_RECALL_SIZE;
 				bool read_eof = false;
 
 				char* buffer = new char[recall_size];		/*Flawfinder: ignore*/
-// [/SL:KB]
 				char *bptr;
 				S32 len;
 				bool firstline = TRUE;
 
-//				if (load_all_history || fseek(fptr, (LOG_RECALL_SIZE - 1) * -1  , SEEK_END))
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 				if (load_all_history || fseek(fptr, (recall_size - 1) * -1  , SEEK_END))
-// [/SL:KB]
 				{	//We need to load the whole historyFile or it's smaller than recall size, so get it all.
 					firstline = FALSE;
 					if (fseek(fptr, 0, SEEK_SET))
 					{
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 						delete[] buffer;
 						fclose(fptr);
 						return false;
-// [/SL:KB]
-//						fclose(fptr);
-//						return;
 					}
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 					read_eof = true;
-// [/SL:KB]
 				}
-//			while (fgets(buffer, LOG_RECALL_SIZE, fptr)  && !feof(fptr))
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 				while (fgets(buffer, recall_size, fptr)  && !feof(fptr))
-// [/SL:KB]
 				{
 					len = strlen(buffer) - 1;		/*Flawfinder: ignore*/
 					for (bptr = (buffer + len); (*bptr == '\n' || *bptr == '\r') && bptr>buffer; bptr--)	*bptr='\0';
@@ -433,11 +410,82 @@ bool LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& m
 				}
 				fclose(fptr);
 
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 	delete[] buffer;
 	return read_eof;
-// [/SL:KB]
 }
+// [/SL:KB]
+//void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
+//{
+//	if (file_name.empty())
+//				{
+//					LL_WARNS("LLLogChat::loadChatHistory") << "Session name is Empty!" << LL_ENDL;
+//					return ;
+//				}
+//
+//				bool load_all_history = load_params.has("load_all_history") ? load_params["load_all_history"].asBoolean() : false;
+//
+//				LLFILE* fptr = LLFile::fopen(LLLogChat::makeLogFileName(file_name), "r");/*Flawfinder: ignore*/
+//				if (!fptr)
+//				{
+//					fptr = LLFile::fopen(LLLogChat::oldLogFileName(file_name), "r");/*Flawfinder: ignore*/
+//					if (!fptr)
+//					{
+//						return;						//No previous conversation with this name.
+//					}
+//				}
+//
+//				char buffer[LOG_RECALL_SIZE];		/*Flawfinder: ignore*/
+//				char *bptr;
+//				S32 len;
+//				bool firstline = TRUE;
+//
+//				if (load_all_history || fseek(fptr, (LOG_RECALL_SIZE - 1) * -1  , SEEK_END))
+//				{	//We need to load the whole historyFile or it's smaller than recall size, so get it all.
+//					firstline = FALSE;
+//					if (fseek(fptr, 0, SEEK_SET))
+//					{
+//						fclose(fptr);
+//						return;
+//					}
+//				}
+//			while (fgets(buffer, LOG_RECALL_SIZE, fptr)  && !feof(fptr))
+//				{
+//					len = strlen(buffer) - 1;		/*Flawfinder: ignore*/
+//					for (bptr = (buffer + len); (*bptr == '\n' || *bptr == '\r') && bptr>buffer; bptr--)	*bptr='\0';
+//
+//					if (firstline)
+//					{
+//						firstline = FALSE;
+//						continue;
+//					}
+//
+//					std::string line(buffer);
+//
+//					//updated 1.23 plain text log format requires a space added before subsequent lines in a multilined message
+//					if (' ' == line[0])
+//					{
+//						line.erase(0, MULTI_LINE_PREFIX.length());
+//						append_to_last_message(messages, '\n' + line);
+//					}
+//					else if (0 == len && ('\n' == line[0] || '\r' == line[0]))
+//					{
+//						//to support old format's multilined messages with new lines used to divide paragraphs
+//						append_to_last_message(messages, line);
+//					}
+//					else
+//					{
+//						LLSD item;
+//						if (!LLChatLogParser::parse(line, item, load_params))
+//						{
+//							item[LL_IM_TEXT] = line;
+//						}
+//						messages.push_back(item);
+//					}
+//				}
+//				fclose(fptr);
+//
+//
+//}
 
 void LLLogChat::startChatHistoryThread(const std::string& file_name, const LLSD& load_params)
 {

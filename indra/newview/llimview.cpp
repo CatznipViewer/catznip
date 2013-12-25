@@ -727,10 +727,10 @@ void LLIMModel::LLIMSession::loadHistory()
 			int cntUnread = LLPersistentUnreadIMStorage::instance().getPersistedUnreadCount(mSessionID);
 
 			int szRecall = 2048;
-			while ( (chat_history.size() < cntUnread) && (szRecall < 65536) )
+			while ( (chat_history.size() < cntUnread) && (szRecall <= 16384) &&
+			        (!LLLogChat::loadChatHistory(mHistoryFileName, chat_history, LLSD().with("recall_size", szRecall))) )
 			{
 				szRecall *= 2;
-				LLLogChat::loadChatHistory(mHistoryFileName, chat_history, LLSD().with("recall_size", szRecall));
 			}
 
 			if (chat_history.size() >= cntUnread)
@@ -739,8 +739,7 @@ void LLIMModel::LLIMSession::loadHistory()
 				std::advance(itLine, cntUnread - 1);
 				for (; itLine != chat_history.rend(); ++itLine)
 				{
-					const std::string strLine = (*itLine)[LL_IM_TEXT].asString();
-					if (strUnreadMsg == strLine)
+					if (strUnreadMsg == (*itLine)[LL_IM_TEXT].asString())
 					{
 						std::list<LLSD> lines;
 						lines.splice(lines.end(), chat_history, (++itLine).base(), chat_history.end());
@@ -1183,6 +1182,8 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
 }
 
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//						   const std::string& utf8_text, bool log2file /* = true */) { 
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
 bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time, bool log2file)
 { 

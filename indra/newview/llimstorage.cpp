@@ -13,7 +13,6 @@
  * abide by those obligations.
  * 
  */
-
 #include "llviewerprecompiledheaders.h"
 
 #include "llimstorage.h"
@@ -29,12 +28,14 @@
 
 LLPersistentUnreadIMStorage::LLPersistentUnreadIMStorage()
 {
-	LLIMModel::instance().addNewMsgCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
-	LLIMModel::instance().addNoUnreadMsgsCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
+	m_NewMsgConn = LLIMModel::instance().addNewMsgCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
+	m_NoUnreadMsgConn = LLIMModel::instance().addNoUnreadMsgsCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
 }
 
 LLPersistentUnreadIMStorage::~LLPersistentUnreadIMStorage()
 {
+	m_NewMsgConn.disconnect();
+	m_NoUnreadMsgConn.disconnect();
 }
 
 void LLPersistentUnreadIMStorage::addPersistedUnreadIMs(const LLUUID& idSession, const std::list<LLSD>& sdMessages)
@@ -118,17 +119,14 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 			for (LLSD::array_const_iterator itIM = sdUnreadIMs.beginArray(); itIM != sdUnreadIMs.endArray(); ++itIM)
 			{
 				const LLSD& sdIM = *itIM;
-const std::string strFrom = sdIM[LL_IM_FROM].asString();
-const LLUUID idFrom = (sdIM.has(LL_IM_FROM_ID)) ? sdIM[LL_IM_FROM_ID].asUUID() : idAgent;
-const std::string strMsg = sdIM[LL_IM_TEXT].asString();
-const std::string strTime = sdIM[LL_IM_TIME].asString();
-				LLIMModel::getInstance()->addMessage(idSession, strFrom, idFrom, strMsg, strTime, false);
+				LLIMModel::getInstance()->addMessage(idSession, sdIM[LL_IM_FROM].asString(), (sdIM.has(LL_IM_FROM_ID)) ? sdIM[LL_IM_FROM_ID].asUUID() : idAgent,
+				                                     sdIM[LL_IM_TEXT].asString(), sdIM[LL_IM_TIME].asString(), false);
 			}
 		}
 	}
-
-	// We don't need the persisted data any longer at this point, so clear it
 	m_PersistedData.clear();
+
+	saveUnreadIMs();
 }
 
 void LLPersistentUnreadIMStorage::saveUnreadIMs()
