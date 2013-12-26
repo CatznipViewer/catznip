@@ -713,15 +713,17 @@ void LLIMModel::LLIMSession::loadHistory()
 {
 	mMsgs.clear();
 
-	if ( gSavedPerAccountSettings.getBOOL("LogShowHistory") )
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+	bool fShowHistory = gSavedPerAccountSettings.getBOOL("LogShowHistory");
+	bool fHasUnreadIM = LLPersistentUnreadIMStorage::instance().hasPersistedUnreadIM(mSessionID);
+	if ( (fShowHistory) || (fHasUnreadIM) )
 	{
 		std::list<LLSD> chat_history;
 
 		//involves parsing of a chat history
 		LLLogChat::loadChatHistory(mHistoryFileName, chat_history);
 
-// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
-		if (LLPersistentUnreadIMStorage::instance().hasPersistedUnreadIM(mSessionID))
+		if (fHasUnreadIM)
 		{
 			const std::string strUnreadMsg = LLPersistentUnreadIMStorage::instance().getPersistedUnreadMessage(mSessionID);
 			int cntUnread = LLPersistentUnreadIMStorage::instance().getPersistedUnreadCount(mSessionID);
@@ -749,10 +751,21 @@ void LLIMModel::LLIMSession::loadHistory()
 				}
 			}
 		}
-// [/SL:KB]
 
-		addMessagesFromHistory(chat_history);
+		if (fShowHistory)
+		{
+			addMessagesFromHistory(chat_history);
+		}
 	}
+// [/SL:KB]
+//	if ( gSavedPerAccountSettings.getBOOL("LogShowHistory") )
+//	{
+//		std::list<LLSD> chat_history;
+//
+//		//involves parsing of a chat history
+//		LLLogChat::loadChatHistory(mHistoryFileName, chat_history);
+//		addMessagesFromHistory(chat_history);
+//	}
 }
 
 LLIMModel::LLIMSession* LLIMModel::findIMSession(const LLUUID& session_id) const
