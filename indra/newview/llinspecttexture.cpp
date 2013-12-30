@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2010-2013, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -22,8 +22,11 @@
 #include "llpreviewnotecard.h"
 #include "llpreviewtexture.h"
 #include "lltexturectrl.h"
+#include "lltrans.h"
 #include "llviewerinventory.h"
 #include "llviewertexteditor.h"
+#include "llviewertexture.h"
+#include "llviewertexturelist.h"
 
 // ============================================================================
 // LLInspectTexture class
@@ -186,6 +189,104 @@ void LLInspectTexture::onClickCopyToInv()
 void LLInspectTextureUtil::registerFloater()
 {
 	LLFloaterReg::add("inspect_texture", "inspect_texture.xml", &LLFloaterReg::build<LLInspectTexture>);
+}
+
+// ============================================================================
+// LLTexturePreviewView helper class
+//
+
+LLTexturePreviewView::LLTexturePreviewView(const LLView::Params& p)
+	: LLView(p)
+	, m_nImageBoostLevel(LLGLTexture::BOOST_NONE)
+{
+	m_strLoading = LLTrans::getString("texture_loading");
+}
+
+LLTexturePreviewView::~LLTexturePreviewView()
+{
+	if (m_Image)
+	{
+		m_Image->setBoostLevel(m_nImageBoostLevel);
+		m_Image = NULL;
+	}
+}
+
+void LLTexturePreviewView::draw()
+{
+	if (m_Image)
+	{
+		LLRect rctClient = getLocalRect();
+
+		gl_rect_2d(rctClient, LLColor4::black);
+		rctClient.stretch(-2);
+		if (4 == m_Image->getComponents())
+			gl_rect_2d_checkerboard(rctClient);
+		gl_draw_scaled_image(rctClient.mLeft, rctClient.mBottom, rctClient.getWidth(), rctClient.getHeight(), m_Image);
+
+		m_Image->addTextureStats((F32)(rctClient.getWidth() * rctClient.getHeight()));
+
+		if ( (!m_Image->isFullyLoaded()) && (m_Image->getDiscardLevel() > 1) )
+		{
+			LLFontGL::getFontSansSerif()->renderUTF8(m_strLoading, 0, llfloor(rctClient.mLeft + 3),  llfloor(rctClient.mTop - 25), LLColor4::white, LLFontGL::LEFT, LLFontGL::BASELINE, LLFontGL::DROP_SHADOW);
+		}
+	}
+}
+
+void LLTexturePreviewView::setImageFromAssetId(const LLUUID& idAsset)
+{
+	// Initialize the texture
+	m_Image = LLViewerTextureManager::getFetchedTexture(idAsset, FTT_DEFAULT, MIPMAP_TRUE, LLGLTexture::BOOST_NONE, LLViewerTexture::LOD_TEXTURE);
+	if (m_Image)
+	{
+		m_nImageBoostLevel = m_Image->getBoostLevel();
+		m_Image->setBoostLevel(LLGLTexture::BOOST_PREVIEW);
+		m_Image->forceToSaveRawImage(0);
+	}
+}
+
+void LLTexturePreviewView::setImageFromItemId(const LLUUID& idItem)
+{
+	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
+	setImageFromAssetId( (pItem) ? pItem->getAssetUUID() : LLUUID::null );
+}
+
+// ============================================================================
+// LLTextureToolTip class
+//
+
+LLTextureToolTip::LLTextureToolTip(const LLToolTip::Params& p)
+	: LLToolTip(p)
+	, m_pPreview(NULL)
+	, m_nPreviewSize(256)
+{
+	mMaxWidth = llmax(mMaxWidth, m_nPreviewSize);
+}
+
+LLTextureToolTip::~LLTextureToolTip()
+{
+}
+
+void LLTextureToolTip::initFromParams(const LLToolTip::Params& p)
+{
+	LLToolTip::initFromParams(p);
+
+	// Create and add the preview control
+	LLView::Params p_preview;
+	p_preview.name = "texture_preview";
+	LLRect rctPreview;
+	rctPreview.setOriginAndSize(mPadding, mTextBox->getRect().mTop, m_nPreviewSize, m_nPreviewSize);
+	p_preview.rect = rctPreview;
+	m_pPreview = LLUICtrlFactory::create<LLTexturePreviewView>(p_preview);
+	addChild(m_pPreview);
+
+	// Parse the control params
+	const LLSD& sdTextureParams = p.create_params;
+	if (sdTextureParams.has("asset_id"))
+		m_pPreview->setImageFromAssetId(sdTextureParams["asset_id"].asUUID());
+	else if (sdTextureParams.has("item_id"))
+		m_pPreview->setImageFromItemId(sdTextureParams["item_id"].asUUID());
+
+	snapToChildren();
 }
 
 // ============================================================================
