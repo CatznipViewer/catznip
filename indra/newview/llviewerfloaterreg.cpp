@@ -129,6 +129,9 @@
 // [/SL:KB]
 #include "llinspectobject.h"
 #include "llinspectremoteobject.h"
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+#include "llinspecttexture.h"
+// [/SL:KB]
 #include "llinspecttoast.h"
 #include "llmoveview.h"
 #include "llfloaterimnearbychat.h"
@@ -233,6 +236,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLInspectLocationUtil::registerFloater();
 // [/SL:KB]
 	LLInspectObjectUtil::registerFloater();
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	LLInspectTextureUtil::registerFloater();
+// [/SL:KB]
 	LLInspectRemoteObjectUtil::registerFloater();
 	LLFloaterVoiceVolumeUtil::registerFloater();
 	LLNotificationsUI::registerFloater();

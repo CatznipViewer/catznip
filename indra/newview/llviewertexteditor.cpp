@@ -245,6 +245,28 @@ public:
 	}
 	virtual BOOL				handleToolTip(S32 x, S32 y, MASK mask )
 	{ 
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+		if (LLAssetType::AT_TEXTURE == mItem->getType())
+		{
+			LLSD sdParams;
+
+			sdParams["name"] = mItem->getName();
+			sdParams["asset_id"] = mItem->getAssetUUID();
+			sdParams["item_id"] = mItem->getUUID();
+
+			const LLViewerTextEditor* pEditor = dynamic_cast<const LLViewerTextEditor*>(&mEditor);
+			if (pEditor)
+			{
+				LLUUID idNotecard, idObject, idPreview;
+				pEditor->getNotecardInfo(idNotecard, idObject, idPreview);
+				sdParams["notecard_id"] = idNotecard;
+			}
+
+			LLFloaterReg::showInstance("inspect_texture", sdParams);
+			return TRUE;
+		}
+// [/SL:KB]
+
 		if (!mToolTip.empty())
 		{
 			LLToolTipMgr::instance().show(mToolTip);
@@ -295,6 +317,10 @@ public:
 
 	BOOL	hasEmbeddedItem(llwchar ext_char); // returns TRUE if /this/ editor has an entry for this item
 	LLUIImagePtr getItemImage(llwchar ext_char) const;
+
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	LLPointer<LLInventoryItem> getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const;
+// [/SL:KB]
 
 	void	getEmbeddedItemList( std::vector<LLPointer<LLInventoryItem> >& items );
 	void	addItems(const std::vector<LLPointer<LLInventoryItem> >& items);
@@ -569,6 +595,23 @@ void LLEmbeddedItems::addItems(const std::vector<LLPointer<LLInventoryItem> >& i
 		}
 	}
 }
+
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+LLPointer<LLInventoryItem> LLEmbeddedItems::getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const
+{
+	for (std::set<llwchar>::const_iterator itChar = mEmbeddedUsedChars.begin(); itChar != mEmbeddedUsedChars.end(); ++itChar)
+	{
+		LLPointer<LLInventoryItem> pItem = getEmbeddedItemPtr(*itChar);
+		if ( (pItem) && (pItem->getUUID() == idItem) )
+		{
+			if (pwCh)
+				*pwCh = *itChar;
+			return pItem.get();
+		}
+	}
+	return NULL;
+}
+// [/SL:KB]
 
 void LLEmbeddedItems::getEmbeddedItemList( std::vector<LLPointer<LLInventoryItem> >& items )
 {
@@ -1089,6 +1132,24 @@ BOOL LLViewerTextEditor::openEmbeddedItemAtPos(S32 pos)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+BOOL LLViewerTextEditor::openEmbeddedItem(const LLUUID& idItem)
+{
+	llwchar wCh;
+	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
+	return (pItem) ? openEmbeddedItem(pItem, wCh) : FALSE;
+}
+
+void LLViewerTextEditor::showCopyToInvDialog(const LLUUID& idItem)
+{
+	llwchar wCh;
+	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
+	if (pItem)
+	{
+		showCopyToInvDialog(pItem, wCh);
+	}
+}
+// [/SL:KB]
 
 BOOL LLViewerTextEditor::openEmbeddedItem(LLPointer<LLInventoryItem> item, llwchar wc)
 {

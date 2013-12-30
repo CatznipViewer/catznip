@@ -63,6 +63,15 @@ public:
 	virtual BOOL 	exportBuffer(std::string& buffer);
 	virtual void	onValueChange(S32 start, S32 end);
 
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	void getNotecardInfo(LLUUID& notecard_item_id, LLUUID& object_id, LLUUID& preview_id) const
+	{
+		notecard_item_id = mNotecardInventoryID;
+		object_id = mObjectID;
+		preview_id = mPreviewID;
+	}
+// [/SL:KB]
+
 	void setNotecardInfo(const LLUUID& notecard_item_id, const LLUUID& object_id, const LLUUID& preview_id)
 	{
 		mNotecardInventoryID = notecard_item_id;
@@ -86,6 +95,11 @@ public:
 	// should be changed to get a different asset id from the verifier
 	// rather than checking if a re-load is necessary. Phoenix 2007-02-27
 	bool hasEmbeddedInventory();
+
+// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+	BOOL			openEmbeddedItem(const LLUUID& idItem);
+	void			showCopyToInvDialog(const LLUUID& idItem);
+// [/SL:KB]
 
 private:
 	// Embedded object operations
