@@ -45,7 +45,7 @@
 #include "llfloatermap.h"
 #include "llfloaterworldmap.h"
 #include "llfocusmgr.h"
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 #include "llinspectlocation.h"
 // [/SL:KB]
 #include "lllocalcliprect.h"
@@ -1084,7 +1084,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 
 		if (!region_flags.empty())
 		{
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 			tooltip_msg += " (";
 			tooltip_msg += region_flags;
 			tooltip_msg += ')';
@@ -1100,7 +1100,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 		LLRect sticky_rect_screen;
 		sticky_rect_screen.setCenterAndSize(screen_x, screen_y, SLOP, SLOP);
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 		if (gSavedSettings.getBOOL("ShowLocationInspector"))
 		{
 			bool fShowToolTip = true;
@@ -1131,7 +1131,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 			LLToolTipMgr::instance().show(LLToolTip::Params()
 				.message(tooltip_msg)
 				.sticky_rect(sticky_rect_screen));
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 		}
 // [/SL:KB]
 	}

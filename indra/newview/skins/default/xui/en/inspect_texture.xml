@@ -48,7 +48,8 @@
    left="7"
    name="open_btn"
    width="115"
-   commit_callback.function="InspectTexture.Open"/>
+   commit_callback.function="InspectTexture.Open"
+   enable_callback.function="InspectTexture.CanOpen" />
   <button
    bottom="-5"
    follows="bottom|left"
@@ -57,5 +58,6 @@
    left_pad="5"
    name="copy_btn"
    width="115"
-   commit_callback.function="InspectTexture.CopyToInv" />
+   commit_callback.function="InspectTexture.CopyToInv"
+   enable_callback.function="InspectTexture.CanCopyToInv" />
 </floater>

@@ -245,7 +245,7 @@ public:
 	}
 	virtual BOOL				handleToolTip(S32 x, S32 y, MASK mask )
 	{ 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+// [SL:KB] - Patch: Control-TextureInspector | Checked: 2012-03-25 (Catznip-3.2)
 		if (LLAssetType::AT_TEXTURE == mItem->getType())
 		{
 			LLSD sdParams;
@@ -318,7 +318,7 @@ public:
 	BOOL	hasEmbeddedItem(llwchar ext_char); // returns TRUE if /this/ editor has an entry for this item
 	LLUIImagePtr getItemImage(llwchar ext_char) const;
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
 	LLPointer<LLInventoryItem> getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const;
 // [/SL:KB]
 
@@ -596,7 +596,7 @@ void LLEmbeddedItems::addItems(const std::vector<LLPointer<LLInventoryItem> >& i
 	}
 }
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
 LLPointer<LLInventoryItem> LLEmbeddedItems::getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const
 {
 	for (std::set<llwchar>::const_iterator itChar = mEmbeddedUsedChars.begin(); itChar != mEmbeddedUsedChars.end(); ++itChar)
@@ -1132,7 +1132,7 @@ BOOL LLViewerTextEditor::openEmbeddedItemAtPos(S32 pos)
 	return FALSE;
 }
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
 BOOL LLViewerTextEditor::openEmbeddedItem(const LLUUID& idItem)
 {
 	llwchar wCh;

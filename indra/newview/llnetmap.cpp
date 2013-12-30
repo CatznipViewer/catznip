@@ -48,7 +48,7 @@
 #include "llappviewer.h" // for gDisconnected
 #include "llcallingcard.h" // LLAvatarTracker
 #include "llfloaterworldmap.h"
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-07-02 (Catznip-3.3)
 #include "llinspectlocation.h"
 // [/SL:KB]
 #include "lltracker.h"
@@ -632,7 +632,7 @@ BOOL LLNetMap::handleToolTip( S32 x, S32 y, MASK mask )
 	std::string msg = mToolTipMsg;
 	LLStringUtil::format(msg, args);
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 	if (gSavedSettings.getBOOL("ShowLocationInspector"))
 	{
 		bool fShowToolTip = true; LLVector3d posGlobal(viewPosToGlobal(x, y));
@@ -662,7 +662,7 @@ BOOL LLNetMap::handleToolTip( S32 x, S32 y, MASK mask )
 		LLToolTipMgr::instance().show(LLToolTip::Params()
 			.message(msg)
 			.sticky_rect(sticky_rect));
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-06-09 (Catznip-3.3)
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 	}
 // [/SL:KB]
 		

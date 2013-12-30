@@ -62,7 +62,7 @@ public:
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
 
-// [SL:KB] - Patch: Control-Inspectors | Checked: 2012-03-25 (Catznip-3.2.3)
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-11-05 (Catznip-2.3)
 	LLViewerTextEditor* getEditor() const;
 // [/SL:KB]
 
