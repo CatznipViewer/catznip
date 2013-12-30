@@ -276,6 +276,9 @@ public:
 								bg_readonly_color,
 								bg_writeable_color,
 								bg_focus_color,
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+								bg_highlighted_color,
+// [/SL:KB]
 								text_selected_color,
 								bg_selected_color;
 
@@ -436,6 +439,12 @@ public:
 	bool					scrolledToStart();
 	bool					scrolledToEnd();
 
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	// highlighting
+	void					clearHighlights();
+	void					setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive);
+// [/SL:KB]
+
 	const LLFontGL*			getFont() const					{ return mFont; }
 
 	virtual void			appendLineBreakSegment(const LLStyle::Params& style_params);
@@ -453,6 +462,10 @@ protected:
 	struct compare_top;
 	struct line_end_compare;
 	typedef std::vector<LLTextSegmentPtr> segment_vec_t;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	typedef std::pair<S32, S32> range_pair_t;
+	typedef std::list<range_pair_t> highlight_list_t;
+// [/SL:KB]
 
 	// Abstract inner base class representing an undoable editor command.
 	// Concrete sub-classes can be defined for operations such as insert, remove, etc.
@@ -520,6 +533,9 @@ protected:
 
 	// draw methods
 	void							drawSelectionBackground(); // draws the black box behind the selected text
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	void							drawHighlightsBackground(const highlight_list_t& highlights, const LLColor4& color);
+// [/SL:KB]
 	void							drawCursor();
 	void							drawText();
 
@@ -600,6 +616,9 @@ protected:
 	LLUIColor					mWriteableBgColor;
 	LLUIColor					mReadOnlyBgColor;
 	LLUIColor					mFocusBgColor;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	LLUIColor					mHighlightedBGColor;
+// [/SL:KB]
 	LLUIColor					mTextSelectedColor;
 	LLUIColor					mSelectedBGColor;
 
@@ -625,6 +644,11 @@ protected:
 	LLTimer						mSpellCheckTimer;
 	std::list<std::pair<U32, U32> > mMisspellRanges;
 	std::vector<std::string>		mSuggestionList;
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	// highlighting
+	highlight_list_t			mHighlights;
+// [/SL:KB]
 
 	// configuration
 	S32							mHPad;				// padding on left of text

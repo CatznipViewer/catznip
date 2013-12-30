@@ -45,6 +45,7 @@ public:
 	/*virtual*/ bool hasAccelerators() const;
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& sdKey);
+	/*virtual*/ void onClose(bool fQuiting);
 
 	/*
 	 * Member functions
@@ -53,7 +54,9 @@ public:
 	static void   show(LLTextEditor* pEditor);
 protected:
 	LLTextEditor* getEditor() const;
+	void          refreshHighlight();
 	void          onSearchClick();
+	void          onSearchKeystroke();
 	void          onReplaceClick();
 	void          onReplaceAllClick();
 

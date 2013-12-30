@@ -43,6 +43,9 @@
 #include "llview.h"
 #include "llwindow.h"
 #include <boost/bind.hpp>
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 const F32	CURSOR_FLASH_DELAY = 1.0f;  // in seconds
 const S32	CURSOR_THICKNESS = 2;
@@ -152,6 +155,9 @@ LLTextBase::Params::Params()
 	bg_readonly_color("bg_readonly_color"),
 	bg_writeable_color("bg_writeable_color"),
 	bg_focus_color("bg_focus_color"),
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	bg_highlighted_color("bg_highlighted_color"),
+// [/SL:KB]
 	text_selected_color("text_selected_color"),
 	bg_selected_color("bg_selected_color"),
 	allow_scroll("allow_scroll", true),
@@ -197,6 +203,9 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mWriteableBgColor(p.bg_writeable_color),
 	mReadOnlyBgColor(p.bg_readonly_color),
 	mFocusBgColor(p.bg_focus_color),
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	mHighlightedBGColor(p.bg_highlighted_color),
+// [/SL:KB]
 	mTextSelectedColor(p.text_selected_color),
 	mSelectedBGColor(p.bg_selected_color),
 	mReflowIndex(S32_MAX),
@@ -354,15 +363,31 @@ void LLTextBase::onValueChange(S32 start, S32 end)
 
 
 // Draws the black box behind the selected text
+//void LLTextBase::drawSelectionBackground()
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
 void LLTextBase::drawSelectionBackground()
 {
-	// Draw selection even if we don't have keyboard focus for search/replace
 	if( hasSelection() && !mLineInfoList.empty())
+	{
+		highlight_list_t highlights;
+		highlights.push_back(range_pair_t(llmin(mSelectionStart, mSelectionEnd), llmax(mSelectionStart, mSelectionEnd)));
+		drawHighlightsBackground(highlights, mSelectedBGColor);
+	}
+}
+
+void LLTextBase::drawHighlightsBackground(const highlight_list_t& highlights, const LLColor4& color)
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+{
+//	// Draw selection even if we don't have keyboard focus for search/replace
+//	if( hasSelection() && !mLineInfoList.empty())
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	if (!mLineInfoList.empty())
+// [/SL:KB]
 	{
 		std::vector<LLRect> selection_rects;
 
-		S32 selection_left		= llmin( mSelectionStart, mSelectionEnd );
-		S32 selection_right		= llmax( mSelectionStart, mSelectionEnd );
+//		S32 selection_left		= llmin( mSelectionStart, mSelectionEnd );
+//		S32 selection_right		= llmax( mSelectionStart, mSelectionEnd );
 
 		// Skip through the lines we aren't drawing.
 		LLRect content_display_rect = getVisibleDocumentRect();
@@ -371,11 +396,29 @@ void LLTextBase::drawSelectionBackground()
 		line_list_t::const_iterator line_iter = std::lower_bound(mLineInfoList.begin(), mLineInfoList.end(), content_display_rect.mTop, compare_bottom());
 		line_list_t::const_iterator end_iter = std::upper_bound(mLineInfoList.begin(), mLineInfoList.end(), content_display_rect.mBottom, compare_top());
 
-		bool done = false;
+//		bool done = false;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		highlight_list_t::const_iterator itHighlight = highlights.begin();
+// [/SL:KB]
 
 		// Find the coordinates of the selected area
-		for (;line_iter != end_iter && !done; ++line_iter)
+//		for (;line_iter != end_iter && !done; ++line_iter)
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		for (; line_iter != end_iter; ++line_iter)
+// [/SL:KB]
 		{
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+			// Find a highlight range with an end index larger than the start of this line
+			while ( (itHighlight != highlights.end()) && (line_iter->mDocIndexStart > itHighlight->second) )
+				++itHighlight;
+			if (itHighlight == highlights.end())
+				break;
+
+			// Keep the names of these to change fewer lines of LL code
+			S32 selection_left  = llmin(itHighlight->first, itHighlight->second);
+			S32 selection_right = llmax(itHighlight->first, itHighlight->second) ;
+// [/SL:KB]
+
 			// is selection visible on this line?
 			if (line_iter->mDocIndexEnd > selection_left && line_iter->mDocIndexStart < selection_right)
 			{
@@ -428,7 +471,10 @@ void LLTextBase::drawSelectionBackground()
 						segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
 						selection_rect.mRight += segment_width;
 
-						break;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+						continue;
+// [/SL:KB]
+//						break;
 					}
 				}
 				selection_rects.push_back(selection_rect);
@@ -437,7 +483,7 @@ void LLTextBase::drawSelectionBackground()
 		
 		// Draw the selection box (we're using a box instead of reversing the colors on the selected text).
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-		const LLColor4& color = mSelectedBGColor;
+//		const LLColor4& color = mSelectedBGColor;
 		F32 alpha = hasFocus() ? 0.7f : 0.3f;
 		alpha *= getDrawContext().mAlpha;
 		LLColor4 selection_color(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], alpha);
@@ -1236,6 +1282,10 @@ void LLTextBase::draw()
 			drawChild(mDocumentView);
 		}
  
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		if (!mHighlights.empty())
+			drawHighlightsBackground(mHighlights, mHighlightedBGColor);
+// [/SL:KB]
 		drawSelectionBackground();
 		drawText();
 		drawCursor();
@@ -2671,6 +2721,37 @@ bool LLTextBase::scrolledToEnd()
 {
 	return mScroller->isAtBottom();
 }
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+void LLTextBase::clearHighlights()
+{
+	mHighlights.clear();
+}
+
+void LLTextBase::setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive)
+{
+	clearHighlights();
+	if (strHighlight.empty())
+	{
+		return;
+	}
+
+	LLWString wstrText = getWText();
+	LLWString wstrHighlight = utf8str_to_wstring(strHighlight);
+
+	std::list<boost::iterator_range<LLWString::const_iterator>> highlightRanges;
+	if (fCaseInsensitive)
+		boost::ifind_all(highlightRanges, wstrText, wstrHighlight);
+	else
+		boost::find_all(highlightRanges, wstrText, wstrHighlight);
+
+	for (std::list<boost::iterator_range<LLWString::const_iterator>>::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
+	{
+		S32 idxStart = itRange->begin() - wstrText.begin();
+		mHighlights.push_back(range_pair_t(idxStart, idxStart + itRange->size()));
+	}
+}
+// [/SL:KB]
 
 bool LLTextBase::setCursor(S32 row, S32 column)
 {

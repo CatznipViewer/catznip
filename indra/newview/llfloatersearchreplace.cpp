@@ -45,9 +45,11 @@ BOOL LLFloaterSearchReplace::postBuild()
 	m_pSearchEditor = getChild<LLLineEditor>("search_text");
 	m_pSearchEditor->setCommitCallback(boost::bind(&LLFloaterSearchReplace::onSearchClick, this));
 	m_pSearchEditor->setCommitOnFocusLost(false);
+	m_pSearchEditor->setKeystrokeCallback(boost::bind(&LLFloaterSearchReplace::refreshHighlight, this), NULL);
 	m_pReplaceEditor = getChild<LLLineEditor>("replace_text");
 
 	m_pCaseInsensitiveCheck = getChild<LLCheckBoxCtrl>("case_text");
+	m_pCaseInsensitiveCheck->setCommitCallback(boost::bind(&LLFloaterSearchReplace::refreshHighlight, this));
 	m_pSearchUpCheck = getChild<LLCheckBoxCtrl>("find_previous");
 
 	LLButton* pSearchBtn = getChild<LLButton>("search_btn");
@@ -65,7 +67,7 @@ BOOL LLFloaterSearchReplace::postBuild()
 
 void LLFloaterSearchReplace::onOpen(const LLSD& sdKey)
 {
-	const LLTextEditor* pEditor = getEditor();
+	LLTextEditor* pEditor = getEditor();
 	if (pEditor)
 	{
 		// HACK-Catznip: hasSelection() is inaccessible but canCopy() is (currently) a synonym *sighs*
@@ -74,12 +76,22 @@ void LLFloaterSearchReplace::onOpen(const LLSD& sdKey)
 			m_pSearchEditor->setText(pEditor->getSelectionString());
 			m_pSearchEditor->setCursorToEnd();
 		}
+		pEditor->setHighlightWord(m_pSearchEditor->getText(), m_pCaseInsensitiveCheck->get());
 
 		m_pReplaceEditor->setEnabled( (pEditor) && (!pEditor->getReadOnly()) );
 		getChild<LLButton>("replace_btn")->setEnabled( (pEditor) && (!pEditor->getReadOnly()) );
 		getChild<LLButton>("replace_all_btn")->setEnabled( (pEditor) && (!pEditor->getReadOnly()) );
 	}
 	m_pSearchEditor->setFocus(TRUE);
+}
+
+void LLFloaterSearchReplace::onClose(bool fQuiting)
+{
+	LLTextEditor* pEditor = getEditor();
+	if (pEditor)
+	{
+		pEditor->clearHighlights();
+	}
 }
 
 bool LLFloaterSearchReplace::hasAccelerators() const
@@ -128,7 +140,11 @@ void LLFloaterSearchReplace::show(LLTextEditor* pEditor)
 			if (pDependeeNew != pDependeeOld)
 			{
 				if (pDependeeOld)
+				{
+					if (pSelf->getEditor())
+						pSelf->getEditor()->clearHighlights();
 					pDependeeOld->removeDependentFloater(pSelf);
+				}
 
 				if (!pDependeeNew->getHost())
 					pDependeeNew->addDependentFloater(pSelf);
@@ -147,6 +163,15 @@ void LLFloaterSearchReplace::show(LLTextEditor* pEditor)
 LLTextEditor* LLFloaterSearchReplace::getEditor() const
 {
 	return dynamic_cast<LLTextEditor*>(m_EditorHandle.get());
+}
+
+void LLFloaterSearchReplace::refreshHighlight()
+{
+	LLTextEditor* pEditor = getEditor();
+	if (pEditor)
+	{
+		pEditor->setHighlightWord(m_pSearchEditor->getText(), m_pCaseInsensitiveCheck->get());
+	}
 }
 
 void LLFloaterSearchReplace::onSearchClick()
