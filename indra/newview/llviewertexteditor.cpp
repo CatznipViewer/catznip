@@ -35,6 +35,9 @@
 #include "llfloatersidepanelcontainer.h"
 #include "llfloaterworldmap.h"
 #include "llfocusmgr.h"
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+#include "llinspecttexture.h"
+// [/SL:KB]
 #include "llinventorybridge.h"
 #include "llinventorydefines.h"
 #include "llinventorymodel.h"
@@ -248,21 +251,27 @@ public:
 // [SL:KB] - Patch: Control-TextureInspector | Checked: 2012-03-25 (Catznip-3.2)
 		if (LLAssetType::AT_TEXTURE == mItem->getType())
 		{
-			LLSD sdParams;
+			LLToolTipMgr::instance().show(LLToolTip::Params()
+					.message(mToolTip)
+					.create_callback(boost::bind(&createInventoryToolTip, _1))
+					.create_params(LLSD().with("inv_type", mItem->getInventoryType()).with("asset_id", mItem->getAssetUUID())));
 
-			sdParams["name"] = mItem->getName();
-			sdParams["asset_id"] = mItem->getAssetUUID();
-			sdParams["item_id"] = mItem->getUUID();
+//			LLSD sdParams;
+//
+//			sdParams["name"] = mItem->getName();
+//			sdParams["asset_id"] = mItem->getAssetUUID();
+//			sdParams["item_id"] = mItem->getUUID();
+//
+//			const LLViewerTextEditor* pEditor = dynamic_cast<const LLViewerTextEditor*>(&mEditor);
+//			if (pEditor)
+//			{
+//				LLUUID idNotecard, idObject, idPreview;
+//				pEditor->getNotecardInfo(idNotecard, idObject, idPreview);
+//				sdParams["notecard_id"] = idNotecard;
+//			}
+//
+//			LLFloaterReg::showInstance("inspect_texture", sdParams);
 
-			const LLViewerTextEditor* pEditor = dynamic_cast<const LLViewerTextEditor*>(&mEditor);
-			if (pEditor)
-			{
-				LLUUID idNotecard, idObject, idPreview;
-				pEditor->getNotecardInfo(idNotecard, idObject, idPreview);
-				sdParams["notecard_id"] = idNotecard;
-			}
-
-			LLFloaterReg::showInstance("inspect_texture", sdParams);
 			return TRUE;
 		}
 // [/SL:KB]
@@ -318,9 +327,9 @@ public:
 	BOOL	hasEmbeddedItem(llwchar ext_char); // returns TRUE if /this/ editor has an entry for this item
 	LLUIImagePtr getItemImage(llwchar ext_char) const;
 
-// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
-	LLPointer<LLInventoryItem> getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const;
-// [/SL:KB]
+//// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
+//	LLPointer<LLInventoryItem> getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const;
+//// [/SL:KB]
 
 	void	getEmbeddedItemList( std::vector<LLPointer<LLInventoryItem> >& items );
 	void	addItems(const std::vector<LLPointer<LLInventoryItem> >& items);
@@ -596,22 +605,22 @@ void LLEmbeddedItems::addItems(const std::vector<LLPointer<LLInventoryItem> >& i
 	}
 }
 
-// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
-LLPointer<LLInventoryItem> LLEmbeddedItems::getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const
-{
-	for (std::set<llwchar>::const_iterator itChar = mEmbeddedUsedChars.begin(); itChar != mEmbeddedUsedChars.end(); ++itChar)
-	{
-		LLPointer<LLInventoryItem> pItem = getEmbeddedItemPtr(*itChar);
-		if ( (pItem) && (pItem->getUUID() == idItem) )
-		{
-			if (pwCh)
-				*pwCh = *itChar;
-			return pItem.get();
-		}
-	}
-	return NULL;
-}
-// [/SL:KB]
+//// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
+//LLPointer<LLInventoryItem> LLEmbeddedItems::getEmbeddedItem(const LLUUID& idItem, llwchar* pwCh) const
+//{
+//	for (std::set<llwchar>::const_iterator itChar = mEmbeddedUsedChars.begin(); itChar != mEmbeddedUsedChars.end(); ++itChar)
+//	{
+//		LLPointer<LLInventoryItem> pItem = getEmbeddedItemPtr(*itChar);
+//		if ( (pItem) && (pItem->getUUID() == idItem) )
+//		{
+//			if (pwCh)
+//				*pwCh = *itChar;
+//			return pItem.get();
+//		}
+//	}
+//	return NULL;
+//}
+//// [/SL:KB]
 
 void LLEmbeddedItems::getEmbeddedItemList( std::vector<LLPointer<LLInventoryItem> >& items )
 {
@@ -1132,24 +1141,24 @@ BOOL LLViewerTextEditor::openEmbeddedItemAtPos(S32 pos)
 	return FALSE;
 }
 
-// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
-BOOL LLViewerTextEditor::openEmbeddedItem(const LLUUID& idItem)
-{
-	llwchar wCh;
-	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
-	return (pItem) ? openEmbeddedItem(pItem, wCh) : FALSE;
-}
-
-void LLViewerTextEditor::showCopyToInvDialog(const LLUUID& idItem)
-{
-	llwchar wCh;
-	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
-	if (pItem)
-	{
-		showCopyToInvDialog(pItem, wCh);
-	}
-}
-// [/SL:KB]
+//// [SL:KB] - Patch: Control-ViewerTextEditor | Checked: 2012-03-25 (Catznip-3.2)
+//BOOL LLViewerTextEditor::openEmbeddedItem(const LLUUID& idItem)
+//{
+//	llwchar wCh;
+//	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
+//	return (pItem) ? openEmbeddedItem(pItem, wCh) : FALSE;
+//}
+//
+//void LLViewerTextEditor::showCopyToInvDialog(const LLUUID& idItem)
+//{
+//	llwchar wCh;
+//	LLPointer<LLInventoryItem> pItem = mEmbeddedItemList->getEmbeddedItem(idItem, &wCh);
+//	if (pItem)
+//	{
+//		showCopyToInvDialog(pItem, wCh);
+//	}
+//}
+//// [/SL:KB]
 
 BOOL LLViewerTextEditor::openEmbeddedItem(LLPointer<LLInventoryItem> item, llwchar wc)
 {

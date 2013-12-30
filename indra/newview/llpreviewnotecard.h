@@ -62,10 +62,6 @@ public:
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-11-05 (Catznip-2.3)
-	LLViewerTextEditor* getEditor() const;
-// [/SL:KB]
-
 	// return true if there is any embedded inventory.
 	bool hasEmbeddedInventory();
 

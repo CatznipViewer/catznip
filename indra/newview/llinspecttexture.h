@@ -25,7 +25,7 @@
 class LLViewerFetchedTexture;
 
 // ============================================================================
-// LLInspectTextureUtil namespace
+// Helper functions
 //
 
 namespace LLInspectTextureUtil
@@ -33,6 +33,8 @@ namespace LLInspectTextureUtil
 	// Register with LLFloaterReg
 	void registerFloater();
 }
+
+LLToolTip* createInventoryToolTip(LLToolTip::Params p);
 
 // ============================================================================
 // LLTexturePreviewView helper class

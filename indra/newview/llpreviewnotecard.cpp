@@ -170,13 +170,6 @@ const LLInventoryItem* LLPreviewNotecard::getDragItem()
 	return NULL;
 }
 
-// [SL:KB] - Patch: UI-Notecards | Checked: 2010-11-05 (Catznip-2.3)
-LLViewerTextEditor* LLPreviewNotecard::getEditor() const
-{
-	return getChild<LLViewerTextEditor>("Notecard Editor");
-}
-// [/SL:KB]
-
 bool LLPreviewNotecard::hasEmbeddedInventory()
 {
 	LLViewerTextEditor* editor = NULL;

@@ -154,32 +154,32 @@ bool LLInspectTexture::hasNotecardInfo() const
 
 void LLInspectTexture::onClickOpen()
 {
-	if (m_idNotecard.notNull())
-	{
-		LLPreviewNotecard* pPreview = LLFloaterReg::findTypedInstance<LLPreviewNotecard>("preview_notecard", m_idNotecard);
-		LLViewerTextEditor* pEditor = (pPreview) ? pPreview->getEditor() : NULL;
-		if (pEditor)
-		{
-			pEditor->openEmbeddedItem(m_idItem);
-		}
-	}
-	else
-	{
-		LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", m_idAsset, TAKE_FOCUS_YES);
-	}
+//	if (m_idNotecard.notNull())
+//	{
+//		LLPreviewNotecard* pPreview = LLFloaterReg::findTypedInstance<LLPreviewNotecard>("preview_notecard", m_idNotecard);
+//		LLViewerTextEditor* pEditor = (pPreview) ? pPreview->getEditor() : NULL;
+//		if (pEditor)
+//		{
+//			pEditor->openEmbeddedItem(m_idItem);
+//		}
+//	}
+//	else
+//	{
+//		LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", m_idAsset, TAKE_FOCUS_YES);
+//	}
 }
 
 void LLInspectTexture::onClickCopyToInv()
 {
-	if (m_idNotecard.notNull())
-	{
-		LLPreviewNotecard* pPreview = LLFloaterReg::findTypedInstance<LLPreviewNotecard>("preview_notecard", m_idNotecard);
-		LLViewerTextEditor* pEditor = (pPreview) ? pPreview->getEditor() : NULL;
-		if (pEditor)
-		{
-			pEditor->showCopyToInvDialog(m_idItem);
-		}
-	}
+//	if (m_idNotecard.notNull())
+//	{
+//		LLPreviewNotecard* pPreview = LLFloaterReg::findTypedInstance<LLPreviewNotecard>("preview_notecard", m_idNotecard);
+//		LLViewerTextEditor* pEditor = (pPreview) ? pPreview->getEditor() : NULL;
+//		if (pEditor)
+//		{
+//			pEditor->showCopyToInvDialog(m_idItem);
+//		}
+//	}
 }
 
 // ============================================================================
@@ -189,6 +189,22 @@ void LLInspectTexture::onClickCopyToInv()
 void LLInspectTextureUtil::registerFloater()
 {
 	LLFloaterReg::add("inspect_texture", "inspect_texture.xml", &LLFloaterReg::build<LLInspectTexture>);
+}
+
+ 
+LLToolTip* createInventoryToolTip(LLToolTip::Params p)
+{
+	const LLSD& sdTooltip = p.create_params;
+
+	LLInventoryType::EType eInvType = (sdTooltip.has("inv_type")) ? (LLInventoryType::EType)sdTooltip["inv_type"].asInteger() : LLInventoryType::IT_NONE;
+	switch (eInvType)
+	{
+		case LLInventoryType::IT_SNAPSHOT:
+		case LLInventoryType::IT_TEXTURE:
+			return LLUICtrlFactory::create<LLTextureToolTip>(p);
+		default:
+			return LLUICtrlFactory::create<LLToolTip>(p);
+	}
 }
 
 // ============================================================================

@@ -900,21 +900,6 @@ BOOL LLInventoryPanel::handleHover(S32 x, S32 y, MASK mask)
 }
 
 // [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
-static LLToolTip* createInventoryToolTip(LLToolTip::Params p)
-{
-	const LLSD& sdTooltip = p.create_params;
-
-	LLInventoryType::EType eInvType = (sdTooltip.has("inv_type")) ? (LLInventoryType::EType)sdTooltip["inv_type"].asInteger() : LLInventoryType::IT_NONE;
-	switch (eInvType)
-	{
-		case LLInventoryType::IT_SNAPSHOT:
-		case LLInventoryType::IT_TEXTURE:
-			return LLUICtrlFactory::create<LLTextureToolTip>(p);
-		default:
-			return LLUICtrlFactory::create<LLToolTip>(p);
-	}
-}
-
 BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
 {
 	const LLFolderViewItem* pHoverItem = mFolderRoot->getHoveredItem();
