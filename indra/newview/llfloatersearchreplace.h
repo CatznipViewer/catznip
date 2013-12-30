@@ -19,9 +19,17 @@
 
 #include "llfloater.h"
 
+// ============================================================================
+// Forward declarations
+//
+
 class LLCheckBoxCtrl;
 class LLLineEditor;
 class LLTextEditor;
+
+// ============================================================================
+// LLFloaterSearchReplace class
+//
 
 class LLFloaterSearchReplace : public LLFloater
 {
@@ -29,24 +37,37 @@ public:
 	LLFloaterSearchReplace(const LLSD& sdKey);
 	~LLFloaterSearchReplace();
 
-	/*virtual*/ bool hasAccelerators() const;
-	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
-	/*virtual*/	BOOL postBuild();
-
+	/*
+	 * LLView overrides
+	 */
 public:
-	static void show(LLTextEditor* pEditor);
+	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
+	/*virtual*/ bool hasAccelerators() const;
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onOpen(const LLSD& sdKey);
 
+	/*
+	 * Member functions
+	 */
+public:
+	static void   show(LLTextEditor* pEditor);
 protected:
-	void onBtnSearch();
-	void onBtnReplace();
-	void onBtnReplaceAll();
+	LLTextEditor* getEditor() const;
+	void          onSearchClick();
+	void          onReplaceClick();
+	void          onReplaceAllClick();
 
+	/*
+	 * Member variables
+	 */
 private:
-	LLLineEditor*      mSearchEditor;
-	LLLineEditor*      mReplaceEditor;
-	LLCheckBoxCtrl*    mCaseInsensitiveCheck;
-	LLCheckBoxCtrl*    mSearchUpCheck;
-	LLHandle<LLUICtrl> mEditorHandle;
+	LLLineEditor*      m_pSearchEditor;
+	LLLineEditor*      m_pReplaceEditor;
+	LLCheckBoxCtrl*    m_pCaseInsensitiveCheck;
+	LLCheckBoxCtrl*    m_pSearchUpCheck;
+	LLHandle<LLUICtrl> m_EditorHandle;
 };
+
+// ============================================================================
 
 #endif // LL_FLOATERSEARCHREPLACE_H

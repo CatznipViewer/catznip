@@ -412,7 +412,10 @@ public:
 	LLRect					getDocRectFromDocIndex(S32 pos) const;
 
 	void					setReadOnly(bool read_only) { mReadOnly = read_only; }
-	bool					getReadOnly() { return mReadOnly; }
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-30 (Catznip-3.6)
+	bool					getReadOnly() const { return mReadOnly; }
+// [/SL:KB
+//	bool					getReadOnly() { return mReadOnly; }
 
 	void					setPlainText(bool value) { mPlainText = value;}
 	bool					getPlainText() const { return mPlainText; }
