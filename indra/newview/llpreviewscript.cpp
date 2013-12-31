@@ -1050,7 +1050,10 @@ void LLScriptEdCore::onErrorList(LLUICtrl*, void* user_data)
 		sscanf(line.c_str(), "%d %d", &row, &column);
 		//llinfos << "LLScriptEdCore::onErrorList() - " << row << ", "
 		//<< column << llendl;
-		self->mEditor->setCursor(row, column);
+// [SL:KB] - Patch: UI-ScriptGoToLine | Checked: 2013-12-31 (Catznip-3.6)
+		self->mEditor->scrollTo(row, column);
+// [/SL:KB]
+//		self->mEditor->setCursor(row, column);
 		self->mEditor->setFocus(TRUE);
 	}
 }
