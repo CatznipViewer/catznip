@@ -251,7 +251,7 @@ void LLPanelPlacesSearch::onSearchResult(const LLUUID& idQuery, U32 nStatus, con
 		sdColumns[0]["column"] = "name";    sdColumns[0]["type"] = "text";
 		sdColumns[1]["column"] = "traffic"; sdColumns[1]["type"] = "text";
 
-		for (LLSearchDirectory::places_results_vec_t::const_iterator itResult = lResults.cbegin(); itResult != lResults.cend(); ++itResult)
+		for (LLSearchDirectory::places_results_vec_t::const_iterator itResult = lResults.begin(); itResult != lResults.end(); ++itResult)
 		{
 			sdColumns[0]["value"] = itResult->mParcelName;
 			sdColumns[1]["value"] = llformat("%.0f", itResult->mDwell);
