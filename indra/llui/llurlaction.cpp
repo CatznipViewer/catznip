@@ -230,3 +230,35 @@ void LLUrlAction::blockObject(std::string url)
 		executeSLURL("secondlife:///app/agent/" + object_id + "/block/" + object_name);
 	}
 }
+
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-3.2.2) | Modified: Catznip-2.5.0
+void LLUrlAction::startIM(const std::string& url)
+{
+	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
+	LLURI uri(url);
+	LLSD path_array = uri.pathArray();
+	if (path_array.size() == 4)
+	{
+		std::string id_str = path_array.get(2).asString();
+		if (LLUUID::validate(id_str))
+		{
+			std::string cmd_str = path_array.get(1).asString();
+			executeSLURL("secondlife:///app/" + cmd_str + "/" + id_str + "/im");
+		}
+	}
+}
+
+void LLUrlAction::offerTeleport(const std::string& url)
+{
+	// Get id from 'secondlife:///app/{cmd}/{id}/{action}'
+	LLURI uri(url);
+	LLSD path_array = uri.pathArray();
+	if ( (path_array.size() == 4) && ("agent" == path_array.get(1).asString()) )
+	{
+		// Teleport offers only make sense for agents
+		std::string id_str = path_array.get(2).asString();
+		if (LLUUID::validate(id_str))
+			executeSLURL("secondlife:///app/agent/" + id_str + "/offerteleport");
+	}
+}
+// [/SL:KB]

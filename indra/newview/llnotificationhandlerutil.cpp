@@ -132,6 +132,14 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	LLUUID from_id = notification->getPayload()["from_id"];
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+		// If the user triggered the notification, log it to the destination instead
+		if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
+		{
+			from_id = notification->getPayload()["dest_id"];
+		}
+// [/SL:KB]
+
 	if (from_id.isNull())
 	{
 		// Normal behavior for system generated messages, don't spam.
@@ -185,6 +193,12 @@ void LLHandlerUtil::logToNearbyChat(const LLNotificationPtr& notification, EChat
 		chat_msg.mSourceType = type;
 		chat_msg.mFromName = SYSTEM_FROM;
 		chat_msg.mFromID = LLUUID::null;
+//// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+//		nearby_chat->addMessage(chat_msg, true, LLSD().with("do_not_log", true));
+//
+//		chat_msg.mText = notification->getLogMessage();
+//		nearby_chat->logMessage(chat_msg);
+//// [/SL:KB]
 		nearby_chat->addMessage(chat_msg);
 	}
 }

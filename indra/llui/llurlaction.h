@@ -84,6 +84,14 @@ public:
 	static void removeFriend(std::string url);
 	static void blockObject(std::string url);
 
+// [SL:KB] - Patch: Chat-LogFriendStatus | Checked: 2011-01-13 (Catznip-3.2.2) | Modified: Catznip-2.5.0
+	/// if the Url specifies an SL command in the form like 'app/{cmd}/{id}/*', start an IM session
+	static void startIM(const std::string& url);
+
+	/// if the Url specifies an SL command in the form like 'app/agent/{id}/*', offer a teleport
+	static void offerTeleport(const std::string& url);
+// [/SL:KB]
+
 	/// specify the callbacks to enable this class's functionality
 	typedef boost::function<void (const std::string&)> url_callback_t;
 	typedef boost::function<bool(const std::string& url)> execute_url_callback_t;

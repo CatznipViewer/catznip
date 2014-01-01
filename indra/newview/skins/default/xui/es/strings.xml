@@ -3943,7 +3943,7 @@ Si sigues recibiendo este mensaje, contacta con [SUPPORT_SITE].
 		Usted es el único usuario en esta sesión.
 	</string>
 	<string name="offline_message">
-		[NAME] está desconectado.
+		[NAME_SLURL] está desconectado.
 	</string>
 	<string name="invite_message">
 		Pulse el botón [BUTTON NAME] para aceptar/conectar este chat de voz.

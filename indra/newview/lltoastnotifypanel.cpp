@@ -41,8 +41,14 @@
 #include "llnotificationsutil.h"
 #include "llviewermessage.h"
 #include "llfloaterimsession.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+#include "llcheckboxctrl.h"
+// [/SL:KB]
 
-const S32 BOTTOM_PAD = VPAD * 3;
+//const S32 BOTTOM_PAD = VPAD * 3;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+const S32 BOTTOM_PAD = VPAD * 2.5;
+// [/SL:KB]
 const S32 IGNORE_BTN_TOP_DELTA = 3*VPAD;//additional ignore_btn padding
 S32 BUTTON_WIDTH = 90;
 // *TODO: magic numbers(???) - copied from llnotify.cpp(250)
@@ -468,6 +474,46 @@ void LLIMToastNotifyPanel::snapToMessageHeight()
 		}
 	}
 }
+
+//// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+//LLCheckBoxCtrl* LLToastNotifyPanel::createCheckBox(const std::string& strMessage, const std::string& strControl)
+//{
+//	LLControlVariable* pControl = gSavedSettings.getControl(strControl);
+//	if ( (!pControl) || (!pControl->isType(TYPE_BOOLEAN)) )
+//		return NULL;
+//
+//	LLCheckBoxCtrl::Params paramsCheck;
+//	paramsCheck.follows.flags = FOLLOWS_LEFT | FOLLOWS_BOTTOM;
+//	paramsCheck.label = strMessage;
+//	paramsCheck.name = "check";
+//
+//	LLCheckBoxCtrl* pCheckCtrl = LLUICtrlFactory::create<LLCheckBoxCtrl>(paramsCheck);
+//	if (!pCheckCtrl)
+//		return NULL;
+//
+//	const S32 LINE_HEIGHT = pCheckCtrl->getFont()->getLineHeight();
+//
+//	// Extend the height of the toast panel
+//	S32 nToastHeight = LLToastPanel::getRect().getHeight() + LINE_HEIGHT + LINE_HEIGHT * 2/3;
+//	LLToastPanel::reshape(getRect().getWidth(), nToastHeight, FALSE);
+//
+//	// Squeeze the checkbox in above the buttons
+//	LLRect check_rect;
+//	S32 nCheckBottom = ((!mButtons.empty()) ? mButtons.back().second->getRect().mTop : VPAD + BTN_HEIGHT) + LINE_HEIGHT * 2/3;
+//	pCheckCtrl->setRect(check_rect.setOriginAndSize(2 * HPAD, nCheckBottom, LLToastPanel::getRect().getWidth() - 3 * HPAD, LINE_HEIGHT));
+//	pCheckCtrl->set(pControl->getValue().asBoolean());
+//	pCheckCtrl->setCommitCallback(boost::bind(&LLToastNotifyPanel::onToggleCheck, this, pCheckCtrl, pControl));
+//	
+//	addChild(pCheckCtrl);
+//
+//	return pCheckCtrl;
+//}
+//
+//void LLToastNotifyPanel::onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl) const
+//{
+//	pControl->setValue(pCheckCtrl->get());
+//}
+//// [/SL:KB]
 
 void LLIMToastNotifyPanel::compactButtons()
 {

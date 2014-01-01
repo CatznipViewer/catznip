@@ -27,6 +27,9 @@
 
 #include "llviewerprecompiledheaders.h" // must be first include
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1)
+#include "llagentdata.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llfloaterimnearbychat.h"
 #include "llfloaterimnearbychat.h"

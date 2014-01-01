@@ -36,6 +36,9 @@
 #include "llxmlnode.h"
 #include "lluictrl.h"
 #include "lluictrlfactory.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+#include "llurlregistry.h"
+// [/SL:KB]
 #include "lldir.h"
 #include "llsdserialize.h"
 #include "lltrans.h"
@@ -70,6 +73,16 @@ LLNotificationForm::FormIgnore::FormIgnore()
 	save_option("save_option", false)
 {}
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+LLNotificationForm::FormCheck::FormCheck()
+:	control("control"),
+	text("text"),
+	type("type")
+{
+	type = "check";
+}
+// [/SL:KB]
+
 LLNotificationForm::FormButton::FormButton()
 :	index("index"),
 	text("text"),
@@ -92,6 +105,9 @@ LLNotificationForm::FormInput::FormInput()
 LLNotificationForm::FormElement::FormElement()
 :	button("button"),
 	input("input")
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+,	check("check")
+// [/SL:KB]
 {}
 
 LLNotificationForm::FormElements::FormElements()
@@ -405,9 +421,70 @@ void LLNotificationForm::setIgnored(bool ignored)
 	}
 }
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// static
+static U32 getLogTypeFromString(const std::string& strText)
+{
+	U32 nRet = 0;
+	if (std::string::npos != strText.find("chat"))
+		nRet |= LLNotificationTemplate::LOG_CHAT;
+
+	if (std::string::npos != strText.find("openim"))
+		nRet |= LLNotificationTemplate::LOG_IM_OPEN;
+	else if (std::string::npos != strText.find("im"))
+		nRet |= LLNotificationTemplate::LOG_IM;
+
+	return nRet;
+}
+
+bool LLNotificationTemplate::canLogToNearbyChat() const
+{
+	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	return (pControl) && (pControl->get().asInteger() & LOG_CHAT);
+}
+
+bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
+{
+	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
+	return (pControl) && ((nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession)));
+}
+
+void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
+{
+	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	if (pControl)
+	{
+		U32 nLogTo = pControl->get().asInteger();
+		if (fLog)
+			nLogTo |= LOG_CHAT_MASK & mCanLogTo;
+		else
+			nLogTo &= ~LOG_CHAT_MASK;
+		pControl->set(convert_to_llsd(nLogTo));
+	}
+}
+
+void LLNotificationTemplate::setLogToIM(bool fLog)
+{
+	LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
+	if (pControl)
+	{
+		U32 nLogTo = pControl->get().asInteger();
+		if (fLog)
+			nLogTo |= LOG_IM_MASK & mCanLogTo;
+		else
+			nLogTo &= ~LOG_IM_MASK;
+		pControl->set(convert_to_llsd(nLogTo));
+	}
+}
+// [/SL:KB]
+
 LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Params& p)
 :	mName(p.name),
 	mType(p.type),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	mCanLogTo(getLogTypeFromString(p.can_logto)),
+// [/SL:KB]
 	mMessage(p.value),
 	mFooter(p.footer.value),
 	mLabel(p.label),
@@ -427,6 +504,14 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mShowToast(p.show_toast),
     mSoundName("")
 {
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
+	if (nLogTo)
+	{
+		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
+	}
+// [/SL:KB]
+
 	if (p.sound.isProvided()
 		&& LLUI::sSettingGroups["config"]->controlExists(p.sound))
 	{
@@ -485,6 +570,9 @@ LLNotification::LLNotification(const LLSDParamAdapter<Params>& p) :
 	mPriority(p.priority),
 	mCancelled(false),
 	mIgnored(false),
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	mPersisted(false),
+// [/SL:KB]
 	mResponderObj(NULL),
 	mId(p.id.isProvided() ? p.id : LLUUID::generateNewID()),
 	mOfferFromAgent(p.offer_from_agent),
@@ -580,6 +668,9 @@ void LLNotification::updateFrom(LLNotificationPtr other)
 	mExpiresAt = other->mExpiresAt;
 	mCancelled = other->mCancelled;
 	mIgnored = other->mIgnored;
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	mPersisted = other->mPersisted;
+// [/SL:KB]
 	mPriority = other->mPriority;
 	mForm = other->mForm;
 	mResponseFunctorName = other->mResponseFunctorName;
@@ -719,6 +810,17 @@ const std::string& LLNotification::getIcon() const
 	return mTemplatep->mIcon;
 }
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+bool LLNotification::canLogToNearbyChat() const
+{
+	return mTemplatep->canLogToNearbyChat();
+}
+
+bool LLNotification::canLogToIM(bool fOpenSession) const
+{
+	return mTemplatep->canLogToIM(fOpenSession);
+}
+// [/SL:KB]
 
 bool LLNotification::isPersistent() const
 {
@@ -886,6 +988,34 @@ std::string LLNotification::getMessage() const
 	LLStringUtil::format(message, mSubstitutions);
 	return message;
 }
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+std::string LLNotification::getLogMessage() const
+{
+	if (!mTemplatep)
+		return std::string();
+
+	// Iterate over all substitutions and replace any SLURLs we come across with their label
+	LLSD logSubstitutions = mSubstitutions;
+	for (LLSD::map_iterator itSubstitution = logSubstitutions.beginMap(); itSubstitution != logSubstitutions.endMap(); ++itSubstitution)
+	{
+		LLSD& sdSubstitution = itSubstitution->second;
+		if (!sdSubstitution.isString())
+			continue;
+
+		LLUrlMatch urlMatch; std::string strSubstitution = sdSubstitution.asString();
+		if ( (LLUrlRegistry::instance().findUrl(strSubstitution, urlMatch)) &&
+		     (0 == urlMatch.getStart()) && (urlMatch.getEnd() >= strSubstitution.size() - 1) )
+		{
+			sdSubstitution = urlMatch.getLabel();
+		}
+	}
+
+	std::string message = mTemplatep->mMessage;
+	LLStringUtil::format(message, logSubstitutions);
+	return message;
+}
+// [/SL:KB]
 
 std::string LLNotification::getFooter() const
 {

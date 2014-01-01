@@ -75,7 +75,14 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 	
-	LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time
+	if (!notification->isPersisted())
+	{
+		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+	}
+// [/SL:KB]
+//	LLHandlerUtil::logGroupNoticeToIMGroup(notification);
 
 	LLPanel* notify_box = new LLToastGroupNotifyPanel(notification);
 	LLToast::Params p;

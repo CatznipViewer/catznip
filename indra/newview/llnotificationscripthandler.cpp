@@ -81,6 +81,22 @@ bool LLScriptHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 	
+//// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+//	// Don't log persisted notifications a second time
+//	if (!notification->isPersisted())
+//	{
+//		// Archive message in nearby chat if desired
+//		if (LLHandlerUtil::canLogToNearbyChat(notification))
+//		{
+//			LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+//		}
+//		// Archive message in instant message if desired
+//		if (LLHandlerUtil::canLogToIM(notification))
+//		{
+//			LLHandlerUtil::logToIMP2P(notification);
+//		}
+//	}
+//// [/SL:KB]
 	if (notification->canLogToIM())
 	{
 		LLHandlerUtil::logToIMP2P(notification);
@@ -105,6 +121,13 @@ bool LLScriptHandler::processNotification(const LLNotificationPtr& notification)
 							||	notification->getName() == "GodMessage" 
 							|| notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH;
 		}
+
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2.1) | Added: Catznip-3.2.0
+		if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
+		{
+			p.lifetime_secs = gSavedSettings.getS32("ScriptQuestionToastLifeTime");
+		}
+// [/SL:KB]
 
 		LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel.get());
 		if(channel)

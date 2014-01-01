@@ -205,6 +205,10 @@ struct LLNotificationTemplate
 										label,
 										sound,
 										type,
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+										can_logto,
+										logto,
+// [/SL:KB]
 										value;
 		Optional<U32>					duration;
 		Optional<S32>					expire_option;
@@ -229,6 +233,10 @@ struct LLNotificationTemplate
 			priority("priority"),
 			sound("sound"),
 			type("type"),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+			can_logto("can_logto"),
+			logto("logto"),
+// [/SL:KB]
 			value("value"),
 			duration("duration"),
 			expire_option("expireOption", -1),
@@ -310,7 +318,25 @@ struct LLNotificationTemplate
 	std::string mURLTarget;
 	//This is a flag that tells if the url needs to open externally dispite 
 	//what the user setting is.
-	
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	enum ELogType
+	{
+		LOG_CHAT	 = 1,	// Log to nearby chat
+		LOG_IM		 = 2,	// Log to instant message
+		LOG_IM_OPEN	 = 4,	// Log only if there's an open IM session
+
+		LOG_CHAT_MASK= LOG_CHAT,
+		LOG_IM_MASK	 = LOG_IM | LOG_IM_OPEN,
+	};
+	U32 mCanLogTo;
+
+	bool canLogToNearbyChat() const;
+	bool canLogToIM(bool fOpenSession) const;
+	void setLogToNearbyChat(bool fLog);
+	void setLogToIM(bool fLog);
+// [/SL:KB]
+
 	// does this notification persist across sessions? if so, it will be
 	// serialized to disk on first receipt and read on startup
 	bool mPersist;

@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llscreenchannel.cpp
  * @brief Class implements a channel on a screen in which appropriate toasts may appear.
  *

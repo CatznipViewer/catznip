@@ -722,8 +722,16 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	// Popup a notify box with online status of this agent
 	// Use display name only because this user is your friend
 	LLSD args;
-	args["NAME"] = av_name.getDisplayName();
+//	args["NAME"] = av_name.getDisplayName();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2010-06-05 (Catznip-3.2.1) | Added: Catznip-2.0.1
+	args["NAME_SLURL"] = LLSLURL("agent", agent_id, "about").getSLURLString();
+// [/SL:KB]
 	args["STATUS"] = online ? LLTrans::getString("OnlineStatus") : LLTrans::getString("OfflineStatus");
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	// Needed so it can be logged to nearby chat or IM
+	payload["from_id"] = agent_id;
+// [/SL:KB]
 
 	LLNotificationPtr notification;
 	if (online)
@@ -740,10 +748,10 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 			LLNotificationsUtil::add("FriendOnlineOffline", args, payload);
 	}
 
-	// If there's an open IM session with this agent, send a notification there too.
-	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, agent_id);
-	std::string notify_msg = notification->getMessage();
-	LLIMModel::instance().proccessOnlineOfflineNotification(session_id, notify_msg);
+//	// If there's an open IM session with this agent, send a notification there too.
+//	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, agent_id);
+//	std::string notify_msg = notification->getMessage();
+//	LLIMModel::instance().proccessOnlineOfflineNotification(session_id, notify_msg);
 }
 
 void LLAvatarTracker::formFriendship(const LLUUID& id)
