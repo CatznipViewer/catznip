@@ -635,7 +635,10 @@ void LLAvatarTracker::processChange(LLMessageSystem* msg)
 				if((mBuddyInfo[agent_id]->getRightsGrantedFrom() ^  new_rights) & LLRelationship::GRANT_MODIFY_OBJECTS)
 				{
 					LLSD args;
-					args["NAME"] = LLSLURL("agent", agent_id, "displayname").getSLURLString();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+					args["NAME"] = LLSLURL("agent", agent_id, "about").getSLURLString();
+// [/SL:KB]
+//					args["NAME"] = LLSLURL("agent", agent_id, "displayname").getSLURLString();
 					
 					LLSD payload;
 					payload["from_id"] = agent_id;
@@ -723,12 +726,12 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	// Use display name only because this user is your friend
 	LLSD args;
 //	args["NAME"] = av_name.getDisplayName();
-// [SL:KB] - Patch: Notification-Logging | Checked: 2010-06-05 (Catznip-3.2.1) | Added: Catznip-2.0.1
-	args["NAME_SLURL"] = LLSLURL("agent", agent_id, "about").getSLURLString();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2010-06-05 (Catznip-2.0)
+	args["NAME"] = LLSLURL("agent", agent_id, "about").getSLURLString();
 // [/SL:KB]
 	args["STATUS"] = online ? LLTrans::getString("OnlineStatus") : LLTrans::getString("OfflineStatus");
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	// Needed so it can be logged to nearby chat or IM
 	payload["from_id"] = agent_id;
 // [/SL:KB]

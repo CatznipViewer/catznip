@@ -70,6 +70,29 @@ bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
 	return res;
 }
 
+// [SL:KB]
+// static
+bool LLHandlerUtil::canLogToChat(const LLNotificationPtr& notification)
+{
+	return notification->canLogToNearbyChat();
+}
+
+// static
+bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
+{
+	bool fOpenSession = false;
+
+	const LLUUID idFrom = notification->getPayload()["from_id"];
+	if (idFrom.notNull())
+	{
+		const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom);
+		fOpenSession = (LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", idSession) != NULL);
+	}
+
+	return notification->canLogToIM(fOpenSession);
+}
+// [/SL:KB]
+
 // static
 void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 		const std::string& session_name, const std::string& from_name,

@@ -299,6 +299,11 @@ public:
 	 */
 	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
 
+// [SL:KB]
+	static bool canLogToChat(const LLNotificationPtr& notification);
+	static bool canLogToIM(const LLNotificationPtr& notification);
+// [/SL:KB]
+
 	/**
 	 * Writes notification message to IM session.
 	 */

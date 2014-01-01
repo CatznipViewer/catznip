@@ -3112,7 +3112,7 @@ Would you like to trust this authority?
    icon="alertmodal.tga"
    name="GrantedModifyRights"
    persist="true"
-   log_to_im="true"   
+   can_logto="im"
    type="notify">
 [NAME] has given you permission to edit their objects.
   </notification>
@@ -3121,7 +3121,7 @@ Would you like to trust this authority?
    icon="alertmodal.tga"
    name="RevokedModifyRights"
    persist="true"
-   log_to_im="true"   
+   can_logto="im"
    type="notify">
 Your privilege to modify [NAME]&apos;s objects has been revoked
   </notification>
@@ -4401,8 +4401,6 @@ Are you sure you want to change the Estate Covenant?
   <notification
    icon="notifytip.tga"
    name="RegionEntryAccessBlocked_Notify"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
    <tag>fail</tag>
 The region you're trying to visit contains [REGIONMATURITY] content, but your current preferences are set to exclude [REGIONMATURITY] content.
@@ -4411,8 +4409,6 @@ The region you're trying to visit contains [REGIONMATURITY] content, but your cu
   <notification
    icon="notifytip.tga"
    name="RegionEntryAccessBlocked_NotifyAdultsOnly"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     <tag>fail</tag>
     The region you're trying to visit contains [REGIONMATURITY] content, which is accessible to adults only.
@@ -4484,8 +4480,6 @@ The region you're trying to visit contains [REGIONMATURITY] content, but your cu
   <notification
    icon="notifytip.tga"
    name="TeleportEntryAccessBlocked_Notify"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     <unique>
       <context>REGIONMATURITY</context>
@@ -4497,8 +4491,6 @@ The region you're trying to visit contains [REGIONMATURITY] content, but your cu
   <notification
    icon="notifytip.tga"
    name="TeleportEntryAccessBlocked_NotifyAdultsOnly"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     <unique>
       <context>REGIONMATURITY</context>
@@ -4619,8 +4611,6 @@ You won't receive any more notifications that you're about to visit a region wit
   <notification
    icon="notifytip.tga"
    name="LandClaimAccessBlocked_Notify"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     The land you're trying to claim contains [REGIONMATURITY] content, but your current preferences are set to exclude [REGIONMATURITY] content.
     <tag>fail</tag>
@@ -4629,8 +4619,6 @@ You won't receive any more notifications that you're about to visit a region wit
   <notification
    icon="notifytip.tga"
    name="LandClaimAccessBlocked_NotifyAdultsOnly"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     <tag>fail</tag>
     The land you're trying to claim contains [REGIONMATURITY] content, which is accessible to adults only.
@@ -4688,8 +4676,6 @@ You won't receive any more notifications that you're about to visit a region wit
   <notification
    icon="notifytip.tga"
    name="LandBuyAccessBlocked_Notify"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     The land you're trying to buy contains [REGIONMATURITY] content, but your current preferences are set to exclude [REGIONMATURITY] content.
     <tag>fail</tag>
@@ -4698,8 +4684,6 @@ You won't receive any more notifications that you're about to visit a region wit
   <notification
    icon="notifytip.tga"
    name="LandBuyAccessBlocked_NotifyAdultsOnly"
-   log_to_im="false"
-   log_to_chat="true"
    type="notifytip">
     <tag>fail</tag>
     The land you're trying to buy contains [REGIONMATURITY] content, which is accessible to adults only.
@@ -5655,8 +5639,7 @@ The string [STRING_NAME] is missing from strings.xml
   <notification
    icon="notifytip.tga"
    name="IMSystemMessageTip"
-   log_to_im="true"   
-   log_to_chat="false"   
+   can_logto="im"
    type="notifytip">
 [MESSAGE]
   </notification>
@@ -5701,7 +5684,7 @@ Topic: [SUBJECT], Message: [MESSAGE]
   <notification
    icon="notifytip.tga"
    name="FriendOnlineOffline"
-   log_to_chat="false"
+   can_logto="chat|openim"
    type="notifytip">
     <tag>friendship</tag>
 [NAME_SLURL] is [STATUS]
@@ -5951,8 +5934,8 @@ You don&apos;t have permission to copy this.
   <notification
    icon="notifytip.tga"
    name="InventoryAccepted"
-   log_to_im="true"   
-   log_to_chat="false"
+   can_logto="chat|im"
+   logto="im"
    type="notifytip">
 [NAME] received your inventory offer.
   </notification>
@@ -5960,8 +5943,8 @@ You don&apos;t have permission to copy this.
   <notification
    icon="notifytip.tga"
    name="InventoryDeclined"
-   log_to_im="true"   
-   log_to_chat="false"
+   can_logto="chat|im"
+   logto="im"
    type="notifytip">
 [NAME] declined your inventory offer.
   </notification>
@@ -6048,7 +6031,6 @@ Please select at least one type of content to search (General, Moderate, or Adul
   <notification
    icon="notify.tga"
    name="PaymentReceived"
-   log_to_im="true"   
    persist="true"
    can_logto="chat|im"
    logto="im"
@@ -6060,7 +6042,6 @@ Please select at least one type of content to search (General, Moderate, or Adul
   <notification
    icon="notify.tga"
    name="PaymentSent"
-   log_to_im="true"   
    persist="true"
    can_logto="chat|im"
    logto="im"
@@ -6209,8 +6190,8 @@ The objects on the selected parcel that are NOT owned by you have been returned 
   <notification
    icon="notify.tga"
    name="ServerObjectMessage"
-   log_to_im="true"   
    persist="true"
+   can_logto="chat|im"
    type="notify">
 Message from [NAME]:
 &lt;nolink&gt;[MSG]&lt;/nolink&gt;
@@ -6619,7 +6600,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="UserGiveItem"
-   log_to_im ="true"
+   can_logto="chat|im"
    type="offer"
    sound="UISndNewIncomingIMSession">
 [NAME_SLURL] has given you this [OBJECTTYPE]:
@@ -6680,8 +6661,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOffered"
-   log_to_im="true"
-   log_to_chat="false"
+   can_logto="im"
    type="offer"
    sound="UISndNewIncomingIMSession">
 [NAME_SLURL] has offered to teleport you to their location:
@@ -6704,8 +6684,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
   <notification
    icon="notify.tga"
    name="TeleportOffered_MaturityExceeded"
-   log_to_im="true"
-   log_to_chat="false"
+   can_logto="im"
    type="offer">
 [NAME_SLURL] has offered to teleport you to their location:
 
@@ -6729,8 +6708,7 @@ This region contains [REGION_CONTENT_MATURITY] content, but your current prefere
   <notification
    icon="notify.tga"
    name="TeleportOffered_MaturityBlocked"
-   log_to_im="true"
-   log_to_chat="false"
+   can_logto="im"
    type="notifytip">
 [NAME_SLURL] has offered to teleport you to their location:
 
@@ -6744,9 +6722,8 @@ However, this region contains content accessible to adults only.
   <notification
    icon="notify.tga"
    name="TeleportOfferSent"
-   log_to_im="true"
-   log_to_chat="false"
    show_toast="false"
+   can_logto="im"
    type="notify">
 	Teleport offer sent to [TO_NAME]
   </notification>
@@ -6795,7 +6772,7 @@ Offer a teleport?
   <notification
    icon="notify.tga"
    name="OfferFriendship"
-   log_to_im="true"
+   can_logto="im"
    type="offer">
     <tag>friendship</tag>
     <tag>confirm</tag>
@@ -6819,7 +6796,7 @@ Offer a teleport?
   <notification
    icon="notify.tga"
    name="FriendshipOffered"
-   log_to_im="true"   
+	can_logto="chat|im"
    type="notify">
     <tag>friendship</tag>
 	You have offered friendship to [TO_NAME]
@@ -6849,7 +6826,7 @@ Offer a teleport?
   <notification
    icon="notify.tga"
    name="FriendshipAccepted"
-   log_to_im="true"   
+   can_logto="chat|im"
    type="notify">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; accepted your friendship offer.
@@ -6858,8 +6835,8 @@ Offer a teleport?
   <notification
    icon="notify.tga"
    name="FriendshipDeclined"
-   log_to_im="true"   
    persist="true"
+   can_logto="chat|im"
    type="notify">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; declined your friendship offer.
@@ -6868,7 +6845,7 @@ Offer a teleport?
     <notification
    icon="notify.tga"
    name="FriendshipAcceptedByMe"
-   log_to_im="true"   
+   can_logto="im"
    type="notify">
     <tag>friendship</tag>
 Friendship offer accepted.
@@ -6877,7 +6854,7 @@ Friendship offer accepted.
   <notification
    icon="notify.tga"
    name="FriendshipDeclinedByMe"
-   log_to_im="true"   
+   can_logto="im"
    type="notify">
     <tag>friendship</tag>
 Friendship offer declined.

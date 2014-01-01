@@ -205,7 +205,7 @@ struct LLNotificationTemplate
 										label,
 										sound,
 										type,
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 										can_logto,
 										logto,
 // [/SL:KB]
@@ -233,7 +233,7 @@ struct LLNotificationTemplate
 			priority("priority"),
 			sound("sound"),
 			type("type"),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 			can_logto("can_logto"),
 			logto("logto"),
 // [/SL:KB]
@@ -319,7 +319,7 @@ struct LLNotificationTemplate
 	//This is a flag that tells if the url needs to open externally dispite 
 	//what the user setting is.
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	enum ELogType
 	{
 		LOG_CHAT	 = 1,	// Log to nearby chat
@@ -327,7 +327,7 @@ struct LLNotificationTemplate
 		LOG_IM_OPEN	 = 4,	// Log only if there's an open IM session
 
 		LOG_CHAT_MASK= LOG_CHAT,
-		LOG_IM_MASK	 = LOG_IM | LOG_IM_OPEN,
+		LOG_IM_MASK	 = LOG_IM | LOG_IM_OPEN
 	};
 	U32 mCanLogTo;
 
@@ -354,8 +354,8 @@ struct LLNotificationTemplate
 	std::list<std::string> mTags;
 
 	// inject these notifications into chat/IM streams
-	bool mLogToChat;
-	bool mLogToIM;
+//	bool mLogToChat;
+//	bool mLogToIM;
 	bool mShowToast;
 };
 

@@ -36,7 +36,7 @@
 #include "llxmlnode.h"
 #include "lluictrl.h"
 #include "lluictrlfactory.h"
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 #include "llurlregistry.h"
 // [/SL:KB]
 #include "lldir.h"
@@ -421,7 +421,7 @@ void LLNotificationForm::setIgnored(bool ignored)
 	}
 }
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 // static
 static U32 getLogTypeFromString(const std::string& strText)
 {
@@ -439,15 +439,17 @@ static U32 getLogTypeFromString(const std::string& strText)
 
 bool LLNotificationTemplate::canLogToNearbyChat() const
 {
+	// If no setting is defined we log to nearby chat by default
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
-	return (pControl) && (pControl->get().asInteger() & LOG_CHAT);
+	return (pControl) ? (pControl->get().asInteger() & LOG_CHAT) : true;
 }
 
 bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
 {
+	// If no setting is defined we don't log to IMs by default
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
 	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
-	return (pControl) && ((nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession)));
+	return (nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession));
 }
 
 void LLNotificationTemplate::setLogToNearbyChat(bool fLog)
@@ -482,7 +484,7 @@ void LLNotificationTemplate::setLogToIM(bool fLog)
 LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Params& p)
 :	mName(p.name),
 	mType(p.type),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	mCanLogTo(getLogTypeFromString(p.can_logto)),
 // [/SL:KB]
 	mMessage(p.value),
@@ -499,17 +501,24 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mPriority(p.priority),
 	mPersist(p.persist),
 	mDefaultFunctor(p.functor.isProvided() ? p.functor() : p.name()),
-	mLogToChat(p.log_to_chat),
-	mLogToIM(p.log_to_im),
+//	mLogToChat(p.log_to_chat),
+//	mLogToIM(p.log_to_im),
 	mShowToast(p.show_toast),
     mSoundName("")
 {
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
 	if (nLogTo)
 	{
 		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
 	}
+
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+	if ( (p.log_to_chat.isProvided()) || (p.log_to_im.isProvided()) )
+	{
+		llerrs << "Notification '" << mName << " is using deprecated 'log_to_chat' or 'log_to_im' parameters" << llendl;
+	}
+#endif // LL_RELEASE_FOR_DOWNLOAD
 // [/SL:KB]
 
 	if (p.sound.isProvided()
@@ -810,7 +819,7 @@ const std::string& LLNotification::getIcon() const
 	return mTemplatep->mIcon;
 }
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 bool LLNotification::canLogToNearbyChat() const
 {
 	return mTemplatep->canLogToNearbyChat();
@@ -1043,15 +1052,15 @@ std::string LLNotification::getURL() const
 	return (mTemplatep ? url : "");
 }
 
-bool LLNotification::canLogToChat() const
-{
-	return mTemplatep->mLogToChat;
-}
+//bool LLNotification::canLogToChat() const
+//{
+//	return mTemplatep->mLogToChat;
+//}
 
-bool LLNotification::canLogToIM() const
-{
-	return mTemplatep->mLogToIM;
-}
+//bool LLNotification::canLogToIM() const
+//{
+//	return mTemplatep->mLogToIM;
+//}
 
 bool LLNotification::canShowToast() const
 {

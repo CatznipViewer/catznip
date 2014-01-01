@@ -88,7 +88,10 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 	}
 	else
 	{
-		bool add_notif_to_im = notification->canLogToIM() && notification->hasFormElements();
+//		bool add_notif_to_im = notification->canLogToIM() && notification->hasFormElements();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		bool add_notif_to_im = (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements());
+// [/SL:KB]
 
 		if (add_notif_to_im)
 		{
@@ -117,7 +120,10 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 		{
 			LLNotificationsUtil::cancel(notification);
 		}
-		else if(!notification->canLogToIM() || !LLHandlerUtil::isIMFloaterOpened(notification))
+//		else if(!notification->canLogToIM() || !LLHandlerUtil::isIMFloaterOpened(notification))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		else if ( (!LLHandlerUtil::canLogToIM(notification)) || (!LLHandlerUtil::isIMFloaterOpened(notification)) )
+// [/SL:KB]
 		{
 			LLToastNotifyPanel* notify_box = new LLToastNotifyPanel(notification);
 			LLToast::Params p;
@@ -134,7 +140,10 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 
 		}
 
-		if (notification->canLogToIM())
+//		if (notification->canLogToIM())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		if (LLHandlerUtil::canLogToIM(notification))
+// [/SL:KB]
 		{
 			// log only to file if notif panel can be embedded to IM and IM is opened
 			bool file_only = add_notif_to_im && LLHandlerUtil::isIMFloaterOpened(notification);
@@ -177,9 +186,12 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 	}
 	else
 	{
-		if (notification->canLogToIM() 
-			&& notification->hasFormElements()
-			&& !LLHandlerUtil::isIMFloaterOpened(notification))
+//		if (notification->canLogToIM() 
+//			&& notification->hasFormElements()
+//			&& !LLHandlerUtil::isIMFloaterOpened(notification))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements()) && (!LLHandlerUtil::isIMFloaterOpened(notification)) )
+// [/SL:KB]
 		{
 			LLHandlerUtil::decIMMesageCounter(notification);
 		}

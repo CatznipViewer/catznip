@@ -39,9 +39,6 @@
 #include "llbutton.h"
 #include "llhttpclient.h"
 #include "llsdutil_math.h"
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1)
-#include "llslurl.h"
-// [/SL:KB]
 #include "llstring.h"
 #include "lltextutil.h"
 #include "lltrans.h"
@@ -64,6 +61,9 @@
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "llfloaterimnearbychat.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+#include "llslurl.h"
+// [/SL:KB]
 #include "llspeakers.h" //for LLIMSpeakerMgr
 #include "lltextbox.h"
 #include "lltoolbarview.h"
@@ -3345,13 +3345,13 @@ void LLIMMgr::noteOfflineUsers(
 //			if (info
 //				&& !info->isOnline()
 //				&& LLAvatarNameCache::get(ids.get(i), &av_name))
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 			if (info && !info->isOnline())
 // [/SL:KB]
 			{
 				LLUIString offline = LLTrans::getString("offline_message");
 				// Use display name only because this user is your friend
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 				offline.setArg("[NAME_SLURL]", LLSLURL("agent", ids.get(i), "about").getSLURLString());
 				im_model.addMessage(session_id, SYSTEM_FROM, LLUUID::null, offline);
 // [/SL:KB]

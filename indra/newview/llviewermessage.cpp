@@ -5554,7 +5554,7 @@ static void money_balance_group_notify(const LLUUID& group_id,
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
 	// Ignore the above, not using SLURLs makes this notification log to file cleanly
 	std::string message = args["MESSAGE"];
-	LLStringUtil::format(message, LLSD().with("NAME", name));
+	LLStringUtil::format(message, LLSD().with("NAME", LLSLURL("group", group_id, "inspect").getSLURLString()));
 	args["MESSAGE"] = message;
 // [/SL:KB]
 	LLNotificationsUtil::add(notification, args, payload);
@@ -5572,7 +5572,7 @@ static void money_balance_avatar_notify(const LLUUID& agent_id,
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
 	// Ignore the above, not using SLURLs makes this notification log to file cleanly
 	std::string message = args["MESSAGE"];
-	LLStringUtil::format(message, LLSD().with("NAME", av_name.getCompleteName()));
+	LLStringUtil::format(message, LLSD().with("NAME", LLSLURL("agent", agent_id, "about").getSLURLString()));
 	args["MESSAGE"] = message;
 // [/SL:KB]
 	LLNotificationsUtil::add(notification, args, payload);
@@ -5706,7 +5706,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		notification = "PaymentReceived";
 	}
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
-	// make notification loggable
+	// Make notification loggable
 	payload["from_id"] = source_id;
 	payload["dest_id"] = dest_id;
 // [/SL:KB]

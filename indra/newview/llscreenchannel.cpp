@@ -40,6 +40,9 @@
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llfloaterimsession.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+#include "llnotificationhandler.h"
+// [/SL:KB]
 #include "llscriptfloater.h"
 #include "llrootview.h"
 
@@ -267,8 +270,11 @@ void LLScreenChannel::addToast(const LLToast::Params& p)
 	{
 		LLNotificationPtr notification = LLNotifications::instance().find(p.notif_id);
 
-		if (notification &&
-			(!notification->canLogToIM() || !notification->hasFormElements()))
+//		if (notification &&
+//			(!notification->canLogToIM() || !notification->hasFormElements()))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (notification) && ((!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements())) )
+// [/SL:KB]
 		{
 			// only cancel notification if it isn't being used in IM session
 			LLNotifications::instance().cancel(notification);
@@ -457,7 +463,10 @@ void LLScreenChannel::killToastByNotificationID(LLUUID id)
 		//			the toast will be destroyed.
 		if(toast && toast->isNotificationValid())
 		{
-			if (!notification->canLogToIM() || !notification->hasFormElements())
+//			if (!notification->canLogToIM() || !notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+			if ( (!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements()) )
+// [/SL:KB]
 			{
 				// only cancel notification if it isn't being used in IM session
 				LLNotifications::instance().cancel(notification);
@@ -478,7 +487,10 @@ void LLScreenChannel::killToastByNotificationID(LLUUID id)
 			LLToast* toast = it->getToast();
 			if (toast)
 			{
-				if (!notification->canLogToIM() || !notification->hasFormElements())
+//				if (!notification->canLogToIM() || !notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+				if ( (!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements()) )
+// [/SL:KB]
 				{
 					// only cancel notification if it isn't being used in IM session
 					LLNotifications::instance().cancel(notification);

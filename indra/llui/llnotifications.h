@@ -522,7 +522,7 @@ public:
 
 	const std::string& getIcon() const;
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	bool canLogToNearbyChat() const;
 	bool canLogToIM(bool fOpenSession) const;
 // [/SL:KB]
@@ -585,8 +585,8 @@ public:
 	std::string getURL() const;
 	S32 getURLOption() const;
     S32 getURLOpenExternally() const;
-	bool canLogToChat() const;
-	bool canLogToIM() const;
+//	bool canLogToChat() const;
+//	bool canLogToIM() const;
 	bool canShowToast() const;
 	bool hasFormElements() const;
     void playSound();

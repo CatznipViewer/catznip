@@ -35,6 +35,9 @@
 // [/SL:KB]
 #include "llfloaterreg.h"
 #include "lllocalcliprect.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+#include "llnotificationhandler.h"
+// [/SL:KB]
 // [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1)
 #include "llpanelblockedlist.h"
 // [/SL:KB]
@@ -237,9 +240,13 @@ bool LLNotificationChiclet::ChicletNotificationChannel::filterNotification( LLNo
 	{
 		displayNotification = false;
 	}
-	else if( !(notification->canLogToIM() && notification->hasFormElements())
-			&& (!notification->getPayload().has("give_inventory_notification")
-				|| notification->getPayload()["give_inventory_notification"]))
+//	else if( !(notification->canLogToIM() && notification->hasFormElements())
+//			&& (!notification->getPayload().has("give_inventory_notification")
+//				|| notification->getPayload()["give_inventory_notification"]))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	else if ( !(LLNotificationsUI::LLHandlerUtil::canLogToIM(notification) && (notification->hasFormElements())) && 
+	          ( (!notification->getPayload().has("give_inventory_notification")) || (notification->getPayload()["give_inventory_notification"]) ) )
+// [/SL:KB]
 	{
 		displayNotification = true;
 	}
