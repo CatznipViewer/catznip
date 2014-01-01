@@ -137,7 +137,7 @@ LLCrashLogger::~LLCrashLogger()
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
 bool getSLLog(const std::string& strLogPath, std::string& strLogFile)
 {
-	std::ifstream inLogFile(strLogPath, std::ios::ate);
+	std::ifstream inLogFile(strLogPath.c_str(), std::ios::ate);
 	if (inLogFile.is_open())
 	{
 		std::ifstream::pos_type szLogFile = inLogFile.tellg();

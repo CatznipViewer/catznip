@@ -2477,7 +2477,7 @@ void LLPanelPreferenceCrashReports::onCopySelection()
 		std::string strCrash;
 
 		const std::vector<LLScrollListItem*> selRows = (pCrashList->getNumSelected() > 0) ? pCrashList->getAllSelected() : pCrashList->getAllData();
-		for (auto itRow = selRows.cbegin(); itRow != selRows.cend(); ++itRow)
+		for (std::vector<LLScrollListItem*>::const_iterator itRow = selRows.begin(); itRow != selRows.end(); ++itRow)
 		{
 			const LLScrollListItem* pSelectedRow = *itRow;
 
