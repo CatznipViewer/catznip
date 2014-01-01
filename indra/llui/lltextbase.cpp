@@ -2792,13 +2792,13 @@ void LLTextBase::setHighlightWord(const std::string& strHighlight, bool fCaseIns
 	LLWString wstrText = getWText();
 	LLWString wstrHighlight = utf8str_to_wstring(strHighlight);
 
-	std::list<boost::iterator_range<LLWString::const_iterator>> highlightRanges;
+	std::list<boost::iterator_range<LLWString::const_iterator> > highlightRanges;
 	if (fCaseInsensitive)
 		boost::ifind_all(highlightRanges, wstrText, wstrHighlight);
 	else
 		boost::find_all(highlightRanges, wstrText, wstrHighlight);
 
-	for (std::list<boost::iterator_range<LLWString::const_iterator>>::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
+	for (std::list<boost::iterator_range<LLWString::const_iterator> >::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
 	{
 		S32 idxStart = itRange->begin() - wstrText.begin();
 		mHighlights.push_back(range_pair_t(idxStart, idxStart + itRange->size()));
