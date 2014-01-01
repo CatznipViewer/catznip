@@ -6670,7 +6670,7 @@ class LLAttachmentDetach : public view_listener_t
 void handle_attachment_detach_folder()
 {
 	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
-	for (auto itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
+	for (LLObjectSelection::root_object_iterator itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
 	{
 		const LLViewerObject* pAttachObj = (*itNode)->getObject();
 		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
@@ -6688,7 +6688,7 @@ bool enable_attachment_detach_folder()
 {
 	// Return true if there's at least one attachment's folder that we can remove
 	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
-	for (auto itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
+	for (LLObjectSelection::root_object_iterator itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
 	{
 		const LLViewerObject* pAttachObj = (*itNode)->getObject();
 		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
