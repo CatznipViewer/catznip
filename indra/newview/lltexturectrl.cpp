@@ -877,7 +877,7 @@ void LLFloaterTexturePicker::onBtnAdd(void* userdata)
 void LLFloaterTexturePicker::onFilePickerCallback(const std::vector<std::string>& files)
 {
 	bool add_successful = false;
-	for (auto it = files.begin(); it != files.end(); ++it)
+	for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it)
 	{
 		add_successful |= LLLocalBitmapMgr::addUnit(*it);
 	}
