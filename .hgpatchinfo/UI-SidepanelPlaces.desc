@@ -1,0 +1,9 @@
+[UI/SidepanelPlaces]
+- added : "Search" panel to the places sidepanel floater
+    -> uses the legacy search backend that was added in UI-Search
+- changed : don't show "Library" landmarks in the landmarks places sidepanel
+- changed : cleaned up XUI layout and made it more consistent with other sidepanel floaters
+
+[Control/Button]
+- changed : draw the centered image overlay of a button to the left of its label instead of behind it
+    -> consistent with how left and right aligned image overlays are displayed

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-background_visible="true"
+background_visible="false"
  default_tab_group="1"
  follows="all"
  height="570"
@@ -10,70 +10,87 @@ background_visible="true"
  name="places panel"
  top="0"
  left="0"
- width="333">
+ width="330">
     <string
      name="landmarks_tab_title"
      value="MY LANDMARKS" />
     <string
      name="teleport_history_tab_title"
      value="TELEPORT HISTORY" />
+    <string
+     name="search_tab_title"
+     value="SEARCH" />
     <filter_editor
      text_pad_left="10"
      follows="left|top|right"
-     font="SansSerifSmall"
      height="23"
      layout="topleft"
      left="10"
      label="Filter My Places"
      max_length_chars="300"
      name="Filter"
-     top="3"
-     width="303" />
+     top="0"
+     width="310" />
+    <search_editor
+     clear_button_visible="true"
+     text_pad_left="10"
+     follows="left|top|right"
+     height="23"
+     layout="topleft"
+     left="10"
+     label="Search places (Press Enter to submit)"
+     max_length_chars="300"
+     name="SearchQuery"
+     top="0"
+     width="310">
+        <search_editor.clear_button
+         image_unselected="Icon_Close_Toast"
+         image_selected="Icon_Close_Toast" />
+    </search_editor>
     <tab_container
      follows="all"
      halign="center"
-     height="503"
+     height="543"
      layout="topleft"
-     left="6"
+     left="3"
      name="Places Tabs"
-     tab_min_width="80"
-     tab_max_width="157"
-     tab_height="30"
+     tab_min_width="65"
+     tab_height="25"
      tab_group="1"
      tab_position="top"
-     top_pad="10"
-     width="315" />
+     top_pad="4"
+     width="324" />
     <panel
      class="panel_place_profile"
      filename="panel_place_profile.xml"
      follows="all"
-     height="533"
+     height="543"
      layout="topleft"
      left="0"
      help_topic="place_profile"
      name="panel_place_profile"
      top="5"
      visible="false"
-     width="315" />
+     width="324" />
     <panel
      class="panel_landmark_info"
      filename="panel_landmark_info.xml"
      follows="all"
-     height="533"
+     height="543"
      layout="topleft"
      left="0"
      help_topic="landmark"
      name="panel_landmark_info"
      top="5"
      visible="false"
-     width="315" />
+     width="324" />
     <panel
      follows="bottom|left|right"
      height="23"
      layout="topleft"
      left="4"
      name="button_panel"
-     width="315">
+     width="324">
      
        <layout_stack
      	follows="bottom|left|right"
