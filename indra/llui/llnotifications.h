@@ -181,7 +181,7 @@ public:
 		FormIgnore();
 	};
 
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
 	struct FormCheck : public LLInitParam::Block<FormCheck, FormElementBase>
 	{
 		Mandatory<std::string>	type;
@@ -219,7 +219,7 @@ public:
 	{
 		Alternative<FormButton> button;
 		Alternative<FormInput>	input;
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3.0)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
 		Alternative<FormCheck>	check;
 // [/SL:KB]
 
