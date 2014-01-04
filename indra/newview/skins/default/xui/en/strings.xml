@@ -196,6 +196,7 @@ Please try logging in again in a minute.</string>
 	<string name="TooltipAgentIM">Click to IM this Resident</string>
 	<string name="TooltipAgentPay">Click to Pay this Resident</string>
 	<string name="TooltipAgentOfferTeleport">Click to offer a teleport request to this Resident</string>
+	<string name="TooltipAgentRequestTeleport">Click to request a teleport from this Resident</string>
 	<string name="TooltipAgentRequestFriend">Click to send a friend request to this Resident</string>
 	<string name="TooltipGroupUrl">Click to view this group's description</string>
 	<string name="TooltipEventUrl">Click to view this event's description</string>
@@ -217,6 +218,7 @@ Please try logging in again in a minute.</string>
 	<string name="SLappAgentIM">IM</string>
 	<string name="SLappAgentPay">Pay</string>
 	<string name="SLappAgentOfferTeleport">Offer Teleport to </string>
+	<string name="SLappAgentRequestTeleport">Request Teleport from </string>
 	<string name="SLappAgentRequestFriend">Friend Request</string>
   <string name="SLappAgentRemoveFriend">Friend Removal</string>
 
