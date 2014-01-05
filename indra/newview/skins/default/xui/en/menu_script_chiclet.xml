@@ -19,6 +19,19 @@
          function="ScriptChiclet.EnableItem"
          parameter="block_object" />
     </menu_item_call>
+<!--
+    <menu_item_call
+     label="Block Object by Name"
+     layout="topleft"
+     name="Block Object by Name">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="block_object_by_name" />
+         <menu_item_call.on_visible
+         function="ScriptChiclet.EnableItem"
+         parameter="block_object_by_name" />
+    </menu_item_call>
+-->
     <menu_item_call
      label="Block Owner"
      layout="topleft"

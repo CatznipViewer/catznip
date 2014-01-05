@@ -52,7 +52,7 @@ public:
 	void setTitle( std::string title );
 
 	// get item's ID
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 	const LLUUID& getID() const { return mID; }
 // [/SL:KB]
 //	LLUUID getID() { return mID; }

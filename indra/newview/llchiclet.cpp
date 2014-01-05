@@ -30,7 +30,7 @@
 #include "llchicletbar.h"
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h"
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1)
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 #include "llfloatersidepanelcontainer.h"
 // [/SL:KB]
 #include "llfloaterreg.h"
@@ -38,13 +38,13 @@
 // [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
 #include "llnotificationhandler.h"
 // [/SL:KB]
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1)
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 #include "llpanelblockedlist.h"
 // [/SL:KB]
 #include "llscriptfloater.h"
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1)
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 #include "llviewerobjectlist.h"
 // [/SL:KB]
 
@@ -1049,7 +1049,7 @@ void LLChicletInvOfferIconCtrl::setValue(const LLSD& value )
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 static void handleMuteByName(const std::string& strTargetName)
 {
 	if (LLMuteList::getInstance()->add(LLMute(LLUUID::null, strTargetName, LLMute::BY_NAME)))
@@ -1111,7 +1111,7 @@ void LLScriptChiclet::onMouseDown()
 	LLScriptFloaterManager::getInstance()->toggleScriptFloater(getSessionId());
 }
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 bool LLScriptChiclet::enableMenuItem(const LLSD& user_data, const LLUUID& idSession)
 {
 	// When the user picks a menu item the chiclet instance will instantly be destroyed, but the menu fade-out will still call the 
@@ -1124,6 +1124,11 @@ bool LLScriptChiclet::enableMenuItem(const LLSD& user_data, const LLUUID& idSess
 		const LLUUID& idObject = LLScriptFloaterManager::instance().findObjectId(idSession);
 		const LLViewerObject* pObject = (idObject.notNull()) ? gObjectList.findObject(idObject) : NULL;
 		return (idObject.notNull()) && ((!pObject) || (!pObject->isAttachment()));
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(idSession);
+		return (!strObjectName.empty());
 	}
 	else if ("block_owner" == action)
 	{
@@ -1148,7 +1153,7 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	else if ("block_object" == action)
 	{
 		// NOTE:
@@ -1161,6 +1166,14 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 			handleMuteByUUID(LLMute::OBJECT, LLScriptFloaterManager::instance().findObjectId(getSessionId()),
 			                 LLScriptFloaterManager::instance().getObjectName(getSessionId()));
 		}
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(getSessionId());
+		if (!strObjectName.empty())
+			handleMuteByName(strObjectName);
 
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
@@ -1180,7 +1193,7 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 		uuid_vec_t idNotifs;
 		if (LLScriptFloaterManager::instance().findNotificationIds(LLScriptFloaterManager::instance().findObjectId(getSessionId()), LLScriptFloaterManager::OBJ_SCRIPT, idNotifs))
 		{
-			for (auto itNotif = idNotifs.cbegin(); itNotif != idNotifs.end(); ++itNotif)
+			for (uuid_vec_t::const_iterator itNotif = idNotifs.begin(); itNotif != idNotifs.end(); ++itNotif)
 				LLScriptFloaterManager::instance().removeNotification(*itNotif);
 		}
 	}
@@ -1195,7 +1208,7 @@ void LLScriptChiclet::createPopupMenu()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("ScriptChiclet.Action", boost::bind(&LLScriptChiclet::onMenuItemClicked, this, _2));
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 	enable_registrar.add("ScriptChiclet.EnableItem", boost::bind(&LLScriptChiclet::enableMenuItem, _2, getSessionId()));
 // [/SL:KB]
@@ -1245,7 +1258,7 @@ void LLInvOfferChiclet::setSessionId(const LLUUID& session_id)
 	LLIMChiclet::setSessionId(session_id);
 	LLNotificationPtr notification = LLNotifications::getInstance()->find(session_id);
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	mIsTaskOffer = (notification) && (INVENTORY_USER_OFFER != notification->getName());
 // [/SL:KB]
 
@@ -1264,7 +1277,7 @@ void LLInvOfferChiclet::onMouseDown()
 	LLScriptFloaterManager::instance().toggleScriptFloater(getSessionId());
 }
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 bool LLInvOfferChiclet::enableMenuItem(const LLSD& user_data, bool fIsTaskOffer, const LLUUID& idSession)
 {
 	// When the user picks a menu item the chiclet instance will instantly be destroyed, but the menu fade-out will still call the 
@@ -1280,6 +1293,11 @@ bool LLInvOfferChiclet::enableMenuItem(const LLSD& user_data, bool fIsTaskOffer,
 		// We won't have a valid object ID for task inventory offers (the one we're passed is generated by the viewer)
 		return false;
 		//return (fIsTaskOffer) && (LLScriptFloaterManager::instance().findObjectId(idSession).notNull());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(idSession);
+		return (!strObjectName.empty());
 	}
 	else if ("block_owner" == action)
 	{
@@ -1298,7 +1316,7 @@ void LLInvOfferChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	else if ("block_agent" == action)
 	{
 		LLNotificationPtr notification = LLNotifications::getInstance()->find(getSessionId());
@@ -1314,6 +1332,12 @@ void LLInvOfferChiclet::onMenuItemClicked(const LLSD& user_data)
 		                 LLScriptFloaterManager::instance().getObjectName(getSessionId()));
 
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(getSessionId());
+		if (!strObjectName.empty())
+			handleMuteByName(strObjectName);
 	}
 	else if ("block_owner" == action)
 	{
@@ -1337,7 +1361,7 @@ void LLInvOfferChiclet::createPopupMenu()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("InvOfferChiclet.Action", boost::bind(&LLInvOfferChiclet::onMenuItemClicked, this, _2));
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 	enable_registrar.add("InvOfferChiclet.EnableItem", boost::bind(&LLInvOfferChiclet::enableMenuItem, _2, mIsTaskOffer, getSessionId()));
 // [/SL:KB]

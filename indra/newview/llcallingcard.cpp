@@ -727,7 +727,7 @@ static void on_avatar_name_cache_notify(const LLUUID& agent_id,
 	LLSD args;
 //	args["NAME"] = av_name.getDisplayName();
 // [SL:KB] - Patch: Notification-Logging | Checked: 2010-06-05 (Catznip-2.0)
-	args["NAME"] = LLSLURL("agent", agent_id, "about").getSLURLString();
+	args["NAME_SLURL"] = LLSLURL("agent", agent_id, "about").getSLURLString();
 // [/SL:KB]
 	args["STATUS"] = online ? LLTrans::getString("OnlineStatus") : LLTrans::getString("OfflineStatus");
 

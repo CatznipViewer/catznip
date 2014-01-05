@@ -125,7 +125,7 @@ bool LLScriptHandler::processNotification(const LLNotificationPtr& notification)
 							|| notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH;
 		}
 
-// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2)
 		if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
 		{
 			p.lifetime_secs = gSavedSettings.getS32("ScriptQuestionToastLifeTime");

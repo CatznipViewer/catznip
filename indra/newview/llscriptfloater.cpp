@@ -506,7 +506,7 @@ bool LLScriptFloaterManager::findNotificationIds(const LLUUID& object_id, EObjec
 	notif_ids.clear();
 	if (object_id.notNull())
 	{
-		for (auto itNotif = mNotifications.cbegin(); mNotifications.cend() != itNotif; ++itNotif)
+		for (script_notification_map_t::const_iterator itNotif = mNotifications.begin(); itNotif != mNotifications.end(); ++itNotif)
 		{
 			if ( (object_id == itNotif->second) && (object_type == getObjectType(itNotif->first)) )
 				notif_ids.push_back(itNotif->first);
@@ -571,7 +571,7 @@ std::string LLScriptFloaterManager::getObjectName(const LLUUID& notification_id)
 	return text;
 }
 
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 LLUUID LLScriptFloaterManager::getObjectOwner(const LLUUID& notification_id)
 {
 	using namespace LLNotificationsUI;
@@ -582,18 +582,18 @@ LLUUID LLScriptFloaterManager::getObjectOwner(const LLUUID& notification_id)
 		return LLUUID::null;
 	}
 
-	LLUUID owner_id;
-	switch(LLScriptFloaterManager::getObjectType(notification_id))
+	LLUUID idOwner;
+	switch (LLScriptFloaterManager::getObjectType(notification_id))
 	{
 		case LLScriptFloaterManager::OBJ_SCRIPT:
 		case LLScriptFloaterManager::OBJ_LOAD_URL:
 		case LLScriptFloaterManager::OBJ_GIVE_INVENTORY:
-			owner_id = notification->getPayload()["owner_id"].asUUID();
+			idOwner = notification->getPayload()["owner_id"].asUUID();
 			break;
 		default:
 			break;
 	}
-	return owner_id;
+	return idOwner;
 }
 // [/SL:KB]
 
@@ -605,7 +605,7 @@ LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMa
 	type_map["ScriptDialogGroup"] = OBJ_SCRIPT;
 	type_map["LoadWebPage"] = OBJ_LOAD_URL;
 	type_map["ObjectGiveItem"] = OBJ_GIVE_INVENTORY;
-// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2.1) | Added: Catznip-3.2.0
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	type_map["OwnObjectGiveItem"] = OBJ_GIVE_INVENTORY;
 // [/SL:KB]
 	return type_map;

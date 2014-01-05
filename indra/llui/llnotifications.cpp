@@ -439,14 +439,14 @@ static U32 getLogTypeFromString(const std::string& strText)
 
 bool LLNotificationTemplate::canLogToNearbyChat() const
 {
-	// If no setting is defined we log to nearby chat by default
+	// If no setting is defined we log to nearby chat by default (mimicks behaviour of log_to_chat being set to true if unspecified)
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
 	return (pControl) ? (pControl->get().asInteger() & LOG_CHAT) : true;
 }
 
 bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
 {
-	// If no setting is defined we don't log to IMs by default
+	// If no setting is defined we don't log to IMs by default ( mimicks behaviour of log_to_im being set to false if unspecified)
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
 	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
 	return (nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession));
@@ -484,9 +484,6 @@ void LLNotificationTemplate::setLogToIM(bool fLog)
 LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Params& p)
 :	mName(p.name),
 	mType(p.type),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
-	mCanLogTo(getLogTypeFromString(p.can_logto)),
-// [/SL:KB]
 	mMessage(p.value),
 	mFooter(p.footer.value),
 	mLabel(p.label),
@@ -501,6 +498,9 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mPriority(p.priority),
 	mPersist(p.persist),
 	mDefaultFunctor(p.functor.isProvided() ? p.functor() : p.name()),
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+	mCanLogTo(getLogTypeFromString(p.can_logto)),
+// [/SL:KB]
 //	mLogToChat(p.log_to_chat),
 //	mLogToIM(p.log_to_im),
 	mShowToast(p.show_toast),
@@ -998,7 +998,7 @@ std::string LLNotification::getMessage() const
 	return message;
 }
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 std::string LLNotification::getLogMessage() const
 {
 	if (!mTemplatep)

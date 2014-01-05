@@ -129,6 +129,9 @@ void LLPersistentNotificationStorage::loadNotifications()
 	{
 		LLSD notification_params = *notification_it;
 		LLNotificationPtr notification(new LLNotification(notification_params));
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+		notification->setPersisted(true);
+// [/SL:KB]
 
 		LLNotificationResponderPtr responder(createResponder(notification_params["name"], notification_params["responder"]));
 		notification->setResponseFunctor(responder);

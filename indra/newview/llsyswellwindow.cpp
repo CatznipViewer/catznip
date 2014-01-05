@@ -299,7 +299,7 @@ BOOL LLIMWellWindow::ObjectRowPanel::handleRightMouseDown(S32 x, S32 y, MASK mas
 /*         LLNotificationWellWindow implementation                      */
 /************************************************************************/
 
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 class LLNotificationDateComparator : public LLFlatListView::ItemComparator
 {
 public:
@@ -350,7 +350,7 @@ LLNotificationWellWindow* LLNotificationWellWindow::getInstance(const LLSD& key 
 BOOL LLNotificationWellWindow::postBuild()
 {
 	BOOL rv = LLSysWellWindow::postBuild();
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 	mMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
 // [/SL:KB]
 	setTitle(getString("title_notification_well_window"));
@@ -379,11 +379,11 @@ void LLNotificationWellWindow::addItem(LLSysWellItem::Params p)
 
 	LLSysWellItem* new_item = new LLSysWellItem(p);
 //	if (mMessageList->addItem(new_item, value, ADD_TOP))
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 	if (mMessageList->addItem(new_item, value, ADD_TOP, false))
 // [/SL:KB]
 	{
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.3) | Added: Catznip-3.2.3
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 		mMessageList->sort();
 // [/SL:KB]
 
