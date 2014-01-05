@@ -168,7 +168,7 @@ BOOL LLGroupDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 				*accept = ACCEPT_YES_COPY_SINGLE;
 				if(drop)
 				{
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 					getParent()->notifyParent(LLSD().with("item_id", inv_item->getUUID()));
 // [/SL:KB]
 //					mGroupNoticesPanel->setItem(inv_item);
@@ -301,7 +301,7 @@ BOOL LLPanelGroupNotices::postBuild()
 //	target->setPanel (this);
 //	target->setGroup (mGroupID);
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
 	mPanelViewNotice->setVisible(TRUE);
 	mBtnOpenAttachment->setEnabled(FALSE);
 // [/SL:KB]
@@ -332,7 +332,7 @@ void LLPanelGroupNotices::activate()
 	}
 }
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 //S32 LLPanelGroupNotices::notifyParent(const LLSD& sdInfo)
 //{
 //	if (sdInfo.has("item_id"))
@@ -443,7 +443,7 @@ void LLPanelGroupNotices::onClickNewMessage(void* data)
 {
 	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
 	LLFloaterReg::showInstance("group_create_notice", LLSD().with("group", self->getGroupID()));
 // [/SL:KB]
 
@@ -631,7 +631,7 @@ void LLPanelGroupNotices::showNotice(const std::string& subject,
 									 LLOfferInfo* inventory_offer)
 {
 //	arrangeNoticeView(VIEW_PAST_NOTICE);
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
 	mPanelViewNotice->setVisible(TRUE);
 	mBtnOpenAttachment->setEnabled(FALSE);
 // [/SL:KB]

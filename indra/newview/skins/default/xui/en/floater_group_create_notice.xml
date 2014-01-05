@@ -9,7 +9,7 @@
  min_height="200"
  min_width="300"
  name="NewGroupNotice"
- open_positioning="centered"
+ positioning="centered"
  save_rect="true"
  save_visibility="false"
  title="New Group Notice"

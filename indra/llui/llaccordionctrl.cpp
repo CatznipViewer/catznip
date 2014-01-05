@@ -841,7 +841,7 @@ void LLAccordionCtrl::expandDefaultTab()
 	}
 }
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 void LLAccordionCtrl::expandTab(const std::string& tab_name)
 {
 	if (mAccordionTabs.size() > 0)

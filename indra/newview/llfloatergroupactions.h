@@ -18,16 +18,27 @@
 #define LLFLOATERGROUPACTIONS_H
 
 #include "llfloater.h"
-#include "lllineeditor.h"
-#include "lltexteditor.h"
 
 // =========================================================================
+// Forward declarations
+//
+
+class LLIconCtrl;
+class LLLineEditor;
+class LLTextEditor;
+
+// =========================================================================
+// LLFloaterGroupCreateNotice class
+//
 
 class LLFloaterGroupCreateNotice : public LLFloater
 {
 public:
 	LLFloaterGroupCreateNotice(const LLSD& sdKey);
 
+	/*
+	 * LLView overrides
+	 */
 public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ S32  notifyParent(const LLSD& sdInfo);
@@ -45,13 +56,13 @@ protected:
 	 * Member variables
 	 */
 protected:
-	LLUUID			m_idGroup;
-	LLLineEditor*	m_pSubjectCtrl;
-	LLTextEditor*	m_pMessageCtrl;
-	LLUUID			m_idAttachItem;
-	LLIconCtrl*		m_pAttachIconCtrl;
-	LLLineEditor*	m_pAttachTextCtrl;
-	LLButton*		m_pAttachClearBtn;
+	LLUUID        m_idGroup;
+	LLLineEditor* m_pSubjectCtrl;
+	LLTextEditor* m_pMessageCtrl;
+	LLUUID        m_idAttachItem;
+	LLIconCtrl*   m_pAttachIconCtrl;
+	LLLineEditor* m_pAttachTextCtrl;
+	LLButton*     m_pAttachClearBtn;
 };
 
 // =========================================================================

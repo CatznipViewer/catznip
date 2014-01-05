@@ -43,7 +43,7 @@
 #include "llviewercontrol.h"
 #include "lltrans.h"
 #include "llstyle.h"
-// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2)
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
 #include "llslurl.h"
 // [/SL:KB]
 
@@ -69,12 +69,12 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 
 	//group icon
 	LLIconCtrl* pGroupIcon = getChild<LLIconCtrl>("group_icon", TRUE);
-// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
 	pGroupIcon->setValue(payload["group_id"].asUUID());
 // [/SL:KB]
 //	pGroupIcon->setValue(groupData.mInsigniaID);
 
-// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
 	LLTextBox* pTitleText = getChild<LLTextBox>("title");
 	pTitleText->setValue(LLSLURL("group", payload["group_id"].asUUID(), "about").getSLURLString());
 // [/SL:KB]
@@ -89,14 +89,14 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 //	pTitleText->setValue(from.str());
 //	pTitleText->setToolTip(from.str());
 
-// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
 	LLUUID idSender = payload["sender_id"].asUUID();
 	if (idSender.isNull())
 	{
 		gCacheName->getUUID(LLCacheName::cleanFullName(payload["sender_name"].asString()), idSender);
 	}
 	LLTextBox* pSenderText = getChild<LLTextBox>("sender");
-	pSenderText->setValue((idSender.notNull()) ? LLSLURL("agent", idSender, "about").getSLURLString() : from_name);
+	pSenderText->setValue( (idSender.notNull()) ? LLSLURL("agent", idSender, "about").getSLURLString() : from_name );
 	pSenderText->setToolTip(from_name);
 // [/SL:KB]
 

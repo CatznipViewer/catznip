@@ -17,24 +17,31 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llbutton.h"
+#include "llfloatergroupactions.h"
 #include "llgroupactions.h"
 #include "lliconctrl.h"
 #include "llinventorydefines.h"
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
+#include "lllineeditor.h"
 #include "llnotificationsutil.h"
 #include "llpanelgroupnotices.h"
 #include "llslurl.h"
+#include "lltexteditor.h"
 #include "llviewerinventory.h"
 #include "llviewermessage.h"
 
-#include "llfloatergroupactions.h"
-
 // =========================================================================
+// LLFloaterGroupCreateNotice class
+//
 
 LLFloaterGroupCreateNotice::LLFloaterGroupCreateNotice(const LLSD& sdKey)
-	: LLFloater(sdKey), m_pSubjectCtrl(NULL), m_pMessageCtrl(NULL), 
-	  m_pAttachIconCtrl(NULL), m_pAttachTextCtrl(NULL), m_pAttachClearBtn(NULL)
+	: LLFloater(sdKey)
+	, m_pSubjectCtrl(NULL)
+	, m_pMessageCtrl(NULL)
+	, m_pAttachIconCtrl(NULL)
+	, m_pAttachTextCtrl(NULL)
+	, m_pAttachClearBtn(NULL)
 {
 }
 
@@ -48,11 +55,11 @@ BOOL LLFloaterGroupCreateNotice::postBuild()
 
 	m_pAttachIconCtrl = findChild<LLIconCtrl>("attach_icon");
 	m_pAttachTextCtrl = findChild<LLLineEditor>("attach_editor");
-	m_pAttachTextCtrl->setTabStop(FALSE);
-	m_pAttachTextCtrl->setEnabled(FALSE);
+	m_pAttachTextCtrl->setTabStop(false);
+	m_pAttachTextCtrl->setEnabled(false);
 	m_pAttachClearBtn = findChild<LLButton>("attach_clear_btn");
 	m_pAttachClearBtn->setCommitCallback(boost::bind(&LLFloaterGroupCreateNotice::onClickClearAttach, this));
-	m_pAttachClearBtn->setVisible(FALSE);
+	m_pAttachClearBtn->setVisible(false);
 
 	return TRUE;
 }
@@ -65,13 +72,13 @@ S32 LLFloaterGroupCreateNotice::notifyParent(const LLSD& sdInfo)
 		if (pItem)
 		{
 			bool fMulti = pItem->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS;
-			std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags(), fMulti );
+			std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags(), fMulti);
 
 			m_idAttachItem = pItem->getUUID();
 			m_pAttachIconCtrl->setValue(strIconName);
-			m_pAttachIconCtrl->setVisible(TRUE);
+			m_pAttachIconCtrl->setVisible(true);
 			m_pAttachTextCtrl->setValue(pItem->getName());
-			m_pAttachClearBtn->setVisible(TRUE);
+			m_pAttachClearBtn->setVisible(true);
 		}
 		return 1;
 	}
@@ -93,9 +100,9 @@ void LLFloaterGroupCreateNotice::onOpen(const LLSD& sdKey)
 void LLFloaterGroupCreateNotice::onClickClearAttach()
 {
 	m_idAttachItem.setNull();
-	m_pAttachIconCtrl->setVisible(FALSE);
+	m_pAttachIconCtrl->setVisible(false);
 	m_pAttachTextCtrl->setValue(LLSD());
-	m_pAttachClearBtn->setVisible(FALSE);
+	m_pAttachClearBtn->setVisible(false);
 }
 
 void LLFloaterGroupCreateNotice::onClickSend()

@@ -374,7 +374,7 @@ void LLGroupActions::show(const LLUUID& group_id)
 	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 }
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 // static
 void LLGroupActions::showNotices(const LLUUID& group_id)
 {
@@ -504,7 +504,7 @@ bool LLGroupActions::isInGroup(const LLUUID& group_id)
 	return gAgent.isInGroup(group_id);
 }
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 // static
 bool LLGroupActions::hasPowerInGroup(const LLUUID& group_id, U64 power)
 {

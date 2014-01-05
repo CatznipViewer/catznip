@@ -2628,7 +2628,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{
 				payload["subject"] = subj;
 				payload["message"] = mes;
-// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
 				payload["sender_id"] = from_id;
 // [/SL:KB]
 				payload["sender_name"] = name;
@@ -2642,7 +2642,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				LLSD args;
 				args["SUBJECT"] = subj;
 				args["MESSAGE"] = mes;
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp( (timestamp) ? timestamp : LLDate::now().secondsSinceEpoch() ));;
 // [/SL:KB]
 //				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));

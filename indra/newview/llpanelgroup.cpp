@@ -137,7 +137,7 @@ void LLPanelGroup::onOpen(const LLSD& key)
 		if(panel_notices)
 			panel_notices->refreshNotices();
 	}
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2.2) | Added: Catznip-3.2.2
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 	else if(str_action == "view_notices")
 	{
 		setGroupID(group_id);
