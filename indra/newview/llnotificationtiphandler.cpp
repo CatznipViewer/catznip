@@ -73,56 +73,57 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 		return false;
 	}
 
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time or pop up a toast for them
+	if (notification->isPersisted())
+	{
+		return true;
+	}
+// [/SL:KB]
+
 	// arrange a channel on a screen
 	if(!mChannel.get()->getVisible())
 	{
 		initChannel();
 	}
 
-// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
-	// Don't log persisted notifications a second time
-	if (!notification->isPersisted())
-	{
-// [/SL:KB]
+
 // [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
-		bool fShowToast = true;
+	bool fShowToast = true;
 
-		if (LLHandlerUtil::canLogToChat(notification))
+	if (LLHandlerUtil::canLogToChat(notification))
+	{
+		LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+
+		// Don't show a toast if the nearby chat floater is visible
+		LLFloaterIMNearbyChat* pNearbyChat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
+		if ( (pNearbyChat) && (!pNearbyChat->isMinimized()) && (pNearbyChat->isInVisibleChain()) )
 		{
-			LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+			fShowToast = false;
+		}
+	}
 
-			// Don't show a toast if the nearby chat floater is visible
-			LLFloaterIMNearbyChat* pNearbyChat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
-			if ( (pNearbyChat) && (!pNearbyChat->isMinimized()) && (pNearbyChat->isInVisibleChain()) )
-			{
-				fShowToast = false;
-			}
+	if (LLHandlerUtil::canLogToIM(notification))
+	{
+		LLHandlerUtil::logToIMP2P(notification);
+
+		if (notification->hasFormElements())
+		{
+			const std::string strName = notification->getSubstitutions()["NAME"];
+			const LLUUID idFrom = notification->getPayload()["from_id"];
+
+			LLHandlerUtil::spawnIMSession(strName, idFrom);
 		}
 
-		if (LLHandlerUtil::canLogToIM(notification))
+		if (LLHandlerUtil::isIMFloaterVisible(notification))
 		{
-			LLHandlerUtil::logToIMP2P(notification);
-
-			if (notification->hasFormElements())
-			{
-				const std::string strName = notification->getSubstitutions()["NAME"];
-				const LLUUID idFrom = notification->getPayload()["from_id"];
-
-				LLHandlerUtil::spawnIMSession(strName, idFrom);
-			}
-
-			if (LLHandlerUtil::isIMFloaterOpened(notification))
-			{
-				fShowToast = false;
-			}
+			fShowToast = false;
 		}
+	}
 
-		if (!fShowToast)
-		{
-			return false;
-		}
-// [/SL:KB]
-// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	if (!fShowToast)
+	{
+		return false;
 	}
 // [/SL:KB]
 //		// archive message in nearby chat

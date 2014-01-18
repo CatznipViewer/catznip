@@ -577,7 +577,7 @@ public:
 
 	std::string getType() const;
 	std::string getMessage() const;
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 	std::string getLogMessage() const;
 // [/SL:KB]
 	std::string getFooter() const;

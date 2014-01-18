@@ -439,14 +439,15 @@ static U32 getLogTypeFromString(const std::string& strText)
 
 bool LLNotificationTemplate::canLogToNearbyChat() const
 {
-	// If no setting is defined we log to nearby chat by default (mimicks behaviour of log_to_chat being set to true if unspecified)
+	// If no setting is defined we don't log to nearby chat unless the notification type is "notifytip"
+	// (mimicks the default behaviour where log_to_chat is 'true' if unspecified but is only ever checked by LLTipHandler)
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
-	return (pControl) ? (pControl->get().asInteger() & LOG_CHAT) : true;
+	return (pControl) ? (pControl->get().asInteger() & LOG_CHAT) : "notifytip" == mType;
 }
 
 bool LLNotificationTemplate::canLogToIM(bool fOpenSession) const
 {
-	// If no setting is defined we don't log to IMs by default ( mimicks behaviour of log_to_im being set to false if unspecified)
+	// If no setting is defined we don't log to IMs by default (mimicks behaviour of log_to_im being set to false if unspecified)
 	const LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("Log" + mName);
 	U32 nLogTo = (pControl) ? pControl->get().asInteger() : 0;
 	return (nLogTo & LOG_IM) || ((nLogTo & LOG_IM_OPEN) && (fOpenSession));

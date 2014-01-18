@@ -298,8 +298,11 @@ public:
 	 * Determines whether IM floater is opened.
 	 */
 	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static bool isIMFloaterVisible(const LLNotificationPtr& notification);
+// [/SL:KB]
 
-// [SL:KB]
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
 	static bool canLogToChat(const LLNotificationPtr& notification);
 	static bool canLogToIM(const LLNotificationPtr& notification);
 // [/SL:KB]

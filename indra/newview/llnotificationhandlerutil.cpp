@@ -53,24 +53,48 @@ LLCommunicationNotificationHandler::LLCommunicationNotificationHandler(const std
 	: LLNotificationHandler(name, notification_type, "Communication")
 {}
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2014-01-18 (Catznip-3.6)
+static LLFloaterIMSession* getIMFloaterFromNotification(const LLNotificationPtr& notification)
+{
+	const LLUUID idFrom = notification->getPayload()["from_id"];
+	const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom);
+	return LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", idSession);
+}
+
 // static
 bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
 {
-	bool res = false;
-
-	LLUUID from_id = notification->getPayload()["from_id"];
-	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
-	LLFloaterIMSession* im_floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", session_id);
-
-	if (im_floater != NULL)
-	{
-		res = im_floater->getVisible() == TRUE;
-	}
-
-	return res;
+	// NOTE: this function is used by LL code and is used as "does the notification source have an open IM session?"
+	//       (with CHUI an existing IM floater is always "visible" since it's hosted so that check was a bit broken/redundant)
+	return (getIMFloaterFromNotification(notification) != NULL);
 }
 
-// [SL:KB]
+// static
+bool LLHandlerUtil::isIMFloaterVisible(const LLNotificationPtr& notification)
+{
+	// NOTE: this function is used by our own code and checks whether the IM floater is currently visible on the screen
+	const LLFloater* pFloater = getIMFloaterFromNotification(notification);
+	return (pFloater) && (!pFloater->isMinimized()) && (pFloater->isInVisibleChain());
+}
+// [/SL:KB]
+//// static
+//bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
+//{
+//	bool res = false;
+//
+//	LLUUID from_id = notification->getPayload()["from_id"];
+//	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
+//	LLFloaterIMSession* im_floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", session_id);
+//
+//	if (im_floater != NULL)
+//	{
+//		res = im_floater->getVisible() == TRUE;
+//	}
+//
+//	return res;
+//}
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
 // static
 bool LLHandlerUtil::canLogToChat(const LLNotificationPtr& notification)
 {
@@ -216,13 +240,13 @@ void LLHandlerUtil::logToNearbyChat(const LLNotificationPtr& notification, EChat
 		chat_msg.mSourceType = type;
 		chat_msg.mFromName = SYSTEM_FROM;
 		chat_msg.mFromID = LLUUID::null;
-//// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
-//		nearby_chat->addMessage(chat_msg, true, LLSD().with("do_not_log", true));
-//
-//		chat_msg.mText = notification->getLogMessage();
-//		nearby_chat->logMessage(chat_msg);
-//// [/SL:KB]
-		nearby_chat->addMessage(chat_msg);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
+		nearby_chat->addMessage(chat_msg, true, LLSD().with("do_not_log", true));
+
+		chat_msg.mText = notification->getLogMessage();
+		nearby_chat->logMessage(chat_msg);
+// [/SL:KB]
+//		nearby_chat->addMessage(chat_msg);
 	}
 }
 

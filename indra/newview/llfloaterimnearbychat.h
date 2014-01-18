@@ -66,7 +66,7 @@ public:
 
 	/** @param archive true - to save a message to the chat history log */
 	void	addMessage			(const LLChat& message,bool archive = true, const LLSD &args = LLSD());
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3.0)
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 	void	logMessage			(const LLChat& message);	
 // [/SL:KB]
 

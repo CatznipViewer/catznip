@@ -322,12 +322,12 @@ struct LLNotificationTemplate
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	enum ELogType
 	{
-		LOG_CHAT	 = 1,	// Log to nearby chat
-		LOG_IM		 = 2,	// Log to instant message
-		LOG_IM_OPEN	 = 4,	// Log only if there's an open IM session
+		LOG_CHAT      = 1,	// Log to nearby chat
+		LOG_IM        = 2,	// Log to instant message
+		LOG_IM_OPEN   = 4,	// Log only if there's an open IM session
 
-		LOG_CHAT_MASK= LOG_CHAT,
-		LOG_IM_MASK	 = LOG_IM | LOG_IM_OPEN
+		LOG_CHAT_MASK = LOG_CHAT,
+		LOG_IM_MASK   = LOG_IM | LOG_IM_OPEN
 	};
 	U32 mCanLogTo;
 
