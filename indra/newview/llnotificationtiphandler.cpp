@@ -87,7 +87,6 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 
-
 // [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
 	bool fShowToast = true;
 

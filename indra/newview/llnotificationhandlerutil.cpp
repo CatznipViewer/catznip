@@ -57,24 +57,22 @@ LLCommunicationNotificationHandler::LLCommunicationNotificationHandler(const std
 static LLFloaterIMSession* getIMFloaterFromNotification(const LLNotificationPtr& notification)
 {
 	const LLUUID idFrom = notification->getPayload()["from_id"];
-	const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom);
-	return LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", idSession);
+	return (idFrom.notNull()) ? LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom)) : NULL;
 }
 
 // static
-bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
+bool LLHandlerUtil::hasIMFloater(const LLNotificationPtr& notification)
 {
-	// NOTE: this function is used by LL code and is used as "does the notification source have an open IM session?"
-	//       (with CHUI an existing IM floater is always "visible" since it's hosted so that check was a bit broken/redundant)
+	// NOTE: simply checks for the existance of an IM floater and nothing else
 	return (getIMFloaterFromNotification(notification) != NULL);
 }
 
 // static
 bool LLHandlerUtil::isIMFloaterVisible(const LLNotificationPtr& notification)
 {
-	// NOTE: this function is used by our own code and checks whether the IM floater is currently visible on the screen
-	const LLFloater* pFloater = getIMFloaterFromNotification(notification);
-	return (pFloater) && (!pFloater->isMinimized()) && (pFloater->isInVisibleChain());
+	// NOTE: checks whether the IM floater is currently visible on the screen (LLFloaterIMSession has a custom getVisible() override)
+	LLFloaterIMSession* pIMFloater = getIMFloaterFromNotification(notification);
+	return (pIMFloater) && (pIMFloater->getVisible());
 }
 // [/SL:KB]
 //// static
@@ -104,15 +102,7 @@ bool LLHandlerUtil::canLogToChat(const LLNotificationPtr& notification)
 // static
 bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
 {
-	bool fOpenSession = false;
-
-	const LLUUID idFrom = notification->getPayload()["from_id"];
-	if (idFrom.notNull())
-	{
-		const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom);
-		fOpenSession = (LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", idSession) != NULL);
-	}
-
+	bool fOpenSession = (getIMFloaterFromNotification(notification) != NULL);
 	return notification->canLogToIM(fOpenSession);
 }
 // [/SL:KB]
@@ -179,12 +169,12 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	LLUUID from_id = notification->getPayload()["from_id"];
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
-		// If the user triggered the notification, log it to the destination instead
-		if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
-		{
-			from_id = notification->getPayload()["dest_id"];
-		}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2)
+	// If the user triggered the notification log it to the destination instead
+	if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
+	{
+		from_id = notification->getPayload()["dest_id"];
+	}
 // [/SL:KB]
 
 	if (from_id.isNull())

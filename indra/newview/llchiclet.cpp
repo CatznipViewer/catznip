@@ -244,8 +244,8 @@ bool LLNotificationChiclet::ChicletNotificationChannel::filterNotification( LLNo
 //			&& (!notification->getPayload().has("give_inventory_notification")
 //				|| notification->getPayload()["give_inventory_notification"]))
 // [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
-	else if ( !(LLNotificationsUI::LLHandlerUtil::canLogToIM(notification) && (notification->hasFormElements())) && 
-	          ( (!notification->getPayload().has("give_inventory_notification")) || (notification->getPayload()["give_inventory_notification"]) ) )
+	else if ( !((LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements())) && 
+	          ((!notification->getPayload().has("give_inventory_notification")) || (notification->getPayload()["give_inventory_notification"])) )
 // [/SL:KB]
 	{
 		displayNotification = true;

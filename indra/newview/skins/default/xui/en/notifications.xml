@@ -3112,7 +3112,8 @@ Would you like to trust this authority?
    icon="alertmodal.tga"
    name="GrantedModifyRights"
    persist="true"
-   can_logto="im"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
 [NAME] has given you permission to edit their objects.
   </notification>
@@ -3121,7 +3122,8 @@ Would you like to trust this authority?
    icon="alertmodal.tga"
    name="RevokedModifyRights"
    persist="true"
-   can_logto="im"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
 Your privilege to modify [NAME]&apos;s objects has been revoked
   </notification>
@@ -6731,7 +6733,7 @@ However, this region contains content accessible to adults only.
   <notification
    icon="notify.tga"
    name="TeleportRequest"
-   log_to_im="true"
+   can_logto="im"
    type="offer">
 [NAME_SLURL] is requesting to be teleported to your location.
 [MESSAGE]
@@ -6796,7 +6798,8 @@ Offer a teleport?
   <notification
    icon="notify.tga"
    name="FriendshipOffered"
-	can_logto="chat|im"
+   can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>friendship</tag>
 	You have offered friendship to [TO_NAME]
@@ -6827,6 +6830,7 @@ Offer a teleport?
    icon="notify.tga"
    name="FriendshipAccepted"
    can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; accepted your friendship offer.
@@ -6837,6 +6841,7 @@ Offer a teleport?
    name="FriendshipDeclined"
    persist="true"
    can_logto="chat|im"
+   logto="im"
    type="notify">
     <tag>friendship</tag>
 &lt;nolink&gt;[NAME]&lt;/nolink&gt; declined your friendship offer.
