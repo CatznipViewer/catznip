@@ -1,21 +1,40 @@
 [UI/Notifications]
-- added : "ChicletBarAlignment" setting to show the chiclet bar at the top or bottom right of the screen (requires a restart)
-- added : "NotificationToastAlignment" setting to show notification toasts at the top or bottom right of the screen (requires a restart)
-- added : "Block Object" and "Block Owner" options to the script and task inventory offer chiclet context menu
+- added   : "NotificationToastAlignment" setting to show notification toasts at the top or bottom right of the screen (requires a restart)
+- added   : "ScriptQuestionToastLifeTime" setting to control how long script permission request toasts remain visible
+    -> set to 60 seconds by default
+- added   : "check" element to notification forms to toggle the specified setting
+    -> added a checkbox to toggle "ShowOfferedInventory" from the "UserGiveItem" notification
+- added   : (select) notifications can be (optionally) logged to chat and/or instant message
+- changed : friends online/offline notification uses a SLURL rather than a plain name
+    -> toast notification set to "plain_text" to inhibit the SLURL icon since it already displays the avatar's profile icon
+- changed : show "XXX is offline" when opening a new IM session to a friend who's currently offline
+- changed : show the recipient in the teleport offer dialog
+- fixed   : "FriendOnline" notification (among others) logs SLurls to the nearby chat and IM logs
+- fixed   : don't log persisted notifications multiple times
+- fixed   : persistent notifications in the syswell aren't sorted by date
+- fixed   : persisted group notices log to the group log on every relog
+- fixed   : group notices received while online don't have a received timestamp
+
+[UI/UrlContextMenu]
+- added   : "Offer Teleport" option to the agent SLURL context menu
+- added   : "Request Teleport" option to the agent SLURL context menu
+- changed : removed "Remove Friend" option from the agent SLURL context menu
+
+[Notification/GroupNotices]
+- added   : new "Create Notice" floater to compose a group message
+    -> opened by clicking the "Create Notice" button on the notices panel in the group floater
+- added   : "Create Notice" and "View Notices" to the group context menu
+- changed : reworked the layout of the group notice toast
+    -> changed : split "notice sender/group" into two lines with clickable SLurls each
+    -> changed : number of visible lines from 7 to 10
+    -> changed : font size of the sent date from normal to small
+    -> fixed   : group icon and name don't load on a stored group notification after leaving the group
+- fixed   : group notices received while online don't have a received timestamp
+
+[Notification/ScriptDialog]
+- added   : "Block Object" and "Block Owner" options to the script and task inventory offer chiclet context menu
     -> "Block Object" will mute the originating object by UUID (not available for task inventory offers)
     -> "Block Owner" will mute the owner of the originating object
-- added : "ScriptQuestionToastLifeTime" setting to control how long script permission request toasts remain visible
-- fixed : various crashes due to the notification screen channel being destroyed before various notification are closed
-    -> i.e. offer 4 inventory items, open IM on the recipient, click "Show" on one of them and then shut down the viewer -> crash
-    -> notification LLScreenChannel instance is destroyed as part of LLToolbarView destruction which happens before the destruction of IM-embedded notification toast panels
-
-- added   : (select) notifications can be (optionally) logged to chat and/or instant message
-    -> currently togglable for FriendOnline, FriendOffline, PaymentReceived, PaymentSent and PaymentFailure
-- changed : show the recipient in the teleport offer dialog
-- changed : (re)show "XXX is offline" when opening a new IM session to a friend who's currently offline
-- fixed   : the "PaymentSent" notification isn't logged
-- fixed   : don't log persisted notifications multiple times
-    -> Repro:
-        * wait for a group notice
-        * relog without closing the notification
-        * open group chat => the group notice will have logged to the group chat twice
+- added    : "Close All" context menu option to script chiclets to close all scripted dialogs from the same object
+- changed  : removed "Block" (= mute) default option from script dialogs and "Block owner" from inventory offer notifications
+    -> chiclet context menu options should be used instead, too prone to accidental muting
