@@ -1002,28 +1002,38 @@ std::string LLNotification::getMessage() const
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 std::string LLNotification::getLogMessage() const
 {
-	if (!mTemplatep)
-		return std::string();
+	return (mTemplatep) ? getLogMessage(mTemplatep->mMessage, mSubstitutions) : std::string();
+}
 
+std::string LLNotification::getRawMessage() const
+{
+	return (mTemplatep) ? mTemplatep->mMessage : std::string();
+}
+
+// static
+std::string LLNotification::getMessage(const std::string& strRawMsg, const LLSD& sdSubstitutions)
+{
+	std::string strMsg = strRawMsg;
+	LLStringUtil::format(strMsg, sdSubstitutions);
+	return strMsg;
+}
+
+// static
+std::string LLNotification::getLogMessage(const std::string& strRawMsg, const LLSD& sdSubstitutions)
+{
 	// Iterate over all substitutions and replace any SLURLs we come across with their label
-	LLSD logSubstitutions = mSubstitutions;
+	LLSD logSubstitutions = sdSubstitutions;
 	for (LLSD::map_iterator itSubstitution = logSubstitutions.beginMap(); itSubstitution != logSubstitutions.endMap(); ++itSubstitution)
 	{
 		LLSD& sdSubstitution = itSubstitution->second;
-		if (!sdSubstitution.isString())
-			continue;
-
-		LLUrlMatch urlMatch; std::string strSubstitution = sdSubstitution.asString();
-		if ( (LLUrlRegistry::instance().findUrl(strSubstitution, urlMatch)) &&
-		     (0 == urlMatch.getStart()) && (urlMatch.getEnd() >= strSubstitution.size() - 1) )
+		if (sdSubstitution.isString())
 		{
-			sdSubstitution = urlMatch.getLabel();
+			LLUrlMatch urlMatch; std::string strSubstitution = sdSubstitution.asString();
+			if (LLUrlRegistry::instance().findUrl(strSubstitution, urlMatch))
+				sdSubstitution = strSubstitution.replace(urlMatch.getStart(), urlMatch.getEnd() - urlMatch.getStart() + 1, urlMatch.getLabel());
 		}
 	}
-
-	std::string message = mTemplatep->mMessage;
-	LLStringUtil::format(message, logSubstitutions);
-	return message;
+	return getMessage(strRawMsg, logSubstitutions);
 }
 // [/SL:KB]
 

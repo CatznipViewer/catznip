@@ -311,10 +311,13 @@ public:
 	/**
 	 * Writes notification message to IM session.
 	 */
-	static void logToIM(const EInstantMessage& session_type,
-			const std::string& session_name, const std::string& from_name,
-			const std::string& message, const LLUUID& session_owner_id,
-			const LLUUID& from_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static void logToIM(const LLUUID& session_id, const std::string& session_name, const std::string& from_name, const LLUUID& from_id, const std::string& message, const LLSD& substitutions);
+// [/SL:KB]
+//	static void logToIM(const EInstantMessage& session_type,
+//			const std::string& session_name, const std::string& from_name,
+//			const std::string& message, const LLUUID& session_owner_id,
+//			const LLUUID& from_id);
 
 	/**
 	 * Writes notification message to IM  p2p session.

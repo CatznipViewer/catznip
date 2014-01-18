@@ -579,6 +579,10 @@ public:
 	std::string getMessage() const;
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
 	std::string getLogMessage() const;
+	std::string getRawMessage() const;
+	
+	static std::string getMessage(const std::string& strRawMsg, const LLSD& sdSubstitutions);
+	static std::string getLogMessage(const std::string& strRawMsg, const LLSD& sdSubstitutions);
 // [/SL:KB]
 	std::string getFooter() const;
 	std::string getLabel() const;

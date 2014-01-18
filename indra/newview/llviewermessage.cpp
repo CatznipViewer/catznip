@@ -5548,15 +5548,9 @@ static void money_balance_group_notify(const LLUUID& group_id,
 									   LLSD args,
 									   LLSD payload)
 {
-//	// Message uses name SLURLs, don't actually have to substitute in
-//	// the name.  We're just making sure it's available.
-//	// Notification is either PaymentReceived or PaymentSent
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
-	// Ignore the above, not using SLURLs makes this notification log to file cleanly
-	std::string message = args["MESSAGE"];
-	LLStringUtil::format(message, LLSD().with("NAME", LLSLURL("group", group_id, "inspect").getSLURLString()));
-	args["MESSAGE"] = message;
-// [/SL:KB]
+	// Message uses name SLURLs, don't actually have to substitute in
+	// the name.  We're just making sure it's available.
+	// Notification is either PaymentReceived or PaymentSent
 	LLNotificationsUtil::add(notification, args, payload);
 }
 
@@ -5566,15 +5560,9 @@ static void money_balance_avatar_notify(const LLUUID& agent_id,
 									   	LLSD args,
 									   	LLSD payload)
 {
-//	// Message uses name SLURLs, don't actually have to substitute in
-//	// the name.  We're just making sure it's available.
-//	// Notification is either PaymentReceived or PaymentSent
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
-	// Ignore the above, not using SLURLs makes this notification log to file cleanly
-	std::string message = args["MESSAGE"];
-	LLStringUtil::format(message, LLSD().with("NAME", LLSLURL("agent", agent_id, "about").getSLURLString()));
-	args["MESSAGE"] = message;
-// [/SL:KB]
+	// Message uses name SLURLs, don't actually have to substitute in
+	// the name.  We're just making sure it's available.
+	// Notification is either PaymentReceived or PaymentSent
 	LLNotificationsUtil::add(notification, args, payload);
 }
 
@@ -5610,29 +5598,35 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		return;
 	}
 
-//	std::string source_slurl;
-//	if (is_source_group)
-//	{
-//		source_slurl =
-//			LLSLURL( "group", source_id, "inspect").getSLURLString();
-//	}
-//	else
-//	{
+	std::string source_slurl;
+	if (is_source_group)
+	{
+		source_slurl =
+			LLSLURL( "group", source_id, "inspect").getSLURLString();
+	}
+	else
+	{
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
+		source_slurl = LLSLURL( "agent", source_id, "about").getSLURLString();
+// [/SL:KB]
 //		source_slurl =
 //			LLSLURL( "agent", source_id, "completename").getSLURLString();
-//	}
-//
-//	std::string dest_slurl;
-//	if (is_dest_group)
-//	{
-//		dest_slurl =
-//			LLSLURL( "group", dest_id, "inspect").getSLURLString();
-//	}
-//	else
-//	{
+	}
+
+	std::string dest_slurl;
+	if (is_dest_group)
+	{
+		dest_slurl =
+			LLSLURL( "group", dest_id, "inspect").getSLURLString();
+	}
+	else
+	{
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
+		dest_slurl = LLSLURL( "agent", dest_id, "about").getSLURLString();
+// [/SL:KB]
 //		dest_slurl =
 //			LLSLURL( "agent", dest_id, "completename").getSLURLString();
-//	}
+	}
 
 	std::string reason =
 		reason_from_transaction_type(transaction_type, item_description);
@@ -5653,7 +5647,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	bool you_paid_someone = (source_id == gAgentID);
 	if (you_paid_someone)
 	{
-//		args["NAME"] = dest_slurl;
+		args["NAME"] = dest_slurl;
 		is_name_group = is_dest_group;
 		name_id = dest_id;
 		if (!reason.empty())
@@ -5689,7 +5683,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	}
 	else {
 		// ...someone paid you
-//		args["NAME"] = source_slurl;
+		args["NAME"] = source_slurl;
 		is_name_group = is_source_group;
 		name_id = source_id;
 		if (!reason.empty())
@@ -5705,7 +5699,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 //		payload["from_id"] = source_id;
 		notification = "PaymentReceived";
 	}
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2.1) | Added: Catznip-3.2.1
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2)
 	// Make notification loggable
 	payload["from_id"] = source_id;
 	payload["dest_id"] = dest_id;

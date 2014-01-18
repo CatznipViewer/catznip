@@ -108,10 +108,13 @@ bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
 // [/SL:KB]
 
 // static
-void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
-		const std::string& session_name, const std::string& from_name,
-		const std::string& message, const LLUUID& session_owner_id,
-		const LLUUID& from_id)
+//void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
+//		const std::string& session_name, const std::string& from_name,
+//		const std::string& message, const LLUUID& session_owner_id,
+//		const LLUUID& from_id)
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+void LLHandlerUtil::logToIM(const LLUUID& session_id, const std::string& session_name, const std::string& from_name, const LLUUID& from_id, const std::string& raw_message, const LLSD& substitutions)
+// [/SL:KB]
 {
 	std::string from = from_name;
 	if (from_name.empty())
@@ -119,29 +122,47 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 		from = SYSTEM_FROM;
 	}
 
-	LLUUID session_id = LLIMMgr::computeSessionID(session_type,
-			session_owner_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	// Replace interactive system message marker with correct from string value
+	if (INTERACTIVE_SYSTEM_FROM == from_name)
+	{
+		from = SYSTEM_FROM;
+	}
+
+	const std::string message = LLNotification::getMessage(raw_message, substitutions);
+	const std::string log_message = LLNotification::getLogMessage(raw_message, substitutions);
+// [/SL:KB]
+
+//	LLUUID session_id = LLIMMgr::computeSessionID(session_type,
+//			session_owner_id);
 	LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(
 			session_id);
 	if (session == NULL)
 	{
-		// replace interactive system message marker with correct from string value
-		if (INTERACTIVE_SYSTEM_FROM == from_name)
-		{
-			from = SYSTEM_FROM;
-		}
+//		// replace interactive system message marker with correct from string value
+//		if (INTERACTIVE_SYSTEM_FROM == from_name)
+//		{
+//			from = SYSTEM_FROM;
+//		}
 
 		// Build a new format username or firstname_lastname for legacy names
 		// to use it for a history log filename.
 		std::string user_name = LLCacheName::buildUsername(session_name);
-		LLIMModel::instance().logToFile(user_name, from, from_id, message);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		LLIMModel::instance().logToFile(user_name, from, from_id, log_message);
+// [/SL:KB]
+//		LLIMModel::instance().logToFile(user_name, from, from_id, message);
 	}
 	else
 	{
 		S32 unread = session->mNumUnread;
 		S32 participant_unread = session->mParticipantUnreadMessageCount;
-		LLIMModel::instance().addMessageSilently(session_id, from, from_id,
-				message);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		LLIMModel::instance().addMessageSilently(session_id, from, from_id, message, false);
+		LLIMModel::instance().logToFile(LLIMModel::instance().getHistoryFileName(session_id), from, from_id, log_message);
+// [/SL:KB]
+//		LLIMModel::instance().addMessageSilently(session_id, from, from_id,
+//				message);
 		// we shouldn't increment counters when logging, so restore them
 		session->mNumUnread = unread;
 		session->mParticipantUnreadMessageCount = participant_unread;
@@ -151,13 +172,20 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 	}
 }
 
-void log_name_callback(const std::string& full_name, const std::string& from_name, 
-					   const std::string& message, const LLUUID& from_id)
-
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+void log_name_callback(const std::string& full_name, const std::string& from_name, const std::string& raw_message, const LLSD& substitutions, const LLUUID& from_id)
 {
-	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
-					from_id, LLUUID());
+	const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
+	LLHandlerUtil::logToIM(idSession, full_name, from_name, LLUUID(), raw_message, substitutions);
 }
+// [/SL:KB]
+//void log_name_callback(const std::string& full_name, const std::string& from_name, 
+//					   const std::string& message, const LLUUID& from_id)
+//
+//{
+//	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
+//					from_id, LLUUID());
+//}
 
 // static
 void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_file_only)
@@ -186,11 +214,17 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	if(to_file_only)
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
 	}
 	else
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 	}
 }
 
@@ -216,8 +250,12 @@ void LLHandlerUtil::logGroupNoticeToIMGroup(
 	LLUUID sender_id;
 	gCacheName->getUUID(sender_name, sender_id);
 
-	logToIM(IM_SESSION_GROUP_START, group_name, sender_name, payload["message"],
-			payload["group_id"], sender_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	const LLUUID idSession = LLIMMgr::computeSessionID(IM_SESSION_GROUP_START, payload["group_id"]);
+	logToIM(idSession, group_name, sender_name, sender_id, payload["message"], LLSD());
+// [/SL:KB]
+//	logToIM(IM_SESSION_GROUP_START, group_name, sender_name, payload["message"],
+//			payload["group_id"], sender_id);
 }
 
 // static
