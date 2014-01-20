@@ -29,7 +29,7 @@
 
 #include <llpanel.h>
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 #include "llavatarlistitem.h"
 // [/SL:KB]
 #include "llcallingcard.h" // for avatar tracker
@@ -83,7 +83,7 @@ private:
 	void					updateNearbyList();
 	void					updateRecentList();
 	void					updateFacebookList(bool visible);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
 	void					updateDistances();
 	void					updateLastInteractionTimes();
 // [/SL:KB]
@@ -95,7 +95,7 @@ private:
 	LLUUID					getCurrentItemID() const;
 	void					getCurrentItemIDs(uuid_vec_t& selected_uuids) const;
 	void					showGroupMenu(LLMenuGL* menu);
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	void					setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save = true);
 // [/SL:KB]
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);
@@ -105,9 +105,6 @@ private:
 	void					onTabSelected(const LLSD& param);
 	void					onAddFriendButtonClicked();
 	void					onAddFriendWizButtonClicked();
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-	void					onBlockListButtonClicked();
-// [/SL:KB]
 	void					onDeleteFriendButtonClicked();
 	void					onChatButtonClicked();
 	void					onGearButtonClicked(LLUICtrl* btn);
@@ -117,6 +114,9 @@ private:
 	void					onAvatarListCommitted(LLAvatarList* list);
 	bool					onGroupPlusButtonValidate();
 	void					onGroupMinusButtonClicked();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	void					onGroupActivateButtonClicked();
+// [/SL:KB]
 	void					onGroupPlusMenuItemClicked(const LLSD& userdata);
 
 	void					onFriendsViewSortMenuItemClicked(const LLSD& userdata);
@@ -146,6 +146,9 @@ private:
 	bool					isAccordionCollapsedByUser(LLUICtrl* acc_tab);
 	bool					isAccordionCollapsedByUser(const std::string& name);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	LLFilterEditor*			mFilterEditor;
+// [/SL:KB]
 	LLTabContainer*			mTabContainer;
 	LLAvatarList*			mOnlineFriendList;
 	LLAvatarList*			mAllFriendList;

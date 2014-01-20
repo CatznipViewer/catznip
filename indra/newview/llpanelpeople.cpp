@@ -80,9 +80,8 @@
 
 #define FRIEND_LIST_UPDATE_TIMEOUT	0.5
 #define NEARBY_LIST_UPDATE_INTERVAL 1
-
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
-static const F32 LIT_UPDATE_PERIOD = 5;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+#define LAST_INTERACTION_UPDATE_PERIOD 5
 // [/SL:KB]
 
 static const std::string NEARBY_TAB_NAME	= "nearby_panel";
@@ -95,7 +94,7 @@ static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
 
 extern S32 gMaxAgentGroups;
 
-// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2011-12-05 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2011-12-05 (Catznip-3.2)
 #include "llcombobox.h"
 
 class LLGroupTitleComboCtrl : public LLComboBox, public LLParticularGroupObserver, public LLOldEvents::LLSimpleListener
@@ -300,8 +299,8 @@ public:
 		}
 	};
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
-	const id_to_pos_map_t& getAvatarsPositions() { return mAvatarsPositions; }
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+	const id_to_pos_map_t& getAvatarsPositions() const { return mAvatarsPositions; }
 // [/SL:KB]
 
 protected:
@@ -662,6 +661,9 @@ LLPanelPeople::LLPanelPeople()
 	mCommitCallbackRegistrar.add("People.AddFriendWizard",	boost::bind(&LLPanelPeople::onAddFriendWizButtonClicked,	this));
 	mCommitCallbackRegistrar.add("People.DelFriend",		boost::bind(&LLPanelPeople::onDeleteFriendButtonClicked,	this));
 	mCommitCallbackRegistrar.add("People.Group.Minus",		boost::bind(&LLPanelPeople::onGroupMinusButtonClicked,  this));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("People.Group.Activate",	boost::bind(&LLPanelPeople::onGroupActivateButtonClicked,	this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("People.Chat",			boost::bind(&LLPanelPeople::onChatButtonClicked,		this));
 	mCommitCallbackRegistrar.add("People.Gear",			boost::bind(&LLPanelPeople::onGearButtonClicked,		this, _1));
 
@@ -719,11 +721,15 @@ void LLPanelPeople::removePicker()
 
 BOOL LLPanelPeople::postBuild()
 {
-	getChild<LLFilterEditor>("nearby_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	mFilterEditor = getChild<LLFilterEditor>("filter_input");
+	mFilterEditor->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+// [/SL:KB]
+//	getChild<LLFilterEditor>("nearby_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 
 	mTabContainer = getChild<LLTabContainer>("tabs");
 	mTabContainer->setCommitCallback(boost::bind(&LLPanelPeople::onTabSelected, this, _2));
@@ -764,7 +770,7 @@ BOOL LLPanelPeople::postBuild()
 	mRecentList->setShowIcons("RecentListShowIcons");
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
 	mRecentList->setTextFieldCallback(boost::bind(&LLPanelPeople::updateLastInteractionTimes, this));
-	mRecentList->setTextFieldRefresh(LIT_UPDATE_PERIOD);
+	mRecentList->setTextFieldRefresh(LAST_INTERACTION_UPDATE_PERIOD);
 // [/SL:KB]
 
 	mGroupList = getChild<LLGroupList>("group_list");
@@ -777,26 +783,17 @@ BOOL LLPanelPeople::postBuild()
 	mOnlineFriendList->setContextMenu(&LLPanelPeopleMenus::gPeopleContextMenu);
 	mSuggestedFriends->setContextMenu(&LLPanelPeopleMenus::gSuggestedFriendsContextMenu);
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-	setNameFormat(mNearbyList,		(EAvatarListNameFormat)gSavedSettings.getU32("NearbyPeopleNameFormat"),	false);
-	setNameFormat(mRecentList,		(EAvatarListNameFormat)gSavedSettings.getU32("RecentPeopleNameFormat"),	false);
-	setNameFormat(mAllFriendList,	(EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),		false);
-	setNameFormat(mOnlineFriendList,(EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),		false);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	setNameFormat(mNearbyList,       (EAvatarListNameFormat)gSavedSettings.getU32("NearbyPeopleNameFormat"), false);
+	setNameFormat(mRecentList,       (EAvatarListNameFormat)gSavedSettings.getU32("RecentPeopleNameFormat"), false);
+	setNameFormat(mAllFriendList,    (EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),      false);
+	setNameFormat(mOnlineFriendList, (EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),      false);
 // [/SL:KB]
 
 	setSortOrder(mRecentList,		(ESortOrder)gSavedSettings.getU32("RecentPeopleSortOrder"),	false);
 	setSortOrder(mAllFriendList,	(ESortOrder)gSavedSettings.getU32("FriendsSortOrder"),		false);
 	setSortOrder(mNearbyList,		(ESortOrder)gSavedSettings.getU32("NearbyPeopleSortOrder"),	false);
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-	LLPanel* nearby_panel = getChild<LLPanel>(NEARBY_TAB_NAME);
-	nearby_panel->childSetAction("add_friend_btn",	boost::bind(&LLPanelPeople::onAddFriendButtonClicked,	this));
-	nearby_panel->childSetAction("blocklist_btn",	boost::bind(&LLPanelPeople::onBlockListButtonClicked,	this));
-// [/SL:KB]
-
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-//	friends_panel->childSetAction("blocklist_btn", boost::bind(&LLPanelPeople::onBlockListButtonClicked,	this));
-// [/SL:KB]
 	mOnlineFriendList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onAvatarListDoubleClicked, this, _1));
 	mAllFriendList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onAvatarListDoubleClicked, this, _1));
 	mNearbyList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onAvatarListDoubleClicked, this, _1));
@@ -823,7 +820,10 @@ BOOL LLPanelPeople::postBuild()
 	LLToggleableMenu* groups_gear_menu = mGroupList->getContextMenu();
 	if (groups_gear_menu)
 	{
-		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_BOTTOM_LEFT);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_TOP_LEFT);
+// [/SL:KB]
+//		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_BOTTOM_LEFT);
 	}
 	else
 	{
@@ -1049,7 +1049,7 @@ void LLPanelPeople::updateFacebookList(bool visible)
 	}
 }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
 void LLPanelPeople::updateDistances()
 {
 	// Make sure we're using the same data as the distance comparator
@@ -1110,6 +1110,9 @@ void LLPanelPeople::updateButtons()
 		}
 
 		LLPanel* groups_panel = mTabContainer->getCurrentPanel();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+		groups_panel->getChildView("activate_btn")->setEnabled( (item_selected) && (gAgent.getGroupID() != selected_id) ); // "none" or a non-active group selected
+// [/SL:KB]
 		groups_panel->getChildView("minus_btn")->setEnabled(item_selected && selected_id.notNull()); // a real group selected
 		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[COUNT]", llformat("%d",gAgent.mGroups.count()));
 		groups_panel->getChild<LLUICtrl>("groupcount")->setTextArg("[REMAINING]", llformat("%d",(gMaxAgentGroups-gAgent.mGroups.count())));
@@ -1346,6 +1349,11 @@ void LLPanelPeople::onFilterEdit(const std::string& search_string)
 
 void LLPanelPeople::onTabSelected(const LLSD& param)
 {
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	const S32 idxCur = mTabContainer->getCurrentPanelIndex();
+	mFilterEditor->setText(mSavedOriginalFilters[idxCur]);
+// [/SL:KB]
+
 	std::string tab_name = getChild<LLPanel>(param.asString())->getName();
 	updateButtons();
 
@@ -1403,13 +1411,6 @@ void LLPanelPeople::onAddFriendButtonClicked()
 		LLAvatarActions::requestFriendshipDialog(id);
 	}
 }
-
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
-void LLPanelPeople::onBlockListButtonClicked()
-{
-	LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
-}
-// [/SL:KB]
 
 bool LLPanelPeople::isItemsFreeOfFriends(const uuid_vec_t& uuids)
 {
@@ -1477,11 +1478,19 @@ void LLPanelPeople::onGearButtonClicked(LLUICtrl* btn)
 {
 	uuid_vec_t selected_uuids;
 	getCurrentItemIDs(selected_uuids);
-	// Spawn at bottom left corner of the button.
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	// Spawn at top left corner of the button.
 	if (getActiveTabName() == NEARBY_TAB_NAME)
-		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, -1, -1);
 	else
-		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, -1, -1);
+// [/SL:KB]
+//	// Spawn at bottom left corner of the button.
+//	if (getActiveTabName() == NEARBY_TAB_NAME)
+//		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+//	else
+//		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, 0, 0);
 }
 
 void LLPanelPeople::onImButtonClicked()
@@ -1524,6 +1533,13 @@ void LLPanelPeople::onGroupMinusButtonClicked()
 	if (group_id.notNull())
 		LLGroupActions::leave(group_id);
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+void LLPanelPeople::onGroupActivateButtonClicked()
+{
+	LLGroupActions::activate(getCurrentItemID());
+}
+// [/SL:KB]
 
 void LLPanelPeople::onGroupPlusMenuItemClicked(const LLSD& userdata)
 {

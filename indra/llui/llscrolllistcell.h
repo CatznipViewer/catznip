@@ -123,7 +123,7 @@ public:
 	/*virtual*/ void			draw(const LLColor4& color, const LLColor4& highlight_color) const {}
 };
 
-// [SL:KB] - Patch: UI-ScrollListSeparator | Checked: 2011-12-05 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+// [SL:KB] - Patch: UI-ScrollListSeparator | Checked: 2011-12-05 (Catznip-3.2)
 class LLScrollListSeparator : public LLScrollListCell
 {
 public:
@@ -132,7 +132,7 @@ public:
 	{
 		mHeight = llround(p.font.getValue()->getLineHeight());
 	}
-	/*virtual*/ ~LLScrollListSeparator() {};
+	/*virtual*/ ~LLScrollListSeparator() {}
 
 	/*virtual*/ void draw(const LLColor4& color, const LLColor4& highlight_color) const
 	{
@@ -142,7 +142,10 @@ public:
 		gl_line_2d(PAD, y, getWidth() - PAD, y);
 	}
 
-	/*virtual*/ S32 getHeight() const { return mHeight; }
+	/*virtual*/ S32 getHeight() const
+	{
+		return mHeight;
+	}
 
 protected:
 	S32 mHeight;

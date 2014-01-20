@@ -239,7 +239,7 @@ public:
 
 	static std::set<LLUUID> getInventorySelectedUUIDs();
 
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-3.0.0a) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4)
 	static void report(const LLUUID& idAgent);
 
 	static bool canZoomIn(const LLUUID& idAgent);

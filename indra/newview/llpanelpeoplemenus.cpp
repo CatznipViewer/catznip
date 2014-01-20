@@ -143,21 +143,37 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
-		items.push_back(std::string("im"));
-		items.push_back(std::string("offer_teleport"));
-		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
-		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
-		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
+		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("pay"));
-		items.push_back(std::string("block_unblock"));
+		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("request_teleport"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("invite_to_group"));
+		items.push_back(std::string("map"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+// [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
@@ -310,22 +326,41 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
-		items.push_back(std::string("im"));
-		items.push_back(std::string("offer_teleport"));
-		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
-		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
-		items.push_back(std::string("zoom_in"));
-		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
+		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("pay"));
+		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("request_teleport"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("invite_to_group"));
+		items.push_back(std::string("map"));
+		items.push_back(std::string("zoom_in"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+
 		items.push_back(std::string("block_unblock"));
+// [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("zoom_in"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
 	}
 
     hide_context_entries(menu, items, disabled_items);

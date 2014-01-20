@@ -75,12 +75,10 @@
 #include "llsidepanelinventory.h"
 #include "llavatarname.h"
 #include "llagentui.h"
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-3.0)
 #include "llfloaterreporter.h"
 #include "llparcel.h"
-#include "llviewermenu.h"
 #include "llviewerparcelmgr.h"
-#include "llvoavatar.h"
 #include "llworld.h"
 // [/SL:KB]
 
@@ -1202,7 +1200,7 @@ bool LLAvatarActions::canBlock(const LLUUID& id)
 	return !is_self && !is_linden;
 }
 
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-3.0.0a) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::report(const LLUUID& idAgent)
 {
 	LLAvatarName avName;
@@ -1228,8 +1226,8 @@ void LLAvatarActions::zoomIn(const LLUUID& idAgent)
 // Defined in llworld.cpp
 LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin);
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
-bool getRegionAndPosGlobalFromAgentID(const LLUUID& idAgent, const LLViewerRegion** ppRegion, LLVector3d* pPosGlobal)
+// Checked: 2010-12-03 (Catznip-2.4)
+static bool getRegionAndPosGlobalFromAgentID(const LLUUID& idAgent, const LLViewerRegion** ppRegion, LLVector3d* pPosGlobal)
 {
 	// Try looking up the agent in gObjectList
 	const LLViewerObject* pAvatarObj = gObjectList.findObject(idAgent);
@@ -1248,16 +1246,15 @@ bool getRegionAndPosGlobalFromAgentID(const LLUUID& idAgent, const LLViewerRegio
 	for (; itRegion != endRegion; ++itRegion)
 	{
 		const LLViewerRegion* pRegion = *itRegion;
-		for (S32 idxRegionAgent = 0, cntRegionAgent = pRegion->mMapAvatars.count(); idxRegionAgent < cntRegionAgent; idxRegionAgent++)
+		
+		S32 idxAgent = pRegion->mMapAvatarIDs.find(idAgent);
+		if (-1 != idxAgent)
 		{
-			if (pRegion->mMapAvatarIDs.get(idxRegionAgent) == idAgent)
-			{
-				if (ppRegion)
-					*ppRegion = pRegion;
-				if (pPosGlobal)
-					*pPosGlobal = unpackLocalToGlobalPosition(pRegion->mMapAvatars.get(idxRegionAgent), pRegion->getOriginGlobal());
-				return (NULL != pRegion);
-			}
+			if (ppRegion)
+				*ppRegion = pRegion;
+			if (pPosGlobal)
+				*pPosGlobal = unpackLocalToGlobalPosition(pRegion->mMapAvatars.get(idxAgent), pRegion->getOriginGlobal());
+			return (NULL != pRegion);
 		}
 	}
 
@@ -1265,19 +1262,19 @@ bool getRegionAndPosGlobalFromAgentID(const LLUUID& idAgent, const LLViewerRegio
 	return false;
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
-inline bool getRegionFromAgentID(const LLUUID& idAgent, const LLViewerRegion** ppRegion)
+// Checked: 2010-12-03 (Catznip-2.4)
+inline static bool getRegionFromAgentID(const LLUUID& idAgent, const LLViewerRegion** ppRegion)
 {
 	return getRegionAndPosGlobalFromAgentID(idAgent, ppRegion, NULL);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
-inline bool getPosGlobalFromAgentID(const LLUUID& idAgent, LLVector3d& posGlobal)
+// Checked: 2010-12-03 (Catznip-2.4)
+inline static bool getPosGlobalFromAgentID(const LLUUID& idAgent, LLVector3d& posGlobal)
 {
 	return getRegionAndPosGlobalFromAgentID(idAgent, NULL, &posGlobal);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::canLandFreezeOrEject(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1285,7 +1282,7 @@ bool LLAvatarActions::canLandFreezeOrEject(const LLUUID& idAgent)
 	return canLandFreezeOrEjectMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::canLandFreezeOrEjectMultiple(uuid_vec_t& idAgents, bool fFilter /*=false*/)
 {
 	if (gAgent.isGodlikeWithoutAdminMenuFakery())
@@ -1316,7 +1313,7 @@ bool LLAvatarActions::canLandFreezeOrEjectMultiple(uuid_vec_t& idAgents, bool fF
 	return fCanFreeze;
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::landEject(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1324,7 +1321,7 @@ void LLAvatarActions::landEject(const LLUUID& idAgent)
 	landEjectMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::landEjectMultiple(const uuid_vec_t& idAgents)
 {
 	uuid_vec_t idEjectAgents(idAgents);
@@ -1362,7 +1359,7 @@ void LLAvatarActions::landEjectMultiple(const uuid_vec_t& idAgents)
 	LLNotificationsUtil::add(strMsgName, args, payload, &callbackLandEject);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::callbackLandEject(const LLSD& notification, const LLSD& response)
 {
 	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -1372,16 +1369,16 @@ bool LLAvatarActions::callbackLandEject(const LLSD& notification, const LLSD& re
 	bool fBanEnabled = notification["payload"]["ban_enabled"].asBoolean();
 	if ( (0 == idxOption) || (fBanEnabled) )	// Eject button (or Eject + Ban)
 	{
+		// This is tricky. It is similar to say if it is not an 'Eject' button, and it is also not an 'Cancel' button, 
+		// and ban_enabled==true, it should be the 'Eject and Ban' button.
+		U32 flags = ( (0 != idxOption) && (fBanEnabled)	) ? 0x1 : 0x0;
+
 		const LLSD& idAgents = notification["payload"]["ids"];
 		for (LLSD::array_const_iterator itAgent = idAgents.beginArray(); itAgent != idAgents.endArray(); ++itAgent)
 		{
 			const LLUUID idAgent = itAgent->asUUID(); const LLViewerRegion* pAgentRegion = NULL;
 			if (getRegionFromAgentID(idAgent, &pAgentRegion))
 			{
-				// This is tricky. It is similar to say if it is not an 'Eject' button, and it is also not an 'Cancel' button, 
-				// and ban_enabled==true, it should be the 'Eject and Ban' button.
-				U32 flags = ( (0 != idxOption) && (fBanEnabled)	) ? 0x1 : 0x0;
-
 				gMessageSystem->newMessage("EjectUser");
 				gMessageSystem->nextBlock("AgentData");
 				gMessageSystem->addUUID("AgentID", gAgent.getID());
@@ -1396,7 +1393,7 @@ bool LLAvatarActions::callbackLandEject(const LLSD& notification, const LLSD& re
 	return false;
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::landFreeze(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1404,7 +1401,7 @@ void LLAvatarActions::landFreeze(const LLUUID& idAgent)
 	landFreezeMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::landFreezeMultiple(const uuid_vec_t& idAgents)
 {
 	uuid_vec_t idEjectAgents(idAgents);
@@ -1435,7 +1432,7 @@ void LLAvatarActions::landFreezeMultiple(const uuid_vec_t& idAgents)
 	LLNotificationsUtil::add(strMsgName, args, payload, &callbackLandFreeze);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::callbackLandFreeze(const LLSD& notification, const LLSD& response)
 {
 	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -1470,7 +1467,7 @@ bool LLAvatarActions::callbackLandFreeze(const LLSD& notification, const LLSD& r
 typedef std::vector<std::string> strings_t;
 
 // Copy/paste from LLPanelRegionInfo::sendEstateOwnerMessage
-void sendEstateOwnerMessage(const LLViewerRegion* pRegion, const std::string& request, const LLUUID& invoice, const strings_t& strings)
+static void sendEstateOwnerMessage(const LLViewerRegion* pRegion, const std::string& request, const LLUUID& invoice, const strings_t& strings)
 {
 	if (pRegion)
 	{
@@ -1502,7 +1499,7 @@ void sendEstateOwnerMessage(const LLViewerRegion* pRegion, const std::string& re
 	}
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::canEstateKickOrTeleportHome(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1510,7 +1507,7 @@ bool LLAvatarActions::canEstateKickOrTeleportHome(const LLUUID& idAgent)
 	return canEstateKickOrTeleportHomeMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::canEstateKickOrTeleportHomeMultiple(uuid_vec_t& idAgents, bool fFilter /*=false*/)
 {
 	if (gAgent.isGodlikeWithoutAdminMenuFakery())
@@ -1535,7 +1532,7 @@ bool LLAvatarActions::canEstateKickOrTeleportHomeMultiple(uuid_vec_t& idAgents, 
 	return fCanKick;
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::estateKick(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1543,7 +1540,7 @@ void LLAvatarActions::estateKick(const LLUUID& idAgent)
 	estateKickMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::estateKickMultiple(const uuid_vec_t& idAgents)
 {
 	uuid_vec_t idEjectAgents(idAgents);
@@ -1574,7 +1571,7 @@ void LLAvatarActions::estateKickMultiple(const uuid_vec_t& idAgents)
 	LLNotificationsUtil::add(strMsgName, args, payload, &callbackEstateKick);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::callbackEstateKick(const LLSD& notification, const LLSD& response)
 {
 	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -1596,7 +1593,7 @@ bool LLAvatarActions::callbackEstateKick(const LLSD& notification, const LLSD& r
 	return false;
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::estateTeleportHome(const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents;
@@ -1604,7 +1601,7 @@ void LLAvatarActions::estateTeleportHome(const LLUUID& idAgent)
 	estateTeleportHomeMultiple(idAgents);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 void LLAvatarActions::estateTeleportHomeMultiple(const uuid_vec_t& idAgents)
 {
 	uuid_vec_t idEjectAgents(idAgents);
@@ -1635,7 +1632,7 @@ void LLAvatarActions::estateTeleportHomeMultiple(const uuid_vec_t& idAgents)
 	LLNotificationsUtil::add(strMsgName, args, payload, &callbackEstateTeleportHome);
 }
 
-// static - Checked: 2010-12-03 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// static - Checked: 2010-12-03 (Catznip-2.4)
 bool LLAvatarActions::callbackEstateTeleportHome(const LLSD& notification, const LLSD& response)
 {
 	S32 idxOption = LLNotificationsUtil::getSelectedOption(notification, response);

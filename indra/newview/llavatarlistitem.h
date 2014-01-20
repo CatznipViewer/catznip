@@ -41,7 +41,7 @@ class LLAvatarIconCtrl;
 class LLAvatarName;
 class LLIconCtrl;
 
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 typedef enum
 {
 	NF_DISPLAYNAME = 0,
@@ -101,21 +101,21 @@ public:
 	virtual void changed(U32 mask); // from LLFriendObserver
 
 	void setOnline(bool online);
-//	void updateAvatarName(); // re-query the name cache
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	void updateAvatarName(EAvatarListNameFormat name_format); // re-query the name cache
 // [/SL:KB]
+//	void updateAvatarName(); // re-query the name cache
 	void setAvatarName(const std::string& name);
 	void setAvatarToolTip(const std::string& tooltip);
 	void setHighlight(const std::string& highlight);
 	void setState(EItemState item_style);
-//	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	void setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes = false, bool is_resident = true);
 	static std::string formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format);
 // [/SL:KB]
+//	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
 //	void setLastInteractionTime(U32 secs_since);
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	void setTextField(const std::string& text);
 	void setTextFieldDistance(F32 distance);
 	void setTextFieldSeconds(U32 secs_since);
@@ -127,12 +127,12 @@ public:
 // [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
 	void showVolumeSlider(bool show);
 // [/SL:KB]
-//	void setShowPermissions(bool show) { mShowPermissions = show; };
-//	void showLastInteractionTime(bool show);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.3)
 	void setShowPermissions(bool show);
 // [/SL:KB]
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+//	void setShowPermissions(bool show) { mShowPermissions = show; };
+//	void showLastInteractionTime(bool show);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	void showTextField(bool show);
 // [/SL:KB]
 	void setAvatarIconVisible(bool visible);

@@ -40,7 +40,7 @@
 #include "llavatarnamecache.h"
 #include "llavatariconctrl.h"
 #include "lloutputmonitorctrl.h"
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-3.0.0a)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-3.0)
 #include "llnotificationsutil.h"
 #include "llslurl.h"
 // [/SL:KB]
@@ -69,10 +69,10 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	LLFriendObserver(),
 	mAvatarIcon(NULL),
 	mAvatarName(NULL),
-//	mLastInteractionTime(NULL),
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	mTextField(NULL),
 // [/SL:KB]
+//	mLastInteractionTime(NULL),
 	mIconPermissionOnline(NULL),
 	mIconPermissionMap(NULL),
 	mIconPermissionEditMine(NULL),
@@ -112,18 +112,18 @@ BOOL  LLAvatarListItem::postBuild()
 {
 	mAvatarIcon = getChild<LLAvatarIconCtrl>("avatar_icon");
 	mAvatarName = getChild<LLTextBox>("avatar_name");
-//	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	mTextField = getChild<LLTextBox>("text_field");
 	mTextField->setVisible(false);
 	mTextField->setRightAlign();
 // [/SL:KB]
+//	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
 
 //	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
 //	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
 //	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
 	mIconPermissionEditTheirs = getChild<LLIconCtrl>("permission_edit_theirs_icon");
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
 	// NOTE-Catznip: we're leaving the names unchanged even though they're buttons now because we change too much LL code otherwise
 	mIconPermissionOnline = getChild<LLButton>("permission_online_icon");
 	mIconPermissionMap = getChild<LLButton>("permission_map_icon");
@@ -140,7 +140,7 @@ BOOL  LLAvatarListItem::postBuild()
 	mIconPermissionEditTheirs->setVisible(false);
 
 	mSpeakingIndicator = getChild<LLOutputMonitorCtrl>("speaking_indicator");
-// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3)
 	mSpeakingIndicator->setVisible(false);
 // [/SL:KB]
 
@@ -165,7 +165,7 @@ BOOL  LLAvatarListItem::postBuild()
 		sStaticInitialized = true;
 	}
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
 	// Disable all controls by default so we'll know which ones we can skip in updateChildren()
 	mIconPermissionOnline->setEnabled(mShowPermissions);
 	mIconPermissionMap->setEnabled(mShowPermissions);
@@ -192,7 +192,7 @@ void LLAvatarListItem::handleVisibilityChange ( BOOL new_visibility )
 }
 
 //void LLAvatarListItem::fetchAvatarName()
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 void LLAvatarListItem::fetchAvatarName(EAvatarListNameFormat name_format)
 // [/SL:KB]
 {
@@ -202,7 +202,7 @@ void LLAvatarListItem::fetchAvatarName(EAvatarListNameFormat name_format)
 		{
 			mAvatarNameCacheConnection.disconnect();
 		}
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 		mAvatarNameCacheConnection = LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
 // [/SL:KB]
 //		mAvatarNameCacheConnection = LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
@@ -229,7 +229,7 @@ void LLAvatarListItem::onMouseEnter(S32 x, S32 y, MASK mask)
 	LLPanel::onMouseEnter(x, y, mask);
 
 //	showPermissions(mShowPermissions);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
 	refreshPermissions();
 // [/SL:KB]
 	updateChildren();
@@ -245,7 +245,7 @@ void LLAvatarListItem::onMouseLeave(S32 x, S32 y, MASK mask)
 	LLPanel::onMouseLeave(x, y, mask);
 
 //	showPermissions(false);
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
 	refreshPermissions();
 // [/SL:KB]
 	updateChildren();
@@ -332,15 +332,15 @@ void LLAvatarListItem::setState(EItemState item_style)
 }
 
 //void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
-void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes /*= false*/, bool is_resident /*= true*/)
 // [/SL:KB]
 {
 	if (mAvatarId.notNull())
 		LLAvatarTracker::instance().removeParticularFriendObserver(mAvatarId, this);
 
 	mAvatarId = id;
-// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3)
 	// Only set the speaker if it's currently non-null
 	if (mSpeakingIndicator->getSpeakerId().notNull())
 		mSpeakingIndicator->setSpeakerId(id, session_id);
@@ -357,19 +357,19 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, E
 		mAvatarIcon->setValue(id);
 
 		// Set avatar name.
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 		fetchAvatarName(name_format);
 // [/SL:KB]
 //		fetchAvatarName();
 	}
 }
 
-// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-FriendPermissions | Checked: 2010-10-24 (Catznip-2.3)
 void LLAvatarListItem::setShowPermissions(bool show)
 {
 	mShowPermissions = show;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
 	// Reenable the controls for updateChildren()
 	mIconPermissionOnline->setEnabled(show);
 	mIconPermissionMap->setEnabled(show);
@@ -385,11 +385,11 @@ void LLAvatarListItem::setShowPermissions(bool show)
 void LLAvatarListItem::showTextField(bool show)
 {
 //	mLastInteractionTime->setVisible(show);
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	mTextField->setVisible(show);
 // [/SL:KB]
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
-	// Reenable updateChildren()
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	// Reenable for updateChildren()
 	mTextField->LLUICtrl::setEnabled(show);
 // [/SL:KB]
 	updateChildren();
