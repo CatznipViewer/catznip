@@ -153,7 +153,7 @@ public:
 	typedef boost::signals2::signal<void(LLViewerRegion*)> region_remove_signal_t;
 	boost::signals2::connection setRegionRemovedCallback(const region_remove_signal_t::slot_type& cb);
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	enum EGetAvatarsFilterMask
 	{
 		E_FILTER_BY_DISTANCE = 1,
@@ -169,7 +169,7 @@ public:
 //		uuid_vec_t* avatar_ids = NULL,
 //		std::vector<LLVector3d>* positions = NULL, 
 //		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX) const;
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	void getAvatars(
 		uuid_vec_t* avatar_ids = NULL, std::vector<LLVector3d>* positions = NULL, 
 		const LLVector3d& relative_to = LLVector3d(), F32 radius = FLT_MAX, U32 maskFilter = E_FILTER_BY_DISTANCE) const;

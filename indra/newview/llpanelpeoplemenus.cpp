@@ -77,7 +77,7 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.InviteToGroup",	boost::bind(&LLAvatarActions::inviteToGroup,			id));
 		registrar.add("Avatar.TeleportRequest",	boost::bind(&PeopleContextMenu::requestTeleport,		this));
 		registrar.add("Avatar.Calllog",			boost::bind(&LLAvatarActions::viewChatHistory,			id));
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-3.0.0a) | Modified: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4)
 		registrar.add("Avatar.ZoomIn",							boost::bind(&LLAvatarActions::zoomIn,						id));
 		enable_registrar.add("Avatar.VisibleZoomIn",			boost::bind(&LLAvatarActions::canZoomIn,					id));
 		registrar.add("Avatar.Report",							boost::bind(&LLAvatarActions::report,						id));
@@ -109,7 +109,7 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		// registrar.add("Avatar.Pay",			boost::bind(&LLAvatarActions::pay,						mUUIDs)); // *TODO: unimplemented
 		
 		enable_registrar.add("Avatar.EnableItem",	boost::bind(&PeopleContextMenu::enableContextMenuItem, this, _2));
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.4)
 		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEjectMultiple,			mUUIDs));
 		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreezeMultiple,			mUUIDs));
 		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEjectMultiple,	mUUIDs, false));
@@ -145,13 +145,13 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	{
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
-		items.push_back(std::string("add_friend"));
-		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("im"));
 		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("add_friend"));
+		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
 		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));
@@ -328,13 +328,13 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	{
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
-		items.push_back(std::string("add_friend"));
-		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("im"));
 		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("add_friend"));
+		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
 		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));

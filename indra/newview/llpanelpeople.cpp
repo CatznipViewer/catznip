@@ -768,7 +768,7 @@ BOOL LLPanelPeople::postBuild()
 	mRecentList->setNoItemsMsg(getString("no_recent_people"));
 	mRecentList->setNoFilteredItemsMsg(getString("no_filtered_recent_people"));
 	mRecentList->setShowIcons("RecentListShowIcons");
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
 	mRecentList->setTextFieldCallback(boost::bind(&LLPanelPeople::updateLastInteractionTimes, this));
 	mRecentList->setTextFieldRefresh(LAST_INTERACTION_UPDATE_PERIOD);
 // [/SL:KB]
@@ -978,7 +978,7 @@ void LLPanelPeople::updateNearbyList()
 
 	std::vector<LLVector3d> positions;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	static LLCachedControl<U32> maskFilter(gSavedSettings, "NearbyPeopleViewMask", 7);
 
 	LLWorld::getInstance()->getAvatars(
@@ -987,7 +987,7 @@ void LLPanelPeople::updateNearbyList()
 // [/SL:KB]
 //	LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
 	mNearbyList->setDirty();
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
 	updateDistances();
 // [/SL:KB]
 
@@ -1225,7 +1225,7 @@ void LLPanelPeople::showGroupMenu(LLMenuGL* menu)
 	LLMenuGL::showPopup(parent_panel, menu, menu_x, menu_y);
 }
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 void LLPanelPeople::setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save)
 {
 	list->setAvatarNameFormat(name_format);
@@ -1233,7 +1233,7 @@ void LLPanelPeople::setNameFormat(LLAvatarList* list, EAvatarListNameFormat name
 	{
 		std::string setting;
 
-		if (list == mAllFriendList || list == mOnlineFriendList)
+		if ( (list == mAllFriendList) || (list == mOnlineFriendList) )
 			setting = "FriendsNameFormat";
 		else if (list == mRecentList)
 			setting = "RecentPeopleNameFormat";
@@ -1563,7 +1563,7 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_STATUS);
 	}
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
 	{
 		setNameFormat(mAllFriendList, NF_DISPLAYNAME);
@@ -1617,7 +1617,7 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_NAME);
 	}
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
 	{
 		setNameFormat(mNearbyList, NF_DISPLAYNAME);
@@ -1639,7 +1639,7 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	else if ( ("show_range" == chosen_item) || ("show_current_parcel" == chosen_item) || ("show_current_region" == chosen_item) )
 	{
 		U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
@@ -1676,23 +1676,23 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	U32 name_format = gSavedSettings.getU32("NearbyPeopleNameFormat");
 	if ("name_displayname" == item)
 		return name_format == NF_DISPLAYNAME;
-	if ("name_fullname" == item)
+	else if ("name_fullname" == item)
 		return name_format == NF_COMPLETENAME;
-	if ("name_username" == item)
+	else if ("name_username" == item)
 		return name_format == NF_USERNAME;
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0.0a) | Added: Catznip-2.4.0h
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
 	if ("show_range" == item)
 		return maskFilter & LLWorld::E_FILTER_BY_DISTANCE;
-	if ("show_current_parcel" == item)
+	else if ("show_current_parcel" == item)
 		return maskFilter & LLWorld::E_FILTER_BY_AGENT_PARCEL;
-	if ("show_current_region" == item)
+	else if ("show_current_region" == item)
 		return maskFilter & LLWorld::E_FILTER_BY_AGENT_REGION;
 // [/SL:KB]
 
@@ -1711,7 +1711,7 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mRecentList, E_SORT_BY_NAME);
 	}
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	else if ("name_displayname" == chosen_item)
 	{
 		setNameFormat(mRecentList, NF_DISPLAYNAME);
@@ -1741,7 +1741,7 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_status")
 		return sort_order == E_SORT_BY_STATUS;
 
-// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
 	U32 name_format = gSavedSettings.getU32("FriendsNameFormat");
 	if ("name_displayname" == item)
 		return name_format == NF_DISPLAYNAME;

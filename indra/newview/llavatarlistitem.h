@@ -189,7 +189,7 @@ private:
 	 */
 	typedef enum e_avatar_item_child {
 		ALIC_SPEAKER_INDICATOR,
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2011-05-13 (Catznip-2.6)
 		ALIC_TEXT_FIELD,
 // [/SL:KB]
 		ALIC_PROFILE_BUTTON,
@@ -199,7 +199,7 @@ private:
 		ALIC_PERMISSION_EDIT_MINE,
 		ALIC_PERMISSION_EDIT_THEIRS,
 //		ALIC_INTERACTION_TIME,
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 //		ALIC_TEXT_FIELD,
 // [/SL:KB]
 		ALIC_NAME,
@@ -209,7 +209,7 @@ private:
 
 	void setNameInternal(const std::string& name, const std::string& highlight);
 //	void onAvatarNameCache(const LLAvatarName& av_name);
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	void onAvatarNameCache(const LLAvatarName& av_name, EAvatarListNameFormat name_format);
 // [/SL:KB]
 
@@ -249,10 +249,10 @@ private:
 	LLView* getItemChildView(EAvatarListItemChildIndex child_index);
 
 	LLTextBox* mAvatarName;
-//	LLTextBox* mLastInteractionTime;
-// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-3.0.0a) | Added: Catznip-2.3.0a
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
 	LLTextBox* mTextField;
 // [/SL:KB]
+//	LLTextBox* mLastInteractionTime;
 	LLStyle::Params mAvatarNameStyle;
 	
 	LLButton* mInfoBtn;
@@ -276,7 +276,7 @@ private:
 	bool mHovered;
 	
 //	void fetchAvatarName();
-// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6.0)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	void fetchAvatarName(EAvatarListNameFormat name_format);
 // [/SL:KB]
 	boost::signals2::connection mAvatarNameCacheConnection;

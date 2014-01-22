@@ -3174,15 +3174,16 @@ class LLAvatarReportAbuse : public view_listener_t
 
 void handle_avatar_freeze(const LLSD& avatar_id)
 {
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
 	// Use avatar_id if available, otherwise default to right-click avatar
 	LLUUID idAgent = avatar_id.asUUID();
 	if (idAgent.isNull())
 	{
-		/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 		if (pAvatar)
 			idAgent = pAvatar->getID();
 	}
+
 	if (idAgent.notNull())
 	{
 		LLAvatarActions::landFreeze(idAgent);
@@ -3255,10 +3256,10 @@ class LLAvatarDebug : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
 void handle_avatar_teleport()
 {
-	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 	if (pAvatar)
 	{
 		LLAvatarActions::offerTeleport(pAvatar->getID());
@@ -3322,15 +3323,16 @@ void handle_avatar_teleport()
 
 void handle_avatar_eject(const LLSD& avatar_id)
 {
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
 	// Use avatar_id if available, otherwise default to right-click avatar
 	LLUUID idAgent = avatar_id.asUUID();
 	if (idAgent.isNull())
 	{
-		/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 		if (pAvatar)
 			idAgent = pAvatar->getID();
 	}
+
 	if (idAgent.notNull())
 	{
 		LLAvatarActions::landEject(idAgent);
@@ -3363,7 +3365,7 @@ void handle_avatar_eject(const LLSD& avatar_id)
 //				if (!fullname.empty())
 //				{
 //    				LLSD args;
-//    				args["AVATAR_NAME"] = fullname;
+//					args["AVATAR_NAME"] = fullname;
 //    				LLNotificationsUtil::add("EjectAvatarFullname",
 //    							args,
 //    							payload,
@@ -3383,7 +3385,7 @@ void handle_avatar_eject(const LLSD& avatar_id)
 //				if (!fullname.empty())
 //				{
 //    				LLSD args;
-//    				args["AVATAR_NAME"] = fullname;
+//					args["AVATAR_NAME"] = fullname;
 //    				LLNotificationsUtil::add("EjectAvatarFullnameNoBan",
 //    							args,
 //    							payload,
@@ -3408,18 +3410,17 @@ bool my_profile_visible()
 
 bool enable_freeze_eject(const LLSD& avatar_id)
 {
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
 	// Use avatar_id if available, otherwise default to right-click avatar
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
 	LLUUID idAgent = avatar_id.asUUID();
 	if (idAgent.isNull())
 	{
-		/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 		if (pAvatar)
 			idAgent = pAvatar->getID();
 	}
 	return (idAgent.notNull()) ? LLAvatarActions::canLandFreezeOrEject(idAgent) : false;
 // [/SL:KB]
-//	// Use avatar_id if available, otherwise default to right-click avatar
 //	LLVOAvatar* avatar = NULL;
 //	if (avatar_id.asUUID().notNull())
 //	{
@@ -3451,20 +3452,16 @@ bool enable_freeze_eject(const LLSD& avatar_id)
 //	return new_value;
 }
 
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
 bool enable_kick_teleport_home()
 {
-	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
-	if (pAvatar)
-	{
-		return LLAvatarActions::canEstateKickOrTeleportHome(pAvatar->getID());
-	}
-	return false;
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	return (pAvatar) ? LLAvatarActions::canEstateKickOrTeleportHome(pAvatar->getID()) : false;
 }
 
 void handle_kick()
 {
-	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 	if (pAvatar)
 	{
 		LLAvatarActions::estateKick(pAvatar->getID());
@@ -3473,13 +3470,14 @@ void handle_kick()
 
 void handle_teleport_home()
 {
-	/*const*/ LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
 	if (pAvatar)
 	{
 		LLAvatarActions::estateTeleportHome(pAvatar->getID());
 	}
 }
 // [/SL:KB]
+
 bool callback_leave_group(const LLSD& notification, const LLSD& response)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -8871,7 +8869,7 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAvatarDebug(), "Avatar.Debug");
 	view_listener_t::addMenu(new LLAvatarVisibleDebug(), "Avatar.VisibleDebug");
 	view_listener_t::addMenu(new LLAvatarInviteToGroup(), "Avatar.InviteToGroup");
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
 	commit.add("Avatar.Teleport", boost::bind(&handle_avatar_teleport));
 // [/SL:KB]
 	commit.add("Avatar.Eject", boost::bind(&handle_avatar_eject, LLSD()));
@@ -8887,7 +8885,7 @@ void initialize_menus()
 	
 	view_listener_t::addMenu(new LLAvatarEnableAddFriend(), "Avatar.EnableAddFriend");
 	enable.add("Avatar.EnableFreezeEject", boost::bind(&enable_freeze_eject, _2));
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2.0b) | Added: Catznip-3.2.0b
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
 	commit.add("Avatar.Kick", boost::bind(&handle_kick));
 	commit.add("Avatar.TeleportHome", boost::bind(&handle_teleport_home));
 	enable.add("Avatar.EnableKickTeleportHome", boost::bind(&enable_kick_teleport_home));

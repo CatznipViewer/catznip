@@ -50,7 +50,7 @@
 #define WATER 2
 const U32	MAX_OBJECT_CACHE_ENTRIES = 50000;
 
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3)
 const F64 COARSEUPDATE_MAX_Z = 1020.0f;
 // [/SL:KB]
 
@@ -284,7 +284,7 @@ public:
 //
 //	// Owned by a group you belong to?  (officer OR member)
 //	BOOL isOwnedGroup(const LLVector3& pos);
-// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-3.0.0a) | Added: Catznip-2.4.0g
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4)
 	BOOL isOwnedSelf(const LLVector3& pos) const;
 
 	// Owned by a group you belong to?  (officer OR member)

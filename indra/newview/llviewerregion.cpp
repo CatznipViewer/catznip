@@ -1129,7 +1129,7 @@ public:
 				pos |= x;
 				pos <<= 8;
 				pos |= y;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3)
 				pos <<= 16;
 // [/SL:KB]
 //				pos <<= 8;
@@ -1166,7 +1166,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 
 	U8 x_pos = 0;
 	U8 y_pos = 0;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3)
 	U16 z_pos16 = 0;
 // [/SL:KB]
 //	U8 z_pos = 0;
@@ -1182,13 +1182,13 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 	S32 count = msg->getNumberOfBlocksFast(_PREHASH_Location);
 	for(S32 i = 0; i < count; i++)
 	{
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3)
 		U8 z_pos = 0;
 // [/SL:KB]
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_X, x_pos, i);
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_Y, y_pos, i);
 		msg->getU8Fast(_PREHASH_Location, _PREHASH_Z, z_pos, i);
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3)
 		z_pos16 = z_pos;
 // [/SL:KB]
 		LLUUID agent_id = LLUUID::null;
@@ -1196,7 +1196,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 		{
 			msg->getUUIDFast(_PREHASH_AgentData, _PREHASH_AgentID, agent_id, i);
 
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-02-15 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-02-15 (Catznip-3.3)
 			if ( (0 == z_pos) || (COARSEUPDATE_MAX_Z / 4 == z_pos) )
 			{
 				const LLViewerObject* pAvatarObj = gObjectList.findObject(agent_id);
@@ -1216,7 +1216,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 			LLVector3d global_pos(mImpl->mOriginGlobal);
 			global_pos.mdV[VX] += (F64)(x_pos);
 			global_pos.mdV[VY] += (F64)(y_pos);
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3)
 			global_pos.mdV[VZ] += (F64)(z_pos16 * 4.0);
 // [/SL:KB]
 //			global_pos.mdV[VZ] += (F64)(z_pos) * 4.0;
@@ -1230,7 +1230,7 @@ void LLViewerRegion::updateCoarseLocations(LLMessageSystem* msg)
 			pos |= x_pos;
 			pos <<= 8;
 			pos |= y_pos;
-// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3.0)
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2010-12-19 (Catznip-3.3)
 			pos <<= 16;
 			pos |= z_pos16;
 // [/SL:KB]
