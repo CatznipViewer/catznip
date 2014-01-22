@@ -881,7 +881,7 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 		// NOTE-Catznip: [SL-2.6] mName will be:
 		//   - the "complete name" if display names are enabled and it's an outgoing IM
 		//   - the "legacy name" if display names are disabled or if it's an incoming IM
-		LLIMModel::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
+		LLLogChat::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
 
 		// If it's an incoming IM session we may not have the display name yet 
  		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
@@ -1120,48 +1120,6 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 
 	return true;
 }
-
-// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
-bool LLIMModel::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
-{
-	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames", true);
-
-	// If we have the name cached then we can simply return the username
-	LLAvatarName avName;
-	if (LLAvatarNameCache::get(idAgent, &avName))
-	{
-		if (!fLegacyFilenames)
-		{
-			strFilename = avName.getUserName();
-		}
-		else
-		{
-			strFilename = LLCacheName::cleanFullName(avName.getLegacyName());
-		}
-		return true;
-	}
-	else
-	{
-		// Try and get it from the legacy cache if we can
-		std::string strLegacyName;
-		if (gCacheName->getFullName(idAgent, strLegacyName))
-			strLegacyName = strName;
-
-		if (!fLegacyFilenames)
-		{
-			// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
-			strFilename = LLCacheName::buildUsername(strName);
-			return strName != strFilename;	// If the assumption above was wrong then the two will match which signals failure
-		}
-		else
-		{
-			// Strip any possible mention of a username
-			strFilename = LLCacheName::buildLegacyName(strName);
-			return (!strFilename.empty());	// Assume success as long as the filename isn't an empty string
-		}
-	}
-}
-// [/SL:KB]
 
 bool LLIMModel::logToFile(const std::string& file_name, const std::string& from, const LLUUID& from_id, const std::string& utf8_text)
 {
@@ -2936,7 +2894,7 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 		{
 // [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
 			std::string strFilename;
-			if (LLIMModel::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
+			if (LLLogChat::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
 			{
 				LLIMModel::instance().logToFile(strFilename, SYSTEM_FROM, LLUUID::null, message.getString());
 			}

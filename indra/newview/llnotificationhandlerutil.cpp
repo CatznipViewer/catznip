@@ -136,7 +136,7 @@ void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name,
 					   const std::string& from_name, const std::string& message, const LLUUID& from_id)
 {
 	std::string strFilename;
-	if (LLIMModel::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(), strFilename))
+	if (LLLogChat::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(), strFilename))
 	{
 		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, strFilename, from_name, message, from_id, LLUUID());
 	}
