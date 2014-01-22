@@ -3256,7 +3256,7 @@ class LLAvatarDebug : public view_listener_t
 	}
 };
 
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2014-01-22 (Catznip-3.6)
 void handle_avatar_teleport()
 {
 	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
@@ -3265,6 +3265,22 @@ void handle_avatar_teleport()
 		LLAvatarActions::offerTeleport(pAvatar->getID());
 	}
 }
+
+void handle_avatar_chathistory()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::viewChatHistory(pAvatar->getID());
+	}
+}
+
+bool enable_avatar_chathistory()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	return (pAvatar) && (LLLogChat::isTranscriptExist(pAvatar->getID()));
+}
+
 // [/SL:KB]
 
 //bool callback_eject(const LLSD& notification, const LLSD& response)
@@ -8869,8 +8885,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAvatarDebug(), "Avatar.Debug");
 	view_listener_t::addMenu(new LLAvatarVisibleDebug(), "Avatar.VisibleDebug");
 	view_listener_t::addMenu(new LLAvatarInviteToGroup(), "Avatar.InviteToGroup");
-// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2014-01-22 (Catznip-3.6)
 	commit.add("Avatar.Teleport", boost::bind(&handle_avatar_teleport));
+	commit.add("Avatar.ShowChatHistory", boost::bind(&handle_avatar_chathistory));
+	enable.add("Avatar.EnableChatHistory", boost::bind(&enable_avatar_chathistory));
 // [/SL:KB]
 	commit.add("Avatar.Eject", boost::bind(&handle_avatar_eject, LLSD()));
 	commit.add("Avatar.ShowInspector", boost::bind(&handle_avatar_show_inspector));

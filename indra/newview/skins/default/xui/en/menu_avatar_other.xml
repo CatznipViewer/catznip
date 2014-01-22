@@ -10,15 +10,6 @@
          function="ShowAgentProfile"
          parameter="hit object" />
     </menu_item_call>
-   <menu_item_call
-     enabled="false"
-     label="Add Friend"
-     name="Add Friend">
-        <menu_item_call.on_click
-         function="Avatar.AddFriend" />
-        <menu_item_call.on_enable
-         function="Avatar.EnableAddFriend" />
-    </menu_item_call>
     <menu_item_call
      label="IM"
      name="Send IM...">
@@ -34,6 +25,12 @@
          function="Avatar.EnableCall" />
     </menu_item_call>
    <menu_item_call
+     label="Teleport"
+     name="Teleport...">
+        <menu_item_call.on_click
+         function="Avatar.Teleport" />
+    </menu_item_call>
+   <menu_item_call
      enabled="false"
      label="Pay"
      name="Pay...">
@@ -43,10 +40,13 @@
          function="EnablePayAvatar" />
     </menu_item_call>
    <menu_item_call
-     label="Teleport"
-     name="Teleport...">
+     enabled="false"
+     label="Add Friend"
+     name="Add Friend">
         <menu_item_call.on_click
-         function="Avatar.Teleport" />
+         function="Avatar.AddFriend" />
+        <menu_item_call.on_visible
+         function="Avatar.EnableAddFriend" />
     </menu_item_call>
     
    <menu_item_separator />
@@ -169,6 +169,14 @@
   <menu_item_separator 
     layout="topleft"  name="Impostor seperator"/>
 
+  <menu_item_call
+     label="View chat history..."
+     name="chat_history">
+    <menu_item_call.on_click
+     function="Avatar.ShowChatHistory" />
+    <menu_item_call.on_enable
+     function="Avatar.EnableChatHistory" />
+  </menu_item_call>
   <menu_item_call
      enabled="false"
      label="Block Particle Owner"
