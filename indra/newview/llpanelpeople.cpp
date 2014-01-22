@@ -1603,6 +1603,12 @@ void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		mGroupList->toggleIcons();
 	}
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	else if (chosen_item == "show_hidden")
+	{
+		mGroupList->toggleHidden();
+	}
+// [/SL:KB]
 }
 
 void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)

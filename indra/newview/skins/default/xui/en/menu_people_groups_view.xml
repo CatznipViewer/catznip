@@ -14,4 +14,16 @@
        function="CheckControl"
        parameter="GroupListShowIcons" />
   </menu_item_check>
+  <menu_item_separator />
+  <menu_item_check
+   label="Highlight Hidden Groups"
+   layout="topleft"
+   name="Highlight Hidden Groups">
+      <menu_item_check.on_click
+       function="People.Groups.ViewSort.Action"
+       parameter="show_hidden" />
+      <menu_item_check.on_check
+       function="CheckControl"
+       parameter="GroupListShowHidden" />
+  </menu_item_check>
 </toggleable_menu>

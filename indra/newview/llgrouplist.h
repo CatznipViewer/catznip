@@ -62,6 +62,9 @@ public:
 
 	void setNameFilter(const std::string& filter);
 	void toggleIcons();
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	void toggleHidden();
+// [/SL:KB]
 	bool getIconsVisible() const { return mShowIcons; }
 
 	LLToggleableMenu* getContextMenu() const { return mContextMenuHandle.get(); }
@@ -78,6 +81,9 @@ private:
 	LLHandle<LLToggleableMenu>	mContextMenuHandle;
 
 	bool mShowIcons;
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	bool mShowHidden;
+// [/SL:KB]
 	bool mDirty;
 	std::string mNameFilter;
 };
@@ -104,10 +110,16 @@ public:
 	void setGroupID(const LLUUID& group_id);
 	void setGroupIconID(const LLUUID& group_icon_id);
 	void setGroupIconVisible(bool visible);
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	void setHighlightHiddenGroup(bool highlight);
+// [/SL:KB]
 
 	virtual void changed(LLGroupChange gc);
 private:
 	void setActive(bool active);
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	void setHidden(bool hidden);
+// [/SL:KB]
 	void onInfoBtnClick();
 	void onProfileBtnClick();
 
@@ -117,6 +129,11 @@ private:
 	LLButton*	mInfoBtn;
 
 	std::string	mGroupName;
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	std::string mGroupNameSuffix;
+	std::string mHighlight;
+	bool        mShowHidden;
+// [/SL:KB]
 	LLStyle::Params mGroupNameStyle;
 
 	static S32	sIconWidth; // icon width + padding
