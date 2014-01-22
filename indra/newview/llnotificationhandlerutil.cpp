@@ -74,13 +74,13 @@ bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
 }
 
 // static
-void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
+//void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 //		const std::string& session_name, const std::string& from_name,
+//		const std::string& message, const LLUUID& session_owner_id,
+//		const LLUUID& from_id)
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
-		const std::string& file_name, const std::string& from_name,
+void LLHandlerUtil::logToIM(const EInstantMessage& session_type, const std::string& file_name, const std::string& from_name, const std::string& message, const LLUUID& session_owner_id, const LLUUID& from_id)
 // [/SL:KB]
-		const std::string& message, const LLUUID& session_owner_id,
-		const LLUUID& from_id)
 {
 	std::string from = from_name;
 	if (from_name.empty())
@@ -124,16 +124,8 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 	}
 }
 
-//void log_name_callback(const std::string& full_name, const std::string& from_name, 
-//					   const std::string& message, const LLUUID& from_id)
-//
-//{
-//	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
-//					from_id, LLUUID());
-//}
 // [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
-void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name,
-					   const std::string& from_name, const std::string& message, const LLUUID& from_id)
+void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name, const std::string& from_name, const std::string& message, const LLUUID& from_id)
 {
 	std::string strFilename;
 	if (LLLogChat::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(), strFilename))
@@ -142,6 +134,13 @@ void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name,
 	}
 }
 // [/SL:KB]
+//void log_name_callback(const std::string& full_name, const std::string& from_name, 
+//					   const std::string& message, const LLUUID& from_id)
+//
+//{
+//	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
+//					from_id, LLUUID());
+//}
 
 // static
 void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_file_only)
