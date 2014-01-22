@@ -173,10 +173,10 @@ void LLHandlerUtil::logToIM(const LLUUID& session_id, const std::string& session
 }
 
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
-void log_name_callback(const std::string& full_name, const std::string& from_name, const std::string& raw_message, const LLSD& substitutions, const LLUUID& from_id)
+void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name, const std::string& from_name, const std::string& raw_message, const LLSD& substitutions, const LLUUID& from_id)
 {
 	const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
-	LLHandlerUtil::logToIM(idSession, full_name, from_name, LLUUID(), raw_message, substitutions);
+	LLHandlerUtil::logToIM(idSession, av_name.getLegacyName(), from_name, LLUUID(), raw_message, substitutions);
 }
 // [/SL:KB]
 //void log_name_callback(const std::string& full_name, const std::string& from_name, 
@@ -215,14 +215,20 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 	if(to_file_only)
 	{
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
 // [/SL:KB]
 //		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
 	}
 	else
 	{
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
 // [/SL:KB]
 //		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 	}
