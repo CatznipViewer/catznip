@@ -133,13 +133,22 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	
 	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
@@ -316,13 +325,24 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	
 	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
