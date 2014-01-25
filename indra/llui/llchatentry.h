@@ -54,8 +54,8 @@ protected:
 
 	friend class LLUICtrlFactory;
 	LLChatEntry(const Params& p);
-    /*virtual*/ void    beforeValueChange();
-    /*virtual*/ void    onValueChange(S32 start, S32 end);
+//    /*virtual*/ void    beforeValueChange();
+//    /*virtual*/ void    onValueChange(S32 start, S32 end);
 //    /*virtual*/ bool    useLabel() const;
 
 public:

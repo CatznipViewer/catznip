@@ -163,6 +163,9 @@ LLTextBase::Params::Params()
 	h_pad("h_pad", 0),
 	clip("clip", true),
 	clip_partial("clip_partial", true),
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+	label("label"),
+// [/SL:KB]
 	line_spacing("line_spacing"),
 	max_text_length("max_length", 255),
 	font_shadow("font_shadow"),
@@ -266,6 +269,13 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mSpellCheckTimer.reset();
 
 	createDefaultSegment();
+
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+	if (p.label.isProvided())
+	{
+		setLabel(p.label.getValue());
+	}
+// [/SL:KB]
 
 	updateRects();
 }
@@ -541,7 +551,8 @@ void LLTextBase::drawText()
 	S32 text_len = getLength();
 
 // [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2013-11-28 (Catznip-3.6)
-	if (useLabel())
+	bool fUseLabel = useLabel();
+	if (fUseLabel)
 	{
 		text_len = mLabel.getWString().length();
 	}
@@ -586,7 +597,10 @@ void LLTextBase::drawText()
 	}
 
 	// Perform spell check if needed
-	if ( (getSpellCheck()) && (getWText().length() > 2) )
+//	if ( (getSpellCheck()) && (getWText().length() > 2) )
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2013-11-28 (Catznip-3.6)
+	if ( (!fUseLabel) && (getSpellCheck()) && (getWText().length() > 2) )
+// [/SL:KB]
 	{
 		// Calculate start and end indices for the spell checking range
 		S32 start = line_start, end = getLineEnd(last_line);
@@ -2166,13 +2180,19 @@ void LLTextBase::resetLabel()
 {
 	if (useLabel())
 	{
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+		getViewModel()->setDisplay(LLWStringUtil::null);
+// [/SL:KB]
 		clearSegments();
 
 		LLStyle* style = new LLStyle(getStyleParams());
 		style->setColor(mTentativeFgColor);
 		LLStyleConstSP sp(style);
 
-		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length() + 1, *this);
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length(), *this);
+// [/SL:KB]
+//		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length() + 1, *this);
 		insertSegment(label);
 	}
 }

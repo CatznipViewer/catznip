@@ -144,19 +144,19 @@ void LLChatEntry::updateHistory()
 	}
 }
 
-void LLChatEntry::beforeValueChange()
-{
-    if(this->getLength() == 0 && !mLabel.empty())
-    {
-        this->clearSegments();
-    }
-}
+//void LLChatEntry::beforeValueChange()
+//{
+//    if(this->getLength() == 0 && !mLabel.empty())
+//    {
+//        this->clearSegments();
+//    }
+//}
 
-void LLChatEntry::onValueChange(S32 start, S32 end)
-{
-    //Internally resetLabel() must meet a condition before it can reset the label
-    resetLabel();
-}
+//void LLChatEntry::onValueChange(S32 start, S32 end)
+//{
+//    //Internally resetLabel() must meet a condition before it can reset the label
+//    resetLabel();
+//}
 
 //bool LLChatEntry::useLabel() const
 //{

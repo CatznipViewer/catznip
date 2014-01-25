@@ -299,6 +299,9 @@ public:
 		Optional<S32>			v_pad,
 								h_pad;
 
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+		Optional<std::string>	label;
+// [/SL:KB]
 
 		Optional<LineSpacingParams>
 								line_spacing;
