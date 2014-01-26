@@ -2893,31 +2893,6 @@ void LLInventoryCopyAndWearObserver::changed(U32 mask)
 	}
 }
 
-// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
-bool idle_invpanel_item_select(const LLSD& sdKey, const LLUUID& idItem)
-{
-	LLFloater* pInvFloater = LLFloaterReg::findInstance("inventory", sdKey);
-	LLSidepanelInventory* pInvSP = (pInvFloater) ? LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater) : NULL;
-	if (!pInvSP)
-		return true;	// Nothing to do if the floater no longer exists
-
-	LLInventoryPanel* pInvPanel = pInvSP->getActivePanel();
-	if (!pInvPanel->getIsViewsInitialized())
-		return false;	// Don't do anything until the panel finished initializing 
-
-	LLFolderView* pRootFolderView = pInvPanel->getRootFolder();
-	LLFolderViewItem* pItemView = pInvPanel->getItemByID(idItem);
-	if (pItemView)
-	{
-		pRootFolderView->setSelection(pItemView, TRUE, TRUE);
-		pItemView->openItem();
-	}
-	pRootFolderView->scrollToShowSelection();
-
-	return true;
-}
-// [/SL:KB]
-
 void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 {
 	if ("open" == action)
@@ -2931,12 +2906,23 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		return;
 	}
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
-	if ("open_newwindow" == action)
+	else if ("open_newwindow" == action)
 	{
 		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
-		if (pInvFloater)
+		LLSidepanelInventory* pInvSP = (pInvFloater) ? LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater) : NULL;
+		if (pInvSP)
 		{
-			doOnIdleRepeating(boost::bind(&idle_invpanel_item_select, pInvFloater->getKey(), mUUID));
+			LLInventoryPanel* pInvPanel = pInvSP->getActivePanel();
+			if (pInvPanel)
+			{
+				LLFolderViewItem* pFVItem = pInvPanel->getItemByID(mUUID);
+				if (pFVItem)
+				{
+				 	pFVItem->setOpen(TRUE);
+					pInvPanel->getRootFolder()->setSelection(pFVItem, TRUE, TRUE);
+					pInvPanel->getRootFolder()->scrollToShowSelection();
+				}
+			}
 		}
 	}
 // [/SL:KB]
@@ -3549,7 +3535,8 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		}
 
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
-		items.push_back(std::string("Open in New Window"));
+		items.push_back(std::string("Outfit Separator"));
+		items.push_back(std::string("Open in XXX"));
 // [/SL:KB]
 	}
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
