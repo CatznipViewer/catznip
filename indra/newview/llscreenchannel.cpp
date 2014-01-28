@@ -285,6 +285,13 @@ void LLScreenChannel::addToast(const LLToast::Params& p)
 	LLToast* toast = new LLToast(p);
 	ToastElem new_toast_elem(toast->getHandle());
 
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	if (gSavedSettings.getBOOL("NotificationToastFrontmost"))
+	{
+		toast->setFrontmostToast(true);
+		toast->setFocusStealsFrontmost(!gSavedSettings.getBOOL("NotificationToastFrontmostFocus"));
+	}
+// [/SL:KB]
 	toast->setOnFadeCallback(boost::bind(&LLScreenChannel::onToastFade, this, _1));
 	toast->setOnToastDestroyedCallback(boost::bind(&LLScreenChannel::onToastDestroyed, this, _1));
 	if(mControlHovering)
@@ -680,7 +687,10 @@ void LLScreenChannel::showToastsBottom()
 			// EXT-2653: it is necessary to prevent overlapping for secondary showed toasts
 			toast->setVisible(TRUE);
 		}		
-		if(!toast->hasFocus())
+//		if(!toast->hasFocus())
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+		if ( (!toast->hasFocus()) && (!toast->isFrontmostToast()) )
+// [/SL:KB]
 		{
 			// Fixing Z-order of toasts (EXT-4862)
 			// Next toast will be positioned under this one.
@@ -827,7 +837,10 @@ void LLScreenChannel::showToastsTop()
 			// EXT-2653: it is necessary to prevent overlapping for secondary showed toasts
 			toast->setVisible(TRUE);
 		}		
-		if (!toast->hasFocus())
+//		if (!toast->hasFocus())
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+		if ( (!toast->hasFocus()) && (!toast->isFrontmostToast()) )
+// [/SL:KB]
 		{
 			// Fixing Z-order of toasts (EXT-4862)
 			// Next toast will be positioned under this one.
