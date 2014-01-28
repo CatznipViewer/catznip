@@ -127,20 +127,36 @@ void LLGridManager::initialize(const std::string& grid_file)
 	mGridFile = grid_file;
 	// as we don't want an attacker to override our grid list
 	// to point the default grid to an invalid grid
-  	addSystemGrid("Second Life Main Grid (Agni)",
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-01-28 (Catznip-3.6)
+	addSystemGrid("Main Grid (Agni)",
 				  MAINGRID,
 				  MAIN_GRID_LOGIN_URI,
 				  "https://secondlife.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Agni");
-	addSystemGrid("Second Life Beta Test Grid (Aditi)",
+	addSystemGrid("Beta Test Grid (Aditi)",
 				  "util.aditi.lindenlab.com",
 				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
 				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Aditi");
+// [/SL:KB]
+//  	addSystemGrid("Second Life Main Grid (Agni)",
+//				  MAINGRID,
+//				  MAIN_GRID_LOGIN_URI,
+//				  "https://secondlife.com/helpers/",
+//				  DEFAULT_LOGIN_PAGE,
+//				  SL_UPDATE_QUERY_URL,
+//				  "Agni");
+//	addSystemGrid("Second Life Beta Test Grid (Aditi)",
+//				  "util.aditi.lindenlab.com",
+//				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
+//				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
+//				  DEFAULT_LOGIN_PAGE,
+//				  SL_UPDATE_QUERY_URL,
+//				  "Aditi");
 
 	LLSD other_grids;
 	llifstream llsd_xml;
