@@ -351,16 +351,19 @@ LLScriptEdCore::LLScriptEdCore(
 	const LLHandle<LLFloater>& floater_handle,
 	void (*load_callback)(void*),
 	void (*save_callback)(void*, BOOL),
-	void (*search_replace_callback) (void* userdata),
+//	void (*search_replace_callback) (void* userdata),
 	void* userdata,
 	S32 bottom_pad)
 	:
 	LLPanel(),
 	mSampleText(sample),
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+	mMenuBar(NULL),
+// [/SL:KB]
 	mEditor( NULL ),
 	mLoadCallback( load_callback ),
 	mSaveCallback( save_callback ),
-	mSearchReplaceCallback( search_replace_callback ),
+//	mSearchReplaceCallback( search_replace_callback ),
 	mUserdata( userdata ),
 	mForceClose( FALSE ),
 	mLastHelpToken(NULL),
@@ -394,6 +397,10 @@ LLScriptEdCore::~LLScriptEdCore()
 
 BOOL LLScriptEdCore::postBuild()
 {
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+	mMenuBar = getChild<LLMenuBarGL>("script_menu");
+// [/SL:KB]
+
 	mErrorList = getChild<LLScrollListCtrl>("lsl errors");
 
 	mFunctions = getChild<LLComboBox>( "Insert...");
@@ -513,6 +520,12 @@ void LLScriptEdCore::initMenu()
 	menuItem = getChild<LLMenuItemCallGL>("Paste");
 	menuItem->setClickCallback(boost::bind(&LLTextEditor::paste, mEditor));
 	menuItem->setEnableCallback(boost::bind(&LLTextEditor::canPaste, mEditor));
+
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+	menuItem = getChild<LLMenuItemCallGL>("Delete");
+	menuItem->setClickCallback(boost::bind(&LLTextEditor::doDelete, mEditor));
+	menuItem->setEnableCallback(boost::bind(&LLTextEditor::canDoDelete, mEditor));
+// [/SL:KB]
 
 	menuItem = getChild<LLMenuItemCallGL>("Select All");
 	menuItem->setClickCallback(boost::bind(&LLTextEditor::selectAll, mEditor));
@@ -1123,28 +1136,35 @@ void LLScriptEdCore::deleteBridges()
 // virtual
 BOOL LLScriptEdCore::handleKeyHere(KEY key, MASK mask)
 {
-	bool just_control = MASK_CONTROL == (mask & MASK_MODIFIERS);
-
-	if(('S' == key) && just_control)
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+	if (mMenuBar->handleAcceleratorKey(key, mask))
 	{
-		if(mSaveCallback)
-		{
-			// don't close after saving
-			mSaveCallback(mUserdata, FALSE);
-		}
-
 		return TRUE;
 	}
+// [/SL:KB]
 
-	if(('F' == key) && just_control)
-	{
-		if(mSearchReplaceCallback)
-		{
-			mSearchReplaceCallback(mUserdata);
-		}
-
-		return TRUE;
-	}
+//	bool just_control = MASK_CONTROL == (mask & MASK_MODIFIERS);
+//
+//	if(('S' == key) && just_control)
+//	{
+//		if(mSaveCallback)
+//		{
+//			// don't close after saving
+//			mSaveCallback(mUserdata, FALSE);
+//		}
+//
+//		return TRUE;
+//	}
+//
+//	if(('F' == key) && just_control)
+//	{
+//		if(mSearchReplaceCallback)
+//		{
+//			mSearchReplaceCallback(mUserdata);
+//		}
+//
+//		return TRUE;
+//	}
 
 	return FALSE;
 }
@@ -1308,7 +1328,7 @@ void* LLPreviewLSL::createScriptEdPanel(void* userdata)
 								   self->getHandle(),
 								   LLPreviewLSL::onLoad,
 								   LLPreviewLSL::onSave,
-								   LLPreviewLSL::onSearchReplace,
+//								   LLPreviewLSL::onSearchReplace,
 								   self,
 								   0);
 
@@ -1457,12 +1477,12 @@ void LLPreviewLSL::closeIfNeeded()
 	}
 }
 
-void LLPreviewLSL::onSearchReplace(void* userdata)
-{
-	LLPreviewLSL* self = (LLPreviewLSL*)userdata;
-	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
-}
+//void LLPreviewLSL::onSearchReplace(void* userdata)
+//{
+//	LLPreviewLSL* self = (LLPreviewLSL*)userdata;
+//	LLScriptEdCore* sec = self->mScriptEd; 
+//	LLFloaterScriptSearch::show(sec);
+//}
 
 // static
 void LLPreviewLSL::onLoad(void* userdata)
@@ -1796,7 +1816,7 @@ void* LLLiveLSLEditor::createScriptEdPanel(void* userdata)
 								   self->getHandle(),
 								   &LLLiveLSLEditor::onLoad,
 								   &LLLiveLSLEditor::onSave,
-								   &LLLiveLSLEditor::onSearchReplace,
+//								   &LLLiveLSLEditor::onSearchReplace,
 								   self,
 								   0);
 
@@ -2162,13 +2182,13 @@ void LLLiveLSLEditor::draw()
 }
 
 
-void LLLiveLSLEditor::onSearchReplace(void* userdata)
-{
-	LLLiveLSLEditor* self = (LLLiveLSLEditor*)userdata;
-
-	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
-}
+//void LLLiveLSLEditor::onSearchReplace(void* userdata)
+//{
+//	LLLiveLSLEditor* self = (LLLiveLSLEditor*)userdata;
+//
+//	LLScriptEdCore* sec = self->mScriptEd; 
+//	LLFloaterScriptSearch::show(sec);
+//}
 
 struct LLLiveLSLSaveData
 {
