@@ -949,6 +949,14 @@ void show_item_links(const LLUUID& idItem)
 
 void show_item(const LLUUID& idItem)
 {
+// [RLVa:KB] - Checked: 2014-01-29 (RLVa-1.4.10)
+	if (gRlvHandler.hasBehaviour(RLV_BHVR_SHOWINV))
+	{
+		// If we can't see inventory then this function won't do anything useful
+		return;
+	}
+// [/RLVa:KB]
+
 	const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false);
 	bool fInInbox = (idInbox.notNull()) && (gInventory.isObjectDescendentOf(idItem, idInbox));
 
