@@ -75,11 +75,6 @@
 #include "llslurl.h"
 #include "llstartup.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
-#include "llchatentry.h"
-#include "llfloaterimsession.h"
-#include "llimview.h"
-// [/SL:KB]
 
 // Third party library includes
 #include <boost/algorithm/string.hpp>
@@ -557,28 +552,6 @@ bool handleSpellCheckChanged()
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
-bool handleChatMultiLineChanged(const LLSD& sdValue)
-{
-	LLFloaterIMSessionTab* pSession = LLFloaterIMSessionTab::findConversation(LLUUID::null);
-	if ( (pSession) && (pSession->getChatBox()) )
-	{
-		pSession->getChatBox()->enableSingleLineMode(!sdValue.asBoolean());
-	}
-
-	for (std::map<LLUUID, LLIMModel::LLIMSession*>::const_iterator itSession = LLIMModel::instance().mId2SessionMap.begin(); 
-			itSession != LLIMModel::instance().mId2SessionMap.end(); ++itSession)
-	{
-		pSession = LLFloaterIMSessionTab::findConversation(itSession->first);
-		if ( (pSession) && (pSession->getChatBox()) )
-		{
-			pSession->getChatBox()->enableSingleLineMode(!sdValue.asBoolean());
-		}
-	}
-	return true;
-}
-// [/SL:KB]
-
 bool toggle_agent_pause(const LLSD& newvalue)
 {
 	if ( newvalue.asBoolean() )
@@ -787,9 +760,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("SpellCheckDictionary")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("LoginLocation")->getSignal()->connect(boost::bind(&handleLoginLocationChanged));
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
-	gSavedSettings.getControl("ChatMultiLine")->getSignal()->connect(boost::bind(&handleChatMultiLineChanged, _2));
-// [/SL:KB]
 }
 
 #if TEST_CACHED_CONTROL
