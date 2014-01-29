@@ -722,7 +722,10 @@ void LLScriptEdCore::updateDynamicHelp(BOOL immediate)
 		}
 		if (immediate || (mLiveHelpTimer.getStarted() && mLiveHelpTimer.getElapsedTimeF32() > LIVE_HELP_REFRESH_TIME))
 		{
-			std::string help_string = mEditor->getText().substr(segment->getStart(), segment->getEnd() - segment->getStart());
+//			std::string help_string = mEditor->getText().substr(segment->getStart(), segment->getEnd() - segment->getStart());
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+			const std::string help_string = wstring_to_utf8str(mEditor->getWText().substr(segment->getStart(), segment->getEnd() - segment->getStart()));
+// [/SL:KB]
 			setHelpPage(help_string);
 			mLiveHelpTimer.stop();
 		}
