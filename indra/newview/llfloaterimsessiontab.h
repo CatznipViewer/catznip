@@ -125,7 +125,10 @@ public:
 	void saveCollapsedState();
 
 protected:
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2013-08-18 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-08-18 (Catznip-3.6)
+	       bool onIMCheckNearbyChat();
+	static void onIMSetChatBarType(const LLSD& sdParam);
+	static bool onIMCheckChatBarType(const LLSD& sdParam);
 	static void onIMSetFontSize(const LLSD& sdParam);
 	static bool onIMCheckFontSize(const LLSD& sdParam);
 // [/SL:KB]

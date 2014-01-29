@@ -109,7 +109,10 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
     mEnableCallbackRegistrar.add("Avatar.EnableItem", boost::bind(&LLFloaterIMSessionTab::enableContextMenuItem, this, _2));
     mCommitCallbackRegistrar.add("Avatar.DoToSelected", boost::bind(&LLFloaterIMSessionTab::doToSelected, this, _2));
 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2013-08-18 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-08-18 (Catznip-3.6)
+	mEnableCallbackRegistrar.add("IMSession.Menu.IsNearbyChat", boost::bind(&LLFloaterIMSessionTab::onIMCheckNearbyChat, this));
+	mCommitCallbackRegistrar.add("IMSession.Menu.SetChatBarType", boost::bind(&LLFloaterIMSessionTab::onIMSetChatBarType, _2));
+	mEnableCallbackRegistrar.add("IMSession.Menu.CheckChatBarType", boost::bind(&LLFloaterIMSessionTab::onIMCheckChatBarType, _2));
 	mCommitCallbackRegistrar.add("IMSession.Menu.SetFontSize", boost::bind(&LLFloaterIMSessionTab::onIMSetFontSize, _2));
 	mEnableCallbackRegistrar.add("IMSession.Menu.CheckFontSize", boost::bind(&LLFloaterIMSessionTab::onIMCheckFontSize, _2));
 // [/SL:KB]
@@ -357,22 +360,13 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	
 	mChatHistory = getChild<LLChatHistory>("chat_history");
 // [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
-	if (isNearbyChat())
-	{
-		mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
-	}
+	mChatHistory->getEditor()->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
 // [/SL:KB]
 
 	mInputEditor = getChild<LLChatEntry>("chat_editor");
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
-	if (isNearbyChat())
-	{
-		mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
-	}
-// [/SL:KB]
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
-	if (!gSavedSettings.getBOOL("ChatMultiLine"))
-		mInputEditor->enableSingleLineMode(true);
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2012-01-10 (Catznip-3.2)
+	mInputEditor->setContextMenu(LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_chat_bar.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance()), true);
+	mInputEditor->enableSingleLineMode(!gSavedSettings.getBOOL("ChatMultiLine"));
 // [/SL:KB]
 
 	mChatLayoutPanel = getChild<LLLayoutPanel>("chat_layout_panel");
@@ -850,7 +844,25 @@ void LLFloaterIMSessionTab::setSortOrder(const LLConversationSort& order)
 // [/SL:KB]
 }
 
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2012-01-10 (Catznip-3.2)
+bool LLFloaterIMSessionTab::onIMCheckNearbyChat()
+{
+	return isNearbyChat();
+}
+
+void LLFloaterIMSessionTab::onIMSetChatBarType(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	gSavedSettings.setBOOL("ChatMultiLine", "expandable" == strParam);
+}
+
+bool LLFloaterIMSessionTab::onIMCheckChatBarType(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	bool fMultiLine = gSavedSettings.getBOOL("ChatMultiLine");
+	return ("expandable" == strParam) ? fMultiLine : !fMultiLine;
+}
+
 void LLFloaterIMSessionTab::onIMSetFontSize(const LLSD& sdParam)
 {
 	const std::string strParam = sdParam.asString();

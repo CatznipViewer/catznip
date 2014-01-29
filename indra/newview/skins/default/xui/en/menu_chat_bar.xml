@@ -2,6 +2,33 @@
 <context_menu
  name="IM session context menu">
   <context_menu
+   label="Chat Bar"
+   layout="topleft"
+   name="Chat Bar">
+    <menu_item_check
+     label="Single-line"
+     layout="topleft"
+     name="Single-line">
+      <menu_item_check.on_click
+       function="IMSession.Menu.SetChatBarType"
+       parameter="single" />
+      <menu_item_check.on_check
+       function="IMSession.Menu.CheckChatBarType"
+       parameter="single" />
+    </menu_item_check>
+    <menu_item_check
+     label="Expandable"
+     layout="topleft"
+     name="Expandable">
+      <menu_item_check.on_click
+       function="IMSession.Menu.SetChatBarType"
+       parameter="expandable" />
+      <menu_item_check.on_check
+       function="IMSession.Menu.CheckChatBarType"
+       parameter="expandable" />
+    </menu_item_check>
+  </context_menu>
+  <context_menu
    label="Font Size"
    layout="topleft"
    name="Font Size">
@@ -49,6 +76,8 @@
     <menu_item_check.on_check
      function="CheckControl"
      parameter="ShowBlockedChat" />
+    <menu_item_check.on_visible
+     function="IMSession.Menu.IsNearbyChat" />
   </menu_item_check>
   <menu_item_check
    label="Translate Nearby Chat"
@@ -62,6 +91,8 @@
      parameter="TranslateChat" />
     <menu_item_check.on_enable
      function="Translate.IsConfigured" />
+    <menu_item_check.on_visible
+     function="IMSession.Menu.IsNearbyChat" />
   </menu_item_check>
  
   <menu_item_separator />

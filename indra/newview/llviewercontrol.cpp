@@ -75,14 +75,12 @@
 #include "llslurl.h"
 #include "llstartup.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-09-24 (Catznip-3.2)
-#include "llfloaterimsessiontab.h"
-#include "llviewerchat.h"
-// [/SL:KB]
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-11-28 (Catznip-3.6)
 #include "llchatentry.h"
 #include "llfloaterimsession.h"
+#include "llfloaterimsessiontab.h"
 #include "llimview.h"
+#include "llviewerchat.h"
 // [/SL:KB]
 
 // Third party library includes
@@ -561,7 +559,7 @@ bool handleSpellCheckChanged()
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-11-28 (Catznip-3.6)
 bool handleChatMultiLineChanged(const LLSD& sdValue)
 {
 	LLFloaterIMSessionTab* pSession = LLFloaterIMSessionTab::findConversation(LLUUID::null);
@@ -694,7 +692,8 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderPerformanceTest")->getSignal()->connect(boost::bind(&handleRenderPerfTestChanged, _2));
 	gSavedSettings.getControl("TextureMemory")->getSignal()->connect(boost::bind(&handleVideoMemoryChanged, _2));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
-// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-10 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2012-01-10 (Catznip-3.2)
+	gSavedSettings.getControl("ChatMultiLine")->getSignal()->connect(boost::bind(&handleChatMultiLineChanged, _2));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLViewerChat::signalChatFontChanged));
 // [/SL:KB]
@@ -795,9 +794,6 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("SpellCheckDictionary")->getSignal()->connect(boost::bind(&handleSpellCheckChanged));
 	gSavedSettings.getControl("LoginLocation")->getSignal()->connect(boost::bind(&handleLoginLocationChanged));
-// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
-	gSavedSettings.getControl("ChatMultiLine")->getSignal()->connect(boost::bind(&handleChatMultiLineChanged, _2));
-// [/SL:KB]
 }
 
 #if TEST_CACHED_CONTROL
