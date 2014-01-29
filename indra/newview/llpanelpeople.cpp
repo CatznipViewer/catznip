@@ -445,6 +445,9 @@ public:
 	LLFriendListUpdater(callback_t cb)
 	:	LLAvatarListUpdater(cb, FRIEND_LIST_UPDATE_TIMEOUT)
 	,	mIsActive(false)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-29 (Catznip-3.6)
+	,	mMask(LLFriendObserver::ALL)
+// [/SL:KB]
 	{
 		LLAvatarTracker::instance().addObserver(this);
 
