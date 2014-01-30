@@ -250,6 +250,34 @@ void handleDisplayNamesOptionChanged(const LLSD& newvalue)
 	LLVOAvatar::invalidateNameTags();
 }
 
+// [SL:KB] - Patch: Catznip-Preferences | Checked: 2014-01-29
+void handleNearbyChatTornOffChanged()
+{
+#ifdef CATZNIP
+	LLFloater* pNearbyChat = LLFloaterReg::findInstance("nearby_chat");
+	LLFloater* pConversations = LLFloaterReg::findInstance("im_container");
+
+	if ( (pNearbyChat) && (pConversations) )
+	{
+		bool fNearbyVisible = pNearbyChat->isInVisibleChain();
+		bool fConvVisible = pConversations->isInVisibleChain();
+
+		bool fTornOff = !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
+		if ( (fTornOff) && (!pNearbyChat->isTornOff()) )
+		{
+			pNearbyChat->onTearOffClicked();
+			pNearbyChat->setVisible(fNearbyVisible);
+			pConversations->setVisible(fConvVisible);
+		}
+		else if ( (!fTornOff) && (pNearbyChat->isTornOff()) )
+		{
+			pNearbyChat->onTearOffClicked();
+			pConversations->setVisible(fConvVisible || fNearbyVisible);
+		}
+	}
+#endif // CATZNIP
+}
+// [/SL:KB]
 
 /*bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater)
 {
@@ -2092,6 +2120,10 @@ BOOL LLPanelPreference::postBuild()
 	if (hasChild("rlva_check", TRUE))
 	{
 		getChild<LLCheckBoxCtrl>("rlva_check")->setValue(gSavedSettings.getBOOL("RestrainedLove"));
+	}
+	if (hasChild("nearbychattornoff_check", TRUE))
+	{
+		getChild<LLUICtrl>("nearbychattornoff_check")->setCommitCallback(boost::bind(handleNearbyChatTornOffChanged));
 	}
 // [/SL:KB]
 

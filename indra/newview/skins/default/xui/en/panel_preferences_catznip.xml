@@ -384,6 +384,16 @@
 			 top_delta="0"
 			 width="350" />
 			<check_box
+			 control_name="ChatMultiLine"
+			 follows="top|left"
+			 height="20"
+			 label="Dynamically resize the chat bar to fit typed text (single line vs multi line)"
+			 layout="topleft"
+			 left="45"
+			 name="chatbartype_check"
+			 top_pad="4"
+			 width="350" />
+			<check_box
 			 control_name="ChatTimestampSeconds"
 			 follows="top|left"
 			 height="20"
@@ -391,7 +401,7 @@
 			 layout="topleft"
 			 left="45"
 			 name="timestampseconds_check"
-			 top_pad="3"
+			 top_pad="0"
 			 width="350" />
 
 			<text
@@ -407,44 +417,14 @@
 			 font.style="BOLD">
 				Nearby Chat
 			</text>
-			<text
-			 follows="top|left"
-			 height="15"
-			 layout="topleft"
-			 left="65"
-			 mouse_opaque="false"
-			 name="nearbychatbartype_text"
-			 top_pad="5"
-			 type="string"
-			 width="95">
-				Nearby chat bar :
-			</text>
-			<combo_box
-			 allow_text_entry="false"
-			 bottom_delta="3"
-			 control_name="NearbyChatFloaterBarType"
-			 follows="top|left"
-			 height="23"
-			 layout="topleft"
-			 left_pad="10"
-			 mouse_opaque="true"
-			 name="nearbychatbartype_combo"
-			 width="100">
-				<combo_box.item
-				 label="Single-line"
-				 value="1" />
-				<combo_box.item
-				 label="Multi-line"
-				 value="2" />
-			</combo_box>
 			<check_box
-			 control_name="NearbyChatFloaterWindow"
+			 control_name="NearbyChatIsNotTornOff"
 			 follows="top|left"
 			 height="20"
 			 label="Dock nearby chat to the conversations floater"
 			 layout="topleft"
 			 left="45"
-			 name="nearbychatdock_check"
+			 name="nearbychattornoff_check"
 			 top_pad="4"
 			 width="350"/>
 
@@ -742,10 +722,10 @@
 			 width="350">
 				<check_box.init_callback
 				 function="Pref.InitLogNotificationChat"
-				 parameter="FriendOnline,FriendOffline" />
+				 parameter="FriendOnlineOffline" />
 				<check_box.commit_callback
 				 function="Pref.LogNotificationChat"
-				 parameter="FriendOnline,FriendOffline" />
+				 parameter="FriendOnlineOffline" />
 			</check_box>
 			<check_box
 			 follows="top|left"
@@ -758,10 +738,10 @@
 			 width="350">
 				<check_box.init_callback
 				 function="Pref.InitLogNotificationIM"
-				 parameter="FriendOnline,FriendOffline" />
+				 parameter="FriendOnlineOffline" />
 				<check_box.commit_callback
 				 function="Pref.LogNotificationIM"
-				 parameter="FriendOnline,FriendOffline" />
+				 parameter="FriendOnlineOffline" />
 			</check_box>
 			<text
 			 follows="top|left"
