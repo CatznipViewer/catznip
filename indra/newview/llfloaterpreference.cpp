@@ -1812,8 +1812,8 @@ void LLFloaterPreference::onInitEditorFont(LLUICtrl* pCtrl)
 
 void LLFloaterPreference::onToggleEditorFont(LLUICtrl* pCheckCtrl)
 {
-	LLComboBox* pMainCombo = findChild<LLComboBox>("combo_font_main");
-	LLComboBox* pEditorCombo = findChild<LLComboBox>("combo_font_editor");
+	LLComboBox* pMainCombo = findChild<LLComboBox>("font_main_combo");
+	LLComboBox* pEditorCombo = findChild<LLComboBox>("font_editor_combo");
 
 	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
 	if (!pCheckCtrl->getValue().asBoolean())
@@ -1835,8 +1835,8 @@ void LLFloaterPreference::onToggleEditorFont(LLUICtrl* pCheckCtrl)
 
 void LLFloaterPreference::onCommitEditorFont()
 {
-	LLComboBox* pMainCombo = findChild<LLComboBox>("combo_font_main");
-	LLComboBox* pEditorCombo = findChild<LLComboBox>("combo_font_editor");
+	LLComboBox* pMainCombo = findChild<LLComboBox>("font_main_combo");
+	LLComboBox* pEditorCombo = findChild<LLComboBox>("font_editor_combo");
 
 	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
 	if (pMainCombo->getSimple() == pEditorCombo->getSimple())
