@@ -146,8 +146,11 @@ Function .onInstSuccess
 label_ask_launch:
     # Don't launch by default when silent
     IfSilent label_no_launch
-	MessageBox MB_YESNO $(InstSuccesssQuestion) \
-        IDYES label_launch IDNO label_no_launch
+    MessageBox MB_OK $(InstSuccesss)
+    Goto label_no_launch
+
+#   MessageBox MB_YESNO $(InstSuccesssQuestion) \
+#        IDYES label_launch IDNO label_no_launch
         
 label_launch:
 	# Assumes SetOutPath $INSTDIR
