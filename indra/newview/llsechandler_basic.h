@@ -232,8 +232,8 @@ class LLSecAPIBasicHandler : public LLSecAPIHandler
 {
 public:
 	
-	LLSecAPIBasicHandler(const std::string& protected_data_filename,
-						 const std::string& legacy_password_path);
+//	LLSecAPIBasicHandler(const std::string& protected_data_filename,
+//						 const std::string& legacy_password_path);
 	LLSecAPIBasicHandler();
 	
 	void init();
@@ -294,13 +294,13 @@ public:
 protected:
 	void _readProtectedData();
 	void _writeProtectedData();
-	std::string _legacyLoadPassword();
+//	std::string _legacyLoadPassword();
 
 	std::string mProtectedDataFilename;
 	LLSD mProtectedDataMap;
 	LLPointer<LLBasicCertificateStore> mStore;
 	
-	std::string mLegacyPasswordPath;
+//	std::string mLegacyPasswordPath;
 };
 
 bool valueCompareLLSD(const LLSD& lhs, const LLSD& rhs);

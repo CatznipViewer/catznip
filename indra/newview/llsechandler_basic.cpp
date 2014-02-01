@@ -1185,14 +1185,14 @@ void LLBasicCertificateStore::validate(int validation_policy,
 
 // We read the file on construction, and write it on destruction.  This
 // means multiple processes cannot modify the datastore.
-LLSecAPIBasicHandler::LLSecAPIBasicHandler(const std::string& protected_data_file,
-										   const std::string& legacy_password_path)
-{
-	mProtectedDataFilename = protected_data_file;
-	mProtectedDataMap = LLSD::emptyMap();
-	mLegacyPasswordPath = legacy_password_path;
-
-}
+//LLSecAPIBasicHandler::LLSecAPIBasicHandler(const std::string& protected_data_file,
+//										   const std::string& legacy_password_path)
+//{
+//	mProtectedDataFilename = protected_data_file;
+//	mProtectedDataMap = LLSD::emptyMap();
+//	mLegacyPasswordPath = legacy_password_path;
+//
+//}
 
 LLSecAPIBasicHandler::LLSecAPIBasicHandler()
 {
@@ -1206,10 +1206,10 @@ void LLSecAPIBasicHandler::init()
 	{
 		mProtectedDataFilename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
 															"bin_conf.dat");
-		mLegacyPasswordPath = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "password.dat");
-	
-		mProtectedDataFilename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
-															"bin_conf.dat");	
+//		mLegacyPasswordPath = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, "password.dat");
+//	
+//		mProtectedDataFilename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
+//															"bin_conf.dat");	
 		std::string store_file = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS,
 														"CA.pem");
 		
@@ -1665,31 +1665,31 @@ bool LLSecAPIBasicHandler::getCredentialIdentifierList(const std::string& grid, 
 
 // load the legacy hash for agni, and decrypt it given the 
 // mac address
-std::string LLSecAPIBasicHandler::_legacyLoadPassword()
-{
-	const S32 HASHED_LENGTH = 32;	
-	std::vector<U8> buffer(HASHED_LENGTH);
-	llifstream password_file(mLegacyPasswordPath, llifstream::binary);
-	
-	if(password_file.fail())
-	{
-		return std::string("");
-	}
-	
-	password_file.read((char*)&buffer[0], buffer.size());
-	if(password_file.gcount() != buffer.size())
-	{
-		return std::string("");
-	}
-	
-	// Decipher with MAC address
-	unsigned char unique_id[MAC_ADDRESS_BYTES];
-    LLMachineID::getUniqueID(unique_id, sizeof(unique_id));
-	LLXORCipher cipher(unique_id, sizeof(unique_id));
-	cipher.decrypt(&buffer[0], buffer.size());
-	
-	return std::string((const char*)&buffer[0], buffer.size());
-}
+//std::string LLSecAPIBasicHandler::_legacyLoadPassword()
+//{
+//	const S32 HASHED_LENGTH = 32;	
+//	std::vector<U8> buffer(HASHED_LENGTH);
+//	llifstream password_file(mLegacyPasswordPath, llifstream::binary);
+//	
+//	if(password_file.fail())
+//	{
+//		return std::string("");
+//	}
+//	
+//	password_file.read((char*)&buffer[0], buffer.size());
+//	if(password_file.gcount() != buffer.size())
+//	{
+//		return std::string("");
+//	}
+//	
+//	// Decipher with MAC address
+//	unsigned char unique_id[MAC_ADDRESS_BYTES];
+//    LLMachineID::getUniqueID(unique_id, sizeof(unique_id));
+//	LLXORCipher cipher(unique_id, sizeof(unique_id));
+//	cipher.decrypt(&buffer[0], buffer.size());
+//	
+//	return std::string((const char*)&buffer[0], buffer.size());
+//}
 
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 std::string LLSecAPIBasicCredential::userIDFromIdentifier(const LLSD& sdIdentifier)
