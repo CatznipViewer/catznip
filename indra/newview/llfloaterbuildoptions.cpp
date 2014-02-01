@@ -88,32 +88,30 @@ LLFloaterSelectionOptions::~LLFloaterSelectionOptions()
 
 BOOL LLFloaterSelectionOptions::postBuild()
 {
-	findChild<LLUICtrl>("RenderHiddenSelections")->setCommitCallback(boost::bind(&LLFloaterSelectionOptions::onToggleHiddenSelection, this, _2));
+	// NOTE-Catznip: we're relying on the fact that the control is updated before the commit signal fires (and the viewer code doesn't actually have contracts so we need to explicitly point this out)
+	findChild<LLUICtrl>("RectangleSelectInclusive")->setCommitCallback(boost::bind(&LLFloaterSelectionOptions::onToggleSelectInclusive, _2));
+	findChild<LLUICtrl>("RenderHiddenSelections")->setCommitCallback(boost::bind(&LLFloaterSelectionOptions::onToggleHiddenSelection, _2));
+	findChild<LLUICtrl>("RenderLightRadius")->setCommitCallback(boost::bind(&LLFloaterSelectionOptions::onToggleLightRadius, _2));
 
 	return TRUE;
 }
 
-void LLFloaterSelectionOptions::onOpen(const LLSD& sdKey)
+// static
+void LLFloaterSelectionOptions::onToggleSelectInclusive(const LLSD& sdValue)
 {
-	m_HiddenSelConn = gSavedSettings.getControl("RenderHiddenSelections")->getSignal()->connect(boost::bind(&LLFloaterSelectionOptions::refresh, this));
-
-	refresh();
+	LLSelectMgr::sRectSelectInclusive = !LLSelectMgr::sRectSelectInclusive;
 }
 
-void LLFloaterSelectionOptions::onClose(bool fQuiting)
-{
-	m_HiddenSelConn.disconnect();
-}
-
-void LLFloaterSelectionOptions::refresh()
-{
-	findChild<LLUICtrl>("RenderHiddenSelections")->setValue(gSavedSettings.getBOOL("RenderHiddenSelections"));
-}
-
+// static
 void LLFloaterSelectionOptions::onToggleHiddenSelection(const LLSD& sdValue)
 {
 	LLSelectMgr::sRenderHiddenSelections = sdValue.asBoolean();
-	gSavedSettings.setBOOL("RenderHiddenSelections", LLSelectMgr::sRenderHiddenSelections);
+}
+
+// static
+void LLFloaterSelectionOptions::onToggleLightRadius(const LLSD& sdValue)
+{
+	LLSelectMgr::sRenderLightRadius = sdValue.asBoolean();
 }
 // [/SL:KB]
 

@@ -1,6 +1,9 @@
 [Build/Tools]
 - added   : "Axis at Root" checkbox to the build floater to position the axis on the first (root) object of the selection
 - added   : axis options floater to change the position of the axis relative to the current prim (or linkset)
+- added   : "SelectCopiableOnly" setting to only (drag-)select objects that are copiable by the user
+    -> this includes copy-for-all and mod-right copiable objects- changed : moved the "Link" and "Unlink" buttons down on the build floater to just above the tab container
+- added   : "Selection Options" floater to the build floater
 - added   : copy/paste buttons to the build floater for position, size, rotation, primitive parameters, texture and colour
 - added   : copy/paste buttons of the different types of texture parameters
     -> Three possible scenarios (always on a single object):

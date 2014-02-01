@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- height="175"
+ height="210"
  layout="topleft"
  name="build selection floater"
  save_rect="true"
  title="SELECTION OPTIONS"
- width="264">
+ width="230">
 
     <check_box
      control_name="SelectOwnedOnly"
@@ -30,6 +30,14 @@
      label="Select Only Movable Objects"
      layout="topleft"
      name="SelectMovableOnly"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="RectangleSelectInclusive"
+     height="18"
+     label="Select by Surrounding"
+     layout="topleft"
+     name="RectangleSelectInclusive"
      top_pad="0"
      width="200" />
 
@@ -58,6 +66,14 @@
      label="Show Hidden Selection"
      layout="topleft"
      name="RenderHiddenSelections"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="RenderLightRadius"
+     height="18"
+     label="Show Light Radius for Selection"
+     layout="topleft"
+     name="RenderLightRadius"
      top_pad="0"
      width="200" />
     <check_box

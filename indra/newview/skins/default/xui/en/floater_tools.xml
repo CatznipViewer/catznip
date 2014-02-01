@@ -230,7 +230,7 @@
 	<radio_group
      follows="left|top"
 	 left="5"
-	 top="55"
+	 top="52"
 	 height="70"
      layout="topleft"
 	 name="edit_radio_group">
@@ -264,7 +264,7 @@
      label="Edit linked"
      layout="topleft"
      name="checkbox edit linked parts"
-     top_pad="-9">
+     top="121">
 		  <check_box.commit_callback
 			function="BuildTool.selectComponent"/>
 	</check_box>
@@ -294,32 +294,6 @@
 	     function="BuildTool.UnlinkObjects"/>
     </button>
 -->
-    <text
-     height="19"
-     left="164"
-     name="selection options"
-     top="47"
-     width="120"
-     layout="topleft"
-     follows="top|left"
-     wrap="true">
-        Selection options
-    </text>
-    <button
-     left="259"
-     label=""
-     image_selected="ForwardArrow_Press"
-     image_unselected="ForwardArrow_Off"
-     layout="topleft"
-     follows="top|left"
-     name="selection options button"
-     tool_tip="See more selection options"
-     top_delta="-3"
-     width="25"
-     height="19">
-        <button.commit_callback
-         function="BuildTool.selectOptions"/>
-    </button>
     <check_box
      control_name="ScaleUniform"
      height="19"
@@ -327,7 +301,7 @@
      layout="topleft"
      left="143"
      name="checkbox uniform"
-     top_pad="-3"
+     top="48"
      width="20" />
     <check_box
      control_name="ScaleStretchTextures"
@@ -340,6 +314,33 @@
      top_pad="-3"
      follows="left|top"
      width="134" />
+    <text
+     height="16"
+     left="164"
+     name="selection options"
+     top_pad="-4"
+     width="120"
+     layout="topleft"
+     follows="top|left"
+     valign="center"
+     wrap="true">
+        Selection options
+    </text>
+    <button
+     left="259"
+     label=""
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="selection options button"
+     tool_tip="See more selection options"
+     top_delta="0"
+     width="25"
+     height="19">
+        <button.commit_callback
+         function="BuildTool.selectOptions"/>
+    </button>
     <check_box
      control_name="AxisAtRootEnabled"
      height="19"
@@ -397,7 +398,7 @@
       tool_tip="Choose the type of grid ruler for positioning the object"
       left="162"
       top_pad="0"
-      width="90">
+      width="105">
       <combo_box.item
       label="World"
       name="World"
@@ -800,7 +801,7 @@
 	  layout="topleft"
 	  left="10"
 	  name="selection_empty"
-	  top="155"
+	  top="156"
 	  width="100">
 		Nothing selected.
 	</text>
@@ -891,11 +892,11 @@
     layout="topleft"
     left="6"
     name="cost_text_border"
-    top="150"
+    top="153"
     width="282"/>
     <tab_container
      follows="left|top"
-     height="410"
+     height="413"
      halign="center"
      left="0"
      name="Object Info Tabs"

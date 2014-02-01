@@ -71,15 +71,11 @@ public:
 	/*virtual*/ ~LLFloaterSelectionOptions();
 
 public:
-	/*virtual*/ void onOpen(const LLSD& sdKey);
-	/*virtual*/ void onClose(bool fQuiting);
 	/*virtual*/ BOOL postBuild();
-	            void refresh();
 protected:
-	void onToggleHiddenSelection(const LLSD& sdValue);
-
-protected:
-	boost::signals2::connection m_HiddenSelConn;
+	static void onToggleSelectInclusive(const LLSD& sdValue);
+	static void onToggleHiddenSelection(const LLSD& sdValue);
+	static void onToggleLightRadius(const LLSD& sdValue);
 };
 // [/SL:KB]
 
