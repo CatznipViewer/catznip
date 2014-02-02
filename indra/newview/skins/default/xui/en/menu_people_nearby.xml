@@ -68,6 +68,16 @@
          parameter="can_add" />
     </menu_item_call>
     <menu_item_call
+     label="Add Contact"
+     layout="topleft"
+     name="add_contact">
+        <menu_item_call.on_click
+         function="Avatar.AddContact" />
+        <menu_item_call.on_visible
+         function="Avatar.EnableItem"
+         parameter="can_add" />
+    </menu_item_call>
+    <menu_item_call
      label="Remove Friend"
      layout="topleft"
      name="remove_friend">
@@ -78,6 +88,31 @@
          parameter="can_delete" />
     </menu_item_call>
     <menu_item_separator name="separator_actions" />
+    <context_menu
+     label="Copy"
+     name="avatar_copy">
+        <menu_item_call
+         label="Copy Display Name"
+         name="avatar_copy_displayname">
+            <menu_item_call.on_click
+             function="Avatar.Copy"
+             parameter="displayname" />
+        </menu_item_call>
+        <menu_item_call
+         label="Copy Full Name"
+         name="avatar_copy_fullname">
+            <menu_item_call.on_click
+             function="Avatar.Copy"
+             parameter="fullname" />
+        </menu_item_call>
+        <menu_item_call
+         label="Copy SLurl"
+         name="avatar_copy_slurl">
+            <menu_item_call.on_click
+             function="Avatar.Copy"
+             parameter="slurl" />
+        </menu_item_call>
+    </context_menu>
     <context_menu
      label="Manage"
      name="menu_manage">
@@ -184,31 +219,6 @@
       	 function="Avatar.EnableItem"
          parameter="can_callog"/>
     </menu_item_call>
-    <context_menu
-     label="Copy"
-     name="avatar_copy">
-        <menu_item_call
-         label="Copy Display Name"
-         name="avatar_copy_displayname">
-            <menu_item_call.on_click
-             function="Avatar.Copy"
-             parameter="displayname" />
-        </menu_item_call>
-        <menu_item_call
-         label="Copy Full Name"
-         name="avatar_copy_fullname">
-            <menu_item_call.on_click
-             function="Avatar.Copy"
-             parameter="fullname" />
-        </menu_item_call>
-        <menu_item_call
-         label="Copy SLurl"
-         name="avatar_copy_slurl">
-            <menu_item_call.on_click
-             function="Avatar.Copy"
-             parameter="slurl" />
-        </menu_item_call>
-    </context_menu>
     <menu_item_call
          label="Freeze"
          name="freeze">
