@@ -239,12 +239,10 @@ void LLTexturePreviewView::draw()
 			gl_rect_2d_checkerboard(rctClient);
 		gl_draw_scaled_image(rctClient.mLeft, rctClient.mBottom, rctClient.getWidth(), rctClient.getHeight(), m_Image);
 
-		m_Image->addTextureStats((F32)(rctClient.getWidth() * rctClient.getHeight()));
-
-		if ( (!m_Image->isFullyLoaded()) && (m_Image->getDiscardLevel() > 1) )
-		{
+		bool fLoading = (!m_Image->isFullyLoaded()) && (m_Image->getDiscardLevel() > 0);
+		if (fLoading)
 			LLFontGL::getFontSansSerif()->renderUTF8(m_strLoading, 0, llfloor(rctClient.mLeft + 3),  llfloor(rctClient.mTop - 25), LLColor4::white, LLFontGL::LEFT, LLFontGL::BASELINE, LLFontGL::DROP_SHADOW);
-		}
+		m_Image->addTextureStats((fLoading) ? MAX_IMAGE_AREA : (F32)(rctClient.getWidth() * rctClient.getHeight()));
 	}
 }
 
