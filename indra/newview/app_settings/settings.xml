@@ -10341,6 +10341,17 @@
       <key>Value</key>
       <real>1.0</real>
     </map>
+    <key>SendPointAt</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows the arm-movement editing motion for your avatart and sends point-at updates to the region when enabled</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>ServerChoice</key>
     <map>
       <key>Comment</key>

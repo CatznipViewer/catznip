@@ -21,9 +21,10 @@
     -> gave options consistent LTR-alignment instead of mixed LTR and TTB
 
 [Build/Misc]
-- added : "RezUnderLandGroup" setting to rez prims under the land group rather than the avatar's active group
+- added   : "RezUnderLandGroup" setting to rez prims under the land group rather than the avatar's active group
     -> rezzing a prim across parcel borders will rez it with the proper parcel's group
     -> works when rezzing from inventory, newly rezzed prims and prim duplication
+- added   : "SendPointAt" setting to not send the LLHUDEffectPointAt effect to the region and to prevent playing the arm-pointing edit animation
 - changed : uncommented the "Restore to Last Position" option in the inventory context menu
     -> added two (ignorable) notifications: one for copyable and one for non-copyable objects to prevent accidental usage
 - fixed   : "Edit" and "Build" should not be mutually exclusive on the object context menu
