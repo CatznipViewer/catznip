@@ -425,7 +425,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mRefreshTimer->start();
 	initBtns();
 
-	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
+//	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
+ // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL(getShowControlPanelControl()))
+ // [/SL:KB
 	{
 		LLFloaterIMSessionTab::onSlide(this);
 	}
@@ -456,6 +459,13 @@ LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 // [/SL:KB]
 //	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
+
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+const std::string LLFloaterIMSessionTab::getShowControlPanelControl() const
+{
+	return (isNearbyChat()) ? "IMShowControlPanelNearby" : "IMShowControlPanelGroup";
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 void LLFloaterIMSessionTab::setParticipantList(LLParticipantList* participant_list)
@@ -1101,7 +1111,10 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
             bool should_be_expanded = self->mParticipantListPanel->isCollapsed();
 
 			// Update the expand/collapse flag of the participant list panel and save it
-            gSavedSettings.setBOOL("IMShowControlPanel", should_be_expanded);
+ // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+			gSavedSettings.setBOOL(self->getShowControlPanelControl(), should_be_expanded);
+ // [/SL:KB
+//            gSavedSettings.setBOOL("IMShowControlPanel", should_be_expanded);
             self->mIsParticipantListExpanded = should_be_expanded;
             
             // Refresh for immediate feedback

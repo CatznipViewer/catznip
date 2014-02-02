@@ -89,7 +89,11 @@ public:
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	const LLUUID& getSessionID() const { return mSessionID; }
 // [/SL:KB]
-	bool isNearbyChat() {return mIsNearbyChat;}
+//	bool isNearbyChat() {return mIsNearbyChat;}
+ // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+	bool isNearbyChat() const { return mIsNearbyChat; }
+	const std::string getShowControlPanelControl() const;
+ // [/SL:KB
 
 	// LLFloater overrides
 	/*virtual*/ void onOpen(const LLSD& key);

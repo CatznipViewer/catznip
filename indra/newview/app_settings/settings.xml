@@ -4479,16 +4479,27 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>IMShowControlPanel</key>
+    <key>IMShowControlPanelGroup</key>
     <map>
       <key>Comment</key>
-      <string>Show IM Control Panel</string>
+      <string>Show the control panel for group sessions</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>IMShowControlPanelNearby</key>
+    <map>
+      <key>Comment</key>
+      <string>Show control panel for nearby chat</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
     </map>
      <key>IMShowContentPanel</key>
     <map>

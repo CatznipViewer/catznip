@@ -319,7 +319,7 @@ void LLFloaterIMSession::initIMFloater()
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		// Show control panel in torn off floaters only.
-		mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
+		mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL(getShowControlPanelControl()));
 	}
 // [/SL:KB]
 //	// Show control panel in torn off floaters only.
