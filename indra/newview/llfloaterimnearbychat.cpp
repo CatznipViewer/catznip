@@ -104,6 +104,9 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 	mIsNearbyChat = true;
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 	mSessionID = LLUUID();
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2014-02-02 (Catznip-3.6)
+	mVisibilityControl = "t";
+// [/SL:KB]
 }
 
 //static
