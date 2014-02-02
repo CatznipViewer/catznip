@@ -315,8 +315,15 @@ void LLFloaterIMSession::initIMFloater()
 
 //	mTypingStart = LLTrans::getString("IM_typing_start_string");
 
-	// Show control panel in torn off floaters only.
-	mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+		// Show control panel in torn off floaters only.
+		mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
+	}
+// [/SL:KB]
+//	// Show control panel in torn off floaters only.
+//	mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
 
 	// Disable input editor if session cannot accept text
 	if ( mSession && !mSession->mTextIMPossible )
