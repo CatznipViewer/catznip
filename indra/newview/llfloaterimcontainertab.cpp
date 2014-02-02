@@ -88,6 +88,7 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 	{
 		if (!pConvFloater->isTornOff())
 		{
+			setMinimized(false);
 			setVisibleAndFrontmost(false);
 			mTabContainer->selectTabPanel(pConvFloater);
 
@@ -99,6 +100,7 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 		}
 		else
 		{
+			pConvFloater->setMinimized(false);
 			pConvFloater->setVisibleAndFrontmost(true);
 		}
 	}

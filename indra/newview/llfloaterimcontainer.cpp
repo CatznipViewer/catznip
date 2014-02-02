@@ -1565,11 +1565,13 @@ void LLFloaterIMContainerView::showConversation(const LLUUID& session_id)
     LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
 	if ( (!session_floater) || (session_floater->getHost()) )
 	{
+		setMinimized(false);
 		setVisibleAndFrontmost(false);
 		selectConversationPair(session_id, true);
 	}
 	else
 	{
+		session_floater->setMinimized(false);
 		session_floater->setVisibleAndFrontmost(true);
 		flashConversationItemWidget(session_id, false);
 	}
