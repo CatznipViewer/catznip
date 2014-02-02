@@ -765,59 +765,57 @@ void LLIMP2PChiclet::setOtherParticipantId(const LLUUID& other_participant_id)
 	mChicletIconCtrl->setValue(getOtherParticipantId());
 }
 
-void LLIMP2PChiclet::updateMenuItems()
-{
-	LLContextMenu* popup_menu = mContextMenuHandle.get();
-	if (!popup_menu )
-		return;
-	if (getSessionId().isNull())
-		return;
-
-	LLFloaterIMSession* open_im_floater = LLFloaterIMSession::findInstance(getSessionId());
-	bool open_window_exists = open_im_floater && open_im_floater->getVisible();
-	popup_menu->getChild<LLUICtrl>("Send IM")->setEnabled(!open_window_exists);
-	
-	bool is_friend = LLAvatarActions::isFriend(getOtherParticipantId());
-	popup_menu->getChild<LLUICtrl>("Add Friend")->setEnabled(!is_friend);
-}
-
 void LLIMP2PChiclet::createPopupMenu()
 {
 	if (!canCreateMenu())
 		return;
 
-	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
-	registrar.add("IMChicletMenu.Action", boost::bind(&LLIMP2PChiclet::onMenuItemClicked, this, _2));
+	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar commit;
+	commit.add("IMChicletMenu.Action", boost::bind(&LLIMP2PChiclet::onMenuItemClicked, this, _2));
 
-	LLContextMenu* popup_menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable;
+	enable.add("IMChicletMenu.EnableAction", boost::bind(&LLIMP2PChiclet::onMenuItemEnable, this, _2));
+
+	LLContextMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>
 		("menu_imchiclet_p2p.xml",
 		LLMenuGL::sMenuContainer,
 		LLViewerMenuHolderGL::child_registry_t::instance());
-	mContextMenuHandle = popup_menu->getHandle();
+	mContextMenuHandle = pMenu->getHandle();
 }
 
-void LLIMP2PChiclet::onMenuItemClicked(const LLSD& user_data)
+void LLIMP2PChiclet::onMenuItemClicked(const LLSD& sdParam)
 {
-	const LLUUID& other_participant_id = getOtherParticipantId();
-	const LLUUID& session_id = getSessionId();
+	const LLUUID& idAvatar = getOtherParticipantId();
 
-	const std::string param = user_data.asString();
-	if("profile" == param)
+	const std::string strParam = sdParam.asString();
+	if ("profile" == strParam)
 	{
-		LLAvatarActions::showProfile(other_participant_id);
+		LLAvatarActions::showProfile(idAvatar);
 	}
-	else if("show" == param)
+	else if("friend_add" == strParam)
 	{
-		LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+		LLAvatarActions::requestFriendshipDialog(idAvatar);
 	}
-	else if("add" == param)
+	else if("session_show" == strParam)
 	{
-		LLAvatarActions::requestFriendshipDialog(other_participant_id);
+		LLFloaterIMContainerBase::getInstance()->showConversation(getSessionId());
 	}
-	else if("end" == param)
+	else if("session_end" == strParam)
 	{
-		LLAvatarActions::endIM(other_participant_id);
+		LLAvatarActions::endIM(idAvatar);
 	}
+}
+
+bool LLIMP2PChiclet::onMenuItemEnable(const LLSD& sdParam)
+{
+	const LLUUID& idAvatar = getOtherParticipantId();
+
+	const std::string strParam = sdParam.asString();
+	if ("can_friend_add" == strParam)
+	{
+		return !LLAvatarActions::isFriend(idAvatar);
+	}
+	return false;
 }
 // [/SL:KB]
 

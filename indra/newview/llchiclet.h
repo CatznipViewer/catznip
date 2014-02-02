@@ -503,7 +503,7 @@ public:
 
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 /**
- * Implements P2P chiclet.
+ * Implements P2P chiclet
  */
 class LLIMP2PChiclet : public LLIMChiclet
 {
@@ -521,44 +521,35 @@ public:
 
 		Optional<LLIconCtrl::Params> new_message_icon;
 
-		Optional<bool>	show_speaker;
+		Optional<bool> show_speaker;
 
 		Params();
 	};
 
 protected:
 	LLIMP2PChiclet(const Params& p);
-
 public:
+	virtual ~LLIMP2PChiclet() {}
+
+	/*
+	 * LLIMChiclet overrides
+	 */
+public:
+	/*virtual*/ void createPopupMenu();
+	/*virtual*/ S32 getCounter() const { return mCounterCtrl->getCounter(); }
+	/*virtual*/ void initSpeakerControl();
 	/*virtual*/ void setOtherParticipantId(const LLUUID& other_participant_id);
 
-	/**
-	 * Init Speaker Control with speaker's ID
+	/*
+	 * Event handlers
 	 */
-	/*virtual*/ void initSpeakerControl();
+protected:
+	void onMenuItemClicked(const LLSD& sdParam);
+	bool onMenuItemEnable(const LLSD& sdParam);
 
-	/**
-	 * Returns number of unread messages.
+	/*
+	 * Member variables
 	 */
-	/*virtual*/ S32 getCounter() const { return mCounterCtrl->getCounter(); }
-
-	/**
-	 * Creates chiclet popup menu. Will create P2P or Group IM Chat menu 
-	 * based on other participant's id.
-	 */
-	/*virtual*/ void createPopupMenu();
-
-	/**
-	 * Processes clicks on chiclet popup menu.
-	 */
-	/*virtual*/ void onMenuItemClicked(const LLSD& user_data);
-
-	/** 
-	 * Enables/disables menus based on relationship with other participant.
-	 * Enables/disables "show session" menu item depending on visible IM floater existence.
-	 */
-	/*virtual*/ void updateMenuItems();
-
 private:
 	LLChicletAvatarIconCtrl* mChicletIconCtrl;
 };
