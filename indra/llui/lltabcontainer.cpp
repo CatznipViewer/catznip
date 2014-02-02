@@ -130,9 +130,14 @@ public:
 		switch(mIconAlignment)
 		{
 		case LLFontGL::LEFT:
-			icon_rect.setLeftTopAndSize(button_rect.mLeft + mIconCtrlPad, button_rect.mTop - mIconCtrlPad, 
-				icon_size, icon_size);
-			setLeftHPad(icon_size + mIconCtrlPad * 2);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2011-01-16 (Catznip-2.4)
+			// TODO-Catznip: this should be fixed for HCENTER and RIGHT as well
+			icon_rect.setLeftTopAndSize(mIconCtrlPad * 1.5, button_rect.getHeight() - mIconCtrlPad, icon_size, icon_size);
+			setLeftHPad(icon_size + mIconCtrlPad * 3);
+// [/SL:KB]
+//			icon_rect.setLeftTopAndSize(button_rect.mLeft + mIconCtrlPad, button_rect.mTop - mIconCtrlPad, 
+//				icon_size, icon_size);
+//			setLeftHPad(icon_size + mIconCtrlPad * 2);
 			break;
 		case LLFontGL::HCENTER:
 			icon_rect.setLeftTopAndSize(button_rect.mRight - (button_rect.getWidth() + mIconCtrlPad - icon_size)/2, button_rect.mTop - mIconCtrlPad, 
@@ -1668,21 +1673,37 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 {
 	static LLUICachedControl<S32> tab_padding ("UITabPadding", 0);
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2011-01-16 (Catznip-2.4)
+	S32 image_overlay_width = 0;
+
+	if(mCustomIconCtrlUsed)
+	{
+		LLCustomButtonIconCtrl* button = dynamic_cast<LLCustomButtonIconCtrl*>(tuple->mButton);
+		LLIconCtrl* icon_ctrl = button ? button->getIconCtrl() : NULL;
+		image_overlay_width = icon_ctrl ? icon_ctrl->getRect().getWidth() : 0;
+	}
+	else
+	{
+		image_overlay_width = tuple->mButton->getImageOverlay().notNull() ?
+				tuple->mButton->getImageOverlay()->getImage()->getWidth(0) : 0;
+	}
+// [/SL:KB]
+
 	if (!mIsVertical)
 	{
-		S32 image_overlay_width = 0;
-
-		if(mCustomIconCtrlUsed)
-		{
-			LLCustomButtonIconCtrl* button = dynamic_cast<LLCustomButtonIconCtrl*>(tuple->mButton);
-			LLIconCtrl* icon_ctrl = button ? button->getIconCtrl() : NULL;
-			image_overlay_width = icon_ctrl ? icon_ctrl->getRect().getWidth() : 0;
-		}
-		else
-		{
-			image_overlay_width = tuple->mButton->getImageOverlay().notNull() ?
-					tuple->mButton->getImageOverlay()->getImage()->getWidth(0) : 0;
-		}
+//		S32 image_overlay_width = 0;
+//
+//		if(mCustomIconCtrlUsed)
+//		{
+//			LLCustomButtonIconCtrl* button = dynamic_cast<LLCustomButtonIconCtrl*>(tuple->mButton);
+//			LLIconCtrl* icon_ctrl = button ? button->getIconCtrl() : NULL;
+//			image_overlay_width = icon_ctrl ? icon_ctrl->getRect().getWidth() : 0;
+//		}
+//		else
+//		{
+//			image_overlay_width = tuple->mButton->getImageOverlay().notNull() ?
+//					tuple->mButton->getImageOverlay()->getImage()->getWidth(0) : 0;
+//		}
 		// remove current width from total tab strip width
 		mTotalTabWidth -= tuple->mButton->getRect().getWidth();
 
@@ -1696,6 +1717,12 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 		// tabs have changed size, might need to scroll to see current tab
 		updateMaxScrollPos();
 	}
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2011-01-16 (Catznip-2.4)
+	else
+	{
+		tuple->mPadding = image_overlay_width;
+	}
+// [/SL:KB]
 }
 
 void LLTabContainer::setTitle(const std::string& title)

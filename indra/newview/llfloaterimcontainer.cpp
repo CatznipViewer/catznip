@@ -288,8 +288,8 @@ BOOL LLFloaterIMContainerView::postBuild()
 	{
 		expandConversation();
 	}
-	// Keep the xml set title around for when we have to overwrite it
-	mGeneralTitle = getTitle();
+//	// Keep the xml set title around for when we have to overwrite it
+//	mGeneralTitle = getTitle();
 	
 	mInitialized = true;
 
@@ -574,9 +574,9 @@ void LLFloaterIMContainerView::draw()
 
 			current_participant_model++;
 		}
-		// Update floater's title as required by the currently selected session or use the default title
-		LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
-		setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
+//		// Update floater's title as required by the currently selected session or use the default title
+//		LLFloaterIMSession * conversation_floaterp = LLFloaterIMSession::findInstance(current_session->getUUID());
+//		setTitle(conversation_floaterp && conversation_floaterp->needsTitleOverwrite() ? conversation_floaterp->getTitle() : mGeneralTitle);
 	}
 
     // "Manually" resize of mConversationsPane: same as temporarity cancellation of the flag "auto_resize=false" for it
@@ -1210,7 +1210,7 @@ void LLFloaterIMContainerBase::doToParticipants(const std::string& command, uuid
 //		{
 //			toggleAllowTextChat(userID);
 //		}
-	}
+ 	}
 	else if (selectedIDS.size() > 1)
 	{
 		if ("im" == command)
@@ -1252,6 +1252,16 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 			fHandled = true;
 		}
 	}
+
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+	// This handles both single and multiple selection
+	if ("eject_from_group" == command)
+	{
+		LLGroupActions::ejectFromGroup(mSelectedSession, selectedIDS);
+			
+		fHandled = true;
+	}
+// [/SL:KB]
 
 	if (!fHandled)
 	{
@@ -1489,6 +1499,17 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uu
 		// *TODO : get that out of here...
 		return enableModerateContextMenuItem(item);
 	}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+	else if ("eject_from_group" == item)
+	{
+		bool fRet = true;
+		for (uuid_vec_t::const_iterator itId = uuids.begin(); itId != uuids.end(); ++itId)
+		{
+			fRet &= LLGroupActions::canEjectFromGroup(mSelectedSession, *itId);
+		}
+		return fRet;
+	}
+// [/SL:KB]
 	return LLFloaterIMContainerBase::enableContextMenuItem(item, uuids);
 }
 // [/SL:KB]
@@ -1555,6 +1576,15 @@ bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 	{
 		return isMuted(getCurSelectedViewModelItem()->getUUID());
 	}
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+	else if ("eject_from_group" == item)
+	{
+		// Show if we have a group member selection (not when the group itself is selected)
+		const LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(getSelectedSession());
+		const LLConversationItem* pConvItem = getCurSelectedViewModelItem();
+		return (pIMSession) && (pIMSession->isGroupSessionType()) && (pConvItem) && (pConvItem->getType() == LLConversationItem::CONV_PARTICIPANT);
+	}
+// [/SL:KB]
 
 	return true;
 }

@@ -1540,6 +1540,17 @@
       <key>Value</key>
       <string>default</string>
     </map>
+    <key>ChatAlerts</key>
+    <map>
+      <key>Comment</key>
+      <string>Enable chat keyword alerts for nearby chat and instant messages</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>ChatBarStealsFocus</key>
     <map>
       <key>Comment</key>
@@ -1659,7 +1670,18 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>ChatTimestampSeconds</key>
+    <map>
+      <key>Comment</key>
+      <string>Include seconds in the timestamps for chat (nearby chat and instant messages)</string>
+      <key>Persist</key>
       <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>CheesyBeacon</key>
     <map>
@@ -4479,6 +4501,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>IMShowTabImage</key>
+    <map>
+      <key>Comment</key>
+      <string>Show avatar/group image on the IM tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>IMUseTabbedContainer</key>
     <map>
       <key>Comment</key>
@@ -7244,7 +7277,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNonFriendIM</key>
     <map>
@@ -7255,7 +7288,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundConferenceIM</key>
     <map>
@@ -7266,7 +7299,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundGroupChatIM</key>
     <map>
@@ -7277,7 +7310,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNearbyChatIM</key>
     <map>
@@ -9447,6 +9480,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>NameTagShowTyping</key>
+    <map>
+      <key>Comment</key>
+      <string>Show typing indicator in avatar name tags</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>NameTagShowUsernames</key>
     <map>
@@ -12719,6 +12763,94 @@
       <string>String</string>
       <key>Value</key>
       <string>c80260ba-41fd-8a46-768a-6bf236360e3a</string>
+    </map>
+    <key>UISndEventConvFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New non-friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvConference</key>
+    <map>
+      <key>Comment</key>
+      <string>New conference conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>New group conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventIMFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a non-friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMConference</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a conference</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a group</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
     </map>
     <key>UISpinctrlBtnHeight</key>
     <map>
