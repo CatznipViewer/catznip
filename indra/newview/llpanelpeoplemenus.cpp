@@ -183,6 +183,7 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("request_teleport"));
 		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
+		items.push_back(std::string("add_contact"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
 		items.push_back(std::string("menu_manage"));
@@ -513,6 +514,7 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("request_teleport"));
 		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
+		items.push_back(std::string("add_contact"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
 		items.push_back(std::string("menu_manage"));
