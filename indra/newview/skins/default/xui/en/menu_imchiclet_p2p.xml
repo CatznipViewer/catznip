@@ -11,6 +11,36 @@
          parameter="profile" />
     </menu_item_call>
     <menu_item_call
+     label="Offer Teleport"
+     layout="topleft"
+     name="Offer Teleport">
+        <menu_item_call.on_click
+         function="IMChicletMenu.Action"
+         parameter="teleport_offer" />
+        <menu_item_call.on_enable
+         function="IMChicletMenu.EnableAction"
+         parameter="can_teleport" />
+    </menu_item_call>
+    <menu_item_call
+     label="Request Teleport"
+     layout="topleft"
+     name="Request Teleport">
+        <menu_item_call.on_click
+         function="IMChicletMenu.Action"
+         parameter="teleport_request" />
+        <menu_item_call.on_enable
+         function="IMChicletMenu.EnableAction"
+         parameter="can_teleport" />
+    </menu_item_call>
+    <menu_item_call
+     label="Pay"
+     layout="topleft"
+     name="Pay">
+        <menu_item_call.on_click
+         function="IMChicletMenu.Action"
+         parameter="pay" />
+    </menu_item_call>
+    <menu_item_call
      label="Add Friend"
      layout="topleft"
      name="Add Friend">
@@ -20,14 +50,6 @@
         <menu_item_call.on_visible
          function="IMChicletMenu.EnableAction"
          parameter="can_friend_add" />
-    </menu_item_call>
-    <menu_item_call
-     label="Teleport"
-     layout="topleft"
-     name="Teleport">
-        <menu_item_call.on_click
-         function="IMChicletMenu.Action"
-         parameter="teleport" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft" />
