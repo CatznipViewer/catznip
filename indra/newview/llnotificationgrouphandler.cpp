@@ -69,21 +69,21 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 		return false;
 	}
 
-// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
-	// Don't log persisted notifications a second time or pop up a toast for them
-	if (notification->isPersisted())
-	{
-		return true;
-	}
-// [/SL:KB]
-
 	// arrange a channel on a screen
 	if(!mChannel.get()->getVisible())
 	{
 		initChannel();
 	}
 	
-	LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time
+	if (notification->isPersisted())
+	{
+// [/SL:KB]
+		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	}
+// [/SL:KB]
 
 	LLPanel* notify_box = new LLToastGroupNotifyPanel(notification);
 	LLToast::Params p;
