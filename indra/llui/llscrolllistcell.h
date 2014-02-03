@@ -130,7 +130,7 @@ public:
 	LLScrollListSeparator(const LLScrollListCell::Params& p) 
 		: LLScrollListCell(p)
 	{
-		mHeight = llround(p.font.getValue()->getLineHeight());
+		mHeight = p.font.getValue()->getLineHeight();
 	}
 	/*virtual*/ ~LLScrollListSeparator() {}
 
