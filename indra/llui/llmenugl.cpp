@@ -564,6 +564,9 @@ void LLMenuItemGL::handleVisibilityChange(BOOL new_visibility)
 // This class represents a separator.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 LLMenuItemSeparatorGL::Params::Params()
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+	: on_visible("on_visible")
+// [/SL:KB]
 {
 }
 
@@ -647,6 +650,33 @@ BOOL LLMenuItemSeparatorGL::handleHover(S32 x, S32 y, MASK mask)
 		return FALSE;
 	}
 }
+
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+void LLMenuItemSeparatorGL::initFromParams(const Params& p)
+{
+	if (p.on_visible.isProvided())
+	{
+		mVisibleSignal.connect(initEnableCallback(p.on_visible));
+	}
+		
+	LLUICtrl::initFromParams(p);
+}
+
+void LLMenuItemSeparatorGL::buildDrawLabel(void)
+{
+	updateVisible();
+	LLMenuItemGL::buildDrawLabel();
+}
+
+void LLMenuItemSeparatorGL::updateVisible( void )
+{
+	if (mVisibleSignal.num_slots() > 0)
+	{
+		bool visible = mVisibleSignal(this, LLSD());
+		setVisible(visible);
+	}
+}
+// [/SL:KB]
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Class LLMenuItemVerticalSeparatorGL

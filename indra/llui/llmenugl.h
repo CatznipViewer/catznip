@@ -217,6 +217,10 @@ class LLMenuItemSeparatorGL : public LLMenuItemGL
 public:
 	struct Params : public LLInitParam::Block<Params, LLMenuItemGL::Params>
 	{
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+		Optional<EnableCallbackParam > on_visible;
+// [/SL:KB]
+
 		Params();
 	};
 	LLMenuItemSeparatorGL(const LLMenuItemSeparatorGL::Params& p = LLMenuItemSeparatorGL::Params());
@@ -227,6 +231,17 @@ public:
 	/*virtual*/ BOOL handleHover(S32 x, S32 y, MASK mask);
 
 	/*virtual*/ U32 getNominalHeight( void ) const;
+
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+public:
+	/*virtual*/ void buildDrawLabel(void);
+	void initFromParams(const Params& p);
+protected:
+	void updateVisible(void);
+
+private:
+	enable_signal_t mVisibleSignal;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

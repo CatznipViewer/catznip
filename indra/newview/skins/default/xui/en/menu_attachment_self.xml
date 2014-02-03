@@ -171,14 +171,13 @@ name="Edit Outfit">
        function="Object.TextureRefresh"/>
    </menu_item_call>
   <menu_item_separator
-       layout="topleft" />
+       layout="topleft" on_visible.function="EnableMuteParticle" />
   <menu_item_call
-     enabled="false"
      label="Block Particle Owner"
      name="Mute Particle">
     <menu_item_call.on_click
      function="Particle.Mute" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="EnableMuteParticle" />
   </menu_item_call>
 </context_menu>
