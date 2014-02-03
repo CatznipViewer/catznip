@@ -846,8 +846,14 @@ void LLAccordionCtrl::expandTab(const std::string& tab_name)
 {
 	if (mAccordionTabs.size() > 0)
 	{
-		std::for_each(mAccordionTabs.begin(), mAccordionTabs.end(), 
-					  [&tab_name](LLAccordionCtrlTab* t) { t->setDisplayChildren((tab_name == t->getName())); });
+//		std::for_each(mAccordionTabs.begin(), mAccordionTabs.end(), 
+//					  [&tab_name](LLAccordionCtrlTab* t) { t->setDisplayChildren((tab_name == t->getName())); });
+		for (std::vector<LLAccordionCtrlTab*>::const_iterator itTab = mAccordionTabs.begin(); itTab != mAccordionTabs.end(); ++itTab)
+		{
+			LLAccordionCtrlTab* pTab = *itTab;
+			pTab->setDisplayChildren((tab_name == pTab->getName()));
+		}
+
 		arrange();
 	}
 }
