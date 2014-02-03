@@ -191,10 +191,10 @@ public:
 	/*virtual*/ BOOL handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MASK mask);
 	/*virtual*/ BOOL handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask);
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow* window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
                                                                    LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data);
-	            LLWindowCallbacks::DragNDropResult handleDragNDropDefault(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
-	            LLWindowCallbacks::DragNDropResult handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+	            LLWindowCallbacks::DragNDropResult handleDragNDropDefault(LLWindow* window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
+	            LLWindowCallbacks::DragNDropResult handleDragNDropFile(LLWindow* window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
                                                                        LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data);
 // [/SL:KB]
 //	/*virtual*/ LLWindowCallbacks::DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data);
@@ -504,7 +504,8 @@ private:
 	// Object temporarily hovered over while dragging
 	LLPointer<LLViewerObject>	mDragHoveredObject;
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-27 (Catznip-3.6)
-	std::vector<LLViewerInventoryItem*> mDragItems;
+	typedef std::pair<LLPointer<LLViewerInventoryItem>, std::string> drag_item_t;
+	std::vector<drag_item_t> mDragItems;
 // [/SL:KB]
 };
 

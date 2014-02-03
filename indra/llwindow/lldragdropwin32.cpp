@@ -114,7 +114,7 @@ class LLDragDropWin32Target:
 				{
 					switch (fmtetc.cfFormat)
 					{
-						case CF_HDROP:	// Files dropped from explorer
+						case CF_HDROP:	// Files dropped from Explorer
 							{
 								fContinue = false;
 

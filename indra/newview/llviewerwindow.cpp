@@ -210,11 +210,6 @@
 #include "llviewerwindowlistener.h"
 #include "llpaneltopinfobar.h"
 
-// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-#include <llviewerassettype.h>
-#include <boost/algorithm/string.hpp>
-// [/SL:KB]
-
 #if LL_WINDOWS
 #include <tchar.h> // For Unicode conversion methods
 #endif
@@ -1117,7 +1112,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop(LLWindow *win
 
 //LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWindow* window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
 // [/SL:KB]
 {
 	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
@@ -1309,10 +1304,9 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 						LLAssetType::EType eAssetType = getAssetTypeFromFilename(strFile);
 						if (LLAssetType::AT_NONE != eAssetType)
 						{
-							LLViewerInventoryItem* pItem = new LLViewerInventoryItem(LLUUID::generateNewID(), LLUUID::null, gDirUtilp->getBaseFileName(strFile), LLInventoryType::defaultForAssetType(eAssetType));
+							LLPointer<LLViewerInventoryItem> pItem = new LLViewerInventoryItem(LLUUID::generateNewID(), LLUUID::null, gDirUtilp->getBaseFileName(strFile), LLInventoryType::defaultForAssetType(eAssetType));
 							pItem->setType(eAssetType);
-							pItem->setDescription(*itFile);	// This will mangle the input string but shouldn't (currently) change the patch
-							mDragItems.push_back(pItem);
+							mDragItems.push_back(drag_item_t(pItem, strFile));
 						}
 					}
 				}
@@ -1342,9 +1336,9 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 						if (fDrop)
 						{
 							std::string strFileList;
-							for (std::vector<LLViewerInventoryItem*>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
+							for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
 							{
-								strFileList += gDirUtilp->getBaseFileName((*itItem)->getDescription(), false);
+								strFileList += itItem->first->getName();
 								strFileList += "\n";
 							}
 
@@ -1355,7 +1349,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 				}
 				else
 				{
-					if ( (1 == mDragItems.size()) && (LLAssetType::AT_TEXTURE == mDragItems.front()->getType()) )
+					if ( (1 == mDragItems.size()) && (LLAssetType::AT_TEXTURE == mDragItems.front().first->getType()) )
 					{
 						LLPickInfo pick = pickImmediate(pos.mX, pos.mY, TRUE);
 
@@ -1377,7 +1371,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 								LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
 								mDragHoveredObject = NULL;
 
-								const std::string& strFilename = mDragItems.front()->getDescription(); LLUUID idLocalBitmap;
+								const std::string& strFilename = mDragItems.front().second; LLUUID idLocalBitmap;
 								if (!LLLocalBitmapMgr::hasUnit(strFilename, &idLocalBitmap))
 								{
 									LLLocalBitmapMgr::addUnit(strFilename, &idLocalBitmap);

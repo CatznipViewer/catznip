@@ -88,7 +88,7 @@ public:
 		DND_LINK		// Drop accepted would result in a "link" operation
 	};
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-	virtual DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, DragNDropAction action, DragNDropType type, const std::vector<std::string>& data);
+	virtual DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, DragNDropAction action, DragNDropType type, const std::vector<std::string>& data) = 0;
 // [/SL:KB]
 //	virtual DragNDropResult handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, DragNDropAction action, std::string data);
 	
