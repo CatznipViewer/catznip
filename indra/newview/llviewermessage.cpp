@@ -4120,6 +4120,19 @@ void process_agent_movement_complete(LLMessageSystem* msg, void**)
 
 		if (isAgentAvatarValid())
 		{
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-02-05 (Catznip-3.6)
+			// Chat the "back" SLURL. (DEV-4907)
+			LLSLURL slurl;
+			gAgent.getTeleportSourceSLURL(slurl);
+			LLSD substitution = LLSD().with("[T_SLURL]", slurl.getSLURLString());
+			std::string completed_from = LLAgent::sTeleportProgressMessages["completed_from"];
+			LLStringUtil::format(completed_from, substitution);
+
+			LLSD args;
+			args["MESSAGE"] = completed_from;
+			LLNotificationsUtil::add("SystemMessageTip", args);
+// [/SL:KB]
+
 			// Set the new position
 			gAgentAvatarp->setPositionAgent(agent_pos);
 			gAgentAvatarp->clearChat();
