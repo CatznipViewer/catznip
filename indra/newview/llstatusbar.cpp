@@ -276,7 +276,7 @@ BOOL LLStatusBar::postBuild()
 	mPanelNearByMedia->setFollows(FOLLOWS_TOP|FOLLOWS_RIGHT);
 	mPanelNearByMedia->setVisible(FALSE);
 
-	mScriptOut = getChildView("scriptout");
+//	mScriptOut = getChildView("scriptout");
 
 	return TRUE;
 }
