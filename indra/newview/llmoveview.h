@@ -172,7 +172,7 @@ private:
 	 */
 	LLHandle<LLPanel> mOriginalParent;
 
-	LLHandle<LLPanel> mStateManagementButtons;
+//	LLHandle<LLPanel> mStateManagementButtons;
 
 	/**
 	 * True if the panel is currently attached to the movement controls floater.
