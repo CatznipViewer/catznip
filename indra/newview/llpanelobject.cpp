@@ -517,19 +517,19 @@ void LLPanelObject::getState( )
 	S32 roots_selected = LLSelectMgr::getInstance()->getSelection()->getRootObjectCount();
 	BOOL editable = root_objectp->permModify();
 
-	// Select Single Message
-	getChildView("select_single")->setVisible( FALSE);
-	getChildView("edit_object")->setVisible( FALSE);
-	if (!editable || single_volume || selected_count <= 1)
-	{
-		getChildView("edit_object")->setVisible( TRUE);
-		getChildView("edit_object")->setEnabled(TRUE);
-	}
-	else
-	{
-		getChildView("select_single")->setVisible( TRUE);
-		getChildView("select_single")->setEnabled(TRUE);
-	}
+//	// Select Single Message
+//	getChildView("select_single")->setVisible( FALSE);
+//	getChildView("edit_object")->setVisible( FALSE);
+//	if (!editable || single_volume || selected_count <= 1)
+//	{
+//		getChildView("edit_object")->setVisible( TRUE);
+//		getChildView("edit_object")->setEnabled(TRUE);
+//	}
+//	else
+//	{
+//		getChildView("select_single")->setVisible( TRUE);
+//		getChildView("select_single")->setEnabled(TRUE);
+//	}
 
 	BOOL is_flexible = volobjp && volobjp->isFlexible();
 	BOOL is_permanent = root_objectp->flagObjectPermanent();
@@ -1981,9 +1981,9 @@ void LLPanelObject::clearCtrls()
 	mBtnPastePrimParams->setEnabled(FALSE);
 // [/SL:KB]
 
-	getChildView("select_single")->setVisible( FALSE);
-	getChildView("edit_object")->setVisible( TRUE);	
-	getChildView("edit_object")->setEnabled(FALSE);
+//	getChildView("select_single")->setVisible( FALSE);
+//	getChildView("edit_object")->setVisible( TRUE);	
+//	getChildView("edit_object")->setEnabled(FALSE);
 	
 	getChildView("scale_hole")->setEnabled(FALSE);
 	getChildView("scale_taper")->setEnabled(FALSE);
