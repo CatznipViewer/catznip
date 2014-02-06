@@ -49,6 +49,10 @@ class LLLayoutPanel;
 class LLLayoutStack;
 class LLTimer;
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+class LLMenuButton;
+class LLToggleableMenu;
+// [/SL:KB]
 
 class LLFloaterIMSessionTab
 	: public LLTransientDockableFloater
@@ -107,6 +111,9 @@ public:
 
 	void setSortOrder(const LLConversationSort& order);
 	virtual void onTearOffClicked();
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	LLToggleableMenu* getGearMenu() const { return mGearMenuHandle.get(); }
+// [/SL:KB]
 	void updateGearBtn();
 	void initBtns();
 	virtual void updateMessages() {}
@@ -199,8 +206,10 @@ protected:
 	LLButton* mExpandCollapseBtn;
 //	LLButton* mTearOffBtn;
 //	LLButton* mCloseBtn;
-	LLButton* mGearBtn;
+//	LLButton* mGearBtn;
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	LLMenuButton* mGearBtn;
+	LLHandle<LLToggleableMenu> mGearMenuHandle;
 	LLButton* mViewBtn;
 // [/SL:KB]
 	LLButton* mAddBtn;

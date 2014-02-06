@@ -20,6 +20,7 @@
 #include "llfloaterimcontainertab.h"
 #include "llfloaterimsession.h"
 #include "llfloaterreg.h"
+#include "lltoggleablemenu.h"
 
 //
 // LLFloaterIMContainerTab
@@ -32,6 +33,13 @@ LLFloaterIMContainerTab::LLFloaterIMContainerTab(const LLSD& seed, const Params&
 
 LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
 {
+}
+
+BOOL LLFloaterIMContainerTab::postBuild()
+{
+	mTabContainer->setRightMouseDownCallback(boost::bind(&LLFloaterIMContainerTab::onTabContainerRightMouseDown, this, _2, _3));
+
+	return TRUE;
 }
 
 void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point)
@@ -153,6 +161,27 @@ const LLConversationSort& LLFloaterIMContainerTab::getSortOrder() const
 
 void LLFloaterIMContainerTab::setTimeNow(const LLUUID& session_id, const LLUUID& participant_id)
 {
+}
+
+void LLFloaterIMContainerTab::onTabContainerRightMouseDown(S32 x, S32 y)
+{
+	LLFloaterIMSessionTab* pTabPanel = dynamic_cast<LLFloaterIMSessionTab*>(mTabContainer->getPanelFromPoint(x, y));
+	if (pTabPanel)
+	{
+		mTabContainer->selectTabPanel(pTabPanel);
+		if (!pTabPanel->isNearbyChat())
+		{
+			LLToggleableMenu* pMenu = pTabPanel->getGearMenu();
+			if (pMenu)
+			{
+				pMenu->buildDrawLabels();
+				pMenu->arrangeAndClear();
+				pMenu->updateParent(LLMenuGL::sMenuContainer);
+
+				LLMenuGL::showPopup(mTabContainer, pMenu, x, y);
+			}
+		}
+	}
 }
 
 // EOF

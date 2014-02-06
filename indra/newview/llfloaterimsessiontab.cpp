@@ -51,6 +51,10 @@
 #include "lltrans.h"
 #include "llviewercontrol.h"
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+#include "llmenubutton.h"
+#include "lltoggleablemenu.h"
+// [/SL:KB]
 
 const F32 REFRESH_INTERVAL = 1.0f;
 
@@ -112,6 +116,13 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
 
 LLFloaterIMSessionTab::~LLFloaterIMSessionTab()
 {
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	if (mGearMenuHandle.get())
+	{
+		mGearMenuHandle.get()->die();
+	}
+// [/SL:KB]
+
 	delete mRefreshTimer;
 }
 
@@ -293,8 +304,15 @@ BOOL LLFloaterIMSessionTab::postBuild()
 //	mTearOffBtn = getChild<LLButton>("tear_off_btn");
 //	mTearOffBtn->setCommitCallback(boost::bind(&LLFloaterIMSessionTab::onTearOffClicked, this));
 
-	mGearBtn = getChild<LLButton>("gear_btn");
+//	mGearBtn = getChild<LLButton>("gear_btn");
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
+	mGearBtn = getChild<LLMenuButton>("gear_btn");
+	if (mIsP2PChat)
+	{
+		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_im_conversation.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
+		mGearBtn->setMenu(pMenu, mGearBtn->getMenuPosition(), false);
+		mGearMenuHandle = pMenu->getHandle();
+	}
 	mViewBtn = getChild<LLButton>("view_options_btn");
 // [/SL:KB]
     mAddBtn = getChild<LLButton>("add_btn");

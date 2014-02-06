@@ -32,6 +32,7 @@ public:
 	 */
 public:
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setVisible(BOOL visible);
 
 	/*virtual*/ const LLUUID& getSelectedSession() const;
@@ -43,6 +44,9 @@ public:
 	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const;
 	/*virtual*/ const LLConversationSort& getSortOrder() const;
 	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
+
+protected:
+	void onTabContainerRightMouseDown(S32 x, S32 y);
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H

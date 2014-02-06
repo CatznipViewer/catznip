@@ -104,7 +104,6 @@
                  tool_tip="Collapse/Expand this pane"
                  width="31" />
                 <menu_button
-                 menu_filename="menu_im_conversation.xml"
                  follows="top|left"
                  height="25"
                  image_hover_unselected="Toolbar_Middle_Over"
