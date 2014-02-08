@@ -93,7 +93,11 @@ public:
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	const LLUUID& getSessionID() const { return mSessionID; }
 // [/SL:KB]
-	bool isNearbyChat() {return mIsNearbyChat;}
+//	bool isNearbyChat() {return mIsNearbyChat;}
+ // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+	bool isNearbyChat() const { return mIsNearbyChat; }
+	const std::string getShowControlPanelControl() const;
+ // [/SL:KB
 
 	// LLFloater overrides
 	/*virtual*/ void onOpen(const LLSD& key);
@@ -101,6 +105,9 @@ public:
 	/*virtual*/ void draw();
 //	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setFocus(BOOL focus);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2)
+	/*virtual*/ BOOL handleUnicodeChar(llwchar uni_char, BOOL called_from_parent);
+// [/SL:KB]
 	
 	// Handle the left hand participant list widgets
 	void addConversationViewParticipant(LLConversationItem* item);
@@ -154,7 +161,10 @@ protected:
 //	void updateHeaderAndToolbar();
 
 	// Update the input field help text and other places that need the session name
-	virtual void updateSessionName(const std::string& name);
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+	/*virtual*/ void updateSessionName();
+// [/Sl:KB]
+//	virtual void updateSessionName(const std::string& name);
 
 	// set the enable/disable state for the Call button
 	virtual void enableDisableCallBtn();

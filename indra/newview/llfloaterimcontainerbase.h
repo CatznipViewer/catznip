@@ -52,6 +52,7 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+	/*virtual*/ void updateFloaterTitle(LLFloater* floaterp);
 
 	/*
 	 * LLIMSessionObserver overrides
@@ -70,6 +71,9 @@ public:
 	static void onCurrentChannelChanged(const LLUUID& session_id);
 protected:
 	       void onCloseFloater(const LLUUID& session_id);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+	       void onSelectConversation();
+// [/SL:KB]
 
 	/*
 	 * Misc
