@@ -37,6 +37,8 @@ LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
 
 BOOL LLFloaterIMContainerTab::postBuild()
 {
+	LLFloaterIMContainerBase::postBuild();
+
 	mTabContainer->setRightMouseDownCallback(boost::bind(&LLFloaterIMContainerTab::onTabContainerRightMouseDown, this, _2, _3));
 
 	return TRUE;
