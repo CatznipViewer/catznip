@@ -1374,6 +1374,39 @@ S32 LLChicletPanel::getChicletIndex(const LLChiclet* chiclet)
 	return -1;
 }
 
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+void LLChicletPanel::setChicletIndex(const LLChiclet* chiclet, EChicletOrder eOrder, const LLUUID& idSession)
+{
+	// Remove it from the list
+	S32 idx = getChicletIndex(chiclet);
+	if (-1 != idx)
+		mChicletList.erase(mChicletList.begin() + idx);
+
+	switch (eOrder)
+	{
+		case START:
+			mChicletList.insert(mChicletList.begin(), const_cast<LLChiclet*>(chiclet));
+			break;
+		case LEFT_OF_SESSION:
+		case RIGHT_OF_SESSION:
+			idx = (idSession.notNull()) ? getChicletIndex(findChiclet<LLChiclet>(idSession)) : -1;
+			if (-1 != idx)
+			{
+				if (RIGHT_OF_SESSION == eOrder)
+					mChicletList.insert(mChicletList.begin() + idx + 1, const_cast<LLChiclet*>(chiclet));
+				else
+					mChicletList.insert(mChicletList.begin() + idx, const_cast<LLChiclet*>(chiclet));
+			}
+			break;
+		case END:
+		default:
+			mChicletList.push_back(const_cast<LLChiclet*>(chiclet));
+			break;
+	}
+	arrange();
+}
+// [/SL:KB]
+
 void LLChicletPanel::removeChiclet(LLChiclet*chiclet)
 {
 	chiclet_list_t::iterator it = mChicletList.begin();
