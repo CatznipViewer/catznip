@@ -245,6 +245,16 @@ void LLFloaterIMSession::sendMsgFromInputEditor()
 
 				mInputEditor->setText(LLStringUtil::null);
 			}
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-02 (Catznip-3.2)
+			else if (gSavedSettings.getBOOL("CloseIMOnEmptyReturn"))
+			{
+				// We don't want to close the floater if we're torn off since that would close the IM session
+				if (!getHost())
+					setVisible(false);
+				else
+					getHost()->closeFloater();
+			}
+// [/SL:KB]
 		}
 	}
 	else

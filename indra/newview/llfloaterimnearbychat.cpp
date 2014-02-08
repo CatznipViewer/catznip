@@ -104,6 +104,9 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 	mIsNearbyChat = true;
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 	mSessionID = LLUUID();
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2014-02-02 (Catznip-3.6)
+	mVisibilityControl = "t";
+// [/SL:KB]
 }
 
 //static
@@ -345,7 +348,7 @@ void LLFloaterIMNearbyChat::onOpen(const LLSD& key)
 		restoreFloater();
 		onCollapseToLine(this);
 	}
-	showTranslationCheckbox(LLTranslate::isTranslationConfigured());
+//	showTranslationCheckbox(LLTranslate::isTranslationConfigured());
 }
 
 // virtual
@@ -718,9 +721,24 @@ void LLFloaterIMNearbyChat::addMessage(const LLChat& chat,bool archive,const LLS
 
 void LLFloaterIMNearbyChat::onChatBoxCommit()
 {
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-12-02 (Catznip-3.2)
+	gAgent.stopTyping();
+
+	// NOTE: this setting will override 'CloseChatOnReturn' which just removes focus from the chat floater after any return (empty or otherwise)
+	if ( (gSavedSettings.getBOOL("CloseChatOnEmptyReturn")) && (getCurrentChat().empty()) )
+	{
+		// We don't want to close the floater if we're torn off since that would redock with the conversations floater
+		if (!getHost())
+			setVisible(false);
+		else
+			getHost()->closeFloater();
+		return;
+	}
+// [/SL:KB]
+
 	sendChat(CHAT_TYPE_NORMAL);
 
-	gAgent.stopTyping();
+//	gAgent.stopTyping();
 }
 
 void LLFloaterIMNearbyChat::displaySpeakingIndicator()

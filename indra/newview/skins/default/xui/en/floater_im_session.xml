@@ -215,6 +215,7 @@
                      tab_group="2"
                      name="right_part_holder"
                      min_width="172">
+<!--
                         <layout_stack
                          animate="true" 
                          default_tab_group="2"
@@ -242,6 +243,7 @@
                             </layout_panel>
                             <layout_panel
                              name="chat_holder">
+-->
                                 <chat_history
                                  font="SansSerifSmall"
                                  follows="all"
@@ -252,8 +254,10 @@
                                  left="0"
                                  top="0"
                                  bottom="-1" />
+<!--
                             </layout_panel>
                         </layout_stack>
+-->
                     </layout_panel>
                 </layout_stack>
             </layout_panel>
