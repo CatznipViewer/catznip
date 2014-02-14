@@ -757,8 +757,14 @@ void LLViewerJoystick::moveAvatar(bool reset)
 	
 	handleRun((F32) sqrt(sDelta[Z_I]*sDelta[Z_I] + sDelta[X_I]*sDelta[X_I]));
 	
-	// Allow forward/backward movement some priority
-	if (dom_axis == Z_I)
+//	if (dom_axis == Z_I)
+// [SL:TD] - Settings-JoystickXbox | Checked: 2014-02-06 (Catznip-R9)
+// Based on Blackdragon (BD) change to use raw deltas, remove limitations and dead zones
+// Fixes XBox 360 Controller movement.
+// https://bitbucket.org/NiranV/black-dragon-materials/commits/7a170706631507054049c65f292d1189dc7b5ae3
+	static LLCachedControl<bool> s_fJoystickRawDeltas(gSavedSettings, "JoystickRawDeltas", true);
+	if ((!s_fJoystickRawDeltas) && (dom_axis == Z_I))
+// [/SL:TD]
 	{
 		agentPush(sDelta[Z_I]);			// forward/back
 		
