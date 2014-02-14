@@ -1478,45 +1478,45 @@ http://secondlife.com/download.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+Версия [VERSION]. [[UPDATE_URL] Сведения об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+Версия [VERSION]. [[UPDATE_URL] Сведения об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		Загружено обязательное обновление.
-Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
+Версия [VERSION]. [[UPDATE_URL] Сведения об этом обновлении]
 
 Необходимо перезапустить [APP_NAME] для установки обновления.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		Необходимо перезапустить [APP_NAME] для установки обновления.
-[[INFO_URL] Сведения об этом обновлении]
+[[UPDATE_URL] Сведения об этом обновлении]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		Загружено обновление для вашей версии [APP_NAME].
 Версия [VERSION] 
 На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] об этом обновлении]
+см. [[UPDATE_URL] об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		Загружено обновление для вашей версии [APP_NAME].
 Версия [VERSION]
 На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
+см. [[UPDATE_URL] Сведения об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		Загружено обязательное обновление.
 Версия [VERSION]
 На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
+см. [[UPDATE_URL] Сведения об этом обновлении]
 
 Необходимо перезапустить [APP_NAME] для установки обновления.
 		<usetemplate name="okbutton" yestext="OK"/>
@@ -1524,7 +1524,7 @@ http://secondlife.com/download.
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		Необходимо перезапустить [APP_NAME] для установки обновления.
 На замену этой экспериментальной версии клиента предлагается клиент [NEW_CHANNEL];
-см. [[INFO_URL] Сведения об этом обновлении]
+см. [[UPDATE_URL] Сведения об этом обновлении]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

@@ -48,12 +48,15 @@ public:
 	Implementation(LLUpdateDownloader::Client & client);
 	~Implementation();
 	void cancel(void);
-	void download(LLURI const & uri,
-				  std::string const & hash,
-				  std::string const & updateChannel,
-				  std::string const & updateVersion,
-				  std::string const & info_url,
-				  bool required);
+//	void download(LLURI const & uri,
+//				  std::string const & hash,
+//				  std::string const & updateChannel,
+//				  std::string const & updateVersion,
+//				  std::string const & info_url,
+//				  bool required);
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+	void download(const LLSD& sdUpdateData, bool required=false);
+// [/SL:KB]
 	bool isDownloading(void);
 	size_t onHeader(void * header, size_t size);
 	size_t onBody(void * header, size_t size);
@@ -126,15 +129,21 @@ void LLUpdateDownloader::cancel(void)
 }
 
 
-void LLUpdateDownloader::download(LLURI const & uri,
-								  std::string const & hash,
-								  std::string const & updateChannel,
-								  std::string const & updateVersion,
-								  std::string const & info_url,
-								  bool required)
+//void LLUpdateDownloader::download(LLURI const & uri,
+//								  std::string const & hash,
+//								  std::string const & updateChannel,
+//								  std::string const & updateVersion,
+//								  std::string const & info_url,
+//								  bool required)
+//{
+//	mImplementation->download(uri, hash, updateChannel, updateVersion, info_url, required);
+//}
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+void LLUpdateDownloader::download(const LLSD& sdUpdateData, bool required)
 {
-	mImplementation->download(uri, hash, updateChannel, updateVersion, info_url, required);
+	mImplementation->download(sdUpdateData, required);
 }
+// [/SL:KB]
 
 
 bool LLUpdateDownloader::isDownloading(void)
@@ -225,24 +234,41 @@ void LLUpdateDownloader::Implementation::cancel(void)
 }
 
 
-void LLUpdateDownloader::Implementation::download(LLURI const & uri,
-												  std::string const & hash,
-												  std::string const & updateChannel,
-												  std::string const & updateVersion,
-												  std::string const & info_url,
-												  bool required)
+//void LLUpdateDownloader::Implementation::download(LLURI const & uri,
+//												  std::string const & hash,
+//												  std::string const & updateChannel,
+//												  std::string const & updateVersion,
+//												  std::string const & info_url,
+//												  bool required)
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData, bool required)
+// [/SL:KB]
 { 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+	const LLURI uri(sdUpdateData["url"].asString());
+	const std::string hash = sdUpdateData["hash"].asString();
+	const std::string updateVersion = sdUpdateData["version"].asString();
+// [/SL:KB]
+
 	if(isDownloading()) mClient.downloadError("download in progress");
 
 	mDownloadRecordPath = downloadMarkerPath();
 	mDownloadData = LLSD();
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-07-15 (Catznip-3.5)
+	mDownloadData["update_data"] = sdUpdateData;
 	mDownloadData["required"] = required;
-	mDownloadData["update_channel"] = updateChannel;
-	mDownloadData["update_version"] = updateVersion;
-	if (!info_url.empty())
-	{
-		mDownloadData["info_url"] = info_url;
-	}
+	mDownloadData["update_channel"] = sdUpdateData["channel"].asString();
+	mDownloadData["update_version"] = sdUpdateData["version"].asString();
+	mDownloadData["more_info"] = sdUpdateData["more_info"].asString();
+	mDownloadData["update_url"] = sdUpdateData["update_url"].asString();
+// [/SL:KB]
+//	mDownloadData["required"] = required;
+//	mDownloadData["update_channel"] = updateChannel;
+//	mDownloadData["update_version"] = updateVersion;
+//	if (!info_url.empty())
+//	{
+//		mDownloadData["info_url"] = info_url;
+//	}
 	try
 	{
 		startDownloading(uri, hash);
@@ -298,12 +324,14 @@ void LLUpdateDownloader::Implementation::resume(void)
 			}
 			else if(!validateOrRemove(filePath))
 			{
-				download(LLURI(mDownloadData["url"].asString()),
-						 mDownloadData["hash"].asString(),
-						 mDownloadData["update_channel"].asString(),
-						 mDownloadData["update_version"].asString(),
-						 mDownloadData["info_url"].asString(),
-						 mDownloadData["required"].asBoolean());
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+				download(mDownloadData["update_data"], mDownloadData["required"].asBoolean());
+// [/SL:KB]
+//				download(LLURI(mDownloadData["url"].asString()),
+//						 mDownloadData["hash"].asString(),
+//						 mDownloadData["update_channel"].asString(),
+//						 mDownloadData["update_version"].asString(),
+//						 mDownloadData["info_url"].asString(),
 			}
 			else
 			{
@@ -312,12 +340,15 @@ void LLUpdateDownloader::Implementation::resume(void)
 		}
 		else
 		{
-			download(LLURI(mDownloadData["url"].asString()),
-					 mDownloadData["hash"].asString(),
-					 mDownloadData["update_channel"].asString(),
-					 mDownloadData["update_version"].asString(),
-					 mDownloadData["info_url"].asString(),
-					 mDownloadData["required"].asBoolean());
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+			download(mDownloadData["update_data"], mDownloadData["required"].asBoolean());
+// [/SL:KB]
+//			download(LLURI(mDownloadData["url"].asString()),
+//					 mDownloadData["hash"].asString(),
+//					 mDownloadData["update_channel"].asString(),
+//					 mDownloadData["update_version"].asString(),
+//					 mDownloadData["info_url"].asString(),
+//					 mDownloadData["required"].asBoolean());
 		}
 	}
 	catch(DownloadError & e)

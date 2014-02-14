@@ -1475,45 +1475,45 @@ Vous pouvez également l&apos;installer dès maintenant.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informations relatives à cette mise à jour]
+Version [VERSION] [[UPDATE_URL] Informations relatives à cette mise à jour]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informations relatives à cette mise à jour]
+Version [VERSION] [[UPDATE_URL] Informations relatives à cette mise à jour]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		Nous avons téléchargé une mise à jour logicielle requise.
-Version [VERSION] [Informations au sujet de cette mise à jour [INFO_URL]]
+Version [VERSION] [Informations au sujet de cette mise à jour [UPDATE_URL]]
 
 [APP_NAME] doit être redémarré pour que la mise à jour soit installée.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
-[Informations au sujet de cette mise à jour [INFO_URL]]
+[Informations au sujet de cette mise à jour [UPDATE_URL]]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
 Version [VERSION] 
 Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [[INFO_URL] pour en savoir plus sur cette mise à jour]
+consultez [[UPDATE_URL] pour en savoir plus sur cette mise à jour]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
 Version [VERSION]
 Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
+consultez [Informations au sujet de cette mise à jour [UPDATE_URL]]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		Nous avons téléchargé une mise à jour logicielle requise.
 Version [VERSION]
 Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
+consultez [Informations au sujet de cette mise à jour [UPDATE_URL]]
 
 [APP_NAME] doit être redémarré pour que la mise à jour soit installée.
 		<usetemplate name="okbutton" yestext="OK"/>
@@ -1521,7 +1521,7 @@ consultez [Informations au sujet de cette mise à jour [INFO_URL]]
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		[APP_NAME] doit être redémarré pour que la mise à jour soit installée.
 Le client expérimental a été remplacé par un nouveau client [NEW_CHANNEL] ;
-consultez [Informations au sujet de cette mise à jour [INFO_URL]]
+consultez [Informations au sujet de cette mise à jour [UPDATE_URL]]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

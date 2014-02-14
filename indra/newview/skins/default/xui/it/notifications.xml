@@ -1479,45 +1479,45 @@ oppure puoi installarlo adesso.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		È stato scaricato un aggiornamento obbligatorio del software.
-Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[UPDATE_URL] Informazioni su questo aggiornamento]
 
 Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
-[[INFO_URL] Informazioni su questo aggiornamento]
+[[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
 Versione [VERSION] 
 Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] per informazioni su queesto aggiornamento]
+vedi [[UPDATE_URL] per informazioni su queesto aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
 Versione [VERSION]
 Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
+vedi [[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		È stato scaricato un aggiornamento obbligatorio del software.
 Versione [VERSION]
 Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
+vedi [[UPDATE_URL] Informazioni su questo aggiornamento]
 
 Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
 		<usetemplate name="okbutton" yestext="OK"/>
@@ -1525,7 +1525,7 @@ Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		Per installare l&apos;aggiornamento è necessario riavviare [APP_NAME].
 Questo viewer sperimentale è stato sostituito con un viewer [NEW_CHANNEL];
-vedi [[INFO_URL] Informazioni su questo aggiornamento]
+vedi [[UPDATE_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
