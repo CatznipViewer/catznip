@@ -269,11 +269,15 @@ class ViewerManifest(LLManifest):
 
     def installer_base_name(self):
         global CHANNEL_VENDOR_BASE
+        # Show R9 for 9.0.Y.Z but R9.1 for 9.1.Y.Z 
+        installer_version = 'R' + self.args['version'][0]
+        if self.args['version'][1] != '0':
+            installer_version += '_' + self.args['version'][1]
         # a standard map of strings for replacing in the templates
         substitution_strings = {
             'channel_vendor_base' : '_'.join(CHANNEL_VENDOR_BASE.split()),
             'channel_variant_underscores':self.channel_variant_app_suffix(),
-            'version_underscores' : '_'.join(self.args['version']),
+            'version_underscores' : installer_version,
             'arch':self.args['arch']
             }
         return "%(channel_vendor_base)s%(channel_variant_underscores)s_%(version_underscores)s_%(arch)s" % substitution_strings
