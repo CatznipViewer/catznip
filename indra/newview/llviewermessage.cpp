@@ -2511,15 +2511,21 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 
 	case IM_TYPING_START:
 		{
-			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
-			gIMMgr->processIMTypingStart(im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+			gIMMgr->processIMTyping(session_id, true);
+// [/SL:KB]
+//			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
+//			gIMMgr->processIMTypingStart(im_info);
 		}
 		break;
 
 	case IM_TYPING_STOP:
 		{
-			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
-			gIMMgr->processIMTypingStop(im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+			gIMMgr->processIMTyping(session_id, false);
+// [/SL:KB]
+//			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
+//			gIMMgr->processIMTypingStop(im_info);
 		}
 		break;
 
@@ -3595,7 +3601,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		// Look for the start of typing so we can put "..." in the bubbles.
 		if (CHAT_TYPE_START == chat.mChatType)
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, TRUE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, TRUE);
 
 			// Might not have the avatar constructed yet, eg on login.
 			if (chatter && chatter->isAvatar())
@@ -3606,7 +3612,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		}
 		else if (CHAT_TYPE_STOP == chat.mChatType)
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
 
 			// Might not have the avatar constructed yet, eg on login.
 			if (chatter && chatter->isAvatar())
@@ -3655,7 +3661,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		// We have a real utterance now, so can stop showing "..." and proceed.
 		if (chatter && chatter->isAvatar())
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
 			((LLVOAvatar*)chatter)->stopTyping();
 			
 			if (!is_muted && !is_do_not_disturb)

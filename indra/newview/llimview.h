@@ -399,8 +399,11 @@ public:
 		const std::string& session_handle = LLStringUtil::null,
 		const std::string& session_uri = LLStringUtil::null);
 
-	void processIMTypingStart(const LLIMInfo* im_info);
-	void processIMTypingStop(const LLIMInfo* im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+	void processIMTyping(const LLUUID& session_id, bool typing);
+// [/SL:KB]
+//	void processIMTypingStart(const LLIMInfo* im_info);
+//	void processIMTypingStop(const LLIMInfo* im_info);
 
 	// automatically start a call once the session has initialized
 	void autoStartCallOnStartup(const LLUUID& session_id);
@@ -473,7 +476,7 @@ private:
 	void noteOfflineUsers(const LLUUID& session_id, const LLDynamicArray<LLUUID>& ids);
 	void noteMutedUsers(const LLUUID& session_id, const LLDynamicArray<LLUUID>& ids);
 
-	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
+//	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
 
 	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const std::string& name, bool is_group);
 

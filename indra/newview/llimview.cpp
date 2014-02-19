@@ -741,7 +741,7 @@ void LLIMModel::LLIMSession::addMessage(const std::string& from, const LLUUID& f
 	if (mSpeakers && from_id.notNull())
 	{
 		mSpeakers->speakerChatted(from_id);
-		mSpeakers->setSpeakerTyping(from_id, FALSE);
+//		mSpeakers->setSpeakerTyping(from_id, FALSE);
 	}
 }
 
@@ -1483,7 +1483,7 @@ void LLIMModel::sendMessage(const std::string& utf8_text,
 		if (speaker_mgr)
 		{
 			speaker_mgr->speakerChatted(gAgentID);
-			speaker_mgr->setSpeakerTyping(gAgentID, FALSE);
+//			speaker_mgr->setSpeakerTyping(gAgentID, FALSE);
 		}
 	}
 
@@ -3551,25 +3551,35 @@ void LLIMMgr::noteMutedUsers(const LLUUID& session_id,
 	}
 }
 
-void LLIMMgr::processIMTypingStart(const LLIMInfo* im_info)
-{
-	processIMTypingCore(im_info, TRUE);
-}
+//void LLIMMgr::processIMTypingStart(const LLIMInfo* im_info)
+//{
+//	processIMTypingCore(im_info, TRUE);
+//}
 
-void LLIMMgr::processIMTypingStop(const LLIMInfo* im_info)
-{
-	processIMTypingCore(im_info, FALSE);
-}
+//void LLIMMgr::processIMTypingStop(const LLIMInfo* im_info)
+//{
+//	processIMTypingCore(im_info, FALSE);
+//}
 
-void LLIMMgr::processIMTypingCore(const LLIMInfo* im_info, BOOL typing)
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+void LLIMMgr::processIMTyping(const LLUUID& session_id, bool typing)
 {
-	LLUUID session_id = computeSessionID(im_info->mIMType, im_info->mFromID);
 	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_id);
-	if ( im_floater )
+	if (im_floater)
 	{
-		im_floater->processIMTyping(im_info, typing);
+		im_floater->processIMTyping(typing);
 	}
 }
+// [/SL:KB]
+//void LLIMMgr::processIMTypingCore(const LLIMInfo* im_info, BOOL typing)
+//{
+//	LLUUID session_id = computeSessionID(im_info->mIMType, im_info->mFromID);
+//	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_id);
+//	if ( im_floater )
+//	{
+//		im_floater->processIMTyping(im_info, typing);
+//	}
+//}
 
 class LLViewerChatterBoxSessionStartReply : public LLHTTPNode
 {
