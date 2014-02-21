@@ -520,6 +520,9 @@ void LLFloaterIMSessionTab::draw()
 			}
 // [/SL:KB]
 		}
+// [SL:KB] - Patch: Chat-Base | Checked: 2014-02-21 (Catznip-3.6)
+		refresh();
+// [/SL:KB]
 
 		// Restart the refresh timer
 		mRefreshTimer->setTimerExpirySec(REFRESH_INTERVAL);
@@ -840,7 +843,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 	}
 // [/SL:KB]
 //	updateHeaderAndToolbar();
-	refresh();
+//	refresh();
 }
 
 // Copied from LLFloaterIMContainer::createConversationViewParticipant(). Refactor opportunity!
