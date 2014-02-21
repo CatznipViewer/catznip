@@ -469,9 +469,9 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	initBtns();
 
 //	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
- // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL(getShowControlPanelControl()))
- // [/SL:KB
+// [/SL:KB
 	{
 		LLFloaterIMSessionTab::onSlide(this);
 	}
@@ -503,10 +503,10 @@ LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 //	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 const std::string LLFloaterIMSessionTab::getShowControlPanelControl() const
 {
-	return (isNearbyChat()) ? "IMShowControlPanelNearby" : "IMShowControlPanelGroup";
+	return (isNearbyChat()) ? "IMShowControlPanelNearby" : ( (!mIsP2PChat) ? "IMShowControlPanelGroup" : "IMShowControlPanelP2P");
 }
 // [/SL:KB]
 
@@ -998,14 +998,20 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 			                : (is_expanded ? getString("expcol_button_tearoff_and_expanded_tooltip") :
 			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
-	// The button (>>) should be disabled for torn off P2P conversations.
-	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-21 (Catznip-3.7)
+	mExpandCollapseBtn->setEnabled( (is_tabbed) || (!is_not_torn_off) );
+// [/SL:KB
+//	// The button (>>) should be disabled for torn off P2P conversations.
+//	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
 }
 
 void LLFloaterIMSessionTab::updateShowParticipantList()
 {
 	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
+//	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded);
+// [/SL:KB
 	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
 	mParticipantListPanel->setVisible(is_participant_list_visible);
 }
@@ -1152,15 +1158,15 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 	}
 	else ///< floater is torn off
 	{
-		if (!self->mIsP2PChat)
+//		if (!self->mIsP2PChat)
 		{
             // The state must toggle the collapsed state of the panel
            should_be_expanded = self->mParticipantListPanel->isCollapsed();
 
 			// Update the expand/collapse flag of the participant list panel and save it
- // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 			gSavedSettings.setBOOL(self->getShowControlPanelControl(), should_be_expanded);
- // [/SL:KB
+// [/SL:KB
 //            gSavedSettings.setBOOL("IMShowControlPanel", should_be_expanded);
             self->mIsParticipantListExpanded = should_be_expanded;
             

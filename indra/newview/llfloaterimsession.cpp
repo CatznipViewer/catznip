@@ -361,7 +361,7 @@ void LLFloaterIMSession::initIMFloater()
 
 //	mTypingStart = LLTrans::getString("IM_typing_start_string");
 
-// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
 	{
 		// Show control panel in torn off floaters only.

@@ -4501,6 +4501,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>IMShowControlPanelP2P</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the control panel for P2P sessions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
      <key>IMShowContentPanel</key>
     <map>
       <key>Comment</key>

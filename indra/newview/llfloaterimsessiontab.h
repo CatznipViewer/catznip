@@ -94,10 +94,12 @@ public:
 	const LLUUID& getSessionID() const { return mSessionID; }
 // [/SL:KB]
 //	bool isNearbyChat() {return mIsNearbyChat;}
- // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
 	bool isNearbyChat() const { return mIsNearbyChat; }
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 	const std::string getShowControlPanelControl() const;
- // [/SL:KB
+// [/SL:KB
 
 	// LLFloater overrides
 	/*virtual*/ void onOpen(const LLSD& key);
