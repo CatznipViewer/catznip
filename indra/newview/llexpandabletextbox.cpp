@@ -260,6 +260,18 @@ void LLExpandableTextBox::draw()
 	LLUICtrl::draw();
 }
 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-02-20 (Catznip-3.7)
+void LLExpandableTextBox::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLUICtrl::reshape(width, height, called_from_parent);
+
+	if (!mExpanded)
+	{
+		updateTextBoxRect();
+	}
+}
+// [/SL:KB]
+
 void LLExpandableTextBox::collapseIfPosChanged()
 {
 	if(mExpanded)

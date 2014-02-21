@@ -55,6 +55,9 @@
 #include "llmenubutton.h"
 #include "lltoggleablemenu.h"
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+#include "llpanelimcontrolpanel.h"
+// [/SL:KB]
 
 const F32 REFRESH_INTERVAL = 1.0f;
 
@@ -374,6 +377,19 @@ BOOL LLFloaterIMSessionTab::postBuild()
 			LLSpeakerMgr* pSpeakerMgr = (mIsNearbyChat) ? (LLSpeakerMgr*)LLLocalSpeakerMgr::getInstance() : LLIMModel::getInstance()->getSpeakerManager(mSessionID);
 			mParticipantList = new LLParticipantAvatarList(pSpeakerMgr, pAvatarList);
 		}
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+		else
+		{
+			LLPanel* pIMPanel = new LLPanelIMControlPanel(LLIMModel::getInstance()->getOtherParticipantID(mSessionID));
+
+			LLRect rect = mParticipantListPanel->getRect();
+			rect.translate(-rect.mLeft, -rect.mBottom);
+			pIMPanel->setShape(rect);
+			pIMPanel->setFollowsAll();
+
+			mParticipantListPanel->addChild(pIMPanel);
+		}
+// [/SL:KB]
 	}
 // [/SL:KB]
 	

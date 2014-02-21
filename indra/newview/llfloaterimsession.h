@@ -39,7 +39,7 @@ class LLAvatarName;
 class LLButton;
 class LLChatEntry;
 class LLTextEditor;
-class LLPanelChatControlPanel;
+//class LLPanelChatControlPanel;
 class LLChatHistory;
 class LLInventoryItem;
 class LLInventoryCategory;

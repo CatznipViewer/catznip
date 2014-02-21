@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="false"
+ follows="all"
+ height="300"
+ name="panel_im_control_panel"
+ width="150">
+    <avatar_icon
+     bevel_style="in"
+     border_style="line"
+     follows="top|left|right"
+     height="130"
+     layout="topleft"
+     left="10"
+     name="avatar_icon"
+     top="5"
+     width="130"/>
+
+    <text
+     follows="top|left"
+     font.style="BOLD"
+     height="15"
+     layout="topleft"
+     left="7"
+     name="label_birthdate"
+     text_color="white"
+     top_pad="7"
+     value="Birthdate :"
+     width="80" />
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left_pad="3"
+     name="avatar_birthdate"
+     top_delta="0"
+     value="12/34/5678"
+     width="60" />
+
+    <text
+     follows="top|left|right"
+     height="15"
+     layout="topleft"
+     left="7"
+     name="avatar_website"
+     top_pad="2"
+     value="http://www.catznip.com"
+     width="143" />
+
+    <expandable_text
+     expanded_bg_visible="true"
+     expanded_bg_color="DkGray"
+     follows="all"
+     height="150"
+     layout="topleft"
+     left="4"
+     name="avatar_description"
+     textbox.max_length="512"
+     top_pad="2"
+     width="140">
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra orci et justo sagittis aliquet.Nullamma lesuada mauris sit amet ipsum. adipiscing elit. Ae nean viverra orci et justo sagittis aliquet. Nullam malesuada mauris sit amet ipsum. adipiscing elit. Aenean viverra orci et justo sagittis aliquet. Nullam malesuada mauris sit amet ipsum.
+    </expandable_text>
+</panel>

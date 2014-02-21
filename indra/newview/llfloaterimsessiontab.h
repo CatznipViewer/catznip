@@ -38,7 +38,7 @@
 //#include "llconversationview.h"
 //#include "lltexteditor.h"
 
-class LLPanelChatControlPanel;
+//class LLPanelChatControlPanel;
 class LLChatEntry;
 class LLChatHistory;
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
