@@ -56,18 +56,26 @@ void LLAvatarPropertiesProcessor::addObserver(const LLUUID& avatar_id, LLAvatarP
 	observer_multimap_t::iterator it;
 
 	// IAN BUG this should update the observer's UUID if this is a dupe - sent to PE
-	it = mObservers.find(avatar_id);
-	while (it != mObservers.end())
+// [SL:KB] - Patch: Control-AvatarIconCtrl | Checked: 2014-02-20 (Catznip-3.7)
+	std::pair<observer_multimap_t::const_iterator, observer_multimap_t::const_iterator> matching_range = mObservers.equal_range(avatar_id);
+	for (observer_multimap_t::const_iterator itObserver = matching_range.first; itObserver != matching_range.second; ++itObserver)
 	{
-		if (it->second == observer)
-		{
+		if (itObserver->second == observer)
 			return;
-		}
-		else
-		{
-			++it;
-		}
 	}
+// [/SL:KB]
+//	it = mObservers.find(avatar_id);
+//	while (it != mObservers.end())
+//	{
+//		if (it->second == observer)
+//		{
+//			return;
+//		}
+//		else
+//		{
+//			++it;
+//		}
+//	}
 
 	mObservers.insert(std::pair<LLUUID, LLAvatarPropertiesObserver*>(avatar_id, observer));
 }
@@ -79,20 +87,31 @@ void LLAvatarPropertiesProcessor::removeObserver(const LLUUID& avatar_id, LLAvat
 		return;
 	}
 
-	observer_multimap_t::iterator it;
-	it = mObservers.find(avatar_id);
-	while (it != mObservers.end())
+// [SL:KB] - Patch: Control-AvatarIconCtrl | Checked: 2014-02-20 (Catznip-3.7)
+	std::pair<observer_multimap_t::const_iterator, observer_multimap_t::const_iterator> matching_range = mObservers.equal_range(avatar_id);
+	for (observer_multimap_t::const_iterator itObserver = matching_range.first; itObserver != matching_range.second; ++itObserver)
 	{
-		if (it->second == observer)
+		if (itObserver->second == observer)
 		{
-			mObservers.erase(it);
+			mObservers.erase(itObserver);
 			break;
 		}
-		else
-		{
-			++it;
-		}
 	}
+// [/SL:KB]
+//	observer_multimap_t::iterator it;
+//	it = mObservers.find(avatar_id);
+//	while (it != mObservers.end())
+//	{
+//		if (it->second == observer)
+//		{
+//			mObservers.erase(it);
+//			break;
+//		}
+//		else
+//		{
+//			++it;
+//		}
+//	}
 }
 
 
