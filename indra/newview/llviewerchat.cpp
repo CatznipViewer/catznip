@@ -36,7 +36,7 @@
 #include "llviewerregion.h"
 #include "llworld.h"
 #include "llinstantmessage.h" //SYSTEM_FROM
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llui.h"
@@ -253,9 +253,10 @@ std::string LLViewerChat::getSenderSLURL(const LLChat& chat, const LLSD& args)
 	return LLStringUtil::null;
 }
 
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
 std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
 {
+	"UISndEventChatAgent",      // SND_CHAT_AGENT
 	"UISndEventConvFriend",     // SND_CONV_FRIEND
 	"UISndEventConvNonFriend",  // SND_CONV_NONFRIEND
 	"UISndEventConvConference", // SND_CONV_CONFERENCE
@@ -273,7 +274,7 @@ LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 	//   * i|<uuid> => inventory item specified by UUID
 	//   * a|<uuid> => sound identified by asset UUID
 	//   * <other>  => sound identified by string name
-	// (The reason for this hackery is that selectByValue will use LLSD::asString to select by value)
+	// (The reason for this hackery is that selectByValue will use LLSD::asString to select by value so we can't use LLSD)
 	if ( (strSetting.length() > 2) && ('|' == strSetting[1]) )
 	{
 		const LLUUID idSound(strSetting.substr(2));
@@ -291,17 +292,17 @@ LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 				LLInventoryFetchItemsObserver* pItemFetch = new LLInventoryFetchItemsObserver(idSound);
 				pItemFetch->startFetch();
 				delete pItemFetch;
-				return LLUUID();
+				return LLUUID::null;
 			}
 			return pItem->getAssetUUID();
 		}
-		return LLUUID();
+		return LLUUID::null;
 	}
-	return find_ui_sound(strSetting.c_str());
+	return (!strSetting.empty()) ? find_ui_sound(strSetting.c_str()) : LLUUID::null;
 }
 
 // static
-LLUUID LLViewerChat::getUISoundFromEvent(EChatEvent eEvent)
+LLUUID LLViewerChat::getUISoundFromChatEvent(EChatEvent eEvent)
 {
 	if ( (eEvent >= SND_CONV_FRIEND) && (eEvent < SND_COUNT) )
 		return getUISoundFromSettingsString(gSavedSettings.getString(SOUND_LOOKUP_SETTINGS[eEvent]));

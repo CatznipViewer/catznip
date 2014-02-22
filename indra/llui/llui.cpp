@@ -138,7 +138,7 @@ LLUUID find_ui_sound(const char * namep)
 	return uuid;
 }
 
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-11-20 (Catznip-3.6)
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-11-20 (Catznip-3.6)
 void make_ui_sound(const LLUUID& sound_id)
 {
 	if (sound_id.notNull())

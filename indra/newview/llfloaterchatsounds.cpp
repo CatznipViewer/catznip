@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2013, Kitty Barnett
+ * Copyright (c) 2013-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -26,10 +26,10 @@
 #include "llviewerinventory.h"
 
 // ============================================================================
-// LLFloaterChatSounds class
+// LLFloaterUISounds class
 //
 
-LLFloaterChatSounds::LLFloaterChatSounds(const LLSD& sdKey)
+LLFloaterUISounds::LLFloaterUISounds(const LLSD& sdKey)
 	: LLFloater(sdKey)
 {
 	std::vector<std::string> strFiles = gDirUtilp->findSkinnedFilenames(LLDir::XUI, "sounds.xml", LLDir::ALL_SKINS);
@@ -43,14 +43,14 @@ LLFloaterChatSounds::LLFloaterChatSounds(const LLSD& sdKey)
 		}
 	}
 
-	mCommitCallbackRegistrar.add("InitSoundsCombo", boost::bind(&LLFloaterChatSounds::onInitSoundsCombo, this, _1, _2));
+	mCommitCallbackRegistrar.add("InitSoundsCombo", boost::bind(&LLFloaterUISounds::onInitSoundsCombo, this, _1, _2));
 }
 
-LLFloaterChatSounds::~LLFloaterChatSounds()
+LLFloaterUISounds::~LLFloaterUISounds()
 {
 }
 
-BOOL LLFloaterChatSounds::postBuild(void)
+BOOL LLFloaterUISounds::postBuild(void)
 {
 	const char* pstrComboNames[] =
 	{
@@ -65,12 +65,12 @@ BOOL LLFloaterChatSounds::postBuild(void)
 	return TRUE;
 }
 
-void LLFloaterChatSounds::initComboCallbacks(LLComboBox* pCombo)
+void LLFloaterUISounds::initComboCallbacks(LLComboBox* pCombo)
 {
-	pCombo->setCommitCallback(boost::bind(&LLFloaterChatSounds::onSelectSound, this, _1));
+	pCombo->setCommitCallback(boost::bind(&LLFloaterUISounds::onSelectSound, this, _1));
 	pCombo->getListControl()->setCommitOnSelectionChange(true);
-	findChild<LLButton>(pCombo->getName() + "_preview")->setCommitCallback(boost::bind(&LLFloaterChatSounds::onPreviewSound, this, pCombo));
-	findChild<LLSoundDropTarget>(pCombo->getName() + "_drop")->setDropCallback(boost::bind(&LLFloaterChatSounds::onDropSound, this, _1, pCombo));
+	findChild<LLButton>(pCombo->getName() + "_preview")->setCommitCallback(boost::bind(&LLFloaterUISounds::onPreviewSound, this, pCombo));
+	findChild<LLSoundDropTarget>(pCombo->getName() + "_drop")->setDropCallback(boost::bind(&LLFloaterUISounds::onDropSound, this, _1, pCombo));
 
 	// Select the current setting
 	setttings_map_t::const_iterator itSetting = m_SettingsMap.find(pCombo->getName());
@@ -84,7 +84,7 @@ void LLFloaterChatSounds::initComboCallbacks(LLComboBox* pCombo)
 	}
 }
 
-void LLFloaterChatSounds::onDropSound(const LLUUID& idSound, LLComboBox* pCombo)
+void LLFloaterUISounds::onDropSound(const LLUUID& idSound, LLComboBox* pCombo)
 {
 	const LLInventoryItem* pItem = gInventory.getItem(idSound);
 	if ( (pItem) && (pCombo) && (pCombo->getEnabled()) )
@@ -104,7 +104,7 @@ void LLFloaterChatSounds::onDropSound(const LLUUID& idSound, LLComboBox* pCombo)
 	}
 }
 
-void LLFloaterChatSounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam)
+void LLFloaterUISounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam)
 {
 	LLComboBox* pCombo = dynamic_cast<LLComboBox*>(pCtrl);
 	if (!pCombo)
@@ -136,14 +136,14 @@ void LLFloaterChatSounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam
 	pCombo->add("Custom (Drop sound here)", pControl->getDefault().asString());
 }
 
-void LLFloaterChatSounds::onPreviewSound(LLComboBox* pCombo)
+void LLFloaterUISounds::onPreviewSound(LLComboBox* pCombo)
 {
 	if (!pCombo)
 		return;
 	make_ui_sound(LLViewerChat::getUISoundFromSettingsString(pCombo->getValue().asString()));
 }
 
-void LLFloaterChatSounds::onSelectSound(const LLUICtrl* pCtrl)
+void LLFloaterUISounds::onSelectSound(const LLUICtrl* pCtrl)
 {
 	setttings_map_t::const_iterator itSetting = (pCtrl) ? m_SettingsMap.find(pCtrl->getName()) : m_SettingsMap.end();
 	if (m_SettingsMap.end() != itSetting)

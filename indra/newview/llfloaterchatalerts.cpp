@@ -51,14 +51,11 @@ LLSoundDropTarget::~LLSoundDropTarget()
 	delete m_pDropSignal;
 }
 
-BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
-                                          EAcceptance* accept, std::string& tooltip_msg)
+BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data, EAcceptance* accept, std::string& tooltip_msg)
 {
 	BOOL fHandled = FALSE;
 	if (getParent())
 	{
-		fHandled = TRUE;
-
 		switch (cargo_type)
 		{
 			case DAD_SOUND:
@@ -70,7 +67,7 @@ BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, ED
 
 						if (drop)
 						{
-							if (m_pDropSignal)
+							if ( (m_pDropSignal) && (!m_pDropSignal->empty()) )
 								(*m_pDropSignal)(pItem->getUUID());
 							else
 								getParent()->notifyParent(LLSD().with("item_id", pItem->getUUID()));;
@@ -87,6 +84,8 @@ BOOL LLSoundDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, ED
 				*accept = ACCEPT_NO;
 				break;
 		}
+
+		fHandled = TRUE;
 	}
 	return fHandled;
 }

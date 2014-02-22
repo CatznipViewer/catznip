@@ -7286,7 +7286,7 @@
     <key>PlaySoundFriendIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when friend's IM received.</string>
+      <string>Plays a sound on an incoming IM from a friend</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7297,7 +7297,7 @@
     <key>PlaySoundNonFriendIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when non-friend's IM received.</string>
+      <string>Plays a sound on an incoming IM from a non-friend</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7308,7 +7308,7 @@
     <key>PlaySoundConferenceIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when conference IM received.</string>
+      <string>Plays a sound on an incoming conference IM</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7319,7 +7319,7 @@
     <key>PlaySoundGroupChatIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when group chat IM received.</string>
+      <string>Plays a sound on an incoming group chat IM</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -12832,6 +12832,17 @@
       <string>String</string>
       <key>Value</key>
       <string>c80260ba-41fd-8a46-768a-6bf236360e3a</string>
+    </map>
+    <key>UISndEventChatAgent</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming nearby chat from an agent</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
     </map>
     <key>UISndEventConvFriend</key>
     <map>

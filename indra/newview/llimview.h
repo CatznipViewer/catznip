@@ -219,7 +219,10 @@ public:
 	 * and also saved into a file if log2file is specified.
 	 * It sends new message signal for each added message.
 	 */
-	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true, bool trigger_sound = true);
+// [/SL:KB]
+//	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
 
 	/**
 	 * Similar to addMessage(...) above but won't send a signal about a new message added

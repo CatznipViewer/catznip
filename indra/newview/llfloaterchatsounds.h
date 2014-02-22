@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2013, Kitty Barnett
+ * Copyright (c) 2013-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -21,21 +21,15 @@
 class LLComboBox;
 
 // ============================================================================
-// LLFloaterChatSounds class
+// LLFloaterUISounds class
 //
 
-class LLFloaterChatSounds : public LLFloater
+class LLFloaterUISounds : public LLFloater
 {
 	friend class LLFloaterReg;
 protected:
-	LLFloaterChatSounds(const LLSD& sdKey);
-	/*virtual*/ ~LLFloaterChatSounds();
-
-	/*
-	 * LLView overrides
-	 */
-public:
-	/*virtual*/ BOOL postBuild();
+	LLFloaterUISounds(const LLSD& sdKey);
+	virtual ~LLFloaterUISounds();
 
 	/*
 	 * Member functions/Event handlers
@@ -46,6 +40,12 @@ protected:
 	void onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam);
 	void onPreviewSound(LLComboBox* pCombo);
 	void onSelectSound(const LLUICtrl* pCtrl);
+
+	/*
+	 * LLView overrides
+	 */
+public:
+	/*virtual*/ BOOL postBuild();
 
 	/*
 	 * Member variables

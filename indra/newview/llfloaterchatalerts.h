@@ -97,15 +97,25 @@ public:
 		}
 	};
 
-public:
 	LLSoundDropTarget(const Params&);
-	/*virtual*/ ~LLSoundDropTarget();
-	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data,
-	                                   EAcceptance* accept, std::string& tooltip_msg);
+	virtual ~LLSoundDropTarget();
 
+	/*
+	 * Member functions
+	 */
+public:
 	typedef boost::signals2::signal<void (const LLUUID&)> drop_signal_t;
 	boost::signals2::connection setDropCallback(const drop_signal_t::slot_type& cb);
 
+	/*
+	 * LLView overrides
+	 */
+public:
+	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void* cargo_data, EAcceptance* accept, std::string& tooltip_msg);
+
+	/*
+	 * Member variables
+	 */
 protected:
 	drop_signal_t* m_pDropSignal;
 };

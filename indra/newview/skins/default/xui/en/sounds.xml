@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <llsd>
 <map>
-	<!-- There will be added to the combo box in the order they're listed here, so make sure they're sorted here -->
+	<!-- These will be added to the combo box in the order they're listed so make sure they're sorted here -->
 	<key>Affirm</key>
 	<map>
 		<key>asset_uuid</key>

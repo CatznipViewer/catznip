@@ -185,6 +185,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
 	bool is_session_visible = session_floater->isShown();
 	bool is_session_focused = (gFocusMgr.getAppHasFocus()) && (session_floater->hasFocus());
+	bool trigger_sound = (!is_session_focused) && (msg["trigger_sound"].asBoolean()) && (!gAgent.isDoNotDisturb());
 // [/SL:KB]
 //	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
 	if (!LLFloater::isVisible(im_box) || im_box->isMinimized())
@@ -236,8 +237,8 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 	else
 	{
 		LLUUID idSound;
-		user_preferences = LLIMModel::getMessageOptions(session, &idSound);
-		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (idSound.notNull()) )
+		user_preferences = LLIMModel::getMessageOptions(session, (trigger_sound) ? &idSound : NULL);
+		if (idSound.notNull())
 		{
 			make_ui_sound(idSound);
 		}
@@ -834,9 +835,9 @@ U32 LLIMModel::getMessageOptions(const LLIMModel::LLIMSession* pSession, LLUUID*
 			if (pidSound)
 			{
 				if ( (fIsFriend) && (gSavedSettings.getBOOL("PlaySoundFriendIM")) )
-					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_FRIEND);
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_FRIEND);
 				else if ( (!fIsFriend) && (gSavedSettings.getBOOL("PlaySoundNonFriendIM")) )
-					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_NONFRIEND);
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_NONFRIEND);
 			}
 // [/SL:KB]
 		}
@@ -857,9 +858,9 @@ U32 LLIMModel::getMessageOptions(const LLIMModel::LLIMSession* pSession, LLUUID*
 			if (pidSound)
 			{
 				if ( (pSession->isGroupSessionType()) && (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) )
-					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_GROUP);
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_GROUP);
 				else if ( (pSession->isAdHocSessionType()) && (gSavedSettings.getBOOL("PlaySoundConferenceIM")) )
-					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_CONFERENCE);
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_CONFERENCE);
 			}
 // [/SL:KB]
 		}
@@ -1203,8 +1204,11 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
 }
 
-bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
-						   const std::string& utf8_text, bool log2file /* = true */) { 
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//						   const std::string& utf8_text, bool log2file /* = true */) { 
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, bool log2file /* = true */, bool trigger_sound /* = true */) { 
+// [/SL:KB]
 
 	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
 	if (!session) return false;
@@ -1225,6 +1229,9 @@ bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, co
 	arg["from_id"] = from_id;
 	arg["time"] = LLLogChat::timestamp(false);
 	arg["session_type"] = session->mSessionType;
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+	arg["trigger_sound"] = trigger_sound;
+// [/SL:KB]
 	mNewMsgSignal(arg);
 
 	return true;
@@ -2877,7 +2884,7 @@ void LLIMMgr::addMessage(
 		}
 
         //Play sound for new conversations
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
 		if (!gAgent.isDoNotDisturb())
 		{
 			LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
@@ -2896,7 +2903,9 @@ void LLIMMgr::addMessage(
 			{
 				eEvent = (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) ? LLViewerChat::SND_CONV_GROUP : LLViewerChat::SND_NONE;
 			}
-			make_ui_sound(LLViewerChat::getUISoundFromEvent(eEvent));
+			
+			if (LLViewerChat::SND_NONE != eEvent)
+				make_ui_sound(LLViewerChat::getUISoundFromChatEvent(eEvent));
 		}
 // [/SL:KB]
 //		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
@@ -2907,7 +2916,10 @@ void LLIMMgr::addMessage(
 
 	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat) && !skip_message)
 	{
-		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg, true, !new_session);
+// [/SL:KB]
+//		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
 	}
 
 	// Open conversation floater if offline messages are present
