@@ -944,7 +944,10 @@ BOOL LLView::handleKey(KEY key, MASK mask, BOOL called_from_parent)
 			handled = handleKeyHere( key, mask );
 			if (handled)
 			{
-				llwarns << "Key handled by " << getName() << llendl;
+//				llwarns << "Key handled by " << getName() << llendl;
+// [SL:TD] - Patch: Viewer-Logging | Checked: 2014-02-22 (Catznip-R9)
+				lldebugs << "Key handled by " << getName() << llendl;
+// [/SL:TD]
 			}
 		}
 	}
@@ -981,7 +984,10 @@ BOOL LLView::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
 			handled = handleUnicodeCharHere(uni_char);
 			if (handled && LLView::sDebugKeys)
 			{
-				llinfos << "Unicode key handled by " << getName() << llendl;
+//				llinfos << "Unicode key handled by " << getName() << llendl;
+// [SL:TD] - Patch: Viewer-Logging | Checked: 2014-02-22 (Catznip-R9)
+				lldebugs << "Unicode key handled by " << getName() << llendl;
+// [/SL:TD]
 			}
 		}
 	}
