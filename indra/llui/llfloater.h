@@ -194,6 +194,11 @@ public:
 								dock_pressed_image,
 								help_pressed_image;
 		
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+		Optional<F32>			active_transparency;
+		Optional<F32>			inactive_transparency;
+// [/SL:KB]
+
 		Optional<CommitCallbackParam> open_callback,
 									  close_callback;
 
@@ -374,6 +379,10 @@ public:
 	static void		setFloaterHost(LLMultiFloater* hostp) {sHostp = hostp; }
 	static LLMultiFloater* getFloaterHost() {return sHostp; }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	/*virtual*/ F32 getCurrentTransparency();
+// [/SL:KB]
+
 	void			updateTransparency(ETypeTransparency transparency_type);
 		
 	void			enableResizeCtrls(bool enable, bool width = true, bool height = true);
@@ -490,6 +499,11 @@ private:
 	S32				mHeaderHeight;		// height in pixels of header for title, drag bar
 	S32				mLegacyHeaderHeight;// HACK see initFloaterXML()
 	
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	F32				mActiveTransparency;
+	F32				mInactiveTransparency;
+// [/SL:KB]
+
 	BOOL			mMinimized;
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
 	BOOL			mCollapseOnMinimize;

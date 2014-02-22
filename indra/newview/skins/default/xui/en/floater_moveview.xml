@@ -2,21 +2,23 @@
 <floater
  positioning="specified"
  right="-693"
+ bg_alpha_image="Window_NoTitle_Background"
+ bg_opaque_image="Window_NoTitle_Foreground"
  bottom="-50"
- legacy_header_height="18"
  can_dock="false"
- can_minimize="true"
+ can_minimize="false"
  can_close="true"
  height="110"
+ inactive_transparency="0.35"
  layout="topleft"
  name="move_floater"
  help_topic="move_floater"
+ header_height="0"
  save_rect="true"
  save_visibility="true"
  single_instance="true"
- chrome="true"
- title="WALK / RUN / FLY"
- width="133">
+ title="MOVE"
+ width="110">
     <string
      name="walk_forward_tooltip">
         Walk Forward (press Up Arrow or W)
@@ -112,7 +114,7 @@
          image_pressed_selected="Movement_TurnLeft_On"
          image_unselected="Movement_TurnLeft_Off"
          layout="topleft"
-         left="30"
+         left="15"
          name="turn left btn"
          scale_image="false"
          tool_tip="Turn left (press Left Arrow or A)"
@@ -140,7 +142,7 @@
          image_pressed_selected="Movement_TurnRight_On"
          image_unselected="Movement_TurnRight_Off"
          layout="topleft"
-         right="-30"
+         left="65"
          name="turn right btn"
          scale_image="false"
          tool_tip="Turn right (press Right Arrow or D)"
@@ -168,7 +170,7 @@
          image_pressed_selected="Movement_Forward_On"
          image_unselected="Movement_Forward_Off"
          layout="topleft"
-         left="54"
+         left="40"
          name="forward btn"
          quadrant="up"
          scale_image="false"
@@ -197,11 +199,11 @@
          image_pressed_selected="Movement_Up_On"
          image_unselected="Movement_Up_Off"
          layout="topleft"
-         right="-11"
+         left="90"
          name="move up btn"
          scale_image="false"
          tool_tip="Fly up (press E)"
-         top="22"
+         top="24"
          width="10" />
         <button
          follows="left|bottom"
@@ -214,18 +216,20 @@
          name="move down btn"
          scale_image="false"
          tool_tip="Fly down (press C)"
-         top_pad="10"
+         top_pad="7"
          width="10" />
     </panel>
 <!-- Width and height of this panel should be synchronized with panel_stand_stop_flying.xml -->
     <panel
      border="false"
-     height="27"
+     follows="bottom|left|right"
+     height="25"
      layout="topleft"
      left="0"
+     mouse_opaque="false"
      name="panel_modes"
      top_pad="0"
-     width="133">
+     width="110">
         <button
          follows="left|bottom"
          height="23"
@@ -234,11 +238,10 @@
 	 label=""
          layout="topleft"
          name="mode_walk_btn"
-         left="20"
-         pad_right="0"
+         left="15"
          tool_tip="Walking mode"
-         top="2"
-         width="31" />
+         top="0"
+         width="25" />
         <button
          follows="left|bottom"
          height="23"
@@ -246,13 +249,11 @@
          image_selected="PushButton_Selected_Press"
 	 label=""
          layout="topleft"
-         left_pad="0"
+         left_pad="1"
          name="mode_run_btn"
-         pad_left="0"
-         pad_right="0"
          tool_tip="Running mode"
-         top="2"
-         width="31" />
+         top="0"
+         width="25" />
         <button
          follows="left|bottom"
          height="23"
@@ -260,12 +261,10 @@
          image_selected="PushButton_Selected_Press"
 	 label=""
          layout="topleft"
-         left_pad="0"
+         left_pad="1"
          name="mode_fly_btn"
-         pad_left="0"
-         pad_right="0"
          tool_tip="Flying mode"
-         top="2"
-         width="31" />
+         top="0"
+         width="25" />
     </panel>
 </floater>

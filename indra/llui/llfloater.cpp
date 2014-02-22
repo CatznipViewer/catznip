@@ -213,6 +213,10 @@ LLFloater::Params::Params()
 	tear_off_pressed_image("tear_off_pressed_image"),
 	dock_pressed_image("dock_pressed_image"),
 	help_pressed_image("help_pressed_image"),
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	active_transparency("active_transparency", F32_MAX),
+	inactive_transparency("inactive_transparency", F32_MAX),
+// [/SL:KB]
 	open_callback("open_callback"),
 	close_callback("close_callback"),
 	follows("follows")
@@ -2072,6 +2076,24 @@ void	LLFloater::drawShadow(LLPanel* panel)
 		llround(shadow_offset));
 }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+F32 LLFloater::getCurrentTransparency()
+{
+	switch (getTransparencyType())
+	{
+		case TT_ACTIVE:
+			if (F32_MAX != mActiveTransparency)
+				return mActiveTransparency;
+			break;
+		case TT_INACTIVE:
+			if (F32_MAX != mInactiveTransparency)
+				return mInactiveTransparency;
+			break;
+	}
+	return LLPanel::getCurrentTransparency();
+}
+// [/SL:KB]
+
 void LLFloater::updateTransparency(LLView* view, ETypeTransparency transparency_type)
 {
 	child_list_t children = *view->getChildList();
@@ -3221,6 +3243,11 @@ void LLFloater::initFromParams(const LLFloater::Params& p)
 	mLegacyHeaderHeight = p.legacy_header_height;
 	mSingleInstance = p.single_instance;
 	mReuseInstance = p.reuse_instance.isProvided() ? p.reuse_instance : p.single_instance;
+
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	mActiveTransparency = (F32_MAX != p.active_transparency) ? llclamp((F32)p.active_transparency, 0.0f, 1.0f) : F32_MAX;
+	mInactiveTransparency = (F32_MAX != p.inactive_transparency) ? llclamp((F32)p.inactive_transparency, 0.0f, 1.0f) : F32_MAX;
+// [/SL:KB]
 
 	mPositioning = p.positioning;
 

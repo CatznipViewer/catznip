@@ -343,7 +343,7 @@ void LLFloaterMove::updateButtonsWithMovementMode(const EMovementMode newMode)
 {
 	setModeTooltip(newMode);
 	setModeButtonToggleState(newMode);
-	setModeTitle(newMode);
+//	setModeTitle(newMode);
 }
 
 void LLFloaterMove::initModeTooltips()
@@ -413,27 +413,27 @@ void LLFloaterMove::setModeTooltip(const EMovementMode mode)
 	}
 }
 
-void LLFloaterMove::setModeTitle(const EMovementMode mode)
-{
-	std::string title; 
-	switch(mode)
-	{
-	case MM_WALK:
-		title = getString("walk_title");
-		break;
-	case MM_RUN:
-		title = getString("run_title");
-		break;
-	case MM_FLY:
-		title = getString("fly_title");
-		break;
-	default:
-		// title should be provided for all modes
-		llassert(false);
-		break;
-	}
-	setTitle(title);
-}
+//void LLFloaterMove::setModeTitle(const EMovementMode mode)
+//{
+//	std::string title; 
+//	switch(mode)
+//	{
+//	case MM_WALK:
+//		title = getString("walk_title");
+//		break;
+//	case MM_RUN:
+//		title = getString("run_title");
+//		break;
+//	case MM_FLY:
+//		title = getString("fly_title");
+//		break;
+//	default:
+//		// title should be provided for all modes
+//		llassert(false);
+//		break;
+//	}
+//	setTitle(title);
+//}
 
 //static
 void LLFloaterMove::sUpdateFlyingStatus()
