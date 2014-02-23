@@ -63,6 +63,7 @@ public:
 		SND_NONE = -1
 	};
 	static LLUUID getUISoundFromChatEvent(EChatEvent eEvent);
+	static LLUUID getUISoundFromSetting(const std::string& strSetting);
 	static LLUUID getUISoundFromSettingsString(const std::string& strSetting);
 // [/SL:KB]
 

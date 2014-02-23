@@ -268,6 +268,12 @@ std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
 };
 
 // static
+LLUUID LLViewerChat::getUISoundFromSetting(const std::string& strSetting)
+{
+	return getUISoundFromSettingsString(gSavedSettings.getString(strSetting));
+}
+
+// static
 LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 {
 	// There are three possibilities:
@@ -304,7 +310,7 @@ LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
 // static
 LLUUID LLViewerChat::getUISoundFromChatEvent(EChatEvent eEvent)
 {
-	if ( (eEvent >= SND_CONV_FRIEND) && (eEvent < SND_COUNT) )
+	if ( (eEvent >= 0) && (eEvent < SND_COUNT) )
 		return getUISoundFromSettingsString(gSavedSettings.getString(SOUND_LOOKUP_SETTINGS[eEvent]));
 	return LLUUID();
 }

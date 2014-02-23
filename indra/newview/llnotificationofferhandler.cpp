@@ -36,6 +36,9 @@
 #include "llscriptfloater.h"
 #include "llimview.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
+#include "llviewerchat.h"
+// [/SL:KB]
 
 using namespace LLNotificationsUI;
 
@@ -96,17 +99,32 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 
 			LLUUID from_id = notification->getPayload()["from_id"];
 
-			//Will not play a notification sound for inventory and teleport offer based upon chat preference
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
 			bool playSound = (!notification->isDND()
 							  && ((notification->getName() == "UserGiveItem"
 			                  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
-			                  || (notification->getName() == "TeleportOffered"
+			                  || ((notification->getName() == "TeleportOffered" || notification->getName() == "TeleportRequest")
 			                  && gSavedSettings.getBOOL("PlaySoundTeleportOffer"))));
-
-			            if(playSound)
-			            {
-			                notification->playSound();
-			            }
+			if (playSound)
+			{
+				const std::string& strSound = notification->getSound();
+				if (!strSound.empty())
+				{
+					make_ui_sound(LLViewerChat::getUISoundFromSetting(strSound));
+				}
+			}
+// [/SL:KB]
+//			//Will not play a notification sound for inventory and teleport offer based upon chat preference
+//			bool playSound = (!notification->isDND()
+//							  && ((notification->getName() == "UserGiveItem"
+//			                  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
+//			                  || (notification->getName() == "TeleportOffered"
+//			                  && gSavedSettings.getBOOL("PlaySoundTeleportOffer"))));
+//
+//			            if(playSound)
+//			            {
+//			                notification->playSound();
+//			            }
 
 			LLHandlerUtil::spawnIMSession(name, from_id);
 			LLHandlerUtil::addNotifPanelToIM(notification);

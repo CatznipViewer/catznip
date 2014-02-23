@@ -25,6 +25,8 @@
 #include "llviewercontrol.h"
 #include "llviewerinventory.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 // ============================================================================
 // LLFloaterUISounds class
 //
@@ -52,21 +54,26 @@ LLFloaterUISounds::~LLFloaterUISounds()
 
 BOOL LLFloaterUISounds::postBuild(void)
 {
-	const char* pstrComboNames[] =
+	for (child_list_const_iter_t itChild = beginChild(); itChild != endChild(); ++itChild)
 	{
-		"sound_friend_conv", "sound_friend_im",
-		"sound_nonfriend_conv", "sound_nonfriend_im",
-		"sound_conference_conv", "sound_conference_im",
-		"sound_group_conv", "sound_group_im"
-	};
-
-	for (int idxComboName = 0, cntComboName = sizeof(pstrComboNames) / sizeof(char*); idxComboName < cntComboName; idxComboName++)
-		initComboCallbacks(findChild<LLComboBox>(pstrComboNames[idxComboName]));
+		LLView* pView = *itChild;
+		if (boost::starts_with(pView->getName(), "sound_"))
+		{
+			LLComboBox* pCombo = dynamic_cast<LLComboBox*>(pView);
+			if (pCombo)
+			{
+				initComboCallbacks(pCombo);
+			}
+		}
+	}
 	return TRUE;
 }
 
 void LLFloaterUISounds::initComboCallbacks(LLComboBox* pCombo)
 {
+	if (!pCombo)
+		return;
+
 	pCombo->setCommitCallback(boost::bind(&LLFloaterUISounds::onSelectSound, this, _1));
 	pCombo->getListControl()->setCommitOnSelectionChange(true);
 	findChild<LLButton>(pCombo->getName() + "_preview")->setCommitCallback(boost::bind(&LLFloaterUISounds::onPreviewSound, this, pCombo));

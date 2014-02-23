@@ -4,38 +4,95 @@
  can_close="true"
  can_minimize="true"
  can_resize="false"
- height="335"
+ height="330"
  name="floater_chat_sounds"
  positioning="centered"
  title="Chat Sounds"
- width="575">
+ width="510">
 
     <text
      follows="left|top"
      font.style="BOLD"
      height="15"
      layout="topleft"
-     left="165"
+     left="155"
      length="1"
      name="text_column_conv"
-     top_pad="10"
+     top="12"
      width="165"
      type="string">
-      New conversation sound
+      New conversation
     </text>
     <text
      follows="left|top"
      font.style="BOLD"
      height="15"
      layout="topleft"
-     left_pad="40"
+     left_pad="15"
      length="1"
      name="text_column_im"
      top_delta="0"
      width="165"
      type="string">
-      Incoming message sound
+      Incoming message
     </text>
+
+    <button
+     control_name="PlaySoundNearbyChatIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_nearby_mute"
+     tab_stop="false"
+     top_pad="4"
+     width="18" />
+    <text
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_nearby_text"
+     width="105"
+     valign="center"
+     top_delta="0">
+      Nearby chat :
+    </text>
+    <combo_box
+     enabled_control="PlaySoundNearbyChatIM"
+     height="23"
+     layout="topleft"
+     left_pad="180"
+     name="sound_nearby"
+     top_delta="-1"
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventChatAgent" />
+    </combo_box>
+    <button
+     enabled_control="PlaySoundNearbyChatIM"
+     follows="top|left"
+     height="20"
+     image_unselected="Play_Off"
+     image_pressed="Play_Press"
+     is_toggle="false"
+     left_pad="1"
+     top_delta="1"
+     name="sound_nearby_preview"
+     sound_flags="0"
+     tool_tip="Preview the selected sound"
+     width="20" >
+    </button>
+    <sound_drop_target
+     height="23"
+     layout="topleft"
+     left="325"
+     name="sound_nearby_drop"
+     top_delta="0"
+     width="175" />
 
     <button
      control_name="PlaySoundFriendIM"
@@ -45,17 +102,17 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left="30"
+     left="15"
      name="sound_friend_mute"
      tab_stop="false"
-     top_pad="3"
+     top_pad="6"
      width="18" />
     <text
      height="16"
      layout="topleft"
      left_pad="7"
      name="sound_friend_text"
-     width="105"
+     width="100"
      valign="center"
      top_delta="0">
       Friend IMs :
@@ -67,7 +124,7 @@
      left_pad="5"
      name="sound_friend_conv"
      top_delta="-2"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventConvFriend" />
@@ -87,12 +144,12 @@
      width="20" >
     </button>
     <sound_drop_target
-     height="23"
+     height="33"
      layout="topleft"
-     left="30"
+     left="145"
      name="sound_friend_conv_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
     <combo_box
      enabled_control="PlaySoundFriendIM"
      height="23"
@@ -100,7 +157,7 @@
      left_pad="5"
      name="sound_friend_im"
      top_delta="-1"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventIMFriend" />
@@ -122,10 +179,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="370"
+     left="325"
      name="sound_friend_im_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
 
     <button
      control_name="PlaySoundNonFriendIM"
@@ -135,7 +192,7 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left="30"
+     left="15"
      name="sound_nonfriend_mute"
      tab_stop="false"
      top_pad="6"
@@ -145,7 +202,7 @@
      layout="topleft"
      left_pad="7"
      name="sound_nonfriend_text"
-     width="105"
+     width="100"
      valign="center"
      top_delta="0">
       Non-friend IMs :
@@ -157,7 +214,7 @@
      left_pad="5"
      name="sound_nonfriend_conv"
      top_delta="-2"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventConvNonFriend" />
@@ -179,10 +236,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="30"
+     left="145"
      name="sound_nonfriend_conv_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
     <combo_box
      enabled_control="PlaySoundNonFriendIM"
      height="23"
@@ -190,7 +247,7 @@
      left_pad="5"
      name="sound_nonfriend_im"
      top_delta="-1"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventIMNonFriend" />
@@ -212,10 +269,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="370"
+     left="325"
      name="sound_nonfriend_im_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
 
     <button
      control_name="PlaySoundConferenceIM"
@@ -225,7 +282,7 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left="30"
+     left="15"
      name="sound_conference_mute"
      tab_stop="false"
      top_pad="6"
@@ -235,7 +292,7 @@
      layout="topleft"
      left_pad="7"
      name="sound_conference_text"
-     width="105"
+     width="100"
      valign="center"
      top_delta="0">
       Conference IMs :
@@ -247,7 +304,7 @@
      left_pad="5"
      name="sound_conference_conv"
      top_delta="-2"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventConvConference" />
@@ -269,10 +326,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="30"
+     left="145"
      name="sound_conference_conv_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
     <combo_box
      enabled_control="PlaySoundConferenceIM"
      height="23"
@@ -280,7 +337,7 @@
      left_pad="5"
      name="sound_conference_im"
      top_delta="-1"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventIMConference" />
@@ -302,10 +359,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="370"
+     left="325"
      name="sound_conference_im_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
 
     <button
      control_name="PlaySoundGroupChatIM"
@@ -315,7 +372,7 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left="30"
+     left="15"
      name="sound_group_mute"
      tab_stop="false"
      top_pad="6"
@@ -325,7 +382,7 @@
      layout="topleft"
      left_pad="7"
      name="sound_group_text"
-     width="105"
+     width="100"
      valign="center"
      top_delta="0">
       Group chat :
@@ -337,7 +394,7 @@
      left_pad="5"
      name="sound_group_conv"
      top_delta="-2"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventConvGroup" />
@@ -359,10 +416,10 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="30"
+     left="145"
      name="sound_group_conv_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
     <combo_box
      enabled_control="PlaySoundGroupChatIM"
      height="23"
@@ -370,7 +427,7 @@
      left_pad="5"
      name="sound_group_im"
      top_delta="-1"
-     width="175">
+     width="150">
         <init_callback
          function="InitSoundsCombo"
          parameter="UISndEventIMGroup" />
@@ -392,253 +449,19 @@
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="370"
+     left="325"
      name="sound_group_im_drop"
      top_delta="0"
-     width="335" />
+     width="175" />
 
-<!--
-    <button
-     control_name="PlaySoundNearbyChatIM"
-     follows="top|left"
-     height="18"
-     image_selected="Audio_Off"
-     image_unselected="AudioMute_Off"
-     is_toggle="true"
-     layout="topleft"
-     left="30"
-     name="play_sound_chat_nearby"
-     tab_stop="false"
-     top_pad="6"
-     width="18" />
-    <text
-     height="16"
-     layout="topleft"
-     left_pad="7"
-     name="chat_nearby"
-     width="105"
-     valign="center"
-     top_delta="0">
-      Nearby chat :
-    </text>
-    <combo_box
-     height="23"
-     layout="topleft"
-     left_pad="5"
-     name="sound_chat_nearby"
-     top_delta="-2"
-     width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
-    </combo_box>
-    <button
-     follows="top|left"
-     height="20"
-     image_unselected="Play_Off"
-     image_pressed="Play_Press"
-     is_toggle="false"
-     left_pad="1"
-     top_delta="1"
-     name="preview_sound_chat_nearby"
-     tool_tip="Preview the selected sound"
-     width="20" >
-    </button>
-    <sound_drop_target
-     height="23"
-     layout="topleft"
-     left="30"
-     name="drop_chat_nearby"
-     top_delta="0"
-     width="385" />
-
-    <button
-     control_name="PlaySoundObjectIM"
-     follows="top|left"
-     height="18"
-     image_selected="Audio_Off"
-     image_unselected="AudioMute_Off"
-     is_toggle="true"
-     layout="topleft"
-     left="30"
-     name="play_sound_chat_object"
-     tab_stop="false"
-     top_pad="6"
-     width="18" />
-    <text
-     height="16"
-     layout="topleft"
-     left_pad="7"
-     name="chat_object"
-     width="105"
-     valign="center"
-     top_delta="0">
-      Object IMs :
-    </text>
-    <combo_box
-     height="23"
-     layout="topleft"
-     left_pad="5"
-     name="sound_chat_object"
-     top_delta="-2"
-     width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
-    </combo_box>
-    <button
-     follows="top|left"
-     height="20"
-     image_unselected="Play_Off"
-     image_pressed="Play_Press"
-     is_toggle="false"
-     left_pad="1"
-     top_delta="1"
-     name="preview_sound_chat_object"
-     tool_tip="Preview the selected sound"
-     width="20" >
-    </button>
-    <sound_drop_target
-     height="23"
-     layout="topleft"
-     left="30"
-     name="drop_chat_object"
-     top_delta="0"
-     width="385" />
-
-    <text
-     follows="left|top"
-     font.style="BOLD"
-     height="15"
+    <view_border
+     bevel_style="none"
+     height="0"
      layout="topleft"
      left="15"
-     length="1"
-     name="chat_sounds"
-     top_pad="7"
-     width="150"
-     type="string">
-      Event sounds
-    </text>
-
-    <button
-     control_name="PlaySoundNewConversation"
-     follows="top|left"
-     height="18"
-     image_selected="Audio_Off"
-     image_unselected="AudioMute_Off"
-     is_toggle="true"
-     layout="topleft"
-     left="30"
-     name="play_sound_new_conversation"
-     tab_stop="false"
-     top_pad="3"
-     width="18" />
-    <text
-     height="16"
-     layout="topleft"
-     left_pad="7"
-     name="new_conversation"
-     width="105"
-     valign="center"
-     top_delta="0">
-      New conversation :
-    </text>
-    <combo_box
-     height="23"
-     layout="topleft"
-     left_pad="5"
-     name="sound_new_conversation"
-     top_delta="-2"
-     width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
-    </combo_box>
-    <button
-     follows="top|left"
-     height="20"
-     image_unselected="Play_Off"
-     image_pressed="Play_Press"
-     is_toggle="false"
-     left_pad="1"
-     top_delta="1"
-     name="preview_sound_new_conversation"
-     tool_tip="Preview the selected sound"
-     width="20" >
-    </button>
-    <sound_drop_target
-     height="23"
-     layout="topleft"
-     left="30"
-     name="drop_new_conversation"
-     top_delta="0"
-     width="385" />
-
-    <button
-     control_name="PlaySoundIncomingVoiceCall"
-     follows="top|left"
-     height="18"
-     image_selected="Audio_Off"
-     image_unselected="AudioMute_Off"
-     is_toggle="true"
-     layout="topleft"
-     left_delta="0"
-     name="play_sound_voice_call"
-     tab_stop="false"
-     top_pad="6"
-     width="18" />
-    <text
-     height="16"
-     layout="topleft"
-     left_pad="7"
-     name="voice_call"
-     width="105"
-     valign="center"
-     top_delta="0">
-      Voice call :
-    </text>
-    <combo_box
-     height="23"
-     layout="topleft"
-     left_pad="5"
-     name="sound_voice_call"
-     top_delta="-2"
-     width="225">
-        <item
-         label="Default"
-         value="UISndWindowOpen" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndWindowOpen" />
-    </combo_box>
-    <button
-     follows="top|left"
-     height="20"
-     image_unselected="Play_Off"
-     image_pressed="Play_Press"
-     is_toggle="false"
-     left_pad="1"
-     top_delta="1"
-     name="preview_sound_voice_call"
-     tool_tip="Preview the selected sound"
-     width="20" >
-    </button>
-    <sound_drop_target
-     height="23"
-     layout="topleft"
-     left="30"
-     name="drop_voice_call"
-     top_delta="0"
-     width="385" />
+     name="cost_text_border"
+     right="-20"
+     top_pad="10" />
 
     <button
      control_name="PlaySoundTeleportOffer"
@@ -648,36 +471,35 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left_delta="0"
-     name="play_sound_teleport_offer"
+     left="15"
+     name="sound_teleportoffer_mute"
      tab_stop="false"
-     top_pad="6"
+     top_pad="10"
      width="18" />
     <text
      height="16"
      layout="topleft"
      left_pad="7"
-     name="teleport_offer"
-     width="105"
+     name="sound_teleportoffer_text"
+     width="100"
      valign="center"
      top_delta="0">
       Teleport offer :
     </text>
     <combo_box
+     enabled_control="PlaySoundTeleportOffer"
      height="23"
      layout="topleft"
      left_pad="5"
-     name="sound_teleport_offer"
+     name="sound_teleportoffer"
      top_delta="-2"
-     width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventTeleportOffer" />
     </combo_box>
     <button
+     enabled_control="PlaySoundTeleportOffer"
      follows="top|left"
      height="20"
      image_unselected="Play_Off"
@@ -685,17 +507,18 @@
      is_toggle="false"
      left_pad="1"
      top_delta="1"
-     name="preview_sound_teleport_offer"
+     name="sound_teleportoffer_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="30"
-     name="drop_teleport_offer"
+     left="145"
+     name="sound_teleportoffer_drop"
      top_delta="0"
-     width="385" />
+     width="175" />
 
     <button
      control_name="PlaySoundInventoryOffer"
@@ -705,8 +528,8 @@
      image_unselected="AudioMute_Off"
      is_toggle="true"
      layout="topleft"
-     left_delta="0"
-     name="play_sound_inventory_offer"
+     left="15"
+     name="sound_inventoryoffer_mute"
      tab_stop="false"
      top_pad="6"
      width="18" />
@@ -714,27 +537,26 @@
      height="16"
      layout="topleft"
      left_pad="7"
-     name="inventory_offer"
-     width="105"
+     name="sound_inventoryoffer_text"
+     width="100"
      valign="center"
      top_delta="0">
       Inventory offer :
     </text>
     <combo_box
+     enabled_control="PlaySoundInventoryOffer"
      height="23"
      layout="topleft"
      left_pad="5"
-     name="sound_inventory_offer"
-     top_delta="0"
-     width="225">
-        <item
-         label="Default"
-         value="UISndNewIncomingIMSession" />
-        <item
-         label="Custom (Drag and drop sound here)"
-         value="UISndNewIncomingIMSession" />
+     name="sound_inventoryoffer"
+     top_delta="-2"
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventInventoryOffer" />
     </combo_box>
     <button
+     enabled_control="PlaySoundInventoryOffer"
      follows="top|left"
      height="20"
      image_unselected="Play_Off"
@@ -742,17 +564,188 @@
      is_toggle="false"
      left_pad="1"
      top_delta="1"
-     name="preview_sound_inventory_offer"
+     name="sound_inventoryoffer_preview"
+     sound_flags="0"
      tool_tip="Preview the selected sound"
      width="20" >
     </button>
     <sound_drop_target
      height="23"
      layout="topleft"
-     left="30"
-     name="drop_inventory_offer"
+     left="145"
+     name="sound_inventoryoffer_drop"
      top_delta="0"
-     width="385" />
--->
+     width="175" />
+
+    <button
+     control_name="PlaySoundGroupNotice"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_groupnotice_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_groupnotice_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Group notice :
+    </text>
+    <combo_box
+     enabled_control="PlaySoundGroupNotice"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_groupnotice"
+     top_delta="-2"
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventGroupNotice" />
+    </combo_box>
+    <button
+     enabled_control="PlaySoundGroupNotice"
+     follows="top|left"
+     height="20"
+     image_unselected="Play_Off"
+     image_pressed="Play_Press"
+     is_toggle="false"
+     left_pad="1"
+     top_delta="1"
+     name="sound_groupnotice_preview"
+     sound_flags="0"
+     tool_tip="Preview the selected sound"
+     width="20" >
+    </button>
+    <sound_drop_target
+     height="23"
+     layout="topleft"
+     left="145"
+     name="sound_groupnotice_drop"
+     top_delta="0"
+     width="175" />
+
+    <button
+     control_name="PlaySoundScriptPermission"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_scriptpermission_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_scriptpermission_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Script permission :
+    </text>
+    <combo_box
+     enabled_control="PlaySoundScriptPermission"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_scriptpermission"
+     top_delta="-2"
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventScriptPermission" />
+    </combo_box>
+    <button
+     enabled_control="PlaySoundScriptPermission"
+     follows="top|left"
+     height="20"
+     image_unselected="Play_Off"
+     image_pressed="Play_Press"
+     is_toggle="false"
+     left_pad="1"
+     top_delta="1"
+     name="sound_scriptpermission_preview"
+     sound_flags="0"
+     tool_tip="Preview the selected sound"
+     width="20" >
+    </button>
+    <sound_drop_target
+     height="23"
+     layout="topleft"
+     left="145"
+     name="sound_scriptpermission_drop"
+     top_delta="0"
+     width="175" />
+
+    <button
+     control_name="PlaySoundRegionRestart"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_regionrestart_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_regionrestart_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Region restart :
+    </text>
+    <combo_box
+     enabled_control="PlaySoundRegionRestart"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_regionrestart"
+     top_delta="-2"
+     width="150">
+        <init_callback
+         function="InitSoundsCombo"
+         parameter="UISndEventRegionRestart" />
+    </combo_box>
+    <button
+     enabled_control="PlaySoundRegionRestart"
+     follows="top|left"
+     height="20"
+     image_unselected="Play_Off"
+     image_pressed="Play_Press"
+     is_toggle="false"
+     left_pad="1"
+     top_delta="1"
+     name="sound_regionrestart_preview"
+     sound_flags="0"
+     tool_tip="Preview the selected sound"
+     width="20" >
+    </button>
+    <sound_drop_target
+     height="23"
+     layout="topleft"
+     left="145"
+     name="sound_regionrestart_drop"
+     top_delta="0"
+     width="175" />
 
 </floater>

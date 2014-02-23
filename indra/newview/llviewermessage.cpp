@@ -3720,6 +3720,9 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		msg_notify["session_id"] = LLUUID();
         msg_notify["from_id"] = chat.mFromID;
 		msg_notify["source_type"] = chat.mSourceType;
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+		msg_notify["trigger_sound"] = true;
+// [/SL:KB]
         on_new_message(msg_notify);
 	}
 }
@@ -5993,7 +5996,13 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 				}
 			}
 
-			send_sound_trigger(LLUUID(gSavedSettings.getString("UISndRestart")), 1.0f);
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+			if (gSavedSettings.getBOOL("PlaySoundRegionRestart"))
+			{
+				make_ui_sound(LLViewerChat::getUISoundFromSetting("UISndEventRegionRestart"));
+			}
+// [/SL:KB]
+//			send_sound_trigger(LLUUID(gSavedSettings.getString("UISndRestart")), 1.0f);
 		}
 
 		LLNotificationsUtil::add(notificationID, llsdBlock);

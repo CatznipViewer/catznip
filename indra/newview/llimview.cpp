@@ -227,10 +227,16 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 			user_preferences = gSavedSettings.getU32("NotificationNearbyChatOptions");
 // [/SL:KB]
 //    	user_preferences = gSavedSettings.getString("NotificationNearbyChatOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE))
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if ( (trigger_sound) && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE) )
 			{
-				make_ui_sound("UISndNewIncomingIMSession");
-    }
+				make_ui_sound(LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_CHAT_AGENT));
+			}
+// [/SL:KB]
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE))
+//			{
+//				make_ui_sound("UISndNewIncomingIMSession");
+//    }
 		}
 	}
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
