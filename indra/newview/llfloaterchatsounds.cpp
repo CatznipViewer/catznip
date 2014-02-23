@@ -122,8 +122,17 @@ void LLFloaterUISounds::onInitSoundsCombo(LLUICtrl* pCtrl, const LLSD& sdParam)
 	if (pControl.isNull())
 		return;
 
+	const std::string strDefaultSound = pControl->getDefault().asString();
+	if (!strDefaultSound.empty())
+	{
+		pCombo->add("Default", strDefaultSound);
+		pCombo->add("No sound", LLStringUtil::null);
+	}
+	else
+	{
+		pCombo->add("Default (no sound)", LLStringUtil::null);
+	}
 	m_SettingsMap[pCombo->getName()] = pControl->getName();
-	pCombo->add("Default", pControl->getDefault().asString());
 
 	// Add sounds from sounds.xml
 	if ( (m_sdSounds.isMap()) && (m_sdSounds.size() > 0) )
