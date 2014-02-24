@@ -9,7 +9,7 @@
 	<floater.string name="Title">
 		SCRIPT : [NAME]
 	</floater.string>
-	<button label="Réinitialiser" label_selected="Réinitialiser" name="Reset"/>
-	<check_box initial_value="true" label="Exécution en cours" name="running"/>
+	<button label="Réinitialiser" label_selected="Réinitialiser" name="Reset" width="85"/>
+	<check_box initial_value="true" label="Exécution en cours" name="running" left="315" />
 	<check_box initial_value="true" label="Mono" name="mono"/>
 </floater>

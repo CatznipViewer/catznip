@@ -45,6 +45,6 @@
 		Chargement...
 	</text_editor>
 	<combo_box label="Insérer..." name="Insert..."/>
-	<button label="Enregistrer" label_selected="Enregistrer" name="Save_btn"/>
-	<button label="Modifier..." name="Edit_btn"/>
+	<button label="Enregistrer" label_selected="Enregistrer" name="Save_btn" width="70"/>
+	<button label="Modifier..." name="Edit_btn" right="435"/>
 </panel>
