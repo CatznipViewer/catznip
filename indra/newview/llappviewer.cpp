@@ -4946,12 +4946,12 @@ void LLAppViewer::idleShutdown()
 		return;
 	}
 
-	if (gPendingMetricsUploads > 0
-		&& gLogoutTimer.getElapsedTimeF32() < SHUTDOWN_UPLOAD_SAVE_TIME
-		&& !logoutRequestSent())
-	{
-		return;
-	}
+//	if (gPendingMetricsUploads > 0
+//		&& gLogoutTimer.getElapsedTimeF32() < SHUTDOWN_UPLOAD_SAVE_TIME
+//		&& !logoutRequestSent())
+//	{
+//		return;
+//	}
 
 	// All floaters are closed.  Tell server we want to quit.
 	if( !logoutRequestSent() )
