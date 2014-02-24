@@ -242,6 +242,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mTitle(p.title),
 	mShortTitle(p.short_title),
 	mSingleInstance(p.single_instance),
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2014-02-24 (Catznip-3.6)
+	mIsReuseInitialized(p.reuse_instance.isProvided()),
+// [/SL:KB]
 	mReuseInstance(p.reuse_instance.isProvided() ? p.reuse_instance : p.single_instance), // reuse single-instance floaters by default
 	mKey(key),
 	mCanTearOff(p.can_tear_off),
