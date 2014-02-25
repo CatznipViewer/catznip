@@ -9,12 +9,14 @@
 	<floater.string name="Title">
 		Not Kartı: [NAME]
 	</floater.string>
-	<text name="desc txt">
+	<text name="desc txt" width="60">
 		Açıklama:
 	</text>
 	<text_editor name="Notecard Editor">
 		Yükleniyor...
 	</text_editor>
+	<panel name="bottom_panel">
 	<button label="Kaydet" label_selected="Kaydet" name="Save"/>
 	<button label="Sil" label_selected="Sil" name="Delete"/>
+	</panel>
 </floater>

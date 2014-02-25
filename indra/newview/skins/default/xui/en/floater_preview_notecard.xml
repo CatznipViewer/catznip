@@ -3,10 +3,10 @@
  legacy_header_height="18"
  can_resize="true"
  default_tab_group="1"
- height="361"
+ height="355"
  layout="topleft"
- min_height="243"
- min_width="234"
+ min_height="200"
+ min_width="230"
  name="preview notecard"
  help_topic="preview_notecard"
  save_rect="true"
@@ -38,64 +38,117 @@
      type="string"
      length="1"
      follows="left|top"
-     font="SansSerif"
      height="19"
      layout="topleft"
      left="10"
      name="desc txt"
-     top="22"
-     width="90">
-        Description:
+     top="19"
+     width="80">
+        Description
     </text>
     <line_editor
      border_style="line"
-     border_thickness="1"
+     border_thickness="0"
      follows="left|top|right"
-     font="SansSerif"
-     height="22"
+     height="17"
      layout="topleft"
      left_pad="0"
      max_length_bytes="127"
      name="desc"
-     width="296" />
+     right="-5"
+     top_delta="0"/>
     <text_editor
      type="string"
      length="1"
      embedded_items="true"
      follows="left|top|right|bottom"
-     font="SansSerif"
-     height="281"
+     height="280"
      ignore_tab="false"
      layout="topleft"
-     left="4"
+     left="7"
      max_length="65536"
      name="Notecard Editor"
      parse_urls="false" 
      spellcheck="true"
      tab_group="1"
-     top="46"
-     width="392"
+     top="39"
+     right="-7"
      word_wrap="true">
         Loading...
     </text_editor>
-    <button
-     follows="right|bottom"
-     height="22"
-     label="Save"
-     label_selected="Save"
+
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left="178"
-     name="Save"
-     top="332"
-     width="100" />
-    <button
-     follows="right|bottom"
-     height="22"
-     label="Delete"
-     label_selected="Delete"
-     layout="topleft"
-     left="288"
-     name="Delete"
-     top="332"
-     width="100" />
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left|right"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         right="-200"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Command_Inventory_Icon"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Save"
+         layout="topleft"
+         left_pad="1"
+         name="Save"
+         width="80" />
+
+
+        <icon  
+         follows="bottom|right"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="18"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="StopReload_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Delete"
+         layout="topleft"
+         left_pad="1"
+         name="Delete"
+         width="80" />
+
+        <icon  
+         follows="bottom|right"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         right="-1"
+         layout="topleft"
+         left_pad="1"
+         left="-18"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
 </floater>
