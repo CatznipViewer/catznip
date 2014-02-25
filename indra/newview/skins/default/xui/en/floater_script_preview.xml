@@ -50,7 +50,6 @@
      border_style="line"
      border_thickness="0"
      follows="left|top|right"
-     font="SansSerif"
      height="17"
      layout="topleft"
      left_delta="80"
