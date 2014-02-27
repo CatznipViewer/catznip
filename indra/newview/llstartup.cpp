@@ -1300,7 +1300,10 @@ bool idle_startup()
 		display_startup();
 		LLStartUp::setStartupState( STATE_MULTIMEDIA_INIT );
 		
-		LLConversationLog::getInstance();
+// [SL:KB] - Patch: Settings-Misc | Checked: 2014-02-27 (Catznip-3.6)
+		LLConversationLog::getInstance()->initClass();
+// [/SL:KB]
+//		LLConversationLog::getInstance();
 
 		return FALSE;
 	}
