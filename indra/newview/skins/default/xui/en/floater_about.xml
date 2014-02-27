@@ -100,10 +100,10 @@ Error fetching server release notes URL.
        tool_tip="Copy the info the clipboard."
        name="copy_btn"
        label="Copy Info"
-       left="40"
+       left="3"
        top="284"
        height="22"
-       width="80" />
+       width="112" />
       <text_editor
        parse_urls="true" 
        follows="top|left"
