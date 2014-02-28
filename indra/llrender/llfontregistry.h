@@ -41,6 +41,9 @@ public:
 	LLFontDescriptor(const std::string& name, const std::string& size, const U8 style);
 	LLFontDescriptor(const std::string& name, const std::string& size, const U8 style, const string_vec_t& file_names);
 	LLFontDescriptor normalize() const;
+// [SL:KB] - Patch: UI-Font | Checked: 2014-02-27 (Catznip-3.6)
+	static LLFontDescriptor normalize(const std::string& name, const std::string& size, const U8 style, const string_vec_t* file_names_p = NULL);
+// [/SL:KB]
 
 	bool operator<(const LLFontDescriptor& b) const;
 

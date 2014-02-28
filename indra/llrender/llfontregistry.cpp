@@ -116,6 +116,12 @@ bool findSubString(std::string& str, const std::string& substr)
 	return false;
 }
 
+// [SL:KB] - Patch: UI-Font | Checked: 2014-02-27 (Catznip-3.6)
+LLFontDescriptor LLFontDescriptor::normalize() const
+{
+	return normalize(mName, mSize, mStyle, &mFileNames);
+}
+// [/SL:KB]
 
 // Normal form is
 // - raw name
@@ -125,11 +131,12 @@ bool findSubString(std::string& str, const std::string& substr)
 // For example,
 // - "SansSerifHuge" would normalize to { "SansSerif", "Huge", 0 }
 // - "SansSerifBold" would normalize to { "SansSerifBold", "Medium", BOLD }
-LLFontDescriptor LLFontDescriptor::normalize() const
+// [SL:KB] - Patch: UI-Font | Checked: 2014-02-27 (Catznip-3.6)
+LLFontDescriptor LLFontDescriptor::normalize(const std::string& name, const std::string& size, const U8 style, const string_vec_t* file_names_p)
 {
-	std::string new_name(mName);
-	std::string new_size(mSize);
-	U8 new_style(mStyle);
+	std::string new_name(name);
+	std::string new_size(size);
+	U8 new_style(style);
 
 	// Only care about style to extent it can be picked up by font.
 	new_style &= (LLFontGL::BOLD | LLFontGL::ITALIC);
@@ -137,14 +144,14 @@ LLFontDescriptor LLFontDescriptor::normalize() const
 	// All these transformations are to support old-style font specifications.
 	if (removeSubString(new_name,"Small"))
 		new_size = "Small";
-	if (removeSubString(new_name,"Big"))
-		new_size = "Large";
-	if (removeSubString(new_name,"Medium"))
+	else if (removeSubString(new_name,"Medium"))
 		new_size = "Medium";
-	if (removeSubString(new_name,"Large"))
+	else if (removeSubString(new_name,"Large"))
 		new_size = "Large";
-	if (removeSubString(new_name,"Huge"))
+	else if (removeSubString(new_name,"Huge"))
 		new_size = "Huge";
+	else if (removeSubString(new_name,"Big"))
+		new_size = "Large";
 
 	// HACK - Monospace is the only one we don't remove, so
 	// name "Monospace" doesn't get taken down to ""
@@ -160,8 +167,48 @@ LLFontDescriptor LLFontDescriptor::normalize() const
 	if (removeSubString(new_name,"Italic"))
 		new_style |= LLFontGL::ITALIC;
 
-	return LLFontDescriptor(new_name,new_size,new_style,getFileNames());
+	if (file_names_p)
+		return LLFontDescriptor(new_name, new_size, new_style, *file_names_p);
+	return LLFontDescriptor(new_name, new_size, new_style);
 }
+// [/SL:KB]
+//LLFontDescriptor LLFontDescriptor::normalize() const
+//{
+//	std::string new_name(mName);
+//	std::string new_size(mSize);
+//	U8 new_style(mStyle);
+//
+//	// Only care about style to extent it can be picked up by font.
+//	new_style &= (LLFontGL::BOLD | LLFontGL::ITALIC);
+//
+//	// All these transformations are to support old-style font specifications.
+//	if (removeSubString(new_name,"Small"))
+//		new_size = "Small";
+//	if (removeSubString(new_name,"Big"))
+//		new_size = "Large";
+//	if (removeSubString(new_name,"Medium"))
+//		new_size = "Medium";
+//	if (removeSubString(new_name,"Large"))
+//		new_size = "Large";
+//	if (removeSubString(new_name,"Huge"))
+//		new_size = "Huge";
+//
+//	// HACK - Monospace is the only one we don't remove, so
+//	// name "Monospace" doesn't get taken down to ""
+//	// For other fonts, there's no ambiguity between font name and size specifier.
+//	if (new_size != s_template_string && new_size.empty() && findSubString(new_name,"Monospace"))
+//		new_size = "Monospace";
+//	if (new_size.empty())
+//		new_size = "Medium";
+//
+//	if (removeSubString(new_name,"Bold"))
+//		new_style |= LLFontGL::BOLD;
+//
+//	if (removeSubString(new_name,"Italic"))
+//		new_style |= LLFontGL::ITALIC;
+//
+//	return LLFontDescriptor(new_name,new_size,new_style,getFileNames());
+//}
 
 LLFontRegistry::LLFontRegistry(bool create_gl_textures)
 :	mCreateGLTextures(create_gl_textures)
