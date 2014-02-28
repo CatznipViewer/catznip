@@ -73,7 +73,7 @@
      follows="top|left"
      height="24"
      image_hover_unselected="Toolbar_Middle_Over"
-     image_overlay="Arrow_Right"
+     image_overlay="StopReload_Off"
      image_overlay_alignment="center"
      image_selected="Toolbar_Middle_Selected"
      image_unselected="Toolbar_Middle_Off"
