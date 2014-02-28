@@ -396,7 +396,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			gProductName = "Second Life";
+			gProductName = "Catznip";
 		}
 		if (gBundleID)
 		{
@@ -497,7 +497,7 @@ int main(int argc, char **argv)
 		err = CreateStandardAlert(
 				kAlertStopAlert,
 				CFSTR("Error"),
-				CFSTR("An error occurred while updating Second Life.  Please download the latest version from www.secondlife.com."),
+				CFSTR("An error occurred while updating Catznip.  Please download the latest version from catznip.com."),
 				&params,
 				&alert);
 		
