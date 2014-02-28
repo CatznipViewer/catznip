@@ -2431,7 +2431,6 @@ BOOL LLPanelPreferenceCrashReports::postBuild()
 void LLPanelPreferenceCrashReports::refresh()
 {
 	bool fEnable = getChild<LLCheckBoxCtrl>("checkSendCrashReports")->get();
-	getChild<LLUICtrl>("comboSaveMiniDumpType")->setEnabled(fEnable);
 	getChild<LLUICtrl>("checkSendCrashReportsAlwaysAsk")->setEnabled(fEnable);
 	getChild<LLUICtrl>("checkSendName")->setEnabled(fEnable);
 	getChild<LLUICtrl>("checkSendSettings")->setEnabled(fEnable);
