@@ -288,10 +288,7 @@ public:
 	 * but assumes that the comparator is always alive.
 	 */
 	void setComparator(const ItemComparator* comp) { mItemComparator = comp; }
-// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
-	virtual void sort();
-// [/SL:KB]
-//	void sort();
+	void sort();
 
 	bool updateValue(const LLSD& old_value, const LLSD& new_value);
 

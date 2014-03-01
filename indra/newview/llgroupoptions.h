@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -41,21 +41,34 @@ struct LLGroupOptions
 class LLGroupOptionsMgr : public LLSingleton<LLGroupOptionsMgr>
 {
 	friend class LLSingleton<LLGroupOptionsMgr>;
+
+	/*
+	 * Constructor
+	 */
 protected:
 	LLGroupOptionsMgr();
-	~LLGroupOptionsMgr();
+	virtual ~LLGroupOptionsMgr();
 
+	/*
+	 * Member functions
+	 */
 public:
-	void            clearOptions(const LLUUID& idGroup);
+	void clearOptions(const LLUUID& idGroup);
 	LLGroupOptions* getOptions(const LLUUID& idGroup);
-	void            setOptionReceiveChat(const LLUUID& idGroup, bool fReceiveChat);
+	void setOptionReceiveChat(const LLUUID& idGroup, bool fReceiveChat);
 protected:
-	void                  load();
-	void                  save();
+	bool load();
+	bool loadLegacy();
+	bool save();
 
+	/*
+	 * Member variables
+	 */
 protected:
 	typedef std::map<LLUUID, LLGroupOptions*> options_map_t;
 	options_map_t mGroupOptions;
 };
+
+// ============================================================================
 
 #endif // LL_LLGROUPOPTIONS_H

@@ -284,16 +284,14 @@ void LLViewerChat::signalChatFontChanged()
 }
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
-U8 LLViewerChat::getChatNameFontStyle(EChatNameStyle name_style)
+U8 LLViewerChat::getChatNameFontStyle(EChatFlags chat_flags)
 {
-	switch (name_style)
+	switch (chat_flags)
 	{
-		case CHAT_NAME_MODERATOR:
+		case CHAT_FLAG_MODERATOR:
 			return LLFontGL::BOLD;
-		case CHAT_NAME_NORMAL:
 		default:
 			return LLFontGL::NORMAL;
 	}
 }
 // [/SL:KB]
-

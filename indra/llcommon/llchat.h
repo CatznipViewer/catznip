@@ -68,11 +68,11 @@ typedef enum e_chat_style
 }EChatStyle;
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
-typedef enum e_chat_name_style
+typedef enum e_chat_flags
 {
-	CHAT_NAME_NORMAL,
-	CHAT_NAME_MODERATOR
-} EChatNameStyle;
+	CHAT_FLAG_NONE      = 0x00,
+	CHAT_FLAG_MODERATOR = 0x01
+} EChatFlags;
 // [/SL:KB]
 
 // A piece of chat

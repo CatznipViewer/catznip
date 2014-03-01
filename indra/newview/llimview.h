@@ -73,6 +73,15 @@ public:
 			NONE_SESSION,
 		} SType;
 
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2014-03-01 (Catznip-3.6)
+		typedef enum e_session_close_action
+		{
+			CLOSE_DEFAULT,
+			CLOSE_LEAVE,
+			CLOSE_SNOOZE
+		} SCloseAction;
+// [/SL:KB]
+
 		LLIMSession(const LLUUID& session_id, const std::string& name, 
 			const EInstantMessage& type, const LLUUID& other_participant_id, const uuid_vec_t& ids, bool voice, bool has_offline_msg);
 		virtual ~LLIMSession();
@@ -107,6 +116,9 @@ public:
 		std::string mName;
 		EInstantMessage mType;
 		SType mSessionType;
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2014-03-01 (Catznip-3.6)
+		SCloseAction mCloseAction;
+// [/SL:KB]
 		LLUUID mOtherParticipantID;
 		uuid_vec_t mInitialTargetIDs;
 		std::string mHistoryFileName;
@@ -379,11 +391,7 @@ public:
 	 * to the server and removes all associated session data
 	 * @return false if the session with specified id was not exist
 	 */
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
-	enum ECloseFlag { CLOSE_DEFAULT, CLOSE_LEAVE, CLOSE_SNOOZE }; 
-	bool leaveSession(const LLUUID& session_id, ECloseFlag flag = CLOSE_DEFAULT);
-// [/SL:KB]
-//	bool leaveSession(const LLUUID& session_id);
+	bool leaveSession(const LLUUID& session_id);
 
 	void inviteToSession(
 		const LLUUID& session_id, 
@@ -417,7 +425,7 @@ public:
 
 	BOOL hasSession(const LLUUID& session_id);
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
 	bool checkSnoozeExpiration(const LLUUID& session_id) const;
 	bool isSnoozedSession(const LLUUID& session_id) const;
 	bool restoreSnoozedSession(const LLUUID& session_id);
@@ -502,7 +510,7 @@ private:
 	LLSD mPendingInvitations;
 	LLSD mPendingAgentListUpdates;
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
 	typedef std::map<LLUUID, F64> snoozed_sessions_t;
 	snoozed_sessions_t mSnoozedSessions;
 // [/SL:KB]

@@ -458,8 +458,9 @@ LLUUID LLGroupActions::startIM(const LLUUID& group_id)
 	}
 }
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-17 (Catznip-3.3.0)
-void close_group_im(const LLUUID& group_id, LLIMMgr::ECloseFlag flag)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-17 (Catznip-3.3)
+
+static void close_group_im(const LLUUID& group_id, LLIMModel::LLIMSession::SCloseAction close_action)
 {
 	if (group_id.isNull())
 		return;
@@ -467,24 +468,39 @@ void close_group_im(const LLUUID& group_id, LLIMMgr::ECloseFlag flag)
 	LLUUID session_id = gIMMgr->computeSessionID(IM_SESSION_GROUP_START, group_id);
 	if (session_id != LLUUID::null)
 	{
-		gIMMgr->leaveSession(session_id);
+		LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(session_id);
+		if (pIMSession)
+		{
+			pIMSession->mCloseAction = close_action;
+		}
+
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-04-24 (Catznip-3.4)
+		LLFloaterIMSession* pIMSessionFloater = LLFloaterIMSession::findInstance(session_id);
+		if (pIMSessionFloater)
+		{
+			// See LLFloaterIMContainer::doToSelectedConversation()
+			LLFloater::onClickClose(pIMSessionFloater);
+		}
+// [/SL:KB]
+//		gIMMgr->leaveSession(session_id);
 	}
 }
 
 void LLGroupActions::leaveIM(const LLUUID& group_id)
 {
-	close_group_im(group_id, LLIMMgr::CLOSE_LEAVE);
+	close_group_im(group_id, LLIMModel::LLIMSession::CLOSE_LEAVE);
 }
 
 void LLGroupActions::snoozeIM(const LLUUID& group_id)
 {
-	close_group_im(group_id, LLIMMgr::CLOSE_SNOOZE);
+	close_group_im(group_id, LLIMModel::LLIMSession::CLOSE_SNOOZE);
 }
 
 void LLGroupActions::endIM(const LLUUID& group_id)
 {
-	close_group_im(group_id, LLIMMgr::CLOSE_DEFAULT);
+	close_group_im(group_id, LLIMModel::LLIMSession::CLOSE_DEFAULT);
 }
+
 // [/SL:KB]
 
 //// static
@@ -496,7 +512,15 @@ void LLGroupActions::endIM(const LLUUID& group_id)
 //	LLUUID session_id = gIMMgr->computeSessionID(IM_SESSION_GROUP_START, group_id);
 //	if (session_id != LLUUID::null)
 //	{
-//		gIMMgr->leaveSession(session_id);
+//// [SL:KB] - Patch: Chat-Base | Checked: 2013-04-24 (Catznip-3.4)
+//		LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(session_id);
+//		if (pIMSession)
+//		{
+//			// See LLFloaterIMContainer::doToSelectedConversation()
+//			LLFloater::onClickClose(pIMSession);
+//		}
+//// [/SL:KB]
+////	gIMMgr->leaveSession(session_id);
 //	}
 //}
 

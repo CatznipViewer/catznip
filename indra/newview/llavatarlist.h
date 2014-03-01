@@ -64,7 +64,7 @@ public:
 	virtual void draw(); // from LLView
 
 	virtual void clear();
-// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3)
 	/*virtual*/ void sort();
 // [/SL:KB]
 
@@ -124,7 +124,7 @@ private:
 	bool mShowLastInteractionTime;
 	bool mDirty;
 	bool mNeedUpdateNames;
-// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3)
 	bool mNeedSort;
 // [/SL:KB]
 	bool mShowIcons;

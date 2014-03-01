@@ -48,7 +48,7 @@ public:
 	static void signalChatFontChanged();
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
-	static U8 getChatNameFontStyle(EChatNameStyle name_style);
+	static U8 getChatNameFontStyle(EChatFlags chat_flags);
 // [/SL:KB]
 
 private:

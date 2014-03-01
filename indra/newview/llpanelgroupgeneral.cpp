@@ -41,7 +41,7 @@
 #include "lldbstrings.h"
 #include "llavataractions.h"
 #include "llgroupactions.h"
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 #include "llgroupoptions.h"
 // [/SL:KB]
 #include "lllineeditor.h"
@@ -81,7 +81,7 @@ LLPanelGroupGeneral::LLPanelGroupGeneral()
 	mSpinEnrollmentFee(NULL),
 	mCtrlReceiveNotices(NULL),
 	mCtrlListGroup(NULL),
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	mCtrlReceiveChat(NULL),
 // [/SL:KB]
 	mActiveTitleLabel(NULL),
@@ -186,7 +186,7 @@ BOOL LLPanelGroupGeneral::postBuild()
 		mCtrlListGroup->resetDirty();
 	}
 
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	LLGroupOptions* pOptions = (mGroupID.notNull()) ? LLGroupOptionsMgr::instance().getOptions(mGroupID) : NULL;
 
 	mCtrlReceiveChat = getChild<LLCheckBoxCtrl>("receive_chat", recurse);
@@ -462,7 +462,7 @@ bool LLPanelGroupGeneral::apply(std::string& mesg)
 
 	gAgent.setUserGroupFlags(mGroupID, receive_notices, list_in_profile);
 
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	if (mCtrlReceiveChat)
 		LLGroupOptionsMgr::instance().setOptionReceiveChat(mGroupID, mCtrlReceiveChat->get());
 // [/SL:KB]
@@ -667,7 +667,7 @@ void LLPanelGroupGeneral::update(LLGroupChange gc)
 		}
 	}
 
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	if (mCtrlReceiveChat)
 	{
 		mCtrlReceiveChat->setVisible(is_member);
@@ -841,7 +841,7 @@ void LLPanelGroupGeneral::updateChanged()
 		mSpinEnrollmentFee,
 		mCtrlReceiveNotices,
 		mCtrlListGroup,
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 		mCtrlReceiveChat,
 // [/SL:KB]
 		mActiveTitleLabel,
@@ -875,7 +875,7 @@ void LLPanelGroupGeneral::reset()
 
 	mCtrlListGroup->setEnabled(false);
 
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	mCtrlReceiveChat->set(false);
 	mCtrlReceiveChat->setEnabled(false);
 	mCtrlReceiveChat->setVisible(true);
@@ -947,7 +947,7 @@ void	LLPanelGroupGeneral::resetDirty()
 		mSpinEnrollmentFee,
 		mCtrlReceiveNotices,
 		mCtrlListGroup,
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 		mCtrlReceiveChat,
 // [/SL:KB]
 		mActiveTitleLabel,
@@ -995,7 +995,7 @@ void LLPanelGroupGeneral::setGroupID(const LLUUID& id)
 		mCtrlListGroup->setEnabled(data.mID.notNull());
 	}
 
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	LLGroupOptions* pOptions = LLGroupOptionsMgr::instance().getOptions(mGroupID);
 
 	mCtrlReceiveChat = getChild<LLCheckBoxCtrl>("receive_chat");

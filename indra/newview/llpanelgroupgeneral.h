@@ -106,7 +106,7 @@ private:
 	LLSpinCtrl      *mSpinEnrollmentFee;
 	LLCheckBoxCtrl	*mCtrlReceiveNotices;
 	LLCheckBoxCtrl  *mCtrlListGroup;
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 	LLCheckBoxCtrl	*mCtrlReceiveChat;
 // [/SL:KB]
 	LLTextBox       *mActiveTitleLabel;

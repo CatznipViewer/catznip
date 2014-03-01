@@ -50,7 +50,7 @@
 #include "llfloaterreg.h"
 #include "llfloatertools.h"
 #include "llgroupactions.h"
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 #include "llgroupoptions.h"
 // [/SL:KB]
 #include "llgroupmgr.h"
@@ -3296,7 +3296,7 @@ void LLAgent::processAgentDropGroup(LLMessageSystem *msg, void **)
 	if (index != -1)
 	{
 		gAgent.mGroups.remove(index);
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 		LLGroupOptionsMgr::instance().clearOptions(group_id);
 // [/SL:KB]
 		if (gAgent.getGroupID() == group_id)
@@ -3376,7 +3376,7 @@ class LLAgentDropGroupViewerNode : public LLHTTPNode
 			if (index != -1)
 			{
 				gAgent.mGroups.remove(index);
-// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3.0)
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
 				LLGroupOptionsMgr::instance().clearOptions(group_id);
 // [/SL:KB]
 				if (gAgent.getGroupID() == group_id)

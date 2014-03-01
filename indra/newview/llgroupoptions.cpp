@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2012, Kitty Barnett
+ * Copyright (c) 2012-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -20,13 +20,13 @@
 #include "llgroupoptions.h"
 #include "llsdserialize.h"
 
-
 // ============================================================================
 // LLGroupOptions
 //
 
 LLGroupOptions::LLGroupOptions(const LLUUID& idGroup)
-	: mGroupId(idGroup), mReceiveGroupChat(true)
+	: mGroupId(idGroup)
+	, mReceiveGroupChat(true)
 {
 }
 
@@ -50,9 +50,16 @@ LLSD LLGroupOptions::toLLSD() const
 // LLGroupOptionsMgr
 //
 
+static const char* GROUP_OPTIONS_FILENAME        = "group_options.xml";
+static const char* GROUP_OPTIONS_FILENAME_LEGACY = "group_options.txt";
+
 LLGroupOptionsMgr::LLGroupOptionsMgr()
 {
-	load();
+	// Try to load the new format first, fallback to legacy otherwise
+	if (!load())
+	{
+		loadLegacy();
+	}
 }
 
 LLGroupOptionsMgr::~LLGroupOptionsMgr()
@@ -66,6 +73,7 @@ void LLGroupOptionsMgr::clearOptions(const LLUUID& idGroup)
 	{
 		delete itOption->second;
 		mGroupOptions.erase(itOption);
+		save();
 	}
 }
 
@@ -94,21 +102,62 @@ LLGroupOptions* LLGroupOptionsMgr::getOptions(const LLUUID& idGroup)
 	return pOptions;
 }
 
-void LLGroupOptionsMgr::load()
+bool LLGroupOptionsMgr::load()
 {
-	llifstream file(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "group_options.txt"));
-	if (!file.is_open())
+	const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, GROUP_OPTIONS_FILENAME);
+	if (!gDirUtilp->fileExists(strFile))
 	{
-		llwarns << "Can't open group options file" << llendl;
-		return;
+		return false;
 	}
 
-	for (options_map_t::iterator itOption = mGroupOptions.begin(); itOption != mGroupOptions.end(); ++itOption)
-		delete itOption->second;
+	llifstream fileGroupOptions(strFile);
+	if (!fileGroupOptions.is_open())
+	{
+		llwarns << "Can't open group options file" << llendl;
+		return false;
+	}
+
+	LLSD sdGroupOptions;
+	LLSDSerialize::fromXMLDocument(sdGroupOptions, fileGroupOptions);
+	fileGroupOptions.close();
+
+	for_each(mGroupOptions.begin(), mGroupOptions.end(), DeletePairedPointer());
+	mGroupOptions.clear();
+
+	for (LLSD::array_const_iterator itOption = sdGroupOptions.beginArray(), endOption = sdGroupOptions.endArray(); itOption != endOption; ++itOption)
+	{
+		LLGroupOptions* pOptions = new LLGroupOptions(*itOption);
+		if (!pOptions->isValid())
+		{
+			delete pOptions;
+			continue;
+		}
+		mGroupOptions.insert(std::pair<LLUUID, LLGroupOptions*>(pOptions->mGroupId, pOptions));
+	}
+
+	return true;
+}
+
+bool LLGroupOptionsMgr::loadLegacy()
+{
+	const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, GROUP_OPTIONS_FILENAME_LEGACY);
+	if (!gDirUtilp->fileExists(strFile))
+	{
+		return false;
+	}
+
+	llifstream fileGroupOptions(strFile);
+	if (!fileGroupOptions.is_open())
+	{
+		llwarns << "Can't open group options file" << llendl;
+		return false;
+	}
+
+	for_each(mGroupOptions.begin(), mGroupOptions.end(), DeletePairedPointer());
 	mGroupOptions.clear();
 
 	LLPointer<LLSDNotationParser> sdParser = new LLSDNotationParser(); std::string strLine;
-	while (std::getline(file, strLine))
+	while (std::getline(fileGroupOptions, strLine))
 	{
 		std::istringstream iss(strLine); LLSD sdData;
 		if (LLSDParser::PARSE_FAILURE == sdParser->parse(iss, sdData, strLine.length()))
@@ -126,25 +175,35 @@ void LLGroupOptionsMgr::load()
 		mGroupOptions.insert(std::pair<LLUUID, LLGroupOptions*>(pOptions->mGroupId, pOptions));
 	}
 
-	file.close();
+	fileGroupOptions.close();
+
+	// Save in the new format and delete the legacy file
+	if (save())
+	{
+		LLFile::remove(strFile);
+	}
+
+	return true;
 }
 
-void LLGroupOptionsMgr::save()
+bool LLGroupOptionsMgr::save()
 {
-	llofstream file(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "group_options.txt"));
-	if (!file.is_open())
+	llofstream fileGroupOptions(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, GROUP_OPTIONS_FILENAME));
+	if (!fileGroupOptions.is_open())
 	{
 		llwarns << "Can't open group options file" << llendl;
-		return;
+		return false;
 	}
 
+	LLSD sdGroupOptions;
 	for (options_map_t::const_iterator itOption = mGroupOptions.begin(); itOption != mGroupOptions.end(); ++itOption)
 	{
-		if ( (itOption->second->isValid()) && (gAgent.isInGroup(itOption->second->mGroupId)) )
-		{
-			file << LLSDOStreamer<LLSDNotationFormatter>(itOption->second->toLLSD()) << std::endl;
-		}
+		sdGroupOptions.append(itOption->second->toLLSD());
 	}
+	LLSDSerialize::toPrettyXML(sdGroupOptions, fileGroupOptions);
 
-	file.close();
+	fileGroupOptions.close();
+	return true;
 }
+
+// ============================================================================
