@@ -61,6 +61,10 @@ public:
 	 */
 	void addAvatarIDExceptAgent(const LLUUID& avatar_id);
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	const LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
+// [/SL:KB]
+
 	/**
 	 * Refreshes the participant list.
 	 */
@@ -221,6 +225,16 @@ public:
 	 */
 public:
 	void getSelectedUUIDs(uuid_vec_t& idsSelected);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+protected:
+	enum ESortOrder
+	{
+		E_SORT_BY_NAME = 0,
+		E_SORT_BY_RECENT_SPEAKERS = 1,
+	};
+	ESortOrder getSortOrder() const;
+	void sort();
+// [/SL:KB]
 
 	/*
 	 * LLParticipantList overrides
@@ -249,8 +263,15 @@ public:
 	 */
 protected:
 	LLAvatarList* m_pAvatarList;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	LLPointer<class LLAvatarItemStatusAndNameComparator> m_SortByStatusAndName;
+	LLPointer<class LLAvatarItemRecentSpeakerComparator> m_SortByRecentSpeakers;
+// [/SL:KB]
 
 	boost::signals2::scoped_connection m_AvatarListRefreshConn;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	boost::signals2::scoped_connection m_AvatarListSortOrderConn;
+// [/SL:KB]
 };
 // [/SL:KB]
 
