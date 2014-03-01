@@ -572,7 +572,11 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 
 LLParticipantAvatarList::~LLParticipantAvatarList()
 {
-	m_AvatarListRefreshConn.disconnect();
+}
+
+void LLParticipantAvatarList::update()
+{
+	LLParticipantList::update();
 }
 
 void LLParticipantAvatarList::getSelectedUUIDs(uuid_vec_t& idsSelected)

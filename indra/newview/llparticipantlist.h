@@ -87,7 +87,7 @@ protected:
 	bool onSpeakerMuteEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	std::set<LLUUID>& getModeratorList()          { return mModeratorList; }
+	std::set<LLUUID>& getModeratorList()         { return mModeratorList; }
 	std::set<LLUUID>& getModeratorToRemoveList() { return mModeratorToRemoveList; }
 
 	virtual const LLUUID& getSessionID() const = 0;
@@ -208,16 +208,26 @@ protected:
 class LLParticipantAvatarList : public LLParticipantList
 {
 	LOG_CLASS(LLParticipantAvatarList);
+
+	/*
+	 * Constructor
+	 */
 public:
 	LLParticipantAvatarList(LLSpeakerMgr* pDataSource, LLAvatarList* pAvatarList);
-	/*virtual*/ ~LLParticipantAvatarList();
+	virtual ~LLParticipantAvatarList();
 
+	/*
+	 * Member functions
+	 */
 public:
 	void getSelectedUUIDs(uuid_vec_t& idsSelected);
-	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
-	/*virtual*/ void update() { LLParticipantList::update(); }
 
-	void onAvatarListRefreshed();
+	/*
+	 * LLParticipantList overrides
+	 */
+public:
+	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
+	/*virtual*/ void update();
 protected:
 	/*virtual*/ const LLUUID& getSessionID() const;
 
@@ -228,10 +238,19 @@ protected:
 	/*virtual*/ void removeParticipant(const LLUUID& particpant_id);
 	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted);
 
+	/*
+	 * Event handlers
+	 */
+public:
+	void onAvatarListRefreshed();
+
+	/*
+	 * Member variables
+	 */
 protected:
 	LLAvatarList* m_pAvatarList;
 
-	boost::signals2::connection m_AvatarListRefreshConn;
+	boost::signals2::scoped_connection m_AvatarListRefreshConn;
 };
 // [/SL:KB]
 
