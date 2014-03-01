@@ -879,6 +879,7 @@ void LLFloaterIMSession::updateMessages()
 			
 			// Add the message to the chat log
 			appendMessage(chat);
+
 			mLastMessageIndex = msg["index"].asInteger();
 
 			// if it is a notification - next message is a notification history log, so skip it

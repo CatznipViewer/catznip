@@ -410,6 +410,20 @@ public:
 					style_params_name.readonly_color(userNameColor);
 					user_name->appendText("  - " + username, FALSE, style_params_name);
 				}
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+				EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
+				if (CHAT_NAME_MODERATOR == name_style)
+				{
+					LLStyle::Params style_params_name;
+					LLColor4 userNameColor = LLUIColorTable::instance().getColor("EmphasisColor");
+					style_params_name.color(userNameColor);
+					style_params_name.font.name("SansSerifSmall");
+					style_params_name.font.style("NORMAL");
+					style_params_name.readonly_color(userNameColor);
+					user_name->appendText(" " + LLTrans::getString("IM_moderator_label"), FALSE, style_params_name);
+				}
+// [/SL:KB]
 			}
 			else
 			{
@@ -839,6 +853,10 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
 	bool square_brackets = false; // square brackets necessary for a system messages
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+	EChatNameStyle name_style = (args.has("name_style")) ? (EChatNameStyle)args["name_style"].asInteger() : CHAT_NAME_NORMAL;
+// [/SL:KB]
+
 	llassert(mEditor);
 	if (!mEditor)
 	{
@@ -994,6 +1012,11 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			{
 				LLStyle::Params link_params(body_message_params);
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+				U8 font_style = LLFontGL::getStyleFromString(link_params.font.style) | LLViewerChat::getChatNameFontStyle(name_style);
+				link_params.font.style = LLFontGL::getStringFromStyle(font_style);
+				link_params.link_style_override = false;
+// [/SL:KB]
 
 				// Add link to avatar's inspector and delimiter to message.
 				mEditor->appendText(std::string(link_params.link_href) + delimiter,

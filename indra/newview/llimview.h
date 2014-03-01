@@ -114,6 +114,10 @@ public:
 		// connection to voice channel state change signal
 		boost::signals2::connection mVoiceChannelStateChangeConnection;
 
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+		LLDate mParticipantLastMessageTime;
+// [/SL:KB]
+
 		//does NOT include system messages and agent's messages
 		S32 mParticipantUnreadMessageCount;
 
@@ -375,7 +379,11 @@ public:
 	 * to the server and removes all associated session data
 	 * @return false if the session with specified id was not exist
 	 */
-	bool leaveSession(const LLUUID& session_id);
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+	enum ECloseFlag { CLOSE_DEFAULT, CLOSE_LEAVE, CLOSE_SNOOZE }; 
+	bool leaveSession(const LLUUID& session_id, ECloseFlag flag = CLOSE_DEFAULT);
+// [/SL:KB]
+//	bool leaveSession(const LLUUID& session_id);
 
 	void inviteToSession(
 		const LLUUID& session_id, 
@@ -408,6 +416,12 @@ public:
 	void disconnectAllSessions();
 
 	BOOL hasSession(const LLUUID& session_id);
+
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+	bool checkSnoozeExpiration(const LLUUID& session_id) const;
+	bool isSnoozedSession(const LLUUID& session_id) const;
+	bool restoreSnoozedSession(const LLUUID& session_id);
+// [/SL:KB]
 
 	static LLUUID computeSessionID(EInstantMessage dialog, const LLUUID& other_participant_id);
 
@@ -487,6 +501,11 @@ private:
 
 	LLSD mPendingInvitations;
 	LLSD mPendingAgentListUpdates;
+
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3.0)
+	typedef std::map<LLUUID, F64> snoozed_sessions_t;
+	snoozed_sessions_t mSnoozedSessions;
+// [/SL:KB]
 };
 
 class LLCallDialogManager : public LLInitClass<LLCallDialogManager>

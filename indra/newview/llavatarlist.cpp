@@ -134,6 +134,9 @@ LLAvatarList::LLAvatarList(const Params& p)
 , mContextMenu(NULL)
 , mDirty(true) // to force initial update
 , mNeedUpdateNames(false)
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+, mNeedSort(false)
+// [/SL:KB]
 , mLITUpdateTimer(NULL)
 , mShowIcons(true)
 , mShowInfoBtn(p.show_info_btn)
@@ -189,6 +192,11 @@ void LLAvatarList::draw()
 
 	if (mDirty)
 		refresh();
+
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+	if (mNeedSort)
+		sort();
+// [/SL:KB]
 
 	if (mShowLastInteractionTime && mLITUpdateTimer->hasExpired())
 	{
@@ -423,11 +431,18 @@ boost::signals2::connection LLAvatarList::setItemDoubleClickCallback(const mouse
 //virtual
 S32 LLAvatarList::notifyParent(const LLSD& info)
 {
-	if (info.has("sort") && &NAME_COMPARATOR == mItemComparator)
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+	if (info.has("sort"))
 	{
-		sort();
+		mNeedSort = true;
 		return 1;
 	}
+// [/SL:KB]
+//	if (info.has("sort") && &NAME_COMPARATOR == mItemComparator)
+//	{
+//		sort();
+//		return 1;
+//	}
 	return LLFlatListViewEx::notifyParent(info);
 }
 
@@ -578,6 +593,14 @@ void LLAvatarList::onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask)
 {
 	mItemDoubleClickSignal(ctrl, x, y, mask);
 }
+
+// [SL:KB] - Patch: Control-AvatarListSort | Checked: 2012-05-30 (Catznip-3.3.0)
+void LLAvatarList::sort()
+{
+	LLFlatListViewEx::sort();
+	mNeedSort = false;
+}
+// [/SL:KB]
 
 bool LLAvatarItemComparator::compare(const LLPanel* item1, const LLPanel* item2) const
 {
