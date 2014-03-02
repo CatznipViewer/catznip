@@ -1241,57 +1241,57 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 }
 
 //static
-void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
-{
-	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
-
-	if (active_panel)
-	{
-		LL_DEBUGS("Messaging") << "Highlighting" << obj_id  << LL_ENDL;
-		
-		LLViewerInventoryItem * item = gInventory.getItem(obj_id);
-		LLViewerInventoryCategory * cat = gInventory.getCategory(obj_id);
-		
-		bool in_inbox = false;
-		
-		LLViewerInventoryCategory * parent_cat = NULL;
-		
-		if (item)
-		{
-			parent_cat = gInventory.getCategory(item->getParentUUID());
-		}
-		else if (cat)
-		{
-			parent_cat = gInventory.getCategory(cat->getParentUUID());
-		}
-		
-		if (parent_cat)
-		{
-			in_inbox = (LLFolderType::FT_INBOX == parent_cat->getPreferredType());
-		}
-		
-		if (in_inbox)
-		{
-			LLSidepanelInventory * sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-			LLInventoryPanel * inventory_panel = NULL;
-			
-			if (in_inbox)
-			{
-				sidepanel_inventory->openInbox();
-				inventory_panel = sidepanel_inventory->getInboxPanel();
-			}
-
-			if (inventory_panel)
-			{
-				inventory_panel->setSelection(obj_id, TAKE_FOCUS_YES);
-			}
-		}
-		else
-		{
-			active_panel->setSelection(obj_id, TAKE_FOCUS_YES);
-		}
-	}
-}
+//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
+//{
+//	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
+//
+//	if (active_panel)
+//	{
+//		LL_DEBUGS("Messaging") << "Highlighting" << obj_id  << LL_ENDL;
+//		
+//		LLViewerInventoryItem * item = gInventory.getItem(obj_id);
+//		LLViewerInventoryCategory * cat = gInventory.getCategory(obj_id);
+//		
+//		bool in_inbox = false;
+//		
+//		LLViewerInventoryCategory * parent_cat = NULL;
+//		
+//		if (item)
+//		{
+//			parent_cat = gInventory.getCategory(item->getParentUUID());
+//		}
+//		else if (cat)
+//		{
+//			parent_cat = gInventory.getCategory(cat->getParentUUID());
+//		}
+//		
+//		if (parent_cat)
+//		{
+//			in_inbox = (LLFolderType::FT_INBOX == parent_cat->getPreferredType());
+//		}
+//		
+//		if (in_inbox)
+//		{
+//			LLSidepanelInventory * sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//			LLInventoryPanel * inventory_panel = NULL;
+//			
+//			if (in_inbox)
+//			{
+//				sidepanel_inventory->openInbox();
+//				inventory_panel = sidepanel_inventory->getInboxPanel();
+//			}
+//
+//			if (inventory_panel)
+//			{
+//				inventory_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//			}
+//		}
+//		else
+//		{
+//			active_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//		}
+//	}
+//}
 
 void LLInventoryPanel::addHideFolderType(LLFolderType::EType folder_type)
 {
