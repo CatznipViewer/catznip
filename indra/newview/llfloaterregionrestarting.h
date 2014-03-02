@@ -48,7 +48,7 @@ private:
 	virtual void draw();
 	virtual void regionChange();
 
-	std::string mName;
+//	std::string mName;
 	U32 mShakeIterations;
 	F32 mShakeMagnitude;
 	LLTimer mShakeTimer;

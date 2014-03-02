@@ -41,7 +41,7 @@ LLFloaterRegionRestarting::LLFloaterRegionRestarting(const LLSD& key) :
 	LLFloater(key),
 	LLEventTimer(1)
 {
-	mName = (std::string)key["NAME"];
+//	mName = (std::string)key["NAME"];
 	sSeconds = (LLSD::Integer)key["SECONDS"];
 }
 
@@ -54,13 +54,13 @@ BOOL LLFloaterRegionRestarting::postBuild()
 {
 	mRegionChangedConnection = gAgent.addRegionChangedCallback(boost::bind(&LLFloaterRegionRestarting::regionChange, this));
 
-	LLStringUtil::format_map_t args;
-	std::string text;
+//	LLStringUtil::format_map_t args;
+//	std::string text;
 
-	args["[NAME]"] = mName;
-	text = getString("RegionName", args);
-	LLTextBox* textbox = getChild<LLTextBox>("region_name");
-	textbox->setValue(text);
+//	args["[NAME]"] = mName;
+//	text = getString("RegionName", args);
+//	LLTextBox* textbox = getChild<LLTextBox>("region_name");
+//	textbox->setValue(text);
 
 	sShakeState = SHAKE_START;
 
@@ -86,7 +86,11 @@ void LLFloaterRegionRestarting::refresh()
 	LLStringUtil::format_map_t args;
 	std::string text;
 
-	args["[SECONDS]"] = llformat("%d", sSeconds);
+//	args["[SECONDS]"] = llformat("%d", sSeconds);
+// [SL:TD] - Patch: UI-Misc | Checked: 2014-26-02 (Catznip-R9)
+	args["[MINUTES]"] = llformat("%d", sSeconds/60);
+	args["[SECONDS]"] = llformat("%02d", sSeconds%60);
+// [/SL:TD]
 	getChild<LLTextBox>("restart_seconds")->setValue(getString("RestartSeconds", args));
 
 	sSeconds = sSeconds - 1;
