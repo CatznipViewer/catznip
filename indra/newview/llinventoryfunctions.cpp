@@ -446,6 +446,9 @@ void show_item_original(const LLUUID& item_uuid)
 
 void show_item(const LLUUID& idItem)
 {
+	const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false);
+	bool fInInbox = (idInbox.notNull()) && (gInventory.isObjectDescendentOf(idItem, idInbox));
+
 	S32 z_min = S32_MAX;
 	LLSidepanelInventory* pActiveInvSidepanel = NULL;
 
@@ -462,7 +465,7 @@ void show_item(const LLUUID& idItem)
 		LLInventoryPanel* inv_panel = (inv_sp) ? inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL) : NULL;
 		if (!inv_panel)
 			continue;
-		if (!inv_panel->getFilter().isDefault())
+		if ( (!inv_panel->getFilter().isDefault()) && (!fInInbox) )
 		{
 			// Check the actual item as fall-back
 			LLFolderViewItem* view_item = (inv_panel->getRootFolder()) ? inv_panel->getItemByID(idItem) : NULL;
@@ -487,7 +490,7 @@ void show_item(const LLUUID& idItem)
 	}
 
 	// If we still haven't found a suitable inventory panel, check if the user prefers to clear the filter or open a new floater
-	if ( (gSavedSettings.getBOOL("InventoryShowItemClearsFilter")) && (!inst_list.empty()) )
+	if ( (!pActiveInvSidepanel) && (gSavedSettings.getBOOL("InventoryShowItemClearsFilter")) && (!inst_list.empty()) )
 	{
 		LLFloater* pInvFloater = inst_list.front();
 		if (pInvFloater)
@@ -531,9 +534,17 @@ void show_item(const LLUUID& idItem)
 			if (pAllItemsPanel)
 			{
 				LLFolderViewItem* pFVItem = pAllItemsPanel->getItemByID(idItem);
-				if (pFVItem)
-					pFVItem->setOpen();
-				pMainPanel->getActivePanel()->setSelection(idItem, TAKE_FOCUS_NO);
+				if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
+				{
+					if (pFVItem)
+						pFVItem->setOpen();
+					pMainPanel->getActivePanel()->setSelectionByID(idItem, TAKE_FOCUS_NO);
+				}
+				else
+				{
+					pActiveInvSidepanel->openInbox();
+					pActiveInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_NO);
+				}
 			}
 		}
 	}
