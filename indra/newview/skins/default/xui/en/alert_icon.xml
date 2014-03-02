@@ -3,6 +3,6 @@
       tab_stop="false"
       mouse_opaque="false"
       name="icon"
-      image_name="notify_caution_icon.tga" 
+      image_name="Warning_Yellow" 
       follows="left|top">
 </icon>

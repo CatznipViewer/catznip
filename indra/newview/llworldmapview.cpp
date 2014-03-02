@@ -115,28 +115,42 @@ const S32 DRAW_LANDFORSALE_THRESHOLD = 2;	// Max level for which we load or disp
 
 void LLWorldMapView::initClass()
 {
-	sAvatarSmallImage =		LLUI::getUIImage("map_avatar_8.tga");
-	sAvatarYouImage =		LLUI::getUIImage("map_avatar_16.tga");
-	sAvatarYouLargeImage =	LLUI::getUIImage("map_avatar_you_32.tga");
-	sAvatarLevelImage =		LLUI::getUIImage("map_avatar_32.tga");
-	sAvatarAboveImage =		LLUI::getUIImage("map_avatar_above_32.tga");
-	sAvatarBelowImage =		LLUI::getUIImage("map_avatar_below_32.tga");
-	sAvatarUnknownImage =	LLUI::getUIImage("map_avatar_unknown_32.tga");
-
-	sHomeImage =			LLUI::getUIImage("map_home.tga");
-	sTelehubImage = 		LLUI::getUIImage("map_telehub.tga");
-	sInfohubImage = 		LLUI::getUIImage("map_infohub.tga");
+//	sAvatarSmallImage =		LLUI::getUIImage("map_avatar_8.tga");
+//	sAvatarYouImage =		LLUI::getUIImage("map_avatar_16.tga");
+//	sAvatarYouLargeImage =	LLUI::getUIImage("map_avatar_you_32.tga");
+//	sAvatarLevelImage =		LLUI::getUIImage("map_avatar_32.tga");
+//	sAvatarAboveImage =		LLUI::getUIImage("map_avatar_above_32.tga");
+//	sAvatarBelowImage =		LLUI::getUIImage("map_avatar_below_32.tga");
+//	sAvatarUnknownImage =	LLUI::getUIImage("map_avatar_unknown_32.tga");
+//	sHomeImage =			LLUI::getUIImage("map_home.tga");
+//	sTelehubImage = 		LLUI::getUIImage("map_telehub.tga");
+//	sInfohubImage = 		LLUI::getUIImage("map_infohub.tga");
 	sEventImage =			LLUI::getUIImage("Parcel_PG_Dark");
 	sEventMatureImage =		LLUI::getUIImage("Parcel_M_Dark");
 	// To Do: update the image resource for adult events.
 	sEventAdultImage =		LLUI::getUIImage("Parcel_R_Dark");
-
-	sTrackCircleImage =		LLUI::getUIImage("map_track_16.tga");
-	sTrackArrowImage =		LLUI::getUIImage("direction_arrow.tga");
-	sClassifiedsImage =		LLUI::getUIImage("icon_top_pick.tga");
-	sForSaleImage =			LLUI::getUIImage("icon_for_sale.tga");
-	// To Do: update the image resource for adult lands on sale.
-	sForSaleAdultImage =    LLUI::getUIImage("icon_for_sale_adult.tga");
+//	sTrackCircleImage =		LLUI::getUIImage("map_track_16.tga");
+//	sTrackArrowImage =		LLUI::getUIImage("direction_arrow.tga");
+//	sClassifiedsImage =		LLUI::getUIImage("icon_top_pick.tga");
+//	sForSaleImage =			LLUI::getUIImage("icon_for_sale.tga");
+//	sForSaleAdultImage =    LLUI::getUIImage("icon_for_sale_adult.tga");
+// [SL:TD] - Patch: UI-Misc | Checked: 2014-03-02 (Catznip-R9)
+	sAvatarSmallImage =		LLUI::getUIImage("Map_Avatar_8");
+	sAvatarYouImage =		LLUI::getUIImage("Map_Avatar_16");
+	sAvatarYouLargeImage =		LLUI::getUIImage("Map_Avatar_You_32");
+	sAvatarLevelImage =		LLUI::getUIImage("Map_Avatar_32");	
+	sAvatarAboveImage =		LLUI::getUIImage("Map_Avatar_Above_32");
+	sAvatarBelowImage =		LLUI::getUIImage("Map_Avatar_Below_32");
+	sAvatarUnknownImage =		LLUI::getUIImage("Map_Avatar_Unknown_32");
+	sTelehubImage = 		LLUI::getUIImage("Map_Telehub");
+	sInfohubImage = 		LLUI::getUIImage("Map_Infohub");
+	sTrackArrowImage =		LLUI::getUIImage("Direction_Arrow");
+	sHomeImage =			LLUI::getUIImage("Map_Home");
+	sTrackCircleImage =		LLUI::getUIImage("Map_Track_16");
+	sClassifiedsImage =		LLUI::getUIImage("Icon_Top_Pick");
+	sForSaleImage =			LLUI::getUIImage("Icon_For_Sale");
+	sForSaleAdultImage =    	LLUI::getUIImage("Icon_For_Sale_Adult");
+// [/SL:TD]
 	
 	sStringsMap["loading"] = LLTrans::getString("texture_loading");
 	sStringsMap["offline"] = LLTrans::getString("worldmap_offline");

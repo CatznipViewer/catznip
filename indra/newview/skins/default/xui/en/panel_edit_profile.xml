@@ -216,7 +216,7 @@
              allow_no_texture="true"
              default_image_name="None"
              enabled="false"
-             fallback_image="default_profile_picture.j2c" 
+             fallback_image="Default_Profile_Picture" 
              follows="top|left"
              height="124"
              layout="topleft"

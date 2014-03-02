@@ -280,7 +280,7 @@
              width="65" />
             <icon
              height="16"
-             image_name="red_x.png"
+             image_name="Red_X"
              layout="topleft"
              left_delta="20"
              mouse_opaque="true"
@@ -408,7 +408,7 @@
              width="65" />
             <icon
              height="16"
-             image_name="red_x.png"
+             image_name="Red_X"
              layout="topleft"
              left_delta="20"
              mouse_opaque="true"
@@ -536,7 +536,7 @@
              width="65" />
             <icon
              height="16"
-             image_name="red_x.png"
+             image_name="Red_X"
              layout="topleft"
              left_delta="20"
              mouse_opaque="true"
@@ -664,7 +664,7 @@
              width="65" />
             <icon
              height="16"
-             image_name="red_x.png"
+             image_name="Red_X"
              layout="topleft"
              left_delta="20"
              mouse_opaque="true"

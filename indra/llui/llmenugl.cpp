@@ -1656,15 +1656,25 @@ LLMenuScrollItem::LLMenuScrollItem(const Params& p)
 :	LLMenuItemCallGL(p)
 {
 	std::string icon;
+//	if (p.arrow_type.isProvided() && p.arrow_type == ARROW_UP)
+//	{
+//		icon = "arrow_up.tga";
+//	}
+//	else
+//	{
+//		icon = "arrow_down.tga";
+//	}
+// [SL:TD] - Patch: UI-Misc | Checked: 2014-03-02 (Catznip-R9)
 	if (p.arrow_type.isProvided() && p.arrow_type == ARROW_UP)
 	{
-		icon = "arrow_up.tga";
+		icon = "Arrow_Up";
 	}
 	else
 	{
-		icon = "arrow_down.tga";
+		icon = "Arrow_Down";
 	}
-
+// [/SL:TD]
+	
 	LLButton::Params bparams;
 
 	// Disabled the Return key handling by LLMenuScrollItem instead of

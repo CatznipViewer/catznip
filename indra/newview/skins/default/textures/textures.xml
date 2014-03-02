@@ -124,7 +124,7 @@ with the same filename but different name
   <texture name="Checkbox_Press" file_name="widgets/Checkbox_Press.png" preload="true" />
   <texture name="Check_Mark" file_name="icons/check_mark.png" preload="true" />
 
-  <texture name="Checker" file_name="checker.png" preload="false" />
+  <texture name="Checker" file_name="icons/checker.png" preload="false" />
   
   <texture name="Command_AboutLand_Icon"    file_name="toolbar_icons/land.png"         preload="true" />
   <texture name="Command_Appearance_Icon"   file_name="toolbar_icons/appearance.png"   preload="true" />
@@ -186,6 +186,10 @@ with the same filename but different name
 
   <texture name="Copy" file_name="icons/Copy.png" preload="false" />
   
+  <texture name="Default_Profile_Picture" filename="icons/default_profile_picture.j2c" />
+  
+  <texture name="Direction_Arrow" file_name="world/BeaconArrow.png" />
+  
   <texture name="DisclosureArrow_Opened_Off" file_name="widgets/DisclosureArrow_Opened_Off.png" preload="true" />
 
   <texture name="ChatBarHandle" file_name="bottomtray/ChatBarHandle.png" preload="false" />
@@ -218,7 +222,7 @@ with the same filename but different name
   <texture name="Flyout_Pointer" file_name="windows/Flyout_Pointer.png" preload="false" />
   <texture name="Flyout_Right" file_name="windows/Flyout_Right.png" preload="false" />
 
-  <texture name="Folder_Arrow" file_name="folder_arrow.tga" preload="false" />
+  <texture name="Folder_Arrow" file_name="icons/folder_arrow.tga" preload="false" />
   <texture name="ForSale_Badge" file_name="icons/ForSale_Badge.png" preload="false" />
   <texture name="ForwardArrow_Off" file_name="icons/ForwardArrow_Off.png" preload="false" />
   <texture name="ForwardArrow_Press" file_name="icons/ForwardArrow_Press.png" preload="false" />
@@ -246,6 +250,7 @@ with the same filename but different name
   <texture name="Icon_Dock_Press" file_name="windows/Icon_Dock_Press.png" preload="true" />
 
   <texture name="Icon_For_Sale" file_name="icons/Icon_For_sale.png" preload="false" />
+  <texture name="Icon_For_Sale_Adult" file_name="icons/Icon_For_sale.png" preload="false" />
 
   <texture name="Icon_Gear_Background" file_name="windows/Icon_Gear_Background.png" preload="false" />
   <texture name="Icon_Gear_Foreground" file_name="windows/Icon_Gear_Foreground.png" preload="false" />
@@ -262,6 +267,7 @@ with the same filename but different name
 
   <texture name="Icon_Restore_Foreground" file_name="windows/Icon_Restore_Foreground.png" preload="false" />
   <texture name="Icon_Restore_Press" file_name="windows/Icon_Restore_Press.png" preload="false" />
+  <texture name="Icon_Top_Pick" file="icons/icon_top_pick.tga" />
 
   <texture name="Info" file_name="icons/Info.png" preload="false" />
   <texture name="Info_Small" file_name="icons/Info_Small.png" preload="false" />
@@ -318,6 +324,8 @@ with the same filename but different name
   <texture name="Inv_Link" file_name="icons/Inv_Link.png" preload="false" />
   <texture name="Inv_Invalid" file_name="icons/Inv_Invalid.png" preload="false" />
   
+  <texture name="Warning_Yellow" file_name="icons/warning_yellow.png" preload="true" />
+  
   <texture name="Linden_Dollar_Alert" file_name="widgets/Linden_Dollar_Alert.png"/>
   <texture name="Linden_Dollar_Background" file_name="widgets/Linden_Dollar_Background.png"/>
 
@@ -332,7 +340,19 @@ with the same filename but different name
 
   <texture name="Locked_Icon" file_name="icons/Locked_Icon.png" preload="false" />
 
+  <texture name="Map_Avatar_8"  file_name="icons/map_avatar_8.tga" />
+  <texture name="Map_Avatar_16"  file_name="icons/map_avatar_16.tga" />
+  <texture name="Map_Avatar_32"  file_name="icons/map_avatar_32.tga" />
+  <texture name="Map_Avatar_Above_32"  file_name="icons/map_avatar_above_32.tga" />
+  <texture name="Map_Avatar_Below_32"  file_name="icons/map_avatar_below_32.tga" />
+  <texture name="Map_Avatar_Unknown_32"  file_name="icons/map_avatar_unknown_32.tga" />
+  <texture name="Map_Avatar_You_32"  file_name="icons/map_avatar_you_32.tga" />
+  <texture name="Map_Event"  file_name="icons/map_event.tga" />
+  <texture name="Map_Home"  file_name="icons/map_home.tga" />
+  <texture name="Map_Infohub"  file_name="icons/map_infohub.tga" />
+  <texture name="Map_Telehub"  file_name="icons/map_telehub.tga" />
   <texture name="Map_Placeholder_Icon" file_name="icons/map_placeholder.png" preload="true" />
+  <texture name="Map_Track_16"  file_name="icons/map_track_16.tga" />
     
   <texture name="MarketplaceBtn_Off" file_name="widgets/MarketplaceBtn_Off.png" preload="true" scale.left="30" scale.top="19" scale.right="35" scale.bottom="4" />
   <texture name="MarketplaceBtn_Selected" file_name="widgets/MarketplaceBtn_Selected.png" preload="true" scale.left="30" scale.top="19" scale.right="35" scale.bottom="4" />
@@ -345,9 +365,9 @@ with the same filename but different name
 
   <texture name="menu_separator" file_name="navbar/FileMenu_Divider.png" scale.left="4" scale.top="166" scale.right="0" scale.bottom="0" />
 
-  <texture name="ModelImport_Status_Good" file_name="green_checkmark.png" preload="false"/>
+  <texture name="ModelImport_Status_Good" file_name="icons/green_checkmark.png" preload="false"/>
   <texture name="ModelImport_Status_Warning" file_name="lag_status_warning.tga" preload="false"/>
-  <texture name="ModelImport_Status_Error" file_name="red_x.png" preload="false"/>
+  <texture name="ModelImport_Status_Error" file_name="icons/red_x.png" preload="false"/>
   
   <texture name="MouseLook_View_Off" file_name="bottomtray/MouseLook_view_off.png" preload="false" />
   <texture name="MouseLook_View_On" file_name="bottomtray/MouseLook_view_on.png" preload="false" />
@@ -421,9 +441,9 @@ with the same filename but different name
   <texture name="OptionsMenu_Off" file_name="icons/OptionsMenu_Off.png" preload="false" />
   <texture name="OptionsMenu_Press" file_name="icons/OptionsMenu_Press.png" preload="false" />
 
-  <texture name="OutboxStatus_Success" file_name="green_checkmark.png" preload="false" />
+  <texture name="OutboxStatus_Success" file_name="icons/green_checkmark.png" preload="false" />
   <texture name="OutboxStatus_Warning" file_name="icons/pop_up_caution.png" preload="false" />
-  <texture name="OutboxStatus_Error" file_name="red_x.png" preload="false" />
+  <texture name="OutboxStatus_Error" file_name="icons/red_x.png" preload="false" />
 
   <texture name="PanOrbit_Off" file_name="bottomtray/PanOrbit_Off.png" preload="false" />
 
@@ -479,6 +499,20 @@ with the same filename but different name
   <texture name="Play_Over" file_name="icons/Play_Over.png" preload="false" />
   <texture name="Play_Press" file_name="icons/Play_Press.png" preload="false" />
   
+  <!-- widgets/loading_indicator.xml -->
+  <texture name="Progress_1" file_name="icons/Progress_1.png" preload="true" />
+  <texture name="Progress_2" file_name="icons/Progress_2.png" preload="true" />
+  <texture name="Progress_3" file_name="icons/Progress_3.png" preload="true" />
+  <texture name="Progress_4" file_name="icons/Progress_4.png" preload="true" />
+  <texture name="Progress_5" file_name="icons/Progress_5.png" preload="true" />
+  <texture name="Progress_6" file_name="icons/Progress_6.png" preload="true" />
+  <texture name="Progress_7" file_name="icons/Progress_7.png" preload="true" />
+  <texture name="Progress_8" file_name="icons/Progress_8.png" preload="true" />
+  <texture name="Progress_9" file_name="icons/Progress_9.png" preload="true" />
+  <texture name="Progress_10" file_name="icons/Progress_10.png" preload="true" />
+  <texture name="Progress_11" file_name="icons/Progress_11.png" preload="true" />
+  <texture name="Progress_12" file_name="icons/Progress_12.png" preload="true" />
+  
   <texture name="ProgressBar" file_name="widgets/ProgressBar.png" preload="true" scale.left="4" scale.top="11" scale.right="48" scale.bottom="3" />
   <texture name="ProgressTrack" file_name="widgets/ProgressTrack.png" preload="true" scale.left="4" scale.top="13" scale.right="148" scale.bottom="2" />
 
@@ -499,7 +533,7 @@ with the same filename but different name
   <texture name="RadioButton_Disabled" file_name="widgets/RadioButton_Disabled.png" preload="true" />
   <texture name="RadioButton_On_Disabled" file_name="widgets/RadioButton_On_Disabled.png" preload="true" />
 
-
+  <texture name="Red_X" file_name="icons/red_x.png" preload="false" />
   <texture name="Refresh_Off" file_name="icons/Refresh_Off.png" preload="true" />
 
   <texture name="Resize_Corner" file_name="windows/Resize_Corner.png" preload="true" />
@@ -572,8 +606,8 @@ with the same filename but different name
   <texture name="Unknown_Icon" file_name="icons/unknown_icon.png" preload="true" />
 
   <texture name="Snapshot_Off" file_name="bottomtray/Snapshot_Off.png" preload="true" scale.left="4" scale.top="19" scale.right="22" scale.bottom="4" />
-  <texture name="Snapshot_Download" file_name="snapshot_download.png" preload="false" />
-  <texture name="Snapshot_Email" file_name="snapshot_email.png" preload="false" />
+  <texture name="Snapshot_Download" file_name="icons/snapshot_download.png" preload="false" />
+  <texture name="Snapshot_Email" file_name="icons/snapshot_email.png" preload="false" />
   <texture name="Snapshot_Inventory" file_name="toolbar_icons/inventory.png" preload="false" />
   <texture name="Snapshot_Profile" file_name="toolbar_icons/profile.png" preload="false" />
   <texture name="Snapshot_Facebook" file_name="toolbar_icons/facebook.png" preload="false" />
@@ -655,6 +689,8 @@ with the same filename but different name
   <texture name="TrashItem_Off" file_name="icons/TrashItem_Off.png" preload="false" />
   <texture name="TrashItem_Press" file_name="icons/TrashItem_Press.png" preload="false" />
 
+  <texture name="Unassigned_Map" filename="icons/unassigned_map.png" />
+  
   <texture name="Unread_Chiclet" file_name="bottomtray/Unread_Chiclet.png" preload="false" />
 
   <texture name="UpArrow_Off" file_name="icons/UpArrow_Off.png" preload="false" />
@@ -683,7 +719,11 @@ with the same filename but different name
            scale.left="4" scale.top="24" scale.right="26" scale.bottom="4" />
   <texture name="Window_NoTitle_Foreground" file_name="windows/Window_NoTitle_Foreground.png" preload="true"
            scale.left="4" scale.top="24" scale.right="26" scale.bottom="4" />
-
+  <texture name="Window_Green_Background" file_name="windows/Window_Green_Background.png" preload="true"
+           scale.left="8" scale.top="22" scale.right="22" scale.bottom="8" />
+  <texture name="Window_Red_Background" file_name="windows/Window_Red_Background.png" preload="true"
+           scale.left="8" scale.top="22" scale.right="22" scale.bottom="8" />
+  
   <texture name="YouAreHere_Badge" file_name="icons/YouAreHere_Badge.png" preload="false" />
 
   <texture name="Zoom_Off" file_name="icons/Zoom_Off.png" preload="false" />
@@ -700,11 +740,11 @@ with the same filename but different name
   <texture name="icn_media_web.tga" preload="true" />
   <texture name="icn_media_movie.tga" preload="true" />
 
+  <!-- lltabcontainer.cpp -->
   <texture name="jump_left_out.tga" file_name="widgets/jump_left_out.png" />
   <texture name="jump_left_in.tga" file_name="widgets/jump_left_in.png" />
   <texture name="jump_right_out.tga" file_name="widgets/jump_right_out.png" />
   <texture name="jump_right_in.tga" file_name="widgets/jump_right_in.png" />
-
   <texture name="scrollbutton_left_out_blue.tga" file_name="widgets/ScrollArrow_Left_Opaque.png" />
   <texture name="scrollbutton_left_in_blue.tga" file_name="widgets/ScrollArrow_Left_Over_Opaque.png" />
   <texture name="scrollbutton_right_out_blue.tga" file_name="widgets/ScrollArrow_Right_Opaque.png" />
@@ -714,27 +754,27 @@ with the same filename but different name
   <texture name="scrollbutton_down_out_blue.tga" file_name="widgets/ScrollArrow_Down_Opaque.png" />
   <texture name="scrollbutton_down_in_blue.tga" file_name="widgets/ScrollArrow_Down_Over_Opaque.png" />
 
-  <texture name="up_arrow.tga" file_name="up_arrow.png" />
-  <texture name="down_arrow.tga" file_name="down_arrow.png" />
-  <texture name="arrow_down.tga" />
 
-  <texture name="tearoffbox.tga" />
-  <texture name="tearoff_pressed.tga" />
 
+
+  <!-- widgets/floater.xml (docked floaters) -->
+  <texture name="tearoffbox.tga"  file_name="widgets/tearoffbox.tga" />
+  <texture name="tearoff_pressed.tga" file_name="widgets/tearoff_pressed.tga" />
+  
+  <!-- widgets/color_swatch.xml -->
   <texture name="color_swatch_alpha.tga" preload="true" />
 
+  <!-- redundant V1 ui ?? used in floater_media_browser & lltooltip.cpp-->
   <texture name="button_anim_pause.tga" />
   <texture name="button_anim_pause_selected.tga" />
   <texture name="button_anim_play.tga" />
   <texture name="button_anim_play_selected.tga" />
+  
+  <!-- mouselook -->
   <texture name="crosshairs.tga" />
-  <texture name="direction_arrow.tga" file_name="world/BeaconArrow.png" />
+  
 
-  <texture name="icon_avatar_offline.tga" />
-  <texture name="icon_avatar_online.tga" />
-  <texture name="icon_diurnal.tga" />
-  <texture name="icon_for_sale.tga" file_name="icons/Icon_For_Sale.png" />
-  <texture name="icon_top_pick.tga" />
+  
 
   <texture name="lag_status_critical.tga" />
   <texture name="lag_status_good.tga" />
@@ -742,33 +782,12 @@ with the same filename but different name
 
   <texture name="legend.tga" />
 
-  <texture name="map_avatar_16.tga" />
-  <texture name="map_avatar_8.tga" />
-  <texture name="map_event.tga" />
-  <texture name="map_home.tga" />
-  <texture name="map_infohub.tga" />
-  <texture name="map_telehub.tga" />
-  <texture name="map_track_16.tga" />
 
-  <texture name="notify_caution_icon.tga" />
 
   <texture name="default_land_picture.j2c" />
-  <texture name="default_profile_picture.j2c" />
+  
   <texture name="locked_image.j2c" />
-  <texture name="materials_ui_x_24.png" />
-
-  <texture name="Progress_1" file_name="icons/Progress_1.png" preload="true" />
-  <texture name="Progress_2" file_name="icons/Progress_2.png" preload="true" />
-  <texture name="Progress_3" file_name="icons/Progress_3.png" preload="true" />
-  <texture name="Progress_4" file_name="icons/Progress_4.png" preload="true" />
-  <texture name="Progress_5" file_name="icons/Progress_5.png" preload="true" />
-  <texture name="Progress_6" file_name="icons/Progress_6.png" preload="true" />
-  <texture name="Progress_7" file_name="icons/Progress_7.png" preload="true" />
-  <texture name="Progress_8" file_name="icons/Progress_8.png" preload="true" />
-  <texture name="Progress_9" file_name="icons/Progress_9.png" preload="true" />
-  <texture name="Progress_10" file_name="icons/Progress_10.png" preload="true" />
-  <texture name="Progress_11" file_name="icons/Progress_11.png" preload="true" />
-  <texture name="Progress_12" file_name="icons/Progress_12.png" preload="true" />
+  
 
   <texture name="bevel_background" file_name="widgets/bevel_background.png" preload="true" scale.left="12" scale.top="15" scale.right="108" scale.bottom="2"/>
   <texture name="buy_off" file_name="widgets/buy_off.png" preload="true" scale.left="2" scale.top="15" scale.right="67" scale.bottom="4"/>
@@ -789,4 +808,11 @@ with the same filename but different name
 
   <texture name="Horizontal Drag Handle" file_name="widgets/horizontal_drag_handle.png"/>
   <texture name="Vertical Drag Handle" file_name="widgets/vertical_drag_handle.png"/>
+  
+  
+  <!-- Unused Artwork
+  <texture name="icon_diurnal.tga" />
+  
+  -->
+  
 </textures>

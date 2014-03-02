@@ -82,7 +82,10 @@ void LLScrollColumnHeader::draw()
 	BOOL is_ascending = mColumn->mParentCtrl->getSortAscending();
 	if (draw_arrow)
 	{
-		setImageOverlay(is_ascending ? "up_arrow.tga" : "down_arrow.tga", LLFontGL::RIGHT, LLColor4::white);
+//		setImageOverlay(is_ascending ? "up_arrow.tga" : "down_arrow.tga", LLFontGL::RIGHT, LLColor4::white);
+// [SL:TD] - Patch: UI-Misc | Checked: 2014-03-02 (Catznip-R9)
+		setImageOverlay(is_ascending ? "Arrow_Up" : "Arrow_Down", LLFontGL::RIGHT, LLColor4::white);
+// [/SL:TD]
 	}
 	else
 	{

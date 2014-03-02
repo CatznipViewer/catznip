@@ -246,7 +246,10 @@ LLToolTip::LLToolTip(const LLToolTip::Params& p)
 		LLRect button_rect;
 		button_rect.setOriginAndSize((mPadding +TOOLTIP_ICON_SIZE+ mPadding ), mPadding, TOOLTIP_ICON_SIZE, TOOLTIP_ICON_SIZE);
 		p_w_button.rect = button_rect;
-		p_w_button.image_unselected.name("map_home.tga");
+//		p_w_button.image_unselected.name("map_home.tga");
+// [SL:TD] - Patch: UI-Misc | Checked: 2014-03-02 (Catznip-R9)	
+		p_w_button.image_unselected.name("Map_Home");
+// [/SL:TD]
 		p_w_button.scale_image(true);
 		
 		mHomePageButton = LLUICtrlFactory::create<LLButton>(p_w_button); 
