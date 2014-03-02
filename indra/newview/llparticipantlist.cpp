@@ -828,10 +828,17 @@ void LLParticipantAvatarList::onAvatarListRefreshed()
 // [/SL:KB]
 
 // [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3)
-LLParticipantAvatarList::ESortOrder LLParticipantAvatarList::getSortOrder() const
+
+// static
+LLParticipantAvatarList::ESortOrder LLParticipantAvatarList::getSortOrder()
 {
-	static LLCachedControl<U32> s_SortOrder(gSavedSettings,"SpeakerParticipantDefaultOrder", 1);
-	return (ESortOrder)(s_SortOrder());
+	return (ESortOrder)gSavedSettings.getU32("SpeakerParticipantDefaultOrder");
+}
+
+// static 
+void LLParticipantAvatarList::setSortOrder(ESortOrder eSortOrder)
+{
+	gSavedSettings.setU32("SpeakerParticipantDefaultOrder", (U32)eSortOrder);
 }
 
 void LLParticipantAvatarList::sort()

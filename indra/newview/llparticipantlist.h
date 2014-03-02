@@ -225,14 +225,17 @@ public:
 	 */
 public:
 	void getSelectedUUIDs(uuid_vec_t& idsSelected);
+
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
-protected:
+public:
 	enum ESortOrder
 	{
 		E_SORT_BY_NAME = 0,
 		E_SORT_BY_RECENT_SPEAKERS = 1,
 	};
-	ESortOrder getSortOrder() const;
+	static ESortOrder getSortOrder();
+	static void       setSortOrder(ESortOrder eSortOrder);
+protected:
 	void sort();
 // [/SL:KB]
 
