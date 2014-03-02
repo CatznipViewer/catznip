@@ -35,6 +35,7 @@ class LLUICtrl;
 class LLAvalineUpdater;
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 class LLAvatarList;
+class LLListContextMenu;
 // [/SL:KB]
 
 //class LLParticipantList : public LLConversationItemSession
@@ -267,6 +268,7 @@ public:
 protected:
 	LLAvatarList* m_pAvatarList;
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	LLListContextMenu* m_pContextMenu;
 	LLPointer<class LLAvatarItemStatusAndNameComparator> m_SortByStatusAndName;
 	LLPointer<class LLAvatarItemRecentSpeakerComparator> m_SortByRecentSpeakers;
 // [/SL:KB]
