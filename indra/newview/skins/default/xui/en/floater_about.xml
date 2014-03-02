@@ -146,6 +146,7 @@ Error fetching server release notes URL.
      top="10">
       <text
           follows="top|left|right"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -167,12 +168,13 @@ Catznip is brought to you by:
        top_pad="5"
        width="545"
        word_wrap="true">
-Trinity Dejavu - Project manager
+Trinity Dejavu - Project lead
 Kitty Barnett - Code kitty
 Catznip Catnap - Test dummy
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -198,6 +200,7 @@ Dummy Name replaced at run time
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -240,6 +243,7 @@ and with the following open source contributions:
      top="10">
       <text
           follows="top|left|right"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -265,6 +269,7 @@ Philip, Andrew, Doug, Richard, Phoenix, Ian, Mark, Robin, Dan, Char, Ryan, Eric,
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -290,6 +295,7 @@ Dummy Name replaced at run time
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
