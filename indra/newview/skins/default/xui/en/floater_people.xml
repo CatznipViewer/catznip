@@ -17,11 +17,11 @@
   width="330">
     <panel_container
       default_panel_name="panel_people"
+      bottom="-1"
       follows="all"
-      height="570"
       left="0"
       name="main_panel"
-      top="0"
+      top="4"
       width="330">
       <panel
         class="panel_people"
