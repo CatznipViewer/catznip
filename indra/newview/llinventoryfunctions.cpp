@@ -432,17 +432,20 @@ void show_item_profile(const LLUUID& item_uuid)
 }
 
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+// We'd like the behaviour of "Find Original" to be:
+//   - always switch to the "All Items" tab
+//       -> "Find Original" when picked on the "Recent" tab did not work
+//       -> "Find Original" picked elsewhere when "Recent" tab was the last used tab on the inventory floater did not work
+//   - prefer the active (topmost) inventory floater over all others but only if the item can be selected
+//       -> "Find Original" with the topmost "All Items" tab unfiltered => item selection happens here
+//       -> "Find Original" on the topmost with a filter applied => item selection happens here only if 
 void show_item_original(const LLUUID& item_uuid)
 {
-	// We'd like the behaviour of "Find Original" to be:
-	//   - always switch to the "All Items" tab
-	//       -> "Find Original" when picked on the "Recent" tab did not work
-	//       -> "Find Original" picked elsewhere when "Recent" tab was the last used tab on the inventory floater did not work
-	//   - prefer the active (topmost) inventory floater over all others but only if the item can be selected
-	//       -> "Find Original" with the topmost "All Items" tab unfiltered => item selection happens here
-	//       -> "Find Original" on the topmost with a filter applied => item selection happens here only if 
-	const LLUUID& idItemTarget = gInventory.getLinkedItemID(item_uuid);
+	show_item(gInventory.getLinkedItemID(item_uuid));
+}
 
+void show_item(const LLUUID& idItem)
+{
 	S32 z_min = S32_MAX;
 	LLSidepanelInventory* pActiveInvSidepanel = NULL;
 
@@ -462,7 +465,7 @@ void show_item_original(const LLUUID& item_uuid)
 		if (!inv_panel->getFilter().isDefault())
 		{
 			// Check the actual item as fall-back
-			LLFolderViewItem* view_item = (inv_panel->getRootFolder()) ? inv_panel->getItemByID(idItemTarget) : NULL;
+			LLFolderViewItem* view_item = (inv_panel->getRootFolder()) ? inv_panel->getItemByID(idItem) : NULL;
 			if ( (!view_item) || (!view_item->passedFilter()) )
 				continue;
 		}
@@ -483,6 +486,24 @@ void show_item_original(const LLUUID& item_uuid)
 		}
 	}
 
+	// If we still haven't found a suitable inventory panel, check if the user prefers to clear the filter or open a new floater
+	if ( (gSavedSettings.getBOOL("InventoryShowItemClearsFilter")) && (!inst_list.empty()) )
+	{
+		LLFloater* pInvFloater = inst_list.front();
+		if (pInvFloater)
+		{
+			LLSidepanelInventory* pInvSidepanel = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater);
+			if ( (pInvSidepanel) && (pInvSidepanel->getMainInventoryPanel()) )
+			{
+				pInvSidepanel->getMainInventoryPanel()->selectPanel(LLPanelMainInventory::PANEL_ALL);
+				pInvSidepanel->getMainInventoryPanel()->resetFilters();
+
+				pActiveInvSidepanel = pInvSidepanel;
+			}
+		}
+	}
+
+	// We still haven't found a suitable inventory panel, attempt to create a new inventory floater
 	if (!pActiveInvSidepanel)
 	{
 		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
@@ -508,7 +529,12 @@ void show_item_original(const LLUUID& item_uuid)
 		{
 			LLInventoryPanel* pAllItemsPanel = pMainPanel->selectPanel(LLPanelMainInventory::PANEL_ALL);
 			if (pAllItemsPanel)
-				pMainPanel->getActivePanel()->setSelection(idItemTarget, TAKE_FOCUS_NO);
+			{
+				LLFolderViewItem* pFVItem = pAllItemsPanel->getItemByID(idItem);
+				if (pFVItem)
+					pFVItem->setOpen();
+				pMainPanel->getActivePanel()->setSelection(idItem, TAKE_FOCUS_NO);
+			}
 		}
 	}
 }
