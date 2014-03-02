@@ -923,7 +923,10 @@ void LLFloaterWorldMap::buildLandmarkIDLists()
 	
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
-	LLIsType is_landmark(LLAssetType::AT_LANDMARK);
+//	LLIsType is_landmark(LLAssetType::AT_LANDMARK);
+// [SL:KB] - Patch: World-LandmarkFilter | Checked: 2014-03-02 (Catznip-3.6)
+	LLFindLandmarks is_landmark(true, gSavedSettings.getBOOL("WorldMapFilterSelfLandmarks"));
+// [/SL:KB]
 	gInventory.collectDescendentsIf(gInventory.getRootFolderID(),
 									cats,
 									items,
