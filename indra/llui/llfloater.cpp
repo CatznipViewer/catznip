@@ -2862,11 +2862,18 @@ LLFloater *LLFloaterView::getFrontmost() const
 {
 	for ( child_list_const_iter_t child_it = getChildList()->begin(); child_it != getChildList()->end(); ++child_it)
 	{
-		LLView* viewp = *child_it;
-		if ( viewp->getVisible() && !viewp->isDead())
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-03-03 (Catznip-3.6)
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(*child_it);
+		if ( (floaterp->getVisible()) && (!floaterp->isDead()) && (floaterp->canFocusStealFrontmost()) )
 		{
-			return (LLFloater *)viewp;
+			return floaterp;
 		}
+// [/SL:KB]
+//		LLView* viewp = *child_it;
+//		if ( viewp->getVisible() && !viewp->isDead())
+//		{
+//			return (LLFloater *)viewp;
+//		}
 	}
 	return NULL;
 }
