@@ -2,34 +2,33 @@
 <panel
  border="true"
  follows="all"
- height="408"
+ height="376"
  label="Auto-Replace Settings"
  layout="topleft"
- left="102"
  name="chat_autoreplace"
- top="1"
- width="517">
-  <check_box
-   top="10"
+ width="509">
+  <text
    layout="topleft"
-   left="15"
+   follows="top|left"
+   top_pad="15"
+   left="35"
+   width="350"
+   height="15"
+   mouse_opaque="false"
+   type="string"
+   name="catznip_nearbychat_text"
+   font.style="BOLD">
+    Auto-Replace (Local Chat, Instant Messages &amp; Group Chat)
+  </text>
+  <check_box
+   left="35"
    height="16"
    width="100"
+   layout="topleft"
    follows="left|top"
    label="Enable Auto-Replace"
    name="autoreplace_enable"
    tool_tip="As you enter chat text, replace any of the keywords entered with the corresponding replacement"/>
-  <view_border
-   top_pad="15"
-   layout="topleft"
-   left="2"
-   height="0"
-   width="491"
-   follows="left|top"
-   bevel_style="none"
-   border_thickness="1"
-   mouse_opaque="false"
-   name="divisor1"/>
   <button
    top_pad="10"
    layout="topleft"
@@ -90,7 +89,7 @@
    top_pad="10"
    layout="topleft"
    left="10"
-   height="100"
+   height="80"
    width="370"
    follows="left|top"
    column_padding="0"
@@ -100,7 +99,7 @@
    search_column="0">
   </scroll_list>
   <button
-   top_delta="23"
+   top_delta="13"
    layout="topleft"
    left_pad="10"
    height="22"
@@ -128,11 +127,11 @@
    image_overlay="Arrow_Down"
    tool_tip="Move this list down in priority."/>
   <view_border
-   top_pad="36"
+   top_pad="30"
    layout="topleft"
-   left="2"
+   left="10"
    height="0"
-   width="491"
+   right="-10"
    follows="left|top"
    bevel_style="none"
    border_thickness="1"
@@ -142,7 +141,7 @@
    top_pad="10"
    layout="topleft"
    left="10"
-   height="120"
+   height="100"
    width="370"
    follows="left|top"
    column_padding="0"
@@ -160,7 +159,7 @@
         relative_width="0.70" />
   </scroll_list>
   <button
-   top_delta="41"
+   top_delta="31"
    layout="topleft"
    left_pad="10"
    height="22"
@@ -186,11 +185,11 @@
    name="autoreplace_delete_entry"
    label="Remove"/>
   <view_border
-   top_pad="38"
+   top_pad="20"
    layout="topleft"
-   left="2"
+   left="10"
    height="0"
-   width="491"
+   right="-10"
    follows="left|top"
    bevel_style="none"
    border_thickness="1"
@@ -252,16 +251,3 @@
    label="Save Entry"
    tool_tip="Save this entry."/>
 </panel>
-<!--
-  <text 
-   top_pad="10"
-   left="10"
-   height="16"
-   width="260"
-   follows="left|top"
-   halign="center"
-   mouse_opaque="true"
-   name="autoreplace_text2">
-    Entries
-  </text>
--->

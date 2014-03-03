@@ -46,10 +46,10 @@
      name="pref core"
      tab_group="1"
      tab_position="left"
-     tab_width="140"
+     tab_width="130"
      tab_padding_right="2"
      top="21"
-     width="658">
+     right="-1">
         <panel
 	 class="panel_preference"
          filename="panel_preferences_general.xml"
@@ -71,13 +71,58 @@
          layout="topleft"
          help_topic="preferences_audio_tab"
          name="audio" />
-        <panel
-		 class="panel_preference"
-         filename="panel_preferences_chat.xml"
+        <tab_container
          label="Chat"
-         layout="topleft"
-         help_topic="preferences_chat_tab"
-         name="chat" />
+         halign="center"
+         name="chat_tabs"
+         tab_position="top"
+         tab_height="25"
+         tab_min_width="50"
+         tab_max_width="150"
+         top="1">
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_nearbychat.xml"
+           label="Chat"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="chat_tab" />
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_im.xml"
+           label="IM &amp; Groups"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="im_tab" />
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_translation.xml"
+           label="Translation"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="translation_tab" />
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_autoreplace.xml"
+           label="Auto-Replace"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="autoreplace_tab" />
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_spellcheck.xml"
+           label="Spell Checking"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="spellcheck_tab" />
+          <panel
+           class="panel_preference"
+           filename="panel_preferences_chat_chatlog.xml"
+           label="Logging"
+           layout="topleft"
+           help_topic="preferences_chatlog_tab"
+           name="chatlog_tab" />
+        </tab_container>
         <panel
 		 class="panel_preference"
          filename="panel_preferences_move.xml"
