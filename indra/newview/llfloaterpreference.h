@@ -109,9 +109,6 @@ protected:
 // [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
 	void		onClickClearSettings(const LLSD& sdParam);
 // [/SL:KB]
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
-	void		onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam);
-// [/SL:KB]
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
 	// string differs from default after user changes.
@@ -204,10 +201,6 @@ private:
 	
 	LLAvatarData mAvatarProperties;
 
-// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5)
-	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
-	control_values_map_t mSavedValues;
-// [/SL:KB]
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	bool mCancelOnClose; // If TRUE then onClose() will call cancel(); set by apply() and cancel()
 	std::list<LLPanelPreference*> mPreferencePanels;
@@ -244,9 +237,6 @@ public:
 // [/SL:KB]
 	virtual void apply();
 	virtual void cancel();
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
-	virtual void refresh();
-// [/SL:KB]
 	void setControlFalse(const LLSD& user_data);
 //	virtual void setHardwareDefaults(){};
 

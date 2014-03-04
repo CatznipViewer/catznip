@@ -377,9 +377,6 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 // [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
 	mCommitCallbackRegistrar.add("Pref.ClearSettings",			boost::bind(&LLFloaterPreference::onClickClearSettings, this, _2));
 // [/SL:KB]
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2)
-	mCommitCallbackRegistrar.add("Clear.SettingsCheck",			boost::bind(&LLFloaterPreference::onClearSettingsCheck, this, _1, _2));
-// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ResetCache",				boost::bind(&LLFloaterPreference::onClickResetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ClickSkin",				boost::bind(&LLFloaterPreference::onClickSkin, this,_1, _2));
@@ -517,11 +514,6 @@ BOOL LLFloaterPreference::postBuild()
 		gSavedPerAccountSettings.setString("DoNotDisturbModeResponse", LLTrans::getString("DoNotDisturbModeResponseDefault"));
 	}
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
-	// Make sure 'ClearCacheMask' gets restored to its previous value when the floater is cancel'ed
-	mSavedValues.insert(std::pair<LLControlVariable*, LLSD>(gSavedSettings.getControl("ClearCacheMask"), LLSD()));
-// [/SL:KB]
-
 	// set 'enable' property for 'Clear log...' button
 	changed();
 
@@ -586,14 +578,6 @@ void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
 	{
 		mPreferencePanels.erase(itPanel);
 	}
-
-// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5)
-	// Store a copy of the current value for all settings in 'mSavedValues' so we can revert them if necessary
-	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
-	{
-		itSavedValue->second = itSavedValue->first->getValue();
-	}
-// [/SL:KB]
 }
 // [/SL:KB]
 
@@ -722,15 +706,6 @@ void LLFloaterPreference::cancel()
 //		if (panel)
 //			panel->cancel();
 //	}
-
-// [SL:KB] - Patch: Settings-Base | Checked: 2011-01-20 (Catznip-2.5)
-	// Restore all settings in 'mSavedValues' to their previous value
-	for (control_values_map_t::iterator itSavedValue = mSavedValues.begin(); itSavedValue != mSavedValues.end(); ++itSavedValue)
-	{
-		itSavedValue->first->set(itSavedValue->second);
-	}
-// [/SL:KB]
-
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
 
@@ -1099,34 +1074,6 @@ void LLFloaterPreference::onClickClearSettings(const LLSD& sdParam)
 	else if ("account" == strParam)
 	{
 		gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
-	}
-}
-// [/SL:KB]
-
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
-void LLFloaterPreference::onClearSettingsCheck(LLUICtrl* pUICtrl, const LLSD& sdParam)
-{
-	/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast</*const*/ LLCheckBoxCtrl*>(pUICtrl);
-	if (pCheckCtrl)
-	{
-		U32 nClearToggle = 0; std::string strParam = sdParam.asString();
-		if ("cookies" == strParam)
-			nClearToggle = CLEAR_MASK_COOKIES;
-		else if ("navbar" == strParam)
-			nClearToggle = CLEAR_MASK_NAVBAR;
-		else if ("search" == strParam)
-			nClearToggle = CLEAR_MASK_SEARCH;
-		else if ("teleport" == strParam)
-			nClearToggle = CLEAR_MASK_TELEPORT;
-		else if ("people" == strParam)
-			nClearToggle = CLEAR_MASK_PEOPLE;
-
-		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
-		if (pCheckCtrl->get())
-			nClearMask |= nClearToggle;
-		else
-			nClearMask &= ~nClearToggle;
-		gSavedSettings.setU32("ClearCacheMask", nClearMask);
 	}
 }
 // [/SL:KB]
@@ -1519,18 +1466,6 @@ void LLFloaterPreference::disableUnavailableSettings()
 void LLFloaterPreference::refresh()
 {
 	LLPanel::refresh();
-
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
-	// Call refresh() on all panels that derive from LLPanelPreference
-	LLTabContainer* pTabContainer = getChild<LLTabContainer>("pref core");
-	for (child_list_t::const_iterator itChild = pTabContainer->getChildList()->begin(); 
-		 itChild != pTabContainer->getChildList()->end(); ++itChild)
-	{
-		LLPanelPreference* pPrefPanel = dynamic_cast<LLPanelPreference*>(*itChild);
-		if (pPrefPanel)
-			pPrefPanel->refresh();
-	}
-// [/SL:KB]
 
 	// sliders and their text boxes
 	//	mPostProcess = gSavedSettings.getS32("RenderGlowResolutionPow");
@@ -2115,27 +2050,6 @@ BOOL LLPanelPreference::postBuild()
 	return true;
 }
 
-// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
-void LLPanelPreference::refresh()
-{
-	if ("im" == getName())
-	{
-		//////////////////////PanelPrivacy ///////////////////
-		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
-		if (hasChild("clear_web_cookies"))
-			getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
-		if (hasChild("clear_navbar_history"))
-			getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
-		if (hasChild("clear_search_history"))
-			getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
-		if (hasChild("clear_teleport_history"))
-			getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
-		if (hasChild("clear_people_history"))
-			getChild<LLCheckBoxCtrl>("clear_people_history")->set(nClearMask & CLEAR_MASK_PEOPLE);
-	}
-}
-// [/SL:KB]
-
 LLPanelPreference::~LLPanelPreference()
 {
 	if (mBandWidthUpdater)
@@ -2283,9 +2197,25 @@ class LLPanelPreferencePrivacy : public LLPanelPreference
 public:
 	LLPanelPreferencePrivacy()
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2)
+		mCommitCallbackRegistrar.add("Privacy.ToggleClearSetting", boost::bind(&LLPanelPreferencePrivacy::onToggleClearSetting, this, _1, _2));
+// [/SL:KB]
+
 		mAccountIndependentSettings.push_back("VoiceCallsFriendsOnly");
 		mAccountIndependentSettings.push_back("AutoDisengageMic");
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+	/*virtual*/ void refresh()
+	{
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
+		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
+		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
+		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+		getChild<LLCheckBoxCtrl>("clear_people_history")->set(nClearMask & CLEAR_MASK_PEOPLE);
+	}
+// [/SL:KB]
 
 	/*virtual*/ void saveSettings()
 	{
@@ -2310,7 +2240,44 @@ public:
 				}
 			}
 		}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
+		LLControlVariablePtr pControl = gSavedSettings.getControl("ClearCacheMask");
+		if (pControl.notNull())
+		{
+			mSavedValues[pControl] = pControl->getValue();
+		}
+// [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+protected:
+	void onToggleClearSetting(LLUICtrl* pUICtrl, const LLSD& sdParam)
+	{
+		/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(pUICtrl);
+		if (pCheckCtrl)
+		{
+			U32 nClearToggle = 0; const std::string strParam = sdParam.asString();
+			if ("cookies" == strParam)
+				nClearToggle = CLEAR_MASK_COOKIES;
+			else if ("navbar" == strParam)
+				nClearToggle = CLEAR_MASK_NAVBAR;
+			else if ("search" == strParam)
+				nClearToggle = CLEAR_MASK_SEARCH;
+			else if ("teleport" == strParam)
+				nClearToggle = CLEAR_MASK_TELEPORT;
+			else if ("people" == strParam)
+				nClearToggle = CLEAR_MASK_PEOPLE;
+
+			U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+			if (pCheckCtrl->get())
+				nClearMask |= nClearToggle;
+			else
+				nClearMask &= ~nClearToggle;
+			gSavedSettings.setU32("ClearCacheMask", nClearMask);
+		}
+	}
+// [/SL:KB]
 
 private:
 	std::list<std::string> mAccountIndependentSettings;

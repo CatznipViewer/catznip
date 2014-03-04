@@ -39,7 +39,7 @@
    tool_tip="Clear web browser cookies when the SL cache is cleared"
    width="120">
     <check_box.commit_callback
-     function="Clear.SettingsCheck"
+     function="Privacy.ToggleClearSetting"
      parameter="cookies" />
   </check_box>
   <check_box
@@ -52,7 +52,7 @@
    tool_tip="Clear navigation bar history when the SL cache is cleared"
    width="120">
     <check_box.commit_callback
-     function="Clear.SettingsCheck"
+     function="Privacy.ToggleClearSetting"
      parameter="navbar" />
   </check_box>
   <check_box
@@ -65,7 +65,7 @@
    tool_tip="Clear people history when the SL cache is cleared"
    width="120">
     <check_box.commit_callback
-     function="Clear.SettingsCheck"
+     function="Privacy.ToggleClearSetting"
      parameter="people" />
   </check_box>
   <check_box
@@ -78,7 +78,7 @@
    tool_tip="Clear search history when the SL cache is cleared"
    width="120">
     <check_box.commit_callback
-     function="Clear.SettingsCheck"
+     function="Privacy.ToggleClearSetting"
      parameter="search" />
   </check_box>
   <check_box
@@ -91,7 +91,7 @@
    tool_tip="Clear teleport history when the SL cache is cleared"
    width="120">
     <check_box.commit_callback
-     function="Clear.SettingsCheck"
+     function="Privacy.ToggleClearSetting"
      parameter="teleport" />
   </check_box>
   <button
