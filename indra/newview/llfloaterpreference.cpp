@@ -508,19 +508,19 @@ void LLFloaterPreference::draw()
 	LLFloater::draw();
 }
 
-void LLFloaterPreference::saveSettings()
-{
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
-	for ( ; iter != end; ++iter)
-	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
-			panel->saveSettings();
-	}
-}	
+//void LLFloaterPreference::saveSettings()
+//{
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
+//	for ( ; iter != end; ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
+//		if (panel)
+//			panel->saveSettings();
+//	}
+//}	
 
 void LLFloaterPreference::apply()
 {
@@ -538,8 +538,15 @@ void LLFloaterPreference::apply()
 	{
 		LLView* view = *iter;
 		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+		if ( (panel) && (panel->isInitialized()) )
+		{
 			panel->apply();
+			panel->saveSettings();
+		}
+// [/SL:KB]
+//		if (panel)
+//			panel->apply();
 	}
 	// hardware menu apply
 	LLFloaterHardwareSettings* hardware_settings = LLFloaterReg::getTypedInstance<LLFloaterHardwareSettings>("prefs_hardware_settings");
@@ -609,8 +616,12 @@ void LLFloaterPreference::cancel()
 	{
 		LLView* view = *iter;
 		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+		if ( (panel) && (panel->isInitialized()) )
 			panel->cancel();
+// [/SL:KB]
+//		if (panel)
+//			panel->cancel();
 	}
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
@@ -730,10 +741,10 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	LLPanelLogin::setAlwaysRefresh(true);
 	refresh();
 	
-	// Make sure the current state of prefs are saved away when
-	// when the floater is opened.  That will make cancel do its
-	// job
-	saveSettings();
+//	// Make sure the current state of prefs are saved away when
+//	// when the floater is opened.  That will make cancel do its
+//	// job
+//	saveSettings();
 }
 
 void LLFloaterPreference::onVertexShaderEnable()
@@ -798,7 +809,7 @@ void LLFloaterPreference::onBtnOK()
 
 	if (canClose())
 	{
-		saveSettings();
+//		saveSettings();
 		apply();
 		closeFloater(false);
 
@@ -857,7 +868,7 @@ void LLFloaterPreference::onBtnApply( )
 		}
 	}
 	apply();
-	saveSettings();
+//	saveSettings();
 
 	LLPanelLogin::updateLocationSelectorsVisibility();
 }
@@ -1825,6 +1836,10 @@ private:
 static LLRegisterPanelClassWrapper<LLPanelPreference> t_places("panel_preference");
 LLPanelPreference::LLPanelPreference()
 : LLPanel(),
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+  mInitialized(false),
+  mRefreshOnOpen(true),
+// [/SL:KB]
   mBandWidthUpdater(NULL)
 {
 	mCommitCallbackRegistrar.add("Pref.setControlFalse",	boost::bind(&LLPanelPreference::setControlFalse,this, _2));
@@ -1907,7 +1922,16 @@ BOOL LLPanelPreference::postBuild()
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
 
-	apply();
+// [SL:KB]
+	LLFloater* pFloater = getParentByType<LLFloater>();
+	if (pFloater)
+	{
+		// We're using the close callback since handleVisibilityChange() will fire before the open callback does causing the currently selected panel to not
+		// have refresh() called. Setting things up on close (and the default to true) causes 'mRefreshOnOpen' to be true on the panel visibility change
+		pFloater->setCloseCallback(boost::bind(&LLPanelPreference::onParentFloaterClose, this));
+	}
+// [/SL:KB]
+//	apply();
 	return true;
 }
 
@@ -1918,6 +1942,35 @@ LLPanelPreference::~LLPanelPreference()
 		delete mBandWidthUpdater;
 	}
 }
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreference::handleVisibilityChange(BOOL new_visibility)
+{
+	LLPanel::handleVisibilityChange(new_visibility);
+
+	if (new_visibility)
+	{
+		if (!mInitialized)
+		{
+			init();
+			saveSettings();
+			mInitialized = true;
+		}
+
+		if (mRefreshOnOpen)
+		{
+			refresh();
+			mRefreshOnOpen = false;
+		}
+		onOpen(LLSD());
+	}
+	else if (mInitialized)
+	{
+		onClose();
+	}
+}
+// [/SL:KB]
+
 void LLPanelPreference::apply()
 {
 	// no-op

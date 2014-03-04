@@ -121,9 +121,9 @@ protected:
 	// updates click/double-click action controls depending on values from settings.xml
 	void updateClickActionControls();
 	
-	// This function squirrels away the current values of the controls so that
-	// cancel() can restore them.	
-	void saveSettings();
+//	// This function squirrels away the current values of the controls so that
+//	// cancel() can restore them.	
+//	void saveSettings();
 		
 
 public:
@@ -202,6 +202,23 @@ public:
 	
 	virtual ~LLPanelPreference();
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Calls onOpen and onClose on derived panels as appropriate
+	/*virtual*/ void handleVisibilityChange(BOOL new_visibility);
+	
+	// Only declared in LLFloater so we hev to declare it here as well
+	virtual void onClose() {}
+	
+	// Returns TRUE if the panel has been initialized (been visible at least once)
+	bool isInitialized() const { return mInitialized; }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Called only once when the panel becomes visible for the first time
+	virtual void init() {}
+	// Called the first time the panel becomes visible in the currently preferences floater session
+	virtual void refresh() {}
+// [/SL:KB]
 	virtual void apply();
 	virtual void cancel();
 	void setControlFalse(const LLSD& user_data);
@@ -220,6 +237,12 @@ public:
 protected:
 	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
 	control_values_map_t mSavedValues;
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mInitialized;
+	bool mRefreshOnOpen;
+
+	void onParentFloaterClose() { mRefreshOnOpen = true; }
+// [/SL:KB]
 
 private:
 	//for "Only friends and groups can call or IM me"
