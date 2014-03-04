@@ -144,6 +144,9 @@ public:
 	bool loadSettingsFromDirectory(const std::string& location_key, 
 				       bool set_defaults = false);
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	const struct SettingsGroup* getSettingsGroup(const std::string& location_key);
+// [/SL:KB]
 	std::string getSettingsFilename(const std::string& location_key,
 					const std::string& file);
 	void loadColorSettings();
