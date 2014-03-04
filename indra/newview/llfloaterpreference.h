@@ -286,7 +286,7 @@ public:
 	/*virtual*/ void apply();
 	/*virtual*/ void cancel();
 
-	void refresh();
+	/*virtual*/ void refresh();
 
 protected:
 	void onCopySelection();
