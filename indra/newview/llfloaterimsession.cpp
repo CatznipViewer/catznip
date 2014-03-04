@@ -587,7 +587,7 @@ void LLFloaterIMSession::updateSessionName()
 			strTitle = LLIMModel::instance().getName(mSessionID);
 			if (strTitle.empty())
 				strTitle = LLTrans::getString("LoadingData");
-			LLAvatarNameCache::get(mSessionID, boost::bind(&LLFloaterIMSession::onAvatarNameCache, mOtherParticipantUUID, _2));
+			LLAvatarNameCache::get(mOtherParticipantUUID, boost::bind(&LLFloaterIMSession::onAvatarNameCache, mSessionID, _2));
 		}
 	}
 	else
@@ -601,9 +601,10 @@ void LLFloaterIMSession::updateSessionName()
 	LLFloaterIMSessionTab::updateSessionName();
 }
 
-void LLFloaterIMSession::onAvatarNameCache(const LLUUID& idAvatar, const LLAvatarName avName)
+// static
+void LLFloaterIMSession::onAvatarNameCache(const LLUUID& idSession, const LLAvatarName& avName)
 {
-	LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(idAvatar);
+	LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(idSession);
 	if ( (pIMSession) && (avName.isValidName()) )
 	{
 		pIMSession->updateSessionName();

@@ -147,7 +147,7 @@ private:
 	// Update the window title and input field help text
 	/*virtual*/ void updateSessionName();
 
-	static void onAvatarNameCache(const LLUUID& idAvatar, const LLAvatarName avName);
+	static void onAvatarNameCache(const LLUUID& idSession, const LLAvatarName& avName);
 // [/Sl:KB]
 //	// Update the window title and input field help text
 //	/*virtual*/ void updateSessionName(const std::string& name);
