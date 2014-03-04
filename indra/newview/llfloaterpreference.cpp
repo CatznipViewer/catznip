@@ -346,7 +346,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.Proxy",					boost::bind(&LLFloaterPreference::onClickProxySettings, this));
 //	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 //	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
-	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
+//	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 
 	sSkin = gSavedSettings.getString("SkinCurrent");
 
@@ -632,8 +632,8 @@ void LLFloaterPreference::cancel()
 //	// hide autoreplace settings floater
 //	LLFloaterReg::hideInstance("prefs_autoreplace");
 	
-	// hide spellchecker settings folder
-	LLFloaterReg::hideInstance("prefs_spellchecker");
+//	// hide spellchecker settings folder
+//	LLFloaterReg::hideInstance("prefs_spellchecker");
 	
 	// cancel hardware menu
 	LLFloaterHardwareSettings* hardware_settings = LLFloaterReg::getTypedInstance<LLFloaterHardwareSettings>("prefs_hardware_settings");
@@ -1683,10 +1683,10 @@ void LLFloaterPreference::onClickProxySettings()
 //	LLFloaterReg::showInstance("prefs_autoreplace");
 //}
 
-void LLFloaterPreference::onClickSpellChecker()
-{
-		LLFloaterReg::showInstance("prefs_spellchecker");
-}
+//void LLFloaterPreference::onClickSpellChecker()
+//{
+//		LLFloaterReg::showInstance("prefs_spellchecker");
+//}
 
 void LLFloaterPreference::onClickActionChange()
 {
@@ -1922,7 +1922,7 @@ BOOL LLPanelPreference::postBuild()
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
 
-// [SL:KB]
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	LLFloater* pFloater = getParentByType<LLFloater>();
 	if (pFloater)
 	{
