@@ -766,16 +766,16 @@ void LLFloaterPreference::setHardwareDefaults()
 {
 	LLFeatureManager::getInstance()->applyRecommendedSettings();
 	refreshEnabledGraphics();
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
-	for ( ; iter != end; ++iter)
-	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
-			panel->setHardwareDefaults();
-	}
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
+//	for ( ; iter != end; ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
+//		if (panel)
+//			panel->setHardwareDefaults();
+//	}
 }
 
 //virtual
@@ -2115,95 +2115,95 @@ private:
 	std::list<std::string> mAccountIndependentSettings;
 };
 
-static LLRegisterPanelClassWrapper<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
+//static LLRegisterPanelClassWrapper<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
 static LLRegisterPanelClassWrapper<LLPanelPreferencePrivacy> t_pref_privacy("panel_preference_privacy");
 
-BOOL LLPanelPreferenceGraphics::postBuild()
-{
-	return LLPanelPreference::postBuild();
-}
-void LLPanelPreferenceGraphics::draw()
-{
-	LLPanelPreference::draw();
-	
-	LLButton* button_apply = findChild<LLButton>("Apply");
-	
-	if (button_apply && button_apply->getVisible())
-	{
-		bool enable = hasDirtyChilds();
-
-		button_apply->setEnabled(enable);
-	}
-}
-bool LLPanelPreferenceGraphics::hasDirtyChilds()
-{
-	std::list<LLView*> view_stack;
-	view_stack.push_back(this);
-	while(!view_stack.empty())
-	{
-		// Process view on top of the stack
-		LLView* curview = view_stack.front();
-		view_stack.pop_front();
-
-		LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(curview);
-		if (ctrl)
-		{
-			if (ctrl->isDirty())
-				return true;
-		}
-		// Push children onto the end of the work stack
-		for (child_list_t::const_iterator iter = curview->getChildList()->begin();
-			 iter != curview->getChildList()->end(); ++iter)
-		{
-			view_stack.push_back(*iter);
-		}
-	}	
-	return false;
-}
-
-void LLPanelPreferenceGraphics::resetDirtyChilds()
-{
-	std::list<LLView*> view_stack;
-	view_stack.push_back(this);
-	while(!view_stack.empty())
-	{
-		// Process view on top of the stack
-		LLView* curview = view_stack.front();
-		view_stack.pop_front();
-
-		LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(curview);
-		if (ctrl)
-		{
-			ctrl->resetDirty();
-		}
-		// Push children onto the end of the work stack
-		for (child_list_t::const_iterator iter = curview->getChildList()->begin();
-			 iter != curview->getChildList()->end(); ++iter)
-		{
-			view_stack.push_back(*iter);
-		}
-	}	
-}
-void LLPanelPreferenceGraphics::apply()
-{
-	resetDirtyChilds();
-	LLPanelPreference::apply();
-}
-void LLPanelPreferenceGraphics::cancel()
-{
-	resetDirtyChilds();
-	LLPanelPreference::cancel();
-}
-void LLPanelPreferenceGraphics::saveSettings()
-{
-	resetDirtyChilds();
-	LLPanelPreference::saveSettings();
-}
-void LLPanelPreferenceGraphics::setHardwareDefaults()
-{
-	resetDirtyChilds();
-	LLPanelPreference::setHardwareDefaults();
-}
+//BOOL LLPanelPreferenceGraphics::postBuild()
+//{
+//	return LLPanelPreference::postBuild();
+//}
+//void LLPanelPreferenceGraphics::draw()
+//{
+//	LLPanelPreference::draw();
+//	
+//	LLButton* button_apply = findChild<LLButton>("Apply");
+//	
+//	if (button_apply && button_apply->getVisible())
+//	{
+//		bool enable = hasDirtyChilds();
+//
+//		button_apply->setEnabled(enable);
+//	}
+//}
+//bool LLPanelPreferenceGraphics::hasDirtyChilds()
+//{
+//	std::list<LLView*> view_stack;
+//	view_stack.push_back(this);
+//	while(!view_stack.empty())
+//	{
+//		// Process view on top of the stack
+//		LLView* curview = view_stack.front();
+//		view_stack.pop_front();
+//
+//		LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(curview);
+//		if (ctrl)
+//		{
+//			if (ctrl->isDirty())
+//				return true;
+//		}
+//		// Push children onto the end of the work stack
+//		for (child_list_t::const_iterator iter = curview->getChildList()->begin();
+//			 iter != curview->getChildList()->end(); ++iter)
+//		{
+//			view_stack.push_back(*iter);
+//		}
+//	}	
+//	return false;
+//}
+//
+//void LLPanelPreferenceGraphics::resetDirtyChilds()
+//{
+//	std::list<LLView*> view_stack;
+//	view_stack.push_back(this);
+//	while(!view_stack.empty())
+//	{
+//		// Process view on top of the stack
+//		LLView* curview = view_stack.front();
+//		view_stack.pop_front();
+//
+//		LLUICtrl* ctrl = dynamic_cast<LLUICtrl*>(curview);
+//		if (ctrl)
+//		{
+//			ctrl->resetDirty();
+//		}
+//		// Push children onto the end of the work stack
+//		for (child_list_t::const_iterator iter = curview->getChildList()->begin();
+//			 iter != curview->getChildList()->end(); ++iter)
+//		{
+//			view_stack.push_back(*iter);
+//		}
+//	}	
+//}
+//void LLPanelPreferenceGraphics::apply()
+//{
+//	resetDirtyChilds();
+//	LLPanelPreference::apply();
+//}
+//void LLPanelPreferenceGraphics::cancel()
+//{
+//	resetDirtyChilds();
+//	LLPanelPreference::cancel();
+//}
+//void LLPanelPreferenceGraphics::saveSettings()
+//{
+//	resetDirtyChilds();
+//	LLPanelPreference::saveSettings();
+//}
+//void LLPanelPreferenceGraphics::setHardwareDefaults()
+//{
+//	resetDirtyChilds();
+//	LLPanelPreference::setHardwareDefaults();
+//}
 
 LLFloaterPreferenceProxy::LLFloaterPreferenceProxy(const LLSD& key)
 	: LLFloater(key),

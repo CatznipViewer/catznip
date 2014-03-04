@@ -222,7 +222,7 @@ public:
 	virtual void apply();
 	virtual void cancel();
 	void setControlFalse(const LLSD& user_data);
-	virtual void setHardwareDefaults(){};
+//	virtual void setHardwareDefaults(){};
 
 	// Disables "Allow Media to auto play" check box only when both
 	// "Streaming Music" and "Media" are unchecked. Otherwise enables it.
@@ -256,20 +256,20 @@ private:
 	Updater* mBandWidthUpdater;
 };
 
-class LLPanelPreferenceGraphics : public LLPanelPreference
-{
-public:
-	BOOL postBuild();
-	void draw();
-	void apply();
-	void cancel();
-	void saveSettings();
-	void setHardwareDefaults();
-protected:
-	bool hasDirtyChilds();
-	void resetDirtyChilds();
-	
-};
+//class LLPanelPreferenceGraphics : public LLPanelPreference
+//{
+//public:
+//	BOOL postBuild();
+//	void draw();
+//	void apply();
+//	void cancel();
+//	void saveSettings();
+//	void setHardwareDefaults();
+//protected:
+//	bool hasDirtyChilds();
+//	void resetDirtyChilds();
+//	
+//};
 
 class LLFloaterPreferenceProxy : public LLFloater
 {
