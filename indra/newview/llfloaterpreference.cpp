@@ -345,7 +345,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
 	mCommitCallbackRegistrar.add("Pref.Proxy",					boost::bind(&LLFloaterPreference::onClickProxySettings, this));
 //	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
-	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
+//	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 
 	sSkin = gSavedSettings.getString("SkinCurrent");
@@ -629,8 +629,8 @@ void LLFloaterPreference::cancel()
 //	// hide translation settings floater
 //	LLFloaterReg::hideInstance("prefs_translation");
 	
-	// hide autoreplace settings floater
-	LLFloaterReg::hideInstance("prefs_autoreplace");
+//	// hide autoreplace settings floater
+//	LLFloaterReg::hideInstance("prefs_autoreplace");
 	
 	// hide spellchecker settings folder
 	LLFloaterReg::hideInstance("prefs_spellchecker");
@@ -1678,10 +1678,10 @@ void LLFloaterPreference::onClickProxySettings()
 //	LLFloaterReg::showInstance("prefs_translation");
 //}
 
-void LLFloaterPreference::onClickAutoReplace()
-{
-	LLFloaterReg::showInstance("prefs_autoreplace");
-}
+//void LLFloaterPreference::onClickAutoReplace()
+//{
+//	LLFloaterReg::showInstance("prefs_autoreplace");
+//}
 
 void LLFloaterPreference::onClickSpellChecker()
 {
