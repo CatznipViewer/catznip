@@ -100,7 +100,7 @@
      control_name="CloseIMOnEmptyReturn"
      follows="top|left"
      height="20"
-     label="Entering a blank line in closes the conversations floater."
+     label="Entering a blank line in closes the active conversation floater"
      layout="topleft"
      left="35"
      name="closeimonreturn_check"

@@ -44,10 +44,10 @@
      top_delta="-4"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationChat"
+         function="PrefChat.InitLogNotificationChat"
          parameter="FriendOnlineOffline" />
         <check_box.commit_callback
-         function="Pref.LogNotificationChat"
+         function="PrefChat.LogNotificationChat"
          parameter="FriendOnlineOffline" />
     </check_box>
     <check_box
@@ -60,10 +60,10 @@
      top_delta="0"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationIM"
+         function="PrefChat.InitLogNotificationIM"
          parameter="FriendOnlineOffline" />
         <check_box.commit_callback
-         function="Pref.LogNotificationIM"
+         function="PrefChat.LogNotificationIM"
          parameter="FriendOnlineOffline" />
     </check_box>
     <text
@@ -88,10 +88,10 @@
      top_delta="-4"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationChat"
+         function="PrefChat.InitLogNotificationChat"
          parameter="PaymentReceived" />
         <check_box.commit_callback
-         function="Pref.LogNotificationChat"
+         function="PrefChat.LogNotificationChat"
          parameter="PaymentReceived" />
     </check_box>
     <check_box
@@ -104,10 +104,10 @@
      top_delta="0"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationIM"
+         function="PrefChat.InitLogNotificationIM"
          parameter="PaymentReceived" />
         <check_box.commit_callback
-         function="Pref.LogNotificationIM"
+         function="PrefChat.LogNotificationIM"
          parameter="PaymentReceived" />
     </check_box>
     <text
@@ -132,10 +132,10 @@
      top_delta="-4"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationChat"
+         function="PrefChat.InitLogNotificationChat"
          parameter="PaymentSent" />
         <check_box.commit_callback
-         function="Pref.LogNotificationChat"
+         function="PrefChat.LogNotificationChat"
          parameter="PaymentSent" />
     </check_box>
     <check_box
@@ -148,10 +148,10 @@
      top_delta="0"
      width="350">
         <check_box.init_callback
-         function="Pref.InitLogNotificationIM"
+         function="PrefChat.InitLogNotificationIM"
          parameter="PaymentSent" />
         <check_box.commit_callback
-         function="Pref.LogNotificationIM"
+         function="PrefChat.LogNotificationIM"
          parameter="PaymentSent" />
     </check_box>
 
@@ -184,7 +184,7 @@
      follows="top|left"
      height="50"
      layout="topleft"
-     name="log_settings" 	
+     name="log_settings"
      left="13"
      top_pad="0"
      width="400">
@@ -319,13 +319,13 @@ Legacy format file names are capatilised and seperated by a space and are used b
 
 Linden viewers use lowercase seperated by an underscore ('firstname_lastname.txt').
 
-It is recomended you keep the same format as the majority of your log files.
+It is recommended you keep the same format as the majority of your log files.
         </text>
         <check_box
          control_name="UseLegacyIMLogNames"
          follows="top|left"
          height="20"
-         label="Use Legacy IM Log File Nameing Scheme."
+         label="Use Legacy IM Log File Naming Scheme"
          layout="topleft"
          left="35"
          name="imlegacylog_check"

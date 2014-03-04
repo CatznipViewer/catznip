@@ -250,35 +250,6 @@ void handleDisplayNamesOptionChanged(const LLSD& newvalue)
 	LLVOAvatar::invalidateNameTags();
 }
 
-// [SL:KB] - Patch: Catznip-Preferences | Checked: 2014-01-29
-void handleNearbyChatTornOffChanged()
-{
-#ifdef CATZNIP
-	LLFloater* pNearbyChat = LLFloaterReg::findInstance("nearby_chat");
-	LLFloater* pConversations = LLFloaterReg::findInstance("im_container");
-
-	if ( (pNearbyChat) && (pConversations) )
-	{
-		bool fNearbyVisible = pNearbyChat->isInVisibleChain();
-		bool fConvVisible = pConversations->isInVisibleChain();
-
-		bool fTornOff = !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
-		if ( (fTornOff) && (!pNearbyChat->isTornOff()) )
-		{
-			pNearbyChat->onTearOffClicked();
-			pNearbyChat->setVisible(fNearbyVisible);
-			pConversations->setVisible(fConvVisible);
-		}
-		else if ( (!fTornOff) && (pNearbyChat->isTornOff()) )
-		{
-			pNearbyChat->onTearOffClicked();
-			pConversations->setVisible(fConvVisible || fNearbyVisible);
-		}
-	}
-#endif // CATZNIP
-}
-// [/SL:KB]
-
 /*bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -381,13 +352,6 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 //	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 //	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 //	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
-
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
-	mCommitCallbackRegistrar.add("Pref.InitLogNotificationChat",boost::bind(&LLFloaterPreference::onInitLogNotification, this, _1, _2, "chat"));
-	mCommitCallbackRegistrar.add("Pref.InitLogNotificationIM",	boost::bind(&LLFloaterPreference::onInitLogNotification, this, _1, _2, "im"));
-	mCommitCallbackRegistrar.add("Pref.LogNotificationChat",	boost::bind(&LLFloaterPreference::onToggleLogNotification, this, _1, _2, "chat"));
-	mCommitCallbackRegistrar.add("Pref.LogNotificationIM",		boost::bind(&LLFloaterPreference::onToggleLogNotification, this, _1, _2, "im"));
-// [/SL:KB]
 
 	sSkin = gSavedSettings.getString("SkinCurrent");
 
@@ -1931,48 +1895,6 @@ void LLFloaterPreference::changed()
 
 }
 
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
-void LLFloaterPreference::onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
-{
-#ifdef CATZNIP
-	std::vector<std::string> notifications;
-	boost::split(notifications, sdParam.asString(), boost::is_any_of(std::string(",")));
-
-	for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
-	{
-		LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
-		if (*itNotif != templ->mName)
-			continue;
-
-		if (0 == strcmp(pstrScope, "chat"))
-			pCtrl->setValue(templ->canLogToNearbyChat());
-		else if (0 == strcmp(pstrScope, "im"))
-			pCtrl->setValue(templ->canLogToIM(true));
-	}
-#endif // CATZNIP
-}
-
-void LLFloaterPreference::onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
-{
-#ifdef CATZNIP
-	std::vector<std::string> notifications;
-	boost::split(notifications, sdParam.asString(), boost::is_any_of(std::string(",")));
-
-	for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
-	{
-		LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
-		if (*itNotif != templ->mName)
-			continue;
-
-		if (0 == strcmp(pstrScope, "chat"))
-			templ->setLogToNearbyChat(pCtrl->getValue().asBoolean());
-		else if (0 == strcmp(pstrScope, "im"))
-			templ->setLogToIM(pCtrl->getValue().asBoolean());
-	}
-#endif // CATZNIP
-}
-// [/SL:KB]
-
 //------------------------------Updater---------------------------------------
 
 static bool handleBandwidthChanged(const LLSD& newvalue)
@@ -2121,10 +2043,6 @@ BOOL LLPanelPreference::postBuild()
 	{
 		getChild<LLCheckBoxCtrl>("rlva_check")->setValue(gSavedSettings.getBOOL("RestrainedLove"));
 	}
-	if (hasChild("nearbychattornoff_check", TRUE))
-	{
-		getChild<LLUICtrl>("nearbychattornoff_check")->setCommitCallback(boost::bind(handleNearbyChatTornOffChanged));
-	}
 // [/SL:KB]
 
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
@@ -2175,6 +2093,104 @@ void LLPanelPreference::handleVisibilityChange(BOOL new_visibility)
 		onClose();
 	}
 }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-Chat | Checked: 2014-03-04 (Catznip-3.6)
+class LLPanelPreferenceChat : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceChat()
+		: LLPanelPreference()
+	{
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationChat",boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationIM",  boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "im"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationChat",    boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationIM",      boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "im"));
+	}
+
+	/*virtual*/ BOOL postBuild()
+	{
+		LLPanelPreference::postBuild();
+
+		LLUICtrl* pCtrl = findChild<LLUICtrl>("nearbychattornoff_check", TRUE);
+		if (pCtrl)
+		{
+			pCtrl->setCommitCallback(boost::bind(LLPanelPreferenceChat::onNearbyChatTornOffChanged));
+		}
+
+		return TRUE;
+	}
+
+protected:
+	static void onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				pCtrl->setValue(templ->canLogToNearbyChat());
+			else if (0 == strcmp(pstrScope, "im"))
+				pCtrl->setValue(templ->canLogToIM(true));
+		}
+#endif // CATZNIP
+	}
+
+	static void onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				templ->setLogToNearbyChat(pCtrl->getValue().asBoolean());
+			else if (0 == strcmp(pstrScope, "im"))
+				templ->setLogToIM(pCtrl->getValue().asBoolean());
+		}
+#endif // CATZNIP
+	}
+
+	static void onNearbyChatTornOffChanged()
+	{
+#ifdef CATZNIP
+		LLFloater* pNearbyChat = LLFloaterReg::findInstance("nearby_chat");
+		LLFloater* pConversations = LLFloaterReg::findInstance("im_container");
+
+		if ( (pNearbyChat) && (pConversations) )
+		{
+			bool fNearbyVisible = pNearbyChat->isInVisibleChain();
+			bool fConvVisible = pConversations->isInVisibleChain();
+
+			bool fTornOff = !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
+			if ( (fTornOff) && (!pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pNearbyChat->setVisible(fNearbyVisible);
+				pConversations->setVisible(fConvVisible);
+			}
+			else if ( (!fTornOff) && (pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pConversations->setVisible(fConvVisible || fNearbyVisible);
+			}
+		}
+#endif // CATZNIP
+	}
+};
+
+static LLRegisterPanelClassWrapper<LLPanelPreferenceChat> t_pref_chat("panel_preference_chat");
 // [/SL:KB]
 
 void LLPanelPreference::apply()
