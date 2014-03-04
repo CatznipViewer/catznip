@@ -91,6 +91,11 @@ public:
 	void selectPrivacyPanel();
 	void selectChatPanel();
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	void registerPrefPanel(LLPanelPreference* pPrefPanel);
+	void unregisterPrefpanel(LLPanelPreference* pPrefPanel);
+// [/SL:KB]
+
 protected:	
 	void		onBtnOK();
 	void		onBtnCancel();
@@ -192,6 +197,11 @@ private:
 	std::string mDirectoryVisibility;
 	
 	LLAvatarData mAvatarProperties;
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mCancelOnClose; // If TRUE then onClose() will call cancel(); set by apply() and cancel()
+	std::list<LLPanelPreference*> mPreferencePanels;
+// [/SL:KB]
 };
 
 class LLPanelPreference : public LLPanel
@@ -211,6 +221,9 @@ public:
 	
 	// Returns TRUE if the panel has been initialized (been visible at least once)
 	bool isInitialized() const { return mInitialized; }
+
+	// Returns TRUE if the user may have made any chances to the state of this panel (currently we return "was opened this sessio")
+	/*virtual*/ BOOL isDirty() const { return !mRefreshOnOpen; }
 // [/SL:KB]
 
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)

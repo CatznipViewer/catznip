@@ -508,6 +508,25 @@ void LLFloaterPreference::draw()
 	LLFloater::draw();
 }
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+void LLFloaterPreference::registerPrefPanel(LLPanelPreference* pPrefPanel)
+{
+	if (mPreferencePanels.end() == std::find(mPreferencePanels.begin(), mPreferencePanels.end(), pPrefPanel))
+	{
+		mPreferencePanels.push_back(pPrefPanel);
+	}
+}
+
+void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
+{
+	std::list<LLPanelPreference*>::iterator itPanel = std::find(mPreferencePanels.begin(), mPreferencePanels.end(), pPrefPanel);
+	if (mPreferencePanels.end() != itPanel)
+	{
+		mPreferencePanels.erase(itPanel);
+	}
+}
+// [/SL:KB]
+
 //void LLFloaterPreference::saveSettings()
 //{
 //	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
@@ -526,28 +545,33 @@ void LLFloaterPreference::apply()
 {
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
 	
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
 	if (sSkin != gSavedSettings.getString("SkinCurrent"))
 	{
 		LLNotificationsUtil::add("ChangeSkin");
 		refreshSkin(this);
 	}
-	// Call apply() on all panels that derive from LLPanelPreference
-	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-		 iter != tabcontainer->getChildList()->end(); ++iter)
-	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
-		if ( (panel) && (panel->isInitialized()) )
+	// Call apply() on all registered preference panels
+	for (std::list<LLPanelPreference*>::iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
+	{
+		LLPanelPreference* pPrefPanel = *itPanel;
+		if ( (pPrefPanel) && (pPrefPanel->isInitialized()) && (pPrefPanel->isDirty()) )
 		{
-			panel->apply();
-			panel->saveSettings();
+			pPrefPanel->apply();
+			pPrefPanel->saveSettings();
 		}
+	}
 // [/SL:KB]
+//	// Call apply() on all panels that derive from LLPanelPreference
+//	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//		 iter != tabcontainer->getChildList()->end(); ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
 //		if (panel)
 //			panel->apply();
-	}
+//	}
 	// hardware menu apply
 	LLFloaterHardwareSettings* hardware_settings = LLFloaterReg::getTypedInstance<LLFloaterHardwareSettings>("prefs_hardware_settings");
 	if (hardware_settings)
@@ -609,20 +633,25 @@ void LLFloaterPreference::apply()
 
 void LLFloaterPreference::cancel()
 {
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-	// Call cancel() on all panels that derive from LLPanelPreference
-	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-		iter != tabcontainer->getChildList()->end(); ++iter)
-	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
-		if ( (panel) && (panel->isInitialized()) )
-			panel->cancel();
+	// Call cancel() on all panels that derive from LLPanelPreference
+	for (std::list<LLPanelPreference*>::iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
+	{
+		LLPanelPreference* pPrefPanel = *itPanel;
+		if ( (pPrefPanel) && (pPrefPanel->isInitialized()) && (pPrefPanel->isDirty()) )
+			pPrefPanel->cancel();
+	}
 // [/SL:KB]
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	// Call cancel() on all panels that derive from LLPanelPreference
+//	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//		iter != tabcontainer->getChildList()->end(); ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
 //		if (panel)
 //			panel->cancel();
-	}
+//	}
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
 
@@ -741,6 +770,9 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	LLPanelLogin::setAlwaysRefresh(true);
 	refresh();
 	
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	mCancelOnClose = true;
+// [/SL:KB]
 //	// Make sure the current state of prefs are saved away when
 //	// when the floater is opened.  That will make cancel do its
 //	// job
@@ -784,6 +816,10 @@ void LLFloaterPreference::onClose(bool app_quitting)
 	gSavedSettings.setS32("LastPrefTab", getChild<LLTabContainer>("pref core")->getCurrentPanelIndex());
 	LLPanelLogin::setAlwaysRefresh(false);
 	if (!app_quitting)
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Don't call cancel() if the user closed the floater by clicking the "OK" or "Cancel" button
+	if ( (!app_quitting) && (mCancelOnClose) )
+// [/SL:KB]
 	{
 		cancel();
 	}
@@ -811,6 +847,9 @@ void LLFloaterPreference::onBtnOK()
 	{
 //		saveSettings();
 		apply();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+		mCancelOnClose = false;
+// [/SL:KB]
 		closeFloater(false);
 
 		//Conversation transcript and log path changed so reload conversations based on new location
@@ -886,6 +925,9 @@ void LLFloaterPreference::onBtnCancel()
 		refresh();
 	}
 	cancel();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	mCancelOnClose = false;
+// [/SL:KB]
 	closeFloater();
 }
 
@@ -1923,9 +1965,10 @@ BOOL LLPanelPreference::postBuild()
 	}
 
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
-	LLFloater* pFloater = getParentByType<LLFloater>();
+	LLFloaterPreference* pFloater = getParentByType<LLFloaterPreference>();
 	if (pFloater)
 	{
+		pFloater->registerPrefPanel(this);
 		// We're using the close callback since handleVisibilityChange() will fire before the open callback does causing the currently selected panel to not
 		// have refresh() called. Setting things up on close (and the default to true) causes 'mRefreshOnOpen' to be true on the panel visibility change
 		pFloater->setCloseCallback(boost::bind(&LLPanelPreference::onParentFloaterClose, this));
