@@ -344,7 +344,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.MaturitySettings",		boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
 	mCommitCallbackRegistrar.add("Pref.Proxy",					boost::bind(&LLFloaterPreference::onClickProxySettings, this));
-	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
+//	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
 	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 
@@ -626,8 +626,8 @@ void LLFloaterPreference::cancel()
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
 
-	// hide translation settings floater
-	LLFloaterReg::hideInstance("prefs_translation");
+//	// hide translation settings floater
+//	LLFloaterReg::hideInstance("prefs_translation");
 	
 	// hide autoreplace settings floater
 	LLFloaterReg::hideInstance("prefs_autoreplace");
@@ -1673,10 +1673,10 @@ void LLFloaterPreference::onClickProxySettings()
 	LLFloaterReg::showInstance("prefs_proxy");
 }
 
-void LLFloaterPreference::onClickTranslationSettings()
-{
-	LLFloaterReg::showInstance("prefs_translation");
-}
+//void LLFloaterPreference::onClickTranslationSettings()
+//{
+//	LLFloaterReg::showInstance("prefs_translation");
+//}
 
 void LLFloaterPreference::onClickAutoReplace()
 {
