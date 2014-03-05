@@ -77,7 +77,7 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 	
 // [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 	// Don't log persisted notifications a second time
-	if (notification->isPersisted())
+	if (!notification->isPersisted())
 	{
 // [/SL:KB]
 		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
