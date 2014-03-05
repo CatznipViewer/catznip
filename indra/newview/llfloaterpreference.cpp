@@ -1651,7 +1651,10 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
-	getChildView("chat_font_size")->setEnabled(TRUE);
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-05 (Catznip-3.6)
+	getChildView("log_transcripts")->setEnabled(TRUE);
+// [/SL:KB]
+//	getChildView("chat_font_size")->setEnabled(TRUE);
 }
 
 void LLFloaterPreference::refreshUI()

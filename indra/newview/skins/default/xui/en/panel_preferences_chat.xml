@@ -470,7 +470,7 @@
         height="23"
         layout="topleft"
         left_pad="5"
-        name="chat_font_size"
+        name="log_transcripts"
         top="0"
         width="165">
         <item
