@@ -641,7 +641,7 @@ std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EAvat
 		case NF_USERNAME:
 			return (!avName.getAccountName().empty()) ? avName.getAccountName() : avName.getDisplayName();
 		case NF_COMPLETENAME:
-			return avName.getCompleteName();
+			return avName.getCompleteName(LLAvatarName::SHOW_MISMATCH);
 		case NF_DISPLAYNAME:
 		default:
 			return avName.getDisplayName();
