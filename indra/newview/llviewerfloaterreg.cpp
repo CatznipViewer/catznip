@@ -52,9 +52,6 @@
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-17 (Catznip-3.3)
 #include "llfloaterchatalerts.h"
 // [/SL:KB]
-// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-11-20 (Catznip-3.6)
-#include "llfloaterchatsounds.h"
-// [/SL:KB]
 #include "llfloaterchatvoicevolume.h"
 #include "llfloaterconversationlog.h"
 #include "llfloaterconversationpreview.h"
@@ -206,9 +203,6 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("camera", "floater_camera.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterCamera>);
 // [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-17 (Catznip-3.3)
 	LLFloaterReg::add("chat_alerts", "floater_chat_alerts.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterChatAlerts>);
-// [/SL:KB]
-// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-11-20 (Catznip-3.6)
-	LLFloaterReg::add("chat_sounds", "floater_chat_sounds.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterUISounds>);
 // [/SL:KB]
 	LLFloaterReg::add("chat_voice", "floater_voice_chat_volume.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterChatVoiceVolume>);
 	LLFloaterReg::add("nearby_chat", "floater_im_session.xml", (LLFloaterBuildFunc)&LLFloaterIMNearbyChat::buildFloater);
