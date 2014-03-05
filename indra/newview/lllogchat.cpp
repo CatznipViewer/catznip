@@ -768,6 +768,18 @@ void LLLogChat::deleteTranscripts()
 	LLFloaterIMSessionTab::processChatHistoryStyleUpdate(true);
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+bool LLLogChat::hasTranscripts()
+{
+	const std::string strPattern = "*." + LL_TRANSCRIPT_FILE_EXTENSION;
+	const std::string strLogPath = gDirUtilp->getPerAccountChatLogsDir() + gDirUtilp->getDirDelimiter();
+
+	std::string strTemp;
+	LLDirIterator it(strLogPath, strPattern);
+	return it.next(strTemp);
+}
+// [/SL:KB]
+
 // static
 bool LLLogChat::isTranscriptExist(const LLUUID& avatar_id, bool is_group)
 {
