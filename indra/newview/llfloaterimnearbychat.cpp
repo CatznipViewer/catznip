@@ -625,7 +625,10 @@ void LLFloaterIMNearbyChat::addMessage(const LLChat& chat,bool archive,const LLS
 	}
 
 	// logging
-	if (!args["do_not_log"].asBoolean() && gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
+//	if (!args["do_not_log"].asBoolean() && gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	if ( (!args["do_not_log"].asBoolean()) && (gSavedPerAccountSettings.getBOOL("LogNearbyChat")) )
+// [/SL:KB]
 	{
 		std::string from_name = chat.mFromName;
 

@@ -164,7 +164,10 @@ private:
 		}
 	}
 	
-	void enableLogging(S32 log_mode);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	void enableLogging(bool enable);
+// [/SL:KB]
+//	void enableLogging(S32 log_mode);
 
 	/**
 	 * adds conversation to the conversation list and notifies observers
