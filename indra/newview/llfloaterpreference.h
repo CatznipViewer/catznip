@@ -104,7 +104,7 @@ protected:
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup
 	void		onClickBrowserClearCache();		// Clear web history and caches as well as viewer caches above
 	void		onLanguageChange();
-	void		onNotificationsChange(const std::string& OptionName);
+//	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
@@ -185,7 +185,7 @@ private:
 	void updateDeleteTranscriptsButton();
 
 	static std::string sSkin;
-	notifications_map mNotificationOptions;
+//	notifications_map mNotificationOptions;
 	bool mClickActionDirty; ///< Set to true when the click/double-click options get changed by user.
 	bool mGotPersonalInfo;
 	bool mOriginalIMViaEmail;

@@ -447,12 +447,12 @@ BOOL LLFloaterPreference::postBuild()
 
 	getChild<LLComboBox>("language_combobox")->setCommitCallback(boost::bind(&LLFloaterPreference::onLanguageChange, this));
 
-	getChild<LLComboBox>("FriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"FriendIMOptions"));
-	getChild<LLComboBox>("NonFriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NonFriendIMOptions"));
-	getChild<LLComboBox>("ConferenceIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ConferenceIMOptions"));
-	getChild<LLComboBox>("GroupChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"GroupChatOptions"));
-	getChild<LLComboBox>("NearbyChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NearbyChatOptions"));
-	getChild<LLComboBox>("ObjectIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ObjectIMOptions"));
+//	getChild<LLComboBox>("FriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"FriendIMOptions"));
+//	getChild<LLComboBox>("NonFriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NonFriendIMOptions"));
+//	getChild<LLComboBox>("ConferenceIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ConferenceIMOptions"));
+//	getChild<LLComboBox>("GroupChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"GroupChatOptions"));
+//	getChild<LLComboBox>("NearbyChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NearbyChatOptions"));
+//	getChild<LLComboBox>("ObjectIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ObjectIMOptions"));
 
 	// if floater is opened before login set default localized do not disturb message
 	if (LLStartUp::getStartupState() < STATE_STARTED)
@@ -759,13 +759,13 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	buildPopupLists();
 
 
-	//get the options that were checked
-	onNotificationsChange("FriendIMOptions");
-	onNotificationsChange("NonFriendIMOptions");
-	onNotificationsChange("ConferenceIMOptions");
-	onNotificationsChange("GroupChatOptions");
-	onNotificationsChange("NearbyChatOptions");
-	onNotificationsChange("ObjectIMOptions");
+//	//get the options that were checked
+//	onNotificationsChange("FriendIMOptions");
+//	onNotificationsChange("NonFriendIMOptions");
+//	onNotificationsChange("ConferenceIMOptions");
+//	onNotificationsChange("GroupChatOptions");
+//	onNotificationsChange("NearbyChatOptions");
+//	onNotificationsChange("ObjectIMOptions");
 
 	LLPanelLogin::setAlwaysRefresh(true);
 	refresh();
@@ -979,22 +979,22 @@ void LLFloaterPreference::onLanguageChange()
 	}
 }
 
-void LLFloaterPreference::onNotificationsChange(const std::string& OptionName)
-{
-	mNotificationOptions[OptionName] = getChild<LLComboBox>(OptionName)->getSelectedItemLabel();
-
-	bool show_notifications_alert = true;
-	for (notifications_map::iterator it_notification = mNotificationOptions.begin(); it_notification != mNotificationOptions.end(); it_notification++)
-	{
-		if(it_notification->second != "No action")
-		{
-			show_notifications_alert = false;
-			break;
-		}
-	}
-
-	getChild<LLTextBox>("notifications_alert")->setVisible(show_notifications_alert);
-}
+//void LLFloaterPreference::onNotificationsChange(const std::string& OptionName)
+//{
+//	mNotificationOptions[OptionName] = getChild<LLComboBox>(OptionName)->getSelectedItemLabel();
+//
+//	bool show_notifications_alert = true;
+//	for (notifications_map::iterator it_notification = mNotificationOptions.begin(); it_notification != mNotificationOptions.end(); it_notification++)
+//	{
+//		if(it_notification->second != "No action")
+//		{
+//			show_notifications_alert = false;
+//			break;
+//		}
+//	}
+//
+//	getChild<LLTextBox>("notifications_alert")->setVisible(show_notifications_alert);
+//}
 
 void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 {
