@@ -448,7 +448,7 @@ BOOL LLFloaterPreference::postBuild()
 	std::string cache_location = gDirUtilp->getExpandedFilename(LL_PATH_CACHE, "");
 	setCacheLocation(cache_location);
 
-	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
+//	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
 
 	getChild<LLComboBox>("language_combobox")->setCommitCallback(boost::bind(&LLFloaterPreference::onLanguageChange, this));
 
@@ -1888,7 +1888,7 @@ void LLFloaterPreference::selectChatPanel()
 
 void LLFloaterPreference::changed()
 {
-	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
+//	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
 
 	// set 'enable' property for 'Delete transcripts...' button
 	updateDeleteTranscriptsButton();

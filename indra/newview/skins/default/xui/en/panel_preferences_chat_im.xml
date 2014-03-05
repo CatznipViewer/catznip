@@ -5,7 +5,7 @@
  height="376"
  label="Instant Message"
  layout="topleft"
- name="im"
+ name="chat_im"
  width="509">
     <text
      layout="topleft"
@@ -16,7 +16,7 @@
      height="15"
      mouse_opaque="false"
      type="string"
-     name="catznip_nearbychat_text"
+     name="im_appearance_text"
      font.style="BOLD">
         Instant Message / Group Chat Appearance
     </text>
@@ -25,7 +25,7 @@
      height="20"
      layout="topleft"
      left="35"
-     name="imorientation_text"
+     name="im_orientation_text"
      width="110">
         Tab orientation :
     </text>
@@ -34,14 +34,14 @@
      height="20"
      layout="topleft"
      left_pad="0"
-     name="imorientation_radio"
+     name="im_orientation_radio"
      top_delta="-7"
      width="221">
         <radio_item
          height="19"
          label="Horizontal"
          layout="topleft"
-         name="imorientation_horz"
+         name="im_orientation_horz"
          value="0"
          width="150" />
         <radio_item
@@ -49,7 +49,7 @@
          label="Vertical"
          layout="topleft"
          left_pad="-16"
-         name="imorientation_vert"
+         name="im_orientation_vert"
          value="1"
          width="150" />
     </radio_group>
@@ -60,7 +60,7 @@
      label="Drag-rearrange IM tabs"
      layout="topleft"
      left="35"
-     name="imrearrange_check"
+     name="im_rearrange_check"
      width="350" />
     <check_box
      control_name="IMShowTabImage"
@@ -69,7 +69,7 @@
      label="Show profile icons on tabs"
      layout="topleft"
      left="35"
-     name="imshowimage_check"
+     name="im_showimage_check"
      width="350" />
     
     <view_border
@@ -92,7 +92,7 @@
      height="15"
      mouse_opaque="false"
      type="string"
-     name="catznip_nearbychat_text"
+     name="im_behaviour_text"
      font.style="BOLD">
         Instant Message / Group Chat Behavior
     </text>
@@ -103,7 +103,7 @@
      label="Entering a blank line in closes the active conversation floater"
      layout="topleft"
      left="35"
-     name="closeimonreturn_check"
+     name="im_closeonreturn_check"
      width="350" />
 
     <text
@@ -112,7 +112,7 @@
      layout="topleft"
      left="35"
      mouse_opaque="false"
-     name="imembedoffer_text"
+     name="im_embedoffer_text"
      top_pad="7"
      type="string"
      width="140">
@@ -127,7 +127,7 @@
      layout="topleft"
      left_pad="10"
      mouse_opaque="true"
-     name="imembedoffer_combo"
+     name="im_embedoffer_combo"
      width="100">
         <combo_box.item
          label="Always"
@@ -160,7 +160,7 @@
      height="15"
      mouse_opaque="false"
      type="string"
-     name="catznip_nearbychat_text"
+     name="im_notifications_text"
      font.style="BOLD">
         Notifications
     </text>
