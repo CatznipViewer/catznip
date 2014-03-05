@@ -169,7 +169,7 @@ std::string LLAvatarName::getCompleteName(EShowUsername eShowUsername) const
 	{
 //		if (mUsername.empty() || mIsDisplayNameDefault)
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-		if ( (mUsername.empty()) || ((SHOW_NEVER == s_eShowUsername) || ((SHOW_MISMATCH == s_eShowUsername) && (mIsDisplayNameDefault))) )
+		if ( (mUsername.empty()) || ((SHOW_NEVER == eShowUsername) || ((SHOW_MISMATCH == eShowUsername) && (mIsDisplayNameDefault))) )
 // [/SL:KB]
 		{
 			// If this particular display name is defaulted (i.e. based on user name),
