@@ -56,6 +56,7 @@ void LLPanelIMControlPanel::refreshFromProperties()
 
 BOOL LLPanelIMControlPanel::postBuild()
 {
+	getChild<LLUICtrl>("avatar_description")->setValue(LLStringUtil::null);
 	return TRUE;
 }
 

@@ -51,11 +51,11 @@
      expanded_bg_visible="true"
      expanded_bg_color="DkGray"
      follows="all"
-     height="150"
+     height="120"
      layout="topleft"
      left="4"
      name="avatar_description"
-     textbox.max_length="512"
+     textbox.max_length="1024"
      top_pad="2"
      width="140">
       Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean viverra orci et justo sagittis aliquet.Nullamma lesuada mauris sit amet ipsum. adipiscing elit. Ae nean viverra orci et justo sagittis aliquet. Nullam malesuada mauris sit amet ipsum. adipiscing elit. Aenean viverra orci et justo sagittis aliquet. Nullam malesuada mauris sit amet ipsum.
