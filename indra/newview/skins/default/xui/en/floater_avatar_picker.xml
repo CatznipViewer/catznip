@@ -166,7 +166,7 @@
              label="Range"
              layout="topleft"
              left="10"
-             max_val="256"
+             max_val="512"
              min_val="8"
              name="near_me_range"
              top_pad="4"
