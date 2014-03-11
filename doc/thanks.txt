@@ -18,6 +18,9 @@ Chloe Constantine
 Ebonaku Dragova
 	Bugs
 	Feedback
+Faith Noonan
+    Beta Testing
+    Feedback
 Inhandra Birdsong
 	Bugs
 	Feedback
@@ -26,6 +29,9 @@ Innula Zenovka
 	Feedback
 Hitomi Tiponi
 	Starlight Art
+Lilly Noodle
+    Beta Testing
+    Feedback
 Loom Kish
 	Mac OS X issues
 Penny Patton
@@ -35,6 +41,8 @@ Razeldine Wirefly
 	Bugs
 	Feedback
 Qetesh (vala.vella)
+    Bugs
+    Feedback
 	Mac Mini
 Satomi Ahn
 	RLVa
