@@ -72,15 +72,17 @@ Error fetching server release notes URL.
   <tab_container
     follows="all" 
     layout="topleft"
-    left="8"
-    height="335"
-    right="-8"
-    tab_height="23"
+    left="4"
+    height="338"
+    right="-4"
+    tab_height="25"
     tab_min_width="120"
     name="about_tab"
     tab_position="top"
-    top="0">
+    top="2">
     <panel
+      border="true"
+      has_border="true"
       label="INFO"
       help_topic="about_support_tab"
       name="support_panel">
@@ -94,14 +96,14 @@ Error fetching server release notes URL.
        top="4"
        width="128" />
       <button
-       follows="top|left" 
+       follows="bottom|left" 
        image_overlay="Copy"
        image_overlay_alignment="left"
        tool_tip="Copy the info the clipboard."
        name="copy_btn"
        label="Copy Info"
        left="3"
-       top="284"
+       bottom="4"
        height="22"
        width="112" />
       <text_editor
@@ -114,10 +116,12 @@ Error fetching server release notes URL.
        max_length="65536"
        name="support_editor"
        top="5"
-       width="429"
+       right="-5"
        word_wrap="true" />
     </panel>
     <panel
+      border="true"
+      has_border="true"
       label="CREDITS" 
       help_topic="about_credits_tab"
       name="credits_panel">
@@ -125,11 +129,11 @@ Error fetching server release notes URL.
  fit_parent="false"
  follows="all"
  layout="topleft"
- left="3"
+ left="2"
  name="credits_accordion"
  single_expansion="true"
  top="0"
- width="558">
+ right="-1">
 <!-- Credits -->
   <accordion_tab
    expanded="true"
@@ -325,6 +329,8 @@ Dummy Name replaced at run time
     </panel>
 <!-- Licences -->
     <panel
+      border="true"
+      has_border="true"
       label="LICENCES"
       help_topic="about_licenses_tab"
       name="licenses_panel">
@@ -338,7 +344,7 @@ Dummy Name replaced at run time
        max_length="65536"
        name="credits_editor"
        top="5"
-       width="552"
+       right="-5"
        word_wrap="true">
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, version 2.1 which can be found in doc/LGPL-licence.txt in this distribution (or online at http://www.gnu.org/licenses/gpl-2.0.txt).
 
