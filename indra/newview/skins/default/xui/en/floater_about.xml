@@ -95,6 +95,33 @@ Error fetching server release notes URL.
        name="catznip_logo"
        top="4"
        width="128" />
+      <icon
+       height="32"
+       image_name="social_twitter"
+       layout="topleft"
+       left="10"
+       mouse_opaque="true"
+       name="twitter_icon"
+       top="130"
+       width="32" />
+      <icon
+       height="32"
+       image_name="social_fb"
+       layout="topleft"
+       left_pad="5"
+       mouse_opaque="true"
+       name="fb_icon"
+       top="130"
+       width="32" />
+      <icon
+       height="32"
+       image_name="social_gplus"
+       layout="topleft"
+       left_pad="5"
+       mouse_opaque="true"
+       name="gplus_icon"
+       top="130"
+       width="32" />
       <button
        follows="bottom|left" 
        image_overlay="Copy"
