@@ -158,6 +158,10 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 			}
 		}
 	}
+	if (!m_PersistedData.emptyMap())
+	{
+		LLNotificationsUtil::add("RestoredUnreadIMs");
+	}
 	m_PersistedData.clear();
 
 	saveUnreadIMs();
