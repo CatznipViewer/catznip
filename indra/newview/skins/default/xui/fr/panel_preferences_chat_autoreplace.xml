@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="autoreplace_floater" title="Paramètres Rechercher/Remplacer">
+<panel name="chat_autoreplace" title="Paramètres Rechercher/Remplacer">
 	<check_box label="Activer la fonction Rechercher/Remplacer" name="autoreplace_enable" tool_tip="Lors de la saisie du texte d&apos;un chat, remplace chaque mot-clé spécifié par la valeur correspondante."/>
 	<button label="Importer une liste..." name="autoreplace_import_list" tool_tip="Charger une liste précédemment exportée à partir d&apos;un fichier."/>
 	<button label="Exporter la liste..." name="autoreplace_export_list" tool_tip="Enregistrer la liste sélectionnée dans un fichier afin de pouvoir la partager."/>
@@ -16,17 +16,4 @@
 	<button label="Enregistrer" name="autoreplace_save_entry" tool_tip="Enregistrer cette entrée."/>
 	<button label="Enregistrer les modifications" name="autoreplace_save_changes" tool_tip="Enregistrer toutes les modifications."/>
 	<button label="Annuler" name="autoreplace_cancel" tool_tip="Ignorer toutes les modifications."/>
-</floater>
-<!--
-  <text 
-   top_pad="10"
-   left="10"
-   height="16"
-   width="260"
-   follows="left|top"
-   halign="center"
-   mouse_opaque="true"
-   name="autoreplace_text2">
-    Entries
-  </text>
--->
+</panel>

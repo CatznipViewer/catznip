@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="autoreplace_floater" title="自動置換設定">
+<panel name="chat_autoreplace" title="自動置換設定">
 	<check_box label="自動置換を有効にする" name="autoreplace_enable" tool_tip="チャットテキストを入力するにつれて、入力したキーワードを対応する置換キーワードに置き換えます"/>
 	<button label="リストをインポート..." name="autoreplace_import_list" tool_tip="以前にエクスポートしたリストをファイルからロードします。"/>
 	<button label="リストをエクスポート..." name="autoreplace_export_list" tool_tip="選択したリストをファイルに保存して、共有できるようにします。"/>
@@ -16,17 +16,4 @@
 	<button label="エントリを保存" name="autoreplace_save_entry" tool_tip="このエントリを保存します。"/>
 	<button label="変更を保存" name="autoreplace_save_changes" tool_tip="変更をすべて保存します。"/>
 	<button label="取り消し" name="autoreplace_cancel" tool_tip="変更をすべて破棄します。"/>
-</floater>
-<!--
-  <text 
-   top_pad="10"
-   left="10"
-   height="16"
-   width="260"
-   follows="left|top"
-   halign="center"
-   mouse_opaque="true"
-   name="autoreplace_text2">
-    Entries
-  </text>
--->
+</panel>

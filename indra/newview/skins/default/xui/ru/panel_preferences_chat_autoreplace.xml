@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="autoreplace_floater" title="Настройки автозамены">
+<panel name="chat_autoreplace" title="Настройки автозамены">
 	<check_box label="Включить автозамену" name="autoreplace_enable" tool_tip="В чате по мере ввода текста ключевые слова будут заменяться соответствующими заменителями"/>
 	<button label="Импорт списка..." name="autoreplace_import_list" tool_tip="Загрузить ранее экспортированный список из файла."/>
 	<button label="Экспорт списка..." name="autoreplace_export_list" tool_tip="Сохранить выбранный список в файл для последующего распространения."/>
@@ -17,16 +17,3 @@
 	<button label="Сохранить изменения" name="autoreplace_save_changes" tool_tip="Сохранить все изменения."/>
 	<button label="Отмена" name="autoreplace_cancel" tool_tip="Отменить все изменения."/>
 </floater>
-<!--
-  <text 
-   top_pad="10"
-   left="10"
-   height="16"
-   width="260"
-   follows="left|top"
-   halign="center"
-   mouse_opaque="true"
-   name="autoreplace_text2">
-    Entries
-  </text>
--->

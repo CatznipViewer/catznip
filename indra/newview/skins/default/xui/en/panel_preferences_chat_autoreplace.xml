@@ -2,7 +2,7 @@
 <panel
  border="true"
  follows="all"
- height="376"
+ height="310"
  label="Auto-Replace Settings"
  layout="topleft"
  name="chat_autoreplace"
@@ -89,9 +89,9 @@
    top_pad="10"
    layout="topleft"
    left="10"
-   height="80"
-   width="370"
-   follows="left|top"
+   height="60"
+   right="-110"
+   follows="left|top|right"
    column_padding="0"
    draw_heading="false"
    multi_select="false"
@@ -99,13 +99,13 @@
    search_column="0">
   </scroll_list>
   <button
-   top_delta="13"
+   top="95"
    layout="topleft"
-   left_pad="10"
+   left="410"
    height="22"
    width="90"
    enabled="true"
-   follows="left|top"
+   follows="top|right"
    mouse_opaque="true"
    halign="center"
    scale_image="true"
@@ -119,135 +119,79 @@
    height="22"
    width="90"
    enabled="true"
-   follows="left|top"
+   follows="top|right"
    mouse_opaque="true"
    halign="center"
    scale_image="true"
    name="autoreplace_list_down"
    image_overlay="Arrow_Down"
    tool_tip="Move this list down in priority."/>
-  <view_border
-   top_pad="30"
-   layout="topleft"
-   left="10"
-   height="0"
-   right="-10"
-   follows="left|top"
-   bevel_style="none"
-   border_thickness="1"
-   mouse_opaque="false"
-   name="divisor2"/>
   <scroll_list
    top_pad="10"
    layout="topleft"
    left="10"
    height="100"
-   width="370"
-   follows="left|top"
+   right="-110"
+   follows="all"
    column_padding="0"
    draw_heading="true"
    multi_select="true"
    name="autoreplace_list_replacements"
    search_column="0">
     <scroll_list.columns
+        type="checkbox"
+        width="20"
+        label=""
+        name="checkbox" />
+    <scroll_list.columns
         label="Keyword"
         name="keyword"
-        relative_width="0.30" />
+        width="120" />
     <scroll_list.columns
         label="Replacement"
-        name="replacement"
-        relative_width="0.70" />
+        name="replacement"/>
   </scroll_list>
-  <button
-   top_delta="31"
-   layout="topleft"
-   left_pad="10"
-   height="22"
-   width="90"
-   enabled="true"
-   follows="left|top"
-   mouse_opaque="true"
-   halign="center"
-   scale_image="true"
-   name="autoreplace_add_entry"
-   label="Add..."/>
   <button 
-   top_pad="10"
+   top="200"
    layout="topleft"
-   left_delta="0"
+   left="410"
    height="22"
    width="90"
    enabled="true"
-   follows="left|top"
+   follows="right|top"
    mouse_opaque="true"
    halign="center"
    scale_image="true"
    name="autoreplace_delete_entry"
    label="Remove"/>
-  <view_border
-   top_pad="20"
-   layout="topleft"
-   left="10"
-   height="0"
-   right="-10"
-   follows="left|top"
-   bevel_style="none"
-   border_thickness="1"
-   mouse_opaque="false"
-   name="divisor3"/>
-  <text
-   type="string"
-   follows="left|top"
-   height="16"
-   layout="topleft"
-   left="10"
-   top_pad="13"
-   width="50">
-   Keyword:
-  </text>
   <line_editor
    name="autoreplace_keyword"
-   follows="left|top"
+   follows="left|bottom"
    height="23"
-   layout="topleft"
-   left="100"
-   max_length_bytes="255"
-   top_delta="-5"
-   width="150"
-   />
-  <text
-   type="string"
-   follows="left|top"
-   height="16"
    layout="topleft"
    left="10"
-   right="90"
-   top_pad="10"
-   >
-   Replacement:
-  </text>
+   max_length_bytes="255"
+   top_pad="38"
+   width="120"/>
   <line_editor
    name="autoreplace_replacement"
-   follows="left|top"
+   follows="left|bottom|right"
    height="23"
    layout="topleft"
-   left="100"
+   left_pad="1"
    max_length_bytes="255"
-   top_delta="-5"
-   width="280"
+   right="-109"
    />
   <button
-   top_delta="0"
-   right="-10"
+   layout="topleft"
+   left_pad="10"
    height="22"
    width="90"
-   enabled="false"
-   follows="left|top"
-   layout="topleft"
+   enabled="true"
+   follows="bottom|right"
    mouse_opaque="true"
    halign="center"
    scale_image="true"
-   name="autoreplace_save_entry"
-   label="Save Entry"
-   tool_tip="Save this entry."/>
+   name="autoreplace_add_entry"
+   label="Add..."/>
 </panel>

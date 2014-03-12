@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="autoreplace_floater" title="Einstellungen für automatische Ersetzung...">
+<panel name="chat_autoreplace" title="Einstellungen für automatische Ersetzung...">
 	<check_box label="Automatische Ersetzung aktivieren..." name="autoreplace_enable" tool_tip="Eines oder mehrere Schlüsselwörter bei der Eingabe von Chat-Text durch die entsprechende Ersetzung substituieren"/>
 	<button label="Liste importieren..." name="autoreplace_import_list" tool_tip="Exportierte Liste aus einer Datei laden."/>
 	<button label="Liste exportieren..." name="autoreplace_export_list" tool_tip="Ausgewählte Liste zur Weitergabe in einer Datei speichern."/>
@@ -17,16 +17,3 @@
 	<button label="Änderungen speichern" name="autoreplace_save_changes" tool_tip="Alle Änderungen speichern."/>
 	<button label="Abbrechen" name="autoreplace_cancel" tool_tip="Alle Änderungen löschen."/>
 </floater>
-<!--
-  <text 
-   top_pad="10"
-   left="10"
-   height="16"
-   width="260"
-   follows="left|top"
-   halign="center"
-   mouse_opaque="true"
-   name="autoreplace_text2">
-    Entries
-  </text>
--->
