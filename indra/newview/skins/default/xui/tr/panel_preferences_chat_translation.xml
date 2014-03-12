@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_translation_settings" title="SOHBET ÇEVİRİSİ AYARLARI">
+<panel name="chat_translation" title="SOHBET ÇEVİRİSİ AYARLARI">
 	<string name="bing_api_key_not_verified">
 		Bing uygulama kimliği doğrulanmadı. Lütfen tekrar deneyin.
 	</string>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_translation_settings" title="CONFIGURACIÓN DE LA TRADUCCIÓN DEL CHAT">
+<panel name="chat_translation" title="CONFIGURACIÓN DE LA TRADUCCIÓN DEL CHAT">
 	<string name="bing_api_key_not_verified">
 		appID de Bing no se ha confirmado. Vuelve a intentarlo.
 	</string>

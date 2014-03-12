@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="floater_translation_settings" title="聊天內容翻譯設定">
+<panel name="chat_translation" title="聊天內容翻譯設定">
 	<string name="bing_api_key_not_verified">
 		Bing AppID 未通過驗證。 請再試一次。
 	</string>
