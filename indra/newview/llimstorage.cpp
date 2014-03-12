@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2013, Kitty Barnett
+ * Copyright (c) 2011-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -13,12 +13,18 @@
  * abide by those obligations.
  * 
  */
+
 #include "llviewerprecompiledheaders.h"
 
+#include "llappviewer.h"
+#include "llcallbacklist.h"
 #include "llimstorage.h"
 #include "llimview.h"
 #include "llmutelist.h"
+#include "llnotificationsutil.h"
 #include "llsdserialize.h"
+#include "llstartup.h"
+#include "llviewercontrol.h"
 
 #define FILE_UNREAD_IMS "unread_ims.xml"
 
@@ -27,15 +33,43 @@
 //
 
 LLPersistentUnreadIMStorage::LLPersistentUnreadIMStorage()
+	: m_fEnabled(false)
 {
-	m_NewMsgConn = LLIMModel::instance().addNewMsgCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
-	m_NoUnreadMsgConn = LLIMModel::instance().addNoUnreadMsgsCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
+	llassert(LLStartUp::getStartupState() >= STATE_WORLD_INIT);
+
+	setEnabled(gSavedPerAccountSettings.getBOOL("LogUnreadIMs"));
+	gSavedPerAccountSettings.getControl("LogUnreadIMs")->getCommitSignal()->connect(boost::bind(&LLPersistentUnreadIMStorage::onEnabledChanged, _2));
 }
 
 LLPersistentUnreadIMStorage::~LLPersistentUnreadIMStorage()
 {
-	m_NewMsgConn.disconnect();
-	m_NoUnreadMsgConn.disconnect();
+}
+
+std::string LLPersistentUnreadIMStorage::getFilePath()
+{
+	return gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILE_UNREAD_IMS);
+}
+
+void LLPersistentUnreadIMStorage::setEnabled(bool fEnable)
+{
+	if (m_fEnabled != fEnable)
+	{
+		m_fEnabled = fEnable;
+		if (m_fEnabled)
+		{
+			m_NewMsgConn = LLIMModel::instance().addNewMsgCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
+			m_NoUnreadMsgConn = LLIMModel::instance().addNoUnreadMsgsCallback(boost::bind(&LLPersistentUnreadIMStorage::onMessageCountChanged, this, _1));
+		}
+		else
+		{
+			m_NewMsgConn.disconnect();
+			m_NoUnreadMsgConn.disconnect();
+
+			if (gDirUtilp->fileExists(getFilePath()))
+				LLFile::remove(getFilePath());
+			m_SessionLookup.clear();
+		}
+	}
 }
 
 void LLPersistentUnreadIMStorage::addPersistedUnreadIMs(const LLUUID& idSession, const std::list<LLSD>& sdMessages)
@@ -74,7 +108,7 @@ const std::string LLPersistentUnreadIMStorage::getPersistedUnreadMessage(const L
 
 void LLPersistentUnreadIMStorage::loadUnreadIMs()
 {
-	llifstream fileUnread(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILE_UNREAD_IMS));
+	llifstream fileUnread(getFilePath());
 	if (!fileUnread.is_open())
 	{
 		llwarns << "Failed to open the unread IM log" << llendl;
@@ -131,7 +165,7 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 
 void LLPersistentUnreadIMStorage::saveUnreadIMs()
 {
-	llofstream fileUnread(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILE_UNREAD_IMS));
+	llofstream fileUnread(getFilePath());
 	if (!fileUnread.is_open())
 	{
 		llwarns << "Failed to open the unread IM log" << llendl;
@@ -147,6 +181,20 @@ void LLPersistentUnreadIMStorage::saveUnreadIMs()
 	LLPointer<LLSDFormatter> sdFormatter = new LLSDXMLFormatter();
 	sdFormatter->format(sdData, fileUnread, LLSDFormatter::OPTIONS_PRETTY);
 	fileUnread.close();
+}
+
+void LLPersistentUnreadIMStorage::onEnabledChanged(const LLSD& sdParam)
+{
+	bool fEnable = sdParam.asBoolean();
+	bool fHasInstance = LLPersistentUnreadIMStorage::instanceExists();
+
+	// Sanity check - don't disable with no active instance
+	if ( (fEnable) || (fHasInstance) )
+	{
+		LLPersistentUnreadIMStorage* pSelf = LLPersistentUnreadIMStorage::getInstance();
+		if (pSelf)
+			pSelf->setEnabled(fEnable);
+	}
 }
 
 void LLPersistentUnreadIMStorage::onMessageCountChanged(const LLSD& sdSessionData)

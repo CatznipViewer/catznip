@@ -715,7 +715,7 @@ void LLIMModel::LLIMSession::loadHistory()
 
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
 	bool fShowHistory = gSavedPerAccountSettings.getBOOL("LogShowHistory");
-	bool fHasUnreadIM = LLPersistentUnreadIMStorage::instance().hasPersistedUnreadIM(mSessionID);
+	bool fHasUnreadIM = LLPersistentUnreadIMStorage::instance().isEnabled() && LLPersistentUnreadIMStorage::instance().hasPersistedUnreadIM(mSessionID);
 	if ( (fShowHistory) || (fHasUnreadIM) )
 	{
 		std::list<LLSD> chat_history;
