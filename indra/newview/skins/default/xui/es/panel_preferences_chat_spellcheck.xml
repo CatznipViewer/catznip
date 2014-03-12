@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="spellcheck_floater" title="Configuración del corrector ortográfico">
+<panel name="chat_spellcheck" title="Configuración del corrector ortográfico">
 	<check_box label="Habilitar la revisión ortográfica" name="spellcheck_enable"/>
 	<text name="spellcheck_main">
 		Diccionario principal:
@@ -15,4 +15,4 @@
 	</text>
 	<button label="Eliminar" name="spellcheck_remove_btn"/>
 	<button label="Importar..." name="spellcheck_import_btn"/>
-</floater>
+</panel>

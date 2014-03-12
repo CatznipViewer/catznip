@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater name="spellcheck_floater" title="拼字檢查設定">
+<panel name="chat_spellcheck" title="拼字檢查設定">
 	<check_box label="啟用拼字檢查" name="spellcheck_enable"/>
 	<text name="spellcheck_main">
 		主要字典：
@@ -15,4 +15,4 @@
 	</text>
 	<button label="移除" name="spellcheck_remove_btn"/>
 	<button label="匯入…" name="spellcheck_import_btn"/>
-</floater>
+</panel>
