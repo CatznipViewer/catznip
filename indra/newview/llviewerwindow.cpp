@@ -2032,11 +2032,7 @@ void LLViewerWindow::initWorldUI()
 // [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
 	if (gSavedSettings.getBOOL("PreInitSearch"))
 	{
-		LLFloaterSearch* pSearchFloater = LLFloaterReg::getInstance("search")->findChild<LLFloaterSearch>("floater_search");
-		if (pSearchFloater)
-		{
-			pSearchFloater->search(LLFloaterSearch::SearchQuery());
-		}
+		LLFloaterReg::getInstance("search");
 	}
 // [/SL:KB]
 }
