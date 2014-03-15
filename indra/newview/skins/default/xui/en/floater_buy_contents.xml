@@ -75,10 +75,10 @@
      name="wear_check"
      width="250" />
     <check_box
-     value="true"
+     control_name="ShowPurchasedInventory"
      follows="left|bottom"
      height="16"
-     label="Open in inventory"
+     label="Show in inventory"
      layout="topleft"
      left="10"
      name="showinv_check"

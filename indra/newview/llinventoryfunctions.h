@@ -427,6 +427,9 @@ class LLInventoryState
 {
 public:
 	// HACK: Until we can route this info through the instant message hierarchy
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+	static bool sShowNewInventory;
+// [/SL:KB]
 	static BOOL sWearNewClothing;
 	static LLUUID sWearNewClothingTransactionID;	// wear all clothing in this transaction	
 };

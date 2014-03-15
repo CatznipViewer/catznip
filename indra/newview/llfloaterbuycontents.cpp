@@ -283,6 +283,13 @@ void LLFloaterBuyContents::onClickBuy()
 		LLInventoryState::sWearNewClothing = TRUE;
 	}
 
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+	if (getChild<LLUICtrl>("showinv_check")->getValue())
+	{
+		LLInventoryState::sShowNewInventory = TRUE;
+	}
+// [/SL:KB]
+
 	// Put the items where we put new folders.
 	LLUUID category_id;
 	category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_ROOT_INVENTORY);

@@ -14491,6 +14491,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ShowPurchasedInventory</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the inventory window with the purchase selected when buying an object or its contents</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>GenericErrorPageURL</key>
     <map>
       <key>Comment</key>

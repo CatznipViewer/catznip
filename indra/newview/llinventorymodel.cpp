@@ -2941,6 +2941,16 @@ void LLInventoryModel::processBulkUpdateInventory(LLMessageSystem* msg, void**)
 		InventoryCallbackInfo cbinfo = (*inv_it);
 		gInventoryCallbacks.fire(cbinfo.mCallback, cbinfo.mInvID);
 	}
+
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+	if (LLInventoryState::sShowNewInventory)
+	{
+		if (!folders.empty())
+			show_item(folders.front()->getUUID());
+		LLInventoryState::sShowNewInventory = false;
+	}
+// [/SL:KB]
+
 	// Don't show the inventory.  We used to call showAgentInventory here.
 	//LLFloaterInventory* view = LLFloaterInventory::getActiveInventory();
 	//if(view)
