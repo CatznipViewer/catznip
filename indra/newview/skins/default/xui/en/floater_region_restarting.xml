@@ -72,7 +72,7 @@
      halign="center">
      13m 02s
     </text>
-  </panel>
+    </panel>
     <text
      type="string"
      length="1"
@@ -86,7 +86,7 @@
      top_pad="14"
      left="30"
      right="-15">
-    ..you will be logged out if you remain here.
+..you will be logged out if you remain here.
     </text>
     <combo_box
      allow_text_entry="true"
@@ -106,7 +106,7 @@
          name="item1"
          value="None" />
     </combo_box>
-        <button
+    <button
      follows="top|left"
      height="23"
      image_overlay="Arrow_Right"
@@ -114,7 +114,7 @@
      tool_tip="Forward"
      layout="topleft"
      left_pad="1"
-     name="forward"
+     name="teleport_btn"
      top_delta="0"
      width="28" />
   </panel>
