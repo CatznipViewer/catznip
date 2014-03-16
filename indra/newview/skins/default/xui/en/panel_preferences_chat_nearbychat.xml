@@ -263,6 +263,7 @@
      width="350" />
     <check_box
      control_name="PlayTypingAnim"
+     follows="top|left"
      height="20"
      initial_value="true"
      label="Play typing animation"
@@ -272,6 +273,7 @@
      width="350" />
     <check_box
      control_name="PlayChatAnim"
+     follows="top|left"
      height="20"
      initial_value="true"
      label="Play chatting animation (Whisper / Shout)"
@@ -282,11 +284,13 @@
      width="350" />
     <check_box
      control_name="UseChatBubbles"
+     follows="top|left"
      height="20"
      label="Bubble Chat"
      layout="topleft"
      left="35"
      name="bubble_text_chat"
+     top_pad="0"
      width="330" />
 
     <view_border
