@@ -57,6 +57,9 @@
 #include "llspellcheck.h"
 #include "llpanel.h"
 #include "llurlregistry.h"
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+#include "lltextsearchctrl.h"
+// [/SL:KB]
 #include "lltooltip.h"
 #include "llmenugl.h"
 
@@ -241,6 +244,9 @@ LLTextEditor::Params::Params()
 	default_color("default_color"),
     commit_on_focus_lost("commit_on_focus_lost", false),
 	show_context_menu("show_context_menu"),
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	show_inplace_search("show_inplace_search", false),
+// [/SL:KB]
 	enable_tooltip_paste("enable_tooltip_paste")
 {
 	addSynonym(prevalidate_callback, "text_type");
@@ -263,6 +269,10 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	mPrevalidateFunc(p.prevalidate_callback()),
 	mContextMenu(NULL),
 	mShowContextMenu(p.show_context_menu),
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	mShowInplaceSearch(p.show_inplace_search),
+	mInplaceSearchPanel(NULL),
+// [/SL:KB]
 	mEnableTooltipPaste(p.enable_tooltip_paste),
 	mPassDelete(FALSE)
 {
@@ -1896,6 +1906,16 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask )
 		resetCursorBlink();
 		needsScroll();
 	}
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	else if ( (mShowInplaceSearch) && ((mask & MASK_MODIFIERS) == MASK_CONTROL) && ('F' == key) )
+	{
+		if (!mInplaceSearchPanel)
+			mInplaceSearchPanel = new LLTextSearchCtrl(this);
+		mInplaceSearchPanel->setVisible(true);
+		mInplaceSearchPanel->setFocus(true);
+		handled = TRUE;
+	}
+// [/SL:KB]
 
 	return handled;
 }
@@ -2380,6 +2400,13 @@ void LLTextEditor::draw()
 	// when in readonly mode
 	mBorder->setKeyboardFocusHighlight( hasFocus() );// && !mReadOnly);
 }
+
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+BOOL LLTextEditor::hasFocus() const
+{
+	return (LLTextBase::hasFocus()) && ( (!mShowInplaceSearch) || (!mInplaceSearchPanel) || (!mInplaceSearchPanel->getVisible()) || (!gFocusMgr.childHasKeyboardFocus(mInplaceSearchPanel)) );
+}
+// [/SL:KB]
 
 // Start or stop the editor from accepting text-editing keystrokes
 // see also LLLineEditor

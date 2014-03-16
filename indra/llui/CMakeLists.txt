@@ -105,6 +105,7 @@ set(llui_SOURCE_FILES
     lltextbox.cpp
     lltexteditor.cpp
     lltextparser.cpp
+    lltextsearchctrl.cpp
     lltextutil.cpp
     lltextvalidate.cpp
     lltimectrl.cpp
@@ -218,6 +219,7 @@ set(llui_HEADER_FILES
     lltextbox.h
     lltexteditor.h
     lltextparser.h
+    lltextsearchctrl.h
     lltextutil.h
     lltextvalidate.h
     lltimectrl.h

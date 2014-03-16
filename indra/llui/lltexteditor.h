@@ -65,6 +65,9 @@ public:
 								show_line_numbers,
 								commit_on_focus_lost,
 								show_context_menu,
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+								show_inplace_search,
+// [/SL:KB]
 								enable_tooltip_paste,
 								auto_indent;
 
@@ -118,6 +121,9 @@ public:
 
 	// uictrl overrides
 	virtual void	clear();
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	/*virtual*/ BOOL hasFocus() const;
+// [/SL:KB]
 	virtual void	setFocus( BOOL b );
 	virtual BOOL	isDirty() const;
 
@@ -346,6 +352,10 @@ private:
 
 	BOOL			mAllowEmbeddedItems;
 	bool			mShowContextMenu;
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	bool			mShowInplaceSearch;
+	LLPanel*		mInplaceSearchPanel;
+// [/SL:KB]
 	bool			mParseOnTheFly;
 	bool			mEnableTooltipPaste;
 	bool			mPassDelete;
