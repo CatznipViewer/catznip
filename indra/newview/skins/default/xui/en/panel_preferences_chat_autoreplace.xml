@@ -11,7 +11,7 @@
    layout="topleft"
    follows="top|left"
    top_pad="15"
-   left="35"
+   left="20"
    width="350"
    height="15"
    mouse_opaque="false"

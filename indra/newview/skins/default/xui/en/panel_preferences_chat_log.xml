@@ -12,7 +12,7 @@
      layout="topleft"
      follows="top|left"
      top_pad="15"
-     left="35"
+     left="20"
      width="350"
      height="15"
      mouse_opaque="false"
@@ -26,7 +26,7 @@
      follows="top|left"
      height="15"
      layout="topleft"
-     left="55"
+     left="35"
      mouse_opaque="false"
      name="log_friendstatus_text"
      top_pad="5"
@@ -70,7 +70,7 @@
      follows="top|left"
      height="15"
      layout="topleft"
-     left="55"
+     left="35"
      mouse_opaque="false"
      name="log_paymentreceived_text"
      top_pad="5"
@@ -114,7 +114,7 @@
      follows="top|left"
      height="15"
      layout="topleft"
-     left="55"
+     left="35"
      mouse_opaque="false"
      name="log_paymentsent_text"
      top_pad="5"
@@ -170,7 +170,7 @@
      layout="topleft"
      follows="top|left"
      top_pad="8"
-     left="35"
+     left="20"
      width="350"
      height="15"
      mouse_opaque="false"
@@ -185,9 +185,9 @@
      height="100"
      layout="topleft"
      name="log_settings"
-     left="13"
+     left="0"
      top_pad="0"
-     width="400">
+     right="-1">
 
         <!-- Referenced in code -->
         <check_box
@@ -197,7 +197,7 @@
          height="16"
          label="Save nearby chat logs on my computer"
          layout="topleft"
-         left="15"
+         left="35"
          name="log_nearby_chat"
          width="350"
          top="10">
@@ -246,11 +246,11 @@
         <text
          follows="top|left"
          layout="topleft"
-         left="0"
+
          name="log_path_text"
-         height="12"
+         height="16"
          width="55">
-            Location:
+            Location
         </text>
 
         <!-- Referenced in code -->
@@ -260,10 +260,9 @@
          border_style="line"
          border_thickness="1"
          enabled="false"
-         font="SansSerif"
          height="23"
          layout="topleft"
-         left_pad="55"
+         left_pad="2"
          max_length="4096"
          name="log_path_string"
          top_delta="-5"
@@ -280,7 +279,7 @@
          left_pad="5"
          name="log_path_button"
          top_delta="0"
-         width="112">
+         width="80">
             <commit_callback function="Pref.LogPath" />
         </button>
 
@@ -291,10 +290,9 @@
          height="23"
          label="Delete transcripts..."
          layout="topleft"
-         left_delta="0"
-         top_pad="0"
+         left_pad="5"
          name="delete_transcripts"
-         width="137">
+         width="110">
             <button.commit_callback
              function="Pref.DeleteTranscripts" />
         </button>
@@ -314,7 +312,7 @@
          layout="topleft"
          follows="top|left"
          top="5"
-         left="35"
+         left="20"
          width="350"
          height="15"
          mouse_opaque="false"
@@ -326,11 +324,11 @@
         <text
          follows="top|left"
          layout="topleft"
-         left="14"
+         left="20"
          height="80"
          name="log_filename_legacy_text"
          word_wrap="true"
-         right="-14">
+         right="-10">
 Legacy format file names are capatilised and seperated by a space and are used by most third party viewers ('Firstname Lastname.txt').
 
 Linden viewers use lowercase seperated by an underscore ('firstname_lastname.txt').

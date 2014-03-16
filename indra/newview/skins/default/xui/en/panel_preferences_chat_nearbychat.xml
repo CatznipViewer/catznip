@@ -23,6 +23,7 @@
     <panel
      layout="topleft"
      left="35"
+     name="sp_showusername"
      top="35"
      width="120"
      height="38">
@@ -58,6 +59,7 @@
     <panel
      layout="topleft"
      left="165"
+     name="sp_fontsize"
      top="35"
      width="120"
      height="38">
@@ -97,6 +99,7 @@
      layout="topleft"
      left="295"
      top="35"
+     name="sp_chatfont"
      width="180"
      height="50">
         <check_box
@@ -147,7 +150,6 @@
              function="Pref.CommitEditorFont" />
         </combo_box>
         <text
-         font="SansSerifSmall"
          height="15"
          layout="topleft"
          left="0"
@@ -232,7 +234,7 @@
          value="1"
          width="120" />
         <radio_item
-         label="Affects movement (i.e. WASD)"
+         label="Affects movement (WASD)"
          left_pad="0"
          layout="topleft"
          top_delta="0" 
