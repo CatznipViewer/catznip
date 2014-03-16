@@ -96,32 +96,50 @@ Error fetching server release notes URL.
        top="4"
        width="128" />
       <icon
+       commit_on_click="true"
        height="32"
+       hover_cursor="UI_CURSOR_HAND"
        image_name="social_twitter"
        layout="topleft"
        left="10"
        mouse_opaque="true"
        name="twitter_icon"
        top="130"
-       width="32" />
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://twitter.com/CatznipSL" />
+      </icon>
       <icon
+       commit_on_click="true"
        height="32"
+       hover_cursor="UI_CURSOR_HAND"
        image_name="social_fb"
        layout="topleft"
        left_pad="5"
        mouse_opaque="true"
        name="fb_icon"
        top="130"
-       width="32" />
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://facebook.com/Catznip" />
+      </icon>
       <icon
+       commit_on_click="true"
        height="32"
+       hover_cursor="UI_CURSOR_HAND"
        image_name="social_gplus"
        layout="topleft"
        left_pad="5"
        mouse_opaque="true"
        name="gplus_icon"
        top="130"
-       width="32" />
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://google.com/+Catznip" />
+      </icon>
       <button
        follows="bottom|left" 
        image_overlay="Copy"

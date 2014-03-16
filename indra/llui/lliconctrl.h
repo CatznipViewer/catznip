@@ -49,6 +49,9 @@ public:
 	{
 		Optional<LLUIImage*>	image;
 		Optional<LLUIColor>		color;
+// [SL:KB] - Patch: Control-IconCtrl | Checked: 2014-03-16 (Catznip-3.6)
+		Optional<bool>			commit_on_click;
+// [/SL:KB]
 		Optional<bool>			use_draw_context_alpha;
 		Ignored					scale_image;
 		Params();
