@@ -894,27 +894,43 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 				{
 					if (mJumpPrevArrowBtn && mJumpPrevArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mJumpPrevArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mJumpPrevArrowBtn->getRect().mBottom;
-						mJumpPrevArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mJumpPrevArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mJumpPrevArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mJumpPrevArrowBtn->getRect().mBottom;
+//						mJumpPrevArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					if (mJumpNextArrowBtn && mJumpNextArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mJumpNextArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mJumpNextArrowBtn->getRect().mBottom;
-						mJumpNextArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mJumpNextArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mJumpNextArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mJumpNextArrowBtn->getRect().mBottom;
+//						mJumpNextArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					if (mPrevArrowBtn->getRect().pointInRect(x,	y))
 					{
-						S32	local_x	= x	- mPrevArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mPrevArrowBtn->getRect().mBottom;
-						mPrevArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mPrevArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mPrevArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mPrevArrowBtn->getRect().mBottom;
+//						mPrevArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					else if	(mNextArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mNextArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mNextArrowBtn->getRect().mBottom;
-						mNextArrowBtn->handleHover(local_x, local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mNextArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mNextArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mNextArrowBtn->getRect().mBottom;
+//						mNextArrowBtn->handleHover(local_x, local_y, mask);
 					}
 				}
 
