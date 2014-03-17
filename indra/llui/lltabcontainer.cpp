@@ -1626,15 +1626,20 @@ BOOL LLTabContainer::setTab(S32 which)
 				if (mIsVertical)
 				{
 					S32 num_visible = getTabCount() - getMaxScrollPos();
-					if( i >= getScrollPos() && i <= getScrollPos() + num_visible)
-					{
-						setCurrentPanelIndex(which);
-						is_visible = TRUE;
-					}
-					else
-					{
-						is_visible = FALSE;
-					}
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+					if ( (i < getScrollPos()) || (i >= getScrollPos() + num_visible) )
+						setScrollPos(llmin(i, getMaxScrollPos()));
+					is_visible = TRUE;
+// [/SL:KB]
+//					if( i >= getScrollPos() && i <= getScrollPos() + num_visible)
+//					{
+//						setCurrentPanelIndex(which);
+//						is_visible = TRUE;
+//					}
+//					else
+//					{
+//						is_visible = FALSE;
+//					}
 				}
 				else if (getMaxScrollPos() > 0)
 				{
