@@ -122,6 +122,7 @@ public:
 	// uictrl overrides
 	virtual void	clear();
 // [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	/*virtual*/ bool hasAccelerators() const { return (mShowInplaceSearch) || (LLTextBase::hasAccelerators()); }
 	/*virtual*/ BOOL hasFocus() const;
 // [/SL:KB]
 	virtual void	setFocus( BOOL b );
