@@ -29,6 +29,7 @@
      layout="topleft"
      left="0"
      name="im_box_tab_container"
+     open_tabs_on_drag_and_drop="true"
      right="-1"
      tab_height="16"
      tab_icon_ctrl_pad="2"
