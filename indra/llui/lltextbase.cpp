@@ -1288,6 +1288,8 @@ void LLTextBase::draw()
 		}
  
 // [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		if (mHighlightsDirty)
+			refreshHighlights();
 		if (!mHighlights.empty())
 			drawHighlightsBackground(mHighlights, mHighlightedBGColor);
 // [/SL:KB]
@@ -2231,6 +2233,10 @@ void LLTextBase::needsReflow(S32 index)
 {
 	lldebugs << "reflow on object " << (void*)this << " index = " << mReflowIndex << ", new index = " << index << llendl;
 	mReflowIndex = llmin(mReflowIndex, index);
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	mHighlightsDirty = true;
+// [/SL:KB]
 }
 
 void LLTextBase::appendLineBreakSegment(const LLStyle::Params& style_params)
@@ -2786,28 +2792,43 @@ void LLTextBase::clearHighlights()
 	mHighlights.clear();
 }
 
+void LLTextBase::refreshHighlights()
+{
+	if (mHighlightsDirty)
+	{
+		clearHighlights();
+		if (!mHighlightWord.empty())
+		{
+			const LLWString& wstrText = getWText();
+
+			std::list<boost::iterator_range<LLWString::const_iterator> > highlightRanges;
+			if (mHighlightCaseInsensitive)
+				boost::ifind_all(highlightRanges, wstrText, mHighlightWord);
+			else
+				boost::find_all(highlightRanges, wstrText, mHighlightWord);
+
+			for (std::list<boost::iterator_range<LLWString::const_iterator> >::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
+			{
+				S32 idxStart = itRange->begin() - wstrText.begin();
+				mHighlights.push_back(range_pair_t(idxStart, idxStart + itRange->size()));
+			}
+		}
+		mHighlightsDirty = false;
+	}
+}
+
 void LLTextBase::setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive)
 {
-	clearHighlights();
 	if (strHighlight.empty())
 	{
+		clearHighlights();
+		mHighlightsDirty = false;
 		return;
 	}
 
-	LLWString wstrText = getWText();
-	LLWString wstrHighlight = utf8str_to_wstring(strHighlight);
-
-	std::list<boost::iterator_range<LLWString::const_iterator> > highlightRanges;
-	if (fCaseInsensitive)
-		boost::ifind_all(highlightRanges, wstrText, wstrHighlight);
-	else
-		boost::find_all(highlightRanges, wstrText, wstrHighlight);
-
-	for (std::list<boost::iterator_range<LLWString::const_iterator> >::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
-	{
-		S32 idxStart = itRange->begin() - wstrText.begin();
-		mHighlights.push_back(range_pair_t(idxStart, idxStart + itRange->size()));
-	}
+	mHighlightWord = utf8str_to_wstring(strHighlight);
+	mHighlightCaseInsensitive = fCaseInsensitive;
+	mHighlightsDirty = true;
 }
 // [/SL:KB]
 

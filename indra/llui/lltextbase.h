@@ -445,6 +445,7 @@ public:
 // [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
 	// highlighting
 	void					clearHighlights();
+	void					refreshHighlights();
 	void					setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive);
 // [/SL:KB]
 
@@ -653,7 +654,10 @@ protected:
 
 // [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
 	// highlighting
+	LLWString					mHighlightWord;
+	bool						mHighlightCaseInsensitive;
 	highlight_list_t			mHighlights;
+	bool						mHighlightsDirty;
 // [/SL:KB]
 
 	// configuration
