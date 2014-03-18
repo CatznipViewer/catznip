@@ -413,7 +413,7 @@ void LLTextBase::drawHighlightsBackground(const highlight_list_t& highlights, co
 				++itHighlight;
 
 			// Draw all highlights on the current line
-			while ( (itHighlight != highlights.end()) && (itHighlight->first <= line_iter->mDocIndexEnd) )
+			while ( (itHighlight != highlights.end()) && (itHighlight->first < line_iter->mDocIndexEnd) )
 			{
 				// Keep the names of these to change fewer lines of LL code
 				S32 selection_left  = llmin(itHighlight->first, itHighlight->second);
@@ -480,7 +480,11 @@ void LLTextBase::drawHighlightsBackground(const highlight_list_t& highlights, co
 					}
 					selection_rects.push_back(selection_rect);
 				}
+
 // [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+				// Only advance if the highlight ends on the current line
+				if (itHighlight->second > line_iter->mDocIndexEnd)
+					break;
 				++itHighlight;
 			}
 // [/SL:KB]
