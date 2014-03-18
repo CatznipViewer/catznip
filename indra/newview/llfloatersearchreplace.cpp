@@ -22,6 +22,7 @@
 #include "lllineeditor.h"
 #include "llmultifloater.h"
 #include "lltexteditor.h"
+#include "llviewermenu.h"
 
 // ============================================================================
 // LLFloaterSearchReplace class
@@ -112,6 +113,16 @@ BOOL LLFloaterSearchReplace::handleKeyHere(KEY key, MASK mask)
 	// (allows Ctrl-F to work when the floater itself has focus - see changeset 0c8947e5f433)
 	if (!LLFloater::handleKeyHere(key, mask))
 	{
+		// Check if one of our children currently has keyboard focus and if so route edit accellerators to it
+		if (gFocusMgr.childHasKeyboardFocus(this))
+		{
+			LLView* pEditView = dynamic_cast<LLView*>(LLEditMenuHandler::gEditMenuHandler);
+			if ( (pEditView) && (pEditView->hasAncestor(this)) && (gEditMenu) && (gEditMenu->handleAcceleratorKey(key, mask)) )
+			{
+				return TRUE;
+			}
+		}
+
 		LLView* pView = m_EditorHandle.get();
 		while (pView)
 		{
