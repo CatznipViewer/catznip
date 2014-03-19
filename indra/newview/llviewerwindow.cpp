@@ -96,6 +96,9 @@
 #include "lldrawpoolalpha.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolwater.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "lleconomy.h"
+// [/SL:KB]
 #include "llmaniptranslate.h"
 #include "llface.h"
 #include "llfeaturemanager.h"
@@ -176,6 +179,9 @@
 #include "llviewermedia.h"
 #include "llviewermediafocus.h"
 #include "llviewermenu.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "llviewermenufile.h"
+// [/SL:KB]
 #include "llviewermessage.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparcelmgr.h"
@@ -1335,6 +1341,10 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 					{
 						if (fDrop)
 						{
+							// getPriceUpload() returns -1 if no data available yet.
+							S32 nUploadCost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+							std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
+
 							std::string strFileList;
 							for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
 							{
@@ -1342,7 +1352,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 								strFileList += "\n";
 							}
 
-							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("FILELIST", strFileList), LLSD(), boost::bind(dnd_upload_nop, data));
+							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("FILELIST", strFileList), LLSD(), boost::bind(upload_bulk, data));
 						}
 						result = DND_COPY;
 					}
