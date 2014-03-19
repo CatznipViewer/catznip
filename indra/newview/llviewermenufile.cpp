@@ -502,12 +502,13 @@ class LLFileUploadBulk : public view_listener_t
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_ALL, 
-			boost::bind(&LLFileUploadBulk::onFilePickerCallback, this, _1));
+			boost::bind(upload_bulk, _1));
 
 		return true;
 	}
+};
 
-	void onFilePickerCallback(const std::vector<std::string>& files)
+	void upload_bulk(const std::vector<std::string>& files)
 	{
 // [/SL:KB]
 		// TODO:
@@ -569,7 +570,7 @@ class LLFileUploadBulk : public view_listener_t
 		}
 //		return true;
 	}
-};
+//};
 
 void upload_error(const std::string& error_message, const std::string& label, const std::string& filename, const LLSD& args) 
 {
