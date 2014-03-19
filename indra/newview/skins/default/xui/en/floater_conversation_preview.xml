@@ -24,6 +24,7 @@
      parse_highlights="true"
      parse_urls="true"
      left="5"
+     show_inplace_search="true"
      top_pad="25"
      width="390">
     </chat_history>
