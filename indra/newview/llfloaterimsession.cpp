@@ -245,6 +245,20 @@ bool LLFloaterIMSession::enableGearGroupMenuItem(const LLSD& userdata)
 }
 // [/SL:KB]
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+void LLFloaterIMSession::onTeleportClicked(const LLUICtrl* pCtrl)
+{
+	if (pCtrl)
+	{
+		const std::string strValue = pCtrl->getValue().asString();
+		if ( (strValue.empty()) || ("offer_teleport" == strValue) )
+			GearDoToSelected("offer_teleport");
+		else if ("request_teleport")
+			GearDoToSelected("request_teleport");
+	}
+}
+// [/SL:KB]
+
 void LLFloaterIMSession::sendMsgFromInputEditor()
 {
 	if (gAgent.isGodlike()
@@ -386,6 +400,21 @@ BOOL LLFloaterIMSession::postBuild()
 	//see LLFloaterIMPanel for how it is done (IB)
 
 	initIMFloater();
+
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	LLUICtrl* pProfileBtn = getChild<LLUICtrl>("profile_btn");
+	pProfileBtn->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "view_profile"));
+	pProfileBtn->setVisible(mIsP2PChat);
+	LLUICtrl* pTeleportBtn = getChild<LLUICtrl>("teleport_btn");
+	pTeleportBtn->setCommitCallback(boost::bind(&LLFloaterIMSession::onTeleportClicked, this, _1));
+	pTeleportBtn->setVisible(mIsP2PChat);
+	LLUICtrl* pChatHistoryBtn = getChild<LLUICtrl>("chat_history_btn");
+	pChatHistoryBtn->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "chat_history"));
+	pChatHistoryBtn->setVisible(mIsP2PChat);
+	LLUICtrl* pPayBtn = getChild<LLUICtrl>("pay_btn");
+	pPayBtn->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "pay"));
+	pPayBtn->setVisible(mIsP2PChat);
+// [/SL:KB]
 
 	return result;
 }

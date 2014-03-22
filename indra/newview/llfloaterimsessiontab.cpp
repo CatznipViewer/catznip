@@ -93,6 +93,9 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mViewBtn(NULL)
   , mAddBtn(NULL)
   , mVoiceButton(NULL)
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+  , mSearchBtn(NULL)
+// [/SL:KB]
   , mTranslationCheckBox(NULL)
 // [/SL:KB]
 {
@@ -324,6 +327,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	}
 	mViewBtn = getChild<LLButton>("view_options_btn");
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	mSearchBtn = getChild<LLButton>("text_search_btn");
+	mSearchBtn->setClickedCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchClicked, this));
+// [/SL:KB]
     mAddBtn = getChild<LLButton>("add_btn");
 	mVoiceButton = getChild<LLButton>("voice_call_btn");
     mTranslationCheckBox = getChild<LLUICtrl>("translate_chat_checkbox_lp");
@@ -432,6 +439,9 @@ BOOL LLFloaterIMSessionTab::postBuild()
 		mConversationsRoot->addChild(mConversationsRoot->mStatusTextBox);
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	}
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	mChatHistory->getEditor()->getInplaceSearchPanel()->setVisibleCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchVisibilityChanged, this));
 // [/SL:KB]
 
 	setMessagePaneExpanded(true);
@@ -1177,6 +1187,18 @@ void LLFloaterIMSessionTab::onCollapseToLine(LLFloaterIMSessionTab* self)
 	}
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+void LLFloaterIMSessionTab::onHistorySearchClicked()
+{
+	mChatHistory->getEditor()->toggleInplaceSearchPanel();
+}
+
+void LLFloaterIMSessionTab::onHistorySearchVisibilityChanged()
+{
+	mSearchBtn->setToggleState(mChatHistory->getEditor()->getInplaceSearchPanel()->getVisible());
+}
+// [/SL:KB]
+
 void LLFloaterIMSessionTab::reshapeFloater(bool collapse)
 {
 	LLRect floater_rect = getRect();
@@ -1323,6 +1345,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 		LLRect view_btn_rect = mViewBtn->getRect();
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+		LLRect search_btn_rect = mSearchBtn->getRect();
+// [/SL:KB]
 		LLRect add_btn_rect = mAddBtn->getRect();
 		LLRect call_btn_rect = mVoiceButton->getRect();
 		S32 gap_width = call_btn_rect.mLeft - add_btn_rect.mRight;
@@ -1333,6 +1358,9 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 			view_btn_rect.translate(right_shift,0);
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+			search_btn_rect.translate(right_shift,0);
+// [/SL:KB]
 			add_btn_rect.translate(right_shift,0);
 			call_btn_rect.translate(right_shift,0);
 		}
@@ -1341,11 +1369,17 @@ void LLFloaterIMSessionTab::updateGearBtn()
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 			view_btn_rect.translate(-right_shift,0);
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+			search_btn_rect.translate(-right_shift,0);
+// [/SL:KB]
 			add_btn_rect.translate(-right_shift,0);
 			call_btn_rect.translate(-right_shift,0);
 		}
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 		mViewBtn->setRect(view_btn_rect);
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+		mSearchBtn->setRect(search_btn_rect);
 // [/SL:KB]
 		mAddBtn->setRect(add_btn_rect);
 		mVoiceButton->setRect(call_btn_rect);
@@ -1358,6 +1392,9 @@ void LLFloaterIMSessionTab::initBtns()
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	LLRect view_btn_rect = mViewBtn->getRect();
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	LLRect search_btn_rect = mSearchBtn->getRect();
+// [/SL:KB]
 	LLRect add_btn_rect = mAddBtn->getRect();
 	LLRect call_btn_rect = mVoiceButton->getRect();
 	S32 gap_width = call_btn_rect.mLeft - add_btn_rect.mRight;
@@ -1366,11 +1403,17 @@ void LLFloaterIMSessionTab::initBtns()
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	view_btn_rect.translate(-right_shift,0);
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	search_btn_rect.translate(-right_shift,0);
+// [/SL:KB]
 	add_btn_rect.translate(-right_shift,0);
 	call_btn_rect.translate(-right_shift,0);
 
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	mViewBtn->setRect(view_btn_rect);
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	mSearchBtn->setRect(search_btn_rect);
 // [/SL:KB]
 	mAddBtn->setRect(add_btn_rect);
 	mVoiceButton->setRect(call_btn_rect);
