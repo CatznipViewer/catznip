@@ -1639,12 +1639,18 @@ BOOL LLTabContainer::getTabPanelFlashing(LLPanel *child)
 	return FALSE;
 }
 
-void LLTabContainer::setTabPanelFlashing(LLPanel* child, BOOL state )
+//void LLTabContainer::setTabPanelFlashing(LLPanel* child, BOOL state )
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
+void LLTabContainer::setTabPanelFlashing(LLPanel* child, BOOL state, BOOL flash_timer)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	if( tuple )
 	{
-		tuple->mButton->setFlashing( state );
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
+		tuple->mButton->setFlashing(state, false, flash_timer);
+// [/SL:KB]
+//		tuple->mButton->setFlashing( state );
 	}
 }
 

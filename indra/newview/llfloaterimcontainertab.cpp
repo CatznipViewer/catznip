@@ -139,7 +139,12 @@ void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, 
 
 void LLFloaterIMContainerTab::setConversationHighlighted(const LLUUID& session_id, bool flashing)
 {
-	// *TODO: need implementing for legacy tab container
+	LLFloater* pIMSession = get_ptr_in_map(getSessionMap(), session_id);
+	LLFloater* pCurSession = getActiveFloater();
+	if ( (pIMSession) && (pCurSession) )
+	{
+		mTabContainer->setTabPanelFlashing(pIMSession, (flashing) && (pIMSession != pCurSession), false);
+	}
 }
 
 
