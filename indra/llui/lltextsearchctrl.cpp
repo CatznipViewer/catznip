@@ -29,6 +29,7 @@ LLTextSearchCtrl::LLTextSearchCtrl(LLTextEditor* pEditor)
 {
 	buildFromFile("panel_editor_inlinesearch.xml");
 
+	setVisible(false);
 	pEditor->addChild(this);
 }
 
@@ -48,6 +49,16 @@ BOOL LLTextSearchCtrl::postBuild()
 	getChild<LLButton>("close_btn")->setCommitCallback(boost::bind(&LLTextSearchCtrl::setVisible, this, false));
 
 	return LLPanel::postBuild();
+}
+
+BOOL LLTextSearchCtrl::handleKeyHere(KEY key, MASK mask)
+{
+	if ( (KEY_ESCAPE == key) && (MASK_NONE == mask) )
+	{
+		setVisible(false);
+		return TRUE;
+	}
+	return LLPanel::handleKeyHere(key, mask);
 }
 
 void LLTextSearchCtrl::setVisible(BOOL fVisible)
@@ -83,7 +94,8 @@ void LLTextSearchCtrl::setVisible(BOOL fVisible)
 	{
 		if (gFocusMgr.childHasKeyboardFocus(this))
 			gFocusMgr.setKeyboardFocus(NULL);
-		getParent()->setFocus(true);
+		if (getParent())
+			getParent()->setFocus(true);
 	}
 }
 

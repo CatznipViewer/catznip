@@ -1932,19 +1932,50 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask )
 // [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
 	else if ( (mShowInplaceSearch) && ((mask & MASK_MODIFIERS) == MASK_CONTROL) && ('F' == key) )
 	{
-		if (!mInplaceSearchPanel)
-			mInplaceSearchPanel = new LLTextSearchCtrl(this);
-		if (hasSelection())
-			mInplaceSearchPanel->setValue(getSelectionString());
-		mInplaceSearchPanel->setVisible(true);
-		mInplaceSearchPanel->setFocus(true);
-		handled = TRUE;
+		LLPanel* pSearchPanel = getInplaceSearchPanel();
+		if (pSearchPanel)
+		{
+			showInplaceSearchPanel(true);
+			if (hasSelection())
+				pSearchPanel->setValue(getSelectionString());
+			handled = TRUE;
+		}
 	}
 // [/SL:KB]
 
 	return handled;
 }
 
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+LLPanel* LLTextEditor::getInplaceSearchPanel()
+{
+	if ( (!mInplaceSearchPanel) && (mShowInplaceSearch) )
+		mInplaceSearchPanel = new LLTextSearchCtrl(this);
+	return mInplaceSearchPanel;
+}
+
+void LLTextEditor::showInplaceSearchPanel(bool fShow)
+{
+	LLPanel* pSearchPanel = getInplaceSearchPanel();
+	if (pSearchPanel)
+	{
+		pSearchPanel->setVisible(fShow);
+		if (fShow)
+		{
+			pSearchPanel->setFocus(true);
+		}
+	}
+}
+
+void LLTextEditor::toggleInplaceSearchPanel()
+{
+	LLPanel* pSearchPanel = getInplaceSearchPanel();
+	if (pSearchPanel)
+	{
+		showInplaceSearchPanel(!pSearchPanel->getVisible());
+	}
+}
+// [/SL:KB]
 
 BOOL LLTextEditor::handleUnicodeCharHere(llwchar uni_char)
 {

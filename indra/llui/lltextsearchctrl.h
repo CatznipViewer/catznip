@@ -43,6 +43,7 @@ public:
 	 * Base class overrides
 	 */
 public:
+	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setVisible(BOOL fVisible);
 	/*virtual*/ LLSD getValue() const;
