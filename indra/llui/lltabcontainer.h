@@ -225,6 +225,10 @@ public:
 	S32			getMinTabWidth() const { return mMinTabWidth; }
 	S32			getMaxTabWidth() const { return mMaxTabWidth; }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
+	bool		isVertical() const { return mIsVertical; }
+// [/SL:KB]
+
 	void		startDragAndDropDelayTimer() { mDragAndDropDelayTimer.start(); }
 	
 	void onTabBtn( const LLSD& data, LLPanel* panel );
