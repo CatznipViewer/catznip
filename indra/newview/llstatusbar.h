@@ -43,6 +43,9 @@ class LLFrameTimer;
 class LLStatGraph;
 class LLPanelVolumePulldown;
 class LLPanelNearByMedia;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+class LLPanelTopInfoBar;
+// [/SL:KB]
 
 class LLStatusBar
 :	public LLPanel
@@ -84,6 +87,7 @@ public:
 
 	LLPanelNearByMedia* getNearbyMediaPanel() { return mPanelNearByMedia; }
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+	LLPanelTopInfoBar*	getTopInfoBarPanel() const;
 	void				showTopInfoBar(bool fVisible);
 // [/SL:KB]
 

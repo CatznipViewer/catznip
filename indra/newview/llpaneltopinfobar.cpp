@@ -326,7 +326,7 @@ void LLPanelTopInfoBar::buildLocationString(std::string& loc_str)
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-16 (Catznip-3.2)
 void LLPanelTopInfoBar::update()
 {
-	updateParcelInfoText();
+	updateParcelInfoText(false, true);
 	updateHealth();
 	updateParcelIcons();
 	updateLayout();
@@ -345,10 +345,10 @@ void LLPanelTopInfoBar::update()
 //}
 
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
-void LLPanelTopInfoBar::updateParcelInfoText(bool fUpdateLayout)
+void LLPanelTopInfoBar::updateParcelInfoText(bool fUpdateLayout, bool fForceUpdate)
 {
 	static LLVector3d sPrevPosGlobal = gAgent.getPositionGlobal();
-	if (dist_vec_squared(sPrevPosGlobal, gAgent.getPositionGlobal()) > 1.0f)
+	if ( (dist_vec_squared(sPrevPosGlobal, gAgent.getPositionGlobal()) > 1.0f) || (fForceUpdate) )
 	{
 		std::string strLocation;
 		buildLocationString(strLocation);

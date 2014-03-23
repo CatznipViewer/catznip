@@ -39,6 +39,9 @@
 #include "llbuycurrencyhtml.h"
 #include "llfloaterlagmeter.h"
 #include "llpanelnearbymedia.h"
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+#include "llpaneltopinfobar.h"
+// [/SL:KB]
 #include "llpanelvolumepulldown.h"
 #include "llfloaterregioninfo.h"
 #include "llfloaterscriptdebug.h"
@@ -365,9 +368,14 @@ void LLStatusBar::setVisibleForMouselook(bool visible)
 }
 
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+LLPanelTopInfoBar* LLStatusBar::getTopInfoBarPanel() const
+{
+	return dynamic_cast<LLPanelTopInfoBar*>(getChildView("topinfo_bar"));
+}
+
 void LLStatusBar::showTopInfoBar(bool fVisible)
 {
-	LLPanel* pTopInfoBar = getChild<LLPanel>("topinfo_bar");
+	LLPanel* pTopInfoBar = getTopInfoBarPanel();
 	if (pTopInfoBar)
 		pTopInfoBar->setVisible(fVisible);
 }

@@ -139,7 +139,7 @@ private:
 	 * Updates parcel info text (mParcelInfoText).
 	 */
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2013-09-25 (Catznip-3.6)
-	void updateParcelInfoText(bool fUpdateLayout = false);
+	void updateParcelInfoText(bool fUpdateLayout = false, bool fForceUpdate = false);
 // [/SL:KB]
 //	void updateParcelInfoText();
 
