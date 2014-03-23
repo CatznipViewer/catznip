@@ -307,7 +307,7 @@ void LLNotificationChiclet::onMenuItemClicked(const LLSD& user_data)
 	if("close all" == action)
 	{
 		LLNotificationWellWindow::getInstance()->closeAll();
-		LLIMWellWindow::getInstance()->closeAll();
+//		LLIMWellWindow::getInstance()->closeAll();
 	}
 }
 
