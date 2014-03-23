@@ -47,6 +47,9 @@
 #include "llaccordionctrl.h"
 #include "llaccordionctrltab.h"
 #include "llagent.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-03-23 (Catznip-3.6)
+#include "llagentcamera.h"
+// [/SL:KB]
 #include "llavataractions.h"
 #include "llavatarlist.h"
 #include "llavatarlistitem.h"
@@ -289,13 +292,21 @@ public:
 			id_it = uuids.begin(),
 			id_end = uuids.end();
 
-		LLAvatarItemDistanceComparator::id_to_pos_map_t pos_map;
+//		LLAvatarItemDistanceComparator::id_to_pos_map_t pos_map;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		const LLVector3& posAgentCam = gAgentCamera.getCameraPositionAgent();
+// [/SL:KB]
 
 		mAvatarsPositions.clear();
 
 		for (;pos_it != pos_end && id_it != id_end; ++pos_it, ++id_it )
 		{
-			mAvatarsPositions[*id_it] = *pos_it;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+			const LLVector3d& posAgent = *pos_it;
+			// NOTE-Catznip: this should match the 'unknown_relative_z' check in LLNetMap::draw()
+			mAvatarsPositions[*id_it] = ((posAgent.mdV[VZ] != COARSEUPDATE_MAX_Z) || (posAgentCam.mV[VZ] < COARSEUPDATE_MAX_Z)) ? *pos_it : LLVector3d::zero;
+// [/SL:KB]
+//			mAvatarsPositions[*id_it] = *pos_it;
 		}
 	};
 
@@ -308,7 +319,15 @@ protected:
 	{
 		const LLVector3d& me_pos = gAgent.getPositionGlobal();
 		const LLVector3d& item1_pos = mAvatarsPositions.find(item1->getAvatarId())->second;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		if (item1_pos.isExactlyZero())
+			return false;
+// [/SL:KB]
 		const LLVector3d& item2_pos = mAvatarsPositions.find(item2->getAvatarId())->second;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		if (item2_pos.isExactlyZero())
+			return true;
+// [/SL:KB]
 		
 		return dist_vec_squared(item1_pos, me_pos) < dist_vec_squared(item2_pos, me_pos);
 	}
@@ -1075,7 +1094,12 @@ void LLPanelPeople::updateDistances()
 		{
 			LLAvatarItemDistanceComparator::id_to_pos_map_t::const_iterator itAvatar = posAvatars.find(pItem->getAvatarId());
 			if (posAvatars.end() != itAvatar)
-				pItem->setTextFieldDistance(dist_vec(itAvatar->second, posSelf));
+			{
+				if (!itAvatar->second.isExactlyZero())
+					pItem->setTextFieldDistance(dist_vec(itAvatar->second, posSelf));
+				else
+					pItem->setTextField("- - -    ");
+			}
 		}
 	}
 }
