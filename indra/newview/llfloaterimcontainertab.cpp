@@ -86,9 +86,9 @@ void LLFloaterIMContainerTab::setVisible(BOOL visible)
 	LLFloaterIMContainerBase::setVisible(visible);
 }
 
-void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id)
+void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id, bool focus_floater)
 {
-	selectConversationPair(session_id, true);
+	selectConversationPair(session_id, true, focus_floater);
 }
 
 bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, bool /*select_widget*/, bool focus_floater /*=true*/)
@@ -111,7 +111,7 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 		else
 		{
 			pConvFloater->setMinimized(false);
-			pConvFloater->setVisibleAndFrontmost(true);
+			pConvFloater->setVisibleAndFrontmost(focus_floater);
 		}
 	}
 	return true;

@@ -151,7 +151,7 @@ static void on_avatar_name_cache_toast(const LLUUID& agent_id,
 	args["SESSION_ID"] = msg["session_id"];
 	args["SESSION_TYPE"] = msg["session_type"];
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainerBase::showConversation, LLFloaterIMContainerBase::getInstance(), msg["session_id"].asUUID()));
+	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainerBase::showConversation, LLFloaterIMContainerBase::getInstance(), msg["session_id"].asUUID(), true));
 // [/SL:KB]
 //	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainer::showConversation, LLFloaterIMContainer::getInstance(), msg["session_id"].asUUID()));
 }

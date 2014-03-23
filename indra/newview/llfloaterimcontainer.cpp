@@ -1589,7 +1589,10 @@ bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 	return true;
 }
 
-void LLFloaterIMContainerView::showConversation(const LLUUID& session_id)
+//void LLFloaterIMContainerView::showConversation(const LLUUID& session_id)
+// [SL:KB] - Patch: Chat-Base | Checked: 2013-11-27 (Catznip-3.6)
+void LLFloaterIMContainerView::showConversation(const LLUUID& session_id, bool focus_floater)
+// [/SL:KB]
 {
 // [SL:KB] - Patch: Chat-Base | Checked: 2013-11-27 (Catznip-3.6)
     LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
@@ -1597,12 +1600,12 @@ void LLFloaterIMContainerView::showConversation(const LLUUID& session_id)
 	{
 		setMinimized(false);
 		setVisibleAndFrontmost(false);
-		selectConversationPair(session_id, true);
+		selectConversationPair(session_id, focus_floater);
 	}
 	else
 	{
 		session_floater->setMinimized(false);
-		session_floater->setVisibleAndFrontmost(true);
+		session_floater->setVisibleAndFrontmost(focus_floater);
 		flashConversationItemWidget(session_id, false);
 	}
 // [/SL:KB]
