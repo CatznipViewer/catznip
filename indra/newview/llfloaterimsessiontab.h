@@ -54,6 +54,16 @@ class LLMenuButton;
 class LLToggleableMenu;
 // [/SL:KB]
 
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+enum EChatMessageOptions
+{
+	MSGOPT_NONE  = 0x00,
+	MSGOPT_FLASH = 0x01,	// Flash the appropriate toolbar
+	MSGOPT_TOAST = 0x02,	// Show a toast for the message
+	MSGOPT_POPUP = 0x04		// Pop up the matching floater
+};
+// [/SL:KB]
+
 class LLFloaterIMSessionTab
 	: public LLTransientDockableFloater
 {
