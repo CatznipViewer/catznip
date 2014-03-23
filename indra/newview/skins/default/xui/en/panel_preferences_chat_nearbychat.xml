@@ -21,10 +21,11 @@
         Nearby Chat &amp; Instant Message Appearance
     </text>
     <panel
+     follows="top|left"
      layout="topleft"
      left="35"
      name="sp_showusername"
-     top="35"
+     top="30"
      width="120"
      height="38">
         <text
@@ -57,10 +58,11 @@
     </panel>
     
     <panel
+     follows="top|left"
      layout="topleft"
      left="165"
      name="sp_fontsize"
-     top="35"
+     top="30"
      width="120"
      height="38">
         <text
@@ -96,9 +98,10 @@
     </panel>
 
     <panel
+     follows="top|left"
      layout="topleft"
      left="295"
-     top="35"
+     top="30"
      name="sp_chatfont"
      width="180"
      height="50">
@@ -171,6 +174,7 @@
      layout="topleft"
      left="35"
      name="chat_timestampseconds_check"
+     top_pad="0"
      width="350" />
     <check_box
      control_name="NearbyChatIsNotTornOff"
@@ -251,6 +255,7 @@
      layout="topleft"
      left="35"
      name="chat_chatbartype_check"
+     top_pad="0"
      width="350" />
     <check_box
      control_name="CloseChatOnEmptyReturn"
@@ -290,9 +295,9 @@
      layout="topleft"
      left="35"
      name="bubble_text_chat"
-     top_pad="0"
+     top_pad="3"
      width="330" />
-
+    
     <view_border
      top_pad="10"
      layout="topleft"
@@ -318,47 +323,63 @@
         Notifications
     </text>
     <text
+     follows="top|left"
      layout="topleft"
      left="35"
-     height="12"
+     height="16"
      name="nearby_chat"
-     width="145">
+     width="105">
         Nearby chat:
     </text>
-    <combo_box
-     control_name="NotificationNearbyChatOptions"
-     height="23"
-     layout="topleft"
-     left_pad="5"
-     top_delta="-6"
-     name="NearbyChatOptions"
-     width="223">
-        <item
-         label="Open Conversations window"
-         name="OpenConversationsWindow"
-         value="openconversations"/>
-        <item
-         label="Pop up the message"
-         name="PopUpMessage"
-         value="toast"/>
-        <item
-         label="Flash toolbar button"
-         name="FlashToolBarButton"
-         value="flash"/>
-        <item
-         label="No action"
-         name="NoAction"
-         value="noaction"/>
-    </combo_box>
     <check_box
-     control_name="PlaySoundNearbyChatIM"
-     height="23"
-     label="Play sound"
+     height="20"
+     label="Show Toasts"
      layout="topleft"
-     name="play_sound_nearby_chat_im"
-     left_pad="7"
+     name="nearbychat_toasts"
+     left_pad="0"
      top_delta="-3"
-     width="28">
+     width="100">
     </check_box>
+    <check_box
+     height="23"
+     label="Flash Button"
+     layout="topleft"
+     name="nearbychat_flashbuttons"
+     left_pad="7"
+     width="100">
+    </check_box>
+    <check_box
+     height="23"
+     label="Show Chat"
+     layout="topleft"
+     name="nearbychat_pop"
+     left_pad="7"
+     width="100">
+    </check_box>
+    <check_box
+     control_name="ChatMultiLine"
+     follows="top|left"
+     height="20"
+     label="Treat messages from worn objects as chat."
+     layout="topleft"
+     left="35"
+     name="chat_wornchat_check"
+     width="350" />
+    <button
+      image_overlay="Audio_Off"
+      image_overlay_alignment="left"
+      follows="top|left"
+      height="23"
+      layout="topleft"
+      left_pad="15"
+      name="soundscheme_apply"
+      label="Sound Alerts"
+      top_delta="-1"
+      right="-15"
+      width="120">
+      <button.commit_callback
+        function="Preferences.SelectPanel"
+        parameter="soundalerts_tab" />
+      </button>
 
 </panel>
