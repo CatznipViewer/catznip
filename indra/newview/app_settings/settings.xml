@@ -4622,6 +4622,17 @@
         <key>Value</key>
         <integer>0</integer>
     </map>
+    <key>InventoryOfferAcceptanceDnd</key>
+    <map>
+        <key>Comment</key>
+        <string>Specifies whether (task) inventory offers will be pop up (0), auto-accept (1), or auto-decline (2) when marked as do not disturb</string>
+        <key>Persist</key>
+        <integer>0</integer>
+        <key>Type</key>
+        <string>U32</string>
+        <key>Value</key>
+        <integer>0</integer>
+    </map>
     <key>InventoryInboxToggleState</key>
     <map>
         <key>Comment</key>

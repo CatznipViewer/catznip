@@ -35,7 +35,9 @@
 #include "llagent.h"
 #include "lldate.h"
 #include "llnotifications.h"
-
+// [SL:KB] - Patch: Notification-InvOfferAcceptance | Checked: 2014-03-24 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 LLCommunicationChannel::LLCommunicationChannel(const std::string& pName, const std::string& pParentName)
 	: LLNotificationChannel(pName, pParentName, filterByDoNotDisturbStatus)
@@ -47,10 +49,19 @@ LLCommunicationChannel::~LLCommunicationChannel()
 {
 }
 
-bool LLCommunicationChannel::filterByDoNotDisturbStatus(LLNotificationPtr)
+// [SL:KB] - Patch: Notification-InvOfferAcceptance | Checked: 2014-03-24 (Catznip-3.6)
+bool LLCommunicationChannel::filterByDoNotDisturbStatus(LLNotificationPtr p)
 {
-	return !gAgent.isDoNotDisturb();
+	static LLCachedControl<U32> sInvOfferResponseDnd(gSavedSettings, "InventoryOfferAcceptanceDnd", 0);
+	llinfos << "Notification type: " << p->getType() << llendl;
+	return (!gAgent.isDoNotDisturb()) || ((sInvOfferResponseDnd == 0) && (p->getType() == "offer"));
+//	return !gAgent.isDoNotDisturb();
 }
+// [/SL:KB]
+//bool LLCommunicationChannel::filterByDoNotDisturbStatus(LLNotificationPtr)
+//{
+//	return !gAgent.isDoNotDisturb();
+//}
 
 S32 LLCommunicationChannel::getHistorySize() const
 {

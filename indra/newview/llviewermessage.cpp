@@ -2771,18 +2771,32 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				// Same as closing window
 				info->forceResponse(IOR_DECLINE);
 			}
-			// old logic: busy mode must not affect interaction with objects (STORM-565)
-			// new logic: inventory offers from in-world objects should be auto-declined (CHUI-519)
-			else if (is_do_not_disturb && dialog == IM_TASK_INVENTORY_OFFERED)
-			{
-				// Until throttling is implemented, do not disturb mode should reject inventory instead of silently
-				// accepting it.  SEE SL-39554
-				info->forceResponse(IOR_DECLINE);
-			}
+// [SL:KB] - Patch: Notification-InvOfferAcceptance | Checked: 2014-03-24 (Catznip-3.6)
 			else
 			{
-				inventory_offer_handler(info);
+				U32 nInvOfferResponseDnd = gSavedSettings.getU32("InventoryOfferAcceptanceDnd");
+				if ( (is_do_not_disturb) && (dialog == IM_TASK_INVENTORY_OFFERED) && (nInvOfferResponseDnd > 0) )
+				{
+					info->forceResponse( (nInvOfferResponseDnd == 2) ? IOR_DECLINE : IOR_ACCEPT);
+				}
+				else
+				{
+					inventory_offer_handler(info);
+				}
 			}
+// [/SL:KB]
+//			// old logic: busy mode must not affect interaction with objects (STORM-565)
+//			// new logic: inventory offers from in-world objects should be auto-declined (CHUI-519)
+//			else if (is_do_not_disturb && dialog == IM_TASK_INVENTORY_OFFERED)
+//			{
+//				// Until throttling is implemented, do not disturb mode should reject inventory instead of silently
+//				// accepting it.  SEE SL-39554
+//				info->forceResponse(IOR_DECLINE);
+//			}
+//			else
+//			{
+//				inventory_offer_handler(info);
+//			}
 		}
 		break;
 
