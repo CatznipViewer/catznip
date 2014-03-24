@@ -1853,6 +1853,15 @@ protected:
 	}
 };
 
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+const char* LLOfferInfo::getNotificationName() const
+{
+	if (mFromObject)
+		return (mFromID == gAgentID) ? "OwnObjectGiveItem" : "ObjectGiveItem";
+	return "UserGiveItem";
+}
+// [/SL:KB]
+
 void LLOfferInfo::initRespondFunctionMap()
 {
 	if(mRespondFunctions.empty())
@@ -1954,6 +1963,9 @@ void inventory_offer_handler(LLOfferInfo* info)
 	args["ITEM_SLURL"] = LLSLURL("inventory", info->mObjectID, verb.c_str()).getSLURLString();
 
 	LLNotification::Params p;
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	p.name = info->getNotificationName();
+// [/SL:KB]
 
 	// Object -> Agent Inventory Offer
 	if (info->mFromObject)
@@ -1964,8 +1976,8 @@ void inventory_offer_handler(LLOfferInfo* info)
 		p.substitutions(args).payload(payload).functor.responder(LLNotificationResponderPtr(info));
 		info->mPersist = true;
 
-		// Offers from your own objects need a special notification template.
-		p.name = info->mFromID == gAgentID ? "OwnObjectGiveItem" : "ObjectGiveItem";
+//		// Offers from your own objects need a special notification template.
+//		p.name = info->mFromID == gAgentID ? "OwnObjectGiveItem" : "ObjectGiveItem";
 
 		// Pop up inv offer chiclet and let the user accept (keep), or reject (and silently delete) the inventory.
 	    LLPostponedNotification::add<LLPostponedOfferNotification>(p, info->mFromID, info->mFromGroup == TRUE);
@@ -1979,7 +1991,7 @@ void inventory_offer_handler(LLOfferInfo* info)
 		// closes viewer(without responding the notification)
 		p.substitutions(args).payload(payload).functor.responder(LLNotificationResponderPtr(info));
 		info->mPersist = true;
-		p.name = "UserGiveItem";
+//		p.name = "UserGiveItem";
 		p.offer_from_agent = true;
 		
 		// Prefetch the item into your local inventory.
@@ -7664,8 +7676,14 @@ void invalid_message_callback(LLMessageSystem* msg,
 
 void LLOfferInfo::forceResponse(InventoryOfferResponse response)
 {
-	LLNotification::Params params("UserGiveItem");
-	params.functor.function(boost::bind(&LLOfferInfo::inventory_offer_callback, this, _1, _2));
+//	LLNotification::Params params("UserGiveItem");
+//	params.functor.function(boost::bind(&LLOfferInfo::inventory_offer_callback, this, _1, _2));
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	initRespondFunctionMap();
+
+	LLNotification::Params params(getNotificationName());
+	params.functor.function = mRespondFunctions[params.name];
+// [/SL:KB]
 	LLNotifications::instance().forceResponse(params, response);
 }
 

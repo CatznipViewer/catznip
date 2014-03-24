@@ -227,6 +227,9 @@ public:
 
 	LLOfferInfo(const LLOfferInfo& info);
 
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	const char* getNotificationName() const;
+// [/SL:KB]
 	void forceResponse(InventoryOfferResponse response);
 
     static std::string mResponderType;
