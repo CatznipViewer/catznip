@@ -191,6 +191,10 @@ void LLScriptFloater::onClose(bool app_quitting)
 		{
 			LLScriptFloaterManager::getInstance()->removeNotification(getNotificationId());
 		}
+
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+		LLScriptFloaterManager::getInstance()->onCloseNotification(getNotificationId(), app_quitting);
+// [/SL:KB]
 	}
 }
 
@@ -202,6 +206,17 @@ void LLScriptFloater::setDocked(bool docked, bool pop_on_undock /* = true */)
 
 	hideToastsIfNeeded();
 }
+
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+void LLScriptFloater::setMinimized(BOOL minimize)
+{
+	if ( (minimize) && (!isMinimized()) )
+	{
+		LLScriptFloaterManager::instance().onCloseNotification(getNotificationId(), false);
+	}
+	LLDockableFloater::setMinimized(minimize);
+}
+// [/SL:KB]
 
 void LLScriptFloater::setVisible(BOOL visible)
 {
@@ -393,6 +408,9 @@ void LLScriptFloaterManager::onAddNotification(const LLUUID& notification_id)
 	}
 
 	mNotifications.insert(std::make_pair(notification_id, object_id));
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	mOpenNotifications.push_back(notification_id);
+// [/SL:KB]
 
 	LLChicletPanel * chiclet_panelp = LLChicletBar::getInstance()->getChicletPanel();
 	if (NULL != chiclet_panelp)
@@ -430,6 +448,30 @@ void LLScriptFloaterManager::removeNotification(const LLUUID& notification_id)
 	onRemoveNotification(notification_id);
 }
 
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+void LLScriptFloaterManager::onCloseNotification(const LLUUID& notification_id, bool app_quitting)
+{
+	uuid_vec_t::iterator itOpenNotif = std::find(mOpenNotifications.begin(), mOpenNotifications.end(), notification_id);
+	if (mOpenNotifications.end() != itOpenNotif)
+	{
+		mOpenNotifications.erase(itOpenNotif);
+	}
+
+	if ( (!mOpenNotifications.empty()) && (!app_quitting) )
+	{
+		LLFloaterReg::const_instance_list_t& lFloaters = LLFloaterReg::getFloaterList("script_floater");
+		for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = lFloaters.begin(); itFloater != lFloaters.end(); ++itFloater)
+		{
+			const LLScriptFloater* pFloater = dynamic_cast<LLScriptFloater*>(*itFloater);
+			if ( (pFloater->getVisible()) && (pFloater->getNotificationId() != notification_id) )
+				return;
+		}
+
+		setFloaterVisible(mOpenNotifications.back(), true);
+	}
+}
+// [/SL:KB]
+
 void LLScriptFloaterManager::onRemoveNotification(const LLUUID& notification_id)
 {
 	if(notification_id.isNull())
@@ -454,6 +496,9 @@ void LLScriptFloaterManager::onRemoveNotification(const LLUUID& notification_id)
 		im_well_window->removeObjectRow(notification_id);
 	}
 
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	onCloseNotification(notification_id, false);
+// [/SL:KB]
 	mNotifications.erase(notification_id);
 
 	// close floater
