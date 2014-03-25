@@ -586,7 +586,13 @@ void LLIMToastNotifyPanel::compactButtons()
 
 void LLIMToastNotifyPanel::updateNotification()
 	{
-	init(LLRect(), true);
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+	if ( (mNotification.get()) && (mNotification->isCancelled()) )
+	{
+		mControlPanel->setEnabled(false);
+	}
+// [/SL:KB]
+//	init(LLRect(), true);
 	}
 
 void LLIMToastNotifyPanel::init( LLRect rect, bool show_images )

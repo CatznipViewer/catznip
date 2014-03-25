@@ -950,6 +950,9 @@ void LLAgent::setRegion(LLViewerRegion *regionp)
 	if (notifyRegionChange)
 	{
 		LL_DEBUGS("AgentLocation") << "Calling RegionChanged callbacks" << LL_ENDL;
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		LLNotifications::instance().cancelByName("TeleportOffered");
+// [/SL:KB]
 		mRegionChangedSignal();
 	}
 }

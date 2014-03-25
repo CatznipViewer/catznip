@@ -213,7 +213,10 @@ private:
 	void remove_()
 	{
 		typename InstanceMap::iterator iter = getMap_().find(mInstanceKey);
-		if (iter != getMap_().end())
+//		if (iter != getMap_().end())
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		if ( (iter != getMap_().end()) && (iter->second == static_cast<T*>(this)) )
+// [/SL:KB]
 		{
 			getMap_().erase(iter);
 		}
