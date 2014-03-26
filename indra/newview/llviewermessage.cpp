@@ -7027,8 +7027,11 @@ void handle_lure(const uuid_vec_t& ids)
 	LLSD edit_args;
 // [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2)
 	edit_args["NAME"] = (1 == ids.size()) ? LLSLURL("agent", ids.front(), "completename").getSLURLString() : LLTrans::getString("AvatarNameMultiple");
+	std::string strLocation;
+	LLAgentUI::buildLocationString(strLocation, LLAgentUI::LOCATION_FORMAT_LANDMARK);
+	edit_args["REGION"] = strLocation;
 // [/SL:KB]
-	edit_args["REGION"] = gAgent.getRegion()->getName();
+//	edit_args["REGION"] = gAgent.getRegion()->getName();
 
 	LLSD payload;
 	for (LLDynamicArray<LLUUID>::const_iterator it = ids.begin();
