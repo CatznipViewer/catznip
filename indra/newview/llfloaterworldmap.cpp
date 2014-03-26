@@ -965,7 +965,10 @@ F32 LLFloaterWorldMap::getDistanceToDestination(const LLVector3d &destination,
 void LLFloaterWorldMap::clearLocationSelection(BOOL clear_ui)
 {
 	LLCtrlListInterface *list = mListSearchResults;
-	if (list)
+//	if (list)
+// [SL:KB] - Patch: UI-WorldMap | Checked: 2014-03-26 (Catznip-3.6)
+	if ( (list) && (clear_ui) )
+// [/SL:KB]
 	{
 		list->operateOnAll(LLCtrlListInterface::OP_DELETE);
 	}
@@ -1217,7 +1220,10 @@ void LLFloaterWorldMap::onLocationCommit()
 		return;
 	}
 	
-	clearLocationSelection(FALSE);
+//	clearLocationSelection(FALSE);
+// [SL:KB] - Patch: UI-WorldMap | Checked: 2014-03-26 (Catznip-3.6)
+	clearLocationSelection(TRUE);
+// [/SL:KB]
 	mCompletingRegionName = "";
 	mLastRegionName = "";
 	
