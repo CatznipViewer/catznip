@@ -919,9 +919,9 @@
      is_toggle="true"
      label="Advanced"
      layout="topleft"
-     left_pad="35"
+     left="270"
      name="Advanced"
-     top_delta="0"
+     top_pad="10"
      width="115" />
     <button
      follows="right|bottom"
