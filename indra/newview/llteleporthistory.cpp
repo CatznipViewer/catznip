@@ -78,14 +78,14 @@ void LLTeleportHistory::goToItem(int idx)
 	if (idx < 0 || idx >= (int)mItems.size())
 	{
 		llwarns << "Invalid teleport history index (" << idx << ") specified" << llendl;
-		dump();
+//		dump();
 		return;
 	}
 	
 	if (idx == mCurrentItem)
 	{
 		llwarns << "Will not teleport to the same location." << llendl;
-		dump();
+//		dump();
 		return;
 	}
 
@@ -167,7 +167,7 @@ void LLTeleportHistory::updateCurrentLocation(const LLVector3d& new_pos)
 		mItems[mCurrentItem].mRegionID = gAgent.getRegion()->getRegionID();
 	}
 
-	dump();
+//	dump();
 	
 	if (!mGotInitialUpdate)
 		mGotInitialUpdate = true;
@@ -220,17 +220,17 @@ std::string LLTeleportHistory::getCurrentLocationTitle(bool full, const LLVector
 	return location_name;
 }
 
-void LLTeleportHistory::dump() const
-{
-	llinfos << "Teleport history dump (" << mItems.size() << " items):" << llendl;
-	
-	for (size_t i=0; i<mItems.size(); i++)
-	{
-		std::stringstream line;
-		line << ((i == mCurrentItem) ? " * " : "   ");
-		line << i << ": " << mItems[i].mTitle;
-		line << " REGION_ID: " << mItems[i].mRegionID;
-		line << ", pos: " << mItems[i].mGlobalPos;
-		llinfos << line.str() << llendl;
-	}
-}
+//void LLTeleportHistory::dump() const
+//{
+//	llinfos << "Teleport history dump (" << mItems.size() << " items):" << llendl;
+//	
+//	for (size_t i=0; i<mItems.size(); i++)
+//	{
+//		std::stringstream line;
+//		line << ((i == mCurrentItem) ? " * " : "   ");
+//		line << i << ": " << mItems[i].mTitle;
+//		line << " REGION_ID: " << mItems[i].mRegionID;
+//		line << ", pos: " << mItems[i].mGlobalPos;
+//		llinfos << line.str() << llendl;
+//	}
+//}
