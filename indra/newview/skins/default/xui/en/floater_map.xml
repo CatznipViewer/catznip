@@ -11,6 +11,7 @@
  min_height="128"
  min_width="128"
  name="Map"
+ chrome="true"
  title=""
  help_topic="map"
  save_rect="true"
