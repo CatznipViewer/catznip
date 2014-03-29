@@ -136,7 +136,10 @@ private:
 	 */
 	void					enableAddLandmarkButton(bool val);
 	void					refresh();
-	void					refreshLocation();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	void					refreshLocation(bool fForceUpdate = false);
+// [/SL:KB]
+//	void					refreshLocation();
 	void					refreshParcelIcons();
 	// Refresh the value in the health percentage text field
 	void					refreshHealth();

@@ -401,7 +401,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	LLControlVariable* coordinates_control = gSavedSettings.getControl("NavBarShowCoordinates").get();
 	if (coordinates_control)
 	{
-		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this));
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this, true));
+// [/SL:KB]
+//		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this));
 	}
 
 	// Connecting signal for updating parcel icons on "Show Parcel Properties" setting change.
@@ -607,7 +610,10 @@ void LLLocationInputCtrl::onFocusReceived()
 void LLLocationInputCtrl::onFocusLost()
 {
 	LLUICtrl::onFocusLost();
-	refreshLocation();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	refreshLocation(true);
+// [/SL:KB]
+//	refreshLocation();
 
 	// Setting cursor to 0  to show the left edge of the text. See STORM-370.
 	mTextEntry->setCursor(0);
@@ -791,12 +797,18 @@ void LLLocationInputCtrl::onTextEditorRightClicked(S32 x, S32 y, MASK mask)
 
 void LLLocationInputCtrl::refresh()
 {
-	refreshLocation();			// update location string
+//	refreshLocation();			// update location string
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	refreshLocation(true);			// update location string
+// [/SL:KB]
 	refreshParcelIcons();
 	updateAddLandmarkButton();	// indicate whether current parcel has been landmarked 
 }
 
-void LLLocationInputCtrl::refreshLocation()
+//void LLLocationInputCtrl::refreshLocation()
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+void LLLocationInputCtrl::refreshLocation(bool fForceUpdate)
+// [/SL:KB]
 {
 	// Is one of our children focused?
 	if (LLUICtrl::hasFocus() || mButton->hasFocus() || mList->hasFocus() ||
@@ -806,6 +818,16 @@ void LLLocationInputCtrl::refreshLocation()
 		llwarns << "Location input should not be refreshed when having focus" << llendl;
 		return;
 	}
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2014-03-29 (Catznip-3.6)
+	// NOTE-Catznip: this assumes there will only ever be one LLLocationInputCtrl instance at a time
+	static LLVector3d sPrevPosGlobal;
+	if ( (dist_vec_squared(sPrevPosGlobal, gAgent.getPositionGlobal()) < 0.5f) && (!fForceUpdate) )
+	{
+		return;
+	}
+	sPrevPosGlobal = gAgent.getPositionGlobal();
+// [/SL:KB]
 
 	// Update location field.
 	std::string location_name;
