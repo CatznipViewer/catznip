@@ -3,7 +3,7 @@
  background_visible="false"
  height="25"
  layout="topleft"
- width="200">
+ width="190">
   <panel_camera_item.icon_over
    follows="top|left"
      height="25"
@@ -15,7 +15,7 @@
      top="25"
      scale_image="true"
      visible="false"
-     width="200" />
+     width="190" />
   <panel_camera_item.icon_selected
    follows="top|left"
      height="25"
@@ -27,7 +27,7 @@
      top="25"
      scale_image="true"
      visible="false"
-     width="200" />
+     width="190" />
   <panel_camera_item.picture
      follows="top|left"
      height="25"
