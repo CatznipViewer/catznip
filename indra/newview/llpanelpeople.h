@@ -165,7 +165,7 @@ private:
 	Updater*				mNearbyListUpdater;
 	Updater*				mRecentListUpdater;
 	Updater*				mFacebookListUpdater;
-	Updater*				mButtonsUpdater;
+//	Updater*				mButtonsUpdater;
     LLHandle< LLFloater >	mPicker;
 };
 

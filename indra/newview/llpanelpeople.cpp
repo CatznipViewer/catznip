@@ -409,29 +409,29 @@ protected:
 	callback_t		mCallback;
 };
 
-/**
- * Update buttons on changes in our friend relations (STORM-557).
- */
-class LLButtonsUpdater : public LLPanelPeople::Updater, public LLFriendObserver
-{
-public:
-	LLButtonsUpdater(callback_t cb)
-	:	LLPanelPeople::Updater(cb)
-	{
-		LLAvatarTracker::instance().addObserver(this);
-	}
-
-	~LLButtonsUpdater()
-	{
-		LLAvatarTracker::instance().removeObserver(this);
-	}
-
-	/*virtual*/ void changed(U32 mask)
-	{
-		(void) mask;
-		update();
-	}
-};
+///**
+// * Update buttons on changes in our friend relations (STORM-557).
+// */
+//class LLButtonsUpdater : public LLPanelPeople::Updater, public LLFriendObserver
+//{
+//public:
+//	LLButtonsUpdater(callback_t cb)
+//	:	LLPanelPeople::Updater(cb)
+//	{
+//		LLAvatarTracker::instance().addObserver(this);
+//	}
+//
+//	~LLButtonsUpdater()
+//	{
+//		LLAvatarTracker::instance().removeObserver(this);
+//	}
+//
+//	/*virtual*/ void changed(U32 mask)
+//	{
+//		(void) mask;
+//		update();
+//	}
+//};
 
 class LLAvatarListUpdater : public LLPanelPeople::Updater, public LLEventTimer
 {
@@ -677,7 +677,7 @@ LLPanelPeople::LLPanelPeople()
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));
 	mNearbyListUpdater = new LLNearbyListUpdater(boost::bind(&LLPanelPeople::updateNearbyList,	this));
 	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
-	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
+//	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
 
 	mCommitCallbackRegistrar.add("People.AddFriend", boost::bind(&LLPanelPeople::onAddFriendButtonClicked, this));
 	mCommitCallbackRegistrar.add("People.AddFriendWizard",	boost::bind(&LLPanelPeople::onAddFriendWizButtonClicked,	this));
@@ -704,7 +704,7 @@ LLPanelPeople::LLPanelPeople()
 
 LLPanelPeople::~LLPanelPeople()
 {
-	delete mButtonsUpdater;
+//	delete mButtonsUpdater;
 	delete mNearbyListUpdater;
 	delete mFriendListUpdater;
 	delete mRecentListUpdater;
