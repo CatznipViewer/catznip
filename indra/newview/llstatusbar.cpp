@@ -120,7 +120,7 @@ LLStatusBar::LLStatusBar(const LLRect& rect)
 	mTextTime(NULL),
 	mSGBandwidth(NULL),
 	mSGPacketLoss(NULL),
-	mBtnStats(NULL),
+//	mBtnStats(NULL),
 	mBtnVolume(NULL),
 	mBoxBalance(NULL),
 	mBalance(0),
@@ -185,7 +185,7 @@ BOOL LLStatusBar::postBuild()
 	mBoxBalance = getChild<LLTextBox>("balance");
 	mBoxBalance->setClickedCallback( &LLStatusBar::onClickBalance, this );
 	
-	mBtnStats = getChildView("stat_btn");
+//	mBtnStats = getChildView("stat_btn");
 
 	mBtnVolume = getChild<LLButton>( "volume_btn" );
 	mBtnVolume->setClickedCallback( onClickVolume, this );
