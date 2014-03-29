@@ -656,9 +656,49 @@ class LLRecentListUpdater : public LLAvatarListUpdater, public boost::signals2::
 public:
 	LLRecentListUpdater(callback_t cb)
 	:	LLAvatarListUpdater(cb, 0)
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	,	mNeedsUpdate(true)
+// [/SL:KB]
 	{
-		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::update, this));
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::onRecentChanged, this));
+// [/SL:KB]
+//		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::update, this));
 	}
+
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	void onRecentChanged()
+	{
+		mNeedsUpdate = true;
+	}
+
+	/*virtual*/ void setActive(bool fActive)
+	{
+		// This is driven by visibility updates so always simulate a tick when we're being set active
+		if (fActive)
+		{
+			tick();
+			mEventTimer.start(); 
+		}
+		else
+		{
+			mEventTimer.stop();
+		}
+	}
+
+	/*virtual*/ BOOL tick()
+	{
+		if (mNeedsUpdate)
+		{
+			update();
+			mNeedsUpdate = false;
+		}
+		return FALSE;
+	}
+
+protected:
+	bool mNeedsUpdate;
+// [/SL:KB]
 };
 
 //=============================================================================
@@ -792,7 +832,12 @@ BOOL LLPanelPeople::postBuild()
 	mMiniMap->setToolTipMsg(gSavedSettings.getBOOL("DoubleClickTeleport") ? 
 		getString("AltMiniMapToolTipMsg") :	getString("MiniMapToolTipMsg"));
 
-	mRecentList = getChild<LLPanel>(RECENT_TAB_NAME)->getChild<LLAvatarList>("avatar_list");
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	LLPanel* recent_tab = getChild<LLPanel>(RECENT_TAB_NAME);
+	recent_tab->setVisibleCallback(boost::bind(&Updater::setActive, mRecentListUpdater, _2));
+	mRecentList = recent_tab->getChild<LLAvatarList>("avatar_list");
+// [/SL:KB]
+//	mRecentList = getChild<LLPanel>(RECENT_TAB_NAME)->getChild<LLAvatarList>("avatar_list");
 	mRecentList->setNoItemsCommentText(getString("no_recent_people"));
 	mRecentList->setNoItemsMsg(getString("no_recent_people"));
 	mRecentList->setNoFilteredItemsMsg(getString("no_filtered_recent_people"));
