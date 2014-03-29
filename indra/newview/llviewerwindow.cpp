@@ -2611,7 +2611,7 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 			pIMSession = dynamic_cast<const LLFloaterIMSessionTab*>(focused_floaterp);
 		}
 
-		if ( ((pIMSession) && (pIMSession->hasFocus()) && (!pIMSession->hasInputText())) || (gSavedSettings.getBOOL("ArrowKeysAlwaysMove")) )
+		if ( ((pIMSession) && (pIMSession->hasFocus())) && ((!pIMSession->hasInputText()) || (gSavedSettings.getBOOL("ArrowKeysAlwaysMove"))) )
 // [/SL:KB]
 //		if ((focusedFloaterName == "nearby_chat") || (focusedFloaterName == "im_container") || (focusedFloaterName == "impanel"))
 		{
