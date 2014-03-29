@@ -99,6 +99,7 @@
      left="58"
      name="reload"
      top_delta="0"
+     visible="false" 
      width="28">
         <button.commit_callback
           function="WebContent.Reload" />
@@ -139,7 +140,7 @@
      image_overlay_alignment="center"
      image_selected="Toolbar_Middle_Selected"
      image_unselected="Toolbar_Middle_Off"
-     tool_tip="Open current URL in your desktop browser"
+     tool_tip="Open URL in your desktop browser"
      top_delta="-2"
      layout="topleft"
     right="-1"
