@@ -227,7 +227,7 @@ protected:
 // [/SL:KB]
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;
-    LLUICtrl* mTranslationCheckBox;
+//    LLUICtrl* mTranslationCheckBox;
 
 private:
 	// Handling selection and contextual menu

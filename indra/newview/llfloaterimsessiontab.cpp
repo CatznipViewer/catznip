@@ -93,7 +93,7 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
   , mViewBtn(NULL)
   , mAddBtn(NULL)
   , mVoiceButton(NULL)
-  , mTranslationCheckBox(NULL)
+//  , mTranslationCheckBox(NULL)
 // [/SL:KB]
 {
     setAutoFocus(FALSE);
@@ -325,7 +325,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 // [/SL:KB]
     mAddBtn = getChild<LLButton>("add_btn");
 	mVoiceButton = getChild<LLButton>("voice_call_btn");
-    mTranslationCheckBox = getChild<LLUICtrl>("translate_chat_checkbox_lp");
+//    mTranslationCheckBox = getChild<LLUICtrl>("translate_chat_checkbox_lp");
     
 	mParticipantListPanel = getChild<LLLayoutPanel>("speakers_list_panel");
 	mRightPartPanel = getChild<LLLayoutPanel>("right_part_holder");
