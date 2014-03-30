@@ -4,5 +4,6 @@
 	<menu_item_call label="Sohbet" name="Chat"/>
 	<menu_item_call label="Sesli arama" name="Call"/>
 	<menu_item_call label="Etkinleştir" name="Activate"/>
+	<menu_item_call label="SLurl&apos;yi Panoya Kopyala" name="Copy SLurl"/>
 	<menu_item_call label="Ayrıl" name="Leave"/>
 </menu>
