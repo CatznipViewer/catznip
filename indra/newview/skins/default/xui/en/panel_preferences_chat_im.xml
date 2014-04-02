@@ -162,224 +162,149 @@
      type="string"
      name="im_notifications_text"
      font.style="BOLD">
-        Notifications
+        Chat toast visibility
     </text>
     
-    
     <text
      follows="top|left"
-     layout="topleft"
      height="16"
+     layout="topleft"
      left="35"
-     name="friend_ims"
-     width="105">
-        Friend IMs:
+     name="im_notif_p2p_text"
+     top_pad="11"
+     width="110">
+      Instant messages :
     </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
-     layout="topleft"
-     name="friend_ims_toasts"
-     left_pad="0"
-     top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
+    <combo_box
+     control_name="NotificationIMP2PToast"
      height="23"
-     label="Flash Button"
      layout="topleft"
-     name="friend_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
+     left_pad="5"
+     name="im_notif_p2p_toastoptions"
+     top_delta="-5"
+     width="175">
+        <item
+         label="Friends and non-friends"
+         value="0" />
+        <item
+         label="Only friends"
+         value="1" />
+        <item
+         label="Only non-friends"
+         value="2" />
+        <item
+         label="Never"
+         value="3" />
+    </combo_box>
     <check_box
+     control_name="NotificationIMP2PFlash"
      height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="friend_ims_pop"
+     label="Flash toolbar button"
      left_pad="7"
-     width="100">
-    </check_box>
-
-
-    <text
-     follows="top|left"
      layout="topleft"
-     height="16"
-     left="35"
-     name="non_friend_ims"
-     width="105">
-        Non-friend IMs:
-    </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
-     layout="topleft"
-     name="non_friend_ims_toasts"
-     left_pad="0"
-     top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Flash Button"
-     layout="topleft"
-     name="non_friend_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="non_friend_ims_pop"
-     left_pad="7"
-     width="100">
-    </check_box>
-
-
+     name="im_notif_p2p_flashtoolbar"
+     top_delta="-2"
+     width="120" />
 
     <text
      follows="top|left"
-     layout="topleft"
      height="16"
+     layout="topleft"
      left="35"
-     name="conference_ims"
-     width="105">
-         Conference IMs:
+     name="im_notif_multi_text"
+     top_pad="10"
+     width="110">
+      Multi-person :
     </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
+    <combo_box
+     control_name="NotificationIMMultiToast"
+     height="23"
      layout="topleft"
-     name="conference_ims_toasts"
-     left_pad="0"
+     left_pad="5"
+     name="im_notif_multi_toastoptions"
+     top_delta="-5"
+     width="175">
+        <item
+         label="Groups and conferences"
+         value="0" />
+        <item
+         label="Only groups"
+         value="1" />
+        <item
+         label="Only conferences"
+         value="2" />
+        <item
+         label="Never"
+         value="3" />
+    </combo_box>
+    <check_box
+     control_name="NotificationIMMultiFlash"
+     height="23"
+     label="Flash toolbar button"
+     left_pad="7"
+     layout="topleft"
+     name="im_notif_multi_flashtoolbar"
      top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Flash Button"
-     layout="topleft"
-     name="conference_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="conference_ims_pop"
-     left_pad="7"
-     width="100">
-    </check_box>
-
+     width="120" />
 
     <text
      follows="top|left"
+     height="15"
      layout="topleft"
-     height="16"
      left="35"
-     name="group_chat"
-     width="105">
-        Group chat:
+     mouse_opaque="false"
+     name="im_notif_toastalign_text"
+     top_pad="20"
+     type="string"
+     width="110">
+        Toast location :
     </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
-     layout="topleft"
-     name="group_chat_ims_toasts"
-     left_pad="0"
-     top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
+    <combo_box
+     allow_text_entry="false"
+     bottom_delta="3"
+     control_name="NotificationToastAlignment"
+     follows="top|left"
      height="23"
-     label="Flash Button"
      layout="topleft"
-     name="group_chat_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="group_chat_ims_pop"
-     left_pad="7"
-     width="100">
-    </check_box>
-
-
-    
+     left_pad="5"
+     mouse_opaque="true"
+     name="im_notif_toastalign_options"
+     width="110">
+        <combo_box.item
+         label="Top right"
+         value="0" />
+        <combo_box.item
+         label="Bottom right"
+         value="1" />
+    </combo_box>
     <text
      follows="top|left"
+     height="15"
      layout="topleft"
-     height="16"
      left="35"
-     name="object_ims"
-     width="105">
-        Object IMs:
+     mouse_opaque="false"
+     name="im_notif_chicletalign_text"
+     top_pad="8"
+     type="string"
+     width="110">
+        Chiclet location :
     </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
-     layout="topleft"
-     name="object_ims_toasts"
-     left_pad="0"
-     top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Flash Button"
-     layout="topleft"
-     name="object_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="object_chat_ims_pop"
-     left_pad="7"
-     width="100">
-    </check_box>
-
- 
-    <text
+    <combo_box
+     allow_text_entry="false"
+     bottom_delta="3"
+     control_name="ChicletBarAlignment"
      follows="top|left"
-     layout="topleft"
-     height="16"
-     left="35"
-     name="attached_object_ims"
-     width="105">
-        Worn Object IMs:
-    </text>
-    <check_box
-     height="20"
-     label="Show Toasts"
-     layout="topleft"
-     name="attached_object_ims_toasts"
-     left_pad="0"
-     top_delta="-3"
-     width="100">
-    </check_box>
-    <check_box
      height="23"
-     label="Flash Button"
      layout="topleft"
-     name="attached_object_ims_flashbuttons"
-     left_pad="7"
-     width="100">
-    </check_box>
-    <check_box
-     height="23"
-     label="Show Conversations"
-     layout="topleft"
-     name="attached_object_chat_ims_pop"
-     left_pad="7"
-     width="100">
-    </check_box>
+     left_pad="5"
+     mouse_opaque="true"
+     name="im_notif_chicletalign_options"
+     width="110">
+        <combo_box.item
+         label="Top right"
+         value="0" />
+        <combo_box.item
+         label="Bottom right"
+         value="1" />
+    </combo_box>
 </panel>
