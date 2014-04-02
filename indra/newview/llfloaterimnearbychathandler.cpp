@@ -620,7 +620,7 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
         //Will show toast when chat preference is set        
 //        if((gSavedSettings.getString("NotificationNearbyChatOptions") == "toast") || !nearby_chat->isMessagePaneExpanded())
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
-		if ( (!nearby_chat->isMessagePaneExpanded()) || (gSavedSettings.getU32("NotificationNearbyChatOptions") & MSGOPT_TOAST) )
+		if ( (!nearby_chat->isMessagePaneExpanded()) || (gSavedSettings.getU32("NotificationNearbyChatOptions") & LLIMModel::MSGOPT_TOAST) )
 // [/SL:KB]
         {
             // Add a nearby chat toast.

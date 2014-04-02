@@ -160,7 +160,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 {
 //    std::string user_preferences;
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
-	U32 user_preferences = MSGOPT_NONE;
+	U32 user_preferences = LLIMModel::MSGOPT_NONE;
 // [/SL:KB]
 	LLUUID participant_id = msg[is_dnd_msg ? "FROM_ID" : "from_id"].asUUID();
 	LLUUID session_id = msg[is_dnd_msg ? "SESSION_ID" : "session_id"].asUUID();
@@ -232,77 +232,52 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     }
 		}
 	}
-    else if(session->isP2PSessionType())
-    {
-        if (LLAvatarTracker::instance().isBuddy(participant_id))
-        {
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
-        	user_preferences = gSavedSettings.getU32("NotificationFriendIMOptions");
+	else
+	{
+		LLUUID idSound;
+		user_preferences = LLIMModel::getMessageOptions(session, &idSound);
+		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (idSound.notNull()) )
+		{
+			make_ui_sound(idSound);
+		}
+	}
 // [/SL:KB]
+//    else if(session->isP2PSessionType())
+//    {
+//        if (LLAvatarTracker::instance().isBuddy(participant_id))
+//        {
 //        	user_preferences = gSavedSettings.getString("NotificationFriendIMOptions");
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-			if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && ((gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE)) )
-			{
-				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_FRIEND));
-			}
-// [/SL:KB]
 //			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
 //			{
 //				make_ui_sound("UISndNewIncomingIMSession");
 //			}
-        }
-        else
-        {
-// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
-        	user_preferences = gSavedSettings.getU32("NotificationNonFriendIMOptions");
-// [/SL:KB]
+//        }
+//        else
+//        {
 //        	user_preferences = gSavedSettings.getString("NotificationNonFriendIMOptions");
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-			if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE) )
-			{
-				make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_NONFRIEND));
-			}
-// [/SL:KB]
 //			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
 //			{
 //				make_ui_sound("UISndNewIncomingIMSession");
 //        }
-    }
-	}
-    else if(session->isAdHocSessionType())
-    {
-// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
-    	user_preferences = gSavedSettings.getU32("NotificationConferenceIMOptions");
-// [/SL:KB]
+//    }
+//	}
+//    else if(session->isAdHocSessionType())
+//    {
 //    	user_preferences = gSavedSettings.getString("NotificationConferenceIMOptions");
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE) )
-		{
-			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_CONFERENCE));
-		}
-// [/SL:KB]
 //		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
 //		{
 //			make_ui_sound("UISndNewIncomingIMSession");
 //    }
-	}
-    else if(session->isGroupSessionType())
-    {
-// [SL:KB]
-    	user_preferences = gSavedSettings.getU32("NotificationGroupChatOptions");
-// [/SL:KB]
+//	}
+//    else if(session->isGroupSessionType())
+//    {
 //    	user_preferences = gSavedSettings.getString("NotificationGroupChatOptions");
-// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-		if ( (!gAgent.isDoNotDisturb()) && (!is_session_focused) && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE) )
-		{
-			make_ui_sound(LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_GROUP));
-		}
-// [/SL:KB]
 //		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
 //		{
 //			make_ui_sound("UISndNewIncomingIMSession");
 //		}
-    }
+//    }
 
     // actions:
 
@@ -313,7 +288,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
 	// Skip processing of the message if the user indicated they don't want to be notified for this message type, or if the session currently has active focus
 	// (and we're using legacy tabs, or the CHUI message pane is expanded)
-	if ( ((MSGOPT_NONE == user_preferences) || (is_session_focused)) && ((im_box->isTabbedContainer()) || (session_floater->isMessagePaneExpanded())) )
+	if ( ((LLIMModel::MSGOPT_NONE == user_preferences) || (is_session_focused)) && ((im_box->isTabbedContainer()) || (session_floater->isMessagePaneExpanded())) )
 // [/SL:KB]
     {
     	return;
@@ -325,7 +300,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 //    				|| NOT_ON_TOP == conversations_floater_status))
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
 	// Open the conversations floater for this message type depending on user preference and current focus
-	if ( (MSGOPT_POPUP & user_preferences) && ( (!session_floater->getHost()) || (!im_box->hasFocus())) )
+	if ( (LLIMModel::MSGOPT_POPUP & user_preferences) && ( (!session_floater->getHost()) || (!im_box->hasFocus())) )
 // [/SL:KB]
     {
     	if(!gAgent.isDoNotDisturb())
@@ -423,7 +398,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 //		&& !is_dnd_msg) //prevent flashing FUI button because the conversation floater will have already opened
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
 	// Flash the FUI button according to user preference if the session isn't currently visible & it's not a stored DnD message
-	if ( (MSGOPT_FLASH & user_preferences) && (!is_session_visible) && (!is_dnd_msg) ) // Prevent flashing FUI button because the conversation floater will have already opened
+	if ( (LLIMModel::MSGOPT_FLASH & user_preferences) && (!is_session_visible) && (!is_dnd_msg) ) // Prevent flashing FUI button because the conversation floater will have already opened
 // [/SL:KB]
 	{
 		if(!LLMuteList::getInstance()->isMuted(participant_id))
@@ -457,7 +432,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 	// Show a toast for the message if ...
 	//   * the user has selected to show toasts for this type of conversation and the conversation doesn't currently have (keyboard) focus
 	//   * the session floater (is torn off and) has been collapsed to a single line
-	if ( ((MSGOPT_TOAST & user_preferences) && (!is_session_focused)) || (!session_floater->isMessagePaneExpanded()) )
+	if ( ((LLIMModel::MSGOPT_TOAST & user_preferences) && (!is_session_focused)) || (!session_floater->isMessagePaneExpanded()) )
 // [/SL:KB]
     {
         //Show IM toasts (upper right toasts)
@@ -828,6 +803,71 @@ void LLIMModel::LLIMSession::loadHistory()
 		addMessagesFromHistory(chat_history);
 	}
 }
+
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+
+// static
+U32 LLIMModel::getMessageOptions(const LLIMModel::LLIMSession* pSession, LLUUID* pidSound)
+{
+	U32 nFlags = 0;
+	if (pidSound)
+		pidSound->setNull();
+
+	if (pSession)
+	{
+		if (pSession->isP2PSessionType())
+		{
+			bool fIsFriend = LLAvatarTracker::instance().isBuddy(pSession->mOtherParticipantID);
+
+			U32 nToastSetting = gSavedSettings.getU32("NotificationIMP2PToast");
+			if ( (0 == nToastSetting) ||                   // Show toasts for all P2P conversations
+				 ((1 == nToastSetting) && (fIsFriend)) ||  // Show toasts only for friends
+				 ((2 == nToastSetting) && (!fIsFriend)) )  // Show toasts only for non-friends
+			{
+				nFlags |= MSGOPT_TOAST;
+			}
+
+			if (gSavedSettings.getBOOL("NotificationIMP2PFlash"))
+				nFlags |= MSGOPT_FLASH;
+
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if (pidSound)
+			{
+				if ( (fIsFriend) && (gSavedSettings.getBOOL("PlaySoundFriendIM")) )
+					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_FRIEND);
+				else if ( (!fIsFriend) && (gSavedSettings.getBOOL("PlaySoundNonFriendIM")) )
+					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_NONFRIEND);
+			}
+// [/SL:KB]
+		}
+		else
+		{
+			U32 nToastSetting = gSavedSettings.getU32("NotificationIMMultiToast");
+			if ( (0 == nToastSetting) ||                                        // Show toasts for all multi-person conversations
+				 ((1 == nToastSetting) && (pSession->isGroupSessionType())) ||  // Show toasts only for groups
+				 ((2 == nToastSetting) && (pSession->isAdHocSessionType())) )   // Show toasts only for conferences
+			{
+				nFlags |= MSGOPT_TOAST;
+			}
+
+			if (gSavedSettings.getBOOL("NotificationIMMultiFlash"))
+				nFlags |= MSGOPT_FLASH;
+
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if (pidSound)
+			{
+				if ( (pSession->isGroupSessionType()) && (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) )
+					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_GROUP);
+				else if ( (pSession->isAdHocSessionType()) && (gSavedSettings.getBOOL("PlaySoundConferenceIM")) )
+					*pidSound = LLViewerChat::getUISoundFromEvent(LLViewerChat::SND_IM_CONFERENCE);
+			}
+// [/SL:KB]
+		}
+	}
+
+	return nFlags;
+}
+// [/SL:KB]
 
 LLIMModel::LLIMSession* LLIMModel::findIMSession(const LLUUID& session_id) const
 {
