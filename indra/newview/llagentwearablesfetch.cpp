@@ -32,6 +32,9 @@
 #include "llappearancemgr.h"
 #include "llinventoryfunctions.h"
 #include "llstartup.h"
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llvoavatarself.h"
 
 
@@ -117,6 +120,20 @@ void LLInitialWearablesFetch::processContents()
 		delete this;
 		return ;
 	}
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+	const std::string strInitialOutfit = gSavedPerAccountSettings.getString("WearInitialOutfit");
+	if (!strInitialOutfit.empty())
+	{
+		gSavedPerAccountSettings.getControl("WearInitialOutfit")->resetToDefault();
+		gSavedPerAccountSettings.saveToFile(gSavedSettings.getString("PerAccountSettingsFile"), TRUE);
+
+		LLAppearanceMgr::instance().setAttachmentInvLinkEnable(true);
+		LLInitialLibraryOutfitFetch::wearInitialLibraryOutfit(strInitialOutfit);
+		delete this;
+		return;
+	}
+// [/SL:KB]
 
 	// Fetch the wearable items from the Current Outfit Folder
 	LLInventoryModel::cat_array_t cat_array;
@@ -598,3 +615,78 @@ void LLLibraryOutfitsFetch::contentsDone()
 	mOutfitsPopulated = true;
 }
 
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+void LLInitialLibraryOutfitFetch::wearInitialLibraryOutfit(const std::string& strOutfit)
+{
+	bool fSuccess = false;
+	llinfos << "Attempting to wear library outfit '" << strOutfit << "' as the initial outfit" << llendl;
+
+	const LLUUID idLibraryClothing = gInventory.findLibraryCategoryUUIDForType(LLFolderType::FT_CLOTHING, false);
+	if (idLibraryClothing.notNull())
+	{
+		LLInventoryModel::cat_array_t folders;
+		LLInventoryModel::item_array_t items;
+		LLNameCategoryCollector f(strOutfit);
+		gInventory.collectDescendentsIf(idLibraryClothing, folders, items, LLInventoryModel::EXCLUDE_TRASH, f);
+		if (folders.count() > 0)
+		{
+			callAfterCategoryFetch(folders.front()->getUUID(), boost::bind(&LLInitialLibraryOutfitFetch::onCategoryFetched, folders.front()->getUUID()));
+			fSuccess = true;
+		}
+	}
+
+	if (!fSuccess)
+	{
+		onFailure();
+	}
+}
+
+void LLInitialLibraryOutfitFetch::onCategoryFetched(const LLUUID& idFolder)
+{
+	llinfos << "Library outfit contents were fetched successfully" << llendl;
+
+	const LLViewerInventoryCategory* pFolder = gInventory.getCategory(idFolder);
+	if (!pFolder)
+	{
+		onFailure();
+		return;
+	}
+
+	// Create a new folder for the library items
+	const LLUUID idFolderDest = gInventory.createNewCategory(gInventory.findCategoryUUIDForType(LLFolderType::FT_CLOTHING), LLFolderType::FT_NONE, pFolder->getName());
+
+	// Collect all the items we want copied
+	LLInventoryModel::cat_array_t* folders;
+	LLInventoryModel::item_array_t* items;
+	gInventory.getDirectDescendentsOf(idFolder, folders, items);
+
+	callAfterItemsCopy(items, idFolderDest, boost::bind(&LLInitialLibraryOutfitFetch::onItemsCopied, idFolderDest), boost::bind(&LLInitialLibraryOutfitFetch::onFailure));
+
+	gInventory.notifyObservers();
+}
+
+void LLInitialLibraryOutfitFetch::onItemsCopied(const LLUUID& idFolderDest)
+{
+	llinfos << "Library outfit contents were successfully copied to the user's inventory" << llendl;
+
+	// Remove current COF contents
+	LLAppearanceMgr::getInstance()->purgeCategory(LLAppearanceMgr::getInstance()->getCOF(), false);
+	gInventory.notifyObservers();
+
+	// Wear the copied library outfit
+	LLAppearanceMgr::getInstance()->wearInventoryCategoryOnAvatar(gInventory.getCategory(idFolderDest), false);
+}
+
+void LLInitialLibraryOutfitFetch::onFailure()
+{
+	llinfos << "Encountered an error while attempting to wear the initial library outfit. Creating default wearables instead." << llendl;
+
+	// Remove current COF contents
+	LLAppearanceMgr::getInstance()->purgeCategory(LLAppearanceMgr::getInstance()->getCOF(), false);
+	gInventory.notifyObservers();
+
+	// Create default wearables as the final fallback
+	gAgentWearables.createStandardWearables();
+}
+// [/SL:KB]

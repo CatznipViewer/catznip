@@ -109,6 +109,9 @@ protected:
 	void		onLanguageChange();
 //	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	void		onClickClearSettings(const LLSD& sdParam);
+// [/SL:KB]
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
 	// string differs from default after user changes.
