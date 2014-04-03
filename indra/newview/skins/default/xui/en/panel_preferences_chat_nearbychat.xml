@@ -322,6 +322,7 @@
      font.style="BOLD">
         Notifications
     </text>
+<!--
     <text
      follows="top|left"
      layout="topleft"
@@ -365,6 +366,7 @@
      left="35"
      name="chat_wornchat_check"
      width="350" />
+-->
     <button
       image_overlay="Audio_Off"
       image_overlay_alignment="left"
@@ -378,7 +380,7 @@
       right="-15"
       width="120">
       <button.commit_callback
-        function="Preferences.SelectPanel"
+        function="Pref.ShowPanel"
         parameter="soundalerts_tab" />
       </button>
 
