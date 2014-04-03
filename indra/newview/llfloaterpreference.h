@@ -100,6 +100,9 @@ protected:
 	void		onBtnOK();
 	void		onBtnCancel();
 	void		onBtnApply();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+	void		onShowPanel(const LLSD& sdParam);
+// [/SL:KB]
 
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup
 	void		onClickBrowserClearCache();		// Clear web history and caches as well as viewer caches above

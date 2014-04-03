@@ -320,6 +320,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.Apply",				boost::bind(&LLFloaterPreference::onBtnApply, this));
 	mCommitCallbackRegistrar.add("Pref.Cancel",				boost::bind(&LLFloaterPreference::onBtnCancel, this));
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this));
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
+// [/SL:KB]
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
@@ -523,6 +526,41 @@ void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
 	if (mPreferencePanels.end() != itPanel)
 	{
 		mPreferencePanels.erase(itPanel);
+	}
+}
+
+void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
+{
+	const std::string strPanel = sdParam.asString();
+	if (!strPanel.empty())
+	{
+		LLPanel* pPanel = NULL;
+		for (std::list<LLPanelPreference*>::const_iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
+		{
+			if ((*itPanel)->getName() == strPanel)
+			{
+				pPanel = *itPanel;
+				break;
+			}
+		}
+		if (pPanel)
+		{
+			while (LLTabContainer* pParent = pPanel->getParentByType<LLTabContainer>())
+			{
+				pParent->selectTabPanel(pPanel);
+				pPanel = pParent;
+			}
+		}
+//		auto itPanel = std::find_if(mPreferencePanels.begin(), mPreferencePanels.end(), [&strPanel](const LLPanelPreference* x) { return x->getName() == strPanel; });
+//		if (itPanel != mPreferencePanels.end())
+//		{
+//			LLPanel* pPanel = *itPanel;
+//			while (LLTabContainer* pParent = pPanel->getParentByType<LLTabContainer>())
+//			{
+//				pParent->selectTabPanel(pPanel);
+//				pPanel = pParent;
+//			}
+//		}
 	}
 }
 // [/SL:KB]
