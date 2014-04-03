@@ -2,6 +2,7 @@
 <floater
  positioning="specified"
  right="-460"
+ active_transparency="0.40"
  bg_alpha_image="Window_NoTitle_Background"
  bg_opaque_image="Window_NoTitle_Foreground"
  bottom="-50"
@@ -10,7 +11,6 @@
  can_close="true"
  header_height="0"
  height="110"
- inactive_transparency="0.35"
  layout="topleft"
  name="camera_floater"
  help_topic="camera_floater"

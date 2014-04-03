@@ -2,6 +2,7 @@
 <floater
  positioning="specified"
  right="-693"
+ active_transparency="0.40"
  bg_alpha_image="Window_NoTitle_Background"
  bg_opaque_image="Window_NoTitle_Foreground"
  bottom="-50"
@@ -9,7 +10,6 @@
  can_minimize="false"
  can_close="true"
  height="110"
- inactive_transparency="0.35"
  layout="topleft"
  name="move_floater"
  help_topic="move_floater"
