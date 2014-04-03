@@ -184,7 +184,7 @@ void LLHandlerUtil::logToIM(const LLUUID& session_id, const std::string& file_na
 void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name, const std::string& from_name, const std::string& raw_message, const LLSD& substitutions, const LLUUID& from_id)
 {
 	std::string strFilename;
-	if (LLLogChat::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(), strFilename))
+	if (LLLogChat::buildIMP2PLogFilename(agent_id, av_name.getCompleteName(LLAvatarName::SHOW_ALWAYS), strFilename))
 	{
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
 		const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
