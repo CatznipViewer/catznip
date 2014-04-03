@@ -512,7 +512,7 @@ void LLMultiFloater::computeResizeLimits(S32& new_min_width, S32& new_min_height
 
 // [SL:KB] - Patch: Control-MultiFloater | Checked: 2014-03-22 (Catznip-3.6)
 	S32 nWidthOffset = (mTabContainer->isVertical()) ? mTabContainer->getMinTabWidth() : 0;
-	S32 nHeightOffset = (mTabContainer->isVertical()) ? 0 : mTabContainer->getRect().getHeight();
+	S32 nHeightOffset = (mTabContainer->isVertical()) ? 0 : tabcntr_header_height;
 // [/SL:KB]
 
 	// possibly increase minimum size constraint due to children's minimums.
@@ -523,7 +523,7 @@ void LLMultiFloater::computeResizeLimits(S32& new_min_width, S32& new_min_height
 		{
 // [SL:KB] - Patch: Control-MultiFloater | Checked: 2014-03-22 (Catznip-3.6)
 			new_min_width = llmax(new_min_width, floaterp->getMinWidth() + LLPANEL_BORDER_WIDTH * 2 + nWidthOffset);
-			new_min_height = llmax(new_min_height, floaterp->getMinHeight() + floater_header_size + tabcntr_header_height + nHeightOffset);
+			new_min_height = llmax(new_min_height, floaterp->getMinHeight() + floater_header_size + nHeightOffset);
 // [/SL:KB]
 //			new_min_width = llmax(new_min_width, floaterp->getMinWidth() + LLPANEL_BORDER_WIDTH * 2);
 //			new_min_height = llmax(new_min_height, floaterp->getMinHeight() + floater_header_size + tabcntr_header_height);
