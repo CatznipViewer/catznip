@@ -23,6 +23,7 @@
      Troubleshooting
     </text>
     <check_box
+     control_name="WearInitialOutfit"
      follows="top|left"
      height="15"
      label="Wear default avatar on next login"

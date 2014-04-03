@@ -377,9 +377,6 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
-// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
-	mCommitCallbackRegistrar.add("Pref.ClearSettings",			boost::bind(&LLFloaterPreference::onClickClearSettings, this, _2));
-// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ResetCache",				boost::bind(&LLFloaterPreference::onClickResetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ClickSkin",				boost::bind(&LLFloaterPreference::onClickSkin, this,_1, _2));
@@ -1100,21 +1097,6 @@ void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 		color_swatch->set( new_color.setAlpha(newvalue.asReal()) );
 	}
 }
-
-// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
-void LLFloaterPreference::onClickClearSettings(const LLSD& sdParam)
-{
-	const std::string strParam = sdParam.asString();
-	if ("user" == strParam)
-	{
-		gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
-	}
-	else if ("account" == strParam)
-	{
-		gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
-	}
-}
-// [/SL:KB]
 
 void LLFloaterPreference::onClickSetCache()
 {
@@ -2326,6 +2308,36 @@ private:
 
 //static LLRegisterPanelClassWrapper<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
 static LLRegisterPanelClassWrapper<LLPanelPreferencePrivacy> t_pref_privacy("panel_preference_privacy");
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-04-03 (Catznip-3.6)
+class LLPanelPreferenceTroubleshooting : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceTroubleshooting()
+	{
+		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClickClearSettings, _2));
+	}
+
+	/*virtual*/ void refresh()
+	{
+		getChild<LLUICtrl>("default_avatar_chk")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
+	}
+
+	static void onClickClearSettings(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+		if ("user" == strParam)
+		{
+			gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
+		}
+		else if ("account" == strParam)
+		{
+			gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+		}
+	}
+};
+static LLRegisterPanelClassWrapper<LLPanelPreferenceTroubleshooting> t_pref_troubleshooting("panel_preference_troubleshooting");
+// [SL:KB]
 
 //BOOL LLPanelPreferenceGraphics::postBuild()
 //{

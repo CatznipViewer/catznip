@@ -122,14 +122,14 @@ void LLInitialWearablesFetch::processContents()
 	}
 
 // [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
-	const std::string strInitialOutfit = gSavedPerAccountSettings.getString("WearInitialOutfit");
-	if (!strInitialOutfit.empty())
+	bool fWearInitialOutfit = gSavedPerAccountSettings.getBOOL("WearInitialOutfit");
+	if (fWearInitialOutfit)
 	{
 		gSavedPerAccountSettings.getControl("WearInitialOutfit")->resetToDefault();
 		gSavedPerAccountSettings.saveToFile(gSavedSettings.getString("PerAccountSettingsFile"), TRUE);
 
 		LLAppearanceMgr::instance().setAttachmentInvLinkEnable(true);
-		LLInitialLibraryOutfitFetch::wearInitialLibraryOutfit(strInitialOutfit);
+		LLInitialLibraryOutfitFetch::wearInitialLibraryOutfit("Female Shape & Outfit");
 		delete this;
 		return;
 	}
