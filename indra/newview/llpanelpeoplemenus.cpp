@@ -471,12 +471,15 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		if (flags & ITEM_IN_MULTI_SELECTION)
 		{
 			items.push_back(std::string("offer_teleport"));
+			items.push_back(std::string("separator_actions"));
+			items.push_back(std::string("menu_manage"));
 		}
 		else
 		{
 			items.push_back(std::string("offer_teleport"));
 			items.push_back(std::string("request_teleport"));
-			items.push_back(std::string("separator_invite_to_group"));
+			items.push_back(std::string("separator_actions"));
+			items.push_back(std::string("menu_manage"));
 			items.push_back(std::string("zoom_in"));
 			items.push_back(std::string("block_unblock"));
 		}
