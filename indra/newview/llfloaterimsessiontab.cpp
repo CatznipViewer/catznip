@@ -123,6 +123,13 @@ LLFloaterIMSessionTab::~LLFloaterIMSessionTab()
 	}
 // [/SL:KB]
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::isTabbedContainer())
+	{
+		delete mParticipantList;
+	}
+// [/SL:KB]
+
 	delete mRefreshTimer;
 }
 
