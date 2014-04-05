@@ -731,9 +731,15 @@ void LLIMWellWindow::sessionRemoved(const LLUUID& sessionId)
 }
 
 //virtual
-void LLIMWellWindow::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
+void LLIMWellWindow::sessionIDUpdated(const LLUUID& idSessionOld, const LLUUID& idSessionNew)
 {
-	mMessageList->updateValue(old_session_id, new_session_id);
+	// TODO-Catznip: long term we should really recreate this row panel when it changes from P2P -> ad-hoc
+	mMessageList->updateValue(idSessionOld, idSessionNew);
+	LLChiclet* pChiclet = findIMChiclet(idSessionOld);
+	if (pChiclet)
+	{
+		pChiclet->setSessionId(idSessionNew);
+	}
 }
 // [/SL:KB]
 
