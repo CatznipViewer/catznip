@@ -53,7 +53,6 @@ LLCommunicationChannel::~LLCommunicationChannel()
 bool LLCommunicationChannel::filterByDoNotDisturbStatus(LLNotificationPtr p)
 {
 	static LLCachedControl<U32> sInvOfferResponseDnd(gSavedSettings, "InventoryOfferAcceptanceDnd", 0);
-	llinfos << "Notification type: " << p->getType() << llendl;
 	return (!gAgent.isDoNotDisturb()) || ((sInvOfferResponseDnd == 0) && (p->getType() == "offer"));
 //	return !gAgent.isDoNotDisturb();
 }
