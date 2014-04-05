@@ -4779,21 +4779,21 @@ void LLLandmarkBridge::openItem()
 }
 
 
-// +=================================================+
-// |        LLCallingCardObserver                    |
-// +=================================================+
-class LLCallingCardObserver : public LLFriendObserver
-{
-public:
-	LLCallingCardObserver(LLCallingCardBridge* bridge) : mBridgep(bridge) {}
-	virtual ~LLCallingCardObserver() { mBridgep = NULL; }
-	virtual void changed(U32 mask)
-	{
-		mBridgep->refreshFolderViewItem();
-	}
-protected:
-	LLCallingCardBridge* mBridgep;
-};
+//// +=================================================+
+//// |        LLCallingCardObserver                    |
+//// +=================================================+
+//class LLCallingCardObserver : public LLFriendObserver
+//{
+//public:
+//	LLCallingCardObserver(LLCallingCardBridge* bridge) : mBridgep(bridge) {}
+//	virtual ~LLCallingCardObserver() { mBridgep = NULL; }
+//	virtual void changed(U32 mask)
+//	{
+//		mBridgep->refreshFolderViewItem();
+//	}
+//protected:
+//	LLCallingCardBridge* mBridgep;
+//};
 
 // +=================================================+
 // |        LLCallingCardBridge                      |
@@ -4804,25 +4804,25 @@ LLCallingCardBridge::LLCallingCardBridge(LLInventoryPanel* inventory,
 										 const LLUUID& uuid ) :
 	LLItemBridge(inventory, root, uuid)
 {
-	mObserver = new LLCallingCardObserver(this);
-	LLAvatarTracker::instance().addObserver(mObserver);
+//	mObserver = new LLCallingCardObserver(this);
+//	LLAvatarTracker::instance().addObserver(mObserver);
 }
 
 LLCallingCardBridge::~LLCallingCardBridge()
 {
-	LLAvatarTracker::instance().removeObserver(mObserver);
-	delete mObserver;
+//	LLAvatarTracker::instance().removeObserver(mObserver);
+//	delete mObserver;
 }
 
-void LLCallingCardBridge::refreshFolderViewItem()
-{
-	LLInventoryPanel* panel = mInventoryPanel.get();
-	LLFolderViewItem* itemp = panel ? panel->getItemByID(mUUID) : NULL;
-	if (itemp)
-	{
-		itemp->refresh();
-	}
-}
+//void LLCallingCardBridge::refreshFolderViewItem()
+//{
+//	LLInventoryPanel* panel = mInventoryPanel.get();
+//	LLFolderViewItem* itemp = panel ? panel->getItemByID(mUUID) : NULL;
+//	if (itemp)
+//	{
+//		itemp->refresh();
+//	}
+//}
 
 // virtual
 void LLCallingCardBridge::performAction(LLInventoryModel* model, std::string action)

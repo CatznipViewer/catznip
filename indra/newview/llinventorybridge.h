@@ -41,7 +41,7 @@ class LLInventoryFilter;
 class LLInventoryPanel;
 class LLInventoryModel;
 class LLMenuGL;
-class LLCallingCardObserver;
+//class LLCallingCardObserver;
 class LLViewerJointAttachment;
 class LLFolderView;
 
@@ -425,9 +425,9 @@ public:
 							EDragAndDropType cargo_type,
 							void* cargo_data,
 							std::string& tooltip_msg);
-	void refreshFolderViewItem();
-protected:
-	LLCallingCardObserver* mObserver;
+//	void refreshFolderViewItem();
+//protected:
+//	LLCallingCardObserver* mObserver;
 };
 
 class LLNotecardBridge : public LLItemBridge
