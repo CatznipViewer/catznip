@@ -152,6 +152,9 @@ public:
 	/*virtual*/ BOOL handleMouseDown( S32 x, S32 y, MASK mask );
 	/*virtual*/ BOOL handleHover( S32 x, S32 y, MASK mask );
 	/*virtual*/ BOOL handleMouseUp( S32 x, S32 y, MASK mask );
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-04-06 (Catznip-3.6)
+	/*virtual*/ BOOL handleScrollWheel(S32 x, S32 y, S32 clicks);
+// [/SL:KB]
 	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL handleKeyHere(KEY key, MASK mask);
 	/*virtual*/ BOOL handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,

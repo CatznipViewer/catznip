@@ -736,6 +736,36 @@ BOOL LLTabContainer::handleMouseUp( S32 x, S32 y, MASK mask )
 	return handled;
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-04-06 (Catznip-3.6)
+BOOL LLTabContainer::handleScrollWheel(S32 x, S32 y, S32 clicks)
+{
+	// NOTE-Catznip: should match the code in LLTabContainer::handleMouseDown()
+	static LLUICachedControl<S32> tabcntrv_pad ("UITabCntrvPad", 0);
+	BOOL handled = FALSE;
+
+	S32 tab_count = getTabCount();
+	if ( (tab_count > 0) && (!getTabsHidden()) )
+	{
+		LLTabTuple* firsttuple = getTab(0);
+		LLRect tab_rect;
+		if (mIsVertical)
+			tab_rect = LLRect(firsttuple->mButton->getRect().mLeft, mPrevArrowBtn->getRect().mTop, firsttuple->mButton->getRect().mRight, mNextArrowBtn->getRect().mBottom );
+		else
+			tab_rect = LLRect(mJumpPrevArrowBtn->getRect().mLeft, firsttuple->mButton->getRect().mTop, mJumpNextArrowBtn->getRect().mRight, firsttuple->mButton->getRect().mBottom);
+
+		if (tab_rect.pointInRect(x, y))
+		{
+			mScrollPos = llclamp(mScrollPos + clicks, 0, mMaxScrollPos);
+			handled = TRUE;
+		}
+	}
+
+	if (!handled)
+		handled = LLUICtrl::handleScrollWheel(x, y, clicks);
+	return handled;
+}
+// [/SL:KB]
+
 // virtual
 BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 {
