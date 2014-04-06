@@ -107,6 +107,12 @@ public:
 private:
 	/*virtual*/ void done()
 	{
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+		// Don't process anything if we know we have a parcel landmark
+		if (mInput->mHasParcelLandmark)
+			return;
+// [/SL:KB]
+
 		uuid_vec_t::const_iterator it = mAdded.begin(), end = mAdded.end();
 		for(; it != end; ++it)
 		{
@@ -115,13 +121,19 @@ private:
 				continue;
 
 			// Start loading the landmark.
-			LLLandmark* lm = gLandmarkList.getAsset(
-					item->getAssetUUID(),
-					boost::bind(&LLLocationInputCtrl::onLandmarkLoaded, mInput, _1));
+//			LLLandmark* lm = gLandmarkList.getAsset(
+//					item->getAssetUUID(),
+//					boost::bind(&LLLocationInputCtrl::onLandmarkLoaded, mInput, _1));
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+			LLLandmark* lm = gLandmarkList.getAsset(item->getAssetUUID(), boost::bind(&LLLocationInputCtrl::onInventoryChanged, mInput));
+// [/SL:KB]
 			if (lm)
 			{
 				// Already loaded? Great, handle it immediately (the callback won't be called).
-				mInput->onLandmarkLoaded(lm);
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+				mInput->onInventoryChanged();
+// [/SL:KB]
+//				mInput->onLandmarkLoaded(lm);
 			}
 		}
 
@@ -142,13 +154,20 @@ public:
 private:
 	/*virtual*/ void changed(U32 mask)
 	{
-//		if (mask & (~(LLInventoryObserver::LABEL|LLInventoryObserver::INTERNAL|LLInventoryObserver::ADD)))
 // [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+		// Don't process anything if we don't have a parcel landmark
+		if (!mInput->mHasParcelLandmark)
+			return;
+
 		if (mask & LLInventoryObserver::REMOVE)
-// [/SL:KB]
 		{
-			mInput->updateAddLandmarkButton();
+			mInput->onInventoryChanged();
 		}
+// [/SL:KB]
+//		if (mask & (~(LLInventoryObserver::LABEL|LLInventoryObserver::INTERNAL|LLInventoryObserver::ADD)))
+//		{
+//			mInput->updateAddLandmarkButton();
+//		}
 	}
 
 	LLLocationInputCtrl* mInput;
@@ -211,6 +230,8 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 // [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
 	mLandmarkAddObserver(NULL),
 	mLandmarkRemoveObserver(NULL),
+	mLandmarksDirty(false),
+	mHasParcelLandmark(false),
 // [/SL:KB]
 	mLocationContextMenu(NULL),
 	mAddLandmarkBtn(NULL),
@@ -636,6 +657,15 @@ void LLLocationInputCtrl::draw()
 	{
 		refreshHealth();
 	}
+
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	if ( (mLandmarksDirty) && (mLandmarkButtonTimer.getElapsedTimeF32() > 2.5) )
+	{
+		updateAddLandmarkButton();
+		mLandmarksDirty = false;
+	}
+// [/SL:KB]
+
 	LLComboBox::draw();
 }
 
@@ -707,11 +737,11 @@ void LLLocationInputCtrl::onNavMeshStatusChange(const LLPathfindingNavMeshStatus
 	refreshParcelIcons();
 }
 
-void LLLocationInputCtrl::onLandmarkLoaded(LLLandmark* lm)
-{
-	(void) lm;
-	updateAddLandmarkButton();
-}
+//void LLLocationInputCtrl::onLandmarkLoaded(LLLandmark* lm)
+//{
+//	(void) lm;
+//	updateAddLandmarkButton();
+//}
 
 void LLLocationInputCtrl::onLocationHistoryChanged(LLLocationHistory::EChangeType event)
 {
@@ -1090,7 +1120,11 @@ void LLLocationInputCtrl::enableAddLandmarkButton(bool val)
 // depending on whether current parcel has been landmarked.
 void LLLocationInputCtrl::updateAddLandmarkButton()
 {
-	enableAddLandmarkButton(LLLandmarkActions::hasParcelLandmark());
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	mHasParcelLandmark = LLLandmarkActions::hasParcelLandmark();
+	enableAddLandmarkButton(mHasParcelLandmark);
+// [/SL:KB]
+//	enableAddLandmarkButton(LLLandmarkActions::hasParcelLandmark());
 }
 void LLLocationInputCtrl::updateAddLandmarkTooltip()
 {

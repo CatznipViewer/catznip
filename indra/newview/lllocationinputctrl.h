@@ -159,7 +159,10 @@ private:
 	void					onLocationHistoryChanged(LLLocationHistory::EChangeType event);
 	void					onLocationPrearrange(const LLSD& data);
 	void 					onTextEditorRightClicked(S32 x, S32 y, MASK mask);
-	void					onLandmarkLoaded(LLLandmark* lm);
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	void					onInventoryChanged() { mLandmarksDirty = true; }
+// [/SL:KB]
+//	void					onLandmarkLoaded(LLLandmark* lm);
 	void					onForSaleButtonClicked();
 	void					onAddLandmarkButtonClicked();
 	void					onAgentParcelChange();
@@ -190,6 +193,9 @@ private:
 	// NOTE: name change to catch all occurances
 	LLAddLandmarkObserver*		mLandmarkAddObserver;
 	LLRemoveLandmarkObserver*	mLandmarkRemoveObserver;
+	LLFrameTimer				mLandmarkButtonTimer;
+	bool						mLandmarksDirty;
+	bool						mHasParcelLandmark;
 // [/SL:KB]
 	LLParcelChangeObserver*		mParcelChangeObserver;
 
