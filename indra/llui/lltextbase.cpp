@@ -2793,14 +2793,16 @@ bool LLTextBase::scrolledToEnd()
 // [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
 void LLTextBase::clearHighlights()
 {
+	mHighlightWord.clear();
 	mHighlights.clear();
+	mHighlightsDirty = false;
 }
 
 void LLTextBase::refreshHighlights()
 {
 	if (mHighlightsDirty)
 	{
-		clearHighlights();
+		mHighlights.clear();
 		if (!mHighlightWord.empty())
 		{
 			const LLWString& wstrText = getWText();
@@ -2826,7 +2828,6 @@ void LLTextBase::setHighlightWord(const std::string& strHighlight, bool fCaseIns
 	if (strHighlight.empty())
 	{
 		clearHighlights();
-		mHighlightsDirty = false;
 		return;
 	}
 
