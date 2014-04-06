@@ -166,6 +166,7 @@
    width="90" />
 
   <panel
+   enabled="false"
    follows="left|bottom"
    height="100"
    layout="topleft"
@@ -176,7 +177,6 @@
     <text
      height="13"
      length="1"
-     enabled="false"
      follows="left|bottom"
      layout="topleft"
      left="40"
@@ -191,7 +191,6 @@
     <line_editor
      border_style="line"
      border_thickness="1"
-     enabled="false"
      follows="left|bottom"
      height="20"
      max_length_chars="255"
@@ -202,7 +201,6 @@
      width="200" />
   
     <text
-     enabled="false"
      follows="left|bottom"
      height="13"
      layout="topleft"
@@ -219,7 +217,6 @@
     <line_editor
      border_style="line"
      border_thickness="1"
-     enabled="false"
      follows="left|bottom"
      height="20"
      max_length_chars="255"
@@ -230,7 +227,6 @@
      width="200" />
   
     <check_box
-     enabled="false"
      follows="left|bottom"
      height="19"
      label="Height between"
@@ -241,7 +237,6 @@
      width="100" />
     <spinner
      decimal_digits="0"
-     enabled="false"
      follows="left|bottom"
      height="23"
      increment="32"
@@ -253,7 +248,6 @@
      top_delta="0"
      width="64" />
     <text
-     enabled="false"
      follows="left|bottom"
      height="19"
      layout="topleft"
@@ -268,7 +262,6 @@
       and
     </text>
     <spinner
-     enabled="false"
      decimal_digits="0"
      follows="left|bottom"
      height="23"
@@ -282,7 +275,6 @@
      width="64" />
   
     <button
-     enabled="false"
      follows="left|bottom"
      height="21"
      label="Apply"
@@ -292,7 +284,6 @@
      top_pad="3"
      width="73"/>
     <button
-     enabled="false"
      follows="left|bottom"
      height="21"
      label="Clear"

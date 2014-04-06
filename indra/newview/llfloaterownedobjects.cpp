@@ -184,16 +184,7 @@ void LLFloaterOwnedObjects::onToggleFilter()
 {
 	bool fFilter = m_pFilterObjects->get();
 
-	LLUICtrl* pFilterPanel = findChild<LLUICtrl>("filter_panel");
-	if (pFilterPanel)
-	{
-		const child_list_t* pChildren = pFilterPanel->getChildList();
-		for (child_list_t::const_iterator itChild = pChildren->begin(); itChild != pChildren->end(); ++itChild)
-		{
-			(*itChild)->setEnabled(fFilter);
-		}
-	}
-
+	findChild<LLUICtrl>("filter_panel")->setEnabled(fFilter);
 	if (fFilter)
 	{
 		refreshFilterButtons();
