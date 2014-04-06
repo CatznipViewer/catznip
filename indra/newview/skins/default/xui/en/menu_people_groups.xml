@@ -59,6 +59,9 @@
     <menu_item_call.on_click
      function="People.Groups.Action"
      parameter="view_notices" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="view_notices" />
   </menu_item_call>
   <menu_item_separator />
   <menu_item_call
