@@ -213,7 +213,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
               tool_tip="Show blocked Residents / Objects"
               width="31">
                <commit_callback
-                function="People.blockList" />
+                function="People.ShowBlockedList" />
              </button>
              <button
               control_name="NearbyListShowMap"
@@ -412,7 +412,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                  top_delta="0"
                  width="31">
                   <commit_callback
-                   function="People.blockList" />
+                   function="People.ShowBlockedList" />
                 </button>
                 <icon
                  follows="left|right|bottom"

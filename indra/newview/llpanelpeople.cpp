@@ -725,6 +725,7 @@ LLPanelPeople::LLPanelPeople()
 	mCommitCallbackRegistrar.add("People.Group.Minus",		boost::bind(&LLPanelPeople::onGroupMinusButtonClicked,  this));
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 	mCommitCallbackRegistrar.add("People.Group.Activate",	boost::bind(&LLPanelPeople::onGroupActivateButtonClicked,	this));
+	mCommitCallbackRegistrar.add("People.ShowBlockedList",	boost::bind(&LLPanelPeople::onShowBlockedList, this));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("People.Chat",			boost::bind(&LLPanelPeople::onChatButtonClicked,		this));
 	mCommitCallbackRegistrar.add("People.Gear",			boost::bind(&LLPanelPeople::onGearButtonClicked,		this, _1));
@@ -1627,6 +1628,11 @@ void LLPanelPeople::onGroupActivateButtonClicked()
 {
 	LLGroupActions::activate(getCurrentItemID());
 }
+
+void LLPanelPeople::onShowBlockedList()
+{
+	LLFloaterSidePanelContainer::showPanel("people", "panel_people", LLSD().with("people_panel_tab_name", "blocked_panel"));
+}
 // [/SL:KB]
 
 void LLPanelPeople::onGroupPlusMenuItemClicked(const LLSD& userdata)
@@ -1882,15 +1888,6 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return name_format == NF_COMPLETENAME;
 	if ("name_username" == item)
 		return name_format == NF_USERNAME;
-// [/SL:KB]
-// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
-	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
-	if ("view_permissions_never" == item)
-		return SP_NEVER == spType;
-	if ("view_permissions_hover" == item)
-		return SP_HOVER == spType;
-	if ("view_permissions_nondefault" == item)
-		return SP_NONDEFAULT == spType;
 // [/SL:KB]
 
 	return false;

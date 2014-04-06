@@ -114,10 +114,11 @@ private:
 	void					onAvatarListCommitted(LLAvatarList* list);
 	bool					onGroupPlusButtonValidate();
 	void					onGroupMinusButtonClicked();
+	void					onGroupPlusMenuItemClicked(const LLSD& userdata);
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 	void					onGroupActivateButtonClicked();
+	void					onShowBlockedList();
 // [/SL:KB]
-	void					onGroupPlusMenuItemClicked(const LLSD& userdata);
 
 	void					onFriendsViewSortMenuItemClicked(const LLSD& userdata);
 	void					onNearbyViewSortMenuItemClicked(const LLSD& userdata);
