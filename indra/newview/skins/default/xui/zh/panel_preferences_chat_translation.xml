@@ -55,4 +55,4 @@
 	</text>
 	<button label="確定" name="ok_btn"/>
 	<button label="取消" name="cancel_btn"/>
-</floater>
+</panel>

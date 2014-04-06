@@ -55,4 +55,4 @@
 	</text>
 	<button label="Tamam" name="ok_btn"/>
 	<button label="İptal" name="cancel_btn"/>
-</floater>
+</panel>
