@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- default_tab_group="1"
  height="110"
  layout="topleft"
  name="search replace"
@@ -95,7 +94,6 @@
      layout="topleft"
      left="55"
      name="search_text"
-     tab_group="1"
      top="21"
      width="240" />
     <line_editor
