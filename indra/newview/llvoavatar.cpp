@@ -2665,7 +2665,7 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		|| is_muted != mNameMute
 		|| is_appearance != mNameAppearance 
 // [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2)
-		|| ( (show_typing) && (!mVisibleChat) && ((bool)mTyping != mNameTyping) )
+		|| ( (show_typing) && ((!mVisibleChat) ? (bool)mTyping != mNameTyping : mNameTyping))
 // [/SL:KB]
 		|| is_friend != mNameFriend
 		|| is_cloud != mNameCloud)
@@ -2676,7 +2676,7 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 
 //		if (is_away || is_muted || is_do_not_disturb || is_appearance)
 // [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2)
-		if (is_away || is_muted || is_do_not_disturb || is_appearance || mTyping)
+		if (is_away || is_muted || is_do_not_disturb || is_appearance || (mTyping && !mVisibleChat))
 // [/SL:KB]
 		{
 			std::string line;
@@ -2767,7 +2767,7 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		mNameMute = is_muted;
 		mNameAppearance = is_appearance;
 // [SL:KB] - Patch: Chat-TagTyping | Checked: 2012-02-02 (Catznip-3.2)
-		mNameTyping = mTyping;
+		mNameTyping = mTyping && !mVisibleChat;
 // [/SL:KB]
 		mNameFriend = is_friend;
 		mNameCloud = is_cloud;
