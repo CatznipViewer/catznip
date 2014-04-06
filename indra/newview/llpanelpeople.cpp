@@ -1002,6 +1002,15 @@ void LLPanelPeople::updateFriendList()
 			online_friendsp.push_back(buddy_id);
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-04-06 (Catznip-3.6)
+	LLAccordionCtrlTab* pOnlineTab = mTabContainer->getCurrentPanel()->getChild<LLAccordionCtrlTab>("tab_online");
+	if (pOnlineTab)
+	{
+		static std::string s_strOrigTitle = pOnlineTab->getTitle();
+		pOnlineTab->setTitle(llformat("%s (%d / %d)", s_strOrigTitle.c_str(), online_friendsp.size(), all_buddies.size()));
+	}
+// [/SL:KB]
+
 	/*
 	 * Avatarlists  will be hidden by showFriendsAccordionsIfNeeded(), if they do not have items.
 	 * But avatarlist can be updated only if it is visible @see LLAvatarList::draw();   
