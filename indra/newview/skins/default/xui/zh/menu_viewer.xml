@@ -16,10 +16,10 @@
 			<menu_item_call label="停止我身上的動作" name="Stop Animating My Avatar"/>
 			<menu_item_call label="行走 / 跑步 / 飛行…" name="Walk / run / fly"/>
 		</menu>
-		<menu label="狀態" name="Status">
-			<menu_item_check label="離開" name="Away"/>
-			<menu_item_check label="請勿打擾" name="Do Not Disturb"/>
-		</menu>
+
+        <menu_item_check label="離開" name="Away"/>
+        <menu_item_check label="請勿打擾" name="Do Not Disturb"/>
+
 		<menu_item_call label="購買 L$…" name="Buy and Sell L$"/>
 		<menu_item_call label="商家發件匣…" name="MerchantOutbox"/>
 		<menu_item_call label="帳戶主控臺…" name="Manage My Account"/>

@@ -16,10 +16,10 @@
 			<menu_item_call label="Arrêter mon animation" name="Stop Animating My Avatar"/>
 			<menu_item_call label="Marcher / Courir / Voler..." name="Walk / run / fly"/>
 		</menu>
-		<menu label="Statut" name="Status">
-			<menu_item_check label="Absent" name="Away"/>
-			<menu_item_check label="Ne pas déranger" name="Do Not Disturb"/>
-		</menu>
+
+        <menu_item_check label="Absent" name="Away"/>
+        <menu_item_check label="Ne pas déranger" name="Do Not Disturb"/>
+
 		<menu_item_call label="Acheter des L$..." name="Buy and Sell L$"/>
 		<menu_item_call label="Boîte d&apos;envoi vendeur..." name="MerchantOutbox"/>
 		<menu_item_call label="Page d&apos;accueil du compte..." name="Manage My Account">
