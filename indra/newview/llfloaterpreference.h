@@ -94,6 +94,7 @@ public:
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	void registerPrefPanel(LLPanelPreference* pPrefPanel);
 	void unregisterPrefpanel(LLPanelPreference* pPrefPanel);
+	void showPanel(const std::string& strPanel);
 // [/SL:KB]
 
 protected:	

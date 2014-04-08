@@ -529,9 +529,8 @@ void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
 	}
 }
 
-void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
+void LLFloaterPreference::showPanel(const std::string& strPanel)
 {
-	const std::string strPanel = sdParam.asString();
 	if (!strPanel.empty())
 	{
 		LLPanel* pPanel = NULL;
@@ -562,6 +561,11 @@ void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
 //			}
 //		}
 	}
+}
+
+void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
+{
+	showPanel(sdParam.asString());
 }
 // [/SL:KB]
 
