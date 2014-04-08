@@ -111,7 +111,8 @@ BOOL LLFloaterSearchReplace::handleKeyHere(KEY key, MASK mask)
 {
 	// Pass this on to the editor we're operating on (or any view up along its hierarchy) if we don't handle the key ourselves 
 	// (allows Ctrl-F to work when the floater itself has focus - see changeset 0c8947e5f433)
-	if (!LLFloater::handleKeyHere(key, mask))
+	BOOL handled = LLFloater::handleKeyHere(key, mask);
+	if (!handled)
 	{
 		// Check if one of our children currently has keyboard focus and if so route edit accellerators to it
 		if (gFocusMgr.childHasKeyboardFocus(this))
@@ -131,7 +132,7 @@ BOOL LLFloaterSearchReplace::handleKeyHere(KEY key, MASK mask)
 			pView = pView->getParent();
 		}
 	}
-	return FALSE;
+	return handled;
 }
 
 //static 
