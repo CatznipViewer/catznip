@@ -72,10 +72,7 @@
 	<check_box label="Modifica parti collegate" name="checkbox edit linked parts"/>
 	<button label="Collegamento" name="link_btn"/>
 	<button label="Scollega" name="unlink_btn"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Allunga entrambi i lati" name="checkbox uniform label">
-		Allunga entrambi i lati
-	</text>
+	<check_box label="Allunga entrambi i lati" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Ridimensiona le texture" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Scatto" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Scegli il tipo di righello per posizionare l&apos;oggetto">
@@ -83,7 +80,7 @@
 		<combo_box.item label="Locale" name="Local"/>
 		<combo_box.item label="Riferimento" name="Reference"/>
 	</combo_box>
-	<button label="" label_selected="Opzioni..." name="Options..." tool_tip="Vedi più opzioni della griglia"/>
+	<button label="" label_selected=""  name="Options..." tool_tip="Vedi più opzioni della griglia"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Cubo"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisma"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Piramide"/>

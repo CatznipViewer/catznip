@@ -69,10 +69,7 @@
 	<text name="RenderingCost" tool_tip="Hvis beregnede rendering omkostninger for dette objekt">
 		þ: [COUNT]
 	</text>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Stræk begge sider" name="checkbox uniform label">
-		Stræk begge sider
-	</text>
+	<check_box label="Stræk begge sider" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Stræk teksturer" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Benyt gitter" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Vælg hvilken type lineal der skal bruges til positionering af objekt">
@@ -80,7 +77,7 @@
 		<combo_box.item label="Lokalt" name="Local"/>
 		<combo_box.item label="Reference" name="Reference"/>
 	</combo_box>
-	<button bottom_delta="-15" height="18" label="Valg..." label_selected="Valg..." name="Options..." tool_tip="Se flere muligheder for gitter"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Se flere muligheder for gitter"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Terning"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisme"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pyramide"/>

@@ -72,10 +72,7 @@
 	<check_box label="Editar partes linkadas" name="checkbox edit linked parts"/>
 	<button label="Link" name="link_btn"/>
 	<button label="Desconectar links" name="unlink_btn"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Esticar ambos lados" name="checkbox uniform label">
-		Esticar ambos lados
-	</text>
+	<check_box label="Esticar ambos lados" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Esticar texturas" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Ajustar" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Selecione o tipo de régua da grade onde o objeto será colocado">
@@ -83,7 +80,7 @@
 		<combo_box.item label="Local" name="Local"/>
 		<combo_box.item label="Referência" name="Reference"/>
 	</combo_box>
-	<button label="" label_selected="Opções..." name="Options..." tool_tip="Mais opções de grade"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Mais opções de grade"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Cubo"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisma"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pirâmide"/>

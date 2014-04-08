@@ -73,9 +73,7 @@
 	<check_box label="Редактировать объединенные" name="checkbox edit linked parts"/>
 	<button label="Объединить" name="link_btn"/>
 	<button label="Разъединить" name="unlink_btn"/>
-	<text label="Растяжка обеих сторон" name="checkbox uniform label">
-		Растяжка обеих сторон
-	</text>
+	<check_box label="Растяжка обеих сторон" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Растягивать текстуры" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Привязка" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Выберите тип линейки сетки для размещения объекта">
@@ -83,7 +81,7 @@
 		<combo_box.item label="Локальная" name="Local"/>
 		<combo_box.item label="Точка отсчета" name="Reference"/>
 	</combo_box>
-	<button label="" name="Options..." tool_tip="Дополнительные параметры сетки"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Дополнительные параметры сетки"/>
 	<button name="ToolCube" tool_tip="Куб"/>
 	<button name="ToolPrism" tool_tip="Призма"/>
 	<button name="ToolPyramid" tool_tip="Пирамида"/>

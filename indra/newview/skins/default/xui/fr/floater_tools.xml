@@ -72,10 +72,7 @@
 	<check_box label="Modification liée" name="checkbox edit linked parts"/>
 	<button label="Lien" name="link_btn"/>
 	<button label="Annuler le lien" name="unlink_btn"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Étirer les deux côtés" name="checkbox uniform label">
-		Étirer les deux côtés
-	</text>
+	<check_box label="Étirer les deux côtés" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Étirer les textures" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Fixer" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Choisir le type d&apos;axe de grille pour le positionnement de l&apos;objet.">
@@ -83,7 +80,7 @@
 		<combo_box.item label="Local" name="Local"/>
 		<combo_box.item label="Référence" name="Reference"/>
 	</combo_box>
-	<button label="" label_selected="Options..." name="Options..." tool_tip="Afficher d&apos;autres options de grille"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Afficher d&apos;autres options de grille"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Cube"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisme droit"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pyramide"/>

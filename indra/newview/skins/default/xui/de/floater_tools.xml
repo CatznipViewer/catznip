@@ -55,35 +55,32 @@
 	</text>
 	<radio_group name="focus_radio_group">
 		<radio_item label="Zoom" name="radio zoom"/>
-		<radio_item label="Orbit (Strg)" name="radio orbit"/>
-		<radio_item label="Schwenken (Strg+Umschalt)" name="radio pan"/>
+		<radio_item label="Orbit (Ctrl)" name="radio orbit"/>
+		<radio_item label="Schwenken (Ctrl+Shift)" name="radio pan"/>
 	</radio_group>
 	<radio_group name="move_radio_group">
 		<radio_item label="Verschieben" name="radio move"/>
-		<radio_item label="Heben (Strg)" name="radio lift"/>
-		<radio_item label="Drehen (Strg+Umschalt)" name="radio spin"/>
+		<radio_item label="Heben (Ctrl)" name="radio lift"/>
+		<radio_item label="Drehen (Ctrl+Shift)" name="radio spin"/>
 	</radio_group>
 	<radio_group name="edit_radio_group">
 		<radio_item label="Bewegen" name="radio position"/>
-		<radio_item label="Drehen (Strg)" name="radio rotate"/>
-		<radio_item label="Dehnen (Strg+Umschalt)" name="radio stretch"/>
+		<radio_item label="Drehen (Ctrl)" name="radio rotate"/>
+		<radio_item label="Dehnen (Ctrl+Shift)" name="radio stretch"/>
 		<radio_item label="Fläche auswählen" name="radio select face"/>
 	</radio_group>
 	<check_box label="Verknüpfte Teile bearbeiten" name="checkbox edit linked parts"/>
 	<button label="Link" name="link_btn" width="30"/>
 	<button label="Verknüpfung auflösen" name="unlink_btn" width="126"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Beide Seiten dehnen" name="checkbox uniform label">
-		Beide Seiten dehnen
-	</text>
-	<check_box initial_value="true" label="Texturen dehnen" name="checkbox stretch textures" top_pad="-5"/>
-	<check_box initial_value="true" label="Einrasten" name="checkbox snap to grid" top_pad="15"/>
+	<check_box label="Beide Seiten dehnen" name="checkbox uniform"/>
+	<check_box initial_value="true" label="Texturen dehnen" name="checkbox stretch textures" />
+	<check_box initial_value="true" label="Einrasten" name="checkbox snap to grid" />
 	<combo_box name="combobox grid mode" tool_tip="Wählen Sie das gewünschte Rasterlineal zum Positionieren des Objekts aus.">
 		<combo_box.item label="Welt" name="World"/>
 		<combo_box.item label="Lokal" name="Local"/>
 		<combo_box.item label="Referenz" name="Reference"/>
 	</combo_box>
-	<button label="" label_selected="Optionen..." name="Options..." tool_tip="Mehr Raster-Optionen anzeigen"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Mehr Raster-Optionen anzeigen"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Würfel"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisma"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pyramide"/>

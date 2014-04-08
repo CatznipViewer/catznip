@@ -69,10 +69,7 @@
 	<text name="RenderingCost" tool_tip="Pokazuje koszt renderowania tego obiektu">
 		þ: [COUNT]
 	</text>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Rozciągnij 2 strony" name="checkbox uniform label">
-		Rozciągnij 2 strony
-	</text>
+	<check_box label="Rozciągnij 2 strony" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Rozciągnij teksturę" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Użyj siatki" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Wybierz rodzaj linijki siatki dla pozycjonowania obiektu">
@@ -80,7 +77,7 @@
 		<combo_box.item label="Lokalna" name="Local"/>
 		<combo_box.item label="Względna" name="Reference"/>
 	</combo_box>
-	<button label="Opcje..." label_selected="Opcje..." name="Options..." tool_tip="Więcej opcji siatki"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Więcej opcji siatki"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Sześcian"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Graniastosłup"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Ostrosłup"/>

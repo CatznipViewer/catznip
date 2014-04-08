@@ -57,13 +57,10 @@
 	<check_box label="Editar las partes enlazadas" name="checkbox edit linked parts"/>
 	<button label="Enlazar" name="link_btn"/>
 	<button label="Desenlazar" name="unlink_btn" width="95"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Estirar ambos lados" name="checkbox uniform label">
-		Estirar ambos lados
-	</text>
+	<check_box label="Estirar ambos lados" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Estirar las texturas" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Intervalo" name="checkbox snap to grid"/>
-	<button label="Opciones..." label_selected="Opciones..." name="Options..." tool_tip="Ver más opciones de la cuadrícula"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Ver más opciones de la cuadrícula"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Cubo"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisma"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pirámide"/>
