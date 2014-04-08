@@ -87,6 +87,17 @@ void LLTextSearchCtrl::setVisible(BOOL fVisible)
 	}
 }
 
+LLSD LLTextSearchCtrl::getValue() const
+{
+	return m_pSearchEditor->getText();
+}
+
+void LLTextSearchCtrl::setValue(const LLSD& sdValue)
+{
+	m_pSearchEditor->setText(sdValue.asString());
+	onRefreshHighlight();
+}
+
 void LLTextSearchCtrl::onRefreshHighlight()
 {
 	LLTextEditor* pEditor = dynamic_cast<LLTextEditor*>(getParent());

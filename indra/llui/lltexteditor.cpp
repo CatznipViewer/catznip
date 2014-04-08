@@ -1931,6 +1931,8 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask )
 	{
 		if (!mInplaceSearchPanel)
 			mInplaceSearchPanel = new LLTextSearchCtrl(this);
+		if (hasSelection())
+			mInplaceSearchPanel->setValue(getSelectionString());
 		mInplaceSearchPanel->setVisible(true);
 		mInplaceSearchPanel->setFocus(true);
 		handled = TRUE;

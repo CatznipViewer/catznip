@@ -45,6 +45,8 @@ public:
 public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setVisible(BOOL fVisible);
+	/*virtual*/ LLSD getValue() const;
+	/*virtual*/ void setValue(const LLSD& sdValue);
 
 	/*
 	 * Event handlers
