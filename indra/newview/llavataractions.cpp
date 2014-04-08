@@ -530,7 +530,10 @@ void LLAvatarActions::share(const LLUUID& id)
 	if (gIMMgr->hasSession(session_id))
 	{
 		// we should always get here, but check to verify anyways
-		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), false);
+// [SL:KB] - Patch: Chat-Logging | Checked: 2014-04-08 (Catznip-3.6)
+		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), LLLogChat::timestamp(false), false);
+// [/SL:KB]
+//		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), false);
 	}
 }
 
