@@ -352,13 +352,41 @@ void LLFloaterAvatarPicker::populateFriend()
 	LLAvatarTracker::instance().applyFunctor(collector);
 	LLCollectAllBuddies::buddy_map_t::iterator it;
 	
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	LLSD sdRow;
+	LLSD& sdColumns = sdRow["columns"];
+	sdColumns[0]["column"] = "name";
+	sdColumns[1]["column"] = "username";
+
+	// Bold font style for online friends
+	sdColumns[1]["font"]["style"] = "BOLD";
+	sdColumns[0]["font"]["style"] = "BOLD";
+// [/SL:KB]
 	for(it = collector.mOnline.begin(); it!=collector.mOnline.end(); it++)
 	{
-		friends_scroller->addStringUUIDItem(it->first, it->second);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		sdRow["id"] = it->first;
+		sdColumns[0]["value"] = it->second.getDisplayName();
+		sdColumns[1]["value"] = it->second.getAccountName();
+		friends_scroller->addElement(sdRow);
+// [/SL:KB]
+//		friends_scroller->addStringUUIDItem(it->first, it->second);
 	}
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	// Normal font style for offline friends
+	sdColumns[1]["font"]["style"] = "NORMAL";
+	sdColumns[0]["font"]["style"] = "NORMAL";
+// [/SL:KB]
 	for(it = collector.mOffline.begin(); it!=collector.mOffline.end(); it++)
 	{
-			friends_scroller->addStringUUIDItem(it->first, it->second);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		sdRow["id"] = it->first;
+		sdColumns[0]["value"] = it->second.getDisplayName();
+		sdColumns[1]["value"] = it->second.getAccountName();
+		friends_scroller->addElement(sdRow);
+// [/SL:KB]
+//			friends_scroller->addStringUUIDItem(it->first, it->second);
 	}
 	friends_scroller->sortByColumnIndex(0, TRUE);
 }

@@ -138,15 +138,24 @@
               function="Refresh.FriendList"/>
             </button>
             <scroll_list
+             border="false"
+             draw_heading="true" 
              follows="all"
              height="120"
-             border="false"
              layout="topleft"
              left="0"
              name="Friends"
-             sort_column="0"
              top_pad="5"
-             width="132" />
+             width="132">
+              <columns
+               label="Name"
+               name="name"
+               width="150" />
+              <columns
+               label="Username"
+               name="username"
+               width="150" />
+            </scroll_list>
         </panel>
 
         <panel
