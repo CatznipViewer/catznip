@@ -2301,11 +2301,14 @@ void LLViewerWindow::setMenuBackgroundColor(bool god_mode, bool dev_grid)
     LLSD args;
     LLColor4 new_bg_color;
 
-	// no l10n problem because channel is always an english string
-	std::string channel = LLVersionInfo::getChannel();
-	static const boost::regex is_beta_channel("\\bBeta\\b");
-	static const boost::regex is_project_channel("\\bProject\\b");
-	static const boost::regex is_test_channel("\\bTest$");
+//	// no l10n problem because channel is always an english string
+//	std::string channel = LLVersionInfo::getChannel();
+//	static const boost::regex is_beta_channel("\\bBeta\\b");
+//	static const boost::regex is_project_channel("\\bProject\\b");
+//	static const boost::regex is_test_channel("\\bTest$");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-09 (Catznip-3.6)
+	LLVersionInfo::EChannelType eChannelType = LLVersionInfo::getChannelType();
+// [/SL:KB]
 	
 	// god more important than project, proj more important than grid
     if ( god_mode ) 
@@ -2319,15 +2322,24 @@ void LLViewerWindow::setMenuBackgroundColor(bool god_mode, bool dev_grid)
 			new_bg_color = LLUIColorTable::instance().getColor( "MenuNonProductionGodBgColor" );
 		}
     }
-	else if (boost::regex_search(channel, is_beta_channel))
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-09 (Catznip-3.6)
+	else if (eChannelType == LLVersionInfo::CHANNEL_BETA)
+// [/SL:KB]
+//	else if (boost::regex_search(channel, is_beta_channel))
 	{
 		new_bg_color = LLUIColorTable::instance().getColor( "MenuBarBetaBgColor" );
 	}
-	else if (boost::regex_search(channel, is_project_channel))
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-09 (Catznip-3.6)
+	else if (eChannelType == LLVersionInfo::CHANNEL_PROJECT)
+// [/SL:KB]
+//	else if (boost::regex_search(channel, is_project_channel))
 	{
 		new_bg_color = LLUIColorTable::instance().getColor( "MenuBarProjectBgColor" );
 	}
-	else if (boost::regex_search(channel, is_test_channel))
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-09 (Catznip-3.6)
+	else if (eChannelType == LLVersionInfo::CHANNEL_TEST)
+// [/SL:KB]
+//	else if (boost::regex_search(channel, is_test_channel))
 	{
 		new_bg_color = LLUIColorTable::instance().getColor( "MenuBarTestBgColor" );
 	}

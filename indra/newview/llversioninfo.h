@@ -59,6 +59,9 @@ public:
 // [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
 	/// return the release viewer version as a string like "R7" or "R7.1"
 	static const std::string &getReleaseVersion();
+
+	enum EChannelType { CHANNEL_RELEASE, CHANNEL_BETA, CHANNEL_TEST, CHANNEL_PROJECT, CHANNEL_DEVELOP, CHANNEL_UNKNOWN };
+	static EChannelType getChannelType();
 // [/SL:KB]
 
 	/// return the viewer version as a string like "2.0.0"
