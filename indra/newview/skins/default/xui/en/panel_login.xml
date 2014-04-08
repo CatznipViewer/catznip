@@ -251,17 +251,17 @@
       </text>
       <button
           follows="right|bottom"
-          top="35"
+          top="50"
           right="-15"
           height="23"
           image_unselected="PushButton_On"
           image_selected="PushButton_On_Selected"
-          label="Start now"
+          label="Start Now"
           label_color="White"
           layout="topleft"
           left_pad="10"
           name="create_new_account_btn"
-          width="90" />
+          width="120" />
     </layout_panel>
   </layout_stack>
 </panel>
