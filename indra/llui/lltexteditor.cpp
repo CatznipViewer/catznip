@@ -1605,31 +1605,51 @@ void LLTextEditor::cleanStringForPaste(LLWString & clean_string)
 
 void LLTextEditor::pasteTextWithLinebreaks(LLWString & clean_string)
 {
-	std::basic_string<llwchar>::size_type start = 0;
-	std::basic_string<llwchar>::size_type pos = clean_string.find('\n',start);
-	
-	while((pos != -1) && (pos != clean_string.length() -1))
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2014-04-08 (Catznip-3.6)
+	std::basic_string<llwchar>::size_type len = clean_string.length(), start = 0, pos;
+	while ( (start < len) && ((pos = clean_string.find('\n', start)) != LLWString::npos) )
 	{
-		if(pos!=start)
+		if (pos!=start)
 		{
 			std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,pos-start);
 			setCursorPos(mCursorPos + insert(mCursorPos, str, TRUE, LLTextSegmentPtr()));
 		}
-		addLineBreakChar(TRUE);			// Add a line break and group with the next addition.
+		addLineBreakChar(pos != len);
 
-		start = pos+1;
-		pos = clean_string.find('\n',start);
+		start = pos + 1;
 	}
 
-	if (pos != start)
+	if (start < len)
 	{
-		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,clean_string.length()-start);
+		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,len - start);
 		setCursorPos(mCursorPos + insert(mCursorPos, str, FALSE, LLTextSegmentPtr()));
 	}
-	else
-	{
-		addLineBreakChar(FALSE);		// Add a line break and end the grouping.
-	}
+// [/SL:KB]
+//	std::basic_string<llwchar>::size_type start = 0;
+//	std::basic_string<llwchar>::size_type pos = clean_string.find('\n',start);
+//	
+//	while((pos != -1) && (pos != clean_string.length() -1))
+//	{
+//		if(pos!=start)
+//		{
+//			std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,pos-start);
+//			setCursorPos(mCursorPos + insert(mCursorPos, str, TRUE, LLTextSegmentPtr()));
+//		}
+//		addLineBreakChar(TRUE);			// Add a line break and group with the next addition.
+//
+//		start = pos+1;
+//		pos = clean_string.find('\n',start);
+//	}
+//
+//	if (pos != start)
+//	{
+//		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,clean_string.length()-start);
+//		setCursorPos(mCursorPos + insert(mCursorPos, str, FALSE, LLTextSegmentPtr()));
+//	}
+//	else
+//	{
+//		addLineBreakChar(FALSE);		// Add a line break and end the grouping.
+//	}
 }
 
 // copy selection to primary
