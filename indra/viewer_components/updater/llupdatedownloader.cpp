@@ -325,7 +325,9 @@ void LLUpdateDownloader::Implementation::resume(void)
 			{
 				LLFile::remove(filePath);
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
-				download(mDownloadData["update_data"]);
+				// download() will clear mDownloadData so we need a local copy
+				const LLSD sdUpdateData = mDownloadData["update_data"];
+				download(sdUpdateData);
 // [/SL:KB]
 //				download(LLURI(mDownloadData["url"].asString()),
 //						 mDownloadData["hash"].asString(),
@@ -341,7 +343,9 @@ void LLUpdateDownloader::Implementation::resume(void)
 		else
 		{
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
-			download(mDownloadData["update_data"]);
+			// download() will clear mDownloadData so we need a local copy
+			const LLSD sdUpdateData = mDownloadData["update_data"];
+			download(sdUpdateData);
 // [/SL:KB]
 //			download(LLURI(mDownloadData["url"].asString()),
 //					 mDownloadData["hash"].asString(),
