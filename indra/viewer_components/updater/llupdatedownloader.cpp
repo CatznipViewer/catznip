@@ -56,6 +56,7 @@ public:
 //				  bool required);
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
 	void download(const LLSD& sdUpdateData);
+	const LLSD& getDownloadData() const { return mDownloadData; }
 // [/SL:KB]
 	bool isDownloading(void);
 	size_t onHeader(void * header, size_t size);
@@ -141,6 +142,11 @@ void LLUpdateDownloader::cancel(void)
 void LLUpdateDownloader::download(const LLSD& sdUpdateData)
 {
 	mImplementation->download(sdUpdateData);
+}
+
+const LLSD& LLUpdateDownloader::getDownloadData() const
+{
+	return mImplementation->getDownloadData();
 }
 // [/SL:KB]
 

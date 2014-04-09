@@ -94,9 +94,6 @@ public:
 	 */
 protected:
 	bool           m_fRequired;
-	std::string    m_strVersion;
-	std::string    m_strInfoUrl;
-
 	LLProgressBar* m_pProgressBar;
 	LLTextBox*     m_pProgressText;
 	LLButton*      m_pInstallBtn;

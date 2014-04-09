@@ -155,6 +155,7 @@ public:
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 	bool isDownloading()	{ return mIsDownloading; }
 	void startDownloading();
+	const LLSD& getDownloadData() const;
 // [/SL:KB]
 
 	void setAppExitCallback(LLUpdaterService::app_exit_callback_t aecb) { mAppExitCallback = aecb;}
@@ -321,6 +322,11 @@ void LLUpdaterServiceImpl::startDownloading()
 	mUpdateDownloader.download(mNewUpdateData);
 
 	mNewUpdateData.clear();
+}
+
+const LLSD& LLUpdaterServiceImpl::getDownloadData() const
+{
+	return mUpdateDownloader.getDownloadData();
 }
 // [/SL:KB]
 
@@ -883,6 +889,11 @@ bool LLUpdaterService::isDownloading()
 void LLUpdaterService::startDownloading()
 {
 	return mImpl->startDownloading();
+}
+
+const LLSD& LLUpdaterService::getDownloadData() const
+{
+	return mImpl->getDownloadData();
 }
 // [/SL:KB]
 

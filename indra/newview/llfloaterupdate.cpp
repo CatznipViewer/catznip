@@ -65,7 +65,7 @@ BOOL LLFloaterUpdate::postBuild()
 void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 {
 	if (mCommitSignal)
-		(*mCommitSignal)(this, LLSD().with("accept", fAccept).with("required", m_fRequired).with("version", m_strVersion).with("info_url", m_strInformationUrl));
+		(*mCommitSignal)(this, LLSD().with("accept", fAccept));
 	closeFloater();
 }
 
@@ -75,13 +75,11 @@ void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 
 LLFloaterUpdateProgress::LLFloaterUpdateProgress(const LLSD& sdKey, bool fModal)
 	: LLModalDialog(LLSD(), fModal)
+	, m_fRequired(false)
 	, m_pProgressBar(NULL)
 	, m_pProgressText(NULL)
 	, m_pInstallBtn(NULL)
 {
-	m_fRequired = sdKey["required"].asBoolean();
-	m_strVersion = sdKey["version"].asString();
-	m_strInfoUrl = sdKey["info_url"].asString();
 }
 
 LLFloaterUpdateProgress::~LLFloaterUpdateProgress()
@@ -90,10 +88,13 @@ LLFloaterUpdateProgress::~LLFloaterUpdateProgress()
 
 BOOL LLFloaterUpdateProgress::postBuild()
 {
+	const LLSD& sdDownloadData = LLLoginInstance::instance().getUpdaterService()->getDownloadData();
+	m_fRequired = sdDownloadData["required"].asBoolean();
+
 	LLStringUtil::format_map_t args;
-	args["VERSION"] = m_strVersion;
+	args["VERSION"] = sdDownloadData["update_version"].asString();
 	getChild<LLUICtrl>("version_text")->setValue(getString((m_fRequired) ? "string_version_required" : "string_version_optional", args));
-	getChild<LLUICtrl>("info_text")->setTextArg("INFO_URL", m_strInfoUrl);
+	getChild<LLUICtrl>("info_text")->setTextArg("INFO_URL", sdDownloadData["info_url"].asString());
 
 	m_pProgressBar = getChild<LLProgressBar>("progress_bar");
 	m_pProgressText = getChild<LLTextBox>("progress_text");

@@ -95,6 +95,9 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+#include "llstartup.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolcomp.h"
 #include "lltoolmgr.h"
@@ -7104,14 +7107,21 @@ void handle_updater_check()
 		case LLUpdaterService::TEMPORARY_ERROR:
 		// Set when we already have the update downloaded but the user picked 'later', or if the update failed
 		case LLUpdaterService::TERMINAL:
-			// Perform a clean manual check
-			pUpdater->checkForUpdate(true);
+			{
+				// Perform a clean manual check
+				pUpdater->checkForUpdate(true);
+			}
 			break;
 		case LLUpdaterService::DOWNLOADING:
-			// TODO: Show the download progress floater
+			{
+				bool fRequired = LLLoginInstance::instance().getUpdaterService()->getDownloadData()["required"].asBoolean();
+				LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
+			}
 			break;
 		default:
-			LLNotificationsUtil::add("UpdaterCheckError");
+			{
+				LLNotificationsUtil::add("UpdaterCheckError");
+			}
 			break;
 	}
 }

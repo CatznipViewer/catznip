@@ -2936,10 +2936,8 @@ namespace {
 		{
 			LLLoginInstance::instance().getUpdaterService()->startDownloading();
 
-			LLSD sdProgressData = sdData;
-			sdProgressData.erase("accept");
-			sdProgressData["modal"] = (sdData["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP);
-			LLFloaterReg::showInstance("update_progress", sdProgressData);
+			bool fRequired = LLLoginInstance::instance().getUpdaterService()->getDownloadData()["required"].asBoolean();
+			LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
 		}
 		else								// User clicked "Later"
 		{
@@ -3146,9 +3144,7 @@ namespace {
 				break;
 			case LLUpdaterService::DOWNLOAD_RESUME:
 				{
-					bool fRequired = (evt["required"].asBoolean());
-					bool fModal = (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP);
-					LLFloaterReg::showInstance("update_progress", LLSD().with("required", fRequired).with("modal", fModal));
+					LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (evt["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
 				}
 				break;
 			case LLUpdaterService::PROGRESS:

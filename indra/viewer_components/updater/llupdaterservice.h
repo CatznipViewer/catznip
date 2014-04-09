@@ -110,6 +110,7 @@ public:
 
 	bool isDownloading();
 	void startDownloading();
+	const LLSD& getDownloadData() const;
 // [/SL:KB]
 
 	typedef boost::function<void (void)> app_exit_callback_t;
