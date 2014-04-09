@@ -898,6 +898,18 @@ bool idle_startup()
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+		// Limit bandwidth for the updater download once the user passes the login screen
+		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
+		{
+			LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
+			if (pUpdater->isChecking())
+			{
+				pUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
+			}
+		}
+// [/SL:KB]
+
 		// save the credentials                                                                                        
 		std::string userid = "unknown";                                                                                
 		if(gUserCredential.notNull())                                                                                  

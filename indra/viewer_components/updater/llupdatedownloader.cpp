@@ -360,7 +360,10 @@ void LLUpdateDownloader::Implementation::resume(void)
 
 void LLUpdateDownloader::Implementation::setBandwidthLimit(U64 bytesPerSecond)
 {
-	if((mBandwidthLimit != bytesPerSecond) && isDownloading() && !mDownloadData["required"].asBoolean())
+//	if((mBandwidthLimit != bytesPerSecond) && isDownloading() && !mDownloadData["required"].asBoolean())
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+	if((mBandwidthLimit != bytesPerSecond) && isDownloading())
+// [/SL:KB]
 	{
 		llassert(mCurl != 0);
 		mBandwidthLimit = bytesPerSecond;
@@ -522,8 +525,12 @@ void LLUpdateDownloader::Implementation::initializeCurlGet(std::string const & u
 	throwOnCurlError(curl_easy_setopt(mCurl, CURLOPT_PROGRESSFUNCTION, &progress_callback));
 	throwOnCurlError(curl_easy_setopt(mCurl, CURLOPT_PROGRESSDATA, this));
 	throwOnCurlError(curl_easy_setopt(mCurl, CURLOPT_NOPROGRESS, false));
-	// if it's a required update set the bandwidth limit to 0 (unlimited)
-	curl_off_t limit = mDownloadData["required"].asBoolean() ? 0 : mBandwidthLimit;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+	// Bandwidth limit is determined by whether the user is still at login screen so always use the set bandwidth limit
+	curl_off_t limit = mBandwidthLimit;
+// [/SL:KB]
+//	// if it's a required update set the bandwidth limit to 0 (unlimited)
+//	curl_off_t limit = mDownloadData["required"].asBoolean() ? 0 : mBandwidthLimit;
 	throwOnCurlError(curl_easy_setopt(mCurl, CURLOPT_MAX_RECV_SPEED_LARGE, limit));
 
 	mDownloadPercent = 0;

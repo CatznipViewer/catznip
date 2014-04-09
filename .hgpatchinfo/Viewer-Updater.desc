@@ -2,3 +2,6 @@
 - changed : point the updater service to catznip.com
 - changed : keep the full set of update information available (see LLUpdateDownloader::Implementation::mDownloadData["update_data"])
 - changed : use the "more_info" URL for an update's release notes (only fall-back to the RELEASE_NOTES_BASE_URL release notes if unspecified)
+- changed : only apply the updater download bandwidth once the user has passed the login screen
+    -> bandwidth cap was increased from the default 500Kbit to 768Kbit which downloads the average Windows viewer in +/-6 minutes rather than +/-10 minutes
+    -> bandwidth cap always applies once the user passes the login screen (users may opt to wait at the login screen for an optional download so don't download slower in that case)
