@@ -53,6 +53,7 @@
 #include "lldraghandle.h"
 #include "message.h"
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-09-30 (Catznip-3.3)
+#include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 // [/SL:KB]
 
@@ -80,6 +81,9 @@ LLFloaterAvatarPicker* LLFloaterAvatarPicker::show(select_callback_t callback,
 	floater->mSelectionCallback = callback;
 	floater->setAllowMultiple(allow_multiple);
 	floater->mNearMeListComplete = FALSE;
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	floater->mFilterFriends.clear();
+// [/SL:KB]
 	floater->mCloseOnSelect = closeOnSelect;
 	floater->mExcludeAgentFromSearchResults = skip_agent;
 	
@@ -111,8 +115,6 @@ LLFloaterAvatarPicker::LLFloaterAvatarPicker(const LLSD& key)
     mContextConeOutAlpha(0.f),
     mContextConeFadeTime(0.f)
 {
-	mCommitCallbackRegistrar.add("Refresh.FriendList", boost::bind(&LLFloaterAvatarPicker::populateFriend, this));
-
     mContextConeInAlpha = gSavedSettings.getF32("ContextConeInAlpha");
     mContextConeOutAlpha = gSavedSettings.getF32("ContextConeOutAlpha");
     mContextConeFadeTime = gSavedSettings.getF32("ContextConeFadeTime");
@@ -135,6 +137,10 @@ BOOL LLFloaterAvatarPicker::postBuild()
 	LLScrollListCtrl* nearme = getChild<LLScrollListCtrl>("NearMe");
 	nearme->setDoubleClickCallback(boost::bind(&LLFloaterAvatarPicker::onBtnSelect, this));
 	nearme->setCommitCallback(boost::bind(&LLFloaterAvatarPicker::onList, this));
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	getChild<LLUICtrl>("filter_friends")->setCommitCallback(boost::bind(&LLFloaterAvatarPicker::onFilterFriends, this, _2));
+// [/SL:KB]
 
 	LLScrollListCtrl* friends = getChild<LLScrollListCtrl>("Friends");
 	friends->setDoubleClickCallback(boost::bind(&LLFloaterAvatarPicker::onBtnSelect, this));
@@ -176,6 +182,15 @@ void LLFloaterAvatarPicker::onTabChanged()
 {
 	getChildView("ok_btn")->setEnabled(isSelectBtnEnabled());
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+void LLFloaterAvatarPicker::onFilterFriends(const std::string& strFilter)
+{
+	// TODO-Catznip: this needs to be a lot more performant
+	mFilterFriends = strFilter;
+	populateFriend();
+}
+// [/SL:KB]
 
 // Destroys the object
 LLFloaterAvatarPicker::~LLFloaterAvatarPicker()
@@ -365,9 +380,15 @@ void LLFloaterAvatarPicker::populateFriend()
 	for(it = collector.mOnline.begin(); it!=collector.mOnline.end(); it++)
 	{
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		const std::string strDisplayName = it->second.getDisplayName();
+		const std::string strAccountName = it->second.getAccountName();
+
+		if ( (!mFilterFriends.empty()) && (boost::ifind_first(strDisplayName, mFilterFriends).empty()) && (boost::ifind_first(strAccountName, mFilterFriends).empty()) )
+			continue;
+
 		sdRow["id"] = it->first;
-		sdColumns[0]["value"] = it->second.getDisplayName();
-		sdColumns[1]["value"] = it->second.getAccountName();
+		sdColumns[0]["value"] = strDisplayName;
+		sdColumns[1]["value"] = strAccountName;
 		friends_scroller->addElement(sdRow);
 // [/SL:KB]
 //		friends_scroller->addStringUUIDItem(it->first, it->second);
@@ -381,9 +402,15 @@ void LLFloaterAvatarPicker::populateFriend()
 	for(it = collector.mOffline.begin(); it!=collector.mOffline.end(); it++)
 	{
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		const std::string strDisplayName = it->second.getDisplayName();
+		const std::string strAccountName = it->second.getAccountName();
+
+		if ( (!mFilterFriends.empty()) && (boost::ifind_first(strDisplayName, mFilterFriends).empty()) && (boost::ifind_first(strAccountName, mFilterFriends).empty()) )
+			continue;
+
 		sdRow["id"] = it->first;
-		sdColumns[0]["value"] = it->second.getDisplayName();
-		sdColumns[1]["value"] = it->second.getAccountName();
+		sdColumns[0]["value"] = strDisplayName;
+		sdColumns[1]["value"] = strAccountName;
 		friends_scroller->addElement(sdRow);
 // [/SL:KB]
 //			friends_scroller->addStringUUIDItem(it->first, it->second);
