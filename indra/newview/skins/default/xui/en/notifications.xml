@@ -3304,6 +3304,26 @@ Finished download of raw terrain file to:
 
   <notification
    icon="alertmodal.tga"
+   name="UpdaterCheckUpToDate"
+   type="alertmodal">
+    Your [APP_NAME] version is up to date.
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="UpdaterCheckError"
+   type="alertmodal">
+    An error occurred while checking for updates. Please try again later.
+    <usetemplate
+     name="okbutton"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="DownloadWindowsMandatory"
    type="alertmodal">
 A new version of [APP_NAME] is available.

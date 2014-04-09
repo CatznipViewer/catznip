@@ -52,6 +52,7 @@ public:
 		INVALID,
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 		CHECK_COMPLETE,
+		CHECK_ERROR,
 // [/SL:KB]
 		DOWNLOAD_COMPLETE,
 		DOWNLOAD_ERROR,
@@ -103,6 +104,8 @@ public:
 	eUpdaterState getState();
 
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	void checkForUpdate(bool user_feedback);
+
 	bool isDownloading();
 	void startDownloading();
 // [/SL:KB]

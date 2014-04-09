@@ -2927,7 +2927,7 @@ namespace {
 	}
 	
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
-	void on_update_check_callback(const LLSD& sdData)
+	void on_update_available_callback(const LLSD& sdData)
 	{
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
 		{
@@ -2940,12 +2940,11 @@ namespace {
 		}
 	}
 
-	void on_update_check(const LLSD& sdData)
+	void on_update_available(const LLSD& sdData)
 	{
-		// Don't do anything if we're up to date; or if it's an optional update and the user was only recently notified
-		if ( (LLUpdaterService::UPDATE_AVAILABLE != LLLoginInstance::instance().getUpdaterService()->getState()) ||
-		     ((!sdData["required"].asBoolean()) && 
-		      (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 48 * 60 * 60)) )
+		// Don't do anything if it's an optional update and the user was already notified recently
+		if ( (!sdData["show_ui"].asBoolean()) && 
+		     (!sdData["required"].asBoolean()) && (LLTimer::getTotalSeconds() - LLDate(gSavedSettings.getString("UpdaterLastPopup")).secondsSinceEpoch() < 48 * 60 * 60) )
 		{
 			return;
 		}
@@ -2960,7 +2959,7 @@ namespace {
 		LLFloater* pFloater = LLFloaterReg::showInstance("update", sdUpdateData);
 		if (pFloater)
 		{
-			pFloater->setCommitCallback(boost::bind(&on_update_check_callback, _2));
+			pFloater->setCommitCallback(boost::bind(&on_update_available_callback, _2));
 		}
 	}
 
@@ -3110,13 +3109,31 @@ namespace {
 		{
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 			case LLUpdaterService::CHECK_COMPLETE:
-				if (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting"))
+				if (!evt["up_to_date"].asBoolean())
 				{
-					on_update_check(evt);
+					// Update is available
+					if ( (evt["show_ui"].asBoolean()) || (LLUpdaterService::PROMPT_DOWNLOAD == gSavedSettings.getU32("UpdaterServiceSetting")) )
+					{
+						on_update_available(evt);
+					}
+					else
+					{
+						on_update_available_callback(LLSD().with("accept", true));
+					}
 				}
 				else
 				{
-					on_update_check_callback(LLSD().with("accept", true));
+					// Viewer is up to date
+					if (evt["show_ui"].asBoolean())
+					{
+						LLNotificationsUtil::add("UpdaterCheckUpToDate");
+					}
+				}
+				break;
+			case LLUpdaterService::CHECK_ERROR:
+				if (evt["show_ui"].asBoolean())
+				{
+					LLNotificationsUtil::add("UpdaterCheckError");
 				}
 				break;
 			case LLUpdaterService::DOWNLOAD_COMPLETE:

@@ -117,6 +117,9 @@ class LLUpdaterServiceImpl :
 	
 	unsigned int mCheckPeriod;
 	bool mIsChecking;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-07 (Catznip-3.6)
+	bool mShowUserFeedback;
+// [/SL:KB]
 	bool mIsDownloading;
 	
 	LLUpdateChecker mUpdateChecker;
@@ -157,6 +160,9 @@ public:
 	void setAppExitCallback(LLUpdaterService::app_exit_callback_t aecb) { mAppExitCallback = aecb;}
 	std::string updatedVersion(void);
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-07 (Catznip-3.6)
+	void checkForUpdate(bool install_if_ready, bool user_feedback);
+// [/SL:KB]
 	bool checkForInstall(bool launchInstaller); // Test if a local install is ready.
 	bool checkForResume(); // Test for resumeable d/l.
 
@@ -192,6 +198,9 @@ const std::string LLUpdaterServiceImpl::sListenerName = "LLUpdaterServiceImpl";
 
 LLUpdaterServiceImpl::LLUpdaterServiceImpl() :
 	mIsChecking(false),
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-07 (Catznip-3.6)
+	mShowUserFeedback(false),
+// [/SL:KB]
 	mIsDownloading(false),
 	mCheckPeriod(0),
 	mUpdateChecker(*this),
@@ -252,40 +261,29 @@ void LLUpdaterServiceImpl::startChecking(bool install_if_ready)
 	}
 
 	mIsChecking = true;
-
-    // Check to see if an install is ready.
-	bool has_install = checkForInstall(install_if_ready);
-	if(!has_install)
-	{
-		checkForResume(); // will set mIsDownloading to true if resuming
-
-		if(!mIsDownloading)
-		{
-			setState(LLUpdaterService::CHECKING_FOR_UPDATE);
-			
-			// Checking can only occur during the mainloop.
-			// reset the timer to 0 so that the next mainloop event 
-			// triggers a check;
-			restartTimer(0); 
-		} 
-		else
-		{
-			setState(LLUpdaterService::DOWNLOADING);
-		}
-	}
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
-	else if (!install_if_ready)
-	{
-		// Simulate a completed download so the user is informed about the update
-		LLSD update_info;
-		get_update_marker_data(update_info);
-
-		mNewVersion = update_info["update_version"].asString();
-		mNewChannel = update_info["update_channel"].asString();
-
-		downloadComplete(update_info);
-	}
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-07 (Catznip-3.6)
+	checkForUpdate(install_if_ready, false);
 // [/SL:KB]
+//    // Check to see if an install is ready.
+//	bool has_install = checkForInstall(install_if_ready);
+//	if(!has_install)
+//	{
+//		checkForResume(); // will set mIsDownloading to true if resuming
+//
+//		if(!mIsDownloading)
+//		{
+//			setState(LLUpdaterService::CHECKING_FOR_UPDATE);
+//			
+//			// Checking can only occur during the mainloop.
+//			// reset the timer to 0 so that the next mainloop event 
+//			// triggers a check;
+//			restartTimer(0); 
+//		} 
+//		else
+//		{
+//			setState(LLUpdaterService::DOWNLOADING);
+//		}
+//	}
 }
 
 void LLUpdaterServiceImpl::stopChecking()
@@ -335,6 +333,49 @@ std::string LLUpdaterServiceImpl::updatedVersion(void)
 {
 	return mNewVersion;
 }
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-07 (Catznip-3.6)
+void LLUpdaterServiceImpl::checkForUpdate(bool install_if_ready, bool user_feedback)
+{
+	mShowUserFeedback = false;
+
+    // Check to see if an install is ready.
+	bool has_install = checkForInstall(install_if_ready);
+	if(!has_install)
+	{
+		checkForResume(); // will set mIsDownloading to true if resuming
+
+		if(!mIsDownloading)
+		{
+			mShowUserFeedback = user_feedback;
+			setState(LLUpdaterService::CHECKING_FOR_UPDATE);
+			
+			// Checking can only occur during the mainloop.
+			// reset the timer to 0 so that the next mainloop event 
+			// triggers a check;
+			if (!LLEventPumps::instance().obtain("mainloop").getListener(sListenerName).connected())
+				restartTimer(0); 
+			else
+				mTimer.setTimerExpirySec(0.f);
+		} 
+		else
+		{
+			setState(LLUpdaterService::DOWNLOADING);
+		}
+	}
+	else if (!install_if_ready)
+	{
+		// Simulate a completed download so the user is informed about the update
+		LLSD update_info;
+		get_update_marker_data(update_info);
+
+		mNewVersion = update_info["update_version"].asString();
+		mNewChannel = update_info["update_channel"].asString();
+
+		downloadComplete(update_info);
+	}
+}
+// [/SL:KB]
 
 bool LLUpdaterServiceImpl::checkForInstall(bool launchInstaller)
 {
@@ -447,6 +488,19 @@ void LLUpdaterServiceImpl::error(std::string const & message)
 {
 	if(mIsChecking)
 	{
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+		LLSD sdEventData;
+		sdEventData["pump"] = LLUpdaterService::pumpName();
+
+		LLSD& sdPayload = sdEventData["payload"];
+		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_ERROR);
+		sdPayload["show_ui"] = mShowUserFeedback;
+
+		LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+
+		mShowUserFeedback = false;
+// [/SL:KB]
+
 		setState(LLUpdaterService::TEMPORARY_ERROR);
 		restartTimer(mCheckPeriod);
 	}
@@ -464,6 +518,25 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 		}
 	
 		setState(LLUpdaterService::UP_TO_DATE);
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-07-15 (Catznip-3.5)
+		mNewChannel.clear();
+		mNewVersion.clear();
+		mNewUpdateData.clear();
+
+		LLSD sdEventData;
+		sdEventData["pump"] = LLUpdaterService::pumpName();
+		sdEventData["payload"] = content;
+
+		LLSD& sdPayload = sdEventData["payload"];
+		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
+		sdPayload["up_to_date"] = true;
+		sdPayload["show_ui"] = mShowUserFeedback;
+
+		LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+
+		mShowUserFeedback = false;
+// [/SL:KB]
 	}
 	else if ( content.isMap() && content.has("url") )
 	{
@@ -487,11 +560,15 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 
 		LLSD& sdPayload = sdEventData["payload"];
 		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
+		sdPayload["up_to_date"] = false;
+		sdPayload["show_ui"] = mShowUserFeedback;
 		sdPayload["required"] = content["required"].asBoolean();
 		sdPayload["channel"] = mNewChannel;
 		sdPayload["version"] = mNewVersion;
 
 		LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+
+		mShowUserFeedback = false;
 // [/SL:KB]
 //		// there is an update available...
 //		stopTimer();
@@ -517,6 +594,23 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 	}
 	else
 	{
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+		mNewChannel.clear();
+		mNewVersion.clear();
+		mNewUpdateData.clear();
+
+		LLSD sdEventData;
+		sdEventData["pump"] = LLUpdaterService::pumpName();
+
+		LLSD& sdPayload = sdEventData["payload"];
+		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_ERROR);
+		sdPayload["show_ui"] = mShowUserFeedback;
+
+		LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+
+		mShowUserFeedback = false;
+// [/SL:KB]
+
 		LL_WARNS("UpdaterService") << "Invalid update query response ignored; retry in "
 								   << mCheckPeriod << " seconds" << LL_ENDL;
 		restartTimer(mCheckPeriod);
@@ -756,6 +850,11 @@ bool LLUpdaterService::isChecking()
 }
 
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+void LLUpdaterService::checkForUpdate(bool user_feedback)
+{
+	return mImpl->checkForUpdate(false, user_feedback);
+}
+
 bool LLUpdaterService::isDownloading()
 {
 	return mImpl->isDownloading();
