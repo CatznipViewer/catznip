@@ -59,7 +59,7 @@ public:
 //				  std::string const & info_url,
 //				  bool required=false);
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
-	void download(const LLSD& sdUpdateData, bool required=false);
+	void download(const LLSD& sdUpdateData);
 // [/SL:KB]
 	
 	// Returns true if a download is in progress.

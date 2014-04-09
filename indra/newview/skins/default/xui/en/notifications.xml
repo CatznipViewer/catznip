@@ -3482,7 +3482,7 @@ or you can install it now.
    type="notify">
 The [APP_NAME] [VERSION] update has finished downloading.
 
-Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton about this update.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton about this update.
 
 Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
@@ -3498,7 +3498,7 @@ Would you like to install it now and restart [APP_NAME]?
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading.
 
-Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton about this update.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton about this update.
 
 Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
@@ -3514,7 +3514,7 @@ Would you like to install it now and restart [APP_NAME]?
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading. This is a required update.
 
-Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
 
 [APP_NAME] will restart to install the update now.
     <tag>confirm</tag>
@@ -3529,7 +3529,7 @@ Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading. This is a required update.
 
-Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
 
 [APP_NAME] will restart to install the update now.
     <tag>confirm</tag>
@@ -3544,7 +3544,7 @@ Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
    type="notify">
 The [APP_NAME] [VERSION] update has finished downloading.
 
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[UPDATE_URL] details about this update]
+This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[INFO_URL] details about this update]
 
 Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
@@ -3560,7 +3560,7 @@ Would you like to install it now and restart [APP_NAME]?
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading.
 
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[UPDATE_URL] details about this update]
+This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[INFO_URL] details about this update]
 
 Would you like to install it now and restart [APP_NAME]?
     <tag>confirm</tag>
@@ -3576,7 +3576,7 @@ Would you like to install it now and restart [APP_NAME]?
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading. This is a required update.
 
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[UPDATE_URL] details about this update]
+This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[INFO_URL] details about this update]
 
 We must restart [APP_NAME] to install the update.
     <tag>confirm</tag>
@@ -3591,7 +3591,7 @@ We must restart [APP_NAME] to install the update.
  type="alertmodal">
 The [APP_NAME] [VERSION] update has finished downloading. This is a required update.
 
-This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[UPDATE_URL] details about this update]
+This experimental viewer has been replaced by a [NEW_CHANNEL] viewer; see [[INFO_URL] details about this update]
 
 We must restart [APP_NAME] to install the update.
     <tag>confirm</tag>

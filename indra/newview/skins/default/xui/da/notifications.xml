@@ -612,12 +612,12 @@ eller du kan installere den nu.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Vi har hentet en opdatering til din [APP_NAME] installation.
-Version [VERSION] [[UPDATE_URL] Information about this update]
+Version [VERSION] [[INFO_URL] Information about this update]
 		<usetemplate name="okcancelbuttons" notext="Senere..." yestext="Installér nu og genstart [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Vi har hentet en opdatering til din [APP_NAME] installation.
-Version [VERSION] [[UPDATE_URL] Information about this update]
+Version [VERSION] [[INFO_URL] Information about this update]
 		<usetemplate name="okcancelbuttons" notext="Senere..." yestext="Installér nu og genstart [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">

@@ -1468,45 +1468,45 @@ SHA1 指紋：[MD5_DIGEST]
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
-[VERSION] 版本 [[UPDATE_URL] 關於此更新的資訊
+[VERSION] 版本 [[INFO_URL] 關於此更新的資訊
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
-[VERSION] 版本 [[UPDATE_URL] 關於此更新的資訊]
+[VERSION] 版本 [[INFO_URL] 關於此更新的資訊]
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		我們已下載了一個必要的軟體更新。
-[VERSION] 版本 [[UPDATE_URL] 關於此更新的資訊]
+[VERSION] 版本 [[INFO_URL] 關於此更新的資訊]
 
 我門必須重新啟動 [APP_NAME] 以安裝更新。
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		我門必須重新啟動 [APP_NAME] 以安裝更新。
-[[UPDATE_URL] 關於此更新的資訊]
+[[INFO_URL] 關於此更新的資訊]
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
 版本：[VERSION] 
 原本試驗性質的瀏覽器已被 [NEW_CHANNEL] 瀏覽器取代，
-參見[[UPDATE_URL] 此更新版的詳情]
+參見[[INFO_URL] 此更新版的詳情]
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝並重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
 版本：[VERSION]
 原本試驗性質的瀏覽器已被 [NEW_CHANNEL] 瀏覽器取代，
-參見[[UPDATE_URL] 介紹此更新版的資訊]
+參見[[INFO_URL] 介紹此更新版的資訊]
 		<usetemplate name="okcancelbuttons" notext="稍候…" yestext="立即安裝並重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		我們已下載了一個必要的軟體更新。
 版本：[VERSION]
 原本試驗性質的瀏覽器已被 [NEW_CHANNEL] 瀏覽器取代，
-參見[[UPDATE_URL] 介紹此更新版的資訊]
+參見[[INFO_URL] 介紹此更新版的資訊]
 
 我們必須重新啟動 [APP_NAME] 以便安裝更新。
 		<usetemplate name="okbutton" yestext="確定"/>
@@ -1514,7 +1514,7 @@ SHA1 指紋：[MD5_DIGEST]
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		我們必須重新啟動 [APP_NAME] 以便安裝更新。
 原本試驗性質的瀏覽器已被 [NEW_CHANNEL] 瀏覽器取代，
-參見[[UPDATE_URL] 介紹此更新版的資訊]
+參見[[INFO_URL] 介紹此更新版的資訊]
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

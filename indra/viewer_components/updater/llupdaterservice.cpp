@@ -320,7 +320,7 @@ void LLUpdaterServiceImpl::startDownloading()
 	mIsDownloading = true;
 	setState(LLUpdaterService::DOWNLOADING);
 
-	mUpdateDownloader.download(mNewUpdateData, mNewUpdateData["required"].asBoolean());
+	mUpdateDownloader.download(mNewUpdateData);
 
 	mNewUpdateData.clear();
 }
@@ -544,9 +544,8 @@ void LLUpdaterServiceImpl::downloadComplete(LLSD const & data)
 	payload["channel"] = mNewChannel;
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
 	payload["more_info"] = data["more_info"];
-	payload["update_url"] = data["update_url"];
 // [/SL:KB]
-//	payload["info_url"] = data["info_url"];
+	payload["info_url"] = data["info_url"];
 	event["payload"] = payload;
 	LL_DEBUGS("UpdaterService")
 		<< "Download complete "
@@ -555,9 +554,8 @@ void LLUpdaterServiceImpl::downloadComplete(LLSD const & data)
 		<< " version " << mNewVersion
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-23 (Catznip-3.6)
 		<< " more_info " << data["more_info"].asString()
-		<< " update_url " << data["update_url"].asString()
 // [/SL:KB]
-//		<< " info " << data["info_url"].asString()
+		<< " info " << data["info_url"].asString()
 		<< LL_ENDL;
 
 	LLEventPumps::instance().obtain("mainlooprepeater").post(event);

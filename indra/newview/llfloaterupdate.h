@@ -52,7 +52,7 @@ private:
 	bool        m_fRequired;
 	std::string m_strVersion;
 	std::string m_strInformation;
-	std::string m_strUpdateUrl;
+	std::string m_strInformationUrl;
 };
 
 // ====================================================================================

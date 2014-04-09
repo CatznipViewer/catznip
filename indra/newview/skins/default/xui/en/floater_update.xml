@@ -80,7 +80,7 @@ This optional updated is highly recomended and fixes 3 bugs. Including the big o
      text_color="white"
      top_pad="12"
      width="272">
-Visit the [[UPDATE_URL] [APP_NAME] website] for more informaton.
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
     </text>
 
     <text

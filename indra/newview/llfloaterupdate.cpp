@@ -29,7 +29,7 @@ LLFloaterUpdate::LLFloaterUpdate(const LLSD& sdData)
 	, m_fRequired(sdData["required"].asBoolean())
 	, m_strVersion(sdData["version"].asString())
 	, m_strInformation(sdData["more_info"].asString())
-	, m_strUpdateUrl(sdData["update_url"].asString())
+	, m_strInformationUrl(sdData["info_url"].asString())
 {
 	if ("download" == sdData["type"].asString())
 		m_eType = TYPE_DOWNLOAD;
@@ -45,7 +45,7 @@ BOOL LLFloaterUpdate::postBuild()
 	args["VERSION"] = m_strVersion;
 	getChild<LLUICtrl>("text_version")->setValue(getString((m_fRequired) ? "string_version_required" : "string_version_optional", args));
 	getChild<LLUICtrl>("text_message")->setValue(m_strInformation);
-	getChild<LLUICtrl>("text_website")->setTextArg("UPDATE_URL", m_strUpdateUrl);
+	getChild<LLUICtrl>("text_website")->setTextArg("INFO_URL", m_strInformationUrl);
 
 	LLButton* pAcceptBtn = getChild<LLButton>("button_accept");
 	pAcceptBtn->setCommitCallback(boost::bind(&LLFloaterUpdate::onAcceptOrCancel, this, true));

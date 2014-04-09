@@ -1478,45 +1478,45 @@ veya şimdi kurabilirsiniz.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		[APP_NAME] kurulumunuz için bir güncellemeyi karşıdan yükledik.
-Sürüm [VERSION] [[UPDATE_URL] Bu güncelleme hakkında ayrıntılı bilgi]
+Sürüm [VERSION] [[INFO_URL] Bu güncelleme hakkında ayrıntılı bilgi]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi kur ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		[APP_NAME] kurulumunuz için bir güncellemeyi karşıdan yükledik.
-Sürüm [VERSION] [[UPDATE_URL] Bu güncelleme hakkında ayrıntılı bilgi]
+Sürüm [VERSION] [[INFO_URL] Bu güncelleme hakkında ayrıntılı bilgi]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi kur ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
 		Gerekli bir yazılım güncellemesi indirdik.
-Sürüm [VERSION] [[UPDATE_URL] Bu güncelleme hakkında ayrıntılı bilgi]
+Sürüm [VERSION] [[INFO_URL] Bu güncelleme hakkında ayrıntılı bilgi]
 
 Güncellemeyi yüklemek için [APP_NAME] uygulamasını yeniden başlatmalısınız.
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedDialog">
 		Güncellemeyi yüklemek için [APP_NAME] uygulamasını yeniden başlatmalısınız.
-[[UPDATE_URL] Bu güncelleme hakkında bilgi]
+[[INFO_URL] Bu güncelleme hakkında bilgi]
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundTip">
 		[APP_NAME] kurulumunuz için bir güncelleme indirdik.
 Sürüm [VERSION] 
 Bu deneysel görüntüleyicinin yerini bir [NEW_CHANNEL] görüntüleyici aldı;
-bkz. [bu güncelleme hakkında bilgi için [UPDATE_URL]]
+bkz. [bu güncelleme hakkında bilgi için [INFO_URL]]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi yükle ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="OtherChannelDownloadBackgroundDialog">
 		[APP_NAME] kurulumunuz için bir güncelleme indirdik.
 Sürüm [VERSION]
 Bu deneysel görüntüleyicinin yerini bir [NEW_CHANNEL] görüntüleyici aldı;
-bkz. [[UPDATE_URL] Bu güncelleme hakkında bilgi]
+bkz. [[INFO_URL] Bu güncelleme hakkında bilgi]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi yükle ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="OtherChannelRequiredUpdateDownloadedVerboseDialog">
 		Gerekli bir yazılım güncellemesi indirdik.
 Sürüm [VERSION]
 Bu deneysel görüntüleyicinin yerini bir [NEW_CHANNEL] görüntüleyici aldı;
-bkz. [[UPDATE_URL] Bu güncelleme hakkında bilgi]
+bkz. [[INFO_URL] Bu güncelleme hakkında bilgi]
 
 Güncellemeyi yüklemek için [APP_NAME] uygulamasını yeniden başlatmalısınız.
 		<usetemplate name="okbutton" yestext="Tamam"/>
@@ -1524,7 +1524,7 @@ Güncellemeyi yüklemek için [APP_NAME] uygulamasını yeniden başlatmalısın
 	<notification name="OtherChannelRequiredUpdateDownloadedDialog">
 		Güncellemeyi yüklemek için [APP_NAME] uygulamasını yeniden başlatmalısınız.
 Bu deneysel görüntüleyicinin yerini bir [NEW_CHANNEL] görüntüleyici aldı;
-bkz. [[UPDATE_URL] Bu güncelleme hakkında bilgi]
+bkz. [[INFO_URL] Bu güncelleme hakkında bilgi]
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

@@ -1321,12 +1321,12 @@ Pobrać i zapisać w folderze Aplikacji?
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Aktualizacja dla [APP_NAME] została pobrana.
-Wersja [VERSION] [[UPDATE_URL] Informacja o tej aktualizacji]
+Wersja [VERSION] [[INFO_URL] Informacja o tej aktualizacji]
 		<usetemplate name="okcancelbuttons" notext="Później..." yestext="Zainstaluj teraz i restartuj [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Aktualizacja [APP_NAME] została pobrana.
-Wersja [VERSION] [[UPDATE_URL] Informacja o aktualizacji]
+Wersja [VERSION] [[INFO_URL] Informacja o aktualizacji]
 		<usetemplate name="okcancelbuttons" notext="Później..." yestext="Zainstaluj teraz i restartuj [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
