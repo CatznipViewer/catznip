@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2012, Kitty Barnett
+ * Copyright (c) 2011-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -19,6 +19,10 @@
 #include "llbutton.h"
 #include "llevents.h"
 #include "llfloaterupdate.h"
+#include "lllogininstance.h"
+#include "llprogressbar.h"
+#include "lltextbox.h"
+#include "llupdaterservice.h"
 
 // ====================================================================================
 // LLFloaterUpdate class
@@ -61,7 +65,78 @@ BOOL LLFloaterUpdate::postBuild()
 void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 {
 	if (mCommitSignal)
-		(*mCommitSignal)(this, LLSD().with("accept", fAccept));
+		(*mCommitSignal)(this, LLSD().with("accept", fAccept).with("required", m_fRequired).with("version", m_strVersion).with("info_url", m_strInformationUrl));
+	closeFloater();
+}
+
+// ====================================================================================
+// LLFloaterUpdateProgress class
+// 
+
+LLFloaterUpdateProgress::LLFloaterUpdateProgress(const LLSD& sdKey, bool fModal)
+	: LLModalDialog(LLSD(), fModal)
+	, m_pProgressBar(NULL)
+	, m_pProgressText(NULL)
+	, m_pInstallBtn(NULL)
+{
+	m_fRequired = sdKey["required"].asBoolean();
+	m_strVersion = sdKey["version"].asString();
+	m_strInfoUrl = sdKey["info_url"].asString();
+}
+
+LLFloaterUpdateProgress::~LLFloaterUpdateProgress()
+{
+}
+
+BOOL LLFloaterUpdateProgress::postBuild()
+{
+	LLStringUtil::format_map_t args;
+	args["VERSION"] = m_strVersion;
+	getChild<LLUICtrl>("version_text")->setValue(getString((m_fRequired) ? "string_version_required" : "string_version_optional", args));
+	getChild<LLUICtrl>("info_text")->setTextArg("INFO_URL", m_strInfoUrl);
+
+	m_pProgressBar = getChild<LLProgressBar>("progress_bar");
+	m_pProgressText = getChild<LLTextBox>("progress_text");
+	m_pInstallBtn = getChild<LLButton>("install_btn");
+	m_pInstallBtn->setCommitCallback(boost::bind(&LLFloaterUpdateProgress::onInstallBtn, this));
+
+	return LLFloater::postBuild();
+}
+
+void LLFloaterUpdateProgress::onOpen(const LLSD& sdKey)
+{
+	m_pProgressBar->setValue(0.f);
+	m_pProgressBar->setVisible(true);
+	m_pProgressText->setVisible(false);
+	m_pInstallBtn->setVisible(false);
+
+	getChild<LLTextBox>("required_text")->setVisible(m_fRequired);
+	getChild<LLTextBox>("optional_text")->setVisible(!m_fRequired);
+
+	LLFloater::onOpen(LLSD());
+	setKey(LLSD());
+}
+
+void LLFloaterUpdateProgress::onDownloadProgress(const LLSD& sdData)
+{
+	double mDownloadProgress = sdData["bytes_downloaded"].asReal() / (1024 * 1024);
+	double nDownloadTotal = sdData["download_size"].asReal() / (1024 * 1024);
+	
+	m_pProgressBar->setValue(mDownloadProgress / nDownloadTotal * 100.f);
+	m_pProgressText->setText(llformat("%.2f / %.2f Mb", mDownloadProgress, nDownloadTotal));
+	m_pProgressText->setVisible(true);
+}
+
+void LLFloaterUpdateProgress::onDownloadCompleted()
+{
+	m_pProgressBar->setVisible(false);
+	m_pProgressText->setVisible(false);
+	m_pInstallBtn->setVisible(true);
+}
+
+void LLFloaterUpdateProgress::onInstallBtn()
+{
+	LLLoginInstance::instance().getUpdaterService()->checkForInstall(true);
 	closeFloater();
 }
 

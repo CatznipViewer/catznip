@@ -42,6 +42,9 @@
 #include "llagentlanguage.h"
 #include "llagentwearables.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+#include "llfloaterupdate.h"
+// [/SL:KB]
 #include "llwindow.h"
 #include "llviewerstats.h"
 #include "llviewerstatsrecorder.h"
@@ -2932,6 +2935,11 @@ namespace {
 		if (sdData["accept"].asBoolean())	// User clicked "Download"
 		{
 			LLLoginInstance::instance().getUpdaterService()->startDownloading();
+
+			LLSD sdProgressData = sdData;
+			sdProgressData.erase("accept");
+			sdProgressData["modal"] = (sdData["required"].asBoolean()) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP);
+			LLFloaterReg::showInstance("update_progress", sdProgressData);
 		}
 		else								// User clicked "Later"
 		{
@@ -3136,14 +3144,36 @@ namespace {
 					LLNotificationsUtil::add("UpdaterCheckError");
 				}
 				break;
-			case LLUpdaterService::DOWNLOAD_COMPLETE:
-				if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
+			case LLUpdaterService::DOWNLOAD_RESUME:
 				{
-					on_update_downloaded_prompt(evt);
+					bool fRequired = (evt["required"].asBoolean());
+					bool fModal = (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP);
+					LLFloaterReg::showInstance("update_progress", LLSD().with("required", fRequired).with("modal", fModal));
 				}
-				else
+				break;
+			case LLUpdaterService::PROGRESS:
 				{
-					on_update_downloaded(evt);
+					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
+					if (pProgressFloater)
+						pProgressFloater->onDownloadProgress(evt);
+				}
+				break;
+			case LLUpdaterService::DOWNLOAD_COMPLETE:
+				{
+					LLFloaterUpdateProgress* pProgressFloater = LLFloaterReg::findTypedInstance<LLFloaterUpdateProgress>("update_progress");
+					if (pProgressFloater)
+					{
+						pProgressFloater->onDownloadCompleted();
+						pProgressFloater->setMinimized(FALSE);
+						pProgressFloater->setVisibleAndFrontmost(true);
+					}
+					else
+					{
+						if (LLUpdaterService::PROMPT_INSTALL == gSavedSettings.getU32("UpdaterServiceSetting"))
+							on_update_downloaded_prompt(evt);
+						else
+							on_update_downloaded(evt);
+					}
 				}
 				break;
 // [/SL:KB]

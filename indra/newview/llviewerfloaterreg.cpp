@@ -321,6 +321,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterUIPreviewUtil::registerFloater();
 // [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
 	LLFloaterReg::add("update", "floater_update.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterUpdate>);
+	LLFloaterReg::add("update_progress", "floater_update_progress.xml", (LLFloaterBuildFunc)&LLFloaterReg::buildModal<LLFloaterUpdateProgress>);
 // [/SL:KB]
 	LLFloaterReg::add("upload_anim_bvh", "floater_animation_bvh_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBvhPreview>, "upload");
 	LLFloaterReg::add("upload_anim_anim", "floater_animation_anim_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAnimPreview>, "upload");

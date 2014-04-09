@@ -467,6 +467,21 @@ bool LLUpdaterServiceImpl::checkForResume()
 				mNewChannel = download_info["update_channel"].asString();
 				mUpdateDownloader.resume();
 				result = true;
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+				LLSD sdEventData;
+				sdEventData["pump"] = LLUpdaterService::pumpName();
+				sdEventData["payload"] = download_info;
+
+				LLSD& sdPayload = sdEventData["payload"];
+				sdPayload["type"] = LLSD(LLUpdaterService::DOWNLOAD_RESUME);
+				sdPayload["show_ui"] = true;
+				sdPayload["required"] = download_info["required"].asBoolean();
+				sdPayload["channel"] = mNewChannel;
+				sdPayload["version"] = mNewVersion;
+
+				LLEventPumps::instance().obtain("mainlooprepeater").post(sdEventData);
+// [/SL:KB]
 			}
 			else 
 			{
@@ -852,7 +867,12 @@ bool LLUpdaterService::isChecking()
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
 void LLUpdaterService::checkForUpdate(bool user_feedback)
 {
-	return mImpl->checkForUpdate(false, user_feedback);
+	mImpl->checkForUpdate(false, user_feedback);
+}
+
+void LLUpdaterService::checkForInstall(bool launch_installer)
+{
+	mImpl->checkForInstall(launch_installer);
 }
 
 bool LLUpdaterService::isDownloading()
