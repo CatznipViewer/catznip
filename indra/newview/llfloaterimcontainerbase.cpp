@@ -29,6 +29,15 @@
 #include "lltoolbarview.h"
 #include "llviewercontrol.h"
 
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+#include "llfloatergroupinvite.h"
+#include "llgroupactions.h"
+#include "llslurl.h"
+#include "llview.h"
+#include "llviewerwindow.h"
+#include "llwindow.h"
+// [/SL:KB]
+
 //
 // LLFloaterIMContainerBase
 //
@@ -271,5 +280,52 @@ const std::string& LLFloaterIMContainerBase::getFloaterXMLFile()
 			: "floater_im_container.xml";
 	return strFile;
 }
+
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+bool LLFloaterIMContainerBase::enableContextGroupMenuItem(const std::string& action, const LLUUID& group_id)
+{
+	if ("can_chat_history" == action)
+	{
+		return LLLogChat::isTranscriptExist(group_id, true);
+	}
+	else if ("can_create_notice" == action)
+	{
+		return LLGroupActions::hasPowerInGroup(group_id, GP_NOTICES_SEND);
+	}
+	else if ("can_invite_to_group" == action)
+	{
+		return LLGroupActions::hasPowerInGroup(group_id, GP_MEMBER_INVITE);
+	}
+	return false;
+}
+
+void LLFloaterIMContainerBase::doToGroup(const std::string& action, const LLUUID& group_id)
+{
+	if ("view_profile" == action)
+	{
+		LLGroupActions::show(group_id);
+	}
+	else if ("chat_history" == action)
+	{
+		LLFloaterReg::showInstance("preview_conversation", group_id, true);
+	}
+	else if ("view_notices" == action)
+	{
+		LLGroupActions::showNotices(group_id);
+	}
+	else if ("create_notice" == action)
+	{
+		LLFloaterReg::showInstance("group_create_notice", LLSD().with("group", group_id));
+	}
+	else if ("invite_to_group" == action)
+	{
+		LLFloaterGroupInvite::showForGroup(group_id);
+	}
+	else if ("copy_slurl" == action)
+	{
+		gViewerWindow->getWindow()->copyTextToClipboard(utf8str_to_wstring(LLSLURL("group", group_id, "about").getSLURLString()));
+	}
+}
+// [/SL:KB]
 
 // EOF

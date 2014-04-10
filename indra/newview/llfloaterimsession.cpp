@@ -91,6 +91,10 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
     mEnableCallbackRegistrar.add("Avatar.EnableGearItem", boost::bind(&LLFloaterIMSession::enableGearMenuItem, this, _2));
     mCommitCallbackRegistrar.add("Avatar.GearDoToSelected", boost::bind(&LLFloaterIMSession::GearDoToSelected, this, _2));
     mEnableCallbackRegistrar.add("Avatar.CheckGearItem", boost::bind(&LLFloaterIMSession::checkGearMenuItem, this, _2));
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+    mEnableCallbackRegistrar.add("Group.EnableGearItem", boost::bind(&LLFloaterIMSession::enableGearGroupMenuItem, this, _2));
+    mCommitCallbackRegistrar.add("Group.GearDoToSelected", boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, _2));
+// [/SL:KB]
 
     setDocked(true);
 }
@@ -228,6 +232,18 @@ bool LLFloaterIMSession::checkGearMenuItem(const LLSD& userdata)
 // [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
+
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+void LLFloaterIMSession::GearDoToSelectedGroup(const LLSD& userdata)
+{
+	LLFloaterIMContainerBase::getInstance()->doToGroup(userdata.asString(), mSessionID);
+}
+
+bool LLFloaterIMSession::enableGearGroupMenuItem(const LLSD& userdata)
+{
+	return LLFloaterIMContainerBase::getInstance()->enableContextGroupMenuItem(userdata.asString(), mSessionID);
+}
+// [/SL:KB]
 
 void LLFloaterIMSession::sendMsgFromInputEditor()
 {

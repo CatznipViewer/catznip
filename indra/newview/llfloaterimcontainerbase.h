@@ -99,6 +99,10 @@ public:
 	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+	virtual bool enableContextGroupMenuItem(const std::string& action, const LLUUID& group_id);
+	virtual void doToGroup(const std::string& action, const LLUUID& group_id);
+// [/SL:KB]
 protected:
 	void toggleMute(const LLUUID& participant_id, U32 flags);
 

@@ -314,9 +314,11 @@ BOOL LLFloaterIMSessionTab::postBuild()
 //	mGearBtn = getChild<LLButton>("gear_btn");
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	mGearBtn = getChild<LLMenuButton>("gear_btn");
-	if (mIsP2PChat)
+
+	std::string strGearMenu = (mIsP2PChat) ? "menu_im_conversation.xml" : ((mSession) && (mSession->isGroupSessionType()) ? "menu_im_conversation_group.xml" : "");
+	if (!strGearMenu.empty())
 	{
-		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_im_conversation.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
+		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(strGearMenu, LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
 		mGearBtn->setMenu(pMenu, mGearBtn->getMenuPosition(), false);
 		mGearMenuHandle = pMenu->getHandle();
 	}
@@ -1309,7 +1311,7 @@ void LLFloaterIMSessionTab::updateGearBtn()
 
 	BOOL prevVisibility = mGearBtn->getVisible();
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-08-17 (Catznip-3.6)
-	mGearBtn->setVisible(mIsP2PChat);
+	mGearBtn->setVisible( (mIsP2PChat) || ((mSession) && (mSession->isGroupSessionType())) );
 // [/SL:KB]
 //	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
 
