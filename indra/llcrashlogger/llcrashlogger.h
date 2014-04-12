@@ -33,6 +33,9 @@
 #include "llapp.h"
 #include "llsd.h"
 #include "llcontrol.h"
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#include "llcrashlookup.h"
+// [/SL:KB]
 
 class LLCrashLogger : public LLApp
 {
@@ -53,14 +56,25 @@ public:
 	void setUserText(const std::string& text) { mCrashInfo["UserNotes"] = text; }
 	S32 getCrashBehavior() { return mCrashBehavior; }
 	bool runCrashLogPost(std::string host, LLSD data, std::string msg, int retries, int timeout);
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	std::string getCrashInformationLink() { return mCrashLink; }
+	void		setCrashInformationLink(const std::string& strCrashLink) { mCrashLink = strCrashLink; }
+// [/SL:KB]
 protected:
 	S32 mCrashBehavior;
 	BOOL mCrashInPreviousExec;
 	std::map<std::string, std::string> mFileMap;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+	std::string mLogFile;
+// [/SL:KB]
 	std::string mGridName;
 	LLControlGroup mCrashSettings;
 	std::string mProductName;
 	LLSD mCrashInfo;
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	LLCrashLookup*	mCrashLookup;
+	std::string		mCrashLink;
+// [/SL:KB]
 	std::string mCrashHost;
 	std::string mAltCrashHost;
 	LLSD mDebugLog;
