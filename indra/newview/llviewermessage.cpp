@@ -1341,7 +1341,7 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
 			!from_name.empty(); // don't open if it's not from anyone.
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2014-03-02 (Catznip-3.6)
-		if (auto_open)
+		if ( (auto_open) || (LLFloaterReg::instanceVisible("inventory")) )
 		{
 			show_item(obj_id);
 		}
