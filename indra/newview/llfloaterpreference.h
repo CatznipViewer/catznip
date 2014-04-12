@@ -180,7 +180,7 @@ public:
 	void onLogChatHistorySaved();	
 	void buildPopupLists();
 	static void refreshSkin(void* data);
-	void selectPanel(const LLSD& name);
+//	void selectPanel(const LLSD& name);
 
 private:
 

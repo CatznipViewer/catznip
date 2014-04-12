@@ -1845,24 +1845,30 @@ void LLFloaterPreference::setCacheLocation(const LLStringExplicit& location)
 	cache_location_editor->setToolTip(location);
 }
 
-void LLFloaterPreference::selectPanel(const LLSD& name)
-{
-	LLTabContainer * tab_containerp = getChild<LLTabContainer>("pref core");
-	LLPanel * panel = tab_containerp->getPanelByName(name);
-	if (NULL != panel)
-	{
-		tab_containerp->selectTabPanel(panel);
-	}
-}
+//void LLFloaterPreference::selectPanel(const LLSD& name)
+//{
+//	LLTabContainer * tab_containerp = getChild<LLTabContainer>("pref core");
+//	LLPanel * panel = tab_containerp->getPanelByName(name);
+//	if (NULL != panel)
+//	{
+//		tab_containerp->selectTabPanel(panel);
+//	}
+//}
 
 void LLFloaterPreference::selectPrivacyPanel()
 {
-	selectPanel("im");
+// [SL:KB] - Patch: Settings-Preferences | Checked: 2014-04-12 (Catznip-3.6)
+	showPanel("im");
+// [/SL:KB]
+//	selectPanel("im");
 }
 
 void LLFloaterPreference::selectChatPanel()
 {
-	selectPanel("chat");
+// [SL:KB] - Patch: Settings-Preferences | Checked: 2014-04-12 (Catznip-3.6)
+	showPanel("chat");
+// [/SL:KB]
+//	selectPanel("chat");
 }
 
 void LLFloaterPreference::changed()
