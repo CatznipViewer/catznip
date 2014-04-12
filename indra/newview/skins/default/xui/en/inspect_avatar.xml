@@ -43,7 +43,6 @@
      text_color="White"
      translate="false"
      use_ellipses="true"
-     word_wrap="true"
     visible="false" 
      value="TestString PleaseIgnore"
      width="185" />
