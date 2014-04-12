@@ -143,7 +143,6 @@ void LLChannelManager::onLoginCompleted()
 			p.lifetime_secs = gSavedSettings.getS32("StartUpToastLifeTime");
 			p.enable_hide_btn = false;
 			p.can_be_stored = false;
-			p.on_delete_toast = boost::bind(&LLChannelManager::onStartUpToastClose, this);
 
 			channel_startup->addToast(p);
 		}
