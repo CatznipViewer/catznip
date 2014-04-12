@@ -115,8 +115,10 @@ void init_llui()
 #else
 	const char* newview_path = "../../../newview";
 #endif
-	gDirUtilp->initAppDirs("SecondLife", newview_path);
+//	gDirUtilp->initAppDirs("SecondLife", newview_path);
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-07-18 (Catznip-3.6)
 	gDirUtilp->setSkinFolder("default", "en");
+// [/SL:KB]
 	
 	// colors are no longer stored in a LLControlGroup file
 	LLUIColorTable::instance().loadFromSettings();
