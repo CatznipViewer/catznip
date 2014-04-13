@@ -1458,7 +1458,7 @@
 	<notification name="FailedUpdateInstall">
 		Произошла ошибка при установке обновления.
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1466,13 +1466,13 @@ http://secondlife.com/download.
 Вы не сможете войти в [APP_NAME], пока обновление не будет установлено.
 
 Загрузите новую версию программы на сайте
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Выйти"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Появились обязательные обновления для вашей версии Second Life.
 
-Загрузите это обновление на сайте http://www.secondlife.com/downloads
+Загрузите это обновление на сайте http://catznip.com/downloads/
 или установите его сейчас.
 		<usetemplate name="okcancelbuttons" notext="Выйти из Second Life" yestext="Загрузить и установить сейчас"/>
 	</notification>
@@ -1549,8 +1549,12 @@ http://secondlife.com/download.
 		<usetemplate ignoretext="Запустить браузер для просмотра вики-страницы вопросов и ответов" name="okcancelignore" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Посетите страницу общедоступного средства исследования проблем [SECOND_LIFE], на котором можно сообщить об ошибках и других проблемах.
+		Посетите страницу общедоступного средства исследования проблем [APP_NAME], на котором можно сообщить об ошибках и других проблемах.
 		<usetemplate ignoretext="Запустить браузер для использования общедоступного средства исследования проблем" name="okcancelignore" notext="Отмена" yestext="Перейти на страницу"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+    Перейти на официальный блог [APP_NAME] для просмотра свежих новостей и прочей информации.
+    <usetemplate ignoretext="Запустить браузер для просмотра блога" name="okcancelignore" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Перейти на официальный блог Linden для просмотра свежих новостей и прочей информации.

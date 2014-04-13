@@ -54,7 +54,7 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_LL_ICON             ICON                    "ll_icon.ico"
+IDI_LL_ICON             ICON                    "catznip.ico"
 IDI_LCD_LL_ICON         ICON                    "icon1.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -151,13 +151,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "Linden Lab"
-            VALUE "FileDescription", "Second Life"
+            VALUE "CompanyName", "Catznip"
+            VALUE "FileDescription", "Catznip"
             VALUE "FileVersion", "${VIEWER_VERSION_MAJOR}.${VIEWER_VERSION_MINOR}.${VIEWER_VERSION_PATCH}.${VIEWER_VERSION_REVISION}"
-            VALUE "InternalName", "Second Life"
-            VALUE "LegalCopyright", "Copyright � 2001, Linden Research, Inc."
-            VALUE "OriginalFilename", "SecondLife.exe"
-            VALUE "ProductName", "Second Life"
+            VALUE "InternalName", "Catznip.exe"
+            VALUE "LegalCopyright", "Copyright (C)2001-2013, portions by Kitty Barnett, portions by Linden Research, Inc"
+            VALUE "OriginalFilename", "catznip-bin.exe"
+            VALUE "ProductName", "Catznip"
             VALUE "ProductVersion", "${VIEWER_VERSION_MAJOR}.${VIEWER_VERSION_MINOR}.${VIEWER_VERSION_PATCH}.${VIEWER_VERSION_REVISION}"
         END
     END

@@ -30,6 +30,10 @@
 #include <sstream>
 #include "llversioninfo.h"
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-09 (Catznip-3.6)
+#include <boost/regex.hpp>
+// [/SL:KB]
+
 #if ! defined(LL_VIEWER_CHANNEL)       \
  || ! defined(LL_VIEWER_VERSION_MAJOR) \
  || ! defined(LL_VIEWER_VERSION_MINOR) \
@@ -81,6 +85,59 @@ const std::string &LLVersionInfo::getVersion()
 	}
 	return version;
 }
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+const std::string &LLVersionInfo::getReleaseVersion()
+{
+	static std::string version("");
+
+	if (version.empty())
+	{
+		// Cache the version string
+		std::ostringstream stream;
+		if (CHANNEL_RELEASE == getChannelType())
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR;
+			if (LL_VIEWER_VERSION_MINOR > 0)
+				stream << "." << LL_VIEWER_VERSION_MINOR;
+		}
+		else
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR << "." << LL_VIEWER_VERSION_MINOR << "." << LL_VIEWER_VERSION_PATCH;
+		}
+		version = stream.str();
+	}
+
+	return version;
+}
+
+LLVersionInfo::EChannelType LLVersionInfo::getChannelType()
+{
+	static EChannelType sChannelType = CHANNEL_UNKNOWN;
+
+	if (sChannelType == CHANNEL_UNKNOWN)
+	{
+		const boost::regex is_release_channel("\\bRelease\\b");
+		const boost::regex is_beta_channel("\\bBeta\\b");
+		const boost::regex is_project_channel("\\bProject\\b");
+		const boost::regex is_test_channel("\\bTest$");
+
+		const std::string& strChannel = getChannel();
+		if (boost::regex_search(strChannel, is_release_channel))
+			sChannelType = CHANNEL_RELEASE;
+		else if (boost::regex_search(strChannel, is_beta_channel))
+			sChannelType = CHANNEL_BETA;
+		else if (boost::regex_search(strChannel, is_project_channel))
+			sChannelType = CHANNEL_PROJECT;
+		else if (boost::regex_search(strChannel, is_test_channel))
+			sChannelType = CHANNEL_TEST;
+		else
+			sChannelType = CHANNEL_DEVELOP;
+	}
+
+	return sChannelType;
+}
+// [/SL:KB]
 
 //static
 const std::string &LLVersionInfo::getShortVersion()
@@ -134,7 +191,7 @@ void LLVersionInfo::resetChannel(const std::string& channel)
 	sVersionChannel.clear(); // Reset version and channel string til next use.
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 const char* getBuildPlatformString()
 {
 #if LL_WINDOWS
