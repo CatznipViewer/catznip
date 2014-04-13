@@ -20,10 +20,10 @@
   follows="all"
   height="535"
   layout="topleft"
-  left="0"
+  left="6"
   name="picks_panel_text"
   wrap="true"
-  top="0"
+  top="10"
   width="316"/>
  <accordion
   fit_parent="true" 
