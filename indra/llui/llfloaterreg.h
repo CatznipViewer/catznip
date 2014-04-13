@@ -39,6 +39,9 @@
 
 class LLFloater;
 class LLUICtrl;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+class LLModalDialog;
+// [/SL:KB]
 
 typedef boost::function<LLFloater* (const LLSD& key)> LLFloaterBuildFunc;
 
