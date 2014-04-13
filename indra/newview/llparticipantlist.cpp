@@ -614,53 +614,6 @@ private:
 	LLParticipantList& mParent;
 };
 
-/**
- * Comparator for comparing avatar items by last spoken time
- */
-class LLAvatarItemRecentSpeakerComparator : public LLAvatarItemNameComparator, public LLRefCount
-{
-	LOG_CLASS(LLAvatarItemRecentSpeakerComparator);
-
-public:
-	LLAvatarItemRecentSpeakerComparator(LLParticipantList& parent) : mParent(parent) { }
-	virtual ~LLAvatarItemRecentSpeakerComparator() { }
-
-protected:
-	/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
-	{
-		const LLSpeakerMgr* pSpeakerMgr = mParent.getSpeakerManager();
-		if (pSpeakerMgr)
-		{
-			LLPointer<LLSpeaker> lhs = pSpeakerMgr->findSpeaker(avatar_item1->getAvatarId());
-			LLPointer<LLSpeaker> rhs = pSpeakerMgr->findSpeaker(avatar_item2->getAvatarId());
-			if ( (lhs.notNull()) && (rhs.notNull()) )
-			{
-				// Compare by last speaking time
-				if (lhs->mLastSpokeTime != rhs->mLastSpokeTime)
-					return (lhs->mLastSpokeTime > rhs->mLastSpokeTime);
-				else if (lhs->mSortIndex != rhs->mSortIndex)
-					return (lhs->mSortIndex < rhs->mSortIndex);
-			}
-			else if (lhs.notNull())
-			{
-				// True if only avatar_item1 speaker info available
-				return true;
-			}
-			else if (rhs.notNull())
-			{
-				// False if only avatar_item2 speaker info available
-				return false;
-			}
-		}
-
-		// By default compare by name.
-		return LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2);
-	}
-
-private:
-	LLParticipantList& mParent;
-};
-
 // [/SL:KB]
 
 //
@@ -856,7 +809,7 @@ void LLParticipantAvatarList::sort()
 			break;
 		case E_SORT_BY_RECENT_SPEAKERS:
 			if (m_SortByRecentSpeakers.isNull())
-				m_SortByRecentSpeakers = new LLAvatarItemRecentSpeakerComparator(*this);
+				m_SortByRecentSpeakers = new LLAvatarItemRecentSpeakerComparator(getSpeakerManager());
 			m_pAvatarList->setComparator(m_SortByRecentSpeakers.get());
 			m_pAvatarList->sort();
 			break;

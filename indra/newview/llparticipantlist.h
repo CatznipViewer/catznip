@@ -62,7 +62,7 @@ public:
 	void addAvatarIDExceptAgent(const LLUUID& avatar_id);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
-	const LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
+	LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
 // [/SL:KB]
 
 	/**

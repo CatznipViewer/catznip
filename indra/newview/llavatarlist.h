@@ -32,6 +32,9 @@
 
 class LLTimer;
 class LLListContextMenu;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+class LLSpeakerMgr;
+// [/SL:KB]
 
 /**
  * Generic list of avatars.
@@ -190,6 +193,23 @@ public:
 protected:
 	virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 };
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+class LLAvatarItemRecentSpeakerComparator : public LLAvatarItemNameComparator, public LLRefCount
+{
+	LOG_CLASS(LLAvatarItemRecentSpeakerComparator);
+
+public:
+	LLAvatarItemRecentSpeakerComparator(LLSpeakerMgr* pSpeakerMgr = NULL) : m_pSpeakerMgr(pSpeakerMgr) { }
+	virtual ~LLAvatarItemRecentSpeakerComparator() { }
+
+protected:
+	/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
+
+private:
+	LLSpeakerMgr* m_pSpeakerMgr;
+};
+// [/SL:KB]
 
 /**
  * Represents Avaline caller in Avatar list in Voice Control Panel and group chats.
