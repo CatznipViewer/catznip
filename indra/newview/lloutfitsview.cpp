@@ -370,6 +370,11 @@ void LLOutfitsView::onOutfitsRemovalConfirmation(const LLSD& notification, const
 // virtual
 void LLOutfitsView::setSelectedOutfitByUUID(const LLUUID& idOutfit)
 {
+	// If mInvPanel hasn't been initialized yet (for instance when makeNewOutfitLinks() is called during the logon of a new accout) then the
+	// base outfit will be highlighted when they open the floater later on so we don't have to do anything in that case
+	if (!mInvPanel)
+		return;
+
 	LLFolderView* pRootFolder = mInvPanel->getRootFolder();
 	LLFolderViewItem *pOutfitFolder = mInvPanel->getItemByID(idOutfit);
 	if (pOutfitFolder)
