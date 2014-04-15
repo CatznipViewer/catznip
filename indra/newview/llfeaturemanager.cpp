@@ -657,7 +657,10 @@ void fetch_feature_table(std::string table)
 	std::string filename;
 	if (os_string.find("Microsoft Windows XP") == 0)
 	{
-		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getReleaseVersion().c_str());
+// [/SL:KB]
+//		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
 	}
 	else
 	{
@@ -673,22 +676,39 @@ void fetch_feature_table(std::string table)
 
 	llinfos << "LLFeatureManager fetching " << url << " into " << path << llendl;
 	
-	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	time_t timeFetch = LLFile::getModifiedTime(path);
+	if (timeFetch)
+		LLHTTPClient::getIfModified(url, new LLHTTPFeatureTableResponder(path), timeFetch);
+	else
+		LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+// [/SL:KB]
+//	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
 }
 
 void fetch_gpu_table(std::string table)
 {
 	const std::string base       = gSavedSettings.getString("FeatureManagerHTTPTable");
 
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getReleaseVersion().c_str());
+// [/SL:KB]
+//	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
 
 	const std::string url        = base + "/" + filename;
 
 	const std::string path       = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, filename);
 
 	llinfos << "LLFeatureManager fetching " << url << " into " << path << llendl;
-	
-	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	time_t timeFetch = LLFile::getModifiedTime(path);
+	if (timeFetch)
+		LLHTTPClient::getIfModified(url, new LLHTTPFeatureTableResponder(path), timeFetch);
+	else
+		LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+// [/SL:KB]
+//	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
 }
 
 // fetch table(s) from a website (S3)

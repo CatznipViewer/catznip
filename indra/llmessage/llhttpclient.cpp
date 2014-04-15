@@ -218,7 +218,11 @@ static void request(
 	LLCurl::ResponderPtr responder,
 	const F32 timeout = HTTP_REQUEST_EXPIRY_SECS,
 	const LLSD& headers = LLSD(),
-	bool follow_redirects = true
+//	bool follow_redirects = true
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	bool follow_redirects = true,
+	const time_t& if_modified_since = 0
+// [/FS:AW]
     )
 {
 	if (!LLHTTPClient::hasPump())
@@ -279,6 +283,13 @@ static void request(
             req->addHeader(header.str().c_str());
         }
     }
+
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	if (if_modified_since)
+	{
+		req->setModifiedSince(if_modified_since);
+	}
+// [/FS:AW]
 
 	// Check to see if we have already set Accept or not. If no one
 	// set it, set it to application/llsd+xml since that's what we
@@ -381,6 +392,19 @@ void LLHTTPClient::get(const std::string& url, const LLSD& query, ResponderPtr r
 	uri = LLURI::buildHTTP(url, LLSD::emptyArray(), query);
 	get(uri.asString(), responder, headers, timeout, follow_redirects);
 }
+
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+void LLHTTPClient::getIfModified(const std::string& url, ResponderPtr responder, const time_t& if_modified_since, const LLSD& headers, const F32 timeout, bool follow_redirects /* = true */)
+{
+	request(url, LLURLRequest::HTTP_GET, NULL, responder, timeout, headers, follow_redirects, if_modified_since);
+}
+
+void LLHTTPClient::getIfModified(const std::string& url, const LLSD& query, ResponderPtr responder, const time_t& if_modified_since, const LLSD& headers, const F32 timeout, bool follow_redirects /* = true */)
+{
+	LLURI uri = LLURI::buildHTTP(url, LLSD::emptyArray(), query);
+	getIfModified(uri.asString(), responder, if_modified_since), headers, timeout, follow_redirects;
+}
+// [/FS:AW]
 
 // A simple class for managing data returned from a curl http request.
 class LLHTTPBuffer
