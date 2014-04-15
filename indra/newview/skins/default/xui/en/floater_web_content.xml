@@ -114,10 +114,10 @@
         left_pad="2"
         max_chars="1024"
         name="address"
+        right="-30"
         combo_editor.select_on_focus="true"
         tool_tip="Enter URL here"
-        top_delta="0"
-        width="320">
+        top_delta="0">
         <combo_box.commit_callback
           function="WebContent.EnterAddress" />
       </combo_box>
