@@ -53,6 +53,18 @@
          value="1"
          width="150" />
     </radio_group>
+    <text
+     height="20"
+     layout="topleft"
+     left_pad="0"
+     length="1"
+     name="im_orientation_restarttext"
+     text_color="White_50"
+     type="string"
+     top_delta="1"
+     width="100">
+        (Requires restart)
+    </text>
     <check_box
      control_name="RearrangeIMTabs"
      follows="top|left"
