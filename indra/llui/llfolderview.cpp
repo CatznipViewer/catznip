@@ -1709,7 +1709,10 @@ void LLFolderView::update()
 	}
 
 	// automatically show matching items, and select first one if we had a selection
-	if (mNeedsAutoSelect)
+//	if (mNeedsAutoSelect)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	if ( (mNeedsAutoSelect) && (hasVisibleChildren()) )
+// [/SL:KB]
 	{
 		LLFastTimer t3(FTM_AUTO_SELECT);
 		// select new item only if a filtered item not currently selected
