@@ -230,6 +230,9 @@ public:
 	void	update();						// needs to be called periodically (e.g. once per frame)
 
 	BOOL needsAutoSelect() { return mNeedsAutoSelect && !mAutoSelectOverride; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	BOOL needsAutoOpen() { return mNeedsAutoOpen; }
+// [/SL:KB]
 	BOOL needsAutoRename() { return mNeedsAutoRename; }
 	void setNeedsAutoRename(BOOL val) { mNeedsAutoRename = val; }
 	void setPinningSelectedItem(BOOL val) { mPinningSelectedItem = val; }
@@ -285,6 +288,9 @@ protected:
 	LLRect							mScrollConstraintRect;
 	BOOL							mNeedsAutoSelect;
 	BOOL							mAutoSelectOverride;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	bool							mNeedsAutoOpen;
+// [/SL:KB]
 	BOOL							mNeedsAutoRename;
 	bool							mUseLabelSuffix;
 	bool							mShowItemLinkOverlays;

@@ -159,6 +159,9 @@ LLFolderView::LLFolderView(const Params& p)
 	mPinningSelectedItem(FALSE),
 	mNeedsAutoSelect( FALSE ),
 	mAutoSelectOverride(FALSE),
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen(false),
+// [/SL:KB]
 	mNeedsAutoRename(FALSE),
 	mShowSelectionContext(FALSE),
 	mShowSingleSelection(FALSE),
@@ -1691,6 +1694,9 @@ void LLFolderView::update()
 //	}
     
 	// Filter to determine visibility before arranging
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen = (mNeedsAutoSelect) && (getFolderViewModel()->getFilter().showAllResults());
+// [/SL:KB]
 	filter(getFolderViewModel()->getFilter());
     
 	// Clear the modified setting on the filter only if the filter finished after running the filter process
@@ -1725,15 +1731,15 @@ void LLFolderView::update()
 			applyFunctorRecursively(functor);
 		}
 
-		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
-		// Used by LLPlacesFolderView.
-		if (getFolderViewModel()->getFilter().showAllResults())
-		{
-			// these are named variables to get around gcc not binding non-const references to rvalues
-			// and functor application is inherently non-const to allow for stateful functors
-			LLOpenFilteredFolders functor;
-			applyFunctorRecursively(functor);
-		}
+//		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
+//		// Used by LLPlacesFolderView.
+//		if (getFolderViewModel()->getFilter().showAllResults())
+//		{
+//			// these are named variables to get around gcc not binding non-const references to rvalues
+//			// and functor application is inherently non-const to allow for stateful functors
+//			LLOpenFilteredFolders functor;
+//			applyFunctorRecursively(functor);
+//		}
 
 		scrollToShowSelection();
 	}
