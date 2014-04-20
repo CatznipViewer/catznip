@@ -450,7 +450,7 @@ void show_item(const LLUUID& idItem)
 	bool fInInbox = (idInbox.notNull()) && (gInventory.isObjectDescendentOf(idItem, idInbox));
 
 	S32 z_min = S32_MAX;
-	LLSidepanelInventory* pActiveInvSidepanel = NULL;
+	LLInventoryPanel* pActiveInvPanel = NULL;
 
 	// See LLInventoryPanel::getActiveInventoryPanel()
 	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
@@ -480,17 +480,17 @@ void show_item(const LLUUID& idItem)
 			if (z_order < z_min)
 			{
 				z_min = z_order;
-				pActiveInvSidepanel = inv_sp;
+				pActiveInvPanel = inv_panel;
 			}
 		}
-		else if (NULL == pActiveInvSidepanel)
+		else if (NULL == pActiveInvPanel)
 		{
-			pActiveInvSidepanel = inv_sp;
+			pActiveInvPanel = inv_panel;
 		}
 	}
 
 	// If we still haven't found a suitable inventory panel, check if the user prefers to clear the filter or open a new floater
-	if ( (!pActiveInvSidepanel) && (gSavedSettings.getBOOL("InventoryShowItemClearsFilter")) && (!inst_list.empty()) )
+	if ( (!pActiveInvPanel) && (gSavedSettings.getBOOL("InventoryShowItemClearsFilter")) && (!inst_list.empty()) )
 	{
 		LLFloater* pInvFloater = inst_list.front();
 		if (pInvFloater)
@@ -498,26 +498,30 @@ void show_item(const LLUUID& idItem)
 			LLSidepanelInventory* pInvSidepanel = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater);
 			if ( (pInvSidepanel) && (pInvSidepanel->getMainInventoryPanel()) )
 			{
-				pInvSidepanel->getMainInventoryPanel()->selectPanel(LLPanelMainInventory::PANEL_ALL);
+				pActiveInvPanel = pInvSidepanel->getMainInventoryPanel()->selectPanel(LLPanelMainInventory::PANEL_ALL);
 				pInvSidepanel->getMainInventoryPanel()->resetFilters();
-
-				pActiveInvSidepanel = pInvSidepanel;
 			}
 		}
 	}
 
 	// We still haven't found a suitable inventory panel, attempt to create a new inventory floater
-	if (!pActiveInvSidepanel)
+	if (!pActiveInvPanel)
 	{
 		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
 		if (pInvFloater)
-			pActiveInvSidepanel = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater);
+		{
+			LLSidepanelInventory* pInvSidepanel = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater);
+			if ( (pInvSidepanel) && (pInvSidepanel->getMainInventoryPanel()) )
+			{
+				pActiveInvPanel = pInvSidepanel->getMainInventoryPanel()->selectPanel(LLPanelMainInventory::PANEL_ALL);
+			}
+		}
 	}
 
-	if (pActiveInvSidepanel)
+	if (pActiveInvPanel)
 	{
 		// Make sure the floater is visible
-		LLFloater* pInvFloater = pActiveInvSidepanel->getParentByType<LLFloater>();
+		LLFloater* pInvFloater = pActiveInvPanel->getParentByType<LLFloater>();
 		if (pInvFloater)
 		{
 			if (pInvFloater->isMinimized())
@@ -530,28 +534,24 @@ void show_item(const LLUUID& idItem)
 		}
 
 		// Make sure the inventory panels are visible
-		pActiveInvSidepanel->showInventoryPanel();
-
-		// Select the item in the "All Items" inventory panel
-		LLPanelMainInventory* pMainPanel = pActiveInvSidepanel->getMainInventoryPanel();
-		if (pMainPanel)
+		LLSidepanelInventory* pInvSidepanel = pActiveInvPanel->getParentByType<LLSidepanelInventory>();
+		if (pInvSidepanel)
 		{
-			LLInventoryPanel* pAllItemsPanel = pMainPanel->selectPanel(LLPanelMainInventory::PANEL_ALL);
-			if (pAllItemsPanel)
-			{
-				LLFolderViewItem* pFVItem = pAllItemsPanel->getItemByID(idItem);
-				if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
-				{
-					if (pFVItem)
-						pFVItem->setOpen();
-					pMainPanel->getActivePanel()->setSelectionByID(idItem, TAKE_FOCUS_NO);
-				}
-				else
-				{
-					pActiveInvSidepanel->openInbox();
-					pActiveInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_NO);
-				}
-			}
+			pInvSidepanel->showInventoryPanel();
+		}
+
+		// Select the item
+		LLFolderViewItem* pFVItem = pActiveInvPanel->getItemByID(idItem);
+		if ( (!fInInbox) || (!pFVItem) || (pFVItem->passedFilter()) )
+		{
+			if (pFVItem)
+				pFVItem->setOpen();
+			pActiveInvPanel->setSelectionByID(idItem, TAKE_FOCUS_NO);
+		}
+		else
+		{
+			pInvSidepanel->openInbox();
+			pInvSidepanel->getInboxPanel()->setSelectionByID(idItem, TAKE_FOCUS_NO);
 		}
 	}
 }
