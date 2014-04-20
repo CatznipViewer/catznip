@@ -1022,10 +1022,11 @@ void LLInventoryPanel::doCreate(const LLSD& userdata)
 {
 //	reset_inventory_filter();
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
-	LLPanelMainInventory* pParent = getParentByType<LLPanelMainInventory>();
-	if (pParent)
+	if (getFilter().isNotDefault())
 	{
-		pParent->resetFilters();
+		LLPanelMainInventory* pParent = getParentByType<LLPanelMainInventory>();
+		if (pParent)
+			pParent->resetFilters();
 	}
 // [/SL:KB]
 	menu_create_inventory_item(this, LLFolderBridge::sSelf.get(), userdata);
