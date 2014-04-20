@@ -77,9 +77,11 @@ public:
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
-	enum EPanelType { PANEL_ALL, PANEL_RECENT };
+	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
+	EPanelType        getActivePanelType() const;
 	LLInventoryPanel* getPanel(EPanelType eType) const;
 	LLInventoryPanel* selectPanel(EPanelType eType);
+	void              selectPanel(LLInventoryPanel* pInvPanel);
 
 	static LLFloater* newWindow();
 	void resetFilters();

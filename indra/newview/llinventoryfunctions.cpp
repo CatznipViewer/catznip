@@ -444,6 +444,21 @@ void show_item_original(const LLUUID& item_uuid)
 	show_item(gInventory.getLinkedItemID(item_uuid));
 }
 
+static bool item_passed_filter(/*const*/ LLInventoryPanel* pInvPanel, const LLUUID& idItem)
+{
+	if (!pInvPanel)
+		return false;
+
+	if (!pInvPanel->getFilter().isDefault())
+	{
+		// Check the actual item as fall-back
+		/*const*/ LLFolderViewItem* pFVItem = pInvPanel->getItemByID(idItem);
+		if ( (!pFVItem) || (!pFVItem->passedFilter()) )
+			return false;
+	}
+	return true;
+}
+
 void show_item(const LLUUID& idItem)
 {
 	const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false);
@@ -457,19 +472,21 @@ void show_item(const LLUUID& idItem)
 	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
 	{
 		LLFloater* inv_floater = *iter;
-		if (!inv_floater)
+		LLSidepanelInventory* inv_sp = (inv_floater) ? LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(inv_floater) : NULL;
+		if (!inv_sp)
 			continue;
 
-		// Check the filter
-		LLSidepanelInventory* inv_sp = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(inv_floater);
-		LLInventoryPanel* inv_panel = (inv_sp) ? inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL) : NULL;
-		if (!inv_panel)
-			continue;
-		if ( (!inv_panel->getFilter().isDefault()) && (!fInInbox) )
+		// Check the filter of the active panel first
+		LLInventoryPanel* inv_panel = inv_sp->getMainInventoryPanel()->getActivePanel();
+		if ( (!fInInbox) && (!item_passed_filter(inv_panel, idItem)) )
 		{
-			// Check the actual item as fall-back
-			LLFolderViewItem* view_item = (inv_panel->getRootFolder()) ? inv_panel->getItemByID(idItem) : NULL;
-			if ( (!view_item) || (!view_item->passedFilter()) )
+			// If the active panel is the "All Items" panel then we're done
+			if (LLPanelMainInventory::PANEL_ALL == inv_sp->getMainInventoryPanel()->getActivePanelType())
+				continue;
+
+			// Otherwise, check the filter of that panel
+			inv_panel = inv_sp->getMainInventoryPanel()->getPanel(LLPanelMainInventory::PANEL_ALL);
+			if (!item_passed_filter(inv_panel, idItem))
 				continue;
 		}
 
@@ -538,6 +555,7 @@ void show_item(const LLUUID& idItem)
 		if (pInvSidepanel)
 		{
 			pInvSidepanel->showInventoryPanel();
+			pInvSidepanel->getMainInventoryPanel()->selectPanel(pActiveInvPanel);
 		}
 
 		// Select the item

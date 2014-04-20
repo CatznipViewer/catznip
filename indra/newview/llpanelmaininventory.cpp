@@ -308,19 +308,35 @@ void LLPanelMainInventory::closeAllFolders()
 
 //void LLPanelMainInventory::newWindow()
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+static const std::string PANEL_ALL_NAME    = "All Items";
+static const std::string PANEL_RECENT_NAME = "Recent Items";
+
 static const std::string& get_panel_name(LLPanelMainInventory::EPanelType eType)
 {
-	static const std::string PANEL_ALL    = "All Items";
-	static const std::string PANEL_RECENT = "Recent ITems";
 	switch (eType)
 	{
 		case LLPanelMainInventory::PANEL_ALL:
-			return PANEL_ALL;
+			return PANEL_ALL_NAME;
 		case LLPanelMainInventory::PANEL_RECENT:
-			return PANEL_RECENT;
+			return PANEL_RECENT_NAME;
 		default:
 			return LLStringUtil::null;
 	}
+}
+
+static LLPanelMainInventory::EPanelType get_panel_type(const LLInventoryPanel* pInvPanel)
+{
+	const std::string& strName = pInvPanel->getName();
+	if (PANEL_ALL_NAME == strName)
+		return LLPanelMainInventory::PANEL_ALL;
+	else if (PANEL_RECENT_NAME == strName)
+		return LLPanelMainInventory::PANEL_RECENT;
+	return LLPanelMainInventory::PANEL_UNKNOWN;
+}
+
+LLPanelMainInventory::EPanelType LLPanelMainInventory::getActivePanelType() const
+{
+	return get_panel_type(getActivePanel());
 }
 
 LLInventoryPanel* LLPanelMainInventory::getPanel(EPanelType eType) const
@@ -334,10 +350,16 @@ LLInventoryPanel* LLPanelMainInventory::selectPanel(EPanelType eType)
 	const std::string& strPanelName = get_panel_name(eType);
 	if (!strPanelName.empty())
 	{
-		mFilterTabs->selectTabByName(get_panel_name(eType));
+		mFilterTabs->selectTabByName(strPanelName);
 		return dynamic_cast<LLInventoryPanel*>(mFilterTabs->getCurrentPanel());
 	}
 	return NULL;
+}
+
+void LLPanelMainInventory::selectPanel(LLInventoryPanel* pInvPanel)
+{
+	if (pInvPanel)
+		mFilterTabs->selectTabPanel(pInvPanel);
 }
 // [/SL:KB]
 
