@@ -70,8 +70,12 @@ public:
 
 	// On LoginCompleted - show StartUp toast
 	void onLoginCompleted();
-	// removes a channel intended for the startup toast and allows other channels to show their toasts
-	void onStartUpToastClose();
+//	// removes a channel intended for the startup toast and allows other channels to show their toasts
+//	void onStartUpToastClose();
+
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	LLScreenChannelBase*    getStartUpChannel() const { return mStartUpChannel.get(); }
+// [/SL:KB]
 
 	// creates a new ScreenChannel according to the given parameters or returns existing if present
 	LLScreenChannelBase*	getChannel(LLScreenChannelBase::Params& p);

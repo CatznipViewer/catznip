@@ -112,7 +112,10 @@ void LLChannelManager::onLoginCompleted()
 
 	if(!away_notifications)
 	{
-		onStartUpToastClose();
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+		LLScreenChannel::setStartUpToastShown();
+// [/SL:KB]
+//		onStartUpToastClose();
 	}
 	else
 	{
@@ -126,7 +129,7 @@ void LLChannelManager::onLoginCompleted()
 		LLScreenChannel* channel_startup = createChannel<LLScreenChannelStartup>(p);
 		if (!channel_startup)
 		{
-			onStartUpToastClose();
+			LLScreenChannel::setStartUpToastShown();
 		}
 		else
 		{
@@ -143,6 +146,7 @@ void LLChannelManager::onLoginCompleted()
 			p.lifetime_secs = gSavedSettings.getS32("StartUpToastLifeTime");
 			p.enable_hide_btn = false;
 			p.can_be_stored = false;
+			p.on_delete_toast = boost::bind(&LLScreenChannel::setStartUpToastShown);
 
 			channel_startup->addToast(p);
 		}
@@ -173,16 +177,8 @@ void LLChannelManager::onLoginCompleted()
 }
 
 //--------------------------------------------------------------------------
-void LLChannelManager::onStartUpToastClose()
-{
-// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
-	LLScreenChannelBase* channel = dynamic_cast<LLScreenChannelBase*>(mStartUpChannel.get());
-	if(channel)
-	{
-		channel->removeToastsFromChannel();
-		channel->setVisible(FALSE);
-	}
-// [/SL:KB]
+//void LLChannelManager::onStartUpToastClose()
+//{
 //	if(mStartUpChannel)
 //	{
 //		mStartUpChannel->setVisible(FALSE);
@@ -190,10 +186,10 @@ void LLChannelManager::onStartUpToastClose()
 //		removeChannelByID(LLUUID(gSavedSettings.getString("StartUpChannelUUID")));
 //		mStartUpChannel = NULL;
 //	}
-
-	// set StartUp Toast Flag to allow all other channels to show incoming toasts
-	LLScreenChannel::setStartUpToastShown();
-}
+//
+//	// set StartUp Toast Flag to allow all other channels to show incoming toasts
+//	LLScreenChannel::setStartUpToastShown();
+//}
 
 //--------------------------------------------------------------------------
 

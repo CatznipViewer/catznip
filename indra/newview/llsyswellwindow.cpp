@@ -594,7 +594,16 @@ void LLNotificationWellWindow::clearScreenChannels()
 	// 1 - remove StartUp toast and channel if present
 	if(!LLNotificationsUI::LLScreenChannel::getStartUpToastShown())
 	{
-		LLNotificationsUI::LLChannelManager::getInstance()->onStartUpToastClose();
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+		LLNotificationsUI::LLScreenChannelBase* pChannel = LLNotificationsUI::LLChannelManager::getInstance()->getStartUpChannel();
+		if (pChannel)
+		{
+			pChannel->removeToastsFromChannel();
+			pChannel->setVisible(FALSE);
+		}
+		LLNotificationsUI::LLScreenChannel::setStartUpToastShown();
+// [/SL:KB]
+//		LLNotificationsUI::LLChannelManager::getInstance()->onStartUpToastClose();
 	}
 
 	// 2 - remove toasts in Notification channel
