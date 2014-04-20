@@ -520,7 +520,13 @@ void show_item(const LLUUID& idItem)
 		LLFloater* pInvFloater = pActiveInvSidepanel->getParentByType<LLFloater>();
 		if (pInvFloater)
 		{
-			pInvFloater->openFloater(pInvFloater->getKey());
+			if (pInvFloater->isMinimized())
+				pInvFloater->setMinimized(FALSE);
+			else if (!pInvFloater->isShown())
+				pInvFloater->openFloater(pInvFloater->getKey());
+
+			if  (!pInvFloater->isFrontmost())
+				pInvFloater->setVisibleAndFrontmost(true, pInvFloater->getKey());
 		}
 
 		// Make sure the inventory panels are visible
