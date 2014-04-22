@@ -64,20 +64,40 @@
 
 #if LL_DARWIN
 const char FEATURE_TABLE_FILENAME[] = "featuretable_mac.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_mac.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_mac.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_mac.%s.txt";
 #elif LL_LINUX
 const char FEATURE_TABLE_FILENAME[] = "featuretable_linux.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_linux.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_linux.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_linux.%s.txt";
 #elif LL_SOLARIS
 const char FEATURE_TABLE_FILENAME[] = "featuretable_solaris.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_solaris.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_solaris.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_solaris.%s.txt";
 #else
 const char FEATURE_TABLE_FILENAME[] = "featuretable%s.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable%s.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable%s.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable%s.%s.txt";
 #endif
 
 const char GPU_TABLE_FILENAME[] = "gpu_table.txt";
-const char GPU_TABLE_VER_FILENAME[] = "gpu_table.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char GPU_TABLE_DOWNLOAD_FILENAME[] = "gpu_table.R%d_%d.txt";
+// [/SL:KB]
+//const char GPU_TABLE_VER_FILENAME[] = "gpu_table.%s.txt";
 
 LLFeatureInfo::LLFeatureInfo(const std::string& name, const BOOL available, const F32 level)
 	: mValid(TRUE), mName(name), mAvailable(available), mRecommendedLevel(level)
@@ -282,16 +302,25 @@ bool LLFeatureManager::loadFeatureTables()
 	if (os_string.find("Microsoft Windows XP") == 0)
 	{
 		filename = llformat(FEATURE_TABLE_FILENAME, "_xp");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "_xp", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, "_xp", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "_xp", LLVersionInfo::getVersion().c_str());
 	}
 	else
 	{
 		filename = llformat(FEATURE_TABLE_FILENAME, "");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, "", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "", LLVersionInfo::getVersion().c_str());
 	}
 #else
 	filename = FEATURE_TABLE_FILENAME;
-	http_filename = llformat(FEATURE_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//	http_filename = llformat(FEATURE_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
 #endif
 
 	app_path += filename;
@@ -430,7 +459,10 @@ bool LLFeatureManager::loadGPUClass()
 	app_path += GPU_TABLE_FILENAME;
 	
 	// second table is downloaded with HTTP
-	std::string http_filename = llformat(GPU_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
+//	std::string http_filename = llformat(GPU_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	std::string http_filename = llformat(GPU_TABLE_DOWNLOAD_FILENAME, LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
 	std::string http_path = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, http_filename);
 
 	// use HTTP table if it exists
@@ -658,16 +690,22 @@ void fetch_feature_table(std::string table)
 	if (os_string.find("Microsoft Windows XP") == 0)
 	{
 // [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
-		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getReleaseVersion().c_str());
+		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
 // [/SL:KB]
 //		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
 	}
 	else
 	{
-		filename = llformat(table.c_str(), "", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		filename = llformat(table.c_str(), "", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		filename = llformat(table.c_str(), "", LLVersionInfo::getVersion().c_str());
 	}
 #else
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
 #endif
 
 	const std::string url        = base + "/" + filename;
@@ -691,7 +729,7 @@ void fetch_gpu_table(std::string table)
 	const std::string base       = gSavedSettings.getString("FeatureManagerHTTPTable");
 
 // [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getReleaseVersion().c_str());
+	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
 // [/SL:KB]
 //	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
 
@@ -714,8 +752,12 @@ void fetch_gpu_table(std::string table)
 // fetch table(s) from a website (S3)
 void LLFeatureManager::fetchHTTPTables()
 {
-	fetch_feature_table(FEATURE_TABLE_VER_FILENAME);
-	fetch_gpu_table(GPU_TABLE_VER_FILENAME);
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	fetch_feature_table(FEATURE_TABLE_DOWNLOAD_FILENAME);
+	fetch_gpu_table(GPU_TABLE_DOWNLOAD_FILENAME);
+// [/SL:KB]
+//	fetch_feature_table(FEATURE_TABLE_VER_FILENAME);
+//	fetch_gpu_table(GPU_TABLE_VER_FILENAME);
 }
 
 
