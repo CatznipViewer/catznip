@@ -117,8 +117,15 @@ void LLFloaterIMSession::refresh()
 		// Send an additional Start Typing packet every ME_TYPING_TIMEOUT seconds
 		if (mMeTypingTimer.getElapsedTimeF32() > ME_TYPING_TIMEOUT && false == mShouldSendTypingState)
 		{
-			LL_DEBUGS("TypingMsgs") << "Send additional Start Typing packet" << LL_ENDL;
-			LLIMModel::instance().sendTypingState(mSessionID, mOtherParticipantUUID, TRUE);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-04-23 (Catznip-3.6)
+			if (mDialog == IM_NOTHING_SPECIAL)
+			{
+// [/SL:KB]
+				LL_DEBUGS("TypingMsgs") << "Send additional Start Typing packet" << LL_ENDL;
+				LLIMModel::instance().sendTypingState(mSessionID, mOtherParticipantUUID, TRUE);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-04-23 (Catznip-3.6)
+			}
+// [/SL:KB]
 			mMeTypingTimer.reset();
 		}
 
