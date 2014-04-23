@@ -2,7 +2,6 @@
 <floater
  positioning="specified"
  right="-693"
- active_transparency="0.40"
  bg_alpha_image="Window_NoTitle_Background"
  bg_opaque_image="Window_NoTitle_Foreground"
  bottom="-50"

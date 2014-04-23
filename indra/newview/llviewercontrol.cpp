@@ -41,6 +41,9 @@
 #include "lldrawpoolterrain.h"
 #include "llflexibleobject.h"
 #include "llfeaturemanager.h"
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llviewershadermgr.h"
 
 #include "llsky.h"
@@ -555,6 +558,27 @@ bool handleSpellCheckChanged()
 	return true;
 }
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+void handleChromeFloaterTransparencyChanged(const LLSD& sdValue)
+{
+	const F32 nTransparency = sdValue.asReal();
+
+	LLFloater* pFloater = LLFloaterReg::findInstance("camera");
+	if (pFloater)
+	{
+		pFloater->setActiveTransparency(nTransparency);
+		pFloater->setTitleVisible(nTransparency != .0f);
+	}
+
+	pFloater = LLFloaterReg::findInstance("moveview");
+	if (pFloater)
+	{
+		pFloater->setActiveTransparency(nTransparency);
+		pFloater->setTitleVisible(nTransparency != .0f);
+	}
+}
+// [/SL:KB]
+
 bool toggle_agent_pause(const LLSD& newvalue)
 {
 	if ( newvalue.asBoolean() )
@@ -674,6 +698,9 @@ void settings_setup_listeners()
 //	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
 //	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));
 //	gSavedSettings.getControl("ConsoleMaxLines")->getSignal()->connect(boost::bind(&handleConsoleMaxLinesChanged, _2));
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+	gSavedSettings.getControl("ChromeFloaterTransparency")->getSignal()->connect(boost::bind(&handleChromeFloaterTransparencyChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("UploadBakedTexOld")->getSignal()->connect(boost::bind(&handleUploadBakedTexOldChanged, _2));
 	gSavedSettings.getControl("UseOcclusion")->getSignal()->connect(boost::bind(&handleUseOcclusionChanged, _2));
 	gSavedSettings.getControl("AudioLevelMaster")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));

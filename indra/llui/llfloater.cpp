@@ -1134,6 +1134,16 @@ std::string LLFloater::getShortTitle() const
 	}
 }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+void LLFloater::setTitleVisible(BOOL visible)
+{
+	if (mDragHandle)
+	{
+		mDragHandle->setTitleVisible(visible);
+	}
+}
+// [/SL:KB]
+
 BOOL LLFloater::canSnapTo(const LLView* other_view)
 {
 	if (NULL == other_view)

@@ -1650,6 +1650,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ChromeFloaterTransparency</key>
+    <map>
+      <key>Comment</key>
+      <string>Transparency of chrome floaters (floaters that cannot receive focus)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.4</real>
+    </map>
     <key>CheesyBeacon</key>
     <map>
       <key>Comment</key>

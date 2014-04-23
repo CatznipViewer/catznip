@@ -91,6 +91,11 @@ LLFloaterMove::~LLFloaterMove()
 BOOL LLFloaterMove::postBuild()
 {
 	updateTransparency(TT_ACTIVE); // force using active floater transparency (STORM-730)
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+	F32 nTransparency = gSavedSettings.getF32("ChromeFloaterTransparency");
+	setActiveTransparency(nTransparency);
+	setTitleVisible(nTransparency != .0f);
+// [/SL:KB]
 	
 	// Code that implements floater buttons toggling when user moves via keyboard is located in LLAgent::propagate()
 

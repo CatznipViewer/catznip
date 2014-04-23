@@ -263,6 +263,9 @@ public:
 	std::string		getTitle() const;
 	void			setShortTitle( const std::string& short_title );
 	std::string		getShortTitle() const;
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	void			setTitleVisible(BOOL visible);
+// [/SL:KB]
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
 	void            setCollapsed(BOOL collapsed);
 // [/SL:KB]
@@ -381,6 +384,13 @@ public:
 
 // [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
 	/*virtual*/ F32 getCurrentTransparency();
+
+	void 			clearActiveTransparency() { mActiveTransparency = F32_MAX; }
+	F32 			getActiveTransparency() const { return mActiveTransparency; }
+	void 			setActiveTransparency(F32 transparency) { mActiveTransparency = transparency; }
+	void 			clearInactiveTransparency() { mInactiveTransparency = F32_MAX; }
+	F32 			getInactiveTransparency() const { return mInactiveTransparency; }
+	void 			setInactiveTransparency(F32 transparency) { mInactiveTransparency = transparency; }
 // [/SL:KB]
 
 	void			updateTransparency(ETypeTransparency transparency_type);
