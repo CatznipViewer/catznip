@@ -247,7 +247,7 @@
                    follows="top|left"
                    height="25"
                    image_hover_unselected="Toolbar_Middle_Over"
-                   image_overlay="Icon_For_Sale"
+                   image_overlay="Conv_toolbar_pay"
                    image_selected="Toolbar_Middle_Selected"
                    image_unselected="Toolbar_Middle_Off"
                    layout="topleft"
