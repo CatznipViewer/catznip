@@ -14,7 +14,7 @@
  name="camera_floater"
  help_topic="camera_floater"
  save_visibility="true"
- single_instance="false"
+ single_instance="true"
  chrome="true"
  title="CAMERA"
  save_rect="true"
