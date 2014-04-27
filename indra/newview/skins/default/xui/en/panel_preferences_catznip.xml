@@ -240,62 +240,45 @@
 			text_color="LtGray"
 			top_pad="10"
 			type="string"
-			width="120">
-				Legend:
-			</text>    
-			<text
-			follows="top|left"
-			height="10"
-			layout="topleft"
-			left_delta="10"
-			length="1"
-			mouse_opaque="false"
-			name="legend_text_date"
-			text_color="LtGray"
-			top_pad="5"
-			type="string"
-			width="120">
-				- %d : date
-			</text>    
-			<text
-			follows="top|left"
-			height="10"
-			layout="topleft"
-			length="1"
-			mouse_opaque="false"
-			name="legend_text_time"
-			text_color="LtGray"
-			top_pad="5"
-			type="string"
-			width="120">
-				- %t : time
-			</text>    
-			<text
-			follows="top|left"
-			height="10"
-			layout="topleft"
-			length="1"
-			mouse_opaque="false"
-			name="legend_text_region"
-			text_color="LtGray"
-			top_pad="5"
-			type="string"
-			width="120">
-				- %r : region
-			</text>    
-			<text
-			follows="top|left"
-			height="10"
-			layout="topleft"
-			length="1"
-			mouse_opaque="false"
-			name="legend_text_parcel"
-			text_color="LtGray"
-			top_pad="5"
-			type="string"
-			width="120">
-				- %p : parcel
-			</text>    
+			right="-20">
+				Legend: %d - date, %t - time, %r - region, %p - parcel
+			</text>  
+    <panel
+     bg_alpha_color="DkGray"
+     bg_opaque_color="DkGray"
+     background_visible="true"
+     border="false"
+     follows="top|left"
+     left="0"
+     right="-1"
+     top_pad="15"
+     height="135">
+        <text
+         layout="topleft"
+         follows="top|left"
+         top="5"
+         left="20"
+         width="350"
+         height="15"
+         mouse_opaque="false"
+         type="string"
+         name="log_filename_text"
+         font.style="BOLD">
+            Catznip Preferances Note
+        </text>
+        <text
+         follows="top|left"
+         layout="topleft"
+         left="20"
+         height="80"
+         name="log_filename_legacy_text"
+         word_wrap="true"
+         right="-10">
+We are revising the layout of preferences going forward, it is planned that we will remove the catznip tab in a future update and integrate the options elsewhere.
+
+Many options from R8 have already been moved.
+        </text>
+    </panel>
 		</panel>
 
 		<panel
@@ -318,6 +301,7 @@
 			 font.style="BOLD">
 				General
 			</text>
+            <!--
 			<text
 			 follows="top|left"
 			 height="15"
@@ -348,6 +332,7 @@
 				 label="Bottom"
 				 value="1" />
 			</combo_box>
+            
 			<text
 			 follows="top|left"
 			 height="15"
@@ -378,6 +363,7 @@
 				 label="Bottom"
 				 value="1" />
 			</combo_box>
+			-->
 			<text
 			 follows="top|left"
 			 height="15"
@@ -835,6 +821,7 @@
 				 top_delta="0" 
 				 width="150" />
 			</radio_group>
+            <!--
 			<check_box
 			 control_name="ShowFloaterCollapseButton"
 			 follows="top|left"
@@ -845,7 +832,7 @@
 			 name="floatercollapse_check"
 			 top_pad="5"
 			 width="350" />
-
+            -->
 			<text
 			 follows="left|top"
 			 font.style="BOLD"
@@ -968,7 +955,7 @@
 			 width="200">
 				(Requires restart)
 			</text>
-			
+			<!--
 			<check_box
 			 follows="left|top"
 			 height="20"
@@ -1031,7 +1018,7 @@
 			 width="200">
 				(Requires restart)
 			</text>
-
+            -->
 		</panel>
 
 	</tab_container>
