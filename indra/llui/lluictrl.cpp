@@ -487,19 +487,9 @@ void LLUICtrl::setControlVariable(LLControlVariable* control)
 		setValue(mControlVariable->getValue());
 
 // [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
-		if ( (mControlToolTip) && (mControlVariable->getToolTipFlags() & LLControlVariable::TOOLTIP_SHOW_COMMENT) && (getToolTip().empty()) )
+		if ( (mControlToolTip) && (mControlVariable->getToolTipFlags() & LLControlVariable::TOOLTIP_SHOW) && (getToolTip().empty()) )
 		{
-			std::string strComment = mControlVariable->getComment();
-
-			if (mControlVariable->getToolTipFlags() & LLControlVariable::TOOLTIP_SHOW_DEFAULT)
-			{
-				if (mControlVariable->isType(TYPE_BOOLEAN))
-				{
-					strComment += llformat(" (Default: %s)", (mControlVariable->getDefault().asBoolean()) ? "enabled" : "disabled");
-				}
-			}
-
-			setToolTip(strComment);
+			setToolTip(mControlVariable->getToolTip());
 		}
 // [/SL:KB]
 	}
