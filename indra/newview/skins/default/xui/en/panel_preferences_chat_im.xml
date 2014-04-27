@@ -54,14 +54,15 @@
          width="150" />
     </radio_group>
     <text
-     height="20"
+     follows="top|left"
+     height="18"
      layout="topleft"
      left_pad="0"
      length="1"
      name="im_orientation_restarttext"
      text_color="White_50"
      type="string"
-     top_delta="1"
+     top_delta="5"
      width="100">
         (Requires restart)
     </text>
@@ -189,6 +190,7 @@
     </text>
     <combo_box
      control_name="NotificationIMP2PToast"
+     follows="top|left"
      height="23"
      layout="topleft"
      left_pad="5"
@@ -230,6 +232,7 @@
     </text>
     <combo_box
      control_name="NotificationIMMultiToast"
+     follows="top|left"
      height="23"
      layout="topleft"
      left_pad="5"
@@ -289,6 +292,19 @@
          label="Bottom right"
          value="1" />
     </combo_box>
+    <text
+     follows="top|left"
+     height="20"
+     layout="topleft"
+     left_pad="20"
+     length="1"
+     name="im_orientation_restarttext"
+     text_color="White_50"
+     type="string"
+     top_delta="4"
+     width="100">
+        (Requires restart)
+    </text>
     <text
      follows="top|left"
      height="15"

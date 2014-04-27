@@ -381,7 +381,7 @@
       width="120">
       <button.commit_callback
         function="Pref.ShowPanel"
-        parameter="soundalerts_tab" />
+        parameter="soundalerts" />
       </button>
 
 </panel>

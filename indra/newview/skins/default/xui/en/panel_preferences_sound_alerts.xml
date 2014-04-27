@@ -255,7 +255,7 @@
             function="Pref.setControlFalse"
             parameter="MuteUI" />
       </slider>
-      
+<!--
       <text
         follows="left|top"
         font.style="BOLD"
@@ -301,7 +301,7 @@
         right="-15">
       </button>
     </panel>
-     
+-->
      
      
     <view_border
