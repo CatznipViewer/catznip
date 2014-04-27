@@ -144,11 +144,11 @@ void LLSpellChecker::refreshDictionaryMap()
 	const std::string user_path = getDictionaryUserPath();
 
 	// Load dictionary information (file name, friendly name, ...)
-	llifstream user_file(user_path + DICT_FILE_MAIN, std::ios::binary);
-	if ( (!user_file.is_open()) 
-		|| (LLSDParser::PARSE_FAILURE == LLSDSerialize::fromXMLDocument(sDictMap, user_file)) 
-		|| (0 == sDictMap.size()) )
-	{
+//	llifstream user_file(user_path + DICT_FILE_MAIN, std::ios::binary);
+//	if ( (!user_file.is_open()) 
+//		|| (LLSDParser::PARSE_FAILURE == LLSDSerialize::fromXMLDocument(sDictMap, user_file)) 
+//		|| (0 == sDictMap.size()) )
+//	{
 		llifstream app_file(app_path + DICT_FILE_MAIN, std::ios::binary);
 		if ( (!app_file.is_open()) 
 			|| (LLSDParser::PARSE_FAILURE == LLSDSerialize::fromXMLDocument(sDictMap, app_file)) 
@@ -156,7 +156,7 @@ void LLSpellChecker::refreshDictionaryMap()
 		{
 			return;
 		}
-	}
+//	}
 
 	// Load user installed dictionary information
 	llifstream custom_file(user_path + DICT_FILE_USER, std::ios::binary);
