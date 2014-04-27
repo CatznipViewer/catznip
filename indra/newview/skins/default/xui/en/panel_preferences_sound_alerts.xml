@@ -558,5 +558,16 @@
      name="sound_group_im"
      top_delta="0"
      width="170" />
-
+    <text
+     follows="top|left"
+     height="18"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="loggedin_msg"
+     text_color="White_50"
+     type="string"
+     right="-10">
+        * You must be logged in before you can change these options.
+    </text>
 </panel>
