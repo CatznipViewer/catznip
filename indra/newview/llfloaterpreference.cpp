@@ -2325,24 +2325,65 @@ class LLPanelPreferenceTroubleshooting : public LLPanelPreference
 public:
 	LLPanelPreferenceTroubleshooting()
 	{
-		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClickClearSettings, _2));
+		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClearSettings, _2));
+		mCommitCallbackRegistrar.add("Pref.ForceInitialOutfit", boost::bind(&LLPanelPreferenceTroubleshooting::onForceInitialOutfit));
 	}
 
 	/*virtual*/ void refresh()
 	{
-		getChild<LLUICtrl>("default_avatar_chk")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
+		const EStartupState eStartupState = LLStartUp::getStartupState();
+
+		getChild<LLUICtrl>("catznip_group_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("reset_avatar_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("clear_account_settings_btn")->setEnabled(eStartupState == STATE_STARTED);
 	}
 
-	static void onClickClearSettings(const LLSD& sdParam)
+	static void onClearSettings(const LLSD& sdParam)
 	{
 		const std::string strParam = sdParam.asString();
+
+		std::string strNotifName;
 		if ("user" == strParam)
-		{
-			gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
-		}
+			strNotifName = "ConfirmResetUserSettings";
 		else if ("account" == strParam)
+			strNotifName = "ConfirmResetAccountSettings";
+
+		if (!strNotifName.empty())
 		{
-			gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+			LLNotificationsUtil::add(strNotifName, LLSD(), sdParam, onClearSettingsCallback);
+		}
+	}
+
+	static void onClearSettingsCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			const std::string strParam = sdNotification["payload"].asString();
+			if ("user" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
+			}
+			else if ("account" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+			}
+			LLNotificationsUtil::add("SettingsWillReset");
+		}
+	}
+
+	static void onForceInitialOutfit()
+	{
+		LLNotificationsUtil::add("ConfirmResetOutfit", LLSD(), LLSD(), onForceInitialOutfitCallback);
+	}
+
+	static void onForceInitialOutfitCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			gSavedPerAccountSettings.setBOOL("WearInitialOutfit", TRUE);
+			LLNotificationsUtil::add("OutfitWillReset");
 		}
 	}
 };
