@@ -298,7 +298,7 @@
      layout="topleft"
      left_pad="20"
      length="1"
-     name="im_orientation_restarttext"
+     name="im_notif_toastalign_restarttext"
      text_color="White_50"
      type="string"
      top_delta="4"
