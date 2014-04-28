@@ -1289,6 +1289,10 @@ void LLFloaterPreference::refreshEnabledState()
 	disableUnavailableSettings();
 
 	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-04-28 (Catznip-3.6)
+	getChild<LLPanel>("soundalerts")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
+// [/SL:KB]
 }
 
 void LLFloaterPreference::disableUnavailableSettings()
