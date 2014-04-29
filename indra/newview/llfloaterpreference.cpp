@@ -190,6 +190,12 @@ void handleDisplayNamesOptionChanged(const LLSD& newvalue);
 bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response);
 bool callback_clear_cache(const LLSD& notification, const LLSD& response);
 
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+void initEditorFont(LLUICtrl* pCtrl);
+void refreshEditorFont(LLHandle<LLUICtrl> hCtrl);
+void handleEditorFontToggle(LLUICtrl* pCheckCtrl);
+// [/SL:KB]
+
 //bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater);
 //bool callback_reset_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater);
 
@@ -348,9 +354,8 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
-	mCommitCallbackRegistrar.add("Pref.InitEditorFont",			boost::bind(&LLFloaterPreference::onInitEditorFont, this, _1));
-	mCommitCallbackRegistrar.add("Pref.ToggleEditorFont",		boost::bind(&LLFloaterPreference::onToggleEditorFont, this, _1));
-	mCommitCallbackRegistrar.add("Pref.CommitEditorFont",		boost::bind(&LLFloaterPreference::onCommitEditorFont, this));
+	mCommitCallbackRegistrar.add("Pref.InitEditorFont",			boost::bind(&initEditorFont, _1));
+	mCommitCallbackRegistrar.add("Pref.ToggleEditorFont",		boost::bind(&handleEditorFontToggle, _1));
 // [/SL:KB]
 
 //	sSkin = gSavedSettings.getString("SkinCurrent");
@@ -1784,17 +1789,32 @@ void LLFloaterPreference::changed()
 }
 
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
-void LLFloaterPreference::onInitEditorFont(LLUICtrl* pCtrl)
+void initEditorFont(LLUICtrl* pCtrl)
 {
 	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+	if ( (pControl) && (pCtrl) )
+	{
+		// This should be safe since the preferences floater is single instance and isn't destroyed until the viewer is shutting down
+		LLHandle<LLUICtrl> hCtrl = pCtrl->getHandle();
+		pControl->getSignal()->connect(boost::bind(&refreshEditorFont, hCtrl));
+		refreshEditorFont(hCtrl);
+	}
+}
 
-	LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(pCtrl);
+void refreshEditorFont(LLHandle<LLUICtrl> hCtrl)
+{
+	if (hCtrl.isDead())
+		return;
+
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+
+	LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(hCtrl.get());
 	if (pCheckCtrl)
 	{
 		pCheckCtrl->set(!pControl->isDefault());
 	}
 
-	LLComboBox* pComboCtrl = dynamic_cast<LLComboBox*>(pCtrl);
+	LLComboBox* pComboCtrl = dynamic_cast<LLComboBox*>(hCtrl.get());
 	if (pComboCtrl)
 	{
 		if (pControl->isDefault())
@@ -1805,44 +1825,32 @@ void LLFloaterPreference::onInitEditorFont(LLUICtrl* pCtrl)
 		else
 		{
 			pComboCtrl->setEnabled(true);
-			pComboCtrl->setValue(pControl->getValue());
 		}
 	}
 }
 
-void LLFloaterPreference::onToggleEditorFont(LLUICtrl* pCheckCtrl)
+void handleEditorFontToggle(LLUICtrl* pCheckCtrl)
 {
-	LLComboBox* pMainCombo = findChild<LLComboBox>("font_main_combo");
-	LLComboBox* pEditorCombo = findChild<LLComboBox>("font_editor_combo");
-
 	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+
+	LLComboBox* pEditorCombo = pCheckCtrl->getParent()->findChild<LLComboBox>("font_editor_combo");
 	if (!pCheckCtrl->getValue().asBoolean())
 	{
+		// When unchecked, revert to default (= use FontOverrideMain)
 		pEditorCombo->setEnabled(false);
 		pEditorCombo->clear();
-		pControl->resetToDefault();
+		pControl->resetToDefault(true);
 	}
 	else
 	{
+		// When checked, use the current FontOverrideMain setting as a starting point
 		pEditorCombo->setEnabled(true);
-		if (pControl->isDefault())
-			pEditorCombo->setSimple(pMainCombo->getSimple());
-		else
-			pEditorCombo->setValue(pControl->getValue());
-		pControl->setValue(pEditorCombo->getValue().asString());
+		std::string strValue = gSavedSettings.getString("FontOverrideMain");
+		LLStringUtil::replaceString(strValue, "main", "editor");
+		if (!pEditorCombo->setSelectedByValue(strValue, TRUE))
+			pEditorCombo->selectFirstItem();
+		pEditorCombo->onCommit();
 	}
-}
-
-void LLFloaterPreference::onCommitEditorFont()
-{
-	LLComboBox* pMainCombo = findChild<LLComboBox>("font_main_combo");
-	LLComboBox* pEditorCombo = findChild<LLComboBox>("font_editor_combo");
-
-	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
-	if (pMainCombo->getSimple() == pEditorCombo->getSimple())
-		pControl->resetToDefault();
-	else
-		pControl->setValue(pEditorCombo->getValue().asString());
 }
 // [/SL:KB]
 
