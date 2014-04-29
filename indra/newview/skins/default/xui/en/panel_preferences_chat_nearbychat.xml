@@ -110,7 +110,7 @@
          layout="topleft"
          label="Chat / IM / Notecards Font:"
          left="0"
-         name="font_edtior_check"
+         name="font_editor_check"
          top="0"
          width="130">
             <check_box.init_callback
@@ -120,6 +120,7 @@
         </check_box>
         <!-- Referenced in code -->
         <combo_box
+         control_name="FontOverrideEditor"
          enabled="false"
          height="23"
          layout="topleft"
@@ -149,8 +150,6 @@
              value="font_editor_ubuntu.xml" />
             <combo_box.init_callback
              function="Pref.InitEditorFont" />
-            <combo_box.commit_callback
-             function="Pref.CommitEditorFont" />
         </combo_box>
         <text
          height="15"

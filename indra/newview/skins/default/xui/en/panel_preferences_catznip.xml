@@ -955,14 +955,13 @@ Many options from R8 have already been moved.
 			 width="200">
 				(Requires restart)
 			</text>
-			<!--
 			<check_box
 			 follows="left|top"
 			 height="20"
 			 layout="topleft"
 			 label="Chat / Notecards :"
 			 left="35"
-			 name="font_edtior_check"
+			 name="font_editor_check"
 			 top_pad="10"
 			 width="130">
 				<check_box.init_callback
@@ -971,6 +970,7 @@ Many options from R8 have already been moved.
 				 function="Pref.ToggleEditorFont" />
 			</check_box>
 			<combo_box
+			 control_name="FontOverrideEditor"
 			 enabled="false"
 			 follows="left|top"
 			 height="23"
@@ -1001,8 +1001,6 @@ Many options from R8 have already been moved.
 				 value="font_editor_ubuntu.xml" />
 				<combo_box.init_callback
 				 function="Pref.InitEditorFont" />
-				<combo_box.commit_callback
-				 function="Pref.CommitEditorFont" />
 			</combo_box>
 			<text
 			 follows="top|left"
@@ -1018,7 +1016,6 @@ Many options from R8 have already been moved.
 			 width="200">
 				(Requires restart)
 			</text>
-            -->
 		</panel>
 
 	</tab_container>
