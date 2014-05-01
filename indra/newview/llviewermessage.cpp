@@ -2469,7 +2469,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				if (!gIMMgr->isNonFriendSessionNotified(session_id))
 				{
 					std::string message = LLTrans::getString("IM_unblock_only_groups_friends");
-					gIMMgr->addMessage(session_id, from_id, name, message, IM_OFFLINE == offline);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-05-01 (Catznip-3.6)
+					gIMMgr->addMessage(session_id, LLUUID::null, SYSTEM_FROM, message, IM_OFFLINE == offline);
+// [/SL:KB]
+//					gIMMgr->addMessage(session_id, from_id, name, message, IM_OFFLINE == offline);
 					gIMMgr->addNotifiedNonFriendSessionID(session_id);
 				}
 
