@@ -182,7 +182,7 @@
 
     <panel
      follows="top|left"
-     height="100"
+     height="110"
      layout="topleft"
      name="log_settings"
      left="0"
@@ -200,7 +200,7 @@
          left="35"
          name="log_nearby_chat"
          width="350"
-         top="10">
+         top="5">
         </check_box>
 
         <!-- Referenced in code -->
@@ -212,6 +212,18 @@
          label="Save IM logs on my computer"
          layout="topleft"
          name="log_instant_messages"
+         width="350">
+        </check_box>
+
+        <!-- Referenced in code -->
+        <check_box
+         control_name="LogUnreadIMs"
+         enabled="false"
+         follows="top|left"
+         height="16"
+         label="Restore unread IM messages on login"
+         layout="topleft"
+         name="log_unread_messages"
          width="350">
         </check_box>
 
@@ -249,6 +261,7 @@
 
          name="log_path_text"
          height="16"
+         top_pad="7"
          width="55">
             Location
         </text>
@@ -307,6 +320,7 @@
      follows="top|left"
      left="0"
      right="-1"
+     top_pad="0"
      height="135">
         <text
          layout="topleft"
