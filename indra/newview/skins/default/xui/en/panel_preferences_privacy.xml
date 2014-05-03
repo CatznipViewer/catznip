@@ -122,11 +122,21 @@
      Privacy
    </text>
   <check_box
+      enabled="false"
+      height="16"
+      label="Email me IMs when I'm offline"
+      layout="topleft"
+      left_delta="30"
+      name="send_im_to_email"
+      top_pad="5"
+      width="330">
+  </check_box>
+
+  <check_box
       height="16"
       enabled="false"
       label="Show me in Search results"
       layout="topleft"
-      left_delta="30"
       name="online_searchresults"
       top_pad="5"
       width="350" />
