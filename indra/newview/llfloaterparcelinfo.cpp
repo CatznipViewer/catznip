@@ -104,7 +104,7 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 
 void LLFloaterParcelInfo::onClickShowOnMap()
 {
-	LLVector3d posGlobal = m_pParcelInfo->getCurrentParcelPos();
+	const LLVector3d posGlobal = m_pParcelInfo->getGlobalPos();
 	if (!posGlobal.isExactlyZero())
 	{
 		LLSD sdParams;
@@ -119,7 +119,7 @@ void LLFloaterParcelInfo::onClickShowOnMap()
 
 void LLFloaterParcelInfo::onClickTeleport()
 {
-	LLVector3d posGlobal = m_pParcelInfo->getCurrentParcelPos();
+	const LLVector3d posGlobal = m_pParcelInfo->getGlobalPos();
 	if (!posGlobal.isExactlyZero())
 	{
 		LLFloaterWorldMap* pWorldMap = LLFloaterWorldMap::getInstance();
