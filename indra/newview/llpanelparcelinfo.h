@@ -57,6 +57,8 @@ public:
 	const std::string   getEditDescription() const;
 	void                setEditMode(bool fEditMode);
 	const LLVector3d&   getGlobalPos() const			{ return (!m_posCurGlobal.isExactlyZero()) ? m_posCurGlobal : m_posGlobalRequest; }
+	const LLUUID&       getItemId() const				{ return m_idItem; }
+	bool                isLandmark() const				{ return m_idItem.notNull(); }
 	void                setParcelFromPos(const LLVector3d posGlobal);
 	void                setParcelFromId(const LLUUID& idParcel);
 	void                setParcelFromItem(const LLUUID& idItem);
