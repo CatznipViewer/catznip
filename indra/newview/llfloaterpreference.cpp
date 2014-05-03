@@ -1604,6 +1604,7 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 // [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
 	getChildView("log_nearby_chat")->setEnabled(TRUE);
 	getChildView("log_instant_messages")->setEnabled(TRUE);
+	getChildView("log_unread_messages")->setEnabled(TRUE);
 // [/SL:KB]
 //	getChildView("chat_font_size")->setEnabled(TRUE);
 }
