@@ -803,7 +803,7 @@ void LLIMP2PChiclet::onMenuItemClicked(const LLSD& sdParam)
 	}
 	else if ("teleport_request" == strParam)
 	{
-		LLAvatarActions::offerTeleport(idAvatar);
+		LLAvatarActions::teleportRequest(idAvatar);
 	}
 	else if ("pay" == strParam)
 	{
