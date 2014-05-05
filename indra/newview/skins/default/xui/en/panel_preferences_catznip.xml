@@ -262,19 +262,19 @@
          height="15"
          mouse_opaque="false"
          type="string"
-         name="log_filename_text"
+         name="pref_note_text"
          font.style="BOLD">
-            Catznip Preferances Note
+            Catznip Preferences Note
         </text>
         <text
          follows="top|left"
          layout="topleft"
-         left="20"
+         left="15"
          height="80"
-         name="log_filename_legacy_text"
+         name="pref_note2_text"
          word_wrap="true"
          right="-10">
-We are revising the layout of preferences going forward, it is planned that we will remove the catznip tab in a future update and integrate the options elsewhere.
+We are revising the layout of preferences going forward, it is planned that we will remove the Catznip tab in a future update and integrate the options elsewhere.
 
 Many options from R8 have already been moved.
         </text>
