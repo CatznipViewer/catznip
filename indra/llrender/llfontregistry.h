@@ -41,6 +41,9 @@ public:
 	LLFontDescriptor(const std::string& name, const std::string& size, const U8 style);
 	LLFontDescriptor(const std::string& name, const std::string& size, const U8 style, const string_vec_t& file_names);
 	LLFontDescriptor normalize() const;
+// [SL:KB] - Patch: UI-Font | Checked: 2014-02-27 (Catznip-3.6)
+	static LLFontDescriptor normalize(const std::string& name, const std::string& size, const U8 style, const string_vec_t* file_names_p = NULL);
+// [/SL:KB]
 
 	bool operator<(const LLFontDescriptor& b) const;
 
@@ -87,7 +90,10 @@ public:
 	const LLFontDescriptor *getMatchingFontDesc(const LLFontDescriptor& desc);
 	const LLFontDescriptor *getClosestFontTemplate(const LLFontDescriptor& desc);
 
-	bool nameToSize(const std::string& size_name, F32& size);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	bool nameToSize(const std::string& font_name, const std::string& size_name, F32& size);
+// [/SL:KB]
+//	bool nameToSize(const std::string& size_name, F32& size);
 
 	void dump();
 	
@@ -96,7 +102,10 @@ public:
 private:
 	LLFontGL *createFont(const LLFontDescriptor& desc);
 	typedef std::map<LLFontDescriptor,LLFontGL*> font_reg_map_t;
-	typedef std::map<std::string,F32> font_size_map_t;
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	typedef std::map<std::pair<std::string, std::string>, F32> font_size_map_t;
+// [/SL:KB]
+//	typedef std::map<std::string,F32> font_size_map_t;
 
 	// Given a descriptor, look up specific font instantiation.
 	font_reg_map_t mFontMap;
