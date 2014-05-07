@@ -52,6 +52,10 @@
 #include "llfocusmgr.h"
 #include "lldraghandle.h"
 #include "message.h"
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-09-30 (Catznip-3.3)
+#include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+// [/SL:KB]
 
 //#include "llsdserialize.h"
 
@@ -77,6 +81,9 @@ LLFloaterAvatarPicker* LLFloaterAvatarPicker::show(select_callback_t callback,
 	floater->mSelectionCallback = callback;
 	floater->setAllowMultiple(allow_multiple);
 	floater->mNearMeListComplete = FALSE;
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	floater->mFilterFriends.clear();
+// [/SL:KB]
 	floater->mCloseOnSelect = closeOnSelect;
 	floater->mExcludeAgentFromSearchResults = skip_agent;
 	
@@ -108,8 +115,6 @@ LLFloaterAvatarPicker::LLFloaterAvatarPicker(const LLSD& key)
     mContextConeOutAlpha(0.f),
     mContextConeFadeTime(0.f)
 {
-	mCommitCallbackRegistrar.add("Refresh.FriendList", boost::bind(&LLFloaterAvatarPicker::populateFriend, this));
-
     mContextConeInAlpha = gSavedSettings.getF32("ContextConeInAlpha");
     mContextConeOutAlpha = gSavedSettings.getF32("ContextConeOutAlpha");
     mContextConeFadeTime = gSavedSettings.getF32("ContextConeFadeTime");
@@ -132,6 +137,10 @@ BOOL LLFloaterAvatarPicker::postBuild()
 	LLScrollListCtrl* nearme = getChild<LLScrollListCtrl>("NearMe");
 	nearme->setDoubleClickCallback(boost::bind(&LLFloaterAvatarPicker::onBtnSelect, this));
 	nearme->setCommitCallback(boost::bind(&LLFloaterAvatarPicker::onList, this));
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	getChild<LLUICtrl>("filter_friends")->setCommitCallback(boost::bind(&LLFloaterAvatarPicker::onFilterFriends, this, _2));
+// [/SL:KB]
 
 	LLScrollListCtrl* friends = getChild<LLScrollListCtrl>("Friends");
 	friends->setDoubleClickCallback(boost::bind(&LLFloaterAvatarPicker::onBtnSelect, this));
@@ -173,6 +182,15 @@ void LLFloaterAvatarPicker::onTabChanged()
 {
 	getChildView("ok_btn")->setEnabled(isSelectBtnEnabled());
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+void LLFloaterAvatarPicker::onFilterFriends(const std::string& strFilter)
+{
+	// TODO-Catznip: this needs to be a lot more performant
+	mFilterFriends = strFilter;
+	populateFriend();
+}
+// [/SL:KB]
 
 // Destroys the object
 LLFloaterAvatarPicker::~LLFloaterAvatarPicker()
@@ -309,7 +327,10 @@ void LLFloaterAvatarPicker::populateNearMe()
 			element["columns"][0]["column"] = "name";
 			element["columns"][0]["value"] = av_name.getDisplayName();
 			element["columns"][1]["column"] = "username";
-			element["columns"][1]["value"] = av_name.getUserName();
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+			element["columns"][1]["value"] = av_name.getAccountName();
+// [/SL:KB]
+//			element["columns"][1]["value"] = av_name.getUserName();
 
 			sAvatarNameMap[av] = av_name;
 		}
@@ -346,13 +367,53 @@ void LLFloaterAvatarPicker::populateFriend()
 	LLAvatarTracker::instance().applyFunctor(collector);
 	LLCollectAllBuddies::buddy_map_t::iterator it;
 	
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	LLSD sdRow;
+	LLSD& sdColumns = sdRow["columns"];
+	sdColumns[0]["column"] = "name";
+	sdColumns[1]["column"] = "username";
+
+	// Bold font style for online friends
+	sdColumns[1]["font"]["style"] = "BOLD";
+	sdColumns[0]["font"]["style"] = "BOLD";
+// [/SL:KB]
 	for(it = collector.mOnline.begin(); it!=collector.mOnline.end(); it++)
 	{
-		friends_scroller->addStringUUIDItem(it->first, it->second);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		const std::string strDisplayName = it->second.getDisplayName();
+		const std::string strAccountName = it->second.getAccountName();
+
+		if ( (!mFilterFriends.empty()) && (boost::ifind_first(strDisplayName, mFilterFriends).empty()) && (boost::ifind_first(strAccountName, mFilterFriends).empty()) )
+			continue;
+
+		sdRow["id"] = it->first;
+		sdColumns[0]["value"] = strDisplayName;
+		sdColumns[1]["value"] = strAccountName;
+		friends_scroller->addElement(sdRow);
+// [/SL:KB]
+//		friends_scroller->addStringUUIDItem(it->first, it->second);
 	}
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	// Normal font style for offline friends
+	sdColumns[1]["font"]["style"] = "NORMAL";
+	sdColumns[0]["font"]["style"] = "NORMAL";
+// [/SL:KB]
 	for(it = collector.mOffline.begin(); it!=collector.mOffline.end(); it++)
 	{
-			friends_scroller->addStringUUIDItem(it->first, it->second);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+		const std::string strDisplayName = it->second.getDisplayName();
+		const std::string strAccountName = it->second.getAccountName();
+
+		if ( (!mFilterFriends.empty()) && (boost::ifind_first(strDisplayName, mFilterFriends).empty()) && (boost::ifind_first(strAccountName, mFilterFriends).empty()) )
+			continue;
+
+		sdRow["id"] = it->first;
+		sdColumns[0]["value"] = strDisplayName;
+		sdColumns[1]["value"] = strAccountName;
+		friends_scroller->addElement(sdRow);
+// [/SL:KB]
+//			friends_scroller->addStringUUIDItem(it->first, it->second);
 	}
 	friends_scroller->sortByColumnIndex(0, TRUE);
 }
@@ -495,6 +556,19 @@ void LLFloaterAvatarPicker::find()
 	sAvatarNameMap.clear();
 
 	std::string text = getChild<LLUICtrl>("Edit")->getValue().asString();
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-09-30 (Catznip-3.3)
+	// Allow copy/pasting of a full name
+	text = LLCacheName::buildLegacyName(text);
+
+	// Allow copy/pasting of a (legacy) username
+	boost::regex complete_name_regex("^[a-z0-9]+\\.[a-z]+$");
+	boost::match_results<std::string::const_iterator> name_results;
+	if (boost::regex_match(text, complete_name_regex))
+	{
+		std::replace(text.begin(), text.end(), '.', ' ');
+	}
+// [/SL:KB]
 
 	mQueryID.generate();
 
