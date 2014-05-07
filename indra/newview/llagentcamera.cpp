@@ -248,7 +248,10 @@ void LLAgentCamera::setAvatarObject(LLVOAvatarSelf* avatar)
 	}
 	if (!mPointAt)
 	{
-		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT, LLHUDEffectPointAt::getSendPointAt());
+// [/SL:KB]
+//		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
 	}
 	
 	if (!mLookAt.isNull())
@@ -2727,7 +2730,10 @@ BOOL LLAgentCamera::setPointAt(EPointAtType target_type, LLViewerObject *object,
 	}
 	if (!mPointAt || mPointAt->isDead())
 	{
-		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT, LLHUDEffectPointAt::getSendPointAt());
+// [/SL:KB]
+//		mPointAt = (LLHUDEffectPointAt *)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINTAT);
 		mPointAt->setSourceObject(gAgentAvatarp);
 	}
 	return mPointAt->setPointAt(target_type, object, position);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  positioning="cascading"
- legacy_header_height="18"
- height="590"
+ header_height="0"
+ height="600"
  layout="topleft"
  bg_opaque_image="Window_NoTitle_Foreground"
  bg_alpha_image="Window_NoTitle_Background"
@@ -84,6 +84,7 @@
      left="10"
      name="button focus"
      tool_tip="Focus"
+     top="5"
      width="35">
 	  <button.commit_callback
 	     function="BuildTool.setTool"
@@ -229,7 +230,7 @@
 	<radio_group
      follows="left|top"
 	 left="5"
-	 top="55"
+	 top="52"
 	 height="70"
      layout="topleft"
 	 name="edit_radio_group">
@@ -263,11 +264,12 @@
      label="Edit linked"
      layout="topleft"
      name="checkbox edit linked parts"
-     top_pad="-18">
+     top="121">
 		  <check_box.commit_callback
 			function="BuildTool.selectComponent"/>
 	</check_box>
 
+<!--
    <button
      follows="left|top"
      height="20"
@@ -291,27 +293,16 @@
 	  <button.commit_callback
 	     function="BuildTool.UnlinkObjects"/>
     </button>
+-->
     <check_box
      control_name="ScaleUniform"
      height="19"
-     label=""
+     label="Stretch Both Sides"
      layout="topleft"
      left="143"
      name="checkbox uniform"
      top="48"
      width="20" />
-    <text
-     height="19"
-     label="Stretch Both Sides"
-     left_delta="20"
-     name="checkbox uniform label"
-     top_delta="2"
-     width="120"
-     layout="topleft"
-     follows="top|left"
-     wrap="true">
-     	Stretch Both Sides
-    </text>
     <check_box
      control_name="ScaleStretchTextures"
      height="19"
@@ -320,28 +311,94 @@
      layout="topleft"
      left="143"
      name="checkbox stretch textures"
-     top_pad="-4"
+     top_pad="-3"
      follows="left|top"
      width="134" />
-   <check_box
-     control_name="SnapEnabled"
-     height="18"
-     initial_value="true"
-     label="Snap"
+    <text
+     height="16"
+     left="164"
+     name="selection options"
+     top_pad="-4"
+     width="120"
      layout="topleft"
-     top_pad="0"
+     follows="top|left"
+     valign="center"
+     wrap="true">
+        Selection options
+    </text>
+    <button
+     left="259"
+     label=""
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="selection options button"
+     tool_tip="See more selection options"
+     top_delta="0"
+     width="25"
+     height="19">
+        <button.commit_callback
+         function="BuildTool.selectOptions"/>
+    </button>
+    <check_box
+     control_name="AxisAtRootEnabled"
+     height="19"
+     initial_value="false"
+     label="Axis at Root"
+     layout="topleft"
+     left="143"
+     top_pad="-3"
+     name="checkbox axis at root"
+     width="134" />
+    <button
+     left="259"
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Axis Options..."
+     tool_tip="See more axis options"
+     top_delta="0"
+     width="25"
+     height="19" >
+        <button.commit_callback
+         function="BuildTool.axisOptions"/>
+    </button>
+    <check_box
+     control_name="SnapEnabled"
+     height="19"
+     initial_value="true"
+     label="Snap to grid"
+     layout="topleft"
+     left="143"
+     top_pad="-3"
      name="checkbox snap to grid"
      width="134" />
+  <button
+     left="259"
+     label=""
+     image_selected="ForwardArrow_Press"
+     image_unselected="ForwardArrow_Off"
+     layout="topleft"
+     follows="top|left"
+     name="Options..."
+     tool_tip="See more grid options"
+     top_delta="0"
+     width="25"
+     height="19" >
+	 <button.commit_callback
+	     function="BuildTool.gridOptions"/>
+	</button>
     <combo_box
       height="20"
       layout="topleft"
       follows="left|top"
       name="combobox grid mode"
       tool_tip="Choose the type of grid ruler for positioning the object"
-      top="83"
-      left="195"
+      left="162"
       top_pad="0"
-      width="60">
+      width="105">
       <combo_box.item
       label="World"
       name="World"
@@ -357,22 +414,6 @@
       <combo_box.commit_callback
       function="BuildTool.gridMode"/>
     </combo_box>  
-  
-  <button
-     left="259"
-     label=""
-     image_selected="ForwardArrow_Press"
-     image_unselected="ForwardArrow_Off"
-     layout="topleft"
-     follows="top|left"
-     name="Options..."
-     tool_tip="See more grid options"
-     top="83"
-     width="25"
-     height="20" >
-	 <button.commit_callback
-	     function="BuildTool.gridOptions"/>
-	</button>
   
    <button
      follows="left|top"
@@ -760,7 +801,7 @@
 	  layout="topleft"
 	  left="10"
 	  name="selection_empty"
-	  top_pad="0"
+	  top="156"
 	  width="100">
 		Nothing selected.
 	</text>
@@ -777,21 +818,6 @@
 	  top_delta="0"
 	  visible="false"
 	  width="280">
-	</text>
-	<text
-	 text_color="LtGray_50"
-	  type="string"
-	  length="1"
-	  height="16"
-	  follows="left|top"
-	  font="SansSerifSmall"
-	  layout="topleft"
-	  left="10"
-	  name="remaining_capacity"
-	  top_pad="0"
-	  visible="false"
-	  width="280">
-	  [CAPACITY_STRING] [secondlife:///app/openfloater/object_weights More info]
 	</text>
     <!-- <text -->
     <!-- text_color="LtGray_50" -->
@@ -819,27 +845,68 @@
     <!--  width="143"> -->
     <!--     Prims: [COUNT] -->
     <!-- </text> -->
-    <view_border
+ 
+    <button
+     follows="left|top"
+     height="20"
+     label="Link"
+     top="170"
+     layout="topleft"
+     left="10"
+     name="link_btn"
+     width="60">
+       <button.commit_callback
+        function="BuildTool.LinkObjects"/>
+    </button>
+    <button
+     follows="left|top"
+     height="20"
+     label="Unlink"
+     layout="topleft"
+     left_pad="2"
+     name="unlink_btn"
+     width="60">
+       <button.commit_callback
+        function="BuildTool.UnlinkObjects"/>
+    </button>
+	<text
+	 text_color="LtGray_50"
+	 type="string"
+	 halign="right"
+	 length="1"
+	 height="16"
+	 follows="left|top"
+	 font="SansSerifSmall"
+	 layout="topleft"
+	 left="-100"
+	 right="-10"
+	 name="remaining_capacity"
+	 top_delta="3"
+	 visible="true">
+	  [secondlife:///app/openfloater/object_weights More info]
+	</text>
+	
+   <view_border
     bevel_style="none"
     follows="top|left"
     height="0"
     layout="topleft"
     left="6"
     name="cost_text_border"
-    top="135"
+    top="153"
     width="282"/>
     <tab_container
      follows="left|top"
-     height="410"
+     height="413"
      halign="center"
      left="0"
      name="Object Info Tabs"
-     tab_max_width="100"
-     tab_min_width="40"
+     tab_max_width="58"
+     tab_min_width="30"
      tab_position="top"
      tab_height="25"
      open_tabs_on_drag_and_drop="true"
-     top="173"
+     top="193"
      width="295">
 	
 <panel
@@ -1403,9 +1470,43 @@ even though the user gets a free copy.
              layout="topleft"
              name="label position"
              top_pad="10"
-             width="121">
-                Position (meters)
+             width="50">
+                Position
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_position_btn"
+             top_delta="-1"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="position" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_position_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="position" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_position_btn"
+             width="16" />
             <spinner
              follows="left|top"
              height="19"
@@ -1414,12 +1515,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="512"
              min_val="-256"
              name="Pos X"
              text_enabled_color="1 0 0.3 .7"
-             top_pad="5"
+             top_pad="3"
              width="87" />
             <spinner
              follows="left|top"
@@ -1456,12 +1557,45 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label size"
-             top_pad="6"
-             width="121">
-                Size (meters)
+             top_pad="10"
+             width="50">
+                Size
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_size_btn"
+             top_delta="-1"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="size" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_size_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="size" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_size_btn"
+             width="16" />
             <spinner
              follows="left|top"
              height="19"
@@ -1470,12 +1604,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="64"
              min_val="0.01"
              name="Scale X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="3"
              width="87" />
             <spinner
              follows="left|top"
@@ -1513,12 +1647,45 @@ even though the user gets a free copy.
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
              name="label rotation"
              top_pad="10"
-             width="121">
-                Rotation (degrees)
+             width="50">
+                Rotation
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="5"
+             name="copy_rotation_btn"
+             top_delta="-1"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="rotation" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_rotation_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="rotation" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_rotation_btn"
+             width="16" />
             <spinner
              decimal_digits="2"
              follows="left|top"
@@ -1528,12 +1695,12 @@ even though the user gets a free copy.
              label="X"
              label_width="10"
              layout="topleft"
-             left_delta="0"
+             left="10"
              max_val="9999"
              min_val="-9999"
              name="Rot X"
              text_enabled_color="1 1 1 1"
-             top_pad="5"
+             top_pad="3"
              width="87" />
             <spinner
              decimal_digits="2"
@@ -1579,11 +1746,57 @@ even though the user gets a free copy.
              width="150">
                 Prim Type
             </text>-->
+            <text
+             type="string"
+             length="1"
+             follows="left|top"
+             height="10"
+             layout="topleft"
+             left="125"
+             name="label rotation"
+             top="5"
+             width="105">
+                Prim Parameters
+            </text>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="8"
+             name="copy_primparams_btn"
+             top_delta="-1"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="prim_params" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_primparams_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="prim_params" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_primparams_btn"
+             width="16" />
             <combo_box
              height="19"
              layout="topleft"
              name="comboBaseType"
-             top="6"
+             top_pad="3"
              left="125"
              width="150">
                 <combo_box.item
@@ -2497,46 +2710,11 @@ even though the user gets a free copy.
          filename="panel_tools_texture.xml">
 	   </panel>
        <panel
-         border="false"
-         follows="all"
+         filename="panel_tools_contents.xml"
          label="Content"
          layout="topleft"
-         left_delta="0"
-         mouse_opaque="false"
          help_topic="toolbox_contents_tab"
-         name="Contents"
-         top_delta="0"
-         width="295">
-            <button
-             follows="left|top"
-             height="23"
-             label="New Script"
-             label_selected="New Script"
-             layout="topleft"
-             left="10"
-             name="button new script"
-             top="10"
-             width="134" />
-            <button
-             follows="left|top"
-             height="23"
-             label="Permissions"
-             layout="topleft"
-             left_pad="8"
-             name="button permissions"
-             width="134" />
-            <panel_inventory_object
-             border="true"
-             border_visible="true"
-             bevel_style="in"
-             follows="left|top|right"
-             height="325"
-             layout="topleft"
-             left="10"
-             name="contents_inventory"
-             top="50"
-             width="275" />
-		</panel>
+         name="Contents" />
         </tab_container>
 	<panel
 	 follows="left|top"

@@ -34,6 +34,9 @@
 #include "llcolorswatch.h"
 #include "llspinctrl.h"
 #include "lltextureentry.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 
 class LLButton;
 class LLLineEditor;
@@ -121,7 +124,10 @@ class LLFloaterColorPicker
 			   void onClickPipette ( );
 		static void onTextCommit ( LLUICtrl* ctrl, void* data );
 		static void onImmediateCheck ( LLUICtrl* ctrl, void* data );
-			   void onColorSelect( const LLTextureEntry& te );
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+			   void onColorSelect(LLToolPipette::EType type, const LLTextureEntry& te);
+// [/SL:KB]
+//			   void onColorSelect( const LLTextureEntry& te );
 	private:
 		// draws color selection palette
 		void drawPalette ();

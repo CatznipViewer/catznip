@@ -232,7 +232,10 @@ BOOL LLFloaterColorPicker::postBuild()
 	childSetCommitCallback("sspin", onTextCommit, (void*)this );
 	childSetCommitCallback("lspin", onTextCommit, (void*)this );
 
-	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterColorPicker::onColorSelect, this, _1));
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterColorPicker::onColorSelect, this, _1, _3));
+// [/SL:KB]
+//	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterColorPicker::onColorSelect, this, _1));
 
     return TRUE;
 }
@@ -425,6 +428,9 @@ void LLFloaterColorPicker::onClickPipette( )
 	if (pipette_active)
 	{
 		LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		LLToolPipette::instance().setPippetType(LLToolPipette::TYPE_COLOR);
+// [/SL:KB]
 	}
 	else
 	{
@@ -460,8 +466,18 @@ void LLFloaterColorPicker::onImmediateCheck( LLUICtrl* ctrl, void* data)
 	}
 }
 
-void LLFloaterColorPicker::onColorSelect( const LLTextureEntry& te )
+//void LLFloaterColorPicker::onColorSelect( const LLTextureEntry& te )
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLFloaterColorPicker::onColorSelect(LLToolPipette::EType type, const LLTextureEntry& te )
+// [/SL:KB]
 {
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	if (LLToolPipette::TYPE_COLOR != type)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	setCurRgb(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE]);
 	if (mApplyImmediateCheck->get())
 	{
@@ -536,7 +552,11 @@ void LLFloaterColorPicker::draw()
 		mContextConeOpacity = lerp(mContextConeOpacity, 0.f, LLCriticalDamp::getInterpolant(mContextConeFadeTime));
 	}
 
-	mPipetteBtn->setToggleState(LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+//	mPipetteBtn->setToggleState(LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	bool fPipetteActive = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+	mPipetteBtn->setToggleState( fPipetteActive && (LLToolPipette::TYPE_COLOR == LLToolPipette::getInstance()->getPipetteType()) );
+// [/SL:KB]
 	mApplyImmediateCheck->setEnabled(mActive && mCanApplyImmediately);
 	mSelectBtn->setEnabled(mActive);
 
