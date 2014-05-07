@@ -89,6 +89,9 @@ private:
 	void updateVolumeSlider();
 
 	// Button callbacks
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+	void onClickCopy(const LLSD& sdParam);
+// [/SL:KB]
 	void onClickMuteVolume();
 	void onVolumeChange(const LLSD& data);
 	
@@ -158,6 +161,10 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 	mPropertiesRequest(NULL),
 	mAvatarNameCacheConnection()
 {
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("InspectAvatar.Copy", boost::bind(&LLInspectAvatar::onClickCopy, this, _2));
+// [/SL:KB]
+
 	// can't make the properties request until the widgets are constructed
 	// as it might return immediately, so do it in onOpen.
 
@@ -380,7 +387,10 @@ void LLInspectAvatar::onAvatarNameCache(
 	{
 		getChild<LLUICtrl>("user_name")->setValue(av_name.getDisplayName());
 		getChild<LLUICtrl>("user_name_small")->setValue(av_name.getDisplayName());
-		getChild<LLUICtrl>("user_slid")->setValue(av_name.getUserName());
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		getChild<LLUICtrl>("user_slid")->setValue(av_name.getAccountName());
+// [/SL:KB]
+//		getChild<LLUICtrl>("user_slid")->setValue(av_name.getUserName());
 		mAvatarName = av_name;
 		
 		// show smaller display name if too long to display in regular size
@@ -398,6 +408,14 @@ void LLInspectAvatar::onAvatarNameCache(
 
 	}
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+void LLInspectAvatar::onClickCopy(const LLSD& sdParam)
+{
+	LLAvatarActions::copyToClipboard(mAvatarID, sdParam);
+	closeFloater();
+}
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////////
 // LLInspectAvatarUtil

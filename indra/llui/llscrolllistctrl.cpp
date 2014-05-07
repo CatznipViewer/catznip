@@ -1799,20 +1799,38 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	if (item)
 	{
 		// check to see if we have a UUID for this row
-		std::string id = item->getValue().asString();
-		LLUUID uuid(id);
+//		std::string id = item->getValue().asString();
+//		LLUUID uuid(id);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-2.6)
+		LLUUID uuid; const LLSD& sdValue = item->getValue();
+		if (sdValue.has("uuid"))
+			uuid = sdValue["uuid"].asUUID();
+		else
+			uuid = sdValue.asUUID(); // <- Original code but since mContextMenuType is only used on LLNameListCtrls it won't do anything
+// [/SL:KB]
 		if (! uuid.isNull() && mContextMenuType != MENU_NONE)
 		{
 			// set up the callbacks for all of the avatar/group menu items
 			// (N.B. callbacks don't take const refs as id is local scope)
 			bool is_group = (mContextMenuType == MENU_GROUP);
 			LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
-			registrar.add("Url.ShowProfile", boost::bind(&LLScrollListCtrl::showProfile, id, is_group));
-			registrar.add("Url.SendIM", boost::bind(&LLScrollListCtrl::sendIM, id));
-			registrar.add("Url.AddFriend", boost::bind(&LLScrollListCtrl::addFriend, id));
-			registrar.add("Url.Execute", boost::bind(&LLScrollListCtrl::showNameDetails, id, is_group));
-			registrar.add("Url.CopyLabel", boost::bind(&LLScrollListCtrl::copyNameToClipboard, id, is_group));
-			registrar.add("Url.CopyUrl", boost::bind(&LLScrollListCtrl::copySLURLToClipboard, id, is_group));
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-05-30 (Catznip-2.6)
+			const std::string strUrl = llformat("secondlife:///app/%s/%s/about", ((!is_group) ? "agent" : "group"), uuid.asString().c_str());
+
+			registrar.add("Url.ShowProfile", boost::bind(&LLUrlAction::showProfile, strUrl));
+			registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, strUrl));
+			registrar.add("Url.AddFriend", boost::bind(&LLUrlAction::addFriend, strUrl));
+			registrar.add("Url.Execute", boost::bind(&LLUrlAction::clickAction, strUrl, true));
+			registrar.add("Url.Copy", boost::bind(&LLUrlAction::copyToClipboard, strUrl, _2));
+			registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, strUrl));
+			registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, strUrl));
+// [/SL:KB]
+//			registrar.add("Url.ShowProfile", boost::bind(&LLScrollListCtrl::showProfile, id, is_group));
+//			registrar.add("Url.SendIM", boost::bind(&LLScrollListCtrl::sendIM, id));
+//			registrar.add("Url.AddFriend", boost::bind(&LLScrollListCtrl::addFriend, id));
+//			registrar.add("Url.Execute", boost::bind(&LLScrollListCtrl::showNameDetails, id, is_group));
+//			registrar.add("Url.CopyLabel", boost::bind(&LLScrollListCtrl::copyNameToClipboard, id, is_group));
+//			registrar.add("Url.CopyUrl", boost::bind(&LLScrollListCtrl::copySLURLToClipboard, id, is_group));
 
 			// create the context menu from the XUI file and display it
 			std::string menu_name = is_group ? "menu_url_group.xml" : "menu_url_agent.xml";
@@ -1830,60 +1848,60 @@ BOOL LLScrollListCtrl::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	return FALSE;
 }
 
-void LLScrollListCtrl::showProfile(std::string id, bool is_group)
-{
-	// show the resident's profile or the group profile
-	std::string sltype = is_group ? "group" : "agent";
-	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
-	LLUrlAction::showProfile(slurl);
-}
+//void LLScrollListCtrl::showProfile(std::string id, bool is_group)
+//{
+//	// show the resident's profile or the group profile
+//	std::string sltype = is_group ? "group" : "agent";
+//	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
+//	LLUrlAction::showProfile(slurl);
+//}
 
-void LLScrollListCtrl::sendIM(std::string id)
-{
-	// send im to the resident
-	std::string slurl = "secondlife:///app/agent/" + id + "/about";
-	LLUrlAction::sendIM(slurl);
-}
+//void LLScrollListCtrl::sendIM(std::string id)
+//{
+//	// send im to the resident
+//	std::string slurl = "secondlife:///app/agent/" + id + "/about";
+//	LLUrlAction::sendIM(slurl);
+//}
 
-void LLScrollListCtrl::addFriend(std::string id)
-{
-	// add resident to friends list
-	std::string slurl = "secondlife:///app/agent/" + id + "/about";
-	LLUrlAction::addFriend(slurl);
-}
+//void LLScrollListCtrl::addFriend(std::string id)
+//{
+//	// add resident to friends list
+//	std::string slurl = "secondlife:///app/agent/" + id + "/about";
+//	LLUrlAction::addFriend(slurl);
+//}
 
-void LLScrollListCtrl::showNameDetails(std::string id, bool is_group)
-{
-	// open the resident's details or the group details
-	std::string sltype = is_group ? "group" : "agent";
-	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
-	LLUrlAction::clickAction(slurl, true);
-}
+//void LLScrollListCtrl::showNameDetails(std::string id, bool is_group)
+//{
+//	// open the resident's details or the group details
+//	std::string sltype = is_group ? "group" : "agent";
+//	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
+//	LLUrlAction::clickAction(slurl, true);
+//}
 
-void LLScrollListCtrl::copyNameToClipboard(std::string id, bool is_group)
-{
-	// copy the name of the avatar or group to the clipboard
-	std::string name;
-	if (is_group)
-	{
-		gCacheName->getGroupName(LLUUID(id), name);
-	}
-	else
-	{
-		LLAvatarName av_name;
-		LLAvatarNameCache::get(LLUUID(id), &av_name);
-		name = av_name.getAccountName();
-	}
-	LLUrlAction::copyURLToClipboard(name);
-}
+//void LLScrollListCtrl::copyNameToClipboard(std::string id, bool is_group)
+//{
+//	// copy the name of the avatar or group to the clipboard
+//	std::string name;
+//	if (is_group)
+//	{
+//		gCacheName->getGroupName(LLUUID(id), name);
+//	}
+//	else
+//	{
+//		LLAvatarName av_name;
+//		LLAvatarNameCache::get(LLUUID(id), &av_name);
+//		name = av_name.getAccountName();
+//	}
+//	LLUrlAction::copyURLToClipboard(name);
+//}
 
-void LLScrollListCtrl::copySLURLToClipboard(std::string id, bool is_group)
-{
-	// copy a SLURL for the avatar or group to the clipboard
-	std::string sltype = is_group ? "group" : "agent";
-	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
-	LLUrlAction::copyURLToClipboard(slurl);
-}
+//void LLScrollListCtrl::copySLURLToClipboard(std::string id, bool is_group)
+//{
+//	// copy a SLURL for the avatar or group to the clipboard
+//	std::string sltype = is_group ? "group" : "agent";
+//	std::string slurl = "secondlife:///app/" + sltype + "/" + id + "/about";
+//	LLUrlAction::copyURLToClipboard(slurl);
+//}
 
 BOOL LLScrollListCtrl::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
