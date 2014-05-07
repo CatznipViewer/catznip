@@ -6670,6 +6670,44 @@ class LLAttachmentDetach : public view_listener_t
 	}
 };
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-16 (Catznip-3.3)
+void handle_attachment_detach_folder()
+{
+	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
+	for (LLObjectSelection::root_object_iterator itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
+	{
+		const LLViewerObject* pAttachObj = (*itNode)->getObject();
+		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
+		{
+			const LLViewerInventoryItem* pItem = gInventory.getItem(pAttachObj->getAttachmentItemID());
+			if (pItem)
+			{
+				LLAppearanceMgr::instance().removeFolderFromAvatar(pItem->getParentUUID());
+			}
+		}
+	}
+}
+
+bool enable_attachment_detach_folder()
+{
+	// Return true if there's at least one attachment's folder that we can remove
+	LLObjectSelectionHandle hSelection = LLSelectMgr::getInstance()->getSelection();
+	for (LLObjectSelection::root_object_iterator itNode = hSelection->root_object_begin(), endNode = hSelection->root_object_end(); itNode != endNode; ++itNode)
+	{
+		const LLViewerObject* pAttachObj = (*itNode)->getObject();
+		if ( (pAttachObj) && (pAttachObj->isAttachment()) )
+		{
+			const LLViewerInventoryItem* pItem = gInventory.getItem(pAttachObj->getAttachmentItemID());
+			if ( (pItem) && (LLAppearanceMgr::instance().getCanRemoveFolderFromAvatar(pItem->getParentUUID())) )
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+// [/SL:KB]
+
 //Adding an observer for a Jira 2422 and needs to be a fetch observer
 //for Jira 3119
 class LLWornItemFetchedObserver : public LLInventoryFetchItemsObserver
@@ -8884,6 +8922,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAttachmentPointFilled(), "Attachment.PointFilled");
 	view_listener_t::addMenu(new LLAttachmentEnableDrop(), "Attachment.EnableDrop");
 	view_listener_t::addMenu(new LLAttachmentEnableDetach(), "Attachment.EnableDetach");
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	commit.add("Attachment.DetachFolder", boost::bind(&handle_attachment_detach_folder));
+	enable.add("Attachment.EnableDetachFolder", boost::bind(&enable_attachment_detach_folder));
+// [/SL:KB]
 
 	// Land pie menu
 	view_listener_t::addMenu(new LLLandBuild(), "Land.Build");

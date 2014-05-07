@@ -29,6 +29,9 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "llagentwearables.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llnotificationsutil.h"
 #include "llsidepanelappearance.h"
@@ -488,11 +491,18 @@ void LLViewerWearable::revertValues()
 	LLWearable::revertValues();
 
 
-	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
-	if( panel )
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
+	if (LLFloaterReg::instanceVisible("appearance"))
 	{
-		panel->updateScrollingPanelList();
+// [/SL:KB]
+		LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
+		if( panel )
+		{
+			panel->updateScrollingPanelList();
+		}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-19 (Catznip-3.3)
 	}
+// [/SL:KB]
 }
 
 void LLViewerWearable::saveValues()
