@@ -5183,6 +5183,17 @@
       <key>Value</key>
       <integer>512</integer>
     </map>
+    <key>LastUserID</key>
+    <map>
+      <key>Comment</key>
+      <string>UserID of the last successful login (combines with CurrentGrid to make an identifier)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>LeftClickShowMenu</key>
     <map>
       <key>Comment</key>
