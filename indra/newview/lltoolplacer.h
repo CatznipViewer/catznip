@@ -58,6 +58,10 @@ private:
 	BOOL raycastForNewObjPos( S32 x, S32 y, LLViewerObject** hit_obj, S32* hit_face, 
 							  BOOL* b_hit_land, LLVector3* ray_start_region, LLVector3* ray_end_region, LLViewerRegion** region );
 	BOOL addDuplicate(S32 x, S32 y);
+
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	LLVector3d mLastHitPos;
+// [/SL:KB]
 };
 
 #endif

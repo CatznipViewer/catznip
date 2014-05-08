@@ -86,6 +86,9 @@ public:
 	void			setOnSelectCallback(commit_callback_t cb) { mOnSelectCallback = cb; }
 	void			setFallbackImage(LLPointer<LLUIImage> image) { mFallbackImage = image; }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	bool			getPickerVisible() const;
+// [/SL:KB]
 	void			showPicker(BOOL take_focus);
 
 	/*virtual*/ BOOL	handleMouseDown(S32 x, S32 y, MASK mask);

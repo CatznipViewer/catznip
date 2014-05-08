@@ -53,6 +53,10 @@
 #include "lltooltip.h"
 #include "lltrans.h"
 #include "llviewerobjectlist.h"
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+#include "llparcel.h"
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewerstats.h"
 #include "llviewerwindow.h"
@@ -1360,7 +1364,18 @@ void LLToolDragAndDrop::dropObject(LLViewerObject* raycast_target,
 	msg->nextBlockFast(_PREHASH_AgentData);
 	msg->addUUIDFast(_PREHASH_AgentID,  gAgent.getID());
 	msg->addUUIDFast(_PREHASH_SessionID,  gAgent.getSessionID());
-	msg->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+//	msg->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID());
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		if ( (!LLViewerParcelMgr::getInstance()->getLandGroup(mLastHitPos, idGroup)) || (!gAgent.isInGroup(idGroup)) )
+		{
+			idGroup = gAgent.getGroupID();
+		}
+	}
+	msg->addUUIDFast(_PREHASH_GroupID, idGroup);
+// [/SL:KB]
 
 	msg->nextBlock("RezData");
 	// if it's being rezzed from task inventory, we need to enable
@@ -1862,6 +1877,17 @@ EAcceptance LLToolDragAndDrop::dad3dRezObjectOnLand(
 	{
 		dropObject(obj, TRUE, FALSE, remove_inventory);
 	}
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	else if ( (accept) && (gSavedSettings.getBOOL("RezUnderLandGroup")) )
+	{
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		{
+			LLViewerParcelMgr::getInstance()->setHoverParcel(mLastHitPos, true);
+			return ACCEPT_NO;
+		}
+	}
+// [/SL:KB]
 
 	return accept;
 }
@@ -1940,6 +1966,17 @@ EAcceptance LLToolDragAndDrop::dad3dRezObjectOnObject(
 	{
 		dropObject(obj, FALSE, FALSE, remove_inventory);
 	}
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-07 (Catznip-3.0)
+	else if ( (accept) && (gSavedSettings.getBOOL("RezUnderLandGroup")) )
+	{
+		if ( (!LLViewerParcelMgr::getInstance()->inAgentParcel(mLastHitPos)) && 
+			 (!LLViewerParcelMgr::getInstance()->inHoverParcel(mLastHitPos)) )
+		{
+			LLViewerParcelMgr::getInstance()->setHoverParcel(mLastHitPos, true);
+			return ACCEPT_NO;
+		}
+	}
+// [/SL:KB]
 
 	return accept;
 }

@@ -108,7 +108,14 @@ public:
 	// parcel.
 	void writeSegmentsFromBitmap(U8* bitmap, U8* segments);
 
-	void writeAgentParcelFromBitmap(U8* bitmap);
+//	void writeAgentParcelFromBitmap(U8* bitmap);
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+protected:
+	void writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap);
+public:
+	void writeAgentParcelFromBitmap(U8* bitmap) { writeParcelOverlayFromBitmap(mAgentParcelOverlay, bitmap); }
+	void writeHoverParcelFromBitmap(U8* bitmap) { writeParcelOverlayFromBitmap(mHoverParcelOverlay, bitmap); }
+// [/SL:KB]
 
 	// Select the collision parcel
 	void selectCollisionParcel();
@@ -156,7 +163,16 @@ public:
 	//LLParcel *getParcelSelection() const;
 	LLParcel *getAgentParcel() const;
 
-	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
+//	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+protected:
+	bool	inParcelOverlay(const U8* overlay, const LLVector3& pos_region) const;
+public:
+	bool	inAgentParcel(const LLVector3d& pos_global) const;
+	bool	inHoverParcel(const LLVector3d& pos_global) const;
+
+	bool	getLandGroup(const LLVector3d& pos_global, LLUUID& idGroup) const;
+// [/SL:KB]
 
 	// Returns a pointer only when it has valid data.
 	LLParcel*	getHoverParcel() const;
@@ -228,7 +244,10 @@ public:
 	void	sendParcelDwellRequest();
 
 	// If the point is outside the current hover parcel, request more data
-	void	setHoverParcel(const LLVector3d& pos_global);
+//	void	setHoverParcel(const LLVector3d& pos_global);
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2010-04-12 (Catznip-2.0)
+	void	setHoverParcel(const LLVector3d& pos_global, bool force_request = false);
+// [/SL:KB]
 
 	bool	canAgentBuyParcel(LLParcel*, bool forGroup) const;
 	
@@ -346,6 +365,9 @@ private:
 	S32							mParcelsPerEdge;
 	U8*							mHighlightSegments;
 	U8*							mAgentParcelOverlay;
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+	U8*							mHoverParcelOverlay;
+// [/SL:KB]
 
 	// Raw data buffer for unpacking parcel overlay chunks
 	// Size = parcels_per_edge * parcels_per_edge / parcel_overlay_chunks

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ height="210"
+ layout="topleft"
+ name="build selection floater"
+ save_rect="true"
+ title="SELECTION OPTIONS"
+ width="230">
+
+    <check_box
+     control_name="SelectOwnedOnly"
+     height="18"
+     label="Select Only My Objects"
+     layout="topleft"
+     left="10"
+     name="SelectOwnedOnly"
+     top="5"
+     width="200" />
+    <check_box
+     control_name="SelectCopiableOnly"
+     height="18"
+     label="Select Only Copiable Objects"
+     layout="topleft"
+     name="SelectCopiableOnly"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="SelectMovableOnly"
+     height="18"
+     label="Select Only Movable Objects"
+     layout="topleft"
+     name="SelectMovableOnly"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="RectangleSelectInclusive"
+     height="18"
+     label="Select by Surrounding"
+     layout="topleft"
+     name="RectangleSelectInclusive"
+     top_pad="0"
+     width="200" />
+
+    <view_border
+     top_pad="5"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1"/>
+
+    <check_box
+     control_name="RenderHighlightSelections"
+     height="18"
+     label="Show Selection Outlines"
+     layout="topleft"
+     name="RenderHighlightSelections"
+     top_pad="5"
+     width="200" />
+    <check_box
+     control_name="RenderHiddenSelections"
+     height="18"
+     label="Show Hidden Selection"
+     layout="topleft"
+     name="RenderHiddenSelections"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="RenderLightRadius"
+     height="18"
+     label="Show Light Radius for Selection"
+     layout="topleft"
+     name="RenderLightRadius"
+     top_pad="0"
+     width="200" />
+    <check_box
+     control_name="ShowSelectionBeam"
+     height="18"
+     label="Show Selection Beam"
+     layout="topleft"
+     name="ShowSelectionBeam"
+     top_pad="0"
+     width="200" />
+
+    <view_border
+     top_pad="5"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1"/>
+
+    <check_box
+     control_name="LimitSelectDistance"
+     height="18"
+     label="Limit Select Distance"
+     layout="topleft"
+     name="LimitSelectDistance"
+     top_pad="5"
+     width="200" />
+    <check_box
+     control_name="HideSelectedObjects"
+     height="18"
+     label="Hide Selection"
+     layout="topleft"
+     name="HideSelectedObjects"
+     top_pad="0"
+     width="200" />
+</floater>
