@@ -1,0 +1,19 @@
+<llsd>
+    <array>
+        <map>
+        <key>name</key>
+            <string>Viewer 2</string>
+        <key>folder</key>
+            <string>default</string>
+        <key>themes</key>
+            <array>
+                <map>
+                <key>name</key>
+                    <string>Default</string>
+                <key>folder</key>
+                    <string>default</string>
+                </map>
+            </array>
+        </map>
+    </array>
+</llsd>
