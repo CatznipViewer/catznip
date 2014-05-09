@@ -91,15 +91,24 @@ public:
 	void selectPrivacyPanel();
 	void selectChatPanel();
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	void registerPrefPanel(LLPanelPreference* pPrefPanel);
+	void unregisterPrefpanel(LLPanelPreference* pPrefPanel);
+	void showPanel(const std::string& strPanel);
+// [/SL:KB]
+
 protected:	
 	void		onBtnOK();
 	void		onBtnCancel();
 	void		onBtnApply();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+	void		onShowPanel(const LLSD& sdParam);
+// [/SL:KB]
 
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup
 	void		onClickBrowserClearCache();		// Clear web history and caches as well as viewer caches above
 	void		onLanguageChange();
-	void		onNotificationsChange(const std::string& OptionName);
+//	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
@@ -121,9 +130,9 @@ protected:
 	// updates click/double-click action controls depending on values from settings.xml
 	void updateClickActionControls();
 	
-	// This function squirrels away the current values of the controls so that
-	// cancel() can restore them.	
-	void saveSettings();
+//	// This function squirrels away the current values of the controls so that
+//	// cancel() can restore them.	
+//	void saveSettings();
 		
 
 public:
@@ -163,15 +172,15 @@ public:
 	void onChangeMaturity();
 	void onClickBlockList();
 	void onClickProxySettings();
-	void onClickTranslationSettings();
-	void onClickAutoReplace();
-	void onClickSpellChecker();
+//	void onClickTranslationSettings();
+//	void onClickAutoReplace();
+//	void onClickSpellChecker();
 	void applyUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void onLogChatHistorySaved();	
 	void buildPopupLists();
 	static void refreshSkin(void* data);
-	void selectPanel(const LLSD& name);
+//	void selectPanel(const LLSD& name);
 
 private:
 
@@ -180,7 +189,7 @@ private:
 	void updateDeleteTranscriptsButton();
 
 	static std::string sSkin;
-	notifications_map mNotificationOptions;
+//	notifications_map mNotificationOptions;
 	bool mClickActionDirty; ///< Set to true when the click/double-click options get changed by user.
 	bool mGotPersonalInfo;
 	bool mOriginalIMViaEmail;
@@ -192,6 +201,11 @@ private:
 	std::string mDirectoryVisibility;
 	
 	LLAvatarData mAvatarProperties;
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mCancelOnClose; // If TRUE then onClose() will call cancel(); set by apply() and cancel()
+	std::list<LLPanelPreference*> mPreferencePanels;
+// [/SL:KB]
 };
 
 class LLPanelPreference : public LLPanel
@@ -202,10 +216,30 @@ public:
 	
 	virtual ~LLPanelPreference();
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Calls onOpen and onClose on derived panels as appropriate
+	/*virtual*/ void handleVisibilityChange(BOOL new_visibility);
+	
+	// Only declared in LLFloater so we hev to declare it here as well
+	virtual void onClose() {}
+	
+	// Returns TRUE if the panel has been initialized (been visible at least once)
+	bool isInitialized() const { return mInitialized; }
+
+	// Returns TRUE if the user may have made any chances to the state of this panel (currently we return "was opened this sessio")
+	/*virtual*/ BOOL isDirty() const { return !mRefreshOnOpen; }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Called only once when the panel becomes visible for the first time
+	virtual void init() {}
+	// Called the first time the panel becomes visible in the currently preferences floater session
+	virtual void refresh() {}
+// [/SL:KB]
 	virtual void apply();
 	virtual void cancel();
 	void setControlFalse(const LLSD& user_data);
-	virtual void setHardwareDefaults(){};
+//	virtual void setHardwareDefaults(){};
 
 	// Disables "Allow Media to auto play" check box only when both
 	// "Streaming Music" and "Media" are unchecked. Otherwise enables it.
@@ -220,6 +254,12 @@ public:
 protected:
 	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
 	control_values_map_t mSavedValues;
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mInitialized;
+	bool mRefreshOnOpen;
+
+	void onParentFloaterClose() { mRefreshOnOpen = true; }
+// [/SL:KB]
 
 private:
 	//for "Only friends and groups can call or IM me"
@@ -233,20 +273,20 @@ private:
 	Updater* mBandWidthUpdater;
 };
 
-class LLPanelPreferenceGraphics : public LLPanelPreference
-{
-public:
-	BOOL postBuild();
-	void draw();
-	void apply();
-	void cancel();
-	void saveSettings();
-	void setHardwareDefaults();
-protected:
-	bool hasDirtyChilds();
-	void resetDirtyChilds();
-	
-};
+//class LLPanelPreferenceGraphics : public LLPanelPreference
+//{
+//public:
+//	BOOL postBuild();
+//	void draw();
+//	void apply();
+//	void cancel();
+//	void saveSettings();
+//	void setHardwareDefaults();
+//protected:
+//	bool hasDirtyChilds();
+//	void resetDirtyChilds();
+//	
+//};
 
 class LLFloaterPreferenceProxy : public LLFloater
 {

@@ -42,14 +42,28 @@
 ///----------------------------------------------------------------------------
 /// Class LLFloaterSpellCheckerSettings
 ///----------------------------------------------------------------------------
-LLFloaterSpellCheckerSettings::LLFloaterSpellCheckerSettings(const LLSD& key)
-	: LLFloater(key)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+static LLPanelInjector<LLPanelPreferenceSpellCheckerSettings> t_pref_chat_spellcheck("panel_preference_chat_spellcheck");
+
+LLPanelPreferenceSpellCheckerSettings::LLPanelPreferenceSpellCheckerSettings()
+	: LLPanelPreference()
 {
 }
+// [/SL:KB]
+//LLFloaterSpellCheckerSettings::LLFloaterSpellCheckerSettings(const LLSD& key)
+//	: LLFloater(key)
+//{
+//}
 
-void LLFloaterSpellCheckerSettings::draw()
+//void LLFloaterSpellCheckerSettings::draw()
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::draw()
+// [/SL:KB]
 {
-	LLFloater::draw();
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+	LLPanelPreference::draw();
+// [/SL:KB]
+//	LLFloater::draw();
 
 	std::vector<LLScrollListItem*> sel_items = getChild<LLScrollListCtrl>("spellcheck_available_list")->getAllSelected();
 	bool enable_remove = !sel_items.empty();
@@ -60,25 +74,48 @@ void LLFloaterSpellCheckerSettings::draw()
 	getChild<LLUICtrl>("spellcheck_remove_btn")->setEnabled(enable_remove);
 }
 
-BOOL LLFloaterSpellCheckerSettings::postBuild(void)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+BOOL LLPanelPreferenceSpellCheckerSettings::postBuild(void)
 {
-	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&LLFloaterSpellCheckerSettings::refreshDictionaries, this, false));
-	LLSpellChecker::setSettingsChangeCallback(boost::bind(&LLFloaterSpellCheckerSettings::onSpellCheckSettingsChange, this));
-	getChild<LLUICtrl>("spellcheck_remove_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnRemove, this));
-	getChild<LLUICtrl>("spellcheck_import_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnImport, this));
-	getChild<LLUICtrl>("spellcheck_main_combo")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::refreshDictionaries, this, false));
-	getChild<LLUICtrl>("spellcheck_moveleft_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnMove, this, "spellcheck_active_list", "spellcheck_available_list"));
-	getChild<LLUICtrl>("spellcheck_moveright_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnMove, this, "spellcheck_available_list", "spellcheck_active_list"));
-	center();
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+	LLPanelPreference::postBuild();
+// [/SL:KB]
+
+	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&LLPanelPreferenceSpellCheckerSettings::refreshDictionaries, this, false));
+	LLSpellChecker::setSettingsChangeCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::onSpellCheckSettingsChange, this));
+	getChild<LLUICtrl>("spellcheck_remove_btn")->setCommitCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::onBtnRemove, this));
+	getChild<LLUICtrl>("spellcheck_import_btn")->setCommitCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::onBtnImport, this));
+	getChild<LLUICtrl>("spellcheck_main_combo")->setCommitCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::refreshDictionaries, this, false));
+	getChild<LLUICtrl>("spellcheck_moveleft_btn")->setCommitCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::onBtnMove, this, "spellcheck_active_list", "spellcheck_available_list"));
+	getChild<LLUICtrl>("spellcheck_moveright_btn")->setCommitCallback(boost::bind(&LLPanelPreferenceSpellCheckerSettings::onBtnMove, this, "spellcheck_available_list", "spellcheck_active_list"));
 	return true;
 }
+// [/SL:KB]
+//BOOL LLFloaterSpellCheckerSettings::postBuild(void)
+//{
+//	gSavedSettings.getControl("SpellCheck")->getSignal()->connect(boost::bind(&LLFloaterSpellCheckerSettings::refreshDictionaries, this, false));
+//	LLSpellChecker::setSettingsChangeCallback(boost::bind(&LLFloaterSpellCheckerSettings::onSpellCheckSettingsChange, this));
+//	getChild<LLUICtrl>("spellcheck_remove_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnRemove, this));
+//	getChild<LLUICtrl>("spellcheck_import_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnImport, this));
+//	getChild<LLUICtrl>("spellcheck_main_combo")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::refreshDictionaries, this, false));
+//	getChild<LLUICtrl>("spellcheck_moveleft_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnMove, this, "spellcheck_active_list", "spellcheck_available_list"));
+//	getChild<LLUICtrl>("spellcheck_moveright_btn")->setCommitCallback(boost::bind(&LLFloaterSpellCheckerSettings::onBtnMove, this, "spellcheck_available_list", "spellcheck_active_list"));
+//	center();
+//	return true;
+//}
 
-void LLFloaterSpellCheckerSettings::onBtnImport()
+//void LLFloaterSpellCheckerSettings::onBtnImport()
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::onBtnImport()
+// [/SL:KB]
 {
 	LLFloaterReg::showInstance("prefs_spellchecker_import");
 }
 
-void LLFloaterSpellCheckerSettings::onBtnMove(const std::string& from, const std::string& to)
+//void LLFloaterSpellCheckerSettings::onBtnMove(const std::string& from, const std::string& to)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::onBtnMove(const std::string& from, const std::string& to)
+// [/SL:KB]
 {
 	LLScrollListCtrl* from_ctrl = findChild<LLScrollListCtrl>(from);
 	LLScrollListCtrl* to_ctrl = findChild<LLScrollListCtrl>(to);
@@ -98,15 +135,23 @@ void LLFloaterSpellCheckerSettings::onBtnMove(const std::string& from, const std
 	from_ctrl->deleteSelectedItems();
 }
 
-void LLFloaterSpellCheckerSettings::onClose(bool app_quitting)
+//void LLFloaterSpellCheckerSettings::onClose(bool app_quitting)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::onClose()
+// [/SL:KB]
 {
-	if (app_quitting)
-	{
-		// don't save anything
-		return;
-	}
+//	if (app_quitting)
+//	{
+//		// don't save anything
+//		return;
+//	}
 	LLFloaterReg::hideInstance("prefs_spellchecker_import");
-	
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+}
+
+void LLPanelPreferenceSpellCheckerSettings::apply()
+{
+// [/SL:KB]
 	std::list<std::string> list_dict;
 
 	LLComboBox* dict_combo = findChild<LLComboBox>("spellcheck_main_combo");
@@ -129,12 +174,18 @@ void LLFloaterSpellCheckerSettings::onClose(bool app_quitting)
 	gSavedSettings.setString("SpellCheckDictionary", boost::join(list_dict, ","));
 }
 
-void LLFloaterSpellCheckerSettings::onOpen(const LLSD& key)
+//void LLFloaterSpellCheckerSettings::onOpen(const LLSD& key)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::refresh()
+// [/SL:KB]
 {
 	refreshDictionaries(true);
 }
 
-void LLFloaterSpellCheckerSettings::onBtnRemove()
+//void LLFloaterSpellCheckerSettings::onBtnRemove()
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::onBtnRemove()
+// [/SL:KB]
 {
 	std::vector<LLScrollListItem*> sel_items = getChild<LLScrollListCtrl>("spellcheck_available_list")->getAllSelected();
 	for (std::vector<LLScrollListItem*>::const_iterator sel_it = sel_items.begin(); sel_it != sel_items.end(); ++sel_it)
@@ -143,12 +194,18 @@ void LLFloaterSpellCheckerSettings::onBtnRemove()
 	}
 }
 
-void LLFloaterSpellCheckerSettings::onSpellCheckSettingsChange()
+//void LLFloaterSpellCheckerSettings::onSpellCheckSettingsChange()
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::onSpellCheckSettingsChange()
+// [/SL:KB]
 {
 	refreshDictionaries(true);
 }
 
-void LLFloaterSpellCheckerSettings::refreshDictionaries(bool from_settings)
+//void LLFloaterSpellCheckerSettings::refreshDictionaries(bool from_settings)
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceSpellCheckerSettings::refreshDictionaries(bool from_settings)
+// [/SL:KB]
 {
 	bool enabled = gSavedSettings.getBOOL("SpellCheck");
 	getChild<LLUICtrl>("spellcheck_moveleft_btn")->setEnabled(enabled);
