@@ -285,6 +285,16 @@ LLScrollListItem* LLComboBox::add(const std::string& name, LLSD value, EAddPosit
 	return item;
 }
 
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+LLScrollListItem* LLComboBox::addRemovable(const std::string& name, LLSD value, EAddPosition pos, BOOL enabled )
+{
+	LLScrollListItem* item = mList->addSimpleElement(name, pos, value);
+	if (item)
+		item->setUserRemovable(true);
+	return item;
+}
+// [/SL:KB]
+
 LLScrollListItem* LLComboBox::addSeparator(EAddPosition pos)
 {
 	return mList->addSeparator(pos);
@@ -868,8 +878,11 @@ void LLComboBox::onTextEntry(LLLineEditor* line_editor)
 		return;
 	}
 
-	if (key == KEY_LEFT || 
-		key == KEY_RIGHT)
+//	if (key == KEY_LEFT || 
+//		key == KEY_RIGHT)
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2014-01-29 (Catznip-3.6)
+	if (key == KEY_LEFT || key == KEY_RIGHT || key == KEY_HOME || key == KEY_END)
+// [/SL:KB]
 	{
 		return;
 	}
@@ -931,10 +944,20 @@ void LLComboBox::updateSelection()
 		prearrangeList(mTextEntry->getText());
 	}
 
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2014-01-29 (Catznip-3.6)
+	S32 nCursorPos = mTextEntry->getCursor();
+	bool fHasSelection = mTextEntry->hasSelection();
+// [/SL:KB]
 	if (mList->selectItemByLabel(full_string, FALSE))
 	{
 		mTextEntry->setTentative(FALSE);
 		mLastSelectedIndex = mList->getFirstSelectedIndex();
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2014-01-29 (Catznip-3.6)
+		// Cancels changes due to "select all" done by selectItemByLabel() when CommitOnSelectionChange is set to true
+		mTextEntry->setCursor(nCursorPos);
+		if (!fHasSelection)
+			mTextEntry->deselect();
+// [/SL:KB]
 	}
 	else if (mList->selectItemByPrefix(left_wstring, FALSE))
 	{

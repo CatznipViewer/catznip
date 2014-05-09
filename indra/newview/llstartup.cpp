@@ -779,7 +779,10 @@ bool idle_startup()
 			// connect dialog is already shown, so fill in the names
 			if (gUserCredential.notNull())
 			{
-				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+				LLPanelLogin::selectUser(gUserCredential, gRememberPassword);
+// [/SL:KB]
+//				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
 			display_startup();
 			LLPanelLogin::giveFocus();
@@ -893,7 +896,7 @@ bool idle_startup()
 		if(gUserCredential.notNull())                                                                                  
 		{  
 			userid = gUserCredential->userID();                                                                    
-			gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
+//			gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
 		}
 		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
@@ -1188,6 +1191,11 @@ bool idle_startup()
 		{
 			if(process_login_success_response())
 			{
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+				// Only save credentials after successful login
+				gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
+				gSavedSettings.setString("LastUserID", gUserCredential->userID());
+// [/SL:KB]
 				// Pass the user information to the voice chat server interface.
 				LLVoiceClient::getInstance()->userAuthorized(gUserCredential->userID(), gAgentID);
 				// create the default proximal channel
