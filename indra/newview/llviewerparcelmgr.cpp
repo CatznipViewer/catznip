@@ -802,7 +802,14 @@ BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
 		return FALSE;
 	}
 
-	LLVector3 pos_region = agent_region->getPosRegionFromGlobal(pos_global);
+//	LLVector3 pos_region = agent_region->getPosRegionFromGlobal(pos_global);
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	return inAgentParcel(agent_region->getPosRegionFromGlobal(pos_global));
+}
+
+BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3& pos_region) const
+{
+// [/SL:KB]
 	S32 row =    S32(pos_region.mV[VY] / PARCEL_GRID_STEP_METERS);
 	S32 column = S32(pos_region.mV[VX] / PARCEL_GRID_STEP_METERS);
 
