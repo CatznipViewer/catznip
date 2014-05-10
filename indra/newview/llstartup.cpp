@@ -915,6 +915,20 @@ bool idle_startup()
 			gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, 
 				LLAppViewer::instance()->getSettingsFilename("Default", "PerAccount")));
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+		if (gStartupSettings.getBOOL("PurgeAccountSettingsOnNextLogin"))
+		{
+			// Delete all xml files in the account folder
+			const std::string strPath = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, "");
+			llinfos << "Removing all xml account files from " << strPath << llendl;
+			gDirUtilp->deleteFilesInDir(strPath, "*.xml");
+
+			// Reset the value and save to avoid infinite looping
+			gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", FALSE);
+			gStartupSettings.saveToFile(gSavedSettings.getString("StartupSettingsFile"), TRUE);
+		}
+// [/SL:KB]
+
 		// Note: can't store warnings files per account because some come up before login
 		
 		// Overwrite default user settings with user settings								 
