@@ -103,29 +103,29 @@ void LLFirstUse::useSandbox()
 }
 
 // static
-void LLFirstUse::notUsingDestinationGuide(bool enable)
-{
-	// not doing this yet
-	firstUseNotification("FirstNotUseDestinationGuide", enable, "HintDestinationGuide", LLSD(), LLSD().with("target", "dest_guide_btn").with("direction", "top"));
-}
+//void LLFirstUse::notUsingDestinationGuide(bool enable)
+//{
+//	// not doing this yet
+//	firstUseNotification("FirstNotUseDestinationGuide", enable, "HintDestinationGuide", LLSD(), LLSD().with("target", "dest_guide_btn").with("direction", "top"));
+//}
 
 // static
-void LLFirstUse::notUsingSidePanel(bool enable)
-{
-	// not doing this yet
-	//firstUseNotification("FirstNotUseSidePanel", enable, "HintSidePanel", LLSD(), LLSD().with("target", "side_panel_btn").with("direction", "left"));
-}
+//void LLFirstUse::notUsingSidePanel(bool enable)
+//{
+//	// not doing this yet
+//	//firstUseNotification("FirstNotUseSidePanel", enable, "HintSidePanel", LLSD(), LLSD().with("target", "side_panel_btn").with("direction", "left"));
+//}
 
 // static
 void LLFirstUse::notMoving(bool enable)
 {
-	// fire off 2 notifications and rely on filtering to select the relevant one
-	firstUseNotification("FirstNotMoving", enable, "HintMove", LLSD(), LLSD().with("target", "move_btn").with("direction", "top"));
-	firstUseNotification("FirstNotMoving", enable, "HintMoveClick", LLSD(), LLSD()
-		.with("target", "nav_bar")
-		.with("direction", "bottom")
-		.with("hint_image", "click_to_move.png")
-		.with("up_arrow", ""));
+//	// fire off 2 notifications and rely on filtering to select the relevant one
+//	firstUseNotification("FirstNotMoving", enable, "HintMove", LLSD(), LLSD().with("target", "move_btn").with("direction", "top"));
+//	firstUseNotification("FirstNotMoving", enable, "HintMoveClick", LLSD(), LLSD()
+//		.with("target", "nav_bar")
+//		.with("direction", "bottom")
+//		.with("hint_image", "click_to_move.png")
+//		.with("up_arrow", ""));
 }
 
 // static

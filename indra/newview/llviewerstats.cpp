@@ -424,6 +424,38 @@ extern U32  gVisTested;
 
 LLFrameTimer gTextureTimer;
 
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-08 (Catznip-3.6)
+void update_staticstics_for_send()
+{
+	// Only update these statistics when we're about to send a stats packet
+	LLViewerStats& stats = LLViewerStats::instance();
+
+	stats.setStat(LLViewerStats::ST_ENABLE_VBO, (F64)gSavedSettings.getBOOL("RenderVBOEnable"));
+	stats.setStat(LLViewerStats::ST_LIGHTING_DETAIL, (F64)gPipeline.getLightingDetail());
+	stats.setStat(LLViewerStats::ST_DRAW_DIST, (F64)gSavedSettings.getF32("RenderFarClip"));
+	stats.setStat(LLViewerStats::ST_CHAT_BUBBLES, (F64)gSavedSettings.getBOOL("UseChatBubbles"));
+
+	stats.setStat(LLViewerStats::ST_FRAME_SECS, gDebugView->mFastTimerView->getTime("Frame"));
+	F64 idle_secs = gDebugView->mFastTimerView->getTime("Idle");
+	F64 network_secs = gDebugView->mFastTimerView->getTime("Network");
+	stats.setStat(LLViewerStats::ST_UPDATE_SECS, idle_secs - network_secs);
+	stats.setStat(LLViewerStats::ST_NETWORK_SECS, network_secs);
+	stats.setStat(LLViewerStats::ST_IMAGE_SECS, gDebugView->mFastTimerView->getTime("Update Images"));
+	stats.setStat(LLViewerStats::ST_REBUILD_SECS, gDebugView->mFastTimerView->getTime("Sort Draw State"));
+	stats.setStat(LLViewerStats::ST_RENDER_SECS, gDebugView->mFastTimerView->getTime("Geometry"));
+
+	static F32 visible_avatar_frames = 0.f;
+	static F32 avg_visible_avatars = 0;
+	F32 visible_avatars = (F32)LLVOAvatar::sNumVisibleAvatars;
+	if (visible_avatars > 0.f)
+	{
+		visible_avatar_frames = 1.f;
+		avg_visible_avatars = (avg_visible_avatars * (F32)(visible_avatar_frames - 1.f) + visible_avatars) / visible_avatar_frames;
+	}
+	stats.setStat(LLViewerStats::ST_VISIBLE_AVATARS, (F64)avg_visible_avatars);
+}
+// [/SL:KB]
+
 void update_statistics()
 {
 	gTotalWorldBytes += gVLManager.getTotalBytes();
@@ -447,19 +479,19 @@ void update_statistics()
 			LLViewerStats::getInstance()->incStat(LLViewerStats::ST_TOOLBOX_SECONDS, gFrameIntervalSeconds);
 		}
 	}
-	stats.setStat(LLViewerStats::ST_ENABLE_VBO, (F64)gSavedSettings.getBOOL("RenderVBOEnable"));
-	stats.setStat(LLViewerStats::ST_LIGHTING_DETAIL, (F64)gPipeline.getLightingDetail());
-	stats.setStat(LLViewerStats::ST_DRAW_DIST, (F64)gSavedSettings.getF32("RenderFarClip"));
-	stats.setStat(LLViewerStats::ST_CHAT_BUBBLES, (F64)gSavedSettings.getBOOL("UseChatBubbles"));
-
-	stats.setStat(LLViewerStats::ST_FRAME_SECS, gDebugView->mFastTimerView->getTime("Frame"));
-	F64 idle_secs = gDebugView->mFastTimerView->getTime("Idle");
-	F64 network_secs = gDebugView->mFastTimerView->getTime("Network");
-	stats.setStat(LLViewerStats::ST_UPDATE_SECS, idle_secs - network_secs);
-	stats.setStat(LLViewerStats::ST_NETWORK_SECS, network_secs);
-	stats.setStat(LLViewerStats::ST_IMAGE_SECS, gDebugView->mFastTimerView->getTime("Update Images"));
-	stats.setStat(LLViewerStats::ST_REBUILD_SECS, gDebugView->mFastTimerView->getTime("Sort Draw State"));
-	stats.setStat(LLViewerStats::ST_RENDER_SECS, gDebugView->mFastTimerView->getTime("Geometry"));
+//	stats.setStat(LLViewerStats::ST_ENABLE_VBO, (F64)gSavedSettings.getBOOL("RenderVBOEnable"));
+//	stats.setStat(LLViewerStats::ST_LIGHTING_DETAIL, (F64)gPipeline.getLightingDetail());
+//	stats.setStat(LLViewerStats::ST_DRAW_DIST, (F64)gSavedSettings.getF32("RenderFarClip"));
+//	stats.setStat(LLViewerStats::ST_CHAT_BUBBLES, (F64)gSavedSettings.getBOOL("UseChatBubbles"));
+//
+//	stats.setStat(LLViewerStats::ST_FRAME_SECS, gDebugView->mFastTimerView->getTime("Frame"));
+//	F64 idle_secs = gDebugView->mFastTimerView->getTime("Idle");
+//	F64 network_secs = gDebugView->mFastTimerView->getTime("Network");
+//	stats.setStat(LLViewerStats::ST_UPDATE_SECS, idle_secs - network_secs);
+//	stats.setStat(LLViewerStats::ST_NETWORK_SECS, network_secs);
+//	stats.setStat(LLViewerStats::ST_IMAGE_SECS, gDebugView->mFastTimerView->getTime("Update Images"));
+//	stats.setStat(LLViewerStats::ST_REBUILD_SECS, gDebugView->mFastTimerView->getTime("Sort Draw State"));
+//	stats.setStat(LLViewerStats::ST_RENDER_SECS, gDebugView->mFastTimerView->getTime("Geometry"));
 		
 	LLCircuitData *cdp = gMessageSystem->mCircuitInfo.findCircuit(gAgent.getRegion()->getHost());
 	if (cdp)
@@ -490,17 +522,17 @@ void update_statistics()
 		gTextureTimer.unpause();
 	}
 	
-	{
-		static F32 visible_avatar_frames = 0.f;
-		static F32 avg_visible_avatars = 0;
-		F32 visible_avatars = (F32)LLVOAvatar::sNumVisibleAvatars;
-		if (visible_avatars > 0.f)
-		{
-			visible_avatar_frames = 1.f;
-			avg_visible_avatars = (avg_visible_avatars * (F32)(visible_avatar_frames - 1.f) + visible_avatars) / visible_avatar_frames;
-		}
-		stats.setStat(LLViewerStats::ST_VISIBLE_AVATARS, (F64)avg_visible_avatars);
-	}
+//	{
+//		static F32 visible_avatar_frames = 0.f;
+//		static F32 avg_visible_avatars = 0;
+//		F32 visible_avatars = (F32)LLVOAvatar::sNumVisibleAvatars;
+//		if (visible_avatars > 0.f)
+//		{
+//			visible_avatar_frames = 1.f;
+//			avg_visible_avatars = (avg_visible_avatars * (F32)(visible_avatar_frames - 1.f) + visible_avatars) / visible_avatar_frames;
+//		}
+//		stats.setStat(LLViewerStats::ST_VISIBLE_AVATARS, (F64)avg_visible_avatars);
+//	}
 	LLWorld::getInstance()->updateNetStats();
 	LLWorld::getInstance()->requestCacheMisses();
 	
@@ -729,6 +761,9 @@ void send_stats()
 	
 	body["MinimalSkin"] = false;
 	
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-08 (Catznip-3.6)
+	update_staticstics_for_send();
+// [/SL:KB]
 	LLViewerStats::getInstance()->addToMessage(body);
 	LLHTTPClient::post(url, body, new ViewerStatsResponder());
 }

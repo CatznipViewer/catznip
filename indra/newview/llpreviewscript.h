@@ -104,6 +104,10 @@ public:
 	static void		onBtnInsertFunction(LLUICtrl*, void*);
 	static void		onBtnLoadFromFile(void*);
 	static void		onBtnSaveToFile(void*);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	void			onFilePickerLoadCallback(const std::string& filename);
+	void			onFilePickerSaveCallback(const std::string& filename);
+// [/SL:KB]
 
 	static bool		enableSaveToFileMenu(void* userdata);
 	static bool		enableLoadFromFileMenu(void* userdata);

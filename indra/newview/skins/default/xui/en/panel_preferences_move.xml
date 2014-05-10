@@ -19,7 +19,20 @@
      visible="true"
      width="18"
      left="30"
-     top="10"/>
+     top="15"/>
+  <text
+   type="string"
+   length="1"
+   follows="left|top"
+   font.style="BOLD"
+   height="12"
+   layout="topleft"
+   left_pad="8"
+   name="Camera:"
+   top_delta="4"
+   width="100">
+    Camera
+  </text>
   <slider
    can_edit_text="true"
    control_name="CameraAngle"
@@ -31,11 +44,12 @@
    layout="topleft"
    label_width="100"
    label="View angle"
-   left_pad="30"
+   left="75"
    max_val="2.97"
    min_val="0.17"
    name="camera_fov"
    show_text="false"
+   top_pad="5"
    width="240" />
   <slider
    can_edit_text="true"
@@ -60,7 +74,7 @@
   type="string"
   length="1"
   height="10"
-  left="80"
+  left="75"
   name="heading2"
   width="270"
   top_pad="5">
@@ -97,17 +111,31 @@
 	 width="18"
    top_pad="10"
    left="30" />
+   <text
+   type="string"
+   length="1"
+   follows="left|top"
+   font.style="BOLD"
+   height="12"
+   layout="topleft"
+   left_pad="8"
+   name="Movement:"
+   top_delta="4"
+   width="100">
+    Movement
+  </text>
   <text
    follows="left|top"
+   font.style="BOLD"
    type="string"
    length="1"
    height="10"
    layout="topleft"
-   left="78"
+   left="75"
    name="keyboard_lbl"
    width="270"
-   top_delta="2">
-    Keyboard:
+   top_pad="5">
+    Keyboard
   </text>
   <check_box
    control_name="ArrowKeysAlwaysMove"
@@ -115,7 +143,7 @@
    height="20"
    label="Arrow keys always move me"
    layout="topleft"
-   left_delta="5"
+   left_delta="15"
    name="arrow_keys_move_avatar_check"
    width="237"
    top_pad="5"/>
@@ -141,15 +169,16 @@
    top_pad="0"/>
   <text
    follows="left|top"
+   font.style="BOLD"
    type="string"
    length="1"
    height="10"
    layout="topleft"
-   left="78"
+   left="75"
    name="mouse_lbl"
    width="270"
-   top_pad="15">
-    Mouse:
+   top_pad="10">
+    Mouse
   </text>
   <check_box
    control_name="FirstPersonAvatarVisible"
@@ -157,7 +186,7 @@
    height="20"
    label="Show me in Mouselook"
    layout="topleft"
-   left_delta="5"
+   left_delta="15"
    name="first_person_avatar_visible"
    top_pad="5"
    width="256" />
@@ -261,11 +290,11 @@
   </combo_box>
   <button
    height="23"
-   label="Other Devices"
+   label="Joystick / Other Devices Setup"
    left="30"
    name="joystick_setup_button"
    top="30"
-   width="155">
+   width="255">
     <button.commit_callback
      function="Floater.Show"
      parameter="pref_joystick" />

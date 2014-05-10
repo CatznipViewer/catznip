@@ -144,6 +144,9 @@ public:
 	void setAllIgnored();
 	void onClickLogPath();
 	bool moveTranscriptsAndLog();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	void onClickSnapshotPath();	
+// [/SL:KB]
 	void enableHistory();
 	void setPersonalInfo(const std::string& visibility, bool im_via_email);
 	void refreshEnabledState();
@@ -155,6 +158,10 @@ public:
 	
 	void updateSliderText(LLSliderCtrl* ctrl, LLTextBox* text_box);
 	void refreshUI();
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	void onClickShapeEditHover();
+// [/SL:KB]
 
 	void onCommitParcelMediaAutoPlayEnable();
 	void onCommitMediaEnabled();

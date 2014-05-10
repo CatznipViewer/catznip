@@ -582,6 +582,9 @@ static void settings_to_globals()
 	LLImageGL::sCompressTextures		= gSavedSettings.getBOOL("RenderCompressTextures");
 	LLVOVolume::sLODFactor				= gSavedSettings.getF32("RenderVolumeLODFactor");
 	LLVOVolume::sDistanceFactor			= 1.f-LLVOVolume::sLODFactor * 0.1f;
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	LLVOVolume::updateCachedSettings();
+// [/SL:KB]
 	LLVolumeImplFlexible::sUpdateFactor = gSavedSettings.getF32("RenderFlexTimeFactor");
 	LLVOTree::sTreeFactor				= gSavedSettings.getF32("RenderTreeLODFactor");
 	LLVOAvatar::sLODFactor				= gSavedSettings.getF32("RenderAvatarLODFactor");
@@ -601,6 +604,10 @@ static void settings_to_globals()
 	gDebugWindowProc = gSavedSettings.getBOOL("DebugWindowProc");
 	gShowObjectUpdates = gSavedSettings.getBOOL("ShowObjectUpdates");
 	LLWorldMapView::sMapScale = gSavedSettings.getF32("MapScale");
+
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	audio_update_settings();
+// [/SL:KB]
 }
 
 static void settings_modify()
@@ -777,6 +784,15 @@ bool LLAppViewer::init()
 		return false;
 
 	LL_INFOS("InitInfo") << "Configuration initialized." << LL_ENDL ;
+
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	// Don't set the snapshot directory if it doesn't exist; the user will be asked for a location the first time they try to save one
+	const std::string strSnapshotPath = gSavedSettings.getString("SnapshotLocalPath");
+	if (gDirUtilp->fileExists(strSnapshotPath))
+	{
+		gDirUtilp->setSnapshotDir(strSnapshotPath);
+	}
+// [/SL:KB]
 
 	//set the max heap size.
 	initMaxHeapSize() ;
@@ -1322,6 +1338,10 @@ bool LLAppViewer::mainLoop()
 	//LLPrivateMemoryPoolTester::getInstance()->run(true) ;
 	//LLPrivateMemoryPoolTester::destroy() ;
 
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+	LLFastTimer::sToggleRun = gSavedSettings.getBOOL("RunFastTimers");
+// [/SL:KB]
+
 	// Handle messages
 #ifdef LL_DARWIN
 	if (!LLApp::isExiting())
@@ -1329,8 +1349,26 @@ bool LLAppViewer::mainLoop()
 	while (!LLApp::isExiting())
 #endif
 	{
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+		if (LLFastTimer::sToggleRun)
+		{
+			LLFastTimer::sToggleRun = false;
+			LLFastTimer::sRunTimers = !LLFastTimer::sRunTimers;
+			if (LLFastTimer::sRunTimers)
+			{
+				LLFastTimer::reset();
+			}
+		}
+// [/SL:KB]
+
 		LLFastTimer _(FTM_FRAME);
-		LLFastTimer::nextFrame(); 
+// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
+		if (LLFastTimer::sRunTimers)
+		{
+			LLFastTimer::nextFrame(); 
+		}
+// [/SL:KB]
+//		LLFastTimer::nextFrame(); 
 
 		//clear call stack records
 		llclearcallstacks;
@@ -2436,8 +2474,21 @@ bool LLAppViewer::initConfiguration()
 		c->setValue(true, false);
 	}
 
-	gSavedSettings.setBOOL("QAMode", TRUE );
-	gSavedSettings.setS32("WatchdogEnabled", 0);
+// [SL:KB] - Patch: Settings-Misc | Checked: 2012-10-18 (Catznip-3.3)
+	LLControlVariable* pCtrl = gSavedSettings.getControl("QAMode");
+	if (pCtrl)
+	{
+		pCtrl->setValue(true, false);
+	}
+
+	pCtrl = gSavedSettings.getControl("WatchdogEnabled");
+	if (pCtrl)
+	{
+		pCtrl->setValue(0, false);
+	}
+// [/SL:KB]
+//	gSavedSettings.setBOOL("QAMode", TRUE );
+//	gSavedSettings.setS32("WatchdogEnabled", 0);
 #endif
 	
 	// These are warnings that appear on the first experience of that condition.
@@ -5747,7 +5798,10 @@ void LLAppViewer::setMasterSystemAudioMute(bool mute)
 //virtual
 bool LLAppViewer::getMasterSystemAudioMute()
 {
-	return gSavedSettings.getBOOL("MuteAudio");
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	return LLAudioEngine::s_fMuteAudio;
+// [/SL:KB]
+//	return gSavedSettings.getBOOL("MuteAudio");
 }
 
 //----------------------------------------------------------------------------
