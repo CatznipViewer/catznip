@@ -781,7 +781,10 @@ public:
 
 void LLFloaterRegionInfo::requestMeshRezInfo()
 {
-	std::string sim_console_url = gAgent.getRegion()->getCapability("SimConsoleAsync");
+//	std::string sim_console_url = gAgent.getRegion()->getCapability("SimConsoleAsync");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string sim_console_url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SimConsoleAsync") : LLStringUtil::null;
+// [/SL:KB]
 
 	if (!sim_console_url.empty())
 	{
