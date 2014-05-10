@@ -54,6 +54,9 @@ LLAudioEngine_FMODEX::LLAudioEngine_FMODEX(bool enable_profiler)
 	mWindGen = NULL;
 	mWindDSP = NULL;
 	mSystem = NULL;
+// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
+	memset(&mDeviceId, 0, sizeof(FMOD_GUID));
+// [/SL:KB]
 	mEnableProfiler = enable_profiler;
 }
 
@@ -250,6 +253,15 @@ bool LLAudioEngine_FMODEX::init(const S32 num_channels, void* userdata)
 		return false;
 #endif
 
+// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
+	mSystem->getDriverInfo(0, NULL, 0, &mDeviceId);
+	if (Check_FMOD_Error(result, "Error initializing FMOD Ex"))
+		memset(&mDeviceId, 0, sizeof(FMOD_GUID));
+
+	mSystem->setUserData(this);
+	mSystem->setCallback(&LLAudioEngine_FMODEX::systemCallback);
+// [/SL:KB]
+
 	// set up our favourite FMOD-native streaming audio implementation if none has already been added
 	if (!getStreamingAudioImpl()) // no existing implementation added
 		setStreamingAudioImpl(new LLStreamingAudio_FMODEX(mSystem));
@@ -442,6 +454,34 @@ void LLAudioEngine_FMODEX::setInternalGain(F32 gain)
 		saimpl->setGain(saimpl->getGain());
 	}
 }
+
+// [SL:KB] - Patch: Viewer-FMODEX | Checked: 2014-05-10 (Catznip-3.6)
+//-----------------------------------------------------------------------
+FMOD_RESULT F_CALLBACK LLAudioEngine_FMODEX::systemCallback(FMOD_SYSTEM* pSys, FMOD_SYSTEM_CALLBACKTYPE cbType, void* pParam1, void* pParam2)
+{
+	FMOD::System* pSystem = (FMOD::System*)pSys;
+
+	LLAudioEngine_FMODEX* pAudioEngine = NULL;
+	pSystem->getUserData((void**)&pAudioEngine);
+
+	switch (cbType)
+	{
+		case FMOD_SYSTEM_CALLBACKTYPE_DEVICELISTCHANGED:
+			{
+				// Check whether the default audio device changed
+				FMOD_GUID defaultDriverId;
+				if ( (FMOD_OK == pSystem->getDriverInfo(0, NULL, 0, &defaultDriverId)) && (memcmp(&defaultDriverId, &pAudioEngine->mDeviceId, sizeof(FMOD_GUID)) != 0) )
+				{
+					memcpy(&pAudioEngine->mDeviceId, &defaultDriverId, sizeof(FMOD_GUID));
+					pSystem->setDriver(0);
+				}
+			}
+			break;
+	}
+
+	return FMOD_OK;
+}
+// [/SL:KB]
 
 //
 // LLAudioChannelFMODEX implementation
