@@ -50,6 +50,9 @@
 #define WATER 2
 const U32	MAX_OBJECT_CACHE_ENTRIES = 50000;
 
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3)
+const F64 COARSEUPDATE_MAX_Z = 1020.0f;
+// [/SL:KB]
 
 class LLEventPoll;
 class LLVLComposition;
@@ -277,10 +280,16 @@ public:
 	LLVLComposition *getComposition() const;
 	F32 getCompositionXY(const S32 x, const S32 y) const;
 
-	BOOL isOwnedSelf(const LLVector3& pos);
+//	BOOL isOwnedSelf(const LLVector3& pos);
+//
+//	// Owned by a group you belong to?  (officer OR member)
+//	BOOL isOwnedGroup(const LLVector3& pos);
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4)
+	BOOL isOwnedSelf(const LLVector3& pos) const;
 
 	// Owned by a group you belong to?  (officer OR member)
-	BOOL isOwnedGroup(const LLVector3& pos);
+	BOOL isOwnedGroup(const LLVector3& pos) const;
+// [/SL:KB]
 
 	// deal with map object updates in the world.
 	void updateCoarseLocations(LLMessageSystem* msg);

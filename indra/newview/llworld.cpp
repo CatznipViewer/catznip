@@ -46,6 +46,9 @@
 #include "llviewernetwork.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparceloverlay.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-3.0)
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewerstats.h"
 #include "llvlcomposition.h"
@@ -1191,18 +1194,29 @@ void send_agent_resume()
 	LLAppViewer::instance()->resumeMainloopTimeout();
 }
 
-static LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
+//static LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-03 (Catznip-2.4)
+LLVector3d unpackLocalToGlobalPosition(U32 compact_local, const LLVector3d& region_origin)
+// [/SL:KB]
 {
 	LLVector3d pos_local;
 
-	pos_local.mdV[VZ] = (compact_local & 0xFFU) * 4;
-	pos_local.mdV[VY] = (compact_local >> 8) & 0xFFU;
-	pos_local.mdV[VX] = (compact_local >> 16) & 0xFFU;
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3)
+	pos_local.mdV[VZ] = (compact_local & 0xFFFFU) * 4;
+	pos_local.mdV[VY] = (compact_local >> 16) & 0xFFU;
+	pos_local.mdV[VX] = (compact_local >> 24) & 0xFFU;
+// [/SL:KB]
+//	pos_local.mdV[VZ] = (compact_local & 0xFFU) * 4;
+//	pos_local.mdV[VY] = (compact_local >> 8) & 0xFFU;
+//	pos_local.mdV[VX] = (compact_local >> 16) & 0xFFU;
 
 	return region_origin + pos_local;
 }
 
-void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius) const
+//void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius) const
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positions, const LLVector3d& relative_to, F32 radius, U32 maskFilter) const
+// [/SL:KB]
 {
 	F32 radius_squared = radius * radius;
 	
@@ -1214,32 +1228,32 @@ void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positi
 	{
 		positions->clear();
 	}
-	// get the list of avatars from the character list first, so distances are correct
-	// when agent is above 1020m and other avatars are nearby
-	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
-		iter != LLCharacter::sInstances.end(); ++iter)
-	{
-		LLVOAvatar* pVOAvatar = (LLVOAvatar*) *iter;
-
-		if (!pVOAvatar->isDead() && !pVOAvatar->mIsDummy)
-		{
-			LLVector3d pos_global = pVOAvatar->getPositionGlobal();
-			LLUUID uuid = pVOAvatar->getID();
-
-			if (!uuid.isNull()
-				&& dist_vec_squared(pos_global, relative_to) <= radius_squared)
-			{
-				if(positions != NULL)
-				{
-					positions->push_back(pos_global);
-				}
-				if(avatar_ids !=NULL)
-				{
-					avatar_ids->push_back(uuid);
-				}
-			}
-		}
-	}
+//	// get the list of avatars from the character list first, so distances are correct
+//	// when agent is above 1020m and other avatars are nearby
+//	for (std::vector<LLCharacter*>::iterator iter = LLCharacter::sInstances.begin();
+//		iter != LLCharacter::sInstances.end(); ++iter)
+//	{
+//		LLVOAvatar* pVOAvatar = (LLVOAvatar*) *iter;
+//
+//		if (!pVOAvatar->isDead() && !pVOAvatar->mIsDummy)
+//		{
+//			LLVector3d pos_global = pVOAvatar->getPositionGlobal();
+//			LLUUID uuid = pVOAvatar->getID();
+//
+//			if (!uuid.isNull()
+//				&& dist_vec_squared(pos_global, relative_to) <= radius_squared)
+//			{
+//				if(positions != NULL)
+//				{
+//					positions->push_back(pos_global);
+//				}
+//				if(avatar_ids !=NULL)
+//				{
+//					avatar_ids->push_back(uuid);
+//				}
+//			}
+//		}
+//	}
 	// region avatars added for situations where radius is greater than RenderFarClip
 	for (LLWorld::region_list_t::const_iterator iter = LLWorld::getInstance()->getRegionList().begin();
 		iter != LLWorld::getInstance()->getRegionList().end(); ++iter)
@@ -1250,18 +1264,33 @@ void LLWorld::getAvatars(uuid_vec_t* avatar_ids, std::vector<LLVector3d>* positi
 		for (S32 i = 0; i < count; i++)
 		{
 			LLVector3d pos_global = unpackLocalToGlobalPosition(regionp->mMapAvatars.get(i), origin_global);
-			if(dist_vec_squared(pos_global, relative_to) <= radius_squared)
+//			if(dist_vec_squared(pos_global, relative_to) <= radius_squared)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+			if ( ((maskFilter & E_FILTER_BY_AGENT_REGION) && (gAgent.getRegion() == regionp)) ||
+			     ((maskFilter & E_FILTER_BY_DISTANCE) && (dist_vec_squared(pos_global, relative_to) <= radius_squared)) ||
+			     ((maskFilter & E_FILTER_BY_AGENT_PARCEL) && (LLViewerParcelMgr::getInstance()->inAgentParcel(pos_global))) )
+// [/SL:KB]
 			{
-				LLUUID uuid = regionp->mMapAvatarIDs.get(i);
-				// if this avatar doesn't already exist in the list, add it
-				if(uuid.notNull() && avatar_ids != NULL && std::find(avatar_ids->begin(), avatar_ids->end(), uuid) == avatar_ids->end())
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+				if(positions != NULL)
 				{
-					if (positions != NULL)
-					{
-						positions->push_back(pos_global);
-					}
-					avatar_ids->push_back(uuid);
+					positions->push_back(pos_global);
 				}
+				if(avatar_ids != NULL)
+				{
+					avatar_ids->push_back(regionp->mMapAvatarIDs.get(i));
+				}
+// [/SL:KB]
+//				LLUUID uuid = regionp->mMapAvatarIDs.get(i);
+//				// if this avatar doesn't already exist in the list, add it
+//				if(uuid.notNull() && avatar_ids != NULL && std::find(avatar_ids->begin(), avatar_ids->end(), uuid) == avatar_ids->end())
+//				{
+//					if (positions != NULL)
+//					{
+//						positions->push_back(pos_global);
+//					}
+//					avatar_ids->push_back(uuid);
+//				}
 			}
 		}
 	}
