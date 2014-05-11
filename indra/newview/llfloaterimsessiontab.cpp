@@ -328,7 +328,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mInputButtonPanel->setVisible(false);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		// Add a scroller for the folder (participant) view
@@ -400,7 +400,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	}
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		// Create the root using an ad-hoc base item
@@ -428,7 +428,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	setMessagePaneExpanded(true);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		buildConversationViewParticipant();
@@ -621,7 +621,7 @@ void LLFloaterIMSessionTab::appendMessage(const LLChat& chat, const LLSD &args)
 void LLFloaterIMSessionTab::buildConversationViewParticipant()
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
 	// Clear the widget list since we are rebuilding afresh from the model
@@ -658,7 +658,7 @@ void LLFloaterIMSessionTab::buildConversationViewParticipant()
 void LLFloaterIMSessionTab::addConversationViewParticipant(LLConversationItem* participant_model)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
 	// Check if the model already has an associated view
@@ -683,7 +683,7 @@ void LLFloaterIMSessionTab::addConversationViewParticipant(LLConversationItem* p
 void LLFloaterIMSessionTab::removeConversationViewParticipant(const LLUUID& participant_id)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
 	LLFolderViewItem* widget = get_ptr_in_map(mConversationsWidgets,participant_id);
@@ -698,7 +698,7 @@ void LLFloaterIMSessionTab::removeConversationViewParticipant(const LLUUID& part
 void LLFloaterIMSessionTab::updateConversationViewParticipant(const LLUUID& participant_id)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
 	LLFolderViewItem* widget = get_ptr_in_map(mConversationsWidgets,participant_id);
@@ -720,7 +720,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 	}
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
@@ -755,7 +755,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 	}
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		if (mSessionID.notNull())
@@ -814,7 +814,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 LLConversationViewParticipant* LLFloaterIMSessionTab::createConversationViewParticipant(LLConversationItem* item)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
     LLRect panel_rect = mParticipantListPanel->getRect();
@@ -833,7 +833,7 @@ LLConversationViewParticipant* LLFloaterIMSessionTab::createConversationViewPart
 void LLFloaterIMSessionTab::setSortOrder(const LLConversationSort& order)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if(!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 // [/SL:KB]
 		mConversationViewModel.setSorter(order);
@@ -921,9 +921,9 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 {
 	// Display collapse image (<<) if the floater is hosted
 	// or if it is torn off but has an open control panel.
-	bool is_tabbed = LLFloaterIMContainerBase::isTabbedContainer();
+	bool is_view = (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 	bool is_not_torn_off = !isTornOff();
-	bool is_expanded = ((!is_tabbed) && (is_not_torn_off)) || mParticipantListPanel->getVisible();
+	bool is_expanded = ((is_view) && (is_not_torn_off)) || mParticipantListPanel->getVisible();
    
 	mExpandCollapseBtn->setImageOverlay(getString(is_expanded ? "collapse_icon" : "expand_icon"));
 	mExpandCollapseBtn->setToolTip(
@@ -932,13 +932,13 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
 	// The button (>>) should be disabled for torn off P2P conversations.
-	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
+	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((is_view) && (is_not_torn_off)) );
 }
 
 void LLFloaterIMSessionTab::updateShowParticipantList()
 {
 	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
+	bool is_participant_list_visible = ((LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
 	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
 	mParticipantListPanel->setVisible(is_participant_list_visible);
 }
@@ -1072,7 +1072,7 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 //	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
 	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
-	if ( (host_floater) && (!LLFloaterIMContainerBase::isTabbedContainer()) )
+	if ( (host_floater) && (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) )
 // [/SL:KB]
 //	if (host_floater)
 	{
@@ -1178,7 +1178,7 @@ void LLFloaterIMSessionTab::onOpen(const LLSD& key)
 //		host_floater->collapseMessagesPane(false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if ( (!LLFloaterIMContainerBase::isTabbedContainer()) && (!isTornOff()) )
+	if ( (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) && (!isTornOff()) )
 	{
 		LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(getHost());
 		// Show the messages pane when opening a floater hosted in the Conversations
@@ -1203,7 +1203,7 @@ void LLFloaterIMSessionTab::onTearOffClicked()
 //	LLFloaterIMContainer* container = LLFloaterReg::findTypedInstance<LLFloaterIMContainer>("im_container");
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 		LLFloaterIMContainerView* container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
 // [/SL:KB]
@@ -1391,7 +1391,7 @@ bool LLFloaterIMSessionTab::checkContextMenuItem(const LLSD& userdata)
 void LLFloaterIMSessionTab::getSelectedUUIDs(uuid_vec_t& selected_uuids)
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType())
 	{
 		LLParticipantAvatarList* pParticipantList = dynamic_cast<LLParticipantAvatarList*>(mParticipantList);
 		if (pParticipantList)
@@ -1417,7 +1417,7 @@ void LLFloaterIMSessionTab::getSelectedUUIDs(uuid_vec_t& selected_uuids)
 LLConversationItem* LLFloaterIMSessionTab::getCurSelectedViewModelItem()
 {
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	llassert(!LLFloaterIMContainerBase::isTabbedContainer());
+	llassert(LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType());
 // [/SL:KB]
 
 	LLConversationItem *conversationItem = NULL;
@@ -1443,7 +1443,7 @@ void LLFloaterIMSessionTab::saveCollapsedState()
 BOOL LLFloaterIMSessionTab::handleKeyHere(KEY key, MASK mask )
 {
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 		// LLFloaterIMContainerView needs custom handling of the navigaion keys
 		BOOL handled = FALSE;

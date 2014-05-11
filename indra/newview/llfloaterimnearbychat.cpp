@@ -501,7 +501,7 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 //		im_box->flashConversationItemWidget(mSessionID,false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 		// NOTE: this is only needed on CHUI
 		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();

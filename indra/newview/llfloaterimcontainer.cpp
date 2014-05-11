@@ -86,7 +86,7 @@ LLFloaterIMContainerView::LLFloaterIMContainerView(const LLSD& seed, const Param
     mCommitCallbackRegistrar.add("Group.DoToSelected", boost::bind(&LLFloaterIMContainerView::doToSelectedGroup, this, _2));
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	sTabbedContainer = false;
+	sContainerType = CT_VIEW;
 // [/SL:KB]
 //	// Firstly add our self to IMSession observers, so we catch session events
 //    LLIMMgr::getInstance()->addSessionObserver(this);
