@@ -2,13 +2,13 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="350"
+ height="280"
  layout="topleft"
  min_height="200"
- min_width="370"
+ min_width="405"
  name="preview_texture"
  help_topic="preview_texture"
- width="370">
+ width="405">
    <floater.string
      name="Title">
         Texture: [NAME]
@@ -26,7 +26,7 @@
      layout="topleft"
      left="10"
      name="desc txt"
-     top="21"
+     top="23"
      width="90">
         Description:
     </text>
@@ -40,79 +40,93 @@
      left_pad="0"
      max_length_bytes="127"
      name="desc"
-     width="190" />
+     top_delta="-2" 
+     width="100" />
     <text
      type="string"
-     halign="right"
      length="1"
-     follows="right|bottom"
-     height="16"
+     follows="top|right"
+     font="SansSerif"
+     height="19"
      layout="topleft"
-     left="110"
-     name="dimensions"
-     top="255"
-     width="200">
-        [WIDTH]px x [HEIGHT]px
-    </text>
-    <text
-     type="string"
-     halign="right"
-     length="1"
-     follows="right|bottom"
-     height="16"
-     layout="topleft"
-     left_delta="-110"
+     left_pad="10"
      name="aspect_ratio"
-     top_pad="5"
-     width="200">
-        Preview aspect ratio
+     top="23"
+     width="75">
+        Aspect ratio:
     </text>
     <combo_box
      allow_text_entry="true" 
-     top_delta="-3" 
-     follows="right|bottom" 
-     height="23"
+     border_style="line"
+     border_thickness="1"
+     enabled="true"
+     follows="top|right" 
+     height="19"
      left_pad="10"
      max_chars="20"
      mouse_opaque="true"
-     enabled="true"
-     width="108"
      name="combo_aspect_ratio"
-     tool_tip="Preview at a fixed aspect ratio">
+     top_delta="-3" 
+     tool_tip="Preview at a fixed aspect ratio"
+     width="108">
     	<combo_item name="Unconstrained" value="Unconstrained">
     		Unconstrained
     	</combo_item>
-   	<combo_item name="1:1" value="1:1" tool_tip="Group insignia or Real World profile">
-		1:1
-	</combo_item>
-	<combo_item name="4:3" value="4:3" tool_tip="[SECOND_LIFE] profile">
-		4:3
-	</combo_item>
-	<combo_item name="10:7" value="10:7" tool_tip="Classifieds and search listings, landmarks">
-		10:7
-	</combo_item>
-	<combo_item name="3:2" value="3:2" tool_tip="About land">
-		3:2
-	</combo_item>
-	<combo_item name="16:10" value="16:10">
-		16:10
-	</combo_item>
-	<combo_item name="16:9" value="16:9" tool_tip="Profile picks">
-		16:9
-	</combo_item>
-	<combo_item name="2:1" value="2:1">
-		2:1
-	</combo_item>
+    	<combo_item name="1:1" value="1:1">
+    		1:1
+    	</combo_item>
+    	<combo_item name="4:3" value="4:3">
+    		4:3
+    	</combo_item>
+    	<combo_item name="5:4" value="5:4">
+    		5:4
+    	</combo_item>
+    	<combo_item name="16:9" value="16:9">
+    		16:9
+    	</combo_item>
+    	<combo_item name="16:10" value="16:10">
+    		16:10
+		</combo_item>
+    	<combo_item name="2:1" value="2:1">
+    		2:1
+    	</combo_item>
+    	<combo_item name="3:2" value="3:2">
+    		3:2
+    	</combo_item>
+    	<combo_item name="10:7" value="10:7">
+    		10:7
+    	</combo_item>
 	</combo_box>
+    <view
+     follows="all"
+     height="200"
+     layout="topleft"
+     left="10"
+     name="texture_placeholder"
+     right="-10"
+     top_pad="5" />
+    <text
+     type="string"
+     halign="left"
+     length="1"
+     follows="left|bottom"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="dimensions"
+     top="255"
+     width="135">
+        [WIDTH]px x [HEIGHT]px
+    </text>
     <button
      follows="right|bottom"
      height="22"
      label="OK"
      layout="topleft"
-     left="6"
+     left_pad="-30"
      name="Keep"
-     top_pad="5"
-     width="110" />
+     top="250"
+     width="90" />
     <button
      follows="right|bottom"
      height="22"
@@ -121,7 +135,7 @@
      left_pad="5"
      name="Discard"
      top_delta="0"
-     width="110" />
+     width="90" />
     <button
      follows="right|bottom"
      height="22"
@@ -130,5 +144,5 @@
      left_pad="5"
      name="save_tex_btn"
      top_delta="0"
-     width="110" />
+     width="90" />
 </floater>
