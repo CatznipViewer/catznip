@@ -328,13 +328,16 @@ LLScrollListItem* LLNameListCtrl::addNameItemRow(
 			else
 			{
 				// ...schedule a callback
-				// This is not correct and will likely lead to partially populated lists in cases where avatar names are not cached.
-				// *TODO : Change this to have 2 callbacks : one callback per list item and one for the whole list.
-				if (mAvatarNameCacheConnection.connected())
-				{
-					mAvatarNameCacheConnection.disconnect();
-				}
-				mAvatarNameCacheConnection = LLAvatarNameCache::get(id,boost::bind(&LLNameListCtrl::onAvatarNameCache,this, _1, _2, item->getHandle()));
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-09-30 (Catznip-3.6)
+				LLAvatarNameCache::get(id, boost::bind(&LLNameListCtrl::onAvatarNameCache, this, _1, _2, item->getHandle()));
+// [/SL:KB]
+//				// This is not correct and will likely lead to partially populated lists in cases where avatar names are not cached.
+//				// *TODO : Change this to have 2 callbacks : one callback per list item and one for the whole list.
+//				if (mAvatarNameCacheConnection.connected())
+//				{
+//					mAvatarNameCacheConnection.disconnect();
+//				}
+//				mAvatarNameCacheConnection = LLAvatarNameCache::get(id,boost::bind(&LLNameListCtrl::onAvatarNameCache,this, _1, _2, item->getHandle()));
 			}
 			break;
 		}
