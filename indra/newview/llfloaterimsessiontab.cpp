@@ -215,8 +215,11 @@ void LLFloaterIMSessionTab::setFocus(BOOL focus)
 
 void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 {
-	if ((session_id.notNull() && !gIMMgr->hasSession(session_id))
-			|| !LLFloaterIMSessionTab::isChatMultiTab())
+//	if ((session_id.notNull() && !gIMMgr->hasSession(session_id))
+//			|| !LLFloaterIMSessionTab::isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2013-04-25 (Catznip-3.5)
+	if (session_id.notNull() && !gIMMgr->hasSession(session_id))
+// [/SL:KB]
 	{
 		return;
 	}
@@ -226,12 +229,15 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 	if (conversp)
 	{
 //		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-		LLFloaterIMContainerBase* floater_container = LLFloaterIMContainerBase::getInstance();
+//
+//		// Do not add again existing floaters
+//		if (floater_container && !conversp->isHostAttached())
+// [SL:KB] - Patch: Chat-Container | Checked: 2013-04-25 (Catznip-3.5)
+		// Don't add the floater if we're showing separate floaters, or if the floater was already attached to the container
+		LLFloaterIMContainerBase* floater_container = NULL;
+		if ( (LLFloaterIMContainerBase::CT_SEPARATE != LLFloaterIMContainerBase::getContainerType()) &&
+		     (floater_container = LLFloaterIMContainerBase::getInstance()) && (!conversp->isHostAttached()) )
 // [/SL:KB]
-
-		// Do not add again existing floaters
-		if (floater_container && !conversp->isHostAttached())
 		{
 			conversp->setHostAttached(true);
 
@@ -259,12 +265,12 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 			}
 			// Added floaters share some state (like sort order) with their host
 			conversp->setSortOrder(floater_container->getSortOrder());
-// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
-			conversp->updateShowParticipantList();
-			conversp->updateExpandCollapseBtn();
-			conversp->hideOrShowTitle();
-// [/SL:KB]
 		}
+// [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
+		conversp->updateShowParticipantList();
+		conversp->updateExpandCollapseBtn();
+		conversp->hideOrShowTitle();
+// [/SL:KB]
 	}
 }
 
@@ -390,7 +396,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 					&&  !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
 	initRectControl();
 
-	if (isChatMultiTab())
+//	if (isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::CT_SEPARATE != LLFloaterIMContainerBase::getContainerType())
+// [/SL:KB]
 	{
 		result = LLFloater::postBuild();
 	}
@@ -1322,12 +1331,12 @@ void LLFloaterIMSessionTab::initBtns()
 	mVoiceButton->setRect(call_btn_rect);
 }
 
-// static
-bool LLFloaterIMSessionTab::isChatMultiTab()
-{
-	// Restart is required in order to change chat window type.
-	return true;
-}
+//// static
+//bool LLFloaterIMSessionTab::isChatMultiTab()
+//{
+//	// Restart is required in order to change chat window type.
+//	return true;
+//}
 
 //bool LLFloaterIMSessionTab::checkIfTornOff()
 //{

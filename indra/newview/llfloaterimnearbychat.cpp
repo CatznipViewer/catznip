@@ -381,25 +381,25 @@ void LLFloaterIMNearbyChat::show()
 		openFloater(getKey());
 	}
 
-bool LLFloaterIMNearbyChat::isChatVisible() const
-{
-	bool isVisible = false;
-//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
-// [/SL:KB]
-	// Is the IM floater container ever null?
-	llassert(im_box != NULL);
-	if (im_box != NULL)
-	{
-		isVisible =
-				isChatMultiTab() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff")?
-						im_box->getVisible() && !im_box->isMinimized() :
-						getVisible() && !isMinimized();
-	}
-
-	return isVisible;
-}
+//bool LLFloaterIMNearbyChat::isChatVisible() const
+//{
+//	bool isVisible = false;
+////	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+//// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+//	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
+//// [/SL:KB]
+//	// Is the IM floater container ever null?
+//	llassert(im_box != NULL);
+//	if (im_box != NULL)
+//	{
+//		isVisible =
+//				isChatMultiTab() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff")?
+//						im_box->getVisible() && !im_box->isMinimized() :
+//						getVisible() && !isMinimized();
+//	}
+//
+//	return isVisible;
+//}
 
 void LLFloaterIMNearbyChat::showHistory()
 {

@@ -645,7 +645,10 @@ void LLFloaterIMSession::setDocked(bool docked, bool pop_on_undock)
 		(LLNotificationsUI::LLChannelManager::getInstance()->
 											findChannelByID(LLUUID(gSavedSettings.getString("NotificationChannelUUID"))));
 	
-	if(!isChatMultiTab())
+//	if(!isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::CT_SEPARATE == LLFloaterIMContainerBase::getContainerType())
+// [/SL:KB]
 	{
 		LLTransientDockableFloater::setDocked(docked, pop_on_undock);
 	}
@@ -683,6 +686,17 @@ void LLFloaterIMSession::setVisible(BOOL visible)
 
 	LLFloaterIMSessionTab::setVisible(visible);
 
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if ( (visible) && (LLFloaterIMContainerBase::CT_SEPARATE == LLFloaterIMContainerBase::getContainerType()) && (!getDockControl()) )
+	{
+		if (LLChiclet* pChiclet = LLChicletBar::getInstance()->getChicletPanel()->findChiclet<LLChiclet>(mSessionID))
+		{
+			LLChicletBar::getInstance()->getChicletPanel()->scrollToChiclet(pChiclet);
+			setDockControl(new LLDockControl(pChiclet, this, this->getDockTongue(), LLDockControl::BOTTOM));
+		}
+	}
+// [/SL:KB]
+
 	// update notification channel state
 	if(channel)
 	{
@@ -715,7 +729,10 @@ BOOL LLFloaterIMSession::getVisible()
 {
 	bool visible;
 
-	if(isChatMultiTab())
+//	if(isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::CT_SEPARATE != LLFloaterIMContainerBase::getContainerType())
+// [/SL:KB]
 	{
 //		LLFloaterIMContainer* im_container =
 //				LLFloaterIMContainer::getInstance();
