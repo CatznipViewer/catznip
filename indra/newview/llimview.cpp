@@ -3085,6 +3085,9 @@ void LLIMMgr::removeSession(const LLUUID& session_id)
 	clearPendingInvitation(session_id);
 	clearPendingAgentListUpdates(session_id);
 
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2014-05-16 (Catznip-3.6)
+	LLIMModel::getInstance()->sendNoUnreadMessages(session_id);
+// [/SL:KB]
 	LLIMModel::getInstance()->clearSession(session_id);
 
     llinfos << "LLIMMgr::removeSession, session removed, session id = " << session_id << llendl;
