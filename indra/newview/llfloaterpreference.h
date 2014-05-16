@@ -174,6 +174,9 @@ public:
 	void onClickAutoReplace();
 	void onClickSpellChecker();
 	void applyUIColor(LLUICtrl* ctrl, const LLSD& param);
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+	void applyNameTagColor(LLUICtrl* ctrl, const LLSD& param);
+// [/SL:KB]
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void onLogChatHistorySaved();	
 	void buildPopupLists();
