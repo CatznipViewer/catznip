@@ -4875,6 +4875,17 @@
       <key>Value</key>
          <integer>1</integer>
     </map>
+    <key>JoystickRawDeltas</key>
+    <map>
+      <key>Comment</key>
+        <string>Pass raw inputs from joystick.</string>
+      <key>Persist</key>
+        <integer>1</integer>
+      <key>Type</key>
+        <string>Boolean</string>
+      <key>Value</key>
+         <integer>1</integer>
+    </map>
     <key>JoystickRunThreshold</key>
     <map>
       <key>Comment</key>
