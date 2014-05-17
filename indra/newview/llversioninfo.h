@@ -66,6 +66,12 @@ public:
 	/// return the channel name, e.g. "Second Life"
 	static const std::string &getChannel();
 	
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-04-09 (Catznip-3.6)
+	/// Return the viewer's channel type
+	enum EChannelType { CHANNEL_RELEASE, CHANNEL_BETA, CHANNEL_TEST, CHANNEL_PROJECT, CHANNEL_DEVELOP, CHANNEL_UNKNOWN };
+	static EChannelType getChannelType();
+// [/SL:KB]
+
 	/// reset the channel name used by the viewer.
 	static void resetChannel(const std::string& channel);
 

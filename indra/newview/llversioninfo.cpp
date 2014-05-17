@@ -30,6 +30,10 @@
 #include <sstream>
 #include "llversioninfo.h"
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-04-09 (Catznip-3.6)
+#include <boost/regex.hpp>
+// [/SL:KB]
+
 #if ! defined(LL_VIEWER_CHANNEL)       \
  || ! defined(LL_VIEWER_VERSION_MAJOR) \
  || ! defined(LL_VIEWER_VERSION_MINOR) \
@@ -127,6 +131,35 @@ const std::string &LLVersionInfo::getChannel()
 {
 	return sWorkingChannelName;
 }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-04-09 (Catznip-3.6)
+LLVersionInfo::EChannelType LLVersionInfo::getChannelType()
+{
+	static EChannelType sChannelType = CHANNEL_UNKNOWN;
+
+	if (sChannelType == CHANNEL_UNKNOWN)
+	{
+		const boost::regex is_release_channel("\\bRelease\\b");
+		const boost::regex is_beta_channel("\\bBeta\\b");
+		const boost::regex is_project_channel("\\bProject\\b");
+		const boost::regex is_test_channel("\\bTest$");
+
+		const std::string& strChannel = getChannel();
+		if (boost::regex_search(strChannel, is_release_channel))
+			sChannelType = CHANNEL_RELEASE;
+		else if (boost::regex_search(strChannel, is_beta_channel))
+			sChannelType = CHANNEL_BETA;
+		else if (boost::regex_search(strChannel, is_project_channel))
+			sChannelType = CHANNEL_PROJECT;
+		else if (boost::regex_search(strChannel, is_test_channel))
+			sChannelType = CHANNEL_TEST;
+		else
+			sChannelType = CHANNEL_DEVELOP;
+	}
+
+	return sChannelType;
+}
+// [/SL:KB]
 
 void LLVersionInfo::resetChannel(const std::string& channel)
 {
