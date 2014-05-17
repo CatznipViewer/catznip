@@ -78,6 +78,9 @@
 #include "llsecondlifeurls.h"
 #include "llstring.h"
 #include "lluserrelations.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "llversioninfo.h"
 #include "llviewercontrol.h"
 #include "llviewerhelp.h"
@@ -835,6 +838,15 @@ bool idle_startup()
 		display_startup();
 #endif
 		timeout.reset();
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+		if ( (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting")) && 
+		     (!LLLoginInstance::instance().getUpdaterService()->isChecking()) )
+		{
+			LLLoginInstance::instance().getUpdaterService()->startChecking();
+		}
+// [/SL:KB]
+
 		return FALSE;
 	}
 
@@ -889,6 +901,18 @@ bool idle_startup()
 		// (possiblely automatically) - flag this so we can test in the 
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+		// Limit bandwidth for the updater download once the user passes the login screen
+		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
+		{
+			LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
+			if (pUpdater->isChecking())
+			{
+				pUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
+			}
+		}
+// [/SL:KB]
 
 		// save the credentials                                                                                        
 		std::string userid = "unknown";                                                                                

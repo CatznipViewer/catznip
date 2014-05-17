@@ -1511,12 +1511,12 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">

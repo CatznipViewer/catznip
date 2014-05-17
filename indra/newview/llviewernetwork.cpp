@@ -65,7 +65,10 @@ const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/"
 
 const std::string MAIN_GRID_LOGIN_URI = "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
 
-const std::string SL_UPDATE_QUERY_URL = "https://update.secondlife.com/update";
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-11-22 (Catznip-3.6)
+const std::string SL_UPDATE_QUERY_URL = "http://viewer.catznip.com/update";
+// [/SL:KB]
+//const std::string SL_UPDATE_QUERY_URL = "https://update.secondlife.com/update";
 
 const std::string MAIN_GRID_SLURL_BASE = "http://maps.secondlife.com/secondlife/";
 const std::string SYSTEM_GRID_APP_SLURL_BASE = "secondlife:///app";
