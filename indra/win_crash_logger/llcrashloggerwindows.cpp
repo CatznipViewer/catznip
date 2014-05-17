@@ -29,6 +29,9 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "llcrashloggerwindows.h"
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#include "llcrashlookupwindows.h"
+// [/SL:KB]
 
 #include <sstream>
 
@@ -246,6 +249,12 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 
 LLCrashLoggerWindows::LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#ifdef LL_SEND_CRASH_REPORTS
+	mCrashLookup = new LLCrashLookupWindows();
+#endif // LL_SEND_CRASH_REPORTS
+// [/SL:KB]
+
 	if (LLCrashLoggerWindows::sInstance==NULL)
 	{
 		sInstance = this; 
@@ -254,6 +263,9 @@ LLCrashLoggerWindows::LLCrashLoggerWindows(void)
 
 LLCrashLoggerWindows::~LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	delete mCrashLookup;
+// [/SL:KB]
 	sInstance = NULL;
 }
 
@@ -468,6 +480,9 @@ void LLCrashLoggerWindows::gatherPlatformSpecificFiles()
 	// At this point we're responsive enough the user could click the close button
 	SetCursor(gCursorArrow);
 	//mDebugLog["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();  //Not initialized.
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
+//	mCrashInfo["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();
+// [/SL:KB]
 }
 
 bool LLCrashLoggerWindows::mainLoop()

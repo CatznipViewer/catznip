@@ -231,7 +231,12 @@
 
 #include "llviewereventrecorder.h"
 
-
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#ifdef LL_WINDOWS
+#include <TlHelp32.h>
+#include "llwindebug.h"
+#endif // LL_WINDOWS
+// [/SL:KB]
 // *FIX: These extern globals should be cleaned up.
 // The globals either represent state/config/resource-storage of either 
 // this app, or another 'component' of the viewer. App globals should be 
@@ -349,6 +354,9 @@ BOOL gPeriodicSlowFrame = FALSE;
 
 BOOL gCrashOnStartup = FALSE;
 BOOL gLLErrorActivated = FALSE;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+std::string gLLErrorLastMessage;
+// [/SL:KB]
 BOOL gLogoutInProgress = FALSE;
 
 ////////////////////////////////////////////////////////////
@@ -1284,7 +1292,10 @@ bool LLAppViewer::mainLoop()
 	if (!mMainLoopInitialized)
 #endif
 	{
-		mMainloopTimeout = new LLWatchdogTimeout();
+//		mMainloopTimeout = new LLWatchdogTimeout();
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		initMainloopTimeout("Mainloop Init", gSavedSettings.getF32("MainloopTimeoutDefault"));
+// [/SL:KB]
 		
 		//-------------------------------------------
 		// Run main loop until time to quit
@@ -1678,12 +1689,12 @@ bool LLAppViewer::cleanup()
 	}
 	LLMetricPerformanceTesterBasic::cleanClass();
 
-	// remove any old breakpad minidump files from the log directory
-	if (! isError())
-	{
-		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
-		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
-	}
+//	// remove any old breakpad minidump files from the log directory
+//	if (! isError())
+//	{
+//		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+//		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+//	}
 
 	{
 		// Kill off LLLeap objects. We can find them all because LLLeap is derived
@@ -1927,6 +1938,11 @@ bool LLAppViewer::cleanup()
 		llinfos << "Saved settings" << llendflush;
 	}
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
+	gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+// [/SL:KB]
+
 	std::string warnings_settings_filename = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Warnings"));
 	gWarningSettings.saveToFile(warnings_settings_filename, TRUE);
 
@@ -2116,6 +2132,9 @@ bool LLAppViewer::cleanup()
 void watchdog_llerrs_callback(const std::string &error_string)
 {
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 
 #ifdef LL_WINDOWS
 	RaiseException(0,0,0,0);
@@ -2130,6 +2149,122 @@ void watchdog_killer_callback()
 	LLError::setFatalFunction(watchdog_llerrs_callback);
 	llerrs << "Watchdog killer event" << llendl;
 }
+
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+
+void enumerate_process_threads(HANDLE hThreadSnapshot, DWORD (WINAPI* pCallback)(HANDLE))
+{
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		THREADENTRY32 threadEntry;
+		threadEntry.dwSize = sizeof(THREADENTRY32);
+		if (Thread32First(hThreadSnapshot, &threadEntry))
+		{
+			DWORD dwProcessId = GetCurrentProcessId();
+			DWORD dwCurThreadId = GetCurrentThreadId();
+			do
+			{
+				if ( (threadEntry.th32OwnerProcessID == dwProcessId) && (threadEntry.th32ThreadID != dwCurThreadId) )
+				{
+					HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME, false, threadEntry.th32ThreadID);
+					if (hThread)
+					{
+						pCallback(hThread);
+						CloseHandle(hThread);
+					}
+				}
+			} while (Thread32Next(hThreadSnapshot, &threadEntry));
+		}
+	}
+}
+
+BOOL CALLBACK watchdog_freeze_dump_callback(void* pParam, const MINIDUMP_CALLBACK_INPUT* pCbInput, MINIDUMP_CALLBACK_OUTPUT* pCbOutput)
+{
+	U32 nFreezeDumpType = (pParam) ? *(U32*)pParam : 0;
+	switch (pCbInput->CallbackType)
+	{
+		case IncludeThreadCallback:
+			{
+				// Only include information about the main thread by default
+				if (0 == nFreezeDumpType)
+				{
+					DWORD dwMainThreadId = (DWORD)gDebugInfo["MainloopThreadID"].asInteger();
+					if ( (dwMainThreadId) && (dwMainThreadId != pCbInput->IncludeThread.ThreadId) )
+					{
+						return FALSE;
+					}
+				}
+			}
+			return TRUE;
+		case ThreadCallback:
+		case ThreadExCallback:
+			return TRUE;
+
+		case IncludeModuleCallback:
+			return TRUE;
+		case ModuleCallback:
+			{
+				// Don't include information about modules that aren't referenced
+				if ( (pCbOutput->ModuleWriteFlags & ModuleReferencedByMemory) == 0)
+				{
+					pCbOutput->ModuleWriteFlags &= ~ModuleWriteModule;
+					return TRUE;
+				}
+
+				// We only want the data segments for the executable and llcommon.dll as a start
+				if (pCbOutput->ModuleWriteFlags & ModuleWriteDataSeg)
+				{
+					if ((HMODULE)pCbInput->Module.BaseOfImage != GetModuleHandle(NULL))
+					{
+						// Not the main executable, check DLLs by name
+						TCHAR* pstrModuleName = wcsrchr(pCbInput->Module.FullPath, L'\\');
+						if ( (!pstrModuleName) || (0 != wcsicmp(++pstrModuleName, L"llcommon.dll")) )
+						{
+							pCbOutput->ModuleWriteFlags &= ~ModuleWriteDataSeg;
+						}
+					}
+				}
+			}
+			return TRUE;
+
+		case MemoryCallback:
+			return TRUE;
+	}
+	return FALSE;
+}
+
+void watchdog_freeze_callback()
+{
+	// NOTE: called from the thread the watchdog runs on, not the main thread
+
+	// SuspendThread() increments the thread's suspend count so we can't wake up a thread that was previously suspended
+	HANDLE hThreadSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0); 
+	if (INVALID_HANDLE_VALUE != hThreadSnapshot)
+	{
+		enumerate_process_threads(hThreadSnapshot, SuspendThread);
+
+		U32 nFreezeDumpType = gSavedSettings.getU32("WatchdogFreezeDumpType");
+		U32 nMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory;
+		if (nFreezeDumpType >= 2)
+			nMiniDumpType |= MiniDumpWithDataSegs;
+		MINIDUMP_CALLBACK_INFORMATION dumpCbInfo;
+		dumpCbInfo.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)watchdog_freeze_dump_callback;
+		dumpCbInfo.CallbackParam = &nFreezeDumpType;
+		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
+		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(strFilename, (MINIDUMP_TYPE)nMiniDumpType, NULL, &dumpCbInfo);
+
+		gDebugInfo["MinidumpPath"] = strMinidumpPath;
+		LLAppViewer::writeDebugInfo();
+
+		enumerate_process_threads(hThreadSnapshot, ResumeThread);
+
+		CloseHandle(hThreadSnapshot);
+	}
+}
+
+#endif // LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+// [/SL:KB]
 
 bool LLAppViewer::initThreads()
 {
@@ -2176,6 +2311,9 @@ void errorCallback(const std::string &error_string)
 
 	//Set the ErrorActivated global so we know to create a marker file
 	gLLErrorActivated = true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+	gLLErrorLastMessage = error_string;
+// [/SL:KB]
 	
 //	LLError::crashAndLoop(error_string);
 // [SL:KB] - Patch: Viewer-Build | Checked: 2010-12-04 (Catznip-2.4)
@@ -2424,6 +2562,10 @@ bool LLAppViewer::initConfiguration()
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
 	gSavedSettings.setString("ClientSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+	gSavedSettings.setString("CrashSettingsFile", 
+        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
+// [/SL:KB]
 
 #ifndef	LL_RELEASE_FOR_DOWNLOAD
 	// provide developer build only overrides for these control variables that are not
@@ -3304,7 +3446,14 @@ bool LLAppViewer::initWindow()
 
 	if (use_watchdog)
 	{
-		LLWatchdog::getInstance()->init(watchdog_killer_callback);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+#if LL_WINDOWS && LL_RELEASE_FOR_DOWNLOAD
+		LLWatchdog::getInstance()->init(NULL, watchdog_freeze_callback);
+#else
+		LLWatchdog::getInstance()->init(NULL);
+#endif // LL_WINDOWS
+// [/SL:KB]
+//		LLWatchdog::getInstance()->init(watchdog_killer_callback);
 	}
 	LL_INFOS("AppInit") << "watchdog setting is done." << LL_ENDL;
 
@@ -3620,20 +3769,32 @@ void LLAppViewer::writeSystemInfo()
     if (! gDebugInfo.has("Dynamic") )
         gDebugInfo["Dynamic"] = LLSD::emptyMap();
     
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-29 (Catznip-3.4.1)
+	// Only include the log if the user consented
+	if (gCrashSettings.getBOOL("CrashSubmitLog"))
+	{
+// [/SL:KB]
 #if LL_WINDOWS
-	gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,"SecondLife.log");
+		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,"SecondLife.log");
 #else
-    //Not ideal but sufficient for good reporting.
-    gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.old");  //LLError::logFileName();
+		//Not ideal but sufficient for good reporting.
+		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.old");  //LLError::logFileName();
 #endif
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-29 (Catznip-3.4.1)
+	}
+// [/SL:KB]
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
 
 	gDebugInfo["CPUInfo"]["CPUString"] = gSysCPU.getCPUString();
 	gDebugInfo["CPUInfo"]["CPUFamily"] = gSysCPU.getFamily();
@@ -3642,8 +3803,23 @@ void LLAppViewer::writeSystemInfo()
 	gDebugInfo["CPUInfo"]["CPUSSE"] = gSysCPU.hasSSE();
 	gDebugInfo["CPUInfo"]["CPUSSE2"] = gSysCPU.hasSSE2();
 	
-	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
-	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated>>10); // MB -> KB
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
+	LLMemory::updateMemoryInfo();
+	gDebugInfo["RAMInfo"]["ProcessWorkingSet"] = (LLSD::Integer)LLMemory::getAllocatedMemKB();
+#if LL_WINDOWS
+	MEMORYSTATUSEX memStatus;
+	memStatus.dwLength = sizeof(memStatus);
+	if (GlobalMemoryStatusEx(&memStatus))
+	{
+		gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(memStatus.ullTotalPhys >> 10);
+		gDebugInfo["RAMInfo"]["VirtualTotal"] = (LLSD::Integer)(memStatus.ullTotalVirtual >> 10);
+	}
+#else
+	gDebugInfo["RAMInfo"]["PhysicalTotal"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
+#endif // LL_WINDOWS
+// [/SL:KB]
+//	gDebugInfo["RAMInfo"]["Physical"] = (LLSD::Integer)(gSysMemory.getPhysicalMemoryKB());
+//	gDebugInfo["RAMInfo"]["Allocated"] = (LLSD::Integer)(gMemoryAllocated>>10); // MB -> KB
 	gDebugInfo["OSInfo"] = getOSInfo().getOSStringSimple();
 
 	// The user is not logged on yet, but record the current grid choice login url
@@ -3796,7 +3972,18 @@ void LLAppViewer::handleViewerCrash()
 	}
 	else
 	{
-		gDebugInfo["Dynamic"]["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+//		gDebugInfo["Dynamic"]["LastExecEvent"] = gLLErrorActivated ? LAST_EXEC_LLERROR_CRASH : LAST_EXEC_OTHER_CRASH;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+		if (gLLErrorActivated)
+		{
+			gDebugInfo["Dynamic"]["LastExecEvent"] = LAST_EXEC_LLERROR_CRASH;
+			gDebugInfo["Dynamic"]["LastErrorMessage"] = gLLErrorLastMessage;
+		}
+		else
+		{
+			gDebugInfo["LastExecEvent"] = LAST_EXEC_OTHER_CRASH;
+		}
+// [/SL:KB]
 	}
 
 	if(gAgent.getRegion())
@@ -3809,6 +3996,21 @@ void LLAppViewer::handleViewerCrash()
 		gDebugInfo["Dynamic"]["CurrentLocationY"] = loc.mV[1];
 		gDebugInfo["Dynamic"]["CurrentLocationZ"] = loc.mV[2];
 	}
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+//	if(gAgent.getRegion())
+//	{
+//		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
+//		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+//		
+//		const LLVector3& loc = gAgent.getPositionAgent();
+//		gDebugInfo["CurrentLocationX"] = loc.mV[0];
+//		gDebugInfo["CurrentLocationY"] = loc.mV[1];
+//		gDebugInfo["CurrentLocationZ"] = loc.mV[2];
+//	}
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{
@@ -5648,7 +5850,12 @@ void LLAppViewer::initMainloopTimeout(const std::string& state, F32 secs)
 	if(!mMainloopTimeout)
 	{
 		mMainloopTimeout = new LLWatchdogTimeout();
-		resumeMainloopTimeout(state, secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->setTimeout(secs);
+		mMainloopState = state;
+		resumeMainloopTimeout();
+// [/SL:KB]
+//		resumeMainloopTimeout(state, secs);
 	}
 }
 
@@ -5661,17 +5868,23 @@ void LLAppViewer::destroyMainloopTimeout()
 	}
 }
 
-void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::resumeMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::resumeMainloopTimeout()
+// [/SL:KB]
 {
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-		
-		mMainloopTimeout->setTimeout(secs);
-		mMainloopTimeout->start(state);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopTimeout->start(mMainloopState);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//		
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->start(state);
 	}
 }
 
@@ -5683,7 +5896,10 @@ void LLAppViewer::pauseMainloopTimeout()
 	}
 }
 
-void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+//void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+void LLAppViewer::pingMainloopTimeout(const std::string& state)
+// [/SL:KB]
 {
 //	if(!restoreErrorTrap())
 //	{
@@ -5692,49 +5908,67 @@ void LLAppViewer::pingMainloopTimeout(const std::string& state, F32 secs)
 	
 	if(mMainloopTimeout)
 	{
-		if(secs < 0.0f)
-		{
-			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
-		}
-
-		mMainloopTimeout->setTimeout(secs);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+		mMainloopState = state;
 		mMainloopTimeout->ping(state);
+// [/SL:KB]
+//		if(secs < 0.0f)
+//		{
+//			secs = gSavedSettings.getF32("MainloopTimeoutDefault");
+//		}
+//
+//		mMainloopTimeout->setTimeout(secs);
+//		mMainloopTimeout->ping(state);
 	}
 }
 
 void LLAppViewer::handleLoginComplete()
 {
 	gLoggedInTime.start();
-	initMainloopTimeout("Mainloop Init");
+//	initMainloopTimeout("Mainloop Init");
 
 	// Store some data to DebugInfo in case of a freeze.
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
-
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	gDebugInfo["ClientInfo"]["Version"] = LLVersionInfo::getVersion();
+	gDebugInfo["ClientInfo"]["Platform"] = LLVersionInfo::getBuildPlatform();
+// [/SL:KB]
 	gDebugInfo["ClientInfo"]["MajorVersion"] = LLVersionInfo::getMajor();
 	gDebugInfo["ClientInfo"]["MinorVersion"] = LLVersionInfo::getMinor();
 	gDebugInfo["ClientInfo"]["PatchVersion"] = LLVersionInfo::getPatch();
 	gDebugInfo["ClientInfo"]["BuildVersion"] = LLVersionInfo::getBuild();
 
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if ( parcel && parcel->getMusicURL()[0])
-	{
-		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
-	}	
-	if ( parcel && parcel->getMediaURL()[0])
-	{
-		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
-	}
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if ( parcel && parcel->getMusicURL()[0])
+//	{
+//		gDebugInfo["ParcelMusicURL"] = parcel->getMusicURL();
+//	}	
+//	if ( parcel && parcel->getMediaURL()[0])
+//	{
+//		gDebugInfo["ParcelMediaURL"] = parcel->getMediaURL();
+//	}
 	
-	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
-	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
-	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
-	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
-
-	if(gAgent.getRegion())
+//	gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-3.0.0a) | Added: Catznip-2.4.0b
+	if (gCrashSettings.getBOOL("CrashSubmitSettings"))
 	{
-		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
-		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+		// Only include settings.xml if the user consented
+		gDebugInfo["SettingsFilename"] = gSavedSettings.getString("ClientSettingsFile");
 	}
+// [/SL:KB]
+//	gDebugInfo["CAFilename"] = gDirUtilp->getCAFile();
+//	gDebugInfo["ViewerExePath"] = gDirUtilp->getExecutablePathAndName();
+//	gDebugInfo["CurrentPath"] = gDirUtilp->getCurPath();
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
+	// Current host and region would expose too much information, but do track the last server version
+	gDebugInfo["LastVersionChannel"] = gLastVersionChannel;
+// [/SL:KB]
+//	if(gAgent.getRegion())
+//	{
+//		gDebugInfo["CurrentSimHost"] = gAgent.getRegionHost().getHostName();
+//		gDebugInfo["CurrentRegion"] = gAgent.getRegion()->getName();
+//	}
 
 	if(LLAppViewer::instance()->mMainloopTimeout)
 	{

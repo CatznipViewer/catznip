@@ -46,6 +46,18 @@
 #include "llsdserialize.h"
 #include "llproxy.h"
  
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#ifdef LL_WINDOWS
+#include <shellapi.h>
+#endif 
+#include <boost/lexical_cast.hpp>
+// LL_WINDOWS
+// [/SL:KB]
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+const std::ifstream::pos_type LOG_TRUNC_SIZE = 16384;
+// [/SL:KB]
+
 LLPumpIO* gServicePump = NULL;
 BOOL gBreak = false;
 BOOL gSent = false;
@@ -64,12 +76,51 @@ public:
 
 	virtual void result(const LLSD& content)
 	{
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2012-05-26 (Catznip-3.3)
+		LLSD sdCrashLog; std::string strCrashLog = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "crash.log");
+
+		if (gDirUtilp->fileExists(strCrashLog))
+		{
+			llifstream fileCrashLogIn;
+			fileCrashLogIn.open(strCrashLog);
+			if (fileCrashLogIn.is_open())
+				LLSDSerialize::fromXML(sdCrashLog, fileCrashLogIn);
+			fileCrashLogIn.close();
+		}
+
+		while (sdCrashLog.size() > 15)
+			sdCrashLog.erase(0);
+
+		LLSD sdCrash;
+		sdCrash["timestamp"] = LLDate::now();
+		sdCrash["crash_freeze"] = (content.has("crash_freeze")) ? content["crash_freeze"].asBoolean() : false;
+		sdCrash["crash_id"] =  (content.has("crash_id")) ? content["crash_id"].asUUID() : LLUUID::null;
+		sdCrash["crash_link"] =  (content.has("crash_link")) ? content["crash_link"].asString() : "";
+		sdCrash["crash_module"] = (content.has("crash_module_name")) ? content["crash_module_name"].asString() : "(Unknown)";
+		sdCrash["crash_offset"] = (content.has("crash_module_offset")) ? content["crash_module_offset"].asString() : "";
+		sdCrashLog.append(sdCrash);
+
+		llofstream fileCrashLogOut;
+		fileCrashLogOut.open(strCrashLog);
+		LLSDSerialize::toPrettyXML(sdCrashLog, fileCrashLogOut);
+// [/SL:KB]
+
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+		if ( (content.has("crash_link")) && (!content["crash_link"].asString().empty()) )
+		{
+			((LLCrashLogger*)LLCrashLogger::instance())->setCrashInformationLink(content["crash_link"].asString());
+		}
+// [/SL:KB]
+
 		gBreak = true;
 		gSent = true;
 	}
 };
 
 LLCrashLogger::LLCrashLogger() :
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	mCrashLookup(NULL),
+// [/SL:KB]
 	mCrashBehavior(CRASH_BEHAVIOR_ALWAYS_SEND),
 	mCrashInPreviousExec(false),
 	mCrashSettings("CrashSettings"),
@@ -82,6 +133,41 @@ LLCrashLogger::~LLCrashLogger()
 {
 
 }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+bool getSLLog(const std::string& strLogPath, std::string& strLogFile)
+{
+	std::ifstream inLogFile(strLogPath.c_str(), std::ios::ate);
+	if (inLogFile.is_open())
+	{
+		std::ifstream::pos_type szLogFile = inLogFile.tellg();
+		std::ifstream::pos_type posTruncLog = 0;
+		if (szLogFile > LOG_TRUNC_SIZE)
+		{
+			posTruncLog = szLogFile - LOG_TRUNC_SIZE;
+			szLogFile = LOG_TRUNC_SIZE;
+		}
+		inLogFile.seekg(posTruncLog);
+
+		std::stringstream s;
+		s << inLogFile.rdbuf();
+
+		strLogFile = s.str();
+		if (0 != posTruncLog)
+		{
+			std::string::size_type posLR = strLogFile.find('\n');
+			if (std::string::npos != posLR)
+			{
+				strLogFile.erase(0, posLR);
+			}
+		}
+
+		inLogFile.close();
+		return true;
+	}
+	return false;
+}
+// [/SL:KB]
 
 // TRIM_SIZE must remain larger than LINE_SEARCH_SIZE.
 const int TRIM_SIZE = 128000;
@@ -329,6 +415,8 @@ void LLCrashLogger::gatherFiles()
                 }
             }
         }
+		// Remove the minidump path after we've retrieved it since it could contain the OS user name
+		mDebugLog.erase("MinidumpPath");
     }
 }
 
@@ -384,13 +472,156 @@ bool LLCrashLogger::saveCrashBehaviorSetting(S32 crash_behavior)
 	return true;
 }
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6)
+static const std::string BOUNDARY("------------abcdef012345xyZ");
+
+std::string getFormDataField(const std::string& strFieldName, const std::string& strFieldValue, const std::string& strBoundary)
+{
+	std::ostringstream streamFormPart;
+
+	streamFormPart << "--" << strBoundary << "\r\n"
+		<< "Content-Disposition: form-data; name=\"" << strFieldName << "\"\r\n\r\n"
+		<< strFieldValue << "\r\n";
+
+	return streamFormPart.str();
+}
+
+void addFormFile(std::ostringstream& body, const std::string strFileName, const char* pBuffer, unsigned int szBuffer)
+{
+	body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szBuffer), BOUNDARY);
+	body << "--" << BOUNDARY << "\r\n"
+			<<	"Content-Disposition: form-data; name=\"crash_report[]\"; "
+			<< "filename=\"" << strFileName << "\"\r\n"
+			<< "Content-Type: application/octet-stream"
+			<< "\r\n\r\n";
+	body.write(pBuffer, szBuffer);
+	body <<	"\r\n";
+}
+// [/SL:KB]
+
 bool LLCrashLogger::runCrashLogPost(std::string host, LLSD data, std::string msg, int retries, int timeout)
 {
 	gBreak = false;
 	for(int i = 0; i < retries; ++i)
 	{
 		updateApplication(llformat("%s, try %d...", msg.c_str(), i+1));
-		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
+//		LLHTTPClient::post(host, data, new LLCrashLoggerResponder(), timeout);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6)
+
+		LLSD headers = LLSD::emptyMap();
+
+		headers["Accept"] = "*/*";
+		headers["Content-Type"] = "multipart/form-data; boundary=" + BOUNDARY;
+
+		std::ostringstream body;
+
+		/*
+		 * Send viewer information for the upload handler's benefit
+		 */
+		if (mDebugLog.has("ClientInfo"))
+		{
+			body << getFormDataField("viewer_channel", mDebugLog["ClientInfo"]["Name"], BOUNDARY);
+			body << getFormDataField("viewer_version", mDebugLog["ClientInfo"]["Version"], BOUNDARY);
+			body << getFormDataField("viewer_platform", mDebugLog["ClientInfo"]["Platform"], BOUNDARY);
+		}
+
+		/*
+		 * Include information about the last execution event
+		 */
+		S32 nLastExecEvent = mDebugLog["LastExecEvent"].asInteger(); std::string strLastExecEvent, strLastExecMsg;
+		switch (nLastExecEvent)
+		{
+			case LAST_EXEC_NORMAL:
+				strLastExecEvent = "normal";
+				break;
+			case LAST_EXEC_FROZE:
+				strLastExecEvent = "froze";
+				break;
+			case LAST_EXEC_LLERROR_CRASH:
+				strLastExecEvent = "llerror_crash";
+				strLastExecMsg = mDebugLog["LastErrorMessage"].asString();
+				break;
+			case LAST_EXEC_OTHER_CRASH:
+				strLastExecEvent = "other_crash";
+				break;
+			case LAST_EXEC_LOGOUT_FROZE:
+				strLastExecEvent = "logout_froze";
+				break;
+			case LAST_EXEC_LOGOUT_CRASH:
+				strLastExecEvent = "logout_crash";
+				break;
+		}
+		body << getFormDataField("last_exec_freeze", boost::lexical_cast<std::string>(mCrashInPreviousExec), BOUNDARY);
+		body << getFormDataField("last_exec_event", strLastExecEvent, BOUNDARY);
+		if (!strLastExecMsg.empty())
+			body << getFormDataField("last_exec_message", strLastExecMsg, BOUNDARY);
+
+		/*
+		 * Include crash analysis pony
+		 */
+		if (mCrashLookup)
+		{
+			body << getFormDataField("crash_module_name", mCrashLookup->getModuleName(), BOUNDARY);
+			body << getFormDataField("crash_module_version", llformat("%I64d", mCrashLookup->getModuleVersion()), BOUNDARY);
+			body << getFormDataField("crash_module_versionstring", mCrashLookup->getModuleVersionString(), BOUNDARY);
+			body << getFormDataField("crash_module_displacement", llformat("%I64d", mCrashLookup->getModuleDisplacement()), BOUNDARY);
+		}
+
+		/*
+		 * Add the actual crash logs
+		 */
+		for (std::map<std::string, std::string>::const_iterator itFile = mFileMap.begin(), endFile = mFileMap.end();
+				itFile != endFile; ++itFile)
+		{
+			std::string strFileName = gDirUtilp->getBaseFileName(itFile->second);
+			if (strFileName.empty())
+				continue;
+
+			llifstream fstream(itFile->second, std::iostream::binary | std::iostream::out);
+			if (!fstream.is_open())
+			{
+				body << getFormDataField("filemap[]", llformat("%s (unable to open)", strFileName.c_str()), BOUNDARY);
+				continue;
+			}
+
+			fstream.seekg(0, std::ios::end);
+			U32 szFile = fstream.tellg();
+			fstream.seekg(0, std::ios::beg);
+
+			char* pBuffer = new char[szFile];
+			fstream.read(pBuffer, szFile);
+
+			addFormFile(body, strFileName, pBuffer, szFile);
+
+			delete[] pBuffer;
+			fstream.close();
+
+			body <<	"\r\n";
+		}
+
+		/*
+		 * Add the - or a portion of - log file
+		 */
+		std::string strLogFile;
+		if ( (!mLogFile.empty()) && (getSLLog(mLogFile, strLogFile)) )
+		{
+			addFormFile(body, "Catznip.log", strLogFile.c_str(), strLogFile.length());
+		}
+
+		/*
+		 * Close the post
+		 */
+		body << "--" << BOUNDARY << "--\r\n";
+
+		// postRaw() takes ownership of the buffer and releases it later.
+		size_t size = body.str().size();
+		U8 *data = new U8[size];
+		memcpy(data, body.str().data(), size);
+
+		// Send request
+		LLHTTPClient::postRaw(host, data, size, new LLCrashLoggerResponder(), headers);
+// [/SL:KB]
+
 		while(!gBreak)
 		{
 			updateApplication(); // No new message, just pump the IO
@@ -430,7 +661,10 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
 		sent = runCrashLogPost(mCrashHost, post_data, std::string("Sending to server"), 3, 5);
 	}
     
-	if(!sent)
+//	if(!sent)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
+	if ( (!sent) && (!mAltCrashHost.empty()) )
+// [/SL:KB]
 	{
 		sent = runCrashLogPost(mAltCrashHost, post_data, std::string("Sending to alternate server"), 3, 5);
 	}
@@ -526,6 +760,9 @@ bool LLCrashLogger::init()
 
 	// Rename current log file to ".old"
 	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "crashreport.log.old");
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2012-07-09 (Catznip-3.3)
+	LLFile::remove(old_log_file);
+// [/SL:KB]
 	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "crashreport.log");
 
 #if LL_WINDOWS
@@ -563,6 +800,10 @@ bool LLCrashLogger::init()
 							  "1 = always send crash report, "
 							  "2 = never send crash report)");
     
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2012-07-09 (Catznip-3.3)
+	llinfos << "Loading crash behavior setting" << llendl;
+	mCrashBehavior = loadCrashBehaviorSetting();
+// [/SL:KB]
 	// llinfos << "Loading crash behavior setting" << llendl;
 	// mCrashBehavior = loadCrashBehaviorSetting();
     
