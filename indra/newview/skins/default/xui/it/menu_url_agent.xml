@@ -4,6 +4,7 @@
 	<menu_item_call label="Manda IM..." name="send_im"/>
 	<menu_item_call label="Aggiungi come amico..." name="add_friend"/>
 	<menu_item_call label="Togli amicizia..." name="remove_friend"/>
-	<menu_item_call label="Copia nome negli Appunti" name="url_copy_label"/>
-	<menu_item_call label="Copia SLurl negli Appunti" name="url_copy"/>
+	<menu_item_call label="Copia nome visualizzato" name="url_copy_displayname"/>
+	<menu_item_call label="Copia nome" name="url_copy_label"/>
+	<menu_item_call label="Copia SLurl" name="url_copy"/>
 </context_menu>
