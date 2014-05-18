@@ -56,7 +56,9 @@ public:
     bool sendCrashLog(std::string dump_dir);
 	bool sendCrashLogs();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
-	void cleanupDumpDirs();
+	void cleanCrashLogs();
+	void cleanupDumpDirs(bool fKeepCurrent);
+	bool hasCrashLog();
 // [/SL:KB]
 	LLSD constructPostData();
 	virtual void updateApplication(const std::string& message = LLStringUtil::null);

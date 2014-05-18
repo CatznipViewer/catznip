@@ -825,13 +825,34 @@ bool LLCrashLogger::sendCrashLogs()
     
     mKeyMaster.putProcessList(newlocks);
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
-	cleanupDumpDirs();
+	cleanupDumpDirs(false);
 // [/SL:KB]
    return true;
 }
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
-void LLCrashLogger::cleanupDumpDirs()
+void LLCrashLogger::cleanCrashLogs()
+{
+	LLSD sdProcessesNew = LLSD::emptyArray();
+
+	const LLSD sdProcesses = mKeyMaster.getProcessList();
+	if (sdProcesses.isArray())
+	{
+		for (LLSD::array_const_iterator itProcess = sdProcesses.beginArray(); itProcess != sdProcesses.endArray(); ++itProcess)
+		{
+			if ( (*itProcess).has("pid") && (*itProcess).has("dumpdir") && (*itProcess).has("procname") )
+			{
+				if (mKeyMaster.isProcessAlive( (*itProcess)["pid"].asInteger(), (*itProcess)["procname"].asString()))
+					sdProcessesNew.append(*itProcess);
+			}
+		}
+	}
+
+	mKeyMaster.putProcessList(sdProcessesNew);
+	cleanupDumpDirs(false);
+}
+
+void LLCrashLogger::cleanupDumpDirs(bool fKeepCurrent)
 {
 	// Grab a list of directories that we shouldn't be deleting
 	std::vector<std::string> activeFolders;
@@ -841,6 +862,17 @@ void LLCrashLogger::cleanupDumpDirs()
 		{
 			for (LLSD::array_const_iterator itProcess = sdProcesses.beginArray(); itProcess != sdProcesses.endArray(); ++itProcess)
 				activeFolders.push_back((*itProcess)["dumpdir"].asString());
+		}
+
+		if (fKeepCurrent)
+		{
+			const LLSD sdOptions = getOptionData(PRIORITY_COMMAND_LINE);
+			if (sdOptions.has("dumpdir"))
+			{
+				const std::string& strPath = sdOptions["dumpdir"].asString();
+				if (activeFolders.end() == std::find(activeFolders.begin(), activeFolders.end(), strPath))
+					activeFolders.push_back(strPath);
+			}
 		}
 	}
 
@@ -867,6 +899,24 @@ void LLCrashLogger::cleanupDumpDirs()
 			}
 		}
 	}
+}
+
+bool LLCrashLogger::hasCrashLog()
+{
+	const LLSD sdProcesses = mKeyMaster.getProcessList();
+	if (sdProcesses.isArray())
+	{
+		for (LLSD::array_const_iterator itProcess = sdProcesses.beginArray(); itProcess != sdProcesses.endArray(); ++itProcess)
+		{
+			if ( (*itProcess).has("pid") && (*itProcess).has("dumpdir") && (*itProcess).has("procname") &&
+			     (LLCrashLock::fileExists((*itProcess)["dumpdir"].asString())) &&
+			     (!mKeyMaster.isProcessAlive((*itProcess)["pid"].asInteger(), (*itProcess)["procname"].asString())) )
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 // [/SL:KB]
 
@@ -926,23 +976,6 @@ bool LLCrashLogger::init()
         return false;
     }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
-	// Save the current process information now in case we crash later (also sends any pending crash reports in this session rather than the next)
-	const LLSD sdOptionData = getOptionData(PRIORITY_COMMAND_LINE);
-	if ( (sdOptionData.has("pid")) && (sdOptionData.has("dumpdir")) && (sdOptionData.has("procname")) )
-	{
-		LLSD sdProcesses = mKeyMaster.getProcessList();
-		
-		LLSD sdProcess;
-		sdProcess["pid"] = sdOptionData["pid"];
-		sdProcess["dumpdir"] = sdOptionData["dumpdir"];
-		sdProcess["procname"] = sdOptionData["procname"];
-		sdProcesses.append(sdProcess);
-		
-		mKeyMaster.putProcessList(sdProcesses);
-	}
-// [/SL:KB]
-
     mCrashSettings.declareS32("CrashSubmitBehavior", CRASH_BEHAVIOR_ALWAYS_SEND,
 							  "Controls behavior when viewer crashes "
 							  "(0 = ask before sending crash report, "
@@ -960,9 +993,30 @@ bool LLCrashLogger::init()
 	if (mCrashBehavior == CRASH_BEHAVIOR_NEVER_SEND)
 	{
 		llinfos << "Crash behavior is never_send, quitting" << llendl;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+		// Keep the current session's directory around since the viewer will be writing to it over its lifetime
+		cleanupDumpDirs(true);
+// [/SL:KB]
 		return false;
 	}
     
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	// Save the current process information now in case we crash later (also sends any pending crash reports in this session rather than the next)
+	const LLSD sdOptionData = getOptionData(PRIORITY_COMMAND_LINE);
+	if ( (sdOptionData.has("pid")) && (sdOptionData.has("dumpdir")) && (sdOptionData.has("procname")) )
+	{
+		LLSD sdProcesses = mKeyMaster.getProcessList();
+		
+		LLSD sdProcess;
+		sdProcess["pid"] = sdOptionData["pid"];
+		sdProcess["dumpdir"] = sdOptionData["dumpdir"];
+		sdProcess["procname"] = sdOptionData["procname"];
+		sdProcesses.append(sdProcess);
+		
+		mKeyMaster.putProcessList(sdProcesses);
+	}
+// [/SL:KB]
+
 	gServicePump = new LLPumpIO(gAPRPoolp);
 	gServicePump->prime(gAPRPoolp);
 	LLHTTPClient::setPump(*gServicePump);

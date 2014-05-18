@@ -15,8 +15,8 @@
         <map>
         <key>Comment</key>
             <string>Second Life name will be included with the crash report</string>
-		<key>Persist</key>
-		    <integer>1</integer>
+        <key>Persist</key>
+            <integer>1</integer>
         <key>Type</key>
             <string>Boolean</string>
         <key>Value</key>
@@ -26,8 +26,8 @@
         <map>
         <key>Comment</key>
             <string>Per-user settings override will be sent along with the crash report</string>
-		<key>Persist</key>
-		    <integer>1</integer>
+       <key>Persist</key>
+            <integer>1</integer>
         <key>Type</key>
             <string>Boolean</string>
         <key>Value</key>

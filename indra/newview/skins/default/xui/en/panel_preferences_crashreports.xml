@@ -16,7 +16,7 @@
      label="Send crash reports to catznip.com"
      layout="topleft"
      left="30"
-     name="checkSendCrashReports"
+     name="send_reports_check"
      parse_urls="false"
      top="25"
      width="275"
@@ -29,7 +29,7 @@
      label="Always ask before sending"
      layout="topleft"
      left="60"
-     name="checkSendCrashReportsAlwaysAsk"
+     name="send_reportsask_check"
      top_pad="10"
      width="250"
     />
@@ -52,7 +52,7 @@
      label="Include Second Life name"
      layout="topleft"
      left="60"
-     name="checkSendName"
+     name="send_name_check"
      top_pad="5"
      width="160"
     />
@@ -63,7 +63,7 @@
      height="16"
      label="Include partial log"
      layout="topleft"
-     name="checkSendLog"
+     name="send_log_check"
      top_pad="5"
      width="130"
     />
@@ -128,17 +128,16 @@
      width="145" />
 
     <text
-     layout="topleft"
      follows="top|left"
+     height="15"
+     layout="topleft"
      left="30"
      type="string"
      length="1"
-     height="15"
      mouse_opaque="false"
-     name="textInformation1"
+     name="crash_info1_text"
      top_pad="20"
-     width="475"
-    >
+     width="475">
         Unless checked above crash reports only contain information relevant to the crash.
     </text>
     <text
@@ -148,11 +147,10 @@
      left="30"
      length="1"
      mouse_opaque="false"
-     name="textInformation2"
+     name="crash_info2_text"
      top_pad="10"
      type="string"
-     width="475"
-    >
+     width="475">
         Please review the privacy policy at http://catznip.com/privacy/ .
     </text>
 

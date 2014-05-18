@@ -1941,7 +1941,7 @@ bool LLAppViewer::cleanup()
 		llinfos << "Saved settings" << llendflush;
 	}
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 	// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
 	gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
 // [/SL:KB]
@@ -2565,7 +2565,7 @@ bool LLAppViewer::initConfiguration()
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
 	gSavedSettings.setString("ClientSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8.0e) | Added: Catznip-2.8.0e
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 	gSavedSettings.setString("CrashSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
 // [/SL:KB]
@@ -3776,16 +3776,15 @@ void LLAppViewer::writeSystemInfo()
 	// Only include the log if the user consented
 	if (gCrashSettings.getBOOL("CrashSubmitLog"))
 	{
-// [/SL:KB]
-#if LL_WINDOWS
-		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,"SecondLife.log");
-#else
-		//Not ideal but sufficient for good reporting.
-		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.old");  //LLError::logFileName();
-#endif
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-29 (Catznip-3.4)
+		gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, LLError::logFileName());
 	}
 // [/SL:KB]
+//#if LL_WINDOWS
+//	gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_DUMP,"SecondLife.log");
+//#else
+//    //Not ideal but sufficient for good reporting.
+//    gDebugInfo["SLLog"] = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.old");  //LLError::logFileName();
+//#endif
 
 	gDebugInfo["ClientInfo"]["Name"] = LLVersionInfo::getChannel();
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)

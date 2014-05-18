@@ -211,6 +211,13 @@ bool handle_button_click(WORD button_id)
 		((LLCrashLoggerWindows*)LLCrashLogger::instance())->setUserText(user_text);
 		((LLCrashLoggerWindows*)LLCrashLogger::instance())->sendCrashLogs();
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.6)
+	else if (button_id == IDCANCEL)
+	{
+		((LLCrashLoggerWindows*)LLCrashLogger::instance())->cleanCrashLogs();
+	}
+// [/SL:KB]
+
 	// Quit the app
 	LLApp::setQuitting();
 	return true;
@@ -495,6 +502,33 @@ bool LLCrashLoggerWindows::mainLoop()
 	gHwndProgress = CreateDialog(hInst, MAKEINTRESOURCE(IDD_PROGRESS), 0, NULL);
 	ProcessCaption(gHwndProgress);
 	ShowWindow(gHwndProgress, SW_HIDE );
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	const LLSD sdOptionData = getOptionData(PRIORITY_COMMAND_LINE);
+	if (sdOptionData.has("pid"))
+	{
+		HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, sdOptionData["pid"].asInteger());
+		if (hProcess != NULL)
+		{
+			llinfos << "Waiting for viewer instance with process id " << sdOptionData["pid"].asInteger() << " to terminate..." << llendl;
+			
+			DWORD dwRet = WaitForSingleObject(hProcess, 10000);
+			if (WAIT_TIMEOUT != dwRet)
+				llinfos << "Instance terminated" << llendl;
+			else
+				llinfos << "Timed out waiting for instance to terminate" << llendl;
+
+			CloseHandle(hProcess);
+		}
+	}
+
+	if (!hasCrashLog())
+	{
+		cleanCrashLogs();
+		cleanupDumpDirs(false);
+		return 0;
+	}
+// [/SL:KB]
 
 	if (mCrashBehavior == CRASH_BEHAVIOR_ALWAYS_SEND)
 	{
