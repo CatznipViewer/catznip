@@ -269,11 +269,15 @@ class ViewerManifest(LLManifest):
 
     def installer_base_name(self):
         global CHANNEL_VENDOR_BASE
+        # Show R9 for 9.0.Y.Z but R9.1 for 9.1.Y.Z 
+        installer_version = 'R' + self.args['version'][0]
+        if self.args['version'][1] != '0':
+            installer_version += '_' + self.args['version'][1]
         # a standard map of strings for replacing in the templates
         substitution_strings = {
             'channel_vendor_base' : '_'.join(CHANNEL_VENDOR_BASE.split()),
             'channel_variant_underscores':self.channel_variant_app_suffix(),
-            'version_underscores' : '_'.join(self.args['version']),
+            'version_underscores' : installer_version,
             'arch':self.args['arch']
             }
         return "%(channel_vendor_base)s%(channel_variant_underscores)s_%(version_underscores)s_%(arch)s" % substitution_strings
@@ -699,7 +703,7 @@ class Darwin_i386_Manifest(ViewerManifest):
         self.path(self.args['configuration'] + "/Catznip.app", dst="")
 
         if self.prefix(src="", dst="Contents"):  # everything goes in Contents
-            self.path("Info-SecondLife.plist", dst="Info.plist")
+            self.path("Info.plist", dst="Info.plist")
 
             # copy additional libs in <bundle>/Contents/MacOS/
             self.path("../packages/lib/release/libndofdev.dylib", dst="Resources/libndofdev.dylib")
@@ -949,10 +953,25 @@ class Darwin_i386_Manifest(ViewerManifest):
 
             for s,d in {self.get_dst_prefix():app_name + ".app",
                         os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
-                        os.path.join(dmg_template, "background.jpg"): "background.jpg",
-                        os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
+                        os.path.join(dmg_template, "background.jpg"): "background.jpg"}.items():
+#                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
+#                        os.path.join(dmg_template, "background.jpg"): "background.jpg",
+#                        os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
                 print "Copying to dmg", s, d
                 self.copy_action(self.src_path_of(s), os.path.join(volpath, d))
+
+            # Create the alias file (which is a resource file) from the .r
+            self.run_command('Rez %r -o %r' %
+                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
+                              os.path.join(volpath, "Applications")))
+
+# [SL:FS]
+            # Set up the installer disk image: set icon positions, folder view
+            #  options, and icon label colors -- TS
+            self.run_command('osascript -s o %r %r' % 
+                             (self.src_path_of("installers/darwin/installer-dmg.applescript"),
+                             volname))
+# [/SL:FS]
 
             # Hide the background image, DS_Store file, and volume icon file (set their "visible" bit)
             for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
@@ -974,10 +993,10 @@ class Darwin_i386_Manifest(ViewerManifest):
                 # the original problem manifest by executing the desired command.
                 self.run_command('SetFile -a V %r' % pathname)
 
-            # Create the alias file (which is a resource file) from the .r
-            self.run_command('Rez %r -o %r' %
-                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
-                              os.path.join(volpath, "Applications")))
+#            # Create the alias file (which is a resource file) from the .r
+#            self.run_command('Rez %r -o %r' %
+#                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
+#                              os.path.join(volpath, "Applications")))
 
             # Set the alias file's alias and custom icon bits
             self.run_command('SetFile -a AC %r' % os.path.join(volpath, "Applications"))
