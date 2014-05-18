@@ -268,7 +268,7 @@ static LLAppViewerListener sAppViewerListener(LLAppViewer::instance);
 // viewer.cpp - these are only used in viewer, should be easily moved.
 
 #if LL_DARWIN
-const char * const LL_VERSION_BUNDLE_ID = "com.secondlife.indra.viewer";
+const char * const LL_VERSION_BUNDLE_ID = "com.catznip.indra.viewer";
 extern void init_apple_menu(const char* product);
 #endif // LL_DARWIN
 
@@ -706,7 +706,10 @@ LLAppViewer::LLAppViewer() :
 
 	// Need to do this initialization before we do anything else, since anything
 	// that touches files should really go through the lldir API
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 	//
 	// IMPORTANT! Do NOT put anything that will write
 	// into the log files during normal startup until AFTER
@@ -2550,8 +2553,14 @@ bool LLAppViewer::initConfiguration()
 	initStrings(); // setup paths for LLTrans based on settings files only
 	// - set procedural settings
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
-	gSavedSettings.setString("ClientSettingsFile", 
-        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+	std::string strSettingsFile = gSavedSettings.getString("ClientSettingsFileOverride");
+	if (strSettingsFile.empty())
+		strSettingsFile = getSettingsFilename("Default", "Global");
+	gSavedSettings.setString("ClientSettingsFile", gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, strSettingsFile));
+// [/SL:KB]
+//	gSavedSettings.setString("ClientSettingsFile", 
+//        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 	gSavedSettings.setString("CrashSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
@@ -3547,7 +3556,10 @@ LLSD LLAppViewer::getViewerInfo() const
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+// [/SL:KB]
+//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 	info["CHANNEL"] = LLVersionInfo::getChannel();
@@ -4067,7 +4079,7 @@ void LLAppViewer::handleViewerCrash()
 
 	if (gMessageSystem)
 	{
-		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
+//		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
 		gMessageSystem->stopLogging();
 	}
 

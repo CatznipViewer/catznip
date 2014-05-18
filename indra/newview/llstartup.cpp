@@ -275,6 +275,9 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+void fetch_viewer_data();
+// [/SL:KB]
 
 void callback_cache_name(const LLUUID& id, const std::string& full_name, bool is_group)
 {
@@ -444,6 +447,11 @@ bool idle_startup()
 			// Otherwise, we'll display a reasonable error message that IS translatable.
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
+
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+		fetch_viewer_data();
+// [/SL:KB]
+
 		//
 		// Statistics stuff
 		//
@@ -3375,7 +3383,13 @@ bool process_login_success_response()
 		gAgent.setHomePosRegion(region_handle, position);
 	}
 
-	gAgent.mMOTD.assign(response["message"]);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+	if (gAgent.mMOTD.empty())
+	{
+		gAgent.mMOTD.assign("Second Life: ").append(response["message"]);
+	}
+// [/SL:KB]
+//	gAgent.mMOTD.assign(response["message"]);
 
 	// Options...
 	// Each 'option' is an array of submaps. 
@@ -3559,3 +3573,28 @@ void transition_back_to_login_panel(const std::string& emsg)
 	reset_login(); // calls LLStartUp::setStartupState( STATE_LOGIN_SHOW );
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
+
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
+{
+public:
+	LLHTTPViewerDataResponder() {}
+
+	/*virtual*/ void result(const LLSD& sdData)
+	{
+		if (sdData.has("motd"))
+		{
+			gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
+		}
+	}
+};
+
+void fetch_viewer_data()
+{
+	std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
+	
+	llinfos << "Fetching viewer data from " << strURL << llendl;
+	
+	LLHTTPClient::get(strURL, new LLHTTPViewerDataResponder());
+}
+// [/SL:KB]

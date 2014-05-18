@@ -205,6 +205,17 @@ void LLURLRequest::setCallback(LLURLRequestComplete* callback)
 	mDetail->mCurlRequest->setHeaderCallback(&headerCallback, (void*)callback);
 }
 
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+void LLURLRequest::setModifiedSince(const time_t& if_modified_since)
+{
+	if (if_modified_since)
+	{
+		mDetail->mCurlRequest->setopt(CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+		mDetail->mCurlRequest->setopt(CURLOPT_TIMEVALUE, (long)if_modified_since);
+	}
+}
+// [/FS:AW]
+
 // Added to mitigate the effect of libcurl looking
 // for the ALL_PROXY and http_proxy env variables
 // and deciding to insert a Pragma: no-cache

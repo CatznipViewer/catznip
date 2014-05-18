@@ -170,6 +170,10 @@ public:
 	void setCallback(LLURLRequestComplete* callback);
 	//@}
 
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	void setModifiedSince(const time_t& if_modified_since);
+// [/FS:AW]
+
 	/* @name LLIOPipe virtual implementations
 	 */
 

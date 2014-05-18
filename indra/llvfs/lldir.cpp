@@ -399,7 +399,10 @@ std::string LLDir::buildSLOSCacheDir() const
 	}
 	else
 	{
-		res = add(getOSCacheDir(), "SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-03-17 (Catznip-3.4)
+		res = add(getOSCacheDir(), "Catznip");
+// [/SL:KB]
+//		res = add(getOSCacheDir(), "SecondLife");
 	}
 	return res;
 }
