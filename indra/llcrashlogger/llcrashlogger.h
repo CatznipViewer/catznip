@@ -55,6 +55,9 @@ public:
 	bool saveCrashBehaviorSetting(S32 crash_behavior);
     bool sendCrashLog(std::string dump_dir);
 	bool sendCrashLogs();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	void cleanupDumpDirs();
+// [/SL:KB]
 	LLSD constructPostData();
 	virtual void updateApplication(const std::string& message = LLStringUtil::null);
 	virtual bool init();

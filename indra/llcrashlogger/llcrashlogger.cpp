@@ -54,6 +54,9 @@
 // [/SL:KB]
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4)
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/filesystem.hpp>  
+
 const std::ifstream::pos_type LOG_TRUNC_SIZE = 16384;
 // [/SL:KB]
 
@@ -799,12 +802,12 @@ bool LLCrashLogger::sendCrashLogs()
                         {
                             newlocks.append(*lock);    //Failed to send log so don't delete it.
                         }
-                        else
-                        {
-                            //mCrashInfo["DebugLog"].erase("MinidumpPath");
-
-                            mKeyMaster.cleanupProcess((*lock)["dumpdir"].asString());
-                        }
+//                        else
+//                        {
+//                            //mCrashInfo["DebugLog"].erase("MinidumpPath");
+//
+//                            mKeyMaster.cleanupProcess((*lock)["dumpdir"].asString());
+//                        }
                     }
 				}
             }
@@ -821,8 +824,51 @@ bool LLCrashLogger::sendCrashLogs()
     }
     
     mKeyMaster.putProcessList(newlocks);
-    return true;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	cleanupDumpDirs();
+// [/SL:KB]
+   return true;
 }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+void LLCrashLogger::cleanupDumpDirs()
+{
+	// Grab a list of directories that we shouldn't be deleting
+	std::vector<std::string> activeFolders;
+	{
+		const LLSD sdProcesses = mKeyMaster.getProcessList();
+		if (sdProcesses.isArray())
+		{
+			for (LLSD::array_const_iterator itProcess = sdProcesses.beginArray(); itProcess != sdProcesses.endArray(); ++itProcess)
+				activeFolders.push_back((*itProcess)["dumpdir"].asString());
+		}
+	}
+
+	// Remove any dump directory not referenced by 'activeFolders'
+	std::vector<std::string> folders = gDirUtilp->getDirectoriesInDir(gDirUtilp->getExpandedFilename(LL_PATH_LOGS, ""));
+	for (std::vector<std::string>::const_iterator itFolder = folders.begin(); itFolder != folders.end(); ++itFolder)
+	{
+		const std::string& strFolder = *itFolder;
+		if (boost::starts_with(strFolder, "dump-"))
+		{
+			const std::string& strPath = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, strFolder);
+			if (activeFolders.end() == std::find(activeFolders.begin(), activeFolders.end(), strPath))
+			{
+				try
+				{
+					boost::filesystem::remove_all(strPath);
+					llinfos << "Removed all files from '" << strFolder << "'" << llendl;
+				}
+				catch (boost::filesystem::filesystem_error e)
+				{
+					llinfos << "Unable to remove all files from '" << strFolder << "'" << llendl;
+					llinfos << e.what() << llendl;
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 void LLCrashLogger::updateApplication(const std::string& message)
 {
