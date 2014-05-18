@@ -61,9 +61,12 @@
 #include "llcommandlineparser.h"
 #include "lltrans.h"
 
-#ifndef LL_RELEASE_FOR_DOWNLOAD
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
 #include "llwindebug.h"
-#endif
+// [/SL:KB]
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
+//#include "llwindebug.h"
+//#endif
 
 #include "stringize.h"
 
@@ -517,9 +520,12 @@ bool LLAppViewerWin32::init()
 	// llinfos << "Turning off Windows error reporting." << llendl;
 	disableWinErrorReporting();
 
-#ifndef LL_RELEASE_FOR_DOWNLOAD
-	LLWinDebug::instance().init();
-#endif
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	LLWinDebug::init();
+// [/SL:KB]
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
+//	LLWinDebug::instance().init();
+//#endif
 
 #if LL_WINDOWS
 #if LL_SEND_CRASH_REPORTS
