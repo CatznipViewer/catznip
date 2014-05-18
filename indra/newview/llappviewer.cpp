@@ -1692,12 +1692,12 @@ bool LLAppViewer::cleanup()
 	}
 	LLMetricPerformanceTesterBasic::cleanClass();
 
-//	// remove any old breakpad minidump files from the log directory
-//	if (! isError())
-//	{
-//		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
-//		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
-//	}
+	// remove any old breakpad minidump files from the log directory
+	if (! isError())
+	{
+		std::string logdir = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "");
+		gDirUtilp->deleteFilesInDir(logdir, "*-*-*-*-*.dmp");
+	}
 
 	{
 		// Kill off LLLeap objects. We can find them all because LLLeap is derived
@@ -2184,19 +2184,15 @@ void enumerate_process_threads(HANDLE hThreadSnapshot, DWORD (WINAPI* pCallback)
 
 BOOL CALLBACK watchdog_freeze_dump_callback(void* pParam, const MINIDUMP_CALLBACK_INPUT* pCbInput, MINIDUMP_CALLBACK_OUTPUT* pCbOutput)
 {
-	U32 nFreezeDumpType = (pParam) ? *(U32*)pParam : 0;
 	switch (pCbInput->CallbackType)
 	{
 		case IncludeThreadCallback:
 			{
 				// Only include information about the main thread by default
-				if (0 == nFreezeDumpType)
+				DWORD dwMainThreadId = (DWORD)gDebugInfo["MainloopThreadID"].asInteger();
+				if ( (dwMainThreadId) && (dwMainThreadId != pCbInput->IncludeThread.ThreadId) )
 				{
-					DWORD dwMainThreadId = (DWORD)gDebugInfo["MainloopThreadID"].asInteger();
-					if ( (dwMainThreadId) && (dwMainThreadId != pCbInput->IncludeThread.ThreadId) )
-					{
-						return FALSE;
-					}
+					return FALSE;
 				}
 			}
 			return TRUE;
@@ -2215,18 +2211,11 @@ BOOL CALLBACK watchdog_freeze_dump_callback(void* pParam, const MINIDUMP_CALLBAC
 					return TRUE;
 				}
 
-				// We only want the data segments for the executable and llcommon.dll as a start
+				// We only want the data segments for the main executable
 				if (pCbOutput->ModuleWriteFlags & ModuleWriteDataSeg)
 				{
 					if ((HMODULE)pCbInput->Module.BaseOfImage != GetModuleHandle(NULL))
-					{
-						// Not the main executable, check DLLs by name
-						TCHAR* pstrModuleName = wcsrchr(pCbInput->Module.FullPath, L'\\');
-						if ( (!pstrModuleName) || (0 != wcsicmp(++pstrModuleName, L"llcommon.dll")) )
-						{
-							pCbOutput->ModuleWriteFlags &= ~ModuleWriteDataSeg;
-						}
-					}
+						pCbOutput->ModuleWriteFlags &= ~ModuleWriteDataSeg;
 				}
 			}
 			return TRUE;
@@ -2247,18 +2236,16 @@ void watchdog_freeze_callback()
 	{
 		enumerate_process_threads(hThreadSnapshot, SuspendThread);
 
-		U32 nFreezeDumpType = gSavedSettings.getU32("WatchdogFreezeDumpType");
 		U32 nMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths | MiniDumpWithIndirectlyReferencedMemory | MiniDumpScanMemory;
-		if (nFreezeDumpType >= 2)
-			nMiniDumpType |= MiniDumpWithDataSegs;
+
 		MINIDUMP_CALLBACK_INFORMATION dumpCbInfo;
 		dumpCbInfo.CallbackRoutine = (MINIDUMP_CALLBACK_ROUTINE)watchdog_freeze_dump_callback;
-		dumpCbInfo.CallbackParam = &nFreezeDumpType;
+		dumpCbInfo.CallbackParam = NULL;
 		const std::string strFilename = LLUUID::generateNewID().asString() + ".dmp";
 		const std::string strMinidumpPath = LLWinDebug::writeDumpToFile(strFilename, (MINIDUMP_TYPE)nMiniDumpType, NULL, &dumpCbInfo);
 
-		gDebugInfo["MinidumpPath"] = strMinidumpPath;
-		LLAppViewer::writeDebugInfo();
+		gDebugInfo["Dynamic"]["MinidumpPath"] = strMinidumpPath;
+		LLAppViewer::instance()->writeDebugInfo(false);
 
 		enumerate_process_threads(hThreadSnapshot, ResumeThread);
 
@@ -3439,7 +3426,10 @@ bool LLAppViewer::initWindow()
 	int watchdog_enabled_setting = gSavedSettings.getS32("WatchdogEnabled");
 	if (watchdog_enabled_setting == -1)
 	{
-		use_watchdog = !LLFeatureManager::getInstance()->isFeatureAvailable("WatchdogDisabled");
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2014-05-18 (Catznip-3.7)
+		use_watchdog = LLVersionInfo::CHANNEL_RELEASE != LLVersionInfo::getChannelType();
+// [/SL:KB]
+//		use_watchdog = !LLFeatureManager::getInstance()->isFeatureAvailable("WatchdogDisabled");
 	}
 	else
 	{

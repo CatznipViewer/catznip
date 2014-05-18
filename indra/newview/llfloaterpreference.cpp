@@ -46,7 +46,7 @@
 #include "llcombobox.h"
 #include "llcommandhandler.h"
 #include "lldirpicker.h"
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4.1)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-06-27 (Catznip-3.4)
 #include "llerrorcontrol.h"
 // [/SL:KB]
 #include "lleventtimer.h"

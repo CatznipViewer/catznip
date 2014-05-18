@@ -759,6 +759,26 @@ bool LLCrashLogger::sendCrashLog(std::string dump_dir)
     
 	mSentCrashLogs = sent;
     
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	if (!mCrashLink.empty())
+	{
+#if LL_WINDOWS && LL_SEND_CRASH_REPORTS
+		if (IDYES == MessageBox(NULL, L"Additional information is available about this crash. Display?", L"Crash Information", MB_YESNO))
+		{
+			wchar_t wstrCrashLink[512];
+			mbstowcs_s(NULL, wstrCrashLink, 512, mCrashLink.c_str(), _TRUNCATE);
+
+			SHELLEXECUTEINFO sei = {0};
+			sei.cbSize = sizeof(SHELLEXECUTEINFO);
+			sei.fMask = SEE_MASK_NOASYNC;
+			sei.lpVerb = L"open";
+			sei.lpFile = wstrCrashLink;
+			ShellExecuteEx(&sei); 
+		}
+#endif // LL_WINDOWS && LL_SEND_CRASH_REPORTS
+	}
+// [/SL:KB]
+
 	return sent;
 }
 
