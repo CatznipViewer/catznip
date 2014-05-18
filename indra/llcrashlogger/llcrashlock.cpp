@@ -117,7 +117,12 @@ LLSD LLCrashLock::getLockFile(std::string filename)
     
 	if (ifile.is_open())
 	{									            
-        LLSDSerialize::fromXML(lock_sd, ifile);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+		// Protective fix in case of an invalid/corrupt file 
+		if (-1 == LLSDSerialize::fromXML(lock_sd, ifile))
+			lock_sd = LLSD::emptyArray();
+// [/SL:KB]
+//        LLSDSerialize::fromXML(lock_sd, ifile);
 		ifile.close();
 	}
 

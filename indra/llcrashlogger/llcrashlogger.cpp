@@ -769,15 +769,15 @@ bool LLCrashLogger::sendCrashLogs()
     LLSD locks = mKeyMaster.getProcessList();
     LLSD newlocks = LLSD::emptyArray();
 
-	LLSD opts = getOptionData(PRIORITY_COMMAND_LINE);
-    LLSD rec;
-
-	if ( opts.has("pid") && opts.has("dumpdir") && opts.has("procname") )
-    {
-        rec["pid"]=opts["pid"];
-        rec["dumpdir"]=opts["dumpdir"];
-        rec["procname"]=opts["procname"];
-    }
+//	LLSD opts = getOptionData(PRIORITY_COMMAND_LINE);
+//    LLSD rec;
+//
+//	if ( opts.has("pid") && opts.has("dumpdir") && opts.has("procname") )
+//    {
+//        rec["pid"]=opts["pid"];
+//        rec["dumpdir"]=opts["dumpdir"];
+//        rec["procname"]=opts["procname"];
+//    }
 	
     if (locks.isArray())
     {
@@ -818,10 +818,10 @@ bool LLCrashLogger::sendCrashLogs()
         }
     }
 
-    if (rec)
-    {
-        newlocks.append(rec);
-    }
+//    if (rec)
+//    {
+//        newlocks.append(rec);
+//    }
     
     mKeyMaster.putProcessList(newlocks);
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
@@ -925,6 +925,23 @@ bool LLCrashLogger::init()
         LL_WARNS("CRASHREPORT") << "Unable to get master lock.  Another crash reporter may be hung." << LL_ENDL;
         return false;
     }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	// Save the current process information now in case we crash later (also sends any pending crash reports in this session rather than the next)
+	const LLSD sdOptionData = getOptionData(PRIORITY_COMMAND_LINE);
+	if ( (sdOptionData.has("pid")) && (sdOptionData.has("dumpdir")) && (sdOptionData.has("procname")) )
+	{
+		LLSD sdProcesses = mKeyMaster.getProcessList();
+		
+		LLSD sdProcess;
+		sdProcess["pid"] = sdOptionData["pid"];
+		sdProcess["dumpdir"] = sdOptionData["dumpdir"];
+		sdProcess["procname"] = sdOptionData["procname"];
+		sdProcesses.append(sdProcess);
+		
+		mKeyMaster.putProcessList(sdProcesses);
+	}
+// [/SL:KB]
 
     mCrashSettings.declareS32("CrashSubmitBehavior", CRASH_BEHAVIOR_ALWAYS_SEND,
 							  "Controls behavior when viewer crashes "
