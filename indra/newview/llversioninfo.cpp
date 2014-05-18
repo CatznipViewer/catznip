@@ -167,7 +167,7 @@ void LLVersionInfo::resetChannel(const std::string& channel)
 	sVersionChannel.clear(); // Reset version and channel string til next use.
 }
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
 const char* getBuildPlatformString()
 {
 #if LL_WINDOWS

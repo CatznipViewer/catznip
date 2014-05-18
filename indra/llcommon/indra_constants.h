@@ -392,7 +392,7 @@ const S32 CRASH_BEHAVIOR_ASK = 0;
 const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
 const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
 
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-17 (Catznip-3.0.0a) | Added: Catznip-2.6.0c
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-17 (Catznip-2.6)
 // Moved here from llappviewer.h so that it can be shared with llcrashlogger.cpp
 typedef enum 
 {

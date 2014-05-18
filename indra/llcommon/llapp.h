@@ -214,15 +214,10 @@ public:
 	 * DO NOT call this method if your application has specialized
 	 * error handling code.
 	 */
-// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-3.0.0a) | Added: Catznip-2.4.0a
-	enum EMiniDumpType
-	{
-		MINIDUMP_MINIMAL = 0,
-		MINIDUMP_NORMAL = 1,
-		MINIDUMP_EXTENDED = 2
-	};
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-17 (Catznip-3.7)
+	void setupErrorHandling(bool second_instance, bool extended_logging);
 // [/SL:KB]
-	void setupErrorHandling(bool mSecondInstance=false);
+//	void setupErrorHandling(bool mSecondInstance=false);
 
 	void setErrorHandler(LLAppErrorHandler handler);
 	static void runErrorHandler(); // run shortly after we detect an error, ran in the relatively robust context of the LLErrorThread - preferred.
