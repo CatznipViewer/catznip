@@ -2,7 +2,7 @@
 * @file llcrashlookup.cpp
 * @brief Base crash analysis class
 * 
-* Copyright (C) 2011-2013, Kitty Barnett
+* Copyright (C) 2011-2014, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -24,20 +24,39 @@
 
 #include "llcrashlookup.h"
 
-LLCrashLookup::LLCrashLookup()
-	: m_nInstructionAddr(0)
-	, m_strModule("unknown")
-	, m_nModuleBaseAddr(0)
-	, m_nModuleTimeStamp(0)
-	, m_nModuleChecksum(0)
-	, m_nModuleVersion(0)
+// ============================================================================
+// LLMinidumpInfo structure
+//
+
+LLMinidumpInfo::LLMinidumpInfo()
 {
+	clear();
 }
 
-const std::string LLCrashLookup::getModuleVersionString() const
+void LLMinidumpInfo::clear()
+{
+	m_nInstructionAddr = m_nModuleBaseAddr = 0;
+	m_strModule = "unknown";
+	m_nModuleTimeStamp = m_nModuleChecksum = 0;
+	m_nModuleVersion = 0;
+}
+
+LLSD LLMinidumpInfo::asLLSD() const
+{
+	LLSD sdInfo;
+	sdInfo["crash_module_name"] = getModuleName();
+	sdInfo["crash_module_version"] = llformat("%I64d", getModuleVersion());
+	sdInfo["crash_module_versionstring"] = getModuleVersionString();
+	sdInfo["crash_module_displacement"] = llformat("%I64d", getModuleDisplacement());
+	return sdInfo;
+}
+
+const std::string LLMinidumpInfo::getModuleVersionString() const
 {
 	std::string strVersion = llformat("%d.%d.%d.%d", 
 		(U32)(m_nModuleVersion >> 48), (U32)((m_nModuleVersion >> 32) & 0xFFFF), 
 		(U32)((m_nModuleVersion >> 16) & 0xFFFF), (U32)(m_nModuleVersion & 0xFFFF));
 	return strVersion;
 }
+
+// ============================================================================

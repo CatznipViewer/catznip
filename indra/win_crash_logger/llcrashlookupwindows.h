@@ -2,7 +2,7 @@
 * @file llcrashlookupwindows.h
 * @brief Basic Windows crash analysis
 * 
-* Copyright (C) 2011-2013, Kitty Barnett
+* Copyright (C) 2011-2014, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -25,8 +25,11 @@
 
 #if LL_SEND_CRASH_REPORTS
 
-#include <DbgEng.h>
 #include "llcrashlookup.h"
+
+// ============================================================================
+// LLCrashLookupWindows class
+//
 
 class LLCrashLookupWindows : public LLCrashLookup
 {
@@ -35,13 +38,10 @@ public:
 	virtual ~LLCrashLookupWindows();
 
 public:
-	/*virtual*/ bool initFromDump(const std::string& strDumpPath);
-
-protected:
-	IDebugClient*	m_pDbgClient;
-	IDebugControl4*	m_pDbgControl;
-	IDebugSymbols2*	m_pDbgSymbols;
+	/*virtual*/ bool getDumpInfo(const std::string& strDumpPath, LLMinidumpInfo& dumpInfo);
 };
+
+// ============================================================================
 
 #endif // LL_SEND_CRASH_REPORTS
 

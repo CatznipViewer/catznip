@@ -463,18 +463,19 @@ void LLCrashLogger::gatherFiles()
 		if (gDirUtilp->fileExists(minidump_path))
 		{
 			mFileMap["Minidump"] = minidump_path;
+
+			LLMinidumpInfo dumpInfo;
 			if (mCrashLookup)
 			{
-				mCrashLookup->initFromDump(minidump_path);
+				mCrashLookup->getDumpInfo(minidump_path, dumpInfo);
 				if (mCrashLookup->hasErorrMessage())
-				{
-					mDebugLog["DbgDumpLookup"] = mCrashLookup->getErrorMessage();
-				}
+					mDebugLog["DumpInfoDbg"] = mCrashLookup->getErrorMessage();
 			}
+			mCrashInfo["DumpInfo"] = dumpInfo.asLLSD();
 		}
 		else
 		{
-			mDebugLog["DbgDump"] = "Minidump path does not exist";
+			mDebugLog["DumpInfoDbg"] = "Minidump path does not exist";
 		}
 
 		// Remove the minidump path after we've retrieved it since it could contain the OS user name
@@ -482,7 +483,7 @@ void LLCrashLogger::gatherFiles()
 	}
 	else
 	{
-		mDebugLog["DbgDump"] = "Minidump path is empty";
+		mDebugLog["DumpInfoDbg"] = "Minidump path is empty";
 	}
 
 	// We're done with mDebugLog so move it into the crash report
@@ -631,12 +632,10 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
 		/*
 		 * Include crash analysis pony
 		 */
-		if (mCrashLookup)
+		if ( (mCrashInfo.has("DumpInfo")) && (mCrashInfo["DumpInfo"].isMap()) )
 		{
-			body << getFormDataField("crash_module_name", mCrashLookup->getModuleName(), BOUNDARY);
-			body << getFormDataField("crash_module_version", llformat("%I64d", mCrashLookup->getModuleVersion()), BOUNDARY);
-			body << getFormDataField("crash_module_versionstring", mCrashLookup->getModuleVersionString(), BOUNDARY);
-			body << getFormDataField("crash_module_displacement", llformat("%I64d", mCrashLookup->getModuleDisplacement()), BOUNDARY);
+			for (LLSD::map_const_iterator itField = mCrashInfo["DumpInfo"].beginMap(), endField = mCrashInfo["DumpInfo"].endMap(); itField != endField; ++itField)
+				body << getFormDataField(itField->first, itField->second.asString(), BOUNDARY);
 		}
 
 		/*
