@@ -135,6 +135,7 @@ protected:
 	/*virtual*/ const std::string& getAnchorViewName() { return NOTIFICATION_WELL_ANCHOR_NAME; }
 
 // [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	bool checkFilter(const LLSysWellItem* pWellItem) const;
 	void refreshFilter();
 // [/SL:KB]
 private:
@@ -154,6 +155,9 @@ private:
 // [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
 	LLComboBox*     m_pFilterType;
 	LLFilterEditor* m_pFilterText;
+
+	std::string     m_strFilterType;
+	std::string     m_strFilterText;
 // [/SL:KB]
 };
 

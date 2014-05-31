@@ -440,12 +440,64 @@ void LLNotificationWellWindow::closeAll()
 }
 
 // [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
+{
+	bool fVisible = true;
+
+	LLNotificationPtr pNotification = (pWellItem) ? LLNotifications::getInstance()->find(pWellItem->getID()) : LLNotificationPtr((LLNotification*)NULL);
+	if (pNotification)
+	{
+		// Filter by type
+		if ( (fVisible) && (!m_strFilterType.empty()))
+		{
+			fVisible = (m_strFilterType == pNotification->getType());
+		}
+
+		// Filter by text
+		if ( (fVisible) && (!m_strFilterText.empty()) )
+		{
+			if ("groupnotify" == pNotification->getType())
+			{
+				const LLSD& sdPayload = pNotification->getPayload();
+
+				// Check the notice's subject or body
+				fVisible = 
+					(!boost::ifind_first(sdPayload["subject"].asString(), m_strFilterText).empty()) || 
+					(!boost::ifind_first(sdPayload["message"].asString(), m_strFilterText).empty());
+				// Check the group's name
+				if (!fVisible)
+				{
+					const LLUUID idGroup = sdPayload["group_id"]; std::string strGroupName;
+					if ( (idGroup.notNull()) && (gCacheName->getGroupName(idGroup, strGroupName)) )
+						fVisible = !boost::ifind_first(strGroupName, m_strFilterText).empty();
+				}
+				// Check the sender's name
+				if (!fVisible)
+				{
+					const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
+					if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
+						fVisible = !boost::ifind_first(avSender.getCompleteName(), m_strFilterText).empty();
+				}
+			}
+			else
+			{
+				fVisible = !boost::ifind_first(pWellItem->getTitle(), m_strFilterText).empty();
+			}
+		}
+	}
+
+	return fVisible;
+}
 
 void LLNotificationWellWindow::refreshFilter()
 {
-	const std::string strFilterType = m_pFilterType->getSelectedValue();
-	const std::string strFilterText = m_pFilterText->getText();
-	const bool fHasFilter = (!strFilterType.empty()) || (!strFilterText.empty());
+	const std::string strNewFilterType = m_pFilterType->getSelectedValue();
+	const std::string strNewFilterText = m_pFilterText->getText();
+	const bool fHasFilter = (!strNewFilterType.empty()) || (!strNewFilterText.empty());
+
+	const bool fFilterSubset = (fHasFilter) && (strNewFilterType == m_strFilterType) && (!m_strFilterText.empty()) && (!boost::ifind_first(strNewFilterText, m_strFilterText).empty());
+	m_strFilterType = strNewFilterType;
+	m_strFilterText = strNewFilterText;
 
 	std::vector<LLPanel*> lMessages;
 	mMessageList->getItems(lMessages);
@@ -459,56 +511,13 @@ void LLNotificationWellWindow::refreshFilter()
 			continue;
 		}
 
-		bool fVisible = true;
-
-		LLNotificationPtr pNotification = LLNotifications::getInstance()->find(pWellItem->getID());
-		if (pNotification)
-		{
-			// Filter by type
-			if ( (fVisible) && (!strFilterType.empty()))
-			{
-				fVisible = (strFilterType == pNotification->getType());
-			}
-
-			// Filter by text
-			if ( (fVisible) && (!strFilterText.empty()) )
-			{
-				if ("groupnotify" == pNotification->getType())
-				{
-					const LLSD& sdPayload = pNotification->getPayload();
-
-					// Check the notice's subject or body
-					fVisible = 
-						(!boost::ifind_first(sdPayload["subject"].asString(), strFilterText).empty()) || 
-						(!boost::ifind_first(sdPayload["message"].asString(), strFilterText).empty());
-					// Check the group's name
-					if (!fVisible)
-					{
-						const LLUUID idGroup = sdPayload["group_id"]; std::string strGroupName;
-						if ( (idGroup.notNull()) && (gCacheName->getGroupName(idGroup, strGroupName)) )
-							fVisible = !boost::ifind_first(strGroupName, strFilterText).empty();
-					}
-					// Check the sender's name
-					if (!fVisible)
-					{
-						const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
-						if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
-							fVisible = !boost::ifind_first(avSender.getCompleteName(), strFilterText).empty();
-					}
-				}
-				else
-				{
-					fVisible = !boost::ifind_first(pWellItem->getTitle(), strFilterText).empty();
-				}
-			}
-		}
-
-		pWellItem->setVisible(fVisible);
+		// If the new filtered set will be a subset of the previous pass then we can only check the currently visible items
+		if ( (!fFilterSubset) || (pWellItem->getVisible()) )
+			pWellItem->setVisible(checkFilter(pWellItem));
 	}
 
 	mMessageList->notify(LLSD().with("rearrange", LLSD()));
 }
-
 // [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////

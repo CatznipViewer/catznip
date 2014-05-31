@@ -50,7 +50,7 @@ public:
 
 	// title
 // [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
-	const std::string getTitle();
+	const std::string getTitle() const;
 	void              setTitle(const std::string& title );
 // [/SL:KB]
 //	void setTitle( std::string title );
