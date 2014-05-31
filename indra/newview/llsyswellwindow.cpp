@@ -476,7 +476,11 @@ bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
 				{
 					const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
 					if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
-						fVisible = !boost::ifind_first(avSender.getCompleteName(), m_strFilterText).empty();
+					{
+						fVisible =
+							(!boost::ifind_first(avSender.getCompleteName(), m_strFilterText).empty()) ||
+							( (!avSender.isDisplayNameDefault()) && (!boost::ifind_first(avSender.getLegacyName(), m_strFilterText).empty()) );
+					}
 				}
 			}
 			else
