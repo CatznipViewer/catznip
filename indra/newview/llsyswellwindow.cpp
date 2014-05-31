@@ -36,6 +36,14 @@
 #include "llspeakers.h"
 #include "lltoastpanel.h"
 
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+#include "llavatarnamecache.h"
+#include "llcombobox.h"
+#include "llfiltereditor.h"
+
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
 //---------------------------------------------------------------------------------
 LLSysWellWindow::LLSysWellWindow(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
 													mChannel(NULL),
@@ -336,6 +344,10 @@ LLNotificationWellWindow::WellNotificationChannel::WellNotificationChannel(LLNot
 
 LLNotificationWellWindow::LLNotificationWellWindow(const LLSD& key)
 :	LLSysWellWindow(key)
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+,	m_pFilterType(NULL)
+,	m_pFilterText(NULL)
+// [/SL:KB]
 {
 	mNotificationUpdates.reset(new WellNotificationChannel(this));
 }
@@ -350,6 +362,14 @@ LLNotificationWellWindow* LLNotificationWellWindow::getInstance(const LLSD& key 
 BOOL LLNotificationWellWindow::postBuild()
 {
 	BOOL rv = LLSysWellWindow::postBuild();
+
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	m_pFilterType = getChild<LLComboBox>("filter_type");
+	m_pFilterType->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
+	m_pFilterText = getChild<LLFilterEditor>("filter_text");
+	m_pFilterText->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
+// [/SL:KB]
+
 // [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 	mMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
 // [/SL:KB]
@@ -418,6 +438,78 @@ void LLNotificationWellWindow::closeAll()
 			onItemClose(sys_well_item);
 	}
 }
+
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+
+void LLNotificationWellWindow::refreshFilter()
+{
+	const std::string strFilterType = m_pFilterType->getSelectedValue();
+	const std::string strFilterText = m_pFilterText->getText();
+	const bool fHasFilter = (!strFilterType.empty()) || (!strFilterText.empty());
+
+	std::vector<LLPanel*> lMessages;
+	mMessageList->getItems(lMessages);
+	for (std::vector<LLPanel*>::const_iterator itMessage = lMessages.begin(); itMessage != lMessages.end(); ++itMessage)
+	{
+		LLSysWellItem* pWellItem = (fHasFilter) ? dynamic_cast<LLSysWellItem*>(*itMessage) : NULL;
+		if (!pWellItem)
+		{
+			// Unknown item (visible when not filtering, otherwise invisible) or not filtering
+			(*itMessage)->setVisible(!fHasFilter);
+			continue;
+		}
+
+		bool fVisible = true;
+
+		LLNotificationPtr pNotification = LLNotifications::getInstance()->find(pWellItem->getID());
+		if (pNotification)
+		{
+			// Filter by type
+			if ( (fVisible) && (!strFilterType.empty()))
+			{
+				fVisible = (strFilterType == pNotification->getType());
+			}
+
+			// Filter by text
+			if ( (fVisible) && (!strFilterText.empty()) )
+			{
+				if ("groupnotify" == pNotification->getType())
+				{
+					const LLSD& sdPayload = pNotification->getPayload();
+
+					// Check the notice's subject or body
+					fVisible = 
+						(!boost::ifind_first(sdPayload["subject"].asString(), strFilterText).empty()) || 
+						(!boost::ifind_first(sdPayload["message"].asString(), strFilterText).empty());
+					// Check the group's name
+					if (!fVisible)
+					{
+						const LLUUID idGroup = sdPayload["group_id"]; std::string strGroupName;
+						if ( (idGroup.notNull()) && (gCacheName->getGroupName(idGroup, strGroupName)) )
+							fVisible = !boost::ifind_first(strGroupName, strFilterText).empty();
+					}
+					// Check the sender's name
+					if (!fVisible)
+					{
+						const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
+						if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
+							fVisible = !boost::ifind_first(avSender.getCompleteName(), strFilterText).empty();
+					}
+				}
+				else
+				{
+					fVisible = !boost::ifind_first(pWellItem->getTitle(), strFilterText).empty();
+				}
+			}
+		}
+
+		pWellItem->setVisible(fVisible);
+	}
+
+	mMessageList->notify(LLSD().with("rearrange", LLSD()));
+}
+
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS

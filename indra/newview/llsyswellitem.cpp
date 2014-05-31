@@ -55,10 +55,21 @@ LLSysWellItem::~LLSysWellItem()
 }
 
 //---------------------------------------------------------------------------------
-void LLSysWellItem::setTitle( std::string title )
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+const std::string LLSysWellItem::getTitle()
+{
+	return mTitle->getText();
+}
+
+void LLSysWellItem::setTitle(const std::string& title)
 {
 	mTitle->setValue(title);
 }
+// [/SL:KB]
+//void LLSysWellItem::setTitle( std::string title )
+//{
+//	mTitle->setValue(title);
+//}
 
 //---------------------------------------------------------------------------------
 void LLSysWellItem::onClickCloseBtn()

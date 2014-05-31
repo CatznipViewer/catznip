@@ -39,6 +39,10 @@ class LLFlatListView;
 class LLIMChiclet;
 class LLScriptChiclet;
 class LLSysWellChiclet;
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+class LLComboBox;
+class LLFilterEditor;
+// [/SL:KB]
 
 class LLSysWellWindow : public LLTransientDockableFloater
 {
@@ -130,6 +134,9 @@ protected:
 	LLNotificationChannelPtr mNotificationUpdates;
 	/*virtual*/ const std::string& getAnchorViewName() { return NOTIFICATION_WELL_ANCHOR_NAME; }
 
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	void refreshFilter();
+// [/SL:KB]
 private:
 	// init Window's channel
 	void initChannel();
@@ -144,6 +151,10 @@ private:
 	// ID of a toast loaded by user (by clicking notification well item)
 	LLUUID mLoadedToastId;
 
+// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	LLComboBox*     m_pFilterType;
+	LLFilterEditor* m_pFilterText;
+// [/SL:KB]
 };
 
 /**
