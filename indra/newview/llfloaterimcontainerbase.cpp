@@ -325,6 +325,10 @@ void LLFloaterIMContainerBase::doToGroup(const std::string& action, const LLUUID
 	{
 		gViewerWindow->getWindow()->copyTextToClipboard(utf8str_to_wstring(LLSLURL("group", group_id, "about").getSLURLString()));
 	}
+	else if ("end_session" == action)
+	{
+		LLGroupActions::endIM(group_id);
+	}
 }
 // [/SL:KB]
 

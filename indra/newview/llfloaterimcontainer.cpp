@@ -1202,6 +1202,12 @@ void LLFloaterIMContainerBase::doToParticipants(const std::string& command, uuid
 		{
 			toggleMute(userID, LLMute::flagTextChat);
 		}
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-06-01 (Catznip-3.6)
+		else if ("end_im" == command)
+		{
+			LLAvatarActions::endIM(userID);
+		}
+// [/SL:KB]
 //		else if ("selected" == command || "mute_all" == command || "unmute_all" == command)
 //		{
 //			moderateVoice(command, userID);
@@ -1439,7 +1445,10 @@ bool LLFloaterIMContainerBase::enableContextMenuItem(const std::string& item, uu
 	}
 
 	// Handle all other options
-	if (("can_invite" == item) || ("can_chat_history" == item) || ("can_share" == item) || ("can_pay" == item))
+//	if (("can_invite" == item) || ("can_chat_history" == item) || ("can_share" == item) || ("can_pay" == item))
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-06-01 (Catznip-3.6)
+	if (("can_invite" == item) || ("can_chat_history" == item) || ("can_share" == item) || ("can_pay" == item) || ("is_single_selection" == item))
+// [/SL:KB]
 	{
 		// Those menu items are enable only if a single avatar is selected
 		return is_single_select;
