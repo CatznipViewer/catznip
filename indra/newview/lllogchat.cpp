@@ -257,6 +257,48 @@ std::string LLLogChat::cleanFileName(std::string filename)
 	return filename;
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+bool LLLogChat::buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename)
+{
+	static LLCachedControl<bool> fLegacyFilenames(gSavedSettings, "UseLegacyIMLogNames", true);
+
+	// If we have the name cached then we can simply return the username
+	LLAvatarName avName;
+	if (LLAvatarNameCache::get(idAgent, &avName))
+	{
+		if (!fLegacyFilenames)
+		{
+			strFilename = avName.getUserName();
+		}
+		else
+		{
+			strFilename = LLCacheName::cleanFullName(avName.getLegacyName());
+		}
+		return true;
+	}
+	else
+	{
+		// Try and get it from the legacy cache if we can
+		std::string strLegacyName;
+		if (gCacheName->getFullName(idAgent, strLegacyName))
+			strLegacyName = strName;
+
+		if (!fLegacyFilenames)
+		{
+			// If we don't have it cached 'strName' *should* be a legacy name (or a complete name) and we can construct a username from that
+			strFilename = LLCacheName::buildUsername(strName);
+			return strName != strFilename;	// If the assumption above was wrong then the two will match which signals failure
+		}
+		else
+		{
+			// Strip any possible mention of a username
+			strFilename = LLCacheName::buildLegacyName(strName);
+			return (!strFilename.empty());	// Assume success as long as the filename isn't an empty string
+		}
+	}
+}
+// [/SL:KB]
+
 std::string LLLogChat::timestamp(bool withdate)
 {
 	std::string timeStr;
@@ -334,12 +376,13 @@ void LLLogChat::saveHistory(const std::string& filename,
 }
 
 // static
-void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+bool LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
 {
 	if (file_name.empty())
 				{
 					LL_WARNS("LLLogChat::loadChatHistory") << "Session name is Empty!" << LL_ENDL;
-					return ;
+					return false;
 				}
 
 				bool load_all_history = load_params.has("load_all_history") ? load_params["load_all_history"].asBoolean() : false;
@@ -350,25 +393,30 @@ void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& m
 					fptr = LLFile::fopen(LLLogChat::oldLogFileName(file_name), "r");/*Flawfinder: ignore*/
 					if (!fptr)
 					{
-						return;						//No previous conversation with this name.
+						return false;
 					}
 				}
 
-				char buffer[LOG_RECALL_SIZE];		/*Flawfinder: ignore*/
+				const S32 recall_size = (load_params.has("recall_size")) ? load_params["recall_size"].asInteger() : LOG_RECALL_SIZE;
+				bool read_eof = false;
+
+				char* buffer = new char[recall_size];		/*Flawfinder: ignore*/
 				char *bptr;
 				S32 len;
 				bool firstline = TRUE;
 
-				if (load_all_history || fseek(fptr, (LOG_RECALL_SIZE - 1) * -1  , SEEK_END))
+				if (load_all_history || fseek(fptr, (recall_size - 1) * -1  , SEEK_END))
 				{	//We need to load the whole historyFile or it's smaller than recall size, so get it all.
 					firstline = FALSE;
 					if (fseek(fptr, 0, SEEK_SET))
 					{
+						delete[] buffer;
 						fclose(fptr);
-						return;
+						return false;
 					}
+					read_eof = true;
 				}
-			while (fgets(buffer, LOG_RECALL_SIZE, fptr)  && !feof(fptr))
+				while (fgets(buffer, recall_size, fptr)  && !feof(fptr))
 				{
 					len = strlen(buffer) - 1;		/*Flawfinder: ignore*/
 					for (bptr = (buffer + len); (*bptr == '\n' || *bptr == '\r') && bptr>buffer; bptr--)	*bptr='\0';
@@ -404,8 +452,82 @@ void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& m
 				}
 				fclose(fptr);
 
-
+	delete[] buffer;
+	return read_eof;
 }
+// [/SL:KB]
+//void LLLogChat::loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params)
+//{
+//	if (file_name.empty())
+//				{
+//					LL_WARNS("LLLogChat::loadChatHistory") << "Session name is Empty!" << LL_ENDL;
+//					return ;
+//				}
+//
+//				bool load_all_history = load_params.has("load_all_history") ? load_params["load_all_history"].asBoolean() : false;
+//
+//				LLFILE* fptr = LLFile::fopen(LLLogChat::makeLogFileName(file_name), "r");/*Flawfinder: ignore*/
+//				if (!fptr)
+//				{
+//					fptr = LLFile::fopen(LLLogChat::oldLogFileName(file_name), "r");/*Flawfinder: ignore*/
+//					if (!fptr)
+//					{
+//						return;						//No previous conversation with this name.
+//					}
+//				}
+//
+//				char buffer[LOG_RECALL_SIZE];		/*Flawfinder: ignore*/
+//				char *bptr;
+//				S32 len;
+//				bool firstline = TRUE;
+//
+//				if (load_all_history || fseek(fptr, (LOG_RECALL_SIZE - 1) * -1  , SEEK_END))
+//				{	//We need to load the whole historyFile or it's smaller than recall size, so get it all.
+//					firstline = FALSE;
+//					if (fseek(fptr, 0, SEEK_SET))
+//					{
+//						fclose(fptr);
+//						return;
+//					}
+//				}
+//			while (fgets(buffer, LOG_RECALL_SIZE, fptr)  && !feof(fptr))
+//				{
+//					len = strlen(buffer) - 1;		/*Flawfinder: ignore*/
+//					for (bptr = (buffer + len); (*bptr == '\n' || *bptr == '\r') && bptr>buffer; bptr--)	*bptr='\0';
+//
+//					if (firstline)
+//					{
+//						firstline = FALSE;
+//						continue;
+//					}
+//
+//					std::string line(buffer);
+//
+//					//updated 1.23 plain text log format requires a space added before subsequent lines in a multilined message
+//					if (' ' == line[0])
+//					{
+//						line.erase(0, MULTI_LINE_PREFIX.length());
+//						append_to_last_message(messages, '\n' + line);
+//					}
+//					else if (0 == len && ('\n' == line[0] || '\r' == line[0]))
+//					{
+//						//to support old format's multilined messages with new lines used to divide paragraphs
+//						append_to_last_message(messages, line);
+//					}
+//					else
+//					{
+//						LLSD item;
+//						if (!LLChatLogParser::parse(line, item, load_params))
+//						{
+//							item[LL_IM_TEXT] = line;
+//						}
+//						messages.push_back(item);
+//					}
+//				}
+//				fclose(fptr);
+//
+//
+//}
 
 void LLLogChat::startChatHistoryThread(const std::string& file_name, const LLSD& load_params)
 {
@@ -470,13 +592,13 @@ void LLLogChat::findTranscriptFiles(std::string pattern, std::vector<std::string
 		LLFILE * filep = LLFile::fopen(fullname, "rb");
 		if (NULL != filep)
 		{
-			if(makeLogFileName("chat")== fullname)
-			{
-				//Add Nearby chat history to the list of transcriptions
-				list_of_transcriptions.push_back(gDirUtilp->add(dirname, filename));
-				LLFile::close(filep);
-				return;
-			}
+//			if(makeLogFileName("chat")== fullname)
+//			{
+//				//Add Nearby chat history to the list of transcriptions
+//				list_of_transcriptions.push_back(gDirUtilp->add(dirname, filename));
+//				LLFile::close(filep);
+//				return;
+//			}
 			char buffer[LOG_RECALL_SIZE];
 
 			fseek(filep, 0, SEEK_END);			// seek to end of file
@@ -646,62 +768,102 @@ void LLLogChat::deleteTranscripts()
 	LLFloaterIMSessionTab::processChatHistoryStyleUpdate(true);
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+bool LLLogChat::hasTranscripts()
+{
+	const std::string strPattern = "*." + LL_TRANSCRIPT_FILE_EXTENSION;
+	const std::string strLogPath = gDirUtilp->getPerAccountChatLogsDir() + gDirUtilp->getDirDelimiter();
+
+	std::string strTemp;
+	LLDirIterator it(strLogPath, strPattern);
+	return it.next(strTemp);
+}
+// [/SL:KB]
+
 // static
 bool LLLogChat::isTranscriptExist(const LLUUID& avatar_id, bool is_group)
 {
-	std::vector<std::string> list_of_transcriptions;
-	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-01-22 (Catznip-3.6)
+	std::string strFileName;
+	if (!is_group)
+		buildIMP2PLogFilename(avatar_id, LLStringUtil::null, strFileName);
+	else
+		gCacheName->getGroupName(avatar_id, strFileName);
 
-	if (list_of_transcriptions.size() > 0)
+	std::string strFilePath = makeLogFileName(strFileName);
+	if ( (!strFilePath.empty()) && (LLFile::isfile(strFilePath)) )
 	{
-		LLAvatarName avatar_name;
-		LLAvatarNameCache::get(avatar_id, &avatar_name);
-		std::string avatar_user_name = avatar_name.getAccountName();
-		if(!is_group)
-		{
-			std::replace(avatar_user_name.begin(), avatar_user_name.end(), '.', '_');
-			BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
-			{
-				if (std::string::npos != transcript_file_name.find(avatar_user_name))
-				{
-					return true;
-				}
-			}
-		}
-		else
-		{
-			std::string file_name;
-			gCacheName->getGroupName(avatar_id, file_name);
-			file_name = makeLogFileName(file_name);
-			BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
-			{
-				if (transcript_file_name == file_name)
-				{
-					return true;
-				}
-			}
-		}
-
+		return true;
 	}
 
-	return false;
+	// If a dated file existed it'll return a valid path; otherwise, it returns the undated unverified path so we do need to check it
+	strFilePath = oldLogFileName(strFileName);
+	return (!strFilePath.empty()) && (LLFile::isfile(strFilePath));
+// [/SL:KB]
+//	std::vector<std::string> list_of_transcriptions;
+//	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions);
+//
+//	if (list_of_transcriptions.size() > 0)
+//	{
+//		LLAvatarName avatar_name;
+//		LLAvatarNameCache::get(avatar_id, &avatar_name);
+//		std::string avatar_user_name = avatar_name.getAccountName();
+//		if(!is_group)
+//		{
+//			std::replace(avatar_user_name.begin(), avatar_user_name.end(), '.', '_');
+//			BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
+//			{
+//				if (std::string::npos != transcript_file_name.find(avatar_user_name))
+//				{
+//					return true;
+//				}
+//			}
+//		}
+//		else
+//		{
+//			std::string file_name;
+//			gCacheName->getGroupName(avatar_id, file_name);
+//			file_name = makeLogFileName(file_name);
+//			BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
+//			{
+//				if (transcript_file_name == file_name)
+//				{
+//					return true;
+//				}
+//			}
+//		}
+//
+//	}
+//
+//	return false;
 }
 
 bool LLLogChat::isNearbyTranscriptExist()
 {
-	std::vector<std::string> list_of_transcriptions;
-	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions);
-
-	std::string file_name;
-	file_name = makeLogFileName("chat");
-	BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-01-22 (Catznip-3.6)
+	std::string strFilePath = makeLogFileName("chat");
+	if ( (!strFilePath.empty()) && (LLFile::isfile(strFilePath)) )
 	{
-	   	if (transcript_file_name == file_name)
-	   	{
-			return true;
-		 }
+		return true;
 	}
-	return false;
+
+	// If a dated file existed it'll return a valid path; otherwise, it returns the undated unverified path so we do need to check it
+	strFilePath = oldLogFileName("chat");
+	return (!strFilePath.empty()) && (LLFile::isfile(strFilePath));
+// [/SL:KB]
+//	std::vector<std::string> list_of_transcriptions;
+//	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions);
+//
+//	std::string file_name;
+//	file_name = makeLogFileName("chat");
+//	BOOST_FOREACH(std::string& transcript_file_name, list_of_transcriptions)
+//	{
+//	   	if (transcript_file_name == file_name)
+//	   	{
+//			return true;
+//		 }
+//	}
+//	return false;
 }
 
 //*TODO mark object's names in a special way so that they will be distinguishable form avatar name 

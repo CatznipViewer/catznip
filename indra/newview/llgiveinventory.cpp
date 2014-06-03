@@ -323,14 +323,21 @@ void LLGiveInventory::logInventoryOffer(const LLUUID& to_agent, const LLUUID &im
 	// If this item was given by drag-and-drop on avatar while IM panel wasn't open, log this action to IM history.
 	else
 	{
-		std::string full_name;
-		if (gCacheName->getFullName(to_agent, full_name))
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+		std::string strFilename;
+		if (LLLogChat::buildIMP2PLogFilename(to_agent, LLStringUtil::null, strFilename))
 		{
-			// Build a new format username or firstname_lastname for legacy names
-			// to use it for a history log filename.
-			full_name = LLCacheName::buildUsername(full_name);
-			LLIMModel::instance().logToFile(full_name, LLTrans::getString("SECOND_LIFE"), im_session_id, LLTrans::getString("inventory_item_offered-im"));
+			LLIMModel::instance().logToFile(strFilename, LLTrans::getString("SECOND_LIFE"), im_session_id, LLTrans::getString("inventory_item_offered-im"));
 		}
+// [/SL:KB]
+//		std::string full_name;
+//		if (gCacheName->getFullName(to_agent, full_name))
+//		{
+//			// Build a new format username or firstname_lastname for legacy names
+//			// to use it for a history log filename.
+//			full_name = LLCacheName::buildUsername(full_name);
+//			LLIMModel::instance().logToFile(full_name, LLTrans::getString("SECOND_LIFE"), im_session_id, LLTrans::getString("inventory_item_offered-im"));
+//		}
 	}
 }
 
