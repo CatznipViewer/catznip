@@ -210,6 +210,9 @@ LLTabContainer::Params::Params()
 	label_pad_left("label_pad_left"),
 	tab_position("tab_position"),
 	hide_tabs("hide_tabs", false),
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-3.3)
+	tab_allow_rearrange("tab_allow_rearrange", false),
+// [/SL:KB]
 	tab_padding_right("tab_padding_right"),
 	first_tab("first_tab"),
 	middle_tab("middle_tab"),
@@ -225,6 +228,10 @@ LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	mAllowRearrange(p.tab_allow_rearrange),
+	mRearrangeSignal(NULL),
+// [/SL:KB]
 	mScrolled(FALSE),
 	mScrollPos(0),
 	mScrollPosPixels(0),
@@ -282,6 +289,10 @@ LLTabContainer::~LLTabContainer()
 {
 	std::for_each(mTabList.begin(), mTabList.end(), DeletePointer());
 	mTabList.clear();
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	delete mRearrangeSignal;
+// [/SL:KB]
 }
 
 //virtual
@@ -387,9 +398,12 @@ void LLTabContainer::draw()
 	S32 cur_scroll_pos = getScrollPos();
 	if (cur_scroll_pos > 0)
 	{
-		S32 available_width_with_arrows = getRect().getWidth() - mRightTabBtnOffset - 2 * (LLPANEL_BORDER_WIDTH + tabcntr_arrow_btn_size  + tabcntr_arrow_btn_size + 1);
+//		S32 available_width_with_arrows = getRect().getWidth() - mRightTabBtnOffset - 2 * (LLPANEL_BORDER_WIDTH + tabcntr_arrow_btn_size  + tabcntr_arrow_btn_size + 1);
 		if (!mIsVertical)
 		{
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+			S32 available_width_with_arrows = getRect().getWidth() - mRightTabBtnOffset - 2 * (LLPANEL_BORDER_WIDTH + tabcntr_arrow_btn_size  + tabcntr_arrow_btn_size + 1);
+// [/SL:KB]
 			for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 			{
 				if (cur_scroll_pos == 0)
@@ -405,9 +419,18 @@ void LLTabContainer::draw()
 			// clamp so that rightmost tab never leaves right side of screen
 			target_pixel_scroll = llmin(mTotalTabWidth - available_width_with_arrows, target_pixel_scroll);
 		}
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		else
+		{
+			target_pixel_scroll = cur_scroll_pos * (BTN_HEIGHT + tabcntrv_pad);
+		}
+// [/SL:KB]
 	}
 
-	setScrollPosPixels((S32)lerp((F32)getScrollPosPixels(), (F32)target_pixel_scroll, LLCriticalDamp::getInterpolant(0.08f)));
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+	setScrollPosPixels( (!mIsVertical) ? (S32)lerp((F32)getScrollPosPixels(), (F32)target_pixel_scroll, LLCriticalDamp::getInterpolant(0.08f)) : target_pixel_scroll);
+// [/SL:KB]
+//	setScrollPosPixels((S32)lerp((F32)getScrollPosPixels(), (F32)target_pixel_scroll, LLCriticalDamp::getInterpolant(0.08f)));
 
 	BOOL has_scroll_arrows = !getTabsHidden() && ((mMaxScrollPos > 0) || (mScrollPosPixels > 0));
 	if (!mIsVertical)
@@ -487,24 +510,32 @@ void LLTabContainer::draw()
 					}
 				}
 			}
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+			else
+			{
+				//  Hide buttons that aren't (fully) visible
+				if ( (idx < getScrollPos()) || (max_scroll_visible <= idx) )
+					tuple->mButton->setVisible(false);
+			}
+// [/SL:KB]
 
 			idx++;
 		}
 
 
-		if( mIsVertical && has_scroll_arrows )
-		{
-			// Redraw the arrows so that they appears on top.
-			gGL.pushUIMatrix();
-			gGL.translateUI((F32)mPrevArrowBtn->getRect().mLeft, (F32)mPrevArrowBtn->getRect().mBottom, 0.f);
-			mPrevArrowBtn->draw();
-			gGL.popUIMatrix();
-
-			gGL.pushUIMatrix();
-			gGL.translateUI((F32)mNextArrowBtn->getRect().mLeft, (F32)mNextArrowBtn->getRect().mBottom, 0.f);
-			mNextArrowBtn->draw();
-			gGL.popUIMatrix();
-		}
+//		if( mIsVertical && has_scroll_arrows )
+//		{
+//			// Redraw the arrows so that they appears on top.
+//			gGL.pushUIMatrix();
+//			gGL.translateUI((F32)mPrevArrowBtn->getRect().mLeft, (F32)mPrevArrowBtn->getRect().mBottom, 0.f);
+//			mPrevArrowBtn->draw();
+//			gGL.popUIMatrix();
+//
+//			gGL.pushUIMatrix();
+//			gGL.translateUI((F32)mNextArrowBtn->getRect().mLeft, (F32)mNextArrowBtn->getRect().mBottom, 0.f);
+//			mNextArrowBtn->draw();
+//			gGL.popUIMatrix();
+//		}
 	}
 
 	mPrevArrowBtn->setFlashing(false);
@@ -572,11 +603,20 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 		}
 		if( tab_rect.pointInRect( x, y ) )
 		{
-			S32 index = getCurrentPanelIndex();
-			index = llclamp(index, 0, tab_count-1);
-			LLButton* tab_button = getTab(index)->mButton;
+//			S32 index = getCurrentPanelIndex();
+//			index = llclamp(index, 0, tab_count-1);
+//			LLButton* tab_button = getTab(index)->mButton;
 			gFocusMgr.setMouseCapture(this);
-			tab_button->setFocus(TRUE);
+//			tab_button->setFocus(TRUE);
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
+			// Only set keyboard focus to the tab button of the active panel (if we have one) if the user actually clicked on it
+			if (mCurrentTabIdx >= 0)
+			{
+				LLButton* pActiveTabBtn = mTabList[mCurrentTabIdx]->mButton;
+				if (pActiveTabBtn->pointInView(x - pActiveTabBtn->getRect().mLeft, y - pActiveTabBtn->getRect().mBottom))
+					pActiveTabBtn->setFocus(TRUE);
+			}
+// [/SL:KB]
 		}
 	}
 	if (handled) {
@@ -692,6 +732,36 @@ BOOL LLTabContainer::handleMouseUp( S32 x, S32 y, MASK mask )
 	return handled;
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-04-06 (Catznip-3.6)
+BOOL LLTabContainer::handleScrollWheel(S32 x, S32 y, S32 clicks)
+{
+	// NOTE-Catznip: should match the code in LLTabContainer::handleMouseDown()
+	static LLUICachedControl<S32> tabcntrv_pad ("UITabCntrvPad", 0);
+	BOOL handled = FALSE;
+
+	S32 tab_count = getTabCount();
+	if ( (tab_count > 0) && (!getTabsHidden()) )
+	{
+		LLTabTuple* firsttuple = getTab(0);
+		LLRect tab_rect;
+		if (mIsVertical)
+			tab_rect = LLRect(firsttuple->mButton->getRect().mLeft, mPrevArrowBtn->getRect().mTop, firsttuple->mButton->getRect().mRight, mNextArrowBtn->getRect().mBottom );
+		else
+			tab_rect = LLRect(mJumpPrevArrowBtn->getRect().mLeft, firsttuple->mButton->getRect().mTop, mJumpNextArrowBtn->getRect().mRight, firsttuple->mButton->getRect().mBottom);
+
+		if (tab_rect.pointInRect(x, y))
+		{
+			mScrollPos = llclamp(mScrollPos + clicks, 0, mMaxScrollPos);
+			handled = TRUE;
+		}
+	}
+
+	if (!handled)
+		handled = LLUICtrl::handleScrollWheel(x, y, clicks);
+	return handled;
+}
+// [/SL:KB]
+
 // virtual
 BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 {
@@ -723,7 +793,11 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 			for(tuple_list_t::iterator iter = mTabList.begin(); iter != mTabList.end(); ++iter)
 			{
 				LLTabTuple* tuple = *iter;
-				tuple->mButton->setVisible( TRUE );
+// [SL:KB]
+				if (!tuple->mButton->getVisible())
+					continue;
+// [/SL/KB]
+//				tuple->mButton->setVisible( TRUE );
 				S32 local_x = x - tuple->mButton->getRect().mLeft;
 				S32 local_y = y - tuple->mButton->getRect().mBottom;
 				handled = tuple->mButton->handleToolTip( local_x, local_y, mask);
@@ -740,6 +814,12 @@ BOOL LLTabContainer::handleToolTip( S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLTabContainer::handleKeyHere(KEY key, MASK mask)
 {
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
+	if ( (mAllowRearrange) && (hasMouseCapture()) )
+	{
+		return FALSE;	// Don't process movement keys while the user might be rearranging tabs
+	}
+// [/SL:KB]
 	BOOL handled = FALSE;
 	if (key == KEY_LEFT && mask == MASK_ALT)
 	{
@@ -840,34 +920,54 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 				{
 					if (mJumpPrevArrowBtn && mJumpPrevArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mJumpPrevArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mJumpPrevArrowBtn->getRect().mBottom;
-						mJumpPrevArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mJumpPrevArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mJumpPrevArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mJumpPrevArrowBtn->getRect().mBottom;
+//						mJumpPrevArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					if (mJumpNextArrowBtn && mJumpNextArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mJumpNextArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mJumpNextArrowBtn->getRect().mBottom;
-						mJumpNextArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mJumpNextArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mJumpNextArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mJumpNextArrowBtn->getRect().mBottom;
+//						mJumpNextArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					if (mPrevArrowBtn->getRect().pointInRect(x,	y))
 					{
-						S32	local_x	= x	- mPrevArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mPrevArrowBtn->getRect().mBottom;
-						mPrevArrowBtn->handleHover(local_x,	local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mPrevArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mPrevArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mPrevArrowBtn->getRect().mBottom;
+//						mPrevArrowBtn->handleHover(local_x,	local_y, mask);
 					}
 					else if	(mNextArrowBtn->getRect().pointInRect(x, y))
 					{
-						S32	local_x	= x	- mNextArrowBtn->getRect().mLeft;
-						S32	local_y	= y	- mNextArrowBtn->getRect().mBottom;
-						mNextArrowBtn->handleHover(local_x, local_y, mask);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+						mNextArrowBtn->onCommit();
+						mDragAndDropDelayTimer.reset();
+// [/SL:KB]
+//						S32	local_x	= x	- mNextArrowBtn->getRect().mLeft;
+//						S32	local_y	= y	- mNextArrowBtn->getRect().mBottom;
+//						mNextArrowBtn->handleHover(local_x, local_y, mask);
 					}
 				}
 
 				for(tuple_list_t::iterator iter	= mTabList.begin();	iter !=	 mTabList.end(); ++iter)
 				{
 					LLTabTuple*	tuple =	*iter;
-					tuple->mButton->setVisible(	TRUE );
+// [SL:KB]
+					if (!tuple->mButton->getVisible())
+						continue;
+// [/SL/KB]
+//					tuple->mButton->setVisible(	TRUE );
 					S32	local_x	= x	- tuple->mButton->getRect().mLeft;
 					S32	local_y	= y	- tuple->mButton->getRect().mBottom;
 					if (tuple->mButton->pointInView(local_x, local_y) &&  tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
@@ -1337,7 +1437,10 @@ LLPanel* LLTabContainer::getPanelByIndex(S32 index)
 	return NULL;
 }
 
-S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+//S32 LLTabContainer::getIndexForPanel(LLPanel* panel)
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
+S32 LLTabContainer::getIndexForPanel(const LLPanel* panel)
+// [/SL:KB]
 {
 	for (S32 index = 0; index < (S32)mTabList.size(); index++)
 	{
@@ -1537,15 +1640,20 @@ BOOL LLTabContainer::setTab(S32 which)
 				if (mIsVertical)
 				{
 					S32 num_visible = getTabCount() - getMaxScrollPos();
-					if( i >= getScrollPos() && i <= getScrollPos() + num_visible)
-					{
-						setCurrentPanelIndex(which);
-						is_visible = TRUE;
-					}
-					else
-					{
-						is_visible = FALSE;
-					}
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+					if ( (i < getScrollPos()) || (i >= getScrollPos() + num_visible) )
+						setScrollPos(llmin(i, getMaxScrollPos()));
+					is_visible = TRUE;
+// [/SL:KB]
+//					if( i >= getScrollPos() && i <= getScrollPos() + num_visible)
+//					{
+//						setCurrentPanelIndex(which);
+//						is_visible = TRUE;
+//					}
+//					else
+//					{
+//						is_visible = FALSE;
+//					}
 				}
 				else if (getMaxScrollPos() > 0)
 				{
@@ -1822,16 +1930,28 @@ void LLTabContainer::initButtons()
 	
 	if (mIsVertical)
 	{
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		static LLUICachedControl<S32> tabcntrv_pad ("UITabCntrvPad", 0);
+// [/SL:KB]
 		static LLUICachedControl<S32> tabcntrv_arrow_btn_size ("UITabCntrvArrowBtnSize", 0);
 		// Left and right scroll arrows (for when there are too many tabs to show all at once).
 		S32 btn_top = getRect().getHeight();
-		S32 btn_top_lower = getRect().mBottom+tabcntrv_arrow_btn_size;
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		S32 btn_top_lower = tabcntrv_arrow_btn_size;
+// [/SL:KB]
+//		S32 btn_top_lower = getRect().mBottom+tabcntrv_arrow_btn_size;
 
 		LLRect up_arrow_btn_rect;
-		up_arrow_btn_rect.setLeftTopAndSize( mMinTabWidth/2 , btn_top, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		up_arrow_btn_rect.setLeftTopAndSize((mMinTabWidth - tabcntrv_arrow_btn_size) / 2, btn_top, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
+// [/SL:KB]
+//		up_arrow_btn_rect.setLeftTopAndSize( mMinTabWidth/2 , btn_top, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
 
 		LLRect down_arrow_btn_rect;
-		down_arrow_btn_rect.setLeftTopAndSize( mMinTabWidth/2 , btn_top_lower, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		down_arrow_btn_rect.setLeftTopAndSize((mMinTabWidth - tabcntrv_arrow_btn_size) / 2, btn_top_lower, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
+// [/SL:KB]
+//		down_arrow_btn_rect.setLeftTopAndSize( mMinTabWidth/2 , btn_top_lower, tabcntrv_arrow_btn_size, tabcntrv_arrow_btn_size );
 
 		LLButton::Params prev_btn_params;
 		prev_btn_params.name(std::string("Up Arrow"));
@@ -1840,6 +1960,9 @@ void LLTabContainer::initButtons()
 		prev_btn_params.image_unselected.name("scrollbutton_up_out_blue.tga");
 		prev_btn_params.image_selected.name("scrollbutton_up_in_blue.tga");
 		prev_btn_params.click_callback.function(boost::bind(&LLTabContainer::onPrevBtn, this, _2));
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		prev_btn_params.mouse_held_callback.function(boost::bind(&LLTabContainer::onPrevBtnHeld, this, _2));
+// [/SL:KB]
 		mPrevArrowBtn = LLUICtrlFactory::create<LLButton>(prev_btn_params);
 
 		LLButton::Params next_btn_params;
@@ -1849,6 +1972,9 @@ void LLTabContainer::initButtons()
 		next_btn_params.image_unselected.name("scrollbutton_down_out_blue.tga");
 		next_btn_params.image_selected.name("scrollbutton_down_in_blue.tga");
 		next_btn_params.click_callback.function(boost::bind(&LLTabContainer::onNextBtn, this, _2));
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-17 (Catznip-3.6)
+		next_btn_params.mouse_held_callback.function(boost::bind(&LLTabContainer::onNextBtnHeld, this, _2));
+// [/SL:KB]
 		mNextArrowBtn = LLUICtrlFactory::create<LLButton>(next_btn_params);
 	}
 	else // Horizontal
@@ -2004,9 +2130,21 @@ void LLTabContainer::insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_p
 		mTabList.insert(current_iter, tuple);
 		}
 		break;
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 	case END:
-	default:
 		mTabList.push_back( tuple );
+		break;
+	// All of the pre-defined insertion points are negative so if we encounter a positive number, assume it's an index
+	default:
+		S32 idxInsertion = (S32)insertion_point;
+		if ( (idxInsertion >= 0) && (idxInsertion < mTabList.size()) )
+			mTabList.insert(mTabList.begin() + llmax(mLockedTabCount, idxInsertion), tuple);
+		else
+			mTabList.push_back(tuple);
+// [/SL:KB]
+//	case END:
+//	default:
+//		mTabList.push_back( tuple );
 	}
 }
 
@@ -2083,8 +2221,55 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
 			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 			{
-				tuple->mButton->onCommit();
+//				tuple->mButton->onCommit();
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5)
+				if ( (mAllowRearrange) && (mCurrentTabIdx >= 0) && (mTabList[mCurrentTabIdx]->mButton->hasFocus()) )
+				{
+					S32 idxHover = iter - mTabList.begin();
+					if ( (mCurrentTabIdx >= mLockedTabCount) && (idxHover >= mLockedTabCount) && (mCurrentTabIdx != idxHover) )
+					{
+						LLRect rctCurTab = mTabList[mCurrentTabIdx]->mButton->getRect();
+						LLRect rctHoverTab = mTabList[idxHover]->mButton->getRect();
+
+						// Only rearrange the tabs if the mouse pointer has cleared the overlap area
+						bool fClearedOverlap = 
+						  (mIsVertical) 
+							? ( (idxHover < mCurrentTabIdx) && (y > rctHoverTab.mTop - rctCurTab.getHeight()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (y < rctCurTab.mTop - rctHoverTab.getHeight()) )
+							: ( (idxHover < mCurrentTabIdx) && (x < rctHoverTab.mLeft + rctCurTab.getWidth()) ) ||
+							  ( (idxHover > mCurrentTabIdx) && (x > rctCurTab.mLeft + rctHoverTab.getWidth()) );
+						if (fClearedOverlap)
+						{
+							tuple = mTabList[mCurrentTabIdx];
+
+							mTabList.erase(mTabList.begin() + mCurrentTabIdx);
+							mTabList.insert(mTabList.begin() + idxHover, tuple);
+
+							if (mRearrangeSignal)
+								(*mRearrangeSignal)(idxHover, tuple->mTabPanel);
+
+							tuple->mButton->onCommit();
+							tuple->mButton->setFocus(TRUE);
+						}
+					}
+				}
+				else
+				{
+					tuple->mButton->onCommit();
+					tuple->mButton->setFocus(TRUE);
+				}
+				break;
+// [/SL:KB]
 			}
 		}
 	}
 }
+
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+boost::signals2::connection LLTabContainer::setRearrangeCallback(const tab_rearrange_signal_t::slot_type& cb)
+{
+	if (!mRearrangeSignal)
+		mRearrangeSignal = new tab_rearrange_signal_t();
+	return mRearrangeSignal->connect(cb);
+}
+// [/SL:KB]
