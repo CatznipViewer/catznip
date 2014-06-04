@@ -201,6 +201,9 @@ void LLUI::initClass(const settings_map_t& settings,
 	// Used by menus along with Floater.Toggle to display visibility as a check-mark
 	LLUICtrl::EnableCallbackRegistry::defaultRegistrar().add("Floater.Visible", boost::bind(&LLFloaterReg::instanceVisible, _2, LLSD()));
 	LLUICtrl::EnableCallbackRegistry::defaultRegistrar().add("Floater.IsOpen", boost::bind(&LLFloaterReg::instanceVisible, _2, LLSD()));
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+	LLUICtrl::EnableCallbackRegistry::defaultRegistrar().add("Floater.InVisibleChain", boost::bind(&LLFloaterReg::instanceInVisibleChain, _2, LLSD()));
+// [/SL:KB]
 
 	// Parse the master list of commands
 	LLCommandManager::load();

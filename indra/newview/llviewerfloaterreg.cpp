@@ -123,6 +123,10 @@
 #include "llfloaterwindowsize.h"
 #include "llfloaterworldmap.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
+#include "llfloaterimcontainerbase.h"
+#include "llfloaterimcontainertab.h"
+// [/SL:KB]
 #include "llinspectavatar.h"
 #include "llinspectgroup.h"
 #include "llinspectobject.h"
@@ -220,7 +224,10 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("hud", "floater_hud.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterHUD>);
 
 	LLFloaterReg::add("impanel", "floater_im_session.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterIMSession>);
-	LLFloaterReg::add("im_container", "floater_im_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterIMContainer>);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-05 (Catznip-3.5)
+	LLFloaterReg::addWithFileCallback("im_container", &LLFloaterIMContainerBase::getFloaterXMLFile, &LLFloaterIMContainerBase::buildFloater);
+// [/SL:KB]
+//	LLFloaterReg::add("im_container", "floater_im_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterIMContainer>);
 	LLFloaterReg::add("im_well_window", "floater_sys_well.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIMWellWindow>);
 	LLFloaterReg::add("incoming_call", "floater_incoming_call.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLIncomingCallDialog>);
 	LLFloaterReg::add("inventory", "floater_my_inventory.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSidePanelContainer>);

@@ -150,7 +150,10 @@ static void on_avatar_name_cache_toast(const LLUUID& agent_id,
 	args["FROM_ID"] = msg["from_id"];
 	args["SESSION_ID"] = msg["session_id"];
 	args["SESSION_TYPE"] = msg["session_type"];
-	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainer::showConversation, LLFloaterIMContainer::getInstance(), msg["session_id"].asUUID()));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainerBase::showConversation, LLFloaterIMContainerBase::getInstance(), msg["session_id"].asUUID()));
+// [/SL:KB]
+//	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainer::showConversation, LLFloaterIMContainer::getInstance(), msg["session_id"].asUUID()));
 }
 
 void notify_of_message(const LLSD& msg, bool is_dnd_msg)
@@ -170,7 +173,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     enum {CLOSED, NOT_ON_TOP, ON_TOP, ON_TOP_AND_ITEM_IS_SELECTED} conversations_floater_status;
 
 
-    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//	LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container");
+// [/SL:KB]
 	LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::getConversation(session_id);
 	bool store_dnd_message = false; // flag storage of a dnd message
 	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
@@ -268,7 +274,13 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
         {
 			// Open conversations floater
 			LLFloaterReg::showInstance("im_container");
-			im_box->collapseMessagesPane(false);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+			if (!im_box->isTabbedContainer())
+			{
+				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
+			}
+// [/SL:KB]
+//			im_box->collapseMessagesPane(false);
 			if (session_floater)
 			{
 				if (session_floater->getHost())
@@ -314,11 +326,17 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 									NOT_ON_TOP == conversations_floater_status || 
 									CLOSED == conversations_floater_status))
 				{
-					im_box->highlightConversationItemWidget(session_id, true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+					im_box->setConversationHighlighted(session_id, true);
+// [/SL:KB]
+//					im_box->highlightConversationItemWidget(session_id, true);
 				}
 				else
 				{
-    		im_box->flashConversationItemWidget(session_id, true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+    				im_box->setConversationFlashing(session_id, true);
+// [/SL:KB]
+//    				im_box->flashConversationItemWidget(session_id, true);
     	}
     }
 		}
@@ -335,7 +353,16 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     {
 			if(!gAgent.isDoNotDisturb())
     	{
-				gToolBarView->flashCommand(LLCommandId("chat"), true, im_box->isMinimized());
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-08-16 (Catznip-3.6)
+				// The behaviour we're aiming for is:
+				//   * with IM sessions we should look at the minimized state of the conversations floater
+				//   * with nearby chat we should look at the minimized state of the conversations floater if it's attached; otherwise the floater itself
+				// im_box is the conversations floater, which isn't what we want to look at if nearby chat is torn off
+				bool fIsNearby = session_id.isNull();
+				bool fSessionMinimized = ((!fIsNearby) || (!session_floater) || (!session_floater->isTornOff())) ? im_box->isMinimized() : session_floater->isMinimized();
+				gToolBarView->flashCommand(LLCommandId((!fIsNearby) ? "conversations" : "chat"), true, fSessionMinimized);
+// [/SL:KB]
+//				gToolBarView->flashCommand(LLCommandId("chat"), true, im_box->isMinimized());
     	}
 			else
 			{
@@ -2743,8 +2770,11 @@ void LLIMMgr::addMessage(
 	if (is_offline_msg && !skip_message)
     {
         LLFloaterReg::showInstance("im_container");
-	    LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->
-	    		flashConversationItemWidget(new_session_id, true);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterReg::getTypedInstance<LLFloaterIMContainerBase>("im_container")->setConversationFlashing(new_session_id, true);
+// [/SL:KB]
+//	    LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container")->
+//	    		flashConversationItemWidget(new_session_id, true);
     }
 }
 

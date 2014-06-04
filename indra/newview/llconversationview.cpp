@@ -109,7 +109,15 @@ void LLConversationViewSession::setFlashState(bool flash_state)
 		// flash chat toolbar button if scrolled out of sight (because flashing will not be visible)
 		if (mContainer->isScrolledOutOfSight(this))
 		{
-			gToolBarView->flashCommand(LLCommandId("chat"), true);
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-08-16 (Catznip-3.6)
+			LLConversationItem* pItem = dynamic_cast<LLConversationItem*>(getViewModelItem());
+			if (pItem)
+			{
+				const LLUUID& idSession = pItem->getUUID();
+				gToolBarView->flashCommand(LLCommandId((idSession.notNull()) ? "conversations" : "chat"), true);
+			}
+// [/SL:KB]
+//			gToolBarView->flashCommand(LLCommandId("chat"), true);
 		}
 	}
 
@@ -127,7 +135,10 @@ void LLConversationViewSession::setHighlightState(bool hihglight_state)
 
 void LLConversationViewSession::startFlashing()
 {
-	LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//	LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
+// [/SL:KB]
 
 	// Need to start flashing only when "Conversations" is opened or brought on top
 	if (isInVisibleChain() && !im_box->isMinimized() && mFlashStateOn && !mFlashStarted)
@@ -272,7 +283,10 @@ BOOL LLConversationViewSession::handleMouseDown( S32 x, S32 y, MASK mask )
 			LLConversationItem* item = dynamic_cast<LLConversationItem *>(getViewModelItem());
 			LLUUID session_id = item? item->getUUID() : LLUUID();
 
-			LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//			LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-18 (Catznip-3.6)
+			LLFloaterIMContainerView* im_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
 			if (im_container->isConversationsPaneCollapsed() && im_container->getSelectedSession() == session_id)
 			{
 				im_container->collapseMessagesPane(!im_container->isMessagesPaneCollapsed());
@@ -330,7 +344,10 @@ void LLConversationViewSession::selectConversationItem()
 		LLConversationItem* item = dynamic_cast<LLConversationItem *>(getViewModelItem());
 		LLUUID session_id = item? item->getUUID() : LLUUID();
 
-		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerView* im_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
 		im_container->flashConversationItemWidget(session_id,false);
 		im_container->selectConversationPair(session_id, false);
 	}
@@ -637,7 +654,10 @@ BOOL LLConversationViewParticipant::handleMouseDown( S32 x, S32 y, MASK mask )
     		LLConversationItem* vmi = getParentFolder() ? dynamic_cast<LLConversationItem*>(getParentFolder()->getViewModelItem()) : NULL;
     		LLUUID session_id = vmi? vmi->getUUID() : LLUUID();
 
-    		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//    		LLFloaterIMContainer *im_container = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterIMContainerView* im_container = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+// [/SL:KB]
     		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
 			im_container->setSelectedSession(session_id);
 			im_container->flashConversationItemWidget(session_id,false);

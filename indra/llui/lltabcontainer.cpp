@@ -1374,6 +1374,21 @@ LLPanel* LLTabContainer::getPanelByName(const std::string& name)
 	return NULL;
 }
 
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-02-06 (Catznip-3.6)
+LLPanel* LLTabContainer::getPanelFromPoint(const S32 x, const S32 y)
+{
+	for (tuple_list_t::const_iterator itTab = mTabList.begin();	itTab != mTabList.end(); ++itTab)
+	{
+		LLTabTuple*	pTabTuple =	*itTab;
+		if ( (pTabTuple->mButton->parentPointInView(x, y)) && (pTabTuple->mButton->getEnabled()) )
+		{
+			return pTabTuple->mTabPanel;
+		}
+	}
+	return NULL;
+}
+// [/SL:KB]
+
 // Change the name of the button for the current tab.
 void LLTabContainer::setCurrentTabName(const std::string& name)
 {
