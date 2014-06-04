@@ -41,6 +41,9 @@
 #include "llfolderviewitem.h"
 #include "llfloaterimcontainer.h"
 #include "llimview.h"
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+#include "llinspecttexture.h"
+// [/SL:KB]
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -919,6 +922,33 @@ BOOL LLInventoryPanel::handleHover(S32 x, S32 y, MASK mask)
 	}
 	return TRUE;
 }
+
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
+{
+	const LLFolderViewItem* pHoverItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getHoveredItem() : NULL;
+	if (pHoverItem)
+	{
+		// NOTE-Catznip: inventory type and item UUID are cached by the bridge (view model item) and don't require going through the inventory model
+		const LLFolderViewModelItemInventory* pVMItem = static_cast<const LLFolderViewModelItemInventory*>(pHoverItem->getViewModelItem());
+		if (pVMItem)
+		{
+			// Copy/pasted from LLView::handleToolTip()
+			F32 nTimeout = LLToolTipMgr::instance().toolTipVisible() 
+					? LLUI::sSettingGroups["config"]->getF32("ToolTipFastDelay")
+					: LLUI::sSettingGroups["config"]->getF32("ToolTipDelay");
+			LLToolTipMgr::instance().show(LLToolTip::Params()
+					.message(pHoverItem->getToolTip())
+					.sticky_rect(pHoverItem->calcScreenRect())
+					.delay_time(nTimeout)
+					.create_callback(boost::bind(&createInventoryToolTip, _1))
+					.create_params(LLSD().with("inv_type", pVMItem->getInventoryType()).with("item_id", pVMItem->getUUID())));
+			return TRUE;
+		}
+	}
+	return LLPanel::handleToolTip(x, y, mask);
+}
+// [/SL:KB]
 
 BOOL LLInventoryPanel::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 								   EDragAndDropType cargo_type,

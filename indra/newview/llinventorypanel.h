@@ -145,6 +145,9 @@ public:
 	void draw();
 	/*virtual*/ BOOL handleKeyHere( KEY key, MASK mask );
 	BOOL handleHover(S32 x, S32 y, MASK mask);
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+	/*virtual*/ BOOL handleToolTip(S32 x, S32 y, MASK mask);
+// [/SL:KB]
 	BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 								   EDragAndDropType cargo_type,
 								   void* cargo_data,
