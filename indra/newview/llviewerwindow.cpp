@@ -106,6 +106,9 @@
 #include "llfloaterbuyland.h"
 #include "llfloatercamera.h"
 #include "llfloaterland.h"
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+#include "llfloaterimcontainerbase.h"
+// [/SL:KB]
 #include "llfloaterinspect.h"
 #include "llfloatermap.h"
 #include "llfloaternamedesc.h"
@@ -2601,9 +2604,26 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 
 	if( keyboard_focus )
 	{
-		if ((focusedFloaterName == "nearby_chat") || (focusedFloaterName == "im_container") || (focusedFloaterName == "impanel"))
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+		// Arrow keys move the avatar if:
+		//   * focus is on a conversation floater and no text has been entered (-> legacy behaviour)
+		//   * OR the focus is on the conversations floater, nearby chat or an IM conversations and "ArrowKeysAlwaysMove" == TRUE
+		const LLFloaterIMSessionTab* pIMSession = NULL;
+		if ("im_container" == focusedFloaterName)
 		{
-			if (gSavedSettings.getBOOL("ArrowKeysAlwaysMove"))
+			const LLUUID& idSession = LLFloaterIMContainerBase::getInstance()->getSelectedSession();
+			pIMSession = (idSession.isNull() ? LLFloaterReg::findTypedInstance<LLFloaterIMSessionTab>("nearby_chat") : LLFloaterIMSession::findInstance(idSession));
+		}
+		else if ( ("nearby_chat" == focusedFloaterName) || ("impanel" == focusedFloaterName) )
+		{
+			pIMSession = dynamic_cast<const LLFloaterIMSessionTab*>(focused_floaterp);
+		}
+
+		if ( ((pIMSession) && (pIMSession->hasFocus())) && ((!pIMSession->hasInputText()) || (gSavedSettings.getBOOL("ArrowKeysAlwaysMove"))) )
+// [/SL:KB]
+//		if ((focusedFloaterName == "nearby_chat") || (focusedFloaterName == "im_container") || (focusedFloaterName == "impanel"))
+		{
+//			if (gSavedSettings.getBOOL("ArrowKeysAlwaysMove"))
 			{
 				// let Control-Up and Control-Down through for chat line history,
 				if (!(key == KEY_UP && mask == MASK_CONTROL)
