@@ -3993,6 +3993,12 @@ Raport o Nadużyciu
 	<string name="EmptyOutfitText">
 		W tym stroju nie ma elementów
 	</string>
+	<string name="SaveOutfit">
+		Zapisz
+	</string>
+	<string name="SaveOutfitAs">
+		Zapisz jako
+	</string>
 	<string name="ExternalEditorNotSet">
 		Wybierz edytor używając ustawień ExternalEditor.
 	</string>

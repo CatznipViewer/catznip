@@ -177,6 +177,9 @@ protected:
 	LLFolderView* mRoot;
 	const LLUUID mUUID;	// item id
 	LLInventoryType::EType mInvType;
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	mutable LLFolderType::EType mFolderType;
+// [/SL:KB]
 	bool						mIsLink;
 	LLTimer						mTimeSinceRequestStart;
 	mutable std::string			mDisplayName;
@@ -270,6 +273,10 @@ public:
 	virtual void selectItem();
 	virtual void restoreItem();
 
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	/*virtual*/ std::string getLabelSuffix() const;
+	/*virtual*/ LLFontGL::StyleFlags getLabelStyle() const;
+// [/SL:KB]
 	virtual LLFolderType::EType getPreferredType() const;
 	virtual LLUIImagePtr getIcon() const;
 	virtual LLUIImagePtr getIconOpen() const;
