@@ -1042,6 +1042,24 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 	<string name="dictionary_files">
 		Wörterbücher
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Zur Zeit gibt es keine Informationen zu diesem Standort. Bitte versuchen Sie es später.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Die Informationen über diesen Standort sind zugriffsbeschränkt.  Bitte wenden Sie sich bezüglich Ihrer Berechtigungen an den Eigentümer der Parzelle.
+	</string>
+	<string name="parcel_server_update_text">
+		Ohne Serverupdate sind keine Ortsinformationen verfügbar.
+	</string>
+
 	<string name="shape">
 		Form
 	</string>
