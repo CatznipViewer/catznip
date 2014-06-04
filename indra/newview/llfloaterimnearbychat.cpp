@@ -92,6 +92,9 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 :	LLFloaterIMSessionTab(llsd),
 	//mOutputMonitor(NULL),
 	mSpeakerMgr(NULL),
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+	mReshapeSignal(NULL),
+// [/SL:KB]
 	mExpandedHeight(COLLAPSED_HEIGHT + EXPANDED_HEIGHT)
 {
     mIsP2PChat = false;
@@ -99,6 +102,13 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
 	mSessionID = LLUUID();
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+LLFloaterIMNearbyChat::~LLFloaterIMNearbyChat()
+{
+	delete mReshapeSignal;
+}
+// [/SL:KB]
 
 //static
 LLFloaterIMNearbyChat* LLFloaterIMNearbyChat::buildFloater(const LLSD& key)
@@ -349,6 +359,28 @@ bool LLFloaterIMNearbyChat::isChatVisible() const
 
 	return isVisible;
 }
+
+// [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
+// virtual
+void LLFloaterIMNearbyChat::reshape(S32 width, S32 height, BOOL called_from_parent)
+{
+	LLFloater::reshape(width, height, called_from_parent);
+
+	if (mReshapeSignal)
+	{
+		(*mReshapeSignal)(this, width, height);
+	}
+}
+
+boost::signals2::connection LLFloaterIMNearbyChat::setReshapeCallback(const reshape_signal_t::slot_type& cb)
+{
+	if (!mReshapeSignal)
+	{
+		mReshapeSignal = new reshape_signal_t();
+	}
+	return mReshapeSignal->connect(cb); 
+}
+// [/SL:KB]
 
 void LLFloaterIMNearbyChat::showHistory()
 {
