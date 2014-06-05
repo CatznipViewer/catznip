@@ -165,6 +165,9 @@ public:
 	virtual BOOL cutToClipboard() const = 0;
 
 	virtual BOOL isClipboardPasteable() const = 0;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+	virtual bool isClipboardCut() const = 0;
+// [/SL:KB]
 	virtual void pasteFromClipboard() = 0;
 	virtual void pasteLinkFromClipboard() = 0;
 

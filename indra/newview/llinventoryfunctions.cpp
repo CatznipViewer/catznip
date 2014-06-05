@@ -34,6 +34,9 @@
 #include "llagent.h"
 #include "llagentwearables.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+#include "llfiltereditor.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llinventorydefines.h"
 #include "llsdserialize.h"
@@ -324,6 +327,36 @@ BOOL get_can_item_be_worn(const LLUUID& id)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+BOOL get_is_item_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// Can't move an item that's in COF (don't block the library as it's a special case where move operations convert to copy instead)
+	if ( (model) && (!model->isObjectDescendentOf(id, LLAppearanceMgr::instance().getCOF())) )
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// NOTE: This function doesn't check the folder's children.
+	// See LLFolderBridge for a function that does consider the children.
+
+	// Don't block the library since it's a special case where move operations will be converted to copy instead
+	if (model)
+	{
+		// Can't move protected category types
+		const LLInventoryCategory* category = model->getCategory(id);
+		if ( (category) && (!LLFolderType::lookupIsProtectedType(category->getPreferredType())) )
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+// [/SL:KB]
+
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id)
 {
 	if (!model)
@@ -420,6 +453,79 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
+
+// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
+LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)
+{
+	LLUUID idParent;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		if (idParent.isNull())
+			idParent = pItem->getParentUUID();
+		else if (idParent != pItem->getParentUUID())
+			return LLUUID::null;
+	}
+	return idParent;
+}
+
+// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
+bool get_item_wearable(const LLInventoryItem* pItem)
+{
+	if (pItem)
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_OBJECT:
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+			case LLAssetType::AT_GESTURE:
+				return true;
+			default:
+				return false;
+		}
+	}
+	return false;
+}
+
+bool get_item_wearable(const LLUUID& idItem)
+{
+	return get_item_wearable(gInventory.getItem(idItem));
+}
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items)
+{
+	bool fWearable = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWearable = get_item_wearable(pItem);
+	}
+	return fWearable;
+}
+
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items)
+{
+	bool fWorn = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWorn = get_is_item_worn(pItem->getUUID());
+	}
+	return fWorn;
+}
+
+// [/SL:KB]
+
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)
 {
 	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
@@ -505,6 +611,34 @@ void reset_inventory_filter()
 		}
 	}
 }
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void show_item_links(const LLUUID& idItem)
+{
+	LLInventoryPanel* pActivePanel = LLInventoryPanel::getActiveInventoryPanel();
+	LLPanelMainInventory* pPanelMainInventory = (pActivePanel) ? pActivePanel->getParentByType<LLPanelMainInventory>() : NULL;
+	LLFilterEditor* pEditor = (pPanelMainInventory) ? pPanelMainInventory->getFilterEditor() : NULL;
+	if (!pEditor)
+	{
+		return;
+	}
+
+	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(idItem);
+	if ( (!pItem) || (pItem->getIsLinkType()) || (!LLAssetType::lookupCanLink(pItem->getType())) )
+	{
+		return;
+	}
+
+	pEditor->setText(pItem->getName());
+	pEditor->setFocus(TRUE);
+	pEditor->onCommit();	// Calls LLPanelMainInventory::onFilterEdit()
+
+	LLInventoryFilter& filter = pActivePanel->getFilter();
+//	filter.setFilterSubString(item_name);
+	filter.setFilterUUID(pItem->getUUID());
+	filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+	filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+}
+// [/SL:KB]
 
 void open_outbox()
 {

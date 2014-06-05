@@ -114,6 +114,12 @@ public:
 	LLFolderViewModelInterface* getFolderViewModel() { return mViewModel; }
 	const LLFolderViewModelInterface* getFolderViewModel() const { return mViewModel; }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	enum EFilterState { FILTER_STOPPED /* Filter isn't running */, FILTER_DEFAULT, FILTER_NONDEFAULT /* Filter is running and marked as default or non-default respectively */ };
+	typedef boost::signals2::signal<void (LLFolderView*, EFilterState)> filterstate_changed_signal_t;
+	boost::signals2::connection setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb);
+// [/SL:KB]
+
 	typedef boost::signals2::signal<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)> signal_t;
 	void setSelectCallback(const signal_t::slot_type& cb) { mSelectSignal.connect(cb); }
 	void setReshapeCallback(const signal_t::slot_type& cb) { mReshapeSignal.connect(cb); }
@@ -157,6 +163,10 @@ public:
 	void addToSelectionList(LLFolderViewItem* item);
 	void removeFromSelectionList(LLFolderViewItem* item);
 
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	void setDragStart(S32 screen_x, S32 screen_y);
+	bool isOverDragThreshold(S32 screen_x, S32 screen_y);
+// [/SL:KB]
 	bool startDrag();
 	void setDragAndDropThisFrame() { mDragAndDropThisFrame = TRUE; }
 	void setDraggingOverItem(LLFolderViewItem* item) { mDraggingOverItem = item; }
@@ -220,6 +230,9 @@ public:
 	void	update();						// needs to be called periodically (e.g. once per frame)
 
 	BOOL needsAutoSelect() { return mNeedsAutoSelect && !mAutoSelectOverride; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	BOOL needsAutoOpen() { return mNeedsAutoOpen; }
+// [/SL:KB]
 	BOOL needsAutoRename() { return mNeedsAutoRename; }
 	void setNeedsAutoRename(BOOL val) { mNeedsAutoRename = val; }
 	void setPinningSelectedItem(BOOL val) { mPinningSelectedItem = val; }
@@ -278,6 +291,9 @@ protected:
 	LLRect							mScrollConstraintRect;
 	BOOL							mNeedsAutoSelect;
 	BOOL							mAutoSelectOverride;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	bool							mNeedsAutoOpen;
+// [/SL:KB]
 	BOOL							mNeedsAutoRename;
 	bool							mUseLabelSuffix;
 	bool							mShowItemLinkOverlays;
@@ -297,10 +313,19 @@ protected:
 	S32								mSignalSelectCallback;
 	S32								mMinWidth;
 	BOOL							mDragAndDropThisFrame;
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	S32                             mDragStartX;
+	S32                             mDragStartY;
+// [/SL:KB]
 	
 	LLHandle<LLPanel>               mParentPanel;
 	
 	LLFolderViewModelInterface*		mViewModel;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	EFilterState					mFilterState;
+	filterstate_changed_signal_t*	mFilterStateChanged;
+// [/SL:KB]
 
 	/**
 	 * Is used to determine if we need to cut text In LLFolderViewItem to avoid horizontal scroll.

@@ -1209,6 +1209,17 @@ Prøv venligst om lidt igen.
 	<string name="Snapshots" value=" Fotos,"/>
 	<string name="No Filters" value="Nej "/>
 	<string name="Since Logoff" value=" - Siden log ud"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Tag på</string>
+	<string name="InvAction take_off">Tag af</string>
+	<string name="InvAction attach">Tag på</string>
+	<string name="InvAction detach">Tag af</string>
+	<string name="InvAction activate">Aktivér</string>
+	<string name="InvAction deactivate">Deaktivér</string>
+	<string name="InvAction teleport">Teleport</string>
+	<string name="InvAction open">åben</string>
+
 	<string name="InvFolder My Inventory">
 		Min beholdning
 	</string>

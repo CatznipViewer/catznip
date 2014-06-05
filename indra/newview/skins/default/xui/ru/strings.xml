@@ -1366,6 +1366,17 @@ support@secondlife.com.
 	<string name="Snapshots" value="Снимки,"/>
 	<string name="No Filters" value="Нет"/>
 	<string name="Since Logoff" value="- С момента выхода"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Надеть</string>
+	<string name="InvAction take_off">Снять</string>
+	<string name="InvAction attach">Надеть</string>
+	<string name="InvAction detach">Снять</string>
+	<string name="InvAction activate">Активировать</string>
+	<string name="InvAction deactivate">Деактивировать</string>
+	<string name="InvAction teleport">Телепортация</string>
+	<string name="InvAction open">Открыть</string>
+
 	<string name="InvFolder My Inventory">
 		Мой инвентарь
 	</string>
