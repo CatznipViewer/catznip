@@ -35,6 +35,9 @@
 #include "llviewerwindow.h"
 #include "llrootview.h"
 #include "llsyswellwindow.h"
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+#include "lltoaststartuppanel.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 
 #include <algorithm>
@@ -46,7 +49,7 @@ LLChannelManager::LLChannelManager()
 {
 	LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLChannelManager::onLoginCompleted, this));
 	mChannelList.clear();
-	mStartUpChannel = NULL;
+//	mStartUpChannel = NULL;
 	
 	if(!gViewerWindow)
 	{
@@ -109,37 +112,64 @@ void LLChannelManager::onLoginCompleted()
 
 	if(!away_notifications)
 	{
-		onStartUpToastClose();
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+		LLScreenChannel::setStartUpToastShown();
+// [/SL:KB]
+//		onStartUpToastClose();
 	}
 	else
 	{
-		// TODO: Seems this code leads to MAINT-3536 new crash in XML_ParserFree.
-		// Need to investigate this and fix possible problems with notifications in startup time
-		// Viewer can normally receive and show of postponed notifications about purchasing in marketplace on startup time.
-		// Other types of postponed notifications did not tested.
-		//// create a channel for the StartUp Toast
-		//LLScreenChannelBase::Params p;
-		//p.id = LLUUID(gSavedSettings.getString("StartUpChannelUUID"));
-		//p.channel_align = CA_RIGHT;
-		//mStartUpChannel = createChannel(p);
+		// create a channel for the StartUp Toast
+		LLScreenChannelBase::Params p;
+		p.id = LLUUID(gSavedSettings.getString("StartUpChannelUUID"));
+		p.channel_align = CA_RIGHT;
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+		p.toast_align = NA_TOP;
+		p.display_toasts_always = true;
+		LLScreenChannel* channel_startup = createChannel<LLScreenChannelStartup>(p);
+		if (!channel_startup)
+		{
+			LLScreenChannel::setStartUpToastShown();
+		}
+		else
+		{
+			mStartUpChannel = channel_startup->getHandle();
 
-		//if(!mStartUpChannel)
-		//{
-		//	onStartUpToastClose();
-		//}
-		//else
-		//{
-		//	gViewerWindow->getRootView()->addChild(mStartUpChannel);
+			// init channel's position and size
+			S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
+			S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
+			channel_startup->init(channel_right_bound - channel_width, channel_right_bound);
 
-		//	// init channel's position and size
-		//	S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
-		//	S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
-		//	mStartUpChannel->init(channel_right_bound - channel_width, channel_right_bound);
-		//	mStartUpChannel->setMouseDownCallback(boost::bind(&LLNotificationWellWindow::onStartUpToastClick, LLNotificationWellWindow::getInstance(), _2, _3, _4));
+			LLRect toast_rect;
+			LLToast::Params p;
+			p.panel = new LLToastStartupPanel();
+			p.lifetime_secs = gSavedSettings.getS32("StartUpToastLifeTime");
+			p.enable_hide_btn = false;
+			p.can_be_stored = false;
+			p.on_delete_toast = boost::bind(&LLScreenChannel::setStartUpToastShown);
 
-		//	mStartUpChannel->setCommitCallback(boost::bind(&LLChannelManager::onStartUpToastClose, this));
-		//	mStartUpChannel->createStartUpToast(away_notifications, gSavedSettings.getS32("StartUpToastLifeTime"));
-		//}
+			channel_startup->addToast(p);
+		}
+// [/SL:KB]
+//		mStartUpChannel = createChannel(p);
+//
+//		if(!mStartUpChannel)
+//		{
+//			onStartUpToastClose();
+//		}
+//		else
+//		{
+//			gViewerWindow->getRootView()->addChild(mStartUpChannel);
+//
+//			// init channel's position and size
+//			S32 channel_right_bound = gViewerWindow->getWorldViewRectScaled().mRight - gSavedSettings.getS32("NotificationChannelRightMargin"); 
+//			S32 channel_width = gSavedSettings.getS32("NotifyBoxWidth");
+//			mStartUpChannel->init(channel_right_bound - channel_width, channel_right_bound);
+//			mStartUpChannel->setMouseDownCallback(boost::bind(&LLNotificationWellWindow::onStartUpToastClick, LLNotificationWellWindow::getInstance(), _2, _3, _4));
+//
+//			mStartUpChannel->setCommitCallback(boost::bind(&LLChannelManager::onStartUpToastClose, this));
+//			mStartUpChannel->createStartUpToast(away_notifications, gSavedSettings.getS32("StartUpToastLifeTime"));
+//		}
 	}
 
 	LLPersistentNotificationStorage::getInstance()->loadNotifications();
@@ -147,19 +177,19 @@ void LLChannelManager::onLoginCompleted()
 }
 
 //--------------------------------------------------------------------------
-void LLChannelManager::onStartUpToastClose()
-{
-	if(mStartUpChannel)
-	{
-		mStartUpChannel->setVisible(FALSE);
-		mStartUpChannel->closeStartUpToast();
-		removeChannelByID(LLUUID(gSavedSettings.getString("StartUpChannelUUID")));
-		mStartUpChannel = NULL;
-	}
-
-	// set StartUp Toast Flag to allow all other channels to show incoming toasts
-	LLScreenChannel::setStartUpToastShown();
-}
+//void LLChannelManager::onStartUpToastClose()
+//{
+//	if(mStartUpChannel)
+//	{
+//		mStartUpChannel->setVisible(FALSE);
+//		mStartUpChannel->closeStartUpToast();
+//		removeChannelByID(LLUUID(gSavedSettings.getString("StartUpChannelUUID")));
+//		mStartUpChannel = NULL;
+//	}
+//
+//	// set StartUp Toast Flag to allow all other channels to show incoming toasts
+//	LLScreenChannel::setStartUpToastShown();
+//}
 
 //--------------------------------------------------------------------------
 
@@ -177,9 +207,15 @@ LLScreenChannelBase*	LLChannelManager::addChannel(LLScreenChannelBase* channel)
 	return channel;
 }
 
-LLScreenChannel* LLChannelManager::createChannel(LLScreenChannelBase::Params& p)
+//LLScreenChannel* LLChannelManager::createChannel(LLScreenChannelBase::Params& p)
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+template <class T> T* LLChannelManager::createChannel(LLScreenChannelBase::Params& p)
+// [/SL:KB]
 {
-	LLScreenChannel* new_channel = new LLScreenChannel(p); 
+//	LLScreenChannel* new_channel = new LLScreenChannel(p); 
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	T* new_channel = new T(p); 
+// [/SL:KB]
 
 	addChannel(new_channel);
 	return new_channel;
@@ -192,8 +228,10 @@ LLScreenChannelBase* LLChannelManager::getChannel(LLScreenChannelBase::Params& p
 	if(new_channel)
 		return new_channel;
 
-	return createChannel(p);
-
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+	return createChannel<LLScreenChannel>(p);
+// [/SL:KB]
+//	return createChannel(p);
 }
 
 //--------------------------------------------------------------------------
