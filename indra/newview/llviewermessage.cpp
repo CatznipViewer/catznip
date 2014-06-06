@@ -1854,6 +1854,15 @@ protected:
 	}
 };
 
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+const char* LLOfferInfo::getNotificationName() const
+{
+	if (mFromObject)
+		return (mFromID == gAgentID) ? "OwnObjectGiveItem" : "ObjectGiveItem";
+	return "UserGiveItem";
+}
+// [/SL:KB]
+
 void LLOfferInfo::initRespondFunctionMap()
 {
 	if(mRespondFunctions.empty())
@@ -1935,6 +1944,10 @@ void inventory_offer_handler(LLOfferInfo* info)
 	// Needed by LLScriptFloaterManager to bind original notification with 
 	// faked for toast one.
 	payload["object_id"] = object_id;
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	payload["owner_id"] = info->mFromID;
+	payload["owner_is_group"] = info->mFromGroup;
+// [/SL:KB]
 	// Flag indicating that this notification is faked for toast.
 	payload["give_inventory_notification"] = FALSE;
 	args["OBJECTFROMNAME"] = info->mFromName;
@@ -1951,6 +1964,9 @@ void inventory_offer_handler(LLOfferInfo* info)
 	args["ITEM_SLURL"] = LLSLURL("inventory", info->mObjectID, verb.c_str()).getSLURLString();
 
 	LLNotification::Params p;
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	p.name = info->getNotificationName();
+// [/SL:KB]
 
 	// Object -> Agent Inventory Offer
 	if (info->mFromObject)
@@ -1961,8 +1977,8 @@ void inventory_offer_handler(LLOfferInfo* info)
 		p.substitutions(args).payload(payload).functor.responder(LLNotificationResponderPtr(info));
 		info->mPersist = true;
 
-		// Offers from your own objects need a special notification template.
-		p.name = info->mFromID == gAgentID ? "OwnObjectGiveItem" : "ObjectGiveItem";
+//		// Offers from your own objects need a special notification template.
+//		p.name = info->mFromID == gAgentID ? "OwnObjectGiveItem" : "ObjectGiveItem";
 
 		// Pop up inv offer chiclet and let the user accept (keep), or reject (and silently delete) the inventory.
 	    LLPostponedNotification::add<LLPostponedOfferNotification>(p, info->mFromID, info->mFromGroup == TRUE);
@@ -1976,7 +1992,7 @@ void inventory_offer_handler(LLOfferInfo* info)
 		// closes viewer(without responding the notification)
 		p.substitutions(args).payload(payload).functor.responder(LLNotificationResponderPtr(info));
 		info->mPersist = true;
-		p.name = "UserGiveItem";
+//		p.name = "UserGiveItem";
 		p.offer_from_agent = true;
 		
 		// Prefetch the item into your local inventory.
@@ -2621,6 +2637,9 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{
 				payload["subject"] = subj;
 				payload["message"] = mes;
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
+				payload["sender_id"] = from_id;
+// [/SL:KB]
 				payload["sender_name"] = name;
 				payload["group_id"] = group_id;
 				payload["inventory_name"] = item_name;
@@ -2632,7 +2651,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				LLSD args;
 				args["SUBJECT"] = subj;
 				args["MESSAGE"] = mes;
-				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp( (timestamp) ? timestamp : LLDate::now().secondsSinceEpoch() ));;
+// [/SL:KB]
+//				LLNotifications::instance().add(LLNotification::Params("GroupNotice").substitutions(args).payload(payload).time_stamp(timestamp));
 			}
 
 			// Also send down the old path for now.
@@ -2746,18 +2768,32 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				// Same as closing window
 				info->forceResponse(IOR_DECLINE);
 			}
-			// old logic: busy mode must not affect interaction with objects (STORM-565)
-			// new logic: inventory offers from in-world objects should be auto-declined (CHUI-519)
-			else if (is_do_not_disturb && dialog == IM_TASK_INVENTORY_OFFERED)
-			{
-				// Until throttling is implemented, do not disturb mode should reject inventory instead of silently
-				// accepting it.  SEE SL-39554
-				info->forceResponse(IOR_DECLINE);
-			}
+// [SL:KB] - Patch: Notification-InvOfferAcceptance | Checked: 2014-03-24 (Catznip-3.6)
 			else
 			{
-				inventory_offer_handler(info);
+				U32 nInvOfferResponseDnd = gSavedSettings.getU32("InventoryOfferAcceptanceDnd");
+				if ( (is_do_not_disturb) && (dialog == IM_TASK_INVENTORY_OFFERED) && (nInvOfferResponseDnd > 0) )
+				{
+					info->forceResponse( (nInvOfferResponseDnd == 2) ? IOR_DECLINE : IOR_ACCEPT);
+				}
+				else
+				{
+					inventory_offer_handler(info);
+				}
 			}
+// [/SL:KB]
+//			// old logic: busy mode must not affect interaction with objects (STORM-565)
+//			// new logic: inventory offers from in-world objects should be auto-declined (CHUI-519)
+//			else if (is_do_not_disturb && dialog == IM_TASK_INVENTORY_OFFERED)
+//			{
+//				// Until throttling is implemented, do not disturb mode should reject inventory instead of silently
+//				// accepting it.  SEE SL-39554
+//				info->forceResponse(IOR_DECLINE);
+//			}
+//			else
+//			{
+//				inventory_offer_handler(info);
+//			}
 		}
 		break;
 
@@ -4107,6 +4143,19 @@ void process_agent_movement_complete(LLMessageSystem* msg, void**)
 
 		if (isAgentAvatarValid())
 		{
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-02-05 (Catznip-3.6)
+			// Chat the "back" SLURL. (DEV-4907)
+			LLSLURL slurl;
+			gAgent.getTeleportSourceSLURL(slurl);
+			LLSD substitution = LLSD().with("[T_SLURL]", slurl.getSLURLString());
+			std::string completed_from = LLAgent::sTeleportProgressMessages["completed_from"];
+			LLStringUtil::format(completed_from, substitution);
+
+			LLSD args;
+			args["MESSAGE"] = completed_from;
+			LLNotificationsUtil::add("SystemMessageTip", args);
+// [/SL:KB]
+
 			// Set the new position
 			gAgentAvatarp->setPositionAgent(agent_pos);
 			gAgentAvatarp->clearChat();
@@ -5593,8 +5642,11 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	}
 	else
 	{
-		source_slurl =
-			LLSLURL( "agent", source_id, "completename").getSLURLString();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
+		source_slurl = LLSLURL( "agent", source_id, "about").getSLURLString();
+// [/SL:KB]
+//		source_slurl =
+//			LLSLURL( "agent", source_id, "completename").getSLURLString();
 	}
 
 	std::string dest_slurl;
@@ -5605,8 +5657,11 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	}
 	else
 	{
-		dest_slurl =
-			LLSLURL( "agent", dest_id, "completename").getSLURLString();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
+		dest_slurl = LLSLURL( "agent", dest_id, "about").getSLURLString();
+// [/SL:KB]
+//		dest_slurl =
+//			LLSLURL( "agent", dest_id, "completename").getSLURLString();
 	}
 
 	std::string reason =
@@ -5676,10 +5731,15 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		}
 		final_args["MESSAGE"] = message;
 
-		// make notification loggable
-		payload["from_id"] = source_id;
+//		// make notification loggable
+//		payload["from_id"] = source_id;
 		notification = "PaymentReceived";
 	}
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2)
+	// Make notification loggable
+	payload["from_id"] = source_id;
+	payload["dest_id"] = dest_id;
+// [/SL:KB]
 
 	// Despite using SLURLs, wait until the name is available before
 	// showing the notification, otherwise the UI layout is strange and
@@ -6927,7 +6987,10 @@ void send_lures(const LLSD& notification, const LLSD& response)
 			std::string target_name;
 			gCacheName->getFullName(target_id, target_name);  // for im log filenames
 			LLSD args;
-			args["TO_NAME"] = LLSLURL("agent", target_id, "displayname").getSLURLString();;
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-08-23 (Catznip-3.3)
+			args["TO_NAME"] = LLSLURL("agent", target_id, "completename").getSLURLString();;
+// [/SL:KB]
+//			args["TO_NAME"] = LLSLURL("agent", target_id, "displayname").getSLURLString();;
 	
 			LLSD payload;
 				
@@ -6982,7 +7045,13 @@ void handle_lure(const uuid_vec_t& ids)
 	if (!gAgent.getRegion()) return;
 
 	LLSD edit_args;
-	edit_args["REGION"] = gAgent.getRegion()->getName();
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2)
+	edit_args["NAME"] = (1 == ids.size()) ? LLSLURL("agent", ids.front(), "completename").getSLURLString() : LLTrans::getString("AvatarNameMultiple");
+	std::string strLocation;
+	LLAgentUI::buildLocationString(strLocation, LLAgentUI::LOCATION_FORMAT_LANDMARK);
+	edit_args["REGION"] = strLocation;
+// [/SL:KB]
+//	edit_args["REGION"] = gAgent.getRegion()->getName();
 
 	LLSD payload;
 	for (LLDynamicArray<LLUUID>::const_iterator it = ids.begin();
@@ -7164,18 +7233,18 @@ bool callback_script_dialog(const LLSD& notification, const LLSD& response)
 	// Button -1 = Ignore - no processing needed for this button
 	// Buttons 0 and above = dialog choices
 
-	if (-2 == button_idx)
-	{
-		std::string object_name = notification["payload"]["object_name"].asString();
-		LLUUID object_id = notification["payload"]["object_id"].asUUID();
-		LLMute mute(object_id, object_name, LLMute::OBJECT);
-		if (LLMuteList::getInstance()->add(mute))
-		{
-			// This call opens the sidebar, displays the block list, and highlights the newly blocked
-			// object in the list so the user can see that their block click has taken effect.
-			LLPanelBlockedList::showPanelAndSelect(object_id);
-		}
-	}
+//	if (-2 == button_idx)
+//	{
+//		std::string object_name = notification["payload"]["object_name"].asString();
+//		LLUUID object_id = notification["payload"]["object_id"].asUUID();
+//		LLMute mute(object_id, object_name, LLMute::OBJECT);
+//		if (LLMuteList::getInstance()->add(mute))
+//		{
+//			// This call opens the sidebar, displays the block list, and highlights the newly blocked
+//			// object in the list so the user can see that their block click has taken effect.
+//			LLPanelBlockedList::showPanelAndSelect(object_id);
+//		}
+//	}
 
 	if (0 <= button_idx)
 	{
@@ -7234,6 +7303,10 @@ void process_script_dialog(LLMessageSystem* msg, void**)
 	msg->getUUID("Data", "ImageID", image_id);
 
 	payload["sender"] = msg->getSender().getIPandPort();
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	payload["owner_id"] = owner_id;
+	payload["owner_is_group"] = first_name.empty();
+// [/SL:KB]
 	payload["object_id"] = object_id;
 	payload["chat_channel"] = chat_channel;
 	payload["object_name"] = object_name;
@@ -7640,8 +7713,14 @@ void invalid_message_callback(LLMessageSystem* msg,
 
 void LLOfferInfo::forceResponse(InventoryOfferResponse response)
 {
-	LLNotification::Params params("UserGiveItem");
-	params.functor.function(boost::bind(&LLOfferInfo::inventory_offer_callback, this, _1, _2));
+//	LLNotification::Params params("UserGiveItem");
+//	params.functor.function(boost::bind(&LLOfferInfo::inventory_offer_callback, this, _1, _2));
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	initRespondFunctionMap();
+
+	LLNotification::Params params(getNotificationName());
+	params.functor.function = mRespondFunctions[params.name];
+// [/SL:KB]
 	LLNotifications::instance().forceResponse(params, response);
 }
 

@@ -64,6 +64,11 @@ public:
 	 */
 	void removeNotification(const LLUUID& notification_id);
 
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	// Called by a LLScriptFloater instance when it is minimized or closed
+	void onCloseNotification(const LLUUID& notification_id, bool app_quitting);
+// [/SL:KB]
+
 	/**
 	 * Handles notification removal.
 	 * Removes script notification toast, removes script chiclet, closes script floater
@@ -79,10 +84,16 @@ public:
 	LLUUID findObjectId(const LLUUID& notification_id);
 
 	LLUUID findNotificationId(const LLUUID& object_id);
+// [SL:KB] - Patch: Notification-ScriptDialog | Checked: 2012-09-30 (Catznip-3.3)
+	bool findNotificationIds(const LLUUID& object_id, EObjectType object_type, uuid_vec_t& notif_ids);
+// [/SL:KB]
 
 	static EObjectType getObjectType(const LLUUID& notification_id);
 
 	static std::string getObjectName(const LLUUID& notification_id);
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	static LLUUID getObjectOwner(const LLUUID& notification_id);
+// [/SL:KB]
 
 	typedef boost::signals2::signal<void(const LLSD&)> object_signal_t;
 
@@ -115,6 +126,9 @@ protected:
 private:
 
 	script_notification_map_t mNotifications;
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	uuid_vec_t mOpenNotifications;
+// [/SL:KB]
 
 	object_signal_t mNewObjectSignal;
 	object_signal_t mToggleFloaterSignal;
@@ -151,7 +165,10 @@ public:
 	 */
 	static LLScriptFloater* show(const LLUUID& object_id);
 
-	const LLUUID& getNotificationId() { return mNotificationId; }
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	const LLUUID& getNotificationId() const { return mNotificationId; }
+// [/SL:KB]
+//	const LLUUID& getNotificationId() { return mNotificationId; }
 
 	void setNotificationId(const LLUUID& id);
 
@@ -164,6 +181,10 @@ public:
 	 * Hide all notification toasts when we show dockable floater
 	 */
 	/*virtual*/ void setDocked(bool docked, bool pop_on_undock = true);
+
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	/*virtual*/ void setMinimized(BOOL minimize);
+// [/SL:KB]
 
 	/**
 	 * Hide all notification toasts when we show dockable floater
