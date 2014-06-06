@@ -39,22 +39,26 @@
         function="Object.EnableOpen" />
   </menu_item_call>
   <menu_item_call
-      enabled="false"
-      label="Sit Here"
-      name="Object Sit">
-    <menu_item_call.on_click
-        function="Object.SitOrStand" />
-    <menu_item_call.on_enable
-        function="Object.EnableSit" />
+     enabled="false"
+     label="Sit Here"
+     name="Object Sit">
+        <menu_item_call.on_click
+         function="Object.SitOrStand" />
+        <menu_item_call.on_enable
+         function="Object.EnableSit" />
+        <menu_item_call.on_visible
+         function="Object.VisibleSit" />
   </menu_item_call>
   <menu_item_call
-      enabled="false"
-      label="Stand Up"
-      name="Object Stand Up">
-    <menu_item_call.on_click
-        function="Object.SitOrStand" />
-    <menu_item_call.on_enable
-        function="Object.EnableStandUp" />
+     enabled="false"
+     label="Stand Up"
+     name="Object Stand Up">
+        <menu_item_call.on_click
+         function="Object.SitOrStand" />
+        <menu_item_call.on_enable
+         function="Object.EnableStandUp" />
+        <menu_item_call.on_visible
+         function="Object.VisibleStandUp" />
   </menu_item_call>
   <menu_item_call
       label="Object Profile"
@@ -64,31 +68,20 @@
     <menu_item_call.on_enable
         function="Object.EnableInspect" />
   </menu_item_call>
+   <menu_item_call
+       label="Inspect"
+       name="Object Inspect Floater">
+         <menu_item_call.on_click
+          function="Floater.Show"
+          parameter="inspect" />
+         <menu_item_call.on_enable
+          function="Object.EnableInspect" />
+   </menu_item_call>
   <menu_item_call
       label="Zoom In"
       name="Zoom In">
     <menu_item_call.on_click
         function="Object.ZoomIn" />
-  </menu_item_call>
-  <menu_item_call
-      label="Show in linksets"
-      name="show_in_linksets">
-    <menu_item_call.on_click
-        function="Pathfinding.Linksets.Select" />
-    <menu_item_call.on_enable
-        function="EnableSelectInPathfindingLinksets"/>
-    <menu_item_call.on_visible
-        function="EnableSelectInPathfindingLinksets"/>
-  </menu_item_call>
-  <menu_item_call
-      label="Show in characters"
-      name="show_in_characters">
-    <menu_item_call.on_click
-        function="Pathfinding.Characters.Select" />
-    <menu_item_call.on_enable
-        function="EnableSelectInPathfindingCharacters"/>
-    <menu_item_call.on_visible
-        function="EnableSelectInPathfindingCharacters"/>
   </menu_item_call>
   <menu_item_separator layout="topleft" />
   <context_menu
@@ -141,6 +134,26 @@
           function="Object.EnableMute" />
     </menu_item_call>
     <menu_item_call
+     label="Show in linksets"
+     name="show_in_linksets">
+    <menu_item_call.on_click
+     function="Pathfinding.Linksets.Select" />
+      <menu_item_call.on_enable
+       function="EnableSelectInPathfindingLinksets"/>
+      <menu_item_call.on_visible
+       function="EnableSelectInPathfindingLinksets"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Show in characters"
+     name="show_in_characters">
+      <menu_item_call.on_click
+       function="Pathfinding.Characters.Select" />
+      <menu_item_call.on_enable
+       function="EnableSelectInPathfindingCharacters"/>
+      <menu_item_call.on_visible
+       function="EnableSelectInPathfindingCharacters"/>
+    </menu_item_call>
+    <menu_item_call
         enabled="false"
         label="Return"
         name="Return...">
@@ -150,6 +163,13 @@
           function="Object.EnableReturn" />
     </menu_item_call>
   </context_menu>
+   <menu_item_call
+     label="Texture Refresh"
+     layout="topleft"
+     name="Texture Refresh">
+      <menu_item_call.on_click
+       function="Object.TextureRefresh"/>
+   </menu_item_call>
   <menu_item_separator layout="topleft" />
   <menu_item_call
       label="Take"
@@ -197,14 +217,13 @@
         function="Object.EnableDelete" />
   </menu_item_call>
   <menu_item_separator
-       layout="topleft" />
+       layout="topleft" on_visible.function="EnableMuteParticle" />
   <menu_item_call
-     enabled="false"
      label="Block Particle Owner"
      name="Mute Particle">
     <menu_item_call.on_click
      function="Particle.Mute" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="EnableMuteParticle" />
   </menu_item_call>
 </context_menu>

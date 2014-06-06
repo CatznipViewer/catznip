@@ -138,6 +138,9 @@ void LLConversationItem::buildParticipantMenuOptions(menuentry_vec_t& items, U32
 		items.push_back(std::string("separator_chat_history"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		items.push_back(std::string("add_contact"));
+// [/SL:KB]
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("separator_invite_to_group"));
 		if (static_cast<LLConversationItem*>(mParent)->getType() == CONV_SESSION_NEARBY)

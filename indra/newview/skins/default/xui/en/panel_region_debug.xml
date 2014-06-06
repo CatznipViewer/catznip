@@ -171,7 +171,7 @@
      tool_tip="List of objects experiencing the most potential collisions"
      top="313"
      width="150" />
-    <button
+    <flyout_button
      follows="left|top"
      height="20"
      label="Restart Region"
@@ -180,7 +180,20 @@
      name="restart_btn"
      tool_tip="Give 2 minute countdown and restart region"
      top_delta="0"
-     width="150" />
+     width="150">
+        <flyout_button.item
+         label="2 minutes"
+         name="restart_two_min"
+         value="120" />
+        <flyout_button.item
+         label="5 minutes"
+         name="restart_five_min"
+         value="300" />
+        <flyout_button.item
+         label="15 minutes"
+         name="restart_fifteen_min"
+         value="900" />
+    </flyout_button>
     <button
      follows="left|top"
      height="20"

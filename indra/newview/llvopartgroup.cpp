@@ -471,6 +471,9 @@ BOOL LLVOPartGroup::updateGeometry(LLDrawable *drawable)
 BOOL LLVOPartGroup::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end,
 										  S32 face,
 										  BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+										  BOOL pick_rigged,
+// [/SL:KB]
 										  S32* face_hit,
 										  LLVector4a* intersection,
 										  LLVector2* tex_coord,

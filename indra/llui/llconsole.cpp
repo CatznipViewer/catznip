@@ -49,7 +49,7 @@
 // Used for LCD display
 extern void AddNewDebugConsoleToLCD(const LLWString &newLine);
 
-LLConsole* gConsole = NULL;  // Created and destroyed in LLViewerWindow.
+//LLConsole* gConsole = NULL;  // Created and destroyed in LLViewerWindow.
 
 const F32 FADE_DURATION = 2.f;
 const S32 MIN_CONSOLE_WIDTH = 200;
@@ -378,6 +378,9 @@ void LLConsole::updateClass()
 
 void LLConsole::update()
 {
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+	if (!mLines.empty())
+// [/SL:KB]
 	{
 		LLMutexLock lock(&mMutex);
 
