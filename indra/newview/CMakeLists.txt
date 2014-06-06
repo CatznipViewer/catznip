@@ -306,6 +306,7 @@ set(viewer_SOURCE_FILES
     llgroupactions.cpp
     llgroupiconctrl.cpp
     llgrouplist.cpp
+    llgroupoptions.cpp
     llgroupmgr.cpp
     llhasheduniqueid.cpp
     llhints.cpp
@@ -896,6 +897,7 @@ set(viewer_HEADER_FILES
     llgroupactions.h
     llgroupiconctrl.h
     llgrouplist.h
+    llgroupoptions.h
     llgroupmgr.h
     llhasheduniqueid.h
     llhints.h
