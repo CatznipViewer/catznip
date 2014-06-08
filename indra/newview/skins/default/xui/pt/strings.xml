@@ -1309,6 +1309,17 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="Snapshots" value="Fotografias"/>
 	<string name="No Filters" value="Não"/>
 	<string name="Since Logoff" value="- Desde desligado"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Vestir</string>
+	<string name="InvAction take_off">Tirar</string>
+	<string name="InvAction attach">Vestir</string>
+	<string name="InvAction detach">Tirar</string>
+	<string name="InvAction activate">Ativar</string>
+	<string name="InvAction deactivate">Desativar</string>
+	<string name="InvAction teleport">Teletransporte</string>
+	<string name="InvAction open">Abrir</string>
+
 	<string name="InvFolder My Inventory">
 		Meu inventário
 	</string>

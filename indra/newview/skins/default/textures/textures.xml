@@ -48,6 +48,7 @@ with the same filename but different name
   <texture name="Arrow_Left_Off" file_name="navbar/Arrow_Left_Off.png" preload="true" />
   <texture name="Arrow_Right_Off" file_name="navbar/Arrow_Right_Off.png" preload="true" />
 
+  <texture name="Arrow_Small_Down" file_name="widgets/Arrow_Small_Down.png" preload="true" />
   <texture name="Arrow_Small_Up" file_name="widgets/Arrow_Small_Up.png" preload="true" />
   <texture name="Arrow_Small_Left" file_name="widgets/Arrow_Small_Left.png" preload="true" />
   <texture name="Arrow_Small_Right" file_name="widgets/Arrow_Small_Right.png" preload="true" />
@@ -125,6 +126,8 @@ with the same filename but different name
   <texture name="Check_Mark" file_name="icons/check_mark.png" preload="true" />
 
   <texture name="Checker" file_name="checker.png" preload="false" />
+
+  <texture name="Inv_Collapse" file_name="icons/Inv_Collapse.png" preload="false" />
   
   <texture name="Command_AboutLand_Icon"    file_name="toolbar_icons/land.png"         preload="true" />
   <texture name="Command_Appearance_Icon"   file_name="toolbar_icons/appearance.png"   preload="true" />
