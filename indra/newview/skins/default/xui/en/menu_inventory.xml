@@ -355,6 +355,14 @@
          function="Inventory.DoToSelected"
          parameter="open" />
     </menu_item_call>
+    <menu_item_call
+     label="Copy Outfit List to Clipboard"
+     layout="topleft"
+     name="Copy Outfit To Clipboard">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="copyoutfittoclipboard" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft"
      name="Folder Wearables Separator" />
@@ -367,7 +375,7 @@
          parameter="replaceoutfit" />
     </menu_item_call>
     <menu_item_call
-     label="Add To Current Outfit"
+     label="Add to Current Outfit"
      layout="topleft"
      name="Add To Outfit">
         <menu_item_call.on_click
