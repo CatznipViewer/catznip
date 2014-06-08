@@ -1477,6 +1477,26 @@ BOOL LLFolderView::handleHover( S32 x, S32 y, MASK mask )
 	return LLView::handleHover( x, y, mask );
 }
 
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+LLFolderViewItem* LLFolderView::getHoveredItem() const
+{
+	return dynamic_cast<LLFolderViewItem*>(mHoveredItem.get());
+}
+
+void LLFolderView::setHoveredItem(LLFolderViewItem* pItem)
+{
+	// NOTE-Catznip: I think LLHandle::get() + pointer comparison should be faster than boost::bind + assignment
+	// (The general case is likely the mouse hovering stationary over the same item or en route to the next item/off-window)
+	if (mHoveredItem.get() != pItem)
+	{
+		if (pItem)
+			mHoveredItem = pItem->getHandle();
+		else
+			mHoveredItem.markDead();
+	}
+}
+// [/SL:KB]
+
 BOOL LLFolderView::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 									 EDragAndDropType cargo_type,
 									 void* cargo_data, 

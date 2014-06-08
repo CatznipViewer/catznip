@@ -331,8 +331,10 @@ set(viewer_SOURCE_FILES
     llinspect.cpp
     llinspectavatar.cpp
     llinspectgroup.cpp
+    llinspectlocation.cpp
     llinspectobject.cpp
     llinspectremoteobject.cpp
+    llinspecttexture.cpp
     llinspecttoast.cpp
     llinventorybridge.cpp
     llinventoryfilter.cpp
@@ -924,8 +926,10 @@ set(viewer_HEADER_FILES
     llinspect.h
     llinspectavatar.h
     llinspectgroup.h
+    llinspectlocation.h
     llinspectobject.h
     llinspectremoteobject.h
+    llinspecttexture.h
     llinspecttoast.h
     llinventorybridge.h
     llinventoryfilter.h
