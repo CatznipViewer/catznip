@@ -203,6 +203,11 @@ public:
 	void setAppearanceServiceURL(const std::string& url) { mAppearanceServiceURL = url; }
 	std::string getAppearanceServiceURL() const;
 
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-04-15 (Catznip-3.2.1a) | Added: Catznip-2.0.0a
+	// We need this to be public since we use it in LLWearableBridge::performActionBatch
+	static void filterWearableItems(LLInventoryModel::item_array_t& items, S32 max_per_type);
+// [/SL:KB]
+
 private:
 	std::string		mAppearanceServiceURL;
 	
@@ -213,7 +218,7 @@ protected:
 
 private:
 
-	void filterWearableItems(LLInventoryModel::item_array_t& items, S32 max_per_type);
+//	void filterWearableItems(LLInventoryModel::item_array_t& items, S32 max_per_type);
 	
 	void getDescendentsOfAssetType(const LLUUID& category, 
 										  LLInventoryModel::item_array_t& items,

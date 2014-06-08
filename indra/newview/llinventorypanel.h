@@ -162,6 +162,9 @@ public:
 	void setSelectCallback(const boost::function<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)>& cb);
 	void clearSelection();
 	bool isSelectionRemovable();
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+	bool isSelectionWearable();
+// [/SL:KB]
 	LLInventoryFilter& getFilter();
 	const LLInventoryFilter& getFilter() const;
 	void setFilterTypes(U64 filter, LLInventoryFilter::EFilterType = LLInventoryFilter::FILTERTYPE_OBJECT);

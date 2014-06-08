@@ -422,13 +422,25 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)
 {
-	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	if (gSavedSettings.getBOOL("ShowPropertiesFloaters"))
+		LLFloaterReg::showInstance("properties", LLSD().with("item_id", item_uuid).with("object_id", object_id));
+	else
+		LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
+// [/SL:KB]
+//	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
 }
 
 void show_item_profile(const LLUUID& item_uuid)
 {
 	LLUUID linked_uuid = gInventory.getLinkedItemID(item_uuid);
-	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	if (gSavedSettings.getBOOL("ShowPropertiesFloaters"))
+		LLFloaterReg::showInstance("properties", LLSD().with("item_id", item_uuid));
+	else
+		LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
+// [/SL:KB]
+//	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", linked_uuid));
 }
 
 void show_item_original(const LLUUID& item_uuid)
@@ -1102,7 +1114,11 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 		LLFloater::setFloaterHost(multi_previewp);
 
 	}
-	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+//	else if (("task_properties" == action || "properties" == action) && selected_items.size() > 1)
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.1)
+	else if ( ("task_properties" == action || "properties" == action) && (selected_items.size() > 1) && 
+	          (gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
+// [/SL:KB]
 	{
 		multi_propertiesp = new LLMultiProperties();
 		gFloaterView->addChild(multi_propertiesp);
@@ -1110,16 +1126,42 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 		LLFloater::setFloaterHost(multi_propertiesp);
 	}
 
-	std::set<LLFolderViewItem*>::iterator set_iter;
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.0)
+	// If we group the selected items together per type then each LLFolderViewEventListener derived class can support batched actions
+	typedef std::map<const std::type_info*, std::list<LLFolderViewModelItemInventory*> > type_batch_map_t;
+	type_batch_map_t mapTypeBatch;
+// [/SL:KB]
 
+	std::set<LLFolderViewItem*>::iterator set_iter;
 	for (set_iter = selected_items.begin(); set_iter != selected_items.end(); ++set_iter)
 	{
 		LLFolderViewItem* folder_item = *set_iter;
 		if(!folder_item) continue;
 		LLInvFVBridge* bridge = (LLInvFVBridge*)folder_item->getViewModelItem();
 		if(!bridge) continue;
-		bridge->performAction(model, action);
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.0)
+		const std::type_info* typeBridge = &typeid(*bridge);
+		type_batch_map_t::iterator itTypeBatch = mapTypeBatch.find(typeBridge);
+		if (itTypeBatch == mapTypeBatch.end())
+		{
+			mapTypeBatch.insert(std::make_pair(typeBridge, std::list<LLFolderViewModelItemInventory*>()));
+			itTypeBatch = mapTypeBatch.find(typeBridge);
+		}
+		itTypeBatch->second.push_back(bridge);
+// [/SL:KB]
+//		bridge->performAction(model, action);
 	}
+
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.0)
+	for (type_batch_map_t::iterator itTypeBatch = mapTypeBatch.begin(); itTypeBatch != mapTypeBatch.end(); ++itTypeBatch)
+	{
+		std::list<LLFolderViewModelItemInventory*>& batch_items = itTypeBatch->second;
+		if (1 == batch_items.size())
+			(*batch_items.begin())->performAction(model, action);
+		else
+			(*batch_items.begin())->performActionBatch(model, action, batch_items);
+	}
+// [/SL:KB]
 
 	LLFloater::setFloaterHost(NULL);
 	if (multi_previewp)
