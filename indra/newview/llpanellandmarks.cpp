@@ -343,23 +343,26 @@ void LLLandmarksPanel::onSelectionChange(LLPlacesInventoryPanel* inventory_list,
 	updateVerbs();
 }
 
-void LLLandmarksPanel::onSelectorButtonClicked()
-{
-	// TODO: mantipov: update getting of selected item
-	// TODO: bind to "i" button
-	LLFolderViewItem* cur_item = mFavoritesInventoryPanel->getRootFolder()->getCurSelectedItem();
-	if (!cur_item) return;
-
-	LLFolderViewModelItemInventory* listenerp = static_cast<LLFolderViewModelItemInventory*>(cur_item->getViewModelItem());
-	if (listenerp->getInventoryType() == LLInventoryType::IT_LANDMARK)
-	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = listenerp->getUUID();
-
-		LLFloaterSidePanelContainer::showPanel("places", key);
-	}
-}
+//void LLLandmarksPanel::onSelectorButtonClicked()
+//{
+//	// TODO: mantipov: update getting of selected item
+//	// TODO: bind to "i" button
+//	LLFolderViewItem* cur_item = mFavoritesInventoryPanel->getRootFolder()->getCurSelectedItem();
+//	if (!cur_item) return;
+//
+//	LLFolderViewModelItemInventory* listenerp = static_cast<LLFolderViewModelItemInventory*>(cur_item->getViewModelItem());
+//	if (listenerp->getInventoryType() == LLInventoryType::IT_LANDMARK)
+//	{
+//// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+//		LLLandmarkActions::showLandmarkInfo(listenerp->getUUID());
+//// [/SL:KB]
+////		LLSD key;
+////		key["type"] = "landmark";
+////		key["id"] = listenerp->getUUID();
+////
+////		LLFloaterSidePanelContainer::showPanel("places", key);
+//	}
+//}
 
 void LLLandmarksPanel::updateShowFolderState()
 {
@@ -773,7 +776,10 @@ void LLLandmarksPanel::onAddAction(const LLSD& userdata) const
 		}
 		else
 		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+			LLLandmarkActions::showCreateLandmark();
+// [/SL:KB]
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
 		}
 	} 
 	else if ("category" == command_name)
