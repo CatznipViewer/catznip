@@ -316,7 +316,10 @@ void LLFloaterGesture::addGesture(const LLUUID& item_id , LLMultiGesture* gestur
 		element["columns"][0]["font"]["name"] = "SANSSERIF";
 		element["columns"][0]["font"]["style"] = font_style;
 
-		std::string key_string = LLKeyboard::stringFromKey(gesture->mKey);
+//		std::string key_string = LLKeyboard::stringFromKey(gesture->mKey);
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-06 (Catznip-3.6)
+		std::string key_string;
+// [/SL:KB]
 		std::string buffer;
 
 		if (gesture->mKey == KEY_NONE)
@@ -328,6 +331,9 @@ void LLFloaterGesture::addGesture(const LLUUID& item_id , LLMultiGesture* gestur
 		{
 			buffer = LLKeyboard::stringFromAccelerator(gesture->mMask,
 					gesture->mKey);
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-06 (Catznip-3.6)
+			key_string = LLKeyboard::stringFromKey(gesture->mKey);
+// [/SL:KB]
 		}
 
 		element["columns"][1]["column"] = "shortcut";

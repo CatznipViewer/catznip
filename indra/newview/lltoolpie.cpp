@@ -107,7 +107,10 @@ BOOL LLToolPie::handleMouseDown(S32 x, S32 y, MASK mask)
 	mMouseDownY = y;
 
 	//left mouse down always picks transparent
-	mPick = gViewerWindow->pickImmediate(x, y, TRUE);
+//	mPick = gViewerWindow->pickImmediate(x, y, TRUE);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	mPick = gViewerWindow->pickImmediate(x, y, TRUE, FALSE);
+// [/SL:KB]
 	mPick.mKeyMask = mask;
 
 	mMouseButtonDown = true;
@@ -122,7 +125,10 @@ BOOL LLToolPie::handleMouseDown(S32 x, S32 y, MASK mask)
 BOOL LLToolPie::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
 	// don't pick transparent so users can't "pay" transparent objects
-	mPick = gViewerWindow->pickImmediate(x, y, FALSE, TRUE);
+//	mPick = gViewerWindow->pickImmediate(x, y, FALSE, TRUE);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	mPick = gViewerWindow->pickImmediate(x, y, FALSE, gSavedSettings.getBOOL("PickRiggedAttachment"), TRUE);
+// [/SL:KB]
 	mPick.mKeyMask = mask;
 
 	// claim not handled so UI focus stays same
@@ -541,7 +547,10 @@ void LLToolPie::selectionPropertiesReceived()
 
 BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 {
-	mHoverPick = gViewerWindow->pickImmediate(x, y, FALSE);
+//	mHoverPick = gViewerWindow->pickImmediate(x, y, FALSE);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	mHoverPick = gViewerWindow->pickImmediate(x, y, FALSE, FALSE);
+// [/SL:KB]
 	LLViewerObject *parent = NULL;
 	LLViewerObject *object = mHoverPick.getObject();
 	if (object)
@@ -586,7 +595,10 @@ BOOL LLToolPie::handleHover(S32 x, S32 y, MASK mask)
 	else
 	{
 		// perform a separate pick that detects transparent objects since they respond to 1-click actions
-		LLPickInfo click_action_pick = gViewerWindow->pickImmediate(x, y, TRUE);
+//		LLPickInfo click_action_pick = gViewerWindow->pickImmediate(x, y, TRUE);
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+		LLPickInfo click_action_pick = gViewerWindow->pickImmediate(x, y, TRUE, FALSE);
+// [/SL:KB]
 
 		LLViewerObject* click_action_object = click_action_pick.getObject();
 
@@ -970,6 +982,14 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			|| !existing_inspector->getVisible()
 			|| existing_inspector->getKey()["avatar_id"].asUUID() != hover_object->getID())
 		{
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2)
+			// Don't show an avatar inspector button if a (context) menu is open
+			if (gMenuHolder->hasVisibleMenu())
+			{
+				return TRUE;
+			}
+// [/SL:KB]
+
 			// Try to get display name + username
 			std::string final_name;
 			LLAvatarName av_name;
@@ -1017,6 +1037,13 @@ BOOL LLToolPie::handleTooltipObject( LLViewerObject* hover_object, std::string l
 			 || !existing_inspector->getVisible()
 			 || existing_inspector->getKey()["object_id"].asUUID() != hover_object->getID()))
 		{
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-18 (Catznip-3.2)
+			// Don't show an object inspector button if a (context) menu is open
+			if (gMenuHolder->hasVisibleMenu())
+			{
+				return TRUE;
+			}
+// [/SL:KB]
 
 			// Add price to tooltip for items on sale
 			bool for_sale = for_sale_selection(nodep);
@@ -1682,7 +1709,10 @@ BOOL LLToolPie::handleRightClickPick()
 				mute_msg = LLTrans::getString("MuteObject2");
 			}
 			
-			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+//			gMenuHolder->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+			gMenuObject->getChild<LLUICtrl>("Object Mute")->setValue(mute_msg);
+// [/SL:KB]
 			gMenuObject->show(x, y);
 
 			showVisualContextMenuEffect();
