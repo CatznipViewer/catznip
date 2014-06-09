@@ -275,7 +275,46 @@ private:
 	bool mUpdateBaseOrder;
 };
 
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2)
+class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
+{
+public:
+	LLReorderAndUpdateAppearanceOnDestroy() : mFireCount(0) {}
+	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& idItem, U32 index, bool do_replace) : mFireCount(0) 
+	{
+		addReorderItem(idItem, index, do_replace);
+	}
+	/*virtual*/ ~LLReorderAndUpdateAppearanceOnDestroy();
 
+	void addReorderItem(const LLUUID& idItem, U32 index, bool do_replace)
+	{
+		mReorderMap.insert(std::pair<LLUUID, reorder_data_t>(idItem, reorder_data_t(do_replace, index)));
+	}
+
+	virtual void fire(const LLUUID& idItem)
+	{
+		mFireCount++;
+		mIDs.push_back(idItem);
+	}
+protected:
+	union reorder_data_t
+	{
+		U32 ReorderData;
+		struct
+		{
+			U32 fReplace:1;
+			U32 nIndex:31;
+		};
+		reorder_data_t(bool replace, U32 index) : fReplace(replace), nIndex(index) {}
+	};
+	typedef std::map<LLUUID, reorder_data_t> reorder_map_t;
+private:
+	U32           mFireCount;
+	uuid_vec_t    mIDs;
+	reorder_map_t mReorderMap;
+};
+// [/SL:KB]
+ 
 #define SUPPORT_ENSEMBLES 0
 
 LLUUID findDescendentCategoryIDByName(const LLUUID& parent_id,const std::string& name);
