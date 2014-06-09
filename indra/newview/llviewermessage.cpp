@@ -1007,6 +1007,17 @@ void set_dad_inbox_object(const LLUUID& object_id)
 //know what to watch for, so instead we just watch for all additions.
 class LLOpenTaskOffer : public LLInventoryAddedObserver
 {
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+public:
+	// TODO-Catznip: a better/cleaner solution would be to create a class instance on demand. Look into why LL didn't do it that way?
+	void addMoveFromTaskFolder(const LLUUID& idFolder, U32 cntItems)
+	{
+		mMoveFromTaskFolders.insert(std::pair<LLUUID, U32>(idFolder, cntItems));
+	}
+protected:
+	std::map<LLUUID, U32> mMoveFromTaskFolders;
+// [/SL:KB]
+
 protected:
 	/*virtual*/ void done()
 	{
@@ -1027,6 +1038,16 @@ protected:
 						LL_DEBUGS("Inventory_Move") << "Found asset UUID: " << asset_uuid << LL_ENDL;
 						was_moved = true;
 					}
+
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+					std::map<LLUUID, U32>::iterator itFolder = mMoveFromTaskFolders.find(added_item->getParentUUID());
+					if (mMoveFromTaskFolders.end() != itFolder)
+					{
+						if (0 == --itFolder->second)
+							mMoveFromTaskFolders.erase(itFolder);
+						was_moved = true;
+					}
+// [/SL:KB]
 				}
 			}
 
@@ -1056,6 +1077,18 @@ protected:
 
 //one global instance to bind them
 LLOpenTaskOffer* gNewInventoryObserver=NULL;
+
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+// Hacky way of getting from move_task_inventory_callback() in llinventorybridge.cpp to the LLOpenTaskOffer class here *sighs*
+void move_task_inventory_register_folder(const LLUUID& idFolder, U32 cntItems)
+{
+	if (gNewInventoryObserver)
+	{
+		gNewInventoryObserver->addMoveFromTaskFolder(idFolder, cntItems);
+	}
+}
+// [/SL:KB]
+
 class LLNewInventoryHintObserver : public LLInventoryAddedObserver
 {
 protected:
@@ -1315,7 +1348,13 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		const BOOL auto_open = 
 			gSavedSettings.getBOOL("ShowInInventory") && // don't open if showininventory is false
 			!from_name.empty(); // don't open if it's not from anyone.
-		LLInventoryPanel::openInventoryPanelAndSetSelection(auto_open, obj_id);
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2014-03-02 (Catznip-3.6)
+		if ( (auto_open) || (LLFloaterReg::instanceVisible("inventory")) )
+		{
+			show_item(obj_id);
+		}
+// [/SL:KB]
+//		LLInventoryPanel::openInventoryPanelAndSetSelection(auto_open, obj_id);
 	}
 }
 
@@ -1813,8 +1852,23 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			// or IM_GROUP_NOTICE_INVENTORY_DECLINED
 		default:
 			// close button probably (or any of the fall-throughs from above)
-			msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
-			msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+// [SL:KB] - Patch: Inventory-DeclineTaskToTrash | Checked: 2011-05-24 (Catznip-2.6)
+			if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (IOR_DECLINE == button) && (gSavedSettings.getBOOL("DeclineTaskOfferToTrash")) )
+			{
+				// open_inventory_offer() will call highlight_offered_object() which returns false for items in the trash 
+				// so we don't have to do anything to suppress the task opener
+				const LLUUID idTash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+				msg->addU8Fast(_PREHASH_Dialog, IM_TASK_INVENTORY_ACCEPTED);
+				msg->addBinaryDataFast(_PREHASH_BinaryBucket, &idTash.mData, sizeof(idTash.mData));
+			}
+			else
+			{
+// [/SL:KB]
+				msg->addU8Fast(_PREHASH_Dialog, (U8)(mIM + 2));
+				msg->addBinaryDataFast(_PREHASH_BinaryBucket, EMPTY_BINARY_BUCKET, EMPTY_BINARY_BUCKET_SIZE);
+// [SL:KB] - Patch: Inventory-DeclineTaskToTrash | Checked: 2011-05-24 (Catznip-2.6)
+			}
+// [/SL:KB]
 			// send the message
 			msg->sendReliable(mHost);
 

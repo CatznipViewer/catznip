@@ -27,6 +27,9 @@
 #ifndef LL_LLAVATARACTIONS_H
 #define LL_LLAVATARACTIONS_H
 
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+#include "llhandle.h"
+// [/SL:KB]
 #include "llsd.h"
 #include "lluuid.h"
 
@@ -36,6 +39,10 @@
 class LLAvatarName;
 class LLInventoryPanel;
 class LLFloater;
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+class LLInventoryPanel;
+class LLPanel;
+// [/SL:KB]
 class LLView;
 
 /**
@@ -123,7 +130,10 @@ public:
 	/**
 	 * Share items with the picked avatars.
 	 */
-	static void shareWithAvatars(LLView * panel);
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	static void shareWithAvatars(LLInventoryPanel* inv_panel);
+// [/SL:KB]
+//	static void shareWithAvatars(LLView * panel);
 
 	/**
 	 * Block/unblock the avatar.
@@ -213,7 +223,10 @@ public:
 	 *
 	 * @return false if the selected items cannot be shared or the active inventory panel cannot be obtained
 	 */
-	static bool canShareSelectedItems(LLInventoryPanel* inv_panel = NULL);
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+	static bool canShareSelectedItems(LLInventoryPanel* inv_panel);
+// [/SL:KB]
+//	static bool canShareSelectedItems(LLInventoryPanel* inv_panel = NULL);
 
 	/**
 	 * Builds a string of residents' display names separated by "words_separator" string.
@@ -236,7 +249,10 @@ public:
 	 */
 	static void viewChatHistory(const LLUUID& id);
 
-	static std::set<LLUUID> getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	static std::set<LLUUID> getInventorySelectedUUIDs(LLInventoryPanel* inv_panel);
+// [/SL:KB]
+//	static std::set<LLUUID> getInventorySelectedUUIDs();
 
 private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
