@@ -40,6 +40,9 @@ void LLMenuButton::MenuPositions::declareValues()
 	declare("topleft", MP_TOP_LEFT);
 	declare("topright", MP_TOP_RIGHT);
 	declare("bottomleft", MP_BOTTOM_LEFT);
+// [SL:KB] - Patch: Control-MenuButton | Checked: 2014-03-16 (Catznip-3.6)
+	declare("bottomright", MP_BOTTOM_RIGHT);
+// [/SL:KB]
 }
 
 LLMenuButton::Params::Params()
@@ -211,6 +214,15 @@ void LLMenuButton::updateMenuOrigin()
 			mY = rect.mBottom;
 			break;
 		}
+// [SL:KB] - Patch: Control-MenuButton | Checked: 2014-03-16 (Catznip-3.6)
+		case MP_BOTTOM_RIGHT:
+		{
+			const LLRect& menu_rect = menu->getRect();
+			mX = rect.mRight - menu_rect.getWidth();
+			mY = rect.mBottom;
+			break;
+		}
+// [/SL:KB]
 	}
 }
 
