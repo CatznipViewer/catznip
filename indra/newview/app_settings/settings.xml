@@ -1682,6 +1682,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ClearCacheMask</key>
+    <map>
+      <key>Comment</key>
+      <string>Determines which history settings get purged and which preserved (bitmask - do not set manually)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>4294967295</integer>
+    </map>
     <key>ClientSettingsFile</key>
     <map>
       <key>Comment</key>
@@ -10945,6 +10956,28 @@
       <key>Value</key>
       <integer>4</integer>
     </map>
+    <key>RecentPeopleInteractionFilter</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the recent people interaction filter</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>RecentPeopleCutOffDays</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies the number of days before a record is purged</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>RecentPeopleSortOrder</key>
     <map>
       <key>Comment</key>
@@ -11549,6 +11582,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>StartupSettingsFile</key>
+    <map>
+      <key>Comment</key>
+      <string>Startup settings file name (per install)</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
     </map>
     <key>StatsAutoRun</key>
     <map>

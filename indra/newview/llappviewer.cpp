@@ -846,6 +846,9 @@ bool LLAppViewer::init()
 	settings_map["ignores"] = &gWarningSettings;
 	settings_map["floater"] = &gSavedSettings; // *TODO: New settings file
 	settings_map["account"] = &gSavedPerAccountSettings;
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	settings_map["startup"] = &gStartupSettings;
+// [/SL:KB]
 
 	LLUI::initClass(settings_map,
 		LLUIImageList::getInstance(),
@@ -2348,6 +2351,20 @@ bool LLAppViewer::loadSettingsFromDirectory(const std::string& location_key,
 	return true;
 }
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+const SettingsGroup* LLAppViewer::getSettingsGroup(const std::string& location_key)
+{
+	BOOST_FOREACH(const SettingsGroup& group, mSettingsLocationList->groups)
+	{
+		if (group.name() == location_key)
+		{
+			return &group;
+		}
+	}
+	return NULL;
+}
+// [/SL:KB]
+
 std::string LLAppViewer::getSettingsFilename(const std::string& location_key,
 											 const std::string& file)
 {
@@ -2427,6 +2444,48 @@ bool LLAppViewer::initConfiguration()
 		OSMessageBox(msg.str(),LLStringUtil::null,OSMB_OK);
 		return false;
 	}
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+	gSavedSettings.setString("StartupSettingsFile", 
+		gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Startup", "StartupSettings")));
+
+	if (loadSettingsFromDirectory("Startup"))
+	{
+		if (gStartupSettings.getBOOL("PurgeUserSettingsOnNextStartup"))
+		{
+			// Iterate over all settings files registered in the "User" group and delete them one by one
+			const SettingsGroup* pSettingsGroup = getSettingsGroup("User");
+			if (pSettingsGroup)
+			{
+				for (auto itFile = pSettingsGroup->files.begin(), endFile = pSettingsGroup->files.end(); itFile != endFile; ++itFile)
+				{
+					const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, (*itFile).file_name);
+					if (gDirUtilp->fileExists(strFile))
+					{
+						LL_INFOS() << "Removing user settings file " << strFile << LL_ENDL;
+						LLFile::remove(strFile);
+					}
+				}
+			}
+
+			// Remove non-settings registered files
+			const std::string strFilenames[] = { "colors.xml", "stored_favorites.xml" };
+			for (int idxFile = 0, cntFile = sizeof(strFilenames) / sizeof(std::string); idxFile < cntFile; idxFile++)
+			{
+				const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, strFilenames[idxFile]);
+				if (gDirUtilp->fileExists(strFile))
+				{
+					LL_INFOS() << "Removing user file " << strFile << LL_ENDL;
+					LLFile::remove(strFile);
+				}
+			}
+
+			// Reset the value and save to avoid infinite looping
+			gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", FALSE);
+			gStartupSettings.saveToFile(gSavedSettings.getString("StartupSettingsFile"), TRUE);
+		}
+	}
+// [/SL:KB]
 
 	initStrings(); // setup paths for LLTrans based on settings files only
 	// - set procedural settings

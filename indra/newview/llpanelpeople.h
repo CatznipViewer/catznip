@@ -79,7 +79,11 @@ private:
 	void					updateFriendList();
 	bool					updateSuggestedFriendList();
 	void					updateNearbyList();
-	void					updateRecentList();
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	void					refreshRecentList();
+	void					updateRecentList(bool fForceUpdate);
+// [/SL:KB]
+//	void					updateRecentList();
 	void					updateFacebookList(bool visible);
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
@@ -111,9 +115,16 @@ private:
 	void					onNearbyViewSortMenuItemClicked(const LLSD& userdata);
 	void					onGroupsViewSortMenuItemClicked(const LLSD& userdata);
 	void					onRecentViewSortMenuItemClicked(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2)
+	void					onRecentSetExpiration(const LLSD& sdParam);
+	void					onRecentClearHistory();
+// [/SL:KB]
 
 	bool					onFriendsViewSortMenuItemCheck(const LLSD& userdata);
 	bool					onRecentViewSortMenuItemCheck(const LLSD& userdata);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-12-09 (Catznip-3.2)
+	bool					onRecentCheckExpiration(const LLSD& sdParam);
+// [/SL:KB]
 	bool					onNearbyViewSortMenuItemCheck(const LLSD& userdata);
 
 	// misc callbacks

@@ -111,4 +111,17 @@ protected:
 	std::string mImportedClothingName;
 };
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+class LLInitialLibraryOutfitFetch : public LLInventoryFetchDescendentsObserver
+{
+public:
+	static void wearInitialLibraryOutfit(const std::string& strOutfit);
+
+protected:
+	static void onCategoryFetched(const LLUUID& idFolder);
+	static void onItemsCopied(const LLUUID& idFolderDest);
+	static void onFailure();
+};
+// [/SL:KB]
+
 #endif // LL_AGENTWEARABLESINITIALFETCH_H
