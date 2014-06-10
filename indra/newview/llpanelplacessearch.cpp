@@ -333,7 +333,7 @@ const LLUUID& LLPanelPlacesSearch::getCurrentParcelId() const
 
 const LLVector3d& LLPanelPlacesSearch::getCurrentParcelPos() const
 {
-	return m_pParcelInfo->getCurrentParcelPos();
+	return m_pParcelInfo->getGlobalPos();
 }
 
 boost::signals2::connection LLPanelPlacesSearch::setSelectCallback(const commit_signal_t::slot_type& cb)

@@ -104,7 +104,7 @@ void LLFloaterParcelInfo::onOpen(const LLSD& sdKey)
 
 void LLFloaterParcelInfo::onClickShowOnMap()
 {
-	LLVector3d posGlobal = m_pParcelInfo->getCurrentParcelPos();
+	const LLVector3d posGlobal = m_pParcelInfo->getGlobalPos();
 	if (!posGlobal.isExactlyZero())
 	{
 		LLSD sdParams;
@@ -119,14 +119,29 @@ void LLFloaterParcelInfo::onClickShowOnMap()
 
 void LLFloaterParcelInfo::onClickTeleport()
 {
-	LLVector3d posGlobal = m_pParcelInfo->getCurrentParcelPos();
-	if (!posGlobal.isExactlyZero())
+	LLFloaterWorldMap* pWorldMap = LLFloaterWorldMap::getInstance();
+	if (m_pParcelInfo->isLandmark())
 	{
-		LLFloaterWorldMap* pWorldMap = LLFloaterWorldMap::getInstance();
-		if (pWorldMap)
+		const LLInventoryItem* pItem = gInventory.getItem(m_pParcelInfo->getItemId());
+		if (pItem)
+		{
+			gAgent.teleportViaLandmark(pItem->getAssetUUID());
+			if (pWorldMap)
+			{
+				const LLVector3d posGlobal = m_pParcelInfo->getGlobalPos();
+				if (!posGlobal.isExactlyZero())
+					pWorldMap->trackLocation(posGlobal);
+			}
+		}
+	}
+	else
+	{
+		const LLVector3d posGlobal = m_pParcelInfo->getGlobalPos();
+		if (!posGlobal.isExactlyZero())
 		{
 			gAgent.teleportViaLocation(posGlobal);
-			pWorldMap->trackLocation(posGlobal);
+			if (pWorldMap)
+				pWorldMap->trackLocation(posGlobal);
 		}
 	}
 }
