@@ -8,6 +8,7 @@
 	<context_menu label="Присоединить" name="wearable_attach_to"/>
 	<context_menu label="Присоединить к данным в игре" name="wearable_attach_to_hud"/>
 	<menu_item_call label="Снять" name="take_off"/>
+	<menu_item_call label="Коснуться" name="touch"/>
 	<menu_item_call label="Изменить" name="edit"/>
 	<menu_item_call label="Профиль объекта" name="object_profile"/>
 	<menu_item_call label="Показать оригинал" name="show_original"/>
