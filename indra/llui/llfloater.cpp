@@ -3038,6 +3038,11 @@ void LLFloaterView::setToolbarRect(LLToolBarEnums::EToolBarLocation tb, const LL
 	case LLToolBarEnums::TOOLBAR_LEFT:
 		mToolbarLeftRect = toolbar_rect;
 		break;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	case LLToolBarEnums::TOOLBAR_TOP:
+		mToolbarTopRect = toolbar_rect;
+		break;
+// [/SL:KB]
 	case LLToolBarEnums::TOOLBAR_BOTTOM:
 		mToolbarBottomRect = toolbar_rect;
 		break;
