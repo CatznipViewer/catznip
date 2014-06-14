@@ -74,11 +74,11 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
   : LLFloaterIMSessionTab(session_id),
 	mLastMessageIndex(-1),
 	mDialog(IM_NOTHING_SPECIAL),
-	mTypingStart(),
+//	mTypingStart(),
 	mShouldSendTypingState(false),
 	mMeTyping(false),
 	mOtherTyping(false),
-	mSessionNameUpdatedForTyping(false),
+//	mSessionNameUpdatedForTyping(false),
 	mTypingTimer(),
 	mTypingTimeoutTimer(),
 	mPositioned(false),
@@ -97,6 +97,10 @@ LLFloaterIMSession::LLFloaterIMSession(const LLUUID& session_id)
     mEnableCallbackRegistrar.add("Avatar.EnableGearItem", boost::bind(&LLFloaterIMSession::enableGearMenuItem, this, _2));
     mCommitCallbackRegistrar.add("Avatar.GearDoToSelected", boost::bind(&LLFloaterIMSession::GearDoToSelected, this, _2));
     mEnableCallbackRegistrar.add("Avatar.CheckGearItem", boost::bind(&LLFloaterIMSession::checkGearMenuItem, this, _2));
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+    mEnableCallbackRegistrar.add("Group.EnableGearItem", boost::bind(&LLFloaterIMSession::enableGearGroupMenuItem, this, _2));
+    mCommitCallbackRegistrar.add("Group.GearDoToSelected", boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, _2));
+// [/SL:KB]
 
     setDocked(true);
 }
@@ -179,7 +183,11 @@ void LLFloaterIMSession::newIMCallback(const LLSD& data)
 		LLFloaterIMSession* floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", session_id);
 
         // update if visible, otherwise will be updated when opened
-		if (floater && floater->isInVisibleChain())
+//		if (floater && floater->isInVisibleChain())
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-09-18 (Catznip-3.3)
+		// Add messages (but not notifications) as they come in (otherwise keyword alerts only trigger when the IM is opened)
+		if ( (floater && floater->isInVisibleChain()) || (!data.has("notification_id")) || (LLNotificationsUtil::find(data["notification_id"].asUUID()) == NULL) )
+// [/SL:KB]
 		{
 			floater->updateMessages();
 		}
@@ -248,6 +256,18 @@ bool LLFloaterIMSession::checkGearMenuItem(const LLSD& userdata)
 // [/SL:KB]
 	return floater_container->checkContextMenuItem(command, selected_uuids);
 }
+
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+void LLFloaterIMSession::GearDoToSelectedGroup(const LLSD& userdata)
+{
+	LLFloaterIMContainerBase::getInstance()->doToGroup(userdata.asString(), mSessionID);
+}
+
+bool LLFloaterIMSession::enableGearGroupMenuItem(const LLSD& userdata)
+{
+	return LLFloaterIMContainerBase::getInstance()->enableContextGroupMenuItem(userdata.asString(), mSessionID);
+}
+// [/SL:KB]
 
 void LLFloaterIMSession::sendMsgFromInputEditor()
 {
@@ -333,10 +353,17 @@ void LLFloaterIMSession::initIMFloater()
 
 	boundVoiceChannel();
 
-	mTypingStart = LLTrans::getString("IM_typing_start_string");
+//	mTypingStart = LLTrans::getString("IM_typing_start_string");
 
-	// Show control panel in torn off floaters only.
-	mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
+	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	{
+		// Show control panel in torn off floaters only.
+		mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL(getShowControlPanelControl()));
+	}
+// [/SL:KB]
+//	// Show control panel in torn off floaters only.
+//	mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL("IMShowControlPanel"));
 
 	// Disable input editor if session cannot accept text
 	if ( mSession && !mSession->mTextIMPossible )
@@ -345,11 +372,14 @@ void LLFloaterIMSession::initIMFloater()
 		mInputEditor->setLabel(LLTrans::getString("IM_unavailable_text_label"));
 	}
 
-	if (!mIsP2PChat)
-	{
-		std::string session_name(LLIMModel::instance().getName(mSessionID));
-		updateSessionName(session_name);
-	}
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+	updateSessionName();
+// [/SL:KB]
+//	if (!mIsP2PChat)
+//	{
+//		std::string session_name(LLIMModel::instance().getName(mSessionID));
+//		updateSessionName(session_name);
+//	}
 }
 
 //virtual
@@ -578,16 +608,62 @@ void LLFloaterIMSession::onVoiceChannelStateChanged(
 	updateCallBtnState(callIsActive);
 }
 
-void LLFloaterIMSession::updateSessionName(const std::string& name)
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+void LLFloaterIMSession::updateSessionName()
 {
-	if (!name.empty())
+	std::string strTitle;
+	std::string strShortTitle;
+
+	if (mIsP2PChat)
 	{
-		LLFloaterIMSessionTab::updateSessionName(name);
-		mTypingStart.setArg("[NAME]", name);
-		setTitle (mOtherTyping ? mTypingStart.getString() : name);
-		mSessionNameUpdatedForTyping = mOtherTyping;
+		LLAvatarName avName;
+		if ( (LLAvatarNameCache::get(mOtherParticipantUUID, &avName)) && (avName.isValidName()) )
+		{
+			strTitle = avName.getCompleteName();
+			strShortTitle = avName.getDisplayName();
+		}
+		else
+		{
+			strTitle = LLIMModel::instance().getName(mSessionID);
+			if (strTitle.empty())
+				strTitle = LLTrans::getString("LoadingData");
+			LLAvatarNameCache::get(mOtherParticipantUUID, boost::bind(&LLFloaterIMSession::onAvatarNameCache, mSessionID, _2));
+		}
+	}
+	else
+	{
+		strTitle = LLIMModel::instance().getName(mSessionID);
+	}
+
+	setTitle(strTitle);
+	setShortTitle(strShortTitle);
+
+	LLFloaterIMSessionTab::updateSessionName();
+}
+
+// static
+void LLFloaterIMSession::onAvatarNameCache(const LLUUID& idSession, const LLAvatarName& avName)
+{
+	LLFloaterIMSession* pIMSession = LLFloaterIMSession::findInstance(idSession);
+	if ( (pIMSession) && (avName.isValidName()) )
+	{
+		pIMSession->updateSessionName();
 	}
 }
+// [/Sl:KB]
+//void LLFloaterIMSession::updateSessionName(const std::string& name)
+//{
+//	if (!name.empty())
+//	{
+//		LLFloaterIMSessionTab::updateSessionName(name);
+//// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+//		setTitle(name);
+//// [/SL:KB]
+////		mTypingStart.setArg("[NAME]", name);
+////		setTitle (mOtherTyping ? mTypingStart.getString() : name);
+////		mSessionNameUpdatedForTyping = mOtherTyping;
+//	}
+//}
 
 //static
 LLFloaterIMSession* LLFloaterIMSession::show(const LLUUID& session_id)
@@ -935,8 +1011,15 @@ void LLFloaterIMSession::reloadMessages(bool clean_messages/* = false*/)
 
 	mChatHistory->clear();
 	mLastMessageIndex = -1;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
 	updateMessages();
 	mInputEditor->setFont(LLViewerChat::getChatFont());
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 }
 
 // static
@@ -1098,6 +1181,13 @@ void LLFloaterIMSession::processAgentListUpdates(const LLSD& body)
 	// the vectors need to be sorted for computing the intersection and difference
 	std::sort(mInvitedParticipants.begin(), mInvitedParticipants.end());
     std::sort(joined_uuids.begin(), joined_uuids.end());
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	bool fParseMask = mChatHistory->getParseHighlightTypeMask();
+	mChatHistory->setParseHighlightTypeMask(LLChatHistory::PARSE_NONE);
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mChatHistory->setParseHighlightTypeMask(fParseMask);
+// [/SL:KB]
 
     uuid_vec_t intersection; // uuids of invited residents who have joined the conversation
 	std::set_intersection(mInvitedParticipants.begin(), mInvitedParticipants.end(),
@@ -1300,6 +1390,9 @@ Note: OTHER_TYPING_TIMEOUT must be > ME_TYPING_TIMEOUT for proper operation of t
 	if (im_info && !mOtherTyping)
 	{
 		mOtherTyping = true;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		mChatHistory->showTypingIndicator(true, im_info->mFromID);
+// [/SL:KB]
 		mOtherTypingTimer.reset();
 		// Save im_info so that removeTypingIndicator can be properly called because a timeout has occurred
 		mImInfo = im_info;
@@ -1310,6 +1403,9 @@ Note: OTHER_TYPING_TIMEOUT must be > ME_TYPING_TIMEOUT for proper operation of t
 		{
 			speaker_mgr->setSpeakerTyping(im_info->mFromID, TRUE);
 		}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+		refreshConversation();
+// [/SL:KB]
 	}
 }
 
@@ -1318,6 +1414,9 @@ void LLFloaterIMSession::removeTypingIndicator(const LLIMInfo* im_info)
 	if (mOtherTyping)
 	{
 		mOtherTyping = false;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+		mChatHistory->showTypingIndicator(false);
+// [/SL:KB]
 
 		if (im_info)
 		{
@@ -1328,6 +1427,9 @@ void LLFloaterIMSession::removeTypingIndicator(const LLIMInfo* im_info)
 				speaker_mgr->setSpeakerTyping(im_info->mFromID, FALSE);
 			}
 		}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+		refreshConversation();
+// [/SL:KB]
 	}
 }
 

@@ -83,19 +83,22 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 	//message body
 	const std::string& message = payload["message"].asString();
 
-	std::string timeStr = "["+LLTrans::getString("UTCTimeWeek")+"],["
-							+LLTrans::getString("UTCTimeDay")+"] ["
-							+LLTrans::getString("UTCTimeMth")+"] ["
-							+LLTrans::getString("UTCTimeYr")+"] ["
-							+LLTrans::getString("UTCTimeHr")+"]:["
-							+LLTrans::getString("UTCTimeMin")+"]:["
-							+LLTrans::getString("UTCTimeSec")+"] ["
-							+LLTrans::getString("UTCTimeTimezone")+"]";
+//	std::string timeStr = "["+LLTrans::getString("UTCTimeWeek")+"],["
+//							+LLTrans::getString("UTCTimeDay")+"] ["
+//							+LLTrans::getString("UTCTimeMth")+"] ["
+//							+LLTrans::getString("UTCTimeYr")+"] ["
+//							+LLTrans::getString("UTCTimeHr")+"]:["
+//							+LLTrans::getString("UTCTimeMin")+"]:["
+//							+LLTrans::getString("UTCTimeSec")+"] ["
+//							+LLTrans::getString("UTCTimeTimezone")+"]";
 	const LLDate timeStamp = notification->getDate();
 	LLDate notice_date = timeStamp.notNull() ? timeStamp : LLDate::now();
-	LLSD substitution;
-	substitution["datetime"] = (S32) notice_date.secondsSinceEpoch();
-	LLStringUtil::format(timeStr, substitution);
+//	LLSD substitution;
+//	substitution["datetime"] = (S32) notice_date.secondsSinceEpoch();
+//	LLStringUtil::format(timeStr, substitution);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+	std::string timeStr = formatted_longtime(notice_date.secondsSinceEpoch());
+// [/SL:KB]
 
 	LLViewerTextEditor* pMessageText = getChild<LLViewerTextEditor>("message");
 	pMessageText->clear();

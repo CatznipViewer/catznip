@@ -59,6 +59,12 @@
 #include "lluiconstants.h"
 #include "llstring.h"
 #include "llurlaction.h"
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+#include "llaudioengine.h"
+#include "lltextparser.h"
+#include "llviewerwindow.h"
+#include "llwindow.h"
+// [/SL:KB]
 #include "llviewercontrol.h"
 #include "llviewerobjectlist.h"
 #include "llmutelist.h"
@@ -713,6 +719,9 @@ LLUICtrl* LLChatHistoryHeader::sInfoCtrl = NULL;
 
 LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 :	LLUICtrl(p),
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+	mParseHighlightTypeMask(PARSE_ALL),
+// [/SL:KB]
 	mMessageHeaderFilename(p.message_header),
 	mMessageSeparatorFilename(p.message_separator),
 	mLeftTextPad(p.left_text_pad),
@@ -723,6 +732,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	mBottomSeparatorPad(p.bottom_separator_pad),
 	mTopHeaderPad(p.top_header_pad),
 	mBottomHeaderPad(p.bottom_header_pad),
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	mShowTypingIndicator(false),
+// [/SL:KB]
 	mIsLastMessageFromLog(false),
 	mNotifyAboutUnreadMsg(p.notify_unread_msg)
 {
@@ -734,6 +746,9 @@ LLChatHistory::LLChatHistory(const LLChatHistory::Params& p)
 	editor_params.trusted_content = false;
 	mEditor = LLUICtrlFactory::create<LLTextEditor>(editor_params, this);
 	mEditor->setIsFriendCallback(LLAvatarActions::isFriend);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+	mEditor->setHighlightsCallback(boost::bind(&LLChatHistory::onTextHighlight, this, _1, _2));
+// [/SL:KB]
 }
 
 LLSD LLChatHistory::getValue() const
@@ -837,6 +852,10 @@ void LLChatHistory::clear()
 	mLastFromName.clear();
 	mEditor->clear();
 	mLastFromID = LLUUID::null;
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	mShowTypingIndicator = false;
+	mTypingFromID.setNull();
+// [/SL:KB]
 }
 
 static LLFastTimer::DeclareTimer FTM_APPEND_MESSAGE("Append Chat Message");
@@ -845,7 +864,14 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 {
 	LLFastTimer _(FTM_APPEND_MESSAGE);
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
-	bool square_brackets = false; // square brackets necessary for a system messages
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	bool is_typing_indicator = (chat.mChatType == CHAT_TYPE_START);
+	bool show_typing_indicator = mShowTypingIndicator;
+	LLUUID typing_from = mTypingFromID;
+	if (mShowTypingIndicator)
+		showTypingIndicator(false);
+// [/SL:KB]
+//	bool square_brackets = false; // square brackets necessary for a system messages
 
 	llassert(mEditor);
 	if (!mEditor)
@@ -856,7 +882,10 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	bool from_me = chat.mFromID == gAgent.getID();
 	mEditor->setPlainText(use_plain_text_chat_history);
 
-	if (mNotifyAboutUnreadMsg && !mEditor->scrolledToEnd() && !from_me && !chat.mFromName.empty())
+//	if (mNotifyAboutUnreadMsg && !mEditor->scrolledToEnd() && !from_me && !chat.mFromName.empty())
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	if ( (mNotifyAboutUnreadMsg) && (!mEditor->scrolledToEnd()) && (!from_me) && (!chat.mFromName.empty()) && (!is_typing_indicator) )
+// [/SL:KB]
 	{
 		mUnreadChatSources.insert(chat.mFromName);
 		mMoreChatPanel->setVisible(TRUE);
@@ -936,6 +965,14 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	{
 		body_message_params.font.style = "BOLD";
 	}
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	else if (is_typing_indicator)
+	{
+		txt_color = LLColor4::grey1;
+		body_message_params.color(txt_color);
+		body_message_params.readonly_color(txt_color);
+	}
+// [/SL:KB]
 
 	bool message_from_log = chat.mChatStyle == CHAT_STYLE_HISTORY;
 	// We graying out chat history by graying out messages that contains full date in a time string
@@ -953,7 +990,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	// compact mode: show a timestamp and name
 	if (use_plain_text_chat_history)
 	{
-		square_brackets = chat.mFromName == SYSTEM_FROM;
+//		square_brackets = chat.mFromName == SYSTEM_FROM;
 
 		LLStyle::Params timestamp_style(body_message_params);
 
@@ -970,12 +1007,12 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			prependNewLineState = false;
 		}
 
-        // out the opening square bracket (if need)
-		if (square_brackets)
-		{
-			mEditor->appendText("[", prependNewLineState, body_message_params);
-			prependNewLineState = false;
-		}
+//        // out the opening square bracket (if need)
+//		if (square_brackets)
+//		{
+//			mEditor->appendText("[", prependNewLineState, body_message_params);
+//			prependNewLineState = false;
+//		}
 
 		// names showing
 		if (args["show_names_for_p2p_conv"].asBoolean() && utf8str_trim(chat.mFromName).size() != 0)
@@ -1004,8 +1041,14 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
 
 				// Add link to avatar's inspector and delimiter to message.
-				mEditor->appendText(std::string(link_params.link_href) + delimiter,
-					prependNewLineState, link_params);
+//				mEditor->appendText(std::string(link_params.link_href) + delimiter,
+//					prependNewLineState, link_params);
+// [SL:KB] - Patch: DisplayName-Misc | Checked: 2011-10-09 (Catznip-3.0)
+				mEditor->appendText(std::string(link_params.link_href), prependNewLineState, link_params);
+
+				link_params.link_href = LLStringUtil::null;
+				mEditor->appendText(delimiter, false, link_params);
+// [/SL:KB]
 				prependNewLineState = false;
 			}
 			else
@@ -1135,12 +1178,45 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			message = chat.mFromName + message;
 		}
 		
-		if (square_brackets)
-		{
-			message += "]";
-	}
+//		if (square_brackets)
+//		{
+//			message += "]";
+//		}
 
-		mEditor->appendText(message, prependNewLineState, body_message_params);
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-07-10 (Catznip-3.3)
+		static LLCachedControl<bool> sEnableChatAlerts(gSavedSettings, "ChatAlerts", false);
+		if (sEnableChatAlerts)
+		{
+			S32 nHighlightMask = mEditor->getHighlightsMask();
+			if ( (CHAT_STYLE_HISTORY != chat.mChatStyle) && (gAgentID != chat.mFromID) )
+			{
+				const LLIMModel::LLIMSession* pSession = NULL;
+				if (chat.mSessionID.isNull())
+				{
+					mEditor->setHighlightsMask(nHighlightMask| LLHighlightEntry::CAT_NEARBYCHAT);
+				}
+				else if (pSession = LLIMModel::getInstance()->findIMSession(chat.mSessionID))
+				{
+					if (pSession->isP2PSessionType())
+						mEditor->setHighlightsMask(nHighlightMask | LLHighlightEntry::CAT_IM);
+					else if ( (pSession->isGroupSessionType()) || (pSession->isAdHocSessionType()) )
+						mEditor->setHighlightsMask(nHighlightMask | LLHighlightEntry::CAT_GROUP);
+				}
+			}
+			else
+			{
+				mEditor->setHighlightsMask(LLHighlightEntry::CAT_GENERAL);
+			}
+
+			mEditor->appendText(message, prependNewLineState, body_message_params);
+			mEditor->setHighlightsMask(nHighlightMask & ~(LLHighlightEntry::CAT_NEARBYCHAT | LLHighlightEntry::CAT_IM | LLHighlightEntry::CAT_GROUP));
+		}
+		else
+		{
+			mEditor->appendText(message, prependNewLineState, body_message_params);
+		}
+// [/SL:KB]
+//		mEditor->appendText(message, prependNewLineState, body_message_params);
 		prependNewLineState = false;
 	}
 
@@ -1151,7 +1227,43 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	{
 		mEditor->setCursorAndScrollToEnd();
 	}
+
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+	if ( (show_typing_indicator) && (!is_typing_indicator) )
+		showTypingIndicator(true, typing_from);
+// [/SL:KB]
 }
+
+// [SL:KB] - Patch: Chat-Typing | Checked: 2013-11-18 (Catznip-3.6)
+void LLChatHistory::showTypingIndicator(bool fShow, const LLUUID& idAgent)
+{
+	if (fShow == mShowTypingIndicator)
+		return;
+
+	if (fShow)
+	{
+		LLChat chatType(LLTrans::getString("IM_typing_start_message"));
+		chatType.mChatType = CHAT_TYPE_START;
+		chatType.mFromID = idAgent;
+		chatType.mFromName = LLSLURL("agent", idAgent, "about").getSLURLString();
+		chatType.mTimeStr = LLLogChat::timestamp();
+
+		appendMessage(chatType, LLSD().with("use_plain_text_chat_history", true).with("show_time", true).with("show_names_for_p2p_conv", true));
+		mTypingFromID = idAgent;
+	}
+	else
+	{
+		const LLWString& wstrText = mEditor->getWText();
+		LLWString::size_type idxNewLine = wstrText.rfind(L'\n');
+		if (LLWString::npos != idxNewLine)
+		{
+			mEditor->removeTextFromEnd(wstrText.length() - idxNewLine);
+		}
+	}
+
+	mShowTypingIndicator = fShow;
+}
+// [/SL:KB]
 
 void LLChatHistory::draw()
 {
@@ -1163,3 +1275,24 @@ void LLChatHistory::draw()
 
 	LLUICtrl::draw();
 }
+
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-08-27 (Catznip-3.3)
+void LLChatHistory::onTextHighlight(const std::string& strText, const LLHighlightEntry* pEntry)
+{
+	if (!pEntry)
+	{
+		return;
+	}
+
+	if ( (mParseHighlightTypeMask && PARSE_SOUND) && (pEntry->mSoundAsset.notNull()) && (gAudiop) )
+	{
+		gAudiop->triggerSound(pEntry->mSoundAsset, gAgent.getID(), 1.f, LLAudioEngine::AUDIO_TYPE_UI, gAgent.getPositionGlobal());
+	}
+	if ( (mParseHighlightTypeMask && PARSE_FLASH) && (pEntry->mFlashWindow) )
+	{
+		LLWindow* pWindow = gViewerWindow->getWindow();
+		if ( (pWindow) && (pWindow->getMinimized()) )
+			pWindow->flashIcon(5.f);
+	}
+}
+// [/SL:KB]
