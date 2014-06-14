@@ -51,13 +51,14 @@ protected:
 	 */
 public:
 	void                clearLocation();
-	const LLParcelData& getCurrentParcelData() const	{ return m_CurParcelData; }
 	const LLUUID&       getCurrentParcelId() const		{ return m_idCurParcel; }
-	const LLVector3d&   getCurrentParcelPos() const		{ return m_posCurGlobal; }
 	bool                getEditMode() const				{ return m_fEditMode; }
 	const std::string&  getEditName() const;
 	const std::string   getEditDescription() const;
 	void                setEditMode(bool fEditMode);
+	const LLVector3d&   getGlobalPos() const			{ return (!m_posCurGlobal.isExactlyZero()) ? m_posCurGlobal : m_posGlobalRequest; }
+	const LLUUID&       getItemId() const				{ return m_idItem; }
+	bool                isLandmark() const				{ return m_idItem.notNull(); }
 	void                setParcelFromPos(const LLVector3d posGlobal);
 	void                setParcelFromId(const LLUUID& idParcel);
 	void                setParcelFromItem(const LLUUID& idItem);
