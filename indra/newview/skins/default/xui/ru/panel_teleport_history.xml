@@ -15,5 +15,9 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<menu_button name="gear_btn" tool_tip="Показать дополнительные параметры"/>
+		<icon name="dummy_icon" width="73" />
+		<button label="Телепортация" name="teleport_btn" tool_tip="Телепортироваться в выбранную область" width="99" />
+		<button label="Карта" name="map_btn" tool_tip="Показать соответствующую область на карте мира"/>
+		<button name="profile_btn" tool_tip="Показать профиль места"/>
 	</panel>
 </panel>

@@ -7,16 +7,12 @@
 		<accordion_tab name="tab_library" title="Bibliothèque"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<button name="options_gear_btn" tool_tip="Afficher d&apos;autres options"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="Ajouter un nouveau repère"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<icon name="dummy_icon" width="10" />
+				<button label="Téléportation" name="teleport_btn" tool_tip="Me téléporter jusqu&apos;à la zone sélectionnée" width="99" />
+				<button label="Carte" name="map_btn" tool_tip="Afficher la zone correspondante sur la carte du monde"/>
+				<button name="profile_btn" tool_tip="Afficher le profil de l&apos;endroit."/>
 				<dnd_button name="trash_btn" tool_tip="Supprimer le repère sélectionné"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>
