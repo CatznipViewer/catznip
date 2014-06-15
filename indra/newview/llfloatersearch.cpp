@@ -108,6 +108,20 @@ BOOL LLFloaterSearch::postBuild()
 	LLFloaterWebContent::postBuild();
 	mWebBrowser->addObserver(this);
 
+// [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("PreInitSearch"))
+	{
+		// Mimick what happens the first time the floater opens
+		Params p;
+		p.trusted_content = true;
+		p.allow_address_entry = false;
+
+		mWebBrowser->setTrustedContent(p.trusted_content);
+		open_media(p);
+		search(p.search);
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
