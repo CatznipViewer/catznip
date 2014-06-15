@@ -54,6 +54,9 @@
 #include "llaccordionctrl.h"
 
 #include "lltrans.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 static LLPanelInjector<LLPanelGroup> t_panel_group("panel_group_info_sidetray");
 
@@ -166,7 +169,24 @@ BOOL LLPanelGroup::postBuild()
 
 	getChild<LLButton>("btn_create")->setVisible(false);
 
-	childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
+//	childSetCommitCallback("back",boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	LLFloater* pParentView = dynamic_cast<LLFloater*>(getParent());
+	if (!pParentView)
+	{
+		childSetCommitCallback("back", boost::bind(&LLPanelGroup::onBackBtnClick,this),NULL);
+	}
+	else
+	{
+		pParentView->setTitle(getLabel());
+
+		childSetVisible("back", false);
+
+		LLUICtrl* pGroupNameCtrl = getChild<LLUICtrl>("group_name");
+		if (pGroupNameCtrl)
+			pGroupNameCtrl->translate(10 - pGroupNameCtrl->getRect().mLeft, 0);
+	}
+// [/SL:KB]
 
 	childSetCommitCallback("btn_create",boost::bind(&LLPanelGroup::onBtnCreate,this),NULL);
 	
@@ -602,7 +622,19 @@ void LLPanelGroup::refreshCreatedGroup(const LLUUID& group_id)
 	LLPanelGroup* panel = LLFloaterSidePanelContainer::getPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
 	if(!panel)
 		return;
-	panel->setGroupID(group_id);
+//	panel->setGroupID(group_id);
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+	if (gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+		panel->onBackBtnClick();
+		LLGroupActions::show(group_id);
+	}
+	else
+	{
+		panel->setGroupID(group_id);
+	}
+// [/SL:KB]
 }
 
 //static
@@ -618,8 +650,19 @@ void LLPanelGroup::showNotice(const std::string& subject,
 	if(!panel)
 		return;
 
-	if(panel->getID() != group_id)//???? only for current group_id or switch panels? FIXME
-		return;
+//	if(panel->getID() != group_id)//???? only for current group_id or switch panels? FIXME
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	if (panel->getID() != group_id)
+	{
+		// Group isn't open in the sidebar, check for a floater
+		const LLFloater* pFloater = LLFloaterReg::findInstance("floater_group_info", group_id);
+		panel = (pFloater) ? pFloater->findChild<LLPanelGroup>("panel_group_info_sidetray") : NULL;
+		if ( (!panel) || (panel->getID() != group_id) )
+			return;
+	}
+// [/SL:KB]
+
 	panel->showNotice(subject,message,has_inventory,inventory_name,inventory_offer);
 
 }
