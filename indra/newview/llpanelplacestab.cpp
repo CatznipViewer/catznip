@@ -37,7 +37,7 @@
 #include "llslurl.h"
 #include "llworldmap.h"
 
-std::string LLPanelPlacesTab::sFilterSubString = LLStringUtil::null;
+//std::string LLPanelPlacesTab::sFilterSubString = LLStringUtil::null;
 
 bool LLPanelPlacesTab::isTabVisible()
 {
@@ -47,12 +47,23 @@ bool LLPanelPlacesTab::isTabVisible()
 	return true;
 }
 
-void LLPanelPlacesTab::setPanelPlacesButtons(LLPanelPlaces* panel)
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+void LLPanelPlacesTab::setPanelPlacesButtons()
 {
-	mTeleportBtn = panel->getChild<LLButton>("teleport_btn");
-	mShowOnMapBtn = panel->getChild<LLButton>("map_btn");
-	mShowProfile = panel->getChild<LLButton>("profile_btn");
+	mTeleportBtn = getChild<LLButton>("teleport_btn");
+	mTeleportBtn->setClickedCallback(boost::bind(&LLPanelPlacesTab::onTeleport, this));
+	mShowOnMapBtn = getChild<LLButton>("map_btn");
+	mShowOnMapBtn->setClickedCallback(boost::bind(&LLPanelPlacesTab::onShowOnMap, this));
+	mShowProfile = getChild<LLButton>("profile_btn");
+	mShowProfile->setClickedCallback(boost::bind(&LLPanelPlacesTab::onShowProfile, this));
 }
+// [/SL:KB]
+//void LLPanelPlacesTab::setPanelPlacesButtons(LLPanelPlaces* panel)
+//{
+//	mTeleportBtn = panel->getChild<LLButton>("teleport_btn");
+//	mShowOnMapBtn = panel->getChild<LLButton>("map_btn");
+//	mShowProfile = panel->getChild<LLButton>("profile_btn");
+//}
 
 void LLPanelPlacesTab::onRegionResponse(const LLVector3d& landmark_global_pos,
 										U64 region_handle,
