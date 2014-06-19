@@ -1,0 +1,11 @@
+[UI/Toolbars]
+- added   : additional toolbar at the top of the world view
+- added   : allow toolbar buttons to be aligned left, center or right
+- added   : "ScriptDialogPerObject" setting to control the behaviour of scripted dialogs from the same object
+    -> 0 - viewer 2 default (one script dialog per object)
+       1 - per-channel (one script dialog per unique reply channel per object)
+       2 - unconstrained (each script dialog will always add a new chiclet)
+- changed : hide the parent panel when a toolbar is empty
+    -> each toolbar layout panel starts out invisible until a button gets added (or until a drag operation starts)
+    -> fixes the floater snap region extending from the edge of the screen even though no toolbar is currently visible
+- changed : all toolbars span the entire width or height of their container
