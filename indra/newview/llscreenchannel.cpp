@@ -1,4 +1,4 @@
-/** 
+﻿/** 
  * @file llscreenchannel.cpp
  * @brief Class implements a channel on a screen in which appropriate toasts may appear.
  *
@@ -40,6 +40,9 @@
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llfloaterimsession.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+#include "llnotificationhandler.h"
+// [/SL:KB]
 #include "llscriptfloater.h"
 #include "llrootview.h"
 
@@ -267,8 +270,11 @@ void LLScreenChannel::addToast(const LLToast::Params& p)
 	{
 		LLNotificationPtr notification = LLNotifications::instance().find(p.notif_id);
 
-		if (notification &&
-			(!notification->canLogToIM() || !notification->hasFormElements()))
+//		if (notification &&
+//			(!notification->canLogToIM() || !notification->hasFormElements()))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (notification) && ((!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements())) )
+// [/SL:KB]
 		{
 			// only cancel notification if it isn't being used in IM session
 			LLNotifications::instance().cancel(notification);
@@ -279,6 +285,13 @@ void LLScreenChannel::addToast(const LLToast::Params& p)
 	LLToast* toast = new LLToast(p);
 	ToastElem new_toast_elem(toast->getHandle());
 
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	if (gSavedSettings.getBOOL("NotificationToastFrontmost"))
+	{
+		toast->setFrontmostToast(true);
+		toast->setFocusStealsFrontmost(!gSavedSettings.getBOOL("NotificationToastFrontmostFocus"));
+	}
+// [/SL:KB]
 	toast->setOnFadeCallback(boost::bind(&LLScreenChannel::onToastFade, this, _1));
 	toast->setOnToastDestroyedCallback(boost::bind(&LLScreenChannel::onToastDestroyed, this, _1));
 	if(mControlHovering)
@@ -457,7 +470,10 @@ void LLScreenChannel::killToastByNotificationID(LLUUID id)
 		//			the toast will be destroyed.
 		if(toast && toast->isNotificationValid())
 		{
-			if (!notification->canLogToIM() || !notification->hasFormElements())
+//			if (!notification->canLogToIM() || !notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+			if ( (!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements()) )
+// [/SL:KB]
 			{
 				// only cancel notification if it isn't being used in IM session
 				LLNotifications::instance().cancel(notification);
@@ -478,7 +494,10 @@ void LLScreenChannel::killToastByNotificationID(LLUUID id)
 			LLToast* toast = it->getToast();
 			if (toast)
 			{
-				if (!notification->canLogToIM() || !notification->hasFormElements())
+//				if (!notification->canLogToIM() || !notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+				if ( (!LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) || (!notification->hasFormElements()) )
+// [/SL:KB]
 				{
 					// only cancel notification if it isn't being used in IM session
 					LLNotifications::instance().cancel(notification);
@@ -668,7 +687,10 @@ void LLScreenChannel::showToastsBottom()
 			// EXT-2653: it is necessary to prevent overlapping for secondary showed toasts
 			toast->setVisible(TRUE);
 		}		
-		if(!toast->hasFocus())
+//		if(!toast->hasFocus())
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+		if ( (!toast->hasFocus()) && (!toast->isFrontmostToast()) )
+// [/SL:KB]
 		{
 			// Fixing Z-order of toasts (EXT-4862)
 			// Next toast will be positioned under this one.
@@ -815,7 +837,10 @@ void LLScreenChannel::showToastsTop()
 			// EXT-2653: it is necessary to prevent overlapping for secondary showed toasts
 			toast->setVisible(TRUE);
 		}		
-		if (!toast->hasFocus())
+//		if (!toast->hasFocus())
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+		if ( (!toast->hasFocus()) && (!toast->isFrontmostToast()) )
+// [/SL:KB]
 		{
 			// Fixing Z-order of toasts (EXT-4862)
 			// Next toast will be positioned under this one.

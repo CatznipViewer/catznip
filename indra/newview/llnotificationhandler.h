@@ -297,15 +297,27 @@ public:
 	/**
 	 * Determines whether IM floater is opened.
 	 */
-	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static bool hasIMFloater(const LLNotificationPtr& notification);
+	static bool isIMFloaterVisible(const LLNotificationPtr& notification);
+// [/SL:KB]
+//	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	static bool canLogToChat(const LLNotificationPtr& notification);
+	static bool canLogToIM(const LLNotificationPtr& notification);
+// [/SL:KB]
 
 	/**
 	 * Writes notification message to IM session.
 	 */
-	static void logToIM(const EInstantMessage& session_type,
-			const std::string& session_name, const std::string& from_name,
-			const std::string& message, const LLUUID& session_owner_id,
-			const LLUUID& from_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static void logToIM(const LLUUID& session_id, const std::string& session_name, const std::string& from_name, const LLUUID& from_id, const std::string& message, const LLSD& substitutions);
+// [/SL:KB]
+//	static void logToIM(const EInstantMessage& session_type,
+//			const std::string& session_name, const std::string& from_name,
+//			const std::string& message, const LLUUID& session_owner_id,
+//			const LLUUID& from_id);
 
 	/**
 	 * Writes notification message to IM  p2p session.
