@@ -3569,7 +3569,7 @@ void transition_back_to_login_panel(const std::string& emsg)
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
 class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
 {
 public:
@@ -3577,16 +3577,35 @@ public:
 
 	/*virtual*/ void result(const LLSD& sdData)
 	{
+		// Message of the day
 		if (sdData.has("motd"))
 		{
 			gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
+		}
+
+		// Introduction text for the support/beta group(s)
+		if ( (sdData.has("groups")) && (sdData["groups"].isArray()) )
+		{
+			const LLSD& sdGroups = sdData["groups"];
+			for (LLSD::array_const_iterator itGroup = sdGroups.beginArray(), endGroup = sdGroups.endArray(); itGroup != endGroup; ++itGroup)
+			{
+				const LLSD& sdGroupInfo = *itGroup;
+				if ( (sdGroupInfo.isMap()) && (sdGroupInfo.has("uuid")) && (sdGroupInfo.has("prelude")) )
+				{
+					const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
+					if (idGroup.notNull())
+					{
+						gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
+					}
+				}
+			}
 		}
 	}
 };
 
 void fetch_viewer_data()
 {
-	std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
+	const std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
 	
 	llinfos << "Fetching viewer data from " << strURL << llendl;
 	
