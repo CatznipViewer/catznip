@@ -1079,18 +1079,19 @@ void LLFloaterIMSessionTab::updateCallBtnState(bool callIsActive)
 void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 {
 //	LLFloaterIMContainer* host_floater = dynamic_cast<LLFloaterIMContainer*>(self->getHost());
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* host_floater = dynamic_cast<LLFloaterIMContainerBase*>(self->getHost());
-	if ( (host_floater) && (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) )
-// [/SL:KB]
 //	if (host_floater)
-	{
+//	{
 //		// Hide the messages pane if a floater is hosted in the Conversations
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-		dynamic_cast<LLFloaterIMContainerView*>(host_floater)->collapseMessagesPane(true);
-// [/SL:KB]
 //		host_floater->collapseMessagesPane(true);
+//	}
+// [SL:KB] - Patch: Chat-Container | Checked: 2013-04-25 (Catznip-3.5)
+	if ( (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) && (!self->isTornOff()) )
+	{
+		// Hide the messages pane if a floater is hosted in the Conversations
+		if (LLFloaterIMContainerView* host_floater = dynamic_cast<LLFloaterIMContainerView*>(self->getHost()))
+			host_floater->collapseMessagesPane(true);
 	}
+// [/SL:KB]
 	else ///< floater is torn off
 	{
 		if (!self->mIsP2PChat)
