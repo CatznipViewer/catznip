@@ -21,6 +21,7 @@
 #include "llfloaterimsession.h"
 #include "llfloaterreg.h"
 #include "lltoggleablemenu.h"
+#include "llviewercontrol.h"
 
 //
 // LLFloaterIMContainerTab
@@ -28,7 +29,7 @@
 LLFloaterIMContainerTab::LLFloaterIMContainerTab(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
 	: LLFloaterIMContainerBase(seed, params)
 {
-	sContainerType = CT_TABBED;
+	sContainerType = (!gSavedSettings.getBOOL("IMUseSeparateFloaters")) ? CT_TABBED : CT_SEPARATE;
 }
 
 LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
