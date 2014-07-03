@@ -69,6 +69,7 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+	/*virtual*/ void updateFloaterTitle(LLFloater* floaterp);
 
 	/*
 	 * LLIMSessionObserver overrides
@@ -87,13 +88,16 @@ public:
 	static void onCurrentChannelChanged(const LLUUID& session_id);
 protected:
 	       void onCloseFloater(const LLUUID& session_id);
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-08-18 (Catznip-3.6)
+	       void onSelectConversation();
+// [/SL:KB]
 
 	/*
 	 * Misc
 	 */
 public:
 	virtual const LLUUID& getSelectedSession() const = 0;
-	virtual void showConversation(const LLUUID& session_id) = 0;
+	virtual void showConversation(const LLUUID& session_id, bool focus_floater = true) = 0;
 	virtual void toggleConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
@@ -113,6 +117,10 @@ public:
 	virtual bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	virtual bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
 	virtual void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+	virtual bool enableContextGroupMenuItem(const std::string& action, const LLUUID& group_id);
+	virtual void doToGroup(const std::string& action, const LLUUID& group_id);
+// [/SL:KB]
 protected:
 	void toggleMute(const LLUUID& participant_id, U32 flags);
 

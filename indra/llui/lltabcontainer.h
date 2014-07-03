@@ -206,7 +206,10 @@ public:
     void        setCurrentPanelIndex(S32 index) { mCurrentTabIdx = index; }
 
 	BOOL        getTabPanelFlashing(LLPanel* child);
-	void		setTabPanelFlashing(LLPanel* child, BOOL state);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
+	void		setTabPanelFlashing(LLPanel* child, BOOL state, BOOL flash_timer = true);
+// [/SL:KB]
+//	void		setTabPanelFlashing(LLPanel* child, BOOL state);
 	void 		setTabImage(LLPanel* child, std::string img_name, const LLColor4& color = LLColor4::white);
 	void 		setTabImage(LLPanel* child, const LLUUID& img_id, const LLColor4& color = LLColor4::white);
 	void		setTabImage(LLPanel* child, LLIconCtrl* icon);

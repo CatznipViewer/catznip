@@ -111,6 +111,10 @@ public:
 	bool enableGearMenuItem(const LLSD& userdata);
 	void GearDoToSelected(const LLSD& userdata);
 	bool checkGearMenuItem(const LLSD& userdata);
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+	void GearDoToSelectedGroup(const LLSD& userdata);
+	bool enableGearGroupMenuItem(const LLSD& userdata);
+// [/SL:KB]
 
 	// Implements LLVoiceClientStatusObserver::onChange() to enable the call
 	// button when voice is available
@@ -134,7 +138,7 @@ public:
 	static boost::signals2::connection setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb);
 	static floater_showed_signal_t sIMFloaterShowedSignal;
 
-	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
+//	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
 	S32 getLastChatMessageIndex() {return mLastMessageIndex;}
 private:
 
@@ -143,8 +147,14 @@ private:
     /*virtual*/ void onTearOffClicked();
 	/*virtual*/ void onClickCloseBtn(bool app_qutting);
 
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
 	// Update the window title and input field help text
-	/*virtual*/ void updateSessionName(const std::string& name);
+	/*virtual*/ void updateSessionName();
+
+	static void onAvatarNameCache(const LLUUID& idSession, const LLAvatarName& avName);
+// [/Sl:KB]
+//	// Update the window title and input field help text
+//	/*virtual*/ void updateSessionName(const std::string& name);
 
 	bool dropPerson(LLUUID* person_id, bool drop);
 
@@ -180,13 +190,13 @@ private:
 	LLUUID mOtherParticipantUUID;
 	bool mPositioned;
 
-	LLUIString mTypingStart;
+//	LLUIString mTypingStart;
 	bool mMeTyping;
 	bool mOtherTyping;
 	bool mShouldSendTypingState;
 	LLFrameTimer mTypingTimer;
 	LLFrameTimer mTypingTimeoutTimer;
-	bool mSessionNameUpdatedForTyping;
+//	bool mSessionNameUpdatedForTyping;
 
 	bool mSessionInitialized;
 	LLSD mQueuedMsgsForInit;

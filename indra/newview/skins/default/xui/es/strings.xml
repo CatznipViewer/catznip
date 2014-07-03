@@ -622,6 +622,9 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="AvatarMuted">
 		Ignorado
 	</string>
+	<string name="AvatarTyping">
+		Escribiendo
+	</string>
 	<string name="anim_express_afraid">
 		Susto
 	</string>
