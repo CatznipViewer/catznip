@@ -55,7 +55,7 @@ LLSysWellItem::~LLSysWellItem()
 }
 
 //---------------------------------------------------------------------------------
-// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
 const std::string LLSysWellItem::getTitle() const
 {
 	return mTitle->getText();

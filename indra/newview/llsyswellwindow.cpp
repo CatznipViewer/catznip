@@ -36,7 +36,7 @@
 #include "llspeakers.h"
 #include "lltoastpanel.h"
 
-// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
 #include "llavatarnamecache.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
@@ -197,12 +197,17 @@ void LLSysWellWindow::reshapeWindow()
 
 		LLRect curRect = getRect();
 
-		S32 new_window_height = notif_list_height + parent_list_delta_height;
-
-		if (new_window_height > MAX_WINDOW_HEIGHT)
-		{
-			new_window_height = MAX_WINDOW_HEIGHT;
-		}
+//		S32 new_window_height = notif_list_height + parent_list_delta_height;
+//
+//		if (new_window_height > MAX_WINDOW_HEIGHT)
+//		{
+//			new_window_height = MAX_WINDOW_HEIGHT;
+//		}
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+		S32 min_window_width, min_window_height;
+		getResizeLimits(&min_window_width, &min_window_height);
+		S32 new_window_height = llclamp(notif_list_height + parent_list_delta_height, min_window_height, MAX_WINDOW_HEIGHT);
+// [/SL:KB]
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
 		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
@@ -344,7 +349,7 @@ LLNotificationWellWindow::WellNotificationChannel::WellNotificationChannel(LLNot
 
 LLNotificationWellWindow::LLNotificationWellWindow(const LLSD& key)
 :	LLSysWellWindow(key)
-// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
 ,	m_pFilterType(NULL)
 ,	m_pFilterText(NULL)
 // [/SL:KB]
@@ -363,7 +368,7 @@ BOOL LLNotificationWellWindow::postBuild()
 {
 	BOOL rv = LLSysWellWindow::postBuild();
 
-// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
 	m_pFilterType = getChild<LLComboBox>("filter_type");
 	m_pFilterType->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
 	m_pFilterText = getChild<LLFilterEditor>("filter_text");
@@ -403,6 +408,9 @@ void LLNotificationWellWindow::addItem(LLSysWellItem::Params p)
 	if (mMessageList->addItem(new_item, value, ADD_TOP, false))
 // [/SL:KB]
 	{
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+		new_item->setVisible(checkFilter(new_item));
+// [/SL:KB]
 // [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 		mMessageList->sort();
 // [/SL:KB]
@@ -439,7 +447,12 @@ void LLNotificationWellWindow::closeAll()
 	}
 }
 
-// [SL:KB] - Patch: Notifications-Filter | Checked: 2014-05-31 (Catznip-3.6)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+bool LLNotificationWellWindow::isWindowEmpty()
+{
+	return mMessageList->size(false) == 0;
+}
+
 bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
 {
 	bool fVisible = true;
