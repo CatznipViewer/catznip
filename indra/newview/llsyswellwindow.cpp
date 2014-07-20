@@ -191,7 +191,11 @@ void LLSysWellWindow::reshapeWindow()
 	// it includes height from floater top to list top and from floater bottom and list bottom
 	static S32 parent_list_delta_height = getRect().getHeight() - mMessageList->getRect().getHeight();
 
-	if (!mIsReshapedByUser) // Don't reshape Well window, if it ever was reshaped by user. See EXT-5715.
+//	if (!mIsReshapedByUser) // Don't reshape Well window, if it ever was reshaped by user. See EXT-5715.
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+	// Don't reshape if the well window was ever reshaped by the user, or if all items aren't currently shown (= filter active on the notfication well)
+	if ( (!mIsReshapedByUser) && (mMessageList->size(true) == mMessageList->size(false)) )
+// [/SL:KB]
 	{
 		S32 notif_list_height = mMessageList->getItemsRect().getHeight() + 2 * mMessageList->getBorderWidth();
 
