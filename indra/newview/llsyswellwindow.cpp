@@ -373,6 +373,8 @@ BOOL LLNotificationWellWindow::postBuild()
 	BOOL rv = LLSysWellWindow::postBuild();
 
 // [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	getChild<LLPanel>("notification_filter_panel")->setVisible(true);
+
 	m_pFilterType = getChild<LLComboBox>("filter_type");
 	m_pFilterType->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
 	m_pFilterText = getChild<LLFilterEditor>("filter_text");

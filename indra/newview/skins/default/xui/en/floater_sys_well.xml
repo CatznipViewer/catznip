@@ -44,7 +44,7 @@
          left="1"
          name="notification_filter_panel"
          right="-1"
-         visible="true">
+         visible="false">
           <combo_box
            bottom="-1"
            follows="top|left"
