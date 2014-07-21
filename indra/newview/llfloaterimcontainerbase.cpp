@@ -327,7 +327,11 @@ void LLFloaterIMContainerBase::doToGroup(const std::string& action, const LLUUID
 	}
 	else if ("end_session" == action)
 	{
-		LLGroupActions::endIM(group_id);
+		LLGroupActions::leaveIM(group_id);
+	}
+	else if ("snooze_session" == action)
+	{
+		LLGroupActions::snoozeIM(group_id);
 	}
 }
 // [/SL:KB]

@@ -9,10 +9,16 @@
         <on_click function="Group.GearDoToSelected" parameter="view_profile" />
     </menu_item_call>
     <menu_item_call
-     label="Close Conversation"
+     label="End Session"
      layout="topleft"
-     name="Close Conversation">
+     name="End Session">
         <on_click function="Group.GearDoToSelected" parameter="end_session" />
+    </menu_item_call>
+    <menu_item_call
+     label="Snooze Session"
+     layout="topleft"
+     name="Snooze Session">
+        <on_click function="Group.GearDoToSelected" parameter="snooze_session" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft"/>
