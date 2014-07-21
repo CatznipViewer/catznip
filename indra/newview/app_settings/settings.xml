@@ -3475,6 +3475,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>EnableGrabNonPhysical</key>
+    <map>
+      <key>Comment</key>
+      <string>Allows grabbing of non-physical objects</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>EnableAltZoom</key>
     <map>
       <key>Comment</key>
