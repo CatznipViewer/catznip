@@ -96,6 +96,9 @@
 #include "lldrawpoolalpha.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolwater.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "lleconomy.h"
+// [/SL:KB]
 #include "llmaniptranslate.h"
 #include "llface.h"
 #include "llfeaturemanager.h"
@@ -176,6 +179,9 @@
 #include "llviewermedia.h"
 #include "llviewermediafocus.h"
 #include "llviewermenu.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "llviewermenufile.h"
+// [/SL:KB]
 #include "llviewermessage.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparcelmgr.h"
@@ -1088,10 +1094,6 @@ BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MAS
 }
 
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-void dnd_upload_nop(const std::vector<std::string>& paths)
-{
-}
-
 LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
                                                                    LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
 {
@@ -1258,7 +1260,23 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWind
 }
   
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
+static void confirmDragNDropUpload(const LLSD& sdNotification, const LLSD& sdResponse)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+	if (idxOption == 0)
+	{
+		const LLSD& sdPayload = sdNotification["payload"];
+		if (sdPayload.isArray())
+		{
+			std::vector<std::string> files;
+			for (LLSD::array_const_iterator itFile = sdPayload.beginArray(), endFile = sdPayload.endArray(); itFile != endFile; ++itFile)
+				files.push_back(*itFile);
+//			upload_bulk(files);
+		}
+	}
+}
+
+static LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
 {
 	static struct ExtLookup
 	{
@@ -1335,14 +1353,19 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 					{
 						if (fDrop)
 						{
-							std::string strFileList;
+							// getPriceUpload() returns -1 if no data available yet.
+							S32 nUploadCost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+							std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
+
+							std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
 							for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
 							{
-								strFileList += itItem->first->getName();
-								strFileList += "\n";
+								strUploadList += itItem->first->getName();
+								strUploadList += "\n";
+								sdFiles.append(itItem->second);
 							}
 
-							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("FILELIST", strFileList), LLSD(), boost::bind(dnd_upload_nop, data));
+							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("UPLOAD_LIST", strUploadList), sdFiles, boost::bind(confirmDragNDropUpload, _1, _2));
 						}
 						result = DND_COPY;
 					}

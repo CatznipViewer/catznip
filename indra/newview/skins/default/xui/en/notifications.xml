@@ -7606,9 +7606,9 @@ This upload will cost L$[PRICE], do you wish to continue with the upload?
    icon="alertmodal.tga"
    name="UploadDnDConfirmation"
    type="alertmodal">
-    This will upload the following file(s): 
+This will upload the following at L$[UPLOAD_COST] per file: 
 
-[FILELIST]
+[UPLOAD_LIST]
     Do you wish to continue with the upload?
     <usetemplate
      name="okcancelbuttons"
