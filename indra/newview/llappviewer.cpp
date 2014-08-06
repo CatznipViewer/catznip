@@ -3479,12 +3479,25 @@ void LLAppViewer::cleanupSavedSettings()
 	// as we don't track it in callbacks
 	if(NULL != gViewerWindow)
 	{
-		BOOL maximized = gViewerWindow->getWindow()->getMaximized();
-		if (!maximized)
+//		BOOL maximized = gViewerWindow->getWindow()->getMaximized();
+//		if (!maximized)
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
+#ifndef LL_WINDOWS
+		if ( (!gViewerWindow->getWindow()->getMaximized()) && (!gViewerWindow->getWindow()->getFullscreenWindow()) )
+#endif // !LL_WINDOWS
+// [/SL:KB]
 		{
 			LLCoordScreen window_pos;
 			
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
+#ifndef LL_WINDOWS
+// [/SL:KB]
 			if (gViewerWindow->getWindow()->getPosition(&window_pos))
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-08-26 (Catznip-2.1)
+#else
+			if (gViewerWindow->getWindow()->getRestoredPosition(&window_pos))
+#endif // !LL_WINDOWS
+// [/SL:KB]
 			{
 				gSavedSettings.setS32("WindowX", window_pos.mX);
 				gSavedSettings.setS32("WindowY", window_pos.mY);
