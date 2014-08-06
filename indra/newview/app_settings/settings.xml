@@ -4170,6 +4170,45 @@
       <key>Value</key>
       <real>0.5</real>
     </map>
+    <key>FontOverrideEditor</key>
+    <map>
+      <key>Comment</key>
+      <string>Name of the editor font override file</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>HideFromEditor</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>FontOverrideMain</key>
+    <map>
+      <key>Comment</key>
+      <string>Name of the main font override file</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>HideFromEditor</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>FontOverrideMonospace</key>
+    <map>
+      <key>Comment</key>
+      <string>Name of the monospace font override file</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>HideFromEditor</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>FontScreenDPI</key>
     <map>
       <key>Comment</key>
@@ -11392,6 +11431,17 @@
     <map>
       <key>Comment</key>
       <string>The currently selected skin.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>default</string>
+    </map>
+    <key>SkinCurrentTheme</key>
+    <map>
+      <key>Comment</key>
+      <string>The selected theme for the current skin.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
