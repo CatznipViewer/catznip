@@ -194,6 +194,9 @@
 #include "llevents.h"
 #include "llstartuplistener.h"
 #include "lltoolbarview.h"
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2010-12-19 (Catznip-2.7.0a) | Added: Catznip-2.5.0a
+#include "llspellcheck.h"
+// [/SL:KB]
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -317,6 +320,57 @@ void set_flags_and_update_appearance()
 	LLAppearanceMgr::instance().updateAppearanceFromCOF(true, true, no_op);
 }
 
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1)
+bool handleSpellCheckChanged();
+
+class LLHTTDictionaryListResponder : public LLHTTPClient::Responder
+{
+public:
+	/*virtual*/ void completedRaw(const LLChannelDescriptors& channels, const LLIOPipe::buffer_ptr_t& buffer)
+	{
+		if (isGoodStatus())
+		{
+			std::string strPath = LLSpellChecker::getDictionaryUserPath() + "dictionaries.xml";
+			LL_INFOS() << "Writing dictionary list to " << strPath << LL_ENDL;
+			
+			S32 file_size = buffer->countAfter(channels.in(), NULL);
+			if (file_size > 0)
+			{
+				// read from buffer
+				U8* copy_buffer = new U8[file_size];
+				buffer->readAfter(channels.in(), NULL, copy_buffer, file_size);
+
+				// write to file
+				LLAPRFile out(strPath, LL_APR_WB);
+				out.write(copy_buffer, file_size);
+				out.close();
+			}
+
+			if ( (gSavedSettings.getBOOL("SpellCheck")) && (!LLSpellChecker::getUseSpellCheck()) )
+			{
+				// It's possible spell check initialization failed due to old dictionaries.xml versions
+				handleSpellCheckChanged();
+			}
+			else if (LLSpellChecker::instanceExists())
+			{
+				LLSpellChecker::instance().refreshDictionaryMap();
+			}
+		}
+	}
+};
+
+void fetch_dictionary_list()
+{
+	std::string strURL = gSavedSettings.getString("SpellCheckHTTPList");
+	if (!strURL.empty())
+	{
+		strURL += "dictionaries.xml";
+		LL_INFOS() << "Fetching dictionary list from " << strURL << LL_ENDL;
+		LLHTTPClient::get(strURL, new LLHTTDictionaryListResponder());
+	}
+}
+// [/SL:KB]
+
 // Returns false to skip other idle processing. Should only return
 // true when all initialization done.
 bool idle_startup()
@@ -420,6 +474,10 @@ bool idle_startup()
 
 		// load dynamic GPU/feature tables from website (S3)
 		LLFeatureManager::getInstance()->fetchHTTPTables();
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
+		if (LLSpellChecker::instanceExists())
+			fetch_dictionary_list();
+// [/SL:KB]
 		
 		std::string xml_file = LLUI::locateSkin("xui_version.xml");
 		LLXMLNodePtr root;
