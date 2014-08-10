@@ -10200,17 +10200,6 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-   <key>RunFastTimers</key>
-    <map>
-      <key>Comment</key>
-      <string>Run fast timers even when the floater isn't currently visible.</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>Boolean</string>
-      <key>Value</key>
-      <boolean>0</boolean>
-    </map>
   <key>SafeMode</key>
     <map>
       <key>Comment</key>

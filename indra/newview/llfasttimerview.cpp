@@ -1550,18 +1550,6 @@ void	LLFastTimerView::onClickCloseBtn(bool)
 	setVisible(false);
 }
 
-// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-void LLFastTimerView::setVisible(BOOL visible)
-{
-	if ( (!gSavedSettings.getBOOL("RunFastTimers")) && (getVisible() != visible) )
-	{
-		LLFastTimer::sToggleRun = (LLFastTimer::sRunTimers != (bool)visible);
-	}
-
-	LLFloater::setVisible(visible);
-}
-// [/SL:KB]
-
 LLFastTimer::NamedTimer& LLFastTimerView::getFrameTimer()
 {
 	return FTM_FRAME.getNamedTimer();

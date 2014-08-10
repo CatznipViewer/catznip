@@ -58,9 +58,6 @@ public:
 	virtual BOOL handleToolTip(S32 x, S32 y, MASK mask);
 	virtual BOOL handleScrollWheel(S32 x, S32 y, S32 clicks);
 	virtual void draw();
-// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-	/*virtual*/ void setVisible(BOOL visible);
-// [/SL:KB]
 
 	LLFastTimer::NamedTimer* getLegendID(S32 y);
 	F64 getTime(const std::string& name);

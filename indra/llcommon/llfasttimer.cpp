@@ -57,10 +57,6 @@ S32 LLFastTimer::sLastFrameIndex = -1;
 U64 LLFastTimer::sLastFrameTime = LLFastTimer::getCPUClockCount64();
 bool LLFastTimer::sPauseHistory = 0;
 bool LLFastTimer::sResetHistory = 0;
-// [SL:KB] - Patch: Settings-FastTimers | Checked: 2013-05-12 (Catznip-3.5)
-bool LLFastTimer::sRunTimers = false;
-bool LLFastTimer::sToggleRun = false;
-// [/SL:KB]
 LLFastTimer::CurTimerData LLFastTimer::sCurTimerData;
 BOOL LLFastTimer::sLog = FALSE;
 std::string LLFastTimer::sLogName = "";
