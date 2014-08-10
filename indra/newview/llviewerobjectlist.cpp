@@ -68,6 +68,9 @@
 #include "u64.h"
 #include "llviewertexturelist.h"
 #include "lldatapacker.h"
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2.1)
+#include "llderenderlist.h"
+// [/SL:KB]
 #ifdef LL_STANDALONE
 #include <zlib.h>
 #else
@@ -599,6 +602,32 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 				continue;
 			}
 #endif
+
+//// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3.0)
+//			// Don't recreate derendered objects (update the core object information so we'll have enough information to rerequest it later if needed)
+//			if ( (OUT_FULL == update_type) || (OUT_FULL_CACHED == update_type) || (OUT_FULL_COMPRESSED == update_type) )
+//			{
+//				U32 idRootLocal = 0; LLDataPackerBinaryBuffer* dp = NULL;
+//				if (OUT_FULL == update_type)
+//				{
+//					mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_ParentID, idRootLocal, i);
+//				}
+//				else if ( ((OUT_FULL_CACHED == update_type) && (dp = (LLDataPackerBinaryBuffer*)cached_dpp)) ||
+//				          ((OUT_FULL_COMPRESSED == update_type) && (dp = (LLDataPackerBinaryBuffer*)&compressed_dp)) )
+//				{
+//					U32 nMask = 0;
+//					htonmemcpy(&nMask, dp->getBuffer() + 64, MVT_U32, 4);			// "SpecialCode"
+//					if (nMask & 0x20)
+//						htonmemcpy(&idRootLocal, dp->getBuffer() + 84, MVT_U32, 4);	// "ParentID"
+//				}
+//
+//				if (LLDerenderList::instance().isDerendered(regionp->getHandle(), fullid, idRootLocal))
+//				{
+//					LLDerenderList::instance().updateObject(regionp->getHandle(), idRootLocal, fullid, local_id);
+//					continue;
+//				}
+//			}
+//// [/SL:KB]
 
 			objectp = createObject(pcode, regionp, fullid, local_id, gMessageSystem->getSender());
 			if (!objectp)
