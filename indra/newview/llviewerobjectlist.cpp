@@ -346,6 +346,15 @@ LLViewerObject* LLViewerObjectList::processObjectUpdateFromCache(LLVOCacheEntry*
 		}
 	}
 
+// [SL:KB] - Patch: World-Derender | Checked: 2014-08-10 (Catznip-3.7)
+	// Don't recreate derendered objects (also kill the cache entry so we don't do this per-frame)
+	if (LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, entry))
+	{
+		regionp->killCacheEntry(local_id);	// NOTE: this will kill all child entries from the cache as well
+		return NULL;
+	}
+// [/SL:KB]
+
 	bool justCreated = false;
 	if (!objectp)
 	{
@@ -603,31 +612,26 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 			}
 #endif
 
-//// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3.0)
-//			// Don't recreate derendered objects (update the core object information so we'll have enough information to rerequest it later if needed)
-//			if ( (OUT_FULL == update_type) || (OUT_FULL_CACHED == update_type) || (OUT_FULL_COMPRESSED == update_type) )
-//			{
-//				U32 idRootLocal = 0; LLDataPackerBinaryBuffer* dp = NULL;
-//				if (OUT_FULL == update_type)
-//				{
-//					mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_ParentID, idRootLocal, i);
-//				}
-//				else if ( ((OUT_FULL_CACHED == update_type) && (dp = (LLDataPackerBinaryBuffer*)cached_dpp)) ||
-//				          ((OUT_FULL_COMPRESSED == update_type) && (dp = (LLDataPackerBinaryBuffer*)&compressed_dp)) )
-//				{
-//					U32 nMask = 0;
-//					htonmemcpy(&nMask, dp->getBuffer() + 64, MVT_U32, 4);			// "SpecialCode"
-//					if (nMask & 0x20)
-//						htonmemcpy(&idRootLocal, dp->getBuffer() + 84, MVT_U32, 4);	// "ParentID"
-//				}
-//
-//				if (LLDerenderList::instance().isDerendered(regionp->getHandle(), fullid, idRootLocal))
-//				{
-//					LLDerenderList::instance().updateObject(regionp->getHandle(), idRootLocal, fullid, local_id);
-//					continue;
-//				}
-//			}
-//// [/SL:KB]
+// [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3)
+			// Don't recreate derendered objects (update the core object information so we'll have enough information to rerequest it later if needed)
+			if ( (OUT_FULL == update_type) || (OUT_FULL_COMPRESSED == update_type) )
+			{
+				bool fBlockObject = false;
+				if (OUT_FULL == update_type)
+				{
+					U32 idRootLocal = 0;
+					mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_ParentID, idRootLocal, i);
+					fBlockObject = LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, local_id, idRootLocal);
+				}
+				else if (OUT_FULL_COMPRESSED == update_type)
+				{
+					fBlockObject = LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, local_id, compressed_dp.getBuffer());
+				}
+
+				if (fBlockObject)
+					continue;
+			}
+// [/SL:KB]
 
 			objectp = createObject(pcode, regionp, fullid, local_id, gMessageSystem->getSender());
 			if (!objectp)

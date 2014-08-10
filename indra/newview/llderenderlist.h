@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2013, Kitty Barnett
+ * Copyright (c) 2011-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -19,7 +19,12 @@
 #include "llsingleton.h"
 #include "lluuid.h"
 
+// ============================================================================
+// Forward declarations
+//
+
 class LLSelectNode;
+class LLVOCacheEntry;
 class LLViewerObject;
 
 // ============================================================================
@@ -63,9 +68,11 @@ public:
 	bool addSelection(bool fPersist, std::vector<LLUUID>* pIdList = NULL);
 	bool isDerendered(const LLUUID& idObject) const									{ return m_Entries.end() != findEntry(idObject); }
 	bool isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const	{ return m_Entries.end() != findEntry(idRegion, idObject, idRootLocal); }
+	bool processUpdate(U64 idRegion, const LLUUID& idObject, const LLVOCacheEntry* pEntry);
+	bool processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, U32 idRootLocal);
+	bool processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, const U8* pBuffer);
 	void removeObject(const LLUUID& idObject);
 	void removeObjects(const uuid_vec_t& idsObject);
-	void updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& idObject, U32 idObjectLocal);
 
 	static bool canAdd(const LLViewerObject* pObj);
 	static bool canAddSelection();

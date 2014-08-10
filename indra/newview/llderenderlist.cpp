@@ -1,6 +1,6 @@
 /** 
  *
- * Copyright (c) 2011-2013, Kitty Barnett
+ * Copyright (c) 2011-2014, Kitty Barnett
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -23,6 +23,7 @@
 #include "llviewerobject.h"
 #include "llviewerobjectlist.h"
 #include "llviewerregion.h"
+#include "llvocache.h"
 #include "llvoavatarself.h"
 #include "llworld.h"
 #include "pipeline.h"
@@ -42,10 +43,7 @@ LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode, bool fPersist)
 		return;
 
 	idObject = pObj->getID();
-	if ( (pNode->mValid) && (!pNode->mName.empty()) )
-		strObjectName = pNode->mName;
-	else
-		strObjectName = LLTrans::getString("Unknown");
+	strObjectName = ((pNode->mValid) && (!pNode->mName.empty())) ? pNode->mName : LLTrans::getString("Unknown");
 
 	idRootLocal = pObj->getLocalID();
 	for (LLViewerObject::const_child_list_t::const_iterator itChild = pObj->getChildren().begin(), endChild = pObj->getChildren().end(); itChild != endChild; ++itChild)
@@ -54,30 +52,26 @@ LLDerenderEntry::LLDerenderEntry(const LLSelectNode* pNode, bool fPersist)
 	//
 	// Fill in all region related information
 	//
-	const LLViewerRegion* pRegion = pObj->getRegion();
-	if (!pRegion)
-		return;
-
-	idRegion = pRegion->getHandle();
-	posRegion = pObj->getPositionRegion();
-	if (!pRegion->getName().empty())
-		strRegionName = pRegion->getName();
-	else
-		strRegionName = LLTrans::getString("Unknown");
+	if (const LLViewerRegion* pRegion = pObj->getRegion())
+	{
+		idRegion = pRegion->getHandle();
+		posRegion = pObj->getPositionRegion();
+		strRegionName = (!pRegion->getName().empty()) ? pRegion->getName() : LLTrans::getString("Unknown");
+	}
 }
 
 LLDerenderEntry::LLDerenderEntry(const LLSD& sdData)
 	: fPersists(true), idRegion(0), idRootLocal(0)
 {
+	idObject = sdData["object_id"].asUUID();
 	strObjectName = sdData["object_name"];
 	if (strObjectName.empty())
 		strObjectName = LLTrans::getString("Unknown");
-	idObject = sdData["object_id"].asUUID();
 
+	posRegion.setValue(sdData["region_pos"]);
 	strRegionName = sdData["region_name"];
 	if (strRegionName.empty())
 		strRegionName = LLTrans::getString("Unknown");
-	posRegion.setValue(sdData["region_pos"]);
 }
 
 LLSD LLDerenderEntry::toLLSD() const
@@ -141,8 +135,12 @@ bool LLDerenderList::addSelection(bool fPersist, std::vector<LLUUID>* pIdList)
 			// Display green bubble on kill [see process_kill_object()]
 			if (gShowObjectUpdates)
 				gPipeline.addDebugBlip(pObj->getPositionAgent(), LLColor4(0.f, 1.f, 0.f, 1.f));
-			LLSelectMgr::getInstance()->removeObjectFromSelections(entry.idObject);
+			// Keep the order of these the same as process_kill_object()
+			LLViewerRegion* pObjRegion = pObj->getRegion(); U32 idObjLocal = pObj->getLocalID();
 			gObjectList.killObject(pObj);
+			if ( (LLViewerRegion::sVOCacheCullingEnabled) && (pObjRegion) )
+				pObjRegion->killCacheEntry(idObjLocal);
+			LLSelectMgr::getInstance()->removeObjectFromSelections(entry.idObject);
 		}
 	}
 
@@ -155,12 +153,12 @@ bool LLDerenderList::addSelection(bool fPersist, std::vector<LLUUID>* pIdList)
 bool LLDerenderList::canAdd(const LLViewerObject* pObj)
 {
 	// Allow derendering if:
-	//   - the object isn't a child prim
-	//   - the object isn't currently sat on by the user
-	//   - the object isn't an attachment
 	return 
+		//   - the object isn't a child prim
 		(pObj) && (pObj->getRootEdit() == pObj) &&
+		//   - the object isn't currently sat on by the user
 		( (isAgentAvatarValid()) && (!pObj->isChild(gAgentAvatarp)) ) &&
+		//   - the object isn't an attachment
 		(!pObj->isAttachment());
 }
 
@@ -229,37 +227,12 @@ void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 		m_Entries.erase(itEntry);
 	}
 
-	bool fNewMsg = true; int nBlockCount = 0;
 	for (std::map<LLViewerRegion*, std::list<U32> >::const_iterator itRegionMap = idRegionObjectMap.begin(); itRegionMap != idRegionObjectMap.end(); ++itRegionMap)
 	{
 		LLViewerRegion* pRegion = itRegionMap->first;
 		for (std::list<U32>::const_iterator itObject = itRegionMap->second.begin(); itObject != itRegionMap->second.end(); ++itObject)
-		{
-			if (fNewMsg)
-			{
-				fNewMsg = false;
-				nBlockCount = 0;
-
-				gMessageSystem->newMessageFast(_PREHASH_RequestMultipleObjects);
-				gMessageSystem->nextBlockFast(_PREHASH_AgentData);
-				gMessageSystem->addUUIDFast(_PREHASH_AgentID, gAgent.getID());
-				gMessageSystem->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID());
-			}
-
-			gMessageSystem->nextBlockFast(_PREHASH_ObjectData);
-			gMessageSystem->addU8Fast(_PREHASH_CacheMissType, LLViewerRegion::CACHE_MISS_TYPE_FULL);
-			gMessageSystem->addU32Fast(_PREHASH_ID, *itObject);
-			nBlockCount++;
-
-			if (nBlockCount >= 255)
-			{
-				gMessageSystem->sendReliable(pRegion->getHost());
-				fNewMsg = true;
-			}
-		}
-
-		if (!fNewMsg)
-			gMessageSystem->sendReliable(pRegion->getHost());
+			pRegion->addCacheMissFull(*itObject);
+		pRegion->requestCacheMisses();
 	}
 
 	if (fSave)
@@ -267,9 +240,38 @@ void LLDerenderList::removeObjects(const uuid_vec_t& idsObject)
 	s_ChangeSignal();
 }
 
-void LLDerenderList::updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& idObject, U32 idObjectLocal)
+bool LLDerenderList::processUpdate(U64 idRegion, const LLUUID& idObject, const LLVOCacheEntry* pEntry)
 {
-	entry_list_t::iterator itEntry = findEntry(idRegion, idObject, idRootLocal);
+	// Used by OUT_FULL_CACHED
+	if (!pEntry->isChild())
+	{
+		// We know it's a root prim so we can skip looking up its parent
+		entry_list_t::iterator itEntry = findEntry(idObject);
+		if (m_Entries.end() == itEntry)
+		{
+			return false;	// Not a derendered object
+		}
+
+		// Updating root prim information
+		itEntry->idRegion = idRegion;
+		itEntry->idRootLocal = pEntry->getLocalID();
+
+		// We can use the object cache entry to give us all child prims IDs
+		itEntry->idsChildLocal.clear();
+		for (LLVOCacheEntry::vocache_entry_set_t::const_iterator itChild = pEntry->getChildrenBegin(), endChild = pEntry->getChildrenEnd(); itChild != endChild; ++itChild)
+			itEntry->idsChildLocal.push_back((*itChild)->getLocalID());
+
+		return true;
+	}
+	
+	// Child prim so perform normal processing
+	return processUpdate(idRegion, idObject, pEntry->getLocalID(), pEntry->getDPBuffer());
+}
+
+bool LLDerenderList::processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, U32 idRootLocal)
+{
+	// Used by OUT_FULL
+	entry_list_t::iterator itEntry = (0 == idRootLocal) ? findEntry(idObject) : findEntry(idRegion, idObject, idRootLocal);
 	if (m_Entries.end() != itEntry)
 	{
 		if (0 != idRootLocal)
@@ -284,7 +286,19 @@ void LLDerenderList::updateObject(U64 idRegion, U32 idRootLocal, const LLUUID& i
 			itEntry->idRegion = idRegion;
 			itEntry->idRootLocal = idObjectLocal;
 		}
+		return true;
 	}
+	return false;
+}
+
+bool LLDerenderList::processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, const U8* pBuffer)
+{
+	// Used by OUT_FULL_COMPRESSED
+	U32 idRootLocal = 0, nMask = 0;
+	htonmemcpy(&nMask, pBuffer + 64, MVT_U32, 4);			// "SpecialCode"
+	if (nMask & 0x20)
+		htonmemcpy(&idRootLocal, pBuffer + 84, MVT_U32, 4);	// "ParentID"
+	return processUpdate(idRegion, idObject, idObjectLocal, idRootLocal);
 }
 
 void LLDerenderList::load()
@@ -292,7 +306,7 @@ void LLDerenderList::load()
 	llifstream fileDerender(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, s_PersistFilename));
 	if (!fileDerender.is_open())
 	{
-		llwarns << "Can't open derender list file \"" << s_PersistFilename << "\" for reading" << llendl;
+		LL_WARNS() << "Can't open derender list file \"" << s_PersistFilename << "\" for reading" << LL_ENDL;
 		return;
 	}
 
@@ -307,7 +321,7 @@ void LLDerenderList::load()
 		std::istringstream iss(strLine);
 		if (sdParser->parse(iss, sdEntry, strLine.length()) == LLSDParser::PARSE_FAILURE)
 		{
-			llinfos << "Failed to parse derender list entry" << llendl;
+			LL_INFOS() << "Failed to parse derender list entry" << LL_ENDL;
 			break;
 		}
 
@@ -324,7 +338,7 @@ void LLDerenderList::save() const
 	llofstream fileDerender(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, s_PersistFilename));
 	if (!fileDerender.is_open())
 	{
-		llwarns << "Can't open derender list file \"" << s_PersistFilename << "\" for writing" << llendl;
+		LL_WARNS() << "Can't open derender list file \"" << s_PersistFilename << "\" for writing" << LL_ENDL;
 		return;
 	}
 
