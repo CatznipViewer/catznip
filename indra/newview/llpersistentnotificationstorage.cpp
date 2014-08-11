@@ -30,6 +30,9 @@
 
 #include "llpersistentnotificationstorage.h"
 
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+#include "llcallbacklist.h"
+// [/SL:KB]
 #include "llchannelmanager.h"
 #include "llnotificationstorage.h"
 #include "llscreenchannel.h"
@@ -40,6 +43,9 @@ LLPersistentNotificationStorage::LLPersistentNotificationStorage()
 	: LLSingleton<LLPersistentNotificationStorage>()
 	, LLNotificationStorage("")
 	, mLoaded(false)
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	, mPendingSave(false)
+// [/SL:KB]
 {
 }
 
@@ -50,6 +56,17 @@ LLPersistentNotificationStorage::~LLPersistentNotificationStorage()
 static LLFastTimer::DeclareTimer FTM_SAVE_NOTIFICATIONS("Save Notifications");
 
 void LLPersistentNotificationStorage::saveNotifications()
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+{
+	if (!mPendingSave)
+	{
+		doOnIdleOneTime(boost::bind(&LLPersistentNotificationStorage::saveNotificationsCb, this));
+		mPendingSave = true;
+	}
+}
+
+void LLPersistentNotificationStorage::saveNotificationsCb()
+// [/SL:KB]
 {
 	LLFastTimer _(FTM_SAVE_NOTIFICATIONS);
 
@@ -88,6 +105,9 @@ void LLPersistentNotificationStorage::saveNotifications()
 	}
 
 	writeNotifications(output);
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	mPendingSave = false;
+// [/SL:KB]
 }
 
 static LLFastTimer::DeclareTimer FTM_LOAD_NOTIFICATIONS("Load Notifications");
