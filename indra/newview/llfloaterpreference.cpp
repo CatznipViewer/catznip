@@ -347,6 +347,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
 	mCommitCallbackRegistrar.add("Pref.applyUIColor",			boost::bind(&LLFloaterPreference::applyUIColor, this ,_1, _2));
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.applyNameTagColor",		boost::bind(&LLFloaterPreference::applyNameTagColor, this ,_1, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.getUIColor",				boost::bind(&LLFloaterPreference::getUIColor, this ,_1, _2));
 	mCommitCallbackRegistrar.add("Pref.MaturitySettings",		boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
@@ -1777,6 +1780,14 @@ void LLFloaterPreference::applyUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
 	LLUIColorTable::instance().setColor(param.asString(), LLColor4(ctrl->getValue()));
 }
+
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
 
 void LLFloaterPreference::getUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
