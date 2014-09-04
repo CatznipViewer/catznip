@@ -377,6 +377,9 @@ static const F32 SEND_STATS_PERIOD = 300.0f;
 
 // The following are from (older?) statistics code found in appviewer.
 void update_statistics();
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-08 (Catznip-3.6)
+void update_staticstics_for_send();
+// [/SL:KB]
 void send_stats();
 
 extern LLFrameTimer gTextureTimer;

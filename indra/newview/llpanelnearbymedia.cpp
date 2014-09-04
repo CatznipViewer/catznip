@@ -983,8 +983,12 @@ void LLPanelNearByMedia::updateControls()
 			showTimeBasedControls(LLViewerMedia::isParcelAudioPlaying(),
 							  false, // include_zoom
 							  false, // is_zoomed
-							  gSavedSettings.getBOOL("MuteMusic"), 
-							  gSavedSettings.getF32("AudioLevelMusic") );
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+							  LLAudioEngine::s_fMuteMusic,
+							  LLAudioEngine::s_nLevelMusic);
+// [/SL:KB]
+//							  gSavedSettings.getBOOL("MuteMusic"), 
+//							  gSavedSettings.getF32("AudioLevelMusic") );
 		}
 	}
 	else if (selected_media_id == PARCEL_MEDIA_LIST_ITEM_UUID)
