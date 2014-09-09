@@ -31,6 +31,9 @@
 #include <set>
 #include <string>
 #include <vector>
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+#include "llavatarname.h"
+// [/SL:KB]
 #include "lluserrelations.h"
 #include "lluuid.h"
 #include "v3dmath.h"
@@ -258,7 +261,10 @@ public:
 	LLCollectAllBuddies() {}
 	virtual ~LLCollectAllBuddies() {}
 	virtual bool operator()(const LLUUID& buddy_id, LLRelationship* buddy);
-	typedef std::map<std::string, LLUUID, LLDictionaryLess> buddy_map_t;
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	typedef std::map<LLUUID, LLAvatarName> buddy_map_t;
+// [/SL:KB]
+//	typedef std::map<std::string, LLUUID, LLDictionaryLess> buddy_map_t;
 	buddy_map_t mOnline;
 	buddy_map_t mOffline;
 	std::string mFullName;
