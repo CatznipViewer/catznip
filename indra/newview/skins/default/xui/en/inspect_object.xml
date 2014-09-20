@@ -147,6 +147,17 @@ L$30,000
    name="open_btn"
    top_delta="0"
    width="80" />
+  <button
+   follows="top|left"
+   height="20"
+   label="Detach"
+   left_delta="0"
+   name="detach_btn"
+   top_delta="0"
+   width="80">
+    <button.commit_callback
+     function="Attachment.Detach" />
+  </button>
 
  <!--  non-overlapping buttons here -->
      <button

@@ -12,8 +12,26 @@
    name="touch">    
     <menu_item_call.on_click
      function="InspectObject.Touch"/>
-    <menu_item_call.on_visible
+    <menu_item_call.on_enable
      function="Object.EnableTouch" />
+  </menu_item_call>
+  <menu_item_call
+   label="Edit"
+   layout="topleft"
+   name="edit">
+        <menu_item_call.on_click
+         function="Object.Edit" />
+        <menu_item_call.on_enable
+         function="EnableEdit"/>
+  </menu_item_call>  
+  <menu_item_call
+   label="Open"
+   layout="topleft"
+   name="open">
+    <menu_item_call.on_click
+     function="InspectObject.Open"/>
+    <menu_item_call.on_visible
+     function="Object.EnableOpen" />
   </menu_item_call>
   <menu_item_call
   label="Sit"
@@ -23,6 +41,24 @@
      function="InspectObject.Sit"/>
     <menu_item_call.on_visible
      function="Object.EnableSit"/>
+  </menu_item_call>
+  <menu_item_call
+   label="Take"
+   layout="topleft"
+   name="take">
+    <menu_item_call.on_click
+     function="Object.Take" />
+    <menu_item_call.on_visible
+     function="Object.VisibleTake"/>
+  </menu_item_call>
+  <menu_item_call
+   label="Take Copy"
+   layout="topleft"
+   name="take_copy">
+    <menu_item_call.on_click
+     function="Tools.TakeCopy"/>
+    <menu_item_call.on_visible
+      function="Tools.EnableTakeCopy"/>
   </menu_item_call>
   <menu_item_call
    label="Pay"
@@ -44,42 +80,6 @@
      function="Object.VisibleBuy" />
   </menu_item_call>
   <menu_item_call
-   label="Take"
-   layout="topleft"
-   name="take">
-    <menu_item_call.on_click
-     function="Object.Take" />
-    <menu_item_call.on_enable
-     function="Object.VisibleTake"/>
-  </menu_item_call>
-  <menu_item_call
-   label="Take Copy"
-   layout="topleft"
-   name="take_copy">
-    <menu_item_call.on_click
-     function="Tools.TakeCopy"/>
-    <menu_item_call.on_visible
-      function="Tools.EnableTakeCopy"/>
-  </menu_item_call>
-  <menu_item_call
-   label="Open"
-   layout="topleft"
-   name="open">
-    <menu_item_call.on_click
-     function="InspectObject.Open"/>
-    <menu_item_call.on_visible
-     function="Object.EnableOpen" />
-  </menu_item_call>
-  <menu_item_call
-   label="Edit"
-   layout="topleft"
-   name="edit">
-        <menu_item_call.on_click
-         function="Object.Edit" />
-        <menu_item_call.on_enable
-         function="EnableEdit"/>
-  </menu_item_call>  
-  <menu_item_call
    label="Wear"
    layout="topleft"
    name="wear">
@@ -97,6 +97,17 @@
     <menu_item_call.on_visible
      function="Object.EnableWear" />
   </menu_item_call>
+  <menu_item_call
+   label="Detach"
+   layout="topleft"
+   name="detach">
+        <menu_item_call.on_click
+         function="Attachment.Detach" />
+        <menu_item_call.on_enable
+         function="Attachment.EnableDetach" />
+        <menu_item_call.on_visible
+         function="Object.IsAttachment" />
+  </menu_item_call>  
   <menu_item_call
    label="Report"
    layout="topleft"
