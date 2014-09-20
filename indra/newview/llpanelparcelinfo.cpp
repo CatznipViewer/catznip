@@ -160,7 +160,7 @@ void LLPanelParcelInfo::processParcelInfo(const LLParcelData& parcelData)
 	updateFromParcelData();
 }
 
-void LLPanelParcelInfo::setErrorStatus(U32 nStatus, const std::string& strReason)
+void LLPanelParcelInfo::setErrorStatus(S32 nStatus, const std::string& strReason)
 {
 	// We only really handle 404 and 499 errors
 	std::string strNotAvailable = LLTrans::getString("parcel_not_available"), strErrorText;

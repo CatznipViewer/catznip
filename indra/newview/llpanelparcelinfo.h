@@ -44,7 +44,7 @@ public:
 protected:
 	/*virtual*/ void setParcelID(const LLUUID& idParcel);
 	/*virtual*/ void processParcelInfo(const LLParcelData& parcelData);
-	/*virtual*/ void setErrorStatus(U32 nStatus, const std::string& strReason);
+	/*virtual*/ void setErrorStatus(S32 nStatus, const std::string& strReason);
 
 	/*
 	 * Member functions
