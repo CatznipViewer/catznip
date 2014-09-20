@@ -30,6 +30,9 @@
 // library includes 
 #include "llfloaterreg.h"
 #include "llui.h"
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+#include "llsliderctrl.h"
+// [/SL:KB]
 
 // viewer includes
 #include "llvoiceclient.h"
@@ -57,6 +60,9 @@ LLOutputMonitorCtrl::Params::Params()
 	image_level_2("image_level_2"),
 	image_level_3("image_level_3"),
 	auto_update("auto_update"),
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	show_volume_slider("show_volume_slider", false),
+// [/SL:KB]
 	speaker_id("speaker_id")
 {
 };
@@ -70,6 +76,9 @@ LLOutputMonitorCtrl::LLOutputMonitorCtrl(const LLOutputMonitorCtrl::Params& p)
 	mImageLevel1(p.image_level_1),
 	mImageLevel2(p.image_level_2),
 	mImageLevel3(p.image_level_3),
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	mVolumeCtrl(NULL),
+// [/SL:KB]
 	mAutoUpdate(p.auto_update),
 	mSpeakerId(p.speaker_id),
 	mIsAgentControl(false),
@@ -100,6 +109,10 @@ LLOutputMonitorCtrl::LLOutputMonitorCtrl(const LLOutputMonitorCtrl::Params& p)
 
 	//with checking mute state
 	setSpeakerId(mSpeakerId);
+
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	showVolumeSlider(p.show_volume_slider);
+// [/SL:KB]
 }
 
 LLOutputMonitorCtrl::~LLOutputMonitorCtrl()
@@ -184,10 +197,23 @@ void LLOutputMonitorCtrl::draw()
 		icon = mImageLevel3;
 	}
 
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	if (mVolumeCtrl)
+	{
+		mVolumeCtrl->setEnabled( (mSpeakerId.notNull()) && (!mIsMuted) );
+		mVolumeCtrl->setValue( (mSpeakerId.notNull()) ? LLVoiceClient::getInstance()->getUserVolume(mSpeakerId) : 0.5f );
+	}
+
+	// Right-align the indicator icon
 	if (icon)
 	{
-		icon->draw(0, 0);
+		icon->draw(getRect().getWidth() - icon->getWidth(), 0);
 	}
+// [/SL:KB]
+//	if (icon)
+//	{
+//		icon->draw(0, 0);
+//	}
 
 	//
 	// Fill the monitor with a bunch of small rectangles.
@@ -238,6 +264,10 @@ void LLOutputMonitorCtrl::draw()
 	//
 	if(mBorder)
 		gl_rect_2d(0, monh, monw, 0, sColorBound, FALSE);
+
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+	LLView::draw();
+// [/SL:KB]
 }
 
 // virtual
@@ -327,6 +357,42 @@ void LLOutputMonitorCtrl::switchIndicator(bool switch_on)
 
     }
 }
+
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+void LLOutputMonitorCtrl::showVolumeSlider(bool show_slider)
+{
+	if ( (!mVolumeCtrl) && (show_slider) )
+	{
+		LLSliderCtrl::Params p;
+		p.follows.flags(FOLLOWS_TOP | FOLLOWS_LEFT);
+		p.increment(0.025f);
+		p.initial_value( (mSpeakerId.notNull()) ? LLVoiceClient::getInstance()->getUserVolume(mSpeakerId) : 0.5f );
+		p.label_width(0);
+		p.layout("topleft");
+		p.min_value(0.05f);
+		p.max_value(0.95f);
+		p.name("volume_slider");
+		p.rect(LLRect(0, getRect().getHeight(), getRect().getWidth() - 20, 0));
+		p.show_text(false);
+		p.text_width(0);
+
+		mVolumeCtrl = LLUICtrlFactory::create<LLSliderCtrl>(p);
+		mVolumeCtrl->setCommitCallback(boost::bind(&LLOutputMonitorCtrl::onVolumeChange, this, _2));
+		addChild(mVolumeCtrl);
+	}
+
+	if (mVolumeCtrl)
+	{
+		mVolumeCtrl->setVisible(show_slider);
+	}
+	mShowVolumeSlider = show_slider;
+}
+
+void LLOutputMonitorCtrl::onVolumeChange(const LLSD& sdValue)
+{
+	LLVoiceClient::getInstance()->setUserVolume(mSpeakerId, sdValue.asReal());
+}
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE SECTION

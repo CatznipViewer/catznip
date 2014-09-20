@@ -77,6 +77,17 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.InviteToGroup",	boost::bind(&LLAvatarActions::inviteToGroup,			id));
 		registrar.add("Avatar.TeleportRequest",	boost::bind(&PeopleContextMenu::requestTeleport,		this));
 		registrar.add("Avatar.Calllog",			boost::bind(&LLAvatarActions::viewChatHistory,			id));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4)
+		registrar.add("Avatar.ZoomIn",							boost::bind(&LLAvatarActions::zoomIn,						id));
+		enable_registrar.add("Avatar.VisibleZoomIn",			boost::bind(&LLAvatarActions::canZoomIn,					id));
+		registrar.add("Avatar.Report",							boost::bind(&LLAvatarActions::report,						id));
+		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEject,					id));
+		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreeze,					id));
+		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEject,			id));
+		registrar.add("Avatar.Kick",							boost::bind(&LLAvatarActions::estateKick,					id));
+		registrar.add("Avatar.TeleportHome",					boost::bind(&LLAvatarActions::estateTeleportHome,			id));
+		enable_registrar.add("Avatar.VisibleKickTeleportHome",	boost::bind(&LLAvatarActions::canEstateKickOrTeleportHome,	id));
+// [/SL:KB]
 
 		enable_registrar.add("Avatar.EnableItem", boost::bind(&PeopleContextMenu::enableContextMenuItem, this, _2));
 		enable_registrar.add("Avatar.CheckItem",  boost::bind(&PeopleContextMenu::checkContextMenuItem,	this, _2));
@@ -98,6 +109,14 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		// registrar.add("Avatar.Pay",			boost::bind(&LLAvatarActions::pay,						mUUIDs)); // *TODO: unimplemented
 		
 		enable_registrar.add("Avatar.EnableItem",	boost::bind(&PeopleContextMenu::enableContextMenuItem, this, _2));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.4)
+		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEjectMultiple,			mUUIDs));
+		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreezeMultiple,			mUUIDs));
+		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEjectMultiple,	mUUIDs, false));
+		registrar.add("Avatar.Kick",							boost::bind(&LLAvatarActions::estateKickMultiple,			mUUIDs));
+		registrar.add("Avatar.TeleportHome",					boost::bind(&LLAvatarActions::estateTeleportHomeMultiple,	mUUIDs));
+		enable_registrar.add("Avatar.VisibleKickTeleportHome",	boost::bind(&LLAvatarActions::canEstateKickOrTeleportHomeMultiple, mUUIDs, false));
+// [/SL:KB]
 
 		// create the context menu from the XUI
 		menu = createFromFile("menu_people_nearby_multiselect.xml");
@@ -114,31 +133,56 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	
 	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
 		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
 		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
-		items.push_back(std::string("block_unblock"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+// [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
@@ -281,32 +325,62 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	
 	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
 		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
-		items.push_back(std::string("zoom_in"));
 		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
+		items.push_back(std::string("zoom_in"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+
 		items.push_back(std::string("block_unblock"));
+// [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("zoom_in"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
