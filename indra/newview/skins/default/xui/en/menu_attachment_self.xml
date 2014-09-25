@@ -55,6 +55,8 @@
          parameter="" />
         <menu_item_call.on_enable
          function="Self.EnableSitDown" />
+        <menu_item_call.on_visible
+         function="Self.VisibleSitDown" />
     </menu_item_call>
 
   <menu_item_call
@@ -66,6 +68,8 @@ name="Stand Up">
      parameter="" />
     <menu_item_call.on_enable
      function="Self.EnableStandUp" />
+    <menu_item_call.on_visible
+     function="Self.VisibleStandUp" />
   </menu_item_call>
   <menu_item_call
   label="My Appearance"
@@ -115,6 +119,13 @@ name="Edit Outfit">
      function="ShowAgentProfile"
      parameter="agent" />
   </menu_item_call>
+      <menu_item_call
+       label="My Picks"
+       name="ChangePicks">
+        <menu_item_call.on_click
+         function="Floater.Show"
+         parameter="picks" />
+      </menu_item_call>
   <menu_item_call
  label="Debug Textures"
      name="Debug...">
@@ -143,15 +154,30 @@ name="Edit Outfit">
     <menu_item_call.on_enable
      function="Attachment.EnableDrop" />
   </menu_item_call>
+   <menu_item_call
+       label="Inspect"
+       name="Object Inspect Floater">
+         <menu_item_call.on_click
+          function="Floater.Show"
+          parameter="inspect" />
+         <menu_item_call.on_enable
+          function="Object.EnableInspect" />
+   </menu_item_call>
+   <menu_item_call
+     label="Texture Refresh"
+     layout="topleft"
+     name="Texture Refresh">
+      <menu_item_call.on_click
+       function="Object.TextureRefresh"/>
+   </menu_item_call>
   <menu_item_separator
-       layout="topleft" />
+       layout="topleft" on_visible.function="EnableMuteParticle" />
   <menu_item_call
-     enabled="false"
      label="Block Particle Owner"
      name="Mute Particle">
     <menu_item_call.on_click
      function="Particle.Mute" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="EnableMuteParticle" />
   </menu_item_call>
 </context_menu>

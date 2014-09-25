@@ -19,8 +19,8 @@
 		<button name="new_gesture_btn" tool_tip="Yeni mimik yap"/>
 		<button name="activate_btn" tool_tip="Seçilen mimiği Etkinleştir/Devre Dışı Bırak"/>
 		<button name="del_btn" tool_tip="Bu mimiği sil"/>
+		<button label="Düzenle" name="edit_btn"/>
+		<button label="Oyna" name="play_btn"/>
+		<button label="Durdur" name="stop_btn"/>
 	</panel>
-	<button label="Düzenle" name="edit_btn"/>
-	<button label="Oyna" name="play_btn"/>
-	<button label="Durdur" name="stop_btn"/>
 </floater>

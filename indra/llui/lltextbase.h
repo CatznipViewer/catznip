@@ -649,7 +649,10 @@ protected:
 	S32							mMaxTextByteLength;	// Maximum length mText is allowed to be in bytes
 
 	// support widgets
-	LLContextMenu*				mPopupMenu;
+//	LLContextMenu*				mPopupMenu;
+// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3)
+	LLHandle<LLContextMenu>		mUrlContextMenuHandle;
+// [/SL:KB]
 	LLView*						mDocumentView;
 	LLScrollContainer*			mScroller;
 

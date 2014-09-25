@@ -30,4 +30,40 @@
              function="CheckControl"
              parameter="ShowMiniLocationPanel" />
     </menu_item_check>
+
+    <menu_item_separator />
+
+    <menu_item_check
+     label="Show Buy L$ Button"
+     layout="topleft"
+     name="ShowBuyCurrencyButton">
+       <on_click
+        function="ToggleControl"
+        parameter="ShowBuyCurrencyButton" /> 
+       <on_check
+        function="CheckControl"
+        parameter="ShowBuyCurrencyButton" />
+    </menu_item_check>
+    <menu_item_check
+     label="Show Marketplace Button"
+     layout="topleft"
+     name="ShowMarketplaceButton">
+       <on_click
+        function="ToggleControl"
+        parameter="ShowMarketplaceButton" /> 
+       <on_check
+        function="CheckControl"
+        parameter="ShowMarketplaceButton" />
+    </menu_item_check>
+    <menu_item_check
+     label="Show Network Statistics"
+     layout="topleft"
+     name="ShowNetStats">
+       <on_click
+        function="ToggleControl"
+        parameter="ShowNetStats" /> 
+       <on_check
+        function="CheckControl"
+        parameter="ShowNetStats" />
+    </menu_item_check>
 </menu>

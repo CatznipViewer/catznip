@@ -429,6 +429,9 @@ void LLLayoutStack::updateLayout()
 		F32 panel_dim = llmax(panelp->getExpandedMinDim(), panelp->mTargetDim);
 
 		LLRect panel_rect;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
+		LLRect panel_rect_old = panelp->getRect();
+// [/SL:KB]
 		if (mOrientation == HORIZONTAL)
 		{
 			panel_rect.setLeftTopAndSize(llround(cur_pos),
@@ -443,6 +446,10 @@ void LLLayoutStack::updateLayout()
 										getRect().getWidth(),
 										llround(panel_dim));
 		}
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
+		if (panel_rect_old != panelp->getRect())
+			panelp->fireResizeSignal();
+// [/SL:KB]
 
 		LLRect resize_bar_rect(panel_rect);
 		F32 panel_spacing = (F32)mPanelSpacing * panelp->getVisibleAmount();

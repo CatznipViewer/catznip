@@ -15,5 +15,7 @@
 	<floater.string name="NotRunning">
 		非執行中
 	</floater.string>
+	<panel name="bottom_panel">
 	<button label="關閉" label_selected="關閉" name="close"/>
+	</panel>
 </floater>

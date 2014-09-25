@@ -20,8 +20,8 @@
 		<button name="new_gesture_btn" tool_tip="新規ジェスチャーを作成"/>
 		<button name="activate_btn" tool_tip="選択したジェスチャーのアクティベートの有無"/>
 		<button name="del_btn" tool_tip="このジェスチャーを削除"/>
+		<button label="編集" name="edit_btn"/>
+		<button label="再生" name="play_btn"/>
+		<button label="停止" name="stop_btn"/>
 	</panel>
-	<button label="編集" name="edit_btn"/>
-	<button label="再生" name="play_btn"/>
-	<button label="停止" name="stop_btn"/>
 </floater>
