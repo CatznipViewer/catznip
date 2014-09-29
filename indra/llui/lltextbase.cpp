@@ -1949,6 +1949,10 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.AddFriend", boost::bind(&LLUrlAction::addFriend, url));
 	registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, url));
 	registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, url));
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
+	registrar.add("Url.RequestTeleport", boost::bind(&LLUrlAction::requestTeleport, url));
+// [/SL:KB]
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
 	registrar.add("Url.CopyLabel", boost::bind(&LLUrlAction::copyLabelToClipboard, url));
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
@@ -1961,14 +1965,21 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	if (mIsFriendSignal)
 	{
 		bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-		LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
-		LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
-
-		if (addFriendButton && removeFriendButton)
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+		LLView* pAddItem = mPopupMenu->getChild<LLView>("add_friend");
+		if (pAddItem)
 		{
-			addFriendButton->setEnabled(!isFriend);
-			removeFriendButton->setEnabled(isFriend);
+			pAddItem->setVisible(!isFriend);
 		}
+// [/SL:KB]
+//		LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
+//		LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
+//
+//		if (addFriendButton && removeFriendButton)
+//		{
+//			addFriendButton->setEnabled(!isFriend);
+//			removeFriendButton->setEnabled(isFriend);
+//		}
 	}
 	
 	if (mPopupMenu)

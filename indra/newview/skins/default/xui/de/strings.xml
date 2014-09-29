@@ -4034,7 +4034,7 @@ Falls diese Meldung weiterhin angezeigt wird, wenden Sie sich bitte an [SUPPORT_
 		Sie sind der einzige Benutzer in dieser Sitzung.
 	</string>
 	<string name="offline_message">
-		[NAME] ist offline.
+		[NAME_SLURL] ist offline.
 	</string>
 	<string name="invite_message">
 		Klicken Sie auf [BUTTON NAME], um eine Verbindung zu diesem Voice-Chat herzustellen.

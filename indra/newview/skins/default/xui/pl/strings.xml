@@ -3593,7 +3593,7 @@ Jeżeli nadal otrzymujesz ten komunikat, skontaktuj się z [SUPPORT_SITE].
 		Jesteś jedyną osobą w tej konferencji.
 	</string>
 	<string name="offline_message">
-		[NAME] opuszcza Second Life.
+		[NAME_SLURL] opuszcza Second Life.
 	</string>
 	<string name="invite_message">
 		Kliknij na [BUTTON NAME] przycisk by zaakceptować/dołączyć do tej rozmowy.
