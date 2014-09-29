@@ -57,6 +57,9 @@
 #include "llspellcheck.h"
 #include "llpanel.h"
 #include "llurlregistry.h"
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+#include "lltextsearchctrl.h"
+// [/SL:KB]
 #include "lltooltip.h"
 #include "llmenugl.h"
 
@@ -241,6 +244,9 @@ LLTextEditor::Params::Params()
 	default_color("default_color"),
     commit_on_focus_lost("commit_on_focus_lost", false),
 	show_context_menu("show_context_menu"),
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	show_inplace_search("show_inplace_search", false),
+// [/SL:KB]
 	enable_tooltip_paste("enable_tooltip_paste")
 {
 	addSynonym(prevalidate_callback, "text_type");
@@ -263,6 +269,10 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	mPrevalidateFunc(p.prevalidate_callback()),
 	mContextMenu(NULL),
 	mShowContextMenu(p.show_context_menu),
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	mShowInplaceSearch(p.show_inplace_search),
+	mInplaceSearchPanel(NULL),
+// [/SL:KB]
 	mEnableTooltipPaste(p.enable_tooltip_paste),
 	mPassDelete(FALSE)
 {
@@ -342,7 +352,19 @@ void LLTextEditor::setText(const LLStringExplicit &utf8str, const LLStyle::Param
 	resetDirty();
 }
 
-void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2013-12-30 (Catznip-3.6)
+std::string LLTextEditor::getSelectionString() const
+{
+	S32 idxSel = 0, lenSel = 0;
+	getSelectionRange(&idxSel, &lenSel);
+	return (lenSel > 0) ? wstring_to_utf8str(getWText().substr(idxSel, lenSel)) : LLStringUtil::null;
+}
+// [/SL:KB]
+
+//void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+// [/SL:KB]
 {
 	if (search_text_in.empty())
 	{
@@ -363,17 +385,35 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 		
 		if (selected_text == search_text)
 		{
-			// We already have this word selected, we are searching for the next.
-			setCursorPos(mCursorPos + search_text.size());
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+			if (search_up)
+			{
+				// We already have this word selected, we are searching for the previous.
+				setCursorPos(llmax(0, mCursorPos - 1));
+			}
+			else
+			{
+				// We already have this word selected, we are searching for the next.
+				setCursorPos(mCursorPos + search_text.size());
+			}
+// [/SL:KB]
+//			// We already have this word selected, we are searching for the next.
+//			setCursorPos(mCursorPos + search_text.size());
 		}
 	}
 	
-	S32 loc = text.find(search_text,mCursorPos);
-	
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+	S32 loc = (search_up) ? text.rfind(search_text, llmax(0, mCursorPos - (S32)search_text.size())) : text.find(search_text,mCursorPos);
+// [/SL:KB]
+//	S32 loc = text.find(search_text,mCursorPos);
+
 	// If Maybe we wrapped, search again
 	if (wrap && (-1 == loc))
 	{	
-		loc = text.find(search_text);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+		loc = (search_up) ? text.rfind(search_text) : text.find(search_text);
+// [/SL:KB]
+//		loc = text.find(search_text);
 	}
 	
 	// If still -1, then search_text just isn't found.
@@ -386,14 +426,23 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	}
 
 	setCursorPos(loc);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	if (mReadOnly)
+	{
+		updateScrollFromCursor();
+	}
+// [/SL:KB]
 	
 	mIsSelecting = TRUE;
 	mSelectionEnd = mCursorPos;
 	mSelectionStart = llmin((S32)getLength(), (S32)(mCursorPos + search_text.size()));
 }
 
-BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
-							   BOOL case_insensitive, BOOL wrap)
+//BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
+//							   BOOL case_insensitive, BOOL wrap)
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+// [/SL:KB]
 {
 	BOOL replaced = FALSE;
 
@@ -421,7 +470,10 @@ BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::str
 		}
 	}
 
-	selectNext(search_text_in, case_insensitive, wrap);
+//	selectNext(search_text_in, case_insensitive, wrap);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+	selectNext(search_text_in, case_insensitive, wrap, search_up);
+// [/SL:KB]
 	return replaced;
 }
 
@@ -690,7 +742,13 @@ BOOL LLTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 
 	if( !handled )
 	{
-		if (!(mask & MASK_SHIFT))
+//		if (!(mask & MASK_SHIFT))
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+		S32 posClick = getDocIndexFromLocalCoord(x, y, true);
+		bool fClickInSel = (hasSelection()) && (llmin(mSelectionStart, mSelectionEnd) <= posClick) && (posClick <= llmax(mSelectionStart, mSelectionEnd));
+
+		if ( (!(mask & MASK_SHIFT)) && (!fClickInSel) )
+// [/SL:K
 		{
 			deselect();
 		}
@@ -719,7 +777,20 @@ BOOL LLTextEditor::handleMouseDown(S32 x, S32 y, MASK mask)
 			else
 			{
 				setCursorAtLocalPos( x, y, true );
-				startSelection();
+
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+				// Start a new selection unless the user clicked inside the current selection
+				if ( (!mReadOnly) && (fClickInSel) )
+				{
+					mIsSelecting = TRUE;
+					mIsSelectDragging = TRUE;
+				}
+				else
+				{
+					startSelection();
+				}
+// [/SL:KB]
+//				startSelection();
 			}
 		}
 
@@ -742,6 +813,9 @@ BOOL LLTextEditor::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	{
 		setFocus(TRUE);
 	}
+// [SL:KB] - Patch: UI-Notecards | Checked: 2010-09-12 (Catznip-2.1)
+	setCursorAtLocalPos(x, y, FALSE);
+// [/SL:KB]
 	// Prefer editor menu if it has selection. See EXT-6806.
 	if (hasSelection() || !LLTextBase::handleRightMouseDown(x, y, mask))
 	{
@@ -790,7 +864,12 @@ BOOL LLTextEditor::handleHover(S32 x, S32 y, MASK mask)
 			S32 clamped_x = llclamp(x, mVisibleTextRect.mLeft, mVisibleTextRect.mRight);
 			S32 clamped_y = llclamp(y, mVisibleTextRect.mBottom, mVisibleTextRect.mTop);
 			setCursorAtLocalPos( clamped_x, clamped_y, true );
-			mSelectionEnd = mCursorPos;
+
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+			if (!mIsSelectDragging)
+				mSelectionEnd = mCursorPos;
+// [/SL:KB]
+//			mSelectionEnd = mCursorPos;
 		}
 		LL_DEBUGS("UserInput") << "hover handled by " << getName() << " (active)" << LL_ENDL;		
 		getWindow()->setCursor(UI_CURSOR_IBEAM);
@@ -841,6 +920,28 @@ BOOL LLTextEditor::handleMouseUp(S32 x, S32 y, MASK mask)
 			S32 clamped_x = llclamp(x, mVisibleTextRect.mLeft, mVisibleTextRect.mRight);
 			S32 clamped_y = llclamp(y, mVisibleTextRect.mBottom, mVisibleTextRect.mTop);
 			setCursorAtLocalPos( clamped_x, clamped_y, true );
+
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+			if (mIsSelectDragging)
+			{
+				S32 selLeft = llmin(mSelectionStart, mSelectionEnd), selRight = llmax(mSelectionStart, mSelectionEnd);
+				if ( (mCursorPos < selLeft) || (selRight < mCursorPos) )
+				{
+					LLWString strSelText = getWText().substr(selLeft, selRight - selLeft);
+					deleteSelection(TRUE);
+
+					S32 idxInsert = mCursorPos;
+					insertText(strSelText);
+
+					setSelectionRange(idxInsert, mCursorPos - idxInsert);
+				}
+				else
+				{
+					deselect();
+				}
+			}
+// [/SL:KB]
+
 			endSelection();
 		}
 		
@@ -1354,10 +1455,21 @@ void LLTextEditor::deleteSelection(BOOL group_with_next_op )
 		S32 pos = llmin( mSelectionStart, mSelectionEnd );
 		S32 length = llabs( mSelectionStart - mSelectionEnd );
 	
-		remove( pos, length, group_with_next_op );
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+		S32 delta = remove(pos, length, group_with_next_op);
+		if (mCursorPos >= pos + length)
+		{
+			setCursorPos(mCursorPos + delta);
+		}
+		else if (mCursorPos >= pos)
+		{
+			setCursorPos(pos);
+		}
+// [/SL:KB]
+//		remove( pos, length, group_with_next_op );
 
 		deselect();
-		setCursorPos(pos);
+//		setCursorPos(pos);
 	}
 }
 
@@ -1493,31 +1605,51 @@ void LLTextEditor::cleanStringForPaste(LLWString & clean_string)
 
 void LLTextEditor::pasteTextWithLinebreaks(LLWString & clean_string)
 {
-	std::basic_string<llwchar>::size_type start = 0;
-	std::basic_string<llwchar>::size_type pos = clean_string.find('\n',start);
-	
-	while((pos != -1) && (pos != clean_string.length() -1))
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2014-04-08 (Catznip-3.6)
+	std::basic_string<llwchar>::size_type len = clean_string.length(), start = 0, pos;
+	while ( (start < len) && ((pos = clean_string.find('\n', start)) != LLWString::npos) )
 	{
-		if(pos!=start)
+		if (pos!=start)
 		{
 			std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,pos-start);
 			setCursorPos(mCursorPos + insert(mCursorPos, str, TRUE, LLTextSegmentPtr()));
 		}
-		addLineBreakChar(TRUE);			// Add a line break and group with the next addition.
+		addLineBreakChar(pos != len);
 
-		start = pos+1;
-		pos = clean_string.find('\n',start);
+		start = pos + 1;
 	}
 
-	if (pos != start)
+	if (start < len)
 	{
-		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,clean_string.length()-start);
+		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,len - start);
 		setCursorPos(mCursorPos + insert(mCursorPos, str, FALSE, LLTextSegmentPtr()));
 	}
-	else
-	{
-		addLineBreakChar(FALSE);		// Add a line break and end the grouping.
-	}
+// [/SL:KB]
+//	std::basic_string<llwchar>::size_type start = 0;
+//	std::basic_string<llwchar>::size_type pos = clean_string.find('\n',start);
+//	
+//	while((pos != -1) && (pos != clean_string.length() -1))
+//	{
+//		if(pos!=start)
+//		{
+//			std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,pos-start);
+//			setCursorPos(mCursorPos + insert(mCursorPos, str, TRUE, LLTextSegmentPtr()));
+//		}
+//		addLineBreakChar(TRUE);			// Add a line break and group with the next addition.
+//
+//		start = pos+1;
+//		pos = clean_string.find('\n',start);
+//	}
+//
+//	if (pos != start)
+//	{
+//		std::basic_string<llwchar> str = std::basic_string<llwchar>(clean_string,start,clean_string.length()-start);
+//		setCursorPos(mCursorPos + insert(mCursorPos, str, FALSE, LLTextSegmentPtr()));
+//	}
+//	else
+//	{
+//		addLineBreakChar(FALSE);		// Add a line break and end the grouping.
+//	}
 }
 
 // copy selection to primary
@@ -1794,6 +1926,18 @@ BOOL LLTextEditor::handleKeyHere(KEY key, MASK mask )
 		resetCursorBlink();
 		needsScroll();
 	}
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	else if ( (mShowInplaceSearch) && ((mask & MASK_MODIFIERS) == MASK_CONTROL) && ('F' == key) )
+	{
+		if (!mInplaceSearchPanel)
+			mInplaceSearchPanel = new LLTextSearchCtrl(this);
+		if (hasSelection())
+			mInplaceSearchPanel->setValue(getSelectionString());
+		mInplaceSearchPanel->setVisible(true);
+		mInplaceSearchPanel->setFocus(true);
+		handled = TRUE;
+	}
+// [/SL:KB]
 
 	return handled;
 }
@@ -2280,6 +2424,13 @@ void LLTextEditor::draw()
 	mBorder->setKeyboardFocusHighlight( hasFocus() );// && !mReadOnly);
 }
 
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+BOOL LLTextEditor::hasFocus() const
+{
+	return (LLTextBase::hasFocus()) && ( (!mShowInplaceSearch) || (!mInplaceSearchPanel) || (!mInplaceSearchPanel->getVisible()) || (!gFocusMgr.childHasKeyboardFocus(mInplaceSearchPanel)) );
+}
+// [/SL:KB]
+
 // Start or stop the editor from accepting text-editing keystrokes
 // see also LLLineEditor
 void LLTextEditor::setFocus( BOOL new_state )
@@ -2324,6 +2475,16 @@ void LLTextEditor::setCursorAndScrollToEnd()
 	endOfDoc();
 }
 
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+void LLTextEditor::setSelectionRange(S32 pos, S32 length)
+{
+	mSelectionStart = pos;
+	mSelectionEnd = pos + length;
+	setCursorPos(mSelectionEnd);
+	updatePrimary();
+}
+// [/SL:KB]
+
 void LLTextEditor::getCurrentLineAndColumn( S32* line, S32* col, BOOL include_wordwrap ) 
 { 
 	*line = getLineNumFromDocIndex(mCursorPos, include_wordwrap);
@@ -2365,6 +2526,15 @@ void LLTextEditor::autoIndent()
 
 // Inserts new text at the cursor position
 void LLTextEditor::insertText(const std::string &new_text)
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+{
+	insertText(utf8str_to_wstring(new_text));
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+void LLTextEditor::insertText(const LLWString &new_text)
+// [/SL:KB]
 {
 	BOOL enabled = getEnabled();
 	setEnabled( TRUE );
@@ -2375,26 +2545,47 @@ void LLTextEditor::insertText(const std::string &new_text)
 		deleteSelection(TRUE);
 	}
 
-	setCursorPos(mCursorPos + insert( mCursorPos, utf8str_to_wstring(new_text), FALSE, LLTextSegmentPtr() ));
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+	std::basic_string<llwchar>::size_type idxStart = -1, idxBreak = -1; bool fInsertLF = false;
+	do
+	{
+		idxStart = idxBreak + 1;
+		idxBreak = new_text.find('\n', idxStart);
+		fInsertLF = (std::basic_string<llwchar>::npos != idxBreak);
+		if (std::basic_string<llwchar>::npos == idxBreak)
+			idxBreak = new_text.length();
+		
+		if (idxStart != idxBreak)
+		{
+			std::basic_string<llwchar> str = std::basic_string<llwchar>(new_text, idxStart, idxBreak - idxStart);
+			setCursorPos(mCursorPos + insert(mCursorPos, str, false, LLTextSegmentPtr()));
+		}
+		if (fInsertLF)
+		{
+			addLineBreakChar();
+		}
+	} while (new_text.length() > idxBreak);
+// [/SL:KB]
+//	setCursorPos(mCursorPos + insert( mCursorPos, utf8str_to_wstring(new_text), FALSE, LLTextSegmentPtr() ));
 	
 	setEnabled( enabled );
 }
 
-void LLTextEditor::insertText(LLWString &new_text)
-{
-	BOOL enabled = getEnabled();
-	setEnabled( TRUE );
-
-	// Delete any selected characters (the insertion replaces them)
-	if( hasSelection() )
-	{
-		deleteSelection(TRUE);
-	}
-
-	setCursorPos(mCursorPos + insert( mCursorPos, new_text, FALSE, LLTextSegmentPtr() ));
-
-	setEnabled( enabled );
-}
+//void LLTextEditor::insertText(LLWString &new_text)
+//{
+//	BOOL enabled = getEnabled();
+//	setEnabled( TRUE );
+//
+//	// Delete any selected characters (the insertion replaces them)
+//	if( hasSelection() )
+//	{
+//		deleteSelection(TRUE);
+//	}
+//
+//	setCursorPos(mCursorPos + insert( mCursorPos, new_text, FALSE, LLTextSegmentPtr() ));
+//
+//	setEnabled( enabled );
+//}
 
 void LLTextEditor::appendWidget(const LLInlineViewSegment::Params& params, const std::string& text, bool allow_undo)
 {
