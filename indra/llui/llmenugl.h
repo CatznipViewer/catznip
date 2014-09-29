@@ -428,7 +428,10 @@ public:
 
 	virtual BOOL handleAcceleratorKey(KEY key, MASK mask);
 
-	LLMenuGL* findChildMenuByName(const std::string& name, BOOL recurse) const;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	virtual LLMenuGL* findChildMenuByName(const std::string& name, BOOL recurse) const;
+// [/SL:KB]
+//	LLMenuGL* findChildMenuByName(const std::string& name, BOOL recurse) const;
 	
 	BOOL clearHoverItem();
 
@@ -691,6 +694,10 @@ public:
 	virtual bool	addChild			(LLView* view, S32 tab_group = 0);
 
 			LLHandle<LLContextMenu> getHandle() { return getDerivedHandle<LLContextMenu>(); }
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	/*virtual*/ LLMenuGL* findChildMenuByName(const std::string& name, BOOL recurse) const;
+// [/SL:KB]
 
 			LLView*	getSpawningView() const		{ return mSpawningViewHandle.get(); }
 			void	setSpawningView(LLHandle<LLView> spawning_view) { mSpawningViewHandle = spawning_view; }
