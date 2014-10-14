@@ -31,59 +31,124 @@
 #include "llsidepanelappearance.h"
 #include "llsaveoutfitcombobtn.h"
 #include "llviewermenu.h"
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+#include "llflyoutbutton.h"
+#include "lltrans.h"
+// [/SL:KB]
 
 static const std::string SAVE_BTN("save_btn");
-static const std::string SAVE_FLYOUT_BTN("save_flyout_btn");
+//static const std::string SAVE_FLYOUT_BTN("save_flyout_btn");
 
 LLSaveOutfitComboBtn::LLSaveOutfitComboBtn(LLPanel* parent, bool saveAsDefaultAction):
 	mParent(parent), mSaveAsDefaultAction(saveAsDefaultAction)
 {
-	// register action mapping before creating menu
-	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar save_registar;
-	save_registar.add("Outfit.Save.Action", boost::bind(
-			&LLSaveOutfitComboBtn::saveOutfit, this, false));
-	save_registar.add("Outfit.SaveAs.Action", boost::bind(
-			&LLSaveOutfitComboBtn::saveOutfit, this, true));
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+	mSaveBtn = mParent->getChild<LLFlyoutButton>(SAVE_BTN);
+	mSaveBtn->setCommitCallback(boost::bind(&LLSaveOutfitComboBtn::saveOutfit, this, _1));
 
-	mParent->childSetAction(SAVE_BTN, boost::bind(&LLSaveOutfitComboBtn::saveOutfit, this, mSaveAsDefaultAction));
-	mParent->childSetAction(SAVE_FLYOUT_BTN, boost::bind(&LLSaveOutfitComboBtn::showSaveMenu, this));
-
-	mSaveMenu = LLUICtrlFactory::getInstance()->createFromFile<
-			LLToggleableMenu> ("menu_save_outfit.xml", gMenuHolder,
-			LLViewerMenuHolderGL::child_registry_t::instance());
+	setMenuItemLabel("save_outfit", LLTrans::getString("SaveOutfit"));
+	setMenuItemLabel("save_as_new_outfit", LLTrans::getString("SaveOutfitAs"));
+// [/SL:KB]
+//	// register action mapping before creating menu
+//	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar save_registar;
+//	save_registar.add("Outfit.Save.Action", boost::bind(
+//			&LLSaveOutfitComboBtn::saveOutfit, this, false));
+//	save_registar.add("Outfit.SaveAs.Action", boost::bind(
+//			&LLSaveOutfitComboBtn::saveOutfit, this, true));
+//
+//	mParent->childSetAction(SAVE_BTN, boost::bind(&LLSaveOutfitComboBtn::saveOutfit, this, mSaveAsDefaultAction));
+//	mParent->childSetAction(SAVE_FLYOUT_BTN, boost::bind(&LLSaveOutfitComboBtn::showSaveMenu, this));
+//
+//	mSaveMenu = LLUICtrlFactory::getInstance()->createFromFile<
+//			LLToggleableMenu> ("menu_save_outfit.xml", gMenuHolder,
+//			LLViewerMenuHolderGL::child_registry_t::instance());
 }
 
-void LLSaveOutfitComboBtn::showSaveMenu()
-{
-	S32 x, y;
-	LLUI::getMousePositionLocal(mParent, &x, &y);
+//void LLSaveOutfitComboBtn::showSaveMenu()
+//{
+//	S32 x, y;
+//	LLUI::getMousePositionLocal(mParent, &x, &y);
+//
+//	mSaveMenu->updateParent(LLMenuGL::sMenuContainer);
+//	LLMenuGL::showPopup(mParent, mSaveMenu, x, y);
+//}
 
-	mSaveMenu->updateParent(LLMenuGL::sMenuContainer);
-	LLMenuGL::showPopup(mParent, mSaveMenu, x, y);
-}
-
-void LLSaveOutfitComboBtn::saveOutfit(bool as_new)
+//void LLSaveOutfitComboBtn::saveOutfit(bool as_new)
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+void LLSaveOutfitComboBtn::saveOutfit(const LLUICtrl* pBtnCtrl)
+// [/SL:KB]
 {
-	if (!as_new && LLAppearanceMgr::getInstance()->updateBaseOutfit())
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+	const std::string strAction = pBtnCtrl->getValue().asString();
+	bool fSaveAs = mSaveAsDefaultAction;
+	if ("save_outfit" == strAction)
+		fSaveAs = false;
+	else if ("save_as_new_outfit" == strAction)
+		fSaveAs = true;
+
+	if ( (!fSaveAs) && (LLAppearanceMgr::getInstance()->updateBaseOutfit()) )
 	{
 		// we don't need to ask for an outfit name, and updateBaseOutfit() successfully saved.
 		// If updateBaseOutfit fails, ask for an outfit name anyways
 		return;
 	}
 
-	LLPanelOutfitsInventory* panel_outfits_inventory =
-			LLPanelOutfitsInventory::findInstance();
+	LLPanelOutfitsInventory* panel_outfits_inventory = LLPanelOutfitsInventory::findInstance();
 	if (panel_outfits_inventory)
 	{
 		panel_outfits_inventory->onSave();
 	} 	
-    
-	//*TODO how to get to know when base outfit is updated or new outfit is created?
+// [/SL:KB]
+//	if (!as_new && LLAppearanceMgr::getInstance()->updateBaseOutfit())
+//	{
+//		// we don't need to ask for an outfit name, and updateBaseOutfit() successfully saved.
+//		// If updateBaseOutfit fails, ask for an outfit name anyways
+//		return;
+//	}
+//
+//	LLPanelOutfitsInventory* panel_outfits_inventory =
+//			LLPanelOutfitsInventory::findInstance();
+//	if (panel_outfits_inventory)
+//	{
+//		panel_outfits_inventory->onSave();
+//	}
+//
+//	//*TODO how to get to know when base outfit is updated or new outfit is created?
 }
+    
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+void LLSaveOutfitComboBtn::setMenuItemLabel(const std::string& item, const std::string& label)
+{
+	LLScrollListCtrl* pListCtrl = mSaveBtn->getListControl();
+	if (pListCtrl)
+	{
+		LLScrollListItem* pItem = pListCtrl->getItem(item);
+		if (pItem)
+		{
+			LLScrollListText* pTextCell = dynamic_cast<LLScrollListText*>(pItem->getColumn(0));
+			if (pTextCell)
+			{
+				pTextCell->setText(label);
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 void LLSaveOutfitComboBtn::setMenuItemEnabled(const std::string& item, bool enabled)
 {
-	mSaveMenu->setItemEnabled("save_outfit", enabled);
+// [SL:KB] - Patch: Control-SaveOutfitComboBtn | Checked: 2012-08-09 (Catznip-3.3)
+	LLScrollListCtrl* pListCtrl = mSaveBtn->getListControl();
+	if (pListCtrl)
+	{
+		LLScrollListItem* pItem = pListCtrl->getItem(item);
+		if (pItem)
+		{
+			pItem->setEnabled(enabled);
+		}
+	}
+// [/SL:KB]
+//	mSaveMenu->setItemEnabled("save_outfit", enabled);
 }
 
 void LLSaveOutfitComboBtn::setSaveBtnEnabled(bool enabled)

@@ -4522,6 +4522,12 @@ http://secondlife.com/viewer-access-faq
 	<string name="EmptyOutfitText">
 		沒有任何物品在這個裝扮內
 	</string>
+	<string name="SaveOutfit">
+		儲存
+	</string>
+	<string name="SaveOutfitAs">
+		另存
+	</string>
 	<string name="ExternalEditorNotSet">
 		選擇一個編輯器使用 ExternalEditor 設定。
 	</string>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-background_visible="true"
+background_visible="false"
 default_tab_group="1"
 follows="all"
 height="570"
@@ -11,7 +11,7 @@ min_width="240"
 name="appearance panel"
 top="0"
 left="0"
-width="333">
+width="330">
    <string
    name="No Outfit"
    value="No Outfit" />
@@ -26,13 +26,13 @@ width="333">
    value="Changing outfits" />
    <panel
    background_opaque="true"
-   background_visible="true"
+   background_visible="false"
    bg_opaque_color="DkGray2"
    left="10"
-   top="5"
+   top="0"
    follows="left|top|right"
    layout="topleft"
-   width="303"
+   width="310"
    height="33"
    name="panel_currentlook"
    >
@@ -117,19 +117,19 @@ width="333">
    max_length_chars="300"
    name="Filter"
    search_button_visible="true"
-   top_pad="10"
-   width="303" />
+   top_pad="4"
+   width="310" />
    <panel
    class="panel_outfits_inventory"
    filename="panel_outfits_inventory.xml"
    name="panel_outfits_inventory"
-   height="493"
+   height="506"
    min_height="410"
-   width="320"
+   width="330"
    visible="false"
    left="0"
    tab_group="1"
-   top_pad="6"
+   top_pad="4"
    follows="all" />
   <!--   <button
 	  follows="bottom|left"
