@@ -327,6 +327,8 @@ set(viewer_SOURCE_FILES
     llhudrender.cpp
     llhudtext.cpp
     llhudview.cpp
+    llfloaterimcontainerbase.cpp
+    llfloaterimcontainertab.cpp
     llimhandler.cpp
     llimview.cpp
     llinspect.cpp
@@ -921,6 +923,8 @@ set(viewer_HEADER_FILES
     llhudrender.h
     llhudtext.h
     llhudview.h
+    llfloaterimcontainerbase.h
+    llfloaterimcontainertab.h
     llimview.h
     llinspect.h
     llinspectavatar.h

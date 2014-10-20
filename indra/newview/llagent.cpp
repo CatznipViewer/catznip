@@ -265,6 +265,22 @@ void LLAgent::setCanEditParcel() // called via mParcelChangedSignal
 	gAgent.mCanEditParcel = can_edit;
 }
 
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+void LLAgent::setVoiceConnected(const bool b)
+{
+	if (mVoiceConnected != b)
+	{
+		mVoiceConnected = b;
+		mVoiceConnectedChangeSignal(b);
+	}
+}
+
+boost::signals2::connection LLAgent::setVoiceConnectedChangeCallback(const voice_connected_change_signal_t::slot_type& cb)
+{
+	return mVoiceConnectedChangeSignal.connect(cb);
+}
+// [/SL:KB]
+
 // static
 bool LLAgent::isActionAllowed(const LLSD& sdname)
 {
@@ -2031,14 +2047,14 @@ void LLAgent::endAnimationUpdateUI()
 				skip_list.insert(LLFloaterReg::findInstance("mini_map"));
 			}
 
-			LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
-			LLFloaterIMContainer::floater_list_t conversations;
-			im_box->getDetachedConversationFloaters(conversations);
-			BOOST_FOREACH(LLFloater* conversation, conversations)
-			{
-				LL_INFOS() << "skip_list.insert(session_floater): " << conversation->getTitle() << LL_ENDL;
-				skip_list.insert(conversation);
-			}
+//			LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
+//			LLFloaterIMContainer::floater_list_t conversations;
+//			im_box->getDetachedConversationFloaters(conversations);
+//			BOOST_FOREACH(LLFloater* conversation, conversations)
+//			{
+//				LL_INFOS() << "skip_list.insert(session_floater): " << conversation->getTitle() << LL_ENDL;
+//				skip_list.insert(conversation);
+//			}
 
 			gFloaterView->popVisibleAll(skip_list);
 #endif
