@@ -261,7 +261,10 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	mMouseDownY(0),
 	mTabsToNextField(p.ignore_tab),
 	mPrevalidateFunc(p.prevalidate_callback()),
-	mContextMenu(NULL),
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
+	mContextMenuOwned(false),
+// [/SL:KB]
+//	mContextMenu(NULL),
 	mShowContextMenu(p.show_context_menu),
 	mEnableTooltipPaste(p.enable_tooltip_paste),
 	mPassDelete(FALSE)
@@ -312,6 +315,16 @@ LLTextEditor::~LLTextEditor()
 	std::for_each(mUndoStack.begin(), mUndoStack.end(), DeletePointer());
 	mUndoStack.clear();
 	// context menu is owned by menu holder, not us
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-08-18 (Catznip-3.6)
+	if (!mDefaultMenuHandle.isDead())
+	{
+		mDefaultMenuHandle.get()->die();
+	}
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
+	{
+		mContextMenuHandle.get()->die();
+	}
+// [/SL:KB]
 	//delete mContextMenu;
 }
 
@@ -2027,15 +2040,35 @@ void LLTextEditor::setEnabled(BOOL enabled)
 	}
 }
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
+void LLTextEditor::setContextMenu(LLContextMenu* pMenu, bool fTakeOwnership)
+{
+	if ( (mContextMenuOwned) && (!mContextMenuHandle.isDead()) )
+	{
+		mContextMenuHandle.get()->die();
+	}
+
+	if (pMenu)
+	{
+		mContextMenuHandle = pMenu->getHandle();
+		mContextMenuOwned = fTakeOwnership;
+	}
+	else
+	{
+		mContextMenuHandle.markDead();
+	}
+}
+// [/SL:KB]
+
 void LLTextEditor::showContextMenu(S32 x, S32 y)
 {
-	if (!mContextMenu)
-	{
-		llassert(LLMenuGL::sMenuContainer != NULL);
-		mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_text_editor.xml", 
-																				LLMenuGL::sMenuContainer, 
-																				LLMenuHolderGL::child_registry_t::instance());
-	}
+//	if (!mContextMenu)
+//	{
+//		llassert(LLMenuGL::sMenuContainer != NULL);
+//		mContextMenu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>("menu_text_editor.xml", 
+//																				LLMenuGL::sMenuContainer, 
+//																				LLMenuHolderGL::child_registry_t::instance());
+//	}
 
 	// Route menu to this class
 	// previously this was done in ::handleRightMoseDown:
@@ -2080,11 +2113,36 @@ void LLTextEditor::showContextMenu(S32 x, S32 y)
 		}
 	}
 
-	mContextMenu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
-	mContextMenu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
-	mContextMenu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
-	mContextMenu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
-	mContextMenu->show(screen_x, screen_y, this);
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
+	// Use the default editor context menu when offering spelling suggestions to avoid clutter
+	LLContextMenu* menu = mContextMenuHandle.get();
+	if ( ((use_spellcheck) && (!mSuggestionList.empty())) || (!menu) )
+	{
+		menu = mDefaultMenuHandle.get();
+		if (!menu)
+		{
+			menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>(
+						"menu_text_editor.xml",
+						LLMenuGL::sMenuContainer,
+						LLMenuHolderGL::child_registry_t::instance());
+			mDefaultMenuHandle = menu->getHandle();
+		}
+	}
+
+	if (menu)
+	{
+		menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+		menu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+		menu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+		menu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+		menu->show(screen_x, screen_y, this);
+	}
+// [/SL:KB]
+//	mContextMenu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
+//	mContextMenu->setItemVisible("Add to Dictionary", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->setItemVisible("Add to Ignore", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->setItemVisible("Spellcheck Separator", (use_spellcheck) && (is_misspelled));
+//	mContextMenu->show(screen_x, screen_y, this);
 }
 
 

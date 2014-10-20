@@ -211,6 +211,10 @@ public:
 
 	void			setPassDelete(BOOL b) { mPassDelete = b; }
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2)
+public:
+	void			setContextMenu(LLContextMenu* pMenu, bool fTakeOwnership);
+// [/SL:KB]
 protected:
 	void			showContextMenu(S32 x, S32 y);
 	void			drawPreeditMarker();
@@ -344,7 +348,12 @@ private:
 	keystroke_signal_t mKeystrokeSignal;
 	LLTextValidate::validate_func_t mPrevalidateFunc;
 
-	LLContextMenu* mContextMenu;
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2012-01-10 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	LLHandle<LLContextMenu> mDefaultMenuHandle;
+	bool                    mContextMenuOwned;		// TRUE if this instance owns the context menu handle
+	LLHandle<LLContextMenu> mContextMenuHandle;
+// [/SL:KB]
+//	LLContextMenu* mContextMenu;
 }; // end class LLTextEditor
 
 // Build time optimization, generate once in .cpp file
