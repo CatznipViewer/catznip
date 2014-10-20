@@ -61,6 +61,10 @@ public:
 	 */
 	void addAvatarIDExceptAgent(const LLUUID& avatar_id);
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
+// [/SL:KB]
+
 	/**
 	 * Refreshes the participant list.
 	 */
@@ -87,7 +91,7 @@ protected:
 	bool onSpeakerMuteEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& userdata);
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	std::set<LLUUID>& getModeratorList()          { return mModeratorList; }
+	std::set<LLUUID>& getModeratorList()         { return mModeratorList; }
 	std::set<LLUUID>& getModeratorToRemoveList() { return mModeratorToRemoveList; }
 
 	virtual const LLUUID& getSessionID() const = 0;
@@ -208,16 +212,39 @@ protected:
 class LLParticipantAvatarList : public LLParticipantList
 {
 	LOG_CLASS(LLParticipantAvatarList);
+
+	/*
+	 * Constructor
+	 */
 public:
 	LLParticipantAvatarList(LLSpeakerMgr* pDataSource, LLAvatarList* pAvatarList);
-	/*virtual*/ ~LLParticipantAvatarList();
+	virtual ~LLParticipantAvatarList();
 
+	/*
+	 * Member functions
+	 */
 public:
 	void getSelectedUUIDs(uuid_vec_t& idsSelected);
-	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
-	/*virtual*/ void update() { LLParticipantList::update(); }
 
-	void onAvatarListRefreshed();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+public:
+	enum ESortOrder
+	{
+		E_SORT_BY_NAME = 0,
+		E_SORT_BY_RECENT_SPEAKERS = 1,
+	};
+	static ESortOrder getSortOrder();
+	static void       setSortOrder(ESortOrder eSortOrder);
+protected:
+	void sort();
+// [/SL:KB]
+
+	/*
+	 * LLParticipantList overrides
+	 */
+public:
+	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
+	/*virtual*/ void update();
 protected:
 	/*virtual*/ const LLUUID& getSessionID() const;
 
@@ -228,10 +255,26 @@ protected:
 	/*virtual*/ void removeParticipant(const LLUUID& particpant_id);
 	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted);
 
+	/*
+	 * Event handlers
+	 */
+public:
+	void onAvatarListRefreshed();
+
+	/*
+	 * Member variables
+	 */
 protected:
 	LLAvatarList* m_pAvatarList;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	LLPointer<class LLAvatarItemStatusAndNameComparator> m_SortByStatusAndName;
+	LLPointer<class LLAvatarItemRecentSpeakerComparator> m_SortByRecentSpeakers;
+// [/SL:KB]
 
-	boost::signals2::connection m_AvatarListRefreshConn;
+	boost::signals2::scoped_connection m_AvatarListRefreshConn;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	boost::signals2::scoped_connection m_AvatarListSortOrderConn;
+// [/SL:KB]
 };
 // [/SL:KB]
 
