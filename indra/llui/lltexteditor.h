@@ -90,7 +90,7 @@ public:
 
 	void	setKeystrokeCallback(const keystroke_signal_t::slot_type& callback);
 
-	void	setParseHighlights(BOOL parsing) {mParseHighlights=parsing;}
+//	void	setParseHighlights(BOOL parsing) {mParseHighlights=parsing;}
 
 	static S32		spacesPerTab();
 
