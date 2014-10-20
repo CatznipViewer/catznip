@@ -215,6 +215,9 @@
 #include "lldrawpoolbump.h"
 #include "llvieweraudio.h"
 #include "llimview.h"
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+#include "llimstorage.h"
+// [/SL:KB]
 #include "llviewerthrottle.h"
 #include "llparcel.h"
 #include "llavatariconctrl.h"
@@ -551,6 +554,10 @@ void request_initial_instant_messages()
 		&& LLMuteList::getInstance()->isLoaded()
 		&& isAgentAvatarValid())
 	{
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+		LLPersistentUnreadIMStorage::instance().loadUnreadIMs();
+// [/SL:KB]
+
 		// Auto-accepted inventory items may require the avatar object
 		// to build a correct name.  Likewise, inventory offers from
 		// muted avatars require the mute list to properly mute.
