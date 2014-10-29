@@ -135,8 +135,12 @@ typedef LLPointer<LLViewerObject> LLViewerObjectPtr;
 
 static boost::unordered_map<std::string, LLStringExplicit> sDefaultItemLabels;
 
-BOOL enable_land_build(void*);
-BOOL enable_object_build(void*);
+//BOOL enable_land_build(void*);
+//BOOL enable_object_build(void*);
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+bool enable_land_build();
+bool enable_object_build();
+// [/SL:KB]
 
 LLVOAvatar* find_avatar_from_object( LLViewerObject* object );
 LLVOAvatar* find_avatar_from_object( const LLUUID& object_id );
@@ -353,6 +357,14 @@ void LLMenuParcelObserver::changed()
 	BOOL buyable = enable_buy_land(NULL);
 	gMenuHolder->childSetEnabled("Land Buy", buyable);
 	gMenuHolder->childSetEnabled("Buy Land...", buyable);
+
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+	LLView* pLandCreate = gMenuLand->findChild<LLView>("Create");
+	if (pLandCreate)
+	{
+		pLandCreate->setEnabled(enable_land_build());
+	}
+// [/SL:KB]
 }
 
 
@@ -2789,32 +2801,77 @@ class LLLandEnableBuyPass : public view_listener_t
 };
 
 // BUG: Should really check if CLICK POINT is in a parcel where you can build.
-BOOL enable_land_build(void*)
+//BOOL enable_land_build(void*)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+bool enable_land_build()
+// [/SL:KB]
 {
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-3.0)
+	// NOTE: we'll prefer "false positives" (enabling build when we can't actually build) over "false negatives"
+	//   -> otherwise if we don't get a response back from the region quickly enough, build will be disabled which might annoy the user
+	bool can_build = true;
+
+	LLParcelSelectionHandle selParcel = LLViewerParcelMgr::getInstance()->getParcelSelection();
+	if ( (selParcel.notNull()) && (selParcel->getParcel()))
 	{
-		can_build = agent_parcel->getAllowModify();
+		can_build = (selParcel->getParcel()->allowModifyBy(gAgent.getID(), gAgent.getGroupID())) ||
+			(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(selParcel->getParcel(), GP_LAND_ALLOW_CREATE));
 	}
+// [/SL:KB]
+//	BOOL can_build = FALSE;
+//	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if (agent_parcel)
+//	{
+//		can_build = agent_parcel->getAllowModify();
+//	}
 	return can_build;
 }
 
 // BUG: Should really check if OBJECT is in a parcel where you can build.
-BOOL enable_object_build(void*)
+//BOOL enable_object_build(void*)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+bool enable_object_build()
+// [/SL:KB]
 {
 	if (gAgent.isGodlike()) return TRUE;
 	if (gAgent.inPrelude()) return FALSE;
 
-	BOOL can_build = FALSE;
-	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
-	if (agent_parcel)
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2011-10-07 (Catznip-3.0)
+	// NOTE: we'll prefer "false positives" (enabling build when we can't actually build) over "false negatives"
+	//   -> otherwise if we don't get a response back from the region quickly enough, build will be disabled which might annoy the user
+	bool can_build = true;
+
+	const LLViewerObject* pObj = LLSelectMgr::getInstance()->getSelection()->getPrimaryObject();
+	if (pObj)
 	{
-		can_build = agent_parcel->getAllowModify();
+		if (LLViewerParcelMgr::getInstance()->inAgentParcel(pObj->getPositionGlobal()))
+		{
+			can_build = LLViewerParcelMgr::getInstance()->allowAgentBuild();
+		}
+		else if (LLViewerParcelMgr::getInstance()->inHoverParcel(pObj->getPositionGlobal()))
+		{
+			const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
+			if (pHoverParcel)
+			{
+				can_build = (pHoverParcel->allowModifyBy(gAgent.getID(), gAgent.getGroupID())) ||
+					(LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(pHoverParcel, GP_LAND_ALLOW_CREATE));
+			}
+		}
+		else
+		{
+			LLViewerParcelMgr::getInstance()->setHoverParcel(pObj->getPositionGlobal(), true);
+		}
 	}
+// [/SL:KB]
+//	BOOL can_build = FALSE;
+//	LLParcel* agent_parcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//	if (agent_parcel)
+//	{
+//		can_build = agent_parcel->getAllowModify();
+//	}
 	return can_build;
 }
 
@@ -2847,10 +2904,10 @@ bool enable_mute_particle()
 }
 
 // mutually exclusive - show either edit option or build in menu
-bool enable_object_build()
-{
-	return !enable_object_edit();
-}
+//bool enable_object_build()
+//{
+//	return !enable_object_edit();
+//}
 
 bool enable_object_select_in_pathfinding_linksets()
 {
@@ -8918,6 +8975,9 @@ void initialize_menus()
 
 	// Land pie menu
 	view_listener_t::addMenu(new LLLandBuild(), "Land.Build");
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2012-10-21 (Catznip-3.3)
+	enable.add("Land.EnableBuild", boost::bind(&enable_land_build));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLLandSit(), "Land.Sit");
 	view_listener_t::addMenu(new LLLandBuyPass(), "Land.BuyPass");
 	view_listener_t::addMenu(new LLLandEdit(), "Land.Edit");
@@ -8948,7 +9008,10 @@ void initialize_menus()
 	enable.add("EnablePayAvatar", boost::bind(&enable_pay_avatar));
 	enable.add("EnableEdit", boost::bind(&enable_object_edit));
 	enable.add("EnableMuteParticle", boost::bind(&enable_mute_particle));
-	enable.add("VisibleBuild", boost::bind(&enable_object_build));
+//	enable.add("VisibleBuild", boost::bind(&enable_object_build));
+// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+	enable.add("Object.EnableBuild", boost::bind(&enable_object_build));
+// [/SL:KB]
 	commit.add("Pathfinding.Linksets.Select", boost::bind(&LLFloaterPathfindingLinksets::openLinksetsWithSelectedObjects));
 	enable.add("EnableSelectInPathfindingLinksets", boost::bind(&enable_object_select_in_pathfinding_linksets));
 	commit.add("Pathfinding.Characters.Select", boost::bind(&LLFloaterPathfindingCharacters::openCharactersWithSelectedObjects));
