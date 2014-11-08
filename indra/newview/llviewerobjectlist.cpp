@@ -348,7 +348,7 @@ LLViewerObject* LLViewerObjectList::processObjectUpdateFromCache(LLVOCacheEntry*
 
 // [SL:KB] - Patch: World-Derender | Checked: 2014-08-10 (Catznip-3.7)
 	// Don't recreate derendered objects (also kill the cache entry so we don't do this per-frame)
-	if (LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, entry))
+	if (LLDerenderList::instance().processObjectUpdate(regionp->getHandle(), fullid, entry))
 	{
 		regionp->killCacheEntry(local_id);	// NOTE: this will kill all child entries from the cache as well
 		return NULL;
@@ -621,11 +621,11 @@ void LLViewerObjectList::processObjectUpdate(LLMessageSystem *mesgsys,
 				{
 					U32 idRootLocal = 0;
 					mesgsys->getU32Fast(_PREHASH_ObjectData, _PREHASH_ParentID, idRootLocal, i);
-					fBlockObject = LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, local_id, idRootLocal);
+					fBlockObject = LLDerenderList::instance().processObjectUpdate(regionp->getHandle(), fullid, local_id, idRootLocal);
 				}
 				else if (OUT_FULL_COMPRESSED == update_type)
 				{
-					fBlockObject = LLDerenderList::instance().processUpdate(regionp->getHandle(), fullid, local_id, compressed_dp.getBuffer());
+					fBlockObject = LLDerenderList::instance().processObjectUpdate(regionp->getHandle(), fullid, local_id, compressed_dp.getBuffer());
 				}
 
 				if (fBlockObject)

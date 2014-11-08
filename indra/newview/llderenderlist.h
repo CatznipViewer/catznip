@@ -31,23 +31,103 @@ class LLViewerObject;
 // LLDerenderEntry
 //
 
-struct LLDerenderEntry
+class LLDerenderEntry
 {
-	LLDerenderEntry(const LLSelectNode* pNode, bool fPersist = false);
-	LLDerenderEntry(const LLSD& sdData);
-	bool isValid() const { return idObject.notNull(); }
-	LLSD toLLSD() const;
+	/*
+	 * Type declarations
+	 */
+public:
+	enum EEntryType
+	{
+		TYPE_OBJECT = 0,
+		TYPE_AVATAR,
+		TYPE_ALL,
+		TYPE_NONE
+	};
 
-	bool			fPersists;			// TRUE if this entry persist across sessions
+	enum
+	{
+		FLAG_NONE    = 0x00,
+		FLAG_PERSIST = 0x01
+	};
 
-	std::string		strObjectName;		// Object name (at the time of adding)
-	LLUUID			idObject;			// Object UUID (at the time of adding)
+	/*
+	 * Constructors
+	 */
+protected:
+	LLDerenderEntry(EEntryType eType, bool fPersists);
+	LLDerenderEntry(EEntryType eType, const LLSD& sdData);
+public:
+	virtual ~LLDerenderEntry() {}
 
-	std::string		strRegionName;		// Region name
-	LLVector3		posRegion;			// Position of the object on the region
-	U64				idRegion;			// Region handle
-	U32				idRootLocal;		// Local object ID of the root (region-specific)
-	std::list<U32>	idsChildLocal;		// Local object ID of all child prims
+	/*
+	 * Member functions
+	 */
+public:
+	std::string   getName() const { return m_strEntryName; }
+	const LLUUID& getID() const   { return m_idEntry; }
+	EEntryType    getType() const { return m_eType; }
+	bool          isPersistent() const { return m_nFlags & FLAG_PERSIST; }
+	bool          isValid() const { return (m_eType != TYPE_NONE) && (m_idEntry.notNull()); }
+
+	static LLDerenderEntry* fromLLSD(const LLSD& sdData);
+	virtual LLSD            toLLSD() const;
+
+	/*
+	 * Member variables
+	 */
+protected:
+	EEntryType  m_eType;
+	S32         m_nFlags;
+	LLUUID      m_idEntry;
+	std::string m_strEntryName;
+};
+
+// ============================================================================
+// LLDerenderObject
+//
+
+class LLDerenderObject : public LLDerenderEntry
+{
+	/*
+	 * Constructors
+	 */
+public:
+	LLDerenderObject(const LLSelectNode* pNode, bool fPersist);
+	LLDerenderObject(const LLSD& sdData);
+
+	/*
+	 * Base class overrides
+	 */
+public:
+	/*virtual*/ LLSD toLLSD() const;
+
+	/*
+	 * Member variables
+	 */
+public:
+	std::string    strRegionName;		// Region name
+	LLVector3      posRegion;			// Position of the object on the region
+	U64            idRegion;			// Region handle
+	U32            idRootLocal;			// Local object ID of the root (region-specific)
+	std::list<U32> idsChildLocal;		// Local object ID of all child prims
+};
+
+// ============================================================================
+// LLDerenderAvatar
+//
+
+class LLDerenderAvatar : public LLDerenderEntry
+{
+public:
+	LLDerenderAvatar(bool fPersists)
+		: LLDerenderEntry(TYPE_AVATAR, fPersists)
+	{
+	}
+	LLDerenderAvatar(const LLSD& sdData)
+		: LLDerenderEntry(TYPE_AVATAR, sdData)
+	{
+	}
 };
 
 // ============================================================================
@@ -61,22 +141,6 @@ protected:
 	LLDerenderList();
 	/*virtual*/ ~LLDerenderList();
 
-	/*
-	 * Member functions
-	 */
-public:
-	bool addSelection(bool fPersist, std::vector<LLUUID>* pIdList = NULL);
-	bool isDerendered(const LLUUID& idObject) const									{ return m_Entries.end() != findEntry(idObject); }
-	bool isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const	{ return m_Entries.end() != findEntry(idRegion, idObject, idRootLocal); }
-	bool processUpdate(U64 idRegion, const LLUUID& idObject, const LLVOCacheEntry* pEntry);
-	bool processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, U32 idRootLocal);
-	bool processUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, const U8* pBuffer);
-	void removeObject(const LLUUID& idObject);
-	void removeObjects(const uuid_vec_t& idsObject);
-
-	static bool canAdd(const LLViewerObject* pObj);
-	static bool canAddSelection();
-protected:
 	void load();
 	void save() const;
 
@@ -84,13 +148,29 @@ protected:
 	 * Entry helper functions
 	 */
 public:
-	typedef std::list<LLDerenderEntry> entry_list_t;
-	const entry_list_t&			 getEntries() const { return m_Entries; }
+	typedef std::list<LLDerenderEntry*> entry_list_t;
+	const entry_list_t& getEntries() const { return m_Entries; }
+	void removeObject(LLDerenderEntry::EEntryType eType, const LLUUID& idObject);
+	void removeObjects(LLDerenderEntry::EEntryType eType, const uuid_vec_t& idsObject);
 protected:
-	entry_list_t::iterator		 findEntry(const LLUUID& idObject);
-	entry_list_t::const_iterator findEntry(const LLUUID& idObject) const;
-	entry_list_t::iterator		 findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal);
-	entry_list_t::const_iterator findEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) const;
+	entry_list_t::iterator findEntry(LLDerenderEntry::EEntryType eType, const LLUUID& idEntry);
+	entry_list_t::iterator findObjectEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal);
+
+	/*
+	 * Object helper functions
+	 */
+public:
+	bool              addSelection(bool fPersist, std::vector<LLUUID>* pIdList = NULL);
+	static bool       canAdd(const LLViewerObject* pObj);
+	static bool       canAddSelection();
+	bool              processObjectUpdate(U64 idRegion, const LLUUID& idObject, const LLVOCacheEntry* pEntry);
+	bool              processObjectUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, U32 idRootLocal);
+	bool              processObjectUpdate(U64 idRegion, const LLUUID& idObject, U32 idObjectLocal, const U8* pBuffer);
+protected:
+	LLDerenderObject* getObjectEntry(const LLUUID& idObject) /*const*/;
+	LLDerenderObject* getObjectEntry(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) /*const*/;
+	bool              isDerendered(const LLUUID& idObject) /*const*/                                { return getObjectEntry(idObject) != NULL; }
+	bool              isDerendered(U64 idRegion, const LLUUID& idObject, U32 idRootLocal) /*const*/ { return getObjectEntry(idRegion, idObject, idRootLocal) != NULL; }
 
 	/*
 	 * Static member functions

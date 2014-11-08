@@ -300,7 +300,7 @@ void LLPanelDerenderList::onSelectionRemove()
 		idsObject.push_back((*itItem)->getValue().asUUID());
 	}
 
-	LLDerenderList::instance().removeObjects(idsObject);
+	LLDerenderList::instance().removeObjects(LLDerenderEntry::TYPE_OBJECT, idsObject);
 }
 
 void LLPanelDerenderList::refresh()
@@ -316,10 +316,13 @@ void LLPanelDerenderList::refresh()
 		const LLDerenderList::entry_list_t& entries = LLDerenderList::instance().getEntries();
 		for (LLDerenderList::entry_list_t::const_iterator itEntry = entries.begin(); itEntry != entries.end(); ++itEntry)
 		{
-			sdRow["value"] = itEntry->idObject;
-			sdColumns[0]["value"] = itEntry->strObjectName;
-			sdColumns[1]["value"] = itEntry->strRegionName;
-			sdColumns[2]["value"] = (itEntry->fPersists) ? "Permanent" : "Temporary";
+			const LLDerenderEntry* pEntry = *itEntry;
+
+			sdRow["value"] = pEntry->getID();
+			sdColumns[0]["value"] = pEntry->getName();
+			if (LLDerenderEntry::TYPE_OBJECT == pEntry->getType())
+				sdColumns[1]["value"] = ((const LLDerenderObject*)pEntry)->strRegionName;
+			sdColumns[2]["value"] = (pEntry->isPersistent()) ? "Permanent" : "Temporary";
 
 			m_pDerenderList->addElement(sdRow, ADD_BOTTOM);
 		}
