@@ -117,8 +117,11 @@ public:
 		U32 			mFilterTypes;
 		U64				mFilterObjectTypes,   // For _OBJECT
 						mFilterWearableTypes,
-						mFilterLinks,
+//						mFilterLinks,
 						mFilterCategoryTypes; // For _CATEGORY
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+		EFilterLink		mFilterLinks;
+// [/SL:KB]
 		LLUUID      	mFilterUUID; 		  // for UUID
 
 		time_t			mMinDate,
@@ -178,8 +181,12 @@ public:
 	void 				setHoursAgo(U32 hours);
 	U32 				getHoursAgo() const;
 
-	void 				setFilterLinks(U64 filter_link);
-	U64					getFilterLinks() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+	void 				setFilterLinks(EFilterLink filter_link);
+	EFilterLink			getFilterLinks() const;
+// [/SL:KB]
+//	void 				setFilterLinks(U64 filter_link);
+//	U64					getFilterLinks() const;
 
 	// +-------------------------------------------------------------------+
 	// + Execution And Results
@@ -251,7 +258,7 @@ private:
 	bool 				checkAgainstPermissions(const class LLFolderViewModelItemInventory* listener) const;
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
-	bool				checkAgainstClipboard(const LLUUID& object_id) const;
+//	bool				checkAgainstClipboard(const LLUUID& object_id) const;
 
 	FilterOps				mFilterOps;
 	FilterOps				mDefaultFilterOps;
