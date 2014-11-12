@@ -55,6 +55,19 @@ public:
 //	virtual bool hasChildren() const = 0;
 //	virtual LLInventoryType::EType getInventoryType() const = 0;
 //	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
+// [SL:KB] - Patch: Inventory-MultiAction | Checked: 2010-03-29 (Catznip-2.0)
+	virtual void performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch)
+	{
+		for (std::list<LLFolderViewModelItemInventory*>::const_iterator itItem = batch.begin(); itItem != batch.end(); ++itItem)
+		{
+			LLFolderViewModelItemInventory* listener = *itItem;
+			if (listener)
+			{
+				listener->performAction(model, action);
+			}
+		}
+	}
+// [/SL:KB]
 	virtual LLWearableType::EType getWearableType() const = 0;
 //	virtual EInventorySortGroup getSortGroup() const = 0;
 //	virtual LLInventoryObject* getInventoryObject() const = 0;
