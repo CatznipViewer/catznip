@@ -27,7 +27,7 @@
 #ifndef LL_LLINVENTORYSUBTREEPANEL_H
 #define LL_LLINVENTORYSUBTREEPANEL_H
 
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llinventorypanel.h"
 
 class LLLandmarksPanel;

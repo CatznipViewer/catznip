@@ -538,40 +538,46 @@ void LLAvatarActions::share(const LLUUID& id)
 
 namespace action_give_inventory
 {
-	/**
-	 * Returns a pointer to 'Add More' inventory panel of Edit Outfit SP.
-	 */
-	static LLInventoryPanel* get_outfit_editor_inventory_panel()
-	{
-		LLPanelOutfitEdit* panel_outfit_edit = dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
-		if (NULL == panel_outfit_edit) return NULL;
-
-		LLInventoryPanel* inventory_panel = panel_outfit_edit->findChild<LLInventoryPanel>("folder_view");
-		return inventory_panel;
-	}
-
-	/**
-	 * @return active inventory panel, or NULL if there's no such panel
-	 */
-	static LLInventoryPanel* get_active_inventory_panel()
-	{
-		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-		if (!active_panel)
-		{
-			active_panel = get_outfit_editor_inventory_panel();
-		}
-
-		return active_panel;
-	}
+//	/**
+//	 * Returns a pointer to 'Add More' inventory panel of Edit Outfit SP.
+//	 */
+//	static LLInventoryPanel* get_outfit_editor_inventory_panel()
+//	{
+//		LLPanelOutfitEdit* panel_outfit_edit = dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
+//		if (NULL == panel_outfit_edit) return NULL;
+//
+//		LLInventoryPanel* inventory_panel = panel_outfit_edit->findChild<LLInventoryPanel>("folder_view");
+//		return inventory_panel;
+//	}
+//
+//	/**
+//	 * @return active inventory panel, or NULL if there's no such panel
+//	 */
+//	static LLInventoryPanel* get_active_inventory_panel()
+//	{
+//		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//		if (!active_panel)
+//		{
+//			active_panel = get_outfit_editor_inventory_panel();
+//		}
+//
+//		return active_panel;
+//	}
 
 	/**
 	 * Checks My Inventory visibility.
 	 */
 
-	static bool is_give_inventory_acceptable()
+//	static bool is_give_inventory_acceptable()
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+	static bool is_give_inventory_acceptable(LLHandle<LLPanel> inv_panel_handle)
+// [/SL:KB]
 	{
-		// check selection in the panel
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		// check selection in the panel
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(dynamic_cast<LLInventoryPanel*>(inv_panel_handle.get()));
+// [/SL:KB]
 		if (inventory_selected_uuids.empty()) return false; // nothing selected
 
 		bool acceptable = false;
@@ -632,6 +638,9 @@ namespace action_give_inventory
 	{
 		std::vector<LLAvatarName> mAvatarNames;
 		uuid_vec_t mAvatarUuids;
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+		std::set<LLUUID> mItemIds;	// Use std::set because it requires the least amount of LL code changes (see give_inventory_cb)
+// [/SL:KB]
 	};
 
 	static void give_inventory_cb(const LLSD& notification, const LLSD& response)
@@ -643,7 +652,11 @@ namespace action_give_inventory
 			return;
 		}
 
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		if (inventory_selected_uuids.empty())
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+		const std::set<LLUUID>& inventory_selected_uuids = LLShareInfo::instance().mItemIds;
+// [/SL:KB]
 		if (inventory_selected_uuids.empty())
 		{
 			return;
@@ -726,11 +739,17 @@ namespace action_give_inventory
 	 * @param avatar_names - avatar names request to be sent.
 	 * @param avatar_uuids - avatar names request to be sent.
 	 */
-	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names)
+//	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names, LLHandle<LLPanel> inv_panel_handle)
+// [/SL:KB]
 	{
 		llassert(avatar_names.size() == avatar_uuids.size());
 
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(dynamic_cast<LLInventoryPanel*>(inv_panel_handle.get()));
+// [/SL:KB]
 		if (inventory_selected_uuids.empty())
 		{
 			return;
@@ -764,6 +783,9 @@ namespace action_give_inventory
 		substitutions["ITEMS"] = items;
 		LLShareInfo::instance().mAvatarNames = avatar_names;
 		LLShareInfo::instance().mAvatarUuids = avatar_uuids;
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+		LLShareInfo::instance().mItemIds = inventory_selected_uuids;
+// [/SL:KB]
 		LLNotificationsUtil::add(notification, substitutions, LLSD(), &give_inventory_cb);
 	}
 }
@@ -809,11 +831,17 @@ void LLAvatarActions::buildResidentsString(const uuid_vec_t& avatar_uuids, std::
 }
 
 //static
-std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
+//std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs(LLInventoryPanel* inv_panel)
+// [/SL:KB]
 {
 	std::set<LLFolderViewItem*> inventory_selected;
 
-	LLInventoryPanel* active_panel = action_give_inventory::get_active_inventory_panel();
+//	LLInventoryPanel* active_panel = action_give_inventory::get_active_inventory_panel();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+	LLInventoryPanel* active_panel = inv_panel;
+// [/SL:KB]
 	if (active_panel)
 	{
 		inventory_selected= active_panel->getRootFolder()->getSelectionList();
@@ -821,7 +849,10 @@ std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
 
 	if (inventory_selected.empty())
 	{
-		LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+		LLSidepanelInventory *sidepanel_inventory = (active_panel) ? active_panel->getParentByType<LLSidepanelInventory>() : NULL;
+// [/SL:KB]
 		if (sidepanel_inventory)
 		{
 			inventory_selected= sidepanel_inventory->getInboxSelectionList();
@@ -839,19 +870,31 @@ std::set<LLUUID> LLAvatarActions::getInventorySelectedUUIDs()
 }
 
 //static
-void LLAvatarActions::shareWithAvatars(LLView * panel)
+//void LLAvatarActions::shareWithAvatars(LLView * panel)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+void LLAvatarActions::shareWithAvatars(LLInventoryPanel* inv_panel)
+// [/SL:KB]
 {
 	using namespace action_give_inventory;
 
-    LLFloater* root_floater = gFloaterView->getParentFloater(panel);
-	LLFloaterAvatarPicker* picker =
-		LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2), TRUE, FALSE, FALSE, root_floater->getName());
+//    LLFloater* root_floater = gFloaterView->getParentFloater(panel);
+//	LLFloaterAvatarPicker* picker =
+//		LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2), TRUE, FALSE, FALSE, root_floater->getName());
+//	if (!picker)
+//	{
+//		return;
+//	}
+//
+//	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable));
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
+	LLFloater* root_floater = gFloaterView->getParentFloater(inv_panel);
+	LLFloaterAvatarPicker* picker = LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2, inv_panel->getHandle()), TRUE, FALSE, FALSE, root_floater->getName());
 	if (!picker)
 	{
 		return;
 	}
-
-	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable));
+	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable, inv_panel->getHandle()));
+// [/SL:KB]
 	picker->openFriendsTab();
     
     if (root_floater)
@@ -863,16 +906,26 @@ void LLAvatarActions::shareWithAvatars(LLView * panel)
 
 
 // static
-bool LLAvatarActions::canShareSelectedItems(LLInventoryPanel* inv_panel /* = NULL*/)
+//bool LLAvatarActions::canShareSelectedItems(LLInventoryPanel* inv_panel /* = NULL*/)
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+bool LLAvatarActions::canShareSelectedItems(LLInventoryPanel* inv_panel)
+// [/SL:KB]
 {
-	using namespace action_give_inventory;
-
+//	using namespace action_give_inventory;
+//
+//	if (!inv_panel)
+//	{
+//		LLInventoryPanel* active_panel = get_active_inventory_panel();
+//		if (!active_panel) return false;
+//		inv_panel = active_panel;
+//	}
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)
+	// We modified shareWithAvatars() and getInventorySelectedUUIDs() to take an inventory panel parameter so it's not optional here
 	if (!inv_panel)
 	{
-		LLInventoryPanel* active_panel = get_active_inventory_panel();
-		if (!active_panel) return false;
-		inv_panel = active_panel;
+		return false;
 	}
+// [/SL:KB]
 
 	// check selection in the panel
 	LLFolderView* root_folder = inv_panel->getRootFolder();
