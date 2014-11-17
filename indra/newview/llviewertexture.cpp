@@ -1551,6 +1551,12 @@ F32 LLViewerFetchedTexture::calcDecodePriority()
 	S32 cur_discard = getCurrentDiscardLevelForFetching();
 	bool have_all_data = (cur_discard >= 0 && (cur_discard <= mDesiredDiscardLevel));
 	F32 pixel_priority = (F32) sqrt(mMaxVirtualSize);
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-08-08 (Catznip-3.3)
+	if (llisnan(pixel_priority))
+	{
+		pixel_priority = MAX_PRIORITY_PIXEL;
+	}
+// [/SL:KB]
 
 	F32 priority = 0.f;
 
