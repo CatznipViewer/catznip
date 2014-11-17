@@ -1,0 +1,11 @@
+[Viewer/FullscreenWindow]
+- fixed : window position isn't (properly) saved on quit if the window is maximized or minimized [Windows only]
+- fixed : window size isn't (properly) saved on quit if the window is maximized or minimized [Windows only]
+- added : fullscreen window support (doesn't require a resolution change or OpenGL context switching) [Windows only]
+    -> doesn't blank out the other monitors
+    -> provides quick and seamless switching back and forth between other applications
+- fixed : fullscreen window serves as a partial fix for the lack of a fullscreen option in SL-2.X
+    -> re-added fullscreen menu option (enables only if available for the platform)
+    -> re-enabled Alt-Enter shortcut for toggling between "default" and "fullscreen"
+- added : added "Fullscreen" as an option to the Advanced / Set Window Size... floater
+- fixed : selecting a window size doesn't (properly) restore the window if it's currently maximized [Windows only]
