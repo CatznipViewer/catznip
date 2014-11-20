@@ -57,10 +57,12 @@
     width="232">
     <combo_box.combo_editor
       text_pad_left="8" />
+<!--
     <combo_box.combo_button
       visible="false" />
     <combo_box.drop_down_button
       visible="false" />
+-->
   </combo_box>
   <line_editor
     follows="left|top"
