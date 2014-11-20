@@ -860,7 +860,8 @@
            width="50" />
       </radio_group> -->
 	</panel>
-	
+
+<!--
     <button
      follows="left|bottom"
      height="23"
@@ -886,6 +887,7 @@
         <button.commit_callback
          function="Pref.HardwareDefaults" />
     </button>
+-->
     <button
      control_name="ShowAdvancedGraphicsSettings"
      follows="right|bottom"
