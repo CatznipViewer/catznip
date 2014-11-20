@@ -3999,6 +3999,13 @@ void callAfterCategoryFetch(const LLUUID& cat_id, nullary_func_t cb)
 	}
 }
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+void callAfterItemsCopy(LLInventoryModel::item_array_t* items, const LLUUID& cat_dest_id, nullary_func_t completion_cb, nullary_func_t failure_cb)
+{
+	new LLCallAfterInventoryCopyMgr(*items, cat_dest_id, std::string("wear_inventory_category_callback"), completion_cb, failure_cb);
+}
+// [/SL:KB]
+
 void wear_multiple(const uuid_vec_t& ids, bool replace)
 {
 	LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy;

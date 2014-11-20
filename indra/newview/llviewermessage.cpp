@@ -208,7 +208,10 @@ bool friendship_offer_callback(const LLSD& notification, const LLSD& response)
     if (notification_ptr)
     {
 	    // add friend to recent people list
-	    LLRecentPeople::instance().add(payload["from_id"]);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	    LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//	    LLRecentPeople::instance().add(payload["from_id"]);
 
 	    switch(option)
 	    {
@@ -1494,7 +1497,10 @@ void LLOfferInfo::send_auto_receive_response(void)
 	if(IM_INVENTORY_OFFERED == mIM)
 	{
 		// add buddy to recent people list
-		LLRecentPeople::instance().add(mFromID);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+		LLRecentPeople::instance().add(mFromID, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//		LLRecentPeople::instance().add(mFromID);
 	}
 }
 
@@ -6848,7 +6854,10 @@ void send_lures(const LLSD& notification, const LLSD& response)
 			LLNotificationsUtil::add("TeleportOfferSent", args, payload);
 
 			// Add the recepient to the recent people list.
-			LLRecentPeople::instance().add(target_id);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			LLRecentPeople::instance().add(target_id, LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//			LLRecentPeople::instance().add(target_id);
 		}
 	}
 	gAgent.sendReliableMessage();
