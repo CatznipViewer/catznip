@@ -322,6 +322,10 @@ public:
 	static void		onCustomizeEnd(bool disable_camera_switch = false);
 	LLPointer<LLInventoryCallback> mEndCustomizeCallback;
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-05-02 (Catznip-3.4)
+	void setUsingLocalAppearance() { mUseLocalAppearance = true; }
+// [/SL:KB]
+
 	//--------------------------------------------------------------------
 	// Visibility
 	//--------------------------------------------------------------------

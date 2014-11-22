@@ -417,6 +417,101 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 	return FALSE;
 }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
+
+// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
+LLUUID get_items_parent(const LLInventoryModel::item_array_t& items)
+{
+	LLUUID idParent;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		if (idParent.isNull())
+			idParent = pItem->getParentUUID();
+		else if (idParent != pItem->getParentUUID())
+			return LLUUID::null;
+	}
+	return idParent;
+}
+
+// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
+bool get_item_wearable(const LLInventoryItem* pItem)
+{
+	if (pItem)
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_OBJECT:
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+			case LLAssetType::AT_GESTURE:
+				return true;
+			default:
+				return false;
+		}
+	}
+	return false;
+}
+
+bool get_item_wearable(const LLUUID& idItem)
+{
+	return get_item_wearable(gInventory.getItem(idItem));
+}
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items)
+{
+	bool fWearable = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWearable); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWearable = get_item_wearable(pItem);
+	}
+	return fWearable;
+}
+
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items)
+{
+	bool fWorn = true;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); (itItem != items.end()) && (fWorn); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+		fWorn = get_is_item_worn(pItem->getUUID());
+	}
+	return fWorn;
+}
+
+// Copies the name of items in a folder to the clipboard (intended to be used for COF and FT_OUTFIT folders)
+void copy_folder_to_clipboard(const LLUUID& idFolder)
+{
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
+	LLFindCOFValidItems f(/*include_gestures=*/ false, /*include_folders=*/ false);
+	gInventory.collectDescendentsIf(idFolder, cats, items, FALSE, f);	
+
+	std::string strText;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end();)
+	{
+		const LLViewerInventoryItem* pItem = *itItem++;
+		if (pItem)
+		{
+			strText += pItem->getName();
+			if (items.end() != itItem)
+				strText.push_back('\n');
+		}
+	}
+
+	LLClipboard::instance().copyToClipboard(utf8str_to_wstring(strText), 0, strText.size());
+}
+// [/SL:KB]
+
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id)
 {
 	LLFloaterSidePanelContainer::showPanel("inventory", LLSD().with("id", item_uuid).with("object", object_id));
@@ -829,6 +924,14 @@ bool LLNameCategoryCollector::operator()(
 	return false;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+LLFindCOFValidItems::LLFindCOFValidItems(bool include_gestures, bool include_folders)
+	: mIncludeGestures(include_gestures)
+	, mIncludeFolders(include_folders)
+{
+}
+// [/SL:KB]
+
 bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 									 LLInventoryItem* item)
 {
@@ -843,10 +946,16 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 		LLAssetType::EType type = linked_item->getType();
 		return (type == LLAssetType::AT_CLOTHING ||
 				type == LLAssetType::AT_BODYPART ||
-				type == LLAssetType::AT_GESTURE ||
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+				( (mIncludeGestures) && (type == LLAssetType::AT_GESTURE) ) ||
+// [/SL:KB]
+//				type == LLAssetType::AT_GESTURE ||
 				type == LLAssetType::AT_OBJECT);
 	}
-	else
+//	else
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	else if (mIncludeFolders)
+// [/SL:KB]
 	{
 		LLViewerInventoryCategory *linked_category = ((LLViewerInventoryItem*)item)->getLinkedCategory();
 		// BAP remove AT_NONE support after ensembles are fully working?
@@ -854,6 +963,9 @@ bool LLFindCOFValidItems::operator()(LLInventoryCategory* cat,
 				((linked_category->getPreferredType() == LLFolderType::FT_NONE) ||
 				 (LLFolderType::lookupIsEnsembleType(linked_category->getPreferredType()))));
 	}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	return false;
+// [/SL:KB]
 }
 
 bool LLFindWearables::operator()(LLInventoryCategory* cat,
@@ -873,12 +985,33 @@ bool LLFindWearables::operator()(LLInventoryCategory* cat,
 LLFindWearablesEx::LLFindWearablesEx(bool is_worn, bool include_body_parts)
 :	mIsWorn(is_worn)
 ,	mIncludeBodyParts(include_body_parts)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+,	mIncludeSubfolders(true)
+// [/SL:KB]
 {}
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+LLFindWearablesEx::LLFindWearablesEx(bool is_worn, bool include_body_parts, const LLUUID& folder_id)
+	: mIsWorn(is_worn)
+	, mIncludeBodyParts(include_body_parts)
+{
+	mFolderId = folder_id;
+	mIncludeSubfolders = mFolderId.isNull();
+}
+// [/SL:KB]
 
 bool LLFindWearablesEx::operator()(LLInventoryCategory* cat, LLInventoryItem* item)
 {
 	LLViewerInventoryItem *vitem = dynamic_cast<LLViewerInventoryItem*>(item);
 	if (!vitem) return false;
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	// Skip subfolders, unless requested to include them
+	if ( (!mIncludeSubfolders) && (item->getParentUUID() != mFolderId) )
+	{
+		return false;
+	}
+// [/SL:KB]
 
 	// Skip non-wearables.
 	if (!vitem->isWearableType() && vitem->getType() != LLAssetType::AT_OBJECT)

@@ -343,15 +343,22 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-static LLPanelInjector<LLOutfitsList> t_outfits_list("outfits_list");
+//static LLPanelInjector<LLOutfitsList> t_outfits_list("outfits_list");
 
 LLOutfitsList::LLOutfitsList()
-	:	LLPanelAppearanceTab()
+//	:	LLPanelAppearanceTab()
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
+	:	LLPanelOutfitsTab()
+// [/SL:KB]
 	,	mAccordion(NULL)
 	,	mListCommands(NULL)
 	,	mIsInitialized(false)
 	,	mItemSelected(false)
 {
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-12-01 (Catznip-2.4)
+	setXMLFilename("panel_outfits_list.xml");
+// [/SL:KB]
+
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
 
 	mGearMenu = new LLOutfitListGearMenu(this);

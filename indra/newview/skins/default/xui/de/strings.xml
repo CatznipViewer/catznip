@@ -4531,6 +4531,12 @@ Missbrauchsbericht
 	<string name="EmptyOutfitText">
 		Keine Objekte in diesem Outfit
 	</string>
+	<string name="SaveOutfit">
+		Speichern
+	</string>
+	<string name="SaveOutfitAs">
+		Speichern unter
+	</string>
 	<string name="ExternalEditorNotSet">
 		Wählen Sie über die Einstellung „ExternalEditor“ einen Editor aus
 	</string>
