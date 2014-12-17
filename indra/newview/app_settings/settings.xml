@@ -10243,6 +10243,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>SaveScriptsAsMono</key>
+    <map>
+      <key>Comment</key>
+      <string>When set to TRUE, save scripts the inventory as Mono scripts instead of LSL2</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>SaveMinidump</key>
     <map>
       <key>Comment</key>
