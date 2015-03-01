@@ -8745,6 +8745,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedDumpInventory(), "Advanced.DumpInventory");
 	commit.add("Advanced.DumpTimers", boost::bind(&handle_dump_timers) );
 	commit.add("Advanced.DumpFocusHolder", boost::bind(&handle_dump_focus) );
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-08 (Catznip-3.3)
+	commit.add("Advanced.DumpFonts", boost::bind(&LLFontGL::dumpFonts));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLAdvancedPrintSelectedObjectInfo(), "Advanced.PrintSelectedObjectInfo");
 	view_listener_t::addMenu(new LLAdvancedPrintAgentInfo(), "Advanced.PrintAgentInfo");
 	view_listener_t::addMenu(new LLAdvancedToggleDebugClicks(), "Advanced.ToggleDebugClicks");
