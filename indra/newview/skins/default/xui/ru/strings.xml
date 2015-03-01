@@ -4665,6 +4665,12 @@ support@secondlife.com.
 	<string name="EmptyOutfitText">
 		Для этого костюма нет вещей
 	</string>
+	<string name="SaveOutfit">
+		Сохранить
+	</string>
+	<string name="SaveOutfitAs">
+		Сохранить как
+	</string>
 	<string name="ExternalEditorNotSet">
 		Выберите редактор, используя параметр ExternalEditor.
 	</string>

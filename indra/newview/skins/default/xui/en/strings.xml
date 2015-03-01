@@ -3800,6 +3800,8 @@ Abuse Report</string>
   <string name="DeleteItem">Delete selected item?</string>
 
   <string name="EmptyOutfitText">There are no items in this outfit</string>
+  <string name="SaveOutfit">Save</string>
+  <string name="SaveOutfitAs">Save As...</string>
 
  <!-- External editor status codes -->
  <string name="ExternalEditorNotSet">Select an editor using the ExternalEditor setting.</string>
