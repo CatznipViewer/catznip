@@ -334,44 +334,51 @@ void LLPanelMainInventory::resetFilters()
 	setFilterTextFromFilter();
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 {
-	U32 sort_order_mask = getActivePanel()->getSortOrder();
-	std::string sort_type = userdata.asString();
-	if (sort_type == "name")
-	{
-		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "date")
-	{
-		sort_order_mask |= LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "foldersalwaysbyname")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-	}
-	else if (sort_type == "systemfolderstotop")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-	}
-
-	getActivePanel()->setSortOrder(sort_order_mask);
-	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+	getActivePanel()->setSortBy(userdata.asString());
+	gSavedSettings.setU32("InventorySortOrder", getActivePanel()->getSortOrder());
 }
+// [/SL:KB]
+//void LLPanelMainInventory::setSortBy(const LLSD& userdata)
+//{
+//	U32 sort_order_mask = getActivePanel()->getSortOrder();
+//	std::string sort_type = userdata.asString();
+//	if (sort_type == "name")
+//	{
+//		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "date")
+//	{
+//		sort_order_mask |= LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "foldersalwaysbyname")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//	}
+//	else if (sort_type == "systemfolderstotop")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//	}
+//
+//	getActivePanel()->setSortOrder(sort_order_mask);
+//	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+//}
 
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
@@ -391,7 +398,10 @@ void LLPanelMainInventory::onClearSearch()
 		initially_active = mActivePanel->getFilter().isNotDefault();
 		mActivePanel->setFilterSubString(LLStringUtil::null);
 		mActivePanel->setFilterTypes(0xffffffffffffffffULL);
-		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS, true);
+// [/SL:KB]
+//		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS);
 	}
 
 	if (finder)
@@ -1139,7 +1149,10 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		mFilterEditor->setFocus(TRUE);
 		filter.setFilterUUID(item_id);
 		filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS, true);
+// [/SL:KB]
+//		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
 	}
 }
 
