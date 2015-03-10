@@ -4,6 +4,7 @@
 	<menu_item_call label="Enviar MI..." name="send_im"/>
 	<menu_item_call label="Adicionar amigo..." name="add_friend"/>
 	<menu_item_call label="Remover amigo..." name="remove_friend"/>
-	<menu_item_call label="Copiar nome para área de transferência" name="url_copy_label"/>
-	<menu_item_call label="Copiar SLurl para área de transferência" name="url_copy"/>
+	<menu_item_call label="Copiar nome de tela" name="url_copy_displayname"/>
+	<menu_item_call label="Copiar nome" name="url_copy_label"/>
+	<menu_item_call label="Copiar SLurl" name="url_copy"/>
 </context_menu>

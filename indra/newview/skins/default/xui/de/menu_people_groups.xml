@@ -4,5 +4,6 @@
 	<menu_item_call label="Chat" name="Chat"/>
 	<menu_item_call label="Voice-Anruf" name="Call"/>
 	<menu_item_call label="Aktivieren" name="Activate"/>
+	<menu_item_call label="SLurl kopieren" name="Copy SLurl"/>
 	<menu_item_call label="Verlassen" name="Leave"/>
 </menu>
