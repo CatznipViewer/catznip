@@ -72,10 +72,7 @@
 	<check_box label="Editar partes linkadas" name="checkbox edit linked parts"/>
 	<button label="Link" name="link_btn"/>
 	<button label="Desconectar links" name="unlink_btn"/>
-	<check_box label="" name="checkbox uniform"/>
-	<text label="Esticar ambos lados" name="checkbox uniform label">
-		Esticar ambos lados
-	</text>
+	<check_box label="Esticar ambos lados" name="checkbox uniform"/>
 	<check_box initial_value="true" label="Esticar texturas" name="checkbox stretch textures"/>
 	<check_box initial_value="true" label="Ajustar" name="checkbox snap to grid"/>
 	<combo_box name="combobox grid mode" tool_tip="Selecione o tipo de régua da grade onde o objeto será colocado">
@@ -83,7 +80,7 @@
 		<combo_box.item label="Local" name="Local"/>
 		<combo_box.item label="Referência" name="Reference"/>
 	</combo_box>
-	<button label="" label_selected="Opções..." name="Options..." tool_tip="Mais opções de grade"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Mais opções de grade"/>
 	<button label="" label_selected="" name="ToolCube" tool_tip="Cubo"/>
 	<button label="" label_selected="" name="ToolPrism" tool_tip="Prisma"/>
 	<button label="" label_selected="" name="ToolPyramid" tool_tip="Pirâmide"/>
@@ -126,7 +123,7 @@
 		Nada selecionado.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights More info]
+		[secondlife:///app/openfloater/object_weights More info]
 	</text>
 	<tab_container name="Object Info Tabs" tab_max_width="60" tab_min_width="30" width="288">
 		<panel label="Comum" name="General">
@@ -256,19 +253,19 @@
 			<check_box label="Temporário" name="Temporary Checkbox Ctrl" tool_tip="O objeto será excluído um minuto depois de ser criado"/>
 			<check_box label="Fantasma" name="Phantom Checkbox Ctrl" tool_tip="Faz com que o objeto não colida com outros objetos ou avatares"/>
 			<text name="label position">
-				Posição (metros)
+				Posição
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Tamanho (metros)
+				Tamanho
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Rotação (graus)
+				Rotação
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>
@@ -408,86 +405,8 @@
 			<spinner label="Densidade em 100 kg/m^3" name="Physics Density"/>
 			<spinner label="Restituição" name="Physics Restitution"/>
 		</panel>
-		<panel label="Textura" name="Texture">
-			<panel.string name="string repeats per meter">
-				Repetir por Metro
-			</panel.string>
-			<panel.string name="string repeats per face">
-				Repetir por Face
-			</panel.string>
-			<texture_picker label="Textura" name="texture control" tool_tip="Clique para escolher uma imagem"/>
-			<color_swatch label="Cor" name="colorswatch" tool_tip="Selecionar a cor"/>
-			<text name="color trans" width="100">
-				Transparência %
-			</text>
-			<text name="glow label">
-				Brilho
-			</text>
-			<check_box label="Claridade" name="checkbox fullbright"/>
-			<text name="tex gen">
-				Mapeamento
-			</text>
-			<combo_box name="combobox texgen">
-				<combo_box.item label="Padrão" name="Default"/>
-				<combo_box.item label="Planar" name="Planar"/>
-			</combo_box>
-			<text name="label shininess">
-				Brilho
-			</text>
-			<combo_box name="combobox shininess">
-				<combo_box.item label="Nenhum" name="None"/>
-				<combo_box.item label="Baixo" name="Low"/>
-				<combo_box.item label="Médio" name="Medium"/>
-				<combo_box.item label="Alto" name="High"/>
-			</combo_box>
-			<text name="label bumpiness">
-				Ondulação
-			</text>
-			<combo_box name="combobox bumpiness" width="100">
-				<combo_box.item label="Nenhum" name="None"/>
-				<combo_box.item label="Claridade" name="Brightness"/>
-				<combo_box.item label="Escuridão" name="Darkness"/>
-				<combo_box.item label="Granulação" name="woodgrain"/>
-				<combo_box.item label="Casca" name="bark"/>
-				<combo_box.item label="Tijolos" name="bricks"/>
-				<combo_box.item label="Caixa" name="checker"/>
-				<combo_box.item label="Concreto" name="concrete"/>
-				<combo_box.item label="Encaroçado" name="crustytile"/>
-				<combo_box.item label="Pedra Cortante" name="cutstone"/>
-				<combo_box.item label="Discos" name="discs"/>
-				<combo_box.item label="Cascalho" name="gravel"/>
-				<combo_box.item label="Pedrisco" name="petridish"/>
-				<combo_box.item label="Revestimento" name="siding"/>
-				<combo_box.item label="Empedrado" name="stonetile"/>
-				<combo_box.item label="Grafiato" name="stucco"/>
-				<combo_box.item label="Sulcos" name="suction"/>
-				<combo_box.item label="Weave" name="weave"/>
-			</combo_box>
-			<spinner label="Horizontal (U)" name="TexScaleU"/>
-			<check_box label="Inverter" name="checkbox flip s"/>
-			<spinner label="Vertical (V)" name="TexScaleV"/>
-			<check_box label="Inverter" name="checkbox flip t"/>
-			<spinner label="Rotação˚" name="TexRot"/>
-			<button label="Aplicar" label_selected="Aplicar" name="button apply"/>
-			<text name="tex offset">
-				Offset de textura
-			</text>
-			<spinner label="Horizontal (U)" name="TexOffsetU"/>
-			<spinner label="Vertical (V)" name="TexOffsetV"/>
-			<panel name="Add_Media">
-				<text name="media_tex">
-					Mídia
-				</text>
-				<button name="add_media" tool_tip="Adicionar mídia"/>
-				<button name="delete_media" tool_tip="Excluir esta textura de mídia"/>
-				<button name="edit_media" tool_tip="Editar esta mídia"/>
-				<button label="Alinhar" label_selected="Alinhar mídias" name="button align" tool_tip="Alinhar textura da mídia (após carregar mídia)"/>
-			</panel>
-		</panel>
-		<panel label="Conteúdo" name="Contents">
-			<button label="Novo script" label_selected="Novo script" name="button new script"/>
-			<button label="Autorizações" name="button permissions"/>
-		</panel>
+		<panel label="Textura" name="Texture" />
+		<panel label="Conteúdo" name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">
