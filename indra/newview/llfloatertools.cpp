@@ -1117,9 +1117,12 @@ void LLFloaterTools::onClickSelectOptions()
 void LLFloaterTools::onClickAxisOptions()
 {
 	LLFloater* pAxisFloater = LLFloaterReg::showInstance("build_options_axis");
-	if ( (pAxisFloater) && (!isDependentFloater(pAxisFloater)) )
+	if (pAxisFloater)
 	{
-		addDependentFloater(pAxisFloater, TRUE);
+		if (!isDependentFloater(pAxisFloater))
+			addDependentFloater(pAxisFloater, TRUE);
+		else
+			pAxisFloater->setRect(gFloaterView->findNeighboringPosition(this, pAxisFloater));
 	}
 }
 // [/SL:KB]
@@ -1128,9 +1131,12 @@ void LLFloaterTools::onClickGridOptions()
 {
 // [SL:KB] - Patch: Build-Misc | Checked: 2011-12-06 (Catznip-3.2)
 	LLFloater* pGridFloater = LLFloaterReg::showInstance("build_options");
-	if ((pGridFloater) && (!isDependentFloater(pGridFloater)))
+	if (pGridFloater)
 	{
-		addDependentFloater(pGridFloater, TRUE);
+		if (!isDependentFloater(pGridFloater))
+			addDependentFloater(pGridFloater, TRUE);
+		else
+			pGridFloater->setRect(gFloaterView->findNeighboringPosition(this, pGridFloater));
 	}
 // [/SL:KB]
 //	LLFloater* floaterp = LLFloaterReg::showInstance("build_options");
