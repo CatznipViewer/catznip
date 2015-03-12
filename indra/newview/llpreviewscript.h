@@ -70,7 +70,7 @@ protected:
 		const LLHandle<LLFloater>& floater_handle,
 		void (*load_callback)(void* userdata),
 		void (*save_callback)(void* userdata, BOOL close_after_save),
-		void (*search_replace_callback)(void* userdata),
+//		void (*search_replace_callback)(void* userdata),
 		void* userdata,
 		bool live,
 		S32 bottom_pad = 0);	// pad below bottom row of buttons
@@ -138,10 +138,13 @@ protected:
 
 private:
 	std::string		mSampleText;
+// [SL:KB] - Patch: Build-ScriptEditor | Checked: 2014-01-29 (Catznip-3.6)
+	LLMenuBarGL*    mMenuBar;
+// [/SL:KB]
 	LLScriptEditor*	mEditor;
 	void			(*mLoadCallback)(void* userdata);
 	void			(*mSaveCallback)(void* userdata, BOOL close_after_save);
-	void			(*mSearchReplaceCallback) (void* userdata);
+//	void			(*mSearchReplaceCallback) (void* userdata);
 	void*			mUserdata;
 	LLComboBox		*mFunctions;
 	BOOL			mForceClose;
@@ -173,6 +176,10 @@ public:
 
 protected:
 	std::string		getTmpFileName();
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: 2011-11-23 (Catznip-3.2)
+	/*virtual*/ void onBackupTimer();
+// [/SL:KB]
+
 	bool			onExternalChange(const std::string& filename);
 	virtual void	saveIfNeeded(bool sync = true) = 0;
 
@@ -202,7 +209,7 @@ protected:
 							const LLUUID& item_id,
 							const LLTransactionID& tid);
 
-	static void onSearchReplace(void* userdata);
+//	static void onSearchReplace(void* userdata);
 	static void onLoad(void* userdata);
 	static void onSave(void* userdata, BOOL close_after_save);
 	
@@ -263,7 +270,7 @@ private:
 	BOOL monoChecked() const;
 
 
-	static void onSearchReplace(void* userdata);
+//	static void onSearchReplace(void* userdata);
 	static void onLoad(void* userdata);
 	static void onSave(void* userdata, BOOL close_after_save);
 
