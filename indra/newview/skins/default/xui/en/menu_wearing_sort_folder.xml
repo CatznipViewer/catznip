@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ layout="topleft"
+ visible="false"
+ name="Folder Sort Wearing">
+    <menu_item_check
+     label="Sort by Name"
+     layout="topleft"
+     name="folder_sort_name">
+        <on_click
+         function="Sort.Folder"
+         parameter="name" />
+        <on_check
+         function="Sort.CheckFolder"
+         parameter="name" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Most Recent"
+     layout="topleft"
+     name="folder_sort_recent">
+        <on_click
+         function="Sort.Folder"
+         parameter="date" />
+        <on_check
+         function="Sort.CheckFolder"
+         parameter="date" />         
+    </menu_item_check>
+    <menu_item_separator />
+    <menu_item_check
+     label="Sort Folders Always by Name"
+     layout="topleft"
+     name="folder_sort_foldersalwaysbyname">
+        <on_click
+         function="Sort.Folder"
+         parameter="foldersalwaysbyname" />
+        <on_check
+         function="Sort.CheckFolder"
+         parameter="foldersalwaysbyname" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort System Folders to Top"
+     layout="topleft"
+     name="folder_sort_systemfolderstotop">
+        <on_click
+         function="Sort.Folder"
+         parameter="systemfolderstotop" />
+        <on_check
+         function="Sort.CheckFolder"
+         parameter="systemfolderstotop" />
+    </menu_item_check>
+</toggleable_menu>

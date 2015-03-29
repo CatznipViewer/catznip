@@ -1,27 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-   background_visible="true"
+   background_visible="false"
    bg_alpha_color="DkGray"
    border="false"
    follows="all"
-   height="430"
+   height="425"
    name="Outfits"
    layout="topleft"
    left="0"
    top="0"
-   width="312">
+   width="300">
     <accordion
-     background_visible="true"
+     background_visible="false"
      bg_alpha_color="DkGray2"
      bg_opaque_color="DkGray2"
-
      follows="all"
      height="400"
      layout="topleft"
-     left="3"
+     left="0"
      name="outfits_accordion"
      top="0"
-     width="309">
+     width="300">
        <no_matched_tabs_text
          name="no_matched_outfits_msg"
          value="Didn't find what you're looking for? Try [secondlife:///app/search/all/[SEARCH_TERM] Search]."
@@ -31,47 +30,133 @@
          value="You don't have any outfits yet. Try [secondlife:///app/search/all/ Search]"/>
     </accordion>
     <panel
-     background_visible="true"
+     background_visible="false"
 	 follows="bottom|left|right"
-	 height="28"
+	 height="25"
 	 layout="topleft"
-	 left="4"
+	 left="0"
+	 name="bottom_panel"
 	 top_pad="0"
 	 visible="true"
-	 name="bottom_panel"
-	 width="312">
-     <menu_button
-       follows="bottom|left"
-       tool_tip="Show additional options"
-       height="25"
-       image_hover_unselected="Toolbar_Left_Over"
-       image_overlay="OptionsMenu_Off"
-       image_selected="Toolbar_Left_Selected"
-       image_unselected="Toolbar_Left_Off"
-       layout="topleft"
-       left="0"
-       name="options_gear_btn"
-       top="1"
-       width="31" />
-     <icon
-       follows="bottom|left|right"
-       height="25"
-       image_name="Toolbar_Middle_Off"
-       layout="topleft"
-       left_pad="1"
-       name="dummy_icon"
-       width="243"/>
-      <button
-       follows="bottom|right"
-       height="25"
-       image_hover_unselected="Toolbar_Right_Over"
-       image_overlay="TrashItem_Off"
-       image_selected="Toolbar_Right_Selected"
-       image_unselected="Toolbar_Right_Off"
-       layout="topleft"
-       left_pad="1"
-       name="trash_btn"
-       tool_tip="Delete selected outfit"
-       width="31"/>
+	 width="300">
+        <menu_button
+         follows="bottom|left"
+         tool_tip="Show additional options"
+         height="25"
+         image_hover_unselected="Toolbar_Left_Over"
+         image_overlay="OptionsMenu_Off"
+         image_selected="Toolbar_Left_Selected"
+         image_unselected="Toolbar_Left_Off"
+         layout="topleft"
+         left="1"
+         name="options_gear_btn"
+         top="0"
+         width="31" />
+        <icon
+         follows="bottom|left|right"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="dummy_icon"
+         width="60"/>
+        <flyout_button
+         arrow_button_width="18"
+         follows="bottom|right"
+         height="25"
+         halign="left"
+         label="Wear"
+         layout="topleft"
+         left_pad="1"
+         name="wear_outfit_btn"
+         width="79">
+            <flyout_button.item
+             label="Replace Current Outfit"
+             name="outfit_replace"
+             value="outfit_replace" />
+            <flyout_button.item
+             label="Add to Current Outfit"
+             name="outfit_add"
+             value="outfit_add" />
+            <flyout_button.action_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Command_Appearance_Icon"
+             image_overlay_alignment="left"
+             image_bottom_pad="1"
+             imgoverlay_label_space="4"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="transparent.j2c" />
+            <flyout_button.drop_down_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Arrow_Small_Down"
+             image_overlay_alignment="right"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             image_pressed="none" 
+             pad_right="-2" />
+        </flyout_button>
+        <button
+         follows="bottom|right"
+         halign="left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Command_Appearance_Icon"
+         image_overlay_alignment="left"
+         image_bottom_pad="1"
+         imgoverlay_label_space="6"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         label="Wear"
+         layout="topleft"
+         left_pad="-79"
+         name="wear_items_btn"
+         visible="false"
+         width="79" />
+        <flyout_button
+         arrow_button_width="18"
+         follows="bottom|right"
+         height="25"
+         halign="left"
+         label="Save As"
+         layout="topleft"
+         left_pad="1"
+         name="save_btn"
+         tool_tip="Save current outfit"
+         width="94">
+            <flyout_button.item
+             label="Save"
+             value="save_outfit" />
+            <flyout_button.item
+             label="Save As..."
+             value="save_as_new_outfit" />
+            <flyout_button.action_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Command_Inventory_Icon"
+             image_overlay_alignment="left"
+             image_bottom_pad="1"
+             imgoverlay_label_space="4"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="transparent.j2c" />
+            <flyout_button.drop_down_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Arrow_Small_Down"
+             image_overlay_alignment="right"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             image_pressed="none" 
+             pad_right="-2" />
+        </flyout_button>
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="TrashItem_Off"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         layout="topleft"
+         left_pad="1"
+         name="trash_btn"
+         tool_tip="Delete selected outfit"
+         width="31" />
     </panel>
 </panel>

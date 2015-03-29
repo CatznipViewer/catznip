@@ -48,6 +48,7 @@
 	<menu_item_call label="Teletrasportati" name="Landmark Open"/>
 	<menu_item_call label="Apri" name="Animation Open"/>
 	<menu_item_call label="Apri" name="Sound Open"/>
+	<menu_item_call label="Copia gruppo vestiti negli Appunti" name="Copy Outfit To Clipboard"/>
 	<menu_item_call label="Sostituisci vestiti" name="Replace Outfit"/>
 	<menu_item_call label="Aggiungi al vestiario" name="Add To Outfit"/>
 	<menu_item_call label="Rimuovi dal vestiario attuale" name="Remove From Outfit"/>
