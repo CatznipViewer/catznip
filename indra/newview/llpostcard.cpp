@@ -125,7 +125,10 @@ void LLPostCard::send(LLPointer<LLImageFormatted> image, const LLSD& postcard_da
 	LLVFile::writeFile(image->getData(), image->getDataSize(), gVFS, asset_id, LLAssetType::AT_IMAGE_JPEG);
 
 	// upload the image
-	std::string url = gAgent.getRegion()->getCapability("SendPostcard");
+//	std::string url = gAgent.getRegion()->getCapability("SendPostcard");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string url = (gAgent.getRegion()) ?  gAgent.getRegion()->getCapability("SendPostcard") : LLStringUtil::null;
+// [/SL:KB]
 	if (!url.empty())
 	{
 		LL_INFOS() << "Sending postcard via capability" << LL_ENDL;
