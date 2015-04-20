@@ -1478,12 +1478,12 @@ veya şimdi kurabilirsiniz.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		[APP_NAME] kurulumunuz için bir güncellemeyi karşıdan yükledik.
-Sürüm [VERSION] [[RELEASE_NOTES_FULL_URL] Bu güncelleme hakkında ayrıntılı bilgi]
+Sürüm [VERSION] [[INFO_URL] Bu güncelleme hakkında ayrıntılı bilgi]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi kur ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		[APP_NAME] kurulumunuz için bir güncellemeyi karşıdan yükledik.
-Sürüm [VERSION] [[RELEASE_NOTES_FULL_URL] Bu güncelleme hakkında ayrıntılı bilgi]
+Sürüm [VERSION] [[INFO_URL] Bu güncelleme hakkında ayrıntılı bilgi]
 		<usetemplate name="okcancelbuttons" notext="Sonra..." yestext="Şimdi kur ve [APP_NAME] uygulamasını yeniden başlat"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">

@@ -95,6 +95,9 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+#include "llstartup.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolcomp.h"
 #include "lltoolmgr.h"
@@ -127,6 +130,10 @@
 #include "llwindow.h"
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+#include "lllogininstance.h"
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "boost/unordered_map.hpp"
 
 using namespace LLAvatarAppearanceDefines;
@@ -7076,6 +7083,44 @@ void handle_selected_material_info()
 	}
 }
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+void handle_updater_check()
+{
+	LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
+
+	// Make sure the update is actually running
+	if (!pUpdater->isChecking())
+		LLLoginInstance::instance().getUpdaterService()->startChecking();
+
+	switch (pUpdater->getState())
+	{
+		case LLUpdaterService::CHECKING_FOR_UPDATE:
+		case LLUpdaterService::UP_TO_DATE:
+		case LLUpdaterService::UPDATE_AVAILABLE:
+		// Set if there was a network or server error on the last update check attempt (i.e. 404)
+		case LLUpdaterService::TEMPORARY_ERROR:
+		// Set when we already have the update downloaded but the user picked 'later', or if the update failed
+		case LLUpdaterService::TERMINAL:
+			{
+				// Perform a clean manual check
+				pUpdater->checkForUpdate(true);
+			}
+			break;
+		case LLUpdaterService::DOWNLOADING:
+			{
+				bool fRequired = LLLoginInstance::instance().getUpdaterService()->getDownloadData()["required"].asBoolean();
+				LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
+			}
+			break;
+		default:
+			{
+				LLNotificationsUtil::add("UpdaterCheckError");
+			}
+			break;
+	}
+}
+// [/SL:KB]
+
 void handle_test_male(void*)
 {
 	LLAppearanceMgr::instance().wearOutfitByName("Male Shape & Outfit");
@@ -8608,6 +8653,9 @@ void initialize_menus()
 	// most items use the ShowFloater method
 	view_listener_t::addMenu(new LLToggleHowTo(), "Help.ToggleHowTo");
 	enable.add("Help.HowToVisible", boost::bind(&enable_how_to_visible, _2));
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+	commit.add("Updater.Check", boost::bind(&handle_updater_check));
+// [/SL:KB]
 
 	// Advanced menu
 	view_listener_t::addMenu(new LLAdvancedToggleConsole(), "Advanced.ToggleConsole");

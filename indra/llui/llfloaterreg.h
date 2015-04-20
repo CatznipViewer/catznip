@@ -40,6 +40,9 @@
 
 class LLFloater;
 class LLUICtrl;
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+class LLModalDialog;
+// [/SL:KB]
 
 typedef boost::function<LLFloater* (const LLSD& key)> LLFloaterBuildFunc;
 
@@ -83,6 +86,17 @@ public:
 		return floater;
 	}
 	
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+	template <class T>
+	static LLFloater* buildModal(const LLSD& key)
+	{
+		LLSD key_copy = key;
+		key_copy.erase("modal");
+		LLModalDialog* floater = new T(key_copy, key["modal"].asBoolean());
+		return floater;
+	}
+// [/SL:KB]
+
 	static void add(const std::string& name, const std::string& file, const LLFloaterBuildFunc& func,
 					const std::string& groupname = LLStringUtil::null);
 
