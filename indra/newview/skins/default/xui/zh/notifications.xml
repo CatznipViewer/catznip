@@ -1468,12 +1468,12 @@ SHA1 指紋：[MD5_DIGEST]
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
-[VERSION] 版本 [[RELEASE_NOTES_FULL_URL] 關於此更新的資訊]
+[VERSION] 版本 [[INFO_URL] 關於此更新的資訊
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		我們已為你的 [APP_NAME] 軟體下載了更新。
-[VERSION] 版本 [[RELEASE_NOTES_FULL_URL] 關於此更新的資訊]
+[VERSION] 版本 [[INFO_URL] 關於此更新的資訊]
 		<usetemplate name="okcancelbuttons" notext="稍候..." yestext="立即安裝及重新啟動 [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
