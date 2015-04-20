@@ -33,7 +33,9 @@
 #include "llsecapi.h"
 #include "lltrans.h"
 #include "llweb.h"
-
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8)
+#include "llversioninfo.h"
+// [/SL:KB]
 
 /// key used to store the grid, and the name attribute in the grid data
 const std::string  GRID_VALUE = "keyname";
@@ -61,7 +63,10 @@ const std::string  GRID_LOGIN_IDENTIFIER_TYPES = "login_identifier_types";
 const std::string GRID_SLURL_BASE = "slurl_base";
 const std::string GRID_APP_SLURL_BASE = "app_slurl_base";
 
-const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8)
+const std::string DEFAULT_LOGIN_PAGE = "http://viewer.catznip.com/login/";
+// [/SL:KB]
+//const std::string DEFAULT_LOGIN_PAGE = "http://viewer-login.agni.lindenlab.com/";
 
 const std::string MAIN_GRID_LOGIN_URI = "https://login.agni.lindenlab.com/cgi-bin/login.cgi";
 
@@ -122,20 +127,36 @@ void LLGridManager::initialize(const std::string& grid_file)
 	mGridFile = grid_file;
 	// as we don't want an attacker to override our grid list
 	// to point the default grid to an invalid grid
-  	addSystemGrid("Second Life Main Grid (Agni)",
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-01-28 (Catznip-3.6)
+	addSystemGrid("Main Grid (Agni)",
 				  MAINGRID,
 				  MAIN_GRID_LOGIN_URI,
 				  "https://secondlife.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Agni");
-	addSystemGrid("Second Life Beta Test Grid (Aditi)",
+	addSystemGrid("Beta Test Grid (Aditi)",
 				  "util.aditi.lindenlab.com",
 				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
 				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
 				  DEFAULT_LOGIN_PAGE,
 				  SL_UPDATE_QUERY_URL,
 				  "Aditi");
+// [/SL:KB]
+//  	addSystemGrid("Second Life Main Grid (Agni)",
+//				  MAINGRID,
+//				  MAIN_GRID_LOGIN_URI,
+//				  "https://secondlife.com/helpers/",
+//				  DEFAULT_LOGIN_PAGE,
+//				  SL_UPDATE_QUERY_URL,
+//				  "Agni");
+//	addSystemGrid("Second Life Beta Test Grid (Aditi)",
+//				  "util.aditi.lindenlab.com",
+//				  "https://login.aditi.lindenlab.com/cgi-bin/login.cgi",
+//				  "http://aditi-secondlife.webdev.lindenlab.com/helpers/",
+//				  DEFAULT_LOGIN_PAGE,
+//				  SL_UPDATE_QUERY_URL,
+//				  "Aditi");
 
 	LLSD other_grids;
 	llifstream llsd_xml;
@@ -534,6 +555,9 @@ std::string LLGridManager::getLoginPage(const std::string& grid)
 std::string LLGridManager::getLoginPage()
 {
 	std::string login_page = mGridList[mGrid][GRID_LOGIN_PAGE_VALUE].asString();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2011-09-15 (Catznip-2.8)
+	login_page.append(LLVersionInfo::getChannel());
+// [/SL:KB]
 	LL_DEBUGS("GridManager")<<"returning "<<login_page<<LL_ENDL;
 	return login_page;
 }

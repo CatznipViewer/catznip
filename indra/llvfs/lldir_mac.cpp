@@ -64,7 +64,10 @@ LLDir_Mac::LLDir_Mac()
 {
 	mDirDelimiter = "/";
 
-    const std::string     secondLifeString = "SecondLife";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-03-17 (Catznip-3.4)
+    const std::string     secondLifeString = "Catznip";
+// [/SL:KB]
+//    const std::string     secondLifeString = "SecondLife";
     
     std::string *executablepathstr = getSystemExecutableFolder();
 

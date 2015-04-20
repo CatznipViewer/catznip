@@ -360,7 +360,10 @@ int parse_args(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	// We assume that all the logs we're looking for reside on the current drive
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 
 	LLError::initForApplication( gDirUtilp->getExpandedFilename(LL_PATH_APP_SETTINGS, ""));
 
@@ -396,7 +399,7 @@ int main(int argc, char **argv)
 		}
 		else
 		{
-			gProductName = "Second Life";
+			gProductName = "Catznip";
 		}
 		if (gBundleID)
 		{
@@ -497,7 +500,7 @@ int main(int argc, char **argv)
 		err = CreateStandardAlert(
 				kAlertStopAlert,
 				CFSTR("Error"),
-				CFSTR("An error occurred while updating Second Life.  Please download the latest version from www.secondlife.com."),
+				CFSTR("An error occurred while updating Catznip.  Please download the latest version from catznip.com."),
 				&params,
 				&alert);
 		
@@ -969,11 +972,17 @@ void *updatethreadproc(void*)
 			goto begin_install;
 		} else {
 			// Continue on to download file.
-			dmgName = "SecondLife.dmg";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+			dmgName = "Catznip.dmg";
+// [/SL:KB]
+//			dmgName = "SecondLife.dmg";
 		}
 
 		
-		strncat(temp, "/SecondLifeUpdate_XXXXXX", (sizeof(temp) - strlen(temp)) - 1);
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+		strncat(temp, "/CatznipUpdate_XXXXXX", (sizeof(temp) - strlen(temp)) - 1);
+// [/SL:KB]
+//		strncat(temp, "/SecondLifeUpdate_XXXXXX", (sizeof(temp) - strlen(temp)) - 1);
 		if(mkdtemp(temp) == NULL)
 		{
 			throw 0;
@@ -991,7 +1000,10 @@ void *updatethreadproc(void*)
 				
 		chdir(tempDir);
 		
-		snprintf(temp, sizeof(temp), "SecondLife.dmg");		
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+		snprintf(temp, sizeof(temp), "Catznip.dmg");		
+// [/SL:KB]
+//		snprintf(temp, sizeof(temp), "SecondLife.dmg");		
 		
 		downloadFile = LLFile::fopen(temp, "wb");		/* Flawfinder: ignore */
 		if(downloadFile == NULL)

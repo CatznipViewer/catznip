@@ -558,7 +558,10 @@ std::string LLViewerMedia::getCurrentUserAgent()
 	// This was also helpful:
 	// http://www.mozilla.org/build/revised-user-agent-strings.html
 	std::ostringstream codec;
-	codec << "SecondLife/";
+//	codec << "SecondLife/";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+	codec << "Catznip/";
+// [/SL:KB]
 	codec << LLVersionInfo::getVersion();
 	codec << " (" << channel << "; " << skin_name << " skin)";
 	LL_INFOS() << codec.str() << LL_ENDL;
