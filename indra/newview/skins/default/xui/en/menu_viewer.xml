@@ -1333,6 +1333,26 @@
             function="Advanced.ShowURL"
             parameter="http://community.secondlife.com/t5/English-Knowledge-Base/Second-Life-Quickstart/ta-p/1087919"/>
         </menu_item_call>
+        <menu_item_call
+         label="[APP_NAME] Blog"
+         name="Show Blog">
+            <menu_item_call.on_click
+             function="PromptShowURL"
+             parameter="WebLaunchBlog,http://catznip.com/" />
+        </menu_item_call>
+        <menu_item_call
+         label="[APP_NAME] Support Group"
+         name="Show Support Group" >
+            <menu_item_call.on_click
+             function="ShowSupportGroup" />
+        </menu_item_call>
+        <menu_item_call
+         label="[APP_NAME] Wiki"
+         name="Show Wiki">
+            <menu_item_call.on_click
+             function="PromptShowURL"
+             parameter="WebLaunchWiki,http://wiki.catznip.com" />
+        </menu_item_call>
 <!--        <menu_item_call
          label="Tutorial"
          name="Tutorial">

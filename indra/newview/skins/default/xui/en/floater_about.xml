@@ -1,61 +1,194 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- positioning="centered"
- legacy_header_height="18"
- height="440"
- layout="topleft"
- name="floater_about"
+ can_close="true"
+ can_minimize="true"
+ can_resize="false"
+ height="340"
  help_topic="floater_about"
+ name="floater_about"
+ positioning="centered"
  save_rect="true"
+ save_visibility="false"
  title="ABOUT [CAPITALIZED_APP_NAME]"
- width="470">
+ width="580">
   
+
   <tab_container
     follows="all" 
-    top="25"
-    left="10"
-    height="405" 
-    width="450" 
+    layout="topleft"
+    left="8"
+    height="335"
+    right="-8"
+    tab_height="23"
+    tab_min_width="120"
     name="about_tab"
-    tab_position="top">
+    tab_position="top"
+    top="0">
     <panel
-      border="true" 
-      label="Info"
+      label="INFO"
       help_topic="about_support_tab"
       name="support_panel">
+      <icon
+       height="128"
+       image_name="Catznip_128"
+       layout="topleft"
+       left="0"
+       mouse_opaque="true"
+       name="catznip_logo"
+       top="4"
+       width="128" />
+      <button
+       follows="top|left" 
+       image_overlay="Copy"
+       image_overlay_alignment="left"
+       tool_tip="Copy the info the clipboard."
+       name="copy_btn"
+       label="Copy Info"
+       left="40"
+       top="284"
+       height="22"
+       width="80" />
       <text_editor
-        parse_urls="true" 
+       parse_urls="true" 
        follows="top|left"
        font="SansSerif"
-       height="343"
+       height="300"
        bg_readonly_color="Transparent"
-       left="5"
+       left="128"
        max_length="65536"
        name="support_editor"
        top="5"
-       width="435"
+       width="429"
        word_wrap="true" />
-      <button
-        follows="left|top" 
-        label="Copy to Clipboard"
-        name="copy_btn"
-        left="10"
-        top_pad="5"
-        height="25"
-        width="180" />
     </panel>
     <panel
-      border="true" 
-      label="Credits" 
+      label="CREDITS" 
       help_topic="about_credits_tab"
       name="credits_panel">
+<accordion
+ fit_parent="false"
+ follows="all"
+ layout="topleft"
+ left="3"
+ name="credits_accordion"
+ single_expansion="true"
+ top="0"
+ width="558">
+<!-- Credits -->
+  <accordion_tab
+   expanded="true"
+   fit_panel="false"
+   layout="topleft"
+   name="catznip_credits_tab"
+   title="Catznip">
+    <panel
+     border="false" 
+     follows="all"
+     left="10"
+     name="catznip_credits_panel"
+     height="250"
+     top="10">
+      <text
+          follows="top|left|right"
+          height="10"
+          layout="topleft"
+          left="5"
+          name="catznip_intro"
+          top="0"
+          width="435"
+          wrap="true">
+Catznip is brought to you by:
+      </text>
+      <text_editor
+       enabled="false" 
+       follows="top|left"
+       height="80"
+       bg_readonly_color="Transparent"
+       left="5"
+       text_color="LtGray"
+       max_length="65536"
+       name="catznip_names"
+       top_pad="5"
+       width="545"
+       word_wrap="true">
+Trinity Dejavu - Project manager
+Kitty Barnett - Code kitty
+Catznip Catnap - Test dummy
+      </text_editor>
+      <text
+          follows="top|left"
+          height="10"
+          layout="topleft"
+          left="5"
+          name="catznip_thanks_intro"
+          top_pad="10"
+          width="435"
+          wrap="true">
+with special thanks to:
+      </text>
+      <text_editor
+       enabled="false" 
+       follows="top|left"
+       height="50"
+       bg_readonly_color="Transparent"
+       left="5"
+       text_color="LtGray"
+       max_length="65536"
+       name="catznip_thanks_names"
+       top_pad="5"
+       width="545"
+       word_wrap="true">
+Dummy Name replaced at run time
+      </text_editor>
+      <text
+          follows="top|left"
+          height="10"
+          layout="topleft"
+          left="5"
+          name="catznip_contrib_intro"
+          top_pad="10"
+          width="435"
+          wrap="true">
+and with the following open source contributions:
+      </text>
+      <text_editor
+       enabled="false" 
+       follows="top|left"
+       height="50"
+       bg_readonly_color="Transparent"
+       left="5"
+       text_color="LtGray"
+       max_length="65536"
+       name="catznip_contrib_names"
+       top_pad="5"
+       width="545"
+       word_wrap="true">
+- Alignment Tool (Qarl Fizz)
+- Windlight Presets (Ana Lutetia, Chic Aeon, Lusus Saule, Luna Jubilee, Mesc, Miranda Kingmaker, Paulina Oceanlane, Penny Patton, Torley)
+
+      </text_editor>
+    </panel>
+  </accordion_tab>
+  <accordion_tab
+   expanded="true"
+   fit_panel="false"
+   layout="topleft"
+   name="sl_credits_tab"
+   title="Second Life">
+    <panel
+     border="false" 
+     follows="all"
+     left="10"
+     name="sl_credits_panel"
+     height="332"
+     top="10">
       <text
           follows="top|left|right"
           height="10"
           layout="topleft"
           left="5"
           name="linden_intro"
-          top="10"
+          top="0"
           width="435"
           wrap="true">
 Second Life is brought to you by the Lindens:
@@ -63,14 +196,14 @@ Second Life is brought to you by the Lindens:
       <text_editor
        enabled="false" 
        follows="top|left"
-       height="98"
+       height="70"
        bg_readonly_color="Transparent"
        left="5"
        text_color="LtGray"
        max_length="65536"
        name="linden_names"
-       top_pad="10"
-       width="435"
+       top_pad="5"
+       width="545"
        word_wrap="true">
 Philip, Andrew, Doug, Richard, Phoenix, Ian, Mark, Robin, Dan, Char, Ryan, Eric, Jim, Lee, Jeff, Michael, Kelly, Steve, Catherine, Bub, Ramzi, Jill, Jeska, Don, Kona, Callum, Charity, Jack, Shawn, babbage, James, Lauren, Blue, Brent, Reuben, Pathfinder, Jesse, Patsy, Torley, Bo, Cyn, Jonathan, Gia, Annette, Ginsu, Harry, Lex, Runitai, Guy, Cornelius, Beth, Swiss, Thumper, Wendy, Teeple, Seth, Dee, Mia, Sally, Liana, Aura, Beez, Milo, Red, Gulliver, Marius, Joe, Jose, Dore, Justin, Nora, Morpheus, Lexie, Amber, Chris, Xan, Leyla, Walker, Sabin, Joshua, Hiromi, Tofu, Fritz, June, Jean, Ivy, Dez, Ken, Betsy, Which, Spike, Rob, Zee, Dustin, George, Claudia, del, Matthew, jane, jay, Adrian, Yool, Rika, Yoz, siobhan, Qarl, Benjamin, Beast, Everett, madhavi, Christopher, Izzy, stephany, Jeremy, sean, adreanne, Pramod, Tobin, sejong, Iridium, maurice, kj, Meta, kari, JP, bert, kyle, Jon, Socrates, Bridie, Ivan, maria, Aric, Coco, Periapse, sandy, Storrs, Lotte, Colossus, Brad, Pastrami, Zen, BigPapi, Banzai, Sardonyx, Mani, Garry, Jaime, Neuro, Samuel, Niko, CeeLo, Austin, Soft, Poppy, emma, tessa, angelo, kurz, alexa, Sue, CG, Blake, Erica, Brett, Bevis, kristen, Q, simon, Enus, MJ, laurap, Kip, Scouse, Ron, Ram, kend, Marty, Prospero, melissa, kraft, Nat, Seraph, Hamilton, Lordan, Green, miz, Ashlei, Trinity, Ekim, Echo, Charlie, Rowan, Rome, Jt, Doris, benoc, Christy, Bao, Kate, Tj, Patch, Cheah, Johan, Brandy, Angela, Oreh, Cogsworth, Lan, Mitchell, Space, Bambers, Einstein, Bender, Malbers, Matias, Maggie, Rothman, Milton, Niall, Marin, Allison, Mango, Andrea, Katt, Yi, Ambroff, Rico, Raymond, Gail, Christa, William, Dawn, Usi, Dynamike, M, Corr, Dante, Molly, kaylee, Danica, Kelv, Lil, jacob, Nya, Rodney, elsie, Blondin, Grant, Nyx, Devin, Monty, Minerva, Keira, Katie, Jenn, Makai, Clare, Joy, Cody, Gayathri, FJ, spider, Oskar, Landon, Jarv, Noelle, Al, Doc, Gray, Vir, t, Maestro, Simone, Shannon, yang, Courtney, Scott, charlene, Quixote, Susan, Zed, Amanda, Katelin, Esbee, JoRoan, Enkidu, roxie, Scarlet, Merov, Kevin, Judy, Rand, Newell, Les, Dessie, Galen, Michon, Geo, Siz, Calyle, Pete, Praveen, Callen, Sheldon, Pink, Nelson, jenelle, Terrence, Nathan, Juan, Sascha, Huseby, Karina, Kaye, Kotler, Lis, Darv, Charrell, Dakota, Kimmora, Theeba, Taka, Mae, Perry, Ducot, dana, Esther, Dough, gisele, Doten, Viale, Fisher, jessieann, ashley, Torres, delby, rountree, kurt, Slaton, Madison, Rue, Gino, Wen, Casssandra, Brodesky, Squid, Gez, Rakesh, Gecko, Ladan, Tony, Tatem, Squire, Falcon, BK, Crimp, Tiggs, Bacon, Coyot, Carmilla, Webb, Sea, Arch, Jillian, Jason, Bernard, Vogt, Peggy, dragon, Pup, xandix, Wallace, Bewest, Inoshiro, Rhett, AG, Aimee, Ghengis, Itiaes, Eli, Steffan, Epic, Grapes, Stone, Prep, Scobu, Robert, Alain, Carla, Vicky, Tia, Alec, Taras, Lisa, Oz, Ariane, Log, House, Kazu, Kim, Drofnas, Tyler, Campbell, Michele, Madeline, Nelly, Baron, Thor, Lori, Hele, Fredrik, Teddy, Pixie, Berry, Gabrielle, Alfonso, Brooke, Wolf, Ringo, Cru, Charlar, Rodvik, Gibson, Elise, Bagman, Greger, Leonidas, Jerm, Leslie, CB, Brenda, Durian, Carlo, mm, Zeeshan, Caleb, Max, Elikak, Mercille, Steph, Chase
       </text_editor>
@@ -88,14 +221,14 @@ with open source contributions from:
       <text_editor
        enabled="false" 
        follows="top|left"
-       height="98"
+       height="70"
        bg_readonly_color="Transparent"
        left="5"
        text_color="LtGray"
        max_length="65536"
        name="contrib_names"
-       top_pad="10"
-       width="435"
+       top_pad="5"
+       width="545"
        word_wrap="true">
 Dummy Name replaced at run time
       </text_editor>
@@ -113,63 +246,71 @@ and translations from:
       <text_editor
        enabled="false" 
        follows="top|left"
-       height="98"
+       height="50"
        bg_readonly_color="Transparent"
        left="5"
        text_color="LtGray"
        max_length="65536"
        name="trans_names"
-       top_pad="10"
-       width="435"
+       top_pad="5"
+       width="545"
        word_wrap="true">
 Dummy Name replaced at run time
       </text_editor>
     </panel>
+  </accordion_tab>
+</accordion>
+    </panel>
+<!-- Licences -->
     <panel
-      border="true"
-      label="Licenses"
+      label="LICENCES"
       help_topic="about_licenses_tab"
       name="licenses_panel">
       <text_editor
        enabled="false"
        follows="left|top"
-       height="375"
+       height="300"
        bg_readonly_color="Transparent"
        left="5"
        text_color="LtGray"
        max_length="65536"
        name="credits_editor"
        top="5"
-       width="435"
+       width="552"
        word_wrap="true">
-        3Dconnexion SDK Copyright (C) 1992-2009 3Dconnexion
-        APR Copyright (C) 2011 The Apache Software Foundation
-        Collada DOM Copyright 2006 Sony Computer Entertainment Inc.
-        cURL Copyright (C) 1996-2010, Daniel Stenberg, (daniel@haxx.se)
-        DBus/dbus-glib Copyright (C) 2002, 2003  CodeFactory AB / Copyright (C) 2003, 2004 Red Hat, Inc.
-        expat Copyright (C) 1998, 1999, 2000 Thai Open Source Software Center Ltd.
-        FreeType Copyright (C) 1996-2002, 2006 David Turner, Robert Wilhelm, and Werner Lemberg.
-        GL Copyright (C) 1999-2004 Brian Paul.
-        GLOD Copyright (C) 2003-04 Jonathan Cohen, Nat Duca, Chris Niski, Johns Hopkins University and David Luebke, Brenden Schubert, University of Virginia.
-        google-perftools Copyright (c) 2005, Google Inc.
-        Havok.com(TM) Copyright (C) 1999-2001, Telekinesys Research Limited.
-        jpeg2000 Copyright (C) 2001, David Taubman, The University of New South Wales (UNSW)
-        jpeglib Copyright (C) 1991-1998, Thomas G. Lane.
-        ogg/vorbis Copyright (C) 2002, Xiphophorus
-        OpenSSL Copyright (C) 1998-2008 The OpenSSL Project.
-        PCRE Copyright (c) 1997-2012 University of Cambridge
-        SDL Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002 Sam Lantinga
-        SSLeay Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
-        xmlrpc-epi Copyright (C) 2000 Epinions, Inc.
-        zlib Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler.
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, version 2.1 which can be found in doc/LGPL-licence.txt in this distribution (or online at http://www.gnu.org/licenses/gpl-2.0.txt).
 
-        Second Life Viewer uses Havok (TM) Physics. (c)Copyright 1999-2010 Havok.com Inc. (and its Licensors). All Rights Reserved. See www.havok.com for details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
-        This software contains source code provided by NVIDIA Corporation.
+- 3Dconnexion SDK Copyright (C) 1992-2009 3Dconnexion
+- APR Copyright (C) 2011 The Apache Software Foundation
+- Collada DOM Copyright 2006 Sony Computer Entertainment Inc.
+- cURL Copyright (C) 1996-2010, Daniel Stenberg, (daniel@haxx.se)
+- DBus/dbus-glib Copyright (C) 2002, 2003 CodeFactory AB / Copyright (C) 2003, 2004 Red Hat, Inc.
+- expat Copyright (C) 1998, 1999, 2000 Thai Open Source Software Center Ltd.
+- FreeType Copyright (C) 1996-2002, 2006 David Turner, Robert Wilhelm, and Werner Lemberg.
+- GL Copyright (C) 1999-2004 Brian Paul.
+- GLOD Copyright (C) 2003-04 Jonathan Cohen, Nat Duca, Chris Niski, Johns Hopkins University and David Luebke, Brenden Schubert, University of Virginia.
+- google-perftools Copyright (c) 2005, Google Inc.
+- Havok.com(TM) Copyright (C) 1999-2001, Telekinesys Research Limited.
+- jpeg2000 Copyright (C) 2001, David Taubman, The University of New South Wales (UNSW)
+- jpeglib Copyright (C) 1991-1998, Thomas G. Lane.
+- ogg/vorbis Copyright (C) 2002, Xiphophorus
+- OpenSSL Copyright (C) 1998-2008 The OpenSSL Project.
+- PCRE Copyright (c) 1997-2012 University of Cambridge
+- Second Life(R) Viewer Copyright (C) 2001-2011, Linden Research, Inc.
+- SDL Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002 Sam Lantinga
+- SSLeay Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
+- xmlrpc-epi Copyright (C) 2000 Epinions, Inc.
+- zlib Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler.
 
-        All rights reserved.  See licenses.txt for details.
+Catznip Viewer uses Havok (TM) Physics. (c)Copyright 1999-2010 Havok.com Inc. (and its Licensors). All Rights Reserved. See www.havok.com for details.
 
-        Voice chat Audio coding: Polycom(R) Siren14(TM) (ITU-T Rec. G.722.1 Annex C)
+This software contains source code provided by NVIDIA Corporation.
+
+All rights reserved. See licenses.txt for details.
+
+Voice chat Audio coding: Polycom(R) Siren14(TM) (ITU-T Rec. G.722.1 Annex C)
       </text_editor>
       </panel>
     </tab_container>
