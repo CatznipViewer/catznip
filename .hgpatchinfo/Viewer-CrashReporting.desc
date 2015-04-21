@@ -1,0 +1,16 @@
+[Viewer/CrashReporting]
+- added   : SaveMinidumpType setting to control minidump creation type [Windows-only]
+    -> include MiniDumpFilterModulePaths by default to strip loaded module paths
+- added   : "CrashSubmitName" and "CrashSubmitSettings" crash behaviour settings to give users more control over what is included in a crash report
+    -> CrashSubmitName = Second Life name is saved as part of debug_info.log
+    -> CrashSubmitSettings = per-user settings override (settings.xml) is included with the crash report
+    -> SecondLife.log is never included with the crash part (too large, not terribly useful and generally contains too much information we don't need/want)
+- added   : "Crash Reports" preference panel to configure crash reports
+    -> hidden if crash reporting isn't enabled for the build configuration
+- added   : ability to display more information to the user about their most recent crash when submitting a crash report
+    -> crash analysis is Windows-only
+- changed : crash logger will send crash reports to catznip.com if crash reporting is enabled
+    -> pruned some of the information that's normally saved to debug_info.log
+- fixed   : "CrashSubmitBehavior" shouldn't be auto-set to CRASH_BEHAVIOR_ALWAYS_SEND when "IgnoreAllNotifications" is set to TRUE
+- fixed   : crash in the crash reporter if the viewer's last run was an unhandled shut down or crash
+    -> log_filename can be empty which causes log_filename.replace() to go out of bounds
