@@ -86,6 +86,32 @@ const std::string &LLVersionInfo::getVersion()
 	return version;
 }
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+const std::string &LLVersionInfo::getReleaseVersion()
+{
+	static std::string version("");
+
+	if (version.empty())
+	{
+		// Cache the version string
+		std::ostringstream stream;
+		if (CHANNEL_RELEASE == getChannelType())
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR;
+			if (LL_VIEWER_VERSION_MINOR > 0)
+				stream << "." << LL_VIEWER_VERSION_MINOR;
+		}
+		else
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR << "." << LL_VIEWER_VERSION_MINOR << "." << LL_VIEWER_VERSION_PATCH;
+		}
+		version = stream.str();
+	}
+
+	return version;
+}
+// [/SL:KB]
+
 //static
 const std::string &LLVersionInfo::getShortVersion()
 {

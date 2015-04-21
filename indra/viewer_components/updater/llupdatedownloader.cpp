@@ -100,8 +100,10 @@ namespace {
 		}
 	};
 
-
-	const char * gSecondLifeUpdateRecord = "SecondLifeUpdateDownload.xml";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+	const char * gSecondLifeUpdateRecord = "CatznipUpdateDownload.xml";
+// [/SL:KB]
+//	const char * gSecondLifeUpdateRecord = "SecondLifeUpdateDownload.xml";
 };
 
 
