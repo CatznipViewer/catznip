@@ -42,6 +42,9 @@
 #include "llnotificationsutil.h"
 #include "lltextbox.h"
 #include "lltoggleablemenu.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewermenu.h"
 #include "lllandmarkactions.h"
 #include "llclipboard.h"
@@ -272,11 +275,32 @@ BOOL LLTeleportHistoryFlatItem::handleRightMouseDown(S32 x, S32 y, MASK mask)
 
 void LLTeleportHistoryFlatItem::showPlaceInfoPanel(S32 index)
 {
-	LLSD params;
-	params["id"] = index;
-	params["type"] = "teleport_history";
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+	{
+		const LLTeleportHistoryPersistentItem* pItem = LLTeleportHistoryStorage::instance().getItem(index);
+		if (pItem)
+		{
+			LLSD sdKey;
+			sdKey["type"] = "remote_place";
+			sdKey["x"] = pItem->mGlobalPos.mdV[VX];
+			sdKey["y"] = pItem->mGlobalPos.mdV[VY];
+			sdKey["z"] = pItem->mGlobalPos.mdV[VZ];
 
-	LLFloaterSidePanelContainer::showPanel("places", params);
+			LLFloaterReg::showInstance("parcel_info", sdKey);
+		}
+	}
+	else
+	{
+// [/SL:KB]
+		LLSD params;
+		params["id"] = index;
+		params["type"] = "teleport_history";
+
+		LLFloaterSidePanelContainer::showPanel("places", params);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	}
+// [/SL:KB]
 }
 
 void LLTeleportHistoryFlatItem::onProfileBtnClick()
