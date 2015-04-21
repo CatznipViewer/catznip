@@ -77,6 +77,9 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+#include "llgroupactions.h"
+// [/SL:KB]
 #include "lltooltip.h"
 #include "llhints.h"
 #include "llhudeffecttrail.h"
@@ -6162,15 +6165,15 @@ class LLSidetrayPanelVisible : public view_listener_t
 };
 
 
-bool callback_show_url(const LLSD& notification, const LLSD& response)
-{
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	if (0 == option)
-	{
-		LLWeb::loadURL(notification["payload"]["url"].asString());
-	}
-	return false;
-}
+//bool callback_show_url(const LLSD& notification, const LLSD& response)
+//{
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//	if (0 == option)
+//	{
+//		LLWeb::loadURL(notification["payload"]["url"].asString());
+//	}
+//	return false;
+//}
 
 class LLPromptShowURL : public view_listener_t
 {
@@ -6183,16 +6186,19 @@ class LLPromptShowURL : public view_listener_t
 			std::string alert = param.substr(0, offset);
 			std::string url = param.substr(offset+1);
 
-			if(gSavedSettings.getBOOL("UseExternalBrowser"))
-			{ 
-    			LLSD payload;
-    			payload["url"] = url;
-    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
-			}
-			else
-			{
-		        LLWeb::loadURL(url);
-			}
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+			LLWeb::openURL(LLSD().with("url", url).with("notification", alert));
+// [/SL:KB]
+//			if(gSavedSettings.getBOOL("UseExternalBrowser"))
+//			{ 
+//    			LLSD payload;
+//    			payload["url"] = url;
+//    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
+//			}
+//			else
+//			{
+//		        LLWeb::loadURL(url);
+//			}
 		}
 		else
 		{
@@ -6303,6 +6309,17 @@ class LLToggleAgentProfile : public view_listener_t
 		return true;
 	}
 };
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+void handle_show_support_group()
+{
+	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
+	if (gAgent.isInGroup(idSupportGroup, true))
+		LLGroupActions::startIM(idSupportGroup);
+	else
+		LLGroupActions::show(idSupportGroup);
+}
+// [/SL:KB]
 
 class LLLandEdit : public view_listener_t
 {
@@ -8982,6 +8999,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
 	view_listener_t::addMenu(new LLToggleSpeak(), "ToggleSpeak");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
+// [/SL:KB]
+
 	view_listener_t::addMenu(new LLPromptShowURL(), "PromptShowURL");
 	view_listener_t::addMenu(new LLShowAgentProfile(), "ShowAgentProfile");
 	view_listener_t::addMenu(new LLToggleAgentProfile(), "ToggleAgentProfile");
