@@ -5364,7 +5364,13 @@ void LLVivoxVoiceClient::notifyParticipantObservers()
 
 void LLVivoxVoiceClient::addObserver(LLVoiceClientStatusObserver* observer)
 {
-	mStatusObservers.insert(observer);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	if (mStatusObservers.end() == mStatusObservers.find(observer))
+	{
+		mStatusObservers.insert(observer);
+	}
+// [/SL:KB]
+//	mStatusObservers.insert(observer);
 }
 
 void LLVivoxVoiceClient::removeObserver(LLVoiceClientStatusObserver* observer)
