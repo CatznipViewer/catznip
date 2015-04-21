@@ -254,6 +254,14 @@ U32Kilobytes LLMemory::getAllocatedMemKB()
 	return sAllocatedMemInKB ;
 }
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
+// static
+U32Kilobytes LLMemory::getAllocatedPageSizeKB()
+{
+	return sAllocatedPageSizeInKB;
+}
+// [/SL:KB]
+
 //----------------------------------------------------------------------------
 
 #if defined(LL_WINDOWS)
