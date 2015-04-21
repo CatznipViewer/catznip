@@ -213,7 +213,10 @@ public:
 	 * DO NOT call this method if your application has specialized
 	 * error handling code.
 	 */
-	void setupErrorHandling(bool mSecondInstance=false);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-17 (Catznip-3.7)
+	void setupErrorHandling(bool second_instance, bool extended_logging);
+// [/SL:KB]
+//	void setupErrorHandling(bool mSecondInstance=false);
 
 	void setErrorHandler(LLAppErrorHandler handler);
 	static void runErrorHandler(); // run shortly after we detect an error, ran in the relatively robust context of the LLErrorThread - preferred.

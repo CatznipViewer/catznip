@@ -277,6 +277,25 @@ const U32 AGENT_CONTROL_FAST_AT             = 0x1 << CONTROL_FAST_AT_INDEX;			//
 const U32 AGENT_CONTROL_FAST_LEFT           = 0x1 << CONTROL_FAST_LEFT_INDEX;		// 0x00000800
 const U32 AGENT_CONTROL_FAST_UP             = 0x1 << CONTROL_FAST_UP_INDEX;			// 0x00001000
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-06-17 (Catznip-2.6)
+// Crash reporter behavior
+const S32 CRASH_BEHAVIOR_ASK = 0;
+const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
+const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
+
+// Moved here from llappviewer.h so that it can be shared with llcrashlogger.cpp
+typedef enum 
+{
+	LAST_EXEC_NORMAL = 0,
+	LAST_EXEC_FROZE,
+	LAST_EXEC_LLERROR_CRASH,
+	LAST_EXEC_OTHER_CRASH,
+	LAST_EXEC_LOGOUT_FROZE,
+	LAST_EXEC_LOGOUT_CRASH
+} eLastExecEvent;
+// [/SL:KB]
+
+
 const U32 AGENT_CONTROL_FLY					= 0x1 << CONTROL_FLY_INDEX;				// 0x00002000
 const U32 AGENT_CONTROL_STOP				= 0x1 << CONTROL_STOP_INDEX;			// 0x00004000
 const U32 AGENT_CONTROL_FINISH_ANIM			= 0x1 << CONTROL_FINISH_ANIM_INDEX;		// 0x00008000

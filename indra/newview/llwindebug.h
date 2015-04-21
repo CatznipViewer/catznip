@@ -31,15 +31,26 @@
 #include "llwin32headerslean.h"
 #include <dbghelp.h>
 
-class LLWinDebug:
-	public LLSingleton<LLWinDebug>
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+class LLWinDebug
 {
 public:
 	static void init();
 	static void generateMinidump(struct _EXCEPTION_POINTERS *pExceptionInfo = NULL);
-	static void cleanup();
+	static std::string writeDumpToFile(const std::string& filename, MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION* pExceptInfo = NULL, MINIDUMP_CALLBACK_INFORMATION* pCallbackInfo = NULL);
 private:
-	static void writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename);
+	static void cleanup();
 };
+// [/SL:KB]
+//class LLWinDebug:
+//	public LLSingleton<LLWinDebug>
+//{
+//public:
+//	static void init();
+//	static void generateMinidump(struct _EXCEPTION_POINTERS *pExceptionInfo = NULL);
+//	static void cleanup();
+//private:
+//	static void writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename);
+//};
 
 #endif // LL_LLWINDEBUG_H
