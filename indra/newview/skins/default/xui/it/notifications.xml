@@ -1479,12 +1479,12 @@ oppure puoi installarlo adesso.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		È stato scaricato un aggiornamento dell&apos;installazione di [APP_NAME].
-Versione [VERSION] [[RELEASE_NOTES_FULL_URL] Informazioni su questo aggiornamento]
+Versione [VERSION] [[INFO_URL] Informazioni su questo aggiornamento]
 		<usetemplate name="okcancelbuttons" notext="Più tardi..." yestext="Installa ora e riavvia [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">

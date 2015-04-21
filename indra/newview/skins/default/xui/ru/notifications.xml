@@ -1478,12 +1478,12 @@ http://secondlife.com/download.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Загружено обновление для вашей версии [APP_NAME].
-Версия [VERSION]. [[RELEASE_NOTES_FULL_URL] Сведения об этом обновлении]
+Версия [VERSION]. [[INFO_URL] Сведения об этом обновлении]
 		<usetemplate name="okcancelbuttons" notext="Позже..." yestext="Установите обновление и перезапустите [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
