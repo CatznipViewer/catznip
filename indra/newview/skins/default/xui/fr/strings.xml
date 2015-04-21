@@ -8,10 +8,10 @@
 		Second Life
 	</string>
 	<string name="APP_NAME">
-		Second Life
+		Catznip
 	</string>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SECOND_LIFE_GRID">
 		Grille de Second Life
@@ -183,7 +183,7 @@ Version serveur vocal : [VOICE_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Le client que vous utilisez ne permet plus d&apos;accéder à Second Life. Téléchargez un nouveau client à la page suivante :
-http://secondlife.com/download
+http://catznip.com/downloads/
 
 Pour plus d&apos;informations, consultez la page FAQ ci-dessous :
 http://secondlife.com/viewer-access-faq
