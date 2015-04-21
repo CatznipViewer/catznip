@@ -572,11 +572,19 @@ BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 			getWindow()->setCursor(UI_CURSOR_NOLOCKED);
 		}
 
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+		root->clearHoveredItem();
+// [/SL:KB]
 		return TRUE;
 	}
 	else
 	{
-		getRoot()->setShowSelectionContext(FALSE);
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+		LLFolderView* pRoot = getRoot();
+		pRoot->setHoveredItem(this);
+		pRoot->setShowSelectionContext(FALSE);
+// [/SL:KB]
+//		getRoot()->setShowSelectionContext(FALSE);
 		getWindow()->setCursor(UI_CURSOR_ARROW);
 		// let parent handle this then...
 		return FALSE;
@@ -631,6 +639,13 @@ BOOL LLFolderViewItem::handleMouseUp( S32 x, S32 y, MASK mask )
 void LLFolderViewItem::onMouseLeave(S32 x, S32 y, MASK mask)
 {
 	mIsMouseOverTitle = false;
+
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+	// NOTE-Catznip: LLViewerWindow::updateUI() calls "enter" before "leave"; if the mouse moved to another item, we can't just outright clear it
+	LLFolderView* pRoot = getRoot();
+	if (this == pRoot->getHoveredItem())
+		pRoot->clearHoveredItem();
+// [/SL:KB]
 }
 
 BOOL LLFolderViewItem::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
