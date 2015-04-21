@@ -122,6 +122,9 @@
 #include "llfloatertranslationsettings.h"
 #include "llfloatertwitter.h"
 #include "llfloateruipreview.h"
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
+#include "llfloaterupdate.h"
+// [/SL:KB]
 #include "llfloatervoiceeffect.h"
 #include "llfloaterwebcontent.h"
 #include "llfloaterwebprofile.h"
@@ -332,6 +335,10 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("big_preview", "floater_big_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBigPreview>);
 	
 	LLFloaterUIPreviewUtil::registerFloater();
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
+	LLFloaterReg::add("update", "floater_update.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterUpdate>);
+	LLFloaterReg::add("update_progress", "floater_update_progress.xml", (LLFloaterBuildFunc)&LLFloaterReg::buildModal<LLFloaterUpdateProgress>);
+// [/SL:KB]
 	LLFloaterReg::add("upload_anim_bvh", "floater_animation_bvh_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBvhPreview>, "upload");
 	LLFloaterReg::add("upload_anim_anim", "floater_animation_anim_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAnimPreview>, "upload");
 	LLFloaterReg::add("upload_image", "floater_image_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterImagePreview>, "upload");

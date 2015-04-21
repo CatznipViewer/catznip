@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="false"
+ can_minimize="false"
+ can_resize="false"
+ height="300"
+ layout="topleft"
+ legacy_header_height="18"
+ positioning="centered"
+ name="floater_update"
+ title="Updater"
+ width="582">
+    <floater.string
+     name="string_title_download">
+        Update available
+    </floater.string>
+    <floater.string
+     name="string_title_install">
+        Update ready to be installed
+    </floater.string>
+    <floater.string
+     name="string_version_optional">
+        [APP_NAME] [VERSION]
+    </floater.string>
+    <floater.string
+     name="string_version_required">
+        [APP_NAME] [VERSION] (Required)
+    </floater.string>
+    <floater.string
+     name="string_button_download">
+        Download now
+    </floater.string>
+    <floater.string
+     name="string_button_install">
+        Install now
+    </floater.string>
+    <icon
+     height="256"
+     image_name="Update_256"
+     layout="topleft"
+     left="20"
+     mouse_opaque="true"
+     name="icon_update"
+     top="26"
+     width="256" />
+    <text
+     follows="top|left"
+     font="SansSerifLargeBold"
+     height="24"
+     left="290"
+     name="text_version"
+     text_color="white"
+     top="26"
+     width="272">
+Catznip R19.1 (Required update)
+    </text>
+
+    <text_editor
+     bg_readonly_color="Transparent"
+     enabled="false" 
+     follows="left|top"
+     font="SansSerif"
+     height="100"
+     layout="topleft"
+     left="290"
+     length="1"
+     max_length="65536"
+     name="text_message"
+     top_pad="0"
+     type="string"
+     width="272"
+     word_wrap="true">       
+This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. This optional updated is highly recomended and fixes 3 bugs. Including the big one Mistress added just to spite you. 
+    </text_editor>
+    <text
+     follows="top|left"
+     height="24"
+     left="290"
+     name="text_website"
+     text_color="white"
+     top_pad="12"
+     width="272">
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
+    </text>
+
+    <text
+      type="string"
+      length="1"
+      follows="left|top"
+      height="10"
+      layout="topleft"
+      left="290"
+      name="future_update"
+      mouse_opaque="false"
+      top_pad="12"
+      width="272">
+      For future updates, prompt me ...
+    </text>
+    <combo_box
+     control_name="UpdaterServiceSetting"
+     follows="left|top"
+     height="23"
+     layout="topleft"
+     left="290"
+     top_pad="5"
+     name="combo_update_notifcation"
+     width="272">
+        <combo_box.item
+         label="before downloading"
+         name="prompt_download"
+         value="1" />
+        <combo_box.item
+         label="before installing (recommended)"
+         name="prompt_install"
+         value="2" />
+    </combo_box>
+
+    <button
+     follows="left|bottom"
+     height="30"
+     label="Later"
+     layout="topleft"
+     left_delta="30"
+     name="button_cancel"
+     top_pad="16"
+     width="50" />
+    <button
+     follows="left|bottom"
+     height="30"
+     image_color="Green"
+     label="Download Now"
+     label_color="White"
+     layout="topleft"
+     left_pad="15"
+     name="button_accept"
+     top_delta="0"
+     width="140" />
+
+</floater>
