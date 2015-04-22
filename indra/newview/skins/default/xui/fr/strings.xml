@@ -1156,6 +1156,24 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="dictionary_files">
 		Dictionnaires
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Aucune information sur ce lieu n&apos;est disponible actuellement, veuillez réessayer ultérieurement.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Les informations sur ce lieu ne sont pas disponibles car l&apos;accès y est restreint.  Veuillez vérifier vos droits auprès du propriétaire de la parcelle.
+	</string>
+	<string name="parcel_server_update_text">
+		Les informations sur le lieu ne sont pas disponibles sans mise à jour du serveur.
+	</string>
+
 	<string name="shape">
 		Silhouette
 	</string>
