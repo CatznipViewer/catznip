@@ -1540,6 +1540,22 @@ He or she will temporarily be unable to move, chat, or interact with the world.
 
   <notification
    icon="alertmodal.tga"
+   name="FreezeAvatarMultiple"
+   type="alertmodal">
+Freeze the following avatars?
+
+[RESIDENTS]
+
+They will temporarily be unable to move, chat, or interact with the world.
+    <usetemplate
+     canceltext="Cancel"
+     name="yesnocancelbuttons"
+     notext="Unfreeze"
+     yestext="Freeze"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="EjectAvatarFullname"
    type="alertmodal">
 Eject [AVATAR_NAME] from your land?
@@ -1569,6 +1585,33 @@ Eject this avatar from your land?
    type="alertmodal">
 Eject [AVATAR_NAME] from your land?
     <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="Eject"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="EjectAvatarMultiple"
+   type="alertmodal">
+Eject the following avatars from your land?
+
+[RESIDENTS]
+    <usetemplate
+     canceltext="Cancel"
+     name="yesnocancelbuttons"
+     notext="Eject and Ban"
+     yestext="Eject"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="EjectAvatarMultipleNoBan"
+   type="alertmodal">
+Eject the following avatars from your land?
+
+[RESIDENTS]
     <usetemplate
      name="okcancelbuttons"
      notext="Cancel"
@@ -4461,6 +4504,46 @@ Remove estate manager for this estate only or for [ALL_ESTATES]?
    type="alert">
 Kick [EVIL_USER] from this estate?
     <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alert.tga"
+   label="Confirm Kick"
+   name="EstateKickMultiple"
+   type="alert">
+Kick the following residents from this estate?
+
+[RESIDENTS]
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alert.tga"
+   label="Confirm Teleport Home"
+   name="EstateTeleportHomeUser"
+   type="alert">
+Teleport [AVATAR_NAME] home?
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alert.tga"
+   label="Confirm Teleport Home"
+   name="EstateTeleportHomeMultiple"
+   type="alert">
+Teleport the following residents home?
+
+[RESIDENTS]
     <usetemplate
      name="okcancelbuttons"
      notext="Cancel"
