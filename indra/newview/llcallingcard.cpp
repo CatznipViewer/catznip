@@ -645,7 +645,10 @@ void LLAvatarTracker::processChange(LLMessageSystem* msg)
 		}
 	}
 
-	addChangedMask(LLFriendObserver::POWERS, agent_id);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	addChangedMask(LLFriendObserver::POWERS, (agent_id == gAgent.getID()) ? agent_related : agent_id);
+// [/SL:KB]
+//	addChangedMask(LLFriendObserver::POWERS, agent_id);
 	notifyObservers();
 }
 

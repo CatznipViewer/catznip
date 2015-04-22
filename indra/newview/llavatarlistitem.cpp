@@ -40,6 +40,10 @@
 #include "llavatarnamecache.h"
 #include "llavatariconctrl.h"
 #include "lloutputmonitorctrl.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-04 (Catznip-3.0)
+#include "llnotificationsutil.h"
+#include "llslurl.h"
+// [/SL:KB]
 #include "lltooldraganddrop.h"
 
 bool LLAvatarListItem::sStaticInitialized = false;
@@ -65,7 +69,10 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	LLFriendObserver(),
 	mAvatarIcon(NULL),
 	mAvatarName(NULL),
-	mLastInteractionTime(NULL),
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	mTextField(NULL),
+// [/SL:KB]
+//	mLastInteractionTime(NULL),
 	mIconPermissionOnline(NULL),
 	mIconPermissionMap(NULL),
 	mIconPermissionEditMine(NULL),
@@ -76,7 +83,10 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	mOnlineStatus(E_UNKNOWN),
 	mShowInfoBtn(true),
 	mShowProfileBtn(true),
-	mShowPermissions(false),
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	mShowPermissions(SP_NEVER),
+// [/SL:KB]
+//	mShowPermissions(false),
 	mHovered(false),
 	mAvatarNameCacheConnection()
 {
@@ -105,18 +115,38 @@ BOOL  LLAvatarListItem::postBuild()
 {
 	mAvatarIcon = getChild<LLAvatarIconCtrl>("avatar_icon");
 	mAvatarName = getChild<LLTextBox>("avatar_name");
-	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	mTextField = getChild<LLTextBox>("text_field");
+	mTextField->setVisible(false);
+	mTextField->setRightAlign();
+// [/SL:KB]
+//	mLastInteractionTime = getChild<LLTextBox>("last_interaction");
 
-	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
-	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
-	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
+//	mIconPermissionOnline = getChild<LLIconCtrl>("permission_online_icon");
+//	mIconPermissionMap = getChild<LLIconCtrl>("permission_map_icon");
+//	mIconPermissionEditMine = getChild<LLIconCtrl>("permission_edit_mine_icon");
 	mIconPermissionEditTheirs = getChild<LLIconCtrl>("permission_edit_theirs_icon");
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	// NOTE-Catznip: we're leaving the names unchanged even though they're buttons now because we change too much LL code otherwise
+	mIconPermissionOnline = getChild<LLButton>("permission_online_icon");
+	mIconPermissionMap = getChild<LLButton>("permission_map_icon");
+	mIconPermissionEditMine = getChild<LLButton>("permission_edit_mine_icon");
+
+	mIconPermissionOnline->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_ONLINE_STATUS));
+	mIconPermissionMap->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_MAP_LOCATION));
+	mIconPermissionEditMine->setClickedCallback(boost::bind(&LLAvatarListItem::onPermissionBtnToggle, this, (S32)LLRelationship::GRANT_MODIFY_OBJECTS));
+// [/SL:KB]
+
 	mIconPermissionOnline->setVisible(false);
 	mIconPermissionMap->setVisible(false);
 	mIconPermissionEditMine->setVisible(false);
 	mIconPermissionEditTheirs->setVisible(false);
 
 	mSpeakingIndicator = getChild<LLOutputMonitorCtrl>("speaking_indicator");
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3)
+	mSpeakingIndicator->setVisible(false);
+// [/SL:KB]
+
 	mInfoBtn = getChild<LLButton>("info_btn");
 	mProfileBtn = getChild<LLButton>("profile_btn");
 
@@ -138,6 +168,18 @@ BOOL  LLAvatarListItem::postBuild()
 		sStaticInitialized = true;
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	// Disable all controls by default so we'll know which ones we can skip in updateChildren()
+	mIconPermissionOnline->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionMap->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionEditMine->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionEditTheirs->setEnabled(SP_NEVER != mShowPermissions);
+	mSpeakingIndicator->setEnabled(false);
+	mInfoBtn->setEnabled(mShowInfoBtn);
+	mProfileBtn->setEnabled(mShowProfileBtn);
+	mTextField->LLUICtrl::setEnabled(false);					// Disabled and invisible by default (see above)
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -152,7 +194,10 @@ void LLAvatarListItem::handleVisibilityChange ( BOOL new_visibility )
     }
 }
 
-void LLAvatarListItem::fetchAvatarName()
+//void LLAvatarListItem::fetchAvatarName()
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+void LLAvatarListItem::fetchAvatarName(EAvatarListNameFormat name_format)
+// [/SL:KB]
 {
 	if (mAvatarId.notNull())
 	{
@@ -160,7 +205,10 @@ void LLAvatarListItem::fetchAvatarName()
 		{
 			mAvatarNameCacheConnection.disconnect();
 		}
-		mAvatarNameCacheConnection = LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+		mAvatarNameCacheConnection = LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2, name_format));
+// [/SL:KB]
+//		mAvatarNameCacheConnection = LLAvatarNameCache::get(getAvatarId(), boost::bind(&LLAvatarListItem::onAvatarNameCache, this, _2));
 	}
 }
 
@@ -183,7 +231,10 @@ void LLAvatarListItem::onMouseEnter(S32 x, S32 y, MASK mask)
 	mHovered = true;
 	LLPanel::onMouseEnter(x, y, mask);
 
-	showPermissions(mShowPermissions);
+//	showPermissions(mShowPermissions);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	refreshPermissions();
+// [/SL:KB]
 	updateChildren();
 }
 
@@ -196,7 +247,10 @@ void LLAvatarListItem::onMouseLeave(S32 x, S32 y, MASK mask)
 	mHovered = false;
 	LLPanel::onMouseLeave(x, y, mask);
 
-	showPermissions(false);
+//	showPermissions(false);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	refreshPermissions();
+// [/SL:KB]
 	updateChildren();
 }
 
@@ -208,7 +262,10 @@ void LLAvatarListItem::changed(U32 mask)
 
 	if (mask & LLFriendObserver::POWERS)
 	{
-		showPermissions(mShowPermissions && mHovered);
+//		showPermissions(mShowPermissions && mHovered);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+		refreshPermissions();
+// [/SL:KB]
 		updateChildren();
 	}
 }
@@ -277,13 +334,22 @@ void LLAvatarListItem::setState(EItemState item_style)
 	mAvatarIcon->setColor(item_icon_color_map[item_style]);
 }
 
-void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+//void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes/* = false*/, bool is_resident/* = true*/)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes /*= false*/, bool is_resident /*= true*/)
+// [/SL:KB]
 {
 	if (mAvatarId.notNull())
 		LLAvatarTracker::instance().removeParticularFriendObserver(mAvatarId, this);
 
 	mAvatarId = id;
-	mSpeakingIndicator->setSpeakerId(id, session_id);
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3)
+	// Only set the speaker if it's currently non-null
+	if (mSpeakingIndicator->getSpeakerId().notNull())
+		mSpeakingIndicator->setSpeakerId(id, session_id);
+	mSessionId = session_id;
+// [/SL:KB]
+//	mSpeakingIndicator->setSpeakerId(id, session_id);
 
 	// We'll be notified on avatar online status changes
 	if (!ignore_status_changes && mAvatarId.notNull())
@@ -294,41 +360,125 @@ void LLAvatarListItem::setAvatarId(const LLUUID& id, const LLUUID& session_id, b
 		mAvatarIcon->setValue(id);
 
 		// Set avatar name.
-		fetchAvatarName();
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+		fetchAvatarName(name_format);
+// [/SL:KB]
+//		fetchAvatarName();
 	}
 }
 
-void LLAvatarListItem::showLastInteractionTime(bool show)
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-24 (Catznip-2.3)
+void LLAvatarListItem::setShowPermissions(EShowPermissionType spType)
 {
-	mLastInteractionTime->setVisible(show);
+	mShowPermissions = spType;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	// Reenable the controls for updateChildren()
+	mIconPermissionOnline->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionMap->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionEditMine->setEnabled(SP_NEVER != mShowPermissions);
+	mIconPermissionEditTheirs->setEnabled(SP_NEVER != mShowPermissions);
+// [/SL:KB]
+	
+	refreshPermissions();
+	updateChildren();
+}
+// [/SL:KB]
+
+void LLAvatarListItem::showTextField(bool show)
+{
+//	mLastInteractionTime->setVisible(show);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	mTextField->setVisible(show);
+// [/SL:KB]
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	// Reenable for updateChildren()
+	mTextField->LLUICtrl::setEnabled(show);
+// [/SL:KB]
 	updateChildren();
 }
 
-void LLAvatarListItem::setLastInteractionTime(U32 secs_since)
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+void LLAvatarListItem::setTextField(const std::string& text)
 {
-	mLastInteractionTime->setValue(formatSeconds(secs_since));
+	mTextField->setValue(text);
 }
+
+void LLAvatarListItem::setTextFieldDistance(F32 distance)
+{
+	mTextField->setValue(llformat("%3.1fm", distance));
+}
+
+void LLAvatarListItem::setTextFieldSeconds(U32 secs_since)
+{
+	mTextField->setValue(formatSeconds(secs_since));
+}
+// [/SL:KB]
+//void LLAvatarListItem::setLastInteractionTime(U32 secs_since)
+//{
+//	mLastInteractionTime->setValue(formatSeconds(secs_since));
+//}
 
 void LLAvatarListItem::setShowInfoBtn(bool show)
 {
 	mShowInfoBtn = show;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	// Reenable for updateChildren()
+	mInfoBtn->setEnabled(show);
+// [/SL:KB]
 }
 
 void LLAvatarListItem::setShowProfileBtn(bool show)
 {
 	mShowProfileBtn = show;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	// Reenable for updateChildren()
+	mProfileBtn->setEnabled(show);
+// [/SL:KB]
 }
 
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
 void LLAvatarListItem::showSpeakingIndicator(bool visible)
 {
 	// Already done? Then do nothing.
-	if (mSpeakingIndicator->getVisible() == (BOOL)visible)
+	if (mSpeakingIndicator->getEnabled() == (BOOL)visible)
 		return;
-// Disabled to not contradict with SpeakingIndicatorManager functionality. EXT-3976
-// probably this method should be totally removed.
-//	mSpeakingIndicator->setVisible(visible);
-//	updateChildren();
+
+	if (visible)
+		mSpeakingIndicator->setSpeakerId(mAvatarId, mSessionId);
+	else
+		mSpeakingIndicator->setSpeakerId(LLUUID::null);
+	mSpeakingIndicator->setEnabled(visible);
+	updateChildren();
 }
+// [/SL:KB]
+//void LLAvatarListItem::showSpeakingIndicator(bool visible)
+//{
+//	// Already done? Then do nothing.
+//	if (mSpeakingIndicator->getVisible() == (BOOL)visible)
+//		return;
+//// Disabled to not contradict with SpeakingIndicatorManager functionality. EXT-3976
+//// probably this method should be totally removed.
+////	mSpeakingIndicator->setVisible(visible);
+////	updateChildren();
+//}
+
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
+void LLAvatarListItem::showVolumeSlider(bool visible)
+{
+	// Already done? Then do nothing.
+	if (mSpeakingIndicator->getShowVolumeSlider() == visible)
+		return;
+
+	// TODO-Catznip: fix hard-coded width values here, updateChildren() and LLOutputMonitorCtrl::showVolumeSlider()
+	const LLRect& rctIndicator = mSpeakingIndicator->getRect();
+	S32 nWidthDelta = (visible) ? 90 : -90;
+	mSpeakingIndicator->reshape(rctIndicator.getWidth() + nWidthDelta, rctIndicator.getHeight());
+	mSpeakingIndicator->showVolumeSlider(visible);
+
+	updateChildren();
+}
+// [/SL:KB]
 
 void LLAvatarListItem::setAvatarIconVisible(bool visible)
 {
@@ -352,6 +502,81 @@ void LLAvatarListItem::onProfileBtnClick()
 {
 	LLAvatarActions::showProfile(mAvatarId);
 }
+
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-11-04 (Catznip-2.3)
+void LLAvatarListItem::onPermissionBtnToggle(S32 toggleRight)
+{
+	LLRelationship* pRelationship = const_cast<LLRelationship*>(LLAvatarTracker::instance().getBuddyInfo(mAvatarId));
+	if (!pRelationship)
+		return;
+
+	if (LLRelationship::GRANT_MODIFY_OBJECTS != toggleRight)
+	{
+		S32 rights = pRelationship->getRightsGrantedTo();
+		if ( (rights & toggleRight) == toggleRight)
+		{
+			rights &= ~toggleRight;
+			// Revoke the permission locally until we hear back from the region
+			pRelationship->revokeRights(toggleRight, LLRelationship::GRANT_NONE);
+		}
+		else
+		{
+			rights |= toggleRight;
+			// Grant the permission locally until we hear back from the region
+			pRelationship->grantRights(toggleRight, LLRelationship::GRANT_NONE);
+		}
+
+		LLAvatarPropertiesProcessor::getInstance()->sendFriendRights(mAvatarId, rights);
+		refreshPermissions();
+		updateChildren();
+	}
+	else
+	{
+		LLSD args;
+		args["NAME"] = LLSLURL("agent", mAvatarId, "fullname").getSLURLString();
+
+		if (!pRelationship->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS))
+		{
+			LLNotificationsUtil::add("GrantModifyRights", args, LLSD(), 
+				boost::bind(&LLAvatarListItem::onModifyRightsConfirmationCallback, this, _1, _2, true));
+		}
+		else
+		{
+			LLNotificationsUtil::add("RevokeModifyRights", args, LLSD(),
+				boost::bind(&LLAvatarListItem::onModifyRightsConfirmationCallback, this, _1, _2, false));
+		}
+	}
+}
+
+void LLAvatarListItem::onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (option == 0)
+	{
+		LLRelationship* pRelationship = const_cast<LLRelationship*>(LLAvatarTracker::instance().getBuddyInfo(mAvatarId));
+		if (!pRelationship)
+			return;
+
+		S32 rights = pRelationship->getRightsGrantedTo();
+		if (!fGrant)
+		{
+			rights &= ~LLRelationship::GRANT_MODIFY_OBJECTS;
+			// Revoke the permission locally until we hear back from the region
+			pRelationship->revokeRights(LLRelationship::GRANT_MODIFY_OBJECTS, LLRelationship::GRANT_NONE);
+		}
+		else
+		{
+			rights |= LLRelationship::GRANT_MODIFY_OBJECTS;
+			// Grant the permission locally until we hear back from the region
+			pRelationship->grantRights(LLRelationship::GRANT_MODIFY_OBJECTS, LLRelationship::GRANT_NONE);
+		}
+
+		LLAvatarPropertiesProcessor::getInstance()->sendFriendRights(mAvatarId, rights);
+		refreshPermissions();
+		updateChildren();
+	}
+}
+// [/SL:KB]
 
 BOOL LLAvatarListItem::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
@@ -390,10 +615,16 @@ std::string LLAvatarListItem::getAvatarToolTip() const
 	return mAvatarName->getToolTip();
 }
 
-void LLAvatarListItem::updateAvatarName()
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+void LLAvatarListItem::updateAvatarName(EAvatarListNameFormat name_format)
 {
-	fetchAvatarName();
+	fetchAvatarName(name_format);
 }
+// [/SL:KB]
+//void LLAvatarListItem::updateAvatarName()
+//{
+//	fetchAvatarName();
+//}
 
 //== PRIVATE SECITON ==========================================================
 
@@ -402,12 +633,33 @@ void LLAvatarListItem::setNameInternal(const std::string& name, const std::strin
 	LLTextUtil::textboxSetHighlightedVal(mAvatarName, mAvatarNameStyle, name, highlight);
 }
 
-void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format)
+{
+	switch (name_format)
+	{
+		case NF_USERNAME:
+			return (!avName.getAccountName().empty()) ? avName.getAccountName() : avName.getDisplayName();
+		case NF_COMPLETENAME:
+			return avName.getCompleteName();
+		case NF_DISPLAYNAME:
+		default:
+			return avName.getDisplayName();
+	}
+}
+// [/SL:KB]
+
+//void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, EAvatarListNameFormat name_format)
+// [/SL:KB]
 {
 	mAvatarNameCacheConnection.disconnect();
 
-	setAvatarName(av_name.getDisplayName());
-	setAvatarToolTip(av_name.getUserName());
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	setAvatarName(formatAvatarName(av_name, name_format));
+// [/SL:KB]
+//	setAvatarName(av_name.mDisplayName);
 
 	//requesting the list to resort
 	notifyParent(LLSD().with("sort", LLSD()));
@@ -500,8 +752,16 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	//speaking indicator width + padding
 	S32 speaking_indicator_width = avatar_item->getRect().getWidth() - avatar_item->mSpeakingIndicator->getRect().mLeft;
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	// Text field textbox width + padding
+	S32 text_field_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+// [/SL:KB]
+
 	//profile btn width + padding
-	S32 profile_btn_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+//	S32 profile_btn_width = avatar_item->mSpeakingIndicator->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+	S32 profile_btn_width = avatar_item->mTextField->getRect().mLeft - avatar_item->mProfileBtn->getRect().mLeft;
+// [/SL:KB]
 
 	//info btn width + padding
 	S32 info_btn_width = avatar_item->mProfileBtn->getRect().mLeft - avatar_item->mInfoBtn->getRect().mLeft;
@@ -519,7 +779,10 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	S32 permission_edit_theirs_width = avatar_item->mIconPermissionEditMine->getRect().mLeft - avatar_item->mIconPermissionEditTheirs->getRect().mLeft;
 
 	// last interaction time textbox width + padding
-	S32 last_interaction_time_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mLastInteractionTime->getRect().mLeft;
+//	S32 last_interaction_time_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mLastInteractionTime->getRect().mLeft;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+//	S32 text_field_width = avatar_item->mIconPermissionEditTheirs->getRect().mLeft - avatar_item->mTextField->getRect().mLeft;
+// [/SL:KB]
 
 	// avatar icon width + padding
 	S32 icon_width = avatar_item->mAvatarName->getRect().mLeft - avatar_item->mAvatarIcon->getRect().mLeft;
@@ -529,13 +792,19 @@ void LLAvatarListItem::initChildrenWidths(LLAvatarListItem* avatar_item)
 	S32 index = ALIC_COUNT;
 	sChildrenWidths[--index] = icon_width;
 	sChildrenWidths[--index] = 0; // for avatar name we don't need its width, it will be calculated as "left available space"
-	sChildrenWidths[--index] = last_interaction_time_width;
+//	sChildrenWidths[--index] = last_interaction_time_width;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+//	sChildrenWidths[--index] = text_field_width;
+// [/SL:KB]
 	sChildrenWidths[--index] = permission_edit_theirs_width;
 	sChildrenWidths[--index] = permission_edit_mine_width;
 	sChildrenWidths[--index] = permission_map_width;
 	sChildrenWidths[--index] = permission_online_width;
 	sChildrenWidths[--index] = info_btn_width;
 	sChildrenWidths[--index] = profile_btn_width;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-2.6)
+	sChildrenWidths[--index] = text_field_width;
+// [/SL:KB]
 	sChildrenWidths[--index] = speaking_indicator_width;
 	llassert(index == 0);
 }
@@ -545,9 +814,13 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << LL_ENDL;
 	LL_DEBUGS("AvatarItemReshape") << "Updating for: " << getAvatarName() << LL_ENDL;
 
-	S32 name_new_width = getRect().getWidth();
-	S32 ctrl_new_left = name_new_width;
+//	S32 name_new_width = getRect().getWidth();
+//	S32 ctrl_new_left = name_new_width;
 	S32 name_new_left = sLeftPadding;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+	S32 name_new_right = getRect().getWidth();
+	S32 ctrl_new_left = name_new_right;
+// [/SL:KB]
 
 	// iterate through all children and set them into correct position depend on each child visibility
 	// assume that child indexes are in back order: the first in Enum is the last (right) in the item
@@ -561,13 +834,24 @@ void LLAvatarListItem::updateChildren()
 
 		LL_DEBUGS("AvatarItemReshape") << "Processing control: " << control->getName() << LL_ENDL;
 		// skip invisible views
-		if (!control->getVisible()) continue;
+//		if (!control->getVisible()) continue;
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2011-05-13 (Catznip-3.0.0a) | Added: Catznip-2.6.0a
+		if (!control->getEnabled())
+			continue;
+// [/SL:KB]
 
 		S32 ctrl_width = sChildrenWidths[i]; // including space between current & left controls
+// [SL:KB] - Patch: Control-OutputMonitor | Checked: 2012-09-04 (Catznip-3.3)
+		// HACK-Catznip: sChildrenWidths is static so shared among all instances so we need to selective adjust the size here
+		if ( (ALIC_SPEAKER_INDICATOR == i) && (mSpeakingIndicator->getShowVolumeSlider()) )
+		{
+			ctrl_width += 90;
+		}
+// [/SL:KB]
 
-		// decrease available for 
-		name_new_width -= ctrl_width;
-		LL_DEBUGS("AvatarItemReshape") << "width: " << ctrl_width << ", name_new_width: " << name_new_width << LL_ENDL;
+//		// decrease available for 
+//		name_new_width -= ctrl_width;
+//		LL_DEBUGS("AvatarItemReshape") << "width: " << ctrl_width << ", name_new_width: " << name_new_width << LL_ENDL;
 
 		LLRect control_rect = control->getRect();
 		LL_DEBUGS("AvatarItemReshape") << "rect before: " << control_rect << LL_ENDL;
@@ -577,11 +861,19 @@ void LLAvatarListItem::updateChildren()
 			// assume that this is the last iteration,
 			// so it is not necessary to save "ctrl_new_left" value calculated on previous iterations
 			ctrl_new_left = sLeftPadding;
-			name_new_left = ctrl_new_left + ctrl_width;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+			if (mAvatarIcon->getVisible())
+				name_new_left = ctrl_new_left + ctrl_width;
+// [/SL:KB]
+//			name_new_left = ctrl_new_left + ctrl_width;
 		}
 		else
 		{
 			ctrl_new_left -= ctrl_width;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+			if (control->getVisible())
+				name_new_right = ctrl_new_left;
+// [/SL:KB]
 		}
 
 		LL_DEBUGS("AvatarItemReshape") << "ctrl_new_left: " << ctrl_new_left << LL_ENDL;
@@ -602,13 +894,19 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << "name rect before: " << name_view_rect << LL_ENDL;
 
 	// apply paddings
-	name_new_width -= sLeftPadding;
-	name_new_width -= sNameRightPadding;
+//	name_new_width -= sLeftPadding;
+//	name_new_width -= sNameRightPadding;
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+	name_new_right -= sNameRightPadding;
+// [/SL:KB]
 
 	name_view_rect.setLeftTopAndSize(
 		name_new_left,
 		name_view_rect.mTop,
-		name_new_width,
+// [SL:KB] - Patch: Control-AvatarList | Checked: 2012-07-04 (Catznip-3.3.0)
+		name_new_right - name_new_left,
+// [/SL:KB]
+//		name_new_width,
 		name_view_rect.getHeight());
 
 	name_view->setShape(name_view_rect);
@@ -616,14 +914,35 @@ void LLAvatarListItem::updateChildren()
 	LL_DEBUGS("AvatarItemReshape") << "name rect after: " << name_view_rect << LL_ENDL;
 }
 
-bool LLAvatarListItem::showPermissions(bool visible)
+//bool LLAvatarListItem::showPermissions(bool visible)
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+bool LLAvatarListItem::refreshPermissions()
+// [/SL:KB]
 {
+	static const std::string strUngrantedOverlay = "Permission_Ungranted";
+
 	const LLRelationship* relation = LLAvatarTracker::instance().getBuddyInfo(getAvatarId());
-	if(relation && visible)
+//	if(relation && visible)
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	if( (relation) && (((SP_HOVER == mShowPermissions) && (mHovered)) || (SP_NONDEFAULT == mShowPermissions)) )
+// [/SL:KB]
 	{
-		mIconPermissionOnline->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS));
-		mIconPermissionMap->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION));
-		mIconPermissionEditMine->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS));
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+		bool fGrantedOnline = relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS);
+		mIconPermissionOnline->setVisible( (!fGrantedOnline) || (mHovered) );
+		mIconPermissionOnline->setImageOverlay( (fGrantedOnline) ? "" : strUngrantedOverlay);
+
+		bool fGrantedMap = relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION);
+		mIconPermissionMap->setVisible( (fGrantedMap) || (mHovered) );
+		mIconPermissionMap->setImageOverlay( (fGrantedMap) ? "" : strUngrantedOverlay);
+
+		bool fGrantedEditMine = relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS);
+		mIconPermissionEditMine->setVisible( (fGrantedEditMine) || (mHovered) );
+		mIconPermissionEditMine->setImageOverlay( (fGrantedEditMine) ? "" : strUngrantedOverlay);
+// [/SL:KB]
+//		mIconPermissionOnline->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_ONLINE_STATUS));
+//		mIconPermissionMap->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MAP_LOCATION));
+//		mIconPermissionEditMine->setVisible(relation->isRightGrantedTo(LLRelationship::GRANT_MODIFY_OBJECTS));
 		mIconPermissionEditTheirs->setVisible(relation->isRightGrantedFrom(LLRelationship::GRANT_MODIFY_OBJECTS));
 	}
 	else
@@ -649,9 +968,14 @@ LLView* LLAvatarListItem::getItemChildView(EAvatarListItemChildIndex child_view_
 	case ALIC_NAME:
 		child_view = mAvatarName;
 		break;
-	case ALIC_INTERACTION_TIME:
-		child_view = mLastInteractionTime;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	case ALIC_TEXT_FIELD:
+		child_view = mTextField;
 		break;
+// [/SL:KB]
+//	case ALIC_INTERACTION_TIME:
+//		child_view = mLastInteractionTime;
+//		break;
 	case ALIC_SPEAKER_INDICATOR:
 		child_view = mSpeakingIndicator;
 		break;
