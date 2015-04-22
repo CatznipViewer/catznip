@@ -1,0 +1,14 @@
+[UI/ProfileGroupFloater]
+- added   : "ShowProfileFloaters" setting to show profiles in a floater rather than the sidebar or web profiles
+- added   : "ShowGroupFloaters" setting to show group information in a floater rather than the sidebar
+- changed : "Copy to clipboard" button on the avatar profile to a flyoout button
+    -> added options to copy full name, display name, user name, SLurl and UUID- fixed : drag-and-drop of inventory items onto a profile no longer works [see LLPanelProfileView::handleDragAndDrop()]
+- changed : rearranged the profile action buttons
+    -> removed "Add Friend"
+    -> added "Pay" and "View Web Profile" buttons
+    -> replaced the overflow button with a gear menu button
+- fixed   : some group members are listed more than once in the group member list
+- fixed   : main group panel doesn't show a progress message when refreshing/opening a group
+- fixed   : crash due to mismatched LLAvatarPropertiesProcessor::addObserver/removeObserver in LLPanelClassifiedInfo
+- fixed   : crash when a profile floater is closed before the properties request(s) complete(s) (thankies crash reporter)
+- fixed   : crash when toggling voice after opening someone's profile in a floater (thankies crash reporter)
