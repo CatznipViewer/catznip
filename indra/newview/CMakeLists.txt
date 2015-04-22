@@ -286,6 +286,7 @@ set(viewer_SOURCE_FILES
     llfloaterscriptedprefs.cpp
     llfloaterscriptlimits.cpp
     llfloatersearch.cpp
+    llfloatersearchcontainer.cpp
     llfloatersellland.cpp
     llfloatersettingsdebug.cpp
     llfloatersidepanelcontainer.cpp
@@ -454,6 +455,7 @@ set(viewer_SOURCE_FILES
     llpanelplaceinfo.cpp
     llpanelplaceprofile.cpp
     llpanelplaces.cpp
+    llpanelplacessearch.cpp
     llpanelplacestab.cpp
     llpanelprimmediacontrols.cpp
     llpanelprofile.cpp
@@ -517,6 +519,7 @@ set(viewer_SOURCE_FILES
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
     llsearchcombobox.cpp
+    llsearchdirectory.cpp
     llsearchhistory.cpp
     llsecapi.cpp
     llsechandler_basic.cpp
@@ -897,6 +900,7 @@ set(viewer_HEADER_FILES
     llfloaterscriptedprefs.h
     llfloaterscriptlimits.h
     llfloatersearch.h
+    llfloatersearchcontainer.h
     llfloatersellland.h
     llfloatersettingsdebug.h
     llfloatersidepanelcontainer.h
@@ -1056,6 +1060,7 @@ set(viewer_HEADER_FILES
     llpanelplaceinfo.h
     llpanelplaceprofile.h
     llpanelplaces.h
+    llpanelplacessearch.h
     llpanelplacestab.h
     llpanelprimmediacontrols.h
     llpanelprofile.h
@@ -1116,6 +1121,7 @@ set(viewer_HEADER_FILES
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
     llsearchcombobox.h
+    llsearchdirectory.h
     llsearchhistory.h
     llsecapi.h
     llsechandler_basic.h
