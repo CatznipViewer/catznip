@@ -60,8 +60,4 @@
 		<combo_box.item label="Kopiér" name="Copy"/>
 		<combo_box.item label="Original" name="Original"/>
 	</combo_box>
-	<spinner label="Pris:" name="Edit Cost"/>
-	<text name="CurrencySymbol">
-		L$
-	</text>
 </floater>
