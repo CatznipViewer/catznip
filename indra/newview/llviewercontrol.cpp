@@ -75,6 +75,13 @@
 #include "llslurl.h"
 #include "llstartup.h"
 #include "llupdaterservice.h"
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-11-28 (Catznip-3.6)
+#include "llchatentry.h"
+#include "llfloaterimsession.h"
+#include "llfloaterimsessiontab.h"
+#include "llimview.h"
+#include "llviewerchat.h"
+// [/SL:KB]
 
 // Third party library includes
 #include <boost/algorithm/string.hpp>
@@ -553,6 +560,28 @@ bool handleSpellCheckChanged()
 	return true;
 }
 
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-11-28 (Catznip-3.6)
+bool handleChatMultiLineChanged(const LLSD& sdValue)
+{
+	LLFloaterIMSessionTab* pSession = LLFloaterIMSessionTab::findConversation(LLUUID::null);
+	if ( (pSession) && (pSession->getChatBox()) )
+	{
+		pSession->getChatBox()->enableSingleLineMode(!sdValue.asBoolean());
+	}
+
+	for (std::map<LLUUID, LLIMModel::LLIMSession*>::const_iterator itSession = LLIMModel::instance().mId2SessionMap.begin(); 
+			itSession != LLIMModel::instance().mId2SessionMap.end(); ++itSession)
+	{
+		pSession = LLFloaterIMSessionTab::findConversation(itSession->first);
+		if ( (pSession) && (pSession->getChatBox()) )
+		{
+			pSession->getChatBox()->enableSingleLineMode(!sdValue.asBoolean());
+		}
+	}
+	return true;
+}
+// [/SL:KB]
+
 bool toggle_agent_pause(const LLSD& newvalue)
 {
 	if ( newvalue.asBoolean() )
@@ -664,6 +693,11 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderPerformanceTest")->getSignal()->connect(boost::bind(&handleRenderPerfTestChanged, _2));
 	gSavedSettings.getControl("TextureMemory")->getSignal()->connect(boost::bind(&handleVideoMemoryChanged, _2));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2012-01-10 (Catznip-3.2)
+	gSavedSettings.getControl("ChatMultiLine")->getSignal()->connect(boost::bind(&handleChatMultiLineChanged, _2));
+	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
+	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLViewerChat::signalChatFontChanged));
+// [/SL:KB]
 	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));
 	gSavedSettings.getControl("ConsoleMaxLines")->getSignal()->connect(boost::bind(&handleConsoleMaxLinesChanged, _2));
 	gSavedSettings.getControl("UploadBakedTexOld")->getSignal()->connect(boost::bind(&handleUploadBakedTexOldChanged, _2));
