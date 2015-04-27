@@ -540,9 +540,17 @@ BOOL LLVoiceClient::lipSyncEnabled()
 
 void LLVoiceClient::setMuteMic(bool muted)
 {
-	mMuteMic = muted;
-	updateMicMuteLogic();
-	mMicroChangedSignal();
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+	if (mMuteMic != muted)
+	{
+		mMuteMic = muted;
+		updateMicMuteLogic();
+		mMicroChangedSignal();
+	}
+// [/SL:KB]
+//	mMuteMic = muted;
+//	updateMicMuteLogic();
+//	mMicroChangedSignal();
 }
 
 
@@ -551,9 +559,17 @@ void LLVoiceClient::setMuteMic(bool muted)
 
 void LLVoiceClient::setUserPTTState(bool ptt)
 {
-	mUserPTTState = ptt;
-	updateMicMuteLogic();
-	mMicroChangedSignal();
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+	if (mUserPTTState != ptt)
+	{
+		mUserPTTState = ptt;
+		updateMicMuteLogic();
+		mMicroChangedSignal();
+	}
+// [/SL:KB]
+//	mUserPTTState = ptt;
+//	updateMicMuteLogic();
+//	mMicroChangedSignal();
 }
 
 bool LLVoiceClient::getUserPTTState()

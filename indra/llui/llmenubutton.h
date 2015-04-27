@@ -73,6 +73,9 @@ public:
 	void setMenu(const std::string& menu_filename, EMenuPosition position = MP_TOP_LEFT);
 	void setMenu(LLToggleableMenu* menu, EMenuPosition position = MP_TOP_LEFT, bool take_ownership = false);
 
+// [SL:KB] - Patch: Control-MenuButton | Checked: 2014-02-06 (Catznip-3.6)
+	EMenuPosition getMenuPosition() const { return mMenuPosition; }
+// [/SL:KB]
 	void setMenuPosition(EMenuPosition position) { mMenuPosition = position; }
 
 protected:

@@ -82,6 +82,9 @@ protected:
 	virtual const std::string& getAnchorViewName() = 0;
 
 	void reshapeWindow();
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	void releaseNewMessagesState();
+// [/SL:KB]
 
 	// pointer to a corresponding channel's instance
 	LLNotificationsUI::LLScreenChannel*	mChannel;
@@ -151,7 +154,10 @@ private:
  * 
  * It contains a list list of all active IM sessions.
  */
-class LLIMWellWindow : public LLSysWellWindow, LLInitClass<LLIMWellWindow>
+//class LLIMWellWindow : public LLSysWellWindow, LLInitClass<LLIMWellWindow>
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+class LLIMWellWindow : public LLSysWellWindow, LLInitClass<LLIMWellWindow>, LLIMSessionObserver
+// [/SL:KB]
 {
 public:
 	LLIMWellWindow(const LLSD& key);
@@ -163,6 +169,15 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	// LLIMSessionObserver observe triggers
+	/*virtual*/ void sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg);
+    /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {}
+	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id) {};
+	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
+	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
+// [/SL:KB]
+
 	void addObjectRow(const LLUUID& notification_id, bool new_message = false);
 	void removeObjectRow(const LLUUID& notification_id);
 	void closeAll();
@@ -171,10 +186,44 @@ protected:
 	/*virtual*/ const std::string& getAnchorViewName() { return IM_WELL_ANCHOR_NAME; }
 
 private:
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	LLChiclet* findIMChiclet(const LLUUID& sessionId);
+// [/SL:KB]
 	LLChiclet* findObjectChiclet(const LLUUID& notification_id);
 
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	void addIMRow(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId);
+	void delIMRow(const LLUUID& sessionId);
+// [/SL:KB]
 	bool confirmCloseAll(const LLSD& notification, const LLSD& response);
 	void closeAllImpl();
+
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	/**
+	 * Scrolling row panel.
+	 */
+	class IMRowPanel: public LLPanel
+	{
+	public:
+		IMRowPanel(const LLUUID& sessionId, S32 chicletCounter, const std::string& name, const LLUUID& otherParticipantId);
+		/*virtual*/ ~IMRowPanel();
+		void onMouseEnter(S32 x, S32 y, MASK mask);
+		void onMouseLeave(S32 x, S32 y, MASK mask);
+		BOOL handleMouseDown(S32 x, S32 y, MASK mask);
+		BOOL handleRightMouseDown(S32 x, S32 y, MASK mask);
+
+		void closeConversation();
+	private:
+		static const S32 CHICLET_HPAD = 10;
+		void onAvatarNameCache(const LLUUID& agent_id, const LLAvatarName& av_name);
+		void onChicletSizeChanged(LLChiclet* ctrl, const LLSD& param);
+
+	public:
+		LLIMChiclet* mChiclet;
+	private:
+		LLButton*    mCloseBtn;
+	};
+// [/SL:KB]
 
 	class ObjectRowPanel: public LLPanel
 	{
