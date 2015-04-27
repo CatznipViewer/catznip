@@ -4678,12 +4678,19 @@ void LLCallingCardBridge::performAction(LLInventoryModel* model, std::string act
 		if (item && (item->getCreatorUUID() != gAgent.getID()) &&
 			(!item->getCreatorUUID().isNull()))
 		{
-			std::string callingcard_name = LLCacheName::getDefaultName();
-			LLAvatarName av_name;
-			if (LLAvatarNameCache::get(item->getCreatorUUID(), &av_name))
+//			std::string callingcard_name = LLCacheName::getDefaultName();
+//			LLAvatarName av_name;
+//			if (LLAvatarNameCache::get(item->getCreatorUUID(), &av_name))
+//			{
+//				callingcard_name = av_name.getCompleteName();
+//			}
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+			std::string callingcard_name;
+			if (!gCacheName->getFullName(item->getCreatorUUID(), callingcard_name))
 			{
-				callingcard_name = av_name.getCompleteName();
+				callingcard_name = item->getName();
 			}
+// [/SL:KB]
 			LLUUID session_id = gIMMgr->addSession(callingcard_name, IM_NOTHING_SPECIAL, item->getCreatorUUID());
 			if (session_id != LLUUID::null)
 			{

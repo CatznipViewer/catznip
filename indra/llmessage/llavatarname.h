@@ -63,6 +63,10 @@ public:
 	// Return true if the name is made up from legacy or temporary data
 	bool isDisplayNameDefault() const { return mIsDisplayNameDefault; }
 	
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+	bool isTemporaryName() const { return mIsTemporaryName; }
+// [/SL:KB]
+
 	// For normal names, returns "James Linden (james.linden)"
 	// When display names are disabled returns just "James Linden"
 	std::string getCompleteName() const;
