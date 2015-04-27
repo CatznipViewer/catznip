@@ -55,7 +55,6 @@ class LLWindow;
 class LLView;
 class LLHelp;
 
-
 // this enum is used by the llview.h (viewer) and the llassetstorage.h (viewer and sim) 
 enum EDragAndDropType
 {
@@ -100,6 +99,11 @@ enum EAddPosition
 	ADD_DEFAULT
 };
 
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-11-20 (Catznip-3.6)
+LLUUID find_ui_sound(const char* name);
+void make_ui_sound(const LLUUID& sound_id);
+// [/SL:KB]
 
 void make_ui_sound(const char* name);
 void make_ui_sound_deferred(const char * name);

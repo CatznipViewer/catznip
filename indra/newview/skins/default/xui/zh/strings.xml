@@ -626,6 +626,9 @@ http://secondlife.com/viewer-access-faq
 	<string name="AvatarMuted">
 		封鎖的
 	</string>
+	<string name="AvatarTyping">
+		打字
+	</string>
 	<string name="anim_express_afraid">
 		害怕
 	</string>

@@ -33,6 +33,9 @@
 #include "llviewerwindow.h"
 #include "llnotificationmanager.h"
 #include "llnotifications.h"
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+#include "llviewerchat.h"
+// [/SL:KB]
 
 using namespace LLNotificationsUI;
 
@@ -75,6 +78,18 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 	
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+	bool playSound = (!notification->isDND()) && (gSavedSettings.getBOOL("PlaySoundGroupNotice"));
+	if (playSound)
+	{
+		const std::string& strSound = notification->getSound();
+		if (!strSound.empty())
+		{
+			make_ui_sound(LLViewerChat::getUISoundFromSetting(strSound));
+		}
+	}
+// [/SL:KB]
+
 	LLHandlerUtil::logGroupNoticeToIMGroup(notification);
 
 	LLPanel* notify_box = new LLToastGroupNotifyPanel(notification);

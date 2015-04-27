@@ -55,6 +55,9 @@
 #include "llmenubutton.h"
 #include "lltoggleablemenu.h"
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+#include "llpanelimcontrolpanel.h"
+// [/SL:KB]
 
 const F32 REFRESH_INTERVAL = 1.0f;
 
@@ -120,6 +123,13 @@ LLFloaterIMSessionTab::~LLFloaterIMSessionTab()
 	if (mGearMenuHandle.get())
 	{
 		mGearMenuHandle.get()->die();
+	}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::isTabbedContainer())
+	{
+		delete mParticipantList;
 	}
 // [/SL:KB]
 
@@ -307,9 +317,11 @@ BOOL LLFloaterIMSessionTab::postBuild()
 //	mGearBtn = getChild<LLButton>("gear_btn");
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	mGearBtn = getChild<LLMenuButton>("gear_btn");
-	if (mIsP2PChat)
+
+	std::string strGearMenu = (mIsP2PChat) ? "menu_im_conversation.xml" : ((mSession) && (mSession->isGroupSessionType()) ? "menu_im_conversation_group.xml" : "");
+	if (!strGearMenu.empty())
 	{
-		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_im_conversation.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
+		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(strGearMenu, LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
 		mGearBtn->setMenu(pMenu, mGearBtn->getMenuPosition(), false);
 		mGearMenuHandle = pMenu->getHandle();
 	}
@@ -365,6 +377,19 @@ BOOL LLFloaterIMSessionTab::postBuild()
 			LLSpeakerMgr* pSpeakerMgr = (mIsNearbyChat) ? (LLSpeakerMgr*)LLLocalSpeakerMgr::getInstance() : LLIMModel::getInstance()->getSpeakerManager(mSessionID);
 			mParticipantList = new LLParticipantAvatarList(pSpeakerMgr, pAvatarList);
 		}
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+		else
+		{
+			LLPanel* pIMPanel = new LLPanelIMControlPanel(LLIMModel::getInstance()->getOtherParticipantID(mSessionID));
+
+			LLRect rect = mParticipantListPanel->getRect();
+			rect.translate(-rect.mLeft, -rect.mBottom);
+			pIMPanel->setShape(rect);
+			pIMPanel->setFollowsAll();
+
+			mParticipantListPanel->addChild(pIMPanel);
+		}
+// [/SL:KB]
 	}
 // [/SL:KB]
 	
@@ -443,7 +468,10 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	mRefreshTimer->start();
 	initBtns();
 
-	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
+//	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL("IMShowControlPanel"))
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
+	if (mIsParticipantListExpanded != (bool)gSavedSettings.getBOOL(getShowControlPanelControl()))
+// [/SL:KB
 	{
 		LLFloaterIMSessionTab::onSlide(this);
 	}
@@ -474,6 +502,13 @@ LLParticipantList* LLFloaterIMSessionTab::getParticipantList()
 // [/SL:KB]
 //	return dynamic_cast<LLParticipantList*>(LLFloaterIMContainer::getInstance()->getSessionModel(mSessionID));
 }
+
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
+const std::string LLFloaterIMSessionTab::getShowControlPanelControl() const
+{
+	return (isNearbyChat()) ? "IMShowControlPanelNearby" : ( (!mIsP2PChat) ? "IMShowControlPanelGroup" : "IMShowControlPanelP2P");
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 void LLFloaterIMSessionTab::setParticipantList(LLParticipantList* participant_list)
@@ -510,6 +545,9 @@ void LLFloaterIMSessionTab::draw()
 			}
 // [/SL:KB]
 		}
+// [SL:KB] - Patch: Chat-Base | Checked: 2014-02-21 (Catznip-3.6)
+		refresh();
+// [/SL:KB]
 
 		// Restart the refresh timer
 		mRefreshTimer->setTimerExpirySec(REFRESH_INTERVAL);
@@ -518,6 +556,19 @@ void LLFloaterIMSessionTab::draw()
 	LLTransientDockableFloater::draw();
 }
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2012-02-19 (Catznip-3.2)
+BOOL LLFloaterIMSessionTab::handleUnicodeChar(llwchar uni_char, BOOL called_from_parent)
+{
+	if ( (!called_from_parent) && (iswgraph(uni_char)) && (hasFocus()) && (!mInputEditor->hasFocus()) )
+	{
+		// Give focus to the line editor and let it handle the character
+		mInputEditor->setFocus(TRUE);
+		return mInputEditor->handleUnicodeChar(uni_char, called_from_parent);
+	}
+	return LLTransientDockableFloater::handleUnicodeChar(uni_char, called_from_parent);
+}
+// [/SL:KB]
+ 
 void LLFloaterIMSessionTab::enableDisableCallBtn()
 {
     mVoiceButton->setEnabled(
@@ -571,6 +622,10 @@ std::string LLFloaterIMSessionTab::appendTime()
 	utc_time = time_corrected();
 	std::string timeStr ="["+ LLTrans::getString("TimeHour")+"]:["
 		+LLTrans::getString("TimeMin")+"]";
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
+	if (gSavedSettings.getBOOL("ChatTimestampSeconds"))
+		timeStr += ":[" + LLTrans::getString("TimeSec") + "]";
+// [/SL:KB]
 
 	LLSD substitution;
 
@@ -710,49 +765,55 @@ void LLFloaterIMSessionTab::updateConversationViewParticipant(const LLUUID& part
 
 void LLFloaterIMSessionTab::refreshConversation()
 {
-	// Note: We collect participants names to change the session name only in the case of ad-hoc conversations
-	bool is_ad_hoc = (mSession ? mSession->isAdHocSessionType() : false);
-	uuid_vec_t participants_uuids; // uuids vector for building the added participants name string
-	// For P2P chat, we still need to update the session name who may have changed (switch display name for instance)
-	if (mIsP2PChat && mSession)
+//	// Note: We collect participants names to change the session name only in the case of ad-hoc conversations
+//	bool is_ad_hoc = (mSession ? mSession->isAdHocSessionType() : false);
+//	uuid_vec_t participants_uuids; // uuids vector for building the added participants name string
+//	// For P2P chat, we still need to update the session name who may have changed (switch display name for instance)
+//	if (mIsP2PChat && mSession)
+//	{
+//		participants_uuids.push_back(mSession->mOtherParticipantID);
+//	}
+//
+//// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+//	if (!LLFloaterIMContainerBase::isTabbedContainer())
+//	{
+//// [/SL:KB]
+//		conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
+//		while (widget_it != mConversationsWidgets.end())
+//		{
+//			// Add the participant to the list except if it's the agent itself (redundant)
+//			if (is_ad_hoc && (widget_it->first != gAgentID))
+//			{
+//				participants_uuids.push_back(widget_it->first);
+//			}
+//			widget_it->second->refresh();
+//			widget_it->second->setVisible(TRUE);
+//			++widget_it;
+//		}
+//// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+//	}
+//// [/SL:KB]
+//
+//	if (is_ad_hoc || mIsP2PChat)
+//	{
+//		// Build the session name and update it
+//		std::string session_name;
+//		if (participants_uuids.size() != 0)
+//		{
+//			LLAvatarActions::buildResidentsString(participants_uuids, session_name);
+//		}
+//		else
+//		{
+//			session_name = LLIMModel::instance().getName(mSessionID);
+//		}
+//		updateSessionName(session_name);
+//	}
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+	if ( (mIsP2PChat) || ((mSession) && (mSession->isAdHocSessionType())) )
 	{
-		participants_uuids.push_back(mSession->mOtherParticipantID);
+		updateSessionName();
 	}
-
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
-	{
 // [/SL:KB]
-		conversations_widgets_map::iterator widget_it = mConversationsWidgets.begin();
-		while (widget_it != mConversationsWidgets.end())
-		{
-			// Add the participant to the list except if it's the agent itself (redundant)
-			if (is_ad_hoc && (widget_it->first != gAgentID))
-			{
-				participants_uuids.push_back(widget_it->first);
-			}
-			widget_it->second->refresh();
-			widget_it->second->setVisible(TRUE);
-			++widget_it;
-		}
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
-	}
-// [/SL:KB]
-
-	if (is_ad_hoc || mIsP2PChat)
-	{
-		// Build the session name and update it
-		std::string session_name;
-		if (participants_uuids.size() != 0)
-		{
-			LLAvatarActions::buildResidentsString(participants_uuids, session_name);
-		}
-		else
-		{
-			session_name = LLIMModel::instance().getName(mSessionID);
-		}
-		updateSessionName(session_name);
-	}
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	if (!LLFloaterIMContainerBase::isTabbedContainer())
@@ -807,7 +868,7 @@ void LLFloaterIMSessionTab::refreshConversation()
 	}
 // [/SL:KB]
 //	updateHeaderAndToolbar();
-	refresh();
+//	refresh();
 }
 
 // Copied from LLFloaterIMContainer::createConversationViewParticipant(). Refactor opportunity!
@@ -899,10 +960,16 @@ void LLFloaterIMSessionTab::hideOrShowTitle()
 	floater_contents->setShape(contents_rect);
 }
 
-void LLFloaterIMSessionTab::updateSessionName(const std::string& name)
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
+void LLFloaterIMSessionTab::updateSessionName()
 {
-	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + name);
+	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + getShortTitle());
 }
+// [/SL:KB]
+//void LLFloaterIMSessionTab::updateSessionName(const std::string& name)
+//{
+//	mInputEditor->setLabel(LLTrans::getString("IM_to_label") + " " + name);
+//}
 
 //void LLFloaterIMSessionTab::hideAllStandardButtons()
 //{
@@ -931,14 +998,20 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 			                : (is_expanded ? getString("expcol_button_tearoff_and_expanded_tooltip") :
 			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
-	// The button (>>) should be disabled for torn off P2P conversations.
-	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-21 (Catznip-3.7)
+	mExpandCollapseBtn->setEnabled( (is_tabbed) || (!is_not_torn_off) );
+// [/SL:KB
+//	// The button (>>) should be disabled for torn off P2P conversations.
+//	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((!is_tabbed) && (is_not_torn_off)) );
 }
 
 void LLFloaterIMSessionTab::updateShowParticipantList()
 {
 	// Participant list should be visible only in torn off floaters.
-	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
+//	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded) && (!mIsP2PChat);
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-20 (Catznip-3.7)
+	bool is_participant_list_visible = ((LLFloaterIMContainerBase::isTabbedContainer()) || (isTornOff())) && (mIsParticipantListExpanded);
+// [/SL:KB
 	mParticipantListAndHistoryStack->collapsePanel(mParticipantListPanel, !is_participant_list_visible);
 	mParticipantListPanel->setVisible(is_participant_list_visible);
 }
@@ -1085,13 +1158,16 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 	}
 	else ///< floater is torn off
 	{
-		if (!self->mIsP2PChat)
+//		if (!self->mIsP2PChat)
 		{
             // The state must toggle the collapsed state of the panel
            should_be_expanded = self->mParticipantListPanel->isCollapsed();
 
 			// Update the expand/collapse flag of the participant list panel and save it
-            gSavedSettings.setBOOL("IMShowControlPanel", should_be_expanded);
+// [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
+			gSavedSettings.setBOOL(self->getShowControlPanelControl(), should_be_expanded);
+// [/SL:KB
+//            gSavedSettings.setBOOL("IMShowControlPanel", should_be_expanded);
             self->mIsParticipantListExpanded = should_be_expanded;
             
             // Refresh for immediate feedback
@@ -1262,7 +1338,7 @@ void LLFloaterIMSessionTab::updateGearBtn()
 
 	BOOL prevVisibility = mGearBtn->getVisible();
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-08-17 (Catznip-3.6)
-	mGearBtn->setVisible(mIsP2PChat);
+	mGearBtn->setVisible( (mIsP2PChat) || ((mSession) && (mSession->isGroupSessionType())) );
 // [/SL:KB]
 //	mGearBtn->setVisible(checkIfTornOff() && mIsP2PChat);
 

@@ -152,14 +152,17 @@ static void on_avatar_name_cache_toast(const LLUUID& agent_id,
 	args["SESSION_ID"] = msg["session_id"];
 	args["SESSION_TYPE"] = msg["session_type"];
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainerBase::showConversation, LLFloaterIMContainerBase::getInstance(), msg["session_id"].asUUID()));
+	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainerBase::showConversation, LLFloaterIMContainerBase::getInstance(), msg["session_id"].asUUID(), true));
 // [/SL:KB]
 //	LLNotificationsUtil::add("IMToast", args, args, boost::bind(&LLFloaterIMContainer::showConversation, LLFloaterIMContainer::getInstance(), msg["session_id"].asUUID()));
 }
 
 void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 {
-    std::string user_preferences;
+//    std::string user_preferences;
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	U32 user_preferences = LLIMModel::MSGOPT_NONE;
+// [/SL:KB]
 	LLUUID participant_id = msg[is_dnd_msg ? "FROM_ID" : "from_id"].asUUID();
 	LLUUID session_id = msg[is_dnd_msg ? "SESSION_ID" : "session_id"].asUUID();
     LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(session_id);
@@ -180,7 +183,12 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [/SL:KB]
 	LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::getConversation(session_id);
 	bool store_dnd_message = false; // flag storage of a dnd message
-	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	bool is_session_visible = session_floater->isShown();
+	bool is_session_focused = (gFocusMgr.getAppHasFocus()) && (session_floater->hasFocus());
+	bool trigger_sound = (!is_session_focused) && (msg["trigger_sound"].asBoolean()) && (!gAgent.isDoNotDisturb());
+// [/SL:KB]
+//	bool is_session_focused = session_floater->isTornOff() && session_floater->hasFocus();
 	if (!LLFloater::isVisible(im_box) || im_box->isMinimized())
 	{
 		conversations_floater_status = CLOSED;
@@ -205,7 +213,10 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     {
 		if (msg["source_type"].asInteger() == CHAT_SOURCE_OBJECT)
 		{
-			user_preferences = gSavedSettings.getString("NotificationObjectIMOptions");
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+			user_preferences = gSavedSettings.getU32("NotificationObjectIMOptions");
+// [/SL:KB]
+//			user_preferences = gSavedSettings.getString("NotificationObjectIMOptions");
 			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundObjectIM") == TRUE))
 			{
 				make_ui_sound("UISndNewIncomingIMSession");
@@ -213,92 +224,128 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 		}
 		else
 		{
-    	user_preferences = gSavedSettings.getString("NotificationNearbyChatOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE))
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+			user_preferences = gSavedSettings.getU32("NotificationNearbyChatOptions");
+// [/SL:KB]
+//    	user_preferences = gSavedSettings.getString("NotificationNearbyChatOptions");
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if ( (trigger_sound) && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE) )
 			{
-				make_ui_sound("UISndNewIncomingIMSession");
-    }
-		}
-	}
-    else if(session->isP2PSessionType())
-    {
-        if (LLAvatarTracker::instance().isBuddy(participant_id))
-        {
-        	user_preferences = gSavedSettings.getString("NotificationFriendIMOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
-			{
-				make_ui_sound("UISndNewIncomingIMSession");
+				make_ui_sound(LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_CHAT_AGENT));
 			}
-        }
-        else
-        {
-        	user_preferences = gSavedSettings.getString("NotificationNonFriendIMOptions");
-			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
-			{
-				make_ui_sound("UISndNewIncomingIMSession");
-        }
-    }
-	}
-    else if(session->isAdHocSessionType())
-    {
-    	user_preferences = gSavedSettings.getString("NotificationConferenceIMOptions");
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
-		{
-			make_ui_sound("UISndNewIncomingIMSession");
-    }
-	}
-    else if(session->isGroupSessionType())
-    {
-    	user_preferences = gSavedSettings.getString("NotificationGroupChatOptions");
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
-		{
-			make_ui_sound("UISndNewIncomingIMSession");
+// [/SL:KB]
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNearbyChatIM") == TRUE))
+//			{
+//				make_ui_sound("UISndNewIncomingIMSession");
+//    }
 		}
-    }
+	}
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	else
+	{
+		LLUUID idSound;
+		user_preferences = LLIMModel::getMessageOptions(session, (trigger_sound) ? &idSound : NULL);
+		if (idSound.notNull())
+		{
+			make_ui_sound(idSound);
+		}
+	}
+// [/SL:KB]
+//    else if(session->isP2PSessionType())
+//    {
+//        if (LLAvatarTracker::instance().isBuddy(participant_id))
+//        {
+//        	user_preferences = gSavedSettings.getString("NotificationFriendIMOptions");
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundFriendIM") == TRUE))
+//			{
+//				make_ui_sound("UISndNewIncomingIMSession");
+//			}
+//        }
+//        else
+//        {
+//        	user_preferences = gSavedSettings.getString("NotificationNonFriendIMOptions");
+//			if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNonFriendIM") == TRUE))
+//			{
+//				make_ui_sound("UISndNewIncomingIMSession");
+//        }
+//    }
+//	}
+//    else if(session->isAdHocSessionType())
+//    {
+//    	user_preferences = gSavedSettings.getString("NotificationConferenceIMOptions");
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundConferenceIM") == TRUE))
+//		{
+//			make_ui_sound("UISndNewIncomingIMSession");
+//    }
+//	}
+//    else if(session->isGroupSessionType())
+//    {
+//    	user_preferences = gSavedSettings.getString("NotificationGroupChatOptions");
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundGroupChatIM") == TRUE))
+//		{
+//			make_ui_sound("UISndNewIncomingIMSession");
+//		}
+//    }
 
     // actions:
 
     // 0. nothing - exit
-    if (("noaction" == user_preferences ||
-    		ON_TOP_AND_ITEM_IS_SELECTED == conversations_floater_status)
-    	    && session_floater->isMessagePaneExpanded())
+//    if (("noaction" == user_preferences ||
+//    		ON_TOP_AND_ITEM_IS_SELECTED == conversations_floater_status)
+//    	    && session_floater->isMessagePaneExpanded())
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	// Skip processing of the message if the user indicated they don't want to be notified for this message type, or if the session currently has active focus
+	// (and we're using legacy tabs, or the CHUI message pane is expanded)
+	if ( ((LLIMModel::MSGOPT_NONE == user_preferences) || (is_session_focused)) && ((im_box->isTabbedContainer()) || (session_floater->isMessagePaneExpanded())) )
+// [/SL:KB]
     {
     	return;
     }
 
     // 1. open floater and [optional] surface it
-    if ("openconversations" == user_preferences &&
-    		(CLOSED == conversations_floater_status
-    				|| NOT_ON_TOP == conversations_floater_status))
+//    if ("openconversations" == user_preferences &&
+//    		(CLOSED == conversations_floater_status
+//    				|| NOT_ON_TOP == conversations_floater_status))
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	// Open the conversations floater for this message type depending on user preference and current focus
+	if ( (LLIMModel::MSGOPT_POPUP & user_preferences) && ( (!session_floater->getHost()) || (!im_box->hasFocus())) )
+// [/SL:KB]
     {
     	if(!gAgent.isDoNotDisturb())
         {
-			// Open conversations floater
-			LLFloaterReg::showInstance("im_container");
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-			if (!im_box->isTabbedContainer())
-			{
-				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
-			}
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+			LLFloaterIMContainerBase::getInstance()->showConversation(session_floater->getSessionID(), gFocusMgr.getKeyboardFocus() == NULL);
+
+			// We might have just made the session floater visible and/or focused so update those two variables
+			is_session_visible = session_floater->isShown();
+			is_session_focused = (gFocusMgr.getAppHasFocus()) && (session_floater->hasFocus());
 // [/SL:KB]
-//			im_box->collapseMessagesPane(false);
-			if (session_floater)
-			{
-				if (session_floater->getHost())
-				{
-					if (NULL != im_box && im_box->isMinimized())
-					{
-						LLFloater::onClickMinimize(im_box);
-					}
-				}
-				else
-				{
-					if (session_floater->isMinimized())
-					{
-						LLFloater::onClickMinimize(session_floater);
-					}
-				}
-			}
+//			// Open conversations floater
+//			LLFloaterReg::showInstance("im_container");
+//// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+//			if (!im_box->isTabbedContainer())
+//			{
+//				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
+//			}
+//// [/SL:KB]
+////			im_box->collapseMessagesPane(false);
+//			if (session_floater)
+//			{
+//				if (session_floater->getHost())
+//				{
+//					if (NULL != im_box && im_box->isMinimized())
+//					{
+//						LLFloater::onClickMinimize(im_box);
+//					}
+//				}
+//				else
+//				{
+//					if (session_floater->isMinimized())
+//					{
+//						LLFloater::onClickMinimize(session_floater);
+//					}
+//				}
+//			}
 		}
         else
         {
@@ -308,12 +355,17 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
     }
 
     // 2. Flash line item
-    if ("openconversations" == user_preferences
-    		|| ON_TOP == conversations_floater_status
-    		|| ("toast" == user_preferences && ON_TOP != conversations_floater_status)
-		|| ("flash" == user_preferences && (CLOSED == conversations_floater_status
-				 	 	 	 	 	 	|| NOT_ON_TOP == conversations_floater_status))
-		|| is_dnd_msg)
+//    if ("openconversations" == user_preferences
+//    		|| ON_TOP == conversations_floater_status
+//    		|| ("toast" == user_preferences && ON_TOP != conversations_floater_status)
+//		|| ("flash" == user_preferences && (CLOSED == conversations_floater_status
+//				 	 	 	 	 	 	|| NOT_ON_TOP == conversations_floater_status))
+//		|| is_dnd_msg)
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	// Flash the message tab if the session isn't currently visible (regardless of focus)
+	// (Additionally, set a non-timer flash to indicate unread IMs even when we're set as DnD)
+    if (!is_session_visible)
+// [/SL:KB]
     {
     	if(!LLMuteList::getInstance()->isMuted(participant_id))
     	{
@@ -321,11 +373,14 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 			{
 				store_dnd_message = true;
 			}
-			else
+//			else
 			{
-				if (is_dnd_msg && (ON_TOP == conversations_floater_status || 
-									NOT_ON_TOP == conversations_floater_status || 
-									CLOSED == conversations_floater_status))
+//				if (is_dnd_msg && (ON_TOP == conversations_floater_status || 
+//									NOT_ON_TOP == conversations_floater_status || 
+//									CLOSED == conversations_floater_status))
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+				if ( (is_dnd_msg) || (gAgent.isDoNotDisturb()) )
+// [/SL:KB]
 				{
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
 					im_box->setConversationHighlighted(session_id, true);
@@ -344,11 +399,15 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 	}
 
     // 3. Flash FUI button
-    if (("toast" == user_preferences || "flash" == user_preferences) &&
-    		(CLOSED == conversations_floater_status
-		|| NOT_ON_TOP == conversations_floater_status)
-		&& !is_session_focused
-		&& !is_dnd_msg) //prevent flashing FUI button because the conversation floater will have already opened
+//    if (("toast" == user_preferences || "flash" == user_preferences) &&
+//    		(CLOSED == conversations_floater_status
+//		|| NOT_ON_TOP == conversations_floater_status)
+//		&& !is_session_focused
+//		&& !is_dnd_msg) //prevent flashing FUI button because the conversation floater will have already opened
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	// Flash the FUI button according to user preference if the session isn't currently visible & it's not a stored DnD message
+	if ( (LLIMModel::MSGOPT_FLASH & user_preferences) && (!is_session_visible) && (!is_dnd_msg) ) // Prevent flashing FUI button because the conversation floater will have already opened
+// [/SL:KB]
 	{
 		if(!LLMuteList::getInstance()->isMuted(participant_id))
     {
@@ -373,11 +432,16 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 	}
 
     // 4. Toast
-    if ((("toast" == user_preferences) &&
-		(ON_TOP_AND_ITEM_IS_SELECTED != conversations_floater_status) &&
-		(!session_floater->isTornOff() || !LLFloater::isVisible(session_floater)))
-    		    || !session_floater->isMessagePaneExpanded())
-
+//    if ((("toast" == user_preferences) &&
+//		(ON_TOP_AND_ITEM_IS_SELECTED != conversations_floater_status) &&
+//		(!session_floater->isTornOff() || !LLFloater::isVisible(session_floater)))
+//    		    || !session_floater->isMessagePaneExpanded())
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	// Show a toast for the message if ...
+	//   * the user has selected to show toasts for this type of conversation and the conversation doesn't currently have (keyboard) focus
+	//   * the session floater (is torn off and) has been collapsed to a single line
+	if ( ((LLIMModel::MSGOPT_TOAST & user_preferences) && (!is_session_focused)) || (!session_floater->isMessagePaneExpanded()) )
+// [/SL:KB]
     {
         //Show IM toasts (upper right toasts)
         // Skip toasting for system messages and for nearby chat
@@ -686,7 +750,7 @@ void LLIMModel::LLIMSession::addMessage(const std::string& from, const LLUUID& f
 	if (mSpeakers && from_id.notNull())
 	{
 		mSpeakers->speakerChatted(from_id);
-		mSpeakers->setSpeakerTyping(from_id, FALSE);
+//		mSpeakers->setSpeakerTyping(from_id, FALSE);
 	}
 }
 
@@ -748,6 +812,71 @@ void LLIMModel::LLIMSession::loadHistory()
 		addMessagesFromHistory(chat_history);
 	}
 }
+
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+
+// static
+U32 LLIMModel::getMessageOptions(const LLIMModel::LLIMSession* pSession, LLUUID* pidSound)
+{
+	U32 nFlags = 0;
+	if (pidSound)
+		pidSound->setNull();
+
+	if (pSession)
+	{
+		if (pSession->isP2PSessionType())
+		{
+			bool fIsFriend = LLAvatarTracker::instance().isBuddy(pSession->mOtherParticipantID);
+
+			U32 nToastSetting = gSavedSettings.getU32("NotificationIMP2PToast");
+			if ( (0 == nToastSetting) ||                   // Show toasts for all P2P conversations
+				 ((1 == nToastSetting) && (fIsFriend)) ||  // Show toasts only for friends
+				 ((2 == nToastSetting) && (!fIsFriend)) )  // Show toasts only for non-friends
+			{
+				nFlags |= MSGOPT_TOAST;
+			}
+
+			if (gSavedSettings.getBOOL("NotificationIMP2PFlash"))
+				nFlags |= MSGOPT_FLASH;
+
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if (pidSound)
+			{
+				if ( (fIsFriend) && (gSavedSettings.getBOOL("PlaySoundFriendIM")) )
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_FRIEND);
+				else if ( (!fIsFriend) && (gSavedSettings.getBOOL("PlaySoundNonFriendIM")) )
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_NONFRIEND);
+			}
+// [/SL:KB]
+		}
+		else
+		{
+			U32 nToastSetting = gSavedSettings.getU32("NotificationIMMultiToast");
+			if ( (0 == nToastSetting) ||                                        // Show toasts for all multi-person conversations
+				 ((1 == nToastSetting) && (pSession->isGroupSessionType())) ||  // Show toasts only for groups
+				 ((2 == nToastSetting) && (pSession->isAdHocSessionType())) )   // Show toasts only for conferences
+			{
+				nFlags |= MSGOPT_TOAST;
+			}
+
+			if (gSavedSettings.getBOOL("NotificationIMMultiFlash"))
+				nFlags |= MSGOPT_FLASH;
+
+// [SL:KB] - Patch: Chat-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+			if (pidSound)
+			{
+				if ( (pSession->isGroupSessionType()) && (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) )
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_GROUP);
+				else if ( (pSession->isAdHocSessionType()) && (gSavedSettings.getBOOL("PlaySoundConferenceIM")) )
+					*pidSound = LLViewerChat::getUISoundFromChatEvent(LLViewerChat::SND_IM_CONFERENCE);
+			}
+// [/SL:KB]
+		}
+	}
+
+	return nFlags;
+}
+// [/SL:KB]
 
 LLIMModel::LLIMSession* LLIMModel::findIMSession(const LLUUID& session_id) const
 {
@@ -1083,8 +1212,11 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
 }
 
-bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
-						   const std::string& utf8_text, bool log2file /* = true */) { 
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//						   const std::string& utf8_text, bool log2file /* = true */) { 
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, bool log2file /* = true */, bool trigger_sound /* = true */) { 
+// [/SL:KB]
 
 	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
 	if (!session) return false;
@@ -1105,6 +1237,9 @@ bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, co
 	arg["from_id"] = from_id;
 	arg["time"] = LLLogChat::timestamp(false);
 	arg["session_type"] = session->mSessionType;
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+	arg["trigger_sound"] = trigger_sound;
+// [/SL:KB]
 	mNewMsgSignal(arg);
 
 	return true;
@@ -1363,7 +1498,7 @@ void LLIMModel::sendMessage(const std::string& utf8_text,
 		if (speaker_mgr)
 		{
 			speaker_mgr->speakerChatted(gAgentID);
-			speaker_mgr->setSpeakerTyping(gAgentID, FALSE);
+//			speaker_mgr->setSpeakerTyping(gAgentID, FALSE);
 		}
 	}
 
@@ -2765,15 +2900,42 @@ void LLIMMgr::addMessage(
 		}
 
         //Play sound for new conversations
-		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
-        {
-            make_ui_sound("UISndNewIncomingIMSession");
-        }
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+		if (!gAgent.isDoNotDisturb())
+		{
+			LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
+			if (session->isP2PSessionType())
+			{
+				if (LLAvatarTracker::instance().isBuddy(other_participant_id))
+					eEvent = (gSavedSettings.getBOOL("PlaySoundFriendIM")) ? LLViewerChat::SND_CONV_FRIEND : LLViewerChat::SND_NONE;
+				else
+					eEvent = (gSavedSettings.getBOOL("PlaySoundNonFriendIM")) ? LLViewerChat::SND_CONV_NONFRIEND : LLViewerChat::SND_NONE;
+			}
+			else if (session->isAdHocSessionType())
+			{
+				eEvent = (gSavedSettings.getBOOL("PlaySoundConferenceIM")) ? LLViewerChat::SND_CONV_CONFERENCE : LLViewerChat::SND_NONE;
+			}
+			else if(session->isGroupSessionType())
+			{
+				eEvent = (gSavedSettings.getBOOL("PlaySoundGroupChatIM")) ? LLViewerChat::SND_CONV_GROUP : LLViewerChat::SND_NONE;
+			}
+			
+			if (LLViewerChat::SND_NONE != eEvent)
+				make_ui_sound(LLViewerChat::getUISoundFromChatEvent(eEvent));
+		}
+// [/SL:KB]
+//		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
+//        {
+//			make_ui_sound("UISndNewIncomingIMSession");
+//        }
 	}
 
 	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat) && !skip_message)
 	{
-		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
+		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg, true, !new_session);
+// [/SL:KB]
+//		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
 	}
 
 	// Open conversation floater if offline messages are present
@@ -3449,25 +3611,35 @@ void LLIMMgr::noteMutedUsers(const LLUUID& session_id,
 	}
 }
 
-void LLIMMgr::processIMTypingStart(const LLIMInfo* im_info)
-{
-	processIMTypingCore(im_info, TRUE);
-}
+//void LLIMMgr::processIMTypingStart(const LLIMInfo* im_info)
+//{
+//	processIMTypingCore(im_info, TRUE);
+//}
 
-void LLIMMgr::processIMTypingStop(const LLIMInfo* im_info)
-{
-	processIMTypingCore(im_info, FALSE);
-}
+//void LLIMMgr::processIMTypingStop(const LLIMInfo* im_info)
+//{
+//	processIMTypingCore(im_info, FALSE);
+//}
 
-void LLIMMgr::processIMTypingCore(const LLIMInfo* im_info, BOOL typing)
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+void LLIMMgr::processIMTyping(const LLUUID& session_id, bool typing)
 {
-	LLUUID session_id = computeSessionID(im_info->mIMType, im_info->mFromID);
 	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_id);
-	if ( im_floater )
+	if (im_floater)
 	{
-		im_floater->processIMTyping(im_info, typing);
+		im_floater->processIMTyping(typing);
 	}
 }
+// [/SL:KB]
+//void LLIMMgr::processIMTypingCore(const LLIMInfo* im_info, BOOL typing)
+//{
+//	LLUUID session_id = computeSessionID(im_info->mIMType, im_info->mFromID);
+//	LLFloaterIMSession* im_floater = LLFloaterIMSession::findInstance(session_id);
+//	if ( im_floater )
+//	{
+//		im_floater->processIMTyping(im_info, typing);
+//	}
+//}
 
 class LLViewerChatterBoxSessionStartReply : public LLHTTPNode
 {
@@ -3660,7 +3832,10 @@ public:
 			if(offline == IM_OFFLINE)
 			{
 				LLStringUtil::format_map_t args;
-				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+				args["[LONG_TIMESTAMP]"] = formatted_longtime(timestamp);
+// [/SL:KB]
+//				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
 				saved = LLTrans::getString("Saved_message", args);
 			}
 			std::string buffer = saved + message;
