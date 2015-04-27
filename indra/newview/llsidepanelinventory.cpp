@@ -34,6 +34,9 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llfolderview.h"
@@ -149,11 +152,22 @@ LLSidepanelInventory::~LLSidepanelInventory()
 
 void handleInventoryDisplayInboxChanged()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLFloaterReg::const_instance_list_t& invFloaters = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = invFloaters.begin(); itFloater != invFloaters.end(); ++itFloater)
 	{
-		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+		LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(*itFloater);
+		if (pInvSP)
+		{
+			pInvSP->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+		}
 	}
+// [/SL:KB]
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (sidepanel_inventory)
+//	{
+//		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//	}
 }
 
 BOOL LLSidepanelInventory::postBuild()
@@ -450,7 +464,10 @@ void LLSidepanelInventory::onInfoButtonClicked()
 
 void LLSidepanelInventory::onShareButtonClicked()
 {
-	LLAvatarActions::shareWithAvatars(this);
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	LLAvatarActions::shareWithAvatars(mPanelMainInventory->getActivePanel());
+// [/SL:KB]
+//	LLAvatarActions::shareWithAvatars(this);
 }
 
 void LLSidepanelInventory::onShopButtonClicked()
@@ -480,7 +497,10 @@ void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 void LLSidepanelInventory::onWearButtonClicked()
 {
 	// Get selected items set.
-	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
+//	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs(getActivePanel());
+// [/SL:KB]
 	if (selected_uuids_set.empty()) return; // nothing selected
 
 	// Convert the set to a vector.
@@ -633,7 +653,10 @@ bool LLSidepanelInventory::canShare()
 bool LLSidepanelInventory::canWearSelected()
 {
 
-	std::set<LLUUID> selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+//	std::set<LLUUID> selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	const std::set<LLUUID> selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(getActivePanel());
+// [/SL:KB]
 
 	if (selected_uuids.empty())
 		return false;

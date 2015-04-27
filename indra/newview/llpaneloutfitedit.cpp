@@ -51,7 +51,7 @@
 #include "llbutton.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -502,6 +502,9 @@ BOOL LLPanelOutfitEdit::postBuild()
 	mInventoryItemsPanel = getChild<LLInventoryPanel>("folder_view");
 	mInventoryItemsPanel->setFilterTypes(ALL_ITEMS_MASK);
 	mInventoryItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-08 (Catznip-3.6)
+	mInventoryItemsPanel->getFilter().markDefault();
+// [/SL:KB]
 	mInventoryItemsPanel->setSelectCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
 	mInventoryItemsPanel->getRootFolder()->setReshapeCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
 
