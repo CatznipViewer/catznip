@@ -51,6 +51,10 @@ public:
 	virtual bool hasChildren() const = 0;
 	virtual LLInventoryType::EType getInventoryType() const = 0;
 	virtual void performAction(LLInventoryModel* model, std::string action)   = 0;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+	virtual bool isItemWorn() const = 0;
+	virtual LLAssetType::EType getAssetType() const = 0;
+// [/SL:KB]
 //	virtual LLWearableType::EType getWearableType() const = 0;
 	virtual EInventorySortGroup getSortGroup() const = 0;
 	virtual LLInventoryObject* getInventoryObject() const = 0;
