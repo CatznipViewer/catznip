@@ -677,13 +677,13 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 					disabled_items.push_back(std::string("Copy Asset UUID"));
 				}
 			}
-			items.push_back(std::string("Copy Separator"));
-			
-			items.push_back(std::string("Copy"));
-			if (!isItemCopyable())
-			{
-				disabled_items.push_back(std::string("Copy"));
-			}
+//			items.push_back(std::string("Copy Separator"));
+//			
+//			items.push_back(std::string("Copy"));
+//			if (!isItemCopyable())
+//			{
+//				disabled_items.push_back(std::string("Copy"));
+//			}
 
 			items.push_back(std::string("Cut"));
 			if (!isItemMovable() || !isItemRemovable())
@@ -703,6 +703,16 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 			}
 		}
 	}
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+	items.push_back(std::string("Copy Separator"));
+	
+	items.push_back(std::string("Copy"));
+	if (!isItemCopyable())
+	{
+		disabled_items.push_back(std::string("Copy"));
+	}
+// [/SL:KB]
 
 	// Don't allow items to be pasted directly into the COF or the inbox/outbox
 	if (!isCOFFolder() && !isInboxFolder() && !isOutboxFolder())
@@ -1761,7 +1771,10 @@ BOOL LLItemBridge::removeItem()
 	// we can't do this check because we may have items in a folder somewhere that is
 	// not yet in memory, so we don't want false negatives.  (If disabled, then we 
 	// know we only have links in the Outfits folder which we explicitly fetch.)
-	if (!gSavedSettings.getBOOL("InventoryLinking"))
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-06-01 (Catznip-3.0.0a) | Added: Catznip-2.0.1a
+	// Users move folders around and reuse links that way... if we know something has links then it's just bad not to warn them :|
+// [/SL:KB]
+//	if (!gSavedSettings.getBOOL("InventoryLinking"))
 	{
 		if (!item->getIsLinkType())
 		{
@@ -1808,19 +1821,33 @@ BOOL LLItemBridge::isItemCopyable() const
 	LLViewerInventoryItem* item = getItem();
 	if (item)
 	{
-		// Can't copy worn objects. DEV-15183
-		if(get_is_item_worn(mUUID))
+//		// Can't copy worn objects. DEV-15183
+//		if(get_is_item_worn(mUUID))
+//		{
+//			return FALSE;
+//		}
+
+//		// You can never copy a link.
+//		if (item->getIsLinkType())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+		// We'll allow copying a link if:
+		//   - its target is available
+		//   - it doesn't point to another link [see LLViewerInventoryItem::getLinkedItem() which returns NULL in that case]
+		if ( (item->getIsLinkType()) && (!item->getLinkedItem()) )
+// [/SL:KB]
 		{
 			return FALSE;
 		}
 
-		// You can never copy a link.
-		if (item->getIsLinkType())
-		{
-			return FALSE;
-		}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+		// User can copy the item if:
+		//   - the item (or its target in the case of a link) is "copy"
+		//   - and/or if the item (or its target in the case of a link) has a linkable asset type
+		// NOTE: we do *not* want to return TRUE on everything like LL seems to do in SL-2.1.0 because not all types are "linkable"
+		return (item->getPermissions().allowCopyBy(gAgent.getID())) || (LLAssetType::lookupCanLink(item->getType()));
+// [/SL:KB]
+//		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
 
-		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
 	}
 	return FALSE;
 }
@@ -3248,13 +3275,24 @@ void LLFolderBridge::pasteFromClipboard()
 					}
 				else
 				{
-					copy_inventory_item(
-						gAgent.getID(),
-						item->getPermissions().getOwner(),
-						item->getUUID(),
-						parent_id,
-						std::string(),
-						LLPointer<LLInventoryCallback>(NULL));
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+					if (item->getPermissions().allowCopyBy(gAgent.getID()))
+					{
+// [/SL:KB]
+						copy_inventory_item(
+							gAgent.getID(),
+							item->getPermissions().getOwner(),
+							item->getUUID(),
+							parent_id,
+							std::string(),
+							LLPointer<LLInventoryCallback>(NULL));
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-3.0.0a) | Added: Catznip-2.0.0a
+					}
+					else if (LLAssetType::lookupIsLinkType(item->getActualType()))
+					{
+						link_inventory_object(parent_id, item, LLPointer<LLInventoryCallback>(NULL));
+					}
+// [/SL:KB]
 				}
 			}
 		}
