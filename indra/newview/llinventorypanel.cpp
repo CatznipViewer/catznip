@@ -297,8 +297,8 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 		getFilter().setFilterEmptySystemFolders();
 	}
 	
-	// keep track of the clipboard state so that we avoid filtering too much
-	mClipboardState = LLClipboard::instance().getGeneration();
+//	// keep track of the clipboard state so that we avoid filtering too much
+//	mClipboardState = LLClipboard::instance().getGeneration();
 	
 	// Initialize base class params.
 	LLPanel::initFromParams(mParams);
@@ -372,6 +372,43 @@ const std::string LLInventoryPanel::getFilterSubString()
 	return getFilter().getFilterSubString();
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-12 (Catznip-3.3)
+void LLInventoryPanel::setSortBy(const std::string& sort_type)
+{
+	U32 sort_order_mask = getSortOrder();
+	if (sort_type == "name")
+	{
+		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
+	}
+	else if (sort_type == "date")
+	{
+		sort_order_mask |= LLInventoryFilter::SO_DATE;
+	}
+	else if (sort_type == "foldersalwaysbyname")
+	{
+		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
+		{
+			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
+		}
+		else
+		{
+			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
+		}
+	}
+	else if (sort_type == "systemfolderstotop")
+	{
+		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
+		{
+			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+		}
+		else
+		{
+			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+		}
+	}
+	setSortOrder(sort_order_mask);
+}
+// [/SL:KB]
 
 void LLInventoryPanel::setSortOrder(U32 order)
 {
@@ -400,7 +437,10 @@ void LLInventoryPanel::setHoursAgo(U32 hours)
 	getFilter().setHoursAgo(hours);
 }
 
-void LLInventoryPanel::setFilterLinks(U64 filter_links)
+//void LLInventoryPanel::setFilterLinks(U64 filter_links)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+void LLInventoryPanel::setFilterLinks(LLInventoryFilter::EFilterLink filter_links)
+// [/SL:KB]
 {
 	getFilter().setFilterLinks(filter_links);
 }
@@ -656,19 +696,19 @@ struct DirtyFilterFunctor : public LLFolderViewFunctor
 void LLInventoryPanel::idle(void* user_data)
 {
 	LLInventoryPanel* panel = (LLInventoryPanel*)user_data;
-	// Nudge the filter if the clipboard state changed
-	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
-	{
-		panel->mClipboardState = LLClipboard::instance().getGeneration();
-		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
-		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
-		if (trash_folder)
-		{
-            DirtyFilterFunctor dirtyFilterFunctor;
-			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
-		}
-
-	}
+//	// Nudge the filter if the clipboard state changed
+//	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
+//	{
+//		panel->mClipboardState = LLClipboard::instance().getGeneration();
+//		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+//		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
+//		if (trash_folder)
+//		{
+//            DirtyFilterFunctor dirtyFilterFunctor;
+//			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
+//		}
+//
+//	}
 
     // Take into account the fact that the root folder might be invalidated
     if (panel->mFolderRoot.get())

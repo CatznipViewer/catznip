@@ -159,6 +159,9 @@ LLFolderView::LLFolderView(const Params& p)
 	mPinningSelectedItem(FALSE),
 	mNeedsAutoSelect( FALSE ),
 	mAutoSelectOverride(FALSE),
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen(false),
+// [/SL:KB]
 	mNeedsAutoRename(FALSE),
 	mShowSelectionContext(FALSE),
 	mShowSingleSelection(FALSE),
@@ -166,7 +169,15 @@ LLFolderView::LLFolderView(const Params& p)
 	mSignalSelectCallback(0),
 	mMinWidth(0),
 	mDragAndDropThisFrame(FALSE),
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	mDragStartX(0),
+	mDragStartY(0),
+// [/SL:KB]
 	mCallbackRegistrar(NULL),
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	mFilterState(FILTER_STOPPED),
+	mFilterStateChanged(NULL),
+// [/SL:KB]
 	mUseEllipses(p.use_ellipses),
 	mDraggingOverItem(NULL),
 	mStatusTextBox(NULL),
@@ -267,6 +278,10 @@ LLFolderView::~LLFolderView( void )
 
 	//mViewModel->setFolderView(NULL);
 	mViewModel = NULL;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	delete mFilterStateChanged;
+// [/SL:KB]
 }
 
 BOOL LLFolderView::canFocusChildren() const
@@ -279,12 +294,39 @@ void LLFolderView::addFolder( LLFolderViewFolder* folder)
 	LLFolderViewFolder::addFolder(folder);
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2)
 void LLFolderView::closeAllFolders()
 {
+	folders_t openTopLevel;
+	for (folders_t::const_iterator itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	{
+		LLFolderViewFolder* pFolder = *itFolder;
+		if (pFolder->isOpen())
+			openTopLevel.push_back(pFolder);
+	}
+//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
+
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+	for (folders_t::const_iterator itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	{
+		(*itFolder)->setOpen(TRUE);
+	}
+//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
+	mScrollContainer->goToTop();
 	arrangeAll();
 }
+// [/SL:KB]
+//void LLFolderView::closeAllFolders()
+//{
+//	// Close all the folders
+//	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+//	arrangeAll();
+//}
 
 void LLFolderView::openTopLevelFolders()
 {
@@ -609,6 +651,24 @@ std::set<LLFolderViewItem*> LLFolderView::getSelectionList() const
 	std::copy(mSelectedItems.begin(), mSelectedItems.end(), std::inserter(selection, selection.begin()));
 	return selection;
 }
+
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+void LLFolderView::setDragStart(S32 screen_x, S32 screen_y)
+{
+	mDragStartX = screen_x;
+	mDragStartY = screen_y;
+}
+
+bool LLFolderView::isOverDragThreshold(S32 screen_x, S32 screen_y)
+{
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"], "DragAndDropDistanceThreshold", 3);
+	
+	S32 dX = screen_x - mDragStartX;
+	S32 dY = screen_y - mDragStartY;
+	
+	return (dX * dX) + (dY * dY) > drag_and_drop_threshold * drag_and_drop_threshold;
+}
+// [/SL:KB]
 
 bool LLFolderView::startDrag()
 {
@@ -947,7 +1007,7 @@ void LLFolderView::cut()
 			if (listener)
 			{
 				listener->cutToClipboard();
-				listener->removeItem();
+//				listener->removeItem();
 			}
 		}
 		
@@ -1592,6 +1652,15 @@ void LLFolderView::setShowSingleSelection(bool show)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+boost::signals2::connection LLFolderView::setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb)
+{
+	if (!mFilterStateChanged)
+		mFilterStateChanged = new filterstate_changed_signal_t();
+	return mFilterStateChanged->connect(cb);
+}
+// [/SL:KB]
+
 static LLTrace::BlockTimerStatHandle FTM_AUTO_SELECT("Open and Select");
 static LLTrace::BlockTimerStatHandle FTM_INVENTORY("Inventory");
 
@@ -1610,12 +1679,35 @@ void LLFolderView::update()
 
 	LLFolderViewFilter& filter_object = getFolderViewModel()->getFilter();
 
-	if (filter_object.isModified() && filter_object.isNotDefault())
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	if (filter_object.isModified())
 	{
-		mNeedsAutoSelect = TRUE;
+		bool fNotDefault = filter_object.isNotDefault();
+		if (fNotDefault)
+		{
+			mNeedsAutoSelect = TRUE;
+		}
+
+		EFilterState filter_state = (fNotDefault) ? FILTER_NONDEFAULT : FILTER_DEFAULT;
+		if (mFilterState != filter_state)
+		{
+			mFilterState = filter_state;
+			if (mFilterStateChanged)
+			{
+				(*mFilterStateChanged)(this, mFilterState);
+			}
+		}
 	}
+// [/SL:KB]
+//	if (filter_object.isModified() && filter_object.isNotDefault())
+//	{
+//		mNeedsAutoSelect = TRUE;
+//	}
     
 	// Filter to determine visibility before arranging
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen = (mNeedsAutoSelect) && (getFolderViewModel()->getFilter().showAllResults());
+// [/SL:KB]
 	filter(filter_object);
     
 	// Clear the modified setting on the filter only if the filter finished after running the filter process
@@ -1623,10 +1715,21 @@ void LLFolderView::update()
     if (filter_object.isModified() && (!filter_object.isTimedOut()))
 	{
 		filter_object.clearModified();
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+		mFilterState = FILTER_STOPPED;
+		if (mFilterStateChanged)
+		{
+			(*mFilterStateChanged)(this, mFilterState);
+		}
+// [/SL:KB]
 	}
 
 	// automatically show matching items, and select first one if we had a selection
-	if (mNeedsAutoSelect)
+//	if (mNeedsAutoSelect)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	if ( (mNeedsAutoSelect) && (hasVisibleChildren()) )
+// [/SL:KB]
 	{
 		LL_RECORD_BLOCK_TIME(FTM_AUTO_SELECT);
 		// select new item only if a filtered item not currently selected
@@ -1639,15 +1742,15 @@ void LLFolderView::update()
 			applyFunctorRecursively(functor);
 		}
 
-		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
-		// Used by LLPlacesFolderView.
+//		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
+//		// Used by LLPlacesFolderView.
 		if (filter_object.showAllResults())
-		{
-			// these are named variables to get around gcc not binding non-const references to rvalues
-			// and functor application is inherently non-const to allow for stateful functors
-			LLOpenFilteredFolders functor;
-			applyFunctorRecursively(functor);
-		}
+//		{
+//			// these are named variables to get around gcc not binding non-const references to rvalues
+//			// and functor application is inherently non-const to allow for stateful functors
+//			LLOpenFilteredFolders functor;
+//			applyFunctorRecursively(functor);
+//		}
 
 		scrollToShowSelection();
 	}

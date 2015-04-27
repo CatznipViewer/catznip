@@ -4,6 +4,7 @@
  *
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2010-2013, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -57,6 +58,12 @@
 #include "lltrans.h"
 #include "llviewermedia.h"
 #include "llviewernetwork.h"
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+#include "llfloaterreg.h"
+#include "llstartup.h"
+#include "lltoggleablemenu.h"
+#include "llviewermenu.h"
+// [/SL:KB]
 #include "llweb.h"
 
 static LLPanelInjector<LLSidepanelInventory> t_inventory("sidepanel_inventory");
@@ -99,7 +106,10 @@ public:
 			switch (added_category_type)
 			{
 				case LLFolderType::FT_INBOX:
-					mSidepanelInventory->enableInbox(true);
+//					mSidepanelInventory->enableInbox(true);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+					mSidepanelInventory->refreshInboxVisibility();
+// [/SL:KB]
 					mSidepanelInventory->observeInboxModifications(added_category->getUUID());
 					break;
 				default:
@@ -112,6 +122,139 @@ private:
 	LLSidepanelInventory * mSidepanelInventory;
 };
 
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+class LLSidepanelActionHelper
+{
+public:
+	LLSidepanelActionHelper(LLPanelMainInventory* pPanelMainInventory)
+	{
+		mPanelMainInventory = pPanelMainInventory->getHandle();
+
+		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+		registrar.add("Inventory.Action", boost::bind(&LLSidepanelActionHelper::onActionPerform, this, _2));
+
+		LLToggleableMenu* pMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
+			"menu_inventory_actions.xml", LLMenuGL::sMenuContainer, LLViewerMenuHolderGL::child_registry_t::instance());
+		if (pMenu)
+		{
+			pMenu->setVisibilityChangeCallback(boost::bind(&LLSidepanelActionHelper::onMenuVisibilityChange, this, _2));
+			mMenuHandle = pMenu->getHandle();
+		}
+	}
+
+	virtual ~LLSidepanelActionHelper()
+	{
+		if (!mMenuHandle.isDead())
+		{
+			mMenuHandle.get()->die();
+		}
+	}
+
+	LLToggleableMenu* getMenu() const
+	{
+		return mMenuHandle.get();
+	}
+
+protected:
+	const LLFolderViewModelItemInventory* getSelectedFVItem() const
+	{
+		/*const*/ LLInventoryPanel* pInvPanel = (!mPanelMainInventory.isDead()) ? static_cast<LLPanelMainInventory*>(mPanelMainInventory.get())->getActivePanel() : NULL;
+		if (pInvPanel)
+		{
+			const LLFolderViewItem* pFVItem = (pInvPanel->getRootFolder()) ? pInvPanel->getRootFolder()->getCurSelectedItem() : NULL;
+			if (pFVItem)
+			{
+				return pFVItem->getViewModelItem<LLFolderViewModelItemInventory>();
+			}
+		}
+		return NULL;
+	}
+
+	const LLViewerInventoryItem* getSelectedItem() const
+	{
+		const LLFolderViewModelItemInventory* pFVItem = getSelectedFVItem();
+		return (pFVItem) ? pFVItem->getInventoryObject<LLViewerInventoryItem>() : NULL;
+	}
+
+	void onActionPerform(const LLSD& sdParam)
+	{
+		LLInventoryPanel* pInvPanel = (!mPanelMainInventory.isDead()) ? static_cast<LLPanelMainInventory*>(mPanelMainInventory.get())->getActivePanel() : NULL;
+		if (!pInvPanel)
+			return;
+
+		const std::string strParam = sdParam.asString();
+		if ( ("open" == strParam) || ("properties" == strParam) ||                          /* General*/  
+		     ("goto" == strParam)|| ("find_links" == strParam) || 
+		     ("playworld" == strParam) || ("playlocal" == strParam) ||                      /* Animations */ 
+		     ("wear" == strParam) || ("attach" == strParam) || ("wear_add" == strParam) ||  /* Wearable items*/
+		     ("take_off" == strParam) || ("detach" == strParam) || ("edit" == strParam) || 
+		     ("activate" == strParam) || ("deactivate" == strParam) ||                      /* Gestures*/ 
+		     ("about" == strParam) ||                                                       /* Landmarks */
+		     ("save_as" == strParam) )                                                      /* Textures */
+		{
+			LLInventoryAction::doToSelected(pInvPanel->getModel(), pInvPanel->getRootFolder(), strParam);
+		}
+		else if ("teleport" == strParam)                                                    /* Landmarks */
+		{
+			LLInventoryAction::doToSelected(pInvPanel->getModel(), pInvPanel->getRootFolder(), "open");
+		}
+	}
+
+	void onMenuVisibilityChange(const LLSD& sdParam)
+	{
+		if ( (!sdParam.has("visibility")) || (!sdParam["visibility"].asBoolean()) )
+		{
+			return;
+		}
+
+		const LLViewerInventoryItem* pItem = getSelectedItem();
+		const LLFolderViewModelItemInventory* pFVItem = getSelectedFVItem();
+		LLToggleableMenu* pMenu = mMenuHandle.get();
+		if ( (!pItem) || (!pMenu) )
+		{
+			return;
+		}
+
+		bool fIsBodyPart = (LLAssetType::AT_BODYPART == pItem->getType());
+		bool fIsClothing = (LLAssetType::AT_CLOTHING == pItem->getType());
+		bool fIsGesture = (LLAssetType::AT_GESTURE == pItem->getType());
+		bool fIsObject = (LLAssetType::AT_OBJECT == pItem->getType());
+		bool fIsWearable = (fIsBodyPart) || (fIsClothing) || (fIsObject);
+		bool fIsWorn = ((fIsWearable) || (fIsGesture)) ? get_is_item_worn(pItem->getUUID()) : false;
+
+		// Generic options
+		pMenu->findChildView("open")->setVisible(  (!fIsWearable) && (LLAssetType::AT_LANDMARK != pItem->getType()) );
+		pMenu->findChildView("find_original")->setVisible(pItem->getIsLinkType());
+		pMenu->findChildView("find_links")->setVisible( (!pItem->getIsLinkType()) && (LLAssetType::lookupCanLink(pItem->getType())) );
+		pMenu->findChildView("properties")->setVisible(true);
+		// Animations
+		pMenu->findChildView("playworld")->setVisible( (LLAssetType::AT_ANIMATION == pItem->getType()) );
+		pMenu->findChildView("playlocal")->setVisible( (LLAssetType::AT_ANIMATION == pItem->getType()));
+		// Wearable and attachment options
+		pMenu->findChildView("wear")->setVisible( (fIsBodyPart || fIsClothing) && (!fIsWorn) );
+		pMenu->findChildView("attach")->setVisible( (fIsObject) && (!fIsWorn) );
+		pMenu->findChildView("wear_add")->setVisible( (fIsClothing || fIsObject) && (!fIsWorn) );
+		pMenu->findChildView("take_off")->setVisible( (fIsClothing) && (fIsWorn) );
+		pMenu->findChildView("detach")->setVisible( (fIsObject) && (fIsWorn) );
+		pMenu->findChildView("edit")->setVisible( (fIsWearable) && (fIsWorn) );
+		// Gestures
+		pMenu->findChildView("activate")->setVisible( (fIsGesture) && (!fIsWorn) );
+		pMenu->findChildView("deactivate")->setVisible( (fIsGesture) && (fIsWorn) );
+		// Landmarks
+		pMenu->findChildView("teleport")->setVisible( (LLAssetType::AT_LANDMARK == pItem->getType()) );
+		pMenu->findChildView("about")->setVisible( (LLAssetType::AT_LANDMARK == pItem->getType()) );
+		// Textures and snapshots
+		const LLTextureBridge* pTexBridge = dynamic_cast<const LLTextureBridge*>(pFVItem);
+		pMenu->findChildView("save_as")->setVisible( (LLAssetType::AT_TEXTURE == pItem->getType()) );
+		pMenu->findChildView("save_as")->setEnabled( (pTexBridge) && (pTexBridge->canSaveTexture()) );
+	}
+
+protected:
+	LLHandle<LLToggleableMenu> mMenuHandle;
+	LLHandle<LLPanel>          mPanelMainInventory;
+};
+// [/SL:KB]
+
 //
 // Implementation
 //
@@ -123,6 +266,14 @@ LLSidepanelInventory::LLSidepanelInventory()
 	, mInboxEnabled(false)
 	, mCategoriesObserver(NULL)
 	, mInboxAddedObserver(NULL)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	, mToolbarActionPanel(NULL)
+	, mToolbarActionBtn(NULL)
+	, mToolbarActionsPanel(NULL)
+	, mToolbarActionsBtn(NULL)
+	, mToolbarActionsFlyoutBtn(NULL)
+	, mToolbarActionsHelper(NULL)
+// [/SL:KB]
 {
 	//buildFromFile( "panel_inventory.xml"); // Called from LLRegisterPanelClass::defaultPanelClassBuilder()
 }
@@ -145,15 +296,30 @@ LLSidepanelInventory::~LLSidepanelInventory()
 		gInventory.removeObserver(mInboxAddedObserver);
 	}
 	delete mInboxAddedObserver;
+
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	delete mToolbarActionsHelper;
+// [/Sl:KB]
 }
 
 void handleInventoryDisplayInboxChanged()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (sidepanel_inventory)
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	LLFloaterReg::const_instance_list_t& invFloaters = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = invFloaters.begin(); itFloater != invFloaters.end(); ++itFloater)
 	{
-		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+		LLSidepanelInventory* sidepanel_inventory = (*itFloater)->findChild<LLSidepanelInventory>("main_panel");
+		if (sidepanel_inventory)
+		{
+			sidepanel_inventory->refreshInboxVisibility();
+		}
 	}
+// [/SL:KB]
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (sidepanel_inventory)
+//	{
+//		sidepanel_inventory->enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//	}
 }
 
 BOOL LLSidepanelInventory::postBuild()
@@ -162,29 +328,41 @@ BOOL LLSidepanelInventory::postBuild()
 	{
 		mInventoryPanel = getChild<LLPanel>("sidepanel_inventory_panel");
 
-		mInfoBtn = mInventoryPanel->getChild<LLButton>("info_btn");
-		mInfoBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onInfoButtonClicked, this));
-		
-		mShareBtn = mInventoryPanel->getChild<LLButton>("share_btn");
-		mShareBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShareButtonClicked, this));
-		
-		mShopBtn = mInventoryPanel->getChild<LLButton>("shop_btn");
-		mShopBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShopButtonClicked, this));
-
-		mWearBtn = mInventoryPanel->getChild<LLButton>("wear_btn");
-		mWearBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onWearButtonClicked, this));
-		
-		mPlayBtn = mInventoryPanel->getChild<LLButton>("play_btn");
-		mPlayBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onPlayButtonClicked, this));
-		
-		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
-		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
-		
-		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
-		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
+//		mInfoBtn = mInventoryPanel->getChild<LLButton>("info_btn");
+//		mInfoBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onInfoButtonClicked, this));
+//		
+//		mShareBtn = mInventoryPanel->getChild<LLButton>("share_btn");
+//		mShareBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShareButtonClicked, this));
+//		
+//		mShopBtn = mInventoryPanel->getChild<LLButton>("shop_btn");
+//		mShopBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onShopButtonClicked, this));
+//
+//		mWearBtn = mInventoryPanel->getChild<LLButton>("wear_btn");
+//		mWearBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onWearButtonClicked, this));
+//		
+//		mPlayBtn = mInventoryPanel->getChild<LLButton>("play_btn");
+//		mPlayBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onPlayButtonClicked, this));
+//		
+//		mTeleportBtn = mInventoryPanel->getChild<LLButton>("teleport_btn");
+//		mTeleportBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onTeleportButtonClicked, this));
+//		
+//		mOverflowBtn = mInventoryPanel->getChild<LLButton>("overflow_btn");
+//		mOverflowBtn->setClickedCallback(boost::bind(&LLSidepanelInventory::onOverflowButtonClicked, this));
 		
 		mPanelMainInventory = mInventoryPanel->getChild<LLPanelMainInventory>("panel_main_inventory");
 		mPanelMainInventory->setSelectCallback(boost::bind(&LLSidepanelInventory::onSelectionChange, this, _1, _2));
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+		mToolbarActionPanel = mPanelMainInventory->findChild<LLPanel>("default_action_btn_panel", TRUE);
+		mToolbarActionBtn = mToolbarActionPanel->findChild<LLButton>("default_action_btn");
+		mToolbarActionBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarActionClicked, this));
+
+		mToolbarActionsPanel = mPanelMainInventory->findChild<LLPanel>("actions_btn_panel", TRUE);
+		mToolbarActionsBtn = mToolbarActionsPanel->findChild<LLButton>("actions_btn");
+		mToolbarActionsBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarActionClicked, this));
+		mToolbarActionsFlyoutBtn = mToolbarActionsPanel->findChild<LLButton>("actions_flyout_btn");
+		mToolbarActionsFlyoutBtn->setCommitCallback(boost::bind(&LLSidepanelInventory::onToolbarFlyoutClicked, this));
+		mToolbarActionsHelper =	new LLSidepanelActionHelper(mPanelMainInventory);
+// [/SL:KB]
 		LLTabContainer* tabs = mPanelMainInventory->getChild<LLTabContainer>("inventory filter tabs");
 		tabs->setCommitCallback(boost::bind(&LLSidepanelInventory::updateVerbs, this));
 
@@ -237,14 +415,27 @@ BOOL LLSidepanelInventory::postBuild()
 			inbox_panel->setTargetDim(gSavedPerAccountSettings.getS32("InventoryInboxHeight"));
 		}
 
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
 		// Set the inbox visible based on debug settings (final setting comes from http request below)
-		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+		refreshInboxVisibility();
 
 		// Trigger callback for after login so we can setup to track inbox changes after initial inventory load
-		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
+		if (LLStartUp::getStartupState() < STATE_STARTED)
+			LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
+		else
+			updateInbox();
+// [/SL:KB]
+//		// Set the inbox visible based on debug settings (final setting comes from http request below)
+//		enableInbox(gSavedSettings.getBOOL("InventoryDisplayInbox"));
+//
+//		// Trigger callback for after login so we can setup to track inbox changes after initial inventory load
+//		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLSidepanelInventory::updateInbox, this));
 	}
 
 	gSavedSettings.getControl("InventoryDisplayInbox")->getCommitSignal()->connect(boost::bind(&handleInventoryDisplayInboxChanged));
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	gSavedSettings.getControl("ShowReceivedItemsPanel")->getCommitSignal()->connect(boost::bind(&handleInventoryDisplayInboxChanged));
+// [/SL:KB]
 
 	// Update the verbs buttons state.
 	updateVerbs();
@@ -272,8 +463,11 @@ void LLSidepanelInventory::updateInbox()
         // things can get messy and conventions broken. This call puts everything back together in its right place.
         gInventory.consolidateForType(inbox_id, LLFolderType::FT_INBOX);
         
-		// Enable the display of the inbox if it exists
-		enableInbox(true);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		refreshInboxVisibility();
+// [/SL:KB]
+//		// Enable the display of the inbox if it exists
+//		enableInbox(true);
 
 		observeInboxModifications(inbox_id);
 	}
@@ -338,13 +532,42 @@ void LLSidepanelInventory::observeInboxModifications(const LLUUID& inboxID)
 	mInventoryPanelInbox = inventory_panel->getInventoryPanelHandle();
 }
 
-void LLSidepanelInventory::enableInbox(bool enabled)
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+void LLSidepanelInventory::refreshInboxVisibility()
 {
-	mInboxEnabled = enabled;
-	
-	LLLayoutPanel * inbox_layout_panel = getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME);
-	inbox_layout_panel->setVisible(enabled);
+	// Rules for showing the "Received Items" panel:
+	//   - "Received Items" folder exists (and contains items)
+	//   - "ShowReceivedItemsPanel" is set to TRUE
+	// -> "InventoryDisplayInbox" overrides and always shows the panel
+	bool fEnableInbox = false;
+	if (gInventory.isInventoryUsable())
+	{
+		const LLUUID idInbox = gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX);
+		fEnableInbox = idInbox.notNull();
+//		if (fEnableInbox)
+//		{
+//			LLInventoryModel::cat_array_t* cats; LLInventoryModel::item_array_t* items;
+//			gInventory.getDirectDescendentsOf(idInbox, cats, items);
+//			fEnableInbox = ((cats) && (!cats->empty())) || ((items) && (!items->empty()));
+//		}
+	}
+
+	if (!gSavedSettings.getBOOL("InventoryDisplayInbox"))
+		fEnableInbox &= (bool)gSavedSettings.getBOOL("ShowReceivedItemsPanel");
+	else
+		fEnableInbox = true;
+
+	mInboxEnabled = fEnableInbox;
+	getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME)->setVisible(fEnableInbox);
 }
+// [/SL:KB]
+//void LLSidepanelInventory::enableInbox(bool enabled)
+//{
+//	mInboxEnabled = enabled;
+//	
+//	LLLayoutPanel * inbox_layout_panel = getChild<LLLayoutPanel>(INBOX_LAYOUT_PANEL_NAME);
+//	inbox_layout_panel->setVisible(enabled);
+//}
 
 void LLSidepanelInventory::openInbox()
 {
@@ -378,6 +601,14 @@ void LLSidepanelInventory::onToggleInboxBtn()
 	
 	const bool inbox_expanded = inboxButton->getToggleState();
 	
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+	// Only track the inbox button state on the primary inventory floater
+	if (this == LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory"))
+	{
+		gSavedPerAccountSettings.setBOOL("InventoryInboxToggleState", inbox_expanded);
+	}
+// [/SL:KB]
+
 	// Expand/collapse the indicated panel
 	inv_stack->collapsePanel(inboxPanel, !inbox_expanded);
 
@@ -437,90 +668,120 @@ void LLSidepanelInventory::onOpen(const LLSD& key)
 	}
 }
 
-void LLSidepanelInventory::onInfoButtonClicked()
+//void LLSidepanelInventory::onInfoButtonClicked()
+//{
+//	LLInventoryItem *item = getSelectedItem();
+//	if (item)
+//	{
+//		mItemPanel->reset();
+//		mItemPanel->setItemID(item->getUUID());
+//		showItemInfoPanel();
+//	}
+//}
+
+//void LLSidepanelInventory::onShareButtonClicked()
+//{
+//	LLAvatarActions::shareWithAvatars(this);
+//}
+
+//void LLSidepanelInventory::onShopButtonClicked()
+//{
+//	LLWeb::loadURLExternal(gSavedSettings.getString("MarketplaceURL"));
+//}
+
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+void LLSidepanelInventory::onToolbarActionClicked()
 {
-	LLInventoryItem *item = getSelectedItem();
-	if (item)
+	performActionOnSelection(getSelectionAction());
+}
+
+void LLSidepanelInventory::onToolbarFlyoutClicked()
+{
+	LLMenuGL* pMenu = mToolbarActionsHelper->getMenu();
+	if (pMenu)
 	{
-		mItemPanel->reset();
-		mItemPanel->setItemID(item->getUUID());
-		showItemInfoPanel();
+		pMenu->buildDrawLabels();
+
+		LLRect rctActionBtn;
+		mToolbarActionBtn->localRectToOtherView(mToolbarActionBtn->getRect(), &rctActionBtn, this);
+		LLMenuGL::showPopup(this, pMenu, rctActionBtn.mLeft, rctActionBtn.mBottom);
 	}
 }
-
-void LLSidepanelInventory::onShareButtonClicked()
-{
-	LLAvatarActions::shareWithAvatars(this);
-}
-
-void LLSidepanelInventory::onShopButtonClicked()
-{
-	LLWeb::loadURLExternal(gSavedSettings.getString("MarketplaceURL"));
-}
+// [/SL:KB]
 
 void LLSidepanelInventory::performActionOnSelection(const std::string &action)
 {
-	LLFolderViewItem* current_item = mPanelMainInventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
-	if (!current_item)
-	{
-		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
-		{
-			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
-		}
-
-		if (!current_item)
-		{
-			return;
-		}
-	}
-
-	static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->performAction(mPanelMainInventory->getActivePanel()->getModel(), action);
-}
-
-void LLSidepanelInventory::onWearButtonClicked()
-{
-	// Get selected items set.
-	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
-	if (selected_uuids_set.empty()) return; // nothing selected
-
-	// Convert the set to a vector.
-	uuid_vec_t selected_uuids_vec;
-	for (std::set<LLUUID>::const_iterator it = selected_uuids_set.begin(); it != selected_uuids_set.end(); ++it)
-	{
-		selected_uuids_vec.push_back(*it);
-	}
-
-	// Wear all selected items.
-	wear_multiple(selected_uuids_vec, true);
-}
-
-void LLSidepanelInventory::onPlayButtonClicked()
-{
-	const LLInventoryItem *item = getSelectedItem();
-	if (!item)
-	{
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
+	LLInventoryPanel* pPanel = getActivePanel();
+	if ( (!pPanel) || (!pPanel->getRootFolder()) )
 		return;
-	}
 
-	switch(item->getInventoryType())
+	if (!action.empty())
 	{
-	case LLInventoryType::IT_GESTURE:
-		performActionOnSelection("play");
-		break;
-	default:
-		performActionOnSelection("open");
-		break;
+		LLInventoryAction::doToSelected(pPanel->getModel(), pPanel->getRootFolder(), action);
 	}
+// [/SL:KB]
+//	LLFolderViewItem* current_item = mPanelMainInventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	if (!current_item)
+//	{
+//		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
+//		{
+//			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
+//		}
+//
+//		if (!current_item)
+//		{
+//			return;
+//		}
+//	}
+//
+//	static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->performAction(mPanelMainInventory->getActivePanel()->getModel(), action);
 }
 
-void LLSidepanelInventory::onTeleportButtonClicked()
-{
-	performActionOnSelection("teleport");
-}
+//void LLSidepanelInventory::onWearButtonClicked()
+//{
+//	// Get selected items set.
+//	const std::set<LLUUID> selected_uuids_set = LLAvatarActions::getInventorySelectedUUIDs();
+//	if (selected_uuids_set.empty()) return; // nothing selected
+//
+//	// Convert the set to a vector.
+//	uuid_vec_t selected_uuids_vec;
+//	for (std::set<LLUUID>::const_iterator it = selected_uuids_set.begin(); it != selected_uuids_set.end(); ++it)
+//	{
+//		selected_uuids_vec.push_back(*it);
+//	}
+//
+//	// Wear all selected items.
+//	wear_multiple(selected_uuids_vec, true);
+//}
 
-void LLSidepanelInventory::onOverflowButtonClicked()
-{
-}
+//void LLSidepanelInventory::onPlayButtonClicked()
+//{
+//	const LLInventoryItem *item = getSelectedItem();
+//	if (!item)
+//	{
+//		return;
+//	}
+//
+//	switch(item->getInventoryType())
+//	{
+//	case LLInventoryType::IT_GESTURE:
+//		performActionOnSelection("play");
+//		break;
+//	default:
+//		performActionOnSelection("open");
+//		break;
+//	}
+//}
+
+//void LLSidepanelInventory::onTeleportButtonClicked()
+//{
+//	performActionOnSelection("teleport");
+//}
+
+//void LLSidepanelInventory::onOverflowButtonClicked()
+//{
+//}
 
 void LLSidepanelInventory::onBackButtonClicked()
 {
@@ -567,51 +828,62 @@ void LLSidepanelInventory::showInventoryPanel()
 
 void LLSidepanelInventory::updateVerbs()
 {
-	mInfoBtn->setEnabled(FALSE);
-	mShareBtn->setEnabled(FALSE);
-
-	mWearBtn->setVisible(FALSE);
-	mWearBtn->setEnabled(FALSE);
-	mPlayBtn->setVisible(FALSE);
-	mPlayBtn->setEnabled(FALSE);
- 	mTeleportBtn->setVisible(FALSE);
- 	mTeleportBtn->setEnabled(FALSE);
- 	mShopBtn->setVisible(TRUE);
-
-	mShareBtn->setEnabled(canShare());
-
-	const LLInventoryItem *item = getSelectedItem();
-	if (!item)
-		return;
-
-	bool is_single_selection = getSelectedCount() == 1;
-
-	mInfoBtn->setEnabled(is_single_selection);
-
-	switch(item->getInventoryType())
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	S32 cntItems = 0;
+	const std::string strAction = getSelectionAction(&cntItems);
+	if (!strAction.empty())
 	{
-		case LLInventoryType::IT_WEARABLE:
-		case LLInventoryType::IT_OBJECT:
-		case LLInventoryType::IT_ATTACHMENT:
-			mWearBtn->setVisible(TRUE);
-			mWearBtn->setEnabled(canWearSelected());
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		case LLInventoryType::IT_SOUND:
-		case LLInventoryType::IT_GESTURE:
-		case LLInventoryType::IT_ANIMATION:
-			mPlayBtn->setVisible(TRUE);
-			mPlayBtn->setEnabled(TRUE);
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		case LLInventoryType::IT_LANDMARK:
-			mTeleportBtn->setVisible(TRUE);
-			mTeleportBtn->setEnabled(TRUE);
-		 	mShopBtn->setVisible(FALSE);
-			break;
-		default:
-			break;
+		LLButton* pActionBtn = (cntItems > 1) ? mToolbarActionBtn : mToolbarActionsBtn;
+		pActionBtn->setLabel(LLTrans::getString("InvAction " + strAction));
 	}
+	mToolbarActionPanel->setVisible( (cntItems > 1) && (!strAction.empty()) );
+	mToolbarActionsPanel->setVisible( (cntItems == 1) && (!strAction.empty()) );;
+// [/SL:KB]
+//	mInfoBtn->setEnabled(FALSE);
+//	mShareBtn->setEnabled(FALSE);
+//
+//	mWearBtn->setVisible(FALSE);
+//	mWearBtn->setEnabled(FALSE);
+//	mPlayBtn->setVisible(FALSE);
+//	mPlayBtn->setEnabled(FALSE);
+// 	mTeleportBtn->setVisible(FALSE);
+// 	mTeleportBtn->setEnabled(FALSE);
+// 	mShopBtn->setVisible(TRUE);
+//
+//	mShareBtn->setEnabled(canShare());
+//
+//	const LLInventoryItem *item = getSelectedItem();
+//	if (!item)
+//		return;
+//
+//	bool is_single_selection = getSelectedCount() == 1;
+//
+//	mInfoBtn->setEnabled(is_single_selection);
+//
+//	switch(item->getInventoryType())
+//	{
+//		case LLInventoryType::IT_WEARABLE:
+//		case LLInventoryType::IT_OBJECT:
+//		case LLInventoryType::IT_ATTACHMENT:
+//			mWearBtn->setVisible(TRUE);
+//			mWearBtn->setEnabled(canWearSelected());
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		case LLInventoryType::IT_SOUND:
+//		case LLInventoryType::IT_GESTURE:
+//		case LLInventoryType::IT_ANIMATION:
+//			mPlayBtn->setVisible(TRUE);
+//			mPlayBtn->setEnabled(TRUE);
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		case LLInventoryType::IT_LANDMARK:
+//			mTeleportBtn->setVisible(TRUE);
+//			mTeleportBtn->setEnabled(TRUE);
+//		 	mShopBtn->setVisible(FALSE);
+//			break;
+//		default:
+//			break;
+//	}
 }
 
 bool LLSidepanelInventory::canShare()
@@ -648,43 +920,73 @@ bool LLSidepanelInventory::canWearSelected()
 	return true;
 }
 
-LLInventoryItem *LLSidepanelInventory::getSelectedItem()
-{
-	LLFolderViewItem* current_item = mPanelMainInventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
-	
-	if (!current_item)
-	{
-		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
-		{
-			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
-		}
+//LLInventoryItem *LLSidepanelInventory::getSelectedItem()
+//{
+//	LLFolderViewItem* current_item = mPanelMainInventory->getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	
+//	if (!current_item)
+//	{
+//		if (mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
+//		{
+//			current_item = mInventoryPanelInbox.get()->getRootFolder()->getCurSelectedItem();
+//		}
+//
+//		if (!current_item)
+//		{
+//			return NULL;
+//		}
+//	}
+//	const LLUUID &item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
+//	LLInventoryItem *item = gInventory.getItem(item_id);
+//	return item;
+//}
 
-		if (!current_item)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
+bool LLSidepanelInventory::getSelectedItems(LLInventoryModel::item_array_t& items) const
+{
+	items.clear();
+
+	LLInventoryPanel* pActivePanel = mPanelMainInventory->getActivePanel();
+
+	std::set<LLFolderViewItem*> selFVItems = pActivePanel->getRootFolder()->getSelectionList();
+	for (std::set<LLFolderViewItem*>::const_iterator itFVItem = selFVItems.begin(); itFVItem != selFVItems.end(); itFVItem++)
+	{
+		const LLFolderViewModelItemInventory* pFVMItem = (*itFVItem) ? (*itFVItem)->getViewModelItem<LLFolderViewModelItemInventory>() : NULL;
+		if (!pFVMItem)
+			continue;
+
+		LLInventoryObject* pInvObj = pFVMItem->getInventoryObject();
+		if (pInvObj)
 		{
-			return NULL;
+			if (LLAssetType::AT_CATEGORY == pInvObj->getType())
+			{
+				// If there are categories selected then we don't want to show any actions so we return an empty selection
+				items.clear();
+				return false;
+			}
+			items.push_back(dynamic_cast<LLViewerInventoryItem*>(pInvObj));
 		}
 	}
-	const LLUUID &item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
-	LLInventoryItem *item = gInventory.getItem(item_id);
-	return item;
+	return !items.empty();
 }
+// [/SL:KB]
 
-U32 LLSidepanelInventory::getSelectedCount()
-{
-	int count = 0;
-
-	std::set<LLFolderViewItem*> selection_list = mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
-	count += selection_list.size();
-
-	if ((count == 0) && mInboxEnabled && mInventoryPanelInbox.get() && mInventoryPanelInbox.get()->getRootFolder())
-	{
-		selection_list = mInventoryPanelInbox.get()->getRootFolder()->getSelectionList();
-
-		count += selection_list.size();
-	}
-
-	return count;
-}
+//U32 LLSidepanelInventory::getSelectedCount()
+//{
+//	int count = 0;
+//
+//	std::set<LLFolderViewItem*> selection_list =    mPanelMainInventory->getActivePanel()->getRootFolder()->getSelectionList();
+//	count += selection_list.size();
+//
+//	if ((count == 0) && mInboxEnabled && (mInventoryPanelInbox != NULL))
+//	{
+//		selection_list = mInventoryPanelInbox->getRootFolder()->getSelectionList();
+//
+//		count += selection_list.size();
+//	}
+//
+//	return count;
+//}
 
 LLInventoryPanel *LLSidepanelInventory::getActivePanel()
 {
@@ -735,3 +1037,72 @@ std::set<LLFolderViewItem*> LLSidepanelInventory::getInboxSelectionList()
 	
 	return inventory_selected_uuids;
 }
+
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-2.0)
+
+// Returns IT_XXX if every item has the same inventory type or IT_NONE otherwise
+static LLInventoryType::EType get_items_invtype(const LLInventoryModel::item_array_t& items)
+{
+	LLInventoryType::EType invType = LLInventoryType::IT_NONE;
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = itItem->get();
+		if (!pItem)
+			continue;
+
+		LLInventoryType::EType invTypeItem = pItem->getInventoryType();
+		if (LLInventoryType::IT_NONE == invType)
+			invType = invTypeItem;
+		else if (invType != invTypeItem)
+			return LLInventoryType::IT_NONE;
+	}
+	return invType;
+}
+
+std::string LLSidepanelInventory::getSelectionAction(S32* pSelCount) const
+{
+	LLInventoryModel::item_array_t items;
+	if (!getSelectedItems(items))
+	{
+		if (pSelCount)
+			*pSelCount = 0;
+		return LLStringUtil::null;
+	}
+
+	const LLUUID idTrash = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+	const LLUUID idParent = get_items_parent(items);
+	if ( (idParent.notNull()) && (gInventory.isObjectDescendentOf(idParent, idTrash)) )
+	{
+		return LLStringUtil::null;
+	}
+
+	if (pSelCount)
+	{
+		*pSelCount = items.size();
+	}
+
+	LLInventoryType::EType invType = get_items_invtype(items);
+	switch (invType)
+	{
+		case LLInventoryType::IT_WEARABLE:
+			if ( (1 == items.size()) && (LLAssetType::AT_BODYPART == items.front()->getType() ) )
+				return (!get_items_worn(items)) ? "wear" : LLStringUtil::null;
+			else
+				return (!get_items_worn(items)) ? "wear" : "take_off";
+		case LLInventoryType::IT_OBJECT:
+		case LLInventoryType::IT_ATTACHMENT:
+			return (!get_items_worn(items)) ? "attach" : "detach";
+		case LLInventoryType::IT_GESTURE:
+			return (!get_items_worn(items)) ? "activate" : "deactivate";
+		case LLInventoryType::IT_LANDMARK:
+			// It doesn't make much sense to teleport to more than one landmark
+			return (1 == items.size()) ? "teleport" : LLStringUtil::null;
+		case LLInventoryType::IT_NONE:
+			// Mixed selection type
+			return (get_items_wearable(items)) ? ( (!get_items_worn(items)) ? "wear" : "take_off" ) : "open";
+		default:
+			return "open";
+	}
+}
+
+// [/SL:KB]
