@@ -87,13 +87,19 @@ public:
     static LLFloaterIMSessionTab* findConversation(const LLUUID& uuid);
     static LLFloaterIMSessionTab* getConversation(const LLUUID& uuid);
 
-	// show/hide the translation check box
-	void showTranslationCheckbox(const BOOL visible = FALSE);
+//	// show/hide the translation check box
+//	void showTranslationCheckbox(const BOOL visible = FALSE);
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	const LLUUID& getSessionID() const { return mSessionID; }
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+	bool hasInputText() const;
+// [/SL:KB]
 	bool isNearbyChat() {return mIsNearbyChat;}
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+	LLChatEntry* getChatBox() { return mInputEditor; }
+// [/SL:KB]
 
 	// LLFloater overrides
 	/*virtual*/ void onOpen(const LLSD& key);
@@ -126,6 +132,13 @@ public:
 	void saveCollapsedState();
 
 protected:
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-08-18 (Catznip-3.6)
+	       bool onIMCheckNearbyChat();
+	static void onIMSetChatBarType(const LLSD& sdParam);
+	static bool onIMCheckChatBarType(const LLSD& sdParam);
+	static void onIMSetFontSize(const LLSD& sdParam);
+	static bool onIMCheckFontSize(const LLSD& sdParam);
+// [/SL:KB]
 
 	// callback for click on any items of the visual states menu
 	void onIMSessionMenuItemClicked(const LLSD& userdata);
@@ -214,7 +227,7 @@ protected:
 // [/SL:KB]
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;
-    LLUICtrl* mTranslationCheckBox;
+//    LLUICtrl* mTranslationCheckBox;
 
 private:
 	// Handling selection and contextual menu
