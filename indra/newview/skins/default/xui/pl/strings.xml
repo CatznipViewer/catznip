@@ -1073,6 +1073,17 @@
 	<string name="Snapshots" value=" Zdjęcia,"/>
 	<string name="No Filters" value="Nie "/>
 	<string name="Since Logoff" value=" - od wylogowania się"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Ubierz</string>
+	<string name="InvAction take_off">Zdejmij</string>
+	<string name="InvAction attach">Ubierz</string>
+	<string name="InvAction detach">Zdejmij</string>
+	<string name="InvAction activate">Aktywuj</string>
+	<string name="InvAction deactivate">Deaktywuj</string>
+	<string name="InvAction teleport">Teleportuj</string>
+	<string name="InvAction open">Otwórz</string>
+
 	<string name="InvFolder My Inventory">
 		Moja Szafa
 	</string>

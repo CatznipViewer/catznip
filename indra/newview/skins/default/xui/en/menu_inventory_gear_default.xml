@@ -17,48 +17,26 @@
     <menu_item_separator
      layout="topleft" />
     <menu_item_check
-     label="Sort by Name"
+     label="Separate Text Filters"
      layout="topleft"
-     name="sort_by_name">
+     name="filter_string_per_tab">
         <on_click
          function="Inventory.GearDefault.Custom.Action"
-         parameter="sort_by_name" />
+         parameter="filter_string_per_tab" />
         <on_check
          function="Inventory.GearDefault.Check"
-         parameter="sort_by_name" />
+         parameter="filter_string_per_tab" />
     </menu_item_check>
     <menu_item_check
-     label="Sort by Most Recent"
+     label="Show Received Items Panel"
      layout="topleft"
-     name="sort_by_recent">
+     name="show_received_items_panel">
         <on_click
          function="Inventory.GearDefault.Custom.Action"
-         parameter="sort_by_recent" />
+         parameter="show_received_items_panel" />
         <on_check
          function="Inventory.GearDefault.Check"
-         parameter="sort_by_recent" />         
-    </menu_item_check>
-    <menu_item_check
-     label="Sort Folders Always by Name"
-     layout="topleft"
-     name="sort_folders_by_name">
-        <on_click
-         function="Inventory.GearDefault.Custom.Action"
-         parameter="sort_folders_by_name" />
-        <on_check
-         function="Inventory.GearDefault.Check"
-         parameter="sort_folders_by_name" />
-    </menu_item_check>
-    <menu_item_check
-     label="Sort System Folders to Top"
-     layout="topleft"
-     name="sort_system_folders_to_top">
-        <on_click
-         function="Inventory.GearDefault.Custom.Action"
-         parameter="sort_system_folders_to_top" />
-        <on_check
-         function="Inventory.GearDefault.Check"
-         parameter="sort_system_folders_to_top" />
+         parameter="show_received_items_panel" />
     </menu_item_check>
     <menu_item_separator
      layout="topleft" />
@@ -96,6 +74,7 @@
          function="Inventory.GearDefault.Custom.Action"
          parameter="empty_lostnfound" />
     </menu_item_call>
+<!--
     <menu_item_separator
      layout="topleft" />
     <menu_item_call 
@@ -142,6 +121,7 @@
 			 function="Inventory.GearDefault.Enable"
 			 parameter="find_links" />
         </menu_item_call>
+-->
     <menu_item_separator
      layout="topleft" />
 

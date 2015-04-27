@@ -2341,6 +2341,16 @@ The [[MARKETPLACE_CREATE_STORE_URL] Marketplace store] is returning errors.
 	<string name="No Filters"    value="No " />
 	<string name="Since Logoff"  value=" - Since Logoff" />
 
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Wear</string>
+	<string name="InvAction take_off">Take Off</string>
+	<string name="InvAction attach">Attach</string>
+	<string name="InvAction detach">Detach</string>
+	<string name="InvAction activate">Activate</string>
+	<string name="InvAction deactivate">Deactivate</string>
+	<string name="InvAction teleport">Teleport</string>
+	<string name="InvAction open">Open</string>
+
 	<!-- inventory folder -->
 	<string name="InvFolder My Inventory">My Inventory</string>
 	<string name="InvFolder Library">Library</string>

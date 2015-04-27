@@ -537,8 +537,13 @@ BOOL LLFolderViewItem::handleMouseDown( S32 x, S32 y, MASK mask )
 		mSelectPending = TRUE;
 	}
 
-	mDragStartX = x;
-	mDragStartY = y;
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	S32 screen_x, screen_y;
+	localPointToScreen(x, y, &screen_x, &screen_y);
+	getRoot()->setDragStart( screen_x, screen_y );
+// [/SL:KB]
+//	mDragStartX = x;
+//	mDragStartY = y;
 	return TRUE;
 }
 
@@ -552,10 +557,34 @@ BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 	{
 			LLFolderView* root = getRoot();
 
-		if( (x - mDragStartX) * (x - mDragStartX) + (y - mDragStartY) * (y - mDragStartY) > drag_and_drop_threshold() * drag_and_drop_threshold() 
-			&& root->getCurSelectedItem()
-			&& root->startDrag())
+//		if( (x - mDragStartX) * (x - mDragStartX) + (y - mDragStartY) * (y - mDragStartY) > drag_and_drop_threshold() * drag_and_drop_threshold() 
+//			&& root->getCurSelectedItem()
+//			&& root->startDrag())
+//		{
+//					// RN: when starting drag and drop, clear out last auto-open
+//					root->autoOpenTest(NULL);
+//					root->setShowSelectionContext(TRUE);
+//
+//					// Release keyboard focus, so that if stuff is dropped into the
+//					// world, pressing the delete key won't blow away the inventory
+//					// item.
+//					gFocusMgr.setKeyboardFocus(NULL);
+//
+//			getWindow()->setCursor(UI_CURSOR_ARROW);
+//		}
+//		else if (x != mDragStartX || y != mDragStartY)
+//		{
+//			getWindow()->setCursor(UI_CURSOR_NOLOCKED);
+//		}
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+		S32 screen_x, screen_y;
+		localPointToScreen(x, y, &screen_x, &screen_y);
+
+		bool can_drag = true;
+		if ( (root->isOverDragThreshold(screen_x, screen_y)) && (root->getCurSelectedItem()) )
 		{
+			if (can_drag = root->startDrag())
+			{
 					// RN: when starting drag and drop, clear out last auto-open
 					root->autoOpenTest(NULL);
 					root->setShowSelectionContext(TRUE);
@@ -564,13 +593,14 @@ BOOL LLFolderViewItem::handleHover( S32 x, S32 y, MASK mask )
 					// world, pressing the delete key won't blow away the inventory
 					// item.
 					gFocusMgr.setKeyboardFocus(NULL);
+			}
+		}
 
+		if (can_drag)
 			getWindow()->setCursor(UI_CURSOR_ARROW);
-		}
-		else if (x != mDragStartX || y != mDragStartY)
-		{
+		else
 			getWindow()->setCursor(UI_CURSOR_NOLOCKED);
-		}
+// [/SL:KB]
 
 		return TRUE;
 	}
@@ -832,18 +862,30 @@ void LLFolderViewItem::draw()
 	// Draw open icon
 	//
 	const S32 icon_x = mIndentation + mArrowSize + mTextPad;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	const F32 label_alpha = (mViewModelItem->isClipboardCut()) ? 0.6f : 1.0f;
+// [/SL:KB]
 	if (!mIconOpen.isNull() && (llabs(mControlLabelRotation) > 80)) // For open folders
  	{
-		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOpen->draw(icon_x, getRect().getHeight() - mIconOpen->getHeight() - TOP_PAD + 1);
 	}
 	else if (mIcon)
 	{
- 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+ 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+// 		mIcon->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
  	}
 
 	if (mIconOverlay && getRoot()->showItemLinkOverlays())
 	{
-		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1, UI_VERTEX_COLOR % label_alpha);
+// [/SL:KB]
+//		mIconOverlay->draw(icon_x, getRect().getHeight() - mIcon->getHeight() - TOP_PAD + 1);
 	}
 
 	//--------------------------------------------------------------------------------//
@@ -873,6 +915,9 @@ void LLFolderViewItem::draw()
     }
 
     LLColor4 color = (mIsSelected && filled) ? mFontHighlightColor : mFontColor;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	color.setAlpha(label_alpha);
+// [/SL:KB]
     drawLabel(font, text_left, y, color, right_x);
 
 	//--------------------------------------------------------------------------------//
@@ -1139,6 +1184,13 @@ BOOL LLFolderViewFolder::needsArrange()
 {
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
 }
+
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2013-05-19 (Catznip-3.5)
+bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
+{
+	return getViewModelItem()->descendantsPassedFilter(filter_generation);
+}
+// [/SL:KB]
 
 // Passes selection information on to children and record selection
 // information if necessary.
