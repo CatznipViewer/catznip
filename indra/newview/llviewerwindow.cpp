@@ -1944,6 +1944,9 @@ void LLViewerWindow::initWorldUI()
 	chiclet_bar->setFollowsAll();
 	chiclet_container->addChild(chiclet_bar);
 	chiclet_container->setVisible(TRUE);
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	chiclet_bar->setAlignment((LLChicletBar::EAlignment)gSavedSettings.getS32("ChicletBarAlignment"));
+// [/SL:KB]
 
 	LLRect morph_view_rect = full_window;
 	morph_view_rect.stretch( -STATUS_BAR_HEIGHT );
