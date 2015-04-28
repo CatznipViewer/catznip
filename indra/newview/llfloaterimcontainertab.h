@@ -47,6 +47,9 @@ public:
 
 protected:
 	void onTabContainerRightMouseDown(S32 x, S32 y);
+// [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
+	void onIMTabRearrange(S32 tab_index, LLPanel* tab_panel);
+// [/SL:KB]
 };
 
 #endif // LL_LLFLOATERIMCONTAINERTAB_H
