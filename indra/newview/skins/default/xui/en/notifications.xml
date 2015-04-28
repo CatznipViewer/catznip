@@ -406,6 +406,21 @@ Do you want to grant modify rights for the selected Residents?
 
   <notification
    icon="alertmodal.tga"
+   name="RestoredUnreadIMs"
+   type="alertmodal">
+    <unique/>
+Conversations that contained unread messages when the viewer last closed have been restored.
+
+You can control this behaviour through the 'Chat' panel in preferences.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Inform me when unread IMs have been restored at login"
+     name="okignore"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="RevokeModifyRights"
    type="alertmodal">
 Do you want to revoke modify rights for [NAME]?
