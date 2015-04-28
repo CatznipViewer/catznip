@@ -8,6 +8,7 @@
 	<context_menu label="Anhängen an" name="wearable_attach_to"/>
 	<context_menu label="An HUD hängen" name="wearable_attach_to_hud"/>
 	<menu_item_call label="Ausziehen" name="take_off"/>
+	<menu_item_call label="Berühren" name="touch"/>
 	<menu_item_call label="Bearbeiten" name="edit"/>
 	<menu_item_call label="Objektprofil" name="object_profile"/>
 	<menu_item_call label="Original anzeigen" name="show_original"/>
