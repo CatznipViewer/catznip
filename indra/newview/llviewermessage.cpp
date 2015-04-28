@@ -2510,7 +2510,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			if(offline == IM_OFFLINE)
 			{
 				LLStringUtil::format_map_t args;
-				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+				args["[LONG_TIMESTAMP]"] = formatted_longtime(timestamp);
+// [/SL:KB]
+//				args["[LONG_TIMESTAMP]"] = formatted_time(timestamp);
 				saved = LLTrans::getString("Saved_message", args);
 			}
 			buffer = saved + message;
@@ -2565,15 +2568,21 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 
 	case IM_TYPING_START:
 		{
-			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
-			gIMMgr->processIMTypingStart(im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+			gIMMgr->processIMTyping(session_id, true);
+// [/SL:KB]
+//			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
+//			gIMMgr->processIMTypingStart(im_info);
 		}
 		break;
 
 	case IM_TYPING_STOP:
 		{
-			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
-			gIMMgr->processIMTypingStop(im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+			gIMMgr->processIMTyping(session_id, false);
+// [/SL:KB]
+//			LLPointer<LLIMInfo> im_info = new LLIMInfo(gMessageSystem);
+//			gIMMgr->processIMTypingStop(im_info);
 		}
 		break;
 
@@ -2996,7 +3005,10 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			std::string saved;
 			if(offline == IM_OFFLINE)
 			{
-				saved = llformat("(Saved %s) ", formatted_time(timestamp).c_str());
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+				saved = llformat("(Saved %s) ", formatted_longtime(timestamp).c_str());
+// [/SL:KB]
+//				saved = llformat("(Saved %s) ", formatted_time(timestamp).c_str());
 			}
 
 			buffer = saved + message;
@@ -3652,7 +3664,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		// Look for the start of typing so we can put "..." in the bubbles.
 		if (CHAT_TYPE_START == chat.mChatType)
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, TRUE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, TRUE);
 
 			// Might not have the avatar constructed yet, eg on login.
 			if (chatter && chatter->isAvatar())
@@ -3663,7 +3675,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		}
 		else if (CHAT_TYPE_STOP == chat.mChatType)
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
 
 			// Might not have the avatar constructed yet, eg on login.
 			if (chatter && chatter->isAvatar())
@@ -3712,7 +3724,7 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		// We have a real utterance now, so can stop showing "..." and proceed.
 		if (chatter && chatter->isAvatar())
 		{
-			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
+//			LLLocalSpeakerMgr::getInstance()->setSpeakerTyping(from_id, FALSE);
 			((LLVOAvatar*)chatter)->stopTyping();
 			
 			if (!is_muted && !is_do_not_disturb)
@@ -3780,6 +3792,9 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		msg_notify["session_id"] = LLUUID();
         msg_notify["from_id"] = chat.mFromID;
 		msg_notify["source_type"] = chat.mSourceType;
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+		msg_notify["trigger_sound"] = true;
+// [/SL:KB]
         on_new_message(msg_notify);
 	}
 }
@@ -5961,7 +5976,13 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 				}
 			}
 
-			make_ui_sound("UISndRestart");
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+			if (gSavedSettings.getBOOL("PlaySoundRegionRestart"))
+			{
+				make_ui_sound(LLViewerChat::getUISoundFromSetting("UISndEventRegionRestart"));
+			}
+// [/SL:KB]
+//			make_ui_sound("UISndRestart");
 		}
 
 		LLNotificationsUtil::add(notificationID, llsdBlock);
@@ -6656,21 +6677,39 @@ void container_inventory_arrived(LLViewerObject* object,
 }
 
 // method to format the time.
-std::string formatted_time(const time_t& the_time)
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+std::string formatted_longtime(const time_t& the_time)
 {
-	std::string dateStr = "["+LLTrans::getString("LTimeWeek")+"] ["
-						+LLTrans::getString("LTimeMonth")+"] ["
-						+LLTrans::getString("LTimeDay")+"] ["
-						+LLTrans::getString("LTimeHour")+"]:["
-						+LLTrans::getString("LTimeMin")+"]:["
-						+LLTrans::getString("LTimeSec")+"] ["
-						+LLTrans::getString("LTimeYear")+"]";
+	std::string dateStr = "["+LLTrans::getString("TimeWeek")+"] ["
+						+LLTrans::getString("TimeMonthName")+"] ["
+						+LLTrans::getString("TimeDay")+"] ["
+						+LLTrans::getString("TimeYear")+"] ["
+						+LLTrans::getString("TimeHour")+"]:["
+						+LLTrans::getString("TimeMin")+"]:["
+						+LLTrans::getString("TimeSec")+"] ["
+						+LLTrans::getString("TimeTimezone")+"]";
 
 	LLSD substitution;
 	substitution["datetime"] = (S32) the_time;
 	LLStringUtil::format (dateStr, substitution);
 	return dateStr;
 }
+// [/SL:KB]
+//std::string formatted_time(const time_t& the_time)
+//{
+//	std::string dateStr = "["+LLTrans::getString("LTimeWeek")+"] ["
+//						+LLTrans::getString("LTimeMonth")+"] ["
+//						+LLTrans::getString("LTimeDay")+"] ["
+//						+LLTrans::getString("LTimeHour")+"]:["
+//						+LLTrans::getString("LTimeMin")+"]:["
+//						+LLTrans::getString("LTimeSec")+"] ["
+//						+LLTrans::getString("LTimeYear")+"]";
+//
+//	LLSD substitution;
+//	substitution["datetime"] = (S32) the_time;
+//	LLStringUtil::format (dateStr, substitution);
+//	return dateStr;
+//}
 
 
 void process_teleport_failed(LLMessageSystem *msg, void**)
@@ -7464,17 +7503,20 @@ void process_covenant_reply(LLMessageSystem* msg, void**)
 	}
 	else
 	{
-		last_modified = LLTrans::getString("covenant_last_modified")+"["
-						+LLTrans::getString("LTimeWeek")+"] ["
-						+LLTrans::getString("LTimeMonth")+"] ["
-						+LLTrans::getString("LTimeDay")+"] ["
-						+LLTrans::getString("LTimeHour")+"]:["
-						+LLTrans::getString("LTimeMin")+"]:["
-						+LLTrans::getString("LTimeSec")+"] ["
-						+LLTrans::getString("LTimeYear")+"]";
-		LLSD substitution;
-		substitution["datetime"] = (S32) covenant_timestamp;
-		LLStringUtil::format (last_modified, substitution);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+		last_modified = LLTrans::getString("covenant_last_modified") + formatted_longtime(covenant_timestamp);
+// [/SL:KB]
+//		last_modified = LLTrans::getString("covenant_last_modified")+"["
+//						+LLTrans::getString("LTimeWeek")+"] ["
+//						+LLTrans::getString("LTimeMonth")+"] ["
+//						+LLTrans::getString("LTimeDay")+"] ["
+//						+LLTrans::getString("LTimeHour")+"]:["
+//						+LLTrans::getString("LTimeMin")+"]:["
+//						+LLTrans::getString("LTimeSec")+"] ["
+//						+LLTrans::getString("LTimeYear")+"]";
+//		LLSD substitution;
+//		substitution["datetime"] = (S32) covenant_timestamp;
+//		LLStringUtil::format (last_modified, substitution);
 	}
 
 	LLPanelEstateCovenant::updateLastModified(last_modified);
