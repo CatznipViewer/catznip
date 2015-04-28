@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<inventory_panel
+ background_visible="false"
+ background_opaque="false"
+ border="false"
+ bevel_style="none"
+ follows="all"
+ height="310"
+ label="CUSTOM"
+ help_topic="my_inventory_tab"
+ layout="topleft"
+ left="0"
+ name="custom"
+ sort_order_setting="InventorySortOrder"
+ show_item_link_overlays="true"
+ width="320"
+ />
