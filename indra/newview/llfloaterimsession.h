@@ -39,7 +39,7 @@ class LLAvatarName;
 class LLButton;
 class LLChatEntry;
 class LLTextEditor;
-class LLPanelChatControlPanel;
+//class LLPanelChatControlPanel;
 class LLChatHistory;
 class LLInventoryItem;
 class LLInventoryCategory;
@@ -111,6 +111,10 @@ public:
 	bool enableGearMenuItem(const LLSD& userdata);
 	void GearDoToSelected(const LLSD& userdata);
 	bool checkGearMenuItem(const LLSD& userdata);
+// [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
+	void GearDoToSelectedGroup(const LLSD& userdata);
+	bool enableGearGroupMenuItem(const LLSD& userdata);
+// [/SL:KB]
 
 	// Implements LLVoiceClientStatusObserver::onChange() to enable the call
 	// button when voice is available
@@ -122,7 +126,10 @@ public:
 			const LLVoiceChannel::EState& old_state,
 			const LLVoiceChannel::EState& new_state);
 
-	void processIMTyping(const LLIMInfo* im_info, BOOL typing);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+	void processIMTyping(bool typing);
+// [/SL:KB]
+//	void processIMTyping(const LLIMInfo* im_info, BOOL typing);
 	void processAgentListUpdates(const LLSD& body);
 	void processSessionUpdate(const LLSD& session_update);
 
@@ -134,7 +141,7 @@ public:
 	static boost::signals2::connection setIMFloaterShowedCallback(const floater_showed_signal_t::slot_type& cb);
 	static floater_showed_signal_t sIMFloaterShowedSignal;
 
-	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
+//	bool needsTitleOverwrite() { return mSessionNameUpdatedForTyping && mOtherTyping; }
 	S32 getLastChatMessageIndex() {return mLastMessageIndex;}
 private:
 
@@ -143,8 +150,14 @@ private:
     /*virtual*/ void onTearOffClicked();
 	/*virtual*/ void onClickCloseBtn(bool app_qutting);
 
+// [SL:KB] - Patch: Chat-Title | Checked: 2013-12-15 (Catznip-3.6)
 	// Update the window title and input field help text
-	/*virtual*/ void updateSessionName(const std::string& name);
+	/*virtual*/ void updateSessionName();
+
+	static void onAvatarNameCache(const LLUUID& idSession, const LLAvatarName& avName);
+// [/Sl:KB]
+//	// Update the window title and input field help text
+//	/*virtual*/ void updateSessionName(const std::string& name);
 
 	bool dropPerson(LLUUID* person_id, bool drop);
 
@@ -165,10 +178,16 @@ private:
 	void boundVoiceChannel();
 
 	// Add the "User is typing..." indicator.
-	void addTypingIndicator(const LLIMInfo* im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+	void addTypingIndicator();
+// [/SL:KB]
+//	void addTypingIndicator(const LLIMInfo* im_info);
 
 	// Remove the "User is typing..." indicator.
-	void removeTypingIndicator(const LLIMInfo* im_info = NULL);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+	void removeTypingIndicator();
+// [/SL:KB]
+//	void removeTypingIndicator(const LLIMInfo* im_info = NULL);
 
 	static void closeHiddenIMToasts();
 
@@ -180,13 +199,13 @@ private:
 	LLUUID mOtherParticipantUUID;
 	bool mPositioned;
 
-	LLUIString mTypingStart;
+//	LLUIString mTypingStart;
 	bool mMeTyping;
 	bool mOtherTyping;
 	bool mShouldSendTypingState;
 	LLFrameTimer mTypingTimer;
 	LLFrameTimer mTypingTimeoutTimer;
-	bool mSessionNameUpdatedForTyping;
+//	bool mSessionNameUpdatedForTyping;
 	LLFrameTimer mMeTypingTimer;
 	LLFrameTimer mOtherTypingTimer;
 
@@ -199,7 +218,7 @@ private:
 	// connection to voice channel state change signal
 	boost::signals2::connection mVoiceChannelStateChangeConnection;
 
-	const LLIMInfo* mImInfo;
+//	const LLIMInfo* mImInfo;
 };
 
 #endif  // LL_FLOATERIMSESSION_H

@@ -53,7 +53,7 @@ LLSpeaker::LLSpeaker(const LLUUID& id, const std::string& name, const ESpeakerTy
 	mHasLeftCurrentCall(FALSE),
 	mDotColor(LLColor4::white),
 	mID(id),
-	mTyping(FALSE),
+//	mTyping(FALSE),
 	mSortIndex(0),
 	mType(type),
 	mIsModerator(FALSE),
@@ -678,14 +678,14 @@ bool LLSpeakerMgr::isSpeakerToBeRemoved(const LLUUID& speaker_id)
 	return mSpeakerDelayRemover && mSpeakerDelayRemover->isTimerStarted(speaker_id);
 }
 
-void LLSpeakerMgr::setSpeakerTyping(const LLUUID& speaker_id, BOOL typing)
-{
-	LLPointer<LLSpeaker> speakerp = findSpeaker(speaker_id);
-	if (speakerp.notNull())
-	{
-		speakerp->mTyping = typing;
-	}
-}
+//void LLSpeakerMgr::setSpeakerTyping(const LLUUID& speaker_id, BOOL typing)
+//{
+//	LLPointer<LLSpeaker> speakerp = findSpeaker(speaker_id);
+//	if (speakerp.notNull())
+//	{
+//		speakerp->mTyping = typing;
+//	}
+//}
 
 // speaker has chatted via either text or voice
 void LLSpeakerMgr::speakerChatted(const LLUUID& speaker_id)

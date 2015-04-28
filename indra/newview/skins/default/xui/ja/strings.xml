@@ -741,6 +741,9 @@ support@secondlife.com にお問い合わせください。
 	<string name="AvatarMuted">
 		ブロック中
 	</string>
+	<string name="AvatarTyping">
+		タイピング
+	</string>
 	<string name="anim_express_afraid">
 		怖れ
 	</string>

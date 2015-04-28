@@ -171,7 +171,11 @@ void send_improved_im(const LLUUID& to_id,
 void process_user_info_reply(LLMessageSystem* msg, void**);
 
 // method to format the time. 
-std::string formatted_time(const time_t& the_time);
+// [SL:KB] - Patch: UI-TimeFormat | Checked: 2013-08-19 (Catznip-3.6)
+// NOTE: function name was changed so we'll get compile errors when new code references the old function
+std::string formatted_longtime(const time_t& the_time);
+// [/SL:KB]
+//std::string formatted_time(const time_t& the_time);
 
 void send_places_query(const LLUUID& query_id,
 					   const LLUUID& trans_id,
