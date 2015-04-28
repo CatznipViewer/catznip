@@ -647,14 +647,6 @@
     <menu_item_separator
      layout="topleft" 
      name="Wearable And Object Separator"/>
-    <menu_item_call
-     label="Detach From Yourself"
-     layout="topleft"
-     name="Detach From Yourself">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="detach" />
-    </menu_item_call>
 	<!-- COMMENTED OUT for DEV-32347 -->
 	<!--
     <menu_item_call
@@ -674,6 +666,14 @@
          function="Inventory.DoToSelected"
          parameter="wear" />
     </menu_item_call>
+    <menu_item_call
+     label="Add"
+     layout="topleft"
+     name="Wearable Add">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="wear_add" />
+    </menu_item_call>
     <menu
      label="Attach To"
      layout="topleft"
@@ -691,20 +691,28 @@
          parameter="edit" />
     </menu_item_call>
     <menu_item_call
-     label="Add"
-     layout="topleft"
-     name="Wearable Add">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="wear_add" />
-    </menu_item_call>
-    <menu_item_call
      label="Take Off"
      layout="topleft"
      name="Take Off">
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
          parameter="take_off" />
+    </menu_item_call>
+    <menu_item_call
+     label="Detach From Yourself"
+     layout="topleft"
+     name="Detach From Yourself">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="detach" />
+    </menu_item_call>
+    <menu_item_call
+     label="Take Off / Detach"
+     layout="topleft"
+     name="Wearable And Object Take Off">
+      <menu_item_call.on_click
+       function="Inventory.DoToSelected"
+       parameter="take_off" />
     </menu_item_call>
 	<menu_item_separator
 	 layout="topleft"
