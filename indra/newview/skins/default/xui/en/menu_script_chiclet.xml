@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<menu
- height="101"
+<context_menu
  layout="topleft"
- left="100"
- mouse_opaque="false"
- name="ScriptChiclet Menu"
- top="724"
- visible="false"
- width="128">
+ name="ScriptChiclet Menu">
     <menu_item_call
      label="Close"
      layout="topleft"
@@ -16,4 +10,4 @@
          function="ScriptChiclet.Action"
          parameter="end" />
     </menu_item_call>
-</menu>
+</context_menu>
