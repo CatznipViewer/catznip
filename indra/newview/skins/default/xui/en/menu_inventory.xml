@@ -682,6 +682,11 @@
      label="Attach To HUD"
      layout="topleft"
      name="Attach To HUD" />
+    <menu
+     label="Wear On"
+     layout="topleft"
+     name="Wear On">
+    </menu>
     <menu_item_call
      label="Edit"
      layout="topleft"

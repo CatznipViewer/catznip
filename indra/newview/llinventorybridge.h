@@ -537,6 +537,11 @@ public:
 	static BOOL		canRemoveFromAvatar( void* userdata );
 	static void 	removeAllClothesFromAvatar();
 	void			removeFromAvatar();
+
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	static  bool    doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam);
+	static  bool    getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl, const LLSD& sdParam);
+// [/SL:KB]
 protected:
 	LLAssetType::EType mAssetType;
 	LLWearableType::EType  mWearableType;
