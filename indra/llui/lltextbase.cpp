@@ -2042,6 +2042,13 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 
 			LLStyle::Params link_params(style_params);
 			link_params.overwriteFrom(match.getStyle());
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+			if (!style_params.link_style_override)
+			{
+				U8 style = LLFontGL::getStyleFromString(input_params.font.style) | LLFontGL::getStyleFromString(link_params.font.style);
+				link_params.font.style = LLFontGL::getStringFromStyle(style);
+			}
+// [/SL:KB]
 
 			// output the text before the Url
 			if (start > 0)
@@ -2222,7 +2229,11 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 			LLTextSegmentPtr segmentp;
 			if(underline_on_hover_only)
 			{
-				highlight_params.font.style("NORMAL");
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+				U8 style = LLFontGL::getStyleFromString(highlight_params.font.style) & ~LLFontGL::UNDERLINE;
+				highlight_params.font.style = LLFontGL::getStringFromStyle(style);
+// [/SL:KB]
+//				highlight_params.font.style("NORMAL");
 				LLStyleConstSP normal_sp(new LLStyle(highlight_params));
 				segmentp = new LLOnHoverChangeableTextSegment(sp, normal_sp, cur_length, cur_length + wide_text.size(), *this);
 			}
@@ -2247,7 +2258,11 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 		if (underline_on_hover_only)
 		{
 			LLStyle::Params normal_style_params(style_params);
-			normal_style_params.font.style("NORMAL");
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+			U8 style = LLFontGL::getStyleFromString(normal_style_params.font.style) & ~LLFontGL::UNDERLINE;
+			normal_style_params.font.style = LLFontGL::getStringFromStyle(style);
+// [/SL:KB]
+//			normal_style_params.font.style("NORMAL");
 			LLStyleConstSP normal_sp(new LLStyle(normal_style_params));
 			segments.push_back(new LLOnHoverChangeableTextSegment(sp, normal_sp, segment_start, segment_end, *this ));
 		}

@@ -713,7 +713,7 @@ void LLIMWellWindow::addIMRow(const LLUUID& sessionId, S32 chicletCounter, const
 	}
 	else
 	{
-		llwarns << "Unable to add IM Row into the list, sessionID: " << sessionId << ", name: " << name << llendl;
+		LL_WARNS() << "Unable to add IM Row into the list, sessionID: " << sessionId << ", name: " << name << LL_ENDL;
 		item->die();
 	}
 	reshapeWindow();
@@ -736,7 +736,7 @@ void LLIMWellWindow::delIMRow(const LLUUID& sessionId)
 	}
 	else
 	{
-		llwarns << "Unable to remove IM Row from the list, sessionID: " << sessionId << llendl;
+		LL_WARNS() << "Unable to remove IM Row from the list, sessionID: " << sessionId << LL_ENDL;
 	}
 	reshapeWindow();
 
