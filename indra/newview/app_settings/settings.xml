@@ -746,6 +746,47 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>AxisAtRootEnabled</key>
+    <map>
+      <key>Comment</key>
+      <string>Position the axis on the first (root) object of the selection</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
+    <key>AxisOffset</key>
+    <map>
+      <key>Comment</key>
+      <string>Offset of the axis (in meters)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Vector3</string>
+      <key>Value</key>
+      <array>
+        <real>0.0</real>
+        <real>0.0</real>
+        <real>0.0</real>
+      </array>
+    </map>
+    <key>AxisPosition</key>
+    <map>
+      <key>Comment</key>
+      <string>Position of the axis relative to the center of the current selection</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Vector3</string>
+      <key>Value</key>
+      <array>
+        <real>0.0</real>
+        <real>0.0</real>
+        <real>0.0</real>
+      </array>
+    </map>
     <key>BackgroundYieldTime</key>
     <map>
       <key>Comment</key>
@@ -3469,6 +3510,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>EnableGrabNonPhysical</key>
+    <map>
+      <key>Comment</key>
+      <string>Allows grabbing of non-physical objects</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>EnableAltZoom</key>
     <map>
@@ -10093,6 +10145,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>RezUnderLandGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>Enables rezzing prims under the land group rather than the avatar's active group</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>ReplaySession</key>
     <map>
       <key>Comment</key>
@@ -10434,6 +10497,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>	
+    <key>SelectCopiableOnly</key>
+    <map>
+      <key>Comment</key>
+      <string>Select only objects you can copy</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>SelectMovableOnly</key>
     <map>
       <key>Comment</key>
@@ -10532,6 +10606,17 @@
       <string>F32</string>
       <key>Value</key>
       <real>1.0</real>
+    </map>
+    <key>SendPointAt</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows the arm-movement editing motion for your avatart and sends point-at updates to the region when enabled</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>ServerChoice</key>
     <map>
