@@ -2870,6 +2870,35 @@ Are you sure you want to delete these items?
 
   <notification
    icon="alertmodal.tga"
+   name="ConfirmObjectRestoreToWorld"
+   type="alertmodal">
+    <unique/>
+Are you sure you want to restore this item to its last in-world position?
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Confirm before restoring copyable items to world"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmObjectRestoreToWorldNoCopy"
+   type="alertmodal">
+    <unique/>
+The item you have selected is not copyable.
+
+Are you sure you want to restore this item to its last in-world position?
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Confirm before restoring non-copyable items to world"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="ConfirmObjectTakeLock"
    type="alertmodal">
 At least one object is locked.
@@ -7703,6 +7732,20 @@ Your voice has been muted by moderator.
     name="UploadCostConfirmation"
     type="alertmodal">
 This upload will cost L$[PRICE], do you wish to continue with the upload?
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="Upload"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="UploadDnDConfirmation"
+   type="alertmodal">
+This will upload the following at L$[UPLOAD_COST] per file: 
+
+[UPLOAD_LIST]
+    Do you wish to continue with the upload?
     <usetemplate
      name="okcancelbuttons"
      notext="Cancel"
