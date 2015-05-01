@@ -15,43 +15,120 @@
     log in to change
   </panel.string>
 
+  <text
+   follows="left|top"
+   font.style="BOLD"
+   height="15"
+   layout="topleft"
+   left="30"
+   length="1"
+   name="clearcache_textbox"
+   top="10"
+   type="string"
+   width="400">
+    Clear
+  </text>
+  <check_box
+   follows="left|top"
+   height="16"
+   label="Web Cookies"
+   layout="topleft"
+   left="60"
+   name="clear_web_cookies"
+   top_pad="5"
+   tool_tip="Clear web browser cookies when the SL cache is cleared"
+   width="120">
+    <check_box.commit_callback
+     function="Privacy.ToggleClearSetting"
+     parameter="cookies" />
+  </check_box>
+  <check_box
+   follows="left|top"
+   height="16"
+   label="Navigation Bar History"
+   layout="topleft"
+   left_delta="125"
+   name="clear_navbar_history"
+   tool_tip="Clear navigation bar history when the SL cache is cleared"
+   width="120">
+    <check_box.commit_callback
+     function="Privacy.ToggleClearSetting"
+     parameter="navbar" />
+  </check_box>
+  <check_box
+   follows="left|top"
+   height="16"
+   label="People History"
+   layout="topleft"
+   left_delta="160"
+   name="clear_people_history"
+   tool_tip="Clear people history when the SL cache is cleared"
+   width="120">
+    <check_box.commit_callback
+     function="Privacy.ToggleClearSetting"
+     parameter="people" />
+  </check_box>
+  <check_box
+   follows="left|top"
+   height="16"
+   label="Search History"
+   layout="topleft"
+   left="60"
+   name="clear_search_history"
+   tool_tip="Clear search history when the SL cache is cleared"
+   width="120">
+    <check_box.commit_callback
+     function="Privacy.ToggleClearSetting"
+     parameter="search" />
+  </check_box>
+  <check_box
+   follows="left|top"
+   height="16"
+   label="Teleport History"
+   layout="topleft"
+   left_delta="125"
+   name="clear_teleport_history"
+   tool_tip="Clear teleport history when the SL cache is cleared"
+   width="120">
+    <check_box.commit_callback
+     function="Privacy.ToggleClearSetting"
+     parameter="teleport" />
+  </check_box>
   <button
-      follows="left|bottom"
+      follows="left|top"
       height="23"
       label="Clear History"
       tool_tip="Clear login image, last location, teleport history, web, and texture cache"
       layout="topleft"
-      left="30"
+      left="60"
       name="clear_cache"
-      top="10"
+      top_pad="5"
       width="145">
     <button.commit_callback
         function="Pref.WebClearCache" />
   </button>
 
   <text
-      type="string"
-      length="1"
-      follows="left|top"
-      height="10"
-      layout="topleft"
-      left_pad="10"
-      mouse_opaque="false"
-      name="cache_size_label_l"
-      top_delta="3"
-      text_color="LtGray_50"
-      width="300">
-    (Locations, images, web, search history)
-  </text>
-
+    follows="left|top"
+    font.style="BOLD"
+    height="15"
+    layout="topleft"
+    left="30"
+    length="1"
+    name="privacy_textbox"
+    top_pad="20"
+    type="string"
+    width="400">
+     Privacy
+   </text>
   <check_box
       height="16"
       enabled="false"
       label="Show my profile info in Search results"
       layout="topleft"
-      left="30"
+      left_delta="30"
       name="online_searchresults"
-      top_pad="20"
+      top_pad="5"
       width="350" />
 
   <check_box
@@ -59,30 +136,27 @@
       enabled="false"
       label="Only friends and groups know I'm online"
       layout="topleft"
-      left="30"
       name="online_visibility"
-      top_pad="30"
+      top_pad="5"
       width="350" />
     
+  <check_box
+      control_name="VoiceCallsFriendsOnly"
+      height="16"
+      label="Only friends and groups can call or IM me"
+      layout="topleft"
+      name="voice_call_friends_only_check"
+      top_pad="6"
+      width="350" />
+
     <check_box
      enabled_control="EnableVoiceChat"
      control_name="AutoDisengageMic"
      height="16"
      label="Switch off microphone when ending calls"
      layout="topleft"
-     left="30"
      name="auto_disengage_mic_check"
-     top_pad="10"
-     width="350" />
-    <check_box
-     control_name="ShowFavoritesOnLogin"
-     enabled="false" 
-     height="16"
-     layout="topleft"
-     label="Show my Favorite Landmarks at Login (via &apos;Start At&apos; drop-down menu)"
-     left="30"
-     name="favorites_on_login_check"
-     top_pad="10"
+     top_pad="5"
      width="350" />
 
     <button
@@ -90,9 +164,8 @@
      height="23"
      label="Block list"
      layout="topleft"
-     left="30"
      name="block_list"
-     top_pad="28"
+     top_pad="5"
      width="145">
         <!--<button.commit_callback
          function="SideTray.ShowPanel"-->
@@ -108,7 +181,7 @@
      left_pad="10"
      mouse_opaque="false"
      name="block_list_label"
-     top_delta="3"
+     top_delta="5"
      text_color="LtGray_50"
      width="300">
        (People and/or Objects you have blocked)

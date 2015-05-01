@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel
+ border="true"
+ follows="all"
+ height="408"
+ label="Troubleshooting"
+ layout="topleft"
+ left="102"
+ name="troubleshoot"
+ top="1"
+ width="517">
+    <text
+     follows="top|left"
+     font.style="BOLD"
+     height="12"
+     layout="topleft"
+     left="30"
+     length="1"
+     name="Troubleshooting:"
+     top_pad="20"
+     type="string"
+     width="150">
+     Troubleshooting
+    </text>
+    <check_box
+     control_name="WearInitialOutfit"
+     follows="top|left"
+     height="15"
+     label="Wear default avatar on next login"
+     layout="topleft"
+     left="50"
+     name="default_avatar_chk"
+     top_pad="10"
+     width="237"/>
+    <button
+     follows="top|left"
+     height="23"
+     label="Clear Viewer Settings"
+     layout="topleft"
+     left="50"
+     name="clear_user_settings_btn"
+     top_pad="5"
+     width="150">
+        <button.commit_callback
+         function="Pref.ClearSettings"
+         parameter="user" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="clear_user_settings_txt"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Preferences, menu options and debug settings)
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Clear Personal Settings"
+     layout="topleft"
+     left="50"
+     name="clear_account_settings_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ClearSettings"
+         parameter="account" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="clear_account_settings_txt"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Toolbar layout, saved notifications, derender list, ...)
+    </text>
+</panel>
