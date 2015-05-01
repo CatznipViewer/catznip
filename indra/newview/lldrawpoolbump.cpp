@@ -199,7 +199,10 @@ void LLDrawPoolBump::prerender()
 // static
 S32 LLDrawPoolBump::numBumpPasses()
 {
-	if (gSavedSettings.getBOOL("RenderObjectBump"))
+//	if (gSavedSettings.getBOOL("RenderObjectBump"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::sRenderBump)
+// [/SL:KB]
 	{
 		if (mVertexShaderLevel > 1)
 		{
@@ -807,7 +810,10 @@ void LLDrawPoolBump::endBump(U32 pass)
 
 S32 LLDrawPoolBump::getNumDeferredPasses()
 { 
-	if (gSavedSettings.getBOOL("RenderObjectBump"))
+//	if (gSavedSettings.getBOOL("RenderObjectBump"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::sRenderBump)
+// [/SL:KB]
 	{
 		return 1;
 	}
@@ -1570,6 +1576,14 @@ void LLDrawPoolInvisible::render(S32 pass)
 { //render invisiprims
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_INVISIBLE);
   
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
+	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisible", true);
+	if (!s_fRenderInvisible)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	if (gPipeline.canUseVertexShaders())
 	{
 		gOcclusionProgram.bind();
@@ -1607,9 +1621,17 @@ void LLDrawPoolInvisible::endDeferredPass( S32 pass )
 
 void LLDrawPoolInvisible::renderDeferred( S32 pass )
 { //render invisiprims; this doesn't work becaue it also blocks all the post-deferred stuff
-#if 0 
+//#if 0 
 	LL_RECORD_BLOCK_TIME(FTM_RENDER_INVISIBLE);
   
+// [SL:KB] - Patch: Settings-DrawPoolInvisible | Checked: 2012-09-05 (Catznip-3.3)
+	static LLCachedControl<bool> s_fRenderInvisible(gSavedSettings, "RenderDrawPoolInvisibleDeferred", false);
+	if (!s_fRenderInvisible)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	U32 invisi_mask = LLVertexBuffer::MAP_VERTEX;
 	glStencilMask(0);
 	glStencilOp(GL_ZERO, GL_KEEP, GL_REPLACE);
@@ -1625,5 +1647,5 @@ void LLDrawPoolInvisible::renderDeferred( S32 pass )
 		renderShiny(true);
 		endShiny(true);
 	}
-#endif
+//#endif
 }

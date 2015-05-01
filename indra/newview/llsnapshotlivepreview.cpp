@@ -808,7 +808,7 @@ void LLSnapshotLivePreview::saveTexture()
 		LLAgentUI::buildFullname(who_took_it);
 		LLAssetStorage::LLStoreAssetCallback callback = NULL;
 		S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-		void *userdata = NULL;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		upload_new_resource(tid,	// tid
 			LLAssetType::AT_TEXTURE,
 			"Snapshot : " + pos_string,
@@ -820,7 +820,21 @@ void LLSnapshotLivePreview::saveTexture()
 			LLFloaterPerms::getGroupPerms(), // that is more permissive than other uploads
 			LLFloaterPerms::getEveryonePerms(),
 			"Snapshot : " + pos_string,
-			callback, expected_upload_cost, userdata);
+			callback, expected_upload_cost);
+// [/SL:KB]
+//		void *userdata = NULL;
+//		upload_new_resource(tid,	// tid
+//			LLAssetType::AT_TEXTURE,
+//			"Snapshot : " + pos_string,
+//			"Taken by " + who_took_it + " at " + pos_string,
+//			0,
+//			LLFolderType::FT_SNAPSHOT_CATEGORY,
+//			LLInventoryType::IT_SNAPSHOT,
+//			PERM_ALL,  // Note: Snapshots to inventory is a special case of content upload
+//			LLFloaterPerms::getGroupPerms(), // that is more permissive than other uploads
+//			LLFloaterPerms::getEveryonePerms(),
+//			"Snapshot : " + pos_string,
+//			callback, expected_upload_cost, userdata);
 		gViewerWindow->playSnapshotAnimAndSound();
 	}
 	else
@@ -834,13 +848,26 @@ void LLSnapshotLivePreview::saveTexture()
 	mDataSize = 0;
 }
 
-BOOL LLSnapshotLivePreview::saveLocal()
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLSnapshotLivePreview::saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb)
 {
-	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
-
-	if(success)
-	{
-		gViewerWindow->playSnapshotAnimAndSound();
-	}
-	return success;
+	gViewerWindow->saveImage(mFormattedImage, cb, prompt_path);
+	gViewerWindow->playSnapshotAnimAndSound();
 }
+//// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//void LLSnapshotLivePreview::saveLocal(const LLViewerWindow::save_image_callback_t& cb)
+//{
+//	gViewerWindow->saveImage(mFormattedImage, cb);
+//	gViewerWindow->playSnapshotAnimAndSound();
+//}
+//// [/SL:KB]
+//BOOL LLSnapshotLivePreview::saveLocal()
+//{
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+//
+//	if(success)
+//	{
+//		gViewerWindow->playSnapshotAnimAndSound();
+//	}
+//	return success;
+//}

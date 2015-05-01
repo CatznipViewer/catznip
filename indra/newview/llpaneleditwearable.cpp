@@ -1246,6 +1246,54 @@ void LLPanelEditWearable::showDefaultSubpart()
         changeCamera(0);
 }
 
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLPanelEditWearable::showWearableParam(const std::string& strParamName)
+{
+	if (mWearablePtr == NULL)
+	{
+		return;
+	}
+
+	LLPanel* curPanel = getPanel(mWearablePtr->getType());
+	if (curPanel)
+	{
+		const LLEditWearableDictionary::WearableEntry* pWearableEntry = LLEditWearableDictionary::getInstance()->getWearable(mWearablePtr->getType());
+		if (!pWearableEntry)
+			return;
+
+		for (U8 idxSubpart = 0, cntSubpart = pWearableEntry->mSubparts.size(); idxSubpart < cntSubpart; idxSubpart++)
+		{
+			ESubpart eSubPart = pWearableEntry->mSubparts[idxSubpart];
+			const LLEditWearableDictionary::SubpartEntry* pSubpartEntry = LLEditWearableDictionary::getInstance()->getSubpart(eSubPart);
+
+			LLScrollingPanelList* pScrollingPanelList = getChild<LLScrollingPanelList>(pSubpartEntry->mParamList);
+			if (!pScrollingPanelList)
+			{
+				continue;
+			}
+
+			const LLScrollingPanelList::panel_list_t& listPanels = pScrollingPanelList->getPanelList();
+			for (LLScrollingPanelList::panel_list_t::const_iterator itPanel = listPanels.begin(); itPanel != listPanels.end(); ++itPanel)
+			{
+				const LLScrollingPanelParamBase* pPanel = dynamic_cast<const LLScrollingPanelParamBase*>(*itPanel);
+				if ( (pPanel) && (pPanel->getParamDisplayName() == strParamName) )
+				{
+					LLAccordionCtrlTab* pPanelTab = dynamic_cast<LLAccordionCtrlTab*>(pScrollingPanelList->getParent());
+					if (pPanelTab)
+					{
+						LLRect rctScreen;
+						changeCamera(idxSubpart);
+						pScrollingPanelList->localRectToScreen(pPanel->getRect(), &rctScreen);
+						pPanelTab->scrollToShowRect(rctScreen);
+					}
+					return;
+				}
+			}
+		}
+	}
+}
+// [/SL:KB]
+
 void LLPanelEditWearable::onTabExpandedCollapsed(const LLSD& param, U8 index)
 {
         bool expanded = param.asBoolean();

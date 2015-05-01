@@ -323,7 +323,7 @@
 		height="15"
 		tool_tip="Check this to let media auto-play if it wants"
 		label="Allow Media to auto-play"
-		top_pad="1"
+		top_pad="5"
 		left="25"/>
  	<check_box
 		name="media_show_on_others_btn"
@@ -350,12 +350,13 @@
      type="string"
      length="1"
      follows="left|top"
+     font.style="BOLD"
      height="20"
      layout="topleft"
      left="25"
      name="voice_chat_settings"
      width="200"
-     top_pad="7">
+     top_pad="20">
 	  Voice Chat Settings
     </text>
     <text
@@ -364,7 +365,7 @@
      follows="left|top"
      layout="topleft"
 	   left="46"
-	   top_delta="16"
+	   top_pad="0"
      name="Listen from"
      width="112">
         Listen from:
@@ -379,7 +380,7 @@
 		visible="true"
 		width="18"
 		left_pad="-4"
-		top_delta="-5"/>
+		top_delta="-4"/>
 	<icon
 		follows="left|top"
 		height="18"

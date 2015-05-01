@@ -5,7 +5,7 @@
 		<check_box label="IMs per E-Mail zustellen, wenn ich offline bin" name="send_im_to_email"/>
 		<check_box label="Nur IMs und Anrufe von Freunden oder Gruppen durchstellen" name="voice_call_friends_only_check"/>
 		<text name="font_size">
-			Schriftgröße:
+			Schriftgröße
 		</text>
 		<combo_box name="chat_font_size">
 			<item label="Klein" name="Small" value="0"/>
