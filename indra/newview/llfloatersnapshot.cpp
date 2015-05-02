@@ -1378,7 +1378,11 @@ void LLFloaterSnapshot::saveTexture()
 }
 
 // static
-BOOL LLFloaterSnapshot::saveLocal()
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//void LLFloaterSnapshot::saveLocal(const save_image_callback_t& cb)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+void LLFloaterSnapshot::saveLocal(bool prompt_path, const save_image_callback_t& cb)
+// [/SL:KB]
 {
 	LL_DEBUGS() << "saveLocal" << LL_ENDL;
 	// FIXME: duplicated code
@@ -1386,16 +1390,41 @@ BOOL LLFloaterSnapshot::saveLocal()
 	if (!instance)
 	{
 		llassert(instance != NULL);
-		return FALSE;
+		cb(false);
+		return;
 	}
 	LLSnapshotLivePreview* previewp = Impl::getPreviewView(instance);
 	if (!previewp)
 	{
 		llassert(previewp != NULL);
-		return FALSE;
+		cb(false);
+		return;
 	}
 
-	return previewp->saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-11-15 (Catznip-3.2)
+	previewp->saveLocal(prompt_path, cb);
+// [/SL:KB]
+//	previewp->saveLocal(cb);
+// [/SL:KB]
+//BOOL LLFloaterSnapshot::saveLocal()
+//{
+//	lldebugs << "saveLocal" << llendl;
+//	// FIXME: duplicated code
+//	LLFloaterSnapshot* instance = LLFloaterReg::findTypedInstance<LLFloaterSnapshot>("snapshot");
+//	if (!instance)
+//	{
+//		llassert(instance != NULL);
+//		return FALSE;
+//	}
+//	LLSnapshotLivePreview* previewp = Impl::getPreviewView(instance);
+//	if (!previewp)
+//	{
+//		llassert(previewp != NULL);
+//		return FALSE;
+//	}
+//
+//	return previewp->saveLocal();
+//}
 }
 
 // static

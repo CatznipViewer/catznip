@@ -833,17 +833,20 @@ void LLLocalBitmapMgr::cleanupClass()
 	sBitmapList.clear();
 }
 
-bool LLLocalBitmapMgr::addUnit()
+//bool LLLocalBitmapMgr::addUnit()
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+bool LLLocalBitmapMgr::addUnit(const std::string& filename)
+// [/SL:KB]
 {
 	bool add_successful = false;
 
-	LLFilePicker& picker = LLFilePicker::instance();
-	if (picker.getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE))
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if (picker.getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE))
 	{
 		sTimer.stopTimer();
 
-		std::string filename = picker.getFirstFile();
-		while(!filename.empty())
+//		std::string filename = picker.getFirstFile();
+//		while(!filename.empty())
 		{
 			LLLocalBitmap* unit = new LLLocalBitmap(filename);
 
@@ -865,7 +868,7 @@ bool LLLocalBitmapMgr::addUnit()
 				unit = NULL;
 			}
 
-			filename = picker.getNextFile();
+//			filename = picker.getNextFile();
 		}
 		
 		sTimer.startTimer();
