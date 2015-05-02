@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Ustawienia" name="Input panel">
 	<text name="Network:">
-		Sieć:
+		Sieć
 	</text>
 	<text name="Maximum bandwidth">
 		Maksymalna przepustowość
@@ -23,7 +23,7 @@
 	<button label="Ustaw" label_selected="Ustaw" name="set_cache"/>
 	<button label="Zresetuj" label_selected="Zresetuj" name="reset_cache"/>
 	<text name="Web:">
-		Internet:
+		Internet
 	</text>
 	<radio_group name="use_external_browser">
 		<radio_item label="Użyj zewnętrznej przeglądarki (IE, Firefox, Safari)" name="external" tool_tip="Używaj zewnętrznej przeglądarki. Nie jest to rekomendowane w trybie pełnoekranowym." value="true"/>
@@ -39,7 +39,7 @@
 	<line_editor name="web_proxy_editor" tool_tip="Nazwa lub IP proxy, którego chcesz użyć"/>
 	<spinner label="Numer portu:" name="web_proxy_port"/>
 	<text name="Software updates:">
-		Aktualizaje oprogramowania:
+		Aktualizaje oprogramowania
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Zainstauj automatycznie" name="Install_automatically"/>
