@@ -938,6 +938,26 @@ void LLAvatarActions::toggleBlock(const LLUUID& id)
 	}
 }
 
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+void LLAvatarActions::copyToClipboard(const LLUUID& id, const LLSD& param)
+{
+	LLAvatarName avName;
+	if (LLAvatarNameCache::get(id, &avName))
+	{
+		std::string strResult, strParam = param.asString();
+		if ("fullname" == strParam)
+			strResult = avName.getCompleteName(LLAvatarName::SHOW_ALWAYS);
+		else if ("displayname" == strParam)
+			strResult = avName.getDisplayName();
+		else if ("username" == strParam)
+			strResult = avName.getAccountName();
+		else if ("slurl" == strParam)
+			strResult = LLSLURL("agent", id, "about").getSLURLString();
+		LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(strResult));
+	}
+}
+// [/SL:KB]
+
 // static
 void LLAvatarActions::toggleMuteVoice(const LLUUID& id)
 {

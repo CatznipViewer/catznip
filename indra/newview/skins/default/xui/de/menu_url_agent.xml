@@ -4,6 +4,7 @@
 	<menu_item_call label="IM senden..." name="send_im"/>
 	<menu_item_call label="Freund hinzufügen..." name="add_friend"/>
 	<menu_item_call label="Freund entfernen..." name="remove_friend"/>
-	<menu_item_call label="Name in Zwischenablage kopieren" name="url_copy_label"/>
-	<menu_item_call label="SLurl in die Zwischenablage kopieren" name="url_copy"/>
+	<menu_item_call label="Anzeigename kopieren" name="url_copy_displayname"/>
+	<menu_item_call label="Name kopieren" name="url_copy_label"/>
+	<menu_item_call label="SLurl kopieren" name="url_copy"/>
 </context_menu>
