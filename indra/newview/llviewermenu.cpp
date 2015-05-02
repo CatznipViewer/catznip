@@ -193,7 +193,10 @@ LLContextMenu* gDetachBodyPartPieMenus[8];
 // Local prototypes
 
 // File Menu
-void handle_compress_image(void*);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void handle_compress_image(const std::vector<std::string>& files);
+// [/SL:KB]
+//void handle_compress_image(void*);
 
 
 // Edit menu
@@ -2086,7 +2089,10 @@ class LLAdvancedCompressImage : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		handle_compress_image(NULL);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		LLFilePicker::getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE, boost::bind(handle_compress_image, _1));
+// [/SL:KB]
+//		handle_compress_image(NULL);
 		return true;
 	}
 };

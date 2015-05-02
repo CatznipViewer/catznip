@@ -245,7 +245,7 @@ void LLAssetUploadResponder::httpFailure()
 		LLNotificationsUtil::add("CannotUploadReason", args);
 	}
 	LLUploadDialog::modalUploadFinished();
-	LLFilePicker::instance().reset();  // unlock file picker when bulk upload fails
+//	LLFilePicker::instance().reset();  // unlock file picker when bulk upload fails
 }
 
 //virtual 
@@ -328,21 +328,33 @@ void LLAssetUploadResponder::uploadComplete(const LLSD& content)
 {
 }
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
 	const LLSD& post_data,
 	const LLUUID& vfile_id,
-	LLAssetType::EType asset_type)
+	LLAssetType::EType asset_type,
+	const std::list<std::string>& files)
 	: LLAssetUploadResponder(post_data, vfile_id, asset_type)
+	, mFiles(files)
 {
 }
+// [/SL:KB]
 
-LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
-	const LLSD& post_data,
-	const std::string& file_name,
-	LLAssetType::EType asset_type)
-	: LLAssetUploadResponder(post_data, file_name, asset_type)
-{
-}
+//LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
+//	const LLSD& post_data,
+//	const LLUUID& vfile_id,
+//	LLAssetType::EType asset_type)
+//	: LLAssetUploadResponder(post_data, vfile_id, asset_type)
+//{
+//}
+
+//LLNewAgentInventoryResponder::LLNewAgentInventoryResponder(
+//	const LLSD& post_data,
+//	const std::string& file_name,
+//	LLAssetType::EType asset_type)
+//	: LLAssetUploadResponder(post_data, file_name, asset_type)
+//{
+//}
 
 // virtual
 void LLNewAgentInventoryResponder::httpFailure()
@@ -396,12 +408,18 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 
 	// continue uploading for bulk uploads
 
-	// *FIX: This is a pretty big hack. What this does is check the
-	// file picker if there are any more pending uploads. If so,
-	// upload that file.
-	std::string next_file = LLFilePicker::instance().getNextFile();
-	if(!next_file.empty())
+//	// *FIX: This is a pretty big hack. What this does is check the
+//	// file picker if there are any more pending uploads. If so,
+//	// upload that file.
+//	std::string next_file = LLFilePicker::instance().getNextFile();
+//	if(!next_file.empty())
+//	{
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	if (!mFiles.empty())
 	{
+		const std::string next_file = mFiles.front();
+		mFiles.pop_front();
+// [/SL:KB]
 		std::string name = gDirUtilp->getBaseFileName(next_file, true);
 
 		std::string asset_name = name;
@@ -429,7 +447,7 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 
 		std::string display_name = LLStringUtil::null;
 		LLAssetStorage::LLStoreAssetCallback callback = NULL;
-		void *userdata = NULL;
+//		void *userdata = NULL;
 
 		upload_new_resource(
 			next_file,
@@ -444,7 +462,10 @@ void LLNewAgentInventoryResponder::uploadComplete(const LLSD& content)
 			display_name,
 			callback,
 			LLGlobalEconomy::Singleton::getInstance()->getPriceUpload(),
-			userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+			(!mFiles.empty()) ? new std::list<std::string>(mFiles) : NULL);
+// [/SL:KB]
+//			userdata);
 	}
 
 	//LLImportColladaAssetCache::getInstance()->assetUploaded(mVFileID, content["new_asset"], TRUE);

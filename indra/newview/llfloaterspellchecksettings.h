@@ -56,6 +56,9 @@ public:
 
 protected:
 	void onBtnBrowse();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	void onBtnBrowseCallback(std::string filepath);
+// [/SL:KB]
 	void onBtnCancel();
 	void onBtnOK();
 	std::string parseXcuFile(const std::string& file_path) const;

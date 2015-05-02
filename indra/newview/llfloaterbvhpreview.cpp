@@ -994,7 +994,7 @@ void LLFloaterBvhPreview::onBtnOK(void* userdata)
 				std::string desc = floaterp->getChild<LLUICtrl>("description_form")->getValue().asString();
 				LLAssetStorage::LLStoreAssetCallback callback = NULL;
 				S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
-				void *userdata = NULL;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 				upload_new_resource(floaterp->mTransactionID, // tid
 						    LLAssetType::AT_ANIMATION,
 						    name,
@@ -1004,7 +1004,19 @@ void LLFloaterBvhPreview::onBtnOK(void* userdata)
 						    LLInventoryType::IT_ANIMATION,
 						    LLFloaterPerms::getNextOwnerPerms("Uploads"), LLFloaterPerms::getGroupPerms("Uploads"), LLFloaterPerms::getEveryonePerms("Uploads"),
 						    name,
-						    callback, expected_upload_cost, userdata);
+						    callback, expected_upload_cost);
+// [/SL:KB]
+//				void *userdata = NULL;
+//				upload_new_resource(floaterp->mTransactionID, // tid
+//						    LLAssetType::AT_ANIMATION,
+//						    name,
+//						    desc,
+//						    0,
+//						    LLFolderType::FT_NONE,
+//						    LLInventoryType::IT_ANIMATION,
+//						    LLFloaterPerms::getNextOwnerPerms(), LLFloaterPerms::getGroupPerms(), LLFloaterPerms::getEveryonePerms(),
+//						    name,
+//						    callback, expected_upload_cost, userdata);
 
 			}
 			else
