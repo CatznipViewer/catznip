@@ -48,6 +48,9 @@ class LLPanelVolumePulldown : public LLPanel
  private:
 	void setControlFalse(const LLSD& user_data);
 	void onAdvancedButtonClick(const LLSD& user_data);
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
+	void onToggleMuteSounds();
+// [/Sl:KB]
 
 	LLFrameTimer mHoverTimer;
 	static const F32 sAutoCloseFadeStartTimeSec;

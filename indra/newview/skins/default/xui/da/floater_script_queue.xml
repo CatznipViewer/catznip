@@ -15,5 +15,7 @@
 	<floater.string name="NotRunning">
 		Not running
 	</floater.string>
+	<panel name="bottom_panel">
 	<button label="Luk" label_selected="Luk" name="close"/>
+	</panel>
 </floater>

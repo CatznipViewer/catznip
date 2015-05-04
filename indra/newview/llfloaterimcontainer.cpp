@@ -1114,6 +1114,12 @@ void LLFloaterIMContainer::doToParticipants(const std::string& command, uuid_vec
 		{
 			LLAvatarActions::removeFriendDialog(userID);
 		}
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		else if ("add_contact" == command)
+		{
+			LLAvatarActions::addContact(userID);
+		}
+// [/SL:KB]
 		else if ("invite_to_group" == command)
 		{
 			LLAvatarActions::inviteToGroup(userID);
@@ -1362,7 +1368,10 @@ bool LLFloaterIMContainer::enableContextMenuItem(const std::string& item, uuid_v
         // - this avatar is not already a friend
         return (is_single_select ? !LLAvatarActions::isFriend(single_id) : false);
     }
-    else if ("can_delete" == item)
+//    else if ("can_delete" == item)
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+	else if ( (item == "can_delete") || (item == "can_delete_multiple") )
+// [/SL:KB]
     {
         // We can remove friends if there are only friends among the selection
         bool result = true;
@@ -1370,7 +1379,10 @@ bool LLFloaterIMContainer::enableContextMenuItem(const std::string& item, uuid_v
         {
 			result &= LLAvatarActions::isFriend(*id);
         }
-        return result;
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		return result && ((1 == uuids.size()) || ("can_delete_multiple" == item));
+// [/SL:KB]
+//        return result;
     }
     else if ("can_call" == item)
     {

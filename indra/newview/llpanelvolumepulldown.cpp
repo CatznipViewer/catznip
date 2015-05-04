@@ -54,14 +54,21 @@ LLPanelVolumePulldown::LLPanelVolumePulldown()
 
     mCommitCallbackRegistrar.add("Vol.setControlFalse", boost::bind(&LLPanelVolumePulldown::setControlFalse, this, _2));
 	mCommitCallbackRegistrar.add("Vol.GoAudioPrefs", boost::bind(&LLPanelVolumePulldown::onAdvancedButtonClick, this, _2));
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Vol.ToggleMuteSounds", boost::bind(&LLPanelVolumePulldown::onToggleMuteSounds, this));
+// [/SL:KB]
 	buildFromFile( "panel_volume_pulldown.xml");
 }
 
 BOOL LLPanelVolumePulldown::postBuild()
 {
-	// set the initial volume-slider's position to reflect reality
-	LLSliderCtrl* volslider =  getChild<LLSliderCtrl>( "mastervolume" );
-	volslider->setValue(gSavedSettings.getF32("AudioLevelMaster"));
+//	// set the initial volume-slider's position to reflect reality
+//	LLSliderCtrl* volslider =  getChild<LLSliderCtrl>( "mastervolume" );
+//	volslider->setValue(gSavedSettings.getF32("AudioLevelMaster"));
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
+	onToggleMuteSounds();
+// [/SL:KB]
 
 	return LLPanel::postBuild();
 }
@@ -129,6 +136,14 @@ void LLPanelVolumePulldown::setControlFalse(const LLSD& user_data)
 	if (control)
 		control->set(LLSD(FALSE));
 }
+
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-02-05 (Catznip-3.6)
+void LLPanelVolumePulldown::onToggleMuteSounds()
+{
+	// Disable "Enable gesture sounds" if the master sound is disabled or if sound effects are disabled.
+	getChildView("gesture_audio_play_btn")->setEnabled( (!gSavedSettings.getBOOL("MuteAudio")) && (!gSavedSettings.getBOOL("MuteSounds")) );
+}
+// [/SL:KB]
 
 //virtual
 void LLPanelVolumePulldown::draw()

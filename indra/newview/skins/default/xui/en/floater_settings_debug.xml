@@ -2,22 +2,22 @@
 <floater
  legacy_header_height="18"
  can_minimize="false"
- height="215"
+ height="205"
  layout="topleft"
  name="settings_debug"
  help_topic="settings_debug"
  title="DEBUG SETTINGS"
- width="350">
+ width="340">
     <combo_box
      allow_text_entry="true"
      follows="top|left"
      height="22"
      layout="topleft"
-     left="15"
+     left="10"
      max_chars="255"
      name="settings_combo"
-     top="30"
-     width="320">
+     top="20"
+     width="325">
       <combo_box.commit_callback
        function="SettingSelect" />
     </combo_box>
@@ -27,7 +27,7 @@
      layout="topleft"
      left_delta="0"
      name="comment_text"
-     top_pad="10"
+     top_pad="5"
      width="320"
      word_wrap="true" />
   <radio_group
@@ -60,17 +60,17 @@
      name="val_text"
      top_delta="0"
      visible="false"
-     width="300" >
+     width="320" >
       <line_editor.commit_callback
        function="CommitSettings" />
     </line_editor>
     <color_swatch
-     bottom="185"
      can_apply_immediately="true"
      height="55"
      name="val_color_swatch"
      label="Color"
      layout="topleft"
+     top_delta="0"
      width="37" >
       <color_swatch.commit_callback
        function="CommitSettings" />
@@ -79,10 +79,10 @@
      height="20"
      label="x"
      layout="topleft"
-     left_delta="0"
+     left="35"
      max_val="1e+007"
      name="val_spinner_1"
-     top_delta="10"
+     top_delta="0"
      visible="false"
      width="120" >
       <spinner.commit_callback
@@ -105,10 +105,10 @@
      height="20"
      label="x"
      layout="topleft"
-     left="15"
+     left="35"
      max_val="1e+007"
      name="val_spinner_3"
-     top="160"
+     top="140"
      visible="false"
      width="120">
       <spinner.commit_callback
@@ -127,15 +127,37 @@
       <spinner.commit_callback
        function="CommitSettings" />
     </spinner>
+    
+  <panel
+   follows="top|left"
+   height="25"
+   layout="topleft"
+   left="10"
+   name="bottom_panel"
+   top="170" >
     <button
-     height="22"
+     follows="top|left"
+     image_hover_unselected="Toolbar_Left_Over"
+     image_overlay="Refresh_Off"
+     image_overlay_alignment="left"
+     image_selected="Toolbar_Left_Selected"
+     image_unselected="Toolbar_Left_Off"
      label="Reset to default"
      layout="topleft"
-     left="15"
+     left="0"
      name="default_btn"
-     top="186"
-     width="150" >
+     tool_tip="Restore selected option to default"
+     top="1"
+     width="120" >
       <button.commit_callback
        function="ClickDefault" />
     </button>
+    <icon
+     follows="left|right"
+     image_name="Toolbar_Right_Off"
+     left_pad="1"
+     name="dummy_icon"
+     top="1"
+     width="200" />
+  </panel>
 </floater>
