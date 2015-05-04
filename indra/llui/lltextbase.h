@@ -281,6 +281,9 @@ public:
 								bg_readonly_color,
 								bg_writeable_color,
 								bg_focus_color,
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+								bg_highlighted_color,
+// [/SL:KB]
 								text_selected_color,
 								bg_selected_color;
 
@@ -421,13 +424,19 @@ public:
 	LLRect					getDocRectFromDocIndex(S32 pos) const;
 
 	void					setReadOnly(bool read_only) { mReadOnly = read_only; }
-	bool					getReadOnly() { return mReadOnly; }
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-30 (Catznip-3.6)
+	bool					getReadOnly() const { return mReadOnly; }
+// [/SL:KB
+//	bool					getReadOnly() { return mReadOnly; }
 
 	void					setPlainText(bool value) { mPlainText = value;}
 	bool					getPlainText() const { return mPlainText; }
 
 	// cursor manipulation
 	bool					setCursor(S32 row, S32 column);
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2010-09-12 (Catznip-2.1)
+	S32						getCursorPos() { return mCursorPos; }
+// [/SL:KB
 	bool					setCursorPos(S32 cursor_pos, bool keep_cursor_offset = false);
 	void					startOfLine();
 	void					endOfLine();
@@ -435,9 +444,19 @@ public:
 	void					endOfDoc();
 	void					changePage( S32 delta );
 	void					changeLine( S32 delta );
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-31 (Catznip-3.6)
+	void					scrollTo(S32 nLine, S32 nColumn);
+// [/SL:KB
 
 	bool					scrolledToStart();
 	bool					scrolledToEnd();
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	// highlighting
+	void					clearHighlights();
+	void					refreshHighlights();
+	void					setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive);
+// [/SL:KB]
 
 	const LLFontGL*			getFont() const					{ return mFont; }
 
@@ -478,6 +497,10 @@ protected:
 	};
 	struct line_end_compare;
 	typedef std::vector<LLTextSegmentPtr> segment_vec_t;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	typedef std::pair<S32, S32> range_pair_t;
+	typedef std::list<range_pair_t> highlight_list_t;
+// [/SL:KB]
 
 	// Abstract inner base class representing an undoable editor command.
 	// Concrete sub-classes can be defined for operations such as insert, remove, etc.
@@ -533,6 +556,9 @@ protected:
 
 	// draw methods
 	virtual void					drawSelectionBackground(); // draws the black box behind the selected text
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	void							drawHighlightsBackground(const highlight_list_t& highlights, const LLColor4& color);
+// [/SL:KB]
 	void							drawCursor();
 	void							drawText();
 
@@ -558,7 +584,10 @@ protected:
 	const LLStyle::Params&			getStyleParams();
 
 	//  manage lines
-	S32								getLineStart( S32 line ) const;
+//	S32								getLineStart( S32 line ) const;
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-31 (Catznip-3.6)
+	S32								getLineStart(S32 line, bool include_wordwrap = true) const;
+// [/SL:KB]
 	S32								getLineEnd( S32 line ) const;
 	S32								getLineNumFromDocIndex( S32 doc_index, bool include_wordwrap = true) const;
 	S32								getLineOffsetFromDocIndex( S32 doc_index, bool include_wordwrap = true) const;
@@ -613,6 +642,9 @@ protected:
 	LLUIColor					mWriteableBgColor;
 	LLUIColor					mReadOnlyBgColor;
 	LLUIColor					mFocusBgColor;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	LLUIColor					mHighlightedBGColor;
+// [/SL:KB]
 	LLUIColor					mTextSelectedColor;
 	LLUIColor					mSelectedBGColor;
 
@@ -627,6 +659,9 @@ protected:
 	LLTimer		                mTripleClickTimer;
 	
 	BOOL						mIsSelecting;		// Are we in the middle of a drag-select? 
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+	BOOL						mIsSelectDragging;	// Are we in the middle of drag-moving the current selection? 
+// [/SL:KB]
 
 	// spell checking
 	bool						mSpellCheck;
@@ -635,6 +670,14 @@ protected:
 	LLTimer						mSpellCheckTimer;
 	std::list<std::pair<U32, U32> > mMisspellRanges;
 	std::vector<std::string>		mSuggestionList;
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	// highlighting
+	LLWString					mHighlightWord;
+	bool						mHighlightCaseInsensitive;
+	highlight_list_t			mHighlights;
+	bool						mHighlightsDirty;
+// [/SL:KB]
 
 	// configuration
 	S32							mHPad;				// padding on left of text

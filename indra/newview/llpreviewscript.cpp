@@ -38,6 +38,9 @@
 #include "llexternaleditor.h"
 #include "llfilepicker.h"
 #include "llfloaterreg.h"
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+#include "llfloatersearchreplace.h"
+// [/SL:KB]
 #include "llinventorydefines.h"
 #include "llinventorymodel.h"
 #include "llkeyboard.h"
@@ -165,180 +168,180 @@ bool LLLiveLSLFile::loadFile()
 /// ---------------------------------------------------------------------------
 /// LLFloaterScriptSearch
 /// ---------------------------------------------------------------------------
-class LLFloaterScriptSearch : public LLFloater
-{
-public:
-	LLFloaterScriptSearch(LLScriptEdCore* editor_core);
-	~LLFloaterScriptSearch();
+//class LLFloaterScriptSearch : public LLFloater
+//{
+//public:
+//	LLFloaterScriptSearch(LLScriptEdCore* editor_core);
+//	~LLFloaterScriptSearch();
+//
+//	/*virtual*/	BOOL	postBuild();
+//	static void show(LLScriptEdCore* editor_core);
+//	static void onBtnSearch(void* userdata);
+//	void handleBtnSearch();
+//
+//	static void onBtnReplace(void* userdata);
+//	void handleBtnReplace();
+//
+//	static void onBtnReplaceAll(void* userdata);
+//	void handleBtnReplaceAll();
+//
+//	LLScriptEdCore* getEditorCore() { return mEditorCore; }
+//	static LLFloaterScriptSearch* getInstance() { return sInstance; }
+//
+//	virtual bool hasAccelerators() const;
+//	virtual BOOL handleKeyHere(KEY key, MASK mask);
+//
+//private:
+//
+//	LLScriptEdCore* mEditorCore;
+//	static LLFloaterScriptSearch*	sInstance;
+//
+//protected:
+//	LLLineEditor*			mSearchBox;
+//	LLLineEditor*			mReplaceBox;
+//        void onSearchBoxCommit();
+//};
 
-	/*virtual*/	BOOL	postBuild();
-	static void show(LLScriptEdCore* editor_core);
-	static void onBtnSearch(void* userdata);
-	void handleBtnSearch();
+//LLFloaterScriptSearch* LLFloaterScriptSearch::sInstance = NULL;
 
-	static void onBtnReplace(void* userdata);
-	void handleBtnReplace();
+//LLFloaterScriptSearch::LLFloaterScriptSearch(LLScriptEdCore* editor_core)
+//:	LLFloater(LLSD()),
+//	mSearchBox(NULL),
+//	mReplaceBox(NULL),
+//	mEditorCore(editor_core)
+//{
+//	buildFromFile("floater_script_search.xml");
+//
+//	sInstance = this;
+//	
+//	// find floater in which script panel is embedded
+//	LLView* viewp = (LLView*)editor_core;
+//	while(viewp)
+//	{
+//		LLFloater* floaterp = dynamic_cast<LLFloater*>(viewp);
+//		if (floaterp)
+//		{
+//			floaterp->addDependentFloater(this);
+//			break;
+//		}
+//		viewp = viewp->getParent();
+//	}
+//}
 
-	static void onBtnReplaceAll(void* userdata);
-	void handleBtnReplaceAll();
-
-	LLScriptEdCore* getEditorCore() { return mEditorCore; }
-	static LLFloaterScriptSearch* getInstance() { return sInstance; }
-
-	virtual bool hasAccelerators() const;
-	virtual BOOL handleKeyHere(KEY key, MASK mask);
-
-private:
-
-	LLScriptEdCore* mEditorCore;
-	static LLFloaterScriptSearch*	sInstance;
-
-protected:
-	LLLineEditor*			mSearchBox;
-	LLLineEditor*			mReplaceBox;
-        void onSearchBoxCommit();
-};
-
-LLFloaterScriptSearch* LLFloaterScriptSearch::sInstance = NULL;
-
-LLFloaterScriptSearch::LLFloaterScriptSearch(LLScriptEdCore* editor_core)
-:	LLFloater(LLSD()),
-	mSearchBox(NULL),
-	mReplaceBox(NULL),
-	mEditorCore(editor_core)
-{
-	buildFromFile("floater_script_search.xml");
-
-	sInstance = this;
-	
-	// find floater in which script panel is embedded
-	LLView* viewp = (LLView*)editor_core;
-	while(viewp)
-	{
-		LLFloater* floaterp = dynamic_cast<LLFloater*>(viewp);
-		if (floaterp)
-		{
-			floaterp->addDependentFloater(this);
-			break;
-		}
-		viewp = viewp->getParent();
-	}
-}
-
-BOOL LLFloaterScriptSearch::postBuild()
-{
-	mReplaceBox = getChild<LLLineEditor>("replace_text");
-	mSearchBox = getChild<LLLineEditor>("search_text");
-	mSearchBox->setCommitCallback(boost::bind(&LLFloaterScriptSearch::onSearchBoxCommit, this));
-	mSearchBox->setCommitOnFocusLost(FALSE);
-	childSetAction("search_btn", onBtnSearch,this);
-	childSetAction("replace_btn", onBtnReplace,this);
-	childSetAction("replace_all_btn", onBtnReplaceAll,this);
-
-	setDefaultBtn("search_btn");
-
-	return TRUE;
-}
+//BOOL LLFloaterScriptSearch::postBuild()
+//{
+//	mReplaceBox = getChild<LLLineEditor>("replace_text");
+//	mSearchBox = getChild<LLLineEditor>("search_text");
+//	mSearchBox->setCommitCallback(boost::bind(&LLFloaterScriptSearch::onSearchBoxCommit, this));
+//	mSearchBox->setCommitOnFocusLost(FALSE);
+//	childSetAction("search_btn", onBtnSearch,this);
+//	childSetAction("replace_btn", onBtnReplace,this);
+//	childSetAction("replace_all_btn", onBtnReplaceAll,this);
+//
+//	setDefaultBtn("search_btn");
+//
+//	return TRUE;
+//}
 
 //static 
-void LLFloaterScriptSearch::show(LLScriptEdCore* editor_core)
-{
-	LLSD::String search_text;
-	LLSD::String replace_text;
-	if (sInstance && sInstance->mEditorCore && sInstance->mEditorCore != editor_core)
-	{
-		search_text=sInstance->mSearchBox->getValue().asString();
-		replace_text=sInstance->mReplaceBox->getValue().asString();
-		sInstance->closeFloater();
-		delete sInstance;
-	}
+//void LLFloaterScriptSearch::show(LLScriptEdCore* editor_core)
+//{
+//	LLSD::String search_text;
+//	LLSD::String replace_text;
+//	if (sInstance && sInstance->mEditorCore && sInstance->mEditorCore != editor_core)
+//	{
+//		search_text=sInstance->mSearchBox->getValue().asString();
+//		replace_text=sInstance->mReplaceBox->getValue().asString();
+//		sInstance->closeFloater();
+//		delete sInstance;
+//	}
+//
+//	if (!sInstance)
+//	{
+//		// sInstance will be assigned in the constructor.
+//		new LLFloaterScriptSearch(editor_core);
+//		sInstance->mSearchBox->setValue(search_text);
+//		sInstance->mReplaceBox->setValue(replace_text);
+//	}
+//
+//	sInstance->openFloater();
+//}
 
-	if (!sInstance)
-	{
-		// sInstance will be assigned in the constructor.
-		new LLFloaterScriptSearch(editor_core);
-		sInstance->mSearchBox->setValue(search_text);
-		sInstance->mReplaceBox->setValue(replace_text);
-	}
-
-	sInstance->openFloater();
-}
-
-LLFloaterScriptSearch::~LLFloaterScriptSearch()
-{
-	sInstance = NULL;
-}
-
-// static 
-void LLFloaterScriptSearch::onBtnSearch(void *userdata)
-{
-	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
-	self->handleBtnSearch();
-}
-
-void LLFloaterScriptSearch::handleBtnSearch()
-{
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	mEditorCore->mEditor->selectNext(mSearchBox->getValue().asString(), caseChk->get());
-}
+//LLFloaterScriptSearch::~LLFloaterScriptSearch()
+//{
+//	sInstance = NULL;
+//}
 
 // static 
-void LLFloaterScriptSearch::onBtnReplace(void *userdata)
-{
-	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
-	self->handleBtnReplace();
-}
+//void LLFloaterScriptSearch::onBtnSearch(void *userdata)
+//{
+//	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
+//	self->handleBtnSearch();
+//}
 
-void LLFloaterScriptSearch::handleBtnReplace()
-{
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	mEditorCore->mEditor->replaceText(mSearchBox->getValue().asString(), mReplaceBox->getValue().asString(), caseChk->get());
-}
+//void LLFloaterScriptSearch::handleBtnSearch()
+//{
+//	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+//	mEditorCore->mEditor->selectNext(mSearchBox->getValue().asString(), caseChk->get());
+//}
 
 // static 
-void LLFloaterScriptSearch::onBtnReplaceAll(void *userdata)
-{
-	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
-	self->handleBtnReplaceAll();
-}
+//void LLFloaterScriptSearch::onBtnReplace(void *userdata)
+//{
+//	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
+//	self->handleBtnReplace();
+//}
 
-void LLFloaterScriptSearch::handleBtnReplaceAll()
-{
-	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-	mEditorCore->mEditor->replaceTextAll(mSearchBox->getValue().asString(), mReplaceBox->getValue().asString(), caseChk->get());
-}
+//void LLFloaterScriptSearch::handleBtnReplace()
+//{
+//	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+//	mEditorCore->mEditor->replaceText(mSearchBox->getValue().asString(), mReplaceBox->getValue().asString(), caseChk->get());
+//}
 
-bool LLFloaterScriptSearch::hasAccelerators() const
-{
-	if (mEditorCore)
-	{
-		return mEditorCore->hasAccelerators();
-	}
-	return FALSE;
-}
+// static 
+//void LLFloaterScriptSearch::onBtnReplaceAll(void *userdata)
+//{
+//	LLFloaterScriptSearch* self = (LLFloaterScriptSearch*)userdata;
+//	self->handleBtnReplaceAll();
+//}
 
-BOOL LLFloaterScriptSearch::handleKeyHere(KEY key, MASK mask)
-{
-	if (mEditorCore)
-	{
-		BOOL handled = mEditorCore->handleKeyHere(key, mask);
-		if (!handled)
-		{
-			LLFloater::handleKeyHere(key, mask);
-		}
-	}
+//void LLFloaterScriptSearch::handleBtnReplaceAll()
+//{
+//	LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+//	mEditorCore->mEditor->replaceTextAll(mSearchBox->getValue().asString(), mReplaceBox->getValue().asString(), caseChk->get());
+//}
 
-	return FALSE;
-}
+//bool LLFloaterScriptSearch::hasAccelerators() const
+//{
+//	if (mEditorCore)
+//	{
+//		return mEditorCore->hasAccelerators();
+//	}
+//	return FALSE;
+//}
 
-void LLFloaterScriptSearch::onSearchBoxCommit()
-{
-	if (mEditorCore && mEditorCore->mEditor)
-	{
-		LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
-		mEditorCore->mEditor->selectNext(mSearchBox->getValue().asString(), caseChk->get());
-	}
-}
+//BOOL LLFloaterScriptSearch::handleKeyHere(KEY key, MASK mask)
+//{
+//	if (mEditorCore)
+//	{
+//		BOOL handled = mEditorCore->handleKeyHere(key, mask);
+//		if (!handled)
+//		{
+//			LLFloater::handleKeyHere(key, mask);
+//		}
+//	}
+//
+//	return FALSE;
+//}
+
+//void LLFloaterScriptSearch::onSearchBoxCommit()
+//{
+//	if (mEditorCore && mEditorCore->mEditor)
+//	{
+//		LLCheckBoxCtrl* caseChk = getChild<LLCheckBoxCtrl>("case_text");
+//		mEditorCore->mEditor->selectNext(mSearchBox->getValue().asString(), caseChk->get());
+//	}
+//}
 
 /// ---------------------------------------------------------------------------
 /// LLScriptEdCore
@@ -391,12 +394,12 @@ LLScriptEdCore::~LLScriptEdCore()
 	deleteBridges();
 
 	// If the search window is up for this editor, close it.
-	LLFloaterScriptSearch* script_search = LLFloaterScriptSearch::getInstance();
-	if (script_search && script_search->getEditorCore() == this)
-	{
-		script_search->closeFloater();
-		delete script_search;
-	}
+//	LLFloaterScriptSearch* script_search = LLFloaterScriptSearch::getInstance();
+//	if (script_search && script_search->getEditorCore() == this)
+//	{
+//		script_search->closeFloater();
+//		delete script_search;
+//	}
 
 	delete mLiveFile;
 	if (mSyntaxIDConnection.connected())
@@ -507,7 +510,10 @@ void LLScriptEdCore::initMenu()
 	menuItem->setEnableCallback(boost::bind(&LLTextEditor::canDeselect, mEditor));
 
 	menuItem = getChild<LLMenuItemCallGL>("Search / Replace...");
-	menuItem->setClickCallback(boost::bind(&LLFloaterScriptSearch::show, this));
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+	menuItem->setClickCallback(boost::bind(&LLFloaterSearchReplace::show, mEditor));
+// [/SL:KB]
+//	menuItem->setClickCallback(boost::bind(&LLFloaterScriptSearch::show, this));
 
 	menuItem = getChild<LLMenuItemCallGL>("Go to line...");
 	menuItem->setClickCallback(boost::bind(&LLFloaterGotoLine::show, this));
@@ -1032,7 +1038,10 @@ void LLScriptEdCore::onErrorList(LLUICtrl*, void* user_data)
 		sscanf(line.c_str(), "%d %d", &row, &column);
 		//LL_INFOS() << "LLScriptEdCore::onErrorList() - " << row << ", "
 		//<< column << LL_ENDL;
-		self->mEditor->setCursor(row, column);
+// [SL:KB] - Patch: UI-ScriptGoToLine | Checked: 2013-12-31 (Catznip-3.6)
+		self->mEditor->scrollTo(row, column);
+// [/SL:KB]
+//		self->mEditor->setCursor(row, column);
 		self->mEditor->setFocus(TRUE);
 	}
 }
@@ -1399,7 +1408,10 @@ void LLPreviewLSL::onSearchReplace(void* userdata)
 {
 	LLPreviewLSL* self = (LLPreviewLSL*)userdata;
 	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+	LLFloaterSearchReplace::show(sec->mEditor);
+// [/SL:KB]
+//	LLFloaterScriptSearch::show(sec);
 }
 
 // static
@@ -2063,7 +2075,10 @@ void LLLiveLSLEditor::onSearchReplace(void* userdata)
 	LLLiveLSLEditor* self = (LLLiveLSLEditor*)userdata;
 
 	LLScriptEdCore* sec = self->mScriptEd; 
-	LLFloaterScriptSearch::show(sec);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+	LLFloaterSearchReplace::show(sec->mEditor);
+// [/SL:KB]
+//	LLFloaterScriptSearch::show(sec);
 }
 
 struct LLLiveLSLSaveData
