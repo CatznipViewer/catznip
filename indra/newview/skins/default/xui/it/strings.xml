@@ -4584,6 +4584,12 @@ Segnala abuso
 	<string name="EmptyOutfitText">
 		Questo vestiario non contiene alcun elemento
 	</string>
+	<string name="SaveOutfit">
+		Salva
+	</string>
+	<string name="SaveOutfitAs">
+		Salva con nome
+	</string>
 	<string name="ExternalEditorNotSet">
 		Seleziona un editor usando le impostazioni ExternalEditor.
 	</string>

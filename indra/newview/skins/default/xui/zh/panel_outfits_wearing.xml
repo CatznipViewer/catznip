@@ -2,5 +2,6 @@
 <panel name="Wearing">
 	<panel name="bottom_panel">
 		<menu_button name="options_gear_btn" tool_tip="顯示額外選項"/>
+		<flyout_button name="save_btn" label="另存" />
 	</panel>
 </panel>
