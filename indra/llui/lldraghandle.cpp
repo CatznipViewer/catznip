@@ -105,6 +105,9 @@ void LLDragHandleTop::setTitle(const std::string& title)
 		params.font(font);
 		params.follows.flags(FOLLOWS_TOP | FOLLOWS_LEFT | FOLLOWS_RIGHT);
 		params.font_shadow(LLFontGL::DROP_SHADOW_SOFT);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-08 (Catznip-3.3)
+		params.font_valign(LLFontGL::BOTTOM);
+// [/SL:KB]
 		params.use_ellipses = true;
 		params.parse_urls = false; //cancel URL replacement in floater title
 		mTitleBox = LLUICtrlFactory::create<LLTextBox> (params);
@@ -235,15 +238,20 @@ void LLDragHandleLeft::draw()
 
 void LLDragHandleTop::reshapeTitleBox()
 {
-	static LLUICachedControl<S32> title_vpad("UIFloaterTitleVPad", 0);
+//	static LLUICachedControl<S32> title_vpad("UIFloaterTitleVPad", 0);
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-08 (Catznip-3.3)
+	// Align the title box with the buttons
+	static LLUICachedControl<S32> title_vpad("UICloseBoxFromTop", 5);
+	static LLUICachedControl<S32> title_height("UIFloaterCloseBoxSize", 16);
+// [/SL:KB]
 	if( ! mTitleBox)
 	{
 		return;
 	}
-	const LLFontGL* font = LLFontGL::getFontSansSerif();
+//	const LLFontGL* font = LLFontGL::getFontSansSerif();
 	S32 title_width = getRect().getWidth();
 	title_width -= LEFT_PAD + 2 * BORDER_PAD + getButtonsRect().getWidth();
-	S32 title_height = font->getLineHeight();
+//	S32 title_height = font->getLineHeight();
 	LLRect title_rect;
 	title_rect.setLeftTopAndSize( 
 		LEFT_PAD, 
