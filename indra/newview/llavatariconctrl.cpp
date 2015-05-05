@@ -343,7 +343,10 @@ void LLAvatarIconCtrl::onAvatarNameCache(const LLUUID& agent_id, const LLAvatarN
 	{
 		// Most avatar icon controls are next to a UI element that shows
 		// a display name, so only show username.
-		mFullName = av_name.getUserName();
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		mFullName = av_name.getAccountName();
+// [/SL:KB]
+//		mFullName = av_name.getUserName();
 
 		if (mDrawTooltip)
 		{

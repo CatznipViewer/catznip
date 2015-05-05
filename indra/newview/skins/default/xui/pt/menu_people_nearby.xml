@@ -12,5 +12,10 @@
 	<menu_item_call label="Mapa" name="map"/>
 	<menu_item_call label="Compartilhar" name="share"/>
 	<menu_item_call label="Pagar" name="pay"/>
+	<context_menu label="Copy" name="avatar_copy">
+		<menu_item_call label="Copiar nome de tela" name="avatar_copy_displayname"/>
+		<menu_item_call label="Copiar nome" name="avatar_copy_fullname"/>
+		<menu_item_call label="Copiar SLurl" name="avatar_copy_slurl"/>
+	</context_menu>
 	<menu_item_check label="Bloquear/desbloquear" name="block_unblock"/>
 </context_menu>
