@@ -156,6 +156,14 @@ LLViewerParcelMgr::LLViewerParcelMgr()
 		mAgentParcelOverlay[i] = 0;
 	}
 
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+	mHoverParcelOverlay = new U8[mParcelsPerEdge * mParcelsPerEdge];
+	for (i = 0; i < mParcelsPerEdge * mParcelsPerEdge; i++)
+	{
+		mHoverParcelOverlay[i] = 0;
+	}
+// [/SL:KB]
+
 	mTeleportInProgress = TRUE; // the initial parcel update is treated like teleport
 }
 
@@ -191,6 +199,11 @@ LLViewerParcelMgr::~LLViewerParcelMgr()
 
 	delete[] mAgentParcelOverlay;
 	mAgentParcelOverlay = NULL;
+
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+	delete[] mHoverParcelOverlay;
+	mHoverParcelOverlay = NULL;
+// [/SL:KB]
 
 	sBlockedImage = NULL;
 	sPassImage = NULL;
@@ -377,7 +390,10 @@ void LLViewerParcelMgr::writeSegmentsFromBitmap(U8* bitmap, U8* segments)
 }
 
 
-void LLViewerParcelMgr::writeAgentParcelFromBitmap(U8* bitmap)
+//void LLViewerParcelMgr::writeAgentParcelFromBitmap(U8* bitmap)
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+void LLViewerParcelMgr::writeParcelOverlayFromBitmap(U8* overlay, U8* bitmap)
+// [/SL:KB]
 {
 	S32 x;
 	S32 y;
@@ -395,11 +411,17 @@ void LLViewerParcelMgr::writeAgentParcelFromBitmap(U8* bitmap)
 			{
 				if (byte & (1 << bit) )
 				{
-					mAgentParcelOverlay[x+y*IN_STRIDE] = 1;
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+					overlay[x+y*IN_STRIDE] = 1;
+// [/SL:KB]
+//					mAgentParcelOverlay[x+y*IN_STRIDE] = 1;
 				}
 				else
 				{
-					mAgentParcelOverlay[x+y*IN_STRIDE] = 0;
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+					overlay[x+y*IN_STRIDE] = 0;
+// [/SL:KB]
+//					mAgentParcelOverlay[x+y*IN_STRIDE] = 0;
 				}
 				x++;
 			}
@@ -790,32 +812,86 @@ BOOL LLViewerParcelMgr::canHearSound(const LLVector3d &pos_global) const
 }
 
 
-BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
+//BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
+//{
+//	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(pos_global);
+//	LLViewerRegion* agent_region = gAgent.getRegion();
+//	if (!region || !agent_region)
+//		return FALSE;
+//
+//	if (region != agent_region)
+//	{
+//		// Can't be in the agent parcel if you're not in the same region.
+//		return FALSE;
+//	}
+//
+//	LLVector3 pos_region = agent_region->getPosRegionFromGlobal(pos_global);
+//	S32 row =    S32(pos_region.mV[VY] / PARCEL_GRID_STEP_METERS);
+//	S32 column = S32(pos_region.mV[VX] / PARCEL_GRID_STEP_METERS);
+//
+//	if (mAgentParcelOverlay[row*mParcelsPerEdge + column])
+//	{
+//		return TRUE;
+//	}
+//	else
+//	{
+//		return FALSE;
+//	}
+//}
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+bool LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
 {
 	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(pos_global);
 	LLViewerRegion* agent_region = gAgent.getRegion();
 	if (!region || !agent_region)
-		return FALSE;
+		return false;
 
 	if (region != agent_region)
 	{
 		// Can't be in the agent parcel if you're not in the same region.
-		return FALSE;
+		return false;
 	}
 
-	LLVector3 pos_region = agent_region->getPosRegionFromGlobal(pos_global);
+	return inParcelOverlay(mAgentParcelOverlay, agent_region->getPosRegionFromGlobal(pos_global));
+}
+
+bool LLViewerParcelMgr::inHoverParcel(const LLVector3d &pos_global) const
+{
+	LLViewerRegion* region = LLWorld::getInstance()->getRegionFromPosGlobal(pos_global);
+	if ( (!region) || (!getHoverParcel()) )
+		return false;
+	return inParcelOverlay(mHoverParcelOverlay, region->getPosRegionFromGlobal(pos_global));
+}
+
+bool LLViewerParcelMgr::inParcelOverlay(const U8* overlay, const LLVector3& pos_region) const
+{
 	S32 row =    S32(pos_region.mV[VY] / PARCEL_GRID_STEP_METERS);
 	S32 column = S32(pos_region.mV[VX] / PARCEL_GRID_STEP_METERS);
 
-	if (mAgentParcelOverlay[row*mParcelsPerEdge + column])
-	{
-		return TRUE;
-	}
-	else
-	{
-		return FALSE;
-	}
+	return (overlay[row*mParcelsPerEdge + column]);
 }
+
+bool LLViewerParcelMgr::getLandGroup(const LLVector3d& posGlobal, LLUUID& idGroup) const
+{
+	if (inAgentParcel(posGlobal))
+	{
+		if (mAgentParcel)
+		{
+			idGroup = mAgentParcel->getGroupID();
+			return true;
+		}
+	}
+	else if (inHoverParcel(posGlobal))
+	{
+		if (mHoverParcel)
+		{
+			idGroup = mHoverParcel->getGroupID();
+			return true;
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 // Returns NULL when there is no valid data.
 LLParcel* LLViewerParcelMgr::getHoverParcel() const
@@ -1597,6 +1673,19 @@ void LLViewerParcelMgr::processParcelProperties(LLMessageSystem *msg, void **use
 			// updated agent parcel
 			parcel_mgr.mAgentParcel->unpackMessage(msg);
 		}
+// [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
+		else if (parcel == LLViewerParcelMgr::getInstance()->mHoverParcel)
+		{
+			S32 bitmap_size =	LLViewerParcelMgr::getInstance()->mParcelsPerEdge
+								* LLViewerParcelMgr::getInstance()->mParcelsPerEdge
+								/ 8;
+			U8* bitmap = new U8[ bitmap_size ];
+			msg->getBinaryDataFast(_PREHASH_ParcelData, _PREHASH_Bitmap, bitmap, bitmap_size);
+
+			LLViewerParcelMgr::getInstance()->writeHoverParcelFromBitmap(bitmap);
+			delete[] bitmap;
+		}
+// [/SL:KB]
 	}
 
 	// Handle updating selections, if necessary.

@@ -854,25 +854,28 @@ bool LLLocalBitmapMgr::addUnit()
 				continue;
 			}
 
-			LLLocalBitmap* unit = new LLLocalBitmap(filename);
-
-			if (unit->getValid())
-			{
-				sBitmapList.push_back(unit);
-				add_successful = true;
-			}
-			else
-			{
-				LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
-					    << "Filename: " << filename << LL_ENDL;
-
-				LLSD notif_args;
-				notif_args["FNAME"] = filename;
-				LLNotificationsUtil::add("LocalBitmapsVerifyFail", notif_args);
-
-				delete unit;
-				unit = NULL;
-			}
+//			LLLocalBitmap* unit = new LLLocalBitmap(filename);
+//
+//			if (unit->getValid())
+//			{
+//				sBitmapList.push_back(unit);
+//				add_successful = true;
+//			}
+//			else
+//			{
+//				LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
+//					    << "Filename: " << filename << LL_ENDL;
+//
+//				LLSD notif_args;
+//				notif_args["FNAME"] = filename;
+//				LLNotificationsUtil::add("LocalBitmapsVerifyFail", notif_args);
+//
+//				delete unit;
+//				unit = NULL;
+//			}
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+			add_successful &= addUnit(filename);
+// [/SL:KB]
 
 			filename = picker.getNextFile();
 		}
@@ -882,6 +885,51 @@ bool LLLocalBitmapMgr::addUnit()
 
 	return add_successful;
 }
+
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+bool LLLocalBitmapMgr::addUnit(const std::string& filename, LLUUID* pTrackingId)
+{
+	bool add_successful = false;
+
+	LLLocalBitmap* unit = new LLLocalBitmap(filename);
+	if (unit->getValid())
+	{
+		sBitmapList.push_back(unit);
+		if (pTrackingId)
+			*pTrackingId = unit->getTrackingID();
+		add_successful = true;
+	}
+	else
+	{
+		LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
+				<< "Filename: " << filename << LL_ENDL;
+
+		LLSD notif_args;
+		notif_args["FNAME"] = filename;
+		LLNotificationsUtil::add("LocalBitmapsVerifyFail", notif_args);
+
+		delete unit;
+		unit = NULL;
+	}
+
+	return add_successful;
+}
+
+bool LLLocalBitmapMgr::hasUnit(const std::string& filename, LLUUID* pTrackingId)
+{
+	for (local_list_iter itBitmap = sBitmapList.begin(); sBitmapList.end() != itBitmap; ++itBitmap)
+	{
+		LLLocalBitmap* unit = *itBitmap;
+		if (filename == unit->getFilename())
+		{
+			if (pTrackingId)
+				*pTrackingId = unit->getTrackingID();
+			return true;
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 bool LLLocalBitmapMgr::checkTextureDimensions(std::string filename)
 {
