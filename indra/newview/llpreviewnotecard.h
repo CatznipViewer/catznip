@@ -62,7 +62,6 @@ public:
 	// reach into the text editor, and grab the drag item
 	const LLInventoryItem* getDragItem();
 
-
 	// return true if there is any embedded inventory.
 	bool hasEmbeddedInventory();
 
