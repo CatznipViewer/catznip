@@ -1172,11 +1172,14 @@ void LLFavoritesBarCtrl::doToSelected(const LLSD& userdata)
 	}
 	else if (action == "about")
 	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = mSelectedItemID;
-
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		LLLandmarkActions::showLandmarkInfo(mSelectedItemID);
+// [/SL:KB]
+//		LLSD key;
+//		key["type"] = "landmark";
+//		key["id"] = mSelectedItemID;
+//
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 	else if (action == "copy_slurl")
 	{
