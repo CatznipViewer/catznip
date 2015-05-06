@@ -736,6 +736,9 @@ Prova ad accedere nuovamente tra un minuto.
 	<string name="AvatarMuted">
 		Mutato
 	</string>
+	<string name="AvatarTyping">
+		Battitura
+	</string>
 	<string name="anim_express_afraid">
 		Dispiaciuto
 	</string>

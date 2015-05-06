@@ -156,6 +156,9 @@ LLTextBase::Params::Params()
 	h_pad("h_pad", 0),
 	clip("clip", true),
 	clip_partial("clip_partial", true),
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+	label("label"),
+// [/SL:KB]
 	line_spacing("line_spacing"),
 	max_text_length("max_length", 255),
 	font_shadow("font_shadow"),
@@ -216,6 +219,10 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mUseEllipses( p.use_ellipses ),
 	mParseHTML(p.parse_urls),
 	mParseHighlights(p.parse_highlights),
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	mHighlightsMask(LLHighlightEntry::CAT_GENERAL),
+	mHighlightsSignal(NULL),
+// [/SL:KB]
 	mBGVisible(p.bg_visible),
 	mScroller(NULL),
 	mStyleDirty(true)
@@ -258,6 +265,13 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 
 	createDefaultSegment();
 
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+	if (p.label.isProvided())
+	{
+		setLabel(p.label.getValue());
+	}
+// [/SL:KB]
+
 	updateRects();
 }
 
@@ -265,6 +279,9 @@ LLTextBase::~LLTextBase()
 {
 	mSegments.clear();
 	delete mURLClickSignal;
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	delete mHighlightsSignal;
+// [/SL:KB]
 }
 
 void LLTextBase::initFromParams(const LLTextBase::Params& p)
@@ -528,14 +545,26 @@ void LLTextBase::drawText()
 {
 	S32 text_len = getLength();
 
-	if (text_len <= 0 && mLabel.empty())
-	{
-		return;
-	}
-	else if (useLabel())
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2013-11-28 (Catznip-3.6)
+	bool fUseLabel = useLabel();
+	if (fUseLabel)
 	{
 		text_len = mLabel.getWString().length();
 	}
+
+	if (text_len <= 0)
+	{
+		return;
+	}
+// [/SL:KB]
+//	if (text_len <= 0 && mLabel.empty())
+//	{
+//		return;
+//	}
+//	else if (useLabel())
+//	{
+//		text_len = mLabel.getWString().length();
+//	}
 
 	S32 selection_left = -1;
 	S32 selection_right = -1;
@@ -563,7 +592,10 @@ void LLTextBase::drawText()
 	}
 
 	// Perform spell check if needed
-	if ( (getSpellCheck()) && (getWText().length() > 2) )
+//	if ( (getSpellCheck()) && (getWText().length() > 2) )
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2013-11-28 (Catznip-3.6)
+	if ( (!fUseLabel) && (getSpellCheck()) && (getWText().length() > 2) )
+// [/SL:KB]
 	{
 		// Calculate start and end indices for the spell checking range
 		S32 start = line_start;
@@ -2026,6 +2058,19 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 	LLStyle::Params style_params(input_params);
 	style_params.fillFrom(getStyleParams());
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+	const LLHighlightEntry* pEntry = NULL;
+	if ( (mParseHighlights) && (LLTextParser::instance().parseFullLineHighlights(new_text, mHighlightsMask, &pEntry)) )
+	{
+		if (mHighlightsSignal)
+			(*mHighlightsSignal)(new_text, pEntry);
+
+		style_params.color = pEntry->mColor;
+		if (pEntry->mColorReadOnly)
+			style_params.readonly_color = pEntry->mColor;
+	}
+// [/SL:KB]
+
 	S32 part = (S32)LLTextParser::WHOLE;
 	if (mParseHTML && !style_params.is_link) // Don't search for URLs inside a link segment (STORM-358).
 	{
@@ -2120,6 +2165,15 @@ void LLTextBase::appendText(const std::string &new_text, bool prepend_newline, c
 	appendTextImpl(new_text,input_params);
 }
 
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+boost::signals2::connection LLTextBase::setHighlightsCallback(const highlights_signal_t::slot_type& cb)
+{
+	if (!mHighlightsSignal)
+		mHighlightsSignal = new highlights_signal_t();
+	return mHighlightsSignal->connect(cb);
+}
+// [/SL:KB]
+
 void LLTextBase::setLabel(const LLStringExplicit& label)
 {
 	mLabel = label;
@@ -2136,13 +2190,19 @@ void LLTextBase::resetLabel()
 {
 	if (useLabel())
 	{
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+		getViewModel()->setDisplay(LLWStringUtil::null);
+// [/SL:KB]
 		clearSegments();
 
 		LLStyle* style = new LLStyle(getStyleParams());
 		style->setColor(mTentativeFgColor);
 		LLStyleConstSP sp(style);
 
-		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length() + 1, *this);
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length(), *this);
+// [/SL:KB]
+//		LLTextSegmentPtr label = new LLLabelTextSegment(sp, 0, mLabel.getWString().length() + 1, *this);
 		insertSegment(label);
 	}
 }
@@ -2213,16 +2273,38 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 	{
 		LLStyle::Params highlight_params(style_params);
 
-		LLSD pieces = LLTextParser::instance().parsePartialLineHighlights(new_text, highlight_params.color(), (LLTextParser::EHighlightPosition)highlight_part);
-		for (S32 i = 0; i < pieces.size(); i++)
+//		LLSD pieces = LLTextParser::instance().parsePartialLineHighlights(new_text, highlight_params.color(), (LLTextParser::EHighlightPosition)highlight_part);
+//		for (S32 i = 0; i < pieces.size(); i++)
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+		LLTextParser::partial_results_t results = LLTextParser::instance().parsePartialLineHighlights(new_text, mHighlightsMask, (LLTextParser::EHighlightPosition)highlight_part);
+		for (LLTextParser::partial_results_t::const_iterator itResult = results.begin(); itResult != results.end(); ++itResult)
+// [/SL:KB]
 		{
-			LLSD color_llsd = pieces[i]["color"];
-			LLColor4 lcolor;
-			lcolor.setValue(color_llsd);
-			highlight_params.color = lcolor;
+//			LLSD color_llsd = pieces[i]["color"];
+//			LLColor4 lcolor;
+//			lcolor.setValue(color_llsd);
+//			highlight_params.color = lcolor;
+//
+//			LLWString wide_text;
+//			wide_text = utf8str_to_wstring(pieces[i]["text"].asString());
+// [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
+			highlight_params.color = style_params.color();
+			highlight_params.readonly_color = style_params.readonly_color();
+
+			const LLHighlightEntry* pEntry = itResult->second;
+			if (pEntry)
+			{
+				if (mHighlightsSignal)
+					(*mHighlightsSignal)(new_text, pEntry);
+
+				highlight_params.color = pEntry->mColor;
+				if (pEntry->mColorReadOnly)
+					highlight_params.readonly_color = pEntry->mColor;
+			}
 
 			LLWString wide_text;
-			wide_text = utf8str_to_wstring(pieces[i]["text"].asString());
+			wide_text = utf8str_to_wstring(itResult->first);
+// [/SL:KB]
 
 			S32 cur_length = getLength();
 			LLStyleConstSP sp(new LLStyle(highlight_params));

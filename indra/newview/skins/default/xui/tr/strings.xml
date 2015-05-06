@@ -739,6 +739,9 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	<string name="AvatarMuted">
 		Engellenmiş
 	</string>
+	<string name="AvatarTyping">
+		Yazı Yazıyor
+	</string>
 	<string name="anim_express_afraid">
 		Korkmuş
 	</string>
