@@ -1708,6 +1708,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ChicletBarAlignment</key>
+    <map>
+      <key>Comment</key>
+      <string>Places the chicet bar at the top, bottom or bottom most</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>ClientSettingsFile</key>
     <map>
       <key>Comment</key>
