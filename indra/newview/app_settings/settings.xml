@@ -1664,6 +1664,17 @@
         <key>Value</key>
         <real>10.0</real>
     </map>
+    <key>ChatMultiLine</key>
+    <map>
+      <key>Comment</key>
+      <string>Use the expanding chat entry line editor</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>ChatOnlineNotification</key>
     <map>
       <key>Comment</key>
@@ -1784,6 +1795,28 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>CloseChatOnEmptyReturn</key>
+    <map>
+      <key>Comment</key>
+      <string>Close the chat history floater after hitting return on an empty line</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
+    <key>CloseIMOnEmptyReturn</key>
+    <map>
+      <key>Comment</key>
+      <string>Close the IM floater after hitting return on an empty line</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>CmdLineChannel</key>
     <map>
@@ -6834,6 +6867,17 @@
       <key>Value</key>
       <integer>23</integer>
     </map>
+    <key>NearbyToastOffset</key>
+    <map>
+      <key>Comment</key>
+      <string>Nearby chat toast offset from the bottom of the screen</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>10</integer>
+    </map>
     <key>StartUpToastLifeTime</key>
     <map>
       <key>Comment</key>
@@ -10632,6 +10676,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>ShowBlockedChat</key>
+    <map>
+      <key>Comment</key>
+      <string>Show blocked nearby chat in the nearby chat history</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>ShowBuildButton</key>
     <map>
