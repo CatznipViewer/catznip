@@ -5695,9 +5695,11 @@ class LLCommunicateNearbyChat : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
-		bool nearby_visible	= LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain();
-		if(nearby_visible && im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1)
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2015-04-27 (Catznip-3.7)
+		LLFloaterIMContainerView* im_box = NULL;
+		if ( (!LLFloaterIMContainerBase::isTabbedContainer()) && (LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain()) &&
+			 (im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance())) &&
+		     (im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1) )
 		{
 			im_box->selectNextorPreviousConversation(false);
 		}
@@ -5705,6 +5707,17 @@ class LLCommunicateNearbyChat : public view_listener_t
 		{
 			LLFloaterReg::toggleInstanceOrBringToFront("nearby_chat");
 		}
+// [/SL:KB]
+//		LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+//		bool nearby_visible	= LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain();
+//		if(nearby_visible && im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1)
+//		{
+//			im_box->selectNextorPreviousConversation(false);
+//		}
+//		else
+//		{
+//			LLFloaterReg::toggleInstanceOrBringToFront("nearby_chat");
+//		}
 		return true;
 	}
 };
@@ -8579,7 +8592,10 @@ void initialize_menus()
 
 	view_listener_t::addEnable(new LLUploadCostCalculator(), "Upload.CalculateCosts");
 
-	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainer::isConversationLoggingAllowed));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainerBase::isConversationLoggingAllowed));
+// [/SL:KB]
+//	enable.add("Conversation.IsConversationLoggingAllowed", boost::bind(&LLFloaterIMContainer::isConversationLoggingAllowed));
 
 	// Agent
 	commit.add("Agent.toggleFlying", boost::bind(&LLAgent::toggleFlying));

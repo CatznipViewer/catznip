@@ -30,51 +30,68 @@
 #include <map>
 #include <vector>
 
-#include "llimview.h"
+//#include "llimview.h"
 #include "llevents.h"
-#include "../llui/llfloater.h"
-#include "../llui/llmultifloater.h"
-#include "llavatarpropertiesprocessor.h"
-#include "llgroupmgr.h"
-#include "../llui/lltrans.h"
+//#include "../llui/llfloater.h"
+//#include "../llui/llmultifloater.h"
+//#include "llavatarpropertiesprocessor.h"
+//#include "llgroupmgr.h"
+//#include "../llui/lltrans.h"
 #include "llconversationmodel.h"
-#include "llconversationview.h"
+//#include "llconversationview.h"
+
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+#include "llfloaterimcontainerbase.h"
+// [/SL:KB]
 
 class LLButton;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-11-21 (Catznip-3.6)
+class LLConversationViewParticipant;
+class LLConversationViewSession;
+// [/SL:KB]
 class LLLayoutPanel;
 class LLLayoutStack;
 class LLTabContainer;
-class LLFloaterIMContainer;
+//class LLFloaterIMContainer;
 class LLSpeaker;
 class LLSpeakerMgr;
 
-class LLFloaterIMContainer
-	: public LLMultiFloater
-	, public LLIMSessionObserver
+class LLFloaterIMContainerView
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	: public LLFloaterIMContainerBase
+// [/SL:KB]
+//	: public LLMultiFloater
+//	, public LLIMSessionObserver
 {
 public:
-	LLFloaterIMContainer(const LLSD& seed, const Params& params = getDefaultParams());
-	virtual ~LLFloaterIMContainer();
+	LLFloaterIMContainerView(const LLSD& seed, const Params& params = getDefaultParams());
+	virtual ~LLFloaterIMContainerView();
 	
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ void draw();
-	/*virtual*/ void setMinimized(BOOL b);
+//	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setVisibleAndFrontmost(BOOL take_focus=TRUE, const LLSD& key = LLSD());
 	/*virtual*/ void updateResizeLimits();
 	/*virtual*/ void handleReshape(const LLRect& rect, bool by_user);
 
-	void onCloseFloater(LLUUID& id);
+//	void onCloseFloater(LLUUID& id);
 
 	/*virtual*/ void addFloater(LLFloater* floaterp, 
 								BOOL select_added_floater, 
 								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	void returnFloaterToHost();
-    void showConversation(const LLUUID& session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	/*virtual*/ void showConversation(const LLUUID& session_id);
+	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
+	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
+	/*virtual*/ void setConversationHighlighted(const LLUUID& session_id, bool is_highlighted);
+// [/SL:KB]
+//    void showConversation(const LLUUID& session_id);
     void selectConversation(const LLUUID& session_id);
 	void selectNextConversationByID(const LLUUID& session_id);
-    BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
+//    BOOL selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
     void clearAllFlashStates();
 	bool selectAdjacentConversation(bool focus_selected);
     bool selectNextorPreviousConversation(bool select_next, bool focus_selected = true);
@@ -84,10 +101,10 @@ public:
 	void showStub(bool visible);
 
 	static LLFloater* getCurrentVoiceFloater();
-	static LLFloaterIMContainer* findInstance();
-	static LLFloaterIMContainer* getInstance();
-
-	static void onCurrentChannelChanged(const LLUUID& session_id);
+//	static LLFloaterIMContainer* findInstance();
+//	static LLFloaterIMContainer* getInstance();
+//
+//	static void onCurrentChannelChanged(const LLUUID& session_id);
 
 	void collapseMessagesPane(bool collapse);
 	bool isMessagesPaneCollapsed();
@@ -103,17 +120,27 @@ public:
 	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
 	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
 
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	/*virtual*/ const LLUUID& getSelectedSession() const { return mSelectedSession; }
+	/*virtual*/ LLConversationItem* getSessionModel(const LLUUID& session_id) const { return get_ptr_in_map(mConversationsItems,session_id); }
+	/*virtual*/ const LLConversationSort& getSortOrder() const { return mConversationViewModel.getSorter(); }
+// [/SL:KB]
 	LLConversationViewModel& getRootViewModel() { return mConversationViewModel; }
-    LLUUID getSelectedSession() { return mSelectedSession; }
+//    LLUUID getSelectedSession() { return mSelectedSession; }
     void setSelectedSession(LLUUID sessionID) { mSelectedSession = sessionID; }
-	LLConversationItem* getSessionModel(const LLUUID& session_id) { return get_ptr_in_map(mConversationsItems,session_id); }
-	LLConversationSort& getSortOrder() { return mConversationViewModel.getSorter(); }
+//	LLConversationItem* getSessionModel(const LLUUID& session_id) { return get_ptr_in_map(mConversationsItems,session_id); }
+//	LLConversationSort& getSortOrder() { return mConversationViewModel.getSorter(); }
 
 	// Handling of lists of participants is public so to be common with llfloatersessiontab
 	// *TODO : Find a better place for this.
-    bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-    bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
-    void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	/*virtual*/ bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	/*virtual*/ bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+	/*virtual*/ void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
+// [/SL:KB]
+//    bool checkContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+//    bool enableContextMenuItem(const std::string& item, uuid_vec_t& selectedIDS);
+//    void doToParticipants(const std::string& item, uuid_vec_t& selectedIDS);
 
 	void assignResizeLimits();
 	virtual BOOL handleKeyHere(KEY key, MASK mask );
@@ -124,13 +151,13 @@ public:
 
 
 private:
-	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
-	avatarID_panel_map_t mSessions;
-	boost::signals2::connection mNewMessageConnection;
+//	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
+//	avatarID_panel_map_t mSessions;
+//	boost::signals2::connection mNewMessageConnection;
 
 	/*virtual*/ void computeResizeLimits(S32& new_min_width, S32& new_min_height) {}
 
-	void onNewMessageReceived(const LLSD& data);
+//	void onNewMessageReceived(const LLSD& data);
 
 	void onExpandCollapseButtonClicked();
 	void onStubCollapseButtonClicked();
@@ -176,7 +203,7 @@ private:
 	void moderateVoiceAllParticipants(bool unmute);
 	void moderateVoiceParticipant(const LLUUID& avatar_id, bool unmute);
 	void toggleAllowTextChat(const LLUUID& participant_uuid);
-	void toggleMute(const LLUUID& participant_id, U32 flags);
+//	void toggleMute(const LLUUID& participant_id, U32 flags);
 	void banSelectedMember(const LLUUID& participant_uuid);
 	void openNearbyChat();
 	bool isParticipantListExpanded();
@@ -200,18 +227,21 @@ private:
 public:
 	bool removeConversationListItem(const LLUUID& uuid, bool change_focus = true);
 	LLConversationItem* addConversationListItem(const LLUUID& uuid, bool isWidgetSelected = false);
-	void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	/*virtual*/ void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
+// [/SL:KB]
+//	void setTimeNow(const LLUUID& session_id, const LLUUID& participant_id);
 	void setNearbyDistances();
 	void reSelectConversation();
 	void updateSpeakBtnState();
-	static bool isConversationLoggingAllowed();
+//	static bool isConversationLoggingAllowed();
 	void flashConversationItemWidget(const LLUUID& session_id, bool is_flashes);
 	void highlightConversationItemWidget(const LLUUID& session_id, bool is_highlighted);
 	bool isScrolledOutOfSight(LLConversationViewSession* conversation_item_widget);
 	boost::signals2::connection mMicroChangedSignal;
 	S32 getConversationListItemSize() { return mConversationsWidgets.size(); }
 	typedef std::list<LLFloater*> floater_list_t;
-	void getDetachedConversationFloaters(floater_list_t& floaters);
+//	void getDetachedConversationFloaters(floater_list_t& floaters);
 
 private:
 	LLConversationViewSession* createConversationItemWidget(LLConversationItem* item);

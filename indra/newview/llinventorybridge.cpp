@@ -4787,7 +4787,10 @@ void LLCallingCardBridge::performAction(LLInventoryModel* model, std::string act
 			LLUUID session_id = gIMMgr->addSession(callingcard_name, IM_NOTHING_SPECIAL, item->getCreatorUUID());
 			if (session_id != LLUUID::null)
 			{
-				LLFloaterIMContainer::getInstance()->showConversation(session_id);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+				LLFloaterIMContainerBase::getInstance()->showConversation(session_id);
+// [/SL:KB]
+//				LLFloaterIMContainer::getInstance()->showConversation(session_id);
 			}
 		}
 	}
