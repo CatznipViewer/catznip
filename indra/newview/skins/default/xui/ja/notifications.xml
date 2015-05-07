@@ -1509,20 +1509,20 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 	</notification>
 	<notification name="FailedUpdateInstall">
 		ビューワのアップデートをインストール中にエラーが発生しました。
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		必要なアップデートをインストールできませんでした。 
 [APP_NAME] がアップデートされるまでログインできません。
 
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、http://www.secondlife.com/downloads からダウンロードして、今すぐインストールできます。
+このアップデートは、http://catznip.com/downloads/ からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -1598,9 +1598,13 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 		<usetemplate ignoretext="ブラウザを起動して QA Wiki を見るとき" name="okcancelignore" notext="キャンセル" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		[SECOND_LIFE] のパブリック問題トラッカーで、
+		[APP_NAME] のパブリック問題トラッカーで、
 バグやその他の問題を報告できます。
 		<usetemplate ignoretext="ブラウザを起動してパブリック問題トラッカーを使用するとき" name="okcancelignore" notext="キャンセル" yestext="ページへ行く"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		[APP_NAME] 公式ブログで、最新のニュースや情報を入手してください。
+		<usetemplate ignoretext="ブラウザを起動して公式ブログを見るとき" name="okcancelignore" notext="取り消し" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Linden 公式ブログで、最新のニュースや情報を入手してください。

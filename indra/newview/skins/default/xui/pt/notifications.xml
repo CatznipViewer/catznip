@@ -1466,7 +1466,7 @@ Salvar na pasta Aplicativos?
 	<notification name="FailedUpdateInstall">
 		Ocorreu um erro de atualização do visualizador. 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1474,13 +1474,13 @@ http://secondlife.com/download.
 Não será possível acessar a sua conta até que você atualize o [APP_NAME].
 
 Baixe e instale a versão mais recente do visualizador em 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Sair"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		A instalação do Second Life requer uma atualização.
 
-Baixe a atualização em http://www.secondlife.com/downloads
+Baixe a atualização em http://catznip.com/downloads/
 ou você pode instalar a instalação agora.
 		<usetemplate name="okcancelbuttons" notext="Sair do Second Life" yestext="Baixar e instalar agora"/>
 	</notification>
@@ -1557,8 +1557,12 @@ consulte a informação [[INFO_URL] sobre essa atualização]
 		<usetemplate ignoretext="Abrir meu navegador para ver a página Wiki" name="okcancelignore" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Visite o Rastreador Público de Problemas do [SECOND_LIFE], onde você poderá reportar Bugs e outros Problemas.
+		Visite o Rastreador de Problemas do [APP_NAME], onde você poderá reportar Bugs e outros Problemas.
 		<usetemplate ignoretext="Abrir o navegador para usar o Monitor de problemas" name="okcancelignore" notext="Cancelar" yestext="Ir para a Página"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		Ir até o Blog Oficial da [APP_NAME] buscar pelas últimas notícias e informações.
+		<usetemplate ignoretext="Abrir meu navegador para ler o blog" name="okcancelignore" notext="Cancelar" yestext="Ir até a página"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Ir até o Blog Oficial da Linden buscar pelas últimas notícias e informações.
