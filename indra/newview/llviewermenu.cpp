@@ -3149,76 +3149,91 @@ class LLAvatarReportAbuse : public view_listener_t
 //---------------------------------------------------------------------------
 // Parcel freeze, eject, etc.
 //---------------------------------------------------------------------------
-bool callback_freeze(const LLSD& notification, const LLSD& response)
-{
-	LLUUID avatar_id = notification["payload"]["avatar_id"].asUUID();
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-
-	if (0 == option || 1 == option)
-	{
-		U32 flags = 0x0;
-		if (1 == option)
-		{
-			// unfreeze
-			flags |= 0x1;
-		}
-
-		LLMessageSystem* msg = gMessageSystem;
-		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
-
-		if (avatar)
-		{
-			msg->newMessage("FreezeUser");
-			msg->nextBlock("AgentData");
-			msg->addUUID("AgentID", gAgent.getID());
-			msg->addUUID("SessionID", gAgent.getSessionID());
-			msg->nextBlock("Data");
-			msg->addUUID("TargetID", avatar_id );
-			msg->addU32("Flags", flags );
-			msg->sendReliable( avatar->getRegion()->getHost() );
-		}
-	}
-	return false;
-}
+//bool callback_freeze(const LLSD& notification, const LLSD& response)
+//{
+//	LLUUID avatar_id = notification["payload"]["avatar_id"].asUUID();
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//
+//	if (0 == option || 1 == option)
+//	{
+//		U32 flags = 0x0;
+//		if (1 == option)
+//		{
+//			// unfreeze
+//			flags |= 0x1;
+//		}
+//
+//		LLMessageSystem* msg = gMessageSystem;
+//		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
+//
+//		if (avatar)
+//		{
+//			msg->newMessage("FreezeUser");
+//			msg->nextBlock("AgentData");
+//			msg->addUUID("AgentID", gAgent.getID());
+//			msg->addUUID("SessionID", gAgent.getSessionID());
+//			msg->nextBlock("Data");
+//			msg->addUUID("TargetID", avatar_id );
+//			msg->addU32("Flags", flags );
+//			msg->sendReliable( avatar->getRegion()->getHost() );
+//		}
+//	}
+//	return false;
+//}
 
 
 void handle_avatar_freeze(const LLSD& avatar_id)
 {
-		// Use avatar_id if available, otherwise default to right-click avatar
-		LLVOAvatar* avatar = NULL;
-		if (avatar_id.asUUID().notNull())
-		{
-			avatar = find_avatar_from_object(avatar_id.asUUID());
-		}
-		else
-		{
-			avatar = find_avatar_from_object(
-				LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
-		}
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
+	// Use avatar_id if available, otherwise default to right-click avatar
+	LLUUID idAgent = avatar_id.asUUID();
+	if (idAgent.isNull())
+	{
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		if (pAvatar)
+			idAgent = pAvatar->getID();
+	}
 
-		if( avatar )
-		{
-			std::string fullname = avatar->getFullname();
-			LLSD payload;
-			payload["avatar_id"] = avatar->getID();
-
-			if (!fullname.empty())
-			{
-				LLSD args;
-				args["AVATAR_NAME"] = fullname;
-				LLNotificationsUtil::add("FreezeAvatarFullname",
-							args,
-							payload,
-							callback_freeze);
-			}
-			else
-			{
-				LLNotificationsUtil::add("FreezeAvatar",
-							LLSD(),
-							payload,
-							callback_freeze);
-			}
-		}
+	if (idAgent.notNull())
+	{
+		LLAvatarActions::landFreeze(idAgent);
+	}
+// [/SL:KB]
+//		// Use avatar_id if available, otherwise default to right-click avatar
+//		LLVOAvatar* avatar = NULL;
+//		if (avatar_id.asUUID().notNull())
+//		{
+//			avatar = find_avatar_from_object(avatar_id.asUUID());
+//		}
+//		else
+//		{
+//			avatar = find_avatar_from_object(
+//				LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+//		}
+//
+//		if( avatar )
+//		{
+//			std::string fullname = avatar->getFullname();
+//			LLSD payload;
+//			payload["avatar_id"] = avatar->getID();
+//
+//			if (!fullname.empty())
+//			{
+//				LLSD args;
+//				args["AVATAR_NAME"] = fullname;
+//				LLNotificationsUtil::add("FreezeAvatarFullname",
+//							args,
+//							payload,
+//							callback_freeze);
+//			}
+//			else
+//			{
+//				LLNotificationsUtil::add("FreezeAvatar",
+//							LLSD(),
+//							payload,
+//							callback_freeze);
+//			}
+//		}
 }
 
 class LLAvatarVisibleDebug : public view_listener_t
@@ -3251,124 +3266,166 @@ class LLAvatarDebug : public view_listener_t
 	}
 };
 
-bool callback_eject(const LLSD& notification, const LLSD& response)
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2014-01-22 (Catznip-3.6)
+void handle_avatar_teleport()
 {
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	if (2 == option)
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
 	{
-		// Cancel button.
-		return false;
+		LLAvatarActions::offerTeleport(pAvatar->getID());
 	}
-	LLUUID avatar_id = notification["payload"]["avatar_id"].asUUID();
-	bool ban_enabled = notification["payload"]["ban_enabled"].asBoolean();
-
-	if (0 == option)
-	{
-		// Eject button
-		LLMessageSystem* msg = gMessageSystem;
-		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
-
-		if (avatar)
-		{
-			U32 flags = 0x0;
-			msg->newMessage("EjectUser");
-			msg->nextBlock("AgentData");
-			msg->addUUID("AgentID", gAgent.getID() );
-			msg->addUUID("SessionID", gAgent.getSessionID() );
-			msg->nextBlock("Data");
-			msg->addUUID("TargetID", avatar_id );
-			msg->addU32("Flags", flags );
-			msg->sendReliable( avatar->getRegion()->getHost() );
-		}
-	}
-	else if (ban_enabled)
-	{
-		// This is tricky. It is similar to say if it is not an 'Eject' button,
-		// and it is also not an 'Cancle' button, and ban_enabled==ture, 
-		// it should be the 'Eject and Ban' button.
-		LLMessageSystem* msg = gMessageSystem;
-		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
-
-		if (avatar)
-		{
-			U32 flags = 0x1;
-			msg->newMessage("EjectUser");
-			msg->nextBlock("AgentData");
-			msg->addUUID("AgentID", gAgent.getID() );
-			msg->addUUID("SessionID", gAgent.getSessionID() );
-			msg->nextBlock("Data");
-			msg->addUUID("TargetID", avatar_id );
-			msg->addU32("Flags", flags );
-			msg->sendReliable( avatar->getRegion()->getHost() );
-		}
-	}
-	return false;
 }
+
+void handle_avatar_chathistory()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::viewChatHistory(pAvatar->getID());
+	}
+}
+
+bool enable_avatar_chathistory()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	return (pAvatar) && (LLLogChat::isTranscriptExist(pAvatar->getID()));
+}
+
+// [/SL:KB]
+
+//bool callback_eject(const LLSD& notification, const LLSD& response)
+//{
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//	if (2 == option)
+//	{
+//		// Cancel button.
+//		return false;
+//	}
+//	LLUUID avatar_id = notification["payload"]["avatar_id"].asUUID();
+//	bool ban_enabled = notification["payload"]["ban_enabled"].asBoolean();
+//
+//	if (0 == option)
+//	{
+//		// Eject button
+//		LLMessageSystem* msg = gMessageSystem;
+//		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
+//
+//		if (avatar)
+//		{
+//			U32 flags = 0x0;
+//			msg->newMessage("EjectUser");
+//			msg->nextBlock("AgentData");
+//			msg->addUUID("AgentID", gAgent.getID() );
+//			msg->addUUID("SessionID", gAgent.getSessionID() );
+//			msg->nextBlock("Data");
+//			msg->addUUID("TargetID", avatar_id );
+//			msg->addU32("Flags", flags );
+//			msg->sendReliable( avatar->getRegion()->getHost() );
+//		}
+//	}
+//	else if (ban_enabled)
+//	{
+//		// This is tricky. It is similar to say if it is not an 'Eject' button,
+//		// and it is also not an 'Cancle' button, and ban_enabled==ture, 
+//		// it should be the 'Eject and Ban' button.
+//		LLMessageSystem* msg = gMessageSystem;
+//		LLViewerObject* avatar = gObjectList.findObject(avatar_id);
+//
+//		if (avatar)
+//		{
+//			U32 flags = 0x1;
+//			msg->newMessage("EjectUser");
+//			msg->nextBlock("AgentData");
+//			msg->addUUID("AgentID", gAgent.getID() );
+//			msg->addUUID("SessionID", gAgent.getSessionID() );
+//			msg->nextBlock("Data");
+//			msg->addUUID("TargetID", avatar_id );
+//			msg->addU32("Flags", flags );
+//			msg->sendReliable( avatar->getRegion()->getHost() );
+//		}
+//	}
+//	return false;
+//}
 
 void handle_avatar_eject(const LLSD& avatar_id)
 {
-		// Use avatar_id if available, otherwise default to right-click avatar
-		LLVOAvatar* avatar = NULL;
-		if (avatar_id.asUUID().notNull())
-		{
-			avatar = find_avatar_from_object(avatar_id.asUUID());
-		}
-		else
-		{
-			avatar = find_avatar_from_object(
-				LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
-		}
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
+	// Use avatar_id if available, otherwise default to right-click avatar
+	LLUUID idAgent = avatar_id.asUUID();
+	if (idAgent.isNull())
+	{
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		if (pAvatar)
+			idAgent = pAvatar->getID();
+	}
 
-		if( avatar )
-		{
-			LLSD payload;
-			payload["avatar_id"] = avatar->getID();
-			std::string fullname = avatar->getFullname();
-
-			const LLVector3d& pos = avatar->getPositionGlobal();
-			LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
-			
-			if (LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED))
-			{
-                payload["ban_enabled"] = true;
-				if (!fullname.empty())
-				{
-    				LLSD args;
-    				args["AVATAR_NAME"] = fullname;
-    				LLNotificationsUtil::add("EjectAvatarFullname",
-    							args,
-    							payload,
-    							callback_eject);
-				}
-				else
-				{
-    				LLNotificationsUtil::add("EjectAvatarFullname",
-    							LLSD(),
-    							payload,
-    							callback_eject);
-				}
-			}
-			else
-			{
-                payload["ban_enabled"] = false;
-				if (!fullname.empty())
-				{
-    				LLSD args;
-    				args["AVATAR_NAME"] = fullname;
-    				LLNotificationsUtil::add("EjectAvatarFullnameNoBan",
-    							args,
-    							payload,
-    							callback_eject);
-				}
-				else
-				{
-    				LLNotificationsUtil::add("EjectAvatarNoBan",
-    							LLSD(),
-    							payload,
-    							callback_eject);
-				}
-			}
-		}
+	if (idAgent.notNull())
+	{
+		LLAvatarActions::landEject(idAgent);
+	}
+// [/SL:KB]
+//		// Use avatar_id if available, otherwise default to right-click avatar
+//		LLVOAvatar* avatar = NULL;
+//		if (avatar_id.asUUID().notNull())
+//		{
+//			avatar = find_avatar_from_object(avatar_id.asUUID());
+//		}
+//		else
+//		{
+//			avatar = find_avatar_from_object(
+//				LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+//		}
+//
+//		if( avatar )
+//		{
+//			LLSD payload;
+//			payload["avatar_id"] = avatar->getID();
+//			std::string fullname = avatar->getFullname();
+//
+//			const LLVector3d& pos = avatar->getPositionGlobal();
+//			LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
+//			
+//			if (LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED))
+//			{
+//                payload["ban_enabled"] = true;
+//				if (!fullname.empty())
+//				{
+//    				LLSD args;
+//					args["AVATAR_NAME"] = fullname;
+//    				LLNotificationsUtil::add("EjectAvatarFullname",
+//    							args,
+//    							payload,
+//    							callback_eject);
+//				}
+//				else
+//				{
+//    				LLNotificationsUtil::add("EjectAvatarFullname",
+//    							LLSD(),
+//    							payload,
+//    							callback_eject);
+//				}
+//			}
+//			else
+//			{
+//                payload["ban_enabled"] = false;
+//				if (!fullname.empty())
+//				{
+//    				LLSD args;
+//					args["AVATAR_NAME"] = fullname;
+//    				LLNotificationsUtil::add("EjectAvatarFullnameNoBan",
+//    							args,
+//    							payload,
+//    							callback_eject);
+//				}
+//				else
+//				{
+//    				LLNotificationsUtil::add("EjectAvatarNoBan",
+//    							LLSD(),
+//    							payload,
+//    							callback_eject);
+//				}
+//			}
+//		}
 }
 
 bool my_profile_visible()
@@ -3380,36 +3437,72 @@ bool my_profile_visible()
 bool enable_freeze_eject(const LLSD& avatar_id)
 {
 	// Use avatar_id if available, otherwise default to right-click avatar
-	LLVOAvatar* avatar = NULL;
-	if (avatar_id.asUUID().notNull())
+// [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2011-05-13 (Catznip-2.6)
+	LLUUID idAgent = avatar_id.asUUID();
+	if (idAgent.isNull())
 	{
-		avatar = find_avatar_from_object(avatar_id.asUUID());
+		const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+		if (pAvatar)
+			idAgent = pAvatar->getID();
 	}
-	else
-	{
-		avatar = find_avatar_from_object(
-			LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
-	}
-	if (!avatar) return false;
-
-	// Gods can always freeze
-	if (gAgent.isGodlike()) return true;
-
-	// Estate owners / managers can freeze
-	// Parcel owners can also freeze
-	const LLVector3& pos = avatar->getPositionRegion();
-	const LLVector3d& pos_global = avatar->getPositionGlobal();
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos_global)->getParcel();
-	LLViewerRegion* region = avatar->getRegion();
-	if (!region) return false;
-				
-	bool new_value = region->isOwnedSelf(pos);
-	if (!new_value || region->isOwnedGroup(pos))
-	{
-		new_value = LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_ADMIN);
-	}
-	return new_value;
+	return (idAgent.notNull()) ? LLAvatarActions::canLandFreezeOrEject(idAgent) : false;
+// [/SL:KB]
+//	LLVOAvatar* avatar = NULL;
+//	if (avatar_id.asUUID().notNull())
+//	{
+//		avatar = find_avatar_from_object(avatar_id.asUUID());
+//	}
+//	else
+//	{
+//		avatar = find_avatar_from_object(
+//			LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+//	}
+//	if (!avatar) return false;
+//
+//	// Gods can always freeze
+//	if (gAgent.isGodlike()) return true;
+//
+//	// Estate owners / managers can freeze
+//	// Parcel owners can also freeze
+//	const LLVector3& pos = avatar->getPositionRegion();
+//	const LLVector3d& pos_global = avatar->getPositionGlobal();
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos_global)->getParcel();
+//	LLViewerRegion* region = avatar->getRegion();
+//	if (!region) return false;
+//				
+//	bool new_value = region->isOwnedSelf(pos);
+//	if (!new_value || region->isOwnedGroup(pos))
+//	{
+//		new_value = LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_ADMIN);
+//	}
+//	return new_value;
 }
+
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
+bool enable_kick_teleport_home()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	return (pAvatar) ? LLAvatarActions::canEstateKickOrTeleportHome(pAvatar->getID()) : false;
+}
+
+void handle_kick()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::estateKick(pAvatar->getID());
+	}
+}
+
+void handle_teleport_home()
+{
+	const LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject());
+	if (pAvatar)
+	{
+		LLAvatarActions::estateTeleportHome(pAvatar->getID());
+	}
+}
+// [/SL:KB]
 
 bool callback_leave_group(const LLSD& notification, const LLSD& response)
 {
@@ -8915,6 +9008,11 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAvatarDebug(), "Avatar.Debug");
 	view_listener_t::addMenu(new LLAvatarVisibleDebug(), "Avatar.VisibleDebug");
 	view_listener_t::addMenu(new LLAvatarInviteToGroup(), "Avatar.InviteToGroup");
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2014-01-22 (Catznip-3.6)
+	commit.add("Avatar.Teleport", boost::bind(&handle_avatar_teleport));
+	commit.add("Avatar.ShowChatHistory", boost::bind(&handle_avatar_chathistory));
+	enable.add("Avatar.EnableChatHistory", boost::bind(&enable_avatar_chathistory));
+// [/SL:KB]
 	commit.add("Avatar.Eject", boost::bind(&handle_avatar_eject, LLSD()));
 	commit.add("Avatar.ShowInspector", boost::bind(&handle_avatar_show_inspector));
 	view_listener_t::addMenu(new LLAvatarSendIM(), "Avatar.SendIM");
@@ -8928,6 +9026,11 @@ void initialize_menus()
 	
 	view_listener_t::addMenu(new LLAvatarEnableAddFriend(), "Avatar.EnableAddFriend");
 	enable.add("Avatar.EnableFreezeEject", boost::bind(&enable_freeze_eject, _2));
+// [SL:KB] - Patch: UI-AvatarContextMenus | Checked: 2011-11-21 (Catznip-3.2)
+	commit.add("Avatar.Kick", boost::bind(&handle_kick));
+	commit.add("Avatar.TeleportHome", boost::bind(&handle_teleport_home));
+	enable.add("Avatar.EnableKickTeleportHome", boost::bind(&enable_kick_teleport_home));
+// [/SL:KB]
 
 	// Object pie menu
 	view_listener_t::addMenu(new LLObjectBuild(), "Object.Build");
