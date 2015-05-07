@@ -1474,6 +1474,17 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="Snapshots" value="Fotos,"/>
 	<string name="No Filters" value="No"/>
 	<string name="Since Logoff" value="- Desde la desconexión"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Ponerse</string>
+	<string name="InvAction take_off">Quitarse</string>
+	<string name="InvAction attach">Ponerse</string>
+	<string name="InvAction detach">Quitarse</string>
+	<string name="InvAction activate">Activar</string>
+	<string name="InvAction deactivate">Desactivar</string>
+	<string name="InvAction teleport">Teleportar</string>
+	<string name="InvAction open">Abrir</string>
+
 	<string name="InvFolder My Inventory">
 		Mi Inventario
 	</string>

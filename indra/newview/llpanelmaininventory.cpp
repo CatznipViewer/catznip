@@ -103,9 +103,20 @@ private:
 LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	: LLPanel(p),
 	  mActivePanel(NULL),
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	  mActivePanelIndex(-1),
+	  mFilterSubStringPerTab(true),
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	  mSpareInvPanel(NULL),
+// [/SL:KB]
 	  mSavedFolderState(NULL),
 	  mFilterText(""),
 	  mMenuGearDefault(NULL),
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	  mMenuSort(NULL),
+	  mSortMenuButton(NULL),
+// [/SL:KB]
 	  mMenuAdd(NULL),
 	  mNeedUploadCost(true)
 {
@@ -119,7 +130,11 @@ LLPanelMainInventory::LLPanelMainInventory(const LLPanel::Params& p)
 	mCommitCallbackRegistrar.add("Inventory.ShowFilters", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
 	mCommitCallbackRegistrar.add("Inventory.ResetFilters", boost::bind(&LLPanelMainInventory::resetFilters, this));
 	mCommitCallbackRegistrar.add("Inventory.SetSortBy", boost::bind(&LLPanelMainInventory::setSortBy, this, _2));
-	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+//	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mEnableCallbackRegistrar.add("Inventory.EnableCreate", boost::bind(&LLPanelMainInventory::checkCreate, this, _2));
+// [/SL:KB]
 
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
@@ -131,16 +146,33 @@ BOOL LLPanelMainInventory::postBuild()
 	
 	mFilterTabs = getChild<LLTabContainer>("inventory filter tabs");
 	mFilterTabs->setCommitCallback(boost::bind(&LLPanelMainInventory::onFilterSelected, this));
-	
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	mFilterTabs->setRemoveCallback(boost::bind(&LLPanelMainInventory::onFilterRemoved, this, _1, _3));
+// [/SL:KB]
+
     mCounterCtrl = getChild<LLUICtrl>("ItemcountText");
     
 	//panel->getFilter().markDefault();
+
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	mActivePanelIndex = mFilterTabs->getPanelIndexByName("All Items");
+	mFilterSubStringPerTab = gSavedSettings.getBOOL("InventoryFilterStringPerTab");
+	mFilterSubStrings.insert(mFilterSubStrings.end(), mFilterTabs->getTabCount(), LLStringUtil::null);
+// [/SL:KB]
 
 	// Set up the default inv. panel/filter settings.
 	mActivePanel = getChild<LLInventoryPanel>("All Items");
 	if (mActivePanel)
 	{
 		// "All Items" is the previous only view, so it gets the InventorySortOrder
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+		if (!gSavedSettings.getBOOL("ShowReceivedItemsPanel"))
+		{
+			mActivePanel->getFilter().setFilterCategoryTypes(mActivePanel->getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		}
+		gSavedSettings.getControl("ShowReceivedItemsPanel")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, mActivePanel));
+		mActivePanel->getRootFolder()->setFilterStateChangedCallback(boost::bind(&LLPanelMainInventory::onToggleReceivedItems, this, mActivePanel));
+// [/SL:KB]
 		mActivePanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
 		mActivePanel->getFilter().markDefault();
 		mActivePanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
@@ -158,6 +190,15 @@ BOOL LLPanelMainInventory::postBuild()
 		recent_filter.markDefault();
 		recent_items_panel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, recent_items_panel, _1, _2));
 	}
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	LLPanel* pNewTabPanel = mFilterTabs->getPanelByName("New Inv Panel");
+	if (pNewTabPanel)
+	{
+		mFilterTabs->setTabImage(pNewTabPanel, "AddItem_Off", LLFontGL::HCENTER);
+		mFilterTabs->setTabSelectable(pNewTabPanel, false);
+	}
+// [/SL:KB]
 
 	// Now load the stored settings from disk, if available.
 	std::string filterSaveName(gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, FILTERS_FILENAME));
@@ -193,8 +234,17 @@ BOOL LLPanelMainInventory::postBuild()
 	}
 
 	mGearMenuButton = getChild<LLMenuButton>("options_gear_btn");
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mAddMenuButton = getChild<LLMenuButton>("add_btn");
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
+// [/SL:KB]
 
 	initListCommandsHandlers();
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
+	updateItemcountText();
+// [/SL:KB]
 
 	// *TODO:Get the cost info from the server
 	const std::string upload_cost("10");
@@ -255,6 +305,13 @@ LLPanelMainInventory::~LLPanelMainInventory( void )
     
 	gInventory.removeObserver(this);
 	delete mSavedFolderState;
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-09-03 (Catznip-3.3)
+	if (mSpareInvPanel)
+	{
+		delete mSpareInvPanel;
+	}
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::startSearch()
@@ -324,6 +381,65 @@ void LLPanelMainInventory::doCreate(const LLSD& userdata)
 	menu_create_inventory_item(getPanel(), NULL, userdata);
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("category" == strParam)
+	{
+		// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
+		return ("Recent Items" != mActivePanel->getName());
+	}
+	return true;
+}
+
+void LLPanelMainInventory::onToggleReceivedItems(LLInventoryPanel* pInvPanel)
+{
+	if (!pInvPanel)
+		return;
+
+	LLInventoryFilter& filter_all = pInvPanel->getFilter();
+
+	// Determine whether the "Received Items" folder should be visible or hidden
+	bool fShow = (!gSavedSettings.getBOOL("ShowReceivedItemsPanel")) || (pInvPanel->getFilter().isNotDefault());
+	bool fShown = (filter_all.getFilterCategoryTypes() & (1ULL << LLFolderType::FT_INBOX));
+
+	if (fShow == fShown)
+	{
+		// Do nothing if we already have the desired visibility
+		return;
+	}
+
+	// Set visibility of the folder, preserving current filter options if present
+	LLInventoryFilter::Params filter_params; bool filter_default = filter_all.isDefault();
+	if (!filter_default)
+	{
+		filter_all.toParams(filter_params);
+		filter_all.resetDefault();
+	}
+
+	if (fShow)
+	{
+		filter_all.setFilterCategoryTypes(filter_all.getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
+		filter_all.markDefault();
+		filter_all.setModified(LLInventoryFilter::FILTER_LESS_RESTRICTIVE);
+	}
+	else
+	{
+		filter_all.setFilterCategoryTypes(filter_all.getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
+		filter_all.markDefault();
+		filter_all.setModified(LLInventoryFilter::FILTER_RESTART);
+	}
+
+	if (!filter_default)
+	{
+		filter_params.filter_ops.category_types.setProvided(false);
+		filter_all.fromParams(filter_params);
+		filter_all.setModified(LLInventoryFilter::FILTER_RESTART);
+	}
+}
+// [/SL:KB]
+
 void LLPanelMainInventory::resetFilters()
 {
 	LLFloaterInventoryFinder *finder = getFinder();
@@ -336,44 +452,51 @@ void LLPanelMainInventory::resetFilters()
 	setFilterTextFromFilter();
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 {
-	U32 sort_order_mask = getActivePanel()->getSortOrder();
-	std::string sort_type = userdata.asString();
-	if (sort_type == "name")
-	{
-		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "date")
-	{
-		sort_order_mask |= LLInventoryFilter::SO_DATE;
-	}
-	else if (sort_type == "foldersalwaysbyname")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
-		}
-	}
-	else if (sort_type == "systemfolderstotop")
-	{
-		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
-		{
-			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-		else
-		{
-			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-		}
-	}
-
-	getActivePanel()->setSortOrder(sort_order_mask);
-	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+	getActivePanel()->setSortBy(userdata.asString());
+	gSavedSettings.setU32("InventorySortOrder", getActivePanel()->getSortOrder());
 }
+// [/SL:KB]
+//void LLPanelMainInventory::setSortBy(const LLSD& userdata)
+//{
+//	U32 sort_order_mask = getActivePanel()->getSortOrder();
+//	std::string sort_type = userdata.asString();
+//	if (sort_type == "name")
+//	{
+//		sort_order_mask &= ~LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "date")
+//	{
+//		sort_order_mask |= LLInventoryFilter::SO_DATE;
+//	}
+//	else if (sort_type == "foldersalwaysbyname")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//		}
+//	}
+//	else if (sort_type == "systemfolderstotop")
+//	{
+//		if ( sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP )
+//		{
+//			sort_order_mask &= ~LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//		else
+//		{
+//			sort_order_mask |= LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//		}
+//	}
+//
+//	getActivePanel()->setSortOrder(sort_order_mask);
+//	gSavedSettings.setU32("InventorySortOrder", sort_order_mask);
+//}
 
 // static
 BOOL LLPanelMainInventory::filtersVisible(void* user_data)
@@ -402,7 +525,11 @@ void LLPanelMainInventory::onClearSearch()
 	}
 
 	// re-open folders that were initially open in case filter was active
-	if (mActivePanel && (mFilterSubString.size() || initially_active))
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	std::string& strFilterSubString = mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0];
+	if (mActivePanel && (strFilterSubString.size() || initially_active))
+// [/SL:KB]
+//	if (mActivePanel && (mFilterSubString.size() || initially_active))
 	{
 		mSavedFolderState->setApply(TRUE);
 		mActivePanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);
@@ -410,7 +537,10 @@ void LLPanelMainInventory::onClearSearch()
 		mActivePanel->getRootFolder()->applyFunctorRecursively(opener);
 		mActivePanel->getRootFolder()->scrollToShowSelection();
 	}
-	mFilterSubString = "";
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	strFilterSubString.clear();
+// [/SL:KB]
+//	mFilterSubString = "";
 }
 
 void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
@@ -426,8 +556,12 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 
 	LLInventoryModelBackgroundFetch::instance().start();
 
-	mFilterSubString = search_string;
-	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
+//	mFilterSubString = search_string;
+//	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = search_string;
+	if (mActivePanel->getFilterSubString().empty() && search_string.empty())
+// [/SL:KB]
 	{
 			// current filter and new filter empty, do nothing
 			return;
@@ -441,7 +575,10 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 	}
 
 	// set new filter string
-	setFilterSubString(mFilterSubString);
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	setFilterSubString(search_string);
+// [/SL:KB]
+//	setFilterSubString(mFilterSubString);
 }
 
 
@@ -485,17 +622,78 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
  	return FALSE;
  }
 
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+LLInventoryPanel* LLPanelMainInventory::addNewPanel(S32 insert_at)
+{
+	static int s_cntPanel = 0;
+
+	LLInventoryPanel* pInvPanel = NULL;
+	if (!mSpareInvPanel)
+	{
+		pInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_main_inventory_newinvpanel.xml", this, LLInventoryPanel::child_registry_t::instance());
+		pInvPanel->setName(llformat("custom tab %d", ++s_cntPanel));
+		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+		pInvPanel->getFilter().markDefault();
+		pInvPanel->setSelectCallback(boost::bind(&LLPanelMainInventory::onSelectionChange, this, pInvPanel, _1, _2));
+	}
+	else
+	{
+		pInvPanel = mSpareInvPanel;
+		pInvPanel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::DEFAULT_SORT_ORDER));
+		pInvPanel->getFilter().resetDefault();
+		pInvPanel->getRootFolder()->closeAllFolders();
+		mSpareInvPanel = NULL;
+	}
+
+	mFilterTabs->addTabPanel(LLTabContainer::TabPanelParams()
+		.panel(pInvPanel)
+		.is_closable(true)
+		.insert_at((LLTabContainer::eInsertionPoint)insert_at)
+		.select_tab(false));	// Don't select the tab since onFilterSelected() will trigger before we inserted into mFilterSubStrings
+
+	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
+	S32 idxTab = mFilterTabs->getIndexForPanel(pInvPanel);
+	mFilterSubStrings.insert(mFilterSubStrings.begin() + idxTab, LLStringUtil::null);
+	
+	mFilterTabs->selectTabPanel(pInvPanel);
+
+	return pInvPanel;
+}
+
+S32 LLPanelMainInventory::getPanelCount() const
+{
+	return mFilterTabs->getTabCount();
+}
+// [/SL:KB]
+
 void LLPanelMainInventory::onFilterSelected()
 {
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	if ( (mFilterTabs->getTabCount() == mFilterTabs->getCurrentPanelIndex() + 1) && 
+		 ("New Inv Panel" == mFilterTabs->getCurrentPanel()->getName()) )
+	{
+		addNewPanel(LLTabContainer::LEFT_OF_CURRENT);
+	}
+// [/SL:KB]
+
 	// Find my index
-	mActivePanel = (LLInventoryPanel*)getChild<LLTabContainer>("inventory filter tabs")->getCurrentPanel();
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	mActivePanel = (LLInventoryPanel*)mFilterTabs->getCurrentPanel();
+	mActivePanelIndex = mFilterTabs->getCurrentPanelIndex();
+// [/SL:KB]
+//	mActivePanel = (LLInventoryPanel*)getChild<LLTabContainer>("inventory filter tabs")->getCurrentPanel();
 
 	if (!mActivePanel)
 	{
 		return;
 	}
 
-	setFilterSubString(mFilterSubString);
+//	setFilterSubString(mFilterSubString);
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	if (mFilterEditor)
+		mFilterEditor->setText(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
+	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
+// [/SL:KB]
 	LLInventoryFilter& filter = mActivePanel->getFilter();
 	LLFloaterInventoryFinder *finder = getFinder();
 	if (finder)
@@ -509,6 +707,26 @@ void LLPanelMainInventory::onFilterSelected()
 	}
 	setFilterTextFromFilter();
 }
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool& fDeletePanel)
+{
+	mFilterSubStrings.erase(mFilterSubStrings.begin() + idxTab);
+	llassert(mFilterSubStrings.size() == mFilterTabs->getTabCount() - 1);
+
+	if ( (gSavedSettings.getBOOL("InventoryReuseUserTab")) && (!mSpareInvPanel) )
+	{
+		mSpareInvPanel = dynamic_cast<LLInventoryPanel*>(mFilterTabs->getPanelByIndex(idxTab));
+		llassert(mSpareInvPanel);
+
+		fDeletePanel = false;
+	}
+	else
+	{
+		fDeletePanel = true;
+	}
+}
+// [/SL:KB]
 
 const std::string LLPanelMainInventory::getFilterSubString() 
 { 
@@ -559,10 +777,10 @@ void LLPanelMainInventory::setFocusFilterEditor()
 // virtual
 void LLPanelMainInventory::draw()
 {
-	if (mActivePanel && mFilterEditor)
-	{
-		mFilterEditor->setText(mFilterSubString);
-	}	
+//	if (mActivePanel && mFilterEditor)
+//	{
+//		mFilterEditor->setText(mFilterSubString);
+//	}	
 	if (mActivePanel && mResortActivePanel)
 	{
 		// EXP-756: Force resorting of the list the first time we draw the list: 
@@ -575,7 +793,7 @@ void LLPanelMainInventory::draw()
 		mResortActivePanel = false;
 	}
 	LLPanel::draw();
-	updateItemcountText();
+//	updateItemcountText();
 }
 
 void LLPanelMainInventory::updateItemcountText()
@@ -604,15 +822,35 @@ void LLPanelMainInventory::updateItemcountText()
 	}
 	else
 	{
-		text = getString("ItemcountUnknown");
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
+		text = getString("ItemcountUnknown", string_args);
+// [/SL:KB]
+//		text = getString("ItemcountUnknown");
 	}
 	
-    mCounterCtrl->setValue(text);
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
+	// NOTE: this is a rather bad hack since it usurps the floater's title (and assumes it will never change during its lifetime)
+	LLFloater* pFloater = getParentByType<LLFloater>();
+	if (pFloater)
+	{
+		if (mFloaterTitle.empty())
+			mFloaterTitle = pFloater->getTitle();
+		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), text.c_str()));
+	}
+	else
+	{
+		mCounterCtrl->setValue(text);
+	}
+// [/SL:KB]
+//    mCounterCtrl->setValue(text);
 }
 
 void LLPanelMainInventory::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (!sidepanel_inventory)
 	{
 		LL_WARNS() << "Could not find Inventory Panel in My Inventory floater" << LL_ENDL;
@@ -625,6 +863,9 @@ void LLPanelMainInventory::onFocusReceived()
 void LLPanelMainInventory::setFilterTextFromFilter() 
 { 
 	mFilterText = mActivePanel->getFilter().getFilterText(); 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-18 (Catznip-3.2)
+	updateItemcountText();
+// [/SL:KB]
 }
 
 void LLPanelMainInventory::toggleFindOptions()
@@ -960,7 +1201,11 @@ void LLFloaterInventoryFinder::selectNoTypes(void* user_data)
 void LLPanelMainInventory::initListCommandsHandlers()
 {
 	childSetAction("trash_btn", boost::bind(&LLPanelMainInventory::onTrashButtonClick, this));
-	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-01-14 (Catznip-3.2)
+	childSetAction("collapse_btn", boost::bind(&LLPanelMainInventory::closeAllFolders, this));
+	childSetAction("filter_btn", boost::bind(&LLPanelMainInventory::toggleFindOptions, this));
+// [/SL:KB]
+//	childSetAction("add_btn", boost::bind(&LLPanelMainInventory::onAddButtonClick, this));
 
 	mTrashButton = getChild<LLDragAndDropButton>("trash_btn");
 	mTrashButton->setDragAndDropHandler(boost::bind(&LLPanelMainInventory::handleDragAndDropToTrash, this
@@ -970,11 +1215,26 @@ void LLPanelMainInventory::initListCommandsHandlers()
 			));
 
 	mCommitCallbackRegistrar.add("Inventory.GearDefault.Custom.Action", boost::bind(&LLPanelMainInventory::onCustomAction, this, _2));
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mCommitCallbackRegistrar.add("Inventory.Sort.Folder", boost::bind(&LLPanelMainInventory::onChangeFolderSortOrder, this, _2));
+// [/SL:KB]
 	mEnableCallbackRegistrar.add("Inventory.GearDefault.Check", boost::bind(&LLPanelMainInventory::isActionChecked, this, _2));
 	mEnableCallbackRegistrar.add("Inventory.GearDefault.Enable", boost::bind(&LLPanelMainInventory::isActionEnabled, this, _2));
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mEnableCallbackRegistrar.add("Inventory.Sort.CheckFolder", boost::bind(&LLPanelMainInventory::onCheckFolderSortOrder, this, _2));
+// [/SL:KB]
 	mMenuGearDefault = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_gear_default.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 	mGearMenuButton->setMenu(mMenuGearDefault);
-	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+	mMenuSort = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_sort.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	mSortMenuButton->setMenu(mMenuSort);
+// [/SL:KB]
+//	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
+	mMenuAdd = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_inventory_add.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+	mAddMenuButton->setMenu(mMenuAdd);
+	mAddMenuButton->setMouseDownCallback(boost::bind(&LLPanelMainInventory::setUploadCostIfNeeded, this));
+// [/SL:KB]
 
 	// Update the trash button when selected item(s) get worn or taken off.
 	LLOutfitObserver::instance().addCOFChangedCallback(boost::bind(&LLPanelMainInventory::updateListCommands, this));
@@ -987,32 +1247,32 @@ void LLPanelMainInventory::updateListCommands()
 	mTrashButton->setEnabled(trash_enabled);
 }
 
-void LLPanelMainInventory::onAddButtonClick()
-{
-// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
-// unless "Always show folders" is checked in the filter options.
-	bool recent_active = ("Recent Items" == mActivePanel->getName());
-	mMenuAdd->getChild<LLMenuItemGL>("New Folder")->setEnabled(!recent_active);
+//void LLPanelMainInventory::onAddButtonClick()
+//{
+//// Gray out the "New Folder" option when the Recent tab is active as new folders will not be displayed
+//// unless "Always show folders" is checked in the filter options.
+//	bool recent_active = ("Recent Items" == mActivePanel->getName());
+//	mMenuAdd->getChild<LLMenuItemGL>("New Folder")->setEnabled(!recent_active);
+//
+//	setUploadCostIfNeeded();
+//
+//	showActionMenu(mMenuAdd,"add_btn");
+//}
 
-	setUploadCostIfNeeded();
-
-	showActionMenu(mMenuAdd,"add_btn");
-}
-
-void LLPanelMainInventory::showActionMenu(LLMenuGL* menu, std::string spawning_view_name)
-{
-	if (menu)
-	{
-		menu->buildDrawLabels();
-		menu->updateParent(LLMenuGL::sMenuContainer);
-		LLView* spawning_view = getChild<LLView> (spawning_view_name);
-		S32 menu_x, menu_y;
-		//show menu in co-ordinates of panel
-		spawning_view->localPointToOtherView(0, spawning_view->getRect().getHeight(), &menu_x, &menu_y, this);
-		menu_y += menu->getRect().getHeight();
-		LLMenuGL::showPopup(this, menu, menu_x, menu_y);
-	}
-}
+//void LLPanelMainInventory::showActionMenu(LLMenuGL* menu, std::string spawning_view_name)
+//{
+//	if (menu)
+//	{
+//		menu->buildDrawLabels();
+//		menu->updateParent(LLMenuGL::sMenuContainer);
+//		LLView* spawning_view = getChild<LLView> (spawning_view_name);
+//		S32 menu_x, menu_y;
+//		//show menu in co-ordinates of panel
+//		spawning_view->localPointToOtherView(0, spawning_view->getRect().getHeight(), &menu_x, &menu_y, this);
+//		menu_y += menu->getRect().getHeight();
+//		LLMenuGL::showPopup(this, menu, menu_x, menu_y);
+//	}
+//}
 
 void LLPanelMainInventory::onTrashButtonClick()
 {
@@ -1025,21 +1285,28 @@ void LLPanelMainInventory::onClipboardAction(const LLSD& userdata)
 	getActivePanel()->doToSelected(command_name);
 }
 
-void LLPanelMainInventory::saveTexture(const LLSD& userdata)
+//void LLPanelMainInventory::saveTexture(const LLSD& userdata)
+//{
+//	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	if (!current_item)
+//	{
+//		return;
+//	}
+//	
+//	const LLUUID& item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
+//	LLPreviewTexture* preview_texture = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item_id), TAKE_FOCUS_YES);
+//	if (preview_texture)
+//	{
+//		preview_texture->openToSave();
+//	}
+//}
+
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+void LLPanelMainInventory::onChangeFolderSortOrder(const LLSD& sdParam)
 {
-	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-	if (!current_item)
-	{
-		return;
-	}
-	
-	const LLUUID& item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
-	LLPreviewTexture* preview_texture = LLFloaterReg::showTypedInstance<LLPreviewTexture>("preview_texture", LLSD(item_id), TAKE_FOCUS_YES);
-	if (preview_texture)
-	{
-		preview_texture->openToSave();
-	}
+	setSortBy(sdParam);
 }
+// [/SL:KB]
 
 void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 {
@@ -1051,26 +1318,26 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 	{
 		newWindow();
 	}
-	if (command_name == "sort_by_name")
-	{
-		const LLSD arg = "name";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_by_recent")
-	{
-		const LLSD arg = "date";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_folders_by_name")
-	{
-		const LLSD arg = "foldersalwaysbyname";
-		setSortBy(arg);
-	}
-	if (command_name == "sort_system_folders_to_top")
-	{
-		const LLSD arg = "systemfolderstotop";
-		setSortBy(arg);
-	}
+//	if (command_name == "sort_by_name")
+//	{
+//		const LLSD arg = "name";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_by_recent")
+//	{
+//		const LLSD arg = "date";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_folders_by_name")
+//	{
+//		const LLSD arg = "foldersalwaysbyname";
+//		setSortBy(arg);
+//	}
+//	if (command_name == "sort_system_folders_to_top")
+//	{
+//		const LLSD arg = "systemfolderstotop";
+//		setSortBy(arg);
+//	}
 	if (command_name == "show_filters")
 	{
 		toggleFindOptions();
@@ -1093,10 +1360,10 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		const std::string notification = "ConfirmEmptyLostAndFound";
 		gInventory.emptyFolderType(notification, LLFolderType::FT_LOST_AND_FOUND);
 	}
-	if (command_name == "save_texture")
-	{
-		saveTexture(userdata);
-	}
+//	if (command_name == "save_texture")
+//	{
+//		saveTexture(userdata);
+//	}
 	// This doesn't currently work, since the viewer can't change an assetID an item.
 	if (command_name == "regenerate_link")
 	{
@@ -1114,52 +1381,66 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 		}
 		active_panel->setSelection(item_id, TAKE_FOCUS_NO);
 	}
-	if (command_name == "find_original")
-	{
-		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-		if (!current_item)
-		{
-			return;
-		}
-		static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->performAction(getActivePanel()->getModel(), "goto");
-	}
+//	if (command_name == "find_original")
+//	{
+//		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//		if (!current_item)
+//		{
+//			return;
+//		}
+//		static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->performAction(getActivePanel()->getModel(), "goto");
+//	}
 
-	if (command_name == "find_links")
-	{
-		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-		if (!current_item)
-		{
-			return;
-		}
-		const LLUUID& item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
-		const std::string &item_name = current_item->getViewModelItem()->getName();
-		mFilterSubString = item_name;
-		LLInventoryFilter &filter = mActivePanel->getFilter();
-		filter.setFilterSubString(item_name);
-		mFilterEditor->setText(item_name);
+//	if (command_name == "find_links")
+// 	{
+//		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//		if (!current_item)
+//		{
+//			return;
+//		}
+//		const LLUUID& item_id = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getUUID();
+//		const std::string &item_name = current_item->getViewModelItem()->getName();
+//		mFilterSubString = item_name;
+//		LLInventoryFilter &filter = mActivePanel->getFilter();
+//		filter.setFilterSubString(item_name);
+//		mFilterEditor->setText(item_name);
+//
+//		mFilterEditor->setFocus(TRUE);
+//		filter.setFilterUUID(item_id);
+//		filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+//		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+// 	}
 
-		mFilterEditor->setFocus(TRUE);
-		filter.setFilterUUID(item_id);
-		filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-		filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
+	if (command_name == "filter_string_per_tab")
+	{
+		mFilterSubStringPerTab = !mFilterSubStringPerTab;
+		gSavedSettings.setBOOL("InventoryFilterStringPerTab", mFilterSubStringPerTab);
 	}
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	else if (command_name == "show_received_items_panel")
+	{
+		gSavedSettings.setBOOL("ShowReceivedItemsPanel", !gSavedSettings.getBOOL("ShowReceivedItemsPanel"));
+	}
+// [/SL:KB]
 }
 
-bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
-{
-	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-	if (current_item) 
-	{
-		LLViewerInventoryItem *inv_item = dynamic_cast<LLViewerInventoryItem*>(static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getInventoryObject());
-		if(inv_item)
-		{
-			bool can_save = inv_item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
-			LLInventoryType::EType curr_type = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getInventoryType();
-			return can_save && (curr_type == LLInventoryType::IT_TEXTURE || curr_type == LLInventoryType::IT_SNAPSHOT);
-		}
-	}
-	return false;
-}
+//bool LLPanelMainInventory::isSaveTextureEnabled(const LLSD& userdata)
+//{
+//	LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//	if (current_item) 
+//	{
+//		LLViewerInventoryItem *inv_item = dynamic_cast<LLViewerInventoryItem*>(static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getInventoryObject());
+//		if(inv_item)
+//		{
+//			bool can_save = inv_item->checkPermissionsSet(PERM_ITEM_UNRESTRICTED);
+//			LLInventoryType::EType curr_type = static_cast<LLFolderViewModelItemInventory*>(current_item->getViewModelItem())->getInventoryType();
+//			return can_save && (curr_type == LLInventoryType::IT_TEXTURE || curr_type == LLInventoryType::IT_SNAPSHOT);
+//		}
+//	}
+//	return false;
+//}
 
 BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 {
@@ -1168,10 +1449,10 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 	{
 		return getActivePanel()->isSelectionRemovable();
 	}
-	if (command_name == "save_texture")
-	{
-		return isSaveTextureEnabled(userdata);
-	}
+//	if (command_name == "save_texture")
+//	{
+//		return isSaveTextureEnabled(userdata);
+//	}
 	if (command_name == "find_original")
 	{
 		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
@@ -1214,40 +1495,70 @@ BOOL LLPanelMainInventory::isActionEnabled(const LLSD& userdata)
 		return FALSE;
 	}
 
-	if (command_name == "share")
-	{
-		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
-		if (!current_item) return FALSE;
-		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-		return parent ? parent->canShare() : FALSE;
-	}
+//	if (command_name == "share")
+//	{
+//		LLFolderViewItem* current_item = getActivePanel()->getRootFolder()->getCurSelectedItem();
+//		if (!current_item) return FALSE;
+//		LLSidepanelInventory* parent = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//		return parent ? parent->canShare() : FALSE;
+//	}
 
 	return TRUE;
 }
 
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-18 (Catznip-3.3)
+bool LLPanelMainInventory::onCheckFolderSortOrder(const LLSD& sdParam)
+{
+	U32 nSortOderMask = getActivePanel()->getSortOrder();
+	const std::string strParam = sdParam.asString();
+	if ("name" == strParam)
+		return ~nSortOderMask & LLInventoryFilter::SO_DATE;
+	else if ("date" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_DATE;
+	else if ("foldersalwaysbyname" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
+	else if ("systemfolderstotop" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+	return false;
+}
+// [/SL:KB]
+
 BOOL LLPanelMainInventory::isActionChecked(const LLSD& userdata)
 {
-	U32 sort_order_mask = getActivePanel()->getSortOrder();
+// [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	const std::string command_name = userdata.asString();
-	if (command_name == "sort_by_name")
+	if (command_name == "filter_string_per_tab")
 	{
-		return ~sort_order_mask & LLInventoryFilter::SO_DATE;
+		return mFilterSubStringPerTab;
 	}
-
-	if (command_name == "sort_by_recent")
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	else if (command_name == "show_received_items_panel")
 	{
-		return sort_order_mask & LLInventoryFilter::SO_DATE;
+		return gSavedSettings.getBOOL("ShowReceivedItemsPanel");
 	}
-
-	if (command_name == "sort_folders_by_name")
-	{
-		return sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
-	}
-
-	if (command_name == "sort_system_folders_to_top")
-	{
-		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
-	}
+// [/SL:KB]
+//	U32 sort_order_mask = getActivePanel()->getSortOrder();
+//	const std::string command_name = userdata.asString();
+//	if (command_name == "sort_by_name")
+//	{
+//		return ~sort_order_mask & LLInventoryFilter::SO_DATE;
+//	}
+//
+//	if (command_name == "sort_by_recent")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_DATE;
+//	}
+//
+//	if (command_name == "sort_folders_by_name")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_FOLDERS_BY_NAME;
+//	}
+//
+//	if (command_name == "sort_system_folders_to_top")
+//	{
+//		return sort_order_mask & LLInventoryFilter::SO_SYSTEM_FOLDERS_TO_TOP;
+//	}
 
 	return FALSE;
 }

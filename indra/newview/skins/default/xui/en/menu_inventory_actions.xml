@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ layout="topleft"
+ visible="false"
+ name="Inventory Actions">
+    <!-- Gestures -->
+    <menu_item_call
+     label="Activate"
+     layout="topleft"
+     name="activate">
+        <on_click
+         function="Inventory.Action"
+         parameter="activate" />
+    </menu_item_call>
+    <menu_item_call
+     label="Deactivate"
+     layout="topleft"
+     name="deactivate">
+        <on_click
+         function="Inventory.Action"
+         parameter="deactivate" />
+    </menu_item_call>
+    <!-- General -->
+    <menu_item_call
+     label="Open"
+     layout="topleft"
+     name="open">
+        <on_click
+         function="Inventory.Action"
+         parameter="open" />
+    </menu_item_call>
+    <!-- Animations -->
+    <menu_item_call
+     label="Play Inworld"
+     layout="topleft"
+     name="playworld">
+        <on_click
+         function="Inventory.Action"
+         parameter="playworld" />
+    </menu_item_call>
+    <menu_item_call
+     label="Play Locally"
+     layout="topleft"
+     name="playlocal">
+        <on_click
+         function="Inventory.Action"
+         parameter="playlocal" />
+    </menu_item_call>
+    <!-- Clothing, body parts and attachments -->
+    <menu_item_call
+     label="Wear"
+     layout="topleft"
+     name="wear">
+        <on_click
+         function="Inventory.Action"
+         parameter="wear" />
+    </menu_item_call>
+    <menu_item_call
+     label="Attach"
+     layout="topleft"
+     name="attach">
+        <on_click
+         function="Inventory.Action"
+         parameter="wear" />
+    </menu_item_call>
+    <menu_item_call
+     label="Add"
+     layout="topleft"
+     name="wear_add">
+        <on_click
+         function="Inventory.Action"
+         parameter="wear_add" />
+    </menu_item_call>
+    <menu_item_call
+     label="Take Off"
+     layout="topleft"
+     name="take_off">
+        <on_click
+         function="Inventory.Action"
+         parameter="take_off" />
+    </menu_item_call>
+    <menu_item_call
+     label="Detach"
+     layout="topleft"
+     name="detach">
+        <on_click
+         function="Inventory.Action"
+         parameter="detach" />
+    </menu_item_call>
+    <menu_item_call
+     label="Edit"
+     layout="topleft"
+     name="edit">
+        <on_click
+         function="Inventory.Action"
+         parameter="edit" />
+    </menu_item_call>
+    <!-- Landmarks (open teleports so we need both options custom) -->
+    <menu_item_call
+     label="Teleport"
+     layout="topleft"
+     name="teleport">
+        <on_click
+         function="Inventory.Action"
+         parameter="teleport" />
+    </menu_item_call>
+    <menu_item_call
+     label="About Landmark"
+     layout="topleft"
+     name="about">
+        <on_click
+         function="Inventory.Action"
+         parameter="about" />
+    </menu_item_call>
+    <!-- Textures and snapshots -->
+    <menu_item_call
+     label="Save As"
+     layout="topleft"
+     name="save_as">
+        <on_click
+         function="Inventory.Action"
+         parameter="save_as" />
+    </menu_item_call>
+    <menu_item_separator />
+    <menu_item_call
+     label="Find Original"
+     layout="topleft"
+     name="find_original">
+        <on_click
+         function="Inventory.Action"
+         parameter="goto" />
+    </menu_item_call>
+    <menu_item_call
+     label="Find All Links"
+     layout="topleft"
+     name="find_links">
+        <on_click
+         function="Inventory.Action"
+         parameter="find_links" />
+    </menu_item_call>
+    <menu_item_call
+     label="Properties"
+     layout="topleft"
+     name="properties">
+        <on_click
+         function="Inventory.Action"
+         parameter="properties" />
+    </menu_item_call>
+</toggleable_menu>
