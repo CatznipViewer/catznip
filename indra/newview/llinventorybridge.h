@@ -342,6 +342,10 @@ protected:
 	BOOL checkFolderForContentsOfType(LLInventoryModel* model, LLInventoryCollectFunctor& typeToCheck);
 
 	void modifyOutfit(BOOL append);
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	void wearItems();
+	static void wearItemsFinal(const LLUUID& idFolder);
+// [/SL:KB]
 	void determineFolderType();
 
 	void dropToFavorites(LLInventoryItem* inv_item);
@@ -482,6 +486,9 @@ public:
 				   U32 flags);
 	virtual LLUIImagePtr	getIcon() const;
 	virtual void			performAction(LLInventoryModel* model, std::string action);
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void            performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
+// [/SL:KB]
 	virtual void			openItem();
 	virtual std::string getLabelSuffix() const;
 	virtual void			buildContextMenu(LLMenuGL& menu, U32 flags);
@@ -514,6 +521,9 @@ public:
 					 LLWearableType::EType wearable_type);
 	virtual LLUIImagePtr getIcon() const;
 	virtual void	performAction(LLInventoryModel* model, std::string action);
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void    performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
+// [/SL:KB]
 	virtual void	openItem();
 	virtual void	buildContextMenu(LLMenuGL& menu, U32 flags);
 	virtual std::string getLabelSuffix() const;

@@ -691,6 +691,14 @@ void LLTaskInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("Task Open"));
 	}
 	items.push_back(std::string("Task Properties"));
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
+	// If multiple items are selected, only disable properties if we're not showing them in a multi-floater
+	if ( ((flags & FIRST_SELECTED_ITEM) == 0) && (!gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
+	{
+		disabled_items.push_back(std::string("Task Properties"));
+	}
+// [/SL:KB]
+
 	if(isItemRenameable())
 	{
 		items.push_back(std::string("Task Rename"));
