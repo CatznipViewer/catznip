@@ -108,7 +108,10 @@
 #include "llkeythrottle.h"
 #include "llgroupactions.h"
 #include "llagentui.h"
-#include "llpanelblockedlist.h"
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+#include "llfloaterblocked.h"
+// [/SL:KB]
+//#include "llpanelblockedlist.h"
 #include "llpanelplaceprofile.h"
 #include "llviewerregion.h"
 #include "llfloaterregionrestarting.h"
@@ -1401,7 +1404,10 @@ void inventory_offer_mute_callback(const LLUUID& blocked_id,
 	LLMute mute(blocked_id, full_name, mute_type);
 	if (LLMuteList::getInstance()->add(mute))
 	{
-		LLPanelBlockedList::showPanelAndSelect(blocked_id);
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+		LLFloaterBlocked::showMuteAndSelect(blocked_id);
+// [/SL:KB]
+//		LLPanelBlockedList::showPanelAndSelect(blocked_id);
 	}
 
 	// purge the message queue of any previously queued inventory offers from the same source.
@@ -7124,9 +7130,12 @@ bool callback_script_dialog(const LLSD& notification, const LLSD& response)
 		LLMute mute(object_id, object_name, LLMute::OBJECT);
 		if (LLMuteList::getInstance()->add(mute))
 		{
-			// This call opens the sidebar, displays the block list, and highlights the newly blocked
-			// object in the list so the user can see that their block click has taken effect.
-			LLPanelBlockedList::showPanelAndSelect(object_id);
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+			LLFloaterBlocked::showMuteAndSelect(object_id);
+// [/SL:KB]
+//			// This call opens the sidebar, displays the block list, and highlights the newly blocked
+//			// object in the list so the user can see that their block click has taken effect.
+//			LLPanelBlockedList::showPanelAndSelect(object_id);
 		}
 	}
 
