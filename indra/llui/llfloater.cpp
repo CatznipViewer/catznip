@@ -257,6 +257,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mMinimized(FALSE),
 	mForeground(FALSE),
 	mFirstLook(TRUE),
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	mButtonsVisible(true),
+// [/SL:KB]
 	mButtonScale(1.0f),
 	mAutoFocus(TRUE), // automatically take focus when opened
 	mCanDock(false),
@@ -1089,6 +1092,16 @@ std::string LLFloater::getShortTitle() const
 		return mShortTitle;
 	}
 }
+
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+void LLFloater::setTitleVisible(BOOL visible)
+{
+	if (mDragHandle)
+	{
+		mDragHandle->setTitleVisible(visible);
+	}
+}
+// [/SL:KB]
 
 BOOL LLFloater::canSnapTo(const LLView* other_view)
 {
@@ -1980,6 +1993,15 @@ void LLFloater::updateTransparency(ETypeTransparency transparency_type)
 	updateTransparency(this, transparency_type);
 }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+void LLFloater::setButtonsVisible(bool visible)
+{
+	mButtonsVisible = visible;
+
+	updateTitleButtons();
+}
+// [/SL:KB]
+
 void	LLFloater::setCanMinimize(BOOL can_minimize)
 {
 	// if removing minimize/restore button programmatically,
@@ -2072,7 +2094,10 @@ void LLFloater::updateTitleButtons()
 
 		mButtons[i]->setEnabled(enabled);
 
-		if (enabled)
+//		if (enabled)
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+		if ( (enabled) && (mButtonsVisible) )
+// [/SL:KB]
 		{
 			button_count++;
 
