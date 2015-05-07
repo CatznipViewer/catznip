@@ -2986,6 +2986,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>DeclineTaskOfferToTrash</key>
+    <map>
+      <key>Comment</key>
+      <string>Accept inventory offers from objects into the trash when declining</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
   <key>DefaultBlankNormalTexture</key>
   <map>
     <key>Comment</key>
@@ -4767,6 +4778,17 @@
       <string>U32</string>
       <key>Value</key>
       <integer>200</integer>
+    </map>
+    <key>InventoryShowItemClearsFilter</key>
+    <map>
+    	<key>Comment</key>
+    	<string>Clear the current inventory filter whenever the viewer is asked to show an inventory item (e.g. "Find Original") that is currently filtered; otherwise, a new inventory floater will be created</string>
+    	<key>Persist</key>
+    	<integer>1</integer>
+    	<key>Type</key>
+    	<string>Boolean</string>
+    	<key>Value</key>
+    	<boolean>1</boolean>
     </map>
     <key>InventorySortOrder</key>
     <map>

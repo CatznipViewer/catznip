@@ -55,8 +55,11 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 void show_item_profile(const LLUUID& item_uuid);
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+void show_item(const LLUUID& idItem);
+// [/SL:KB]
 void show_item_original(const LLUUID& item_uuid);
-void reset_inventory_filter();
+//void reset_inventory_filter();
 
 void rename_category(LLInventoryModel* model, const LLUUID& cat_id, const std::string& new_name);
 

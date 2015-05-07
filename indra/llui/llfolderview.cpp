@@ -1334,6 +1334,14 @@ BOOL LLFolderView::handleMouseDown( S32 x, S32 y, MASK mask )
 
 BOOL LLFolderView::search(LLFolderViewItem* first_item, const std::string &search_string, BOOL backward)
 {
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-05-29 (Catznip-3.4)
+	// It's possible that "first_item->getVisible() == false" in which case we'd end up in an eternal loop further down
+	if ( (first_item) && (!first_item->getVisible()) )
+	{
+		first_item = NULL;
+	}
+// [/SL:KB]
+
 	// get first selected item
 	LLFolderViewItem* search_item = first_item;
 
