@@ -67,9 +67,12 @@ class LLFilePicker
 	friend class LLDirPicker;
 	friend void chooser_responder(GtkWidget *, gint, gpointer);
 #endif // LL_GTK
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	friend class LLFilePickerThread;
+// [/SL:KB]
 public:
-	// calling this before main() is undefined
-	static LLFilePicker& instance( void ) { return sInstance; }
+//	// calling this before main() is undefined
+//	static LLFilePicker& instance( void ) { return sInstance; }
 
 	enum ELoadFilter
 	{
@@ -109,14 +112,39 @@ public:
 		FFSAVE_PNG = 13,
 		FFSAVE_JPEG = 14,
 		FFSAVE_SCRIPT = 15,
-		FFSAVE_TGAPNG = 16
+		FFSAVE_TGAPNG = 16,
+// [SL:KB] - Patch: Inventory-SaveTextureFormat | Checked: 2012-07-29 (Catznip-3.3)
+#ifdef LL_WINDOWS
+		FFSAVE_IMAGES = 20
+#endif // LL_WINDOWS
+// [/SL:KB]
 	};
 
 	// open the dialog. This is a modal operation
-	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
-	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
-	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+protected:
+	BOOL getSaveFile(ESaveFilter filter, const std::string& filename, bool blocking);
+	BOOL getOpenFile(ELoadFilter filter, bool blocking);
+	BOOL getMultipleOpenFiles(ELoadFilter filter, bool blocking);
+public:
+	typedef boost::function<void(const std::string&)> picker_single_callback_t;
+	typedef boost::function<void(const std::vector<std::string>&)> picker_multi_callback_t;
 
+	static void getSaveFile(ESaveFilter filter, const std::string& filename, const picker_single_callback_t& cb);
+	static void getOpenFile(ELoadFilter filter, const picker_single_callback_t& cb);
+	static void getMultipleOpenFiles(ELoadFilter filter, const picker_multi_callback_t& cb);
+
+	static const std::string& getExtension(ESaveFilter filter);
+	static bool               hasExtension(ESaveFilter filter);
+// [/SL:KB]
+//	BOOL getSaveFile( ESaveFilter filter = FFSAVE_ALL, const std::string& filename = LLStringUtil::null );
+//	BOOL getOpenFile( ELoadFilter filter = FFLOAD_ALL, bool blocking = true  );
+//	BOOL getMultipleOpenFiles( ELoadFilter filter = FFLOAD_ALL );
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	// We refactored the entire class to work exclusively with callbacks so there isn't any need for outside access to these functions
+protected:
+// [/SL:KB]
 	// Get the filename(s) found. getFirstFile() sets the pointer to
 	// the start of the structure and allows the start of iteration.
 	const std::string getFirstFile();
@@ -184,7 +212,11 @@ private:
 	S32 mCurrentFile;
 	bool mLocked;
 
-	static LLFilePicker sInstance;
+//	static LLFilePicker sInstance;
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-09-25 (Catznip-3.3)
+	static std::map<ESaveFilter, std::string> sSaveFilterExtensions;
+// [/SL:KB]
 	
 protected:
 #if LL_GTK
@@ -198,6 +230,10 @@ public:
 	~LLFilePicker();
 };
 
-const std::string upload_pick(void* data);
+//const std::string upload_pick(void* data);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void upload_pick(LLFilePicker::ELoadFilter filter);
+void upload_pick_callback(LLFilePicker::ELoadFilter filter, const std::string& filename);
+// [/SL:KB]
 
 #endif

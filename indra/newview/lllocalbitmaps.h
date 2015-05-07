@@ -118,7 +118,10 @@ class LLLocalBitmapMgr
 
 	public:
 		static void			cleanupClass();
-		static bool         addUnit();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		static bool         addUnit(const std::string& filename);
+// [/SL:KB]
+//		static bool         addUnit();
 		static void         delUnit(LLUUID tracking_id);
 		static bool 		checkTextureDimensions(std::string filename);
 

@@ -1,0 +1,37 @@
+[Settings/Misc]
+- added   : "InspectNearbyRemoteObject" setting to show the object inspector for "objectim" app URLs for nearby objects
+    -> affects plain text chat where llOwnerSay(), llSay() and llInstantMessage() chat from scripts always opens the "remote object inspector" by default
+- added   : "Render Glow" graphics preferences checkbox	
+- added   : "RenderDrawPoolInvisible" and "RenderDrawPoolInvisibleDeferred" to toggle rendering of invisiprims
+    -> "RenderDrawPoolInvisibleDeferred" is tentative since it causes numerous graphical glicthes
+- added   : Xbox 360 joystick preset to the "Joystick configuration" floater
+- added   : "DebugTimeMessageDecoding" setting to aid with viewer stalling or inventory fetching problems
+- changed : [CATZ-1] Remember last used debug setting (per session only)
+- changed : preferences panel clean-up
+    -> sound
+    -> move
+    -> setup
+- changed : draw distance minimum to 32m with increments of 32m (previously 8m)	
+- changed : raise the minimum LOD from 0.0 to 0.125
+- changed : decrease the maximum bandwidth from 10,000 to 3,000
+- changed : never enable texture compression on cards with 512Mb VRAM or less by default
+- changed : don't show the destination guide on first run
+- fixed   : "Play Inworld" doesn't audibly play sound when "Play sound from gestures" is unchecked
+- fixed   : remote object inspector isn't passed any parameters for object IMs
+- fixed   : llOwnerSay from objects outside draw distance shows 0,0,0 for the object coordinates on the remote object inspector
+- fixed   : radio group preferences settings don't work properly when driven by boolean typed settings
+- fixed   : enabling QAMode and disabling WatchDog on debug builds shouldn't persist to settings.xml
+
+[Settings/Snapshots]
+- added   : customization of the snapshot name ("SnapshotLocalName" setting)
+    -> %d - date (YYYYMMDD)
+       %t - time (HHmm)
+       %r - region name
+       %p - parcel name
+       %c - image counter
+- added   : "SnapshotLocalPath" setting to control where snapshots are saved to
+    -> "bmp" and "png" as file type options to the texture "Save As" file picker
+    -> "Save As" preview button (or inventory context menu option) will show a file-picker with all three filetypes on Windows
+    -> on non-Windows platforms it will show a file-picker for the last saved file format
+- changed : re-added "Save As" option when saving snapshots locally
+- fixed   : file picker dialogs block the viewer's main thread
