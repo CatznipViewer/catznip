@@ -1991,19 +1991,19 @@ Intenta iniciar sesión de nuevo en unos instantes.
 		Este residente tiene activado &apos;No molestar&apos; y verá tu mensaje más tarde.
 	</string>
 	<string name="MuteByName">
-		(Por el nombre)
+		Por el nombre
 	</string>
 	<string name="MuteAgent">
-		(Residente)
+		Residente
 	</string>
 	<string name="MuteObject">
-		(Objeto)
+		Objeto
 	</string>
 	<string name="MuteGroup">
-		(Grupo)
+		Grupo
 	</string>
 	<string name="MuteExternal">
-		(Externo)
+		Externo
 	</string>
 	<string name="RegionNoCovenant">
 		No se ha aportado un contrato para este estado.
