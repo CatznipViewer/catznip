@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ follows="all"
+ height="400"
+ label="Search"
+ layout="topleft"
+ name="panel_places_search"
+ width="313">
+    <panel
+     class="panel_places_search"
+     follows="all"
+     height="400"
+     layout="topleft"
+     left="0"
+     name="search_panel"
+     top="0"
+     width="313">
+        <panel.string
+         name="not_found">
+            No results for &apos;[TEXT]&apos;
+        </panel.string>
+        <panel.string
+         name="no_results">
+            No results
+        </panel.string>
+        <panel.string
+         name="count_results">
+            [FIRST] - [LAST]
+        </panel.string>
+        <panel.string
+         name="searching">
+            Searching...
+        </panel.string>
+        <panel.string
+         name="all_categories">
+            All Categories
+        </panel.string>
+        <layout_stack
+         animate="false"
+         border_size="0"
+         follows="all"
+         height="375"
+         layout="topleft"
+         left="0"
+         name="search_stack"
+         orientation="vertical"
+         top="0"
+         width="313">
+            <layout_panel
+             auto_resize="false"
+             height="40"
+             layout="topleft"
+             name="search_options_panel"
+             width="313">
+                <combo_box
+                 follows="top|left"
+                 height="23"
+                 layout="topleft"
+                 left="5"
+                 left_pad="10"
+                 name="search_category"
+                 top="5" 
+                 width="140" />
+                <check_box
+                 height="16"
+                 label=""
+                 layout="topleft"
+                 left_pad="25"
+                 name="search_pg_check"
+                 top_delta="4"
+                 value="1"
+                 width="16" />
+                <icon
+                 follows="top|left"
+                 height="16"
+                 image_name="Parcel_PG_Dark"
+                 layout="topleft"
+                 left_pad="4"
+                 name="search_pg_icon"
+                 top_delta="-1"
+                 width="18" />
+                <check_box
+                 height="16"
+                 label=""
+                 layout="topleft"
+                 left_pad="8"
+                 name="search_mature_check"
+                 top_delta="1"
+                 value="1"
+                 width="16" />
+                <icon
+                 follows="top|left"
+                 height="16"
+                 image_name="Parcel_M_Dark"
+                 layout="topleft"
+                 left_pad="4"
+                 name="search_mature_icon"
+                 top_delta="-1"
+                 width="18" />
+                <check_box
+                 height="16"
+                 label=""
+                 layout="topleft"
+                 left_pad="8"
+                 name="search_adult_check"
+                 top_delta="1"
+                 value="1"
+                 width="16" />
+                <icon
+                 follows="top|left"
+                 height="16"
+                 image_name="Parcel_R_Dark"
+                 layout="topleft"
+                 left_pad="4"
+                 name="search_adult_icon"
+                 top_delta="-1"
+                 width="18" />
+
+                <view_border 
+                 bevel_style="in"
+                 follows="left|top|right" 
+                 height="1"
+                 left="5"
+                 layout="topleft"
+                 name="border"
+                 right="-5"
+                 top_pad="7"
+                 />
+	
+            </layout_panel>
+            <layout_panel
+             auto_resize="false"
+             height="148"
+             layout="topleft"
+             name="search_info_panel"
+             visible="false"
+             width="313">
+                <!-- This needs to match panel_parcel_info.xml -->
+                <panel
+                 class="panel_parcel_info"
+                 follows="all"
+                 height="148"
+                 layout="topleft"
+                 left="0"
+                 name="search_parcel"
+                 top="0"
+                 visible="true"
+                 width="313">
+                    <!-- Parcel numbers text -->
+                    <string
+                     name="area_traffic_text">
+                        Area: [AREA]m² - Traffic: [TRAFFIC]
+                    </string>
+                    <string
+                     name="area_sale_text">
+                        Area: [AREA]m² - For sale: [PRICE]
+                    </string>
+
+	                <!-- Currently set to 4:3 -->
+                    <texture_picker
+                     enabled="false"
+                     fallback_image="default_land_picture.j2c"
+                     follows="top|left"
+                     height="60"
+                     layout="topleft"
+                     left="10"
+                     name="parcel_snapshot"
+	                 show_label="false"
+                     top="5"
+                     width="80" />
+                    <text
+                     follows="top|left|right"
+                     font="SansSerifLarge"
+                     height="14"
+                     layout="topleft"
+                     left_pad="10"
+                     name="parcel_name"
+                     right="-10"
+                     text_color="white"
+                     top_delta="3"
+                     use_ellipses="true"
+                     value="Parcel name goes here"  />
+                    <icon
+                     follows="top|left"
+                     height="16"
+                     image_name="transparent.j2c"
+                     layout="topleft"
+                     left_delta="0"
+                     name="region_maturity"
+                     top_pad="4"
+                     width="18" />
+                    <text
+                     follows="top|left|right"
+                     height="14"
+                     layout="topleft"
+                     left_pad="5"
+                     name="parcel_location"
+                     right="-10"
+                     top_delta="3"
+                     use_ellipses="true"
+                     value="Region (128, 128, 20)" />
+                    <text
+                     follows="top|left|right"
+                     height="15"
+                     layout="topleft"
+                     left="100"
+                     name="parcel_numbers"
+                     right="-10"
+                     top_pad="4"
+                     value="Area: 4096m² - For sale: L$5,000,000" />
+                    <text_editor
+                     bg_readonly_color="Transparent"
+                     enabled="false" 
+                     follows="all"
+                     height="75"
+                     max_length="65536"
+                     left="10"
+                     text_color="LtGray"
+                     name="parcel_description"
+                     right="-10"
+                     top="70"
+                     word_wrap="true" />
+                </panel>
+            </layout_panel>
+            <layout_panel
+             auto_resize="auto"
+             height="187"
+             layout="topleft"
+             name="search_list_panel"
+             width="313">
+                <button
+                 enabled="false"
+                 follows="top|left"
+                 height="25"
+                 image_overlay="Arrow_Small_Left"
+                 image_overlay_alignment="left"
+                 label="Previous"
+                 layout="topleft"
+                 left="5"
+                 name="search_prev_btn"
+                 top="0"
+                 width="75" />
+                <text
+                 follows="top|left|right"
+                 halign="center"
+                 height="24"
+                 left="85"
+                 layout="topleft"
+                 name="search_results_label"
+                 right="-85"
+                 top_delta="-1"
+                 valign="center"
+                 value="No results" />
+                <button
+                 enabled="false"
+                 follows="top|right"
+                 height="25"
+                 image_overlay="Arrow_Small_Right"
+                 image_overlay_alignment="right"
+                 label="Next"
+                 layout="topleft"
+                 right="-5"
+                 name="search_next_btn"
+                 top_delta="1"
+                 width="75" />
+
+                <scroll_list
+                 draw_heading="true" 
+                 follows="all"
+                 height="159"
+                 layout="topleft"
+                 left="0"
+                 name="search_results"
+                 top_pad="3"
+                 width="313">
+                  <columns
+                   label="Name"
+                   name="name" />
+                  <columns
+                   label="Traffic"
+                   name="traffic"
+                   width="50" />
+                </scroll_list>
+            </layout_panel>
+        </layout_stack>
+ 
+        <panel
+         background_visible="false"
+         bottom="0"
+         follows="left|right|bottom"
+         height="25"
+         label="bottom_panel"
+         layout="bottomleft"
+         left="0"
+         name="bottom_panel"
+         width="313">
+            <icon
+             follows="bottom|left|right"
+             height="25"
+             image_name="Toolbar_Left_Off"
+             layout="topleft"
+             left="0"
+             name="dummy_icon"
+             top="0"
+             width="126"
+            />
+            <button
+             follows="bottom|right"
+             height="25"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Move_Run_Off"
+             image_overlay_alignment="left"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             layout="topleft"
+             label="Teleport"
+             left_pad="1"
+             name="teleport_btn"
+             tool_tip="Teleport to the selected area"
+             width="84" />
+            <button
+             follows="bottom|right"
+             height="25"
+             image_bottom_pad="1"
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Command_Map_Icon"
+             image_overlay_alignment="left"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             layout="topleft"
+             label="Map"
+             left_pad="1"
+             name="map_btn"
+             pad_left="5"
+             tool_tip="Show the corresponding area on the World Map"
+             width="69" />
+            <button
+             follows="bottom|right"
+             height="25"
+             image_hover_unselected="Toolbar_Right_Over"
+             image_overlay="Web_Profile_Off"
+             image_selected="Toolbar_Right_Selected"
+             image_unselected="Toolbar_Right_Off"
+             layout="topleft"
+             left_pad="1"
+             name="profile_btn"
+             tool_tip="Show place profile"
+             width="31" />
+        </panel>
+    </panel>
+
+</panel>
