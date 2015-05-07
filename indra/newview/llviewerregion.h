@@ -69,6 +69,9 @@ class LLHost;
 class LLBBox;
 class LLSpatialGroup;
 class LLDrawable;
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+class LLViewerTexture;
+// [/SL:KB]
 class LLViewerRegionImpl;
 class LLViewerOctreeGroup;
 class LLVOCachePartition;
@@ -135,7 +138,12 @@ public:
 	inline BOOL getRestrictPushObject()		const;
 	inline BOOL getReleaseNotesRequested()		const;
 
-	bool isAlive(); // can become false if circuit disconnects
+//	bool isAlive(); // can become false if circuit disconnects
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	bool isAlive() const; // can become false if circuit disconnects
+
+	LLViewerTexture* getWorldMapTile() const;
+// [/SL:KB]
 
 	void setWaterHeight(F32 water_level);
 	F32 getWaterHeight() const;
@@ -518,6 +526,10 @@ private:
 
 	typedef std::map<U32, std::vector<U32> > orphan_list_t;
 	orphan_list_t mOrphanMap;
+
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-07-26 (Catznip-3.3)
+	mutable LLPointer<LLViewerTexture>		mWorldMapTile;
+// [/SL:KB]
 
 	class CacheMissItem
 	{
