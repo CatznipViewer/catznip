@@ -1097,7 +1097,7 @@ Możesz ustawić nowe miejsce startu.
 	</notification>
 	<notification name="ClothingLoading">
 		Twoje ubranie wciąż się ładuje.
-Możesz normalnie używać [SECOND_LIFE], inni użytkownicy będą Cię widzieli poprawnie.
+Możesz normalnie używać [APP_NAME], inni użytkownicy będą Cię widzieli poprawnie.
 		<form name="form">
 			<ignore name="ignore" text="Ładowanie ubrań nadal trwa"/>
 		</form>

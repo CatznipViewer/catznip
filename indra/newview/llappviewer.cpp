@@ -365,11 +365,18 @@ BOOL gLogoutInProgress = FALSE;
 // Internal globals... that should be removed.
 static std::string gArgs;
 const int MAX_MARKER_LENGTH = 1024;
-const std::string MARKER_FILE_NAME("SecondLife.exec_marker");
-const std::string START_MARKER_FILE_NAME("SecondLife.start_marker");
-const std::string ERROR_MARKER_FILE_NAME("SecondLife.error_marker");
-const std::string LLERROR_MARKER_FILE_NAME("SecondLife.llerror_marker");
-const std::string LOGOUT_MARKER_FILE_NAME("SecondLife.logout_marker");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+const std::string MARKER_FILE_NAME("Catznip.exec_marker");
+const std::string START_MARKER_FILE_NAME("Catznip.start_marker");
+const std::string ERROR_MARKER_FILE_NAME("Catznip.error_marker");
+const std::string LLERROR_MARKER_FILE_NAME("Catznip.llerror_marker");
+const std::string LOGOUT_MARKER_FILE_NAME("Catznip.logout_marker");
+// [/SL:KB]
+//const std::string MARKER_FILE_NAME("SecondLife.exec_marker"); const
+//std::string START_MARKER_FILE_NAME("SecondLife.start_marker"); const
+//std::string ERROR_MARKER_FILE_NAME("SecondLife.error_marker"); const
+//std::string LLERROR_MARKER_FILE_NAME("SecondLife.llerror_marker"); const
+//std::string LOGOUT_MARKER_FILE_NAME("SecondLife.logout_marker");
 static BOOL gDoDisconnect = FALSE;
 static std::string gLaunchFileOnQuit;
 
@@ -2352,13 +2359,19 @@ void LLAppViewer::initLoggingAndGetLastDuration()
 	//LLError::setTimeFunction(getRuntime);
 
 	// Remove the last ".old" log file.
-	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
-							     "SecondLife.old");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.old");
+// [/SL:KB]
+//	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+//							     "SecondLife.old");
 	LLFile::remove(old_log_file);
 
 	// Get name of the log file
-	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
-							     "SecondLife.log");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.log");
+// [/SL:KB]
+//	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+//							     "SecondLife.log");
  	/*
 	 * Before touching any log files, compute the duration of the last run
 	 * by comparing the ctime of the previous start marker file with the ctime

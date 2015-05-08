@@ -92,7 +92,6 @@ void LLWeb::openURL(const LLSD& sdData)
 		// Force load in the internal browser, as if with a blank target.
 		openURLInternal(sdData);
 	}
-
 	else if (useExternalBrowser(sdData["url"]) || (target == "_external"))
 	{
 		openURLExternal(sdData);

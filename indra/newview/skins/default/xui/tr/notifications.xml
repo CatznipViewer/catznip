@@ -1259,7 +1259,7 @@ Yeni bir ana konum ayarlamak isteyebilirsiniz.
 	</notification>
 	<notification name="ClothingLoading">
 		Giysileriniz hala karşıdan yükleniyor.
-[SECOND_LIFE]&apos;ı normal şekilde kullanmaya devam edebilirsiniz, diğer insanlar sizi düzgün bir şekilde görecektir.
+[APP_NAME]&apos;ı normal şekilde kullanmaya devam edebilirsiniz, diğer insanlar sizi düzgün bir şekilde görecektir.
 		<form name="form">
 			<ignore name="ignore" text="Giysilerin karşıdan yüklenmesi uzun zaman alıyor"/>
 		</form>

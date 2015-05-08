@@ -1252,7 +1252,7 @@
 	</notification>
 	<notification name="ClothingLoading">
 		你的服裝仍在下載中。
-你可以正常使用 [SECOND_LIFE]，而且其他人看到你也是正常的。
+你可以正常使用 [APP_NAME]，而且其他人看到你也是正常的。
 		<form name="form">
 			<ignore name="ignore" text="服裝花太多時間下載"/>
 		</form>

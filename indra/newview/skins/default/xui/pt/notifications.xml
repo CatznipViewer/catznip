@@ -1252,7 +1252,7 @@ Pense em usar outra região como seu início.
 	</notification>
 	<notification name="ClothingLoading">
 		As suas roupas estão sendo transferidas. 
-Enquando isso, use o [SECOND_LIFE] normalmente. Seu visual será exibido corretamente.
+Enquando isso, use o [APP_NAME] normalmente. Seu visual será exibido corretamente.
 		<form name="form">
 			<ignore name="ignore" text="A roupa está demorando para chegar"/>
 		</form>

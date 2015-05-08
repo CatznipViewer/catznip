@@ -472,7 +472,7 @@ Du kan måske ønske at sætte en ny hjemme lokation.
 	</notification>
 	<notification name="ClothingLoading">
 		Dit tøj hentes stadig ned.
-Du kan bruge [SECOND_LIFE] normalt og andre personer vil se dig korrekt.
+Du kan bruge [APP_NAME] normalt og andre personer vil se dig korrekt.
 		<form name="form">
 			<ignore name="ignore" text="Det tager lang tid at hente tøj"/>
 		</form>

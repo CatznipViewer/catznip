@@ -995,7 +995,7 @@ class Darwin_i386_Manifest(ViewerManifest):
                                 raise
                     self.run_command('spctl -a -texec -vv %(bundle)r' % { 'bundle': app_in_dmg })
 
-            imagename="SecondLife_" + '_'.join(self.args['version'])
+            imagename="Catznip_" + '_'.join(self.args['version'])
 
 
         finally:

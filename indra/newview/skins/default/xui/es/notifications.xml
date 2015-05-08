@@ -1263,7 +1263,7 @@ Quizá quieras configurar una nueva posición para tu Base.
 	</notification>
 	<notification name="ClothingLoading">
 		Aún está descargándose tu ropa.
-Puedes usar [SECOND_LIFE] de forma normal; los demás residentes te verán correctamente.
+Puedes usar [APP_NAME] de forma normal; los demás residentes te verán correctamente.
 		<form name="form">
 			<ignore name="ignore" text="La ropa está tardando mucho en descargarse"/>
 		</form>
