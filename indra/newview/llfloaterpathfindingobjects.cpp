@@ -404,7 +404,10 @@ void LLFloaterPathfindingObjects::addObjectToScrollList(const LLPathfindingObjec
 
 	LLScrollListItem *scrollListItem = mObjectsScrollList->addRow(rowParams);
 
-	if (pObjectPtr->hasOwner() && !pObjectPtr->hasOwnerName())
+//	if (pObjectPtr->hasOwner() && !pObjectPtr->hasOwnerName())
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	if ( (-1 != getOwnerNameColumnIndex()) && (pObjectPtr->hasOwner()) && (!pObjectPtr->hasOwnerName()) )
+// [/SL:KB]
 	{
 		mMissingNameObjectsScrollListItems.insert(std::make_pair<std::string, LLScrollListItem *>(pObjectPtr->getUUID().asString(), scrollListItem));
 		pObjectPtr->registerOwnerNameListener(boost::bind(&LLFloaterPathfindingObjects::handleObjectNameResponse, this, _1));
