@@ -329,6 +329,15 @@ LLDataPackerBinaryBuffer *LLVOCacheEntry::getDP()
 	return &mDP;
 }
 
+// [SL:KB] - Patch: World-Derender | Checked: 2014-08-10 (Catznip-3.7)
+const U8* LLVOCacheEntry::getDPBuffer() const
+{
+	if (mDP.getBufferSize() == 0)
+		return NULL;
+	return mDP.getBuffer();
+}
+// [/SL:KB]
+
 void LLVOCacheEntry::recordHit()
 {
 	mHitCount++;
