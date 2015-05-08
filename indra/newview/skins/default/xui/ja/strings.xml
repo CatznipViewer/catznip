@@ -2151,19 +2151,19 @@ support@secondlife.com にお問い合わせください。
 		この住民が「通知を受けない」をオンにすると、あなたのメッセージが後で表示されるようになります。
 	</string>
 	<string name="MuteByName">
-		（名称別）
+		名称別
 	</string>
 	<string name="MuteAgent">
-		（住人）
+		住人
 	</string>
 	<string name="MuteObject">
-		（オブジェクト）
+		オブジェクト
 	</string>
 	<string name="MuteGroup">
-		（グループ）
+		グループ
 	</string>
 	<string name="MuteExternal">
-		（外部）
+		外部
 	</string>
 	<string name="RegionNoCovenant">
 		この不動産には約款がありません。

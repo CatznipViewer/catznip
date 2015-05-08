@@ -812,6 +812,28 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>BlockMuteSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies sort order for mute list</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>BlockDerenderSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies sort order for derender list</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>BlockAvatarAppearanceMessages</key>
         <map>
         <key>Comment</key>
@@ -10984,17 +11006,6 @@
       <string>U32</string>
       <key>Value</key>
       <integer>2</integer>
-    </map>
-    <key>BlockPeopleSortOrder</key>
-    <map>
-      <key>Comment</key>
-      <string>Specifies sort order for recent people (0 = by name, 1 = by type)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>U32</string>
-      <key>Value</key>
-      <integer>0</integer>
     </map>
     <key>CallLogSortOrder</key>
     <map>

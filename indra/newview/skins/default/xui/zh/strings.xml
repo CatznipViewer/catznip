@@ -2144,19 +2144,19 @@ http://secondlife.com/viewer-access-faq
 		這居民處於「請勿打擾」狀態，不會立即看到你的訊息。
 	</string>
 	<string name="MuteByName">
-		（按名稱）
+		按名稱
 	</string>
 	<string name="MuteAgent">
-		（居民）
+		居民
 	</string>
 	<string name="MuteObject">
-		（物件）
+		物件
 	</string>
 	<string name="MuteGroup">
-		（群組）
+		群組
 	</string>
 	<string name="MuteExternal">
-		（外部）
+		外部
 	</string>
 	<string name="RegionNoCovenant">
 		此領地沒有任何契約要求。
