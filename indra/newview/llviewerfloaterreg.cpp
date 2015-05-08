@@ -88,6 +88,9 @@
 #include "llfloaterobjectweights.h"
 #include "llfloateropenobject.h"
 #include "llfloateroutbox.h"
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+#include "llfloaterownedobjects.h"
+// [/SL:KB]
 #include "llfloaterpathfindingcharacters.h"
 #include "llfloaterpathfindingconsole.h"
 #include "llfloaterpathfindinglinksets.h"
@@ -261,6 +264,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("openobject", "floater_openobject.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOpenObject>);
 	LLFloaterReg::add("outbox", "floater_merchant_outbox.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutbox>);
 	LLFloaterReg::add("outgoing_call", "floater_outgoing_call.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLOutgoingCallDialog>);
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	LLFloaterReg::add("owned_objects", "floater_owned_objects.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOwnedObjects>);
+// [/SL:KB]
 	LLFloaterPayUtil::registerFloater();
 
 	LLFloaterReg::add("pathfinding_characters", "floater_pathfinding_characters.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterPathfindingCharacters>);
