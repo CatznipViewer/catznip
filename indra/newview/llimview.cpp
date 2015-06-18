@@ -61,6 +61,9 @@
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "llfloaterimnearbychat.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+#include "llslurl.h"
+// [/SL:KB]
 #include "llspeakers.h" //for LLIMSpeakerMgr
 #include "lltextbox.h"
 #include "lltoolbarview.h"
@@ -1048,13 +1051,13 @@ bool LLIMModel::logToFile(const std::string& file_name, const std::string& from,
 	}
 }
 
-bool LLIMModel::proccessOnlineOfflineNotification(
-	const LLUUID& session_id, 
-	const std::string& utf8_text)
-{
-	// Add system message to history
-	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
-}
+//bool LLIMModel::proccessOnlineOfflineNotification(
+//	const LLUUID& session_id, 
+//	const std::string& utf8_text)
+//{
+//	// Add system message to history
+//	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
+//}
 
 bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 						   const std::string& utf8_text, bool log2file /* = true */) { 
@@ -2939,9 +2942,12 @@ LLUUID LLIMMgr::addSession(
 	
     LL_INFOS() << "LLIMMgr::addSession, new session added, name = " << name << ", session id = " << session_id << LL_ENDL;
     
-	//Per Plan's suggestion commented "explicit offline status warning" out to make Dessie happier (see EXT-3609)
-	//*TODO After February 2010 remove this commented out line if no one will be missing that warning
-	//noteOfflineUsers(session_id, floater, ids);
+//	//Per Plan's suggestion commented "explicit offline status warning" out to make Dessie happier (see EXT-3609)
+//	//*TODO After February 2010 remove this commented out line if no one will be missing that warning
+//	//noteOfflineUsers(session_id, floater, ids);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2.1) | Added: Catznip-3.2.1
+	noteOfflineUsers(session_id, ids);
+// [/SL:KB]
 
 	// Only warn for regular IMs - not group IMs
 	if( dialog == IM_NOTHING_SPECIAL )
@@ -3378,14 +3384,21 @@ void LLIMMgr::noteOfflineUsers(
 		{
 			info = at.getBuddyInfo(ids.at(i));
 			LLAvatarName av_name;
-			if (info
-				&& !info->isOnline()
-				&& LLAvatarNameCache::get(ids.at(i), &av_name))
+//			if (info
+//				&& !info->isOnline()
+//				&& LLAvatarNameCache::get(ids.at(i), &av_name))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+			if (info && !info->isOnline())
+// [/SL:KB]
 			{
 				LLUIString offline = LLTrans::getString("offline_message");
 				// Use display name only because this user is your friend
-				offline.setArg("[NAME]", av_name.getDisplayName());
-				im_model.proccessOnlineOfflineNotification(session_id, offline);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+				offline.setArg("[NAME_SLURL]", LLSLURL("agent", ids.at(i), "about").getSLURLString());
+				im_model.addMessage(session_id, SYSTEM_FROM, LLUUID::null, offline);
+// [/SL:KB]
+//				offline.setArg("[NAME]", av_name.getDisplayName());
+//				im_model.proccessOnlineOfflineNotification(session_id, offline);
 			}
 		}
 	}

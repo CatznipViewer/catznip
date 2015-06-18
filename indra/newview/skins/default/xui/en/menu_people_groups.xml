@@ -3,16 +3,6 @@
  left="0" bottom="0" visible="false"
  mouse_opaque="false" opaque="true" color="MenuDefaultBgColor">
   <menu_item_call
-   label="Activate"
-   name="Activate">
-    <menu_item_call.on_click
-     function="People.Groups.Action"
-     parameter="activate" />
-    <menu_item_call.on_enable
-     function="People.Groups.Enable"
-     parameter="activate" />
-  </menu_item_call>
-  <menu_item_call
    label="View Info"
    name="View Info">
     <menu_item_call.on_click
@@ -41,6 +31,37 @@
     <menu_item_call.on_enable
      function="People.Groups.Enable"
      parameter="call" />
+  </menu_item_call>
+  <menu_item_separator />
+  <menu_item_call
+   label="Activate"
+   name="Activate">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="activate" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="activate" />
+  </menu_item_call>
+  <menu_item_call
+   label="Create Notice"
+   name="Create Notice">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="create_notice" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="create_notice" />
+  </menu_item_call>
+  <menu_item_call
+   label="View Notices"
+   name="View Notices">
+    <menu_item_call.on_click
+     function="People.Groups.Action"
+     parameter="view_notices" />
+    <menu_item_call.on_enable
+     function="People.Groups.Enable"
+     parameter="view_notices" />
   </menu_item_call>
   <menu_item_separator />
   <menu_item_call

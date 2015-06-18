@@ -4170,7 +4170,7 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 		このセッションにいるユーザーはあなただけです。
 	</string>
 	<string name="offline_message">
-		[NAME] はオフライン中です。
+		[NAME_SLURL] はオフライン中です。
 	</string>
 	<string name="invite_message">
 		このボイスチャットに応答・接続する場合は、[BUTTON NAME] をクリックしてください。
