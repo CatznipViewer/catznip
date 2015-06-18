@@ -68,6 +68,9 @@ public:
 protected:
 	void				init();
 	/* virtual */ BOOL	postBuild();
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	LLRect				calcClientRect(S32 nWidth = -1, S32 nHeight = -1) const;
+// [/SL:KB]
 	bool				setAspectRatio(const F32 width, const F32 height);
 	static void			onAspectRatioCommit(LLUICtrl*,void* userdata);
 	void				adjustAspectRatio();
@@ -94,6 +97,10 @@ private:
 	S32 mLastHeight;
 	S32 mLastWidth;
 	F32 mAspectRatio;	
+
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	LLView*				mTexturePlaceholder;
+// [/SL:KB]
 
 	LLLoadedCallbackEntry::source_callback_list_t mCallbackTextureList ; 
 	std::vector<std::string>		mRatiosList;
