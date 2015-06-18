@@ -2097,6 +2097,9 @@ bool LLViewerFetchedTexture::updateFetch()
 
 void LLViewerFetchedTexture::clearFetchedResults()
 {
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-08-18 (Catznip-3.3)
+	mIsMissingAsset = FALSE;
+// [/SL:KB]
 	if(mNeedsCreateTexture || mIsFetching)
 	{
 		return;

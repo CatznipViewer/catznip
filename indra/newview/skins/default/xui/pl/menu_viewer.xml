@@ -16,10 +16,8 @@
 			<menu_item_check label="Zawsze biegnij" name="Always Run"/>
 			<menu_item_call label="Zatrzymaj animacje" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="Mój Status" name="Status">
 			<menu_item_call label="Tryb oddalenia" name="Set Away"/>
 			<menu_item_call label="Tryb pracy" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="Wyłącz [APP_NAME]" name="Quit"/>
 	</menu>
 	<menu label="Komunikacja" name="Communicate">
@@ -130,6 +128,7 @@
 	</menu>
 	<menu label="Zaawansowane" name="Advanced">
 		<menu_item_call label="Odswież wyświetlanie tekstur" name="Rebake Texture"/>
+		<menu_item_call label="Odświeżyć bilans L$" name="Refresh Balance"/>
 		<menu_item_call label="Domyślne ustawienia rozmiaru interfejsu" name="Set UI Size to Default"/>
 		<menu_item_call label="Ustaw rozmiar interfejsu..." name="Set Window Size..."/>
 		<menu_item_check label="Ogranicz dystans selekcji" name="Limit Select Distance"/>
