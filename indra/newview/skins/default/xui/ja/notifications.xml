@@ -2395,7 +2395,7 @@ Web ページにリンクすると、他人がこの場所に簡単にアクセ�
 		件名： [SUBJECT]、メッセージ： [MESSAGE]
 	</notification>
 	<notification name="FriendOnlineOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; は [STATUS] です
+		[NAME_SLURL] は [STATUS] です
 	</notification>
 	<notification name="AddSelfFriend">
 		残念ながら自分自身をフレンド登録することはできません。

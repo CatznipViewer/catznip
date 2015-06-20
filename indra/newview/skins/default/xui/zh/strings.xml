@@ -4163,7 +4163,7 @@ http://secondlife.com/viewer-access-faq
 		這次會話只有你一人。
 	</string>
 	<string name="offline_message">
-		[NAME] 離線。
+		[NAME_SLURL] 離線。
 	</string>
 	<string name="invite_message">
 		點按 [BUTTON NAME] 按鈕接受並連通到這個語音聊天。

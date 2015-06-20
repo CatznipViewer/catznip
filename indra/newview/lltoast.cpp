@@ -90,6 +90,9 @@ LLToast::Params::Params()
 	can_be_stored("can_be_stored", true),
 	is_modal("is_modal", false),
 	is_tip("is_tip", false),
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	is_frontmost("is_frontmost", false),
+// [/SL:KB]
 	enable_hide_btn("enable_hide_btn", true),
 	force_show("force_show", false),
 	force_store("force_store", false),
@@ -143,6 +146,10 @@ LLToast::LLToast(const LLToast::Params& p)
 	{
 		mOnDeleteToastSignal.connect(p.on_delete_toast());
 	}
+
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	setFrontmostToast(p.is_frontmost);
+// [/SL:KB]
 }
 
 void LLToast::reshape(S32 width, S32 height, BOOL called_from_parent)
@@ -312,6 +319,16 @@ F32 LLToast::getTimeLeftToLive()
 
 	return time_to_live;
 }
+
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+void LLToast::setFrontmostToast(bool fFrontmost)
+{
+	if (fFrontmost)
+		getParent()->sendChildToFront(this);
+	mIsFrontmost = fFrontmost;
+}
+// [/SL:KB]
+
 //--------------------------------------------------------------------------
 
 void LLToast::reshapeToPanel()

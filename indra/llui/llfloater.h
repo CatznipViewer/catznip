@@ -289,6 +289,11 @@ public:
 	S32				getMinHeight() const{ return mMinHeight; }
 	S32				getHeaderHeight() const { return mHeaderHeight; }
 
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
+	bool			canFocusStealFrontmost() const { return mFocusStealsFrontmost; }
+	void            setFocusStealsFrontmost(bool fFocusStealsFrontmost) { mFocusStealsFrontmost = fFocusStealsFrontmost; }
+// [/SL:KB]
+
 	virtual BOOL	handleMouseDown(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleMouseUp(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleRightMouseDown(S32 x, S32 y, MASK mask);
@@ -462,6 +467,9 @@ private:
 	BOOL			mCanTearOff;
 	BOOL			mCanMinimize;
 	BOOL			mCanClose;
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
+	bool			mFocusStealsFrontmost;	// FALSE if we don't want the currently focused floater to cover this floater without user interaction
+// [/SL:KB]
 	BOOL			mDragOnLeft;
 	BOOL			mResizable;
 

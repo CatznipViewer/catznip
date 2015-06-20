@@ -53,28 +53,68 @@ LLCommunicationNotificationHandler::LLCommunicationNotificationHandler(const std
 	: LLNotificationHandler(name, notification_type, "Communication")
 {}
 
-// static
-bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
+// [SL:KB] - Patch: Notification-Logging | Checked: 2014-01-18 (Catznip-3.6)
+static LLFloaterIMSession* getIMFloaterFromNotification(const LLNotificationPtr& notification)
 {
-	bool res = false;
-
-	LLUUID from_id = notification->getPayload()["from_id"];
-	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
-	LLFloaterIMSession* im_floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", session_id);
-
-	if (im_floater != NULL)
-	{
-		res = im_floater->getVisible() == TRUE;
-	}
-
-	return res;
+	const LLUUID idFrom = notification->getPayload()["from_id"];
+	return (idFrom.notNull()) ? LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, idFrom)) : NULL;
 }
 
 // static
-void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
-		const std::string& session_name, const std::string& from_name,
-		const std::string& message, const LLUUID& session_owner_id,
-		const LLUUID& from_id)
+bool LLHandlerUtil::hasIMFloater(const LLNotificationPtr& notification)
+{
+	// NOTE: simply checks for the existance of an IM floater and nothing else
+	return (getIMFloaterFromNotification(notification) != NULL);
+}
+
+// static
+bool LLHandlerUtil::isIMFloaterVisible(const LLNotificationPtr& notification)
+{
+	// NOTE: checks whether the IM floater is currently visible on the screen (LLFloaterIMSession has a custom getVisible() override)
+	LLFloaterIMSession* pIMFloater = getIMFloaterFromNotification(notification);
+	return (pIMFloater) && (pIMFloater->getVisible());
+}
+// [/SL:KB]
+//// static
+//bool LLHandlerUtil::isIMFloaterOpened(const LLNotificationPtr& notification)
+//{
+//	bool res = false;
+//
+//	LLUUID from_id = notification->getPayload()["from_id"];
+//	LLUUID session_id = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
+//	LLFloaterIMSession* im_floater = LLFloaterReg::findTypedInstance<LLFloaterIMSession>("impanel", session_id);
+//
+//	if (im_floater != NULL)
+//	{
+//		res = im_floater->getVisible() == TRUE;
+//	}
+//
+//	return res;
+//}
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+// static
+bool LLHandlerUtil::canLogToChat(const LLNotificationPtr& notification)
+{
+	return notification->canLogToNearbyChat();
+}
+
+// static
+bool LLHandlerUtil::canLogToIM(const LLNotificationPtr& notification)
+{
+	bool fOpenSession = (getIMFloaterFromNotification(notification) != NULL);
+	return notification->canLogToIM(fOpenSession);
+}
+// [/SL:KB]
+
+// static
+//void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
+//		const std::string& session_name, const std::string& from_name,
+//		const std::string& message, const LLUUID& session_owner_id,
+//		const LLUUID& from_id)
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+void LLHandlerUtil::logToIM(const LLUUID& session_id, const std::string& session_name, const std::string& from_name, const LLUUID& from_id, const std::string& raw_message, const LLSD& substitutions)
+// [/SL:KB]
 {
 	std::string from = from_name;
 	if (from_name.empty())
@@ -82,29 +122,47 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 		from = SYSTEM_FROM;
 	}
 
-	LLUUID session_id = LLIMMgr::computeSessionID(session_type,
-			session_owner_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	// Replace interactive system message marker with correct from string value
+	if (INTERACTIVE_SYSTEM_FROM == from_name)
+	{
+		from = SYSTEM_FROM;
+	}
+
+	const std::string message = LLNotification::getMessage(raw_message, substitutions);
+	const std::string log_message = LLNotification::getLogMessage(raw_message, substitutions);
+// [/SL:KB]
+
+//	LLUUID session_id = LLIMMgr::computeSessionID(session_type,
+//			session_owner_id);
 	LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(
 			session_id);
 	if (session == NULL)
 	{
-		// replace interactive system message marker with correct from string value
-		if (INTERACTIVE_SYSTEM_FROM == from_name)
-		{
-			from = SYSTEM_FROM;
-		}
+//		// replace interactive system message marker with correct from string value
+//		if (INTERACTIVE_SYSTEM_FROM == from_name)
+//		{
+//			from = SYSTEM_FROM;
+//		}
 
 		// Build a new format username or firstname_lastname for legacy names
 		// to use it for a history log filename.
 		std::string user_name = LLCacheName::buildUsername(session_name);
-		LLIMModel::instance().logToFile(user_name, from, from_id, message);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		LLIMModel::instance().logToFile(user_name, from, from_id, log_message);
+// [/SL:KB]
+//		LLIMModel::instance().logToFile(user_name, from, from_id, message);
 	}
 	else
 	{
 		S32 unread = session->mNumUnread;
 		S32 participant_unread = session->mParticipantUnreadMessageCount;
-		LLIMModel::instance().addMessageSilently(session_id, from, from_id,
-				message);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+		LLIMModel::instance().addMessageSilently(session_id, from, from_id, message, false);
+		LLIMModel::instance().logToFile(LLIMModel::instance().getHistoryFileName(session_id), from, from_id, log_message);
+// [/SL:KB]
+//		LLIMModel::instance().addMessageSilently(session_id, from, from_id,
+//				message);
 		// we shouldn't increment counters when logging, so restore them
 		session->mNumUnread = unread;
 		session->mParticipantUnreadMessageCount = participant_unread;
@@ -114,13 +172,20 @@ void LLHandlerUtil::logToIM(const EInstantMessage& session_type,
 	}
 }
 
-void log_name_callback(const std::string& full_name, const std::string& from_name, 
-					   const std::string& message, const LLUUID& from_id)
-
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name, const std::string& from_name, const std::string& raw_message, const LLSD& substitutions, const LLUUID& from_id)
 {
-	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
-					from_id, LLUUID());
+	const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
+	LLHandlerUtil::logToIM(idSession, av_name.getLegacyName(), from_name, LLUUID(), raw_message, substitutions);
 }
+// [/SL:KB]
+//void log_name_callback(const std::string& full_name, const std::string& from_name, 
+//					   const std::string& message, const LLUUID& from_id)
+//
+//{
+//	LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, full_name, from_name, message,
+//					from_id, LLUUID());
+//}
 
 // static
 void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_file_only)
@@ -132,6 +197,14 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	LLUUID from_id = notification->getPayload()["from_id"];
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2)
+	// If the user triggered the notification log it to the destination instead
+	if ( (gAgentID == from_id) && (notification->getPayload().has("dest_id")) )
+	{
+		from_id = notification->getPayload()["dest_id"];
+	}
+// [/SL:KB]
+
 	if (from_id.isNull())
 	{
 		// Normal behavior for system generated messages, don't spam.
@@ -141,11 +214,23 @@ void LLHandlerUtil::logToIMP2P(const LLNotificationPtr& notification, bool to_fi
 
 	if(to_file_only)
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getRawMessage(), notification->getSubstitutions(), LLUUID()));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, "", notification->getMessage(), LLUUID()));
 	}
 	else
 	{
-		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+		LLAvatarNameCache::get(from_id, boost::bind(&log_name_callback, _1, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getRawMessage(), notification->getSubstitutions(), from_id));
+// [/SL:KB]
+//		gCacheName->get(from_id, false, boost::bind(&log_name_callback, _2, INTERACTIVE_SYSTEM_FROM, notification->getMessage(), from_id));
 	}
 }
 
@@ -171,8 +256,12 @@ void LLHandlerUtil::logGroupNoticeToIMGroup(
 	LLUUID sender_id;
 	gCacheName->getUUID(sender_name, sender_id);
 
-	logToIM(IM_SESSION_GROUP_START, group_name, sender_name, payload["message"],
-			payload["group_id"], sender_id);
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	const LLUUID idSession = LLIMMgr::computeSessionID(IM_SESSION_GROUP_START, payload["group_id"]);
+	logToIM(idSession, group_name, sender_name, sender_id, payload["message"], LLSD());
+// [/SL:KB]
+//	logToIM(IM_SESSION_GROUP_START, group_name, sender_name, payload["message"],
+//			payload["group_id"], sender_id);
 }
 
 // static
@@ -185,7 +274,13 @@ void LLHandlerUtil::logToNearbyChat(const LLNotificationPtr& notification, EChat
 		chat_msg.mSourceType = type;
 		chat_msg.mFromName = SYSTEM_FROM;
 		chat_msg.mFromID = LLUUID::null;
-		nearby_chat->addMessage(chat_msg);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
+		nearby_chat->addMessage(chat_msg, true, LLSD().with("do_not_log", true));
+
+		chat_msg.mText = notification->getLogMessage();
+		nearby_chat->logMessage(chat_msg);
+// [/SL:KB]
+//		nearby_chat->addMessage(chat_msg);
 	}
 }
 
