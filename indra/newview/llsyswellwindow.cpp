@@ -36,6 +36,14 @@
 #include "llspeakers.h"
 #include "lltoastpanel.h"
 
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+#include "llavatarnamecache.h"
+#include "llcombobox.h"
+#include "llfiltereditor.h"
+
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
+
 //---------------------------------------------------------------------------------
 LLSysWellWindow::LLSysWellWindow(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
 													mChannel(NULL),
@@ -183,18 +191,27 @@ void LLSysWellWindow::reshapeWindow()
 	// it includes height from floater top to list top and from floater bottom and list bottom
 	static S32 parent_list_delta_height = getRect().getHeight() - mMessageList->getRect().getHeight();
 
-	if (!mIsReshapedByUser) // Don't reshape Well window, if it ever was reshaped by user. See EXT-5715.
+//	if (!mIsReshapedByUser) // Don't reshape Well window, if it ever was reshaped by user. See EXT-5715.
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+	// Don't reshape if the well window was ever reshaped by the user, or if all items aren't currently shown (= filter active on the notfication well)
+	if ( (!mIsReshapedByUser) && (mMessageList->size(true) == mMessageList->size(false)) )
+// [/SL:KB]
 	{
 		S32 notif_list_height = mMessageList->getItemsRect().getHeight() + 2 * mMessageList->getBorderWidth();
 
 		LLRect curRect = getRect();
 
-		S32 new_window_height = notif_list_height + parent_list_delta_height;
-
-		if (new_window_height > MAX_WINDOW_HEIGHT)
-		{
-			new_window_height = MAX_WINDOW_HEIGHT;
-		}
+//		S32 new_window_height = notif_list_height + parent_list_delta_height;
+//
+//		if (new_window_height > MAX_WINDOW_HEIGHT)
+//		{
+//			new_window_height = MAX_WINDOW_HEIGHT;
+//		}
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+		S32 min_window_width, min_window_height;
+		getResizeLimits(&min_window_width, &min_window_height);
+		S32 new_window_height = llclamp(notif_list_height + parent_list_delta_height, min_window_height, MAX_WINDOW_HEIGHT);
+// [/SL:KB]
 		S32 newWidth = curRect.getWidth() < MIN_WINDOW_WIDTH ? MIN_WINDOW_WIDTH	: curRect.getWidth();
 
 		curRect.setLeftTopAndSize(curRect.mLeft, curRect.mTop, newWidth, new_window_height);
@@ -299,6 +316,30 @@ BOOL LLIMWellWindow::ObjectRowPanel::handleRightMouseDown(S32 x, S32 y, MASK mas
 /*         LLNotificationWellWindow implementation                      */
 /************************************************************************/
 
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+class LLNotificationDateComparator : public LLFlatListView::ItemComparator
+{
+public:
+	LLNotificationDateComparator() {}
+	/*virtual*/ ~LLNotificationDateComparator() {}
+
+	/*virtual*/ bool compare(const LLPanel* pLHS, const LLPanel* pRHS) const
+	{
+		const LLSysWellItem* pItemLeft = dynamic_cast<const LLSysWellItem*>(pLHS);
+		const LLSysWellItem* pItemRight= dynamic_cast<const LLSysWellItem*>(pRHS);
+		if ( (pItemLeft) && (pItemRight) )
+		{
+			LLNotificationPtr notifLeft = LLNotifications::instance().find(pItemLeft->getID());
+			LLNotificationPtr notifRight= LLNotifications::instance().find(pItemRight->getID());
+			// NOTE: we want to sort notifications from old to new
+			return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() > notifRight.get()->getDate());
+		}
+		return false;
+	}
+};
+static const LLNotificationDateComparator NOTIF_DATE_COMPARATOR;
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 // PUBLIC METHODS
 LLNotificationWellWindow::WellNotificationChannel::WellNotificationChannel(LLNotificationWellWindow* well_window)
@@ -312,6 +353,10 @@ LLNotificationWellWindow::WellNotificationChannel::WellNotificationChannel(LLNot
 
 LLNotificationWellWindow::LLNotificationWellWindow(const LLSD& key)
 :	LLSysWellWindow(key)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+,	m_pFilterType(NULL)
+,	m_pFilterText(NULL)
+// [/SL:KB]
 {
 	mNotificationUpdates.reset(new WellNotificationChannel(this));
 }
@@ -326,6 +371,19 @@ LLNotificationWellWindow* LLNotificationWellWindow::getInstance(const LLSD& key 
 BOOL LLNotificationWellWindow::postBuild()
 {
 	BOOL rv = LLSysWellWindow::postBuild();
+
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+	getChild<LLPanel>("notification_filter_panel")->setVisible(true);
+
+	m_pFilterType = getChild<LLComboBox>("filter_type");
+	m_pFilterType->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
+	m_pFilterText = getChild<LLFilterEditor>("filter_text");
+	m_pFilterText->setCommitCallback(boost::bind(&LLNotificationWellWindow::refreshFilter, this));
+// [/SL:KB]
+
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+	mMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+// [/SL:KB]
 	setTitle(getString("title_notification_well_window"));
 	return rv;
 }
@@ -351,8 +409,18 @@ void LLNotificationWellWindow::addItem(LLSysWellItem::Params p)
 		return;
 
 	LLSysWellItem* new_item = new LLSysWellItem(p);
-	if (mMessageList->addItem(new_item, value, ADD_TOP))
+//	if (mMessageList->addItem(new_item, value, ADD_TOP))
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+	if (mMessageList->addItem(new_item, value, ADD_TOP, false))
+// [/SL:KB]
 	{
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
+		new_item->setVisible(checkFilter(new_item));
+// [/SL:KB]
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+		mMessageList->sort();
+// [/SL:KB]
+
 		mSysWellChiclet->updateWidget(isWindowEmpty());
 		reshapeWindow();
 		new_item->setOnItemCloseCallback(boost::bind(&LLNotificationWellWindow::onItemClose, this, _1));
@@ -384,6 +452,96 @@ void LLNotificationWellWindow::closeAll()
 			onItemClose(sys_well_item);
 	}
 }
+
+// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
+bool LLNotificationWellWindow::isWindowEmpty()
+{
+	return mMessageList->size(false) == 0;
+}
+
+bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
+{
+	bool fVisible = true;
+
+	LLNotificationPtr pNotification = (pWellItem) ? LLNotifications::getInstance()->find(pWellItem->getID()) : LLNotificationPtr((LLNotification*)NULL);
+	if (pNotification)
+	{
+		// Filter by type
+		if ( (fVisible) && (!m_strFilterType.empty()))
+		{
+			fVisible = (m_strFilterType == pNotification->getType());
+		}
+
+		// Filter by text
+		if ( (fVisible) && (!m_strFilterText.empty()) )
+		{
+			if ("groupnotify" == pNotification->getType())
+			{
+				const LLSD& sdPayload = pNotification->getPayload();
+
+				// Check the notice's subject or body
+				fVisible = 
+					(!boost::ifind_first(sdPayload["subject"].asString(), m_strFilterText).empty()) || 
+					(!boost::ifind_first(sdPayload["message"].asString(), m_strFilterText).empty());
+				// Check the group's name
+				if (!fVisible)
+				{
+					const LLUUID idGroup = sdPayload["group_id"]; std::string strGroupName;
+					if ( (idGroup.notNull()) && (gCacheName->getGroupName(idGroup, strGroupName)) )
+						fVisible = !boost::ifind_first(strGroupName, m_strFilterText).empty();
+				}
+				// Check the sender's name
+				if (!fVisible)
+				{
+					const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
+					if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
+					{
+						fVisible =
+							(!boost::ifind_first(avSender.getCompleteName(), m_strFilterText).empty()) ||
+							( (!avSender.isDisplayNameDefault()) && (!boost::ifind_first(avSender.getLegacyName(), m_strFilterText).empty()) );
+					}
+				}
+			}
+			else
+			{
+				fVisible = !boost::ifind_first(pWellItem->getTitle(), m_strFilterText).empty();
+			}
+		}
+	}
+
+	return fVisible;
+}
+
+void LLNotificationWellWindow::refreshFilter()
+{
+	const std::string strNewFilterType = m_pFilterType->getSelectedValue();
+	const std::string strNewFilterText = m_pFilterText->getText();
+	const bool fHasFilter = (!strNewFilterType.empty()) || (!strNewFilterText.empty());
+
+	const bool fFilterSubset = (fHasFilter) && (strNewFilterType == m_strFilterType) && (!m_strFilterText.empty()) && (!boost::ifind_first(strNewFilterText, m_strFilterText).empty());
+	m_strFilterType = strNewFilterType;
+	m_strFilterText = strNewFilterText;
+
+	std::vector<LLPanel*> lMessages;
+	mMessageList->getItems(lMessages);
+	for (std::vector<LLPanel*>::const_iterator itMessage = lMessages.begin(); itMessage != lMessages.end(); ++itMessage)
+	{
+		LLSysWellItem* pWellItem = (fHasFilter) ? dynamic_cast<LLSysWellItem*>(*itMessage) : NULL;
+		if (!pWellItem)
+		{
+			// Unknown item (visible when not filtering, otherwise invisible) or not filtering
+			(*itMessage)->setVisible(!fHasFilter);
+			continue;
+		}
+
+		// If the new filtered set will be a subset of the previous pass then we can only check the currently visible items
+		if ( (!fFilterSubset) || (pWellItem->getVisible()) )
+			pWellItem->setVisible(checkFilter(pWellItem));
+	}
+
+	mMessageList->notify(LLSD().with("rearrange", LLSD()));
+}
+// [/SL:KB]
 
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE METHODS

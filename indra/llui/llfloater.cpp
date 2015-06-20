@@ -247,6 +247,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mCanTearOff(p.can_tear_off),
 	mCanMinimize(p.can_minimize),
 	mCanClose(p.can_close),
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
+	mFocusStealsFrontmost(true),
+// [/SL:KB]
 	mDragOnLeft(p.can_drag_on_left),
 	mResizable(p.can_resize),
 	mPositioning(p.positioning),
@@ -2890,11 +2893,18 @@ LLFloater *LLFloaterView::getFrontmost() const
 {
 	for ( child_list_const_iter_t child_it = getChildList()->begin(); child_it != getChildList()->end(); ++child_it)
 	{
-		LLView* viewp = *child_it;
-		if ( viewp->getVisible() && !viewp->isDead())
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-03-03 (Catznip-3.6)
+		LLFloater* floaterp = dynamic_cast<LLFloater*>(*child_it);
+		if ( (floaterp) && (floaterp->getVisible()) && (!floaterp->isDead()) && (floaterp->canFocusStealFrontmost()) )
 		{
-			return (LLFloater *)viewp;
+			return floaterp;
 		}
+// [/SL:KB]
+//		LLView* viewp = *child_it;
+//		if ( viewp->getVisible() && !viewp->isDead())
+//		{
+//			return (LLFloater *)viewp;
+//		}
 	}
 	return NULL;
 }
@@ -2950,7 +2960,33 @@ void LLFloaterView::syncFloaterTabOrder()
 			LLFloater* floaterp = (LLFloater*)*child_it;
 			if (gFocusMgr.childHasKeyboardFocus(floaterp))
 			{
-				bringToFront(floaterp, FALSE);
+// [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
+				// NOTE: this is hacky, but hopefully won't result in any measurable slowdown
+				if (mFrontChild != floaterp)
+				{
+					std::list<LLView*> listTop;
+
+					// Grab a list of top floaters that want to stay on top of the focused floater
+					if ( (mFrontChild) && (!mFrontChild->canFocusStealFrontmost()) )
+					{
+						for (child_list_const_iter_t itChild = getChildList()->begin(); itChild != getChildList()->end(); ++itChild)
+						{
+							LLFloater* pTopFloater = (LLFloater*)*itChild;
+							if (pTopFloater->canFocusStealFrontmost())
+								break;
+							listTop.push_back(pTopFloater);
+						}
+					}
+
+					bringToFront(floaterp, FALSE);
+
+					// Restore top floaters
+					for (std::list<LLView*>::const_reverse_iterator itChild = listTop.rbegin(); itChild != listTop.rend(); ++itChild)
+					{
+						sendChildToFront(*itChild);
+					}
+				}
+// [/SL:KB]
 				break;
 			}
 		}

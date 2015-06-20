@@ -98,6 +98,9 @@ public:
 										enable_hide_btn,
 										is_modal,
 										is_tip,
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+										is_frontmost,
+// [/SL:KB]
 										force_show,
 										force_store;
 
@@ -126,6 +129,11 @@ public:
 	virtual void startTimer();
 
 	bool isHovered() { return mIsHovered; }
+
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	bool isFrontmostToast() const { return mIsFrontmost; }
+	void setFrontmostToast(bool fFrontmost);
+// [/SL:KB]
 
 	// Operating with toasts
 	// insert a panel to a toast
@@ -233,6 +241,9 @@ private:
 	bool		mHideBtnPressed;
 	bool		mIsHidden;  // this flag is TRUE when a toast has faded or was hidden with (x) button (EXT-1849)
 	bool		mIsTip;
+// [SL:KB] - Patch: Notification-Misc | Checked: 2014-01-27 (Catznip-3.6)
+	bool		mIsFrontmost;
+// [/SL:KB]
 	bool		mIsFading;
 	bool		mIsHovered;
 

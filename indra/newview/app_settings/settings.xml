@@ -4691,6 +4691,17 @@
         <key>Value</key>
         <integer>0</integer>
     </map>
+    <key>InventoryOfferAcceptanceDnd</key>
+    <map>
+        <key>Comment</key>
+        <string>Specifies whether (task) inventory offers will be pop up (0), auto-accept (1), or auto-decline (2) when marked as do not disturb</string>
+        <key>Persist</key>
+        <integer>0</integer>
+        <key>Type</key>
+        <string>U32</string>
+        <key>Value</key>
+        <integer>0</integer>
+    </map>
     <key>InventoryInboxToggleState</key>
     <map>
         <key>Comment</key>
@@ -6757,6 +6768,39 @@
       <key>Value</key>
       <string>toast</string>
     </map>  
+    <key>NotificationToastAlignment</key>
+    <map>
+      <key>Comment</key>
+      <string>Notification toast's vertical aligment (0 = top; 1 = bottom)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>NotificationToastFrontmost</key>
+    <map>
+      <key>Comment</key>
+      <string>Show notification toasts above unfocused floaters on creation</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>NotificationToastFrontmostFocus</key>
+    <map>
+      <key>Comment</key>
+      <string>Show notification toasts above all floaters even if they currently have focus</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>NotificationToastLifeTime</key>
     <map>
       <key>Comment</key>
@@ -10423,6 +10467,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>ScriptQuestionToastLifeTime</key>
+    <map>
+      <key>Comment</key>
+      <string>Number of seconds while the ScriptQuestion notification toast exists</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>60</integer>
     </map>
     <key>ScriptsCanShowUI</key>
     <map>

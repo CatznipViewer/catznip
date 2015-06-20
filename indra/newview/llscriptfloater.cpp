@@ -191,6 +191,10 @@ void LLScriptFloater::onClose(bool app_quitting)
 		{
 			LLScriptFloaterManager::getInstance()->removeNotification(getNotificationId());
 		}
+
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+		LLScriptFloaterManager::getInstance()->onCloseNotification(getNotificationId(), app_quitting);
+// [/SL:KB]
 	}
 }
 
@@ -202,6 +206,17 @@ void LLScriptFloater::setDocked(bool docked, bool pop_on_undock /* = true */)
 
 	hideToastsIfNeeded();
 }
+
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+void LLScriptFloater::setMinimized(BOOL minimize)
+{
+	if ( (minimize) && (!isMinimized()) )
+	{
+		LLScriptFloaterManager::instance().onCloseNotification(getNotificationId(), false);
+	}
+	LLDockableFloater::setMinimized(minimize);
+}
+// [/SL:KB]
 
 void LLScriptFloater::setVisible(BOOL visible)
 {
@@ -394,6 +409,9 @@ void LLScriptFloaterManager::onAddNotification(const LLUUID& notification_id)
 	}
 
 	mNotifications.insert(std::make_pair(notification_id, object_id));
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	mOpenNotifications.push_back(notification_id);
+// [/SL:KB]
 
 	LLChicletPanel * chiclet_panelp = LLChicletBar::getInstance()->getChicletPanel();
 	if (NULL != chiclet_panelp)
@@ -431,6 +449,30 @@ void LLScriptFloaterManager::removeNotification(const LLUUID& notification_id)
 	onRemoveNotification(notification_id);
 }
 
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+void LLScriptFloaterManager::onCloseNotification(const LLUUID& notification_id, bool app_quitting)
+{
+	uuid_vec_t::iterator itOpenNotif = std::find(mOpenNotifications.begin(), mOpenNotifications.end(), notification_id);
+	if (mOpenNotifications.end() != itOpenNotif)
+	{
+		mOpenNotifications.erase(itOpenNotif);
+	}
+
+	if ( (!mOpenNotifications.empty()) && (!app_quitting) )
+	{
+		LLFloaterReg::const_instance_list_t& lFloaters = LLFloaterReg::getFloaterList("script_floater");
+		for (LLFloaterReg::const_instance_list_t::const_iterator itFloater = lFloaters.begin(); itFloater != lFloaters.end(); ++itFloater)
+		{
+			const LLScriptFloater* pFloater = dynamic_cast<LLScriptFloater*>(*itFloater);
+			if ( (pFloater->getVisible()) && (pFloater->getNotificationId() != notification_id) )
+				return;
+		}
+
+		setFloaterVisible(mOpenNotifications.back(), true);
+	}
+}
+// [/SL:KB]
+
 void LLScriptFloaterManager::onRemoveNotification(const LLUUID& notification_id)
 {
 	if(notification_id.isNull())
@@ -455,6 +497,9 @@ void LLScriptFloaterManager::onRemoveNotification(const LLUUID& notification_id)
 		im_well_window->removeObjectRow(notification_id);
 	}
 
+// [SL:KB] - Patch: Notifications-CycleOpen | Checked: 2014-03-24 (Catznip-3.6)
+	onCloseNotification(notification_id, false);
+// [/SL:KB]
 	mNotifications.erase(notification_id);
 
 	// close floater
@@ -500,6 +545,23 @@ LLUUID LLScriptFloaterManager::findNotificationId(const LLUUID& object_id)
 	}
 	return LLUUID::null;
 }
+
+// [SL:KB] - Patch: Notification-ScriptDialog | Checked: 2012-09-30 (Catznip-3.3)
+bool LLScriptFloaterManager::findNotificationIds(const LLUUID& object_id, EObjectType object_type, uuid_vec_t& notif_ids)
+{
+	notif_ids.clear();
+	if (object_id.notNull())
+	{
+		for (script_notification_map_t::const_iterator itNotif = mNotifications.begin(); itNotif != mNotifications.end(); ++itNotif)
+		{
+			if ( (object_id == itNotif->second) && (object_type == getObjectType(itNotif->first)) )
+				notif_ids.push_back(itNotif->first);
+		}
+		return !notif_ids.empty();
+	}
+	return false;
+}
+// [/SL:KB]
 
 // static
 LLScriptFloaterManager::EObjectType LLScriptFloaterManager::getObjectType(const LLUUID& notification_id)
@@ -555,6 +617,32 @@ std::string LLScriptFloaterManager::getObjectName(const LLUUID& notification_id)
 	return text;
 }
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+LLUUID LLScriptFloaterManager::getObjectOwner(const LLUUID& notification_id)
+{
+	using namespace LLNotificationsUI;
+	LLNotificationPtr notification = LLNotifications::getInstance()->find(notification_id);
+	if (!notification)
+	{
+		LL_WARNS() << "Invalid notification" << LL_ENDL;
+		return LLUUID::null;
+	}
+
+	LLUUID idOwner;
+	switch (LLScriptFloaterManager::getObjectType(notification_id))
+	{
+		case LLScriptFloaterManager::OBJ_SCRIPT:
+		case LLScriptFloaterManager::OBJ_LOAD_URL:
+		case LLScriptFloaterManager::OBJ_GIVE_INVENTORY:
+			idOwner = notification->getPayload()["owner_id"].asUUID();
+			break;
+		default:
+			break;
+	}
+	return idOwner;
+}
+// [/SL:KB]
+
 //static
 LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMap()
 {
@@ -563,6 +651,9 @@ LLScriptFloaterManager::object_type_map LLScriptFloaterManager::initObjectTypeMa
 	type_map["ScriptDialogGroup"] = OBJ_SCRIPT;
 	type_map["LoadWebPage"] = OBJ_LOAD_URL;
 	type_map["ObjectGiveItem"] = OBJ_GIVE_INVENTORY;
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	type_map["OwnObjectGiveItem"] = OBJ_GIVE_INVENTORY;
+// [/SL:KB]
 	return type_map;
 }
 

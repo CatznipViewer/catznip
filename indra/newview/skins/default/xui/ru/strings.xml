@@ -4165,7 +4165,7 @@ support@secondlife.com.
 		Вы – единственный пользователь в этом сеансе.
 	</string>
 	<string name="offline_message">
-		[NAME] не в сети.
+		[NAME_SLURL] не в сети.
 	</string>
 	<string name="invite_message">
 		Нажмите кнопку [BUTTON NAME], чтобы участвовать в этом голосовом чате.

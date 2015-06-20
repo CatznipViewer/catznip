@@ -612,6 +612,12 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 	{
 		return LLTrans::getString("TooltipAgentOfferTeleport");
 	}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+	if (LLStringUtil::endsWith(url, "/requestteleport"))
+	{
+		return LLTrans::getString("TooltipAgentRequestTeleport");
+	}
+// [/SL:KB]
 	if (LLStringUtil::endsWith(url, "/requestfriend"))
 	{
 		return LLTrans::getString("TooltipAgentRequestFriend");
@@ -698,6 +704,12 @@ std::string localize_slapp_label(const std::string& url, const std::string& full
 	{
 		return LLTrans::getString("SLappAgentOfferTeleport") + " " + full_name;
 	}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+	if (LLStringUtil::endsWith(url, "/requestteleport"))
+	{
+		return LLTrans::getString("SLappAgentRequestTeleport") + " " + full_name;
+	}
+// [/SL:KB]
 	if (LLStringUtil::endsWith(url, "/requestfriend"))
 	{
 		return LLTrans::getString("SLappAgentRequestFriend") + " " + full_name;
