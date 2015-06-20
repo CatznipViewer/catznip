@@ -51,7 +51,7 @@
 #include "llviewerwindow.h"
 #include "lllineeditor.h"
 
-const S32 CLIENT_RECT_VPAD = 4;
+//const S32 CLIENT_RECT_VPAD = 4;
 
 const F32 SECONDS_TO_SHOW_FILE_SAVED_MSG = 8.f;
 
@@ -61,6 +61,9 @@ const F32 PREVIEW_TEXTURE_MIN_ASPECT = 0.005f;
 
 LLPreviewTexture::LLPreviewTexture(const LLSD& key)
 	: LLPreview(key),
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	  mTexturePlaceholder(NULL),
+// [/SL:KB]
 	  mLoadingFullImage( FALSE ),
 	  mShowKeepDiscard(FALSE),
 	  mCopyToInv(FALSE),
@@ -131,13 +134,23 @@ BOOL LLPreviewTexture::postBuild()
 	// Fill in ratios list with common aspect ratio values
 	mRatiosList.clear();
 	mRatiosList.push_back(LLTrans::getString("Unconstrained"));
+// [SL:KB]
 	mRatiosList.push_back("1:1");
 	mRatiosList.push_back("4:3");
-	mRatiosList.push_back("10:7");
-	mRatiosList.push_back("3:2");
-	mRatiosList.push_back("16:10");
+	mRatiosList.push_back("5:4");
 	mRatiosList.push_back("16:9");
+	mRatiosList.push_back("16:10");
 	mRatiosList.push_back("2:1");
+	mRatiosList.push_back("3:2");
+	mRatiosList.push_back("10:7");
+// [/SL:KB]
+//	mRatiosList.push_back("1:1");
+//	mRatiosList.push_back("4:3");
+//	mRatiosList.push_back("10:7");
+//	mRatiosList.push_back("3:2");
+//	mRatiosList.push_back("16:10");
+//	mRatiosList.push_back("16:9");
+//	mRatiosList.push_back("2:1");
 	
 	// Now fill combo box with provided list
 	LLComboBox* combo = getChild<LLComboBox>("combo_aspect_ratio");
@@ -151,6 +164,11 @@ BOOL LLPreviewTexture::postBuild()
 	childSetCommitCallback("combo_aspect_ratio", onAspectRatioCommit, this);
 	combo->setCurrentByIndex(0);
 	
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	mTexturePlaceholder = getChild<LLView>("texture_placeholder");
+	mClientRect = calcClientRect();
+// [/SL:KB]
+
 	return LLPreview::postBuild();
 }
 
@@ -301,19 +319,32 @@ void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
 {
 	LLPreview::reshape(width, height, called_from_parent);
 
-	LLRect dim_rect(getChildView("dimensions")->getRect());
+//	LLRect dim_rect(getChildView("dimensions")->getRect());
+//
+//	S32 horiz_pad = 2 * (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
+//
+//	// add space for dimensions and aspect ratio
+//	S32 info_height = dim_rect.mTop + CLIENT_RECT_VPAD;
+//
+//	LLRect client_rect(horiz_pad, getRect().getHeight(), getRect().getWidth() - horiz_pad, 0);
+//	client_rect.mTop -= (PREVIEW_HEADER_SIZE + CLIENT_RECT_VPAD);
+//	client_rect.mBottom += PREVIEW_BORDER + CLIENT_RECT_VPAD + info_height ;
 
-	S32 horiz_pad = 2 * (LLPANEL_BORDER_WIDTH + PREVIEW_PAD) + PREVIEW_RESIZE_HANDLE_SIZE;
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	if (mTexturePlaceholder)
+	{
+		mClientRect = calcClientRect();
+	}
+}
 
-	// add space for dimensions and aspect ratio
-	S32 info_height = dim_rect.mTop + CLIENT_RECT_VPAD;
-
-	LLRect client_rect(horiz_pad, getRect().getHeight(), getRect().getWidth() - horiz_pad, 0);
-	client_rect.mTop -= (PREVIEW_HEADER_SIZE + CLIENT_RECT_VPAD);
-	client_rect.mBottom += PREVIEW_BORDER + CLIENT_RECT_VPAD + info_height ;
-
-	S32 client_width = client_rect.getWidth();
-	S32 client_height = client_rect.getHeight();
+LLRect LLPreviewTexture::calcClientRect(S32 nWidth, S32 nHeight) const
+{
+	LLRect client_rect = mTexturePlaceholder->getRect();
+	S32 client_width = (nWidth > 0) ? nWidth : client_rect.getWidth();
+	S32 client_height = (nHeight > 0) ? nHeight : client_rect.getHeight();
+// [/SL:KB]
+//	S32 client_width = client_rect.getWidth();
+//	S32 client_height = client_rect.getHeight();
 
 	if (mAspectRatio > 0.f)
 	{
@@ -337,7 +368,12 @@ void LLPreviewTexture::reshape(S32 width, S32 height, BOOL called_from_parent)
 		}
 	}
 
-	mClientRect.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+	LLRect rctClient;
+	rctClient.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
+	return rctClient;
+// [/SL:KB]
+//	mClientRect.setLeftTopAndSize(client_rect.getCenterX() - (client_width / 2), client_rect.getCenterY() +  (client_height / 2), client_width, client_height);
 
 }
 
@@ -450,8 +486,35 @@ void LLPreviewTexture::updateDimensions()
 	{
 		mUpdateDimensions = FALSE;
 		
-		//reshape floater
-		reshape(getRect().getWidth(), getRect().getHeight());
+// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+		// Calculate shrink/expand deltas to show the texture at its full resolution
+		LLRect rctTexture = mTexturePlaceholder->getRect();
+		rctTexture.stretch(-PREVIEW_BORDER_WIDTH);
+
+		S32 imgWidth = mImage->getFullWidth(), imgHeight = mImage->getFullHeight(); F32 fMult = 1.0;
+		LLRect rctSnap = gFloaterView->getSnapRect();
+
+		S32 deltaWidth = 0, deltaHeight =  0;
+		do
+		{
+			deltaWidth = imgWidth * fMult - rctTexture.getWidth();
+			deltaHeight = imgHeight * fMult - rctTexture.getHeight();
+			if (mAspectRatio > 0.0f)
+			{
+				// Recalculate shrink/expand deltas taking the aspect ratio into account
+				LLRect rctTextureNew = calcClientRect(mTexturePlaceholder->getRect().getWidth() + deltaWidth, mTexturePlaceholder->getRect().getHeight() + deltaHeight);
+				rctTextureNew.stretch(-PREVIEW_BORDER_WIDTH);
+	
+				deltaWidth = rctTextureNew.getWidth() - rctTexture.getWidth();
+				deltaHeight = rctTextureNew.getHeight() - rctTexture.getHeight();
+			}
+			fMult -= 0.25;
+		} while( (getRect().getWidth() + deltaWidth >= rctSnap.getWidth()) || (getRect().getHeight() + deltaHeight >= rctSnap.getHeight()) );
+
+		reshape(llmax(getRect().getWidth() + deltaWidth, getMinWidth()), llmax(getRect().getHeight() + deltaHeight, getMinHeight()));
+// [/SL:KB]
+//		//reshape floater
+//		reshape(getRect().getWidth(), getRect().getHeight());
 
 		gFloaterView->adjustToFitScreen(this, FALSE);
 
