@@ -15,5 +15,7 @@
 	<floater.string name="NotRunning">
 		Läuft nicht
 	</floater.string>
-	<button label="Schließen" label_selected="Schließen" left="215" name="close" width="72"/>
+	<panel name="bottom_panel">
+	<button label="Schließen" label_selected="Schließen" name="close" />
+	</panel>
 </floater>

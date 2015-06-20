@@ -66,6 +66,9 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.Profile",			boost::bind(&LLAvatarActions::showProfile,				id));
 		registrar.add("Avatar.AddFriend",		boost::bind(&LLAvatarActions::requestFriendshipDialog,	id));
 		registrar.add("Avatar.RemoveFriend",	boost::bind(&LLAvatarActions::removeFriendDialog, 		id));
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
+		registrar.add("Avatar.AddContact",		boost::bind(&LLAvatarActions::addContact, 				id));
+// [/SL:KB]
 		registrar.add("Avatar.IM",				boost::bind(&LLAvatarActions::startIM,					id));
 		registrar.add("Avatar.Call",			boost::bind(&LLAvatarActions::startCall,				id));
 		registrar.add("Avatar.OfferTeleport",	boost::bind(&PeopleContextMenu::offerTeleport,			this));
