@@ -43,6 +43,9 @@
 #include "llview.h"
 #include "llwindow.h"
 #include <boost/bind.hpp>
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 const F32	CURSOR_FLASH_DELAY = 1.0f;  // in seconds
 const S32	CURSOR_THICKNESS = 2;
@@ -145,6 +148,9 @@ LLTextBase::Params::Params()
 	bg_readonly_color("bg_readonly_color"),
 	bg_writeable_color("bg_writeable_color"),
 	bg_focus_color("bg_focus_color"),
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	bg_highlighted_color("bg_highlighted_color"),
+// [/SL:KB]
 	text_selected_color("text_selected_color"),
 	bg_selected_color("bg_selected_color"),
 	allow_scroll("allow_scroll", true),
@@ -191,6 +197,9 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mWriteableBgColor(p.bg_writeable_color),
 	mReadOnlyBgColor(p.bg_readonly_color),
 	mFocusBgColor(p.bg_focus_color),
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	mHighlightedBGColor(p.bg_highlighted_color),
+// [/SL:KB]
 	mTextSelectedColor(p.text_selected_color),
 	mSelectedBGColor(p.bg_selected_color),
 	mReflowIndex(S32_MAX),
@@ -211,6 +220,9 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mSelectionStart( 0 ),
 	mSelectionEnd( 0 ),
 	mIsSelecting( FALSE ),
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+	mIsSelectDragging(FALSE),
+// [/SL:KB]
 	mPlainText ( p.plain_text ),
 	mWordWrap(p.wrap),
 	mUseEllipses( p.use_ellipses ),
@@ -346,15 +358,31 @@ void LLTextBase::onValueChange(S32 start, S32 end)
 
 
 // Draws the black box behind the selected text
+//void LLTextBase::drawSelectionBackground()
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
 void LLTextBase::drawSelectionBackground()
 {
-	// Draw selection even if we don't have keyboard focus for search/replace
 	if( hasSelection() && !mLineInfoList.empty())
+	{
+		highlight_list_t highlights;
+		highlights.push_back(range_pair_t(llmin(mSelectionStart, mSelectionEnd), llmax(mSelectionStart, mSelectionEnd)));
+		drawHighlightsBackground(highlights, mSelectedBGColor);
+	}
+}
+
+void LLTextBase::drawHighlightsBackground(const highlight_list_t& highlights, const LLColor4& color)
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+{
+//	// Draw selection even if we don't have keyboard focus for search/replace
+//	if( hasSelection() && !mLineInfoList.empty())
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	if (!mLineInfoList.empty())
+// [/SL:KB]
 	{
 		std::vector<LLRect> selection_rects;
 
-		S32 selection_left		= llmin( mSelectionStart, mSelectionEnd );
-		S32 selection_right		= llmax( mSelectionStart, mSelectionEnd );
+//		S32 selection_left		= llmin( mSelectionStart, mSelectionEnd );
+//		S32 selection_right		= llmax( mSelectionStart, mSelectionEnd );
 
 		// Skip through the lines we aren't drawing.
 		LLRect content_display_rect = getVisibleDocumentRect();
@@ -363,73 +391,103 @@ void LLTextBase::drawSelectionBackground()
 		line_list_t::const_iterator line_iter = std::lower_bound(mLineInfoList.begin(), mLineInfoList.end(), content_display_rect.mTop, compare_bottom());
 		line_list_t::const_iterator end_iter = std::upper_bound(mLineInfoList.begin(), mLineInfoList.end(), content_display_rect.mBottom, compare_top());
 
-		bool done = false;
+//		bool done = false;
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		highlight_list_t::const_iterator itHighlight = highlights.begin();
+// [/SL:KB]
 
 		// Find the coordinates of the selected area
-		for (;line_iter != end_iter && !done; ++line_iter)
+//		for (;line_iter != end_iter && !done; ++line_iter)
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		for (; (line_iter != end_iter) && (itHighlight != highlights.end()); ++line_iter)
+// [/SL:KB]
 		{
-			// is selection visible on this line?
-			if (line_iter->mDocIndexEnd > selection_left && line_iter->mDocIndexStart < selection_right)
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+			// Find a highlight range with an end index larger than the start of this line
+			while ( (itHighlight != highlights.end()) && (line_iter->mDocIndexStart > itHighlight->second) )
+				++itHighlight;
+
+			// Draw all highlights on the current line
+			while ( (itHighlight != highlights.end()) && (itHighlight->first < line_iter->mDocIndexEnd) )
 			{
-				segment_set_t::iterator segment_iter;
-				S32 segment_offset;
-				getSegmentAndOffset(line_iter->mDocIndexStart, &segment_iter, &segment_offset);
-				
-				LLRect selection_rect;
-				selection_rect.mLeft = line_iter->mRect.mLeft;
-				selection_rect.mRight = line_iter->mRect.mLeft;
-				selection_rect.mBottom = line_iter->mRect.mBottom;
-				selection_rect.mTop = line_iter->mRect.mTop;
-					
-				for(;segment_iter != mSegments.end(); ++segment_iter, segment_offset = 0)
+				// Keep the names of these to change fewer lines of LL code
+				S32 selection_left  = llmin(itHighlight->first, itHighlight->second);
+				S32 selection_right = llmax(itHighlight->first, itHighlight->second) ;
+// [/SL:KB]
+
+				// is selection visible on this line?
+				if (line_iter->mDocIndexEnd > selection_left && line_iter->mDocIndexStart < selection_right)
 				{
-					LLTextSegmentPtr segmentp = *segment_iter;
-
-					S32 segment_line_start = segmentp->getStart() + segment_offset;
-					S32 segment_line_end = llmin(segmentp->getEnd(), line_iter->mDocIndexEnd);
-
-					if (segment_line_start > segment_line_end) break;
-
-					S32 segment_width = 0;
-					S32 segment_height = 0;
-
-					// if selection after beginning of segment
-					if(selection_left >= segment_line_start)
+					segment_set_t::iterator segment_iter;
+					S32 segment_offset;
+					getSegmentAndOffset(line_iter->mDocIndexStart, &segment_iter, &segment_offset);
+				
+					LLRect selection_rect;
+					selection_rect.mLeft = line_iter->mRect.mLeft;
+					selection_rect.mRight = line_iter->mRect.mLeft;
+					selection_rect.mBottom = line_iter->mRect.mBottom;
+					selection_rect.mTop = line_iter->mRect.mTop;
+					
+					for(;segment_iter != mSegments.end(); ++segment_iter, segment_offset = 0)
 					{
-						S32 num_chars = llmin(selection_left, segment_line_end) - segment_line_start;
-						segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
-						selection_rect.mLeft += segment_width;
-					}
+						LLTextSegmentPtr segmentp = *segment_iter;
 
-					// if selection_right == segment_line_end then that means we are the first character of the next segment
-					// or first character of the next line, in either case we want to add the length of the current segment
-					// to the selection rectangle and continue.
-					// if selection right > segment_line_end then selection spans end of current segment...
-					if (selection_right >= segment_line_end)
-					{
-						// extend selection slightly beyond end of line
-						// to indicate selection of newline character (use "n" character to determine width)
-						S32 num_chars = segment_line_end - segment_line_start;
-						segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
-						selection_rect.mRight += segment_width;
-					}
-					// else if selection ends on current segment...
-					else
-					{
-						S32 num_chars = selection_right - segment_line_start;
-						segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
-						selection_rect.mRight += segment_width;
+						S32 segment_line_start = segmentp->getStart() + segment_offset;
+						S32 segment_line_end = llmin(segmentp->getEnd(), line_iter->mDocIndexEnd);
 
-						break;
+						if (segment_line_start > segment_line_end) break;
+
+						S32 segment_width = 0;
+						S32 segment_height = 0;
+
+						// if selection after beginning of segment
+						if(selection_left >= segment_line_start)
+						{
+							S32 num_chars = llmin(selection_left, segment_line_end) - segment_line_start;
+							segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
+							selection_rect.mLeft += segment_width;
+						}
+
+						// if selection_right == segment_line_end then that means we are the first character of the next segment
+						// or first character of the next line, in either case we want to add the length of the current segment
+						// to the selection rectangle and continue.
+						// if selection right > segment_line_end then selection spans end of current segment...
+						if (selection_right >= segment_line_end)
+						{
+							// extend selection slightly beyond end of line
+							// to indicate selection of newline character (use "n" character to determine width)
+							S32 num_chars = segment_line_end - segment_line_start;
+							segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
+							selection_rect.mRight += segment_width;
+						}
+						// else if selection ends on current segment...
+						else
+						{
+							S32 num_chars = selection_right - segment_line_start;
+							segmentp->getDimensions(segment_offset, num_chars, segment_width, segment_height);
+							selection_rect.mRight += segment_width;
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+							continue;
+// [/SL:KB]
+//							break;
+						}
 					}
+					selection_rects.push_back(selection_rect);
 				}
-				selection_rects.push_back(selection_rect);
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+				// Only advance if the highlight ends on the current line
+				if (itHighlight->second > line_iter->mDocIndexEnd)
+					break;
+				++itHighlight;
 			}
+// [/SL:KB]
 		}
 		
 		// Draw the selection box (we're using a box instead of reversing the colors on the selected text).
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-		const LLColor4& color = mSelectedBGColor;
+//		const LLColor4& color = mSelectedBGColor;
 		F32 alpha = hasFocus() ? 0.7f : 0.3f;
 		alpha *= getDrawContext().mAlpha;
 		LLColor4 selection_color(color.mV[VRED], color.mV[VGREEN], color.mV[VBLUE], alpha);
@@ -1229,6 +1287,12 @@ void LLTextBase::draw()
 			drawChild(mDocumentView);
 		}
  
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+		if (mHighlightsDirty)
+			refreshHighlights();
+		if (!mHighlights.empty())
+			drawHighlightsBackground(mHighlights, mHighlightedBGColor);
+// [/SL:KB]
 		drawSelectionBackground();
 		drawText();
 		drawCursor();
@@ -1283,6 +1347,9 @@ void LLTextBase::deselect()
 	mSelectionStart = 0;
 	mSelectionEnd = 0;
 	mIsSelecting = FALSE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+	mIsSelectDragging = FALSE;
+// [/SL:KB]
 }
 
 bool LLTextBase::getSpellCheck() const
@@ -1658,13 +1725,31 @@ void LLTextBase::clearSegments()
 	createDefaultSegment();
 }
 
-S32 LLTextBase::getLineStart( S32 line ) const
+//S32 LLTextBase::getLineStart( S32 line ) const
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-31 (Catznip-3.6)
+S32 LLTextBase::getLineStart(S32 line, bool include_wordwrap) const
+// [/SL:KB]
 {
 	S32 num_lines = getLineCount();
 	if (num_lines == 0)
 	{
 		return 0;
 	}
+
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-31 (Catznip-3.6)
+	if (!include_wordwrap)
+	{
+		for (S32 line_it = line; line_it < num_lines; ++line_it)
+		{
+			const line_info& liLine = mLineInfoList[line_it];
+			if (liLine.mLineNum == line)
+			{
+				line = line_it;
+				break;
+			}
+		}
+	}
+// [/SL:KB]
 
 	line = llclamp(line, 0, num_lines-1);
 	return mLineInfoList[line].mDocIndexStart;
@@ -2162,6 +2247,10 @@ void LLTextBase::needsReflow(S32 index)
 {
 	LL_DEBUGS() << "reflow on object " << (void*)this << " index = " << mReflowIndex << ", new index = " << index << LL_ENDL;
 	mReflowIndex = llmin(mReflowIndex, index);
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+	mHighlightsDirty = true;
+// [/SL:KB]
 }
 
 void LLTextBase::appendLineBreakSegment(const LLStyle::Params& style_params)
@@ -2671,6 +2760,41 @@ void LLTextBase::changeLine( S32 delta )
     }
 }
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2013-12-31 (Catznip-3.6)
+void LLTextBase::scrollTo(S32 nLine, S32 nColumn)
+{
+	// Make sure we have an up-to-date mLineInfoList
+	reflow();
+
+	LLRect rctVisible = getVisibleDocumentRect();
+	line_list_t::const_iterator itFirst = std::lower_bound(mLineInfoList.begin(), mLineInfoList.end(), rctVisible.mTop, compare_top());
+	line_list_t::const_iterator itLast = std::upper_bound(mLineInfoList.begin(), mLineInfoList.end(), rctVisible.mBottom, compare_bottom());
+
+	// We'd like to scroll to three lines above, or three lines below the requested line
+	S32 nScrollPos = mCursorPos;
+	if (itFirst->mLineNum + 3 > nLine)
+	{
+		// Scroll up
+		nScrollPos = getLineStart(llmax(0, nLine - 3), false);
+	}
+	else if (itLast->mLineNum - 3 < nLine)
+	{
+		// Scroll down
+		nScrollPos = getLineStart(llmin(nLine + 3, getLineCount()), false);
+	}
+
+	if ( (mScroller) && (nScrollPos != mCursorPos) )
+	{
+		// Scroll so that the cursor is at the top of the page
+		LLRect rctDesired = getDocRectFromDocIndex(nScrollPos);
+		mScroller->scrollToShowRect(rctDesired, LLRect(0, rctVisible.getHeight() - 5, rctVisible.getWidth(), 5));
+	}
+
+	setCursor(nLine, nColumn);
+	mScrollNeeded = FALSE; 
+}
+// [/SL:KB
+
 bool LLTextBase::scrolledToStart()
 {
 	return mScroller->isAtTop();
@@ -2680,6 +2804,53 @@ bool LLTextBase::scrolledToEnd()
 {
 	return mScroller->isAtBottom();
 }
+
+// [SL:KB] - Patch: Control-TextHighlight | Checked: 2013-12-30 (Catznip-3.6)
+void LLTextBase::clearHighlights()
+{
+	mHighlightWord.clear();
+	mHighlights.clear();
+	mHighlightsDirty = false;
+}
+
+void LLTextBase::refreshHighlights()
+{
+	if (mHighlightsDirty)
+	{
+		mHighlights.clear();
+		if (!mHighlightWord.empty())
+		{
+			const LLWString& wstrText = getWText();
+
+			std::list<boost::iterator_range<LLWString::const_iterator> > highlightRanges;
+			if (mHighlightCaseInsensitive)
+				boost::ifind_all(highlightRanges, wstrText, mHighlightWord);
+			else
+				boost::find_all(highlightRanges, wstrText, mHighlightWord);
+
+			for (std::list<boost::iterator_range<LLWString::const_iterator> >::const_iterator itRange = highlightRanges.begin(); itRange != highlightRanges.end(); ++itRange)
+			{
+				S32 idxStart = itRange->begin() - wstrText.begin();
+				mHighlights.push_back(range_pair_t(idxStart, idxStart + itRange->size()));
+			}
+		}
+		mHighlightsDirty = false;
+	}
+}
+
+void LLTextBase::setHighlightWord(const std::string& strHighlight, bool fCaseInsensitive)
+{
+	if (strHighlight.empty())
+	{
+		clearHighlights();
+		return;
+	}
+
+	mHighlightWord = utf8str_to_wstring(strHighlight);
+	mHighlightCaseInsensitive = fCaseInsensitive;
+	mHighlightsDirty = true;
+}
+// [/SL:KB]
 
 bool LLTextBase::setCursor(S32 row, S32 column)
 {
@@ -2924,6 +3095,9 @@ void LLTextBase::startSelection()
 	if( !mIsSelecting )
 	{
 		mIsSelecting = TRUE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+		mIsSelectDragging = FALSE;
+// [/SL:KB]
 		mSelectionStart = mCursorPos;
 		mSelectionEnd = mCursorPos;
 	}
@@ -2934,6 +3108,9 @@ void LLTextBase::endSelection()
 	if( mIsSelecting )
 	{
 		mIsSelecting = FALSE;
+// [SL:KB] - Patch: Control-TextEditorSelectDrag | Checked: 2012-01-02 (Catznip-3.2)
+		mIsSelectDragging = FALSE;
+// [/SL:KB]
 		mSelectionEnd = mCursorPos;
 	}
 }
