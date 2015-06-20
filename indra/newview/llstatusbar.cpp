@@ -38,6 +38,9 @@
 #include "llfloaterbuycurrency.h"
 #include "llbuycurrencyhtml.h"
 #include "llpanelnearbymedia.h"
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+#include "llpaneltopinfobar.h"
+// [/SL:KB]
 #include "llpanelvolumepulldown.h"
 #include "llfloaterregioninfo.h"
 #include "llfloaterscriptdebug.h"
@@ -109,10 +112,13 @@ static void onClickVolume(void*);
 
 LLStatusBar::LLStatusBar(const LLRect& rect)
 :	LLPanel(),
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	mViewStatus(NULL),
+// [/SL:KB]
 	mTextTime(NULL),
 	mSGBandwidth(NULL),
 	mSGPacketLoss(NULL),
-	mBtnStats(NULL),
+//	mBtnStats(NULL),
 	mBtnVolume(NULL),
 	mBoxBalance(NULL),
 	mBalance(0),
@@ -163,6 +169,10 @@ BOOL LLStatusBar::postBuild()
 {
 	gMenuBarView->setRightMouseDownCallback(boost::bind(&show_navbar_context_menu, _1, _2, _3));
 
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	mViewStatus = findChildView("status_panel");
+// [/SL:KB]
+
 	mTextTime = getChild<LLTextBox>("TimeText" );
 	
 	getChild<LLUICtrl>("buyL")->setCommitCallback(
@@ -173,7 +183,7 @@ BOOL LLStatusBar::postBuild()
 	mBoxBalance = getChild<LLTextBox>("balance");
 	mBoxBalance->setClickedCallback( &LLStatusBar::onClickBalance, this );
 	
-	mBtnStats = getChildView("stat_btn");
+//	mBtnStats = getChildView("stat_btn");
 
 	mBtnVolume = getChild<LLButton>( "volume_btn" );
 	mBtnVolume->setClickedCallback( onClickVolume, this );
@@ -183,15 +193,39 @@ BOOL LLStatusBar::postBuild()
 	mMediaToggle->setClickedCallback( &LLStatusBar::onClickMediaToggle, this );
 	mMediaToggle->setMouseEnterCallback(boost::bind(&LLStatusBar::onMouseEnterNearbyMedia, this));
 
-	LLHints::registerHintTarget("linden_balance", getChild<LLView>("balance_bg")->getHandle());
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	LLHints::registerHintTarget("linden_balance", mBoxBalance->getHandle());
+// [/SL:KB]
+//	LLHints::registerHintTarget("linden_balance", getChild<LLView>("balance_bg")->getHandle());
 
 	gSavedSettings.getControl("MuteAudio")->getSignal()->connect(boost::bind(&LLStatusBar::onVolumeChanged, this, _2));
 
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	LLControlVariable* pControl = gSavedSettings.getControl("ShowBuyCurrencyButton");
+	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleBuyCurrencyButton, this, _2));
+	onToggleBuyCurrencyButton(pControl->getValue());
+
+	pControl = gSavedSettings.getControl("ShowMarketplaceButton");
+	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleMarketplaceButton, this, _2));
+	onToggleMarketplaceButton(pControl->getValue());
+
+	pControl = gSavedSettings.getControl("ShowNetStats");
+	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleNetStats, this, _2));
+	onToggleNetStats(pControl->getValue());
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	LLPanel* pNetStats = findChild<LLPanel>("netstats_panel");
+// [/SL:KB]
+
 	// Adding Net Stat Graph
-	S32 x = getRect().getWidth() - 2;
-	S32 y = 0;
+//	S32 x = getRect().getWidth() - 2;
+//	S32 y = 0;
 	LLRect r;
-	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	r.set(0, MENU_BAR_HEIGHT - 1, SIM_STAT_WIDTH, 1);
+// [/SL:KB]
+//	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
 	LLStatGraph::Params sgp;
 	sgp.name("BandwidthGraph");
 	sgp.rect(r);
@@ -202,10 +236,16 @@ BOOL LLStatusBar::postBuild()
 	sgp.precision(0);
 	sgp.per_sec(true);
 	mSGBandwidth = LLUICtrlFactory::create<LLStatGraph>(sgp);
-	addChild(mSGBandwidth);
-	x -= SIM_STAT_WIDTH + 2;
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	pNetStats->addChild(mSGBandwidth);
+// [/SL:KB]
+//	addChild(mSGBandwidth);
+//	x -= SIM_STAT_WIDTH + 2;
 
-	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	r.set(SIM_STAT_WIDTH, MENU_BAR_HEIGHT - 1, SIM_STAT_WIDTH * 2, 1);
+// [/SL:KB]
+//	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
 	//these don't seem to like being reused
 	LLStatGraph::Params pgp;
 	pgp.name("PacketLossPercent");
@@ -226,7 +266,10 @@ BOOL LLStatusBar::postBuild()
 	pgp.thresholds(thresholds);
 
 	mSGPacketLoss = LLUICtrlFactory::create<LLStatGraph>(pgp);
-	addChild(mSGPacketLoss);
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	pNetStats->addChild(mSGPacketLoss);
+// [/SL:KB]
+//	addChild(mSGPacketLoss);
 
 	mPanelVolumePulldown = new LLPanelVolumePulldown();
 	addChild(mPanelVolumePulldown);
@@ -238,7 +281,7 @@ BOOL LLStatusBar::postBuild()
 	mPanelNearByMedia->setFollows(FOLLOWS_TOP|FOLLOWS_RIGHT);
 	mPanelNearByMedia->setVisible(FALSE);
 
-	mScriptOut = getChildView("scriptout");
+//	mScriptOut = getChildView("scriptout");
 
 	return TRUE;
 }
@@ -291,9 +334,9 @@ void LLStatusBar::refresh()
 		gMenuBarView->reshape(MENU_RIGHT, gMenuBarView->getRect().getHeight());
 	}
 
-	mSGBandwidth->setVisible(net_stats_visible);
-	mSGPacketLoss->setVisible(net_stats_visible);
-	mBtnStats->setEnabled(net_stats_visible);
+//	mSGBandwidth->setVisible(net_stats_visible);
+//	mSGPacketLoss->setVisible(net_stats_visible);
+//	mBtnStats->setEnabled(net_stats_visible);
 
 	// update the master volume button state
 	bool mute_audio = LLAppViewer::instance()->getMasterSystemAudioMute();
@@ -313,15 +356,32 @@ void LLStatusBar::refresh()
 
 void LLStatusBar::setVisibleForMouselook(bool visible)
 {
-	mTextTime->setVisible(visible);
-	getChild<LLUICtrl>("balance_bg")->setVisible(visible);
-	mBoxBalance->setVisible(visible);
-	mBtnVolume->setVisible(visible);
-	mMediaToggle->setVisible(visible);
-	mSGBandwidth->setVisible(visible);
-	mSGPacketLoss->setVisible(visible);
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	mViewStatus->setVisible(visible);
+// [/SL:KB]
+//	mTextTime->setVisible(visible);
+//	getChild<LLUICtrl>("balance_bg")->setVisible(visible);
+//	mBoxBalance->setVisible(visible);
+//	mBtnVolume->setVisible(visible);
+//	mMediaToggle->setVisible(visible);
+//	mSGBandwidth->setVisible(visible);
+//	mSGPacketLoss->setVisible(visible);
 	setBackgroundVisible(visible);
 }
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+LLPanelTopInfoBar* LLStatusBar::getTopInfoBarPanel() const
+{
+	return dynamic_cast<LLPanelTopInfoBar*>(getChildView("topinfo_bar"));
+}
+
+void LLStatusBar::showTopInfoBar(bool fVisible)
+{
+	LLPanel* pTopInfoBar = getTopInfoBarPanel();
+	if (pTopInfoBar)
+		pTopInfoBar->setVisible(fVisible);
+}
+// [/SL:KB]
 
 void LLStatusBar::debitBalance(S32 debit)
 {
@@ -351,12 +411,16 @@ void LLStatusBar::setBalance(S32 balance)
 	{
 		const S32 HPAD = 24;
 		LLRect balance_rect = mBoxBalance->getTextBoundingRect();
-		LLRect buy_rect = getChildView("buyL")->getRect();
-		LLRect shop_rect = getChildView("goShop")->getRect();
-		LLView* balance_bg_view = getChildView("balance_bg");
-		LLRect balance_bg_rect = balance_bg_view->getRect();
-		balance_bg_rect.mLeft = balance_bg_rect.mRight - (buy_rect.getWidth() + shop_rect.getWidth() + balance_rect.getWidth() + HPAD);
-		balance_bg_view->setShape(balance_bg_rect);
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+		LLView* balance_panel = findChildView("balance_panel");
+		balance_panel->reshape(balance_rect.getWidth() + HPAD, balance_panel->getRect().getHeight());
+// [/SL:KB]
+//		LLRect buy_rect = getChildView("buyL")->getRect();
+//		LLRect shop_rect = getChildView("goShop")->getRect();
+//		LLView* balance_bg_view = getChildView("balance_bg");
+//		LLRect balance_bg_rect = balance_bg_view->getRect();
+//		balance_bg_rect.mLeft = balance_bg_rect.mRight - (buy_rect.getWidth() + shop_rect.getWidth() + balance_rect.getWidth() + HPAD);
+//		balance_bg_view->setShape(balance_bg_rect);
 	}
 
 	if (mBalance && (fabs((F32)(mBalance - balance)) > gSavedSettings.getF32("UISndMoneyChangeThreshold")))
@@ -457,6 +521,23 @@ S32 LLStatusBar::getSquareMetersLeft() const
 	return mSquareMetersCredit - mSquareMetersCommitted;
 }
 
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+void LLStatusBar::onToggleBuyCurrencyButton(const LLSD& sdValue)
+{
+	getChildView("buyL_panel")->setVisible(sdValue.asBoolean());
+}
+
+void LLStatusBar::onToggleMarketplaceButton(const LLSD& sdValue)
+{
+	getChildView("shop_panel")->setVisible(sdValue.asBoolean());
+}
+
+void LLStatusBar::onToggleNetStats(const LLSD& sdValue)
+{
+	getChildView("netstats_panel")->setVisible(sdValue.asBoolean());
+}
+// [/SL:KB]
+
 void LLStatusBar::onClickBuyCurrency()
 {
 	// open a currency floater - actual one open depends on 
@@ -468,7 +549,11 @@ void LLStatusBar::onClickBuyCurrency()
 void LLStatusBar::onMouseEnterVolume()
 {
 	LLButton* volbtn =  getChild<LLButton>( "volume_btn" );
-	LLRect vol_btn_rect = volbtn->getRect();
+//	LLRect vol_btn_rect = volbtn->getRect();
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2)
+	LLRect vol_btn_rect;
+	volbtn->localRectToOtherView(volbtn->getLocalRect(), &vol_btn_rect, this);
+// [/SL:KB]
 	LLRect volume_pulldown_rect = mPanelVolumePulldown->getRect();
 	volume_pulldown_rect.setLeftTopAndSize(vol_btn_rect.mLeft -
 	     (volume_pulldown_rect.getWidth() - vol_btn_rect.getWidth()),
@@ -491,7 +576,11 @@ void LLStatusBar::onMouseEnterNearbyMedia()
 	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
 	LLRect nearby_media_rect = mPanelNearByMedia->getRect();
 	LLButton* nearby_media_btn =  getChild<LLButton>( "media_toggle_btn" );
-	LLRect nearby_media_btn_rect = nearby_media_btn->getRect();
+//	LLRect nearby_media_btn_rect = nearby_media_btn->getRect();
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2)
+	LLRect nearby_media_btn_rect;
+	nearby_media_btn->localRectToOtherView(nearby_media_btn->getLocalRect(), &nearby_media_btn_rect, this);
+// [/SL:KB]
 	nearby_media_rect.setLeftTopAndSize(nearby_media_btn_rect.mLeft - 
 										(nearby_media_rect.getWidth() - nearby_media_btn_rect.getWidth())/2,
 										nearby_media_btn_rect.mBottom,

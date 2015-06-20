@@ -1111,7 +1111,10 @@ void create_inventory_item(const LLUUID& agent_id, const LLUUID& session_id,
 	gAgent.sendReliableMessage();
 }
 
-void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent /*= LLUUID::null*/, LLPointer<LLInventoryCallback> cb/*=NULL*/)
+//void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent /*= LLUUID::null*/, LLPointer<LLInventoryCallback> cb/*=NULL*/)
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-12-13 (Catznip-3.6)
+void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent, LLPointer<LLInventoryCallback> cb/*=NULL*/)
+// [/SL:KB]
 {
 	std::string item_desc = avatar_id.asString();
 	std::string item_name;

@@ -1992,7 +1992,7 @@ SHA1 指紋：[MD5_DIGEST]
 		<usetemplate canceltext="取消" name="yesnocancelbuttons" notext="否" yestext="是"/>
 	</notification>
 	<notification label="確定重新啟動" name="ConfirmRestart">
-		你確定要在 2 分鐘後重新啟動這個地區？
+		你確定要在[MINUTES] 分鐘後重新啟動這個地區？
 		<usetemplate name="okcancelbuttons" notext="取消" yestext="確定"/>
 	</notification>
 	<notification label="對地區裡每個人發出訊息" name="MessageRegion">
