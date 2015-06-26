@@ -883,8 +883,11 @@ bool LLCollectAllBuddies::operator()(const LLUUID& buddy_id, LLRelationship* bud
 {
 	LLAvatarName av_name;
 	LLAvatarNameCache::get(buddy_id, &av_name);
-	mFullName = av_name.getCompleteName();
-	buddy_map_t::value_type value(buddy_id, mFullName);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	buddy_map_t::value_type value(buddy_id, av_name);
+// [/SL:KB]
+//	mFullName = av_name.getCompleteName();
+//	buddy_map_t::value_type value(buddy_id, mFullName);
 	if(buddy->isOnline())
 	{
 		mOnline.insert(value);

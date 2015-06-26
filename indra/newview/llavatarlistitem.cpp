@@ -407,7 +407,10 @@ void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
 	mAvatarNameCacheConnection.disconnect();
 
 	setAvatarName(av_name.getDisplayName());
-	setAvatarToolTip(av_name.getUserName());
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+	setAvatarToolTip(av_name.getAccountName());
+// [/SL:KB]
+//	setAvatarToolTip(av_name.getUserName());
 
 	//requesting the list to resort
 	notifyParent(LLSD().with("sort", LLSD()));

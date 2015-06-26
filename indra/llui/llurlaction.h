@@ -68,6 +68,11 @@ public:
 	/// perform the appropriate action for left-clicking on a Url
 	static void clickAction(std::string url, bool trusted_content);
 
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-2.5)
+	/// perform the specified copy to clipboard action on a Url 
+	static void copyToClipboard(std::string strURL, const LLSD& sdAction);
+// [/SL:KB]
+
 	/// copy the label for a Url to the clipboard
 	static void copyLabelToClipboard(std::string url);
 

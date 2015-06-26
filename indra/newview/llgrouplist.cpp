@@ -43,6 +43,10 @@
 #include "llviewercontrol.h"	// for gSavedSettings
 #include "llviewermenu.h"		// for gMenuHolder
 #include "llvoiceclient.h"
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+#include "llslurl.h"
+#include "llwindow.h"
+// [/SL:KB]
 
 static LLDefaultChildRegistry::Register<LLGroupList> r("group_list");
 S32 LLGroupListItem::sIconWidth = 0;
@@ -271,6 +275,12 @@ bool LLGroupList::onContextMenuItemClick(const LLSD& userdata)
 	{
 		LLGroupActions::leave(selected_group);
 	}
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+	else if (action == "copy_slurl")
+	{
+		LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(LLSLURL("group", selected_group, "about").getSLURLString()));
+	}
+// [/SL:KB]
 
 	return true;
 }
