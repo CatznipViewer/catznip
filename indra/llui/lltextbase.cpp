@@ -2154,6 +2154,21 @@ bool LLTextBase::useLabel() const
 
 void LLTextBase::setFont(const LLFontGL* font)
 {
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2)
+	for(segment_set_t::iterator itSegment = mSegments.begin(); itSegment != mSegments.end(); ++itSegment)
+	{
+		LLTextSegmentPtr segment = *itSegment;
+
+		LLStyleConstSP curStyle = segment->getStyle();
+		if (curStyle->getFont() == mFont)
+		{
+			LLStyleSP newStyle(new LLStyle(*curStyle));
+			newStyle->setFont(font);
+			LLStyleConstSP newStyleConst(newStyle);
+			segment->setStyle(newStyleConst);
+		}
+	}
+// [/SL:KB]
 	mFont = font;
 	mStyleDirty = true;
 }
@@ -3511,6 +3526,13 @@ F32	LLLineBreakTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 se
 {
 	return  draw_rect.mLeft;
 }
+
+// [SL:KB] - Patch: Control-TextEditorFont | Checked: 2012-01-10 (Catznip-3.2)
+void LLLineBreakTextSegment::setStyle(LLStyleConstSP style)
+{
+	mFontHeight = llceil(style->getFont()->getLineHeight());
+}
+// [/SL:KB]
 
 LLImageTextSegment::LLImageTextSegment(LLStyleConstSP style,S32 pos,class LLTextBase& editor)
 :	LLTextSegment(pos,pos+1),
