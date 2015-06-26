@@ -3316,6 +3316,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>DoubleClickAttachmentAdd</key>
+    <map>
+      <key>Comment</key>
+      <string>Double-clicking an attachment in inventory will add wear it rather than replace wear it</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>DoubleClickAutoPilot</key>
     <map>
       <key>Comment</key>
@@ -3348,6 +3359,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>DoubleClickWearableAdd</key>
+    <map>
+      <key>Comment</key>
+      <string>Double-clicking a clothing wearable in inventory will add wear it rather than replace wear it</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>DragAndDropToolTipDelay</key>
     <map>
@@ -10786,6 +10808,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>ShowPropertiesFloaters</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows item properties in a floater rather than the sidebar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
 	<key>ShowScriptErrors</key>
     <map>
