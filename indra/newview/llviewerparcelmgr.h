@@ -157,6 +157,9 @@ public:
 	LLParcel *getAgentParcel() const;
 
 	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	BOOL	inAgentParcel(const LLVector3& pos_region) const;
+// [/SL:KB]
 
 	// Returns a pointer only when it has valid data.
 	LLParcel*	getHoverParcel() const;
