@@ -58,11 +58,17 @@
 #include "llmarketplacefunctions.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llpreviewanim.h"
 #include "llpreviewgesture.h"
 #include "llpreviewtexture.h"
 #include "llselectmgr.h"
 #include "llsidepanelappearance.h"
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
+#include "llsidepanelinventory.h"
+// [/SL:KB]
 #include "lltooldraganddrop.h"
 #include "lltrans.h"
 #include "llviewerassettype.h"
@@ -1013,6 +1019,21 @@ BOOL LLInvFVBridge::isAgentInventory() const
 	return model->isObjectDescendentOf(mUUID, gInventory.getRootFolderID());
 }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
+BOOL LLInvFVBridge::isLibraryInventory() const
+{
+	const LLInventoryModel* model = getInventoryModel();
+	if (!model) return FALSE;
+	if (gInventory.getLibraryRootFolderID() == mUUID) return TRUE;
+	return model->isObjectDescendentOf(mUUID, gInventory.getLibraryRootFolderID());
+}
+
+BOOL LLInvFVBridge::isLostInventory() const
+{
+	return (!isAgentInventory()) && (!isLibraryInventory());
+}
+// [/SL:KB]
+
 BOOL LLInvFVBridge::isCOFFolder() const
 {
 	return LLAppearanceMgr::instance().getIsInCOF(mUUID);
@@ -1620,15 +1641,31 @@ void LLItemBridge::restoreToWorld()
 
 void LLItemBridge::gotoItem()
 {
-	LLInventoryObject *obj = getInventoryObject();
-	if (obj && obj->getIsLinkType())
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	// Prefer the current inventory panel if possible
+	if (!mInventoryPanel.isDead())
 	{
-		LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
-		if (active_panel)
+		const LLUUID& idTarget = gInventory.getLinkedItemID(mUUID);
+
+		LLInventoryPanel* inv_panel = mInventoryPanel.get();
+		LLFolderViewItem* view_item = inv_panel->getItemByID(idTarget);
+		if ( (view_item) && (view_item->passedFilter()) )
 		{
-			active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+			inv_panel->setSelection(idTarget, TAKE_FOCUS_NO);
+			return;
 		}
 	}
+	show_item_original(mUUID);
+// [/SL:KB]
+//	LLInventoryObject *obj = getInventoryObject();
+//	if (obj && obj->getIsLinkType())
+//	{
+//		LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel();
+//		if (active_panel)
+//		{
+//			active_panel->setSelection(obj->getLinkedUUID(), TAKE_FOCUS_NO);
+//		}
+//	}
 }
 
 LLUIImagePtr LLItemBridge::getIcon() const
@@ -2910,8 +2947,6 @@ void LLInventoryCopyAndWearObserver::changed(U32 mask)
 	}
 }
 
-
-
 void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 {
 	if ("open" == action)
@@ -2924,6 +2959,27 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		
 		return;
 	}
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
+	else if ("open_newwindow" == action)
+	{
+		LLFloater* pInvFloater = LLPanelMainInventory::newWindow();
+		LLSidepanelInventory* pInvSP = (pInvFloater) ? LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(pInvFloater) : NULL;
+		if (pInvSP)
+		{
+			LLInventoryPanel* pInvPanel = pInvSP->getActivePanel();
+			if (pInvPanel)
+			{
+				LLFolderViewItem* pFVItem = pInvPanel->getItemByID(mUUID);
+				if (pFVItem)
+				{
+				 	pFVItem->setOpen(TRUE);
+					pInvPanel->getRootFolder()->setSelection(pFVItem, TRUE, TRUE);
+					pInvPanel->getRootFolder()->scrollToShowSelection();
+				}
+			}
+		}
+	}
+// [/SL:KB]
 	else if ("paste" == action)
 	{
 		pasteFromClipboard();
@@ -2980,6 +3036,20 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		restoreItem();
 		return;
 	}
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
+	else if ("move_to_lost_and_found" == action)
+	{
+		LLInventoryModel* pModel = getInventoryModel();
+		LLViewerInventoryCategory* pCat = getCategory();
+		if ( (!pModel) || (&gInventory != pModel) || (!pCat) )
+			return;
+
+		gInventory.changeCategoryParent(pCat, gInventory.findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND), TRUE);
+
+		gInventory.addChangedMask(LLInventoryObserver::REBUILD, mUUID);
+		gInventory.notifyObservers();
+	}
+// [/SL:KB]
 #ifndef LL_RELEASE_FOR_DOWNLOAD
 	else if ("delete_system_folder" == action)
 	{
@@ -3414,7 +3484,7 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 	if (lost_and_found_id == mUUID)
 	{
 		// This is the lost+found folder.
-		items.push_back(std::string("Empty Lost And Found"));
+//		items.push_back(std::string("Empty Lost And Found"));
 
 		disabled_items.push_back(std::string("New Folder"));
 		disabled_items.push_back(std::string("New Script"));
@@ -3501,7 +3571,20 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		{
 			mWearables=TRUE;
 		}
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
+		items.push_back(std::string("Outfit Separator"));
+		items.push_back(std::string("Open in XXX"));
+// [/SL:KB]
 	}
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
+	else if (isLostInventory())
+	{
+		items.push_back(std::string("Move to Lost And Found"));
+		if (0 == (flags & FIRST_SELECTED_ITEM))
+			disabled_items.push_back(std::string("Move to Lost And Found"));
+	}
+// [/SL:KB]
 
 	// Preemptively disable system folder removal if more than one item selected.
 	if ((flags & FIRST_SELECTED_ITEM) == 0)
@@ -3690,25 +3773,29 @@ BOOL LLFolderBridge::dragOrDrop(MASK mask, BOOL drop,
 		case DAD_ANIMATION:
 		case DAD_GESTURE:
 		case DAD_MESH:
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4)
+		// Moving a folder link to a different folder should move the *link* and not the target folder
+		case DAD_LINK:
+// [/SL:KB]
 			accept = dragItemIntoFolder(inv_item, drop, tooltip_msg);
 			break;
-		case DAD_LINK:
-			// DAD_LINK type might mean one of two asset types: AT_LINK or AT_LINK_FOLDER.
-			// If we have an item of AT_LINK_FOLDER type we should process the linked
-			// category being dragged or dropped into folder.
-			if (inv_item && LLAssetType::AT_LINK_FOLDER == inv_item->getActualType())
-			{
-				LLInventoryCategory* linked_category = gInventory.getCategory(inv_item->getLinkedUUID());
-				if (linked_category)
-				{
-					accept = dragCategoryIntoFolder((LLInventoryCategory*)linked_category, drop, tooltip_msg);
-				}
-			}
-			else
-			{
-				accept = dragItemIntoFolder(inv_item, drop, tooltip_msg);
-			}
-			break;
+//		case DAD_LINK:
+//			// DAD_LINK type might mean one of two asset types: AT_LINK or AT_LINK_FOLDER.
+//			// If we have an item of AT_LINK_FOLDER type we should process the linked
+//			// category being dragged or dropped into folder.
+//			if (inv_item && LLAssetType::AT_LINK_FOLDER == inv_item->getActualType())
+//			{
+//				LLInventoryCategory* linked_category = gInventory.getCategory(inv_item->getLinkedUUID());
+//				if (linked_category)
+//				{
+//					accept = dragCategoryIntoFolder((LLInventoryCategory*)linked_category, drop, tooltip_msg);
+//				}
+//			}
+//			else
+//			{
+//				accept = dragItemIntoFolder(inv_item, drop, tooltip_msg);
+//			}
+//			break;
 		case DAD_CATEGORY:
 			if (LLFriendCardsManager::instance().isAnyFriendCategory(mUUID))
 			{
@@ -3877,15 +3964,27 @@ bool move_task_inventory_callback(const LLSD& notification, const LLSD& response
 
 	if(option == 0 && object)
 	{
-		if (cat_and_wear && cat_and_wear->mWear) // && !cat_and_wear->mFolderResponded)
+//		if (cat_and_wear && cat_and_wear->mWear) // && !cat_and_wear->mFolderResponded)
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+		if (cat_and_wear)
+// [/SL:KB]
 		{
 			LLInventoryObject::object_list_t inventory_objects;
 			object->getInventoryContents(inventory_objects);
 			int contents_count = inventory_objects.size()-1; //subtract one for containing folder
-			LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count, cat_and_wear->mFolderResponded,
-																									cat_and_wear->mReplace);
 			
-			gInventory.addObserver(inventoryObserver);
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+			move_task_inventory_register_folder(cat_and_wear->mCatID, contents_count);
+
+			if (cat_and_wear->mWear)
+			{
+				LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count, cat_and_wear->mFolderResponded, cat_and_wear->mReplace);
+				gInventory.addObserver(inventoryObserver);
+			}
+// [/SL:KB]
+//			LLInventoryCopyAndWearObserver* inventoryObserver = new LLInventoryCopyAndWearObserver(cat_and_wear->mCatID, contents_count, cat_and_wear->mFolderResponded,
+//																									cat_and_wear->mReplace);
+//			gInventory.addObserver(inventoryObserver);
 		}
 
 		two_uuids_list_t::iterator move_it;
@@ -3981,7 +4080,11 @@ void LLFolderBridge::dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_c
 	{
 		LLAppearanceMgr::instance().wearItemOnAvatar(inv_item->getUUID(), true, true);
 	}
-	else
+//	else
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4)
+	// Don't create a link when dropping one of our direct descendents
+	else if (inv_item->getParentUUID() != mUUID)
+// [/SL:KB]
 	{
 		LLPointer<LLInventoryCallback> cb = NULL;
 		link_inventory_object(mUUID, LLConstPointer<LLInventoryObject>(inv_item), cb);
@@ -4087,11 +4190,17 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 		}
 		else if (move_is_into_current_outfit || move_is_into_outfit)
 		{
-			accept = can_move_to_outfit(inv_item, move_is_into_current_outfit);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4)
+			accept &= can_move_to_outfit(inv_item, move_is_into_current_outfit);
+// [/SL:KB]
+//			accept = can_move_to_outfit(inv_item, move_is_into_current_outfit);
 		}
 		else if (move_is_into_favorites || move_is_into_landmarks)
 		{
-			accept = can_move_to_landmarks(inv_item);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2010-11-14 (Catznip-2.4)
+			accept &= can_move_to_landmarks(inv_item);
+// [/SL:KB]
+//			accept = can_move_to_landmarks(inv_item);
 		}
 		else if (move_is_into_outbox)
 		{
@@ -4618,18 +4727,24 @@ LLLandmarkBridge::LLLandmarkBridge(LLInventoryPanel* inventory,
 								   LLFolderView* root,
 								   const LLUUID& uuid, 
 								   U32 flags/* = 0x00*/) :
-	LLItemBridge(inventory, root, uuid)
+//	LLItemBridge(inventory, root, uuid)
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	LLItemBridge(inventory, root, uuid, flags)
+// [/SL:KB]
 {
-	mVisited = FALSE;
-	if (flags & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED)
-	{
-		mVisited = TRUE;
-	}
+//	mVisited = FALSE;
+//	if (flags & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED)
+//	{
+//		mVisited = TRUE;
+//	}
 }
 
 LLUIImagePtr LLLandmarkBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_LANDMARK, LLInventoryType::IT_LANDMARK, mVisited, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(LLAssetType::AT_LANDMARK, LLInventoryType::IT_LANDMARK, mFlags);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_LANDMARK, LLInventoryType::IT_LANDMARK, mVisited, FALSE);
 }
 
 void LLLandmarkBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
@@ -4748,25 +4863,25 @@ void LLLandmarkBridge::openItem()
 }
 
 
-// +=================================================+
-// |        LLCallingCardObserver                    |
-// +=================================================+
-class LLCallingCardObserver : public LLFriendObserver
-{
-public:
-	LLCallingCardObserver(LLCallingCardBridge* bridge) : mBridgep(bridge) {}
-	virtual ~LLCallingCardObserver() { mBridgep = NULL; }
-	virtual void changed(U32 mask)
-	{
-		mBridgep->refreshFolderViewItem();
-		if (mask & LLFriendObserver::ONLINE)
-		{
-			mBridgep->checkSearchBySuffixChanges();
-		}
-	}
-protected:
-	LLCallingCardBridge* mBridgep;
-};
+//// +=================================================+
+//// |        LLCallingCardObserver                    |
+//// +=================================================+
+//class LLCallingCardObserver : public LLFriendObserver
+//{
+//public:
+//	LLCallingCardObserver(LLCallingCardBridge* bridge) : mBridgep(bridge) {}
+//	virtual ~LLCallingCardObserver() { mBridgep = NULL; }
+//	virtual void changed(U32 mask)
+//	{
+//		mBridgep->refreshFolderViewItem();
+//		if (mask & LLFriendObserver::ONLINE)
+//		{
+//			mBridgep->checkSearchBySuffixChanges();
+//		}
+//	}
+//protected:
+//	LLCallingCardBridge* mBridgep;
+//};
 
 // +=================================================+
 // |        LLCallingCardBridge                      |
@@ -4777,63 +4892,63 @@ LLCallingCardBridge::LLCallingCardBridge(LLInventoryPanel* inventory,
 										 const LLUUID& uuid ) :
 	LLItemBridge(inventory, root, uuid)
 {
-	mObserver = new LLCallingCardObserver(this);
-	LLAvatarTracker::instance().addObserver(mObserver);
+//	mObserver = new LLCallingCardObserver(this);
+//	LLAvatarTracker::instance().addObserver(mObserver);
 }
 
 LLCallingCardBridge::~LLCallingCardBridge()
 {
-	LLAvatarTracker::instance().removeObserver(mObserver);
-	delete mObserver;
+//	LLAvatarTracker::instance().removeObserver(mObserver);
+//	delete mObserver;
 }
 
-void LLCallingCardBridge::refreshFolderViewItem()
-{
-	LLInventoryPanel* panel = mInventoryPanel.get();
-	LLFolderViewItem* itemp = panel ? panel->getItemByID(mUUID) : NULL;
-	if (itemp)
-	{
-		itemp->refresh();
-	}
-}
+//void LLCallingCardBridge::refreshFolderViewItem()
+//{
+//	LLInventoryPanel* panel = mInventoryPanel.get();
+//	LLFolderViewItem* itemp = panel ? panel->getItemByID(mUUID) : NULL;
+//	if (itemp)
+//	{
+//		itemp->refresh();
+//	}
+//}
 
-void LLCallingCardBridge::checkSearchBySuffixChanges()
-{
-	if (!mDisplayName.empty())
-	{
-		// changes in mDisplayName are processed by rename function and here it will be always same
-		// suffixes are also of fixed length, and we are processing change of one at a time,
-		// so it should be safe to use length (note: mSearchableName is capitalized)
-		S32 old_length = mSearchableName.length();
-		S32 new_length = mDisplayName.length() + getLabelSuffix().length();
-		if (old_length == new_length)
-		{
-			return;
-		}
-		mSearchableName.assign(mDisplayName);
-		mSearchableName.append(getLabelSuffix());
-		LLStringUtil::toUpper(mSearchableName);
-		if (new_length<old_length)
-		{
-			LLInventoryFilter* filter = getInventoryFilter();
-			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
-			{
-				// string no longer contains substring 
-				// we either have to update all parents manually or restart filter.
-				// dirtyFilter will not work here due to obsolete descendants' generations 
-				getInventoryFilter()->setModified(LLFolderViewFilter::FILTER_MORE_RESTRICTIVE);
-			}
-		}
-		else
-		{
-			if (getInventoryFilter())
-			{
-				// mSearchableName became longer, we gained additional suffix and need to repeat filter check.
-				dirtyFilter();
-			}
-		}
-	}
-}
+//void LLCallingCardBridge::checkSearchBySuffixChanges()
+//{
+//	if (!mDisplayName.empty())
+//	{
+//		// changes in mDisplayName are processed by rename function and here it will be always same
+//		// suffixes are also of fixed length, and we are processing change of one at a time,
+//		// so it should be safe to use length (note: mSearchableName is capitalized)
+//		S32 old_length = mSearchableName.length();
+//		S32 new_length = mDisplayName.length() + getLabelSuffix().length();
+//		if (old_length == new_length)
+//		{
+//			return;
+//		}
+//		mSearchableName.assign(mDisplayName);
+//		mSearchableName.append(getLabelSuffix());
+//		LLStringUtil::toUpper(mSearchableName);
+//		if (new_length<old_length)
+//		{
+//			LLInventoryFilter* filter = getInventoryFilter();
+//			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
+//			{
+//				// string no longer contains substring 
+//				// we either have to update all parents manually or restart filter.
+//				// dirtyFilter will not work here due to obsolete descendants' generations 
+//				getInventoryFilter()->setModified(LLFolderViewFilter::FILTER_MORE_RESTRICTIVE);
+//			}
+//		}
+//		else
+//		{
+//			if (getInventoryFilter())
+//			{
+//				// mSearchableName became longer, we gained additional suffix and need to repeat filter check.
+//				dirtyFilter();
+//			}
+//		}
+//	}
+//}
 
 // virtual
 void LLCallingCardBridge::performAction(LLInventoryModel* model, std::string action)
@@ -4887,7 +5002,10 @@ LLUIImagePtr LLCallingCardBridge::getIcon() const
 	{
 		online = LLAvatarTracker::instance().isBuddyOnline(item->getCreatorUUID());
 	}
-	return LLInventoryIcon::getIcon(LLAssetType::AT_CALLINGCARD, LLInventoryType::IT_CALLINGCARD, online, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(LLAssetType::AT_CALLINGCARD, LLInventoryType::IT_CALLINGCARD, online);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_CALLINGCARD, LLInventoryType::IT_CALLINGCARD, online, FALSE);
 }
 
 std::string LLCallingCardBridge::getLabelSuffix() const
@@ -5335,16 +5453,22 @@ LLObjectBridge::LLObjectBridge(LLInventoryPanel* inventory,
 							   const LLUUID& uuid, 
 							   LLInventoryType::EType type, 
 							   U32 flags) :
-	LLItemBridge(inventory, root, uuid)
+//	LLItemBridge(inventory, root, uuid)
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	LLItemBridge(inventory, root, uuid, flags)
+// [/SL:KB]
 {
-	mAttachPt = (flags & 0xff); // low bye of inventory flags
-	mIsMultiObject = ( flags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS ) ?  TRUE: FALSE;
+//	mAttachPt = (flags & 0xff); // low bye of inventory flags
+//	mIsMultiObject = ( flags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS ) ?  TRUE: FALSE;
 	mInvType = type;
 }
 
 LLUIImagePtr LLObjectBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_OBJECT, mInvType, mAttachPt, mIsMultiObject);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(LLAssetType::AT_OBJECT, mInvType, mFlags);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_OBJECT, mInvType, mAttachPt, mIsMultiObject);
 }
 
 LLInventoryObject* LLObjectBridge::getObject() const
@@ -5710,7 +5834,10 @@ std::string LLWearableBridge::getLabelSuffix() const
 
 LLUIImagePtr LLWearableBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(mAssetType, mInvType, mWearableType, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(mAssetType, mInvType, mWearableType);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(mAssetType, mInvType, mWearableType, FALSE);
 }
 
 // virtual
@@ -6027,7 +6154,10 @@ void LLLinkItemBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 
 LLUIImagePtr LLMeshBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-08-24 (Catznip-2.8)
+	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, mFlags);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
 }
 
 void LLMeshBridge::openItem()
