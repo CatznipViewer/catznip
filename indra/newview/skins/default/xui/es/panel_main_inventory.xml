@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Cosas" name="main inventory panel">
 	<panel.string name="ItemcountFetching">
-		Obtenidos [ITEM_COUNT] ítems... [FILTER]
+		(Obtenidos [ITEM_COUNT] ítems)[FILTER]
 	</panel.string>
 	<panel.string name="ItemcountCompleted">
-		[ITEM_COUNT] ítems [FILTER]
+		([ITEM_COUNT] ítems)[FILTER]
 	</panel.string>
 	<text name="ItemcountText">
 		Ítems:
