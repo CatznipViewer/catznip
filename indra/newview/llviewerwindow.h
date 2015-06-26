@@ -401,6 +401,12 @@ public:
 	// Prints window implementation details
 	void			dumpState();
 
+// [SL:KB] - Patch: Viewer-FullscreenWindow | Checked: 2010-07-09 (Catznip-2.1)
+	bool			canFullscreenWindow();
+	bool			getFullscreenWindow();
+	void			setFullscreenWindow(BOOL fFullscreen);
+// [/SL:KB]
+
 	// handle shutting down GL and bringing it back up
 	void			requestResolutionUpdate();
 	void			checkSettings();
