@@ -159,6 +159,9 @@ public:
 
 	// Call this method to set the selection.
 	void openAllFolders();
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
+	bool getSelectedItems(LLInventoryModel::item_array_t& items) const;
+// [/SL:KB]
 	void setSelection(const LLUUID& obj_id, BOOL take_keyboard_focus);
 	void setSelectCallback(const boost::function<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)>& cb);
 	void clearSelection();
@@ -176,7 +179,13 @@ public:
 	void setHoursAgo(U32 hours);
 	void setDateSearchDirection(U32 direction);
 	BOOL getSinceLogoff();
-	void setFilterLinks(U64 filter_links);
+//	void setFilterLinks(U64 filter_links);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	void setFilterLinks(U64 filter_links, bool substring_reset);
+// [/SL:KB]
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void setFilterWorn(bool filter);
+// [/SL:KB]
 
 	void setShowFolderState(LLInventoryFilter::EFolderShow show);
 	LLInventoryFilter::EFolderShow getShowFolderState();
@@ -263,6 +272,9 @@ public:
 	static const std::string RECENTITEMS_SORT_ORDER;
 	static const std::string INHERIT_SORT_ORDER;
 	
+// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
+	void setSortBy(const std::string& sort_type);
+// [/SL:KB]
 	void setSortOrder(U32 order);
 	U32 getSortOrder() const;
 

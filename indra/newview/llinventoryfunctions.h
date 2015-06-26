@@ -52,6 +52,26 @@ BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id);
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2010-11-09 (Catznip-2.4)
+// These functions are shared betwen UI-SidepanelInventory and UI-SidepanelOutfitsView
+
+// Returns the UUID of the items' common parent (or a null UUID if the items don't all belong to the same parent)
+LLUUID get_items_parent(const LLInventoryModel::item_array_t& items);
+
+// Returns TRUE if the item is something that can be worn (wearables, attachments and gestures)
+bool get_item_wearable(const LLInventoryItem* pItem);
+bool get_item_wearable(const LLUUID& idItem);
+
+// Returns TRUE if every item is something that can be worn (wearables, attachments and gestures)
+bool get_items_wearable(const LLInventoryModel::item_array_t& items);
+
+// Returns TRUE if every item is worn (wearables, attachments and gestures)
+bool get_items_worn(const LLInventoryModel::item_array_t& items);
+
+// Copies the name of items in a folder to the clipboard (intended to be used for COF and FT_OUTFIT folders)
+void copy_folder_to_clipboard(const LLUUID& idFolder);
+// [/SL:KB]
+
 void show_item_profile(const LLUUID& item_uuid);
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
 
@@ -282,11 +302,19 @@ protected:
 class LLFindCOFValidItems : public LLInventoryCollectFunctor
 {
 public:
-	LLFindCOFValidItems() {}
+//	LLFindCOFValidItems() {}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+	LLFindCOFValidItems(bool include_gestures, bool include_folders);
+// [/SL:KB]
 	virtual ~LLFindCOFValidItems() {}
 	virtual bool operator()(LLInventoryCategory* cat,
 							LLInventoryItem* item);
 	
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-11-05 (Catznip-3.3)
+protected:
+	bool mIncludeGestures;
+	bool mIncludeFolders;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -368,10 +396,17 @@ class LLFindWearablesEx : public LLInventoryCollectFunctor
 {
 public:
 	LLFindWearablesEx(bool is_worn, bool include_body_parts = true);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	LLFindWearablesEx(bool is_worn, bool include_body_parts, const LLUUID& folder_id);
+// [/SL:KB]
 	virtual bool operator()(LLInventoryCategory* cat, LLInventoryItem* item);
 private:
 	bool mIncludeBodyParts;
 	bool mIsWorn;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-02 (Catznip-3.6)
+	bool mIncludeSubfolders;
+	LLUUID mFolderId;
+// [/SL:KB]
 };
 
 //Inventory collect functor collecting wearables of a specific wearable type

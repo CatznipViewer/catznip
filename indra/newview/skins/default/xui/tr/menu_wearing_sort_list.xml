@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ name="List Sort Wearing">
+    <menu_item_check label="Sort by Appearance" name="list_sort_appearance">
+	<menu_item_check label="Ada Göre Sırala" name="list_sort_name"/>
+	<menu_item_check label="Türe Göre Sırala" name="list_sort_type"/>
+</toggleable_menu>
