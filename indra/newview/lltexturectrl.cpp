@@ -145,7 +145,10 @@ public:
 		   void		onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action);
 	static void		onShowFolders(LLUICtrl* ctrl, void* userdata);
 	static void		onApplyImmediateCheck(LLUICtrl* ctrl, void* userdata);
-		   void		onTextureSelect( const LLTextureEntry& te );
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		   void		onTextureSelect(LLToolPipette::EType type, const LLTextureEntry& te);
+// [/SL:KB]
+//		   void		onTextureSelect( const LLTextureEntry& te );
 
 	static void		onModeSelect(LLUICtrl* ctrl, void *userdata);
 	static void		onBtnAdd(void* userdata);
@@ -495,7 +498,10 @@ BOOL LLFloaterTexturePicker::postBuild()
 	updateFilterPermMask();
 	mSavedFolderState.setApply(FALSE);
 
-	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterTexturePicker::onTextureSelect, this, _1));
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterTexturePicker::onTextureSelect, this, _1, _3));
+// [/SL:KB]
+//	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterTexturePicker::onTextureSelect, this, _1));
 	
 	return TRUE;
 }
@@ -563,7 +569,11 @@ void LLFloaterTexturePicker::draw()
 	getChildView("show_folders_check")->setEnabled(mActive && mCanApplyImmediately && !mNoCopyTextureSelected);
 	getChildView("Select")->setEnabled(mActive && mCanApply);
 	getChildView("Pipette")->setEnabled(mActive);
-	getChild<LLUICtrl>("Pipette")->setValue(LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	bool fPipetteActive = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
+	getChild<LLUICtrl>("Pipette")->setValue( fPipetteActive && (LLToolPipette::TYPE_TEXTURE == LLToolPipette::getInstance()->getPipetteType()) );
+// [/SL:KB]
+//	getChild<LLUICtrl>("Pipette")->setValue(LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance());
 
 	//BOOL allow_copy = FALSE;
 	if( mOwner ) 
@@ -658,6 +668,15 @@ void LLFloaterTexturePicker::draw()
 }
 
 const LLUUID& LLFloaterTexturePicker::findItemID(const LLUUID& asset_id, BOOL copyable_only)
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+{
+	return find_item_from_asset(asset_id, copyable_only);
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only)
+// [/SL:KB]
 {
 	LLViewerInventoryCategory::cat_array_t cats;
 	LLViewerInventoryItem::item_array_t items;
@@ -1015,8 +1034,18 @@ void LLFloaterTexturePicker::onFilterEdit(const std::string& search_string )
 	mInventoryPanel->setFilterSubString(search_string);
 }
 
-void LLFloaterTexturePicker::onTextureSelect( const LLTextureEntry& te )
+//void LLFloaterTexturePicker::onTextureSelect( const LLTextureEntry& te )
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLFloaterTexturePicker::onTextureSelect(LLToolPipette::EType type, const LLTextureEntry& te)
+// [/SL:KB]
 {
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	if (LLToolPipette::TYPE_TEXTURE != type)
+	{
+		return;
+	}
+// [/SL:KB]
+
 	LLUUID inventory_item_id = findItemID(te.getID(), TRUE);
 	if (inventory_item_id.notNull())
 	{
@@ -1209,6 +1238,14 @@ void LLTextureCtrl::setLabel(const std::string& label)
 	mCaption->setText(label);
 }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+bool LLTextureCtrl::getPickerVisible() const
+{
+	LLFloater* floaterp = mFloaterHandle.get();
+	return (floaterp) && (floaterp->getVisible());
+}
+// [/SL:KB]
+
 void LLTextureCtrl::showPicker(BOOL take_focus)
 {
 	// show hourglass cursor when loading inventory window
@@ -1391,6 +1428,21 @@ void	LLTextureCtrl::setImageAssetName(const std::string& name)
 		}
 	}
 }
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLTextureCtrl::setImageItemID(const LLUUID& item_id)
+{
+	if (mImageItemID != item_id)
+	{
+		const LLViewerInventoryItem* pItem = gInventory.getItem(item_id);
+		if ( (pItem) && (LLAssetType::AT_TEXTURE == pItem->getType()) && (pItem->getPermissions().allowCopyBy(gAgentID)) )
+		{
+			setImageAssetID(pItem->getAssetUUID());
+			mImageItemID = pItem->getUUID();
+		}
+	}
+}
+// [/SL:KB]
 
 void LLTextureCtrl::setImageAssetID( const LLUUID& asset_id )
 {

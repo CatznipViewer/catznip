@@ -81,12 +81,18 @@ LLObjectSelectionHandle LLToolSelect::handleObjectSelection(const LLPickInfo& pi
 		object = object->getRootEdit();
 	}
 	BOOL select_owned = gSavedSettings.getBOOL("SelectOwnedOnly");
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+	BOOL select_copiable = gSavedSettings.getBOOL("SelectCopiableOnly");
+// [/SL:KB]
 	BOOL select_movable = gSavedSettings.getBOOL("SelectMovableOnly");
 	
 	// *NOTE: These settings must be cleaned up at bottom of function.
 	if (temp_select || LLSelectMgr::getInstance()->mAllowSelectAvatar)
 	{
 		gSavedSettings.setBOOL("SelectOwnedOnly", FALSE);
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+		gSavedSettings.setBOOL("SelectCopiableOnly", FALSE);
+// [/SL:KB]
 		gSavedSettings.setBOOL("SelectMovableOnly", FALSE);
 		LLSelectMgr::getInstance()->setForceSelection(TRUE);
 	}
@@ -232,6 +238,9 @@ LLObjectSelectionHandle LLToolSelect::handleObjectSelection(const LLPickInfo& pi
 	if (temp_select ||LLSelectMgr::getInstance()->mAllowSelectAvatar)
 	{
 		gSavedSettings.setBOOL("SelectOwnedOnly", select_owned);
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+		gSavedSettings.setBOOL("SelectCopiableOnly", select_copiable);
+// [/SL:KB]
 		gSavedSettings.setBOOL("SelectMovableOnly", select_movable);
 		LLSelectMgr::getInstance()->setForceSelection(FALSE);
 	}

@@ -33,6 +33,9 @@
 #include "llpointer.h"
 #include "llcolorswatch.h"
 #include "llspinctrl.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 
 class LLButton;
 class LLLineEditor;
@@ -120,7 +123,10 @@ class LLFloaterColorPicker
 			   void onClickPipette ( );
 		static void onTextCommit ( LLUICtrl* ctrl, void* data );
 		static void onImmediateCheck ( LLUICtrl* ctrl, void* data );
-			   void onColorSelect( const class LLTextureEntry& te );
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+			   void onColorSelect(LLToolPipette::EType type, const class LLTextureEntry& te);
+// [/SL:KB]
+//			   void onColorSelect( const LLTextureEntry& te );
 	private:
 		// mutators for color values, can raise event to preview changes at object
 		void selectCurRgb ( F32 curRIn, F32 curGIn, F32 curBIn );
