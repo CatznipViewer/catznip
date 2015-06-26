@@ -55,9 +55,15 @@ public:
 		void (*callback)(S32 option, void* user_data), 
 		void* callback_data);
 
-	static void setFields(LLPointer<LLCredential> credential, BOOL remember);
+//	static void setFields(LLPointer<LLCredential> credential, BOOL remember);
 
 	static void getFields(LLPointer<LLCredential>& credential, BOOL& remember);
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	static LLSD getIdentifier();
+
+	static void selectUser(LLPointer<LLCredential> credential, BOOL remember);
+// [/SL:KB]
 
 	static BOOL areCredentialFieldsDirty();
 	static void setLocation(const LLSLURL& slurl);
@@ -91,6 +97,11 @@ private:
 	void addFavoritesToStartLocation();
 	void addUsersWithFavoritesToUsername();
 	void onSelectServer();
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	void onSelectUser();
+	bool onRemoveUser(LLScrollListItem* itemp);
+	void onRemoveUserResponse(const LLSD& sdNotification, const LLSD& sdResponse);
+// [/SL:KB]
 	void onLocationSLURL();
 
 	static void onClickConnect(void*);
