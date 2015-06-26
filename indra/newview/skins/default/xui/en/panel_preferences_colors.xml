@@ -300,6 +300,78 @@
     URLs
   </text>
   <text
+   follows="top|left"
+   font.style="BOLD"
+   height="12"
+   layout="topleft"
+   left="30"
+   name="nametag_color_text"
+   top_pad="20"
+   width="495">
+    Name tag color:
+  </text>
+  <color_swatch
+   can_apply_immediately="true"
+   enabled_control="NameTagShowFriends"
+   follows="left|top"
+   height="24"
+   label_height="0"
+   layout="topleft"
+   left="40"
+   name="nametag_friends"
+   top_pad="10"
+   width="44" >
+    <color_swatch.init_callback
+     function="Pref.getUIColor"
+     parameter="NameTagFriend" />
+    <color_swatch.commit_callback
+     function="Pref.applyNameTagColor"
+     parameter="NameTagFriend" />
+  </color_swatch>
+  <text
+   type="string"
+   length="1"
+   follows="left|top"
+   height="10"
+   layout="topleft"
+   left_pad="5"
+   mouse_opaque="false"
+   name="nametag_friends_text"
+   top_delta="5"
+   width="95">
+    Friends
+  </text>
+  <color_swatch
+   can_apply_immediately="true"
+   follows="left|top"
+   height="24"
+   label_height="0"
+   layout="topleft"
+   left="190"
+   name="nametag_others"
+   top_pad="-15"
+   width="44" >
+    <color_swatch.init_callback
+     function="Pref.getUIColor"
+     parameter="NameTagOthers" />
+    <color_swatch.commit_callback
+     function="Pref.applyNameTagColor"
+     parameter="NameTagOthers" />
+  </color_swatch>
+  <text
+   type="string"
+   length="1"
+   follows="left|top"
+   height="10"
+   layout="topleft"
+   left_pad="5"
+   mouse_opaque="false"
+   name="nametag_others_text"
+   top_delta="5"
+   width="95">
+    Others
+  </text>
+  <text
    follows="left|top"
    layout="topleft"
    left="30"

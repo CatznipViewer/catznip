@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Graphiques" name="Display panel">
 	<text name="QualitySpeed">
-		Qualité et vitesse :
+		Qualité et vitesse
 	</text>
 	<text name="FasterText">
 		Plus rapide
@@ -23,7 +23,7 @@
 	</text>
 	<panel label="Graphiques personnalisés" name="CustomGraphics Panel">
 		<text name="ShadersText">
-			Effets :
+			Effets
 		</text>
 		<check_box initial_value="true" label="Eau transparente" name="TransparentWater"/>
 		<check_box initial_value="true" label="Placage de relief et brillance" name="BumpShiny"/>
@@ -34,7 +34,7 @@
 		<check_box initial_value="true" label="Occlusion ambiante" name="UseSSAO"/>
 		<check_box initial_value="true" label="Profondeur de champ" name="UseDoF"/>
 		<text name="shadows_label">
-			Ombres :
+			Ombres
 		</text>
 		<combo_box name="ShadowDetail">
 			<combo_box.item label="Aucune" name="0"/>
@@ -42,7 +42,7 @@
 			<combo_box.item label="Soleil/Lune + Projecteurs" name="2"/>
 		</combo_box>
 		<text name="reflection_label">
-			Reflets dans l&apos;eau :
+			Reflets dans l&apos;eau
 		</text>
 		<combo_box initial_value="true" label="Reflets dans l&apos;eau" name="Reflections">
 			<combo_box.item label="Minimes" name="0"/>
@@ -63,7 +63,7 @@
 		<slider label="Avatars max. non éloignés en 2D :" name="MaxNumberAvatarDrawn"/>
 		<slider label="Qualité post-traitement :" name="RenderPostProcess"/>
 		<text name="MeshDetailText">
-			Détails des rendus :
+			Détails des rendus
 		</text>
 		<slider label="  Objets :" name="ObjectMeshDetail"/>
 		<slider label="  Flexiprims :" name="FlexibleMeshDetail"/>
@@ -93,13 +93,13 @@
 			Faible
 		</text>
 		<text name="AvatarRenderingText">
-			Rendu de l&apos;avatar :
+			Rendu de l&apos;avatar
 		</text>
 		<check_box initial_value="true" label="Avatars éloignés en 2D" name="AvatarImpostors"/>
 		<check_box initial_value="true" label="Accélération du rendu" name="AvatarVertexProgram"/>
 		<check_box initial_value="true" label="Mouvement des habits" name="AvatarCloth"/>
 		<text left="380" name="TerrainDetailText">
-			Rendu du terrain :
+			Rendu du terrain
 		</text>
 		<radio_group name="TerrainDetailRadio">
 			<radio_item label="Faible" name="0"/>

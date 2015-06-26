@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Czat/IM" name="chat">
 	<text name="font_size">
-		Rozmiar czcionki:
+		Rozmiar czcionki
 	</text>
 	<radio_group name="chat_font_size">
 		<radio_item label="Mała" name="radio" value="0"/>
