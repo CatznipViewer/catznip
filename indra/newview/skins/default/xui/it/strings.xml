@@ -2131,19 +2131,19 @@ Prova ad accedere nuovamente tra un minuto.
 		Questo residente ha attivato la modalità &apos;Non disturbare&apos; e vedrà il tuo messaggio più tardi.
 	</string>
 	<string name="MuteByName">
-		(In base al nome)
+		In base al nome
 	</string>
 	<string name="MuteAgent">
-		(Residente)
+		Residente
 	</string>
 	<string name="MuteObject">
-		(Oggetto)
+		Oggetto
 	</string>
 	<string name="MuteGroup">
-		(Gruppo)
+		Gruppo
 	</string>
 	<string name="MuteExternal">
-		(esterno)
+		Esterno
 	</string>
 	<string name="RegionNoCovenant">
 		Non esiste alcun regolamento per questa proprietà.

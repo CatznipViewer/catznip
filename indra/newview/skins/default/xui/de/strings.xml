@@ -2152,19 +2152,19 @@ Warten Sie kurz und versuchen Sie dann noch einmal, sich anzumelden.
 		Dieser Einwohner hat den Nicht-stören-Modus aktiviert und wird Ihre Nachricht später sehen.
 	</string>
 	<string name="MuteByName">
-		(Nach Namen)
+		Nach Namen
 	</string>
 	<string name="MuteAgent">
-		(Einwohner)
+		Einwohner
 	</string>
 	<string name="MuteObject">
-		(Objekt)
+		Objekt
 	</string>
 	<string name="MuteGroup">
-		(Gruppe)
+		Gruppe
 	</string>
 	<string name="MuteExternal">
-		(Extern)
+		Extern
 	</string>
 	<string name="RegionNoCovenant">
 		Für diesen Grundbesitz liegt kein Vertrag vor.

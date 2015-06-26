@@ -29,6 +29,9 @@
 
 #include "llagent.h"
 #include "llavataractions.h"
+// [SL:KB] - World-Mute | Checked: 2013-12-12 (Catznip-3.6)
+#include "llfloaterblocked.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llcommandhandler.h"
 #include "llnotificationsutil.h"
@@ -171,7 +174,10 @@ public:
 				const std::string object_name = params[2].asString();
 				LLMute mute(avatar_id, object_name, LLMute::OBJECT);
 				LLMuteList::getInstance()->add(mute);
-				LLPanelBlockedList::showPanelAndSelect(mute.mID);
+// [SL:KB] - World-Mute | Checked: 2013-12-12 (Catznip-3.6)
+				LLFloaterBlocked::showMuteAndSelect(mute.mID);
+// [/SL:KB]
+//				LLPanelBlockedList::showPanelAndSelect(mute.mID);
 			}
 			return true;
 		}
