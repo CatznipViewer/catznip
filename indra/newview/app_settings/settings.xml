@@ -14131,6 +14131,17 @@
       <key>Value</key>
       <integer>10</integer>
     </map>
+    <key>WorldMapFilterSelfLandmarks</key>
+    <map>
+      <key>Comment</key>
+      <string>Only show landmarks you created in the world map landmarks dropdown</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>XferThrottle</key>
     <map>
       <key>Comment</key>
