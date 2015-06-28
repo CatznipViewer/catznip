@@ -5922,10 +5922,13 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
 		if( notificationID == "HomePositionSet" )
 		{
 			// save the home location image to disk
-			std::string snap_filename = gDirUtilp->getLindenUserDir();
-			snap_filename += gDirUtilp->getDirDelimiter();
-			snap_filename += SCREEN_HOME_FILENAME;
-			gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+			gViewerWindow->saveSnapshot(getHomeScreenPath(), gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+// [/SL:KB]
+//			std::string snap_filename = gDirUtilp->getLindenUserDir();
+//			snap_filename += gDirUtilp->getDirDelimiter();
+//			snap_filename += SCREEN_HOME_FILENAME;
+//			gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
 		}
 		
 		if (notificationID == "RegionRestartMinutes" ||
@@ -5980,10 +5983,13 @@ static void process_special_alert_messages(const std::string & message)
 	else if( message == "Home position set." )
 	{
 		// save the home location image to disk
-		std::string snap_filename = gDirUtilp->getLindenUserDir();
-		snap_filename += gDirUtilp->getDirDelimiter();
-		snap_filename += SCREEN_HOME_FILENAME;
-		gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+		gViewerWindow->saveSnapshot(getHomeScreenPath(), gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
+// [/SL:KB]
+//		std::string snap_filename = gDirUtilp->getLindenUserDir();
+//		snap_filename += gDirUtilp->getDirDelimiter();
+//		snap_filename += SCREEN_HOME_FILENAME;
+//		gViewerWindow->saveSnapshot(snap_filename, gViewerWindow->getWindowWidthRaw(), gViewerWindow->getWindowHeightRaw(), FALSE, FALSE);
 	}
 }
 

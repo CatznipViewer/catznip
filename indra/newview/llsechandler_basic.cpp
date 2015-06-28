@@ -1632,7 +1632,7 @@ void LLSecAPIBasicHandler::deleteCredential(const std::string& grid, const LLSD&
 			const LLSD& sdCredential = *itCred;
 			if ( (sdCredential.has("identifier")) && (LLSecAPIBasicCredential::userIDFromIdentifier(sdCredential["identifier"]) == strUserId) )
 			{
-				sdCredentials.erase(sdCredentials.beginArray() - itCred);
+				sdCredentials.erase(itCred - sdCredentials.beginArray());
 				break;
 			}
 		}
