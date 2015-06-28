@@ -261,9 +261,13 @@ void LLAvatarNameCache::handleAgentError(const LLUUID& agent_id)
 	std::map<LLUUID,LLAvatarName>::iterator existing = sCache.find(agent_id);
 	if (existing == sCache.end())
     {
-        // there is no existing cache entry, so make a temporary name from legacy
-        LL_WARNS("AvNameCache") << "LLAvatarNameCache get legacy for agent "
+//        // there is no existing cache entry, so make a temporary name from legacy
+ //       LL_WARNS("AvNameCache") << "LLAvatarNameCache get legacy for agent "
+//								<< agent_id << LL_ENDL;
+// [SL:KB] - Patch: Agent-DisplayNameCache | Checked: 2013-05-01 (Catznip-3.5)
+        LL_DEBUGS("AvNameCache") << "LLAvatarNameCache get legacy for agent "
 								<< agent_id << LL_ENDL;
+// [/SL:KB]
         gCacheName->get(agent_id, false,  // legacy compatibility
                         boost::bind(&LLAvatarNameCache::legacyNameFetch, _1, _2, _3));
     }
