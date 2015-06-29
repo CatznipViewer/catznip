@@ -353,6 +353,9 @@ public:
 	static U32Kilobytes getAvailableMemKB() ;
 	static U32Kilobytes getMaxMemKB() ;
 	static U32Kilobytes getAllocatedMemKB() ;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2013-05-26 (Catznip-3.5)
+	static U32Kilobytes getAllocatedPageSizeKB();
+// [/SL:KB]
 private:
 	static char* reserveMem;
 	static U32Kilobytes sAvailPhysicalMemInKB ;
