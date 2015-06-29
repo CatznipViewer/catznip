@@ -307,6 +307,7 @@ set(viewer_SOURCE_FILES
     llfloatertranslationsettings.cpp
     llfloatertwitter.cpp
     llfloateruipreview.cpp
+    llfloaterupdate.cpp
     llfloaterurlentry.cpp
     llfloatervoiceeffect.cpp
     llfloatervoicevolume.cpp
@@ -916,6 +917,7 @@ set(viewer_HEADER_FILES
     llfloatertranslationsettings.h
     llfloatertwitter.h
     llfloateruipreview.h
+    llfloaterupdate.h
     llfloaterurlentry.h
     llfloatervoiceeffect.h
     llfloatervoicevolume.h

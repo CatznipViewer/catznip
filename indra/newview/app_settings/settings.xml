@@ -11951,7 +11951,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>500.0</real>
+      <real>1024.0</real>
     </map>
     <key>ToolTipDelay</key>
     <map>
@@ -13053,6 +13053,17 @@
       <key>Value</key>
       <integer>15</integer>
     </map>
+    <key>UpdaterLastPopup</key>
+    <map>
+      <key>Comment</key>
+      <string>Timestamp of the last update popup</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>UpdaterServiceSetting</key>
     <map>
       <key>Comment</key>
@@ -13062,7 +13073,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>3</integer>
+      <integer>1</integer>
     </map>
     <key>UpdaterServiceCheckPeriod</key>
     <map>
@@ -13084,7 +13095,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>https://update.secondlife.com</string>
+      <string>http://viewer.catznip.com</string>
     </map>
     <key>UpdaterServicePath</key>
     <map>

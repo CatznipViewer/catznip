@@ -1491,12 +1491,12 @@ Vous pouvez également l&apos;installer dès maintenant.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informations relatives à cette mise à jour]
+Version [VERSION] [[INFO_URL] Informations relatives à cette mise à jour]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Nous avons téléchargé une mise à jour de votre installation [APP_NAME].
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informations relatives à cette mise à jour]
+Version [VERSION] [[INFO_URL] Informations relatives à cette mise à jour]
 		<usetemplate name="okcancelbuttons" notext="Ultérieurement..." yestext="Installer maintenant et redémarrer [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">

@@ -1500,12 +1500,12 @@ o instalarla ahora.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Hemos descargado una actualización para la instalación de [APP_NAME].
-Versión [VERSION] [[RELEASE_NOTES_FULL_URL]; información acerca de esta actualización]
+Versión [VERSION] [[INFO_URL]; información acerca de esta actualización]
 		<usetemplate name="okcancelbuttons" notext="Más tarde..." yestext="Instalar ahora y reiniciar [NOMBRE_APL]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Hemos descargado una actualización para la instalación de [APP_NAME].
-Versión [VERSION] [[RELEASE_NOTES_FULL_URL]; información acerca de esta actualización]
+Versión [VERSION] [[INFO_URL]; información acerca de esta actualización]
 		<usetemplate name="okcancelbuttons" notext="Más tarde..." yestext="Instalar ahora y reiniciar [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
