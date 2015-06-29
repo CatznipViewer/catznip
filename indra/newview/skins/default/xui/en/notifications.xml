@@ -3043,7 +3043,7 @@ You may want to set a new home location.
    type="alertmodal">
    <tag>fail</tag>
 Your clothing is still downloading.
-You can use [SECOND_LIFE] normally and other people will see you correctly.
+You can use [APP_NAME] normally and other people will see you correctly.
     <form name="form">
       <ignore name="ignore"
        text="Clothing is taking a long time to download"/>
@@ -3524,7 +3524,7 @@ Download to your Applications folder?
    type="alertmodal">
 An error occurred installing the viewer update.
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
     <usetemplate
      name="okbutton"
      yestext="OK"/>
@@ -3538,7 +3538,7 @@ We were unable to install a required update.
 You will be unable to log in until [APP_NAME] has been updated.
 
 Please download and install the latest viewer from
-http://secondlife.com/download.
+http://catznip.com/downloads/.
   <tag>fail</tag>
     <usetemplate
      name="okbutton"
@@ -3551,7 +3551,7 @@ http://secondlife.com/download.
    type="alertmodal">
 There is a required update for your Second Life Installation.
 
-You may download this update from http://www.secondlife.com/downloads
+You may download this update from http://catznip.com/downloads/
 or you can install it now.
     <tag>confirm</tag>
     <usetemplate
@@ -3701,6 +3701,32 @@ Deeding this object will cause the group to:
 
   <notification
    icon="alertmodal.tga"
+   name="WebLaunchBlog"
+   type="alertmodal">
+Go to the [APP_NAME] blog, for the latest news and information.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view the blog"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+ 
+  <notification
+   icon="alertmodal.tga"
+   name="WebLaunchWiki"
+   type="alertmodal">
+Go to the [APP_NAME] wiki for documentation and support information.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view the wiki"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+ 
+  <notification
+   icon="alertmodal.tga"
    name="WebLaunchExternalTarget"
    type="alertmodal">
 Do you want to open your Web browser to view this content?
@@ -3755,10 +3781,10 @@ Visit the [SECOND_LIFE] QA Wiki.
    icon="alertmodal.tga"
    name="WebLaunchPublicIssue"
    type="alertmodal">
-Visit the [SECOND_LIFE] Public Issue Tracker, where you can report bugs and other issues.
+Visit the [APP_NAME] issue tracker, where you can report bugs and other issues.
     <tag>confirm</tag>
     <usetemplate
-     ignoretext="Launch my browser to use the Public Issue Tracker"
+     ignoretext="Launch my browser to use the issue tracker"
      name="okcancelignore"
      notext="Cancel"
      yestext="Go to page"/>

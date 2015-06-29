@@ -47,11 +47,14 @@
 
 class LLFilePicker;
 
-class LLDirPicker
+//class LLDirPicker
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-09-28 (Catznip-3.6)
+class LLDirPicker : public LLSingleton<LLDirPicker>
+// [/SL:KB]
 {
 public:
-	// calling this before main() is undefined
-	static LLDirPicker& instance( void ) { return sInstance; }
+//	// calling this before main() is undefined
+//	static LLDirPicker& instance( void ) { return sInstance; }
 
 	BOOL getDir(std::string* filename);
 	std::string getDirName();
@@ -80,7 +83,7 @@ private:
 	std::string  mDir;
 	bool mLocked;
 
-	static LLDirPicker sInstance;
+//	static LLDirPicker sInstance;
 	
 public:
 	// don't call these directly please.

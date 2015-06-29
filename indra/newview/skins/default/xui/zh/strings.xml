@@ -8,10 +8,10 @@
 		第二人生
 	</string>
 	<string name="APP_NAME">
-		第二人生
+		Catznip
 	</string>
 	<string name="CAPITALIZED_APP_NAME">
-		第二人生
+		CATZNIP
 	</string>
 	<string name="SECOND_LIFE_GRID">
 		第二人生網格
@@ -38,7 +38,7 @@
 		顯像初始化失敗。 請更新你的顯像卡驅動程式！
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2] ([VIEWER_VERSION_3]) [BUILD_DATE] [BUILD_TIME] ([CHANNEL])
+		[APP_NAME] [VIEWER_VERSION_STR] [BUILD_DATE] [BUILD_TIME] ([CHANNEL])
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="AboutCompiler">
@@ -183,7 +183,7 @@ Qt Webkit 版本： [QT_WEBKIT_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		你目前所用的 Viewer 已經無法再進入第二人生。 請到這個頁面下載最新 Viewer：
-http://secondlife.com/download
+http://catznip.com/downloads/
 
 欲知詳情，請參閱下面的常見問題集：
 http://secondlife.com/viewer-access-faq

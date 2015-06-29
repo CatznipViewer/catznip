@@ -1254,7 +1254,7 @@ Nous vous conseillons de définir votre domicile ailleurs.
 	</notification>
 	<notification name="ClothingLoading">
 		Vos habits sont en cours de téléchargement.
-Vous pouvez utiliser [SECOND_LIFE] normalement, les autres résidents vous voient correctement.
+Vous pouvez utiliser [APP_NAME] normalement, les autres résidents vous voient correctement.
 		<form name="form">
 			<ignore name="ignore" text="Vos habits prennent du temps à télécharger"/>
 		</form>
@@ -1471,7 +1471,7 @@ Télécharger vers le dossier Applications ?
 	<notification name="FailedUpdateInstall">
 		Une erreur est survenue lors de l&apos;installation de la mise à jour du client.
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1479,13 +1479,13 @@ http://secondlife.com/download.
 Vous ne pourrez pas vous connecter tant que [APP_NAME] ne sera pas mis à jour.
 
 Veuillez télécharger et installer la dernière version du client à la page Web
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Quitter"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Une mise à jour requise pour votre installation Second Life existe.
 
-Pour la télécharger, accédez à http://www.secondlife.com/downloads.
+Pour la télécharger, accédez à http://catznip.com/downloads/ .
 Vous pouvez également l&apos;installer dès maintenant.
 		<usetemplate name="okcancelbuttons" notext="Quitter Second Life" yestext="Télécharger et installer maintenant"/>
 	</notification>
@@ -1562,8 +1562,12 @@ consultez [Informations au sujet de cette mise à jour [INFO_URL]]
 		<usetemplate ignoretext="Lancer mon navigateur web pour consulter la page Wiki sur l&apos;Assurance Qualité" name="okcancelignore" notext="Annuler" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Pour signaler des bugs et autres problèmes, utilisez le JIRA de [SECOND_LIFE].
-		<usetemplate ignoretext="Lancer mon navigateur pour utiliser le Public Issue Tracker (JIRA)" name="okcancelignore" notext="Annuler" yestext="Aller sur cette page"/>
+		Pour signaler des bugs et autres problèmes, utilisez le JIRA de [APP_NAME].
+		<usetemplate ignoretext="Lancer mon navigateur pour utiliser le Issue Tracker (JIRA)" name="okcancelignore" notext="Annuler" yestext="Aller sur cette page"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		Visitez le blog officiel des [APP_NAME] pour les dernières nouvelles et informations.
+		<usetemplate ignoretext="Lancer mon navigateur web pour consulter le blog" name="okcancelignore" notext="Annuler" yestext="Aller à la page"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Visitez le blog officiel des Lindens pour les dernières nouvelles et informations.

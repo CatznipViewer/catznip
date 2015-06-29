@@ -73,6 +73,13 @@ public:
 	static void get(const std::string& url, const LLSD& query, ResponderPtr, const LLSD& headers = LLSD(),
 					const F32 timeout=HTTP_REQUEST_EXPIRY_SECS, bool follow_redirects = true);
 
+// [FS:AW] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	static void getIfModified(const std::string& url, ResponderPtr, const time_t& if_modified_since, const LLSD& headers = LLSD(),
+					const F32 timeout=HTTP_REQUEST_EXPIRY_SECS, bool follow_redirects = true);
+	static void getIfModified(const std::string& url, const LLSD& query, ResponderPtr, const time_t& if_modified_since, const LLSD& headers = LLSD(),
+					const F32 timeout=HTTP_REQUEST_EXPIRY_SECS, bool follow_redirects = true);
+// [/FS:AW]
+
 	static void put(
 		const std::string& url,
 		const LLSD& body,
