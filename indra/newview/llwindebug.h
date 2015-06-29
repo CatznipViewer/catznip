@@ -36,10 +36,9 @@ class LLWinDebug
 {
 public:
 	static void init();
+	static void cleanup();
 	static void generateMinidump(struct _EXCEPTION_POINTERS *pExceptionInfo = NULL);
 	static std::string writeDumpToFile(const std::string& filename, MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION* pExceptInfo = NULL, MINIDUMP_CALLBACK_INFORMATION* pCallbackInfo = NULL);
-private:
-	static void cleanup();
 };
 // [/SL:KB]
 //class LLWinDebug:
