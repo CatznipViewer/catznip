@@ -3,11 +3,13 @@
  bevel_style="none"
  border_style="line"
  follows="left|top|right|bottom"
- height="522"
+ height="570"
+ min_height="271"
+ min_width="290"
  layout="topleft"
  left="0"
  name="script panel"
- width="497">
+ width="508">
     <panel.string
      name="loading">
         Loading...
@@ -40,6 +42,7 @@
      left="0"
      mouse_opaque="false"
      name="script_menu"
+     top="2"
      width="476">
         <menu
          top="0"
@@ -178,7 +181,7 @@
      layout="topleft"
      max_length="262144"
      name="Script Editor"
-     width="487"
+     width="512"
      text_color="ScriptText"
      default_color="ScriptText"
      bg_writeable_color="ScriptBackground"
@@ -192,45 +195,47 @@
         Loading...
     </script_editor>
     <scroll_list
-    top_pad="10"
-    left="0"
+    top_pad="4"
+    left="2"
      follows="left|right|bottom"
-     height="60"
+     height="38"
      layout="topleft"
      name="lsl errors"
-     width="487" />
+     right="-8" />
     <text
      follows="left|bottom"
      height="12"
      layout="topleft"
-     left="0"
+     left="5"
      name="line_col"
+     bottom="458"
      width="128" />
     <combo_box
      follows="left|bottom"
-     height="23"
+     height="22"
      label="Insert..."
      layout="topleft"
      name="Insert..."
-     width="128" />
+     bottom="486"
+     width="80" />
     <button
      follows="right|bottom"
      height="23"
      label="Save"
      label_selected="Save"
      layout="topleft"
-     top_pad="-35"
-     right="487"
+     bottom="486"
+     right="508"
      name="Save_btn"
-     width="81" />
+     width="60" />
     <button
      enabled="false"
      follows="right|bottom"
      height="23"
      label="Edit..."
      layout="topleft"
-     top_pad="-23"
-     right="400"
+     bottom="486"
+     right="445"
      name="Edit_btn"
-     width="81" />
+     width="60" />
 </panel>

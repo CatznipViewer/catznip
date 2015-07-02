@@ -140,7 +140,7 @@ protected:
 // static
 static bool removeEmbeddedMarkers(const std::string& strFilename)
 {
-	std::ifstream inNotecardFile(strFilename, std::ios::in | std::ios::binary);
+	std::ifstream inNotecardFile(strFilename.c_str(), std::ios::in | std::ios::binary);
 	if (!inNotecardFile.is_open())
 		return false;
 
@@ -165,7 +165,7 @@ static bool removeEmbeddedMarkers(const std::string& strFilename)
 		idxText = strText.find('\xF4', idxText + 1);
 	}
 
-	std::ofstream outNotecardFile(strFilename, std::ios::out | std::ios::binary | std::ios::trunc);
+	std::ofstream outNotecardFile(strFilename.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
 	if (!outNotecardFile.is_open())
 		return false;
 
