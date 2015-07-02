@@ -1920,7 +1920,7 @@ struct LLSelectedTEGetLLSDFunctor : public LLSelectedTEFunctor, public LLSelecte
 		const LLTextureEntry* pTE = pObj->getTE(idxTE);
 		if (pTE)
 		{
-			LLMaterialPtr pMaterial = (pTE) ? pTE->getMaterialParams() : NULL;
+			LLMaterialPtr pMaterial = pTE->getMaterialParams();
 
 			LLSD& sdFaceParams = m_sdParams[(m_fIdentical) ? 0 : idxTE];
 			applyFunc(sdFaceParams, pObj, idxTE, pTE, pMaterial);

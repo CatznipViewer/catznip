@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- height="210"
+ height="255"
  layout="topleft"
  name="build selection floater"
  save_rect="true"
@@ -94,7 +94,7 @@
      bevel_style="none"
      border_thickness="1"
      mouse_opaque="false"
-     name="divisor1"/>
+     name="divisor2"/>
 
     <check_box
      control_name="LimitSelectDistance"
@@ -110,6 +110,34 @@
      label="Hide Selection"
      layout="topleft"
      name="HideSelectedObjects"
+     top_pad="0"
+     width="200" />
+
+    <view_border
+     top_pad="5"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor3"/>
+
+    <check_box
+     control_name="SendPointAt"
+     height="18"
+     label="Arm Points Towards Selection"
+     layout="topleft"
+     name="SendPointAt"
+     top_pad="5"
+     width="200" />
+    <check_box
+     control_name="RotateAtSelection"
+     height="18"
+     label="Turn Towards Selection"
+     layout="topleft"
+     name="LimitSelectDistance"
      top_pad="0"
      width="200" />
 </floater>

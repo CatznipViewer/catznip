@@ -9,6 +9,7 @@
 		<scroll_list.columns label="Oluşturanın Adı" name="creator_name"/>
 		<scroll_list.columns label="Oluşturma Tarihi" name="creation_date"/>
 	</scroll_list>
+	<panel name="bottom_panel">
 	<button label="Sahip Profiline Bak..." name="button owner" tool_tip="Vurgulanan nesnenin sahibinin profiline bak"/>
-	<button label="Oluşturan Profiline Bak..." name="button creator" tool_tip="Vurgulanan nesneyi ilk oluşturanın profiline bak"/>
+	<button label="Oluşturan Profiline Bak..." name="button creator" tool_tip="Vurgulanan nesneyi ilk oluşturanın profiline bak"/>\</panel>
 </floater>
