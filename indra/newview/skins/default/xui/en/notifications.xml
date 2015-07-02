@@ -3725,6 +3725,45 @@ Go to the [APP_NAME] wiki for documentation and support information.
      yestext="OK"/>
   </notification>
  
+   <notification
+   icon="alertmodal.tga"
+   name="WebLaunchATwitter"
+   type="alertmodal">
+Open [APP_NAME]'s Twitter page in your browser.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view twitter"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+  
+   <notification
+   icon="alertmodal.tga"
+   name="WebLaunchAFacebook"
+   type="alertmodal">
+Open [APP_NAME]'s Facebook page in your browser.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view facebook"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification> 
+
+   <notification
+   icon="alertmodal.tga"
+   name="WebLaunchAGoogleplus"
+   type="alertmodal">
+Open [APP_NAME]'s Google+ page in your browser.
+    <tag>confirm</tag>
+    <usetemplate
+     ignoretext="Launch my browser to view google+"
+     name="okcancelignore"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+  
   <notification
    icon="alertmodal.tga"
    name="WebLaunchExternalTarget"

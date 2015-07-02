@@ -2698,6 +2698,47 @@ bool LLAppViewer::initConfiguration()
 	}
 	loadSettingsFromDirectory("UserSession");
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
+	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
+	{
+		// setings.xml
+		{
+			const char* pstrSettings[] =
+				{ 
+					"MeshMaxConcurrentRequests"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
+			}
+		}
+
+		// settings_crash_behavior.xml
+		{
+			const char* pstrDbgSettings[] =
+				{ 
+					"CrashSubmitBehavior",
+					"CrashSubmitName",
+					"CrashSubmitSettings"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrDbgSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrDbgSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
+			}
+			gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+		}
+	}
+// [/SL:KB]
+
 	// - apply command line settings 
 	if (! clp.notify())
 	{
@@ -4443,11 +4484,11 @@ void LLAppViewer::requestQuit()
 		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
 	}
 	
-	// Try to send last batch of avatar rez metrics.
-	if (!gDisconnected && isAgentAvatarValid())
-	{
-		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
-	}
+//	// Try to send last batch of avatar rez metrics.
+//	if (!gDisconnected && isAgentAvatarValid())
+//	{
+//		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
+//	}
 	
 	LLHUDEffectSpiral *effectp = (LLHUDEffectSpiral*)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINT, TRUE);
 	effectp->setPositionGlobal(gAgent.getPositionGlobal());

@@ -8,10 +8,14 @@ Arrehn Oberlander
 Batche Manen
 	Bugs
 	Feedback
+Be Holder
+	Beta tester
+	Bugs
 Camille Serpentine
 	Bugs
 	Feedback
 Chloe Constantine
+	Beta tester
 	Bugs
 	Feedback
 	RLVa
@@ -20,14 +24,21 @@ Cinder Roxley
 Ebonaku Dragova
 	Bugs
 	Feedback
+Faith Noonan
+	Beta tester
+	Feedback
 Inhandra Birdsong
 	Bugs
 	Feedback
 Innula Zenovka
+	Beta tester
 	Bugs
 	Feedback
 Hitomi Tiponi
 	Starlight Art
+Lilly Noodle
+	Beta tester
+	Feedback
 Loom Kish
 	Mac OS X issues
 Penny Patton
@@ -37,15 +48,27 @@ Razeldine Wirefly
 	Bugs
 	Feedback
 Qetesh (vala.vella)
+	Beta tester
+	Bugs
+	Feedback
 	Mac Mini
 Satomi Ahn
 	RLVa
+Sean Brady
+	Beta tester
+	Bugs	
 Trix Braveheart
 	Bugs
 	Feedback
 Vanilla Meili
+	Beta tester
 	Bugs
 	Feedback
 Whirly Fizzle
 	Bugs
 	Feedback
+Winter Ventura
+    Art
+    Beta Tester
+    Bugs
+    Feedback

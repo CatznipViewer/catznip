@@ -16,15 +16,17 @@
   <tab_container
     follows="all" 
     layout="topleft"
-    left="8"
-    height="335"
-    right="-8"
-    tab_height="23"
+    left="4"
+    height="338"
+    right="-4"
+    tab_height="25"
     tab_min_width="120"
     name="about_tab"
     tab_position="top"
-    top="0">
+    top="2">
     <panel
+      border="true"
+      has_border="true"
       label="INFO"
       help_topic="about_support_tab"
       name="support_panel">
@@ -37,17 +39,62 @@
        name="catznip_logo"
        top="4"
        width="128" />
+      <icon
+       commit_on_click="true"
+       height="32"
+       hover_cursor="UI_CURSOR_HAND"
+       image_name="social_twitter"
+       layout="topleft"
+       left="10"
+       mouse_opaque="true"
+       name="twitter_icon"
+       top="130"
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://twitter.com/CatznipSL" />
+      </icon>
+      <icon
+       commit_on_click="true"
+       height="32"
+       hover_cursor="UI_CURSOR_HAND"
+       image_name="social_fb"
+       layout="topleft"
+       left_pad="5"
+       mouse_opaque="true"
+       name="fb_icon"
+       top="130"
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://facebook.com/Catznip" />
+      </icon>
+      <icon
+       commit_on_click="true"
+       height="32"
+       hover_cursor="UI_CURSOR_HAND"
+       image_name="social_gplus"
+       layout="topleft"
+       left_pad="5"
+       mouse_opaque="true"
+       name="gplus_icon"
+       top="130"
+       width="32">
+        <icon.commit_callback
+         function="Advanced.ShowURL"
+         parameter="http://google.com/+Catznip" />
+      </icon>
       <button
-       follows="top|left" 
+       follows="bottom|left" 
        image_overlay="Copy"
        image_overlay_alignment="left"
        tool_tip="Copy the info the clipboard."
        name="copy_btn"
        label="Copy Info"
-       left="40"
-       top="284"
+       left="3"
+       bottom="4"
        height="22"
-       width="80" />
+       width="112" />
       <text_editor
        parse_urls="true" 
        follows="top|left"
@@ -58,10 +105,12 @@
        max_length="65536"
        name="support_editor"
        top="5"
-       width="429"
+       right="-5"
        word_wrap="true" />
     </panel>
     <panel
+      border="true"
+      has_border="true"
       label="CREDITS" 
       help_topic="about_credits_tab"
       name="credits_panel">
@@ -69,11 +118,11 @@
  fit_parent="false"
  follows="all"
  layout="topleft"
- left="3"
+ left="2"
  name="credits_accordion"
  single_expansion="true"
  top="0"
- width="558">
+ right="-1">
 <!-- Credits -->
   <accordion_tab
    expanded="true"
@@ -90,6 +139,7 @@
      top="10">
       <text
           follows="top|left|right"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -111,12 +161,13 @@ Catznip is brought to you by:
        top_pad="5"
        width="545"
        word_wrap="true">
-Trinity Dejavu - Project manager
+Trinity Dejavu - Project lead
 Kitty Barnett - Code kitty
 Catznip Catnap - Test dummy
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -142,6 +193,7 @@ Dummy Name replaced at run time
       </text_editor>
       <text
           follows="top|left"
+          font.style="BOLD"
           height="10"
           layout="topleft"
           left="5"
@@ -164,8 +216,8 @@ and with the following open source contributions:
        width="545"
        word_wrap="true">
 - Alignment Tool (Qarl Fizz)
-- Windlight Presets (Ana Lutetia, Chic Aeon, Lusus Saule, Luna Jubilee, Mesc, Miranda Kingmaker, Paulina Oceanlane, Penny Patton, Torley)
-
+- Windlight Presets (Ana Lutetia, Chic Aeon, Lusus Saule, Luna Jubilee, Mesc, Miranda Kingmaker, Paulina Oceanlane, Penny Patton, Torley, Xanthe)
+- Joystick contributions (Amethyst ~Black Dragon)
       </text_editor>
     </panel>
   </accordion_tab>
@@ -184,6 +236,7 @@ and with the following open source contributions:
      top="10">
       <text
           follows="top|left|right"
+          font.style="BOLD"
           height="20"
           layout="topleft"
           left="5"
@@ -214,6 +267,8 @@ Dummy Name replaced at run time
     </panel>
 <!-- Licences -->
     <panel
+      border="true"
+      has_border="true"
       label="LICENCES"
       help_topic="about_licenses_tab"
       name="licenses_panel">
@@ -227,7 +282,7 @@ Dummy Name replaced at run time
        max_length="65536"
        name="licenses_editor"
        top="5"
-       width="552"
+       right="-5"
        word_wrap="true">
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License, version 2.1 which can be found in doc/LGPL-licence.txt in this distribution (or online at http://www.gnu.org/licenses/gpl-2.0.txt).
 
@@ -254,6 +309,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 - SSLeay Copyright (C) 1995-1998 Eric Young (eay@cryptsoft.com)
 - xmlrpc-epi Copyright (C) 2000 Epinions, Inc.
 - zlib Copyright (C) 1995-2012 Jean-loup Gailly and Mark Adler.
+
+Fonts:
+- Open Dyslexic Copyright (C) 2012 Abelardo Gonzalez
+- Source Code Pro Copyright (C) 2010, 2012 Adobe Systems Incorporated
+- Source Sans Pro Copyright (C) 2010, 2012 Adobe Systems Incorporated
+- Ubuntu Copyright (C) 2010, 2011 Canonical Ltd.
 
 Catznip Viewer uses Havok (TM) Physics. (c)Copyright 1999-2010 Havok.com Inc. (and its Licensors). All Rights Reserved. See www.havok.com for details.
 

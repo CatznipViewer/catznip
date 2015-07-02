@@ -584,7 +584,11 @@ with the same filename but different name
   <texture name="Snapshot_Profile" file_name="toolbar_icons/profile.png" preload="false" />
   <texture name="Snapshot_Facebook" file_name="toolbar_icons/facebook.png" preload="false" />
 
-  <texture name="startup_logo"  file_name="windows/startup_logo.png" preload="true" />
+  <texture name="startup_logo"  file_name="windows/startup_logo.png" preload="false" />
+  
+  <texture name="social_fb"  file_name="icons/Social_Fb.png" preload="true" />
+  <texture name="social_gplus"  file_name="icons/Social_Gplus.png" preload="true" />
+  <texture name="social_twitter"  file_name="icons/Social_Twitter.png" preload="true" />
 
   <texture name="login_sl_logo"  file_name="windows/login_sl_logo.png" preload="true" />
   <texture name="login_sl_logo_small"  file_name="windows/login_sl_logo_small.png" preload="true" />
