@@ -324,8 +324,8 @@ private:
 class LLReorderAndUpdateAppearanceOnDestroy : public LLInventoryCallback
 {
 public:
-	LLReorderAndUpdateAppearanceOnDestroy() : mFireCount(0) {}
-	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& idItem, U32 index, bool do_replace) : mFireCount(0) 
+	LLReorderAndUpdateAppearanceOnDestroy() {}
+	LLReorderAndUpdateAppearanceOnDestroy(const LLUUID& idItem, U32 index, bool do_replace)
 	{
 		addReorderItem(idItem, index, do_replace);
 	}
@@ -333,12 +333,11 @@ public:
 
 	void addReorderItem(const LLUUID& idItem, U32 index, bool do_replace)
 	{
-		mReorderMap.insert(std::pair<LLUUID, reorder_data_t>(idItem, reorder_data_t(do_replace, index)));
+		mReorderMap.insert(std::make_pair(idItem, reorder_data_t(do_replace, index)));
 	}
 
-	virtual void fire(const LLUUID& idItem)
+	/*virtual*/ void fire(const LLUUID& idItem)
 	{
-		mFireCount++;
 		mIDs.push_back(idItem);
 	}
 protected:
@@ -354,7 +353,6 @@ protected:
 	};
 	typedef std::map<LLUUID, reorder_data_t> reorder_map_t;
 private:
-	U32           mFireCount;
 	uuid_vec_t    mIDs;
 	reorder_map_t mReorderMap;
 };

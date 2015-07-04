@@ -5914,44 +5914,36 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 // [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 		if (item)
 		{
-			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", TRUE);
+			LLMenuGL* pWearOnMenu = menu.findChildMenuByName("Wear On", true);
 			if ( (pWearOnMenu) && (0 == pWearOnMenu->getChildCount()) )
 			{
-				LLMenuItemCallGL::Params paramsItem; LLSD sdParam;
+				LLMenuItemCallGL::Params paramsItem;
 				paramsItem.on_click.function_name = "Inventory.WearOn";
 				paramsItem.on_visible.function_name = "Inventory.WearOnLabel";
 
 				// (top)
-				sdParam["action"] = std::string("insert");
-				sdParam["index"] = std::string("top");
-				paramsItem.name = "(top)";	// TODO: needs translation
-				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+				paramsItem.name = "(top)"; // CATZ_TODO: needs translation
+				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = LLSD().with("action", "insert").with("index", "top");
 				LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
 
 				// One replace + insert option per wearable index
 				for (S32 idxWearable = LLAgentWearables::MAX_CLOTHING_LAYERS - 1; idxWearable >= 0; idxWearable--)
 				{
-					sdParam["index"] = idxWearable;
-
-					sdParam["action"] = std::string("replace");
 					paramsItem.name = "(placeholder)";
-					paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+					paramsItem.on_click.parameter = paramsItem.on_visible.parameter = LLSD().with("action", "replace").with("index", idxWearable);
 					LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
 
-					if (idxWearable)
+					if (idxWearable > 0)
 					{
-						sdParam["action"] = std::string("insert");
-						paramsItem.name = "(between)";	// TODO: needs translation
-						paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+						paramsItem.name = "(between)"; // CATZ_TODO: needs translation
+						paramsItem.on_click.parameter = paramsItem.on_visible.parameter = LLSD().with("action", "insert").with("index", idxWearable);
 						LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
 					}
 				}
 
 				// (bottom)
-				sdParam["action"] = std::string("insert");
-				sdParam["index"] = std::string("bottom");
-				paramsItem.name = "(bottom)";	// TODO: needs translation
-				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = sdParam;
+				paramsItem.name = "(bottom)"; // CATZ_TODO: needs translation
+				paramsItem.on_click.parameter = paramsItem.on_visible.parameter = LLSD().with("action", "insert").with("index", "bottom");
 				LLUICtrlFactory::create<LLMenuItemCallGL>(paramsItem, pWearOnMenu);
 			}
 		}
@@ -6055,7 +6047,7 @@ bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl,
 	if (1 != pPanel->getRootFolder()->getSelectedCount())
 	{
 		// If multiple items are selected the only options that really make sense are "(top)" and "(bottom)" (and then only for clothing)
-		return (sdParam["index"].isString()) && (("top" == sdParam["index"].asString()) || ("bottom" == sdParam["index"].asString()));
+		return (sdParam["index"].isString()) && (("top" == sdParam["index"]) || ("bottom" == sdParam["index"]));
 	}
 
 	const LLFolderViewModelItemInventory* pVMItem = pPanel->getRootFolder()->getCurSelectedItem()->getViewModelItem<LLFolderViewModelItemInventory>();
@@ -6066,7 +6058,7 @@ bool LLWearableBridge::getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl,
 	LLWearableType::EType eType = pItem->getWearableType();
 	U32 cntWearable = gAgentWearables.getWearableCount(eType);
 	if ( (0 == cntWearable) ||
-		 ( (gAgentWearables.canAddWearable(eType)) && ((sdParam["index"].isString()) || ("insert" == sdParam["action"].asString())) ) )
+		 ( (!gAgentWearables.canAddWearable(eType)) && ((sdParam["index"].isString()) || ("insert" == sdParam["action"].asString())) ) )
 	{
 		return false; // Hide all options if no wearable on this type or if user is at maximum hide "(top)", "(bottom)" and "(between)"
 	}

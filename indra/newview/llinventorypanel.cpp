@@ -257,8 +257,6 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	mFolderRoot.get()->setCallbackRegistrar(&mCommitCallbackRegistrar);
 // [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 	mEnableCallbackRegistrar.popScope();
-// [/SL:KB]
-// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
 	mFolderRoot.get()->setEnableCallbackRegistrar(&mEnableCallbackRegistrar);
 // [/SL:KB]
 	
