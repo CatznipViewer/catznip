@@ -34,6 +34,10 @@
 #include "llcolorswatch.h"
 #include "llviewercontrol.h"
 #include "lltexteditor.h"
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+#include "llcommandhandler.h"
+#include "llfloaterreg.h"
+// [/SL:KB]
 
 // [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
 std::string LLFloaterSettingsDebug::g_strLastUsedSetting;
@@ -74,7 +78,10 @@ BOOL LLFloaterSettingsDebug::postBuild()
 		}
 	} func(settings_combo);
 
-	std::string key = getKey().asString();
+//	std::string key = getKey().asString();
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+	std::string key = getKey()["group"].asString();
+// [/SL:KB]
 	if (key == "all" || key == "base")
 	{
 		gSavedSettings.applyToAll(&func);
@@ -192,10 +199,20 @@ void LLFloaterSettingsDebug::onCommitSettings()
 // [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
 void LLFloaterSettingsDebug::onOpen(const LLSD& sdKey)
 {
-	if (!g_strLastUsedSetting.empty())
+	LLFloater::onOpen(sdKey);
+
+	LLComboBox* pComboCtrl = getChild<LLComboBox>("settings_combo");
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+	setKey(LLSD().with("group", sdKey["group"]));
+
+	if (sdKey.has("setting"))
 	{
-		LLComboBox* pComboCtrl = getChild<LLComboBox>("settings_combo");
-		pComboCtrl->setTextEntry(g_strLastUsedSetting);
+		pComboCtrl->selectByValue(sdKey["setting"].asString());
+	}
+// [/SL:KB]
+	else if (!g_strLastUsedSetting.empty())
+	{
+		pComboCtrl->selectByValue(g_strLastUsedSetting);
 	}
 }
 // [/SL:KB]
@@ -467,3 +484,30 @@ void LLFloaterSettingsDebug::updateControl(LLControlVariable* controlp)
 	}
 
 }
+
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+class LLSettingsCommandHandler : public LLCommandHandler
+{
+public:
+	LLSettingsCommandHandler()
+		: LLCommandHandler("setting", UNTRUSTED_THROTTLE)
+	{
+	}
+	
+	bool handle(const LLSD& sdParams, const LLSD& sdQueryMap, LLMediaCtrl* pMediaCtrl)
+	{
+		if (sdParams.size() < 1)
+			return false;
+
+		const std::string strVerb = (sdParams.size() >= 2) ? sdParams[1].asString() : LLStringUtil::null;
+		if ( (strVerb == "show") || (strVerb.empty()) )
+		{
+			LLFloaterReg::showInstance("settings_debug", LLSD().with("group", "all").with("setting", sdParams[0].asString()));
+			return true;
+		}
+		
+		return false;
+	}
+};
+LLSettingsCommandHandler gSettingsCommandHandler;
+// [/SL:KB]

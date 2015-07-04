@@ -1163,6 +1163,34 @@ std::string LLUrlEntryRegion::getLocation(const std::string &url) const
 	return region_name;
 }
 
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+///
+/// LLUrlEntrySetting Describes a Second Life (debug) setting Url, e.g.,
+/// secondlife:///app/setting/<setting>[/show]
+///
+LLUrlEntrySetting::LLUrlEntrySetting()
+{
+	mPattern = boost::regex(APP_HEADER_REGEX "/setting/\\S+(/\\S+)?", boost::regex::perl | boost::regex::icase);
+	mMenuName = "menu_url_setting.xml";
+	mTooltip = LLTrans::getString("TooltipSettingUrl");
+}
+
+std::string LLUrlEntrySetting::getLabel(const std::string& url, const LLUrlLabelCallback& cb)
+{
+	LLURI uri(url);
+
+	const LLSD sdPathArray = uri.pathArray();
+	if (sdPathArray.size() >= 3)
+	{
+		const LLControlVariable* pControl = LLUI::getControl(sdPathArray[2].asString());
+		if ( (pControl) && (!pControl->isHiddenFromSettingsEditor()) )
+			return pControl->getName();
+	}
+	// CATZ_TODO: needs translating
+	return "(Invalid setting)";
+}
+// [/SL:KB]
+
 //
 // LLUrlEntryTeleport Describes a Second Life teleport Url, e.g.,
 // secondlife:///app/teleport/Ahern/50/50/50/

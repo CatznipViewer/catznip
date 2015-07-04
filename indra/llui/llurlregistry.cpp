@@ -70,6 +70,9 @@ LLUrlRegistry::LLUrlRegistry()
 	registerUrl(new LLUrlEntryPlace());
 	registerUrl(new LLUrlEntryInventory());
 	registerUrl(new LLUrlEntryObjectIM());
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+	registerUrl(new LLUrlEntrySetting());
+// [/SL:KB]
 	//LLUrlEntrySL and LLUrlEntrySLLabel have more common pattern, 
 	//so it should be registered in the end of list
 	registerUrl(new LLUrlEntrySL());

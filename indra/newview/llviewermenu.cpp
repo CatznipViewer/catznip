@@ -2107,7 +2107,10 @@ class LLAdvancedShowDebugSettings : public view_listener_t
 {
 	bool handleEvent(const LLSD& userdata)
 	{
-		LLFloaterReg::showInstance("settings_debug",userdata);
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+		LLFloaterReg::showInstance("settings_debug", LLSD().with("group", userdata));
+// [/SL:KB]
+//		LLFloaterReg::showInstance("settings_debug",userdata);
 		return true;
 	}
 };
