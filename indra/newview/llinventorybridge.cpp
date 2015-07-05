@@ -1964,17 +1964,20 @@ BOOL LLItemBridge::isItemCopyable() const
 //			return FALSE;
 //		}
 
-//		// You can never copy a link.
-//		if (item->getIsLinkType())
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
 		// We'll allow copying a link if:
 		//   - its target is available
 		//   - it doesn't point to another link [see LLViewerInventoryItem::getLinkedItem() which returns NULL in that case]
-		if ( (item->getIsLinkType()) && (!item->getLinkedItem()) )
-// [/SL:KB]
+		if (item->getIsLinkType())
 		{
-			return FALSE;
+			return (NULL != item->getLinkedItem());
 		}
+// [/SL:KB]
+//		// You can never copy a link.
+//		if (item->getIsLinkType())
+//		{
+//			return FALSE;
+//		}
 
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
 		return (item->getPermissions().allowCopyBy(gAgent.getID()));
