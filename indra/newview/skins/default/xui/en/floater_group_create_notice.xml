@@ -12,7 +12,7 @@
  positioning="centered"
  save_rect="true"
  save_visibility="false"
- title="New Group Notice"
+ title="NEW GROUP NOTICE"
  width="400">
     <panel
      follows="all"
@@ -74,7 +74,6 @@
          length="1"
          top_pad="10"
          follows="top|left"
-         font="SansSerif"
          height="16"
          layout="topleft"
          left="5"
@@ -98,7 +97,6 @@
          length="1"
          top_pad="10"
          follows="top|left"
-         font="SansSerif"
          layout="topleft"
          left="5"
          name="message_label"
@@ -124,7 +122,6 @@
          length="1"
          top_pad="10"
          follows="bottom|left"
-         font="SansSerif"
          height="16"
          layout="topleft"
          left="5"
