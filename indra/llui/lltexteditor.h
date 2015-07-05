@@ -60,6 +60,9 @@ public:
 								ignore_tab,
 								commit_on_focus_lost,
 								show_context_menu,
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+								show_inplace_search,
+// [/SL:KB]
 								enable_tooltip_paste,
 								auto_indent;
 
@@ -113,6 +116,10 @@ public:
 
 	// uictrl overrides
 	virtual void	clear();
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	/*virtual*/ bool hasAccelerators() const { return (mShowInplaceSearch) || (LLTextBase::hasAccelerators()); }
+	/*virtual*/ BOOL hasFocus() const;
+// [/SL:KB]
 	virtual void	setFocus( BOOL b );
 	virtual BOOL	isDirty() const;
 
@@ -143,8 +150,13 @@ public:
 
 	virtual bool	canLoadOrSaveToFile();
 
-	void			selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap = TRUE);
-	BOOL			replaceText(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive, BOOL wrap = TRUE);
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
+	std::string		getSelectionString() const;
+	void			selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap = TRUE, BOOL search_up = FALSE);
+	BOOL			replaceText(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive, BOOL wrap = TRUE, BOOL search_up = FALSE);
+// [/SL:KB]
+//	void			selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap = TRUE);
+//	BOOL			replaceText(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive, BOOL wrap = TRUE);
 	void			replaceTextAll(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive);
 
 	// Undo/redo stack
@@ -166,7 +178,10 @@ public:
 
 	// inserts text at cursor
 	void			insertText(const std::string &text);
-	void			insertText(LLWString &text);
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+	void			insertText(const LLWString &text);
+// [/SL:KB]
+//	void			insertText(LLWString &text);
 
 	void			appendWidget(const LLInlineViewSegment::Params& params, const std::string& text, bool allow_undo);
 	// Non-undoable
@@ -180,6 +195,9 @@ public:
 	BOOL			tryToRevertToPristineState();
 
 	void			setCursorAndScrollToEnd();
+// [SL:KB] - Patch: Control-TextEditorBase | Checked: 2012-01-02 (Catznip-3.2)
+	void 			setSelectionRange(S32 pos, S32 length);
+// [/SL:KB]
 
 	void			getCurrentLineAndColumn( S32* line, S32* col, BOOL include_wordwrap );
 
@@ -315,6 +333,10 @@ private:
 
 	BOOL			mAllowEmbeddedItems;
 	bool			mShowContextMenu;
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	bool			mShowInplaceSearch;
+	LLPanel*		mInplaceSearchPanel;
+// [/SL:KB]
 	bool			mEnableTooltipPaste;
 	bool			mPassDelete;
 	bool			mKeepSelectionOnReturn;	// disabling of removing selected text after pressing of Enter
