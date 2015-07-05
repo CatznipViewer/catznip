@@ -6,8 +6,10 @@
 	<text name="buy_text">
 		¿Comprar por [AMOUNT] L$ a [NAME]?
 	</text>
-	<button label="Cancelar" label_selected="Cancelar" name="cancel_btn" width="73"/>
+	<panel name="bottom_panel" >
+	<button label="Cancelar" label_selected="Cancelar" name="cancel_btn"/>
 	<button label="Comprar" label_selected="Comprar" name="buy_btn"/>
+	</panel>
 	<check_box label="Vestirse ahora la ropa" name="wear_check"/>
 	<string name="no_copy_text">
 		(no copiable)

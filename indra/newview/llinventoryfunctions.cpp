@@ -88,6 +88,9 @@
 
 #include <boost/foreach.hpp>
 
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+bool LLInventoryState::sShowNewInventory = false;
+// [/SL:KB]
 BOOL LLInventoryState::sWearNewClothing = FALSE;
 LLUUID LLInventoryState::sWearNewClothingTransactionID;
 
