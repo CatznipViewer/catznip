@@ -2015,7 +2015,7 @@ Anzeige für [AMOUNT] L$ veröffentlichen?
 		<usetemplate canceltext="Abbrechen" name="yesnocancelbuttons" notext="Nein" yestext="Ja"/>
 	</notification>
 	<notification label="Neustart bestätigen" name="ConfirmRestart">
-		Möchten Sie diese Region in 2 Minuten neu starten?
+		Möchten Sie diese Region in [MINUTES] Minuten neu starten?
 		<usetemplate name="okcancelbuttons" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification label="Nachricht an alle in dieser Region" name="MessageRegion">

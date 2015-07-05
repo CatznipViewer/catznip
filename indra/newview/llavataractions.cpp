@@ -1012,6 +1012,16 @@ void LLAvatarActions::inviteToGroup(const LLUUID& id)
 	}
 }
 
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-12-12 (Catznip-3.6)
+void LLAvatarActions::addContact(const LLUUID& id)
+{
+	if (id.notNull())
+	{
+		create_inventory_callingcard(id, gInventory.findCategoryUUIDForType(LLFolderType::FT_CALLINGCARD));
+	}
+}
+// [/SL:KB]
+
 // static
 void LLAvatarActions::viewChatHistory(const LLUUID& id)
 {

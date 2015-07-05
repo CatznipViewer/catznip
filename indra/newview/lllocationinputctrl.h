@@ -136,7 +136,10 @@ private:
 	 */
 	void					enableAddLandmarkButton(bool val);
 	void					refresh();
-	void					refreshLocation();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	void					refreshLocation(bool fForceUpdate = false);
+// [/SL:KB]
+//	void					refreshLocation();
 	void					refreshParcelIcons();
 	// Refresh the value in the health percentage text field
 	void					refreshHealth();
@@ -156,7 +159,10 @@ private:
 	void					onLocationHistoryChanged(LLLocationHistory::EChangeType event);
 	void					onLocationPrearrange(const LLSD& data);
 	void 					onTextEditorRightClicked(S32 x, S32 y, MASK mask);
-	void					onLandmarkLoaded(LLLandmark* lm);
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	void					onInventoryChanged() { mLandmarksDirty = true; }
+// [/SL:KB]
+//	void					onLandmarkLoaded(LLLandmark* lm);
 	void					onForSaleButtonClicked();
 	void					onAddLandmarkButtonClicked();
 	void					onAgentParcelChange();
@@ -181,8 +187,16 @@ private:
 	LLIconCtrl*	mParcelIcon[ICON_COUNT];
 	LLTextBox* mDamageText;
 
-	LLAddLandmarkObserver*		mAddLandmarkObserver;
-	LLRemoveLandmarkObserver*	mRemoveLandmarkObserver;
+//	LLAddLandmarkObserver*		mAddLandmarkObserver;
+//	LLRemoveLandmarkObserver*	mRemoveLandmarkObserver;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	// NOTE: name change to catch all occurances
+	LLAddLandmarkObserver*		mLandmarkAddObserver;
+	LLRemoveLandmarkObserver*	mLandmarkRemoveObserver;
+	LLFrameTimer				mLandmarkButtonTimer;
+	bool						mLandmarksDirty;
+	bool						mHasParcelLandmark;
+// [/SL:KB]
 	LLParcelChangeObserver*		mParcelChangeObserver;
 
 	boost::signals2::connection	mCoordinatesControlConnection;

@@ -2001,7 +2001,7 @@ Binlerce bölgeyi değiştirecek ve alan sunucusunu kesintiye uğratacaktır.
 		<usetemplate canceltext="İptal" name="yesnocancelbuttons" notext="Hayır" yestext="Evet"/>
 	</notification>
 	<notification label="Yeniden başlatmayı onayla" name="ConfirmRestart">
-		Bu bölgeyi gerçekten 2 dakika sonra yeniden başlatmak istiyor musunuz?
+		Bu bölgeyi gerçekten [MINUTES] dakika sonra yeniden başlatmak istiyor musunuz?
 		<usetemplate name="okcancelbuttons" notext="İptal" yestext="Tamam"/>
 	</notification>
 	<notification label="Bu bölgedeki herkese ileti gönderme" name="MessageRegion">
