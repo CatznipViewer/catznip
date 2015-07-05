@@ -508,6 +508,7 @@
     <menu_item_separator
      layout="topleft" 
      name="Paste Separator" />
+<!--
     <menu_item_call
      label="Delete"
      layout="topleft"
@@ -516,6 +517,7 @@
          function="Inventory.DoToSelected"
          parameter="delete" />
     </menu_item_call>
+-->
     <menu_item_call
      label="Delete"
      layout="topleft"
