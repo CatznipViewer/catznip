@@ -3713,7 +3713,10 @@ class LLCheckPanelPeopleTab : public view_listener_t
 		{
 			std::string panel_name = userdata.asString();
 
-			LLPanel *panel = LLFloaterSidePanelContainer::getPanel("people", panel_name);
+//			LLPanel *panel = LLFloaterSidePanelContainer::getPanel("people", panel_name);
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+			LLPanel *panel = LLFloaterSidePanelContainer::findPanel("people", panel_name);
+// [/SL:KB]
 			if(panel && panel->isInVisibleChain())
 			{
 				return true;
