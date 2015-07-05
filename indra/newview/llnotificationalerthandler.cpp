@@ -82,7 +82,10 @@ bool LLAlertHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 
-	if (notification->canLogToIM() && notification->hasFormElements())
+//	if (notification->canLogToIM() && notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	if ( (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements()) )
+// [/SL:KB]
 	{
 		const std::string name = LLHandlerUtil::getSubstitutionName(notification);
 

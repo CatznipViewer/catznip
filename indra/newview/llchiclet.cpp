@@ -30,11 +30,23 @@
 #include "llchicletbar.h"
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+#include "llfloatersidepanelcontainer.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "lllocalcliprect.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+#include "llnotificationhandler.h"
+// [/SL:KB]
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+#include "llpanelblockedlist.h"
+// [/SL:KB]
 #include "llscriptfloater.h"
 #include "llsingleton.h"
 #include "llsyswellwindow.h"
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+#include "llviewerobjectlist.h"
+// [/SL:KB]
 
 static LLDefaultChildRegistry::Register<LLChicletPanel> t1("chiclet_panel");
 static LLDefaultChildRegistry::Register<LLNotificationChiclet> t2("chiclet_notification");
@@ -229,9 +241,13 @@ bool LLNotificationChiclet::ChicletNotificationChannel::filterNotification( LLNo
 	{
 		displayNotification = false;
 	}
-	else if( !(notification->canLogToIM() && notification->hasFormElements())
-			&& (!notification->getPayload().has("give_inventory_notification")
-				|| notification->getPayload()["give_inventory_notification"]))
+//	else if( !(notification->canLogToIM() && notification->hasFormElements())
+//			&& (!notification->getPayload().has("give_inventory_notification")
+//				|| notification->getPayload()["give_inventory_notification"]))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	else if ( !((LLNotificationsUI::LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements())) && 
+	          ((!notification->getPayload().has("give_inventory_notification")) || (notification->getPayload()["give_inventory_notification"])) )
+// [/SL:KB]
 	{
 		displayNotification = true;
 	}
@@ -1042,6 +1058,28 @@ void LLChicletInvOfferIconCtrl::setValue(const LLSD& value )
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+static void handleMuteByName(const std::string& strTargetName)
+{
+	if (LLMuteList::getInstance()->add(LLMute(LLUUID::null, strTargetName, LLMute::BY_NAME)))
+		LLFloaterSidePanelContainer::showPanel("people", "panel_block_list_sidetray", LLSD());
+}
+
+static void handleMuteByUUID(LLMute::EType eType, const LLUUID& idTarget, const std::string& strTargetName)
+{
+	if ( (idTarget.notNull()) && (!strTargetName.empty()) )
+	{
+		if (LLMuteList::getInstance()->add(LLMute(idTarget, strTargetName, eType)))
+			LLPanelBlockedList::showPanelAndSelect(idTarget);
+	}
+}
+
+static void handleMuteAgentOrGroupUUID(const LLUUID& idTarget, bool fIsGroup)
+{
+	gCacheName->get(idTarget, fIsGroup, boost::bind(&handleMuteByUUID, (!fIsGroup) ? LLMute::AGENT : LLMute::GROUP, idTarget, _2));
+}
+// [/SL:KB]
+
 LLScriptChiclet::Params::Params()
  : icon("icon")
  , chiclet_button("chiclet_button")
@@ -1082,6 +1120,40 @@ void LLScriptChiclet::onMouseDown()
 	LLScriptFloaterManager::getInstance()->toggleScriptFloater(getSessionId());
 }
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+bool LLScriptChiclet::enableMenuItem(const LLSD& user_data, const LLUUID& idSession)
+{
+	// When the user picks a menu item the chiclet instance will instantly be destroyed, but the menu fade-out will still call the 
+	// on_enable function so we need to be static *and* not be passed any this-pointer (which would no longer be valid on the last call)
+	std::string action = user_data.asString();
+
+	if ("block_object" == action)
+	{
+		// We can't block attachments [see LLMute::LLMute()]
+		const LLUUID& idObject = LLScriptFloaterManager::instance().findObjectId(idSession);
+		const LLViewerObject* pObject = (idObject.notNull()) ? gObjectList.findObject(idObject) : NULL;
+		return (idObject.notNull()) && ((!pObject) || (!pObject->isAttachment()));
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(idSession);
+		return (!strObjectName.empty());
+	}
+	else if ("block_owner" == action)
+	{
+		return LLScriptFloaterManager::instance().getObjectOwner(idSession).notNull();
+	}
+	else if ("end_all" == action)
+	{
+		uuid_vec_t idNotifs;
+		LLScriptFloaterManager* pFloaterMgr = LLScriptFloaterManager::getInstance();
+		return (pFloaterMgr->findNotificationIds(pFloaterMgr->findObjectId(idSession), LLScriptFloaterManager::OBJ_SCRIPT, idNotifs)) && (idNotifs.size() > 1);
+	}
+
+	return true;
+}
+// [/SL:KB]
+
 void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 {
 	std::string action = user_data.asString();
@@ -1090,6 +1162,51 @@ void LLScriptChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	else if ("block_object" == action)
+	{
+		// NOTE:
+		//   - we can't block attachments [see LLMute::LLMute()]
+		//   - we won't have a valid object ID for task inventory offers (the one we're passed is generated by the viewer)
+		const LLUUID& idObject = LLScriptFloaterManager::instance().findObjectId(getSessionId());
+		const LLViewerObject* pObject = (idObject.notNull()) ? gObjectList.findObject(idObject) : NULL;
+		if ( (idObject.notNull()) && ((!pObject) || (!pObject->isAttachment())) )
+		{
+			handleMuteByUUID(LLMute::OBJECT, LLScriptFloaterManager::instance().findObjectId(getSessionId()),
+			                 LLScriptFloaterManager::instance().getObjectName(getSessionId()));
+		}
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(getSessionId());
+		if (!strObjectName.empty())
+			handleMuteByName(strObjectName);
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_owner" == action)
+	{
+		LLNotificationPtr notification = LLNotifications::getInstance()->find(getSessionId());
+		if (notification)
+		{
+			handleMuteAgentOrGroupUUID(LLScriptFloaterManager::instance().getObjectOwner(getSessionId()),
+			                           notification->getPayload()["owner_is_group"].asBoolean());
+		}
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("end_all" == action)
+	{
+		uuid_vec_t idNotifs;
+		if (LLScriptFloaterManager::instance().findNotificationIds(LLScriptFloaterManager::instance().findObjectId(getSessionId()), LLScriptFloaterManager::OBJ_SCRIPT, idNotifs))
+		{
+			for (uuid_vec_t::const_iterator itNotif = idNotifs.begin(); itNotif != idNotifs.end(); ++itNotif)
+				LLScriptFloaterManager::instance().removeNotification(*itNotif);
+		}
+	}
+// [/SL:KB]
 }
 
 void LLScriptChiclet::createPopupMenu()
@@ -1099,6 +1216,11 @@ void LLScriptChiclet::createPopupMenu()
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("ScriptChiclet.Action", boost::bind(&LLScriptChiclet::onMenuItemClicked, this, _2));
+
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+	enable_registrar.add("ScriptChiclet.EnableItem", boost::bind(&LLScriptChiclet::enableMenuItem, _2, getSessionId()));
+// [/SL:KB]
 
 	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
 		("menu_script_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
@@ -1145,6 +1267,10 @@ void LLInvOfferChiclet::setSessionId(const LLUUID& session_id)
 	LLIMChiclet::setSessionId(session_id);
 	LLNotificationPtr notification = LLNotifications::getInstance()->find(session_id);
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	mIsTaskOffer = (notification) && (INVENTORY_USER_OFFER != notification->getName());
+// [/SL:KB]
+
 	if ( notification && notification->getName() == INVENTORY_USER_OFFER )
 	{
 		mChicletIconCtrl->setValue(notification->getPayload()["from_id"]);
@@ -1160,6 +1286,37 @@ void LLInvOfferChiclet::onMouseDown()
 	LLScriptFloaterManager::instance().toggleScriptFloater(getSessionId());
 }
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+bool LLInvOfferChiclet::enableMenuItem(const LLSD& user_data, bool fIsTaskOffer, const LLUUID& idSession)
+{
+	// When the user picks a menu item the chiclet instance will instantly be destroyed, but the menu fade-out will still call the 
+	// on_enable function so we need to be static *and* not be passed any this-pointer (which would no longer be valid on the last call)
+	std::string action = user_data.asString();
+
+	if ("block_agent" == action)
+	{
+		return !fIsTaskOffer;
+	}
+	else if ("block_object" == action)
+	{
+		// We won't have a valid object ID for task inventory offers (the one we're passed is generated by the viewer)
+		return false;
+		//return (fIsTaskOffer) && (LLScriptFloaterManager::instance().findObjectId(idSession).notNull());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(idSession);
+		return (!strObjectName.empty());
+	}
+	else if ("block_owner" == action)
+	{
+		return (fIsTaskOffer) && (LLScriptFloaterManager::instance().getObjectOwner(idSession).notNull());
+	}
+
+	return true;
+}
+// [/SL:KB]
+
 void LLInvOfferChiclet::onMenuItemClicked(const LLSD& user_data)
 {
 	std::string action = user_data.asString();
@@ -1168,6 +1325,41 @@ void LLInvOfferChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLScriptFloaterManager::instance().removeNotification(getSessionId());
 	}
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	else if ("block_agent" == action)
+	{
+		LLNotificationPtr notification = LLNotifications::getInstance()->find(getSessionId());
+		if (notification)
+			handleMuteAgentOrGroupUUID(notification->getPayload()["from_id"], false);
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_object" == action)
+	{
+		// We won't have a valid object ID for task inventory offers (the one we're passed is generated by the viewer)
+		handleMuteByUUID(LLMute::OBJECT, LLScriptFloaterManager::instance().findObjectId(getSessionId()),
+		                 LLScriptFloaterManager::instance().getObjectName(getSessionId()));
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+	else if ("block_object_by_name" == action)
+	{
+		const std::string strObjectName = LLScriptFloaterManager::instance().getObjectName(getSessionId());
+		if (!strObjectName.empty())
+			handleMuteByName(strObjectName);
+	}
+	else if ("block_owner" == action)
+	{
+		LLNotificationPtr notification = LLNotifications::getInstance()->find(getSessionId());
+		if (notification)
+		{
+			handleMuteAgentOrGroupUUID(LLScriptFloaterManager::instance().getObjectOwner(getSessionId()),
+			                           notification->getPayload()["owner_is_group"].asBoolean());
+		}
+
+		LLScriptFloaterManager::instance().removeNotification(getSessionId());
+	}
+// [/SL:KB]
 }
 
 void LLInvOfferChiclet::createPopupMenu()
@@ -1177,6 +1369,11 @@ void LLInvOfferChiclet::createPopupMenu()
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	registrar.add("InvOfferChiclet.Action", boost::bind(&LLInvOfferChiclet::onMenuItemClicked, this, _2));
+
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+	enable_registrar.add("InvOfferChiclet.EnableItem", boost::bind(&LLInvOfferChiclet::enableMenuItem, _2, mIsTaskOffer, getSessionId()));
+// [/SL:KB]
 
 	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLMenuGL>
 		("menu_inv_offer_chiclet.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());

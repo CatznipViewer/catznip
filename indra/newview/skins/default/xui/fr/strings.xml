@@ -4171,7 +4171,7 @@ Si ce message persiste, veuillez aller sur la page [SUPPORT_SITE].
 		Vous êtes le seul participant à cette session.
 	</string>
 	<string name="offline_message">
-		[NAME] est hors ligne.
+		[NAME_SLURL] est hors ligne.
 	</string>
 	<string name="invite_message">
 		Pour accepter ce chat vocal/vous connecter, cliquez sur le bouton [BUTTON NAME].
