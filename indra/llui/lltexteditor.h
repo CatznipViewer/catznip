@@ -159,6 +159,13 @@ public:
 //	BOOL			replaceText(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive, BOOL wrap = TRUE);
 	void			replaceTextAll(const std::string& search_text, const std::string& replace_text, BOOL case_insensitive);
 
+// [SL:KB] - Patch: Control-TextSearch | Checked: 2014-03-16 (Catznip-3.6)
+	bool			getShowInplaceSearch() const { return mShowInplaceSearch; }
+	LLPanel*		getInplaceSearchPanel();
+	void			showInplaceSearchPanel(bool fShow);
+	void			toggleInplaceSearchPanel();
+// [/SL:KB]
+
 	// Undo/redo stack
 	void			blockUndo();
 

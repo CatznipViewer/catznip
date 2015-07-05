@@ -9,12 +9,14 @@
 	<floater.string name="Title">
 		記事卡： [NAME]
 	</floater.string>
-	<text name="desc txt">
+	<text name="desc txt" width="30">
 		描述：
 	</text>
 	<text_editor name="Notecard Editor">
 		載入中...
 	</text_editor>
+	<panel name="bottom_panel">
 	<button label="儲存" label_selected="儲存" name="Save"/>
 	<button label="刪除" label_selected="刪除" name="Delete"/>
+	</panel>
 </floater>
