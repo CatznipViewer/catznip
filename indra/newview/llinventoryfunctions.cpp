@@ -1259,7 +1259,11 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 	}
 
     
-	std::set<LLUUID> selected_uuid_set = LLAvatarActions::getInventorySelectedUUIDs();
+//	std::set<LLUUID> selected_uuid_set = LLAvatarActions::getInventorySelectedUUIDs();
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2015-07-05 (Catznip-3.7)
+	// NOTE: we bypass the call to LLAvatarActions::getInventorySelectedUUIDs() since it's superceded by Inventory-MultiAction anyway
+	std::set<LLUUID> selected_uuid_set;
+// [/SL:KB]
     uuid_vec_t ids;
     std::copy(selected_uuid_set.begin(), selected_uuid_set.end(), std::back_inserter(ids));
     // Check for actions that get handled in bulk

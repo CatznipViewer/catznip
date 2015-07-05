@@ -578,13 +578,13 @@ namespace action_give_inventory
 
 //	static bool is_give_inventory_acceptable()
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
-	static bool is_give_inventory_acceptable(LLHandle<LLPanel> inv_panel_handle)
+	static bool is_give_inventory_acceptable(LLHandle<LLInventoryPanel> inv_panel_handle)
 // [/SL:KB]
 	{
 //		// check selection in the panel
 //		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(dynamic_cast<LLInventoryPanel*>(inv_panel_handle.get()));
+		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(inv_panel_handle.get());
 // [/SL:KB]
 		if (inventory_selected_uuids.empty()) return false; // nothing selected
 
@@ -749,14 +749,14 @@ namespace action_give_inventory
 	 */
 //	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names)
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
-	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names, LLHandle<LLPanel> inv_panel_handle)
+	static void give_inventory(const uuid_vec_t& avatar_uuids, const std::vector<LLAvatarName> avatar_names, LLHandle<LLInventoryPanel> inv_panel_handle)
 // [/SL:KB]
 	{
 		llassert(avatar_names.size() == avatar_uuids.size());
 
 //		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs();
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
-		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(dynamic_cast<LLInventoryPanel*>(inv_panel_handle.get()));
+		const std::set<LLUUID> inventory_selected_uuids = LLAvatarActions::getInventorySelectedUUIDs(inv_panel_handle.get());
 // [/SL:KB]
 		if (inventory_selected_uuids.empty())
 		{
@@ -904,12 +904,12 @@ void LLAvatarActions::shareWithAvatars(LLInventoryPanel* inv_panel)
 //	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable));
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2011-06-29 (Catznip-2.6)
 	LLFloater* root_floater = gFloaterView->getParentFloater(inv_panel);
-	LLFloaterAvatarPicker* picker = LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2, inv_panel->getHandle()), TRUE, FALSE, FALSE, root_floater->getName());
+	LLFloaterAvatarPicker* picker = LLFloaterAvatarPicker::show(boost::bind(give_inventory, _1, _2, inv_panel->getInventoryPanelHandle()), TRUE, FALSE, FALSE, root_floater->getName());
 	if (!picker)
 	{
 		return;
 	}
-	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable, inv_panel->getHandle()));
+	picker->setOkBtnEnableCb(boost::bind(is_give_inventory_acceptable, inv_panel->getInventoryPanelHandle()));
 // [/SL:KB]
 	picker->openFriendsTab();
     
