@@ -625,10 +625,10 @@ void disable_context_entries_if_present(LLMenuGL& menu,
 
         if (found)
         {
-			menu_item->setVisible(TRUE);
-			// A bit of a hack so we can remember that some UI element explicitly set this to be visible
-			// so that some other UI element from multi-select doesn't later set this invisible.
-			menu_item->pushVisible(TRUE);
+//			menu_item->setVisible(TRUE);
+//			// A bit of a hack so we can remember that some UI element explicitly set this to be visible
+//			// so that some other UI element from multi-select doesn't later set this invisible.
+//			menu_item->pushVisible(TRUE);
 
 			menu_item->setEnabled(FALSE);
         }
