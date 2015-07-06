@@ -538,11 +538,6 @@
              function="Inventory.DoToSelected"
              parameter="open_newtab" />
         </menu_item_call>
-    </menu>
-    <menu
-     label="Open folder in"
-     layout="topleft"
-     name="Open in XXX">
         <menu_item_call
          label="New Window"
          layout="topleft"
