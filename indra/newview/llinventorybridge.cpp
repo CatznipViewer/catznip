@@ -6078,7 +6078,7 @@ void LLWearableBridge::openItem()
 			bool fCtrlDown = (MASK_CONTROL == mask);
 			bool fOpenAdd = gSavedSettings.getBOOL("DoubleClickWearableAdd");
 
-			const char* pstrAction = (fIsWorn) ? "take_off" : ((fCtrlDown ^ fOpenAdd) || (LLAssetType::AT_BODYPART == item->getType())) ? "wear_add" : "wear";
+			const char* pstrAction = (fIsWorn) ? "take_off" : ((fCtrlDown ^ fOpenAdd) && (LLAssetType::AT_BODYPART != item->getType())) ? "wear_add" : "wear";
 			performAction(getInventoryModel(), pstrAction);
 		}
 	}
