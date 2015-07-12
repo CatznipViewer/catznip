@@ -2307,7 +2307,12 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 		const LLUUID &my_outifts_id = model->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
 
 		const BOOL move_is_into_trash = (mUUID == trash_id) || model->isObjectDescendentOf(mUUID, trash_id);
-		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+//		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2015-07-12 (Catznip-3.8)
+		const BOOL move_is_into_my_outfits = 
+			(mUUID == my_outifts_id) || 
+			( (model->isObjectDescendentOf(mUUID, my_outifts_id)) && (getCategory()) && (getCategory()->getPreferredType() != LLFolderType::FT_NONE) );
+// [/SL:KB]
 		const BOOL move_is_into_outfit = move_is_into_my_outfits || (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT);
 		const BOOL move_is_into_landmarks = (mUUID == landmarks_id) || model->isObjectDescendentOf(mUUID, landmarks_id);
 
@@ -3259,7 +3264,12 @@ void LLFolderBridge::pasteFromClipboard()
 		const LLUUID &my_outifts_id = model->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
 
 		const BOOL move_is_into_current_outfit = (mUUID == current_outfit_id);
-		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+//		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2015-07-12 (Catznip-3.8)
+		const BOOL move_is_into_my_outfits = 
+			(mUUID == my_outifts_id) || 
+			( (model->isObjectDescendentOf(mUUID, my_outifts_id)) && (getCategory()) && (getCategory()->getPreferredType() != LLFolderType::FT_NONE) );
+// [/SL:KB]
 		const BOOL move_is_into_outfit = move_is_into_my_outfits || (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT);
 		const BOOL move_is_into_outbox = model->isObjectDescendentOf(mUUID, outbox_id);
 		const BOOL move_is_into_favorites = (mUUID == favorites_id);
