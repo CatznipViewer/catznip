@@ -1820,6 +1820,14 @@ void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
 }
 // [/SL:KB]
 
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
+
 void LLFloaterPreference::getUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
 	LLColorSwatchCtrl* color_swatch = (LLColorSwatchCtrl*) ctrl;
