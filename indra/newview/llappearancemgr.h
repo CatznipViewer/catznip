@@ -234,6 +234,10 @@ public:
 	void setAppearanceServiceURL(const std::string& url) { mAppearanceServiceURL = url; }
 	std::string getAppearanceServiceURL() const;
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+	void purgeCategory(const LLUUID& category, bool keep_outfit_links, LLInventoryModel::item_array_t* keep_items = NULL);
+// [/SL:KB]
+
 private:
 	std::string		mAppearanceServiceURL;
 	
@@ -324,6 +328,9 @@ LLUUID findDescendentCategoryIDByName(const LLUUID& parent_id,const std::string&
 
 // Invoke a given callable after category contents are fully fetched.
 void callAfterCategoryFetch(const LLUUID& cat_id, nullary_func_t cb);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
+void callAfterItemsCopy(LLInventoryModel::item_array_t* items, const LLUUID& cat_dest_id, nullary_func_t completion_cb, nullary_func_t failure_cb);
+// [/SL:KB]
 
 // Wear all items in a uuid vector.
 void wear_multiple(const uuid_vec_t& ids, bool replace);
