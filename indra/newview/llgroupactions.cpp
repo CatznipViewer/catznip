@@ -41,6 +41,10 @@
 #include "llnotificationsutil.h"
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "groupchatlistener.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-3.0)
+#include "llpanelgroup.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //
 // Globals
@@ -339,15 +343,46 @@ void LLGroupActions::activate(const LLUUID& group_id)
 	gAgent.sendReliableMessage();
 }
 
-static bool isGroupUIVisible()
+//static bool isGroupUIVisible()
+//{
+//	static LLPanel* panel = 0;
+//	if(!panel)
+//		panel = LLSideTray::getInstance()->getPanel("panel_group_info_sidetray");
+//	if(!panel)
+//		return false;
+//	return panel->isInVisibleChain();
+//}
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+typedef enum
 {
-	static LLPanel* panel = 0;
-	if(!panel)
-		panel = LLFloaterSidePanelContainer::getPanel("people", "panel_group_info_sidetray");
-	if(!panel)
-		return false;
-	return panel->isInVisibleChain();
+	GV_FLOATER,   // Group is visible as a floater
+	GV_SIDEPANEL, // Group is visible in the people sidepanel
+	GV_NONE       // Group is not visible
+} EGroupVisibility; 
+
+static EGroupVisibility getGroupVisible(const LLUUID& idGroup)
+{
+	// Sanity check
+	if (idGroup.isNull())
+	{
+		return GV_NONE;
+	}
+
+	// Check if we have the group open as a floater
+	if (NULL != LLFloaterReg::findInstance("floater_group_info", idGroup))
+	{
+		return GV_FLOATER;
+	}
+
+	// Check if we have the group open in the people sidepanel
+	static LLPanelGroup* s_pPanelGroupInfo = NULL;
+	if (!s_pPanelGroupInfo)
+	{
+		s_pPanelGroupInfo = LLFloaterSidePanelContainer::findPanel<LLPanelGroup>("people", "panel_group_info_sidetray");
+	}
+	return ( (s_pPanelGroupInfo) && (s_pPanelGroupInfo->isInVisibleChain()) && (idGroup == s_pPanelGroupInfo->getID()) ) ? GV_SIDEPANEL : GV_NONE;
 }
+// [/SL:KB]
 
 // static 
 void LLGroupActions::inspect(const LLUUID& group_id)
@@ -361,38 +396,97 @@ void LLGroupActions::show(const LLUUID& group_id)
 	if (group_id.isNull())
 		return;
 
-	LLSD params;
-	params["group_id"] = group_id;
-	params["open_tab_name"] = "panel_group_info_sidetray";
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+// [/SL:KB]
+		LLSD params;
+		params["group_id"] = group_id;
+		params["open_tab_name"] = "panel_group_info_sidetray";
 
-	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	}
+	else
+	{
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
+		if (pFloater)
+		{
+			pFloater->openFloater(LLSD().with("group_id", group_id));
+		}
+	}
+// [/SL:KB]
 }
 
-void LLGroupActions::refresh_notices()
+//void LLGroupActions::refresh_notices()
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+void LLGroupActions::refresh_notices(const LLUUID& group_id)
+// [/SL:KB]
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
+// [/SL:KB]
 
 	LLSD params;
-	params["group_id"] = LLUUID::null;
+//	params["group_id"] = LLUUID::null;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	params["group_id"] = group_id;
+// [/SL:KB]
 	params["open_tab_name"] = "panel_group_info_sidetray";
 	params["action"] = "refresh_notices";
 
-	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+//	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
+	{
+		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+	}
+	else
+	{
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
+		if (pFloater)
+		{
+			pFloater->openFloater(params);
+		}
+	}
+// [/SL:KB]
 }
 
 //static 
 void LLGroupActions::refresh(const LLUUID& group_id)
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
+// [/SL:KB]
 
 	LLSD params;
 	params["group_id"] = group_id;
 	params["open_tab_name"] = "panel_group_info_sidetray";
 	params["action"] = "refresh";
 
-	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+//	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	if ( (!gSavedSettings.getBOOL("ShowGroupFloaters")) || (GV_SIDEPANEL == eGroupVisibility) )
+	{
+		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+	}
+	else
+	{
+		LLFloater* pFloater = LLFloaterReg::getInstance("floater_group_info", group_id);
+		if (pFloater)
+		{
+			pFloater->openFloater(params);
+		}
+	}
+// [/SL:KB]
 }
 
 //static 
@@ -409,8 +503,13 @@ void LLGroupActions::createGroup()
 //static
 void LLGroupActions::closeGroup(const LLUUID& group_id)
 {
-	if(!isGroupUIVisible())
+//	if(!isGroupUIVisible())
+//		return;
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2013-07-08 (Catznip-3.4)
+	EGroupVisibility eGroupVisibility = getGroupVisible(group_id);
+	if (GV_NONE == eGroupVisibility)
 		return;
+// [/SL:KB]
 
 	LLSD params;
 	params["group_id"] = group_id;
@@ -418,6 +517,10 @@ void LLGroupActions::closeGroup(const LLUUID& group_id)
 	params["action"] = "close";
 
 	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	LLFloaterReg::hideInstance("floater_group_info", group_id);
+// [/SL:KB]
 }
 
 
