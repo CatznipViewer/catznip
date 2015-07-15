@@ -8,12 +8,12 @@
 	<check_box label="Construire/Modifier" name="edit_camera_movement" tool_tip="Utiliser le positionnement automatique de la caméra lorsque vous entrez en mode de modification et le quittez."/>
 	<check_box label="Apparence" name="appearance_camera_movement" tool_tip="Utiliser le positionnement automatique de la caméra en mode de modification."/>
 	<text name="keyboard_lbl">
-		Clavier :
+		Clavier
 	</text>
 	<check_box label="Les touches de direction me font toujours me déplacer" name="arrow_keys_move_avatar_check"/>
 	<check_box label="Appuyer deux fois et maintenir enfoncé pour courir" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		Souris :
+		Souris
 	</text>
 	<check_box label="Afficher en vue subjective" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">

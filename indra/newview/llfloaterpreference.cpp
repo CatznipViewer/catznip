@@ -107,6 +107,9 @@
 #include "llpluginclassmedia.h"
 #include "llteleporthistorystorage.h"
 #include "llproxy.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 #include "lllogininstance.h"        // to check if logged in yet
 #include "llsdserialize.h"
@@ -257,7 +260,6 @@ void handleAppearanceCameraMovementChanged(const LLSD& newvalue)
 		gAgentCamera.resetView();
 	}
 }
-
 /*bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -459,7 +461,7 @@ BOOL LLFloaterPreference::postBuild()
 	std::string cache_location = gDirUtilp->getExpandedFilename(LL_PATH_CACHE, "");
 	setCacheLocation(cache_location);
 
-	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
+//	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
 
 	getChild<LLComboBox>("language_combobox")->setCommitCallback(boost::bind(&LLFloaterPreference::onLanguageChange, this));
 
@@ -1300,6 +1302,11 @@ void LLFloaterPreference::refreshEnabledState()
 
 	ctrl_shadow->setEnabled(enabled);
 	
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Setting should be disabled when basic shaders is unchecked or deferred rendering is enabled
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+	ctrl_glow->setEnabled((ctrl_shader_enable->get()) && (!ctrl_deferred->get()));
+// [/SL:TD]
 
 	// now turn off any features that are unavailable
 	disableUnavailableSettings();
@@ -1316,6 +1323,9 @@ void LLFloaterPreference::disableUnavailableSettings()
 	LLCheckBoxCtrl* ctrl_avatar_vp     = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
 	LLCheckBoxCtrl* ctrl_avatar_cloth  = getChild<LLCheckBoxCtrl>("AvatarCloth");
 	LLCheckBoxCtrl* ctrl_shader_enable = getChild<LLCheckBoxCtrl>("BasicShaders");
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+// [/SL:TD]
 	LLCheckBoxCtrl* ctrl_wind_light    = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
 	LLCheckBoxCtrl* ctrl_avatar_impostors = getChild<LLCheckBoxCtrl>("AvatarImpostors");
 	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
@@ -1330,6 +1340,11 @@ void LLFloaterPreference::disableUnavailableSettings()
 		ctrl_shader_enable->setEnabled(FALSE);
 		ctrl_shader_enable->setValue(FALSE);
 		
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+		ctrl_glow->setEnabled(FALSE);
+		ctrl_glow->setValue(FALSE);
+// [/SL:TD]
+
 		ctrl_wind_light->setEnabled(FALSE);
 		ctrl_wind_light->setValue(FALSE);
 		
@@ -1905,7 +1920,7 @@ void LLFloaterPreference::selectChatPanel()
 
 void LLFloaterPreference::changed()
 {
-	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
+//	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
 
 	// set 'enable' property for 'Delete transcripts...' button
 	updateDeleteTranscriptsButton();
@@ -2049,6 +2064,21 @@ BOOL LLPanelPreference::postBuild()
 		gSavedSettings.getControl("ThrottleBandwidthKBPS")->getSignal()->connect(boost::bind(&LLPanelPreference::Updater::update, mBandWidthUpdater, _2));
 	}
 
+// [SL:KB] - Checked: 2011-06-27 (Catznip-2.6)
+	//////////////////////PanelCatznip ///////////////////
+	if (hasChild("windowedfullscreen_check", TRUE))
+	{
+#ifdef CATZNIP
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setEnabled( (gViewerWindow) && (gViewerWindow->canFullscreenWindow()) );
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setValue( (gViewerWindow) && (gViewerWindow->getFullscreenWindow()) );
+#endif // CATZNIP
+	}
+	if (hasChild("rlva_check", TRUE))
+	{
+		getChild<LLCheckBoxCtrl>("rlva_check")->setValue(gSavedSettings.getBOOL("RestrainedLove"));
+	}
+// [/SL:KB]
+
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	LLFloaterPreference* pFloater = getParentByType<LLFloaterPreference>();
 	if (pFloater)
@@ -2097,6 +2127,104 @@ void LLPanelPreference::onVisibilityChange(BOOL new_visibility)
 		onClose();
 	}
 }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-Chat | Checked: 2014-03-04 (Catznip-3.6)
+class LLPanelPreferenceChat : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceChat()
+		: LLPanelPreference()
+	{
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationChat",boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationIM",  boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "im"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationChat",    boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationIM",      boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "im"));
+	}
+
+	/*virtual*/ BOOL postBuild()
+	{
+		LLPanelPreference::postBuild();
+
+		LLUICtrl* pCtrl = findChild<LLUICtrl>("nearbychattornoff_check", TRUE);
+		if (pCtrl)
+		{
+			pCtrl->setCommitCallback(boost::bind(LLPanelPreferenceChat::onNearbyChatTornOffChanged));
+		}
+
+		return TRUE;
+	}
+
+protected:
+	static void onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				pCtrl->setValue(templ->canLogToNearbyChat());
+			else if (0 == strcmp(pstrScope, "im"))
+				pCtrl->setValue(templ->canLogToIM(true));
+		}
+#endif // CATZNIP
+	}
+
+	static void onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				templ->setLogToNearbyChat(pCtrl->getValue().asBoolean());
+			else if (0 == strcmp(pstrScope, "im"))
+				templ->setLogToIM(pCtrl->getValue().asBoolean());
+		}
+#endif // CATZNIP
+	}
+
+	static void onNearbyChatTornOffChanged()
+	{
+#ifdef CATZNIP
+		LLFloater* pNearbyChat = LLFloaterReg::findInstance("nearby_chat");
+		LLFloater* pConversations = LLFloaterReg::findInstance("im_container");
+
+		if ( (pNearbyChat) && (pConversations) )
+		{
+			bool fNearbyVisible = pNearbyChat->isInVisibleChain();
+			bool fConvVisible = pConversations->isInVisibleChain();
+
+			bool fTornOff = !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
+			if ( (fTornOff) && (!pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pNearbyChat->setVisible(fNearbyVisible);
+				pConversations->setVisible(fConvVisible);
+			}
+			else if ( (!fTornOff) && (pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pConversations->setVisible(fConvVisible || fNearbyVisible);
+			}
+		}
+#endif // CATZNIP
+	}
+};
+
+static LLPanelInjector<LLPanelPreferenceChat> t_pref_chat("panel_preference_chat");
 // [/SL:KB]
 
 void LLPanelPreference::apply()

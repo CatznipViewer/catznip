@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- border="true"
+ border="false"
  can_close="true"
  can_minimize="true"
  bottom="275"
@@ -81,16 +81,28 @@
    width="200" />
   <view_border
    top_pad="10"
-   left="2"
+   left="7"
    height="0"
-   width="396"
+   right="-7"
    follows="left|top"
    bevel_style="none"
    border_thickness="1"
    mouse_opaque="false"
    name="divisor"/>
+  <text
+    follows="top|left"
+    font.style="BOLD"
+    height="10"
+    layout="topleft"
+    left="25"
+    name="catznip_wiki_link"
+    top_pad="15"
+    width="180"
+    wrap="true">
+    [http://catznip.com/index.php/Adding_Spelling_Dictionaries Import Dictionary Help]
+  </text>
   <button
-   top_pad="10"
+   top_delta="-5"
    right="280"
    height="22"
    width="90"
