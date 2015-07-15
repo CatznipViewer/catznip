@@ -4,7 +4,7 @@
      left="0" bottom="0" visible="false"
      mouse_opaque="false">
   <menu_item_check
-   label="Display Group Icons"
+   label="View Group Icons"
    layout="topleft"
    name="Display Group Icons">
       <menu_item_check.on_click
@@ -13,5 +13,17 @@
       <menu_item_check.on_check
        function="CheckControl"
        parameter="GroupListShowIcons" />
+  </menu_item_check>
+  <menu_item_separator />
+  <menu_item_check
+   label="Highlight Hidden Groups"
+   layout="topleft"
+   name="Highlight Hidden Groups">
+      <menu_item_check.on_click
+       function="People.Groups.ViewSort.Action"
+       parameter="show_hidden" />
+      <menu_item_check.on_check
+       function="CheckControl"
+       parameter="GroupListShowHidden" />
   </menu_item_check>
 </toggleable_menu>

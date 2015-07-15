@@ -1,0 +1,50 @@
+[UI/SidepanelPeople]
+- added   : "Kick" and "Teleport Home" estate options to the "Manage" avatar context submenu
+- added   : "Teleport" option to the avatar context menu
+- added   : "Report", "Eject", "Freeze" and "Zoom In" to the "Nearby" people sidebar panel context menu
+    -> also reordered the menu options to match the "Inspect Avatar" gear dropdown menu
+    -> "Freeze" and "Eject" and "Kick" and "Teleport Home" operate on both single and multiple avatars
+- added   : per-avatar voice volume slider in the "Voice settings" floater
+    -> visibility is tied to the speaking indicator and hence requires that control to be shown/active
+- changed : attempt to get the Z-position from an avatar instance if the CoarseLocationUpdate for an agent's Z-position is zero
+- changed : "Freeze/Unfreeze" and "Eject/Ban" on the avatar context menu use the new LLAvatarActions functions
+    -> adds the ability to affect agents outside of draw distance and (improved) display name handling
+- changed : moved "Block", "Report", "Freeze" and "Eject" to a "Manage" sub-menu on the avatar menu, the avatar inspect menu and the nearby people menu
+- changed : removed "Share" from the avatar inspect menu and the nearby people menu
+- changed : swapped "Pay" and "Invite to Group" on the 4 avatar context menus
+- changed : voice controls floater clean-up
+- fixed   : combobox separators aren't drawn
+- fixed   : "Report", "Eject", "Freeze" and "Zoom In" only work on avatars who made it on the interest list
+
+[People]
+- changed : moved the filter editor back to the top of the tab container
+    -> maintains consistency with the other floaters
+- changed : moved the toolbar back to the bottom of the tab panel
+    -> maintains consistency with the other floaters
+- changed : menus open above the buttons rather than below
+- changed : reordered the avatar context menu in the people panels to be more consistent
+- changed : line up shown avatar list item child controls in columns rather than compacting them together
+    -> before: 1 2 3 4 => 2 used but invisible => 3 unused => 1 4
+               1 2 3 4 => 2 used and visible   => 3 unsued => 1 2 4
+    -> after : 1 2 3 4 => 2 used but invisible => 3 unused => 1 2 4
+               1 2 3 4 => 2 used and visible   => 3 unsued => 1 2 4
+    => as long as a "column" is shown then all items will have a dedicated (empty) visible space for it
+- changed : display the complete name in an avatar list control when a filter is active
+- changed : moved the avatar list item text field to the next-to-last slot
+    -> prevents other icons from popping into view when hovering (and subsequently displacing the text field)
+
+[People/Nearby]
+- added   : distance field in the "Nearby" people sidebar tab
+- added   : "Show within Range", "Show on Current Parcel" and "Show on Current Region" options to the nearby people sidebar tab gear menu
+- added   : slider to easily adjust the "NearMeRange" setting (inspired by Starlight)
+- changed : moved the "Sort by" options on all people panels to a child menu
+
+[People/Friends]
+- added   : "Show names as" sub-menu to the nearby, friends and recent people gear menus to specify the displayed name format
+- changed : friend permissions can be toggled directly from the friends list
+- changed : moved the "Sort by" options on all people panels to a child menu
+- changed : don't show the "profile button" and "speaking indicator" on the "My Friends" avatar list in the people sidebar tab
+
+[People/Groups]
+- added   : (re)added the "Activate" toolbar button
+- added   : "Highlight Hidden Groups" option to the view/sort menu for the People/Groups panel
