@@ -63,6 +63,9 @@
 #include "llpanellandmarks.h"
 #include "llpanelpick.h"
 #include "llpanelplaceprofile.h"
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+#include "llpanelplacessearchpanel.h"
+// [/SL:KB]
 #include "llpanelteleporthistory.h"
 #include "llremoteparcelrequest.h"
 #include "llteleporthistorystorage.h"
@@ -237,8 +240,24 @@ static LLPanelInjector<LLPanelPlaces> t_places("panel_places");
 
 LLPanelPlaces::LLPanelPlaces()
 	:	LLPanel(),
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		mTabContainer(NULL),
+		mPlaceProfileBackBtn(NULL),
+		mButtonPanel(NULL),
+		mTeleportBtn(NULL),
+		mShowOnMapBtn(NULL),
+		mEditBtn(NULL),
+		mSaveBtn(NULL),
+		mCancelBtn(NULL),
+		mCloseBtn(NULL),
+		mOverflowBtn(NULL),
+		mPlaceInfoBtn(NULL),
+// [/SL:KB]
 		mActivePanel(NULL),
 		mFilterEditor(NULL),
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+		mSearchEditor(NULL),
+// [/SL:KB]
 		mPlaceProfile(NULL),
 		mLandmarkInfo(NULL),
 		mPickPanel(NULL),
@@ -247,7 +266,13 @@ LLPanelPlaces::LLPanelPlaces()
 		mLandmarkMenu(NULL),
 		mPosGlobal(),
 		isLandmarkEditModeOn(false),
-		mTabsCreated(false)
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+		mTabsCreated(false),
+		mLandmarksPanel(NULL),
+		mTeleportHistoryPanel(NULL),
+		mSearchPanel(NULL)
+// [/SL:KB]
+//		mTabsCreated(false)
 {
 	mParcelObserver = new LLPlacesParcelObserver(this);
 	mInventoryObserver = new LLPlacesInventoryObserver(this);
@@ -280,6 +305,10 @@ LLPanelPlaces::~LLPanelPlaces()
 
 BOOL LLPanelPlaces::postBuild()
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	mButtonPanel = getChild<LLPanel>("button_panel");
+// [/SL:KB]
+
 	mTeleportBtn = getChild<LLButton>("teleport_btn");
 	mTeleportBtn->setClickedCallback(boost::bind(&LLPanelPlaces::onTeleportButtonClicked, this));
 	
@@ -335,8 +364,17 @@ BOOL LLPanelPlaces::postBuild()
 		//BUT a detached list item cannot be made selected and must not be clicked onto
 		mFilterEditor->setCommitOnFocusLost(false);
 
-		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, false));
+// [/SL:KB]
+//		mFilterEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _2, false));
 	}
+
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mSearchEditor = findChild<LLSearchEditor>("SearchQuery");
+	mSearchEditor->setCommitOnFocusLost(true);
+	mSearchEditor->setCommitCallback(boost::bind(&LLPanelPlaces::onFilterEdit, this, _1, _2, true));
+// [/SL:KB]
 
 	mPlaceProfile = findChild<LLPanelPlaceProfile>("panel_place_profile");
 	mLandmarkInfo = findChild<LLPanelLandmarkInfo>("panel_landmark_info");
@@ -392,7 +430,10 @@ void LLPanelPlaces::onOpen(const LLSD& key)
 		else
 		{
 			mFilterEditor->clear();
-			onFilterEdit("", false);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+			onFilterEdit(mFilterEditor, "", false);
+// [/SL:KB]
+//			onFilterEdit("", false);
 
 			mPlaceInfoType = key_type;
 			mPosGlobal.setZero();
@@ -583,7 +624,10 @@ void LLPanelPlaces::onLandmarkLoaded(LLLandmark* landmark)
 	updateVerbs();
 }
 
-void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+//void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_filter)
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+void LLPanelPlaces::onFilterEdit(LLUICtrl* ctrl_editor, const std::string& search_string, bool force_filter)
+// [/SL:KB]
 {
 	if (!mActivePanel)
 		return;
@@ -596,6 +640,9 @@ void LLPanelPlaces::onFilterEdit(const std::string& search_string, bool force_fi
 		// but we don't convert the typed string to upper-case so that it can be fed to the web search as-is.
 
 		mActivePanel->onSearchEdit(string);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+		ctrl_editor->resetDirty();
+// [/SL:KB]
 	}
 }
 
@@ -605,7 +652,18 @@ void LLPanelPlaces::onTabSelected()
 	if (!mActivePanel)
 		return;
 
-	onFilterEdit(mActivePanel->getFilterSubString(), true);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	bool fSearchPanelActive = (mSearchPanel == mActivePanel);
+	if (!fSearchPanelActive)
+	{
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+		onFilterEdit(mFilterEditor, mFilterEditor->getText(), true);
+// [/SL:KB]
+	}
+	mFilterEditor->setVisible(!fSearchPanelActive);
+	mSearchEditor->setVisible(fSearchPanelActive);
+// [/SL:KB]
+//	onFilterEdit(mActivePanel->getFilterSubString(), true);
 	mActivePanel->updateVerbs();
 }
 
@@ -641,11 +699,11 @@ void LLPanelPlaces::onTeleportButtonClicked()
 			}
 		}
 	}
-	else
-	{
-		if (mActivePanel)
-			mActivePanel->onTeleport();
-	}
+//	else
+//	{
+//		if (mActivePanel)
+//			mActivePanel->onTeleport();
+//	}
 }
 
 void LLPanelPlaces::onShowOnMapButtonClicked()
@@ -685,24 +743,24 @@ void LLPanelPlaces::onShowOnMapButtonClicked()
 			}
 		}
 	}
-	else
-	{
-		if (mActivePanel && mActivePanel->isSingleItemSelected())
-		{
-			mActivePanel->onShowOnMap();
-		}
-		else
-		{
-			LLFloaterWorldMap* worldmap_instance = LLFloaterWorldMap::getInstance();
-			LLVector3d global_pos = gAgent.getPositionGlobal();
-
-			if (!global_pos.isExactlyZero() && worldmap_instance)
-			{
-				worldmap_instance->trackLocation(global_pos);
-				LLFloaterReg::showInstance("world_map", "center");
-			}
-		}
-	}
+//	else
+//	{
+//		if (mActivePanel && mActivePanel->isSingleItemSelected())
+//		{
+//			mActivePanel->onShowOnMap();
+//		}
+//		else
+//		{
+//			LLFloaterWorldMap* worldmap_instance = LLFloaterWorldMap::getInstance();
+//			LLVector3d global_pos = gAgent.getPositionGlobal();
+//
+//			if (!global_pos.isExactlyZero() && worldmap_instance)
+//			{
+//				worldmap_instance->trackLocation(global_pos);
+//				LLFloaterReg::showInstance("world_map", "center");
+//			}
+//		}
+//	}
 }
 
 void LLPanelPlaces::onEditButtonClicked()
@@ -830,10 +888,10 @@ void LLPanelPlaces::onOverflowButtonClicked()
 
 void LLPanelPlaces::onProfileButtonClicked()
 {
-	if (!mActivePanel)
-		return;
-
-	mActivePanel->onShowProfile();
+//	if (!mActivePanel)
+//		return;
+//
+//	mActivePanel->onShowProfile();
 }
 
 bool LLPanelPlaces::onOverflowMenuItemEnable(const LLSD& param)
@@ -936,6 +994,9 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 		return;
 
 	mFilterEditor->setVisible(!visible);
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mSearchEditor->setVisible(!visible);
+// [/SL:KB]
 	mTabContainer->setVisible(!visible);
 
 	if (mPlaceInfoType == AGENT_INFO_TYPE ||
@@ -952,8 +1013,12 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 			// to avoid text blinking.
 			mResetInfoTimer.setTimerExpirySec(PLACE_INFO_UPDATE_INTERVAL);
 
+//			LLRect rect = getRect();
+//			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
 			LLRect rect = getRect();
-			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom + mButtonPanel->getRect().getHeight());
+// [/SL:KB]
 			mPlaceProfile->reshape(new_rect.getWidth(), new_rect.getHeight());
 
 			mLandmarkInfo->setVisible(FALSE);
@@ -977,8 +1042,12 @@ void LLPanelPlaces::togglePlaceInfoPanel(BOOL visible)
 		{
 			mLandmarkInfo->resetLocation();
 
+//			LLRect rect = getRect();
+//			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
 			LLRect rect = getRect();
-			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom);
+			LLRect new_rect = LLRect(rect.mLeft, rect.mTop, rect.mRight, mTabContainer->getRect().mBottom + mButtonPanel->getRect().getHeight());
+// [/SL:KB]
 			mLandmarkInfo->reshape(new_rect.getWidth(), new_rect.getHeight());
 
 			mPlaceProfile->setVisible(FALSE);
@@ -1066,7 +1135,10 @@ void LLPanelPlaces::createTabs()
 	LLLandmarksPanel* landmarks_panel = new LLLandmarksPanel();
 	if (landmarks_panel)
 	{
-		landmarks_panel->setPanelPlacesButtons(this);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		landmarks_panel->setPanelPlacesButtons();
+// [/SL:KB]
+//		landmarks_panel->setPanelPlacesButtons(this);
 
 		mTabContainer->addTabPanel(
 			LLTabContainer::TabPanelParams().
@@ -1078,7 +1150,10 @@ void LLPanelPlaces::createTabs()
 	LLTeleportHistoryPanel* teleport_history_panel = new LLTeleportHistoryPanel();
 	if (teleport_history_panel)
 	{
-		teleport_history_panel->setPanelPlacesButtons(this);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+		teleport_history_panel->setPanelPlacesButtons();
+// [/SL:KB]
+//		teleport_history_panel->setPanelPlacesButtons(this);
 
 		mTabContainer->addTabPanel(
 			LLTabContainer::TabPanelParams().
@@ -1086,6 +1161,21 @@ void LLPanelPlaces::createTabs()
 			label(getString("teleport_history_tab_title")).
 			insert_at(LLTabContainer::END));
 	}
+
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	LLPanelPlacesSearchPanel* search_panel = new LLPanelPlacesSearchPanel();
+	if (search_panel)
+	{
+		search_panel->setPanelPlacesButtons();
+
+		mTabContainer->addTabPanel(
+			LLTabContainer::TabPanelParams().
+			panel(search_panel).
+			label("SEARCH").
+			label(getString("search_tab_title")).
+			insert_at(LLTabContainer::END));
+	}
+// [/SL:KB]
 
 	mTabContainer->selectFirstTab();
 
@@ -1096,6 +1186,11 @@ void LLPanelPlaces::createTabs()
 		mActivePanel->onSearchEdit(mActivePanel->getFilterSubString());
 
 	mTabsCreated = true;
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-15 (Catznip-3.3)
+	mLandmarksPanel = landmarks_panel;
+	mTeleportHistoryPanel = teleport_history_panel;
+	mSearchPanel = search_panel;
+// [/SL:KB]
 }
 
 void LLPanelPlaces::changedGlobalPos(const LLVector3d &global_pos)
@@ -1133,6 +1228,15 @@ void LLPanelPlaces::showAddedLandmarkInfo(const uuid_set_t& items)
 
 void LLPanelPlaces::updateVerbs()
 {
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-09-22 (Catznip-3.3)
+	// Only show the bottom button bar if the tab controls aren't visible
+	if ( (mTabContainer->getVisible()) && (mActivePanel) )
+	{
+		mActivePanel->updateVerbs();
+	}
+	mButtonPanel->setVisible(!mTabContainer->getVisible());
+// [/SL:KB]
+
 	bool is_place_info_visible;
 
 	LLPanelPlaceInfo* panel = getCurrentInfoPanel();
@@ -1176,11 +1280,11 @@ void LLPanelPlaces::updateVerbs()
 			mTeleportBtn->setEnabled(have_3d_pos);
 		}
 	}
-	else
-	{
-		if (mActivePanel)
-			mActivePanel->updateVerbs();
-	}
+//	else
+//	{
+//		if (mActivePanel)
+//			mActivePanel->updateVerbs();
+//	}
 }
 
 LLPanelPlaceInfo* LLPanelPlaces::getCurrentInfoPanel()

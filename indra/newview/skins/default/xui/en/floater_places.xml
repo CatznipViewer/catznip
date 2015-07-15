@@ -3,24 +3,25 @@
 <floater
   positioning="cascading"
   default_tab_group="1"
-  legacy_header_height="18"
+  can_close="true"
+  can_minimize="true"
   can_resize="true"
-  height="588"
+  height="570"
   layout="topleft"
   name="floater_places"
   help_topic="floater_places"
   save_rect="true"
   reuse_instance="true"
   title="PLACES"
-  min_height="440"
-  min_width="333"
-  width="333">
+  min_height="430"
+  min_width="330"
+  width="330">
     <panel
-      top="18"
+      top="4"
+      height="562"
       tab_group="1"
       class="panel_places"
       name="main_panel"
       filename="panel_places.xml"
-      label="Places"
-      font="SansSerifBold"/>
+      label="Places" />
 </floater>
