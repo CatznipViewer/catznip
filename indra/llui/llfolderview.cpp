@@ -979,7 +979,10 @@ BOOL LLFolderView::canCut() const
 		const LLFolderViewItem* item = *selected_it;
 		const LLFolderViewModelItem* listener = item->getViewModelItem();
 
-		if (!listener || !listener->isItemRemovable())
+//		if (!listener || !listener->isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2015-07-15 (Catznip-3.8)
+		if (!listener || !listener->isItemMovable())
+// [/SL:KB]
 		{
 			return FALSE;
 		}
