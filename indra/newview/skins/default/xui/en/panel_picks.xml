@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-bg_opaque_color="DkGray2"
-       background_visible="true"
-       background_opaque="true"
+
  follows="all"
- height="571"
+ height="570"
  label="Picks"
  layout="topleft"
- left="8"
+ left="7"
  name="panel_picks"
- top_pad="0"
- width="313">
+ top="0"
+ width="316">
  <string
   name="no_picks"
   value="No Picks" />
@@ -26,7 +24,7 @@ bg_opaque_color="DkGray2"
   name="picks_panel_text"
   wrap="true"
   top="10"
-  width="313"/>
+  width="316"/>
  <accordion
   fit_parent="true" 
   follows="all"
@@ -36,7 +34,7 @@ bg_opaque_color="DkGray2"
   name="accordion"
   top="0"
   single_expansion="true"
-  width="313">
+  width="316">
     <accordion_tab
      layout="topleft"
      height="235"
@@ -50,9 +48,9 @@ bg_opaque_color="DkGray2"
          layout="topleft"
          left="0"
          name="picks_list"
-         opaque="true"
+         opaque="false"
          top="0"
-         width="313" />
+         width="316" />
     </accordion_tab>
     <accordion_tab
      layout="topleft"
@@ -68,13 +66,11 @@ bg_opaque_color="DkGray2"
              name="classifieds_list"
              opaque="true"
              top="0"
-             width="313" />
+             width="316" />
     </accordion_tab>
  </accordion>
    <panel
-       bg_opaque_color="DkGray2"
-       background_visible="true"
-       background_opaque="true"
+
        bevel_style="none"
        enabled="false"
        follows="bottom|left|right"
@@ -84,7 +80,7 @@ bg_opaque_color="DkGray2"
        layout="topleft"
        name="edit_panel"
        top_pad="0"
-       width="312">
+       width="316">
          
          <layout_stack
 		  follows="bottom|left|right"
@@ -94,7 +90,7 @@ bg_opaque_color="DkGray2"
 		  left="10"
 		  orientation="horizontal"
 		  top_pad="0"
-		  width="293">
+		  width="316">
 		  
 		  <layout_panel
 			  follows="bottom|left"
@@ -141,16 +137,13 @@ bg_opaque_color="DkGray2"
 	  </panel>
 	  
 	  <panel
- bg_opaque_color="DkGray"
-       background_visible="true"
-       background_opaque="true"
          follows="bottom|left|right"
          layout="topleft"
          left="0"
          height="30"
          name="buttons_cucks"
          top_pad="0"
-         width="313">
+         width="316">
       
       <layout_stack
 		  follows="bottom|left|right"
