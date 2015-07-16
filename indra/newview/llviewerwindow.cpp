@@ -4832,13 +4832,29 @@ void LLViewerWindow::revealIntroPanel()
 	}
 }
 
-void LLViewerWindow::setShowProgress(const BOOL show)
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+void LLViewerWindow::setShowProgress(bool show, F32 fade_duration /*=0.0f*/)
 {
 	if (mProgressView)
 	{
-		mProgressView->setVisible(show);
+		if (fade_duration != 0.0f)
+		{
+			mProgressView->fade(show, fade_duration);
+		}
+		else
+		{
+			mProgressView->setVisible(show);
+		}
 	}
 }
+// [/SL:KB]
+//void LLViewerWindow::setShowProgress(const BOOL show)
+//{
+//	if (mProgressView)
+//	{
+//		mProgressView->setVisible(show);
+//	}
+//}
 
 void LLViewerWindow::setStartupComplete()
 {

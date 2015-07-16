@@ -397,6 +397,9 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		LLAppViewer::instance()->pingMainloopTimeout("Display:Teleport");
 		static LLCachedControl<F32> teleport_arrival_delay(gSavedSettings, "TeleportArrivalDelay");
 		static LLCachedControl<F32> teleport_local_delay(gSavedSettings, "TeleportLocalDelay");
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		static LLCachedControl<F32> teleport_fade_duration(gSavedSettings, "TeleportFadeDuration");
+// [/SL:KB]
 
 		S32 attach_count = 0;
 		if (isAgentAvatarValid())
@@ -418,7 +421,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		{
 		case LLAgent::TELEPORT_PENDING:
 			gTeleportDisplayTimer.reset();
-			gViewerWindow->setShowProgress(TRUE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(true, teleport_fade_duration());
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(TRUE);
 			gViewerWindow->setProgressPercent(llmin(teleport_percent, 0.0f));
 			gAgent.setTeleportMessage(LLAgent::sTeleportProgressMessages["pending"]);
 			gViewerWindow->setProgressString(LLAgent::sTeleportProgressMessages["pending"]);
@@ -428,7 +434,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			// Transition to REQUESTED.  Viewer has sent some kind
 			// of TeleportRequest to the source simulator
 			gTeleportDisplayTimer.reset();
-			gViewerWindow->setShowProgress(TRUE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(true, teleport_fade_duration());
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(TRUE);
 			gViewerWindow->setProgressPercent(llmin(teleport_percent, 0.0f));
 			gAgent.setTeleportState( LLAgent::TELEPORT_REQUESTED );
 			gAgent.setTeleportMessage(
@@ -465,6 +474,13 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			// Make the user wait while content "pre-caches"
 			{
 				F32 arrival_fraction = (gTeleportArrivalTimer.getElapsedTimeF32() / teleport_arrival_delay());
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+				F32 delta = teleport_arrival_delay() - gTeleportArrivalTimer.getElapsedTimeF32();
+				if (delta < teleport_fade_duration())
+				{
+					gViewerWindow->setShowProgress(false, teleport_fade_duration());
+				}
+// [/SL:KB]
 				if( arrival_fraction > 1.f )
 				{
 					arrival_fraction = 1.f;
@@ -481,7 +497,15 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			// Short delay when teleporting in the same sim (progress screen active but not shown - did not
 			// fall-through from TELEPORT_START)
 			{
-				if( gTeleportDisplayTimer.getElapsedTimeF32() > teleport_local_delay() )
+//				if( gTeleportDisplayTimer.getElapsedTimeF32() > teleport_local_delay() )
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+				F32 delta = teleport_local_delay() - gTeleportDisplayTimer.getElapsedTimeF32();
+				if (delta < teleport_fade_duration())
+				{
+					gViewerWindow->setShowProgress(false, teleport_fade_duration());
+				}
+				if (delta <= 0.0f)
+// [/SL:KB]
 				{
 					//LLFirstUse::useTeleport();
 					gAgent.setTeleportState( LLAgent::TELEPORT_NONE );
@@ -491,7 +515,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		case LLAgent::TELEPORT_NONE:
 			// No teleport in progress
-			gViewerWindow->setShowProgress(FALSE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(false);
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(FALSE);
 			gTeleportDisplay = FALSE;
 			break;
 		}
