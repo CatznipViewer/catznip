@@ -10972,7 +10972,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>2</integer>
     </map>
     <key>FriendsSortOrder</key>
     <map>
@@ -10994,7 +10994,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>2</integer>
     </map>
     <key>NearbyPeopleSortOrder</key>
     <map>
@@ -11027,7 +11027,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>2</integer>
     </map>
     <key>RecentPeopleSortOrder</key>
     <map>
