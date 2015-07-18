@@ -105,6 +105,7 @@
   name="push_to_talk_toggle_check"
   width="350"
   tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
+  top_pad="3"/>
   <line_editor
    follows="top|left"
    control_name="PushToTalkButton"
