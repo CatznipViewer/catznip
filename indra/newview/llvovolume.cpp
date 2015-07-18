@@ -88,6 +88,12 @@ BOOL gAnimateTextures = TRUE;
 F32 LLVOVolume::sLODFactor = 1.f;
 F32	LLVOVolume::sLODSlopDistanceFactor = 0.5f; //Changing this to zero, effectively disables the LOD transition slop 
 F32 LLVOVolume::sDistanceFactor = 1.0f;
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+F32 LLVOVolume::sOctreeObjectSizeFactor = 3.0f;
+S32 LLVOVolume::sOctreeAttachmentSizeFactor = 4;
+LLVector3 LLVOVolume::sOctreeDistanceFactor = LLVector3(0.01f, 0.0f, 0.0f);
+LLVector3 LLVOVolume::sOctreeAlphaDistanceFactor = LLVector3(0.1f, 0.0f, 0.0f);
+// [/SL:KB]
 S32 LLVOVolume::sNumLODChanges = 0;
 S32 LLVOVolume::mRenderComplexity_last = 0;
 S32 LLVOVolume::mRenderComplexity_current = 0;
@@ -3717,16 +3723,26 @@ void LLVOVolume::updateSpatialExtents(LLVector4a& newMin, LLVector4a& newMax)
 {		
 }
 
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+void LLVOVolume::updateCachedSettings()
+{
+	sOctreeObjectSizeFactor = llmax(gSavedSettings.getS32("OctreeStaticObjectSizeFactor"), 1);
+	sOctreeAttachmentSizeFactor = llmax(gSavedSettings.getS32("OctreeAttachmentSizeFactor"), 1);
+	sOctreeDistanceFactor = gSavedSettings.getVector3("OctreeDistanceFactor");
+	sOctreeAlphaDistanceFactor = gSavedSettings.getVector3("OctreeAlphaDistanceFactor");
+}
+// [/SL:KB]
+
 F32 LLVOVolume::getBinRadius()
 {
 	F32 radius;
 	
 	F32 scale = 1.f;
 
-	S32 size_factor = llmax(gSavedSettings.getS32("OctreeStaticObjectSizeFactor"), 1);
-	S32 attachment_size_factor = llmax(gSavedSettings.getS32("OctreeAttachmentSizeFactor"), 1);
-	LLVector3 distance_factor = gSavedSettings.getVector3("OctreeDistanceFactor");
-	LLVector3 alpha_distance_factor = gSavedSettings.getVector3("OctreeAlphaDistanceFactor");
+//	S32 size_factor = llmax(gSavedSettings.getS32("OctreeStaticObjectSizeFactor"), 1);
+//	S32 attachment_size_factor = llmax(gSavedSettings.getS32("OctreeAttachmentSizeFactor"), 1);
+//	LLVector3 distance_factor = gSavedSettings.getVector3("OctreeDistanceFactor");
+//	LLVector3 alpha_distance_factor = gSavedSettings.getVector3("OctreeAlphaDistanceFactor");
 	const LLVector4a* ext = mDrawable->getSpatialExtents();
 	
 	BOOL shrink_wrap = mDrawable->isAnimating();
@@ -3757,8 +3773,12 @@ F32 LLVOVolume::getBinRadius()
 		radius = llmin(bounds.mV[1], bounds.mV[2]);
 		radius = llmin(radius, bounds.mV[0]);
 		radius *= 0.5f;
-		radius *= 1.f+mDrawable->mDistanceWRTCamera*alpha_distance_factor[1];
-		radius += mDrawable->mDistanceWRTCamera*alpha_distance_factor[0];
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+		radius *= 1.f+mDrawable->mDistanceWRTCamera*sOctreeAlphaDistanceFactor[1];
+		radius += mDrawable->mDistanceWRTCamera*sOctreeAlphaDistanceFactor[0];
+// [/SL:KB]
+//		radius *= 1.f+mDrawable->mDistanceWRTCamera*alpha_distance_factor[1];
+//		radius += mDrawable->mDistanceWRTCamera*alpha_distance_factor[0];
 	}
 	else if (shrink_wrap)
 	{
@@ -3769,24 +3789,39 @@ F32 LLVOVolume::getBinRadius()
 	}
 	else if (mDrawable->isStatic())
 	{
-		F32 szf = size_factor;
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+		radius = llmax(mDrawable->getRadius(), sOctreeObjectSizeFactor);
 
-		radius = llmax(mDrawable->getRadius(), szf);
-		
-		radius = powf(radius, 1.f+szf/radius);
-
-		radius *= 1.f + mDrawable->mDistanceWRTCamera * distance_factor[1];
-		radius += mDrawable->mDistanceWRTCamera * distance_factor[0];
+		radius = powf(radius, 1.f+sOctreeObjectSizeFactor/radius);
+	
+		radius *= 1.f + mDrawable->mDistanceWRTCamera * sOctreeDistanceFactor[1];
+		radius += mDrawable->mDistanceWRTCamera * sOctreeDistanceFactor[0];
+// [/SL:KB]
+//		F32 szf = size_factor;
+//
+//		radius = llmax(mDrawable->getRadius(), szf);
+//		
+//		radius = powf(radius, 1.f+szf/radius);
+//
+//		radius *= 1.f + mDrawable->mDistanceWRTCamera * distance_factor[1];
+//		radius += mDrawable->mDistanceWRTCamera * distance_factor[0];
 	}
 	else if (mDrawable->getVObj()->isAttachment())
 	{
-		radius = llmax((S32) mDrawable->getRadius(),1)*attachment_size_factor;
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+		radius = llmax((S32) mDrawable->getRadius(),1)*sOctreeAttachmentSizeFactor;
+// [/SL:KB]
+//		radius = llmax((S32) mDrawable->getRadius(),1)*attachment_size_factor;
 	}
 	else
 	{
 		radius = mDrawable->getRadius();
-		radius *= 1.f + mDrawable->mDistanceWRTCamera * distance_factor[1];
-		radius += mDrawable->mDistanceWRTCamera * distance_factor[0];
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+		radius *= 1.f + mDrawable->mDistanceWRTCamera * sOctreeDistanceFactor[1];
+		radius += mDrawable->mDistanceWRTCamera * sOctreeDistanceFactor[0];
+// [/SL:KB]
+//		radius *= 1.f + mDrawable->mDistanceWRTCamera * distance_factor[1];
+//		radius += mDrawable->mDistanceWRTCamera * distance_factor[0];
 	}
 
 	return llclamp(radius*scale, 0.5f, 256.f);

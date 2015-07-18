@@ -38,6 +38,9 @@
 #include "llfloaterautoreplacesettings.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+#include "llagentwearables.h"
+// [/SL:KB]
 #include "llcheckboxctrl.h"
 #include "llcolorswatch.h"
 #include "llcombobox.h"
@@ -343,6 +346,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareSettings",		boost::bind(&LLFloaterPreference::onOpenHardwareSettings, this));
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreference::onVertexShaderEnable, this));
@@ -350,6 +356,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
 	mCommitCallbackRegistrar.add("Pref.applyUIColor",			boost::bind(&LLFloaterPreference::applyUIColor, this ,_1, _2));
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.applyNameTagColor",		boost::bind(&LLFloaterPreference::applyNameTagColor, this ,_1, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.getUIColor",				boost::bind(&LLFloaterPreference::getUIColor, this ,_1, _2));
 	mCommitCallbackRegistrar.add("Pref.MaturitySettings",		boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
@@ -1108,7 +1117,7 @@ void LLFloaterPreference::buildPopupLists()
 void LLFloaterPreference::refreshEnabledState()
 {	
 	LLComboBox* ctrl_reflections = getChild<LLComboBox>("Reflections");
-	LLRadioGroup* radio_reflection_detail = getChild<LLRadioGroup>("ReflectionDetailRadio");
+//	LLRadioGroup* radio_reflection_detail = getChild<LLRadioGroup>("ReflectionDetailRadio");
 	
 	// Reflections
 	BOOL reflections = gSavedSettings.getBOOL("VertexShaderEnable") 
@@ -1121,7 +1130,7 @@ void LLFloaterPreference::refreshEnabledState()
 	bool bumpshiny = gGLManager.mHasCubeMap && LLCubeMap::sUseCubeMaps && LLFeatureManager::getInstance()->isFeatureAvailable("RenderObjectBump");
 	bumpshiny_ctrl->setEnabled(bumpshiny ? TRUE : FALSE);
 	
-	radio_reflection_detail->setEnabled(reflections);
+//	radio_reflection_detail->setEnabled(reflections);
 	
 	// Avatar Mode
 	// Enable Avatar Shaders
@@ -1205,6 +1214,11 @@ void LLFloaterPreference::refreshEnabledState()
 
 	ctrl_shadow->setEnabled(enabled);
 	
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Setting should be disabled when basic shaders is unchecked or deferred rendering is enabled
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+	ctrl_glow->setEnabled((ctrl_shader_enable->get()) && (!ctrl_deferred->get()));
+// [/SL:TD]
 
 	// now turn off any features that are unavailable
 	disableUnavailableSettings();
@@ -1213,6 +1227,14 @@ void LLFloaterPreference::refreshEnabledState()
 
 	// Cannot have floater active until caps have been received
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	LLButton* pEditHoverBtn = getChild<LLButton>("hover_edit_btn");
+	if (pEditHoverBtn)
+	{
+		pEditHoverBtn->setEnabled( (LLStartUp::getStartupState() >= STATE_STARTED) && (gAgentWearables.isWearableModifiable(LLWearableType::WT_SHAPE, 0)) );
+	}
+// [/SL:KB]
 }
 
 void LLFloaterPreference::disableUnavailableSettings()
@@ -1221,6 +1243,9 @@ void LLFloaterPreference::disableUnavailableSettings()
 	LLCheckBoxCtrl* ctrl_avatar_vp     = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
 	LLCheckBoxCtrl* ctrl_avatar_cloth  = getChild<LLCheckBoxCtrl>("AvatarCloth");
 	LLCheckBoxCtrl* ctrl_shader_enable = getChild<LLCheckBoxCtrl>("BasicShaders");
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+// [/SL:TD]
 	LLCheckBoxCtrl* ctrl_wind_light    = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
 	LLCheckBoxCtrl* ctrl_avatar_impostors = getChild<LLCheckBoxCtrl>("AvatarImpostors");
 	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
@@ -1235,6 +1260,11 @@ void LLFloaterPreference::disableUnavailableSettings()
 		ctrl_shader_enable->setEnabled(FALSE);
 		ctrl_shader_enable->setValue(FALSE);
 		
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+		ctrl_glow->setEnabled(FALSE);
+		ctrl_glow->setValue(FALSE);
+// [/SL:TD]
+
 		ctrl_wind_light->setEnabled(FALSE);
 		ctrl_wind_light->setValue(FALSE);
 		
@@ -1531,6 +1561,22 @@ void LLFloaterPreference::onClickLogPath()
 }
 }
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLFloaterPreference::onClickSnapshotPath()
+{
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
+	
+	LLDirPicker& picker = LLDirPicker::instance();
+	if (!picker.getDir(&proposed_name))
+	{
+		return; //Canceled!
+	}
+
+	gSavedSettings.setString("SnapshotLocalPath", picker.getDirName());
+	gDirUtilp->setSnapshotDir(picker.getDirName());
+}
+// [/SL:KB]
+
 bool LLFloaterPreference::moveTranscriptsAndLog()
 {
 	std::string instantMessageLogPath(gSavedPerAccountSettings.getString("InstantMessageLogPath"));
@@ -1766,6 +1812,22 @@ void LLFloaterPreference::applyUIColor(LLUICtrl* ctrl, const LLSD& param)
 	LLUIColorTable::instance().setColor(param.asString(), LLColor4(ctrl->getValue()));
 }
 
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
+
 void LLFloaterPreference::getUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
 	LLColorSwatchCtrl* color_swatch = (LLColorSwatchCtrl*) ctrl;
@@ -1807,6 +1869,18 @@ void LLFloaterPreference::changed()
 	updateDeleteTranscriptsButton();
 
 }
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLFloaterPreference::onClickShapeEditHover()
+{
+	if ( (LLStartUp::getStartupState() >= STATE_STARTED) && (gAgentWearables.isWearableModifiable(LLWearableType::WT_SHAPE, 0)) )
+	{
+		onBtnOK();
+
+		LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "edit_shape").with("wearable_param", "Hover"));
+	}
+}
+// [/SL:KB]
 
 //------------------------------Updater---------------------------------------
 

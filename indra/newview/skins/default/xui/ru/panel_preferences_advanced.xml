@@ -4,7 +4,7 @@
 		[NUM]:[DEN]
 	</panel.string>
 	<text name="Cache:">
-		Кэш:
+		Кэш
 	</text>
 	<spinner label="Размер кэша (64 - 9984 МБ)" name="cachesizespinner"/>
 	<text name="text_box5">
