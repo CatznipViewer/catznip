@@ -1,0 +1,9 @@
+[Settings/ClearCache]
+- added   : "ClearCacheMask" setting to optionally prevent purging certain history settings when the viewer/browser cache is purged
+- added   : "Clear Cache" button to the "Setup" preferences tab to clear only the viewer cache
+- changed : layout of the "Privacy" preference tab to accomodate the preferences redesign
+
+[Settings/Base]
+- changed : reorganized the 'General' preferences tab
+- changed : moved the "Show my Favorite Landmarks at Login" checkbox to the "General" preferences tab
+- fixed   : can't select radio group items on the General preferences page
