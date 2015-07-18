@@ -9,18 +9,7 @@
  name="colors_panel"
  top="1"
  width="517">
-  <text
-   type="string"
-   length="1"
-   follows="left|top"
-   height="15"
-   layout="topleft"
-   left="30"
-   name="effects_color_textbox"
-   top_pad="10"
-   width="200">
-    My effects (selection beam):
-  </text>
+
   <color_swatch
 	 can_apply_immediately="true"
      follows="left|top"
@@ -29,6 +18,7 @@
      layout="topleft"
      left="40"
      name="effect_color_swatch"
+     top="20"
      tool_tip="Click to open Color Picker"
      width="44">
     <color_swatch.init_callback
@@ -41,7 +31,57 @@
     height="0" />
   </color_swatch>
   <text
+   type="string"
+   length="1"
    follows="left|top"
+   height="10"
+   layout="topleft"
+   left_pad="5"
+   mouse_opaque="false"
+   name="effects_color_textbox"
+   top_delta="5"
+   width="200">
+     My effects (selection beam)
+  </text>
+  
+  
+  <color_swatch
+     can_apply_immediately="true"
+     follows="left|top"
+     height="24"
+     label_height="0"
+     layout="topleft"
+     left="300"
+     name="minimap_propertylines_color_swatch"
+     tool_tip="Click to open Color Picker"
+     top="20"
+     width="44">
+    <color_swatch.init_callback
+		 function="Pref.getUIColor"
+		 parameter="MiniMapPropertyLine" />
+    <color_swatch.commit_callback
+		 function="Pref.applyUIColor"
+		 parameter="MiniMapPropertyLine" />
+    <color_swatch.caption_text
+    height="0" />
+  </color_swatch>
+  <text
+   type="string"
+   length="1"
+   follows="left|top"
+   height="10"
+   layout="topleft"
+   left_pad="5"
+   mouse_opaque="false"
+   name="minimap_propertylines_color_textbox"
+   top_delta="5"
+   width="200">
+     Mini-map property lines
+  </text>
+  
+  <text
+   follows="left|top"
+   font.style="BOLD"
    layout="topleft"
    left="30"
    height="12"
@@ -49,7 +89,7 @@
    top_pad="20"
    width="170"
    >
-    Chat font colors:
+    Chat font colors
   </text>
   <color_swatch
    can_apply_immediately="true"
@@ -301,11 +341,12 @@
   </text>
   <text
    follows="left|top"
+   font.style="BOLD"
    layout="topleft"
    left="30"
    height="12"
    name="bubble_chat"
-   top_pad="20"
+   top_pad="30"
    width="495"
    >
     Name tag background color (also affects Bubble Chat):
@@ -346,14 +387,15 @@
    width="378" />
   <text
    follows="left|top"
+   font.style="BOLD"
    layout="topleft"
    left="30"
    height="12"
    name="floater_opacity"
-   top_pad="15"
+   top_pad="20"
    width="200"
    >
-    Floater Opacity:
+    Floater Opacity
   </text>
  <slider
    can_edit_text="false"
@@ -361,7 +403,7 @@
    decimal_digits="2"
    follows="left|top"
    height="16"
-   increment="0.01"
+   increment="0.05"
    initial_value="1.0"
    layout="topleft"
    label_width="115"
@@ -379,7 +421,7 @@
    decimal_digits="2"
    follows="left|top"
    height="16"
-   increment="0.01"
+   increment="0.05"
    initial_value="0.95"
    layout="topleft"
    label_width="115"

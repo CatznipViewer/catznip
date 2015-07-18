@@ -13,13 +13,14 @@
      type="string"
      length="1"
      follows="left|top"
+     font.style="BOLD"
      height="12"
      layout="topleft"
      left="30"
      name="QualitySpeed"
      top="10" 
      width="400">
-        Quality and speed:
+        Quality and speed
     </text>
     <text
      type="string"
@@ -268,13 +269,14 @@
 		 type="string"
 		 length="1"
 		 follows="left|top"
+		 font.style="BOLD"
 		 height="12"
 		 layout="topleft"
 		 left_delta="5"
 		 name="ShadersText"
 		 top="3"
 		 width="128">
-			Shaders:
+			Shaders
 		</text>
 		<check_box
 		 control_name="RenderTransparentWater"
@@ -323,6 +325,20 @@
 			<check_box.commit_callback
 		     function="Pref.VertexShaderEnable" />
 		</check_box>
+		
+		<check_box
+		 control_name="RenderGlow"
+		 height="16"
+		 initial_value="true"
+		 label="Glow / Bloom Effect"
+		 layout="topleft"
+		 left_delta="0"
+		 name="UseGlow"
+		 tool_tip="Render object bloom / glow"
+		 top_pad="1"
+		 width="120">
+		</check_box>
+		
 		<check_box
 		 control_name="WindLightUseAtmosShaders"
 		 height="16"
@@ -379,22 +395,23 @@
         <text
          type="string"
          length="1"
-         top_pad="8"
+         top_pad="4"
          follows="top|left"
-         height="23"
+         font.style="BOLD"
+         height="12"
          width="110"
          word_wrap="true"
          layout="topleft"
-         left="10"
+         left="5"
          name="shadows_label">
-         	Shadows:
+         	Shadows
         </text>
         <combo_box
          control_name="RenderShadowDetail"
-         height="23"
+         height="22"
          layout="topleft"
          left="10"
-         top_pad="0" 
+         top_pad="3" 
          name="ShadowDetail"
          width="150">
            <combo_box.item
@@ -414,21 +431,22 @@
         <text
          type="string"
          length="1"
-         top_pad="8"
+         top_pad="4"
          follows="top|left"
+         font.style="BOLD"
          height="12"
          width="110"
          word_wrap="true"
          layout="topleft"
          left="05"
          name="reflection_label">
-            Water Reflections:
+            Water Reflections
         </text>
         <combo_box
          control_name="RenderReflectionDetail"
-         height="18"
+         height="22"
          layout="topleft"
-         left_delta="10"
+         left="10"
          top_pad ="3"
          name="Reflections"
          width="150">
@@ -463,10 +481,10 @@
         label="  Avatar Physics:"
         label_width="85"
         layout="topleft"
-        left_delta="-16"
+        left="5"
         name="AvatarPhysicsDetail"
         show_text="false"
-        top_pad="12"
+        top_pad="8"
         width="160">
            <slider.commit_callback
             function="Pref.UpdateSliderText"
@@ -489,16 +507,18 @@
 		 control_name="RenderFarClip"
 		 decimal_digits="0"
 		 follows="left|top"
+		 font.style="BOLD"
 		 height="16"
-		 increment="8"
+		 increment="32"
 		 initial_value="160"
 		 label="Draw distance:"
 		 label_width="185"
 		 layout="topleft"
 		 left="200"
 		 max_val="512"
-		 min_val="64"
+		 min_val="32"
 		 name="DrawDistance"
+		 tool_tip="A lower draw distance will boost frame rate and rezzing speed."
 		 top="3"
 		 width="296" />
 		<text
@@ -569,13 +589,14 @@
 		 type="string"
 		 length="1"
 		 follows="left|top"
+		 font.style="BOLD"
 		 height="12"
 		 layout="topleft"
 		 left_delta="0"
 		 name="MeshDetailText"
 		 top_pad="5"
 		 width="128">
-			Mesh detail:
+			Mesh detail
 		</text>
 		<slider
 		 control_name="RenderVolumeLODFactor"
@@ -587,6 +608,7 @@
 		 label_width="185"
 		 layout="topleft"
 		 left_delta="0"
+		 min_val="0.125"
 		 max_val="2"
 		 name="ObjectMeshDetail"
 		 show_text="false"
@@ -781,13 +803,14 @@
          type="string"
          length="1"
          follows="left|top"
+         font.style="BOLD"
          height="12"
          layout="topleft"
          left_delta="-260"
          name="AvatarRenderingText"
          top_pad="18"
          width="128">
-        Avatar Rendering:
+        Avatar Rendering
       </text>
       <check_box
        control_name="RenderUseImpostors"
@@ -826,14 +849,15 @@
        type="string"
        length="1"
        follows="left|top"
+       font.style="BOLD"
        height="12"
        layout="topleft"
-       left="407"
+       left="390"
        left_pad="-30"
        name="TerrainDetailText"
-        top="250"
+        top="228"
        width="155">
-          Terrain detail:
+          Terrain detail
       </text>
       <radio_group
        control_name="RenderTerrainDetail"
@@ -858,7 +882,7 @@
            name="2"
            top_delta="16"
            width="50" />
-      </radio_group> -->
+      </radio_group>
 	</panel>
 
 <!--
@@ -895,9 +919,9 @@
      is_toggle="true"
      label="Advanced"
      layout="topleft"
-     left_pad="35"
+     left="270"
      name="Advanced"
-     top_delta="0"
+     top_pad="10"
      width="115" />
     <button
      follows="right|bottom"
