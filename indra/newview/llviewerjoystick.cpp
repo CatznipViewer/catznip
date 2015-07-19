@@ -757,8 +757,14 @@ void LLViewerJoystick::moveAvatar(bool reset)
 	
 	handleRun((F32) sqrt(sDelta[Z_I]*sDelta[Z_I] + sDelta[X_I]*sDelta[X_I]));
 	
-	// Allow forward/backward movement some priority
-	if (dom_axis == Z_I)
+//	if (dom_axis == Z_I)
+// [SL:TD] - Settings-JoystickXbox | Checked: 2014-02-06 (Catznip-R9)
+// Based on Blackdragon (BD) change to use raw deltas, remove limitations and dead zones
+// Fixes XBox 360 Controller movement.
+// https://bitbucket.org/NiranV/black-dragon-materials/commits/7a170706631507054049c65f292d1189dc7b5ae3
+	static LLCachedControl<bool> s_fJoystickRawDeltas(gSavedSettings, "JoystickRawDeltas", true);
+	if ((!s_fJoystickRawDeltas) && (dom_axis == Z_I))
+// [/SL:TD]
 	{
 		agentPush(sDelta[Z_I]);			// forward/back
 		
@@ -1160,14 +1166,14 @@ void LLViewerJoystick::setSNDefaults()
 	gSavedSettings.setF32("FlycamFeathering", 5.f);
 }
 
-// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2012-10-08 (Catznip-3.3)
+// [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2014-02-06 (Catznip-R9)
 void LLViewerJoystick::setXBDefaults()
 { 
 	llinfos << "restoring Xbox 360 defaults..." << llendl;
 
 	// Ordered by apppearance on floater as read
 	gSavedSettings.setS32("JoystickAxis1", 0); // X Axis
-	gSavedSettings.setS32("JoystickAxis2", 2); // Y Axis
+	gSavedSettings.setS32("JoystickAxis2", -1); // Y Axis
 	gSavedSettings.setS32("JoystickAxis0", 1); // Z Axis
 	gSavedSettings.setS32("JoystickAxis4", 4); // Pitch
 	gSavedSettings.setS32("JoystickAxis",  3); // Yaw
@@ -1176,65 +1182,65 @@ void LLViewerJoystick::setXBDefaults()
 
 	gSavedSettings.setBOOL("Cursor3D", false);
 	gSavedSettings.setBOOL("AutoLeveling", true);
-	gSavedSettings.setBOOL("ZoomDirect", true);
+	gSavedSettings.setBOOL("ZoomDirect", false);
 	gSavedSettings.setBOOL("JoystickAvatarEnabled", true);
 	gSavedSettings.setBOOL("JoystickBuildEnabled", false);
 	gSavedSettings.setBOOL("JoystickFlycamEnabled", true);
 
 	// XScale
-	gSavedSettings.setF32("AvatarAxisScale1",    .25f);
-	gSavedSettings.setF32("BuildAxisScale1",    1.0f);
-	gSavedSettings.setF32("FlycamAxisScale1",   1.5f);
+	gSavedSettings.setF32("AvatarAxisScale1",    .35f);
+	gSavedSettings.setF32("BuildAxisScale1",    .9f);
+	gSavedSettings.setF32("FlycamAxisScale1",   10.0f);
 	// YScale
 	gSavedSettings.setF32("AvatarAxisScale2",   1.0f);
 	gSavedSettings.setF32("BuildAxisScale2",    1.0f);
-	gSavedSettings.setF32("FlycamAxisScale2",   1.5f);
+	gSavedSettings.setF32("FlycamAxisScale2",   2.0f);
 	// ZScale
-	gSavedSettings.setF32("AvatarAxisScale0",    .34f);
+	gSavedSettings.setF32("AvatarAxisScale0",    .35f);
 	gSavedSettings.setF32("BuildAxisScale0",    1.0f);
-	gSavedSettings.setF32("FlycamAxisScale0",   4.0f);
+	gSavedSettings.setF32("FlycamAxisScale0",   10.0f);
 
 	// Pitch Scale
-	gSavedSettings.setF32("AvatarAxisScale4",  -1.5f);
+	gSavedSettings.setF32("AvatarAxisScale4",   1.0f);
 	gSavedSettings.setF32("BuildAxisScale4",    1.0f);
-	gSavedSettings.setF32("FlycamAxisScale4",  -1.5f);
+	gSavedSettings.setF32("FlycamAxisScale4",   2.0f);
 	// Yaw Scale
-	gSavedSettings.setF32("AvatarAxisScale5",   5.f);
-	gSavedSettings.setF32("BuildAxisScale5",    1.f);
-	gSavedSettings.setF32("FlycamAxisScale5",   3.5f);
+	gSavedSettings.setF32("AvatarAxisScale5",   1.0f);
+	gSavedSettings.setF32("BuildAxisScale5",    1.0f);
+	gSavedSettings.setF32("FlycamAxisScale5",   1.5f);
 	//Roll Scale
-	gSavedSettings.setF32("BuildAxisScale3",    1.f);
-	gSavedSettings.setF32("FlycamAxisScale3",    .1f);
+	gSavedSettings.setF32("BuildAxisScale3",    1.0f);
+	gSavedSettings.setF32("FlycamAxisScale3",   1.0f);
 
 	// X Dead Zone
 	gSavedSettings.setF32("AvatarAxisDeadZone1", .25f);
-	gSavedSettings.setF32("BuildAxisDeadZone1",  .1f);
-	gSavedSettings.setF32("FlycamAxisDeadZone1", .5f);
+	gSavedSettings.setF32("BuildAxisDeadZone1",  .25f);
+	gSavedSettings.setF32("FlycamAxisDeadZone1", .25f);
 	// Y Dead Zone
 	gSavedSettings.setF32("AvatarAxisDeadZone2", .25f);
 	gSavedSettings.setF32("BuildAxisDeadZone2",  .1f);
 	gSavedSettings.setF32("FlycamAxisDeadZone2", .1f);
 	// Z Dead Zone
 	gSavedSettings.setF32("AvatarAxisDeadZone0", .25f);
-	gSavedSettings.setF32("BuildAxisDeadZone0",  .1f);
-	gSavedSettings.setF32("FlycamAxisDeadZone0", .1f);
+	gSavedSettings.setF32("BuildAxisDeadZone0",  .25f);
+	gSavedSettings.setF32("FlycamAxisDeadZone0", .25f);
 
 	// Pitch Dead Zone
 	gSavedSettings.setF32("AvatarAxisDeadZone4", .25f);
-	gSavedSettings.setF32("BuildAxisDeadZone4",  .1f);
-	gSavedSettings.setF32("FlycamAxisDeadZone4", .1f);
+	gSavedSettings.setF32("BuildAxisDeadZone4",  .25f);
+	gSavedSettings.setF32("FlycamAxisDeadZone4", .25f);
 	//Yaw Dead Zone
-	gSavedSettings.setF32("AvatarAxisDeadZone5", .2f);
-	gSavedSettings.setF32("BuildAxisDeadZone5",  .1f);
-	gSavedSettings.setF32("FlycamAxisDeadZone5", .3f);
+	gSavedSettings.setF32("AvatarAxisDeadZone5", .25f);
+	gSavedSettings.setF32("BuildAxisDeadZone5",  .25f);
+	gSavedSettings.setF32("FlycamAxisDeadZone5", .25f);
 	// Roll Dead Zone
-	gSavedSettings.setF32("BuildAxisDeadZone3",  .1f);
-	gSavedSettings.setF32("FlycamAxisDeadZone3", .05f);
+	gSavedSettings.setF32("BuildAxisDeadZone3",  .25f);
+	gSavedSettings.setF32("FlycamAxisDeadZone3", .25f);
 
 	// Feathering
-	gSavedSettings.setF32("AvatarFeathering",  32.0f);
-	gSavedSettings.setF32("BuildFeathering",   16.0f);
-	gSavedSettings.setF32("FlycamFeathering",  16.0f);
+	gSavedSettings.setF32("AvatarFeathering",   0.25f);
+	gSavedSettings.setF32("BuildFeathering",    0.25f);
+	gSavedSettings.setF32("FlycamFeathering",   0.25f);
 
 	gSavedSettings.setF32("FlycamAxisScale6",   1.0f);
 	gSavedSettings.setF32("FlycamAxisDeadZone6",1.0f);

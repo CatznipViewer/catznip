@@ -66,6 +66,8 @@ class LLFilePicker
 #ifdef LL_GTK
 	friend class LLDirPicker;
 	friend void chooser_responder(GtkWidget *, gint, gpointer);
+#elif LL_DARWIN
+	friend class LLDirPicker;
 #endif // LL_GTK
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	friend class LLFilePickerThread;
