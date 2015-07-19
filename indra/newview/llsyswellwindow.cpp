@@ -480,9 +480,8 @@ bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
 				const LLSD& sdPayload = pNotification->getPayload();
 
 				// Check the notice's subject or body
-				fVisible = 
-					(!boost::ifind_first(sdPayload["subject"].asString(), m_strFilterText).empty()) || 
-					(!boost::ifind_first(sdPayload["message"].asString(), m_strFilterText).empty());
+				const std::string strSubject = sdPayload["subject"].asString(), strMessage = sdPayload["message"].asString();
+				fVisible = (!boost::ifind_first(strSubject, m_strFilterText).empty()) || (!boost::ifind_first(strMessage, m_strFilterText).empty());
 				// Check the group's name
 				if (!fVisible)
 				{
@@ -496,9 +495,10 @@ bool LLNotificationWellWindow::checkFilter(const LLSysWellItem* pWellItem) const
 					const LLUUID idSender = sdPayload["sender_id"]; LLAvatarName avSender;
 					if ( (idSender.notNull()) && (LLAvatarNameCache::get(idSender, &avSender)) )
 					{
+						const std::string strCompleteName = avSender.getCompleteName(), strLegacyName = avSender.getLegacyName();
 						fVisible =
-							(!boost::ifind_first(avSender.getCompleteName(), m_strFilterText).empty()) ||
-							( (!avSender.isDisplayNameDefault()) && (!boost::ifind_first(avSender.getLegacyName(), m_strFilterText).empty()) );
+							(!boost::ifind_first(strCompleteName, m_strFilterText).empty()) || 
+							( (!avSender.isDisplayNameDefault()) && (!boost::ifind_first(strLegacyName, m_strFilterText).empty()) );
 					}
 				}
 			}
