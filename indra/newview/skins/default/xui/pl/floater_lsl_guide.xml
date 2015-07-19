@@ -2,6 +2,6 @@
 <floater name="script ed float" title="LSL WIKI">
 	<check_box label="Idź za kursorem" name="lock_check"/>
 	<combo_box label="Zablokuj" name="history_combo"/>
-	<button label="Wróć" name="back_btn"/>
-	<button label="Do przodu" name="fwd_btn"/>
+	<button tool_tip="Wróć" name="back_btn"/>
+	<button tool_tip="Do przodu" name="fwd_btn"/>
 </floater>

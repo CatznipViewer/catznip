@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-  bevel_style="none"
-  border_style="line"
-  follows="left|top|right|bottom"
- height="522"
-  layout="topleft"
-  left="0"
-  name="script panel"
-  width="497">
+ bevel_style="none"
+ border_style="line"
+ follows="left|top|right|bottom"
+ height="570"
+ min_height="271"
+ min_width="290"
+ layout="topleft"
+ left="0"
+ name="script panel"
+ width="508">
   <panel.string
     name="loading">
     Loading...
@@ -40,6 +42,7 @@
     left="0"
     mouse_opaque="false"
     name="script_menu"
+     top="2"
     width="476">
     <menu
       top="0"
@@ -53,7 +56,8 @@
       <menu_item_call
         label="Save"
         layout="topleft"
-        name="Save" />
+        name="Save"
+        shortcut="control|S" />
       <menu_item_separator
         layout="topleft" />
       <menu_item_call
@@ -93,57 +97,63 @@
         enabled="false"
         label="Undo"
         layout="topleft"
-        name="Undo" />
+        name="Undo"
+        shortcut="control|Z" />
       <menu_item_call
         enabled="false"
         label="Redo"
         layout="topleft"
-        name="Redo" />
+        name="Redo"
+        shortcut="control|Y" />
       <menu_item_separator
         layout="topleft" />
       <menu_item_call
         enabled="false"
         label="Cut"
         layout="topleft"
-        name="Cut" />
+        name="Cut"
+        shortcut="control|X" />
       <menu_item_call
         enabled="false"
         label="Copy"
         layout="topleft"
-        name="Copy" />
+        name="Copy"
+        shortcut="control|C" />
       <menu_item_call
         enabled="false"
         label="Paste"
         layout="topleft"
-        name="Paste" />
-      <menu_item_separator
+        name="Paste"
+        shortcut="control|V" />
+      <menu_item_call
+        enabled="false"
+        label="Delete"
         layout="topleft"
-        name="separator2" />
+        name="Delete"
+        shortcut="Del" />
       <menu_item_call
         label="Select All"
         layout="topleft"
-        name="Select All" />
-      <menu_item_call
-        enabled="false"
-        label="Deselect"
-        layout="topleft"
-        name="Deselect" />
+        name="Select All"
+        shortcut="control|A" />
       <menu_item_separator
         layout="topleft"
         name="separator3" />
       <menu_item_call
         label="Search / Replace..."
         layout="topleft"
-        name="Search / Replace..." />
+             name="Search / Replace..."
+             shortcut="control|F" />
             <menu_item_call
              label="Go to line..."
              layout="topleft"
-             name="Go to line..." />
+             name="Go to line..."
+             shortcut="control|G" />
     </menu>
     <menu
       top="0"
       height="34"
-      label="Help"
+         label="LSL Reference"
       layout="topleft"
       mouse_opaque="false"
       name="Help"
@@ -151,11 +161,13 @@
       <menu_item_call
         label="Help..."
         layout="topleft"
-        name="Help..." />
+             name="Help..."
+             shortcut="F1" />
       <menu_item_call
         label="Keyword Help..."
         layout="topleft"
-        name="Keyword Help..." />
+             name="Keyword Help..."
+             shortcut="shift|F1" />
     </menu>
   </menu_bar>
     <script_editor
@@ -169,7 +181,7 @@
     layout="topleft"
      max_length="262144"
     name="Script Editor"
-     width="487"
+     width="512"
      text_color="ScriptText"
      default_color="ScriptText"
      bg_writeable_color="ScriptBackground"
@@ -183,45 +195,47 @@
     Loading...
     </script_editor>
   <scroll_list
-    top_pad="10"
-    left="0"
+    top_pad="4"
+    left="2"
     follows="left|right|bottom"
-    height="60"
+    height="38"
     layout="topleft"
     name="lsl errors"
-     width="487" />
+    right="-8" />
   <text
     follows="left|bottom"
     height="12"
     layout="topleft"
-     left="0"
+    left="5"
     name="line_col"
+    bottom="458"
     width="128" />
   <combo_box
     follows="left|bottom"
-    height="23"
+    height="22"
     label="Insert..."
     layout="topleft"
     name="Insert..."
-     width="128" />
+    bottom="486"
+    width="80" />
   <button
     follows="right|bottom"
     height="23"
     label="Save"
     label_selected="Save"
     layout="topleft"
-    top_pad="-35"
-     right="487"
+    bottom="486"
+    right="508"
     name="Save_btn"
-    width="81" />
+    width="60" />
   <button
     enabled="false"
     follows="right|bottom"
     height="23"
     label="Edit..."
     layout="topleft"
-    top_pad="-23"
-     right="400"
+    bottom="486"
+    right="445"
     name="Edit_btn"
-    width="81" />
+    width="60" />
 </panel>
