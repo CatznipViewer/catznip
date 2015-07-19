@@ -57,7 +57,7 @@ LLDerenderEntry::LLDerenderEntry(EEntryType eType, const LLSD& sdData)
 	m_idEntry = (sdData.has("entry_id")) ? sdData["entry_id"].asUUID() : sdData["object_id"].asUUID();
 
 	// Legacy support for object_name
-	m_strEntryName = (sdData.has("entry_name")) ? sdData["entry_name"] : sdData["object_name"];
+	m_strEntryName = (sdData.has("entry_name")) ? sdData["entry_name"].asString(): sdData["object_name"].asString();
 	if (m_strEntryName.empty())
 		m_strEntryName = LLTrans::getString("Unknown");
 }
@@ -129,7 +129,7 @@ LLDerenderObject::LLDerenderObject(const LLSD& sdData)
 {
 	if (sdData.has("region_pos"))
 		posRegion.setValue(sdData["region_pos"]);
-	strRegionName = (sdData.has("region_name")) ? sdData["region_name"] : LLTrans::getString("Unknown");
+	strRegionName = (sdData.has("region_name")) ? sdData["region_name"].asString() : LLTrans::getString("Unknown");
 }
 
 LLSD LLDerenderObject::toLLSD() const
