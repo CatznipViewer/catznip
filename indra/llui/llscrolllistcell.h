@@ -152,6 +152,10 @@ public:
 	void			setText(const LLStringExplicit& text);
 	void			setFontStyle(const U8 font_style);
 
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	void			setIcon(const LLUUID& idImage);
+	void			setIcon(const std::string& strImage);
+// [/SL:KB]
 private:
 	LLUIString		mText;
 	S32				mTextWidth;
@@ -164,6 +168,9 @@ private:
 	S32				mHighlightOffset;
 
 	LLPointer<LLUIImage> mRoundedRectImage;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	LLPointer<LLUIImage> mIcon;
+// [/SL:KB]
 
 	static U32 sCount;
 };

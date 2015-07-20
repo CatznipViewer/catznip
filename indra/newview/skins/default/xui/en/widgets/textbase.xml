@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <textbase clip_partial="false"
           halign="left" 
+          text_tentative_color="TextFgTentativeColor"
           valign="top" 
           font="SansSerif"/>

@@ -307,7 +307,7 @@ void LLNotificationChiclet::onMenuItemClicked(const LLSD& user_data)
 	if("close all" == action)
 	{
 		LLNotificationWellWindow::getInstance()->closeAll();
-		LLIMWellWindow::getInstance()->closeAll();
+//		LLIMWellWindow::getInstance()->closeAll();
 	}
 }
 
@@ -812,6 +812,20 @@ void LLIMP2PChiclet::onMenuItemClicked(const LLSD& sdParam)
 	{
 		LLAvatarActions::requestFriendshipDialog(idAvatar);
 	}
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2014-02-01 (Catznip-3.6)
+	else if ("teleport_offer" == strParam)
+ 	{
+		LLAvatarActions::offerTeleport(idAvatar);
+	}
+	else if ("teleport_request" == strParam)
+	{
+		LLAvatarActions::offerTeleport(idAvatar);
+	}
+	else if ("pay" == strParam)
+	{
+		LLAvatarActions::pay(idAvatar);
+	}
+// [/SL:KB]
 	else if("session_show" == strParam)
 	{
 		LLFloaterIMContainerBase::getInstance()->showConversation(getSessionId());
@@ -831,6 +845,12 @@ bool LLIMP2PChiclet::onMenuItemEnable(const LLSD& sdParam)
 	{
 		return !LLAvatarActions::isFriend(idAvatar);
 	}
+// [SL:KB] - Patch: Chat-ChicletContextMenu | Checked: 2014-02-01 (Catznip-3.6)
+	else if ("can_teleport" == strParam)
+	{
+		return LLAvatarActions::canOfferTeleport(idAvatar);
+	}
+// [/SL:KB]
 	return false;
 }
 // [/SL:KB]

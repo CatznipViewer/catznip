@@ -548,6 +548,9 @@ public:
 	std::string getMessage() const;
 	std::string getFooter() const;
 	std::string getLabel() const;
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
+	std::string getSound() const;
+// [/SL:KB]
 	std::string getURL() const;
 	S32 getURLOption() const;
     S32 getURLOpenExternally() const;
@@ -555,7 +558,7 @@ public:
 	bool canLogToIM() const;
 	bool canShowToast() const;
 	bool hasFormElements() const;
-    void playSound();
+//    void playSound();
 
 	typedef enum e_combine_behavior
 	{
