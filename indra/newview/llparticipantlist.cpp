@@ -37,6 +37,7 @@
 #include "llparticipantlist.h"
 #include "llspeakers.h"
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+#include "llpanelpeoplemenus.h"
 #include "llviewercontrol.h"
 // [/SL:KB]
 
@@ -623,6 +624,9 @@ private:
 LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAvatarList* pAvatarList)
 	: LLParticipantList(data_source)
 	, m_pAvatarList(pAvatarList)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	, m_pContextMenu(NULL)
+// [/SL:KB]
 {
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
 	m_pAvatarList->setSessionID(data_source->getSessionID());
@@ -631,11 +635,23 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 // [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3)
 	m_AvatarListSortOrderConn = gSavedSettings.getControl("SpeakerParticipantDefaultOrder")->getSignal()->connect(boost::bind(&LLParticipantAvatarList::sort, this));
 	sort();
+
+	m_pContextMenu = new LLPanelPeopleMenus::ParticipantContextMenu(this);
+	m_pAvatarList->setContextMenu(m_pContextMenu);
 // [/SL:KB]
 }
 
 LLParticipantAvatarList::~LLParticipantAvatarList()
 {
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	if (m_pContextMenu)
+	{
+		m_pAvatarList->setContextMenu(NULL);
+
+		delete m_pContextMenu;
+		m_pContextMenu = NULL;
+	}
+// [/SL:KB]
 }
 
 void LLParticipantAvatarList::update()

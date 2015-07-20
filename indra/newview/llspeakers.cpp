@@ -677,7 +677,10 @@ void LLSpeakerMgr::getSpeakerList(speaker_list_t* speaker_list, BOOL include_tex
 	}
 }
 
-const LLUUID LLSpeakerMgr::getSessionID() 
+//const LLUUID LLSpeakerMgr::getSessionID() 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+const LLUUID LLSpeakerMgr::getSessionID() const
+// [/SL:KB]
 { 
 	return mVoiceChannel->getSessionID(); 
 }
