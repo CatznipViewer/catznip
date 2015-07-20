@@ -1,7 +1,7 @@
 /** 
  *
- * Copyright (c) 2013, Kitty Barnett
- * Copyright (C) 2010-2013, Linden Research, Inc.
+ * Copyright (c) 2013-2014, Kitty Barnett
+ * Copyright (C) 2010-2014, Linden Research, Inc.
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -29,11 +29,11 @@
 #include "lltoolbarview.h"
 #include "llviewercontrol.h"
 
-//
-// LLFloaterIMContainerBase
+// ============================================================================
+// LLFloaterIMContainerBase class
 //
 
-bool LLFloaterIMContainerBase::sTabbedContainer = false;
+LLFloaterIMContainerBase::EContainerType LLFloaterIMContainerBase::sContainerType = LLFloaterIMContainerBase::CT_SEPARATE;
 
 // Checked: 2013-09-01 (Catznip-3.6)
 LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Params& params /*= getDefaultParams()*/)

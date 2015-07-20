@@ -1,7 +1,7 @@
 /** 
  *
- * Copyright (c) 2013, Kitty Barnett
- * Copyright (C) 2010-2013, Linden Research, Inc.
+ * Copyright (c) 2013-2014, Kitty Barnett
+ * Copyright (C) 2010-2014, Linden Research, Inc.
  * 
  * The source code in this file is provided to you under the terms of the 
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
@@ -21,26 +21,43 @@
 #include "llimview.h"
 #include "llmultifloater.h"
 
+// ============================================================================
+// Forward declarations
+//
+
 class LLConversationItem;
 class LLConversationSort;
+
+// ============================================================================
+// LLFloaterIMContainerBase class
+//
 
 class LLFloaterIMContainerBase
 	: public LLMultiFloater
 	, public LLIMSessionObserver
 {
 public:
-	LLFloaterIMContainerBase(const LLSD& seed, const Params& params = getDefaultParams());
+	LLFloaterIMContainerBase(const LLSD& sdKey, const Params& p = getDefaultParams());
 	virtual ~LLFloaterIMContainerBase();
 
 	/*
 	 * Member functions
 	 */
 public:
+	static LLFloater*         buildFloater(const LLSD& sdKey);
+	static const std::string& getFloaterXMLFile();
+
 	static LLFloaterIMContainerBase* findInstance();
 	static LLFloaterIMContainerBase* getInstance();
-	static bool                      isTabbedContainer() { return sTabbedContainer; }
-	static LLFloater*                buildFloater(const LLSD& sdKey);
-	static const std::string&        getFloaterXMLFile();
+
+	enum EContainerType
+	{
+		CT_VIEW,	// Default v3 CHUI
+		CT_TABBED,	// Legacy horizontal/vertical tab container
+		CT_SEPARATE	// Legacy separate/independent IM floaters (no container)
+	};
+	static EContainerType getContainerType() { return sContainerType; }
+
 protected:
 	typedef std::map<LLUUID,LLFloater*> avatarID_panel_map_t;
 	avatarID_panel_map_t&            getSessionMap() { return mSessions; }
@@ -77,6 +94,7 @@ protected:
 public:
 	virtual const LLUUID& getSelectedSession() const = 0;
 	virtual void showConversation(const LLUUID& session_id) = 0;
+	virtual void toggleConversation(const LLUUID& session_id) = 0;
 	virtual bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true) = 0;
 	virtual void setConversationFlashing(const LLUUID& session_id, bool flashing) = 0;
 	virtual void setConversationHighlighted(const LLUUID& session_id, bool is_highlighted) = 0;
@@ -102,9 +120,11 @@ protected:
 	 * Member variables
 	 */
 protected:
-	static bool sTabbedContainer;
+	static EContainerType sContainerType;
 private:
 	avatarID_panel_map_t mSessions;
 };
+
+// ============================================================================
 
 #endif // LL_LLFLOATERIMCONTAINERBASE_H
