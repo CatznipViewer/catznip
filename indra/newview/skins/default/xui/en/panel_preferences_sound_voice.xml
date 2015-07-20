@@ -18,19 +18,29 @@
      font.style="BOLD"
      height="20"
      layout="topleft"
-     left="25"
+     left="30"
      name="voice_chat_settings"
      width="200"
-     top_pad="10">
+     top="15">
       Voice Chat Settings
     </text>
+    <check_box
+     control_name="EnableVoiceChat"
+     follows="left|top"
+     height="16"
+     label="Voice chat"
+     layout="topleft"
+     left="45"
+     name="enable_voice_chat"
+     top_pad="3" 
+     width="237"/>
     <text
      type="string"
      length="1"
      follows="left|top"
      layout="topleft"
-	   left="46"
-	   top_pad="0"
+	   left="67"
+	   top_pad="9"
      name="Listen from"
      width="112">
         Listen from:
@@ -44,55 +54,70 @@
 		mouse_opaque="false"
 		visible="true"
 		width="18"
-		left_pad="-4"
-		top_delta="-4"/>
+		left="100"
+		top_pad="8"/>
 	<icon
 		follows="left|top"
 		height="18"
 		image_name="Move_Walk_Off"
 		layout="topleft"
-		left_pad="170" 
+		left_delta="0" 
 		name="avatar_icon"
 		mouse_opaque="false"
 		visible="true"
 		width="18"
-		top_delta="0" />
+		top_pad="1" />
    <radio_group
      enabled_control="EnableVoiceChat"
      control_name="VoiceEarLocation"
      draw_border="false"
      follows="left|top"
      layout="topleft"
-     left_delta="-168"
+     left="125"
      width="360"
-     height="20"
-     name="ear_location">
+     height="60"
+     name="ear_location"
+     top_delta="-22">
     <radio_item
      height="19"
      label="Camera position"
      follows="left|top"
      layout="topleft"
-     name="0"
+     name="camera"
+     value="0"
+     top_pad="3"
      width="200"/>
     <radio_item
      height="19"
      follows="left|top"
      label="Avatar position"
      layout="topleft"
-     left_pad="-16"
-     name="1"
-     top_delta ="0" 
+     left_delta="0"
+     name="avatar"
+     value="1"
+     top_pad="1"
+     width="200" />
+    <radio_item
+     height="19"
+     follows="left|top"
+     label="Speaker position (no spatial audio)"
+     layout="topleft"
+     left_delta="0"
+     name="speaker"
+     value="3"
+     top_pad="1"
      width="200" />
    </radio_group>
   <check_box
+   enabled_control="EnableVoiceChat"
    control_name="LipSyncEnabled"
    follows="left|top"
    height="20"
    label="Move avatar lips when speaking"
    layout="topleft"
-   left="35"
+   left="67"
    name="enable_lip_sync"
-   top_pad="350" 
+   top_pad="5" 
    width="237"/>
  <check_box
   follows="top|left"
@@ -101,18 +126,18 @@
   height="20"
   label="Toggle speak on/off when I press:"
   layout="topleft"
-  left="35"
+  left="67"
   name="push_to_talk_toggle_check"
   width="350"
   tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
-  top_pad="3"/>
+  top_pad="2"/>
   <line_editor
    follows="top|left"
    control_name="PushToTalkButton"
    enabled="false"
    enabled_control="EnableVoiceChat"
    height="23"
-   left="80"
+   left="88"
    max_length_bytes="200"
    name="modifier_combo"
    label="Push-to-Speak trigger"
@@ -151,8 +176,8 @@
    is_toggle="true"
    label="Input/Output devices"
    layout="topleft"
-   left="20"
-   top_pad="20"
+   left="70"
+   top_pad="10"
    name="device_settings_btn"
    width="190">
   </button>
@@ -161,9 +186,9 @@
     filename="panel_sound_devices.xml"
      visiblity_control="ShowDeviceSettings"
      name="device_settings_panel"
-    top_pad="0"
+    top_pad="3"
     width="480"
-    left="18"
+    left="24"
     class="panel_voice_device_settings"/>
 </panel>
   
