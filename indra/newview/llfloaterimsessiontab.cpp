@@ -269,22 +269,22 @@ void LLFloaterIMSessionTab::addToHost(const LLUUID& session_id)
 	}
 }
 
-void LLFloaterIMSessionTab::assignResizeLimits()
-{
-	bool is_participants_pane_collapsed = mParticipantListPanel->isCollapsed();
-
-    // disable a layoutstack's functionality when participant list panel is collapsed
-	mRightPartPanel->setIgnoreReshape(is_participants_pane_collapsed);
-
-    S32 participants_pane_target_width = is_participants_pane_collapsed?
-    		0 : (mParticipantListPanel->getRect().getWidth() + mParticipantListAndHistoryStack->getPanelSpacing());
-
-    S32 new_min_width = participants_pane_target_width + mRightPartPanel->getExpandedMinDim() + mFloaterExtraWidth;
-
-	setResizeLimits(new_min_width, getMinHeight());
-
-	this->mParticipantListAndHistoryStack->updateLayout();
-}
+//void LLFloaterIMSessionTab::assignResizeLimits()
+//{
+//	bool is_participants_pane_collapsed = mParticipantListPanel->isCollapsed();
+//
+//    // disable a layoutstack's functionality when participant list panel is collapsed
+//	mRightPartPanel->setIgnoreReshape(is_participants_pane_collapsed);
+//
+//    S32 participants_pane_target_width = is_participants_pane_collapsed?
+//    		0 : (mParticipantListPanel->getRect().getWidth() + mParticipantListAndHistoryStack->getPanelSpacing());
+//
+//    S32 new_min_width = participants_pane_target_width + mRightPartPanel->getExpandedMinDim() + mFloaterExtraWidth;
+//
+//	setResizeLimits(new_min_width, getMinHeight());
+//
+//	this->mParticipantListAndHistoryStack->updateLayout();
+//}
 
 BOOL LLFloaterIMSessionTab::postBuild()
 {
@@ -456,14 +456,14 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	updateGearBtn();
 // [/SL:KB]
 
-	// The resize limits for LLFloaterIMSessionTab should be updated, based on current values of width of conversation and message panels
-	mParticipantListPanel->getResizeBar()->setResizeListener(boost::bind(&LLFloaterIMSessionTab::assignResizeLimits, this));
-	mFloaterExtraWidth =
-			getRect().getWidth()
-			- mParticipantListAndHistoryStack->getRect().getWidth()
-			- (mParticipantListPanel->isCollapsed()? 0 : LLPANEL_BORDER_WIDTH);
-
-	assignResizeLimits();
+//	// The resize limits for LLFloaterIMSessionTab should be updated, based on current values of width of conversation and message panels
+//	mParticipantListPanel->getResizeBar()->setResizeListener(boost::bind(&LLFloaterIMSessionTab::assignResizeLimits, this));
+//	mFloaterExtraWidth =
+//			getRect().getWidth()
+//			- mParticipantListAndHistoryStack->getRect().getWidth()
+//			- (mParticipantListPanel->isCollapsed()? 0 : LLPANEL_BORDER_WIDTH);
+//
+//	assignResizeLimits();
 
 	return result;
 }
@@ -1100,7 +1100,7 @@ void LLFloaterIMSessionTab::onSlide(LLFloaterIMSessionTab* self)
 		}
 	}
 
-	self->assignResizeLimits();
+//	self->assignResizeLimits();
 // [SL:KB] - Patch: Chat-Refactor | Checked: 2013-08-28 (Catznip-3.6)
 	self->updateShowParticipantList();
 	self->updateExpandCollapseBtn();

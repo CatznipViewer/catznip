@@ -167,9 +167,9 @@ protected:
 	void appendMessage(const LLChat& chat, const LLSD &args = 0);
 
 	std::string appendTime();
-	void assignResizeLimits();
+//	void assignResizeLimits();
 
-	S32  mFloaterExtraWidth;
+//	S32  mFloaterExtraWidth;
 
 	bool mIsNearbyChat;
 	bool mIsP2PChat;
