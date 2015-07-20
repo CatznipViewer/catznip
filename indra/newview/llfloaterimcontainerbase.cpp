@@ -325,6 +325,7 @@ void LLFloaterIMContainerBase::doToGroup(const std::string& action, const LLUUID
 	{
 		gViewerWindow->getWindow()->copyTextToClipboard(utf8str_to_wstring(LLSLURL("group", group_id, "about").getSLURLString()));
 	}
+#ifdef CATZNIP
 	else if ("end_session" == action)
 	{
 		LLGroupActions::leaveIM(group_id);
@@ -333,6 +334,7 @@ void LLFloaterIMContainerBase::doToGroup(const std::string& action, const LLUUID
 	{
 		LLGroupActions::snoozeIM(group_id);
 	}
+#endif // CATZNIP
 }
 // [/SL:KB]
 
