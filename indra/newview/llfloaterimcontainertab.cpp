@@ -87,9 +87,9 @@ void LLFloaterIMContainerTab::setVisible(BOOL visible)
 	LLFloaterIMContainerBase::setVisible(visible);
 }
 
-void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id)
+void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id, bool focus_floater)
 {
-	selectConversationPair(session_id, true);
+	selectConversationPair(session_id, true, focus_floater);
 }
 
 void LLFloaterIMContainerTab::toggleConversation(const LLUUID& session_id)
@@ -130,7 +130,7 @@ bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, b
 		else
 		{
 			pConvFloater->setMinimized(false);
-			pConvFloater->setVisibleAndFrontmost(true);
+			pConvFloater->setVisibleAndFrontmost(focus_floater);
 		}
 	}
 	return true;
@@ -158,7 +158,12 @@ void LLFloaterIMContainerTab::setConversationFlashing(const LLUUID& session_id, 
 
 void LLFloaterIMContainerTab::setConversationHighlighted(const LLUUID& session_id, bool flashing)
 {
-	// *TODO: need implementing for legacy tab container
+	LLFloater* pIMSession = get_ptr_in_map(getSessionMap(), session_id);
+	LLFloater* pCurSession = getActiveFloater();
+	if ( (pIMSession) && (pCurSession) )
+	{
+		mTabContainer->setTabPanelFlashing(pIMSession, (flashing) && (pIMSession != pCurSession), false);
+	}
 }
 
 

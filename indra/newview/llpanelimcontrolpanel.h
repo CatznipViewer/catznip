@@ -1,84 +1,65 @@
 /** 
- * @file llpanelimcontrolpanel.h
- * @brief LLPanelIMControlPanel and related class definitions
  *
- * $LicenseInfo:firstyear=2004&license=viewerlgpl$
- * Second Life Viewer Source Code
- * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (c) 2014, Kitty Barnett
  * 
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation;
- * version 2.1 of the License only.
+ * The source code in this file is provided to you under the terms of the 
+ * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
  * 
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * By copying, modifying or distributing this software, you acknowledge that
+ * you have read and understood your obligations described above, and agree to 
+ * abide by those obligations.
  * 
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- * 
- * Linden Research, Inc., 945 Battery Street, San Francisco, CA  94111  USA
- * $/LicenseInfo$
  */
 
 #ifndef LL_LLPANELIMCONTROLPANEL_H
 #define LL_LLPANELIMCONTROLPANEL_H
 
+#include "llavatarpropertiesprocessor.h"
 #include "llpanel.h"
-#include "llcallingcard.h"
 
-class LLParticipantList;
+// ============================================================================
+// LLPanelIMControlPanel class
+//
 
-class LLPanelChatControlPanel
-	: public LLPanel
+class LLPanelIMControlPanel : public LLPanel, public LLAvatarPropertiesObserver
 {
+	/*
+	 * Constructor
+	 */
 public:
-	LLPanelChatControlPanel() :
-		mSessionId(LLUUID()) {};
-	~LLPanelChatControlPanel();
+	LLPanelIMControlPanel(const LLUUID& idAvatar);
+	virtual ~LLPanelIMControlPanel();
 
-	virtual BOOL postBuild();
-
-	virtual void setSessionId(const LLUUID& session_id);
-	const LLUUID& getSessionId() { return mSessionId; }
-
-private:
-	LLUUID mSessionId;
-
-	// connection to voice channel state change signal
-	boost::signals2::connection mVoiceChannelStateChangeConnection;
-};
-
-class LLPanelGroupControlPanel : public LLPanelChatControlPanel
-{
-public:
-	LLPanelGroupControlPanel(const LLUUID& session_id);
-	~LLPanelGroupControlPanel();
-
-	BOOL postBuild();
-
-	void setSessionId(const LLUUID& session_id);
-	/*virtual*/ void draw();
-
+	/*
+	 * Member functions
+	 */
 protected:
-	LLUUID mGroupID;
+	void refreshFromProperties();
 
-	LLParticipantList* mParticipantList;
-
-private:
-	void onSortMenuItemClicked(const LLSD& userdata);
-};
-
-class LLPanelAdHocControlPanel : public LLPanelGroupControlPanel
-{
+	/*
+	 * LLPanel overrides
+	 */
 public:
-	LLPanelAdHocControlPanel(const LLUUID& session_id);
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onVisibilityChange(BOOL fVisible);
 
-	BOOL postBuild();
+	/*
+	 * LLAvatarPropertiesObserver overrides
+	 */
+public:
+	/*virtual*/ void processProperties(void* pData, EAvatarProcessorType eType);
 
+	/*
+	 * Member variables
+	 */
+protected:
+	LLUUID mAvatarId;
+	bool   mRequestSent;
 };
+
+// ============================================================================
 
 #endif // LL_LLPANELIMCONTROLPANEL_H

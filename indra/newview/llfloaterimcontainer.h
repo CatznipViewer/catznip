@@ -83,7 +83,7 @@ public:
 								LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
 	void returnFloaterToHost();
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	/*virtual*/ void showConversation(const LLUUID& session_id);
+	/*virtual*/ void showConversation(const LLUUID& session_id, bool focus_floater = true);
 	/*virtual*/ void toggleConversation(const LLUUID& session_id) { showConversation(session_id); }
 	/*virtual*/ bool selectConversationPair(const LLUUID& session_id, bool select_widget, bool focus_floater = true);
 	/*virtual*/ void setConversationFlashing(const LLUUID& session_id, bool flashing);
@@ -222,7 +222,7 @@ private:
 	bool mIsFirstLaunch;
 
 	LLUUID mSelectedSession;
-	std::string mGeneralTitle;
+//	std::string mGeneralTitle;
 
 	// Conversation list implementation
 public:
