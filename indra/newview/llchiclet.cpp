@@ -602,7 +602,7 @@ bool LLIMChiclet::getShowNewMessagesIcon()
 void LLIMChiclet::onMouseDown()
 {
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
-	LLFloaterIMContainerBase::getInstance()->showConversation(getSessionId());
+	LLFloaterIMContainerBase::getInstance()->toggleConversation(getSessionId());
 	setCounter(0);
 // [/SL:KB]
 //	LLFloaterIMSession::toggle(getSessionId());

@@ -21,6 +21,7 @@
 #include "llfloaterimsession.h"
 #include "llfloaterreg.h"
 #include "lltoggleablemenu.h"
+#include "llviewercontrol.h"
 
 //
 // LLFloaterIMContainerTab
@@ -28,7 +29,7 @@
 LLFloaterIMContainerTab::LLFloaterIMContainerTab(const LLSD& seed, const Params& params /*= getDefaultParams()*/)
 	: LLFloaterIMContainerBase(seed, params)
 {
-	sTabbedContainer = true;
+	sContainerType = (!gSavedSettings.getBOOL("IMUseSeparateFloaters")) ? CT_TABBED : CT_SEPARATE;
 }
 
 LLFloaterIMContainerTab::~LLFloaterIMContainerTab()
@@ -89,6 +90,24 @@ void LLFloaterIMContainerTab::setVisible(BOOL visible)
 void LLFloaterIMContainerTab::showConversation(const LLUUID& session_id, bool focus_floater)
 {
 	selectConversationPair(session_id, true, focus_floater);
+}
+
+void LLFloaterIMContainerTab::toggleConversation(const LLUUID& session_id)
+{
+	if (LLFloaterIMContainerBase::CT_SEPARATE == LLFloaterIMContainerBase::getContainerType())
+	{
+		// Clicking the chiclet while the conversation has focus toggles its visibility
+		if (LLFloaterIMSession* pIMFloater = LLFloaterIMSession::findInstance(session_id))
+		{
+			if ( (pIMFloater->getVisible()) && (pIMFloater->hasFocus()) )
+			{
+				pIMFloater->setVisible(false);
+				return;
+			}
+		}
+	}
+
+	showConversation(session_id);
 }
 
 bool LLFloaterIMContainerTab::selectConversationPair(const LLUUID& session_id, bool /*select_widget*/, bool focus_floater /*=true*/)

@@ -4603,6 +4603,17 @@
       <key>Value</key>
       <boolean>1</boolean>
     </map>
+    <key>IMUseSeparateFloaters</key>
+    <map>
+      <key>Comment</key>
+      <string>Show chat in multiple windows or in one multi-tabbed window</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>S32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>IMUseTabbedContainer</key>
     <map>
       <key>Comment</key>

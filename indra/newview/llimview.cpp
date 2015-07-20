@@ -296,7 +296,7 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
 	// Skip processing of the message if the user indicated they don't want to be notified for this message type, or if the session currently has active focus
 	// (and we're using legacy tabs, or the CHUI message pane is expanded)
-	if ( ((LLIMModel::MSGOPT_NONE == user_preferences) || (is_session_focused)) && ((im_box->isTabbedContainer()) || (session_floater->isMessagePaneExpanded())) )
+	if ( ((LLIMModel::MSGOPT_NONE == user_preferences) || (is_session_focused)) && ((LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType()) || (session_floater->isMessagePaneExpanded())) )
 // [/SL:KB]
     {
     	return;
@@ -322,8 +322,8 @@ void notify_of_message(const LLSD& msg, bool is_dnd_msg)
 // [/SL:KB]
 //			// Open conversations floater
 //			LLFloaterReg::showInstance("im_container");
-//// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
-//			if (!im_box->isTabbedContainer())
+//// [SL:KB] - Patch: Chat-Container | Checked: 2013-05-11 (Catznip-3.5)
+//			if (LLFloaterIMContainerBase::CT_VIEW == im_box->getContainerType())
 //			{
 //				dynamic_cast<LLFloaterIMContainerView*>(im_box)->collapseMessagesPane(false);
 //			}

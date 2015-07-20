@@ -68,11 +68,11 @@ public:
 	static void processChatHistoryStyleUpdate(bool clean_messages = false);
 	static void reloadEmptyFloaters();
 
-	/**
-	 * Returns true if chat is displayed in multi tabbed floater
-	 *         false if chat is displayed in multiple windows
-	 */
-	static bool isChatMultiTab();
+//	/**
+//	 * Returns true if chat is displayed in multi tabbed floater
+//	 *         false if chat is displayed in multiple windows
+//	 */
+//	static bool isChatMultiTab();
 
 	// add conversation to container
 	static void addToHost(const LLUUID& session_id);

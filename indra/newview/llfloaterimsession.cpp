@@ -378,7 +378,7 @@ void LLFloaterIMSession::initIMFloater()
 //	mTypingStart = LLTrans::getString("IM_typing_start_string");
 
 // [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 		// Show control panel in torn off floaters only.
 		mParticipantListPanel->setVisible(!getHost() && gSavedSettings.getBOOL(getShowControlPanelControl()));
@@ -789,7 +789,10 @@ void LLFloaterIMSession::setDocked(bool docked, bool pop_on_undock)
 		(LLNotificationsUI::LLChannelManager::getInstance()->
 											findChannelByID(LLUUID(gSavedSettings.getString("NotificationChannelUUID"))));
 	
-	if(!isChatMultiTab())
+//	if(!isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::CT_SEPARATE == LLFloaterIMContainerBase::getContainerType())
+// [/SL:KB]
 	{
 		LLTransientDockableFloater::setDocked(docked, pop_on_undock);
 	}
@@ -827,6 +830,17 @@ void LLFloaterIMSession::setVisible(BOOL visible)
 
 	LLFloaterIMSessionTab::setVisible(visible);
 
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if ( (visible) && (LLFloaterIMContainerBase::CT_SEPARATE == LLFloaterIMContainerBase::getContainerType()) && (!getDockControl()) )
+	{
+		if (LLChiclet* pChiclet = LLChicletBar::getInstance()->getChicletPanel()->findChiclet<LLChiclet>(mSessionID))
+		{
+			LLChicletBar::getInstance()->getChicletPanel()->scrollToChiclet(pChiclet);
+			setDockControl(new LLDockControl(pChiclet, this, this->getDockTongue(), LLDockControl::BOTTOM));
+		}
+	}
+// [/SL:KB]
+
 	// update notification channel state
 	if(channel)
 	{
@@ -859,7 +873,10 @@ BOOL LLFloaterIMSession::getVisible()
 {
 	bool visible;
 
-	if(isChatMultiTab())
+//	if(isChatMultiTab())
+// [SL:KB] - Patch: Chat-Container | Checked: 2014-05-14 (Catznip-3.6)
+	if (LLFloaterIMContainerBase::CT_SEPARATE != LLFloaterIMContainerBase::getContainerType())
+// [/SL:KB]
 	{
 //		LLFloaterIMContainer* im_container =
 //				LLFloaterIMContainer::getInstance();
@@ -1098,7 +1115,7 @@ void LLFloaterIMSession::onInputEditorKeystroke(LLTextEditor* caller, void* user
 //		im_box->flashConversationItemWidget(self->mSessionID,false);
 //	}
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	if (!LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
 		// NOTE: this is only needed on CHUI
 		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
