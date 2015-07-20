@@ -277,6 +277,20 @@ bool LLFloaterIMSession::enableGearGroupMenuItem(const LLSD& userdata)
 }
 // [/SL:KB]
 
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+void LLFloaterIMSession::onTeleportClicked(const LLUICtrl* pCtrl)
+{
+	if (pCtrl)
+	{
+		const std::string strValue = pCtrl->getValue().asString();
+		if ( (strValue.empty()) || ("offer_teleport" == strValue) )
+			GearDoToSelected("offer_teleport");
+		else if ("request_teleport")
+			GearDoToSelected("request_teleport");
+	}
+}
+// [/SL:KB]
+
 void LLFloaterIMSession::sendMsgFromInputEditor()
 {
 	if (gAgent.isGodlike()
@@ -418,6 +432,28 @@ BOOL LLFloaterIMSession::postBuild()
 	//see LLFloaterIMPanel for how it is done (IB)
 
 	initIMFloater();
+
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	if (mIsP2PChat)
+	{
+		LLPanel* pToolbar = getChild<LLPanel>("p2p_toolbar");
+		pToolbar->setVisible(true);
+
+		pToolbar->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "view_profile"));
+		pToolbar->getChild<LLUICtrl>("teleport_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::onTeleportClicked, this, _1));
+		pToolbar->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "chat_history"));
+		pToolbar->getChild<LLUICtrl>("pay_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelected, this, "pay"));
+	}
+	else if ( (mSession) && (mSession->isGroupSessionType()) )
+	{
+		LLPanel* pToolbar = getChild<LLPanel>("group_toolbar");
+		pToolbar->setVisible(true);
+
+		pToolbar->getChild<LLUICtrl>("profile_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_profile"));
+		pToolbar->getChild<LLUICtrl>("chat_history_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "chat_history"));
+		pToolbar->getChild<LLUICtrl>("view_notices_btn")->setCommitCallback(boost::bind(&LLFloaterIMSession::GearDoToSelectedGroup, this, "view_notices"));
+	}
+// [/SL:KB]
 
 	return result;
 }
