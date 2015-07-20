@@ -5697,8 +5697,9 @@ class LLCommunicateNearbyChat : public view_listener_t
 	{
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2015-04-27 (Catznip-3.7)
 		LLFloaterIMContainerView* im_box = NULL;
-		if ( (!LLFloaterIMContainerBase::isTabbedContainer()) && (LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain()) &&
-			 (im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance())) &&
+		if ( (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType()) &&
+		     (LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat")->isInVisibleChain()) &&
+		     (im_box = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance())) &&
 		     (im_box->getSelectedSession() == LLUUID() && im_box->getConversationListItemSize() > 1) )
 		{
 			im_box->selectNextorPreviousConversation(false);
