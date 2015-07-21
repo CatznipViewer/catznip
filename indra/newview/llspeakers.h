@@ -224,7 +224,10 @@ public:
 	LLSpeakerMgr(LLVoiceChannel* channelp);
 	virtual ~LLSpeakerMgr();
 
-	LLPointer<LLSpeaker> findSpeaker(const LLUUID& avatar_id);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	LLPointer<LLSpeaker> findSpeaker(const LLUUID& avatar_id) const;
+// [/SL:KB]
+//	LLPointer<LLSpeaker> findSpeaker(const LLUUID& avatar_id);
 	void update(BOOL resort_ok);
 	void setSpeakerTyping(const LLUUID& speaker_id, BOOL typing);
 	void speakerChatted(const LLUUID& speaker_id);
@@ -238,7 +241,10 @@ public:
 	typedef std::vector<LLPointer<LLSpeaker> > speaker_list_t;
 	void getSpeakerList(speaker_list_t* speaker_list, BOOL include_text);
 	LLVoiceChannel* getVoiceChannel() { return mVoiceChannel; }
-	const LLUUID getSessionID();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	const LLUUID getSessionID() const;
+// [/SL:KB]
+//	const LLUUID getSessionID();
 	bool isSpeakerToBeRemoved(const LLUUID& speaker_id);
 
 	/**

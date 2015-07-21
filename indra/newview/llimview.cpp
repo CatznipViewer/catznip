@@ -53,6 +53,9 @@
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h"
 #include "llgroupiconctrl.h"
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
+#include "llgroupoptions.h"
+// [/SL:KB]
 #include "llmd5.h"
 #include "llmutelist.h"
 #include "llrecentpeople.h"
@@ -425,6 +428,10 @@ LLIMModel::LLIMSession::LLIMSession(const LLUUID& session_id, const std::string&
 	mName(name),
 	mType(type),
 	mHasOfflineMessage(has_offline_msg),
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+	mCloseAction(CLOSE_DEFAULT),
+	mParticipantLastMessageTime(LLDate::now()),
+// [/SL:KB]
 	mParticipantUnreadMessageCount(0),
 	mNumUnread(0),
 	mOtherParticipantID(other_participant_id),
@@ -680,6 +687,13 @@ void LLIMModel::LLIMSession::addMessage(const std::string& from, const LLUUID& f
 	message["time"] = time; 
 	message["index"] = (LLSD::Integer)mMsgs.size(); 
 	message["is_history"] = is_history;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+	if ( (isGroupSessionType()) && (mSpeakers) )
+	{
+		const LLSpeaker* pSpeaker = mSpeakers->findSpeaker(from_id);
+		message["chat_flags"] = ((pSpeaker) && (pSpeaker->mIsModerator)) ? CHAT_FLAG_MODERATOR : CHAT_FLAG_NONE;
+	}
+// [/SL:KB]
 
 	mMsgs.push_front(message); 
 
@@ -1142,6 +1156,9 @@ LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, 
 			|| INTERACTIVE_SYSTEM_FROM == from)
 	{
 		++(session->mParticipantUnreadMessageCount);
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
+		session->mParticipantLastMessageTime = LLDate::now();
+// [/SL:K]
 	}
 
 	return session;
@@ -2572,96 +2589,96 @@ void LLIncomingCallDialog::processCallResponse(S32 response, const LLSD &payload
 	}
 }
 
-bool inviteUserResponse(const LLSD& notification, const LLSD& response)
-{
-	if (!gIMMgr)
-		return false;
-
-	const LLSD& payload = notification["payload"];
-	LLUUID session_id = payload["session_id"].asUUID();
-	EInstantMessage type = (EInstantMessage)payload["type"].asInteger();
-	LLIMMgr::EInvitationType inv_type = (LLIMMgr::EInvitationType)payload["inv_type"].asInteger();
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	switch(option) 
-	{
-	case 0: // accept
-		{
-			if (type == IM_SESSION_P2P_INVITE)
-			{
-				// create a normal IM session
-				session_id = gIMMgr->addP2PSession(
-					payload["session_name"].asString(),
-					payload["caller_id"].asUUID(),
-					payload["session_handle"].asString(),
-					payload["session_uri"].asString());
-
-				gIMMgr->startCall(session_id);
-
-				gIMMgr->clearPendingAgentListUpdates(session_id);
-				gIMMgr->clearPendingInvitation(session_id);
-			}
-			else
-			{
-				LLUUID new_session_id = gIMMgr->addSession(
-					payload["session_name"].asString(),
-					type,
-					session_id, true);
-
-				std::string url = gAgent.getRegion()->getCapability(
-					"ChatSessionRequest");
-
-				LLSD data;
-				data["method"] = "accept invitation";
-				data["session-id"] = session_id;
-				LLHTTPClient::post(
-					url,
-					data,
-					new LLViewerChatterBoxInvitationAcceptResponder(
-						session_id,
-						inv_type));
-			}
-		}
-		break;
-	case 2: // mute (also implies ignore, so this falls through to the "ignore" case below)
-	{
-		// mute the sender of this invite
-		if (!LLMuteList::getInstance()->isMuted(payload["caller_id"].asUUID()))
-		{
-			LLMute mute(payload["caller_id"].asUUID(), payload["caller_name"].asString(), LLMute::AGENT);
-			LLMuteList::getInstance()->add(mute);
-		}
-	}
-	/* FALLTHROUGH */
-	
-	case 1: // decline
-	{
-		if (type == IM_SESSION_P2P_INVITE)
-		{
-		  std::string s = payload["session_handle"].asString();
-		  LLVoiceClient::getInstance()->declineInvite(s);
-		}
-		else
-		{
-			std::string url = gAgent.getRegion()->getCapability(
-				"ChatSessionRequest");
-
-			LLSD data;
-			data["method"] = "decline invitation";
-			data["session-id"] = session_id;
-			LLHTTPClient::post(
-				url,
-				data,
-				NULL);				
-		}
-	}
-
-	gIMMgr->clearPendingAgentListUpdates(session_id);
-	gIMMgr->clearPendingInvitation(session_id);
-	break;
-	}
-	
-	return false;
-}
+//bool inviteUserResponse(const LLSD& notification, const LLSD& response)
+//{
+//	if (!gIMMgr)
+//		return false;
+//
+//	const LLSD& payload = notification["payload"];
+//	LLUUID session_id = payload["session_id"].asUUID();
+//	EInstantMessage type = (EInstantMessage)payload["type"].asInteger();
+//	LLIMMgr::EInvitationType inv_type = (LLIMMgr::EInvitationType)payload["inv_type"].asInteger();
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//	switch(option) 
+//	{
+//	case 0: // accept
+//		{
+//			if (type == IM_SESSION_P2P_INVITE)
+//			{
+//				// create a normal IM session
+//				session_id = gIMMgr->addP2PSession(
+//					payload["session_name"].asString(),
+//					payload["caller_id"].asUUID(),
+//					payload["session_handle"].asString(),
+//					payload["session_uri"].asString());
+//
+//				gIMMgr->startCall(session_id);
+//
+//				gIMMgr->clearPendingAgentListUpdates(session_id);
+//				gIMMgr->clearPendingInvitation(session_id);
+//			}
+//			else
+//			{
+//				LLUUID new_session_id = gIMMgr->addSession(
+//					payload["session_name"].asString(),
+//					type,
+//					session_id, true);
+//
+//				std::string url = gAgent.getRegion()->getCapability(
+//					"ChatSessionRequest");
+//
+//				LLSD data;
+//				data["method"] = "accept invitation";
+//				data["session-id"] = session_id;
+//				LLHTTPClient::post(
+//					url,
+//					data,
+//					new LLViewerChatterBoxInvitationAcceptResponder(
+//						session_id,
+//						inv_type));
+//			}
+//		}
+//		break;
+//	case 2: // mute (also implies ignore, so this falls through to the "ignore" case below)
+//	{
+//		// mute the sender of this invite
+//		if (!LLMuteList::getInstance()->isMuted(payload["caller_id"].asUUID()))
+//		{
+//			LLMute mute(payload["caller_id"].asUUID(), payload["caller_name"].asString(), LLMute::AGENT);
+//			LLMuteList::getInstance()->add(mute);
+//		}
+//	}
+//	/* FALLTHROUGH */
+//	
+//	case 1: // decline
+//	{
+//		if (type == IM_SESSION_P2P_INVITE)
+//		{
+//		  std::string s = payload["session_handle"].asString();
+//		  LLVoiceClient::getInstance()->declineInvite(s);
+//		}
+//		else
+//		{
+//			std::string url = gAgent.getRegion()->getCapability(
+//				"ChatSessionRequest");
+//
+//			LLSD data;
+//			data["method"] = "decline invitation";
+//			data["session-id"] = session_id;
+//			LLHTTPClient::post(
+//				url,
+//				data,
+//				NULL);				
+//		}
+//	}
+//
+//	gIMMgr->clearPendingAgentListUpdates(session_id);
+//	gIMMgr->clearPendingInvitation(session_id);
+//	break;
+//	}
+//	
+//	return false;
+//}
 
 //
 // Member Functions
@@ -2706,14 +2723,14 @@ void LLIMMgr::addMessage(
 		fixed_session_name = session_name;
 		name_is_setted = true;
 	}
-	bool skip_message = false;
-	bool from_linden = LLMuteList::getInstance()->isLinden(from);
-	if (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") && !from_linden)
-	{
-		// Evaluate if we need to skip this message when that setting is true (default is false)
-		skip_message = (LLAvatarTracker::instance().getBuddyInfo(other_participant_id) == NULL);	// Skip non friends...
-		skip_message &= !(other_participant_id == gAgentID);	// You are your best friend... Don't skip yourself
-	}
+//	bool skip_message = false;
+//	bool from_linden = LLMuteList::getInstance()->isLinden(from);
+//	if (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") && !from_linden)
+//	{
+//		// Evaluate if we need to skip this message when that setting is true (default is false)
+//		skip_message = (LLAvatarTracker::instance().getBuddyInfo(other_participant_id) == NULL);	// Skip non friends...
+//		skip_message &= !(other_participant_id == gAgentID);	// You are your best friend... Don't skip yourself
+//	}
 
 	bool new_session = !hasSession(new_session_id);
 	if (new_session)
@@ -2725,12 +2742,12 @@ void LLIMMgr::addMessage(
 		}
 		LLIMModel::getInstance()->newSession(new_session_id, fixed_session_name, dialog, other_participant_id, false, is_offline_msg);
 
-		LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(new_session_id);
-		skip_message &= !session->isGroupSessionType();			// Do not skip group chats...
-		if(skip_message)
-		{
-			gIMMgr->leaveSession(new_session_id);
-		}
+//		LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(new_session_id);
+//		skip_message &= !session->isGroupSessionType();			// Do not skip group chats...
+//		if(skip_message)
+//		{
+//			gIMMgr->leaveSession(new_session_id);
+//		}
 		// When we get a new IM, and if you are a god, display a bit
 		// of information about the source. This is to help liaisons
 		// when answering questions.
@@ -2752,17 +2769,17 @@ void LLIMMgr::addMessage(
 			LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, bonus_info.str());
 		}
 
-		// Logically it would make more sense to reject the session sooner, in another area of the
-		// code, but the session has to be established inside the server before it can be left.
-		if (LLMuteList::getInstance()->isMuted(other_participant_id) && !from_linden)
-		{
-			LL_WARNS() << "Leaving IM session from initiating muted resident " << from << LL_ENDL;
-			if(!gIMMgr->leaveSession(new_session_id))
-			{
-				LL_INFOS() << "Session " << new_session_id << " does not exist." << LL_ENDL;
-			}
-			return;
-		}
+//		// Logically it would make more sense to reject the session sooner, in another area of the
+//		// code, but the session has to be established inside the server before it can be left.
+//		if (LLMuteList::getInstance()->isMuted(other_participant_id) && !from_linden)
+//		{
+//			LL_WARNS() << "Leaving IM session from initiating muted resident " << from << LL_ENDL;
+//			if(!gIMMgr->leaveSession(new_session_id))
+//			{
+//				LL_INFOS() << "Session " << new_session_id << " does not exist." << LL_ENDL;
+//			}
+//			return;
+//		}
 
         //Play sound for new conversations
 		if (!gAgent.isDoNotDisturb() && (gSavedSettings.getBOOL("PlaySoundNewConversation") == TRUE))
@@ -2771,13 +2788,19 @@ void LLIMMgr::addMessage(
         }
 	}
 
-	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat) && !skip_message)
+//	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat) && !skip_message)
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-05-01 (Catznip-3.6)
+	if (!LLMuteList::getInstance()->isMuted(other_participant_id, LLMute::flagTextChat))
+// [/SL:KB]
 	{
 		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
 	}
 
 	// Open conversation floater if offline messages are present
-	if (is_offline_msg && !skip_message)
+//	if (is_offline_msg && !skip_message)
+// [SL:KB] - Patch: Chat-Misc | Checked: 2014-05-01 (Catznip-3.6)
+	if (is_offline_msg)
+// [/SL:KB]
     {
         LLFloaterReg::showInstance("im_container");
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
@@ -2989,7 +3012,22 @@ bool LLIMMgr::leaveSession(const LLUUID& session_id)
 	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(session_id);
 	if (!im_session) return false;
 
-	LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+	// Only group sessions can be snoozed
+	if ( (im_session->isGroupSessionType()) && (LLIMModel::LLIMSession::CLOSE_SNOOZE == im_session->mCloseAction) )
+	{
+		snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
+		if (mSnoozedSessions.end() != itSession)
+			itSession->second = im_session->mParticipantLastMessageTime.secondsSinceEpoch();
+		else
+			mSnoozedSessions.insert(std::pair<LLUUID, F64>(session_id, im_session->mParticipantLastMessageTime.secondsSinceEpoch()));
+	}
+	else
+	{
+		LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
+	}
+// [/SL:KB]
+//	LLIMModel::getInstance()->sendLeaveSession(session_id, im_session->mOtherParticipantID);
 	gIMMgr->removeSession(session_id);
 	return true;
 }
@@ -3163,6 +3201,43 @@ BOOL LLIMMgr::hasSession(const LLUUID& session_id)
 {
 	return LLIMModel::getInstance()->findIMSession(session_id) != NULL;
 }
+
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+bool LLIMMgr::checkSnoozeExpiration(const LLUUID& session_id) const
+{
+	static LLCachedControl<S32> s_nSnoozeTime(gSavedSettings, "GroupSnoozeTime", 900);
+
+	snoozed_sessions_t::const_iterator itSession = mSnoozedSessions.find(session_id);
+	return (mSnoozedSessions.end() != itSession) && (itSession->second + s_nSnoozeTime < LLTimer::getTotalSeconds());
+}
+
+bool LLIMMgr::isSnoozedSession(const LLUUID& session_id) const
+{
+	return (mSnoozedSessions.end() != mSnoozedSessions.find(session_id));
+}
+
+bool LLIMMgr::restoreSnoozedSession(const LLUUID& session_id)
+{
+	snoozed_sessions_t::iterator itSession = mSnoozedSessions.find(session_id);
+	if (mSnoozedSessions.end() != itSession)
+	{
+		mSnoozedSessions.erase(itSession);
+
+		LLGroupData groupData;
+		if (gAgent.getGroupData(session_id, groupData))
+		{
+			gIMMgr->addSession(groupData.mName, IM_SESSION_INVITE, session_id);
+
+			uuid_vec_t ids;
+			LLIMModel::sendStartSession(session_id, session_id, ids, IM_SESSION_GROUP_START);
+
+			make_ui_sound("UISndStartIM");
+			return true;
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 void LLIMMgr::clearPendingInvitation(const LLUUID& session_id)
 {
@@ -3665,13 +3740,42 @@ public:
 				(time_t) message_params["timestamp"].asInteger();
 
 			BOOL is_do_not_disturb = gAgent.isDoNotDisturb();
+ // [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
+			BOOL is_muted = LLMuteList::getInstance()->isMuted(from_id, LLMute::flagTextChat);
+			BOOL is_group = gAgent.isInGroup(session_id);
 
-			//don't return if user is muted b/c proper way to ignore a muted user who
-			//initiated an adhoc/group conference is to create then leave the session (see STORM-1731)
-			if (is_do_not_disturb)
+			// Just return if the user is currently marked DnD or if the group session was started by someone on the mute list (we'll get another invitation later)
+			if ( (is_do_not_disturb) || ((is_muted) && (is_group)) )
 			{
 				return;
 			}
+
+			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends and groups can IM me" is checked
+			if ( (!is_group) && ( (is_muted) || ((gSavedSettings.getBOOL("VoiceCallsFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id))) ) )
+			{
+				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
+				if (!strUrl.empty())
+					LLHTTPClient::post(strUrl, LLSD().with("method", "decline invitation").with("session-id", session_id), NULL);
+				return;
+			}
+// [/SL:KB]
+//			//don't return if user is muted b/c proper way to ignore a muted user who
+//			//initiated an adhoc/group conference is to create then leave the session (see STORM-1731)
+//			if (is_do_not_disturb)
+//			{
+//				return;
+//			}
+
+// [SL:KB] - Patch: Chat-GroupOptions | Checked: 2012-06-21 (Catznip-3.3)
+			const LLGroupOptions* pGroupOptions = LLGroupOptionsMgr::getInstance()->getOptions(session_id);
+			if ( (pGroupOptions) && (!pGroupOptions->mReceiveGroupChat) )
+			{
+				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
+				if (!strUrl.empty())
+					LLHTTPClient::post(strUrl, LLSD().with("method", "decline invitation").with("session-id", session_id), NULL);
+				return;
+			}
+// [/SL:KB]
 
 			// standard message, not from system
 			std::string saved;

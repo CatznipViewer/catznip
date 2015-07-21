@@ -644,12 +644,18 @@ bool LLSpeakerMgr::removeSpeaker(const LLUUID& speaker_id)
 	return false;
 }
 
-LLPointer<LLSpeaker> LLSpeakerMgr::findSpeaker(const LLUUID& speaker_id)
+//LLPointer<LLSpeaker> LLSpeakerMgr::findSpeaker(const LLUUID& speaker_id)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+LLPointer<LLSpeaker> LLSpeakerMgr::findSpeaker(const LLUUID& speaker_id) const
+// [/SL:KB]
 {
 	//In some conditions map causes crash if it is empty(Windows only), adding check (EK)
 	if (mSpeakers.size() == 0)
 		return NULL;
-	speaker_map_t::iterator found_it = mSpeakers.find(speaker_id);
+//	speaker_map_t::iterator found_it = mSpeakers.find(speaker_id);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	speaker_map_t::const_iterator found_it = mSpeakers.find(speaker_id);
+// [/SL:KB]
 	if (found_it == mSpeakers.end())
 	{
 		return NULL;
@@ -671,7 +677,10 @@ void LLSpeakerMgr::getSpeakerList(speaker_list_t* speaker_list, BOOL include_tex
 	}
 }
 
-const LLUUID LLSpeakerMgr::getSessionID() 
+//const LLUUID LLSpeakerMgr::getSessionID() 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+const LLUUID LLSpeakerMgr::getSessionID() const
+// [/SL:KB]
 { 
 	return mVoiceChannel->getSessionID(); 
 }
