@@ -68,19 +68,11 @@ void LLFloaterSearchContainer::onOpen(const LLSD& sdKey)
 	if (sdKey.has("category"))
 	{
 		// This is meant for the web search tab
-		S32 idxTab = mTabContainer->getIndexForPanel(m_pWebSearch);
-		if (-1 != idxTab)
-		{
-			mTabContainer->selectTab(idxTab);
-			m_pWebSearch->onOpen(sdKey);
-		}
+		mTabContainer->selectTabPanel(m_pWebSearch);
 	}
-	else
-	{
-		// TODO-Catznip: should we call onOpen only for the active tab, or all tabs?
-		// (Right now we're using it to initialize LLFloaterSearch's first navigation when search is opened)
-		mTabContainer->getCurrentPanel()->onOpen(sdKey);
-	}
+
+	m_pWebSearch->onOpen(sdKey);
+	m_pPlacesSearch->onOpen(sdKey);
 }
 
 void LLFloaterSearchContainer::addFloater(LLFloater* pFloater, BOOL fSelect, LLTabContainer::eInsertionPoint eInsert)
