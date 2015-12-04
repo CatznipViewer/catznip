@@ -50,6 +50,9 @@ public:
 	void addPopup(LLView* popup);
 	void removePopup(LLView* popup);
 	void clearPopups();
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+	LLView* getTopPopup() const { return (!mPopups.empty()) ? mPopups.front().get() : NULL; }
+// [/SL:KB]
 
 	typedef std::list<LLHandle<LLView> > popup_list_t;
 	popup_list_t getCurrentPopups() { return mPopups; }

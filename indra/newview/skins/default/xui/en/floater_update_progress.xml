@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="true"
+ can_minimize="true"
+ can_resize="false"
+ height="135"
+ layout="topleft"
+ legacy_header_height="18"
+ positioning="centered"
+ name="floater_update_progress"
+ title="Download Progress"
+ width="400">
+    <floater.string
+     name="string_version_optional">
+        [APP_NAME] [VERSION]
+    </floater.string>
+    <floater.string
+     name="string_version_required">
+        [APP_NAME] [VERSION] (Required)
+    </floater.string>
+    <icon
+     follows="top|left"
+     height="96"
+     image_name="Update_256"
+     layout="topleft"
+     left="5"
+     mouse_opaque="true"
+     name="icon_update"
+     top="26"
+     width="96" />
+    <text
+     follows="top|left|right"
+     font="SansSerifLargeBold"
+     height="18"
+     left="110"
+     name="version_text"
+     right="-10"
+     text_color="white"
+     top="22">
+Catznip R19.1 (Required update)
+    </text>
+
+    <text
+     follows="top|left|right"
+     height="16"
+     left="110"
+     name="info_text"
+     right="-10"
+     text_color="white"
+     top_pad="6">
+Visit the [[INFO_URL] [APP_NAME] website] for more informaton.
+    </text>
+
+    <text
+     follows="top|left|right"
+     halign="center"
+     height="18"
+     left="110"
+     name="progress_text"
+     right="-10"
+     text_color="white"
+     top_pad="5"
+     valign="center"
+     visible="false">
+0.00 / 30.0 Mb downloaded
+    </text>
+    <progress_bar
+     color_bar="0.3 1.0 0.3 1"
+     follows="top|left|right"
+     height="20"
+     left_delta="0"
+     layout="topleft"
+     name="progress_bar"
+     right="-10"
+     top_delta="0"
+     visible="true" />
+    <button
+     follows="left|bottom"
+     height="25"
+     image_color="Green"
+     label="Install Now"
+     label_color="White"
+     layout="topleft"
+     left_delta="90"
+     name="install_btn"
+     top_delta="0"
+     visible="false"
+     width="100" />
+
+    <text
+     follows="top|left|right"
+     halign="center"
+     height="18"
+     left="110"
+     name="required_text"
+     right="-10"
+     text_color="white"
+     top_pad="8"
+     valign="center"
+     visible="false"
+     wrap="true">
+This is a required update: you have to wait for the download to finish and then install the update.
+    </text>
+    <text
+     follows="top|left|right"
+     halign="center"
+     height="18"
+     left="110"
+     name="optional_text"
+     right="-10"
+     text_color="white"
+     top_delta="0"
+     valign="center"
+     visible="true"
+     wrap="true">
+You can close this floater and the download will continue in the background.
+    </text>
+
+
+</floater>
