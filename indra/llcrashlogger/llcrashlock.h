@@ -49,7 +49,7 @@ public:
     bool isProcessAlive(U32 pid, const std::string& pname);               //Check if pid is alive.
     bool isWaiting();                           //Waiting for master lock to be released.
     LLSD getProcessList();                      //Get next process pid/dir pairs
-    void cleanupProcess(std::string proc_dir);               //Remove from list, clean up working dir.
+//    void cleanupProcess(std::string proc_dir);               //Remove from list, clean up working dir.
     bool putProcessList(const LLSD& processlist); //Write pid/dir pairs back to disk.
 	static bool fileExists(std::string filename);
     

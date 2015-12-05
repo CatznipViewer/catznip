@@ -320,7 +320,10 @@ void EnableCrashingOnCrashes()
 }
 #endif
 
-void LLApp::setupErrorHandling(bool second_instance)
+//void LLApp::setupErrorHandling(bool second_instance)
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-17 (Catznip-3.7)
+void LLApp::setupErrorHandling(bool second_instance, bool extended_logging)
+// [/SL:KB]
 {
 	// Error handling is done by starting up an error handling thread, which just sleeps and
 	// occasionally checks to see if the app is in an error state, and sees if it needs to be run.
@@ -334,17 +337,34 @@ void LLApp::setupErrorHandling(bool second_instance)
 	// The viewer shouldn't be affected, sicne its a windowed app.
 	SetConsoleCtrlHandler( (PHANDLER_ROUTINE) ConsoleCtrlHandler, TRUE);
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-17 (Catznip-3.7)
+	U32 maskMiniDumpType = MiniDumpNormal | MiniDumpFilterModulePaths;
+	if (extended_logging)
+		maskMiniDumpType |= MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory;
+// [/SL:KB]
+
 	// Install the Google Breakpad crash handler for Windows
 	if(mExceptionHandler == 0)
 	{
 		if ( second_instance )  //BUG-5707 Firing teleport from a web browser causes second 
 		{
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.4)
 			mExceptionHandler = new google_breakpad::ExceptionHandler(
 															L"C:\\Temp\\",		
 															0,		//No filter
 															windows_post_minidump_callback,
 															0,
-															google_breakpad::ExceptionHandler::HANDLER_ALL);  //No custom client info.
+															google_breakpad::ExceptionHandler::HANDLER_ALL,  //No custom client info.
+															(MINIDUMP_TYPE)maskMiniDumpType,
+															(const wchar_t*)NULL,
+															NULL);
+// [/SL:KB]
+//			mExceptionHandler = new google_breakpad::ExceptionHandler(
+//															L"C:\\Temp\\",		
+//															0,		//No filter
+//															windows_post_minidump_callback,
+//															0,
+//															google_breakpad::ExceptionHandler::HANDLER_ALL);  //No custom client info.
 		}
 		else
 		{
@@ -366,7 +386,10 @@ void LLApp::setupErrorHandling(bool second_instance)
 															windows_post_minidump_callback,
 															0,
 															google_breakpad::ExceptionHandler::HANDLER_ALL,
-															MiniDumpNormal, //Generate a 'normal' minidump.
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-12 (Catznip-2.4)
+															(MINIDUMP_TYPE)maskMiniDumpType,
+// [/SL:KB]
+//															MiniDumpNormal, //Generate a 'normal' minidump.
 															wpipe_name.c_str(),
 															NULL);  //No custom client info.
 				if (mExceptionHandler->IsOutOfProcess())

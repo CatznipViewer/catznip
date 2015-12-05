@@ -34,7 +34,7 @@
 #include <fstream>
 #include <algorithm>
 #include <boost/lambda/core.hpp>
-#include <boost/regex.hpp>
+//#include <boost/regex.hpp>
 
 #include "llagent.h"
 #include "llagentcamera.h"
