@@ -82,34 +82,79 @@ void LLWeb::initClass()
 
 
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+// static
+void LLWeb::openURL(const LLSD& sdData)
+{
+	const std::string target = (sdData.has("target")) ? sdData["target"].asString() : LLStringUtil::null;
+	if(target == "_internal")
+	{
+		// Force load in the internal browser, as if with a blank target.
+		openURLInternal(sdData);
+	}
+	else if (useExternalBrowser(sdData["url"]) || (target == "_external"))
+	{
+		openURLExternal(sdData);
+	}
+	else
+	{
+		openURLInternal(sdData);
+	}
+}
 
 // static
 void LLWeb::loadURL(const std::string& url, const std::string& target, const std::string& uuid)
 {
-	if(target == "_internal")
-	{
-		// Force load in the internal browser, as if with a blank target.
-		loadURLInternal(url, "", uuid);
-	}
+	openURL(LLSD().with("url", url).with("target", target).with("uuid", LLUUID(uuid)));
+}
+// [/SL:KB]
+//// static
+//void LLWeb::loadURL(const std::string& url, const std::string& target, const std::string& uuid)
+//{
+//	if(target == "_internal")
+//	{
+//		// Force load in the internal browser, as if with a blank target.
+//		loadURLInternal(url, "", uuid);
+//	}
+//
+//	else if (useExternalBrowser(url) || (target == "_external"))
+//	{
+//		loadURLExternal(url);
+//	}
+//	else
+//	{
+//		loadURLInternal(url, target, uuid);
+//	}
+//}
 
-	else if (useExternalBrowser(url) || (target == "_external"))
-	{
-		loadURLExternal(url);
-	}
-	else
-	{
-		loadURLInternal(url, target, uuid);
-	}
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+// static
+// Explicitly open a Web URL using the Web content floater
+void LLWeb::openURLInternal(const LLSD& sdData)
+{
+	const std::string url    = (sdData.has("url"))    ? sdData["url"].asString()    : LLStringUtil::null;
+	const std::string target = (sdData.has("target")) ? sdData["target"].asString() : LLStringUtil::null;
+	const LLUUID uuid        = (sdData.has("uuid"))   ? sdData["uuid"].asUUID()     : LLUUID::null;
+
+	LLFloaterWebContent::Params p;
+	p.url(url).target(target).id(uuid.asString());
+	LLFloaterReg::showInstance("web_content", p);
 }
 
 // static
-// Explicitly open a Web URL using the Web content floater
 void LLWeb::loadURLInternal(const std::string &url, const std::string& target, const std::string& uuid)
 {
-	LLFloaterWebContent::Params p;
-	p.url(url).target(target).id(uuid);
-	LLFloaterReg::showInstance("web_content", p);
+	openURLInternal(LLSD().with("url", url).with("target", target).with("uuid", LLUUID(uuid)));
 }
+// [/SL:KB]
+//// static
+//// Explicitly open a Web URL using the Web content floater
+//void LLWeb::loadURLInternal(const std::string &url, const std::string& target, const std::string& uuid)
+//{
+//	LLFloaterWebContent::Params p;
+//	p.url(url).target(target).id(uuid);
+//	LLFloaterReg::showInstance("web_content", p);
+//}
 
 // static
 void LLWeb::loadURLExternal(const std::string& url, const std::string& uuid)
@@ -117,11 +162,16 @@ void LLWeb::loadURLExternal(const std::string& url, const std::string& uuid)
 	loadURLExternal(url, true, uuid);
 }
 
-// static
-void LLWeb::loadURLExternal(const std::string& url, bool async, const std::string& uuid)
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+void LLWeb::openURLExternal(const LLSD& sdData)
 {
+	const std::string url = (sdData.has("url")) ? sdData["url"].asString() : LLStringUtil::null;
+	const std::string notification = (sdData.has("notification")) ? sdData["notification"].asString() : "WebLaunchExternalTarget";
+	const LLUUID uuid = (sdData.has("uuid")) ? sdData["uuid"].asUUID() : LLUUID::null;
+	bool async = (sdData.has("async")) ? sdData["async"].asBoolean() : true;
+
 	// Act like the proxy window was closed, since we won't be able to track targeted windows in the external browser.
-	LLViewerMedia::proxyWindowClosed(uuid);
+	LLViewerMedia::proxyWindowClosed(uuid.asString());
 	
 	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
 	{
@@ -132,8 +182,31 @@ void LLWeb::loadURLExternal(const std::string& url, bool async, const std::strin
 	
 	LLSD payload;
 	payload["url"] = url;
-	LLNotificationsUtil::add( "WebLaunchExternalTarget", LLSD(), payload, boost::bind(on_load_url_external_response, _1, _2, async));
+	LLNotificationsUtil::add(notification, LLSD(), payload, boost::bind(on_load_url_external_response, _1, _2, async));
 }
+
+void LLWeb::loadURLExternal(const std::string& url, bool async, const std::string& uuid)
+{
+	openURLExternal(LLSD().with("url", url).with("async", async).with("uuid", LLUUID(uuid)));
+}
+// [/SL:KB]
+//// static
+//void LLWeb::loadURLExternal(const std::string& url, bool async, const std::string& uuid)
+//{
+//	// Act like the proxy window was closed, since we won't be able to track targeted windows in the external browser.
+//	LLViewerMedia::proxyWindowClosed(uuid);
+//	
+//	if(gSavedSettings.getBOOL("DisableExternalBrowser"))
+//	{
+//		// Don't open an external browser under any circumstances.
+//		llwarns << "Blocked attempt to open external browser." << llendl;
+//		return;
+//	}
+//	
+//	LLSD payload;
+//	payload["url"] = url;
+//	LLNotificationsUtil::add( "WebLaunchExternalTarget", LLSD(), payload, boost::bind(on_load_url_external_response, _1, _2, async));
+//}
 
 // static 
 bool on_load_url_external_response(const LLSD& notification, const LLSD& response, bool async )

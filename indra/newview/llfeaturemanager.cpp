@@ -64,16 +64,32 @@
 
 #if LL_DARWIN
 const char FEATURE_TABLE_FILENAME[] = "featuretable_mac.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_mac.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_mac.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_mac.%s.txt";
 #elif LL_LINUX
 const char FEATURE_TABLE_FILENAME[] = "featuretable_linux.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_linux.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_linux.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_linux.%s.txt";
 #elif LL_SOLARIS
 const char FEATURE_TABLE_FILENAME[] = "featuretable_solaris.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_solaris.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable_solaris.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable_solaris.%s.txt";
 #else
 const char FEATURE_TABLE_FILENAME[] = "featuretable%s.txt";
-const char FEATURE_TABLE_VER_FILENAME[] = "featuretable%s.%s.txt";
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+// Renamed to catch any new future references
+const char FEATURE_TABLE_DOWNLOAD_FILENAME[] = "featuretable%s.R%d_%d.txt";
+// [/SL:KB]
+//const char FEATURE_TABLE_VER_FILENAME[] = "featuretable%s.%s.txt";
 #endif
 
 #if 0                               // consuming code in #if 0 below
@@ -281,16 +297,25 @@ bool LLFeatureManager::loadFeatureTables()
 	if (os_string.find("Microsoft Windows XP") == 0)
 	{
 		filename = llformat(FEATURE_TABLE_FILENAME, "_xp");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "_xp", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, "_xp", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "_xp", LLVersionInfo::getVersion().c_str());
 	}
 	else
 	{
 		filename = llformat(FEATURE_TABLE_FILENAME, "");
-		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, "", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		http_filename = llformat(FEATURE_TABLE_VER_FILENAME, "", LLVersionInfo::getVersion().c_str());
 	}
 #else
 	filename = FEATURE_TABLE_FILENAME;
-	http_filename = llformat(FEATURE_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	http_filename = llformat(FEATURE_TABLE_DOWNLOAD_FILENAME, LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//	http_filename = llformat(FEATURE_TABLE_VER_FILENAME, LLVersionInfo::getVersion().c_str());
 #endif
 
 	app_path += filename;
@@ -554,14 +579,23 @@ void fetch_feature_table(std::string table)
 	std::string filename;
 	if (os_string.find("Microsoft Windows XP") == 0)
 	{
-		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		filename = llformat(table.c_str(), "_xp", LLVersionInfo::getVersion().c_str());
 	}
 	else
 	{
-		filename = llformat(table.c_str(), "", LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+		filename = llformat(table.c_str(), "", LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//		filename = llformat(table.c_str(), "", LLVersionInfo::getVersion().c_str());
 	}
 #else
-	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getMajor(), LLVersionInfo::getMinor());
+// [/SL:KB]
+//	const std::string filename   = llformat(table.c_str(), LLVersionInfo::getVersion().c_str());
 #endif
 
 	const std::string url        = base + "/" + filename;
@@ -570,14 +604,24 @@ void fetch_feature_table(std::string table)
 
 	LL_INFOS() << "LLFeatureManager fetching " << url << " into " << path << LL_ENDL;
 	
-	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	time_t timeFetch = LLFile::getModifiedTime(path);
+	if (timeFetch)
+		LLHTTPClient::getIfModified(url, new LLHTTPFeatureTableResponder(path), timeFetch);
+	else
+		LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
+// [/SL:KB]
+//	LLHTTPClient::get(url, new LLHTTPFeatureTableResponder(path));
 }
 
 
 // fetch table(s) from a website (S3)
 void LLFeatureManager::fetchHTTPTables()
 {
-	fetch_feature_table(FEATURE_TABLE_VER_FILENAME);
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	fetch_feature_table(FEATURE_TABLE_DOWNLOAD_FILENAME);
+// [/SL:KB]
+//	fetch_feature_table(FEATURE_TABLE_VER_FILENAME);
 }
 
 

@@ -1352,7 +1352,7 @@ Yeni bir ana konum ayarlamak isteyebilirsiniz.
 	</notification>
 	<notification name="ClothingLoading">
 		Giysileriniz hala karşıdan yükleniyor.
-[SECOND_LIFE]&apos;ı normal şekilde kullanmaya devam edebilirsiniz, diğer insanlar sizi düzgün bir şekilde görecektir.
+[APP_NAME]&apos;ı normal şekilde kullanmaya devam edebilirsiniz, diğer insanlar sizi düzgün bir şekilde görecektir.
 		<form name="form">
 			<ignore name="ignore" text="Giysilerin karşıdan yüklenmesi uzun zaman alıyor"/>
 		</form>
@@ -1567,7 +1567,7 @@ Uygulamalar klasörünüze karşıdan yüklensin mi?
 	<notification name="FailedUpdateInstall">
 		Görüntüleyici güncellemesi yüklenirken bir hata oluştu.
 Lütfen en son görüntüleyiciyi şu adresten karşıdan yükleyin ve kurun: 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -1575,13 +1575,13 @@ http://secondlife.com/download.
 [APP_NAME] güncellenene kadar oturum açamayacaksınız.
 
 Lütfen en son görüntüleyiciyi şu adresten karşıdan yükleyin ve kurun: 
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Çık"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Second Life kurulumunuz için gerekli bir güncelleme var.
 
-Bu güncellemeyi http://www.secondlife.com/downloads adresinden karşıdan yükleyebilir
+Bu güncellemeyi http://catznip.com/downloads/ adresinden karşıdan yükleyebilir
 veya şimdi kurabilirsiniz.
 		<usetemplate name="okcancelbuttons" notext="Second Life&apos;tan çık" yestext="Karşıdan yükle ve şimdi kur"/>
 	</notification>
@@ -1658,8 +1658,12 @@ bkz. [[INFO_URL] Bu güncelleme hakkında bilgi]
 		<usetemplate ignoretext="Wiki Kalite Güvencesi sayfasını görüntülemek için tarayıcımı başlat" name="okcancelignore" notext="İptal" yestext="Tamam"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Hataları ve diğer sorunları bildirebileceğiniz [SECOND_LIFE] Kamuya Açık Sorun Takip sayfasını ziyaret edin.
+		Hataları ve diğer sorunları bildirebileceğiniz [APP_NAME] Kamuya Açık Sorun Takip sayfasını ziyaret edin.
 		<usetemplate ignoretext="Kamuya Açık Sorun Takip hizmetini kullanmak için tarayıcımı başlat" name="okcancelignore" notext="İptal Et" yestext="Sayfaya git"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+    En son haberler ve bilgiler için Resmi [APP_NAME] Blog&apos;una git.
+		<usetemplate ignoretext="Blog sayfasını görüntülemek için tarayıcımı başlat" name="okcancelignore" notext="İptal" yestext="Tamam"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		En son haberler ve bilgiler için Resmi Linden Blog&apos;una git.

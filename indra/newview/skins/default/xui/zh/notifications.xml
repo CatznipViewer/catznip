@@ -1345,7 +1345,7 @@
 	</notification>
 	<notification name="ClothingLoading">
 		你的服裝仍在下載中。
-你可以正常使用 [SECOND_LIFE]，而且其他人看到你也是正常的。
+你可以正常使用 [APP_NAME]，而且其他人看到你也是正常的。
 		<form name="form">
 			<ignore name="ignore" text="服裝花太多時間下載"/>
 		</form>
@@ -1559,20 +1559,20 @@ SHA1 指紋：[MD5_DIGEST]
 	</notification>
 	<notification name="FailedUpdateInstall">
 		安裝更新版 Viewer 時出錯。
-請到 http://secondlife.com/download 下載並安裝最新版 Viewer。
+請到 http://catznip.com/downloads/ 下載並安裝最新版 Viewer。
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		無法安裝必要的更新。 
 除非 [APP_NAME] 更新，你將無法登入。
 
-請到 http://secondlife.com/download 下載並安裝最新版 Viewer。
+請到 http://catznip.com/downloads/ 下載並安裝最新版 Viewer。
 		<usetemplate name="okbutton" yestext="結束退出"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		你已安裝的第二人生軟體現有一個必要的更新。
 
-你可以到 http://www.secondlife.com/downloads 下載此更新，或者現在立即安裝。
+你可以到 http://catznip.com/downloads/ 下載此更新，或者現在立即安裝。
 		<usetemplate name="okcancelbuttons" notext="結束退出第二人生" yestext="立即下載及安裝"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
@@ -1648,8 +1648,12 @@ SHA1 指紋：[MD5_DIGEST]
 		<usetemplate ignoretext="開啟我的網頁瀏覽器去察看問與答維基" name="okcancelignore" notext="取消" yestext="確定"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		拜訪 [SECOND_LIFE] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
+		拜訪 [APP_NAME] 公共議題追蹤，那裡你將可以回報臭蟲與其他議題。
 		<usetemplate ignoretext="開啟我的網頁瀏覽器以使用公共議題追蹤。" name="okcancelignore" notext="取消" yestext="前往頁面"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		前往林登官方部落格，以取得最新的新聞與資訊。
+		<usetemplate ignoretext="開啟我的網頁瀏覽器以察看部落格" name="okcancelignore" notext="取消" yestext="確定"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		前往林登官方部落格，以取得最新的新聞與資訊。

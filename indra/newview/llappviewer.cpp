@@ -271,7 +271,7 @@ static LLAppViewerListener sAppViewerListener(LLAppViewer::instance);
 // viewer.cpp - these are only used in viewer, should be easily moved.
 
 #if LL_DARWIN
-const char * const LL_VERSION_BUNDLE_ID = "com.secondlife.indra.viewer";
+const char * const LL_VERSION_BUNDLE_ID = "com.catznip.indra.viewer";
 extern void init_apple_menu(const char* product);
 #endif // LL_DARWIN
 
@@ -366,11 +366,18 @@ BOOL gLogoutInProgress = FALSE;
 // Internal globals... that should be removed.
 static std::string gArgs;
 const int MAX_MARKER_LENGTH = 1024;
-const std::string MARKER_FILE_NAME("SecondLife.exec_marker");
-const std::string START_MARKER_FILE_NAME("SecondLife.start_marker");
-const std::string ERROR_MARKER_FILE_NAME("SecondLife.error_marker");
-const std::string LLERROR_MARKER_FILE_NAME("SecondLife.llerror_marker");
-const std::string LOGOUT_MARKER_FILE_NAME("SecondLife.logout_marker");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+const std::string MARKER_FILE_NAME("Catznip.exec_marker");
+const std::string START_MARKER_FILE_NAME("Catznip.start_marker");
+const std::string ERROR_MARKER_FILE_NAME("Catznip.error_marker");
+const std::string LLERROR_MARKER_FILE_NAME("Catznip.llerror_marker");
+const std::string LOGOUT_MARKER_FILE_NAME("Catznip.logout_marker");
+// [/SL:KB]
+//const std::string MARKER_FILE_NAME("SecondLife.exec_marker"); const
+//std::string START_MARKER_FILE_NAME("SecondLife.start_marker"); const
+//std::string ERROR_MARKER_FILE_NAME("SecondLife.error_marker"); const
+//std::string LLERROR_MARKER_FILE_NAME("SecondLife.llerror_marker"); const
+//std::string LOGOUT_MARKER_FILE_NAME("SecondLife.logout_marker");
 static BOOL gDoDisconnect = FALSE;
 static std::string gLaunchFileOnQuit;
 
@@ -716,7 +723,10 @@ LLAppViewer::LLAppViewer()
 
 	// Need to do this initialization before we do anything else, since anything
 	// that touches files should really go through the lldir API
-	gDirUtilp->initAppDirs("SecondLife");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-11-12 (Catznip-2.4)
+	gDirUtilp->initAppDirs("Catznip");
+// [/SL:KB]
+//	gDirUtilp->initAppDirs("SecondLife");
 	//
 	// IMPORTANT! Do NOT put anything that will write
 	// into the log files during normal startup until AFTER
@@ -2350,13 +2360,19 @@ void LLAppViewer::initLoggingAndGetLastDuration()
 	//LLError::setTimeFunction(getRuntime);
 
 	// Remove the last ".old" log file.
-	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
-							     "SecondLife.old");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.old");
+// [/SL:KB]
+//	std::string old_log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+//							     "SecondLife.old");
 	LLFile::remove(old_log_file);
 
 	// Get name of the log file
-	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
-							     "SecondLife.log");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "Catznip.log");
+// [/SL:KB]
+//	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,
+//							     "SecondLife.log");
  	/*
 	 * Before touching any log files, compute the duration of the last run
 	 * by comparing the ctime of the previous start marker file with the ctime
@@ -2575,8 +2591,14 @@ bool LLAppViewer::initConfiguration()
 	initStrings(); // setup paths for LLTrans based on settings files only
 	// - set procedural settings
 	// Note: can't use LL_PATH_PER_SL_ACCOUNT for any of these since we haven't logged in yet
-	gSavedSettings.setString("ClientSettingsFile", 
-        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+	std::string strSettingsFile = gSavedSettings.getString("ClientSettingsFileOverride");
+	if (strSettingsFile.empty())
+		strSettingsFile = getSettingsFilename("Default", "Global");
+	gSavedSettings.setString("ClientSettingsFile", gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, strSettingsFile));
+// [/SL:KB]
+//	gSavedSettings.setString("ClientSettingsFile", 
+//        gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "Global")));
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 	gSavedSettings.setString("CrashSettingsFile", 
         gDirUtilp->getExpandedFilename(LL_PATH_USER_SETTINGS, getSettingsFilename("Default", "CrashSettings")));
@@ -2676,6 +2698,47 @@ bool LLAppViewer::initConfiguration()
 
 	}
 	loadSettingsFromDirectory("UserSession");
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+	// Catznip-TODO: should we parse this and compare CurrentVersion > LastVersion & Release > Beta > Internal?
+	if (LLVersionInfo::getChannelAndVersion() != gSavedSettings.getString("LastRunVersion"))
+	{
+		// setings.xml
+		{
+			const char* pstrSettings[] =
+				{ 
+					"MeshMaxConcurrentRequests"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
+			}
+		}
+
+		// settings_crash_behavior.xml
+		{
+			const char* pstrDbgSettings[] =
+				{ 
+					"CrashSubmitBehavior",
+					"CrashSubmitName",
+					"CrashSubmitSettings"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrDbgSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedSettings.getControl(pstrDbgSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->resetToDefault();
+				}
+			}
+			gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
+		}
+	}
+// [/SL:KB]
 
 	// - apply command line settings 
 	if (! clp.notify())
@@ -3598,7 +3661,10 @@ LLSD LLAppViewer::getViewerInfo() const
 	version.append(LLVersionInfo::getPatch());
 	version.append(LLVersionInfo::getBuild());
 	info["VIEWER_VERSION"] = version;
-	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+// [/SL:KB]
+//	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
 	info["BUILD_DATE"] = __DATE__;
 	info["BUILD_TIME"] = __TIME__;
 	info["CHANNEL"] = LLVersionInfo::getChannel();
@@ -4126,7 +4192,7 @@ void LLAppViewer::handleViewerCrash()
 
 	if (gMessageSystem)
 	{
-		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
+//		gMessageSystem->getCircuitInfo(gDebugInfo["CircuitInfo"]);
 		gMessageSystem->stopLogging();
 	}
 
@@ -4421,11 +4487,11 @@ void LLAppViewer::requestQuit()
 		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
 	}
 	
-	// Try to send last batch of avatar rez metrics.
-	if (!gDisconnected && isAgentAvatarValid())
-	{
-		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
-	}
+//	// Try to send last batch of avatar rez metrics.
+//	if (!gDisconnected && isAgentAvatarValid())
+//	{
+//		gAgentAvatarp->updateAvatarRezMetrics(true); // force a last packet to be sent.
+//	}
 	
 	LLHUDEffectSpiral *effectp = (LLHUDEffectSpiral*)LLHUDManager::getInstance()->createViewerEffect(LLHUDObject::LL_HUD_EFFECT_POINT, TRUE);
 	effectp->setPositionGlobal(gAgent.getPositionGlobal());

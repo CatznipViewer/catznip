@@ -1752,6 +1752,17 @@
       <key>Value</key>
       <string />
     </map>
+    <key>ClientSettingsFileOverride</key>
+    <map>
+      <key>Comment</key>
+      <string>Overrides the filename of the client settings file</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>ContextConeInAlpha</key>
     <map>
       <key>Comment</key>
@@ -3655,7 +3666,7 @@
         <key>Type</key>
         <string>String</string>
         <key>Value</key>
-        <string>http://viewer-settings.secondlife.com</string>
+        <string>http://viewer.catznip.com/data/settings</string>
     </map>
     <key>FPSLogFrequency</key>
         <map>
@@ -4447,7 +4458,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer-help.secondlife.com/[LANGUAGE]/[CHANNEL]/[VERSION]/[TOPIC][DEBUG_MODE]</string>
+      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.3.4.0/[TOPIC][DEBUG_MODE]</string>
     </map>
     <key>HowToHelpURL</key>
     <map>
@@ -13668,6 +13679,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>ViewerDataURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer data service (supplies custom MOTD, blocked viewer versions, etc))</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
     </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>

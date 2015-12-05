@@ -69,6 +69,10 @@ class ViewerManifest(LLManifest):
 
                 # include the entire shaders directory recursively
                 self.path("shaders")
+                # include the extracted list of Catznip thanks
+                thanks_names = self.extract_names("../../doc/thanks.txt")
+                self.put_in_file(thanks_names, "thanks.txt")
+                self.file_list.append(["../../doc/thanks.txt",self.dst_path_of("thanks.txt")])
                 # include the extracted list of contributors
                 contributions_path = "../../doc/contributions.txt"
                 contributor_names = self.extract_names(contributions_path)
@@ -127,6 +131,24 @@ class ViewerManifest(LLManifest):
                                  "settings_install.xml",
                                  src="environment")
 
+# [SL:KB] - Patch: Viewer-Branding | Checked: 2013-09-16 (Catznip-3.6)
+                # Figure out if the channel requires a settings file override
+                settings_file = ''
+                if self.channel_type() != 'release':
+                    settings_file = 'settings_%s.xml' % self.channel_type()
+                
+                # Store the override in settings_install.xml
+                if settings_file:
+                    content = dict(ClientSettingsFileOverride=dict(Comment='Client settings file name (per install).',
+                                                 Persist=0,
+                                                 Type='String',
+                                                 Value=settings_file))
+                    settings_install = self.put_in_file(llsd.format_pretty_xml(content),
+                                                        "settings_install.xml",
+                                                        src="environment")
+                    print "Put ClientSettingsFileOverride override '%s' in %s" % (settings_install, settings_install)
+# [/SL:KB]
+
                 self.end_prefix("app_settings")
 
             if self.prefix(src="character"):
@@ -143,6 +165,7 @@ class ViewerManifest(LLManifest):
 
             # skins
             if self.prefix(src="skins"):
+                    self.path("skins.xml")
                     # include the entire textures directory recursively
                     if self.prefix(src="*/textures"):
                             self.path("*/*.tga")
@@ -211,6 +234,8 @@ class ViewerManifest(LLManifest):
             channel_type='beta'
         elif channel_qualifier.startswith('project'):
             channel_type='project'
+        elif channel_qualifier.startswith('develop'):
+            channel_type='develop'
         else:
             channel_type='test'
         return channel_type
@@ -231,11 +256,15 @@ class ViewerManifest(LLManifest):
 
     def installer_base_name(self):
         global CHANNEL_VENDOR_BASE
+        # Show R9 for 9.0.Y.Z but R9.1 for 9.1.Y.Z 
+        installer_version = 'R' + self.args['version'][0]
+        if self.args['version'][1] != '0':
+            installer_version += '_' + self.args['version'][1]
         # a standard map of strings for replacing in the templates
         substitution_strings = {
             'channel_vendor_base' : '_'.join(CHANNEL_VENDOR_BASE.split()),
             'channel_variant_underscores':self.channel_variant_app_suffix(),
-            'version_underscores' : '_'.join(self.args['version']),
+            'version_underscores' : installer_version,
             'arch':self.args['arch']
             }
         return "%(channel_vendor_base)s%(channel_variant_underscores)s_%(version_underscores)s_%(arch)s" % substitution_strings
@@ -336,8 +365,8 @@ class Windows_i686_Manifest(ViewerManifest):
         debpkgdir = os.path.join(pkgdir, "lib", "debug")
 
         if self.is_packaging_viewer():
-            # Find secondlife-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
-            self.path(src='%s/secondlife-bin.exe' % self.args['configuration'], dst=self.final_exe())
+            # Find catznip-bin.exe in the 'configuration' dir, then rename it to the result of final_exe.
+            self.path(src='%s/catznip-bin.exe' % self.args['configuration'], dst=self.final_exe())
 
         # Plugin host application
         # The current slplugin package places slplugin.exe right into the
@@ -423,6 +452,7 @@ class Windows_i686_Manifest(ViewerManifest):
 
             self.end_prefix()
 
+        self.path("licenses-installer.rtf")
         self.path(src="licenses-win32.txt", dst="licenses.txt")
         self.path("featuretable.txt")
         self.path("featuretable_xp.txt")
@@ -534,6 +564,7 @@ class Windows_i686_Manifest(ViewerManifest):
             'version' : '.'.join(self.args['version']),
             'version_short' : '.'.join(self.args['version'][:-1]),
             'version_dashes' : '-'.join(self.args['version']),
+            'version_release' : 'R' + self.args['version'][0],
             'final_exe' : self.final_exe(),
             'flags':'',
             'app_name':self.app_name(),
@@ -544,10 +575,16 @@ class Windows_i686_Manifest(ViewerManifest):
         substitution_strings['installer_file'] = installer_file
         
         version_vars = """
+        !define PRODUCT_SHORT "Catznip"
+        !define PRODUCT_LONG "Catznip viewer"
         !define INSTEXE  "%(final_exe)s"
+        !define PUBLISHER "<TODO>"
+        !define URL_ABOUT "http://catznip.com/"
+        !define URL_DOWNLOAD "http://catznip.com/downloads/" 
         !define VERSION "%(version_short)s"
         !define VERSION_LONG "%(version)s"
         !define VERSION_DASHES "%(version_dashes)s"
+        !define VERSION_RELEASE "%(version_release)s"
         """ % substitution_strings
         
         if self.channel_type() == 'release':
@@ -563,7 +600,7 @@ class Windows_i686_Manifest(ViewerManifest):
             Caption "%(caption)s"
             """
 
-        tempfile = "secondlife_setup_tmp.nsi"
+        tempfile = "catznip_setup_tmp.nsi"
         # the following replaces strings in the nsi template
         # it also does python-style % substitution
         self.replace_in("installers/windows/installer_template.nsi", tempfile, {
@@ -580,6 +617,8 @@ class Windows_i686_Manifest(ViewerManifest):
         NSIS_path = os.path.expandvars('${ProgramFiles}\\NSIS\\Unicode\\makensis.exe')
         if not os.path.exists(NSIS_path):
             NSIS_path = os.path.expandvars('${ProgramFiles(x86)}\\NSIS\\Unicode\\makensis.exe')
+        if not os.path.exists(NSIS_path):
+            NSIS_path = 'd:\\Tools\\NSIS\\Unicode\\makensis.exe'
         installer_created=False
         nsis_attempts=3
         nsis_retry_wait=15
@@ -621,7 +660,7 @@ class Darwin_i386_Manifest(ViewerManifest):
 
     def construct(self):
         # copy over the build result (this is a no-op if run within the xcode script)
-        self.path(self.args['configuration'] + "/Second Life.app", dst="")
+        self.path(self.args['configuration'] + "/Catznip.app", dst="")
 
         pkgdir = os.path.join(self.args['build'], os.pardir, 'packages')
         relpkgdir = os.path.join(pkgdir, "lib", "release")
@@ -648,14 +687,14 @@ class Darwin_i386_Manifest(ViewerManifest):
 
                 self.path("licenses-mac.txt", dst="licenses.txt")
                 self.path("featuretable_mac.txt")
-                self.path("SecondLife.nib")
+                self.path("Catznip.nib")
 
                 icon_path = self.icon_path()
                 if self.prefix(src=icon_path, dst="") :
-                    self.path("secondlife.icns")
+                    self.path("catznip.icns")
                     self.end_prefix(icon_path)
 
-                self.path("SecondLife.nib")
+                self.path("Catznip.nib")
                 
                 # Translations
                 self.path("English.lproj/language.txt")
@@ -806,7 +845,7 @@ class Darwin_i386_Manifest(ViewerManifest):
         if ("package" in self.args['actions'] or 
             "unpacked" in self.args['actions']):
             self.run_command('strip -S %(viewer_binary)r' %
-                             { 'viewer_binary' : self.dst_path_of('Contents/MacOS/Second Life')})
+                             { 'viewer_binary' : self.dst_path_of('Contents/MacOS/Catznip')})
 
 
     def copy_finish(self):
@@ -863,10 +902,25 @@ class Darwin_i386_Manifest(ViewerManifest):
 
             for s,d in {self.get_dst_prefix():app_name + ".app",
                         os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
-                        os.path.join(dmg_template, "background.jpg"): "background.jpg",
-                        os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
+                        os.path.join(dmg_template, "background.jpg"): "background.jpg"}.items():
+#                        os.path.join(dmg_template, "_VolumeIcon.icns"): ".VolumeIcon.icns",
+#                        os.path.join(dmg_template, "background.jpg"): "background.jpg",
+#                        os.path.join(dmg_template, "_DS_Store"): ".DS_Store"}.items():
                 print "Copying to dmg", s, d
                 self.copy_action(self.src_path_of(s), os.path.join(volpath, d))
+
+            # Create the alias file (which is a resource file) from the .r
+            self.run_command('Rez %r -o %r' %
+                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
+                              os.path.join(volpath, "Applications")))
+
+# [SL:FS]
+            # Set up the installer disk image: set icon positions, folder view
+            #  options, and icon label colors -- TS
+            self.run_command('osascript -s o %r %r' % 
+                             (self.src_path_of("installers/darwin/installer-dmg.applescript"),
+                             volname))
+# [/SL:FS]
 
             # Hide the background image, DS_Store file, and volume icon file (set their "visible" bit)
             for f in ".VolumeIcon.icns", "background.jpg", ".DS_Store":
@@ -888,10 +942,10 @@ class Darwin_i386_Manifest(ViewerManifest):
                 # the original problem manifest by executing the desired command.
                 self.run_command('SetFile -a V %r' % pathname)
 
-            # Create the alias file (which is a resource file) from the .r
-            self.run_command('Rez %r -o %r' %
-                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
-                              os.path.join(volpath, "Applications")))
+#            # Create the alias file (which is a resource file) from the .r
+#            self.run_command('Rez %r -o %r' %
+#                             (self.src_path_of("installers/darwin/release-dmg/Applications-alias.r"),
+#                              os.path.join(volpath, "Applications")))
 
             # Set the alias file's alias and custom icon bits
             self.run_command('SetFile -a AC %r' % os.path.join(volpath, "Applications"))
@@ -945,7 +999,7 @@ class Darwin_i386_Manifest(ViewerManifest):
                                 raise
                     self.run_command('spctl -a -texec -vv %(bundle)r' % { 'bundle': app_in_dmg })
 
-            imagename="SecondLife_" + '_'.join(self.args['version'])
+            imagename="Catznip_" + '_'.join(self.args['version'])
 
 
         finally:
@@ -972,7 +1026,7 @@ class LinuxManifest(ViewerManifest):
             self.path("client-readme.txt","README-linux.txt")
             self.path("client-readme-voice.txt","README-linux-voice.txt")
             self.path("client-readme-joystick.txt","README-linux-joystick.txt")
-            self.path("wrapper.sh","secondlife")
+            self.path("wrapper.sh","catznip")
             if self.prefix(src="", dst="etc"):
                 self.path("handle_secondlifeprotocol.sh")
                 self.path("register_secondlifeprotocol.sh")
@@ -983,7 +1037,7 @@ class LinuxManifest(ViewerManifest):
             self.end_prefix("linux_tools")
 
         if self.prefix(src="", dst="bin"):
-            self.path("secondlife-bin","do-not-directly-run-secondlife-bin")
+            self.path("catznip-bin","do-not-directly-run-catznip-bin")
             self.path("../linux_crash_logger/linux-crash-logger","linux-crash-logger.bin")
             self.path2basename(pkgdir, "SLPlugin")
             self.path2basename("../viewer_components/updater/scripts/linux", "update_install")
@@ -998,9 +1052,9 @@ class LinuxManifest(ViewerManifest):
         icon_path = self.icon_path()
         print "DEBUG: icon_path '%s'" % icon_path
         if self.prefix(src=icon_path, dst="") :
-            self.path("secondlife_256.png","secondlife_icon.png")
+            self.path("catznip_64.png","catznip_icon.png")
             if self.prefix(src="",dst="res-sdl") :
-                self.path("secondlife_256.BMP","ll_icon.BMP")
+                self.path("catznip_64.BMP","ll_icon.BMP")
                 self.end_prefix("res-sdl")
             self.end_prefix(icon_path)
 
@@ -1019,7 +1073,7 @@ class LinuxManifest(ViewerManifest):
     def copy_finish(self):
         # Force executable permissions to be set for scripts
         # see CHOP-223 and http://mercurial.selenic.com/bts/issue1802
-        for script in 'secondlife', 'bin/update_install':
+        for script in 'catznip', 'bin/update_install':
             self.run_command("chmod +x %r" % os.path.join(self.get_dst_prefix(), script))
 
     def package_finish(self):

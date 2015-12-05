@@ -83,6 +83,10 @@ public:
 	static	LLFILE *	_Fiopen(const std::string& filename, 
 			std::ios::openmode mode);
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+	static time_t	getModifiedTime(const std::string& filename);
+// [/SL:KB]
+
 	static  const char * tmpdir();
 };
 

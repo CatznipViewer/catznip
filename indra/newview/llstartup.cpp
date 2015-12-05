@@ -276,6 +276,9 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+void fetch_viewer_data();
+// [/SL:KB]
 
 void callback_cache_name(const LLUUID& id, const std::string& full_name, bool is_group)
 {
@@ -449,6 +452,11 @@ bool idle_startup()
 			// Otherwise, we'll display a reasonable error message that IS translatable.
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
+
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+		fetch_viewer_data();
+// [/SL:KB]
+
 		//
 		// Statistics stuff
 		//
@@ -3410,7 +3418,13 @@ bool process_login_success_response()
 		gAgent.setHomePosRegion(region_handle, position);
 	}
 
-	gAgent.mMOTD.assign(response["message"]);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+	if (gAgent.mMOTD.empty())
+	{
+		gAgent.mMOTD.assign("Second Life: ").append(response["message"]);
+	}
+// [/SL:KB]
+//	gAgent.mMOTD.assign(response["message"]);
 
 	// Options...
 	// Each 'option' is an array of submaps. 
@@ -3608,3 +3622,46 @@ void transition_back_to_login_panel(const std::string& emsg)
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
 
+// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
+class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
+{
+public:
+	LLHTTPViewerDataResponder() {}
+
+	/*virtual*/ void result(const LLSD& sdData)
+	{
+		// Message of the day
+		if (sdData.has("motd"))
+		{
+			gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
+		}
+
+		// Introduction text for the support/beta group(s)
+		if ( (sdData.has("groups")) && (sdData["groups"].isArray()) )
+		{
+			const LLSD& sdGroups = sdData["groups"];
+			for (LLSD::array_const_iterator itGroup = sdGroups.beginArray(), endGroup = sdGroups.endArray(); itGroup != endGroup; ++itGroup)
+			{
+				const LLSD& sdGroupInfo = *itGroup;
+				if ( (sdGroupInfo.isMap()) && (sdGroupInfo.has("uuid")) && (sdGroupInfo.has("prelude")) )
+				{
+					const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
+					if (idGroup.notNull())
+					{
+						gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
+					}
+				}
+			}
+		}
+	}
+};
+
+void fetch_viewer_data()
+{
+	const std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
+	
+	LL_INFOS() << "Fetching viewer data from " << strURL << LL_ENDL;
+	
+	LLHTTPClient::get(strURL, new LLHTTPViewerDataResponder());
+}
+// [/SL:KB]
