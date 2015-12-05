@@ -42,8 +42,12 @@ void release_start_screen();
 bool login_alert_done(const LLSD& notification, const LLSD& response);
 
 // constants, variables,  & enumerations
-extern std::string SCREEN_HOME_FILENAME;
-extern std::string SCREEN_LAST_FILENAME;
+//extern std::string SCREEN_HOME_FILENAME;
+//extern std::string SCREEN_LAST_FILENAME;
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+const std::string getHomeScreenPath();
+const std::string getLastScreenPath();
+// [/Sl:KB]
 
 // start location constants
 enum EStartLocation

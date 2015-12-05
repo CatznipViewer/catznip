@@ -58,10 +58,12 @@
     <combo_box.combo_editor
       text_pad_left="8" 
       bg_image_always_focused="true"/>
+<!--
     <combo_box.combo_button
       visible="false" />
     <combo_box.drop_down_button
       visible="false" />
+-->
   </combo_box>
   <line_editor
     follows="left|top"
