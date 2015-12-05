@@ -103,6 +103,14 @@ public:
     // Can we add all referenced items to the avatar?
     bool canAddWearables(const uuid_vec_t& item_ids);
     
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	// Determine whether the folder has any worn items in it (NOTE: no recursion)
+	bool getCanRemoveFolderFromAvatar(const LLUUID& folder_id) const;
+	// Remove all worn items from the folder (NOTE: no recursion)
+	void removeFolderFromAvatar(const LLUUID& folder_id);
+	void removeFoldersFromAvatar(const uuid_vec_t& folder_ids);
+// [/SL:KB]
+
 	// Copy all items in a category.
 	void shallowCopyCategoryContents(const LLUUID& src_id, const LLUUID& dst_id,
 									 LLPointer<LLInventoryCallback> cb);
@@ -200,7 +208,10 @@ public:
 
 	void makeNewOutfitLinks(const std::string& new_folder_name,bool show_panel = true);
 
-	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body, bool upload = false);
+// [/SL:KB]
+//	bool moveWearable(LLViewerInventoryItem* item, bool closer_to_body);
 
 	static void sortItemsByActualDescription(LLInventoryModel::item_array_t& items);
 

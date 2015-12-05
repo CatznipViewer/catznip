@@ -144,6 +144,10 @@ BOOL LLSidepanelAppearance::postBuild()
 
 	setVisibleCallback(boost::bind(&LLSidepanelAppearance::onVisibilityChanged,this,_2));
 
+// [SL:KB] - Patch: Appearance-Outfits | Checked: 2012-08-08 (Catznip-3.3)
+	setWearablesLoading(!gAgentWearables.areWearablesLoaded());
+// [/SL:KB]
+
 	return TRUE;
 }
 

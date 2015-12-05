@@ -1155,6 +1155,16 @@ S32 LLFlatListView::notify(const LLSD& info)
 	return 0;
 }
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+void LLFlatListView::notifyItems(const LLSD& sdInfo)
+{
+	for (pairs_iterator_t itItem = mItemPairs.begin(); itItem != mItemPairs.end(); ++itItem)
+	{
+		(*itItem)->first->notify(sdInfo);
+	}
+}
+// [/SL:KB]
+
 void LLFlatListView::detachItems(std::vector<LLPanel*>& detached_items)
 {
 	LLSD action;

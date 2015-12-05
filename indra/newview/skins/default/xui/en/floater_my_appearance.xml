@@ -2,9 +2,10 @@
 
 <floater
   positioning="cascading"
-  legacy_header_height="18"
+  can_close="true"
+  can_minimize="true"
   can_resize="true"
-  height="588"
+  height="570"
   layout="topleft"
   name="floater_my_appearance"
   help_topic="appearance"
@@ -12,11 +13,13 @@
   single_instance="true"
   reuse_instance="true"
   title="APPEARANCE"
-  min_height="440"
-  min_width="333"
-  width="333">
+  min_height="430"
+  min_width="330"
+  width="330">
     <panel
-      top="18"
+      follows="all"
+      height="562"
+      top="4"
       class="sidepanel_appearance"
       name="main_panel"
       filename="sidepanel_appearance.xml"

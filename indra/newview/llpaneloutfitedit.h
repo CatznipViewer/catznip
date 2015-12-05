@@ -127,6 +127,11 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	LLWearableItemsList* getWearableList() const { return mWearableItemsList; }
+	LLInventoryPanel* getInventoryPanel() const { return mItemsPanel; }
+// [/SL:KB]
+
 	void moveWearable(bool closer_to_body);
 
 	void toggleAddWearablesPanel();
@@ -195,6 +200,10 @@ private:
 	void getCurrentItemUUID(LLUUID& selected_id);
 	void onCOFChanged();
 
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	bool createItemsPanel();
+// [/SL:KB]
+
 	/**
 	 * Method preserves selection while switching between folder/list view modes
 	*/
@@ -210,7 +219,10 @@ private:
 
 	LLTextBox*			mCurrentOutfitName;
 	LLTextBox*			mStatus;
-	LLInventoryPanel*	mInventoryItemsPanel;
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	LLInventoryPanel*	mItemsPanel;			// Renamed to catch each occurance
+// [/SL:KB]
+//	LLInventoryPanel*	mInventoryItemsPanel;
 	LLFilterEditor*		mSearchFilter;
 	LLSaveFolderState*	mSavedFolderState;
 	std::string			mSearchString;
