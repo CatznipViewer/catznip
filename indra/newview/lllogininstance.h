@@ -75,6 +75,9 @@ public:
 	typedef boost::function<void()> UpdaterLauncherCallback;
 	void setUpdaterLauncher(const UpdaterLauncherCallback& ulc) { mUpdaterLauncher = ulc; }
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+	LLUpdaterService* getUpdaterService() { return mUpdaterService; }
+// [/SL:KB]
 	void setUpdaterService(LLUpdaterService * updaterService) { mUpdaterService = updaterService; }
 private:
 	void constructAuthParams(LLPointer<LLCredential> user_credentials);
