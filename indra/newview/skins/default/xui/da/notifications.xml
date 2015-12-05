@@ -472,7 +472,7 @@ Du kan måske ønske at sætte en ny hjemme lokation.
 	</notification>
 	<notification name="ClothingLoading">
 		Dit tøj hentes stadig ned.
-Du kan bruge [SECOND_LIFE] normalt og andre personer vil se dig korrekt.
+Du kan bruge [APP_NAME] normalt og andre personer vil se dig korrekt.
 		<form name="form">
 			<ignore name="ignore" text="Det tager lang tid at hente tøj"/>
 		</form>
@@ -592,7 +592,7 @@ Download til dit Program bibliotek?
 	<notification name="FailedUpdateInstall">
 		Der opstod en fejl ved installation af opdatering.
 Hent og installér venligst den nyeste version fra
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
@@ -600,13 +600,13 @@ http://secondlife.com/download.
 Du kan ikke logge på før [APP_NAME] er blevet opdateret.
 
 Hent og installer venligst den nyeste klien fra
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 		<usetemplate name="okbutton" yestext="Afslut"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Dette er en påkrævet opdatering af din Second Life installation.
 
-Du kan downloade opdateringen fra http://www.secondlife.com/downloads
+Du kan downloade opdateringen fra http://catznip.com/downloads/
 eller du kan installere den nu.
 		<usetemplate name="okcancelbuttons" notext="Afslut Second Life" yestext="Hent og installér nu"/>
 	</notification>
@@ -649,7 +649,10 @@ Du skal genstarte [APP_NAME] for at installere denne opdatering.
 		<usetemplate ignoretext="Start min browser for at se QA Wiki" name="okcancelignore" notext="Cancel" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		<usetemplate ignoretext="Start min browser for at bruge det Linden Labs sagsstyring" name="okcancelignore" notext="Cancel" yestext="Go to page"/>
+		<usetemplate ignoretext="Start min browser for at bruge det [APP_NAME] sagsstyring" name="okcancelignore" notext="Cancel" yestext="Go to page"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		<usetemplate ignoretext="Start min browser for at se bloggen" name="okcancelignore" notext="Cancel" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		<usetemplate ignoretext="Start min browser for at se bloggen" name="okcancelignore" notext="Cancel" yestext="OK"/>
