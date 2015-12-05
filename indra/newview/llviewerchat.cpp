@@ -190,16 +190,28 @@ LLFontGL* LLViewerChat::getChatFont()
 	LLFontGL* fontp = NULL;
 	switch(font_size)
 	{
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
 		case 0:
-			fontp = LLFontGL::getFontSansSerifSmall();
+			fontp = LLFontGL::getFontEditorSmall();
 			break;
 		default:
 		case 1:
-			fontp = LLFontGL::getFontSansSerif();
+			fontp = LLFontGL::getFontEditor();
 			break;
 		case 2:
-			fontp = LLFontGL::getFontSansSerifBig();
+			fontp = LLFontGL::getFontEditorLarge();
 			break;
+// [/SL:KB]
+//		case 0:
+//			fontp = LLFontGL::getFontSansSerifSmall();
+//			break;
+//		default:
+//		case 1:
+//			fontp = LLFontGL::getFontSansSerif();
+//			break;
+//		case 2:
+//			fontp = LLFontGL::getFontSansSerifBig();
+//			break;
 	}
 	
 	return fontp;
