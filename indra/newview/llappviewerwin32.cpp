@@ -61,9 +61,12 @@
 #include "llcommandlineparser.h"
 #include "lltrans.h"
 
-#ifndef LL_RELEASE_FOR_DOWNLOAD
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
 #include "llwindebug.h"
-#endif
+// [/SL:KB]
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
+//#include "llwindebug.h"
+//#endif
 
 #include "stringize.h"
 
@@ -520,9 +523,12 @@ bool LLAppViewerWin32::init()
 	// LL_INFOS() << "Turning off Windows error reporting." << LL_ENDL;
 	disableWinErrorReporting();
 
-#ifndef LL_RELEASE_FOR_DOWNLOAD
-	LLWinDebug::instance().init();
-#endif
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	LLWinDebug::init();
+// [/SL:KB]
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
+//	LLWinDebug::instance().init();
+//#endif
 
 #if LL_WINDOWS
 #if LL_SEND_CRASH_REPORTS
@@ -546,7 +552,10 @@ bool LLAppViewerWin32::cleanup()
 	gDXHardware.cleanup();
 
 #ifndef LL_RELEASE_FOR_DOWNLOAD
-	LLWinDebug::instance().cleanup();
+// [SL:KB] Patch: Viewer-CrashReporting | Checked: 2015-05-08 (Catznip-3.7)
+	LLWinDebug::cleanup();
+// [/SL:KB]
+//	LLWinDebug::instance().cleanup();
 #endif
 
 	if (mIsConsoleAllocated)

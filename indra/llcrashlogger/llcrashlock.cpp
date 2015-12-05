@@ -110,7 +110,12 @@ LLSD LLCrashLock::getLockFile(std::string filename)
     
 	if (ifile.is_open())
 	{									            
-        LLSDSerialize::fromXML(lock_sd, ifile);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+		// Protective fix in case of an invalid/corrupt file 
+		if (-1 == LLSDSerialize::fromXML(lock_sd, ifile))
+			lock_sd = LLSD::emptyArray();
+// [/SL:KB]
+//        LLSDSerialize::fromXML(lock_sd, ifile);
 		ifile.close();
 	}
 
@@ -191,10 +196,21 @@ bool LLCrashLock::fileExists(std::string filename)
 	return boost::filesystem::exists(filename.c_str());
 }
 
-void LLCrashLock::cleanupProcess(std::string proc_dir)
-{
-    boost::filesystem::remove_all(proc_dir);
-}
+//void LLCrashLock::cleanupProcess(std::string proc_dir)
+//{
+//// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+//	try
+//	{
+//		boost::filesystem::remove_all(proc_dir);
+//	}
+//	catch (boost::filesystem::filesystem_error e)
+//	{
+//		llinfos << "Unable to remove all files from '" << proc_dir << "'" << llendl;
+//		llinfos << e.what() << llendl;
+//	}
+//// [/SL:KB]
+////    boost::filesystem::remove_all(proc_dir);
+//}
 
 bool LLCrashLock::putProcessList(const LLSD& proc_sd)
 {

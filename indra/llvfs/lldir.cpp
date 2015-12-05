@@ -101,6 +101,31 @@ LLDir::~LLDir()
 {
 }
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+std::vector<std::string> LLDir::getDirectoriesInDir(const std::string &dirname)
+{
+    // Returns a vector of fullpath subdirectories.
+    boost::filesystem::path p (dirname);
+    std::vector<std::string> v;
+    
+    if (exists(p))
+    {
+        if (is_directory(p))
+        {
+            boost::filesystem::directory_iterator end_iter;
+            for (boost::filesystem::directory_iterator dir_itr(p); dir_itr != end_iter; ++dir_itr)
+            {
+				if (boost::filesystem::is_directory(dir_itr->status()))
+                {
+                    v.push_back(dir_itr->path().filename().string());
+                }
+            }
+        }
+    }
+    return v;
+}
+// [/SL:KB]
+
 std::vector<std::string> LLDir::getFilesInDir(const std::string &dirname)
 {
     //Returns a vector of fullpath filenames.
