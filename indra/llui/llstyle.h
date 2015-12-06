@@ -47,6 +47,9 @@ public:
 		Optional<const LLFontGL*>		font;
 		Optional<LLUIImage*>			image;
 		Optional<std::string>			link_href;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+		Optional<bool>					link_style_override;
+// [/SL:KB]
 		Optional<bool>					is_link;
 		Params();
 	};
@@ -72,6 +75,9 @@ public:
 	const std::string& getLinkHREF() const { return mLink; }
 	void setLinkHREF(const std::string& href);
 	BOOL isLink() const;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+	bool getLinkStyleOverrides() const { return mLinkStyleOverrides; }
+// [/SL:KB]
 
 	LLPointer<LLUIImage> getImage() const;
 	void setImage(const LLUUID& src);
@@ -109,6 +115,9 @@ private:
 	const LLFontGL*		mFont;
 	std::string			mLink;
 	bool				mIsLink;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+	bool				mLinkStyleOverrides;
+// [/SL:KB]
 	LLPointer<LLUIImage> mImagep;
 };
 
