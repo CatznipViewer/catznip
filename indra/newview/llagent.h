@@ -335,7 +335,13 @@ public:
 	//--------------------------------------------------------------------
 public:
 	bool 			isVoiceConnected() const { return mVoiceConnected; }
-	void			setVoiceConnected(const bool b)	{ mVoiceConnected = b; }
+//	void			setVoiceConnected(const bool b)	{ mVoiceConnected = b; }
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+	void			setVoiceConnected(const bool b);
+
+	typedef boost::signals2::signal<void(bool)> voice_connected_change_signal_t;
+	boost::signals2::connection setVoiceConnectedChangeCallback(const voice_connected_change_signal_t::slot_type& cb);
+// [/SL:KB]
 
 	static void		pressMicrophone(const LLSD& name);
 	static void		releaseMicrophone(const LLSD& name);
@@ -345,6 +351,9 @@ public:
 
 private:
 	bool			mVoiceConnected;
+// [SL:KB] - Patch: Chat-Voice | Checked: 2013-08-27 (Catznip-3.6)
+	voice_connected_change_signal_t	mVoiceConnectedChangeSignal;
+// [/SL:KB]
 
 	//--------------------------------------------------------------------
 	// Chat
