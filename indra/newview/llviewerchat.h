@@ -47,10 +47,33 @@ public:
 	static boost::signals2::connection setFontChangedCallback(const font_change_signal_t::slot_type& cb);
 	static void signalChatFontChanged();
 
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+	enum EChatEvent
+	{
+		SND_CHAT_AGENT = 0,  // An avatar said something in nearby chat
+		SND_CONV_FRIEND,     // New friend conversation
+		SND_CONV_NONFRIEND,  // New non-friend conversation
+		SND_CONV_CONFERENCE, // New conference conversation
+		SND_CONV_GROUP,      // New group conversation
+		SND_IM_FRIEND,       // Incoming IM from a friend
+		SND_IM_NONFRIEND,    // Incoming IM from a non-friend
+		SND_IM_CONFERENCE,   // Incoming IM from a conference
+		SND_IM_GROUP,        // Incoming IM from a group
+		SND_COUNT,
+		SND_NONE = -1
+	};
+	static LLUUID getUISoundFromChatEvent(EChatEvent eEvent);
+	static LLUUID getUISoundFromSetting(const std::string& strSetting);
+	static LLUUID getUISoundFromSettingsString(const std::string& strSetting);
+// [/SL:KB]
+
 private:
 	static std::string getObjectImSLURL(const LLChat& chat, const LLSD& args);
 	static font_change_signal_t sChatFontChangedSignal;
 
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+	static std::string SOUND_LOOKUP_SETTINGS[SND_COUNT];
+// [/SL:KB]
 };
 
 #endif

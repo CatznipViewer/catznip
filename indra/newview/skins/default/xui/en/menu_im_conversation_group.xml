@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ layout="topleft"
+ name="Group Conversation Gear Menu">
+    <menu_item_call
+     label="View Information"
+     layout="topleft"
+     name="View Information">
+        <on_click function="Group.GearDoToSelected" parameter="view_profile" />
+    </menu_item_call>
+    <menu_item_call
+     label="End Session"
+     layout="topleft"
+     name="End Session">
+        <on_click function="Group.GearDoToSelected" parameter="end_session" />
+    </menu_item_call>
+    <menu_item_call
+     label="Snooze Session"
+     layout="topleft"
+     name="Snooze Session">
+        <on_click function="Group.GearDoToSelected" parameter="snooze_session" />
+    </menu_item_call>
+    <menu_item_separator
+     layout="topleft"/>
+    <menu_item_call
+     label="Chat history..."
+     layout="topleft"
+     name="chat_history">
+        <on_click function="Group.GearDoToSelected" parameter="chat_history"/>
+        <on_enable function="Group.EnableGearItem" parameter="can_chat_history"/>
+    </menu_item_call>
+    <menu_item_call
+     label="View Notices"
+     layout="topleft"
+     name="View Notices">
+        <on_click function="Group.GearDoToSelected" parameter="view_notices" />
+    </menu_item_call>
+    <menu_item_call
+     label="Create Notice"
+     layout="topleft"
+     name="Create Notice">
+        <on_click function="Group.GearDoToSelected" parameter="create_notice" />
+        <on_enable function="Group.EnableGearItem" parameter="can_create_notice" />
+    </menu_item_call>
+    <menu_item_separator
+     layout="topleft"/>
+    <menu_item_call
+     label="Invite to Group"
+     layout="topleft"
+     name="Invite to Group">
+        <on_click function="Group.GearDoToSelected" parameter="invite_to_group" />
+        <on_enable function="Group.EnableGearItem" parameter="can_invite_to_group" />
+    </menu_item_call>
+    <menu_item_call
+     label="Copy SLurl"
+     layout="topleft"
+     name="Copy SLurl">
+        <on_click function="Group.GearDoToSelected" parameter="copy_slurl" />
+    </menu_item_call>
+</toggleable_menu>

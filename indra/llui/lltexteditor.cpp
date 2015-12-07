@@ -274,7 +274,13 @@ LLTextEditor::LLTextEditor(const LLTextEditor::Params& p) :
 	params.visible = p.border_visible;
 	mBorder = LLUICtrlFactory::create<LLViewBorder> (params);
 	addChild( mBorder );
-	setText(p.default_text());
+// [SL:KB] - Patch: Control-TextBaseLabel | Checked: 2014-01-25 (Catznip-3.6)
+	if ( (p.default_text.isProvided()) && (!p.default_text().empty()) )
+	{
+		setText(p.default_text());
+	}
+// [/SL:KB]
+//	setText(p.default_text());
 	
 	mParseOnTheFly = TRUE;
 }

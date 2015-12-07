@@ -103,181 +103,89 @@
       width="517">
 
     <text
-        layout="topleft"
-        height="12"
-        name="friend_ims"
-        width="145"
-        left="0"
-        top_pad="13">
-      Friend IMs:
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="0"
+     name="im_notif_p2p_text"
+     top_pad="11"
+     width="145">
+      Instant messages :
     </text>
     <combo_box
-        control_name="NotificationFriendIMOptions"
-        height="23"
-        layout="topleft"
-        left_pad="5"
-        top_delta="-6"
-        name="FriendIMOptions"
-        width="223">
-      <item
-          label="Open Conversations window"
-          name="OpenConversationsWindow"
-          value="openconversations"/>      
-      <item
-          label="Pop up the message"
-          name="PopUpMessage"
-          value="toast"/>
-      <item
-          label="Flash toolbar button"
-          name="FlashToolbarButton"
-          value="flash"/>
-      <item
-          label="No action"
-          name="NoAction"
-          value="noaction"/>
+     control_name="NotificationIMP2PToast"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="im_notif_p2p_toastoptions"
+     top_delta="-6"
+     width="223">
+        <item
+         label="Friends and non-friends"
+         value="0" />
+        <item
+         label="Only friends"
+         value="1" />
+        <item
+         label="Only non-friends"
+         value="2" />
+        <item
+         label="Never"
+         value="3" />
     </combo_box>
     <check_box
-        control_name="PlaySoundFriendIM"
-        height="23"
-        label="Play sound"
-        layout="topleft"
-        name="play_sound_friend_im"
-        left_pad="7"
-        top_delta="-3"
-        width="28">
+     control_name="NotificationIMP2PFlash"
+     height="23"
+     label="Flash toolbar button"
+     left_pad="7"
+     layout="topleft"
+     name="im_notif_p2p_flashtoolbar"
+     top_delta="-3"
+     width="28">
     </check_box>
+
     <text
-        layout="topleft"
-        height="12"
-        name="non_friend_ims"
-        width="145"
-        left="0"
-        top_pad="11">
-      Non-friend IMs:
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="0"
+     name="im_notif_multi_text"
+     top_pad="11"
+     width="145">
+      Multi-person :
     </text>
     <combo_box
-        control_name="NotificationNonFriendIMOptions"
-        height="23"
-        layout="topleft"
-        left_pad="5"
-        top_delta="-6"
-        name="NonFriendIMOptions"
-        width="223">
-      <item
-          label="Open Conversations window"
-          name="OpenConversationsWindow"
-          value="openconversations"/>
-      <item
-          label="Pop up the message"
-          name="PopUpMessage"
-          value="toast"/>
-      <item
-          label="Flash toolbar button"
-          name="FlashToolbarButton"
-          value="flash"/>
-      <item
-          label="No action"
-          name="NoAction"
-          value="noaction"/>
+     control_name="NotificationIMMultiToast"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="im_notif_multi_toastoptions"
+     top_delta="-6"
+     width="223">
+        <item
+         label="Groups and conferences"
+         value="0" />
+        <item
+         label="Only groups"
+         value="1" />
+        <item
+         label="Only conferences"
+         value="2" />
+        <item
+         label="Never"
+         value="3" />
     </combo_box>
     <check_box
-        control_name="PlaySoundNonFriendIM"
-        height="23"
-        label="Play sound"
-        layout="topleft"
-        name="play_sound_non_friend_im"
-        left_pad="7"
-        top_delta="-3"
-        width="28">
+     control_name="NotificationIMMultiFlash"
+     height="23"
+     label="Flash toolbar button"
+     left_pad="7"
+     layout="topleft"
+     name="im_notif_multi_flashtoolbar"
+     top_delta="-3"
+     width="28">
     </check_box>
-    <text
-        layout="topleft"
-        left="0"
-        height="13"
-        name="conference_ims"
-        width="145"
-        top_pad="11">
-      Conference IMs:
-    </text>
-    <combo_box
-        control_name="NotificationConferenceIMOptions"
-        height="23"
-        layout="topleft"
-        left_pad="5"
-        top_delta="-6"
-        name="ConferenceIMOptions"
-        width="223">
-      <item
-          label="Open Conversations window"
-          name="OpenConversationsWindow"
-          value="openconversations"/>
-      <item
-          label="Pop up the message"
-          name="PopUpMessage"
-          value="toast"/>
-      <item
-          label="Flash toolbar button"
-          name="FlashToolbarButton"
-          value="flash"/>
-      <item
-          label="No action"
-          name="NoAction"
-          value="noaction"/>
-    </combo_box>
-    <check_box
-        control_name="PlaySoundConferenceIM"
-        height="23"
-        label="Play sound"
-        layout="topleft"
-        name="play_sound_conference_im"
-        left_pad="7"
-        top_delta="-3"
-        width="28">
-    </check_box>
-    <text
-        layout="topleft"
-        left="0"
-        height="13"
-        name="group_chat"
-        width="145"
-        top_pad="11">
-      Group chat:
-    </text>
-    <combo_box
-        control_name="NotificationGroupChatOptions"
-        height="23"
-        layout="topleft"
-        left_pad="5"
-        top_delta="-6"
-        name="GroupChatOptions"
-        width="223">
-      <item
-          label="Open Conversations window"
-          name="OpenConversationsWindow"
-          value="openconversations"/>
-      <item
-          label="Pop up the message"
-          name="PopUpMessage"
-          value="toast"/>
-      <item
-          label="Flash toolbar button"
-          name="FlashToolbarButton"
-          value="flash"/>
-      <item
-          label="No action"
-          name="NoAction"
-          value="noaction"/>
-    </combo_box>
-    <check_box
-        control_name="PlaySoundGroupChatIM"
-        height="23"
-        label="Play sound"
-        layout="topleft"
-        name="play_sound_group_chat_im"
-        left_pad="7"
-        top_delta="-3"
-        width="28">
-    </check_box>
+
     <text
         layout="topleft"
         left="0"

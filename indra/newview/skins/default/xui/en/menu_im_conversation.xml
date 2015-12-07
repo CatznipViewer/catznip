@@ -10,6 +10,15 @@
         <on_enable function="Avatar.EnableGearItem" parameter="can_view_profile" />
     </menu_item_call>
     <menu_item_call
+     label="Close Conversation"
+     layout="topleft"
+     name="Close Conversation">
+        <on_click function="Avatar.GearDoToSelected" parameter="end_im" />
+        <on_enable function="Avatar.EnableGearItem" parameter="is_single_selection" />
+    </menu_item_call>
+    <menu_item_separator
+     layout="topleft"/>
+    <menu_item_call
      label="Add Friend"
      layout="topleft"
      name="Add Friend">
