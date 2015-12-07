@@ -720,12 +720,22 @@ std::string LLViewerRegion::regionFlagsToString(U64 flags)
 
 	if (flags & REGION_FLAGS_SANDBOX)
 	{
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+		if (!result.empty())
+			result += ", ";
 		result += "Sandbox";
+// [/SL:KB]
+//		result += "Sandbox";
 	}
 
 	if (flags & REGION_FLAGS_ALLOW_DAMAGE)
 	{
-		result += " Not Safe";
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+		if (!result.empty())
+			result += ", ";
+		result += "Not Safe";
+// [/SL:KB]
+//		result += " Not Safe";
 	}
 
 	return result;

@@ -68,6 +68,9 @@ public:
 	struct Params : public LLInitParam::Block<Params, LLPanel::Params> 
 	{
 		typedef boost::function<void(void)> click_callback_t;
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+		typedef boost::function<LLToolTip*(LLToolTip::Params)> create_callback_t;
+// [/SL:KB]
 
 		Optional<std::string>		message;
 		Multiple<StyledText>		styled_message;
@@ -84,6 +87,10 @@ public:
 		Optional<bool>				time_based_media,
 									web_based_media,
 									media_playing;
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+		Optional<create_callback_t>	create_callback;
+		Optional<LLSD>				create_params;
+// [/SL:KB]
 		Optional<click_callback_t>	click_callback,
 									click_playmedia_callback,
 									click_homepage_callback;
@@ -103,11 +110,23 @@ public:
 	bool hasClickCallback();
 
 	LLToolTip(const Params& p);
-	void initFromParams(const LLToolTip::Params& params);
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+	virtual void initFromParams(const LLToolTip::Params& params);
+// [/SL:KB]
+//	void initFromParams(const LLToolTip::Params& params);
 
 	void getToolTipMessage(std::string & message);
 
-private:
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+protected:
+	void updateTextBox();
+	void snapToChildren();
+// [/SL:KB]
+
+//private:
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+protected:
+// [/SL:KB]
 	class LLTextBox*	mTextBox;
 	class LLButton*     mInfoButton;
 	class LLButton*     mPlayMediaButton;
@@ -117,6 +136,9 @@ private:
 	LLFrameTimer	mVisibleTimer;
 	bool			mHasClickCallback;
 	S32				mPadding;	// pixels
+// [SL:KB] - Patch: Control-ToolTip | Checked: 2013-12-28 (Catznip-3.6)
+	S32				mMaxWidth;
+// [/SL:KB]
 };
 
 // used for the inspector tooltips which need different background images etc.
