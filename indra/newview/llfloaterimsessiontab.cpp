@@ -918,7 +918,7 @@ void LLFloaterIMSessionTab::onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdPara
 void LLFloaterIMSessionTab::onMenuParticipantListItemClicked(const LLSD& sdParam)
 {
 	const std::string strParam = sdParam.asString();
-	if (LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType())
 	{
 		if ("sort_name" == strParam)
 			LLParticipantAvatarList::setSortOrder(LLParticipantAvatarList::E_SORT_BY_NAME);
@@ -941,7 +941,7 @@ void LLFloaterIMSessionTab::onMenuParticipantListItemClicked(const LLSD& sdParam
 bool LLFloaterIMSessionTab::onMenuParticipantListItemEnable(const LLSD& sdParam)
 {
 	const std::string strParam = sdParam.asString();
-	if (LLFloaterIMContainerBase::isTabbedContainer())
+	if (LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType())
 	{
 		if ("sort_name" == strParam)
 			return LLParticipantAvatarList::E_SORT_BY_NAME == LLParticipantAvatarList::getSortOrder();
