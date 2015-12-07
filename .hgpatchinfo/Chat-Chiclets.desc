@@ -1,0 +1,6 @@
+[Chat/ChicletBarAligment]
+- added : "ChicletBarAlignment" setting to show the chiclet bar at the top or bottom right of the screen (requires a restart)
+- fixed : gap between the bottom of the screen and the bottom of the first bottom-aligned toast
+- fixed : resize the syswell window bottom-up if we're docked at the top and top-down if we're docked at the bottom
+- fixed : group notice toasts can overlap the bottom toolbar/bottom chiclets
+- fixed : bottom-aligned toasts don't (re)align with the right side of the window after resizing
