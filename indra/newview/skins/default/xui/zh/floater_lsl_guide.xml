@@ -2,6 +2,6 @@
 <floater name="script ed float" title="LSL 參考">
 	<check_box label="跟隨游標" name="lock_check"/>
 	<combo_box label="鎖定" name="history_combo"/>
-	<button label="返回" name="back_btn"/>
-	<button label="向前" name="fwd_btn"/>
+	<button tool_tip="返回" name="back_btn"/>
+	<button tool_tip="向前" name="fwd_btn"/>
 </floater>
