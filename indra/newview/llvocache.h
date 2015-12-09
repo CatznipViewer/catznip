@@ -108,6 +108,9 @@ public:
 	void dump() const;
 	BOOL writeToFile(LLAPRFile* apr_file) const;
 	LLDataPackerBinaryBuffer *getDP();
+// [SL:KB] - Patch: World-Derender | Checked: 2014-08-10 (Catznip-3.7)
+	const U8* getDPBuffer() const;
+// [/SL:KB]
 	void recordHit();
 	void recordDupe() { mDupeCount++; }
 	
@@ -143,6 +146,11 @@ public:
 	typedef std::map<U32, LLPointer<LLVOCacheEntry> >	   vocache_entry_map_t;
 	typedef std::set<LLVOCacheEntry*>                      vocache_entry_set_t;
 	typedef std::set<LLVOCacheEntry*, CompareVOCacheEntry> vocache_entry_priority_list_t;	
+
+// [SL:KB] - Patch: World-Derender | Checked: 2014-08-10 (Catznip-3.7)
+	vocache_entry_set_t::const_iterator getChildrenBegin() const { return mChildrenList.begin(); }
+	vocache_entry_set_t::const_iterator getChildrenEnd() const { return mChildrenList.end(); }
+// [/SL:KB]
 
 	S32                         mLastCameraUpdated;
 protected:

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="true"
+ can_minimize="true"
+ can_resize="true"
+ height="300"
+ help_topic="blocked_list"
+ layout="topleft"
+ min_height="300"
+ min_width="330"
+ name="blocked"
+ positioning="cascading"
+ save_rect="true"
+ save_visibility="false"
+ single_instance="true"
+ title="BLOCKED / DERENDER LIST"
+ width="350">
+    <tab_container
+     follows="all"
+     layout="topleft"
+     left="8"  
+     name="blocked_tabs"
+     height="292"
+     right="-8"   
+     tab_height="25"
+     tab_min_width="120"
+     tab_position="top"
+     top="4" >
+        <panel
+         class="panel_block_list"
+         filename="panel_block_list.xml"
+         label="BLOCKED"
+         layout="topleft"
+         name="mute_tab" />
+        <panel
+         class="panel_derender_list"
+         filename="panel_block_derender.xml"
+         label="DERENDERED"
+         layout="topleft"
+         name="derender_tab" />
+    </tab_container>
+</floater>

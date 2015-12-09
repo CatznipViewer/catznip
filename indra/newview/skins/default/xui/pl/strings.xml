@@ -1815,19 +1815,19 @@
 		Nowy skrypt
 	</string>
 	<string name="MuteByName">
-		(Nazwa)
+		Nazwa
 	</string>
 	<string name="MuteAgent">
-		(Rezydent)
+		Rezydent
 	</string>
 	<string name="MuteObject">
-		(Obiekt)
+		Obiekt
 	</string>
 	<string name="MuteGroup">
-		(Grupę)
+		Grupę
 	</string>
 	<string name="MuteExternal">
-		(Zewnętrzne)
+		Zewnętrzne
 	</string>
 	<string name="RegionNoCovenant">
 		Brak umowy dla tego majątku.

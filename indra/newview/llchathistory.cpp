@@ -153,8 +153,11 @@ public:
 		{
 			LLMuteList::getInstance()->add(LLMute(getAvatarId(), mFrom, LLMute::OBJECT));
 
-			LLFloaterSidePanelContainer::showPanel("people", "panel_people",
-				LLSD().with("people_panel_tab_name", "blocked_panel").with("blocked_to_select", getAvatarId()));
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
+			LLFloaterReg::showInstance("blocked", LLSD().with("blocked_to_select", getAvatarId()));
+// [/SL:KB]
+//			LLFloaterSidePanelContainer::showPanel("people", "panel_people",
+//				LLSD().with("people_panel_tab_name", "blocked_panel").with("blocked_to_select", getAvatarId()));
 		}
 		else if (level == "map")
 		{
