@@ -71,6 +71,9 @@ protected:
 	void update();
 public:
 	static BOOL sDebugPointAt;
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+	static bool getSendPointAt();
+// [/SL:KB]
 private:
 	EPointAtType				mTargetType;
 	LLVector3d					mTargetOffsetGlobal;

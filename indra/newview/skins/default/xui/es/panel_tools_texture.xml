@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Pulsa para abrir el selector de color"/>
 	<text name="color trans">
-		Porcentaje de transparencia
+		Alpha %
 	</text>
 	<text name="glow label">
 		Resplandor

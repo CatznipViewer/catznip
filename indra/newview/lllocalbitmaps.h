@@ -119,6 +119,10 @@ class LLLocalBitmapMgr
 	public:
 		static void			cleanupClass();
 		static bool         addUnit();
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+		static bool         addUnit(const std::string& filename, LLUUID* pTrackingId = NULL);
+		static bool         hasUnit(const std::string& filename, LLUUID* pTrackingId = NULL);
+// [/SL:KB]
 		static void         delUnit(LLUUID tracking_id);
 		static bool 		checkTextureDimensions(std::string filename);
 

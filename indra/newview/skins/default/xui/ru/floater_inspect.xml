@@ -9,6 +9,8 @@
 		<scroll_list.columns label="Имя создателя" name="creator_name"/>
 		<scroll_list.columns label="Дата создания" name="creation_date"/>
 	</scroll_list>
+	<panel name="bottom_panel">
 	<button label="Профиль владельца..." name="button owner" tool_tip="Показывает профиль владельца подсвеченного объекта"/>
 	<button label="Профиль создателя..." name="button creator" tool_tip="Показывает профиль создателя подсвеченного объекта"/>
+	</panel>
 </floater>

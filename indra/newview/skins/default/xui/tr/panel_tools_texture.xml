@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Renk seçiciyi açmak için tıklayın"/>
 	<text name="color trans">
-		Saydamlık %
+		Alpha %
 	</text>
 	<text name="glow label">
 		Parıltı

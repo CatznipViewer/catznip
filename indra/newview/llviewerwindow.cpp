@@ -95,6 +95,9 @@
 #include "lldrawpoolalpha.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolwater.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "lleconomy.h"
+// [/SL:KB]
 #include "llmaniptranslate.h"
 #include "llface.h"
 #include "llfeaturemanager.h"
@@ -175,6 +178,9 @@
 #include "llviewermedia.h"
 #include "llviewermediafocus.h"
 #include "llviewermenu.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include "llviewermenufile.h"
+// [/SL:KB]
 #include "llviewermessage.h"
 #include "llviewerobjectlist.h"
 #include "llviewerparcelmgr.h"
@@ -1103,7 +1109,29 @@ BOOL LLViewerWindow::handleMiddleMouseDown(LLWindow *window,  LLCoordGL pos, MAS
 	return TRUE;
 }
 
-LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, 
+                                                                   LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
+{
+	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
+	switch (type)
+	{
+		case LLWindowCallbacks::DNDT_FILE:
+			result = handleDragNDropFile(window, pos, mask, action, type, data);
+			break;
+		case LLWindowCallbacks::DNDT_DEFAULT:
+		default:
+			result = handleDragNDropDefault(window, pos, mask, action, (!data.empty()) ? data.front() : LLStringUtil::null);
+			break;
+	}
+	return result;
+}
+// [/SL:KB]
+
+//LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropDefault(LLWindow* window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action, std::string data)
+// [/SL:KB]
 {
 	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
 
@@ -1247,6 +1275,173 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDrop( LLWindow *wi
 	return result;
 }
   
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+static void confirmDragNDropUpload(const LLSD& sdNotification, const LLSD& sdResponse)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+	if (idxOption == 0)
+	{
+		const LLSD& sdPayload = sdNotification["payload"];
+		if (sdPayload.isArray())
+		{
+			std::vector<std::string> files;
+			for (LLSD::array_const_iterator itFile = sdPayload.beginArray(), endFile = sdPayload.endArray(); itFile != endFile; ++itFile)
+				files.push_back(*itFile);
+//			upload_bulk(files);
+		}
+	}
+}
+
+static LLAssetType::EType getAssetTypeFromFilename(const std::string strFilename)
+{
+	static struct ExtLookup
+	{
+		const char*        pstrExtension;
+		LLAssetType::EType eAssetType;
+	}
+	// This really should be standardized somewhere instead of having extensions duplicated all over the code
+	s_ExtLookup[] =
+		{
+			{ "tga", LLAssetType::AT_TEXTURE },
+			{ "bmp", LLAssetType::AT_TEXTURE },
+			{ "jpg", LLAssetType::AT_TEXTURE },
+			{ "jpeg", LLAssetType::AT_TEXTURE },
+			{ "png", LLAssetType::AT_TEXTURE }
+		};
+
+	const std::string& strExt = gDirUtilp->getExtension(strFilename);
+	for (int idxExt = 0, cntExt = sizeof(s_ExtLookup) / sizeof(ExtLookup); idxExt < cntExt; idxExt++)
+	{
+		if (strExt == s_ExtLookup[idxExt].pstrExtension)
+			return s_ExtLookup[idxExt].eAssetType;
+	}
+	return LLAssetType::AT_NONE;
+}
+
+LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow *window, LLCoordGL pos, MASK mask, LLWindowCallbacks::DragNDropAction action,
+                                                                       LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data)
+{
+	bool fDrop = (LLWindowCallbacks::DNDA_DROPPED == action);
+
+	LLWindowCallbacks::DragNDropResult result = LLWindowCallbacks::DND_NONE;
+	switch (action)
+	{
+		case LLWindowCallbacks::DNDA_START_TRACKING:
+			{
+				mDragItems.clear();
+				if (gLoggedInTime.getStarted())
+				{
+					for (std::vector<std::string>::const_iterator itFile = data.begin(); itFile != data.end(); ++itFile)
+					{
+						const std::string& strFile = *itFile;
+
+						LLAssetType::EType eAssetType = getAssetTypeFromFilename(strFile);
+						if (LLAssetType::AT_NONE != eAssetType)
+						{
+							LLPointer<LLViewerInventoryItem> pItem = new LLViewerInventoryItem(LLUUID::generateNewID(), LLUUID::null, gDirUtilp->getBaseFileName(strFile), LLInventoryType::defaultForAssetType(eAssetType));
+							pItem->setType(eAssetType);
+							mDragItems.push_back(drag_item_t(pItem, strFile));
+						}
+					}
+				}
+
+				if (!mDragItems.empty())
+				{
+					//uuid_vec_t idsCargo; std::vector<EDragAndDropType> typesCargo;
+					//for (std::vector<LLViewerInventoryItem*>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
+					//{
+					//	const LLViewerInventoryItem* pItem = *itItem;
+					//	idsCargo.push_back(pItem->getUUID());
+					//	typesCargo.push_back(LLViewerAssetType::lookupDragAndDropType(pItem->getType()));
+					//}
+					//
+					//LLToolDragAndDrop::getInstance()->beginMultiDrag(typesCargo, idsCargo, LLToolDragAndDrop::SOURCE_DND);
+					result = LLWindowCallbacks::DND_LINK;
+				}
+			}
+			// Fall through to tracking and dropping for now
+		case LLWindowCallbacks::DNDA_TRACK:
+		case LLWindowCallbacks::DNDA_DROPPED:
+			{
+				if (!LLToolMgr::getInstance()->inBuildMode())
+				{
+					if (!mDragItems.empty())
+					{
+						if (fDrop)
+						{
+							// getPriceUpload() returns -1 if no data available yet.
+							S32 nUploadCost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+							std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
+
+							std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
+							for (std::vector<drag_item_t>::const_iterator itItem = mDragItems.begin(); itItem != mDragItems.end(); ++itItem)
+							{
+								strUploadList += itItem->first->getName();
+								strUploadList += "\n";
+								sdFiles.append(itItem->second);
+							}
+
+							LLNotificationsUtil::add("UploadDnDConfirmation", LLSD().with("UPLOAD_COST", strUploadCost).with("UPLOAD_LIST", strUploadList), sdFiles, boost::bind(confirmDragNDropUpload, _1, _2));
+						}
+						result = DND_COPY;
+					}
+				}
+				else
+				{
+					if ( (1 == mDragItems.size()) && (LLAssetType::AT_TEXTURE == mDragItems.front().first->getType()) )
+					{
+						LLPickInfo pick = pickImmediate(pos.mX, pos.mY, TRUE);
+
+						LLViewerObject* pObj = pick.getObject();
+						if ( (pObj) && (pObj->permModify()) )
+						{
+							result = LLWindowCallbacks::DND_LINK;
+							if (!fDrop)
+							{
+								if (pObj != mDragHoveredObject)
+								{
+									LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+									mDragHoveredObject = pObj;
+									LLSelectMgr::getInstance()->highlightObjectOnly(mDragHoveredObject);
+								}
+							}
+							else 
+							{
+								LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+								mDragHoveredObject = NULL;
+
+								const std::string& strFilename = mDragItems.front().second; LLUUID idLocalBitmap;
+								if (!LLLocalBitmapMgr::hasUnit(strFilename, &idLocalBitmap))
+								{
+									LLLocalBitmapMgr::addUnit(strFilename, &idLocalBitmap);
+								}
+
+								if (idLocalBitmap.notNull())
+								{
+									pObj->setTETexture(pick.mObjectFace, LLLocalBitmapMgr::getWorldID(idLocalBitmap));
+								}
+							}
+						}
+					}
+				}
+			}
+			break;
+		case LLWindowCallbacks::DNDA_STOP_TRACKING:
+			{
+				mDragItems.clear();
+			}
+			break;
+	}
+
+	if ( (LLWindowCallbacks::DND_NONE == result) && (mDragHoveredObject.notNull()) )
+	{
+		LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
+		mDragHoveredObject = NULL;
+	}
+	return result;
+}
+// [/SL:KB]
+
 BOOL LLViewerWindow::handleMiddleMouseUp(LLWindow *window,  LLCoordGL pos, MASK mask)
 {
 	BOOL down = FALSE;

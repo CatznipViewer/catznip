@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<floater min_width="460" name="inspect" title="OBJEKTE UNTERSUCHEN" width="460">
+<floater name="inspect" title="OBJEKTE UNTERSUCHEN" >
 	<floater.string name="timeStamp">
 		[wkday,datetime,local] [mth,datetime,local] [day,datetime,local] [hour,datetime,local]:[min,datetime,local]:[second,datetime,local] [year,datetime,local]
 	</floater.string>
@@ -9,6 +9,8 @@
 		<scroll_list.columns label="Ersteller" name="creator_name"/>
 		<scroll_list.columns label="Erstellungsdatum" name="creation_date" width="116"/>
 	</scroll_list>
-	<button label="Besitzerprofil einsehen..." name="button owner" tool_tip="Profil des Besitzers des markierten Objekts einsehen" width="155"/>
-	<button label="Erstellerprofil einsehen..." left="175" name="button creator" tool_tip="Profil des ursprünglichen Erstellers des markierten Objekts einsehen" width="155"/>
+	<panel name="bottom_panel">
+	<button label="Besitzerprofil einsehen..." name="button owner" tool_tip="Profil des Besitzers des markierten Objekts einsehen"/>
+	<button label="Erstellerprofil einsehen..." name="button creator" tool_tip="Profil des ursprünglichen Erstellers des markierten Objekts einsehen"/>
+	</panel>
 </floater>

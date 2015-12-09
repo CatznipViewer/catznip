@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Klicken Sie hier, um die Farbauswahl zu öffnen"/>
 	<text name="color trans">
-		Transparenz %
+		Alpha %
 	</text>
 	<text name="glow label">
 		Leuchten

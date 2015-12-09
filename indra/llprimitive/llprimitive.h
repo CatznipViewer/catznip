@@ -257,7 +257,10 @@ public:
 	/*virtual*/ void copy(const LLNetworkData& data);
 	LLSD asLLSD() const;
 	operator LLSD() const { return asLLSD(); }
-	bool fromLLSD(LLSD& sd);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+	bool fromLLSD(const LLSD& sd);
+// [/SL:KB]
+//	bool fromLLSD(LLSD& sd);
 
 	void setSculptTexture(const LLUUID& texture_id, U8 sculpt_type);
 	LLUUID getSculptTexture() const         { return mSculptTexture; }
