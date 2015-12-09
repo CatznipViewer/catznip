@@ -2097,7 +2097,7 @@ struct LLSelectedTEFromLLSDFunctor : public LLSelectedTEMaterialFunctor, public 
 			LLMaterialMgr::getInstance()->remove(pObj->getID(), idxTE);
 			pMaterial = NULL;
 		}
-		pObj->setTEMaterialParams(idxTE, pMaterial);
+		pObj->setTEMaterialParams(idxTE, pMaterial, true);
 
 		return pMaterial;
 	}
