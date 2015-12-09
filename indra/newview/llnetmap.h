@@ -40,6 +40,10 @@ class LLImageRaw;
 class LLViewerTexture;
 class LLFloaterMap;
 class LLMenuGL;
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+class LLViewerRegion;
+class LLAvatarName;
+// [/SL:KB]
 
 class LLNetMap : public LLUICtrl
 {
@@ -79,6 +83,9 @@ public:
 	/*virtual*/ BOOL	handleClick(S32 x, S32 y, MASK mask);
 	/*virtual*/ BOOL	handleDoubleClick( S32 x, S32 y, MASK mask );
 
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	void			refreshParcelOverlay() { mUpdateParcelImage = true; }
+// [/SL:KB]
 	void			setScale( F32 scale );
 	void			setToolTipMsg(const std::string& msg) { mToolTipMsg = msg; }
 	void			renderScaledPointGlobal( const LLVector3d& pos, const LLColor4U &color, F32 radius );
@@ -97,12 +104,23 @@ private:
 	BOOL			handleToolTipAgent(const LLUUID& avatar_id);
 	static void		showAvatarInspector(const LLUUID& avatar_id);
 
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	bool			createImage(LLPointer<LLImageRaw>& rawimagep) const;
 	void			createObjectImage();
+	void			createParcelImage();
+
+	void			renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const LLColor4U& clrOverlay);
+// [/SL:KB]
+//	void			createObjectImage();
 
 	static bool		outsideSlop(S32 x, S32 y, S32 start_x, S32 start_y, S32 slop);
 
 private:
-	bool			mUpdateNow;
+//	bool			mUpdateNow;
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	bool			mUpdateObjectImage;
+	bool			mUpdateParcelImage;
+// [/SL:KB]
 
 	LLUIColor		mBackgroundColor;
 
@@ -121,9 +139,23 @@ private:
 	LLVector3d		mObjectImageCenterGlobal;
 	LLPointer<LLImageRaw> mObjectRawImagep;
 	LLPointer<LLViewerTexture>	mObjectImagep;
+// [SL:KB] - Patch: World-MinimapOverlay | Checked: 2012-06-20 (Catznip-3.3)
+	LLVector3d		mParcelImageCenterGlobal;
+	LLPointer<LLImageRaw> mParcelRawImagep;
+	LLPointer<LLViewerTexture>	mParcelImagep;
+
+	boost::signals2::connection mParcelMgrConn;
+	boost::signals2::connection mParcelOverlayConn;
+// [/SL:KB]
 
 	LLUUID			mClosestAgentToCursor;
-	LLUUID			mClosestAgentAtLastRightClick;
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
+	uuid_vec_t		mClosestAgentsToCursor;
+
+	LLUUID			mClosestAgentRightClick;
+	LLVector3d		mPosGlobalRightClick;
+// [/SL:KB]
+//	LLUUID			mClosestAgentAtLastRightClick;
 
 	std::string		mToolTipMsg;
 
@@ -133,6 +165,13 @@ public:
 private:
 	void handleZoom(const LLSD& userdata);
 	void handleStopTracking (const LLSD& userdata);
+// [SL:KB] - Patch: World-MiniMap | Checked: 2012-07-08 (Catznip-3.3)
+	void handleOverlayToggle(const LLSD& sdParam);
+	void handleShowProfile(const LLSD& sdParam) const;
+	bool checkTextureType(const LLSD& sdParam) const;
+	void handleTextureType(const LLSD& sdParam) const;
+	void setAvatarProfileLabel(const LLAvatarName& avName, const std::string& item_name);
+// [/SL:KB]
 
 	LLMenuGL*		mPopupMenu;
 	uuid_vec_t		gmSelected;
