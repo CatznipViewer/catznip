@@ -66,6 +66,9 @@ public:
 	void				revertChanges();
 
 	void				showDefaultSubpart();
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	void				showWearableParam(const std::string& strParamName);
+// [/SL:KB]
 	void				onTabExpandedCollapsed(const LLSD& param, U8 index);
 
 	void 				updateScrollingPanelList();

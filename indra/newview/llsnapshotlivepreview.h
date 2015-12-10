@@ -108,7 +108,13 @@ public:
     std::string  getFilter() const { return mFilterName; }
 	void updateSnapshot(BOOL new_snapshot, BOOL new_thumbnail = FALSE, F32 delay = 0.f);
 	void saveTexture();
-	BOOL saveLocal();
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	void saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb);
+// [/SL:KB]
+//// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+//	void saveLocal(const LLViewerWindow::save_image_callback_t& cb);
+//// [/SL:KB]
+//	BOOL saveLocal();
 
 	LLPointer<LLImageFormatted>	getFormattedImage();
 	LLPointer<LLImageRaw>		getEncodedImage();

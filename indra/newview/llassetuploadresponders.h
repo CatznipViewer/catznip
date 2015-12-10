@@ -65,18 +65,29 @@ class LLNewAgentInventoryResponder : public LLAssetUploadResponder
 {
 	LOG_CLASS(LLNewAgentInventoryResponder);
 public:
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
 	LLNewAgentInventoryResponder(
 		const LLSD& post_data,
 		const LLUUID& vfile_id,
-		LLAssetType::EType asset_type);
-	LLNewAgentInventoryResponder(
-		const LLSD& post_data,
-		const std::string& file_name,
-		LLAssetType::EType asset_type);
+		LLAssetType::EType asset_type,
+		const std::list<std::string>& files = std::list<std::string>());
+// [/SL:KB]
+//	LLNewAgentInventoryResponder(
+//		const LLSD& post_data,
+//		const LLUUID& vfile_id,
+//		LLAssetType::EType asset_type);
+//	LLNewAgentInventoryResponder(
+//		const LLSD& post_data,
+//		const std::string& file_name,
+//		LLAssetType::EType asset_type);
 	virtual void uploadComplete(const LLSD& content);
 	virtual void uploadFailure(const LLSD& content);
 protected:
 	virtual void httpFailure();
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-04-01 (Catznip-3.3)
+	std::list<std::string> mFiles;
+// [/SL:KB]
 };
 
 // A base class which goes through and performs some default

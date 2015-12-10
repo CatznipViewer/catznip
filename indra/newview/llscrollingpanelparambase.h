@@ -52,6 +52,9 @@ public:
 	F32					weightToPercent( F32 weight );
 	F32					percentToWeight( F32 percent );
 
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	const std::string&	getParamDisplayName() const;
+// [/SL:KB]
 public:
 	LLViewerVisualParam* mParam;
 protected:

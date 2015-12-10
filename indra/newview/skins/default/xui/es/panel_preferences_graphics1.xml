@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Gráficos" name="Display panel">
 	<text name="QualitySpeed">
-		Calidad y velocidad:
+		Calidad y velocidad
 	</text>
 	<text name="FasterText">
 		Más rápido
@@ -23,7 +23,7 @@
 	</text>
 	<panel label="CustomGraphics" name="CustomGraphics Panel">
 		<text name="ShadersText">
-			Shaders:
+			Shaders
 		</text>
 		<check_box initial_value="true" label="Agua transparente" name="TransparentWater"/>
 		<check_box initial_value="true" label="Efecto de relieve y brillo" name="BumpShiny"/>
@@ -34,7 +34,7 @@
 		<check_box initial_value="true" label="Oclusión del ambiente" name="UseSSAO"/>
 		<check_box initial_value="true" label="Profundidad del campo" name="UseDoF"/>
 		<text name="shadows_label">
-			Sombras:
+			Sombras
 		</text>
 		<combo_box name="ShadowDetail">
 			<combo_box.item label="Ninguno" name="0"/>
@@ -42,7 +42,7 @@
 			<combo_box.item label="Sol/luna + proyectores" name="2"/>
 		</combo_box>
 		<text name="reflection_label">
-			Reflejos en el agua:
+			Reflejos en el agua
 		</text>
 		<combo_box initial_value="true" label="Reflejos en el agua" name="Reflections">
 			<combo_box.item label="Mínimo" name="0"/>
@@ -63,7 +63,7 @@
 		<slider label="Nº máx. de avats. no impostores:" name="MaxNumberAvatarDrawn"/>
 		<slider label="Calidad de procesamiento:" name="RenderPostProcess"/>
 		<text name="MeshDetailText">
-			Detalle de la malla:
+			Detalle de la malla
 		</text>
 		<slider label="  Objetos:" name="ObjectMeshDetail"/>
 		<slider label="  Prims flexibles:" name="FlexibleMeshDetail"/>
@@ -93,13 +93,13 @@
 			Bajo
 		</text>
 		<text name="AvatarRenderingText">
-			Renderización del avatar:
+			Renderización del avatar
 		</text>
 		<check_box initial_value="true" label="Avatares simulados" name="AvatarImpostors"/>
 		<check_box initial_value="true" label="Renderizado por hardware" name="AvatarVertexProgram"/>
 		<check_box initial_value="true" label="Ropas del avatar" name="AvatarCloth"/>
 		<text left="402" name="TerrainDetailText">
-			Detalle del terreno:
+			Detalle del terreno
 		</text>
 		<radio_group name="TerrainDetailRadio">
 			<radio_item label="Bajo" name="0"/>

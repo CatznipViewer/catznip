@@ -51,6 +51,28 @@ LLAudioEngine* gAudiop = NULL;
 // LLAudioEngine implementation
 //
 
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+// NOTE: muted with level set to 0 by default to make it easier to spot when the settings aren't updating
+bool LLAudioEngine::s_fMuteAudio = true;
+F32 LLAudioEngine::s_nLevelMaster = 0.0;
+bool LLAudioEngine::s_fMuteAmbient = true;
+F32 LLAudioEngine::s_nLevelAmbient = 0.0f;
+bool LLAudioEngine::s_fMuteMedia = true;
+F32 LLAudioEngine::s_nLevelMedia = 0.0f;
+bool LLAudioEngine::s_fMuteMusic = true;
+F32 LLAudioEngine::s_nLevelMusic = 0.0f;
+bool LLAudioEngine::s_fMuteSounds = true;
+F32 LLAudioEngine::s_nLevelSounds = 0.0f;
+bool LLAudioEngine::s_fMuteUI = true;
+F32 LLAudioEngine::s_nLevelUI = 0.0f;
+bool LLAudioEngine::s_fMuteVoice = true;
+F32 LLAudioEngine::s_nLevelVoice = 0.0;
+F32 LLAudioEngine::s_nLevelMic = 0.0;
+
+F32 LLAudioEngine::s_nLevelDoppler = 1.0f;
+F32 LLAudioEngine::s_nLevelRolloff = 1.0f;
+F32 LLAudioEngine::s_nLevelUnderwaterRolloff = 5.0f;
+// [/SL:KB]
 
 LLAudioEngine::LLAudioEngine()
 {

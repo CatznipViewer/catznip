@@ -39,6 +39,11 @@ class LLTransactionID;
 
 void init_menu_file();
 
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// NOTE: uploads the files without asking the user for confirmation
+void upload_bulk(const std::vector<std::string>& files);
+// [/SL:KB]
+
 LLUUID upload_new_resource(
 	const std::string& src_filename, 
 	std::string name,
@@ -52,7 +57,10 @@ LLUUID upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList = NULL);
+// [/SL:KB]
+//	void *userdata);
 
 void upload_new_resource(
 	const LLTransactionID &tid, 
@@ -68,7 +76,10 @@ void upload_new_resource(
 	const std::string& display_name,
 	LLAssetStorage::LLStoreAssetCallback callback,
 	S32 expected_upload_cost,
-	void *userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	std::list<std::string>* pFileList = NULL);
+// [/SL:KB]
+//	void *userdata);
 
 
 LLAssetID generate_asset_id_for_new_upload(const LLTransactionID& tid);
@@ -111,21 +122,46 @@ public:
 	static void cleanupClass();
 	static void clearDead();
 
-	std::string mFile; 
+//	std::string mFile; 
+//
+//	LLFilePicker::ELoadFilter mFilter;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	enum EPickerType { OPEN_SINGLE, OPEN_MULTIPLE, SAVE_SINGLE } mPickerType;
+	std::vector<std::string> mFiles;
+	S32 mFilter;
+	std::string mInitialFile;
+// [/SL:KB]
 
-	LLFilePicker::ELoadFilter mFilter;
-
-	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
-		: LLThread("file picker"), mFilter(filter)
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	LLFilePickerThread(LLFilePicker::ELoadFilter filter, bool multiple = false)
+		: LLThread("file picker")
+		, mPickerType( (multiple) ? OPEN_MULTIPLE : OPEN_SINGLE )
+		, mFilter(filter)
 	{
-
 	}
+
+	LLFilePickerThread(LLFilePicker::ESaveFilter filter, const std::string& initial_file)
+		: LLThread("file picker")
+		, mPickerType(SAVE_SINGLE)
+		, mFilter(filter)
+		, mInitialFile(initial_file)
+	{
+	}
+// [/SL:KB]
+//	LLFilePickerThread(LLFilePicker::ELoadFilter filter)
+//		: LLThread("file picker"), mFilter(filter)
+//	{
+//
+//	}
 
 	void getFile();
 
 	virtual void run();
 
-	virtual void notify(const std::string& filename) = 0;
+//	virtual void notify(const std::string& filename) = 0;
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+	virtual void notify(const std::vector<std::string>& files) = 0;
+// [/SL:KB]
 };
 
 

@@ -642,7 +642,10 @@ BOOL LLAccordionCtrlTab::postBuild()
 		sbparams.page_size(getRect().getHeight());
 		sbparams.step_size(VERTICAL_MULTIPLE);
 		sbparams.follows.flags(FOLLOWS_RIGHT | FOLLOWS_TOP | FOLLOWS_BOTTOM);
-		sbparams.change_callback(boost::bind(&LLAccordionCtrlTab::onScrollPosChangeCallback, this, _1, _2));
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+		sbparams.change_callback(boost::bind(&LLAccordionCtrlTab::onScrollPosChangeCallback, this));
+// [/SL:KB]
+//		sbparams.change_callback(boost::bind(&LLAccordionCtrlTab::onScrollPosChangeCallback, this, _1, _2));
 
 
 		mScrollbar = LLUICtrlFactory::create<LLScrollbar> (sbparams);
@@ -948,7 +951,10 @@ void	LLAccordionCtrlTab::hideScrollbar( const LLRect& child_rect )
 	updateLayout(child_rect);
 }
 
-void	LLAccordionCtrlTab::onScrollPosChangeCallback(S32, LLScrollbar*)
+//void	LLAccordionCtrlTab::onScrollPosChangeCallback(S32, LLScrollbar*)
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLAccordionCtrlTab::onScrollPosChangeCallback()
+// [/SL:KB]
 {
 	LLRect child_rect;
 
@@ -963,6 +969,27 @@ void	LLAccordionCtrlTab::onScrollPosChangeCallback(S32, LLScrollbar*)
 
 	updateLayout(child_rect);
 }
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLAccordionCtrlTab::scrollToShowRect(const LLRect& rctScreen)
+{
+	LLRect rctLocal;
+	screenRectToLocal(rctScreen, &rctLocal);
+
+	// Translate to parent coordinatess to check if we are in visible rectangle
+	rctLocal.translate( getRect().mLeft, getRect().mBottom );
+	if ( !getRect().contains (rctLocal) )
+	{
+		// Back to local coords and calculate position for scroller
+		S32 nPosBottom = mScrollbar->getDocPos() - rctLocal.mBottom + getRect().mBottom;
+		S32 nPosTop = mScrollbar->getDocPos() - rctLocal.mTop + getRect().mTop;
+
+		S32 nScrollPos = llclamp(mScrollbar->getDocPos(), nPosBottom, nPosTop);
+		mScrollbar->setDocPos(nScrollPos);
+		onScrollPosChangeCallback();
+	}
+}
+// [/SL:KB]
 
 void LLAccordionCtrlTab::drawChild(const LLRect& root_rect,LLView* child)
 {

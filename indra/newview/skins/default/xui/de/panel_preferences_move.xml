@@ -8,12 +8,12 @@
 	<check_box label="Bauen/Bearbeiten" name="edit_camera_movement" tool_tip="Automatische Kamerapositionierung bei Wechsel in und aus dem Bearbeitungsmodus verwenden"/>
 	<check_box label="Aussehen" name="appearance_camera_movement" tool_tip="Automatische Kamerapositionierung im Bearbeitenmodus verwenden"/>
 	<text name="keyboard_lbl">
-		Tastatur:
+		Tastatur
 	</text>
 	<check_box label="Mit Pfeiltasten bewegen" name="arrow_keys_move_avatar_check"/>
 	<check_box label="Drücken-drücken-halten, um zu rennen" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		Maus:
+		Maus
 	</text>
 	<check_box label="Mich im Mouselook anzeigen" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">
