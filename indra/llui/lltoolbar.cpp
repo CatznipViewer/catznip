@@ -73,10 +73,22 @@ namespace LLInitParam
 		declare("right",	SIDE_RIGHT);
 		declare("top",		SIDE_TOP);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	void TypeValues<AlignmentType>::declareValues()
+	{
+		declare("topleft",		ALIGN_TOPLEFT);
+		declare("center",		ALIGN_CENTER);
+		declare("bottomright",	ALIGN_BOTTOMRIGHT);
+	}
+// [/SL:KB]
 }
 
 LLToolBar::Params::Params()
 :	button_display_mode("button_display_mode"),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	button_alignment("button_alignment", LLToolBarEnums::ALIGN_CENTER),
+// [/SL:KB]
 	commands("command"),
 	side("side", SIDE_TOP),
 	button_icon("button_icon"),
@@ -95,6 +107,9 @@ LLToolBar::Params::Params()
 LLToolBar::LLToolBar(const LLToolBar::Params& p)
 :	LLUICtrl(p),
 	mReadOnly(p.read_only),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	mAlignment(LLToolBarEnums::ALIGN_CENTER),
+// [/SL:KB]
 	mButtonType(p.button_display_mode),
 	mSideType(p.side),
 	mWrap(p.wrap),
@@ -141,10 +156,16 @@ void LLToolBar::createContextMenu()
 		// Setup bindings specific to this instance for the context menu options
 
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar commit_reg;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		commit_reg.add("Toolbars.ChangeButtonAlignment", boost::bind(&LLToolBar::onChangeButtonAlignment, this, _2));
+// [/SL:KB]
 		commit_reg.add("Toolbars.EnableSetting", boost::bind(&LLToolBar::onSettingEnable, this, _2));
 		commit_reg.add("Toolbars.RemoveSelectedCommand", boost::bind(&LLToolBar::onRemoveSelectedCommand, this));
 
 		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_reg;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		enable_reg.add("Toolbars.CheckButtonAlignment", boost::bind(&LLToolBar::onCheckButtonAlignment, this, _2));
+// [/SL:KB]
 		enable_reg.add("Toolbars.CheckSetting", boost::bind(&LLToolBar::isSettingChecked, this, _2));
 
 		// Create the context menu
@@ -156,6 +177,17 @@ void LLToolBar::createContextMenu()
 			menu->setBackgroundColor(LLUIColorTable::instance().getColor("MenuPopupBgColor"));
 			mPopupMenuHandle = menu->getHandle();
 			mRemoveButtonHandle = menu->getChild<LLView>("Remove button")->getHandle();
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+			LLMenuGL* pAlignmentMenu = menu->findChildMenuByName("Alignment", FALSE);
+			if (pAlignmentMenu)
+			{
+				pAlignmentMenu->getChild<LLMenuItemGL>("Alignment TopLeft")->setLabel(
+					LLTrans::getString( ( LLLayoutStack::HORIZONTAL == getOrientation(getSideType()) ) ? "Toolbar_Left" : "Toolbar_Top"));
+				pAlignmentMenu->getChild<LLMenuItemGL>("Alignment BottomRight")->setLabel(
+					LLTrans::getString( ( LLLayoutStack::HORIZONTAL == getOrientation(getSideType()) ) ? "Toolbar_Right" : "Toolbar_Bottom"));
+			}
+// [/SL:KB]
 		}
 		else
 		{
@@ -188,7 +220,10 @@ void LLToolBar::initFromParams(const LLToolBar::Params& p)
 	addChild(mCenteringStack);
 	
 	LLLayoutPanel::Params border_panel_p;
-	border_panel_p.name = "border_panel";
+//	border_panel_p.name = "border_panel";
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	border_panel_p.name = "border_panel_left";
+// [/SL:KB]
 	border_panel_p.rect = getLocalRect();
 	border_panel_p.auto_resize = true;
 	border_panel_p.user_resize = false;
@@ -212,12 +247,19 @@ void LLToolBar::initFromParams(const LLToolBar::Params& p)
 	mCenterPanel->setButtonPanel(mButtonPanel);
 	mCenterPanel->addChild(mButtonPanel);
 	
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	border_panel_p.name = "border_panel_right";
+// [/SL:KB]
 	mCenteringStack->addChild(LLUICtrlFactory::create<LLLayoutPanel>(border_panel_p));
 
 	BOOST_FOREACH(LLCommandId id, p.commands)
 	{
 		addCommand(id);
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	setButtonAlignment(p.button_alignment);
+// [/SL:KB]
 
 	mNeedsLayout = true;
 }
@@ -484,6 +526,66 @@ void LLToolBar::onRemoveSelectedCommand()
 		mRightMouseTargetButton = NULL;
 	}
 }
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+LLToolBarEnums::AlignmentType LLToolBar::getButtonAlignment() const
+{
+	return mAlignment;
+}
+
+void LLToolBar::setButtonAlignment(LLToolBarEnums::AlignmentType alignment)
+{
+	LLLayoutPanel* pLeftBorder = mCenteringStack->findChild<LLLayoutPanel>("border_panel_left", FALSE);
+	if (pLeftBorder)
+	{
+		pLeftBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_BOTTOMRIGHT == alignment) );
+	}
+
+	LLLayoutPanel* pRightBorder = mCenteringStack->findChild<LLLayoutPanel>("border_panel_right", FALSE);
+	if (pRightBorder)
+	{
+		pRightBorder->setVisible( (LLToolBarEnums::ALIGN_CENTER == alignment) || (LLToolBarEnums::ALIGN_TOPLEFT == alignment) );
+	}
+
+	mCenteringStack->updateLayout();
+	mAlignment = alignment;
+}
+
+void LLToolBar::onChangeButtonAlignment(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("topleft" == strParam)
+	{
+		setButtonAlignment(LLToolBarEnums::ALIGN_TOPLEFT);
+	}
+	else if ("center" == strParam)
+	{
+		setButtonAlignment(LLToolBarEnums::ALIGN_CENTER);
+	}
+	else if ("bottomright" == strParam)
+	{
+		setButtonAlignment(LLToolBarEnums::ALIGN_BOTTOMRIGHT);
+	}
+}
+
+bool LLToolBar::onCheckButtonAlignment(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if ("topleft" == strParam)
+	{
+		return LLToolBarEnums::ALIGN_TOPLEFT == getButtonAlignment();
+	}
+	else if ("center" == strParam)
+	{
+		return LLToolBarEnums::ALIGN_CENTER == getButtonAlignment();
+	}
+	else if ("bottomright" == strParam)
+	{
+		return LLToolBarEnums::ALIGN_BOTTOMRIGHT == getButtonAlignment();
+	}
+	return false;
+}
+// [/SL:KB]
 
 void LLToolBar::setButtonType(LLToolBarEnums::ButtonType button_type)
 {

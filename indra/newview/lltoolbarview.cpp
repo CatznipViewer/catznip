@@ -58,12 +58,18 @@ bool isToolDragged()
 
 LLToolBarView::Toolbar::Toolbar()
 :	button_display_mode("button_display_mode"),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	button_alignment("button_alignment", LLToolBarEnums::ALIGN_CENTER),
+// [/SL:KB]
 	commands("command")
 {}
 
 LLToolBarView::ToolbarSet::ToolbarSet()
 :	left_toolbar("left_toolbar"),
 	right_toolbar("right_toolbar"),
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	top_toolbar("top_toolbar"),
+// [/SL:KB]
 	bottom_toolbar("bottom_toolbar")
 {}
 
@@ -101,6 +107,11 @@ BOOL LLToolBarView::postBuild()
 
 	mToolbars[LLToolBarEnums::TOOLBAR_RIGHT] = getChild<LLToolBar>("toolbar_right");
 	mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->getCenterLayoutPanel()->setLocationId(LLToolBarEnums::TOOLBAR_RIGHT);
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	mToolbars[LLToolBarEnums::TOOLBAR_TOP] = getChild<LLToolBar>("toolbar_top");
+	mToolbars[LLToolBarEnums::TOOLBAR_TOP]->getCenterLayoutPanel()->setLocationId(LLToolBarEnums::TOOLBAR_TOP);
+// [/SL:KB]
 
 	mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM] = getChild<LLToolBar>("toolbar_bottom");
 	mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->getCenterLayoutPanel()->setLocationId(LLToolBarEnums::TOOLBAR_BOTTOM);
@@ -280,10 +291,18 @@ bool LLToolBarView::loadToolbars(bool force_default)
 		{
 			LLToolBarEnums::ButtonType button_type = toolbar_set.left_toolbar.button_display_mode;
 			mToolbars[LLToolBarEnums::TOOLBAR_LEFT]->setButtonType(button_type);
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+			LLToolBarEnums::AlignmentType button_alignment = toolbar_set.left_toolbar.button_alignment;
+			mToolbars[LLToolBarEnums::TOOLBAR_LEFT]->setButtonAlignment(button_alignment);
+// [/SL:KB]
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.left_toolbar.commands)
 		{
-			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_LEFT]))
+//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_LEFT]))
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
+			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_LEFT]))
+// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to left toolbar." << LL_ENDL;
 			}
@@ -295,25 +314,61 @@ bool LLToolBarView::loadToolbars(bool force_default)
 		{
 			LLToolBarEnums::ButtonType button_type = toolbar_set.right_toolbar.button_display_mode;
 			mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->setButtonType(button_type);
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+			LLToolBarEnums::AlignmentType button_alignment = toolbar_set.right_toolbar.button_alignment;
+			mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->setButtonAlignment(button_alignment);
+// [/SL:KB]
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.right_toolbar.commands)
 		{
-			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]))
+//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]))
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
+			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]))
+// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to right toolbar." << LL_ENDL;
 			}
 		}
 	}
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	if (toolbar_set.top_toolbar.isProvided() && mToolbars[LLToolBarEnums::TOOLBAR_TOP])
+	{
+		if (toolbar_set.top_toolbar.button_display_mode.isProvided())
+		{
+			LLToolBarEnums::ButtonType button_type = toolbar_set.top_toolbar.button_display_mode;
+			mToolbars[LLToolBarEnums::TOOLBAR_TOP]->setButtonType(button_type);
+
+			LLToolBarEnums::AlignmentType button_alignment = toolbar_set.top_toolbar.button_alignment;
+			mToolbars[LLToolBarEnums::TOOLBAR_TOP]->setButtonAlignment(button_alignment);
+		}
+		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.top_toolbar.commands)
+		{
+			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_TOP]))
+			{
+				llwarns << "Error adding command '" << command_params.name() << "' to top toolbar." << llendl;
+			}
+		}
+	}
+// [/SL:KB]
 	if (toolbar_set.bottom_toolbar.isProvided() && mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM])
 	{
 		if (toolbar_set.bottom_toolbar.button_display_mode.isProvided())
 		{
 			LLToolBarEnums::ButtonType button_type = toolbar_set.bottom_toolbar.button_display_mode;
 			mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->setButtonType(button_type);
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+			LLToolBarEnums::AlignmentType button_alignment = toolbar_set.bottom_toolbar.button_alignment;
+			mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->setButtonAlignment(button_alignment);
+// [/SL:KB]
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.bottom_toolbar.commands)
 		{
-			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]))
+//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]))
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
+			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]))
+// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to bottom toolbar." << LL_ENDL;
 			}
@@ -380,16 +435,35 @@ void LLToolBarView::saveToolbars() const
 	if (mToolbars[LLToolBarEnums::TOOLBAR_LEFT])
 	{
 		toolbar_set.left_toolbar.button_display_mode = mToolbars[LLToolBarEnums::TOOLBAR_LEFT]->getButtonType();
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		toolbar_set.left_toolbar.button_alignment = mToolbars[LLToolBarEnums::TOOLBAR_LEFT]->getButtonAlignment();
+// [/SL:KB]
 		addToToolset(mToolbars[LLToolBarEnums::TOOLBAR_LEFT]->getCommandsList(), toolbar_set.left_toolbar);
+
 	}
 	if (mToolbars[LLToolBarEnums::TOOLBAR_RIGHT])
 	{
 		toolbar_set.right_toolbar.button_display_mode = mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->getButtonType();
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		toolbar_set.right_toolbar.button_alignment = mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->getButtonAlignment();
+// [/SL:KB]
 		addToToolset(mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]->getCommandsList(), toolbar_set.right_toolbar);
+
 	}
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	if (mToolbars[LLToolBarEnums::TOOLBAR_TOP])
+	{
+		toolbar_set.top_toolbar.button_display_mode = mToolbars[LLToolBarEnums::TOOLBAR_TOP]->getButtonType();
+		toolbar_set.top_toolbar.button_alignment = mToolbars[LLToolBarEnums::TOOLBAR_TOP]->getButtonAlignment();
+		addToToolset(mToolbars[LLToolBarEnums::TOOLBAR_TOP]->getCommandsList(), toolbar_set.top_toolbar);
+	}
+// [/SL:KB]
 	if (mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM])
 	{
 		toolbar_set.bottom_toolbar.button_display_mode = mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->getButtonType();
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+		toolbar_set.bottom_toolbar.button_alignment = mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->getButtonAlignment();
+// [/SL:KB]
 		addToToolset(mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->getCommandsList(), toolbar_set.bottom_toolbar);
 	}
 	
