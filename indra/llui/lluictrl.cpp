@@ -79,6 +79,9 @@ LLUICtrl::Params::Params()
 	mouseenter_callback("mouseenter_callback"),
 	mouseleave_callback("mouseleave_callback"),
 	control_name("control_name"),
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	control_tooltip("control_tooltip", true),
+// [/SL:KB]
 	font("font", LLFontGL::getFontSansSerif()),
 	font_halign("halign"),
 	font_valign("valign"),
@@ -130,6 +133,9 @@ void LLUICtrl::initFromParams(const Params& p)
 	mRequestsFront = p.requests_front;
 
 	setIsChrome(p.chrome);
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	mControlToolTip = p.control_tooltip;
+// [/SL:KB]
 	setControlName(p.control_name);
 	if(p.enabled_controls.isProvided())
 	{
@@ -482,6 +488,13 @@ void LLUICtrl::setControlVariable(LLControlVariable* control)
 		mControlVariable = control;
 		mControlConnection = mControlVariable->getSignal()->connect(boost::bind(&controlListener, _2, getHandle(), std::string("value")));
 		setValue(mControlVariable->getValue());
+
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+		if ( (mControlToolTip) && (mControlVariable->getToolTipFlags() & LLControlVariable::TOOLTIP_SHOW) && (getToolTip().empty()) )
+		{
+			setToolTip(mControlVariable->getToolTip());
+		}
+// [/SL:KB]
 	}
 }
 

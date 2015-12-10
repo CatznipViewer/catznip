@@ -28,16 +28,24 @@
 #define LLFLOATERSPELLCHECKERSETTINGS_H
 
 #include "llfloater.h"
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+#include "llfloaterpreference.h"
+// [/SL:KB]
 
-class LLFloaterSpellCheckerSettings : public LLFloater
+// [SL:KB] - Patch: Preferences-SpellCheck | Checked: 2014-03-04 (Catznip-3.6)
+class LLPanelPreferenceSpellCheckerSettings : public LLPanelPreference
 {
 public:
-	LLFloaterSpellCheckerSettings(const LLSD& key);
+	LLPanelPreferenceSpellCheckerSettings();
 
 	/*virtual*/ void draw();
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& key);
-	/*virtual*/ void onClose(bool app_quitting);
+
+	// LLPanelPreference overrides
+public:
+	/*virtual*/ void refresh();
+	/*virtual*/ void apply();
+	/*virtual*/ void onClose();
 
 protected:
 	void onBtnImport();
@@ -46,6 +54,24 @@ protected:
 	void onSpellCheckSettingsChange();
 	void refreshDictionaries(bool from_settings);
 };
+// [/SL:KB]
+//class LLFloaterSpellCheckerSettings : public LLFloater
+//{
+//public:
+//	LLFloaterSpellCheckerSettings(const LLSD& key);
+//
+//	/*virtual*/ void draw();
+//	/*virtual*/ BOOL postBuild();
+//	/*virtual*/ void onOpen(const LLSD& key);
+//	/*virtual*/ void onClose(bool app_quitting);
+//
+//protected:
+//	void onBtnImport();
+//	void onBtnMove(const std::string& from, const std::string& to);
+//	void onBtnRemove();
+//	void onSpellCheckSettingsChange();
+//	void refreshDictionaries(bool from_settings);
+//};
 
 class LLFloaterSpellCheckerImport : public LLFloater
 {

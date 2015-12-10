@@ -130,14 +130,24 @@ bool LLControlVariable::llsd_compare(const LLSD& a, const LLSD & b)
 	return result;
 }
 
-LLControlVariable::LLControlVariable(const std::string& name, eControlType type,
-							 LLSD initial, const std::string& comment,
-							 ePersist persist, bool hidefromsettingseditor)
+//LLControlVariable::LLControlVariable(const std::string& name, eControlType type,
+//							 LLSD initial, const std::string& comment,
+//							 ePersist persist, bool hidefromsettingseditor)
+//	: mName(name),
+//	  mComment(comment),
+//	  mType(type),
+//	  mPersist(persist),
+//	  mHideFromSettingsEditor(hidefromsettingseditor)
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+LLControlVariable::LLControlVariable(const std::string& name, eControlType type, LLSD initial, const std::string& comment, ePersist persist, bool hidefromsettingseditor, const std::string& tooltip, U32 tooltipflags)
 	: mName(name),
 	  mComment(comment),
 	  mType(type),
 	  mPersist(persist),
-	  mHideFromSettingsEditor(hidefromsettingseditor)
+	  mHideFromSettingsEditor(hidefromsettingseditor),
+	  mToolTip(tooltip),
+	  mToolTipFlags(tooltipflags)
+// [/SL:KB]
 {
 	if ((persist != PERSIST_NO) && mComment.empty())
 	{
@@ -275,6 +285,32 @@ void LLControlVariable::setComment(const std::string& comment)
 	mComment = comment;
 }
 
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+std::string LLControlVariable::getToolTip() const
+{
+	if ((mToolTipFlags & TOOLTIP_SHOW) == 0)
+		return LLStringUtil::null;
+
+	std::string strComment = (!mToolTip.empty()) ? mToolTip : mComment;
+	if (mToolTipFlags & TOOLTIP_SHOW_DEFAULT)
+	{
+		if (TYPE_BOOLEAN == mType)
+			strComment += llformat(" (Default: %s)", (getDefault().asBoolean()) ? "enabled" : "disabled");
+	}
+	return strComment;
+}
+
+void LLControlVariable::setToolTip(const std::string& tooltip)
+{
+	mToolTip = tooltip;
+}
+
+void LLControlVariable::setToolTipFlags(U32 tooltip_flags)
+{
+	mToolTipFlags = tooltip_flags;
+}
+// [/SL:KB]
+
 void LLControlVariable::resetToDefault(bool fire_signal)
 {
 	//The first setting is always the default
@@ -374,7 +410,11 @@ std::string LLControlGroup::typeEnumToString(eControlType typeenum)
 	return mTypeString[typeenum];
 }
 
-LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor)
+//LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor)
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+LLControlVariable* LLControlGroup::declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor,
+                                                  const std::string& tooltip, U32 tooltipflags)
+// [/SL:KB]
 {
 	LLControlVariable* existing_control = getControl(name);
 	if (existing_control)
@@ -397,7 +437,10 @@ LLControlVariable* LLControlGroup::declareControl(const std::string& name, eCont
 	}
 
 	// if not, create the control and add it to the name table
-	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor);
+//	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor);
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	LLControlVariable* control = new LLControlVariable(name, type, initial_val, comment, persist, hidefromsettingseditor, tooltip, tooltipflags);
+// [/SL:KB]
 	mNameTable[name] = control;	
 	return control;
 }
@@ -869,6 +912,9 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 
 	U32	validitems = 0;
 	bool hidefromsettingseditor = false;
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	U32 tooltipflags = 0;
+// [/SL:KB]
 	
 	for(LLSD::map_const_iterator itr = settings.beginMap(); itr != settings.endMap(); ++itr)
 	{
@@ -893,7 +939,26 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 		{
 			hidefromsettingseditor = false;
 		}
-		
+	
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+		// If a control doesn't specify its own tooltop but is driven by a control variable then the control can
+		// choose to use the description/comment as its tooltip. However, this isn't always appropriate so we can
+		// control the behaviour in the settings definition as well
+		tooltipflags = LLControlVariable::TOOLTIP_SHOW | LLControlVariable::TOOLTIP_SHOW_DEFAULT;
+		if (control_map.has("ToolTipFlags"))
+		{
+			const std::string strToolTipFlags = control_map["ShowCommentAsToolip"].asString();
+			if ("none" == strToolTipFlags)
+				tooltipflags = LLControlVariable::TOOLTIP_NONE;
+			else if ("show" == strToolTipFlags)
+				tooltipflags = LLControlVariable::TOOLTIP_SHOW | LLControlVariable::TOOLTIP_SHOW_DEFAULT;
+			else if ("shownodefault" == strToolTipFlags)
+				tooltipflags = LLControlVariable::TOOLTIP_SHOW;
+			else
+				llassert(false);
+		}
+// [/SL:KB]
+
 		// If the control exists just set the value from the input file.
 		LLControlVariable* existing_control = getControl(name);
 		if(existing_control)
@@ -911,6 +976,11 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 					existing_control->setPersist(persist);
 					existing_control->setHiddenFromSettingsEditor(hidefromsettingseditor);
 					existing_control->setComment(control_map["Comment"].asString());
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+					if (control_map.has("ToolTip"))
+						existing_control->setToolTip(control_map["ToolTip"].asString());
+					existing_control->setToolTipFlags(tooltipflags);
+// [/SL:KB]
 				}
 				else
 				{
@@ -969,7 +1039,12 @@ U32 LLControlGroup::loadFromFile(const std::string& filename, bool set_default_v
 						   control_map["Value"], 
 						   control_map["Comment"].asString(), 
 						   persist,
-						   hidefromsettingseditor
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+						   hidefromsettingseditor,
+						   control_map.has("ToolTip") ? control_map["ToolTip"].asString() : LLStringUtil::null,
+						   tooltipflags
+// [/SL:KB]
+//						   hidefromsettingseditor
 						   );
 		}
 

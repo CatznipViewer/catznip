@@ -366,6 +366,7 @@
         top_delta="-3"
         width="28">
     </check_box>
+<!--
     <text
         layout="topleft"
         left="0"
@@ -377,6 +378,7 @@
         text_color="DrYellow">
       To temporarily stop all notifications, use Communicate &gt; Do Not Disturb.
     </text>
+-->
 
   </panel>
 
@@ -468,7 +470,7 @@
         height="23"
         layout="topleft"
         left_pad="5"
-        name="chat_font_size"
+        name="log_transcripts"
         top="0"
         width="165">
         <item
