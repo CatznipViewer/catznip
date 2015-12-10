@@ -55,6 +55,10 @@ extern LLControlGroup gWarningSettings;
 // Saved at end of session
 extern LLControlGroup gCrashSettings;
 
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+extern LLControlGroup gStartupSettings;
+// [/SL:KB]
+
 // Set after settings loaded
 extern std::string gLastRunVersion;
 

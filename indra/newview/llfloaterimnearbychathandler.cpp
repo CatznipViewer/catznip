@@ -547,8 +547,10 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
  		LLFirstUse::otherAvatarChatFirst();
 
  		// Add sender to the recent people list.
- 		LLRecentPeople::instance().add(chat_msg.mFromID);
-
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+		LLRecentPeople::instance().add(chat_msg.mFromID, LLRecentPeople::IT_CHAT);
+// [/SL:KB]
+// 		LLRecentPeople::instance().add(chat_msg.mFromID);
 	}
 
 	// Send event on to LLEventStream

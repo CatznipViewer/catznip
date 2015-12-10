@@ -100,6 +100,10 @@ public:
 	void addAvalineItem(const LLUUID& item_id, const LLUUID& session_id, const std::string& item_name);
 	void handleDisplayNamesOptionChanged();
 
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	void updateLastInteractionTimes();
+// [/SL:KB]
+
 protected:
 	void refresh();
 
@@ -108,7 +112,7 @@ protected:
 		const uuid_vec_t& vnew,
 		uuid_vec_t& vadded,
 		uuid_vec_t& vremoved);
-	void updateLastInteractionTimes();	
+//	void updateLastInteractionTimes();	
 	void rebuildNames();
 	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
 	void updateAvatarNames();

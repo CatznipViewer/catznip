@@ -231,6 +231,17 @@
         <key>Value</key>
         <integer>0</integer>
       </map>
+    <key>WearInitialOutfit</key>
+      <map>
+        <key>Comment</key>
+        <string>Force-wear the default avatar on the next login (account specific, requires restart)</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <boolean>0</boolean>
+      </map>
     <!-- Settings below are for back compatibility only.
     They are not used in current viewer anymore. But they can't be removed to avoid
     influence on previous versions of the viewer in case of settings are not used or default value
