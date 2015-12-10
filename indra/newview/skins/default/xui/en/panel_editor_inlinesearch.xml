@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ background_opaque="true"
+ background_visible="true"
+ bg_alpha_color="DkGray2"
+ follows="top|right"
+ height="22"
+ layout="topleft"
+ name="panel_editor_inlinesearch"
+ width="185">
+
+    <line_editor
+     border_style="line"
+     border_thickness="1"
+     follows="top|left|right"
+     height="16"
+     layout="topleft"
+     left="5"
+     name="search_editor"
+     top="3"
+     width="100" />
+
+    <button
+     follows="top|right"
+     height="16"
+     image_selected="Arrow_Up"
+     image_unselected="Arrow_Up"
+     layout="topleft"
+     left_pad="5"
+     name="search_up"
+     top_delta="0"
+     width="16" />
+    <button
+     follows="top|right"
+     height="16"
+     image_selected="Arrow_Down"
+     image_unselected="Arrow_Down"
+     layout="topleft"
+     left_pad="3"
+     top_delta="0"
+     name="search_down"
+     width="16" />
+    <menu_button
+     follows="top|right"
+     height="16"
+     image_hover_unselected="Icon_Gear_Foreground"
+     image_selected="Icon_Gear_Press"
+     image_unselected="Icon_Gear_Background"
+     layout="topleft"
+     left_pad="3"
+     menu_filename="menu_editor_inlinesearch.xml"
+     menu_position="bottomright"
+     top_delta="0"
+     name="options_btn"
+     width="16" />
+    <button
+     follows="top|right"
+     height="16"
+     image_selected="Icon_Close_Press"
+     image_unselected="Icon_Close_Foreground"
+     layout="topleft"
+     left_pad="5"
+     name="close_btn"
+     top_delta="0"
+     width="16" />
+</panel>
