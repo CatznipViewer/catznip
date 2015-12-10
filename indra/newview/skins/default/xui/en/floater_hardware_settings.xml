@@ -6,7 +6,7 @@
  name="Hardware Settings Floater"
  help_topic="hardware_settings_floater"
  title="HARDWARE SETTINGS"
- width="615">
+ width="415">
     <text
      type="string"
      length="1"
@@ -15,14 +15,14 @@
      layout="topleft"
      left="10"
      name="Filtering:"
-     top="20"
-     width="188">
+     top="25"
+     width="140">
         Filtering:
     </text>
     <check_box
      control_name="RenderAnisotropic"
      height="16"
-     label="Anisotropic Filtering (slower when enabled)"
+     label="Anisotropic Filtering (slower)"
      layout="topleft"
      left_pad="10"
      name="ani"
@@ -37,7 +37,7 @@
      left="10"
      name="antialiasing label"
      top_pad="7"
-     width="188">
+     width="140">
         Antialiasing:
     </text>
     <combo_box
@@ -81,7 +81,7 @@
      name="antialiasing restart"
      top_delta="0"
      width="230">
-      (requires viewer restart)
+      (requires restart)
     </text>
     <spinner
      control_name="RenderGamma"
@@ -96,8 +96,8 @@
      left="10"
      max_val="2"
      name="gamma"
-     top_pad="11"
-     width="262" />
+     top_pad="15"
+     width="190" />
     <text
      type="string"
      length="1"
@@ -108,7 +108,7 @@
      name="(brightness, lower is brighter)"
      top_delta="2"
      width="385">
-        (0 = default brightness, lower = brighter)
+        (0 = default, lower = brighter)
     </text>
     <text
      type="string"
@@ -118,8 +118,8 @@
      layout="topleft"
      left="10"
      name="Enable VBO:"
-     top_pad="10"
-     width="188">
+     top_pad="15"
+     width="140">
         Enable VBO:
     </text>
     <check_box
@@ -141,14 +141,14 @@
     left="10"
     name="tc label"
     top_pad="10"
-    width="188">
+    width="140">
     Enable S3TC:
   </text>
     <check_box
      control_name="RenderCompressTextures"
      height="16"
      initial_value="true"
-     label="Enable Texture Compression (requires restart)"
+     label="Texture Compression (requires restart)"
      layout="topleft"
      left_pad="10"
      name="texture compression"
@@ -159,10 +159,10 @@
      decimal_digits="0"
      follows="left|top"
      height="20"
-     increment="16"
+     increment="32"
      initial_value="32"
      label="Texture Memory (MB):"
-     label_width="195"
+     label_width="140"
      layout="topleft"
      left="10"
      max_val="4096"
@@ -177,7 +177,7 @@
      height="22"
      initial_value="4"
      label="Fog Distance Ratio:"
-     label_width="198"
+     label_width="140"
      layout="topleft"
      left_delta="0"
      max_val="10"

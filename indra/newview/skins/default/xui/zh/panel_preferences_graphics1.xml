@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="顯像" name="Display panel">
 	<text name="QualitySpeed">
-		品質與速度：
+		品質與速度
 	</text>
 	<text name="FasterText">
 		最快
@@ -23,7 +23,7 @@
 	</text>
 	<panel label="自訂圖形" name="CustomGraphics Panel">
 		<text name="ShadersText">
-			著色器：
+			著色器
 		</text>
 		<check_box initial_value="true" label="清澈透明的水" name="TransparentWater"/>
 		<check_box initial_value="true" label="凹凸映射與光澤效果" name="BumpShiny"/>
@@ -34,7 +34,7 @@
 		<check_box initial_value="true" label="環境光遮蔽" name="UseSSAO"/>
 		<check_box initial_value="true" label="景深" name="UseDoF"/>
 		<text name="shadows_label">
-			陰影：
+			陰影
 		</text>
 		<combo_box name="ShadowDetail">
 			<combo_box.item label="無" name="0"/>
@@ -42,7 +42,7 @@
 			<combo_box.item label="日 / 月 + 投影物" name="2"/>
 		</combo_box>
 		<text name="reflection_label">
-			水文反射：
+			水文反射
 		</text>
 		<combo_box name="Reflections">
 			<combo_box.item label="最小" name="0"/>
@@ -63,7 +63,7 @@
 		<slider label="非假冒化身上限：" name="MaxNumberAvatarDrawn"/>
 		<slider label="後處理品質：" name="RenderPostProcess"/>
 		<text name="MeshDetailText">
-			網面細節：
+			網面細節
 		</text>
 		<slider label="物件：" name="ObjectMeshDetail"/>
 		<slider label="彈性幾何元件：" name="FlexibleMeshDetail"/>
@@ -93,13 +93,13 @@
 			低
 		</text>
 		<text name="AvatarRenderingText">
-			化身呈像：
+			化身呈像
 		</text>
 		<check_box initial_value="true" label="化身假冒者" name="AvatarImpostors"/>
 		<check_box initial_value="true" label="硬體換膚" name="AvatarVertexProgram"/>
 		<check_box initial_value="true" label="化身衣服" name="AvatarCloth"/>
 		<text name="TerrainDetailText">
-			地形細節：
+			地形細節
 		</text>
 		<radio_group name="TerrainDetailRadio">
 			<radio_item label="低" name="0"/>

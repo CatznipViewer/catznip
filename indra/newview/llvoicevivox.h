@@ -786,7 +786,10 @@ private:
 	{
 		earLocCamera = 0,		// ear at camera
 		earLocAvatar,			// ear at avatar
-		earLocMixed				// ear at avatar location/camera direction
+		earLocMixed,			// ear at avatar location/camera direction
+// [SL:FS] - Patch: Viewer-VoiceAtSpeaker | Checked: 2015-07-20 (Catznip-3.8)
+		earLocSpeaker			// ear at speaker, no spatial audio
+// [/SL:FS]
 	};
 	
 	S32			mEarLocation;  
