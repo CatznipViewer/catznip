@@ -16,10 +16,8 @@
 			<menu_item_check label="Løb altid" name="Always Run"/>
 			<menu_item_call label="Stop animering" name="Stop Animating My Avatar"/>
 		</menu>
-		<menu label="Min status" name="Status">
 			<menu_item_call label="Væk" name="Set Away"/>
 			<menu_item_call label="Optaget" name="Set Busy"/>
-		</menu>
 		<menu_item_call label="Afslut [APP_NAME]" name="Quit"/>
 	</menu>
 	<menu label="Kommunikér" name="Communicate">
@@ -133,6 +131,7 @@
 	</menu>
 	<menu label="Avanceret" name="Advanced">
 		<menu_item_call label="Gendan teksturer" name="Rebake Texture"/>
+		<menu_item_call label="Opdaterer L$ balance" name="Refresh Balance"/>
 		<menu_item_call label="Sæt UI størrelse til standard" name="Set UI Size to Default"/>
 		<menu_item_call label="Vælg vinduesstørrelse..." name="Set Window Size..."/>
 		<menu_item_check label="Begræns valg afstand" name="Limit Select Distance"/>

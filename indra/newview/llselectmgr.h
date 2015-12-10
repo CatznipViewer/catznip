@@ -175,7 +175,10 @@ public:
 	void renderOneSilhouette(const LLColor4 &color);
 	void setTransient(BOOL transient) { mTransient = transient; }
 	BOOL isTransient() { return mTransient; }
-	LLViewerObject* getObject();
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+	LLViewerObject* getObject() const;
+// [/SL:KB]
+//	LLViewerObject* getObject();
 	void setObject(LLViewerObject* object);
 	// *NOTE: invalidate stored textures and colors when # faces change
 	void saveColors();
@@ -224,7 +227,10 @@ public:
 	BOOL					mSilhouetteExists;	// need to generate silhouette?
 
 protected:
-	LLPointer<LLViewerObject>	mObject;
+//	LLPointer<LLViewerObject>	mObject;
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+	mutable LLPointer<LLViewerObject> mObject;
+// [/SL:KB]
 	S32				mTESelectMask;
 	S32				mLastTESelected;
 };

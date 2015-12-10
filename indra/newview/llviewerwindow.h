@@ -89,6 +89,9 @@ public:
 	LLPickInfo(const LLCoordGL& mouse_pos, 
 		MASK keyboard_mask, 
 		BOOL pick_transparent,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+		BOOL pick_rigged,
+// [/SL:KB]
 		BOOL pick_particle,
 		BOOL pick_surface_info,
 		BOOL pick_unselectable,
@@ -123,6 +126,9 @@ public:
 	LLVector4		mTangent;
 	LLVector3		mBinormal;
 	BOOL			mPickTransparent;
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+	BOOL			mPickRigged;
+// [/SL:KB]
 	BOOL			mPickParticle;
 	BOOL			mPickUnselectable;
 	void		    getSurfaceInfo();
@@ -292,7 +298,10 @@ public:
 	BOOL            getCursorHidden() { return mCursorHidden; }
 	void			moveCursorToCenter();								// move to center of window
 													
-	void			setShowProgress(const BOOL show);
+//	void			setShowProgress(const BOOL show);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+	void			setShowProgress(bool show, F32 fade_duration = 0.0f);
+// [/SL:KB]
 	BOOL			getShowProgress() const;
 	void			setProgressString(const std::string& string);
 	void			setProgressPercent(const F32 percent);
@@ -362,13 +371,23 @@ public:
 	void			performPick();
 	void			returnEmptyPicks();
 
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
 	void			pickAsync(	S32 x,
 								S32 y_from_bot,
 								MASK mask,
 								void (*callback)(const LLPickInfo& pick_info),
 								BOOL pick_transparent = FALSE,
-								BOOL pick_unselectable = FALSE);
-	LLPickInfo		pickImmediate(S32 x, S32 y, BOOL pick_transparent, BOOL pick_particle = FALSE);
+								BOOL pick_unselectable = FALSE,
+								BOOL pick_rigged = FALSE);
+	LLPickInfo		pickImmediate(S32 x, S32 y, BOOL pick_transparent, BOOL pick_rigged, BOOL pick_particle = FALSE);
+// [/SL:KB]
+//	void			pickAsync(	S32 x,
+//								S32 y_from_bot,
+//								MASK mask,
+//								void (*callback)(const LLPickInfo& pick_info),
+//								BOOL pick_transparent = FALSE,
+//								BOOL pick_unselectable = FALSE);
+//	LLPickInfo		pickImmediate(S32 x, S32 y, BOOL pick_transparent, BOOL pick_particle = FALSE);
 	LLHUDIcon* cursorIntersectIcon(S32 mouse_x, S32 mouse_y, F32 depth,
 										   LLVector4a* intersection);
 
@@ -376,6 +395,9 @@ public:
 									LLViewerObject *this_object = NULL,
 									S32 this_face = -1,
 									BOOL pick_transparent = FALSE,
+// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
+									BOOL pick_rigged = FALSE,
+// [/SL:KB]
 									S32* face_hit = NULL,
 									LLVector4a *intersection = NULL,
 									LLVector2 *uv = NULL,
@@ -422,8 +444,8 @@ private:
 	void			restoreGL(const std::string& progress_message = LLStringUtil::null);
 	void			initFonts(F32 zoom_factor = 1.f);
 	void			schedulePick(LLPickInfo& pick_info);
-	S32				getChatConsoleBottomPad(); // Vertical padding for child console rect, varied by bottom clutter
-	LLRect			getChatConsoleRect(); // Get optimal cosole rect.
+//	S32				getChatConsoleBottomPad(); // Vertical padding for child console rect, varied by bottom clutter
+//	LLRect			getChatConsoleRect(); // Get optimal cosole rect.
 
 private:
 	LLWindow*		mWindow;						// graphical window object

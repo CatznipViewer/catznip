@@ -57,7 +57,7 @@ LLProgressView* LLProgressView::sInstance = NULL;
 
 S32 gStartImageWidth = 1;
 S32 gStartImageHeight = 1;
-const F32 FADE_TO_WORLD_TIME = 1.0f;
+//const F32 FADE_TO_WORLD_TIME = 1.0f;
 
 static LLPanelInjector<LLProgressView> r("progress_view");
 
@@ -70,6 +70,9 @@ LLProgressView::LLProgressView()
 	mUpdateEvents("LLProgressView"),
 	mFadeToWorldTimer(),
 	mFadeFromLoginTimer(),
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+	mFadeDuration(1.0f),
+// [/SL:KB]
 	mStartupComplete(false)
 {
 	mUpdateEvents.listen("self", boost::bind(&LLProgressView::handleUpdate, this, _1));
@@ -84,9 +87,9 @@ BOOL LLProgressView::postBuild()
 	// media control that is used to play intro video
 	mMediaCtrl = getChild<LLMediaCtrl>("login_media_panel");
 	mMediaCtrl->setVisible( false );		// hidden initially
-	mMediaCtrl->addObserver( this );		// watch events
-	
-	LLViewerMedia::setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
+//	mMediaCtrl->addObserver( this );		// watch events
+//	
+//	LLViewerMedia::setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
 
 	mCancelBtn = getChild<LLButton>("cancel_btn");
 	mCancelBtn->setClickedCallback(  LLProgressView::onCancelButtonClicked, NULL );
@@ -135,6 +138,43 @@ BOOL LLProgressView::handleKeyHere(KEY key, MASK mask)
 	return TRUE;
 }
 
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+void LLProgressView::fade(bool show, F32 fade_duration)
+{
+	if (fade_duration == 0.0f)
+	{
+		mFadeFromLoginTimer.stop();
+		mFadeToWorldTimer.stop();
+
+		setVisible(show);
+		return;
+	}
+
+	if (show)
+	{
+		// Don't do anything if we're already visible or fading in
+		if ((getVisible()) && (mFadeFromLoginTimer.getStarted()))
+			return;
+
+		mFadeToWorldTimer.stop();
+		mFadeFromLoginTimer.start();
+		mFadeDuration = fade_duration;
+
+		setVisible(true);
+	}
+	else
+	{
+		// Don't do anything if we're no longer visible or already fading out
+		if ( (!getVisible()) || (mFadeToWorldTimer.getStarted()) )
+			return;
+
+		mFadeFromLoginTimer.stop();
+		mFadeToWorldTimer.start();
+		mFadeDuration = fade_duration;
+	}
+}
+// [/SL:KB]
+
 void LLProgressView::revealIntroPanel()
 {
 	// if user hasn't yet seen intro video
@@ -146,6 +186,11 @@ void LLProgressView::revealIntroPanel()
 		// hide the progress bar
 		getChild<LLView>("stack1")->setVisible(false);
 		
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		mMediaCtrl->addObserver(this);		// watch events
+		LLViewerMedia::setOnlyAudibleMediaTextureID(mMediaCtrl->getTextureID());
+// [/SL:KB]
+
 		// navigate to intro URL and reveal widget 
 		mMediaCtrl->navigateTo( intro_url );	
 		mMediaCtrl->setVisible( TRUE );
@@ -219,7 +264,10 @@ void LLProgressView::drawStartTexture(F32 alpha)
 	else
 	{
 		gGL.getTexUnit(0)->unbind(LLTexUnit::TT_TEXTURE);
-		gGL.color4f(0.f, 0.f, 0.f, 1.f);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		gGL.color4f(0.f, 0.f, 0.f, alpha);
+// [/SL:KB]
+//		gGL.color4f(0.f, 0.f, 0.f, 1.f);
 		gl_rect_2d(getRect());
 	}
 	gGL.popMatrix();
@@ -232,7 +280,10 @@ void LLProgressView::draw()
 
 	if (mFadeFromLoginTimer.getStarted())
 	{
-		F32 alpha = clamp_rescale(mFadeFromLoginTimer.getElapsedTimeF32(), 0.f, FADE_TO_WORLD_TIME, 0.f, 1.f);
+//		F32 alpha = clamp_rescale(mFadeFromLoginTimer.getElapsedTimeF32(), 0.f, FADE_TO_WORLD_TIME, 0.f, 1.f);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		F32 alpha = clamp_rescale(mFadeFromLoginTimer.getElapsedTimeF32(), 0.f, mFadeDuration, 0.f, 1.f);
+// [/SL:KB]
 		LLViewDrawContext context(alpha);
 
 		if (!mMediaCtrl->getVisible())
@@ -248,36 +299,55 @@ void LLProgressView::draw()
 	if (mFadeToWorldTimer.getStarted())
 	{
 		// draw fading panel
-		F32 alpha = clamp_rescale(mFadeToWorldTimer.getElapsedTimeF32(), 0.f, FADE_TO_WORLD_TIME, 1.f, 0.f);
+//		F32 alpha = clamp_rescale(mFadeToWorldTimer.getElapsedTimeF32(), 0.f, FADE_TO_WORLD_TIME, 1.f, 0.f);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		F32 alpha = clamp_rescale(mFadeToWorldTimer.getElapsedTimeF32(), 0.f, mFadeDuration, 1.f, 0.f);
+// [/SL:KB]
 		LLViewDrawContext context(alpha);
 				
 		drawStartTexture(alpha);
 		LLPanel::draw();
 
 		// faded out completely - remove panel and reveal world
-		if (mFadeToWorldTimer.getElapsedTimeF32() > FADE_TO_WORLD_TIME )
+//		if (mFadeToWorldTimer.getElapsedTimeF32() > FADE_TO_WORLD_TIME )
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		if (mFadeToWorldTimer.getElapsedTimeF32() > mFadeDuration)
+// [/SL:KB]
 		{
 			mFadeToWorldTimer.stop();
 
-			LLViewerMedia::setOnlyAudibleMediaTextureID(LLUUID::null);
-
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
 			// Fade is complete, release focus
-			gFocusMgr.releaseFocusIfNeeded( this );
+			gFocusMgr.releaseFocusIfNeeded(this);
 
 			// turn off panel that hosts intro so we see the world
 			setVisible(FALSE);
 
-			// stop observing events since we no longer care
-			mMediaCtrl->remObserver( this );
+			if (mMediaCtrl->getVisible())
+			{
+// [/SL:KB]
+				LLViewerMedia::setOnlyAudibleMediaTextureID(LLUUID::null);
 
-			// hide the intro
-			mMediaCtrl->setVisible( false );
+//				// Fade is complete, release focus
+//				gFocusMgr.releaseFocusIfNeeded(this);
 
-			// navigate away from intro page to something innocuous since 'unload' is broken right now
-			//mMediaCtrl->navigateTo( "about:blank" );
+//				// turn off panel that hosts intro so we see the world
+//				setVisible(FALSE);
 
-			// FIXME: this causes a crash that i haven't been able to fix
-			mMediaCtrl->unloadMediaSource();	
+				// stop observing events since we no longer care
+				mMediaCtrl->remObserver(this);
+
+				// hide the intro
+				mMediaCtrl->setVisible(false);
+
+				// navigate away from intro page to something innocuous since 'unload' is broken right now
+				//mMediaCtrl->navigateTo( "about:blank" );
+
+				// FIXME: this causes a crash that i haven't been able to fix
+				mMediaCtrl->unloadMediaSource();
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			}
+// [/SL:KB]
 
 			gStartTexture = NULL;
 		}
@@ -430,8 +500,11 @@ void LLProgressView::onIdle(void* user_data)
 	LLProgressView* self = (LLProgressView*) user_data;
 
 	// Close login panel on mFadeToWorldTimer expiration.
-	if (self->mFadeFromLoginTimer.getStarted() &&
-		self->mFadeFromLoginTimer.getElapsedTimeF32() > FADE_TO_WORLD_TIME)
+//	if (self->mFadeFromLoginTimer.getStarted() &&
+//		self->mFadeFromLoginTimer.getElapsedTimeF32() > FADE_TO_WORLD_TIME)
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+	if (self->mFadeFromLoginTimer.getStarted() && self->mFadeFromLoginTimer.getElapsedTimeF32() > self->mFadeDuration)
+// [/SL:KB]
 	{
 		self->mFadeFromLoginTimer.stop();
 		LLPanelLogin::closePanel();

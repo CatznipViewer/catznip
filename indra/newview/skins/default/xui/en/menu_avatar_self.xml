@@ -11,6 +11,8 @@
          parameter="" />
         <menu_item_call.on_enable
          function="Self.EnableSitDown" />
+        <menu_item_call.on_visible
+         function="Self.VisibleSitDown" />
     </menu_item_call>
     <menu_item_call
      label="Stand Up"
@@ -21,6 +23,8 @@
          parameter="" />
         <menu_item_call.on_enable
          function="Self.EnableStandUp" />
+        <menu_item_call.on_visible
+         function="Self.VisibleStandUp" />
     </menu_item_call>
     <context_menu
      label="Take Off"
@@ -261,6 +265,13 @@
          function="ShowAgentProfile"
          parameter="agent" />
     </menu_item_call>
+      <menu_item_call
+       label="My Picks"
+       name="ChangePicks">
+        <menu_item_call.on_click
+         function="Floater.Show"
+         parameter="picks" />
+      </menu_item_call>
     <menu_item_call
 		 label="Debug Textures"
          name="Debug...">
@@ -278,15 +289,14 @@
              function="Advanced.EnableAppearanceToXML"/>
     </menu_item_call>
   <menu_item_separator
-       layout="topleft" />
+       layout="topleft" on_visible.function="EnableMuteParticle" />
   <menu_item_call
-     enabled="false"
      label="Block Particle Owner"
      name="Mute Particle">
     <menu_item_call.on_click
      function="Particle.Mute" />
 
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="EnableMuteParticle" />
   </menu_item_call>
 </context_menu>

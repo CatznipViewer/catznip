@@ -90,6 +90,17 @@
          parameter="is_friend" />
     </menu_item_call>
     <menu_item_call
+     label="Add Contact"
+     layout="topleft"
+     name="add_contact">
+        <on_click
+         function="Calllog.Action"
+         parameter="add_contact"/>
+        <on_visible
+         function="Calllog.Check"
+         parameter="is_not_friend" />
+    </menu_item_call>
+    <menu_item_call
      label="Invite to group..."
      layout="topleft"
      name="Invite">

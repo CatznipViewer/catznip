@@ -107,6 +107,12 @@ public:
 private:
 	/*virtual*/ void done()
 	{
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+		// Don't process anything if we know we have a parcel landmark
+		if (mInput->mHasParcelLandmark)
+			return;
+// [/SL:KB]
+
 		const uuid_set_t& added = gInventory.getAddedIDs();
 		for (uuid_set_t::const_iterator it = added.begin(); it != added.end(); ++it)
 		{
@@ -115,13 +121,19 @@ private:
 				continue;
 
 			// Start loading the landmark.
-			LLLandmark* lm = gLandmarkList.getAsset(
-					item->getAssetUUID(),
-					boost::bind(&LLLocationInputCtrl::onLandmarkLoaded, mInput, _1));
+//			LLLandmark* lm = gLandmarkList.getAsset(
+//					item->getAssetUUID(),
+//					boost::bind(&LLLocationInputCtrl::onLandmarkLoaded, mInput, _1));
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+			LLLandmark* lm = gLandmarkList.getAsset(item->getAssetUUID(), boost::bind(&LLLocationInputCtrl::onInventoryChanged, mInput));
+// [/SL:KB]
 			if (lm)
 			{
 				// Already loaded? Great, handle it immediately (the callback won't be called).
-				mInput->onLandmarkLoaded(lm);
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+				mInput->onInventoryChanged();
+// [/SL:KB]
+//				mInput->onLandmarkLoaded(lm);
 			}
 		}
 	}
@@ -140,14 +152,24 @@ public:
 private:
 	/*virtual*/ void changed(U32 mask)
 	{
-		if (mask & (~(LLInventoryObserver::LABEL|
-					  LLInventoryObserver::INTERNAL|
-					  LLInventoryObserver::ADD|
-					  LLInventoryObserver::CREATE|
-					  LLInventoryObserver::UPDATE_CREATE)))
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+		// Don't process anything if we don't have a parcel landmark
+		if (!mInput->mHasParcelLandmark)
+			return;
+
+		if (mask & LLInventoryObserver::REMOVE)
 		{
-			mInput->updateAddLandmarkButton();
+			mInput->onInventoryChanged();
 		}
+// [/SL:KB]
+//		if (mask & (~(LLInventoryObserver::LABEL|
+//					  LLInventoryObserver::INTERNAL|
+//					  LLInventoryObserver::ADD|
+//					  LLInventoryObserver::CREATE|
+//					  LLInventoryObserver::UPDATE_CREATE)))
+//		{
+//			mInput->updateAddLandmarkButton();
+//		}
 	}
 
 	LLLocationInputCtrl* mInput;
@@ -207,6 +229,12 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 :	LLComboBox(p),
 	mIconHPad(p.icon_hpad),
 	mAddLandmarkHPad(p.add_landmark_hpad),
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	mLandmarkAddObserver(NULL),
+	mLandmarkRemoveObserver(NULL),
+	mLandmarksDirty(false),
+	mHasParcelLandmark(false),
+// [/SL:KB]
 	mLocationContextMenu(NULL),
 	mAddLandmarkBtn(NULL),
 	mForSaleBtn(NULL),
@@ -396,7 +424,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	LLControlVariable* coordinates_control = gSavedSettings.getControl("NavBarShowCoordinates").get();
 	if (coordinates_control)
 	{
-		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this));
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this, true));
+// [/SL:KB]
+//		mCoordinatesControlConnection = coordinates_control->getSignal()->connect(boost::bind(&LLLocationInputCtrl::refreshLocation, this));
 	}
 
 	// Connecting signal for updating parcel icons on "Show Parcel Properties" setting change.
@@ -419,10 +450,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	mRegionCrossingSlot = gAgent.addRegionChangedCallback(boost::bind(&LLLocationInputCtrl::onRegionBoundaryCrossed, this));
 	createNavMeshStatusListenerForCurrentRegion();
 
-	mRemoveLandmarkObserver	= new LLRemoveLandmarkObserver(this);
-	mAddLandmarkObserver	= new LLAddLandmarkObserver(this);
-	gInventory.addObserver(mRemoveLandmarkObserver);
-	gInventory.addObserver(mAddLandmarkObserver);
+//	mRemoveLandmarkObserver	= new LLRemoveLandmarkObserver(this);
+//	mAddLandmarkObserver	= new LLAddLandmarkObserver(this);
+//	gInventory.addObserver(mRemoveLandmarkObserver);
+//	gInventory.addObserver(mAddLandmarkObserver);
 
 	mParcelChangeObserver = new LLParcelChangeObserver(this);
 	LLViewerParcelMgr::getInstance()->addObserver(mParcelChangeObserver);
@@ -435,10 +466,22 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 
 LLLocationInputCtrl::~LLLocationInputCtrl()
 {
-	gInventory.removeObserver(mRemoveLandmarkObserver);
-	gInventory.removeObserver(mAddLandmarkObserver);
-	delete mRemoveLandmarkObserver;
-	delete mAddLandmarkObserver;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	if (mLandmarkAddObserver)
+	{
+		gInventory.removeObserver(mLandmarkAddObserver);
+		delete mLandmarkAddObserver;
+	}
+	if (mLandmarkRemoveObserver)
+	{
+		gInventory.removeObserver(mLandmarkRemoveObserver);
+		delete mLandmarkRemoveObserver;
+	}
+// [/SL:KB]
+//	gInventory.removeObserver(mRemoveLandmarkObserver);
+//	gInventory.removeObserver(mAddLandmarkObserver);
+//	delete mRemoveLandmarkObserver;
+//	delete mAddLandmarkObserver;
 
 	LLViewerParcelMgr::getInstance()->removeObserver(mParcelChangeObserver);
 	delete mParcelChangeObserver;
@@ -568,6 +611,13 @@ void LLLocationInputCtrl::setFocus(BOOL b)
 
 void LLLocationInputCtrl::handleLoginComplete()
 {
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2012-07-30 (Catznip-3.3)
+	// Don't start observing the inventory until after login has successfully completed to avoid stalling
+	mLandmarkAddObserver = new LLAddLandmarkObserver(this);
+	gInventory.addObserver(mLandmarkAddObserver);
+	mLandmarkRemoveObserver	= new LLRemoveLandmarkObserver(this);
+	gInventory.addObserver(mLandmarkRemoveObserver);
+// [/SL:KB]
 	// An agent parcel update hasn't occurred yet, so we have to
 	// manually set location and the appropriate "Add landmark" icon.
 	refresh();
@@ -583,7 +633,10 @@ void LLLocationInputCtrl::onFocusReceived()
 void LLLocationInputCtrl::onFocusLost()
 {
 	LLUICtrl::onFocusLost();
-	refreshLocation();
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	refreshLocation(true);
+// [/SL:KB]
+//	refreshLocation();
 
 	// Setting cursor to 0  to show the left edge of the text. See STORM-370.
 	mTextEntry->setCursor(0);
@@ -606,6 +659,15 @@ void LLLocationInputCtrl::draw()
 	{
 		refreshHealth();
 	}
+
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	if ( (mLandmarksDirty) && (mLandmarkButtonTimer.getElapsedTimeF32() > 2.5) )
+	{
+		updateAddLandmarkButton();
+		mLandmarksDirty = false;
+	}
+// [/SL:KB]
+
 	LLComboBox::draw();
 }
 
@@ -677,11 +739,11 @@ void LLLocationInputCtrl::onNavMeshStatusChange(const LLPathfindingNavMeshStatus
 	refreshParcelIcons();
 }
 
-void LLLocationInputCtrl::onLandmarkLoaded(LLLandmark* lm)
-{
-	(void) lm;
-	updateAddLandmarkButton();
-}
+//void LLLocationInputCtrl::onLandmarkLoaded(LLLandmark* lm)
+//{
+//	(void) lm;
+//	updateAddLandmarkButton();
+//}
 
 void LLLocationInputCtrl::onLocationHistoryChanged(LLLocationHistory::EChangeType event)
 {
@@ -767,12 +829,18 @@ void LLLocationInputCtrl::onTextEditorRightClicked(S32 x, S32 y, MASK mask)
 
 void LLLocationInputCtrl::refresh()
 {
-	refreshLocation();			// update location string
+//	refreshLocation();			// update location string
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+	refreshLocation(true);			// update location string
+// [/SL:KB]
 	refreshParcelIcons();
 	updateAddLandmarkButton();	// indicate whether current parcel has been landmarked 
 }
 
-void LLLocationInputCtrl::refreshLocation()
+//void LLLocationInputCtrl::refreshLocation()
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-03-29 (Catznip-3.6)
+void LLLocationInputCtrl::refreshLocation(bool fForceUpdate)
+// [/SL:KB]
 {
 	// Is one of our children focused?
 	if (LLUICtrl::hasFocus() || mButton->hasFocus() || mList->hasFocus() ||
@@ -782,6 +850,16 @@ void LLLocationInputCtrl::refreshLocation()
 		LL_WARNS() << "Location input should not be refreshed when having focus" << LL_ENDL;
 		return;
 	}
+
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2014-03-29 (Catznip-3.6)
+	// NOTE-Catznip: this assumes there will only ever be one LLLocationInputCtrl instance at a time
+	static LLVector3d sPrevPosGlobal;
+	if ( (dist_vec_squared(sPrevPosGlobal, gAgent.getPositionGlobal()) < 0.5f) && (!fForceUpdate) )
+	{
+		return;
+	}
+	sPrevPosGlobal = gAgent.getPositionGlobal();
+// [/SL:KB]
 
 	// Update location field.
 	std::string location_name;
@@ -1044,7 +1122,11 @@ void LLLocationInputCtrl::enableAddLandmarkButton(bool val)
 // depending on whether current parcel has been landmarked.
 void LLLocationInputCtrl::updateAddLandmarkButton()
 {
-	enableAddLandmarkButton(LLLandmarkActions::hasParcelLandmark());
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2014-04-06 (Catznip-3.6)
+	mHasParcelLandmark = LLLandmarkActions::hasParcelLandmark();
+	enableAddLandmarkButton(mHasParcelLandmark);
+// [/SL:KB]
+//	enableAddLandmarkButton(LLLandmarkActions::hasParcelLandmark());
 }
 void LLLocationInputCtrl::updateAddLandmarkTooltip()
 {

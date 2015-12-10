@@ -43,6 +43,9 @@ class LLFrameTimer;
 class LLStatGraph;
 class LLPanelVolumePulldown;
 class LLPanelNearByMedia;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+class LLPanelTopInfoBar;
+// [/SL:KB]
 
 class LLStatusBar
 :	public LLPanel
@@ -83,8 +86,17 @@ public:
 	S32 getSquareMetersLeft() const;
 
 	LLPanelNearByMedia* getNearbyMediaPanel() { return mPanelNearByMedia; }
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+	LLPanelTopInfoBar*	getTopInfoBarPanel() const;
+	void				showTopInfoBar(bool fVisible);
+// [/SL:KB]
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	void onToggleBuyCurrencyButton(const LLSD& sdValue);
+	void onToggleMarketplaceButton(const LLSD& sdValue);
+	void onToggleNetStats(const LLSD& sdValue);
+// [/SL:KB]
 	
 	void onClickBuyCurrency();
 	void onVolumeChanged(const LLSD& newvalue);
@@ -97,16 +109,20 @@ private:
 	static void onClickBalance(void* data);
 
 private:
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	LLView		*mViewStatus;		// Contains all status bar controls
+// [/SL:KB]
+
 	LLTextBox	*mTextTime;
 
 	LLStatGraph *mSGBandwidth;
 	LLStatGraph *mSGPacketLoss;
 
-	LLView		*mBtnStats;
+//	LLView		*mBtnStats;
 	LLButton	*mBtnVolume;
 	LLTextBox	*mBoxBalance;
 	LLButton	*mMediaToggle;
-	LLView		*mScriptOut;
+//	LLView		*mScriptOut;
 	LLFrameTimer	mClockUpdateTimer;
 
 	S32				mBalance;
