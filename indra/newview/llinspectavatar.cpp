@@ -34,6 +34,9 @@
 #include "llavatarnamecache.h"
 #include "llavatarpropertiesprocessor.h"
 #include "lldateutil.h"
+// [SL:KB] - World-Mute | Checked: 2013-12-12 (Catznip-3.6)
+#include "llfloaterblocked.h"
+// [/SL:KB]
 #include "llinspect.h"
 #include "llmutelist.h"
 #include "llslurl.h"
@@ -572,7 +575,10 @@ void LLInspectAvatar::onAvatarAction(const LLSD& sdParam)
 	else if ("toggle_mute" == strAction)
 	{
 		LLAvatarActions::toggleBlock(mAvatarID);
-		LLPanelBlockedList::showPanelAndSelect(mAvatarID);
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+		LLFloaterBlocked::showMuteAndSelect(mAvatarID);
+// [/SL:KB]
+//		LLPanelBlockedList::showPanelAndSelect(mAvatarID);
 	}
 	else if ("freeze" == strAction)
 	{
