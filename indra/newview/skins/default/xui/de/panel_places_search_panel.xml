@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="panel_places_search">
+    <panel name="search_panel">
+        <panel name="bottom_panel">
+		    <button name="gear_btn" tool_tip="Zusätzliche Optionen anzeigen"/>
+		    <icon name="dummy_icon" width="105" />
+		    <button label="Teleportieren" name="teleport_btn" tool_tip="Zu ausgewähltem Standort teleportieren" width="99" />
+		    <button label="Karte" name="map_btn" tool_tip="Den entsprechenden Standort auf der Karte anzeigen"/>
+		    <button name="profile_btn" tool_tip="Ortsprofil anzeigen"/>
+        </panel>
+    </panel>
+</panel>

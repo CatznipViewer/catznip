@@ -15,5 +15,9 @@
 	</accordion>
 	<panel label="bottom_panel" name="bottom_panel">
 		<button name="gear_btn" tool_tip="Afficher d&apos;autres options"/>
+		<icon name="dummy_icon" width="73" />
+		<button label="Téléportation" name="teleport_btn" tool_tip="Me téléporter jusqu&apos;à la zone sélectionnée" width="99" />
+		<button label="Carte" name="map_btn" tool_tip="Afficher la zone correspondante sur la carte du monde"/>
+		<button name="profile_btn" tool_tip="Afficher le profil de l&apos;endroit."/>
 	</panel>
 </panel>

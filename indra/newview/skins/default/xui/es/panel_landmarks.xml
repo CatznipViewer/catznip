@@ -7,16 +7,11 @@
 		<accordion_tab name="tab_library" title="Biblioteca"/>
 	</accordion>
 	<panel name="bottom_panel">
-		<layout_stack name="bottom_panel">
-			<layout_panel name="options_gear_btn_panel">
 				<button name="options_gear_btn" tool_tip="Ver más opciones"/>
-			</layout_panel>
-			<layout_panel name="add_btn_panel">
 				<button name="add_btn" tool_tip="Añadir un nuevo hito"/>
-			</layout_panel>
-			<layout_panel name="trash_btn_panel">
+				<button label="Teleporte" name="teleport_btn" tool_tip="Teleportar a la zona elegida"/>
+				<button label="Mapa" name="map_btn" tool_tip="Mostrar esta zona en el mapa del mundo"/>
+				<button label="Perfil" name="profile_btn" tool_tip="Mostrar el perfil del lugar"/>
 				<dnd_button name="trash_btn" tool_tip="Quitar el hito seleccionado"/>
-			</layout_panel>
-		</layout_stack>
 	</panel>
 </panel>
