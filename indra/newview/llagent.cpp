@@ -119,6 +119,10 @@ const F32 MAX_FIDGET_TIME = 20.f; // seconds
 // The agent instance.
 LLAgent gAgent;
 
+// [SL:KB] - Patch: UI-GroupListHidden | Checked: 2014-01-22 (Catznip-3.6)
+void update_group_floaters(const LLUUID& group_id);
+// [/SL:KB]
+
 class LLTeleportRequest
 {
 public:
@@ -2940,6 +2944,10 @@ BOOL LLAgent::setUserGroupFlags(const LLUUID& group_id, BOOL accept_notices, BOO
 	{
 		if(mGroups[i].mID == group_id)
 		{
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+			bool fUpdateFloater = (mGroups[i].mAcceptNotices != accept_notices) || (mGroups[i].mListInProfile != list_in_profile);
+// [/SL:KB]
+
 			mGroups[i].mAcceptNotices = accept_notices;
 			mGroups[i].mListInProfile = list_in_profile;
 			LLMessageSystem* msg = gMessageSystem;
@@ -2953,6 +2961,14 @@ BOOL LLAgent::setUserGroupFlags(const LLUUID& group_id, BOOL accept_notices, BOO
 			msg->nextBlock("NewData");
 			msg->addBOOL("ListInProfile", list_in_profile);
 			sendReliableMessage();
+
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+			if (fUpdateFloater)
+			{
+				update_group_floaters(group_id);
+			}
+// [/SL:KB]
+
 			return TRUE;
 		}
 	}

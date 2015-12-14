@@ -1174,10 +1174,13 @@ LLScrollListItem* LLScrollListCtrl::addSeparator(EAddPosition pos)
 	LLScrollListItem::Params separator_params;
 	separator_params.enabled(false);
 	LLScrollListCell::Params column_params;
-	column_params.type = "icon";
-	column_params.value = "menu_separator";
-	column_params.color = LLColor4(0.f, 0.f, 0.f, 0.7f);
-	column_params.font_halign = LLFontGL::HCENTER;
+//	column_params.type = "icon";
+//	column_params.value = "menu_separator";
+//	column_params.color = LLColor4(0.f, 0.f, 0.f, 0.7f);
+//	column_params.font_halign = LLFontGL::HCENTER;
+// [SL:KB] - Patch: UI-ScrollListSeparator | Checked: 2011-12-05 (Catznip-3.2)
+	column_params.type = "separator";
+// [/SL:KB]
 	separator_params.columns.add(column_params);
 	return addRow( separator_params, pos );
 }

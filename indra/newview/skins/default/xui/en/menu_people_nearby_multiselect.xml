@@ -3,27 +3,6 @@
  layout="topleft"
  name="Multi-Selected People Context Menu">
     <menu_item_call
-     enabled="false"
-     label="Add Friends"
-     layout="topleft"
-     name="add_friends">
-        <on_click
-         function="Avatar.AddFriends" />
-        <on_enable
-         function="Avatar.EnableItem"
-         parameter="can_add" />
-    </menu_item_call>
-    <menu_item_call
-     label="Remove Friends"
-     layout="topleft"
-     name="remove_friends">
-        <menu_item_call.on_click
-         function="Avatar.RemoveFriend" />
-        <menu_item_call.on_enable
-         function="Avatar.EnableItem"
-         parameter="can_delete" />
-    </menu_item_call>
-    <menu_item_call
      label="IM"
      layout="topleft"
      name="im">
@@ -42,12 +21,13 @@
          parameter="can_call" />
     </menu_item_call>
     <menu_item_call
-     enabled="false"
-     label="Share"
-     layout="topleft"
-     name="share">
-        <on_click
-         function="Avatar.Share" />
+    label="Offer Teleport"
+    name="offer_teleport">
+      <menu_item_call.on_click
+       function="Avatar.OfferTeleport"/>
+      <menu_item_call.on_enable
+      function="Avatar.EnableItem"
+      parameter="can_offer_teleport"/>
     </menu_item_call>
     <menu_item_call
      enabled="false"
@@ -58,12 +38,66 @@
          function="Avatar.Pay" />
     </menu_item_call>
     <menu_item_call
-    label="Offer Teleport"
-    name="offer_teleport">
+     enabled="false"
+     label="Share"
+     layout="topleft"
+     name="share">
+        <on_click
+         function="Avatar.Share" />
+    </menu_item_call>
+    <menu_item_call
+     enabled="false"
+     label="Add Friends"
+     layout="topleft"
+     name="add_friends">
+        <on_click
+         function="Avatar.AddFriends" />
+        <on_visible
+         function="Avatar.EnableItem"
+         parameter="can_add" />
+    </menu_item_call>
+    <menu_item_call
+     label="Remove Friends"
+     layout="topleft"
+     name="remove_friends">
+        <menu_item_call.on_click
+         function="Avatar.RemoveFriend" />
+        <menu_item_call.on_visible
+         function="Avatar.EnableItem"
+         parameter="can_delete" />
+    </menu_item_call>
+    <menu_item_separator
+     name="separator_actions" />
+    <menu_item_call
+     label="Freeze"
+     name="freeze">
       <menu_item_call.on_click
-       function="Avatar.OfferTeleport"/>
-      <menu_item_call.on_enable
-      function="Avatar.EnableItem"
-      parameter="can_offer_teleport"/>
+         function="Avatar.Freeze"/>
+      <menu_item_call.on_visible
+         function="Avatar.VisibleFreezeEject"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Eject"
+     name="eject">
+      <menu_item_call.on_click
+         function="Avatar.Eject"/>
+      <menu_item_call.on_visible
+         function="Avatar.VisibleFreezeEject"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Kick"
+     name="kick">
+      <menu_item_call.on_click
+         function="Avatar.Kick"/>
+      <menu_item_call.on_visible
+         function="Avatar.VisibleKickTeleportHome"/>
+    </menu_item_call>
+    <menu_item_call
+     label="Teleport Home"
+     name="teleport_home">
+      <menu_item_call.on_click
+         function="Avatar.TeleportHome"/>
+      <menu_item_call.on_visible
+         function="Avatar.VisibleKickTeleportHome"/>
     </menu_item_call>
 </context_menu>

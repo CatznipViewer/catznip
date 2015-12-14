@@ -41,6 +41,25 @@ class LLAvatarIconCtrl;
 class LLAvatarName;
 class LLIconCtrl;
 
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+typedef enum
+{
+	NF_DISPLAYNAME = 0,
+	NF_USERNAME = 1,
+	NF_COMPLETENAME = 2
+} EAvatarListNameFormat;
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+typedef enum
+{
+	SP_NEVER = 0,			// Never show permission icons
+	SP_HOVER = 1,			// Only show permission icons on hover
+	SP_NONDEFAULT = 2,		// Show permissions different from default
+	SP_COUNT
+} EShowPermissionType;
+// [/SL:KB]
+
 class LLAvatarListItem : public LLPanel, public LLFriendObserver
 {
 public:
@@ -92,19 +111,40 @@ public:
 	virtual void changed(U32 mask); // from LLFriendObserver
 
 	void setOnline(bool online);
-	void updateAvatarName(); // re-query the name cache
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	void updateAvatarName(EAvatarListNameFormat name_format); // re-query the name cache
+// [/SL:KB]
+//	void updateAvatarName(); // re-query the name cache
 	void setAvatarName(const std::string& name);
 	void setAvatarToolTip(const std::string& tooltip);
 	void setHighlight(const std::string& highlight);
 	void setState(EItemState item_style);
-	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
-	void setLastInteractionTime(U32 secs_since);
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	void setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes = false, bool is_resident = true);
+	static std::string formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format);
+// [/SL:KB]
+//	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
+//	void setLastInteractionTime(U32 secs_since);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	void setTextField(const std::string& text);
+	void setTextFieldDistance(F32 distance);
+	void setTextFieldSeconds(U32 secs_since);
+// [/SL:KB]
 	//Show/hide profile/info btn, translating speaker indicator and avatar name coordinates accordingly
 	void setShowProfileBtn(bool show);
 	void setShowInfoBtn(bool show);
 	void showSpeakingIndicator(bool show);
-	void setShowPermissions(bool show) { mShowPermissions = show; };
-	void showLastInteractionTime(bool show);
+// [SL:KB] - Patch: UI-AvatarListVolumeSlider | Checked: 2012-06-03 (Catznip-3.3)
+	void showVolumeSlider(bool show);
+// [/SL:KB]
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	void setShowPermissions(EShowPermissionType spType);
+// [/SL:KB]
+//	void setShowPermissions(bool show) { mShowPermissions = show; };
+//	void showLastInteractionTime(bool show);
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	void showTextField(bool show);
+// [/SL:KB]
 	void setAvatarIconVisible(bool visible);
 	
 	const LLUUID& getAvatarId() const;
@@ -113,6 +153,10 @@ public:
 
 	void onInfoBtnClick();
 	void onProfileBtnClick();
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-11-04 (Catznip-2.3)
+	void onPermissionBtnToggle(S32 toggleRight);
+	void onModifyRightsConfirmationCallback(const LLSD& notification, const LLSD& response, bool fGrant);
+// [/SL:KB]
 
 	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
 
@@ -125,13 +169,18 @@ protected:
 	LLAvatarIconCtrl* mAvatarIcon;
 
 	/// Indicator for permission to see me online.
-	LLIconCtrl* mIconPermissionOnline;
+//	LLIconCtrl* mIconPermissionOnline;
 	/// Indicator for permission to see my position on the map.
-	LLIconCtrl* mIconPermissionMap;
+//	LLIconCtrl* mIconPermissionMap;
 	/// Indicator for permission to edit my objects.
-	LLIconCtrl* mIconPermissionEditMine;
+//	LLIconCtrl* mIconPermissionEditMine;
 	/// Indicator for permission to edit their objects.
 	LLIconCtrl* mIconPermissionEditTheirs;
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	LLButton* mIconPermissionOnline;
+	LLButton* mIconPermissionMap;
+	LLButton* mIconPermissionEditMine;
+// [/SL:KB]
 
 private:
 
@@ -150,20 +199,29 @@ private:
 	 */
 	typedef enum e_avatar_item_child {
 		ALIC_SPEAKER_INDICATOR,
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2011-05-13 (Catznip-2.6)
+		ALIC_TEXT_FIELD,
+// [/SL:KB]
 		ALIC_PROFILE_BUTTON,
 		ALIC_INFO_BUTTON,
 		ALIC_PERMISSION_ONLINE,
 		ALIC_PERMISSION_MAP,
 		ALIC_PERMISSION_EDIT_MINE,
 		ALIC_PERMISSION_EDIT_THEIRS,
-		ALIC_INTERACTION_TIME,
+//		ALIC_INTERACTION_TIME,
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+//		ALIC_TEXT_FIELD,
+// [/SL:KB]
 		ALIC_NAME,
 		ALIC_ICON,
 		ALIC_COUNT,
 	} EAvatarListItemChildIndex;
 
 	void setNameInternal(const std::string& name, const std::string& highlight);
-	void onAvatarNameCache(const LLAvatarName& av_name);
+//	void onAvatarNameCache(const LLAvatarName& av_name);
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	void onAvatarNameCache(const LLAvatarName& av_name, EAvatarListNameFormat name_format);
+// [/SL:KB]
 
 	std::string formatSeconds(U32 secs);
 
@@ -187,7 +245,10 @@ private:
 	 *
 	 * Need to call updateChildren() afterwards to sort out their layout.
 	 */
-	bool showPermissions(bool visible);
+//	bool showPermissions(bool visible);
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2010-10-26 (Catznip-2.3)
+	bool refreshPermissions();
+// [/SL:KB]
 
 	/**
 	 * Gets child view specified by index.
@@ -198,13 +259,19 @@ private:
 	LLView* getItemChildView(EAvatarListItemChildIndex child_index);
 
 	LLTextBox* mAvatarName;
-	LLTextBox* mLastInteractionTime;
+// [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)
+	LLTextBox* mTextField;
+// [/SL:KB]
+//	LLTextBox* mLastInteractionTime;
 	LLStyle::Params mAvatarNameStyle;
 	
 	LLButton* mInfoBtn;
 	LLButton* mProfileBtn;
 
 	LLUUID mAvatarId;
+// [SL:KB] - Control-AvatarListSpeakingIndicator | Checked: 2012-06-03 (Catznip-3.3.0)
+	LLUUID mSessionId;
+// [/SL:KB]
 	std::string mHighlihtSubstring; // substring to highlight
 	EOnlineStatus mOnlineStatus;
 	//Flag indicating that info/profile button shouldn't be shown at all.
@@ -213,12 +280,18 @@ private:
 	bool mShowProfileBtn;
 
 	/// indicates whether to show icons representing permissions granted
-	bool mShowPermissions;
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType mShowPermissions;
+// [/SL:KB]
+//	bool mShowPermissions;
 
 	/// true when the mouse pointer is hovering over this item
 	bool mHovered;
 	
-	void fetchAvatarName();
+//	void fetchAvatarName();
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	void fetchAvatarName(EAvatarListNameFormat name_format);
+// [/SL:KB]
 	boost::signals2::connection mAvatarNameCacheConnection;
 
 	static bool	sStaticInitialized; // this variable is introduced to improve code readability

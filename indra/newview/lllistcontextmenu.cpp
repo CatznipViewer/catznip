@@ -54,40 +54,83 @@ LLListContextMenu::~LLListContextMenu()
 	}
 }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 void LLListContextMenu::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
 {
-	LLContextMenu* menup = mMenuHandle.get();
-	if (menup)
-	{
-		//preventing parent (menu holder) from deleting already "dead" context menus on exit
-		LLView* parent = menup->getParent();
-		if (parent)
-		{
-			parent->removeChild(menup);
-		}
-		delete menup;
-		mUUIDs.clear();
-	}
-
-	if ( uuids.empty() )
+	if (uuids.empty())
 	{
 		return;
+	}
+
+	LLContextMenu* pMenu = mMenuHandle.get();
+	if (pMenu)
+	{
+		pMenu->die();
+		mMenuHandle.markDead();
+		mUUIDs.clear();
 	}
 
 	mUUIDs.resize(uuids.size());
 	std::copy(uuids.begin(), uuids.end(), mUUIDs.begin());
 
-	menup = createMenu();
-	if (!menup)
+	pMenu = createMenu();
+	if (!pMenu)
 	{
 		LL_WARNS() << "Context menu creation failed" << LL_ENDL;
 		return;
 	}
+	mMenuHandle = pMenu->getHandle();
 
-	mMenuHandle = menup->getHandle();
-	menup->show(x, y);
-	LLMenuGL::showPopup(spawning_view, menup, x, y);
+	if ( (-1 == x) && (-1 == y) )
+	{
+		pMenu->buildDrawLabels();
+		pMenu->arrangeAndClear();
+
+		LLRect rct = spawning_view->getRect();
+		x = rct.mLeft;
+		y = rct.mTop + pMenu->getRect().getHeight();
+
+		spawning_view = spawning_view->getParent();
+	}
+
+	pMenu->show(x, y);
+	LLMenuGL::showPopup(spawning_view, pMenu, x, y);
 }
+// [/SL:KB]
+//void LLListContextMenu::show(LLView* spawning_view, const uuid_vec_t& uuids, S32 x, S32 y)
+//{
+//	LLContextMenu* menup = mMenuHandle.get();
+//	if (menup)
+//	{
+//		//preventing parent (menu holder) from deleting already "dead" context menus on exit
+//		LLView* parent = menup->getParent();
+//		if (parent)
+//		{
+//			parent->removeChild(menup);
+//		}
+//		delete menup;
+//		mUUIDs.clear();
+//	}
+//
+//	if ( uuids.empty() )
+//	{
+//		return;
+//	}
+//
+//	mUUIDs.resize(uuids.size());
+//	std::copy(uuids.begin(), uuids.end(), mUUIDs.begin());
+//
+//	menup = createMenu();
+//	if (!menup)
+//	{
+//		llwarns << "Context menu creation failed" << llendl;
+//		return;
+//	}
+//
+//	mMenuHandle = menup->getHandle();
+//	menup->show(x, y);
+//	LLMenuGL::showPopup(spawning_view, menup, x, y);
+//}
 
 void LLListContextMenu::hide()
 {

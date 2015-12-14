@@ -50,6 +50,12 @@ LLScrollListCell* LLScrollListCell::create(const LLScrollListCell::Params& cell_
 	{
 		cell = new LLScrollListDate(cell_p);
 	}
+// [SL:KB] - Patch: UI-ScrollListSeparator | Checked: 2011-12-05 (Catznip-3.2)
+	else if (cell_p.type() == "separator")
+	{
+		cell = new LLScrollListSeparator(cell_p);
+	}
+// [/SL:KB]
 	else	// default is "text"
 	{
 		cell = new LLScrollListText(cell_p);

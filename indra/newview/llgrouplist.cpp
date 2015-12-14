@@ -76,6 +76,9 @@ LLGroupList::LLGroupList(const Params& p)
 	gAgent.addListener(this, "new group");
 
 	mShowIcons = gSavedSettings.getBOOL("GroupListShowIcons");
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	mShowHidden = gSavedSettings.getBOOL("GroupListShowHidden");
+// [/SL:KB]
 	setCommitOnSelectionChange(true);
 
 	// Set default sort order.
@@ -212,6 +215,23 @@ void LLGroupList::toggleIcons()
 	}
 }
 
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+void LLGroupList::toggleHidden()
+{
+	// Save the new value for new items to use
+	mShowHidden = !mShowHidden;
+	gSavedSettings.setBOOL("GroupListShowHidden", mShowHidden);
+
+	// Show/hide hidden status for all existing items
+	std::vector<LLPanel*> items;
+	getItems(items);
+	for (std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); itItem++)
+	{
+		static_cast<LLGroupListItem*>(*itItem)->setHighlightHiddenGroup(mShowHidden);
+	}
+}
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 // PRIVATE Section
 //////////////////////////////////////////////////////////////////////////
@@ -227,6 +247,10 @@ void LLGroupList::addNewItem(const LLUUID& id, const std::string& name, const LL
 	item->getChildView("info_btn")->setVisible( false);
 	item->getChildView("profile_btn")->setVisible( false);
 	item->setGroupIconVisible(mShowIcons);
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	item->setHighlightHiddenGroup(mShowHidden);
+// [/SL:KB]
+
 
 	addItem(item, id, pos);
 
@@ -299,6 +323,9 @@ LLGroupListItem::LLGroupListItem()
 mGroupIcon(NULL),
 mGroupNameBox(NULL),
 mInfoBtn(NULL),
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+mShowHidden(true),
+// [/SL:KB]
 mGroupID(LLUUID::null)
 {
 	buildFromFile( "panel_group_list_item.xml");
@@ -359,12 +386,31 @@ void LLGroupListItem::onMouseLeave(S32 x, S32 y, MASK mask)
 	LLPanel::onMouseLeave(x, y, mask);
 }
 
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
 void LLGroupListItem::setName(const std::string& name, const std::string& highlight)
 {
 	mGroupName = name;
+	mHighlight = highlight;
+
 	LLTextUtil::textboxSetHighlightedVal(mGroupNameBox, mGroupNameStyle, name, highlight);
+	if (!mGroupNameSuffix.empty())
+	{
+		mGroupNameBox->appendText(" ", false, mGroupNameStyle);
+
+		LLStyle::Params styleSuffix = mGroupNameStyle;
+		styleSuffix.font.style = "ITALIC";
+		mGroupNameBox->appendText(mGroupNameSuffix, false, styleSuffix);
+	}
+
 	mGroupNameBox->setToolTip(name);
 }
+// [/SL:KB]
+//void LLGroupListItem::setName(const std::string& name, const std::string& highlight)
+//{
+//	mGroupName = name;
+//	LLTextUtil::textboxSetHighlightedVal(mGroupNameBox, mGroupNameStyle, name, highlight);
+//	mGroupNameBox->setToolTip(name);
+//}
 
 void LLGroupListItem::setGroupID(const LLUUID& group_id)
 {
@@ -373,6 +419,14 @@ void LLGroupListItem::setGroupID(const LLUUID& group_id)
 	mID = group_id;
 	mGroupID = group_id;
 	setActive(group_id == gAgent.getGroupID());
+
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	LLGroupData dataGroup;
+	if (gAgent.getGroupData(group_id, dataGroup))
+	{
+		setHidden(!dataGroup.mListInProfile);
+	}
+// [/SL:KB]
 
 	LLGroupMgr::getInstance()->addObserver(this);
 }
@@ -400,12 +454,31 @@ void LLGroupListItem::setGroupIconVisible(bool visible)
 	mGroupNameBox->setRect(name_rect);
 }
 
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+void LLGroupListItem::setHighlightHiddenGroup(bool highlight)
+{
+	mShowHidden = highlight;
+
+	LLGroupData dataGroup;
+	if ( (mGroupID.notNull()) && (gAgent.getGroupData(mGroupID, dataGroup)) )
+	{
+		setHidden(!dataGroup.mListInProfile) ;
+	}
+}
+
+void LLGroupListItem::setHidden(bool hidden)
+{
+	mGroupNameSuffix = (mShowHidden) && (hidden) ? "(hidden)" : "";
+	setName(mGroupName, mHighlight);
+}
+// [/SL:KB]
+
 //////////////////////////////////////////////////////////////////////////
 // Private Section
 //////////////////////////////////////////////////////////////////////////
 void LLGroupListItem::setActive(bool active)
 {
-	// *BUG: setName() overrides the style params.
+//	// *BUG: setName() overrides the style params.
 
 	// Active group should be bold.
 	LLFontDescriptor new_desc(mGroupNameBox->getFont()->getFontDesc());
@@ -417,10 +490,13 @@ void LLGroupListItem::setActive(bool active)
 	LLFontGL* new_font = LLFontGL::getFont(new_desc);
 	mGroupNameStyle.font = new_font;
 
-	// *NOTE: You cannot set the style on a text box anymore, you must
-	// rebuild the text.  This will cause problems if the text contains
-	// hyperlinks, as their styles will be wrong.
-	mGroupNameBox->setText(mGroupName, mGroupNameStyle);
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	setName(mGroupName, mHighlight);
+// [/SL:KB]
+//	// *NOTE: You cannot set the style on a text box anymore, you must
+//	// rebuild the text.  This will cause problems if the text contains
+//	// hyperlinks, as their styles will be wrong.
+//	mGroupNameBox->setText(mGroupName, mGroupNameStyle);
 }
 
 void LLGroupListItem::onInfoBtnClick()
