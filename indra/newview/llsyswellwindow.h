@@ -39,10 +39,6 @@ class LLFlatListView;
 class LLIMChiclet;
 class LLScriptChiclet;
 class LLSysWellChiclet;
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
-class LLComboBox;
-class LLFilterEditor;
-// [/SL:KB]
 
 class LLSysWellWindow : public LLTransientDockableFloater
 {
@@ -55,10 +51,7 @@ public:
 
 	// other interface functions
 	// check is window empty
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
-	virtual bool isWindowEmpty();
-// [/SL:KB]
-//	bool isWindowEmpty();
+	bool isWindowEmpty();
 
 	// Operating with items
 	void removeItemByID(const LLUUID& id);
@@ -122,9 +115,6 @@ public:
 	// Closes all notifications and removes them from the Notification Well
 	void closeAll();
 
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-07-06 (Catznip-3.6)
-	/*virtual*/ bool isWindowEmpty();
-// [/SL:KB]
 protected:
 	struct WellNotificationChannel : public LLNotificationChannel
 	{
@@ -140,10 +130,6 @@ protected:
 	LLNotificationChannelPtr mNotificationUpdates;
 	/*virtual*/ const std::string& getAnchorViewName() { return NOTIFICATION_WELL_ANCHOR_NAME; }
 
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
-	bool checkFilter(const LLSysWellItem* pWellItem) const;
-	void refreshFilter();
-// [/SL:KB]
 private:
 	// init Window's channel
 	void initChannel();
@@ -157,14 +143,6 @@ private:
 
 	// ID of a toast loaded by user (by clicking notification well item)
 	LLUUID mLoadedToastId;
-
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
-	LLComboBox*     m_pFilterType;
-	LLFilterEditor* m_pFilterText;
-
-	std::string     m_strFilterType;
-	std::string     m_strFilterText;
-// [/SL:KB]
 };
 
 /**
