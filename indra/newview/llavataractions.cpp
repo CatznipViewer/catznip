@@ -335,11 +335,40 @@ static void on_avatar_name_show_profile(const LLUUID& agent_id, const LLAvatarNa
 // static
 void LLAvatarActions::showProfile(const LLUUID& id)
 {
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
+	if ( (!gSavedSettings.getBOOL("ShowProfileFloaters")) || ((gAgent.getID() == id)) )
+		showWebProfile(id);
+	else
+		showLegacyProfile(id);
+// [/SL:KB]
+}
+//void LLAvatarActions::showProfile(const LLUUID& id)
+//{
+//	if (id.notNull())
+//	{
+//		LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
+//	}
+//}
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
+// static
+void LLAvatarActions::showLegacyProfile(const LLUUID& id)
+{
+	if (id.notNull())
+	{
+		LLFloaterReg::showInstance("floater_profile_view", LLSD().with("id", id));
+	}
+}
+
+// static
+void LLAvatarActions::showWebProfile(const LLUUID& id)
+{
 	if (id.notNull())
 	{
 		LLAvatarNameCache::get(id, boost::bind(&on_avatar_name_show_profile, _1, _2));
 	}
 }
+// [/SL:KB]
 
 //static 
 bool LLAvatarActions::profileVisible(const LLUUID& id)
@@ -353,9 +382,14 @@ bool LLAvatarActions::profileVisible(const LLUUID& id)
 //static
 LLFloater* LLAvatarActions::getProfileFloater(const LLUUID& id)
 {
-	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*>
-		(LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id)));
-	return browser;
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-11-05 (Catznip-3.2)
+	LLFloater* pFloater = LLFloaterReg::findInstance("floater_profile_view", LLSD().with("id", id));
+	if (!pFloater)
+		pFloater = LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id));
+	return pFloater;
+// [/SL:KB]
+//	LLFloaterWebContent *browser = dynamic_cast<LLFloaterWebContent*>
+//		(LLFloaterReg::findInstance(get_profile_floater_name(id), LLSD().with("id", id)));
 }
 
 //static 
@@ -965,6 +999,28 @@ void LLAvatarActions::toggleMuteVoice(const LLUUID& id)
 		mute_list->remove(mute, LLMute::flagVoiceChat);
 	}
 }
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
+void LLAvatarActions::copyToClipboard(const LLUUID& id, const LLSD& param)
+{
+	LLAvatarName avName;
+	if (LLAvatarNameCache::get(id, &avName))
+	{
+		std::string strResult, strParam = param.asString();
+		if ( ("fullname" == strParam) || (strParam.empty()) )
+			strResult = avName.getCompleteName();
+		else if ("displayname" == strParam)
+			strResult = avName.getDisplayName();
+		else if ("username" == strParam)
+			strResult = avName.getAccountName();
+		else if ("slurl" == strParam)
+			strResult = LLSLURL("agent", id, "about").getSLURLString();
+		else if ("uuid" == strParam)
+			strResult = id.asString();
+		LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(strResult));
+	}
+}
+// [/SL:KB]
 
 // static
 bool LLAvatarActions::canOfferTeleport(const LLUUID& id)

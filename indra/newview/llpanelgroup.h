@@ -26,6 +26,9 @@
 #ifndef LL_LLPANELGROUP_H
 #define LL_LLPANELGROUP_H
 
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+#include "llfloater.h"
+// [/SL:KB]
 #include "llgroupmgr.h"
 #include "llpanel.h"
 #include "lltimer.h"
@@ -121,6 +124,29 @@ protected:
 	LLButton*		mButtonJoin;
 	LLUICtrl*		mJoinText;
 };
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+class LLFloaterGroupInfo : public LLFloater
+{
+public:
+	LLFloaterGroupInfo(const LLSD& sdKey) : LLFloater(sdKey) {}
+	virtual ~LLFloaterGroupInfo() {}
+	
+	/*virtual*/ void onOpen(const LLSD& sdKey)
+	{
+		LLPanel* pPanel = findChild<LLPanel>("panel_group_info_sidetray");
+		if (pPanel)
+		{
+			pPanel->onOpen(sdKey);
+		}
+		if (sdKey.isMap())
+		{
+			setKey(sdKey["group_id"]);
+		}
+	}
+
+};
+// [/SL:KB]
 
 class LLPanelGroupTab : public LLPanel
 {
