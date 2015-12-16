@@ -134,6 +134,14 @@ public:
 			return true;
 		}
 
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+		if (verb == "requestteleport")
+		{
+			LLAvatarActions::teleportRequest(avatar_id);
+			return true;
+		}
+// [/SL:KB]
+
 		if (verb == "requestfriend")
 		{
 			LLAvatarActions::requestFriendshipDialog(avatar_id);

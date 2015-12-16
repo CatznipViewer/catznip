@@ -56,10 +56,16 @@ public:
 	void initialize();
 
 protected:
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	void saveNotificationsCb();
+// [/SL:KB]
 
 private:
 	bool onPersistentChannelChanged(const LLSD& payload);
 	bool mLoaded;
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	bool mPendingSave;
+// [/SL:KB]
 };
 
 #endif // LL_LLPERSISTENTNOTIFICATIONSTORAGE_H

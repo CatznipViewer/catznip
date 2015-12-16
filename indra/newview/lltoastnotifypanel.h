@@ -37,6 +37,9 @@
 #include "lltextbox.h"
 
 class LLNotificationForm;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+class LLCheckBoxCtrl;
+// [/SL:KB]
 
 /**
  * Toast panel for notification.
@@ -73,6 +76,9 @@ public:
 
 protected:
 	LLButton* createButton(const LLSD& form_element, BOOL is_option);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+	LLCheckBoxCtrl* createCheckBox(const std::string& strMessage, const std::string& strControl);
+// [/SL:KB]
 
 	// Used for callbacks
 	struct InstanceAndS32
@@ -92,7 +98,10 @@ protected:
 	 * @param  h_pad horizontal space between buttons. It is depend on number of buttons.
 	 * @param buttons vector of button to be added. 
 	 */
-	void updateButtonsLayout(const std::vector<index_button_pair_t>& buttons, S32 h_pad);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+	void updateControlPanelLayout(const std::vector<index_button_pair_t>& buttons, const std::vector<LLCheckBoxCtrl*>& checkboxes, S32 h_pad);
+// [/SL:KB]
+//	void updateButtonsLayout(const std::vector<index_button_pair_t>& buttons, S32 h_pad);
 
 	/**
 	 * Disable specific button(s) based on notification name and clicked button
@@ -118,6 +127,10 @@ protected:
 	 * handle sButtonClickSignal (to disable buttons) across all panels with given notification_id
 	 */
 	void onToastPanelButtonClicked(const LLUUID& notification_id, const std::string btn_name);
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+	void onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl) const;
+// [/SL:KB]
 
 	/**
 	 * Process response data. Will disable selected options

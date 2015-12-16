@@ -215,10 +215,10 @@ public:
 	LLIMModel::LLIMSession* addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 		const std::string& utf8_text, bool log2file = true);
 
-	/**
-	 * Add a system message to an IM Model
-	 */
-	bool proccessOnlineOfflineNotification(const LLUUID& session_id, const std::string& utf8_text);
+//	/**
+//	 * Add a system message to an IM Model
+//	 */
+//	bool proccessOnlineOfflineNotification(const LLUUID& session_id, const std::string& utf8_text);
 
 	/**
 	 * Get a session's name. 

@@ -38,6 +38,9 @@
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
 #include "llfloaterinventory.h"
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2)
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "llagent.h"
 #include "llagentui.h"
 
@@ -70,48 +73,48 @@ static LLPanelInjector<LLPanelGroupNotices> t_panel_group_notices("panel_group_n
 // view. It handles drop events, always setting itself to the size of
 // its parent.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-class LLGroupDropTarget : public LLView
-{
-public:
-	struct Params : public LLInitParam::Block<Params, LLView::Params>
-	{
-		// *NOTE: These parameters logically Mandatory, but are not
-		// specified in XML files, hence Optional
-		Optional<LLPanelGroupNotices*> panel;
-		Optional<LLUUID>	group_id;
-		Params()
-		:	panel("panel"),
-			group_id("group_id")
-		{
-			changeDefault(mouse_opaque, false);
-			changeDefault(follows.flags, FOLLOWS_ALL);
-		}
-	};
-	LLGroupDropTarget(const Params&);
-	~LLGroupDropTarget() {};
-
-	void doDrop(EDragAndDropType cargo_type, void* cargo_data);
-
-	//
-	// LLView functionality
-	virtual BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
-								   EDragAndDropType cargo_type,
-								   void* cargo_data,
-								   EAcceptance* accept,
-								   std::string& tooltip_msg);
-	void setPanel (LLPanelGroupNotices* panel) {mGroupNoticesPanel = panel;};
-	void setGroup (LLUUID group) {mGroupID = group;};
-
-protected:
-	LLPanelGroupNotices* mGroupNoticesPanel;
-	LLUUID	mGroupID;
-};
+//class LLGroupDropTarget : public LLView
+//{
+//public:
+//	struct Params : public LLInitParam::Block<Params, LLView::Params>
+//	{
+//		// *NOTE: These parameters logically Mandatory, but are not
+//		// specified in XML files, hence Optional
+//		Optional<LLPanelGroupNotices*> panel;
+//		Optional<LLUUID>	group_id;
+//		Params()
+//		:	panel("panel"),
+//			group_id("group_id")
+//		{
+//			changeDefault(mouse_opaque, false);
+//			changeDefault(follows.flags, FOLLOWS_ALL);
+//		}
+//	};
+//	LLGroupDropTarget(const Params&);
+//	~LLGroupDropTarget() {};
+//
+//	void doDrop(EDragAndDropType cargo_type, void* cargo_data);
+//
+//	//
+//	// LLView functionality
+//	virtual BOOL handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
+//								   EDragAndDropType cargo_type,
+//								   void* cargo_data,
+//								   EAcceptance* accept,
+//								   std::string& tooltip_msg);
+//	void setPanel (LLPanelGroupNotices* panel) {mGroupNoticesPanel = panel;};
+//	void setGroup (LLUUID group) {mGroupID = group;};
+//
+//protected:
+//	LLPanelGroupNotices* mGroupNoticesPanel;
+//	LLUUID	mGroupID;
+//};
 
 static LLDefaultChildRegistry::Register<LLGroupDropTarget> r("group_drop_target");
 
 LLGroupDropTarget::LLGroupDropTarget(const LLGroupDropTarget::Params& p) 
 :	LLView(p),
-	mGroupNoticesPanel(p.panel),
+//	mGroupNoticesPanel(p.panel),
 	mGroupID(p.group_id)
 {}
 
@@ -165,7 +168,10 @@ BOOL LLGroupDropTarget::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
 				*accept = ACCEPT_YES_COPY_SINGLE;
 				if(drop)
 				{
-					mGroupNoticesPanel->setItem(inv_item);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+					getParent()->notifyParent(LLSD().with("item_id", inv_item->getUUID()));
+// [/SL:KB]
+//					mGroupNoticesPanel->setItem(inv_item);
 				}
 			}
 			else
@@ -254,23 +260,23 @@ BOOL LLPanelGroupNotices::postBuild()
 	mBtnGetPastNotices = getChild<LLButton>("refresh_notices",recurse);
 	mBtnGetPastNotices->setClickedCallback(onClickRefreshNotices, this);
 
-	// Create
-	mCreateSubject = getChild<LLLineEditor>("create_subject",recurse);
-	mCreateMessage = getChild<LLTextEditor>("create_message",recurse);
-
-	mCreateInventoryName =  getChild<LLLineEditor>("create_inventory_name",recurse);
-	mCreateInventoryName->setTabStop(FALSE);
-	mCreateInventoryName->setEnabled(FALSE);
-
-	mCreateInventoryIcon = getChild<LLIconCtrl>("create_inv_icon",recurse);
-	mCreateInventoryIcon->setVisible(FALSE);
-
-	mBtnSendMessage = getChild<LLButton>("send_notice",recurse);
-	mBtnSendMessage->setClickedCallback(onClickSendMessage, this);
-
-	mBtnRemoveAttachment = getChild<LLButton>("remove_attachment",recurse);
-	mBtnRemoveAttachment->setClickedCallback(onClickRemoveAttachment, this);
-	mBtnRemoveAttachment->setEnabled(FALSE);
+//	// Create
+//	mCreateSubject = getChild<LLLineEditor>("create_subject",recurse);
+//	mCreateMessage = getChild<LLTextEditor>("create_message",recurse);
+//
+//	mCreateInventoryName =  getChild<LLLineEditor>("create_inventory_name",recurse);
+//	mCreateInventoryName->setTabStop(FALSE);
+//	mCreateInventoryName->setEnabled(FALSE);
+//
+//	mCreateInventoryIcon = getChild<LLIconCtrl>("create_inv_icon",recurse);
+//	mCreateInventoryIcon->setVisible(FALSE);
+//
+//	mBtnSendMessage = getChild<LLButton>("send_notice",recurse);
+//	mBtnSendMessage->setClickedCallback(onClickSendMessage, this);
+//
+//	mBtnRemoveAttachment = getChild<LLButton>("remove_attachment",recurse);
+//	mBtnRemoveAttachment->setClickedCallback(onClickRemoveAttachment, this);
+//	mBtnRemoveAttachment->setEnabled(FALSE);
 
 	// View
 	mViewSubject = getChild<LLLineEditor>("view_subject",recurse);
@@ -288,14 +294,18 @@ BOOL LLPanelGroupNotices::postBuild()
 
 	mNoNoticesStr = getString("no_notices_text");
 
-	mPanelCreateNotice = getChild<LLPanel>("panel_create_new_notice",recurse);
+//	mPanelCreateNotice = getChild<LLPanel>("panel_create_new_notice",recurse);
 	mPanelViewNotice = getChild<LLPanel>("panel_view_past_notice",recurse);
 
-	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
-	target->setPanel (this);
-	target->setGroup (mGroupID);
+//	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
+//	target->setPanel (this);
+//	target->setGroup (mGroupID);
 
-	arrangeNoticeView(VIEW_PAST_NOTICE);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
+	mPanelViewNotice->setVisible(TRUE);
+	mBtnOpenAttachment->setEnabled(FALSE);
+// [/SL:KB]
+//	arrangeNoticeView(VIEW_PAST_NOTICE);
 
 	return LLPanelGroupTab::postBuild();
 }
@@ -305,14 +315,14 @@ void LLPanelGroupNotices::activate()
 	if(mNoticesList)
 		mNoticesList->deleteAllItems();
 	
-	BOOL can_send = gAgent.hasPowerInGroup(mGroupID,GP_NOTICES_SEND);
+//	BOOL can_send = gAgent.hasPowerInGroup(mGroupID,GP_NOTICES_SEND);
 	BOOL can_receive = gAgent.hasPowerInGroup(mGroupID,GP_NOTICES_RECEIVE);
 
 	mPanelViewNotice->setEnabled(can_receive);
-	mPanelCreateNotice->setEnabled(can_send);
+//	mPanelCreateNotice->setEnabled(can_send);
 
 	// Always disabled to stop direct editing of attachment names
-	mCreateInventoryName->setEnabled(FALSE);
+//	mCreateInventoryName->setEnabled(FALSE);
 	mViewInventoryName->setEnabled(FALSE);
 
 	// If we can receive notices, grab them right away.
@@ -322,39 +332,51 @@ void LLPanelGroupNotices::activate()
 	}
 }
 
-void LLPanelGroupNotices::setItem(LLPointer<LLInventoryItem> inv_item)
-{
-	mInventoryItem = inv_item;
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+//S32 LLPanelGroupNotices::notifyParent(const LLSD& sdInfo)
+//{
+//	if (sdInfo.has("item_id"))
+//	{
+//		setItem(gInventory.getItem(sdInfo["item_id"].asUUID()));
+//		return 1;
+//	}
+//	return LLPanelGroupTab::notifyParent(sdInfo);
+//}
+// [/SL:KB]
 
-	BOOL item_is_multi = FALSE;
-	if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS )
-	{
-		item_is_multi = TRUE;
-	};
+//void LLPanelGroupNotices::setItem(LLPointer<LLInventoryItem> inv_item)
+//{
+//	mInventoryItem = inv_item;
+//
+//	BOOL item_is_multi = FALSE;
+//	if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS )
+//	{
+//		item_is_multi = TRUE;
+//	};
+//
+//	std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(),
+//										inv_item->getInventoryType(),
+//										inv_item->getFlags(),
+//										item_is_multi );
+//
+//	mCreateInventoryIcon->setValue(icon_name);
+//	mCreateInventoryIcon->setVisible(TRUE);
+//
+//	std::stringstream ss;
+//	ss << "        " << mInventoryItem->getName();
+//
+//	mCreateInventoryName->setText(ss.str());
+//	mBtnRemoveAttachment->setEnabled(TRUE);
+//}
 
-	std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(),
-										inv_item->getInventoryType(),
-										inv_item->getFlags(),
-										item_is_multi );
-
-	mCreateInventoryIcon->setValue(icon_name);
-	mCreateInventoryIcon->setVisible(TRUE);
-
-	std::stringstream ss;
-	ss << "        " << mInventoryItem->getName();
-
-	mCreateInventoryName->setText(ss.str());
-	mBtnRemoveAttachment->setEnabled(TRUE);
-}
-
-void LLPanelGroupNotices::onClickRemoveAttachment(void* data)
-{
-	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
-	self->mInventoryItem = NULL;
-	self->mCreateInventoryName->clear();
-	self->mCreateInventoryIcon->setVisible(FALSE);
-	self->mBtnRemoveAttachment->setEnabled(FALSE);
-}
+//void LLPanelGroupNotices::onClickRemoveAttachment(void* data)
+//{
+//	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
+//	self->mInventoryItem = NULL;
+//	self->mCreateInventoryName->clear();
+//	self->mCreateInventoryIcon->setVisible(FALSE);
+//	self->mBtnRemoveAttachment->setEnabled(FALSE);
+//}
 
 //static 
 void LLPanelGroupNotices::onClickOpenAttachment(void* data)
@@ -366,73 +388,77 @@ void LLPanelGroupNotices::onClickOpenAttachment(void* data)
 	self->mBtnOpenAttachment->setEnabled(FALSE);
 }
 
-void LLPanelGroupNotices::onClickSendMessage(void* data)
-{
-	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
-	
-	if (self->mCreateSubject->getText().empty())
-	{
-		// Must supply a subject
-		LLNotificationsUtil::add("MustSpecifyGroupNoticeSubject");
-		return;
-	}
-	send_group_notice(
-			self->mGroupID,
-			self->mCreateSubject->getText(),
-			self->mCreateMessage->getText(),
-			self->mInventoryItem);
-
-
-	//instantly add new notice. actual notice will be added after ferreshNotices call
-	LLUUID id = LLUUID::generateNewID();
-	std::string subj = self->mCreateSubject->getText();
-	std::string name ;
-	LLAgentUI::buildFullname(name);
-	U32 timestamp = 0;
-
-	LLSD row;
-	row["id"] = id;
-	
-	row["columns"][0]["column"] = "icon";
-
-	row["columns"][1]["column"] = "subject";
-	row["columns"][1]["value"] = subj;
-
-	row["columns"][2]["column"] = "from";
-	row["columns"][2]["value"] = name;
-
-	row["columns"][3]["column"] = "date";
-	row["columns"][3]["value"] = build_notice_date(timestamp);
-
-	row["columns"][4]["column"] = "sort";
-	row["columns"][4]["value"] = llformat( "%u", timestamp);
-
-	self->mNoticesList->addElement(row, ADD_BOTTOM);
-
-	self->mCreateMessage->clear();
-	self->mCreateSubject->clear();
-	onClickRemoveAttachment(data);
-
-	self->arrangeNoticeView(VIEW_PAST_NOTICE);
-}
+//void LLPanelGroupNotices::onClickSendMessage(void* data)
+//{
+//	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
+//	
+//	if (self->mCreateSubject->getText().empty())
+//	{
+//		// Must supply a subject
+//		LLNotificationsUtil::add("MustSpecifyGroupNoticeSubject");
+//		return;
+//	}
+//	send_group_notice(
+//			self->mGroupID,
+//			self->mCreateSubject->getText(),
+//			self->mCreateMessage->getText(),
+//			self->mInventoryItem);
+//
+//
+//	//instantly add new notice. actual notice will be added after ferreshNotices call
+//	LLUUID id = LLUUID::generateNewID();
+//	std::string subj = self->mCreateSubject->getText();
+//	std::string name ;
+//	LLAgentUI::buildFullname(name);
+//	U32 timestamp = 0;
+//
+//	LLSD row;
+//	row["id"] = id;
+//	
+//	row["columns"][0]["column"] = "icon";
+//
+//	row["columns"][1]["column"] = "subject";
+//	row["columns"][1]["value"] = subj;
+//
+//	row["columns"][2]["column"] = "from";
+//	row["columns"][2]["value"] = name;
+//
+//	row["columns"][3]["column"] = "date";
+//	row["columns"][3]["value"] = build_notice_date(timestamp);
+//
+//	row["columns"][4]["column"] = "sort";
+//	row["columns"][4]["value"] = llformat( "%u", timestamp);
+//
+//	self->mNoticesList->addElement(row, ADD_BOTTOM);
+//
+//	self->mCreateMessage->clear();
+//	self->mCreateSubject->clear();
+//	onClickRemoveAttachment(data);
+//
+//	self->arrangeNoticeView(VIEW_PAST_NOTICE);
+//}
 
 //static 
 void LLPanelGroupNotices::onClickNewMessage(void* data)
 {
 	LLPanelGroupNotices* self = (LLPanelGroupNotices*)data;
 
-	self->arrangeNoticeView(CREATE_NEW_NOTICE);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
+	LLFloaterReg::showInstance("group_create_notice", LLSD().with("group", self->getGroupID()));
+// [/SL:KB]
 
-	if (self->mInventoryOffer)
-	{
-		self->mInventoryOffer->forceResponse(IOR_DECLINE);
-		self->mInventoryOffer = NULL;
-	}
-
-	self->mCreateSubject->clear();
-	self->mCreateMessage->clear();
-	if (self->mInventoryItem) onClickRemoveAttachment(self);
-	self->mNoticesList->deselectAllItems(TRUE); // TRUE == don't commit on chnage
+//	self->arrangeNoticeView(CREATE_NEW_NOTICE);
+//
+//	if (self->mInventoryOffer)
+//	{
+//		self->mInventoryOffer->forceResponse(IOR_DECLINE);
+//		self->mInventoryOffer = NULL;
+//	}
+//
+//	self->mCreateSubject->clear();
+//	self->mCreateMessage->clear();
+//	if (self->mInventoryItem) onClickRemoveAttachment(self);
+//	self->mNoticesList->deselectAllItems(TRUE); // TRUE == don't commit on chnage
 }
 
 void LLPanelGroupNotices::refreshNotices()
@@ -604,7 +630,11 @@ void LLPanelGroupNotices::showNotice(const std::string& subject,
 									 const std::string& inventory_name,
 									 LLOfferInfo* inventory_offer)
 {
-	arrangeNoticeView(VIEW_PAST_NOTICE);
+//	arrangeNoticeView(VIEW_PAST_NOTICE);
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2)
+	mPanelViewNotice->setVisible(TRUE);
+	mBtnOpenAttachment->setEnabled(FALSE);
+// [/SL:KB]
 
 	if(mViewSubject) mViewSubject->setText(subject);
 	if(mViewMessage) mViewMessage->setText(message);
@@ -640,20 +670,20 @@ void LLPanelGroupNotices::showNotice(const std::string& subject,
 	}
 }
 
-void LLPanelGroupNotices::arrangeNoticeView(ENoticeView view_type)
-{
-	if (CREATE_NEW_NOTICE == view_type)
-	{
-        mPanelCreateNotice->setVisible(TRUE);
-		mPanelViewNotice->setVisible(FALSE);
-	}
-	else
-	{
-		mPanelCreateNotice->setVisible(FALSE);
-		mPanelViewNotice->setVisible(TRUE);
-		mBtnOpenAttachment->setEnabled(FALSE);
-	}
-}
+//void LLPanelGroupNotices::arrangeNoticeView(ENoticeView view_type)
+//{
+//	if (CREATE_NEW_NOTICE == view_type)
+//	{
+//        mPanelCreateNotice->setVisible(TRUE);
+//		mPanelViewNotice->setVisible(FALSE);
+//	}
+//	else
+//	{
+//		mPanelCreateNotice->setVisible(FALSE);
+//		mPanelViewNotice->setVisible(TRUE);
+//		mBtnOpenAttachment->setEnabled(FALSE);
+//	}
+//}
 void LLPanelGroupNotices::setGroupID(const LLUUID& id)
 {
 	sInstances.erase(mGroupID);
@@ -662,9 +692,9 @@ void LLPanelGroupNotices::setGroupID(const LLUUID& id)
 
 	mBtnNewMessage->setEnabled(gAgent.hasPowerInGroup(mGroupID, GP_NOTICES_SEND));
 
-	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
-	target->setPanel (this);
-	target->setGroup (mGroupID);
+//	LLGroupDropTarget* target = getChild<LLGroupDropTarget> ("drop_target");
+//	target->setPanel (this);
+//	target->setGroup (mGroupID);
 
 	if(mViewMessage) 
 		mViewMessage->clear();

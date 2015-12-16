@@ -84,6 +84,13 @@ void LLScriptHandler::addToastWithNotification(const LLNotificationPtr& notifica
 						|| notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH;
 	}
 
+// [SL:KB] - Patch: Notification-Misc | Checked: 2011-11-23 (Catznip-3.2)
+		if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
+		{
+			p.lifetime_secs = gSavedSettings.getS32("ScriptQuestionToastLifeTime");
+		}
+// [/SL:KB]
+
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel.get());
 	if(channel)
 	{
@@ -105,10 +112,29 @@ bool LLScriptHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 	
-	if (notification->canLogToIM())
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time
+	if (!notification->isPersisted())
 	{
-		LLHandlerUtil::logToIMP2P(notification);
+// [/SL:KB]
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
+		if (LLHandlerUtil::canLogToChat(notification))
+		{
+			LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+		}
+
+		if (LLHandlerUtil::canLogToIM(notification))
+		{
+			LLHandlerUtil::logToIMP2P(notification);
+		}
+// [/SL:KB]
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
 	}
+// [/SL:KB]
+//	if (notification->canLogToIM())
+//	{
+//		LLHandlerUtil::logToIMP2P(notification);
+//	}
 
 	if(notification->hasFormElements() && !notification->canShowToast())
 	{

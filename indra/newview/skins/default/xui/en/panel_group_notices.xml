@@ -95,6 +95,7 @@ Maximum 200 per group daily
      tool_tip="Refresh list of notices"
      top_delta="0"
      width="23" />
+ <!--
     <panel
      follows="left|top|right"
      height="280"
@@ -255,6 +256,7 @@ Maximum 200 per group daily
          tool_tip="Drag an inventory item onto this target box to send it with this notice. You must have permission to copy and transfer the item in order to attach it."
          width="280" />
    </panel>
+ -->
     <panel
      follows="left|top|right"
      height="280"
