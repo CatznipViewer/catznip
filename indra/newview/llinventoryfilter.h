@@ -131,8 +131,11 @@ public:
 		U32 			mFilterTypes;
 		U64				mFilterObjectTypes,   // For _OBJECT
 						mFilterWearableTypes,
-						mFilterLinks,
+//						mFilterLinks,
 						mFilterCategoryTypes; // For _CATEGORY
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+		EFilterLink		mFilterLinks;
+// [/SL:KB]
 		LLUUID      	mFilterUUID; 		  // for UUID
 
 		time_t			mMinDate,
@@ -201,8 +204,12 @@ public:
 	void				setDateSearchDirection(U32 direction);
 	U32					getDateSearchDirection() const;
 
-	void 				setFilterLinks(U64 filter_link);
-	U64					getFilterLinks() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+	void 				setFilterLinks(EFilterLink filter_link);
+	EFilterLink			getFilterLinks() const;
+// [/SL:KB]
+//	void 				setFilterLinks(U64 filter_link);
+//	U64					getFilterLinks() const;
 
 	// sets params for Link-only search and backs up search settings for future restoration
 	void				setFindAllLinksMode(const std::string &search_name, const LLUUID& search_id);
@@ -277,7 +284,7 @@ private:
 	bool 				checkAgainstPermissions(const class LLFolderViewModelItemInventory* listener) const;
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
-	bool				checkAgainstClipboard(const LLUUID& object_id) const;
+//	bool				checkAgainstClipboard(const LLUUID& object_id) const;
 
 	FilterOps				mFilterOps;
 	FilterOps				mDefaultFilterOps;
