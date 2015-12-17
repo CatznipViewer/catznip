@@ -1,0 +1,8 @@
+[Inventory/ContextMenu]
+- fixed : various longstanding inventory context menu annoyances for a selection of "Wear"'able items
+    -> "Wear" will be enabled if at least one of the selected items is unworn
+    -> "Add" will be enabled if at least one of the selected items is unworn (and no body parts are selected)
+    -> "Take Off" will be enabled if at least one of the selected items is worn (and no body parts are selected)
+    -> "Take Off" will be hidden if no item in the selection is worn
+    -> "Attach To" will be hidden if the selection contains a mix of wearables and attachments
+    -> new "Take Off / Detach" option which is visible and enabled for a selection containing wearables and attachments with at least one worn item
