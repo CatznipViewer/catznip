@@ -31,6 +31,4 @@
 		<combo_box.item label="Содержимое" name="Contents"/>
 		<combo_box.item label="Оригинал" name="Original"/>
 	</combo_box>
-	<spinner label="Цена:" name="Edit Cost"/>
-	<text name="CurrencySymbol">L$</text>
 </floater>
