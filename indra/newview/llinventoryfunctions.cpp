@@ -429,7 +429,10 @@ void copy_inventory_category(LLInventoryModel* model,
             // Decrement the count in root_id since that one item won't be copied over
             LLMarketplaceData::instance().decrementValidationWaiting(root_id);
         }
-        else
+//        else
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		else if (!item->getIsLinkType())
+// [/SL:KB]
         {
             copy_inventory_item(
                                 gAgent.getID(),
@@ -439,6 +442,12 @@ void copy_inventory_category(LLInventoryModel* model,
                                 std::string(),
                                 cb);
         }
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		else
+		{
+			link_inventory_object(new_cat_uuid, item, LLPointer<LLInventoryCallback>(NULL));
+		}
+// [/SL:KB]
 	}
 	
 	// Copy all the folders
