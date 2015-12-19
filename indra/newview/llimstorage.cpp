@@ -111,14 +111,14 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 	llifstream fileUnread(getFilePath());
 	if (!fileUnread.is_open())
 	{
-		llwarns << "Failed to open the unread IM log" << llendl;
+		LL_WARNS() << "Failed to open the unread IM log" << LL_ENDL;
 		return;
 	}
 
 	LLPointer<LLSDParser> sdParser = new LLSDXMLParser();
 	if ( (LLSDParser::PARSE_FAILURE == sdParser->parse(fileUnread, m_PersistedData, LLSDSerialize::SIZE_UNLIMITED)) || (!m_PersistedData.isMap()) )
 	{
-		llwarns << "Failed to parse unread IM log" << llendl;
+		LL_WARNS() << "Failed to parse unread IM log" << LL_ENDL;
 		fileUnread.close();
 		return;
 	}
@@ -174,7 +174,7 @@ void LLPersistentUnreadIMStorage::saveUnreadIMs()
 	llofstream fileUnread(getFilePath());
 	if (!fileUnread.is_open())
 	{
-		llwarns << "Failed to open the unread IM log" << llendl;
+		LL_WARNS() << "Failed to open the unread IM log" << LL_ENDL;
 		return;
 	}
 
