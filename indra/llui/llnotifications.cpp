@@ -517,7 +517,7 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 #ifndef LL_RELEASE_FOR_DOWNLOAD
 	if ( (p.log_to_chat.isProvided()) || (p.log_to_im.isProvided()) )
 	{
-		llerrs << "Notification '" << mName << " is using deprecated 'log_to_chat' or 'log_to_im' parameters" << llendl;
+		LL_ERRS() << "Notification '" << mName << " is using deprecated 'log_to_chat' or 'log_to_im' parameters" << LL_ENDL;
 	}
 #endif // LL_RELEASE_FOR_DOWNLOAD
 // [/SL:KB]
