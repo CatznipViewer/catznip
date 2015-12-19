@@ -919,9 +919,7 @@ void show_item_links(const LLUUID& idItem)
 
 	LLInventoryFilter& filter = pActivePanel->getFilter();
 //	filter.setFilterSubString(item_name);
-	filter.setFilterUUID(pItem->getUUID());
-	filter.setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-	filter.setFilterLinks(LLInventoryFilter::FILTERLINK_ONLY_LINKS);
+	filter.setFindAllLinksMode(pItem->getName(), pItem->getUUID());
 }
 // [/SL:KB]
 
