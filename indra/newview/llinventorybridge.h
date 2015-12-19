@@ -43,7 +43,7 @@ class LLInventoryFilter;
 class LLInventoryPanel;
 class LLInventoryModel;
 class LLMenuGL;
-class LLCallingCardObserver;
+//class LLCallingCardObserver;
 class LLViewerJointAttachment;
 class LLFolderView;
 
@@ -164,6 +164,10 @@ protected:
 	BOOL isCOFFolder() const;       // true if COF or descendant of
 	BOOL isInboxFolder() const;     // true if COF or descendant of   marketplace inbox
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
+	BOOL isLibraryInventory() const;
+	BOOL isLostInventory() const;
+// [/SL:KB]
 	BOOL isOutboxFolderDirectParent() const;
 	BOOL isMarketplaceListingsFolder() const;     // true if descendant of Marketplace listings folder
 	const LLUUID getOutboxFolder() const;
@@ -224,10 +228,14 @@ public:
 class LLItemBridge : public LLInvFVBridge
 {
 public:
-	LLItemBridge(LLInventoryPanel* inventory, 
-				 LLFolderView* root,
-				 const LLUUID& uuid) :
-		LLInvFVBridge(inventory, root, uuid) {}
+//	LLItemBridge(LLInventoryPanel* inventory, 
+//				 LLFolderView* root,
+//				 const LLUUID& uuid) :
+//		LLInvFVBridge(inventory, root, uuid) {}
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	LLItemBridge(LLInventoryPanel* inventory, LLFolderView* root, const LLUUID& uuid, U32 flags = 0x0)
+		: LLInvFVBridge(inventory, root, uuid), mFlags(flags) {}
+// [/SL:KB]
 
 	typedef boost::function<void(std::string& slurl)> slurl_callback_t;
 
@@ -257,6 +265,9 @@ protected:
 	virtual void buildDisplayName() const;
 	void doActionOnCurSelectedLandmark(LLLandmarkList::loaded_callback_t cb);
 
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	U32 mFlags;
+// [/SL:KB]
 private:
 	void doShowOnMap(LLLandmark* landmark);
 };
@@ -422,7 +433,7 @@ public:
 	virtual LLUIImagePtr getIcon() const;
 	virtual void openItem();
 protected:
-	BOOL mVisited;
+//	BOOL mVisited;
 };
 
 class LLCallingCardBridge : public LLItemBridge
@@ -442,10 +453,10 @@ public:
 							EDragAndDropType cargo_type,
 							void* cargo_data,
 							std::string& tooltip_msg);
-	void refreshFolderViewItem();
-	void checkSearchBySuffixChanges();
-protected:
-	LLCallingCardObserver* mObserver;
+//	void refreshFolderViewItem();
+//	void checkSearchBySuffixChanges();
+//protected:
+//	LLCallingCardObserver* mObserver;
 };
 
 class LLNotecardBridge : public LLItemBridge
@@ -507,8 +518,8 @@ public:
 	LLInventoryObject* getObject() const;
 protected:
 	static LLUUID sContextMenuItemID;  // Only valid while the context menu is open.
-	U32 mAttachPt;
-	BOOL mIsMultiObject;
+//	U32 mAttachPt;
+//	BOOL mIsMultiObject;
 };
 
 class LLLSLTextBridge : public LLItemBridge

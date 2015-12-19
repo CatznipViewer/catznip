@@ -263,6 +263,11 @@ private:
 	respond_function_map_t mRespondFunctions;
 };
 
+// [SL:KB] - Patch: Inventory-MoveFromTaskThrottle | Checked: 2011-09-12 (Catznip-2.8)
+// Hacky way of getting from move_task_inventory_callback() in llinventorybridge.cpp to the LLOpenTaskOffer class here *sighs*
+void move_task_inventory_register_folder(const LLUUID& idFolder, U32 cntItems);
+// [/SL:KB]
+
 void process_feature_disabled_message(LLMessageSystem* msg, void**);
 
 #endif

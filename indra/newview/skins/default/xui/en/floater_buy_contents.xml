@@ -4,8 +4,8 @@
  can_resize="true"
  height="290"
  layout="topleft"
- min_height="150"
- min_width="200"
+ min_height="290"
+ min_width="280"
  name="floater_buy_contents"
  help_topic="floater_buy_contents"
  save_rect="true"
@@ -27,7 +27,6 @@
      type="string"
      length="1"
      follows="left|top|right"
-     font="SansSerif"
      height="16"
      top="22"
      left="10"
@@ -40,7 +39,7 @@
      background_visible="true"
      draw_border="false"
      follows="all"
-     height="163"
+     height="150"
      layout="topleft"
      left="10"
      name="item_list"
@@ -57,13 +56,12 @@
      type="string"
      length="1"
      follows="left|right|bottom"
-     font="SansSerif"
      height="16"
      layout="topleft"
      left="10"
      name="buy_text"
      text_color="White"
-     top="220"
+     top_pad="5"
      use_ellipses="true" 
      width="260">
         Buy for L$[AMOUNT] from [NAME]?
@@ -71,28 +69,95 @@
     <check_box
      follows="left|bottom"
      height="16"
-     label="Wear clothing now"
+     label="Wear clothing &amp; attachments now"
      layout="topleft"
      left="10"
      name="wear_check"
      width="250" />
-    <button
-     follows="right|bottom"
-     height="23"
-     label="Buy"
-     label_selected="Buy"
+    <check_box
+     control_name="ShowPurchasedInventory"
+     follows="left|bottom"
+     height="16"
+     label="Show in inventory"
      layout="topleft"
-     left="65"
-     name="buy_btn"
-     top_pad="5"
-     width="100" />
-    <button
-     follows="right|bottom"
-     height="23"
-     label="Cancel"
-     label_selected="Cancel"
+     left="10"
+     name="showinv_check"
+     width="250" />
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left_pad="5"
-     name="cancel_btn"
-     width="100" />
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="42"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Shop"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Buy"
+         layout="topleft"
+         left_pad="1"
+         name="buy_btn"
+         width="80" />
+
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="StopReload_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Cancel"
+         layout="topleft"
+         left_pad="1"
+         name="cancel_btn"
+         width="80" />
+
+        <icon  
+         follows="bottom|right|left"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="42"
+         layout="topleft"
+         left_pad="1"
+         left="226"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
+    
+    
+    
 </floater>

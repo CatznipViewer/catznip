@@ -76,6 +76,16 @@ public:
 	LLInventoryPanel* getPanel() { return mActivePanel; }
 	LLInventoryPanel* getActivePanel() { return mActivePanel; }
 	const LLInventoryPanel* getActivePanel() const { return mActivePanel; }
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	enum EPanelType { PANEL_ALL, PANEL_RECENT, PANEL_UNKNOWN };
+	EPanelType        getActivePanelType() const;
+	LLInventoryPanel* getPanel(EPanelType eType) const;
+	LLInventoryPanel* selectPanel(EPanelType eType);
+	void              selectPanel(LLInventoryPanel* pInvPanel);
+
+	static LLFloater* newWindow();
+	void resetFilters();
+// [/SL:KB]
 
 	const std::string& getFilterText() const { return mFilterText; }
 	
@@ -109,10 +119,13 @@ protected:
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();
-	void newWindow();
+//	void newWindow();
 	void doCreate(const LLSD& userdata);
-	void resetFilters();
+//	void resetFilters();
 	void setSortBy(const LLSD& userdata);
+// [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)
+	void shareWithAvatars();
+// [/SL:KB]
 	void saveTexture(const LLSD& userdata);
 	bool isSaveTextureEnabled(const LLSD& userdata);
 	void updateItemcountText();
