@@ -920,7 +920,7 @@ void LLDir::setSnapshotDir(const std::string &path)
 	}
 	else
 	{
-		llwarns << "Invalid name for LLDir::setSnapshotDir" << llendl;
+		LL_WARNS() << "Invalid name for LLDir::setSnapshotDir" << LL_ENDL;
 	}
 }
 // [/SL:KB]

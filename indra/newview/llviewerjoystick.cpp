@@ -1169,7 +1169,7 @@ void LLViewerJoystick::setSNDefaults()
 // [SL:TD] - Patch: Settings-JoystickXbox | Checked: 2014-02-06 (Catznip-R9)
 void LLViewerJoystick::setXBDefaults()
 { 
-	llinfos << "restoring Xbox 360 defaults..." << llendl;
+	LL_INFOS() << "restoring Xbox 360 defaults..." << LL_ENDL;
 
 	// Ordered by apppearance on floater as read
 	gSavedSettings.setS32("JoystickAxis1", 0); // X Axis

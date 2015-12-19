@@ -1403,7 +1403,7 @@ void LLFloaterSnapshot::saveLocal(bool prompt_path, const save_image_callback_t&
 // [/SL:KB]
 //BOOL LLFloaterSnapshot::saveLocal()
 //{
-//	lldebugs << "saveLocal" << llendl;
+//	LL_DEBUGS() << "saveLocal" << LL_ENDL;
 //	// FIXME: duplicated code
 //	LLFloaterSnapshot* instance = LLFloaterReg::findTypedInstance<LLFloaterSnapshot>("snapshot");
 //	if (!instance)

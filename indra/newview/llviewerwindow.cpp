@@ -4362,7 +4362,7 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 {
 	if (!image)
 	{
-		llwarns << "No image to save" << llendl;
+		LL_WARNS() << "No image to save" << LL_ENDL;
 		if (!cb.empty())
 		{
 			cb(false);
