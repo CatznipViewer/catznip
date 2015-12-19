@@ -127,6 +127,12 @@ void LLOutfitObserver::checkBaseOutfit()
 	}
 	else
 	{
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+		if (mBaseOutfitId.notNull())
+			gInventory.addChangedMask(LLInventoryObserver::LABEL, mBaseOutfitId);
+		if (baseoutfit_id.notNull())
+			gInventory.addChangedMask(LLInventoryObserver::LABEL, baseoutfit_id);
+// [/SL:KB]
 		mBaseOutfitId = baseoutfit_id;
 		mBOFReplaced();
 

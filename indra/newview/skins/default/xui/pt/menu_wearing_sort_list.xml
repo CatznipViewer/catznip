@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ name="List Sort Wearing">
+    <menu_item_check label="Ordenar por aparência" name="list_sort_appearance">
+	<menu_item_check label="Ordenar por nome" name="list_sort_name"/>
+	<menu_item_check label="Ordenar por tipo" name="list_sort_type"/>
+</toggleable_menu>

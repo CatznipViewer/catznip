@@ -178,7 +178,7 @@ void LLInventoryItemsList::refresh()
 
 	bool needs_refresh = add_limit_exceeded;
 	setNeedsRefresh(needs_refresh);
-	setForceRefresh(needs_refresh);
+//	setForceRefresh(needs_refresh);
 
 	// After list building completed, select items that had been requested to select before list was build
 	if(!needs_refresh)
