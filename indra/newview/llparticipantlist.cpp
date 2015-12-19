@@ -830,7 +830,7 @@ void LLParticipantAvatarList::sort()
 			m_pAvatarList->sort();
 			break;
 		default:
-			llwarns << "Unrecognized sort order for " << m_pAvatarList->getName() << llendl;
+			LL_WARNS() << "Unrecognized sort order for " << m_pAvatarList->getName() << LL_ENDL;
 			return;
 	}
 }
