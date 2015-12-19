@@ -230,7 +230,7 @@ void LLPanelAvatarNotes::onCommitRights()
 	if (NULL == buddy_relationship)
 	{
 		// Lets have a warning log message instead of having a crash. EXT-4947.
-		llwarns << "Trying to modify rights for non-friend avatar. Skipped." << llendl;
+		LL_WARNS() << "Trying to modify rights for non-friend avatar. Skipped." << LL_ENDL;
 		return;
 	}
 
