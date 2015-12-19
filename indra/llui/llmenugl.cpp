@@ -4235,7 +4235,7 @@ LLMenuGL* LLContextMenu::findChildMenuByName(const std::string& name, BOOL recur
 		}
 		return LLMenuGL::findChildMenuByName(name, recurse);
 	}
-	llwarns << "Child Menu " << name << " not found in menu " << getName() << llendl;
+	LL_WARNS() << "Child Menu " << name << " not found in menu " << getName() << LL_ENDL;
 	return NULL;
 }
 // [/SL:KB]
