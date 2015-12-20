@@ -300,8 +300,8 @@ public:
 	LLCredential(const std::string& grid)
 	{
 		mGrid = grid;
-		mIdentifier = LLSD::emptyMap();
-		mAuthenticator = LLSD::emptyMap();
+//		mIdentifier = LLSD::emptyMap();
+//		mAuthenticator = LLSD::emptyMap();
 	}
 	
 	virtual ~LLCredential() {}
@@ -319,6 +319,10 @@ public:
 	virtual std::string getGrid() { return mGrid; }
 	
 
+// [SL:KB] - Patch: Viewer-Login | Checked: 2015-12-20 (Catznip-4.0)
+	virtual bool hasIdentifier() { return !mIdentifier.isUndefined(); }
+	virtual bool hasAuthenticator() { return !mAuthenticator.isUndefined(); }
+// [/SL:KB]
 	virtual void clearAuthenticator() { mAuthenticator = LLSD(); } 
 	virtual std::string userID() const { return std::string("unknown");}
 // [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)

@@ -483,7 +483,12 @@ void LLPanelLogin::selectUser(LLPointer<LLCredential> cred, BOOL remember)
 	LL_INFOS("Credentials") << "Setting login fields to " << *cred << LL_ENDL;
 
 	LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
-	pUserCombo->setTextEntry(cred->userName());
+
+	if (cred->hasIdentifier())
+	{
+		pUserCombo->setTextEntry(cred->userName());
+	}
+
 	if (-1 == pUserCombo->getCurrentIndex())
 	{
 		sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);
