@@ -189,11 +189,11 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 		login_holder->addChild(this);
 	}
 
-	if (gSavedSettings.getBOOL("FirstLoginThisInstall"))
-	{
-		buildFromFile( "panel_login_first.xml");
-	}
-	else
+//	if (gSavedSettings.getBOOL("FirstLoginThisInstall"))
+//	{
+//		buildFromFile( "panel_login_first.xml");
+//	}
+//	else
 	{
 		buildFromFile( "panel_login.xml");
 	}
