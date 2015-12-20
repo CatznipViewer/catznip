@@ -119,7 +119,7 @@
          image_unselected="Toolbar_Left_Off"
          label="Send Invitations"
          left="0"
-         name="ok_button"
+         name="invite_button"
          top="1"
          width="122" />
         <button
