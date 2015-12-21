@@ -3883,12 +3883,9 @@ LLVector3 LLVOVolume::volumeDirectionToAgent(const LLVector3& dir) const
 }
 
 
-//BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, S32 face, BOOL pick_transparent, S32 *face_hitp,
-//									  LLVector4a* intersection,LLVector2* tex_coord, LLVector4a* normal, LLVector4a* tangent)
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, S32 face, BOOL pick_transparent, BOOL pick_rigged, S32 *face_hitp,
+BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a& end, S32 face, BOOL pick_transparent, S32 *face_hitp,
 									  LLVector4a* intersection,LLVector2* tex_coord, LLVector4a* normal, LLVector4a* tangent)
-// [/SL:KB]
+	
 {
 	if (!mbCanSelect 
 		|| mDrawable->isDead() 
@@ -3905,16 +3902,9 @@ BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a&
 
 	if (mDrawable->isState(LLDrawable::RIGGED))
 	{
-//		if (LLFloater::isVisible(gFloaterTools) && getAvatar()->isSelf())
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-		const LLVOAvatar* pAvatar = NULL;
-		if ( (pick_rigged) || ((pAvatar = getAvatar()) && (pAvatar->isSelf()) && (LLFloater::isVisible(gFloaterTools)))  )
-// [/SL:KB]
+		if (LLFloater::isVisible(gFloaterTools) && getAvatar()->isSelf())
 		{
-//			updateRiggedVolume();
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-			updateRiggedVolume(true);
-// [/SL:KB]
+			updateRiggedVolume();
 			volume = mRiggedVolume;
 			transform = false;
 		}
@@ -4093,13 +4083,10 @@ BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a&
 
 bool LLVOVolume::treatAsRigged()
 {
-//	return LLFloater::isVisible(gFloaterTools) && 
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-	return isSelected() &&
-// [/SL:KB]
+	return LLFloater::isVisible(gFloaterTools) && 
 			isAttachment() && 
-//			getAvatar() &&
-//			getAvatar()->isSelf() &&
+			getAvatar() &&
+			getAvatar()->isSelf() &&
 			mDrawable.notNull() &&
 			mDrawable->isState(LLDrawable::RIGGED);
 }
@@ -4118,18 +4105,12 @@ void LLVOVolume::clearRiggedVolume()
 	}
 }
 
-//void LLVOVolume::updateRiggedVolume()
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-void LLVOVolume::updateRiggedVolume(bool force_update)
-// [/SL:KB]
+void LLVOVolume::updateRiggedVolume()
 {
 	//Update mRiggedVolume to match current animation frame of avatar. 
 	//Also update position/size in octree.  
 
-//	if (!treatAsRigged())
-// [SL:KB] - Patch: UI-PickRiggedAttachment | Checked: 2012-07-12 (Catznip-3.3)
-	if ( (!force_update) && (!treatAsRigged()) )
-// [/SL:KB]
+	if (!treatAsRigged())
 	{
 		clearRiggedVolume();
 		
