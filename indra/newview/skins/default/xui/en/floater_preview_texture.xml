@@ -99,7 +99,7 @@
      left_pad="-30"
      name="Keep"
      top="250"
-     width="90" />
+     width="85" />
     <button
      follows="right|bottom"
      height="22"
@@ -108,7 +108,7 @@
      left_pad="5"
      name="Discard"
      top_delta="0"
-     width="90" />
+     width="85" />
     <flyout_button
      follows="right|bottom"
      height="22"
@@ -117,7 +117,7 @@
      left_pad="5"
      name="save_tex_btn"
      top_delta="0"
-     width="110">
+     width="105">
       <flyout_button.item
        label="Save as PNG"
        name="save_tex_png"
