@@ -166,7 +166,7 @@ void LLHandlerUtil::logToIM(const LLUUID& session_id, const std::string& file_na
 		S32 unread = session->mNumUnread;
 		S32 participant_unread = session->mParticipantUnreadMessageCount;
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
-		LLIMModel::instance().addMessageSilently(session_id, from, from_id, message, false);
+		LLIMModel::instance().addMessageSilently(session_id, from, from_id, message, LLLogChat::timestamp(false), false);
 		LLIMModel::instance().logToFile(LLIMModel::instance().getHistoryFileName(session_id), from, from_id, log_message);
 // [/SL:KB]
 //		LLIMModel::instance().addMessageSilently(session_id, from, from_id,
