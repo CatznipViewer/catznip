@@ -1022,7 +1022,7 @@ Henvis til dette fra en hjemmeside for at give andre nem adgang til denne lokati
 		Erstattet manglende tøj/kropsdele med standard.
 	</notification>
 	<notification name="FriendOnline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; er logget på
+		&lt;nolink&gt;[NAME]&lt;/nolink&gt; er logget pÃ¥
 	</notification>
 	<notification name="FriendOffline">
 		&lt;nolink&gt;[NAME]&lt;/nolink&gt; er logget af

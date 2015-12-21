@@ -246,7 +246,10 @@ private:
 	{
 		InstanceMap& map = getMap_();
 		typename InstanceMap::iterator iter = map.find(mInstanceKey);
-		if (iter != map.end())
+//		if (iter != map.end())
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		if ( (iter != map.end()) && (iter->second == static_cast<T*>(this)) )
+// [/SL:KB]
 		{
 			map.erase(iter);
 		}
