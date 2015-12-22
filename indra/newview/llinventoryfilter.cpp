@@ -6,6 +6,7 @@
 * $LicenseInfo:firstyear=2005&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
+* Copyright (C) 2010-2015, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -499,10 +500,13 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	if (!listener) return TRUE;
 
 	const LLUUID object_id = listener->getUUID();
-	const LLInventoryObject *object = gInventory.getObject(object_id);
-	if (!object) return TRUE;
-
-	const BOOL is_link = object->getIsLinkType();
+//	const LLInventoryObject *object = gInventory.getObject(object_id);
+//	if (!object) return TRUE;
+//
+//	const BOOL is_link = object->getIsLinkType();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2015-12-22 (Catznip-4.0)
+	const bool is_link = listener->isLink();
+// [/SL:KB]
 	if (is_link && (mFilterOps.mFilterLinks == FILTERLINK_EXCLUDE_LINKS))
 		return FALSE;
 	if (!is_link && (mFilterOps.mFilterLinks == FILTERLINK_ONLY_LINKS))
