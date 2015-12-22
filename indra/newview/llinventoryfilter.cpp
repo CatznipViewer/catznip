@@ -218,15 +218,15 @@ bool LLInventoryFilter::checkFolder(const LLUUID& folder_id) const
         }
     }
     
-	// show folder links
-	LLViewerInventoryItem* item = gInventory.getItem(folder_id);
-	if (item && item->getActualType() == LLAssetType::AT_LINK_FOLDER)
-	{
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
-		return true;
-// [/SL:KB]
-//		return passed_clipboard;
-	}
+//	// show folder links
+//	LLViewerInventoryItem* item = gInventory.getItem(folder_id);
+//	if (item && item->getActualType() == LLAssetType::AT_LINK_FOLDER)
+//	{
+//// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+//		return true;
+//// [/SL:KB]
+////		return passed_clipboard;
+//	}
 
 	if (mFilterOps.mFilterTypes & FILTERTYPE_CATEGORY)
 	{
