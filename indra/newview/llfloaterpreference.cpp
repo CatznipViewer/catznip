@@ -2437,8 +2437,6 @@ BOOL LLPanelPreferenceCrashReports::postBuild()
 	getChild<LLCheckBoxCtrl>("checkSendSettings")->set(gCrashSettings.getBOOL("CrashSubmitSettings"));
 	getChild<LLCheckBoxCtrl>("send_log_check")->set(gCrashSettings.getBOOL("CrashSubmitLog"));
 
-	refresh();
-
 	//
 	// Populate recent crashes
 	//
