@@ -506,12 +506,12 @@ void LLFloaterPreference::onDoNotDisturbResponseChanged()
 
 LLFloaterPreference::~LLFloaterPreference()
 {
-	// clean up user data
-	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
-	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
-	{
-		ctrl_window_size->setCurrentByIndex(i);
-	}
+//	// clean up user data
+//	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
+//	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
+//	{
+//		ctrl_window_size->setCurrentByIndex(i);
+//	}
 
 	LLConversationLog::instance().removeObserver(this);
 }
@@ -1316,6 +1316,10 @@ void LLFloaterPreference::refreshEnabledState()
 
 	// Cannot have floater active until caps have been received
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-04-28 (Catznip-3.6)
+	getChild<LLPanel>("soundalerts")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
+// [/SL:KB]
 }
 
 void LLFloaterPreference::disableUnavailableSettings()

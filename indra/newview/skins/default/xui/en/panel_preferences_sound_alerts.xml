@@ -566,6 +566,7 @@
      length="1"
      name="loggedin_msg"
      text_color="White_50"
+     top_pad="10"
      type="string"
      right="-10">
         * You must be logged in before you can change these options.
