@@ -214,7 +214,7 @@
                      value="request_teleport" />
                     <flyout_button.action_button
                      image_hover_unselected="Toolbar_Middle_Over"
-                     image_overlay="Command_Move_Icon"
+                     image_overlay="Conv_toolbar_teleport"
                      image_overlay_alignment="left"
                      image_bottom_pad="1"
                      imgoverlay_label_space="0"
@@ -246,7 +246,7 @@
                    follows="top|left"
                    height="25"
                    image_hover_unselected="Toolbar_Middle_Over"
-                   image_overlay="Icon_For_Sale"
+                   image_overlay="Conv_toolbar_pay"
                    image_selected="Toolbar_Middle_Selected"
                    image_unselected="Toolbar_Middle_Off"
                    layout="topleft"
