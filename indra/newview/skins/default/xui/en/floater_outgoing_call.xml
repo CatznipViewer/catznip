@@ -35,6 +35,7 @@
      enabled="false"
      follows="left|top"
      height="36"
+     image_name="icon_avatar_online.tga"
      layout="topleft"
      left_delta="19"
      top="35"
