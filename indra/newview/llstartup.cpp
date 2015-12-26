@@ -476,8 +476,8 @@ bool idle_startup()
 		gSavedSettings.setString("LastGPUString", thisGPU);
 
 // [SL:KB] - Patch: Misc-Spellcheck | Checked: 2011-10-12 (Catznip-3.1.0a) | Added: Catznip-3.1.0a
-		if (LLSpellChecker::instanceExists())
-			fetch_dictionary_list();
+//		if (LLSpellChecker::instanceExists())
+//			fetch_dictionary_list();
 // [/SL:KB]
 
 		std::string xml_file = LLUI::locateSkin("xui_version.xml");
