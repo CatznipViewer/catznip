@@ -9,6 +9,8 @@
 		<scroll_list.columns label="制作者名" name="creator_name"/>
 		<scroll_list.columns label="作成日" name="creation_date"/>
 	</scroll_list>
+	<panel name="bottom_panel">
 	<button label="所有者のプロフィールを表示..." name="button owner" tool_tip="選択したオブジェクトの所有者のプロフィールを表示します" width="180"/>
 	<button label="制作者のプロフィールを表示..." name="button creator" tool_tip="選択したオブジェクトの制作者のプロフィールを表示します" width="180"/>
+	</panel>
 </floater>

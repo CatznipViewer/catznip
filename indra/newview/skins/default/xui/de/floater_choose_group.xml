@@ -3,6 +3,9 @@
 	<text name="groupdesc">
 		Gruppe wählen:
 	</text>
+	<panel name="bottom_panel" >
+	<icon name="spacer_icon_2" width="10" />
 	<button label="OK" label_selected="OK" name="OK"/>
-	<button label="Abbrechen" label_selected="Abbrechen" name="Cancel"/>
+	<button label="Abbrechen" label_selected="Abbrechen" name="Cancel" width="90"/>
+	</panel>
 </floater>

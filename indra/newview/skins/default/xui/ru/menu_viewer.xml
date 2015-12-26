@@ -17,10 +17,10 @@
 			<menu_item_call label="Остановить анимацию" name="Stop Animating My Avatar"/>
 			<menu_item_call label="Ходьба / бег / полет..." name="WalkRunFly"/>
 		</menu>
-		<menu label="Статус" name="Status">
-			<menu_item_check label="Нет на месте" name="Away"/>
-			<menu_item_check label="Не беспокоить" name="Do Not Disturb"/>
-		</menu>
+        
+        <menu_item_check label="Нет на месте" name="Away"/>
+        <menu_item_check label="Не беспокоить" name="Do Not Disturb"/>
+			
 		<menu_item_call label="Купить L$..." name="Buy and Sell L$"/>
 		<menu_item_call label="Торговые исходящие..." name="MerchantOutbox"/>
 		<menu_item_call label="Списки товаров торгового центра..." name="MarketplaceListings"/>

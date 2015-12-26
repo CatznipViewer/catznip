@@ -9,6 +9,8 @@
 		<scroll_list.columns label="Twórca" name="creator_name"/>
 		<scroll_list.columns label="Data kreacji" name="creation_date"/>
 	</scroll_list>
+	<panel name="bottom_panel">
 	<button label="Profil Właściciela..." label_selected="" name="button owner" tool_tip=""/>
 	<button label="Profil Twórcy..." label_selected="" name="button creator" tool_tip=""/>
+	</panel>
 </floater>

@@ -125,8 +125,7 @@
             <button
              follows="left|top"
              height="20"
-             image_selected="button_anim_play_selected.tga"
-             image_unselected="button_anim_play.tga"
+             label="play"
              layout="topleft"
              left_delta="55"
              name="play"
@@ -135,8 +134,7 @@
             <button
              follows="left|top"
              height="20"
-             image_selected="button_anim_pause_selected.tga"
-             image_unselected="button_anim_pause.tga"
+             label="pause"
              layout="topleft"
              left_delta="0"
              name="pause"
