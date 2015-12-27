@@ -80,7 +80,7 @@
 			 top_pad="3"
 			 width="350" />
 			<check_box
-			 commit_callback.function="RLV.ToggleEnabled"
+			 control_name="RestrainedLove"
 			 follows="top|left"
 			 height="20"
 			 label="RestrainedLove API support"

@@ -2078,10 +2078,6 @@ BOOL LLPanelPreference::postBuild()
 		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setValue( (gViewerWindow) && (gViewerWindow->getFullscreenWindow()) );
 #endif // CATZNIP
 	}
-	if (hasChild("rlva_check", TRUE))
-	{
-		getChild<LLCheckBoxCtrl>("rlva_check")->setValue(gSavedSettings.getBOOL("RestrainedLove"));
-	}
 // [/SL:KB]
 
 // [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
