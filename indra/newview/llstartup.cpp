@@ -3628,8 +3628,10 @@ class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
 public:
 	LLHTTPViewerDataResponder() {}
 
-	/*virtual*/ void result(const LLSD& sdData)
+	/*virtual*/ void httpSuccess()
 	{
+		const LLSD& sdData = getContent();
+
 		// Message of the day
 		if (sdData.has("motd"))
 		{
