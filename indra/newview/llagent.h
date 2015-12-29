@@ -849,6 +849,8 @@ public:
 // [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
 	typedef std::map<LLUUID, std::string> groupprelude_map_t;
 	groupprelude_map_t mGroupPrelude;
+
+	LLSD mFeedbackInfo;
 // [/SL:KB]
 
 	//--------------------------------------------------------------------

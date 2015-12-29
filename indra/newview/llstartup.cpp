@@ -3655,6 +3655,16 @@ public:
 				}
 			}
 		}
+
+		// Feedback button
+		if (sdData.has("feedback"))
+		{
+			const LLSD& sdFeedbackInfo = sdData["feedback"];
+			if (sdFeedbackInfo.has("url"))
+			{
+				gAgent.mFeedbackInfo = sdFeedbackInfo;
+			}
+		}
 	}
 };
 
