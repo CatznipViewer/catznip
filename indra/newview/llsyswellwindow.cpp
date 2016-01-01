@@ -295,31 +295,6 @@ BOOL LLIMWellWindow::ObjectRowPanel::handleRightMouseDown(S32 x, S32 y, MASK mas
 	return mChiclet->handleRightMouseDown(x, y, mask);
 }
 
-// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
-class LLNotificationDateComparator : public LLFlatListView::ItemComparator
-{
-public:
-	LLNotificationDateComparator() {}
-	/*virtual*/ ~LLNotificationDateComparator() {}
-
-	/*virtual*/ bool compare(const LLPanel* pLHS, const LLPanel* pRHS) const
-	{
-		const LLSysWellItem* pItemLeft = dynamic_cast<const LLSysWellItem*>(pLHS);
-		const LLSysWellItem* pItemRight= dynamic_cast<const LLSysWellItem*>(pRHS);
-		if ( (pItemLeft) && (pItemRight) )
-		{
-			LLNotificationPtr notifLeft = LLNotifications::instance().find(pItemLeft->getID());
-			LLNotificationPtr notifRight= LLNotifications::instance().find(pItemRight->getID());
-			// NOTE: we want to sort notifications from old to new
-			return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() > notifRight.get()->getDate());
-		}
-		return false;
-	}
-};
-static const LLNotificationDateComparator NOTIF_DATE_COMPARATOR;
-// [/SL:KB]
-
-
 /************************************************************************/
 /*         LLIMWellWindow  implementation                               */
 /************************************************************************/

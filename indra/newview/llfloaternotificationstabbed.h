@@ -71,6 +71,17 @@ private:
     LLNotificationListView* mUnTaggedList;
 };
 
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+class LLNotificationDateComparator : public LLFlatListView::ItemComparator
+{
+public:
+	LLNotificationDateComparator() {}
+	/*virtual*/ ~LLNotificationDateComparator() {}
+
+	/*virtual*/ bool compare(const LLPanel* pLHS, const LLPanel* pRHS) const;
+};
+// [/SL:KB]
+
 class LLFloaterNotifications : public LLTransientDockableFloater
 {
 public:
@@ -220,6 +231,11 @@ private:
     LLNotificationSeparator* mNotificationsSeparator;
     LLTabContainer* mNotificationsTabContainer;
 };
+
+namespace LLFloaterNotificationsUtil
+{
+	void registerFloater();
+}
 // [/SL:KB]
 
 #endif // LL_FLOATERNOTIFICATIONSTABBED_H

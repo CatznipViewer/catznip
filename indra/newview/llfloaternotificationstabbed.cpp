@@ -38,6 +38,12 @@
 #include "lltoastpanel.h"
 #include "lltoastnotifypanel.h"
 
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+#include "llfloaternotificationsflat.h"
+
+LLNotificationDateComparator NOTIF_DATE_COMPARATOR;
+// [/SL:KB]
+
 //---------------------------------------------------------------------------------
 LLFloaterNotifications::LLFloaterNotifications(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
     mChannel(NULL),
@@ -76,17 +82,21 @@ LLFloaterNotificationsTabbed::LLFloaterNotificationsTabbed(const LLSD& key) : LL
 // [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
 BOOL LLFloaterNotificationsTabbed::postBuild()
 {
-    mGroupInviteMessageList = getChild<LLNotificationListView>("group_invite_notification_list");
-    mGroupNoticeMessageList = getChild<LLNotificationListView>("group_notice_notification_list");
-    mTransactionMessageList = getChild<LLNotificationListView>("transaction_notification_list");
-    mSystemMessageList = getChild<LLNotificationListView>("system_notification_list");
-    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupInviteTypes(), mGroupInviteMessageList);
-    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupNoticeTypes(), mGroupNoticeMessageList);
-    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getTransactionTypes(), mTransactionMessageList);
-    mNotificationsSeparator->initUnTaggedList(mSystemMessageList);
-    mNotificationsTabContainer = getChild<LLTabContainer>("notifications_tab_container");
-
-    return LLFloaterNotifications::postBuild();
+	mGroupInviteMessageList = getChild<LLNotificationListView>("group_invite_notification_list");
+	mGroupInviteMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+	mGroupNoticeMessageList = getChild<LLNotificationListView>("group_notice_notification_list");
+	mGroupNoticeMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+	mTransactionMessageList = getChild<LLNotificationListView>("transaction_notification_list");
+	mTransactionMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+	mSystemMessageList = getChild<LLNotificationListView>("system_notification_list");
+	mSystemMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+	mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupInviteTypes(), mGroupInviteMessageList);
+	mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupNoticeTypes(), mGroupNoticeMessageList);
+	mNotificationsSeparator->initTaggedList(LLNotificationListItem::getTransactionTypes(), mTransactionMessageList);
+	mNotificationsSeparator->initUnTaggedList(mSystemMessageList);
+	mNotificationsTabContainer = getChild<LLTabContainer>("notifications_tab_container");
+	
+	return LLFloaterNotifications::postBuild();
 }
 // [/SL:KB]
 
@@ -683,3 +693,27 @@ LLNotificationSeparator::LLNotificationSeparator()
 //---------------------------------------------------------------------------------
 LLNotificationSeparator::~LLNotificationSeparator()
 {}
+
+//---------------------------------------------------------------------------------
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLNotificationDateComparator::compare(const LLPanel* pLHS, const LLPanel* pRHS) const
+{
+	const LLSysWellItem* pItemLeft = dynamic_cast<const LLSysWellItem*>(pLHS);
+	const LLSysWellItem* pItemRight= dynamic_cast<const LLSysWellItem*>(pRHS);
+	if ( (pItemLeft) && (pItemRight) )
+	{
+		LLNotificationPtr notifLeft = LLNotifications::instance().find(pItemLeft->getID());
+		LLNotificationPtr notifRight= LLNotifications::instance().find(pItemRight->getID());
+		// NOTE: we want to sort notifications from old to new
+		return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() > notifRight.get()->getDate());
+	}
+	return false;
+}
+
+void LLFloaterNotificationsUtil::registerFloater()
+{
+	LLFloaterReg::add("notification_well_window", "floater_notifications_flat.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotificationsFlat>);
+//	LLFloaterReg::add("notification_well_window", "floater_notifications_tabbed.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotificationsTabbed>);
+}
+// [/SL:KB]
+//---------------------------------------------------------------------------------

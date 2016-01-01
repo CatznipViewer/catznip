@@ -49,11 +49,7 @@ public:
 	virtual	~LLSysWellItem();
 
 	// title
-// [SL:KB] - Patch: Notification-Filter | Checked: 2014-05-31 (Catznip-3.6)
-	const std::string getTitle() const;
-	void              setTitle(const std::string& title );
-// [/SL:KB]
-//	void setTitle( std::string title );
+	void setTitle( std::string title );
 
 	// get item's ID
 // [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)

@@ -271,6 +271,7 @@ set(viewer_SOURCE_FILES
     llfloatermodeluploadbase.cpp
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
+    llfloaternotificationsflat.cpp
     llfloaternotificationstabbed.cpp 
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
@@ -894,6 +895,7 @@ set(viewer_HEADER_FILES
     llfloatermodeluploadbase.h
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
+    llfloaternotificationsflat.h
     llfloaternotificationstabbed.h 
     llfloaterobjectweights.h
     llfloateropenobject.h
