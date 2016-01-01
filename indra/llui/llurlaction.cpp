@@ -166,7 +166,8 @@ std::string LLUrlAction::getUserID(std::string url)
 //	if (path_array.size() == 4)
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
 	// Only grab the UUID if it's an agent URL
-	if ( (path_array.size() == 4) && ("agent" == path_array.get(1).asString()) )
+	const std::string strCommand = path_array.get(1).asString();
+	if ( (path_array.size() == 4) && (("agent" == strCommand) || ("group" == strCommand)) )
 // [/SL:KB]
 	{
 		id_str = path_array.get(2).asString();
@@ -208,9 +209,18 @@ void LLUrlAction::sendIM(std::string url)
 }
 
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+void LLUrlAction::startGroupChat(const std::string& url)
+{
+	const std::string strGroupId = getUserID(url);
+	if (LLUUID::validate(strGroupId))
+	{
+		executeSLURL("secondlife:///app/group/" + strGroupId + "/im");
+	}
+}
+
 void LLUrlAction::offerTeleport(const std::string& url)
 {
-	std::string strAgentId = getUserID(url);
+	const std::string strAgentId = getUserID(url);
 	if (LLUUID::validate(strAgentId))
 	{
 		executeSLURL("secondlife:///app/agent/" + strAgentId + "/offerteleport");
@@ -219,7 +229,7 @@ void LLUrlAction::offerTeleport(const std::string& url)
 
 void LLUrlAction::requestTeleport(const std::string& url)
 {
-	std::string strAgentId = getUserID(url);
+	const std::string strAgentId = getUserID(url);
 	if (LLUUID::validate(strAgentId))
 	{
 		executeSLURL("secondlife:///app/agent/" + strAgentId + "/requestteleport");

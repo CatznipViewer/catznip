@@ -14,7 +14,7 @@
      layout="topleft"
      name="Show Group Chat">
         <menu_item_call.on_click
-         function="Url.StartIM" />
+         function="Url.GroupChat" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft" />

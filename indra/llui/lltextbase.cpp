@@ -1945,6 +1945,7 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, url));
 	registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, url));
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	registrar.add("Url.GroupChat", boost::bind(&LLUrlAction::startGroupChat, url));
 	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
 	registrar.add("Url.RequestTeleport", boost::bind(&LLUrlAction::requestTeleport, url));
 // [/SL:KB]

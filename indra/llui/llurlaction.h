@@ -81,13 +81,13 @@ public:
 	static std::string getObjectId(std::string url);
 	static void sendIM(std::string url);
 // [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	static void startGroupChat(const std::string& url);
 	static void offerTeleport(const std::string& url);
 	static void requestTeleport(const std::string& url);
 // [/SL:KB]
 	static void addFriend(std::string url);
 	static void removeFriend(std::string url);
 	static void blockObject(std::string url);
-
 
 	/// specify the callbacks to enable this class's functionality
 	typedef boost::function<void (const std::string&)> url_callback_t;

@@ -114,6 +114,15 @@ public:
 			LLGroupActions::inspect(group_id);
 			return true;
 		}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+		if (tokens[1].asString() == "im")
+		{
+			if ( (group_id.isNull()) || (!LLGroupActions::isInGroup(group_id)) )
+				return true;
+			LLGroupActions::startIM(group_id);
+			return true;
+		}
+// [/SL:KB]
 		return false;
 	}
 };
