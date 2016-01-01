@@ -4,6 +4,7 @@
  * $LicenseInfo:firstyear=2015&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2015, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,26 +39,41 @@
 #include "lltoastnotifypanel.h"
 
 //---------------------------------------------------------------------------------
-LLFloaterNotificationsTabbed::LLFloaterNotificationsTabbed(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
+LLFloaterNotifications::LLFloaterNotifications(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
     mChannel(NULL),
     mSysWellChiclet(NULL),
-    mGroupInviteMessageList(NULL),
-    mGroupNoticeMessageList(NULL),
-    mTransactionMessageList(NULL),
-    mSystemMessageList(NULL),
-    mNotificationsSeparator(NULL),
-    mNotificationsTabContainer(NULL),
+//    mGroupInviteMessageList(NULL),
+//    mGroupNoticeMessageList(NULL),
+//    mTransactionMessageList(NULL),
+//    mSystemMessageList(NULL),
+//    mNotificationsSeparator(NULL),
+//    mNotificationsTabContainer(NULL),
     NOTIFICATION_TABBED_ANCHOR_NAME("notification_well_panel"),
     IM_WELL_ANCHOR_NAME("im_well_panel"),
     mIsReshapedByUser(false)
 
 {
     setOverlapsScreenChannel(true);
-    mNotificationUpdates.reset(new NotificationTabbedChannel(this));
-    mNotificationsSeparator = new LLNotificationSeparator();
+    mNotificationUpdates.reset(new NotificationChannel(this));
+//    mNotificationsSeparator = new LLNotificationSeparator();
 }
 
 //---------------------------------------------------------------------------------
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+LLFloaterNotificationsTabbed::LLFloaterNotificationsTabbed(const LLSD& key) : LLFloaterNotifications(key),
+    mGroupInviteMessageList(NULL),
+    mGroupNoticeMessageList(NULL),
+    mTransactionMessageList(NULL),
+    mSystemMessageList(NULL),
+    mNotificationsSeparator(NULL),
+    mNotificationsTabContainer(NULL)
+{
+    mNotificationsSeparator = new LLNotificationSeparator();
+}
+// [/SL:KB]
+
+//---------------------------------------------------------------------------------
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
 BOOL LLFloaterNotificationsTabbed::postBuild()
 {
     mGroupInviteMessageList = getChild<LLNotificationListView>("group_invite_notification_list");
@@ -70,11 +86,28 @@ BOOL LLFloaterNotificationsTabbed::postBuild()
     mNotificationsSeparator->initUnTaggedList(mSystemMessageList);
     mNotificationsTabContainer = getChild<LLTabContainer>("notifications_tab_container");
 
+    return LLFloaterNotifications::postBuild();
+}
+// [/SL:KB]
+
+//---------------------------------------------------------------------------------
+BOOL LLFloaterNotifications::postBuild()
+{
+//    mGroupInviteMessageList = getChild<LLNotificationListView>("group_invite_notification_list");
+//    mGroupNoticeMessageList = getChild<LLNotificationListView>("group_notice_notification_list");
+//    mTransactionMessageList = getChild<LLNotificationListView>("transaction_notification_list");
+//    mSystemMessageList = getChild<LLNotificationListView>("system_notification_list");
+//    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupInviteTypes(), mGroupInviteMessageList);
+//    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getGroupNoticeTypes(), mGroupNoticeMessageList);
+//    mNotificationsSeparator->initTaggedList(LLNotificationListItem::getTransactionTypes(), mTransactionMessageList);
+//    mNotificationsSeparator->initUnTaggedList(mSystemMessageList);
+//    mNotificationsTabContainer = getChild<LLTabContainer>("notifications_tab_container");
+
     mDeleteAllBtn = getChild<LLButton>("delete_all_button");
-    mDeleteAllBtn->setClickedCallback(boost::bind(&LLFloaterNotificationsTabbed::onClickDeleteAllBtn,this));
+    mDeleteAllBtn->setClickedCallback(boost::bind(&LLFloaterNotifications::onClickDeleteAllBtn,this));
 
     mCollapseAllBtn = getChild<LLButton>("collapse_all_button");
-    mCollapseAllBtn->setClickedCallback(boost::bind(&LLFloaterNotificationsTabbed::onClickCollapseAllBtn,this));
+    mCollapseAllBtn->setClickedCallback(boost::bind(&LLFloaterNotifications::onClickCollapseAllBtn,this));
 
     // get a corresponding channel
     initChannel();
@@ -85,27 +118,27 @@ BOOL LLFloaterNotificationsTabbed::postBuild()
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::setMinimized(BOOL minimize)
+void LLFloaterNotifications::setMinimized(BOOL minimize)
 {
     LLTransientDockableFloater::setMinimized(minimize);
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::handleReshape(const LLRect& rect, bool by_user)
+void LLFloaterNotifications::handleReshape(const LLRect& rect, bool by_user)
 {
     mIsReshapedByUser |= by_user; // mark floater that it is reshaped by user
     LLTransientDockableFloater::handleReshape(rect, by_user);
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onStartUpToastClick(S32 x, S32 y, MASK mask)
+void LLFloaterNotifications::onStartUpToastClick(S32 x, S32 y, MASK mask)
 {
     // just set floater visible. Screen channels will be cleared.
     setVisible(TRUE);
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::setSysWellChiclet(LLSysWellChiclet* chiclet) 
+void LLFloaterNotifications::setSysWellChiclet(LLSysWellChiclet* chiclet) 
 { 
     mSysWellChiclet = chiclet;
     if(NULL != mSysWellChiclet)
@@ -115,14 +148,24 @@ void LLFloaterNotificationsTabbed::setSysWellChiclet(LLSysWellChiclet* chiclet)
 }
 
 //---------------------------------------------------------------------------------
-LLFloaterNotificationsTabbed::~LLFloaterNotificationsTabbed()
+LLFloaterNotifications::~LLFloaterNotifications()
 {
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::removeItemByID(const LLUUID& id, std::string type)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+LLFloaterNotificationsTabbed::~LLFloaterNotificationsTabbed()
 {
-    if(mNotificationsSeparator->removeItemByID(type, id))
+}
+// [/SL:KB]
+
+//---------------------------------------------------------------------------------
+void LLFloaterNotifications::removeItemByID(const LLUUID& id, std::string type)
+{
+//    if(mNotificationsSeparator->removeItemByID(type, id))
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	if (removeNotificationByID(id, type))
+// [/SL:KB]
     {
         if (NULL != mSysWellChiclet)
         {
@@ -145,13 +188,29 @@ void LLFloaterNotificationsTabbed::removeItemByID(const LLUUID& id, std::string 
 }
 
 //---------------------------------------------------------------------------------
-LLPanel * LLFloaterNotificationsTabbed::findItemByID(const LLUUID& id, std::string type)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLFloaterNotificationsTabbed::removeNotificationByID(const LLUUID& id, const std::string& type)
+{
+	return mNotificationsSeparator->removeItemByID(type, id);
+}
+
+LLPanel * LLFloaterNotificationsTabbed::findNotificationByID(const LLUUID& id, const std::string& type)
 {
     return mNotificationsSeparator->findItemByID(type, id);
 }
+// [/SL:KB]
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::initChannel() 
+LLPanel * LLFloaterNotifications::findItemByID(const LLUUID& id, std::string type)
+{
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	return findNotificationByID(id, type);
+// [/SL:KB]
+//    return mNotificationsSeparator->findItemByID(type, id);
+}
+
+//---------------------------------------------------------------------------------
+void LLFloaterNotifications::initChannel() 
 {
     LLNotificationsUI::LLScreenChannelBase* channel = LLNotificationsUI::LLChannelManager::getInstance()->findChannelByID(
         LLUUID(gSavedSettings.getString("NotificationChannelUUID")));
@@ -163,12 +222,12 @@ void LLFloaterNotificationsTabbed::initChannel()
 
     if(mChannel)
     {
-        mChannel->addOnStoreToastCallback(boost::bind(&LLFloaterNotificationsTabbed::onStoreToast, this, _1, _2));
+        mChannel->addOnStoreToastCallback(boost::bind(&LLFloaterNotifications::onStoreToast, this, _1, _2));
     }
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
+void LLFloaterNotifications::setVisible(BOOL visible)
 {
     if (visible)
     {
@@ -186,7 +245,11 @@ void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
     }
 
     // do not show empty window
-    if (NULL == mNotificationsSeparator || isWindowEmpty()) visible = FALSE;
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	if (isWindowEmpty())
+		visible = FALSE;
+// [/SL:KB]
+//    if (NULL == mNotificationsSeparator || isWindowEmpty()) visible = FALSE;
 
     LLTransientDockableFloater::setVisible(visible);
 
@@ -200,7 +263,7 @@ void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::setDocked(bool docked, bool pop_on_undock)
+void LLFloaterNotifications::setDocked(bool docked, bool pop_on_undock)
 {
     LLTransientDockableFloater::setDocked(docked, pop_on_undock);
 
@@ -213,7 +276,7 @@ void LLFloaterNotificationsTabbed::setDocked(bool docked, bool pop_on_undock)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::reshapeWindow()
+void LLFloaterNotifications::reshapeWindow()
 {
     // update notification channel state
     // update on a window reshape is important only when a window is visible and docked
@@ -224,15 +287,18 @@ void LLFloaterNotificationsTabbed::reshapeWindow()
 }
 
 //---------------------------------------------------------------------------------
-bool LLFloaterNotificationsTabbed::isWindowEmpty()
+//bool LLFloaterNotificationsTabbed::isWindowEmpty()
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLFloaterNotificationsTabbed::isWindowEmpty() const
+// [/SL:KB]
 {
     return mNotificationsSeparator->size() == 0;
 }
 
 //---------------------------------------------------------------------------------
-LLFloaterNotificationsTabbed::NotificationTabbedChannel::NotificationTabbedChannel(LLFloaterNotificationsTabbed* notifications_tabbed_window)
-    : LLNotificationChannel(LLNotificationChannel::Params().name(notifications_tabbed_window->getPathname())),
-    mNotificationsTabbedWindow(notifications_tabbed_window)
+LLFloaterNotifications::NotificationChannel::NotificationChannel(LLFloaterNotifications* notifications_window)
+    : LLNotificationChannel(LLNotificationChannel::Params().name(notifications_window->getPathname())),
+    mNotificationsWindow(notifications_window)
 {
     connectToChannel("Notifications");
     connectToChannel("Group Notifications");
@@ -241,9 +307,9 @@ LLFloaterNotificationsTabbed::NotificationTabbedChannel::NotificationTabbedChann
 
 // static
 //---------------------------------------------------------------------------------
-LLFloaterNotificationsTabbed* LLFloaterNotificationsTabbed::getInstance(const LLSD& key /*= LLSD()*/)
+LLFloaterNotifications* LLFloaterNotifications::getInstance(const LLSD& key /*= LLSD()*/)
 {
-    return LLFloaterReg::getTypedInstance<LLFloaterNotificationsTabbed>("notification_well_window", key);
+    return LLFloaterReg::getTypedInstance<LLFloaterNotifications>("notification_well_window", key);
 }
 
 //---------------------------------------------------------------------------------
@@ -265,23 +331,30 @@ void LLFloaterNotificationsTabbed::updateNotificationCounters()
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::addItem(LLNotificationListItem::Params p)
+void LLFloaterNotifications::addItem(LLNotificationListItem::Params p)
 {
     // do not add clones
-    if (mNotificationsSeparator->findItemByID(p.notification_name, p.notification_id))
-        return;
+//    if (mNotificationsSeparator->findItemByID(p.notification_name, p.notification_id))
+//        return;
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	if (findNotificationByID(p.notification_id, p.notification_name))
+		return;
+// [/SL:KB]
     LLNotificationListItem* new_item = LLNotificationListItem::create(p);
     if (new_item == NULL)
     {
         return;
     }
-    if (mNotificationsSeparator->addItem(new_item->getNotificationName(), new_item))
+//    if (mNotificationsSeparator->addItem(new_item->getNotificationName(), new_item))
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	if (addNotification(new_item))
+// [/SL:KB]
     {
         mSysWellChiclet->updateWidget(isWindowEmpty());
         reshapeWindow();
         updateNotificationCounters();
-        new_item->setOnItemCloseCallback(boost::bind(&LLFloaterNotificationsTabbed::onItemClose, this, _1));
-        new_item->setOnItemClickCallback(boost::bind(&LLFloaterNotificationsTabbed::onItemClick, this, _1));
+        new_item->setOnItemCloseCallback(boost::bind(&LLFloaterNotifications::onItemClose, this, _1));
+        new_item->setOnItemClickCallback(boost::bind(&LLFloaterNotifications::onItemClick, this, _1));
     }
     else
     {
@@ -294,13 +367,29 @@ void LLFloaterNotificationsTabbed::addItem(LLNotificationListItem::Params p)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::closeAll()
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLFloaterNotificationsTabbed::addNotification(LLNotificationListItem* item)
+{
+	return mNotificationsSeparator->addItem(item->getNotificationName(), item);
+}
+
+void LLFloaterNotificationsTabbed::getNotifications(std::vector<LLNotificationListItem*>& items)
+{
+	mNotificationsSeparator->getItems(items);
+}
+// [/SL:KB]
+
+//---------------------------------------------------------------------------------
+void LLFloaterNotifications::closeAll()
 {
     // Need to clear notification channel, to add storable toasts into the list.
     clearScreenChannels();
 
     std::vector<LLNotificationListItem*> items;
-    mNotificationsSeparator->getItems(items);
+//    mNotificationsSeparator->getItems(items);
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	getNotifications(items);
+// [/SL:KB]
     std::vector<LLNotificationListItem*>::iterator iter = items.begin();
     for (; iter != items.end(); ++iter)
     {
@@ -331,7 +420,10 @@ void LLFloaterNotificationsTabbed::getAllItemsOnCurrentTab(std::vector<LLPanel*>
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::closeAllOnCurrentTab()
+//void LLFloaterNotificationsTabbed::closeAllOnCurrentTab()
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+void LLFloaterNotificationsTabbed::closeVisibleNotifications()
+// [/SL:KB]
 {
     // Need to clear notification channel, to add storable toasts into the list.
     clearScreenChannels();
@@ -347,7 +439,10 @@ void LLFloaterNotificationsTabbed::closeAllOnCurrentTab()
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::collapseAllOnCurrentTab()
+//void LLFloaterNotificationsTabbed::collapseAllOnCurrentTab()
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+void LLFloaterNotificationsTabbed::collapseVisibleNotifications()
+// [/SL:KB]
 {
     std::vector<LLPanel*> items;
     getAllItemsOnCurrentTab(items);
@@ -361,7 +456,7 @@ void LLFloaterNotificationsTabbed::collapseAllOnCurrentTab()
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::clearScreenChannels()
+void LLFloaterNotifications::clearScreenChannels()
 {
     // 1 - remove StartUp toast and channel if present
     if(!LLNotificationsUI::LLScreenChannel::getStartUpToastShown())
@@ -377,7 +472,7 @@ void LLFloaterNotificationsTabbed::clearScreenChannels()
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onStoreToast(LLPanel* info_panel, LLUUID id)
+void LLFloaterNotifications::onStoreToast(LLPanel* info_panel, LLUUID id)
 {
     LLNotificationListItem::Params p;	
     p.notification_id = id;
@@ -401,7 +496,7 @@ void LLFloaterNotificationsTabbed::onStoreToast(LLPanel* info_panel, LLUUID id)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onItemClick(LLNotificationListItem* item)
+void LLFloaterNotifications::onItemClick(LLNotificationListItem* item)
 {
     LLUUID id = item->getID();
     if (item->showPopup())
@@ -415,7 +510,7 @@ void LLFloaterNotificationsTabbed::onItemClick(LLNotificationListItem* item)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onItemClose(LLNotificationListItem* item)
+void LLFloaterNotifications::onItemClose(LLNotificationListItem* item)
 {
     LLUUID id = item->getID();
 
@@ -433,21 +528,27 @@ void LLFloaterNotificationsTabbed::onItemClose(LLNotificationListItem* item)
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onAdd( LLNotificationPtr notify )
+void LLFloaterNotifications::onAdd( LLNotificationPtr notify )
 {
     removeItemByID(notify->getID(), notify->getName());
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onClickDeleteAllBtn()
+void LLFloaterNotifications::onClickDeleteAllBtn()
 {
-    closeAllOnCurrentTab();
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	closeVisibleNotifications();
+// [/SL:KB]
+//    closeAllOnCurrentTab();
 }
 
 //---------------------------------------------------------------------------------
-void LLFloaterNotificationsTabbed::onClickCollapseAllBtn()
+void LLFloaterNotifications::onClickCollapseAllBtn()
 {
-    collapseAllOnCurrentTab();
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	collapseVisibleNotifications();
+// [/SL:KB]
+//    collapseAllOnCurrentTab();
 }
 
 //---------------------------------------------------------------------------------
@@ -474,7 +575,10 @@ void LLNotificationSeparator::initUnTaggedList(LLNotificationListView* list)
 }
 
 //---------------------------------------------------------------------------------
-bool LLNotificationSeparator::addItem(std::string& tag, LLNotificationListItem* item)
+//bool LLNotificationSeparator::addItem(std::string& tag, LLNotificationListItem* item)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLNotificationSeparator::addItem(const std::string& tag, LLNotificationListItem* item)
+// [/SL:KB]
 {
     notification_list_map_t::iterator it = mNotificationListMap.find(tag);
     if (it != mNotificationListMap.end())
@@ -489,7 +593,10 @@ bool LLNotificationSeparator::addItem(std::string& tag, LLNotificationListItem* 
 }
 
 //---------------------------------------------------------------------------------
-bool LLNotificationSeparator::removeItemByID(std::string& tag, const LLUUID& id)
+//bool LLNotificationSeparator::removeItemByID(std::string& tag, const LLUUID& id)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+bool LLNotificationSeparator::removeItemByID(const std::string& tag, const LLUUID& id)
+// [/SL:KB]
 {
     notification_list_map_t::iterator it = mNotificationListMap.find(tag);
     if (it != mNotificationListMap.end())
@@ -520,7 +627,10 @@ U32 LLNotificationSeparator::size() const
 }
 
 //---------------------------------------------------------------------------------
-LLPanel* LLNotificationSeparator::findItemByID(std::string& tag, const LLUUID& id)
+//LLPanel* LLNotificationSeparator::findItemByID(std::string& tag, const LLUUID& id)
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+LLPanel* LLNotificationSeparator::findItemByID(const std::string& tag, const LLUUID& id)
+// [/SL:KB]
 {
     notification_list_map_t::iterator it = mNotificationListMap.find(tag);
     if (it != mNotificationListMap.end())
