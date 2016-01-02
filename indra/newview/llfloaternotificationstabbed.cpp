@@ -593,11 +593,25 @@ bool LLNotificationSeparator::addItem(const std::string& tag, LLNotificationList
     notification_list_map_t::iterator it = mNotificationListMap.find(tag);
     if (it != mNotificationListMap.end())
     {
-        return it->second->addNotification(item);
+// [SL:KB] - Patch: Notification-Misc | Checked: 2016-01-01 (Catznip-4.0)
+		if (it->second->addNotification(item, false))
+		{
+			it->second->sort();
+			return true;
+		}
+// [/SL:KB]
+//        return it->second->addNotification(item);
     }
     else if (mUnTaggedList != NULL)
     {
-        return mUnTaggedList->addNotification(item);
+// [SL:KB] - Patch: Notification-Misc | Checked: 2016-01-01 (Catznip-4.0)
+		if (mUnTaggedList->addNotification(item, false))
+		{
+			mUnTaggedList->sort();
+			return true;
+		}
+// [/SL:KB]
+//        return mUnTaggedList->addNotification(item);
     }
     return false;
 }
@@ -704,8 +718,8 @@ bool LLNotificationDateComparator::compare(const LLPanel* pLHS, const LLPanel* p
 	{
 		LLNotificationPtr notifLeft = LLNotifications::instance().find(pItemLeft->getID());
 		LLNotificationPtr notifRight= LLNotifications::instance().find(pItemRight->getID());
-		// NOTE: we want to sort notifications from old to new
-		return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() > notifRight.get()->getDate());
+		// NOTE: we want to sort notifications from new to top
+		return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() < notifRight.get()->getDate());
 	}
 	return false;
 }

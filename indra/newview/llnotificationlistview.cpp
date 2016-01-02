@@ -36,9 +36,15 @@ LLNotificationListView::LLNotificationListView(const Params& p)
 LLNotificationListView::~LLNotificationListView()
 {}
 
-bool LLNotificationListView::addNotification(LLNotificationListItem * item)
+// [SL:KB] - Patch: Notification-Misc | Checked: 2016-01-01 (Catznip-4.0)
+bool LLNotificationListView::addNotification(LLNotificationListItem* item, bool rearrange)
 {
-    return LLFlatListView::addItem(item, item->getID(), ADD_TOP);
+	return LLFlatListView::addItem(item, item->getID(), ADD_TOP, rearrange);
 }
+// [/SL:KB]
+//bool LLNotificationListView::addNotification(LLNotificationListItem * item)
+//{
+//    return LLFlatListView::addItem(item, item->getID(), ADD_TOP);
+//}
 
 //EOF

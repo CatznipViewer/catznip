@@ -76,7 +76,7 @@ public:
     // get item's ID
 // [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
 	LLUUID getID() const { return mParams.notification_id; }
-	const std::string& getTitle() const { return mTitle; }
+	const std::string& getTitle() const { return mParams.title; }
 // [/SL:KB]
 //    LLUUID getID() { return mParams.notification_id; }
 //    std::string& getTitle() { return mTitle; }
@@ -129,7 +129,7 @@ protected:
     LLButton*           mCloseBtnExp;
     LLPanel*            mCondensedViewPanel;
     LLPanel*            mExpandedViewPanel;
-    std::string         mTitle;
+//    std::string         mTitle;
     std::string         mNotificationName;
     S32                 mCondensedHeight;
     S32                 mExpandedHeight;

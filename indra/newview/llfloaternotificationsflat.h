@@ -50,7 +50,16 @@ public:
 	 * Helper functions
 	 */
 protected:
-	bool checkFilter(const LLNotificationListItem* pWellItem) const;
+	enum ENotificationFilter
+	{
+		NF_NONE = 0,
+		NF_SYSTEM,
+		NF_GROUP_NOTICE,
+		NF_OFFERS,
+		NF_TRANSACTION
+	};
+
+	bool checkFilter(const LLNotificationListItem* pItem) const;
 	void refreshFilter();
 
 	/*
@@ -71,13 +80,15 @@ protected:
 	 * Member variables
 	 */
 private:
-    LLNotificationListView*	mMessageList;
+    LLNotificationListView*	m_pMessageList;
 
 	LLComboBox*     m_pFilterType;
 	LLFilterEditor* m_pFilterText;
 
-	std::string     m_strFilterType;
 	std::string     m_strFilterText;
+	std::string     m_strFilterType;
+	std::set<std::string> m_FilterNames;
+	std::set<std::string> m_FilterNamesExclude;
 };
 
 // =========================================================================

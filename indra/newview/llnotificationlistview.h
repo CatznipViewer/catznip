@@ -43,7 +43,10 @@ public:
     ~LLNotificationListView();
     friend class LLUICtrlFactory;
 
-    virtual bool addNotification(LLNotificationListItem * item);
+// [SL:KB] - Patch: Notification-Misc | Checked: 2016-01-01 (Catznip-4.0)
+	virtual bool addNotification(LLNotificationListItem * item, bool rearrange);
+// [/SL:KB]
+//    virtual bool addNotification(LLNotificationListItem * item);
 };
 
 #endif

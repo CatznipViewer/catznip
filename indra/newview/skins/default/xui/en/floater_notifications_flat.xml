@@ -66,16 +66,19 @@
        width="120">
         <combo_box.item
          label="All"
-         value="" />
+         value="0" />
+        <combo_box.item
+         label="System"
+         value="1" />
         <combo_box.item
          label="Group Notices"
-         value="groupnotify" />
-        <combo_box.item
-         label="Notifications"
-         value="notify" />
+         value="2" />
         <combo_box.item
          label="Offers"
-         value="offer" />
+         value="3" />
+        <combo_box.item
+         label="Transactions"
+         value="4" />
       </combo_box>
       <filter_editor
        follows="top|left|right"

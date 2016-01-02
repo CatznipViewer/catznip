@@ -31,7 +31,7 @@ extern LLNotificationDateComparator NOTIF_DATE_COMPARATOR;
 
 LLFloaterNotificationsFlat::LLFloaterNotificationsFlat(const LLSD& key)
 	: LLFloaterNotifications(key),
-	  mMessageList(nullptr),
+	  m_pMessageList(nullptr),
 	  m_pFilterType(nullptr),
 	  m_pFilterText(nullptr)
 {
@@ -43,23 +43,23 @@ LLFloaterNotificationsFlat::~LLFloaterNotificationsFlat()
 
 BOOL LLFloaterNotificationsFlat::postBuild()
 {
-	mMessageList = getChild<LLNotificationListView>("notification_list");
+	m_pMessageList = getChild<LLNotificationListView>("notification_list");
 
 	m_pFilterType = getChild<LLComboBox>("filter_type");
 	m_pFilterType->setCommitCallback(boost::bind(&LLFloaterNotificationsFlat::refreshFilter, this));
 	m_pFilterText = getChild<LLFilterEditor>("filter_text");
 	m_pFilterText->setCommitCallback(boost::bind(&LLFloaterNotificationsFlat::refreshFilter, this));
 
-	mMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
+	m_pMessageList->setComparator(&NOTIF_DATE_COMPARATOR);
 
 	return LLFloaterNotifications::postBuild();
 }
 
-bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pWellItem) const
+bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pItem) const
 {
 	bool fVisible = true;
 
-	LLNotificationPtr pNotification = (pWellItem) ? LLNotifications::getInstance()->find(pWellItem->getID()) : LLNotificationPtr(nullptr);
+	LLNotificationPtr pNotification = (pItem) ? LLNotifications::getInstance()->find(pItem->getID()) : nullptr;
 	if (pNotification)
 	{
 		// Filter by type
@@ -100,8 +100,20 @@ bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pWell
 			}
 			else
 			{
-				fVisible = !boost::ifind_first(pWellItem->getTitle(), m_strFilterText).empty();
+				fVisible = !boost::ifind_first(pItem->getTitle(), m_strFilterText).empty();
 			}
+		}
+
+		// Filter by notification name (inclusive)
+		if ( (fVisible) && (!m_FilterNames.empty()) )
+		{
+			fVisible = (std::find(m_FilterNames.begin(), m_FilterNames.end(), pNotification->getName()) != m_FilterNames.end());
+		}
+
+		// Filter by notification name (exclusive)
+		if ( (fVisible) && (!m_FilterNamesExclude.empty()) )
+		{
+			fVisible = (std::find(m_FilterNamesExclude.begin(), m_FilterNamesExclude.end(), pNotification->getName()) == m_FilterNamesExclude.end());
 		}
 	}
 
@@ -110,16 +122,42 @@ bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pWell
 
 void LLFloaterNotificationsFlat::refreshFilter()
 {
-	const std::string strNewFilterType = m_pFilterType->getSelectedValue();
-	const std::string strNewFilterText = m_pFilterText->getText();
-	const bool fHasFilter = (!strNewFilterType.empty()) || (!strNewFilterText.empty());
+	std::string strNewFilterText = m_pFilterText->getText(), strNewFilterType;
+	std::set<std::string> NewFilterNames, NewFilterNamesExclude;
+	switch ((ENotificationFilter)m_pFilterType->getSelectedValue().asInteger())
+	{
+		case NF_SYSTEM:
+			strNewFilterType = "notify";
+			NewFilterNamesExclude = LLNotificationListItem::getTransactionTypes();
+			break;
+		case NF_GROUP_NOTICE:
+			strNewFilterType = "groupnotify";
+			break;
+		case NF_OFFERS:
+			strNewFilterType = "offer";
+			break;
+		case NF_TRANSACTION:
+			strNewFilterType = "notify";
+			NewFilterNames = LLNotificationListItem::getTransactionTypes();
+			break;
+	}
 
-	const bool fFilterSubset = (fHasFilter) && (strNewFilterType == m_strFilterType) && (!m_strFilterText.empty()) && (!boost::ifind_first(strNewFilterText, m_strFilterText).empty());
+	const bool fHasFilter = (!strNewFilterType.empty()) || (!strNewFilterText.empty()) || (NewFilterNames.empty()) || (NewFilterNamesExclude.empty());
+
+	const bool fFilterSubset =
+		(fHasFilter) && 
+		(strNewFilterType == m_strFilterType) && 
+		(!m_strFilterText.empty()) && (!boost::ifind_first(strNewFilterText, m_strFilterText).empty()) &&
+		(NewFilterNames == m_FilterNames) &&
+		(NewFilterNamesExclude == m_FilterNamesExclude);
+
 	m_strFilterType = strNewFilterType;
 	m_strFilterText = strNewFilterText;
+	m_FilterNames = NewFilterNames;
+	m_FilterNamesExclude = NewFilterNamesExclude;
 
 	std::vector<LLPanel*> itemList;
-	mMessageList->getItems(itemList);
+	m_pMessageList->getItems(itemList);
 	for (LLPanel* pItemPanel : itemList)
 	{
 		LLNotificationListItem* pWellItem = (fHasFilter) ? dynamic_cast<LLNotificationListItem*>(pItemPanel) : nullptr;
@@ -135,18 +173,24 @@ void LLFloaterNotificationsFlat::refreshFilter()
 			pWellItem->setVisible(checkFilter(pWellItem));
 	}
 
-	mMessageList->notify(LLSD().with("rearrange", LLSD()));
+	m_pMessageList->notify(LLSD().with("rearrange", LLSD()));
 }
 
 bool LLFloaterNotificationsFlat::isWindowEmpty() const
 {
 	// NOTE: consider all items, not just the visible ones
-	return (!mMessageList) || (mMessageList->size(false) == 0);
+	return (!m_pMessageList) || (m_pMessageList->size(false) == 0);
 }
 
-bool LLFloaterNotificationsFlat::addNotification(LLNotificationListItem* item)
+bool LLFloaterNotificationsFlat::addNotification(LLNotificationListItem* pItem)
 {
-	return mMessageList->addNotification(item);
+	if (m_pMessageList->addNotification(pItem, false))
+	{
+		pItem->setVisible(checkFilter(pItem));
+		m_pMessageList->sort();
+		return true;
+	}
+	return false;
 }
 
 void LLFloaterNotificationsFlat::closeVisibleNotifications()
@@ -155,7 +199,7 @@ void LLFloaterNotificationsFlat::closeVisibleNotifications()
 	clearScreenChannels();
 
 	std::vector<LLPanel*> itemList;
-	mMessageList->getItems(itemList);
+	m_pMessageList->getItems(itemList);
 	for (LLPanel* pItemPanel : itemList)
 	{
 		if (!pItemPanel->getVisible())
@@ -170,7 +214,7 @@ void LLFloaterNotificationsFlat::closeVisibleNotifications()
 void LLFloaterNotificationsFlat::collapseVisibleNotifications()
 {
 	std::vector<LLPanel*> itemList;
-	mMessageList->getItems(itemList);
+	m_pMessageList->getItems(itemList);
 	for (LLPanel* pItemPanel : itemList)
 	{
 		if (!pItemPanel->getVisible())
@@ -184,7 +228,7 @@ void LLFloaterNotificationsFlat::collapseVisibleNotifications()
 
 LLPanel* LLFloaterNotificationsFlat::findNotificationByID(const LLUUID& id, const std::string& /*type*/)
 {
-	return mMessageList->getItemByValue(id);
+	return m_pMessageList->getItemByValue(id);
 }
 
 void LLFloaterNotificationsFlat::getNotifications(std::vector<LLNotificationListItem*>& items)
@@ -192,7 +236,7 @@ void LLFloaterNotificationsFlat::getNotifications(std::vector<LLNotificationList
 	items.clear();
 	
 	std::vector<LLPanel*> itemList;
-	mMessageList->getItems(itemList);
+	m_pMessageList->getItems(itemList);
 
 	for (LLPanel* pItemPanel : itemList)
 	{
@@ -204,7 +248,7 @@ void LLFloaterNotificationsFlat::getNotifications(std::vector<LLNotificationList
 
 bool LLFloaterNotificationsFlat::removeNotificationByID(const LLUUID& id, const std::string& /*type*/)
 {
-	return mMessageList->removeItemByValue(id);
+	return m_pMessageList->removeItemByValue(id);
 }
 
 void LLFloaterNotificationsFlat::updateNotificationCounters()
