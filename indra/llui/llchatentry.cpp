@@ -69,6 +69,17 @@ void LLChatEntry::draw()
 	LLTextEditor::draw();
 }
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2016-01-02 (Catznip-4.0)
+void LLChatEntry::expandAndReflow()
+{
+	if (mIsExpandable)
+	{
+		reflow();
+		expandText();
+	}
+}
+// [/SL:KB]
+
 void LLChatEntry::onCommit()
 {
 	updateHistory();

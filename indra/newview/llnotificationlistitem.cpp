@@ -90,8 +90,8 @@ BOOL LLNotificationListItem::postBuild()
     mCloseBtn->setClickedCallback(boost::bind(&LLNotificationListItem::onClickCloseBtn,this));
     mCloseBtnExp->setClickedCallback(boost::bind(&LLNotificationListItem::onClickCloseBtn,this));
 
-    mCondensedViewPanel = getChild<LLPanel>("layout_panel_condensed_view");
-    mExpandedViewPanel = getChild<LLPanel>("layout_panel_expanded_view");
+    mCondensedViewPanel = getChild<LLPanel>("panel_condensed_view");
+    mExpandedViewPanel = getChild<LLPanel>("panel_expanded_view");
 
     std::string expanded_height_str = getString("item_expanded_height");
     std::string condensed_height_str = getString("item_condensed_height");
@@ -232,6 +232,9 @@ void LLNotificationListItem::setExpanded(BOOL value)
 
     if (value)
     {
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+		mNoticeTextExp->expandAndReflow();
+// [/SL:KB]
        this->reshape(width, mNoticeTextExp->getRect().getHeight() + mExpandedHeight, FALSE);
     }
     else

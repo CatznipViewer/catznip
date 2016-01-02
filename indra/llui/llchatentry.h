@@ -68,6 +68,10 @@ public:
 	void enableSingleLineMode(bool single_line_mode);
 	boost::signals2::connection setTextExpandedCallback(const commit_signal_t::slot_type& cb);
 
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2016-01-02 (Catznip-4.0)
+	void expandAndReflow();
+// [/SL:KB]
+
 private:
 
 	/**
