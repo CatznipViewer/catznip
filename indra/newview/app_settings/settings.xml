@@ -815,13 +815,13 @@
     <key>BrowserHomePage</key>
     <map>
       <key>Comment</key>
-      <string>[NOT USED]</string>
+      <string>Starting page for the web browser floater</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://www.secondlife.com</string>
+      <string>http://www.catznip.com</string>
     </map>
     <key>BrowserIgnoreSSLCertErrors</key>
     <map>

@@ -8039,6 +8039,18 @@ const LLRect LLViewerMenuHolderGL::getMenuRect() const
 	return LLRect(0, getRect().getHeight() - MENU_BAR_HEIGHT, getRect().getWidth(), STATUS_BAR_HEIGHT);
 }
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2016-01-02 (Catznip-3.8)
+void handle_web_browser(const LLSD& param)
+{
+	std::string strUrl = gSavedSettings.getString("BrowserHomePage");
+	if (strUrl.empty())
+	{
+		strUrl = "about:blank";
+	}
+	LLWeb::loadURLInternal(strUrl);
+}
+// [/SL:KB]
+
 void handle_web_browser_test(const LLSD& param)
 {
 	std::string url = param.asString();
@@ -9076,6 +9088,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedToggleViewAdminOptions(), "Advanced.ToggleViewAdminOptions");
 	view_listener_t::addMenu(new LLAdvancedCheckViewAdminOptions(), "Advanced.CheckViewAdminOptions");
 	view_listener_t::addMenu(new LLAdvancedToggleVisualLeakDetector(), "Advanced.ToggleVisualLeakDetector");
+// [SL:KB] - Patch: UI-Misc | Checked: 2016-01-02 (Catznip-3.8)
+	commit.add("Advanced.ShowWebBrowser", boost::bind(&handle_web_browser, _2));
+// [/SL:KB]
 
 	view_listener_t::addMenu(new LLAdvancedRequestAdminStatus(), "Advanced.RequestAdminStatus");
 	view_listener_t::addMenu(new LLAdvancedLeaveAdminStatus(), "Advanced.LeaveAdminStatus");

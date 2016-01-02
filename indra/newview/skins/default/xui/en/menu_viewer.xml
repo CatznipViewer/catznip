@@ -2087,7 +2087,14 @@
              function="Advanced.ShowDebugSettings"
              parameter="all" />
         </menu_item_call>
-     <menu_item_check
+        <menu_item_call
+         label="Show Web Browser"
+         name="Web Browser"
+         shortcut="control|shift|Z">
+            <menu_item_call.on_click
+             function="Advanced.ShowWebBrowser" />
+      </menu_item_call>
+      <menu_item_check
          label="Show Develop Menu"
          name="Debug Mode"
          shortcut="control|alt|Q">
@@ -3198,8 +3205,7 @@
             </menu_item_call>
           <menu_item_call
            label="Web Content Browser"
-           name="Web Content Browser"
-           shortcut="control|shift|Z">
+           name="Web Content Browser">
             <menu_item_call.on_click
              function="Advanced.WebContentTest"
              parameter="http://google.com"/>
