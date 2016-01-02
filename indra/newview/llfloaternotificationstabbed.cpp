@@ -193,9 +193,13 @@ void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
     {
         if (NULL == getDockControl() && getDockTongue().notNull())
         {
-            setDockControl(new LLDockControl(
-                LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
-                getDockTongue(), LLDockControl::BOTTOM));
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+			setDockControl(new LLDockControl(LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this, getDockTongue(),
+				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
+//			setDockControl(new LLDockControl(
+//				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
+//				getDockTongue(), LLDockControl::BOTTOM));
         }
     }
 
