@@ -96,6 +96,9 @@ public:
     boost::signals2::connection setOnItemClickCallback(item_callback_t cb) { return mOnItemClick.connect(cb); }
     
     virtual bool showPopup() { return true; }
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+	bool isExpanded() const;
+// [/SL:KB]
     void setExpanded(BOOL value);
     virtual BOOL postBuild();
     void reshapeNotification();

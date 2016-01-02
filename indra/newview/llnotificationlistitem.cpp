@@ -224,6 +224,13 @@ void LLNotificationListItem::reshapeNotification()
     }
 }
 
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+bool LLNotificationListItem::isExpanded() const
+{
+	return mExpandedViewPanel->getVisible();
+}
+// [/SL:KB]
+
 void LLNotificationListItem::setExpanded(BOOL value)
 {
     mCondensedViewPanel->setVisible(!value);

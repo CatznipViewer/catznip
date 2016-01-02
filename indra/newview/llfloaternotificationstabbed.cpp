@@ -515,7 +515,10 @@ void LLFloaterNotifications::onItemClick(LLNotificationListItem* item)
     }
     else
     {
-        item->setExpanded(TRUE);
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+		item->setExpanded(!item->isExpanded());
+// [/SL:KB]
+//        item->setExpanded(TRUE);
     }
 }
 
