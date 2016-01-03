@@ -170,6 +170,10 @@ BOOL LLStatusBar::postBuild()
 
 	mTextTime = getChild<LLTextBox>("TimeText" );
 	
+// [SL:KB] - Patch: UI-StatusBar | Checked: 2016-01-03 (Catznip-3.8)
+	getChild<LLUICtrl>("giveFeedback")->setCommitCallback(boost::bind(&LLStatusBar::onClickGiveFeedback, this));
+// [/SL:KB]
+
 	getChild<LLUICtrl>("buyL")->setCommitCallback(
 		boost::bind(&LLStatusBar::onClickBuyCurrency, this));
 
@@ -199,6 +203,10 @@ BOOL LLStatusBar::postBuild()
 	LLControlVariable* pControl = gSavedSettings.getControl("ShowBuyCurrencyButton");
 	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleBuyCurrencyButton, this, _2));
 	onToggleBuyCurrencyButton(pControl->getValue());
+
+	pControl = gSavedSettings.getControl("ShowFeedbackButton");
+	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleFeedbackButton, this, _2));
+	onToggleFeedbackButton(pControl->getValue());
 
 	pControl = gSavedSettings.getControl("ShowMarketplaceButton");
 	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleMarketplaceButton, this, _2));
@@ -517,6 +525,16 @@ S32 LLStatusBar::getSquareMetersLeft() const
 }
 
 // [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+void LLStatusBar::onClickGiveFeedback()
+{
+	LLFloaterReg::showInstance("feedback", LLSD());
+}
+
+void LLStatusBar::onToggleFeedbackButton(const LLSD& sdValue)
+{
+	getChildView("giveFeedback_panel")->setVisible( (sdValue.asBoolean()) && (gAgent.mFeedbackInfo.has("url")) );
+}
+
 void LLStatusBar::onToggleBuyCurrencyButton(const LLSD& sdValue)
 {
 	getChildView("buyL_panel")->setVisible(sdValue.asBoolean());

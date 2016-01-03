@@ -104,6 +104,33 @@
      height="18"
      visible="true"
      layout="topleft"
+     name="giveFeedback_panel"
+     width="65">
+    <button
+     halign="center"
+     font="SansSerifSmall"
+     follows="right|top|bottom"
+     image_hover_unselected="PushButton_Over"
+     image_unselected="PushButton_Off"
+     image_pressed="PushButton_Press"
+     height="18"
+     label="Feedback"
+     label_color="White"
+     left="0"
+     label_shadow="true"
+     name="giveFeedback"
+     pad_right="0"
+     tool_tip="Click to provide feedback"
+     top="0"
+     width="65" />
+    </layout_panel>
+    <layout_panel
+     auto_resize="false"
+     user_resize="false"
+     follows="top|right"
+     height="18"
+     visible="true"
+     layout="topleft"
      name="buyL_panel"
      width="65">
     <button

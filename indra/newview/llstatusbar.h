@@ -93,6 +93,9 @@ public:
 
 private:
 // [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+	void onClickGiveFeedback();
+
+	void onToggleFeedbackButton(const LLSD& sdValue);
 	void onToggleBuyCurrencyButton(const LLSD& sdValue);
 	void onToggleMarketplaceButton(const LLSD& sdValue);
 	void onToggleNetStats(const LLSD& sdValue);

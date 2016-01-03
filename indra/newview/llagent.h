@@ -846,6 +846,9 @@ protected:
 	BOOL			isGroupMember() const 		{ return !mGroupID.isNull(); } 
 public:
 	std::vector<LLGroupData> mGroups;
+ // [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
+	LLSD mFeedbackInfo;
+ // [/SL:KB]
 
 	//--------------------------------------------------------------------
 	// Group Title
