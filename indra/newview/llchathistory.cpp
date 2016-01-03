@@ -409,7 +409,10 @@ public:
 				mFrom = chat.mFromName.substr(0, username_start);
 				user_name->setValue(mFrom);
 
-				if (gSavedSettings.getBOOL("NameTagShowUsernames"))
+//				if (gSavedSettings.getBOOL("NameTagShowUsernames"))
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
+				if (SHOW_NEVER != LLAvatarName::getShowUsername())
+// [/SL:KB]
 				{
 					std::string username = chat.mFromName.substr(username_start + 2);
 					username = username.substr(0, username.length() - 1);
@@ -661,9 +664,14 @@ private:
 // [/SL:KB]
 //		user_name->setToolTip( av_name.getUserName() );
 
-		if (gSavedSettings.getBOOL("NameTagShowUsernames") && 
-			av_name.useDisplayNames() &&
-			!av_name.isDisplayNameDefault())
+//		if (gSavedSettings.getBOOL("NameTagShowUsernames") && 
+//			av_name.useDisplayNames() &&
+//			!av_name.isDisplayNameDefault())
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
+		if ( (SHOW_NEVER != LLAvatarName::getShowUsername()) && 
+		     (av_name.useDisplayNames()) && 
+		     (!av_name.isDisplayNameDefault()) )
+// [/SL:KB]
 		{
 			LLStyle::Params style_params_name;
 			LLColor4 userNameColor = LLUIColorTable::instance().getColor("EmphasisColor");

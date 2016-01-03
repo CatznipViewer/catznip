@@ -2833,10 +2833,10 @@ void LLStartUp::initNameCache()
 	// capabilities for display name lookup
 	LLAvatarNameCache::initClass(false,gSavedSettings.getBOOL("UsePeopleAPI"));
 	LLAvatarNameCache::setUseDisplayNames(gSavedSettings.getBOOL("UseDisplayNames"));
-	LLAvatarNameCache::setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-	LLAvatarName::setShowUsername((LLAvatarName::EShowUsername)gSavedSettings.getU32("AgentLinkShowUsernames"));
+	LLAvatarNameCache::setShowUsername((LLAvatarName::EShowUsername)gSavedSettings.getU32("AgentLinkShowUsernames"));
 // [/SL:KB]
+//	LLAvatarNameCache::setUseUsernames(gSavedSettings.getBOOL("NameTagShowUsernames"));
 }
 
 

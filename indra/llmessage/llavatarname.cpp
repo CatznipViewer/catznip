@@ -48,7 +48,7 @@ LLAvatarName::EShowUsername LLAvatarName::s_eShowUsername = LLAvatarName::SHOW_A
 // [/SL:KB]
 
 bool LLAvatarName::sUseDisplayNames = true;
-bool LLAvatarName::sUseUsernames = true;
+//bool LLAvatarName::sUseUsernames = true;
 
 // Minimum time-to-live (in seconds) for a name entry.
 // Avatar name should always guarantee to expire reasonably soon by default
@@ -86,15 +86,15 @@ bool LLAvatarName::useDisplayNames()
 	return sUseDisplayNames; 
 }
 
-void LLAvatarName::setUseUsernames(bool use)
-{
-	sUseUsernames = use;
-}
+//void LLAvatarName::setUseUsernames(bool use)
+//{
+//	sUseUsernames = use;
+//}
 
-bool LLAvatarName::useUsernames()
-{
-	return sUseUsernames;
-}
+//bool LLAvatarName::useUsernames()
+//{
+//	return sUseUsernames;
+//}
 
 LLSD LLAvatarName::asLLSD() const
 {
@@ -189,11 +189,14 @@ std::string LLAvatarName::getCompleteName(EShowUsername eShowUsername) const
 		}
 		else
 		{
-			name = mDisplayName;
-			if(sUseUsernames)
-			{
-				name += " (" + mUsername + ")";
-			}
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
+			name = mDisplayName + " (" + mUsername + ")";
+// [/SL:KB]
+//			name = mDisplayName;
+//			if(sUseUsernames)
+//			{
+//				name += " (" + mUsername + ")";
+//			}
 		}
 	}
 	else

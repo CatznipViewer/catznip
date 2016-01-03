@@ -31,14 +31,14 @@
 
 // Library includes
 #include "llwindow.h"	// getGamma()
-// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
-#include "llavatarname.h"
-// [/SL:KB]
 
 // For Listeners
 #include "llaudioengine.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
+#include "llavatarnamecache.h"
+// [/SL:KB]
 #include "llconsole.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolterrain.h"
@@ -573,7 +573,7 @@ bool toggle_agent_pause(const LLSD& newvalue)
 bool handleAgentLinkUsernamesChanged(const LLSD& sdValue)
 {
 	U32 nValue = sdValue.asInteger();
-	LLAvatarName::setShowUsername((LLAvatarName::EShowUsername)nValue);
+	LLAvatarNameCache::setShowUsername((LLAvatarName::EShowUsername)nValue);
 	return true;
 }
 // [/SL:KB]

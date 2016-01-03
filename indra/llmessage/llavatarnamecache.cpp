@@ -703,14 +703,25 @@ void LLAvatarNameCache::setUseDisplayNames(bool use)
 	}
 }
 
-void LLAvatarNameCache::setUseUsernames(bool use)
+//void LLAvatarNameCache::setUseUsernames(bool use)
+//{
+//	if (use != LLAvatarName::useUsernames())
+//	{
+//		LLAvatarName::setUseUsernames(use);
+//		mUseDisplayNamesSignal();
+//	}
+//}
+
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
+void LLAvatarNameCache::setShowUsername(LLAvatarName::EShowUsername eShowUsername)
 {
-	if (use != LLAvatarName::useUsernames())
+	if (eShowUsername != LLAvatarName::getShowUsername())
 	{
-		LLAvatarName::setUseUsernames(use);
+		LLAvatarName::setShowUsername(eShowUsername);
 		mUseDisplayNamesSignal();
 	}
 }
+// [/SL:KB]
 
 void LLAvatarNameCache::erase(const LLUUID& agent_id)
 {
