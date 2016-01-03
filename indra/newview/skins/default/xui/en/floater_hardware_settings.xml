@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  legacy_header_height="18"
- height="224"
+ height="240"
  layout="topleft"
  name="Hardware Settings Floater"
  help_topic="hardware_settings_floater"
@@ -193,7 +193,7 @@
      layout="topleft"
      right="-105"
      name="OK"
-     top="192"
+     top_pad="6"
      width="90" />
     <button
      follows="right|bottom"
