@@ -21,7 +21,7 @@
      left="30"
      name="voice_chat_settings"
      width="200"
-     top="15">
+     top_pad="20">
       Voice Chat Settings
     </text>
     <check_box
@@ -40,7 +40,7 @@
      follows="left|top"
      layout="topleft"
 	   left="67"
-	   top_pad="9"
+	   top_pad="10"
      name="Listen from"
      width="112">
         Listen from:
