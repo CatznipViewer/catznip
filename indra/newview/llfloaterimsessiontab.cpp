@@ -1019,7 +1019,7 @@ void LLFloaterIMSessionTab::updateExpandCollapseBtn()
 			                                 getString("expcol_button_tearoff_and_collapsed_tooltip")));
 
 // [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-21 (Catznip-3.7)
-	mExpandCollapseBtn->setEnabled( ((is_view) && (is_not_torn_off)) );
+	mExpandCollapseBtn->setEnabled( ((!is_view) || (!is_not_torn_off)) );
 // [/SL:KB
 //	// The button (>>) should be disabled for torn off P2P conversations.
 //	mExpandCollapseBtn->setEnabled( (!mIsP2PChat) || ((is_view) && (is_not_torn_off)) );
