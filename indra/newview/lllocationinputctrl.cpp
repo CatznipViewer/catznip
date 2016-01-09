@@ -41,6 +41,10 @@
 #include "lltooltip.h"
 #include "llnotificationsutil.h"
 #include "llregionflags.h"
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+#include "llclipboard.h"
+#include "llurlentry.h"
+// [/SL:KB]
 
 // newview includes
 #include "llagent.h"
@@ -1234,6 +1238,14 @@ void LLLocationInputCtrl::onLocationContextMenuItemClicked(const LLSD& userdata)
 	{
 		mTextEntry->paste();
 	}
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+	else if (item == "paste_teleport")
+	{
+		mTextEntry->clear();
+		mTextEntry->paste();
+		onCommit();
+	}
+// [/SL:KB]
 	else if (item == "delete")
 	{
 		mTextEntry->deleteSelection();
@@ -1260,6 +1272,21 @@ bool LLLocationInputCtrl::onLocationContextMenuItemEnabled(const LLSD& userdata)
 	{
 		return mTextEntry->canPaste();
 	}
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+	else if (item == "can_paste_teleport")
+	{
+		if (mTextEntry->canPaste())
+		{
+			LLWString wstrClipboard;
+			LLClipboard::instance().pasteFromClipboard(wstrClipboard, false);
+			if (!wstrClipboard.empty())
+			{
+				return LLUrlEntryInvalidSLURL::isSLURLvalid(wstring_to_utf8str(wstrClipboard));
+			}
+		}
+		return false;
+	}
+// [/SL:KB]
 	else if (item == "can_delete")
 	{
 		return mTextEntry->canDeselect();
