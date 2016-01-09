@@ -158,10 +158,7 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	mTentativeFgColor(p.text_tentative_color()),
 	mHighlightColor(p.highlight_color()),
 	mPreeditBgColor(p.preedit_bg_color()),
-	mGLFont(p.font),
-// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
-	mContextMenuOwned(false)
-// [/SL:KB]
+	mGLFont(p.font)
 //	mContextMenuHandle()
 {
 	llassert( mMaxLengthBytes > 0 );
@@ -197,6 +194,16 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 	setPrevalidateInput(p.prevalidate_input_callback());
 	setPrevalidate(p.prevalidate_callback());
 
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	LLContextMenu* menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>
+		("menu_text_editor.xml",
+		 LLMenuGL::sMenuContainer,
+		 LLMenuHolderGL::child_registry_t::instance());
+	mDefaultMenuHandle = menu->getHandle();
+
+	mContextMenuHandle = menu->getHandle();
+	mContextMenuOwned = false;
+// [/SL:KB]
 //	llassert(LLMenuGL::sMenuContainer != NULL);
 //	LLContextMenu* menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>
 //		("menu_text_editor.xml",
@@ -2612,6 +2619,9 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 //	LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
 //
 //	if (menu)
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	if (!mContextMenuHandle.isDead())
+// [/SL:KB]
 	{
 		gEditMenuHandler = this;
 
@@ -2646,20 +2656,7 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 
 // [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
 		// Use the default editor context menu when offering spelling suggestions to avoid clutter
-		LLContextMenu* menu = mContextMenuHandle.get();
-		if ( ((use_spellcheck) && (!mSuggestionList.empty())) || (!menu) )
-		{
-			menu = mDefaultMenuHandle.get();
-			if (!menu)
-			{
-				menu = LLUICtrlFactory::instance().createFromFile<LLContextMenu>(
-							"menu_text_editor.xml", 
-							LLMenuGL::sMenuContainer,
-							LLMenuHolderGL::child_registry_t::instance());
-				mDefaultMenuHandle = menu->getHandle();
-			}
-		}
-
+		LLContextMenu* menu = ((!use_spellcheck) || (mSuggestionList.empty())) ? mContextMenuHandle.get() : mDefaultMenuHandle.get();
 		if (menu)
 		{
 			menu->setItemVisible("Suggestion Separator", (use_spellcheck) && (!mSuggestionList.empty()));
