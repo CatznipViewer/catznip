@@ -502,7 +502,12 @@ public:
 		const std::string strVerb = (sdParams.size() >= 2) ? sdParams[1].asString() : LLStringUtil::null;
 		if ( (strVerb == "show") || (strVerb.empty()) )
 		{
-			LLFloaterReg::showInstance("settings_debug", LLSD().with("group", "all").with("setting", sdParams[0].asString()));
+			LLSD sdKey = LLSD().with("group", "all");
+			
+			LLFloater* pFloater = LLFloaterReg::getInstance("settings_debug", sdKey);
+			if (pFloater)
+				pFloater->openFloater(sdKey.with("setting", sdParams[0].asString()));
+
 			return true;
 		}
 		
