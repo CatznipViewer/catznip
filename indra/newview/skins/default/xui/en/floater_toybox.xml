@@ -4,7 +4,7 @@
   can_dock="false"
   can_minimize="false"
   can_resize="false"
-  height="345"
+  height="360"
   help_topic="toybox"
   layout="topleft"
   legacy_header_height="18"
@@ -85,7 +85,7 @@
   left="5"
   name="bottom_panel"
   right="-5"
-  top_pad="3" >
+  bottom="-5" >
     <icon  
       follows="bottom|left"
       height="25"
