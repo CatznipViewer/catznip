@@ -715,14 +715,14 @@ LLNotificationSeparator::~LLNotificationSeparator()
 // [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
 bool LLNotificationDateComparator::compare(const LLPanel* pLHS, const LLPanel* pRHS) const
 {
-	const LLSysWellItem* pItemLeft = dynamic_cast<const LLSysWellItem*>(pLHS);
-	const LLSysWellItem* pItemRight= dynamic_cast<const LLSysWellItem*>(pRHS);
+	const LLNotificationListItem* pItemLeft = dynamic_cast<const LLNotificationListItem*>(pLHS);
+	const LLNotificationListItem* pItemRight= dynamic_cast<const LLNotificationListItem*>(pRHS);
 	if ( (pItemLeft) && (pItemRight) )
 	{
 		LLNotificationPtr notifLeft = LLNotifications::instance().find(pItemLeft->getID());
 		LLNotificationPtr notifRight= LLNotifications::instance().find(pItemRight->getID());
 		// NOTE: we want to sort notifications from new to top
-		return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() < notifRight.get()->getDate());
+		return (notifLeft.get()) && (notifRight.get()) && (notifLeft.get()->getDate() > notifRight.get()->getDate());
 	}
 	return false;
 }
