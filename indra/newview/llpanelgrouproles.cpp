@@ -417,8 +417,12 @@ void LLPanelGroupRoles::setGroupID(const LLUUID& id)
 	if ( button )
 		button->setEnabled(gAgent.hasPowerInGroup(mGroupID, GP_MEMBER_INVITE));
 
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2016-01-24 (Catznip-3.8)
 	if(mSubTabContainer)
-		mSubTabContainer->selectTab(1);
+		mSubTabContainer->selectTab(0);
+// [/SL:KB]
+//	if(mSubTabContainer)
+//		mSubTabContainer->selectTab(1);
 	group_roles_tab->mFirstOpen = TRUE;
 	activate();
 }
