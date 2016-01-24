@@ -922,6 +922,24 @@ bool idle_startup()
 		
 		// Overwrite default user settings with user settings								 
 		LLAppViewer::instance()->loadSettingsFromDirectory("Account");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-09-13 (Catznîp-3.3)
+		if (LLVersionInfo::getChannelAndVersion() != gLastRunVersion)
+		{
+			// Temporary fix
+			const char* pstrDbgSettings[] =
+				{ 
+					"floater_vis_search_web"
+				};
+			for (int idxSetting = 0, cntSetting = sizeof(pstrDbgSettings) / sizeof(char*); idxSetting < cntSetting; idxSetting++)
+			{
+				LLControlVariable* pCtrl = gSavedPerAccountSettings.getControl(pstrDbgSettings[idxSetting]);
+				if (pCtrl)
+				{
+					pCtrl->setValue(LLSD(false));
+				}
+			}
+		}
+// [/SL:KB]
 
 		// Convert 'LogInstantMessages' into 'KeepConversationLogTranscripts' for backward compatibility (CHUI-743).
 		LLControlVariablePtr logInstantMessagesControl = gSavedPerAccountSettings.getControl("LogInstantMessages");
