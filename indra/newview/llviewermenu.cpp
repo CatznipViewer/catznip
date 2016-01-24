@@ -2903,7 +2903,9 @@ void handle_texture_refresh()
 		if (pTexture)
 		{
 			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+			pTexture->clearFetcher();
 			pTexture->clearFetchedResults();
+			pTexture->setIsMissingAsset(0);
 
 			if (itTexture->second)
 			{

@@ -343,6 +343,9 @@ public:
 	bool setDebugFetching(S32 debug_level);
 	bool isInDebug() {return mInDebug;}
 	
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2016-01-24 (Catznip-3.8)
+	void clearFetcher();
+// [/SL:KB]
 	void clearFetchedResults(); //clear all fetched results, for debug use.
 
 	// Override the computation of discard levels if we know the exact output
