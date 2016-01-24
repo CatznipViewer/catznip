@@ -3223,6 +3223,17 @@ void LLFloater::setInstanceName(const std::string& name)
 		{
 			mVisibilityControl = LLFloaterReg::declareVisibilityControl(ctrl_name);
 		}
+// [SL:KB] - Patch: Control-Floater | Checked: 2016-01-24 (Catznip-3.8)
+		else
+		{
+			// Visibility setting is present in settings_per_account but is not defined on the floater so don't keep it around
+			LLControlVariable* pControl = getControlGroup()->getControl(LLFloaterReg::getVisibilityControlName(name));
+			if (pControl)
+			{
+				pControl->setPersist(LLControlVariable::PERSIST_NO);
+			}
+		}
+// [/SL:KB]
 		if(!mDocStateControl.empty())
 		{
 			mDocStateControl = LLFloaterReg::declareDockStateControl(ctrl_name);
