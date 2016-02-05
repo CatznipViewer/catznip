@@ -199,19 +199,28 @@ BOOL LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 		{
 			// if we didn't get the discard level we're expecting, fail
 			opj_image_destroy(image);
-			base.mDecoding = FALSE;
+
+// [SN:SG] - Patch: Import-MiscOpenJPEG
+			LL_WARNS("Texture") <<  "Expected discard level not reached!" << LL_ENDL;
+			base.decodeFailed();
+// [SN:SG]
+//			base.mDecoding = FALSE;
 			return TRUE;
 		}
 	}
 	
 	if(image->numcomps <= first_channel)
 	{
-		LL_WARNS() << "trying to decode more channels than are present in image: numcomps: " << image->numcomps << " first_channel: " << first_channel << LL_ENDL;
+//		LL_WARNS() << "trying to decode more channels than are present in image: numcomps: " << image->numcomps << " first_channel: " << first_channel << LL_ENDL;
 		if (image)
 		{
 			opj_image_destroy(image);
 		}
 			
+// [SN:SG] - Patch: Import-MiscOpenJPEG
+		LL_WARNS("Texture") << "trying to decode more channels than are present in image: numcomps: " << image->numcomps << " first_channel: " << first_channel << LL_ENDL;
+		base.decodeFailed();
+// [SN:SG]
 		return TRUE;
 	}
 
@@ -259,6 +268,9 @@ BOOL LLImageJ2COJ::decodeImpl(LLImageJ2C &base, LLImageRaw &raw_image, F32 decod
 			LL_DEBUGS("Texture") << "ERROR -> decodeImpl: failed to decode image! (NULL comp data - OpenJPEG bug)" << LL_ENDL;
 			opj_image_destroy(image);
 
+// [SN:SG] - Patch: Import-MiscOpenJPEG
+			base.decodeFailed();
+// [SN:SG]
 			return TRUE; // done
 		}
 	}
