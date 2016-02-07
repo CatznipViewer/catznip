@@ -2115,6 +2115,10 @@ bool LLVOVolume::notifyAboutMissingAsset(LLViewerTexture *texture)
 	for(mmap_UUID_MAP_t::iterator range_it = range.first; range_it != range.second; ++range_it)
 	{
 		LLMaterialPtr cur_material = getTEMaterialParams(range_it->second.te);
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-07 (Catznip-4.0)
+		if (cur_material.isNull())
+			continue;
+// [/SL:KB]
 
 		switch(range_it->second.map)
 		{

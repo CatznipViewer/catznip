@@ -7,3 +7,4 @@
     -> send the stats package but don't sit around for 5 seconds waiting for the response since we'll idle waiting for the logout acknowledgement in the next step anyway
 [FIXED] CRASH-1: LLViewerTextureList::removeImageFromList() and LLViewerTextureList::addImageToList()
     -> previous fix didn't actually address the problem: the decode priority ends up as NaN which messes with the comparison operator
+[FIXED] CRASH-13: LLVOVolume::notifyAboutMissingAsset
