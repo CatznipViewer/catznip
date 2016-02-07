@@ -8,3 +8,4 @@
 [FIXED] CRASH-1: LLViewerTextureList::removeImageFromList() and LLViewerTextureList::addImageToList()
     -> previous fix didn't actually address the problem: the decode priority ends up as NaN which messes with the comparison operator
 [FIXED] CRASH-13: LLVOVolume::notifyAboutMissingAsset
+[FIXED] CRASH-14: LLVOVolume::lineSegmentIntersect

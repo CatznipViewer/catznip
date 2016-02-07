@@ -3906,7 +3906,10 @@ BOOL LLVOVolume::lineSegmentIntersect(const LLVector4a& start, const LLVector4a&
 
 	if (mDrawable->isState(LLDrawable::RIGGED))
 	{
-		if ((pick_rigged) || ((getAvatar()->isSelf()) && (LLFloater::isVisible(gFloaterTools))))
+//		if ((pick_rigged) || ((getAvatar()->isSelf()) && (LLFloater::isVisible(gFloaterTools))))
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-07 (Catznip-4.0)
+		if ((pick_rigged) || (getAvatar() && (getAvatar()->isSelf()) && (LLFloater::isVisible(gFloaterTools))))
+// [/SL:KB]
 		{
 			updateRiggedVolume(true);
 			volume = mRiggedVolume;
