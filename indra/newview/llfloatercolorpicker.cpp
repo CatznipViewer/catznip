@@ -810,7 +810,10 @@ BOOL LLFloaterColorPicker::updateRgbHslFromPoint ( S32 xPosIn, S32 yPosIn )
 		// update HSL (and therefore RGB) based on new H & S and current L
 		selectCurHsl ( ( ( F32 )xPosIn - ( F32 )mRGBViewerImageLeft ) / ( F32 )mRGBViewerImageWidth,
 					( ( F32 )yPosIn - ( ( F32 )mRGBViewerImageTop - ( F32 )mRGBViewerImageHeight ) ) / ( F32 )mRGBViewerImageHeight,
-					getCurL () );
+// [SL:KB] - Patch: Build-Misc | Checked: 2016-02-09 (Catznip-4.0)
+					((getCurL() != 0.0f) && (getCurL() != 1.0f)) ? getCurL() : 0.5f);
+// [/SL:KB]
+//					getCurL () );
 
 		// indicate a value changed
 		return TRUE;
