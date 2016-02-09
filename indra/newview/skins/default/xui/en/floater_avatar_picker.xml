@@ -144,7 +144,7 @@
              left="0"
              name="Friends"
              top="52"
-             width="132">
+             right="-1">
               <columns
                label="Name"
                name="name"
