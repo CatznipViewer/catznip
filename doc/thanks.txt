@@ -39,6 +39,8 @@ Hitomi Tiponi
 Lilly Noodle
 	Beta tester
 	Feedback
+Liss (lissomeprey)
+	Bugs
 Loom Kish
 	Mac OS X issues
 Penny Patton
@@ -56,7 +58,11 @@ Satomi Ahn
 	RLVa
 Sean Brady
 	Beta tester
-	Bugs	
+	Bugs
+Trip Hastings
+	Bugs
+Tristizia Demonista
+	Bugs
 Trix Braveheart
 	Bugs
 	Feedback
@@ -68,11 +74,7 @@ Whirly Fizzle
 	Bugs
 	Feedback
 Winter Ventura
-    Art
-    Beta Tester
-    Bugs
-    FeedbackWinter Ventura
-    Art
-    Beta Tester
-    Bugs
-    Feedback
+	Art
+	Beta Tester
+	Bugs
+	Feedback
