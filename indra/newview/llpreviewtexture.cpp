@@ -89,8 +89,16 @@ LLPreviewTexture::~LLPreviewTexture()
 	{
 		getWindow()->decBusyCount();
 	}
-	mImage->setBoostLevel(mImageOldBoostLevel);
-	mImage = NULL;
+
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-13 (Catznip-4.0)
+	if (mImage.notNull())
+	{
+		mImage->setBoostLevel(mImageOldBoostLevel);
+		mImage = NULL;
+	}
+// [/SL:KB]
+//	mImage->setBoostLevel(mImageOldBoostLevel);
+//	mImage = NULL;
 }
 
 // virtual
