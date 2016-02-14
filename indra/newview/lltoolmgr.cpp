@@ -400,6 +400,11 @@ void LLToolMgr::clearTransientTool()
 
 void LLToolMgr::onAppFocusLost()
 {
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-14 (Catznip-4.0)
+	if (LLApp::isQuitting())
+		return;
+// [/SL:KB]
+
 	if (mSelectedTool)
 	{
 		mSelectedTool->handleDeselect();
