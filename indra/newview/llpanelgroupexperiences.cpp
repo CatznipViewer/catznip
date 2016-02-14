@@ -102,7 +102,10 @@ void LLPanelGroupExperiences::activate()
 	}
 
 	// search for experiences owned by the current group
-	std::string url = gAgent.getRegion()->getCapability("GroupExperiences"); 
+//	std::string url = gAgent.getRegion()->getCapability("GroupExperiences"); 
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-14 (Catznip-4.0)
+	std::string url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("GroupExperiences") : LLStringUtil::null;
+// [/SL:KB]
 	if (!url.empty())
 	{
 		url += "?" + getGroupID().asString();
