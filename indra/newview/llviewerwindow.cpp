@@ -2655,10 +2655,14 @@ BOOL LLViewerWindow::handleKey(KEY key, MASK mask)
 //			if (gSavedSettings.getBOOL("ArrowKeysAlwaysMove"))
 			{
 				// let Control-Up and Control-Down through for chat line history,
-				if (!(key == KEY_UP && mask == MASK_CONTROL)
-					&& !(key == KEY_DOWN && mask == MASK_CONTROL)
-					&& !(key == KEY_UP && mask == MASK_ALT)
-					&& !(key == KEY_DOWN && mask == MASK_ALT))
+//				if (!(key == KEY_UP && mask == MASK_CONTROL)
+//					&& !(key == KEY_DOWN && mask == MASK_CONTROL)
+//					&& !(key == KEY_UP && mask == MASK_ALT)
+//					&& !(key == KEY_DOWN && mask == MASK_ALT))
+// [SL:KB] - Patch: Chat-Misc | Checked: 2016-02-14 (Catznip-4.0)
+				// Let all modified keys through
+				if (MASK_NONE == mask)
+// [/SL:KB]
 				{
 					switch(key)
 					{
