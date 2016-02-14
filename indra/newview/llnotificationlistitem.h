@@ -136,6 +136,9 @@ class LLGroupNotificationListItem
     : public LLNotificationListItem, public LLGroupMgrObserver
 {
 public:
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-14 (Catznip-4.0)
+	virtual ~LLGroupNotificationListItem();
+// [/SL:KB]
     virtual BOOL postBuild();
 
     void setGroupId(const LLUUID& value);
@@ -192,7 +195,7 @@ class LLGroupNoticeNotificationListItem
     : public LLGroupNotificationListItem
 {
 public:
-	~LLGroupNoticeNotificationListItem();
+//	~LLGroupNoticeNotificationListItem();
     static std::set<std::string> getTypes();
     virtual BOOL postBuild();
 

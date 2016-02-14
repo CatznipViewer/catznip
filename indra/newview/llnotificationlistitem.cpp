@@ -381,10 +381,16 @@ LLGroupNoticeNotificationListItem::LLGroupNoticeNotificationListItem(const Param
     buildFromFile("panel_notification_list_item.xml");
 }
 
-LLGroupNoticeNotificationListItem::~LLGroupNoticeNotificationListItem()
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2016-02-14 (Catznip-4.0)
+LLGroupNotificationListItem::~LLGroupNotificationListItem()
 {
 	LLGroupMgr::getInstance()->removeObserver(this);
 }
+// [/SL:KB]
+//LLGroupNoticeNotificationListItem::~LLGroupNoticeNotificationListItem()
+//{
+//	LLGroupMgr::getInstance()->removeObserver(this);
+//}
 
 BOOL LLGroupNoticeNotificationListItem::postBuild()
 {
@@ -539,7 +545,7 @@ void LLGroupNoticeNotificationListItem::close()
         mInventoryOffer->forceResponse(IOR_DECLINE);
         mInventoryOffer = NULL;
     }
-    LLGroupMgr::getInstance()->removeObserver(this);
+//    LLGroupMgr::getInstance()->removeObserver(this);
 }
 
 void LLGroupNoticeNotificationListItem::onClickAttachment()
