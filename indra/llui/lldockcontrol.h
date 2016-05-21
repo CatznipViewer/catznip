@@ -65,6 +65,12 @@ public:
 	{
 		return mDockWidgetHandle.get();
 	}
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	DocAt getDockAt() const
+	{
+		return mDockAt;
+	}
+// [/SL:KB]
 	void repositionDockable();
 	void drawToungue();
 	bool isDockVisible();
