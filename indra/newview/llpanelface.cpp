@@ -53,7 +53,7 @@
 #include "llmaterialmgr.h"
 #include "llmediaentry.h"
 #include "llnotificationsutil.h"
-#include "llradiogroup.h"
+//#include "llradiogroup.h"
 #include "llresmgr.h"
 #include "llselectmgr.h"
 #include "llspinctrl.h"
@@ -103,10 +103,16 @@ std::string USE_TEXTURE;
 LLRender::eTexIndex LLPanelFace::getTextureChannelToEdit()
 {
 	LLComboBox* combobox_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 
 	LLRender::eTexIndex channel_to_edit = (combobox_matmedia && combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ?
-	                                                    (radio_mat_type ? (LLRender::eTexIndex)radio_mat_type->getSelectedIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+													  (combobox_mattype ? (LLRender::eTexIndex)combobox_mattype->getCurrentIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
+// [/SL:KB]
+//	                                                    (radio_mat_type ? (LLRender::eTexIndex)radio_mat_type->getSelectedIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
 
 	channel_to_edit = (channel_to_edit == LLRender::NORMAL_MAP)		? (getCurrentNormalMap().isNull()		? LLRender::DIFFUSE_MAP : channel_to_edit) : channel_to_edit;
 	channel_to_edit = (channel_to_edit == LLRender::SPECULAR_MAP)	? (getCurrentSpecularMap().isNull()		? LLRender::DIFFUSE_MAP : channel_to_edit) : channel_to_edit;
@@ -175,6 +181,9 @@ BOOL	LLPanelFace::postBuild()
 
 	LLComboBox*		mComboTexGen;
 	LLComboBox*		mComboMatMedia;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox*		mComboMatType;
+// [/SL:KB]
 
 	LLCheckBoxCtrl	*mCheckFullbright;
 	
@@ -312,12 +321,20 @@ BOOL	LLPanelFace::postBuild()
 		mComboMatMedia->selectNthItem(MATMEDIA_MATERIAL);
 	}
 
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-    if(radio_mat_type)
-    {
-        radio_mat_type->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
-        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
-    }
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	mComboMatType = getChild<LLComboBox>("combobox mattype");
+	if(mComboMatType)
+	{
+		mComboMatType->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
+		mComboMatType->selectNthItem(MATTYPE_DIFFUSE);
+	}
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//    if(radio_mat_type)
+//    {
+//        radio_mat_type->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
+//        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
+//    }
 
 	mCtrlGlow = getChild<LLSpinCtrl>("glow");
 	if(mCtrlGlow)
@@ -731,21 +748,36 @@ void LLPanelFace::updateUI()
 		}
 		getChildView("combobox matmedia")->setEnabled(editable);
 
-		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-		if(radio_mat_type)
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+		LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+		if (combobox_mattype)
 		{
-		    if (radio_mat_type->getSelectedIndex() < MATTYPE_DIFFUSE)
-		    {
-		        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
-		    }
-
+			if (combobox_mattype->getCurrentIndex() < MATTYPE_DIFFUSE)
+			{
+				combobox_mattype->selectNthItem(MATTYPE_DIFFUSE);
+			}
 		}
 		else
 		{
-		    LL_WARNS("Materials") << "failed getChild for 'radio_material_type'" << LL_ENDL;
+			LL_WARNS("Materials") << "failed getChild for 'combobox mattype'" << LL_ENDL;
 		}
-
-		getChildView("radio_material_type")->setEnabled(editable);
+		getChildView("combobox mattype")->setEnabled(editable);
+// [/SL:KB]
+//		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//		if(radio_mat_type)
+//		{
+//		    if (radio_mat_type->getSelectedIndex() < MATTYPE_DIFFUSE)
+//		    {
+//		        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
+//		    }
+//
+//		}
+//		else
+//		{
+//		    LL_WARNS("Materials") << "failed getChild for 'radio_material_type'" << LL_ENDL;
+//		}
+//
+//		getChildView("radio_material_type")->setEnabled(editable);
 
 // [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
 		mBtnCopyMaterialTypeParams->setEnabled(editable);
@@ -1269,7 +1301,10 @@ void LLPanelFace::updateUI()
 				BOOL identical_repeats = true;
 				F32  repeats = 1.0f;
 
-				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : MATTYPE_DIFFUSE;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? combobox_mattype->getCurrentIndex() : MATTYPE_DIFFUSE;
+// [/SL:KB]
+//				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : MATTYPE_DIFFUSE;
 				LLSelectMgr::getInstance()->setTextureChannel(LLRender::eTexIndex(material_type));
 
 				switch (material_type)
@@ -1534,21 +1569,33 @@ void LLPanelFace::onCommitMaterialsMedia(LLUICtrl* ctrl, void* userdata)
 void LLPanelFace::updateVisibility()
 {	
 	LLComboBox* combo_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 	LLComboBox* combo_shininess = getChild<LLComboBox>("combobox shininess");
 	LLComboBox* combo_bumpiness = getChild<LLComboBox>("combobox bumpiness");
-	if (!radio_mat_type || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+//	if (!radio_mat_type || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	if (!combo_mattype || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+// [/SL:KB]
 	{
 		LL_WARNS("Materials") << "Combo box not found...exiting." << LL_ENDL;
 		return;
 	}
 	U32 materials_media = combo_matmedia->getCurrentIndex();
-	U32 material_type = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type = combo_mattype->getCurrentIndex();
+// [/SL:KB]
+//	U32 material_type = radio_mat_type->getSelectedIndex();
 	bool show_media = (materials_media == MATMEDIA_MEDIA) && combo_matmedia->getEnabled();
 	bool show_texture = (show_media || ((material_type == MATTYPE_DIFFUSE) && combo_matmedia->getEnabled()));
 	bool show_bumpiness = (!show_media) && (material_type == MATTYPE_NORMAL) && combo_matmedia->getEnabled();
 	bool show_shininess = (!show_media) && (material_type == MATTYPE_SPECULAR) && combo_matmedia->getEnabled();
-	getChildView("radio_material_type")->setVisible(!show_media);
+//	getChildView("radio_material_type")->setVisible(!show_media);
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	getChildView("combobox mattype")->setVisible(!show_media);
+// [/SL:KB]
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
 	mBtnCopyMaterialTypeParams->setVisible(!show_media);
 	mBtnPasteMaterialTypeParams->setVisible(!show_media);
@@ -1683,9 +1730,15 @@ void LLPanelFace::updateShinyControls(bool is_setting_texture, bool mess_with_sh
 	}
 
 	LLComboBox* combo_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 	U32 materials_media = combo_matmedia->getCurrentIndex();
-	U32 material_type = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type = combo_mattype->getCurrentIndex();
+// [/SL:KB]
+//	U32 material_type = radio_mat_type->getSelectedIndex();
 	bool show_media = (materials_media == MATMEDIA_MEDIA) && combo_matmedia->getEnabled();
 	bool show_shininess = (!show_media) && (material_type == MATTYPE_SPECULAR) && combo_matmedia->getEnabled();
 	U32 shiny_value = comboShiny->getCurrentIndex();
@@ -1768,12 +1821,19 @@ void LLPanelFace::updateAlphaControls()
         mat_media = combobox_matmedia->getCurrentIndex();
     }
     
-    U32 mat_type = MATTYPE_DIFFUSE;
-    LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-    if(radio_mat_type)
-    {
-        mat_type = radio_mat_type->getSelectedIndex();
-    }
+	U32 mat_type = MATTYPE_DIFFUSE;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+	if (combobox_mattype)
+	{
+		mat_type = combobox_mattype->getCurrentIndex();
+	}
+// [/SL:KB]
+//    LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//    if(radio_mat_type)
+//    {
+//        mat_type = radio_mat_type->getSelectedIndex();
+//    }
 
     show_alphactrls = show_alphactrls && (mat_media == MATMEDIA_MATERIAL);
     show_alphactrls = show_alphactrls && (mat_type == MATTYPE_DIFFUSE);
@@ -2097,7 +2157,7 @@ struct LLSelectedTEFromLLSDFunctor : public LLSelectedTEMaterialFunctor, public 
 			LLMaterialMgr::getInstance()->remove(pObj->getID(), idxTE);
 			pMaterial = NULL;
 		}
-		pObj->setTEMaterialParams(idxTE, pMaterial, true);
+		pObj->setTEMaterialParams(idxTE, pMaterial);
 
 		return pMaterial;
 	}
@@ -2462,11 +2522,17 @@ void LLPanelFace::onCommitRepeatsPerMeter(LLUICtrl* ctrl, void* userdata)
 	
 	LLUICtrl*	repeats_ctrl	= self->getChild<LLUICtrl>("rptctrl");
 	LLComboBox* combo_matmedia = self->getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = self->getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype	= self->getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = self->getChild<LLRadioGroup>("radio_material_type");
 	
 	U32 materials_media = combo_matmedia->getCurrentIndex();
 
-	U32 material_type           = (materials_media == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : 0;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type			= (materials_media == MATMEDIA_MATERIAL) ? combo_mattype->getCurrentIndex() : 0;
+// [/SL:KB]
+//	U32 material_type           = (materials_media == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : 0;
 	F32 repeats_per_meter	= repeats_ctrl->getValue().asReal();
 	
    F32 obj_scale_s = 1.0f;
@@ -2590,12 +2656,20 @@ void LLPanelFace::onCommitPlanarAlign(LLUICtrl* ctrl, void* userdata)
 void LLPanelFace::onTextureSelectionChanged(LLInventoryItem* itemp)
 {
 	LL_DEBUGS("Materials") << "item asset " << itemp->getAssetUUID() << LL_ENDL;
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-	if(radio_mat_type)
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//	if(radio_mat_type)
+//	{
+//	    return;
+//	}
+//	U32 mattype = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+	if (!combo_mattype)
 	{
 	    return;
 	}
-	U32 mattype = radio_mat_type->getSelectedIndex();
+	U32 mattype = combo_mattype->getCurrentIndex();
+// [/SL:KB]
 	std::string which_control="texture control";
 	switch (mattype)
 	{
