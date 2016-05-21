@@ -69,7 +69,15 @@ LLLandmark* LLLandmarkList::getAsset(const LLUUID& asset_uuid, loaded_callback_t
 		{
 			return NULL;
 		}
-		
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+		if (cb)
+		{
+			loaded_callback_map_t::value_type vt(asset_uuid, cb);
+			mLoadedCallbackMap.insert(vt);
+		}
+// [/Sl:KB]
+
 		landmark_requested_list_t::iterator iter = mRequestedList.find(asset_uuid);
 		if (iter != mRequestedList.end())
 		{
@@ -80,11 +88,11 @@ LLLandmark* LLLandmarkList::getAsset(const LLUUID& asset_uuid, loaded_callback_t
 			}
 		}
 		
-		if (cb)
-		{
-			loaded_callback_map_t::value_type vt(asset_uuid, cb);
-			mLoadedCallbackMap.insert(vt);
-		}
+//		if (cb)
+//		{
+//			loaded_callback_map_t::value_type vt(asset_uuid, cb);
+//			mLoadedCallbackMap.insert(vt);
+//		}
 
 		gAssetStorage->getAssetData(asset_uuid,
 									LLAssetType::AT_LANDMARK,
