@@ -53,6 +53,9 @@ public:
 
 	static void		onClickNewScript(void*);
 	static void		onClickPermissions(void*);
+// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+	void			onClickRefresh();
+// [/SL:KB]
 	
     // Key suffix for "tentative" fields
     static const char* TENTATIVE_SUFFIX;

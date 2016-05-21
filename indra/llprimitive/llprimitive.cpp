@@ -1914,7 +1914,10 @@ LLSD LLSculptParams::asLLSD() const
 	return sd;
 }
 
-bool LLSculptParams::fromLLSD(LLSD& sd)
+//bool LLSculptParams::fromLLSD(LLSD& sd)
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-09-11 (Catznip-3.3)
+bool LLSculptParams::fromLLSD(const LLSD& sd)
+// [/SL:KB]
 {
 	const char *w;
 	U8 type;
