@@ -36,6 +36,10 @@
 #include "llfloaterimcontainer.h"
 #include "llparticipantlist.h"
 #include "llspeakers.h"
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+#include "llpanelpeoplemenus.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //LLParticipantList retrieves add, clear and remove events and updates view accordingly 
 #if LL_MSVC
@@ -557,22 +561,115 @@ void LLParticipantModelList::addAvalineParticipant(const LLUUID& particpant_id)
 	LLConversationItemSession::addParticipant(participant);
 }
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
 //
-// LLParticipantAvatarList class
+// LLParticipantAvatarList helper classes
+//
+
+/**
+ * Comparator for comparing avatar items by status and then name
+ */
+class LLAvatarItemStatusAndNameComparator : public LLAvatarItemNameComparator, public LLRefCount
+{
+	LOG_CLASS(LLAvatarItemStatusAndNameComparator);
+
+public:
+	LLAvatarItemStatusAndNameComparator(LLParticipantList& parent) : mParent(parent) { }
+	virtual ~LLAvatarItemStatusAndNameComparator() { }
+
+protected:
+	/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
+	{
+		const LLSpeakerMgr* pSpeakerMgr = mParent.getSpeakerManager();
+		if (pSpeakerMgr)
+		{
+			LLPointer<LLSpeaker> lhs = pSpeakerMgr->findSpeaker(avatar_item1->getAvatarId());
+			LLPointer<LLSpeaker> rhs = pSpeakerMgr->findSpeaker(avatar_item2->getAvatarId());
+			if ( (lhs.notNull()) && (rhs.notNull()) )
+			{
+				// Sort moderators before non-moderators, then sort by name
+				if (lhs->mIsModerator == rhs->mIsModerator)
+					return LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2);
+				else if (lhs->mIsModerator)
+					return true;
+				else if (rhs->mIsModerator)
+					return false;
+			}
+			else if (lhs.notNull())
+			{
+				// True if only avatar_item1 speaker info available
+				return true;
+			}
+			else if (rhs.notNull())
+			{
+				// False if only avatar_item2 speaker info available
+				return false;
+			}
+		}
+
+		// By default compare by name.
+		return LLAvatarItemNameComparator::doCompare(avatar_item1, avatar_item2);
+	}
+
+private:
+	LLParticipantList& mParent;
+};
+
+// [/SL:KB]
+
+//
+// LLParticipantAvatarList
 //
 
 LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAvatarList* pAvatarList)
 	: LLParticipantList(data_source)
 	, m_pAvatarList(pAvatarList)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	, m_pContextMenu(NULL)
+// [/SL:KB]
 {
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
 	m_pAvatarList->setSessionID(data_source->getSessionID());
 	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
+
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3)
+	m_AvatarListSortOrderConn = gSavedSettings.getControl("SpeakerParticipantDefaultOrder")->getSignal()->connect(boost::bind(&LLParticipantAvatarList::sort, this));
+	sort();
+
+	m_pContextMenu = new LLPanelPeopleMenus::ParticipantContextMenu(this);
+	m_pAvatarList->setContextMenu(m_pContextMenu);
+// [/SL:KB]
 }
 
 LLParticipantAvatarList::~LLParticipantAvatarList()
 {
-	m_AvatarListRefreshConn.disconnect();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	if (m_pContextMenu)
+	{
+		m_pAvatarList->setContextMenu(NULL);
+
+		delete m_pContextMenu;
+		m_pContextMenu = NULL;
+	}
+// [/SL:KB]
+}
+
+void LLParticipantAvatarList::update()
+{
+	LLParticipantList::update();
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+	// Refresh the sort if the mouse isn't hovering over us
+	if ( (E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) && (m_pAvatarList) )
+	{
+		S32 x, y;
+		LLUI::getMousePositionScreen(&x, &y);
+		if (!m_pAvatarList->calcScreenRect().pointInRect(x, y))
+		{
+			sort();
+		}
+	}
+// [/SL:KB]
 }
 
 void LLParticipantAvatarList::getSelectedUUIDs(uuid_vec_t& idsSelected)
@@ -658,6 +755,10 @@ void LLParticipantAvatarList::onAvatarListRefreshed()
 				strTooltip.erase(idxModIndicator, s_lenModIndicator);
 				pItem->setAvatarToolTip(strTooltip);
 			}
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+			pItem->setState(LLAvatarListItem::IS_ONLINE);
+// [/SL:KB]
 		}
 	}
 	lModeratorsToRemove.clear();
@@ -686,7 +787,51 @@ void LLParticipantAvatarList::onAvatarListRefreshed()
 				strTooltip += s_strModIndicator;
 				pItem->setAvatarToolTip(strTooltip);
 			}
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+			pItem->setState(LLAvatarListItem::IS_MODERATOR);
+// [/SL:KB]
 		}
+	}
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2012-06-10 (Catznip-3.3)
+
+// static
+LLParticipantAvatarList::ESortOrder LLParticipantAvatarList::getSortOrder()
+{
+	return (ESortOrder)gSavedSettings.getU32("SpeakerParticipantDefaultOrder");
+}
+
+// static 
+void LLParticipantAvatarList::setSortOrder(ESortOrder eSortOrder)
+{
+	gSavedSettings.setU32("SpeakerParticipantDefaultOrder", (U32)eSortOrder);
+}
+
+void LLParticipantAvatarList::sort()
+{
+	if (!m_pAvatarList)
+		return;
+
+	switch (getSortOrder()) 
+	{
+		case E_SORT_BY_NAME :
+			if (m_SortByStatusAndName.isNull())
+				m_SortByStatusAndName = new LLAvatarItemStatusAndNameComparator(*this);
+			m_pAvatarList->setComparator(m_SortByStatusAndName.get());
+			m_pAvatarList->sort();
+			break;
+		case E_SORT_BY_RECENT_SPEAKERS:
+			if (m_SortByRecentSpeakers.isNull())
+				m_SortByRecentSpeakers = new LLAvatarItemRecentSpeakerComparator(getSpeakerManager());
+			m_pAvatarList->setComparator(m_SortByRecentSpeakers.get());
+			m_pAvatarList->sort();
+			break;
+		default:
+			LL_WARNS() << "Unrecognized sort order for " << m_pAvatarList->getName() << LL_ENDL;
+			return;
 	}
 }
 // [/SL:KB]

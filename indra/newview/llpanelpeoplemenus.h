@@ -29,6 +29,10 @@
 
 #include "lllistcontextmenu.h"
 
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
+class LLParticipantList;
+// [/SL:KB]
+
 namespace LLPanelPeopleMenus
 {
 
@@ -71,6 +75,37 @@ public:
 protected:
 	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
 };
+
+// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
+
+/**
+ * Menu used in the participant list
+ */
+class ParticipantContextMenu : public PeopleContextMenu
+{
+public:
+	ParticipantContextMenu(LLParticipantList* pParticipantList);
+	virtual ~ParticipantContextMenu() { }
+
+public:
+	/*virtual*/ LLContextMenu* createMenu();
+protected:
+	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
+
+protected:
+	bool canEjectAvatar(const LLUUID& idAgent) const;
+	void ejectAvatar(const LLUUID& idAgent);
+	bool hasBlockedText(const LLUUID& idAgent) const;
+	bool hasBlockedVoice(const LLUUID& idAgent) const;
+	bool isModerator() const;
+	void toggleBlockText(const LLUUID& idAgent);
+	void toggleBlockVoice(const LLUUID& idAgent);
+
+protected:
+	LLParticipantList* m_pParticipantList;
+};
+
+// [/SL:KB]
 
 extern PeopleContextMenu gPeopleContextMenu;
 extern NearbyPeopleContextMenu gNearbyPeopleContextMenu;

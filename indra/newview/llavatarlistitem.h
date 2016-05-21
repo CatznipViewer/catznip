@@ -51,7 +51,11 @@ public:
 									voice_call_joined_style,
 									voice_call_left_style,
 									online_style,
-									offline_style;
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+									offline_style,
+									moderator_style;
+// [/SL:KB]
+//									offline_style;
 
 		Optional<S32>				name_right_pad;
 
@@ -65,6 +69,9 @@ public:
 		IS_VOICE_LEFT,
 		IS_ONLINE,
 		IS_OFFLINE,
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+		IS_MODERATOR,
+// [/SL:KB]
 	} EItemState;
 
 	/**
