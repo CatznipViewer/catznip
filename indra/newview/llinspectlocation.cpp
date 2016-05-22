@@ -245,16 +245,12 @@ void LLInspectLocation::requestRemoteParcel(const LLVector3d& posGlobal)
 	const std::string strUrl = pRegion->getCapability("RemoteParcelRequest");
 	if (!strUrl.empty())
 	{
-		U64 hRegion = to_region_handle(posGlobal);
-		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS), 
+		LLVector3 posRegion((F32)fmod(posGlobal.mdV[VX], (F64)REGION_WIDTH_METERS),
 							(F32)fmod(posGlobal.mdV[VY], (F64)REGION_WIDTH_METERS),
 							(F32)posGlobal.mdV[VZ]);
 		m_posCurRequest = posGlobal;
 
-		LLSD sdBody;
-		sdBody["region_handle"] = ll_sd_from_U64(hRegion);
-		sdBody["location"] = ll_sd_from_vector3(posRegion);
-		LLHTTPClient::post(strUrl, sdBody, new LLRemoteParcelRequestResponder(getObserverHandle()));
+		LLRemoteParcelInfoProcessor::getInstance()->requestRegionParcelInfo(strUrl, LLUUID::null, posRegion, posGlobal, getObserverHandle());
 	}
 	else
 	{
