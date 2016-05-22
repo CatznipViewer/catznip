@@ -232,6 +232,14 @@ void LLPreviewNotecard::loadAsset()
 				editor->makePristine();
 				editor->setEnabled(TRUE);
 				mAssetStatus = PREVIEW_ASSET_LOADED;
+
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+				// Start the timer which will perform regular backup saves
+				if (!isBackupRunning())
+				{
+					startBackupTimer(60.0f);
+				}
+// [/SL:KB]
 			}
 			else
 			{

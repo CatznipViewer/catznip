@@ -837,5 +837,8 @@ void LLViewerAssetUpload::HandleUploadError(LLCore::HttpStatus status, LLSD &res
         }
     }
 
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: Catznip-4.0
+	uploadInfo->callUploadErrorCb();
+// [/SL:KB]
 }
 

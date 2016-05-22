@@ -1,26 +1,26 @@
-/** 
+/**
  *
- * Copyright (c) 2011-2013, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2011-2016, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
 
 #include "llagent.h"
-#include "llassetuploadresponders.h"
 #include "llcheckboxctrl.h"
 #include "lldiriterator.h"
 #include "llfloaterreg.h"
+#include "llfloaterperms.h"
 #include "llfolderview.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodel.h"
@@ -29,6 +29,7 @@
 #include "llviewerassettype.h"
 #include "llviewerinventory.h"
 #include "llviewerregion.h"
+#include "llviewerassetupload.h"
 
 #include "llfloaterassetrecovery.h"
 
@@ -155,8 +156,8 @@ static bool removeEmbeddedMarkers(const std::string& strFilename)
 		char chByte3 = strText[idxText + 2];
 		char chByte4 = strText[idxText + 3];
 		if ( ((chByte2 >= '\x80') && (chByte2 <= '\x8F')) &&
-		     ((chByte3 >= '\x80') && (chByte3 <= '\xBF')) &&
-		     ((chByte4 >= '\x80') && (chByte4 <= '\xBF')) )
+			 ((chByte3 >= '\x80') && (chByte3 <= '\xBF')) &&
+			 ((chByte4 >= '\x80') && (chByte4 <= '\xBF')) )
 		{
 			// We're being lazy and replacing embedded markers with spaces since we don't want to adjust the notecard length field
 			strText.replace(idxText, 4, 4, ' ');
@@ -220,28 +221,61 @@ LLAssetRecoverQueue::LLAssetRecoverQueue(const LLSD& sdFiles)
 		const LLSD& sdFile = *itFile;
 		if (LLFile::isfile(sdFile["path"]))
 		{
-			m_FileQueue.insert(std::pair<std::string, LLSD>(sdFile["path"], sdFile));
+			LLAssetRecoverItem recoveryItem;
+			recoveryItem.strPath = sdFile["path"];
+			recoveryItem.strName = sdFile["name"];
+
+			// Figure out the asset type
+			if ("script" == sdFile["type"].asString())
+				recoveryItem.eAssetType = LLAssetType::AT_LSL_TEXT;
+			else if ("notecard" == sdFile["type"].asString())
+				recoveryItem.eAssetType = LLAssetType::AT_NOTECARD;
+
+			// Generate description
+			LLViewerAssetType::generateDescriptionFor(recoveryItem.eAssetType, recoveryItem.strDescription);
+
+			// Per asset type handling
+			switch (recoveryItem.eAssetType)
+			{
+				case LLAssetType::AT_LSL_TEXT:
+					recoveryItem.eInvType = LLInventoryType::IT_LSL;
+					recoveryItem.nNextOwnerPerm = LLFloaterPerms::getNextOwnerPerms("Scripts");
+					break;
+				case LLAssetType::AT_NOTECARD:
+					recoveryItem.eInvType = LLInventoryType::IT_NOTECARD;
+					recoveryItem.nNextOwnerPerm = LLFloaterPerms::getNextOwnerPerms("Notecards");
+					removeEmbeddedMarkers(recoveryItem.strPath);
+					break;
+			}
+
+			if (recoveryItem.eAssetType != LLAssetType::AT_NONE)
+				m_RecoveryQueue.push_back(recoveryItem);
 		}
 	}
-	recoverNext();
+
+	if (!m_RecoveryQueue.empty())
+		recoverNext();
+	else
+		delete this;
 }
 
 bool LLAssetRecoverQueue::recoverNext()
 {
 	/**
 	 * Steps:
-	 *  (1) create a script inventory item under Lost and Found
-	 *  (2) once we have the item's UUID we can upload the script
-	 *  (3) once the script is uploaded we move on to the next item
+	 *  (1) create a script/notecard inventory item under "Lost and Found"
+	 *  (2) once we have the item's UUID we can upload it
+	 *  (3) once the asset is uploaded we move on to the next item
 	 */
 	const LLUUID idFNF = gInventory.findCategoryUUIDForType(LLFolderType::FT_LOST_AND_FOUND);
 
-	// Sanity check - if the associated UUID is non-null then this file is already being processed
-	filename_queue_t::const_iterator itFile = m_FileQueue.begin();
-	while ( (itFile != m_FileQueue.end()) && (itFile->second.has("item")) && (itFile->second["item"].asUUID().notNull()) )
-		++itFile;
+	// If the associated UUID is non-null then this file is already being processed
+	auto itItem = m_RecoveryQueue.cbegin();
+	while ( (m_RecoveryQueue.cend() != itItem) && (itItem->idItem.notNull()) )
+		++itItem;
 
-	if (m_FileQueue.end() == itFile) 
+	// Empty queue - pop-up inventory floater
+	if (m_RecoveryQueue.cend() == itItem)
 	{
 		LLInventoryPanel* pInvPanel = LLInventoryPanel::getActiveInventoryPanel(TRUE);
 		if (pInvPanel)
@@ -258,22 +292,10 @@ bool LLAssetRecoverQueue::recoverNext()
 		return false;
 	}
 
-	std::string strItemDescr;
-	LLViewerAssetType::generateDescriptionFor(LLAssetType::AT_LSL_TEXT, strItemDescr);
-
-	if ("script" == itFile->second["type"].asString())
-	{
-		create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
-		                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_LSL_TEXT, LLInventoryType::IT_LSL,
-		                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverAssetCallback(this));
-	}
-	else if ("notecard" == itFile->second["type"].asString())
-	{
-		removeEmbeddedMarkers(itFile->first);
-		create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull, 
-		                      itFile->second["name"].asString(), strItemDescr, LLAssetType::AT_NOTECARD, LLInventoryType::IT_NOTECARD,
-		                      NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, new LLCreateRecoverAssetCallback(this));
-	}
+	// Otherwise start the recovery cycle
+	create_inventory_item(gAgent.getID(), gAgent.getSessionID(), idFNF, LLTransactionID::tnull,
+	                      itItem->strName, itItem->strDescription, itItem->eAssetType, itItem->eInvType,
+	                      NOT_WEARABLE, itItem->nNextOwnerPerm, new LLCreateRecoverAssetCallback(this));
 	return true;
 }
 
@@ -282,7 +304,7 @@ void LLAssetRecoverQueue::onCreateItem(const LLUUID& idItem)
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (!pItem)
 	{
-		// TODO: error handling
+		// CATZ-TODO: error handling (can't call onUploadError or we'll create an endless loop)
 		return;
 	}
 
@@ -290,73 +312,78 @@ void LLAssetRecoverQueue::onCreateItem(const LLUUID& idItem)
 	std::string strItemName = pItem->getName();
 	LLViewerInventoryItem::lookupSystemName(strItemName);
 
-	filename_queue_t::iterator itFile = m_FileQueue.begin();
-	while (itFile != m_FileQueue.end())
+	auto itItem = m_RecoveryQueue.begin();
+	while (m_RecoveryQueue.end() != itItem)
 	{
-		if (itFile->second["name"].asString() == strItemName)
+		if (itItem->strName == strItemName)
 			break;
-		++itFile;
+		++itItem;
 	}
 
-	if (m_FileQueue.end() != itFile)
+	if (m_RecoveryQueue.end() != itItem)
 	{
-		std::string strFileName = itFile->second["path"];
-		itFile->second["item"] = idItem;
+		itItem->idItem = idItem;
 
-		std::string strCapsUrl; LLSD sdBody; 
+		std::string strCapsUrl, strBuffer;
 
-		if (LLAssetType::AT_LSL_TEXT == pItem->getType())
+		std::ifstream inNotecardFile(itItem->strPath.c_str(), std::ios::in | std::ios::binary);
+		if (inNotecardFile.is_open())
 		{
-			strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
-			sdBody["item_id"] = idItem;
-			sdBody["target"] = "lsl2";
-		}
-		else if (LLAssetType::AT_NOTECARD == pItem->getType())
-		{
-			strCapsUrl = gAgent.getRegion()->getCapability("UpdateNotecardAgentInventory");
-			sdBody["item_id"] = idItem;
+			strBuffer.assign((std::istreambuf_iterator<char>(inNotecardFile)), std::istreambuf_iterator<char>());
+			inNotecardFile.close();
 		}
 
-		if (!strCapsUrl.empty())
+		LLResourceUploadInfo::ptr_t uploadInfo;
+		switch (pItem->getType())
 		{
-			LLHTTPClient::post(strCapsUrl, sdBody, 
-			                   new LLUpdateAgentInventoryResponder(sdBody, strFileName, pItem->getType(), 
-			                                                       boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _2, _3),
-			                                                       boost::bind(&LLAssetRecoverQueue::onUploadError, this, _1)));
+			case LLAssetType::AT_LSL_TEXT:
+				strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
+				uploadInfo = LLResourceUploadInfo::ptr_t(new LLScriptAssetUpload(idItem, strBuffer, boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _4)));
+				break;
+			case LLAssetType::AT_NOTECARD:
+				strCapsUrl = gAgent.getRegion()->getCapability("UpdateNotecardAgentInventory");
+				uploadInfo = LLResourceUploadInfo::ptr_t(new LLBufferedAssetUploadInfo(itItem->idItem, LLAssetType::AT_NOTECARD, strBuffer, boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _4)));
+				break;
+		}
+
+		if ( (!strCapsUrl.empty()) && (uploadInfo) )
+		{
+			uploadInfo->setUploadErrorCb(boost::bind(&LLAssetRecoverQueue::onUploadError, this, _1));
+			LLViewerAssetUpload::EnqueueInventoryUpload(strCapsUrl, uploadInfo);
+			return;
 		}
 	}
+
+	// CATZ-TODO: error handling (if we can't find the current item)
 }
 
-void LLAssetRecoverQueue::onSavedAsset(const LLUUID& idItem, const LLSD&, bool fSuccess)
+void LLAssetRecoverQueue::onSavedAsset(const LLUUID& idItem, const LLSD& sdResponse)
 {
 	const LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
 	if (pItem)
 	{
-		filename_queue_t::iterator itFile = m_FileQueue.begin();
-		while ( (itFile != m_FileQueue.end()) && ((!itFile->second.has("item")) || (itFile->second["item"].asUUID() != idItem)) )
-			++itFile;
-		if (itFile != m_FileQueue.end())
+		auto itItem = std::find_if(m_RecoveryQueue.begin(), m_RecoveryQueue.end(), [&idItem](const LLAssetRecoverItem& item)->bool { return item.idItem == idItem; });
+		if (m_RecoveryQueue.end() != itItem)
 		{
-			LLFile::remove(itFile->first);
-			m_FileQueue.erase(itFile);
+			LLFile::remove(itItem->strPath);
+			m_RecoveryQueue.erase(itItem);
 		}
 	}
 	recoverNext();
 }
 
-bool LLAssetRecoverQueue::onUploadError(const std::string& strFilename)
+void LLAssetRecoverQueue::onUploadError(const LLUUID& idItem)
 {
 	// Skip over the file when there's an error, we can try again on the next relog
-	filename_queue_t::iterator itFile = m_FileQueue.find(strFilename);
-	if (itFile != m_FileQueue.end())
+	auto itItem = std::find_if(m_RecoveryQueue.begin(), m_RecoveryQueue.end(), [&idItem](const LLAssetRecoverItem& item)->bool { return item.idItem == idItem; });
+	if (m_RecoveryQueue.end() != itItem)
 	{
-		LLViewerInventoryItem* pItem = gInventory.getItem(itFile->second["item"]);
+		LLViewerInventoryItem* pItem = gInventory.getItem(itItem->idItem);
 		if (pItem)
 			gInventory.changeItemParent(pItem, gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH), FALSE);
-		m_FileQueue.erase(itFile);
+		m_RecoveryQueue.erase(itItem);
 	}
 	recoverNext();
-	return false;
 }
 
 // ============================================================================
