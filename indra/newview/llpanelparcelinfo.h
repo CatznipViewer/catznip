@@ -65,9 +65,8 @@ public:
 protected:
 	void clearControls(const std::string& strGeneral, const std::string& strDescription);
 	void clearPendingRequest();
-	void requestRemoteParcel(const LLSD& sdBody);
-	void requestRemoteParcel(const LLVector3d& posGlobal, const LLUUID& idRegion = LLUUID::null);
-	void requestRemoteParcel(const LLUUID& idRegion, const LLVector3& posRegion);
+	// Can be called with either idRegion and posRegion specified or only posGlobal specified
+	void requestRemoteParcel(const LLUUID& idRegion, LLVector3 posRegion, const LLVector3d& posGlobal);
 	void updateFromInventoryItem();
 	void updateFromParcelData();
 	static void onLandmarkLoaded(LLLandmark* pLandmark, LLHandle<LLPanel> hPanel);
