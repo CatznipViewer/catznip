@@ -25,8 +25,8 @@
 		Caricamento in corso...
 	</floater.string>
 	<button label="Ripristina" label_selected="Ripristina" name="Reset"/>
-	<check_box initial_value="true" label="In esecuzione" left="4" name="running"/>
-	<check_box initial_value="true" label="Mono" left="106" name="mono"/>
+	<check_box initial_value="true" label="In esecuzione" name="running" left="345"/>
+	<check_box initial_value="true" label="Mono" name="mono"/>
 	<check_box label="Usa le esperienze:" name="enable_xp"/>
 	<button label="&gt;" name="view_profile"/>
 </floater>
