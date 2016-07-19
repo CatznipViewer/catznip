@@ -56,7 +56,7 @@
 #include "llviewerassettype.h"
 #include "llviewerinventory.h"
 #include "llviewerobject.h"
-// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+// [SL:KB] - Patch: Build-ContentsRefresh | Checked: Catznip-3.2
 #include "llviewerobjectlist.h"
 // [/SL:KB]
 #include "llviewerregion.h"
@@ -86,7 +86,7 @@ BOOL LLPanelContents::postBuild()
 
 	childSetAction("button new script",&LLPanelContents::onClickNewScript, this);
 	childSetAction("button permissions",&LLPanelContents::onClickPermissions, this);
-// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+// [SL:KB] - Patch: Build-ContentsRefresh | Checked: Catznip-3.2
 	getChild<LLUICtrl>("button refresh")->setCommitCallback(boost::bind(&LLPanelContents::onClickRefresh, this));
 // [/SL:KB]
 
@@ -156,18 +156,19 @@ void LLPanelContents::clearContents()
 	}
 }
 
-// [SL:KB] - Patch: Build-Misc | Checked: 2012-02-15 (Catznip-3.2)
+// [SL:KB] - Patch: Build-ContentsRefresh | Checked: Catznip-3.2
 void LLPanelContents::onClickRefresh()
 {
 	if ( (mPanelInventoryObject) && (mPanelInventoryObject->getTaskUUID().notNull()) )
 	{
-		LLViewerObject* pObj = gObjectList.findObject(mPanelInventoryObject->getTaskUUID());
-		if (pObj)
+		if (LLViewerObject* pObj = gObjectList.findObject(mPanelInventoryObject->getTaskUUID()))
 		{
 			pObj->dirtyInventory();
 		}
+
+		mPanelInventoryObject->clearInventoryTask();
 		mPanelInventoryObject->refresh();
-	}	
+	}
 }
 // [/SL:KB]
 
