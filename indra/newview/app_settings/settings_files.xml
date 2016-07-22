@@ -49,6 +49,19 @@
           file_name_setting="UserSessionSettingsFile"
           persistent="false"/>
   </group>
+  <group name="CurrentSkin"
+         path_index="10">
+      <file name="Global"
+            file_name="settings.xml" 
+            persistent="false"/>
+  </group>
+  <group name="CurrentSkinTheme"
+         path_index="19">
+      <file name="Global"
+            file_name="settings.xml" 
+            persistent="false"/>
+  </group>
+<!--
   <group name="DefaultSkin"
          path_index="17">
     <file name="Skinning"
@@ -59,10 +72,16 @@
     <file name="Skinning"
           file_name="colors.xml"/>
   </group>
+  <group name="CurrentSkinTheme"
+         path_index="19">
+    <file name="Skinning"
+          file_name="colors.xml"/>
+  </group>
   <group name="UserSkin"
          path_index="14">
     <file name="Skinning"
           file_name="colors.xml"
           file_name_setting="SkinningSettingsFile"/>
   </group>
+-->
 </settings_files>
