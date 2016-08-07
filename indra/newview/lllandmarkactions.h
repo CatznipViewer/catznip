@@ -32,6 +32,9 @@
 #include "lllandmarklist.h"
 
 class LLLandmark;
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+class LLInventoryCallback;
+// [/SL:KB]
 
 /**
  * @brief Provides helper functions to manage landmarks
@@ -81,15 +84,25 @@ public:
 	/**
 	 * @brief Creates landmark for current parcel.
 	 */
-	static void createLandmarkHere();
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+	static void createLandmarkHere(LLPointer<LLInventoryCallback> cb = NULL);
+// [/SL:KB]
+//	static void createLandmarkHere();
 
 	/**
 	 * @brief Creates landmark for current parcel.
 	 */
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
 	static void createLandmarkHere(
 		const std::string& name, 
 		const std::string& desc, 
-		const LLUUID& folder_id);
+		const LLUUID& folder_id,
+		LLPointer<LLInventoryCallback> cb = NULL);
+// [/SL:KB]
+//	static void createLandmarkHere(
+//		const std::string& name, 
+//		const std::string& desc, 
+//		const LLUUID& folder_id);
 	/**
 	 * @brief Creates SLURL for given global position.
 	 */
@@ -121,6 +134,11 @@ public:
      *  when URL is copied .
      */
     static void copySLURLtoClipboard(const LLUUID& landmarkInventoryItemID);
+
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-14 (Catznip-3.6)
+	static void showCreateLandmark();
+	static void showLandmarkInfo(const LLUUID& idItem);
+// [/SL:KB]
 
 private:
     LLLandmarkActions();
