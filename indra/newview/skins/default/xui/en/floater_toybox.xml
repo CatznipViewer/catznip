@@ -4,7 +4,7 @@
   can_dock="false"
   can_minimize="false"
   can_resize="false"
-  height="375"
+  height="360"
   help_topic="toybox"
   layout="topleft"
   legacy_header_height="18"
@@ -13,54 +13,52 @@
   save_rect="true"
   single_instance="true"
   title="TOOLBAR BUTTONS"
-  width="650">
+  width="500">
   <text
     follows="left|top"
-    font="SansSerifMedium"
     valign="top"
     halign="left"
-    height="20"
+    height="15"
     layout="topleft"
     left="20"
     length="1"
     name="toybox label 1"
     right="-20"
-    top="35"
+    top="25"
     type="string">
-      Add or remove buttons by dragging them to or from the toolbars.
+      Drag and drop buttons on/off and between toolbars. Right click on a toolbar to
   </text>
   <text
     follows="left|top"
-    font="SansSerifMedium"
     valign="top"
     halign="left"
-    height="20"
+    height="15"
     layout="topleft"
     left="20"
     length="1"
     name="toybox label 2"
     right="-20"
-    top="55"
+    top="40"
     type="string">
-      Buttons will appear as shown or as icon-only depending on each toolbar's settings.
+       change it's alignment and text visability settings.
   </text>
   <toolbar
     bottom="310"
     button_display_mode="icons_with_text"
     follows="all"
-    left="20"
+    left="10"
     button_icon_and_text.button_width.max="140"
-    button_icon_and_text.button_width.min="70"
+    button_icon_and_text.button_width.min="140"
     name="toybox_toolbar"
     pad_left="5"
     pad_right="5"
-    pad_top="5"
+    pad_top="0"
     pad_bottom="5"
-    pad_between="15"
+    pad_between="5"
     read_only="true"
-    right="-20"
+    right="-10"
     side="top"
-    top="85">
+    top="65">
     <button_panel background_visible="false" />
     <button_icon_and_text image_unselected="PushButton_Off"
                           image_selected="PushButton_Off"
@@ -79,35 +77,77 @@
                           display_pressed_state="false" />
   </toolbar>
   <panel
-    bevel_style="none"
-    border="true"
-    bottom="311"
-    follows="left|bottom|right"
-    left="20"
-    right="-20"
-    top="311" />
-  <button
-    follows="left|bottom|right"
-    height="23"
-    label="Clear all toolbars"
-    label_selected="Clear all toolbars"
-    layout="topleft"
-    left="185"
-    name="btn_clear_all"
-    top="330"
-    width="130">
-    <button.commit_callback function="Toybox.ClearAll" />
-  </button>
-  <button
-    follows="left|bottom|right"
-    height="23"
-    label="Restore defaults"
-    label_selected="Restore defaults"
-    layout="topleft"
-    left="335"
-    name="btn_restore_defaults"
-    top="330"
-    width="130">
-    <button.commit_callback function="Toybox.RestoreDefaults" />
-  </button>
+  background_visible="false"
+  follows="left|right|bottom"
+  height="25"
+  label="bottom_panel"
+  layout="topleft"
+  left="5"
+  name="bottom_panel"
+  right="-5"
+  bottom="-5" >
+    <icon  
+      follows="bottom|left"
+      height="25"
+      image_name="Toolbar_Left_Off"
+      width="88"
+      layout="topleft"
+      left="0"
+      name="spacer_icon_1"
+      top="0" />
+
+    <button
+      follows="bottom|left"
+      height="25"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      imgoverlay_label_align="true"
+      imgoverlay_label_space="5"
+      label="Clear all toolbars"
+      layout="topleft"
+      left_pad="1"
+      name="btn_clear_all"
+      width="140">
+      <button.commit_callback function="Toybox.ClearAll" />
+    </button>
+
+    <icon  
+      follows="bottom|left"
+      height="25"
+      image_name="Toolbar_Middle_Off"
+      width="29"
+      layout="topleft"
+      left_pad="1"
+      name="spacer_icon_2"
+      top="0" />
+
+    <button
+      follows="bottom|left"
+      height="25"
+      image_hover_unselected="Toolbar_Middle_Over"
+      image_selected="Toolbar_Middle_Selected"
+      image_unselected="Toolbar_Middle_Off"
+      imgoverlay_label_align="true"
+      imgoverlay_label_space="5"
+      label="Restore defaults"
+      layout="topleft"
+      left_pad="1"
+      name="btn_restore_defaults"
+      width="140">
+      <button.commit_callback function="Toybox.RestoreDefaults" />
+    </button>
+    <icon  
+      follows="bottom|right|left"
+      height="25"
+      image_name="Toolbar_Right_Off"
+      width="88"
+      layout="topleft"
+      left_pad="1"
+      right="-1"
+      name="spacer_icon_3"
+      top="0" />
+  </panel>
+
+
 </floater>

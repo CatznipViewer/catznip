@@ -3,6 +3,8 @@
 	<text name="groupdesc">
 		Escolha um grupo:
 	</text>
+	<panel name="bottom_panel" >
 	<button label="OK" label_selected="OK" name="OK"/>
 	<button label="Cancelar" label_selected="Cancelar" name="Cancel"/>
+	</panel>
 </floater>

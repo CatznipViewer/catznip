@@ -256,19 +256,19 @@
 			<button label="İptal" name="cancel_btn"/>
 			<button label="Karşıya Yükle" name="ok_btn" tool_tip="Simülatöre karşıya yükle"/>
 			<button label="Ayarları temizle ve formu sıfırla" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="190">
 				Karşıya yükleme ücreti: L$ [FEE]
 			</text>
-			<text name="prim_weight">
+			<text name="prim_weight" width="110">
 				Arazi etkisi [EQ]
 			</text>
-			<text name="download_weight">
+			<text name="download_weight" width="120">
 				Karşıdan Yükle: [ST]
 			</text>
-			<text name="physics_weight">
+			<text name="physics_weight" width="80">
 				Fizik: [PH]
 			</text>
-			<text name="server_weight">
+			<text name="server_weight" width="80">
 				Sunucu: [SIM]
 			</text>
 			<text name="warning_title">
@@ -304,10 +304,10 @@
 			Ekran...
 		</text>
 		<check_box label="Kenarlar" name="show_edges"/>
-		<check_box label="Fizik" name="show_physics"/>
+		<check_box label="Fizik" name="show_physics" left="100"/>
 		<check_box label="Dokular" name="show_textures"/>
 		<check_box label="Dış katman ağırlıkları" name="show_skin_weight"/>
-		<check_box label="Eklemler" name="show_joint_positions"/>
+		<check_box label="Eklemler" name="show_joint_positions" top_delta="-16"/>
 		<text name="physics_explode_label">
 			Önizleme Yayılımı:
 		</text>

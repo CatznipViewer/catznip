@@ -1,0 +1,55 @@
+[UI/Misc]
+- added   : "collapse" button to the floater top right controls (between "minimize" and "close")
+    -> collapses the floater in-place rather than moving it to a different part of the screen and changing the width of the title bar
+    -> double-clicking the title bar will collapse the floater as well
+- added   : ability to right-click rigged mesh attachments to detach them and to right-click other avatar's rigged mesh attachments
+- added   : "Inspect" menu item to bring up the old-style Inspect floater
+    -> added to the context menus for: "attachment self", "attachment other" and "object"
+    -> added to the gear menu for object inspectors
+- added   : "Add Contact" option to various context menus
+    -> creates a calling card for that avatar in the "Calling Cards" folder
+- added   : context menu options to the status bar to selectively show/hide UI elements
+    -> "Show Buy L$ Button", "Show Marketplace Button" and "Show Network Statistics"
+- added   : added "Refresh L$ Balance" option to the Advanced menu
+- added   : "Picks" menu option to the self avatar and attachment context menu
+- added   : enable drag-and-drop commit behaviour for main inventory panel, IM container floater, people sidebar panel and avatar picker floater
+- added   : share inventory by drag-and-drop'ing items onto an avatar list item (i.e. drag drop inventory on a friend in the People floater)
+- changed : don't reset the URL each time the search floater is opened
+    -> "Find always resets to start page" (WEB-1819)
+- changed : "Restart Region" button to a flyout button with 2, 5 and 15 minute restart delay options
+- changed : embedded the "Mini-Location" bar into the status bar
+    -> "Mini-Location" bar can also be shown independently of the navigation bar
+    -> removed the info button
+    -> show the maturity rating as an icon rather than part of the parcel text
+    -> reformat the parcel text to "Region (Coordinates) - Parcel"
+    -> coordinates and properties are always visible, regardless of navigation bar options
+- changed : open the "About" tab on web profiles by default (rather than the "Feed" tab)
+- changed : pulled "Set Away" and "Set Busy" out of their submenu into the main "Me" menu
+- changed : "Add Friend" and "Remove Friend" enabler on various context menus was changed from on_enable to on_visible
+- changed : don't initialize the "Destination Guide" or "Avatar Picker" floaters until the user actually opens them
+- fixed   : can't drag-and-drop between inventory tabs
+    -> if the inventory panel is scrolled down, hovering over the other tab just makes it scroll up
+    -> items can not be drag-and-dropped on the revent items tab
+- changed : various floater clean-ups
+    -> debug settings floater
+    -> animation preview floater
+    -> sound preview floater
+    -> script queue floater
+    -> gestures floater
+    -> group invite panel
+- fixed   : [CATZ-4] Right-clicking a linkset freezes the viewer for a split second
+- fixed   : [CATZ-5] Editing a linkset freezes the viewer for a (few) second(s)
+- fixed   : pressing the up arrow doesn't skip over separators
+    -> right-click on an inventory item and press the down arrow => skips over all disabled and invisible items and separators
+    -> right-click on an inventory item and press the up arrow => skips over all disabled and invisible items but not separators
+- fixed   : hovering the mouse above/below the separator line doesn't highlight anything if the items above/below it are invisible
+    -> right-click on the "Current Outfit" folder and hover on the separators
+- fixed   : clicking on a separator commits the wrong menu item
+    -> fixes "Wearing Folder Occasionally Equips Entire Inventory!" (https://jira.secondlife.com/browse/VWR-28494)
+- fixed   : minimize repetitive (per-frame) calls to findChild/getChild
+- fixed   : having the syswell floater open results in higher 'Find Widgets' time
+- fixed   : scrolling through the friends list with the arrow keys spikes 'Find Widgets'
+- fixed   : don't show an avatar or object inspector button if a (context) menu is open
+- fixed   : LLLandmarkList::onRegionHandle() floods the log during log-on
+    -> LLRemoveLandmarkObserver was firing for more than just removal of inventory items
+    -> LLLocationInputCtrl inventory observers were firing during log-on when refresh() will be called on successful login anyway

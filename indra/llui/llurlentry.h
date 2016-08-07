@@ -107,7 +107,7 @@ public:
 
 	bool isWikiLinkCorrect(std::string url);
 
-	virtual bool isSLURLvalid(const std::string &url) const { return TRUE; };
+//	virtual bool isSLURLvalid(const std::string &url) const { return TRUE; };
 
 protected:
 	std::string getIDStringFromUrl(const std::string &url) const;
@@ -165,7 +165,10 @@ public:
 	/*virtual*/ std::string getUrl(const std::string &string) const;
 	/*virtual*/ std::string getTooltip(const std::string &url) const;
 
-	bool isSLURLvalid(const std::string &url) const;
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+	static bool isSLURLvalid(const std::string &url);
+// [/SL:KB]
+//	bool isSLURLvalid(const std::string &url) const;
 };
 
 ///

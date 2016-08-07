@@ -35,6 +35,9 @@
 #include "llcommandmanager.h"
 #include "llassettype.h"
 
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-18 (Catznip-3.2.2)
+class LLIconCtrl;
+// [/SL:KB]
 class LLToolBar;
 class LLToolBarButton;
 class LLIconCtrl;

@@ -6,4 +6,6 @@
 	</radio_group>
 	<color_swatch name="val_color_swatch" label="Kolor" />
 	<button label="Domyślnie" name="default_btn" />
+	<panel name="bottom_panel">
+	</panel>
 </floater>
