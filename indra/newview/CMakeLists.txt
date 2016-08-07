@@ -461,6 +461,7 @@ set(viewer_SOURCE_FILES
     llpanelplaceprofile.cpp
     llpanelplaces.cpp
     llpanelplacessearch.cpp
+    llpanelplacessearchpanel.cpp
     llpanelplacestab.cpp
     llpanelpresetspulldown.cpp
     llpanelprimmediacontrols.cpp
@@ -1073,6 +1074,7 @@ set(viewer_HEADER_FILES
     llpanelplaceprofile.h
     llpanelplaces.h
     llpanelplacessearch.h
+    llpanelplacessearchpanel.h
     llpanelplacestab.h
     llpanelpresetspulldown.h
     llpanelprimmediacontrols.h
