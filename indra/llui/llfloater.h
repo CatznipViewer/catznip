@@ -250,6 +250,9 @@ public:
 	std::string		getTitle() const;
 	void			setShortTitle( const std::string& short_title );
 	std::string		getShortTitle() const;
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	void			setTitleVisible(BOOL visible);
+// [/SL:KB]
 	virtual void	setMinimized(BOOL b);
 	void			moveResizeHandlesToFront();
 	void			addDependentFloater(LLFloater* dependent, BOOL reposition = TRUE);
@@ -268,6 +271,9 @@ public:
 	BOOL			isFirstLook() { return mFirstLook; } // EXT-2653: This function is necessary to prevent overlapping for secondary showed toasts
 	virtual BOOL	isFrontmost();
 	BOOL			isDependent()					{ return !mDependeeHandle.isDead(); }
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	void			setButtonsVisible(bool visible);
+// [/SL:KB]
 	void			setCanMinimize(BOOL can_minimize);
 	void			setCanClose(BOOL can_close);
 	void			setCanTearOff(BOOL can_tear_off);
@@ -484,6 +490,9 @@ private:
 	typedef std::set<LLHandle<LLFloater> >::iterator handle_set_iter_t;
 	handle_set_t	mDependents;
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	bool			mButtonsVisible;
+// [/SL:KB]
 	bool			mButtonsEnabled[BUTTON_COUNT];
 	F32				mButtonScale;
 	BOOL			mAutoFocus;
