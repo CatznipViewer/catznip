@@ -582,6 +582,9 @@ private:
 
 	LLRect				mLastSnapRect;
 	LLRect				mToolbarLeftRect;
+// [SL:KB] - Patch: UI-Toolbars | Checked: 2012-11-08 (Catznip-3.3)
+	LLRect				mToolbarTopRect;
+// [/SL:KB]
 	LLRect				mToolbarBottomRect;
 	LLRect				mToolbarRightRect;
 	LLHandle<LLView>	mSnapView;
