@@ -37,6 +37,10 @@ static const U32 REGION_WIDTH_U32 = 256;
 
 const F32 REGION_HEIGHT_METERS = 4096.f;
 
+// [SL:KB] - Patch: Misc-CoarseLocationUpdate | Checked: 2012-05-20 (Catznip-3.3)
+const F64 COARSEUPDATE_MAX_Z = 1020.0f;
+// [/SL:KB]
+
 const 	F32 	DEFAULT_AGENT_DEPTH 	= 0.45f;
 const 	F32 	DEFAULT_AGENT_WIDTH 	= 0.60f;
 const 	F32 	DEFAULT_AGENT_HEIGHT	= 1.9f;

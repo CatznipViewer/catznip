@@ -3,26 +3,64 @@
      name="menu_group_plus"
      left="0" bottom="0" visible="false"
      mouse_opaque="false">
-  <menu_item_check
-   label="Sort by Most Recent"
-   name="sort_most">
+  <menu
+   label="Show names as"
+   name="People Nearby Names" >
+    <menu_item_check
+       label="Display name"
+       name="name_displayname">
       <menu_item_check.on_click
-       function="People.Recent.ViewSort.Action"
-       parameter="sort_recent" />
+         function="People.Recent.ViewSort.Action"
+         parameter="name_displayname"/>
       <menu_item_check.on_check
-       function="People.Recent.ViewSort.CheckItem"
-       parameter="sort_recent" />
-  </menu_item_check>
-  <menu_item_check
-   label="Sort by Name"
-   name="sort_name">
+         function="People.Recent.ViewSort.CheckItem"
+         parameter="name_displayname"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Full name"
+       name="name_fullname">
       <menu_item_check.on_click
-       function="People.Recent.ViewSort.Action"
-       parameter="sort_name" />
+         function="People.Recent.ViewSort.Action"
+         parameter="name_fullname"/>
       <menu_item_check.on_check
-       function="People.Recent.ViewSort.CheckItem"
-       parameter="sort_name" />
-  </menu_item_check>
+         function="People.Recent.ViewSort.CheckItem"
+         parameter="name_fullname"/>
+    </menu_item_check>
+    <menu_item_check
+       label="Username"
+       name="name_username">
+      <menu_item_check.on_click
+         function="People.Recent.ViewSort.Action"
+         parameter="name_username"/>
+      <menu_item_check.on_check
+         function="People.Recent.ViewSort.CheckItem"
+         parameter="name_username"/>
+    </menu_item_check>
+  </menu>
+    <menu
+     label="Sort by"
+     name="People Friends Sort" >
+    <menu_item_check
+     label="Sort by Most Recent"
+     name="sort_most">
+        <menu_item_check.on_click
+         function="People.Recent.ViewSort.Action"
+         parameter="sort_recent" />
+        <menu_item_check.on_check
+         function="People.Recent.ViewSort.CheckItem"
+         parameter="sort_recent" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Name"
+     name="sort_name">
+        <menu_item_check.on_click
+         function="People.Recent.ViewSort.Action"
+         parameter="sort_name" />
+        <menu_item_check.on_check
+         function="People.Recent.ViewSort.CheckItem"
+         parameter="sort_name" />
+    </menu_item_check>
+  </menu>
   <menu_item_separator layout="topleft" />
   <menu_item_check name="view_icons" label="View People Icons">
     <menu_item_check.on_click
