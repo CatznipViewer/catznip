@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ background_visible="true"
+ follows="all"
+ height="600"
+ layout="topleft"
+ name="panel_target_profile"
+ label="Profile View"
+ left="0"
+ width="343">
+  <string name="status_online">Online</string>
+  <string name="status_offline">Offline</string>
+
+  <text
+   follows="top|left"
+   height="13"
+   layout="topleft"
+   left="15"
+   name="display_name_label"
+   text_color="LtGray"
+   top="10"
+   value="Display Name:"
+   width="80" />
+  <text
+   follows="top|left"
+   height="13"
+   layout="topleft"
+   left="15"
+   name="solo_username_label"
+   text_color="LtGray"
+   top_delta="0"
+   value="Username:"
+   visible="false" 
+   width="80" />
+  <text
+   follows="top|right"
+   halign="right"
+   height="13"
+   layout="topleft"
+   name="status"
+   right="-15"
+   text_color="LtGray_50"
+   top_delta="0"
+   value="Online"
+   width="150" />
+  <text
+   follows="top|left|right"
+   font="SansSerifBigBold"
+   height="28"
+   layout="topleft"
+   left="15"
+   name="user_name_small"
+   right="-40"
+   text_color="LtGray"
+   top="22"
+   value="Jack oh look at me this is a super duper long name"
+   use_ellipses="true"
+   valign="center"
+   word_wrap="true"
+   visible="false" />
+  <text
+   follows="top|left|right"
+   font="SansSerifHugeBold"
+   height="22"
+   layout="topleft"
+   left="15"
+   name="user_name"
+   right="-60"
+   text_color="LtGray"
+   translate="false"
+   top="28"
+   value="TestString PleaseIgnore"
+   visible="true"
+   use_ellipses="true" /> 
+  <flyout_button
+   follows="top|right"
+   height="21"
+   layout="topleft"
+   name="copy_to_clipboard"
+   right="-15"
+   tab_stop="false" 
+   tool_tip="Copy to Clipboard"
+   top_delta="1"
+   width="45"
+   action_button.image_overlay="Copy">
+    <flyout_button.item
+     label="Copy display name"
+     name="displayname"
+     value="displayname" />
+    <flyout_button.item
+     label="Copy full name"
+     name="fullname"
+     value="fullname" />
+    <flyout_button.item
+     label="Copy SLurl"
+     name="slurl"
+     value="slurl" />
+    <flyout_button.item
+     label="Copy avatar UUID"
+     name="uuid"
+     value="uuid" />
+  </flyout_button>
+  <text
+   follows="top|left"
+   height="13"
+   layout="topleft"
+   left="15"
+   name="user_label"
+   text_color="LtGray"
+   top_pad="9"
+   value="Username:"
+   width="70" />
+  <text
+   follows="top|left"
+   font="SansSerifBold"
+   height="13"
+   layout="topleft"
+   left_pad="0"
+   name="user_slid"
+   text_color="EmphasisColor"
+   top_delta="0"
+   translate="false"
+   use_ellipses="true"
+   value="teststring.pleaseignore"
+   width="195" 
+   wrap="true "/>
+  <tab_container
+   follows="all"
+   height="515"
+   halign="center"
+   layout="topleft"
+   left="5"
+   min_width="333"
+   name="tabs"
+   right="-10"
+   tab_min_width="80"
+   tab_height="30"
+   tab_position="top"
+   top_pad="7">
+    <panel
+     class="panel_profile"
+     filename="panel_profile.xml"
+     help_topic="profile_profile_tab"
+     label="PROFILE"
+     layout="topleft"
+     name="panel_profile" />
+    <panel
+     class="panel_picks"
+     filename="panel_picks.xml"
+     help_topic="profile_picks_tab"
+     label="PICKS"
+     layout="topleft"
+     name="panel_picks" />
+    <panel
+     class="panel_notes"
+     filename="panel_notes.xml"
+     help_topic="profile_notes_tab"
+     label="NOTES &amp; PRIVACY"
+     layout="topleft"
+     name="panel_notes" />
+  </tab_container>
+</panel>
