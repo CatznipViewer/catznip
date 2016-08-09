@@ -8,6 +8,7 @@
 	<context_menu label="Şuna ekle" name="wearable_attach_to"/>
 	<context_menu label="BÜG&apos;e Ekle" name="wearable_attach_to_hud"/>
 	<menu_item_call label="Çıkar" name="take_off"/>
+	<menu_item_call label="Dokun" name="touch"/>
 	<menu_item_call label="Düzenle" name="edit"/>
 	<menu_item_call label="Öğe Profili" name="object_profile"/>
 	<menu_item_call label="Orijinali Göster" name="show_original"/>
