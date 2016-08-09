@@ -1,0 +1,22 @@
+[Inventory/MultiAction]
+- added   : LLFolderViewerListener::peformActionBatch() to handle an action for multiple items of the same type
+- added   : <Ctrl> as a wear add modifier (i.e. <Ctrl>+<Enter> adds the selection rather than replacing and similarly with double-click)
+- added   : "DoubleClickAttachmentAdd" and "DoubleClickWearableAdd" to independently override the default "open" action for attachments and wearables
+    -> note that the settings actually affect <Enter>'ing a selection to wear it as well
+    -> <Ctrl> still serves as a modifier
+- added   : "ShowPropertiesFloaters" setting to optionally show item properties in a viewer 1 style (multi-)floater
+- added   : "Wear on Current Outfit" option to the inventory category context menu
+    -> (replace) wears all items in the folder similarly to selecting all items and right-click "Wear"'ing
+
+[Inventory/MultiWear]
+- added   : LLWearableBridge::performActionBatch() wears multiple wearables at once
+    -> fixes some instances of COF "corruption"
+- changed : <Enter>'ing a selection of wearables will wear them if at least one is unworn or remove them if all are worn
+    -> undesired edge case would be a selection of all worn wearables + 1 unworn attachment => attachment will get attached while the wearables are removed
+- fixed   : double-clicking a wearable wears it if it's unworn and removes it if it's worn
+    -> behaviour is made consistent with the double-click behaviour of an attachment
+
+[Inventory/MultiAttach]
+- added   : LLObjectBridge::performActionBatch() attaches multiple selected attachments at once (fixes http://jira.secondlife.com/browse/VWR-5063)
+- changed : <Enter>'ing a selection of attachments will wear them if at least one is unworn or remove them if all are worn
+    -> undesired edge case would be a selection of all worn attachments + 1 unworn wearable => wearable will get worn while the attachments are detached
