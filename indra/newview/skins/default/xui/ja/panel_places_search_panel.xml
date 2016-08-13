@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel name="panel_places_search">
+    <panel name="search_panel">
+        <panel name="bottom_panel">
+		    <button name="gear_btn" tool_tip="オプションを表示します"/>
+		    <button label="テレポート" name="teleport_btn" tool_tip="該当するエリアにテレポートする"/>
+		    <button label="地図" name="map_btn" tool_tip="世界地図に該当するエリアを表示"/>
+		    <button name="profile_btn" tool_tip="場所のプロフィールを表示"/>
+        </panel>
+    </panel>
+</panel>
