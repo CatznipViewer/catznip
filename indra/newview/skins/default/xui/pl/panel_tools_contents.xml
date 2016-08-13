@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="Zawart." name="Contents">
+			<button label="Nowy skrypt" label_selected="Nowy skrypt" name="button new script" />
+			<button label="Prawa" name="button permissions" />
+		</panel>

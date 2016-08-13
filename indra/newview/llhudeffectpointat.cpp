@@ -34,6 +34,9 @@
 #include "llagent.h"
 #include "llagentcamera.h"
 #include "lldrawable.h"
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerobjectlist.h"
 #include "llvoavatar.h"
 #include "message.h"
@@ -251,7 +254,13 @@ BOOL LLHUDEffectPointAt::setPointAt(EPointAtType target_type, LLViewerObject *ob
 	{
 		mLastSentOffsetGlobal = position;
 		setDuration(POINTAT_TIMEOUTS[target_type]);
-		setNeedsSendToSim(TRUE);
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+		if ( (!getOriginatedHere()) || (getSendPointAt()) )
+		{
+			setNeedsSendToSim(TRUE);
+		}
+// [/SL:KB]
+//		setNeedsSendToSim(TRUE);
 //		LL_INFOS() << "Sending pointat data" << LL_ENDL;
 	}
 
@@ -377,10 +386,16 @@ void LLHUDEffectPointAt::update()
 		}
 		else
 		{
-			if (calcTargetPosition())
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+			if ( (calcTargetPosition()) && ((!getOriginatedHere()) || (getSendPointAt())) )
 			{
 				((LLVOAvatar*)(LLViewerObject*)mSourceObject)->startMotion(ANIM_AGENT_EDITING);
 			}
+// [/SL:KB]
+//			if (calcTargetPosition())
+//			{
+//				((LLVOAvatar*)(LLViewerObject*)mSourceObject)->startMotion(ANIM_AGENT_EDITING);
+//			}
 		}
 	}
 }
@@ -459,3 +474,11 @@ const LLVector3d LLHUDEffectPointAt::getPointAtPosGlobal()
 	
 	return global_pos;
 }
+
+// [SL:KB] - Patch: Build-SendPointAt | Checked: 2014-02-02 (Catznip-3.6)
+bool LLHUDEffectPointAt::getSendPointAt()
+{
+	LLCachedControl<bool> sSendPointAt(gSavedSettings, "SendPointAt", true);
+	return sSendPointAt;
+}
+// [/SL:KB]

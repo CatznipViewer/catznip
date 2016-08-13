@@ -1,0 +1,39 @@
+[Build/Tools]
+- added   : "Axis at Root" checkbox to the build floater to position the axis on the first (root) object of the selection
+- added   : axis options floater to change the position of the axis relative to the current prim (or linkset)
+- added   : "SelectCopiableOnly" setting to only (drag-)select objects that are copiable by the user
+    -> this includes copy-for-all and mod-right copiable objects- changed : moved the "Link" and "Unlink" buttons down on the build floater to just above the tab container
+- added   : "Selection Options" floater to the build floater
+- added   : copy/paste buttons to the build floater for position, size, rotation, primitive parameters, texture and colour
+- added   : copy/paste buttons of the different types of texture parameters
+    -> Three possible scenarios (always on a single object):
+        1) copy all texture faces (which may or may not be identical) => pastes the texture data on matching selected faces
+        2) copy one texture face => pastes the texture data on all selected faces
+        3) copy several texture faces => pastes the texture data on matching selected faces
+- added   : pipette pickers for position, size, rotation, prim parameters, texture, colour and texture type params
+- added   : 'Refresh' button to the build tools' 'Contents' panel
+- changed : moved the "Link" and "Unlink" buttons down on the build floater to just above the tab container
+- changed : grid options floater is a dependent of the buid floater
+- changed : clamp the maximum value of texture repeats to 256 (up from 100)
+- changed : partial clean-up of panel_tools_texture.xml mess
+    -> rename "Transparency %" to "Alpha %", reduce width and move to align on the right side
+    -> fixed "Fullbright" being offset on some languages
+    -> gave options consistent LTR-alignment instead of mixed LTR and TTB
+
+[Build/Misc]
+- added   : "RezUnderLandGroup" setting to rez prims under the land group rather than the avatar's active group
+    -> rezzing a prim across parcel borders will rez it with the proper parcel's group
+    -> works when rezzing from inventory, newly rezzed prims and prim duplication
+- added   : "SendPointAt" setting to not send the LLHUDEffectPointAt effect to the region and to prevent playing the arm-pointing edit animation
+- changed : uncommented the "Restore to Last Position" option in the inventory context menu
+    -> added two (ignorable) notifications: one for copyable and one for non-copyable objects to prevent accidental usage
+- fixed   : "Edit" and "Build" should not be mutually exclusive on the object context menu
+- fixed   : enable "Build" on the land context menu only if the user has build permissions for the parcel
+- fixed   : enable "Build" on the object context menu only if the user has build permissions for the parcel the object resides on
+
+[Build/DragNDrop]
+- added : drag-and-drop uploading of textures WIP
+    -> Windows-only at the moment
+    -> actual uploading depends on another patch so will be tied up in the release branch instead
+    -> currently only supposed textures but would ideally support more file types
+- added : drag-and-drop textures directly onto a prim face (using local textures as the backing store)

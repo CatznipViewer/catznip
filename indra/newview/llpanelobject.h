@@ -30,6 +30,9 @@
 #include "v3math.h"
 #include "llpanel.h"
 #include "llpointer.h"
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 #include "llvolume.h"
 
 class LLSpinCtrl;
@@ -75,6 +78,15 @@ public:
 	BOOL     		onDropSculpt(LLInventoryItem* item);
 	static void     onCommitSculptType(    LLUICtrl *ctrl, void* userdata);
 
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	void			onClickPipette(LLToolPipette::EType type);
+	void			onSelectPipette(LLToolPipette::EType type, LLViewerObject* pObj);
+
+	void			onClickBtnCopyParams(const LLSD& sdParam);
+	void			onClickBtnPasteParams(const LLSD& sdParam);
+	static LLSD		objectToLLSD(const std::string& strParamType, const LLViewerObject* pObj);
+	       void		objectFromLLSD(const std::string& strParamType, const LLSD& sdParams);
+// [/SL:KB]
 protected:
 	void			getState();
 
@@ -91,6 +103,11 @@ protected:
 	
 protected:
 	// Per-object options
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-23 (Catznip-3.1)
+	LLButton*		mBtnCopyPrimParams;
+	LLButton*		mBtnPastePrimParams;
+	LLButton*		mBtnPipettePrimParams;
+// [/SL:KB]
 	LLComboBox*		mComboBaseType;
 
 	LLTextBox*		mLabelCut;
@@ -132,17 +149,32 @@ protected:
 	LLSpinCtrl*		mSpinRevolutions;
 
 	LLTextBox*		mLabelPosition;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	LLButton*		mBtnCopyPosition;
+	LLButton*		mBtnPastePosition;
+	LLButton*		mBtnPipettePosition;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlPosX;
 	LLSpinCtrl*		mCtrlPosY;
 	LLSpinCtrl*		mCtrlPosZ;
 
 	LLTextBox*		mLabelSize;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	LLButton*		mBtnCopySize;
+	LLButton*		mBtnPasteSize;
+	LLButton*		mBtnPipetteSize;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlScaleX;
 	LLSpinCtrl*		mCtrlScaleY;
 	LLSpinCtrl*		mCtrlScaleZ;
 	BOOL			mSizeChanged;
 
 	LLTextBox*		mLabelRotation;
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	LLButton*		mBtnCopyRotation;
+	LLButton*		mBtnPasteRotation;
+	LLButton*		mBtnPipetteRotation;
+// [/SL:KB]
 	LLSpinCtrl*		mCtrlRotX;
 	LLSpinCtrl*		mCtrlRotY;
 	LLSpinCtrl*		mCtrlRotZ;
@@ -163,6 +195,9 @@ protected:
 	BOOL			mIsTemporary;			// to avoid sending "temporary" when not changed
 	BOOL			mIsPhantom;				// to avoid sending "phantom" when not changed
 	S32				mSelectedType;			// So we know what selected type we last were
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+	LLSD			mObjectClipboard;
+// [/SL:KB]
 
 	LLUUID          mSculptTextureRevert;   // so we can revert the sculpt texture on cancel
 	U8              mSculptTypeRevert;      // so we can revert the sculpt type on cancel
