@@ -41,7 +41,11 @@ public:
 	{
 		MP_TOP_LEFT,
 		MP_TOP_RIGHT,
-		MP_BOTTOM_LEFT
+// [SL:KB] - Patch: Control-MenuButton | Checked: 2014-03-16 (Catznip-3.6)
+		MP_BOTTOM_LEFT,
+		MP_BOTTOM_RIGHT
+// [/SL:KB]
+//		MP_BOTTOM_LEFT
 	} EMenuPosition;
 
 	struct MenuPositions
