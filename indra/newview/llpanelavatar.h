@@ -100,9 +100,143 @@ protected:
 
 	virtual void updateButtons();
 
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2013-08-26 (Catznip-3.6)
+	typedef boost::function<void (const LLUUID&)> functor_t;
+
+	void onAvatarAction(functor_t functor);
+	bool onEnableAddFriend();
+	bool onEnableRemoveFriend();
+	bool onEnableShowOnMap();
+	bool onEnableBlock();
+	bool onEnableUnblock();
+// [/SL:KB]
+
 private:
 
 	LLUUID mAvatarId;
 };
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
+/**
+ * Panel for displaying Avatar's first and second life related info.
+ */
+class LLPanelAvatarProfile
+	: public LLPanelProfileTab
+	, public LLFriendObserver
+	, public LLVoiceClientStatusObserver
+{
+public:
+	LLPanelAvatarProfile();
+	/*virtual*/ ~LLPanelAvatarProfile();
+
+	/*virtual*/ BOOL postBuild();
+	/*virtual*/ void onOpen(const LLSD& key);
+
+	/**
+	 * LLFriendObserver trigger
+	 */
+	virtual void changed(U32 mask);
+
+	// Implements LLVoiceClientStatusObserver::onChange() to enable the call
+	// button when voice is available
+	/*virtual*/ void onChange(EStatusType status, const std::string &channelURI, bool proximal);
+
+	/*virtual*/ void setAvatarId(const LLUUID& id);
+
+	/**
+	 * Processes data received from server.
+	 */
+	/*virtual*/ void processProperties(void* data, EAvatarProcessorType type);
+
+	/*virtual*/ void updateData();
+
+	/*virtual*/ void resetControls();
+
+	/*virtual*/ void resetData();
+
+protected:
+	/**
+	 * Process profile related data received from server.
+	 */
+	virtual void processProfileProperties(const LLAvatarData* avatar_data);
+
+	/**
+	 * Processes group related data received from server.
+	 */
+	virtual void processGroupProperties(const LLAvatarGroups* avatar_groups);
+
+	/**
+	 * Fills common for Avatar profile and My Profile fields.
+	 */
+	virtual void fillCommonData(const LLAvatarData* avatar_data);
+
+	/**
+	 * Fills partner data.
+	 */
+	virtual void fillPartnerData(const LLAvatarData* avatar_data);
+
+	/**
+	 * Fills account status.
+	 */
+	virtual void fillAccountStatus(const LLAvatarData* avatar_data);
+
+private:
+	typedef std::map< std::string,LLUUID>	group_map_t;
+	group_map_t 			mGroups;
+};
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2012-01-01 (Catznip-3.2)
+/**
+ * Panel for displaying Avatar's notes and modifying friend's rights.
+ */
+class LLPanelAvatarNotes 
+	: public LLPanelProfileTab
+	, public LLFriendObserver
+	, public LLVoiceClientStatusObserver
+{
+public:
+	LLPanelAvatarNotes();
+	/*virtual*/ ~LLPanelAvatarNotes();
+
+	virtual void setAvatarId(const LLUUID& id);
+
+	/** 
+	 * LLFriendObserver trigger
+	 */
+	virtual void changed(U32 mask);
+
+	// Implements LLVoiceClientStatusObserver::onChange() to enable the call
+	// button when voice is available
+	/*virtual*/ void onChange(EStatusType status, const std::string &channelURI, bool proximal);
+
+	/*virtual*/ void onOpen(const LLSD& key);
+
+	/*virtual*/ BOOL postBuild();
+
+	/*virtual*/ void processProperties(void* data, EAvatarProcessorType type);
+
+	/*virtual*/ void updateData();
+
+protected:
+
+	/*virtual*/ void resetControls();
+
+	/*virtual*/ void resetData();
+
+	/**
+	 * Fills rights data for friends.
+	 */
+	void fillRightsData();
+
+	void rightsConfirmationCallback(const LLSD& notification,
+			const LLSD& response, S32 rights);
+	void confirmModifyRights(bool grant, S32 rights);
+	void onCommitRights();
+	void onCommitNotes();
+
+	void enableCheckboxes(bool enable);
+};
+// [/SL:KB]
 
 #endif // LL_LLPANELAVATAR_H
