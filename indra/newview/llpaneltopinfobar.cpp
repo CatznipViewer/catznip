@@ -454,14 +454,20 @@ void LLPanelTopInfoBar::onContextMenuItemClicked(const LLSD::String& item)
 	{
 		LLViewerInventoryItem* landmark = LLLandmarkActions::findLandmarkForAgentPos();
 
-		if(landmark == NULL)
-		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
-		}
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+		if (landmark == NULL)
+			LLLandmarkActions::showCreateLandmark();
 		else
-		{
-			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
-		}
+			LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//		if(landmark == NULL)
+//		{
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+//		}
+//		else
+//		{
+//			LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
+//		}
 	}
 	else if (item == "copy")
 	{

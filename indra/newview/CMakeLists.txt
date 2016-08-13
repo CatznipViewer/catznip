@@ -265,6 +265,7 @@ set(viewer_SOURCE_FILES
     llfloaternotificationstabbed.cpp 
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
+    llfloaterparcelinfo.cpp
     llfloaterpathfindingcharacters.cpp
     llfloaterpathfindingconsole.cpp
     llfloaterpathfindinglinksets.cpp
@@ -449,6 +450,7 @@ set(viewer_SOURCE_FILES
     llpanelonlinestatus.cpp
     llpaneloutfitedit.cpp
     llpaneloutfitsinventory.cpp
+    llpanelparcelinfo.cpp
     llpanelpeople.cpp
     llpanelpeoplemenus.cpp
     llpanelpermissions.cpp
@@ -881,6 +883,7 @@ set(viewer_HEADER_FILES
     llfloaternotificationstabbed.h 
     llfloaterobjectweights.h
     llfloateropenobject.h
+    llfloaterparcelinfo.h
     llfloaterpathfindingcharacters.h
     llfloaterpathfindingconsole.h
     llfloaterpathfindinglinksets.h
@@ -1059,6 +1062,7 @@ set(viewer_HEADER_FILES
     llpanelpeople.h
     llpanelpeoplemenus.h
     llpanelpermissions.h
+    llpanelparcelinfo.h
     llpanelpick.h
     llpanelpicks.h
     llpanelplaceinfo.h
