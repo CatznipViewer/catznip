@@ -254,8 +254,8 @@
 	             label="Set Default Upload Permissions"
 	             name="perm prefs">
 	                <menu_item_call.on_click
-	                 function="Floater.Toggle"
-	                 parameter="perm_prefs" />
+	                 function="Floater.ToggleOrBringToFront"
+	                 parameter="perms_default" />
 	            </menu_item_call>
             </menu>
 
