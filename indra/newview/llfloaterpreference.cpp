@@ -209,6 +209,12 @@ void handleDisplayNamesOptionChanged(const LLSD& newvalue);
 bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response);
 bool callback_clear_cache(const LLSD& notification, const LLSD& response);
 
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+void initEditorFont(LLUICtrl* pCtrl);
+void refreshEditorFont(LLHandle<LLUICtrl> hCtrl);
+void handleEditorFontToggle(LLUICtrl* pCheckCtrl);
+// [/SL:KB]
+
 //bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater);
 //bool callback_reset_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater);
 
@@ -322,7 +328,7 @@ void fractionFromDecimal(F32 decimal_val, S32& numerator, S32& denominator)
 	}
 }
 // static
-std::string LLFloaterPreference::sSkin = "";
+//std::string LLFloaterPreference::sSkin = "";
 //////////////////////////////////////////////
 // LLFloaterPreference
 
@@ -352,8 +358,8 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.SetCache",				boost::bind(&LLFloaterPreference::onClickSetCache, this));
 	mCommitCallbackRegistrar.add("Pref.ResetCache",				boost::bind(&LLFloaterPreference::onClickResetCache, this));
-	mCommitCallbackRegistrar.add("Pref.ClickSkin",				boost::bind(&LLFloaterPreference::onClickSkin, this,_1, _2));
-	mCommitCallbackRegistrar.add("Pref.SelectSkin",				boost::bind(&LLFloaterPreference::onSelectSkin, this));
+//	mCommitCallbackRegistrar.add("Pref.ClickSkin",				boost::bind(&LLFloaterPreference::onClickSkin, this,_1, _2));
+//	mCommitCallbackRegistrar.add("Pref.SelectSkin",				boost::bind(&LLFloaterPreference::onSelectSkin, this));
 	mCommitCallbackRegistrar.add("Pref.VoiceSetKey",			boost::bind(&LLFloaterPreference::onClickSetKey, this));
 	mCommitCallbackRegistrar.add("Pref.VoiceSetMiddleMouse",	boost::bind(&LLFloaterPreference::onClickSetMiddleMouse, this));
 	mCommitCallbackRegistrar.add("Pref.SetSounds",				boost::bind(&LLFloaterPreference::onClickSetSounds, this));
@@ -377,8 +383,12 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.PermsDefault",           boost::bind(&LLFloaterPreference::onClickPermsDefault, this));
 	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 	mCommitCallbackRegistrar.add("Pref.Advanced",				boost::bind(&LLFloaterPreference::onClickAdvanced, this));
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+	mCommitCallbackRegistrar.add("Pref.InitEditorFont",			boost::bind(&initEditorFont, _1));
+	mCommitCallbackRegistrar.add("Pref.ToggleEditorFont",		boost::bind(&handleEditorFontToggle, _1));
+// [/SL:KB]
 
-	sSkin = gSavedSettings.getString("SkinCurrent");
+//	sSkin = gSavedSettings.getString("SkinCurrent");
 
 	mCommitCallbackRegistrar.add("Pref.ClickActionChange",		boost::bind(&LLFloaterPreference::onClickActionChange, this));
 
@@ -563,11 +573,13 @@ void LLFloaterPreference::apply()
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
 	
 	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-	if (sSkin != gSavedSettings.getString("SkinCurrent"))
-	{
-		LLNotificationsUtil::add("ChangeSkin");
-		refreshSkin(this);
-	}
+
+//	if (sSkin != gSavedSettings.getString("SkinCurrent"))
+//	{
+//		LLNotificationsUtil::add("ChangeSkin");
+//		refreshSkin(this);
+//	}
+
 	// Call apply() on all panels that derive from LLPanelPreference
 	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
 		 iter != tabcontainer->getChildList()->end(); ++iter)
@@ -658,7 +670,7 @@ void LLFloaterPreference::cancel()
 	LLFloaterReg::hideInstance("prefs_graphics_advanced");
 	
 	// reverts any changes to current skin
-	gSavedSettings.setString("SkinCurrent", sSkin);
+//	gSavedSettings.setString("SkinCurrent", sSkin);
 
 	if (mClickActionDirty)
 	{
@@ -1121,24 +1133,24 @@ void LLFloaterPreference::onClickResetCache()
 	gSavedSettings.setString("CacheLocationTopFolder", top_folder);
 }
 
-void LLFloaterPreference::onClickSkin(LLUICtrl* ctrl, const LLSD& userdata)
-{
-	gSavedSettings.setString("SkinCurrent", userdata.asString());
-	ctrl->setValue(userdata.asString());
-}
-
-void LLFloaterPreference::onSelectSkin()
-{
-	std::string skin_selection = getChild<LLRadioGroup>("skin_selection")->getValue().asString();
-	gSavedSettings.setString("SkinCurrent", skin_selection);
-}
-
-void LLFloaterPreference::refreshSkin(void* data)
-{
-	LLPanel*self = (LLPanel*)data;
-	sSkin = gSavedSettings.getString("SkinCurrent");
-	self->getChild<LLRadioGroup>("skin_selection", true)->setValue(sSkin);
-}
+//void LLFloaterPreference::onClickSkin(LLUICtrl* ctrl, const LLSD& userdata)
+//{
+//	gSavedSettings.setString("SkinCurrent", userdata.asString());
+//	ctrl->setValue(userdata.asString());
+//}
+//
+//void LLFloaterPreference::onSelectSkin()
+//{
+//	std::string skin_selection = getChild<LLRadioGroup>("skin_selection")->getValue().asString();
+//	gSavedSettings.setString("SkinCurrent", skin_selection);
+//}
+//
+//void LLFloaterPreference::refreshSkin(void* data)
+//{
+//	LLPanel*self = (LLPanel*)data;
+//	sSkin = gSavedSettings.getString("SkinCurrent");
+//	self->getChild<LLRadioGroup>("skin_selection", true)->setValue(sSkin);
+//}
 
 void LLFloaterPreference::buildPopupLists()
 {
@@ -2133,6 +2145,72 @@ void LLFloaterPreference::saveGraphicsPreset(std::string& preset)
 	mSavedGraphicsPreset = preset;
 }
 
+// [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
+void initEditorFont(LLUICtrl* pCtrl)
+{
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+	if ( (pControl) && (pCtrl) )
+	{
+		// This should be safe since the preferences floater is single instance and isn't destroyed until the viewer is shutting down
+		LLHandle<LLUICtrl> hCtrl = pCtrl->getHandle();
+		pControl->getSignal()->connect(boost::bind(&refreshEditorFont, hCtrl));
+		refreshEditorFont(hCtrl);
+	}
+}
+
+void refreshEditorFont(LLHandle<LLUICtrl> hCtrl)
+{
+	if (hCtrl.isDead())
+		return;
+
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+
+	LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(hCtrl.get());
+	if (pCheckCtrl)
+	{
+		pCheckCtrl->set(!pControl->isDefault());
+	}
+
+	LLComboBox* pComboCtrl = dynamic_cast<LLComboBox*>(hCtrl.get());
+	if (pComboCtrl)
+	{
+		if (pControl->isDefault())
+		{
+			pComboCtrl->setEnabled(false);
+			pComboCtrl->clear();
+		}
+		else
+		{
+			pComboCtrl->setEnabled(true);
+		}
+	}
+}
+
+void handleEditorFontToggle(LLUICtrl* pCheckCtrl)
+{
+	LLControlVariable* pControl = gSavedSettings.getControl("FontOverrideEditor");
+
+	LLComboBox* pEditorCombo = pCheckCtrl->getParent()->findChild<LLComboBox>("font_editor_combo");
+	if (!pCheckCtrl->getValue().asBoolean())
+	{
+		// When unchecked, revert to default (= use FontOverrideMain)
+		pEditorCombo->setEnabled(false);
+		pEditorCombo->clear();
+		pControl->resetToDefault(true);
+	}
+	else
+	{
+		// When checked, use the current FontOverrideMain setting as a starting point
+		pEditorCombo->setEnabled(true);
+		std::string strValue = gSavedSettings.getString("FontOverrideMain");
+		LLStringUtil::replaceString(strValue, "main", "editor");
+		if (!pEditorCombo->setSelectedByValue(strValue, TRUE))
+			pEditorCombo->selectFirstItem();
+		pEditorCombo->onCommit();
+	}
+}
+// [/SL:KB]
+
 //------------------------------Updater---------------------------------------
 
 static bool handleBandwidthChanged(const LLSD& newvalue)
@@ -2216,18 +2294,18 @@ BOOL LLPanelPreference::postBuild()
 	
 	//////////////////////PanelSkins ///////////////////
 	
-	if (hasChild("skin_selection", TRUE))
-	{
-		LLFloaterPreference::refreshSkin(this);
-
-		// if skin is set to a skin that no longer exists (silver) set back to default
-		if (getChild<LLRadioGroup>("skin_selection")->getSelectedIndex() < 0)
-		{
-			gSavedSettings.setString("SkinCurrent", "default");
-			LLFloaterPreference::refreshSkin(this);
-		}
-
-	}
+//	if (hasChild("skin_selection", TRUE))
+//	{
+//		LLFloaterPreference::refreshSkin(this);
+//
+//		// if skin is set to a skin that no longer exists (silver) set back to default
+//		if (getChild<LLRadioGroup>("skin_selection")->getSelectedIndex() < 0)
+//		{
+//			gSavedSettings.setString("SkinCurrent", "default");
+//			LLFloaterPreference::refreshSkin(this);
+//		}
+//
+//	}
 
 	//////////////////////PanelPrivacy ///////////////////
 	if (hasChild("media_enabled", TRUE))
@@ -2865,3 +2943,134 @@ void LLFloaterPreferenceProxy::onChangeSocksSettings()
 
 }
 
+// [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-21 (Catznip-2.2)
+static LLPanelInjector<LLPanelPreferenceSkins> t_pref_skins("panel_preference_skins");
+
+LLPanelPreferenceSkins::LLPanelPreferenceSkins()
+	: LLPanelPreference()
+	, m_pSkinCombo(NULL)
+	, m_pSkinThemeCombo(NULL)
+{
+	m_Skin = gSavedSettings.getString("SkinCurrent");
+	m_SkinTheme = gSavedSettings.getString("SkinCurrentTheme");
+
+	const std::string strSkinsPath = gDirUtilp->getSkinBaseDir() + gDirUtilp->getDirDelimiter() + "skins.xml";
+	llifstream fileSkins(strSkinsPath, std::ios::binary);
+	if (fileSkins.is_open())
+	{
+		LLSDSerialize::fromXMLDocument(m_SkinsInfo, fileSkins);
+	}
+}
+
+BOOL LLPanelPreferenceSkins::postBuild()
+{
+	m_pSkinCombo = getChild<LLComboBox>("skin_combobox");
+	if (m_pSkinCombo)
+	{
+		m_pSkinCombo->setCommitCallback(boost::bind(&LLPanelPreferenceSkins::onSkinChanged, this));
+	}
+
+	m_pSkinThemeCombo = getChild<LLComboBox>("theme_combobox");
+	if (m_pSkinThemeCombo)
+	{
+		m_pSkinThemeCombo->setCommitCallback(boost::bind(&LLPanelPreferenceSkins::onSkinThemeChanged, this));
+	}
+
+	refreshSkinList();
+
+	return LLPanelPreference::postBuild();
+}
+
+void LLPanelPreferenceSkins::apply()
+{
+	if ( (m_Skin != gSavedSettings.getString("SkinCurrent")) || (m_SkinTheme != gSavedSettings.getString("SkinCurrentTheme")) )
+	{
+		gSavedSettings.setString("SkinCurrent", m_Skin);
+		gSavedSettings.setString("SkinCurrentTheme", m_SkinTheme);
+
+		LLNotificationsUtil::add("ChangeSkin");
+	}
+}
+
+void LLPanelPreferenceSkins::cancel()
+{
+	m_Skin = gSavedSettings.getString("SkinCurrent");
+	m_SkinTheme = gSavedSettings.getString("SkinCurrentTheme");
+	refreshSkinList();
+}
+
+void LLPanelPreferenceSkins::onSkinChanged()
+{
+	m_Skin = (m_pSkinCombo) ? m_pSkinCombo->getSelectedValue().asString() : "default";
+	refreshSkinThemeList();
+	m_SkinTheme = (m_pSkinThemeCombo) ? m_pSkinThemeCombo->getSelectedValue().asString() : "";
+}
+
+void LLPanelPreferenceSkins::onSkinThemeChanged()
+{
+	m_SkinTheme = (m_pSkinThemeCombo) ? m_pSkinThemeCombo->getSelectedValue().asString() : "";
+}
+
+void LLPanelPreferenceSkins::refreshSkinList()
+{
+	if (!m_pSkinCombo)
+		return;
+
+	m_pSkinCombo->clearRows();
+	for (LLSD::array_const_iterator itSkinInfo = m_SkinsInfo.beginArray(), endSkinInfo = m_SkinsInfo.endArray();
+			itSkinInfo != endSkinInfo; ++itSkinInfo)
+	{
+		const LLSD& sdSkin = *itSkinInfo;
+		std::string strPath = gDirUtilp->getSkinBaseDir();
+		gDirUtilp->append(strPath, sdSkin["folder"].asString());
+		if (gDirUtilp->fileExists(strPath))
+		{
+			m_pSkinCombo->add(sdSkin["name"].asString(), sdSkin["folder"]);
+		}
+	}
+
+	BOOL fFound = m_pSkinCombo->setSelectedByValue(m_Skin, TRUE);
+	if (!fFound)
+	{
+		m_pSkinCombo->setSelectedByValue("default", TRUE);
+	}
+
+	refreshSkinThemeList();
+}
+
+void LLPanelPreferenceSkins::refreshSkinThemeList()
+{
+	if (!m_pSkinThemeCombo)
+		return;
+
+	m_pSkinThemeCombo->clearRows();
+	for (LLSD::array_const_iterator itSkinInfo = m_SkinsInfo.beginArray(), endSkinInfo = m_SkinsInfo.endArray(); 
+			itSkinInfo != endSkinInfo; ++itSkinInfo)
+	{
+		const LLSD& sdSkin = *itSkinInfo;
+		if (sdSkin["folder"].asString() == m_Skin)
+		{
+			const LLSD& sdThemes = sdSkin["themes"];
+			for (LLSD::array_const_iterator itTheme = sdThemes.beginArray(), endTheme = sdThemes.endArray(); itTheme != endTheme; ++itTheme)
+			{
+				const LLSD& sdTheme = *itTheme;
+				std::string strPath = gDirUtilp->getSkinBaseDir();
+				gDirUtilp->append(strPath, sdSkin["folder"].asString());
+				gDirUtilp->append(strPath, "themes");
+				gDirUtilp->append(strPath, sdTheme["folder"].asString());
+				if ( (gDirUtilp->fileExists(strPath)) || (sdTheme["folder"].asString().empty()) )
+				{
+					m_pSkinThemeCombo->add(sdTheme["name"].asString(), sdTheme["folder"]);
+				}
+			}
+			break;
+		}
+	}
+
+	BOOL fFound = m_pSkinThemeCombo->setSelectedByValue(m_SkinTheme, TRUE);
+	if (!fFound)
+	{
+		m_pSkinThemeCombo->selectFirstItem();
+	}
+}
+// [/SL:KB]

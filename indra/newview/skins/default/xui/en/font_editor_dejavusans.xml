@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<fonts>
+  <font name="EditorFont">
+    <file>DejaVuSans.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="BOLD">
+    <file>DejaVuSans-Bold.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="ITALIC">
+    <file>DejaVuSans-Oblique.ttf</file>
+  </font>
+
+  <font name="EditorFont" font_style="BOLD|ITALIC">
+    <file>DejaVuSans-BoldOblique.ttf</file>
+  </font>
+
+  <font_size name="Large" font="EditorFont" size="10.6" />
+  <font_size name="Medium" font="EditorFont" size="8.6" />
+  <font_size name="Small" font="EditorFont" size="7.6" />
+</fonts>

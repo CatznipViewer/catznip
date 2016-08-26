@@ -1810,6 +1810,21 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	// Init font system, but don't actually load the fonts yet
 	// because our window isn't onscreen and they take several
 	// seconds to parse.
+// [SL:KB] - Patch: UI-Font | Checked: 2012-09-27 (Catznip-3.3)
+	std::vector<std::string> font_files(1, "fonts.xml");
+	std::string strFontOverride = gSavedSettings.getString("FontOverrideMain");
+	if (!strFontOverride.empty())
+		font_files.push_back(strFontOverride);
+	strFontOverride = gSavedSettings.getString("FontOverrideMonospace");
+	if (!strFontOverride.empty())
+		font_files.push_back(strFontOverride);
+	strFontOverride = gSavedSettings.getString("FontOverrideEditor");
+	LLFontGL::setUseEditorFont(!strFontOverride.empty());
+	if (!strFontOverride.empty())
+		font_files.push_back(strFontOverride);
+	LLFontGL::setFontFiles(font_files);
+// [/SL:KB]
+
 	LLFontGL::initClass( gSavedSettings.getF32("FontScreenDPI"),
 								mDisplayScale.mV[VX],
 								mDisplayScale.mV[VY],

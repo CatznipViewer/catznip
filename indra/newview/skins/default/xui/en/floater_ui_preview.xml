@@ -2,10 +2,10 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="640"
+ height="310"
  layout="topleft"
- min_height="230"
- min_width="750"
+ min_height="130"
+ min_width="430"
  name="gui_preview_tool"
  help_topic="gui_preview_tool"
  single_instance="true"
@@ -30,23 +30,22 @@ or specifying its path in the "Editor Path" field.</string>
          type="string"
          length="1"
          follows="top|left"
-         font="SansSerif"
-         height="30"
+         height="20"
          layout="topleft"
          left="10"
          name="select_language_label"
-         top="25"
-         width="130">
-            Primary Language:
+         top="18"
+         width="50">
+            Primary:
         </text>
         <combo_box
          follows="top|left"
          height="20"
          layout="topleft"
-         left_pad="5"
+         left_pad="0"
          name="language_select_combo"
          top_delta="0"
-         width="55">
+         width="50">
             <combo_box.item
              label="en"
              name="item1"
@@ -54,94 +53,92 @@ or specifying its path in the "Editor Path" field.</string>
         </combo_box>
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Show"
          label_selected="Show"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="display_floater"
          tool_tip="Display the XUI floater defined by the selected XML file"
-         top_delta="-2"
-         width="95" />
+         top_delta="0"
+         width="50" />
         <button
          enabled="false"
          follows="left|top"
-         height="25"
+         height="20"
          label="Hide"
          label_selected="Hide"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="close_displayed_floater"
          tool_tip="Closes the currently-displayed floater, if one exists"
          top_delta="0"
-         width="85" />
+         width="50" />
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Edit..."
          label_selected="Edit..."
          layout="topleft"
-         left_pad="10"
+         left_pad="0"
          name="edit_floater"
          tool_tip="Edit the XUI floater defined by the selected XML file (opens external editor).  Opens en version if no localized version exists."
          top_delta="0"
-         width="95" />
+         width="50" />
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Save"
          label_selected="Save"
          layout="topleft"
-         left_pad="5"
+         left_pad="0"
          name="save_floater"
          tool_tip="Save the XUI floater defined by the selected XML file"
          top_delta="0"
-         width="85" />
+         width="50" />
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Save All"
          label_selected="Save All"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="save_all_floaters"
          tool_tip="Save all XUI floaters defined by the selected language"
          top_delta="0"
-         width="85" />
-        <button
-         follows="right|top"
-         height="25"
+         width="55" />
+<!--        <button
+         follows="left|top"
+         height="20"
          is_toggle="true"
-         label="&gt; &gt;"
-         label_selected="&lt; &lt;"
+         label="&gt;&gt;"
+         label_selected="&lt;&lt;"
          layout="topleft"
-         left_pad="15"
+         left_pad="1"
          name="toggle_overlap_panel"
          tool_tip="Toggle highlighting and display panel for overlapping elements; right-click an element to select it for this feature.  The selected element is marked by a red rectangle."
          top_delta="0"
-         width="30" />
+         width="50" /> -->
         <text
          type="string"
          length="1"
          follows="top|left"
-         font="SansSerif"
-         height="30"
+         height="20"
          layout="topleft"
          left="10"
          name="select_language_label_2"
-         right="-50"
-         top="53"
-         width="105">
-            Secondary Language:
+         top="38"
+         width="50">
+            Sec.. :
         </text>
         <combo_box
          follows="top|left"
          height="20"
          layout="topleft"
-         left_delta="135"
+         left_pad="0"
          name="language_select_combo_2"
          top_delta="0"
-         width="55">
+         width="50">
             <combo_box.item
              label="en"
              name="item1"
@@ -149,70 +146,71 @@ or specifying its path in the "Editor Path" field.</string>
         </combo_box>
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Show"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="display_floater_2"
          tool_tip="Display the XUI floater defined by the selected XML file"
-         top_delta="-2"
-         width="95" />
+         top_delta="0"
+         width="50" />
         <button
          enabled="false"
          follows="left|top"
-         height="25"
+         height="20"
          label="Hide"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="close_displayed_floater_2"
          tool_tip="Closes the currently-displayed floater, if one exists"
          top_delta="0"
-         width="85" />
+         width="50" />
         <button
          follows="left|top"
-         height="25"
+         height="20"
          label="Export Schema"
          layout="topleft"
-         left_pad="10"
+         left_pad="1"
          name="export_schema"
          top_delta="0"
-         width="120" />
+         width="100" />
         <check_box
           follows="left|top"
-          label="Show Rectangles"
+          label="Show Rect.."
           name="show_rectangles"
-          left_pad="10"
+          left_pad="5"
           top_delta="0"
-          height="25"
-          width="120" />
+          height="20"
+          width="100" />
       
         <scroll_list
-         bottom="525"
+         bottom="300"
          column_padding="0"
          draw_heading="true"
          draw_stripes="false"
          follows="left|top|bottom|right"
          label="Name"
          layout="topleft"
-         left="10"
+         left="7"
          name="name_list"
-         right="-10"
+         right="-7"
          tab_group="1"
          search_column="1"
-         top="80">
+         top="60">
             <scroll_list.columns
              label="Title"
              name="title_column"
-             width="150" />
+             width="120" />
             <scroll_list.columns
              label="File"
              name="file_column"
-             width="150" />
+             width="120" />
             <scroll_list.columns
              dynamic_width="true"
              label="Top-Level Node"
              name="top_level_node_column" />
         </scroll_list>
+<!--
         <panel
          bevel_style="in"
          bg_alpha_color="0 0 0 0"
@@ -358,9 +356,10 @@ or specifying its path in the "Editor Path" field.</string>
              width="110" />
         </panel>
     </panel>
+    
     <scroll_container
      follows="top|right|bottom"
-     height="600"
+     height="310"
      layout="topleft"
      left="750"
      name="overlap_scroll"
@@ -408,4 +407,6 @@ or specifying its path in the "Editor Path" field.</string>
         </text>
       </panel>
     </scroll_container>
+    -->
+  </panel>
 </floater>

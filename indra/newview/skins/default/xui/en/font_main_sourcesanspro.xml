@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<fonts>
+  <font name="default">
+    <file>SourceSansPro.ttf</file>
+  </font>
+
+  <font name="SansSerifBold">
+    <file>SourceSansPro-Bold.ttf</file>
+  </font>
+
+  <font name="SansSerif">
+    <file>SourceSansPro.ttf</file>
+  </font>
+
+  <font name="SansSerif" font_style="BOLD">
+    <file>SourceSansPro-Bold.ttf</file>
+  </font>
+
+  <font name="SansSerif" font_style="ITALIC">
+    <file>SourceSansPro-Italic.ttf</file>
+  </font>
+
+  <font name="SansSerif" font_style="BOLD|ITALIC">
+    <file>SourceSansPro-BoldItalic.ttf</file>
+  </font>
+
+  <font name="OverrideTest">
+    <file>SourceSansPro.ttf</file>
+  </font>
+
+  <font_size name="Huge" size="16.0" />
+  <font_size name="Large" size="11.6" />
+  <font_size name="Medium" size="9.6" />
+  <font_size name="Small" size="8.6" />
+</fonts>
