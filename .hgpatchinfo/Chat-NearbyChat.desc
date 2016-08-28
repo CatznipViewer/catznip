@@ -1,0 +1,28 @@
+[Chat/NearbyChat]
+- added   : nearby chat/IM session context menu to both the chat history and the chat entry controls
+    -> "Show Blocked Chat" (toggles "ShowBlockedChat" below)
+    -> "Font Size" allows switching between the various font chat sizes without going through preferences
+- added   : "CloseChatOnEmptyReturn" and "CloseIMOnEmptyReturn" debug settings to close nearby chat or an IM session after an empty return
+- added   : "ShowBlockedChat" debug setting to view blocked nearby chat
+    -> muted nearby chat won't spawn a nearby chat toast
+    -> muted nearby chat will appear in the chat history with 50% gray as a colour to visually distinguish it
+    -> the setting only takes effect at the moment it was flipped and will not show previously blocked chat
+- added   : "NearbyToastOffset" debug setting to specify the distance between the bottom of the screen and the bottom toast
+    -> Catznip default is 10px ; LL default is 80px
+- changed : re-add the nearby chat floater as the very first tab when using a legacy tabbed IM container
+- changed : don't allow the nearby chat tab to be drag-rearranged
+- changed : only show nearby chat toasts if the nearby chat floater is not currently visible, is minimized, or the message pane is collapsed
+- changed : behaviour of arrow keys when focus is on the conversations container, nearby chat or IM conversation
+    -> CHUI default: arrow keys never move unless "ArrowKeysAlwaysMove" is set to TRUE
+    -> additionally: arrow keys move the avatar if focus is on a conversation floater and no text has been entered (legacy behaviour)
+- changed : show the user's own name in nearby chat and IMs rather than showing "(You)"
+
+[Control/LineEditor]
+- changed : separated the default context menu from a custom context menu for a line editor control
+    -> if setContextMenu() isn't called the default menu in "menu_text_editor.xml" will be used
+    -> if a custom menu has been specified then the default menu will override it if spell checking is enabled for the control, and a suggestion list will be shown
+
+[Control/TextEditor]
+- changed : separated the default context menu from a custom context menu for a text editor control
+    -> if setContextMenu() isn't called the default menu in "menu_text_editor.xml" will be used
+    -> if a custom menu has been specified then the default menu will override it if spell checking is enabled for the control, and a suggestion list will be shown
