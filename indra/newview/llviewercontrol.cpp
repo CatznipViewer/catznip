@@ -41,6 +41,9 @@
 #include "lldrawpoolterrain.h"
 #include "llflexibleobject.h"
 #include "llfeaturemanager.h"
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2014-03-12 (Catznip-3.6)
+#include "llimstorage.h"
+// [/SL:KB]
 #include "llviewershadermgr.h"
 
 #include "llsky.h"

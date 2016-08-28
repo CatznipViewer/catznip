@@ -31,7 +31,7 @@
      text_color="Black"
      text_pad_left="10"
      top="4"
-     width="204" />
+     width="214" />
     <menu_button
      follows="top|right"
      height="25"
@@ -55,7 +55,7 @@
      image_selected="Toolbar_Middle_Selected"
      image_unselected="Toolbar_Middle_Off"
      layout="topleft"
-     left_pad="8"
+     left_pad="1"
      name="conversations_gear_btn"
      tool_tip="Actions on selected person or group"
      top="3"
