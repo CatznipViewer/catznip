@@ -79,6 +79,61 @@
          function="Avatar.EnableItem"
          parameter="can_delete" />
     </menu_item_call>
+    <context_menu
+     label="Manage"
+     name="menu_manage_participant">
+        <menu_item_check
+         label="Block/Unblock"
+         layout="topleft"
+         name="block_unblock">
+            <menu_item_check.on_click
+             function="Avatar.BlockUnblock" />
+            <menu_item_check.on_check
+             function="Avatar.CheckItem"
+             parameter="is_blocked" />
+            <menu_item_check.on_enable
+             function="Avatar.EnableItem"
+             parameter="can_block" />
+        </menu_item_check>
+        <menu_item_call
+         label="Report"
+         name="report">
+            <menu_item_call.on_click
+             function="Avatar.Report"/>
+        </menu_item_call>  
+        <menu_item_separator
+         on_visible.function="Group.IsModerator"/>
+        <menu_item_check
+         label="Allow Text Chat"
+         name="block_group_text">
+            <menu_item_check.on_click
+             function="Group.ToggleBlockText"/>
+            <menu_item_check.on_visible
+             function="Group.CheckBlockText"/>
+            <menu_item_check.on_visible
+             function="Group.IsModerator"/>
+        </menu_item_check>
+        <menu_item_check
+         label="Allow Voice Chat"
+         name="block_group_voice">
+            <menu_item_check.on_click
+             function="Group.ToggleBlockVoice"/>
+            <mmenu_item_check.on_visible
+             function="Group.CheckBlockVoice"/>
+            <menu_item_check.on_visible
+             function="Group.IsModerator"/>
+        </menu_item_check>
+        <menu_item_separator
+         on_visible.function="Group.CanEjectAvatar"/>
+        <menu_item_call
+         label="Eject from Group"
+         name="eject_from_group">
+            <menu_item_call.on_click
+             function="Group.EjectAvatar"/>
+            <menu_item_call.on_visible
+             function="Group.CanEjectAvatar"/>
+        </menu_item_call>
+    </context_menu>
     <menu_item_call
      label="Invite to group..."
      layout="topleft"

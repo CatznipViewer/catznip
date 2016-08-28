@@ -24,6 +24,30 @@
          parameter="expanded_view"/>
     </menu_item_check>
     <menu_item_separator layout="topleft" />
+    <context_menu
+     label="Sort list by"
+     name="Participant List Sort">
+        <menu_item_check
+         label="Sort by Name"
+         name="sort_name">
+            <menu_item_check.on_click
+             function="IMSession.Menu.ParticipantList"
+             parameter="sort_name" />
+            <menu_item_check.on_check
+             function="IMSession.Menu.CheckParticipantList"
+             parameter="sort_name" />
+        </menu_item_check>
+        <menu_item_check
+         label="Sort by Recent Speakers"
+         name="sort_by_recent_speakers">
+            <menu_item_check.on_click
+             function="IMSession.Menu.ParticipantList"
+             parameter="sort_by_recent_speakers" />
+            <menu_item_check.on_check
+             function="IMSession.Menu.CheckParticipantList"
+             parameter="sort_by_recent_speakers" />
+        </menu_item_check>
+    </context_menu>
     <menu_item_check name="IMShowTime" label="Show time">
         <menu_item_check.on_click
          function="IMSession.Menu.Action"
