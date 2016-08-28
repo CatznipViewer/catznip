@@ -53,6 +53,9 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void onOpen(const LLSD& key);
 	/*virtual*/ void onClose(bool app_quitting);
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
+	/*virtual*/ void setMinimized(BOOL b);
+// [/SL:KB]
 	/*virtual*/ void setVisible(BOOL visible);
 	/*virtual*/ void setVisibleAndFrontmost(BOOL take_focus=TRUE, const LLSD& key = LLSD());
 	/*virtual*/ void closeHostedFloater();
@@ -62,7 +65,7 @@ public:
 	void removeScreenChat();
 
 	void show();
-	bool isChatVisible() const;
+//	bool isChatVisible() const;
 
 	/** @param archive true - to save a message to the chat history log */
 	void	addMessage			(const LLChat& message,bool archive = true, const LLSD &args = LLSD());
