@@ -771,6 +771,9 @@ Veuillez réessayer de vous connecter dans une minute.
 	<string name="AvatarMuted">
 		Bloqué(e)
 	</string>
+	<string name="AvatarTyping">
+		Clavier
+	</string>
 	<string name="anim_express_afraid">
 		Effrayé
 	</string>
