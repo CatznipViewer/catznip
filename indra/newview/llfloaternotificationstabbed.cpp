@@ -39,7 +39,7 @@
 
 //---------------------------------------------------------------------------------
 LLFloaterNotificationsTabbed::LLFloaterNotificationsTabbed(const LLSD& key) : LLTransientDockableFloater(NULL, true,  key),
-    mChannel(NULL),
+//    mChannel(NULL),
     mSysWellChiclet(NULL),
     mGroupInviteMessageList(NULL),
     mGroupNoticeMessageList(NULL),
@@ -153,18 +153,32 @@ LLPanel * LLFloaterNotificationsTabbed::findItemByID(const LLUUID& id, std::stri
 //---------------------------------------------------------------------------------
 void LLFloaterNotificationsTabbed::initChannel() 
 {
-    LLNotificationsUI::LLScreenChannelBase* channel = LLNotificationsUI::LLChannelManager::getInstance()->findChannelByID(
-        LLUUID(gSavedSettings.getString("NotificationChannelUUID")));
-    mChannel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(channel);
-    if(NULL == mChannel)
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = 
+		dynamic_cast<LLNotificationsUI::LLScreenChannel*>(LLNotificationsUI::LLChannelManager::getInstance()->findChannelByID(LLUUID(gSavedSettings.getString("NotificationChannelUUID"))));
+    if(NULL == channel)
     {
         LL_WARNS() << "LLSysWellWindow::initChannel() - could not get a requested screen channel" << LL_ENDL;
     }
 
-    if(mChannel)
+    if (channel)
     {
-        mChannel->addOnStoreToastCallback(boost::bind(&LLFloaterNotificationsTabbed::onStoreToast, this, _1, _2));
+        channel->addOnStoreToastCallback(boost::bind(&LLFloaterNotificationsTabbed::onStoreToast, this, _1, _2));
+	    mChannel = channel->getHandle();
     }
+// [/SL:KB]
+//    LLNotificationsUI::LLScreenChannelBase* channel = LLNotificationsUI::LLChannelManager::getInstance()->findChannelByID(
+//        LLUUID(gSavedSettings.getString("NotificationChannelUUID")));
+//    mChannel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(channel);
+//    if(NULL == mChannel)
+//    {
+//        LL_WARNS() << "LLSysWellWindow::initChannel() - could not get a requested screen channel" << LL_ENDL;
+//    }
+//
+//    if(mChannel)
+//    {
+//        mChannel->addOnStoreToastCallback(boost::bind(&LLFloaterNotificationsTabbed::onStoreToast, this, _1, _2));
+//    }
 }
 
 //---------------------------------------------------------------------------------
@@ -179,9 +193,13 @@ void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
     {
         if (NULL == getDockControl() && getDockTongue().notNull())
         {
-            setDockControl(new LLDockControl(
-                LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
-                getDockTongue(), LLDockControl::BOTTOM));
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+			setDockControl(new LLDockControl(LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this, getDockTongue(),
+				(LLChicletBar::ALIGN_TOP == LLChicletBar::getInstance()->getAlignment()) ? LLDockControl::BOTTOM : LLDockControl::TOP));
+// [/SL:KB]
+//			setDockControl(new LLDockControl(
+//				LLChicletBar::getInstance()->getChild<LLView>(getAnchorViewName()), this,
+//				getDockTongue(), LLDockControl::BOTTOM));
         }
     }
 
@@ -192,11 +210,19 @@ void LLFloaterNotificationsTabbed::setVisible(BOOL visible)
 
     // update notification channel state	
     initChannel(); // make sure the channel still exists
-    if(mChannel)
-    {
-        mChannel->updateShowToastsState();
-        mChannel->redrawToasts();
-    }
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2015-12-07 (Catznip-3.8)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
+	{
+		channel->updateShowToastsState();
+		channel->redrawToasts();
+	}
+// [/SL:KB]
+//    if(mChannel)
+//    {
+//        mChannel->updateShowToastsState();
+//        mChannel->redrawToasts();
+//    }
 }
 
 //---------------------------------------------------------------------------------
@@ -205,11 +231,19 @@ void LLFloaterNotificationsTabbed::setDocked(bool docked, bool pop_on_undock)
     LLTransientDockableFloater::setDocked(docked, pop_on_undock);
 
     // update notification channel state
-    if(mChannel)
-    {
-        mChannel->updateShowToastsState();
-        mChannel->redrawToasts();
-    }
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2015-12-07 (Catznip-3.8)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
+	{
+		channel->updateShowToastsState();
+		channel->redrawToasts();
+	}
+// [/SL:KB]
+//    if(mChannel)
+//    {
+//        mChannel->updateShowToastsState();
+//        mChannel->redrawToasts();
+//    }
 }
 
 //---------------------------------------------------------------------------------
@@ -217,10 +251,17 @@ void LLFloaterNotificationsTabbed::reshapeWindow()
 {
     // update notification channel state
     // update on a window reshape is important only when a window is visible and docked
-    if(mChannel && getVisible() && isDocked())
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2015-12-07 (Catznip-3.8)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+    if (channel && getVisible() && isDocked())
     {
-        mChannel->updateShowToastsState();
+        channel->updateShowToastsState();
     }
+// [/SL:KB]
+//    if(mChannel && getVisible() && isDocked())
+//    {
+//        mChannel->updateShowToastsState();
+//    }
 }
 
 //---------------------------------------------------------------------------------
@@ -366,23 +407,50 @@ void LLFloaterNotificationsTabbed::clearScreenChannels()
     // 1 - remove StartUp toast and channel if present
     if(!LLNotificationsUI::LLScreenChannel::getStartUpToastShown())
     {
-        LLNotificationsUI::LLChannelManager::getInstance()->onStartUpToastClose();
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+		LLNotificationsUI::LLScreenChannelBase* pChannel = LLNotificationsUI::LLChannelManager::getInstance()->getStartUpChannel();
+		if (pChannel)
+		{
+			pChannel->removeToastsFromChannel();
+			pChannel->setVisible(FALSE);
+		}
+		LLNotificationsUI::LLScreenChannel::setStartUpToastShown();
+// [/SL:KB]
+//        LLNotificationsUI::LLChannelManager::getInstance()->onStartUpToastClose();
     }
 
     // 2 - remove toasts in Notification channel
-    if(mChannel)
-    {
-        mChannel->removeAndStoreAllStorableToasts();
-    }
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (channel)
+	{
+		channel->removeAndStoreAllStorableToasts();
+	}
+// [/SL:KB]
+//    if(mChannel)
+//    {
+//        mChannel->removeAndStoreAllStorableToasts();
+//    }
 }
 
 //---------------------------------------------------------------------------------
 void LLFloaterNotificationsTabbed::onStoreToast(LLPanel* info_panel, LLUUID id)
 {
-    LLNotificationListItem::Params p;	
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2015-12-07 (Catznip-3.8)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if (!channel)
+	{
+		return;
+	}
+// [/SL:KB]
+
+	LLNotificationListItem::Params p;	
     p.notification_id = id;
     p.title = static_cast<LLToastPanel*>(info_panel)->getTitle();
-    LLNotificationPtr notify = mChannel->getToastByNotificationID(id)->getNotification();
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2015-12-07 (Catznip-3.8)
+    LLNotificationPtr notify = channel->getToastByNotificationID(id)->getNotification();
+// [/SL:KB]
+//    LLNotificationPtr notify = mChannel->getToastByNotificationID(id)->getNotification();
     LLSD payload = notify->getPayload();
     p.notification_name = notify->getName();
     p.transaction_id = payload["transaction_id"];
@@ -419,11 +487,19 @@ void LLFloaterNotificationsTabbed::onItemClose(LLNotificationListItem* item)
 {
     LLUUID id = item->getID();
 
-    if(mChannel)
-    {
-        // removeItemByID() is invoked from killToastByNotificationID() and item will removed;
-        mChannel->killToastByNotificationID(id);
-    }
+//    if(mChannel)
+//    {
+//        // removeItemByID() is invoked from killToastByNotificationID() and item will removed;
+//        mChannel->killToastByNotificationID(id);
+//    }
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLNotificationsUI::LLScreenChannel* channel = dynamic_cast<LLNotificationsUI::LLScreenChannel*>(mChannel.get());
+	if(channel)
+	{
+		// removeItemByID() is invoked from killToastByNotificationID() and item will removed;
+		channel->killToastByNotificationID(id);
+	}
+// [/SL:KB]
     else
     {
         // removeItemByID() should be called one time for each item to remove it from notification well

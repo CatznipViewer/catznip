@@ -44,11 +44,18 @@ namespace
 
 LLChicletBar::LLChicletBar(const LLSD&)
 :	mChicletPanel(NULL),
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	mAlignment(ALIGN_TOP),
+// [/SL:KB]
 	mToolbarStack(NULL)
 {
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	// Firstly add our self to IMSession observers, so we catch session events before chiclets do that.
 	LLIMMgr::getInstance()->addSessionObserver(this);
+// [/SL:KB]
+
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2014-04-05 (Catznip-3.6)
+	gSavedSettings.getControl("ChicletBarAlignment")->getCommitSignal()->connect(boost::bind(&LLChicletBar::onAlignmentChanged, _2));
 // [/SL:KB]
 
 	buildFromFile("panel_chiclet_bar.xml");
@@ -155,6 +162,48 @@ BOOL LLChicletBar::postBuild()
 
 	return TRUE;
 }
+
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2014-04-05 (Catznip-3.6)
+void LLChicletBar::setAlignment(EAlignment eAlignment)
+{
+	if ( (mAlignment == eAlignment) || (eAlignment > ALIGN_COUNT) )
+		return;
+
+	LLView* pContainerView = getParent();
+	while ( (pContainerView) && (pContainerView->getName() != "chiclet_container") )
+		pContainerView = pContainerView->getParent();
+
+	const LLView* pContainerParent = (pContainerView) ? pContainerView->getParent() : NULL;
+	if ( (pContainerView) && (pContainerParent) )
+	{
+		U32 nFollowFlags = pContainerView->getFollows() & ~(FOLLOWS_TOP | FOLLOWS_BOTTOM);
+		LLRect rctClient = pContainerView->getRect();
+		switch (eAlignment)
+		{
+			case ALIGN_TOP:
+				nFollowFlags |= FOLLOWS_TOP;
+				rctClient.setLeftTopAndSize(rctClient.mLeft, pContainerParent->getRect().getHeight(), rctClient.getWidth(), rctClient.getHeight());
+				break;
+			case ALIGN_BOTTOM:
+				nFollowFlags |= FOLLOWS_BOTTOM;
+				rctClient.setOriginAndSize(rctClient.mLeft, 0, rctClient.getWidth(), rctClient.getHeight());
+				break;
+		}
+		pContainerView->setFollows(nFollowFlags);
+		pContainerView->setRect(rctClient);
+	}
+
+	mAlignment = eAlignment;
+}
+
+void LLChicletBar::onAlignmentChanged(const LLSD& sdValue)
+{
+	if (LLChicletBar::instanceExists())
+	{
+		LLChicletBar::instance().setAlignment((EAlignment)sdValue.asInteger());
+	}
+}
+// [/SL:KB]
 
 void LLChicletBar::showWellButton(const std::string& well_name, bool visible)
 {
