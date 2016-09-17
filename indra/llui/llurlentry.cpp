@@ -552,35 +552,64 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 	// return a tooltip corresponding to the URL type instead of the generic one
 	std::string url = getUrl(string);
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
+	std::string strTooltip;
 	if (LLStringUtil::endsWith(url, "/inspect"))
+		strTooltip = LLTrans::getString("TooltipAgentInspect");
+	else if (LLStringUtil::endsWith(url, "/mute"))
+		strTooltip = LLTrans::getString("TooltipAgentMute");
+	else if (LLStringUtil::endsWith(url, "/unmute"))
+		strTooltip = LLTrans::getString("TooltipAgentUnmute");
+	else if (LLStringUtil::endsWith(url, "/im"))
+		strTooltip = LLTrans::getString("TooltipAgentIM");
+	else if (LLStringUtil::endsWith(url, "/pay"))
+		strTooltip = LLTrans::getString("TooltipAgentPay");
+	else if (LLStringUtil::endsWith(url, "/offerteleport"))
+		strTooltip = LLTrans::getString("TooltipAgentOfferTeleport");
+	else if (LLStringUtil::endsWith(url, "/requestfriend"))
+		strTooltip = LLTrans::getString("TooltipAgentRequestFriend");
+	else
+		strTooltip = LLTrans::getString("TooltipAgentUrl");
+
+	// If we (sometimes) hide the username, we have to show it as part of the tooltip
+	// NOTE: if the name isn't currently cached then the tooltip will be the default one, regardless of the current setting
+	if ( (LLAvatarName::useDisplayNames()) && (LLAvatarName::SHOW_ALWAYS != LLAvatarName::getShowUsername()) )
 	{
-		return LLTrans::getString("TooltipAgentInspect");
+		LLUUID idAgent(getIDStringFromUrl(url)); LLAvatarName avName;
+		if ( (idAgent.notNull()) && (LLAvatarNameCache::get(idAgent, &avName)) )
+			return llformat("%s\n(%s)", avName.getAccountName().c_str(), strTooltip.c_str());
 	}
-	if (LLStringUtil::endsWith(url, "/mute"))
-	{
-		return LLTrans::getString("TooltipAgentMute");
-	}
-	if (LLStringUtil::endsWith(url, "/unmute"))
-	{
-		return LLTrans::getString("TooltipAgentUnmute");
-	}
-	if (LLStringUtil::endsWith(url, "/im"))
-	{
-		return LLTrans::getString("TooltipAgentIM");
-	}
-	if (LLStringUtil::endsWith(url, "/pay"))
-	{
-		return LLTrans::getString("TooltipAgentPay");
-	}
-	if (LLStringUtil::endsWith(url, "/offerteleport"))
-	{
-		return LLTrans::getString("TooltipAgentOfferTeleport");
-	}
-	if (LLStringUtil::endsWith(url, "/requestfriend"))
-	{
-		return LLTrans::getString("TooltipAgentRequestFriend");
-	}
-	return LLTrans::getString("TooltipAgentUrl");
+	return strTooltip;
+// [/SL:KB]
+//	if (LLStringUtil::endsWith(url, "/inspect"))
+//	{
+//		return LLTrans::getString("TooltipAgentInspect");
+//	}
+//	if (LLStringUtil::endsWith(url, "/mute"))
+//	{
+//		return LLTrans::getString("TooltipAgentMute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/unmute"))
+//	{
+//		return LLTrans::getString("TooltipAgentUnmute");
+//	}
+//	if (LLStringUtil::endsWith(url, "/im"))
+//	{
+//		return LLTrans::getString("TooltipAgentIM");
+//	}
+//	if (LLStringUtil::endsWith(url, "/pay"))
+//	{
+//		return LLTrans::getString("TooltipAgentPay");
+//	}
+//	if (LLStringUtil::endsWith(url, "/offerteleport"))
+//	{
+//		return LLTrans::getString("TooltipAgentOfferTeleport");
+//	}
+//	if (LLStringUtil::endsWith(url, "/requestfriend"))
+//	{
+//		return LLTrans::getString("TooltipAgentRequestFriend");
+//	}
+//	return LLTrans::getString("TooltipAgentUrl");
 }
 
 bool LLUrlEntryAgent::underlineOnHoverOnly(const std::string &string) const
@@ -627,6 +656,16 @@ std::string LLUrlEntryAgent::getLabel(const std::string &url, const LLUrlLabelCa
 		}
 		mAvatarNameCacheConnection = LLAvatarNameCache::get(agent_id, boost::bind(&LLUrlEntryAgent::onAvatarNameCache, this, _1, _2));
 		addObserver(agent_id_string, url, cb);
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-07-05 (Catznip-3.3)
+		// Display the legacy name if we have it
+		std::string strName;
+		if (gCacheName->getFullName(agent_id, strName))
+		{
+			return strName;
+		}
+// [/SL:KB]
+
 		return LLTrans::getString("LoadingData");
 	}
 }
@@ -734,6 +773,16 @@ std::string LLUrlEntryAgentName::getLabel(const std::string &url, const LLUrlLab
 		}
 		mAvatarNameCacheConnection = LLAvatarNameCache::get(agent_id, boost::bind(&LLUrlEntryAgentName::onAvatarNameCache, this, _1, _2));
 		addObserver(agent_id_string, url, cb);
+
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2012-07-05 (Catznip-3.3)
+		// Display the legacy name if we have it
+		std::string strName;
+		if (gCacheName->getFullName(agent_id, strName))
+		{
+			return strName;
+		}
+// [/SL:KB]
+
 		return LLTrans::getString("LoadingData");
 	}
 }
@@ -757,7 +806,10 @@ LLUrlEntryAgentCompleteName::LLUrlEntryAgentCompleteName()
 
 std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name)
 {
-	return avatar_name.getCompleteName();
+//	return avatar_name.getCompleteName();
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6)
+	return avatar_name.getCompleteName(LLAvatarName::SHOW_ALWAYS);
+// [/SL:KB]
 }
 
 //

@@ -12,5 +12,10 @@
 	<menu_item_call label="Карта" name="map"/>
 	<menu_item_call label="Поделиться" name="share"/>
 	<menu_item_call label="Заплатить" name="pay"/>
+	<context_menu label="Copy" name="avatar_copy">
+		<menu_item_call label="Копировать Экранное имя" name="avatar_copy_displayname"/>
+		<menu_item_call label="Копировать название" name="avatar_copy_fullname"/>
+		<menu_item_call label="Копировать URL-адрес SL" name="avatar_copy_slurl"/>
+	</context_menu>
 	<menu_item_check label="Черный список" name="block_unblock"/>
 </context_menu>

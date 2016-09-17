@@ -1,0 +1,27 @@
+[Agent/DisplayNames]
+- added   : "AgentLinkShowUsernames" setting to control when the username is shown as part of an agent app URL label
+    -> 0 = Always show the username as part of the label, i.e. "Kitty Barnett (kitty.barnett)"
+       1 = Only show the username as part of the label on mismatch, i.e. "Kitty Barnett (random.resident)"
+       2 = Never show the username as part of the label (will still be visible on the tooltip)
+- added   : "Copy" submenu containing "Copy Display Name", "Copy Full Name" and "Copy SLurl" to the avatar context menu
+    -> added to the SLurl scroll list control context menu 
+    -> added to the avatar inspect menus
+    -> added to the people context menu
+- added   : "Copy SLurl" menu option to the context menu for the Groups panel
+- changed : don't replace existing cached names with dummies on lookup failure
+- changed : LLAvatarNameCache::get() invokes the callback immediately if a cached entry exists rather than waiting for the look-up
+    -> makes the UI feel more responsive
+- changed : increased the unrefreshed cache entry timeout to 90 minutes
+- changed : allow copy/pasting of a complete name or username in the avatar picker floater search
+- changed : show the display name - rather than the complete name - on emotes in IM toasts
+    -> the username is already shown in the header so it's redundant to show it as part of the emote as well (and it doesn't really look very appealing)
+- changed : use the legacy name as a fallback label (rather than "Loading...") if it's available
+- changed : reverted display of user name (now referred to as account name)
+    -> second line of avatar name tags
+    -> second line of the name on the avatar inspector
+    -> username column of the nearby tab in the avatar picker floater
+    -> name byline on the v2 chat headers
+    -> tooltip for the v2 chat headers
+    -> tooltip of an avatarlist item (i.e. Friends people panel)
+    -> tooltip of an avatarlist icon (i.e. Friends people panel)
+- fixed   : secondlife:///app/agent/<uuid>/completename no longer shows the complete name of the specified agent
