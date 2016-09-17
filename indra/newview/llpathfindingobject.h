@@ -56,6 +56,9 @@ public:
 	inline const LLUUID&      getUUID() const        {return mUUID;};
 	inline const std::string& getName() const        {return mName;};
 	inline const std::string& getDescription() const {return mDescription;};
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	inline const LLUUID&      getOwnerID() const     { return mOwnerUUID; }
+// [/SL:KB]
 	inline BOOL               hasOwner() const       {return mOwnerUUID.notNull();};
 	inline bool               hasOwnerName() const   {return mHasOwnerName;};
 	std::string               getOwnerName() const;
