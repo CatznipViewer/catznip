@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="true"
+ can_resize="false"
+ height="410"
+ layout="topleft"
+ name="floater_parcel_info"
+ positioning="cascading"
+ save_rect="true"
+ title=""
+ width="300">
+    <string name="title_parcel">Parcel Information</string>
+    <string name="title_landmark">Landmark Information</string>
+
+    <panel
+     class="panel_parcel_info"
+     filename="panel_parcel_info.xml"
+     follows="all"
+     height="370"
+     layout="topleft"
+     left="0"
+     name="panel_parcel_info"
+     top="5"
+     width="300" />
+
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
+     layout="topleft"
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="18"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <!-- Parcel/landmark information -->
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Move_Run_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Teleport"
+         layout="topleft"
+         left_pad="1"
+         name="teleport_btn"
+         tool_tip="Teleport to the selected area"
+         width="115" />
+        <!-- Landmark editing -->
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         label="Save"
+         layout="topleft"
+         left_pad="-115"
+         name="save_btn"
+         tool_tip="Save changes and close"
+         visible="false"
+         width="115" />
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+        <!-- Parcel/landmark information -->
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Command_Map_Icon"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Show on Map"
+         layout="topleft"
+         left_pad="1"
+         name="map_btn"
+         tool_tip="Show the corresponding area on the World Map"
+         width="115" />
+        <!-- Landmark editing -->
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay_alignment="left"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         label="Discard"
+         layout="topleft"
+         left_pad="-115"
+         name="discard_btn"
+         tool_tip="Delete the landmark from inventory"
+         top_delta="0"
+         visible="false"
+         width="115" />
+
+        <icon  
+         follows="bottom|right"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="18"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
+</floater>

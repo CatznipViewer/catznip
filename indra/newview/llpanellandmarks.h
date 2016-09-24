@@ -61,7 +61,7 @@ public:
 	/*virtual*/ bool isSingleItemSelected();
 
 	void onSelectionChange(LLPlacesInventoryPanel* inventory_list, const std::deque<LLFolderViewItem*> &items, BOOL user_action);
-	void onSelectorButtonClicked();
+//	void onSelectorButtonClicked();
 	void setCurrentSelectedList(LLPlacesInventoryPanel* inventory_list)
 	{
 		mCurrentSelectedList = inventory_list;
