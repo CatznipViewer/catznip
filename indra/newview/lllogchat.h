@@ -92,6 +92,14 @@ public:
 
 	static std::string timestamp(bool withdate = false);
 	static std::string makeLogFileName(std::string(filename));
+
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+	/**
+	 * Attempts to build the correct IM P2P log filename for the specified agent UUID and agent name
+	 */
+	static bool buildIMP2PLogFilename(const LLUUID& idAgent, const std::string& strName, std::string& strFilename);
+// [/SL:KB]
+
 	/**
 	*Add functions to get old and non date stamped file names when needed
 	*/
@@ -104,7 +112,10 @@ public:
 	static void getListOfTranscriptFiles(std::vector<std::string>& list);
 	static void getListOfTranscriptBackupFiles(std::vector<std::string>& list_of_transcriptions);
 
-	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+	static bool loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
+// [/SL:KB]
+//	static void loadChatHistory(const std::string& file_name, std::list<LLSD>& messages, const LLSD& load_params = LLSD());
 
 	typedef boost::signals2::signal<void ()> save_history_signal_t;
 	static boost::signals2::connection setSaveHistorySignal(const save_history_signal_t::slot_type& cb);
@@ -118,6 +129,9 @@ public:
 		std::vector<std::string>& listOfFilesToMove);
 
 	static void deleteTranscripts();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	static bool hasTranscripts();
+// [/SL:KB]
 	static bool isTranscriptExist(const LLUUID& avatar_id, bool is_group=false);
 	static bool isNearbyTranscriptExist();
 	static bool isAdHocTranscriptExist(std::string file_name);

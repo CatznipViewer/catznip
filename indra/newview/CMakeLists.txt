@@ -339,6 +339,7 @@ set(viewer_SOURCE_FILES
     llhudview.cpp
     llimagefiltersmanager.cpp
     llimhandler.cpp
+    llimstorage.cpp
     llimview.cpp
     llinspect.cpp
     llinspectavatar.cpp
@@ -955,6 +956,7 @@ set(viewer_HEADER_FILES
     llhudtext.h
     llhudview.h
     llimagefiltersmanager.h
+    llimstorage.h
     llimview.h
     llinspect.h
     llinspectavatar.h
