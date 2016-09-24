@@ -1697,7 +1697,6 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		ご利用のビューワは最新です!
-最新の機能と修正を今すぐ試したい場合は、代替ビューワページ (http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers) をチェックしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

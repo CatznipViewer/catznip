@@ -1668,7 +1668,6 @@ http://secondlife.com/download.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Ваш клиент уже обновлен!
-Если вы хотите немедленно испробовать наши новейшие функции и исправления, обратитесь на страницу «Альтернативные клиенты»: http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

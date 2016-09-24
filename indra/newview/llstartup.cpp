@@ -805,10 +805,11 @@ bool idle_startup()
         timeout.reset();
 
 // [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
-		if ( (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting")) && 
-		     (!LLLoginInstance::instance().getUpdaterService()->isChecking()) )
+		if (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting"))
 		{
-			LLLoginInstance::instance().getUpdaterService()->startChecking();
+			LLUpdaterService updaterService;
+			if (!updaterService.isChecking())
+				updaterService.startChecking();
 		}
 // [/SL:KB]
 
@@ -871,11 +872,9 @@ bool idle_startup()
 		// Limit bandwidth for the updater download once the user passes the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
-			LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
-			if (pUpdater->isChecking())
-			{
-				pUpdater->setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024/8));
-			}
+			LLUpdaterService updaterService;
+			if (updaterService.isChecking())
+				updaterService.setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024 / 8));
 		}
 // [/SL:KB]
 

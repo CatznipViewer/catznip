@@ -1660,7 +1660,6 @@ Tente novamente mais tarde.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Seu visualizador está atualizado!
-Se você estiver muito ansioso para experimentar os novos recursos e correções, consulte a página de visualizadores alternativos. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

@@ -1668,7 +1668,6 @@ Lütfen daha sonra tekrar deneyin.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Görüntüleyiciniz güncel.
-En yeni özellikleri ve düzeltmeleri görmek için sabırsızlanıyorsanız Alternatif Görüntüleyici sayfasına göz atın. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="Tamam"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

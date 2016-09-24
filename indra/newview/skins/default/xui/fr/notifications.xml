@@ -1665,7 +1665,6 @@ Veuillez réessayer ultérieurement.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Votre client est à jour.
-Si vous êtes impatients de découvrir les dernières fonctionnalités et corrections, consultez la page Autres clients. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

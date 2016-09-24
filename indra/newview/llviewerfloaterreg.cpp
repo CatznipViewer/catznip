@@ -129,7 +129,7 @@
 #include "llfloatertranslationsettings.h"
 #include "llfloatertwitter.h"
 #include "llfloateruipreview.h"
-// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-UpdateFloater | Catznip-3.1
 #include "llfloaterupdate.h"
 // [/SL:KB]
 #include "llfloatervoiceeffect.h"
@@ -353,7 +353,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("big_preview", "floater_big_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBigPreview>);
 	
 	LLFloaterUIPreviewUtil::registerFloater();
-// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-UpdateFloater | Checked: Catznip-3.1
 	LLFloaterReg::add("update", "floater_update.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterUpdate>);
 	LLFloaterReg::add("update_progress", "floater_update_progress.xml", (LLFloaterBuildFunc)&LLFloaterReg::buildModal<LLFloaterUpdateProgress>);
 // [/SL:KB]

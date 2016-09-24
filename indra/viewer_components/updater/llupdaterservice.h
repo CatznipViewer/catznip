@@ -50,7 +50,7 @@ public:
 	// Type codes for events posted by this service.  Stored the event's 'type' element.
 	enum eUpdaterEvent {
 		INVALID,
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 		CHECK_COMPLETE,
 		CHECK_ERROR,
 		DOWNLOAD_RESUME,
@@ -69,14 +69,14 @@ public:
 		DOWNLOADING,
 		INSTALLING,
 		UP_TO_DATE,
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 		UPDATE_AVAILABLE,
 // [/SL:KB]
 		TERMINAL,
 		FAILURE
 	};
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 	enum eUpdaterSetting
 	{
 		UPDATER_DISABLED= 0,
@@ -101,11 +101,11 @@ public:
 	
 	void startChecking(bool install_if_ready = false);
 	void stopChecking();
-	bool forceCheck();
+//	bool forceCheck();
 	bool isChecking();
 	eUpdaterState getState();
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 	void checkForUpdate(bool user_feedback);
 	void checkForInstall(bool launch_installer);
 

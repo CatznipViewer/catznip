@@ -1658,7 +1658,6 @@ SHA1 指紋：[MD5_DIGEST]
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		你的瀏覽器已是最新版！
-如果你急欲試用最新的功能和修補，請光臨「替代瀏覽器」網頁：http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers。
 		<usetemplate name="okbutton" yestext="確定"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

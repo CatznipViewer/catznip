@@ -3695,26 +3695,6 @@ Finished download of raw terrain file to:
 
   <notification
    icon="alertmodal.tga"
-   name="UpdaterCheckUpToDate"
-   type="alertmodal">
-    Your [APP_NAME] version is up to date.
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
-   name="UpdaterCheckError"
-   type="alertmodal">
-    An error occurred while checking for updates. Please try again later.
-    <usetemplate
-     name="okbutton"
-     yestext="OK"/>
-  </notification>
-
-  <notification
-   icon="alertmodal.tga"
    name="DownloadWindowsMandatory"
    type="alertmodal">
 A new version of [APP_NAME] is available.
@@ -4054,8 +4034,7 @@ Please try again later.
  icon="alertmodal.tga"
  name="UpdateViewerUpToDate"
  type="alertmodal">
-Your viewer is up to date!
-If you can't wait to try out the latest features and fixes, check out the Alternate Viewers page. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
+Your [APP_NAME] version is up to date.
     <tag>confirm</tag>
     <usetemplate
      name="okbutton"

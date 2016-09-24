@@ -99,7 +99,7 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 #include "llstartup.h"
 // [/SL:KB]
 #include "lltextureview.h"
@@ -135,8 +135,7 @@
 #include "llwindow.h"
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
-#include "lllogininstance.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 #include "llupdaterservice.h"
 // [/SL:KB]
 #include "boost/unordered_map.hpp"
@@ -2132,14 +2131,14 @@ class LLAdvancedCheckShowObjectUpdates : public view_listener_t
 
 
 
-class LLAdvancedCheckViewerUpdates : public view_listener_t
-{
-	bool handleEvent(const LLSD& userdata)
-	{
-		LLFloaterAboutUtil::checkUpdatesAndNotify();
-		return true;
-	}
-};
+//class LLAdvancedCheckViewerUpdates : public view_listener_t
+//{
+//	bool handleEvent(const LLSD& userdata)
+//	{
+//		LLFloaterAboutUtil::checkUpdatesAndNotify();
+//		return true;
+//	}
+//};
 
 
 ////////////////////
@@ -7199,40 +7198,24 @@ void handle_selected_material_info()
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
 void handle_updater_check()
 {
-	LLUpdaterService* pUpdater = LLLoginInstance::instance().getUpdaterService();
+	LLUpdaterService updater_service;
 
 	// Make sure the update is actually running
-	if (!pUpdater->isChecking())
-		LLLoginInstance::instance().getUpdaterService()->startChecking();
+	if (!updater_service.isChecking())
+		updater_service.startChecking();
 
-	switch (pUpdater->getState())
+	if (updater_service.isDownloading())
 	{
-		case LLUpdaterService::CHECKING_FOR_UPDATE:
-		case LLUpdaterService::UP_TO_DATE:
-		case LLUpdaterService::UPDATE_AVAILABLE:
-		// Set if there was a network or server error on the last update check attempt (i.e. 404)
-		case LLUpdaterService::TEMPORARY_ERROR:
-		// Set when we already have the update downloaded but the user picked 'later', or if the update failed
-		case LLUpdaterService::TERMINAL:
-			{
-				// Perform a clean manual check
-				pUpdater->checkForUpdate(true);
-			}
-			break;
-		case LLUpdaterService::DOWNLOADING:
-			{
-				bool fRequired = LLLoginInstance::instance().getUpdaterService()->getDownloadData()["required"].asBoolean();
-				LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
-			}
-			break;
-		default:
-			{
-				LLNotificationsUtil::add("UpdaterCheckError");
-			}
-			break;
+		bool fRequired = updater_service.getDownloadData()["required"].asBoolean();
+		LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
+	}
+	else
+	{
+		// Perform a clean manual check
+		updater_service.checkForUpdate(true);
 	}
 }
 // [/SL:KB]
@@ -8819,9 +8802,6 @@ void initialize_menus()
 	// most items use the ShowFloater method
 	view_listener_t::addMenu(new LLToggleHowTo(), "Help.ToggleHowTo");
 	enable.add("Help.HowToVisible", boost::bind(&enable_how_to_visible, _2));
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
-	commit.add("Updater.Check", boost::bind(&handle_updater_check));
-// [/SL:KB]
 
 	// Advanced menu
 	view_listener_t::addMenu(new LLAdvancedToggleConsole(), "Advanced.ToggleConsole");
@@ -8971,7 +8951,10 @@ void initialize_menus()
 	// Advanced (toplevel)
 	view_listener_t::addMenu(new LLAdvancedToggleShowObjectUpdates(), "Advanced.ToggleShowObjectUpdates");
 	view_listener_t::addMenu(new LLAdvancedCheckShowObjectUpdates(), "Advanced.CheckShowObjectUpdates");
-	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
+	commit.add("Advanced.CheckViewerUpdates", boost::bind(&handle_updater_check));
+	// [/SL:KB]
+//	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");
 	view_listener_t::addMenu(new LLAdvancedEnableViewAdminOptions(), "Advanced.EnableViewAdminOptions");

@@ -1680,7 +1680,6 @@ Versuchen Sie es später erneut.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Ihr Viewer ist auf dem neuesten Stand.
-Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Seite „Alternate Viewers“. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

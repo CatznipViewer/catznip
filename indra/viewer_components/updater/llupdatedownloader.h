@@ -58,7 +58,7 @@ public:
 //				  std::string const & updateVersion,
 //				  std::string const & info_url,
 //				  bool required=false);
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 	void download(const LLSD& sdUpdateData);
 
 	const LLSD& getDownloadData() const;

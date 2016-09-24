@@ -1,17 +1,17 @@
-/** 
+/**
  *
- * Copyright (c) 2011-2014, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2011-2016, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -26,7 +26,7 @@
 
 // ====================================================================================
 // LLFloaterUpdate class
-// 
+//
 
 LLFloaterUpdate::LLFloaterUpdate(const LLSD& sdData)
 	: LLModalDialog(sdData["version"])
@@ -71,7 +71,7 @@ void LLFloaterUpdate::onAcceptOrCancel(bool fAccept)
 
 // ====================================================================================
 // LLFloaterUpdateProgress class
-// 
+//
 
 LLFloaterUpdateProgress::LLFloaterUpdateProgress(const LLSD& sdKey, bool fModal)
 	: LLModalDialog(LLSD(), fModal)
@@ -88,7 +88,7 @@ LLFloaterUpdateProgress::~LLFloaterUpdateProgress()
 
 BOOL LLFloaterUpdateProgress::postBuild()
 {
-	const LLSD& sdDownloadData = LLLoginInstance::instance().getUpdaterService()->getDownloadData();
+	const LLSD& sdDownloadData = LLUpdaterService().getDownloadData();
 	m_fRequired = sdDownloadData["required"].asBoolean();
 
 	LLStringUtil::format_map_t args;
@@ -122,7 +122,7 @@ void LLFloaterUpdateProgress::onDownloadProgress(const LLSD& sdData)
 {
 	double mDownloadProgress = sdData["bytes_downloaded"].asReal() / (1024 * 1024);
 	double nDownloadTotal = sdData["download_size"].asReal() / (1024 * 1024);
-	
+
 	m_pProgressBar->setValue(mDownloadProgress / nDownloadTotal * 100.f);
 	m_pProgressText->setText(llformat("%.2f / %.2f Mb", mDownloadProgress, nDownloadTotal));
 	m_pProgressText->setVisible(true);
@@ -137,7 +137,7 @@ void LLFloaterUpdateProgress::onDownloadCompleted()
 
 void LLFloaterUpdateProgress::onInstallBtn()
 {
-	LLLoginInstance::instance().getUpdaterService()->checkForInstall(true);
+	LLUpdaterService().checkForInstall(true);
 	closeFloater();
 }
 

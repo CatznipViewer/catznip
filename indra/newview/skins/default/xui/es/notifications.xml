@@ -1674,7 +1674,6 @@ Repite la operación más adelante.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		El visor está actualizado.
-Si estás impaciente por probar las nuevas funciones y correcciones, lee la página sobre los visores alternativos. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

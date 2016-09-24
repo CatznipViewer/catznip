@@ -53,7 +53,7 @@ public:
 //				  std::string const & updateVersion,
 //				  std::string const & info_url,
 //				  bool required);
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 	void download(const LLSD& sdUpdateData);
 	const LLSD& getDownloadData() const { return mDownloadData; }
 // [/SL:KB]
@@ -138,7 +138,7 @@ void LLUpdateDownloader::cancel(void)
 //{
 //	mImplementation->download(uri, hash, updateChannel, updateVersion, info_url, required);
 //}
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 void LLUpdateDownloader::download(const LLSD& sdUpdateData)
 {
 	mImplementation->download(sdUpdateData);
@@ -242,11 +242,11 @@ void LLUpdateDownloader::Implementation::cancel(void)
 //												  std::string const & updateVersion,
 //												  std::string const & info_url,
 //												  bool required)
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData)
 // [/SL:KB]
 { 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 	const LLURI uri(sdUpdateData["url"].asString());
 	const std::string hash = sdUpdateData["hash"].asString();
 	const std::string updateVersion = sdUpdateData["version"].asString();
@@ -256,7 +256,7 @@ void LLUpdateDownloader::Implementation::download(const LLSD& sdUpdateData)
 
 	mDownloadRecordPath = downloadMarkerPath();
 	mDownloadData = LLSD();
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2013-07-15 (Catznip-3.5)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.5
 	mDownloadData["update_data"] = sdUpdateData;
 	mDownloadData["required"] = sdUpdateData["required"].asBoolean();
 	mDownloadData["update_channel"] = sdUpdateData["channel"].asString();
@@ -326,7 +326,7 @@ void LLUpdateDownloader::Implementation::resume(void)
 			}
 			else if(!validateOrRemove(filePath))
 			{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 				// download() will clear mDownloadData so we need a local copy
 				const LLSD sdUpdateData = mDownloadData["update_data"];
 				download(sdUpdateData);
@@ -344,7 +344,7 @@ void LLUpdateDownloader::Implementation::resume(void)
 		}
 		else
 		{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-04-12 (Catznip-2.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
 			// download() will clear mDownloadData so we need a local copy
 			const LLSD sdUpdateData = mDownloadData["update_data"];
 			download(sdUpdateData);
@@ -367,7 +367,7 @@ void LLUpdateDownloader::Implementation::resume(void)
 void LLUpdateDownloader::Implementation::setBandwidthLimit(U64 bytesPerSecond)
 {
 //	if((mBandwidthLimit != bytesPerSecond) && isDownloading() && !mDownloadData["required"].asBoolean())
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 	if((mBandwidthLimit != bytesPerSecond) && isDownloading())
 // [/SL:KB]
 	{
@@ -527,7 +527,7 @@ void LLUpdateDownloader::Implementation::initializeCurlGet(std::string const & u
 	throwOnCurlError(curl_easy_setopt(mCurl.get(), CURLOPT_XFERINFOFUNCTION, &xferinfo_callback));
 	throwOnCurlError(curl_easy_setopt(mCurl.get(), CURLOPT_XFERINFODATA, this));
 	throwOnCurlError(curl_easy_setopt(mCurl.get(), CURLOPT_NOPROGRESS, 0));
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 	// Bandwidth limit is determined by whether the user is still at login screen so always use the set bandwidth limit
 	curl_off_t limit = mBandwidthLimit;
 // [/SL:KB]
