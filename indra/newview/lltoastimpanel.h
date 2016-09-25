@@ -74,7 +74,7 @@ private:
 	LLTextBox*			mTime;
 	LLTextBox*			mMessage;
 
-	bool                mIsGroupMsg;
+//	bool                mIsGroupMsg;
 };
 
 #endif // LLTOASTIMPANEL_H_

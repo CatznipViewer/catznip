@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<llsd>
+<map>
+	<!-- These will be added to the combo box in the order they're listed so make sure they're sorted here -->
+	<key>Affirm</key>
+	<map>
+		<key>asset_uuid</key>
+		<string>2b850f03-ab11-4cbc-b213-0ae2004241f3</string>
+	</map>
+	<key>Affirm 2</key>
+	<map>
+		<key>asset_uuid</key>
+		<string>b9b466cb-7d8a-87c8-c2a2-e290edc5dcaa</string>
+	</map>
+	<key>Whoosh</key>
+	<map>
+		<key>asset_uuid</key>
+		<string>a8bf53d4-c682-bbfa-388f-7e20ac4462eb</string>
+	</map>
+	<key>Wobble</key>
+	<map>
+		<key>asset_uuid</key>
+		<string>35fa83bb-3026-f181-dce3-9ab3b87153b0</string>
+	</map>
+</map>
+</llsd>

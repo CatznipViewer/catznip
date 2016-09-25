@@ -789,6 +789,13 @@ void LLScrollListCtrl::setPageLines(S32 new_page_lines)
 
 BOOL LLScrollListCtrl::selectFirstItem()
 {
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-09-22 (Catznip-3.3)
+	if (!mCanSelect)
+	{
+		return FALSE;
+	}
+// [/SL:KB]
+
 	BOOL success = FALSE;
 
 	// our $%&@#$()^%#$()*^ iterators don't let us check against the first item inside out iteration
