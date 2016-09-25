@@ -108,6 +108,11 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
 	mEnableCallbackRegistrar.add("IMSession.Menu.ShowModes.Enable",
 			boost::bind(&LLFloaterIMSessionTab::onIMShowModesMenuItemEnable,  this, _2));
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("IMSession.Menu.ParticipantList", boost::bind(&LLFloaterIMSessionTab::onMenuParticipantListItemClicked,  this, _2));
+	mEnableCallbackRegistrar.add("IMSession.Menu.CheckParticipantList", boost::bind(&LLFloaterIMSessionTab::onMenuParticipantListItemEnable,  this, _2));
+// [/SL:KB]
+
 	// Right click menu handling
     mEnableCallbackRegistrar.add("Avatar.CheckItem",  boost::bind(&LLFloaterIMSessionTab::checkContextMenuItem,	this, _2));
     mEnableCallbackRegistrar.add("Avatar.EnableItem", boost::bind(&LLFloaterIMSessionTab::enableContextMenuItem, this, _2));
@@ -320,7 +325,14 @@ BOOL LLFloaterIMSessionTab::postBuild()
 		mGearBtn->setMenu(pMenu, mGearBtn->getMenuPosition(), false);
 		mGearMenuHandle = pMenu->getHandle();
 	}
-	mViewBtn = getChild<LLButton>("view_options_btn");
+//	mViewBtn = getChild<LLButton>("view_options_btn");
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+	mViewBtn = getChild<LLMenuButton>("view_options_btn");
+	if (mViewBtn->getMenu())
+	{
+		mViewBtn->getMenu()->setVisibilityChangeCallback(boost::bind(&LLFloaterIMSessionTab::onToggleViewMenu, this, _1, _2));
+	}
 // [/SL:KB]
     mAddBtn = getChild<LLButton>("add_btn");
 	mVoiceButton = getChild<LLButton>("voice_call_btn");
@@ -893,6 +905,63 @@ bool LLFloaterIMSessionTab::onIMShowModesMenuItemEnable(const LLSD& userdata)
 	bool is_not_names = (item != "IMShowNamesForP2PConv");
 	return (plain_text && (is_not_names || mIsP2PChat));
 }
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+void LLFloaterIMSessionTab::onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdParam)
+{
+	if ( (pCtrl) && (sdParam["visibility"].asBoolean()) )
+	{
+		pCtrl->getChildView("Participant List Sort")->setVisible(!mIsP2PChat);
+	}
+}
+
+void LLFloaterIMSessionTab::onMenuParticipantListItemClicked(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if (LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType())
+	{
+		if ("sort_name" == strParam)
+			LLParticipantAvatarList::setSortOrder(LLParticipantAvatarList::E_SORT_BY_NAME);
+		else if ("sort_by_recent_speakers" == strParam)
+			LLParticipantAvatarList::setSortOrder(LLParticipantAvatarList::E_SORT_BY_RECENT_SPEAKERS);
+	}
+	else
+	{
+		LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+		if (pIMContainer)
+		{
+			if ("sort_name" == strParam)
+				pIMContainer->setSortOrderParticipants(LLConversationFilter::SO_NAME);
+			else if ("sort_by_recent_speakers" == strParam)
+				pIMContainer->setSortOrderParticipants(LLConversationFilter::SO_DATE);
+		}
+	}
+}
+
+bool LLFloaterIMSessionTab::onMenuParticipantListItemEnable(const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+	if (LLFloaterIMContainerBase::CT_VIEW != LLFloaterIMContainerBase::getContainerType())
+	{
+		if ("sort_name" == strParam)
+			return LLParticipantAvatarList::E_SORT_BY_NAME == LLParticipantAvatarList::getSortOrder();
+		else if ("sort_by_recent_speakers" == strParam)
+			return LLParticipantAvatarList::E_SORT_BY_RECENT_SPEAKERS == LLParticipantAvatarList::getSortOrder();
+	}
+	else
+	{
+		LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
+		if (pIMContainer)
+		{
+			if ("sort_name" == strParam)
+				return (pIMContainer->getSortOrder().getSortOrderParticipants() == LLConversationFilter::SO_NAME);
+			else if ("sort_by_recent_speakers" == strParam)
+				return (pIMContainer->getSortOrder().getSortOrderParticipants() == LLConversationFilter::SO_DATE);
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 void LLFloaterIMSessionTab::hideOrShowTitle()
 {

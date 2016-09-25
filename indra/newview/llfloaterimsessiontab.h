@@ -129,6 +129,12 @@ public:
 
 protected:
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+	void onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdParam);
+	void onMenuParticipantListItemClicked(const LLSD& sdParam);
+	bool onMenuParticipantListItemEnable(const LLSD& sdParam);
+// [/SL:KB]
+
 	// callback for click on any items of the visual states menu
 	void onIMSessionMenuItemClicked(const LLSD& userdata);
 
@@ -212,7 +218,10 @@ protected:
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2013-11-27 (Catznip-3.6)
 	LLMenuButton* mGearBtn;
 	LLHandle<LLToggleableMenu> mGearMenuHandle;
-	LLButton* mViewBtn;
+//	LLButton* mViewBtn;
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+	LLMenuButton* mViewBtn;
 // [/SL:KB]
 	LLButton* mAddBtn;
     LLButton* mVoiceButton;

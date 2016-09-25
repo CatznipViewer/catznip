@@ -92,6 +92,10 @@ public:
 	/**
 	 * End group instant messaging session.
 	 */
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-17 (Catznip-3.3)
+	static void leaveIM(const LLUUID& group_id);
+	static void snoozeIM(const LLUUID& group_id);
+// [/SL:KB]
 	static void endIM(const LLUUID& group_id);
 
 	/// Returns if the current user is a member of the group
@@ -111,6 +115,12 @@ public:
 	 */
 	static bool isAvatarMemberOfGroup(const LLUUID& group_id, const LLUUID& avatar_id);
 	
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+	static bool canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent) { return true; }
+	static void ejectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent) {}
+	static void ejectFromGroup(const LLUUID& idGroup, const uuid_vec_t& idAgents) {}
+// [/SL:KB]
+
 private:
 	static bool onJoinGroup(const LLSD& notification, const LLSD& response);
 	static bool onLeaveGroup(const LLSD& notification, const LLSD& response);
