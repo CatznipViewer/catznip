@@ -73,6 +73,9 @@ class LLDir
 
 	virtual S32 deleteFilesInDir(const std::string &dirname, const std::string &mask);
     U32 deleteDirAndContents(const std::string& dir_name);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	std::vector<std::string> getDirectoriesInDir(const std::string &dirname);
+// [/SL:KB]
     std::vector<std::string> getFilesInDir(const std::string &dirname);
 // pure virtual functions
 	virtual std::string getCurPath() = 0;
