@@ -140,7 +140,10 @@ LLPointer<LLCredential> LLLoginHandler::initializeLoginInfo()
 	result = loadSavedUserLoginInfo();                                                                                   
 	if (result.isNull())                                                                                                 
 	{                                                                                                                    
-		result =  gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());                       
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+		result = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid(), gSavedSettings.getString("LastUserID"));
+// [/SL:KB]
+//		result =  gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());                       
 	}                                                                                                                    
 	
 	return result;                                                                                                       

@@ -42,6 +42,9 @@ LLScrollListItem::LLScrollListItem( const Params& p )
 	mHighlighted(FALSE),
 	mEnabled(p.enabled),
 	mUserdata(p.userdata),
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	mUserRemovable(p.user_removable),
+// [/SL:KB]
 	mItemValue(p.value)
 {
 }
