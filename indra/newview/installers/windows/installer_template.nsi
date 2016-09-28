@@ -90,8 +90,12 @@ InstProgressFlags smooth colored		# New colored smooth look
 SetOverwrite on							# Overwrite files by default
 AutoCloseWindow true					# After all files install, close window
 
+LicenseText "Catznip License and Vivox AUP"
+LicenseData "licenses-installer.rtf"
+Page license
+
 InstallDir "$PROGRAMFILES\${INSTNAME}"
-InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" ""
+InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
 UninstallText $(UninstallTextMsg)
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 Page directory dirPre
@@ -107,7 +111,7 @@ Var COMMANDLINE         # Command line passed to this installer, set in .onInit
 Var SHORTCUT_LANG_PARAM # "--set InstallLanguage de", Passes language to viewer
 Var SKIP_DIALOGS        # Set from command line in  .onInit. autoinstall GUI and the defaults.
 Var SKIP_AUTORUN		# Skip automatic launch of the viewer after install
-Var DO_UNINSTALL_V2     # If non-null, path to a previous Viewer 2 installation that will be uninstalled.
+;Var DO_UNINSTALL_V2     # If non-null, path to a previous Viewer 2 installation that will be uninstalled.
 
 # Function definitions should go before file includes, because calls to
 # DLLs like LangDLL trigger an implicit file include, so if that call is at
@@ -160,7 +164,7 @@ Call CheckWindowsVersion					# Don't install On unsupported systems
 lbl_configure_default_lang:
 # If we currently have a version of SL installed, default to the language of that install
 # Otherwise don't change $LANGUAGE and it will default to the OS UI language.
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors +2 0	# If error skip the copy instruction 
 	StrCpy $LANGUAGE $0
 
@@ -183,7 +187,7 @@ lbl_build_menu:
     StrCpy $LANGUAGE $0
 
 # Save language in registry		
-	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage" $LANGUAGE
+	WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage" $LANGUAGE
 lbl_return:
     Pop $0
     Return
@@ -195,7 +199,7 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function un.onInit
 # Read language from registry and set for uninstaller. Key will be removed on successful uninstall
-	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\${INSTNAME}" "InstallerLanguage"
+	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors lbl_end
 	StrCpy $LANGUAGE $0
 lbl_end:
@@ -259,10 +263,10 @@ Call CheckIfAdministrator		# Make sure the user can install/uninstall
 Call CheckIfAlreadyCurrent		# Make sure this version is not already installed
 Call CloseSecondLife			# Make sure Second Life not currently running
 Call CheckNetworkConnection		# Ping secondlife.com
-Call CheckWillUninstallV2		# Check if Second Life is already installed
+;Call CheckWillUninstallV2		# Check if Second Life is already installed
 
-StrCmp $DO_UNINSTALL_V2 "" PRESERVE_DONE
-PRESERVE_DONE:
+;StrCmp $DO_UNINSTALL_V2 "" PRESERVE_DONE
+;PRESERVE_DONE:
 
 Call RemoveProgFilesOnInst		# Remove existing files to prevent certain errors when running the new version of the viewer
 
@@ -306,14 +310,14 @@ FileWrite $9 'start "$INSTDIR\$INSTEXE" "$INSTDIR\$INSTEXE" $SHORTCUT_LANG_PARAM
 FileClose $9
 
 # Write registry
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "" "$INSTDIR"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version" "${VERSION_LONG}"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
-WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Exe" "$INSTEXE"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "Publisher" "Linden Research, Inc."
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLInfoAbout" "http://secondlife.com/whatis/"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLUpdateInfo" "http://secondlife.com/support/downloads/"
-WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "HelpLink" "https://support.secondlife.com/contact-support/"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "" "$INSTDIR"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version" "${VERSION_LONG}"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Shortcut" "$INSTSHORTCUT"
+WriteRegStr HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Exe" "$INSTEXE"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "Publisher" "${PUBLISHER}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLInfoAbout" "${URL_ABOUT}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "URLUpdateInfo" "${URL_DOWNLOAD}"
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "HelpLink" "${URL_ABOUT}"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayName" "$INSTPROG"
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "UninstallString" '"$INSTDIR\uninst.exe"'
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayVersion" "${VERSION_LONG}"
@@ -338,13 +342,13 @@ WriteRegExpandStr HKEY_CLASSES_ROOT "x-grid-location-info\shell\open\command" ""
 # Write out uninstaller
 WriteUninstaller "$INSTDIR\uninst.exe"
 
-# Uninstall existing "Second Life Viewer 2" install if needed.
-StrCmp $DO_UNINSTALL_V2 "" REMOVE_SLV2_DONE
-  ExecWait '"$PROGRAMFILES\SecondLifeViewer2\uninst.exe" /S _?=$PROGRAMFILES\SecondLifeViewer2'
-  Delete "$PROGRAMFILES\SecondLifeViewer2\uninst.exe"	# With _? option above, uninst.exe will be left behind.
-  RMDir "$PROGRAMFILES\SecondLifeViewer2"	# Will remove only if empty.
-
-REMOVE_SLV2_DONE:
+;# Uninstall existing "Second Life Viewer 2" install if needed.
+;StrCmp $DO_UNINSTALL_V2 "" REMOVE_SLV2_DONE
+;  ExecWait '"$PROGRAMFILES\SecondLifeViewer2\uninst.exe" /S _?=$PROGRAMFILES\SecondLifeViewer2'
+;  Delete "$PROGRAMFILES\SecondLifeViewer2\uninst.exe"	# With _? option above, uninst.exe will be left behind.
+;  RMDir "$PROGRAMFILES\SecondLifeViewer2"	# Will remove only if empty.
+;
+;REMOVE_SLV2_DONE:
 
 SectionEnd
 
@@ -368,7 +372,7 @@ SetShellVarContext all
 Call un.CloseSecondLife
 
 # Clean up registry keys and subkeys (these should all be !defines somewhere)
-DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG"
+DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG"
 DeleteRegKey HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG"
 # BUG-2707 Remove entry that disabled SEHOP
 DeleteRegKey HKEY_LOCAL_MACHINE "Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\$INSTEXE"
@@ -425,7 +429,7 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function CheckIfAlreadyCurrent
     Push $0
-    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Linden Research, Inc.\$INSTPROG" "Version"
+    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\$INSTPROG" "Version"
     StrCmp $0 ${VERSION_LONG} 0 continue_install
     StrCmp $SKIP_DIALOGS "true" continue_install
     MessageBox MB_OKCANCEL $(CheckIfCurrentMB) /SD IDOK IDOK continue_install
@@ -443,20 +447,20 @@ FunctionEnd
 ;; Don't want to end up with SecondLifeViewer2 and SecondLifeViewer installations
 ;;  existing side by side with no indication on which to use.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-Function CheckWillUninstallV2
-
-  StrCpy $DO_UNINSTALL_V2 ""
-
-  StrCmp $SKIP_DIALOGS "true" 0 CHECKV2_DONE
-  StrCmp $INSTDIR "$PROGRAMFILES\SecondLifeViewer2" CHECKV2_DONE	# Don't uninstall our own install dir.
-  IfFileExists "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" CHECKV2_FOUND CHECKV2_DONE
-
-CHECKV2_FOUND:
-  StrCpy $DO_UNINSTALL_V2 "true"
-
-CHECKV2_DONE:
-
-FunctionEnd
+;Function CheckWillUninstallV2
+;
+;  StrCpy $DO_UNINSTALL_V2 ""
+;
+;  StrCmp $SKIP_DIALOGS "true" 0 CHECKV2_DONE
+;  StrCmp $INSTDIR "$PROGRAMFILES\SecondLifeViewer2" CHECKV2_DONE	# Don't uninstall our own install dir.
+;  IfFileExists "$PROGRAMFILES\SecondLifeViewer2\uninst.exe" CHECKV2_FOUND CHECKV2_DONE
+;
+;CHECKV2_FOUND:
+;  StrCpy $DO_UNINSTALL_V2 "true"
+;
+;CHECKV2_DONE:
+;
+;FunctionEnd
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Close the program, if running. Modifies no variables.
@@ -558,8 +562,8 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function RemoveProgFilesOnInst
 
-# Remove old SecondLife.exe to invalidate any old shortcuts to it that may be in non-standard locations. See MAINT-3575
-Delete "$INSTDIR\SecondLife.exe"
+# Remove old Catznip.exe to invalidate any old shortcuts to it that may be in non-standard locations. See MAINT-3575
+Delete "$INSTDIR\${PRODUCT_SHORT}.exe"
 
 # Remove old shader files first so fallbacks will work. See DEV-5663
 RMDir /r "$INSTDIR\app_settings\shaders"
@@ -578,7 +582,7 @@ FunctionEnd
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function un.UserSettingsFiles
 
-StrCmp $DO_UNINSTALL_V2 "true" Keep			# Don't remove user's settings files on auto upgrade
+;StrCmp $DO_UNINSTALL_V2 "true" Keep			# Don't remove user's settings files on auto upgrade
 
 # Ask if user wants to keep data files or not
 MessageBox MB_YESNO|MB_ICONQUESTION $(RemoveDataFilesMB) IDYES Remove IDNO Keep
@@ -588,7 +592,7 @@ Push $0
 Push $1
 Push $2
 
-  DetailPrint "Deleting Second Life data files"
+  DetailPrint "Deleting Catznip data files"
 
   StrCpy $0 0	# Index number used to iterate via EnumRegKey
 
@@ -602,18 +606,18 @@ Push $2
 # Required since ProfileImagePath is of type REG_EXPAND_SZ
     ExpandEnvStrings $2 $2
 
-# Delete files in \Users\<User>\AppData\Roaming\SecondLife
+# Delete files in \Users\<User>\AppData\Roaming\${PRODUCT_SHORT}
 # Remove all settings files but leave any other .txt files to preserve the chat logs
-;    RMDir /r "$2\AppData\Roaming\SecondLife\logs"
-    RMDir /r "$2\AppData\Roaming\SecondLife\browser_profile"
-    RMDir /r "$2\AppData\Roaming\SecondLife\user_settings"
-    Delete  "$2\AppData\Roaming\SecondLife\*.xml"
-    Delete  "$2\AppData\Roaming\SecondLife\*.bmp"
-    Delete  "$2\AppData\Roaming\SecondLife\search_history.txt"
-    Delete  "$2\AppData\Roaming\SecondLife\plugin_cookies.txt"
-    Delete  "$2\AppData\Roaming\SecondLife\typed_locations.txt"
-# Delete files in \Users\<User>\AppData\Local\SecondLife
-    RmDir /r  "$2\AppData\Local\SecondLife"							#Delete the cache folder
+;    RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\logs"
+    RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\browser_profile"
+    RMDir /r "$2\AppData\Roaming\${PRODUCT_SHORT}\user_settings"
+    Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\*.xml"
+    Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\*.bmp"
+    Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\search_history.txt"
+    Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\plugin_cookies.txt"
+    Delete  "$2\AppData\Roaming\${PRODUCT_SHORT}\typed_locations.txt"
+# Delete files in \Users\<User>\AppData\Local\${PRODUCT_SHORT}
+    RmDir /r  "$2\AppData\Local\${PRODUCT_SHORT}"							#Delete the cache folder
 
   CONTINUE:
     IntOp $0 $0 + 1
@@ -624,11 +628,11 @@ Pop $2
 Pop $1
 Pop $0
 
-# Delete files in ProgramData\Secondlife
+# Delete files in ProgramData\${PRODUCT_SHORT}
 Push $0
   ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
   StrCmp $0 "" +2
-  RMDir /r "$0\SecondLife"
+  RMDir /r "$0\${PRODUCT_SHORT}"
 Pop $0
 
 Keep:
@@ -653,14 +657,14 @@ Delete "$INSTDIR\dronesettings.ini"
 Delete "$INSTDIR\message_template.msg"
 Delete "$INSTDIR\newview.pdb"
 Delete "$INSTDIR\newview.map"
-Delete "$INSTDIR\SecondLife.pdb"
-Delete "$INSTDIR\SecondLife.map"
+Delete "$INSTDIR\${PRODUCT_SHORT}.pdb"
+Delete "$INSTDIR\${PRODUCT_SHORT}.map"
 Delete "$INSTDIR\comm.dat"
 Delete "$INSTDIR\*.glsl"
 Delete "$INSTDIR\motions\*.lla"
 Delete "$INSTDIR\trial\*.html"
 Delete "$INSTDIR\newview.exe"
-Delete "$INSTDIR\SecondLife.exe"
+Delete "$INSTDIR\${PRODUCT_SHORT}.exe"
 
 # MAINT-3099 workaround - prevent these log files, if present, from causing a user alert
 Delete "$INSTDIR\VivoxVoiceService-*.log"
@@ -747,7 +751,7 @@ FunctionEnd
 ;# Required since ProfileImagePath is of type REG_EXPAND_SZ
 ;    ExpandEnvStrings $2 $2
 ;
-;    RMDir /r "$2\Application Data\SecondLife\"
+;    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\"
 ;
 ;  CONTINUE:
 ;    IntOp $0 $0 + 1
@@ -758,11 +762,11 @@ FunctionEnd
 ;Pop $1
 ;Pop $0
 ;
-;# Copy files in Documents and Settings\All Users\SecondLife
+;# Copy files in Documents and Settings\All Users\${PRODUCT_SHORT}
 ;Push $0
 ;    ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders" "Common AppData"
 ;    StrCmp $0 "" +2
-;    RMDir /r "$2\Application Data\SecondLife\"
+;    RMDir /r "$2\Application Data\${PRODUCT_SHORT}\"
 ;Pop $0
 ;
 ;FunctionEnd

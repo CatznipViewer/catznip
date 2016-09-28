@@ -45,7 +45,7 @@
 // Globals
 //
 
-LLDirPicker LLDirPicker::sInstance;
+//LLDirPicker LLDirPicker::sInstance;
 
 #if LL_WINDOWS
 #include <shlobj.h>
