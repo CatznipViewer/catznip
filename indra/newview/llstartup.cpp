@@ -3592,58 +3592,48 @@ void transition_back_to_login_panel(const std::string& emsg)
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
 
-// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
-class LLHTTPViewerDataResponder : public LLHTTPClient::Responder
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+void fetch_viewer_data_cb(const LLSD& sdData)
 {
-public:
-	LLHTTPViewerDataResponder() {}
-
-	/*virtual*/ void httpSuccess()
+	// Message of the day
+	if (sdData.has("motd"))
 	{
-		const LLSD& sdData = getContent();
+		gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
+	}
 
-		// Message of the day
-		if (sdData.has("motd"))
+	// Introduction text for the support/beta group(s)
+	if ( (sdData.has("groups")) && (sdData["groups"].isArray()) )
+	{
+		const LLSD& sdGroups = sdData["groups"];
+		for (LLSD::array_const_iterator itGroup = sdGroups.beginArray(), endGroup = sdGroups.endArray(); itGroup != endGroup; ++itGroup)
 		{
-			gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
-		}
-
-		// Introduction text for the support/beta group(s)
-		if ( (sdData.has("groups")) && (sdData["groups"].isArray()) )
-		{
-			const LLSD& sdGroups = sdData["groups"];
-			for (LLSD::array_const_iterator itGroup = sdGroups.beginArray(), endGroup = sdGroups.endArray(); itGroup != endGroup; ++itGroup)
+			const LLSD& sdGroupInfo = *itGroup;
+			if ( (sdGroupInfo.isMap()) && (sdGroupInfo.has("uuid")) && (sdGroupInfo.has("prelude")) )
 			{
-				const LLSD& sdGroupInfo = *itGroup;
-				if ( (sdGroupInfo.isMap()) && (sdGroupInfo.has("uuid")) && (sdGroupInfo.has("prelude")) )
+				const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
+				if (idGroup.notNull())
 				{
-					const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
-					if (idGroup.notNull())
-					{
-						gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
-					}
+					gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
 				}
 			}
 		}
+	}
 
-		// Feedback button
-		if (sdData.has("feedback"))
+	// Feedback button
+	if (sdData.has("feedback"))
+	{
+		const LLSD& sdFeedbackInfo = sdData["feedback"];
+		if (sdFeedbackInfo.has("url"))
 		{
-			const LLSD& sdFeedbackInfo = sdData["feedback"];
-			if (sdFeedbackInfo.has("url"))
-			{
-				gAgent.mFeedbackInfo = sdFeedbackInfo;
-			}
+			gAgent.mFeedbackInfo = sdFeedbackInfo;
 		}
 	}
-};
+}
 
 void fetch_viewer_data()
 {
 	const std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
-	
 	LL_INFOS() << "Fetching viewer data from " << strURL << LL_ENDL;
-	
-	LLHTTPClient::get(strURL, new LLHTTPViewerDataResponder());
+	LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpGet(strURL, boost::bind(fetch_viewer_data_cb, _1));
 }
 // [/SL:KB]
