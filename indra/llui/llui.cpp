@@ -599,8 +599,11 @@ namespace LLInitParam
 
 		U8 fontstyle = 0;
 		fontstyle = LLFontGL::getStyleFromString(style());
-		LLFontDescriptor desc(name(), size(), fontstyle);
-		const LLFontGL* fontp = LLFontGL::getFont(desc);
+//		LLFontDescriptor desc(name(), size(), fontstyle);
+//		const LLFontGL* fontp = LLFontGL::getFont(desc);
+// [SL:KB] - Patch: UI-Font | Checked: 2014-02-27 (Catznip-3.6)
+ 		const LLFontGL* fontp = LLFontGL::getFont(LLFontDescriptor::normalize(name(), size(), fontstyle));
+// [/SL:KB]
 		if (fontp)
 		{
 			updateValue(fontp);

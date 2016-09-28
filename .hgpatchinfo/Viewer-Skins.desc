@@ -1,0 +1,21 @@
+[Viewer/Skins]
+- added   : skin switching + per-skin theme (=colour scheme/general overrides) support
+- added   : concept of "skin themes" where a skin comes in different versions, options and/or colours that all share a common set of (base) files
+    -> i.e. all the different Starlight skins have all of the XUI files in common, along with some of the textures so they work better as a Starlight skin + colour themes
+- added   : per-skin and per-theme (non-persistant) settings overrides
+    -> by default settings will be loaded from the settings.xml file in the current skin and current theme folder
+    -> settings are applied *after* the session specific options
+- changed : include the theme name in the user agent used by the internal browser
+
+[UI/Font]
+- added : separate font options for nearby chat, IMs and notecards
+    -> see 'FontOverrideMain', 'FontOverrideMonospace' and 'FontOverrideEditor' debug settings
+- added : additional user interface and monospace font options
+    -> Open Dyslexic Copyright (C) 2012 Abelardo Gonzalez
+    -> PT Sans Copyright (c) 2009 ParaType Ltd.
+    -> Source Code Pro Copyright (C) 2010, 2012 Adobe Systems Incorporated
+    -> Source Sans Pro Copyright (C) 2010, 2012 Adobe Systems Incorporated
+    -> Ubuntu Copyright (C) 2010, 2011 Canonical Ltd.
+- added : ability to change the font of a text editor control at run-time
+    -> ported over from the Chat-NearbyChat patch branch
+- fixed : floater title is positioned too far down for some of the different fonts
