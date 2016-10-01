@@ -36,6 +36,9 @@
 #include "llinventorymodelbackgroundfetch.h"
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+#include "llcombobox.h"
+// [/SL:KB]
 #include "lloutfitobserver.h"
 #include "lloutfitgallery.h"
 #include "lloutfitslist.h"
@@ -85,7 +88,14 @@ BOOL LLPanelOutfitsInventory::postBuild()
 		LLInventoryModelBackgroundFetch::instance().start(outfits_cat);
 	}
 	
-	mSaveComboBtn.reset(new LLSaveOutfitComboBtn(this, true));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	mMyOutfitsPanel->getChild<LLUICtrl>("wear_outfit_btn")->setToolTip(getString("wear_outfit_tooltip"));
+	mMyOutfitsPanel->getChild<LLUICtrl>("wear_items_btn")->setToolTip(getString("wear_items_tooltip"));
+
+	mOutfitsSaveComboBtn.reset(new LLSaveOutfitComboBtn(mMyOutfitsPanel, true));
+	mWearingSaveComboBtn.reset(new LLSaveOutfitComboBtn(mCurrentOutfitPanel, true));
+// [/SL:KB]
+//	mSaveComboBtn.reset(new LLSaveOutfitComboBtn(this, true));
 
 	return TRUE;
 }
@@ -135,10 +145,10 @@ void LLPanelOutfitsInventory::onOpen(const LLSD& key)
 
 void LLPanelOutfitsInventory::updateVerbs()
 {
-	if (mListCommands)
-	{
+//	if (mListCommands)
+//	{
 		updateListCommands();
-	}
+//	}
 }
 
 // virtual
@@ -165,25 +175,50 @@ void LLPanelOutfitsInventory::onSearchEdit(const std::string& string)
 	mActivePanel->setFilterSubString(string);
 }
 
-void LLPanelOutfitsInventory::onWearButtonClick()
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+void LLPanelOutfitsInventory::onWearItemsClick()
 {
-	if(isOutfitsListPanelActive())
+	if (mMyOutfitsPanel->hasItemSelected())
 	{
-		if (mMyOutfitsPanel->hasItemSelected())
-		{
-			mMyOutfitsPanel->wearSelectedItems();
-		}
-		else
+		mMyOutfitsPanel->wearSelectedItems();
+	}
+}
+
+void LLPanelOutfitsInventory::onWearOutfitClick()
+{
+	if (!mMyOutfitsPanel->hasItemSelected())
+	{
+		const std::string strAction = mMyOutfitsPanel->getChild<LLUICtrl>("wear_outfit_btn")->getValue().asString();
+		if ( (strAction.empty()) || ("outfit_replace" == strAction) )
 		{
 			mMyOutfitsPanel->performAction("replaceoutfit");
 		}
+		else if ("outfit_add" == strAction)
+		{
+			mMyOutfitsPanel->performAction("addtooutfit");
+		}
 	}
-	else if(isOutfitsGalleryPanelActive())
-	{
-		mOutfitGalleryPanel->wearSelectedOutfit();
-	}
-
 }
+// [/SL:KB]
+//void LLPanelOutfitsInventory::onWearButtonClick()
+//{
+//	if(isOutfitsListPanelActive())
+//	{
+//		if (mMyOutfitsPanel->hasItemSelected())
+//		{
+//			mMyOutfitsPanel->wearSelectedItems();
+//		}
+//		else
+//		{
+//			mMyOutfitsPanel->performAction("replaceoutfit");
+//		}
+//	}
+//	else if(isOutfitsGalleryPanelActive())
+//	{
+//		mOutfitGalleryPanel->wearSelectedOutfit();
+//	}
+//
+//}
 
 bool LLPanelOutfitsInventory::onSaveCommit(const LLSD& notification, const LLSD& response)
 {
@@ -241,8 +276,12 @@ LLPanelOutfitsInventory* LLPanelOutfitsInventory::findInstance()
 
 void LLPanelOutfitsInventory::initListCommandsHandlers()
 {
-	mListCommands = getChild<LLPanel>("bottom_panel");
-	mListCommands->childSetAction("wear_btn", boost::bind(&LLPanelOutfitsInventory::onWearButtonClick, this));
+//	mListCommands = getChild<LLPanel>("bottom_panel");
+//	mListCommands->childSetAction("wear_btn", boost::bind(&LLPanelOutfitsInventory::onWearButtonClick, this));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	mMyOutfitsPanel->getChild<LLUICtrl>("wear_outfit_btn")->setCommitCallback(boost::bind(&LLPanelOutfitsInventory::onWearOutfitClick, this));
+	mMyOutfitsPanel->getChild<LLUICtrl>("wear_items_btn")->setCommitCallback(boost::bind(&LLPanelOutfitsInventory::onWearItemsClick, this));
+// [/SL:KB]
 	mMyOutfitsPanel->childSetAction("trash_btn", boost::bind(&LLPanelOutfitsInventory::onTrashButtonClick, this));
 	mOutfitGalleryPanel->childSetAction("trash_btn", boost::bind(&LLPanelOutfitsInventory::onTrashButtonClick, this));
 }
@@ -251,16 +290,30 @@ void LLPanelOutfitsInventory::updateListCommands()
 {
 	bool trash_enabled = isActionEnabled("delete");
 	bool wear_enabled =  isActionEnabled("wear");
-	bool wear_visible = !isCOFPanelActive();
+//	bool wear_visible = !isCOFPanelActive();
 	bool make_outfit_enabled = isActionEnabled("save_outfit");
 
-	LLButton* wear_btn = mListCommands->getChild<LLButton>("wear_btn");
+//	LLButton* wear_btn = mListCommands->getChild<LLButton>("wear_btn");
 	mMyOutfitsPanel->childSetEnabled("trash_btn", trash_enabled);
 	mOutfitGalleryPanel->childSetEnabled("trash_btn", trash_enabled);
-	wear_btn->setEnabled(wear_enabled);
-	wear_btn->setVisible(wear_visible);
-	mSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
-	wear_btn->setToolTip(getString((!isOutfitsGalleryPanelActive() && mMyOutfitsPanel->hasItemSelected()) ? "wear_items_tooltip" : "wear_outfit_tooltip"));
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLUICtrl* pWearOutfit = mMyOutfitsPanel->getChild<LLUICtrl>("wear_outfit_btn");
+	pWearOutfit->setVisible( (wear_enabled) && (!mMyOutfitsPanel->hasItemSelected()) );
+	pWearOutfit->setEnabled(wear_enabled);
+//	wear_btn->setToolTip(getString((!isOutfitsGalleryPanelActive() && mMyOutfitsPanel->hasItemSelected()) ? "wear_items_tooltip" : "wear_outfit_tooltip"));
+	LLUICtrl* pWearItems = mMyOutfitsPanel->getChild<LLUICtrl>("wear_items_btn");
+	pWearItems->setVisible(!pWearOutfit->getVisible());
+	pWearItems->setEnabled(wear_enabled);
+
+	mCurrentOutfitPanel->getChild<LLUICtrl>("take_off_btn")->setEnabled(isActionEnabled("take_off"));
+
+	mOutfitsSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
+	mWearingSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
+// [/SL:KB]
+//	wear_btn->setEnabled(wear_enabled);
+//	wear_btn->setVisible(wear_visible);
+//	mSaveComboBtn->setMenuItemEnabled("save_outfit", make_outfit_enabled);
+//	wear_btn->setToolTip(getString((!isOutfitsGalleryPanelActive() && mMyOutfitsPanel->hasItemSelected()) ? "wear_items_tooltip" : "wear_outfit_tooltip"));
 }
 
 void LLPanelOutfitsInventory::onTrashButtonClick()
@@ -291,7 +344,10 @@ void LLPanelOutfitsInventory::initTabPanels()
 	mCurrentOutfitPanel = findChild<LLPanelWearing>(COF_TAB_NAME);
 	mCurrentOutfitPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
-	mMyOutfitsPanel = findChild<LLOutfitsList>(OUTFITS_TAB_NAME);
+//	mMyOutfitsPanel = findChild<LLOutfitsList>(OUTFITS_TAB_NAME);
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
+	mMyOutfitsPanel = findChild<LLPanelOutfitsTab>(OUTFITS_TAB_NAME);
+// [/SL:KB]
 	mMyOutfitsPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
     mOutfitGalleryPanel = findChild<LLOutfitGallery>(OUTFIT_GALLERY_TAB_NAME);

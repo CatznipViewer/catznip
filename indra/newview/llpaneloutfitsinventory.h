@@ -39,6 +39,9 @@ class LLMenuGL;
 class LLSidepanelAppearance;
 class LLTabContainer;
 class LLSaveOutfitComboBtn;
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-3.0)
+class LLPanelOutfitsTab;
+// [/SL:KB]
 
 class LLPanelOutfitsInventory : public LLPanel
 {
@@ -65,7 +68,11 @@ protected:
 private:
 	LLTabContainer*			mAppearanceTabs;
 	std::string 			mFilterSubString;
-	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	std::auto_ptr<LLSaveOutfitComboBtn> mOutfitsSaveComboBtn;
+	std::auto_ptr<LLSaveOutfitComboBtn> mWearingSaveComboBtn;
+// [/SL:KB]
+//	std::auto_ptr<LLSaveOutfitComboBtn> mSaveComboBtn;
 
 	//////////////////////////////////////////////////////////////////////////////////
 	// tab panels                                                                   //
@@ -78,7 +85,10 @@ protected:
 
 private:
 	LLPanelAppearanceTab*	mActivePanel;
-	LLOutfitsList*			mMyOutfitsPanel;
+//	LLOutfitsList*			mMyOutfitsPanel;
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
+	LLPanelOutfitsTab*		mMyOutfitsPanel;
+// [/SL:KB]
     LLOutfitGallery*        mOutfitGalleryPanel;
 	LLPanelWearing*			mCurrentOutfitPanel;
 
@@ -90,15 +100,19 @@ private:
 protected:
 	void initListCommandsHandlers();
 	void updateListCommands();
-	void onWearButtonClick();
-	void showGearMenu();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-08-10 (Catznip-3.3)
+	void onWearItemsClick();
+	void onWearOutfitClick();
+// [/SL:KB]
+//	void onWearButtonClick();
+//	void showGearMenu();
 	void onTrashButtonClick();
 	bool isActionEnabled(const LLSD& userdata);
 	void setWearablesLoading(bool val);
 	void onWearablesLoaded();
 	void onWearablesLoading();
 private:
-	LLPanel*					mListCommands;
+//	LLPanel*					mListCommands;
 	LLMenuGL*					mMenuAdd;
 	// List Commands                                                                //
 	//////////////////////////////////////////////////////////////////////////////////
