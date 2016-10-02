@@ -71,6 +71,9 @@ public:
 	// asset system. :(
 	void refreshFromInventory(const LLUUID& item_id = LLUUID::null);
 
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+	void callbackSaveComplete();
+// [/SL:KB]
 protected:
 
 	void updateTitleButtons();
@@ -78,6 +81,10 @@ protected:
 	bool saveIfNeeded(LLInventoryItem* copyitem = NULL);
 
 	void deleteNotecard();
+
+// [SL:KB] - Patch: Build-AssetRecovery | Checked: 2013-07-28 (Catznip-3.6)
+	/*virtual*/ void onBackupTimer();
+// [/SL:KB]
 
 	static void onLoadComplete(LLVFS *vfs,
 							   const LLUUID& asset_uuid,
@@ -98,7 +105,7 @@ protected:
     static void finishInventoryUpload(LLUUID itemId, LLUUID newAssetId, LLUUID newItemId);
 
 protected:
-	LLViewerTextEditor* mEditor;
+//	LLViewerTextEditor* mEditor;
 	LLButton* mSaveBtn;
 
 	LLUUID mAssetID;

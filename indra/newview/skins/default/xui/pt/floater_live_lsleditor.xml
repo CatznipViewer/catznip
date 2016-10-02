@@ -25,8 +25,8 @@
 		Carregando...
 	</floater.string>
 	<button label="Resetar" label_selected="Resetar" name="Reset"/>
-	<check_box initial_value="true" label="Correndo" name="running"/>
-	<check_box initial_value="true" label="Mono" left="86" name="mono"/>
+	<check_box initial_value="true" label="Correndo" name="running"  left="370"/>
+	<check_box initial_value="true" label="Mono" name="mono"/>
 	<check_box label="Usar experiência:" name="enable_xp"/>
 	<button label="&gt;" name="view_profile"/>
 </floater>

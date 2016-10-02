@@ -2,7 +2,7 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="570"
+ height="450"
  layout="topleft"
  min_height="271"
  min_width="290"
@@ -17,12 +17,12 @@
     </floater.string>
     <panel
      follows="left|top|right|bottom"
-     height="522"
+     height="512"
      layout="topleft"
-     left="10"
+     left="3"
      name="script panel"
-     top="42"
-     width="497" />
+     top="16"
+     right="-8" />
     <icon
      follows="top|right"
      height="18"
@@ -37,25 +37,24 @@
      type="string"
      length="1"
      follows="left|top"
-     font="SansSerif"
-     height="19"
+     halign="right"
+     height="21"
      layout="topleft"
-     left="13"
+     left="180"
      name="desc txt"
      top="19"
      width="80">
-        Description:
+        Description
     </text>
     <line_editor
      border_style="line"
-     border_thickness="1"
+     border_thickness="0"
      follows="left|top|right"
-     font="SansSerif"
-     height="19"
+     height="17"
      layout="topleft"
      left_delta="80"
      max_length_bytes="127"
      name="desc"
      top_delta="0"
-     width="394" />
+     right="-5" />
 </floater>

@@ -4,6 +4,6 @@
 		SKRYPT: [NAME]
 	</floater.string>
 	<text name="desc txt">
-		Opis:
+		Opis
 	</text>
 </floater>
