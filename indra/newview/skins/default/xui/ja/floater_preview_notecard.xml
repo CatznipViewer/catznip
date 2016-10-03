@@ -9,12 +9,14 @@
 	<floater.string name="Title">
 		ノートカード： [NAME]
 	</floater.string>
-	<text name="desc txt">
+	<text name="desc txt" width="30">
 		説明：
 	</text>
 	<text_editor name="Notecard Editor">
 		ローディング．．．
 	</text_editor>
+	<panel name="bottom_panel">
 	<button label="保存" label_selected="保存" name="Save"/>
 	<button label="削除" label_selected="削除" name="Delete"/>
+	</panel>
 </floater>
