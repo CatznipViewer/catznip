@@ -4,6 +4,7 @@
  * $LicenseInfo:firstyear=2006&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -138,7 +139,14 @@ void LLPanelGroup::onOpen(const LLSD& key)
 		if(panel_notices)
 			panel_notices->refreshNotices();
 	}
-
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+	else if(str_action == "view_notices")
+	{
+		setGroupID(group_id);
+		getChild<LLAccordionCtrl>("groups_accordion")->expandTab("group_notices_tab");
+		return;
+	}
+// [/SL:KB]
 }
 
 BOOL LLPanelGroup::postBuild()

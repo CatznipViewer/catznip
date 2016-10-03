@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -576,6 +577,12 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 	{
 		return LLTrans::getString("TooltipAgentOfferTeleport");
 	}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+	if (LLStringUtil::endsWith(url, "/requestteleport"))
+	{
+		return LLTrans::getString("TooltipAgentRequestTeleport");
+	}
+// [/SL:KB]
 	if (LLStringUtil::endsWith(url, "/requestfriend"))
 	{
 		return LLTrans::getString("TooltipAgentRequestFriend");
@@ -662,6 +669,12 @@ std::string localize_slapp_label(const std::string& url, const std::string& full
 	{
 		return LLTrans::getString("SLappAgentOfferTeleport") + " " + full_name;
 	}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+	if (LLStringUtil::endsWith(url, "/requestteleport"))
+	{
+		return LLTrans::getString("SLappAgentRequestTeleport") + " " + full_name;
+	}
+// [/SL:KB]
 	if (LLStringUtil::endsWith(url, "/requestfriend"))
 	{
 		return LLTrans::getString("SLappAgentRequestFriend") + " " + full_name;

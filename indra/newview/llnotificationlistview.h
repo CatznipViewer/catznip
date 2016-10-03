@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2015&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2015, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +44,10 @@ public:
     ~LLNotificationListView();
     friend class LLUICtrlFactory;
 
-    virtual bool addNotification(LLNotificationListItem * item);
+// [SL:KB] - Patch: Notification-Misc | Checked: 2016-01-01 (Catznip-4.0)
+	virtual bool addNotification(LLNotificationListItem * item, bool rearrange);
+// [/SL:KB]
+//    virtual bool addNotification(LLNotificationListItem * item);
 };
 
 #endif

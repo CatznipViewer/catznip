@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2015&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2015, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -90,8 +91,8 @@ BOOL LLNotificationListItem::postBuild()
     mCloseBtn->setClickedCallback(boost::bind(&LLNotificationListItem::onClickCloseBtn,this));
     mCloseBtnExp->setClickedCallback(boost::bind(&LLNotificationListItem::onClickCloseBtn,this));
 
-    mCondensedViewPanel = getChild<LLPanel>("layout_panel_condensed_view");
-    mExpandedViewPanel = getChild<LLPanel>("layout_panel_expanded_view");
+    mCondensedViewPanel = getChild<LLPanel>("panel_condensed_view");
+    mExpandedViewPanel = getChild<LLPanel>("panel_expanded_view");
 
     std::string expanded_height_str = getString("item_expanded_height");
     std::string condensed_height_str = getString("item_condensed_height");
@@ -224,6 +225,13 @@ void LLNotificationListItem::reshapeNotification()
     }
 }
 
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+bool LLNotificationListItem::isExpanded() const
+{
+	return mExpandedViewPanel->getVisible();
+}
+// [/SL:KB]
+
 void LLNotificationListItem::setExpanded(BOOL value)
 {
     mCondensedViewPanel->setVisible(!value);
@@ -232,6 +240,9 @@ void LLNotificationListItem::setExpanded(BOOL value)
 
     if (value)
     {
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+		mNoticeTextExp->expandAndReflow();
+// [/SL:KB]
        this->reshape(width, mNoticeTextExp->getRect().getHeight() + mExpandedHeight, FALSE);
     }
     else

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -396,6 +397,13 @@ protected:
 	 */
 	virtual void createPopupMenu();
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	/**
+	 * Enables chiclet menu items.
+	 */
+	static bool enableMenuItem(const LLSD& user_data, const LLUUID& idSession);
+// [/SL:KB]
+
 	/**
 	 * Processes clicks on chiclet popup menu.
 	 */
@@ -440,12 +448,22 @@ protected:
 	 */
 	virtual void createPopupMenu();
 
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	/**
+	 * Enables chiclet menu items.
+	 */
+	static bool enableMenuItem(const LLSD& user_data, bool fIsTaskOffer, const LLUUID& idSession);
+// [/SL:KB]
+
 	/**
 	 * Processes clicks on chiclet popup menu.
 	 */
 	virtual void onMenuItemClicked(const LLSD& user_data);
 
 private:
+// [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
+	bool mIsTaskOffer;
+// [/SL:KB]
 	LLChicletInvOfferIconCtrl* mChicletIconCtrl;
 };
 
