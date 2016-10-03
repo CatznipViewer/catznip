@@ -2879,10 +2879,12 @@ void handle_texture_refresh()
 	for (texture_list_t::const_iterator itTexture = idTextures.begin(); itTexture != idTextures.end(); ++itTexture)
 	{
 		LLViewerFetchedTexture* pTexture = gTextureList.findImage(itTexture->first, TEX_LIST_STANDARD);
-		if (pTexture)
+		if ( (pTexture) && (FTT_LOCAL_FILE != pTexture->getFTType()) )
 		{
 			LLAppViewer::getTextureCache()->removeFromCache(pTexture->getID());
+			pTexture->clearFetcher();
 			pTexture->clearFetchedResults();
+			pTexture->setIsMissingAsset(0);
 
 			if (itTexture->second)
 			{

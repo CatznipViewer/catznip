@@ -19,6 +19,7 @@
 #include "llagent.h"
 #include "llfloaterfeedback.h"
 #include "llmediactrl.h"
+#include "llweb.h"
 
 // =========================================================================
 // LLFloaterFeedback class
@@ -56,7 +57,7 @@ BOOL LLFloaterFeedback::postBuild()
 	 */
 	m_pWebBrowser = getChild<LLMediaCtrl>("floater_feedback_browser");
 	if (sdFeedbackInfo.has("url"))
-		m_pWebBrowser->navigateTo(sdFeedbackInfo["url"].asString());
+		m_pWebBrowser->navigateTo(LLWeb::expandURLSubstitutions(sdFeedbackInfo["url"], LLSD().with("AGENT_NAME", gAgentUsername)));
 
 	return TRUE;
 }
