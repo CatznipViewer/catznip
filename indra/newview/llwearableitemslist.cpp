@@ -129,7 +129,7 @@ void LLPanelWearableOutfitItem::updateItem(const std::string& name,
 	if (mWornIndicationEnabled && LLAppearanceMgr::instance().isLinkedInCOF(mInventoryItemUUID))
 	{
 //		search_label += LLTrans::getString("worn");
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-2.6
 		switch (mInventoryItemAssetType)
 		{
 			case LLAssetType::AT_OBJECT:
@@ -649,7 +649,7 @@ bool LLWearableItemCreationDateComparator::doCompare(const LLPanelInventoryListI
 	return date1 > date2;
 }
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 // ============================================================================
 // LLWearableItemAppearanceComparator
 //
@@ -660,71 +660,74 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 {
 	if (sSortOrder.empty())
 	{
-		// Head
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  2)); // Skull
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 15)); // Left Eyeball
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 16)); // Right Eyeball
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 13)); // Left Ear
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 14)); // Right Ear
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 17)); // Nose
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 11)); // Mouth
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 12)); // Chin
+		sSortOrder =
+			{
+				// Head
+				{ LLAssetType::AT_OBJECT,  2 }, // Skull
+				{ LLAssetType::AT_OBJECT, 15 }, // Left Eyeball
+				{ LLAssetType::AT_OBJECT, 16 }, // Right Eyeball
+				{ LLAssetType::AT_OBJECT, 13 }, // Left Ear
+				{ LLAssetType::AT_OBJECT, 14 }, // Right Ear
+				{ LLAssetType::AT_OBJECT, 17 }, // Nose
+				{ LLAssetType::AT_OBJECT, 11 }, // Mouth
+				{ LLAssetType::AT_OBJECT, 12 }, // Chin
 
-		// Torso
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_JACKET));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHIRT));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERSHIRT));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_GLOVES));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  1)); // Chest
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  9)); // Spine
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 39)); // Neck
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 29)); // Left Pec
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 30)); // Right Pec
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  3)); // Left Shoulder
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  4)); // Right Shoulder
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 20)); // L Upper Arm
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 18)); // R Upper Arm
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 21)); // L Forearm
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 19)); // R Forearm
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  5)); // Left Hand
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  6)); // Right Hand
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 25)); // Left Hip
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 22)); // Right Hip
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 28)); // Stomach
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 10)); // Pelvis
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 40)); // Avatar Center
+				// Torso
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_JACKET },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERSHIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_GLOVES },
+				{ LLAssetType::AT_OBJECT,  1 }, // Chest
+				{ LLAssetType::AT_OBJECT,  9 }, // Spine
+				{ LLAssetType::AT_OBJECT, 39 }, // Neck
+				{ LLAssetType::AT_OBJECT, 29 }, // Left Pec
+				{ LLAssetType::AT_OBJECT, 30 }, // Right Pec
+				{ LLAssetType::AT_OBJECT,  3 }, // Left Shoulder
+				{ LLAssetType::AT_OBJECT,  4 }, // Right Shoulder
+				{ LLAssetType::AT_OBJECT, 20 }, // L Upper Arm
+				{ LLAssetType::AT_OBJECT, 18 }, // R Upper Arm
+				{ LLAssetType::AT_OBJECT, 21 }, // L Forearm
+				{ LLAssetType::AT_OBJECT, 19 }, // R Forearm
+				{ LLAssetType::AT_OBJECT,  5 }, // Left Hand
+				{ LLAssetType::AT_OBJECT,  6 }, // Right Hand
+				{ LLAssetType::AT_OBJECT, 25 }, // Left Hip
+				{ LLAssetType::AT_OBJECT, 22 }, // Right Hip
+				{ LLAssetType::AT_OBJECT, 28 }, // Stomach
+				{ LLAssetType::AT_OBJECT, 10 }, // Pelvis
+				{ LLAssetType::AT_OBJECT, 40 }, // Avatar Center
 
-		// Legs
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERPANTS));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PANTS));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SKIRT));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SOCKS));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHOES));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 26)); // L Upper Leg
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 23)); // R Upper Leg
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 27)); // L Lower Leg
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 24)); // R Lower Leg
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  7)); // Left Foot
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT,  8)); // Right Foot
+				// Legs
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_UNDERPANTS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PANTS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SKIRT },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SOCKS },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_SHOES },
+				{ LLAssetType::AT_OBJECT, 26 }, // L Upper Leg
+				{ LLAssetType::AT_OBJECT, 23 }, // R Upper Leg
+				{ LLAssetType::AT_OBJECT, 27 }, // L Lower Leg
+				{ LLAssetType::AT_OBJECT, 24 }, // R Lower Leg
+				{ LLAssetType::AT_OBJECT,  7 }, // Left Foot
+				{ LLAssetType::AT_OBJECT,  8 }, // Right Foot
 
-		// HUD attachments
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 34)); // Top Left
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 33)); // Top
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 32)); // Top Right
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 35)); // Center
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 31)); // Center 2
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 36)); // Bottom Left
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 37)); // Bottom
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_OBJECT, 38)); // Bottom Right
+				// HUD attachments
+				{ LLAssetType::AT_OBJECT, 34 }, // Top Left
+				{ LLAssetType::AT_OBJECT, 33 }, // Top
+				{ LLAssetType::AT_OBJECT, 32 }, // Top Right
+				{ LLAssetType::AT_OBJECT, 35 }, // Center
+				{ LLAssetType::AT_OBJECT, 31 }, // Center 2
+				{ LLAssetType::AT_OBJECT, 36 }, // Bottom Left
+				{ LLAssetType::AT_OBJECT, 37 }, // Bottom
+				{ LLAssetType::AT_OBJECT, 38 }, // Bottom Right
 
-		// Misc
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_HAIR));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_EYES));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SHAPE));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PHYSICS));
-		sSortOrder.push_back(sortorder_pair_t(LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SKIN));
+				// Misc
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_TATTOO },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_ALPHA },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_HAIR },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_EYES },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SHAPE },
+				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_PHYSICS },
+				{ LLAssetType::AT_BODYPART, (int)LLWearableType::WT_SKIN }
+			};
 	}
 }
 
@@ -732,8 +735,7 @@ LLWearableItemAppearanceComparator::sortorder_pair_t LLWearableItemAppearanceCom
 {
 	sortorder_pair_t sortOrder(LLAssetType::AT_NONE, -1);
 
-	const LLViewerInventoryItem* pInvItem = pListItem->getItem();
-	if (pInvItem)
+	if (const LLViewerInventoryItem* pInvItem = pListItem->getItem())
 	{
 		sortOrder.first = pInvItem->getType();
 		switch (sortOrder.first)
@@ -775,6 +777,37 @@ bool LLWearableItemAppearanceComparator::doCompare(const LLPanelInventoryListIte
 	return sortLHS < sortRHS;
 }
 
+LLWearableItemComplexityComparator::LLWearableItemComplexityComparator()
+	: LLWearableItemAppearanceComparator()
+{
+}
+
+bool LLWearableItemComplexityComparator::doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const
+{
+	LLAssetType::EType typeLHS = pLHS->getType();
+	LLAssetType::EType typeRHS = pRHS->getType();
+
+	if ( (LLAssetType::AT_OBJECT == typeLHS) && (LLAssetType::AT_OBJECT == typeRHS) )
+	{
+		if (isAgentAvatarValid())
+		{
+			const LLViewerObject* pObjLHS = gAgentAvatarp->getWornAttachment(pLHS->getItemID());
+			const LLViewerObject* pObjRHS = gAgentAvatarp->getWornAttachment(pRHS->getItemID());
+			if (pObjLHS->getAttachmentComplexity() != pObjRHS->getAttachmentComplexity())
+				return pObjLHS->getAttachmentComplexity() > pObjRHS->getAttachmentComplexity();
+		}
+	}
+	else if (LLAssetType::AT_OBJECT == typeLHS)
+	{
+		return true;
+	}
+	else if (LLAssetType::AT_OBJECT == typeRHS)
+	{
+		return false;
+	}
+	return LLWearableItemAppearanceComparator::doCompare(pLHS, pRHS);
+}
+
 // ============================================================================
 // [/SL:KB]
 
@@ -786,8 +819,9 @@ static LLWearableItemTypeNameComparator WEARABLE_TYPE_NAME_COMPARATOR;
 static const LLWearableItemTypeNameComparator WEARABLE_TYPE_LAYER_COMPARATOR;
 static const LLWearableItemNameComparator WEARABLE_NAME_COMPARATOR;
 static const LLWearableItemCreationDateComparator WEARABLE_CREATION_DATE_COMPARATOR;
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 static const LLWearableItemAppearanceComparator WEARABLE_APPEARANCE_COMPARATOR;
+static const LLWearableItemComplexityComparator WEARABLE_COMPLEXITY_COMPARATOR;
 // [/SL:KB]
 
 static const LLDefaultChildRegistry::Register<LLWearableItemsList> r("wearable_items_list");
@@ -925,9 +959,12 @@ void LLWearableItemsList::setSortOrder(ESortOrder sort_order, bool sort_now)
 		setComparator(&WEARABLE_TYPE_NAME_COMPARATOR);
 		break;
 	}
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 	case E_SORT_BY_APPEARANCE:
 		setComparator(&WEARABLE_APPEARANCE_COMPARATOR);
+		break;
+	case E_SORT_BY_COMPLEXITY:
+		setComparator(&WEARABLE_COMPLEXITY_COMPARATOR);
 		break;
 // [/SL:KB]
 

@@ -30,7 +30,7 @@
 
 #include "lltoggleablemenu.h"
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-05-01 (Catznip-3.4)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.4
 #include "llagent.h"
 // [/SL:KB]
 #include "llappearancemgr.h"
@@ -43,8 +43,8 @@
 #include "llwearableitemslist.h"
 #include "llsdserialize.h"
 #include "llclipboard.h"
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-#include "llfolderview.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+#include "llavatarrendernotifier.h"
 #include "llinventorypanel.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
@@ -59,44 +59,85 @@ static void edit_outfit()
 	LLFloaterSidePanelContainer::showPanel("appearance", LLSD().with("type", "edit_outfit"));
 }
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
 //////////////////////////////////////////////////////////////////////////
 
-class LLWornListItem : public LLPanelClothingListItem
+class LLWornListItem : public LLPanelWearableListItem
 {
+	LOG_CLASS(LLWornListItem);
 public:
-	struct Params : public LLInitParam::Block<Params, LLPanelClothingListItem::Params>
+	struct Params : public LLInitParam::Block<Params, LLPanelWearableListItem::Params>
 	{
-		Params() {}
+		Optional<LLButton::Params>   up_btn;
+		Optional<LLButton::Params>   down_btn;
+		Optional<LLButton::Params>   delete_btn;
+		Optional<LLTextBox::Params>  item_complexity;
+
+		Params();
 	};
+
 protected:
-	LLWornListItem(LLViewerInventoryItem* pItem, const Params& p);
+	LLWornListItem(LLViewerInventoryItem* pItem, const Params& params);
 public:
-	/*virtual*/ ~LLWornListItem();
-	/*virtual*/ S32  notify(const LLSD& sdInfo);
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void updateItem(const std::string& strName, EItemState itemState = IS_DEFAULT);
+	~LLWornListItem() override;
+	BOOL postBuild() override;
+	S32  notify(const LLSD& sdInfo) override;
+	void updateItem(const std::string& strName, EItemState itemState = IS_DEFAULT) override;
+
+	static LLWornListItem* create(LLViewerInventoryItem* pItem);
 
 public:
-	bool getShowOrdering() { return mShowOrdering; }
+	bool getShowOrdering() const { return mShowOrdering; }
 	void setShowOrdering(bool fShowOrdering);
-	static LLWornListItem* create(LLViewerInventoryItem* pItem);
 protected:
 	void onMoveWearable(bool fDown);
+	void setShowMoveUpButton(bool fShow)   { setShowWidget("btn_move_up", fShow); }
+	void setShowMoveDownButton(bool fShow) { setShowWidget("btn_move_down", fShow); }
+	void setShowDeleteButton(bool fShow)   { setShowWidget("btn_delete", fShow); }
+	void setShowComplexity(bool fShow)     { setShowWidget(mComplexityCtrl, fShow); }
 
 protected:
 	bool                  mShowOrdering;
+	LLTextBox*            mComplexityCtrl;
 	LLAssetType::EType    mAssetType;
 	LLWearableType::EType mWearableType;
 };
 
-LLWornListItem::LLWornListItem(LLViewerInventoryItem* pItem, const Params& p)
-	: LLPanelClothingListItem(pItem, p)
-	, mShowOrdering(true)
-	, mAssetType(pItem->getType())
-	, mWearableType( (LLAssetType::AT_CLOTHING == pItem->getType()) ? pItem->getWearableType() : LLWearableType::WT_INVALID)
+static LLWidgetNameRegistry::StaticRegistrar sRegisterPanelWornWearableListItem(&typeid(LLWornListItem::Params), "worn_wearable_list_item");
+
+LLWornListItem::Params::Params()
+	: up_btn("up_btn")
+	, down_btn("down_btn")
+	, delete_btn("delete_btn")
+	, item_complexity("item_complexity")
 {
-	setReshapeWidgetMask(SIDE_LEFT | getReshapeWidgetMask());
+}
+
+LLWornListItem::LLWornListItem(LLViewerInventoryItem* pItem, const LLWornListItem::Params& params)
+	: LLPanelWearableListItem(pItem, params)
+	, mShowOrdering(true)
+	, mComplexityCtrl(nullptr)
+	, mAssetType(pItem->getType())
+	, mWearableType((LLAssetType::AT_CLOTHING == pItem->getType()) ? pItem->getWearableType() : LLWearableType::WT_INVALID)
+{
+	LLTextBox::Params paramsText = params.item_complexity;
+	applyXUILayout(paramsText, this);
+	mComplexityCtrl = LLUICtrlFactory::create<LLTextBox>(paramsText);
+	addChild(mComplexityCtrl);
+
+	LLButton::Params paramsButton = params.up_btn;
+	applyXUILayout(paramsButton, this);
+	addChild(LLUICtrlFactory::create<LLButton>(paramsButton));
+
+	paramsButton = params.down_btn;
+	applyXUILayout(paramsButton, this);
+	addChild(LLUICtrlFactory::create<LLButton>(paramsButton));
+
+	paramsButton = params.delete_btn;
+	applyXUILayout(paramsButton, this);
+	addChild(LLUICtrlFactory::create<LLButton>(paramsButton));
+
+	setSeparatorVisible(false);
 }
 
 LLWornListItem::~LLWornListItem()
@@ -106,15 +147,48 @@ LLWornListItem::~LLWornListItem()
 // static
 LLWornListItem* LLWornListItem::create(LLViewerInventoryItem* pItem)
 {
-	LLWornListItem* pListItem = NULL;
 	if (pItem)
 	{
 		const LLWornListItem::Params& params = LLUICtrlFactory::getDefaultParams<LLWornListItem>();
-		pListItem = new LLWornListItem(pItem, params);
+		LLWornListItem* pListItem = new LLWornListItem(pItem, params);
 		pListItem->initFromParams(params);
 		pListItem->postBuild();
+		return pListItem;
 	}
-	return pListItem;
+	return nullptr;
+}
+
+// virtual
+BOOL LLWornListItem::postBuild()
+{
+	LLPanelWearableListItem::postBuild();
+
+	addWidgetToRightSide(mComplexityCtrl);
+	addWidgetToRightSide("btn_move_up");
+	addWidgetToRightSide("btn_move_down");
+	addWidgetToRightSide("btn_delete");
+
+	setShowMoveUpButton(false);
+	getChild<LLUICtrl>("btn_move_up")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, false));
+	setShowMoveDownButton(false);
+	getChild<LLUICtrl>("btn_move_down")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, true));
+	setShowDeleteButton(false);
+
+	setWidgetsVisible(false);
+	reshapeWidgets();
+
+	return TRUE;
+}
+
+// virtual
+S32 LLWornListItem::notify(const LLSD& sdInfo)
+{
+	if (sdInfo.has("show_ordering"))
+	{
+		setShowOrdering(sdInfo["show_ordering"].asBoolean());
+		return 0;
+	}
+	return LLPanelWearableListItem::notify(sdInfo);
 }
 
 void LLWornListItem::onMoveWearable(bool fDown)
@@ -127,37 +201,11 @@ void LLWornListItem::onMoveWearable(bool fDown)
 
 	LLAppearanceMgr::getInstance()->moveWearable(getItem(), fDown, true);
 	LLAppearanceMgr::getInstance()->updateIsDirty();
-	
+
 	if (fCentralBaking)
 	{
 		LLAppearanceMgr::getInstance()->requestServerAppearanceUpdate();
 	}
-}
-
-S32 LLWornListItem::notify(const LLSD& sdInfo)
-{
-	if(sdInfo.has("show_ordering"))
-	{
-		setShowOrdering(sdInfo["show_ordering"].asBoolean());
-		return 0;
-	}
-	return LLPanelClothingListItem::notify(sdInfo);
-}
-
-BOOL LLWornListItem::postBuild()
-{
-	LLPanelClothingListItem::postBuild();
-
-	setShowDeleteButton(false);
-	setShowLockButton(false);
-	setShowEditButton(false);
-
-	setShowMoveUpButton(false);
-	getChild<LLUICtrl>("btn_move_up")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, false));
-	setShowMoveDownButton(false);
-	getChild<LLUICtrl>("btn_move_down")->setCommitCallback(boost::bind(&LLWornListItem::onMoveWearable, this, true));
-
-	return TRUE;
 }
 
 void LLWornListItem::setShowOrdering(bool fShowOrdering)
@@ -172,45 +220,55 @@ void LLWornListItem::setShowOrdering(bool fShowOrdering)
 // virtual
 void LLWornListItem::updateItem(const std::string& strName, EItemState itemState)
 {
-	std::string strItemName = strName;
-	if (LLAssetType::AT_OBJECT == mAssetType)
+	std::string strItemName = strName; bool fShowUp = false, fShowDown = false;
+
+	switch (mAssetType)
 	{
-		if (isAgentAvatarValid())
-		{
-			std::string strAttachPt;
-			if (gAgentAvatarp->getAttachedPointName(mInventoryItemUUID, strAttachPt))
+		case LLAssetType::AT_OBJECT:
+			if (isAgentAvatarValid())
 			{
-				LLStringUtil::format_map_t args;
-				args["[ATTACHMENT_POINT]"] = LLTrans::getString(strAttachPt);
-				strItemName += LLTrans::getString("WornOnAttachmentPoint", args);
+				std::string strAttachPt;
+				if (gAgentAvatarp->getAttachedPointName(mInventoryItemUUID, strAttachPt))
+				{
+					LLStringUtil::format_map_t args;
+					args["[ATTACHMENT_POINT]"] = LLTrans::getString(strAttachPt);
+					strItemName += LLTrans::getString("WornOnAttachmentPoint", args);
+				}
+				else
+				{
+					LLStringUtil::format_map_t args;
+					args["[ATTACHMENT_ERROR]"] = LLTrans::getString(strAttachPt);
+					strItemName += LLTrans::getString("AttachmentErrorMessage", args);
+				}
+
+				if (LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(mInventoryItemUUID))
+				{
+					mComplexityCtrl->setText(llformat("(%d) ", pAttachObj->getAttachmentComplexity()));
+				}
 			}
 			else
 			{
-				LLStringUtil::format_map_t args;
-				args["[ATTACHMENT_ERROR]"] = LLTrans::getString(strAttachPt);
-				strItemName += LLTrans::getString("AttachmentErrorMessage", args);
+				strItemName += LLTrans::getString("worn");
 			}
-		}
-		else
-		{
-			strItemName += LLTrans::getString("worn");
-		}
+			break;
+		case LLAssetType::AT_CLOTHING:
+			if (mShowOrdering)
+			{
+				U32 cntWearable = gAgentWearables.getWearableCount(mWearableType), idxWearable = 0;
+				if ((cntWearable > 1) && (gAgentWearables.getWearableIndex(gAgentWearables.getWearableFromItemID(mInventoryItemUUID), idxWearable)))
+				{
+					fShowDown = (idxWearable > 0);
+					fShowUp = (idxWearable < cntWearable - 1);
+				}
+			}
+			break;
 	}
 
-	LLPanelClothingListItem::updateItem(strItemName, itemState);
+	LLPanelWearableListItem::updateItem(strItemName, itemState);
 
-	bool fShowUp = false, fShowDown = false;
-	if ( (mShowOrdering) && (LLAssetType::AT_CLOTHING == mAssetType) )
-	{
-		U32 cntWearable = gAgentWearables.getWearableCount(mWearableType), idxWearable = 0;
-		if ( (cntWearable > 1) && (gAgentWearables.getWearableIndex(gAgentWearables.getWearableFromItemID(mInventoryItemUUID), idxWearable)) )
-		{
-			fShowDown = (idxWearable > 0);
-			fShowUp = (idxWearable < cntWearable - 1);
-		}
-	}
 	setShowMoveUpButton(fShowUp);
 	setShowMoveDownButton(fShowDown);
+	setShowComplexity(LLAssetType::AT_OBJECT == mAssetType);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -247,7 +305,7 @@ void LLWornItemsList::addNewItem(LLViewerInventoryItem* pItem, bool rearrange)
 		llassert(pItem != NULL);
 	}
 
-	LLPanelClothingListItem* pListItem = LLWornListItem::create(pItem);
+	LLWornListItem* pListItem = LLWornListItem::create(pItem);
 	if (!pListItem)
 		return;
 
@@ -309,12 +367,14 @@ private:
 	LLPanelWearing* 		mPanelWearing;
 };
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 class LLWearingSortMenu
 {
 public:
 	LLWearingSortMenu(LLPanelWearing* pWearingPanel)
-		: mFolderMenu(NULL), mListMenu(NULL), mWearingPanel(pWearingPanel)
+		: mFolderMenu(NULL)
+		, mListMenu(NULL)
+		, mWearingPanel(pWearingPanel)
 	{
 		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 		registrar.add("Sort.Folder", boost::bind(&LLWearingSortMenu::onChangeFolderSortOrder, this, _2));
@@ -324,16 +384,14 @@ public:
 		enable_registrar.add("Sort.CheckFolder", boost::bind(&LLWearingSortMenu::onCheckFolderSortOrder, this, _2));
 		enable_registrar.add("Sort.CheckList", boost::bind(&LLWearingSortMenu::onCheckListSortOrder, this, _2));
 
-		mFolderMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
-			"menu_wearing_sort_folder.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+		mFolderMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_wearing_sort_folder.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(mFolderMenu);
-		mListMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>(
-			"menu_wearing_sort_list.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
+		mListMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_wearing_sort_list.xml", gMenuHolder, LLViewerMenuHolderGL::child_registry_t::instance());
 		llassert(mListMenu);
 	}
 
-	LLToggleableMenu* getFolderMenu() { return mFolderMenu; }
-	LLToggleableMenu* getListMenu()    { return mListMenu; }
+	LLToggleableMenu* getFolderMenu() const { return mFolderMenu; }
+	LLToggleableMenu* getListMenu() const   { return mListMenu; }
 
 protected:
 	void onChangeFolderSortOrder(const LLSD& sdParam)
@@ -363,28 +421,28 @@ protected:
 		return false;
 	}
 
+	static LLWearableItemsList::ESortOrder getListSortOrder(const std::string& strParam)
+	{
+		if ("appearance" == strParam)
+			return LLWearableItemsList::E_SORT_BY_APPEARANCE;
+		else if ("complexity" == strParam)
+			return LLWearableItemsList::E_SORT_BY_COMPLEXITY;
+		else if ("name" == strParam)
+			return LLWearableItemsList::E_SORT_BY_NAME;
+		else if ("type_name" == strParam)
+			return LLWearableItemsList::E_SORT_BY_TYPE_NAME;
+		return (LLWearableItemsList::ESortOrder)- 1;
+	}
+
 	void onChangeListSortOrder(const LLSD& sdParam)
 	{
-		const std::string strParam = sdParam.asString();
-		if ("appearance" == strParam)
-			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_APPEARANCE);
-		else if ("name" == strParam)
-			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_NAME);
-		else if ("type_name" == strParam)
-			mWearingPanel->getItemsList()->setSortOrder(LLWearableItemsList::E_SORT_BY_TYPE_NAME);
+		mWearingPanel->getItemsList()->setSortOrder(getListSortOrder(sdParam.asString()));
 		gSavedSettings.setU32("WearingListSortOrder", mWearingPanel->getItemsList()->getSortOrder());
 	}
 
 	bool onCheckListSortOrder(const LLSD& sdParam)
 	{
-		const std::string strParam = sdParam.asString();
-		if ("appearance" == strParam)
-			return LLWearableItemsList::E_SORT_BY_APPEARANCE == mWearingPanel->getItemsList()->getSortOrder();
-		else if ("name" == strParam)
-			return LLWearableItemsList::E_SORT_BY_NAME == mWearingPanel->getItemsList()->getSortOrder();
-		else if ("type_name" == strParam)
-			return LLWearableItemsList::E_SORT_BY_TYPE_NAME == mWearingPanel->getItemsList()->getSortOrder();
-		return false;
+		return getListSortOrder(sdParam.asString()) == mWearingPanel->getItemsList()->getSortOrder();
 	}
 
 protected:
@@ -544,7 +602,7 @@ LLPanelWearing::LLPanelWearing()
 	mCategoriesObserver = new LLInventoryCategoriesObserver();
 
 	mGearMenu = new LLWearingGearMenu(this);
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 	mSortMenu = new LLWearingSortMenu(this);
 // [/SL:KB]
 	mContextMenu = new LLWearingContextMenu();
@@ -553,9 +611,17 @@ LLPanelWearing::LLPanelWearing()
 LLPanelWearing::~LLPanelWearing()
 {
 	delete mGearMenu;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+	delete mSortMenu;
+// [/SL:KB]
 	delete mContextMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	delete mSavedFolderState;
+
+	if (mComplexityChangedSlot.connected())
+	{
+		mComplexityChangedSlot.disconnect();
+	}
 // [/SL:KB]
 
 	if (gInventory.containsObserver(mCategoriesObserver))
@@ -574,6 +640,7 @@ BOOL LLPanelWearing::postBuild()
 	mCOFItemsList->setRightMouseDownCallback(boost::bind(&LLPanelWearing::onWearableItemsListRightClick, this, _1, _2, _3));
 	mCOFItemsList->setSortOrder((LLWearableItemsList::ESortOrder)gSavedSettings.getU32("WearingListSortOrder"));
 	mCOFItemsList->setCommitCallback(boost::bind(&LLPanelWearing::onSelectionChange, this));
+	mComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLWornItemsList::setNeedsRefresh, mCOFItemsList, true));
 // [/SL:KB]
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)

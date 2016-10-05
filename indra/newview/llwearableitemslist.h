@@ -91,7 +91,7 @@ protected:
 
 private:
 	bool	mWornIndicationEnabled;
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6)
+// [SL:KB] - Patch: Appearance-Wearing| Checked: Catznip-2.6
 	bool	mWornTargetIndicationEnabled;
 // [/SL:KB]
 };
@@ -400,7 +400,7 @@ protected:
 	/*virtual*/ bool doCompare(const LLPanelInventoryListItemBase* item1, const LLPanelInventoryListItemBase* item2) const;
 };
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 /**
  * @class LLWearableItemAppearanceComparator
  *
@@ -411,19 +411,35 @@ class LLWearableItemAppearanceComparator : public LLWearableListItemComparator
 	LOG_CLASS(LLWearableItemAppearanceComparator);
 public:
 	LLWearableItemAppearanceComparator();
-	/*virtual*/ ~LLWearableItemAppearanceComparator() {};
+	~LLWearableItemAppearanceComparator() override {}
 
 public:
-	/*virtual*/ bool areWearablesOrdered() const { return true; }
+	bool areWearablesOrdered() const override { return true; }
 protected:
 	typedef std::pair<LLAssetType::EType, int> sortorder_pair_t;
 	typedef std::vector<sortorder_pair_t> sortorder_list_t;
 
-	/*virtual*/ bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const;
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
 	sortorder_pair_t getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const;
 
 protected:
 	static sortorder_list_t sSortOrder;
+};
+
+/**
+* @class LLWearableItemAppearanceComparator
+*
+* Comparator for sorting wearable list items by item complexity
+*/
+class LLWearableItemComplexityComparator : public LLWearableItemAppearanceComparator
+{
+	LOG_CLASS(LLWearableItemComplexityComparator);
+public:
+	LLWearableItemComplexityComparator();
+	~LLWearableItemComplexityComparator() override {}
+
+protected:
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
 };
 // [/SL:KB]
 
@@ -485,8 +501,9 @@ public:
 		E_SORT_BY_MOST_RECENT	= 1,
 		E_SORT_BY_TYPE_LAYER	= 2,
 		E_SORT_BY_TYPE_NAME 	= 3,
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
 		E_SORT_BY_APPEARANCE 	= 10,
+		E_SORT_BY_COMPLEXITY 	= 11,
 // [/SL:KB]
 	} ESortOrder;
 

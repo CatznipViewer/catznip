@@ -99,6 +99,7 @@ private:
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 //	LLWearableItemsList* 			mCOFItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	boost::signals2::connection		mComplexityChangedSlot;
 	selection_change_signal_t		mSelectionSignal;
 	LLWornItemsList*				mCOFItemsList;
 	LLInventoryPanel*				mInvPanel;

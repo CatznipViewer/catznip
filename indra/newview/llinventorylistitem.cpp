@@ -292,7 +292,7 @@ S32 LLPanelInventoryListItemBase::notify(const LLSD& info)
 
 LLPanelInventoryListItemBase::LLPanelInventoryListItemBase(LLViewerInventoryItem* item, const LLPanelInventoryListItemBase::Params& params)
 :	LLPanel(params),
-// [SL:KB] - Patch: Sidepanel-OutfitWornTarget | Checked: 2011-07-05 (Catznip-2.6)
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-2.6
 	mInventoryItemAssetType((item) ? item->getType() : LLAssetType::AT_NONE),
 // [/SL:KB]
 	mInventoryItemUUID(item ? item->getUUID() : LLUUID::null),
@@ -350,7 +350,13 @@ public:
 	void operator()(LLUICtrl* widget)
 	{
 		// Disabled widgets never become visible. see LLPanelInventoryListItemBase::setShowWidget()
-		widget->setVisible(mVisible && widget->getEnabled());
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+		if (!widget->getRequestsFront())
+		{
+			widget->setVisible(mVisible && widget->getEnabled());
+		}
+// [/SL:KB]
+//		widget->setVisible(mVisible && widget->getEnabled());
 	}
 private:
 	bool mVisible;
@@ -367,9 +373,9 @@ void LLPanelInventoryListItemBase::reshapeWidgets()
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
 	if (SIDE_LEFT & mReshapeWidgetMask)
 		reshapeLeftWidgets();
-	if (SIDE_MIDDLE & mReshapeWidgetMask)
-		reshapeRightWidgets();
 	if (SIDE_RIGHT & mReshapeWidgetMask)
+		reshapeRightWidgets();
+	if (SIDE_MIDDLE & mReshapeWidgetMask)
 		reshapeMiddleWidgets();
 // [/SL:KB]
 //	// disabled reshape left for now to reserve space for 'delete' button in LLPanelClothingListItem

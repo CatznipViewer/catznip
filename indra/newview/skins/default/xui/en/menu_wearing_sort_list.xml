@@ -14,6 +14,16 @@
          parameter="appearance" />
     </menu_item_check>
     <menu_item_check
+     label="Sort by Complexity"
+     name="list_sort_complexity">
+        <menu_item_check.on_click
+         function="Sort.List"
+         parameter="complexity" />
+        <menu_item_check.on_check
+         function="Sort.CheckList"
+         parameter="complexity" />
+    </menu_item_check>
+    <menu_item_check
      label="Sort by Name"
      name="list_sort_name">
         <menu_item_check.on_click

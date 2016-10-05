@@ -24,6 +24,9 @@ width="330">
    <string
    name="Changing outfits"
    value="Changing outfits" />
+   <string
+   name ="Complexity"
+   value="(Complexity: [COMPLEXITY])" />
    <panel
    background_opaque="true"
    background_visible="false"
@@ -32,7 +35,7 @@ width="330">
    top="0"
    follows="left|top|right"
    layout="topleft"
-   width="310"
+   right="-10"
    height="33"
    name="panel_currentlook"
    >
@@ -94,7 +97,7 @@ width="330">
       image_overlay="Edit_Wrench"
       label=""
       layout="topleft"
-      left="265"
+      right="-1"
       name="edit_outfit_btn"
       tool_tip="Edit this outfit"
       top="3"
@@ -103,7 +106,7 @@ width="330">
       follows="top|right"
       height="24"
       layout="topleft"
-      left="268"
+      right="-1"
       name="wearables_loading_indicator"
       top="6"
       width="24" />

@@ -62,6 +62,9 @@ public:
 	void showWearableEditPanel(LLViewerWearable *wearable = NULL, BOOL disable_camera_switch = FALSE);
 	void setWearablesLoading(bool val);
 	void showDefaultSubpart();
+// [SL:KB] Patch: Appearance-Wearing | Checked: Catznip-4.1
+	void updateComplexityTitle();
+// [/SL:KB]
 	void updateScrollingPanelList();
 	void updateToVisibility( const LLSD& new_visibility );
 	LLPanelEditWearable* getWearable(){ return mEditWearable; }
@@ -89,6 +92,11 @@ private:
 
 	LLTextBox*					mCurrentLookName;
 	LLTextBox*					mOutfitStatus;
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+	std::string                 mFloaterTitle;
+	boost::signals2::connection mComplexityChangedSlot;
+// [/SL:KB]
 
 	// Search string for filtering landmarks and teleport
 	// history locations
