@@ -622,10 +622,16 @@ LLUUID LLBufferedAssetUploadInfo::finishUpload(LLSD &result)
 
 //=========================================================================
 
-LLScriptAssetUpload::LLScriptAssetUpload(LLUUID itemId, std::string buffer, invnUploadFinish_f finish):
+//LLScriptAssetUpload::LLScriptAssetUpload(LLUUID itemId, std::string buffer, invnUploadFinish_f finish):
+// [SL:KB] - Patch: Build-ScriptSaveAsMono | Checked: Catznip-4.0
+LLScriptAssetUpload::LLScriptAssetUpload(LLUUID itemId, TargetType_t targetType, std::string buffer, invnUploadFinish_f finish):
+// [/SL:KB]
     LLBufferedAssetUploadInfo(itemId, LLAssetType::AT_LSL_TEXT, buffer, finish),
     mExerienceId(),
-    mTargetType(LSL2),
+// [SL:KB] - Patch: Build-ScriptSaveAsMono | Checked: Catznip-4.0
+	mTargetType(targetType),
+// [/SL:KB]
+//    mTargetType(LSL2),
     mIsRunning(false)
 {
 }

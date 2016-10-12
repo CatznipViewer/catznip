@@ -1683,7 +1683,10 @@ void LLPreviewLSL::saveIfNeeded(bool sync /*= true*/)
             std::string buffer(mScriptEd->mEditor->getText());
             LLBufferedAssetUploadInfo::invnUploadFinish_f proc = boost::bind(&LLPreviewLSL::finishedLSLUpload, _1, _4);
 
-            LLResourceUploadInfo::ptr_t uploadInfo(new LLScriptAssetUpload(mItemUUID, buffer, proc));
+// [SL:KB] - Patch: Build-ScriptSaveAsMono | Checked: Catznip-4.0
+			LLResourceUploadInfo::ptr_t uploadInfo(new LLScriptAssetUpload(mItemUUID, (gSavedSettings.getBOOL("SaveScriptsAsMono")) ? LLScriptAssetUpload::MONO : LLScriptAssetUpload::LSL2, buffer, proc));
+// [/SL:KB]
+//            LLResourceUploadInfo::ptr_t uploadInfo(new LLScriptAssetUpload(mItemUUID, buffer, proc));
 
             LLViewerAssetUpload::EnqueueInventoryUpload(url, uploadInfo);
         }
