@@ -39,53 +39,56 @@ typedef BOOL (WINAPI *MINIDUMPWRITEDUMP)(HANDLE hProcess, DWORD dwPid, HANDLE hF
 MINIDUMPWRITEDUMP f_mdwp = NULL;
 
 
-class LLMemoryReserve {
-public:
-	LLMemoryReserve();
-	~LLMemoryReserve();
-	void reserve();
-	void release();
-private:
-	unsigned char *mReserve;
-	static const size_t MEMORY_RESERVATION_SIZE;
-};
+//class LLMemoryReserve {
+//public:
+//	LLMemoryReserve();
+//	~LLMemoryReserve();
+//	void reserve();
+//	void release();
+//private:
+//	unsigned char *mReserve;
+//	static const size_t MEMORY_RESERVATION_SIZE;
+//};
 
-LLMemoryReserve::LLMemoryReserve() :
-	mReserve(NULL)
-{
-}
+//LLMemoryReserve::LLMemoryReserve() :
+//	mReserve(NULL)
+//{
+//}
 
-LLMemoryReserve::~LLMemoryReserve()
-{
-	release();
-}
+//LLMemoryReserve::~LLMemoryReserve()
+//{
+//	release();
+//}
 
-// I dunno - this just seemed like a pretty good value.
-const size_t LLMemoryReserve::MEMORY_RESERVATION_SIZE = 5 * 1024 * 1024;
+//// I dunno - this just seemed like a pretty good value.
+//const size_t LLMemoryReserve::MEMORY_RESERVATION_SIZE = 5 * 1024 * 1024;
 
-void LLMemoryReserve::reserve()
-{
-	if(NULL == mReserve)
-	{
-		mReserve = new unsigned char[MEMORY_RESERVATION_SIZE];
-	}
-}
+//void LLMemoryReserve::reserve()
+//{
+//	if(NULL == mReserve)
+//	{
+//		mReserve = new unsigned char[MEMORY_RESERVATION_SIZE];
+//	}
+//}
 
-void LLMemoryReserve::release()
-{
-	if (NULL != mReserve)
-	{
-		delete [] mReserve;
-	}
-	mReserve = NULL;
-}
+//void LLMemoryReserve::release()
+//{
+//	if (NULL != mReserve)
+//	{
+//		delete [] mReserve;
+//	}
+//	mReserve = NULL;
+//}
 
-static LLMemoryReserve gEmergencyMemoryReserve;
+//static LLMemoryReserve gEmergencyMemoryReserve;
 
 
 LONG NTAPI vectoredHandler(PEXCEPTION_POINTERS exception_infop)
 {
-	LLWinDebug::instance().generateMinidump(exception_infop);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	LLWinDebug::generateMinidump(exception_infop);
+// [/SL:KB]
+//	LLWinDebug::instance().generateMinidump(exception_infop);
 	return EXCEPTION_CONTINUE_SEARCH;
 }
 
@@ -96,8 +99,8 @@ void  LLWinDebug::init()
 	// Load the dbghelp dll now, instead of waiting for the crash.
 	// Less potential for stack mangling
 
-	// Don't install vectored exception handler if being debugged.
-	if(IsDebuggerPresent()) return;
+//	// Don't install vectored exception handler if being debugged.
+//	if(IsDebuggerPresent()) return;
 
 	if (s_first_run)
 	{
@@ -126,60 +129,80 @@ void  LLWinDebug::init()
 			}
 		}
 
-		gEmergencyMemoryReserve.reserve();
+//		gEmergencyMemoryReserve.reserve();
 
 		s_first_run = false;
 
-		// Add this exeption hanlder to save windows style minidump.
-		AddVectoredExceptionHandler(0, &vectoredHandler);
+//		// Add this exeption hanlder to save windows style minidump.
+//		AddVectoredExceptionHandler(0, &vectoredHandler);
 	}
 }
 
 void LLWinDebug::cleanup ()
 {
-	gEmergencyMemoryReserve.release();
+//	gEmergencyMemoryReserve.release();
 }
 
-void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+std::string LLWinDebug::writeDumpToFile(const std::string& filename, MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION* pExceptInfo, MINIDUMP_CALLBACK_INFORMATION* pCallbackInfo)
 {
-	// Temporary fix to switch out the code that writes the DMP file.
-	// Fix coming that doesn't write a mini dump file for regular C++ exceptions.
-	const bool enable_write_dump_file = false;
-	if ( enable_write_dump_file )
+	if ( (f_mdwp != NULL) && (gDirUtilp != NULL) )
 	{
-		if(f_mdwp == NULL || gDirUtilp == NULL)
+		std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_DUMP, filename);
+
+		HANDLE hFile = CreateFileA(dump_path.c_str(), GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (hFile != INVALID_HANDLE_VALUE)
 		{
-			return;
-		}
-		else
-		{
-			std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
+			// Write the dump, ignoring the return value
+			f_mdwp(GetCurrentProcess(), GetCurrentProcessId(), hFile, type, pExceptInfo, NULL, pCallbackInfo);
 
-			HANDLE hFile = CreateFileA(dump_path.c_str(),
-										GENERIC_WRITE,
-										FILE_SHARE_WRITE,
-										NULL,
-										CREATE_ALWAYS,
-										FILE_ATTRIBUTE_NORMAL,
-										NULL);
-
-			if (hFile != INVALID_HANDLE_VALUE)
-			{
-				// Write the dump, ignoring the return value
-				f_mdwp(GetCurrentProcess(),
-						GetCurrentProcessId(),
-						hFile,
-						type,
-						ExInfop,
-						NULL,
-						NULL);
-
-				CloseHandle(hFile);
-			}
-
+			CloseHandle(hFile);
+			return dump_path;
 		}
 	}
+	return std::string();
 }
+// [/SL:KB]
+//void LLWinDebug::writeDumpToFile(MINIDUMP_TYPE type, MINIDUMP_EXCEPTION_INFORMATION *ExInfop, const std::string& filename)
+//{
+//	// Temporary fix to switch out the code that writes the DMP file.
+//	// Fix coming that doesn't write a mini dump file for regular C++ exceptions.
+//	const bool enable_write_dump_file = false;
+//	if ( enable_write_dump_file )
+//	{
+//		if(f_mdwp == NULL || gDirUtilp == NULL)
+//		{
+//			return;
+//		}
+//		else
+//		{
+//			std::string dump_path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, filename);
+//
+//			HANDLE hFile = CreateFileA(dump_path.c_str(),
+//										GENERIC_WRITE,
+//										FILE_SHARE_WRITE,
+//										NULL,
+//										CREATE_ALWAYS,
+//										FILE_ATTRIBUTE_NORMAL,
+//										NULL);
+//
+//			if (hFile != INVALID_HANDLE_VALUE)
+//			{
+//				// Write the dump, ignoring the return value
+//				f_mdwp(GetCurrentProcess(),
+//						GetCurrentProcessId(),
+//						hFile,
+//						type,
+//						ExInfop,
+//						NULL,
+//						NULL);
+//
+//				CloseHandle(hFile);
+//			}
+//
+//		}
+//	}
+//}
 
 // static
 void LLWinDebug::generateMinidump(struct _EXCEPTION_POINTERS *exception_infop)
@@ -188,14 +211,17 @@ void LLWinDebug::generateMinidump(struct _EXCEPTION_POINTERS *exception_infop)
 												"SecondLifeException");
 	if (exception_infop)
 	{
-		// Since there is exception info... Release the hounds.
-		gEmergencyMemoryReserve.release();
+//		// Since there is exception info... Release the hounds.
+//		gEmergencyMemoryReserve.release();
 
 		_MINIDUMP_EXCEPTION_INFORMATION ExInfo;
 
 		ExInfo.ThreadId = ::GetCurrentThreadId();
 		ExInfo.ExceptionPointers = exception_infop;
 		ExInfo.ClientPointers = NULL;
-		writeDumpToFile((MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory), &ExInfo, "SecondLife.dmp");
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2015-04-20 (Catznip-3.7)
+		writeDumpToFile("Catznip.dmp", (MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory), &ExInfo);
+// [/SL:KB]
+//		writeDumpToFile((MINIDUMP_TYPE)(MiniDumpWithDataSegs | MiniDumpWithIndirectlyReferencedMemory), &ExInfo, "SecondLife.dmp");
 	}
 }
