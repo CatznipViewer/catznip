@@ -35,6 +35,9 @@ namespace LLCore
 
 HttpOptions::HttpOptions() :
     mWantHeaders(false),
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	mIfModifiedSince(0),
+// [/SL:KB]
     mTracing(HTTP_TRACE_OFF),
     mTimeout(HTTP_REQUEST_TIMEOUT_DEFAULT),
     mTransferTimeout(HTTP_REQUEST_XFER_TIMEOUT_DEFAULT),
@@ -56,6 +59,14 @@ void HttpOptions::setWantHeaders(bool wanted)
 {
 	mWantHeaders = wanted;
 }
+
+
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+void HttpOptions::setIfModifiedSince(const time_t& timestamp)
+{
+	mIfModifiedSince = timestamp;
+}
+// [/SL:KB]
 
 
 void HttpOptions::setTrace(long level)

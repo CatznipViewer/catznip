@@ -1235,11 +1235,17 @@ LLCore::HttpStatus HttpCoroutineAdapter::getStatusFromLLSD(const LLSD &httpResul
 }
 
 /*static*/
-void HttpCoroutineAdapter::callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+void HttpCoroutineAdapter::callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure, LLCore::HttpOptions::ptr_t options)
 {
-    LLCoros::instance().launch("HttpCoroutineAdapter::genericGetCoro",
-        boost::bind(&HttpCoroutineAdapter::trivialGetCoro, url, policyId, success, failure));
+	LLCoros::instance().launch("HttpCoroutineAdapter::genericGetCoro", boost::bind(&HttpCoroutineAdapter::trivialGetCoro, url, policyId, success, failure, options));
 }
+// [/SL:KB]
+//void HttpCoroutineAdapter::callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure)
+//{
+//    LLCoros::instance().launch("HttpCoroutineAdapter::genericGetCoro",
+//        boost::bind(&HttpCoroutineAdapter::trivialGetCoro, url, policyId, success, failure));
+//}
 
 /*static*/
 void HttpCoroutineAdapter::messageHttpGet(const std::string &url, const std::string &success, const std::string &failure)
@@ -1252,18 +1258,29 @@ void HttpCoroutineAdapter::messageHttpGet(const std::string &url, const std::str
 }
 
 /*static*/
-void HttpCoroutineAdapter::trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure)
+//void HttpCoroutineAdapter::trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure)
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+void HttpCoroutineAdapter::trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure, LLCore::HttpOptions::ptr_t options)
+// [/SL:KB]
 {
     LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t
         httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("genericGetCoro", policyId));
     LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
-    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
-
-    httpOpts->setWantHeaders(true);
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	if (options == nullptr)
+		options = LLCore::HttpOptions::ptr_t(new LLCore::HttpOptions());
+	options->setWantHeaders(true);
+// [/SL:KB]
+//    LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
+//
+//    httpOpts->setWantHeaders(true);
 
     LL_INFOS("HttpCoroutineAdapter", "genericGetCoro") << "Generic GET for " << url << LL_ENDL;
 
-    LLSD result = httpAdapter->getAndSuspend(httpRequest, url, httpOpts);
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	LLSD result = httpAdapter->getAndSuspend(httpRequest, url, options);
+// [/SL:KB]
+//    LLSD result = httpAdapter->getAndSuspend(httpRequest, url, httpOpts);
 
     LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
     LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);

@@ -8,10 +8,10 @@
 		Second Life
 	</string>
 	<string name="APP_NAME">
-		Second Life
+		Catznip
 	</string>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SECOND_LIFE_GRID">
 		Second Life Ağı
@@ -38,7 +38,7 @@
 		Grafik başlatma başarılamadı. Lütfen grafik sürücünüzü güncelleştirin!
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+		[APP_NAME] [VIEWER_VERSION_STR] [BUILD_DATE] [BUILD_TIME] ([CHANNEL])
 [[VIEWER_RELEASE_NOTES_URL] [Sürüm Notları]]
 	</string>
 	<string name="AboutPosition">
@@ -185,7 +185,7 @@ Ses Sunucusu Sürümü: [VOICE_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Kullandığınız görüntüleyici ile artık Second Life&apos;a erişemezsiniz. Yeni bir görüntüleyiciyi karşıdan yüklemek için lütfen şu sayfayı ziyaret edin:
-http://secondlife.com/download
+http://catznip.com/downloads/
 
 Daha fazla bilgi edinmek için asağıdaki SSS sayfamızı ziyaret edin:
 http://secondlife.com/viewer-access-faq

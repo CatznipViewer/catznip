@@ -94,7 +94,10 @@ std::string const & ll_install_failed_marker_path(void)
 {
 	static std::string path;
 	if(path.empty()) {
-		path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SecondLifeInstallFailed.marker");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-05-20 (Catznip-3.7)
+		path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "CatznipInstallFailed.marker");
+// [/SL:KB]
+//		path = gDirUtilp->getExpandedFilename(LL_PATH_LOGS, "SecondLifeInstallFailed.marker");
 	}
 	return path;
 }

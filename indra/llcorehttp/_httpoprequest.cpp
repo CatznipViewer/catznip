@@ -534,6 +534,9 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 	long sslHostV(0L);
     long dnsCacheTimeout(-1L);
     long nobody(0L);
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	time_t timestamp(0);
+// [/SL:KB]
 
 	if (mReqOptions)
 	{
@@ -542,6 +545,9 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 		sslHostV = mReqOptions->getSSLVerifyHost() ? 2L : 0L;
 		dnsCacheTimeout = mReqOptions->getDNSCacheTimeout();
         nobody = mReqOptions->getHeadersOnly() ? 1L : 0L;
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+		timestamp = mReqOptions->getIfModifiedSince();
+// [/SL:KB]
 	}
 	code = curl_easy_setopt(mCurlHandle, CURLOPT_FOLLOWLOCATION, follow_redirect);
 	check_curl_easy_code(code, CURLOPT_FOLLOWLOCATION);
@@ -553,6 +559,16 @@ HttpStatus HttpOpRequest::prepareRequest(HttpService * service)
 
     code = curl_easy_setopt(mCurlHandle, CURLOPT_NOBODY, nobody);
     check_curl_easy_code(code, CURLOPT_NOBODY);
+
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	if (timestamp != 0)
+	{
+		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+		check_curl_easy_code(code, CURLOPT_TIMECONDITION);
+		code = curl_easy_setopt(mCurlHandle, CURLOPT_TIMEVALUE, (long)timestamp);
+		check_curl_easy_code(code, CURLOPT_TIMEVALUE);
+	}
+// [/SL:KB]
 
 	// The Linksys WRT54G V5 router has an issue with frequent
 	// DNS lookups from LAN machines.  If they happen too often,

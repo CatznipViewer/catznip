@@ -5,7 +5,7 @@
      that are returned from one component and may appear in many places-->
 <strings>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SUPPORT_SITE">
 		Second Life Support Portal
@@ -117,7 +117,7 @@
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Den klient du benytter kan ikke længere få adgang til Second Life. Besøg venligst denne side for at hente en ny klient:
-http://secondlife.com/download
+http://catznip.com/downloads/
 
 For mere information, se denne FAQ:
 http://secondlife.com/viewer-access-faq

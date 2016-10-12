@@ -1,0 +1,20 @@
+[Viewer/Branding]
+- added   : "ClientSettingsFileOverride" setting to override the default user settings filename
+    -> non-release channels will auto-fill the override with settings_<channel>.xml to mimic the legacy behaviour
+- changed : basic rebranding from "Second Life" to "Catznip"
+    -> per-type Catznip icons (thankies Raz!)
+    -> use a Catznip-specific app folder and Catznip-specific cache folder
+    -> default channel set to "Catznip Internal" to keep private testing builds separate from released betas
+    -> "Help / Catznip Support Group" menu option to either open the support group profile (if not a member) or start a group chat session
+    -> use viewer.catznip.com for the login page (per-channel) and release notes
+    -> changed "HelpURLFormat" to prevent "Second Life Help" from showing "404 Not found"
+    -> branding on llcommon.dll and fixed "OriginalFilename" on the main executable
+- changed : branding of the viewer installer [Windows-only]
+    -> use HKLM\Software\Catznip registry key to store installation information
+    -> only remove %LOCAL_APPDATA%\Catznip when uninstalling (leave %APPDATA%\Catznip intact)
+    -> use Catznip icons for the installer/uninstaller
+    -> "DisplayVersion", "Publisher", "URLInfoAbout" and "URLUpdateInfo" install information
+    -> remove the default, starlight and stardust skins from the installation folder
+- added   : MOTD customization
+    -> custom MOTDs are prefixed with "Catznip" while standard MOTDs are prefixed with "Second Life"
+
