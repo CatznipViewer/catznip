@@ -78,6 +78,15 @@ public:
 		return mWantHeaders;
 	}
 
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	// Default:   0
+	void				setIfModifiedSince(const time_t& timestamp);
+	const time_t&		getIfModifiedSince() const
+	{
+		return mIfModifiedSince;
+	}
+// [/SL:KB]
+
 	// Default:  0
 	void				setTrace(int long);
 	int					getTrace() const
@@ -162,6 +171,9 @@ public:
 	
 protected:
 	bool				mWantHeaders;
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	time_t              mIfModifiedSince;
+// [/SL:KB]
 	int					mTracing;
 	unsigned int		mTimeout;
 	unsigned int		mTransferTimeout;

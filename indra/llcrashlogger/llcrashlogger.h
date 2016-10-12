@@ -35,11 +35,14 @@
 #include "llcontrol.h"
 #include "llcrashlock.h"
 #include "_mutex.h"
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#include "llcrashlookup.h"
+// [/SL:KB]
 
-// Crash reporter behavior
-const S32 CRASH_BEHAVIOR_ASK = 0;
-const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
-const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
+//// Crash reporter behavior
+//const S32 CRASH_BEHAVIOR_ASK = 0;
+//const S32 CRASH_BEHAVIOR_ALWAYS_SEND = 1;
+//const S32 CRASH_BEHAVIOR_NEVER_SEND = 2;
 
 class LLCrashLogger : public LLApp
 {
@@ -49,11 +52,19 @@ public:
 	std::string loadCrashURLSetting();
     bool readFromXML(LLSD& dest, const std::string& filename );
 	void gatherFiles();
-    void mergeLogs( LLSD src_sd );
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	static void mergeLogs(LLSD& dest_sd, const LLSD& src_sd);
+// [/SL:KB]
+//    void mergeLogs( LLSD src_sd );
 
 	virtual void gatherPlatformSpecificFiles() {}
     bool sendCrashLog(std::string dump_dir);
 	bool sendCrashLogs();
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	void cleanCrashLogs();
+	void cleanupDumpDirs(bool fKeepCurrent);
+	bool hasCrashLog();
+// [/SL:KB]
 	LLSD constructPostData();
 	virtual void updateApplication(const std::string& message = LLStringUtil::null);
 	virtual bool init();
@@ -62,9 +73,16 @@ public:
 	void commonCleanup();
 	void setUserText(const std::string& text) { mCrashInfo["UserNotes"] = text; }
 	S32 getCrashBehavior() { return mCrashBehavior; }
-	bool runCrashLogPost(std::string host, LLSD data, std::string msg, int retries, int timeout);
-	bool readMinidump(std::string minidump_path);
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
+	bool runCrashLogPost(const std::string& host, const std::string& msg, int retries, int timeout);
+// [/SL:KB]
+//	bool runCrashLogPost(std::string host, LLSD data, std::string msg, int retries, int timeout);
+//	bool readMinidump(std::string minidump_path);
 
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	std::string getCrashInformationLink() { return mCrashLink; }
+	void		setCrashInformationLink(const std::string& strCrashLink) { mCrashLink = strCrashLink; }
+// [/SL:KB]
 protected:
     static void init_curl();
     static void term_curl();
@@ -78,6 +96,10 @@ protected:
 	LLControlGroup mCrashSettings;
 	std::string mProductName;
 	LLSD mCrashInfo;
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	LLCrashLookup*	mCrashLookup;
+	std::string		mCrashLink;
+// [/SL:KB]
 	std::string mCrashHost;
 	std::string mAltCrashHost;
 	LLSD mDebugLog;

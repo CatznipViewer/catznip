@@ -2918,6 +2918,17 @@ LLUUID LLIMMgr::addSession(
 	{
 		noteMutedUsers(session_id, ids);
 	}
+// [SL:KB] - Patch: Viewer-Data | Checked: 2014-05-20 (Catznip-3.6)
+	else if (dialog == IM_SESSION_GROUP_START)
+	{
+		// Check if we have a prelude for this group and show it to the user if so
+		LLAgent::groupprelude_map_t::const_iterator itGroupPrelude = gAgent.mGroupPrelude.find(session_id);
+		if (gAgent.mGroupPrelude.end() != itGroupPrelude)
+		{
+			LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, itGroupPrelude->second, false);
+		}
+	}
+// [/SL:KB]
 
 	notifyObserverSessionVoiceOrIMStarted(session_id);
 

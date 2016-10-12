@@ -1390,7 +1390,7 @@ https://wiki.secondlife.com/wiki/Adding_Spelling_Dictionaries を参照してく
 	</notification>
 	<notification name="ClothingLoading">
 		現在衣類をダウンロード中です。
-このまま [SECOND_LIFE] を通常通りご使用いただけます。他人からはあなたは正しく表示されます。
+このまま [APP_NAME] を通常通りご使用いただけます。他人からはあなたは正しく表示されます。
 		<form name="form">
 			<ignore name="ignore" text="衣類がダウンロードされるまで時間がかかっているとき"/>
 		</form>
@@ -1614,30 +1614,30 @@ SHA1 フィンガープリント： [MD5_DIGEST]
 	</notification>
 	<notification name="FailedUpdateInstall">
 		ビューワのアップデートをインストール中にエラーが発生しました。
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		必要なアップデートをインストールできませんでした。 
 [APP_NAME] がアップデートされるまでログインできません。
 
-http://secondlife.com/download から最新バージョンをダウンロードしてインストールしてください。
+http://catznip.com/downloads/ から最新バージョンをダウンロードしてインストールしてください。
 		<usetemplate name="okbutton" yestext="終了"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		お使いの Second Life に必要なアップデートがインストールされていません。
 
-このアップデートは、http://www.secondlife.com/downloads からダウンロードして、今すぐインストールできます。
+このアップデートは、http://catznip.com/downloads/ からダウンロードして、今すぐインストールできます。
 		<usetemplate name="okcancelbuttons" notext="終了" yestext="今すぐダウンロードしてインストール"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		お使いの [APP_NAME] に必要なアップデートをダウンロードしました。
-バージョン [VERSION] [[RELEASE_NOTES_FULL_URL] このアップデートに関する情報]
+バージョン [VERSION] [[INFO_URL] このアップデートに関する情報]
 		<usetemplate name="okcancelbuttons" notext="後で実行" yestext="今すぐインストールして [APP_NAME] を再起動"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1697,7 +1697,6 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		ご利用のビューワは最新です!
-最新の機能と修正を今すぐ試したい場合は、代替ビューワページ (http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers) をチェックしてください。
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
@@ -1722,9 +1721,13 @@ http://secondlife.com/download から最新バージョンをダウンロード�
 		<usetemplate ignoretext="ブラウザを起動して QA Wiki を見るとき" name="okcancelignore" notext="キャンセル" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		[SECOND_LIFE] のパブリック問題トラッカーで、
+		[APP_NAME] のパブリック問題トラッカーで、
 バグやその他の問題を報告できます。
 		<usetemplate ignoretext="ブラウザを起動してパブリック問題トラッカーを使用するとき" name="okcancelignore" notext="キャンセル" yestext="ページへ行く"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		[APP_NAME] 公式ブログで、最新のニュースや情報を入手してください。
+		<usetemplate ignoretext="ブラウザを起動して公式ブログを見るとき" name="okcancelignore" notext="取り消し" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Linden 公式ブログで、最新のニュースや情報を入手してください。

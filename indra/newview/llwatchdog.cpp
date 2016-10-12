@@ -31,14 +31,14 @@
 
 const U32 WATCHDOG_SLEEP_TIME_USEC = 1000000;
 
-void default_killer_callback()
-{
-#ifdef LL_WINDOWS
-	RaiseException(0,0,0,0);
-#else
-	raise(SIGQUIT);
-#endif
-}
+//void default_killer_callback()
+//{
+//#ifdef LL_WINDOWS
+//	RaiseException(0,0,0,0);
+//#else
+//	raise(SIGQUIT);
+//#endif
+//}
 
 // This class runs the watchdog timing thread.
 class LLWatchdogTimerThread : public LLThread
@@ -158,7 +158,12 @@ LLWatchdog::LLWatchdog() :
 	mSuspectsAccessMutex(NULL),
 	mTimer(NULL),
 	mLastClockCount(0),
-	mKillerCallback(&default_killer_callback)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	mLastRunFreeze(false),
+	mKillerCallback(NULL),
+	mFreezeCallback(NULL)
+// [/SL:KB]
+//	mKillerCallback(&default_killer_callback)
 {
 }
 
@@ -180,9 +185,16 @@ void LLWatchdog::remove(LLWatchdogEntry* e)
 	unlockThread();
 }
 
-void LLWatchdog::init(killer_event_callback func)
+//void LLWatchdog::init(killer_event_callback func)
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+void LLWatchdog::init(killer_event_callback killer_func, freeze_event_callback freeze_func)
+// [/SL:KB]
 {
-	mKillerCallback = func;
+//	mKillerCallback = func;
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	mKillerCallback = killer_func;
+	mFreezeCallback = freeze_func;
+// [/SL:KB]
 	if(!mSuspectsAccessMutex && !mTimer)
 	{
 		mSuspectsAccessMutex = new LLMutex(NULL);
@@ -221,38 +233,68 @@ void LLWatchdog::run()
 	// Check the time since the last call to run...
 	// If the time elapsed is two times greater than the regualr sleep time
 	// reset the active timeouts.
-	const U32 TIME_ELAPSED_MULTIPLIER = 2;
+//	const U32 TIME_ELAPSED_MULTIPLIER = 2;
 	U64 current_time = LLTimer::getTotalTime();
-	U64 current_run_delta = current_time - mLastClockCount;
+//	U64 current_run_delta = current_time - mLastClockCount;
 	mLastClockCount = current_time;
 	
-	if(current_run_delta > (WATCHDOG_SLEEP_TIME_USEC * TIME_ELAPSED_MULTIPLIER))
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+	for (SuspectsRegistry::iterator itSuspect = mSuspects.begin(); itSuspect != mSuspects.end(); ++itSuspect)
 	{
-		LL_INFOS() << "Watchdog thread delayed: resetting entries." << LL_ENDL;
-		std::for_each(mSuspects.begin(), 
-			mSuspects.end(), 
-			std::mem_fun(&LLWatchdogEntry::reset)
-			);
-	}
-	else
-	{
-		SuspectsRegistry::iterator result = 
-			std::find_if(mSuspects.begin(), 
-				mSuspects.end(), 
-				std::not1(std::mem_fun(&LLWatchdogEntry::isAlive))
-				);
-		if(result != mSuspects.end())
+		if (!(*itSuspect)->isAlive())
 		{
-			// error!!!
-			if(mTimer)
+			if (!mKillerCallback.empty())
 			{
-				mTimer->stop();
-			}
+				if (mTimer)
+				{
+					mTimer->stop();
+				}
 
-			LL_INFOS() << "Watchdog detected error:" << LL_ENDL;
-			mKillerCallback();
+				LL_INFOS() << "Watchdog detected error:" << LL_ENDL;
+				mKillerCallback();
+			}
+			else if ( (!mFreezeCallback.empty()) && (!mLastRunFreeze) )
+			{
+				mLastRunFreeze = true;
+
+				LL_INFOS() << "Watchdog detected freeze:" << LL_ENDL;
+				mFreezeCallback();
+			}
+		}
+		else if (mLastRunFreeze)
+		{
+			mLastRunFreeze = false;
 		}
 	}
+// [/SL:KB]
+//	if(current_run_delta > (WATCHDOG_SLEEP_TIME_USEC * TIME_ELAPSED_MULTIPLIER))
+//	{
+//		llinfos << "Watchdog thread delayed: resetting entries." << llendl;
+//		std::for_each(mSuspects.begin(), 
+//			mSuspects.end(), 
+//			std::mem_fun(&LLWatchdogEntry::reset)
+//			);
+//	}
+//	else
+//	{
+//		SuspectsRegistry::iterator result = 
+//			std::find_if(mSuspects.begin(), 
+//				mSuspects.end(), 
+//				std::not1(std::mem_fun(&LLWatchdogEntry::isAlive))
+//				);
+//
+//		if(result != mSuspects.end())
+//		{
+//			// error!!!
+//			if(mTimer)
+//			{
+//				mTimer->stop();
+//			}
+//
+//			LL_INFOS() << "Watchdog detected error:" << LL_ENDL;
+//			mKillerCallback();
+//		}
+//	}
 
 
 	unlockThread();

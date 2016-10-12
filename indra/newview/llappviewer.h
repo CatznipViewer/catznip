@@ -176,8 +176,12 @@ public:
 	void initMainloopTimeout(const std::string& state, F32 secs = -1.0f);
 	void destroyMainloopTimeout();
 	void pauseMainloopTimeout();
-	void resumeMainloopTimeout(const std::string& state = "", F32 secs = -1.0f);
-	void pingMainloopTimeout(const std::string& state, F32 secs = -1.0f);
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	void resumeMainloopTimeout();
+	void pingMainloopTimeout(const std::string& state);
+// [/SL:KB]
+//	void resumeMainloopTimeout(const std::string& state = "", F32 secs = -1.0f);
+//	void pingMainloopTimeout(const std::string& state, F32 secs = -1.0f);
 
 	// Handle the 'login completed' event.
 	// *NOTE:Mani Fix this for login abstraction!!
@@ -298,6 +302,9 @@ private:
 	struct SettingsFiles* mSettingsLocationList;
 
 	LLWatchdogTimeout* mMainloopTimeout;
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-05 (Catznip-3.3)
+	std::string mMainloopState;
+// [/SL:KB]
 
 	// For performance and metric gathering
 	class LLThread*	mFastTimerLogThread;
@@ -344,15 +351,15 @@ const S32 AGENT_FORCE_UPDATES_PER_SECOND  = 1;
 extern LLSD gDebugInfo;
 extern BOOL	gShowObjectUpdates;
 
-typedef enum 
-{
-	LAST_EXEC_NORMAL = 0,
-	LAST_EXEC_FROZE,
-	LAST_EXEC_LLERROR_CRASH,
-	LAST_EXEC_OTHER_CRASH,
-	LAST_EXEC_LOGOUT_FROZE,
-	LAST_EXEC_LOGOUT_CRASH
-} eLastExecEvent;
+//typedef enum 
+//{
+//	LAST_EXEC_NORMAL = 0,
+//	LAST_EXEC_FROZE,
+//	LAST_EXEC_LLERROR_CRASH,
+//	LAST_EXEC_OTHER_CRASH,
+//	LAST_EXEC_LOGOUT_FROZE,
+//	LAST_EXEC_LOGOUT_CRASH
+//} eLastExecEvent;
 
 extern eLastExecEvent gLastExecEvent; // llstartup
 extern S32 gLastExecDuration; ///< the duration of the previous run in seconds (<0 indicates unknown)

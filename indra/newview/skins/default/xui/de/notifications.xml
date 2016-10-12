@@ -1375,7 +1375,7 @@ Sie müssen eventuell ein neues Zuhause festlegen.
 	</notification>
 	<notification name="ClothingLoading">
 		Ihre Kleidung wird noch heruntergeladen.
-Sie können [SECOND_LIFE] normal verwenden. Andere Benutzer können Sie korrekt dargestellt sehen.
+Sie können [APP_NAME] normal verwenden. Andere Benutzer können Sie korrekt dargestellt sehen.
 		<form name="form">
 			<ignore name="ignore" text="Das Herunterladen der Kleidung dauert lange"/>
 		</form>
@@ -1597,30 +1597,30 @@ In Ihren Anwendungsordner herunterladen?
 	</notification>
 	<notification name="FailedUpdateInstall">
 		Beim Installieren des Viewer-Updates ist ein Fehler aufgetreten.
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von http://catznip.com/downloads/ herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="FailedRequiredUpdateInstall">
 		Ein erforderliches Update konnte nicht installiert werden. 
 Sie können sich erst anmelden, wenn [APP_NAME] aktualisiert wurde.
 
-Laden Sie den neuesten Viewer von http://secondlife.com/download herunter und installieren Sie ihn.
+Laden Sie den neuesten Viewer von http://catznip.com/downloads/ herunter und installieren Sie ihn.
 		<usetemplate name="okbutton" yestext="Beenden"/>
 	</notification>
 	<notification name="UpdaterServiceNotRunning">
 		Für Ihre SecondLife-Installation ist ein Update erforderlich.
 
-Sie können dieses Update von http://www.secondlife.com/downloads herunterladen oder jetzt installieren.
+Sie können dieses Update von http://catznip.com/downloads/ herunterladen oder jetzt installieren.
 		<usetemplate name="okcancelbuttons" notext="Second Life beenden" yestext="Jetzt herunterladen und installieren"/>
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[INFO_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[INFO_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1680,7 +1680,6 @@ Versuchen Sie es später erneut.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Ihr Viewer ist auf dem neuesten Stand.
-Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Seite „Alternate Viewers“. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">
@@ -1705,8 +1704,12 @@ Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Se
 		<usetemplate ignoretext="Meinen Browser starten, um das QA-Wiki anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Im [SECOND_LIFE] Allgemeine-Fragen-Tracker können Sie Fehler und andere Probleme melden.
+		Im [APP_NAME] Fragen-Tracker können Sie Fehler und andere Probleme melden.
 		<usetemplate ignoretext="Meinen Browser starten, um die Datenbank für Fehler und Verbesserungsvorschläge anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="Gehe zu Seite"/>
+	</notification>
+	<notification name="WebLaunchBlog">
+		Im offiziellen [APP_NAME] Blog finden Sie die neuesten Nachrichten und Informationen.
+		<usetemplate ignoretext="Meinen Browser starten, um das Blog anzuzeigen" name="okcancelignore" notext="Abbrechen" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Im offiziellen Linden-Blog finden Sie die neuesten Nachrichten und Informationen.

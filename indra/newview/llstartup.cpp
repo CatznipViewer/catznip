@@ -76,6 +76,9 @@
 #include "llsdutil_math.h"
 #include "llstring.h"
 #include "lluserrelations.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "llversioninfo.h"
 #include "llviewercontrol.h"
 #include "llviewerhelp.h"
@@ -270,6 +273,9 @@ void trust_cert_done(const LLSD& notification, const LLSD& response);
 void apply_udp_blacklist(const std::string& csv);
 bool process_login_success_response();
 void transition_back_to_login_panel(const std::string& emsg);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+void fetch_viewer_data();
+// [/SL:KB]
 
 void callback_cache_name(const LLUUID& id, const std::string& full_name, bool is_group)
 {
@@ -429,6 +435,11 @@ bool idle_startup()
 			// Otherwise, we'll display a reasonable error message that IS translatable.
 			LLAppViewer::instance()->earlyExit("BadInstallation");
 		}
+
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+		fetch_viewer_data();
+// [/SL:KB]
+
 		//
 		// Statistics stuff
 		//
@@ -803,6 +814,16 @@ bool idle_startup()
 #endif
         display_startup();
         timeout.reset();
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+		if (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting"))
+		{
+			LLUpdaterService updaterService;
+			if (!updaterService.isChecking())
+				updaterService.startChecking();
+		}
+// [/SL:KB]
+
 		return FALSE;
 	}
 
@@ -858,6 +879,16 @@ bool idle_startup()
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+		// Limit bandwidth for the updater download once the user passes the login screen
+		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
+		{
+			LLUpdaterService updaterService;
+			if (updaterService.isChecking())
+				updaterService.setBandwidthLimit((int)gSavedSettings.getF32("UpdaterMaximumBandwidth") * (1024 / 8));
+		}
+// [/SL:KB]
+
 		// save the credentials                                                                                        
 		std::string userid = "unknown";                                                                                
 		if(gUserCredential.notNull())                                                                                  
@@ -867,7 +898,14 @@ bool idle_startup()
 		}
 		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
-		gDebugInfo["LoginName"] = userid;                                                                              
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4)
+		// Only include the agent name if the user consented
+		if (gCrashSettings.getBOOL("CrashSubmitName"))
+		{
+			gDebugInfo["LoginName"] = userid;                                                                              
+		}
+// [/SL:KB]
+//		gDebugInfo["LoginName"] = userid;                                                                              
          
 		// create necessary directories
 		// *FIX: these mkdir's should error check
@@ -3207,7 +3245,14 @@ bool process_login_success_response()
 	// unpack login data needed by the application
 	text = response["agent_id"].asString();
 	if(!text.empty()) gAgentID.set(text);
-	gDebugInfo["AgentID"] = text;
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-16 (Catznip-2.4)
+	// Only include the agent UUID if the user consented
+	if (gCrashSettings.getBOOL("CrashSubmitName"))
+	{
+		gDebugInfo["AgentID"] = text;
+	}
+// [/SL:KB]
+//	gDebugInfo["AgentID"] = text;
 	
 	// Agent id needed for parcel info request in LLUrlEntryParcel
 	// to resolve parcel name.
@@ -3215,7 +3260,7 @@ bool process_login_success_response()
 
 	text = response["session_id"].asString();
 	if(!text.empty()) gAgentSessionID.set(text);
-	gDebugInfo["SessionID"] = text;
+//	gDebugInfo["SessionID"] = text;
 
 	// Session id needed for parcel info request in LLUrlEntryParcel
 	// to resolve parcel name.
@@ -3386,7 +3431,13 @@ bool process_login_success_response()
 		gAgent.setHomePosRegion(region_handle, position);
 	}
 
-	gAgent.mMOTD.assign(response["message"]);
+// [SL:KB] - Patch: Viewer-Data | Checked: 2011-05-31 (Catznip-2.6)
+	if (gAgent.mMOTD.empty())
+	{
+		gAgent.mMOTD.assign("Second Life: ").append(response["message"]);
+	}
+// [/SL:KB]
+//	gAgent.mMOTD.assign(response["message"]);
 
 	// Options...
 	// Each 'option' is an array of submaps. 
@@ -3584,3 +3635,48 @@ void transition_back_to_login_panel(const std::string& emsg)
 	gSavedSettings.setBOOL("AutoLogin", FALSE);
 }
 
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+void fetch_viewer_data_cb(const LLSD& sdData)
+{
+	// Message of the day
+	if (sdData.has("motd"))
+	{
+		gAgent.mMOTD.assign("Catznip: ").append(sdData["motd"].asString());
+	}
+
+	// Introduction text for the support/beta group(s)
+	if ( (sdData.has("groups")) && (sdData["groups"].isArray()) )
+	{
+		const LLSD& sdGroups = sdData["groups"];
+		for (LLSD::array_const_iterator itGroup = sdGroups.beginArray(), endGroup = sdGroups.endArray(); itGroup != endGroup; ++itGroup)
+		{
+			const LLSD& sdGroupInfo = *itGroup;
+			if ( (sdGroupInfo.isMap()) && (sdGroupInfo.has("uuid")) && (sdGroupInfo.has("prelude")) )
+			{
+				const LLUUID idGroup = sdGroupInfo["uuid"].asUUID();
+				if (idGroup.notNull())
+				{
+					gAgent.mGroupPrelude.insert(LLAgent::groupprelude_map_t::value_type(idGroup, sdGroupInfo["prelude"].asString()));
+				}
+			}
+		}
+	}
+
+	// Feedback button
+	if (sdData.has("feedback"))
+	{
+		const LLSD& sdFeedbackInfo = sdData["feedback"];
+		if (sdFeedbackInfo.has("url"))
+		{
+			gAgent.mFeedbackInfo = sdFeedbackInfo;
+		}
+	}
+}
+
+void fetch_viewer_data()
+{
+	const std::string strURL = LLWeb::expandURLSubstitutions(gSavedSettings.getString("ViewerDataURL"), LLSD());
+	LL_INFOS() << "Fetching viewer data from " << strURL << LL_ENDL;
+	LLCoreHttpUtil::HttpCoroutineAdapter::callbackHttpGet(strURL, boost::bind(fetch_viewer_data_cb, _1));
+}
+// [/SL:KB]

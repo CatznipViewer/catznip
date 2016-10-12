@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="left|top|right|bottom"
+ height="408"
+ label="Crash Reports"
+ layout="topleft"
+ left="102"
+ name="crash_reports"
+ top="1"
+ width="517">
+    <check_box
+     enabled="true"
+     follows="top|left"
+     height="16"
+     label="Send crash reports to catznip.com"
+     layout="topleft"
+     left="30"
+     name="send_reports_check"
+     parse_urls="false"
+     top="25"
+     width="275"
+    />
+
+    <check_box
+     enabled="false"
+     follows="top|left"
+     height="16"
+     label="Always ask before sending"
+     layout="topleft"
+     left="60"
+     name="send_reportsask_check"
+     top_pad="10"
+     width="250"
+    />
+
+    <check_box
+     enabled="false"
+     follows="top|left"
+     height="16"
+     label="Include settings.xml"
+     layout="topleft"
+     name="checkSendSettings"
+     top_pad="5"
+     width="130"
+    />
+
+    <check_box
+     enabled="false"
+     follows="top|left"
+     height="16"
+     label="Include Second Life name"
+     layout="topleft"
+     left="60"
+     name="send_name_check"
+     tool_tip="Including your name helps us to collate persistent crashes and allows us to contact you if we have questions."
+     top_pad="5"
+     width="160"
+    />
+
+    <check_box
+     enabled="false"
+     follows="top|left"
+     height="16"
+     label="Include partial log"
+     layout="topleft"
+     name="send_log_check"
+     top_pad="5"
+     width="130"
+    />
+
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left="30"
+     length="1"
+     mouse_opaque="false"
+     name="crashes_text"
+     top_pad="10"
+     type="string"
+     width="475"
+    >
+        Recent crashes:
+    </text>
+    <scroll_list
+     draw_border="false"
+     draw_heading="true"
+     draw_stripes="true"
+     follows="top|left|bottom|right"
+     height="150"
+     multi_select="true"
+     name="crashes_list"
+     layout="topleft"
+     left="30"
+     right="-30"
+     top_pad="5"
+    >
+        <scroll_list.columns
+         label="Timestamp"
+         name="crash_timestamp"
+         width="120" />
+        <scroll_list.columns
+         label="Crash Module"
+         name="crash_module"
+         width="160" />
+        <scroll_list.columns
+         label="Crash Id"
+         name="crash_id"
+         width="160" />
+    </scroll_list>
+    <button
+     follows="left|top" 
+     label="Copy selected"
+     layout="topleft"
+     name="crashes_copysel_btn"
+     left="32"
+     top_pad="5"
+     height="25"
+     width="145" />
+    <button
+     follows="left|top" 
+     label="Clear list"
+     layout="topleft"
+     name="crashes_clearall_btn"
+     left_pad="10"
+     top_delta="0"
+     height="25"
+     width="145" />
+
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="30"
+     type="string"
+     length="1"
+     mouse_opaque="false"
+     name="crash_info1_text"
+     top_pad="20"
+     width="475">
+        Unless checked above crash reports only contain information relevant to the crash.
+    </text>
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="30"
+     length="1"
+     mouse_opaque="false"
+     name="crash_info2_text"
+     top_pad="10"
+     type="string"
+     width="475">
+        Please review the privacy policy at http://catznip.com/privacy/ .
+    </text>
+
+</panel>

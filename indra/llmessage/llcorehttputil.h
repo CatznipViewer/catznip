@@ -597,11 +597,18 @@ public:
     /// @sa callbackHttpPost
     typedef boost::function<void(const LLSD &)> completionCallback_t;
 
-    static void callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success = NULL, completionCallback_t failure = NULL);
-    static void callbackHttpGet(const std::string &url, completionCallback_t success = NULL, completionCallback_t failure = NULL)
-    {
-        callbackHttpGet(url, LLCore::HttpRequest::DEFAULT_POLICY_ID, success, failure);
-    }
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	static void callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success = NULL, completionCallback_t failure = NULL, LLCore::HttpOptions::ptr_t options = NULL);
+	static void callbackHttpGet(const std::string &url, completionCallback_t success = NULL, completionCallback_t failure = NULL, LLCore::HttpOptions::ptr_t options = NULL)
+	{
+		callbackHttpGet(url, LLCore::HttpRequest::DEFAULT_POLICY_ID, success, failure, options);
+	}
+// [/SL:KB]
+//    static void callbackHttpGet(const std::string &url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success = NULL, completionCallback_t failure = NULL);
+//    static void callbackHttpGet(const std::string &url, completionCallback_t success = NULL, completionCallback_t failure = NULL)
+//    {
+//        callbackHttpGet(url, LLCore::HttpRequest::DEFAULT_POLICY_ID, success, failure);
+//    }
     static void callbackHttpPost(const std::string &url, LLCore::HttpRequest::policy_t policyId, const LLSD &postData, completionCallback_t success = NULL, completionCallback_t failure = NULL);
     static void callbackHttpPost(const std::string &url, const LLSD &postData, completionCallback_t success = NULL, completionCallback_t failure = NULL)
     {
@@ -667,8 +674,12 @@ private:
         LLCore::HttpOptions::ptr_t &options, LLCore::HttpHeaders::ptr_t &headers,
         HttpCoroHandler::ptr_t &handler);
 
-    static void trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure);
-    static void trivialPostCoro(std::string url, LLCore::HttpRequest::policy_t policyId, LLSD postData, completionCallback_t success, completionCallback_t failure);
+// [SL:KB] - Patch: Viewer-Data | Checked: Catznip-4.0
+	static void trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure, LLCore::HttpOptions::ptr_t options = nullptr);
+	static void trivialPostCoro(std::string url, LLCore::HttpRequest::policy_t policyId, LLSD postData, completionCallback_t success, completionCallback_t failure);
+// [/SL:KB]
+//    static void trivialGetCoro(std::string url, LLCore::HttpRequest::policy_t policyId, completionCallback_t success, completionCallback_t failure);
+//    static void trivialPostCoro(std::string url, LLCore::HttpRequest::policy_t policyId, LLSD postData, completionCallback_t success, completionCallback_t failure);
 
     void checkDefaultHeaders(LLCore::HttpHeaders::ptr_t &headers);
 

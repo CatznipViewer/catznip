@@ -139,6 +139,10 @@ bool handle_go_to();
 // Export to XML or Collada
 void handle_export_selected( void * );
 
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
+void handle_updater_check();
+// [/SL:KB]
+
 // Convert strings to internal types
 U32 render_type_from_string(std::string render_type);
 U32 feature_from_string(std::string feature);

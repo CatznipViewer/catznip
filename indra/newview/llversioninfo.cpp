@@ -31,6 +31,10 @@
 #include "llversioninfo.h"
 #include <boost/regex.hpp>
 
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-04-09 (Catznip-3.6)
+#include <boost/regex.hpp>
+// [/SL:KB]
+
 #if ! defined(LL_VIEWER_CHANNEL)       \
  || ! defined(LL_VIEWER_VERSION_MAJOR) \
  || ! defined(LL_VIEWER_VERSION_MINOR) \
@@ -80,6 +84,32 @@ const std::string &LLVersionInfo::getVersion()
 	}
 	return version;
 }
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
+const std::string &LLVersionInfo::getReleaseVersion()
+{
+	static std::string version("");
+
+	if (version.empty())
+	{
+		// Cache the version string
+		std::ostringstream stream;
+		if (RELEASE_VIEWER == getViewerMaturity())
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR;
+			if (LL_VIEWER_VERSION_MINOR > 0)
+				stream << "." << LL_VIEWER_VERSION_MINOR;
+		}
+		else
+		{
+			stream << "R" << LL_VIEWER_VERSION_MAJOR << "." << LL_VIEWER_VERSION_MINOR << "." << LL_VIEWER_VERSION_PATCH;
+		}
+		version = stream.str();
+	}
+
+	return version;
+}
+// [/SL:KB]
 
 //static
 const std::string &LLVersionInfo::getShortVersion()
@@ -171,9 +201,39 @@ LLVersionInfo::ViewerMaturity LLVersionInfo::getViewerMaturity()
     return maturity;
 }
 
-    
 const std::string &LLVersionInfo::getBuildConfig()
 {
     static const std::string build_configuration(LLBUILD_CONFIG); // set in indra/cmake/BuildVersion.cmake
     return build_configuration;
 }
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-05-08 (Catznip-2.6)
+const char* getBuildPlatformString()
+{
+#if LL_WINDOWS
+	#ifndef _WIN64
+			return "Win32";
+	#else
+			return "Win64";
+	#endif // _WIN64
+#elif LL_SDL
+	#if LL_GNUC
+		#if ( defined(__amd64__) || defined(__x86_64__) )
+			return "Linux64";
+		#else
+			return "Linux32";
+		#endif
+	#endif
+#elif LL_DARWIN
+			return "Darwin";
+#else
+			return "Unknown";
+#endif
+}
+
+const std::string& LLVersionInfo::getBuildPlatform()
+{
+	static std::string strPlatform = getBuildPlatformString();
+	return strPlatform;
+}
+// [/SL:KB]

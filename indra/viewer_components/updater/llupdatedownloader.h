@@ -52,12 +52,17 @@ public:
 	void cancel(void);
 	
 	// Start a new download.
-	void download(LLURI const & uri,
-				  std::string const & hash, 
-				  std::string const & updateChannel,
-				  std::string const & updateVersion,
-				  std::string const & info_url,
-				  bool required=false);
+//	void download(LLURI const & uri,
+//				  std::string const & hash, 
+//				  std::string const & updateChannel,
+//				  std::string const & updateVersion,
+//				  std::string const & info_url,
+//				  bool required=false);
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-2.6
+	void download(const LLSD& sdUpdateData);
+
+	const LLSD& getDownloadData() const;
+// [/SL:KB]
 	
 	// Returns true if a download is in progress.
 	bool isDownloading(void);

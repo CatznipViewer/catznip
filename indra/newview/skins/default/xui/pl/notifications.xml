@@ -1164,7 +1164,7 @@ Możesz ustawić nowe miejsce startu.
 	</notification>
 	<notification name="ClothingLoading">
 		Twoje ubranie wciąż się ładuje.
-Możesz normalnie używać [SECOND_LIFE], inni użytkownicy będą Cię widzieli poprawnie.
+Możesz normalnie używać [APP_NAME], inni użytkownicy będą Cię widzieli poprawnie.
 		<form name="form">
 			<ignore name="ignore" text="Ładowanie ubrań nadal trwa" />
 		</form>
@@ -1459,8 +1459,12 @@ Otwieranie stron internetowych z nieznanego źródła może narazić Twój kompu
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć QA Wiki" name="okcancelignore" notext="Anuluj" />
 	</notification>
 	<notification name="WebLaunchPublicIssue">
-		Odwiedź [SECOND_LIFE] katalog publicznych problemów, gdzie możesz zgłaszać błędy i inne problemy.
+		Odwiedź [APP_NAME] katalog problemów, gdzie możesz zgłaszać błędy i inne problemy.
 		<usetemplate ignoretext="Uruchom przeglądarkę internetową by wysłać Błędy klienta" name="okcancelignore" notext="Anuluj" />
+	</notification>
+	<notification name="WebLaunchBlog">
+		Otwórz oficjalny blog [APP_NAME] żeby zobaczyć nowe wiadomości i informacje.
+		<usetemplate ignoretext="Uruchom przeglądarkę internetową by zobaczyć blog" name="okcancelignore" notext="Anuluj" yestext="OK"/>
 	</notification>
 	<notification name="WebLaunchSupportWiki">
 		Otwórz oficjalny blog Lindenów żeby zobaczyć nowe wiadomości i informacje.

@@ -1774,6 +1774,17 @@
       <key>Value</key>
       <string />
     </map>
+    <key>ClientSettingsFileOverride</key>
+    <map>
+      <key>Comment</key>
+      <string>Overrides the filename of the client settings file</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>ContextConeInAlpha</key>
     <map>
       <key>Comment</key>
@@ -2050,6 +2061,17 @@
       <string>S32</string>
       <key>Value</key>
       <integer>262144</integer>
+    </map>
+    <key>CrashSettingsFile</key>
+    <map>
+      <key>Comment</key>
+      <string>Crash settings file name (per install).</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
     </map>
     <key>CrashOnStartup</key>
     <map>
@@ -3677,7 +3699,7 @@
         <key>Type</key>
         <string>String</string>
         <key>Value</key>
-        <string>http://viewer-settings.secondlife.com</string>
+        <string>http://viewer.catznip.com/data/settings</string>
     </map>
     <key>FPSLogFrequency</key>
         <map>
@@ -4530,7 +4552,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://viewer-help.secondlife.com/[LANGUAGE]/[CHANNEL]/[VERSION]/[TOPIC][DEBUG_MODE]</string>
+      <string>http://viewer-help.secondlife.com/[LANGUAGE]/Second Life Release/3.3.4.0/[TOPIC][DEBUG_MODE]</string>
     </map>
     <key>HowToHelpURL</key>
     <map>
@@ -5687,7 +5709,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>60.0</real>
+      <real>30.0</real>
     </map>
     <key>MapOverlayIndex</key>
     <map>
@@ -12213,7 +12235,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>500.0</real>
+      <real>1024.0</real>
     </map>
     <key>ToolTipDelay</key>
     <map>
@@ -13315,6 +13337,17 @@
       <key>Value</key>
       <integer>15</integer>
     </map>
+    <key>UpdaterLastPopup</key>
+    <map>
+      <key>Comment</key>
+      <string>Timestamp of the last update popup</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
     <key>UpdaterServiceSetting</key>
     <map>
       <key>Comment</key>
@@ -13324,7 +13357,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>3</integer>
+      <integer>1</integer>
     </map>
     <key>UpdaterServiceCheckPeriod</key>
     <map>
@@ -13346,7 +13379,7 @@
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>https://update.secondlife.com</string>
+      <string>http://viewer.catznip.com</string>
     </map>
     <key>UpdaterServicePath</key>
     <map>
@@ -13832,6 +13865,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ViewerDataURL</key>
+    <map>
+      <key>Comment</key>
+      <string>Default location for the viewer data service (supplies custom MOTD, blocked viewer versions, etc))</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>http://viewer.catznip.com/data/[CHANNEL]/[VERSION]</string>
+    </map>
     <key>VivoxAutoPostCrashDumps</key>
     <map>
       <key>Comment</key>
@@ -14178,11 +14222,11 @@
       <key>Comment</key>
       <string>Controls whether the thread watchdog timer is activated. Value is boolean. Set to -1 to defer to built-in default.</string>
       <key>Persist</key>
-      <integer>0</integer>
+      <integer>1</integer>
       <key>Type</key>
       <string>S32</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>-1</integer>
     </map>
     <key>WaterGLFogDensityScale</key>
     <map>

@@ -128,6 +128,13 @@
          help_topic="preferences_skins_tab"
          name="skins" />
         <panel
+		 class="panel_preference_crashreports"
+         filename="panel_preferences_crashreports.xml"
+         label="Crash Reports"
+         layout="topleft"
+         help_topic="preferences_crashreports_tab"
+         name="crashreports" />
+        <panel
 		 class="panel_preference_fonts"
          filename="panel_preferences_fonts.xml"
          label="Fonts"

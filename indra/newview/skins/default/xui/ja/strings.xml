@@ -8,10 +8,10 @@
 		Second Life
 	</string>
 	<string name="APP_NAME">
-		Second Life
+		Catznip
 	</string>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SECOND_LIFE_GRID">
 		Second Life Grid
@@ -38,7 +38,8 @@
 		グラフィックを初期化できませんでした。グラフィックドライバを更新してください。
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
+[APP_NAME] [VIEWER_VERSION_STR] [BUILD_DATE] [BUILD_TIME] ([CHANNEL])
+[[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="AboutPosition">
 		あなたの現在地は、[POSITION_LOCAL_0,number,1]、[POSITION_LOCAL_1,number,1]、[POSITION_LOCAL_2,number,1] の [REGION] です。位置は &lt;nolink&gt;[HOSTNAME]&lt;/nolink&gt; です。（[HOSTIP]）
@@ -184,7 +185,7 @@ LLCEFLib/CEF バージョン： [LLCEFLIB_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		お使いの古いビューワでは Second Life にアクセスできません。以下のページから新しいビューワをダウンロードしてください：
-http://secondlife.com/download
+http://catznip.com/downloads/
 
 詳細については、FAQ を参照してください：
 http://secondlife.com/viewer-access-faq

@@ -1,13 +1,12 @@
 #!/bin/bash
 
-## Here are some configuration options for Linux Client Testers.
-## These options are for self-assisted troubleshooting during this beta
-## testing phase; you should not usually need to touch them.
+## Here are some options configuration options for Linux Catznip Users.
+## You should not usually need to touch these.
 
 ## - Avoids using any FMOD Ex audio driver.
 #export LL_BAD_FMODEX_DRIVER=x
 ## - Avoids using any OpenAL audio driver.
-#export LL_BAD_OPENAL_DRIVER=x
+export LL_BAD_OPENAL_DRIVER=x
 
 ## - Avoids using the FMOD Ex PulseAudio audio driver.
 #export LL_BAD_FMOD_PULSEAUDIO=x
@@ -24,16 +23,11 @@
 #export LL_GL_BASICEXT=x
 
 ## - Avoids *all* optional OpenGL extensions.  This is the safest and least-
-##   exciting option.  Enable this if you experience stability issues, and
-##   report whether it helps in the Linux Client Testers forum.
+##   exciting option.
 #export LL_GL_NOEXT=x
 
 ## - For advanced troubleshooters, this lets you disable specific GL
-##   extensions, each of which is represented by a letter a-o.  If you can
-##   narrow down a stability problem on your system to just one or two
-##   extensions then please post details of your hardware (and drivers) to
-##   the Linux Client Testers forum along with the minimal
-##   LL_GL_BLACKLIST which solves your problems.
+##   extensions, each of which is represented by a letter a-o.
 #export LL_GL_BLACKLIST=abcdefghijklmno
 
 ## - Some ATI/Radeon users report random X server crashes when the mouse
@@ -135,7 +129,7 @@ done
 # Don't quote $LL_WRAPPER because, if empty, it should simply vanish from the
 # command line. But DO quote "${ARGS[@]}": preserve separate args as
 # individually quoted.
-$LL_WRAPPER bin/do-not-directly-run-secondlife-bin "${ARGS[@]}"
+$LL_WRAPPER bin/do-not-directly-run-catznip-bin "${ARGS[@]}"
 LL_RUN_ERR=$?
 
 # Handle any resulting errors
@@ -145,20 +139,18 @@ if [ $LL_RUN_ERR -ne 0 ]; then
 	if [ "$(uname -m)" = "x86_64" ]; then
 		echo
 		cat << EOFMARKER
-You are running the Second Life Viewer on a x86_64 platform.  The
+You are running the Catznip Viewer on a x86_64 platform.  The
 most common problems when launching the Viewer (particularly
-'bin/do-not-directly-run-secondlife-bin: not found' and 'error while
+'bin/do-not-directly-run-catznip-bin: not found' and 'error while
 loading shared libraries') may be solved by installing your Linux
 distribution's 32-bit compatibility packages.
-For example, on Ubuntu and other Debian-based Linuxes you might run:
-$ sudo apt-get install ia32-libs ia32-libs-gtk ia32-libs-kde ia32-libs-sdl
+
+For example, on Ubuntu you might run:
+
+$ sudo apt-get install ia32-libs 
+
 EOFMARKER
 	fi
 fi
 
-echo
-echo '*******************************************************'
-echo 'This is a BETA release of the Second Life linux client.'
-echo 'Thank you for testing!'
-echo 'Please see README-linux.txt before reporting problems.'
-echo
+

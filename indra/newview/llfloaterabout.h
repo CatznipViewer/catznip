@@ -31,8 +31,8 @@ namespace LLFloaterAboutUtil
 {
 	void registerFloater();
 
-	// Support for user initialized update/state checks
-	void checkUpdatesAndNotify();
+//	// Support for user initialized update/state checks
+//	void checkUpdatesAndNotify();
 }
 
 #endif // LL_LLFLOATERABOUT_H

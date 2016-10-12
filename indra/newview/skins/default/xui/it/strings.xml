@@ -8,10 +8,10 @@
 		Second Life
 	</string>
 	<string name="APP_NAME">
-		Second Life
+		Catznip
 	</string>
 	<string name="CAPITALIZED_APP_NAME">
-		SECOND LIFE
+		CATZNIP
 	</string>
 	<string name="SUPPORT_SITE">
 		Portale di supporto di Second Life
@@ -35,7 +35,7 @@
 		Inizializzazione grafica non riuscita. Aggiorna il driver della scheda grafica!
 	</string>
 	<string name="AboutHeader">
-		[APP_NAME] [VIEWER_VERSION_0].[VIEWER_VERSION_1].[VIEWER_VERSION_2].[VIEWER_VERSION_3] ([CHANNEL])
+[APP_NAME] [VIEWER_VERSION_STR] [BUILD_DATE] [BUILD_TIME] ([CHANNEL])
 [[VIEWER_RELEASE_NOTES_URL] [ReleaseNotes]]
 	</string>
 	<string name="AboutPosition">
@@ -182,7 +182,7 @@ Versione server voce: [VOICE_VERSION]
 	</string>
 	<string name="LoginFailedViewerNotPermitted">
 		Il viewer utilizzato non è più in grado di accedere a Second Life. Visita la parina seguente per scaricare un nuovo viewer:
-http://secondlife.com/download.
+http://catznip.com/downloads/.
 
 Per maggiori informazioni, consulta le domande frequenti alla pagina seguente:
 http://secondlife.com/viewer-access-faq

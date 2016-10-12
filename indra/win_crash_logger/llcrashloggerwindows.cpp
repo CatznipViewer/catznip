@@ -29,6 +29,9 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "llcrashloggerwindows.h"
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#include "llcrashlookupwindows.h"
+// [/SL:KB]
 
 #include <sstream>
 
@@ -192,6 +195,13 @@ bool handle_button_click(WORD button_id)
 		((LLCrashLoggerWindows*)LLCrashLogger::instance())->setUserText(user_text);
 		((LLCrashLoggerWindows*)LLCrashLogger::instance())->sendCrashLogs();
 	}
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.6)
+	else if (button_id == IDCANCEL)
+	{
+		((LLCrashLoggerWindows*)LLCrashLogger::instance())->cleanCrashLogs();
+	}
+// [/SL:KB]
+
 	// Quit the app
 	LLApp::setQuitting();
 	return true;
@@ -230,6 +240,12 @@ LRESULT CALLBACK WndProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam 
 
 LLCrashLoggerWindows::LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+#ifdef LL_SEND_CRASH_REPORTS
+	mCrashLookup = new LLCrashLookupWindows();
+#endif // LL_SEND_CRASH_REPORTS
+// [/SL:KB]
+
 	if (LLCrashLoggerWindows::sInstance==NULL)
 	{
 		sInstance = this; 
@@ -238,6 +254,9 @@ LLCrashLoggerWindows::LLCrashLoggerWindows(void)
 
 LLCrashLoggerWindows::~LLCrashLoggerWindows(void)
 {
+// [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2011-03-24 (Catznip-2.6)
+	delete mCrashLookup;
+// [/SL:KB]
 	sInstance = NULL;
 }
 
@@ -305,8 +324,12 @@ int LLCrashLoggerWindows::processingLoop() {
     LL_INFOS() << "session ending.." << LL_ENDL;
     
     std::string per_run_dir = options["dumpdir"].asString();
-	std::string per_run_file = per_run_dir + "\\SecondLife.log";
-    std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.log");
+// [SL:KB] Patch: Viewer-Branding | Checked: 2015-05-08 (Catznip-3.7)
+	std::string per_run_file = per_run_dir + "\\Catznip.log";
+	std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"Catznip.log");
+// [/SL:KB]
+//	std::string per_run_file = per_run_dir + "\\SecondLife.log";
+//    std::string log_file = gDirUtilp->getExpandedFilename(LL_PATH_LOGS,"SecondLife.log");
 
 	if (gDirUtilp->fileExists(per_run_dir))  
 	{
@@ -452,6 +475,9 @@ void LLCrashLoggerWindows::gatherPlatformSpecificFiles()
 	// At this point we're responsive enough the user could click the close button
 	SetCursor(gCursorArrow);
 	//mDebugLog["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();  //Not initialized.
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2010-11-14 (Catznip-2.4)
+//	mCrashInfo["DisplayDeviceInfo"] = gDXHardware.getDisplayInfo();
+// [/SL:KB]
 }
 
 bool LLCrashLoggerWindows::frame()
@@ -465,6 +491,33 @@ bool LLCrashLoggerWindows::frame()
 	gHwndProgress = CreateDialog(hInst, MAKEINTRESOURCE(IDD_PROGRESS), 0, NULL);
 	ProcessCaption(gHwndProgress);
 	ShowWindow(gHwndProgress, SW_HIDE );
+
+// [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2014-05-18 (Catznip-3.7)
+	const LLSD sdOptionData = getOptionData(PRIORITY_COMMAND_LINE);
+	if (sdOptionData.has("pid"))
+	{
+		HANDLE hProcess = OpenProcess(SYNCHRONIZE, FALSE, sdOptionData["pid"].asInteger());
+		if (hProcess != NULL)
+		{
+			LL_INFOS() << "Waiting for viewer instance with process id " << sdOptionData["pid"].asInteger() << " to terminate..." << LL_ENDL;
+			
+			DWORD dwRet = WaitForSingleObject(hProcess, 10000);
+			if (WAIT_TIMEOUT != dwRet)
+				LL_INFOS() << "Instance terminated" << LL_ENDL;
+			else
+				LL_INFOS() << "Timed out waiting for instance to terminate" << LL_ENDL;
+
+			CloseHandle(hProcess);
+		}
+	}
+
+	if (!hasCrashLog())
+	{
+		cleanCrashLogs();
+		cleanupDumpDirs(false);
+		return 0;
+	}
+// [/SL:KB]
 
 	if (mCrashBehavior == CRASH_BEHAVIOR_ALWAYS_SEND)
 	{

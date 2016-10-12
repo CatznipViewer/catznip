@@ -79,6 +79,9 @@
 #include "llavataractions.h"
 #include "lllandmarkactions.h"
 #include "llgroupmgr.h"
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+#include "llgroupactions.h"
+// [/SL:KB]
 #include "lltooltip.h"
 #include "llhints.h"
 #include "llhudeffecttrail.h"
@@ -99,6 +102,9 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
+#include "llstartup.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolbarview.h"
 #include "lltoolcomp.h"
@@ -132,6 +138,9 @@
 #include "llwindow.h"
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "boost/unordered_map.hpp"
 
 using namespace LLAvatarAppearanceDefines;
@@ -2125,14 +2134,14 @@ class LLAdvancedCheckShowObjectUpdates : public view_listener_t
 
 
 
-class LLAdvancedCheckViewerUpdates : public view_listener_t
-{
-	bool handleEvent(const LLSD& userdata)
-	{
-		LLFloaterAboutUtil::checkUpdatesAndNotify();
-		return true;
-	}
-};
+//class LLAdvancedCheckViewerUpdates : public view_listener_t
+//{
+//	bool handleEvent(const LLSD& userdata)
+//	{
+//		LLFloaterAboutUtil::checkUpdatesAndNotify();
+//		return true;
+//	}
+//};
 
 
 ////////////////////
@@ -6284,15 +6293,15 @@ class LLSidetrayPanelVisible : public view_listener_t
 };
 
 
-bool callback_show_url(const LLSD& notification, const LLSD& response)
-{
-	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
-	if (0 == option)
-	{
-		LLWeb::loadURL(notification["payload"]["url"].asString());
-	}
-	return false;
-}
+//bool callback_show_url(const LLSD& notification, const LLSD& response)
+//{
+//	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+//	if (0 == option)
+//	{
+//		LLWeb::loadURL(notification["payload"]["url"].asString());
+//	}
+//	return false;
+//}
 
 class LLPromptShowURL : public view_listener_t
 {
@@ -6305,16 +6314,19 @@ class LLPromptShowURL : public view_listener_t
 			std::string alert = param.substr(0, offset);
 			std::string url = param.substr(offset+1);
 
-			if (LLWeb::useExternalBrowser(url))
-			{ 
-    			LLSD payload;
-    			payload["url"] = url;
-    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
-			}
-			else
-			{
-		        LLWeb::loadURL(url);
-			}
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2012-07-15 (Catznip-3.3)
+			LLWeb::openURL(LLSD().with("url", url).with("notification", alert));
+// [/SL:KB]
+//			if (LLWeb::useExternalBrowser(url))
+//			{ 
+//    			LLSD payload;
+//    			payload["url"] = url;
+//    			LLNotificationsUtil::add(alert, LLSD(), payload, callback_show_url);
+//			}
+//			else
+//			{
+//		        LLWeb::loadURL(url);
+//			}
 		}
 		else
 		{
@@ -6425,6 +6437,17 @@ class LLToggleAgentProfile : public view_listener_t
 		return true;
 	}
 };
+
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+void handle_show_support_group()
+{
+	const LLUUID idSupportGroup = LLUUID("0ca3355c-c72c-4db5-d2e2-79127a134d55");
+	if (gAgent.isInGroup(idSupportGroup, true))
+		LLGroupActions::startIM(idSupportGroup);
+	else
+		LLGroupActions::show(idSupportGroup);
+}
+// [/SL:KB]
 
 class LLLandEdit : public view_listener_t
 {
@@ -7204,6 +7227,28 @@ void handle_selected_material_info()
 		LLNotificationsUtil::add("SystemMessage", args);
 	}
 }
+
+// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
+void handle_updater_check()
+{
+	LLUpdaterService updater_service;
+
+	// Make sure the update is actually running
+	if (!updater_service.isChecking())
+		updater_service.startChecking();
+
+	if (updater_service.isDownloading())
+	{
+		bool fRequired = updater_service.getDownloadData()["required"].asBoolean();
+		LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
+	}
+	else
+	{
+		// Perform a clean manual check
+		updater_service.checkForUpdate(true);
+	}
+}
+// [/SL:KB]
 
 void handle_test_male(void*)
 {
@@ -8943,7 +8988,10 @@ void initialize_menus()
 	// Advanced (toplevel)
 	view_listener_t::addMenu(new LLAdvancedToggleShowObjectUpdates(), "Advanced.ToggleShowObjectUpdates");
 	view_listener_t::addMenu(new LLAdvancedCheckShowObjectUpdates(), "Advanced.CheckShowObjectUpdates");
-	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
+	commit.add("Advanced.CheckViewerUpdates", boost::bind(&handle_updater_check));
+	// [/SL:KB]
+//	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");
 	view_listener_t::addMenu(new LLAdvancedEnableViewAdminOptions(), "Advanced.EnableViewAdminOptions");
@@ -9080,6 +9128,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLShowHelp(), "ShowHelp");
 	view_listener_t::addMenu(new LLToggleHelp(), "ToggleHelp");
 	view_listener_t::addMenu(new LLToggleSpeak(), "ToggleSpeak");
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2010-09-04 (Catznip-2.1)
+	commit.add("ShowSupportGroup", boost::bind(&handle_show_support_group));
+// [/SL:KB]
+
 	view_listener_t::addMenu(new LLPromptShowURL(), "PromptShowURL");
 	view_listener_t::addMenu(new LLShowAgentProfile(), "ShowAgentProfile");
 	view_listener_t::addMenu(new LLToggleAgentProfile(), "ToggleAgentProfile");

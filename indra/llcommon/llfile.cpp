@@ -324,6 +324,16 @@ bool LLFile::isfile(const std::string& filename)
 	return stat(filename, &st) == 0 && S_ISREG(st.st_mode);
 }
 
+// [SL:KB] - Patch: Viewer-Branding | Checked: 2014-04-14 (Catznip-3.6)
+time_t LLFile::getModifiedTime(const std::string& filename)
+{
+	llstat fileStat;
+	if (0 == LLFile::stat(filename, &fileStat))
+		return fileStat.st_mtime;
+	return 0;
+}
+// [/SL:KB]
+
 const char *LLFile::tmpdir()
 {
 	static std::string utf8path;
