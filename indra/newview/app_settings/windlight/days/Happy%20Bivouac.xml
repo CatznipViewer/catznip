@@ -1,0 +1,44 @@
+<llsd>
+    <array>
+        <array>
+            <real>0</real>
+            <string>Happy Bivouac-12AM</string>
+        </array>
+        <array>
+            <real>0.125</real>
+            <string>Happy Bivouac-3AM</string>
+        </array>
+        <array>
+            <real>0.16666667</real>
+            <string>Happy Bivouac-4AM</string>
+        </array>
+        <array>
+            <real>0.25</real>
+            <string>Happy Bivouac-6AM</string>
+        </array>
+        <array>
+            <real>0.375</real>
+            <string>Happy Bivouac-9AM</string>
+        </array>
+        <array>
+            <real>0.5</real>
+            <string>Happy Bivouac-12PM</string>
+        </array>
+        <array>
+            <real>0.625</real>
+            <string>Happy Bivouac-3PM</string>
+        </array>
+        <array>
+            <real>0.75</real>
+            <string>Happy Bivouac-6PM</string>
+        </array>
+        <array>
+            <real>0.79166667</real>
+            <string>Happy Bivouac-7PM</string>
+        </array>
+        <array>
+            <real>0.875</real>
+            <string>Happy Bivouac-9PM</string>
+        </array>
+    </array>
+</llsd>
