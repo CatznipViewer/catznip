@@ -204,8 +204,8 @@
 bool gAgentMovementCompleted = false;
 S32  gMaxAgentGroups;
 
-std::string SCREEN_HOME_FILENAME = "screen_home.bmp";
-std::string SCREEN_LAST_FILENAME = "screen_last.bmp";
+//std::string SCREEN_HOME_FILENAME = "screen_home.bmp";
+//std::string SCREEN_LAST_FILENAME = "screen_last.bmp";
 
 LLPointer<LLViewerTexture> gStartTexture;
 
@@ -754,7 +754,10 @@ bool idle_startup()
 			// connect dialog is already shown, so fill in the names
 			if (gUserCredential.notNull())
 			{
-				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+				LLPanelLogin::selectUser(gUserCredential, gRememberPassword);
+// [/SL:KB]
+//				LLPanelLogin::setFields( gUserCredential, gRememberPassword);
 			}
 			LLPanelLogin::giveFocus();
 
@@ -860,7 +863,7 @@ bool idle_startup()
 		if(gUserCredential.notNull())                                                                                  
 		{  
 			userid = gUserCredential->userID();                                                                    
-			gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
+//			gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
 		}
 		gSavedSettings.setBOOL("RememberPassword", gRememberPassword);                                                 
 		LL_INFOS("AppInit") << "Attempting login as: " << userid << LL_ENDL;                                           
@@ -1152,6 +1155,11 @@ bool idle_startup()
 		{
 			if(process_login_success_response())
 			{
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+				// Only save credentials after successful login
+				gSecAPIHandler->saveCredential(gUserCredential, gRememberPassword);  
+				gSavedSettings.setString("LastUserID", gUserCredential->userID());
+// [/SL:KB]
 				// Pass the user information to the voice chat server interface.
 				LLVoiceClient::getInstance()->userAuthorized(gUserCredential->userID(), gAgentID);
 				// create the default proximal channel
@@ -2264,7 +2272,32 @@ bool first_run_dialog_callback(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+static const std::string getScreenName(const char* pstrBase)
+{
+	std::string strPath(gDirUtilp->getLindenUserDir());
+	strPath += gDirUtilp->getDirDelimiter();
+	strPath += pstrBase;
+	if (!LLGridManager::instance().isInProductionGrid())
+	{
+		std::string strGrid = LLGridManager::instance().getGridId();
+		LLStringUtil::toLower(strGrid);
+		strPath += strGrid;
+	}
+	strPath += ".bmp";
+	return strPath;
+}
 
+const std::string getHomeScreenPath()
+{
+	return getScreenName("screen_home");
+}
+
+const std::string getLastScreenPath()
+{
+	return getScreenName("screen_last");
+}
+// [/Sl:KB]
 
 void set_startup_status(const F32 frac, const std::string& string, const std::string& msg)
 {
@@ -2619,16 +2652,19 @@ void init_start_screen(S32 location_id)
 
 	LL_DEBUGS("AppInit") << "Loading startup bitmap..." << LL_ENDL;
 
-	std::string temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter();
-
-	if ((S32)START_LOCATION_ID_LAST == location_id)
-	{
-		temp_str += SCREEN_LAST_FILENAME;
-	}
-	else
-	{
-		temp_str += SCREEN_HOME_FILENAME;
-	}
+//	std::string temp_str = gDirUtilp->getLindenUserDir() + gDirUtilp->getDirDelimiter();
+//
+//	if ((S32)START_LOCATION_ID_LAST == location_id)
+//	{
+//		temp_str += SCREEN_LAST_FILENAME;
+//	}
+//	else
+//	{
+//		temp_str += SCREEN_HOME_FILENAME;
+//	}
+// [SL:KB] - Patch: Viewer-HomeLastScreen | Checked: 2013-12-14 (Catznip-3.6)
+	const std::string temp_str = ((S32)START_LOCATION_ID_LAST == location_id) ? getLastScreenPath() : getHomeScreenPath();
+// [/SL:KB]
 
 	LLPointer<LLImageBMP> start_image_bmp = new LLImageBMP;
 	

@@ -35,15 +35,15 @@
       top="0"
       height="172">
   <icon
-    height="73"
-    width="165"
+    height="96"
+    width="96"
     image_name="login_sl_logo"
     left="0"
-    top="25"
+    top="18"
     name="sl_logo_small" />
   <combo_box
     left_pad="22"
-    bottom_delta="-7"
+    bottom_delta="-42"
     allow_text_entry="true"
     follows="left|top"
     height="32"
@@ -58,15 +58,17 @@
     <combo_box.combo_editor
       text_pad_left="8" 
       bg_image_always_focused="true"/>
+<!--
     <combo_box.combo_button
       visible="false" />
     <combo_box.drop_down_button
       visible="false" />
+-->
   </combo_box>
   <line_editor
     follows="left|top"
     height="32"
-    left_pad="-11"
+    left_pad="15"
     max_length_chars="16"
     text_pad_left="8"
     name="password_edit"
@@ -121,8 +123,8 @@
     control_name="RememberPassword"
     follows="left|top"
     font="SansSerifMedium"
-    left="185"
-    bottom_delta="21"  	
+    left="116"
+    bottom_delta="30"  	
     height="24"
     label="Remember me"
     check_button.bottom="3"
@@ -134,8 +136,8 @@
     text_color="EmphasisColor"
     height="16"
     name="forgot_password_text"
-    left="408"    
-    bottom_delta="0"
+    left="369"    
+    bottom_delta="-2"
     width="200">
     Forgotten password
   </text> 
@@ -144,13 +146,13 @@
     font="SansSerifTiny"
     follows="left|top"
     height="26"
-  	left="588"
-  	bottom_delta="10"
+  	left="545"
+  	bottom_delta="4"
     max_chars="128"
     label="Select grid"    
     layout="topleft"
     name="server_combo"
-    width="149" />	
+    width="175" />	
   </layout_panel>
   <layout_panel
       height="172"
@@ -167,7 +169,7 @@
     left="0"
     name="login_html"
     start_url=""
-    top="154"
+    top="134"
     height="600"
     width="1024" />
 </panel>

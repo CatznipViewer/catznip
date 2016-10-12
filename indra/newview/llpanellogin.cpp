@@ -66,6 +66,9 @@
 #include "lltrans.h"
 #include "llglheaders.h"
 #include "llpanelloginlistener.h"
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+#include "llsechandler_basic.h"
+// [/SL:KB]
 
 #if LL_WINDOWS
 #pragma warning(disable: 4355)      // 'this' used in initializer list
@@ -184,11 +187,11 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 		login_holder->addChild(this);
 	}
 
-	if (gSavedSettings.getBOOL("FirstLoginThisInstall"))
-	{
-		buildFromFile( "panel_login_first.xml");
-	}
-	else
+//	if (gSavedSettings.getBOOL("FirstLoginThisInstall"))
+//	{
+//		buildFromFile( "panel_login_first.xml");
+//	}
+//	else
 	{
 		buildFromFile( "panel_login.xml");
 	}
@@ -276,12 +279,22 @@ LLPanelLogin::LLPanelLogin(const LLRect &rect,
 	LLMediaCtrl* web_browser = getChild<LLMediaCtrl>("login_html");
 	web_browser->addObserver(this);
 
-	loadLoginPage();
+//	loadLoginPage();
 
 	LLComboBox* username_combo(getChild<LLComboBox>("username_combo"));
-	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::addFavoritesToStartLocation, this));
-	// STEAM-14: When user presses Enter with this field in focus, initiate login
-	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onClickConnect, this));
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::onSelectUser, this));
+	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onSelectUser, this));
+	username_combo->getListCtrl()->setCommitOnSelectionChange(true);
+	username_combo->getListCtrl()->setUserRemoveCallback(boost::bind(&LLPanelLogin::onRemoveUser, this, _1));
+// [/SL:KB]
+//	username_combo->setTextChangedCallback(boost::bind(&LLPanelLogin::addFavoritesToStartLocation, this));
+//	// STEAM-14: When user presses Enter with this field in focus, initiate login
+//	username_combo->setCommitCallback(boost::bind(&LLPanelLogin::onClickConnect, this));
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	updateServer();
+// [/SL:KB]
 }
 
 void LLPanelLogin::addFavoritesToStartLocation()
@@ -449,111 +462,116 @@ void LLPanelLogin::show(const LLRect &rect,
 	gFocusMgr.setDefaultKeyboardFocus(sInstance);
 }
 
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
 // static
-void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
-							 BOOL remember)
+void LLPanelLogin::selectUser(LLPointer<LLCredential> cred, BOOL remember)
 {
 	if (!sInstance)
 	{
-		LL_WARNS() << "Attempted fillFields with no login view shown" << LL_ENDL;
+		LL_WARNS() << "Attempted selectUser with no login view shown" << LL_ENDL;
 		return;
 	}
-	LL_INFOS("Credentials") << "Setting login fields to " << *credential << LL_ENDL;
+	LL_INFOS("Credentials") << "Setting login fields to " << *cred << LL_ENDL;
 
-	LLSD identifier = credential->getIdentifier();
-	if((std::string)identifier["type"] == "agent") 
+	LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
+
+	if (cred->hasIdentifier())
 	{
-		std::string firstname = identifier["first_name"].asString();
-		std::string lastname = identifier["last_name"].asString();
-	    std::string login_id = firstname;
-	    if (!lastname.empty() && lastname != "Resident")
-	    {
-		    // support traditional First Last name SLURLs
-		    login_id += " ";
-		    login_id += lastname;
-	    }
-		sInstance->getChild<LLComboBox>("username_combo")->setLabel(login_id);	
+		pUserCombo->setTextEntry(cred->userName());
 	}
-	else if((std::string)identifier["type"] == "account")
+
+	if (-1 == pUserCombo->getCurrentIndex())
 	{
-		sInstance->getChild<LLComboBox>("username_combo")->setLabel((std::string)identifier["account_name"]);		
-	}
-	else
-	{
-	  sInstance->getChild<LLComboBox>("username_combo")->setLabel(std::string());	
-	}
-	sInstance->addFavoritesToStartLocation();
-	// if the password exists in the credential, set the password field with
-	// a filler to get some stars
-	LLSD authenticator = credential->getAuthenticator();
-	LL_INFOS("Credentials") << "Setting authenticator field " << authenticator["type"].asString() << LL_ENDL;
-	if(authenticator.isMap() && 
-	   authenticator.has("secret") && 
-	   (authenticator["secret"].asString().size() > 0))
-	{
-		
-		// This is a MD5 hex digest of a password.
-		// We don't actually use the password input field, 
-		// fill it with MAX_PASSWORD characters so we get a 
-		// nice row of asterisks.
-		const std::string filler("123456789!123456");
-		sInstance->getChild<LLUICtrl>("password_edit")->setValue(filler);
-		sInstance->mPasswordLength = filler.length();
+		sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);
+		sInstance->mPasswordLength = 0;
 		sInstance->updateLoginButtons();
 	}
-	else
-	{
-		sInstance->getChild<LLUICtrl>("password_edit")->setValue(std::string());		
-	}
+
 	sInstance->getChild<LLUICtrl>("remember_check")->setValue(remember);
 }
+// [/SL:KB]
+//// static
+//void LLPanelLogin::setFields(LLPointer<LLCredential> credential,
+//							 BOOL remember)
+//{
+//	if (!sInstance)
+//	{
+//		LL_WARNS() << "Attempted fillFields with no login view shown" << LL_ENDL;
+//		return;
+//	}
+//	LL_INFOS("Credentials") << "Setting login fields to " << *credential << LL_ENDL;
+//
+//
+//	LLSD identifier = credential->getIdentifier();
+//	if((std::string)identifier["type"] == "agent") 
+//	{
+//		std::string firstname = identifier["first_name"].asString();
+//		std::string lastname = identifier["last_name"].asString();
+//	    std::string login_id = firstname;
+//	    if (!lastname.empty() && lastname != "Resident")
+//	    {
+//		    // support traditional First Last name SLURLs
+//		    login_id += " ";
+//		    login_id += lastname;
+//	    }
+//		sInstance->getChild<LLComboBox>("username_combo")->setLabel(login_id);	
+//	}
+//	else if((std::string)identifier["type"] == "account")
+//	{
+//		sInstance->getChild<LLComboBox>("username_combo")->setLabel((std::string)identifier["account_name"]);		
+//	}
+//	else
+//	{
+//	  sInstance->getChild<LLComboBox>("username_combo")->setLabel(std::string());	
+//	}
+//	sInstance->addFavoritesToStartLocation();
+//	// if the password exists in the credential, set the password field with
+//	// a filler to get some stars
+//	LLSD authenticator = credential->getAuthenticator();
+//	LL_INFOS("Credentials") << "Setting authenticator field " << authenticator["type"].asString() << LL_ENDL;
+//	if(authenticator.isMap() && 
+//	   authenticator.has("secret") && 
+//	   (authenticator["secret"].asString().size() > 0))
+//	{
+//		
+//		// This is a MD5 hex digest of a password.
+//		// We don't actually use the password input field, 
+//		// fill it with MAX_PASSWORD characters so we get a 
+//		// nice row of asterisks.
+//		const std::string filler("123456789!123456");
+//		sInstance->getChild<LLUICtrl>("password_edit")->setValue(filler);
+//		sInstance->mPasswordLength = filler.length();
+//		sInstance->updateLoginButtons();
+//	}
+//	else
+//	{
+//		sInstance->getChild<LLUICtrl>("password_edit")->setValue(std::string());		
+//	}
+//	sInstance->getChild<LLUICtrl>("remember_check")->setValue(remember);
+//}
 
 
-// static
-void LLPanelLogin::getFields(LLPointer<LLCredential>& credential,
-							 BOOL& remember)
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+LLSD LLPanelLogin::getIdentifier()
 {
 	if (!sInstance)
 	{
-		LL_WARNS() << "Attempted getFields with no login view shown" << LL_ENDL;
-		return;
+		LL_WARNS() << "Attempted getIdentifier with no login view shown" << LL_ENDL;
+		return LLSD();
 	}
 	
-	// load the credential so we can pass back the stored password or hash if the user did
-	// not modify the password field.
-	
-	credential = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());
-
 	LLSD identifier = LLSD::emptyMap();
-	LLSD authenticator = LLSD::emptyMap();
-	
-	if(credential.notNull())
-	{
-		authenticator = credential->getAuthenticator();
-	}
 
-	std::string username = sInstance->getChild<LLUICtrl>("username_combo")->getValue().asString();
+	std::string username = sInstance->getChild<LLComboBox>("username_combo")->getSimple();
 	LLStringUtil::trim(username);
-	std::string password = sInstance->getChild<LLUICtrl>("password_edit")->getValue().asString();
 
-	LL_INFOS("Credentials", "Authentication") << "retrieving username:" << username << LL_ENDL;
 	// determine if the username is a first/last form or not.
 	size_t separator_index = username.find_first_of(' ');
-	if (separator_index == username.npos
-		&& !LLGridManager::getInstance()->isSystemGrid())
+	if (separator_index == username.npos && !LLGridManager::getInstance()->isSystemGrid())
 	{
-		LL_INFOS("Credentials", "Authentication") << "account: " << username << LL_ENDL;
 		// single username, so this is a 'clear' identifier
 		identifier["type"] = CRED_IDENTIFIER_TYPE_ACCOUNT;
 		identifier["account_name"] = username;
-		
-		if (LLPanelLogin::sInstance->mPasswordModified)
-		{
-			authenticator = LLSD::emptyMap();
-			// password is plaintext
-			authenticator["type"] = CRED_AUTHENTICATOR_TYPE_CLEAR;
-			authenticator["secret"] = password;
-		}
 	}
 	else
 	{
@@ -565,7 +583,7 @@ void LLPanelLogin::getFields(LLPointer<LLCredential>& credential,
 		if (separator_index != username.npos)
 		{
 			last = username.substr(separator_index+1, username.npos);
-		LLStringUtil::trim(last);
+			LLStringUtil::trim(last);
 		}
 		else
 		{
@@ -577,13 +595,42 @@ void LLPanelLogin::getFields(LLPointer<LLCredential>& credential,
 		
 		if (last.find_first_of(' ') == last.npos)
 		{
-			LL_INFOS("Credentials", "Authentication") << "agent: " << username << LL_ENDL;
 			// traditional firstname / lastname
 			identifier["type"] = CRED_IDENTIFIER_TYPE_AGENT;
 			identifier["first_name"] = first;
 			identifier["last_name"] = last;
-		
-			if (LLPanelLogin::sInstance->mPasswordModified)
+		}
+	}
+
+	return identifier;
+}
+
+// static
+void LLPanelLogin::getFields(LLPointer<LLCredential>& credential, BOOL& remember)
+{
+	if (!sInstance)
+	{
+		LL_WARNS() << "Attempted getFields with no login view shown" << LL_ENDL;
+		return;
+	}
+	
+	LLSD authenticator = LLSD::emptyMap();
+	std::string password = sInstance->getChild<LLUICtrl>("password_edit")->getValue().asString();
+
+	LLSD identifier = getIdentifier();
+	if (identifier.has("type"))
+	{
+		if (LLPanelLogin::sInstance->mPasswordModified)
+		{
+			if (CRED_IDENTIFIER_TYPE_ACCOUNT == identifier["type"])
+			{
+				// single username, so this is a 'clear' identifier
+				authenticator = LLSD::emptyMap();
+				// password is plaintext
+				authenticator["type"] = CRED_AUTHENTICATOR_TYPE_CLEAR;
+				authenticator["secret"] = password;
+			}
+			else if (CRED_IDENTIFIER_TYPE_AGENT == identifier["type"])
 			{
 				authenticator = LLSD::emptyMap();
 				authenticator["type"] = CRED_AUTHENTICATOR_TYPE_HASH;
@@ -594,10 +641,108 @@ void LLPanelLogin::getFields(LLPointer<LLCredential>& credential,
 				authenticator["secret"] = md5pass;
 			}
 		}
+		else
+		{
+			credential = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid(), identifier);
+			if (credential.notNull())
+			{
+				authenticator = credential->getAuthenticator();
+			}
+		}
 	}
+
 	credential = gSecAPIHandler->createCredential(LLGridManager::getInstance()->getGrid(), identifier, authenticator);
 	remember = sInstance->getChild<LLUICtrl>("remember_check")->getValue();
 }
+// [/SL:KB]
+//void LLPanelLogin::getFields(LLPointer<LLCredential>& credential,
+//							 BOOL& remember)
+//{
+//	if (!sInstance)
+//	{
+//		LL_WARNS() << "Attempted getFields with no login view shown" << LL_ENDL;
+//		return;
+//	}
+//	
+//	// load the credential so we can pass back the stored password or hash if the user did
+//	// not modify the password field.
+//	
+//	credential = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());
+//
+//	LLSD identifier = LLSD::emptyMap();
+//	LLSD authenticator = LLSD::emptyMap();
+//	
+//	if(credential.notNull())
+//	{
+//		authenticator = credential->getAuthenticator();
+//	}
+//
+//	std::string username = sInstance->getChild<LLUICtrl>("username_combo")->getValue().asString();
+//	LLStringUtil::trim(username);
+//	std::string password = sInstance->getChild<LLUICtrl>("password_edit")->getValue().asString();
+//
+//	LL_INFOS2("Credentials", "Authentication") << "retrieving username:" << username << LL_ENDL;
+//	// determine if the username is a first/last form or not.
+//	size_t separator_index = username.find_first_of(' ');
+//	if (separator_index == username.npos
+//		&& !LLGridManager::getInstance()->isSystemGrid())
+//	{
+//		LL_INFOS2("Credentials", "Authentication") << "account: " << username << LL_ENDL;
+//		// single username, so this is a 'clear' identifier
+//		identifier["type"] = CRED_IDENTIFIER_TYPE_ACCOUNT;
+//		identifier["account_name"] = username;
+//		
+//		if (LLPanelLogin::sInstance->mPasswordModified)
+//		{
+//			authenticator = LLSD::emptyMap();
+//			// password is plaintext
+//			authenticator["type"] = CRED_AUTHENTICATOR_TYPE_CLEAR;
+//			authenticator["secret"] = password;
+//		}
+//	}
+//	else
+//	{
+//		// Be lenient in terms of what separators we allow for two-word names
+//		// and allow legacy users to login with firstname.lastname
+//		separator_index = username.find_first_of(" ._");
+//		std::string first = username.substr(0, separator_index);
+//		std::string last;
+//		if (separator_index != username.npos)
+//		{
+//			last = username.substr(separator_index+1, username.npos);
+//		LLStringUtil::trim(last);
+//		}
+//		else
+//		{
+//			// ...on Linden grids, single username users as considered to have
+//			// last name "Resident"
+//			// *TODO: Make login.cgi support "account_name" like above
+//			last = "Resident";
+//		}
+//		
+//		if (last.find_first_of(' ') == last.npos)
+//		{
+//			LL_INFOS2("Credentials", "Authentication") << "agent: " << username << LL_ENDL;
+//			// traditional firstname / lastname
+//			identifier["type"] = CRED_IDENTIFIER_TYPE_AGENT;
+//			identifier["first_name"] = first;
+//			identifier["last_name"] = last;
+//		
+//			if (LLPanelLogin::sInstance->mPasswordModified)
+//			{
+//				authenticator = LLSD::emptyMap();
+//				authenticator["type"] = CRED_AUTHENTICATOR_TYPE_HASH;
+//				authenticator["algorithm"] = "md5";
+//				LLMD5 pass((const U8 *)password.c_str());
+//				char md5pass[33];               /* Flawfinder: ignore */
+//				pass.hex_digest(md5pass);
+//				authenticator["secret"] = md5pass;
+//			}
+//		}
+//	}
+//	credential = gSecAPIHandler->createCredential(LLGridManager::getInstance()->getGrid(), identifier, authenticator);
+//	remember = sInstance->getChild<LLUICtrl>("remember_check")->getValue();
+//}
 
 
 // static
@@ -848,9 +993,12 @@ void LLPanelLogin::onClickConnect(void *)
 
 		// The start location SLURL has already been sent to LLStartUp::setStartSLURL
 
-		std::string username = sInstance->getChild<LLUICtrl>("username_combo")->getValue().asString();
+//		std::string username = sInstance->getChild<LLUICtrl>("username_combo")->getValue().asString();
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+		const std::string username = sInstance->getChild<LLComboBox>("username_combo")->getSimple();
+// [/SL:KB]
 		std::string password = sInstance->getChild<LLUICtrl>("password_edit")->getValue().asString();
-		
+
 		if(username.empty())
 		{
 			// user must type in something into the username field
@@ -941,14 +1089,35 @@ void LLPanelLogin::updateServer()
 	{
 		try 
 		{
-			// if they've selected another grid, we should load the credentials
-			// for that grid and set them to the UI.
-			if(!sInstance->areCredentialFieldsDirty())
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+			//
+			// Retrieve credentials we have stored for this grid (if any)
+			//
+			LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
+			pUserCombo->clearRows();
+			pUserCombo->clear();
+			sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);		
+
+			std::vector<LLSD> lIdentifiers;
+			if (gSecAPIHandler->getCredentialIdentifierList(LLGridManager::getInstance()->getGrid(), lIdentifiers))
 			{
-				LLPointer<LLCredential> credential = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());	
-				bool remember = sInstance->getChild<LLUICtrl>("remember_check")->getValue();
-				sInstance->setFields(credential, remember);
+				for (std::vector<LLSD>::const_iterator itId = lIdentifiers.begin(); itId != lIdentifiers.end(); ++itId)
+				{
+					const LLSD& sdIdentifier = *itId;
+					pUserCombo->addRemovable(LLSecAPIBasicCredential::userNameFromIdentifier(sdIdentifier), LLSD(sdIdentifier));
+				}
+				pUserCombo->sortByName();
+				pUserCombo->selectFirstItem();
 			}
+// [/SL:KB]
+//			// if they've selected another grid, we should load the credentials
+//			// for that grid and set them to the UI.
+//			if(!sInstance->areCredentialFieldsDirty())
+//			{
+//				LLPointer<LLCredential> credential = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid());	
+//				bool remember = sInstance->getChild<LLUICtrl>("remember_check")->getValue();
+//				sInstance->setFields(credential, remember);
+//			}
 
 			// update the login panel links 
 			bool system_grid = LLGridManager::getInstance()->isSystemGrid();
@@ -1028,6 +1197,74 @@ void LLPanelLogin::onSelectServer()
 
 	updateServer();
 }
+
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+void LLPanelLogin::onSelectUser()
+{
+	LLLineEditor* pPasswordCtrl = sInstance->getChild<LLLineEditor>("password_edit");
+
+	LLPointer<LLCredential> userCred = gSecAPIHandler->loadCredential(LLGridManager::getInstance()->getGrid(), getIdentifier());
+	if (userCred.notNull())
+	{
+		// If the password exists in the credential, set the password field with a filler to get some stars
+		const LLSD sdAuthenticator = userCred->getAuthenticator();
+		if ( (sdAuthenticator.isMap()) && (sdAuthenticator.has("secret")) && (sdAuthenticator["secret"].asString().size() > 0) )
+		{
+			// This is a MD5 hex digest of a password.
+			// We don't actually use the password input field, 
+			// fill it with MAX_PASSWORD characters so we get a 
+			// nice row of asterixes.
+			pPasswordCtrl->setValue(std::string("123456789!123456"));
+		}
+		else
+		{
+			pPasswordCtrl->setValue(LLStringUtil::null);		
+		}
+	}
+
+	sInstance->mPasswordLength = pPasswordCtrl->getText().length();
+	sInstance->updateLoginButtons();
+
+	addFavoritesToStartLocation();
+}
+
+bool LLPanelLogin::onRemoveUser(LLScrollListItem* itemp)
+{
+	// Cancel the removal and ask the user for confirmation
+	sInstance->getChild<LLComboBox>("username_combo")->hideList();
+	LLNotificationsUtil::add("RemoveLoginCredential", LLSD().with("NAME", itemp->getColumn(0)->getValue()), itemp->getValue(), boost::bind(&LLPanelLogin::onRemoveUserResponse, this, _1, _2));
+	return false;
+}
+
+void LLPanelLogin::onRemoveUserResponse(const LLSD& sdNotification, const LLSD& sdResponse)
+{
+	if (0 == LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse))
+	{
+		const LLSD& sdIdentifier = sdNotification["payload"];
+		const std::string strUsername = LLSecAPIBasicCredential::userNameFromIdentifier(sdIdentifier);
+
+		LLComboBox* pUserCombo = sInstance->getChild<LLComboBox>("username_combo");
+
+		LLScrollListItem* pItem = pUserCombo->getListCtrl()->getItemByLabel(strUsername);
+		if (pItem)
+		{
+			S32 idxCur = pUserCombo->getListCtrl()->getItemIndex(pItem);
+			pUserCombo->remove(idxCur);
+			if (pUserCombo->getItemCount() > 0)
+			{
+				pUserCombo->selectNthItem(llmin(idxCur, pUserCombo->getItemCount() - 1));
+			}
+			else
+			{
+				pUserCombo->clear();
+				sInstance->getChild<LLUICtrl>("password_edit")->setValue(LLStringUtil::null);
+			}
+		}
+
+		gSecAPIHandler->deleteCredential(LLGridManager::getInstance()->getGrid(), sdIdentifier);
+	}
+}
+// [/SL:KB]
 
 void LLPanelLogin::onLocationSLURL()
 {
