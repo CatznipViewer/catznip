@@ -1,0 +1,11 @@
+[Viewer/Crash]
+
+[FIXED] Crash opening a classified when the viewer is disconnected
+[FIXED] Crash when attempting to send an open snapshot as a postcard when the viewer is disconnected
+[FIXED] Various crashes due to gAgent.getRegion() == NULL when the viewer is disconnected
+[FIXED] Viewer idles for a few seconds before shutting down after clicking the close button
+    -> send the stats package but don't sit around for 5 seconds waiting for the response since we'll idle waiting for the logout acknowledgement in the next step anyway
+[FIXED] CRASH-1: LLViewerTextureList::removeImageFromList() and LLViewerTextureList::addImageToList()
+    -> previous fix didn't actually address the problem: the decode priority ends up as NaN which messes with the comparison operator
+[FIXED] CRASH-13: LLVOVolume::notifyAboutMissingAsset
+[FIXED] CRASH-14: LLVOVolume::lineSegmentIntersect

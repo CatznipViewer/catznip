@@ -210,8 +210,11 @@ void LLPanelClassifiedInfo::onOpen(const LLSD& key)
 
 	// While we're at it let's get the stats from the new table if that
 	// capability exists.
-	std::string url = gAgent.getRegion()->getCapability("SearchStatRequest");
-	if (!url.empty())
+//	std::string url = gAgent.getRegion()->getCapability("SearchStatRequest");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SearchStatRequest") : LLStringUtil::null;
+// [/SL:KB]
+ 	if (!url.empty())
 	{
 		LL_INFOS() << "Classified stat request via capability" << LL_ENDL;
 		LLSD body;
@@ -550,11 +553,20 @@ void LLPanelClassifiedInfo::sendClickMessage(
 	body["dest_pos_global"]	= global_pos.getValue();
 	body["region_name"]		= sim_name;
 
-	std::string url = gAgent.getRegion()->getCapability("SearchStatTracking");
-	LL_INFOS() << "Sending click msg via capability (url=" << url << ")" << LL_ENDL;
-	LL_INFOS() << "body: [" << body << "]" << LL_ENDL;
-    LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, body,
-        "SearchStatTracking Click report sent.", "SearchStatTracking Click report NOT sent.");
+// [SL:KB] - Patch: Viewer-Crash | Checked: 2012-09-16 (Catznip-3.3)
+	const std::string url = (gAgent.getRegion()) ? gAgent.getRegion()->getCapability("SearchStatTracking") : LLStringUtil::null;
+	if (!url.empty())
+	{
+		LL_INFOS() << "Sending click msg via capability (url=" << url << ")" << LL_ENDL;
+		LL_INFOS() << "body: [" << body << "]" << LL_ENDL;
+		LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, body, "SearchStatTracking Click report sent.", "SearchStatTracking Click report NOT sent.");
+	}
+// [/SL:KB]
+//	std::string url = gAgent.getRegion()->getCapability("SearchStatTracking");
+//	LL_INFOS() << "Sending click msg via capability (url=" << url << ")" << LL_ENDL;
+//	LL_INFOS() << "body: [" << body << "]" << LL_ENDL;
+//    LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(url, body,
+//        "SearchStatTracking Click report sent.", "SearchStatTracking Click report NOT sent.");
 }
 
 void LLPanelClassifiedInfo::sendClickMessage(const std::string& type)
