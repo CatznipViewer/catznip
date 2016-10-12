@@ -247,19 +247,27 @@
      name="updater_service_combobox"
      width="300">
         <combo_box.item
+         label="Prompt before downloading"
+         name="Prompt_download"
+         value="1" />
+        <combo_box.item
+         label="Prompt before installing"
+         name="Prompt_install"
+         value="2" />
+      <!--
+        <combo_box.item
          label="Install automatically"
          name="Install_automatically"
          value="3" />
-      <!--
         <combo_box.item
          label="Ask before installing"
          name="Install_ask"
          value="1" />
-      -->
         <combo_box.item
          label="I will download and install updates manually"
          name="Install_manual"
          value="0" />
+      -->
   </combo_box>
   <check_box
     top_delta="4"

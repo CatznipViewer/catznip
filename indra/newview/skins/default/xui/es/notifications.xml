@@ -1609,12 +1609,12 @@ o instalarla ahora.
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Hemos descargado una actualización para la instalación de [APP_NAME].
-Versión [VERSION] [[RELEASE_NOTES_FULL_URL]; información acerca de esta actualización]
+Versión [VERSION] [[INFO_URL]; información acerca de esta actualización]
 		<usetemplate name="okcancelbuttons" notext="Más tarde..." yestext="Instalar ahora y reiniciar [NOMBRE_APL]"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Hemos descargado una actualización para la instalación de [APP_NAME].
-Versión [VERSION] [[RELEASE_NOTES_FULL_URL]; información acerca de esta actualización]
+Versión [VERSION] [[INFO_URL]; información acerca de esta actualización]
 		<usetemplate name="okcancelbuttons" notext="Más tarde..." yestext="Instalar ahora y reiniciar [APP_NAME]"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1674,7 +1674,6 @@ Repite la operación más adelante.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		El visor está actualizado.
-Si estás impaciente por probar las nuevas funciones y correcciones, lee la página sobre los visores alternativos. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

@@ -2939,7 +2939,14 @@ void LLFloaterView::syncFloaterTabOrder()
 	if (modal_dialog)
 	{
 		// If we have a visible modal dialog, make sure that it has focus
-		LLUI::addPopup(modal_dialog);
+// [SL:KB] - Patch: Control-ModalDialog | Checked: 2012-07-05 (Catznip-3.3)
+		const LLView* pTopPopup = LLUI::getTopPopup();
+		if ( (!pTopPopup) || (modal_dialog != pTopPopup->getParentByType<LLModalDialog>()) )
+		{
+			LLUI::addPopup(modal_dialog);
+		}
+// [/SL:KB]
+//		LLUI::addPopup(modal_dialog);
 		
 		if( !gFocusMgr.childHasKeyboardFocus( modal_dialog ) )
 		{

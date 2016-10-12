@@ -99,6 +99,9 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
+#include "llstartup.h"
+// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolbarview.h"
 #include "lltoolcomp.h"
@@ -132,6 +135,9 @@
 #include "llwindow.h"
 #include "llpathfindingmanager.h"
 #include "llstartup.h"
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
+#include "llupdaterservice.h"
+// [/SL:KB]
 #include "boost/unordered_map.hpp"
 
 using namespace LLAvatarAppearanceDefines;
@@ -2125,14 +2131,14 @@ class LLAdvancedCheckShowObjectUpdates : public view_listener_t
 
 
 
-class LLAdvancedCheckViewerUpdates : public view_listener_t
-{
-	bool handleEvent(const LLSD& userdata)
-	{
-		LLFloaterAboutUtil::checkUpdatesAndNotify();
-		return true;
-	}
-};
+//class LLAdvancedCheckViewerUpdates : public view_listener_t
+//{
+//	bool handleEvent(const LLSD& userdata)
+//	{
+//		LLFloaterAboutUtil::checkUpdatesAndNotify();
+//		return true;
+//	}
+//};
 
 
 ////////////////////
@@ -7192,6 +7198,28 @@ void handle_selected_material_info()
 	}
 }
 
+// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
+void handle_updater_check()
+{
+	LLUpdaterService updater_service;
+
+	// Make sure the update is actually running
+	if (!updater_service.isChecking())
+		updater_service.startChecking();
+
+	if (updater_service.isDownloading())
+	{
+		bool fRequired = updater_service.getDownloadData()["required"].asBoolean();
+		LLFloaterReg::showInstance("update_progress", LLSD().with("modal", (fRequired) && (LLStartUp::getStartupState() < STATE_LOGIN_CLEANUP)));
+	}
+	else
+	{
+		// Perform a clean manual check
+		updater_service.checkForUpdate(true);
+	}
+}
+// [/SL:KB]
+
 void handle_test_male(void*)
 {
 	LLAppearanceMgr::instance().wearOutfitByName("Male Shape & Outfit");
@@ -8923,7 +8951,10 @@ void initialize_menus()
 	// Advanced (toplevel)
 	view_listener_t::addMenu(new LLAdvancedToggleShowObjectUpdates(), "Advanced.ToggleShowObjectUpdates");
 	view_listener_t::addMenu(new LLAdvancedCheckShowObjectUpdates(), "Advanced.CheckShowObjectUpdates");
-	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
+	commit.add("Advanced.CheckViewerUpdates", boost::bind(&handle_updater_check));
+	// [/SL:KB]
+//	view_listener_t::addMenu(new LLAdvancedCheckViewerUpdates(), "Advanced.CheckViewerUpdates");
 	view_listener_t::addMenu(new LLAdvancedCompressImage(), "Advanced.CompressImage");
 	view_listener_t::addMenu(new LLAdvancedShowDebugSettings(), "Advanced.ShowDebugSettings");
 	view_listener_t::addMenu(new LLAdvancedEnableViewAdminOptions(), "Advanced.EnableViewAdminOptions");

@@ -1615,12 +1615,12 @@ Sie können dieses Update von http://www.secondlife.com/downloads herunterladen 
 	</notification>
 	<notification name="DownloadBackgroundTip">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[INFO_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="DownloadBackgroundDialog">
 		Für Ihre [APP_NAME]-Installation wurde ein Update heruntergeladen.
-Version [VERSION] [[RELEASE_NOTES_FULL_URL] Informationen zu diesem Update]
+Version [VERSION] [[INFO_URL] Informationen zu diesem Update]
 		<usetemplate name="okcancelbuttons" notext="Später..." yestext="Jetzt installieren und [APP_NAME] neu starten"/>
 	</notification>
 	<notification name="RequiredUpdateDownloadedVerboseDialog">
@@ -1680,7 +1680,6 @@ Versuchen Sie es später erneut.
 	</notification>
 	<notification name="UpdateViewerUpToDate">
 		Ihr Viewer ist auf dem neuesten Stand.
-Wenn Sie die neuesten Features und Fixes ausprobieren möchten, gehen Sie zur Seite „Alternate Viewers“. http://wiki.secondlife.com/wiki/Linden_Lab_Official:Alternate_Viewers.
 		<usetemplate name="okbutton" yestext="OK"/>
 	</notification>
 	<notification name="DeedObjectToGroup">

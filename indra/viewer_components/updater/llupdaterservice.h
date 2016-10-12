@@ -51,6 +51,11 @@ public:
 	// Type codes for events posted by this service.  Stored the event's 'type' element.
 	enum eUpdaterEvent {
 		INVALID,
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
+		CHECK_COMPLETE,
+		CHECK_ERROR,
+		DOWNLOAD_RESUME,
+// [/SL:KB]
 		DOWNLOAD_COMPLETE,
 		DOWNLOAD_ERROR,
 		INSTALL_ERROR,
@@ -65,9 +70,21 @@ public:
 		DOWNLOADING,
 		INSTALLING,
 		UP_TO_DATE,
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
+		UPDATE_AVAILABLE,
+// [/SL:KB]
 		TERMINAL,
 		FAILURE
 	};
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
+	enum eUpdaterSetting
+	{
+		UPDATER_DISABLED= 0,
+		PROMPT_DOWNLOAD = 1,		// Prompt the user before downloading and prompt before installation
+		PROMPT_INSTALL  = 2			// Download automatically, prompt before installation
+	};
+// [/SL:KB]
 
 	LLUpdaterService();
 	~LLUpdaterService();
@@ -85,9 +102,18 @@ public:
 	
 	void startChecking(bool install_if_ready = false);
 	void stopChecking();
-	bool forceCheck();
+//	bool forceCheck();
 	bool isChecking();
 	eUpdaterState getState();
+
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
+	void checkForUpdate(bool user_feedback);
+	void checkForInstall(bool launch_installer);
+
+	bool isDownloading();
+	void startDownloading();
+	const LLSD& getDownloadData() const;
+// [/SL:KB]
 
 	typedef boost::function<void (void)> app_exit_callback_t;
 	template <typename F>
