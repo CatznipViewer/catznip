@@ -135,17 +135,17 @@ void LLWeb::openURLInternal(const LLSD& sdData)
 	const std::string url    = (sdData.has("url"))      ? sdData["url"].asString()       : LLStringUtil::null;
 	const std::string target = (sdData.has("target"))   ? sdData["target"].asString()    : LLStringUtil::null;
 	const LLUUID uuid        = (sdData.has("uuid"))     ? sdData["uuid"].asUUID()        : LLUUID::null;
-	const bool dev_mode      = (sdData.has("dev_mode")) ? sdData["dev_mode"].asBooelan() : false;
+	const bool dev_mode      = (sdData.has("dev_mode")) ? sdData["dev_mode"].asBoolean() : false;
 
 	LLFloaterWebContent::Params p;
-	p.url(url).target(target).id(uuid.asString().dev_mode(dev_mode));
+	p.url(url).target(target).id(uuid.asString()).dev_mode(dev_mode);
 	LLFloaterReg::showInstance("web_content", p);
 }
 
 // static
 void LLWeb::loadURLInternal(const std::string &url, const std::string& target, const std::string& uuid, bool dev_mode)
 {
-	openURLInternal(LLSD().with("url", url).with("target", target).with("uuid", LLUUID(uuid)).with("dev_mode", dev_mode);
+	openURLInternal(LLSD().with("url", url).with("target", target).with("uuid", LLUUID(uuid)).with("dev_mode", dev_mode));
 }
 // [/SL:KB]
 //// static
