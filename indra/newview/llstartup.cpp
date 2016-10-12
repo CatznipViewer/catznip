@@ -196,6 +196,9 @@
 #include "llstartuplistener.h"
 #include "lltoolbarview.h"
 #include "llexperiencelog.h"
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: Catznip-2.5
+#include "llspellcheck.h"
+// [/SL:KB]
 
 #if LL_WINDOWS
 #include "lldxhardware.h"
@@ -309,6 +312,67 @@ void set_flags_and_update_appearance()
 	LLAppearanceMgr::instance().updateAppearanceFromCOF(true, true, no_op);
 }
 
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: Catznip-4.0
+extern bool handleSpellCheckChanged();
+
+void fetch_dictionary_list_cb(const LLSD& sdResponse)
+{
+	const LLSD::Binary& rawResponse = sdResponse.asBinary();
+
+	std::string strPath = LLSpellChecker::getDictionaryUserPath();
+	gDirUtilp->append(strPath, "dictionaries.xml");
+	LL_INFOS() << "Writing dictionary list to " << strPath << LL_ENDL;
+			
+	S32 file_size = rawResponse.size();
+	if (file_size > 0)
+	{
+		LLAPRFile out(strPath, LL_APR_WB);
+		out.write(rawResponse.data(), file_size);
+		out.close();
+	}
+
+	if ( (gSavedSettings.getBOOL("SpellCheck")) && (!LLSpellChecker::getUseSpellCheck()) )
+	{
+		// It's possible spell check initialization failed due to old dictionaries.xml versions
+		handleSpellCheckChanged();
+	}
+	else if (LLSpellChecker::instanceExists())
+	{
+		LLSpellChecker::instance().refreshDictionaryMap();
+	}
+}
+
+void fetch_dictionary_list_coro()
+{
+	LLCore::HttpRequest::policy_t httpPolicy(LLCore::HttpRequest::DEFAULT_POLICY_ID);
+	LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t httpAdapter(new LLCoreHttpUtil::HttpCoroutineAdapter("SpellCheckHTTPList", httpPolicy));
+	LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest());
+
+	std::string strURL = gSavedSettings.getString("SpellCheckHTTPList");
+	if (!strURL.empty())
+	{
+		strURL += "dictionaries.xml";
+
+		LL_INFOS() << "Fetching dictionary list from " << strURL << LL_ENDL;
+
+		const LLSD rawResult = httpAdapter->getRawAndSuspend(httpRequest, strURL);
+		const LLSD& httpResults = rawResult[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
+
+		LLCore::HttpStatus httpStatus = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
+		if (httpStatus == LLCore::HttpStatus(HTTP_OK))
+		{
+			const LLSD::Binary& sdResponse = rawResult[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS_RAW];
+			fetch_dictionary_list_cb(sdResponse);
+		}
+	}
+}
+
+void fetch_dictionary_list()
+{
+	LLCoros::instance().launch("fetch_dictionary_list_coro", boost::bind(&fetch_dictionary_list_coro));
+}
+// [/SL:KB]
+
 // Returns false to skip other idle processing. Should only return
 // true when all initialization done.
 bool idle_startup()
@@ -410,6 +474,10 @@ bool idle_startup()
 		gSavedSettings.setS32("LastFeatureVersion", LLFeatureManager::getInstance()->getVersion());
 		gSavedSettings.setString("LastGPUString", thisGPU);
 
+// [SL:KB] - Patch: Misc-Spellcheck | Checked: Catznip-3.1
+//		if (LLSpellChecker::instanceExists())
+//			fetch_dictionary_list();
+// [/SL:KB]
 
 		std::string xml_file = LLUI::locateSkin("xui_version.xml");
 		LLXMLNodePtr root;
