@@ -297,8 +297,8 @@ public:
 	LLCredential(const std::string& grid)
 	{
 		mGrid = grid;
-		mIdentifier = LLSD::emptyMap();
-		mAuthenticator = LLSD::emptyMap();
+//		mIdentifier = LLSD::emptyMap();
+//		mAuthenticator = LLSD::emptyMap();
 	}
 	
 	virtual ~LLCredential() {}
@@ -316,8 +316,24 @@ public:
 	virtual std::string getGrid() { return mGrid; }
 	
 
+// [SL:KB] - Patch: Viewer-Login | Checked: 2015-12-20 (Catznip-4.0)
+	virtual bool hasIdentifier() { return !mIdentifier.isUndefined(); }
+	virtual bool hasAuthenticator() { return !mAuthenticator.isUndefined(); }
+// [/SL:KB]
 	virtual void clearAuthenticator() { mAuthenticator = LLSD(); } 
 	virtual std::string userID() const { return std::string("unknown");}
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual std::string userName() const { return std::string("unknown");}
+
+	virtual LLSD asLLSD(bool save_authenticator)
+	{
+		LLSD sdCredential = LLSD::emptyMap();
+		sdCredential["identifier"] = getIdentifier(); 
+		if (save_authenticator)
+			sdCredential["authenticator"] = getAuthenticator();
+		return sdCredential;
+	}
+// [/SL:KB]
 	virtual std::string asString() const { return std::string("unknown");}
 	operator std::string() const { return asString(); }
 protected:
@@ -472,12 +488,22 @@ public:
 													 const LLSD& identifier, 
 													 const LLSD& authenticator)=0;
 	
-	virtual LLPointer<LLCredential> loadCredential(const std::string& grid)=0;
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const std::string& user_id = LLStringUtil::null) = 0;
+	virtual LLPointer<LLCredential> loadCredential(const std::string& grid, const LLSD& identifier) = 0;
+// [/SL:KB]
+//	virtual LLPointer<LLCredential> loadCredential(const std::string& grid)=0;
 	
 	virtual void saveCredential(LLPointer<LLCredential> cred, bool save_authenticator)=0;
 	
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual void deleteCredential(const std::string& grid, const LLSD& identifier) = 0;
+// [/SL:KB]
 	virtual void deleteCredential(LLPointer<LLCredential> cred)=0;
 	
+// [SL:KB] - Patch: Viewer-Login | Checked: 2013-12-16 (Catznip-3.6)
+	virtual bool getCredentialIdentifierList(const std::string& grid, std::vector<LLSD>& identifiers) = 0;
+// [/SL:KB]
 };
 
 void initializeSecHandler();

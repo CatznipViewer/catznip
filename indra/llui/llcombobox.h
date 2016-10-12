@@ -131,6 +131,9 @@ public:
 	LLScrollListItem*	add(const std::string& name, const LLUUID& id, EAddPosition pos = ADD_BOTTOM, BOOL enabled = TRUE);
 	LLScrollListItem*	add(const std::string& name, void* userdata, EAddPosition pos = ADD_BOTTOM, BOOL enabled = TRUE);
 	LLScrollListItem*	add(const std::string& name, LLSD value, EAddPosition pos = ADD_BOTTOM, BOOL enabled = TRUE);
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	LLScrollListItem*	addRemovable(const std::string& name, LLSD value, EAddPosition pos = ADD_BOTTOM, BOOL enabled = TRUE);
+// [/SL:KB]
 	LLScrollListItem*	addSeparator(EAddPosition pos = ADD_BOTTOM);
 	BOOL			remove( S32 index );	// remove item by index, return TRUE if found and removed
 	void			removeall() { clearRows(); }
@@ -162,6 +165,9 @@ public:
 	//========================================================================
 	LLCtrlSelectionInterface* getSelectionInterface()	{ return (LLCtrlSelectionInterface*)this; };
 	LLCtrlListInterface* getListInterface()				{ return (LLCtrlListInterface*)this; };
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	LLScrollListCtrl* getListCtrl()						{ return mList; }
+// [/SL:KB]
 
 	// LLCtrlListInterface functions
 	// See llscrolllistctrl.h

@@ -55,6 +55,9 @@ public:
 		Optional<bool>		enabled;
 		Optional<void*>		userdata;
 		Optional<LLSD>		value;
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+		Optional<bool>		user_removable;
+// [/SL:KB]
 		
 		Ignored				name; // use for localization tools
 		Ignored				type; 
@@ -65,6 +68,9 @@ public:
 		Params()
 		:	enabled("enabled", true),
 			value("value"),
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+			user_removable("user_removable"),
+// [/SL:KB]
 			name("name"),
 			type("type"),
 			length("length"),
@@ -88,6 +94,11 @@ public:
 
 	void	setUserdata( void* userdata )	{ mUserdata = userdata; }
 	void*	getUserdata() const 			{ return mUserdata; }
+
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	void	setUserRemovable(bool b)		{ mUserRemovable = b; }
+	bool	getUserRemovable() const 		{ return mUserRemovable; }
+// [/SL:KB]
 
 	virtual LLUUID	getUUID() const			{ return mItemValue.asUUID(); }
 	LLSD	getValue() const				{ return mItemValue; }
@@ -117,6 +128,10 @@ private:
 	BOOL	mHighlighted;
 	BOOL	mEnabled;
 	void*	mUserdata;
+// [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
+	bool	mUserRemovable;
+// [/SL:KB]
+
 	LLSD	mItemValue;
 	std::vector<LLScrollListCell *> mColumns;
 	LLRect  mRectangle;
