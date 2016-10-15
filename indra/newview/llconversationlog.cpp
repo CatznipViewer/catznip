@@ -189,24 +189,43 @@ LLConversationLog::LLConversationLog() :
 	mAvatarNameCacheConnection(),
 	mLoggingEnabled(false)
 {
-	if(gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
+//	if(gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	if(gSavedPerAccountSettings.controlExists("LogConversations"))
+// [/SL:KB]
 	{
-		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("KeepConversationLogTranscripts").get();
-		S32 log_mode = keep_log_ctrlp->getValue();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("LogConversations").get();
 		keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
-		if (log_mode > 0)
+		if (keep_log_ctrlp->getValue().asBoolean())
 		{
 			loadFromFile(getFileName());
-
-			enableLogging(log_mode);
+			enableLogging(true);
 		}
+// [/SL:KB]
+//		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("KeepConversationLogTranscripts").get();
+//		S32 log_mode = keep_log_ctrlp->getValue();
+//		keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
+//		if (log_mode > 0)
+//		{
+//			loadFromFile(getFileName());
+//
+//			enableLogging(log_mode);
+//		}
 	}
 }
 
-void LLConversationLog::enableLogging(S32 log_mode)
+//void LLConversationLog::enableLogging(S32 log_mode)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+void LLConversationLog::enableLogging(bool enable)
+// [/SL:KB]
 {
-	mLoggingEnabled = log_mode > 0;
-	if (log_mode > 0)
+//	mLoggingEnabled = log_mode > 0;
+//	if (log_mode > 0)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	mLoggingEnabled = enable;
+	if (mLoggingEnabled)
+// [/SL:KB]
 	{
 		mConversations.clear();
 		loadFromFile(getFileName());
@@ -374,7 +393,10 @@ void LLConversationLog::sessionAdded(const LLUUID& session_id, const std::string
 
 void LLConversationLog::cache()
 {
-	if (gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0)
+//	if (gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	if (mLoggingEnabled)
+// [/SL:KB]
 	{
 		saveToFile(getFileName());
 	}
