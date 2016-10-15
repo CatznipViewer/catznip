@@ -23,15 +23,25 @@
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
              left="10"
              name="color label"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="64">
+             width="48">
                 Color
             </text>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="0"
+             name="color_pipette"
+             top_delta="-1"
+             width="16" />
             <!-- label is blank because control places it below the box -->
             <color_swatch
              can_apply_immediately="true"
@@ -43,20 +53,20 @@
              left="10"
              name="colorswatch"
              tool_tip="Click to open color picker"
-             top="20"
+             top_pad="2"
              width="64" />
             <text
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
-             left_pad="15"
+             left="140"
              name="color trans"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="110">
-                Transparency %
+             width="60">
+                Alpha %
             </text>
             <spinner
              decimal_digits="0"
@@ -69,18 +79,18 @@
              max_val="100"
              name="ColorTrans"
              top_pad="4"
-             width="80" />
+             width="60" />
             <text
              type="string"
              length="1"
              follows="left|top"
-             height="10"
+             height="14"
              layout="topleft"
-             left_pad="15"
+             left_pad="10"
              name="glow label"
              text_readonly_color="LabelDisabledColor"
              top="6"
-             width="80">
+             width="60">
                 Glow
             </text>
             <spinner
@@ -92,14 +102,14 @@
              left_delta="0"
              name="glow"
              top_pad="4"
-             width="80" />
+             width="60" />
             <check_box
              height="19"
              label="Full Bright"
              layout="topleft"
              left="7"
              name="checkbox fullbright"
-             top_pad="4"
+             top_pad="2"
              width="81" />
             <combo_box
              height="23"
@@ -107,7 +117,7 @@
              left="10"
              name="combobox matmedia"
              top_pad="5"
-             width="100">
+             width="80">
                 <combo_box.item
                  label="Materials"
                  name="Materials"
@@ -117,70 +127,103 @@
                  name="Media"
                  value="Media" />
             </combo_box>
-            <radio_group
-            control_name="ComboMaterialType"
-            height="50"
-            layout="topleft"
-            left_pad="20"
-            top_delta="-10"
-            width="150"
-            visible = "false"
-            name="radio_material_type">
-                <radio_item
-                label="Texture (diffuse)"
-                name="Texture (diffuse)"
-                top="0" 
-                layout="topleft"
-                height="16" 
-                value="0"/>
-                <radio_item
-                label="Bumpiness (normal)"
-                layout="topleft"
-                top_pad="1" 
-                height="16" 
-                name="Bumpiness (normal)"
-                value="1"/>
-                <radio_item
-                label="Shininess (specular)"
-                name="Shininess (specular)"
-                height="16"
-                layout="topleft"
-                top_pad="1"
-                value="2"/>
-            </radio_group> 
+            <combo_box
+             height="23"
+             layout="topleft"
+             left_pad="5"
+             name="combobox mattype"
+             top_delta="0"
+             width="140">
+                <combo_box.item
+                 label="Texture (diffuse)"
+                 name="Texture (diffuse)"
+                 value="diffuse" />
+                <combo_box.item
+                 label="Bumpiness (normal)"
+                 name="Bumpiness (normal)"
+                 value="normal" />
+                <combo_box.item
+                 label="Shininess (specular)"
+                 name="Shininess (specular)"
+                 value="specular" />
+            </combo_box>
+            <button
+             follows="left|top"
+             height="16"
+             label="C"
+             layout="topleft"
+             left_pad="2"
+             name="copy_mattype_btn"
+             top_delta="3"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.CopyParams"
+               parameter="mattype" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             label="P"
+             layout="topleft"
+             left_pad="1"
+             name="paste_mattype_btn"
+             width="16">
+              <button.commit_callback
+               function="BuildTool.PasteParams"
+               parameter="mattype" />
+            </button>
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_pad="1"
+             name="pipette_mattype_btn"
+             width="16" />
             <texture_picker
              can_apply_immediately="true"
              default_image_name="Default"
              fallback_image="materials_ui_x_24.png"
              follows="left|top"
              height="80"
-             label="Texture       "
+             label="Texture"
              layout="topleft"
              left="10"
              name="texture control"
              tool_tip="Click to choose a picture"
              top_pad="7"
              width="64" />
+            <button
+             follows="left|top"
+             height="16"
+             image_selected="eye_button_active.png"
+             image_unselected="eye_button_inactive.png"
+             layout="topleft"
+             left_delta="24"
+             name="texture_pipette"
+             top_delta="75"
+             width="16" />
             <text
              type="string"
              length="1"
              follows="left|top"
              height="10"
              layout="topleft"
-             left_pad="10"
+             left_pad="35"
              name="label alphamode"
              text_readonly_color="LabelDisabledColor"
-             top_delta="0"
-             width="90">
+             top_delta="-69"
+             width="95">
                 Alpha mode
             </text>
             <combo_box
              height="23"
              layout="topleft"
-             left_delta="0"
+             left="165"
              name="combobox alphamode"
-             top_pad="4"
-             width="120">
+             top_delta="-6"
+             width="110">
                 <combo_box.item
                  label="None"
                  name="None"
@@ -204,11 +247,11 @@
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="0"
+             left="85"
              name="label maskcutoff"
              text_readonly_color="LabelDisabledColor"
-             top_pad="4"
-             width="90">
+             top_pad="8"
+             width="120">
                 Mask cutoff
             </text>
             <spinner
@@ -219,11 +262,11 @@
              height="19"
              initial_value="55"
              layout="topleft"
-             top_pad="4"
-             left_delta="0"
+             top_delta="-4"
+             left_pad="5"
              increment="1"
              name="maskcutoff"
-             width="80" />
+             width="64" />
             <texture_picker
              allow_no_texture="true"
              can_apply_immediately="true"
@@ -231,12 +274,12 @@
              fallback_image="materials_ui_x_24.png"
              follows="left|top"
              height="80"
-             label="Texture       "
+             label="Texture"
              layout="topleft"
              left="10"
              name="bumpytexture control"
              tool_tip="Click to choose a picture"
-             top_delta="-55"
+             top_delta="-27"
              width="64" />
             <text
              type="string"
@@ -244,19 +287,19 @@
              follows="left|top"
              height="10"
              layout="topleft"
-             left_pad="10"
+             left_pad="25"
              name="label bumpiness"
              text_readonly_color="LabelDisabledColor"
-             top_delta="0"
-             width="90">
+             top_delta="6"
+             width="80">
                 Bumpiness
             </text>
             <combo_box
              height="23"
              layout="topleft"
-             left_delta="0"
+             left_pad="5"
              name="combobox bumpiness"
-             top_pad="4"
+             top_pad="-16"
              width="90">
                 <combo_box.item
                  label="None"
@@ -345,12 +388,12 @@
              fallback_image="materials_ui_x_24.png"
              follows="left|top"
              height="80"
-             label="Texture       "
+             label="Texture"
              layout="topleft"
              left="10"
              name="shinytexture control"
              tool_tip="Click to choose a picture"
-             top_delta="-14"
+             top_delta="0"
              width="64" />
             <text
              type="string"
@@ -359,10 +402,10 @@
              height="10"
              layout="topleft"
              name="label shininess"
-             left_pad="10"
+             left_pad="35"
              text_readonly_color="LabelDisabledColor"
              top_delta="4"
-             width="90">
+             width="65">
                 Shininess
             </text>
             <combo_box
@@ -402,11 +445,11 @@
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="-100"
+             left_delta="-75"
              name="label glossiness"
              text_readonly_color="LabelDisabledColor"
              top_pad="7"
-             width="116">
+             width="91">
                 Glossiness
             </text>
             <spinner
@@ -428,11 +471,11 @@
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="-126"
+             left_delta="-101"
              name="label environment"
              text_readonly_color="LabelDisabledColor"
              top_pad="8"
-             width="116">
+             width="91">
                 Environment
             </text>
             <spinner
@@ -454,11 +497,11 @@
              follows="left|top"
              height="10"
              layout="topleft"
-             left_delta="-126"
+             left_delta="-101"
              name="label shinycolor"
              text_readonly_color="LabelDisabledColor"
              top_pad="8"
-             width="116">
+             width="91">
                 Color
             </text>
             <!-- label is blank because control places it below the box -->
@@ -531,7 +574,7 @@
              left="10"
              name="tex gen"
              text_readonly_color="LabelDisabledColor"
-             top_pad="46"
+             top_pad="50"
              width="140">
                 Mapping
             </text>
@@ -761,7 +804,7 @@
              left="7"
              name="checkbox planar align"
              tool_tip="Align textures on all selected faces with the last selected face. Requires Planar texture mapping."
-             top_delta="16"
+             top_delta="18"
              width="260" />
             <web_browser
              visible="false"

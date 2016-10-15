@@ -11,7 +11,7 @@
 	</text>
 	<color_swatch label="" name="colorswatch" tool_tip="Selecionar a cor"/>
 	<text name="color trans">
-		% de transparência
+		Alpha %
 	</text>
 	<text name="glow label">
 		Brilho

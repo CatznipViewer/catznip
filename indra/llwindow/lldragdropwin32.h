@@ -32,6 +32,9 @@
 #define LL_LLDRAGDROP32_H
 
 #include "llwin32headerslean.h"
+// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
+#include <shellapi.h>
+// [/SL:KB]
 #include <ole2.h>
 
 class LLDragDropWin32

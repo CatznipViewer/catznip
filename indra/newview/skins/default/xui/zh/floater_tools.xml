@@ -81,7 +81,7 @@
 		<combo_box.item label="本地" name="Local"/>
 		<combo_box.item label="參考" name="Reference"/>
 	</combo_box>
-	<button label="" name="Options..." tool_tip="察看更多格線選項"/>
+	<button label="" label_selected="" name="Options..." tool_tip="察看更多格線選項"/>
 	<button name="ToolCube" tool_tip="立方體"/>
 	<button name="ToolPrism" tool_tip="稜鏡體"/>
 	<button name="ToolPyramid" tool_tip="金字塔"/>
@@ -126,7 +126,7 @@
 		未做任何選擇。
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights 詳情]
+		[secondlife:///app/openfloater/object_weights 詳情]
 	</text>
 	<tab_container name="Object Info Tabs">
 		<panel label="一般" name="General">
@@ -256,19 +256,19 @@
 			<check_box label="暫時性" name="Temporary Checkbox Ctrl" tool_tip="使物件在建造後的一分鐘自動刪除"/>
 			<check_box label="幻影性" name="Phantom Checkbox Ctrl" tool_tip="使物件不會與其他物件或化身產生碰撞"/>
 			<text name="label position">
-				位置（公尺）
+				位置
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				尺寸（公尺）
+				尺寸
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				旋轉（角度）
+				旋轉
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>
@@ -408,11 +408,8 @@
 			<spinner label="密度（100 公斤 / 立方公尺）" name="Physics Density"/>
 			<spinner label="恢復" name="Physics Restitution"/>
 		</panel>
-		<panel label="材質" name="Texture"/>
-		<panel label="內容" name="Contents">
-			<button label="新腳本" label_selected="新腳本" name="button new script"/>
-			<button label="權限" name="button permissions"/>
-		</panel>
+		<panel label="材質" name="Texture" />
+		<panel label="內容" name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="內容" name="Contents">
+			<button label="新腳本" label_selected="新腳本" name="button new script"/>
+			<button label="權限" name="button permissions"/>
+		</panel>

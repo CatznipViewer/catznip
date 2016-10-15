@@ -38,6 +38,9 @@
 #include "llpermissionsflags.h"
 #include "llradiogroup.h"
 #include "lltextbox.h" // for params
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolpipette.h"
+// [/SL:KB]
 #include "llviewerinventory.h"
 #include "llviewborder.h" // for params
 #include "llviewerobject.h"
@@ -133,6 +136,9 @@ public:
 	virtual LLSD	getValue() const;
 
 	// LLTextureCtrl interface
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	bool			getPickerVisible() const;
+// [/SL:KB]
 	void			showPicker(BOOL take_focus);
 	bool			isPickerShown() { return !mFloaterHandle.isDead(); }
 	void			setLabel(const std::string& label);
@@ -142,6 +148,9 @@ public:
 	void			setAllowNoTexture( BOOL b )					{ mAllowNoTexture = b; }
 	bool			getAllowNoTexture() const					{ return mAllowNoTexture; }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	void			setImageItemID(const LLUUID& item_id);
+// [/SL:KB]
 	const LLUUID&	getImageItemID() { return mImageItemID; }
 
 	virtual void	setImageAssetName(const std::string& name);
@@ -314,6 +323,10 @@ public:
 	void			onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action);
 	static void		onShowFolders(LLUICtrl* ctrl, void* userdata);
 	static void		onApplyImmediateCheck(LLUICtrl* ctrl, void* userdata);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	void			onTextureSelect(LLToolPipette::EType type, const LLTextureEntry& te);
+// [/SL:KB]
+//	void			onTextureSelect( const LLTextureEntry& te );
 	void			onTextureSelect(const LLTextureEntry& te);
 
 	static void		onModeSelect(LLUICtrl* ctrl, void *userdata);
