@@ -26,6 +26,10 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+#include "llavatarlist.h"
+#include "lltrans.h"
+// [/SL:KB]
 #include "llavatarnamecache.h"
 #include "llerror.h"
 #include "llimview.h"
@@ -177,10 +181,15 @@ private:
 	uuid_set_t mAvalineCallers;
 };
 
-LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model) :
-	LLConversationItemSession(data_source->getSessionID(), root_view_model),
-	mSpeakerMgr(data_source),
-	mValidateSpeakerCallback(NULL)
+//LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model) :
+//	LLConversationItemSession(data_source->getSessionID(), root_view_model),
+//	mSpeakerMgr(data_source),
+//	mValidateSpeakerCallback(NULL)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source)
+	: mSpeakerMgr(data_source)
+	, mValidateSpeakerCallback(NULL)
+// [/SL:KB]
 {
 
 	mAvalineUpdater = new LLAvalineUpdater(boost::bind(&LLParticipantList::onAvalineCallerFound, this, _1),
@@ -199,7 +208,7 @@ LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewMode
 	mSpeakerMgr->addListener(mSpeakerModeratorListener, "update_moderator");
 	mSpeakerMgr->addListener(mSpeakerUpdateListener, "update_speaker");
 
-	setSessionID(mSpeakerMgr->getSessionID());
+//	setSessionID(mSpeakerMgr->getSessionID());
 
 	//Lets fill avatarList with existing speakers
 	LLSpeakerMgr::speaker_list_t speaker_list;
@@ -219,26 +228,26 @@ LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source, LLFolderViewMode
 		}
 	}
 	
-	// Identify and store what kind of session we are
-	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(data_source->getSessionID());
-	if (im_session)
-	{
-		// By default, sessions that can't be identified as group or ad-hoc will be considered P2P (i.e. 1 on 1)
-		mConvType = CONV_SESSION_1_ON_1;
-		if (im_session->isAdHocSessionType())
-		{
-			mConvType = CONV_SESSION_AD_HOC;
-		}
-		else if (im_session->isGroupSessionType())
-		{
-			mConvType = CONV_SESSION_GROUP;
-		}
-	}
-	else 
-	{
-		// That's the only session that doesn't get listed in the LLIMModel as a session...
-		mConvType = CONV_SESSION_NEARBY;
-	}
+//	// Identify and store what kind of session we are
+//	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(data_source->getSessionID());
+//	if (im_session)
+//	{
+//		// By default, sessions that can't be identified as group or ad-hoc will be considered P2P (i.e. 1 on 1)
+//		mConvType = CONV_SESSION_1_ON_1;
+//		if (im_session->isAdHocSessionType())
+//		{
+//			mConvType = CONV_SESSION_AD_HOC;
+//		}
+//		else if (im_session->isGroupSessionType())
+//		{
+//			mConvType = CONV_SESSION_GROUP;
+//		}
+//	}
+//	else 
+//	{
+//		// That's the only session that doesn't get listed in the LLIMModel as a session...
+//		mConvType = CONV_SESSION_NEARBY;
+//	}
 }
 
 LLParticipantList::~LLParticipantList()
@@ -259,11 +268,15 @@ LLParticipantList::~LLParticipantList()
 */
 void LLParticipantList::onAvalineCallerFound(const LLUUID& participant_id)
 {
-	LLConversationItemParticipant* participant = findParticipant(participant_id);
-	if (participant)
-	{
-		removeParticipant(participant);
-	}
+//	LLConversationItemParticipant* participant = findParticipant(participant_id);
+//	if (participant)
+//	{
+//		removeParticipant(participant);
+//	}
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	removeParticipant(participant_id);
+// [/SL:KB]
+
 	// re-add avaline caller with a correct class instance.
 	addAvatarIDExceptAgent(participant_id);
 }
@@ -317,10 +330,16 @@ bool LLParticipantList::onSpeakerUpdateEvent(LLPointer<LLOldEvents::LLEvent> eve
 	if ( evt_data.has("id") )
 	{
 		LLUUID participant_id = evt_data["id"];
-		LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//		LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+// [/SL:KB]
 		if (im_box)
 		{
-			im_box->setTimeNow(mUUID,participant_id);
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+			im_box->setTimeNow(getSessionID(), participant_id);
+// [/SL:KB]
+//			im_box->setTimeNow(mUUID,participant_id);
 		}
 	}
 	return true;
@@ -368,36 +387,50 @@ bool LLParticipantList::onSpeakerMuteEvent(LLPointer<LLOldEvents::LLEvent> event
 void LLParticipantList::addAvatarIDExceptAgent(const LLUUID& avatar_id)
 {
 	// Do not add if already in there, is the session id (hence not an avatar) or excluded for some reason
-	if (findParticipant(avatar_id) || (avatar_id == mUUID))
+//	if (findParticipant(avatar_id) || (avatar_id == mUUID))
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	if ( (isParticipant(avatar_id)) || ((avatar_id == getSessionID())) )
+// [/SL:KB]
 	{
 		return;
 	}
 
 	bool is_avatar = LLVoiceClient::getInstance()->isParticipantAvatar(avatar_id);
 
-	LLConversationItemParticipant* participant = NULL;
-	
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 	if (is_avatar)
 	{
-		// Create a participant view model instance
-		LLAvatarName avatar_name;
-		bool has_name = LLAvatarNameCache::get(avatar_id, &avatar_name);
-		participant = new LLConversationItemParticipant(!has_name ? LLTrans::getString("AvatarNameWaiting") : avatar_name.getDisplayName() , avatar_id, mRootViewModel);
-		participant->fetchAvatarName();
+		addAvatarParticipant(avatar_id);
 	}
 	else
 	{
-		std::string display_name = LLVoiceClient::getInstance()->getDisplayName(avatar_id);
-		// Create a participant view model instance
-		participant = new LLConversationItemParticipant(display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name, avatar_id, mRootViewModel);
 		mAvalineUpdater->watchAvalineCaller(avatar_id);
+		addAvalineParticipant(avatar_id);
 	}
-
-	// *TODO : Need to update the online/offline status of the participant
-	// Hack for this: LLAvatarTracker::instance().isBuddyOnline(avatar_id))
-	
-	// Add the participant model to the session's children list
-	addParticipant(participant);
+// [/SL:KB]
+//	LLConversationItemParticipant* participant = NULL;
+//	
+//	if (is_avatar)
+//	{
+//		// Create a participant view model instance
+//		LLAvatarName avatar_name;
+//		bool has_name = LLAvatarNameCache::get(avatar_id, &avatar_name);
+//		participant = new LLConversationItemParticipant(!has_name ? LLTrans::getString("AvatarNameWaiting") : avatar_name.getDisplayName() , avatar_id, mRootViewModel);
+//		participant->fetchAvatarName();
+//	}
+//	else
+//	{
+//		std::string display_name = LLVoiceClient::getInstance()->getDisplayName(avatar_id);
+//		// Create a participant view model instance
+//		participant = new LLConversationItemParticipant(display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name, avatar_id, mRootViewModel);
+//		mAvalineUpdater->watchAvalineCaller(avatar_id);
+//	}
+//
+//	// *TODO : Need to update the online/offline status of the participant
+//	// Hack for this: LLAvatarTracker::instance().isBuddyOnline(avatar_id))
+//	
+//	// Add the participant model to the session's children list
+//	addParticipant(participant);
 
 	adjustParticipant(avatar_id);
 }
@@ -467,5 +500,195 @@ bool LLParticipantList::SpeakerMuteListener::handleEvent(LLPointer<LLOldEvents::
 {
 	return mParent.onSpeakerMuteEvent(event, userdata);
 }
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+
+//
+// LLParticipantModelList class
+//
+LLParticipantModelList::LLParticipantModelList(LLSpeakerMgr* data_source, LLFolderViewModelInterface& root_view_model)
+	: LLConversationItemSession(data_source->getSessionID(), root_view_model)
+	, LLParticipantList(data_source)
+{
+	LLConversationItemSession::setSessionID(data_source->getSessionID());
+
+	// Identify and store what kind of session we are
+	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(data_source->getSessionID());
+	if (im_session)
+	{
+		// By default, sessions that can't be identified as group or ad-hoc will be considered P2P (i.e. 1 on 1)
+		mConvType = CONV_SESSION_1_ON_1;
+		if (im_session->isAdHocSessionType())
+		{
+			mConvType = CONV_SESSION_AD_HOC;
+		}
+		else if (im_session->isGroupSessionType())
+		{
+			mConvType = CONV_SESSION_GROUP;
+		}
+	}
+	else 
+	{
+		// That's the only session that doesn't get listed in the LLIMModel as a session...
+		mConvType = CONV_SESSION_NEARBY;
+	}
+}
+
+LLParticipantModelList::~LLParticipantModelList()
+{
+}
+
+void LLParticipantModelList::addAvatarParticipant(const LLUUID& particpant_id)
+{
+	// Create a participant view model instance
+	LLAvatarName avatar_name;
+	bool has_name = LLAvatarNameCache::get(particpant_id, &avatar_name);
+	LLConversationItemParticipant* participant =  new LLConversationItemParticipant(!has_name ? LLTrans::getString("AvatarNameWaiting") : avatar_name.getDisplayName() , particpant_id, mRootViewModel);
+	participant->fetchAvatarName();
+
+	LLConversationItemSession::addParticipant(participant);
+}
+
+void LLParticipantModelList::addAvalineParticipant(const LLUUID& particpant_id)
+{
+	// Create a participant view model instance
+	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
+	LLConversationItemParticipant* participant = new LLConversationItemParticipant(display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name, particpant_id, mRootViewModel);
+	LLConversationItemSession::addParticipant(participant);
+}
+
+//
+// LLParticipantAvatarList class
+//
+
+LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAvatarList* pAvatarList)
+	: LLParticipantList(data_source)
+	, m_pAvatarList(pAvatarList)
+{
+	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
+	m_pAvatarList->setSessionID(data_source->getSessionID());
+	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
+}
+
+LLParticipantAvatarList::~LLParticipantAvatarList()
+{
+	m_AvatarListRefreshConn.disconnect();
+}
+
+void LLParticipantAvatarList::getSelectedUUIDs(uuid_vec_t& idsSelected)
+{
+	if (m_pAvatarList)
+	{
+		m_pAvatarList->getSelectedUUIDs(idsSelected);
+	}
+}
+
+const LLUUID& LLParticipantAvatarList::getSessionID() const
+{
+	return m_pAvatarList->getSessionID();
+}
+
+void LLParticipantAvatarList::addAvatarParticipant(const LLUUID& particpant_id)
+{
+	m_pAvatarList->getIDs().push_back(particpant_id);
+	m_pAvatarList->setDirty();
+
+	//sort();
+}
+
+void LLParticipantAvatarList::addAvalineParticipant(const LLUUID& particpant_id)
+{
+	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
+	m_pAvatarList->addAvalineItem(particpant_id, m_pAvatarList->getSessionID(), display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name);
+
+	//sort();
+}
+
+void LLParticipantAvatarList::clearParticipants()
+{
+	m_pAvatarList->getIDs().clear();
+	m_pAvatarList->setDirty();
+}
+
+bool LLParticipantAvatarList::isParticipant(const LLUUID& particpant_id)
+{
+	return m_pAvatarList->contains(particpant_id);
+}
+
+void LLParticipantAvatarList::removeParticipant(const LLUUID& particpant_id)
+{
+	uuid_vec_t& lParticipantIds = m_pAvatarList->getIDs();
+
+	uuid_vec_t::iterator itParticipant = std::find(lParticipantIds.begin(), lParticipantIds.end(), particpant_id);
+	if (lParticipantIds.end() != itParticipant)
+	{
+		lParticipantIds.erase(itParticipant);
+		m_pAvatarList->setDirty();
+	}
+}
+
+void LLParticipantAvatarList::setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted)
+{
+}
+
+void LLParticipantAvatarList::onAvatarListRefreshed()
+{
+	static const std::string s_strModIndicator(LLTrans::getString("IM_moderator_label")); 
+	static const std::size_t s_lenModIndicator = s_strModIndicator.length();
+
+	// Firstly remove moderators indicator
+	std::set<LLUUID>& lModeratorsToRemove = getModeratorToRemoveList();
+	for (std::set<LLUUID>::const_iterator itModRemove = lModeratorsToRemove.begin(); itModRemove != lModeratorsToRemove.end(); ++itModRemove)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(m_pAvatarList->getItemByValue(*itModRemove));
+		if (pItem)
+		{
+			std::string strName = pItem->getAvatarName();
+			size_t idxModIndicator = strName.find(s_strModIndicator);
+			if (std::string::npos != idxModIndicator)
+			{
+				strName.erase(idxModIndicator, s_lenModIndicator);
+				pItem->setAvatarName(strName);
+			}
+
+			std::string strTooltip = pItem->getAvatarToolTip();
+			idxModIndicator = strTooltip.find(s_strModIndicator);
+			if (std::string::npos != idxModIndicator)
+			{
+				strTooltip.erase(idxModIndicator, s_lenModIndicator);
+				pItem->setAvatarToolTip(strTooltip);
+			}
+		}
+	}
+	lModeratorsToRemove.clear();
+
+	// Add moderators indicator
+	std::set<LLUUID>& lModerators = getModeratorList();
+	for (std::set<LLUUID>::const_iterator itMod = lModerators.begin(); itMod != lModerators.end(); ++itMod)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(m_pAvatarList->getItemByValue(*itMod));
+		if (pItem)
+		{
+			std::string strName = pItem->getAvatarName();
+			size_t idxModIndicator = strName.find(s_strModIndicator);
+			if (std::string::npos == idxModIndicator)
+			{
+				strName += " ";
+				strName += s_strModIndicator;
+				pItem->setAvatarName(strName);
+			}
+
+			std::string strTooltip = pItem->getAvatarToolTip();
+			idxModIndicator = strTooltip.find(s_strModIndicator);
+			if (std::string::npos == idxModIndicator)
+			{
+				strTooltip += " ";
+				strTooltip += s_strModIndicator;
+				pItem->setAvatarToolTip(strTooltip);
+			}
+		}
+	}
+}
+// [/SL:KB]
 
 //EOF

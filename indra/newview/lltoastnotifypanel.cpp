@@ -29,6 +29,9 @@
 #include "lltoastnotifypanel.h"
 
 // project includes
+// [SL:KB] - Patch: Chat-Base | Checked: Catznip-4.0
+#include "llmutelist.h"
+// [/SL:KB]
 #include "llviewercontrol.h"
 
 // library includes
