@@ -8,6 +8,11 @@
 	<menu_item_call label="Kort" name="Map"/>
 	<menu_item_call label="Del" name="Share"/>
 	<menu_item_call label="Betal" name="Pay"/>
+	<context_menu label="Copy" name="avatar_copy">
+		<menu_item_call label="Kopiér visningsnavn" name="avatar_copy_displayname"/>
+		<menu_item_call label="Kopiér navn" name="avatar_copy_fullname"/>
+		<menu_item_call label="Kopiér SLurl" name="avatar_copy_slurl"/>
+	</context_menu>
 	<menu_item_check label="Blokér/Fjern blokering" name="Block/Unblock"/>
 	<menu_item_call label="Tilbyd teleport" name="teleport"/>
 </context_menu>

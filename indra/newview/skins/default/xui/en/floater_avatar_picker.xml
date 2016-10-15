@@ -121,32 +121,39 @@
              layout="topleft"
              left="10"
              name="InstructSelectFriend"
-             top="5"
+             top="7"
              width="200">
                 Select a person:
             </text>
-            <button
-             follows="top|right"
+            <filter_editor
+             follows="left|top|right"
+             height="22"
+             label="Filter Friends"
              layout="topleft"
-             right="-5"
-             top ="5"
-             height="20"
-             width="20"
-             name="RefreshFriends"
-             image_overlay="Refresh_Off">
-             <button.commit_callback 
-              function="Refresh.FriendList"/>
-            </button>
+             left="10"
+             right="-10"
+             name="filter_friends"
+             search_button_visible="false"
+             top_pad="3" />
             <scroll_list
-             follows="all"
-             height="120"
              border="false"
+             draw_heading="true" 
+             follows="all"
+             height="100"
              layout="topleft"
              left="0"
              name="Friends"
-             sort_column="0"
-             top_pad="5"
-             width="132" />
+             top="52"
+             width="132">
+              <columns
+               label="Name"
+               name="name"
+               width="150" />
+              <columns
+               label="Username"
+               name="username"
+               width="150" />
+            </scroll_list>
         </panel>
 
         <panel
