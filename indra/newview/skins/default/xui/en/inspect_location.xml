@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<!--
+  Not can_close / no title to avoid window chrome
+  Single instance - only have one at a time, recycle it each spawn
+-->
+<floater
+ legacy_header_height="25"
+ bevel_style="in"
+ bg_opaque_image="Inspector_Background" 
+ can_close="false"
+ can_minimize="false"
+ height="158"
+ layout="topleft"
+ name="inspect_group"
+ single_instance="true"
+ sound_flags="0"
+ visible="true"
+ width="250">
+  <string
+   name="not_available">
+      (Not Available)
+  </string>
+  <string
+   name="server_error_text">
+      Information about this location is unavailable at this time, please try again later.
+  </string>
+  <string
+   name="server_forbidden_text">
+      Information about this location is unavailable due to access restrictions.  Please check your permissions with the parcel owner.
+  </string>
+  <string
+   name="server_update_text">
+      Place information not available without server update.
+  </string>
+  <string
+   name="location_text">
+      [SLURL] - [AREA]m²
+  </string>
+  <!-- Texture names -->
+  <string
+   name="icon_PG"
+   translate="false"
+   value="Parcel_PG_Dark" />
+  <string
+   name="icon_M"
+   translate="false"
+   value="Parcel_M_Dark" />
+  <string
+   name="icon_R"
+   translate="false"
+   value="Parcel_R_Dark" />
+
+  <text
+   follows="all"
+   font="SansSerifLarge"
+   height="16"
+   left="8"
+   name="parcel_name"
+   text_color="White"
+   top="10"
+   translate="false"
+   use_ellipses="true"
+   width="234"
+   word_wrap="false">
+    The name of a parcel goes here
+  </text>
+  <icon
+   follows="bottom|left"
+   height="16"
+   image_name="transparent.j2c"
+   layout="topleft"
+   left="8"
+   name="region_maturity"
+   top_pad="0"
+   width="18" />
+  <text
+   follows="all"
+   font="SansSerifSmall"
+   height="16"
+   left_pad="5"
+   name="parcel_slurl"
+   text_color="White"
+   top_delta="3"
+   use_ellipses="true"
+   width="234">
+    A long region name (128, 128, 128)
+  </text>
+  <text
+   follows="all"
+   height="63"
+   left="8"
+   name="parcel_description"
+   top_pad="3"
+   use_ellipses="true"
+   width="234"
+   word_wrap="true">
+    Parcel description goes here.
+    Parcel description goes here.
+    Parcel description goes here.
+    Parcel description goes here.
+    Parcel description goes here.
+    Parcel description goes here.
+    Parcel description goes here.
+  </text>
+  <button
+   commit_callback.function="InspectLocation.Teleport"
+   follows="bottom|left"
+   height="23"
+   label="Teleport"
+   left="20"
+   name="teleport_btn"
+   top_pad="16"
+   width="100" />
+  <button
+   commit_callback.function="InspectLocation.ShowDetails"
+   follows="bottom|left"
+   height="23"
+   label="More Info"
+   left_pad="10"
+   name="more_info_btn"
+   top_delta="0"
+   width="100" />
+</floater>

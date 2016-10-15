@@ -314,6 +314,9 @@ void LLInspectObject::hideButtons()
 	getChild<LLUICtrl>("touch_btn")->setVisible(false);
 	getChild<LLUICtrl>("sit_btn")->setVisible(false);
 	getChild<LLUICtrl>("open_btn")->setVisible(false);
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-18 (Catznip-3.3)
+	getChild<LLUICtrl>("detach_btn")->setVisible(false);
+// [/SL:KB]
 }
 
 // *TODO: Extract this method from lltoolpie.cpp and put somewhere shared
@@ -365,6 +368,13 @@ void LLInspectObject::updateButtons(LLSelectNode* nodep)
 		// Open is last because anything with a script in it can be opened
 		getChild<LLUICtrl>("open_btn")->setVisible(true);
 	}
+// [SL:KB] - Patch: Control-ObjectInspector | Checked: 2012-08-18 (Catznip-3.3)
+	else if (object->isAttachment())
+	{
+		// Detach is the default option for attachments
+		getChild<LLUICtrl>("detach_btn")->setVisible(true);
+	}
+// [/SL:KB]
 	else
 	{
 		// By default, we can sit on anything

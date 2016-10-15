@@ -141,6 +141,12 @@ public:
 	// applies filters to control visibility of items
 	virtual void filter( LLFolderViewFilter& filter);
 
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+	void              clearHoveredItem() { setHoveredItem(NULL); }
+	LLFolderViewItem* getHoveredItem() const;
+	void              setHoveredItem(LLFolderViewItem* pItem);
+// [/SL:KB]
+
 	// Get the last selected item
 	virtual LLFolderViewItem* getCurSelectedItem( void );
     selected_items_t& getSelectedItems( void );
@@ -268,6 +274,9 @@ protected:
 protected:
 	LLHandle<LLView>					mPopupMenuHandle;
 	
+// [SL:KB] - Patch: Inspect-Inventory | Checked: 2013-12-28 (Catznip-3.6)
+	LLHandle<LLView>				mHoveredItem;
+// [/SL:KB]
 	selected_items_t				mSelectedItems;
 	bool							mKeyboardSelection,
 									mAllowMultiSelect,
