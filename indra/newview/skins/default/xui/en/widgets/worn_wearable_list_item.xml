@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<worn_wearable_list_item
+ bottom="0"
+ follows="top|right|left"
+ height="23"
+ layout="topleft"
+ left="0"
+ name="wearable_item"
+ width="380">
+  <item_icon
+   follows="top|left"
+   height="16"
+   image_name="Inv_Object"
+   layout="topleft"
+   left="24"
+   name="item_icon"
+   top="3"
+   width="16" />
+  <item_name
+   follows="left|right"
+   height="16"
+   layout="topleft"
+   left="42"
+   parse_urls="false"
+   name="item_name"
+   text_color="White"
+   top="5"
+   use_ellipses="true"
+   value="..."
+   width="359" />
+  <item_complexity
+   follows="right"
+   halign="right"
+   height="16"
+   layout="topleft"
+   left="0"
+   name="item_complexity"
+   requests_front="true"
+   text_color="White"
+   top="5"
+   value="0"
+   width="69" />
+  <up_btn
+   follows="top|right"
+   height="23"
+   image_overlay="UpArrow_Off"
+   name="btn_move_up"
+   layout="topleft"
+   left="0"
+   tab_stop="false"
+   top="1"
+   width="23" />
+  <down_btn
+   follows="top|right"
+   height="23"
+   image_overlay="DownArrow_Off"
+   name="btn_move_down"
+   layout="topleft"
+   left="26"
+   top="1"
+   tab_stop="false"
+   width="23" />
+  <delete_btn
+   follows="top|right"
+   height="18"
+   image_selected="Toast_CloseBtn"
+   image_unselected="Toast_CloseBtn"
+   name="btn_delete"
+   layout="topleft"
+   left="0"
+   tab_stop="false"
+   tool_tip="Remove from outfit"
+   top="3"
+   width="18" />
+</worn_wearable_list_item>

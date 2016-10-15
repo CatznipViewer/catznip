@@ -4804,6 +4804,12 @@ www.secondlife.com から最新バージョンをダウンロードしてくだ�
 	<string name="EmptyOutfitText">
 		このアウトフィットにはアイテムがありません
 	</string>
+	<string name="SaveOutfit">
+		保存
+	</string>
+	<string name="SaveOutfitAs">
+		別名で保存
+	</string>
 	<string name="ExternalEditorNotSet">
 		ExternalEditor 設定を使ってエディターを選択します。
 	</string>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ name="Folder Sort Wearing">
+	<menu_item_check label="Nach Name sortieren" name="folder_sort_name"/>
+	<menu_item_check label="Nach aktuellesten Objekten sortieren" name="folder_sort_recent"/>
+	<menu_item_check label="Ordner immer nach Namen sortieren" name="folder_sort_foldersalwaysbyname"/>
+	<menu_item_check label="Systemordner nach oben" name="folder_sort_systemfolderstotop"/>
+</toggleable_menu>

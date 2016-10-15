@@ -145,12 +145,18 @@ public:
 
 	/** Get the description of a corresponding inventory item */
 	const std::string& getDescription() const;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-21 (Catznip-3.3)
+	const std::string& getActualDescription() const;
+// [/SL:KB]
 
 	/** Get the creation date of a corresponding inventory item */
 	time_t getCreationDate() const;
 
 	/** Get the associated inventory item */
 	LLViewerInventoryItem* getItem() const;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	const LLUUID& getItemID() const { return mInventoryItemUUID; }
+// [/SL:KB]
 
 	void setSeparatorVisible(bool visible) { mSeparatorVisible = visible; }
 
@@ -195,7 +201,16 @@ protected:
 	 */
 	virtual BOOL handleToolTip( S32 x, S32 y, MASK mask);
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-2.6
+	LLAssetType::EType mInventoryItemAssetType;
+// [/SL:KB]
 	const LLUUID mInventoryItemUUID;
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	enum EReshapeWidgetSide { SIDE_LEFT = 0x1, SIDE_MIDDLE = 0x2, SIDE_RIGHT = 0x4 };
+	S32  getReshapeWidgetMask() { return mReshapeWidgetMask; }
+	void setReshapeWidgetMask(S32 mask) { mReshapeWidgetMask = mask; }
+// [/SL:KB]
 
 private:
 
@@ -232,6 +247,9 @@ private:
 
 	S32				mLeftWidgetsWidth;
 	S32				mRightWidgetsWidth;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	S32				mReshapeWidgetMask;
+// [/SL:KB]
 	bool			mNeedsRefresh;
 };
 

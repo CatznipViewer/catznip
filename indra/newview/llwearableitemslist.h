@@ -91,6 +91,9 @@ protected:
 
 private:
 	bool	mWornIndicationEnabled;
+// [SL:KB] - Patch: Appearance-Wearing| Checked: Catznip-2.6
+	bool	mWornTargetIndicationEnabled;
+// [/SL:KB]
 };
 
 class LLPanelDeletableWearableListItem : public LLPanelWearableListItem
@@ -265,6 +268,9 @@ public:
 		return doCompare(wearable_item1, wearable_item2);
 	}
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	virtual bool areWearablesOrdered() const { return false; }
+// [/SL:KB]
 protected:
 
 	/**
@@ -316,6 +322,9 @@ public:
 
 	void setOrder(LLAssetType::EType items_of_type, ETypeListOrder order_priority, bool sort_items_by_name, bool sort_wearable_items_by_name);
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	virtual bool areWearablesOrdered() const { return true; }
+// [/SL:KB]
 protected:
 	/**
 	 * All information about sort order is stored in mWearableOrder map
@@ -391,6 +400,49 @@ protected:
 	/*virtual*/ bool doCompare(const LLPanelInventoryListItemBase* item1, const LLPanelInventoryListItemBase* item2) const;
 };
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+/**
+ * @class LLWearableItemAppearanceComparator
+ *
+ * Comparator for sorting wearable list items by avatar appearance (top to bottom).
+ */
+class LLWearableItemAppearanceComparator : public LLWearableListItemComparator
+{
+	LOG_CLASS(LLWearableItemAppearanceComparator);
+public:
+	LLWearableItemAppearanceComparator();
+	~LLWearableItemAppearanceComparator() override {}
+
+public:
+	bool areWearablesOrdered() const override { return true; }
+protected:
+	typedef std::pair<LLAssetType::EType, int> sortorder_pair_t;
+	typedef std::vector<sortorder_pair_t> sortorder_list_t;
+
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
+	sortorder_pair_t getSortOrderPair(const LLPanelInventoryListItemBase* pListItem) const;
+
+protected:
+	static sortorder_list_t sSortOrder;
+};
+
+/**
+* @class LLWearableItemAppearanceComparator
+*
+* Comparator for sorting wearable list items by item complexity
+*/
+class LLWearableItemComplexityComparator : public LLWearableItemAppearanceComparator
+{
+	LOG_CLASS(LLWearableItemComplexityComparator);
+public:
+	LLWearableItemComplexityComparator();
+	~LLWearableItemComplexityComparator() override {}
+
+protected:
+	bool doCompare(const LLPanelInventoryListItemBase* pLHS, const LLPanelInventoryListItemBase* pRHS) const override;
+};
+// [/SL:KB]
+
 /**
  * @class LLWearableItemsList
  *
@@ -449,6 +501,10 @@ public:
 		E_SORT_BY_MOST_RECENT	= 1,
 		E_SORT_BY_TYPE_LAYER	= 2,
 		E_SORT_BY_TYPE_NAME 	= 3,
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-3.3
+		E_SORT_BY_APPEARANCE 	= 10,
+		E_SORT_BY_COMPLEXITY 	= 11,
+// [/SL:KB]
 	} ESortOrder;
 
 	virtual ~LLWearableItemsList();
@@ -467,7 +523,10 @@ public:
 
 	ESortOrder getSortOrder() const { return mSortOrder; }
 
-	void setSortOrder(ESortOrder sort_order, bool sort_now = true);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	virtual void setSortOrder(ESortOrder sort_order, bool sort_now = true);
+// [/SL:KB]
+//	void setSortOrder(ESortOrder sort_order, bool sort_now = true);
 
 protected:
 	friend class LLUICtrlFactory;

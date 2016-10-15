@@ -6,6 +6,13 @@
 	</accordion>
 	<panel name="bottom_panel">
 		<menu_button tool_tip="Pokaż dodatkowe opcje" name="options_gear_btn" />
+		<icon name="dummy_icon" width="55" />
+		<flyout_button name="wear_outfit_btn" label="Załóż" width="80">
+			<flyout_button.item label="Zastąp obecny strój" name="outfit_replace" />
+			<flyout_button.item label="Dodaj do bieżącego stroju" name="outfit_add" />
+		</flyout_button>
+		<button name="wear_items_btn" label="Załóż" left_pad="-80" width="80" />
+		<flyout_button name="save_btn" label="Zapisz jako" width="110" />
 		<button name="trash_btn" tool_tip="Usuń wybrany strój" />
 	</panel>
 </panel>

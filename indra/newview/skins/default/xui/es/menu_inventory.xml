@@ -57,6 +57,7 @@
 	<menu_item_call label="Teleportar" name="Landmark Open"/>
 	<menu_item_call label="Abrir" name="Animation Open"/>
 	<menu_item_call label="Abrir" name="Sound Open"/>
+	<menu_item_call label="Copiar la lista del vestuario" name="Copy Outfit To Clipboard"/>
 	<menu_item_call label="Reemplazar el vestuario" name="Replace Outfit"/>
 	<menu_item_call label="Añadir al vestuario" name="Add To Outfit"/>
 	<menu_item_call label="Quitar del vestuario actual" name="Remove From Outfit"/>

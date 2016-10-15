@@ -168,6 +168,9 @@ public:
 // [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
 	LLScrollListCtrl* getListCtrl()						{ return mList; }
 // [/SL:KB]
+// [SL:KB] - Patch: Control-ComboBox | Checked: 2012-08-09 (Catznip-3.3)
+	LLScrollListCtrl* getListControl() const			{ return mList; }
+// [/SL:KB]
 
 	// LLCtrlListInterface functions
 	// See llscrolllistctrl.h

@@ -93,7 +93,11 @@ public:
 
 		FT_COUNT,
 
-		FT_NONE = -1
+		FT_NONE = -1,
+
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+		FT_INVALID = -2
+// [/SL:KB]
 	};
 
 	static EType 				lookup(const std::string& type_name);

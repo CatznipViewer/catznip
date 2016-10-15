@@ -57,6 +57,7 @@
 	<menu_item_call label="Телепорт" name="Landmark Open"/>
 	<menu_item_call label="Открыть" name="Animation Open"/>
 	<menu_item_call label="Открыть" name="Sound Open"/>
+	<menu_item_call label="Копировать список костюмов в буфер обмена" name="Copy Outfit To Clipboard"/>
 	<menu_item_call label="Сменить текущий костюм" name="Replace Outfit"/>
 	<menu_item_call label="Добавить к текущему костюму" name="Add To Outfit"/>
 	<menu_item_call label="Убрать из текущего костюма" name="Remove From Outfit"/>

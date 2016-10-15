@@ -224,6 +224,9 @@ public:
 	// Non Virtuals
 	LLHandle<LLUICtrl> getHandle() const { return getDerivedHandle<LLUICtrl>(); }
 	BOOL			getIsChrome() const;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+	bool            getRequestsFront() const { return mRequestsFront; }
+// [/SL:KB]
 	
 	void			setTabStop( BOOL b );
 	BOOL			hasTabStop() const;

@@ -97,7 +97,7 @@ const outfit_accordion_tab_params& get_accordion_tab_params()
 }
 
 
-static LLPanelInjector<LLOutfitsList> t_outfits_list("outfits_list");
+//static LLPanelInjector<LLOutfitsList> t_outfits_list("outfits_list");
 
 LLOutfitsList::LLOutfitsList()
     :   LLOutfitListBase()
@@ -105,6 +105,9 @@ LLOutfitsList::LLOutfitsList()
 	,	mListCommands(NULL)
 	,	mItemSelected(false)
 {
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	setXMLFilename("panel_outfits_list.xml");
+// [/SL:KB]
 }
 
 LLOutfitsList::~LLOutfitsList()
@@ -767,7 +770,10 @@ bool is_tab_header_clicked(LLAccordionCtrlTab* tab, S32 y)
 }
 
 LLOutfitListBase::LLOutfitListBase()
-    :   LLPanelAppearanceTab()
+//	:	LLPanelAppearanceTab()
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	:	LLPanelOutfitsTab()
+// [/SL:KB]
     ,   mIsInitialized(false)
 {
     mCategoriesObserver = new LLInventoryCategoriesObserver();

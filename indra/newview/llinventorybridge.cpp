@@ -176,12 +176,24 @@ LLInvFVBridge::LLInvFVBridge(LLInventoryPanel* inventory,
 	mUUID(uuid), 
 	mRoot(root),
 	mInvType(LLInventoryType::IT_NONE),
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	mFolderType(LLFolderType::FT_INVALID),
+// [/SL:KB]
 	mIsLink(FALSE),
 	LLFolderViewModelItemInventory(inventory->getRootViewModel())
 {
 	mInventoryPanel = inventory->getInventoryPanelHandle();
 	const LLInventoryObject* obj = getInventoryObject();
 	mIsLink = obj && obj->getIsLinkType();
+
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	if ( (obj) && (LLAssetType::AT_CATEGORY == obj->getType()) )
+	{
+		const LLInventoryCategory* cat = dynamic_cast<const LLInventoryCategory*>(obj);
+		if (cat)
+			mFolderType = cat->getPreferredType();
+	}
+// [/SL:KB]
 }
 
 const std::string& LLInvFVBridge::getName() const
@@ -2106,12 +2118,23 @@ std::string LLFolderBridge::getLabelSuffix() const
         return llformat(" ( %s ) ", LLTrans::getString("LoadingData").c_str());
     }
     
-    return LLInvFVBridge::getLabelSuffix();
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+ 	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
+		return LLInvFVBridge::getLabelSuffix() + LLTrans::getString("worn");
+// [/SL:KB]
+   return LLInvFVBridge::getLabelSuffix();
 }
 
 LLFontGL::StyleFlags LLFolderBridge::getLabelStyle() const
 {
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	if ( (LLFolderType::FT_OUTFIT == getPreferredType()) && (LLAppearanceMgr::instance().getBaseOutfitUUID() == getUUID()) )
+	{
+		return LLFontGL::BOLD;
+	}
     return LLFontGL::NORMAL;
+// [/SL:KB]
+//    return LLFontGL::NORMAL;
 }
 
 void LLFolderBridge::update()
@@ -2355,7 +2378,12 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 		const LLUUID &my_outifts_id = model->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
 
 		const BOOL move_is_into_trash = (mUUID == trash_id) || model->isObjectDescendentOf(mUUID, trash_id);
-		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+//		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2015-07-12 (Catznip-3.8)
+		const BOOL move_is_into_my_outfits = 
+			(mUUID == my_outifts_id) || 
+			( (model->isObjectDescendentOf(mUUID, my_outifts_id)) && (getCategory()) && (getCategory()->getPreferredType() != LLFolderType::FT_NONE) );
+// [/SL:KB]
 		const BOOL move_is_into_outfit = move_is_into_my_outfits || (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT);
 		const BOOL move_is_into_current_outfit = (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_CURRENT_OUTFIT);
 		const BOOL move_is_into_landmarks = (mUUID == landmarks_id) || model->isObjectDescendentOf(mUUID, landmarks_id);
@@ -3213,6 +3241,12 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
         const LLUUID &marketplacelistings_id = model->findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
         move_folder_to_marketplacelistings(cat, marketplacelistings_id, ("move_to_marketplace_listings" != action), (("copy_or_move_to_marketplace_listings" == action)));
     }
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+	else if ("copyoutfittoclipboard" == action)
+	{
+		copy_folder_to_clipboard(mUUID);
+	}
+// [/SL:BK]
 }
 
 void LLFolderBridge::gatherMessage(std::string& message, S32 depth, LLError::ELevel log_level)
@@ -3287,14 +3321,29 @@ void LLFolderBridge::restoreItem()
 
 LLFolderType::EType LLFolderBridge::getPreferredType() const
 {
-	LLFolderType::EType preferred_type = LLFolderType::FT_NONE;
-	LLViewerInventoryCategory* cat = getCategory();
-	if(cat)
+// [SL:KB] - Patch: Inventory-WornOutfit | Checked: 2013-05-02 (Catznip-3.4)
+	if (LLFolderType::FT_INVALID == mFolderType)
 	{
-		preferred_type = cat->getPreferredType();
+		const LLViewerInventoryCategory* pCat = getCategory();
+		if (pCat)
+		{
+			mFolderType = pCat->getPreferredType();
+		}
+		else
+		{
+			return LLFolderType::FT_NONE;
+		}
 	}
-
-	return preferred_type;
+	return mFolderType;
+// [/SL:KB]
+//	LLFolderType::EType preferred_type = LLFolderType::FT_NONE;
+//	LLViewerInventoryCategory* cat = getCategory();
+//	if(cat)
+//	{
+//		preferred_type = cat->getPreferredType();
+//	}
+//
+//	return preferred_type;
 }
 
 // Icons for folders are based on the preferred type
@@ -3451,7 +3500,12 @@ void LLFolderBridge::perform_pasteFromClipboard()
 		const LLUUID &my_outifts_id = model->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
 
 		const BOOL move_is_into_current_outfit = (mUUID == current_outfit_id);
-		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+//		const BOOL move_is_into_my_outfits = (mUUID == my_outifts_id) || model->isObjectDescendentOf(mUUID, my_outifts_id);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2015-07-12 (Catznip-3.8)
+		const BOOL move_is_into_my_outfits = 
+			(mUUID == my_outifts_id) || 
+			( (model->isObjectDescendentOf(mUUID, my_outifts_id)) && (getCategory()) && (getCategory()->getPreferredType() != LLFolderType::FT_NONE) );
+// [/SL:KB]
 		const BOOL move_is_into_outfit = move_is_into_my_outfits || (getCategory() && getCategory()->getPreferredType()==LLFolderType::FT_OUTFIT);
         const BOOL move_is_into_marketplacelistings = model->isObjectDescendentOf(mUUID, marketplacelistings_id);
 		const BOOL move_is_into_favorites = (mUUID == favorites_id);
@@ -3840,18 +3894,30 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		disabled_items.push_back(std::string("Delete System Folder"));
 	}
 
-	if (!isMarketplaceListingsFolder())
-	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
-		{
-			disabled_items.push_back(std::string("Share"));
-		}
-	}
+//	if (!isMarketplaceListingsFolder())
+//	{
+//		items.push_back(std::string("Share"));
+//		if (!canShare())
+//		{
+//			disabled_items.push_back(std::string("Share"));
+//		}
+//	}
 	// Add menu items that are dependent on the contents of the folder.
 	LLViewerInventoryCategory* category = (LLViewerInventoryCategory *) model->getCategory(mUUID);
 	if (category && (marketplace_listings_id != mUUID))
 	{
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+		// Don't show share except on user created folders
+		if (LLFolderType::FT_NONE == category->getPreferredType())
+		{
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+		}
+// [/SL:KB]
+
 		uuid_vec_t folders;
 		folders.push_back(category->getUUID());
 
@@ -3966,6 +4032,12 @@ void LLFolderBridge::buildContextMenuFolderOptions(U32 flags,   menuentry_vec_t&
 		{
 			disabled_items.push_back(std::string("Add To Outfit"));
 		}
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2013-12-08 (Catznip-3.6)
+		if (LLFolderType::FT_OUTFIT == type)
+		{
+			items.push_back(std::string("Copy Outfit To Clipboard"));
+		}
+// [/SL:BK]
 		items.push_back(std::string("Outfit Separator"));
 	}
 }

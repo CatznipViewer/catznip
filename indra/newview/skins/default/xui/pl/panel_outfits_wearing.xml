@@ -2,5 +2,7 @@
 <panel name="Wearing">
 	<panel name="bottom_panel">
 		<menu_button name="options_gear_btn" tool_tip="Pokaż dodatkowe opcje" />
+		<icon name="dummy_icon" width="40" />
+		<flyout_button name="save_btn" label="Zapisz jako" width="110" />
 	</panel>
 </panel>

@@ -89,7 +89,10 @@ public:
     void onSelectPhoto(LLUUID selected_outfit_id);
     void onTakeSnapshot(LLUUID selected_outfit_id);
 
-    void wearSelectedOutfit();
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-4.0
+	void wearSelectedItems() override;
+// [/SL:KB]
+//    void wearSelectedOutfit();
 
 
     /*virtual*/ void setFilterSubString(const std::string& string);

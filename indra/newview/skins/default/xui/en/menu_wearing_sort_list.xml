@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<toggleable_menu
+ layout="topleft"
+ visible="false"
+ name="List Sort Wearing">
+    <menu_item_check
+     label="Sort by Appearance"
+     name="list_sort_appearance">
+        <menu_item_check.on_click
+         function="Sort.List"
+         parameter="appearance" />
+        <menu_item_check.on_check
+         function="Sort.CheckList"
+         parameter="appearance" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Complexity"
+     name="list_sort_complexity">
+        <menu_item_check.on_click
+         function="Sort.List"
+         parameter="complexity" />
+        <menu_item_check.on_check
+         function="Sort.CheckList"
+         parameter="complexity" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Name"
+     name="list_sort_name">
+        <menu_item_check.on_click
+         function="Sort.List"
+         parameter="name" />
+        <menu_item_check.on_check
+         function="Sort.CheckList"
+         parameter="name" />
+    </menu_item_check>
+    <menu_item_check
+     label="Sort by Type"
+     name="list_sort_type">
+        <menu_item_check.on_click
+         function="Sort.List"
+         parameter="type_name" />
+        <menu_item_check.on_check
+         function="Sort.CheckList"
+         parameter="type_name" />
+    </menu_item_check>
+</toggleable_menu>

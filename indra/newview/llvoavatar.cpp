@@ -8359,6 +8359,9 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 	if (mVisualComplexityStale)
 	{
 		U32 cost = VISUAL_COMPLEXITY_UNKNOWN;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		U32 old_cost = mVisualComplexity;
+// [/SL:KB]
 		LLVOVolume::texture_cost_t textures;
 
 		for (U8 baked_index = 0; baked_index < BAKED_NUM_INDICES; baked_index++)
@@ -8386,7 +8389,10 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 				 attachment_iter != attachment->mAttachedObjects.end();
 				 ++attachment_iter)
 			{
-				const LLViewerObject* attached_object = (*attachment_iter);
+//				const LLViewerObject* attached_object = (*attachment_iter);
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+				LLViewerObject* attached_object = (*attachment_iter);
+// [/SL:KB]
 				if (attached_object && !attached_object->isHUDAttachment())
 				{
 					textures.clear();
@@ -8432,6 +8438,9 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
                                                    << ", " << volume->numChildren()
                                                    << " children: " << attachment_children_cost
                                                    << LL_ENDL;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+							attached_object->setAttachmentComplexity(attachment_total_cost);
+// [/SL:KB]
                             cost += attachment_total_cost;
 						}
 					}
@@ -8497,10 +8506,20 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 
         static LLCachedControl<U32> show_my_complexity_changes(gSavedSettings, "ShowMyComplexityChanges", 20);
 
-		if (isSelf() && show_my_complexity_changes)
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		if (isSelf())
 		{
-			LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
+			LLAvatarRenderNotifier::getInstance()->notifyComplexityChanged(old_cost, cost);
+			if (show_my_complexity_changes)
+			{
+				LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
+			}
 		}
+// [/SL:KB]
+//		if (isSelf() && show_my_complexity_changes)
+//		{
+//			LLAvatarRenderNotifier::getInstance()->updateNotificationAgent(mVisualComplexity);
+//		}
 	}
 }
 
