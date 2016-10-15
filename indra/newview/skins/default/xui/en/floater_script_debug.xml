@@ -6,15 +6,15 @@
  name="script debug floater"
  help_topic="script_debug_floater"
  save_rect="true"
- title="Script Warning/Error"
+ title="SCRIPT WARNING / ERROR"
  width="450">
     <tab_container
      follows="left|top|right|bottom"
-     height="217"
+     height="233"
      layout="topleft"
-     left="1"
+     left="0"
      name="Preview Tabs"
      tab_position="bottom"
-     top="16"
-     width="448" />
+     top="0"
+     width="450" />
 </multi_floater>

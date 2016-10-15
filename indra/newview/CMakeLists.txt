@@ -198,6 +198,7 @@ set(viewer_SOURCE_FILES
     llflexibleobject.cpp
     llflickrconnect.cpp
     llfloaterabout.cpp
+    llfloaterassetrecovery.cpp
     llfloaterbvhpreview.cpp
     llfloaterauction.cpp
     llfloaterautoreplacesettings.cpp
@@ -813,6 +814,7 @@ set(viewer_HEADER_FILES
     llflexibleobject.h
     llflickrconnect.h
     llfloaterabout.h
+    llfloaterassetrecovery.h
     llfloaterbvhpreview.h
     llfloaterauction.h
     llfloaterautoreplacesettings.h

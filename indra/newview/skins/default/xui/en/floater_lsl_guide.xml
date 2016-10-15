@@ -2,62 +2,70 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="400"
+ height="300"
  layout="topleft"
- min_height="271"
+ min_height="100"
  min_width="350"
  name="script ed float"
  help_topic="lsl_reference"
  save_rect="true"
  title="LSL REFERENCE"
- width="370">
-    <check_box
+ width="350">
+    <button
      follows="top|left"
-     font="SansSerif"
+     height="24"
+     image_hover_unselected="Toolbar_Middle_Over"
+     image_overlay="Arrow_Left"
+     image_overlay_alignment="center"
+     image_selected="Toolbar_Middle_Selected"
+     image_unselected="Toolbar_Middle_Off"
+     tool_tip="Back"
+     layout="topleft"
+     left="5"
+     name="back_btn"
+     top="20"
+     width="28" />
+    <button
+     follows="top|left"
+     height="24"
+     image_hover_unselected="Toolbar_Middle_Over"
+     image_overlay="Arrow_Right"
+     image_overlay_alignment="center"
+     image_selected="Toolbar_Middle_Selected"
+     image_unselected="Toolbar_Middle_Off"
+     tool_tip="Forward"
+     layout="topleft"
+     left_pad="1"
+     name="fwd_btn"
+     top_delta="0"
+     width="28" />
+    <combo_box
+     allow_text_entry="true"
+     follows="top|left|right"
+     halign="center"
+     height="22"
+     label="Lock"
+     layout="topleft"
+     left_pad="2"
+     name="history_combo"
+     top="20"
+     width="180" />
+    <check_box
+     follows="top|right"
      halign="center"
      height="20"
      label="Follow cursor"
      layout="topleft"
-     left="10"
+     left="240"
      name="lock_check"
-     top="25"
+     top="18"
      width="60" />
-    <combo_box
-     allow_text_entry="true"
-     follows="top|left|right"
-     font="SansSerif"
-     halign="center"
-     height="20"
-     label="Lock"
-     layout="topleft"
-     left_pad="40"
-     name="history_combo"
-     top_delta="0"
-     width="90" />
-    <button
-     follows="top|right"
-     height="20"
-     label="Back"
-     layout="topleft"
-     left_pad="5"
-     name="back_btn"
-     top_delta="0"
-     width="70" />
-    <button
-     follows="top|right"
-     height="20"
-     label="Forward"
-     layout="topleft"
-     left_pad="5"
-     name="fwd_btn"
-     top_delta="0"
-     width="70" />
     <web_browser
-     bottom="390"
+     bottom="296"
      follows="left|right|top|bottom"
      layout="topleft"
-     left="10"
+     left="7"
      name="lsl_guide_html"
-     right="-10"
-     top="50" />
+     right="-7"
+     top="46" />
 </floater>

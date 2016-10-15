@@ -4,6 +4,6 @@
 		СКРИПТ: [NAME]
 	</floater.string>
 	<text name="desc txt">
-		Описание:
+		Описание
 	</text>
 </floater>
