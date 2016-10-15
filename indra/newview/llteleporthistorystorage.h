@@ -90,6 +90,10 @@ public:
 	void addItem(const std::string title, const LLVector3d& global_pos);
 	void addItem(const std::string title, const LLVector3d& global_pos, const LLDate& date);
 
+// [SL:KB] - Patch: Control-ParcelInfo | Checked: 2012-08-16 (Catznip-3.3)
+	const LLTeleportHistoryPersistentItem* getItem(S32 idx) const { return ((idx >= 0) && (idx < mItems.size())) ? &mItems[idx] : NULL; }
+// [/SL:KB]
+
 	void removeItem(S32 idx);
 
 	void save();
