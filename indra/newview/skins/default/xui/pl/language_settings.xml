@@ -10,6 +10,7 @@
 	<string name="TimeYear">year,datetime,slt</string>
 	<string name="TimeDay">day,datetime,slt</string>
 	<string name="TimeMonth">mthnum,datetime,slt</string>
+	<string name="TimeMonthName">mth,datetime,slt</string>	
 	<string name="TimeMth">mth,datetime,slt</string>
 	<string name="TimeWeek">wkday,datetime,slt</string>
 	<string name="TimeAMPM">ampm,datetime,slt</string>

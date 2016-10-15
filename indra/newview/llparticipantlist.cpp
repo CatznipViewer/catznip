@@ -210,23 +210,25 @@ LLParticipantList::LLParticipantList(LLSpeakerMgr* data_source)
 
 //	setSessionID(mSpeakerMgr->getSessionID());
 
-	//Lets fill avatarList with existing speakers
-	LLSpeakerMgr::speaker_list_t speaker_list;
-	mSpeakerMgr->getSpeakerList(&speaker_list, true);
-	for(LLSpeakerMgr::speaker_list_t::iterator it = speaker_list.begin(); it != speaker_list.end(); it++)
-	{
-		const LLPointer<LLSpeaker>& speakerp = *it;
-
-		addAvatarIDExceptAgent(speakerp->mID);
-		if ( speakerp->mIsModerator )
-		{
-			mModeratorList.insert(speakerp->mID);
-		}
-		else
-		{
-			mModeratorToRemoveList.insert(speakerp->mID);
-		}
-	}
+//	NOTE-Catznip: addAvatarIDExceptAgent() calls two (pure) virtual functions which aren't available since at this point we have a LLParticipantList vtable pointer
+//                so we moved it to its own function which will need to be called from derived class' constructor
+//	//Lets fill avatarList with existing speakers
+//	LLSpeakerMgr::speaker_list_t speaker_list;
+//	mSpeakerMgr->getSpeakerList(&speaker_list, true);
+//	for(LLSpeakerMgr::speaker_list_t::iterator it = speaker_list.begin(); it != speaker_list.end(); it++)
+//	{
+//		const LLPointer<LLSpeaker>& speakerp = *it;
+//
+//		addAvatarIDExceptAgent(speakerp->mID);
+//		if ( speakerp->mIsModerator )
+//		{
+//			mModeratorList.insert(speakerp->mID);
+//		}
+//		else
+//		{
+//			mModeratorToRemoveList.insert(speakerp->mID);
+//		}
+//	}
 	
 //	// Identify and store what kind of session we are
 //	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(data_source->getSessionID());
@@ -254,6 +256,29 @@ LLParticipantList::~LLParticipantList()
 {
 	delete mAvalineUpdater;
 }
+
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-02-24(Catznip-3.6)
+void LLParticipantList::initInitialSpeakers()
+{
+	//Lets fill avatarList with existing speakers
+	LLSpeakerMgr::speaker_list_t speaker_list;
+	mSpeakerMgr->getSpeakerList(&speaker_list, true);
+	for(LLSpeakerMgr::speaker_list_t::iterator it = speaker_list.begin(); it != speaker_list.end(); it++)
+	{
+		const LLPointer<LLSpeaker>& speakerp = *it;
+
+		addAvatarIDExceptAgent(speakerp->mID);
+		if ( speakerp->mIsModerator )
+		{
+			mModeratorList.insert(speakerp->mID);
+		}
+		else
+		{
+			mModeratorToRemoveList.insert(speakerp->mID);
+		}
+	}
+}
+// [/SL:KB]
 
 /*
   Seems this method is not necessary after onAvalineCallerRemoved was implemented;
@@ -511,7 +536,8 @@ LLParticipantModelList::LLParticipantModelList(LLSpeakerMgr* data_source, LLFold
 	, LLParticipantList(data_source)
 {
 	LLConversationItemSession::setSessionID(data_source->getSessionID());
-
+	initInitialSpeakers();
+	
 	// Identify and store what kind of session we are
 	LLIMModel::LLIMSession* im_session = LLIMModel::getInstance()->findIMSession(data_source->getSessionID());
 	if (im_session)
@@ -565,6 +591,8 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 	: LLParticipantList(data_source)
 	, m_pAvatarList(pAvatarList)
 {
+	initInitialSpeakers();
+
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
 	m_pAvatarList->setSessionID(data_source->getSessionID());
 	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));

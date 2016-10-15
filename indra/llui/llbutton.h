@@ -201,7 +201,10 @@ public:
 	void			setToggleState(BOOL b);
 
 	void			setHighlight(bool b);
-	void			setFlashing( bool b, bool force_flashing = false );
+// [SL:KB] - Patch: Control-Button | Checked: 2014-03-22 (Catznip-3.6)
+	void			setFlashing(bool b, bool force_flashing = false, bool flash_timer = true);
+// [/SL:KB]
+//	void			setFlashing( bool b, bool force_flashing = false );
 	BOOL			getFlashing() const		{ return mFlashing; }
     LLFlashTimer*   getFlashTimer() {return mFlashingTimer;}
 

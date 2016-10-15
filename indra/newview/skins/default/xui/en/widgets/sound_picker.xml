@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<sound_picker
+ height="23"
+ mouse_opaque="false"
+ layout="topleft"
+ width="212">
+    <sound_picker.sound_combo
+     follows="top|left|right"
+     height="23"
+     layout="topleft"
+     name="sound_combo" />
+    <sound_picker.preview_button
+     follows="top|right"
+     height="20"
+     image_unselected="Play_Off"
+     image_pressed="Play_Press"
+     is_toggle="false"
+     name="preview_button"
+     layout="topleft"
+     left_pad="1"
+     sound_flags="0"
+     tool_tip="Preview the selected sound"
+     width="20" />
+    <sound_picker.drop_target
+     follows="all"
+     height="23"
+     layout="topleft"
+     name="drop_target" />
+</sound_picker>

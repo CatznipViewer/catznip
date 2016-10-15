@@ -721,6 +721,9 @@ Spróbuj zalogować się ponownie za minutę.
 	<string name="AvatarMuted">
 		Wyciszony
 	</string>
+	<string name="AvatarTyping">
+		Pisz
+	</string>
 	<string name="anim_express_afraid">
 		Strach
 	</string>

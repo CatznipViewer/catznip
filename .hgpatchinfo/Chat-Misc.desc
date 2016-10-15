@@ -1,0 +1,28 @@
+[Control/TabContainer]
+- fixed   : vertical tabs containers don't show their tab icon
+
+[UI/TimeFormat]
+- changed : normalized display of time in the viewers to SLT (PDT/PST)
+    -> offline IMs show SLT rather than local time
+    -> convenant modify timestamp shown as SLT rather than local time
+    -> group notice toasts shown as SLT rather than UTC time
+    -> group notice times in the group floater shown as SLT rather than local time
+    -> timezone indicator was added to help point out the difference to new Catznip users:
+        Before: Saved Mon Aug 19 14:50:10 2013
+        After : Saved Mon Aug 19 2013 05:50:10 PDT
+
+[Chat/Misc]
+- added   : "Teleport" option on the chiclet context menu
+    -> added a separator between session type specific options and the shared "Show Session" and "End Session" options
+- added   : "Eject from Group" option on the participant context menu
+    -> if group membership isn't currently available, it will enable if the proper ability is set from the group
+    -> if group membership is available, it will enable as long as the selected avatar is only a member of "Everyone"
+    -> if the agent doesn't appear to be a member of the group the active group session is checked since group membership might be stale
+- added   : "IMShowTabImage" debug setting to toggle showing an avatar/group image on legacy IM tabs
+- added   : "NameTagShowTyping" debug setting to show an avatar's typing status in their name tag
+- added   : "ChatTimestampSeconds" debug setting to show and log seconds in the chat history and chat logs timestamp
+- changed : show the name of the currently selected conversation in the conversations floater's title
+- fixed   : typing an (unhandled) printable character anywhere in the nearby chat or IM floater should set focus to the chat editor
+- fixed   : don't open the conversations floater when closing an IM from the chiclet context menu
+- fixed   : Ctrl-Up or Ctrl-Down in a line editor should set the cursor to the end of the history line (not the beginning)
+    -> in CHUI LLChatEntry is used, but the region debug console still has a line editor with history enabled so we keep the fix
