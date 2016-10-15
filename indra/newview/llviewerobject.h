@@ -819,6 +819,10 @@ public:
 	const LLUUID &getAttachmentItemID() const;
 	void setAttachmentItemID(const LLUUID &id);
 	const LLUUID &extractAttachmentItemID(); // find&set the inventory item ID of the attached object
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32 getAttachmentComplexity() const { return mAttachmentComplexity; }
+	void setAttachmentComplexity(U32 nCost) { mAttachmentComplexity = nCost; }
+// [/SL:KB]
 	EObjectUpdateType getLastUpdateType() const;
 	void setLastUpdateType(EObjectUpdateType last_update_type);
 	BOOL getLastUpdateCached() const;
@@ -826,6 +830,9 @@ public:
 
 private:
 	LLUUID mAttachmentItemID; // ItemID of the associated object is in user inventory.
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32 mAttachmentComplexity;
+// [/SL:KB]
 	EObjectUpdateType	mLastUpdateType;
 	BOOL	mLastUpdateCached;
 };

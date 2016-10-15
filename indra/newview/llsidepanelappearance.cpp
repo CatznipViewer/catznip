@@ -32,6 +32,9 @@
 #include "llagentcamera.h"
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+#include "llavatarrendernotifier.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfolderview.h"
 #include "llinventorypanel.h"
@@ -89,6 +92,12 @@ LLSidepanelAppearance::LLSidepanelAppearance() :
 
 LLSidepanelAppearance::~LLSidepanelAppearance()
 {
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+	if (mComplexityChangedSlot.connected())
+	{
+		mComplexityChangedSlot.disconnect();
+	}
+// [/SL:KB]
 }
 
 // virtual
@@ -144,6 +153,16 @@ BOOL LLSidepanelAppearance::postBuild()
 
 	setVisibleCallback(boost::bind(&LLSidepanelAppearance::onVisibilityChanged,this,_2));
 
+// [SL:KB] - Patch: Appearance-Outfits | Checked: 2012-08-08 (Catznip-3.3)
+	setWearablesLoading(!gAgentWearables.areWearablesLoaded());
+// [/SL:KB]
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+	if (!mComplexityChangedSlot.connected())
+	{
+		mComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLSidepanelAppearance::updateComplexityTitle, this));
+	}
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -179,7 +198,30 @@ void LLSidepanelAppearance::onOpen(const LLSD& key)
 	}
 
 	mOpened = true;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+	updateComplexityTitle();
+// [/SL:KB]
 }
+
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.1
+void LLSidepanelAppearance::updateComplexityTitle()
+{
+	if (!isInVisibleChain())
+		return;
+
+	// NOTE: this is a rather bad hack since it usurps the floater's title (and assumes it will never change during its lifetime)
+	LLFloater* pFloater = getParentByType<LLFloater>();
+	if (pFloater)
+	{
+		if (mFloaterTitle.empty())
+			mFloaterTitle = pFloater->getTitle();
+
+		LLStringUtil::format_map_t args;
+		args["[COMPLEXITY]"] = std::to_string(gAgentAvatarp->getVisualComplexity());
+		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), getString("Complexity", args)));
+	}
+}
+// [/SL:KB]
 
 void LLSidepanelAppearance::onVisibilityChanged(const LLSD &new_visibility)
 {

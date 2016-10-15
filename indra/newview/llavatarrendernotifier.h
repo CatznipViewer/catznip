@@ -47,6 +47,15 @@ public:
     void updateNotificationState();
 	void updateNotificationAgent(U32 agentComplexity);
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	typedef boost::signals2::signal<void(U32, U32)> complexity_changed_signal_t;
+	boost::signals2::connection addComplexityChangedCallback(const complexity_changed_signal_t::slot_type& cb) { return mComplexityChangedSignal.connect(cb); }
+	void                        notifyComplexityChanged(U32 oldScore, U32 newScore) { mComplexityChangedSignal(oldScore, newScore); }
+	void                        removeComplexityChangedCallback(boost::signals2::connection callback) { mComplexityChangedSignal.disconnect(callback); }
+protected:
+	complexity_changed_signal_t mComplexityChangedSignal;
+// [/SL:KB]
+
 private:
 
 	LLNotificationPtr mNotificationPtr;

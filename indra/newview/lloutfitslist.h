@@ -33,7 +33,10 @@
 // newview
 #include "llinventorymodel.h"
 #include "lllistcontextmenu.h"
-#include "llpanelappearancetab.h"
+//#include "llpanelappearancetab.h"
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-3.0
+#include "llpaneloutfitstab.h"
+// [/SL:KB]
 #include "lltoggleablemenu.h"
 #include "llviewermenu.h"
 
@@ -60,11 +63,14 @@ public:
 	/*virtual*/ bool compare(const LLAccordionCtrlTab* tab1, const LLAccordionCtrlTab* tab2) const;
 };
 
-class LLOutfitListBase : public LLPanelAppearanceTab
+//class LLOutfitListBase : public LLPanelAppearanceTab
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+class LLOutfitListBase : public LLPanelOutfitsTab
+// [/SL:KB]
 {
 public:
-    typedef boost::function<void(const LLUUID&)> selection_change_callback_t;
-    typedef boost::signals2::signal<void(const LLUUID&)> selection_change_signal_t;
+//    typedef boost::function<void(const LLUUID&)> selection_change_callback_t;
+//    typedef boost::signals2::signal<void(const LLUUID&)> selection_change_signal_t;
 
     LLOutfitListBase();
     virtual ~LLOutfitListBase();
@@ -85,15 +91,25 @@ public:
     virtual void updateChangedCategoryName(LLViewerInventoryCategory *cat, std::string name) = 0;
     virtual void sortOutfits();
 
-    void removeSelected();
-    void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	void removeSelected() override;
+	void setSelectedOutfitByUUID(const LLUUID& outfit_uuid) override;
+// [/SL:KB]
+//    void removeSelected();
+//    void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
     const LLUUID& getSelectedOutfitUUID() const { return mSelectedOutfitUUID; }
-    boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb) override;
+// [/SL:KB]
+//    boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
     void outfitRightClickCallBack(LLUICtrl* ctrl, S32 x, S32 y, const LLUUID& cat_id);
 
     virtual bool isActionEnabled(const LLSD& userdata);
-    virtual void performAction(std::string action);
-    virtual bool hasItemSelected() = 0;
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	void performAction(std::string action) override;
+// [/SL:KB]
+//    virtual void performAction(std::string action);
+//    virtual bool hasItemSelected() = 0;
     virtual bool canWearSelected() = 0;
 
     virtual void deselectOutfit(const LLUUID& category_id);
@@ -233,7 +249,10 @@ public:
 	/*virtual*/ void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const;
 
     // Collects selected items from all selected lists and wears them(if possible- adds, else replaces)
-	void wearSelectedItems();
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-2.4
+	void wearSelectedItems() override;
+// [/SL:KB]
+//	void wearSelectedItems();
 
 	/**
 	 * Returns true if there is a selection inside currently selected outfit

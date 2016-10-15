@@ -571,7 +571,10 @@ void LLOutfitGallery::onChangeOutfitSelection(LLWearableItemsList* list, const L
     }
 }
 
-void LLOutfitGallery::wearSelectedOutfit()
+//void LLOutfitGallery::wearSelectedOutfit()
+// [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: Catznip-4.0
+void LLOutfitGallery::wearSelectedItems()
+// [/SL:KB]
 {
     LLAppearanceMgr::instance().replaceCurrentOutfit(getSelectedOutfitUUID());
 }

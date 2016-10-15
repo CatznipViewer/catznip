@@ -36,6 +36,13 @@ class LLInventoryCategoriesObserver;
 class LLListContextMenu;
 class LLWearableItemsList;
 class LLWearingGearMenu;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+class LLWornItemsList;
+class LLInventoryPanel;
+class LLMenuButton;
+class LLWearingSortMenu;
+class LLSaveFolderState;
+// [/SL:KB]
 
 /**
  * @class LLPanelWearing
@@ -62,16 +69,49 @@ public:
 
 	/*virtual*/ void copyToClipboard();
 
-	boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	typedef boost::signals2::signal<void()> selection_change_signal_t;
+	boost::signals2::connection setSelectionChangeCallback(selection_change_signal_t::slot_type cb);
+// [/SL:KB]
+//	boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
 
 	bool hasItemSelected();
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
+	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
+
+	void onTakeOffClicked();
+	void onTakeOffFolderClicked();
+protected:
+	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
+	void onToggleWearingView(EWearingView eView);
+
+	bool createInventoryPanel();
+// [/SL:KB]
+
 private:
 	void onWearableItemsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
+	void onSelectionChange();
+// [/SL:KB]
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
-	LLWearableItemsList* 			mCOFItemsList;
+//	LLWearableItemsList* 			mCOFItemsList;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	boost::signals2::connection		mComplexityChangedSlot;
+	selection_change_signal_t		mSelectionSignal;
+	LLWornItemsList*				mCOFItemsList;
+	LLInventoryPanel*				mInvPanel;
+	LLSaveFolderState*				mSavedFolderState;
+	LLMenuButton*					mSortMenuButton;
+	LLButton*						mToggleFolderView;
+	LLButton*						mToggleListView;
+// [/SL:KB]
 	LLWearingGearMenu*				mGearMenu;
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	LLWearingSortMenu*				mSortMenu;
+// [/SL:KB]
 	LLListContextMenu*				mContextMenu;
 
 	bool							mIsInitialized;

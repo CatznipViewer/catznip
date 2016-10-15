@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- background_visible="true"
+ background_visible="false"
  bg_alpha_color="DkGray"
  follows="all"
- height="430"
+ height="425"
  layout="topleft"
  left="0"
  name="Wearing"
  top="0"
- width="312">
-    <wearable_items_list
+ width="300">
+    <wearing_items_list
      follows="all"
      height="400"
      layout="topleft"
-     left="3"
+     left="0"
      multi_select="true"
      name="cof_items_list"
      standalone="false"
      top="0"
-     width="309"
-     worn_indication_enabled="false" />
+     width="300"
+     worn_indication_enabled="true" />
     <panel
-     background_visible="true"
-     follows="bottom|left|right"
-     height="28"
+     follows="all"
+     height="400"
      layout="topleft"
-     left="4"
+     left="0"
+     name="wearing_invpanel_placeholder" 
+     top="0"
+     visible="false"
+     width="300" /> 
+    <panel
+     background_visible="false"
+     follows="bottom|left|right"
+     height="25"
+     layout="topleft"
+     left="0"
      name="bottom_panel"
      top_pad="0"
-     width="312">
+     width="300">
         <menu_button
          follows="bottom|left"
          height="25"
@@ -37,18 +46,102 @@
          image_selected="Toolbar_Left_Selected"
          image_unselected="Toolbar_Left_Off"
          layout="topleft"
-         left="0"
+         left="1"
          name="options_gear_btn"
          tool_tip="Show additional options"
-         top="1"
+         top="0"
+         width="31" />
+        <menu_button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Conv_toolbar_sort"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="options_sort_btn"
+         tool_tip="Show sorting options"
+         width="31" />
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Hierarchy_View_On"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         is_toggle="true"
+         layout="topleft"
+         left_pad="1"
+         name="folder_view_btn"
+         tool_tip="Switch to inventory view"
+         width="31" />
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="List_View_On"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         is_toggle="true"
+         layout="topleft"
+         left_pad="1"
+         name="list_view_btn"
+         tool_tip="Switch to list view"
          width="31" />
         <icon
          follows="bottom|left|right"
          height="25"
-         image_name="Toolbar_Right_Off"
+         image_name="Toolbar_Middle_Off"
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="274" />
+         width="44" />
+        <flyout_button
+         arrow_button_width="18"
+         follows="bottom|right"
+         height="25"
+         halign="left"
+         label="Save As"
+         layout="topleft"
+         left_pad="1"
+         name="save_btn"
+         tool_tip="Save current outfit"
+         width="94">
+            <flyout_button.item
+             label="Save"
+             value="save_outfit" />
+            <flyout_button.item
+             label="Save As..."
+             value="save_as_new_outfit" />
+            <flyout_button.action_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Command_Inventory_Icon"
+             image_overlay_alignment="left"
+             image_bottom_pad="1"
+             imgoverlay_label_space="4"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="transparent.j2c" />
+            <flyout_button.drop_down_button
+             image_hover_unselected="Toolbar_Middle_Over"
+             image_overlay="Arrow_Small_Down"
+             image_overlay_alignment="right"
+             image_selected="Toolbar_Middle_Selected"
+             image_unselected="Toolbar_Middle_Off"
+             image_pressed="none" 
+             pad_right="-2" />
+        </flyout_button>
+        <button
+         follows="bottom|right"
+         height="25"
+         image_hover_unselected="Toolbar_Right_Over"
+         image_overlay="Icon_Close_Toast"
+         image_selected="Toolbar_Right_Selected"
+         image_unselected="Toolbar_Right_Off"
+         layout="topleft"
+         left_pad="1"
+         name="take_off_btn"
+         tool_tip="Take off selection"
+         width="31" />
     </panel>
 </panel>

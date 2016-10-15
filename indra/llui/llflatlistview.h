@@ -299,6 +299,10 @@ public:
 
 	virtual S32	notify(const LLSD& info) ;
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
+	void notifyItems(const LLSD& sdInfo);
+// [/SL:KB]
+
 protected:
 
 	/** Pairs LLpanel representing a single item LLPanel and LLSD associated with it */
@@ -480,6 +484,9 @@ public:
 	 * Sets up new filter string and filters the list.
 	 */
 	void setFilterSubString(const std::string& filter_str);
+// [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
+	const std::string& getFilterSubString() { return mFilterSubString; }
+// [/SL:KB]
 	
 	/**
 	 * Filters the list, rearranges and notifies parent about shape changes.

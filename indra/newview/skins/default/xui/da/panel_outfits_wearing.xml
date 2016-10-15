@@ -2,5 +2,7 @@
 <panel name="Wearing">
 	<panel name="bottom_panel">
 		<button name="options_gear_btn" tool_tip="Vis yderligere valgmuligheder"/>
+		<icon name="dummy_icon" width="50" />
+		<flyout_button name="save_btn" label="Gem som" width="100" />
 	</panel>
 </panel>

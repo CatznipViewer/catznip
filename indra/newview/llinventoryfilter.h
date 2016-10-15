@@ -57,7 +57,12 @@ public:
         FILTERTYPE_MARKETPLACE_INACTIVE = 0x1 << 7,		// pass if folder is a marketplace inactive folder
         FILTERTYPE_MARKETPLACE_UNASSOCIATED = 0x1 << 8,	// pass if folder is a marketplace non associated (no market ID) folder
         FILTERTYPE_MARKETPLACE_LISTING_FOLDER = 0x1 << 9,	// pass iff folder is a listing folder
-        FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10         // pass iff folder is not under the marketplace
+//        FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10         // pass iff folder is not under the marketplace
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+		FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10,		// pass iff folder is not under the marketplace
+		FILTERTYPE_WORN = 0x1 << 11		// filter by worn status
+// [/SL:KB]
+
 	};
 
 	enum EFilterDateDirection
@@ -176,6 +181,9 @@ public:
 	void 				setFilterUUID(const LLUUID &object_id);
 	void				setFilterWearableTypes(U64 types);
 	void				setFilterEmptySystemFolders();
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+	void				setFilterWorn(bool filter);
+// [/SL:KB]
 	void				setFilterMarketplaceActiveFolders();
 	void				setFilterMarketplaceInactiveFolders();
 	void				setFilterMarketplaceUnassociatedFolders();
@@ -201,7 +209,10 @@ public:
 	void				setDateSearchDirection(U32 direction);
 	U32					getDateSearchDirection() const;
 
-	void 				setFilterLinks(U64 filter_link);
+//	void 				setFilterLinks(U64 filter_link);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	void 				setFilterLinks(U64 filter_link, bool substring_reset);
+// [/SL:KB]
 	U64					getFilterLinks() const;
 
 	// sets params for Link-only search and backs up search settings for future restoration
@@ -285,6 +296,9 @@ private:
 
 	std::string				mFilterSubString;
 	std::string				mFilterSubStringOrig;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
+	bool					mFilterSubStringResetFilterLinks;		// True if a change to the sub string should reset filter links
+// [/SL:KB]
 	const std::string		mName;
 
 	S32						mCurrentGeneration;
