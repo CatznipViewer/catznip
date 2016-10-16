@@ -1895,6 +1895,17 @@
       <key>Value</key>
       <string>default</string>
     </map>
+    <key>ChatAlerts</key>
+    <map>
+      <key>Comment</key>
+      <string>Enable chat keyword alerts for nearby chat and instant messages</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>ChatBarStealsFocus</key>
     <map>
       <key>Comment</key>
@@ -2014,7 +2025,18 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>ChatTimestampSeconds</key>
+    <map>
+      <key>Comment</key>
+      <string>Include seconds in the timestamps for chat (nearby chat and instant messages)</string>
+      <key>Persist</key>
       <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>CheesyBeacon</key>
     <map>
@@ -4983,10 +5005,32 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>IMShowControlPanel</key>
+    <key>IMShowControlPanelGroup</key>
     <map>
       <key>Comment</key>
-      <string>Show IM Control Panel</string>
+      <string>Show the control panel for group sessions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>IMShowControlPanelNearby</key>
+    <map>
+      <key>Comment</key>
+      <string>Show control panel for nearby chat</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>IMShowControlPanelP2P</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the control panel for P2P sessions</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -5004,6 +5048,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>IMShowTabImage</key>
+    <map>
+      <key>Comment</key>
+      <string>Show avatar/group image on the IM tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>IMUseSeparateFloaters</key>
     <map>
@@ -7229,89 +7284,71 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
-    <key>NotificationConferenceIMOptions</key>
-    <map>
-      <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Conference IM Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>toast</string>
-    </map>
-    <key>NotificationFriendIMOptions</key>
-    <map>
-      <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Friend IM Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>toast</string>
-    </map>
-    <key>NotificationGroupChatOptions</key>
-    <map>
-      <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Group Chat Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>toast</string>
-    </map>
     <key>NotificationNearbyChatOptions</key>
     <map>
       <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Nearby Chat Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
+      <string>Specifies how the UI responds to nearby chat messages</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
-      <string>String</string>
+      <string>U32</string>
       <key>Value</key>
-      <string>toast</string>
-    </map>
-    <key>NotificationNonFriendIMOptions</key>
-    <map>
-      <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Non Friend IM Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>toast</string>
+      <integer>3</integer>
     </map>
     <key>NotificationObjectIMOptions</key>
     <map>
       <key>Comment</key>
-      <string>
-        Specifies how the UI responds to Object IM Notifications.
-        Allowed values: [openconversations,toast,flash,noaction]
-      </string>
+      <string>Specifies how the UI responds to object chat and object messages</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
-      <string>String</string>
+      <string>U32</string>
       <key>Value</key>
-      <string>toast</string>
+      <integer>3</integer>
+    </map>  
+    <key>NotificationIMP2PToast</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies whether chat toasts are shown when receiving IMs from friends or non-friends</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>  
+    <key>NotificationIMP2PFlash</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies whether the toolbar button will flash when receiving IMs from friends or non-friends</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>  
+    <key>NotificationIMMultiToast</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies whether chat toasts are shown when receiving IMs from groups or conferences</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
+    <key>NotificationIMMultiFlash</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies whether the toolbar button will flash when receiving IMs from groups or conferences</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>NotificationToastLifeTime</key>
     <map>
@@ -7897,73 +7934,73 @@
     <key>PlaySoundInventoryOffer</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when have an inventory offer.</string>
+      <string>Play a sound when receiving an inventory offer</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>0</boolean>
     </map>
     <key>PlaySoundFriendIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when friend's IM received.</string>
+      <string>Play a sound on an incoming IM from a friend</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNonFriendIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when non-friend's IM received.</string>
+      <string>Play a sound on an incoming IM from a non-friend</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundConferenceIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when conference IM received.</string>
+      <string>Play a sound on an incoming conference IM</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundGroupChatIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when group chat IM received.</string>
+      <string>Play a sound on an incoming group chat IM</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundNearbyChatIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when nearby chat IM received.</string>
+      <string>Play a sound when an avatar talks in nearby chat</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>PlaySoundObjectIM</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when IM fom an object received.</string>
+      <string>Play a sound when IM fom an object received.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7974,7 +8011,7 @@
     <key>PlaySoundNewConversation</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when have a new conversation.</string>
+      <string>Play a sound when have a new conversation.</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
@@ -7985,13 +8022,46 @@
     <key>PlaySoundTeleportOffer</key>
     <map>
       <key>Comment</key>
-      <string>Plays a sound when have a teleport offer.</string>
+      <string>Play a sound when receiving a teleport offer</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
+    </map>
+    <key>PlaySoundGroupNotice</key>
+    <map>
+      <key>Comment</key>
+      <string>Play a sound when receiving a group notice</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
+    <key>PlaySoundScriptPermission</key>
+    <map>
+      <key>Comment</key>
+      <string>Play a sound when receiving a script permission request (e.g. animate permission)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
+    <key>PlaySoundRegionRestart</key>
+    <map>
+      <key>Comment</key>
+      <string>Play a sound when the region you're on is restaring</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>PluginAttachDebuggerToPlugins</key>
     <map>
@@ -10138,6 +10208,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>NameTagShowTyping</key>
+    <map>
+      <key>Comment</key>
+      <string>Show typing indicator in avatar name tags</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>NameTagShowUsernames</key>
     <map>
@@ -13556,6 +13637,160 @@
       <string>String</string>
       <key>Value</key>
       <string>c80260ba-41fd-8a46-768a-6bf236360e3a</string>
+    </map>
+    <key>UISndEventChatAgent</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming nearby chat from an agent</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventConvFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>New non-friend conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvConference</key>
+    <map>
+      <key>Comment</key>
+      <string>New conference conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventConvGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>New group conversation sound</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventIMFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMNonFriend</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a non-friend</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMConference</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a conference</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventIMGroup</key>
+    <map>
+      <key>Comment</key>
+      <string>Incoming IM from a group</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventTeleportOffer</key>
+    <map>
+      <key>Comment</key>
+      <string>Sound played when receiving a teleport offer</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventInventoryOffer</key>
+    <map>
+      <key>Comment</key>
+      <string>Sound played when receiving an inventory offer</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndNewIncomingIMSession</string>
+    </map>
+    <key>UISndEventGroupNotice</key>
+    <map>
+      <key>Comment</key>
+      <string>Sound played when receiving a group notice</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventScriptPermission</key>
+    <map>
+      <key>Comment</key>
+      <string>Sound played when a script is requestion permissions</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string/>
+    </map>
+    <key>UISndEventRegionRestart</key>
+    <map>
+      <key>Comment</key>
+      <string>Suond played when the current region is restarting</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>UISndRestart</string>
     </map>
     <key>UISpinctrlBtnHeight</key>
     <map>

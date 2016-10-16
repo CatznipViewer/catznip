@@ -993,7 +993,10 @@ void LLButton::setToggleState(BOOL b)
 	}
 }
 
-void LLButton::setFlashing(bool b, bool force_flashing/* = false */)
+//void LLButton::setFlashing(bool b, bool force_flashing/* = false */)
+// [SL:KB] - Patch: Control-Button | Checked: 2014-03-22 (Catznip-3.6)
+void LLButton::setFlashing(bool b, bool force_flashing, bool flash_timer)
+// [/SL:KB]
 { 
 	mForceFlashing = force_flashing;
 // [SL:KB] - Patch: Control-Button | Checked: 2013-05-11 (Catznip-3.5)
@@ -1007,7 +1010,13 @@ void LLButton::setFlashing(bool b, bool force_flashing/* = false */)
 	if (mFlashingTimer)
 	{
 		mFlashing = b; 
-		(b ? mFlashingTimer->startFlashing() : mFlashingTimer->stopFlashing());
+// [SL:KB] - Patch: Control-Button | Checked: 2014-03-22 (Catznip-3.6)
+		if ( (b) && (flash_timer) )
+			mFlashingTimer->startFlashing();
+		else
+			mFlashingTimer->stopFlashing();
+// [/SL:KB]
+//		(b ? mFlashingTimer->startFlashing() : mFlashingTimer->stopFlashing());
 	}
 //	else if (b != mFlashing)
 //	{

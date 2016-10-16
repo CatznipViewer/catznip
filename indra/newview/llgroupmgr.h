@@ -99,6 +99,10 @@ public:
 	void clearRoles() { mRolesList.clear(); };
 	role_list_t::iterator roleBegin() { return mRolesList.begin(); }
 	role_list_t::iterator roleEnd() { return mRolesList.end(); }
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+	role_list_t::const_iterator roleBegin() const { return mRolesList.begin(); }
+	role_list_t::const_iterator roleEnd() const { return mRolesList.end(); }
+// [/SL:KB]
 
 	BOOL isInRole(const LLUUID& role_id) { return (mRolesList.find(role_id) != mRolesList.end()); }
 
@@ -253,10 +257,16 @@ public:
 	void recalcAllAgentPowers();
 	void recalcAgentPowers(const LLUUID& agent_id);
 
-	bool isMemberDataComplete() { return mMemberDataComplete; }
-	bool isRoleDataComplete() { return mRoleDataComplete; }
-	bool isRoleMemberDataComplete() { return mRoleMemberDataComplete; }
-	bool isGroupPropertiesDataComplete() { return mGroupPropertiesDataComplete; }
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+	bool isMemberDataComplete() const { return mMemberDataComplete; }
+	bool isRoleDataComplete() const { return mRoleDataComplete; }
+	bool isRoleMemberDataComplete() const { return mRoleMemberDataComplete; }
+	bool isGroupPropertiesDataComplete() const { return mGroupPropertiesDataComplete; }
+// [/SL:KB]
+//	bool isMemberDataComplete() { return mMemberDataComplete; }
+//	bool isRoleDataComplete() { return mRoleDataComplete; }
+//	bool isRoleMemberDataComplete() { return mRoleMemberDataComplete; }
+//	bool isGroupPropertiesDataComplete() { return mGroupPropertiesDataComplete; }
 
 	bool isSingleMemberNotOwner();
 
@@ -399,8 +409,11 @@ public:
 
 	static void sendGroupMemberJoin(const LLUUID& group_id);
 	static void sendGroupMemberInvites(const LLUUID& group_id, std::map<LLUUID,LLUUID>& role_member_pairs);
-	static void sendGroupMemberEjects(const LLUUID& group_id,
-									  uuid_vec_t& member_ids);
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+	static void sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t& member_ids);
+// [/SL:KB]
+//	static void sendGroupMemberEjects(const LLUUID& group_id,
+//									  uuid_vec_t& member_ids);
 	
 	void sendGroupBanRequest(EBanRequestType request_type, 
 									const LLUUID& group_id,	

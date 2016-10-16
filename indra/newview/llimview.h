@@ -180,6 +180,18 @@ public:
 	session_signal_t mNewMsgSignal;
 	session_signal_t mNoUnreadMsgsSignal;
 	
+// [SL:KB] - Patch: Chat-MessageOptions | Checked: 2014-03-23 (Catznip-3.6)
+	enum EChatMessageOptions
+	{
+		MSGOPT_NONE  = 0x00,
+		MSGOPT_FLASH = 0x01,	// Flash the appropriate toolbar
+		MSGOPT_TOAST = 0x02,	// Show a toast for the message
+		MSGOPT_POPUP = 0x04		// Pop up the matching floater
+	};
+
+	static U32 getMessageOptions(const LLIMModel::LLIMSession* pSession, LLUUID* pidSound);
+// [/SL:KB]
+
 	/** 
 	 * Find an IM Session corresponding to session_id
 	 * Returns NULL if the session does not exist
@@ -232,6 +244,8 @@ public:
 	 */
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
 	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, const std::string& time = LLLogChat::timestamp(false), bool log2file = true);
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true, bool trigger_sound = true);
 // [/SL:KB]
 //	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
 
@@ -420,8 +434,11 @@ public:
 		const std::string& session_handle = LLStringUtil::null,
 		const std::string& session_uri = LLStringUtil::null);
 
-	void processIMTypingStart(const LLIMInfo* im_info);
-	void processIMTypingStop(const LLIMInfo* im_info);
+// [SL:KB] - Patch: Chat-Typing | Checked: 2014-02-19 (Catznip-3.7)
+	void processIMTyping(const LLUUID& session_id, bool typing);
+// [/SL:KB]
+//	void processIMTypingStart(const LLIMInfo* im_info);
+//	void processIMTypingStop(const LLIMInfo* im_info);
 
 	// automatically start a call once the session has initialized
 	void autoStartCallOnStartup(const LLUUID& session_id);
@@ -506,7 +523,7 @@ private:
 	void noteOfflineUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
 	void noteMutedUsers(const LLUUID& session_id, const std::vector<LLUUID>& ids);
 
-	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
+//	void processIMTypingCore(const LLIMInfo* im_info, BOOL typing);
 
 	static void onInviteNameLookup(LLSD payload, const LLUUID& id, const std::string& name, bool is_group);
 

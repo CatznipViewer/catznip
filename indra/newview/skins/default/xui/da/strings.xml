@@ -572,6 +572,9 @@ Prøv venligst om lidt igen.
 	<string name="AvatarMuted">
 		Blokeret
 	</string>
+	<string name="AvatarTyping">
+		Skrivende
+	</string>
 	<string name="anim_express_afraid">
 		Bange
 	</string>

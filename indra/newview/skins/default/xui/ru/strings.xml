@@ -768,6 +768,9 @@ support@secondlife.com.
 	<string name="AvatarMuted">
 		В черном списке
 	</string>
+	<string name="AvatarTyping">
+		Печатают
+	</string>
 	<string name="anim_express_afraid">
 		Страх
 	</string>

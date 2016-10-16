@@ -59,6 +59,13 @@ public:
 	 */
 	static void show(const LLUUID& group_id);
 
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+	/**
+	 * Show group information panel.
+	 */
+	static void showNotices(const LLUUID& group_id) {}
+// [/SL:KB]
+
 	/**
 	 * Show group inspector floater.
 	 */
@@ -101,6 +108,11 @@ public:
 	/// Returns if the current user is a member of the group
 	static bool isInGroup(const LLUUID& group_id);
 
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+	/// Returns true if the current user has the specified power in the group
+	static bool hasPowerInGroup(const LLUUID& group_id, U64 power) { return true; }
+// [/SL:KB]
+
 	/**
 	 * Start a group voice call.
 	 */
@@ -116,9 +128,9 @@ public:
 	static bool isAvatarMemberOfGroup(const LLUUID& group_id, const LLUUID& avatar_id);
 	
 // [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
-	static bool canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent) { return true; }
-	static void ejectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent) {}
-	static void ejectFromGroup(const LLUUID& idGroup, const uuid_vec_t& idAgents) {}
+	static bool canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent);
+	static void ejectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent);
+	static void ejectFromGroup(const LLUUID& idGroup, const uuid_vec_t& idAgents);
 // [/SL:KB]
 
 private:

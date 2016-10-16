@@ -71,6 +71,10 @@ public:
 	 */
 	void update();
 
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-02-24(Catznip-3.6)
+	void initInitialSpeakers();
+// [/SL:KB]
+
 	/**
 	 * Set a callback to be called before adding a speaker. Invalid speakers will not be added.
 	 *

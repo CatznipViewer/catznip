@@ -48,6 +48,10 @@
 #include "llpanelgroup.h"
 #include "llgroupactions.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2.1)
+#include "llimview.h"
+#include "llspeakers.h"
+// [/SL:KB]
 #include "lluictrlfactory.h"
 #include "lltrans.h"
 #include "llviewerregion.h"
@@ -1863,8 +1867,28 @@ void LLGroupMgr::sendGroupMemberInvites(const LLUUID& group_id, std::map<LLUUID,
 }
 
 //static
-void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id,
-									   uuid_vec_t& member_ids)
+//void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id,
+//									   uuid_vec_t& member_ids)
+//{
+//	bool start_message = true;
+//	LLMessageSystem* msg = gMessageSystem;
+//
+//	LLGroupMgrGroupData* group_datap = LLGroupMgr::getInstance()->getGroupData(group_id);
+//	if (!group_datap) return;
+//
+//	for (uuid_vec_t::iterator it = member_ids.begin();
+//		 it != member_ids.end(); ++it)
+//	{
+//		LLUUID& ejected_member_id = (*it);
+//
+//		// Can't use 'eject' to leave a group.
+//		if (ejected_member_id == gAgent.getID()) continue;
+//
+//		// Make sure they are in the group, and we need the member data
+//		LLGroupMgrGroupData::member_list_t::iterator mit = group_datap->mMembers.find(ejected_member_id);
+//		if (mit != group_datap->mMembers.end())
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t& member_ids)
 {
 	bool start_message = true;
 	LLMessageSystem* msg = gMessageSystem;
@@ -1872,17 +1896,26 @@ void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id,
 	LLGroupMgrGroupData* group_datap = LLGroupMgr::getInstance()->getGroupData(group_id);
 	if (!group_datap) return;
 
-	for (uuid_vec_t::iterator it = member_ids.begin();
-		 it != member_ids.end(); ++it)
+	for (uuid_vec_t::const_iterator it = member_ids.begin(); it != member_ids.end(); ++it)
 	{
-		LLUUID& ejected_member_id = (*it);
+		const LLUUID& ejected_member_id = (*it);
 
 		// Can't use 'eject' to leave a group.
 		if (ejected_member_id == gAgent.getID()) continue;
 
 		// Make sure they are in the group, and we need the member data
 		LLGroupMgrGroupData::member_list_t::iterator mit = group_datap->mMembers.find(ejected_member_id);
-		if (mit != group_datap->mMembers.end())
+		if (mit == group_datap->mMembers.end())
+		{
+			// Or check if they're listed in an active group session
+			LLIMSpeakerMgr* pSpeakerMgr = LLIMModel::instance().getSpeakerManager(LLIMMgr::computeSessionID(IM_SESSION_GROUP_START, group_id));
+			if ( (!pSpeakerMgr) || (pSpeakerMgr->findSpeaker(ejected_member_id).isNull()) )
+			{
+				continue;
+			}
+		}
+// [/SL:KB]
+
 		{
 			// Add them to the message
 			if (start_message)
@@ -1905,23 +1938,30 @@ void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id,
 				start_message = true;
 			}
 
-			LLGroupMemberData* member_data = (*mit).second;
-
-			// Clean up groupmgr
-			for (LLGroupMemberData::role_list_t::iterator rit = member_data->roleBegin();
-				 rit != member_data->roleEnd(); ++rit)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+			if (mit != group_datap->mMembers.end())
 			{
-				if ((*rit).first.notNull() && (*rit).second!=0)
+// [/SL:KB]
+				LLGroupMemberData* member_data = (*mit).second;
+
+				// Clean up groupmgr
+				for (LLGroupMemberData::role_list_t::iterator rit = member_data->roleBegin();
+					 rit != member_data->roleEnd(); ++rit)
 				{
-					(*rit).second->removeMember(ejected_member_id);
+					if ((*rit).first.notNull() && (*rit).second!=0)
+					{
+						(*rit).second->removeMember(ejected_member_id);
+					}
 				}
+			
+				group_datap->mMembers.erase(ejected_member_id);
+			
+				// member_data was introduced and is used here instead of (*mit).second to avoid crash because of invalid iterator
+				// It becomes invalid after line with erase above. EXT-4778
+				delete member_data;
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
 			}
-			
-			group_datap->mMembers.erase(ejected_member_id);
-			
-			// member_data was introduced and is used here instead of (*mit).second to avoid crash because of invalid iterator
-			// It becomes invalid after line with erase above. EXT-4778
-			delete member_data;
+// [/SL:KB]
 		}
 	}
 

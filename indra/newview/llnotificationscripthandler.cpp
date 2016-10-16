@@ -38,6 +38,9 @@
 #include "llfacebookconnect.h"
 #include "llavatarname.h"
 #include "llavatarnamecache.h"
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+#include "llviewerchat.h"
+// [/SL:KB]
 
 using namespace LLNotificationsUI;
 
@@ -83,6 +86,21 @@ void LLScriptHandler::addToastWithNotification(const LLNotificationPtr& notifica
 						||	notification->getName() == "GodMessage" 
 						|| notification->getPriority() >= NOTIFICATION_PRIORITY_HIGH;
 	}
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-23 (Catznip-3.7)
+	if ( ("ScriptQuestion" == notification->getName()) || ("ScriptQuestionCaution" == notification->getName()) )
+	{
+		bool playSound = (!notification->isDND()) && (gSavedSettings.getBOOL("PlaySoundScriptPermission"));
+		if (playSound)
+		{
+			const std::string& strSound = notification->getSound();
+			if (!strSound.empty())
+			{
+				make_ui_sound(LLViewerChat::getUISoundFromSetting(strSound));
+			}
+		}
+	}
+// [/SL:KB]
 
 	LLScreenChannel* channel = dynamic_cast<LLScreenChannel*>(mChannel.get());
 	if(channel)

@@ -6424,6 +6424,7 @@ Replaced missing clothing/body part with default.
    icon="groupnotify"
    name="GroupNotice"
    persist="true"
+   sound="UISndEventGroupNotice"
    type="groupnotify">
 Topic: [SUBJECT], Message: [MESSAGE]
     <tag>group</tag>
@@ -7363,7 +7364,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
    label="Inventory offer from [NAME_LABEL]"
    log_to_im ="true"
    type="offer"
-   sound="UISndNewIncomingIMSession">
+   sound="UISndEventInventoryOffer">
 [NAME_SLURL] has given you this [OBJECTTYPE]:
 [ITEM_SLURL]
     <form name="form">
@@ -7422,7 +7423,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
    log_to_im="true"
    log_to_chat="false"
    type="offer"
-   sound="UISndNewIncomingIMSession">
+   sound="UISndEventTeleportOffer">
 [NAME_SLURL] has offered to teleport you to their location:
 
 "[MESSAGE]”
@@ -7494,7 +7495,8 @@ However, this region contains content accessible to adults only.
    icon="notify.tga"
    name="TeleportRequest"
    log_to_im="true"
-   type="offer">
+   type="offer"
+   sound="UISndEventTeleportOffer">
 [NAME_SLURL] is requesting to be teleported to your location.
 [MESSAGE]
 
@@ -7717,6 +7719,7 @@ The item you are trying to wear uses a feature that your Viewer can&apos;t read.
    icon="notify.tga"
    name="ScriptQuestion"
    persist="true"
+   sound="UISndEventScriptPermission"
    type="notify">
 &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos;, an object owned by &apos;[NAME]&apos;, would like to:
 
@@ -7892,6 +7895,7 @@ Scripts associated with this experience will be able to do the following on regi
    name="ScriptQuestionCaution"
    priority="critical"
    persist="true"
+   sound="UISndEventScriptPermission"
    type="notify">
 Warning: The object &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos; wants total access to your Linden Dollars account. If you allow access, it can remove funds from your account at any time, or empty your account completely, on an ongoing basis with no additional warnings.
   

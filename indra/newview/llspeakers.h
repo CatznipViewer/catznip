@@ -73,7 +73,7 @@ public:
 	BOOL			mHasLeftCurrentCall;	// has this speaker left the current voice call?
 	LLColor4		mDotColor;
 	LLUUID			mID;
-	BOOL			mTyping;
+//	BOOL			mTyping;
 	S32				mSortIndex;
 	ESpeakerType	mType;
 	BOOL			mIsModerator;
@@ -231,7 +231,7 @@ public:
 // [/SL:KB]
 //	LLPointer<LLSpeaker> findSpeaker(const LLUUID& avatar_id);
 	void update(BOOL resort_ok);
-	void setSpeakerTyping(const LLUUID& speaker_id, BOOL typing);
+//	void setSpeakerTyping(const LLUUID& speaker_id, BOOL typing);
 	void speakerChatted(const LLUUID& speaker_id);
 	LLPointer<LLSpeaker> setSpeaker(const LLUUID& id, 
 					const std::string& name = LLStringUtil::null, 

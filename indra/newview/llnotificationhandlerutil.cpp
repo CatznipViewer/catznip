@@ -276,6 +276,9 @@ void LLHandlerUtil::addNotifPanelToIM(const LLNotificationPtr& notification)
 	// update IM floater and counters
 	LLSD arg;
 	arg["session_id"] = session_id;
+// [SL:KB] - Patch: Chat-Alerts | Checked: 2012-09-18 (Catznip-3.3)
+	arg["notification_id"] = notification->getID();
+// [/SL:KB]
 	arg["num_unread"] = ++(session->mNumUnread);
 	arg["participant_unread"] = ++(session->mParticipantUnreadMessageCount);
 	LLIMModel::getInstance()->mNewMsgSignal(arg);

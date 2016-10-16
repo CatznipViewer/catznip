@@ -954,10 +954,17 @@ bool LLNotification::hasFormElements() const
 	return mTemplatep->mForm->getNumElements() != 0;
 }
 
-void LLNotification::playSound()
-{ 
-    make_ui_sound(mTemplatep->mSoundName.c_str());
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
+std::string LLNotification::getSound() const
+{
+	return mTemplatep->mSoundName;
 }
+// [/SL:KB]
+
+//void LLNotification::playSound()
+//{ 
+//    make_ui_sound(mTemplatep->mSoundName.c_str());
+//}
 
 LLNotification::ECombineBehavior LLNotification::getCombineBehavior() const
 {

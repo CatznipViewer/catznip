@@ -36,6 +36,12 @@
 #include "llviewerregion.h"
 #include "llworld.h"
 #include "llinstantmessage.h" //SYSTEM_FROM
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+#include "llinventorymodel.h"
+#include "llinventoryobserver.h"
+#include "llui.h"
+#include "llviewerinventory.h"
+// [/SL:KB]
 
 // LLViewerChat
 LLViewerChat::font_change_signal_t LLViewerChat::sChatFontChangedSignal;
@@ -258,6 +264,69 @@ std::string LLViewerChat::getSenderSLURL(const LLChat& chat, const LLSD& args)
 
 	return LLStringUtil::null;
 }
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-20 (Catznip-3.6)
+std::string LLViewerChat::SOUND_LOOKUP_SETTINGS[] =
+{
+	"UISndEventChatAgent",      // SND_CHAT_AGENT
+	"UISndEventConvFriend",     // SND_CONV_FRIEND
+	"UISndEventConvNonFriend",  // SND_CONV_NONFRIEND
+	"UISndEventConvConference", // SND_CONV_CONFERENCE
+	"UISndEventConvGroup",      // SND_CONV_GROUP
+	"UISndEventIMFriend",       // SND_IM_FRIEND
+	"UISndEventIMNonFriend",    // SND_IM_NONFRIEND
+	"UISndEventIMConference",   // SND_IM_CONFERENCE
+	"UISndEventIMGroup"         // SND_IM_GROUP
+};
+
+// static
+LLUUID LLViewerChat::getUISoundFromSetting(const std::string& strSetting)
+{
+	return getUISoundFromSettingsString(gSavedSettings.getString(strSetting));
+}
+
+// static
+LLUUID LLViewerChat::getUISoundFromSettingsString(const std::string& strSetting)
+{
+	// There are three possibilities:
+	//   * i|<uuid> => inventory item specified by UUID
+	//   * a|<uuid> => sound identified by asset UUID
+	//   * <other>  => sound identified by string name
+	// (The reason for this hackery is that selectByValue will use LLSD::asString to select by value so we can't use LLSD)
+	if ( (strSetting.length() > 2) && ('|' == strSetting[1]) )
+	{
+		const LLUUID idSound(strSetting.substr(2));
+		if ('a' == strSetting[0])
+		{
+			return idSound;
+		}
+		else if ('i' == strSetting[0])
+		{
+			const LLViewerInventoryItem* pItem = gInventory.getItem(idSound);
+			if (!pItem)
+			{
+				// NOTE: we're not hooking this up to a callback since there's no real way to tell how long it will take
+				//       so if the item isn't currently fetched, we'll likely miss the first play but manage the second
+				LLInventoryFetchItemsObserver* pItemFetch = new LLInventoryFetchItemsObserver(idSound);
+				pItemFetch->startFetch();
+				delete pItemFetch;
+				return LLUUID::null;
+			}
+			return pItem->getAssetUUID();
+		}
+		return LLUUID::null;
+	}
+	return (!strSetting.empty()) ? find_ui_sound(strSetting.c_str()) : LLUUID::null;
+}
+
+// static
+LLUUID LLViewerChat::getUISoundFromChatEvent(EChatEvent eEvent)
+{
+	if ( (eEvent >= 0) && (eEvent < SND_COUNT) )
+		return getUISoundFromSettingsString(gSavedSettings.getString(SOUND_LOOKUP_SETTINGS[eEvent]));
+	return LLUUID();
+}
+// [/SL:KB]
 
 //static
 std::string LLViewerChat::getObjectImSLURL(const LLChat& chat, const LLSD& args)

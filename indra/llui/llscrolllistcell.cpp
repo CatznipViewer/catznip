@@ -232,7 +232,12 @@ BOOL LLScrollListText::getVisible() const
 //virtual 
 S32 LLScrollListText::getHeight() const
 {
-	return mFont->getLineHeight();
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	S32 nIconHeight = (mIcon.notNull()) ? mIcon->getHeight() : 0;
+	S32 nLineHeight = mFont->getLineHeight();
+	return llmax(nIconHeight, nLineHeight);
+// [/SL:KB]
+//	return mFont->getLineHeight();
 }
 
 
@@ -243,7 +248,12 @@ LLScrollListText::~LLScrollListText()
 
 S32	LLScrollListText::getContentWidth() const
 {
-	return mFont->getWidth(mText.getString());
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	S32 nIconWidth = (mIcon.notNull()) ? mIcon->getWidth() + 5 : 0;
+	S32 nTextWidth = mFont->getWidth(mText.getString());
+	return nIconWidth + nTextWidth;
+// [/SL:KB]
+//	return mFont->getWidth(mText.getString());
 }
 
 
@@ -264,6 +274,18 @@ void LLScrollListText::setFontStyle(const U8 font_style)
 	new_desc.setStyle(font_style);
 	mFont = LLFontGL::getFont(new_desc);
 }
+
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+void LLScrollListText::setIcon(const LLUUID& idImage)
+{
+	mIcon = (idImage.notNull()) ? LLUI::getUIImageByID(idImage) : LLUIImagePtr(NULL);
+}
+
+void LLScrollListText::setIcon(const std::string& strImage)
+{
+	mIcon = (!strImage.empty()) ? LLUI::getUIImage(strImage) : LLUIImagePtr(NULL);
+}
+// [/SL:KB]
 
 //virtual
 void LLScrollListText::setValue(const LLSD& text)
@@ -290,19 +312,35 @@ void LLScrollListText::draw(const LLColor4& color, const LLColor4& highlight_col
 		display_color = color;
 	}
 
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	S32 nIconWidth = (mIcon.notNull()) ? mIcon->getWidth() + 5 : 0;
+// [/SL:KB]
+
 	if (mHighlightCount > 0)
 	{
-		S32 left = 0;
+//		S32 left = 0;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+		S32 left = nIconWidth;
+// [/SL:KB]
 		switch(mFontAlignment)
 		{
 		case LLFontGL::LEFT:
-			left = mFont->getWidth(mText.getString(), 0, mHighlightOffset);
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+			left += mFont->getWidth(mText.getString(), 0, mHighlightOffset);
+// [/SL:KB]
+//			left = mFont->getWidth(mText.getString(), 0, mHighlightOffset);
 			break;
 		case LLFontGL::RIGHT:
-			left = getWidth() - mFont->getWidth(mText.getString(), mHighlightOffset, S32_MAX);
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+			left += getWidth() - mFont->getWidth(mText.getString(), mHighlightOffset, S32_MAX);
+// [/SL:KB]
+//			left = getWidth() - mFont->getWidth(mText.getString(), mHighlightOffset, S32_MAX);
 			break;
 		case LLFontGL::HCENTER:
-			left = (getWidth() - mFont->getWidth(mText.getString())) / 2;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+			left += (getWidth() - mFont->getWidth(mText.getString())) / 2;
+// [/SL:KB]
+//			left = (getWidth() - mFont->getWidth(mText.getString())) / 2;
 			break;
 		}
 		LLRect highlight_rect(left - 2, 
@@ -312,20 +350,39 @@ void LLScrollListText::draw(const LLColor4& color, const LLColor4& highlight_col
 		mRoundedRectImage->draw(highlight_rect, highlight_color);
 	}
 
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	if (mIcon)
+	{
+		mIcon->draw(0, 0, LLColor4::white);
+	}
+// [/SL:KB]
+
 	// Try to draw the entire string
 	F32 right_x;
 	U32 string_chars = mText.length();
-	F32 start_x = 0.f;
+//	F32 start_x = 0.f;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+	F32 start_x = nIconWidth;
+// [/SL:KB]
 	switch(mFontAlignment)
 	{
 	case LLFontGL::LEFT:
-		start_x = 0.f;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+		start_x += 0.f;
+// [/SL:KB]
+//		start_x = 0.f;
 		break;
 	case LLFontGL::RIGHT:
-		start_x = (F32)getWidth();
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+		start_x += (F32)getWidth();
+// [/SL:KB]
+//		start_x = (F32)getWidth();
 		break;
 	case LLFontGL::HCENTER:
-		start_x = (F32)getWidth() * 0.5f;
+// [SL:KB] - Patch: Control-ScrollListIcon | Checked: 2013-11-20 (Catznip-3.6)
+		start_x += (F32)getWidth() * 0.5f;
+// [/SL:KB]
+//		start_x = (F32)getWidth() * 0.5f;
 		break;
 	}
 	mFont->render(mText.getWString(), 0, 
