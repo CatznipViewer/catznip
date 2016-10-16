@@ -66,6 +66,15 @@ void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_
 		return;
 	}
 
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2)
+	const LLUUID idSession = floaterp->getKey();
+	if (idSession.isNull())
+	{
+		// Re-insert the nearby chat floater at the start
+		insertion_point = LLTabContainer::START;
+	}
+// [/SL:KB]
+
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 	const LLUUID idSession = floaterp->getKey();
 

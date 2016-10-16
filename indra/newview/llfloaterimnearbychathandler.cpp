@@ -430,7 +430,10 @@ void LLFloaterIMNearbyChatScreenChannel::arrangeToasts()
 
 	S32 channel_bottom = channel_rect.mBottom;
 
-	S32		bottom = channel_bottom + 80;
+//	S32		bottom = channel_bottom + 80;
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-17 (Catznip-3.2)
+	S32		bottom = channel_bottom + gSavedSettings.getS32("NearbyToastOffset");
+// [/SL:KB]
 	S32		margin = gSavedSettings.getS32("ToastGap");
 
 	//sort active toasts
@@ -595,8 +598,12 @@ void LLFloaterIMNearbyChatHandler::initChannel()
 void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 									  const LLSD &args)
 {
-	if(chat_msg.mMuted == TRUE)
+//	if(chat_msg.mMuted == TRUE)
+//		return;
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
+	if ( (chat_msg.mMuted) && (!gSavedSettings.getBOOL("ShowBlockedChat")) )
 		return;
+// [/SL:KB]
 
 	if(chat_msg.mText.empty())
 		return;//don't process empty messages
@@ -680,6 +687,9 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 
 	if(chat_msg.mSourceType == CHAT_SOURCE_AGENT 
 		&& chat_msg.mFromID.notNull() 
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
+		&& !chat_msg.mMuted	
+// [/SL:KB]
 		&& chat_msg.mFromID != gAgentID)
 	{
  		LLFirstUse::otherAvatarChatFirst();
@@ -695,9 +705,6 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 	// Send event on to LLEventStream
 	sChatWatcher->post(chat);
 
-// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
-	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
-// [/SL:KB]
 //    LLFloaterIMContainer* im_box = LLFloaterReg::getTypedInstance<LLFloaterIMContainer>("im_container");
 
 	if((  ( chat_msg.mSourceType == CHAT_SOURCE_AGENT
@@ -707,6 +714,13 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 		&& nearby_chat->isMessagePaneExpanded())
 		// to prevent toasts in Do Not Disturb mode
 		return;//no need in toast if chat is visible or if bubble chat is enabled
+
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2012-01-11 (Catznip-3.2)
+	if (chat_msg.mMuted)
+	{
+		return;		// Don't show toasts for blocked chat
+	}
+// [/SL:KB]
 
 	// arrange a channel on a screen
 	if(!mChannel.get()->getVisible())
@@ -764,18 +778,26 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
 				}
 			}
 		}
-		//Don't show nearby toast, if conversation is visible and selected
-		if ((nearby_chat->hasFocus()) ||
-			(LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized()) ||
-		    ((im_box->getSelectedSession().isNull() && !chat_overlaps &&
-				((LLFloater::isVisible(im_box) && !nearby_chat->isTornOff() && !im_box->isMinimized())
-						|| (LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized())))))
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-21 (Catznip-3.6)
+		// Don't show nearby toasts if the nearby chat floater is currently visible and not minimized
+		if ( (nearby_chat->isMessagePaneExpanded()) && (nearby_chat->isInVisibleChain()) && 
+			 ( (nearby_chat->getHost()) ? !nearby_chat->getHost()->isMinimized() : !nearby_chat->isMinimized() ) )
 		{
-			if(nearby_chat->isMessagePaneExpanded())
-			{
-				return;
-			}
+			return;
 		}
+// [/SL:KB]
+//		//Don't show nearby toast, if conversation is visible and selected
+//		if ((nearby_chat->hasFocus()) ||
+//			(LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized()) ||
+//		    ((im_box->getSelectedSession().isNull() && !chat_overlaps &&
+//				((LLFloater::isVisible(im_box) && !nearby_chat->isTornOff() && !im_box->isMinimized())
+//						|| (LLFloater::isVisible(nearby_chat) && nearby_chat->isTornOff() && !nearby_chat->isMinimized())))))
+//		{
+//			if(nearby_chat->isMessagePaneExpanded())
+//			{
+//				return;
+//			}
+//		}
 
         //Will show toast when chat preference is set        
 //        if((gSavedSettings.getString("NotificationNearbyChatOptions") == "toast") || !nearby_chat->isMessagePaneExpanded())

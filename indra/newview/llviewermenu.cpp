@@ -112,6 +112,9 @@
 #include "lltoolpie.h"
 #include "lltoolselectland.h"
 #include "lltrans.h"
+// [SL:KB] - Patch: Chat-NearbyChat | 2013-08-31 (Catznip-3.6)
+#include "lltranslate.h"
+// [/SL:KB]
 #include "llviewerdisplay.h" //for gWindowResized
 #include "llviewergenericmessage.h"
 #include "llviewerhelp.h"
@@ -9197,6 +9200,10 @@ void initialize_menus()
 	commit.add("Agent.ToggleMicrophone", boost::bind(&LLAgent::toggleMicrophone, _2));
 	enable.add("Agent.IsMicrophoneOn", boost::bind(&LLAgent::isMicrophoneOn, _2));
 	enable.add("Agent.IsActionAllowed", boost::bind(&LLAgent::isActionAllowed, _2));
+
+// [SL:KB] - Patch: Chat-NearbyChat | 2013-08-31 (Catznip-3.6)
+	enable.add("Translate.IsConfigured", boost::bind(&LLTranslate::isTranslationConfigured));
+// [/SL:KB]
 
 	// File menu
 	init_menu_file();

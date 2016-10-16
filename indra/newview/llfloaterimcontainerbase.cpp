@@ -133,7 +133,20 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	LLMultiFloater::addFloater(floaterp, select_added_floater, insertion_point);
 
 	LLIconCtrl* icon = NULL;
-	if (gAgent.isInGroup(idSession, TRUE))
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2)
+	if (idSession.isNull())
+	{
+		// Don't allow the nearby chat tab to be drag-rearranged
+		mTabContainer->lockTabs(1);
+
+		// Add an icon for the nearby chat floater
+		LLIconCtrl::Params icon_params;
+		icon_params.image = LLUI::getUIImage("Command_Chat_Icon");
+		icon = LLUICtrlFactory::instance().create<LLIconCtrl>(icon_params);
+	}
+	else if (gAgent.isInGroup(idSession, TRUE))
+// [/SL:KB]
+//	if (gAgent.isInGroup(idSession, TRUE))
 	{
 // [SL:KB] - Patch: Chat-VertIMTabs | Checked: 2011-01-16 (Catznip-2.4)
 		if (gSavedSettings.getBOOL("IMShowTabImage"))
@@ -171,6 +184,17 @@ void LLFloaterIMContainerBase::addFloater(LLFloater* floaterp, BOOL select_added
 	mSessions[idSession] = floaterp;
 	floaterp->mCloseSignal.connect(boost::bind(&LLFloaterIMContainerBase::onCloseFloater, this, idSession));
 }
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2)
+void LLFloaterIMContainerBase::removeFloater(LLFloater* floaterp)
+{
+	LLUUID idSession = floaterp->getKey();
+	if (idSession.isNull())
+	{
+		mTabContainer->unlockTabs();
+	}
+	LLMultiFloater::removeFloater(floaterp);
+}
+// [/SL:KB]
 
 // static
 void LLFloaterIMContainerBase::onCurrentChannelChanged(const LLUUID& session_id)

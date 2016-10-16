@@ -73,7 +73,7 @@ public:
 	/** @param archive true - to save a message to the chat history log */
 	void	addMessage			(const LLChat& message,bool archive = true, const LLSD &args = LLSD());
 
-	LLChatEntry* getChatBox() { return mInputEditor; }
+//	LLChatEntry* getChatBox() { return mInputEditor; }
 
 	std::string getCurrentChat();
 	S32 getMessageArchiveLength() {return mMessageArchive.size();}

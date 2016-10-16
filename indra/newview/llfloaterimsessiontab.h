@@ -87,15 +87,21 @@ public:
     static LLFloaterIMSessionTab* findConversation(const LLUUID& uuid);
     static LLFloaterIMSessionTab* getConversation(const LLUUID& uuid);
 
-	// show/hide the translation check box
-	void showTranslationCheckbox(const BOOL visible = FALSE);
+//	// show/hide the translation check box
+//	void showTranslationCheckbox(const BOOL visible = FALSE);
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-27 (Catznip-3.5)
 	const LLUUID& getSessionID() const { return mSessionID; }
 // [/SL:KB]
+// [SL:KB] - Patch: Chat-NearbyChat | Checked: 2013-08-22 (Catznip-3.6)
+	bool hasInputText() const;
+// [/SL:KB]
 //	bool isNearbyChat() {return mIsNearbyChat;}
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-02-02 (Catznip-3.6)
 	bool isNearbyChat() const { return mIsNearbyChat; }
+// [/SL:KB]
+// [SL:KB] - Patch: Chat-Misc | Checked: 2013-11-28 (Catznip-3.6)
+	LLChatEntry* getChatBox() { return mInputEditor; }
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-IMPanel | Checked: 2014-02-02 (Catznip-3.6)
 	const std::string getShowControlPanelControl() const;
@@ -137,6 +143,13 @@ public:
 	LLView* getChatHistory();
 
 protected:
+// [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2013-08-18 (Catznip-3.6)
+	       bool onIMCheckNearbyChat();
+	static void onIMSetChatBarType(const LLSD& sdParam);
+	static bool onIMCheckChatBarType(const LLSD& sdParam);
+	static void onIMSetFontSize(const LLSD& sdParam);
+	static bool onIMCheckFontSize(const LLSD& sdParam);
+// [/SL:KB]
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
 	void onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdParam);
@@ -244,7 +257,7 @@ protected:
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
 	LLButton* mSearchBtn;
 // [/SL:KB]
-    LLUICtrl* mTranslationCheckBox;
+//    LLUICtrl* mTranslationCheckBox;
 
 private:
 	// Handling selection and contextual menu

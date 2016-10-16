@@ -69,6 +69,9 @@ public:
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void setMinimized(BOOL b);
 	/*virtual*/ void addFloater(LLFloater* floaterp, BOOL select_added_floater, LLTabContainer::eInsertionPoint insertion_point = LLTabContainer::END);
+// [SL:KB] - Patch: Chat-NearbyChatBar | Checked: 2011-11-17 (Catznip-3.2)
+	/*virtual*/ void removeFloater(LLFloater* floaterp);
+// [/SL:KB]
 	/*virtual*/ void updateFloaterTitle(LLFloater* floaterp);
 
 	/*

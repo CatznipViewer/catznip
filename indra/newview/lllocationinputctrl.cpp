@@ -246,7 +246,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	params.commit_on_focus_lost(false);
 	params.follows.flags(FOLLOWS_ALL);
 	mTextEntry = LLUICtrlFactory::create<LLURLLineEditor>(params);
-	mTextEntry->setContextMenu(NULL);
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+	mTextEntry->setContextMenu(NULL, false);
+// [/SL:KB]
+//	mTextEntry->setContextMenu(NULL);
 	addChild(mTextEntry);
 	// LLLineEditor is replaced with LLLocationLineEditor
 
@@ -395,7 +398,10 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 		LL_WARNS() << "Error loading navigation bar context menu" << LL_ENDL;
 		
 	}
-	getTextEntry()->setRightMouseUpCallback(boost::bind(&LLLocationInputCtrl::onTextEditorRightClicked,this,_2,_3,_4));
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+	getTextEntry()->setRightMouseDownCallback(boost::bind(&LLLocationInputCtrl::onTextEditorRightClicked,this,_2,_3,_4));
+// [/SL:KB]
+//	getTextEntry()->setRightMouseUpCallback(boost::bind(&LLLocationInputCtrl::onTextEditorRightClicked,this,_2,_3,_4));
 	updateWidgetlayout();
 
 	// Connecting signal for updating location on "Show Coordinates" setting change.
