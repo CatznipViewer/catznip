@@ -87,7 +87,10 @@ protected:
 // [/SL:KB]
 
 	// pointer to a corresponding channel's instance
-	LLNotificationsUI::LLScreenChannel*	mChannel;
+// [SL:KB] - Patch: Chat-ScreenChannelHandle | Checked: 2013-08-23 (Catznip-3.6)
+	LLHandle<LLNotificationsUI::LLScreenChannelBase> mChannel;
+// [/SL:KB]
+//	LLNotificationsUI::LLScreenChannel*	mChannel;
 	LLFlatListView*	mMessageList;
 
 	/**
@@ -124,7 +127,7 @@ public:
     /*virtual*/ void sessionActivated(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id) {}
 	/*virtual*/ void sessionVoiceOrIMStarted(const LLUUID& session_id) {};
 	/*virtual*/ void sessionRemoved(const LLUUID& session_id);
-	/*virtual*/ void sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id);
+	/*virtual*/ void sessionIDUpdated(const LLUUID& idSessionOld, const LLUUID& idSessionNew);
 // [/SL:KB]
 
 	void addObjectRow(const LLUUID& notification_id, bool new_message = false);

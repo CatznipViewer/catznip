@@ -37,6 +37,10 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 #include "llagent.h"
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+#include "llchannelmanager.h"
+#include "llchicletbar.h"
+// [/SL:KB]
 #include "lldockablefloater.h"
 #include "llsyswellwindow.h"
 #include "llfloaterimsession.h"
@@ -59,18 +63,30 @@ LLRect LLScreenChannelBase::getChannelRect()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-	if (mChicletRegion == NULL)
-	{
-		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-	}
+//	if (mChicletRegion == NULL)
+//	{
+//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+//	}
 	
 	LLRect channel_rect;
 	LLRect chiclet_rect;
 
 	mFloaterSnapRegion->localRectToScreen(mFloaterSnapRegion->getLocalRect(), &channel_rect);
-	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
-
-	channel_rect.mTop = chiclet_rect.mBottom;
+//	mChicletRegion->localRectToScreen(mChicletRegion->getLocalRect(), &chiclet_rect);
+//
+//	channel_rect.mTop = chiclet_rect.mBottom;
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	if (LLChicletBar::instanceExists())
+	{
+		const LLChicletBar* chiclet_bar = LLChicletBar::getInstance();
+		chiclet_bar->localRectToScreen(chiclet_bar->getLocalRect(), &chiclet_rect);
+ 
+		if (LLChicletBar::ALIGN_TOP == chiclet_bar->getAlignment())
+			channel_rect.mTop = chiclet_rect.mBottom;
+		else
+			channel_rect.mBottom = chiclet_rect.mTop;
+	}
+// [/SL:KB]
 	return channel_rect;
 }
 
@@ -91,8 +107,11 @@ LLScreenChannelBase::LLScreenChannelBase(const Params& p)
 	mID(p.id),
 	mDisplayToastsAlways(p.display_toasts_always),
 	mChannelAlignment(p.channel_align),
-	mFloaterSnapRegion(NULL),
-	mChicletRegion(NULL)
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	mFloaterSnapRegion(NULL)
+// [/SL:KB]
+//	mFloaterSnapRegion(NULL),
+//	mChicletRegion(NULL)
 {
 	mID = p.id;
 
@@ -107,10 +126,10 @@ BOOL LLScreenChannelBase::postBuild()
 		mFloaterSnapRegion = gViewerWindow->getRootView()->getChildView("floater_snap_region");
 	}
 	
-	if (mChicletRegion == NULL)
-	{
-		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
-	}
+//	if (mChicletRegion == NULL)
+//	{
+//		mChicletRegion = gViewerWindow->getRootView()->getChildView("chiclet_container");
+//	}
 	
 	return TRUE;
 }
@@ -176,8 +195,11 @@ void	LLScreenChannelBase::updateRect()
 //////////////////////
 //--------------------------------------------------------------------------
 LLScreenChannel::LLScreenChannel(const Params& p)
-:	LLScreenChannelBase(p),
-	mStartUpToastPanel(NULL)
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+:	LLScreenChannelBase(p)
+// [/SL:KB]
+//:	LLScreenChannelBase(p),
+//	mStartUpToastPanel(NULL)
 {
 }
 
@@ -595,14 +617,23 @@ void LLScreenChannel::redrawToasts()
 //--------------------------------------------------------------------------
 void LLScreenChannel::showToastsBottom()
 {
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	LLRect channel_rect = getChannelRect();
+// [/SL:KB]
 	LLRect	toast_rect;	
-	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2011-11-19 (Catznip-3.2)
+	S32		bottom = channel_rect.mBottom;
+// [/SL:KB]
+//	S32		bottom = getRect().mBottom - gFloaterView->getRect().mBottom;
 	S32		toast_margin = 0;
 	std::vector<ToastElem>::reverse_iterator it;
 
 	updateRect();
 
 	LLDockableFloater* floater = dynamic_cast<LLDockableFloater*>(LLDockableFloater::getInstanceHandle().get());
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+	LLDockControl::DocAt dock_side = (floater) && (floater->getDockControl()) ? floater->getDockControl()->getDockAt() : LLDockControl::TOP;
+// [/SL:KB]
 
 	// Use a local variable instead of mToastList.
 	// mToastList can be modified during recursive calls and then all iteratos will be invalidated.
@@ -631,12 +662,18 @@ void LLScreenChannel::showToastsBottom()
 		}
 
 		toast_rect = toast->getRect();
-		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
+//		toast_rect.setOriginAndSize(getRect().mRight - toast_rect.getWidth(),
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+		toast_rect.setOriginAndSize(channel_rect.mRight - toast_rect.getWidth(),
+// [/SL:KB]
 				bottom + toast_margin, toast_rect.getWidth(),
 				toast_rect.getHeight());
 		toast->setRect(toast_rect);
 
-		if(floater && floater->overlapsScreenChannel())
+//		if(floater && floater->overlapsScreenChannel())
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (floater) && (floater->overlapsScreenChannel()) && (LLDockControl::TOP == dock_side) )
+// [/SL:KB]
 		{
 			if(it == vToastList.rbegin())
 			{
@@ -649,7 +686,7 @@ void LLScreenChannel::showToastsBottom()
 				toast->translate(0, shift);
 			}
 
-			LLRect channel_rect = getChannelRect();
+//			LLRect channel_rect = getChannelRect();
 			// don't show toasts if there is not enough space
 			if(toast_rect.mTop > channel_rect.mTop)
 			{
@@ -693,6 +730,9 @@ void LLScreenChannel::showToastsBottom()
 	}
 
 	// Dismiss toasts we don't have space for (STORM-391).
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+	std::vector<LLToast*> toasts_to_hide;
+// [/SL:KB]
 	if(it != vToastList.rend())
 	{
 		mHiddenToastsNum = 0;
@@ -702,9 +742,21 @@ void LLScreenChannel::showToastsBottom()
 			LLToast* toast = it->getToast();
 			if (toast)
 			{
-				toast->hide();
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+				toasts_to_hide.push_back(toast);
+// [/SL:KB]
+//				toast->hide();
 			}
 		}
+
+// [SL:KB] - Patch: Chat-ToastAlignment | Checked: 2012-06-21 (Catznip-3.3.0)
+	for (std::vector<LLToast*>::iterator it = toasts_to_hide.begin(), end_it = toasts_to_hide.end();
+		it != end_it;
+		++it)
+	{
+		(*it)->hide();
+	}
+// [/SL:KB]
 	}
 }
 
@@ -751,6 +803,9 @@ void LLScreenChannel::showToastsTop()
 	updateRect();
 
 	LLDockableFloater* floater = dynamic_cast<LLDockableFloater*>(LLDockableFloater::getInstanceHandle().get());
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+	LLDockControl::DocAt dock_side = (floater) && (floater->getDockControl()) ? floater->getDockControl()->getDockAt() : LLDockControl::BOTTOM;
+// [/SL:KB]
 
 	// Use a local variable instead of mToastList.
 	// mToastList can be modified during recursive calls and then all iteratos will be invalidated.
@@ -784,7 +839,10 @@ void LLScreenChannel::showToastsTop()
 			toast_rect.getHeight());
 		toast->setRect(toast_rect);
 
-		if(floater && floater->overlapsScreenChannel())
+//		if(floater && floater->overlapsScreenChannel())
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2013-10-14 (Catznip-3.6)
+		if ( (floater) && (floater->overlapsScreenChannel()) && (LLDockControl::BOTTOM == dock_side) )
+// [/SL:KB]
 		{
 			if(it == vToastList.rbegin())
 			{
@@ -865,42 +923,42 @@ void LLScreenChannel::showToastsTop()
 }
 
 //--------------------------------------------------------------------------
-void LLScreenChannel::createStartUpToast(S32 notif_num, F32 timer)
-{
-	LLScreenChannelBase::updateRect();
-
-	LLRect toast_rect;
-	LLToast::Params p;
-	p.lifetime_secs = timer;
-	p.enable_hide_btn = false;
-	mStartUpToastPanel = new LLToast(p);
-
-	if(!mStartUpToastPanel)
-		return;
-
-	mStartUpToastPanel->setOnFadeCallback(boost::bind(&LLScreenChannel::onStartUpToastHide, this));
-
-	LLPanel* wrapper_panel = mStartUpToastPanel->getChild<LLPanel>("wrapper_panel");
-	LLTextBox* text_box = mStartUpToastPanel->getChild<LLTextBox>("toast_text");
-
-	std::string	text = LLTrans::getString("StartUpNotifications");
-
-	toast_rect = mStartUpToastPanel->getRect();
-	mStartUpToastPanel->reshape(getRect().getWidth(), toast_rect.getHeight(), true);
-
-	text_box->setValue(text);
-	text_box->setVisible(TRUE);
-
-	text_box->reshapeToFitText();
-	text_box->setOrigin(text_box->getRect().mLeft, (wrapper_panel->getRect().getHeight() - text_box->getRect().getHeight())/2);
-
-	toast_rect.setLeftTopAndSize(0, getRect().getHeight() - gSavedSettings.getS32("ToastGap"), getRect().getWidth(), toast_rect.getHeight());
-	mStartUpToastPanel->setRect(toast_rect);
-
-	addChild(mStartUpToastPanel);
-	
-	mStartUpToastPanel->setVisible(TRUE);
-}
+//void LLScreenChannel::createStartUpToast(S32 notif_num, F32 timer)
+//{
+//	LLScreenChannelBase::updateRect();
+//
+//	LLRect toast_rect;
+//	LLToast::Params p;
+//	p.lifetime_secs = timer;
+//	p.enable_hide_btn = false;
+//	mStartUpToastPanel = new LLToast(p);
+//
+//	if(!mStartUpToastPanel)
+//		return;
+//
+//	mStartUpToastPanel->setOnFadeCallback(boost::bind(&LLScreenChannel::onStartUpToastHide, this));
+//
+//	LLPanel* wrapper_panel = mStartUpToastPanel->getChild<LLPanel>("wrapper_panel");
+//	LLTextBox* text_box = mStartUpToastPanel->getChild<LLTextBox>("toast_text");
+//
+//	std::string	text = LLTrans::getString("StartUpNotifications");
+//
+//	toast_rect = mStartUpToastPanel->getRect();
+//	mStartUpToastPanel->reshape(getRect().getWidth(), toast_rect.getHeight(), true);
+//
+//	text_box->setValue(text);
+//	text_box->setVisible(TRUE);
+//
+//	text_box->reshapeToFitText();
+//	text_box->setOrigin(text_box->getRect().mLeft, (wrapper_panel->getRect().getHeight() - text_box->getRect().getHeight())/2);
+//
+//	toast_rect.setLeftTopAndSize(0, getRect().getHeight() - gSavedSettings.getS32("ToastGap"), getRect().getWidth(), toast_rect.getHeight());
+//	mStartUpToastPanel->setRect(toast_rect);
+//
+//	addChild(mStartUpToastPanel);
+//	
+//	mStartUpToastPanel->setVisible(TRUE);
+//}
 
 // static --------------------------------------------------------------------------
 F32 LLScreenChannel::getHeightRatio()
@@ -918,26 +976,26 @@ F32 LLScreenChannel::getHeightRatio()
 }
 
 //--------------------------------------------------------------------------
-void LLScreenChannel::updateStartUpString(S32 num)
-{
-	// *TODO: update string if notifications are arriving while the StartUp toast is on a screen
-}
+//void LLScreenChannel::updateStartUpString(S32 num)
+//{
+//	// *TODO: update string if notifications are arriving while the StartUp toast is on a screen
+//}
 
 //--------------------------------------------------------------------------
-void LLScreenChannel::onStartUpToastHide()
-{
-	onCommit();
-}
+//void LLScreenChannel::onStartUpToastHide()
+//{
+//	onCommit();
+//}
 
 //--------------------------------------------------------------------------
-void LLScreenChannel::closeStartUpToast()
-{
-	if(mStartUpToastPanel != NULL)
-	{
-		mStartUpToastPanel->setVisible(FALSE);
-		mStartUpToastPanel = NULL;
-	}
-}
+//void LLScreenChannel::closeStartUpToast()
+//{
+//	if(mStartUpToastPanel != NULL)
+//	{
+//		mStartUpToastPanel->setVisible(FALSE);
+//		mStartUpToastPanel = NULL;
+//	}
+//}
 
 void LLNotificationsUI::LLScreenChannel::stopToastTimer(LLToast* toast)
 {
@@ -1134,3 +1192,25 @@ LLToast* LLScreenChannel::getToastByNotificationID(LLUUID id)
 
 	return it->getToast();
 }
+
+// [SL:KB] - Patch: Chat-ScreenChannelStartup | Checked: 2013-08-24 (Catznip-3.6)
+LLScreenChannelStartup::LLScreenChannelStartup(const Params& p)
+:	LLScreenChannel(p)
+{
+}
+
+LLScreenChannelStartup::~LLScreenChannelStartup()
+{
+}
+
+void LLScreenChannelStartup::onToastDestroyed(LLToast* toast)
+{
+	LLScreenChannel::onToastDestroyed(toast);
+
+	if (mToastList.empty())
+	{
+		LLChannelManager::instance().removeChannelByID(mID);
+		delete this;
+	}
+}
+// [/SL:KB]

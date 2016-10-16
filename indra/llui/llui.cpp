@@ -474,6 +474,17 @@ void LLUI::reportBadKeystroke()
 //static
 // spawn_x and spawn_y are top left corner of view in screen GL coordinates
 void LLUI::positionViewNearMouse(LLView* view, S32 spawn_x, S32 spawn_y)
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+{
+	positionViewNearMouse(view, view->getParent()->getLocalRect(), spawn_x, spawn_y);
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+//static
+// spawn_x and spawn_y are top left corner of view in screen GL coordinates
+void LLUI::positionViewNearMouse(LLView* view, const LLRect& rctConstrain, S32 spawn_x, S32 spawn_y)
+// [/SL:KB]
 {
 	const S32 CURSOR_HEIGHT = 16;		// Approximate "normal" cursor size
 	const S32 CURSOR_WIDTH = 8;
@@ -491,7 +502,7 @@ void LLUI::positionViewNearMouse(LLView* view, S32 spawn_x, S32 spawn_y)
 		spawn_y = mouse_y - CURSOR_HEIGHT;
 	}
 
-	LLRect virtual_window_rect = parent->getLocalRect();
+//	LLRect virtual_window_rect = parent->getLocalRect();
 
 	LLRect mouse_rect;
 	const S32 MOUSE_CURSOR_PADDING = 1;
@@ -507,7 +518,10 @@ void LLUI::positionViewNearMouse(LLView* view, S32 spawn_x, S32 spawn_y)
 	// Start at spawn position (using left/top)
 	view->setOrigin( local_x, local_y - view->getRect().getHeight());
 	// Make sure we're on-screen and not overlapping the mouse
-	view->translateIntoRectWithExclusion( virtual_window_rect, mouse_rect );
+// [SL:KB] - Patch: Chat-ChicletBarAligment | Checked: 2012-02-18 (Catznip-3.2)
+	view->translateIntoRectWithExclusion(rctConstrain, mouse_rect);
+// [/SL:KB]
+//	view->translateIntoRectWithExclusion( virtual_window_rect, mouse_rect );
 }
 
 LLView* LLUI::resolvePath(LLView* context, const std::string& path)

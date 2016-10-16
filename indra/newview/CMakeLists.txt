@@ -574,6 +574,7 @@ set(viewer_SOURCE_FILES
     lltoastimpanel.cpp
     lltoastnotifypanel.cpp
     lltoastpanel.cpp
+    lltoaststartuppanel.cpp
     lltoastscripttextbox.cpp
     lltoastscriptquestion.cpp
     lltool.cpp
@@ -1197,6 +1198,7 @@ set(viewer_HEADER_FILES
     lltoastimpanel.h
     lltoastnotifypanel.h
     lltoastpanel.h
+    lltoaststartuppanel.h
     lltoastscripttextbox.h
     lltoastscriptquestion.h
     lltool.h
