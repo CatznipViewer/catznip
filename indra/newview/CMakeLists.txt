@@ -247,6 +247,8 @@ set(viewer_SOURCE_FILES
     llfloaterimsessiontab.cpp
     llfloaterimsession.cpp
     llfloaterimcontainer.cpp
+    llfloaterimcontainerbase.cpp
+    llfloaterimcontainertab.cpp
     llfloaterinspect.cpp
     llfloaterinventory.cpp
     llfloaterjoystick.cpp
@@ -878,6 +880,8 @@ set(viewer_HEADER_FILES
     llfloaterimsessiontab.h
     llfloaterimsession.h
     llfloaterimcontainer.h
+    llfloaterimcontainerbase.h
+    llfloaterimcontainertab.h
     llfloaterinspect.h
     llfloaterinventory.h
     llfloaterjoystick.h

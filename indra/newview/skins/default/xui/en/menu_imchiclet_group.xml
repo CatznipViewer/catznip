@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<menu
- height="101"
+<context_menu
  layout="topleft"
- left="100"
- mouse_opaque="false"
- name="IMChiclet Group Menu"
- top="724"
- visible="false"
- width="128">
+ name="IMChiclet Group Menu">
     <menu_item_call
      label="Group Info"
      layout="topleft"
      name="Show Profile">
         <menu_item_call.on_click
          function="IMChicletMenu.Action"
-         parameter="info" />
+         parameter="profile" />
     </menu_item_call>
     <menu_item_call
      label="Show Session"
@@ -22,7 +16,7 @@
      name="Chat">
         <menu_item_call.on_click
          function="IMChicletMenu.Action"
-         parameter="group chat" />
+         parameter="show" />
     </menu_item_call>
     <menu_item_call
      label="End Session"
@@ -32,4 +26,4 @@
          function="IMChicletMenu.Action"
          parameter="end" />
     </menu_item_call>
-</menu>
+</context_menu>

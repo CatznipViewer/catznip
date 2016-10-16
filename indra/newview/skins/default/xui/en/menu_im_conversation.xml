@@ -31,6 +31,13 @@
         <on_enable function="Avatar.EnableGearItem" parameter="can_offer_teleport"/>
     </menu_item_call>
     <menu_item_call
+     label="Request teleport"
+     layout="topleft"
+     name="offer_teleport">
+        <on_click function="Avatar.GearDoToSelected" parameter="request_teleport"/>
+        <on_enable function="Avatar.EnableGearItem" parameter="can_offer_teleport"/>
+    </menu_item_call>
+    <menu_item_call
      label="Invite to group..."
      layout="topleft"
      name="invite_to_group">
@@ -53,8 +60,8 @@
        label="Zoom In"
        layout="topleft"
        name="zoom_in">
-      <on_click function="Avatar.DoToSelected" parameter="zoom_in" />
-      <on_enable function="Avatar.EnableItem" parameter="can_zoom_in" />
+      <on_click function="Avatar.GearDoToSelected" parameter="zoom_in" />
+      <on_enable function="Avatar.EnableGearItem" parameter="can_zoom_in" />
     </menu_item_call>
     <menu_item_call
      label="Map"
@@ -95,7 +102,5 @@
         <on_click function="Avatar.GearDoToSelected" parameter="mute_unmute" />
         <on_enable function="Avatar.EnableGearItem" parameter="can_block" />
     </menu_item_check>
-    <menu_item_separator
-     layout="topleft"/>
 </toggleable_menu>
 

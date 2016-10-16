@@ -183,6 +183,9 @@ public:
 	S32			getIndexForPanel(LLPanel* panel);
 	S32			getPanelIndexByTitle(const std::string& title);
     LLPanel*	getPanelByName(const std::string& name);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-02-06 (Catznip-3.6)
+	LLPanel*	getPanelFromPoint(const S32 x, const S32 y);
+// [/SL:KB]
     S32         getTotalTabWidth() const;
 	void		setCurrentTabName(const std::string& name);
 
@@ -214,6 +217,10 @@ public:
 	void		setMaxTabWidth(S32 width) { mMaxTabWidth = width; }
 	S32			getMinTabWidth() const { return mMinTabWidth; }
 	S32			getMaxTabWidth() const { return mMaxTabWidth; }
+
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
+	bool		isVertical() const { return mIsVertical; }
+// [/SL:KB]
 
 	void		startDragAndDropDelayTimer() { mDragAndDropDelayTimer.start(); }
 	

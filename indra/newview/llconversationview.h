@@ -34,7 +34,10 @@
 #include "lloutputmonitorctrl.h"
 
 class LLTextBox;
-class LLFloaterIMContainer;
+//class LLFloaterIMContainer;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+class LLFloaterIMContainerView;
+// [/SL:KB]
 class LLConversationViewSession;
 class LLConversationViewParticipant;
 
@@ -47,7 +50,10 @@ class LLConversationViewSession : public LLFolderViewFolder
 public:
 	struct Params : public LLInitParam::Block<Params, LLFolderViewItem::Params>
 	{
-		Optional<LLFloaterIMContainer*>			container;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		Optional<LLFloaterIMContainerView*>		container;
+// [/SL:KB]
+//		Optional<LLFloaterIMContainer*>			container;
 
 		Params();
 	};
@@ -60,7 +66,10 @@ protected:
 	/*virtual*/ bool isHighlightActive();
 	/*virtual*/ bool isFlashing() { return mFlashStateOn; }
 
-	LLFloaterIMContainer* mContainer;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	LLFloaterIMContainerView* mContainer;
+// [/SL:KB]
+//	LLFloaterIMContainer* mContainer;
 	
 public:
 	virtual ~LLConversationViewSession();
@@ -124,7 +133,10 @@ public:
 
 	struct Params : public LLInitParam::Block<Params, LLFolderViewItem::Params>
 	{
-        Optional<LLFloaterIMContainer*>			container;
+//        Optional<LLFloaterIMContainer*>			container;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+        Optional<LLFloaterIMContainerView*>			container;
+// [/SL:KB]
 		Optional<LLUUID>	                    participant_id;
         Optional<LLAvatarIconCtrl::Params>	    avatar_icon;
 		Optional<LLButton::Params>				info_button;

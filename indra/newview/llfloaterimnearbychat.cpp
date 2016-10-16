@@ -34,6 +34,9 @@
 #include "llfloaterreg.h"
 #include "lltrans.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+#include "llfloaterimcontainertab.h"
+// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfocusmgr.h"
 #include "lllogchat.h"
@@ -67,6 +70,9 @@
 #include "llviewerchat.h"
 #include "lltranslate.h"
 #include "llautoreplace.h"
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
+#include "lltoolbarview.h"
+// [/SL:KB]
 // [RLVa:KB] - Checked: 2010-02-27 (RLVa-1.2.0b)
 #include "rlvhandler.h"
 #include "rlvactions.h"
@@ -144,36 +150,47 @@ BOOL LLFloaterIMNearbyChat::postBuild()
 // virtual
 void LLFloaterIMNearbyChat::closeHostedFloater()
 {
-	// If detached from conversations window close anyway
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-11 (Catznip-3.5)
+	// If nearby chat is torn off hide the floater since closing it would result in redocking to the container
 	if (!getHost())
 	{
-		setVisible(FALSE);
-	}
-
-	// Should check how many conversations are ongoing. Select next to "Nearby Chat" in case there are some other besides.
-	// Close conversations window in case "Nearby Chat" is attached and the only conversation
-	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-	if (floater_container->getConversationListItemSize() == 1)
-	{
-		if (getHost())
-		{
-			floater_container->closeFloater();
-		}
+		setVisible(false);
 	}
 	else
 	{
-		if (!getHost())
-		{
-			floater_container->selectNextConversationByID(LLUUID());
-		}
+		getHost()->closeFloater();
 	}
+// [/SL:KB]
+//	// If detached from conversations window close anyway
+//	if (!getHost())
+//	{
+//		setVisible(FALSE);
+//	}
+//
+//	// Should check how many conversations are ongoing. Select next to "Nearby Chat" in case there are some other besides.
+//	// Close conversations window in case "Nearby Chat" is attached and the only conversation
+//	LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//	if (floater_container->getConversationListItemSize() == 1)
+//	{
+//		if (getHost())
+//		{
+//			floater_container->closeFloater();
+//		}
+//	}
+//	else
+//	{
+//		if (!getHost())
+//		{
+//			floater_container->selectNextConversationByID(LLUUID());
+//		}
+//	}
 }
 
 // virtual
 void LLFloaterIMNearbyChat::refresh()
 {
 	displaySpeakingIndicator();
-	updateCallBtnState(LLVoiceClient::getInstance()->getUserPTTState());
+//	updateCallBtnState(LLVoiceClient::getInstance()->getUserPTTState());
 
 	// *HACK: Update transparency type depending on whether our children have focus.
 	// This is needed because this floater is chrome and thus cannot accept focus, so
@@ -261,6 +278,19 @@ void LLFloaterIMNearbyChat::removeScreenChat()
 	}
 }
 
+// [SL:KB] - Patch: Chat-BaseConversationsBtn | Checked: 2013-11-27 (Catznip-3.6)
+void LLFloaterIMNearbyChat::setMinimized(BOOL b)
+{
+	bool fMinimized = isMinimized();
+	LLFloaterIMSessionTab::setMinimized(b);
+
+	// Switching from minimized to un-minimized
+	if ( (fMinimized) && (!b) )
+	{
+		gToolBarView->flashCommand(LLCommandId("chat"), false);
+	}
+}
+// [/SL:KB]
 
 void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 {
@@ -268,6 +298,21 @@ void LLFloaterIMNearbyChat::setVisible(BOOL visible)
 
 	if(visible)
 	{
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-13-15 (Catznip-3.6)
+		// Two things can happen:
+		//   (1) user opens the conversations floater before opening us => addToHost() will be called and nearby chat will be embedded, or detached from the floater as need be
+		//   (2) user opens the nearby chat floater first => nearby chat will always be "detached" without a host until the user opens the conversations floater
+		//   => if we're opened first, attach us to the conversations floater and show it if need be
+		if (!isHostAttached())
+		{
+			addToHost(LLUUID());
+			if (getHost())
+			{
+				getHost()->setVisible(visible);
+			}
+		}
+// [/SL:KB]
+
 		removeScreenChat();
 	}
 }
@@ -279,7 +324,10 @@ void LLFloaterIMNearbyChat::setVisibleAndFrontmost(BOOL take_focus, const LLSD& 
 
 	if(matchesKey(key))
 	{
-		LLFloaterIMContainer::getInstance()->selectConversationPair(mSessionID, true, take_focus);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+		LLFloaterIMContainerBase::getInstance()->selectConversationPair(mSessionID, true, take_focus);
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance()->selectConversationPair(mSessionID, true, take_focus);
 	}
 }
 
@@ -339,27 +387,33 @@ void LLFloaterIMNearbyChat::show()
 		openFloater(getKey());
 }
 
-bool LLFloaterIMNearbyChat::isChatVisible() const
-{
-	bool isVisible = false;
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
-	// Is the IM floater container ever null?
-	llassert(im_box != NULL);
-	if (im_box != NULL)
-	{
-		isVisible =
-				isChatMultiTab() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff")?
-						im_box->getVisible() && !im_box->isMinimized() :
-						getVisible() && !isMinimized();
-	}
-
-	return isVisible;
-}
+//bool LLFloaterIMNearbyChat::isChatVisible() const
+//{
+//	bool isVisible = false;
+////	LLFloaterIMContainer* im_box = LLFloaterIMContainer::getInstance();
+//// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+//	LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::getInstance();
+//// [/SL:KB]
+//	// Is the IM floater container ever null?
+//	llassert(im_box != NULL);
+//	if (im_box != NULL)
+//	{
+//		isVisible =
+//				isChatMultiTab() && gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff")?
+//						im_box->getVisible() && !im_box->isMinimized() :
+//						getVisible() && !isMinimized();
+//	}
+//
+//	return isVisible;
+//}
 
 void LLFloaterIMNearbyChat::showHistory()
 {
 	openFloater();
-	LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-31 (Catznip-3.6)
+	LLFloaterIMContainerBase::getInstance()->selectConversationPair(LLUUID(NULL), true);
+// [/SL:KB]
+//	LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
 
 	if(!isMessagePaneExpanded())
 	{
@@ -368,7 +422,10 @@ void LLFloaterIMNearbyChat::showHistory()
 	}
 	else
 	{
-		LLFloaterIMContainer::getInstance()->setFocus(TRUE);
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-08-31 (Catznip-3.6)
+		LLFloaterIMContainerBase::getInstance()->setFocus(TRUE);
+// [/SL:KB]
+//		LLFloaterIMContainer::getInstance()->setFocus(TRUE);
 	}
 	setResizeLimits(getMinWidth(), EXPANDED_MIN_HEIGHT);
 }
@@ -396,23 +453,25 @@ BOOL LLFloaterIMNearbyChat::handleKeyHere( KEY key, MASK mask )
 		handled = TRUE;
 	}
 
-
-	if((mask == MASK_ALT) && isTornOff())
-	{
-		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
-		if ((KEY_UP == key) || (KEY_LEFT == key))
-		{
-			floater_container->selectNextorPreviousConversation(false);
-			handled = TRUE;
-		}
-		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
-		{
-			floater_container->selectNextorPreviousConversation(true);
-			handled = TRUE;
-		}
-	}
-
-	return handled;
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-05-04 (Catznip-3.5)
+	return (!handled) ? LLFloaterIMSessionTab::handleKeyHere(key, mask) : TRUE;
+// [/SL:KB]
+//	if((mask == MASK_ALT) && isTornOff())
+//	{
+//		LLFloaterIMContainer* floater_container = LLFloaterIMContainer::getInstance();
+//		if ((KEY_UP == key) || (KEY_LEFT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(false);
+//			handled = TRUE;
+//		}
+//		if ((KEY_DOWN == key ) || (KEY_RIGHT == key))
+//		{
+//			floater_container->selectNextorPreviousConversation(true);
+//			handled = TRUE;
+//		}
+//	}
+//
+//	return handled;
 }
 
 BOOL LLFloaterIMNearbyChat::matchChatTypeTrigger(const std::string& in_str, std::string* out_str)
@@ -442,11 +501,22 @@ BOOL LLFloaterIMNearbyChat::matchChatTypeTrigger(const std::string& in_str, std:
 
 void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 {
-	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
-	if (im_box)
+//	LLFloaterIMContainer* im_box = LLFloaterIMContainer::findInstance();
+//	if (im_box)
+//	{
+//		im_box->flashConversationItemWidget(mSessionID,false);
+//	}
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+	if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
 	{
-		im_box->flashConversationItemWidget(mSessionID,false);
+		// NOTE: this is only needed on CHUI
+		LLFloaterIMContainerBase* im_box = LLFloaterIMContainerBase::findInstance();
+		if (im_box)
+		{
+			im_box->setConversationFlashing(mSessionID, false);
+		}
 	}
+// [/SL:KB]
 
 	LLFirstUse::otherAvatarChatFirst(false);
 
@@ -661,22 +731,22 @@ void LLFloaterIMNearbyChat::onChatBoxCommit()
 
 void LLFloaterIMNearbyChat::displaySpeakingIndicator()
 {
-	LLSpeakerMgr::speaker_list_t speaker_list;
-	LLUUID id;
+//	LLSpeakerMgr::speaker_list_t speaker_list;
+//	LLUUID id;
 
-	id.setNull();
+//	id.setNull();
 	mSpeakerMgr->update(FALSE);
-	mSpeakerMgr->getSpeakerList(&speaker_list, FALSE);
-
-	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
-	{
-		LLPointer<LLSpeaker> s = *i;
-		if (s->mSpeechVolume > 0 || s->mStatus == LLSpeaker::STATUS_SPEAKING)
-		{
-			id = s->mID;
-			break;
-		}
-	}
+//	mSpeakerMgr->getSpeakerList(&speaker_list, FALSE);
+//
+//	for (LLSpeakerMgr::speaker_list_t::iterator i = speaker_list.begin(); i != speaker_list.end(); ++i)
+//	{
+//		LLPointer<LLSpeaker> s = *i;
+//		if (s->mSpeechVolume > 0 || s->mStatus == LLSpeaker::STATUS_SPEAKING)
+//		{
+//			id = s->mID;
+//			break;
+//		}
+//	}
 }
 
 void LLFloaterIMNearbyChat::sendChatFromViewer(const std::string &utf8text, EChatType type, BOOL animate)
@@ -761,7 +831,10 @@ void LLFloaterIMNearbyChat::startChat(const char* line)
 	{
 		if(!nearby_chat->isTornOff())
 		{
-			LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
+// [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)
+			LLFloaterIMContainerBase::getInstance()->selectConversationPair(LLUUID::null, true);
+// [/SL:KB]
+//			LLFloaterIMContainer::getInstance()->selectConversation(LLUUID(NULL));
 		}
 		if(nearby_chat->isMinimized())
 		{

@@ -207,6 +207,9 @@ void LLUI::initClass(const settings_map_t& settings,
 // [RLVa:KB] - Checked: 2012-02-07 (RLVa-1.4.5) | Added: RLVa-1.4.5
 	LLUICtrl::EnableCallbackRegistry::defaultRegistrar().add("Floater.CanShow", boost::bind(&LLFloaterReg::canShowInstance, _2, LLSD()));
 // [/RLVa:KB]
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+	LLUICtrl::EnableCallbackRegistry::defaultRegistrar().add("Floater.InVisibleChain", boost::bind(&LLFloaterReg::instanceInVisibleChain, _2, LLSD()));
+// [/SL:KB]
 
 	// Parse the master list of commands
 	LLCommandManager::load();

@@ -323,6 +323,16 @@ bool LLFloaterReg::instanceVisible(const std::string& name, const LLSD& key)
 	return LLFloater::isVisible(instance);
 }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-16 (Catznip-3.6)
+//static
+// Returns true if the instance exists and is in the visible chain (doesn't matter if it's minimized or not)
+bool LLFloaterReg::instanceInVisibleChain(const std::string& name, const LLSD& key)
+{
+	LLFloater* instance = findInstance(name, key); 
+	return (instance) && (instance->isInVisibleChain());
+}
+// [/SL:KB]
+
 //static
 void LLFloaterReg::showInitialVisibleInstances() 
 {
