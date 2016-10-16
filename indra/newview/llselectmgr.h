@@ -705,7 +705,7 @@ public:
 	void selectDelete();							// Delete on simulator
 	void selectForceDelete();			// just delete, no into trash
 	void selectDuplicate(const LLVector3& offset, BOOL select_copy);	// Duplicate on simulator
-	void repeatDuplicate();
+//	void repeatDuplicate();
 	void selectDuplicateOnRay(const LLVector3 &ray_start_region,
 								const LLVector3 &ray_end_region,
 								BOOL bypass_raycast,
@@ -713,6 +713,9 @@ public:
 								const LLUUID &ray_target_id,
 								BOOL copy_centers,
 								BOOL copy_rotates,
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+								const LLUUID& group_id,
+// [/SL:KB]
 								BOOL select_copy);
 
 	void sendMultipleUpdate(U32 type);	// Position, rotation, scale all in one

@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+		<panel label="Conteúdo" name="Contents">
+			<button label="Novo script" label_selected="Novo script" name="button new script"/>
+			<button label="Autorizações" name="button permissions"/>
+		</panel>

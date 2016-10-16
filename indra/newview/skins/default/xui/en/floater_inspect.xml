@@ -2,15 +2,15 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="300"
+ height="304"
  layout="topleft"
- min_height="300"
- min_width="400"
+ min_height="304"
+ min_width="440"
  name="inspect"
  help_topic="inspect"
  save_rect="true"
  title="INSPECT OBJECTS"
- width="400">
+ width="440">
     <floater.string
      name="timeStamp">
         [wkday,datetime,local] [mth,datetime,local] [day,datetime,local] [hour,datetime,local]:[min,datetime,local]:[second,datetime,local] [year,datetime,local]
@@ -21,9 +21,9 @@
      draw_heading="true"
      follows="top|right|left|bottom"
      layout="topleft"
-     left="10"
+     left="7"
      name="object_list"
-     right="-10"
+     right="-7"
      tool_tip="Select an object from this list to highlight it in-world"
      top="20">
         <scroll_list.columns
@@ -45,30 +45,86 @@
 		 <scroll_list.commit_callback
 		   function="Inspect.SelectObject" />
     </scroll_list>
-    <button
-     follows="left|bottom"
-     height="23"
-     label="See Owner Profile..."
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left_delta="-1"
-     name="button owner"
-     tool_tip="See profile of the highlighted object&apos;s owner"
-     top_pad="4"
-     width="150">
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="20"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Snapshot_Profile"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Owner Profile..."
+         layout="topleft"
+         left_pad="1"
+         name="button owner"
+         tool_tip="See profile of the highlighted object&apos;s owner"
+         width="180" >
 		<button.commit_callback
 		function="Inspect.OwnerProfile" />
 	</button>
-    <button
-     follows="left|bottom"
-     height="23"
-     label="See Creator Profile..."
-     layout="topleft"
-     left_pad="5"
-     name="button creator"
-     tool_tip="See profile of the highlighted object&apos;s original creator"
-     top_delta="0"
-     width="150">
+
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="24"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Snapshot_Profile"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Creator Profile..."
+         layout="topleft"
+         left_pad="1"
+         name="button creator"
+         tool_tip="See profile of the highlighted object&apos;s original creator"
+         width="180">
 		<button.commit_callback
 		function="Inspect.CreatorProfile" />
 	</button>
+
+        <icon  
+         follows="bottom|right|left"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         left="408"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
 </floater>

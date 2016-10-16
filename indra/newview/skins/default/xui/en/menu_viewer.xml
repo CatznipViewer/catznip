@@ -1199,6 +1199,15 @@
                      parameter="agents" />
                 </menu_item_check>
                 <menu_item_check
+                 label="Select Only Copiable Objects"
+                 name="Select Only Copiable Objects">
+                    <menu_item_check.on_check
+                     control="SelectCopiableOnly" />
+                    <menu_item_check.on_click
+                     function="ToggleControl"
+                     parameter="SelectCopiableOnly" />
+                </menu_item_check>
+                <menu_item_check
                  label="Select Only Movable Objects"
                  name="Select Only Movable Objects">
                     <menu_item_check.on_check

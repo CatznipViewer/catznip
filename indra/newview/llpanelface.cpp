@@ -45,11 +45,15 @@
 #include "llcombobox.h"
 #include "lldrawpoolbump.h"
 #include "llface.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "llinventoryfunctions.h"
+#include "llinventorymodel.h"
+// [/SL:KB]
 #include "lllineeditor.h"
 #include "llmaterialmgr.h"
 #include "llmediaentry.h"
 #include "llnotificationsutil.h"
-#include "llradiogroup.h"
+//#include "llradiogroup.h"
 #include "llresmgr.h"
 #include "llselectmgr.h"
 #include "llspinctrl.h"
@@ -57,6 +61,9 @@
 #include "lltexturectrl.h"
 #include "lltextureentry.h"
 #include "lltooldraganddrop.h"
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+#include "lltoolmgr.h"
+// [/SL:KB]
 #include "lltrans.h"
 #include "llui.h"
 #include "llviewercontrol.h"
@@ -68,6 +75,11 @@
 #include "lluictrlfactory.h"
 #include "llpluginclassmedia.h"
 #include "llviewertexturelist.h"// Update sel manager as to which channel we're editing so it can reflect the correct overlay UI
+
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2013-07-28 (Catznip-3.6)
+#include "llsdutil_math.h"
+#include "material_codes.h"
+// [/SL:KB]
 
 //
 // Constant definitions for comboboxes
@@ -91,10 +103,16 @@ std::string USE_TEXTURE;
 LLRender::eTexIndex LLPanelFace::getTextureChannelToEdit()
 {
 	LLComboBox* combobox_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 
 	LLRender::eTexIndex channel_to_edit = (combobox_matmedia && combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ?
-	                                                    (radio_mat_type ? (LLRender::eTexIndex)radio_mat_type->getSelectedIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+													  (combobox_mattype ? (LLRender::eTexIndex)combobox_mattype->getCurrentIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
+// [/SL:KB]
+//	                                                    (radio_mat_type ? (LLRender::eTexIndex)radio_mat_type->getSelectedIndex() : LLRender::DIFFUSE_MAP) : LLRender::DIFFUSE_MAP;
 
 	channel_to_edit = (channel_to_edit == LLRender::NORMAL_MAP)		? (getCurrentNormalMap().isNull()		? LLRender::DIFFUSE_MAP : channel_to_edit) : channel_to_edit;
 	channel_to_edit = (channel_to_edit == LLRender::SPECULAR_MAP)	? (getCurrentSpecularMap().isNull()		? LLRender::DIFFUSE_MAP : channel_to_edit) : channel_to_edit;
@@ -163,6 +181,9 @@ BOOL	LLPanelFace::postBuild()
 
 	LLComboBox*		mComboTexGen;
 	LLComboBox*		mComboMatMedia;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox*		mComboMatType;
+// [/SL:KB]
 
 	LLCheckBoxCtrl	*mCheckFullbright;
 	
@@ -172,6 +193,13 @@ BOOL	LLPanelFace::postBuild()
 	LLSpinCtrl*     mCtrlGlow;
 
 	setMouseOpaque(FALSE);
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
+	mBtnCopyMaterialTypeParams = findChild<LLButton>("copy_mattype_btn");
+	mBtnPasteMaterialTypeParams = findChild<LLButton>("paste_mattype_btn");
+	mBtnMaterialTypePipette = findChild<LLButton>("pipette_mattype_btn");
+	mBtnMaterialTypePipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, _1, LLToolPipette::TYPE_MATERIAL_TYPE));
+// [/SL:KB]
 
 	mTextureCtrl = getChild<LLTextureCtrl>("texture control");
 	if(mTextureCtrl)
@@ -189,6 +217,11 @@ BOOL	LLPanelFace::postBuild()
 		mTextureCtrl->setImmediateFilterPermMask(PERM_NONE);
 		mTextureCtrl->setDnDFilterPermMask(PERM_COPY | PERM_TRANSFER);
 	}
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mBtnTexturePipette = findChild<LLButton>("texture_pipette");
+	mBtnTexturePipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, _1, LLToolPipette::TYPE_TEXTURE));
+// [/SL:KB]
 
 	mShinyTextureCtrl = getChild<LLTextureCtrl>("shinytexture control");
 	if(mShinyTextureCtrl)
@@ -235,6 +268,11 @@ BOOL	LLPanelFace::postBuild()
 		mColorSwatch->setFollowsLeft();
 		mColorSwatch->setCanApplyImmediately(TRUE);
 	}
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mBtnColorPipette = findChild<LLButton>("color_pipette");
+	mBtnColorPipette->setCommitCallback(boost::bind(&LLPanelFace::onClickPipette, this, _1, LLToolPipette::TYPE_COLOR));
+// [/SL:KB]
 
 	mShinyColorSwatch = getChild<LLColorSwatchCtrl>("shinycolorswatch");
 	if(mShinyColorSwatch)
@@ -283,12 +321,20 @@ BOOL	LLPanelFace::postBuild()
 		mComboMatMedia->selectNthItem(MATMEDIA_MATERIAL);
 	}
 
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-    if(radio_mat_type)
-    {
-        radio_mat_type->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
-        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
-    }
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	mComboMatType = getChild<LLComboBox>("combobox mattype");
+	if(mComboMatType)
+	{
+		mComboMatType->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
+		mComboMatType->selectNthItem(MATTYPE_DIFFUSE);
+	}
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//    if(radio_mat_type)
+//    {
+//        radio_mat_type->setCommitCallback(LLPanelFace::onCommitMaterialType, this);
+//        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
+//    }
 
 	mCtrlGlow = getChild<LLSpinCtrl>("glow");
 	if(mCtrlGlow)
@@ -299,14 +345,29 @@ BOOL	LLPanelFace::postBuild()
 
 	clearCtrls();
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLPanelFace::onSelectPipette, this, _1, _2, _3));
+// [/SL:KB]
+
 	return TRUE;
 }
 
 LLPanelFace::LLPanelFace()
 :	LLPanel(),
 	mIsAlpha(false)
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
+,	mBtnColorPipette(NULL)
+,	mBtnCopyMaterialTypeParams(NULL)
+,	mBtnPasteMaterialTypeParams(NULL)
+,	mBtnMaterialTypePipette(NULL)
+,	mBtnTexturePipette(NULL)
+// [/SL:KB]
 {
 	USE_TEXTURE = LLTrans::getString("use_texture");
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("BuildTool.CopyParams", boost::bind(&LLPanelFace::onClickBtnCopyParams, this, _2));
+	mCommitCallbackRegistrar.add("BuildTool.PasteParams", boost::bind(&LLPanelFace::onClickBtnPasteParams, this, _2));
+// [/SL:KB]
 }
 
 
@@ -315,6 +376,17 @@ LLPanelFace::~LLPanelFace()
 	// Children all cleaned up by default view destructor.
 }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+void LLPanelFace::draw()
+{
+	LLToolPipette::EType typePipette = (LLToolMgr::getInstance()->getCurrentTool() == LLToolPipette::getInstance()) ? LLToolPipette::getInstance()->getPipetteType() : LLToolPipette::TYPE_NONE;
+	mBtnColorPipette->setValue(LLToolPipette::TYPE_COLOR == typePipette);
+	mBtnMaterialTypePipette->setValue(LLToolPipette::TYPE_MATERIAL_TYPE == typePipette);
+	mBtnTexturePipette->setValue(LLToolPipette::TYPE_TEXTURE == typePipette);
+
+	LLPanel::draw();
+}
+// [/SL:KB]
 
 void LLPanelFace::sendTexture()
 {
@@ -676,21 +748,43 @@ void LLPanelFace::updateUI()
 		}
 		getChildView("combobox matmedia")->setEnabled(editable);
 
-		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-		if(radio_mat_type)
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+		LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+		if (combobox_mattype)
 		{
-		    if (radio_mat_type->getSelectedIndex() < MATTYPE_DIFFUSE)
-		    {
-		        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
-		    }
-
+			if (combobox_mattype->getCurrentIndex() < MATTYPE_DIFFUSE)
+			{
+				combobox_mattype->selectNthItem(MATTYPE_DIFFUSE);
+			}
 		}
 		else
 		{
-		    LL_WARNS("Materials") << "failed getChild for 'radio_material_type'" << LL_ENDL;
+			LL_WARNS("Materials") << "failed getChild for 'combobox mattype'" << LL_ENDL;
 		}
+		getChildView("combobox mattype")->setEnabled(editable);
+// [/SL:KB]
+//		LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//		if(radio_mat_type)
+//		{
+//		    if (radio_mat_type->getSelectedIndex() < MATTYPE_DIFFUSE)
+//		    {
+//		        radio_mat_type->selectNthItem(MATTYPE_DIFFUSE);
+//		    }
+//
+//		}
+//		else
+//		{
+//		    LL_WARNS("Materials") << "failed getChild for 'radio_material_type'" << LL_ENDL;
+//		}
+//
+//		getChildView("radio_material_type")->setEnabled(editable);
 
-		getChildView("radio_material_type")->setEnabled(editable);
+// [SL:KB] - Patch: Build-CopyPasteParams | Checked: 2011-10-09 (Catznip-3.0)
+		mBtnCopyMaterialTypeParams->setEnabled(editable);
+		mBtnPasteMaterialTypeParams->setEnabled(editable && mObjectClipboard.has(combobox_mattype->getValue().asString()));
+		mBtnMaterialTypePipette->setEnabled(editable);
+// [/SL:KB]
+
 		updateVisibility();
 
 		bool identical				= true;	// true because it is anded below
@@ -726,6 +820,9 @@ void LLPanelFace::updateUI()
 			mColorSwatch->setEnabled( editable );
 			mColorSwatch->setCanApplyImmediately( editable );
 		}
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mBtnColorPipette->setEnabled(editable);
+// [/SL:KB]
 
 		// Color transparency
 		getChildView("color trans")->setEnabled(editable);
@@ -901,6 +998,9 @@ void LLPanelFace::updateUI()
 					getChildView("label maskcutoff")->setEnabled(editable && mIsAlpha);
 				}
 			}
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+		mBtnTexturePipette->setEnabled(editable);
+// [/SL:KB]
 
 			if (shinytexture_ctrl)
 			{
@@ -1201,7 +1301,10 @@ void LLPanelFace::updateUI()
 				BOOL identical_repeats = true;
 				F32  repeats = 1.0f;
 
-				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : MATTYPE_DIFFUSE;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? combobox_mattype->getCurrentIndex() : MATTYPE_DIFFUSE;
+// [/SL:KB]
+//				U32 material_type = (combobox_matmedia->getCurrentIndex() == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : MATTYPE_DIFFUSE;
 				LLSelectMgr::getInstance()->setTextureChannel(LLRender::eTexIndex(material_type));
 
 				switch (material_type)
@@ -1466,21 +1569,38 @@ void LLPanelFace::onCommitMaterialsMedia(LLUICtrl* ctrl, void* userdata)
 void LLPanelFace::updateVisibility()
 {	
 	LLComboBox* combo_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 	LLComboBox* combo_shininess = getChild<LLComboBox>("combobox shininess");
 	LLComboBox* combo_bumpiness = getChild<LLComboBox>("combobox bumpiness");
-	if (!radio_mat_type || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+//	if (!radio_mat_type || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	if (!combo_mattype || !combo_matmedia || !combo_shininess || !combo_bumpiness)
+// [/SL:KB]
 	{
 		LL_WARNS("Materials") << "Combo box not found...exiting." << LL_ENDL;
 		return;
 	}
 	U32 materials_media = combo_matmedia->getCurrentIndex();
-	U32 material_type = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type = combo_mattype->getCurrentIndex();
+// [/SL:KB]
+//	U32 material_type = radio_mat_type->getSelectedIndex();
 	bool show_media = (materials_media == MATMEDIA_MEDIA) && combo_matmedia->getEnabled();
 	bool show_texture = (show_media || ((material_type == MATTYPE_DIFFUSE) && combo_matmedia->getEnabled()));
 	bool show_bumpiness = (!show_media) && (material_type == MATTYPE_NORMAL) && combo_matmedia->getEnabled();
 	bool show_shininess = (!show_media) && (material_type == MATTYPE_SPECULAR) && combo_matmedia->getEnabled();
-	getChildView("radio_material_type")->setVisible(!show_media);
+//	getChildView("radio_material_type")->setVisible(!show_media);
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	getChildView("combobox mattype")->setVisible(!show_media);
+// [/SL:KB]
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2013-07-27 (Catznip-3.6)
+	mBtnCopyMaterialTypeParams->setVisible(!show_media);
+	mBtnPasteMaterialTypeParams->setVisible(!show_media);
+	mBtnMaterialTypePipette->setVisible(!show_media);
+// [/SL:KB]
 
 	// Media controls
 	getChildView("media_info")->setVisible(show_media);
@@ -1490,6 +1610,9 @@ void LLPanelFace::updateVisibility()
 
 	// Diffuse texture controls
 	getChildView("texture control")->setVisible(show_texture && !show_media);
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+	mBtnTexturePipette->setVisible( (show_texture) && (!show_media) );
+// [/SL:KB]
 	getChildView("label alphamode")->setVisible(show_texture && !show_media);
 	getChildView("combobox alphamode")->setVisible(show_texture && !show_media);
 	getChildView("label maskcutoff")->setVisible(false);
@@ -1607,9 +1730,15 @@ void LLPanelFace::updateShinyControls(bool is_setting_texture, bool mess_with_sh
 	}
 
 	LLComboBox* combo_matmedia = getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
 	U32 materials_media = combo_matmedia->getCurrentIndex();
-	U32 material_type = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type = combo_mattype->getCurrentIndex();
+// [/SL:KB]
+//	U32 material_type = radio_mat_type->getSelectedIndex();
 	bool show_media = (materials_media == MATMEDIA_MEDIA) && combo_matmedia->getEnabled();
 	bool show_shininess = (!show_media) && (material_type == MATTYPE_SPECULAR) && combo_matmedia->getEnabled();
 	U32 shiny_value = comboShiny->getCurrentIndex();
@@ -1692,12 +1821,19 @@ void LLPanelFace::updateAlphaControls()
         mat_media = combobox_matmedia->getCurrentIndex();
     }
     
-    U32 mat_type = MATTYPE_DIFFUSE;
-    LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-    if(radio_mat_type)
-    {
-        mat_type = radio_mat_type->getSelectedIndex();
-    }
+	U32 mat_type = MATTYPE_DIFFUSE;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combobox_mattype = getChild<LLComboBox>("combobox mattype");
+	if (combobox_mattype)
+	{
+		mat_type = combobox_mattype->getCurrentIndex();
+	}
+// [/SL:KB]
+//    LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//    if(radio_mat_type)
+//    {
+//        mat_type = radio_mat_type->getSelectedIndex();
+//    }
 
     show_alphactrls = show_alphactrls && (mat_media == MATMEDIA_MATERIAL);
     show_alphactrls = show_alphactrls && (mat_type == MATTYPE_DIFFUSE);
@@ -1812,6 +1948,408 @@ void LLPanelFace::onCommitNormalTexture( const LLSD& data )
 	LLUUID nmap_id = getCurrentNormalMap();
 	sendBump(nmap_id.isNull() ? 0 : BUMPY_TEXTURE);
 }
+
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+struct LLSelectedLLSDFunctorHelper
+{
+	static U8 getDefaultDiffuseMode(const LLViewerObject* pObj, S32 idxTE)
+	{
+		const LLViewerTexture* pImg = pObj->getTEImage(idxTE);
+		LLGLenum formatImg = (pImg) ? pImg->getPrimaryFormat() : GL_RGB;
+
+		if ( (GL_RGBA == formatImg) || (GL_ALPHA == formatImg) )
+			return LLMaterial::DIFFUSE_ALPHA_MODE_BLEND;
+		return LLMaterial::DIFFUSE_ALPHA_MODE_NONE;
+	}
+
+	static bool getNeedsMaterial(const LLViewerObject* pObj, S32 idxTE, const LLMaterialPtr& material)
+	{
+		return 
+			(material.notNull()) &&
+			( (material->getDiffuseAlphaMode() != getDefaultDiffuseMode(pObj, idxTE)) || (material->getNormalID().notNull()) || (material->getSpecularID().notNull()) );
+	}
+};
+
+struct LLSelectedTEGetLLSDFunctor : public LLSelectedTEFunctor, public LLSelectedLLSDFunctorHelper
+{
+	LLSelectedTEGetLLSDFunctor(bool fIdentical) : LLSelectedTEFunctor(), m_fIdentical(fIdentical) {}
+	const LLSD& getParams() const { return m_sdParams; }
+
+	/*virtual*/ bool apply(LLViewerObject* pObj, S32 idxTE)
+	{
+		const LLTextureEntry* pTE = pObj->getTE(idxTE);
+		if (pTE)
+		{
+			LLMaterialPtr pMaterial = pTE->getMaterialParams();
+
+			LLSD& sdFaceParams = m_sdParams[(m_fIdentical) ? 0 : idxTE];
+			applyFunc(sdFaceParams, pObj, idxTE, pTE, pMaterial);
+		}
+		return true;
+	}
+
+	static void setCommonParams(LLSD& sdFaceParams, const LLUUID& idTexture, F32 nScaleS, F32 nScaleT, F32 nRotation, F32 nOffsetS, F32 nOffsetT)
+	{
+		if (find_item_from_asset(idTexture, TRUE) != LLUUID::null)
+			sdFaceParams["texture_id"] = idTexture;
+		else
+			sdFaceParams["texture_id"] = LL_DEFAULT_WOOD_UUID;
+		sdFaceParams["scale_s"] = nScaleS;
+		sdFaceParams["scale_t"] = nScaleT;
+		sdFaceParams["rotation"] = nRotation;
+		sdFaceParams["offset_s"] = nOffsetS;
+		sdFaceParams["offset_t"] = nOffsetT;
+	}
+
+protected:
+	virtual void applyFunc(LLSD& sdFaceParams, const LLViewerObject* pObj, U8 idxTe, const LLTextureEntry* pTE, LLMaterialPtr& pMaterial) = 0;
+
+	bool m_fIdentical;
+	LLSD m_sdParams;
+};
+
+struct LLSelectedDiffuseTEGetLLSDFunctor : public LLSelectedTEGetLLSDFunctor
+{
+	LLSelectedDiffuseTEGetLLSDFunctor(bool fIdentical) : LLSelectedTEGetLLSDFunctor(fIdentical) {}
+protected:
+	/*virtual*/ void applyFunc(LLSD& sdFaceParams, const LLViewerObject* pObj, U8 idxTe, const LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		bool fHasDiffuse = (pMaterial) && (pMaterial->getDiffuseAlphaMode() != getDefaultDiffuseMode(pObj, idxTe));
+		if (fHasDiffuse)
+		{
+			sdFaceParams["alphamode"] = pMaterial->getDiffuseAlphaMode();
+			sdFaceParams["alphacutoff"] = pMaterial->getAlphaMaskCutoff();
+		}
+		sdFaceParams["has_diffuse"] = fHasDiffuse;
+
+		setCommonParams(sdFaceParams, pTE->getID(), pTE->getScaleS(), pTE->getScaleT(), pTE->getRotation(), pTE->getOffsetS(), pTE->getOffsetT());
+		sdFaceParams["texgen"] = (U8)pTE->getTexGen();
+	}
+};
+
+struct LLSelectedNormalTEGetLLSDFunctor : public LLSelectedTEGetLLSDFunctor
+{
+	LLSelectedNormalTEGetLLSDFunctor(bool fIdentical) : LLSelectedTEGetLLSDFunctor(fIdentical) {}
+protected:
+	/*virtual*/ void applyFunc(LLSD& sdFaceParams, const LLViewerObject* pObj, U8 idxTe, const LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		bool fHasNormal = (pMaterial) && (pMaterial->getNormalID().notNull());
+		if (fHasNormal)
+			setCommonParams(sdFaceParams, pMaterial->getNormalID(), pMaterial->getNormalRepeatX(), pMaterial->getNormalRepeatY(), pMaterial->getNormalRotation(), pMaterial->getNormalOffsetX(), pMaterial->getNormalOffsetY());
+		else
+			sdFaceParams["bumpmap"] = pTE->getBumpmap();
+		sdFaceParams["has_normal"] = fHasNormal;
+	}
+};
+
+struct LLSelectedSpecularTEGetLLSDFunctor : public LLSelectedTEGetLLSDFunctor
+{
+	LLSelectedSpecularTEGetLLSDFunctor(bool fIdentical) : LLSelectedTEGetLLSDFunctor(fIdentical){}
+protected:
+	/*virtual*/ void applyFunc(LLSD& sdFaceParams, const LLViewerObject* pObj, U8 idxTe, const LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		bool fHasSpecular = (pMaterial) && (pMaterial->getSpecularID().notNull());
+		if (fHasSpecular)
+		{
+			setCommonParams(sdFaceParams, pMaterial->getSpecularID(), pMaterial->getSpecularRepeatX(), pMaterial->getSpecularRepeatY(), pMaterial->getSpecularRotation(), pMaterial->getSpecularOffsetX(), pMaterial->getSpecularOffsetY());
+
+			sdFaceParams["color"] = ll_sd_from_color4(pMaterial->getSpecularLightColor());
+			sdFaceParams["exponent"] = pMaterial->getSpecularLightExponent();
+			sdFaceParams["environment"] = pMaterial->getEnvironmentIntensity();
+		}
+		else
+		{
+			sdFaceParams["shiny"] = pTE->getShiny();
+		}
+		sdFaceParams["has_specular"] = fHasSpecular;
+	}
+};
+
+LLSD LLPanelFace::objectToLLSD(const std::string& strParamType)
+{
+	// Allowed use cases:
+	//   * selection of multiple faces on multiple objects but they all have identical values => supported (1 face)
+	//   * selection of multiple faces on the same object and some/all have different values => supported (save all selected faces, paste on identical faces)
+	//   * selection of multiple faces on multiple objects and some/all have different values => unsupported
+	bool fIdentical = false;	// The functions won't really tell us if all params are identical, but it will do for now
+
+	LLSelectedTEGetLLSDFunctor* pFunc = NULL;
+	if ("diffuse" == strParamType)
+	{
+		LLUUID idTexture;
+		LLSelectedTE::getTexId(idTexture, fIdentical);
+		pFunc = new LLSelectedDiffuseTEGetLLSDFunctor(fIdentical);
+	}
+	else if ("normal" == strParamType)
+	{
+		LLUUID idNormal;
+		LLSelectedTEMaterial::getSpecularID(idNormal, fIdentical);
+		pFunc = new LLSelectedNormalTEGetLLSDFunctor(fIdentical);
+	}
+	else if ("specular" == strParamType)
+	{
+		LLUUID idSpecular;
+		LLSelectedTEMaterial::getSpecularID(idSpecular, fIdentical);
+		pFunc = new LLSelectedSpecularTEGetLLSDFunctor(fIdentical);
+	}
+
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	if ( (hSel.notNull()) && (pFunc) && ((fIdentical) || (hSel->getNumNodes() == 1)) )
+	{
+		hSel->applyToTEs(pFunc, fIdentical);
+		LLSD sdParams = pFunc->getParams();
+		delete pFunc;
+		return sdParams;
+	}
+	return LLSD();
+}
+
+void LLPanelFace::onClickBtnCopyParams(const LLSD& sdParam)
+{
+	std::string strParamType = sdParam.asString();
+
+	LLButton* pButton = NULL;
+	if ("mattype" == strParamType)
+	{
+		const LLComboBox* pComboMatType = findChild<LLComboBox>("combobox mattype");
+		if (pComboMatType)
+		{
+			strParamType = pComboMatType->getValue().asString();
+			pButton = mBtnPasteMaterialTypeParams;
+		}
+	}
+
+	if (pButton)
+	{
+		mObjectClipboard[strParamType] = objectToLLSD(strParamType);
+		if (!pButton->getEnabled())
+			refresh();
+	}
+}
+
+struct LLSelectedTEFromLLSDFunctor : public LLSelectedTEMaterialFunctor, public LLSelectedLLSDFunctorHelper
+{
+	LLSelectedTEFromLLSDFunctor(const LLSD& sdParams) : m_sdParams(sdParams) {}
+
+	/*virtual*/ LLMaterialPtr apply(LLViewerObject* pObj, S32 idxTE, LLTextureEntry* pTE, LLMaterialPtr& material)
+	{
+		if ( (m_sdParams.size() > 1) && ((idxTE >= m_sdParams.size()) || (m_sdParams[idxTE].isUndefined())) )
+		{
+			// We don't have any information about this face
+			return material;
+		}
+
+		LLMaterialPtr pMaterial( (!material.isNull()) ? new LLMaterial(material->asLLSD()) : new LLMaterial());
+		if (material.isNull())
+		{
+			pMaterial->setDiffuseAlphaMode(getDefaultDiffuseMode(pObj, idxTE));
+		}
+
+		const LLSD& sdFaceParams = m_sdParams[(1 == m_sdParams.size()) ? 0 : idxTE];
+		applyParams(sdFaceParams, pObj, idxTE, pTE, pMaterial);
+
+		if (getNeedsMaterial(pObj, idxTE, pMaterial))
+		{
+			LLMaterialMgr::getInstance()->put(pObj->getID(), idxTE, *pMaterial);
+		}
+		else
+		{
+			LLMaterialMgr::getInstance()->remove(pObj->getID(), idxTE);
+			pMaterial = NULL;
+		}
+		pObj->setTEMaterialParams(idxTE, pMaterial);
+
+		return pMaterial;
+	}
+
+	virtual void applyParams(const LLSD& sdFaceParams, LLViewerObject* pObj, S32 idxTE, LLTextureEntry* pTE, LLMaterialPtr& pMaterial) = 0;
+
+protected:
+	LLSD m_sdParams;
+};
+
+struct LLSelectedDiffuseTEFromLLSDFunctor : public LLSelectedTEFromLLSDFunctor
+{
+	LLSelectedDiffuseTEFromLLSDFunctor(const LLSD& sdDiffuseParams) : LLSelectedTEFromLLSDFunctor(sdDiffuseParams) {}
+
+	/*virtual*/ void applyParams(const LLSD& sdFaceParams, LLViewerObject* pObj, S32 idxTE, LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		pObj->setTETexture(idxTE, sdFaceParams["texture_id"].asUUID());
+		pObj->setTETexGen(idxTE, sdFaceParams["texgen"].asInteger() & TEM_TEX_GEN_MASK);
+		pObj->setTEScale(idxTE, sdFaceParams["scale_s"].asReal(), sdFaceParams["scale_t"].asReal());
+		pObj->setTERotation(idxTE, sdFaceParams["rotation"].asReal());
+		pObj->setTEOffset(idxTE, sdFaceParams["offset_s"].asReal(), sdFaceParams["offset_t"].asReal());
+
+		bool fHasDiffuse = sdFaceParams["has_diffuse"].asBoolean();
+		if (fHasDiffuse)
+		{
+			pMaterial->setDiffuseAlphaMode(sdFaceParams["alphamode"].asInteger());
+			pMaterial->setAlphaMaskCutoff(sdFaceParams["alphacutoff"].asInteger());
+		}
+		else
+		{
+			pMaterial->setDiffuseAlphaMode(getDefaultDiffuseMode(pObj, idxTE));
+		}
+	}
+};
+
+struct LLSelectedNormalTEFromLLSDFunctor : public LLSelectedTEFromLLSDFunctor
+{
+	LLSelectedNormalTEFromLLSDFunctor(const LLSD& sdNormalParams) : LLSelectedTEFromLLSDFunctor(sdNormalParams) {}
+
+	/*virtual*/ void applyParams(const LLSD& sdFaceParams, LLViewerObject* pObj, S32 idxTE, LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		bool fHasNormal = sdFaceParams["has_normal"].asBoolean();
+		if (fHasNormal)
+		{
+			pMaterial->setNormalID(sdFaceParams["texture_id"].asUUID());
+			pMaterial->setNormalRepeat(sdFaceParams["scale_s"].asReal(), sdFaceParams["scale_t"].asReal());
+			pMaterial->setNormalRotation(sdFaceParams["rotation"].asReal());
+			pMaterial->setNormalOffset(sdFaceParams["offset_s"].asReal(), sdFaceParams["offset_t"].asReal());
+		}
+		else
+		{
+			pMaterial->setNormalID(LLUUID::null);
+			pTE->setBumpmap(sdFaceParams["bumpmap"].asInteger());
+		}
+	}
+};
+
+struct LLSelectedSpecularTEFromLLSDFunctor : public LLSelectedTEFromLLSDFunctor
+{
+	LLSelectedSpecularTEFromLLSDFunctor(const LLSD& sdSpecularParams) : LLSelectedTEFromLLSDFunctor(sdSpecularParams) {}
+
+	/*virtual*/ void applyParams(const LLSD& sdFaceParams, LLViewerObject* pObj, S32 idxTE, LLTextureEntry* pTE, LLMaterialPtr& pMaterial)
+	{
+		bool fHasSpecular = sdFaceParams["has_specular"].asBoolean();
+		if (fHasSpecular)
+		{
+			pMaterial->setSpecularID(sdFaceParams["texture_id"].asUUID());
+			pMaterial->setSpecularRepeat(sdFaceParams["scale_s"].asReal(), sdFaceParams["scale_t"].asReal());
+			pMaterial->setSpecularRotation(sdFaceParams["rotation"].asReal());
+			pMaterial->setSpecularOffset(sdFaceParams["offset_s"].asReal(), sdFaceParams["offset_t"].asReal());
+
+			pMaterial->setSpecularLightColor(ll_color4_from_sd(sdFaceParams["color"]));
+			pMaterial->setSpecularLightExponent(sdFaceParams["exponent"].asInteger());
+			pMaterial->setEnvironmentIntensity(sdFaceParams["environment"].asInteger());
+		}
+		else
+		{
+			pMaterial->setSpecularID(LLUUID::null);
+			pTE->setShiny(sdFaceParams["shiny"].asInteger());
+		}
+	}
+};
+
+void LLPanelFace::objectFromLLSD(const std::string& strParamType, const LLSD& sdParams)
+{
+	if (!sdParams.has(strParamType))
+		return;
+
+	LLSelectedTEFromLLSDFunctor* pFunc = NULL;
+	if ("diffuse" == strParamType)
+		pFunc = new LLSelectedDiffuseTEFromLLSDFunctor(sdParams[strParamType]);
+	else if ("normal" == strParamType)
+		pFunc = new LLSelectedNormalTEFromLLSDFunctor(sdParams[strParamType]);
+	else if ("specular" == strParamType)
+		pFunc = new LLSelectedSpecularTEFromLLSDFunctor(sdParams[strParamType]);
+
+	if (pFunc)
+	{
+		LLSelectMgr::getInstance()->selectionSetMaterialParams(pFunc);
+		delete pFunc;
+	}
+}
+
+void LLPanelFace::onClickBtnPasteParams(const LLSD& sdParam)
+{
+	std::string strParamType = sdParam.asString();
+	if ("mattype" == strParamType)
+	{
+		const LLComboBox* pComboMatType = findChild<LLComboBox>("combobox mattype");
+		if (pComboMatType)
+			strParamType = pComboMatType->getValue().asString();
+	}
+	objectFromLLSD(strParamType, mObjectClipboard);
+}
+
+void LLPanelFace::onClickPipette(LLUICtrl* pCtrl, LLToolPipette::EType typePipette)
+{
+	LLButton* pPipetteBtn = dynamic_cast<LLButton*>(pCtrl);
+	if (pCtrl)
+	{
+		if (!pPipetteBtn->getToggleState())
+		{
+			LLToolMgr::getInstance()->setTransientTool(LLToolPipette::getInstance());
+			LLToolPipette::getInstance()->setPippetType(typePipette);
+		}
+		else
+		{
+			LLToolMgr::getInstance()->clearTransientTool();
+		}
+	}
+}
+
+void LLPanelFace::onSelectPipette(LLToolPipette::EType typePipette, LLViewerObject* pObj, const LLTextureEntry& te)
+{
+	switch (typePipette)
+	{
+		case LLToolPipette::TYPE_TEXTURE:
+			{
+				LLTextureCtrl* pTextureCtrl = findChild<LLTextureCtrl>("texture control");
+				if ( (pTextureCtrl) && (!pTextureCtrl->getPickerVisible()) )
+				{
+					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
+					if (idItem.notNull())
+					{
+						pTextureCtrl->setImageItemID(idItem);
+						onSelectTexture(LLSD());
+					}
+				}
+			}
+			break;
+		case LLToolPipette::TYPE_COLOR:
+			{
+				LLColorSwatchCtrl* pColorSwatch = getChild<LLColorSwatchCtrl>("colorswatch");
+				if (!pColorSwatch->getPickerVisible())
+				{
+					pColorSwatch->set(LLColor4(te.getColor().mV[VRED], te.getColor().mV[VGREEN], te.getColor().mV[VBLUE], 1.0));
+					onSelectColor(LLSD());
+				}
+			}
+			break;
+		case LLToolPipette::TYPE_MATERIAL_TYPE:
+			{
+				const LLComboBox* pComboMatType = findChild<LLComboBox>("combobox mattype");
+				if (pComboMatType)
+				{
+					const std::string strParamType = pComboMatType->getValue().asString();
+
+					LLSelectedTEGetLLSDFunctor* pFunc = NULL;
+					if ("diffuse" == strParamType)
+						pFunc = new LLSelectedDiffuseTEGetLLSDFunctor(false);
+					else if ("normal" == strParamType)
+						pFunc = new LLSelectedNormalTEGetLLSDFunctor(false);
+					else if ("specular" == strParamType)
+						pFunc = new LLSelectedSpecularTEGetLLSDFunctor(false);
+
+					if (pFunc)
+					{
+						for (int idxTE = 0, cntTE = llmin((int)pObj->getNumTEs(), (int)pObj->getNumFaces()); idxTE < cntTE; idxTE++)
+							pFunc->apply(pObj, idxTE);
+
+						LLSD sdParams;
+						sdParams[strParamType] = pFunc->getParams();
+						objectFromLLSD(strParamType, sdParams);
+					}
+				}
+			}
+			break;
+		default:
+			break;
+	}
+}
+// [/SL:KB]
 
 void LLPanelFace::onCancelSpecularTexture(const LLSD& data)
 {
@@ -1984,11 +2522,17 @@ void LLPanelFace::onCommitRepeatsPerMeter(LLUICtrl* ctrl, void* userdata)
 	
 	LLUICtrl*	repeats_ctrl	= self->getChild<LLUICtrl>("rptctrl");
 	LLComboBox* combo_matmedia = self->getChild<LLComboBox>("combobox matmedia");
-	LLRadioGroup* radio_mat_type = self->getChild<LLRadioGroup>("radio_material_type");
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype	= self->getChild<LLComboBox>("combobox mattype");
+// [/SL:KB]
+//	LLRadioGroup* radio_mat_type = self->getChild<LLRadioGroup>("radio_material_type");
 	
 	U32 materials_media = combo_matmedia->getCurrentIndex();
 
-	U32 material_type           = (materials_media == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : 0;
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	U32 material_type			= (materials_media == MATMEDIA_MATERIAL) ? combo_mattype->getCurrentIndex() : 0;
+// [/SL:KB]
+//	U32 material_type           = (materials_media == MATMEDIA_MATERIAL) ? radio_mat_type->getSelectedIndex() : 0;
 	F32 repeats_per_meter	= repeats_ctrl->getValue().asReal();
 	
    F32 obj_scale_s = 1.0f;
@@ -2112,12 +2656,20 @@ void LLPanelFace::onCommitPlanarAlign(LLUICtrl* ctrl, void* userdata)
 void LLPanelFace::onTextureSelectionChanged(LLInventoryItem* itemp)
 {
 	LL_DEBUGS("Materials") << "item asset " << itemp->getAssetUUID() << LL_ENDL;
-	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
-	if(radio_mat_type)
+//	LLRadioGroup* radio_mat_type = getChild<LLRadioGroup>("radio_material_type");
+//	if(radio_mat_type)
+//	{
+//	    return;
+//	}
+//	U32 mattype = radio_mat_type->getSelectedIndex();
+// [SL:KB] - Patch: Build-Misc | Checked: Catznip-4.2
+	LLComboBox* combo_mattype = getChild<LLComboBox>("combobox mattype");
+	if (!combo_mattype)
 	{
 	    return;
 	}
-	U32 mattype = radio_mat_type->getSelectedIndex();
+	U32 mattype = combo_mattype->getCurrentIndex();
+// [/SL:KB]
 	std::string which_control="texture control";
 	switch (mattype)
 	{

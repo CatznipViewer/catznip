@@ -245,7 +245,10 @@ BOOL LLToolGrab::handleObjectHit(const LLPickInfo& info)
 				gViewerWindow->hideCursor();
 				gViewerWindow->moveCursorToCenter();
 			}
-			else if (objectp->permMove() && !objectp->isPermanentEnforced())
+//			else if (objectp->permMove() && !objectp->isPermanentEnforced())
+// [SL:KB] - Patch: Build-Misc | Checked: 2014-07-21 (Catznip-3.6)
+			else if ( (objectp->permMove()) && (!objectp->isPermanentEnforced()) && (gSavedSettings.getBOOL("EnableGrabNonPhysical")) )
+// [/SL:KB]
 			{
 				mMode = GRAB_ACTIVE_CENTER;
 				gViewerWindow->hideCursor();

@@ -69,6 +69,9 @@
 #include "llmeshrepository.h"
 #include "llmutelist.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+#include "llparcel.h"
+// [/SL:KB]
 #include "llsidepaneltaskinfo.h"
 #include "llslurl.h"
 #include "llstatusbar.h"
@@ -86,6 +89,9 @@
 #include "llviewermenu.h"
 #include "llviewerobject.h"
 #include "llviewerobjectlist.h"
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+#include "llviewerparcelmgr.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewerstats.h"
 #include "llvoavatarself.h"
@@ -1025,8 +1031,13 @@ void LLSelectMgr::highlightObjectOnly(LLViewerObject* objectp)
 		return;
 	}
 	
-	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) 
-		|| (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())))
+//	if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) 
+//		|| (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())))
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+	if ( (gSavedSettings.getBOOL("SelectOwnedOnly") && !objectp->permYouOwner()) || 
+	     (gSavedSettings.getBOOL("SelectCopiableOnly") && !objectp->permCopy()) || 
+	     (gSavedSettings.getBOOL("SelectMovableOnly") && (!objectp->permMove() ||  objectp->isPermanentEnforced())) )
+// [/SL:KB]
 	{
 		// only select my own objects
 		return;
@@ -3847,6 +3858,9 @@ struct LLDuplicateData
 {
 	LLVector3	offset;
 	U32			flags;
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	LLUUID		group_id;
+// [/SL:KB]
 };
 
 void LLSelectMgr::selectDuplicate(const LLVector3& offset, BOOL select_copy)
@@ -3864,6 +3878,23 @@ void LLSelectMgr::selectDuplicate(const LLVector3& offset, BOOL select_copy)
 
 	data.offset = offset;
 	data.flags = (select_copy ? FLAGS_CREATE_SELECTED : 0x0);
+
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	LLUUID idGroup = gAgent.getGroupID();
+	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+	{
+		const LLViewerObject* pObj = getSelection()->getFirstRootObject(FALSE);
+		if (pObj)
+		{
+			if ( (!LLViewerParcelMgr::getInstance()->getLandGroup(pObj->getPositionGlobal() + LLVector3d(offset), idGroup)) ||
+			     (!gAgent.isInGroup(idGroup)) )
+			{
+				idGroup = gAgent.getGroupID();
+			}
+		}
+	}
+	data.group_id = idGroup;
+// [/SL:KB]
 
 	sendListToRegions("ObjectDuplicate", packDuplicateHeader, packDuplicate, logNoOp, &data, SEND_ONLY_ROOTS);
 
@@ -3885,65 +3916,93 @@ void LLSelectMgr::selectDuplicate(const LLVector3& offset, BOOL select_copy)
 	}
 }
 
-void LLSelectMgr::repeatDuplicate()
-{
-	if (mSelectedObjects->isAttachment())
-	{
-		//RN: do not duplicate attachments
-		make_ui_sound("UISndInvalidOp");
-		return;
-	}
-
-	std::vector<LLViewerObject*> non_duplicated_objects;
-
-	for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
-		 iter != getSelection()->root_end(); iter++ )
-	{
-		LLSelectNode* node = *iter;	
-		if (!node->mDuplicated)
-		{
-			non_duplicated_objects.push_back(node->getObject());
-		}
-	}
-
-	// make sure only previously duplicated objects are selected
-	for (std::vector<LLViewerObject*>::iterator iter = non_duplicated_objects.begin();
-		 iter != non_duplicated_objects.end(); ++iter)
-	{
-		LLViewerObject* objectp = *iter;
-		deselectObjectAndFamily(objectp);
-	}
-	
-	// duplicate objects in place
-	LLDuplicateData	data;
-
-	data.offset = LLVector3::zero;
-	data.flags = 0x0;
-
-	sendListToRegions("ObjectDuplicate", packDuplicateHeader, packDuplicate, logNoOp, &data, SEND_ONLY_ROOTS);
-
-	// move current selection based on delta from duplication position and update duplication position
-	for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
-		 iter != getSelection()->root_end(); iter++ )
-	{
-		LLSelectNode* node = *iter;	
-		if (node->mDuplicated)
-		{
-			LLQuaternion cur_rot = node->getObject()->getRotation();
-			LLQuaternion rot_delta = (~node->mDuplicateRot * cur_rot);
-			LLQuaternion new_rot = cur_rot * rot_delta;
-			LLVector3d cur_pos = node->getObject()->getPositionGlobal();
-			LLVector3d new_pos = cur_pos + ((cur_pos - node->mDuplicatePos) * rot_delta);
-
-			node->mDuplicatePos = node->getObject()->getPositionGlobal();
-			node->mDuplicateRot = node->getObject()->getRotation();
-			node->getObject()->setPositionGlobal(new_pos);
-			node->getObject()->setRotation(new_rot);
-		}
-	}
-
-	sendMultipleUpdate(UPD_ROTATION | UPD_POSITION);
-}
+//void LLSelectMgr::repeatDuplicate()
+//{
+//	if (mSelectedObjects->isAttachment())
+//	{
+//		//RN: do not duplicate attachments
+//		make_ui_sound("UISndInvalidOp");
+//		return;
+//	}
+//
+//	std::vector<LLViewerObject*> non_duplicated_objects;
+//
+//	for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
+//		 iter != getSelection()->root_end(); iter++ )
+//	{
+//		LLSelectNode* node = *iter;	
+//		if (!node->mDuplicated)
+//		{
+//			non_duplicated_objects.push_back(node->getObject());
+//		}
+//	}
+//
+//	// make sure only previously duplicated objects are selected
+//	for (std::vector<LLViewerObject*>::iterator iter = non_duplicated_objects.begin();
+//		 iter != non_duplicated_objects.end(); ++iter)
+//	{
+//		LLViewerObject* objectp = *iter;
+//		deselectObjectAndFamily(objectp);
+//	}
+//	
+//	// duplicate objects in place
+//	LLDuplicateData	data;
+//
+//	data.offset = LLVector3::zero;
+//	data.flags = 0x0;
+//
+//// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+//	LLUUID idGroup = gAgent.getGroupID();
+//	if (gSavedSettings.getBOOL("RezUnderLandGroup"))
+//	{
+//		const LLViewerObject* pObj = getSelection()->getFirstRootObject(FALSE);
+//		if (pObj)
+//		{
+//			const LLVector3d posGlobal = pObj->getPositionGlobal();
+//			if (LLViewerParcelMgr::getInstance()->inAgentParcel(posGlobal))
+//			{
+//				const LLParcel* pAgentParcel = LLViewerParcelMgr::getInstance()->getAgentParcel();
+//				if (pAgentParcel)
+//					idGroup = pAgentParcel->getGroupID();
+//			}
+//			else if (LLViewerParcelMgr::getInstance()->inHoverParcel(posGlobal))
+//			{
+//				const LLParcel* pHoverParcel = LLViewerParcelMgr::getInstance()->getHoverParcel();
+//				if (pHoverParcel)
+//					idGroup = pHoverParcel->getGroupID();
+//			}
+//
+//			if ( (idGroup.notNull()) && (!gAgent.isInGroup(idGroup)) )
+//				idGroup = gAgent.getGroupID();
+//		}
+//	}
+//	data.group_id = idGroup;
+//// [/SL:KB]
+//
+//	sendListToRegions("ObjectDuplicate", packDuplicateHeader, packDuplicate, logNoOp, &data, SEND_ONLY_ROOTS);
+//
+//	// move current selection based on delta from duplication position and update duplication position
+//	for (LLObjectSelection::root_iterator iter = getSelection()->root_begin();
+//		 iter != getSelection()->root_end(); iter++ )
+//	{
+//		LLSelectNode* node = *iter;	
+//		if (node->mDuplicated)
+//		{
+//			LLQuaternion cur_rot = node->getObject()->getRotation();
+//			LLQuaternion rot_delta = (~node->mDuplicateRot * cur_rot);
+//			LLQuaternion new_rot = cur_rot * rot_delta;
+//			LLVector3d cur_pos = node->getObject()->getPositionGlobal();
+//			LLVector3d new_pos = cur_pos + ((cur_pos - node->mDuplicatePos) * rot_delta);
+//
+//			node->mDuplicatePos = node->getObject()->getPositionGlobal();
+//			node->mDuplicateRot = node->getObject()->getRotation();
+//			node->getObject()->setPositionGlobal(new_pos);
+//			node->getObject()->setRotation(new_rot);
+//		}
+//	}
+//
+//	sendMultipleUpdate(UPD_ROTATION | UPD_POSITION);
+//}
 
 // static 
 void LLSelectMgr::packDuplicate( LLSelectNode* node, void *duplicate_data )
@@ -3969,6 +4028,9 @@ struct LLDuplicateOnRayData
 	BOOL		mCopyCenters;
 	BOOL		mCopyRotates;
 	U32			mFlags;
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	LLUUID		mGroupID;
+// [/SL:KB]
 };
 
 void LLSelectMgr::selectDuplicateOnRay(const LLVector3 &ray_start_region,
@@ -3978,6 +4040,9 @@ void LLSelectMgr::selectDuplicateOnRay(const LLVector3 &ray_start_region,
 									   const LLUUID &ray_target_id,
 									   BOOL copy_centers,
 									   BOOL copy_rotates,
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+									   const LLUUID& group_id,
+// [/SL:KB]
 									   BOOL select_copy)
 {
 	if (mSelectedObjects->isAttachment())
@@ -3997,6 +4062,9 @@ void LLSelectMgr::selectDuplicateOnRay(const LLVector3 &ray_start_region,
 	data.mCopyCenters		= copy_centers;
 	data.mCopyRotates		= copy_rotates;
 	data.mFlags				= (select_copy ? FLAGS_CREATE_SELECTED : 0x0);
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	data.mGroupID			= group_id;
+// [/SL:KB]
 
 	sendListToRegions("ObjectDuplicateOnRay", 
                       packDuplicateOnRayHead, packObjectLocalID, logNoOp, &data, SEND_ONLY_ROOTS);
@@ -4017,7 +4085,10 @@ void LLSelectMgr::packDuplicateOnRayHead(void *user_data)
 	msg->nextBlockFast(_PREHASH_AgentData);
 	msg->addUUIDFast(_PREHASH_AgentID, gAgent.getID() );
 	msg->addUUIDFast(_PREHASH_SessionID, gAgent.getSessionID() );
-	msg->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID() );
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	msg->addUUIDFast(_PREHASH_GroupID, data->mGroupID);
+// [/SL:KB]
+//	msg->addUUIDFast(_PREHASH_GroupID, gAgent.getGroupID() );
 	msg->addVector3Fast(_PREHASH_RayStart, data->mRayStartRegion );
 	msg->addVector3Fast(_PREHASH_RayEnd, data->mRayEndRegion );
 	msg->addBOOLFast(_PREHASH_BypassRaycast, data->mBypassRaycast );
@@ -4874,10 +4945,14 @@ void LLSelectMgr::packAgentAndSessionAndGroupID(void* user_data)
 // static
 void LLSelectMgr::packDuplicateHeader(void* data)
 {
-	LLUUID group_id(gAgent.getGroupID());
-	packAgentAndSessionAndGroupID(&group_id);
+//	LLUUID group_id(gAgent.getGroupID());
+//	packAgentAndSessionAndGroupID(&group_id);
 
 	LLDuplicateData* dup_data = (LLDuplicateData*) data;
+
+// [SL:KB] - Patch: Build-RezUnderLandGroup | Checked: 2011-10-09 (Catznip-3.0)
+	packAgentAndSessionAndGroupID(&dup_data->group_id);
+// [/SL:KB]
 
 	gMessageSystem->nextBlockFast(_PREHASH_SharedData);
 	gMessageSystem->addVector3Fast(_PREHASH_Offset, dup_data->offset);
@@ -6978,8 +7053,13 @@ BOOL LLSelectMgr::canSelectObject(LLViewerObject* object, BOOL ignore_select_own
 
 	if(!ignore_select_owned)
 	{
-		if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
-				(gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())))
+//		if ((gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
+//				(gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())))
+// [SL:KB] - Patch: Build-SelectCopiable | Checked: 2013-10-26 (Catznip-3.6)
+		if ( (gSavedSettings.getBOOL("SelectOwnedOnly") && !object->permYouOwner()) ||
+		     (gSavedSettings.getBOOL("SelectCopiableOnly") && !object->permCopy()) || 
+		     (gSavedSettings.getBOOL("SelectMovableOnly") && (!object->permMove() ||  object->isPermanentEnforced())) )
+// [/SL:KB]
 		{
 			// only select my own objects
 			return FALSE;

@@ -81,7 +81,7 @@
 		<combo_box.item label="Локальная" name="Local"/>
 		<combo_box.item label="Точка отсчета" name="Reference"/>
 	</combo_box>
-	<button label="" name="Options..." tool_tip="Дополнительные параметры сетки"/>
+	<button label="" label_selected="" name="Options..." tool_tip="Дополнительные параметры сетки"/>
 	<button name="ToolCube" tool_tip="Куб"/>
 	<button name="ToolPrism" tool_tip="Призма"/>
 	<button name="ToolPyramid" tool_tip="Пирамида"/>
@@ -126,7 +126,7 @@
 		Не выбрано.
 	</text>
 	<text name="remaining_capacity">
-		[CAPACITY_STRING] [secondlife:///app/openfloater/object_weights Дополнительная информация]
+		[secondlife:///app/openfloater/object_weights Дополнительная информация]
 	</text>
 	<tab_container name="Object Info Tabs">
 		<panel label="Общие" name="General">
@@ -256,19 +256,19 @@
 			<check_box label="Временный" name="Temporary Checkbox Ctrl" tool_tip="Приводит к автоматическому удалению объекта через минуту после создания."/>
 			<check_box label="Фантомный" name="Phantom Checkbox Ctrl" tool_tip="Предотвращает столкновение объекта с другими объектами или аватарами."/>
 			<text name="label position">
-				Позиция (метры)
+				Позиция
 			</text>
 			<spinner label="X" name="Pos X"/>
 			<spinner label="Y" name="Pos Y"/>
 			<spinner label="Z" name="Pos Z"/>
 			<text name="label size">
-				Размер (метры)
+				Размер
 			</text>
 			<spinner label="X" name="Scale X"/>
 			<spinner label="Y" name="Scale Y"/>
 			<spinner label="Z" name="Scale Z"/>
 			<text name="label rotation">
-				Поворот (градусы)
+				Поворот
 			</text>
 			<spinner label="X" name="Rot X"/>
 			<spinner label="Y" name="Rot Y"/>
@@ -408,11 +408,8 @@
 			<spinner label="Плотность в 100 кг/м^3" name="Physics Density"/>
 			<spinner label="Восстанавливаемость" name="Physics Restitution"/>
 		</panel>
-		<panel label="Текстура" name="Texture"/>
-		<panel label="Контент" name="Contents">
-			<button label="Создать скрипт" label_selected="Создать скрипт" name="button new script"/>
-			<button label="Разрешения" name="button permissions"/>
-		</panel>
+		<panel label="Текстура" name="Texture" />
+		<panel label="Контент" name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">

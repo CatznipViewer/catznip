@@ -1538,6 +1538,13 @@ void LLFloater::removeDependentFloater(LLFloater* floaterp)
 	floaterp->mDependeeHandle = LLHandle<LLFloater>();
 }
 
+// [SL:KB] - Patch: Build-Misc | Checked: 2011-12-11 (Catznip-3.2)
+bool LLFloater::isDependentFloater(const LLFloater* dependent) const
+{
+	return (dependent) && (mDependents.end() != std::find(mDependents.begin(), mDependents.end(), dependent->getHandle()));
+}
+// [/SL:KB]
+
 BOOL LLFloater::offerClickToButton(S32 x, S32 y, MASK mask, EFloaterButton index)
 {
 	if( mButtonsEnabled[index] )

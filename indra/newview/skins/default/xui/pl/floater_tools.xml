@@ -233,13 +233,13 @@
 			<check_box label="Tymczasowy" name="Temporary Checkbox Ctrl" tool_tip="Umożliwia usunięcie obiektu po 1 minucie od jego stworzenia." />
 			<check_box label="Widmowy" name="Phantom Checkbox Ctrl" tool_tip="Obiekt nie koliduje z awatarami i innymi obiektami, przenikają one przez niego." />
 			<text name="label position">
-				Pozycja (metry)
+				Pozycja
 			</text>
 			<text name="label size">
-				Rozmiar (metry)
+				Rozmiar
 			</text>
 			<text name="label rotation">
-				Obrót (stopnie)
+				Obrót
 			</text>
 			<combo_box name="comboBaseType">
 				<combo_box.item label="Klocek" name="Box" />
@@ -352,26 +352,8 @@
 			<spinner label="Nastrój" name="Light Ambiance" />
 			<text name="label physicsshapetype">
 				Typ kształtu fizycznego:
-			</text>
-			<combo_box name="Physics Shape Type Combo Ctrl" tool_tip="Wybierz typ kształtu fizycznego" />
-			<combo_box name="material">
-				<combo_box.item label="Kamień" name="Stone" />
-				<combo_box.item label="Szkło" name="Glass" />
-				<combo_box.item label="Drewno" name="Wood" />
-				<combo_box.item label="Ciało" name="Flesh" />
-				<combo_box.item label="Plastik" name="Plastic" />
-				<combo_box.item label="Guma" name="Rubber" />
-			</combo_box>
-			<spinner label="Grawitacja" name="Physics Gravity" />
-			<spinner label="Tarcie" name="Physics Friction" />
-			<spinner label="Gęstość w 100 kg/m^3" name="Physics Density" />
-			<spinner label="Odbijanie" name="Physics Restitution" />
-		</panel>
 		<panel label="Tekstura" name="Texture" />
-		<panel label="Zawart." name="Contents">
-			<button label="Nowy skrypt" label_selected="Nowy skrypt" name="button new script" />
-			<button label="Prawa" name="button permissions" />
-		</panel>
+		<panel label="Treść" name="Contents" />
 	</tab_container>
 	<panel name="land info panel">
 		<text name="label_parcel_info">

@@ -47,13 +47,13 @@
             <menu_item_separator
      layout="topleft" />
    <menu_item_call
-     enabled="false"
+     enabled="true"
      label="Build"
      name="Create">
         <menu_item_call.on_click
          function="Land.Build" />
-        <menu_item_call.on_enable
-         function="EnableEdit" />
+        <!-- <menu_item_call.on_enable
+         function="Land.EnableBuild" /> -->
     </menu_item_call>
     <menu_item_call
      enabled="false"

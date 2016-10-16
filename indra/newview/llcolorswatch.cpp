@@ -354,6 +354,14 @@ void LLColorSwatchCtrl::setValid(BOOL valid )
 	}
 }
 
+// [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
+bool LLColorSwatchCtrl::getPickerVisible() const
+{
+	const LLFloater* floaterp = mPickerHandle.get();
+	return (floaterp) && (floaterp->getVisible());
+}
+// [/SL:KB]
+
 void LLColorSwatchCtrl::showPicker(BOOL take_focus)
 {
 	LLFloaterColorPicker* pickerp = (LLFloaterColorPicker*)mPickerHandle.get();
