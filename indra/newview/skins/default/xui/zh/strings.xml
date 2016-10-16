@@ -1184,6 +1184,24 @@ http://secondlife.com/viewer-access-faq
 	<string name="dictionary_files">
 		字典
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		目前無法取得此位置的訊息，請稍候再試。
+	</string>
+	<string name="parcel_server_forbidden_text">
+		權限不足，無法取得此位置的資訊。  請向地段所有人查詢你的權限。
+	</string>
+	<string name="parcel_server_update_text">
+		地點資訊因無伺服器更新故無法提供。
+	</string>
+
 	<string name="shape">
 		體形
 	</string>

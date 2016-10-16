@@ -35,6 +35,9 @@
 #include "lltransientfloatermgr.h"
 #include "llpaneloutfitedit.h"
 #include "llsidepanelappearance.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 
 //static
 const std::string LLFloaterSidePanelContainer::sMainPanelName("main_panel");
@@ -126,6 +129,22 @@ bool LLFloaterSidePanelContainer::canShowPanel(const std::string& floater_name, 
 	
 void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, const LLSD& key)
 {
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	// Hack in case we forget a reference somewhere
+	if ( ("places" == floater_name) && (key.has("type")) && (gSavedSettings.getBOOL("ShowPlaceFloater")) )
+	{
+		const std::string strType = key["type"].asString();
+		if ( ("remote_place" == strType) || ("landmark" == strType) )
+		{
+			LLFloaterReg::showInstance("parcel_info", key);
+#if !LL_RELEASE_FOR_DOWNLOAD
+			LL_ERRS() << "Left-over reference to the places sidepanel" << LL_ENDL;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+			return;
+		}
+	}
+// [/SL:KB]
+
 	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::getTypedInstance<LLFloaterSidePanelContainer>(floater_name);
 //	if (floaterp)
 // [RLVa:KB] - Checked: 2013-04-16 (RLVa-1.4.8)

@@ -1174,6 +1174,24 @@ Intenta iniciar sesión de nuevo en unos instantes.
 	<string name="dictionary_files">
 		Diccionarios
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		En este momento no está disponible la información de esta parcela. Por favor, inténtalo más tarde.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Por tener restringido el acceso, no está disponible la información de esta parcela.  Por favor, revisa tus permisos con el propietario de la parcela.
+	</string>
+	<string name="parcel_server_update_text">
+		La información de esta parcela no está disponible sin una actualización del servidor.
+	</string>
+
 	<string name="shape">
 		Forma
 	</string>

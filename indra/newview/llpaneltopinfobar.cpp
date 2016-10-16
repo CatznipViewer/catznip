@@ -461,14 +461,20 @@ void LLPanelTopInfoBar::onContextMenuItemClicked(const LLSD::String& item)
 // [/RLVa:KB]
 			LLViewerInventoryItem* landmark = LLLandmarkActions::findLandmarkForAgentPos();
 
-			if(landmark == NULL)
-			{
-				LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
-			}
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2013-08-15 (Catznip-3.6)
+			if (landmark == NULL)
+				LLLandmarkActions::showCreateLandmark();
 			else
-			{
-				LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
-			}
+				LLLandmarkActions::showLandmarkInfo(landmark->getUUID());
+// [/SL:KB]
+//			if(landmark == NULL)
+//			{
+//				LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "create_landmark"));
+//			}
+//			else
+//			{
+//				LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id",landmark->getUUID()));
+//			}
 // [RLVa:KB] - Checked: 2012-02-08 (RLVa-1.4.5) | Added: RLVa-1.4.5
 		}
 // [/RLVa:KB]

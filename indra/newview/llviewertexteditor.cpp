@@ -80,10 +80,13 @@ public:
 	}
 	static void showInfo(const LLUUID& landmark_inv_id)
 	{
-		LLSD key;
-		key["type"] = "landmark";
-		key["id"] = landmark_inv_id;
-		LLFloaterSidePanelContainer::showPanel("places", key);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+		LLLandmarkActions::showLandmarkInfo(landmark_inv_id);
+// [/SL:KB]
+//		LLSD key;
+//		key["type"] = "landmark";
+//		key["id"] = landmark_inv_id;
+//		LLFloaterSidePanelContainer::showPanel("places", key);
 	}
 	static void processForeignLandmark(LLLandmark* landmark,
 			const LLUUID& object_id, const LLUUID& notecard_inventory_id,

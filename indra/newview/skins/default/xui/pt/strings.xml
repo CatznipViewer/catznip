@@ -1138,6 +1138,24 @@ Pessoas com contas gratuitas não poderão acessar o Second Life no momento para
 	<string name="dictionary_files">
 		Dicionários
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Dados sobre o local não disponíveis no momento. Favor tentar mais tarde.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Dados sobre o local controlados por lista de acesso. Verifique se você está autorizado a acessá-los com o dono do lote.
+	</string>
+	<string name="parcel_server_update_text">
+		Dados sobre o local requerem atualização do servidor.
+	</string>
+
 	<string name="shape">
 		Silhueta
 	</string>

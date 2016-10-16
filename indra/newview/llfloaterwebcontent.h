@@ -83,6 +83,11 @@ public:
 	/* virtual */ void onClose(bool app_quitting);
 	/* virtual */ void draw();
 
+// [SL:KB] - Patch: Control-FloaterWebContent | Checked: 2012-09-30 (Catznip-3.3)
+	bool getShowPageTitle() const { return mShowPageTitle; }
+	void setShowPageTitle(bool show_page_title) { mShowPageTitle = show_page_title; }
+// [/SL:KB]
+
 protected:
 	// inherited from LLViewerMediaObserver
 	/*virtual*/ void handleMediaEvent(LLPluginClassMedia* self, EMediaEvent event);

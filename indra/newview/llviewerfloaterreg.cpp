@@ -106,6 +106,9 @@
 // [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
 #include "llfloaterownedobjects.h"
 // [/SL:KB]
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
+#include "llfloaterparcelinfo.h"
+// [/SL:KB]
 #include "llfloaterpathfindingcharacters.h"
 #include "llfloaterpathfindingconsole.h"
 #include "llfloaterpathfindinglinksets.h"
@@ -124,6 +127,9 @@
 #include "llfloaterscriptedprefs.h"
 #include "llfloaterscriptlimits.h"
 #include "llfloatersearch.h"
+// [SL:KB] - Patch: UI-Search | Checked: 2012-09-03 (Catznip-3.3)
+#include "llfloatersearchcontainer.h"
+// [/SL:KB]
 #include "llfloatersellland.h"
 #include "llfloatersettingsdebug.h"
 #include "llfloatersidepanelcontainer.h"
@@ -333,6 +339,9 @@ void LLViewerFloaterReg::registerFloaters()
 // [/SL:KB]
 	LLFloaterPayUtil::registerFloater();
 
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
+	LLFloaterReg::add("parcel_info", "floater_parcel_info.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterParcelInfo>);
+// [/SL:KB]
 	LLFloaterReg::add("pathfinding_characters", "floater_pathfinding_characters.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterPathfindingCharacters>);
 	LLFloaterReg::add("pathfinding_linksets", "floater_pathfinding_linksets.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterPathfindingLinksets>);
 	LLFloaterReg::add("pathfinding_console", "floater_pathfinding_console.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterPathfindingConsole>);
@@ -395,7 +404,12 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("stop_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotRunQueue>);
 	LLFloaterReg::add("snapshot", "floater_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSnapshot>);
     LLFloaterReg::add("outfit_snapshot", "floater_outfit_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutfitSnapshot>);
-    LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
+//	LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
+// [SL:KB] - Patch: UI-Search | Checked: 2012-09-03 (Catznip-3.3)
+	LLFloaterReg::add("search", "floater_search_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchContainer>);
+	LLFloaterReg::add("search_places", "floater_search_places.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloater>);
+	LLFloaterReg::add("search_web", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
+// [/SL:KB]
 	LLFloaterReg::add("my_profile", "floater_my_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
 	LLFloaterReg::add("profile", "floater_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
 	LLFloaterReg::add("how_to", "floater_how_to.xml", (LLFloaterBuildFunc)&LLFloaterWebContent::create);

@@ -1183,6 +1183,24 @@ Prova ad accedere nuovamente tra un minuto.
 	<string name="dictionary_files">
 		Dizionari
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		Informazioni su questo luogo non disponibili al momento, riprova più tardi.
+	</string>
+	<string name="parcel_server_forbidden_text">
+		Informazioni su questo luogo non disponibili a causa delle limitazioni di accesso.  Controlla i tuoi permessi con il proprietario del terreno.
+	</string>
+	<string name="parcel_server_update_text">
+		Informazioni sul luogo non disponibili senza l&apos;aggiornamento del server.
+	</string>
+
 	<string name="shape">
 		Figura corporea
 	</string>

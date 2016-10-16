@@ -273,6 +273,7 @@ set(viewer_SOURCE_FILES
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
     llfloaterownedobjects.cpp
+    llfloaterparcelinfo.cpp
     llfloaterpathfindingcharacters.cpp
     llfloaterpathfindingconsole.cpp
     llfloaterpathfindinglinksets.cpp
@@ -292,6 +293,7 @@ set(viewer_SOURCE_FILES
     llfloaterscriptedprefs.cpp
     llfloaterscriptlimits.cpp
     llfloatersearch.cpp
+    llfloatersearchcontainer.cpp
     llfloatersellland.cpp
     llfloatersettingsdebug.cpp
     llfloatersidepanelcontainer.cpp
@@ -466,6 +468,7 @@ set(viewer_SOURCE_FILES
     llpaneloutfitedit.cpp
     llpaneloutfitsinventory.cpp
     llpaneloutfitstab.cpp
+    llpanelparcelinfo.cpp
     llpanelpeople.cpp
     llpanelpeoplemenus.cpp
     llpanelpermissions.cpp
@@ -474,6 +477,8 @@ set(viewer_SOURCE_FILES
     llpanelplaceinfo.cpp
     llpanelplaceprofile.cpp
     llpanelplaces.cpp
+    llpanelplacessearch.cpp
+    llpanelplacessearchpanel.cpp
     llpanelplacestab.cpp
     llpanelpresetspulldown.cpp
     llpanelprimmediacontrols.cpp
@@ -539,6 +544,7 @@ set(viewer_SOURCE_FILES
     llscrollingpanelparam.cpp
     llscrollingpanelparambase.cpp
     llsearchcombobox.cpp
+    llsearchdirectory.cpp
     llsearchhistory.cpp
     llsecapi.cpp
     llsechandler_basic.cpp
@@ -918,6 +924,7 @@ set(viewer_HEADER_FILES
     llfloaterobjectweights.h
     llfloateropenobject.h
     llfloaterownedobjects.h
+    llfloaterparcelinfo.h
     llfloaterpathfindingcharacters.h
     llfloaterpathfindingconsole.h
     llfloaterpathfindinglinksets.h
@@ -937,6 +944,7 @@ set(viewer_HEADER_FILES
     llfloaterscriptedprefs.h
     llfloaterscriptlimits.h
     llfloatersearch.h
+    llfloatersearchcontainer.h
     llfloatersellland.h
     llfloatersettingsdebug.h
     llfloatersidepanelcontainer.h
@@ -1105,11 +1113,14 @@ set(viewer_HEADER_FILES
     llpanelpeople.h
     llpanelpeoplemenus.h
     llpanelpermissions.h
+    llpanelparcelinfo.h
     llpanelpick.h
     llpanelpicks.h
     llpanelplaceinfo.h
     llpanelplaceprofile.h
     llpanelplaces.h
+    llpanelplacessearch.h
+    llpanelplacessearchpanel.h
     llpanelplacestab.h
     llpanelpresetspulldown.h
     llpanelprimmediacontrols.h
@@ -1173,6 +1184,7 @@ set(viewer_HEADER_FILES
     llscrollingpanelparam.h
     llscrollingpanelparambase.h
     llsearchcombobox.h
+    llsearchdirectory.h
     llsearchhistory.h
     llsecapi.h
     llsechandler_basic.h

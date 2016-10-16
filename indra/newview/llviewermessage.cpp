@@ -72,6 +72,9 @@
 #include "llinventorypanel.h"
 #include "llfloaterimnearbychat.h"
 #include "llmarketplacefunctions.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "lllandmarkactions.h"
+// [/SL:KB]
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "llpanelgrouplandmoney.h"
@@ -1277,16 +1280,22 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 						LLInventoryCategory* parent_folder = gInventory.getCategory(item->getParentUUID());
 						if ("inventory_handler" == from_name)
 						{
-							LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id", item->getUUID()));
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+							LLLandmarkActions::showLandmarkInfo(item->getUUID());
+// [/SL:KB]
+//							LLFloaterSidePanelContainer::showPanel("places", LLSD().with("type", "landmark").with("id", item->getUUID()));
 						}
 						else if("group_offer" == from_name)
 						{
 							// "group_offer" is passed by LLOpenTaskGroupOffer
 							// Notification about added landmark will be generated under the "from_name.empty()" called from LLOpenTaskOffer::done().
-							LLSD args;
-							args["type"] = "landmark";
-							args["id"] = obj_id;
-							LLFloaterSidePanelContainer::showPanel("places", args);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+							LLLandmarkActions::showLandmarkInfo(obj_id);
+// [/SL:KB]
+//							LLSD args;
+//							args["type"] = "landmark";
+//							args["id"] = obj_id;
+//							LLFloaterSidePanelContainer::showPanel("places", args);
 
 							continue;
 						}

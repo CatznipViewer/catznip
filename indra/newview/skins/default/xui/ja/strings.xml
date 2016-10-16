@@ -1192,6 +1192,24 @@ support@secondlife.com にお問い合わせください。
 	<string name="dictionary_files">
 		辞書
 	</string>
+
+	<!-- Parcel strings (used in multiple panels) -->
+	<string name="parcel_no_description">
+		(No Description)
+	</string>
+	<string name="parcel_not_available">
+		(N/A)
+	</string>
+	<string name="parcel_server_error_text">
+		この場所の情報は現在ご利用いただけません。あとでもう一度お試しください。
+	</string>
+	<string name="parcel_server_forbidden_text">
+		この場所の情報は、アクセス制限のためご利用いただけません。  許可については区画所有者にお問い合わせください。
+	</string>
+	<string name="parcel_server_update_text">
+		場所の情報は、サーバーがアップデートされるまでご利用いただけません。
+	</string>
+
 	<string name="shape">
 		シェイプ
 	</string>

@@ -42,6 +42,9 @@
 #include "llnotificationsutil.h"
 #include "lltextbox.h"
 #include "lltoggleablemenu.h"
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewermenu.h"
 #include "lllandmarkactions.h"
 #include "llclipboard.h"
@@ -272,11 +275,32 @@ BOOL LLTeleportHistoryFlatItem::handleRightMouseDown(S32 x, S32 y, MASK mask)
 
 void LLTeleportHistoryFlatItem::showPlaceInfoPanel(S32 index)
 {
-	LLSD params;
-	params["id"] = index;
-	params["type"] = "teleport_history";
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	if (gSavedSettings.getBOOL("ShowPlaceFloater"))
+	{
+		const LLTeleportHistoryPersistentItem* pItem = LLTeleportHistoryStorage::instance().getItem(index);
+		if (pItem)
+		{
+			LLSD sdKey;
+			sdKey["type"] = "remote_place";
+			sdKey["x"] = pItem->mGlobalPos.mdV[VX];
+			sdKey["y"] = pItem->mGlobalPos.mdV[VY];
+			sdKey["z"] = pItem->mGlobalPos.mdV[VZ];
 
-	LLFloaterSidePanelContainer::showPanel("places", params);
+			LLFloaterReg::showInstance("parcel_info", sdKey);
+		}
+	}
+	else
+	{
+// [/SL:KB]
+		LLSD params;
+		params["id"] = index;
+		params["type"] = "teleport_history";
+
+		LLFloaterSidePanelContainer::showPanel("places", params);
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-08-01 (Catznip-3.3)
+	}
+// [/SL:KB]
 }
 
 void LLTeleportHistoryFlatItem::onProfileBtnClick()
@@ -540,7 +564,10 @@ void LLTeleportHistoryPanel::draw()
 // virtual
 void LLTeleportHistoryPanel::onSearchEdit(const std::string& string)
 {
-	sFilterSubString = string;
+//	sFilterSubString = string;
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	setFilterSubString(string);
+// [/SL:KB]
 	showTeleportHistory();
 }
 
@@ -716,7 +743,10 @@ void LLTeleportHistoryPanel::refresh()
 	LLDate tab_boundary_date =  LLDate::now();
 
 	LLFlatListView* curr_flat_view = NULL;
-	std::string filter_string = sFilterSubString;
+//	std::string filter_string = sFilterSubString;
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	std::string filter_string = getFilterSubString();
+// [/SL:KB]
 	LLStringUtil::toUpper(filter_string);
 
 	U32 added_items = 0;
@@ -751,7 +781,10 @@ void LLTeleportHistoryPanel::refresh()
 				tab->setVisible(true);
 
 				// Expand all accordion tabs when filtering
-				if(!sFilterSubString.empty())
+//				if(!sFilterSubString.empty())
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+				if (hasFilterSubString())
+// [/SL:KB]
 				{
 					//store accordion tab state when filter is not empty
 					tab->notifyChildren(LLSD().with("action","store_state"));
@@ -802,7 +835,10 @@ void LLTeleportHistoryPanel::refresh()
 		}
 	}
 
-	mHistoryAccordion->setFilterSubString(sFilterSubString);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+	mHistoryAccordion->setFilterSubString(getFilterSubString());
+// [/SL:KB]
+//	mHistoryAccordion->setFilterSubString(sFilterSubString);
 
 	mHistoryAccordion->arrange();
 
@@ -848,7 +884,10 @@ void LLTeleportHistoryPanel::replaceItem(S32 removed_index)
 		.getFlatItemForPersistentItem(&mContextMenu,
 									  history_items[history_items.size() - 1], // Most recent item, it was added instead of removed
 									  history_items.size(), // index will be decremented inside loop below
-									  sFilterSubString);
+// [SL:KB] - Patch: UI-SidepanelPlaces | Checked: 2012-08-15 (Catznip-3.3)
+									  getFilterSubString());
+// [/SL:KB]
+//									  sFilterSubString);
 
 	fv->addItem(item, LLUUID::null, ADD_TOP);
 

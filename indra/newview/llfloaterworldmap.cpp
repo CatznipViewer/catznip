@@ -348,7 +348,16 @@ void LLFloaterWorldMap::onClose(bool app_quitting)
 // virtual
 void LLFloaterWorldMap::onOpen(const LLSD& key)
 {
-	bool center_on_target = (key.asString() == "center");
+// [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
+	if (key.has("target"))
+	{
+		LLVector3d posTarget(key["target"]["x"].asReal(), key["target"]["y"].asReal(), key["target"]["z"].asReal());
+		if (!posTarget.isExactlyZero())
+			trackLocation(posTarget);
+	}
+	bool center_on_target = (key.asString() == "center") || ( (key.has("center")) && (key["center"].asBoolean()) );
+// [/SL:KB]
+//	bool center_on_target = (key.asString() == "center");
 	
 	mIsClosing = FALSE;
 	
