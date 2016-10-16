@@ -706,6 +706,15 @@ set(viewer_SOURCE_FILES
     llxmlrpctransaction.cpp
     noise.cpp
     pipeline.cpp
+    rlvactions.cpp
+    rlvhandler.cpp
+    rlvhelper.cpp
+    rlvcommon.cpp
+    rlvlocks.cpp
+    rlvinventory.cpp
+    rlvextensions.cpp
+    rlvfloaters.cpp
+    rlvui.cpp
     qtoolalign.cpp
     )
 
@@ -1320,6 +1329,16 @@ set(viewer_HEADER_FILES
     macmain.h
     noise.h
     pipeline.h
+    rlvactions.h
+    rlvdefines.h
+    rlvhandler.h
+    rlvhelper.h
+    rlvcommon.h
+    rlvlocks.h
+    rlvinventory.h
+    rlvextensions.h
+    rlvfloaters.h
+    rlvui.h
     roles_constants.h
     qtoolalign.h
     VertexCache.h
