@@ -93,6 +93,9 @@ protected:
 	
 	LLTabContainer::TabPosition mTabPos;
 	BOOL				mAutoResize;
+// [SL:KB] - Patch: Control-MultiFloater | Checked: 2012-09-03 (Catznip-3.3)
+	bool				mCloseFloaters;					// Close all hosted floaters when this floater closes
+// [/SL:KB]
 	S32					mOrigMinWidth, mOrigMinHeight;  // logically const but initialized late
 
 private:
