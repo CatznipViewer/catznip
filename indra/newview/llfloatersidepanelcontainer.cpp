@@ -138,6 +138,18 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 
 void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, const std::string& panel_name, const LLSD& key)
 {
+// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
+	// Hack in case we forget a reference somewhere
+	if ( (!panel_name.empty()) && ("panel_people" == panel_name) && (key.has("people_panel_tab_name")) && ("blocked_panel" == key["people_panel_tab_name"].asString()) )
+	{
+#ifndef LL_RELEASE_FOR_DOWNLOAD
+		LL_ERRS() << "Request to open the blocked floater through the sidepanel!" << LL_ENDL;
+#endif // LL_RELEASE_FOR_DOWNLOAD
+		LLFloaterReg::showInstance("blocked", key);
+		return;
+	}
+// [/SL:KB]
+
 	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::getTypedInstance<LLFloaterSidePanelContainer>(floater_name);
 //	if (floaterp)
 // [RLVa:KB] - Checked: 2013-04-16 (RLVa-1.4.8)

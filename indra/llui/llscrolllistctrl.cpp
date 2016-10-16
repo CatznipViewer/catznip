@@ -162,6 +162,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mAllowKeyboardMovement(true),
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
 	mCommitOnSelectionChange(false),
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+	mCommitOnDelete(false),
+// [/SL:KB]
 	mSelectionChanged(false),
 // [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
 	mItemRemoved(false),
@@ -365,6 +368,13 @@ void LLScrollListCtrl::clearRows()
 	mLastSelected = NULL;
 	updateLayout();
 	mDirty = false; 
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 
@@ -943,7 +953,38 @@ void LLScrollListCtrl::deleteSingleItem(S32 target_index)
 	delete itemp;
 	mItemList.erase(mItemList.begin() + target_index);
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-08 (Catznip-3.5)
+void LLScrollListCtrl::deleteSingleItem(LLScrollListItem* itemp)
+{
+	item_list::iterator itItem = std::find(mItemList.begin(), mItemList.end(), itemp);
+	if (mItemList.end() == itItem)
+	{
+		return;
+	}
+
+	if (mLastSelected == itemp)
+	{
+		mLastSelected = NULL;
+	}
+	delete itemp;
+	mItemList.erase(itItem);
+	dirtyColumns();
+
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+}
+// [/SL:KB]
 
 //FIXME: refactor item deletion
 void LLScrollListCtrl::deleteItems(const LLSD& sd)
@@ -968,6 +1009,13 @@ void LLScrollListCtrl::deleteItems(const LLSD& sd)
 	}
 
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 void LLScrollListCtrl::deleteSelectedItems()
@@ -988,6 +1036,13 @@ void LLScrollListCtrl::deleteSelectedItems()
 	}
 	mLastSelected = NULL;
 	dirtyColumns();
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+	if (mCommitOnDelete)
+	{
+		onCommit();
+	}
+// [/SL:KB]
 }
 
 void LLScrollListCtrl::clearHighlightedItems()
@@ -2833,6 +2888,13 @@ std::string LLScrollListCtrl::getSortColumnName()
 	if (column) return column->mName;
 	else return "";
 }
+
+// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-13 (Catznip-3.5)
+S32 LLScrollListCtrl::getSortColumnIndex() const
+{
+	return (!mSortColumns.empty()) ? mSortColumns.back().first : -1;
+}
+// [/SL:KB]
 
 BOOL LLScrollListCtrl::hasSortOrder() const
 {

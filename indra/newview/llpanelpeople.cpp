@@ -86,7 +86,7 @@ static const std::string NEARBY_TAB_NAME	= "nearby_panel";
 static const std::string FRIENDS_TAB_NAME	= "friends_panel";
 static const std::string GROUP_TAB_NAME		= "groups_panel";
 static const std::string RECENT_TAB_NAME	= "recent_panel";
-static const std::string BLOCKED_TAB_NAME	= "blocked_panel"; // blocked avatars
+//static const std::string BLOCKED_TAB_NAME	= "blocked_panel"; // blocked avatars
 static const std::string COLLAPSED_BY_USER  = "collapsed_by_user";
 
 const S32 BASE_MAX_AGENT_GROUPS = 42;
@@ -1013,8 +1013,8 @@ LLUUID LLPanelPeople::getCurrentItemID() const
 	if (cur_tab == GROUP_TAB_NAME)
 		return mGroupList->getSelectedUUID();
 
-	if (cur_tab == BLOCKED_TAB_NAME)
-		return LLUUID::null; // FIXME?
+//	if (cur_tab == BLOCKED_TAB_NAME)
+//		return LLUUID::null; // FIXME?
 
 	llassert(0 && "unknown tab selected");
 	return LLUUID::null;
@@ -1036,8 +1036,8 @@ void LLPanelPeople::getCurrentItemIDs(uuid_vec_t& selected_uuids) const
 		mRecentList->getSelectedUUIDs(selected_uuids);
 	else if (cur_tab == GROUP_TAB_NAME)
 		mGroupList->getSelectedUUIDs(selected_uuids);
-	else if (cur_tab == BLOCKED_TAB_NAME)
-		selected_uuids.clear(); // FIXME?
+//	else if (cur_tab == BLOCKED_TAB_NAME)
+//		selected_uuids.clear(); // FIXME?
 	else
 		llassert(0 && "unknown tab selected");
 

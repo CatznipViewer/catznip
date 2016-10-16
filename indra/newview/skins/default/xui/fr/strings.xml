@@ -2288,19 +2288,19 @@ Veuillez réessayer de vous connecter dans une minute.
 		Ce résident a activé Ne pas déranger et verra votre message plus tard.
 	</string>
 	<string name="MuteByName">
-		(par nom)
+		Par nom
 	</string>
 	<string name="MuteAgent">
-		(résident)
+		Résident
 	</string>
 	<string name="MuteObject">
-		(objet)
+		Objet
 	</string>
 	<string name="MuteGroup">
-		(groupe)
+		Groupe
 	</string>
 	<string name="MuteExternal">
-		(externe)
+		Externe
 	</string>
 	<string name="RegionNoCovenant">
 		Il n&apos;y a aucun règlement pour ce domaine.

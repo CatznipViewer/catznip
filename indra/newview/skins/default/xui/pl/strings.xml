@@ -2116,19 +2116,19 @@ Spróbuj zalogować się ponownie za minutę.
 		Rezydent, do którego wysłałeś/aś wiadomość prywatną znajduje się w trybie zajętości i nie chce, aby mu przeszkadzano. Oznacza to, iż Twoja wiadomość zostanie zapisana do przejrzenia na później.
 	</string>
 	<string name="MuteByName">
-		(Nazwa)
+		Nazwa
 	</string>
 	<string name="MuteAgent">
-		(Rezydent)
+		Rezydent
 	</string>
 	<string name="MuteObject">
-		(Obiekt)
+		Obiekt
 	</string>
 	<string name="MuteGroup">
-		(Grupa)
+		Grupa
 	</string>
 	<string name="MuteExternal">
-		(Zewnętrzne)
+		Zewnętrzne
 	</string>
 	<string name="RegionNoCovenant">
 		Brak umowy dla tego majątku.

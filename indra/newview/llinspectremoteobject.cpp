@@ -29,7 +29,10 @@
 #include "llinspectremoteobject.h"
 #include "llinspect.h"
 #include "llmutelist.h"
-#include "llpanelblockedlist.h"
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+#include "llfloaterblocked.h"
+// [/SL:KB]
+//#include "llpanelblockedlist.h"
 #include "llslurl.h"
 #include "lltrans.h"
 #include "llui.h"
@@ -148,7 +151,10 @@ void LLInspectRemoteObject::onClickBlock()
 {
 	LLMute mute(mObjectID, mName, LLMute::OBJECT);
 	LLMuteList::getInstance()->add(mute);
-	LLPanelBlockedList::showPanelAndSelect(mute.mID);
+// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+	LLFloaterBlocked::showMuteAndSelect(mute.mID);
+// [/SL:KB]
+//	LLPanelBlockedList::showPanelAndSelect(mute.mID);
 	closeFloater();
 }
 

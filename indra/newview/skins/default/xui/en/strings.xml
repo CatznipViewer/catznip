@@ -2693,11 +2693,11 @@ This feature is currently in Beta. Please add your name to this [http://goo.gl/f
   <string name="DoNotDisturbModeResponseDefault">This resident has turned on &apos;Do Not Disturb&apos; and will see your message later.</string>
 
 	<!-- Mute -->
-	<string name="MuteByName">(By name)</string>
-	<string name="MuteAgent">(Resident)</string>
-	<string name="MuteObject">(Object)</string>
-	<string name="MuteGroup">(Group)</string>
-	<string name="MuteExternal">(External)</string>
+	<string name="MuteByName">By Name</string>
+	<string name="MuteAgent">Resident</string>
+	<string name="MuteObject">Object</string>
+	<string name="MuteGroup">Group</string>
+	<string name="MuteExternal">External</string>
 
 	<!-- Region/Estate Covenant -->
 	<string name="RegionNoCovenant">There is no Covenant provided for this Estate.</string>

@@ -2285,19 +2285,19 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 		Bu sakin &quot;Rahatsız Etme&quot; seçeneğini devreye almış, mesajınızı sonra görecek.
 	</string>
 	<string name="MuteByName">
-		(Adına göre)
+		Adına göre
 	</string>
 	<string name="MuteAgent">
-		(Sakin)
+		Sakin
 	</string>
 	<string name="MuteObject">
-		(Nesne)
+		Nesne
 	</string>
 	<string name="MuteGroup">
-		(Grup)
+		Grup
 	</string>
 	<string name="MuteExternal">
-		(Harici)
+		Harici
 	</string>
 	<string name="RegionNoCovenant">
 		Bu Gayrimenkul için Sözleşmesi yok.

@@ -2285,19 +2285,19 @@ support@secondlife.com.
 		Этот житель включил режим «Не беспокоить» и увидит ваше сообщение позже.
 	</string>
 	<string name="MuteByName">
-		(по имени)
+		по имени
 	</string>
 	<string name="MuteAgent">
-		(для жителя)
+		для жителя
 	</string>
 	<string name="MuteObject">
-		(для объекта)
+		для объекта
 	</string>
 	<string name="MuteGroup">
-		(для группы)
+		для группы
 	</string>
 	<string name="MuteExternal">
-		(внешний)
+		внешний
 	</string>
 	<string name="RegionNoCovenant">
 		Нет соглашения для этого землевладения.
