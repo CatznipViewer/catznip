@@ -975,7 +975,10 @@ void LLFloaterWorldMap::buildLandmarkIDLists()
 	
 	LLInventoryModel::cat_array_t cats;
 	LLInventoryModel::item_array_t items;
-	LLIsType is_landmark(LLAssetType::AT_LANDMARK);
+//	LLIsType is_landmark(LLAssetType::AT_LANDMARK);
+// [SL:KB] - Patch: World-LandmarkFilter | Checked: 2014-03-02 (Catznip-3.6)
+	LLFindLandmarks is_landmark(true, gSavedSettings.getBOOL("WorldMapFilterSelfLandmarks"));
+// [/SL:KB]
 	gInventory.collectDescendentsIf(gInventory.getRootFolderID(),
 									cats,
 									items,
@@ -1017,7 +1020,11 @@ F32 LLFloaterWorldMap::getDistanceToDestination(const LLVector3d &destination,
 void LLFloaterWorldMap::clearLocationSelection(BOOL clear_ui, BOOL dest_reached)
 {
 	LLCtrlListInterface *list = mListSearchResults;
-	if (list && (!dest_reached || (list->getItemCount() == 1)))
+//	if (list && (!dest_reached || (list->getItemCount() == 1)))
+// [SL:KB] - Patch: UI-WorldMap | Checked: 2014-03-26 (Catznip-3.6)
+// [SL:KB] - Patch: UI-WorldMap | Checked: 2014-03-26 (Catznip-3.6)
+	if ( (list) && (!dest_reached || (list->getItemCount() == 1)) && (clear_ui) )
+// [/SL:KB]
 	{
 		list->operateOnAll(LLCtrlListInterface::OP_DELETE);
 	}
@@ -1269,7 +1276,10 @@ void LLFloaterWorldMap::onLocationCommit()
 		return;
 	}
 	
-	clearLocationSelection(FALSE);
+//	clearLocationSelection(FALSE);
+// [SL:KB] - Patch: UI-WorldMap | Checked: 2014-03-26 (Catznip-3.6)
+	clearLocationSelection(TRUE);
+// [/SL:KB]
 	mCompletingRegionName = "";
 	mLastRegionName = "";
 	

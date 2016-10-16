@@ -28,10 +28,20 @@
 
 #include "llfloaterregionrestarting.h"
 
+// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
+#include "llcombobox.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "lluictrl.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
+#include "llinventoryfunctions.h"
+#include "llinventorymodel.h"
+#include "llinventorymodelbackgroundfetch.h"
+#include "llviewercontrol.h"
+#include "llviewerinventory.h"
+// [/SL:KB]
 #include "llviewerwindow.h"
 
 static S32 sSeconds;
@@ -41,8 +51,11 @@ LLFloaterRegionRestarting::LLFloaterRegionRestarting(const LLSD& key) :
 	LLFloater(key),
 	LLEventTimer(1)
 {
-	mName = (std::string)key["NAME"];
-	sSeconds = (LLSD::Integer)key["SECONDS"];
+//	mName = (std::string)key["NAME"];
+//	sSeconds = (LLSD::Integer)key["SECONDS"];
+// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
+	sSeconds = (key.has("[SECONDS]")) ? key["SECONDS"].asInteger() : 300;
+// [/SL:KB]
 }
 
 LLFloaterRegionRestarting::~LLFloaterRegionRestarting()
@@ -54,13 +67,21 @@ BOOL LLFloaterRegionRestarting::postBuild()
 {
 	mRegionChangedConnection = gAgent.addRegionChangedCallback(boost::bind(&LLFloaterRegionRestarting::regionChange, this));
 
-	LLStringUtil::format_map_t args;
-	std::string text;
+// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
+	const LLUUID idLandmarks = gInventory.findCategoryUUIDForType(LLFolderType::FT_LANDMARK);
+	LLInventoryModelBackgroundFetch::instance().start(idLandmarks);
 
-	args["[NAME]"] = mName;
-	text = getString("RegionName", args);
-	LLTextBox* textbox = getChild<LLTextBox>("region_name");
-	textbox->setValue(text);
+	getChild<LLComboBox>("landmark combo")->setPrearrangeCallback(boost::bind(&LLFloaterRegionRestarting::refreshLandmarkList, this));
+	getChild<LLUICtrl>("teleport_btn")->setCommitCallback(boost::bind(&LLFloaterRegionRestarting::onTeleportClicked, this));
+// [/SL:KB]
+
+//	LLStringUtil::format_map_t args;
+//	std::string text;
+
+//	args["[NAME]"] = mName;
+//	text = getString("RegionName", args);
+//	LLTextBox* textbox = getChild<LLTextBox>("region_name");
+//	textbox->setValue(text);
 
 	sShakeState = SHAKE_START;
 
@@ -86,7 +107,11 @@ void LLFloaterRegionRestarting::refresh()
 	LLStringUtil::format_map_t args;
 	std::string text;
 
-	args["[SECONDS]"] = llformat("%d", sSeconds);
+//	args["[SECONDS]"] = llformat("%d", sSeconds);
+// [SL:TD] - Patch: UI-RegionRestart | Checked: 2014-02-26 (Catznip-R9)
+	args["[MINUTES]"] = llformat("%d", sSeconds/60);
+	args["[SECONDS]"] = llformat("%02d", sSeconds%60);
+// [/SL:TD]
 	getChild<LLTextBox>("restart_seconds")->setValue(getString("RestartSeconds", args));
 
 	sSeconds = sSeconds - 1;
@@ -95,6 +120,57 @@ void LLFloaterRegionRestarting::refresh()
 		sSeconds = 0;
 	}
 }
+
+// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
+void LLFloaterRegionRestarting::onOpen(const LLSD& key)
+{
+	LLFloater::onOpen(key);
+
+	refreshLandmarkList();
+}
+
+void LLFloaterRegionRestarting::onTeleportClicked()
+{
+	LLComboBox* pCombo = findChild<LLComboBox>("landmark combo");
+	if (pCombo)
+	{
+		const LLUUID idAsset = pCombo->getSelectedValue().asUUID();
+		if (idAsset.notNull())
+			gAgent.teleportViaLandmark(idAsset);
+	}
+}
+
+void LLFloaterRegionRestarting::refreshLandmarkList()
+{
+	LLComboBox* pCombo = findChild<LLComboBox>("landmark combo");
+	if (!pCombo)
+		return;
+
+	// Delete all but the placehold entry
+	S32 cntItem = pCombo->getItemCount();
+	if (cntItem > 1)
+	{
+		pCombo->selectItemRange(1, -1);
+		pCombo->operateOnSelection(LLCtrlListInterface::OP_DELETE);
+	}
+	
+	// Add landmarks from inventory (match the logic from the world map floater)
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
+	LLFindLandmarks is_landmark(true, gSavedSettings.getBOOL("WorldMapFilterSelfLandmarks"));
+	gInventory.collectDescendentsIf(gInventory.getRootFolderID(), cats, items, LLInventoryModel::EXCLUDE_TRASH, is_landmark);
+	
+	std::sort(items.begin(), items.end(), LLViewerInventoryItem::comparePointers());
+
+	for (LLInventoryModel::item_array_t::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		const LLViewerInventoryItem* pItem = *itItem;
+		pCombo->addSimpleElement(pItem->getName(), ADD_BOTTOM, pItem->getAssetUUID());
+	}
+
+	pCombo->selectFirstItem();
+}
+// [/SL:KB]
 
 void LLFloaterRegionRestarting::draw()
 {

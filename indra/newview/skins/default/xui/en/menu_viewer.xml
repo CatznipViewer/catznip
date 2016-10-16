@@ -3479,6 +3479,16 @@
            label="Media Browser"
            name="Media Browser"
            shortcut="control|alt|shift|Z">
+          <menu_item_check
+           label="Region Restart Test..."
+           name="Region Restart Test">
+              <menu_item_check.on_check
+               function="Floater.Visible"
+               parameter="region_restarting" />
+              <menu_item_check.on_click
+               function="Floater.Toggle"
+               parameter="region_restarting" />
+          </menu_item_check>
             <menu_item_call.on_click
              function="Advanced.WebContentTest"
              parameter="http://google.com"/>
