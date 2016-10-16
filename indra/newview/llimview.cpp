@@ -51,6 +51,9 @@
 #include "llchat.h"
 #include "llfloaterimsession.h"
 #include "llfloaterimcontainer.h"
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+#include "llimstorage.h"
+// [/SL:KB]
 #include "llgroupiconctrl.h"
 #include "llmd5.h"
 #include "llmutelist.h"
@@ -125,11 +128,11 @@ void process_dnd_im(const LLSD& notification)
     {
         //reconstruct session using data from the notification
         std::string name = data["FROM"];
-        LLAvatarName av_name;
-        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
-        {
-            name = av_name.getDisplayName();
-        }
+//        LLAvatarName av_name;
+//        if (LLAvatarNameCache::get(data["FROM_ID"], &av_name))
+//        {
+//            name = av_name.getDisplayName();
+//        }
 		
         
         LLIMModel::getInstance()->newSession(sessionID, 
@@ -868,14 +871,59 @@ void LLIMModel::LLIMSession::loadHistory()
 {
 	mMsgs.clear();
 
-	if ( gSavedPerAccountSettings.getBOOL("LogShowHistory") )
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2013-12-25 (Catznip-3.6)
+	bool fShowHistory = gSavedPerAccountSettings.getBOOL("LogShowHistory");
+	bool fHasUnreadIM = LLPersistentUnreadIMStorage::instance().isEnabled() && LLPersistentUnreadIMStorage::instance().hasPersistedUnreadIM(mSessionID);
+	if ( (fShowHistory) || (fHasUnreadIM) )
 	{
 		std::list<LLSD> chat_history;
 
 		//involves parsing of a chat history
 		LLLogChat::loadChatHistory(mHistoryFileName, chat_history);
-		addMessagesFromHistory(chat_history);
+
+		if (fHasUnreadIM)
+		{
+			const std::string strUnreadMsg = LLPersistentUnreadIMStorage::instance().getPersistedUnreadMessage(mSessionID);
+			int cntUnread = LLPersistentUnreadIMStorage::instance().getPersistedUnreadCount(mSessionID);
+
+			int szRecall = 2048;
+			while ( (chat_history.size() < cntUnread) && (szRecall <= 16384) &&
+			        (!LLLogChat::loadChatHistory(mHistoryFileName, chat_history, LLSD().with("recall_size", szRecall))) )
+			{
+				szRecall *= 2;
+			}
+
+			if (chat_history.size() >= cntUnread)
+			{
+				std::list<LLSD>::reverse_iterator itLine = chat_history.rbegin();
+				std::advance(itLine, cntUnread - 1);
+				for (; itLine != chat_history.rend(); ++itLine)
+				{
+					if (strUnreadMsg == (*itLine)[LL_IM_TEXT].asString())
+					{
+						std::list<LLSD> lines;
+						lines.splice(lines.end(), chat_history, (++itLine).base(), chat_history.end());
+						LLPersistentUnreadIMStorage::instance().addPersistedUnreadIMs(mSessionID, lines);
+						break;
+					}
+				}
+			}
+		}
+
+		if (fShowHistory)
+		{
+			addMessagesFromHistory(chat_history);
+		}
 	}
+// [/SL:KB]
+//	if ( gSavedPerAccountSettings.getBOOL("LogShowHistory") )
+//	{
+//		std::list<LLSD> chat_history;
+//
+//		//involves parsing of a chat history
+//		LLLogChat::loadChatHistory(mHistoryFileName, chat_history);
+//		addMessagesFromHistory(chat_history);
+//	}
 }
 
 LLIMModel::LLIMSession* LLIMModel::findIMSession(const LLUUID& session_id) const
@@ -955,12 +1003,19 @@ LLUUID LLIMModel::LLIMSession::generateOutgoingAdHocHash() const
 	return hash;
 }
 
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.8)
+void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name)
+{
+	// Standardize P2P IM session names to "complete name"
+	mName = av_name.getCompleteName();
+}
+// [/SL:KB]
+
 void LLIMModel::LLIMSession::buildHistoryFileName()
 {
-	mHistoryFileName = mName;
-
-	//ad-hoc requires sophisticated chat history saving schemes
-	if (isAdHoc())
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+	// Not all of the code above is broken but it becomes a bit of a mess otherwise
+	if (isAdHoc())		//ad-hoc requires sophisticated chat history saving schemes
 	{
 		/* in case of outgoing ad-hoc sessions we need to make specilized names
 		* if this naming system is ever changed then the filtering definitions in 
@@ -979,21 +1034,58 @@ void LLIMModel::LLIMSession::buildHistoryFileName()
 			mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
 		}
 	}
-	else if (isP2P()) // look up username to use as the log name
+	else if (isP2P())	// look up username to use as the log name
 	{
-		LLAvatarName av_name;
-		// For outgoing sessions we already have a cached name
-		// so no need for a callback in LLAvatarNameCache::get()
-		if (LLAvatarNameCache::get(mOtherParticipantID, &av_name))
-		{
-			mHistoryFileName = LLCacheName::buildUsername(av_name.getUserName());
-		}
-		else
-		{
-			// Incoming P2P sessions include a name that we can use to build a history file name
-			mHistoryFileName = LLCacheName::buildUsername(mName);
-		}
+		// NOTE-Catznip: [SL-2.6] mName will be:
+		//   - the "complete name" if display names are enabled and it's an outgoing IM
+		//   - the "legacy name" if display names are disabled or if it's an incoming IM
+		LLLogChat::buildIMP2PLogFilename(mOtherParticipantID, mName, mHistoryFileName);
+
+		// If it's an incoming IM session we may not have the display name yet 
+ 		LLAvatarNameCache::get(mOtherParticipantID, boost::bind(&LLIMModel::LLIMSession::onAvatarNameCache, this, _1, _2));
 	}
+	else
+	{
+		mHistoryFileName = mName;
+	}
+// [/SL:KB]
+//	mHistoryFileName = mName;
+//
+//	//ad-hoc requires sophisticated chat history saving schemes
+//	if (isAdHoc())
+//	{
+//		/* in case of outgoing ad-hoc sessions we need to make specilized names
+//		* if this naming system is ever changed then the filtering definitions in 
+//		* lllogchat.cpp need to be change acordingly so that the filtering for the
+//		* date stamp code introduced in STORM-102 will work properly and not add
+//		* a date stamp to the Ad-hoc conferences.
+//		*/
+//		if (mInitialTargetIDs.size())
+//		{
+//			std::set<LLUUID> sorted_uuids(mInitialTargetIDs.begin(), mInitialTargetIDs.end());
+//			mHistoryFileName = mName + " hash" + generateHash(sorted_uuids).asString();
+//		}
+//		else
+//		{
+//			//in case of incoming ad-hoc sessions
+//			mHistoryFileName = mName + " " + LLLogChat::timestamp(true) + " " + mSessionID.asString().substr(0, 4);
+//		}
+//	}
+//	else if (isP2P()) // look up username to use as the log name
+//	{
+//		LLAvatarName av_name;
+//		// For outgoing sessions we already have a cached name
+//		// so no need for a callback in LLAvatarNameCache::get()
+//		if (LLAvatarNameCache::get(mOtherParticipantID, &av_name))
+//		{
+//			mHistoryFileName = LLCacheName::buildUsername(av_name.getUserName());
+//		}
+//		else
+//		{
+//			// Incoming P2P sessions include a name that we can use to build a history file name
+//			mHistoryFileName = LLCacheName::buildUsername(mName);
+//		}
+//	}
 }
 
 //static
@@ -1165,7 +1257,11 @@ void LLIMModel::sendNoUnreadMessages(const LLUUID& session_id)
 	mNoUnreadMsgsSignal(arg);
 }
 
-bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text) {
+//bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text) {
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time)
+{
+// [/SL:KB]
 	
 	LLIMSession* session = findIMSession(session_id);
 
@@ -1175,14 +1271,20 @@ bool LLIMModel::addToHistory(const LLUUID& session_id, const std::string& from, 
 		return false;
 	}
 
-	session->addMessage(from, from_id, utf8_text, LLLogChat::timestamp(false)); //might want to add date separately
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+	session->addMessage(from, from_id, utf8_text, time); //might want to add date separately
+// [/SL:KB]
+//	session->addMessage(from, from_id, utf8_text, LLLogChat::timestamp(false)); //might want to add date separately
 
 	return true;
 }
 
 bool LLIMModel::logToFile(const std::string& file_name, const std::string& from, const LLUUID& from_id, const std::string& utf8_text)
 {
-	if (gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
+//	if (gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	if (gSavedPerAccountSettings.getBOOL("LogInstantMessages"))
+// [/SL:KB]
 	{	
 		std::string from_name = from;
 
@@ -1212,10 +1314,14 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 	return addMessage(session_id, SYSTEM_FROM, LLUUID::null, utf8_text);
 }
 
-bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
-						   const std::string& utf8_text, bool log2file /* = true */) { 
-
-	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//						   const std::string& utf8_text, bool log2file /* = true */) { 
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time, bool log2file)
+{ 
+	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, time, log2file);
+// [/SL:KB]
+//	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
 	if (!session) return false;
 
 	//good place to add some1 to recent list
@@ -1232,15 +1338,22 @@ bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, co
 	arg["message"] = utf8_text;
 	arg["from"] = from;
 	arg["from_id"] = from_id;
-	arg["time"] = LLLogChat::timestamp(false);
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+	arg["time"] = time;
+// [/SL:KB]
+//	arg["time"] = LLLogChat::timestamp(false);
 	arg["session_type"] = session->mSessionType;
 	mNewMsgSignal(arg);
 
 	return true;
 }
 
+//LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
+//													 const std::string& utf8_text, bool log2file /* = true */)
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
 LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
-													 const std::string& utf8_text, bool log2file /* = true */)
+                                                      const std::string& utf8_text, const std::string& time, bool log2file)
+// [/SL:KB]
 {
 	LLIMSession* session = findIMSession(session_id);
 
@@ -1257,7 +1370,10 @@ LLIMModel::LLIMSession* LLIMModel::addMessageSilently(const LLUUID& session_id, 
 		from_name = SYSTEM_FROM;
 	}
 
-	addToHistory(session_id, from_name, from_id, utf8_text);
+//	addToHistory(session_id, from_name, from_id, utf8_text);
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
+	addToHistory(session_id, from_name, from_id, utf8_text, time);
+// [/SL:KB]
 	if (log2file)
 	{
 		logToFile(getHistoryFileName(session_id), from_name, from_id, utf8_text);
@@ -2691,11 +2807,11 @@ void LLIMMgr::addMessage(
 	bool new_session = !hasSession(new_session_id);
 	if (new_session)
 	{
-		LLAvatarName av_name;
-		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
-		{
-			fixed_session_name = av_name.getDisplayName();
-		}
+//		LLAvatarName av_name;
+//		if (LLAvatarNameCache::get(other_participant_id, &av_name) && !name_is_setted)
+//		{
+//			fixed_session_name = av_name.getDisplayName();
+//		}
 		LLIMModel::getInstance()->newSession(new_session_id, fixed_session_name, dialog, other_participant_id, false, is_offline_msg);
 
 		LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(new_session_id);
@@ -2792,11 +2908,18 @@ void LLIMMgr::addSystemMessage(const LLUUID& session_id, const std::string& mess
 
 		else
 		{
-			std::string session_name;
-			// since we select user to share item with - his name is already in cache
-			gCacheName->getFullName(args["user_id"], session_name);
-			session_name = LLCacheName::buildUsername(session_name);
-			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
+// [SL:KB] - Patch: Chat-Logs | Checked: 2011-08-25 (Catznip-2.4)
+			std::string strFilename;
+			if (LLLogChat::buildIMP2PLogFilename(args["user_id"], LLStringUtil::null, strFilename))
+			{
+				LLIMModel::instance().logToFile(strFilename, SYSTEM_FROM, LLUUID::null, message.getString());
+			}
+// [/SL:KB]
+//			std::string session_name;
+//			// since we select user to share item with - his name is already in cache
+//			gCacheName->getFullName(args["user_id"], session_name);
+//			session_name = LLCacheName::buildUsername(session_name);
+//			LLIMModel::instance().logToFile(session_name, SYSTEM_FROM, LLUUID::null, message.getString());
 		}
 	}
 }
@@ -2986,6 +3109,9 @@ void LLIMMgr::removeSession(const LLUUID& session_id)
 	clearPendingInvitation(session_id);
 	clearPendingAgentListUpdates(session_id);
 
+// [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2014-05-16 (Catznip-3.6)
+	LLIMModel::getInstance()->sendNoUnreadMessages(session_id);
+// [/SL:KB]
 	LLIMModel::getInstance()->clearSession(session_id);
 
     LL_INFOS() << "LLIMMgr::removeSession, session removed, session id = " << session_id << LL_ENDL;

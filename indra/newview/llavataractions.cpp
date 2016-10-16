@@ -192,7 +192,10 @@ void LLAvatarActions::offerTeleport(const uuid_vec_t& ids)
 static void on_avatar_name_cache_start_im(const LLUUID& agent_id,
 										  const LLAvatarName& av_name)
 {
-	std::string name = av_name.getDisplayName();
+//	std::string name = av_name.getDisplayName();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+	std::string name = av_name.getUserName();
+// [/SL:KB]
 	LLUUID session_id = gIMMgr->addSession(name, IM_NOTHING_SPECIAL, agent_id);
 	if (session_id != LLUUID::null)
 	{
@@ -246,7 +249,10 @@ void LLAvatarActions::endIM(const LLUUID& id)
 static void on_avatar_name_cache_start_call(const LLUUID& agent_id,
 											const LLAvatarName& av_name)
 {
-	std::string name = av_name.getDisplayName();
+//	std::string name = av_name.getDisplayName();
+// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
+	std::string name = av_name.getUserName();
+// [/SL:KB]
 	LLUUID session_id = gIMMgr->addSession(name, IM_NOTHING_SPECIAL, agent_id, true);
 	if (session_id != LLUUID::null)
 	{
@@ -656,7 +662,10 @@ void LLAvatarActions::share(const LLUUID& id)
 	if (gIMMgr->hasSession(session_id))
 	{
 		// we should always get here, but check to verify anyways
-		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), false);
+// [SL:KB] - Patch: Chat-Logging | Checked: 2014-04-08 (Catznip-3.6)
+		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), LLLogChat::timestamp(false), false);
+// [/SL:KB]
+//		LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, LLTrans::getString("share_alert"), false);
 
 		LLFloaterIMSessionTab* session_floater = LLFloaterIMSessionTab::findConversation(session_id);
 		if (session_floater && session_floater->isMinimized())

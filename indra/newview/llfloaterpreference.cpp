@@ -539,9 +539,12 @@ BOOL LLFloaterPreference::postBuild()
 
 void LLFloaterPreference::updateDeleteTranscriptsButton()
 {
-	std::vector<std::string> list_of_transcriptions_file_names;
-	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions_file_names);
-	getChild<LLButton>("delete_transcripts")->setEnabled(list_of_transcriptions_file_names.size() > 0);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	getChild<LLButton>("delete_transcripts")->setEnabled(LLLogChat::hasTranscripts());
+// [/SL:KB]
+//	std::vector<std::string> list_of_transcriptions_file_names;
+//	LLLogChat::getListOfTranscriptFiles(list_of_transcriptions_file_names);
+//	getChild<LLButton>("delete_transcripts")->setEnabled(list_of_transcriptions_file_names.size() > 0);
 }
 
 void LLFloaterPreference::onDoNotDisturbResponseChanged()
@@ -1903,7 +1906,15 @@ void LLFloaterPreference::setPersonalInfo(const std::string& visibility, bool im
 	getChild<LLUICtrl>("send_im_to_email")->setValue(im_via_email);
 	getChildView("favorites_on_login_check")->setEnabled(TRUE);
 	getChildView("log_path_button")->setEnabled(TRUE);
-	getChildView("chat_font_size")->setEnabled(TRUE);
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	getChildView("log_nearby_chat")->setEnabled(TRUE);
+	getChildView("log_instant_messages")->setEnabled(TRUE);
+	getChildView("log_unread_messages")->setEnabled(TRUE);
+// [/SL:KB]
+// [SL:KB] - Patch: Preferences-Chat | Checked: 2014-07-02 (Catznip-3.6)
+	getChildView("logfile_name_datestamp")->setEnabled(TRUE);
+// [/SL:KB]
+//	getChildView("chat_font_size")->setEnabled(TRUE);
 	getChildView("conversation_log_combo")->setEnabled(TRUE);
 }
 

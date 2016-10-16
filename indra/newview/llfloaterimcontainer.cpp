@@ -1412,7 +1412,10 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const LLSD& userdata)
 
 	if ("conversation_log" == item)
 	{
-		return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+		return LLConversationLog::instance().getIsLoggingEnabled();
+// [/SL:KB]
+//		return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
 	}
 
 	//Enable Chat history item for ad-hoc and group conversations
@@ -2287,7 +2290,10 @@ void LLFloaterIMContainerView::updateSpeakBtnState()
 
 bool LLFloaterIMContainerBase::isConversationLoggingAllowed()
 {
-	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
+// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+	return LLConversationLog::instance().getIsLoggingEnabled();
+// [/SL:KB]
+//	return gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 0;
 }
 
 // [SL:KB] - Patch: Chat-Tabs | Checked: 2013-04-25 (Catznip-3.5)

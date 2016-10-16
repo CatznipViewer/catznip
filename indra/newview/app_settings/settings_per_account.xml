@@ -187,16 +187,38 @@
         <key>Value</key>
           <string />
       </map>
-    <key>LogNearbyChat</key>
+    <key>LogConversations</key>
         <map>
         <key>Comment</key>
-            <string>Log Nearby Chat messages to a file. Is used instead of LogChat but with the "1" default value.</string>
+            <string>Keep a log of past conversations</string>
         <key>Persist</key>
             <integer>1</integer>
         <key>Type</key>
             <string>Boolean</string>
         <key>Value</key>
+            <boolean>1</boolean>
+        </map>
+    <key>LogInstantMessages</key>
+        <map>
+        <key>Comment</key>
+            <string>Log IM, group and conference conversations</string>
+        <key>Persist</key>
             <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <boolean>1</boolean>
+        </map>
+    <key>LogNearbyChat</key>
+        <map>
+        <key>Comment</key>
+            <string>Log nearby chat text</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <boolean>1</boolean>
         </map>
     <key>LogTimestamp</key>
         <map>
@@ -230,6 +252,17 @@
             <string>Boolean</string>
         <key>Value</key>
             <integer>1</integer>
+        </map>
+    <key>LogUnreadIMs</key>
+        <map>
+        <key>Comment</key>
+            <string>Restore unread IMs on the next login</string>
+        <key>Persist</key>
+            <integer>1</integer>
+        <key>Type</key>
+            <string>Boolean</string>
+        <key>Value</key>
+            <boolean>1</boolean>
         </map>
     <key>VoiceEffectDefault</key>
     <map>
@@ -308,11 +341,11 @@
       	<key>Comment</key>
       		<string>Keep a conversation log and transcripts</string>
       	<key>Persist</key>
-      		<integer>1</integer>
+      		<integer>0</integer>
       	<key>Type</key>
       		<string>S32</string>
       	<key>Value</key>
-      		<integer>2</integer>
+      		<integer>1</integer>
     	</map>    
     <key>NearbyChatIsNotTornOff</key>
     <map>

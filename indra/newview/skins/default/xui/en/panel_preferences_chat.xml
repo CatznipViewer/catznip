@@ -452,6 +452,7 @@
       top_pad="10"
       width="505">
 
+<!--
     <text
         name="logging_label"
         layout="topleft"
@@ -485,6 +486,28 @@
             label="No log or transcripts"
             value="0"/>
     </combo_box>
+-->
+    <check_box
+     follows="left|top"
+	   enabled="false"
+     control_name="LogNearbyChat"
+     height="16"
+     label="Save nearby chat logs on my computer"
+     layout="topleft"
+     left="0"
+     name="log_nearby_chat"
+     width="250"
+     top_pad="0">
+    </check_box>
+    <check_box
+	   enabled="false"
+     control_name="LogInstantMessages"
+     height="16"
+     label="Save IM logs on my computer"
+     layout="topleft"
+     name="log_instant_messages"
+     width="250">
+    </check_box>
 
     <button
         enabled="false"

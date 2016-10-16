@@ -289,7 +289,10 @@ public:
 	 * Writes notification message to IM session.
 	 */
 	static void logToIM(const EInstantMessage& session_type,
-			const std::string& session_name, const std::string& from_name,
+//			const std::string& session_name, const std::string& from_name,
+// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
+			const std::string& file_name, const std::string& from_name,
+// [/SL:KB]
 			const std::string& message, const LLUUID& session_owner_id,
 			const LLUUID& from_id);
 
