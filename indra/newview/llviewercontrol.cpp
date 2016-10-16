@@ -36,6 +36,9 @@
 #include "llaudioengine.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
+#include "llavatarnamecache.h"
+// [/SL:KB]
 #include "llconsole.h"
 #include "lldrawpoolbump.h"
 #include "lldrawpoolterrain.h"
@@ -584,6 +587,15 @@ bool toggle_agent_pause(const LLSD& newvalue)
 	return true;
 }
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+bool handleAgentLinkUsernamesChanged(const LLSD& sdValue)
+{
+	U32 nValue = sdValue.asInteger();
+	LLAvatarNameCache::setShowUsername((LLAvatarName::EShowUsername)nValue);
+	return true;
+}
+// [/SL:KB]
+
 bool toggle_show_navigation_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
@@ -775,6 +787,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("QAMode")->getSignal()->connect(boost::bind(&show_debug_menus));
 	gSavedSettings.getControl("UseDebugMenus")->getSignal()->connect(boost::bind(&show_debug_menus));
 	gSavedSettings.getControl("AgentPause")->getSignal()->connect(boost::bind(&toggle_agent_pause, _2));
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2010-11-08 (Catznip-2.3)
+	gSavedSettings.getControl("AgentLinkShowUsernames")->getSignal()->connect(boost::bind(&handleAgentLinkUsernamesChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("ShowNavbarNavigationPanel")->getSignal()->connect(boost::bind(&toggle_show_navigation_panel, _2));
 	gSavedSettings.getControl("ShowMiniLocationPanel")->getSignal()->connect(boost::bind(&toggle_show_mini_location_panel, _2));
 	gSavedSettings.getControl("ShowObjectRenderingCost")->getSignal()->connect(boost::bind(&toggle_show_object_render_cost, _2));

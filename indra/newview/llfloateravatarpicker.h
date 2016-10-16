@@ -80,6 +80,9 @@ private:
 	void onBtnClose();
 	void onList();
 	void onTabChanged();
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2014-04-09 (Catznip-3.6)
+	void onFilterFriends(const std::string& strFilter);
+// [/SL:KB]
 	bool isSelectBtnEnabled();
 
 	void populateNearMe();
@@ -105,6 +108,9 @@ private:
     F32                 mContextConeInAlpha;
     F32                 mContextConeOutAlpha;
     F32                 mContextConeFadeTime;
+// [SL:KB]
+	std::string			mFilterFriends;
+// [/SL:KB]
 
 	validate_signal_t mOkButtonValidateSignal;
 	select_callback_t mSelectionCallback;

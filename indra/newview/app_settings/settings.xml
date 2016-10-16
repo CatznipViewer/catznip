@@ -401,6 +401,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>AgentLinkShowUsernames</key>
+    <map>
+      <key>Comment</key>
+      <string>Show usernames in agent app URLs (0 = always, 1 = on mismatch, 2 = never)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
     <key>AgentPause</key>
     <map>
       <key>Comment</key>

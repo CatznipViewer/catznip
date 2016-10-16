@@ -454,7 +454,10 @@ void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name)
 	bool fRlvCanShowName = (!mRlvCheckShowNames) || (RlvActions::canShowName(RlvActions::SNC_DEFAULT, mAvatarId));
 
 	setAvatarName( (fRlvCanShowName) ?  name_string : RlvStrings::getAnonym(av_name) );
-	setAvatarToolTip( (fRlvCanShowName) ? av_name.getUserName() : RlvStrings::getAnonym(av_name) );
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+	setAvatarToolTip( (fRlvCanShowName) ? av_name.getAccountName() : RlvStrings::getAnonym(av_name) );
+// [/SL:KB]
+//	setAvatarToolTip( (fRlvCanShowName) ? av_name.getUserName() : RlvStrings::getAnonym(av_name) );
 	// TODO-RLVa: bit of a hack putting this here. Maybe find a better way?
 	mAvatarIcon->setDrawTooltip(fRlvCanShowName);
 // [/RLVa:KB]

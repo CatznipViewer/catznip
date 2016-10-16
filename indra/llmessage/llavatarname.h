@@ -54,8 +54,8 @@ public:
 	static void setUseDisplayNames(bool use);
 	static bool useDisplayNames();
 	
-	static void setUseUsernames(bool use);
-	static bool useUsernames();
+//	static void setUseUsernames(bool use);
+//	static bool useUsernames();
 
 	// A name object is valid if not temporary and not yet expired (default is expiration not checked)
 	bool isValidName(F64 max_unrefreshed = 0.0f) const { return !mIsTemporaryName && (mExpires >= max_unrefreshed); }
@@ -67,9 +67,24 @@ public:
 	bool isTemporaryName() const { return mIsTemporaryName; }
 // [/SL:KB]
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+	typedef enum e_show_username_type
+	{
+		SHOW_ALWAYS = 0,		// Always show the username, i.e. "Kitty Barnett (kitty.barnett)"
+		SHOW_MISMATCH = 1,		// Only show the username on mismatch, i.e. "Kitty Barnett (random.resident)"
+		SHOW_NEVER = 2			// Never show the username
+	} EShowUsername;
+
+	static EShowUsername	getShowUsername()                            { return s_eShowUsername; }
+	static void				setShowUsername(EShowUsername eShowUsername) { s_eShowUsername = eShowUsername; }
+// [/SL:KB]
+
 	// For normal names, returns "James Linden (james.linden)"
 	// When display names are disabled returns just "James Linden"
-	std::string getCompleteName(bool use_parentheses = true) const;
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+	std::string getCompleteName(bool use_parentheses = true, EShowUsername eShowUsername = s_eShowUsername) const;
+// [/SL:KB]
+//	std::string getCompleteName(bool use_parentheses = true) const;
 	
 	// Returns "James Linden" or "bobsmith123 Resident" for backwards
 	// compatibility with systems like voice and muting
@@ -136,8 +151,12 @@ private:
 	// This will affect the output of the high level "get" methods
 	static bool sUseDisplayNames;
 
-	// Flag indicating if username should be shown after display name or not
-	static bool sUseUsernames;
+//	// Flag indicating if username should be shown after display name or not
+//	static bool sUseUsernames;
+
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+	static EShowUsername s_eShowUsername;
+// [/SL:KB]
 };
 
 #endif

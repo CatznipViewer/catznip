@@ -2893,8 +2893,15 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 				{
 					// *HACK: Desaturate the color
 					LLColor4 username_color = name_tag_color * 0.83f;
-					addNameTagLine(av_name.getUserName(), username_color, LLFontGL::NORMAL,
-					LLFontGL::getFontSansSerifSmall());
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+					addNameTagLine(av_name.getAccountName(), username_color, LLFontGL::NORMAL,
+						LLFontGL::getFontSansSerifSmall());
+// [/SL:KB]
+//					addNameTagLine(av_name.getUserName(), username_color, LLFontGL::NORMAL,
+//						LLFontGL::getFontSansSerifSmall());
+// [/SL:KB]
+//				addNameTagLine(av_name.getUserName(), username_color, LLFontGL::NORMAL,
+//					LLFontGL::getFontSansSerifSmall());
 				}
 // [RLVa:KB] - Checked: RLVa-1.2.2
 			}

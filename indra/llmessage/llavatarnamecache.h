@@ -79,7 +79,11 @@ namespace LLAvatarNameCache
 	// Set display name: flips the switch and triggers the callbacks.
 	void setUseDisplayNames(bool use);
 	
-	void setUseUsernames(bool use);
+//	void setUseUsernames(bool use);
+
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
+	void setShowUsername(LLAvatarName::EShowUsername eShowUsername);
+// [/SL:KB]
 
 	void insert(const LLUUID& agent_id, const LLAvatarName& av_name);
 

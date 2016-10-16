@@ -43,8 +43,12 @@ static const std::string IS_DISPLAY_NAME_DEFAULT("is_display_name_default");
 static const std::string DISPLAY_NAME_EXPIRES("display_name_expires");
 static const std::string DISPLAY_NAME_NEXT_UPDATE("display_name_next_update");
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+LLAvatarName::EShowUsername LLAvatarName::s_eShowUsername = LLAvatarName::SHOW_ALWAYS;
+// [/SL:KB]
+
 bool LLAvatarName::sUseDisplayNames = true;
-bool LLAvatarName::sUseUsernames = true;
+//bool LLAvatarName::sUseUsernames = true;
 
 // Minimum time-to-live (in seconds) for a name entry.
 // Avatar name should always guarantee to expire reasonably soon by default
@@ -82,15 +86,15 @@ bool LLAvatarName::useDisplayNames()
 	return sUseDisplayNames; 
 }
 
-void LLAvatarName::setUseUsernames(bool use)
-{
-	sUseUsernames = use;
-}
+//void LLAvatarName::setUseUsernames(bool use)
+//{
+//	sUseUsernames = use;
+//}
 
-bool LLAvatarName::useUsernames()
-{
-	return sUseUsernames;
-}
+//bool LLAvatarName::useUsernames()
+//{
+//	return sUseUsernames;
+//}
 
 LLSD LLAvatarName::asLLSD() const
 {
@@ -166,12 +170,18 @@ void LLAvatarName::setExpires(F64 expires)
 	mExpires = LLFrameTimer::getTotalSeconds() + expires;
 }
 
-std::string LLAvatarName::getCompleteName(bool use_parentheses) const
+//std::string LLAvatarName::getCompleteName(bool use_parentheses) const
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+std::string LLAvatarName::getCompleteName(bool use_parentheses, EShowUsername eShowUsername) const
+// [/SL:KB]
 {
 	std::string name;
 	if (sUseDisplayNames)
 	{
-		if (mUsername.empty() || mIsDisplayNameDefault)
+//		if (mUsername.empty() || mIsDisplayNameDefault)
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+		if ( (mUsername.empty()) || ((SHOW_NEVER == eShowUsername) || ((SHOW_MISMATCH == eShowUsername) && (mIsDisplayNameDefault))) )
+// [/SL:KB]
 		{
 			// If this particular display name is defaulted (i.e. based on user name),
 			// then display only the easier to read instance of the person's name.
@@ -179,18 +189,24 @@ std::string LLAvatarName::getCompleteName(bool use_parentheses) const
 		}
 		else
 		{
-			name = mDisplayName;
-			if(sUseUsernames)
-			{
-				if(use_parentheses)
-				{
-				    name += " (" + mUsername + ")";
-				}
-				else
-				{
-				    name += "  [ " + mUsername + " ]";
-				}
-			}
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
+			if(use_parentheses)
+				name = mDisplayName + " (" + mUsername + ")";
+			else
+				name = mDisplayName + " [" + mUsername + " ]";
+// [/SL:KB]
+//			name = mDisplayName;
+//			if(sUseUsernames)
+//			{
+//				if(use_parentheses)
+//				{
+//				    name += " (" + mUsername + ")";
+//				}
+//				else
+//				{
+//				    name += "  [ " + mUsername + " ]";
+//				}
+//			}
 		}
 	}
 	else

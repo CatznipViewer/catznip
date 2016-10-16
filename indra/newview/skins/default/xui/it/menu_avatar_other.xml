@@ -6,6 +6,11 @@
 	<menu_item_call label="IM" name="Send IM..."/>
 	<menu_item_call label="Chiama" name="Call"/>
 	<menu_item_call label="Invita al gruppo" name="Invite..."/>
+	<context_menu label="Copy" name="avatar_copy">
+		<menu_item_call label="Copia nome visualizzato" name="avatar_copy_displayname"/>
+		<menu_item_call label="Copia nome" name="avatar_copy_fullname"/>
+		<menu_item_call label="Copia SLurl" name="avatar_copy_slurl"/>
+	</context_menu>
 	<menu_item_call label="Blocca" name="Avatar Mute"/>
 	<menu_item_call label="Segnala" name="abuse"/>
 	<menu_item_call label="Congela" name="Freeze..."/>

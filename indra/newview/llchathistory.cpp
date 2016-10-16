@@ -474,7 +474,10 @@ public:
 				mFrom = chat.mFromName.substr(0, username_start);
 				user_name->setValue(mFrom);
 
-				if (gSavedSettings.getBOOL("NameTagShowUsernames"))
+//				if (gSavedSettings.getBOOL("NameTagShowUsernames"))
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
+				if (SHOW_NEVER != LLAvatarName::getShowUsername())
+// [/SL:KB]
 				{
 					std::string username = chat.mFromName.substr(username_start + 2);
 					username = username.substr(0, username.length() - 1);
@@ -750,11 +753,19 @@ private:
 
 		LLTextBox* user_name = getChild<LLTextBox>("user_name");
 		user_name->setValue( LLSD(av_name.getDisplayName() ) );
-		user_name->setToolTip( av_name.getUserName() );
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		user_name->setToolTip(av_name.getAccountName());
+// [/SL:KB]
+//		user_name->setToolTip( av_name.getUserName() );
 
-		if (gSavedSettings.getBOOL("NameTagShowUsernames") && 
-			av_name.useDisplayNames() &&
-			!av_name.isDisplayNameDefault())
+//		if (gSavedSettings.getBOOL("NameTagShowUsernames") && 
+//			av_name.useDisplayNames() &&
+//			!av_name.isDisplayNameDefault())
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
+		if ( (SHOW_NEVER != LLAvatarName::getShowUsername()) && 
+		     (av_name.useDisplayNames()) && 
+		     (!av_name.isDisplayNameDefault()) )
+// [/SL:KB]
 		{
 			LLStyle::Params style_params_name;
 			LLColor4 userNameColor = LLUIColorTable::instance().getColor("EmphasisColor");
@@ -762,8 +773,15 @@ private:
 			style_params_name.font.name("SansSerifSmall");
 			style_params_name.font.style("NORMAL");
 			style_params_name.readonly_color(userNameColor);
-			user_name->appendText("  - " + av_name.getUserName(), FALSE, style_params_name);
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+			user_name->appendText("  - " + av_name.getAccountName(), FALSE, style_params_name);
+// [/SL:KB]
+//			user_name->appendText("  - " + av_name.getUserName(), FALSE, style_params_name);
 		}
+// [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
+		setToolTip(av_name.getAccountName());
+// [/SL:KB]
+//		setToolTip( av_name.getUserName() );
 
 // [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
 		if (mChatFlags & CHAT_FLAG_MODERATOR)
@@ -778,7 +796,6 @@ private:
 		}
 // [/SL:KB]
 
-		setToolTip( av_name.getUserName() );
 		// name might have changed, update width
 		updateMinUserNameWidth();
 	}
