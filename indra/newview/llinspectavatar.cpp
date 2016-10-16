@@ -48,6 +48,16 @@
 #include "lltooltip.h"	// positionViewNearMouse()
 #include "lltrans.h"
 
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+#include "llfloaterreporter.h"
+#include "llfloaterworldmap.h"
+#include "llmenubutton.h"
+#include "llnotificationsutil.h"
+#include "llpanelblockedlist.h"
+#include "lltoggleablemenu.h"
+#include "llviewerobjectlist.h"
+// [/SL:KB]
+
 class LLFetchAvatarData;
 
 
@@ -74,6 +84,14 @@ public:
 	// (for example, inspector about same avatar but in different position)
 	/*virtual*/ void onOpen(const LLSD& avatar_id);
 
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	// When closing they should close their gear menu 
+	/*virtual*/ void onClose(bool app_quitting);
+
+	// override the inspector mouse leave so timer is only paused if gear menu is not open
+	/*virtual*/ void onMouseLeave(S32 x, S32 y, MASK mask);
+// [/SL:KB]
+
 	// Update view based on information from avatar properties processor
 	void processAvatarData(LLAvatarData* data);
 	
@@ -94,6 +112,11 @@ private:
 // [/SL:KB]
 	void onClickMuteVolume();
 	void onVolumeChange(const LLSD& data);
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	// Button callbacks
+	void onAvatarAction(const LLSD& sdParam);
+	bool onAvatarEnableAction(const LLSD& sdParam) const;
+// [/SL:KB]
 	
 	void onAvatarNameCache(const LLUUID& agent_id,
 						   const LLAvatarName& av_name);
@@ -102,6 +125,10 @@ private:
 	LLUUID				mAvatarID;
 	// Need avatar name information to spawn friend add request
 	LLAvatarName		mAvatarName;
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	S32					mDescriptionHeight;
+	S32					mDescriptionHeightExpanded;
+// [/SL:KB]
 	// an in-flight request for avatar properties from LLAvatarPropertiesProcessor
 	// is represented by this object
 	LLFetchAvatarData*	mPropertiesRequest;
@@ -158,11 +185,19 @@ LLInspectAvatar::LLInspectAvatar(const LLSD& sd)
 :	LLInspect( LLSD() ),	// single_instance, doesn't really need key
 	mAvatarID(),			// set in onOpen()  *Note: we used to show partner's name but we dont anymore --angela 3rd Dec* 
 	mAvatarName(),
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	mDescriptionHeight(-1),
+	mDescriptionHeightExpanded(-1),
+// [/SL:KB]
 	mPropertiesRequest(NULL),
 	mAvatarNameCacheConnection()
 {
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-11-10 (Catznip-3.2)
 	mCommitCallbackRegistrar.add("InspectAvatar.Copy", boost::bind(&LLInspectAvatar::onClickCopy, this, _2));
+// [/SL:KB]
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	mCommitCallbackRegistrar.add("InspectAvatar.Action",      boost::bind(&LLInspectAvatar::onAvatarAction, this, _2));	
+	mEnableCallbackRegistrar.add("InspectAvatar.CheckAction", boost::bind(&LLInspectAvatar::onAvatarEnableAction, this, _2));
 // [/SL:KB]
 
 	// can't make the properties request until the widgets are constructed
@@ -189,6 +224,17 @@ LLInspectAvatar::~LLInspectAvatar()
 /*virtual*/
 BOOL LLInspectAvatar::postBuild(void)
 {
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	const LLRect rctDescription = getChild<LLUICtrl>("user_details")->getRect();
+	const LLRect rctVolume = getChild<LLUICtrl>("volume_slider")->getRect();
+	mDescriptionHeight = rctDescription.getHeight();
+	mDescriptionHeightExpanded = mDescriptionHeight + (rctDescription.mBottom - rctVolume.mBottom);
+
+	getChild<LLUICtrl>("view_profile_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "profile"));
+	getChild<LLUICtrl>("add_friend_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "friend_add"));
+	getChild<LLUICtrl>("im_btn")->setCommitCallback(boost::bind(&LLInspectAvatar::onAvatarAction, this, "send_im"));
+// [/SL:KB]
+
 	getChild<LLUICtrl>("mute_btn")->setCommitCallback(
 		boost::bind(&LLInspectAvatar::onClickMuteVolume, this) );
 
@@ -209,6 +255,12 @@ void LLInspectAvatar::onOpen(const LLSD& data)
 	// Extract appropriate avatar id
 	mAvatarID = data["avatar_id"];
 
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	bool fIsSelf = (gAgent.getID() == mAvatarID);
+	getChild<LLUICtrl>("gear_self_btn")->setVisible(fIsSelf);
+	getChild<LLUICtrl>("gear_btn")->setVisible(!fIsSelf);
+// [/SL:KB]
+
 	// Position the inspector relative to the mouse cursor
 	// Similar to how tooltips are positioned
 	// See LLToolTipMgr::createToolTip
@@ -221,14 +273,23 @@ void LLInspectAvatar::onOpen(const LLSD& data)
 		LLUI::positionViewNearMouse(this);
 	}
 
-	// Generate link to avatar profile.
-	getChild<LLUICtrl>("avatar_profile_link")->setTextArg("[LINK]", LLSLURL("agent", mAvatarID, "about").getSLURLString());
+//	// Generate link to avatar profile.
+//	getChild<LLUICtrl>("avatar_profile_link")->setTextArg("[LINK]", LLSLURL("agent", mAvatarID, "about").getSLURLString());
 
 	// can't call from constructor as widgets are not built yet
 	requestUpdate();
 
 	updateVolumeSlider();
 }
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+// virtual
+void LLInspectAvatar::onClose(bool app_quitting)
+{  
+	getChild<LLMenuButton>("gear_self_btn")->hideMenu();
+	getChild<LLMenuButton>("gear_btn")->hideMenu();
+}	
+// [/SL:KB]
 
 void LLInspectAvatar::requestUpdate()
 {
@@ -255,6 +316,27 @@ void LLInspectAvatar::requestUpdate()
 	// Make a new request for properties
 	delete mPropertiesRequest;
 	mPropertiesRequest = new LLFetchAvatarData(mAvatarID, this);
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+	// You can't re-add someone as a friend if they are already your friend
+	bool is_friend = LLAvatarTracker::instance().getBuddyInfo(mAvatarID) != NULL;
+	bool is_self = (mAvatarID == gAgentID);
+	if (is_self)
+	{
+		getChild<LLUICtrl>("add_friend_btn")->setVisible(false);
+		getChild<LLUICtrl>("im_btn")->setVisible(false);
+	}
+	else if (is_friend)
+	{
+		getChild<LLUICtrl>("add_friend_btn")->setVisible(false);
+		getChild<LLUICtrl>("im_btn")->setVisible(true);
+	}
+	else
+	{
+		getChild<LLUICtrl>("add_friend_btn")->setVisible(true);
+		getChild<LLUICtrl>("im_btn")->setVisible(false);
+	}
+// [/SL:KB]
 
 	// Use an avatar_icon even though the image id will come down with the
 	// avatar properties because the avatar_icon code maintains a cache of icons
@@ -300,6 +382,28 @@ void LLInspectAvatar::processAvatarData(LLAvatarData* data)
 	mPropertiesRequest = NULL;
 }
 
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+// For the avatar inspector, we only want to unpause the fade timer 
+// if neither the gear menu or self gear menu are open
+void LLInspectAvatar::onMouseLeave(S32 x, S32 y, MASK mask)
+{
+	LLToggleableMenu* gear_menu = getChild<LLMenuButton>("gear_btn")->getMenu();
+	LLToggleableMenu* gear_menu_self = getChild<LLMenuButton>("gear_self_btn")->getMenu();
+
+	if ( (gear_menu) && (gear_menu->getVisible()) || (gear_menu_self) && (gear_menu_self->getVisible()) )
+	{
+		return;
+	}
+
+	if (childHasVisiblePopupMenu())
+	{
+		return;
+	}
+
+	mOpenTimer.unpause();
+}
+// [/SL:KB]
+
 void LLInspectAvatar::updateVolumeSlider()
 {
 	bool voice_enabled = LLVoiceClient::getInstance()->getVoiceEnabled(mAvatarID);
@@ -310,12 +414,28 @@ void LLInspectAvatar::updateVolumeSlider()
 	{
 		getChild<LLUICtrl>("mute_btn")->setVisible(false);
 		getChild<LLUICtrl>("volume_slider")->setVisible(false);
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+		// TODO-Catznip: find a better way?
+		LLUICtrl* pDescription = getChild<LLUICtrl>("user_details");
+		const LLRect rctDescription = pDescription->getRect();
+		pDescription->reshape(rctDescription.getWidth(), mDescriptionHeightExpanded);
+		pDescription->translate(0, rctDescription.getHeight() - mDescriptionHeightExpanded);
+// [/SL:KB]
 	}
 
 	else 
 	{
 		getChild<LLUICtrl>("mute_btn")->setVisible(true);
 		getChild<LLUICtrl>("volume_slider")->setVisible(true);
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+		// TODO-Catznip: find a better way?
+		LLUICtrl* pDescription = getChild<LLUICtrl>("user_details");
+		const LLRect rctDescription = pDescription->getRect();
+		pDescription->reshape(rctDescription.getWidth(), mDescriptionHeight);
+		pDescription->translate(0, rctDescription.getHeight() - mDescriptionHeight);
+// [/SL:KB]
 
 		// By convention, we only display and toggle voice mutes, not all mutes
 		bool is_muted = LLAvatarActions::isVoiceMuted(mAvatarID);
@@ -409,6 +529,113 @@ void LLInspectAvatar::onClickCopy(const LLSD& sdParam)
 {
 	LLAvatarActions::copyToClipboard(mAvatarID, sdParam);
 	closeFloater();
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Control-AvatarInspector | Checked: 2013-05-03 (Catznip-3.5)
+void LLInspectAvatar::onAvatarAction(const LLSD& sdParam)
+{
+	const std::string strAction = sdParam.asString();
+
+	if ("profile" == strAction)
+	{
+		LLAvatarActions::showProfile(mAvatarID);
+	}
+	else if ("friend_add" == strAction)
+	{
+		LLAvatarActions::requestFriendshipDialog(mAvatarID, mAvatarName.getCompleteName());
+	}
+	else if ("send_im" == strAction)
+	{
+		LLAvatarActions::startIM(mAvatarID);
+	}
+	else if ("call" == strAction)
+	{
+		LLAvatarActions::startCall(mAvatarID);
+	}
+	else if ("teleport" == strAction)
+	{
+		LLAvatarActions::offerTeleport(mAvatarID);
+	}
+	else if ("invite_group" == strAction)
+	{
+		LLAvatarActions::inviteToGroup(mAvatarID);
+	}
+	else if ("pay" == strAction)
+	{
+		LLAvatarActions::pay(mAvatarID);
+	}
+	else if ("share" == strAction)
+	{
+		LLAvatarActions::share(mAvatarID);
+	}
+	else if ("toggle_mute" == strAction)
+	{
+		LLAvatarActions::toggleBlock(mAvatarID);
+		LLPanelBlockedList::showPanelAndSelect(mAvatarID);
+	}
+	else if ("freeze" == strAction)
+	{
+		handle_avatar_freeze(LLSD(mAvatarID));
+	}
+	else if ("eject" == strAction)
+	{
+		handle_avatar_eject( LLSD(mAvatarID) );
+	}
+	else if ("report" == strAction)
+	{
+		LLFloaterReporter::showFromAvatar(mAvatarID, mAvatarName.getCompleteName());
+	}
+	else if ("find_map" == strAction)
+	{
+		gFloaterWorldMap->trackAvatar(mAvatarID, mAvatarName.getDisplayName());
+		LLFloaterReg::showInstance("world_map");
+	}
+	else if ("zoom_in" == strAction)
+	{
+		handle_zoom_to_object(mAvatarID);
+	}
+
+	closeFloater();
+}
+
+bool LLInspectAvatar::onAvatarEnableAction(const LLSD& sdParam) const
+{
+	const std::string strAction = sdParam.asString();
+
+	if ("friend_add" == strAction)
+	{
+		return !LLAvatarActions::isFriend(mAvatarID);
+	}
+	else if ("teleport" == strAction)
+	{
+		return LLAvatarActions::canOfferTeleport(mAvatarID);
+	}
+	else if ("check_mute" == strAction)
+	{
+		return (!LLAvatarActions::isBlocked(mAvatarID)) && (LLAvatarActions::canBlock(mAvatarID));
+	}
+	else if ("check_unmute" == strAction)
+	{
+		return LLAvatarActions::isBlocked(mAvatarID);
+	}
+	else if ("freeze" == strAction)
+	{
+		return enable_freeze_eject(LLSD(mAvatarID));
+	}
+	else if ("eject" == strAction)
+	{
+		return enable_freeze_eject(LLSD(mAvatarID));
+	}
+	else if ("find_map" == strAction)
+	{
+		return is_agent_mappable(mAvatarID);
+	}
+	else if ("zoom_in" == strAction)
+	{
+		return gObjectList.findObject(mAvatarID);
+	}
+	return false;
 }
 // [/SL:KB]
 

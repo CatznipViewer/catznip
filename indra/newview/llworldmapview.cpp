@@ -45,6 +45,9 @@
 #include "llfloatermap.h"
 #include "llfloaterworldmap.h"
 #include "llfocusmgr.h"
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+#include "llinspectlocation.h"
+// [/SL:KB]
 #include "lllocalcliprect.h"
 #include "lltextbox.h"
 #include "lltextureview.h"
@@ -1094,8 +1097,13 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 
 		if (!region_flags.empty())
 		{
-			tooltip_msg += '\n';
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+			tooltip_msg += " (";
 			tooltip_msg += region_flags;
+			tooltip_msg += ')';
+// [/SL:KB]
+//			tooltip_msg += '\n';
+//			tooltip_msg += region_flags;
 		}
 					
 		const S32 SLOP = 9;
@@ -1105,9 +1113,40 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 		LLRect sticky_rect_screen;
 		sticky_rect_screen.setCenterAndSize(screen_x, screen_y, SLOP, SLOP);
 
-		LLToolTipMgr::instance().show(LLToolTip::Params()
-			.message(tooltip_msg)
-			.sticky_rect(sticky_rect_screen));
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+		if (gSavedSettings.getBOOL("ShowLocationInspector"))
+		{
+			bool fShowToolTip = true;
+
+			LLFloater* pInspector = LLFloaterReg::findInstance("inspect_location");
+			if ( (pInspector) && (pInspector->getVisible()) )
+			{
+				LLVector2 posCur(pos_global.mdV[VX], pos_global.mdV[VY]);
+				LLVector2 posOld(pInspector->getKey()["x"].asReal(), pInspector->getKey()["y"].asReal());
+			
+				fShowToolTip = (dist_vec_squared(posCur, posOld) >= 9.0f);
+			}
+
+			if (fShowToolTip)
+			{
+				LLInspector::Params p;
+				p.fillFrom(LLUICtrlFactory::instance().getDefaultParams<LLInspector>());
+				p.message(tooltip_msg);
+				p.image.name("Inspector_I");
+				p.click_callback(boost::bind(&LLInspectLocationUtil::showInspector, pos_global));
+				p.wrap(false);
+				LLToolTipMgr::instance().show(p);
+			}
+		}
+		else
+		{
+// [/SL:KB]
+			LLToolTipMgr::instance().show(LLToolTip::Params()
+				.message(tooltip_msg)
+				.sticky_rect(sticky_rect_screen));
+// [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
+		}
+// [/SL:KB]
 	}
 	return TRUE;
 }
