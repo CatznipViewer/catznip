@@ -81,7 +81,10 @@ public:
 	{
 		F32 right_x;
 		mStyle->getFont()->renderUTF8(mExpanderLabel, start, 
-									draw_rect.mRight, draw_rect.mTop, 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+									draw_rect.mRight - 5, draw_rect.mTop, 
+// [/SL:KB]
+//									draw_rect.mRight, draw_rect.mTop, 
 									mStyle->getColor(), 
 									LLFontGL::RIGHT, LLFontGL::TOP, 
 									0, 
@@ -113,7 +116,11 @@ LLExpandableTextBox::LLTextBoxEx::Params::Params()
 LLExpandableTextBox::LLTextBoxEx::LLTextBoxEx(const Params& p)
 :	LLTextEditor(p),
 	mExpanderLabel(p.label.isProvided() ? p.label : LLTrans::getString("More")),
-	mExpanderVisible(false)
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	mShowExpander(true),
+	mExpanderPos(-1)
+// [/SL:KB]
+//	mExpanderVisible(false)
 {
 	setIsChrome(TRUE);
 	setMaxTextLength(p.max_text_length);
@@ -128,16 +135,32 @@ void LLExpandableTextBox::LLTextBoxEx::setText(const LLStringExplicit& text,cons
 {
 	// LLTextBox::setText will obliterate the expander segment, so make sure
 	// we generate it again by clearing mExpanderVisible
-	mExpanderVisible = false;
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	mExpanderPos = -1;
+	mHiddenSegments.clear();
+// [/SL:KB]
+//	mExpanderVisible = false;
 	LLTextEditor::setText(text, input_params);
 
 	hideOrShowExpandTextAsNeeded();
 }
 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+void LLExpandableTextBox::LLTextBoxEx::setCanShowExpander(bool show_expander)
+{
+	if (show_expander == mShowExpander)
+		return;
+	mShowExpander = show_expander;
+	hideOrShowExpandTextAsNeeded();
+}
+// [/SL:KB]
 
 void LLExpandableTextBox::LLTextBoxEx::showExpandText()
 {
-	if (!mExpanderVisible)
+//	if (!mExpanderVisible)
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	if ( (mShowExpander) && (mExpanderPos == -1) )
+// [/SL:KB]
 	{
 		// make sure we're scrolled to top when collapsing
 		if (mScroller)
@@ -151,9 +174,44 @@ void LLExpandableTextBox::LLTextBoxEx::showExpandText()
 		LLStyle::Params expander_style(getStyleParams());
 		expander_style.font.style = "UNDERLINE";
 		expander_style.color = LLUIColorTable::instance().getColor("HTMLLinkColor");
-		LLExpanderSegment* expanderp = new LLExpanderSegment(new LLStyle(expander_style), getLineStart(last_line), getLength() + 1, mExpanderLabel, *this);
-		insertSegment(expanderp);
-		mExpanderVisible = true;
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+		mExpanderPos = getLineStart(last_line);
+		mHiddenSegments.clear();
+
+		segment_set_t::iterator itSegment = getSegIterContaining(mExpanderPos);
+		if (mSegments.end() != itSegment)
+		{
+			// Split the segment containing the last visible line at the start of the line
+			LLTextSegmentPtr pSegment = *itSegment;
+			if ( (pSegment->getStart() < mExpanderPos) && (mExpanderPos < pSegment->getEnd()) )
+			{
+				mHiddenSegments.insert(new LLNormalTextSegment(new LLStyle(getStyleParams()), mExpanderPos, pSegment->getEnd(), *this));
+				pSegment->setEnd(mExpanderPos);
+				++itSegment;
+			}
+
+			// Copy all remaining segments so we can restore them later
+			while (mSegments.end() != itSegment)
+			{
+				pSegment = *itSegment;
+				pSegment->unlinkFromDocument(this);
+				mHiddenSegments.insert(pSegment);
+				mSegments.erase(itSegment++);
+			}
+
+			// Insert the expander segment
+			if (mExpanderSegment.isNull())
+				mExpanderSegment = new LLExpanderSegment(new LLStyle(expander_style), 0, 0, mExpanderLabel, *this);
+			mExpanderSegment->setStart(mExpanderPos);
+			mExpanderSegment->setEnd(getLength() + 1);
+			mSegments.insert(mExpanderSegment);
+			mExpanderSegment->linkToDocument(this);
+			needsReflow(mExpanderPos);
+		}
+// [/SL:KB]
+//		LLExpanderSegment* expanderp = new LLExpanderSegment(new LLStyle(expander_style), getLineStart(last_line), getLength() + 1, mExpanderLabel, *this);
+//		insertSegment(expanderp);
+//		mExpanderVisible = true;
 	}
 
 }
@@ -161,15 +219,35 @@ void LLExpandableTextBox::LLTextBoxEx::showExpandText()
 //NOTE: obliterates existing styles (including hyperlinks)
 void LLExpandableTextBox::LLTextBoxEx::hideExpandText() 
 { 
-	if (mExpanderVisible)
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	if (mExpanderPos != -1)
 	{
-		// this will overwrite the expander segment and all text styling with a single style
-		LLStyleConstSP sp(new LLStyle(getStyleParams()));
-		LLNormalTextSegment* segmentp = new LLNormalTextSegment(sp, 0, getLength() + 1, *this);
-		insertSegment(segmentp);
-		
-		mExpanderVisible = false;
+		// Remove the expander segment
+		mExpanderSegment->unlinkFromDocument(this);
+		mSegments.erase(mExpanderSegment);
+
+		// Restore the original segments
+		for (segment_set_t::iterator itSegment = mHiddenSegments.begin(); itSegment != mHiddenSegments.end(); ++itSegment)
+		{
+			LLTextSegment* pSegment = *itSegment;
+			mSegments.insert(*itSegment);
+			pSegment->linkToDocument(this);
+		}
+		mHiddenSegments.clear();
+		needsReflow(mExpanderPos);
+
+		mExpanderPos = -1;
 	}
+// [/SL:KB]
+//	if (mExpanderVisible)
+//	{
+//		// this will overwrite the expander segment and all text styling with a single style
+//		LLStyleConstSP sp(new LLStyle(getStyleParams()));
+//		LLNormalTextSegment* segmentp = new LLNormalTextSegment(sp, 0, getLength() + 1, *this);
+//		insertSegment(segmentp);
+//		
+//		mExpanderVisible = false;
+//	}
 }
 
 S32 LLExpandableTextBox::LLTextBoxEx::getVerticalTextDelta()
@@ -333,12 +411,12 @@ void LLExpandableTextBox::expandTextBox()
 	// hide "more" link, and show full text contents
 	mTextBox->hideExpandText();
 
-	// *HACK dz
-	// hideExpandText brakes text styles (replaces hyper-links with plain text), see ticket EXT-3290
-	// Set text again to make text box re-apply styles.
-	// *TODO Find proper solution to fix this issue.
-	// Maybe add removeSegment to LLTextBase
-	mTextBox->setTextBase(mText);
+//	// *HACK dz
+//	// hideExpandText brakes text styles (replaces hyper-links with plain text), see ticket EXT-3290
+//	// Set text again to make text box re-apply styles.
+//	// *TODO Find proper solution to fix this issue.
+//	// Maybe add removeSegment to LLTextBase
+//	mTextBox->setTextBase(mText);
 
 	S32 text_delta = mTextBox->getVerticalTextDelta();
 	text_delta += mTextBox->getVPad() * 2;
@@ -349,6 +427,9 @@ void LLExpandableTextBox::expandTextBox()
 		return;
 	}
 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	mTextBox->setCanShowExpander(false);
+// [/SL:KB]
 	saveCollapsedState();
 
 	LLRect expanded_rect = getLocalRect();
@@ -401,6 +482,9 @@ void LLExpandableTextBox::collapseTextBox()
 		return;
 	}
 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+	mTextBox->setCanShowExpander(true);
+// [/SL:KB]
 	mExpanded = false;
 
 	reshape(mCollapsedRect.getWidth(), mCollapsedRect.getHeight(), FALSE);

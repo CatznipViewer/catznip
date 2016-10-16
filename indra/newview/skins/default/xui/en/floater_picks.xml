@@ -2,17 +2,17 @@
 <floater
  positioning="cascading"
  can_close="true"
- can_resize="true"
- height="572"
+ can_resize="false"
+ height="570"
  help_topic="sidebar_me"
- min_width="333"
- min_height="440"
+ min_width="330"
+ min_height="300"
  name="floater_picks"
  save_rect="true"
  save_visibility="true"
  reuse_instance="true"
- title="Picks"
- width="333" >
+ title="PICKS"
+ width="330" >
    <panel
     class="panel_me"
     name="main_panel"
