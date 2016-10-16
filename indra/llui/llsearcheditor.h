@@ -81,6 +81,11 @@ public:
 	virtual void	clear();
 	virtual void	setFocus( BOOL b );
 
+// [SL:KB] - Patch: UI-SidepanelPlacesSearch | Checked: 2012-08-31 (Catznip-3.3)
+	/*virtual*/ BOOL isDirty() const;
+	/*virtual*/ void resetDirty();
+// [/SL:KB]
+
 	void			setKeystrokeCallback( commit_callback_t cb ) { mKeystrokeCallback = cb; }
 	void			setTextChangedCallback( commit_callback_t cb ) { mTextChangedCallback = cb; }
 
