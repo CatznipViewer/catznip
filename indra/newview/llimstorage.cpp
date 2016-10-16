@@ -155,7 +155,7 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 			{
 				const LLSD& sdIM = *itIM;
 				LLIMModel::getInstance()->addMessage(idSession, sdIM[LL_IM_FROM].asString(), (sdIM.has(LL_IM_FROM_ID)) ? sdIM[LL_IM_FROM_ID].asUUID() : idAgent,
-				                                     sdIM[LL_IM_TEXT].asString(), sdIM[LL_IM_TIME].asString(), false);
+				                                     sdIM[LL_IM_TEXT].asString(), sdIM[LL_IM_TIME].asString(), false, true);
 			}
 			fShowNotice = true;
 		}

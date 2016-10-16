@@ -1459,12 +1459,13 @@ bool LLIMModel::proccessOnlineOfflineNotification(
 
 //bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, 
 //						   const std::string& utf8_text, bool log2file /* = true */) { 
-// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
-bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, bool log2file /* = true */, bool trigger_sound /* = true */) { 
-// [/SL:KB]
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
-bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time, bool log2file)
-{ 
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time, bool log2file)
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
+bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, const std::string& time, bool log2file, bool trigger_sound)
+//bool LLIMModel::addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& from_id, const std::string& utf8_text, bool log2file /* = true */, bool trigger_sound /* = true */) { 
+// [/SL:KB]
+{
 	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, time, log2file);
 // [/SL:KB]
 //	LLIMSession* session = addMessageSilently(session_id, from, from_id, utf8_text, log2file);
@@ -3010,6 +3011,8 @@ void LLIMMgr::addMessage(
 		if (!gAgent.isDoNotDisturb())
 		{
 			LLViewerChat::EChatEvent eEvent = LLViewerChat::SND_NONE;
+
+			LLIMModel::LLIMSession* session = LLIMModel::instance().findIMSession(new_session_id);
 			if (session->isP2PSessionType())
 			{
 				if (LLAvatarTracker::instance().isBuddy(other_participant_id))
@@ -3042,7 +3045,7 @@ void LLIMMgr::addMessage(
 // [/SL:KB]
 	{
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2013-12-21 (Catznip-3.6)
-		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg, true, !new_session);
+		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg, LLLogChat::timestamp(false), true, !new_session);
 // [/SL:KB]
 //		LLIMModel::instance().addMessage(new_session_id, from, other_participant_id, msg);
 	}
@@ -3266,7 +3269,7 @@ LLUUID LLIMMgr::addSession(
 		LLAgent::groupprelude_map_t::const_iterator itGroupPrelude = gAgent.mGroupPrelude.find(session_id);
 		if (gAgent.mGroupPrelude.end() != itGroupPrelude)
 		{
-			LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, itGroupPrelude->second, false);
+			LLIMModel::getInstance()->addMessage(session_id, SYSTEM_FROM, LLUUID::null, itGroupPrelude->second, LLLogChat::timestamp(false), false, false);
 		}
 	}
 // [/SL:KB]

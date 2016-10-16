@@ -243,9 +243,12 @@ public:
 	 * It sends new message signal for each added message.
 	 */
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2011-10-05 (Catznip-3.0)
-	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, const std::string& time = LLLogChat::timestamp(false), bool log2file = true);
+//	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, const std::string& time = LLLogChat::timestamp(false), bool log2file = true);
+// [/SL:KB]
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2014-02-22 (Catznip-3.7)
-	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true, bool trigger_sound = true);
+	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text) { return addMessage(session_id, from, other_participant_id, utf8_text, LLLogChat::timestamp(false), true, true); }
+	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, const std::string& time, bool log2file, bool trigger_sound);
+//	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true, bool trigger_sound = true);
 // [/SL:KB]
 //	bool addMessage(const LLUUID& session_id, const std::string& from, const LLUUID& other_participant_id, const std::string& utf8_text, bool log2file = true);
 

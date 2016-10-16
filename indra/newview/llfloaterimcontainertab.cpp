@@ -76,7 +76,7 @@ void LLFloaterIMContainerTab::addFloater(LLFloater* floaterp, BOOL select_added_
 // [/SL:KB]
 
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
-	const LLUUID idSession = floaterp->getKey();
+//	const LLUUID idSession = floaterp->getKey();
 
 	// NOTE: this will only do work on legacy IM-tabs but shouldn't actually harm CHUI's hidden tabs
 	if ( (LLChicletBar::instanceExists()) && (floaterp->isTornOff()) && (LLTabContainer::END == insertion_point) )
