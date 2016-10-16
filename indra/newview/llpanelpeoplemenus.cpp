@@ -82,15 +82,15 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.InviteToGroup",	boost::bind(&LLAvatarActions::inviteToGroup,			id));
 		registrar.add("Avatar.TeleportRequest",	boost::bind(&PeopleContextMenu::requestTeleport,		this));
 		registrar.add("Avatar.Calllog",			boost::bind(&LLAvatarActions::viewChatHistory,			id));
-		registrar.add("Avatar.Freeze",			boost::bind(&LLAvatarActions::freezeAvatar,					id));
-		registrar.add("Avatar.Eject",			boost::bind(&PeopleContextMenu::eject,					this));
+//		registrar.add("Avatar.Freeze",			boost::bind(&LLAvatarActions::freezeAvatar,					id));
+//		registrar.add("Avatar.Eject",			boost::bind(&PeopleContextMenu::eject,					this));
 
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4)
 		registrar.add("Avatar.ZoomIn",							boost::bind(&LLAvatarActions::zoomIn,						id));
 		enable_registrar.add("Avatar.VisibleZoomIn",			boost::bind(&LLAvatarActions::canZoomIn,					id));
 		registrar.add("Avatar.Report",							boost::bind(&LLAvatarActions::report,						id));
-123		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEject,					id));
-123		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreeze,					id));
+		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEject,					id));
+		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreeze,					id));
 		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEject,			id));
 		registrar.add("Avatar.Kick",							boost::bind(&LLAvatarActions::estateKick,					id));
 		registrar.add("Avatar.TeleportHome",					boost::bind(&LLAvatarActions::estateTeleportHome,			id));
@@ -369,38 +369,38 @@ void PeopleContextMenu::offerTeleport()
 	LLAvatarActions::offerTeleport(mUUIDs);
 }
 
-void PeopleContextMenu::eject()
-{
-	if((gAgent.getID() == mUUIDs.front()) || (mUUIDs.size() != 1))
-	{
-		return;
-	}
-
-	const LLUUID& id = mUUIDs.front();
-
-	// Use avatar_id if available, otherwise default to right-click avatar
-	LLVOAvatar* avatar = NULL;
-	if (id.notNull())
-	{
-		LLViewerObject* object = gObjectList.findObject(id);
-		if (object)
-		{
-			if( !object->isAvatar() )
-			{
-				object = NULL;
-			}
-			avatar = (LLVOAvatar*) object;
-		}
-	}
-	if (!avatar) return;
-	LLSD payload;
-	payload["avatar_id"] = avatar->getID();
-	std::string fullname = avatar->getFullname();
-
-	const LLVector3d& pos = avatar->getPositionGlobal();
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
-	LLAvatarActions::ejectAvatar(id ,LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED));
-}
+//void PeopleContextMenu::eject()
+//{
+//	if((gAgent.getID() == mUUIDs.front()) || (mUUIDs.size() != 1))
+//	{
+//		return;
+//	}
+//
+//	const LLUUID& id = mUUIDs.front();
+//
+//	// Use avatar_id if available, otherwise default to right-click avatar
+//	LLVOAvatar* avatar = NULL;
+//	if (id.notNull())
+//	{
+//		LLViewerObject* object = gObjectList.findObject(id);
+//		if (object)
+//		{
+//			if( !object->isAvatar() )
+//			{
+//				object = NULL;
+//			}
+//			avatar = (LLVOAvatar*) object;
+//		}
+//	}
+//	if (!avatar) return;
+//	LLSD payload;
+//	payload["avatar_id"] = avatar->getID();
+//	std::string fullname = avatar->getFullname();
+//
+//	const LLVector3d& pos = avatar->getPositionGlobal();
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
+//	LLAvatarActions::ejectAvatar(id ,LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED));
+//}
 
 void PeopleContextMenu::startConference()
 {

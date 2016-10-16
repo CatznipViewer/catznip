@@ -482,55 +482,55 @@ void LLAvatarActions::kick(const LLUUID& id)
 }
 
 // static
-void LLAvatarActions::freezeAvatar(const LLUUID& id)
-{
-	std::string fullname;
-	gCacheName->getFullName(id, fullname);
-	LLSD payload;
-	payload["avatar_id"] = id;
-
-	if (!fullname.empty())
-	{
-		LLSD args;
-		args["AVATAR_NAME"] = fullname;
-		LLNotificationsUtil::add("FreezeAvatarFullname", args, payload, handleFreezeAvatar);
-	}
-	else
-	{
-		LLNotificationsUtil::add("FreezeAvatar", LLSD(), payload, handleFreezeAvatar);
-	}
-}
+//void LLAvatarActions::freezeAvatar(const LLUUID& id)
+//{
+//	std::string fullname;
+//	gCacheName->getFullName(id, fullname);
+//	LLSD payload;
+//	payload["avatar_id"] = id;
+//
+//	if (!fullname.empty())
+//	{
+//		LLSD args;
+//		args["AVATAR_NAME"] = fullname;
+//		LLNotificationsUtil::add("FreezeAvatarFullname", args, payload, handleFreezeAvatar);
+//	}
+//	else
+//	{
+//		LLNotificationsUtil::add("FreezeAvatar", LLSD(), payload, handleFreezeAvatar);
+//	}
+//}
 
 // static
-void LLAvatarActions::ejectAvatar(const LLUUID& id, bool ban_enabled)
-{
-	std::string fullname;
-	gCacheName->getFullName(id, fullname);
-	LLSD payload;
-	payload["avatar_id"] = id;
-	payload["ban_enabled"] = ban_enabled;
-	LLSD args;
-	if (!fullname.empty())
-	{
-		args["AVATAR_NAME"] = fullname;
-	}
-
-	if (ban_enabled)
-	{
-			LLNotificationsUtil::add("EjectAvatarFullname", args, payload, handleEjectAvatar);
-	}
-	else
-	{
-		if (!fullname.empty())
-		{
-			LLNotificationsUtil::add("EjectAvatarFullnameNoBan", args, payload, handleEjectAvatar);
-		}
-		else
-		{
-			LLNotificationsUtil::add("EjectAvatarNoBan", LLSD(), payload, handleEjectAvatar);
-		}
-	}
-}
+//void LLAvatarActions::ejectAvatar(const LLUUID& id, bool ban_enabled)
+//{
+//	std::string fullname;
+//	gCacheName->getFullName(id, fullname);
+//	LLSD payload;
+//	payload["avatar_id"] = id;
+//	payload["ban_enabled"] = ban_enabled;
+//	LLSD args;
+//	if (!fullname.empty())
+//	{
+//		args["AVATAR_NAME"] = fullname;
+//	}
+//
+//	if (ban_enabled)
+//	{
+//			LLNotificationsUtil::add("EjectAvatarFullname", args, payload, handleEjectAvatar);
+//	}
+//	else
+//	{
+//		if (!fullname.empty())
+//		{
+//			LLNotificationsUtil::add("EjectAvatarFullnameNoBan", args, payload, handleEjectAvatar);
+//		}
+//		else
+//		{
+//			LLNotificationsUtil::add("EjectAvatarNoBan", LLSD(), payload, handleEjectAvatar);
+//		}
+//	}
+//}
 
 // static
 void LLAvatarActions::freeze(const LLUUID& id)

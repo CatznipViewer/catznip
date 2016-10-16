@@ -105,14 +105,6 @@
      parameter="FriendsListShowIcons" />
   </menu_item_check>
   <menu_item_separator layout="topleft" />
-  <menu_item_check name="view_usernames" label="Hide usernames">
-    <menu_item_check.on_click
-     function="People.Friends.ViewSort.Action"
-     parameter="view_usernames" />
-    <menu_item_check.on_check
-     function="CheckControl"
-     parameter="FriendsListHideUsernames" />
-  </menu_item_check>
   <menu_item_check name="view_conversation" label="Conversation Log...">
     <menu_item_check.on_check
      function="Floater.Visible"

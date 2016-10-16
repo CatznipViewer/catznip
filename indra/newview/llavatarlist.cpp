@@ -224,7 +224,7 @@ LLAvatarList::LLAvatarList(const Params& p)
 , mShowVolumeSlider(p.show_volume_slider)
 // [/SL:KB]
 , mShowPermissions(p.show_permissions_granted)
-, mShowCompleteName(false)
+//, mShowCompleteName(false)
 {
 	setCommitOnSelectionChange(true);
 
@@ -431,13 +431,14 @@ void LLAvatarList::refresh()
 				}
 				else
 				{
-					std::string display_name = getAvatarName(av_name);
+//					std::string display_name = getAvatarName(av_name);
 //					addNewItem(buddy_id, 
 //						display_name.empty() ? waiting_str : display_name, 
 //						LLAvatarTracker::instance().isBuddyOnline(buddy_id));
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 					// NOTE-Catznip: the name parameter isn't currently used, but it might be in the future
-					addNewItem(buddy_id, 
+					std::string display_name = av_name.getDisplayName();
+					addNewItem(buddy_id,
 						display_name.empty() ? waiting_str : LLAvatarListItem::formatAvatarName(av_name, getAvatarNameFormat()), 
 						LLAvatarTracker::instance().isBuddyOnline(buddy_id));
 // [/SL:KB]
@@ -524,10 +525,10 @@ void LLAvatarList::updateAvatarNames()
 	for( std::vector<LLPanel*>::const_iterator it = items.begin(); it != items.end(); it++)
 	{
 		LLAvatarListItem* item = static_cast<LLAvatarListItem*>(*it);
-		item->setShowCompleteName(mShowCompleteName);
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 		item->updateAvatarName(getAvatarNameFormat());
 // [/SL:KB]
+//		item->setShowCompleteName(mShowCompleteName);
 //		item->updateAvatarName();
 	}
 	mNeedUpdateNames = false;
@@ -599,7 +600,7 @@ S32 LLAvatarList::notifyParent(const LLSD& info)
 void LLAvatarList::addNewItem(const LLUUID& id, const std::string& name, BOOL is_online, EAddPosition pos)
 {
 	LLAvatarListItem* item = new LLAvatarListItem();
-	item->setShowCompleteName(mShowCompleteName);
+//	item->setShowCompleteName(mShowCompleteName);
 	// This sets the name as a side effect
 //	item->setAvatarId(id, mSessionID, mIgnoreOnlineStatus);
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)

@@ -121,7 +121,7 @@ public:
 	void setState(EItemState item_style);
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	void setAvatarId(const LLUUID& id, const LLUUID& session_id, EAvatarListNameFormat name_format, bool ignore_status_changes = false, bool is_resident = true);
-	static std::string formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format);
+	static std::string formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat eNameFormat, bool* pfShowUsername = nullptr);
 // [/SL:KB]
 //	void setAvatarId(const LLUUID& id, const LLUUID& session_id, bool ignore_status_changes = false, bool is_resident = true);
 //	void setLastInteractionTime(U32 secs_since);
@@ -146,7 +146,7 @@ public:
 	void showTextField(bool show);
 // [/SL:KB]
 	void setAvatarIconVisible(bool visible);
-	void setShowCompleteName(bool show) { mShowCompleteName = show;};
+//	void setShowCompleteName(bool show) { mShowCompleteName = show;};
 	
 	const LLUUID& getAvatarId() const;
 	std::string getAvatarName() const;
@@ -289,7 +289,7 @@ private:
 	/// true when the mouse pointer is hovering over this item
 	bool mHovered;
 	
-	bool mShowCompleteName;
+//	bool mShowCompleteName;
 	std::string mGreyOutUsername;
 
 //	void fetchAvatarName();

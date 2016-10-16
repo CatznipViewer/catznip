@@ -173,9 +173,9 @@ public:
 	 */	
 	static void inviteToGroup(const LLUUID& id);
 	
-	static void freezeAvatar(const LLUUID& id);
-
-	static void ejectAvatar(const LLUUID& id, bool ban_enabled = false);
+//	static void freezeAvatar(const LLUUID& id);
+//
+//	static void ejectAvatar(const LLUUID& id, bool ban_enabled = false);
 	/**
 	 * Kick avatar off grid
 	 */	

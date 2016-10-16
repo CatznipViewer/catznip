@@ -331,7 +331,7 @@ Looking for people to hang out with? Try the [secondlife:///app/worldmap World M
                  layout="topleft"
                  left="0"
                  name="suggested_friends"
-                 show_permissions_granted="true"
+                 show_permissions_granted="hover"
                  top="0"
                  width="307" />
               </accordion_tab>              

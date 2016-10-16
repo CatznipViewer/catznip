@@ -155,7 +155,7 @@ public:
 	void addAvalineItem(const LLUUID& item_id, const LLUUID& session_id, const std::string& item_name);
 	void handleDisplayNamesOptionChanged();
 
-	void setShowCompleteName(bool show) { mShowCompleteName = show;};
+//	void setShowCompleteName(bool show) { mShowCompleteName = show;};
 
 protected:
 	void refresh();
@@ -192,7 +192,7 @@ private:
 	EShowPermissionType mShowPermissions;
 // [/SL:KB]
 //	bool mShowPermissions;
-	bool mShowCompleteName;
+//	bool mShowCompleteName;
 
 //	LLTimer*				mLITUpdateTimer; // last interaction time update timer
 // [SL:KB] - Patch: UI-AvatarListTextField | Checked: 2010-10-24 (Catznip-2.3)

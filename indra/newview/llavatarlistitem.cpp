@@ -87,7 +87,7 @@ LLAvatarListItem::LLAvatarListItem(bool not_from_ui_factory/* = true*/)
 	mShowPermissions(SP_NEVER),
 // [/SL:KB]
 //	mShowPermissions(false),
-	mShowCompleteName(false),
+//	mShowCompleteName(false),
 	mHovered(false),
 	mAvatarNameCacheConnection(),
 	mGreyOutUsername("")
@@ -632,7 +632,10 @@ void LLAvatarListItem::updateAvatarName(EAvatarListNameFormat name_format)
 
 void LLAvatarListItem::setNameInternal(const std::string& name, const std::string& highlight)
 {
-    if(mShowCompleteName && highlight.empty())
+//    if(mShowCompleteName && highlight.empty())
+// [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
+	if ( (!mGreyOutUsername.empty()) && (highlight.empty()) )
+// [/SL:KB]
     {
         LLTextUtil::textboxSetGreyedVal(mAvatarName, mAvatarNameStyle, name, mGreyOutUsername);
     }
@@ -643,16 +646,22 @@ void LLAvatarListItem::setNameInternal(const std::string& name, const std::strin
 }
 
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
-std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat name_format)
+std::string LLAvatarListItem::formatAvatarName(const LLAvatarName& avName, EAvatarListNameFormat eNameFormat, bool* pfShowUsername)
 {
-	switch (name_format)
+	switch (eNameFormat)
 	{
 		case NF_USERNAME:
+			if (pfShowUsername)
+				*pfShowUsername = false;
 			return (!avName.getAccountName().empty()) ? avName.getAccountName() : avName.getDisplayName();
 		case NF_COMPLETENAME:
-			return avName.getCompleteName(LLAvatarName::SHOW_MISMATCH);
+			if (pfShowUsername)
+				*pfShowUsername = !avName.isDisplayNameDefault();
+			return avName.getCompleteName(true/*, LLAvatarName::SHOW_MISMATCH*/);
 		case NF_DISPLAYNAME:
 		default:
+			if (pfShowUsername)
+				*pfShowUsername = false;
 			return avName.getDisplayName();
 	}
 }
@@ -665,17 +674,19 @@ void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, EAvatarLis
 {
 	mAvatarNameCacheConnection.disconnect();
 
-	mGreyOutUsername = "";
-	std::string name_string = mShowCompleteName? av_name.getCompleteName(false) : av_name.getDisplayName();
-	if(av_name.getCompleteName() != av_name.getUserName())
-	{
-	    mGreyOutUsername = "[ " + av_name.getUserName(true) + " ]";
-	    LLStringUtil::toLower(mGreyOutUsername);
-	}
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
-	setAvatarName(formatAvatarName(av_name, name_format));
+	bool fVisibleUsername;
+	setAvatarName(formatAvatarName(av_name, name_format, &fVisibleUsername));
+	mGreyOutUsername = (fVisibleUsername) ? llformat("(%s)", av_name.getAccountName().c_str()) : LLStringUtil::null;
 // [/SL:KB]
-123	setAvatarName(name_string);
+//	mGreyOutUsername = "";
+//	std::string name_string = mShowCompleteName? av_name.getCompleteName(false) : av_name.getDisplayName();
+//	if(av_name.getCompleteName() != av_name.getUserName())
+//	{
+//	    mGreyOutUsername = "[ " + av_name.getUserName(true) + " ]";
+//	    LLStringUtil::toLower(mGreyOutUsername);
+//	}
+//	setAvatarName(name_string);
 	setAvatarToolTip(av_name.getUserName());
 
 	//requesting the list to resort

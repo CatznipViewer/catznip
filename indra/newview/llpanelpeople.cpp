@@ -819,7 +819,7 @@ BOOL LLPanelPeople::postBuild()
 	mOnlineFriendList->setNoItemsCommentText(getString("no_friends_online"));
 	mOnlineFriendList->setShowIcons("FriendsListShowIcons");
 //	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
-	mOnlineFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
+//	mOnlineFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 	mAllFriendList->setNoItemsCommentText(getString("no_friends"));
 	mAllFriendList->setShowIcons("FriendsListShowIcons");
 //	mAllFriendList->showPermissions("FriendsListShowPermissions");
@@ -830,7 +830,7 @@ BOOL LLPanelPeople::postBuild()
 	mOnlineFriendList->showPermissions(spType);
 	mAllFriendList->showPermissions(spType);
 // [/SL:KB]
-	mAllFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
+//	mAllFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 
 	LLPanel* nearby_tab = getChild<LLPanel>(NEARBY_TAB_NAME);
 	nearby_tab->setVisibleCallback(boost::bind(&Updater::setActive, mNearbyListUpdater, _2));
@@ -839,7 +839,7 @@ BOOL LLPanelPeople::postBuild()
 	mNearbyList->setNoItemsMsg(getString("no_one_near"));
 	mNearbyList->setNoFilteredItemsMsg(getString("no_one_filtered_near"));
 	mNearbyList->setShowIcons("NearbyListShowIcons");
-	mNearbyList->setShowCompleteName(!gSavedSettings.getBOOL("NearbyListHideUsernames"));
+//	mNearbyList->setShowCompleteName(!gSavedSettings.getBOOL("NearbyListHideUsernames"));
 	mMiniMap = (LLNetMap*)getChildView("Net Map",true);
 	mMiniMap->setToolTipMsg(gSavedSettings.getBOOL("DoubleClickTeleport") ? 
 		getString("AltMiniMapToolTipMsg") :	getString("MiniMapToolTipMsg"));
@@ -1725,16 +1725,16 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 //		mAllFriendList->showPermissions(show_permissions);
 //		mOnlineFriendList->showPermissions(show_permissions);
 //	}
-	else if (chosen_item == "view_usernames")
-	{
-		bool hide_usernames = !gSavedSettings.getBOOL("FriendsListHideUsernames");
-		gSavedSettings.setBOOL("FriendsListHideUsernames", hide_usernames);
-
-		mAllFriendList->setShowCompleteName(!hide_usernames);
-		mAllFriendList->handleDisplayNamesOptionChanged();
-		mOnlineFriendList->setShowCompleteName(!hide_usernames);
-		mOnlineFriendList->handleDisplayNamesOptionChanged();
-	}
+//	else if (chosen_item == "view_usernames")
+//	{
+//		bool hide_usernames = !gSavedSettings.getBOOL("FriendsListHideUsernames");
+//		gSavedSettings.setBOOL("FriendsListHideUsernames", hide_usernames);
+//
+//		mAllFriendList->setShowCompleteName(!hide_usernames);
+//		mAllFriendList->handleDisplayNamesOptionChanged();
+//		mOnlineFriendList->setShowCompleteName(!hide_usernames);
+//		mOnlineFriendList->handleDisplayNamesOptionChanged();
+//	}
 	}
 
 void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
@@ -1787,14 +1787,14 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
-	else if (chosen_item == "view_usernames")
-	{
-	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
-	    gSavedSettings.setBOOL("NearbyListHideUsernames", hide_usernames);
-
-	    mNearbyList->setShowCompleteName(!hide_usernames);
-	    mNearbyList->handleDisplayNamesOptionChanged();
-	}
+//	else if (chosen_item == "view_usernames")
+//	{
+//	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
+//	    gSavedSettings.setBOOL("NearbyListHideUsernames", hide_usernames);
+//
+//	    mNearbyList->setShowCompleteName(!hide_usernames);
+//	    mNearbyList->handleDisplayNamesOptionChanged();
+//	}
 // [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
 	else if ( ("show_range" == chosen_item) || ("show_current_parcel" == chosen_item) || ("show_current_region" == chosen_item) )
 	{

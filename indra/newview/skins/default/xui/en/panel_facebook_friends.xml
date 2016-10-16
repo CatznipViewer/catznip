@@ -34,7 +34,7 @@
        layout="topleft"
        left="0"
        name="second_life_friends"
-       show_permissions_granted="true"
+       show_permissions_granted="hover"
        top="0"
        width="272" />
     </accordion_tab>
@@ -51,7 +51,7 @@
        layout="topleft"
        left="0"
        name="suggested_friends"
-       show_permissions_granted="true"
+       show_permissions_granted="hover"
        top="0"
        width="272" />
     </accordion_tab>
