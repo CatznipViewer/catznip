@@ -4,6 +4,6 @@
 		腳本：[NAME]
 	</floater.string>
 	<text name="desc txt">
-		描述：
+		描述
 	</text>
 </floater>

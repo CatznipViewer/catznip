@@ -848,6 +848,10 @@ void LLViewerAssetUpload::HandleUploadError(LLCore::HttpStatus status, LLSD &res
         }
     }
 
+// [SL:KB] - Patch: Build-ScriptRecover | Checked: Catznip-4.0
+	uploadInfo->callUploadErrorCb();
+// [/SL:KB]
+
     // Let the Snapshot floater know we have failed uploading.
     LLFloater* floater_snapshot = LLFloaterReg::findInstance("snapshot");
     if (uploadInfo->getAssetType() == LLAssetType::AT_TEXTURE && floater_snapshot && floater_snapshot->isShown())
