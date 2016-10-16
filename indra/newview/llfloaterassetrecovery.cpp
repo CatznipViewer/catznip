@@ -338,7 +338,7 @@ void LLAssetRecoverQueue::onCreateItem(const LLUUID& idItem)
 		{
 			case LLAssetType::AT_LSL_TEXT:
 				strCapsUrl = gAgent.getRegion()->getCapability("UpdateScriptAgent");
-				uploadInfo = LLResourceUploadInfo::ptr_t(new LLScriptAssetUpload(idItem, strBuffer, boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _4)));
+				uploadInfo = LLResourceUploadInfo::ptr_t(new LLScriptAssetUpload(idItem, LLScriptAssetUpload::MONO, strBuffer, boost::bind(&LLAssetRecoverQueue::onSavedAsset, this, _1, _4)));
 				break;
 			case LLAssetType::AT_NOTECARD:
 				strCapsUrl = gAgent.getRegion()->getCapability("UpdateNotecardAgentInventory");

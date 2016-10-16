@@ -826,6 +826,12 @@ BOOL LLViewerParcelMgr::canHearSound(const LLVector3d &pos_global) const
 	}
 }
 
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3& pos_region) const
+{
+	return inParcelOverlay(mAgentParcelOverlay, pos_region);
+}
+// [/SL:KB]
 
 //BOOL LLViewerParcelMgr::inAgentParcel(const LLVector3d &pos_global) const
 //{

@@ -167,6 +167,9 @@ public:
 	//LLParcel *getParcelSelection() const;
 	LLParcel *getAgentParcel() const;
 
+// [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
+	BOOL	inAgentParcel(const LLVector3& pos_region) const;
+// [/SL:KB]
 //	BOOL	inAgentParcel(const LLVector3d &pos_global) const;
 // [SL:KB] - Patch: Build-HoverParcel | Checked: 2011-10-07 (Catznip-3.0)
 protected:
