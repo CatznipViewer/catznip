@@ -978,7 +978,13 @@ void LLFloaterIMSession::updateMessages()
 			}
 			
 			// Add the message to the chat log
-			appendMessage(chat);
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+			LLSD args;
+			args["chat_flags"] = (msg.has("chat_flags")) ? msg["chat_flags"].asInteger() : CHAT_FLAG_NONE;
+
+			appendMessage(chat, args);
+// [/SL:KB]
+//			appendMessage(chat);
 			mLastMessageIndex = msg["index"].asInteger();
 
 			// if it is a notification - next message is a notification history log, so skip it

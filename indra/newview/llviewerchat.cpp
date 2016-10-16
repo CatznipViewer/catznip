@@ -294,3 +294,16 @@ void LLViewerChat::signalChatFontChanged()
 	// Notify all observers that our font has changed
 	sChatFontChangedSignal(getChatFont());
 }
+
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+U8 LLViewerChat::getChatNameFontStyle(EChatFlags chat_flags)
+{
+	switch (chat_flags)
+	{
+		case CHAT_FLAG_MODERATOR:
+			return LLFontGL::BOLD;
+		default:
+			return LLFontGL::NORMAL;
+	}
+}
+// [/SL:KB]

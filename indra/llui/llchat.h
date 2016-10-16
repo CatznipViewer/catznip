@@ -67,6 +67,14 @@ typedef enum e_chat_style
 	CHAT_STYLE_HISTORY
 }EChatStyle;
 
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+typedef enum e_chat_flags
+{
+	CHAT_FLAG_NONE      = 0x00,
+	CHAT_FLAG_MODERATOR = 0x01
+} EChatFlags;
+// [/SL:KB]
+
 // A piece of chat
 class LLChat
 {

@@ -184,38 +184,38 @@ private:
 	id_to_pos_map_t mAvatarsPositions;
 };
 
-/** Comparator for comparing nearby avatar items by last spoken time */
-class LLAvatarItemRecentSpeakerComparator : public  LLAvatarItemNameComparator
-{
-public:
-	LLAvatarItemRecentSpeakerComparator() {};
-	virtual ~LLAvatarItemRecentSpeakerComparator() {};
-
-protected:
-	virtual bool doCompare(const LLAvatarListItem* item1, const LLAvatarListItem* item2) const
-	{
-		LLPointer<LLSpeaker> lhs = LLActiveSpeakerMgr::instance().findSpeaker(item1->getAvatarId());
-		LLPointer<LLSpeaker> rhs = LLActiveSpeakerMgr::instance().findSpeaker(item2->getAvatarId());
-		if ( lhs.notNull() && rhs.notNull() )
-		{
-			// Compare by last speaking time
-			if( lhs->mLastSpokeTime != rhs->mLastSpokeTime )
-				return ( lhs->mLastSpokeTime > rhs->mLastSpokeTime );
-		}
-		else if ( lhs.notNull() )
-		{
-			// True if only item1 speaker info available
-			return true;
-		}
-		else if ( rhs.notNull() )
-		{
-			// False if only item2 speaker info available
-			return false;
-		}
-		// By default compare by name.
-		return LLAvatarItemNameComparator::doCompare(item1, item2);
-	}
-};
+///** Comparator for comparing nearby avatar items by last spoken time */
+//class LLAvatarItemRecentSpeakerComparator : public  LLAvatarItemNameComparator
+//{
+//public:
+//	LLAvatarItemRecentSpeakerComparator() {};
+//	virtual ~LLAvatarItemRecentSpeakerComparator() {};
+//
+//protected:
+//	virtual bool doCompare(const LLAvatarListItem* item1, const LLAvatarListItem* item2) const
+//	{
+//		LLPointer<LLSpeaker> lhs = LLActiveSpeakerMgr::instance().findSpeaker(item1->getAvatarId());
+//		LLPointer<LLSpeaker> rhs = LLActiveSpeakerMgr::instance().findSpeaker(item2->getAvatarId());
+//		if ( lhs.notNull() && rhs.notNull() )
+//		{
+//			// Compare by last speaking time
+//			if( lhs->mLastSpokeTime != rhs->mLastSpokeTime )
+//				return ( lhs->mLastSpokeTime > rhs->mLastSpokeTime );
+//		}
+//		else if ( lhs.notNull() )
+//		{
+//			// True if only item1 speaker info available
+//			return true;
+//		}
+//		else if ( rhs.notNull() )
+//		{
+//			// False if only item2 speaker info available
+//			return false;
+//		}
+//		// By default compare by name.
+//		return LLAvatarItemNameComparator::doCompare(item1, item2);
+//	}
+//};
 
 static const LLAvatarItemRecentComparator RECENT_COMPARATOR;
 static const LLAvatarItemStatusComparator STATUS_COMPARATOR;
