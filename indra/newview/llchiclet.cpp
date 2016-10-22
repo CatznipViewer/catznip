@@ -58,6 +58,9 @@
 #include "llgroupactions.h"
 #include "llspeakers.h"
 // [/SL:KB]
+// [SL:KB] - World-Mute | Checked: 2013-12-12 (Catznip-3.6)
+#include "llfloaterblocked.h"
+// [/SL:KB]
 
 static LLDefaultChildRegistry::Register<LLChicletPanel> t1("chiclet_panel");
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
@@ -2029,7 +2032,12 @@ static void handleMuteByUUID(LLMute::EType eType, const LLUUID& idTarget, const 
 	if ( (idTarget.notNull()) && (!strTargetName.empty()) )
 	{
 		if (LLMuteList::getInstance()->add(LLMute(idTarget, strTargetName, eType)))
-			LLPanelBlockedList::showPanelAndSelect(idTarget);
+		{
+// [SL:KB] - World-Mute | Checked: 2013-12-12 (Catznip-3.6)
+			LLFloaterBlocked::showMuteAndSelect(idTarget);
+// [/SL:KB]
+//			LLPanelBlockedList::showPanelAndSelect(idTarget);
+		}
 	}
 }
 

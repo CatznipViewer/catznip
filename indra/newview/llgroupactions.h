@@ -114,11 +114,6 @@ public:
 	static bool hasPowerInGroup(const LLUUID& group_id, U64 power);
 // [/SL:KB]
 
-// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
-	/// Returns true if the current user has the specified power in the group
-	static bool hasPowerInGroup(const LLUUID& group_id, U64 power) { return true; }
-// [/SL:KB]
-
 	/**
 	 * Start a group voice call.
 	 */

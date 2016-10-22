@@ -2090,17 +2090,6 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>ChatPersistTime</key>
-    <map>
-      <key>Comment</key>
-      <string>Time for which chat stays visible in console (seconds)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>F32</string>
-      <key>Value</key>
-      <real>20.0</real>
-    </map>
     <key>ChatShowTimestamps</key>
     <map>
       <key>Comment</key>

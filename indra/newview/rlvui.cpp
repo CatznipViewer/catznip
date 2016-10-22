@@ -24,6 +24,7 @@
 #include "llnavigationbar.h"			// Navigation bar
 #include "llparcel.h"
 #include "llpaneltopinfobar.h"
+#include "llstatusbar.h"
 #include "llteleporthistory.h"
 #include "lltoolmgr.h"
 #include "llviewerparcelmgr.h"
@@ -115,8 +116,9 @@ void RlvUIEnabler::onToggleShowLoc()
 
 	if (LLNavigationBar::instanceExists())
 		LLNavigationBar::instance().refreshLocationCtrl();
-	if (LLPanelTopInfoBar::instanceExists())
-		LLPanelTopInfoBar::instance().update();
+	LLPanelTopInfoBar* pTopInfoBar = gStatusBar->getTopInfoBarPanel();
+	if (pTopInfoBar)
+		pTopInfoBar->update();
 
 	if (!fEnable)
 	{

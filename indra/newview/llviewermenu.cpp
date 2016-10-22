@@ -391,16 +391,14 @@ static LLUIListener sUIListener;
 //	BOOL buyable = enable_buy_land(NULL);
 //	gMenuHolder->childSetEnabled("Land Buy", buyable);
 //	gMenuHolder->childSetEnabled("Buy Land...", buyable);
+//// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
+//	LLView* pLandCreate = gMenuLand->findChild<LLView>("Create");
+//	if (pLandCreate)
+//	{
+//		pLandCreate->setEnabled(enable_land_build());
+//	}
+//// [/SL:KB]
 //}
-
-// [SL:KB] - Patch: UI-BuildEdit | Checked: 2010-04-12 (Catznip-2.0)
-	LLView* pLandCreate = gMenuLand->findChild<LLView>("Create");
-	if (pLandCreate)
-	{
-		pLandCreate->setEnabled(enable_land_build());
-	}
-// [/SL:KB]
-
 
 void initialize_menus();
 

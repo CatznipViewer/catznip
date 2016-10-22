@@ -249,6 +249,10 @@ public:
 
 	static std::set<LLUUID> getInventorySelectedUUIDs();
 
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
+	static void addContact(const LLUUID& id);
+// [/SL:KB]
+
 // [SL:KB] - Patch: UI-AvatarNearbyActions | Checked: 2010-12-02 (Catznip-2.4)
 	static void report(const LLUUID& idAgent);
 
@@ -285,10 +289,6 @@ public:
 protected:
 	static bool callbackEstateKick(const LLSD& notification, const LLSD& response);
 	static bool callbackEstateTeleportHome(const LLSD& notification, const LLSD& response);
-// [/SL:KB]
-
-// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
-	static void addContact(const LLUUID& id);
 // [/SL:KB]
 
 private:
