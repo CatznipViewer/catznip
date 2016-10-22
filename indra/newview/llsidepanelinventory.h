@@ -4,6 +4,7 @@
  *
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
+ * Copyright (C) 2010-2013, Kitty Barnett
  * Copyright (C) 2010, Linden Research, Inc.
  * 
  * This library is free software; you can redistribute it and/or
@@ -28,6 +29,9 @@
 #define LL_LLSIDEPANELINVENTORY_H
 
 #include "llpanel.h"
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2010-04-15 (Catznip-3.2)
+#include "llinventorymodel.h"
+// [/SL:KB]
 
 class LLButton;
 class LLFolderViewItem;
@@ -39,6 +43,9 @@ class LLLayoutPanel;
 class LLPanelMainInventory;
 class LLSidepanelItemInfo;
 class LLSidepanelTaskInfo;
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+class LLSidepanelActionHelper;
+// [/SL:KB]
 
 class LLSidepanelInventory : public LLPanel
 {
@@ -74,7 +81,10 @@ public:
 
 	void onToggleInboxBtn();
 
-	void enableInbox(bool enabled);
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-07-25 (Catznip-3.3)
+	void refreshInboxVisibility();
+// [/SL:KB]
+//	void enableInbox(bool enabled);
 	
 	void openInbox();
 	
@@ -84,8 +94,13 @@ public:
 
 protected:
 	// Tracks highlighted (selected) item in inventory panel.
-	LLInventoryItem *getSelectedItem();
-	U32 getSelectedCount();
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)
+	bool getSelectedItems(LLInventoryModel::item_array_t& items) const;
+	// Returns the action that makes sense for the current selection (or an empty string if none)
+	std::string getSelectionAction(S32* pSelCount = NULL) const;
+// [/SL:KB]
+//	LLInventoryItem *getSelectedItem();
+//	U32 getSelectedCount();
 	void onSelectionChange(const std::deque<LLFolderViewItem*> &items, BOOL user_action);
 	// "wear", "teleport", etc.
 	void performActionOnSelection(const std::string &action);
@@ -105,24 +120,37 @@ private:
 	LLPanelMainInventory*		mPanelMainInventory;
 
 protected:
-	void 						onInfoButtonClicked();
-	void 						onShareButtonClicked();
-	void 						onShopButtonClicked();
-	void 						onWearButtonClicked();
-	void 						onPlayButtonClicked();
-	void 						onTeleportButtonClicked();
-	void 						onOverflowButtonClicked();
+//	void 						onInfoButtonClicked();
+//	void 						onShareButtonClicked();
+//	void 						onShopButtonClicked();
+//	void 						onWearButtonClicked();
+//	void 						onPlayButtonClicked();
+//	void 						onTeleportButtonClicked();
+//	void 						onOverflowButtonClicked();
 	void 						onBackButtonClicked();
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	void 						onToolbarActionClicked();
+	void 						onToolbarFlyoutClicked();
+// [/SL:KB]
 
 private:
-	LLButton*					mInfoBtn;
-	LLButton*					mShareBtn;
-	LLButton*					mWearBtn;
-	LLButton*					mPlayBtn;
-	LLButton*					mTeleportBtn;
-	LLButton*					mOverflowBtn;
-	LLButton*					mShopBtn;
-
+//	LLButton*					mInfoBtn;
+//	LLButton*					mShareBtn;
+//	LLButton*					mWearBtn;
+//	LLButton*					mPlayBtn;
+//	LLButton*					mTeleportBtn;
+//	LLButton*					mOverflowBtn;
+//	LLButton*					mShopBtn;
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-07-18 (Catznip-3.3)
+	// Single action button
+	LLPanel*					mToolbarActionPanel;
+	LLButton*					mToolbarActionBtn;
+	// Flyout action button
+	LLPanel*					mToolbarActionsPanel;
+	LLButton*					mToolbarActionsBtn;
+	LLButton*					mToolbarActionsFlyoutBtn;
+	LLSidepanelActionHelper*	mToolbarActionsHelper;
+// [/SL:KB]
 	bool						mInboxEnabled;
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;

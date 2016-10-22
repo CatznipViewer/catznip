@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Ting" name="main inventory panel">
 	<panel.string name="ItemcountFetching">
-		Henter [ITEM_COUNT] Genstande... [FILTER]
+		(Henter [ITEM_COUNT] Genstande)[FILTER]
 	</panel.string>
 	<panel.string name="ItemcountCompleted">
-		[ITEM_COUNT] Genstande [FILTER]
+		([ITEM_COUNT] Genstande)[FILTER]
 	</panel.string>
 	<text name="ItemcountText">
 		Genstande:

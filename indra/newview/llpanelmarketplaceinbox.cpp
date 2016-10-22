@@ -71,8 +71,10 @@ BOOL LLPanelMarketplaceInbox::postBuild()
 
 void LLPanelMarketplaceInbox::onSelectionChange()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-		
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	sidepanel_inventory->updateVerbs();
 }
 
@@ -111,7 +113,10 @@ LLInventoryPanel * LLPanelMarketplaceInbox::setupInventoryPanel()
 
 void LLPanelMarketplaceInbox::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (sidepanel_inventory)
 	{
 		sidepanel_inventory->clearSelections(true, false);
