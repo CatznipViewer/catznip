@@ -40,6 +40,9 @@
 #include "llscrolllistitem.h"
 #include "llspinctrl.h"
 #include "lltextbox.h"
+// [SL:KB] - Patch: Floater-GroupInfo | Checked: 2016-02-10 (Catznip-4.0)
+#include "lltrans.h"
+// [/SL:KB]
 #include "llviewerobject.h"
 #include "llviewerobjectlist.h"
 #include "lluictrlfactory.h"
@@ -51,8 +54,11 @@ public:
 	impl(const LLUUID& group_id);
 	~impl();
 
-	void addUsers(const std::vector<std::string>& names,
-				  const uuid_vec_t& agent_ids);
+//	void addUsers(const std::vector<std::string>& names,
+//				  const uuid_vec_t& agent_ids);
+// [SL:KB] - Patch: Floater-GroupInfo | Checked: 2016-02-10 (Catznip-4.0)
+	void addUsers(const uuid_vec_t& agent_ids);
+// [/SL:KB]
 	void submitInvitations();
 	void addRoleNames(LLGroupMgrGroupData* gdatap);
 	void handleRemove();
@@ -120,13 +126,12 @@ LLPanelGroupInvite::impl::~impl()
 
 const S32 MAX_GROUP_INVITES = 100; // Max invites per request. 100 to match server cap.
 
-void LLPanelGroupInvite::impl::addUsers(const std::vector<std::string>& names,
-										const uuid_vec_t& agent_ids)
+// [SL:KB] - Patch: Floater-GroupInfo | Checked: 2016-02-10 (Catznip-4.0)
+void LLPanelGroupInvite::impl::addUsers(const uuid_vec_t& agent_ids)
 {
-	std::string name;
 	LLUUID id;
 
-	if (names.size() + mInviteeIDs.size() > MAX_GROUP_INVITES)
+	if (agent_ids.size() + mInviteeIDs.size() > MAX_GROUP_INVITES)
 	{
 		// Fail! Show a warning and don't add any names.
 		LLSD msg;
@@ -135,9 +140,9 @@ void LLPanelGroupInvite::impl::addUsers(const std::vector<std::string>& names,
 		return;
 	}
 
-	for (S32 i = 0; i < (S32)names.size(); i++)
+	const std::string strLoading = LLTrans::getString("LoadingData");
+	for (S32 i = 0; i < (S32)agent_ids.size(); i++)
 	{
-		name = names[i];
 		id = agent_ids[i];
 
 		// Make sure this agent isn't already in the list.
@@ -149,12 +154,47 @@ void LLPanelGroupInvite::impl::addUsers(const std::vector<std::string>& names,
 		//add the name to the names list
 		LLSD row;
 		row["id"] = id;
-		row["columns"][0]["value"] = name;
+		row["columns"][0]["value"] = strLoading;
 
 		mInvitees->addElement(row);
 		mInviteeIDs.insert(id);
 	}
 }
+// [/SL:KB]
+//void LLPanelGroupInvite::impl::addUsers(const uuid_vec_t& agent_ids)
+//{
+//	std::string name;
+//	LLUUID id;
+//
+//	if (names.size() + mInviteeIDs.size() > MAX_GROUP_INVITES)
+//	{
+//		// Fail! Show a warning and don't add any names.
+//		LLSD msg;
+//		msg["MESSAGE"] = mTooManySelected;
+//		LLNotificationsUtil::add("GenericAlert", msg);
+//		return;
+//	}
+//
+//	for (S32 i = 0; i < (S32)names.size(); i++)
+//	{
+//		name = names[i];
+//		id = agent_ids[i];
+//
+//		// Make sure this agent isn't already in the list.
+//		if (mInviteeIDs.find(id) != mInviteeIDs.end())
+//		{
+//			continue;
+//		}
+//
+//		//add the name to the names list
+//		LLSD row;
+//		row["id"] = id;
+//		row["columns"][0]["value"] = name;
+//
+//		mInvitees->addElement(row);
+//		mInviteeIDs.insert(id);
+//	}
+//}
 
 void LLPanelGroupInvite::impl::submitInvitations()
 {
@@ -435,7 +475,10 @@ void LLPanelGroupInvite::impl::onAvatarNameCache(const LLUUID& agent_id,
 		agent_ids.push_back(agent_id);
 		names.push_back(av_name.getCompleteName());
 		
-		selfp->addUsers(names, agent_ids);
+// [SL:KB] - Patch: Floater-GroupInfo | Checked: 2016-02-10 (Catznip-4.0)
+		selfp->addUsers(agent_ids);
+// [/SL:KB]
+//		selfp->addUsers(names, agent_ids);
 	}
 }
 
@@ -473,65 +516,69 @@ void LLPanelGroupInvite::clear()
 
 void LLPanelGroupInvite::addUsers(uuid_vec_t& agent_ids)
 {
-	std::vector<std::string> names;
-	for (S32 i = 0; i < (S32)agent_ids.size(); i++)
-	{
-		std::string fullname;
-		LLUUID agent_id = agent_ids[i];
-		LLViewerObject* dest = gObjectList.findObject(agent_id);
-		if(dest && dest->isAvatar())
-		{
-			LLNameValue* nvfirst = dest->getNVPair("FirstName");
-			LLNameValue* nvlast = dest->getNVPair("LastName");
-			if(nvfirst && nvlast)
-			{
-				fullname = LLCacheName::buildFullName(
-					nvfirst->getString(), nvlast->getString());
-
-			}
-			if (!fullname.empty())
-			{
-				names.push_back(fullname);
-			} 
-			else 
-			{
-				LL_WARNS() << "llPanelGroupInvite: Selected avatar has no name: " << dest->getID() << LL_ENDL;
-				names.push_back("(Unknown)");
-			}
-		}
-		else
-		{
-			//looks like user try to invite offline avatar (or the avatar from the other region)
-			//for offline avatar_id gObjectList.findObject() will return null
-			//so we need to do this additional search in avatar tracker, see EXT-4732
-			LLAvatarName av_name;
-			if (!LLAvatarNameCache::get(agent_id, &av_name))
-			{
-				// actually it should happen, just in case
-				//LLAvatarNameCache::get(LLUUID(agent_id), boost::bind(&LLPanelGroupInvite::addUserCallback, this, _1, _2));
-				// for this special case!
-				//when there is no cached name we should remove resident from agent_ids list to avoid breaking of sequence
-				// removed id will be added in callback
-				agent_ids.erase(agent_ids.begin() + i);
-			}
-			else
-			{
-				names.push_back(av_name.getAccountName());
-			}
-		}
-	}
-	mImplementation->addUsers(names, agent_ids);
+// [SL:KB] - Patch: Floater-GroupInfo | Checked: 2016-02-10 (Catznip-4.0)
+	// If we have the name here, we'll have it in LLNameListCtrl as well so there's no need for any of the hoop-jumping below
+	mImplementation->addUsers(agent_ids);
+// [/SL:KB]
+//	std::vector<std::string> names;
+//	for (S32 i = 0; i < (S32)agent_ids.size(); i++)
+//	{
+//		std::string fullname;
+//		LLUUID agent_id = agent_ids[i];
+//		LLViewerObject* dest = gObjectList.findObject(agent_id);
+//		if(dest && dest->isAvatar())
+//		{
+//			LLNameValue* nvfirst = dest->getNVPair("FirstName");
+//			LLNameValue* nvlast = dest->getNVPair("LastName");
+//			if(nvfirst && nvlast)
+//			{
+//				fullname = LLCacheName::buildFullName(
+//					nvfirst->getString(), nvlast->getString());
+//
+//			}
+//			if (!fullname.empty())
+//			{
+//				names.push_back(fullname);
+//			} 
+//			else 
+//			{
+//				LL_WARNS() << "llPanelGroupInvite: Selected avatar has no name: " << dest->getID() << LL_ENDL;
+//				names.push_back("(Unknown)");
+//			}
+//		}
+//		else
+//		{
+//			//looks like user try to invite offline avatar (or the avatar from the other region)
+//			//for offline avatar_id gObjectList.findObject() will return null
+//			//so we need to do this additional search in avatar tracker, see EXT-4732
+//			LLAvatarName av_name;
+//			if (!LLAvatarNameCache::get(agent_id, &av_name))
+//			{
+//				// actually it should happen, just in case
+//				//LLAvatarNameCache::get(LLUUID(agent_id), boost::bind(&LLPanelGroupInvite::addUserCallback, this, _1, _2));
+//				// for this special case!
+//				//when there is no cached name we should remove resident from agent_ids list to avoid breaking of sequence
+//				// removed id will be added in callback
+//				agent_ids.erase(agent_ids.begin() + i);
+//			}
+//			else
+//			{
+//				names.push_back(av_name.getAccountName());
+//			}
+//		}
+//	}
+//	mImplementation->addUsers(names, agent_ids);//		{
 }
 
-void LLPanelGroupInvite::addUserCallback(const LLUUID& id, const LLAvatarName& av_name)
-{
-	std::vector<std::string> names;
-	uuid_vec_t agent_ids;
-	agent_ids.push_back(id);
-	names.push_back(av_name.getAccountName());
-
-	mImplementation->addUsers(names, agent_ids);
-}
+//void LLPanelGroupInvite::addUserCallback(const LLUUID& id, const LLAvatarName& av_name)
+//{
+//	std::vector<std::string> names;
+//	uuid_vec_t agent_ids;
+//	agent_ids.push_back(id);
+//	names.push_back(av_name.getAccountName());
+//
+//	mImplementation->addUsers(names, agent_ids);
+//}
 
 void LLPanelGroupInvite::draw()
 {
