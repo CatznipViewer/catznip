@@ -70,7 +70,7 @@ background_visible="false"
      left="0"
      help_topic="place_profile"
      name="panel_place_profile"
-     top="5"
+     top="0"
      visible="false"
      width="324" />
     <panel
@@ -82,7 +82,7 @@ background_visible="false"
      left="0"
      help_topic="landmark"
      name="panel_landmark_info"
-     top="5"
+     top="0"
      visible="false"
      width="324" />
     <panel
