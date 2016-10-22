@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -985,6 +986,9 @@ void LLAgent::setRegion(LLViewerRegion *regionp)
 // [/RLVa:KB]
 
 	LL_DEBUGS("AgentLocation") << "Calling RegionChanged callbacks" << LL_ENDL;
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		LLNotifications::instance().cancelByName("TeleportOffered");
+// [/SL:KB]
 	mRegionChangedSignal();
 }
 

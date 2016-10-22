@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -63,7 +64,7 @@ public:
 	/**
 	 * Show group information panel.
 	 */
-	static void showNotices(const LLUUID& group_id) {}
+	static void showNotices(const LLUUID& group_id);
 // [/SL:KB]
 
 	/**
@@ -107,6 +108,11 @@ public:
 
 	/// Returns if the current user is a member of the group
 	static bool isInGroup(const LLUUID& group_id);
+
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+	/// Returns true if the current user has the specified power in the group
+	static bool hasPowerInGroup(const LLUUID& group_id, U64 power);
+// [/SL:KB]
 
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
 	/// Returns true if the current user has the specified power in the group

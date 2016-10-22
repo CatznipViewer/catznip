@@ -10,6 +10,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -67,6 +68,10 @@ public:
 
 	void enableSingleLineMode(bool single_line_mode);
 	boost::signals2::connection setTextExpandedCallback(const commit_signal_t::slot_type& cb);
+
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2016-01-02 (Catznip-4.0)
+	void expandAndReflow();
+// [/SL:KB]
 
 private:
 

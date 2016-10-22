@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2003&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -52,7 +53,10 @@ public:
 	void setTitle( std::string title );
 
 	// get item's ID
-	LLUUID getID() { return mID; }
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+	const LLUUID& getID() const { return mID; }
+// [/SL:KB]
+//	LLUUID getID() { return mID; }
 
 	// handlers
 	virtual BOOL handleMouseDown(S32 x, S32 y, MASK mask);

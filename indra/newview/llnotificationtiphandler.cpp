@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -73,46 +74,86 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 		return false;
 	}
 
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time or pop up a toast for them
+	if (notification->isPersisted())
+	{
+		return true;
+	}
+// [/SL:KB]
+
 	// arrange a channel on a screen
 	if(!mChannel.get()->getVisible())
 	{
 		initChannel();
 	}
 
-		// archive message in nearby chat
-	if (notification->canLogToChat())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	bool fShowToast = true;
+
+	if (LLHandlerUtil::canLogToChat(notification))
 	{
 		LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+
+		// Don't show a toast if the nearby chat floater is visible
+		LLFloaterIMNearbyChat* pNearbyChat = LLFloaterReg::findTypedInstance<LLFloaterIMNearbyChat>("nearby_chat");
+		if ( (pNearbyChat) && (!pNearbyChat->isMinimized()) && (pNearbyChat->isInVisibleChain()) )
+		{
+			fShowToast = false;
+		}
 	}
 
-	std::string session_name = notification->getPayload()["SESSION_NAME"];
-	const std::string name = notification->getSubstitutions()["NAME"];
-	if (session_name.empty())
+	if (LLHandlerUtil::canLogToIM(notification))
 	{
-		session_name = name;
-	}
-	LLUUID from_id = notification->getPayload()["from_id"];
-	if (notification->canLogToIM())
-	{
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
-		LLHandlerUtil::logToIMP2P(notification, false);
-// [/SL:KB]
-//		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
-//				notification->getMessage(), from_id, from_id);
+		LLHandlerUtil::logToIMP2P(notification);
+
+		if (notification->hasFormElements())
+		{
+			const std::string strName = notification->getSubstitutions()["NAME"];
+			const LLUUID idFrom = notification->getPayload()["from_id"];
+
+			LLHandlerUtil::spawnIMSession(strName, idFrom);
+		}
+
+		if (LLHandlerUtil::isIMFloaterVisible(notification))
+		{
+			fShowToast = false;
+		}
 	}
 
-	if (notification->canLogToIM() && notification->hasFormElements())
-	{
-// [SL:KB] - Patch: Chat-Logs | Checked: 2013-08-15 (Catznip-3.6)
-		LLHandlerUtil::spawnIMSession(session_name, from_id);
-// [/SL:KB]
-//		LLHandlerUtil::spawnIMSession(name, from_id);
-	}
-
-	if (notification->canLogToIM() && LLHandlerUtil::isIMFloaterOpened(notification))
+	if (!fShowToast)
 	{
 		return false;
 	}
+// [/SL:KB]
+//		// archive message in nearby chat
+//	if (notification->canLogToChat())
+//	{
+//		LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+//	}
+//
+//	std::string session_name = notification->getPayload()["SESSION_NAME"];
+//	const std::string name = notification->getSubstitutions()["NAME"];
+//	if (session_name.empty())
+//	{
+//		session_name = name;
+//	}
+//	LLUUID from_id = notification->getPayload()["from_id"];
+//	if (notification->canLogToIM())
+//	{
+//		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, session_name, name,
+//				notification->getMessage(), from_id, from_id);
+//	}
+//
+//	if (notification->canLogToIM() && notification->hasFormElements())
+//	{
+//		LLHandlerUtil::spawnIMSession(name, from_id);
+//	}
+//
+//	if (notification->canLogToIM() && LLHandlerUtil::isIMFloaterOpened(notification))
+//	{
+//		return false;
+//	}
 
 	LLToastPanel* notify_box = LLToastPanel::buidPanelFromNotification(notification);
 

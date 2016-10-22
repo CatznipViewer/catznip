@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -194,7 +195,12 @@ std::string LLUrlAction::getUserID(std::string url)
 	LLURI uri(url);
 	LLSD path_array = uri.pathArray();
 	std::string id_str;
-	if (path_array.size() == 4)
+//	if (path_array.size() == 4)
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+	// Only grab the UUID if it's an agent URL
+	const std::string strCommand = path_array.get(1).asString();
+	if ( (path_array.size() == 4) && (("agent" == strCommand) || ("group" == strCommand)) )
+// [/SL:KB]
 	{
 		id_str = path_array.get(2).asString();
 	}
@@ -233,6 +239,35 @@ void LLUrlAction::sendIM(std::string url)
 		executeSLURL("secondlife:///app/agent/" + id_str + "/im");
 	}
 }
+
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+void LLUrlAction::startGroupChat(const std::string& url)
+{
+	const std::string strGroupId = getUserID(url);
+	if (LLUUID::validate(strGroupId))
+	{
+		executeSLURL("secondlife:///app/group/" + strGroupId + "/im");
+	}
+}
+
+void LLUrlAction::offerTeleport(const std::string& url)
+{
+	const std::string strAgentId = getUserID(url);
+	if (LLUUID::validate(strAgentId))
+	{
+		executeSLURL("secondlife:///app/agent/" + strAgentId + "/offerteleport");
+	}
+}
+
+void LLUrlAction::requestTeleport(const std::string& url)
+{
+	const std::string strAgentId = getUserID(url);
+	if (LLUUID::validate(strAgentId))
+	{
+		executeSLURL("secondlife:///app/agent/" + strAgentId + "/requestteleport");
+	}
+}
+// [/SL:KB]
 
 void LLUrlAction::addFriend(std::string url)
 {

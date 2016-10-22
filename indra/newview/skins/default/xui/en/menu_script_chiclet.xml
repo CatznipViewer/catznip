@@ -3,11 +3,58 @@
  layout="topleft"
  name="ScriptChiclet Menu">
     <menu_item_call
+     label="Block Object"
+     layout="topleft"
+     name="Block Object">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="block_object" />
+         <menu_item_call.on_enable
+         function="ScriptChiclet.EnableItem"
+         parameter="block_object" />
+    </menu_item_call>
+<!--
+    <menu_item_call
+     label="Block Object by Name"
+     layout="topleft"
+     name="Block Object by Name">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="block_object_by_name" />
+         <menu_item_call.on_visible
+         function="ScriptChiclet.EnableItem"
+         parameter="block_object_by_name" />
+    </menu_item_call>
+-->
+    <menu_item_call
+     label="Block Owner"
+     layout="topleft"
+     name="Block Owner">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="block_owner" />
+        <menu_item_call.on_enable
+         function="ScriptChiclet.EnableItem"
+         parameter="block_owner" />
+    </menu_item_call>
+    <menu_item_separator />
+    <menu_item_call
      label="Close"
      layout="topleft"
      name="Close">
         <menu_item_call.on_click
          function="ScriptChiclet.Action"
          parameter="end" />
+    </menu_item_call>
+    <menu_item_call
+     label="Close All"
+     layout="topleft"
+     name="Close All">
+        <menu_item_call.on_click
+         function="ScriptChiclet.Action"
+         parameter="end_all" />
+        <menu_item_call.on_visible
+         function="ScriptChiclet.EnableItem"
+         parameter="end_all" />
     </menu_item_call>
 </context_menu>

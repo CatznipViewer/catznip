@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -94,7 +95,10 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 	}
 	else
 	{
-		bool add_notif_to_im = notification->canLogToIM() && notification->hasFormElements();
+//		bool add_notif_to_im = notification->canLogToIM() && notification->hasFormElements();
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		bool add_notif_to_im = (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements());
+// [/SL:KB]
 
 		if (add_notif_to_im)
 		{
@@ -150,7 +154,10 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 		{
 			LLNotificationsUtil::cancel(notification);
 		}
-		else if(!notification->canLogToIM() || !LLHandlerUtil::isIMFloaterOpened(notification))
+//		else if(!notification->canLogToIM() || !LLHandlerUtil::isIMFloaterOpened(notification))
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		else if ( (!LLHandlerUtil::canLogToIM(notification)) || (!LLHandlerUtil::isIMFloaterVisible(notification)) )
+// [/SL:KB]
 		{
 			LLToastNotifyPanel* notify_box = new LLToastNotifyPanel(notification);
 			LLToast::Params p;
@@ -167,10 +174,24 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 
 		}
 
-		if (notification->canLogToIM())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-27 (Catznip-3.2)
+		// NOTE: do we actually ever want "offer" notifications to be logged to nearby chat?
+		if (LLHandlerUtil::canLogToChat(notification))
+		{
+			LLHandlerUtil::logToNearbyChat(notification, CHAT_SOURCE_SYSTEM);
+		}
+// [/SL:KB]
+
+//		if (notification->canLogToIM())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+		if (LLHandlerUtil::canLogToIM(notification))
+// [/SL:KB]
 		{
 			// log only to file if notif panel can be embedded to IM and IM is opened
-			bool file_only = add_notif_to_im && LLHandlerUtil::isIMFloaterOpened(notification);
+//			bool file_only = add_notif_to_im && LLHandlerUtil::isIMFloaterOpened(notification);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+			bool file_only = add_notif_to_im && LLHandlerUtil::hasIMFloater(notification);
+// [/SL:KB]
 			LLHandlerUtil::logToIMP2P(notification, file_only);
 		}
 	}
@@ -213,6 +234,9 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 //		if (notification->canLogToIM() 
 //			&& notification->hasFormElements()
 //			&& !LLHandlerUtil::isIMFloaterOpened(notification))
+//// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+//		if ( (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements()) && (!LLHandlerUtil::isIMFloaterVisible(notification)) )
+//// [/SL:KB]
 // [SL:KB] - Patch: UI-Notifications | Checked: 2013-05-09 (Catznip-3.5)
 		// The above test won't necessarily tell us whether the notification went into an IM or to the notification syswell
 		//   -> the one and only time we need to decrease the unread IM count is when we've clicked any of the buttons on the *toast*
@@ -225,6 +249,15 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 		{
 			LLHandlerUtil::decIMMesageCounter(notification);
 		}
+
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		LLToastNotifyPanel* panelp = LLToastNotifyPanel::getInstance(notification->getID());
+		if (panelp)
+		{
+			panelp->updateNotification();
+		}
+// [/SL:KB]
+
 		mChannel.get()->removeToastByNotificationID(notification->getID());
 	}
 }

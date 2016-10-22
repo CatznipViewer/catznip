@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2009-2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -2089,6 +2090,11 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.AddFriend", boost::bind(&LLUrlAction::addFriend, url));
 	registrar.add("Url.RemoveFriend", boost::bind(&LLUrlAction::removeFriend, url));
 	registrar.add("Url.SendIM", boost::bind(&LLUrlAction::sendIM, url));
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+	registrar.add("Url.GroupChat", boost::bind(&LLUrlAction::startGroupChat, url));
+	registrar.add("Url.OfferTeleport", boost::bind(&LLUrlAction::offerTeleport, url));
+	registrar.add("Url.RequestTeleport", boost::bind(&LLUrlAction::requestTeleport, url));
+// [/SL:KB]
 	registrar.add("Url.ShowOnMap", boost::bind(&LLUrlAction::showLocationOnMap, url));
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2011-03-19 (Catznip-3.0.0a) | Added: Catznip-2.5.0a
 	registrar.add("Url.Copy", boost::bind(&LLUrlAction::copyToClipboard, url, _2));
@@ -2118,14 +2124,21 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 		if (mIsFriendSignal)
 		{
 			bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-			LLView* addFriendButton = pUrlMenu->getChild<LLView>("add_friend");
-			LLView* removeFriendButton = pUrlMenu->getChild<LLView>("remove_friend");
-
-			if (addFriendButton && removeFriendButton)
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+			LLView* pAddItem = pUrlMenu->getChild<LLView>("add_friend");
+			if (pAddItem)
 			{
-				addFriendButton->setVisible(!isFriend);
-				removeFriendButton->setVisible(isFriend);
+				pAddItem->setVisible(!isFriend);
 			}
+// [/SL:KB]
+//			LLView* addFriendButton = pUrlMenu->getChild<LLView>("add_friend");
+//			LLView* removeFriendButton = pUrlMenu->getChild<LLView>("remove_friend");
+//
+//			if (addFriendButton && removeFriendButton)
+//			{
+//				addFriendButton->setVisible(!isFriend);
+//				removeFriendButton->setVisible(isFriend);
+//			}
 		}
 
 		if (mIsObjectBlockedSignal)

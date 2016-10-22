@@ -8,6 +8,7 @@
  save_rect="true"
  title="NOTIFICATIONS"
  width="320"
+ min_height="90"
  min_width="320"
  height="23"
  can_minimize="false"
@@ -24,13 +25,69 @@
         CONVERSATIONS
     </string>
 
-    <flat_list_view
-	    color="FloaterDefaultBackgroundColor"
-	    follows="all"
-	    layout="topleft"
-	    name="notification_list"
-	    left="1"
-	    top="20"
-	    height="0"
-	    width="318"/>
+    <layout_stack
+     bottom="-1"
+     follows="all"
+     left="1"
+     mouse_opaque="false"
+     name="notification_stack"
+     orientation="vertical"
+     right="-1"
+     top="20">
+        <layout_panel
+         auto_resize="false"
+         height="23"
+         left="1"
+         name="notification_filter_panel"
+         right="-1"
+         visible="false">
+          <combo_box
+           bottom="-1"
+           follows="top|left"
+           layout="topleft"
+           left="5"
+           name="filter_type"
+           top="1"
+           width="120">
+            <combo_box.item
+             label="All"
+             value="" />
+            <combo_box.item
+             label="Group Notices"
+             value="groupnotify" />
+            <combo_box.item
+             label="Notifications"
+             value="notify" />
+            <combo_box.item
+             label="Offers"
+             value="offer" />
+          </combo_box>
+          <filter_editor
+           follows="|top|leftright"
+           text_pad_left="10"
+           height="23"
+           label="Filter notifications"
+           layout="topleft"
+           left_pad="3"
+           max_length_chars="300"
+           name="filter_text"
+           right="-3"
+           top_delta="0" />
+        </layout_panel>
+        <layout_panel
+         auto_resize="true"
+         name="notification_list_panel"
+         left="1"
+         right="-1">
+          <flat_list_view
+           color="FloaterDefaultBackgroundColor"
+           follows="all"
+           layout="topleft"
+           name="notification_list"
+           left="1"
+           top="1"
+           bottom="-1"
+           width="318"/>
+        </layout_panel>
+    </layout_stack>
 </floater>

@@ -3754,7 +3754,7 @@ Hvis du bliver ved med at modtage denne besked, kontakt venligst [SUPPORT_SITE].
 		Du er den eneste deltager i denne samtale
 	</string>
 	<string name="offline_message">
-		[NAME] er logget af.
+		[NAME_SLURL] er logget af.
 	</string>
 	<string name="invite_message">
 		Tryk på [BUTTON NAME] knappen for at acceptére/tilslutte til denne stemme chat.

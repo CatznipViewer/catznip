@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -90,7 +91,15 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 	}
 // [/SL:KB]
 
-	LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	// Don't log persisted notifications a second time
+	if (!notification->isPersisted())
+	{
+// [/SL:KB]
+		LLHandlerUtil::logGroupNoticeToIMGroup(notification);
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+	}
+// [/SL:KB]
 
 	LLPanel* notify_box = new LLToastGroupNotifyPanel(notification);
 	LLToast::Params p;

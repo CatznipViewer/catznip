@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +48,9 @@
 // [/SL:KB]
 #include "llstatusbar.h"	// can_afford_transaction()
 #include "groupchatlistener.h"
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+#include "llviewercontrol.h"
+// [/SL:KB]
 // [RLVa:KB] - Checked: 2011-03-28 (RLVa-1.3.0)
 #include "llslurl.h"
 #include "rlvactions.h"
@@ -123,6 +127,15 @@ public:
 			LLGroupActions::inspect(group_id);
 			return true;
 		}
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2011-01-13 (Catznip-2.5)
+		if (tokens[1].asString() == "im")
+		{
+			if ( (group_id.isNull()) || (!LLGroupActions::isInGroup(group_id)) )
+				return true;
+			LLGroupActions::startIM(group_id);
+			return true;
+		}
+// [/SL:KB]
 		return false;
 	}
 };
@@ -399,6 +412,34 @@ void LLGroupActions::show(const LLUUID& group_id)
 	LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", params);
 }
 
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+// static
+void LLGroupActions::showNotices(const LLUUID& group_id)
+{
+	if (group_id.isNull())
+		return;
+
+	LLSD sdParams;
+	sdParams["group_id"] = group_id;
+	sdParams["action"] = "view_notices";
+
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+	if (!gSavedSettings.getBOOL("ShowGroupFloaters"))
+	{
+// [/SL:KB]
+		sdParams["open_tab_name"] = "panel_group_info_sidetray";
+
+		LLFloaterSidePanelContainer::showPanel("people", "panel_group_info_sidetray", sdParams);
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2012-10-17 (Catznip-3.3)
+	}
+	else
+	{
+		LLFloaterReg::showInstance("floater_group_info", sdParams);
+	}
+// [/SL:KB]
+}
+// [/SL:KB]
+
 void LLGroupActions::refresh_notices()
 {
 	if(!isGroupUIVisible())
@@ -565,6 +606,14 @@ bool LLGroupActions::isInGroup(const LLUUID& group_id)
 	// this one.
 	return gAgent.isInGroup(group_id);
 }
+
+// [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-16 (Catznip-3.2)
+// static
+bool LLGroupActions::hasPowerInGroup(const LLUUID& group_id, U64 power)
+{
+	return gAgent.hasPowerInGroup(group_id, power);
+}
+// [/SL:KB]
 
 // static
 bool LLGroupActions::isAvatarMemberOfGroup(const LLUUID& group_id, const LLUUID& avatar_id)

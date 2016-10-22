@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -230,6 +231,9 @@ public:
 
 	LLOfferInfo(const LLOfferInfo& info);
 
+// [SL:KB] - Patch: Notification-InvOfferInfo | Checked: 2014-03-24 (Catznip-3.6)
+	const char* getNotificationName() const;
+// [/SL:KB]
 	void forceResponse(InventoryOfferResponse response);
 
     static std::string mResponderType;

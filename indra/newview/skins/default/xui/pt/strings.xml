@@ -4195,7 +4195,7 @@ If you continue to receive this message, contact the [SUPPORT_SITE].
 		Você é o único usuário desta sessão.
 	</string>
 	<string name="offline_message">
-		[NAME] está offline.
+		[NAME_SLURL] está offline.
 	</string>
 	<string name="invite_message">
 		Clique no botão [BUTTON NAME] para aceitar/ conectar a este bate-papo em voz.

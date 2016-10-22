@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2015&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2015, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -70,11 +71,15 @@ public:
     static std::set<std::string> getGroupNoticeTypes();
 
     // title
-    void setTitle( std::string title );
+//    void setTitle( std::string title );
 
     // get item's ID
-    LLUUID getID() { return mParams.notification_id; }
-    std::string& getTitle() { return mTitle; }
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+	LLUUID getID() const { return mParams.notification_id; }
+	const std::string& getTitle() const { return mParams.title; }
+// [/SL:KB]
+//    LLUUID getID() { return mParams.notification_id; }
+//    std::string& getTitle() { return mTitle; }
     std::string& getNotificationName() { return mNotificationName; }
 
     // handlers
@@ -91,6 +96,9 @@ public:
     boost::signals2::connection setOnItemClickCallback(item_callback_t cb) { return mOnItemClick.connect(cb); }
     
     virtual bool showPopup() { return true; }
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-02 (Catznip-4.0)
+	bool isExpanded() const;
+// [/SL:KB]
     void setExpanded(BOOL value);
     virtual BOOL postBuild();
     void reshapeNotification();
@@ -124,7 +132,7 @@ protected:
     LLButton*           mCloseBtnExp;
     LLPanel*            mCondensedViewPanel;
     LLPanel*            mExpandedViewPanel;
-    std::string         mTitle;
+//    std::string         mTitle;
     std::string         mNotificationName;
     S32                 mCondensedHeight;
     S32                 mExpandedHeight;

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -45,8 +46,14 @@
 #include "llviewermessage.h"
 #include "llfloaterimsession.h"
 #include "llavataractions.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+#include "llcheckboxctrl.h"
+// [/SL:KB]
 
-const S32 BOTTOM_PAD = VPAD * 3;
+//const S32 BOTTOM_PAD = VPAD * 3;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+const S32 BOTTOM_PAD = VPAD * 2.5;
+// [/SL:KB]
 const S32 IGNORE_BTN_TOP_DELTA = 3*VPAD;//additional ignore_btn padding
 S32 BUTTON_WIDTH = 90;
 // *TODO: magic numbers - copied from llnotify.cpp(250)
@@ -141,7 +148,10 @@ LLToastNotifyPanel::~LLToastNotifyPanel()
 		}
 	}
 
-void LLToastNotifyPanel::updateButtonsLayout(const std::vector<index_button_pair_t>& buttons, S32 h_pad)
+//void LLToastNotifyPanel::updateButtonsLayout(const std::vector<index_button_pair_t>& buttons, S32 h_pad)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+void LLToastNotifyPanel::updateControlPanelLayout(const std::vector<index_button_pair_t>& buttons, const std::vector<LLCheckBoxCtrl*>& checkboxes, S32 h_pad)
+// [/SL:KB]
 {
 	S32 left = 0;
 	//reserve place for ignore button
@@ -179,6 +189,19 @@ void LLToastNotifyPanel::updateButtonsLayout(const std::vector<index_button_pair
 		left = btn_rect.mLeft + btn_rect.getWidth() + h_pad;
 		mControlPanel->addChild(btn, -1);
 	}
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+	for (std::vector<LLCheckBoxCtrl*>::const_iterator itCtrl = checkboxes.begin(); itCtrl != checkboxes.end(); ++itCtrl)
+	{
+		LLCheckBoxCtrl* pCtrl = *itCtrl;
+
+		LLRect rctCtrl(pCtrl->getRect());
+		bottom_offset += BTN_HEIGHT + VPAD;
+		rctCtrl.setOriginAndSize(rctCtrl.mLeft, bottom_offset, rctCtrl.getWidth(),	rctCtrl.getHeight());
+		pCtrl->setRect(rctCtrl);
+		mControlPanel->addChild(pCtrl);
+	}
+// [/SL:KB]
 
 	U32 ignore_btn_width = 0;
 	U32 mute_btn_pad = 0;
@@ -337,6 +360,10 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
     }
     else
     {
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+        std::vector<LLCheckBoxCtrl*> checkboxes;
+		S32 checkbox_height = 0;
+// [/SL:KB]
         std::vector<index_button_pair_t> buttons;
         buttons.reserve(mNumOptions);
         S32 buttons_width = 0;
@@ -344,6 +371,21 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
         for (S32 i = 0; i < mNumOptions; i++)
         {
             LLSD form_element = form->getElement(i);
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+			if (form_element["type"].asString() == "check")
+			{
+				// Create control checkboxes
+				LLCheckBoxCtrl* pCheckCtrl = createCheckBox(form_element["text"].asString(), form_element["control"].asString());
+				if (pCheckCtrl)
+				{
+					checkboxes.push_back(pCheckCtrl);
+					checkbox_height += pCheckCtrl->getFont()->getLineHeight() + VPAD;
+				}
+				continue;
+			}
+// [/SL:KB]
+
             if (form_element["type"].asString() != "button")
             {
                 // not a button.
@@ -392,7 +434,10 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
                 //reserve one row for the ignore_btn
                 button_rows++;
                 //calculate required panel height for scripdialog notification.
-                button_panel_height = button_rows * (BTN_HEIGHT + VPAD)	+ IGNORE_BTN_TOP_DELTA + BOTTOM_PAD;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+				button_panel_height = button_rows * (BTN_HEIGHT + VPAD) + checkbox_height + IGNORE_BTN_TOP_DELTA + BOTTOM_PAD;
+// [/SL:KB]
+//                button_panel_height = button_rows * (BTN_HEIGHT + VPAD)	+ IGNORE_BTN_TOP_DELTA + BOTTOM_PAD;
             }
             else
             {
@@ -400,12 +445,18 @@ void LLToastNotifyPanel::init( LLRect rect, bool show_images )
                 //S32 button_rows = llceil(F32(buttons.size()) * (buttons_width + h_pad) / button_panel_width);
                 S32 button_rows = llceil(F32((buttons.size() - 1) * h_pad + buttons_width) / button_panel_width);
                 //calculate required panel height 
-                button_panel_height = button_rows * (BTN_HEIGHT + VPAD)	+ BOTTOM_PAD;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+				button_panel_height = button_rows * (BTN_HEIGHT + VPAD) + checkbox_height + BOTTOM_PAD;
+// [/SL:KB]
+//                button_panel_height = button_rows * (BTN_HEIGHT + VPAD)	+ BOTTOM_PAD;
             }
 
             // we need to keep min width and max height to make visible all buttons, because width of the toast can not be changed
             adjustPanelForScriptNotice(button_panel_width, button_panel_height);
-            updateButtonsLayout(buttons, h_pad);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
+			updateControlPanelLayout(buttons, checkboxes, h_pad);
+// [/SL:KB]
+//            updateButtonsLayout(buttons, h_pad);
             // save buttons for later use in disableButtons()
             //mButtons.assign(buttons.begin(), buttons.end());
         }
@@ -485,6 +536,33 @@ void LLIMToastNotifyPanel::snapToMessageHeight()
 	}
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+LLCheckBoxCtrl* LLToastNotifyPanel::createCheckBox(const std::string& strMessage, const std::string& strControl)
+{
+	LLControlVariable* pControl = gSavedSettings.getControl(strControl);
+	if ( (!pControl) || (!pControl->isType(TYPE_BOOLEAN)) )
+		return NULL;
+
+	LLCheckBoxCtrl::Params p;
+	p.follows.flags = FOLLOWS_LEFT | FOLLOWS_BOTTOM;
+	p.label = strMessage;
+	p.name = "check";
+
+	LLCheckBoxCtrl* pCheckCtrl = LLUICtrlFactory::create<LLCheckBoxCtrl>(p);
+	if (pCheckCtrl)
+	{
+		pCheckCtrl->set(pControl->getValue().asBoolean());
+		pCheckCtrl->setCommitCallback(boost::bind(&LLToastNotifyPanel::onToggleCheck, this, pCheckCtrl, pControl));
+	}
+	return pCheckCtrl;
+}
+
+void LLToastNotifyPanel::onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl) const
+{
+	pControl->setValue(pCheckCtrl->get());
+}
+// [/SL:KB]
+
 void LLIMToastNotifyPanel::compactButtons()
 {
 	//we can't set follows in xml since it broke toasts behavior
@@ -522,7 +600,13 @@ void LLIMToastNotifyPanel::compactButtons()
 
 void LLIMToastNotifyPanel::updateNotification()
 	{
-	init(LLRect(), true);
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+	if ( (mNotification.get()) && (mNotification->isCancelled()) )
+	{
+		mControlPanel->setEnabled(false);
+	}
+// [/SL:KB]
+//	init(LLRect(), true);
 	}
 
 void LLIMToastNotifyPanel::init( LLRect rect, bool show_images )

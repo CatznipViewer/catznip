@@ -5,6 +5,7 @@
 * $LicenseInfo:firstyear=2009&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
+* Copyright (C) 2010-2016, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -142,6 +143,14 @@ public:
 			LLAvatarActions::offerTeleport(avatar_id);
 			return true;
 		}
+
+// [SL:KB] - Patch: UI-UrlContextMenu | Checked: 2014-01-05 (Catznip-3.6)
+		if (verb == "requestteleport")
+		{
+			LLAvatarActions::teleportRequest(avatar_id);
+			return true;
+		}
+// [/SL:KB]
 
 		if (verb == "requestfriend")
 		{

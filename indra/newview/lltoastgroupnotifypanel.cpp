@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,6 +44,9 @@
 #include "llviewercontrol.h"
 #include "lltrans.h"
 #include "llstyle.h"
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
+#include "llslurl.h"
+// [/SL:KB]
 
 #include "llglheaders.h"
 #include "llagent.h"
@@ -58,27 +62,45 @@ LLToastGroupNotifyPanel::LLToastGroupNotifyPanel(const LLNotificationPtr& notifi
 {
 	buildFromFile( "panel_group_notify.xml");
 	const LLSD& payload = notification->getPayload();
-	LLGroupData groupData;
-	if (!gAgent.getGroupData(payload["group_id"].asUUID(),groupData))
-	{
-		LL_WARNS() << "Group notice for unknown group: " << payload["group_id"].asUUID() << LL_ENDL;
-	}
+//	LLGroupData groupData;
+//	if (!gAgent.getGroupData(payload["group_id"].asUUID(),groupData))
+//	{
+//		LL_WARNS() << "Group notice for unknown group: " << payload["group_id"].asUUID() << LL_ENDL;
+//	}
 
 	//group icon
 	LLGroupIconCtrl* pGroupIcon = getChild<LLGroupIconCtrl>("group_icon", TRUE);
-
 	// We should already have this data preloaded, so no sense in setting icon through setValue(group_id)
-	pGroupIcon->setIconId(groupData.mInsigniaID);
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
+	pGroupIcon->setIconId(payload["group_id"].asUUID());
+// [/SL:KB]
+//	pGroupIcon->setIconId(groupData.mInsigniaID);
+
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
+	LLTextBox* pTitleText = getChild<LLTextBox>("title");
+	pTitleText->setValue(LLSLURL("group", payload["group_id"].asUUID(), "about").getSLURLString());
+// [/SL:KB]
 
 	//header title
 	std::string from_name = payload["sender_name"].asString();
 	from_name = LLCacheName::buildUsername(from_name);
 
-	std::stringstream from;
-	from << from_name << "/" << groupData.mName;
-	LLTextBox* pTitleText = getChild<LLTextBox>("title");
-	pTitleText->setValue(from.str());
-	pTitleText->setToolTip(from.str());
+//	std::stringstream from;
+//	from << from_name << "/" << groupData.mName;
+//	LLTextBox* pTitleText = getChild<LLTextBox>("title");
+//	pTitleText->setValue(from.str());
+//	pTitleText->setToolTip(from.str());
+
+// [SL:KB] - Patch: Notification-GroupNoticeToast | Checked: 2012-02-16 (Catznip-3.2)
+	LLUUID idSender = payload["sender_id"].asUUID();
+	if (idSender.isNull())
+	{
+		gCacheName->getUUID(LLCacheName::cleanFullName(payload["sender_name"].asString()), idSender);
+	}
+	LLTextBox* pSenderText = getChild<LLTextBox>("sender");
+	pSenderText->setValue( (idSender.notNull()) ? LLSLURL("agent", idSender, "about").getSLURLString() : from_name );
+	pSenderText->setToolTip(from_name);
+// [/SL:KB]
 
 	//message subject
 	const std::string& subject = payload["subject"].asString();

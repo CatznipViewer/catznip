@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -737,10 +738,19 @@ void LLFloaterIMNearbyChat::addMessage(const LLChat& chat,bool archive,const LLS
 
 	// logging
 //	if (!args["do_not_log"].asBoolean() && gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
-// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
-	if ( (!args["do_not_log"].asBoolean()) && (gSavedPerAccountSettings.getBOOL("LogNearbyChat")) )
-// [/SL:KB]
+//	{
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-07-03 (Catznip-3.3)
+	if (!args["do_not_log"].asBoolean())
 	{
+		logMessage(chat);
+	}
+}
+
+void LLFloaterIMNearbyChat::logMessage(const LLChat& chat)
+{
+	if (gSavedPerAccountSettings.getS32("KeepConversationLogTranscripts") > 1)
+	{
+// [/SL:KB]
 		std::string from_name = chat.mFromName;
 
 		if (chat.mSourceType == CHAT_SOURCE_AGENT)

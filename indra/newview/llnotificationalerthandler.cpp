@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -86,7 +87,10 @@ bool LLAlertHandler::processNotification(const LLNotificationPtr& notification)
 		initChannel();
 	}
 
-	if (notification->canLogToIM() && notification->hasFormElements())
+//	if (notification->canLogToIM() && notification->hasFormElements())
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	if ( (LLHandlerUtil::canLogToIM(notification)) && (notification->hasFormElements()) )
+// [/SL:KB]
 	{
 		const std::string name = LLHandlerUtil::getSubstitutionName(notification);
 

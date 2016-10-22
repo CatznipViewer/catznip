@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2003&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -283,18 +284,27 @@ public:
 	/**
 	 * Determines whether IM floater is opened.
 	 */
-	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
+// [SL:KB] - Patch: Notification-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static bool hasIMFloater(const LLNotificationPtr& notification);
+	static bool isIMFloaterVisible(const LLNotificationPtr& notification);
+// [/SL:KB]
+//	static bool isIMFloaterOpened(const LLNotificationPtr& notification);
+
+// [SL:KB] - Patch: Notification-Logging | Checked: 2013-10-14 (Catznip-3.6)
+	static bool canLogToChat(const LLNotificationPtr& notification);
+	static bool canLogToIM(const LLNotificationPtr& notification);
+// [/SL:KB]
 
 	/**
 	 * Writes notification message to IM session.
 	 */
-	static void logToIM(const EInstantMessage& session_type,
-//			const std::string& session_name, const std::string& from_name,
-// [SL:KB] - Patch: Chat-Logs | Checked: 2010-11-18 (Catznip-2.4)
-			const std::string& file_name, const std::string& from_name,
+// [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
+	static void logToIM(const LLUUID& session_id, const std::string& session_name, const std::string& from_name, const LLUUID& from_id, const std::string& message, const LLSD& substitutions);
 // [/SL:KB]
-			const std::string& message, const LLUUID& session_owner_id,
-			const LLUUID& from_id);
+//	static void logToIM(const EInstantMessage& session_type,
+//			const std::string& session_name, const std::string& from_name,
+//			const std::string& message, const LLUUID& session_owner_id,
+//			const LLUUID& from_id);
 
 	/**
 	 * Writes notification message to IM  p2p session.

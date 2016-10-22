@@ -2528,7 +2528,7 @@ http://catznip.com/downloads/.
 		Раздел: [SUBJECT], сообщение: [MESSAGE]
 	</notification>
 	<notification name="FriendOnlineOffline">
-		&lt;nolink&gt;[NAME]&lt;/nolink&gt; [STATUS]
+		[NAME_SLURL] [STATUS]
 	</notification>
 	<notification name="AddSelfFriend">
 		Вы лучше всех, но нельзя добавить в друзья себя самого.

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2012, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -68,6 +69,17 @@ void LLChatEntry::draw()
 	}
 	LLTextEditor::draw();
 }
+
+// [SL:KB] - Patch: Control-TextEditor | Checked: 2016-01-02 (Catznip-4.0)
+void LLChatEntry::expandAndReflow()
+{
+	if (mIsExpandable)
+	{
+		reflow();
+		expandText();
+	}
+}
+// [/SL:KB]
 
 void LLChatEntry::onCommit()
 {

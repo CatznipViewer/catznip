@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2015&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2015, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -50,9 +51,14 @@ public:
     void initTaggedList(const std::string& tag, LLNotificationListView* list);
     void initTaggedList(const std::set<std::string>& tags, LLNotificationListView* list);
     void initUnTaggedList(LLNotificationListView* list);
-    bool addItem(std::string& tag, LLNotificationListItem* item);
-    LLPanel* findItemByID(std::string& tag, const LLUUID& id);
-    bool removeItemByID(std::string& tag, const LLUUID& id);
+//    bool addItem(std::string& tag, LLNotificationListItem* item);
+//    LLPanel* findItemByID(std::string& tag, const LLUUID& id);
+//    bool removeItemByID(std::string& tag, const LLUUID& id);
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	bool addItem(const std::string& tag, LLNotificationListItem* item);
+	LLPanel* findItemByID(const std::string& tag, const LLUUID& id);
+	bool removeItemByID(const std::string& tag, const LLUUID& id);
+// [/SL:KB]
     void getItems(std::vector<LLNotificationListItem*>& items) const;
     U32 size() const;
 private:
@@ -65,24 +71,38 @@ private:
     LLNotificationListView* mUnTaggedList;
 };
 
-class LLFloaterNotificationsTabbed : public LLTransientDockableFloater
+// [SL:KB] - Patch: Notification-Misc | Checked: 2012-02-26 (Catznip-3.2)
+class LLNotificationDateComparator : public LLFlatListView::ItemComparator
 {
 public:
-    LOG_CLASS(LLFloaterNotificationsTabbed);
+	LLNotificationDateComparator() {}
+	/*virtual*/ ~LLNotificationDateComparator() {}
 
-    LLFloaterNotificationsTabbed(const LLSD& key);
-    virtual ~LLFloaterNotificationsTabbed();
+	/*virtual*/ bool compare(const LLPanel* pLHS, const LLPanel* pRHS) const;
+};
+// [/SL:KB]
+
+class LLFloaterNotifications : public LLTransientDockableFloater
+{
+public:
+    LOG_CLASS(LLFloaterNotifications);
+
+    LLFloaterNotifications(const LLSD& key);
+    virtual ~LLFloaterNotifications();
     BOOL postBuild();
 
     // other interface functions
     // check is window empty
-    bool isWindowEmpty();
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+	virtual bool isWindowEmpty() const = 0;
+// [/SL:KB]
+//    bool isWindowEmpty();
 
     // Operating with items
     void removeItemByID(const LLUUID& id, std::string type);
     LLPanel * findItemByID(const LLUUID& id, std::string type);
-    void updateNotificationCounters();
-    void updateNotificationCounter(S32 panelIndex, S32 counterValue, std::string stringName);
+//    void updateNotificationCounters();
+//    void updateNotificationCounter(S32 panelIndex, S32 counterValue, std::string stringName);
 
     // Operating with outfit
     virtual void setVisible(BOOL visible);
@@ -98,13 +118,23 @@ public:
     void setSysWellChiclet(LLSysWellChiclet* chiclet);
     void closeAll();
 
-    static LLFloaterNotificationsTabbed* getInstance(const LLSD& key = LLSD());
+    static LLFloaterNotifications* getInstance(const LLSD& key = LLSD());
 
     // size constants for the window and for its elements
     static const S32 MAX_WINDOW_HEIGHT      = 200;
     static const S32 MIN_WINDOW_WIDTH       = 318;
 
-private:
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+protected:
+	virtual bool addNotification(LLNotificationListItem* item) = 0;
+	virtual void closeVisibleNotifications() = 0;
+	virtual void collapseVisibleNotifications() = 0;
+	virtual void getNotifications(std::vector<LLNotificationListItem*>& items) = 0;
+	virtual LLPanel* findNotificationByID(const LLUUID& id, const std::string& type) = 0;
+	virtual bool removeNotificationByID(const LLUUID& id, const std::string& type) = 0;
+	virtual void updateNotificationCounters() = 0;
+// [/SL:KB]
+//private:
     // init Window's channel
     virtual void initChannel();
 
@@ -127,15 +157,15 @@ private:
 
     bool mIsReshapedByUser;
 
-    struct NotificationTabbedChannel : public LLNotificationChannel
+    struct NotificationChannel : public LLNotificationChannel
     {
-        NotificationTabbedChannel(LLFloaterNotificationsTabbed*);
+        NotificationChannel(LLFloaterNotifications*);
         void onDelete(LLNotificationPtr notify)
         {
-            mNotificationsTabbedWindow->removeItemByID(notify->getID(), notify->getName());
+            mNotificationsWindow->removeItemByID(notify->getID(), notify->getName());
         } 
 
-        LLFloaterNotificationsTabbed* mNotificationsTabbedWindow;
+        LLFloaterNotifications* mNotificationsWindow;
     };
 
     LLNotificationChannelPtr mNotificationUpdates;
@@ -146,11 +176,11 @@ private:
     void clearScreenChannels();
     // Operating with items
     void addItem(LLNotificationListItem::Params p);
-    void getAllItemsOnCurrentTab(std::vector<LLPanel*>& items) const;
+//    void getAllItemsOnCurrentTab(std::vector<LLPanel*>& items) const;
 
-    // Closes all notifications and removes them from the Notification Well
-    void closeAllOnCurrentTab();
-    void collapseAllOnCurrentTab();
+//    // Closes all notifications and removes them from the Notification Well
+//    void closeAllOnCurrentTab();
+//    void collapseAllOnCurrentTab();
 
     void onStoreToast(LLPanel* info_panel, LLUUID id);
     void onClickDeleteAllBtn();
@@ -161,17 +191,54 @@ private:
     // ID of a toast loaded by user (by clicking notification well item)
     LLUUID mLoadedToastId;
 
+//    LLNotificationListView*	mGroupInviteMessageList;
+//    LLNotificationListView*	mGroupNoticeMessageList;
+//    LLNotificationListView*	mTransactionMessageList;
+//    LLNotificationListView*	mSystemMessageList;
+//    LLNotificationSeparator* mNotificationsSeparator;
+//    LLTabContainer* mNotificationsTabContainer;
+    LLButton*	mDeleteAllBtn;
+    LLButton*	mCollapseAllBtn;
+};
+
+// [SL:KB] - Patch: Notification-Filter | Checked: 2016-01-01 (Catznip-4.0)
+class LLFloaterNotificationsTabbed : public LLFloaterNotifications
+{
+public:
+    LOG_CLASS(LLFloaterNotificationsTabbed);
+
+    LLFloaterNotificationsTabbed(const LLSD& key);
+    virtual ~LLFloaterNotificationsTabbed();
+    /*virtual*/ BOOL postBuild();
+
+protected:
+	void getAllItemsOnCurrentTab(std::vector<LLPanel*>& items) const;
+	void updateNotificationCounter(S32 panelIndex, S32 counterValue, std::string stringName);
+
+public:
+	/*virtual*/ bool isWindowEmpty() const;
+protected:
+	/*virtual*/ bool addNotification(LLNotificationListItem* item);
+	/*virtual*/ void closeVisibleNotifications();
+	/*virtual*/ void collapseVisibleNotifications();
+	/*virtual*/ void getNotifications(std::vector<LLNotificationListItem*>& items);
+	/*virtual*/ LLPanel* findNotificationByID(const LLUUID& id, const std::string& type);
+	/*virtual*/ bool removeNotificationByID(const LLUUID& id, const std::string& type);
+	/*virtual*/ void updateNotificationCounters();
+
+private:
     LLNotificationListView*	mGroupInviteMessageList;
     LLNotificationListView*	mGroupNoticeMessageList;
     LLNotificationListView*	mTransactionMessageList;
     LLNotificationListView*	mSystemMessageList;
     LLNotificationSeparator* mNotificationsSeparator;
     LLTabContainer* mNotificationsTabContainer;
-    LLButton*	mDeleteAllBtn;
-    LLButton*	mCollapseAllBtn;
 };
 
+namespace LLFloaterNotificationsUtil
+{
+	void registerFloater();
+}
+// [/SL:KB]
+
 #endif // LL_FLOATERNOTIFICATIONSTABBED_H
-
-
-

@@ -4322,7 +4322,7 @@ Bu iletiyi almaya devam ederseniz, lütfen [SUPPORT_SITE] bölümüne başvurun.
 		Bu oturumdaki tek kullanıcısınız.
 	</string>
 	<string name="offline_message">
-		[NAME] çevrim dışı.
+		[NAME_SLURL] çevrim dışı.
 	</string>
 	<string name="invite_message">
 		Bu sesli sohbeti kabul etmek/bağlanmak için [BUTTON NAME] düğmesine tıklayın.
