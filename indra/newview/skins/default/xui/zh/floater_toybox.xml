@@ -6,6 +6,8 @@
 	<text name="toybox label 2">
 		按鈕將根據每一個工具列的設定，僅顯示圖示或一併顯示文字標籤。
 	</text>
-	<button label="清除所有工具列" label_selected="清除所有工具列" name="btn_clear_all"/>
-	<button label="還原預設值" label_selected="還原預設值" name="btn_restore_defaults"/>
+    <panel name="bottom_panel">
+        <button label="清除所有工具列" label_selected="清除所有工具列" name="btn_clear_all"/>
+        <button label="還原預設值" label_selected="還原預設值" name="btn_restore_defaults"/>
+	</panel>
 </floater>

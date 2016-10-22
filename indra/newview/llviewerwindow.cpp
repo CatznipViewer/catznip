@@ -2147,17 +2147,17 @@ void LLViewerWindow::initBase()
 	gFloaterView->setFloaterSnapView(main_view->getChild<LLView>("floater_snap_region")->getHandle());
 	gSnapshotFloaterView = main_view->getChild<LLSnapshotFloaterView>("Snapshot Floater View");
 
-	// Console
-	llassert( !gConsole );
-	LLConsole::Params cp;
-	cp.name("console");
-	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
-	cp.rect(getChatConsoleRect());
-	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
-	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
-	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
-	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
-	getRootView()->addChild(gConsole);
+//	// Console
+//	llassert( !gConsole );
+//	LLConsole::Params cp;
+//	cp.name("console");
+//	cp.max_lines(gSavedSettings.getS32("ConsoleBufferSize"));
+//	cp.rect(getChatConsoleRect());
+//	cp.persist_time(gSavedSettings.getF32("ChatPersistTime"));
+//	cp.font_size_index(gSavedSettings.getS32("ChatFontSize"));
+//	cp.follows.flags(FOLLOWS_LEFT | FOLLOWS_RIGHT | FOLLOWS_BOTTOM);
+//	gConsole = LLUICtrlFactory::create<LLConsole>(cp);
+//	getRootView()->addChild(gConsole);
 
 	// optionally forward warnings to chat console/chat floater
 	// for qa runs and dev builds
@@ -2251,18 +2251,21 @@ void LLViewerWindow::initWorldUI()
 		navbar->setVisible(FALSE);
 	}
 
-	// Top Info bar
-	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
-	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
-
-	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
-
-	topinfo_bar_container->addChild(topinfo_bar);
-	topinfo_bar_container->setVisible(TRUE);
-
+//	// Top Info bar
+//	LLPanel* topinfo_bar_container = getRootView()->getChild<LLPanel>("topinfo_bar_container");
+//	LLPanelTopInfoBar* topinfo_bar = LLPanelTopInfoBar::getInstance();
+//
+//	topinfo_bar->setShape(topinfo_bar_container->getLocalRect());
+//
+//	topinfo_bar_container->addChild(topinfo_bar);
+//	topinfo_bar_container->setVisible(TRUE);
+//
 	if (!gSavedSettings.getBOOL("ShowMiniLocationPanel"))
 	{
-		topinfo_bar->setVisible(FALSE);
+//		topinfo_bar->setVisible(FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+		gStatusBar->showTopInfoBar(FALSE);
+// [/SL:KB]
 	}
 
 	if ( gHUDView == NULL )
@@ -2295,22 +2298,22 @@ void LLViewerWindow::initWorldUI()
 		gToolBarView->setVisible(TRUE);
 	}
 
-	LLMediaCtrl* destinations = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
-	if (destinations)
-	{
-		destinations->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
-		std::string url = gSavedSettings.getString("DestinationGuideURL");
-		url = LLWeb::expandURLSubstitutions(url, LLSD());
-		destinations->navigateTo(url, HTTP_CONTENT_TEXT_HTML);
-	}
-	LLMediaCtrl* avatar_picker = LLFloaterReg::getInstance("avatar")->findChild<LLMediaCtrl>("avatar_picker_contents");
-	if (avatar_picker)
-	{
-		avatar_picker->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
-		std::string url = gSavedSettings.getString("AvatarPickerURL");
-		url = LLWeb::expandURLSubstitutions(url, LLSD());
-		avatar_picker->navigateTo(url, HTTP_CONTENT_TEXT_HTML);
-	}
+//	LLMediaCtrl* destinations = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
+//	if (destinations)
+//	{
+//		destinations->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
+//		std::string url = gSavedSettings.getString("DestinationGuideURL");
+//		url = LLWeb::expandURLSubstitutions(url, LLSD());
+//		destinations->navigateTo(url, HTTP_CONTENT_TEXT_HTML);
+//	}
+//	LLMediaCtrl* avatar_picker = LLFloaterReg::getInstance("avatar")->findChild<LLMediaCtrl>("avatar_picker_contents");
+//	if (avatar_picker)
+//	{
+//		avatar_picker->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
+//		std::string url = gSavedSettings.getString("AvatarPickerURL");
+//		url = LLWeb::expandURLSubstitutions(url, LLSD());
+//		avatar_picker->navigateTo(url, HTTP_CONTENT_TEXT_HTML);
+//	}
 
 // [SL:KB] - Patch: UI-Search | Checked: 2012-10-21 (Catznip-3.3)
 	if (gSavedSettings.getBOOL("PreInitSearch"))
@@ -3559,8 +3562,11 @@ void LLViewerWindow::updateUI()
 					// and blacklist the various containers we don't care about
 					else if (dynamic_cast<LLUICtrl*>(viewp) 
 							&& viewp != gMenuHolder
-							&& viewp != gFloaterView
-							&& viewp != gConsole) 
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+							&& viewp != gFloaterView)
+// [/SL:KB]
+//							&& viewp != gFloaterView
+//							&& viewp != gConsole) 
 					{
 						if (dynamic_cast<LLFloater*>(viewp))
 						{
@@ -3692,13 +3698,13 @@ void LLViewerWindow::updateLayout()
 		//gMenuBarView->setItemVisible("BuildTools", gFloaterTools->getVisible());
 	}
 
-	// Always update console
-	if(gConsole)
-	{
-		LLRect console_rect = getChatConsoleRect();
-		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
-		gConsole->setRect(console_rect);
-	}
+//	// Always update console
+//	if(gConsole)
+//	{
+//		LLRect console_rect = getChatConsoleRect();
+//		gConsole->reshape(console_rect.getWidth(), console_rect.getHeight());
+//		gConsole->setRect(console_rect);
+//	}
 }
 
 void LLViewerWindow::updateMouseDelta()
@@ -5173,13 +5179,29 @@ void LLViewerWindow::revealIntroPanel()
 	}
 }
 
-void LLViewerWindow::setShowProgress(const BOOL show)
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+void LLViewerWindow::setShowProgress(bool show, F32 fade_duration /*=0.0f*/)
 {
 	if (mProgressView)
 	{
-		mProgressView->setVisible(show);
+		if (fade_duration != 0.0f)
+		{
+			mProgressView->fade(show, fade_duration);
+		}
+		else
+		{
+			mProgressView->setVisible(show);
+		}
 	}
 }
+// [/SL:KB]
+//void LLViewerWindow::setShowProgress(const BOOL show)
+//{
+//	if (mProgressView)
+//	{
+//		mProgressView->setVisible(show);
+//	}
+//}
 
 void LLViewerWindow::setStartupComplete()
 {
@@ -5581,45 +5603,45 @@ LLRect 	LLViewerWindow::calcScaledRect(const LLRect & rect, const LLVector2& dis
 	return res;
 }
 
-S32 LLViewerWindow::getChatConsoleBottomPad()
-{
-	S32 offset = 0;
+//S32 LLViewerWindow::getChatConsoleBottomPad()
+//{
+//	S32 offset = 0;
+//
+//	if(gToolBarView)
+//		offset += gToolBarView->getBottomToolbar()->getRect().getHeight();
+//
+//	return offset;
+//}
 
-	if(gToolBarView)
-		offset += gToolBarView->getBottomToolbar()->getRect().getHeight();
-
-	return offset;
-}
-
-LLRect LLViewerWindow::getChatConsoleRect()
-{
-	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
-	LLRect console_rect = full_window;
-
-	const S32 CONSOLE_PADDING_TOP = 24;
-	const S32 CONSOLE_PADDING_LEFT = 24;
-	const S32 CONSOLE_PADDING_RIGHT = 10;
-
-	console_rect.mTop    -= CONSOLE_PADDING_TOP;
-	console_rect.mBottom += getChatConsoleBottomPad();
-
-	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
-
-	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
-
-	if (CHAT_FULL_WIDTH)
-	{
-		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
-	}
-	else
-	{
-		// Make console rect somewhat narrow so having inventory open is
-		// less of a problem.
-		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
-	}
-
-	return console_rect;
-}
+//LLRect LLViewerWindow::getChatConsoleRect()
+//{
+//	LLRect full_window(0, getWindowHeightScaled(), getWindowWidthScaled(), 0);
+//	LLRect console_rect = full_window;
+//
+//	const S32 CONSOLE_PADDING_TOP = 24;
+//	const S32 CONSOLE_PADDING_LEFT = 24;
+//	const S32 CONSOLE_PADDING_RIGHT = 10;
+//
+//	console_rect.mTop    -= CONSOLE_PADDING_TOP;
+//	console_rect.mBottom += getChatConsoleBottomPad();
+//
+//	console_rect.mLeft   += CONSOLE_PADDING_LEFT; 
+//
+//	static const BOOL CHAT_FULL_WIDTH = gSavedSettings.getBOOL("ChatFullWidth");
+//
+//	if (CHAT_FULL_WIDTH)
+//	{
+//		console_rect.mRight -= CONSOLE_PADDING_RIGHT;
+//	}
+//	else
+//	{
+//		// Make console rect somewhat narrow so having inventory open is
+//		// less of a problem.
+//		console_rect.mRight  = console_rect.mLeft + 2 * getWindowWidthScaled() / 3;
+//	}
+//
+//	return console_rect;
+//}
 //----------------------------------------------------------------------------
 
 
@@ -5643,7 +5665,10 @@ void LLViewerWindow::setUIVisibility(bool visible)
 	}
 
 	LLNavigationBar::getInstance()->setVisible(visible ? gSavedSettings.getBOOL("ShowNavbarNavigationPanel") : FALSE);
-	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
+	gStatusBar->showTopInfoBar(visible ? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+// [/SL:KB]
+//	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
 	mRootView->getChildView("status_bar_container")->setVisible(visible);
 }
 

@@ -614,6 +614,18 @@ S32 LLAvatarList::notifyParent(const LLSD& info)
 		return 1;
 	}
 // [/SL:KB]
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-2.6)
+	else if ( (info.has("select")) && (info["select"].isUUID()) )
+	{
+		const LLSD& sdValue = getSelectedValue();
+		const LLUUID idItem = info["select"].asUUID();
+		if ( (!sdValue.isDefined()) || ((sdValue.isUUID()) && (sdValue.asUUID() != idItem)) )
+		{
+			resetSelection();
+			selectItemByUUID(idItem);
+		}
+	}
+// [/SL:KB]
 //	if (info.has("sort") && &NAME_COMPARATOR == mItemComparator)
 //	{
 //		sort();

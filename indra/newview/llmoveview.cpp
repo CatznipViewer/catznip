@@ -94,6 +94,11 @@ LLFloaterMove::~LLFloaterMove()
 BOOL LLFloaterMove::postBuild()
 {
 	updateTransparency(TT_ACTIVE); // force using active floater transparency (STORM-730)
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+	F32 nTransparency = gSavedSettings.getF32("ChromeFloaterTransparency");
+	setActiveTransparency(nTransparency);
+	setTitleVisible(nTransparency != .0f);
+// [/SL:KB]
 	
 	// Code that implements floater buttons toggling when user moves via keyboard is located in LLAgent::propagate()
 
@@ -366,7 +371,7 @@ void LLFloaterMove::updateButtonsWithMovementMode(const EMovementMode newMode)
 {
 	setModeTooltip(newMode);
 	setModeButtonToggleState(newMode);
-	setModeTitle(newMode);
+//	setModeTitle(newMode);
 }
 
 void LLFloaterMove::initModeTooltips()
@@ -436,27 +441,27 @@ void LLFloaterMove::setModeTooltip(const EMovementMode mode)
 	}
 }
 
-void LLFloaterMove::setModeTitle(const EMovementMode mode)
-{
-	std::string title; 
-	switch(mode)
-	{
-	case MM_WALK:
-		title = getString("walk_title");
-		break;
-	case MM_RUN:
-		title = getString("run_title");
-		break;
-	case MM_FLY:
-		title = getString("fly_title");
-		break;
-	default:
-		// title should be provided for all modes
-		llassert(false);
-		break;
-	}
-	setTitle(title);
-}
+//void LLFloaterMove::setModeTitle(const EMovementMode mode)
+//{
+//	std::string title; 
+//	switch(mode)
+//	{
+//	case MM_WALK:
+//		title = getString("walk_title");
+//		break;
+//	case MM_RUN:
+//		title = getString("run_title");
+//		break;
+//	case MM_FLY:
+//		title = getString("fly_title");
+//		break;
+//	default:
+//		// title should be provided for all modes
+//		llassert(false);
+//		break;
+//	}
+//	setTitle(title);
+//}
 
 //static
 //void LLFloaterMove::sUpdateFlyingStatus()
@@ -754,19 +759,19 @@ void LLPanelStandStopFlying::updatePosition()
 		left_tb_width = toolbar_left->getRect().getWidth();
 	}
 
-	if (!mStateManagementButtons.get())
-	{
-		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
-		if (panel_ssf_container)
-		{
-			mStateManagementButtons = panel_ssf_container->getHandle();
-		}
-	}
-
-	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
-	{
-		panel_ssf_container->setOrigin(0, y_pos);
-	}
+//	if (!mStateManagementButtons.get())
+//	{
+//		LLPanel* panel_ssf_container = getRootView()->getChild<LLPanel>("state_management_buttons_container");
+//		if (panel_ssf_container)
+//		{
+//			mStateManagementButtons = panel_ssf_container->getHandle();
+//		}
+//	}
+//
+//	if(LLPanel* panel_ssf_container = mStateManagementButtons.get())
+//	{
+//		panel_ssf_container->setOrigin(0, y_pos);
+//	}
 
 	S32 x_pos = bottom_tb_center-getRect().getWidth()/2 - left_tb_width;
 

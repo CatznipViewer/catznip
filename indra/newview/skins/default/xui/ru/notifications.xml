@@ -2171,7 +2171,7 @@ http://catznip.com/downloads/.
 		<usetemplate canceltext="Отмена" name="yesnocancelbuttons" notext="Нет" yestext="Да"/>
 	</notification>
 	<notification label="Подтвердить перезапуск" name="ConfirmRestart">
-		Вы действительно хотите перезапустить этот регион через 2 минуты?
+		Вы действительно хотите перезапустить этот регион через [MINUTES] минуты?
 		<usetemplate name="okcancelbuttons" notext="Отмена" yestext="OK"/>
 	</notification>
 	<notification label="Сообщение для всех в этом регионе" name="MessageRegion">

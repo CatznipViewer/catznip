@@ -18,8 +18,8 @@
 	<string name="Close">
 		閉じる
 	</string>
-	<tab_container name="ResidentChooserTabs" width="265">
-		<panel label="検索" name="SearchPanel" width="145">
+	<tab_container name="ResidentChooserTabs">
+		<panel label="検索" name="SearchPanel">
 			<text name="InstructSearchResidentName">
 				名前の一部を入力：
 			</text>
@@ -34,12 +34,12 @@
 				アバターを選択：
 			</text>
 		</panel>
-		<panel label="自分の近く" name="NearMePanel" width="145">
+		<panel label="自分の近く" name="NearMePanel">
 			<text name="InstructSelectResident">
 				近くの人を選択：
 			</text>
 			<slider label="範囲" name="near_me_range"/>
-			<text name="meters" width="50">
+			<text name="meters">
 				メートル
 			</text>
 			<button label="リスト更新" label_selected="リスト更新" name="Refresh"/>
@@ -49,6 +49,8 @@
 			</scroll_list>
 		</panel>
 	</tab_container>
-	<button label="OK" label_selected="OK" name="ok_btn"/>
-	<button label="キャンセル" label_selected="キャンセル" name="cancel_btn"/>
+    <panel name="bottom_panel">
+        <button label="OK" label_selected="OK" name="ok_btn"/>
+        <button label="キャンセル" label_selected="キャンセル" name="cancel_btn"/>
+	</panel>
 </floater>

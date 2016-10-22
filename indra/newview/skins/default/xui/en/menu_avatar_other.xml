@@ -12,6 +12,14 @@
         <menu_item_call.on_enable
          function="RLV.CanShowName" />
     </menu_item_call>
+   <menu_item_call
+     label="Add Contact"
+     name="Add Contact">
+        <menu_item_call.on_click
+         function="Avatar.AddContact" />
+        <menu_item_call.on_visible
+         function="Avatar.EnableAddFriend" />
+    </menu_item_call>
     <menu_item_call
      label="IM"
      name="Send IM...">
@@ -162,8 +170,8 @@
         <menu_item_call.on_enable
          function="EnablePayAvatar" />
 
-   <menu_item_separator />
-    
+      <menu_item_separator
+        layout="topleft"  name="Impostor seperator"/>
       <menu_item_check
         name="RenderNormally"
         label="Render Normally">
@@ -195,8 +203,8 @@
 	      parameter="2" />
       </menu_item_check>
 
-  <menu_item_separator 
-    layout="topleft"  name="Impostor seperator"/>
+  <menu_item_separator
+     layout="topleft" on_visible.function="EnableMuteParticle" />
 
   <menu_item_call
      label="View chat history..."
@@ -207,12 +215,11 @@
      function="Avatar.EnableChatHistory" />
   </menu_item_call>
   <menu_item_call
-     enabled="false"
      label="Block Particle Owner"
      name="Mute Particle">
     <menu_item_call.on_click
      function="Particle.Mute" />
-    <menu_item_call.on_enable
+    <menu_item_call.on_visible
      function="EnableMuteParticle" />
   </menu_item_call>
 </context_menu>

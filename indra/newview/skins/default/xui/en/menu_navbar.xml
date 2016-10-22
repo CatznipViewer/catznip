@@ -71,6 +71,16 @@
          parameter="can_paste" />
     </menu_item_call>
     <menu_item_call
+     label="Paste and Teleport"
+     name="Paste and Teleport">
+        <menu_item_call.on_click
+         function="Navbar.Action"
+         parameter="paste_teleport" />
+        <menu_item_call.on_enable
+         function="Navbar.EnableMenuItem"
+         parameter="can_paste_teleport" />
+    </menu_item_call>
+    <menu_item_call
      label="Delete"
      name="Delete">
         <menu_item_call.on_click

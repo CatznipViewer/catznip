@@ -181,6 +181,7 @@
 	</menu>
 	<menu label="Zaawansowane" name="Advanced">
 		<menu_item_call label="Odśwież tekstury (rebake)" name="Rebake Texture" />
+		<menu_item_call label="Odświeżyć bilans L$" name="Refresh Balance"/>
 		<menu_item_call label="Domyślne ustawienia rozmiaru interfejsu" name="Set UI Size to Default" />
 		<menu_item_call label="Ustaw rozmiar okna..." name="Set Window Size..." />
 		<menu_item_check label="Ogranicz dystans selekcji" name="Limit Select Distance" />

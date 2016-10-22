@@ -44,6 +44,9 @@
 #include "lldrawpoolterrain.h"
 #include "llflexibleobject.h"
 #include "llfeaturemanager.h"
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+#include "llfloaterreg.h"
+// [/SL:KB]
 // [SL:KB] - Patch: Chat-UnreadIMs | Checked: 2014-03-12 (Catznip-3.6)
 #include "llimstorage.h"
 // [/SL:KB]
@@ -87,6 +90,9 @@
 #include "llfloaterimsessiontab.h"
 #include "llimview.h"
 #include "llviewerchat.h"
+// [/SL:KB]
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1)
+#include "llstatusbar.h"
 // [/SL:KB]
 // [RLVa:KB] - Checked: 2015-12-27 (RLVa-1.5.0)
 #include "rlvcommon.h"
@@ -298,32 +304,32 @@ static bool handleVideoMemoryChanged(const LLSD& newvalue)
 	return true;
 }
 
-static bool handleChatFontSizeChanged(const LLSD& newvalue)
-{
-	if(gConsole)
-	{
-		gConsole->setFontSize(newvalue.asInteger());
-	}
-	return true;
-}
+//static bool handleChatFontSizeChanged(const LLSD& newvalue)
+//{
+//	if(gConsole)
+//	{
+//		gConsole->setFontSize(newvalue.asInteger());
+//	}
+//	return true;
+//}
 
-static bool handleChatPersistTimeChanged(const LLSD& newvalue)
-{
-	if(gConsole)
-	{
-		gConsole->setLinePersistTime((F32) newvalue.asReal());
-	}
-	return true;
-}
+//static bool handleChatPersistTimeChanged(const LLSD& newvalue)
+//{
+//	if(gConsole)
+//	{
+//		gConsole->setLinePersistTime((F32) newvalue.asReal());
+//	}
+//	return true;
+//}
 
-static bool handleConsoleMaxLinesChanged(const LLSD& newvalue)
-{
-	if(gConsole)
-	{
-		gConsole->setMaxLines(newvalue.asInteger());
-	}
-	return true;
-}
+//static bool handleConsoleMaxLinesChanged(const LLSD& newvalue)
+//{
+//	if(gConsole)
+//	{
+//		gConsole->setMaxLines(newvalue.asInteger());
+//	}
+//	return true;
+//}
 
 static void handleAudioVolumeChanged(const LLSD& newvalue)
 {
@@ -574,6 +580,27 @@ bool handleChatMultiLineChanged(const LLSD& sdValue)
 }
 // [/SL:KB]
 
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+void handleChromeFloaterTransparencyChanged(const LLSD& sdValue)
+{
+	const F32 nTransparency = sdValue.asReal();
+
+	LLFloater* pFloater = LLFloaterReg::findInstance("camera");
+	if (pFloater)
+	{
+		pFloater->setActiveTransparency(nTransparency);
+		pFloater->setTitleVisible(nTransparency != .0f);
+	}
+
+	pFloater = LLFloaterReg::findInstance("moveview");
+	if (pFloater)
+	{
+		pFloater->setActiveTransparency(nTransparency);
+		pFloater->setTitleVisible(nTransparency != .0f);
+	}
+}
+// [/SL:KB]
+
 bool toggle_agent_pause(const LLSD& newvalue)
 {
 	if ( newvalue.asBoolean() )
@@ -601,7 +628,7 @@ bool toggle_show_navigation_panel(const LLSD& newvalue)
 	bool value = newvalue.asBoolean();
 
 	LLNavigationBar::getInstance()->setVisible(value);
-	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
+//	gSavedSettings.setBOOL("ShowMiniLocationPanel", !value);
 
 	return true;
 }
@@ -610,8 +637,14 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
 
-	LLPanelTopInfoBar::getInstance()->setVisible(value);
-	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+	if (gStatusBar)
+	{
+		gStatusBar->showTopInfoBar(value);
+	}
+// [/SL:KB]
+//	LLPanelTopInfoBar::getInstance()->setVisible(value);
+//	gSavedSettings.setBOOL("ShowNavbarNavigationPanel", !value);
 
 	return true;
 }
@@ -693,14 +726,17 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("RenderDeferredSSAO")->getSignal()->connect(boost::bind(&handleSetShaderChanged, _2));
 	gSavedSettings.getControl("RenderPerformanceTest")->getSignal()->connect(boost::bind(&handleRenderPerfTestChanged, _2));
 	gSavedSettings.getControl("TextureMemory")->getSignal()->connect(boost::bind(&handleVideoMemoryChanged, _2));
-	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
 // [SL:KB] - Patch: Chat-IMSessionMenu | Checked: 2012-01-10 (Catznip-3.2)
 	gSavedSettings.getControl("ChatMultiLine")->getSignal()->connect(boost::bind(&handleChatMultiLineChanged, _2));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLFloaterIMSessionTab::processChatHistoryStyleUpdate, false));
 	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&LLViewerChat::signalChatFontChanged));
 // [/SL:KB]
-	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));
-	gSavedSettings.getControl("ConsoleMaxLines")->getSignal()->connect(boost::bind(&handleConsoleMaxLinesChanged, _2));
+//	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
+//	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));
+//	gSavedSettings.getControl("ConsoleMaxLines")->getSignal()->connect(boost::bind(&handleConsoleMaxLinesChanged, _2));
+// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+	gSavedSettings.getControl("ChromeFloaterTransparency")->getSignal()->connect(boost::bind(&handleChromeFloaterTransparencyChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("UploadBakedTexOld")->getSignal()->connect(boost::bind(&handleUploadBakedTexOldChanged, _2));
 	gSavedSettings.getControl("UseOcclusion")->getSignal()->connect(boost::bind(&handleUseOcclusionChanged, _2));
 	gSavedSettings.getControl("AudioLevelMaster")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));

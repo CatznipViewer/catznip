@@ -18,15 +18,15 @@
 	<string name="Close">
 		Schließen
 	</string>
-	<tab_container name="ResidentChooserTabs">
+	<tab_container name="ResidentChooserTabs" tab_min_width="70">
 		<panel label="Suchen" name="SearchPanel">
 			<text name="InstructSearchResidentName">
 				Geben Sie einen Teil des Namens einer
 Person ein:
 			</text>
-			<line_editor bottom_delta="-76" name="Edit" top_pad="16"/>
-			<button label="Los" label_selected="Los" name="Find" top="70"/>
-			<scroll_list height="54" name="SearchResults" top="80">
+			<line_editor name="Edit"/>
+			<button label="Los" label_selected="Los" name="Find" />
+			<scroll_list name="SearchResults">
 				<columns label="Name" name="name"/>
 				<columns label="Benutzername" name="username"/>
 			</scroll_list>
@@ -40,17 +40,19 @@ Person ein:
 			<text name="InstructSelectResident">
 				Wählen Sie eine Person aus:
 			</text>
-			<slider bottom_delta="-36" label="Bereich" name="near_me_range"/>
+			<slider label="Bereich" name="near_me_range"/>
 			<text name="meters">
 				Meter
 			</text>
-			<button follows="top|left" height="28" image_overlay="Refresh_Off" layout="topleft" left_pad="0" name="Refresh" width="28"/>
-			<scroll_list border="false" follows="all" height="100" layout="topleft" left="0" name="NearMe" sort_column="0" top="50" width="132">
+			<button name="Refresh"/>
+			<scroll_list name="NearMe">
 				<columns label="Name" name="name"/>
 				<columns label="Benutzername" name="username"/>
 			</scroll_list>
 		</panel>
 	</tab_container>
-	<button label="OK" label_selected="OK" name="ok_btn"/>
-	<button label="Abbrechen" label_selected="Abbrechen" name="cancel_btn"/>
+    <panel name="bottom_panel">
+        <button label="OK" label_selected="OK" name="ok_btn"/>
+        <button label="Abbrechen" label_selected="Abbrechen" name="cancel_btn"/>
+	</panel>
 </floater>

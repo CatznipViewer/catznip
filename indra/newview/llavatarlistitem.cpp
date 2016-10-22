@@ -621,6 +621,15 @@ BOOL LLAvatarListItem::handleDoubleClick(S32 x, S32 y, MASK mask)
 	return LLPanel::handleDoubleClick(x, y, mask);
 }
 
+// [SL:KB] - Patch: UI-AvatarListDndShare | Checked: 2011-06-19 (Catznip-2.6)
+BOOL LLAvatarListItem::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop, EDragAndDropType cargo_type, void *cargo_data, 
+	                                     EAcceptance *accept, std::string& tooltip_msg)
+{
+	notifyParent(LLSD().with("select", mAvatarId));
+	return LLToolDragAndDrop::handleGiveDragAndDrop(mAvatarId, LLUUID::null, drop, cargo_type, cargo_data, accept, getAvatarName());
+}
+// [/SL:KB]
+
 void LLAvatarListItem::setValue( const LLSD& value )
 {
 	if (!value.isMap()) return;;

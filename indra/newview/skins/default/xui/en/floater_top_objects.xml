@@ -5,14 +5,14 @@
  height="372"
  layout="topleft"
  min_height="300"
- min_width="450"
+ min_width="600"
  name="top_objects"
  help_topic="top_objects"
  title="Top Objects"
  width="800">
     <floater.string
      name="top_scripts_title">
-        Top Scripts
+        TOP SCRIPTS
     </floater.string>
     <floater.string
      name="top_scripts_text">
@@ -24,7 +24,7 @@
     </floater.string>
     <floater.string
      name="top_colliders_title">
-        Top Colliders
+        TOP COLLDIERS
     </floater.string>
     <floater.string
      name="top_colliders_text">
@@ -56,9 +56,9 @@
      follows="left|top"
      height="20"
      layout="topleft"
-     left="10"
+     left="200"
      name="title_text"
-     top="20"
+     top="0"
      text_color="EmphasisColor"
      width="400">
         Loading...
@@ -68,11 +68,11 @@
      follows="all"
      height="170"
      layout="topleft"
-     left_delta="0"
+     left="7"
      multi_select="true"
      name="objects_list"
      top_delta="17"
-     width="780">
+     right="-7">
         <scroll_list.columns
          label="Score"
          name="score"

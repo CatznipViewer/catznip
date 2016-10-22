@@ -6,6 +6,8 @@
 	<text name="desc txt">
 		Opis:
 	</text>
+	<panel name="bottom_panel">
 	<button label="Uruchom publicznie" label_selected="Zatrzymaj" name="Inworld" tool_tip="Uruchom animację tak, aby widzieli ją pozostali Rezydenci" />
 	<button label="Uruchom prywatnie" label_selected="Zatrzymaj" name="Locally" tool_tip="Uruchom animację tak, aby była ona widoczna tylko dla Ciebie" />
+	</panel>
 </floater>

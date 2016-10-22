@@ -256,17 +256,17 @@
 			<button label="Annuler" name="cancel_btn"/>
 			<button label="Charger le modèle" name="ok_btn" tool_tip="Charger dans le simulateur"/>
 			<button label="Effacer les paramètres / réinitialiser le formulaire" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="180">
 				Frais de chargement : [FEE] L$
 			</text>
-			<text name="prim_weight">
-				Impact sur le terrain : [EQ]
+			<text name="prim_weight" width="90">
+				Impact : [EQ]
 			</text>
 			<text name="download_weight">
 				Téléchargement : [ST]
 			</text>
 			<text name="physics_weight">
-				Propriétés physiques : [PH]
+				Physiques : [PH]
 			</text>
 			<text name="server_weight">
 				Serveur : [SIM]
@@ -307,7 +307,7 @@
 		<check_box label="Propriétés physiques" name="show_physics"/>
 		<check_box label="Textures" name="show_textures"/>
 		<check_box label="Pondération de la peau" name="show_skin_weight"/>
-		<check_box label="Articulations" name="show_joint_positions"/>
+		<check_box label="Articulations" name="show_joint_positions" left="200" top_delta="-16"/>
 		<text name="physics_explode_label">
 			Décomposition de l&apos;aperçu :
 		</text>

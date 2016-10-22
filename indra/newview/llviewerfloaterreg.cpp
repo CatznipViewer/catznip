@@ -75,6 +75,9 @@
 #include "llfloaterexperiencepicker.h"
 #include "llfloaterevent.h"
 #include "llfloaterfacebook.h"
+// [SL:KB] - Patch: UI-Feedback | Checked: 2016-01-02 (Catznip-3.8)
+#include "llfloaterfeedback.h"
+// [/SL:KB]
 #include "llfloaterflickr.h"
 #include "llfloaterfonttest.h"
 #include "llfloatergesture.h"
@@ -278,6 +281,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("experience_profile", "floater_experienceprofile.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterExperienceProfile>);
 	LLFloaterReg::add("experience_search", "floater_experience_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterExperiencePicker>);
 
+// [SL:KB] - Patch: UI-Feedback | Checked: 2016-01-02 (Catznip-3.8)
+	LLFloaterReg::add("feedback", "floater_feedback.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterFeedback>);
+// [/SL:KB]
 	LLFloaterReg::add("font_test", "floater_font_test.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterFontTest>);
 
 	LLFloaterReg::add("gestures", "floater_gesture.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterGesture>);

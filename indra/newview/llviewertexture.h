@@ -351,6 +351,9 @@ public:
 	void setUnremovable(BOOL value) { mUnremovable = value; }
 	bool isUnremovable() const { return mUnremovable; }
 	
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2016-01-24 (Catznip-3.8)
+	void clearFetcher();
+// [/SL:KB]
 	void clearFetchedResults(); //clear all fetched results, for debug use.
 
 	// Override the computation of discard levels if we know the exact output

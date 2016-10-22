@@ -2180,7 +2180,7 @@ Se cambiarán miles de regiones, y se provocará un colapso en el espacio del se
 		<usetemplate canceltext="Cancelar" name="yesnocancelbuttons" notext="No" yestext="Sí"/>
 	</notification>
 	<notification label="Confirmar el reinicio" name="ConfirmRestart">
-		¿Verdaderamente quieres reiniciar la región de aquí a 2 minutos?
+		¿Verdaderamente quieres reiniciar la región de aquí a [MINUTES] minutos?
 		<usetemplate name="okcancelbuttons" notext="Cancelar" yestext="OK"/>
 	</notification>
 	<notification label="Mensaje a toda la región" name="MessageRegion">

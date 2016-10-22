@@ -15,5 +15,7 @@
 	<floater.string name="NotRunning">
 		Wyłączanie
 	</floater.string>
+	<panel name="bottom_panel">
 	<button label="Zamknij" label_selected="Zamknij" name="close" />
+	</panel>
 </floater>

@@ -401,6 +401,9 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		LLAppViewer::instance()->pingMainloopTimeout("Display:Teleport");
 		static LLCachedControl<F32> teleport_arrival_delay(gSavedSettings, "TeleportArrivalDelay");
 		static LLCachedControl<F32> teleport_local_delay(gSavedSettings, "TeleportLocalDelay");
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+		static LLCachedControl<F32> teleport_fade_duration(gSavedSettings, "TeleportFadeDuration");
+// [/SL:KB]
 
 		S32 attach_count = 0;
 		if (isAgentAvatarValid())
@@ -422,7 +425,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 		{
 		case LLAgent::TELEPORT_PENDING:
 			gTeleportDisplayTimer.reset();
-			gViewerWindow->setShowProgress(TRUE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(true, teleport_fade_duration());
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(TRUE);
 			gViewerWindow->setProgressPercent(llmin(teleport_percent, 0.0f));
 			gAgent.setTeleportMessage(LLAgent::sTeleportProgressMessages["pending"]);
 			gViewerWindow->setProgressString(LLAgent::sTeleportProgressMessages["pending"]);
@@ -432,7 +438,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 			// Transition to REQUESTED.  Viewer has sent some kind
 			// of TeleportRequest to the source simulator
 			gTeleportDisplayTimer.reset();
-			gViewerWindow->setShowProgress(TRUE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(true, teleport_fade_duration());
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(TRUE);
 			gViewerWindow->setProgressPercent(llmin(teleport_percent, 0.0f));
 			gAgent.setTeleportState( LLAgent::TELEPORT_REQUESTED );
 			gAgent.setTeleportMessage(
@@ -495,7 +504,10 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 		case LLAgent::TELEPORT_NONE:
 			// No teleport in progress
-			gViewerWindow->setShowProgress(FALSE);
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+			gViewerWindow->setShowProgress(false, teleport_fade_duration());
+// [/SL:KB]
+//			gViewerWindow->setShowProgress(FALSE);
 			gTeleportDisplay = FALSE;
 // [SL:KB] - Patch: Appearance-TeleportAttachKill | Checked: Catznip-4.0
 			LLViewerParcelMgr::getInstance()->onTeleportDone();

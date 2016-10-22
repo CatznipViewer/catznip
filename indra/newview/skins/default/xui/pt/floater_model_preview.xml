@@ -256,13 +256,13 @@
 			<button label="Cancelar" name="cancel_btn"/>
 			<button label="Upload" name="ok_btn" tool_tip="Carregar no simulador"/>
 			<button label="Limpar configurações e redefinir formulário" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="160">
 				Tarifa de upload: L$ [FEE]
 			</text>
-			<text name="prim_weight">
-				Impacto no terreno: [EQ]
+			<text name="prim_weight" width="100">
+				Impacto: [EQ]
 			</text>
-			<text name="download_weight">
+			<text name="download_weight" width="110">
 				Download: [ST]
 			</text>
 			<text name="physics_weight">

@@ -20,7 +20,7 @@
 	</string>
 	<tab_container name="ResidentChooserTabs">
 		<panel label="Rechercher" name="SearchPanel">
-			<text name="InstructSearchResidentName" width="240">
+			<text name="InstructSearchResidentName">
 				Saisissez une partie du nom du résident :
 			</text>
 			<button label="OK" label_selected="OK" name="Find"/>
@@ -38,17 +38,19 @@
 			<text name="InstructSelectResident">
 				Sélectionner une personne près de vous :
 			</text>
-			<slider bottom_delta="-36" label="Distance" name="near_me_range"/>
+			<slider label="Distance" name="near_me_range"/>
 			<text name="meters">
 				mètres
 			</text>
-			<button font="SansSerifSmall" label="Rafraîchir la liste" label_selected="Rafraîchir la liste" left_delta="10" name="Refresh" width="105"/>
-			<scroll_list bottom_delta="-169" height="159" name="NearMe">
+			<button label="Rafraîchir la liste" label_selected="Rafraîchir la liste" name="Refresh"/>
+			<scroll_list name="NearMe">
 				<columns label="Nom" name="name"/>
 				<columns label="Nom d&apos;utilisateur" name="username"/>
 			</scroll_list>
 		</panel>
 	</tab_container>
-	<button label="OK" label_selected="OK" name="ok_btn"/>
-	<button label="Annuler" label_selected="Annuler" name="cancel_btn"/>
+    <panel name="bottom_panel">
+        <button label="OK" label_selected="OK" name="ok_btn"/>
+        <button label="Annuler" label_selected="Annuler" name="cancel_btn"/>
+    </panel>
 </floater>

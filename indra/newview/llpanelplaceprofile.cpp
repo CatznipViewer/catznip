@@ -188,26 +188,26 @@ void LLPanelPlaceProfile::resetLocation()
 	std::string loading = LLTrans::getString("LoadingData");
 	mParcelOwner->setValue(loading);
 
-	mParcelRatingIcon->setValue(loading);
+//	mParcelRatingIcon->setValue(loading);
 	mParcelRatingText->setText(loading);
-	mVoiceIcon->setValue(loading);
+//	mVoiceIcon->setValue(loading);
 	mVoiceText->setText(loading);
-	mFlyIcon->setValue(loading);
+//	mFlyIcon->setValue(loading);
 	mFlyText->setText(loading);
-	mPushIcon->setValue(loading);
+//	mPushIcon->setValue(loading);
 	mPushText->setText(loading);
-	mBuildIcon->setValue(loading);
+//	mBuildIcon->setValue(loading);
 	mBuildText->setText(loading);
-	mScriptsIcon->setValue(loading);
+//	mScriptsIcon->setValue(loading);
 	mScriptsText->setText(loading);
-	mDamageIcon->setValue(loading);
+//	mDamageIcon->setValue(loading);
 	mDamageText->setText(loading);
-	mSeeAVsIcon->setValue(loading);
+//	mSeeAVsIcon->setValue(loading);
 	mSeeAVsText->setText(loading);
 
 	mRegionNameText->setValue(loading);
 	mRegionTypeText->setValue(loading);
-	mRegionRatingIcon->setValue(loading);
+//	mRegionRatingIcon->setValue(loading);
 	mRegionRatingText->setValue(loading);
 	mRegionOwnerText->setValue(loading);
 	mRegionGroupText->setValue(loading);

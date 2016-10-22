@@ -2182,6 +2182,21 @@ bool LLViewerFetchedTexture::updateFetch()
 	return mIsFetching ? true : false;
 }
 
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2016-01-24 (Catznip-3.8)
+void LLViewerFetchedTexture::clearFetcher()
+{
+	if (mHasFetcher)
+	{
+		LLAppViewer::getTextureFetch()->deleteRequest(getID(), true);
+		mHasFetcher = FALSE;
+		mIsFetching = FALSE;
+		mLastPacketTimer.reset();
+		mFetchState = 0;
+		mFetchPriority = 0;
+	}
+}
+// [/SL:KB]
+
 void LLViewerFetchedTexture::clearFetchedResults()
 {
 	if(mNeedsCreateTexture || mIsFetching)

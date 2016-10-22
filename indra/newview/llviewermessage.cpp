@@ -8221,8 +8221,12 @@ void process_covenant_reply(LLMessageSystem* msg, void**)
 	LLPanelEstateInfo::updateEstateOwnerName(owner_name);
 	LLFloaterBuyLand::updateEstateOwnerName(owner_name);
 
-	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
-	if (panel)
+//	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
+//	if (panel)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::findPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
+	if ( (panel) && (panel->isInVisibleChain()) )
+// [/SL:KB]
 	{
 		panel->updateEstateName(estate_name);
 		panel->updateEstateOwnerName(owner_name);
@@ -8356,8 +8360,12 @@ void onCovenantLoadComplete(LLVFS *vfs,
 	LLPanelLandCovenant::updateCovenantText(covenant_text);
 	LLFloaterBuyLand::updateCovenantText(covenant_text, asset_uuid);
 
-	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
-	if (panel)
+//	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
+//	if (panel)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::findPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
+	if ( (panel) && (panel->isInVisibleChain()) )
+// [/SL:KB]
 	{
 		panel->updateCovenantText(covenant_text);
 	}

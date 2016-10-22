@@ -221,6 +221,10 @@ class LLMenuItemSeparatorGL : public LLMenuItemGL
 public:
 	struct Params : public LLInitParam::Block<Params, LLMenuItemGL::Params>
 	{
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+		Optional<EnableCallbackParam > on_visible;
+// [/SL:KB]
+
 		Params();
 	};
 	LLMenuItemSeparatorGL(const LLMenuItemSeparatorGL::Params& p = LLMenuItemSeparatorGL::Params());
@@ -231,6 +235,17 @@ public:
 	/*virtual*/ BOOL handleHover(S32 x, S32 y, MASK mask);
 
 	/*virtual*/ U32 getNominalHeight( void ) const;
+
+// [SL:KB] - Patch: Control-MenuItemSeparator | Checked: 2014-02-03 (Catznip-3.6)
+public:
+	/*virtual*/ void buildDrawLabel(void);
+	void initFromParams(const Params& p);
+protected:
+	void updateVisible(void);
+
+private:
+	enable_signal_t mVisibleSignal;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -773,6 +788,10 @@ public:
 
 	void resetMenuTrigger() { mAltKeyTrigger = FALSE; }
 
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
+	typedef boost::signals2::signal<void()> resize_signal_t;
+	boost::signals2::connection setResizeCallback(const resize_signal_t::slot_type& cb) { return mResizeSignal.connect(cb); }
+// [/SL:KB]
 private:
 	// add a menu - this will create a drop down menu.
 	virtual BOOL appendMenu( LLMenuGL* menu );
@@ -784,6 +803,9 @@ private:
 
 	std::list <LLKeyBinding*>	mAccelerators;
 	BOOL						mAltKeyTrigger;
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
+	resize_signal_t				mResizeSignal;
+// [/SL:KB]
 };
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -195,13 +195,19 @@ bool LLUrlRegistry::findUrl(const std::string &text, LLUrlMatch &match, const LL
 			if (start < match_start || match_entry == NULL)
 			{
 
-				if (mLLUrlEntryInvalidSLURL == *it)
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+				if ( (mLLUrlEntryInvalidSLURL == url_entry) && (LLUrlEntryInvalidSLURL::isSLURLvalid(text.substr(start, end - start + 1))) )
 				{
-					if(url_entry && url_entry->isSLURLvalid(text.substr(start, end - start + 1)))
-					{
-						continue;
-					}
+					continue;
 				}
+// [/SL:KB]
+//				if (mLLUrlEntryInvalidSLURL == *it)
+//				{
+//					if(url_entry && url_entry->isSLURLvalid(text.substr(start, end - start + 1)))
+//					{
+//						continue;
+//					}
+//				}
 
 				if((mUrlEntryHTTPLabel == *it) || (mUrlEntrySLLabel == *it))
 				{
@@ -241,13 +247,19 @@ bool LLUrlRegistry::findUrl(const std::string &text, LLUrlMatch &match, const LL
 				U32 start = 0, end = 0;
 				if (matchRegex(url.c_str(), url_entry->getPattern(), start, end))
 				{
-					if (mLLUrlEntryInvalidSLURL == *iter)
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+					if ( (mLLUrlEntryInvalidSLURL == url_entry) && (LLUrlEntryInvalidSLURL::isSLURLvalid(url)) )
 					{
-						if(url_entry && url_entry->isSLURLvalid(url))
-						{
-							continue;
-						}
+						continue;
 					}
+// [/SL:KB]
+//					if (mLLUrlEntryInvalidSLURL == *iter)
+//					{
+//						if(url_entry && url_entry->isSLURLvalid(url))
+//						{
+//							continue;
+//						}
+//					}
 					stripped_entry = url_entry;
 					break;
 				}

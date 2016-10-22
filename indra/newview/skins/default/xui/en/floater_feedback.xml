@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_minimize="false"
+ height="200"
+ layout="topleft"
+ legacy_header_height="18"
+ name="floater_feedback"
+ positioning="centered"
+ title="FEEDBACK"
+ width="200">
+    <web_browser
+     layout="topleft"
+     follows="top|left|bottom|right"
+     border_visible="false"
+     bottom="-1"
+     caret_color="1 1 1 1"
+     left="1"
+     name="floater_feedback_browser"
+     right="-1"
+     top="20"
+     />
+</floater>

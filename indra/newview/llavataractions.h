@@ -287,6 +287,10 @@ protected:
 	static bool callbackEstateTeleportHome(const LLSD& notification, const LLSD& response);
 // [/SL:KB]
 
+// [SL:KB] - Patch: UI-AddContact | Checked: 2010-06-04 (Catznip-2.0)
+	static void addContact(const LLUUID& id);
+// [/SL:KB]
+
 private:
 	static bool callbackAddFriendWithMessage(const LLSD& notification, const LLSD& response);
 	static bool handleRemove(const LLSD& notification, const LLSD& response);

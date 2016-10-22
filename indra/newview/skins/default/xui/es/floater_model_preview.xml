@@ -256,11 +256,11 @@
 			<button label="Cancelar" name="cancel_btn"/>
 			<button label="subir" name="ok_btn" tool_tip="Subir al simulador"/>
 			<button label="Limpiar la configuración y reiniciar el formulario" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="150">
 				Precio de subida: L$ [FEE]
 			</text>
-			<text name="prim_weight">
-				Impacto en el terreno: [EQ]
+			<text name="prim_weight" width="100">
+				Impacto: [EQ]
 			</text>
 			<text name="download_weight">
 				Descargar: [ST]
@@ -306,7 +306,7 @@
 		<check_box label="Bordes" name="show_edges"/>
 		<check_box label="Física" name="show_physics"/>
 		<check_box label="Texturas" name="show_textures"/>
-		<check_box label="Pesos de la piel" name="show_skin_weight"/>
+		<check_box label="Pesos de la piel" name="show_skin_weight" left="80" />
 		<check_box label="Articulaciones" name="show_joint_positions"/>
 		<text name="physics_explode_label">
 			Ampliación de vista previa:

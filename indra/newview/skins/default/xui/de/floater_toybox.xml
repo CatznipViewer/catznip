@@ -6,6 +6,8 @@
 	<text name="toybox label 2">
 		Je nach Einstellung erscheinen Schaltflächen wie dargestellt oder nur als Symbol.
 	</text>
-	<button label="Alle Symbolleisten leeren" label_selected="Alle Symbolleisten leeren" name="btn_clear_all"/>
-	<button label="Standards wiederherstellen" label_selected="Standards wiederherstellen" name="btn_restore_defaults"/>
+    <panel name="bottom_panel">
+        <button label="Symbolleisten leeren" label_selected="Symbolleisten leeren" name="btn_clear_all"/>
+        <button label="Zurücksetzen" label_selected="Zurücksetzen" name="btn_restore_defaults"/>
+    </panel>
 </floater>

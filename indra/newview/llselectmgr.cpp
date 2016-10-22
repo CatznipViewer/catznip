@@ -6159,6 +6159,7 @@ S32 LLSelectNode::getLastSelectedTE()
 
 //LLViewerObject* LLSelectNode::getObject()
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
 LLViewerObject* LLSelectNode::getObject() const
 // [/SL:KB]
 {

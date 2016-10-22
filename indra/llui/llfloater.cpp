@@ -81,6 +81,9 @@ std::string	LLFloater::sButtonNames[BUTTON_COUNT] =
 {
 	"llfloater_close_btn",		//BUTTON_CLOSE
 	"llfloater_restore_btn",	//BUTTON_RESTORE
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	"llfloater_collapse_btn",	//BUTTON_COLLAPSE
+// [/SL:KB]
 	"llfloater_minimize_btn",	//BUTTON_MINIMIZE
 	"llfloater_tear_off_btn",	//BUTTON_TEAR_OFF
 	"llfloater_dock_btn",		//BUTTON_DOCK
@@ -97,6 +100,9 @@ std::string LLFloater::sButtonToolTipsIndex[BUTTON_COUNT]=
 	"BUTTON_CLOSE_WIN",		//"Close (Ctrl-W)",	//BUTTON_CLOSE
 #endif
 	"BUTTON_RESTORE",		//"Restore",	//BUTTON_RESTORE
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	"BUTTON_COLLAPSE",		//"Collapse",	//BUTTON_COLLAPSE
+// [/SL:KB]
 	"BUTTON_MINIMIZE",		//"Minimize",	//BUTTON_MINIMIZE
 	"BUTTON_TEAR_OFF",		//"Tear Off",	//BUTTON_TEAR_OFF
 	"BUTTON_DOCK",
@@ -107,11 +113,18 @@ LLFloater::click_callback LLFloater::sButtonCallbacks[BUTTON_COUNT] =
 {
 	LLFloater::onClickClose,	//BUTTON_CLOSE
 	LLFloater::onClickMinimize, //BUTTON_RESTORE
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	LLFloater::onClickCollapse, //BUTTON_COLLAPSE
+// [/SL:KB]
 	LLFloater::onClickMinimize, //BUTTON_MINIMIZE
 	LLFloater::onClickTearOff,	//BUTTON_TEAR_OFF
 	LLFloater::onClickDock,		//BUTTON_DOCK
 	LLFloater::onClickHelp		//BUTTON_HELP
 };
+
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+BOOL LLFloater::sShowCollapseButton = FALSE;
+// [/SL:KB]
 
 LLMultiFloater* LLFloater::sHostp = NULL;
 BOOL			LLFloater::sQuitting = FALSE; // Flag to prevent storing visibility controls while quitting
@@ -185,15 +198,25 @@ LLFloater::Params::Params()
 	close_image("close_image"),
 	restore_image("restore_image"),
 	minimize_image("minimize_image"),
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	collapse_image("collapse_image"),
+// [/SL:KB]
 	tear_off_image("tear_off_image"),
 	dock_image("dock_image"),
 	help_image("help_image"),
 	close_pressed_image("close_pressed_image"),
 	restore_pressed_image("restore_pressed_image"),
 	minimize_pressed_image("minimize_pressed_image"),
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	collapse_pressed_image("collapse_pressed_image"),
+// [/SL:KB]
 	tear_off_pressed_image("tear_off_pressed_image"),
 	dock_pressed_image("dock_pressed_image"),
 	help_pressed_image("help_pressed_image"),
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	active_transparency("active_transparency", F32_MAX),
+	inactive_transparency("inactive_transparency", F32_MAX),
+// [/SL:KB]
 	open_callback("open_callback"),
 	close_callback("close_callback"),
 	follows("follows")
@@ -258,6 +281,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mHeaderHeight(p.header_height),
 	mLegacyHeaderHeight(p.legacy_header_height),
 	mMinimized(FALSE),
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	mCollapseOnMinimize(FALSE),
+// [/SL:KB]
 	mForeground(FALSE),
 	mFirstLook(TRUE),
 // [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
@@ -278,6 +304,20 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mMinimizeSignal(NULL)
 //	mNotificationContext(NULL)
 {
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	static bool sShowCollapseInit = false;
+	if (!sShowCollapseInit)
+	{
+		LLControlVariable* pControl = LLUI::sSettingGroups["config"]->getControl("ShowFloaterCollapseButton");
+		if (pControl)
+		{
+			sShowCollapseButton = pControl->getValue().asBoolean();
+			pControl->getSignal()->connect(boost::bind(&LLFloater::handleShowCollapseButtonChanged, _2));
+			sShowCollapseInit = true;
+		}
+	}
+// [/SL:KB]
+
 	mPosition.setFloater(*this);
 //	mNotificationContext = new LLFloaterNotificationContext(getHandle());
 
@@ -321,6 +361,9 @@ void LLFloater::initFloater(const Params& p)
 	if ( !mDragOnLeft && mCanMinimize )
 	{
 		mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
+// [/SL:KB]
 	}
 
 	if(mCanDock)
@@ -1228,6 +1271,19 @@ void LLFloater::handleReshape(const LLRect& new_rect, bool by_user)
 	}
 }
 
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
+void LLFloater::setCollapsed(BOOL collapsed)
+{
+	// (mMinimized == true) && (collapse == true)   => currently minimized, can not collapse
+	// (mMinimized == false) && (collapse == false) => currently not minimized, can not restore
+	if (mMinimized == collapsed)
+		return;
+
+	mCollapseOnMinimize = collapsed;
+	setMinimized(collapsed);
+}
+// [/SL:KB]
+
 void LLFloater::setMinimized(BOOL minimize)
 {
 	const LLFloater::Params& default_params = LLFloater::getDefaultParams();
@@ -1250,7 +1306,14 @@ void LLFloater::setMinimized(BOOL minimize)
 		// If the floater has been dragged while minimized in the
 		// past, then locate it at its previous minimized location.
 		// Otherwise, ask the view for a minimize position.
-		if (mHasBeenDraggedWhileMinimized)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		if (mCollapseOnMinimize)
+		{
+			setOrigin(mExpandedRect.mLeft, mExpandedRect.mTop - floater_header_size);
+		}
+		else if (mHasBeenDraggedWhileMinimized)
+// [/SL:KB]
+//		if (mHasBeenDraggedWhileMinimized)
 		{
 			setOrigin(mPreviousMinimizedLeft, mPreviousMinimizedBottom);
 		}
@@ -1264,6 +1327,9 @@ void LLFloater::setMinimized(BOOL minimize)
 		if (mButtonsEnabled[BUTTON_MINIMIZE])
 		{
 			mButtonsEnabled[BUTTON_MINIMIZE] = FALSE;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+			mButtonsEnabled[BUTTON_COLLAPSE] = FALSE;
+// [/SL:KB]
 			mButtonsEnabled[BUTTON_RESTORE] = TRUE;
 		}
 
@@ -1303,23 +1369,44 @@ void LLFloater::setMinimized(BOOL minimize)
 		}
 		
 		// Reshape *after* setting mMinimized
-		reshape( minimized_width, floater_header_size, TRUE);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		reshape((!mCollapseOnMinimize) ? minimized_width : mExpandedRect.getWidth(), floater_header_size, TRUE);
+// [/SL:KB]
+//		reshape( minimized_width, floater_header_size, TRUE);
 	}
 	else
 	{
 		// If this window has been dragged while minimized (at any time),
 		// remember its position for the next time it's minimized.
-		if (mHasBeenDraggedWhileMinimized)
+//		if (mHasBeenDraggedWhileMinimized)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-15 (Catznip-3.2)
+		if ( (mHasBeenDraggedWhileMinimized) && (!mCollapseOnMinimize) )
+// [/SL:KB]
 		{
 			const LLRect& currentRect = getRect();
 			mPreviousMinimizedLeft = currentRect.mLeft;
 			mPreviousMinimizedBottom = currentRect.mBottom;
 		}
 
-		setOrigin( mExpandedRect.mLeft, mExpandedRect.mBottom );
+//		setOrigin( mExpandedRect.mLeft, mExpandedRect.mBottom );
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-15 (Catznip-3.2)
+		// If the floater was moved while collapsed then expand it in-place rather, otherwise snap back to the position it was in when minimized
+		if (mCollapseOnMinimize)
+		{
+			const LLRect& currentRect = getRect();
+			setOrigin(currentRect.mLeft, currentRect.mTop - mExpandedRect.getHeight());
+		}
+		else
+		{
+			setOrigin(mExpandedRect.mLeft, mExpandedRect.mBottom);
+		}
+// [/SL:KB]
 		if (mButtonsEnabled[BUTTON_RESTORE])
 		{
 			mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+			mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
+// [/SL:KB]
 			mButtonsEnabled[BUTTON_RESTORE] = FALSE;
 		}
 
@@ -1349,7 +1436,11 @@ void LLFloater::setMinimized(BOOL minimize)
 		}
 		
 		mMinimized = FALSE;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		mCollapseOnMinimize = FALSE;
+// [/SL:KB]
 		setFrontmost();
+
 		// Reshape *after* setting mMinimized
 		reshape( mExpandedRect.getWidth(), mExpandedRect.getHeight(), TRUE );
 	}
@@ -1641,9 +1732,25 @@ BOOL LLFloater::handleMiddleMouseDown(S32 x, S32 y, MASK mask)
 // virtual
 BOOL LLFloater::handleDoubleClick(S32 x, S32 y, MASK mask)
 {
-	BOOL was_minimized = mMinimized;
-	setMinimized(FALSE);
-	return was_minimized || LLPanel::handleDoubleClick(x, y, mask);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
+	// If currently minimized double-click always restores; otherwise, check for double-click in the header area
+	if (mMinimized)
+	{
+		setMinimized(FALSE);
+		return TRUE;
+	}
+	else if ( (mHeaderHeight > 0) && (mDragHandle) && (mButtons[BUTTON_COLLAPSE]) && (mButtons[BUTTON_COLLAPSE]->getVisible()) && (mButtons[BUTTON_COLLAPSE]->getEnabled()) && 
+	          ( ((!mDragOnLeft) && (mDragHandle->getRect().mTop >= y) && (mDragHandle->getRect().mTop - mHeaderHeight <= y)) ||
+	            (mDragOnLeft) && (mDragHandle->getRect().pointInRect(x,y))) )
+	{
+		setCollapsed(TRUE);
+		return TRUE;
+	}
+	return LLPanel::handleDoubleClick(x, y, mask);
+// [/SL:KB]
+//	BOOL was_minimized = mMinimized;
+//	setMinimized(FALSE);
+//	return was_minimized || LLPanel::handleDoubleClick(x, y, mask);
 }
 
 void LLFloater::bringToFront( S32 x, S32 y )
@@ -1751,6 +1858,15 @@ void LLFloater::onClickMinimize(LLFloater* self)
 		return;
 	self->setMinimized( !self->isMinimized() );
 }
+	
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+void LLFloater::onClickCollapse(LLFloater* self)
+{
+	if (!self)
+		return;
+	self->setCollapsed(!self->isMinimized());
+}
+// [/SL:KB]
 
 // [SL:KB] - Patch: Control-FloaterTearOff |  Checked: 2013-05-03 (Catznip-3.5)
 void LLFloater::onClickTearOff(LLFloater* self)
@@ -1902,6 +2018,18 @@ void LLFloater::initRectControl()
 		mPosYControl = LLFloaterReg::declarePosYControl(ctrl_name);
 	}
 }
+
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+void LLFloater::handleShowCollapseButtonChanged(const LLSD& sdValue)
+{
+	sShowCollapseButton = sdValue.asBoolean();
+	for (LLInstanceTracker<LLFloater>::instance_iter itFloater = beginInstances(); itFloater != endInstances(); ++itFloater)
+	{
+		itFloater->mButtonsEnabled[BUTTON_COLLAPSE] = itFloater->mButtonsEnabled[BUTTON_MINIMIZE] && sShowCollapseButton;
+		itFloater->updateTitleButtons();
+	}
+}
+// [/SL:KB]
 
 // static
 void LLFloater::closeFrontmostFloater()
@@ -2059,6 +2187,24 @@ void	LLFloater::drawShadow(LLPanel* panel)
 		ll_round(shadow_offset));
 }
 
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+F32 LLFloater::getCurrentTransparency()
+{
+	switch (getTransparencyType())
+	{
+		case TT_ACTIVE:
+			if (F32_MAX != mActiveTransparency)
+				return mActiveTransparency;
+			break;
+		case TT_INACTIVE:
+			if (F32_MAX != mInactiveTransparency)
+				return mInactiveTransparency;
+			break;
+	}
+	return LLPanel::getCurrentTransparency();
+}
+// [/SL:KB]
+
 void LLFloater::updateTransparency(LLView* view, ETypeTransparency transparency_type)
 {
 	if (!view) return;
@@ -2102,6 +2248,9 @@ void	LLFloater::setCanMinimize(BOOL can_minimize)
 	}
 
 	mButtonsEnabled[BUTTON_MINIMIZE] = can_minimize && !isMinimized();
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	mButtonsEnabled[BUTTON_COLLAPSE] = can_minimize && !isMinimized() && sShowCollapseButton;
+// [/SL:KB]
 	mButtonsEnabled[BUTTON_RESTORE]  = can_minimize &&  isMinimized();
 
 	updateTitleButtons();
@@ -2306,6 +2455,10 @@ LLUIImage* LLFloater::getButtonImage(const Params& p, EFloaterButton e)
 			return p.restore_image;
 		case BUTTON_MINIMIZE:
 			return p.minimize_image;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		case BUTTON_COLLAPSE:
+			return p.collapse_image;
+// [/SL:KB]
 		case BUTTON_TEAR_OFF:
 			return p.tear_off_image;
 		case BUTTON_DOCK:
@@ -2327,6 +2480,10 @@ LLUIImage* LLFloater::getButtonPressedImage(const Params& p, EFloaterButton e)
 			return p.restore_pressed_image;
 		case BUTTON_MINIMIZE:
 			return p.minimize_pressed_image;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		case BUTTON_COLLAPSE:
+			return p.collapse_pressed_image;
+// [/SL:KB]
 		case BUTTON_TEAR_OFF:
 			return p.tear_off_pressed_image;
 		case BUTTON_DOCK:
@@ -3186,6 +3343,17 @@ void LLFloater::setInstanceName(const std::string& name)
 		{
 			mVisibilityControl = LLFloaterReg::declareVisibilityControl(ctrl_name);
 		}
+// [SL:KB] - Patch: Control-Floater | Checked: 2016-01-24 (Catznip-3.8)
+		else
+		{
+			// Visibility setting is present in settings_per_account but is not defined on the floater so don't keep it around
+			LLControlVariable* pControl = getControlGroup()->getControl(LLFloaterReg::getVisibilityControlName(name));
+			if (pControl)
+			{
+				pControl->setPersist(LLControlVariable::PERSIST_NO);
+			}
+		}
+// [/SL:KB]
 		if(!mDocStateControl.empty())
 		{
 			mDocStateControl = LLFloaterReg::declareDockStateControl(ctrl_name);
@@ -3259,6 +3427,11 @@ void LLFloater::initFromParams(const LLFloater::Params& p)
 	mLegacyHeaderHeight = p.legacy_header_height;
 	mSingleInstance = p.single_instance;
 	mReuseInstance = p.reuse_instance.isProvided() ? p.reuse_instance : p.single_instance;
+
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	mActiveTransparency = (F32_MAX != p.active_transparency) ? llclamp((F32)p.active_transparency, 0.0f, 1.0f) : F32_MAX;
+	mInactiveTransparency = (F32_MAX != p.inactive_transparency) ? llclamp((F32)p.inactive_transparency, 0.0f, 1.0f) : F32_MAX;
+// [/SL:KB]
 
 	mPositioning = p.positioning;
 

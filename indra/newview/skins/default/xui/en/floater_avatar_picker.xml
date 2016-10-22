@@ -1,80 +1,69 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
- positioning="cascading"
- legacy_header_height="18"
- can_resize="true"
- height="350"
- layout="topleft"
- min_height="200"
- min_width="400"
- name="avatarpicker"
- help_topic="avatarpicker"
- title="CHOOSE RESIDENT"
- width="500">
-    <floater.string
-     name="not_found">
-        &apos;[TEXT]&apos; not found
-    </floater.string>
-    <floater.string
-     name="no_one_near">
-        No one near
-    </floater.string>
-    <floater.string
-     name="no_results">
-        No results
-    </floater.string>
-    <floater.string
-     name="searching">
-        Searching...
-    </floater.string>
+  positioning="cascading"
+  can_resize="true"
+  height="220"
+  help_topic="avatarpicker"
+  layout="topleft"
+  min_height="220"
+  min_width="280"
+  name="avatarpicker"
+  title="CHOOSE RESIDENT"
+  width="280">
+    <floater.string name="not_found">&apos;[TEXT]&apos; not found</floater.string>
+    <floater.string name="no_one_near">No one near</floater.string>
+    <floater.string name="no_results">No results</floater.string>
+    <floater.string name="searching">Searching...</floater.string>
     <!-- For multiple person selection, use "Select" and "Close" 
       instead of "OK" and "Cancel" because "Cancel" still keeps the ones 
       you have already selected.  The code will show the appropriate
       set of buttons. -->
     <string name="Select">Select</string>
     <string name="Close">Close</string>
+    
     <tab_container
      follows="all"
-     height="300"
+     height="184"
      layout="topleft"
-     left="0"
+     left="7"
      name="ResidentChooserTabs"
+     open_tabs_on_drag_and_drop="true"
+     tab_height="25"
+     tab_min_width="80"
      tab_position="top"
-     top="20"
-     width="500">
+     top="0"
+     right="-7">
         <panel
          border="none"
          height="150"
-         label="Search"
+         label="SEARCH"
          layout="topleft"
-         left="6"
+         left="0"
          help_topic="avatarpicker"
-         name="SearchPanel"
-         top="150"
-         width="132">
+         name="SearchPanel">
             <text
              type="string"
              length="1"
              follows="left|top"
              height="16"
              layout="topleft"
-             left="10"
+             left="2"
              name="InstructSearchResidentName"
-             top="8"
-             width="220">
-                Type part of a person&apos;s name:
+             top="4"
+             width="310">
+                Enter part of a person&apos;s user or display name :
             </text>
             <line_editor
-	     bevel_style="none"
-	     border_style="line"
-	     border.border_thickness="0"
-	     commit_on_focus_lost="false"
+             bevel_style="none"
+             border_style="line"
+             border.border_thickness="0"
+             commit_on_focus_lost="false"
              follows="left|top|right"
              height="23"
              left_delta="0"
              name="Edit"
              top_pad="0"
-             width="65" />
+             right="-50" />
             <button
              follows="top|right"
              height="23"
@@ -87,42 +76,38 @@
           <scroll_list
             draw_heading="true" 
            follows="all"
-           height="98"
+           height="106"
            layout="topleft"
-           left="0"
+           left="1"
            name="SearchResults"
-           top="52"
-           width="132">
+           top_pad="2"
+           right="-1">
             <columns
               label="Name"
-              name="name"
-              width="150" />
+              name="name" />
             <columns
               label="Username"
-              name="username"
-              width="150" />
+              name="username" />
           </scroll_list>
         </panel>
         <panel
          border="none"
          height="150"
-         label="Friends"
+         label="FRIENDS"
          layout="topleft"
-         left="6"
+         left="0"
          help_topic="avatarpicker"
-         name="FriendsPanel"
-         top="150"
-         width="132">
+         name="FriendsPanel">
             <text
              type="string"
              length="1"
              follows="left|top"
              height="16"
              layout="topleft"
-             left="10"
+             left="1"
              name="InstructSelectFriend"
-             top="7"
-             width="200">
+             top_pad="4"
+             width="300">
                 Select a person:
             </text>
             <filter_editor
@@ -141,7 +126,7 @@
              follows="all"
              height="100"
              layout="topleft"
-             left="0"
+             left="1"
              name="Friends"
              top="52"
              right="-1">
@@ -159,7 +144,7 @@
         <panel
          border="none"
          height="150"
-         label="Near Me"
+         label="NEARBY"
          layout="topleft"
          left="6"
          help_topic="avatarpicker"
@@ -172,83 +157,142 @@
              follows="left|top"
              height="16"
              layout="topleft"
-             left="10"
+             left="1"
              name="InstructSelectResident"
-             top="8"
-             width="220">
+             top_pad="4"
+             width="300">
                 Select a person nearby:
             </text>
             <slider
              control_name="NearMeRange"
              decimal_digits="0"
-             follows="left|top"
-             height="18"
-             increment="1"
-             initial_value="20"
+             follows="left|top|right"
+             height="20"
+             increment="8"
+             initial_value="32"
              label="Range"
              layout="topleft"
              left="10"
-             max_val="130"
-             min_val="5"
+             max_val="512"
+             min_val="8"
              name="near_me_range"
-             top_pad="0"
-             width="160" />
+             top_pad="4"
+             width="210" />
             <text
              type="string"
              length="1"
-             follows="left|top"
+             follows="top|left"
              height="18"
              layout="topleft"
-             left_pad="0"
+             left_pad="-4"
              name="meters"
+             top_pad="-20"
              width="60">
                 Meters
             </text>
             <button
-             follows="top|left"
+             follows="top|right"
              layout="topleft"
-             left_pad="0"
-             height="28"
-             width="28"
+             right="-5"
+             top ="5"
+             height="20"
+             width="20"
              name="Refresh"
              image_overlay="Refresh_Off" />
           <scroll_list
              draw_heading="true"
              follows="all"
-             height="100"
+             height="106"
              border="false"
              layout="topleft"
-             left="0"
+             left="1"
              name="NearMe"
              sort_column="0"
-             top="52"
-             width="132">
+             top_pad="20"
+             right="-1">
             <columns
               label="Name"
-              name="name"
-              width="150" />
+              name="name" />
             <columns
               label="Username"
-              name="username"
-              width="150" />
+              name="username" />
           </scroll_list>
         </panel>
     </tab_container>
-    <button
-     follows="left|bottom"
-     height="23"
-     label="OK"
-     label_selected="OK"
-     name="ok_btn"
-     top_pad="3"
-     left="10"
-     width="100" />
-    <button
-     follows="left|bottom"
-     height="23"
-     label="Cancel"
-     label_selected="Cancel"
-     name="cancel_btn"
-     width="100"
-     left_pad="5" />
+
+
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
+     layout="topleft"
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="42"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Permission_Visible_Online"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="OK"
+         layout="topleft"
+         left_pad="1"
+         name="ok_btn"
+         width="80" />
+
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="StopReload_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Cancel"
+         layout="topleft"
+         left_pad="1"
+         name="cancel_btn"
+         width="80" />
+
+        <icon  
+         follows="bottom|right|left"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="42"
+         layout="topleft"
+         left_pad="1"
+         left="226"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
 </floater>

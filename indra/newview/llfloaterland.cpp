@@ -1189,8 +1189,12 @@ BOOL LLPanelLandObjects::postBuild()
 	mBtnReturnOwnerList = getChild<LLButton>("Return objects...");
 	mBtnReturnOwnerList->setClickedCallback(onClickReturnOwnerList, this);
 
-	mIconAvatarOnline = LLUIImageList::getInstance()->getUIImage("icon_avatar_online.tga", 0);
-	mIconAvatarOffline = LLUIImageList::getInstance()->getUIImage("icon_avatar_offline.tga", 0);
+	//mIconAvatarOnline = LLUIImageList::getInstance()->getUIImage("icon_avatar_online.tga", 0);
+	//mIconAvatarOffline = LLUIImageList::getInstance()->getUIImage("icon_avatar_offline.tga", 0);
+// [SD:TD] - Patch: UI-Misc | Checked: 2014-02-28 (Catznip-R9)
+	mIconAvatarOnline = LLUIImageList::getInstance()->getUIImage("Generic_Person", 0);
+	mIconAvatarOffline = LLUIImageList::getInstance()->getUIImage("Generic_Person", 0);
+// [/SL:TD]
 	mIconGroup = LLUIImageList::getInstance()->getUIImage("icon_group.tga", 0);
 
 	mOwnerList = getChild<LLNameListCtrl>("owner list");

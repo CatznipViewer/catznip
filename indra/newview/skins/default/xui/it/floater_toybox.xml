@@ -6,6 +6,8 @@
 	<text name="toybox label 2">
 		I pulsanti verranno visualizzati come mostrato o solo come icone, a seconda delle impostazioni della singola barra degli strumenti.
 	</text>
-	<button label="Cancella tutte le barre strumenti" label_selected="Cancella tutte le barre strumenti" name="btn_clear_all"/>
-	<button label="Ripristina predefiniti" label_selected="Ripristina predefiniti" name="btn_restore_defaults"/>
+    <panel name="bottom_panel">
+        <button label="Cancella" label_selected="Cancella" name="btn_clear_all"/>
+        <button label="Ripristina predefiniti" label_selected="Ripristina predefiniti" name="btn_restore_defaults"/>
+    </panel>
 </floater>

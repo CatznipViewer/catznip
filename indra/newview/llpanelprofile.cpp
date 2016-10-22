@@ -58,7 +58,13 @@ std::string getProfileURL(const std::string& agent_name)
 		url = gSavedSettings.getString("WebProfileNonProductionURL");
 	}
 	LLSD subs;
-	subs["AGENT_NAME"] = agent_name;
+// [SL:KB] - Patch: UI-Misc | Checked: 2012-02-25 (Catznip-3.2)
+	if (!agent_name.empty())
+		subs["AGENT_NAME"] = agent_name + "#about_tab";
+	else
+		subs["AGENT_NAME"] = LLStringUtil::null;
+// [/SL:KB]
+//	subs["AGENT_NAME"] = agent_name;
 	url = LLWeb::expandURLSubstitutions(url,subs);
 	LLStringUtil::toLower(url);
 	return url;

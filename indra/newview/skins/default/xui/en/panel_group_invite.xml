@@ -1,12 +1,19 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
- height="380"
- label="Invite a Member"
- layout="topleft"
- left="0"
- name="invite_panel"
- top="380"
- width="210">
+  can_resize="false"
+  height="245"
+  help_topic="invite_panel"
+  label="GROUP INVITE"
+  layout="topleft"
+  min_height="245"
+  min_width="280"
+  name="invite_panel"
+  title="GROUP INVITE"
+  width="280">
+     <string 
+     name="GroupInvitation">
+     GROUP INVITE
+     </string>
     <panel.string
      name="confirm_invite_owner_str">
         Are you sure you want to invite new owner(s)? This action is permanent!
@@ -23,84 +30,131 @@
      name="invite_selection_too_large">
 		Group Invitations not sent: too many Residents selected. Group Invitations are limited to 100 per request.
 	</panel.string>
-    <text
-     type="string"
-     length="1"
-     height="54"
-     layout="topleft"
-     left="7"
-     name="help_text"
-     top="28"
-     word_wrap="true"
-     width="200">
-        You can select multiple Residents to invite to your group. Click &apos;Open Resident Chooser&apos; to start.
-    </text>
     <button
-     height="20"
-     label="Open Resident Chooser"
+     follows="top|left"
+     height="25"
+     label="Select Additional Avatars"
      layout="topleft"
-     left_delta="-2"
+     left="12"
      name="add_button"
-     top_delta="44"
-     width="200" />
+     top_pad="28"
+     right="-12" />
     <name_list
      allow_calling_card_drop="true"
      column_padding="0"
-     height="174"
+     follows="top|left"
+     height="83"
      layout="topleft"
-     left_delta="0"
+     left="14"
      multi_select="true"
      name="invitee_list"
      tool_tip="Hold the Ctrl key and click Resident names to multi-select"
-     top_pad="4"
-     width="200" />
+     top_pad="1"
+     right="-14" />
     <button
-     height="20"
+     follows="top|left"
+     height="25"
      label="Remove Selected from List"
      layout="topleft"
-     left_delta="0"
+     left="12"
      name="remove_button"
      tool_tip="Removes the Residents selected above from the invite list"
-     top_pad="4"
-     width="200" />
+     top_pad="0"
+     right="-12" />
     <text
+     follows="top|left"
      type="string"
      length="1"
      height="16"
      layout="topleft"
-     left_delta="4"
+     left="12"
      name="role_text"
-     top_pad="5"
+     top_pad="2"
      word_wrap="true"
-     width="200">
-        Choose what Role to assign them to:
+     right="-12">
+        Select the role to assign them :
     </text>
     <combo_box
-     height="20"
+     follows="top|left"
+     height="25"
      layout="topleft"
-     left_delta="0"
+     left="12"
      name="role_name"
      tool_tip="Choose from the list of Roles you are allowed to assign members to"
-     top_delta="16"
-     width="196" />
-    <button
-     height="20"
-     label="Send Invitations"
+     top_delta="20"
+     right="-12" />
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left="4"
-     name="invite_button"
-     top="356"
-     width="135" />
-    <button
-     height="20"
-     label="Cancel"
-     layout="topleft"
-     left_pad="2"
-     name="cancel_button"
-     top_delta="0"
-     width="65" />
-	 <string 
-	 name="GroupInvitation">
-	 Group Invitation
-	 </string>
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="22"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Permission_Visible_Online"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Invite"
+         layout="topleft"
+         left_pad="1"
+         name="invite_button"
+         width="120" />
+
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="StopReload_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Cancel"
+         layout="topleft"
+         left_pad="1"
+         name="cancel_button"
+         width="80" />
+
+        <icon  
+         follows="bottom|right|left"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="22"
+         layout="topleft"
+         left_pad="1"
+         left="246"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
 </panel>

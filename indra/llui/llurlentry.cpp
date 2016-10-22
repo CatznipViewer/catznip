@@ -312,7 +312,10 @@ std::string LLUrlEntryInvalidSLURL::getTooltip(const std::string &url) const
 	return unescapeUrl(url);
 }
 
-bool LLUrlEntryInvalidSLURL::isSLURLvalid(const std::string &url) const
+//bool LLUrlEntryInvalidSLURL::isSLURLvalid(const std::string &url) const
+// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
+bool LLUrlEntryInvalidSLURL::isSLURLvalid(const std::string &url)
+// [/SL:KB]
 {
 	S32 actual_parts;
 

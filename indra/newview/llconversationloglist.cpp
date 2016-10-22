@@ -334,6 +334,12 @@ void LLConversationLogList::onCustomAction(const LLSD& userdata)
 			LLAvatarActions::removeFriendDialog(selected_conversation_participant_id);
 		}
 	}
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+	else if("add_contact" == command_name)
+	{
+		LLAvatarActions::addContact(selected_conversation_participant_id);
+	}
+// [/SL:KB]
 	else if ("invite_to_group" == command_name)
 	{
 		LLAvatarActions::inviteToGroup(selected_conversation_participant_id);

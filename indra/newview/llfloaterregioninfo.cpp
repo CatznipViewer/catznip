@@ -986,7 +986,10 @@ BOOL LLPanelRegionDebugInfo::postBuild()
 	childSetAction("return_btn", onClickReturn, this);
 	childSetAction("top_colliders_btn", onClickTopColliders, this);
 	childSetAction("top_scripts_btn", onClickTopScripts, this);
-	childSetAction("restart_btn", onClickRestart, this);
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+	getChild<LLUICtrl>("restart_btn")->setCommitCallback(boost::bind(&LLPanelRegionDebugInfo::onClickRestart, this, _1));
+// [/SL:KB]
+//	childSetAction("restart_btn", onClickRestart, this);
 	childSetAction("cancel_restart_btn", onClickCancelRestart, this);
 	childSetAction("region_debug_console_btn", onClickDebugConsole, this);
 
@@ -1155,19 +1158,33 @@ void LLPanelRegionDebugInfo::onClickTopScripts(void* data)
 }
 
 // static
-void LLPanelRegionDebugInfo::onClickRestart(void* data)
+//void LLPanelRegionDebugInfo::onClickRestart(void* data)
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+void LLPanelRegionDebugInfo::onClickRestart(LLUICtrl* ctrl)
+// [/SL:KB]
 {
-	LLNotificationsUtil::add("ConfirmRestart", LLSD(), LLSD(), 
-		boost::bind(&LLPanelRegionDebugInfo::callbackRestart, (LLPanelRegionDebugInfo*)data, _1, _2));
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+	U32 seconds = llclamp<U32>(ctrl->getValue().asInteger(), 120, U32_MAX);
+	LLNotificationsUtil::add("ConfirmRestart", LLSD().with("[MINUTES]", llformat("%d", seconds / 60)), LLSD(), 
+		boost::bind(&LLPanelRegionDebugInfo::callbackRestart, this, _1, _2, seconds));
+// [/SL:KB]
+//	LLNotificationsUtil::add("ConfirmRestart", LLSD(), LLSD(), 
+//		boost::bind(&LLPanelRegionDebugInfo::callbackRestart, this, _1, _2));
 }
 
-bool LLPanelRegionDebugInfo::callbackRestart(const LLSD& notification, const LLSD& response)
+//bool LLPanelRegionDebugInfo::callbackRestart(const LLSD& notification, const LLSD& response)
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+bool LLPanelRegionDebugInfo::callbackRestart(const LLSD& notification, const LLSD& response, U32 seconds)
+// [/SL:KB]
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if (option != 0) return false;
 
 	strings_t strings;
-	strings.push_back("120");
+//	strings.push_back("120");
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+	strings.push_back(llformat("%d", seconds));
+// [/SL:KB]
 	LLUUID invoice(LLFloaterRegionInfo::getLastInvoice());
 	sendEstateOwnerMessage(gMessageSystem, "restart", invoice, strings);
 	return false;

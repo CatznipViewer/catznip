@@ -256,19 +256,19 @@
 			<button label="Abbrechen" name="cancel_btn"/>
 			<button label="Hochladen" name="ok_btn" tool_tip="Auf Simulator hochladen"/>
 			<button label="Einstellungen löschen und Formular zurücksetzen" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="160">
 				Gebühr für Hochladen: [FEE] L$
 			</text>
-			<text name="prim_weight">
+			<text name="prim_weight" width="160">
 				Auswirkung auf Land: [EQ]
 			</text>
-			<text name="download_weight">
+			<text name="download_weight" width="120">
 				Herunterladen: [ST]
 			</text>
-			<text name="physics_weight">
+			<text name="physics_weight" width="70">
 				Physik: [PH]
 			</text>
-			<text name="server_weight">
+			<text name="server_weight" width="70">
 				Server: [SIM]
 			</text>
 			<text name="warning_title">

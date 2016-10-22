@@ -256,16 +256,16 @@
 			<button label="Annulla" name="cancel_btn"/>
 			<button label="Carica" name="ok_btn" tool_tip="Carica al simulatore"/>
 			<button label="Annulla impostazioni e ripristina modulo" name="reset_btn"/>
-			<text name="upload_fee">
+			<text name="upload_fee" width="170">
 				Costo caricamento: L$ [FEE]
 			</text>
 			<text name="prim_weight">
-				Impatto sul terreno: [EQ]
+				Impatto : [EQ]
 			</text>
-			<text name="download_weight">
+			<text name="download_weight" width="100">
 				Download: [ST]
 			</text>
-			<text name="physics_weight">
+			<text name="physics_weight" width="100">
 				Fisica: [PH]
 			</text>
 			<text name="server_weight">
