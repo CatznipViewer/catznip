@@ -3427,8 +3427,7 @@ You can use [APP_NAME] normally and other people will see you correctly.
   <notification
    icon = "notifytip.tga"
    name = "AgentComplexityWithVisibility"
-   type = "notifytip"
-   log_to_chat = "false">
+   type = "notifytip">
    <unique combine = "cancel_old">
      <context>AgentComplexityNotice</context>
    </unique>
@@ -3442,8 +3441,7 @@ Your [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Renderin
   <notification
    icon = "notifytip.tga"
    name = "AgentComplexity"
-   type = "notifytip"
-   log_to_chat = "false">
+   type = "notifytip">
    <unique combine = "cancel_old">
      <context>AgentComplexityNotice</context>
    </unique>
