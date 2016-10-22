@@ -35,6 +35,9 @@
 #include "llviewerwindow.h"
 #include "llbutton.h"
 #include "llfloaterreg.h"
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+#include "llfloatersearchreplace.h"
+// [/SL:KB]
 #include "llinventorydefines.h"
 #include "llinventorymodel.h"
 #include "lllineeditor.h"
@@ -145,6 +148,14 @@ BOOL LLPreviewNotecard::handleKeyHere(KEY key, MASK mask)
 		return TRUE;
 	}
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+	if(('F' == key) && (MASK_CONTROL == (mask & MASK_CONTROL)))
+	{
+		LLFloaterSearchReplace::show(getEditor());
+		return TRUE;
+	}
+// [/SL:KB]
+
 	return LLPreview::handleKeyHere(key, mask);
 }
 
@@ -177,6 +188,13 @@ const LLInventoryItem* LLPreviewNotecard::getDragItem()
 	return NULL;
 }
 
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-11-05 (Catznip-2.3)
+LLTextEditor* LLPreviewNotecard::getEditor()
+{
+	return getChild<LLViewerTextEditor>("Notecard Editor");
+}
+// [/SL:KB]
+
 bool LLPreviewNotecard::hasEmbeddedInventory()
 {
 	LLViewerTextEditor* editor = NULL;
@@ -195,6 +213,23 @@ void LLPreviewNotecard::refreshFromInventory(const LLUUID& new_item_id)
 	LL_DEBUGS() << "LLPreviewNotecard::refreshFromInventory()" << LL_ENDL;
 	loadAsset();
 }
+
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+void LLPreviewNotecard::inventoryChanged(LLViewerObject* object, LLInventoryObject::object_list_t* inventory, S32 serial_num, void* user_data)
+{
+	removeVOInventoryListener();
+
+	for (LLInventoryObject::object_list_t::const_iterator itItem = inventory->begin(); itItem != inventory->end(); ++itItem)
+	{
+		const LLInventoryObject* pInvObj = *itItem;
+		if (pInvObj->getUUID() == mItemUUID)
+		{
+			loadAsset();
+			break;
+		}
+	}
+}
+// [/SL:KB]
 
 void LLPreviewNotecard::updateTitleButtons()
 {
@@ -311,9 +346,30 @@ void LLPreviewNotecard::loadAsset()
 	}
 	else
 	{
-		editor->setText(LLStringUtil::null);
-		editor->makePristine();
-		editor->setEnabled(TRUE);
+// [SL:KB] - Patch: UI-Notecards | Checked: 2013-04-20 (Catznip-3.4)
+		editor->setEnabled(FALSE);
+
+		bool fClearEditor = true;
+		if (mObjectUUID.notNull())
+		{
+			LLViewerObject* pObj = gObjectList.findObject(mObjectUUID);
+			if ( (pObj) && (pObj->isInventoryPending()) )
+			{
+				registerVOInventoryListener(pObj, NULL);
+
+				fClearEditor = false;
+			}
+		}
+		
+		if (fClearEditor)
+		{
+			editor->setText(LLStringUtil::null);
+			editor->makePristine();
+		}
+// [/SL:KB]
+//		editor->setText(LLStringUtil::null);
+//		editor->makePristine();
+//		editor->setEnabled(TRUE);
 		// Don't set asset status here; we may not have set the item id yet
 		// (e.g. when this gets called initially)
 		//mAssetStatus = PREVIEW_ASSET_LOADED;

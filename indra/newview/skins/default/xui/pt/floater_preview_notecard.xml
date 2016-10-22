@@ -9,12 +9,14 @@
 	<floater.string name="Title">
 		Anotação: [NAME]
 	</floater.string>
-	<text name="desc txt">
+	<text name="desc txt" width="60">
 		Descrição:
 	</text>
 	<text_editor name="Notecard Editor">
 		Carregando...
 	</text_editor>
+	<panel name="bottom_panel">
 	<button label="Salvar" label_selected="Salvar" name="Save"/>
 	<button label="Excluir" label_selected="Excluir" name="Delete"/>
+	</panel>
 </floater>

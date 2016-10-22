@@ -130,6 +130,9 @@
 // [SL:KB] - Patch: UI-Search | Checked: 2012-09-03 (Catznip-3.3)
 #include "llfloatersearchcontainer.h"
 // [/SL:KB]
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+#include "llfloatersearchreplace.h"
+// [/SL:KB]
 #include "llfloatersellland.h"
 #include "llfloatersettingsdebug.h"
 #include "llfloatersidepanelcontainer.h"
@@ -409,6 +412,9 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("search", "floater_search_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchContainer>);
 	LLFloaterReg::add("search_places", "floater_search_places.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloater>);
 	LLFloaterReg::add("search_web", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
+// [/SL:KB]
+// [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-26 (Catznip-2.3)
+	LLFloaterReg::add("search_replace", "floater_search_replace.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchReplace>);
 // [/SL:KB]
 	LLFloaterReg::add("my_profile", "floater_my_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
 	LLFloaterReg::add("profile", "floater_web_profile.xml", (LLFloaterBuildFunc)&LLFloaterWebProfile::create);
