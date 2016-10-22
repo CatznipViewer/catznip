@@ -112,7 +112,11 @@ bool LLGroupHandler::processNotification(const LLNotificationPtr& notification)
 	if(channel)
 		channel->addToast(p);
 
-	LLGroupActions::refresh_notices();
+// [SL:KB] - Patch: UI-GroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	LLGroupActions::refresh_notices(notification->getPayload()["group_id"].asUUID());
+// [/SL:KB]
+//	LLGroupActions::refresh_notices();
+
 
 	return false;
 }

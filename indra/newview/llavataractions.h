@@ -95,6 +95,10 @@ public:
 	 * Show avatar profile.
 	 */
 	static void showProfile(const LLUUID& id);
+// [SL:KB] - Patch: UI-ProfileFloaters | Checked: 2011-05-13 (Catznip-2.6)
+	static void showLegacyProfile(const LLUUID& id);
+	static void showWebProfile(const LLUUID& id);
+// [/SL:KB]
 	static void hideProfile(const LLUUID& id);
 	static bool profileVisible(const LLUUID& id);
 	static LLFloater* getProfileFloater(const LLUUID& id);

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Notlar ve Gizlilik" name="panel_notes">
+	<layout_stack name="layout">
+		<layout_panel name="notes_stack">
+			<scroll_container name="profile_scroll">
+				<panel name="profile_scroll_panel">
+					<text name="status_message" value="Özel notlarım:"/>
+					<text name="status_message2" value="Bu kişiye şu izinler verilsin:"/>
+					<check_box label="Çevrimiçi durumumu görme" name="status_check"/>
+					<check_box label="Beni haritada görme" name="map_check"/>
+					<check_box label="Nesnelerimi düzenleme, silme veya alma" name="objects_check"/>
+				</panel>
+			</scroll_container>
+		</layout_panel>
+		<layout_panel name="notes_buttons_panel">
+			<button label="Arkadaş Ekle" name="add_friend" tool_tip="Sakine arkadaşlık öner"/>
+			<button label="Aİ" name="im" tool_tip="Anlık ileti oturumu aç"/>
+			<button label="Ara" name="call" tool_tip="Bu Sakini ara"/>
+			<button label="Işınla" name="teleport" tool_tip="Işınlama teklif et"/>
+			<button label="Öde" name="pay" />
+			<menu_button name="gear_btn" tool_tip="Sakine para öde veya envanteri paylaş"/>
+		</layout_panel>
+	</layout_stack>
+</panel>

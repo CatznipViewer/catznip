@@ -187,6 +187,10 @@
 #include "llfloaterimnearbychat.h"
 #include "llpanelblockedlist.h"
 #include "llpanelclassified.h"
+// [SL:KB] - Patch: UI-ProfileGroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+#include "llpanelgroup.h"
+#include "llpanelprofileview.h"
+// [/SL:KB]
 #include "llpreviewanim.h"
 #include "llpreviewgesture.h"
 #include "llpreviewnotecard.h"
@@ -284,6 +288,11 @@ void LLViewerFloaterReg::registerFloaters()
     LLFloaterReg::add("experiences", "floater_experiences.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterExperiences>);
 	LLFloaterReg::add("experience_profile", "floater_experienceprofile.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterExperienceProfile>);
 	LLFloaterReg::add("experience_search", "floater_experience_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterExperiencePicker>);
+
+// [SL:KB] - Patch: UI-ProfileGroupFloaters | Checked: 2011-01-23 (Catznip-2.5)
+	LLFloaterReg::add("floater_group_info", "floater_group_info.xml", &LLFloaterReg::build<LLFloaterGroupInfo>);
+	LLFloaterReg::add("floater_profile_view", "floater_profile_view.xml", &LLFloaterReg::build<LLFloaterProfileView>);
+// [/SL:KB]
 
 // [SL:KB] - Patch: UI-Feedback | Checked: 2016-01-02 (Catznip-3.8)
 	LLFloaterReg::add("feedback", "floater_feedback.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterFeedback>);

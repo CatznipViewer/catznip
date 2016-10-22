@@ -39,10 +39,10 @@ public:
 	~LLPanelGroupInvite();
 	
 	void addUsers(uuid_vec_t& agent_ids);
-	/**
-	 * this callback is being used to add a user whose fullname isn't been loaded before invoking of addUsers().
-	 */  
-	void addUserCallback(const LLUUID& id, const LLAvatarName& av_name);
+//	/**
+//	 * this callback is being used to add a user whose fullname isn't been loaded before invoking of addUsers().
+//	 */  
+//	void addUserCallback(const LLUUID& id, const LLAvatarName& av_name);
 	void clear();
 	void update();
 
