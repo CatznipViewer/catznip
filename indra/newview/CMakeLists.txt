@@ -236,6 +236,7 @@ set(viewer_SOURCE_FILES
     llfloatergesture.cpp
     llfloatergodtools.cpp
     llfloatergotoline.cpp
+    llfloatergroupactions.cpp
     llfloatergroupbulkban.cpp
     llfloatergroupinvite.cpp
     llfloatergroups.cpp
@@ -262,6 +263,7 @@ set(viewer_SOURCE_FILES
     llfloatermodeluploadbase.cpp
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
+    llfloaternotificationsflat.cpp
     llfloaternotificationstabbed.cpp 
     llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
@@ -851,6 +853,7 @@ set(viewer_HEADER_FILES
     llfloatergesture.h
     llfloatergodtools.h
     llfloatergotoline.h
+    llfloatergroupactions.h
     llfloatergroupbulkban.h
     llfloatergroupinvite.h
     llfloatergroups.h
@@ -880,6 +883,7 @@ set(viewer_HEADER_FILES
     llfloatermodeluploadbase.h
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
+    llfloaternotificationsflat.h
     llfloaternotificationstabbed.h 
     llfloateroutfitsnapshot.h
     llfloaterobjectweights.h

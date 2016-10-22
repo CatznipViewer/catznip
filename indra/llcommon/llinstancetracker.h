@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2000&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2016, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -246,7 +247,10 @@ private:
 	{
 		InstanceMap& map = getMap_();
 		typename InstanceMap::iterator iter = map.find(mInstanceKey);
-		if (iter != map.end())
+//		if (iter != map.end())
+// [SL:KB] - Patch: UI-Notifications | Checked: 2014-03-25 (Catznip-3.6)
+		if ( (iter != map.end()) && (iter->second == static_cast<T*>(this)) )
+// [/SL:KB]
 		{
 			map.erase(iter);
 		}

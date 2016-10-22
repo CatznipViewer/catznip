@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<floater
+ legacy_header_height="18"
+ bevel_style="in"
+ layout="topleft"
+ name="floater_notifications_tabbed"
+ help_topic="notification_chiclet"
+ save_rect="true"
+ title="NOTIFICATIONS"
+ width="350"
+ min_width="435"
+ height="550"
+ min_height="150"
+ can_minimize="false"
+ can_tear_off="false"
+ can_resize="true"
+ can_drag_on_left="false"
+ can_dock="true"
+ save_dock_state="true"
+ save_visibility="true"
+ single_instance="true"
+>
+  <floater.string
+    name="system_tab_title">
+    System ([COUNT])
+  </floater.string>
+  <floater.string
+    name="transactions_tab_title">
+    Transactions ([COUNT])
+  </floater.string>
+  <floater.string
+    name="group_invitations_tab_title">
+    Invitations ([COUNT])
+  </floater.string>
+  <floater.string
+    name="group_notices_tab_title">
+    Group ([COUNT])
+  </floater.string>
+
+  <string
+   name="title_notification_tabbed_window">
+    NOTIFICATIONS
+  </string>
+  <layout_stack
+    width="350"
+    height="533"
+    enabled="true"
+    orientation="vertical"
+    name="TabButtonsStack"
+    follows="left|top|right|bottom"
+    top="24">
+    <layout_panel
+     auto_resize="false"
+     height="25"
+     left="1"
+     name="notification_filter_panel"
+     right="-1"
+     visible="true">
+      <combo_box
+       follows="top|left"
+       layout="topleft"
+       name="filter_type"
+       left="9"
+       top="1"
+       bottom="-1"
+       width="120">
+        <combo_box.item
+         label="All"
+         value="0" />
+        <combo_box.item
+         label="System"
+         value="1" />
+        <combo_box.item
+         label="Group Notices"
+         value="2" />
+        <combo_box.item
+         label="Offers"
+         value="3" />
+        <combo_box.item
+         label="Transactions"
+         value="4" />
+      </combo_box>
+      <filter_editor
+       follows="top|left|right"
+       layout="topleft"
+       name="filter_text"
+       left_pad="3"
+       right="-8"
+       top_delta="0"
+       height="23"
+       label="Filter notifications"
+       text_pad_left="10"
+       max_length_chars="300" />
+  </layout_panel>
+  <layout_panel
+    auto_resize="true"
+    left="1"
+    right="-1"
+    height="505"
+    enabled="true"
+    name="TabButtonsLayoutPanel">
+      <notification_list_view
+       color="FloaterDefaultBackgroundColor"
+       follows="all"
+       layout="topleft"
+       name="notification_list"
+       left="8"
+       top="1"
+       height="466"
+       right="-8"/>
+    
+    <layout_stack left="140" width="200" height="26" enabled="true" orientation="horizontal"  follows="right" name="ButtonsStack">
+      <layout_panel width="93" height="30" enabled="true" orientation="horizontal" name="CondenseAllButtonPanel">
+        <button width="93" height="21" left="2" label="Collapse all" name="collapse_all_button">
+        </button>
+      </layout_panel>
+      <layout_panel width="6" height="30" enabled="true" orientation="horizontal" name="GapLayoutPanel">
+        <panel width="5" height="21" left="2" label="Gap Panel" border="false" name="GapPanel">
+        </panel>
+      </layout_panel>
+      <layout_panel width="93" height="30" enabled="true" orientation="horizontal" name="DeleteAllButtonPanel">
+        <button width="93" height="21" left="0" label="Delete all" follows="right" name="delete_all_button">
+        </button>
+      </layout_panel>
+    </layout_stack>
+  </layout_panel>
+  </layout_stack>
+</floater>

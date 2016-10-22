@@ -6,6 +6,7 @@
 * $LicenseInfo:firstyear=2012&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2012, Linden Research, Inc.
+* Copyright (C) 2010-2016, Kitty Barnett
 *
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -30,6 +31,9 @@
 
 #include "llpersistentnotificationstorage.h"
 
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+#include "llcallbacklist.h"
+// [/SL:KB]
 #include "llchannelmanager.h"
 #include "llnotificationstorage.h"
 #include "llscreenchannel.h"
@@ -40,6 +44,9 @@ LLPersistentNotificationStorage::LLPersistentNotificationStorage()
 	: LLSingleton<LLPersistentNotificationStorage>()
 	, LLNotificationStorage("")
 	, mLoaded(false)
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	, mPendingSave(false)
+// [/SL:KB]
 {
 }
 
@@ -50,6 +57,17 @@ LLPersistentNotificationStorage::~LLPersistentNotificationStorage()
 static LLTrace::BlockTimerStatHandle FTM_SAVE_NOTIFICATIONS("Save Notifications");
 
 void LLPersistentNotificationStorage::saveNotifications()
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+{
+	if (!mPendingSave)
+	{
+		doOnIdleOneTime(boost::bind(&LLPersistentNotificationStorage::saveNotificationsCb, this));
+		mPendingSave = true;
+	}
+}
+
+void LLPersistentNotificationStorage::saveNotificationsCb()
+// [/SL:KB]
 {
 	LL_RECORD_BLOCK_TIME(FTM_SAVE_NOTIFICATIONS);
 
@@ -88,6 +106,9 @@ void LLPersistentNotificationStorage::saveNotifications()
 	}
 
 	writeNotifications(output);
+// [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
+	mPendingSave = false;
+// [/SL:KB]
 }
 
 static LLTrace::BlockTimerStatHandle FTM_LOAD_NOTIFICATIONS("Load Notifications");
@@ -146,6 +167,9 @@ void LLPersistentNotificationStorage::loadNotifications()
 	{
 		LLSD notification_params = *notification_it;
 		LLNotificationPtr notification(new LLNotification(notification_params));
+// [SL:KB] - Patch: Notification-Persisted | Checked: 2012-01-27 (Catznip-3.2)
+		notification->setPersisted(true);
+// [/SL:KB]
 
 		LLNotificationResponderPtr responder(createResponder(notification_params["name"], notification_params["responder"]));
 		notification->setResponseFunctor(responder);
