@@ -223,8 +223,12 @@ protected:
 	bool callbackReturn(const LLSD& notification, const LLSD& response);
 	static void onClickTopColliders(void*);
 	static void onClickTopScripts(void*);
-	static void onClickRestart(void* data);
-	bool callbackRestart(const LLSD& notification, const LLSD& response);
+// [SL:KB] - Patch: UI-RegionRestartDelay | Checked: 2011-12-16 (Catznip-3.2)
+	void onClickRestart(LLUICtrl* ctrl);
+	bool callbackRestart(const LLSD& notification, const LLSD& response, U32 seconds);
+// [/SL:KB]
+//	static void onClickRestart(void* data);
+//	bool callbackRestart(const LLSD& notification, const LLSD& response);
 	static void onClickCancelRestart(void* data);
 	static void onClickDebugConsole(void* data);
 	

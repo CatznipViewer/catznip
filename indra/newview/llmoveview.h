@@ -82,7 +82,7 @@ private:
 	void setMovementMode(const EMovementMode mode);
 	void initModeTooltips();
 	void setModeTooltip(const EMovementMode mode);
-	void setModeTitle(const EMovementMode mode);
+//	void setModeTitle(const EMovementMode mode);
 	void initModeButtonMap();
 	void setModeButtonToggleState(const EMovementMode mode);
 	void updateButtonsWithMovementMode(const EMovementMode newMode);
@@ -172,7 +172,7 @@ private:
 	 */
 	LLHandle<LLPanel> mOriginalParent;
 
-	LLHandle<LLPanel> mStateManagementButtons;
+//	LLHandle<LLPanel> mStateManagementButtons;
 
 	/**
 	 * True if the panel is currently attached to the movement controls floater.

@@ -141,6 +141,9 @@ public:
 	{
 		BUTTON_CLOSE = 0,
 		BUTTON_RESTORE,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+		BUTTON_COLLAPSE,
+// [/SL:KB]
 		BUTTON_MINIMIZE,
 		BUTTON_TEAR_OFF,
 		BUTTON_DOCK,
@@ -176,16 +179,27 @@ public:
 		Optional<LLUIImage*>	close_image,
 								restore_image,
 								minimize_image,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+								collapse_image,
+// [/SL:KB]
 								tear_off_image,
 								dock_image,
 								help_image;
 		Optional<LLUIImage*>	close_pressed_image,
 								restore_pressed_image,
 								minimize_pressed_image,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+								collapse_pressed_image,
+// [/SL:KB]
 								tear_off_pressed_image,
 								dock_pressed_image,
 								help_pressed_image;
 		
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+		Optional<F32>			active_transparency;
+		Optional<F32>			inactive_transparency;
+// [/SL:KB]
+
 		Optional<CommitCallbackParam> open_callback,
 									  close_callback;
 
@@ -250,6 +264,12 @@ public:
 	std::string		getTitle() const;
 	void			setShortTitle( const std::string& short_title );
 	std::string		getShortTitle() const;
+// [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
+	void			setTitleVisible(BOOL visible);
+// [/SL:KB]
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
+	void            setCollapsed(BOOL collapsed);
+// [/SL:KB]
 	virtual void	setMinimized(BOOL b);
 	void			moveResizeHandlesToFront();
 	void			addDependentFloater(LLFloater* dependent, BOOL reposition = TRUE);
@@ -350,12 +370,29 @@ public:
 
 	static void		onClickClose(LLFloater* floater);
 	static void		onClickMinimize(LLFloater* floater);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	static void		onClickCollapse(LLFloater* floater);
+// [/SL:KB]
 	static void		onClickTearOff(LLFloater* floater);
 	static void     onClickDock(LLFloater* floater);
 	static void		onClickHelp(LLFloater* floater);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	static void		handleShowCollapseButtonChanged(const LLSD& sdValue);
+// [/SL:KB]
 
 	static void		setFloaterHost(LLMultiFloater* hostp) {sHostp = hostp; }
 	static LLMultiFloater* getFloaterHost() {return sHostp; }
+
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	/*virtual*/ F32 getCurrentTransparency();
+
+	void 			clearActiveTransparency() { mActiveTransparency = F32_MAX; }
+	F32 			getActiveTransparency() const { return mActiveTransparency; }
+	void 			setActiveTransparency(F32 transparency) { mActiveTransparency = transparency; }
+	void 			clearInactiveTransparency() { mInactiveTransparency = F32_MAX; }
+	F32 			getInactiveTransparency() const { return mInactiveTransparency; }
+	void 			setInactiveTransparency(F32 transparency) { mInactiveTransparency = transparency; }
+// [/SL:KB]
 
 	void			updateTransparency(ETypeTransparency transparency_type);
 		
@@ -473,7 +510,15 @@ private:
 	S32				mHeaderHeight;		// height in pixels of header for title, drag bar
 	S32				mLegacyHeaderHeight;// HACK see initFloaterXML()
 	
+// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+	F32				mActiveTransparency;
+	F32				mInactiveTransparency;
+// [/SL:KB]
+
 	BOOL			mMinimized;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	BOOL			mCollapseOnMinimize;
+// [/SL:KB]
 	BOOL			mForeground;
 	LLHandle<LLFloater>	mDependeeHandle;
 	
@@ -501,6 +546,9 @@ private:
 	static std::string	sButtonNames[BUTTON_COUNT];
 	static std::string	sButtonToolTips[BUTTON_COUNT];
 	static std::string  sButtonToolTipsIndex[BUTTON_COUNT];
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+	static BOOL			sShowCollapseButton;
+// [/SL:KB]
 	
 	typedef void(*click_callback)(LLFloater*);
 	static click_callback sButtonCallbacks[BUTTON_COUNT];

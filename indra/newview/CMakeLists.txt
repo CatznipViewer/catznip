@@ -231,6 +231,7 @@ set(viewer_SOURCE_FILES
     llfloaterexperienceprofile.cpp
     llfloaterexperiences.cpp
     llfloaterfacebook.cpp
+    llfloaterfeedback.cpp
     llfloaterflickr.cpp
     llfloaterfonttest.cpp
     llfloatergesture.cpp
@@ -846,6 +847,7 @@ set(viewer_HEADER_FILES
     llfloaterexperienceprofile.h
     llfloaterexperiences.h
     llfloaterfacebook.h
+    llfloaterfeedback.h
     llfloaterflickr.h
     llfloaterfonttest.h
     llfloatergesture.h

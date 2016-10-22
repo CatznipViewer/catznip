@@ -77,14 +77,11 @@
      width="188">
         My awesome object with a really damn long name
     </text>
-    <panel
-     border_thickness="0"
+    <view
      height="104"
-     label="Search"
      layout="topleft"
      left="0"
      top_pad="10"
-     help_topic="avatarpicker"
      name="PatternsPanel"
      width="120">
       <button
@@ -123,17 +120,15 @@
        top_pad="4"
        name="fastpay 20"
        width="110" />
-    </panel>
+    </view>
     <view_border
      bevel_style="in"
      width="1"
      height="104"
      left_pad="10"
      layout="topleft" />
-    <panel
-     border_thickness="0"
+    <view
      height="104"
-     label="Search"
      layout="topleft"
      left_pad="0"
      name="InputPanel"
@@ -179,5 +174,5 @@
        top_pad="4"
        name="cancel btn"
        width="110" />
-    </panel>
+    </view>
 </floater>

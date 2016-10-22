@@ -48,5 +48,8 @@
 			</scroll_list>
 		</panel>
 	</tab_container>
+    <panel name="bottom_panel">
+    	<button label="OK" label_selected="OK" name="ok_btn"/>
 	<button label="Anuluj" label_selected="Anuluj" name="cancel_btn" />
+	</panel>
 </floater>

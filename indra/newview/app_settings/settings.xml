@@ -837,13 +837,13 @@
     <key>BrowserHomePage</key>
     <map>
       <key>Comment</key>
-      <string>[NOT USED]</string>
+      <string>Starting page for the web browser floater</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>
       <string>String</string>
       <key>Value</key>
-      <string>http://www.secondlife.com</string>
+      <string>http://www.catznip.com</string>
     </map>
     <key>BrowserIgnoreSSLCertErrors</key>
     <map>
@@ -1730,17 +1730,6 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
-    <key>ChatPersistTime</key>
-    <map>
-      <key>Comment</key>
-      <string>Time for which chat stays visible in console (seconds)</string>
-      <key>Persist</key>
-      <integer>1</integer>
-      <key>Type</key>
-      <string>F32</string>
-      <key>Value</key>
-      <real>20.0</real>
-    </map>
     <key>ChatShowTimestamps</key>
     <map>
       <key>Comment</key>
@@ -1751,6 +1740,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>ChromeFloaterTransparency</key>
+    <map>
+      <key>Comment</key>
+      <string>Transparency of chrome floaters (floaters that cannot receive focus)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>F32</string>
+      <key>Value</key>
+      <real>0.4</real>
     </map>
     <key>CheesyBeacon</key>
     <map>
@@ -10790,6 +10790,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ShowBuyCurrencyButton</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows/hides the buy currency button in the status bar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>ShowCameraButton</key>
     <map>
       <key>Comment</key>
@@ -10899,6 +10910,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>ShowFeedbackButton</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows/hides the feedback button in the status bar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>ShowGestureButton</key>
     <map>
@@ -11043,6 +11065,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>ShowMarketplaceButton</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows/hides the buy marketplace button in the status bar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>ShowMiniLocationPanel</key>
     <map>
       <key>Comment</key>
@@ -11052,7 +11085,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>GroupListShowIcons</key>
     <map>
@@ -11174,6 +11207,17 @@
       <string>U32</string>
       <key>Value</key>
       <integer>2</integer>
+    </map>
+    <key>ShowFloaterCollapseButton</key>
+    <map>
+      <key>Comment</key>
+      <string>Show/hide the collapse button in the floater controls</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>BlockPeopleSortOrder</key>
     <map>
@@ -11539,7 +11583,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>ShowSelectionBeam</key>
     <map>
@@ -15708,6 +15752,17 @@
     <string>F32</string>
     <key>Value</key>
     <real>2.0</real>
+  </map>
+  <key>TeleportFadeDuration</key>
+  <map>
+    <key>Comment</key>
+    <string>Time to fade between the world and progress view</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>F32</string>
+    <key>Value</key>
+    <real>1.25</real>
   </map>
   <key>TeleportLocalDelay</key>
   <map>

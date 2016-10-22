@@ -3,6 +3,8 @@
 	<text name="groupdesc">
 		Bir grup seç:
 	</text>
+	<panel name="bottom_panel" >
 	<button label="Tamam" label_selected="Tamam" name="OK"/>
 	<button label="İptal" label_selected="İptal" name="Cancel"/>
+	</panel>
 </floater>

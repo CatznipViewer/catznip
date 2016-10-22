@@ -48,6 +48,8 @@
 			</scroll_list>
 		</panel>
 	</tab_container>
-	<button label="確定" label_selected="確定" name="ok_btn"/>
-	<button label="取消" label_selected="取消" name="cancel_btn"/>
+    <panel name="bottom_panel">
+        <button label="確定" label_selected="確定" name="ok_btn"/>
+        <button label="取消" label_selected="取消" name="cancel_btn"/>
+	</panel>
 </floater>

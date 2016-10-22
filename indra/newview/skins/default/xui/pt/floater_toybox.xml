@@ -6,6 +6,8 @@
 	<text name="toybox label 2">
 		Os botões aparecerão como mostrado ou somente como ícone, dependendo das configurações de cada barra de ferramentas.
 	</text>
-	<button label="Limpar todas as barras de ferramentas" label_selected="Limpar todas as barras de ferramentas" name="btn_clear_all"/>
-	<button label="Restaurar padrão" label_selected="Restaurar padrão" name="btn_restore_defaults"/>
+    <panel name="bottom_panel">
+        <button label="Limpar tudo" label_selected="Limpar tudo" name="btn_clear_all"/>
+        <button label="Restaurar padrão" label_selected="Restaurar padrão" name="btn_restore_defaults"/>
+	</panel>
 </floater>

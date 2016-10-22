@@ -49,7 +49,7 @@
 // Used for LCD display
 extern void AddNewDebugConsoleToLCD(const LLWString &newLine);
 
-LLConsole* gConsole = NULL;  // Created and destroyed in LLViewerWindow.
+//LLConsole* gConsole = NULL;  // Created and destroyed in LLViewerWindow.
 
 const F32 FADE_DURATION = 2.f;
  
@@ -178,7 +178,10 @@ void LLConsole::draw()
 	// draw remaining lines
 	F32 y_pos = 0.f;
 
-	LLUIImagePtr imagep = LLUI::getUIImage("transparent");
+//	LLUIImagePtr imagep = LLUI::getUIImage("transparent");
+// [SL:KB]
+	LLUIImagePtr imagep = LLUI::getUIImage("transparent.j2c");
+// [/SL:KB]
 
 	F32 console_opacity = llclamp(LLUI::sSettingGroups["config"]->getF32("ConsoleBackgroundOpacity"), 0.f, 1.f);
 	LLColor4 color = LLUIColorTable::instance().getColor("ConsoleBackground");
@@ -377,6 +380,9 @@ void LLConsole::updateClass()
 
 void LLConsole::update()
 {
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2012-02-13 (Catznip-3.2)
+	if (!mLines.empty())
+// [/SL:KB]
 	{
 		LLMutexLock lock(&mMutex);
 

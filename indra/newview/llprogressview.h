@@ -65,6 +65,10 @@ public:
 	// Set it to NULL when you want to eliminate the message.
 	void setMessage(const std::string& msg);
 	
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+	void fade(bool show, F32 fade_duration);
+// [/SL:KB]
+
 	// turns on (under certain circumstances) the into video after login
 	void revealIntroPanel();
 
@@ -84,6 +88,9 @@ protected:
 	LLButton*	mCancelBtn;
 	LLFrameTimer mFadeToWorldTimer;
 	LLFrameTimer mFadeFromLoginTimer;
+// [SL:KB] - Patch: UI-TeleportFade | Checked: 2015-07-16 (Catznip-3.8)
+	F32 mFadeDuration;
+// [/SL:KB]
 	LLRect mOutlineRect;
 	bool mMouseDownInActiveArea;
 	bool mStartupComplete;

@@ -96,7 +96,10 @@ public:
 	static void resetDragTool(LLToolBarButton* toolbarButton);
 	LLInventoryObject* getDragItem();
 	LLView* getBottomToolbar() { return mBottomToolbarPanel; }
-	LLToolBar* getToolbar(LLToolBarEnums::EToolBarLocation toolbar) { return mToolbars[toolbar]; }
+// [SL:KB] - Patch: UI-FindWidgets | Checked: 2011-11-28 (Catznip-3.2)
+	LLToolBar* getToolbar(LLToolBarEnums::EToolBarLocation toolbar) const { return (toolbar < LLToolBarEnums::TOOLBAR_COUNT) ? mToolbars[toolbar] : NULL; }
+// [/SL:KB]
+//	LLToolBar* getToolbar(LLToolBarEnums::EToolBarLocation toolbar) { return mToolbars[toolbar]; }
 	bool isModified() const;
 	
 protected:

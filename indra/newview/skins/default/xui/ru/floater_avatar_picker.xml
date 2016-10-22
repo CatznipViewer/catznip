@@ -18,7 +18,7 @@
 	<string name="Close">
 		Закрыть
 	</string>
-	<tab_container name="ResidentChooserTabs">
+	<tab_container name="ResidentChooserTabs" tab_min_width="75">
 		<panel label="Поиск" name="SearchPanel">
 			<text name="InstructSearchResidentName">
 				Наберите часть имени жителя:
@@ -48,6 +48,8 @@
 			</scroll_list>
 		</panel>
 	</tab_container>
-	<button label="ОК" label_selected="ОК" name="ok_btn"/>
-	<button label="Отмена" label_selected="Отмена" name="cancel_btn"/>
+    <panel name="bottom_panel">
+        <button label="ОК" label_selected="ОК" name="ok_btn"/>
+        <button label="Отмена" label_selected="Отмена" name="cancel_btn"/>
+	</panel>
 </floater>

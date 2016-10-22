@@ -17,10 +17,10 @@
 			<menu_item_call label="私のアニメーションを停止する" name="Stop Animating My Avatar"/>
 			<menu_item_call label="歩行／走行／飛行..." name="WalkRunFly"/>
 		</menu>
-		<menu label="ログイン" name="Status">
-			<menu_item_check label="一時退席中" name="Away"/>
-			<menu_item_check label="着信拒否" name="Do Not Disturb"/>
-		</menu>
+
+        <menu_item_check label="一時退席中" name="Away"/>
+        <menu_item_check label="着信拒否" name="Do Not Disturb"/>
+
 		<menu_item_call label="L$ の購入..." name="Buy and Sell L$"/>
 		<menu_item_call label="マーチャントアウトボックス..." name="MerchantOutbox"/>
 		<menu_item_call label="マーケティングプレイスのリスト..." name="MarketplaceListings"/>

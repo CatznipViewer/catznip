@@ -3,5 +3,7 @@
 	<text name="groupdesc">
 		Wybierz grupę:
 	</text>
+	<panel name="bottom_panel" >
 	<button label="Anuluj" label_selected="Anuluj" name="Cancel" />
+	</panel>
 </floater>
