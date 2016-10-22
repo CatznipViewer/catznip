@@ -47,6 +47,9 @@
 #include "llaccordionctrl.h"
 #include "llaccordionctrltab.h"
 #include "llagent.h"
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-03-23 (Catznip-3.6)
+#include "llagentcamera.h"
+// [/SL:KB]
 #include "llavataractions.h"
 #include "llavatarlist.h"
 #include "llavatarlistitem.h"
@@ -64,6 +67,9 @@
 #include "llpanelpeoplemenus.h"
 #include "llparticipantlist.h"
 #include "llsidetraypanelcontainer.h"
+// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2012-07-30 (Catznip-3.3)
+#include "llstartup.h"
+// [/SL:KB]
 #include "llrecentpeople.h"
 #include "llviewercontrol.h"		// for gSavedSettings
 #include "llviewermenu.h"			// for gMenuHolder
@@ -81,6 +87,9 @@
 
 #define FRIEND_LIST_UPDATE_TIMEOUT	0.5
 #define NEARBY_LIST_UPDATE_INTERVAL 1
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+#define LAST_INTERACTION_UPDATE_PERIOD 5
+// [/SL:KB]
 
 static const std::string NEARBY_TAB_NAME	= "nearby_panel";
 static const std::string FRIENDS_TAB_NAME	= "friends_panel";
@@ -93,6 +102,134 @@ const S32 BASE_MAX_AGENT_GROUPS = 42;
 const S32 PREMIUM_MAX_AGENT_GROUPS = 60;
 
 extern S32 gMaxAgentGroups;
+
+// [SL:KB] - Patch: UI-GroupTitleCombo | Checked: 2011-12-05 (Catznip-3.2)
+#include "llcombobox.h"
+
+class LLGroupTitleComboCtrl : public LLComboBox, public LLParticularGroupObserver, public LLOldEvents::LLSimpleListener
+{
+	friend class LLUICtrlFactory;
+public:
+	struct Params : public LLInitParam::Block<Params, LLComboBox::Params> {};
+protected:
+	LLGroupTitleComboCtrl(const Params& p);
+public:
+	/*virtual*/ ~LLGroupTitleComboCtrl(); 
+
+	/*virtual*/ void onCommit();
+	/*virtual*/ BOOL postBuild();
+protected:
+	void requestTitles();
+
+public:
+	// LLParticularGroupObserver overrides
+	/*virtual*/ void changed(const LLUUID& idGroup, LLGroupChange change);
+	// LLSimpleListener overrides
+	/*virtual*/ bool handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& sdData);
+
+protected:
+	LLUUID m_idCurGroup;
+};
+
+static LLDefaultChildRegistry::Register<LLGroupTitleComboCtrl> register_grouptitle_combo("grouptitle_combo");
+
+LLGroupTitleComboCtrl::LLGroupTitleComboCtrl(const Params& p) : LLComboBox(p)
+{
+	gAgent.addListener(this, "new group");
+}
+
+LLGroupTitleComboCtrl::~LLGroupTitleComboCtrl()
+{
+	gAgent.removeListener(this);
+}
+
+void LLGroupTitleComboCtrl::onCommit()
+{
+	LLComboBox::onCommit();
+
+	S32 idxCur = getCurrentIndex();
+	if (0 == idxCur)		// "<No Title>"
+	{
+		gSavedSettings.setBOOL("RenderHideGroupTitle", TRUE);
+	}
+	else if (idxCur > 1)	// Group roles (anything past separator)
+	{
+		gSavedSettings.setBOOL("RenderHideGroupTitle", FALSE);
+		LLGroupMgr::getInstance()->sendGroupTitleUpdate(m_idCurGroup, getCurrentID());
+	}
+}
+
+void LLGroupTitleComboCtrl::requestTitles()
+{
+	// Only refresh titles if the active group changed
+	if (gAgent.getGroupID() != m_idCurGroup)
+	{
+		clear();
+		clearRows();
+		setEnabled(false);
+
+		if (m_idCurGroup.notNull())
+			LLGroupMgr::getInstance()->removeObserver(m_idCurGroup, this);
+
+		m_idCurGroup = gAgent.getGroupID();
+		if (m_idCurGroup.notNull())
+		{
+			LLGroupMgr::getInstance()->addObserver(m_idCurGroup, this);
+			LLGroupMgr::getInstance()->sendGroupTitlesRequest(m_idCurGroup);
+		}
+	}
+}
+
+BOOL LLGroupTitleComboCtrl::postBuild()
+{
+	if (LLStartUp::getStartupState() >= STATE_STARTED)
+		requestTitles();
+	else
+		LLAppViewer::instance()->setOnLoginCompletedCallback(boost::bind(&LLGroupTitleComboCtrl::requestTitles, this));
+	return TRUE;
+}
+
+void LLGroupTitleComboCtrl::changed(const LLUUID& idGroup, LLGroupChange change)
+{
+	if ( ((GC_ALL != change) && (GC_TITLES != change)) || (gAgent.getGroupID() != idGroup) )
+		return;
+
+	const LLGroupMgrGroupData* pGroupData = LLGroupMgr::getInstance()->getGroupData(gAgent.getGroupID());
+	if (!pGroupData)
+		return;
+
+	clear();
+	clearRows();
+	setEnabled(true);
+
+	add("<No Title>", LLUUID::generateNewID());
+	addSeparator(ADD_BOTTOM);
+
+	LLUUID idActiveRole;
+	for (std::vector<LLGroupTitle>::const_iterator itGroupTitle = pGroupData->mTitles.begin(); itGroupTitle != pGroupData->mTitles.end(); ++itGroupTitle)
+	{
+		add(itGroupTitle->mTitle, itGroupTitle->mRoleID, ADD_BOTTOM);
+		if (itGroupTitle->mSelected)
+			idActiveRole = itGroupTitle->mRoleID;
+	}
+
+	if (gSavedSettings.getBOOL("RenderHideGroupTitle"))
+		setCurrentByIndex(0);
+	else
+		setCurrentByID(idActiveRole);
+}
+
+bool LLGroupTitleComboCtrl::handleEvent(LLPointer<LLOldEvents::LLEvent> event, const LLSD& sdData)
+{
+	if ("new group" == event->desc())
+	{
+		if (LLStartUp::getStartupState() >= STATE_STARTED)
+			requestTitles();
+		return true;
+	}
+	return false;
+}
+// [/SL:KB]
 
 /** Comparator for comparing avatar items by last interaction date */
 class LLAvatarItemRecentComparator : public LLAvatarItemComparator
@@ -161,22 +298,42 @@ public:
 			id_it = uuids.begin(),
 			id_end = uuids.end();
 
-		LLAvatarItemDistanceComparator::id_to_pos_map_t pos_map;
+//		LLAvatarItemDistanceComparator::id_to_pos_map_t pos_map;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		const LLVector3& posAgentCam = gAgentCamera.getCameraPositionAgent();
+// [/SL:KB]
 
 		mAvatarsPositions.clear();
 
 		for (;pos_it != pos_end && id_it != id_end; ++pos_it, ++id_it )
 		{
-			mAvatarsPositions[*id_it] = *pos_it;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+			const LLVector3d& posAgent = *pos_it;
+			// NOTE-Catznip: this should match the 'unknown_relative_z' check in LLNetMap::draw()
+			mAvatarsPositions[*id_it] = ((posAgent.mdV[VZ] != COARSEUPDATE_MAX_Z) || (posAgentCam.mV[VZ] < COARSEUPDATE_MAX_Z)) ? *pos_it : LLVector3d::zero;
+// [/SL:KB]
+//			mAvatarsPositions[*id_it] = *pos_it;
 		}
 	};
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+	const id_to_pos_map_t& getAvatarsPositions() const { return mAvatarsPositions; }
+// [/SL:KB]
 
 protected:
 	virtual bool doCompare(const LLAvatarListItem* item1, const LLAvatarListItem* item2) const
 	{
 		const LLVector3d& me_pos = gAgent.getPositionGlobal();
 		const LLVector3d& item1_pos = mAvatarsPositions.find(item1->getAvatarId())->second;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		if (item1_pos.isExactlyZero())
+			return false;
+// [/SL:KB]
 		const LLVector3d& item2_pos = mAvatarsPositions.find(item2->getAvatarId())->second;
+// [SL:KB] - Patch: Sidepanel-NearbyDistance | Checked: 2014-03-23 (Catznip-3.6)
+		if (item2_pos.isExactlyZero())
+			return true;
+// [/SL:KB]
 		
 		return dist_vec_squared(item1_pos, me_pos) < dist_vec_squared(item2_pos, me_pos);
 	}
@@ -258,29 +415,29 @@ protected:
 	callback_t		mCallback;
 };
 
-/**
- * Update buttons on changes in our friend relations (STORM-557).
- */
-class LLButtonsUpdater : public LLPanelPeople::Updater, public LLFriendObserver
-{
-public:
-	LLButtonsUpdater(callback_t cb)
-	:	LLPanelPeople::Updater(cb)
-	{
-		LLAvatarTracker::instance().addObserver(this);
-	}
-
-	~LLButtonsUpdater()
-	{
-		LLAvatarTracker::instance().removeObserver(this);
-	}
-
-	/*virtual*/ void changed(U32 mask)
-	{
-		(void) mask;
-		update();
-	}
-};
+///**
+// * Update buttons on changes in our friend relations (STORM-557).
+// */
+//class LLButtonsUpdater : public LLPanelPeople::Updater, public LLFriendObserver
+//{
+//public:
+//	LLButtonsUpdater(callback_t cb)
+//	:	LLPanelPeople::Updater(cb)
+//	{
+//		LLAvatarTracker::instance().addObserver(this);
+//	}
+//
+//	~LLButtonsUpdater()
+//	{
+//		LLAvatarTracker::instance().removeObserver(this);
+//	}
+//
+//	/*virtual*/ void changed(U32 mask)
+//	{
+//		(void) mask;
+//		update();
+//	}
+//};
 
 class LLAvatarListUpdater : public LLPanelPeople::Updater, public LLEventTimer
 {
@@ -313,6 +470,9 @@ public:
 	LLFriendListUpdater(callback_t cb)
 	:	LLAvatarListUpdater(cb, FRIEND_LIST_UPDATE_TIMEOUT)
 	,	mIsActive(false)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-29 (Catznip-3.6)
+	,	mMask(LLFriendObserver::ALL)
+// [/SL:KB]
 	{
 		LLAvatarTracker::instance().addObserver(this);
 
@@ -502,9 +662,49 @@ class LLRecentListUpdater : public LLAvatarListUpdater, public boost::signals2::
 public:
 	LLRecentListUpdater(callback_t cb)
 	:	LLAvatarListUpdater(cb, 0)
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	,	mNeedsUpdate(true)
+// [/SL:KB]
 	{
-		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::update, this));
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::onRecentChanged, this));
+// [/SL:KB]
+//		LLRecentPeople::instance().setChangedCallback(boost::bind(&LLRecentListUpdater::update, this));
 	}
+
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	void onRecentChanged()
+	{
+		mNeedsUpdate = true;
+	}
+
+	/*virtual*/ void setActive(bool fActive)
+	{
+		// This is driven by visibility updates so always simulate a tick when we're being set active
+		if (fActive)
+		{
+			tick();
+			mEventTimer.start(); 
+		}
+		else
+		{
+			mEventTimer.stop();
+		}
+	}
+
+	/*virtual*/ BOOL tick()
+	{
+		if (mNeedsUpdate)
+		{
+			update();
+			mNeedsUpdate = false;
+		}
+		return FALSE;
+	}
+
+protected:
+	bool mNeedsUpdate;
+// [/SL:KB]
 };
 
 //=============================================================================
@@ -523,12 +723,16 @@ LLPanelPeople::LLPanelPeople()
 	mFriendListUpdater = new LLFriendListUpdater(boost::bind(&LLPanelPeople::updateFriendList,	this));
 	mNearbyListUpdater = new LLNearbyListUpdater(boost::bind(&LLPanelPeople::updateNearbyList,	this));
 	mRecentListUpdater = new LLRecentListUpdater(boost::bind(&LLPanelPeople::updateRecentList,	this));
-	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
+//	mButtonsUpdater = new LLButtonsUpdater(boost::bind(&LLPanelPeople::updateButtons, this));
 
 	mCommitCallbackRegistrar.add("People.AddFriend", boost::bind(&LLPanelPeople::onAddFriendButtonClicked, this));
 	mCommitCallbackRegistrar.add("People.AddFriendWizard",	boost::bind(&LLPanelPeople::onAddFriendWizButtonClicked,	this));
 	mCommitCallbackRegistrar.add("People.DelFriend",		boost::bind(&LLPanelPeople::onDeleteFriendButtonClicked,	this));
 	mCommitCallbackRegistrar.add("People.Group.Minus",		boost::bind(&LLPanelPeople::onGroupMinusButtonClicked,  this));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("People.Group.Activate",	boost::bind(&LLPanelPeople::onGroupActivateButtonClicked,	this));
+	mCommitCallbackRegistrar.add("People.ShowBlockedList",	boost::bind(&LLPanelPeople::onShowBlockedList, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("People.Chat",			boost::bind(&LLPanelPeople::onChatButtonClicked,		this));
 	mCommitCallbackRegistrar.add("People.Gear",			boost::bind(&LLPanelPeople::onGearButtonClicked,		this, _1));
 
@@ -547,7 +751,7 @@ LLPanelPeople::LLPanelPeople()
 
 LLPanelPeople::~LLPanelPeople()
 {
-	delete mButtonsUpdater;
+//	delete mButtonsUpdater;
 	delete mNearbyListUpdater;
 	delete mFriendListUpdater;
 	delete mRecentListUpdater;
@@ -586,11 +790,15 @@ void LLPanelPeople::removePicker()
 
 BOOL LLPanelPeople::postBuild()
 {
-	getChild<LLFilterEditor>("nearby_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
-	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	mFilterEditor = getChild<LLFilterEditor>("filter_input");
+	mFilterEditor->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+// [/SL:KB]
+//	getChild<LLFilterEditor>("nearby_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("friends_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("groups_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("recent_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
+//	getChild<LLFilterEditor>("fbc_filter_input")->setCommitCallback(boost::bind(&LLPanelPeople::onFilterEdit, this, _2));
 
 	if(gMaxAgentGroups <= BASE_MAX_AGENT_GROUPS)
 	{
@@ -614,12 +822,19 @@ BOOL LLPanelPeople::postBuild()
 	mSuggestedFriends = friends_tab->getChild<LLAvatarList>("suggested_friends");
 	mOnlineFriendList->setNoItemsCommentText(getString("no_friends_online"));
 	mOnlineFriendList->setShowIcons("FriendsListShowIcons");
-	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
-	mOnlineFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
+//	mOnlineFriendList->showPermissions("FriendsListShowPermissions");
+//	mOnlineFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 	mAllFriendList->setNoItemsCommentText(getString("no_friends"));
 	mAllFriendList->setShowIcons("FriendsListShowIcons");
-	mAllFriendList->showPermissions("FriendsListShowPermissions");
-	mAllFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
+//	mAllFriendList->showPermissions("FriendsListShowPermissions");
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-26 (Catznip-3.4)
+	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
+	if (spType >= SP_COUNT)
+		spType = SP_NEVER;
+	mOnlineFriendList->showPermissions(spType);
+	mAllFriendList->showPermissions(spType);
+// [/SL:KB]
+//	mAllFriendList->setShowCompleteName(!gSavedSettings.getBOOL("FriendsListHideUsernames"));
 
 	LLPanel* nearby_tab = getChild<LLPanel>(NEARBY_TAB_NAME);
 	nearby_tab->setVisibleCallback(boost::bind(&Updater::setActive, mNearbyListUpdater, _2));
@@ -628,7 +843,7 @@ BOOL LLPanelPeople::postBuild()
 	mNearbyList->setNoItemsMsg(getString("no_one_near"));
 	mNearbyList->setNoFilteredItemsMsg(getString("no_one_filtered_near"));
 	mNearbyList->setShowIcons("NearbyListShowIcons");
-	mNearbyList->setShowCompleteName(!gSavedSettings.getBOOL("NearbyListHideUsernames"));
+//	mNearbyList->setShowCompleteName(!gSavedSettings.getBOOL("NearbyListHideUsernames"));
 // [RLVa:KB] - Checked: RLVa-1.2.0
 	mNearbyList->setRlvCheckShowNames(true);
 // [/RLVa:KB]
@@ -636,11 +851,20 @@ BOOL LLPanelPeople::postBuild()
 	mMiniMap->setToolTipMsg(gSavedSettings.getBOOL("DoubleClickTeleport") ? 
 		getString("AltMiniMapToolTipMsg") :	getString("MiniMapToolTipMsg"));
 
-	mRecentList = getChild<LLPanel>(RECENT_TAB_NAME)->getChild<LLAvatarList>("avatar_list");
+// [SL:KB] - Patch: Panel-People | Checked: 2014-03-29 (Catznip-3.6)
+	LLPanel* recent_tab = getChild<LLPanel>(RECENT_TAB_NAME);
+	recent_tab->setVisibleCallback(boost::bind(&Updater::setActive, mRecentListUpdater, _2));
+	mRecentList = recent_tab->getChild<LLAvatarList>("avatar_list");
+// [/SL:KB]
+//	mRecentList = getChild<LLPanel>(RECENT_TAB_NAME)->getChild<LLAvatarList>("avatar_list");
 	mRecentList->setNoItemsCommentText(getString("no_recent_people"));
 	mRecentList->setNoItemsMsg(getString("no_recent_people"));
 	mRecentList->setNoFilteredItemsMsg(getString("no_filtered_recent_people"));
 	mRecentList->setShowIcons("RecentListShowIcons");
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+	mRecentList->setTextFieldCallback(boost::bind(&LLPanelPeople::updateLastInteractionTimes, this));
+	mRecentList->setTextFieldRefresh(LAST_INTERACTION_UPDATE_PERIOD);
+// [/SL:KB]
 
 	mGroupList = getChild<LLGroupList>("group_list");
 	mGroupList->setNoItemsMsg(getString("no_groups_msg"));
@@ -651,6 +875,13 @@ BOOL LLPanelPeople::postBuild()
 	mAllFriendList->setContextMenu(&LLPanelPeopleMenus::gPeopleContextMenu);
 	mOnlineFriendList->setContextMenu(&LLPanelPeopleMenus::gPeopleContextMenu);
 	mSuggestedFriends->setContextMenu(&LLPanelPeopleMenus::gSuggestedFriendsContextMenu);
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	setNameFormat(mNearbyList,       (EAvatarListNameFormat)gSavedSettings.getU32("NearbyPeopleNameFormat"), false);
+	setNameFormat(mRecentList,       (EAvatarListNameFormat)gSavedSettings.getU32("RecentPeopleNameFormat"), false);
+	setNameFormat(mAllFriendList,    (EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),      false);
+	setNameFormat(mOnlineFriendList, (EAvatarListNameFormat)gSavedSettings.getU32("FriendsNameFormat"),      false);
+// [/SL:KB]
 
 	setSortOrder(mRecentList,		(ESortOrder)gSavedSettings.getU32("RecentPeopleSortOrder"),	false);
 	setSortOrder(mAllFriendList,	(ESortOrder)gSavedSettings.getU32("FriendsSortOrder"),		false);
@@ -682,7 +913,10 @@ BOOL LLPanelPeople::postBuild()
 	LLToggleableMenu* groups_gear_menu = mGroupList->getContextMenu();
 	if (groups_gear_menu)
 	{
-		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_BOTTOM_LEFT);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_TOP_LEFT);
+// [/SL:KB]
+//		groups_gear_btn->setMenu(groups_gear_menu, LLMenuButton::MP_BOTTOM_LEFT);
 	}
 	else
 	{
@@ -787,6 +1021,15 @@ void LLPanelPeople::updateFriendList()
 			online_friendsp.push_back(buddy_id);
 	}
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-04-06 (Catznip-3.6)
+	LLAccordionCtrlTab* pOnlineTab = mTabContainer->getCurrentPanel()->getChild<LLAccordionCtrlTab>("tab_online");
+	if (pOnlineTab)
+	{
+		static std::string s_strOrigTitle = pOnlineTab->getTitle();
+		pOnlineTab->setTitle(llformat("%s (%d / %d)", s_strOrigTitle.c_str(), online_friendsp.size(), all_buddies.size()));
+	}
+// [/SL:KB]
+
 	/*
 	 * Avatarlists  will be hidden by showFriendsAccordionsIfNeeded(), if they do not have items.
 	 * But avatarlist can be updated only if it is visible @see LLAvatarList::draw();   
@@ -841,7 +1084,14 @@ void LLPanelPeople::updateNearbyList()
 	if (RlvActions::canShowNearbyAgents())
 	{
 // [/RLVa:KB]
-		LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+		static LLCachedControl<U32> maskFilter(gSavedSettings, "NearbyPeopleViewMask", 7);
+
+		LLWorld::getInstance()->getAvatars(
+			&mNearbyList->getIDs(), &positions, 
+			gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"), (maskFilter) ? maskFilter : (U32)LLWorld::E_FILTER_BY_DISTANCE);
+// [/SL:KB]
+//		LLWorld::getInstance()->getAvatars(&mNearbyList->getIDs(), &positions, gAgent.getPositionGlobal(), gSavedSettings.getF32("NearMeRange"));
 // [RLVa:KB] - Checked: RLVa-2.0.3
 	}
 	else
@@ -850,6 +1100,9 @@ void LLPanelPeople::updateNearbyList()
 	}
 // [/RLVa:KB]
 	mNearbyList->setDirty();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+	updateDistances();
+// [/SL:KB]
 
 	DISTANCE_COMPARATOR.updateAvatarsPositions(positions, mNearbyList->getIDs());
 	LLActiveSpeakerMgr::instance().update(TRUE);
@@ -909,6 +1162,51 @@ void LLPanelPeople::updateFacebookList(bool visible)
 	}
 }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+void LLPanelPeople::updateDistances()
+{
+	// Make sure we're using the same data as the distance comparator
+	const LLAvatarItemDistanceComparator::id_to_pos_map_t& posAvatars = DISTANCE_COMPARATOR.getAvatarsPositions();
+	const LLVector3d& posSelf = gAgent.getPositionGlobal();
+
+	std::vector<LLPanel*> items;
+	mNearbyList->getItems(items);
+	for (std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(*itItem);
+		if (pItem)
+		{
+			LLAvatarItemDistanceComparator::id_to_pos_map_t::const_iterator itAvatar = posAvatars.find(pItem->getAvatarId());
+			if (posAvatars.end() != itAvatar)
+			{
+				if (!itAvatar->second.isExactlyZero())
+					pItem->setTextFieldDistance(dist_vec(itAvatar->second, posSelf));
+				else
+					pItem->setTextField("- - -    ");
+			}
+		}
+	}
+}
+
+// Refresh shown time of our last interaction with all listed avatars.
+void LLPanelPeople::updateLastInteractionTimes()
+{
+	std::vector<LLPanel*> items;
+	mRecentList->getItems(items);
+	for( std::vector<LLPanel*>::const_iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+	{
+		LLAvatarListItem* pItem = dynamic_cast<LLAvatarListItem*>(*itItem);
+		if (pItem)
+		{
+			S32 secsNow = LLDate::now().secondsSinceEpoch();
+			S32 secsDuration = secsNow - LLRecentPeople::instance().getDate(pItem->getAvatarId()).secondsSinceEpoch();
+			if (secsDuration >= 0)
+				pItem->setTextFieldSeconds(secsDuration);
+		}
+	}
+}
+// [/SL:KB]
+
 void LLPanelPeople::updateButtons()
 {
 	std::string cur_tab		= getActiveTabName();
@@ -933,6 +1231,9 @@ void LLPanelPeople::updateButtons()
 		}
 
 		LLPanel* groups_panel = mTabContainer->getCurrentPanel();
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+		groups_panel->getChildView("activate_btn")->setEnabled( (item_selected) && (gAgent.getGroupID() != selected_id) ); // "none" or a non-active group selected
+// [/SL:KB]
 		groups_panel->getChildView("minus_btn")->setEnabled(item_selected && selected_id.notNull()); // a real group selected
 
 		U32 groups_count = gAgent.mGroups.size();
@@ -1062,6 +1363,27 @@ void LLPanelPeople::showGroupMenu(LLMenuGL* menu)
 	LLMenuGL::showPopup(parent_panel, menu, menu_x, menu_y);
 }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+void LLPanelPeople::setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save)
+{
+	list->setAvatarNameFormat(name_format);
+	if (save)
+	{
+		std::string setting;
+
+		if ( (list == mAllFriendList) || (list == mOnlineFriendList) )
+			setting = "FriendsNameFormat";
+		else if (list == mRecentList)
+			setting = "RecentPeopleNameFormat";
+		else if (list == mNearbyList)
+			setting = "NearbyPeopleNameFormat";
+
+		if (!setting.empty())
+			gSavedSettings.setU32(setting, name_format);
+	}
+}
+// [/SL:KB]
+
 void LLPanelPeople::setSortOrder(LLAvatarList* list, ESortOrder order, bool save)
 {
 	switch (order)
@@ -1173,6 +1495,11 @@ void LLPanelPeople::onGroupLimitInfo()
 
 void LLPanelPeople::onTabSelected(const LLSD& param)
 {
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	const S32 idxCur = mTabContainer->getCurrentPanelIndex();
+	mFilterEditor->setText(mSavedOriginalFilters[idxCur]);
+// [/SL:KB]
+
 	std::string tab_name = getChild<LLPanel>(param.asString())->getName();
 	updateButtons();
 
@@ -1304,11 +1631,19 @@ void LLPanelPeople::onGearButtonClicked(LLUICtrl* btn)
 {
 	uuid_vec_t selected_uuids;
 	getCurrentItemIDs(selected_uuids);
-	// Spawn at bottom left corner of the button.
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	// Spawn at top left corner of the button.
 	if (getActiveTabName() == NEARBY_TAB_NAME)
-		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, -1, -1);
 	else
-		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, -1, -1);
+// [/SL:KB]
+//	// Spawn at bottom left corner of the button.
+//	if (getActiveTabName() == NEARBY_TAB_NAME)
+//		LLPanelPeopleMenus::gNearbyPeopleContextMenu.show(btn, selected_uuids, 0, 0);
+//	else
+//		LLPanelPeopleMenus::gPeopleContextMenu.show(btn, selected_uuids, 0, 0);
 }
 
 void LLPanelPeople::onImButtonClicked()
@@ -1361,6 +1696,18 @@ void LLPanelPeople::onGroupMinusButtonClicked()
 		LLGroupActions::leave(group_id);
 }
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+void LLPanelPeople::onGroupActivateButtonClicked()
+{
+	LLGroupActions::activate(getCurrentItemID());
+}
+
+void LLPanelPeople::onShowBlockedList()
+{
+	LLFloaterSidePanelContainer::showPanel("people", "panel_people", LLSD().with("people_panel_tab_name", "blocked_panel"));
+}
+// [/SL:KB]
+
 void LLPanelPeople::onGroupPlusMenuItemClicked(const LLSD& userdata)
 {
 	std::string chosen_item = userdata.asString();
@@ -1383,29 +1730,62 @@ void LLPanelPeople::onFriendsViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mAllFriendList, E_SORT_BY_STATUS);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_DISPLAYNAME);
+		setNameFormat(mOnlineFriendList, NF_DISPLAYNAME, false);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_COMPLETENAME);
+		setNameFormat(mOnlineFriendList, NF_COMPLETENAME, false);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mAllFriendList, NF_USERNAME);
+		setNameFormat(mOnlineFriendList, NF_USERNAME, false);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mAllFriendList->toggleIcons();
 		mOnlineFriendList->toggleIcons();
 	}
-	else if (chosen_item == "view_permissions")
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	else if ( ("view_permissions_never" == chosen_item) || 
+	          ("view_permissions_hover" == chosen_item) ||
+	          ("view_permissions_nondefault" == chosen_item) )
 	{
-		bool show_permissions = !gSavedSettings.getBOOL("FriendsListShowPermissions");
-		gSavedSettings.setBOOL("FriendsListShowPermissions", show_permissions);
-
-		mAllFriendList->showPermissions(show_permissions);
-		mOnlineFriendList->showPermissions(show_permissions);
+		EShowPermissionType spType = SP_NEVER;
+		if ("view_permissions_hover" == chosen_item)
+			spType = SP_HOVER;
+		else if ("view_permissions_nondefault" == chosen_item)
+			spType = SP_NONDEFAULT;
+		gSavedSettings.setU32("FriendsListShowPermissions", (U32)spType);
+		
+		mAllFriendList->showPermissions(spType);
+		mOnlineFriendList->showPermissions(spType);
 	}
-	else if (chosen_item == "view_usernames")
-	{
-		bool hide_usernames = !gSavedSettings.getBOOL("FriendsListHideUsernames");
-		gSavedSettings.setBOOL("FriendsListHideUsernames", hide_usernames);
-
-		mAllFriendList->setShowCompleteName(!hide_usernames);
-		mAllFriendList->handleDisplayNamesOptionChanged();
-		mOnlineFriendList->setShowCompleteName(!hide_usernames);
-		mOnlineFriendList->handleDisplayNamesOptionChanged();
-	}
+// [/SL:KB]
+//	else if (chosen_item == "view_permissions")
+//	{
+//		bool show_permissions = !gSavedSettings.getBOOL("FriendsListShowPermissions");
+//		gSavedSettings.setBOOL("FriendsListShowPermissions", show_permissions);
+//
+//		mAllFriendList->showPermissions(show_permissions);
+//		mOnlineFriendList->showPermissions(show_permissions);
+//	}
+//	else if (chosen_item == "view_usernames")
+//	{
+//		bool hide_usernames = !gSavedSettings.getBOOL("FriendsListHideUsernames");
+//		gSavedSettings.setBOOL("FriendsListHideUsernames", hide_usernames);
+//
+//		mAllFriendList->setShowCompleteName(!hide_usernames);
+//		mAllFriendList->handleDisplayNamesOptionChanged();
+//		mOnlineFriendList->setShowCompleteName(!hide_usernames);
+//		mOnlineFriendList->handleDisplayNamesOptionChanged();
+//	}
 	}
 
 void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
@@ -1416,6 +1796,12 @@ void LLPanelPeople::onGroupsViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		mGroupList->toggleIcons();
 	}
+// [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
+	else if (chosen_item == "show_hidden")
+	{
+		mGroupList->toggleHidden();
+	}
+// [/SL:KB]
 }
 
 void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
@@ -1430,6 +1816,20 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_NAME);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_DISPLAYNAME);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_COMPLETENAME);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mNearbyList, NF_USERNAME);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mNearbyList->toggleIcons();
@@ -1438,14 +1838,37 @@ void LLPanelPeople::onNearbyViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mNearbyList, E_SORT_BY_DISTANCE);
 	}
-	else if (chosen_item == "view_usernames")
+//	else if (chosen_item == "view_usernames")
+//	{
+//	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
+//	    gSavedSettings.setBOOL("NearbyListHideUsernames", hide_usernames);
+//
+//	    mNearbyList->setShowCompleteName(!hide_usernames);
+//	    mNearbyList->handleDisplayNamesOptionChanged();
+//	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+	else if ( ("show_range" == chosen_item) || ("show_current_parcel" == chosen_item) || ("show_current_region" == chosen_item) )
 	{
-	    bool hide_usernames = !gSavedSettings.getBOOL("NearbyListHideUsernames");
-	    gSavedSettings.setBOOL("NearbyListHideUsernames", hide_usernames);
+		U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
 
-	    mNearbyList->setShowCompleteName(!hide_usernames);
-	    mNearbyList->handleDisplayNamesOptionChanged();
+		U32 mask = 0;
+		if ("show_range" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_DISTANCE;
+		else if ("show_current_parcel" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_AGENT_PARCEL;
+		else if ("show_current_region" == chosen_item)
+			mask = LLWorld::E_FILTER_BY_AGENT_REGION;
+
+		if (maskFilter & mask)
+			maskFilter &= ~mask;
+		else
+			maskFilter |= mask;
+
+		// Always leave at least one item checked
+		if (maskFilter)
+			gSavedSettings.setU32("NearbyPeopleViewMask", maskFilter);
 	}
+// [/SL:KB]
 }
 
 bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
@@ -1459,6 +1882,26 @@ bool LLPanelPeople::onNearbyViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_NAME;
 	if (item == "sort_distance")
 		return sort_order == E_SORT_BY_DISTANCE;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	U32 name_format = gSavedSettings.getU32("NearbyPeopleNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	else if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	else if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-19 (Catznip-2.4)
+	U32 maskFilter = gSavedSettings.getU32("NearbyPeopleViewMask");
+	if ("show_range" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_DISTANCE;
+	else if ("show_current_parcel" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_AGENT_PARCEL;
+	else if ("show_current_region" == item)
+		return maskFilter & LLWorld::E_FILTER_BY_AGENT_REGION;
+// [/SL:KB]
 
 	return false;
 }
@@ -1475,6 +1918,20 @@ void LLPanelPeople::onRecentViewSortMenuItemClicked(const LLSD& userdata)
 	{
 		setSortOrder(mRecentList, E_SORT_BY_NAME);
 	}
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	else if ("name_displayname" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_DISPLAYNAME);
+	}
+	else if ("name_fullname" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_COMPLETENAME);
+	}
+	else if ("name_username" == chosen_item)
+	{
+		setNameFormat(mRecentList, NF_USERNAME);
+	}
+// [/SL:KB]
 	else if (chosen_item == "view_icons")
 	{
 		mRecentList->toggleIcons();
@@ -1491,6 +1948,16 @@ bool LLPanelPeople::onFriendsViewSortMenuItemCheck(const LLSD& userdata)
 	if (item == "sort_status")
 		return sort_order == E_SORT_BY_STATUS;
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	U32 name_format = gSavedSettings.getU32("FriendsNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
+
 	return false;
 }
 
@@ -1503,6 +1970,26 @@ bool LLPanelPeople::onRecentViewSortMenuItemCheck(const LLSD& userdata)
 		return sort_order == E_SORT_BY_MOST_RECENT;
 	if (item == "sort_name") 
 		return sort_order == E_SORT_BY_NAME;
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3.0)
+	U32 name_format = gSavedSettings.getU32("RecentPeopleNameFormat");
+	if ("name_displayname" == item)
+		return name_format == NF_DISPLAYNAME;
+	if ("name_fullname" == item)
+		return name_format == NF_COMPLETENAME;
+	if ("name_username" == item)
+		return name_format == NF_USERNAME;
+// [/SL:KB]
+
+// [SL:KB] - Patch: UI-PeopleFriendPermissions | Checked: 2013-06-03 (Catznip-3.4)
+	EShowPermissionType spType = (EShowPermissionType)gSavedSettings.getU32("FriendsListShowPermissions");
+	if ("view_permissions_never" == item)
+		return SP_NEVER == spType;
+	if ("view_permissions_hover" == item)
+		return SP_HOVER == spType;
+	if ("view_permissions_nondefault" == item)
+		return SP_NONDEFAULT == spType;
+// [/SL:KB]
 
 	return false;
 }

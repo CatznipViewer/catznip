@@ -93,9 +93,20 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		registrar.add("Avatar.InviteToGroup",	boost::bind(&LLAvatarActions::inviteToGroup,			id));
 		registrar.add("Avatar.TeleportRequest",	boost::bind(&PeopleContextMenu::requestTeleport,		this));
 		registrar.add("Avatar.Calllog",			boost::bind(&LLAvatarActions::viewChatHistory,			id));
-		registrar.add("Avatar.Freeze",			boost::bind(&LLAvatarActions::freezeAvatar,					id));
-		registrar.add("Avatar.Eject",			boost::bind(&PeopleContextMenu::eject,					this));
+//		registrar.add("Avatar.Freeze",			boost::bind(&LLAvatarActions::freezeAvatar,					id));
+//		registrar.add("Avatar.Eject",			boost::bind(&PeopleContextMenu::eject,					this));
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-12-03 (Catznip-2.4)
+		registrar.add("Avatar.ZoomIn",							boost::bind(&LLAvatarActions::zoomIn,						id));
+		enable_registrar.add("Avatar.VisibleZoomIn",			boost::bind(&LLAvatarActions::canZoomIn,					id));
+		registrar.add("Avatar.Report",							boost::bind(&LLAvatarActions::report,						id));
+		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEject,					id));
+		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreeze,					id));
+		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEject,			id));
+		registrar.add("Avatar.Kick",							boost::bind(&LLAvatarActions::estateKick,					id));
+		registrar.add("Avatar.TeleportHome",					boost::bind(&LLAvatarActions::estateTeleportHome,			id));
+		enable_registrar.add("Avatar.VisibleKickTeleportHome",	boost::bind(&LLAvatarActions::canEstateKickOrTeleportHome,	id));
+// [/SL:KB]
 
 		enable_registrar.add("Avatar.EnableItem", boost::bind(&PeopleContextMenu::enableContextMenuItem, this, _2));
 		enable_registrar.add("Avatar.CheckItem",  boost::bind(&PeopleContextMenu::checkContextMenuItem,	this, _2));
@@ -118,6 +129,14 @@ LLContextMenu* PeopleContextMenu::createMenu()
 		// registrar.add("Avatar.Pay",			boost::bind(&LLAvatarActions::pay,						mUUIDs)); // *TODO: unimplemented
 		
 		enable_registrar.add("Avatar.EnableItem",	boost::bind(&PeopleContextMenu::enableContextMenuItem, this, _2));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-11-05 (Catznip-2.4)
+		registrar.add("Avatar.Eject",							boost::bind(&LLAvatarActions::landEjectMultiple,			mUUIDs));
+		registrar.add("Avatar.Freeze",							boost::bind(&LLAvatarActions::landFreezeMultiple,			mUUIDs));
+		enable_registrar.add("Avatar.VisibleFreezeEject",		boost::bind(&LLAvatarActions::canLandFreezeOrEjectMultiple,	mUUIDs, false));
+		registrar.add("Avatar.Kick",							boost::bind(&LLAvatarActions::estateKickMultiple,			mUUIDs));
+		registrar.add("Avatar.TeleportHome",					boost::bind(&LLAvatarActions::estateTeleportHomeMultiple,	mUUIDs));
+		enable_registrar.add("Avatar.VisibleKickTeleportHome",	boost::bind(&LLAvatarActions::canEstateKickOrTeleportHomeMultiple, mUUIDs, false));
+// [/SL:KB]
 
 		// create the context menu from the XUI
 		menu = createFromFile("menu_people_nearby_multiselect.xml");
@@ -134,34 +153,59 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 	
 	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
 		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
 		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
-		items.push_back(std::string("block_unblock"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+// [/SL:KB]
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
 		items.push_back("avatar_copy");
 // [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
@@ -360,38 +404,38 @@ void PeopleContextMenu::offerTeleport()
 //	LLAvatarActions::offerTeleport(mUUIDs);
 }
 
-void PeopleContextMenu::eject()
-{
-	if((gAgent.getID() == mUUIDs.front()) || (mUUIDs.size() != 1))
-	{
-		return;
-	}
-
-	const LLUUID& id = mUUIDs.front();
-
-	// Use avatar_id if available, otherwise default to right-click avatar
-	LLVOAvatar* avatar = NULL;
-	if (id.notNull())
-	{
-		LLViewerObject* object = gObjectList.findObject(id);
-		if (object)
-		{
-			if( !object->isAvatar() )
-			{
-				object = NULL;
-			}
-			avatar = (LLVOAvatar*) object;
-		}
-	}
-	if (!avatar) return;
-	LLSD payload;
-	payload["avatar_id"] = avatar->getID();
-	std::string fullname = avatar->getFullname();
-
-	const LLVector3d& pos = avatar->getPositionGlobal();
-	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
-	LLAvatarActions::ejectAvatar(id ,LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED));
-}
+//void PeopleContextMenu::eject()
+//{
+//	if((gAgent.getID() == mUUIDs.front()) || (mUUIDs.size() != 1))
+//	{
+//		return;
+//	}
+//
+//	const LLUUID& id = mUUIDs.front();
+//
+//	// Use avatar_id if available, otherwise default to right-click avatar
+//	LLVOAvatar* avatar = NULL;
+//	if (id.notNull())
+//	{
+//		LLViewerObject* object = gObjectList.findObject(id);
+//		if (object)
+//		{
+//			if( !object->isAvatar() )
+//			{
+//				object = NULL;
+//			}
+//			avatar = (LLVOAvatar*) object;
+//		}
+//	}
+//	if (!avatar) return;
+//	LLSD payload;
+//	payload["avatar_id"] = avatar->getID();
+//	std::string fullname = avatar->getFullname();
+//
+//	const LLVector3d& pos = avatar->getPositionGlobal();
+//	LLParcel* parcel = LLViewerParcelMgr::getInstance()->selectParcelAt(pos)->getParcel();
+//	LLAvatarActions::ejectAvatar(id ,LLViewerParcelMgr::getInstance()->isParcelOwnedByAgent(parcel,GP_LAND_MANAGE_BANNED));
+//}
 
 void PeopleContextMenu::startConference()
 {
@@ -437,37 +481,67 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 // [/RLVa:KB]
 //	if (flags & ITEM_IN_MULTI_SELECTION)
 	{
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("pay"));
+		items.push_back(std::string("share"));
+		items.push_back(std::string("add_friends"));
+		items.push_back(std::string("remove_friends"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
+// [/SL:KB]
+//		items.push_back(std::string("add_friends"));
+//		items.push_back(std::string("remove_friends"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("call"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("offer_teleport"));
 	}
 	else 
 	{
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
 		items.push_back(std::string("view_profile"));
 		items.push_back(std::string("im"));
+		items.push_back(std::string("voice_call"));
 		items.push_back(std::string("offer_teleport"));
 		items.push_back(std::string("request_teleport"));
-		items.push_back(std::string("voice_call"));
-		items.push_back(std::string("chat_history"));
-		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("pay"));
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
+		items.push_back(std::string("separator_actions"));
+		items.push_back(std::string("menu_manage"));
 		items.push_back(std::string("invite_to_group"));
-		items.push_back(std::string("separator_invite_to_group"));
-		items.push_back(std::string("zoom_in"));
 		items.push_back(std::string("map"));
-		items.push_back(std::string("share"));
-		items.push_back(std::string("pay"));
+		items.push_back(std::string("zoom_in"));
+		items.push_back(std::string("separator_chat_history"));
+		items.push_back(std::string("chat_history"));
+
 		items.push_back(std::string("block_unblock"));
-		items.push_back(std::string("freeze"));
-		items.push_back(std::string("eject"));
+// [/SL:KB]
 // [SL:KB] - Patch: Agent-DisplayNames | Checked: 2013-08-03 (Catznip-3.6)
 		items.push_back("avatar_copy");
 // [/SL:KB]
+//		items.push_back(std::string("view_profile"));
+//		items.push_back(std::string("im"));
+//		items.push_back(std::string("offer_teleport"));
+//		items.push_back(std::string("request_teleport"));
+//		items.push_back(std::string("voice_call"));
+//		items.push_back(std::string("chat_history"));
+//		items.push_back(std::string("separator_chat_history"));
+//		items.push_back(std::string("add_friend"));
+//		items.push_back(std::string("remove_friend"));
+//		items.push_back(std::string("invite_to_group"));
+//		items.push_back(std::string("separator_invite_to_group"));
+//		items.push_back(std::string("zoom_in"));
+//		items.push_back(std::string("map"));
+//		items.push_back(std::string("share"));
+//		items.push_back(std::string("pay"));
+//		items.push_back(std::string("block_unblock"));
+//		items.push_back(std::string("freeze"));
+//		items.push_back(std::string("eject"));
 	}
 
     hide_context_entries(menu, items, disabled_items);

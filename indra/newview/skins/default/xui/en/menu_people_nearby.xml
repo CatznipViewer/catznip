@@ -20,6 +20,16 @@
          parameter="can_im"/> 
     </menu_item_call>
     <menu_item_call
+     label="Voice call"
+     layout="topleft"
+     name="voice_call">
+        <menu_item_call.on_click
+         function="Avatar.Call" />
+        <menu_item_call.on_enable
+         function="Avatar.EnableItem"
+         parameter="can_call" />
+    </menu_item_call>
+    <menu_item_call
     label="Offer Teleport"
     name="offer_teleport">
       <menu_item_call.on_click
@@ -38,27 +48,15 @@
       parameter="can_offer_teleport"/>
     </menu_item_call>
     <menu_item_call
-     label="Voice call"
+     label="Pay"
      layout="topleft"
-     name="voice_call">
+     name="pay">
         <menu_item_call.on_click
-         function="Avatar.Call" />
-        <menu_item_call.on_enable
-         function="Avatar.EnableItem"
-         parameter="can_call" />
-    </menu_item_call>
-    <menu_item_separator />
-    <menu_item_call
-     label="View chat history..."
-     layout="topleft"
-     name="chat_history">
-        <menu_item_call.on_click
-         function="Avatar.Calllog" />
+         function="Avatar.Pay" />
         <menu_item_call.on_enable
       	 function="Avatar.EnableItem"
-         parameter="can_callog"/>
+         parameter="can_pay"/> 
     </menu_item_call>
-    <menu_item_separator name="separator_chat_history"/>
     <menu_item_call
      label="Add Friend"
      layout="topleft"
@@ -75,13 +73,14 @@
      name="remove_friend">
         <menu_item_call.on_click
          function="Avatar.RemoveFriend" />
-        <menu_item_call.on_enable
+        <menu_item_call.on_visible
          function="Avatar.EnableItem"
          parameter="can_delete" />
     </menu_item_call>
+    <menu_item_separator name="separator_actions" />
     <context_menu
      label="Manage"
-     name="menu_manage_participant">
+     name="menu_manage">
         <menu_item_check
          label="Block/Unblock"
          layout="topleft"
@@ -99,39 +98,39 @@
          label="Report"
          name="report">
             <menu_item_call.on_click
-             function="Avatar.Report"/>
+         function="Avatar.Report"/>
         </menu_item_call>  
-        <menu_item_separator
-         on_visible.function="Group.IsModerator"/>
-        <menu_item_check
-         label="Allow Text Chat"
-         name="block_group_text">
-            <menu_item_check.on_click
-             function="Group.ToggleBlockText"/>
-            <menu_item_check.on_visible
-             function="Group.CheckBlockText"/>
-            <menu_item_check.on_visible
-             function="Group.IsModerator"/>
-        </menu_item_check>
-        <menu_item_check
-         label="Allow Voice Chat"
-         name="block_group_voice">
-            <menu_item_check.on_click
-             function="Group.ToggleBlockVoice"/>
-            <mmenu_item_check.on_visible
-             function="Group.CheckBlockVoice"/>
-            <menu_item_check.on_visible
-             function="Group.IsModerator"/>
-        </menu_item_check>
-        <menu_item_separator
-         on_visible.function="Group.CanEjectAvatar"/>
         <menu_item_call
-         label="Eject from Group"
-         name="eject_from_group">
+         label="Freeze"
+         name="freeze">
             <menu_item_call.on_click
-             function="Group.EjectAvatar"/>
+             function="Avatar.Freeze"/>
             <menu_item_call.on_visible
-             function="Group.CanEjectAvatar"/>
+             function="Avatar.VisibleFreezeEject"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Eject"
+         name="eject">
+            <menu_item_call.on_click
+             function="Avatar.Eject"/>
+            <menu_item_call.on_visible
+             function="Avatar.VisibleFreezeEject"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Kick"
+         name="kick">
+            <menu_item_call.on_click
+             function="Avatar.Kick"/>
+            <menu_item_call.on_visible
+             function="Avatar.VisibleKickTeleportHome"/>
+        </menu_item_call>
+        <menu_item_call
+         label="Teleport Home"
+         name="teleport_home">
+            <menu_item_call.on_click
+             function="Avatar.TeleportHome"/>
+            <menu_item_call.on_visible
+             function="Avatar.VisibleKickTeleportHome"/>
         </menu_item_call>
     </context_menu>
     <menu_item_call
@@ -144,17 +143,6 @@
       	 function="Avatar.EnableItem"
          parameter="can_invite"/>
     </menu_item_call>
-    <menu_item_separator name="separator_invite_to_group"/>
-    <menu_item_call
-     label="Zoom In"
-     layout="topleft"
-     name="zoom_in">
-      <menu_item_call.on_click
-       function="Avatar.ZoomIn" />
-      <menu_item_call.on_enable
-       function="Avatar.EnableItem"
-       parameter="can_zoom_in"/>
-    </menu_item_call>
     <menu_item_call
      label="Map"
      layout="topleft"
@@ -166,24 +154,25 @@
          parameter="can_show_on_map" />
     </menu_item_call>
     <menu_item_call
-     label="Share"
+     label="Zoom In"
      layout="topleft"
-     name="share">
-        <menu_item_call.on_click
-         function="Avatar.Share" />
-        <menu_item_call.on_enable
-      	 function="Avatar.EnableItem"
-         parameter="can_share"/>
+     name="zoom_in">
+      <menu_item_call.on_click
+       function="Avatar.ZoomIn" />
+      <menu_item_call.on_enable
+       function="Avatar.EnableItem"
+       parameter="can_zoom_in"/>
     </menu_item_call>
+    <menu_item_separator name="separator_chat_history"/>
     <menu_item_call
-     label="Pay"
+     label="View chat history..."
      layout="topleft"
-     name="pay">
+     name="chat_history">
         <menu_item_call.on_click
-         function="Avatar.Pay" />
+         function="Avatar.Calllog" />
         <menu_item_call.on_enable
       	 function="Avatar.EnableItem"
-         parameter="can_pay"/> 
+         parameter="can_callog"/>
     </menu_item_call>
     <context_menu
      label="Copy"
@@ -210,19 +199,6 @@
              parameter="slurl" />
         </menu_item_call>
     </context_menu>
-    <menu_item_check
-     label="Block/Unblock"
-     layout="topleft"
-     name="block_unblock">
-        <menu_item_check.on_click
-         function="Avatar.BlockUnblock" />
-        <menu_item_check.on_check
-         function="Avatar.CheckItem"
-         parameter="is_blocked" />
-        <menu_item_check.on_enable
-         function="Avatar.EnableItem"
-         parameter="can_block" />
-    </menu_item_check>
     <menu_item_call
          label="Freeze"
          name="freeze">

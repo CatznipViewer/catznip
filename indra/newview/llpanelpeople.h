@@ -29,6 +29,9 @@
 
 #include <llpanel.h>
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+#include "llavatarlistitem.h"
+// [/SL:KB]
 #include "llcallingcard.h" // for avatar tracker
 #include "llfloaterwebcontent.h"
 #include "llvoiceclient.h"
@@ -86,6 +89,10 @@ private:
 //	void					updateNearbyList();
 	void					updateRecentList();
 	void					updateFacebookList(bool visible);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2010-10-24 (Catznip-2.3)
+	void					updateDistances();
+	void					updateLastInteractionTimes();
+// [/SL:KB]
 
 	bool					isItemsFreeOfFriends(const uuid_vec_t& uuids);
 
@@ -94,6 +101,9 @@ private:
 	LLUUID					getCurrentItemID() const;
 	void					getCurrentItemIDs(uuid_vec_t& selected_uuids) const;
 	void					showGroupMenu(LLMenuGL* menu);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2012-07-04 (Catznip-3.3)
+	void					setNameFormat(LLAvatarList* list, EAvatarListNameFormat name_format, bool save = true);
+// [/SL:KB]
 	void					setSortOrder(LLAvatarList* list, ESortOrder order, bool save = true);
 
 	// UI callbacks
@@ -112,6 +122,10 @@ private:
 	bool					onGroupPlusButtonValidate();
 	void					onGroupMinusButtonClicked();
 	void					onGroupPlusMenuItemClicked(const LLSD& userdata);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	void					onGroupActivateButtonClicked();
+	void					onShowBlockedList();
+// [/SL:KB]
 
 	void					onFriendsViewSortMenuItemClicked(const LLSD& userdata);
 	void					onNearbyViewSortMenuItemClicked(const LLSD& userdata);
@@ -140,6 +154,9 @@ private:
 	bool					isAccordionCollapsedByUser(LLUICtrl* acc_tab);
 	bool					isAccordionCollapsedByUser(const std::string& name);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: 2014-01-19 (Catznip-3.6)
+	LLFilterEditor*			mFilterEditor;
+// [/SL:KB]
 	LLTabContainer*			mTabContainer;
 	LLAvatarList*			mOnlineFriendList;
 	LLAvatarList*			mAllFriendList;
@@ -155,7 +172,7 @@ private:
 	Updater*				mFriendListUpdater;
 	Updater*				mNearbyListUpdater;
 	Updater*				mRecentListUpdater;
-	Updater*				mButtonsUpdater;
+//	Updater*				mButtonsUpdater;
     LLHandle< LLFloater >	mPicker;
 };
 

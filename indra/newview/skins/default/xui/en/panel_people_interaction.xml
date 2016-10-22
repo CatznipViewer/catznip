@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+             name="Net Map Panel"
+ 
+<panel
+ follows="all"
+ height="383"
+ label="RECENT"
+ layout="topleft"
+ left="0"
+ help_topic="people_recent_tab"
+ name="recent_panel"
+ top="0"
+ width="330">
+    <avatar_list
+     allow_select="true"
+     bottom="-28"
+     follows="all"
+     layout="topleft"
+     left="0"
+     multi_select="true"
+     name="avatar_list"
+     show_text_field="true"
+     right="-1"
+     top="4" />
+    <panel
+     follows="bottom|left|right"
+     height="25"
+     label="bottom_panel"
+     layout="topleft"
+     left="1"
+     name="recent_buttons_panel"
+     right="-1"
+     top="-25">
+        <button
+         commit_callback.function="People.Gear"
+         follows="top|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="OptionsMenu_Off"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+          layout="topleft"
+         left="1"
+         name="gear_btn"
+         tool_tip="Actions on selected person"
+         top="0"
+         width="31" />
+        <menu_button
+         follows="top|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Conv_toolbar_sort"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="2"
+         menu_filename="menu_people_recent_view.xml"
+         menu_position="topleft"
+         name="recent_view_btn"
+         tool_tip="View/sort options"
+         top_delta="0"
+         width="31" />
+        <button
+         follows="top|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="AddItem_Off"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="2"
+         name="add_friend_btn"
+         tool_tip="Offer friendship to a resident"
+         top_delta="0"
+         width="31">
+            <commit_callback
+             function="People.AddFriend" />
+        </button>
+        <icon
+         follows="top|left|right"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         layout="topleft"
+         left_pad="2"
+         name="dummy_icon"
+         right="-1" />
+        <combo_box
+         follows="bottom|left|right"
+         control_name="RecentPeopleInteractionFilter"
+         height="23"
+         layout="topleft"
+         left_delta="0"
+         name="interaction_type"
+          right="-1"
+         top_delta="1" >
+            <combo_box.item
+             label="Any Interaction"
+             name="General"
+             value="0" />
+            <combo_box.item
+             label="Public Chat"
+             name="Chat"
+             value="1" />
+            <combo_box.item
+             label="Instant Messages"
+             name="IM"
+             value="2" />
+            <combo_box.item
+             label="Inventory"
+             name="Inventory"
+             value="3" />
+            <combo_box.item
+             label="Avaline"
+             name="Avaline"
+             value="4" />
+        </combo_box>
+    </panel>
+</panel>
