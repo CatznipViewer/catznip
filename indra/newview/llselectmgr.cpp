@@ -5772,7 +5772,10 @@ void LLSelectMgr::renderSilhouettes(BOOL for_hud)
 	if (mSelectedObjects->getNumNodes())
 	{
 		LLUUID inspect_item_id= LLUUID::null;
-		LLFloaterInspect* inspect_instance = LLFloaterReg::getTypedInstance<LLFloaterInspect>("inspect");
+//		LLFloaterInspect* inspect_instance = LLFloaterReg::getTypedInstance<LLFloaterInspect>("inspect");
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+		LLFloaterInspect* inspect_instance = LLFloaterReg::findTypedInstance<LLFloaterInspect>("inspect");
+// [/SL:KB]
 		if(inspect_instance && inspect_instance->getVisible())
 		{
 			inspect_item_id = inspect_instance->getSelectedUUID();
@@ -6007,7 +6010,7 @@ S32 LLSelectNode::getLastSelectedTE()
 }
 
 //LLViewerObject* LLSelectNode::getObject()
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
 LLViewerObject* LLSelectNode::getObject() const
 // [/SL:KB]
 {
@@ -6537,8 +6540,12 @@ void dialog_refresh_all()
 
 	LLFloaterProperties::dirtyAll();
 
-	LLFloaterInspect* inspect_instance = LLFloaterReg::getTypedInstance<LLFloaterInspect>("inspect");
-	if(inspect_instance)
+//	LLFloaterInspect* inspect_instance = LLFloaterReg::getTypedInstance<LLFloaterInspect>("inspect");
+//	if(inspect_instance)
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+	LLFloaterInspect* inspect_instance = LLFloaterReg::findTypedInstance<LLFloaterInspect>("inspect");
+	if ( (inspect_instance) && (inspect_instance->getVisible()) )
+// [/SL:KB]
 	{
 		inspect_instance->dirty();
 	}

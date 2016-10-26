@@ -41,7 +41,7 @@
 #include "lldrawpoolterrain.h"
 #include "llflexibleobject.h"
 #include "llfeaturemanager.h"
-// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+// [SL:KB] - Patch: UI-Misc | Checked: Catznip-3.6
 #include "llfloaterreg.h"
 // [/SL:KB]
 #include "llviewershadermgr.h"
@@ -78,7 +78,7 @@
 #include "llslurl.h"
 #include "llstartup.h"
 #include "llupdaterservice.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-3.2.1)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-3.2
 #include "llstatusbar.h"
 // [/SL:KB]
 
@@ -590,7 +590,7 @@ bool toggle_show_mini_location_panel(const LLSD& newvalue)
 {
 	bool value = newvalue.asBoolean();
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-2.6
 	if (gStatusBar)
 	{
 		gStatusBar->showTopInfoBar(value);
@@ -679,7 +679,7 @@ void settings_setup_listeners()
 //	gSavedSettings.getControl("ChatFontSize")->getSignal()->connect(boost::bind(&handleChatFontSizeChanged, _2));
 //	gSavedSettings.getControl("ChatPersistTime")->getSignal()->connect(boost::bind(&handleChatPersistTimeChanged, _2));
 //	gSavedSettings.getControl("ConsoleMaxLines")->getSignal()->connect(boost::bind(&handleConsoleMaxLinesChanged, _2));
-// [SL:KB] - Patch: UI-Misc | Checked: 2014-04-23 (Catznip-3.6)
+// [SL:KB] - Patch: UI-Misc | Checked: Catznip-3.6
 	gSavedSettings.getControl("ChromeFloaterTransparency")->getSignal()->connect(boost::bind(&handleChromeFloaterTransparencyChanged, _2));
 // [/SL:KB]
 	gSavedSettings.getControl("UploadBakedTexOld")->getSignal()->connect(boost::bind(&handleUploadBakedTexOldChanged, _2));

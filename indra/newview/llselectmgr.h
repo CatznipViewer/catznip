@@ -175,7 +175,7 @@ public:
 	void renderOneSilhouette(const LLColor4 &color);
 	void setTransient(BOOL transient) { mTransient = transient; }
 	BOOL isTransient() { return mTransient; }
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
 	LLViewerObject* getObject() const;
 // [/SL:KB]
 //	LLViewerObject* getObject();
@@ -228,7 +228,7 @@ public:
 
 protected:
 //	LLPointer<LLViewerObject>	mObject;
-// [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
+// [SL:KB] - Patch: UI-TextureRefresh | Checked: Catznip-3.3
 	mutable LLPointer<LLViewerObject> mObject;
 // [/SL:KB]
 	S32				mTESelectMask;

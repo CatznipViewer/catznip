@@ -342,8 +342,12 @@ void LLGroupActions::activate(const LLUUID& group_id)
 static bool isGroupUIVisible()
 {
 	static LLPanel* panel = 0;
-	if(!panel)
-		panel = LLFloaterSidePanelContainer::getPanel("people", "panel_group_info_sidetray");
+//	if(!panel)
+//		panel = LLFloaterSidePanelContainer::getPanel("people", "panel_group_info_sidetray");
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-4.2
+	if (!panel)
+		panel = LLFloaterSidePanelContainer::findPanel("people", "panel_group_info_sidetray");
+// [/SL:KB]
 	if(!panel)
 		return false;
 	return panel->isInVisibleChain();

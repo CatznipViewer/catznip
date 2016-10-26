@@ -3,6 +3,7 @@
 	<menu label="Ja" name="Me">
 		<menu_item_call label="Profil..." name="Profile" />
 		<menu_item_call label="Wygląd..." name="ChangeOutfit" />
+		<menu_item_call label="Uniesienie" name="Hover Height"/>
 		<menu_item_call label="Wybierz awatara..." name="Avatar Picker" />
 		<menu_item_check label="Szafa..." name="Inventory" />
 		<menu_item_call label="Nowe okno Szafy" name="NewInventoryWindow" />
@@ -17,10 +18,8 @@
 			<menu_item_call label="Przestań mnie animować" name="Stop Animating My Avatar" />
 			<menu_item_call label="Chodzenie / Bieganie / Latanie..." name="Walk / run / fly" />
 		</menu>
-		<menu name="Status">
-			<menu_item_check name="Away" label="Z dala od klawiatury (śpij)" />
-			<menu_item_check name="Do Not Disturb" label="Zajęty lub Niedostępny" />
-		</menu>
+		<menu_item_check name="Away" label="Z dala od klawiatury (śpij)" />
+		<menu_item_check name="Do Not Disturb" label="Zajęty lub Niedostępny" />
 		<menu_item_call label="Kup L$..." name="Buy and Sell L$" />
 		<menu_item_call label="Skrzynka nadawcza kupca..." name="MerchantOutbox" />
 		<menu_item_call label="Zarządzaj kontem..." name="Manage My Account" />

@@ -47,6 +47,9 @@
 class LLViewerMediaImpl;
 class LLUUID;
 class LLViewerMediaTexture;
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+class LLMediaCtrl;
+// [/SL:KB]
 class LLMediaEntry;
 class LLVOVolume;
 class LLMimeDiscoveryResponder;
@@ -132,6 +135,10 @@ public:
 	static bool isParcelAudioPlaying();
 	
 	static void onAuthSubmit(const LLSD& notification, const LLSD& response);
+
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+	static void setOpenIDCookie(LLMediaCtrl* media_instance);
+// [/SL:KB]
 
 	// Clear all cookies for all plugins
 	static void clearAllCookies();

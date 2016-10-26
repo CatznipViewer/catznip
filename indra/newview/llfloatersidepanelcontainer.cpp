@@ -62,7 +62,7 @@ void LLFloaterSidePanelContainer::closeFloater(bool app_quitting)
 //	LLPanelOutfitEdit* panel_outfit_edit =
 //		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::getPanel("appearance", "panel_outfit_edit"));
 //	if (panel_outfit_edit)
-// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-3.6
 	LLPanelOutfitEdit* panel_outfit_edit =
 		dynamic_cast<LLPanelOutfitEdit*>(LLFloaterSidePanelContainer::findPanel("appearance", "panel_outfit_edit"));
 	if ( (panel_outfit_edit) && (panel_outfit_edit->isInVisibleChain()) )
@@ -131,7 +131,7 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 	}
 }
 
-// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-10-13 (Catznip-3.4)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-3.4
 LLPanel* LLFloaterSidePanelContainer::findPanel(const std::string& floater_name, const std::string& panel_name)
 {
 	LLFloaterSidePanelContainer* floaterp = LLFloaterReg::findTypedInstance<LLFloaterSidePanelContainer>(floater_name);

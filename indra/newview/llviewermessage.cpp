@@ -7556,7 +7556,7 @@ void process_covenant_reply(LLMessageSystem* msg, void**)
 
 //	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
 //	if (panel)
-// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-3.6
 	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::findPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
 	if ( (panel) && (panel->isInVisibleChain()) )
 // [/SL:KB]
@@ -7692,7 +7692,7 @@ void onCovenantLoadComplete(LLVFS *vfs,
 
 //	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::getPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
 //	if (panel)
-// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-3.6
 	LLPanelPlaceProfile* panel = LLFloaterSidePanelContainer::findPanel<LLPanelPlaceProfile>("places", "panel_place_profile");
 	if ( (panel) && (panel->isInVisibleChain()) )
 // [/SL:KB]

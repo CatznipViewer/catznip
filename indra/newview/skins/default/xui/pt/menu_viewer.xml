@@ -3,6 +3,7 @@
 	<menu label="Eu" name="Me">
 		<menu_item_call label="Perfil..." name="Profile"/>
 		<menu_item_call label="Aparência..." name="ChangeOutfit"/>
+		<menu_item_call label="Altura de foco" name="Hover Height"/>
 		<menu_item_call label="Selecione um avatar..." name="Avatar Picker"/>
 		<menu_item_check label="Inventário..." name="Inventory"/>
 		<menu_item_call label="Nova janela de inventário" name="NewInventoryWindow"/>

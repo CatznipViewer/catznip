@@ -35,7 +35,7 @@
 #include "llfloateravatar.h"
 #include "lluictrlfactory.h"
 #include "llmediactrl.h"
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-07-30 (Catznip-3.3)
+// [SL:KB] - Patch: UI-Misc | Checked: Catznip-3.3
 #include "llmediactrl.h"
 #include "llviewercontrol.h"
 #include "llweb.h"
@@ -61,7 +61,7 @@ BOOL LLFloaterAvatar::postBuild()
 {
 	enableResizeCtrls(true, true, false);
 
-// [SL:KB] - Patch: UI-Misc | Checked: 2012-07-30 (Catznip-3.3)
+// [SL:KB] - Patch: UI-Misc | Checked: Catznip-3.3
 	// Moved here from LLViewerWindow::initWorldUI()
 	LLMediaCtrl* pMediaCtrl = getChild<LLMediaCtrl>("avatar_picker_contents");
 	pMediaCtrl->setErrorPageURL(gSavedSettings.getString("GenericErrorPageURL"));
