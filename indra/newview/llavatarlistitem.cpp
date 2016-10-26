@@ -710,12 +710,12 @@ void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, EAvatarLis
 	mAvatarNameCacheConnection.disconnect();
 
 // [RLVa:KB] - Checked: 2010-10-31 (RLVa-1.2.2a) | Modified: RLVa-1.2.2a
-	bool fRlvFilter = (mRlvCheckShowNames) && (RlvActions::canShowName(RlvActions::SNC_DEFAULT, getAvatarId()));
+	bool fRlvCanShowName = (!mRlvCheckShowNames) || (RlvActions::canShowName(RlvActions::SNC_DEFAULT, mAvatarId));
 // [SL:KB] - Patch: Control-AvatarListNameFormat | Checked: 2010-05-30 (Catnzip-2.6)
 	bool fVisibleUsername = false;
-	setAvatarName( (!fRlvFilter) ? formatAvatarName(av_name, name_format, &fVisibleUsername) : RlvStrings::getAnonym(av_name) );
+	setAvatarName( (fRlvCanShowName) ? formatAvatarName(av_name, name_format, &fVisibleUsername) : RlvStrings::getAnonym(av_name) );
 // [/RLVa:KB]
-	mGreyOutUsername = ((!fRlvFilter) & (fVisibleUsername)) ? llformat("(%s)", av_name.getAccountName().c_str()) : LLStringUtil::null;
+	mGreyOutUsername = ((fRlvCanShowName) & (fVisibleUsername)) ? llformat("(%s)", av_name.getAccountName().c_str()) : LLStringUtil::null;
 // [/SL:KB]
 //	mGreyOutUsername = "";
 //	std::string name_string = mShowCompleteName? av_name.getCompleteName(false) : av_name.getDisplayName();
@@ -727,9 +727,9 @@ void LLAvatarListItem::onAvatarNameCache(const LLAvatarName& av_name, EAvatarLis
 //	setAvatarName(name_string);
 //	setAvatarToolTip(av_name.getUserName());
 // [RLVa:KB] - Checked: 2010-10-31 (RLVa-1.2.2a) | Modified: RLVa-1.2.2a
-	setAvatarToolTip((!fRlvFilter) ? av_name.getUserName() : RlvStrings::getAnonym(av_name));
+	setAvatarToolTip((fRlvCanShowName) ? av_name.getUserName() : RlvStrings::getAnonym(av_name));
 	// TODO-RLVa: bit of a hack putting this here. Maybe find a better way?
-	mAvatarIcon->setDrawTooltip(!fRlvFilter);
+	mAvatarIcon->setDrawTooltip(fRlvCanShowName);
 // [/RLVa:KB]
 	//requesting the list to resort
 	notifyParent(LLSD().with("sort", LLSD()));
