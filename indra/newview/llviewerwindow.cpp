@@ -2262,10 +2262,10 @@ void LLViewerWindow::initWorldUI()
 //
 	if (!gSavedSettings.getBOOL("ShowMiniLocationPanel"))
 	{
-//		topinfo_bar->setVisible(FALSE);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-2.6
 		gStatusBar->showTopInfoBar(FALSE);
 // [/SL:KB]
+//		topinfo_bar->setVisible(FALSE);
 	}
 
 	if ( gHUDView == NULL )
@@ -5665,8 +5665,11 @@ void LLViewerWindow::setUIVisibility(bool visible)
 	}
 
 	LLNavigationBar::getInstance()->setVisible(visible ? gSavedSettings.getBOOL("ShowNavbarNavigationPanel") : FALSE);
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)
-	gStatusBar->showTopInfoBar(visible ? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-3.2
+	if (gStatusBar)
+	{
+		gStatusBar->showTopInfoBar(visible ? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
+	}
 // [/SL:KB]
 //	LLPanelTopInfoBar::getInstance()->setVisible(visible? gSavedSettings.getBOOL("ShowMiniLocationPanel") : FALSE);
 	mRootView->getChildView("status_bar_container")->setVisible(visible);

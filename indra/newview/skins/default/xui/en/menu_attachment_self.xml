@@ -81,6 +81,7 @@ name="Stand Up">
     <menu_item_call.on_visible
      function="Self.VisibleStandUp" />
   </menu_item_call>
+  <menu_item_separator/>
   <menu_item_call
   label="My Appearance"
   name="Change Outfit">
@@ -113,6 +114,7 @@ name="Edit Outfit">
      <menu_item_call.on_enable
       function="Edit.EnableHoverHeight" />
   </menu_item_call>
+  <menu_item_separator/>
   <menu_item_call
     label="My Friends"
     layout="topleft"

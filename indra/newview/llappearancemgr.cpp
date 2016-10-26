@@ -2346,8 +2346,8 @@ void LLAppearanceMgr::updatePanelOutfitName(const std::string& name)
 {
 //	LLSidepanelAppearance* panel_appearance =
 //		dynamic_cast<LLSidepanelAppearance *>(LLFloaterSidePanelContainer::getPanel("appearance"));
-// [SL:KB] - Patch: UI-SidePanelInstance | Checked: 2013-12-14 (Catznip-3.6)
-	LLSidepanelAppearance* panel_appearance = dynamic_cast<LLSidepanelAppearance *>(LLFloaterSidePanelContainer::findPanel("appearance"));
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-3.6
+	LLSidepanelAppearance* panel_appearance = LLFloaterSidePanelContainer::findPanel<LLSidepanelAppearance>("appearance");
 // [/SL:KB]
 	if (panel_appearance)
 	{

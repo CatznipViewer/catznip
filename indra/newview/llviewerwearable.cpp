@@ -485,7 +485,10 @@ void LLViewerWearable::saveValues()
 {
 	LLWearable::saveValues();
 
-	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
+//	LLSidepanelAppearance *panel = dynamic_cast<LLSidepanelAppearance*>(LLFloaterSidePanelContainer::getPanel("appearance"));
+// [SL:KB] - Patch: UI-SidePanelInstance | Checked: Catznip-4.2
+	LLSidepanelAppearance *panel = LLFloaterSidePanelContainer::findPanel<LLSidepanelAppearance>("appearance");
+// [/SL:KB]
 	if( panel )
 	{
 		panel->updateScrollingPanelList();
