@@ -4,6 +4,7 @@
 		<menu_item_call label="Profil..." name="Profile"/>
 		<menu_item_call label="Aussehen..." name="ChangeOutfit"/>
 		<menu_item_call label="Avatar auswählen..." name="Avatar Picker"/>
+	    <menu_item_call label="Schwebehöhe" name="Hover Height"/>
 		<menu_item_check label="Inventar..." name="Inventory"/>
 		<menu_item_call label="Neues Inventarfenster" name="NewInventoryWindow"/>
 		<menu_item_call label="Orte..." name="Places"/>

@@ -34,25 +34,25 @@
         L$ [AMT]
     </panel.string>
   <layout_stack
-   animate="false" 
-   layout="topleft"
-   orientation="horizontal"
+   animate="false"
+   follows="left|right|top"
    height="18"
-   left="-815"
-   width="815"
+   layout="topleft"
+   left="-715"
+   name="status_panel"
+   orientation="horizontal"
    right_pad="0"
    top="1"
-   follows="left|right|top" 
-   name="status_panel">
+   width="715">
     <layout_panel
      auto_resize="true"
-     user_resize="false"
      follows="top|right"
      height="18"
-     visible="true"
      layout="topleft"
      name="overflow_panel"
-     width="1">
+     user_resize="false"
+     visible="true"
+     width="250">
         <panel
          class="topinfo_bar"
          filename="panel_topinfo_bar.xml"
@@ -67,13 +67,13 @@
     </layout_panel>
     <layout_panel
      auto_resize="false"
-     user_resize="false"
      follows="top|right"
      height="18"
-     visible="true"
      layout="topleft"
      name="balance_panel"
-     width="110">
+     user_resize="false"
+     visible="true"
+     width="90">
 <!--
   <panel
     height="18"
@@ -94,8 +94,8 @@
      top="0"
      valign="center"     
      wrap="false" 
-     value="L$??" 
-     width="110" />
+     value="L$123,456,789" 
+     width="90" />
     </layout_panel>
     <layout_panel
      auto_resize="false"
@@ -191,7 +191,7 @@
      visible="true"
      layout="topleft"
      name="time_panel"
-     width="142">
+     width="160">
     <text
      type="string"
      font="SansSerifSmall"
@@ -205,7 +205,7 @@
      name="TimeText"
      tool_tip="Current time (Pacific)"
      valign="center"     
-     width="100">
+     width="89">
         24:00 AM PST
     </text>
     <icon
@@ -224,11 +224,11 @@
      image_pressed="Pause_Press"
      image_pressed_selected="Play_Press"
      is_toggle="true"
-     left_pad="0"
+     left_pad="3"
      top="1"
      name="media_toggle_btn"
      tool_tip="Start/Stop All Media (Music, Video, Web pages)"
-     width="16" >
+     width="18" >
     </button>
     <button
      follows="right|top"
@@ -237,20 +237,20 @@
      image_pressed="Audio_Press"
      image_unselected="Audio_Off"
      is_toggle="true"
-     left_pad="5"
+     left_pad="1"
      right_pad="5"
      top="2"
      name="volume_btn"
-     width="16" />
+     width="18" />
     </layout_panel>
     <layout_panel
      auto_resize="false"
-     user_resize="false"
      follows="top|right"
      height="18"
-     visible="true"
      layout="topleft"
      name="netstats_panel"
+     user_resize="false"
+     visible="true"
      width="16" />
   </layout_stack>
 </panel>

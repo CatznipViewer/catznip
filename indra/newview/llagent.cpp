@@ -3898,8 +3898,10 @@ bool LLAgent::teleportCore(bool is_local)
 
 	// minimize the Search floater (STORM-1474)
 	{
-		LLFloater* instance = LLFloaterReg::getInstance("search");
-
+//		LLFloater* instance = LLFloaterReg::getInstance("search");
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+		LLFloater* instance = LLFloaterReg::findInstance("search");
+// [/SL:KB]
 		if (instance && instance->getVisible())
 		{
 			instance->setMinimized(TRUE);

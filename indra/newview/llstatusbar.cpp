@@ -39,7 +39,7 @@
 #include "llbuycurrencyhtml.h"
 #include "llpanelnearbymedia.h"
 #include "llpanelpresetspulldown.h"
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-2.6
 #include "llpaneltopinfobar.h"
 // [/SL:KB]
 #include "llpanelvolumepulldown.h"
@@ -107,9 +107,6 @@ static void onClickVolume(void*);
 
 LLStatusBar::LLStatusBar(const LLRect& rect)
 :	LLPanel(),
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
-	mViewStatus(NULL),
-// [/SL:KB]
 	mTextTime(NULL),
 	mSGBandwidth(NULL),
 	mSGPacketLoss(NULL),
@@ -164,13 +161,14 @@ BOOL LLStatusBar::postBuild()
 {
 	gMenuBarView->setRightMouseDownCallback(boost::bind(&show_navbar_context_menu, _1, _2, _3));
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	mViewStatus = findChildView("status_panel");
+	llassert(mViewStatus);
 // [/SL:KB]
 
 	mTextTime = getChild<LLTextBox>("TimeText" );
 	
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2016-01-03 (Catznip-3.8)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.8
 	getChild<LLUICtrl>("giveFeedback")->setCommitCallback(boost::bind(&LLStatusBar::onClickGiveFeedback, this));
 // [/SL:KB]
 
@@ -195,14 +193,14 @@ BOOL LLStatusBar::postBuild()
 	mMediaToggle->setClickedCallback( &LLStatusBar::onClickMediaToggle, this );
 	mMediaToggle->setMouseEnterCallback(boost::bind(&LLStatusBar::onMouseEnterNearbyMedia, this));
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	LLHints::registerHintTarget("linden_balance", mBoxBalance->getHandle());
 // [/SL:KB]
 //	LLHints::registerHintTarget("linden_balance", getChild<LLView>("balance_bg")->getHandle());
 
 	gSavedSettings.getControl("MuteAudio")->getSignal()->connect(boost::bind(&LLStatusBar::onVolumeChanged, this, _2));
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	LLControlVariable* pControl = gSavedSettings.getControl("ShowBuyCurrencyButton");
 	pControl->getSignal()->connect(boost::bind(&LLStatusBar::onToggleBuyCurrencyButton, this, _2));
 	onToggleBuyCurrencyButton(pControl->getValue());
@@ -220,15 +218,16 @@ BOOL LLStatusBar::postBuild()
 	onToggleNetStats(pControl->getValue());
 // [/SL:KB]
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	LLPanel* pNetStats = findChild<LLPanel>("netstats_panel");
+	llassert(pNetStats);
 // [/SL:KB]
 
 	// Adding Net Stat Graph
 //	S32 x = getRect().getWidth() - 2;
 //	S32 y = 0;
 	LLRect r;
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	r.set(0, MENU_BAR_HEIGHT - 1, SIM_STAT_WIDTH, 1);
 // [/SL:KB]
 //	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
@@ -242,13 +241,13 @@ BOOL LLStatusBar::postBuild()
 	sgp.precision(0);
 	sgp.per_sec(true);
 	mSGBandwidth = LLUICtrlFactory::create<LLStatGraph>(sgp);
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	pNetStats->addChild(mSGBandwidth);
 // [/SL:KB]
 //	addChild(mSGBandwidth);
 //	x -= SIM_STAT_WIDTH + 2;
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	r.set(SIM_STAT_WIDTH, MENU_BAR_HEIGHT - 1, SIM_STAT_WIDTH * 2, 1);
 // [/SL:KB]
 //	r.set( x-SIM_STAT_WIDTH, y+MENU_BAR_HEIGHT-1, x, y+1);
@@ -272,7 +271,7 @@ BOOL LLStatusBar::postBuild()
 	pgp.thresholds(thresholds);
 
 	mSGPacketLoss = LLUICtrlFactory::create<LLStatGraph>(pgp);
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	pNetStats->addChild(mSGPacketLoss);
 // [/SL:KB]
 //	addChild(mSGPacketLoss);
@@ -367,7 +366,7 @@ void LLStatusBar::refresh()
 
 void LLStatusBar::setVisibleForMouselook(bool visible)
 {
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	mViewStatus->setVisible(visible);
 // [/SL:KB]
 //	mTextTime->setVisible(visible);
@@ -381,7 +380,7 @@ void LLStatusBar::setVisibleForMouselook(bool visible)
 	mIconPresets->setVisible(visible);
 }
 
-// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: Catznip-2.6
 LLPanelTopInfoBar* LLStatusBar::getTopInfoBarPanel() const
 {
 	return dynamic_cast<LLPanelTopInfoBar*>(getChildView("topinfo_bar"));
@@ -423,7 +422,7 @@ void LLStatusBar::setBalance(S32 balance)
 	{
 		const S32 HPAD = 24;
 		LLRect balance_rect = mBoxBalance->getTextBoundingRect();
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 		LLView* balance_panel = findChildView("balance_panel");
 		balance_panel->reshape(balance_rect.getWidth() + HPAD, balance_panel->getRect().getHeight());
 // [/SL:KB]
@@ -533,7 +532,7 @@ S32 LLStatusBar::getSquareMetersLeft() const
 	return mSquareMetersCredit - mSquareMetersCommitted;
 }
 
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-15 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 void LLStatusBar::onClickGiveFeedback()
 {
 	LLFloaterReg::showInstance("feedback", LLSD());
@@ -572,7 +571,11 @@ void LLStatusBar::onMouseEnterPresets()
 {
 	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
 	LLIconCtrl* icon =  getChild<LLIconCtrl>( "presets_icon" );
-	LLRect icon_rect = icon->getRect();
+//	LLRect icon_rect = icon->getRect();
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-4.2
+	LLRect icon_rect;
+	icon->localRectToOtherView(icon->getLocalRect(), &icon_rect, this);
+// [/SL:KB]
 	LLRect pulldown_rect = mPanelPresetsPulldown->getRect();
 	pulldown_rect.setLeftTopAndSize(icon_rect.mLeft -
 	     (pulldown_rect.getWidth() - icon_rect.getWidth()),
@@ -596,7 +599,7 @@ void LLStatusBar::onMouseEnterVolume()
 	LLView* popup_holder = gViewerWindow->getRootView()->getChildView("popup_holder");
 	LLButton* volbtn =  getChild<LLButton>( "volume_btn" );
 //	LLRect vol_btn_rect = volbtn->getRect();
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	LLRect vol_btn_rect;
 	volbtn->localRectToOtherView(volbtn->getLocalRect(), &vol_btn_rect, this);
 // [/SL:KB]
@@ -625,7 +628,7 @@ void LLStatusBar::onMouseEnterNearbyMedia()
 	LLRect nearby_media_rect = mPanelNearByMedia->getRect();
 	LLButton* nearby_media_btn =  getChild<LLButton>( "media_toggle_btn" );
 //	LLRect nearby_media_btn_rect = nearby_media_btn->getRect();
-// [SL:KB] - Patch: UI-StatusBar | Checked: 2012-01-17 (Catznip-3.2)
+// [SL:KB] - Patch: UI-StatusBar | Checked: Catznip-3.2
 	LLRect nearby_media_btn_rect;
 	nearby_media_btn->localRectToOtherView(nearby_media_btn->getLocalRect(), &nearby_media_btn_rect, this);
 // [/SL:KB]

@@ -1306,30 +1306,39 @@ void LLViewerMedia::getOpenIDCookieCoro(std::string url)
 
 	if (url.length())
 	{
-		LLMediaCtrl* media_instance = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
-		if (media_instance)
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+		if (LLFloater* pFloater = LLFloaterReg::findInstance("destinations"))
 		{
-			std::string cookie_host = authority.substr(hostStart, hostEnd - hostStart);
-			std::string cookie_name = "";
-			std::string cookie_value = "";
-			std::string cookie_path = "";
-			bool httponly = true;
-			bool secure = true;
-			if (parseRawCookie(sOpenIDCookie, cookie_name, cookie_value, cookie_path, httponly, secure) &&
-                media_instance->getMediaPlugin())
+			if (LLMediaCtrl* pMediaCtrl = pFloater->getChild<LLMediaCtrl>("destination_guide_contents"))
 			{
-				// MAINT-5711 - inexplicably, the CEF setCookie function will no longer set the cookie if the 
-				// url and domain are not the same. This used to be my.sl.com and id.sl.com respectively and worked.
-				// For now, we use the URL for the OpenID POST request since it will have the same authority
-				// as the domain field.
-				// (Feels like there must be a less dirty way to construct a URL from component LLURL parts)
-				// MAINT-6392 - Rider: Do not change, however, the original URI requested, since it is used further
-				// down.
-                std::string cefUrl(std::string(sOpenIDURL.mURI) + "://" + std::string(sOpenIDURL.mAuthority));
-
-				media_instance->getMediaPlugin()->setCookie(cefUrl, cookie_name, cookie_value, cookie_host, cookie_path, httponly, secure);
+				setOpenIDCookie(pMediaCtrl);
 			}
 		}
+// [/SL:KB]
+//		LLMediaCtrl* media_instance = LLFloaterReg::getInstance("destinations")->getChild<LLMediaCtrl>("destination_guide_contents");
+//		if (media_instance)
+//		{
+//			std::string cookie_host = authority.substr(hostStart, hostEnd - hostStart);
+//			std::string cookie_name = "";
+//			std::string cookie_value = "";
+//			std::string cookie_path = "";
+//			bool httponly = true;
+//			bool secure = true;
+//			if (parseRawCookie(sOpenIDCookie, cookie_name, cookie_value, cookie_path, httponly, secure) &&
+//                media_instance->getMediaPlugin())
+//			{
+//				// MAINT-5711 - inexplicably, the CEF setCookie function will no longer set the cookie if the 
+//				// url and domain are not the same. This used to be my.sl.com and id.sl.com respectively and worked.
+//				// For now, we use the URL for the OpenID POST request since it will have the same authority
+//				// as the domain field.
+//				// (Feels like there must be a less dirty way to construct a URL from component LLURL parts)
+//				// MAINT-6392 - Rider: Do not change, however, the original URI requested, since it is used further
+//				// down.
+//                std::string cefUrl(std::string(sOpenIDURL.mURI) + "://" + std::string(sOpenIDURL.mAuthority));
+//
+//				media_instance->getMediaPlugin()->setCookie(cefUrl, cookie_name, cookie_value, cookie_host, cookie_path, httponly, secure);
+//			}
+//		}
 	}
 
     // Note: Rider: MAINT-6392 - Some viewer code requires access to the my.sl.com openid cookie for such 
@@ -1374,6 +1383,50 @@ void LLViewerMedia::getOpenIDCookieCoro(std::string url)
     LLWebProfile::setAuthCookie(authCookie);
 
 }
+
+// [SL:KB] - Patch: UI-FloaterInstance | Checked: Catznip-4.2
+void LLViewerMedia::setOpenIDCookie(LLMediaCtrl* media_instance)
+{
+	std::string authority = sOpenIDURL.mAuthority;
+	std::string::size_type hostStart = authority.find('@');
+	if (hostStart == std::string::npos)
+	{   // no username/password
+		hostStart = 0;
+	}
+	else
+	{   // Hostname starts after the @. 
+		// Hostname starts after the @. 
+		// (If the hostname part is empty, this may put host_start at the end of the string.  In that case, it will end up passing through an empty hostname, which is correct.)
+		++hostStart;
+	}
+	std::string::size_type hostEnd = authority.rfind(':');
+	if ((hostEnd == std::string::npos) || (hostEnd < hostStart))
+	{   // no port
+		hostEnd = authority.size();
+	}
+
+	std::string cookie_host = authority.substr(hostStart, hostEnd - hostStart);
+	std::string cookie_name = "";
+	std::string cookie_value = "";
+	std::string cookie_path = "";
+	bool httponly = true;
+	bool secure = true;
+	if (parseRawCookie(sOpenIDCookie, cookie_name, cookie_value, cookie_path, httponly, secure) &&
+		media_instance->getMediaPlugin())
+	{
+		// MAINT-5711 - inexplicably, the CEF setCookie function will no longer set the cookie if the 
+		// url and domain are not the same. This used to be my.sl.com and id.sl.com respectively and worked.
+		// For now, we use the URL for the OpenID POST request since it will have the same authority
+		// as the domain field.
+		// (Feels like there must be a less dirty way to construct a URL from component LLURL parts)
+		// MAINT-6392 - Rider: Do not change, however, the original URI requested, since it is used further
+		// down.
+		std::string cefUrl(std::string(sOpenIDURL.mURI) + "://" + std::string(sOpenIDURL.mAuthority));
+
+		media_instance->getMediaPlugin()->setCookie(cefUrl, cookie_name, cookie_value, cookie_host, cookie_path, httponly, secure);
+	}
+}
+// [/SL:KB]
 
 /////////////////////////////////////////////////////////////////////////////////////////
 // static
