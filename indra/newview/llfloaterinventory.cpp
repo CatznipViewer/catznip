@@ -41,69 +41,69 @@
 /// LLFloaterInventory
 ///----------------------------------------------------------------------------
 
-LLFloaterInventory::LLFloaterInventory(const LLSD& key)
-	: LLFloater(key)
-{
-	LLTransientFloaterMgr::getInstance()->addControlView(this);
-}
+//LLFloaterInventory::LLFloaterInventory(const LLSD& key)
+//	: LLFloater(key)
+//{
+//	LLTransientFloaterMgr::getInstance()->addControlView(this);
+//}
 
-LLFloaterInventory::~LLFloaterInventory()
-{
-	LLTransientFloaterMgr::getInstance()->removeControlView(this);
-}
+//LLFloaterInventory::~LLFloaterInventory()
+//{
+//	LLTransientFloaterMgr::getInstance()->removeControlView(this);
+//}
 
-BOOL LLFloaterInventory::postBuild()
-{
-	mPanelMainInventory = findChild<LLPanelMainInventory>("Inventory Panel");
-	return TRUE;
-}
+//BOOL LLFloaterInventory::postBuild()
+//{
+//	mPanelMainInventory = findChild<LLPanelMainInventory>("Inventory Panel");
+//	return TRUE;
+//}
 
-LLInventoryPanel* LLFloaterInventory::getPanel()
-{
-	if (mPanelMainInventory)
-		return mPanelMainInventory->getPanel();
-	return NULL;
-}
-
-// static
-LLFloaterInventory* LLFloaterInventory::showAgentInventory()
-{
-	// Hack to generate semi-unique key for each inventory floater.
-	static S32 instance_num = 0;
-	instance_num = (instance_num + 1) % S32_MAX;
-
-	LLFloaterInventory* iv = NULL;
-	if (!gAgentCamera.cameraMouselook())
-	{
-		iv = LLFloaterReg::showTypedInstance<LLFloaterInventory>("inventory", LLSD(instance_num));
-	}
-	return iv;
-}
+//LLInventoryPanel* LLFloaterInventory::getPanel()
+//{
+//	if (mPanelMainInventory)
+//		return mPanelMainInventory->getPanel();
+//	return NULL;
+//}
 
 // static
-void LLFloaterInventory::cleanup()
-{
-	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
-	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end();)
-	{
-		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter++);
-		if (iv)
-		{
-			iv->destroy();
-		}
-	}
-}
+//LLFloaterInventory* LLFloaterInventory::showAgentInventory()
+//{
+//	// Hack to generate semi-unique key for each inventory floater.
+//	static S32 instance_num = 0;
+//	instance_num = (instance_num + 1) % S32_MAX;
+//
+//	LLFloaterInventory* iv = NULL;
+//	if (!gAgentCamera.cameraMouselook())
+//	{
+//		iv = LLFloaterReg::showTypedInstance<LLFloaterInventory>("inventory", LLSD(instance_num));
+//	}
+//	return iv;
+//}
 
-void LLFloaterInventory::onOpen(const LLSD& key)
-{
-	//LLFirstUse::useInventory();
-}
+// static
+//void LLFloaterInventory::cleanup()
+//{
+//	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
+//	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end();)
+//	{
+//		LLFloaterInventory* iv = dynamic_cast<LLFloaterInventory*>(*iter++);
+//		if (iv)
+//		{
+//			iv->destroy();
+//		}
+//	}
+//}
 
-void LLFloaterInventory::onClose(bool app_quitting)
-{
-	LLFloater::onClose(app_quitting);
-	if (mKey.asInteger() > 1)
-	{
-		destroy();
-	}
-}
+//void LLFloaterInventory::onOpen(const LLSD& key)
+//{
+//	//LLFirstUse::useInventory();
+//}
+
+//void LLFloaterInventory::onClose(bool app_quitting)
+//{
+//	LLFloater::onClose(app_quitting);
+//	if (mKey.asInteger() > 1)
+//	{
+//		destroy();
+//	}
+//}

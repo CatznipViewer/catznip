@@ -60,8 +60,11 @@ BOOL get_is_category_renameable(const LLInventoryModel* model, const LLUUID& id)
 void show_item_profile(const LLUUID& item_uuid);
 void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
 
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+void show_item(const LLUUID& idItem);
+// [/SL:KB]
 void show_item_original(const LLUUID& item_uuid);
-void reset_inventory_filter();
+//void reset_inventory_filter();
 
 // Nudge the listing categories in the inventory to signal that their marketplace status changed
 void update_marketplace_category(const LLUUID& cat_id, bool perform_consistency_enforcement = true);
@@ -448,6 +451,9 @@ class LLInventoryState
 {
 public:
 	// HACK: Until we can route this info through the instant message hierarchy
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+	static bool sShowNewInventory;
+// [/SL:KB]
 	static BOOL sWearNewClothing;
 	static LLUUID sWearNewClothingTransactionID;	// wear all clothing in this transaction	
 };

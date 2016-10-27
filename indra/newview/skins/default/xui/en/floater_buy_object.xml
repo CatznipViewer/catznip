@@ -2,10 +2,10 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="310"
+ height="290"
  layout="topleft"
- min_height="150"
- min_width="225"
+ min_height="290"
+ min_width="280"
  name="contents"
  help_topic="contents"
  save_rect="true"
@@ -33,10 +33,10 @@
         (no transfer)
     </floater.string>
     <scroll_list
-     background_visible="true"
+     background_visible="false"
      draw_border="false"
      follows="left|top|right"
-     height="35"
+     height="25"
      layout="topleft"
      name="object_list"
      top="20"
@@ -53,12 +53,11 @@
      type="string"
      length="1"
      follows="left|top|right"
-     font="SansSerif"
      height="16"
      layout="topleft"
      left="10"
      name="contents_text"
-     top_pad="5"
+     top_pad="2"
      width="260">
      Contains:
     </text>
@@ -83,7 +82,6 @@
      type="string"
      length="1"
      follows="left|right|bottom"
-     font="SansSerif"
      height="15"
      layout="topleft"
      left_delta="0"
@@ -100,7 +98,6 @@ Buy for L$[AMOUNT] from:
      type="string"
      length="1"
      follows="left|right|bottom"
-     font="SansSerif"
      height="15"
      layout="topleft"
      left_delta="0"
@@ -112,24 +109,78 @@ Buy for L$[AMOUNT] from:
      width="260">
     [NAME]?
   </text>
-    <button
-     follows="right|bottom"
-     height="23"
-     label="Buy"
-     label_selected="Buy"
+    <panel
+     background_visible="false"
+     follows="left|right|bottom"
+     height="25"
+     label="bottom_panel"
      layout="topleft"
-     left="65"
-     name="buy_btn"
-     top_pad="10"
-     width="100" />
-    <button
-     follows="right|bottom"
-     height="23"
-     label="Cancel"
-     label_selected="Cancel"
-     layout="topleft"
-     left_pad="5"
-     name="cancel_btn"
-     top_delta="0"
-     width="100" />
+     left="5"
+     name="bottom_panel"
+     top_pad="5" >
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Left_Off"
+         width="42"
+         layout="topleft"
+         left="0"
+         name="spacer_icon_1"
+         top="0" />
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Shop"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Buy"
+         layout="topleft"
+         left_pad="1"
+         name="buy_btn"
+         width="80" />
+
+
+        <icon  
+         follows="bottom|left"
+         height="25"
+         image_name="Toolbar_Middle_Off"
+         width="20"
+         layout="topleft"
+         left_pad="1"
+         name="spacer_icon_2"
+         top="0" />
+
+
+        <button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="StopReload_Off"
+         image_overlay_alignment="center"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         imgoverlay_label_align="true"
+         imgoverlay_label_space="5"
+         label="Cancel"
+         layout="topleft"
+         left_pad="1"
+         name="cancel_btn"
+         width="80" />
+
+        <icon  
+         follows="bottom|right|left"
+         height="25"
+         image_name="Toolbar_Right_Off"
+         width="42"
+         layout="topleft"
+         left_pad="1"
+         left="226"
+         name="spacer_icon_3"
+         top="0" />
+    </panel>
 </floater>
