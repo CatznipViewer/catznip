@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -241,7 +242,7 @@ public:
 
 	BOOL needsAutoSelect() { return mNeedsAutoSelect && !mAutoSelectOverride; }
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
-	BOOL needsAutoOpen() { return mNeedsAutoOpen; }
+	bool needsAutoOpen() const { return mNeedsAutoOpen; }
 // [/SL:KB]
 	BOOL needsAutoRename() { return mNeedsAutoRename; }
 	void setNeedsAutoRename(BOOL val) { mNeedsAutoRename = val; }
@@ -307,15 +308,15 @@ protected:
 									mShowItemLinkOverlays,
 									mShowSelectionContext,
 									mShowSingleSelection;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	bool							mNeedsAutoOpen;
+// [/SL:KB]
 
 	// Renaming variables and methods
 	LLFolderViewItem*				mRenameItem;  // The item currently being renamed
 	LLLineEditor*					mRenamer;
 
 	LLRect							mScrollConstraintRect;
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
-	bool							mNeedsAutoOpen;
-// [/SL:KB]
 	
 	LLDepthStack<LLFolderViewFolder>	mAutoOpenItems;
 	LLFolderViewFolder*				mAutoOpenCandidate;

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -85,6 +86,9 @@ public:
 	virtual void removeBatch(std::vector<LLFolderViewModelItem*>& batch) { }
 	virtual void move( LLFolderViewModelItem* parent_listener ) { }
 	virtual BOOL isItemCopyable() const { return FALSE; }
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const { return false; }
+// [/SL:KB]
 	virtual BOOL copyToClipboard() const { return FALSE; }
 	virtual BOOL cutToClipboard() { return FALSE; }
 	virtual BOOL isClipboardPasteable() const { return FALSE; }

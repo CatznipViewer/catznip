@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -441,7 +442,7 @@ void copy_inventory_category(LLInventoryModel* model,
             LLMarketplaceData::instance().decrementValidationWaiting(root_id);
         }
 //        else
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2010-04-12 (Catznip-2.0)
 		else if (!item->getIsLinkType())
 // [/SL:KB]
         {
@@ -453,10 +454,10 @@ void copy_inventory_category(LLInventoryModel* model,
                                 std::string(),
                                 cb);
         }
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2010-04-12 (Catznip-2.0)
 		else
 		{
-			link_inventory_object(new_cat_uuid, item, LLPointer<LLInventoryCallback>(NULL));
+			link_inventory_object(new_cat_uuid, gInventory.getLinkedItem(item->getUUID()), cb);
 		}
 // [/SL:KB]
 	}

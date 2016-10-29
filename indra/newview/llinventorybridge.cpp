@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -300,7 +301,10 @@ BOOL LLInvFVBridge::isLibraryItem() const
 BOOL LLInvFVBridge::cutToClipboard()
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
-	if (obj && isItemMovable() && isItemRemovable())
+//	if (obj && isItemMovable() && isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	if ( (obj) && (isItemMovable()) )
+// [/SL:KB]
 	{
         const LLUUID &marketplacelistings_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_MARKETPLACE_LISTINGS, false);
         const BOOL cut_from_marketplacelistings = gInventory.isObjectDescendentOf(mUUID, marketplacelistings_id);
@@ -340,12 +344,12 @@ BOOL LLInvFVBridge::perform_cutToClipboard()
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
 //	if (obj && isItemMovable() && isItemRemovable())
 // [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
-	if (obj && isItemMovable())
+	if ( (obj) && (isItemMovable()) )
 // [/SL:KB]
 	{
 		LLClipboard::instance().setCutMode(true);
 		BOOL added_to_clipboard = LLClipboard::instance().addToClipboard(mUUID);
-        removeObject(&gInventory, mUUID);   // Always perform the remove even if the object couldn't make it to the clipboard
+//        removeObject(&gInventory, mUUID);   // Always perform the remove even if the object couldn't make it to the clipboard
         return added_to_clipboard;
 	}
 	return FALSE;
@@ -355,8 +359,8 @@ BOOL LLInvFVBridge::copyToClipboard() const
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
 //	if (obj && isItemCopyable())
-// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
-	if ( (obj) && (isItemCopyable()) || (isItemLinkable()) )
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+	if ( (obj) && ( (isItemCopyable()) || (isItemLinkable()) ) )
 // [/SL:KB]
 	{
 		return LLClipboard::instance().addToClipboard(mUUID);
@@ -559,13 +563,13 @@ void  LLInvFVBridge::removeBatchNoCheck(std::vector<LLFolderViewModelItem*>&  ba
 // [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
 bool LLInvFVBridge::isClipboardCut() const
 {
-	LLClipboard* pClipboard = LLClipboard::getInstance();
+	const LLClipboard* pClipboard = LLClipboard::getInstance();
 	if (mClipboardGeneration != pClipboard->getGeneration())
 	{
 		mClipboardGeneration = pClipboard->getGeneration();
 
 		mIsClipboardCut = false;
-		if (LLClipboard::instance().isCutMode())
+		if (pClipboard->isCutMode())
 		{
 			mIsClipboardCut |= pClipboard->isOnClipboard(mUUID);
 			if (mParent)
@@ -831,12 +835,9 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 //			{
 //				disabled_items.push_back(std::string("Copy"));
 //			}
-
+//
 //			items.push_back(std::string("Cut"));
-////			if (!isItemMovable() || !isItemRemovable())
-//// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
-//			if (!isItemMovable())
-//// [/SL:KB]
+//			if (!isItemMovable() || !isItemRemovable())
 //			{
 //				disabled_items.push_back(std::string("Cut"));
 //			}
@@ -858,19 +859,19 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 			}
 		}
 
-// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2010-04-12 (Catznip-2.0)
 		items.push_back(std::string("Copy Separator"));
-
-		items.push_back(std::string("Cut"));
-		if ( (!isItemMovable()) || (isLibraryItem()) )
-		{
-			disabled_items.push_back(std::string("Cut"));
-		}
 	
 		items.push_back(std::string("Copy"));
 		if ( (!isItemCopyable()) && (!isItemLinkable()) )
 		{
 			disabled_items.push_back(std::string("Copy"));
+		}
+
+		items.push_back(std::string("Cut"));
+		if ( (!isItemMovable()) || (isLibraryItem()) )
+		{
+			disabled_items.push_back(std::string("Cut"));
 		}
 // [/SL:KB]
 	}
@@ -2216,7 +2217,6 @@ BOOL LLItemBridge::isItemCopyable() const
 		return (item->getPermissions().allowCopyBy(gAgent.getID()));
 // [/SL:KB]
 //		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
-
 	}
 	return FALSE;
 }
@@ -4015,22 +4015,22 @@ void LLFolderBridge::perform_pasteFromClipboard()
                             else
                             {
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
-					if (item->getPermissions().allowCopyBy(gAgent.getID()))
-					{
+								if (item->getPermissions().allowCopyBy(gAgent.getID()))
+								{
 // [/SL:KB]
-						copy_inventory_item(
-							gAgent.getID(),
-							item->getPermissions().getOwner(),
-							item->getUUID(),
-							parent_id,
-							std::string(),
-							LLPointer<LLInventoryCallback>(NULL));
+									copy_inventory_item(
+										gAgent.getID(),
+										item->getPermissions().getOwner(),
+										item->getUUID(),
+										parent_id,
+										std::string(),
+										LLPointer<LLInventoryCallback>(NULL));
 // [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
-					}
-					else if (LLAssetType::lookupIsLinkType(item->getActualType()))
-					{
-						link_inventory_object(parent_id, item, LLPointer<LLInventoryCallback>(NULL));
-					}
+								}
+								else if (LLAssetType::lookupIsLinkType(item->getActualType()))
+								{
+									link_inventory_object(parent_id, item, LLPointer<LLInventoryCallback>(NULL));
+								}
 // [/SL:KB]
                             }
                         }

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -943,7 +944,11 @@ BOOL LLFolderView::canCopy() const
 	for (selected_items_t::const_iterator selected_it = mSelectedItems.begin(); selected_it != mSelectedItems.end(); ++selected_it)
 	{
 		const LLFolderViewItem* item = *selected_it;
-		if (!item->getViewModelItem()->isItemCopyable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+		const LLFolderViewFolder* folder = dynamic_cast<const LLFolderViewFolder*>(item);
+		if ( (!item->getViewModelItem()->isItemCopyable()) && ((folder) || (!item->getViewModelItem()->isItemLinkable())) )
+// [/SL:KB]
+//		if (!item->getViewModelItem()->isItemCopyable())
 		{
 			return FALSE;
 		}
@@ -1757,7 +1762,7 @@ void LLFolderView::update()
     
 	// Filter to determine visibility before arranging
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
-	mNeedsAutoOpen = (mNeedsAutoSelect) && (getFolderViewModel()->getFilter().showAllResults());
+	mNeedsAutoOpen = (mNeedsAutoSelect) && (filter_object.showAllResults());
 // [/SL:KB]
 	filter(filter_object);
     
@@ -1795,7 +1800,7 @@ void LLFolderView::update()
 
 //		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
 //		// Used by LLPlacesFolderView.
-		if (filter_object.showAllResults())
+//		if (filter_object.showAllResults())
 //		{
 //			// these are named variables to get around gcc not binding non-const references to rvalues
 //			// and functor application is inherently non-const to allow for stateful functors
