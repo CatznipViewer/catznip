@@ -49,7 +49,7 @@
 
 #include "llinventorybridge.h"
 #include "llinventorypanel.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "lllandmarkactions.h"
 
 #include "llviewerassettype.h"

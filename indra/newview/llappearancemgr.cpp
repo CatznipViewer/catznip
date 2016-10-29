@@ -4493,6 +4493,94 @@ BOOL LLAppearanceMgr::getIsProtectedCOFItem(const LLUUID& obj_id) const
 	return TRUE;
 }
 
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-09-30 (Catznip-2.2)
+LLReorderAndUpdateAppearanceOnDestroy::~LLReorderAndUpdateAppearanceOnDestroy()
+{
+	if (!LLApp::isExiting())
+	{
+		LLAppearanceMgr* pAppearanceMgr = LLAppearanceMgr::getInstance();
+
+		// Collect COF wearables
+		LLAppearanceMgr::wearables_by_type_t itemsByType(LLWearableType::WT_COUNT);
+		{
+			LLInventoryModel::item_array_t items;
+			LLInventoryModel::cat_array_t folders;
+			LLFindWearables f;
+			gInventory.collectDescendentsIf(pAppearanceMgr->getCOF(), folders, items, LLInventoryModel::EXCLUDE_TRASH, f);
+
+			LLAppearanceMgr::divvyWearablesByType(items, itemsByType);
+		}
+
+		LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy();
+
+		// Reorder the requested items
+		std::map<LLUUID, std::string> itemUpdates;
+		for (const LLUUID& idItem : mIDs)
+		{
+			// Sanity check the inventory item
+			LLViewerInventoryItem* pItem = gInventory.getItem(idItem);
+			if ( (!pItem) || (!pItem->isWearableType()) )
+				continue;
+
+			// Sanity check the wearable type (some ancient inventory items won't have the flag set properly)
+			LLWearableType::EType eType = pItem->getWearableType();
+			if ( (eType <= 0) || (eType >= LLWearableType::WT_COUNT) )
+				continue;
+
+			// Check if we have a reorder request for this item
+			reorder_map_t::const_iterator itReorder = mReorderMap.find(pItem->getLinkedUUID());
+			if (itReorder == mReorderMap.end())
+				continue;
+
+			// Need to get the item out of the inventory item array
+			LLInventoryModel::item_array_t& items = itemsByType[eType];
+			LLInventoryModel::item_array_t::iterator itTemp = std::find(items.begin(), items.end(), pItem);
+			if (itTemp == items.end())
+				continue;
+			items.erase(itTemp);
+
+			// If the user is trying to wear higher than the current count (or replace at the current count) then it's simply a normal wear
+			bool fReplace = itReorder->second.fReplace; U32 idxAt = itReorder->second.nIndex;
+			if ( ((!fReplace) && (idxAt <= items.size())) || ((fReplace) && (idxAt < items.size() - 1)) )
+			{
+				std::sort(items.begin(), items.end(), WearablesOrderComparator(eType));
+
+				if (!fReplace)
+				{
+					items.insert(items.begin() + idxAt, pItem);
+				}
+				else
+				{
+					if (items[idxAt])
+						pAppearanceMgr->removeCOFItemLinks(items[idxAt]->getLinkedUUID(), cb);
+					items[idxAt] = pItem;
+				}
+
+				// Find our item again
+				itTemp = std::find(items.begin(), items.end(), pItem);
+
+				// Now reorder from our item until the end
+				for (; itTemp < items.end(); ++itTemp)
+				{
+					LLViewerInventoryItem* pItem = *itTemp;
+
+					std::string strOrder = build_order_string(eType, itTemp - items.begin());
+					if (strOrder == pItem->getActualDescription())
+						continue;
+					itemUpdates[pItem->getUUID()] = strOrder;
+				}
+			}
+		}
+
+		// Issue the inventory item updates
+		for (const auto& itItemUpdate : itemUpdates)
+		{
+			update_inventory_item(itItemUpdate.first, LLSD().with("desc", itItemUpdate.second), cb);
+		}
+	}
+}
+// [/SL:KB]
+
 class CallAfterCategoryFetchStage2: public LLInventoryFetchItemsObserver
 {
 public:

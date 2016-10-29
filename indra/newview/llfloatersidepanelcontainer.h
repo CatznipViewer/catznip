@@ -94,6 +94,22 @@ public:
 		return panel;
 	}
 	
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	static LLPanel* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName);
+
+	template <typename T>
+	static T* getPanel(const LLFloater* floaterp, const std::string& panel_name = sMainPanelName)
+	{
+		T* panel = dynamic_cast<T*>(getPanel(floaterp, panel_name));
+		if (!panel)
+		{
+			LL_WARNS() << "Child named \"" << panel_name << "\" of type " << typeid(T*).name() << " not found" << LL_ENDL;
+		}
+		return panel;
+	}
+// [/Sl:KB]
+
 // [RLVa:KB] - Checked: 2012-02-07 (RLVa-1.4.5) | Added: RLVa-1.4.5
 	// Used to determine whether a sidepanel can be shown
 public:
@@ -103,5 +119,17 @@ private:
 	static validate_signal_t mValidateSignal;
 // [/RLVa:KB]
 };
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
+class LLFloaterSidePanelInventoryContainer : public LLFloaterSidePanelContainer
+{
+public:
+	LLFloaterSidePanelInventoryContainer(const LLSD& key, const Params& params = getDefaultParams())
+		: LLFloaterSidePanelContainer(key, params) {}
+	/*virtual*/ ~LLFloaterSidePanelInventoryContainer() {}
+
+	/*virtual*/ void onClose(bool app_quitting);
+};
+// [/SL:KB]
 
 #endif // LL_LLFLOATERSIDEPANELCONTAINER_H

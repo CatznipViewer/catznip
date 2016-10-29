@@ -1,0 +1,9 @@
+[Inventory/AttachmentEdit]
+- added   : "Edit" and "Touch" options to the inventory item context menu
+    -> translations for all languages
+- added   : "Edit", "Touch" and "Take Off / Detach" options to the "Wearing" appearance panel context and gear menus
+    -> translations for all languages
+- added   : "Edit" and "Touch" options to the wearable item context menu
+    -> translations for all languages
+- added   : "Edit" and "Touch" options to the attachment context menu for the "Edit Outfit" appearance panel
+    -> translations for all languages

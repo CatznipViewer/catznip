@@ -1619,6 +1619,17 @@ Lütfen bir dakika içerisinde tekrar oturum açmayı deneyin.
 	<string name="Snapshots" value="Anlık Görüntüler,"/>
 	<string name="No Filters" value="Hayır"/>
 	<string name="Since Logoff" value="- Oturum Kapandıktan Beri"/>
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">Giy</string>
+	<string name="InvAction take_off">Çıkar</string>
+	<string name="InvAction attach">Giy</string>
+	<string name="InvAction detach">Çıkar</string>
+	<string name="InvAction activate">Etkinleştir</string>
+	<string name="InvAction deactivate">Devre Dışı Bırak</string>
+	<string name="InvAction teleport">Işınla</string>
+	<string name="InvAction open">Aç</string>
+
 	<string name="InvFolder My Inventory">
 		Envanterim
 	</string>

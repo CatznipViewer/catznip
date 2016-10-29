@@ -21,6 +21,8 @@
 	<text name="buy_text">
 		Kup za [AMOUNT]L$ od:
 	</text>
+	<panel name="bottom_panel" >
 	<button label="Kup" label_selected="Kup" name="buy_btn" />
 	<button label="Anuluj" label_selected="Anuluj" name="cancel_btn" />
+	</panel>
 </floater>

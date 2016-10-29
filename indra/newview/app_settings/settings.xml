@@ -3478,6 +3478,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>DeclineTaskOfferToTrash</key>
+    <map>
+      <key>Comment</key>
+      <string>Accept inventory offers from objects into the trash when declining</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
   <key>DefaultBlankNormalTexture</key>
   <map>
     <key>Comment</key>
@@ -3808,6 +3819,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>DoubleClickAttachmentAdd</key>
+    <map>
+      <key>Comment</key>
+      <string>Double-clicking an attachment in inventory will add wear it rather than replace wear it</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
+    </map>
     <key>DoubleClickAutoPilot</key>
     <map>
       <key>Comment</key>
@@ -3840,6 +3862,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>1</integer>
+    </map>
+    <key>DoubleClickWearableAdd</key>
+    <map>
+      <key>Comment</key>
+      <string>Double-clicking a clothing wearable in inventory will add wear it rather than replace wear it</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>0</boolean>
     </map>
     <key>DragAndDropToolTipDelay</key>
     <map>
@@ -5387,6 +5420,28 @@
         <key>Value</key>
         <integer>0</integer>
     </map>
+    <key>InventoryDnDCheckFilter</key>
+    <map>
+        <key>Comment</key>
+        <string>Inventory items and folders need to pass the filter before they can be dropped</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <boolean>0</boolean>
+    </map>
+    <key>InventoryFilterStringPerTab</key>
+    <map>
+        <key>Comment</key>
+        <string>Each inventory tab has its own separate filter string</string>
+        <key>Persist</key>
+        <integer>0</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <boolean>1</boolean>
+    </map>
 	<key>InventoryLinking</key>
 	<map>
 		<key>Comment</key>
@@ -5396,7 +5451,7 @@
 		<key>Type</key>
 		<string>Boolean</string>
 		<key>Value</key>
-		<integer>0</integer>
+		<integer>1</integer>
 	</map>
     <key>InventoryOutboxDisplayBoth</key>
     <map>
@@ -5474,6 +5529,28 @@
         <string>U32</string>
         <key>Value</key>
         <integer>200</integer>
+    </map>
+    <key>InventoryReuseUserTab</key>
+    <map>
+        <key>Comment</key>
+        <string>Cache user-added inventory panels when closed</string>
+        <key>Persist</key>
+        <integer>1</integer>
+        <key>Type</key>
+        <string>Boolean</string>
+        <key>Value</key>
+        <boolean>1</boolean>
+    </map>
+    <key>InventoryShowItemClearsFilter</key>
+    <map>
+    	<key>Comment</key>
+    	<string>Clear the current inventory filter whenever the viewer is asked to show an inventory item (e.g. "Find Original") that is currently filtered; otherwise, a new inventory floater will be created</string>
+    	<key>Persist</key>
+    	<integer>1</integer>
+    	<key>Type</key>
+    	<string>Boolean</string>
+    	<key>Value</key>
+    	<boolean>1</boolean>
     </map>
     <key>InventorySortOrder</key>
     <map>
@@ -11874,6 +11951,17 @@
       <key>Value</key>
       <integer>1</integer>
     </map>
+    <key>ShowPropertiesFloaters</key>
+    <map>
+      <key>Comment</key>
+      <string>Shows item properties in a floater rather than the sidebar</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>ShowProfileFloaters</key>
     <map>
       <key>Comment</key>
@@ -12415,6 +12503,17 @@
       <string>Boolean</string>
       <key>Value</key>
       <integer>0</integer>
+    </map>
+    <key>ShowReceivedItemsPanel</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the received items panel on the inventory floater</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
     </map>
     <key>ShowNearClip</key>
     <map>
@@ -16219,6 +16318,17 @@
     <map>
       <key>Comment</key>
       <string>Show inventory window with last inventory offer selected when receiving inventory from other users.</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <integer>1</integer>
+    </map>
+    <key>ShowPurchasedInventory</key>
+    <map>
+      <key>Comment</key>
+      <string>Show the inventory window with the purchase selected when buying an object or its contents</string>
       <key>Persist</key>
       <integer>1</integer>
       <key>Type</key>

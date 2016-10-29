@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -133,9 +134,16 @@ public:
 	virtual void removeBatch(std::vector<LLFolderViewModelItem*>& batch);
 	virtual void move(LLFolderViewModelItem* parent_listener);	
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const;
+	/*virtual*/ BOOL isLink() const;
+// [/SL:KB]
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
 	virtual BOOL isClipboardPasteable() const;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+	/*virtual*/ bool isClipboardCut() const;
+// [/SL:KB]
 	virtual void pasteFromClipboard();
 	virtual void pasteLinkFromClipboard();
 	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
@@ -143,6 +151,10 @@ public:
 	virtual BOOL isUpToDate() const { return TRUE; }
 	virtual bool hasChildren() const { return FALSE; }
 	virtual LLInventoryType::EType getInventoryType() const { return LLInventoryType::IT_NONE; }
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+	/*virtual*/ bool isItemWorn() const { return false; }
+	/*virtual*/ LLAssetType::EType getAssetType() const { return mAssetType; }
+// [/SL:KB]
 	virtual LLWearableType::EType getWearableType() const { return LLWearableType::WT_NONE; }
 	virtual EInventorySortGroup getSortGroup() const { return SG_ITEM; }
 	virtual LLInventoryObject* getInventoryObject() const { return findInvObject(); }
@@ -368,9 +380,12 @@ void LLTaskInvFVBridge::setCreationDate(time_t creation_date_utc)
 
 LLUIImagePtr LLTaskInvFVBridge::getIcon() const
 {
-	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
-
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+/// [/SL:KB]
+//	const BOOL item_is_multi = (mFlags & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS);
+//
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, 0, item_is_multi );
 }
 
 void LLTaskInvFVBridge::openItem()
@@ -590,6 +605,18 @@ BOOL LLTaskInvFVBridge::isItemCopyable() const
 								GP_OBJECT_MANIPULATE);
 }
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+bool LLTaskInvFVBridge::isItemLinkable() const
+{
+	return false;
+}
+
+BOOL LLTaskInvFVBridge::isLink() const
+{
+	return FALSE;
+}
+// [/SL:KB]
+
 BOOL LLTaskInvFVBridge::copyToClipboard() const
 {
 	return FALSE;
@@ -604,6 +631,13 @@ BOOL LLTaskInvFVBridge::isClipboardPasteable() const
 {
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+bool LLTaskInvFVBridge::isClipboardCut() const
+{
+	return false;
+}
+// [/SL:KB]
 
 void LLTaskInvFVBridge::pasteFromClipboard()
 {
@@ -764,6 +798,13 @@ void LLTaskInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 // [/RLVa:KB]
 	}
 	items.push_back(std::string("Task Properties"));
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
+	// If multiple items are selected, only disable properties if we're not showing them in a multi-floater
+	if ( ((flags & FIRST_SELECTED_ITEM) == 0) && (!gSavedSettings.getBOOL("ShowPropertiesFloaters")) )
+	{
+		disabled_items.push_back(std::string("Task Properties"));
+	}
+// [/SL:KB]
 // [RLVa:KB] - Checked: 2010-09-28 (RLVa-1.2.1f) | Added: RLVa-1.2.1f
 	items.push_back(std::string("Task Rename"));
 	if ( (!isItemRenameable()) || ((flags & FIRST_SELECTED_ITEM) == 0) )
@@ -1382,7 +1423,10 @@ public:
 
 LLUIImagePtr LLTaskWearableBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(mAssetType, mInventoryType, mFlags, FALSE );
 }
 
 ///----------------------------------------------------------------------------
@@ -1413,7 +1457,10 @@ LLTaskMeshBridge::LLTaskMeshBridge(
 
 LLUIImagePtr LLTaskMeshBridge::getIcon() const
 {
-	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-08-24 (Catznip-2.8)
+	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, mFlags);
+// [/SL:KB]
+//	return LLInventoryIcon::getIcon(LLAssetType::AT_MESH, LLInventoryType::IT_MESH, 0, FALSE);
 }
 
 void LLTaskMeshBridge::openItem()
@@ -1614,11 +1661,11 @@ LLPanelObjectInventory::LLPanelObjectInventory(const LLPanelObjectInventory::Par
 	// Setup context menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLPanelObjectInventory::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&do_nothing));
 	mCommitCallbackRegistrar.add("Inventory.AttachObject", boost::bind(&do_nothing));
 	mCommitCallbackRegistrar.add("Inventory.BeginIMSession", boost::bind(&do_nothing));
-	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+//	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
 }
 
 // Destroys the object

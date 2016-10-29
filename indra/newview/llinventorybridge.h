@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,7 +44,7 @@ class LLInventoryFilter;
 class LLInventoryPanel;
 class LLInventoryModel;
 class LLMenuGL;
-class LLCallingCardObserver;
+//class LLCallingCardObserver;
 class LLViewerJointAttachment;
 class LLFolderView;
 
@@ -114,8 +115,14 @@ public:
 	virtual void removeBatch(std::vector<LLFolderViewModelItem*>& batch);
 	virtual void move(LLFolderViewModelItem* new_parent_bridge) {}
 	virtual BOOL isItemCopyable() const { return FALSE; }
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	virtual bool isItemLinkable() const { return FALSE; }
+// [/SL:KB]
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	/*virtual*/ bool isClipboardCut() const;
+// [/SL:KB]
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	virtual void pasteFromClipboard() {}
@@ -133,7 +140,10 @@ public:
 	virtual LLWearableType::EType getWearableType() const { return LLWearableType::WT_NONE; }
         EInventorySortGroup getSortGroup()  const { return SG_ITEM; }
 	virtual LLInventoryObject* getInventoryObject() const;
-
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+	/*virtual*/ bool isItemWorn() const;
+	/*virtual*/ LLAssetType::EType getAssetType() const;
+// [/SL:KB]
 
 	//--------------------------------------------------------------------
 	// Convenience functions for adding various common menu options.
@@ -160,6 +170,10 @@ protected:
 	BOOL isCOFFolder() const;       // true if COF or descendant of
 	BOOL isInboxFolder() const;     // true if COF or descendant of   marketplace inbox
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
+	BOOL isLibraryInventory() const;
+	BOOL isLostInventory() const;
+// [/SL:KB]
 	BOOL isMarketplaceListingsFolder() const;     // true if descendant of Marketplace listings folder
 
 	virtual BOOL isItemPermissive() const;
@@ -185,6 +199,10 @@ protected:
 // [/SL:KB]
 	bool						mIsLink;
 	LLTimer						mTimeSinceRequestStart;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	mutable int					mClipboardGeneration;
+	mutable bool				mIsClipboardCut;			// Only access this through isClipboardCut()
+// [/SL:KB]
 	mutable std::string			mDisplayName;
 	mutable std::string			mSearchableName;
 
@@ -217,10 +235,14 @@ public:
 class LLItemBridge : public LLInvFVBridge
 {
 public:
-	LLItemBridge(LLInventoryPanel* inventory, 
-				 LLFolderView* root,
-				 const LLUUID& uuid) :
-		LLInvFVBridge(inventory, root, uuid) {}
+//	LLItemBridge(LLInventoryPanel* inventory, 
+//				 LLFolderView* root,
+//				 const LLUUID& uuid) :
+//		LLInvFVBridge(inventory, root, uuid) {}
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	LLItemBridge(LLInventoryPanel* inventory, LLFolderView* root, const LLUUID& uuid, U32 flags = 0x0)
+		: LLInvFVBridge(inventory, root, uuid), mFlags(flags) {}
+// [/SL:KB]
 
 	typedef boost::function<void(std::string& slurl)> slurl_callback_t;
 
@@ -229,6 +251,9 @@ public:
 	virtual void restoreItem();
 	virtual void restoreToWorld();
 	virtual void gotoItem();
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	virtual void findLinks();
+// [/SL:KB]
 	virtual LLUIImagePtr getIcon() const;
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
@@ -238,6 +263,9 @@ public:
 	virtual BOOL renameItem(const std::string& new_name);
 	virtual BOOL removeItem();
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const;
+// [/SL:KB]
 	virtual bool hasChildren() const { return FALSE; }
 	virtual BOOL isUpToDate() const { return TRUE; }
 	virtual LLUIImagePtr getIconOverlay() const;
@@ -253,6 +281,9 @@ protected:
 	virtual void buildDisplayName() const;
 	void doActionOnCurSelectedLandmark(LLLandmarkList::loaded_callback_t cb);
 
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+	U32 mFlags;
+// [/SL:KB]
 private:
 	void doShowOnMap(LLLandmark* landmark);
 };
@@ -311,6 +342,9 @@ public:
 	virtual BOOL isItemMovable() const ;
 	virtual BOOL isUpToDate() const;
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const;
+// [/SL:KB]
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	
@@ -349,6 +383,10 @@ protected:
 	BOOL checkFolderForContentsOfType(LLInventoryModel* model, LLInventoryCollectFunctor& typeToCheck);
 
 	void modifyOutfit(BOOL append);
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	void wearItems();
+	static void wearItemsFinal(const LLUUID& idFolder);
+// [/SL:KB]
 	void determineFolderType();
 
 	void dropToFavorites(LLInventoryItem* inv_item);
@@ -390,7 +428,10 @@ public:
 	virtual void openItem();
 	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
 	virtual void performAction(LLInventoryModel* model, std::string action);
-	bool canSaveTexture(void);
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2013-05-18 (Catznip-3.4)
+	bool canSaveTexture(void) const;
+// [/SL:KB]
+//	bool canSaveTexture(void);
 };
 
 class LLSoundBridge : public LLItemBridge
@@ -418,7 +459,7 @@ public:
 	virtual LLUIImagePtr getIcon() const;
 	virtual void openItem();
 protected:
-	BOOL mVisited;
+//	BOOL mVisited;
 };
 
 class LLCallingCardBridge : public LLItemBridge
@@ -438,10 +479,10 @@ public:
 							EDragAndDropType cargo_type,
 							void* cargo_data,
 							std::string& tooltip_msg);
-	void refreshFolderViewItem();
-	void checkSearchBySuffixChanges();
-protected:
-	LLCallingCardObserver* mObserver;
+//	void refreshFolderViewItem();
+//	void checkSearchBySuffixChanges();
+//protected:
+//	LLCallingCardObserver* mObserver;
 };
 
 class LLNotecardBridge : public LLItemBridge
@@ -495,6 +536,9 @@ public:
 				   U32 flags);
 	virtual LLUIImagePtr	getIcon() const;
 	virtual void			performAction(LLInventoryModel* model, std::string action);
+// [SL:KB] - Patch: Inventory-MultiAttach | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void            performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
+// [/SL:KB]
 	virtual void			openItem();
     virtual BOOL isItemWearable() const { return TRUE; }
 	virtual std::string getLabelSuffix() const;
@@ -503,8 +547,8 @@ public:
 	LLInventoryObject* getObject() const;
 protected:
 	static LLUUID sContextMenuItemID;  // Only valid while the context menu is open.
-	U32 mAttachPt;
-	BOOL mIsMultiObject;
+//	U32 mAttachPt;
+//	BOOL mIsMultiObject;
 };
 
 class LLLSLTextBridge : public LLItemBridge
@@ -528,6 +572,9 @@ public:
 					 LLWearableType::EType wearable_type);
 	virtual LLUIImagePtr getIcon() const;
 	virtual void	performAction(LLInventoryModel* model, std::string action);
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2010-03-29 (Catznip-2.0)
+	/*virtual*/ void    performActionBatch(LLInventoryModel* model, std::string action, std::list<LLFolderViewModelItemInventory*>& batch);
+// [/SL:KB]
 	virtual void	openItem();
     virtual BOOL isItemWearable() const { return TRUE; }
 	virtual void	buildContextMenu(LLMenuGL& menu, U32 flags);
@@ -550,6 +597,11 @@ public:
 	static BOOL		canRemoveFromAvatar( void* userdata );
 	static void 	removeAllClothesFromAvatar();
 	void			removeFromAvatar();
+
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	static  bool    doWearOn(LLInventoryPanel* pPanel, const LLSD& sdParam);
+	static  bool    getWearOnLabel(LLInventoryPanel* pPanel, LLUICtrl* pCtrl, const LLSD& sdParam);
+// [/SL:KB]
 protected:
 	LLAssetType::EType mAssetType;
 	LLWearableType::EType  mWearableType;

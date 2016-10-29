@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,6 +29,9 @@
 
 #include "llfolderview.h"
 #include "llfolderviewmodel.h"
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+#include "llfolderviewmodelinventorycommon.h"
+// [/SL:KB]
 #include "llclipboard.h" // *TODO: remove this once hack below gone.
 #include "llkeyboard.h"
 #include "lllineeditor.h"
@@ -158,6 +162,9 @@ LLFolderView::LLFolderView(const Params& p)
 	mPinningSelectedItem(FALSE),
 	mNeedsAutoSelect( FALSE ),
 	mAutoSelectOverride(FALSE),
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen(false),
+// [/SL:KB]
 	mNeedsAutoRename(FALSE),
 	mShowSelectionContext(FALSE),
 	mShowSingleSelection(FALSE),
@@ -165,7 +172,18 @@ LLFolderView::LLFolderView(const Params& p)
 	mSignalSelectCallback(0),
 	mMinWidth(0),
 	mDragAndDropThisFrame(FALSE),
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	mDragStartX(0),
+	mDragStartY(0),
+// [/SL:KB]
 	mCallbackRegistrar(NULL),
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mEnableCallbackRegistrar(NULL),
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	mFilterState(FILTER_STOPPED),
+	mFilterStateChanged(NULL),
+// [/SL:KB]
 	mUseEllipses(p.use_ellipses),
 	mDraggingOverItem(NULL),
 	mStatusTextBox(NULL),
@@ -267,6 +285,10 @@ LLFolderView::~LLFolderView( void )
 
 	//mViewModel->setFolderView(NULL);
 	mViewModel = NULL;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	delete mFilterStateChanged;
+// [/SL:KB]
 }
 
 BOOL LLFolderView::canFocusChildren() const
@@ -279,12 +301,39 @@ void LLFolderView::addFolder( LLFolderViewFolder* folder)
 	LLFolderViewFolder::addFolder(folder);
 }
 
+// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2)
 void LLFolderView::closeAllFolders()
 {
+	folders_t openTopLevel;
+	for (folders_t::const_iterator itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	{
+		LLFolderViewFolder* pFolder = *itFolder;
+		if (pFolder->isOpen())
+			openTopLevel.push_back(pFolder);
+	}
+//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
+
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+	for (folders_t::const_iterator itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	{
+		(*itFolder)->setOpen(TRUE);
+	}
+//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
+
+	clearSelection();
+	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;
+
+	mScrollContainer->goToTop();
 	arrangeAll();
 }
+// [/SL:KB]
+//void LLFolderView::closeAllFolders()
+//{
+//	// Close all the folders
+//	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
+//	arrangeAll();
+//}
 
 void LLFolderView::openTopLevelFolders()
 {
@@ -610,6 +659,24 @@ std::set<LLFolderViewItem*> LLFolderView::getSelectionList() const
 	return selection;
 }
 
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+void LLFolderView::setDragStart(S32 screen_x, S32 screen_y)
+{
+	mDragStartX = screen_x;
+	mDragStartY = screen_y;
+}
+
+bool LLFolderView::isOverDragThreshold(S32 screen_x, S32 screen_y)
+{
+	static LLCachedControl<S32> drag_and_drop_threshold(*LLUI::sSettingGroups["config"], "DragAndDropDistanceThreshold", 3);
+	
+	S32 dX = screen_x - mDragStartX;
+	S32 dY = screen_y - mDragStartY;
+	
+	return (dX * dX) + (dY * dY) > drag_and_drop_threshold * drag_and_drop_threshold;
+}
+// [/SL:KB]
+
 bool LLFolderView::startDrag()
 {
 	std::vector<LLFolderViewModelItem*> selected_items;
@@ -877,7 +944,11 @@ BOOL LLFolderView::canCopy() const
 	for (selected_items_t::const_iterator selected_it = mSelectedItems.begin(); selected_it != mSelectedItems.end(); ++selected_it)
 	{
 		const LLFolderViewItem* item = *selected_it;
-		if (!item->getViewModelItem()->isItemCopyable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-09-19 (Catznip-3.6)
+		const LLFolderViewFolder* folder = dynamic_cast<const LLFolderViewFolder*>(item);
+		if ( (!item->getViewModelItem()->isItemCopyable()) && ((folder) || (!item->getViewModelItem()->isItemLinkable())) )
+// [/SL:KB]
+//		if (!item->getViewModelItem()->isItemCopyable())
 		{
 			return FALSE;
 		}
@@ -919,7 +990,10 @@ BOOL LLFolderView::canCut() const
 		const LLFolderViewItem* item = *selected_it;
 		const LLFolderViewModelItem* listener = item->getViewModelItem();
 
-		if (!listener || !listener->isItemRemovable())
+//		if (!listener || !listener->isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2015-07-15 (Catznip-3.8)
+		if (!listener || !listener->isItemMovable())
+// [/SL:KB]
 		{
 			return FALSE;
 		}
@@ -1334,6 +1408,14 @@ BOOL LLFolderView::handleMouseDown( S32 x, S32 y, MASK mask )
 
 BOOL LLFolderView::search(LLFolderViewItem* first_item, const std::string &search_string, BOOL backward)
 {
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-05-29 (Catznip-3.4)
+	// It's possible that "first_item->getVisible() == false" in which case we'd end up in an eternal loop further down
+	if ( (first_item) && (!first_item->getVisible()) )
+	{
+		first_item = NULL;
+	}
+// [/SL:KB]
+
 	// get first selected item
 	LLFolderViewItem* search_item = first_item;
 
@@ -1422,6 +1504,12 @@ BOOL LLFolderView::handleRightMouseDown( S32 x, S32 y, MASK mask )
         {
 			mCallbackRegistrar->pushScope();
         }
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+		if (mEnableCallbackRegistrar)
+		{
+			mEnableCallbackRegistrar->pushScope();
+		}
+// [/SL:KB]
 
 		updateMenuOptions(menu);
 	   
@@ -1431,6 +1519,13 @@ BOOL LLFolderView::handleRightMouseDown( S32 x, S32 y, MASK mask )
         {
 			mCallbackRegistrar->popScope();
 	}
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+		if (mEnableCallbackRegistrar)
+		{
+			mEnableCallbackRegistrar->popScope();
+		}
+// [/SL:KB]
+
 	}
 	else
 	{
@@ -1612,6 +1707,15 @@ void LLFolderView::setShowSingleSelection(bool show)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+boost::signals2::connection LLFolderView::setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb)
+{
+	if (!mFilterStateChanged)
+		mFilterStateChanged = new filterstate_changed_signal_t();
+	return mFilterStateChanged->connect(cb);
+}
+// [/SL:KB]
+
 static LLTrace::BlockTimerStatHandle FTM_AUTO_SELECT("Open and Select");
 static LLTrace::BlockTimerStatHandle FTM_INVENTORY("Inventory");
 
@@ -1630,12 +1734,36 @@ void LLFolderView::update()
 
 	LLFolderViewFilter& filter_object = getFolderViewModel()->getFilter();
 
-	if (filter_object.isModified() && filter_object.isNotDefault() && mParentPanel.get()->getVisible())
+//	if (filter_object.isModified() && filter_object.isNotDefault() && mParentPanel.get()->getVisible())
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	if (filter_object.isModified())
 	{
-		mNeedsAutoSelect = TRUE;
+		bool fNotDefault = filter_object.isNotDefault();
+		if ( (fNotDefault) && (mParentPanel.get()->getVisible()) )
+		{
+			mNeedsAutoSelect = TRUE;
+		}
+
+		EFilterState filter_state = (fNotDefault) ? FILTER_NONDEFAULT : FILTER_DEFAULT;
+		if (mFilterState != filter_state)
+		{
+			mFilterState = filter_state;
+			if (mFilterStateChanged)
+			{
+				(*mFilterStateChanged)(this, mFilterState);
+			}
+		}
 	}
+// [/SL:KB]
+//	if (filter_object.isModified() && filter_object.isNotDefault())
+//	{
+//		mNeedsAutoSelect = TRUE;
+//	}
     
 	// Filter to determine visibility before arranging
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	mNeedsAutoOpen = (mNeedsAutoSelect) && (filter_object.showAllResults());
+// [/SL:KB]
 	filter(filter_object);
     
 	// Clear the modified setting on the filter only if the filter finished after running the filter process
@@ -1643,10 +1771,21 @@ void LLFolderView::update()
     if (filter_object.isModified() && (!filter_object.isTimedOut()))
 	{
 		filter_object.clearModified();
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+		mFilterState = FILTER_STOPPED;
+		if (mFilterStateChanged)
+		{
+			(*mFilterStateChanged)(this, mFilterState);
+		}
+// [/SL:KB]
 	}
 
 	// automatically show matching items, and select first one if we had a selection
-	if (mNeedsAutoSelect)
+//	if (mNeedsAutoSelect)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	if ( (mNeedsAutoSelect) && (hasVisibleChildren()) )
+// [/SL:KB]
 	{
 		LL_RECORD_BLOCK_TIME(FTM_AUTO_SELECT);
 		// select new item only if a filtered item not currently selected and there was a selection
@@ -1659,15 +1798,15 @@ void LLFolderView::update()
 			applyFunctorRecursively(functor);
 		}
 
-		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
-		// Used by LLPlacesFolderView.
-		if (filter_object.showAllResults())
-		{
-			// these are named variables to get around gcc not binding non-const references to rvalues
-			// and functor application is inherently non-const to allow for stateful functors
-			LLOpenFilteredFolders functor;
-			applyFunctorRecursively(functor);
-		}
+//		// Open filtered folders for folder views with mAutoSelectOverride=TRUE.
+//		// Used by LLPlacesFolderView.
+//		if (filter_object.showAllResults())
+//		{
+//			// these are named variables to get around gcc not binding non-const references to rvalues
+//			// and functor application is inherently non-const to allow for stateful functors
+//			LLOpenFilteredFolders functor;
+//			applyFunctorRecursively(functor);
+//		}
 
 		scrollToShowSelection();
 	}
@@ -1832,13 +1971,60 @@ void LLFolderView::updateMenuOptions(LLMenuGL* menu)
 	// Successively filter out invalid options
 	U32 multi_select_flag = (mSelectedItems.size() > 1 ? ITEM_IN_MULTI_SELECTION : 0x0);
 	U32 flags = multi_select_flag | FIRST_SELECTED_ITEM;
-	for (selected_items_t::iterator item_itor = mSelectedItems.begin();
-			item_itor != mSelectedItems.end();
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
+	// NOTE-Catznip: this is really a bad hack but I can't really think of a better way short of just rewriting all menu item handling
+	U32 cntWearable = 0, cntWorn = 0;
+	for (selected_items_t::const_iterator itSel = mSelectedItems.begin(); itSel != mSelectedItems.end(); ++itSel)
+	{
+		const LLFolderViewModelItemInventoryCommon* pFVInvItem = (*itSel)->getViewModelItem<LLFolderViewModelItemInventoryCommon>();
+		if (!pFVInvItem)
+			continue;
+
+		LLAssetType::EType typeItem = pFVInvItem->getAssetType(); bool fWearable = false;
+		if (LLAssetType::AT_OBJECT == typeItem)
+		{
+			flags |= ATTACHMENT_SELECTION;
+			fWearable = true;
+		}
+		else if (LLAssetType::AT_CLOTHING == typeItem)
+		{
+			flags |= CLOTHING_SELECTION;
+			fWearable = true;
+		}
+		else if (LLAssetType::AT_BODYPART == typeItem)
+		{
+			flags |= BODYPART_SELECTION;
+			fWearable = true;
+		}
+
+		if (fWearable)
+		{
+			if (pFVInvItem->isItemWorn())
+				cntWorn++;
+			cntWearable++;
+		}
+		else
+		{
+			flags |= NONWEARABLE_SELECTION;
+		}
+	}
+
+	if ( (cntWearable) && (cntWorn) )
+	{
+		flags |= (cntWearable == cntWorn) ? WORN_SELECTION : PARTIAL_WORN_SELECTION;
+	}
+// [/SL:KB]
+
+	for (selected_items_t::iterator item_itor = mSelectedItems.begin(); 
+			item_itor != mSelectedItems.end(); 
 			++item_itor)
 	{
 		LLFolderViewItem* selected_item = (*item_itor);
 		selected_item->buildContextMenu(*menu, flags);
-		flags = multi_select_flag;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
+		flags &= ~FIRST_SELECTED_ITEM;
+// [/SL:KB]
+//		flags = multi_select_flag;
 	}
 
 	// This adds a check for restrictions based on the entire

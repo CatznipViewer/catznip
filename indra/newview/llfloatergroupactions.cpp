@@ -71,8 +71,11 @@ S32 LLFloaterGroupCreateNotice::notifyParent(const LLSD& sdInfo)
 		const LLViewerInventoryItem* pItem = gInventory.getItem(sdInfo["item_id"].asUUID());
 		if (pItem)
 		{
-			bool fMulti = pItem->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS;
-			std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags(), fMulti);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+			std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags());
+// [/SL:KB]
+//			bool fMulti = pItem->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS;
+//			std::string strIconName = LLInventoryIcon::getIconName(pItem->getType(), pItem->getInventoryType(), pItem->getFlags(), fMulti);
 
 			m_idAttachItem = pItem->getUUID();
 			m_pAttachIconCtrl->setValue(strIconName);

@@ -5,6 +5,7 @@
 * $LicenseInfo:firstyear=2011&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -71,8 +72,11 @@ BOOL LLPanelMarketplaceInbox::postBuild()
 
 void LLPanelMarketplaceInbox::onSelectionChange()
 {
-	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-		
+//	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	sidepanel_inventory->updateVerbs();
 }
 
@@ -111,7 +115,11 @@ LLInventoryPanel * LLPanelMarketplaceInbox::setupInventoryPanel()
 
 void LLPanelMarketplaceInbox::onFocusReceived()
 {
-	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+// [/SL:KB]
 	if (sidepanel_inventory)
 	{
 		sidepanel_inventory->clearSelections(true, false);
@@ -197,7 +205,12 @@ std::string LLPanelMarketplaceInbox::getBadgeString() const
 {
 	std::string item_count_str("");
 
-	LLPanel *inventory_panel = LLFloaterSidePanelContainer::getPanel("inventory");
+//	LLPanel *inventory_panel = LLFloaterSidePanelContainer::getPanel("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+	LLPanel* inventory_panel = (sidepanel_inventory) ? sidepanel_inventory->getActivePanel() : NULL;
+// [/SL:KB]
 
 	// If the inbox is visible, and the side panel is collapsed or expanded and not the inventory panel
 	if (getParent()->getVisible() && inventory_panel && !inventory_panel->isInVisibleChain())

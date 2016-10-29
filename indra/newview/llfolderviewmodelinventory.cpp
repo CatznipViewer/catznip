@@ -233,7 +233,10 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
 	}
      */
     
-	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+//	const bool passed_filter_folder = (getInventoryType() == LLInventoryType::IT_CATEGORY) ? filter.checkFolder(this) : true;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	const bool passed_filter_folder = ((getInventoryType() == LLInventoryType::IT_CATEGORY) && (!isLink())) ? filter.checkFolder(this) : true;
+// [/SL:KB]
 	setPassedFolderFilter(passed_filter_folder, filter_generation);
 
 	bool continue_filtering = true;
@@ -259,6 +262,16 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
         // This is where filter check on the item done (CHUI-849)
 		const bool passed_filter = filter.check(this);
 		setPassedFilter(passed_filter, filter_generation, filter.getStringMatchOffset(this), filter.getFilterStringSize());
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+		if ( ((passed_filter) || (descendantsPassedFilter(filter_generation))) && (mFolderViewItem->getRoot()) && (mFolderViewItem->getRoot()->needsAutoOpen()) )
+		{
+			LLFolderViewFolder* pFolder = dynamic_cast<LLFolderViewFolder*>(mFolderViewItem);
+			if (!pFolder)
+				pFolder = mFolderViewItem->getParentFolder();
+			if (pFolder)
+				pFolder->setOpenArrangeRecursively(TRUE, LLFolderViewFolder::RECURSE_UP);
+		}
+// [/SL:KB]
         continue_filtering = !filter.isTimedOut();
 	}
     return continue_filtering;
@@ -373,8 +386,15 @@ bool LLInventorySort::operator()(const LLFolderViewModelItemInventory* const& a,
 	}
 }
 
+// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-20 (Catznip-3.5)
 LLFolderViewModelItemInventory::LLFolderViewModelItemInventory( class LLFolderViewModelInventory& root_view_model ) :
-    LLFolderViewModelItemCommon(root_view_model),
-    mPrevPassedAllFilters(false)
+	LLFolderViewModelItemInventoryCommon(root_view_model),
+	mPrevPassedAllFilters(false)
 {
 }
+// [/SL:KB]
+//LLFolderViewModelItemInventory::LLFolderViewModelItemInventory( class LLFolderViewModelInventory& root_view_model ) :
+//    LLFolderViewModelItemCommon(root_view_model),
+//    mPrevPassedAllFilters(false)
+//{
+//}

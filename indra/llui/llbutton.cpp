@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -626,12 +627,28 @@ BOOL LLButton::handleHover(S32 x, S32 y, MASK mask)
 
 void LLButton::getOverlayImageSize(S32& overlay_width, S32& overlay_height)
 {
-	overlay_width = mImageOverlay->getWidth();
-	overlay_height = mImageOverlay->getHeight();
+// [SL:KB] - Patch: Control-Button | Checked: 2012-08-13 (Catznip-3.3)
+	if (mImageOverlay.notNull())
+	{
+		overlay_width = mImageOverlay->getWidth();
+		overlay_height = mImageOverlay->getHeight();
 
-	F32 scale_factor = llmin((F32)getRect().getWidth() / (F32)overlay_width, (F32)getRect().getHeight() / (F32)overlay_height, 1.f);
-	overlay_width = ll_round((F32)overlay_width * scale_factor);
-	overlay_height = ll_round((F32)overlay_height * scale_factor);
+		F32 scale_factor = llmin((F32)getRect().getWidth() / (F32)overlay_width, (F32)getRect().getHeight() / (F32)overlay_height, 1.f);
+		overlay_width = llround((F32)overlay_width * scale_factor);
+		overlay_height = llround((F32)overlay_height * scale_factor);
+	}
+	else
+	{
+		overlay_width = 0;
+		overlay_height = 0;
+	}
+// [/SL:KB]
+//	overlay_width = mImageOverlay->getWidth();
+//	overlay_height = mImageOverlay->getHeight();
+//
+//	F32 scale_factor = llmin((F32)getRect().getWidth() / (F32)overlay_width, (F32)getRect().getHeight() / (F32)overlay_height, 1.f);
+//	overlay_width = llround((F32)overlay_width * scale_factor);
+//	overlay_height = llround((F32)overlay_height * scale_factor);
 }
 
 

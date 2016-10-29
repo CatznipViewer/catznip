@@ -154,6 +154,9 @@ public:
 	void addParticularFriendObserver(const LLUUID& buddy_id, LLFriendObserver* observer);
 	void removeParticularFriendObserver(const LLUUID& buddy_id, LLFriendObserver* observer);
 	void notifyParticularFriendObservers(const LLUUID& buddy_id);
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+	bool updateCallingCards(const LLUUID& buddy_id);
+// [/SL:KB]
 
 	/**
 	 * Stores flag for change and id of object change applies to

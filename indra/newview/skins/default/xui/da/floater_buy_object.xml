@@ -24,6 +24,8 @@
 	<text name="buy_name_text">
 		[NAME]?
 	</text>
+	<panel name="bottom_panel" >
 	<button label="Køb" label_selected="Køb" name="buy_btn"/>
 	<button label="Annullér" label_selected="Annullér" name="cancel_btn"/>
+	</panel>
 </floater>

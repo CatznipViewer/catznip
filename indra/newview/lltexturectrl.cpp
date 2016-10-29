@@ -43,7 +43,7 @@
 #include "llinventorymodelbackgroundfetch.h"
 #include "llinventoryobserver.h"
 #include "llinventorypanel.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "lllineeditor.h"
 #include "llui.h"
 #include "llviewerinventory.h"

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -118,6 +119,12 @@ public:
     LLFolderViewGroupedItemModel* getFolderViewGroupedItemModel() { return mGroupedItemModel; }
     const LLFolderViewGroupedItemModel* getFolderViewGroupedItemModel() const { return mGroupedItemModel; }
     
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	enum EFilterState { FILTER_STOPPED /* Filter isn't running */, FILTER_DEFAULT, FILTER_NONDEFAULT /* Filter is running and marked as default or non-default respectively */ };
+	typedef boost::signals2::signal<void (LLFolderView*, EFilterState)> filterstate_changed_signal_t;
+	boost::signals2::connection setFilterStateChangedCallback(const filterstate_changed_signal_t::slot_type& cb);
+// [/SL:KB]
+
 	typedef boost::signals2::signal<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)> signal_t;
 	void setSelectCallback(const signal_t::slot_type& cb) { mSelectSignal.connect(cb); }
 	void setReshapeCallback(const signal_t::slot_type& cb) { mReshapeSignal.connect(cb); }
@@ -167,6 +174,10 @@ public:
 	void addToSelectionList(LLFolderViewItem* item);
 	void removeFromSelectionList(LLFolderViewItem* item);
 
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	void setDragStart(S32 screen_x, S32 screen_y);
+	bool isOverDragThreshold(S32 screen_x, S32 screen_y);
+// [/SL:KB]
 	bool startDrag();
 	void setDragAndDropThisFrame() { mDragAndDropThisFrame = TRUE; }
 	void setDraggingOverItem(LLFolderViewItem* item) { mDraggingOverItem = item; }
@@ -230,14 +241,19 @@ public:
 	void	update();						// needs to be called periodically (e.g. once per frame)
 
 	BOOL needsAutoSelect() { return mNeedsAutoSelect && !mAutoSelectOverride; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	bool needsAutoOpen() const { return mNeedsAutoOpen; }
+// [/SL:KB]
 	BOOL needsAutoRename() { return mNeedsAutoRename; }
 	void setNeedsAutoRename(BOOL val) { mNeedsAutoRename = val; }
 	void setPinningSelectedItem(BOOL val) { mPinningSelectedItem = val; }
 	void setAutoSelectOverride(BOOL val) { mAutoSelectOverride = val; }
 
 	bool showItemLinkOverlays() { return mShowItemLinkOverlays; }
-
 	void setCallbackRegistrar(LLUICtrl::CommitCallbackRegistry::ScopedRegistrar* registrar) { mCallbackRegistrar = registrar; }
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	void setEnableCallbackRegistrar(LLUICtrl::EnableCallbackRegistry::ScopedRegistrar* registrar) { mEnableCallbackRegistrar = registrar; }
+// [/SL:KB]
 
 	LLPanel* getParentPanel() { return mParentPanel.get(); }
 	// DEBUG only
@@ -292,6 +308,9 @@ protected:
 									mShowItemLinkOverlays,
 									mShowSelectionContext,
 									mShowSingleSelection;
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+	bool							mNeedsAutoOpen;
+// [/SL:KB]
 
 	// Renaming variables and methods
 	LLFolderViewItem*				mRenameItem;  // The item currently being renamed
@@ -311,11 +330,20 @@ protected:
 	signal_t						mReshapeSignal;
 	S32								mSignalSelectCallback;
 	S32								mMinWidth;
+// [SL:KB] - Patch: Inventory-DragDrop | Checked: 2014-02-04 (Catznip-3.6)
+	S32                             mDragStartX;
+	S32                             mDragStartY;
+// [/SL:KB]
 	
 	LLHandle<LLPanel>               mParentPanel;
 	
 	LLFolderViewModelInterface*		mViewModel;
     LLFolderViewGroupedItemModel*   mGroupedItemModel;
+
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-11 (Catznip-3.6)
+	EFilterState					mFilterState;
+	filterstate_changed_signal_t*	mFilterStateChanged;
+// [/SL:KB]
 
 	/**
 	 * Is used to determine if we need to cut text In LLFolderViewItem to avoid horizontal scroll.
@@ -329,6 +357,9 @@ protected:
 	LLFolderViewItem*				mDraggingOverItem; // See EXT-719
 
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar* mCallbackRegistrar;
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar* mEnableCallbackRegistrar;
+// [/SL:KB]
 	
 public:
 	static F32 sAutoOpenTime;
@@ -413,5 +444,16 @@ public:
 const U32 SUPPRESS_OPEN_ITEM = 0x1;
 const U32 FIRST_SELECTED_ITEM = 0x2;
 const U32 ITEM_IN_MULTI_SELECTION = 0x4;
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
+const U32 BODYPART_SELECTION = 0x10;			// Selection contains AT_BODYPART items (at least one)
+const U32 CLOTHING_SELECTION = 0x20;			// Selection contains AT_CLOTHING items (at least one)
+const U32 ATTACHMENT_SELECTION = 0x40;			// Selection contains AT_OBJECT items (at least one)
+const U32 NONWEARABLE_SELECTION = 0x80;			// Selection contains non-wearable items (at least one)
+const U32 WEARABLE_SELECTION_MASK = 0x70;		// "Selection has at least one wearable item"
+
+const U32 WORN_SELECTION = 0x100;				// All wearable items in the selection are worn
+const U32 PARTIAL_WORN_SELECTION = 0x200;		// Some wearable items in the selection are worn
+const U32 WORN_SELECTION_MASK = 0x300;			// "Selection has at least one worn item"
+// [/SL:KB]
 
 #endif // LL_LLFOLDERVIEW_H

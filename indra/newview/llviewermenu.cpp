@@ -65,7 +65,7 @@
 #include "llfloaterbuycontents.h"
 #include "llbuycurrencyhtml.h"
 #include "llfloatergodtools.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llfloaterimcontainer.h"
 #include "llfloaterland.h"
 #include "llfloaterimnearbychat.h"
@@ -96,6 +96,9 @@
 #include "llpanellogin.h"
 // [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
 #include "llfloaterblocked.h"
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
+#include "llpanelmaininventory.h"
 // [/SL:KB]
 //#include "llpanelblockedlist.h"
 #include "llmarketplacefunctions.h"
@@ -2896,6 +2899,103 @@ void handle_object_edit()
 	//LLFirstUse::useBuild();
 	return;
 }
+
+// [SL:KB] - Patch: Inventory-AttachmentActions - Checked: 2012-05-05 (Catznip-3.3)
+void handle_attachment_edit(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (isAgentAvatarValid()) && (pItem) )
+	{
+		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+		if (pAttachObj)
+		{
+			LLSelectMgr::getInstance()->deselectAll();
+			LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
+
+			handle_object_edit();
+		}
+	}
+}
+
+void handle_item_edit(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (pItem) && (enable_item_edit(idItem)) )
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+				LLAgentWearables::editWearable(idItem);
+				break;
+			case LLAssetType::AT_OBJECT:
+				handle_attachment_edit(idItem);
+				break;
+			default:
+				break;
+		}
+	}
+}
+
+bool enable_item_edit(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if (pItem)
+	{
+		switch (pItem->getType())
+		{
+			case LLAssetType::AT_BODYPART:
+			case LLAssetType::AT_CLOTHING:
+				return gAgentWearables.isWearableModifiable(idItem);
+			case LLAssetType::AT_OBJECT:
+				return true;
+			default:
+				break;
+		}
+	}
+	return false;
+}
+
+void handle_attachment_touch(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (pItem) && (isAgentAvatarValid()) && (enable_attachment_touch(idItem)) )
+	{
+		LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+		if (pAttachObj)
+		{
+			LLSelectMgr::getInstance()->deselectAll();
+
+			LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->selectObjectAndFamily(pAttachObj);
+			if (!LLToolMgr::getInstance()->inBuildMode())
+			{
+				struct SetTransient : public LLSelectedNodeFunctor
+				{
+					bool apply(LLSelectNode* node)
+					{
+						node->setTransient(TRUE);
+						return true;
+					}
+				} f;
+				hSel->applyToNodes(&f);
+			}
+
+			handle_object_touch();
+		}
+	}
+}
+
+bool enable_attachment_touch(const LLUUID& idItem)
+{
+	const LLInventoryItem* pItem = gInventory.getItem(idItem);
+	if ( (isAgentAvatarValid()) && (pItem) && (LLAssetType::AT_OBJECT == pItem->getType()) )
+	{
+		const LLViewerObject* pAttachObj = gAgentAvatarp->getWornAttachment(pItem->getLinkedUUID());
+		return (pAttachObj) && (pAttachObj->flagHandleTouch());
+	}
+	return false;
+}
+// [/SL:KB]
 
 void handle_object_inspect()
 {
@@ -10039,7 +10139,10 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLGoToObject(), "GoToObject");
 	commit.add("PayObject", boost::bind(&handle_give_money_dialog));
 
-	commit.add("Inventory.NewWindow", boost::bind(&LLFloaterInventory::showAgentInventory));
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-07 (Catznip-3.2)
+	commit.add("Inventory.NewWindow", boost::bind(&LLPanelMainInventory::newWindow));
+// [/SL:KB]
+//	commit.add("Inventory.NewWindow", boost::bind(&LLFloaterInventory::showAgentInventory));
 
 	enable.add("EnablePayObject", boost::bind(&enable_pay_object));
 	enable.add("EnablePayAvatar", boost::bind(&enable_pay_avatar));

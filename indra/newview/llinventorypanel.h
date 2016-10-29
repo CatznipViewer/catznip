@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -175,6 +176,9 @@ public:
 	void setSelectCallback(const boost::function<void (const std::deque<LLFolderViewItem*>& items, BOOL user_action)>& cb);
 	void clearSelection();
 	bool isSelectionRemovable();
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+	bool isSelectionWearable();
+// [/SL:KB]
 	LLInventoryFilter& getFilter();
 	const LLInventoryFilter& getFilter() const;
 	void setFilterTypes(U64 filter, LLInventoryFilter::EFilterType = LLInventoryFilter::FILTERTYPE_OBJECT);
@@ -190,7 +194,10 @@ public:
 	BOOL getSinceLogoff();
 //	void setFilterLinks(U64 filter_links);
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
-	void setFilterLinks(U64 filter_links, bool substring_reset);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+	void setFilterLinks(LLInventoryFilter::EFilterLink filter_links, bool substring_reset);
+// [/SL:KB]
+//	void setFilterLinks(U64 filter_links, bool substring_reset);
 // [/SL:KB]
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void setFilterWorn(bool filter);
@@ -228,7 +235,7 @@ public:
 	// "Auto_open" determines if we open an inventory panel if none are open.
 	static LLInventoryPanel *getActiveInventoryPanel(BOOL auto_open = TRUE);
 	
-	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id);
+//	static void openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id);
 
 	void addItemID(const LLUUID& id, LLFolderViewItem* itemp);
 	void removeItemID(const LLUUID& id);
@@ -290,7 +297,7 @@ public:
 
 private:
 	std::string					mSortOrderSetting;
-	int							mClipboardState;
+//	int							mClipboardState;
 
 	//--------------------------------------------------------------------
 	// Hidden folders

@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2015, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +35,7 @@
 #include "llappearancemgr.h"
 #include "llavataractions.h"
 #include "llclipboard.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfolderview.h"
@@ -48,6 +49,9 @@
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
 #include "llpreview.h"
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llsidepanelinventory.h"
 #include "lltrans.h"
 #include "llviewerattachmenu.h"
@@ -170,11 +174,15 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	// context menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
-	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
+//	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLInventoryPanel::doCreate, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.AttachObject", boost::bind(&LLInventoryPanel::attachObject, this, _2));
 	mCommitCallbackRegistrar.add("Inventory.BeginIMSession", boost::bind(&LLInventoryPanel::beginIMSession, this));
 	mCommitCallbackRegistrar.add("Inventory.Share",  boost::bind(&LLAvatarActions::shareWithAvatars, this));
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mCommitCallbackRegistrar.add("Inventory.WearOn",  boost::bind(&LLWearableBridge::doWearOn, this, _2));
+	mEnableCallbackRegistrar.add("Inventory.WearOnLabel",  boost::bind(&LLWearableBridge::getWearOnLabel, this, _1, _2));
+// [/SL:KB]
 
 }
 
@@ -246,6 +254,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	}
 
 	mCommitCallbackRegistrar.pushScope(); // registered as a widget; need to push callback scope ourselves
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mEnableCallbackRegistrar.pushScope();
+// [/SL:KB]
 	{
 		// Determine the root folder in case specified, and
 		// build the views starting with that folder.
@@ -256,6 +267,10 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	}
 	mCommitCallbackRegistrar.popScope();
 	mFolderRoot.get()->setCallbackRegistrar(&mCommitCallbackRegistrar);
+// [SL:KB] - Patch: MultiWearables-WearOn | Checked: 2010-05-13 (Catznip-2.0)
+	mEnableCallbackRegistrar.popScope();
+	mFolderRoot.get()->setEnableCallbackRegistrar(&mEnableCallbackRegistrar);
+// [/SL:KB]
 	
 	// Scroller
 		LLRect scroller_view_rect = getRect();
@@ -299,6 +314,9 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	{
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
+		getFilter().markDefault();
+// [/SL:KB]
 	}
     // hide marketplace listing box, unless we are a marketplace panel
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible") && !mParams.use_marketplace_folders)
@@ -312,8 +330,8 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 		getFilter().setFilterEmptySystemFolders();
 	}
 	
-	// keep track of the clipboard state so that we avoid filtering too much
-	mClipboardState = LLClipboard::instance().getGeneration();
+//	// keep track of the clipboard state so that we avoid filtering too much
+//	mClipboardState = LLClipboard::instance().getGeneration();
 	
 	// Initialize base class params.
 	LLPanel::initFromParams(mParams);
@@ -464,7 +482,10 @@ void LLInventoryPanel::setDateSearchDirection(U32 direction)
 //	getFilter().setFilterLinks(filter_links);
 //}
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
-void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
+//void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+void LLInventoryPanel::setFilterLinks(LLInventoryFilter::EFilterLink filter_links, bool substring_reset)
+// [/SL:KB]
 {
 	getFilter().setFilterLinks(filter_links, substring_reset);
 }
@@ -735,19 +756,19 @@ struct DirtyFilterFunctor : public LLFolderViewFunctor
 void LLInventoryPanel::idle(void* user_data)
 {
 	LLInventoryPanel* panel = (LLInventoryPanel*)user_data;
-	// Nudge the filter if the clipboard state changed
-	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
-	{
-		panel->mClipboardState = LLClipboard::instance().getGeneration();
-		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
-		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
-		if (trash_folder)
-		{
-            DirtyFilterFunctor dirtyFilterFunctor;
-			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
-		}
-
-	}
+//	// Nudge the filter if the clipboard state changed
+//	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
+//	{
+//		panel->mClipboardState = LLClipboard::instance().getGeneration();
+//		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+//		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
+//		if (trash_folder)
+//		{
+//            DirtyFilterFunctor dirtyFilterFunctor;
+//			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
+//		}
+//
+//	}
 
     // Take into account the fact that the root folder might be invalidated
     if (panel->mFolderRoot.get())
@@ -1212,7 +1233,15 @@ void LLInventoryPanel::onSelectionChange(const std::deque<LLFolderViewItem*>& it
 
 void LLInventoryPanel::doCreate(const LLSD& userdata)
 {
-	reset_inventory_filter();
+//	reset_inventory_filter();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
+	if (getFilter().isNotDefault())
+	{
+		LLPanelMainInventory* pParent = getParentByType<LLPanelMainInventory>();
+		if (pParent)
+			pParent->resetFilters();
+	}
+// [/SL:KB]
 	menu_create_inventory_item(this, LLFolderBridge::sSelf.get(), userdata);
 }
 
@@ -1382,49 +1411,61 @@ void LLInventoryPanel::dumpSelectionInformation(void* user_data)
 	iv->mFolderRoot.get()->dumpSelectionInformation();
 }
 
-BOOL is_inventorysp_active()
-{
-	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
-	return sidepanel_inventory->isMainInventoryPanelActive();
-}
+//BOOL is_inventorysp_active()
+//{
+//	LLSidepanelInventory *sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//	if (!sidepanel_inventory || !sidepanel_inventory->isInVisibleChain()) return FALSE;
+//	return sidepanel_inventory->isMainInventoryPanelActive();
+//}
 
 // static
 LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 {
+//	S32 z_min = S32_MAX;
+//	LLInventoryPanel* res = NULL;
+//	LLFloater* active_inv_floaterp = NULL;
+//
+//	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+//	if (!floater_inventory)
+//	{
+//		LL_WARNS() << "Could not find My Inventory floater" << LL_ENDL;
+//		return FALSE;
+//	}
+//
+//	LLSidepanelInventory *inventory_panel =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	S32 z_min = S32_MAX;
-	LLInventoryPanel* res = NULL;
 	LLFloater* active_inv_floaterp = NULL;
-
-	LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
-	if (!floater_inventory)
-	{
-		LL_WARNS() << "Could not find My Inventory floater" << LL_ENDL;
-		return FALSE;
-	}
-
-	LLSidepanelInventory *inventory_panel =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [/SL:KB]
 
 	// Iterate through the inventory floaters and return whichever is on top.
 	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
 	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end(); ++iter)
 	{
-		LLFloaterSidePanelContainer* inventory_floater = dynamic_cast<LLFloaterSidePanelContainer*>(*iter);
-		inventory_panel = inventory_floater->findChild<LLSidepanelInventory>("main_panel");
-
-		if (inventory_floater && inventory_panel && inventory_floater->getVisible())
+//		LLFloaterSidePanelContainer* inventory_floater = dynamic_cast<LLFloaterSidePanelContainer*>(*iter);
+//		inventory_panel = inventory_floater->findChild<LLSidepanelInventory>("main_panel");
+//
+//		if (inventory_floater && inventory_panel && inventory_floater->getVisible())
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+		LLFloater* inventory_floater = *iter;
+		if (inventory_floater && inventory_floater->getVisible())
+// [/SL:KB]
 		{
 			S32 z_order = gFloaterView->getZOrder(inventory_floater);
 			if (z_order < z_min)
 			{
-				res = inventory_panel->getActivePanel();
+//				res = inventory_panel->getActivePanel();
 				z_min = z_order;
 				active_inv_floaterp = inventory_floater;
 			}
 		}
 	}
 
-	if (res)
+//	if (res)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	if (active_inv_floaterp)
+// [/SL:KB]
 	{
 		// Make sure the floater is not minimized (STORM-438).
 		if (active_inv_floaterp && active_inv_floaterp->isMinimized())
@@ -1434,74 +1475,85 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	}	
 //	else if (auto_open)
 // [RLVa:KB] - Checked: 2012-05-15 (RLVa-1.4.6)
-	else if ( (auto_open) && (LLFloaterReg::canShowInstance(floater_inventory->getInstanceName())) )
-	{
+	else if ( (auto_open) && (LLFloaterReg::canShowInstance("inventory")) )
 // [/RLVa:KB]
-		floater_inventory->openFloater();
-
-		res = inventory_panel->getActivePanel();
+	{
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+		active_inv_floaterp = LLFloaterReg::getInstance("inventory");
+		if (active_inv_floaterp)
+		{
+			active_inv_floaterp->openFloater(active_inv_floaterp->getKey());
+		}
+// [/SL:KB]
+//		floater_inventory->openFloater();
+//
+//		res = inventory_panel->getActivePanel();
 	}
 
-	return res;
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* pInvSP = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>(active_inv_floaterp);
+	return (pInvSP) ? pInvSP->getActivePanel() : NULL;
+// [/SL:KB]
+//	return res;
 }
 
 //static
-void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
-{
-	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
-
-	if (active_panel)
-	{
-		LL_DEBUGS("Messaging") << "Highlighting" << obj_id  << LL_ENDL;
-		
-		LLViewerInventoryItem * item = gInventory.getItem(obj_id);
-		LLViewerInventoryCategory * cat = gInventory.getCategory(obj_id);
-		
-		bool in_inbox = false;
-		
-		LLViewerInventoryCategory * parent_cat = NULL;
-		
-		if (item)
-		{
-			parent_cat = gInventory.getCategory(item->getParentUUID());
-		}
-		else if (cat)
-		{
-			parent_cat = gInventory.getCategory(cat->getParentUUID());
-		}
-		
-		if (parent_cat)
-		{
-			in_inbox = (LLFolderType::FT_INBOX == parent_cat->getPreferredType());
-		}
-		
-		if (in_inbox)
-		{
-			LLSidepanelInventory * sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
-			LLInventoryPanel * inventory_panel = NULL;
-			
-			if (in_inbox)
-			{
-				sidepanel_inventory->openInbox();
-				inventory_panel = sidepanel_inventory->getInboxPanel();
-			}
-
-			if (inventory_panel)
-			{
-				inventory_panel->setSelection(obj_id, TAKE_FOCUS_YES);
-			}
-		}
-		else
-		{
-			LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
-			if (floater_inventory)
-			{
-				floater_inventory->setFocus(TRUE);
-			}
-			active_panel->setSelection(obj_id, TAKE_FOCUS_YES);
-		}
-	}
-}
+//void LLInventoryPanel::openInventoryPanelAndSetSelection(BOOL auto_open, const LLUUID& obj_id)
+//{
+//	LLInventoryPanel *active_panel = LLInventoryPanel::getActiveInventoryPanel(auto_open);
+//
+//	if (active_panel)
+//	{
+//		LL_DEBUGS("Messaging") << "Highlighting" << obj_id  << LL_ENDL;
+//		
+//		LLViewerInventoryItem * item = gInventory.getItem(obj_id);
+//		LLViewerInventoryCategory * cat = gInventory.getCategory(obj_id);
+//		
+//		bool in_inbox = false;
+//		
+//		LLViewerInventoryCategory * parent_cat = NULL;
+//		
+//		if (item)
+//		{
+//			parent_cat = gInventory.getCategory(item->getParentUUID());
+//		}
+//		else if (cat)
+//		{
+//			parent_cat = gInventory.getCategory(cat->getParentUUID());
+//		}
+//		
+//		if (parent_cat)
+//		{
+//			in_inbox = (LLFolderType::FT_INBOX == parent_cat->getPreferredType());
+//		}
+//		
+//		if (in_inbox)
+//		{
+//			LLSidepanelInventory * sidepanel_inventory =	LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+//			LLInventoryPanel * inventory_panel = NULL;
+//			
+//			if (in_inbox)
+//			{
+//				sidepanel_inventory->openInbox();
+//				inventory_panel = sidepanel_inventory->getInboxPanel();
+//			}
+//
+//			if (inventory_panel)
+//			{
+//				inventory_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//			}
+//		}
+//		else
+//		{
+//			LLFloater* floater_inventory = LLFloaterReg::getInstance("inventory");
+//			if (floater_inventory)
+//			{
+//				floater_inventory->setFocus(TRUE);
+//			}
+//			active_panel->setSelection(obj_id, TAKE_FOCUS_YES);
+//		}
+//	}
+//}
 
 void LLInventoryPanel::addHideFolderType(LLFolderType::EType folder_type)
 {
@@ -1601,7 +1653,11 @@ BOOL LLInventoryPanel::handleKeyHere( KEY key, MASK mask )
 	{
 	case KEY_RETURN:
 		// Open selected items if enter key hit on the inventory panel
-		if (mask == MASK_NONE)
+//		if (mask == MASK_NONE)
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+		// (ctrl can be used as a modifier on wearable items
+		if ( (mask == MASK_NONE) || ((isSelectionWearable()) && (mask == MASK_CONTROL)) )
+// [/SL:KB]
 		{
 
 // @TODO$: Rider: This code is dead with Outbox, however should something similar be 
@@ -1665,6 +1721,27 @@ bool LLInventoryPanel::isSelectionRemovable()
 	return can_delete;
 }
 
+// [SL:KB] - Patch: Inventory-MultiWear | Checked: 2013-09-08 (Catznip-3.6)
+bool LLInventoryPanel::isSelectionWearable()
+{
+	bool fCanWear = false;
+	if (!mFolderRoot.isDead())
+	{
+		std::set<LLFolderViewItem*> lSelItems = mFolderRoot.get()->getSelectionList();
+		if (!lSelItems.empty()) 
+		{
+			fCanWear = true;
+			for (std::set<LLFolderViewItem*>::const_iterator itItem = lSelItems.begin(); itItem != lSelItems.end(); ++itItem)
+			{
+				const LLFolderViewModelItemInventory* pFVMItem = (*itItem) ? (*itItem)->getViewModelItem<LLFolderViewModelItemInventory>() : NULL;
+				fCanWear &= (pFVMItem) && (get_can_item_be_worn(pFVMItem->getUUID()));
+			}
+		}
+	}
+	return fCanWear;
+}
+// [/SL:KB]
+
 /************************************************************************/
 /* Recent Inventory Panel related class                                 */
 /************************************************************************/
@@ -1685,6 +1762,9 @@ public:
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
         // turn off marketplace for recent items
         getFilter().setFilterNoMarketplaceFolder();
+// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
+		getFilter().markDefault();
+// [/SL:KB]
 	}
 
 protected:

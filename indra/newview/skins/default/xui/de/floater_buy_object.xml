@@ -24,6 +24,10 @@
 	<text name="buy_name_text">
 		[NAME]?
 	</text>
+	<panel name="bottom_panel" >
+	  
+	<icon name="spacer_icon_2" width="10" />
 	<button label="Kaufen" label_selected="Kaufen" name="buy_btn"/>
-	<button label="Abbrechen" label_selected="Abbrechen" name="cancel_btn"/>
+	<button label="Abbrechen" label_selected="Abbrechen" name="cancel_btn" width="90"/>
+	</panel>
 </floater>

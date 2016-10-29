@@ -163,7 +163,10 @@ BOOL LLPanelInventoryListItemBase::postBuild()
 	LLViewerInventoryItem* inv_item = getItem();
 	if (inv_item)
 	{
-		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags(), FALSE);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+// [/SL:KB]
+//		mIconImage = LLInventoryIcon::getIcon(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags(), FALSE);
 		updateItem(inv_item->getName());
 	}
 

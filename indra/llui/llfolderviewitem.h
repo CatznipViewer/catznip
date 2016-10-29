@@ -5,6 +5,7 @@
 * $LicenseInfo:firstyear=2001&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
+* Copyright (C) 2010-2015, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -101,8 +102,8 @@ protected:
     S32                         mLocalIndentation;
 	S32							mIndentation;
 	S32							mItemHeight;
-	S32							mDragStartX,
-								mDragStartY;
+//	S32							mDragStartX,
+//								mDragStartY;
 
     S32                         mLeftPad,
                                 mIconPad,
@@ -243,6 +244,17 @@ public:
 
 	const LLFolderViewModelItem* getViewModelItem( void ) const { return mViewModelItem; }
 	LLFolderViewModelItem* getViewModelItem( void ) { return mViewModelItem; }
+
+// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-21 (Catznip-3.5)
+	template <class T> const T* getViewModelItem() const
+	{
+		return dynamic_cast<const T*>(getViewModelItem());
+	}
+	template <class T> T* getViewModelItem()
+	{
+		return dynamic_cast<T*>(getViewModelItem());
+	}
+// [/SL:KB]
 
 	const LLFolderViewModelInterface* getFolderViewModel( void ) const;
 	LLFolderViewModelInterface* getFolderViewModel( void );
