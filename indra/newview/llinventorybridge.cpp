@@ -62,6 +62,9 @@
 #include "llmarketplacefunctions.h"
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 #include "llpreviewanim.h"
 #include "llpreviewgesture.h"
 #include "llpreviewtexture.h"
@@ -114,13 +117,13 @@ bool confirm_attachment_rez(const LLSD& notification, const LLSD& response);
 void teleport_via_landmark(const LLUUID& asset_id);
 static BOOL can_move_to_outfit(LLInventoryItem* inv_item, BOOL move_is_into_current_outfit);
 static BOOL can_move_to_landmarks(LLInventoryItem* inv_item);
-static bool check_category(LLInventoryModel* model,
-						   const LLUUID& cat_id,
-						   LLInventoryPanel* active_panel,
-						   LLInventoryFilter* filter);
-static bool check_item(const LLUUID& item_id,
-					   LLInventoryPanel* active_panel,
-					   LLInventoryFilter* filter);
+//static bool check_category(LLInventoryModel* model,
+//						   const LLUUID& cat_id,
+//						   LLInventoryPanel* active_panel,
+//						   LLInventoryFilter* filter);
+//static bool check_item(const LLUUID& item_id,
+//					   LLInventoryPanel* active_panel,
+//					   LLInventoryFilter* filter);
 
 // Helper functions
 
@@ -188,6 +191,10 @@ LLInvFVBridge::LLInvFVBridge(LLInventoryPanel* inventory,
 	mFolderType(LLFolderType::FT_INVALID),
 // [/SL:KB]
 	mIsLink(FALSE),
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	mClipboardGeneration(-1),
+	mIsClipboardCut(false),
+// [/SL:KB]
 	LLFolderViewModelItemInventory(inventory->getRootViewModel())
 {
 	mInventoryPanel = inventory->getInventoryPanelHandle();
@@ -266,7 +273,10 @@ BOOL LLInvFVBridge::isItemRemovable() const
 // Can be moved to another folder
 BOOL LLInvFVBridge::isItemMovable() const
 {
-	return TRUE;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	return get_is_item_movable(getInventoryModel(), mUUID);
+// [/SL:KB]
+//	return TRUE;
 }
 
 BOOL LLInvFVBridge::isLink() const
@@ -324,7 +334,10 @@ BOOL LLInvFVBridge::callback_cutToClipboard(const LLSD& notification, const LLSD
 BOOL LLInvFVBridge::perform_cutToClipboard()
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
-	if (obj && isItemMovable() && isItemRemovable())
+//	if (obj && isItemMovable() && isItemRemovable())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	if (obj && isItemMovable())
+// [/SL:KB]
 	{
 		LLClipboard::instance().setCutMode(true);
 		BOOL added_to_clipboard = LLClipboard::instance().addToClipboard(mUUID);
@@ -337,7 +350,10 @@ BOOL LLInvFVBridge::perform_cutToClipboard()
 BOOL LLInvFVBridge::copyToClipboard() const
 {
 	const LLInventoryObject* obj = gInventory.getObject(mUUID);
-	if (obj && isItemCopyable())
+//	if (obj && isItemCopyable())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	if ( (obj) && (isItemCopyable()) || (isItemLinkable()) )
+// [/SL:KB]
 	{
 		return LLClipboard::instance().addToClipboard(mUUID);
 	}
@@ -536,6 +552,26 @@ void  LLInvFVBridge::removeBatchNoCheck(std::vector<LLFolderViewModelItem*>&  ba
 	model->notifyObservers();
 }
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+bool LLInvFVBridge::isClipboardCut() const
+{
+	LLClipboard* pClipboard = LLClipboard::getInstance();
+	if (mClipboardGeneration != pClipboard->getGeneration())
+	{
+		mClipboardGeneration = pClipboard->getGeneration();
+
+		mIsClipboardCut = false;
+		if (LLClipboard::instance().isCutMode())
+		{
+			mIsClipboardCut |= pClipboard->isOnClipboard(mUUID);
+			if (mParent)
+				mIsClipboardCut |= mParent->isClipboardCut();
+		}
+	}
+	return mIsClipboardCut;
+}
+// [/SL:KB]
+
 BOOL LLInvFVBridge::isClipboardPasteable() const
 {
 	// Return FALSE on degenerated cases: empty clipboard, no inventory, no agent
@@ -649,10 +685,10 @@ void disable_context_entries_if_present(LLMenuGL& menu,
 
         if (found)
         {
-			menu_item->setVisible(TRUE);
-			// A bit of a hack so we can remember that some UI element explicitly set this to be visible
-			// so that some other UI element from multi-select doesn't later set this invisible.
-			menu_item->pushVisible(TRUE);
+//			menu_item->setVisible(TRUE);
+//			// A bit of a hack so we can remember that some UI element explicitly set this to be visible
+//			// so that some other UI element from multi-select doesn't later set this invisible.
+//			menu_item->pushVisible(TRUE);
 
 			menu_item->setEnabled(FALSE);
         }
@@ -748,7 +784,11 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 		}
 		else
 		{
-			if (LLAssetType::lookupCanLink(obj->getType()))
+//			if (LLAssetType::lookupCanLink(obj->getType()))
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+			// Don't show 'Find Links' for folders
+			if ( (LLAssetType::AT_CATEGORY != obj->getType()) && (LLAssetType::lookupCanLink(obj->getType())) )
+// [/SL:KB]
 			{
 				items.push_back(std::string("Find Links"));
 			}
@@ -780,19 +820,22 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 					disabled_items.push_back(std::string("Copy Asset UUID"));
 				}
 			}
-			items.push_back(std::string("Copy Separator"));
-			
-			items.push_back(std::string("Copy"));
-			if (!isItemCopyable())
-			{
-				disabled_items.push_back(std::string("Copy"));
-			}
+//			items.push_back(std::string("Copy Separator"));
+//			
+//			items.push_back(std::string("Copy"));
+//			if (!isItemCopyable())
+//			{
+//				disabled_items.push_back(std::string("Copy"));
+//			}
 
-			items.push_back(std::string("Cut"));
-			if (!isItemMovable() || !isItemRemovable())
-			{
-				disabled_items.push_back(std::string("Cut"));
-			}
+//			items.push_back(std::string("Cut"));
+////			if (!isItemMovable() || !isItemRemovable())
+//// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+//			if (!isItemMovable())
+//// [/SL:KB]
+//			{
+//				disabled_items.push_back(std::string("Cut"));
+//			}
 
 			if (canListOnMarketplace() && !isMarketplaceListingsFolder() && !isInboxFolder())
 			{
@@ -810,6 +853,22 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
                 }
 			}
 		}
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		items.push_back(std::string("Copy Separator"));
+
+		items.push_back(std::string("Cut"));
+		if ( (!isItemMovable()) || (isLibraryItem()) )
+		{
+			disabled_items.push_back(std::string("Cut"));
+		}
+	
+		items.push_back(std::string("Copy"));
+		if ( (!isItemCopyable()) && (!isItemLinkable()) )
+		{
+			disabled_items.push_back(std::string("Copy"));
+		}
+// [/SL:KB]
 	}
 
 	// Don't allow items to be pasted directly into the COF or the inbox
@@ -853,11 +912,18 @@ void LLInvFVBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 	}	
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -1560,6 +1626,12 @@ void LLItemBridge::performAction(LLInventoryModel* model, std::string action)
 	{
 		gotoItem();
 	}
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	else if ("find_links" == action)
+	{
+		findLinks();
+	}
+// [/SL:KB]
 
 	if ("open" == action || "open_original" == action)
 	{
@@ -1799,6 +1871,13 @@ void LLItemBridge::gotoItem()
 	}
 }
 
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void LLItemBridge::findLinks()
+{
+	show_item_links(mUUID);
+}
+// [/SL:KB]
+
 LLUIImagePtr LLItemBridge::getIcon() const
 {
 	LLInventoryObject *obj = getInventoryObject();
@@ -2004,7 +2083,10 @@ BOOL LLItemBridge::removeItem()
 	// we can't do this check because we may have items in a folder somewhere that is
 	// not yet in memory, so we don't want false negatives.  (If disabled, then we 
 	// know we only have links in the Outfits folder which we explicitly fetch.)
-	if (!gSavedSettings.getBOOL("InventoryLinking"))
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-06-01 (Catznip-2.0)
+	// Users move folders around and reuse links that way... if we know something has links then it's just bad not to warn them :|
+// [/SL:KB]
+//	if (!gSavedSettings.getBOOL("InventoryLinking"))
 	{
 		if (!item->getIsLinkType())
 		{
@@ -2052,22 +2134,43 @@ BOOL LLItemBridge::isItemCopyable() const
 	LLViewerInventoryItem* item = getItem();
 	if (item)
 	{
-		// Can't copy worn objects. DEV-15183
-		if(get_is_item_worn(mUUID))
-		{
-			return FALSE;
-		}
+//		// Can't copy worn objects. DEV-15183
+//		if(get_is_item_worn(mUUID))
+//		{
+//			return FALSE;
+//		}
 
-		// You can never copy a link.
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		// We'll allow copying a link if:
+		//   - its target is available
+		//   - it doesn't point to another link [see LLViewerInventoryItem::getLinkedItem() which returns NULL in that case]
 		if (item->getIsLinkType())
 		{
-			return FALSE;
+			return (NULL != item->getLinkedItem());
 		}
+// [/SL:KB]
+//		// You can never copy a link.
+//		if (item->getIsLinkType())
+//		{
+//			return FALSE;
+//		}
 
-		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		return (item->getPermissions().allowCopyBy(gAgent.getID()));
+// [/SL:KB]
+//		return item->getPermissions().allowCopyBy(gAgent.getID()) || gSavedSettings.getBOOL("InventoryLinking");
+
 	}
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+bool LLItemBridge::isItemLinkable() const
+{
+	LLViewerInventoryItem* item = getItem();
+	return (item) && (LLAssetType::lookupCanLink(item->getType()));
+}
+// [/SL:KB]
 
 LLViewerInventoryItem* LLItemBridge::getItem() const
 {
@@ -2099,15 +2202,18 @@ LLHandle<LLFolderBridge> LLFolderBridge::sSelf;
 // Can be moved to another folder
 BOOL LLFolderBridge::isItemMovable() const
 {
-	LLInventoryObject* obj = getInventoryObject();
-	if(obj)
-	{
-		// If it's a protected type folder, we can't move it
-		if (LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
-			return FALSE;
-		return TRUE;
-	}
-	return FALSE;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+	return get_is_category_movable(getInventoryModel(), mUUID);
+// [/SL:KB]
+//	LLInventoryObject* obj = getInventoryObject();
+//	if(obj)
+//	{
+//		// If it's a protected type folder, we can't move it
+//		if (LLFolderType::lookupIsProtectedType(((LLInventoryCategory*)obj)->getPreferredType()))
+//			return FALSE;
+//		return TRUE;
+//	}
+//	return FALSE;
 }
 
 void LLFolderBridge::selectItem()
@@ -2296,6 +2402,14 @@ BOOL LLFolderBridge::isItemCopyable() const
 		return TRUE;
 	}
 
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+bool LLFolderBridge::isItemLinkable() const
+{
+	LLFolderType::EType ftType = getPreferredType();
+	return (LLFolderType::FT_NONE == ftType) || (LLFolderType::FT_OUTFIT == ftType);
+}
+// [/SL:KB]
+
 BOOL LLFolderBridge::isClipboardPasteable() const
 {
 	if ( ! LLInvFVBridge::isClipboardPasteable() )
@@ -2397,11 +2511,19 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 	if (!isAgentAvatarValid()) return FALSE;
 	if (!isAgentInventory()) return FALSE; // cannot drag categories into library
 
-	LLInventoryPanel* destination_panel = mInventoryPanel.get();
-	if (!destination_panel) return false;
-
-	LLInventoryFilter* filter = getInventoryFilter();
-	if (!filter) return false;
+//	LLInventoryPanel* destination_panel = mInventoryPanel.get();
+//	if (!destination_panel) return false;
+//
+//	LLInventoryFilter* filter = getInventoryFilter();
+//	if (!filter) return false;
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	// Change the variable names so we know when anything else references them
+	LLInventoryPanel* inv_dest_panel = mInventoryPanel.get();
+	if (!inv_dest_panel)
+	{
+		return false;
+	}
+// [/SL:KB]
 
 	const LLUUID &cat_id = inv_cat->getUUID();
 	const LLUUID &current_outfit_id = model->findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT, false);
@@ -2418,7 +2540,10 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 		&& (LLToolDragAndDrop::SOURCE_AGENT == source);
 
 	BOOL accept = FALSE;
-	U64 filter_types = filter->getFilterTypes();
+//	U64 filter_types = filter->getFilterTypes();
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	U64 filter_types = getInventoryFilter()->getFilterTypes();
+// [/SL:KB]
 	BOOL use_filter = filter_types && (filter_types&LLInventoryFilter::FILTERTYPE_DATE || (filter_types&LLInventoryFilter::FILTERTYPE_OBJECT)==0);
 
 	if (is_agent_inventory)
@@ -2573,39 +2698,56 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
             is_movable = can_move_folder_to_marketplace(master_folder, dest_folder, inv_cat, tooltip_msg, bundle_size);
 		}
 
-		if (is_movable)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+		if ( (is_movable) && (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) )
 		{
-			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
-			is_movable = active_panel != NULL;
-
-			// For a folder to pass the filter all its descendants are required to pass.
-			// We make this exception to allow reordering folders within an inventory panel,
-			// which has a filter applied, like Recent tab for example.
-			// There may be folders which are displayed because some of their descendants pass
-			// the filter, but other don't, and thus remain hidden. Without this check,
-			// such folders would not be allowed to be moved within a panel.
-			if (destination_panel == active_panel)
+			if (inv_dest_panel == LLInventoryPanel::getActiveInventoryPanel(FALSE))
 			{
 				is_movable = true;
 			}
 			else
 			{
-				LLFolderView* active_folder_view = NULL;
-
-				if (is_movable)
+				LLFolderViewFolder* folder_view = inv_dest_panel->getFolderByID(inv_cat->getUUID());
+				if ( (folder_view) && (use_filter) )
 				{
-					active_folder_view = active_panel->getRootFolder();
-					is_movable = active_folder_view != NULL;
-				}
-
-				if (is_movable && use_filter)
-				{
-					// Check whether the folder being dragged from active inventory panel
-					// passes the filter of the destination panel.
-					is_movable = check_category(model, cat_id, active_panel, filter);
+					is_movable = (folder_view->passedFilter()) || (folder_view->descendantsPassedFilter());
 				}
 			}
 		}
+// [/SL:KB]
+//		if (is_movable)
+//		{
+//			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//			is_movable = active_panel != NULL;
+//
+//			// For a folder to pass the filter all its descendants are required to pass.
+//			// We make this exception to allow reordering folders within an inventory panel,
+//			// which has a filter applied, like Recent tab for example.
+//			// There may be folders which are displayed because some of their descendants pass
+//			// the filter, but other don't, and thus remain hidden. Without this check,
+//			// such folders would not be allowed to be moved within a panel.
+//			if (destination_panel == active_panel)
+//			{
+//				is_movable = true;
+//			}
+//			else
+//			{
+//				LLFolderView* active_folder_view = NULL;
+//
+//				if (is_movable)
+//				{
+//					active_folder_view = active_panel->getRootFolder();
+//					is_movable = active_folder_view != NULL;
+//				}
+//
+//				if (is_movable && use_filter)
+//				{
+//					// Check whether the folder being dragged from active inventory panel
+//					// passes the filter of the destination panel.
+//					is_movable = check_category(model, cat_id, active_panel, filter);
+//				}
+//			}
+//		}
 
 // [RLVa:KB] - Checked: 2011-03-29 (RLVa-1.3.0g) | Added: RLVa-1.3.0g
 		if ( (is_movable) && (rlv_handler_t::isEnabled()) && (RlvFolderLocks::instance().hasLockedFolder(RLV_LOCK_ANY)) )
@@ -2743,7 +2885,10 @@ BOOL LLFolderBridge::dragCategoryIntoFolder(LLInventoryCategory* inv_cat,
 		}
 		else
 		{
-			accept = move_inv_category_world_to_agent(cat_id, mUUID, drop, NULL, NULL, filter);
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+			accept = move_inv_category_world_to_agent(cat_id, mUUID, drop, NULL, NULL, (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) ? &inv_dest_panel->getFilter() : NULL);
+// [/SL:KB]
+//			accept = move_inv_category_world_to_agent(cat_id, mUUID, drop, NULL, NULL, filter);
 		}
 	}
 	else if (LLToolDragAndDrop::SOURCE_LIBRARY == source)
@@ -2842,6 +2987,9 @@ BOOL move_inv_category_world_to_agent(const LLUUID& object_id,
 
 	BOOL accept = FALSE;
 	BOOL is_move = FALSE;
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	BOOL passed_filter = (!filter);	// If at least one item passes the filter, we're happy
+// [/SL:KB]
 	BOOL use_filter = FALSE;
 	if (filter)
 	{
@@ -2880,16 +3028,26 @@ BOOL move_inv_category_world_to_agent(const LLUUID& object_id,
 			accept = TRUE;
 		}
 
-		if (accept && use_filter)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+		if (filter && !passed_filter)
 		{
-			accept = filter->check(item);
+			passed_filter = filter->check(item);
 		}
+// [/SL:KB]
+//		if (accept && use_filter)
+//		{
+//			accept = filter->check(item);
+//		}
 
 		if (!accept)
 		{
 			break;
 		}
 	}
+
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	accept &= passed_filter;
+// [/SL:KB]
 
 	if(drop && accept)
 	{
@@ -3117,6 +3275,35 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		
 		return;
 	}
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+	else if ("open_newtab" == action)
+	{
+		LLPanelMainInventory* pMainInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : NULL;
+		if (!pMainInvPanel)
+		{
+			// User picked this menu option on a different inventory panel than the main inventory floater (i.e. "My Outfits" panel)
+			LLInventoryPanel* pInvPanel = LLInventoryPanel::getActiveInventoryPanel(true);
+			if (pInvPanel)
+			{
+				pMainInvPanel = pInvPanel->getParentByType<LLPanelMainInventory>();
+			}
+		}
+		if (pMainInvPanel)
+		{
+			LLInventoryPanel* pInvPanel = pMainInvPanel->addNewPanel(pMainInvPanel->getPanelCount() - 1);
+			if (pInvPanel)
+			{
+				LLFolderViewItem* pFVItem = pInvPanel->getItemByID(mUUID);
+				if (pFVItem)
+				{
+				 	pFVItem->setOpen(TRUE);
+					pInvPanel->getRootFolder()->setSelection(pFVItem, TRUE, TRUE);
+					pInvPanel->getRootFolder()->scrollToShowSelection();
+				}
+			}
+ 		}
+ 	}
+// [/SL:KB]
 	else if ("paste" == action)
 	{
 		pasteFromClipboard();
@@ -3730,13 +3917,24 @@ void LLFolderBridge::perform_pasteFromClipboard()
                             }
                             else
                             {
-                                copy_inventory_item(
-                                                    gAgent.getID(),
-                                                    item->getPermissions().getOwner(),
-                                                    item->getUUID(),
-                                                    parent_id,
-                                                    std::string(),
-                                                    LLPointer<LLInventoryCallback>(NULL));
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+					if (item->getPermissions().allowCopyBy(gAgent.getID()))
+					{
+// [/SL:KB]
+						copy_inventory_item(
+							gAgent.getID(),
+							item->getPermissions().getOwner(),
+							item->getUUID(),
+							parent_id,
+							std::string(),
+							LLPointer<LLInventoryCallback>(NULL));
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+					}
+					else if (LLAssetType::lookupIsLinkType(item->getActualType()))
+					{
+						link_inventory_object(parent_id, item, LLPointer<LLInventoryCallback>(NULL));
+					}
+// [/SL:KB]
                             }
                         }
                     }
@@ -3944,6 +4142,11 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 		{
 			mWearables=TRUE;
 		}
+
+// [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
+		items.push_back(std::string("Outfit Separator"));
+		items.push_back(std::string("Open in XXX"));
+// [/SL:KB]
 	}
 
 	// Preemptively disable system folder removal if more than one item selected.
@@ -4630,11 +4833,19 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 	if (!isAgentInventory()) return FALSE; // cannot drag into library
 	if (!isAgentAvatarValid()) return FALSE;
 
-	LLInventoryPanel* destination_panel = mInventoryPanel.get();
-	if (!destination_panel) return false;
-
-	LLInventoryFilter* filter = getInventoryFilter();
-	if (!filter) return false;
+//	LLInventoryPanel* destination_panel = mInventoryPanel.get();
+//	if (!destination_panel) return false;
+//
+//	LLInventoryFilter* filter = getInventoryFilter();
+//	if (!filter) return false;
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	// Change the variable names so we know when anything else references them
+	LLInventoryPanel* inv_dest_panel = mInventoryPanel.get();
+	if (!inv_dest_panel)
+	{
+		return false;
+	}
+// [/SL:KB]
 
 	const LLUUID &current_outfit_id = model->findCategoryUUIDForType(LLFolderType::FT_CURRENT_OUTFIT, false);
 	const LLUUID &favorites_id = model->findCategoryUUIDForType(LLFolderType::FT_FAVORITE, false);
@@ -4653,7 +4864,10 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 
 	LLToolDragAndDrop::ESource source = LLToolDragAndDrop::getInstance()->getSource();
 	BOOL accept = FALSE;
-	U64 filter_types = filter->getFilterTypes();
+//	U64 filter_types = filter->getFilterTypes();
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	U64 filter_types = getInventoryFilter()->getFilterTypes();
+// [/SL:KB]
 	// We shouldn't allow to drop non recent items into recent tab (or some similar transactions)
 	// while we are allowing to interact with regular filtered inventory
 	BOOL use_filter = filter_types && (filter_types&LLInventoryFilter::FILTERTYPE_DATE || (filter_types&LLInventoryFilter::FILTERTYPE_OBJECT)==0);
@@ -4755,17 +4969,27 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
             accept = dest_folder->acceptItem(inv_item);
         }
         
-		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//		LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
 
 		// Check whether the item being dragged from active inventory panel
 		// passes the filter of the destination panel.
-		if (user_confirm && accept && active_panel && use_filter)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+		if ( (user_confirm) && (accept) && (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) && (use_filter) )
 		{
-			LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
-			if (!fv_item) return false;
-
-			accept = filter->check(fv_item->getViewModelItem());
+			LLFolderViewItem* fv_item = inv_dest_panel->getItemByID(inv_item->getUUID());
+			if (fv_item)
+			{
+				accept = fv_item->passedFilter();
+			}
 		}
+// [/SL:KB]
+//		if (user_confirm && accept && active_panel && use_filter)
+//		{
+//			LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
+//			if (!fv_item) return false;
+//
+//			accept = filter->check(fv_item->getViewModelItem());
+//		}
 
 		if (accept && drop)
 		{
@@ -4778,7 +5002,11 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 			// so that we don't follow the selection to its new location (which is very annoying).
                         // RN: a better solution would be to deselect automatically when an   item is moved
 			// and then select any item that is dropped only in the panel that it   is dropped in
-			if (active_panel && (destination_panel != active_panel))
+//			if (active_panel && (destination_panel != active_panel))
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+			if ( (active_panel) && (inv_dest_panel != active_panel) )
+// [/SL:KB]
             {
                 active_panel->unSelectAll();
             }
@@ -4807,7 +5035,10 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 			// (only reorder the item in Favorites folder)
 			if ((mUUID == inv_item->getParentUUID()) && move_is_into_favorites)
 			{
-				LLFolderViewItem* itemp = destination_panel->getRootFolder()->getDraggingOverItem();
+//				LLFolderViewItem* itemp = destination_panel->getRootFolder()->getDraggingOverItem();
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+				LLFolderViewItem* itemp = inv_dest_panel->getRootFolder()->getDraggingOverItem();
+// [/SL:KB]
 				if (itemp)
 				{
                     LLUUID srcItemId = inv_item->getUUID();
@@ -4922,10 +5153,16 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 		
 		// Check whether the item being dragged from in world
 		// passes the filter of the destination panel.
-		if (accept && use_filter)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+		if ( (accept) && (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) && (use_filter) )
 		{
-			accept = filter->check(inv_item);
+			accept = inv_dest_panel->getFilter().check(inv_item);
 		}
+// [/SL:KB]
+//		if (accept)
+//		{
+//			accept = filter->check(inv_item);
+//		}
 
 		if (accept && drop)
 		{
@@ -4966,10 +5203,16 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 		
 		// Check whether the item being dragged from notecard
 		// passes the filter of the destination panel.
-		if (accept && use_filter)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+	 	if ( (accept) && (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) && (use_filter))
 		{
-			accept = filter->check(inv_item);
+			accept = inv_dest_panel->getFilter().check(inv_item);
 		}
+// [/SL:KB]
+//		if (accept)
+//		{
+//			accept = filter->check(inv_item);
+//		}
 
 		if (accept && drop)
 		{
@@ -5002,17 +5245,27 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 				accept = can_move_to_landmarks(inv_item);
 			}
 
-			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
+//			LLInventoryPanel* active_panel = LLInventoryPanel::getActiveInventoryPanel(FALSE);
 
 			// Check whether the item being dragged from the library
 			// passes the filter of the destination panel.
-			if (accept && active_panel && use_filter)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+			if ( (accept) && (gSavedSettings.getBOOL("InventoryDnDCheckFilter")) && (use_filter) )
 			{
-				LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
-				if (!fv_item) return false;
-
-				accept = filter->check(fv_item->getViewModelItem());
+				LLFolderViewItem* fv_item = inv_dest_panel->getItemByID(inv_item->getUUID());
+				if (fv_item)
+				{
+					accept = fv_item->passedFilter();
+				}
 			}
+// [/SL:KB]
+//			if (accept && active_panel && use_filter)
+//			{
+//				LLFolderViewItem* fv_item =   active_panel->getItemByID(inv_item->getUUID());
+//				if (!fv_item) return false;
+//
+//				accept = filter->check(fv_item->getViewModelItem());
+//			}
 
 			if (accept && drop)
 			{
@@ -5049,67 +5302,67 @@ BOOL LLFolderBridge::dragItemIntoFolder(LLInventoryItem* inv_item,
 }
 
 // static
-bool check_category(LLInventoryModel* model,
-					const LLUUID& cat_id,
-					LLInventoryPanel* active_panel,
-					LLInventoryFilter* filter)
-{
-	if (!model || !active_panel || !filter)
-		return false;
-
-	if (!filter->checkFolder(cat_id))
-	{
-		return false;
-	}
-
-	LLInventoryModel::cat_array_t descendent_categories;
-	LLInventoryModel::item_array_t descendent_items;
-	model->collectDescendents(cat_id, descendent_categories, descendent_items, TRUE);
-
-	S32 num_descendent_categories = descendent_categories.size();
-	S32 num_descendent_items = descendent_items.size();
-
-	if (num_descendent_categories + num_descendent_items == 0)
-	{
-		// Empty folder should be checked as any other folder view item.
-		// If we are filtering by date the folder should not pass because
-		// it doesn't have its own creation date. See LLInvFVBridge::getCreationDate().
-		return check_item(cat_id, active_panel, filter);
-	}
-
-	for (S32 i = 0; i < num_descendent_categories; ++i)
-	{
-		LLInventoryCategory* category = descendent_categories[i];
-		if(!check_category(model, category->getUUID(), active_panel, filter))
-		{
-			return false;
-		}
-	}
-
-	for (S32 i = 0; i < num_descendent_items; ++i)
-	{
-		LLViewerInventoryItem* item = descendent_items[i];
-		if(!check_item(item->getUUID(), active_panel, filter))
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
+//bool check_category(LLInventoryModel* model,
+//					const LLUUID& cat_id,
+//					LLInventoryPanel* active_panel,
+//					LLInventoryFilter* filter)
+//{
+//	if (!model || !active_panel || !filter)
+//		return false;
+//
+//	if (!filter->checkFolder(cat_id))
+//	{
+//		return false;
+//	}
+//
+//	LLInventoryModel::cat_array_t descendent_categories;
+//	LLInventoryModel::item_array_t descendent_items;
+//	model->collectDescendents(cat_id, descendent_categories, descendent_items, TRUE);
+//
+//	S32 num_descendent_categories = descendent_categories.size();
+//	S32 num_descendent_items = descendent_items.size();
+//
+//	if (num_descendent_categories + num_descendent_items == 0)
+//	{
+//		// Empty folder should be checked as any other folder view item.
+//		// If we are filtering by date the folder should not pass because
+//		// it doesn't have its own creation date. See LLInvFVBridge::getCreationDate().
+//		return check_item(cat_id, active_panel, filter);
+//	}
+//
+//	for (S32 i = 0; i < num_descendent_categories; ++i)
+//	{
+//		LLInventoryCategory* category = descendent_categories[i];
+//		if(!check_category(model, category->getUUID(), active_panel, filter))
+//		{
+//			return false;
+//		}
+//	}
+//
+//	for (S32 i = 0; i < num_descendent_items; ++i)
+//	{
+//		LLViewerInventoryItem* item = descendent_items[i];
+//		if(!check_item(item->getUUID(), active_panel, filter))
+//		{
+//			return false;
+//		}
+//	}
+//
+//	return true;
+//}
 
 // static
-bool check_item(const LLUUID& item_id,
-				LLInventoryPanel* active_panel,
-				LLInventoryFilter* filter)
-{
-	if (!active_panel || !filter) return false;
-
-	LLFolderViewItem* fv_item = active_panel->getItemByID(item_id);
-	if (!fv_item) return false;
-
-	return filter->check(fv_item->getViewModelItem());
-}
+//bool check_item(const LLUUID& item_id,
+//				LLInventoryPanel* active_panel,
+//				LLInventoryFilter* filter)
+//{
+//	if (!active_panel || !filter) return false;
+//
+//	LLFolderViewItem* fv_item = active_panel->getItemByID(item_id);
+//	if (!fv_item) return false;
+//
+//	return filter->check(fv_item->getViewModelItem());
+//}
 
 // +=================================================+
 // |        LLTextureBridge                          |
@@ -5130,7 +5383,10 @@ void LLTextureBridge::openItem()
 	}
 }
 
-bool LLTextureBridge::canSaveTexture(void)
+//bool LLTextureBridge::canSaveTexture(void)
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2013-05-18 (Catznip-3.4)
+bool LLTextureBridge::canSaveTexture(void) const
+// [/SL:KB]
 {
 	const LLInventoryModel* model = getInventoryModel();
 	if(!model) 
@@ -5163,11 +5419,18 @@ void LLTextureBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
     }
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -5238,11 +5501,18 @@ void LLSoundBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
 			items.push_back(std::string("Sound Open"));
 			items.push_back(std::string("Properties"));
 
@@ -5315,11 +5585,19 @@ void LLLandmarkBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
+
 			items.push_back(std::string("Landmark Open"));
 			items.push_back(std::string("Properties"));
 
@@ -5626,11 +5904,18 @@ void LLCallingCardBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
     }
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		if ((flags & FIRST_SELECTED_ITEM) == 0)
 		{
 		disabled_items.push_back(std::string("Open"));
@@ -5914,11 +6199,18 @@ void LLGestureBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
     }
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		addOpenRightClickMenuOption(items);
 		items.push_back(std::string("Properties"));
@@ -5976,11 +6268,18 @@ void LLAnimationBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		}	
 		else
 		{
-			items.push_back(std::string("Share"));
-			if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+			if (!isLink())
 			{
-				disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+				items.push_back(std::string("Share"));
+				if (!canShare())
+				{
+					disabled_items.push_back(std::string("Share"));
+				}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 			}
+// [/SL:KB]
 			items.push_back(std::string("Animation Open"));
 			items.push_back(std::string("Properties"));
 
@@ -6274,11 +6573,18 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
     }
 	else
 	{
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 
 		items.push_back(std::string("Properties"));
 
@@ -6542,11 +6848,18 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			can_open = FALSE;
 		}
-		items.push_back(std::string("Share"));
-		if (!canShare())
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
+		if (!isLink())
 		{
-			disabled_items.push_back(std::string("Share"));
+// [/SL:KB]
+			items.push_back(std::string("Share"));
+			if (!canShare())
+			{
+				disabled_items.push_back(std::string("Share"));
+			}
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-17 (Catznip-3.6)
 		}
+// [/SL:KB]
 		
 		if (can_open)
 		{
@@ -6572,7 +6885,10 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			disabled_items.push_back(std::string("Wearable Edit"));
 		}
 		// Don't allow items to be worn if their baseobj is in the trash.
-		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
+//		if (isLinkedObjectInTrash() || isLinkedObjectMissing() || isCOFFolder())
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+		if (isLinkedObjectInTrash() || isLinkedObjectMissing())
+// [/SL:KB]
 		{
 			disabled_items.push_back(std::string("Wearable And Object Wear"));
 			disabled_items.push_back(std::string("Wearable Add"));

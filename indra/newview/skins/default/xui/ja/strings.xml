@@ -1622,7 +1622,18 @@ support@secondlife.com にお問い合わせください。
 	<string name="Snapshots" value="スナップショット、"/>
 	<string name="No Filters" value="いいえ "/>
 	<string name="Since Logoff" value=" - ログオフ以来"/>
-	<string name="InvFolder My Inventory">
+
+	<!-- inventory item actions -->
+	<string name="InvAction wear">装着</string>
+	<string name="InvAction take_off">取り外す"</string>
+	<string name="InvAction attach">装着</string>
+	<string name="InvAction detach">取り外す"</string>
+	<string name="InvAction activate">アクティブ</string>
+	<string name="InvAction deactivate">非アクティブ</string>
+	<string name="InvAction teleport">テレポート</string>
+	<string name="InvAction open">開く</string>
+  
+  <string name="InvFolder My Inventory">
 		インベントリ
 	</string>
 	<string name="InvFolder Library">

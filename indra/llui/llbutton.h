@@ -213,6 +213,10 @@ public:
 
 	void			setHAlign( LLFontGL::HAlign align )		{ mHAlign = align; }
 	LLFontGL::HAlign getHAlign() const						{ return mHAlign; }
+// [SL:KB] - Patch: Control-Button | Checked: 2012-08-13 (Catznip-3.3)
+	S32				getLeftHPad() const						{ return mLeftHPad; }
+	S32				getRightHPad() const					{ return mRightHPad; }
+// [/SL:KB]
 	void			setLeftHPad( S32 pad )					{ mLeftHPad = pad; }
 	void			setRightHPad( S32 pad )					{ mRightHPad = pad; }
 
@@ -238,6 +242,9 @@ public:
 	void 			setImageOverlay(const LLUUID& image_id, LLFontGL::HAlign alignment = LLFontGL::HCENTER, const LLColor4& color = LLColor4::white);
 	LLPointer<LLUIImage> getImageOverlay() { return mImageOverlay; }
 	LLFontGL::HAlign getImageOverlayHAlign() const	{ return mImageOverlayAlignment; }
+// [SL:KB] - Patch: Control-Button | Checked: 2012-08-13 (Catznip-3.3)
+	void 			getOverlayImageSize(S32& overlay_width, S32& overlay_height);
+// [/SL:KB]
 	
 	void            autoResize();	// resize with label of current btn state 
 	void            resize(LLUIString label); // resize with label input
@@ -290,7 +297,7 @@ public:
 protected:
 	LLPointer<LLUIImage> getImageUnselected() const	{ return mImageUnselected; }
 	LLPointer<LLUIImage> getImageSelected() const	{ return mImageSelected; }
-	void getOverlayImageSize(S32& overlay_width, S32& overlay_height);
+//	void getOverlayImageSize(S32& overlay_width, S32& overlay_height);
 
 	LLFrameTimer	mMouseDownTimer;
 	bool			mNeedsHighlight;

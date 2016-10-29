@@ -56,6 +56,12 @@ BOOL get_is_item_worn(const LLUUID& id);
 // Could this item be worn (correct type + not already being worn)
 BOOL get_can_item_be_worn(const LLUUID& id);
 
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+BOOL get_is_item_movable(const LLInventoryModel* model, const LLUUID& id);
+
+BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id);
+// [/SL:KB]
+
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id);
 
 BOOL get_is_category_removable(const LLInventoryModel* model, const LLUUID& id);
@@ -87,6 +93,10 @@ void show_task_item_profile(const LLUUID& item_uuid, const LLUUID& object_id);
 
 void show_item_original(const LLUUID& item_uuid);
 void reset_inventory_filter();
+
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void show_item_links(const LLUUID& idItem);
+// [/SL:KB]
 
 // Nudge the listing categories in the inventory to signal that their marketplace status changed
 void update_marketplace_category(const LLUUID& cat_id, bool perform_consistency_enforcement = true);

@@ -34,6 +34,9 @@
 #include "llagent.h"
 #include "llagentwearables.h"
 #include "llcallingcard.h"
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+#include "llfiltereditor.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llinventorydefines.h"
 #include "llsdserialize.h"
@@ -434,7 +437,10 @@ void copy_inventory_category(LLInventoryModel* model,
             // Decrement the count in root_id since that one item won't be copied over
             LLMarketplaceData::instance().decrementValidationWaiting(root_id);
         }
-        else
+//        else
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		else if (!item->getIsLinkType())
+// [/SL:KB]
         {
             copy_inventory_item(
                                 gAgent.getID(),
@@ -444,6 +450,12 @@ void copy_inventory_category(LLInventoryModel* model,
                                 std::string(),
                                 cb);
         }
+// [SL:KB] - Patch: Inventory-Links | Checked: 2010-04-12 (Catznip-2.0)
+		else
+		{
+			link_inventory_object(new_cat_uuid, item, LLPointer<LLInventoryCallback>(NULL));
+		}
+// [/SL:KB]
 	}
 	
 	// Copy all the folders
@@ -608,6 +620,36 @@ BOOL get_can_item_be_worn(const LLUUID& id)
 	}
 	return FALSE;
 }
+
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-18 (Catznip-3.3)
+BOOL get_is_item_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// Can't move an item that's in COF (don't block the library as it's a special case where move operations convert to copy instead)
+	if ( (model) && (!model->isObjectDescendentOf(id, LLAppearanceMgr::instance().getCOF())) )
+	{
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL get_is_category_movable(const LLInventoryModel* model, const LLUUID& id)
+{
+	// NOTE: This function doesn't check the folder's children.
+	// See LLFolderBridge for a function that does consider the children.
+
+	// Don't block the library since it's a special case where move operations will be converted to copy instead
+	if (model)
+	{
+		// Can't move protected category types
+		const LLInventoryCategory* category = model->getCategory(id);
+		if ( (category) && (!LLFolderType::lookupIsProtectedType(category->getPreferredType())) )
+		{
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+// [/SL:KB]
 
 BOOL get_is_item_removable(const LLInventoryModel* model, const LLUUID& id)
 {
@@ -908,6 +950,32 @@ void reset_inventory_filter()
 		}
 	}
 }
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+void show_item_links(const LLUUID& idItem)
+{
+	LLInventoryPanel* pActivePanel = LLInventoryPanel::getActiveInventoryPanel();
+	LLPanelMainInventory* pPanelMainInventory = (pActivePanel) ? pActivePanel->getParentByType<LLPanelMainInventory>() : NULL;
+	LLFilterEditor* pEditor = (pPanelMainInventory) ? pPanelMainInventory->getFilterEditor() : NULL;
+	if (!pEditor)
+	{
+		return;
+	}
+
+	const LLViewerInventoryItem* pItem = gInventory.getLinkedItem(idItem);
+	if ( (!pItem) || (pItem->getIsLinkType()) || (!LLAssetType::lookupCanLink(pItem->getType())) )
+	{
+		return;
+	}
+
+	pEditor->setText(pItem->getName());
+	pEditor->setFocus(TRUE);
+	pEditor->onCommit();	// Calls LLPanelMainInventory::onFilterEdit()
+
+	LLInventoryFilter& filter = pActivePanel->getFilter();
+//	filter.setFilterSubString(item_name);
+	filter.setFindAllLinksMode(pItem->getName(), pItem->getUUID());
+}
+// [/SL:KB]
 
 void open_marketplace_listings()
 {

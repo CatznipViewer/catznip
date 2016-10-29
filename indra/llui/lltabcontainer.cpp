@@ -69,10 +69,17 @@ void LLTabContainer::TabPositions::declareValues()
 class LLTabTuple
 {
 public:
-	LLTabTuple( LLTabContainer* c, LLPanel* p, LLButton* b, LLTextBox* placeholder = NULL)
+//	LLTabTuple( LLTabContainer* c, LLPanel* p, LLButton* b, LLTextBox* placeholder = NULL)
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	LLTabTuple( LLTabContainer* c, LLPanel* p, bool closable, bool selectable, LLButton* b, LLTextBox* placeholder = NULL)
+// [/SL:KB]
 		:
 		mTabContainer(c),
 		mTabPanel(p),
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+		mClosable(closable),
+		mSelectable(selectable),
+// [/SL:KB]
 		mButton(b),
 		mOldState(FALSE),
 		mPlaceholderText(placeholder),
@@ -81,6 +88,10 @@ public:
 
 	LLTabContainer*  mTabContainer;
 	LLPanel*		 mTabPanel;
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	bool			 mClosable;
+	bool			 mSelectable;
+// [/SL:KB]
 	LLButton*		 mButton;
 	BOOL			 mOldState;
 	LLTextBox*		 mPlaceholderText;
@@ -182,6 +193,68 @@ private:
 	LLFontGL::HAlign mIconAlignment;
 	S32 mIconCtrlPad;
 };
+
+//============================================================================
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+/*
+ * @file lltabcontainer.cpp
+ * @brief Class which implements a tab button with a close button on it
+ */
+class LLClosableTabButton : public LLButton
+{
+	friend class LLUICtrlFactory;
+public:
+	LLClosableTabButton(const Params& p) 
+		: LLButton(p), mCloseBtn(NULL)
+	{
+	}
+
+	/*virtual*/ BOOL postBuild()
+	{
+		LLUIImage* pNormalImg = LLUI::getUIImage("Icon_Close_Foreground");
+		LLUIImage* pPressedImg = LLUI::getUIImage("Icon_Close_Press");
+		LLRect rctButton = getRect();
+		rctButton.setLeftTopAndSize(rctButton.mRight - pNormalImg->getWidth() - 2, (rctButton.getHeight() + pNormalImg->getHeight()) / 2,
+		                            pNormalImg->getWidth(), pNormalImg->getHeight());
+
+		// Create the close button
+		LLButton::Params p;
+		p.chrome(true);
+		p.click_callback.function(boost::bind(&LLClosableTabButton::onCloseTabBtn, this));
+		p.follows.flags(FOLLOWS_TOP | FOLLOWS_RIGHT);
+		p.hover_glow_amount(0.33f);
+		p.image_hover_selected = pPressedImg;
+		p.image_selected = pPressedImg;
+		p.image_unselected = pNormalImg;
+		p.name("close_btn");
+		p.rect(rctButton);
+		p.tab_stop(false);
+		setRightHPad(pNormalImg->getWidth());
+
+		mCloseBtn = LLUICtrlFactory::create<LLButton>(p);
+		addChild(mCloseBtn);
+
+		return TRUE;
+	}
+
+protected:
+	void onCloseTabBtn()
+	{
+		LLTabContainer* pTabContainer = getParentByType<LLTabContainer>();
+		if (pTabContainer)
+		{
+			LLPanel* pPanel = pTabContainer->getPanelByIndex(pTabContainer->getIndexForButton(this));
+			if (pPanel)
+			{
+				pTabContainer->removeTabPanel(pPanel);
+			}
+		}
+	}
+
+protected:
+	LLButton* mCloseBtn;
+};
+// [/SL:KB]
 //============================================================================
 
 struct LLPlaceHolderPanel : public LLPanel
@@ -231,6 +304,9 @@ LLTabContainer::Params::Params()
 
 LLTabContainer::LLTabContainer(const LLTabContainer::Params& p)
 :	LLPanel(p),
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	mRemoveSignal(NULL),
+// [/SL:KB]
 	mCurrentTabIdx(-1),
 	mTabsHidden(p.hide_tabs),
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)
@@ -611,7 +687,15 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 //			S32 index = getCurrentPanelIndex();
 //			index = llclamp(index, 0, tab_count-1);
 //			LLButton* tab_button = getTab(index)->mButton;
-			gFocusMgr.setMouseCapture(this);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			// Only grab mouse capture and set focus if it's not currently on a child of the button (i.e. the close button)
+			if ( (!tab_button->hasMouseCapture()) && (!gFocusMgr.childHasMouseCapture(tab_button)) )
+			{
+				gFocusMgr.setMouseCapture(this);
+				tab_button->setFocus(TRUE);
+			}
+// [/SL:KB]
+//			gFocusMgr.setMouseCapture(this);
 //			tab_button->setFocus(TRUE);
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
 			// Only set keyboard focus to the tab button of the active panel (if we have one) if the user actually clicked on it
@@ -670,7 +754,10 @@ BOOL LLTabContainer::handleHover( S32 x, S32 y, MASK mask )
 		handled = LLPanel::handleHover(x, y, mask);
 	}
 
-	commitHoveredButton(x, y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	commitHoveredButton(x, y, true);
+// [/SL:KB]
+//	commitHoveredButton(x, y);
 	return handled;
 }
 
@@ -715,7 +802,10 @@ BOOL LLTabContainer::handleMouseUp( S32 x, S32 y, MASK mask )
 		handled = LLPanel::handleMouseUp( x, y, mask );
 	}
 
-	commitHoveredButton(x, y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	commitHoveredButton(x, y, false);
+// [/SL:KB]
+//	commitHoveredButton(x, y);
 	LLPanel* cur_panel = getCurrentPanel();
 	if (hasMouseCapture())
 	{
@@ -978,6 +1068,9 @@ BOOL LLTabContainer::handleDragAndDrop(S32 x, S32 y, MASK mask,	BOOL drop,	EDrag
 					if (tuple->mButton->pointInView(local_x, local_y) &&  tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
 					{
 						tuple->mButton->onCommit();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-09-19 (Catznip-3.3)
+						break;
+// [/SL:KB]
 					}
 				}
 				// Stop the timer whether successful or not. Don't let it run forever.
@@ -1199,13 +1292,22 @@ void LLTabContainer::addTabPanel(const TabPanelParams& panel)
 		{
 			btn = LLUICtrlFactory::create<LLCustomButtonIconCtrl>(custom_btn_params);
 		}
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+		else if (panel.is_closable)
+		{
+			btn = LLUICtrlFactory::create<LLClosableTabButton>(p);
+		}
+// [/SL:KB]
 		else
 		{
 			btn = LLUICtrlFactory::create<LLButton>(p);
 		}
 	}
 	
-	LLTabTuple* tuple = new LLTabTuple( this, child, btn, textbox );
+//	LLTabTuple* tuple = new LLTabTuple( this, child, btn, textbox );
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	LLTabTuple* tuple = new LLTabTuple(this, child, panel.is_closable, panel.is_selectable, btn, textbox);
+// [/SL:KB]
 	insertTuple( tuple, insertion_point );
 
 	// if new tab was added as a first or last tab, update button image 
@@ -1267,9 +1369,20 @@ void LLTabContainer::addTabPanel(const TabPanelParams& panel)
 	sendChildToFront(mJumpPrevArrowBtn);
 	sendChildToFront(mJumpNextArrowBtn);
 	
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	// We don't know the size of the close button until after it's been created so reshape now if necessary
+	if ( (tuple->mClosable) && (!mIsVertical) )
+	{
+		reshapeTuple(tuple);
+	}
+// [/SL:KB]
+
 	if( select )
 	{
-		selectLastTab();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		selectTabPanel(child);
+// [/SL:KB]
+//		selectLastTab();
 	}
 
 	updateMaxScrollPos();
@@ -1328,6 +1441,14 @@ void LLTabContainer::removeTabPanel(LLPanel* child)
 		LLTabTuple* tuple = *iter;
 		if( tuple->mTabPanel == child )
 		{
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+			bool fDeletePanel = false;
+			if (mRemoveSignal)
+			{
+				(*mRemoveSignal)(iter - mTabList.begin(), tuple->mTabPanel, fDeletePanel);
+			}
+// [/SL:KB]
+
 			// update tab button images if removing the first or last tab
 			if ((tuple == mTabList.front()) && (mTabList.size() > 1))
 			{
@@ -1347,6 +1468,12 @@ void LLTabContainer::removeTabPanel(LLPanel* child)
             tuple->mButton = NULL;
 
  			removeChild( tuple->mTabPanel );
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+			if (fDeletePanel)
+			{
+				delete tuple->mTabPanel;
+			}
+// [/SL:KB]
 // 			delete tuple->mTabPanel;
             tuple->mTabPanel = NULL;
 			
@@ -1360,11 +1487,18 @@ void LLTabContainer::removeTabPanel(LLPanel* child)
 	// make sure we don't have more locked tabs than we have tabs
 	mLockedTabCount = llmin(getTabCount(), mLockedTabCount);
 
-	if (mCurrentTabIdx >= (S32)mTabList.size())
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	mCurrentTabIdx = findSelectableTabIndex( (mCurrentTabIdx < getTabCount()) ? mCurrentTabIdx : getTabCount() - 1);
+	if (-1 != mCurrentTabIdx)
 	{
-		mCurrentTabIdx = mTabList.size()-1;
+		selectTab(mCurrentTabIdx);
 	}
-	selectTab(mCurrentTabIdx);
+// [/SL:KB]
+//	if (mCurrentTabIdx >= (S32)mTabList.size())
+//	{
+//		mCurrentTabIdx = mTabList.size()-1;
+//	}
+//	selectTab(mCurrentTabIdx);
 	if (has_focus)
 	{
 		LLPanel* panelp = getPanelByIndex(mCurrentTabIdx);
@@ -1434,12 +1568,18 @@ LLPanel* LLTabContainer::getCurrentPanel()
 	return NULL;
 }
 
-S32 LLTabContainer::getCurrentPanelIndex()
+//S32 LLTabContainer::getCurrentPanelIndex()
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-13 (Catznip-3.3)
+S32 LLTabContainer::getCurrentPanelIndex() const
+// [/SL:KB]
 {
 	return mCurrentTabIdx;
 }
 
-S32 LLTabContainer::getTabCount()
+//S32 LLTabContainer::getTabCount()
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-13 (Catznip-3.3)
+S32 LLTabContainer::getTabCount() const
+// [/SL:KB]
 {
 	return mTabList.size();
 }
@@ -1468,6 +1608,20 @@ S32 LLTabContainer::getIndexForPanel(const LLPanel* panel)
 	return -1;
 }
 
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+S32 LLTabContainer::getIndexForButton(LLButton* btn)
+{
+	for (S32 index = 0; index < (S32)mTabList.size(); index++)
+	{
+		if (mTabList[index]->mButton == btn)
+		{
+			return index;
+		}
+	}
+	return -1;
+}
+// [/SL:KB]
+
 S32 LLTabContainer::getPanelIndexByTitle(const std::string& title)
 {
 	for (S32 index = 0 ; index < (S32)mTabList.size(); index++)
@@ -1479,6 +1633,20 @@ S32 LLTabContainer::getPanelIndexByTitle(const std::string& title)
 	}
 	return -1;
 }
+
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-07-22 (Catznip-3.3)
+S32 LLTabContainer::getPanelIndexByName(const std::string& name)
+{
+	for (S32 index = 0 ; index < (S32)mTabList.size(); index++)
+	{
+		if (name == mTabList[index]->mTabPanel->getName())
+		{
+			return index;
+		}
+	}
+	return -1;
+}
+// [/SL:KB]
 
 LLPanel* LLTabContainer::getPanelByName(const std::string& name)
 {
@@ -1732,6 +1900,46 @@ BOOL LLTabContainer::selectTabByName(const std::string& name)
 	return result;
 }
 
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+bool LLTabContainer::canSelectTab(S32 index) const
+{
+	const LLTabTuple* pTuple = ((index >= 0) && (index < getTabCount())) ? getTab(index) : NULL;
+	return (pTuple) && (pTuple->mSelectable);
+}
+
+S32 LLTabContainer::findSelectableTabIndex(S32 desired_index) const
+{
+	// Sanitize desired_index
+	desired_index = llclamp(desired_index, 0, getTabCount());
+
+	// From the desired index to the end of the list
+	for (S32 idxTab = desired_index, cntTab = getTabCount(); idxTab < cntTab; idxTab++)
+	{
+		if (getTab(idxTab)->mSelectable)
+			return idxTab;
+	}
+
+	// From the desired index to the beginning of the list
+	for (S32 idxTab = desired_index - 1; idxTab >= 0; idxTab--)
+	{
+		if (getTab(idxTab)->mSelectable)
+			return idxTab;
+	}
+
+	return -1;
+}
+
+void LLTabContainer::setTabSelectable(LLPanel* child, bool selectable)
+{
+	S32 idxTab = getIndexForPanel(child);
+	LLTabTuple* pTuple = ((idxTab >= 0) && (idxTab < getTabCount())) ? getTab(idxTab) : NULL;
+	if (pTuple)
+	{
+		pTuple->mSelectable = selectable;
+	}
+}
+// [/SL:KB]
+
 BOOL LLTabContainer::getTabPanelFlashing(LLPanel *child)
 {
 	LLTabTuple* tuple = getTabByPanel(child);
@@ -1757,27 +1965,42 @@ void LLTabContainer::setTabPanelFlashing(LLPanel* child, BOOL state, BOOL flash_
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, const LLColor4& color)
+//void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, const LLColor4& color)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, std::string image_name, LLFontGL::HAlign alignment, const LLColor4& color)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	if( tuple )
 	{
-		tuple->mButton->setImageOverlay(image_name, LLFontGL::LEFT, color);
+//		tuple->mButton->setImageOverlay(image_name, LLFontGL::LEFT, color);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		tuple->mButton->setImageOverlay(image_name, alignment, color);
+// [/SL:KB]
 		reshapeTuple(tuple);
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, const LLColor4& color)
+//void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, const LLColor4& color)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, const LLUUID& image_id, LLFontGL::HAlign alignment, const LLColor4& color)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	if( tuple )
 	{
-		tuple->mButton->setImageOverlay(image_id, LLFontGL::LEFT, color);
+//		tuple->mButton->setImageOverlay(image_id, LLFontGL::LEFT, color);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+		tuple->mButton->setImageOverlay(image_id, alignment, color);
+// [/SL:KB]
 		reshapeTuple(tuple);
 	}
 }
 
-void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
+//void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon, LLFontGL::HAlign alignment)
+// [/SL:KB]
 {
 	LLTabTuple* tuple = getTabByPanel(child);
 	LLCustomButtonIconCtrl* button;
@@ -1789,7 +2012,10 @@ void LLTabContainer::setTabImage(LLPanel* child, LLIconCtrl* icon)
 		if(button)
 		{
 			hasButton = true;
-			button->setIcon(icon);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+			button->setIcon(icon, alignment);
+// [/SL:KB]
+//			button->setIcon(icon);
 			reshapeTuple(tuple);
 		}
 	}
@@ -1818,8 +2044,12 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 	}
 	else
 	{
-		image_overlay_width = tuple->mButton->getImageOverlay().notNull() ?
-				tuple->mButton->getImageOverlay()->getImage()->getWidth(0) : 0;
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			S32 image_overlay_height = 0;
+			tuple->mButton->getOverlayImageSize(image_overlay_width, image_overlay_height);
+// [/SL:KB]
+//			image_overlay_width = tuple->mButton->getImageOverlay().notNull() ?
+//					tuple->mButton->getImageOverlay()->getImage()->getWidth(0) : 0;
 	}
 // [/SL:KB]
 
@@ -1842,9 +2072,20 @@ void LLTabContainer::reshapeTuple(LLTabTuple* tuple)
 		mTotalTabWidth -= tuple->mButton->getRect().getWidth();
 
 		tuple->mPadding = image_overlay_width;
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+		if (tuple->mClosable)
+			tuple->mPadding += tuple->mButton->getRightHPad();
 
-		tuple->mButton->reshape(llclamp(mFont->getWidth(tuple->mButton->getLabelSelected()) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth),
-								tuple->mButton->getRect().getHeight());
+		S32 nTabWidth = tab_padding + tuple->mPadding;
+		if (!tuple->mButton->getLabelSelected().empty())
+		{
+			// Only clamp to the minimum tab width if there's a title
+			nTabWidth = llmax(nTabWidth + mFont->getWidth(tuple->mButton->getLabelSelected()), mMinTabWidth);
+		}
+		tuple->mButton->reshape(llmin(nTabWidth, mMaxTabWidth), tuple->mButton->getRect().getHeight());
+// [/SL:KB]
+//		tuple->mButton->reshape(llclamp(mFont->getWidth(tuple->mButton->getLabelSelected()) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth),
+//								tuple->mButton->getRect().getHeight());
 		// add back in button width to total tab strip width
 		mTotalTabWidth += tuple->mButton->getRect().getWidth();
 
@@ -1904,7 +2145,16 @@ void LLTabContainer::setPanelTitle(S32 index, const std::string& title)
 		LLButton* tab_button = tuple->mButton;
 		const LLFontGL* fontp = LLFontGL::getFontSansSerifSmall();
 		mTotalTabWidth -= tab_button->getRect().getWidth();
-		tab_button->reshape(llclamp(fontp->getWidth(title) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth), tab_button->getRect().getHeight());
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+		S32 nTabWidth = tab_padding + tuple->mPadding;
+		if (!title.empty())
+		{
+			// Only clamp to the minimum tab width if there's a title
+			nTabWidth = llmax(nTabWidth + fontp->getWidth(title), mMinTabWidth);
+		}
+		tab_button->reshape(llmin(nTabWidth, mMaxTabWidth), tab_button->getRect().getHeight());
+// [/SL:KB]
+//		tab_button->reshape(llclamp(fontp->getWidth(title) + tab_padding + tuple->mPadding, mMinTabWidth, mMaxTabWidth), tab_button->getRect().getHeight());
 		mTotalTabWidth += tab_button->getRect().getWidth();
 		tab_button->setLabelSelected(title);
 		tab_button->setLabelUnselected(title);
@@ -2284,7 +2534,10 @@ void LLTabContainer::updateMaxScrollPos()
 	}
 }
 
-void LLTabContainer::commitHoveredButton(S32 x, S32 y)
+//void LLTabContainer::commitHoveredButton(S32 x, S32 y)
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+void LLTabContainer::commitHoveredButton(S32 x, S32 y, bool drag_commit)
+// [/SL:KB]
 {
 	if (!getTabsHidden() && hasMouseCapture())
 	{
@@ -2293,7 +2546,12 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 			LLTabTuple* tuple = *iter;
 			S32 local_x = x - tuple->mButton->getRect().mLeft;
 			S32 local_y = y - tuple->mButton->getRect().mBottom;
-			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
+//			if (tuple->mButton->pointInView(local_x, local_y) && tuple->mButton->getEnabled() && !tuple->mTabPanel->getVisible())
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			// Don't drag-select unselectable tabs
+			if ( (tuple->mButton->pointInView(local_x, local_y)) && (tuple->mButton->getEnabled()) && 
+				 (!tuple->mTabPanel->getVisible()) && ((!drag_commit) || (tuple->mSelectable)) )
+// [/SL:KB]
 			{
 //				tuple->mButton->onCommit();
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.5)
@@ -2331,6 +2589,9 @@ void LLTabContainer::commitHoveredButton(S32 x, S32 y)
 				{
 					tuple->mButton->onCommit();
 					tuple->mButton->setFocus(TRUE);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+					return;
+// [/SL:KB]
 				}
 				break;
 // [/SL:KB]
@@ -2350,5 +2611,16 @@ boost::signals2::connection LLTabContainer::setRearrangeCallback(const tab_rearr
 	if (!mRearrangeSignal)
 		mRearrangeSignal = new tab_rearrange_signal_t();
 	return mRearrangeSignal->connect(cb);
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+boost::signals2::connection LLTabContainer::setRemoveCallback(const tab_remove_signal_t::slot_type& cb)
+{
+	if (!mRemoveSignal)
+	{
+		mRemoveSignal = new tab_remove_signal_t();
+	}
+	return mRemoveSignal->connect(cb);
 }
 // [/SL:KB]

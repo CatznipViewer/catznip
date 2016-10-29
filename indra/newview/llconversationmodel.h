@@ -88,6 +88,9 @@ public:
 	virtual BOOL copyToClipboard() const { return FALSE; }
 	virtual BOOL cutToClipboard() { return FALSE; }
 	virtual BOOL isClipboardPasteable() const { return FALSE; }
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2013-05-18 (Catznip-3.5)
+	/*virtual*/ bool isClipboardCut() const { return false; }
+// [/SL:KB]
 	virtual void pasteFromClipboard() { }
 	virtual void pasteLinkFromClipboard() { }
 	virtual void buildContextMenu(LLMenuGL& menu, U32 flags) { }

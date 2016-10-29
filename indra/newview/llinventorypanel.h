@@ -190,7 +190,10 @@ public:
 	BOOL getSinceLogoff();
 //	void setFilterLinks(U64 filter_links);
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
-	void setFilterLinks(U64 filter_links, bool substring_reset);
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+	void setFilterLinks(LLInventoryFilter::EFilterLink filter_links, bool substring_reset);
+// [/SL:KB]
+//	void setFilterLinks(U64 filter_links, bool substring_reset);
 // [/SL:KB]
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void setFilterWorn(bool filter);
@@ -290,7 +293,7 @@ public:
 
 private:
 	std::string					mSortOrderSetting;
-	int							mClipboardState;
+//	int							mClipboardState;
 
 	//--------------------------------------------------------------------
 	// Hidden folders

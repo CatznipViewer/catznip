@@ -164,6 +164,10 @@ public:
 		
 		Optional<std::string>		label;
 		Optional<bool>				select_tab,
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+									is_closable,		// Only works if use_custom_icon_ctrl is false on the tab container
+									is_selectable,
+// [/SL:KB]
 									is_placeholder;
 		Optional<S32>				indent;
 		Optional<eInsertionPoint>	insert_at;
@@ -173,6 +177,10 @@ public:
 		:	panel("panel", NULL),
 			label("label"),
 			select_tab("select_tab"),
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+			is_closable("is_closable", false),
+			is_selectable("is_selectable", true),
+// [/SL:KB]
 			is_placeholder("is_placeholder"),
 			indent("indent"),
 			insert_at("insert_at", END)
@@ -183,20 +191,32 @@ public:
 	void		addTabPanel(const TabPanelParams& panel);
 	void 		addPlaceholder(LLPanel* child, const std::string& label);
 	void 		removeTabPanel( LLPanel* child );
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	typedef boost::signals2::signal<void(S32, LLPanel*, bool&)> tab_remove_signal_t;
+	boost::signals2::connection setRemoveCallback(const tab_remove_signal_t::slot_type& cb);
+// [/SL:KB]
 	void 		lockTabs(S32 num_tabs = 0);
 	void 		unlockTabs();
 	S32 		getNumLockedTabs() { return mLockedTabCount; }
 	void 		enableTabButton(S32 which, BOOL enable);
 	void 		deleteAllTabs();
 	LLPanel*	getCurrentPanel();
-	S32			getCurrentPanelIndex();
-	S32			getTabCount();
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-13 (Catznip-3.3)
+	S32			getCurrentPanelIndex() const;
+	S32			getTabCount() const;
+// [/SL:KB]
 	LLPanel*	getPanelByIndex(S32 index);
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-06-22 (Catznip-3.3)
 	S32			getIndexForPanel(const LLPanel* panel);
 // [/SL:KB]
 //	S32			getIndexForPanel(LLPanel* panel);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	S32			getIndexForButton(LLButton* btn);
+// [/SL:KB]
 	S32			getPanelIndexByTitle(const std::string& title);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-07-22 (Catznip-3.3)
+	S32			getPanelIndexByName(const std::string& name);
+// [/SL:KB]
     LLPanel*	getPanelByName(const std::string& name);
 // [SL:KB] - Patch: Control-TabContainer | Checked: 2014-02-06 (Catznip-3.6)
 	LLPanel*	getPanelFromPoint(const S32 x, const S32 y);
@@ -212,15 +232,25 @@ public:
 	BOOL 		selectTab(S32 which);
 	BOOL 		selectTabByName(const std::string& title);
     void        setCurrentPanelIndex(S32 index) { mCurrentTabIdx = index; }
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	bool		canSelectTab(S32 index) const;
+	S32			findSelectableTabIndex(S32 desired_index) const;
+	void		setTabSelectable(LLPanel* child, bool selectable);
+// [/SL:KB]
 
 	BOOL        getTabPanelFlashing(LLPanel* child);
 // [SL:KB] - Patch: Control-TabContainer | Checked: 2014-03-22 (Catznip-3.6)
 	void		setTabPanelFlashing(LLPanel* child, BOOL state, BOOL flash_timer = true);
 // [/SL:KB]
 //	void		setTabPanelFlashing(LLPanel* child, BOOL state);
-	void 		setTabImage(LLPanel* child, std::string img_name, const LLColor4& color = LLColor4::white);
-	void 		setTabImage(LLPanel* child, const LLUUID& img_id, const LLColor4& color = LLColor4::white);
-	void		setTabImage(LLPanel* child, LLIconCtrl* icon);
+// [SL:KB] - Patch: Control-TabContainer | Checked: 2012-08-10 (Catznip-3.3)
+	void 		setTabImage(LLPanel* child, std::string img_name, LLFontGL::HAlign alignment = LLFontGL::LEFT, const LLColor4& color = LLColor4::white);
+	void 		setTabImage(LLPanel* child, const LLUUID& img_id, LLFontGL::HAlign alignment = LLFontGL::LEFT, const LLColor4& color = LLColor4::white);
+	void		setTabImage(LLPanel* child, LLIconCtrl* icon, LLFontGL::HAlign alignment = LLFontGL::LEFT);
+// [/SL:KB]
+//	void 		setTabImage(LLPanel* child, std::string img_name, const LLColor4& color = LLColor4::white);
+//	void 		setTabImage(LLPanel* child, const LLUUID& img_id, const LLColor4& color = LLColor4::white);
+//	void		setTabImage(LLPanel* child, LLIconCtrl* icon);
 	void		setTitle( const std::string& title );
 	const std::string getPanelTitle(S32 index);
 
@@ -265,6 +295,9 @@ private:
 	BOOL		setTab(S32 which);
 
 	LLTabTuple* getTab(S32 index) 		{ return mTabList[index]; }
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+	const LLTabTuple* getTab(S32 index) const { return mTabList[index]; }
+// [/SL:KB]
 	LLTabTuple* getTabByPanel(LLPanel* child);
 	void insertTuple(LLTabTuple * tuple, eInsertionPoint insertion_point);
 
@@ -282,7 +315,10 @@ private:
 	void scrollNext() { mScrollPos = llmin(mScrollPos+1, mMaxScrollPos); } // No wrap
 
 	void updateMaxScrollPos();
-	void commitHoveredButton(S32 x, S32 y);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	void commitHoveredButton(S32 x, S32 y, bool drag_commit);
+// [/SL:KB]
+//	void commitHoveredButton(S32 x, S32 y);
 
 	// updates tab button images given the tuple, tab position and the corresponding params
 	void update_images(LLTabTuple* tuple, TabParams params, LLTabContainer::TabPosition pos);
@@ -293,6 +329,10 @@ private:
 	typedef std::vector<LLTabTuple*> tuple_list_t;
 	tuple_list_t					mTabList;
 	
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-14 (Catznip-3.3)
+	tab_remove_signal_t*			mRemoveSignal;
+// [/SL:KB]
+
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2012-05-05 (Catznip-3.3)

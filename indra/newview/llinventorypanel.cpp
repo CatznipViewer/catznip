@@ -312,8 +312,8 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 		getFilter().setFilterEmptySystemFolders();
 	}
 	
-	// keep track of the clipboard state so that we avoid filtering too much
-	mClipboardState = LLClipboard::instance().getGeneration();
+//	// keep track of the clipboard state so that we avoid filtering too much
+//	mClipboardState = LLClipboard::instance().getGeneration();
 	
 	// Initialize base class params.
 	LLPanel::initFromParams(mParams);
@@ -464,7 +464,10 @@ void LLInventoryPanel::setDateSearchDirection(U32 direction)
 //	getFilter().setFilterLinks(filter_links);
 //}
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
-void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
+//void LLInventoryPanel::setFilterLinks(U64 filter_links, bool substring_reset)
+// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+void LLInventoryPanel::setFilterLinks(LLInventoryFilter::EFilterLink filter_links, bool substring_reset)
+// [/SL:KB]
 {
 	getFilter().setFilterLinks(filter_links, substring_reset);
 }
@@ -735,19 +738,19 @@ struct DirtyFilterFunctor : public LLFolderViewFunctor
 void LLInventoryPanel::idle(void* user_data)
 {
 	LLInventoryPanel* panel = (LLInventoryPanel*)user_data;
-	// Nudge the filter if the clipboard state changed
-	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
-	{
-		panel->mClipboardState = LLClipboard::instance().getGeneration();
-		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
-		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
-		if (trash_folder)
-		{
-            DirtyFilterFunctor dirtyFilterFunctor;
-			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
-		}
-
-	}
+//	// Nudge the filter if the clipboard state changed
+//	if (panel->mClipboardState != LLClipboard::instance().getGeneration())
+//	{
+//		panel->mClipboardState = LLClipboard::instance().getGeneration();
+//		const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+//		LLFolderViewFolder* trash_folder = panel->getFolderByID(trash_id);
+//		if (trash_folder)
+//		{
+//            DirtyFilterFunctor dirtyFilterFunctor;
+//			trash_folder->applyFunctorToChildren(dirtyFilterFunctor);
+//		}
+//
+//	}
 
     // Take into account the fact that the root folder might be invalidated
     if (panel->mFolderRoot.get())

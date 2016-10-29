@@ -114,8 +114,14 @@ public:
 	virtual void removeBatch(std::vector<LLFolderViewModelItem*>& batch);
 	virtual void move(LLFolderViewModelItem* new_parent_bridge) {}
 	virtual BOOL isItemCopyable() const { return FALSE; }
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	virtual bool isItemLinkable() const { return FALSE; }
+// [/SL:KB]
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	/*virtual*/ bool isClipboardCut() const;
+// [/SL:KB]
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	virtual void pasteFromClipboard() {}
@@ -185,6 +191,10 @@ protected:
 // [/SL:KB]
 	bool						mIsLink;
 	LLTimer						mTimeSinceRequestStart;
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
+	mutable int					mClipboardGeneration;
+	mutable bool				mIsClipboardCut;			// Only access this through isClipboardCut()
+// [/SL:KB]
 	mutable std::string			mDisplayName;
 	mutable std::string			mSearchableName;
 
@@ -229,6 +239,9 @@ public:
 	virtual void restoreItem();
 	virtual void restoreToWorld();
 	virtual void gotoItem();
+// [SL:KB] - Patch: Inventory-FindAllLinks | Checked: 2012-07-21 (Catznip-3.3)
+	virtual void findLinks();
+// [/SL:KB]
 	virtual LLUIImagePtr getIcon() const;
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
@@ -238,6 +251,9 @@ public:
 	virtual BOOL renameItem(const std::string& new_name);
 	virtual BOOL removeItem();
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const;
+// [/SL:KB]
 	virtual bool hasChildren() const { return FALSE; }
 	virtual BOOL isUpToDate() const { return TRUE; }
 	virtual LLUIImagePtr getIconOverlay() const;
@@ -311,6 +327,9 @@ public:
 	virtual BOOL isItemMovable() const ;
 	virtual BOOL isUpToDate() const;
 	virtual BOOL isItemCopyable() const;
+// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+	/*virtual*/ bool isItemLinkable() const;
+// [/SL:KB]
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	
@@ -390,7 +409,10 @@ public:
 	virtual void openItem();
 	virtual void buildContextMenu(LLMenuGL& menu, U32 flags);
 	virtual void performAction(LLInventoryModel* model, std::string action);
-	bool canSaveTexture(void);
+// [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2013-05-18 (Catznip-3.4)
+	bool canSaveTexture(void) const;
+// [/SL:KB]
+//	bool canSaveTexture(void);
 };
 
 class LLSoundBridge : public LLItemBridge
