@@ -149,6 +149,10 @@ public:
 	virtual BOOL isUpToDate() const { return TRUE; }
 	virtual bool hasChildren() const { return FALSE; }
 	virtual LLInventoryType::EType getInventoryType() const { return LLInventoryType::IT_NONE; }
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2013-05-20 (Catznip-3.5)
+	/*virtual*/ bool isItemWorn() const { return false; }
+	/*virtual*/ LLAssetType::EType getAssetType() const { return mAssetType; }
+// [/SL:KB]
 	virtual LLWearableType::EType getWearableType() const { return LLWearableType::WT_NONE; }
 	virtual EInventorySortGroup getSortGroup() const { return SG_ITEM; }
 	virtual LLInventoryObject* getInventoryObject() const { return findInvObject(); }

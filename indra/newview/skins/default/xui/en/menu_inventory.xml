@@ -775,20 +775,20 @@
      layout="topleft" 
      name="Wearable And Object Separator"/>
     <menu_item_call
-     label="Detach From Yourself"
-     layout="topleft"
-     name="Detach From Yourself">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="detach" />
-    </menu_item_call>
-    <menu_item_call
      label="Wear"
      layout="topleft"
      name="Wearable And Object Wear">
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
          parameter="wear" />
+    </menu_item_call>
+    <menu_item_call
+     label="Add"
+     layout="topleft"
+     name="Wearable Add">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="wear_add" />
     </menu_item_call>
     <menu
      label="Attach To"
@@ -798,6 +798,11 @@
      label="Attach To HUD"
      layout="topleft"
      name="Attach To HUD" />
+    <menu
+     label="Wear On"
+     layout="topleft"
+     name="Wear On">
+    </menu>
     <menu_item_call
      label="Touch"
      layout="topleft"
@@ -815,20 +820,28 @@
          parameter="edit" />
     </menu_item_call>
     <menu_item_call
-     label="Add"
-     layout="topleft"
-     name="Wearable Add">
-        <menu_item_call.on_click
-         function="Inventory.DoToSelected"
-         parameter="wear_add" />
-    </menu_item_call>
-    <menu_item_call
      label="Take Off"
      layout="topleft"
      name="Take Off">
         <menu_item_call.on_click
          function="Inventory.DoToSelected"
          parameter="take_off" />
+    </menu_item_call>
+    <menu_item_call
+     label="Detach From Yourself"
+     layout="topleft"
+     name="Detach From Yourself">
+        <menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="detach" />
+    </menu_item_call>
+    <menu_item_call
+     label="Take Off / Detach"
+     layout="topleft"
+     name="Wearable And Object Take Off">
+      <menu_item_call.on_click
+       function="Inventory.DoToSelected"
+       parameter="take_off" />
     </menu_item_call>
     <menu_item_separator
      layout="topleft"
