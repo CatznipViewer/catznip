@@ -687,14 +687,6 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 //			S32 index = getCurrentPanelIndex();
 //			index = llclamp(index, 0, tab_count-1);
 //			LLButton* tab_button = getTab(index)->mButton;
-// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
-			// Only grab mouse capture and set focus if it's not currently on a child of the button (i.e. the close button)
-			if ( (!tab_button->hasMouseCapture()) && (!gFocusMgr.childHasMouseCapture(tab_button)) )
-			{
-				gFocusMgr.setMouseCapture(this);
-				tab_button->setFocus(TRUE);
-			}
-// [/SL:KB]
 //			gFocusMgr.setMouseCapture(this);
 //			tab_button->setFocus(TRUE);
 // [SL:KB] - Patch: UI-TabRearrange | Checked: 2010-06-05 (Catznip-2.0)
@@ -702,8 +694,18 @@ BOOL LLTabContainer::handleMouseDown( S32 x, S32 y, MASK mask )
 			if (mCurrentTabIdx >= 0)
 			{
 				LLButton* pActiveTabBtn = mTabList[mCurrentTabIdx]->mButton;
-				if (pActiveTabBtn->pointInView(x - pActiveTabBtn->getRect().mLeft, y - pActiveTabBtn->getRect().mBottom))
-					pActiveTabBtn->setFocus(TRUE);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+				// Only grab mouse capture and set focus if it's not currently on a child of the button (i.e. the close button)
+				S32 local_x = x - pActiveTabBtn->getRect().mLeft, local_y = y - pActiveTabBtn->getRect().mBottom;
+				if (!pActiveTabBtn->childFromPoint(local_x, local_y, false))
+				{
+// [/SL:KB]
+					gFocusMgr.setMouseCapture(this);
+					if (pActiveTabBtn->pointInView(local_x, local_y))
+						pActiveTabBtn->setFocus(TRUE);
+// [SL:KB] - Patch: Control-TabContainerClosable | Checked: 2012-08-13 (Catznip-3.3)
+				}
+// [/SL:KB]
 			}
 // [/SL:KB]
 		}

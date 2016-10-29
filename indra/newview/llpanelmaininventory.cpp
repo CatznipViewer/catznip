@@ -473,9 +473,6 @@ bool LLPanelMainInventory::checkCreate(const LLSD& sdParam)
 		return ("Recent Items" != mActivePanel->getName());
 	}
 	return true;
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
-	onFilterEdit("");
-// [/SL:KB]
 }
 
 void LLPanelMainInventory::onToggleReceivedItems(LLInventoryPanel* pInvPanel)
@@ -535,22 +532,11 @@ void LLPanelMainInventory::resetFilters()
 	}
 
 	setFilterTextFromFilter();
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2013-03-20 (Catznip-3.4)
+	onFilterEdit("");
+// [/SL:KB]
 }
 
-// [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
-void LLPanelMainInventory::setSortBy(const LLSD& userdata)
-{
-	getActivePanel()->setSortBy(userdata.asString());
-	if ("Recent Items" == getActivePanel()->getName())
-	{
-		gSavedSettings.setU32("RecentItemsSortOrder", getActivePanel()->getSortOrder());
-	}
-	else
-	{
-		gSavedSettings.setU32("InventorySortOrder", getActivePanel()->getSortOrder());
-	}
-}
-// [/SL:KB]
 // [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLPanelMainInventory::setSortBy(const LLSD& userdata)
 {

@@ -644,6 +644,9 @@ bool LLPanelOutfitEdit::createItemsPanel()
 		mItemsPanel = getChild<LLInventoryPanel>("folder_view");
 		mItemsPanel->setFilterTypes(ALL_ITEMS_MASK);
 		mItemsPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+// [SL:KB] - Patch: Inventory-Misc | Checked: 2013-09-08 (Catznip-3.6)
+		mItemsPanel->getFilter().markDefault();
+// [/SL:KB]
 		mItemsPanel->setSelectCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
 		mItemsPanel->getRootFolder()->setReshapeCallback(boost::bind(&LLPanelOutfitEdit::updatePlusButton, this));
 	}

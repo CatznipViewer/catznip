@@ -1299,7 +1299,7 @@ void LLInventoryFilter::fromParams(const Params& params)
 
 	if (params.filter_ops.links.isProvided())
 	{
-		setFilterLinks(params.filter_ops.links);
+		setFilterLinks(params.filter_ops.links, true);
 	}
 
 	if (params.filter_ops.uuid.isProvided())

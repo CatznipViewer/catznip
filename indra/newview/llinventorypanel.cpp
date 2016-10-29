@@ -1463,8 +1463,7 @@ LLInventoryPanel* LLInventoryPanel::getActiveInventoryPanel(BOOL auto_open)
 	}	
 //	else if (auto_open)
 // [RLVa:KB] - Checked: 2012-05-15 (RLVa-1.4.6)
-	else if ( (auto_open) && (LLFloaterReg::canShowInstance(floater_inventory->getInstanceName())) )
-	{
+	else if ( (auto_open) && (LLFloaterReg::canShowInstance("inventory")) )
 // [/RLVa:KB]
 	{
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)

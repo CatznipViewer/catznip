@@ -601,28 +601,28 @@ protected:
 
 		menu->setItemVisible("touch_attach",       show_touch);
 		menu->setItemEnabled("touch_attach",       1 == mUUIDs.size() && enable_attachment_touch(mUUIDs.front()));
+		menu->setItemVisible("edit_item",          show_edit);
+		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && enable_item_edit(mUUIDs.front()));
+		menu->setItemVisible("detach",             show_detach);
+//		menu->setItemEnabled("detach",             !bp_selected);
+		menu->setItemVisible("take_off",           show_take_off);
+//		menu->setItemEnabled("take_off",           !bp_selected);
+		menu->setItemVisible("take_off_or_detach", show_take_off_or_detach);
+//		menu->setItemEnabled("take_off_or_detach", !bp_selected);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-12 (Catznip-3.3)
-		menu->setItemVisible("take_off_folder",	allow_take_off);
-		menu->setItemEnabled("take_off_folder",	can_remove_folder);
-		menu->setItemVisible("detach_folder",	allow_detach);
-		menu->setItemEnabled("detach_folder",	can_remove_folder);
+		menu->setItemVisible("take_off_folder",    show_take_off || show_take_off_or_detach);
+		menu->setItemEnabled("take_off_folder",    can_remove_folder);
+		menu->setItemVisible("detach_folder",      show_detach);
+		menu->setItemEnabled("detach_folder",      can_remove_folder);
 
 		menu->setItemEnabled("find_original", 1 == mUUIDs.size());
 		menu->setItemEnabled("properties", 1 == mUUIDs.size());
 // [/SL:KB]
 // [RLVa:KB] - Checked: 2012-07-28 (RLVa-1.4.7)
-		menu->setItemEnabled("take_off",	!rlv_blocked);
-		menu->setItemEnabled("detach",		!rlv_blocked);
+		menu->setItemEnabled("take_off",           !rlv_blocked);
+		menu->setItemEnabled("detach",             !rlv_blocked);
+		menu->setItemEnabled("take_off_or_detach", !bp_selected && !rlv_blocked);
 // [/RLVa:KB]
-		menu->setItemVisible("edit_item",          show_edit);
-		menu->setItemEnabled("edit_item",          1 == mUUIDs.size() && enable_item_edit(mUUIDs.front()));
-		menu->setItemVisible("detach",             show_detach);
-		menu->setItemEnabled("detach",             !bp_selected);
-		menu->setItemVisible("take_off",           show_take_off);
-		menu->setItemEnabled("take_off",           !bp_selected);
-		menu->setItemVisible("take_off_or_detach", show_take_off_or_detach);
-		menu->setItemEnabled("take_off_or_detach", !bp_selected);
-
 		menu->setItemVisible("edit_outfit_separator", show_edit || show_detach || show_take_off || show_take_off_or_detach);
 // [/SL:KB]
 //		bool allow_detach = !bp_selected && !clothes_selected && attachments_selected;
