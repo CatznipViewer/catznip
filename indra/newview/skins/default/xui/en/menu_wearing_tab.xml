@@ -3,6 +3,20 @@
  layout="topleft"
  name="Wearing">
     <menu_item_call
+     label="Touch"
+     layout="topleft"
+     name="touch_attach">
+        <on_click
+         function="Wearing.TouchAttach" />
+    </menu_item_call>
+    <menu_item_call
+     label="Edit"
+     layout="topleft"
+     name="edit_item">
+        <on_click
+         function="Wearing.EditItem" />
+    </menu_item_call>
+    <menu_item_call
      label="Take Off"
      layout="topleft"
      name="take_off">
@@ -45,6 +59,13 @@
         <on_click
          function="Wearing.Properties" />
     </menu_item_call>
+    <menu_item_call
+     label="Take Off / Detach"
+     layout="topleft"
+     name="take_off_or_detach">
+        <on_click
+         function="Wearing.TakeOffDetach" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft"
      name="edit_outfit_separator" />
@@ -53,7 +74,7 @@
      layout="topleft"
      name="edit">
         <on_click
-         function="Wearing.Edit" />
+         function="Wearing.EditOutfit" />
     </menu_item_call>
     <menu_item_call
      label="Show Original"
