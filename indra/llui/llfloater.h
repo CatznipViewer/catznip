@@ -361,6 +361,11 @@ public:
 	const LLSD& 	getKey() { return mKey; }
 	virtual bool	matchesKey(const LLSD& key) { return mSingleInstance || KeyCompare::equate(key, mKey); }
 	
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2012-07-16 (Catznip-3.3)
+	bool		 	getReuseInstance() const { return mReuseInstance; }
+	void		 	setReuseInstance(bool reuse_instance) { mReuseInstance = reuse_instance; }
+// [/SL:KB]
+
 	const std::string& getInstanceName() { return mInstanceName; }
 	
 	bool            isDockable() const { return mCanDock; }

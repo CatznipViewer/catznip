@@ -44,7 +44,7 @@
 #include "llinventorymodel.h"	// for gInventory
 #include "llfirstuse.h"
 #include "llfloaterreg.h"
-#include "llfloaterinventory.h"	// for LLInventoryIcon::getIcon
+//#include "llfloaterinventory.h"	// for LLInventoryIcon::getIcon
 #include "llnotificationsutil.h"
 #include "llselectmgr.h"
 #include "llscrolllistctrl.h"
@@ -217,18 +217,21 @@ void LLFloaterBuyContents::inventoryChanged(LLViewerObject* obj,
 		// Create the line in the list
 		LLSD row;
 
-		BOOL item_is_multi = FALSE;
-		if ((inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED
-			|| inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS)
-			&& !(inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_WEARABLES_MASK))
-		{
-			item_is_multi = TRUE;
-		}
-
-		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), 
-								 inv_item->getInventoryType(),
-								 inv_item->getFlags(),
-								 item_is_multi);
+//		BOOL item_is_multi = FALSE;
+//		if ((inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_LANDMARK_VISITED
+//			|| inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS)
+//			&& !(inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_WEARABLES_MASK))
+//		{
+//			item_is_multi = TRUE;
+//		}
+//
+//		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), 
+//								 inv_item->getInventoryType(),
+//								 inv_item->getFlags(),
+//								 item_is_multi);
+// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+		std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+// [/SL:KB]
 		row["columns"][0]["column"] = "icon";
 		row["columns"][0]["type"] = "icon";
 		row["columns"][0]["value"] = icon_name;
@@ -282,6 +285,13 @@ void LLFloaterBuyContents::onClickBuy()
 	{
 		LLInventoryState::sWearNewClothing = TRUE;
 	}
+
+// [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
+	if (getChild<LLUICtrl>("showinv_check")->getValue())
+	{
+		LLInventoryState::sShowNewInventory = TRUE;
+	}
+// [/SL:KB]
 
 	// Put the items where we put new folders.
 	LLUUID category_id;

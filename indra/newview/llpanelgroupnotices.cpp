@@ -38,7 +38,7 @@
 #include "llinventoryfunctions.h"
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
-#include "llfloaterinventory.h"
+//#include "llfloaterinventory.h"
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2)
 #include "llfloaterreg.h"
 // [/SL:KB]
@@ -356,16 +356,19 @@ void LLPanelGroupNotices::activate()
 //{
 //	mInventoryItem = inv_item;
 //
-//	BOOL item_is_multi = FALSE;
-//	if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS )
-//	{
-//		item_is_multi = TRUE;
-//	};
-//
-//	std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(),
-//										inv_item->getInventoryType(),
-//										inv_item->getFlags(),
-//										item_is_multi );
+////	BOOL item_is_multi = FALSE;
+////	if ( inv_item->getFlags() & LLInventoryItemFlags::II_FLAGS_OBJECT_HAS_MULTIPLE_ITEMS )
+////	{
+////		item_is_multi = TRUE;
+////	};
+////
+////	std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(),
+////										inv_item->getInventoryType(),
+////										inv_item->getFlags(),
+////										item_is_multi );
+//// [SL:KB] - Patch: Inventory-IconMismatch | Checked: 2011-05-31 (Catznip-2.6)
+//	std::string icon_name = LLInventoryIcon::getIconName(inv_item->getType(), inv_item->getInventoryType(), inv_item->getFlags());
+//// [/SL:KB]
 //
 //	mCreateInventoryIcon->setValue(icon_name);
 //	mCreateInventoryIcon->setVisible(TRUE);

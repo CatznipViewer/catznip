@@ -8679,7 +8679,8 @@ With the following Residents:
 &lt;nolink&gt;[RESIDENTS]&lt;/nolink&gt;
   <tag>confirm</tag>
 	<usetemplate
-     name="okcancelbuttons"
+     ignoretext="Confirm when sharing items from inventory"
+     name="okcancelignore"
      notext="Cancel"
      yestext="OK"/>
   </notification>
@@ -8699,7 +8700,8 @@ With the following Residents:
 &lt;nolink&gt;[RESIDENTS]&lt;/nolink&gt;
   <tag>confirm</tag>
 	<usetemplate
-     name="okcancelbuttons"
+     ignoretext="Confirm when sharing a folder from inventory"
+     name="okcancelignore"
      notext="Cancel"
      yestext="Ok"/>
   </notification>

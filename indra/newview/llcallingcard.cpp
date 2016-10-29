@@ -44,6 +44,9 @@
 
 #include "llagent.h"
 #include "llavatarnamecache.h"
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+#include "llinventoryfunctions.h"
+// [/SL:KB]
 #include "llinventoryobserver.h"
 #include "llinventorymodel.h"
 #include "llnotifications.h"
@@ -51,6 +54,9 @@
 #include "llimview.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+#include "llviewerinventory.h"
+// [/SL:KB]
 #include "llviewerobjectlist.h"
 #include "llvoavatar.h"
 #include "llavataractions.h"
@@ -502,10 +508,22 @@ void LLAvatarTracker::notifyObservers()
 		(*it)->changed(mModifyMask);
 	}
 
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+	bool fNotifyInvObservers = false;
+// [/SL:KB]
 	for (changed_buddy_t::iterator it = mChangedBuddyIDs.begin(); it != mChangedBuddyIDs.end(); it++)
 	{
 		notifyParticularFriendObservers(*it);
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+		if (mModifyMask & ~LLFriendObserver::POWERS)
+			fNotifyInvObservers |= updateCallingCards(*it);
+// [/SL:KB]
 	}
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+	if (fNotifyInvObservers)
+		gInventory.notifyObservers();
+// [/SL:KB]
+
 
 	mModifyMask = LLFriendObserver::NONE;
 	mChangedBuddyIDs.clear();
@@ -547,6 +565,21 @@ void LLAvatarTracker::notifyParticularFriendObservers(const LLUUID& buddy_id)
         (*ob_it)->changed(mModifyMask);
     }
 }
+
+// [SL:KB] - Patch: Inventory-CallingCard | Checked: 2014-04-05 (Catznip-3.6)
+bool LLAvatarTracker::updateCallingCards(const LLUUID& buddy_id)
+{
+	// Update all calling cards with the specified avatar as the creator
+	LLInventoryModel::cat_array_t cats;
+	LLInventoryModel::item_array_t items;
+	LLParticularBuddyCollector f(buddy_id);
+	gInventory.collectDescendentsIf(gInventory.getRootFolderID(), cats, items, LLInventoryModel::INCLUDE_TRASH, f);
+
+	for (LLInventoryModel::item_array_t::iterator itItem = items.begin(); itItem != items.end(); ++itItem)
+		gInventory.addChangedMask(LLInventoryObserver::LABEL, (*itItem)->getUUID());
+	return !items.empty();
+}
+// [/SL:KB]
 
 // store flag for change
 // and id of object change applies to

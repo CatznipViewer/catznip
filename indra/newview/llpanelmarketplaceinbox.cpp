@@ -73,6 +73,7 @@ void LLPanelMarketplaceInbox::onSelectionChange()
 {
 //	LLSidepanelInventory* sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
 // [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
 // [/SL:KB]
 	sidepanel_inventory->updateVerbs();
@@ -115,6 +116,7 @@ void LLPanelMarketplaceInbox::onFocusReceived()
 {
 //	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
 // [SL:KB] - Patch: Inventory-ReceivedItemsPanel | Checked: 2012-08-11 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
 // [/SL:KB]
 	if (sidepanel_inventory)
@@ -202,7 +204,12 @@ std::string LLPanelMarketplaceInbox::getBadgeString() const
 {
 	std::string item_count_str("");
 
-	LLPanel *inventory_panel = LLFloaterSidePanelContainer::getPanel("inventory");
+//	LLPanel *inventory_panel = LLFloaterSidePanelContainer::getPanel("inventory");
+//	LLSidepanelInventory *sidepanel_inventory = LLFloaterSidePanelContainer::getPanel<LLSidepanelInventory>("inventory");
+// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
+	LLSidepanelInventory* sidepanel_inventory = getParentByType<LLSidepanelInventory>();
+	LLPanel* inventory_panel = (sidepanel_inventory) ? sidepanel_inventory->getActivePanel() : NULL;
+// [/SL:KB]
 
 	// If the inbox is visible, and the side panel is collapsed or expanded and not the inventory panel
 	if (getParent()->getVisible() && inventory_panel && !inventory_panel->isInVisibleChain())
