@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="376"
+ label="Text Chat"
+ layout="topleft"
+ name="chat_nearby"
+ width="509">
+    <text
+     layout="topleft"
+     follows="top|left"
+     top="15"
+     left="20"
+     width="350"
+     height="15"
+     mouse_opaque="false"
+     type="string"
+     name="chat_appearance_text"
+     font.style="BOLD">
+        Nearby Chat &amp; Instant Message Appearance
+    </text>
+    <panel
+     follows="top|left"
+     layout="topleft"
+     left="35"
+     name="sp_showusername"
+     top="30"
+     width="120"
+     height="38">
+        <text
+         layout="topleft"
+         left="0"
+         height="12"
+         name="chat_usernames_text"
+         width="120"
+         top="3">
+            Show usernames:
+        </text>
+        <combo_box
+         control_name="AgentLinkShowUsernames"
+         height="23"
+         layout="topleft"
+         left="0"
+         name="chat_usernames_combo"
+         top_pad="4"
+         width="100">
+            <combo_box.item
+             label="Always"
+             value="0" />
+            <combo_box.item
+             label="On Mismatch"
+             value="1" />
+            <combo_box.item
+             label="Never"
+             value="2" />
+        </combo_box>
+    </panel>
+    
+    <panel
+     follows="top|left"
+     layout="topleft"
+     left="165"
+     name="sp_fontsize"
+     top="30"
+     width="120"
+     height="38">
+        <text
+         layout="topleft"
+         left="0"
+         height="12"
+         name="chat_font_size_text"
+         width="120"
+         top="3">
+              Font size:
+        </text>
+        <combo_box
+         control_name="ChatFontSize"
+         height="23"
+         layout="topleft"
+         left="0"
+         name="chat_font_size"
+         top_pad="4"
+         width="100">
+            <item
+             label="Small"
+             name="Small"
+             value="0"/>
+            <item
+             label="Medium"
+             name="Medium"
+             value="1"/>
+            <item
+             label="Large"
+             name="Large"
+             value="2"/>  
+        </combo_box>
+    </panel>
+
+    <panel
+     follows="top|left"
+     layout="topleft"
+     left="295"
+     top="30"
+     name="sp_chatfont"
+     width="180"
+     height="50">
+        <check_box
+         height="20"
+         layout="topleft"
+         label="Chat / IM / Notecards Font:"
+         left="0"
+         name="font_editor_check"
+         top="0"
+         width="130">
+            <check_box.init_callback
+             function="Pref.InitEditorFont" />
+            <check_box.commit_callback
+             function="Pref.ToggleEditorFont" />
+        </check_box>
+        <!-- Referenced in code -->
+        <combo_box
+         control_name="FontOverrideEditor"
+         enabled="false"
+         height="23"
+         layout="topleft"
+         left="0"
+         name="font_editor_combo"
+         top_pad="0"
+         width="175">
+            <combo_box.item
+             label="DejaVu Sans (Default)"
+             name="font_editor_0"
+             value="font_editor_dejavusans.xml" />
+            <combo_box.item
+             label="Open Dyslexic"
+             name="font_editor_1"
+             value="font_editor_opendyslexic.xml" />
+            <combo_box.item
+             label="PT Sans"
+             name="font_editor_2"
+             value="font_editor_ptsans.xml" />
+            <combo_box.item
+             label="Source Sans Pro"
+             name="font_editor_3"
+             value="font_editor_sourcesanspro.xml" />
+            <combo_box.item
+             label="Ubuntu"
+             name="font_editor_4"
+             value="font_editor_ubuntu.xml" />
+            <combo_box.init_callback
+             function="Pref.InitEditorFont" />
+        </combo_box>
+        <text
+         height="15"
+         layout="topleft"
+         left="0"
+         length="1"
+         name="font_editor_restarttext"
+         text_color="White_50"
+         type="string"
+         top_pad="0"
+         width="200">
+            (Requires restart)
+        </text>
+    </panel>
+
+    <check_box
+     control_name="ChatTimestampSeconds"
+     follows="top|left"
+     height="20"
+     label="Show seconds in timestamps."
+     layout="topleft"
+     left="35"
+     name="chat_timestampseconds_check"
+     top_pad="0"
+     width="350" />
+    <check_box
+     control_name="NearbyChatIsNotTornOff"
+     follows="top|left"
+     height="20"
+     label="Dock nearby chat to the conversations floater"
+     layout="topleft"
+     left="35"
+     name="chat_docknearbychat_check"
+     width="350"/>
+    <view_border
+     top_pad="10"
+     layout="topleft"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1" />
+    <text
+     layout="topleft"
+     follows="top|left"
+     top_pad="15"
+     left="20"
+     width="350"
+     height="15"
+     mouse_opaque="false"
+     type="string"
+     name="chat_behavior"
+     font.style="BOLD">
+        Nearby Chat Behavior
+    </text>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="20"
+     layout="topleft"
+     left="35"
+     name="inworld_typing_rg_label"
+     width="120">
+        Pressing letter keys :
+    </text>
+    <radio_group
+     control_name="LetterKeysFocusChatBar" 
+     height="20"
+     layout="topleft"
+     left_pad="5"
+     top_delta="0" 
+     name="inworld_typing_preference"
+     width="300">
+        <radio_item
+         label="Starts local chat"
+         name="radio_start_chat"
+         top="0" 
+         layout="topleft"
+         height="16" 
+         left="0" 
+         value="1"
+         width="120" />
+        <radio_item
+         label="Affects movement (WASD)"
+         left_pad="0"
+         layout="topleft"
+         top_delta="0" 
+         height="16" 
+         name="radio_move"
+         value="0"
+         width="150" />
+    </radio_group>
+    <check_box
+     control_name="ChatMultiLine"
+     follows="top|left"
+     height="20"
+     label="Dynamically resize the chat bar to fit typed text (single line vs multi line)"
+     layout="topleft"
+     left="35"
+     name="chat_chatbartype_check"
+     top_pad="0"
+     width="350" />
+    <check_box
+     control_name="CloseChatOnEmptyReturn"
+     follows="top|left"
+     height="20"
+     label="Entering a blank line closes the nearby chat floater"
+     layout="topleft"
+     left="35"
+     name="chat_closeonreturn_check"
+     width="350" />
+    <check_box
+     control_name="PlayTypingAnim"
+     follows="top|left"
+     height="20"
+     initial_value="true"
+     label="Play typing animation"
+     layout="topleft"
+     left="35"
+     name="play_typing_animation"
+     width="350" />
+    <check_box
+     control_name="PlayChatAnim"
+     follows="top|left"
+     height="20"
+     initial_value="true"
+     label="Play chatting animation (Whisper / Shout)"
+     layout="topleft"
+     left="210"
+     name="play_chatting_animation"
+     top_pad="-20"
+     width="350" />
+    <check_box
+     control_name="UseChatBubbles"
+     follows="top|left"
+     height="20"
+     label="Bubble Chat"
+     layout="topleft"
+     left="35"
+     name="bubble_text_chat"
+     top_pad="3"
+     width="330" />
+    
+    <view_border
+     top_pad="10"
+     layout="topleft"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1" />
+    <text
+     layout="topleft"
+     follows="top|left"
+     top_pad="15"
+     left="20"
+     width="350"
+     height="15"
+     mouse_opaque="false"
+     type="string"
+     name="chat_notifications"
+     font.style="BOLD">
+        Notifications
+    </text>
+<!--
+    <text
+     follows="top|left"
+     layout="topleft"
+     left="35"
+     height="16"
+     name="nearby_chat"
+     width="105">
+        Nearby chat:
+    </text>
+    <check_box
+     height="20"
+     label="Show Toasts"
+     layout="topleft"
+     name="nearbychat_toasts"
+     left_pad="0"
+     top_delta="-3"
+     width="100">
+    </check_box>
+    <check_box
+     height="23"
+     label="Flash Button"
+     layout="topleft"
+     name="nearbychat_flashbuttons"
+     left_pad="7"
+     width="100">
+    </check_box>
+    <check_box
+     height="23"
+     label="Show Chat"
+     layout="topleft"
+     name="nearbychat_pop"
+     left_pad="7"
+     width="100">
+    </check_box>
+    <check_box
+     control_name="ChatMultiLine"
+     follows="top|left"
+     height="20"
+     label="Treat messages from worn objects as chat."
+     layout="topleft"
+     left="35"
+     name="chat_wornchat_check"
+     width="350" />
+-->
+    <button
+      image_overlay="Audio_Off"
+      image_overlay_alignment="left"
+      follows="top|left"
+      height="23"
+      layout="topleft"
+      left_pad="15"
+      name="soundscheme_apply"
+      label="Sound Alerts"
+      top_delta="-1"
+      right="-15"
+      width="120">
+      <button.commit_callback
+        function="Pref.ShowPanel"
+        parameter="soundalerts" />
+      </button>
+
+</panel>

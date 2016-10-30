@@ -170,6 +170,11 @@ public:
 	
 	void refreshUI();
 
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+	void onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope);
+	void onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope);
+// [/SL:KB]
+
 	void onCommitParcelMediaAutoPlayEnable();
 	void onCommitMediaEnabled();
 	void onCommitMusicEnabled();

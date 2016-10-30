@@ -2567,38 +2567,45 @@ void LLVivoxVoiceClient::sendPositionAndVolumeUpdate(void)
 		LLVector3	earVelocity;
 		LLMatrix3	earRot;
 		
-		switch(mEarLocation)
+// [SL:FS] - Patch: Viewer-VoiceAtSpeaker | Checked: 2015-07-20 (Catznip-3.8)
+		if (mEarLocation != earLocSpeaker)
 		{
-			case earLocCamera:
-			default:
-				earPosition = mCameraPosition;
-				earVelocity = mCameraVelocity;
-				earRot = mCameraRot;
-			break;
+// [/SL:FS]
+			switch(mEarLocation)
+			{
+				case earLocCamera:
+				default:
+					earPosition = mCameraPosition;
+					earVelocity = mCameraVelocity;
+					earRot = mCameraRot;
+				break;
 			
-			case earLocAvatar:
-				earPosition = mAvatarPosition;
-				earVelocity = mAvatarVelocity;
-				earRot = avatarRot;
-			break;
+				case earLocAvatar:
+					earPosition = mAvatarPosition;
+					earVelocity = mAvatarVelocity;
+					earRot = avatarRot;
+				break;
 			
-			case earLocMixed:
-				earPosition = mAvatarPosition;
-				earVelocity = mAvatarVelocity;
-				earRot = mCameraRot;
-			break;
-		}
+				case earLocMixed:
+					earPosition = mAvatarPosition;
+					earVelocity = mAvatarVelocity;
+					earRot = mCameraRot;
+				break;
+			}
 
-		l = earRot.getLeftRow();
-		u = earRot.getUpRow();
-		a = earRot.getFwdRow();
+			l = earRot.getLeftRow();
+			u = earRot.getUpRow();
+			a = earRot.getFwdRow();
 
-        pos = earPosition;
-		vel = earVelocity;
+			pos = earPosition;
+			vel = earVelocity;
 
-//		LL_DEBUGS("Voice") << "Sending listener position " << earPosition << LL_ENDL;
+//			LL_DEBUGS("Voice") << "Sending listener position " << earPosition << LL_ENDL;
 		
-		oldSDKTransform(l, u, a, pos, vel);
+			oldSDKTransform(l, u, a, pos, vel);
+// [SL:FS] - Patch: Viewer-VoiceAtSpeaker | Checked: 2015-07-20 (Catznip-3.8)
+		}
+// [/SL:FS]
 		
         if (mHidden)
         {

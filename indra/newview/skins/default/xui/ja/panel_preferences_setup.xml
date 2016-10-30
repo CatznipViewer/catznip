@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="セットアップ" name="Input panel">
 	<text name="Network:">
-		ネットワーク：
+		ネットワーク
 	</text>
 	<text name="Maximum bandwidth">
 		最大帯域幅
@@ -12,7 +12,7 @@
 	<check_box label="カスタムポート" name="connection_port_enabled"/>
 	<spinner label="ポート番号：" name="connection_port"/>
 	<text name="Web:">
-		Web：
+		Web
 	</text>
 	<radio_group name="preferred_browser_behavior">
 		<radio_item label="すべてのリンクにマイ ブラウザ (Chrome、Firefox、IE) を使用" name="internal" tool_tip="デフォルトのシステム Web ブラウザでヘルプや Web リンク先などを見ます。全画面で起動中にはおすすめしません。" value="0"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Cookie を受け入れる" name="cookies_enabled"/>
 	<check_box initial_value="true" label="Javascript を有効にする" name="browser_javascript_enabled"/>
 	<text name="Software updates:">
-		ソフトウェアアップデート：
+		ソフトウェアアップデート
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="自動的にインストール" name="Install_automatically"/>

@@ -2,23 +2,38 @@
 <panel
  border="true"
  follows="all"
- height="408"
- label="Sounds"
+ height="376"
+ label="Sound &amp; Media"
  layout="topleft"
- left="102"
- name="Preference Media panel"
- top="1"
- width="517">
-    <panel.string
-     name="middle_mouse">
-     Middle Mouse
-    </panel.string>
+ name="sound_media"
+ width="509">
+    <text
+      follows="top|left"
+      font.style="BOLD"
+      height="15"
+      mouse_opaque="false"
+      name="text_miscellaneous"
+      layout="topleft"
+      left="30"
+      top="15"
+      type="string"
+      width="350">
+        Volume Controls
+    </text>
+    <panel
+      border="false"
+      height="155"
+      layout="topleft"
+      name="sound_volume_controls" 
+      top_pad="0"
+      left="50"
+      width="400">
     <slider
      control_name="AudioLevelMaster"
      follows="left|top"
      font.style="BOLD"
      height="15"
-     increment="0.025"
+     increment="0.05"
      initial_value="0.5"
      label="Master volume"
 	   label_width="120"
@@ -27,7 +42,7 @@
      name="System Volume"
      show_text="false"
      slider_label.halign="right"
-     top="10"
+     top_pad="10"
      volume="true"
      width="300">
         <slider.commit_callback
@@ -46,36 +61,14 @@
      name="mute_audio"
      tab_stop="false"
      width="16" />
-    <check_box
-     control_name="MuteWhenMinimized"
-     height="15"
-     initial_value="true"
-     layout="topleft"
-     name="mute_when_minimized"
-	   top_delta="3"
-     left_pad="5"
-     width="20" />
-     <!-- *HACK 
-     	After storm-1109 will be fixed: instead of using this text_box, word_wrap should be applied for "mute_when_minimized" check_box's label.-->
-     <text
-      follows="top|left"
-      height="15"
-      layout="topleft"
-      left_pad="0"
-      name="mute_chb_label"
-      top_delta="-1"
-      width="150"
-      wrap="true">
-      Mute when minimized
-     </text>
 	<slider
 		control_name="AudioLevelUI"
 		disabled_control="MuteAudio"
 		follows="left|top"
 		height="15"
-		increment="0.025"
+		increment="0.05"
 		initial_value="0.5"
-		label="Buttons"
+		label="Button &amp; UI"
 		label_width="120"
 		layout="topleft"
 		left="0"
@@ -107,7 +100,7 @@
      disabled_control="MuteAudio"
      follows="left|top"
      height="15"
-     increment="0.025"
+     increment="0.05"
      initial_value="0.5"
      label="Ambient"
      label_width="120"
@@ -141,7 +134,7 @@
      disabled_control="MuteAudio"
      follows="left|top"
      height="15"
-     increment="0.025"
+     increment="0.05"
      initial_value="0.5"
      label="Sound Effects"
      label_width="120"
@@ -178,7 +171,7 @@
      disabled_control="MuteAudio"
      follows="left|top"
      height="15"
-     increment="0.025"
+     increment="0.05"
      initial_value="0.5"
      label="Streaming music"
      label_width="120"
@@ -224,7 +217,7 @@
 		disabled_control="MuteAudio"
 		follows="left|top"
 		height="16"
-		increment="0.025"
+		increment="0.05"
 		initial_value="0.5"
 		label="Media"
 		label_width="120"
@@ -272,7 +265,7 @@
 		disabled_control="MuteAudio"
 		follows="left|top"
 		height="16"
-		increment="0.025"
+		increment="0.05"
 		initial_value="0.5"
 		label="Voice Chat"
 		label_width="120"
@@ -313,191 +306,73 @@
 		left_pad="5"
 		name="enable_voice_check"
 		width="110"/>
-	<!-- -->
-	<check_box
-		name="media_auto_play_btn"
-		control_name="ParcelMediaAutoPlayEnable"
-		enabled_control="AudioStreamingMedia"
-		value="true"
-		follows="left|bottom|right"
-		height="15"
-		tool_tip="Check this to let media auto-play if it wants"
-		label="Allow Media to auto-play"
-		top_pad="1"
-		left="25"/>
- 	<check_box
-		name="media_show_on_others_btn"
-		control_name="MediaShowOnOthers"
-		value="true"
-		follows="left|bottom|right"
-		height="15"
-		tool_tip="Uncheck this to hide media attached to other avatars nearby"
-		label="Play media attached to other avatars"
-		left="25"
-    width="230"/>
-	<check_box
-		name="gesture_audio_play_btn"
-		control_name="EnableGestureSounds"
-        disabled_control="MuteAudio"
-		value="true"
-		follows="left|bottom|right"
-		height="15"
-		tool_tip="Check this to hear sounds from gestures"
-		label="Play sounds from gestures"
-		top_pad="1"
-		left="25"/>
-    <text
-     type="string"
-     length="1"
-     follows="left|top"
-     height="20"
-     layout="topleft"
-     left="25"
-     name="voice_chat_settings"
-     width="200"
-     top_pad="7">
-	  Voice Chat Settings
-    </text>
-    <text
-     type="string"
-     length="1"
-     follows="left|top"
-     layout="topleft"
-	   left="46"
-	   top_delta="16"
-     name="Listen from"
-     width="112">
-        Listen from:
-    </text>
-	<icon
-		follows="left|top"
-		height="18"
-		image_name="Cam_FreeCam_Off"
-		layout="topleft"
-		name="camera_icon"
-		mouse_opaque="false"
-		visible="true"
-		width="18"
-		left_pad="-4"
-		top_delta="-5"/>
-	<icon
-		follows="left|top"
-		height="18"
-		image_name="Move_Walk_Off"
-		layout="topleft"
-		left_pad="170" 
-		name="avatar_icon"
-		mouse_opaque="false"
-		visible="true"
-		width="18"
-		top_delta="0" />
-   <radio_group
-     enabled_control="EnableVoiceChat"
-     control_name="VoiceEarLocation"
-     draw_border="false"
-     follows="left|top"
-     layout="topleft"
-     left_delta="-168"
-     width="360"
-     height="20"
-     name="ear_location">
-    <radio_item
-     height="19"
-     label="Camera position"
-     follows="left|top"
-     layout="topleft"
-     name="0"
-     width="200"/>
-    <radio_item
-     height="19"
-     follows="left|top"
-     label="Avatar position"
-     layout="topleft"
-     left_pad="-16"
-     name="1"
-     top_delta ="0" 
-     width="200" />
-   </radio_group>
-  <check_box
-   control_name="LipSyncEnabled"
-   follows="left|top"
-   height="15"
-   label="Move avatar lips when speaking"
-   layout="topleft"
-   left="44"
-   name="enable_lip_sync"
-   top_pad="5" 
-   width="237"/>
- <check_box
-  follows="top|left"
-  enabled_control="EnableVoiceChat"
-  control_name="PushToTalkToggle"
-  height="15"
-  label="Toggle speak on/off when I press:"
-  layout="topleft"
-  left="44"
-  name="push_to_talk_toggle_check"
-  width="237"
-  tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
-  top_pad="3"/>
-  <line_editor
-   follows="top|left"
-   control_name="PushToTalkButton"
-   enabled="false"
-   enabled_control="EnableVoiceChat"
-   height="23"
-   left="80"
-   max_length_bytes="200"
-   name="modifier_combo"
-   label="Push-to-Speak trigger"
-   top_pad="3"
-   width="200" />
-  <button
-   layout="topleft"
-   follows="top|left"
-   enabled_control="EnableVoiceChat"
-   height="23"
-   label="Set Key"
-   left_pad="5"
-   name="set_voice_hotkey_button"
-   width="100">
-    <button.commit_callback
-    function="Pref.VoiceSetKey" />
-  </button>
-  <button
-     enabled_control="EnableVoiceChat"
+    </panel>
+
+
+   <check_box
+     control_name="MuteWhenMinimized"
      follows="top|left"
-     halign="center"
-     height="23"
-     image_overlay="Refresh_Off"
+     height="20"
+     label="Mute all sound when viewer is minimized"
      layout="topleft"
-     tool_tip="Reset to Middle Mouse Button"
-     mouse_opaque="true"
-     name="set_voice_middlemouse_button"
-     left_pad="5"
-     width="25">
-    <button.commit_callback
-    function="Pref.VoiceSetMiddleMouse" />
-  </button>
-  <button
-   control_name="ShowDeviceSettings"
-   follows="left|top"
-   height="23"
-   is_toggle="true"
-   label="Input/Output devices"
-   layout="topleft"
-   left="20"
-   top_pad="6"
-   name="device_settings_btn"
-   width="190">
-  </button>
-    <panel
+     left="35"
+     name="mute_when_minimized"
+     width="350"/>
+   <check_box
+		control_name="EnableGestureSounds"
+		disabled_control="MuteAudio"
+		follows="top|left"
+		height="20"
+		label="Play sounds from gestures"
+		layout="topleft"
+		left="35"
+		name="gesture_audio_play_btn"
+		width="350"/>
+		
+
+   <view_border
+    top_pad="10"
     layout="topleft"
-    filename="panel_sound_devices.xml"
-     visiblity_control="ShowDeviceSettings"
-     name="device_settings_panel"
-    top_pad="0"
-    width="480"
-    left="18"
-    class="panel_voice_device_settings"/>
+    left="10"
+    height="0"
+    right="-10"
+    follows="left|top"
+    bevel_style="none"
+    border_thickness="1"
+    mouse_opaque="false"
+    name="divisor1" />
+	<text
+    follows="top|left"
+    font.style="BOLD"
+    height="15"
+    mouse_opaque="false"
+    name="text_miscellaneous"
+    layout="topleft"
+    left="30"
+    top_pad="15"
+    type="string"
+    width="350">
+        Streaming Media
+    </text>
+    <check_box
+      control_name="ParcelMediaAutoPlayEnable"
+      enabled_control="AudioStreamingMedia"
+      follows="top|left"
+      height="20"
+      label="Allow streaming media to auto-play (parcel radio &amp; video)"
+      layout="topleft"
+      left="35"
+      name="media_auto_play_btn"
+      width="350"/>
+    <check_box
+      control_name="MediaShowOnOthers"
+      follows="top|left"
+      height="20"
+      label="Play media attached to other avatars"
+      layout="topleft"
+      left="35"
+      name="media_show_on_others_btn"
+      width="350"/> 
+
+
     </panel>

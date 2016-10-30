@@ -1,27 +1,37 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <panel
-    border="true"
-    has_border="true"
-    height="408"
-    label="CHAT TRANSLATION SETTINGS"
-    layout="topleft"
-    left="102"
-    name="chat"
-    top="1"
-    width="517">
+ border="true"
+ follows="all"
+ height="376"
+ label="Translation"
+ layout="topleft"
+ name="chat_translation"
+ width="509">
  <string name="bing_api_key_not_verified">Bing appID not verified. Please try again.</string>
  <string name="google_api_key_not_verified">Google API key not verified. Please try again.</string>
 
  <string name="bing_api_key_verified">Bing appID verified.</string>
  <string name="google_api_key_verified">Google API key verified.</string>
 
+ <text
+   layout="topleft"
+   follows="top|left"
+   top_pad="15"
+   left="20"
+   width="350"
+   height="15"
+   mouse_opaque="false"
+   type="string"
+   name="catznip_nearbychat_text"
+   font.style="BOLD">
+   Chat / IM / Group Chat Translation
+ </text>
  <check_box
-  height="16"     
-  label="Enable machine translation while chatting"
+  height="20"     
+  label="Enable machine translation"
   layout="topleft"
-  left="10"
+  left="35"
   name="translate_chat_checkbox"
-  top="30"
   width="20" />
  <text
   height="20"
@@ -115,7 +125,7 @@
  </combo_box>
 
  <text
-  follows="top|left|right"
+  follows="top|left"
   height="15"
   layout="topleft"
   left="40"
@@ -150,7 +160,7 @@
  <text
   type="string"
   length="1"
-  follows="top|right"
+  follows="top|left"
   height="20"
   layout="topleft"
   left="70"
@@ -180,7 +190,7 @@
   width="90" />	
 
  <text
-  follows="top|right"
+  follows="top|left"
   height="20"
   layout="topleft"
   left="70"
@@ -212,7 +222,7 @@
   width="90" />	
 
  <text
-  follows="top|right"
+  follows="top|left"
   height="20"
   layout="topleft"
   left="185"

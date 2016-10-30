@@ -259,6 +259,15 @@
 	 top_pad="2"
      width="100" />
    <check_box
+     control_name="NameTagShowTyping"
+     height="16"
+     label="Show typing indicator"
+     layout="topleft"
+     left_pad="50"
+     name="show_typing"
+     tool_tip="Show typing indicator in name tag"
+     top_delta="0" />
+   <check_box
      control_name="NameTagShowUsernames"
 	 enabled_control="AvatarNameTagMode"
      height="16"

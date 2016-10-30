@@ -46,10 +46,10 @@
      name="pref core"
      tab_group="1"
      tab_position="left"
-     tab_width="140"
-     tab_padding_right="0"
+     tab_width="130"
+     tab_padding_right="2"
      top="21"
-     width="658">
+     right="-1">
         <panel
 	 class="panel_preference"
          filename="panel_preferences_general.xml"
@@ -64,20 +64,89 @@
          layout="topleft"
          help_topic="preferences_display_tab"
          name="display" />
-        <panel
-		 class="panel_preference"
-         filename="panel_preferences_sound.xml"
-         label="Sound &amp; Media"
-         layout="topleft"
-         help_topic="preferences_audio_tab"
-         name="audio" />
-        <panel
-		 class="panel_preference"
-         filename="panel_preferences_chat.xml"
+        <tab_container
+          label="Sounds &amp; Media"
+          halign="center"
+          name="sound_tabs"
+          tab_position="top"
+          tab_height="25"
+          tab_min_width="50"
+          tab_max_width="150"
+          top="1">
+          <panel
+            class="panel_preference"
+            filename="panel_preferences_sound.xml"
+            label="Sound &amp; Media"
+            layout="topleft"
+            help_topic="preferences_audio_tab"
+            name="audio" />
+          <panel
+            class="panel_preference"
+            filename="panel_preferences_sound_alerts.xml"
+            label="Sound Alerts"
+            layout="topleft"
+            help_topic="preferences_audio_tab"
+            name="soundalerts" />
+          <panel
+            class="panel_preference"
+            filename="panel_preferences_sound_voice.xml"
+            label="Voice Chat"
+            layout="topleft"
+            help_topic="preferences_audio_tab"
+            name="voice" />
+        </tab_container>
+        <tab_container
          label="Chat"
-         layout="topleft"
-         help_topic="preferences_chat_tab"
-         name="chat" />
+         halign="center"
+         name="chat_tabs"
+         tab_position="top"
+         tab_height="25"
+         tab_min_width="50"
+         tab_max_width="150"
+         top="1">
+          <panel
+           class="panel_preference_chat"
+           filename="panel_preferences_chat_nearbychat.xml"
+           label="Chat"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="chat_nearbychat" />
+          <panel
+           class="panel_preference_chat"
+           filename="panel_preferences_chat_im.xml"
+           label="IM &amp; Groups"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="chat_im" />
+          <panel
+           class="panel_preference_chat_translation"
+           filename="panel_preferences_chat_translation.xml"
+           label="Translation"
+           layout="topleft"
+           help_topic="translation_settings"
+           name="chat_translation" />
+          <panel
+           class="panel_preference_chat_autoreplace"
+           filename="panel_preferences_chat_autoreplace.xml"
+           label="Auto-Replace"
+           layout="topleft"
+           help_topic="autoreplace_settings"
+           name="chat_autoreplace" />
+          <panel
+           class="panel_preference_chat_spellcheck"
+           filename="panel_preferences_chat_spellcheck.xml"
+           label="Spell Checking"
+           layout="topleft"
+           help_topic="spelling_settings"
+           name="chat_spellcheck" />
+          <panel
+           class="panel_preference_chat"
+           filename="panel_preferences_chat_log.xml"
+           label="Logging"
+           layout="topleft"
+           help_topic="preferences_chat_tab"
+           name="chat_log" />
+        </tab_container>
         <panel
 		 class="panel_preference"
          filename="panel_preferences_move.xml"
@@ -127,6 +196,13 @@
          layout="topleft"
          help_topic="preferences_crashreports_tab"
          name="crashreports" />
+        <panel
+         class="panel_preference"
+         filename="panel_preferences_catznip.xml"
+         label="Catznip"
+         layout="topleft"
+         help_topic="preferences_catznip_tab"
+         name="catznip" />
     </tab_container>
 
 </floater>

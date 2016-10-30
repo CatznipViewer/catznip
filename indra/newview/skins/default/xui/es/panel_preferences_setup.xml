@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Configurar" name="Input panel">
 	<text name="Network:">
-		Red:
+		Red
 	</text>
 	<text name="Maximum bandwidth">
 		Ancho de banda máximo
@@ -12,7 +12,7 @@
 	<check_box label="Personalizar el puerto" name="connection_port_enabled"/>
 	<spinner label="Nº del puerto:" name="connection_port"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="preferred_browser_behavior">
 		<radio_item label="Usar mi navegador (Chrome, Firefox, IE) para todos los enlaces" name="internal" tool_tip="Usa el navegador predeterminado para obtener ayuda, visitar enlaces web, etc. No es aconsejable si estás a pantalla completa." value="0"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Aceptar las &apos;cookies&apos;" name="cookies_enabled"/>
 	<check_box initial_value="true" label="Activar Javascript" name="browser_javascript_enabled"/>
 	<text name="Software updates:">
-		Actualizaciones de software:
+		Actualizaciones de software
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Instalar automáticamente" name="Install_automatically"/>

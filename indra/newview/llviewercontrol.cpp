@@ -399,6 +399,14 @@ static bool handleRenderLocalLightsChanged(const LLSD& newvalue)
 
 static bool handleRenderDeferredChanged(const LLSD& newvalue)
 {
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Force RenderGlow to TRUE for deferred rendering if it's currently disabled
+	if ( (newvalue.asBoolean()) && (!gSavedSettings.getBOOL("RenderGlow")) )
+	{
+		gSavedSettings.setBOOL("RenderGlow", TRUE);
+	}
+// [/SL:TD]
+
 	LLRenderTarget::sUseFBO = newvalue.asBoolean();
 	if (gPipeline.isInit())
 	{
