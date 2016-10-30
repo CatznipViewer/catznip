@@ -42,8 +42,11 @@
 #include "llnotificationsutil.h"
 #include "llradiogroup.h"
 
-LLFloaterTranslationSettings::LLFloaterTranslationSettings(const LLSD& key)
-:	LLFloater(key)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+static LLPanelInjector<LLPanelPreferenceTranslationSettings> t_pref_chat_translation("panel_preference_chat_translation");
+
+LLPanelPreferenceTranslationSettings::LLPanelPreferenceTranslationSettings()
+:	LLPanelPreference()
 ,	mMachineTranslationCB(NULL)
 ,	mLanguageCombo(NULL)
 ,	mTranslationServiceRadioGroup(NULL)
@@ -51,15 +54,34 @@ LLFloaterTranslationSettings::LLFloaterTranslationSettings(const LLSD& key)
 ,	mGoogleAPIKeyEditor(NULL)
 ,	mBingVerifyBtn(NULL)
 ,	mGoogleVerifyBtn(NULL)
-,	mOKBtn(NULL)
 ,	mBingKeyVerified(false)
 ,	mGoogleKeyVerified(false)
 {
 }
+// [/SL:KB]
+//LLFloaterTranslationSettings::LLFloaterTranslationSettings(const LLSD& key)
+//:	LLFloater(key)
+//,	mMachineTranslationCB(NULL)
+//,	mLanguageCombo(NULL)
+//,	mTranslationServiceRadioGroup(NULL)
+//,	mBingAPIKeyEditor(NULL)
+//,	mGoogleAPIKeyEditor(NULL)
+//,	mBingVerifyBtn(NULL)
+//,	mGoogleVerifyBtn(NULL)
+//,	mOKBtn(NULL)
+//,	mBingKeyVerified(false)
+//,	mGoogleKeyVerified(false)
+//{
+//}
 
 // virtual
-BOOL LLFloaterTranslationSettings::postBuild()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+BOOL LLPanelPreferenceTranslationSettings::postBuild()
 {
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+	LLPanelPreference::postBuild();
+// [/SL:KB]
+
 	mMachineTranslationCB = getChild<LLCheckBoxCtrl>("translate_chat_checkbox");
 	mLanguageCombo = getChild<LLComboBox>("translate_language_combo");
 	mTranslationServiceRadioGroup = getChild<LLRadioGroup>("translation_service_rg");
@@ -67,26 +89,52 @@ BOOL LLFloaterTranslationSettings::postBuild()
 	mGoogleAPIKeyEditor = getChild<LLLineEditor>("google_api_key");
 	mBingVerifyBtn = getChild<LLButton>("verify_bing_api_key_btn");
 	mGoogleVerifyBtn = getChild<LLButton>("verify_google_api_key_btn");
-	mOKBtn = getChild<LLButton>("ok_btn");
 
-	mMachineTranslationCB->setCommitCallback(boost::bind(&LLFloaterTranslationSettings::updateControlsEnabledState, this));
-	mTranslationServiceRadioGroup->setCommitCallback(boost::bind(&LLFloaterTranslationSettings::updateControlsEnabledState, this));
-	mOKBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnOK, this));
-	getChild<LLButton>("cancel_btn")->setClickedCallback(boost::bind(&LLFloater::closeFloater, this, false));
-	mBingVerifyBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnBingVerify, this));
-	mGoogleVerifyBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnGoogleVerify, this));
+	mMachineTranslationCB->setCommitCallback(boost::bind(&LLPanelPreferenceTranslationSettings::updateControlsEnabledState, this));
+	mTranslationServiceRadioGroup->setCommitCallback(boost::bind(&LLPanelPreferenceTranslationSettings::updateControlsEnabledState, this));
+	mBingVerifyBtn->setClickedCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onBtnBingVerify, this));
+	mGoogleVerifyBtn->setClickedCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onBtnGoogleVerify, this));
 
-	mBingAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLFloaterTranslationSettings::onEditorFocused, this, _1));
-	mBingAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLFloaterTranslationSettings::onBingKeyEdited, this), NULL);
-	mGoogleAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLFloaterTranslationSettings::onEditorFocused, this, _1));
-	mGoogleAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLFloaterTranslationSettings::onGoogleKeyEdited, this), NULL);
+	mBingAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onEditorFocused, this, _1));
+	mBingAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onBingKeyEdited, this), NULL);
+	mGoogleAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onEditorFocused, this, _1));
+	mGoogleAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLPanelPreferenceTranslationSettings::onGoogleKeyEdited, this), NULL);
 
-	center();
 	return TRUE;
 }
+// [/SL:KB]
+//BOOL LLFloaterTranslationSettings::postBuild()
+//{
+//	mMachineTranslationCB = getChild<LLCheckBoxCtrl>("translate_chat_checkbox");
+//	mLanguageCombo = getChild<LLComboBox>("translate_language_combo");
+//	mTranslationServiceRadioGroup = getChild<LLRadioGroup>("translation_service_rg");
+//	mBingAPIKeyEditor = getChild<LLLineEditor>("bing_api_key");
+//	mGoogleAPIKeyEditor = getChild<LLLineEditor>("google_api_key");
+//	mBingVerifyBtn = getChild<LLButton>("verify_bing_api_key_btn");
+//	mGoogleVerifyBtn = getChild<LLButton>("verify_google_api_key_btn");
+//	mOKBtn = getChild<LLButton>("ok_btn");
+//
+//	mMachineTranslationCB->setCommitCallback(boost::bind(&LLFloaterTranslationSettings::updateControlsEnabledState, this));
+//	mTranslationServiceRadioGroup->setCommitCallback(boost::bind(&LLFloaterTranslationSettings::updateControlsEnabledState, this));
+//	mOKBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnOK, this));
+//	getChild<LLButton>("cancel_btn")->setClickedCallback(boost::bind(&LLFloater::closeFloater, this, false));
+//	mBingVerifyBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnBingVerify, this));
+//	mGoogleVerifyBtn->setClickedCallback(boost::bind(&LLFloaterTranslationSettings::onBtnGoogleVerify, this));
+//
+//	mBingAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLFloaterTranslationSettings::onEditorFocused, this, _1));
+//	mBingAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLFloaterTranslationSettings::onBingKeyEdited, this), NULL);
+//	mGoogleAPIKeyEditor->setFocusReceivedCallback(boost::bind(&LLFloaterTranslationSettings::onEditorFocused, this, _1));
+//	mGoogleAPIKeyEditor->setKeystrokeCallback(boost::bind(&LLFloaterTranslationSettings::onGoogleKeyEdited, this), NULL);
+//
+//	center();
+//	return TRUE;
+//}
 
 // virtual
-void LLFloaterTranslationSettings::onOpen(const LLSD& key)
+//void LLFloaterTranslationSettings::onOpen(const LLSD& key)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::refresh()
+// [/SL:KB]
 {
 	mMachineTranslationCB->setValue(gSavedSettings.getBOOL("TranslateChat"));
 	mLanguageCombo->setSelectedByValue(gSavedSettings.getString("TranslateLanguage"), TRUE);
@@ -121,7 +169,10 @@ void LLFloaterTranslationSettings::onOpen(const LLSD& key)
 	updateControlsEnabledState();
 }
 
-void LLFloaterTranslationSettings::setBingVerified(bool ok, bool alert)
+//void LLFloaterTranslationSettings::setBingVerified(bool ok, bool alert)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::setBingVerified(bool ok, bool alert)
+// [/SL:KB]
 {
 	if (alert)
 	{
@@ -132,7 +183,10 @@ void LLFloaterTranslationSettings::setBingVerified(bool ok, bool alert)
 	updateControlsEnabledState();
 }
 
-void LLFloaterTranslationSettings::setGoogleVerified(bool ok, bool alert)
+//void LLFloaterTranslationSettings::setGoogleVerified(bool ok, bool alert)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::setGoogleVerified(bool ok, bool alert)
+// [/SL:KB]
 {
 	if (alert)
 	{
@@ -143,29 +197,44 @@ void LLFloaterTranslationSettings::setGoogleVerified(bool ok, bool alert)
 	updateControlsEnabledState();
 }
 
-std::string LLFloaterTranslationSettings::getSelectedService() const
+//std::string LLFloaterTranslationSettings::getSelectedService() const
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+std::string LLPanelPreferenceTranslationSettings::getSelectedService() const
+// [/SL:KB]
 {
 	return mTranslationServiceRadioGroup->getSelectedValue().asString();
 }
 
-std::string LLFloaterTranslationSettings::getEnteredBingKey() const
+//std::string LLFloaterTranslationSettings::getEnteredBingKey() const
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+std::string LLPanelPreferenceTranslationSettings::getEnteredBingKey() const
+// [/SL:KB]
 {
 	return mBingAPIKeyEditor->getTentative() ? LLStringUtil::null : mBingAPIKeyEditor->getText();
 }
 
-std::string LLFloaterTranslationSettings::getEnteredGoogleKey() const
+//std::string LLFloaterTranslationSettings::getEnteredGoogleKey() const
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+std::string LLPanelPreferenceTranslationSettings::getEnteredGoogleKey() const
+// [/SL:KB]
 {
 	return mGoogleAPIKeyEditor->getTentative() ? LLStringUtil::null : mGoogleAPIKeyEditor->getText();
 }
 
-void LLFloaterTranslationSettings::showAlert(const std::string& msg_name) const
+//void LLFloaterTranslationSettings::showAlert(const std::string& msg_name) const
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::showAlert(const std::string& msg_name) const
+// [/SL:KB]
 {
 	LLSD args;
 	args["MESSAGE"] = getString(msg_name);
 	LLNotificationsUtil::add("GenericAlert", args);
 }
 
-void LLFloaterTranslationSettings::updateControlsEnabledState()
+//void LLFloaterTranslationSettings::updateControlsEnabledState()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::updateControlsEnabledState()
+// [/SL:KB]
 {
 	// Enable/disable controls based on the checkbox value.
 	bool on = mMachineTranslationCB->getValue().asBoolean();
@@ -193,14 +262,21 @@ void LLFloaterTranslationSettings::updateControlsEnabledState()
 	bool service_verified = (bing_selected && mBingKeyVerified) || (google_selected && mGoogleKeyVerified);
 	gSavedPerAccountSettings.setBOOL("TranslatingEnabled", service_verified);
 
-	mOKBtn->setEnabled(!on || service_verified);
+//	mOKBtn->setEnabled(!on || service_verified);
 }
 
 /*static*/
-void LLFloaterTranslationSettings::setVerificationStatus(int service, bool ok, bool alert)
+//void LLFloaterTranslationSettings::setVerificationStatus(int service, bool ok, bool alert)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::setVerificationStatus(int service, bool ok, bool alert)
+// [/SL:KB]
 {
-    LLFloaterTranslationSettings* floater =
-        LLFloaterReg::getTypedInstance<LLFloaterTranslationSettings>("prefs_translation");
+//    LLFloaterTranslationSettings* floater =
+//        LLFloaterReg::getTypedInstance<LLFloaterTranslationSettings>("prefs_translation");
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+	LLPanelPreferenceTranslationSettings* floater =
+		LLFloaterReg::getTypedInstance<LLPanelPreferenceTranslationSettings>("prefs_translation");
+// [/SL:KB]
 
     if (!floater)
     {
@@ -220,13 +296,23 @@ void LLFloaterTranslationSettings::setVerificationStatus(int service, bool ok, b
 }
 
 
-void LLFloaterTranslationSettings::verifyKey(int service, const std::string& key, bool alert)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::verifyKey(int service, const std::string& key, bool alert)
 {
     LLTranslate::verifyKey(static_cast<LLTranslate::EService>(service), key,
-        boost::bind(&LLFloaterTranslationSettings::setVerificationStatus, _1, _2, alert));
+		boost::bind(&LLPanelPreferenceTranslationSettings::setVerificationStatus, _1, _2, alert));
 }
+// [/SL:KB]
+//void LLFloaterTranslationSettings::verifyKey(int service, const std::string& key, bool alert)
+//{
+//    LLTranslate::verifyKey(static_cast<LLTranslate::EService>(service), key,
+//        boost::bind(&LLFloaterTranslationSettings::setVerificationStatus, _1, _2, alert));
+//}
 
-void LLFloaterTranslationSettings::onEditorFocused(LLFocusableElement* control)
+//void LLFloaterTranslationSettings::onEditorFocused(LLFocusableElement* control)
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::onEditorFocused(LLFocusableElement* control)
+// [/SL:KB]
 {
 	LLLineEditor* editor = dynamic_cast<LLLineEditor*>(control);
 	if (editor && editor->hasTabStop()) // if enabled. getEnabled() doesn't work
@@ -239,7 +325,10 @@ void LLFloaterTranslationSettings::onEditorFocused(LLFocusableElement* control)
 	}
 }
 
-void LLFloaterTranslationSettings::onBingKeyEdited()
+//void LLFloaterTranslationSettings::onBingKeyEdited()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::onBingKeyEdited()
+// [/SL:KB]
 {
 	if (mBingAPIKeyEditor->isDirty())
 	{
@@ -247,7 +336,10 @@ void LLFloaterTranslationSettings::onBingKeyEdited()
 	}
 }
 
-void LLFloaterTranslationSettings::onGoogleKeyEdited()
+//void LLFloaterTranslationSettings::onGoogleKeyEdited()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::onGoogleKeyEdited()
+// [/SL:KB]
 {
 	if (mGoogleAPIKeyEditor->isDirty())
 	{
@@ -255,7 +347,10 @@ void LLFloaterTranslationSettings::onGoogleKeyEdited()
 	}
 }
 
-void LLFloaterTranslationSettings::onBtnBingVerify()
+//void LLFloaterTranslationSettings::onBtnBingVerify()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::onBtnBingVerify()
+// [/SL:KB]
 {
 	std::string key = getEnteredBingKey();
 	if (!key.empty())
@@ -264,7 +359,10 @@ void LLFloaterTranslationSettings::onBtnBingVerify()
 	}
 }
 
-void LLFloaterTranslationSettings::onBtnGoogleVerify()
+//void LLFloaterTranslationSettings::onBtnGoogleVerify()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::onBtnGoogleVerify()
+// [/SL:KB]
 {
 	std::string key = getEnteredGoogleKey();
 	if (!key.empty())
@@ -272,18 +370,49 @@ void LLFloaterTranslationSettings::onBtnGoogleVerify()
 		verifyKey(LLTranslate::SERVICE_GOOGLE, key);
 	}
 }
-void LLFloaterTranslationSettings::onClose(bool app_quitting)
+
+// [SL:KB] - updateControlsEnabledState() already takes care of this and is called by both setBingVerified() and setGoogleVerified()
+//void LLFloaterTranslationSettings::onClose(bool app_quitting)
+//{
+//	std::string service = gSavedSettings.getString("TranslationService");
+//	bool bing_selected = service == "bing";
+//	bool google_selected = service == "google";
+//
+//	bool service_verified = (bing_selected && mBingKeyVerified) || (google_selected && mGoogleKeyVerified);
+//	gSavedPerAccountSettings.setBOOL("TranslatingEnabled", service_verified);
+//
+//}
+
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::saveSettings()
 {
-	std::string service = gSavedSettings.getString("TranslationService");
-	bool bing_selected = service == "bing";
-	bool google_selected = service == "google";
+	LLPanelPreference::saveSettings();
 
-	bool service_verified = (bing_selected && mBingKeyVerified) || (google_selected && mGoogleKeyVerified);
-	gSavedPerAccountSettings.setBOOL("TranslatingEnabled", service_verified);
-
+	// See apply() below
+	const char* strControls[] =
+		{
+			"TranslateChat", "TranslateLanguage", "TranslationService", "BingTranslateAPIKey", "GoogleTranslateAPIKey"
+		};
+	for (int idxControl = 0, cntControl = sizeof(strControls) / sizeof(char*); idxControl < cntControl; idxControl++)
+	{
+		LLControlVariable* pControl = gSavedSettings.getControl(strControls[idxControl]);
+		if (pControl)
+		{
+			mSavedValues[pControl] = pControl->getValue();
+		}
+	}
 }
-void LLFloaterTranslationSettings::onBtnOK()
+// [/SL:KB]
+
+//void LLFloaterTranslationSettings::onBtnOK()
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+void LLPanelPreferenceTranslationSettings::apply()
+// [/SL:KB]
 {
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+	LLPanelPreference::apply();
+// [/SL:KB]
+
 	gSavedSettings.setBOOL("TranslateChat", mMachineTranslationCB->getValue().asBoolean());
 	gSavedSettings.setString("TranslateLanguage", mLanguageCombo->getSelectedValue().asString());
 	gSavedSettings.setString("TranslationService", getSelectedService());
@@ -291,5 +420,5 @@ void LLFloaterTranslationSettings::onBtnOK()
 	gSavedSettings.setString("GoogleTranslateAPIKey", getEnteredGoogleKey());
 //	(LLFloaterReg::getTypedInstance<LLFloaterIMNearbyChat>("nearby_chat"))->
 //			showTranslationCheckbox(LLTranslate::isTranslationConfigured());
-	closeFloater(false);
+//	closeFloater(false);
 }

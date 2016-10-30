@@ -106,6 +106,9 @@ public:
 										mouseleave_callback;
 		
 		Optional<std::string>			control_name;
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+		Optional<bool>					control_tooltip;
+// [/SL:KB]
 		Optional<EnableControls>		enabled_controls;
 		Optional<ControlVisibility>		controls_visibility;
 		
@@ -297,6 +300,9 @@ protected:
     LLViewModelPtr  mViewModel;
 
 	LLControlVariable* mControlVariable;
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	bool mControlToolTip;
+// [/SL:KB]
 	boost::signals2::connection mControlConnection;
 	LLControlVariable* mEnabledControlVariable;
 	boost::signals2::connection mEnabledControlConnection;

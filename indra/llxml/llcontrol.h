@@ -104,26 +104,50 @@ public:
 		PERSIST_ALWAYS              // save this var even if has default value
 	};
 
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	enum eToolTipFlags
+	{
+		TOOLTIP_NONE         = 0x00,
+		TOOLTIP_SHOW         = 0x01,	// Shows the comment as the main tooltip body
+		TOOLTIP_SHOW_DEFAULT = 0x02,	// Shows the default value as part of the tooltip (currently only for bool)
+	};
+// [/SL:KB]
+
 private:
 	std::string		mName;
 	std::string		mComment;
 	eControlType	mType;
 	ePersist		mPersist;
 	bool			mHideFromSettingsEditor;
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	std::string		mToolTip;
+	U32				mToolTipFlags;
+// [/SL:KB]
 	std::vector<LLSD> mValues;
 
 	commit_signal_t mCommitSignal;
 	validate_signal_t mValidateSignal;
 	
 public:
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
 	LLControlVariable(const std::string& name, eControlType type,
 					  LLSD initial, const std::string& comment,
-					  ePersist persist = PERSIST_NONDFT, bool hidefromsettingseditor = false);
+					  ePersist persist = PERSIST_NONDFT, bool hidefromsettingseditor = false,
+					  const std::string& tooltip = LLStringUtil::null, U32 tooltipflags = TOOLTIP_NONE);
+// [/SL:KB]
+//	LLControlVariable(const std::string& name, eControlType type,
+//					  LLSD initial, const std::string& comment,
+//					  ePersist persist = PERSIST_NONDFT, bool hidefromsettingseditor = false);
 
 	virtual ~LLControlVariable();
 	
 	const std::string& getName() const { return mName; }
 	const std::string& getComment() const { return mComment; }
+
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	std::string getToolTip() const;
+	U32 getToolTipFlags(void) const { return mToolTipFlags; }
+// [/SL:KB]
 
 	eControlType type()		{ return mType; }
 	bool isType(eControlType tp) { return tp == mType; }
@@ -145,10 +169,13 @@ public:
 
 	void set(const LLSD& val)	{ setValue(val); }
 	void setValue(const LLSD& value, bool saved_value = TRUE);
-	void setDefaultValue(const LLSD& value);
-	void setPersist(ePersist);
+	void setDefaultValue(const LLSD& value);	void setPersist(ePersist);
 	void setHiddenFromSettingsEditor(bool hide);
 	void setComment(const std::string& comment);
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	void setToolTip(const std::string& tooltip);
+	void setToolTipFlags(U32 tooltip_flags);
+// [/SL:KB]
 
 private:
 	void firePropertyChanged(const LLSD &pPreviousValue)
@@ -212,7 +239,10 @@ public:
 	};
 	void applyToAll(ApplyFunctor* func);
 
-	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor = FALSE);
+//	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor = FALSE);
+// [SL:KB] - Patch: Control-ControlToolTip | Checked: 2014-02-16 (Catznip-3.6)
+	LLControlVariable* declareControl(const std::string& name, eControlType type, const LLSD initial_val, const std::string& comment, LLControlVariable::ePersist persist, BOOL hidefromsettingseditor = FALSE, const std::string& tooltip = LLStringUtil::null, U32 tooltipflags = LLControlVariable::TOOLTIP_NONE);
+// [/SL:KB]
 	LLControlVariable* declareU32(const std::string& name, U32 initial_val, const std::string& comment, LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT);
 	LLControlVariable* declareS32(const std::string& name, S32 initial_val, const std::string& comment, LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT);
 	LLControlVariable* declareF32(const std::string& name, F32 initial_val, const std::string& comment, LLControlVariable::ePersist persist = LLControlVariable::PERSIST_NONDFT);

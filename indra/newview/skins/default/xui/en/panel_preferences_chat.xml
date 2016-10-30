@@ -274,6 +274,7 @@
         top_delta="-3"
         width="28">
     </check_box>
+<!--
     <text
         layout="topleft"
         left="0"
@@ -285,6 +286,7 @@
         text_color="DrYellow">
       To temporarily stop all notifications, use Communicate &gt; Do Not Disturb.
     </text>
+-->
 
   </panel>
 
