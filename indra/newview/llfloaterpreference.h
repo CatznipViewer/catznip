@@ -94,16 +94,18 @@ public:
 	void selectChatPanel();
 	void getControlNames(std::vector<std::string>& names);
 
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	void registerPrefPanel(LLPanelPreference* pPrefPanel);
 	void unregisterPrefpanel(LLPanelPreference* pPrefPanel);
-	void showPanel(const std::string& strPanel);
+
+	template<class T> T* getPanelByType() const;
+	void                 showPanel(const std::string& strPanel);
 // [/SL:KB]
 
 protected:	
 	void		onBtnOK(const LLSD& userdata);
 	void		onBtnCancel(const LLSD& userdata);
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	void		onShowPanel(const LLSD& sdParam);
 // [/SL:KB]
 
@@ -222,26 +224,23 @@ public:
 	
 	virtual ~LLPanelPreference();
 
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	// Calls onOpen and onClose on derived panels as appropriate
-	/*virtual*/ void onVisibilityChange(BOOL new_visibility);
-	
-	// Only declared in LLFloater so we hev to declare it here as well
-	virtual void onClose() {}
-	
-	// Returns TRUE if the panel has been initialized (been visible at least once)
-	bool isInitialized() const { return mInitialized; }
+	void onVisibilityChange(BOOL new_visibility) override;
 
-	// Returns TRUE if the user may have made any chances to the state of this panel (currently we return "was opened this sessio")
-	/*virtual*/ BOOL isDirty() const { return !mRefreshOnOpen; }
-// [/SL:KB]
-
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	// Called only once when the panel becomes visible for the first time
 	virtual void init() {}
 	// Called the first time the panel becomes visible in the currently preferences floater session
 	virtual void refresh() {}
+	//virtual void onOpen(const LLSD& sdKey) {}
+	virtual void onClose() {}
+
+	// Returns TRUE if the user may have made any chances to the state of this panel (currently we return "was opened this session")
+	BOOL isDirty() const override { return !mRefreshOnOpen; }
+	// Returns TRUE if the panel has been initialized (been visible at least once)
+	bool isInitialized() const { return mInitialized; }
 // [/SL:KB]
+
 	virtual void apply();
 	virtual void cancel();
 	void setControlFalse(const LLSD& user_data);
@@ -264,9 +263,9 @@ public:
 protected:
 	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
 	control_values_map_t mSavedValues;
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
-	bool mInitialized;
-	bool mRefreshOnOpen;
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
+	bool mInitialized = false;
+	bool mRefreshOnOpen = true;
 
 	void onParentFloaterClose() { mRefreshOnOpen = true; }
 // [/SL:KB]

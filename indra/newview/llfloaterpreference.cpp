@@ -347,7 +347,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 	mCommitCallbackRegistrar.add("Pref.Cancel",				boost::bind(&LLFloaterPreference::onBtnCancel, this, _2));
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this, _2));
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6)
 	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
 // [/SL:KB]
 	
@@ -547,10 +547,10 @@ void LLFloaterPreference::draw()
 	LLFloater::draw();
 }
 
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 void LLFloaterPreference::registerPrefPanel(LLPanelPreference* pPrefPanel)
 {
-	if (mPreferencePanels.end() == std::find(mPreferencePanels.begin(), mPreferencePanels.end(), pPrefPanel))
+	if (mPreferencePanels.end() == std::find(mPreferencePanels.cbegin(), mPreferencePanels.cend(), pPrefPanel))
 	{
 		mPreferencePanels.push_back(pPrefPanel);
 	}
@@ -558,44 +558,39 @@ void LLFloaterPreference::registerPrefPanel(LLPanelPreference* pPrefPanel)
 
 void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
 {
-	std::list<LLPanelPreference*>::iterator itPanel = std::find(mPreferencePanels.begin(), mPreferencePanels.end(), pPrefPanel);
+	std::list<LLPanelPreference*>::const_iterator itPanel = std::find(mPreferencePanels.cbegin(), mPreferencePanels.cend(), pPrefPanel);
 	if (mPreferencePanels.end() != itPanel)
 	{
 		mPreferencePanels.erase(itPanel);
 	}
 }
 
+template<class T> T* LLFloaterPreference::getPanelByType() const
+{
+	T* pRetPanel = nullptr;
+	for (LLPanelPreference* pPanel : mPreferencePanels)
+	{
+		pRetPanel = dynamic_cast<T*>(pPanel);
+		if (pRetPanel)
+			break;
+	}
+	return pRetPanel;
+}
+
 void LLFloaterPreference::showPanel(const std::string& strPanel)
 {
 	if (!strPanel.empty())
 	{
-		LLPanel* pPanel = NULL;
-		for (std::list<LLPanelPreference*>::const_iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
+		auto itPanel = std::find_if(mPreferencePanels.begin(), mPreferencePanels.end(), [&strPanel](const LLPanelPreference* x) { return x->getName() == strPanel; });
+		if (mPreferencePanels.end() != itPanel)
 		{
-			if ((*itPanel)->getName() == strPanel)
-			{
-				pPanel = *itPanel;
-				break;
-			}
-		}
-		if (pPanel)
-		{
+			LLPanel* pPanel = *itPanel;
 			while (LLTabContainer* pParent = pPanel->getParentByType<LLTabContainer>())
 			{
 				pParent->selectTabPanel(pPanel);
 				pPanel = pParent;
 			}
 		}
-//		auto itPanel = std::find_if(mPreferencePanels.begin(), mPreferencePanels.end(), [&strPanel](const LLPanelPreference* x) { return x->getName() == strPanel; });
-//		if (itPanel != mPreferencePanels.end())
-//		{
-//			LLPanel* pPanel = *itPanel;
-//			while (LLTabContainer* pParent = pPanel->getParentByType<LLTabContainer>())
-//			{
-//				pParent->selectTabPanel(pPanel);
-//				pPanel = pParent;
-//			}
-//		}
 	}
 }
 
@@ -629,11 +624,10 @@ void LLFloaterPreference::apply()
 		LLNotificationsUtil::add("ChangeSkin");
 		refreshSkin(this);
 	}
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	// Call apply() on all registered preference panels
-	for (std::list<LLPanelPreference*>::iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
+	for (LLPanelPreference* pPrefPanel : mPreferencePanels)
 	{
-		LLPanelPreference* pPrefPanel = *itPanel;
 		if ( (pPrefPanel) && (pPrefPanel->isInitialized()) && (pPrefPanel->isDirty()) )
 		{
 			pPrefPanel->apply();
@@ -917,8 +911,15 @@ void LLFloaterPreference::setHardwareDefaults()
 	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
 	if (!preset_graphic_active.empty())
 	{
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-4.1
 		saveGraphicsPreset(preset_graphic_active);
-		saveSettings(); // save here to be able to return to the previous preset by Cancel
+		if (LLPanelPreferenceGraphics* pGraphicsPanel = getPanelByType<LLPanelPreferenceGraphics>())
+		{
+			pGraphicsPanel->saveSettings(); // save here to be able to return to the previous preset by Cancel
+		}
+// [/SL:KB]
+//		saveGraphicsPreset(preset_graphic_active);
+//		saveSettings(); // save here to be able to return to the previous preset by Cancel
 	}
 
 	LLFeatureManager::getInstance()->applyRecommendedSettings();
@@ -2283,10 +2284,6 @@ private:
 static LLPanelInjector<LLPanelPreference> t_places("panel_preference");
 LLPanelPreference::LLPanelPreference()
 : LLPanel(),
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
-  mInitialized(false),
-  mRefreshOnOpen(true),
-// [/SL:KB]
   mBandWidthUpdater(NULL)
 {
 	mCommitCallbackRegistrar.add("Pref.setControlFalse",	boost::bind(&LLPanelPreference::setControlFalse,this, _2));
@@ -2384,7 +2381,7 @@ BOOL LLPanelPreference::postBuild()
 	}
 #endif
 
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 	LLFloaterPreference* pFloater = getParentByType<LLFloaterPreference>();
 	if (pFloater)
 	{
@@ -2406,7 +2403,7 @@ LLPanelPreference::~LLPanelPreference()
 	}
 }
 
-// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
 void LLPanelPreference::onVisibilityChange(BOOL new_visibility)
 {
 	LLPanel::onVisibilityChange(new_visibility);
@@ -2616,7 +2613,7 @@ private:
 	std::list<std::string> mAccountIndependentSettings;
 };
 
-//static LLPanelInjector<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
+static LLPanelInjector<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
 static LLPanelInjector<LLPanelPreferencePrivacy> t_pref_privacy("panel_preference_privacy");
 
 BOOL LLPanelPreferenceGraphics::postBuild()
@@ -2660,7 +2657,10 @@ void LLPanelPreferenceGraphics::onPresetsListChange()
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance && !gSavedSettings.getString("PresetGraphicActive").empty())
 	{
-		instance->saveSettings(); //make cancel work correctly after changing the preset
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-4.1
+		saveSettings(); //make cancel work correctly after changing the preset
+// [/SL:KB]
+//		instance->saveSettings(); //make cancel work correctly after changing the preset
 	}
 }
 
