@@ -527,12 +527,15 @@ class LLFileUploadBulk : public view_listener_t
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 		if (!files.empty())
 		{
-			const std::string& filename = files.front();
+			bool fHasNewFileUpload = (gAgent.getRegion()) ? !gAgent.getRegion()->getCapability("NewFileAgentInventory").empty() : false;
 // [/SL:KB]
             S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
 
 //            while (!filename.empty())
-//            {
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+			for (const std::string& filename : files)
+// [/SL:KB]
+            {
                 std::string name = gDirUtilp->getBaseFileName(filename, true);
 
                 std::string asset_name = name;
@@ -552,13 +555,13 @@ class LLFileUploadBulk : public view_listener_t
                     expected_upload_cost));
 
 // [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
-				std::list<std::string>* pFileList = new std::list<std::string>(files.begin() + 1, files.end());
+				std::list<std::string>* pFileList = (!fHasNewFileUpload) ? new std::list<std::string>(files.begin() + 1, files.end()) : nullptr;
 				upload_new_resource(uploadInfo, NULL, pFileList);
 // [/SL:KB]
 //                upload_new_resource(uploadInfo, NULL, NULL);
 //
 //                filename = picker.getNextFile();
-//            }
+            }
 		}
 		else
 		{
@@ -946,6 +949,10 @@ void upload_new_resource(
 	if ( !url.empty() )
 	{
         LLViewerAssetUpload::EnqueueInventoryUpload(url, uploadInfo);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+		delete pFileList;
+		pFileList = nullptr;
+// [/SL:KB]
 	}
 	else
 	{
