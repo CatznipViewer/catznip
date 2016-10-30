@@ -1,0 +1,574 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+  border="true"
+  follows="all"
+  height="376"
+  label="Sound Alerts"
+  layout="topleft"
+  name="panel_chat_sounds"
+  width="509">
+    <text
+      follows="top|left"
+      font.style="BOLD"
+      height="15"
+      mouse_opaque="false"
+      name="text_miscellaneous"
+      layout="topleft"
+      left="30"
+      top="15"
+      type="string"
+      width="220">
+        Notification &amp; Alert Sounds
+    </text>
+
+    <button
+     control_name="PlaySoundTeleportOffer"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_teleportoffer_mute"
+     tab_stop="false"
+     top_pad="10"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_teleportoffer_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Teleport offer :
+    </text>
+    <sound_picker
+     control_name="UISndEventTeleportOffer"
+     enabled_control="PlaySoundTeleportOffer"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_teleportoffer"
+     top_delta="-2"
+     width="170" />
+
+    <button
+     control_name="PlaySoundInventoryOffer"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_inventoryoffer_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_inventoryoffer_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Inventory offer :
+    </text>
+    <sound_picker
+     control_name="UISndEventInventoryOffer"
+     enabled_control="PlaySoundInventoryOffer"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_inventoryoffer"
+     top_delta="-2"
+     width="170" />
+
+    <button
+     control_name="PlaySoundGroupNotice"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_groupnotice_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_groupnotice_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Group notice :
+    </text>
+    <sound_picker
+     control_name="UISndEventGroupNotice"
+     enabled_control="PlaySoundGroupNotice"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_groupnotice"
+     top_delta="-2"
+     width="170" />
+
+    <button
+     control_name="PlaySoundScriptPermission"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_scriptpermission_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_scriptpermission_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Script permission :
+    </text>
+    <sound_picker
+     control_name="UISndEventScriptPermission"
+     enabled_control="PlaySoundScriptPermission"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_scriptpermission"
+     top_delta="-2"
+     width="170" />
+
+    <button
+     control_name="PlaySoundRegionRestart"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_regionrestart_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_regionrestart_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Region restart :
+    </text>
+    <sound_picker
+     control_name="UISndEventRegionRestart"
+     enabled_control="PlaySoundRegionRestart"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_regionrestart"
+     top_delta="-2"
+     width="170" />
+
+
+    <panel
+     bg_alpha_color="DkGray"
+     bg_opaque_color="DkGray"
+     background_visible="true"
+     border="false"
+     follows="top|left"
+     layout="topleft"
+     left="320"
+     right="-10"
+     top="20"
+     height="155">
+      <text
+        follows="left|top"
+        font.style="BOLD"
+        height="15"
+        layout="topleft"
+        left="15"
+        length="1"
+        name="text_column_conv"
+        top_pad="15"
+        right="-1"
+        type="string">
+        Button &amp; UI Volume :
+      </text>
+      <button
+      control_name="MuteAudio"
+      follows="top|left"
+      height="16"
+      image_selected="AudioMute_Off"
+      image_unselected="Audio_Off"
+      is_toggle="true"
+      layout="topleft"
+        left="15"
+      name="mute_audio"
+      tab_stop="false"
+      top="35"
+      width="16" />
+      <slider
+          control_name="AudioLevelUI"
+          disabled_control="MuteAudio"
+          follows="left|top"
+          height="15"
+          increment="0.05"
+          initial_value="0.5"
+          label=""
+          label_width="0"
+          layout="topleft"
+          left_pad="0"
+          name="UI Volume"
+          show_text="false"
+          slider_label.halign="right"
+          top="35"
+          volume="true"
+          width="135">
+        <slider.commit_callback
+            function="Pref.setControlFalse"
+            parameter="MuteUI" />
+      </slider>
+<!--
+      <text
+        follows="left|top"
+        font.style="BOLD"
+        height="15"
+        layout="topleft"
+        left="15"
+        length="1"
+        name="text_column_conv"
+        top_pad="10"
+        right="-1"
+        type="string">
+        Sound Scheme :
+      </text>
+      <combo_box
+          control_name="ChatFontSize"
+          height="23"
+          layout="topleft"
+          left="15"
+          name="sound_scheme"
+          top_pad="5"
+          right="-15">
+        <item
+            label="Catznip Defaults"
+            name="cmb_catznip_default"
+            value="0"/>
+        <item
+            label="Linden Defaults"
+            name="cmb_catznip_default"
+            value="1"/>
+        <item
+            label="Some Other Set"
+            name="cmb_some_other"
+            value="2"/>  
+      </combo_box>
+       <button
+        height="23"
+        layout="topleft"
+        top_pad="5"
+        left="15"
+        name="soundscheme_apply"
+        commit_callback.function="Pref.SpellChecker"
+        label="Apply"
+        right="-15">
+      </button>
+      -->
+    </panel>
+
+     
+     
+    <view_border
+     top_pad="10"
+     layout="topleft"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1" />
+
+   <text
+     follows="left|top"
+     font.style="BOLD"
+     height="15"
+     layout="topleft"
+     left="145"
+     length="1"
+     name="text_column_conv"
+     top_pad="15"
+     width="165"
+     type="string">
+      New conversation
+    </text>
+    <text
+     follows="left|top"
+     font.style="BOLD"
+     height="15"
+     layout="topleft"
+     left_pad="15"
+     length="1"
+     name="text_column_im"
+     top_delta="0"
+     width="165"
+     type="string">
+      Incoming message
+    </text>
+
+    <button
+     control_name="PlaySoundNearbyChatIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_nearby_mute"
+     tab_stop="false"
+     top_pad="4"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_nearby_text"
+     width="105"
+     valign="center"
+     top_delta="0">
+      Nearby chat :
+    </text>
+    <sound_picker
+     control_name="UISndEventChatAgent"
+     enabled_control="PlaySoundNearbyChatIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="180"
+     name="sound_nearby"
+     top_delta="-1"
+     width="170" />
+
+    <button
+     control_name="PlaySoundFriendIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_friend_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_friend_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Friend IMs :
+    </text>
+    <sound_picker
+     control_name="UISndEventConvFriend"
+     enabled_control="PlaySoundFriendIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_friend_conv"
+     top_delta="-2"
+     width="170" />
+    <sound_picker
+     control_name="UISndEventIMFriend"
+     enabled_control="PlaySoundFriendIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="10"
+     name="sound_friend_im"
+     top_delta="0"
+     width="170" />
+
+    <button
+     control_name="PlaySoundNonFriendIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_nonfriend_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_nonfriend_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Non-friend IMs :
+    </text>
+    <sound_picker
+     control_name="UISndEventConvNonFriend"
+     enabled_control="PlaySoundNonFriendIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_nonfriend_conv"
+     top_delta="-2"
+     width="170" />
+    <sound_picker
+     control_name="UISndEventIMNonFriend"
+     enabled_control="PlaySoundNonFriendIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="10"
+     name="sound_nonfriend_im"
+     top_delta="0"
+     width="170" />
+
+    <button
+     control_name="PlaySoundConferenceIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_conference_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_conference_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Conference IMs :
+    </text>
+    <sound_picker
+     control_name="UISndEventConvConference"
+     enabled_control="PlaySoundConferenceIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_conference_conv"
+     top_delta="-2"
+     width="170" />
+    <sound_picker
+     control_name="UISndEventIMConference"
+     enabled_control="PlaySoundConferenceIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="10"
+     name="sound_conference_im"
+     top_delta="0"
+     width="170" />
+
+    <button
+     control_name="PlaySoundGroupChatIM"
+     follows="top|left"
+     height="18"
+     image_selected="Audio_Off"
+     image_unselected="AudioMute_Off"
+     is_toggle="true"
+     layout="topleft"
+     left="15"
+     name="sound_group_mute"
+     tab_stop="false"
+     top_pad="6"
+     width="18" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="7"
+     name="sound_group_text"
+     width="100"
+     valign="center"
+     top_delta="0">
+      Group chat :
+    </text>
+    <sound_picker
+     control_name="UISndEventConvGroup"
+     enabled_control="PlaySoundGroupChatIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="5"
+     name="sound_group_conv"
+     top_delta="-2"
+     width="170" />
+    <sound_picker
+     control_name="UISndEventIMGroup"
+     enabled_control="PlaySoundGroupChatIM"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="10"
+     name="sound_group_im"
+     top_delta="0"
+     width="170" />
+    <text
+     follows="top|left"
+     height="18"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="loggedin_msg"
+     text_color="White_50"
+     top_pad="10"
+     type="string"
+     right="-10">
+        * You must be logged in before you can change these options.
+    </text>
+</panel>

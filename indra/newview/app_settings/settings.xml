@@ -1382,7 +1382,7 @@
       <key>Type</key>
       <string>U32</string>
       <key>Value</key>
-      <integer>512</integer>
+      <integer>1024</integer>
     </map>
     <key>CacheValidateCounter</key>
     <map>
@@ -2269,7 +2269,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>DebugInventoryFilters</key>
     <map>
@@ -3160,7 +3160,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>DisableCrashLogger</key>
     <map>
@@ -3402,7 +3402,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>DoubleClickShowWorldMap</key>
     <map>
@@ -3611,7 +3611,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>EnergyFromTop</key>
     <map>
@@ -5405,7 +5405,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <boolean>0</boolean>
     </map>
     <key>LipSyncAah</key>
     <map>
@@ -7314,7 +7314,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>ParticipantListShowIcons</key>
     <map>
@@ -7590,7 +7590,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
 
     <key>PluginInstancesLow</key>
@@ -7636,7 +7636,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
    <key>PostFirstLoginIntroURL</key>
    <map>
@@ -9702,7 +9702,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>NameTagShowUsernames</key>
     <map>
@@ -10832,7 +10832,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>NavBarShowParcelProperties</key>
     <map>
@@ -11561,7 +11561,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>ShowTangentBasis</key>
     <map>
@@ -13373,7 +13373,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <integer>1</integer>
     </map>
     <key>UseDefaultColorPicker</key>
     <map>
@@ -13428,7 +13428,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>0</integer>
+      <boolean>1</boolean>
     </map>
     <key>UseDayCycle</key>
     <map>
@@ -14942,7 +14942,7 @@
       <key>Type</key>
       <string>Boolean</string>
       <key>Value</key>
-      <integer>1</integer>
+      <integer>0</integer>
     </map>
     <key>ShowOfferedInventory</key>
     <map>

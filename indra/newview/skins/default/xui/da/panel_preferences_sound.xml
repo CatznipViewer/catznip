@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<panel label="Lyde" name="Preference Media panel">
+<panel label="Lyde" name="sound_media">
 	<panel.string name="middle_mouse">
 		Midterste museknap
 	</panel.string>
+	<panel name="sound_volume_controls">
 	<slider label="Generel" name="System Volume"/>
-	<check_box initial_value="true" name="mute_when_minimized"/>
-	<text name="mute_chb_label">
-		Sluk for lyd når minimeret
-	</text>
 	<slider label="Knapper" name="UI Volume"/>
 	<slider label="Omgivelser" name="Wind Volume"/>
 	<slider label="Lyd effekter" name="SFX Volume"/>
@@ -17,8 +14,11 @@
 	<check_box label="Aktiveret" name="enable_media"/>
 	<slider label="Stemme chat" name="Voice Volume"/>
 	<check_box label="Aktiveret" name="enable_voice_check"/>
+	</panel>
 	<check_box label="Tillad media at afspilles automatisk" name="media_auto_play_btn" tool_tip="Vælg dette for at media afspille automatisk hvis det ønsker det" value="true"/>
 	<check_box label="Afspil media vedhæftet andre avatarer" name="media_show_on_others_btn" tool_tip="Deaktiver dette for at skjule vedhæftet media for avatarer i nærheden" value="true"/>
+	<check_box label="Sluk for lyd når minimeret" name="mute_when_minimized"/>
+	
 	<text name="voice_chat_settings">
 		Stemme chat opsætning
 	</text>

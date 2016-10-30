@@ -1,0 +1,1403 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="408"
+ label="Move"
+ layout="topleft"
+ left="102"
+ name="move_panel"
+ top="1"
+ width="515">
+  <tab_container
+    follows="top|left"
+    halign="center"
+    height="408"
+    left="0"
+    name="moveview_settings_tab"
+    tab_height="25"
+    tab_min_width="40"
+    tab_max_width="130"
+    tab_position="top"
+    top="408"
+    width="515">
+    <panel
+      border="true"
+      follows="all"
+      label="Keyboard &amp; Mouse"
+      layout="topleft"
+      mouse_opaque="false"
+      name="moveview_settings_kbm">
+      <icon
+	follows="left|top"
+	height="18"
+	image_name="Cam_FreeCam_Off"
+	layout="topleft"
+	name="camera_icon"
+	mouse_opaque="false"
+	visible="true"
+	width="18"
+	left="30"
+	top="15"/>
+      <text
+	type="string"
+	length="1"
+	follows="left|top"
+	font.style="BOLD"
+	height="12"
+	layout="topleft"
+	left_pad="8"
+	name="Camera:"
+	top_delta="4"
+	width="100">
+	Camera
+      </text>
+      <slider
+	can_edit_text="true"
+	control_name="CameraAngle"
+	decimal_digits="2"
+	follows="left|top"
+	height="16"
+	increment="0.025"
+	initial_value="1.57"
+	layout="topleft"
+	label_width="100"
+	label="View angle"
+	left="75"
+	max_val="2.97"
+	min_val="0.17"
+	name="camera_fov"
+	show_text="true"
+	top_pad="5"
+	width="240" />
+      <slider
+	can_edit_text="true"
+	control_name="CameraOffsetScale"
+	decimal_digits="2"
+	follows="left|top"
+	height="16"
+	increment="0.025"
+	initial_value="1"
+	layout="topleft"
+	label="Distance"
+	left_delta="0"
+	label_width="100"
+	max_val="3"
+	min_val="0.5"
+	name="camera_offset_scale"
+	show_text="true"
+	width="240"
+	top_pad="5"/>
+      <text
+	follows="left|top"
+	type="string"
+	length="1"
+	height="10"
+	left="75"
+	name="heading2"
+	width="270"
+	top_pad="5">
+	Automatic position for:
+      </text>
+      <check_box
+	control_name="EditCameraMovement"
+	height="20"
+	follows="left|top"
+	label="Build/Edit"
+	layout="topleft"
+	left_delta="30"
+	name="edit_camera_movement"
+	tool_tip="Use automatic camera positioning when entering and exiting edit mode"
+	width="280"
+	top_pad="5" />
+      <check_box
+	control_name="AppearanceCameraMovement"
+	follows="left|top"
+	height="16"
+	label="Appearance"
+	layout="topleft"
+	name="appearance_camera_movement"
+	tool_tip="Use automatic camera positioning while in edit mode"
+	width="242" />
+      <icon
+	follows="left|top"
+	height="18"
+	image_name="Move_Walk_Off"
+	layout="topleft"
+	name="avatar_icon"
+	mouse_opaque="false"
+	visible="true"
+	width="18"
+	top_pad="10"
+	left="30" />
+      <text
+	type="string"
+	length="1"
+	follows="left|top"
+	font.style="BOLD"
+	height="12"
+	layout="topleft"
+	left_pad="8"
+	name="Movement:"
+	top_delta="4"
+	width="100">
+	Movement
+      </text>
+      <text
+	follows="left|top"
+	font.style="BOLD"
+	type="string"
+	length="1"
+	height="10"
+	layout="topleft"
+	left="75"
+	name="keyboard_lbl"
+	width="270"
+	top_pad="5">
+	Keyboard
+      </text>
+      <check_box
+	control_name="ArrowKeysAlwaysMove"
+	follows="left|top"
+	height="20"
+	label="Arrow keys always move me"
+	layout="topleft"
+	left_delta="15"
+	name="arrow_keys_move_avatar_check"
+	width="237"
+	top_pad="5"/>
+      <check_box
+	control_name="AllowTapTapHoldRun"
+	follows="left|top"
+	height="20"
+	label="Tap-tap-hold to run"
+	layout="topleft"
+	left_delta="0"
+	name="tap_tap_hold_to_run"
+	width="237"
+	top_pad="0"/>
+      <check_box
+	control_name="AutomaticFly"
+	follows="left|top"
+	height="20"
+	label="Hold jump or crouch key to start or stop flying"
+	layout="topleft"
+	left_delta="0"
+	name="automatic_fly"
+	width="237"
+	top_pad="0"/>
+      <text
+	follows="left|top"
+	font.style="BOLD"
+	type="string"
+	length="1"
+	height="10"
+	layout="topleft"
+	left="75"
+	name="mouse_lbl"
+	width="270"
+	top_pad="10">
+	Mouse
+      </text>
+      <check_box
+	control_name="FirstPersonAvatarVisible"
+	follows="left|top"
+	height="20"
+	label="Show me in Mouselook"
+	layout="topleft"
+	left_delta="15"
+	name="first_person_avatar_visible"
+	top_pad="5"
+	width="256" />
+      <text
+	type="string"
+	length="1"
+	follows="left|top"
+	height="15"
+	layout="topleft"
+	left_delta="3"
+	name=" Mouse Sensitivity"
+	top_pad="10"
+	width="160"
+	wrap="true">
+	Mouselook mouse sensitivity:
+      </text>
+      <slider
+	control_name="MouseSensitivity"
+	follows="left|top"
+	height="15"
+	initial_value="2"
+	layout="topleft"
+	show_text="false"
+	left_pad="0"
+	max_val="15"
+	name="mouse_sensitivity"
+	top_delta="-1"
+	width="115" />
+      <check_box
+	control_name="InvertMouse"
+	height="16"
+	label="Invert"
+	layout="topleft"
+	left_pad="2"
+	name="invert_mouse"
+	top_delta="0"
+	width="128" />
+      <text
+	follows="left|top"
+	type="string"
+	length="1"
+	height="10"
+	layout="topleft"
+	left="86"
+	name="single_click_action_lbl"
+	width="150"
+	top_pad="20">
+	Single click on land:
+      </text>
+      <combo_box
+	height="23"
+	layout="topleft"
+	left_pad="10"
+	top_delta="-6"
+	name="single_click_action_combo"
+	width="200">
+	<combo_box.item
+	  label="No action"
+	  name="0"
+	  value="0"/>
+	<combo_box.item
+	  label="Move to clicked point"
+	  name="1"
+	  value="1"/>
+	<combo_box.commit_callback
+	  function="Pref.ClickActionChange"/>
+      </combo_box>
+      <text
+	follows="left|top"
+	type="string"
+	length="1"
+	height="10"
+	layout="topleft"
+	left="86"
+	name="double_click_action_lbl"
+	width="150"
+	top_pad="12">
+	Double click on land:
+      </text>
+      <combo_box
+	height="23"
+	layout="topleft"
+	left_pad="10"
+	top_delta="-6"
+	name="double_click_action_combo"
+	width="200">
+	<combo_box.item
+	  label="No action"
+	  name="0"
+	  value="0"/>
+	<combo_box.item
+	  label="Move to clicked point"
+	  name="1"
+	  value="1"/>
+	<combo_box.item
+	  label="Teleport to clicked point"
+	  name="2"
+	  value="2"/>
+	<combo_box.commit_callback
+	  function="Pref.ClickActionChange"/>
+      </combo_box>
+    </panel>
+
+
+    <panel
+      border="true"
+      follows="all"
+      label="Joystick / Pad"
+      layout="topleft"
+      mouse_opaque="false"
+      name="moveview_settings_joystick">
+      <floater.string
+	name="NoDevice">
+	no device detected
+      </floater.string>
+      <check_box
+	control_name="JoystickEnabled"
+	follows="top|left"
+	halign="left"
+	height="10"
+	label="Enable Joystick:"
+	layout="topleft"
+	left="14"
+	name="enable_joystick"
+	top_pad="15"
+	width="60" />
+      <text
+	layout="topleft"
+	left="130"
+	name="joystick_type"
+	width="380" />
+      <panel
+	follows="top|left"
+	height="250"
+	layout="topleft"
+	left="10"
+	top="37"
+	visiblity_control="ShowAdvancedJoystickSettings" 
+	width="180" >
+	<spinner
+	  follows="top|left"
+	  height="10"
+	  control_name="JoystickAxis1"
+	  decimal_digits="0"
+	  increment="1"
+	  label="X Axis Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="20"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis1"
+	  top_pad="-10"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis2"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Y Axis Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="170"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis2"
+	  top_pad="-10"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis0"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Z Axis Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="320"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis0"
+	  top_pad="-10"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis4"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Pitch Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="20"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis4"
+	  top_pad="15"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis5"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Yaw Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="170"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis5"
+	  top_pad="-10"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis3"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Roll Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="320"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis3"
+	  top_pad="-10"
+	  width="140" />
+	<spinner
+	  follows="top|left"
+	  height="10"     
+	  control_name="JoystickAxis6"
+	  decimal_digits="0"
+	  increment="1"
+	  label="Zoom Mapping"
+	  label_width="100"
+	  layout="topleft"
+	  left="20"
+	  max_val="5"
+	  min_val="-1"
+	  name="JoystickAxis6"
+	  top_pad="15"
+	  width="140" />
+	<check_box
+	  follows="top|left"
+	  bottom_delta="10"
+	  height="10"
+	  control_name="ZoomDirect"
+	  label="Direct Zoom"
+	  layout="topleft"
+	  left="170"
+	  name="ZoomDirect"
+	  width="60" />
+	<check_box
+	  bottom_delta="0"
+	  height="10"     
+	  control_name="Cursor3D"
+	  label="3D Cursor"
+	  layout="topleft"
+	  left="280"
+	  name="Cursor3D"
+	  width="60" />
+	<check_box
+	  bottom_delta="0"
+	  height="10"     
+	  control_name="AutoLeveling"
+	  label="Auto Level"
+	  layout="topleft"
+	  left="370"
+	  name="AutoLeveling"
+	  width="60" />
+      </panel>
+      <text
+	type="string"
+	length="1"
+	follows="left|top"
+	font.style="BOLD"
+	halign="right"
+	height="10"
+	layout="topleft"
+	left="35"
+	mouse_opaque="false"
+	name="Control Modes:"
+	top="105"
+	width="102">
+	Joystick Controls :
+      </text>
+      <check_box
+	bottom="122"
+	height="10"     
+	control_name="JoystickAvatarEnabled"
+	halign="center"
+	label="Avatar"
+	layout="topleft"
+	left="140"
+	name="JoystickAvatarEnabled"
+	width="60" />
+      <check_box
+	bottom="122"
+	height="10"     
+	control_name="JoystickBuildEnabled"
+	halign="center"
+	label="Build"
+	layout="topleft"
+	left="200"
+	name="JoystickBuildEnabled"
+	width="60" />
+      <check_box
+	bottom="122"
+	height="10"     
+	control_name="JoystickFlycamEnabled"
+	halign="center"
+	label="Flycam"
+	layout="topleft"
+	left="260"
+	name="JoystickFlycamEnabled"
+	width="60" />
+      <panel
+	follows="top|left"
+	height="250"
+	layout="topleft"
+	left="330"
+	name="axis_view"
+	top="100"
+	visiblity_control="ShowAdvancedJoystickSettings" 
+	width="180" >
+	<stat_view
+	  follows="top|left"
+	  height="250"
+	  label="Joystick Monitor"
+	  layout="topleft"
+	  left="0"
+	  name="axis_view"
+	  show_label="true"
+	  top="0"
+	  width="180">
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    height="0"
+	    label="Axis 0"
+	    label_spacing="1"
+	    layout="topleft"
+	    left="0"
+	    name="axis0"
+	    tick_spacing="0.5"
+	    top="20"
+	    width="0" />
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    label="Axis 1"
+	    label_spacing="1"
+	    layout="topleft"
+	    name="axis1"
+	    tick_spacing="0.5" />
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    label="Axis 2"
+	    label_spacing="1"
+	    layout="topleft"
+	    name="axis2"
+	    tick_spacing="0.5" />
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    label="Axis 3"
+	    label_spacing="1"
+	    layout="topleft"
+	    name="axis3"
+	    tick_spacing="0.5" />
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    label="Axis 4"
+	    label_spacing="1"
+	    layout="topleft"
+	    name="axis4"
+	    tick_spacing="0.5" />
+	  <stat_bar
+	    bar_max="2"
+	    bar_min="-2"
+	    label="Axis 5"
+	    label_spacing="1"
+	    layout="topleft"
+	    name="axis5"
+	    tick_spacing="0.5" />
+	</stat_view>
+      </panel>
+      <tab_container
+	follows="top|left"
+	halign="center"
+	height="188"
+	left="0"
+	name="joystick_settings_tab"
+	tab_height="25"
+	tab_min_width="40"
+	tab_max_width="130"
+	tab_position="top"
+	top="130"
+	visiblity_control="ShowAdvancedJoystickSettings"
+	width="330">
+	<panel
+	  border="true"
+	  follows="all"
+	  label="Axis Scale"
+	  layout="topleft"
+	  mouse_opaque="false"
+	  name="joystick_settings_scale">
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="144"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="XScale"
+	    top_pad="12"
+	    width="100">
+	    X Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisScale1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisScale1"
+	    top_pad="-15"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisScale1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale1"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisScale1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale1"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="164"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="YScale"
+	    top_pad="15"
+	    width="100">
+	  Y Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisScale2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisScale2"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisScale2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale2"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisScale2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale2"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="184"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="ZScale"
+	    top_pad="15"
+	    width="100">
+	  Z Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisScale0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisScale0"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisScale0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale0"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisScale0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale0"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="204"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="PitchScale"
+	    top_pad="15"
+	    width="100">
+	  Pitch Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisScale4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="AvatarAxisScale4"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisScale4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale4"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisScale4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale4"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="224"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="YawScale"
+	    top_pad="15"
+	    width="100">
+	  Yaw Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="AvatarAxisScale5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="AvatarAxisScale5"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="BuildAxisScale5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale5"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisScale5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale5"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="244"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="RollScale"
+	    top_pad="15"
+	    width="100">
+	  Roll Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="BuildAxisScale3"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisScale3"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisScale3"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale3"
+	    top_pad="-10"
+	    width="56" />
+	</panel>
+	 
+	<panel
+	  border="true"
+	  follows="all"
+	  label="Dead Zones"
+	  layout="topleft"
+	  mouse_opaque="false"
+	  name="joystick_settings_scale">
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="144"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="XDeadZone"
+	    top_pad="12"
+	    width="100">
+	    X Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisDeadZone1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisDeadZone1"
+	    top_pad="-15"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisDeadZone1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone1"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisDeadZone1"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone1"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="164"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="YDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Y Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisDeadZone2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisDeadZone2"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisDeadZone2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone2"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisDeadZone2"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone2"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="184"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="ZDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Z Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisDeadZone0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="50"
+	    min_val="-50"
+	    name="AvatarAxisDeadZone0"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisDeadZone0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone0"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisDeadZone0"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone0"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="204"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="PitchDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Pitch Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="AvatarAxisDeadZone4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="AvatarAxisDeadZone4"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="BuildAxisDeadZone4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone4"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"     
+	    control_name="FlycamAxisDeadZone4"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone4"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="224"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="YawDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Yaw Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="AvatarAxisDeadZone5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="AvatarAxisDeadZone5"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="BuildAxisDeadZone5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone5"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisDeadZone5"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone5"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="244"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="RollDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Roll Deadzone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="BuildAxisDeadZone3"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="200"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="BuildAxisDeadZone3"
+	    top_pad="-10"
+	    width="56" />
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisDeadZone3"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="260"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisDeadZone3"
+	    top_pad="-10"
+	    width="56" />
+	</panel>
+
+	<panel
+	  border="true"
+	  follows="all"
+	  label="Feathering &amp; Zoom"
+	  layout="topleft"
+	  mouse_opaque="false"
+	  name="joystick_settings_feathering">
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="Feathering"
+	    top_pad="15"
+	    width="140">
+	    Avatar Feathering
+	  </text>
+	  <slider
+	    follows="top|left"
+	    control_name="AvatarFeathering"
+	    decimal_digits="1"
+	    height="16"
+	    increment="0.5"
+	    initial_value="0.7"
+	    layout="topleft"
+	    left="160"
+	    max_val="32"
+	    min_val="1"
+	    name="AvatarFeathering"
+	    show_text="true"
+	    top_pad="-10"
+	    width="180" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="Feathering"
+	    top_pad="15"
+	    width="140">
+	    Build Feathering
+	  </text>
+	  <slider
+	    follows="top|left"
+	    control_name="BuildFeathering"
+	    decimal_digits="1"
+	    height="16"
+	    increment="0.5"
+	    initial_value="0.7"
+	    layout="topleft"
+	    left_delta="160"
+	    max_val="32"
+	    min_val="1"
+	    name="BuildFeathering"
+	    show_text="true"
+	    top_delta="0"
+	    width="180" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="Feathering"
+	    top_pad="15"
+	    width="140">
+	    Flycam Feathering
+	  </text>
+	  <slider
+	    follows="top|left"
+	    control_name="FlycamFeathering"
+	    decimal_digits="1"
+	    height="16"
+	    increment="0.5"
+	    initial_value="0.7"
+	    layout="topleft"
+	    left_delta="160"
+	    max_val="32"
+	    min_val="1"
+	    name="FlycamFeathering"
+	    show_text="true"
+	    top_delta="0"
+	    width="180" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="430"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="ZoomScale2"
+	    top_pad="15"
+	    width="100">
+	    Zoom Scale
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisScale6"
+	    decimal_digits="2"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    max_val="1024"
+	    min_val="-1024"
+	    name="FlycamAxisScale6"
+	    top_pad="-10"
+	    width="56" />
+	  <text
+	    follows="top|left"
+	    type="string"
+	    length="1"
+	    bottom="450"
+	    halign="right"
+	    layout="topleft"
+	    left="3"
+	    name="ZoomDeadZone"
+	    top_pad="15"
+	    width="100">
+	    Zoom Dead Zone
+	  </text>
+	  <spinner
+	    follows="top|left"
+	    height="10"
+	    control_name="FlycamAxisDeadZone6"
+	    decimal_digits="2"
+	    increment="0.01"
+	    label_width="0"
+	    layout="topleft"
+	    left="140"
+	    name="FlycamAxisDeadZone6"
+	    top_pad="-10"
+	    width="56" />	  
+	</panel>
+      </tab_container>
+
+      <button
+	follows="top|left"
+	height="22"
+	label="Xbox 360 Pad Defaults"
+	layout="topleft"
+	left="10"
+	name="Xbox360Defaults"
+	top="325"
+	width="150" />
+      <button
+	follows="top|left"
+	height="22"
+	label="SpaceNavigator Defaults"
+	layout="topleft"
+	left="170"
+	name="SpaceNavigatorDefaults"
+	top="325"
+	width="150" />
+
+      <button
+	control_name="ShowAdvancedJoystickSettings"
+	follows="left|bottom"
+	height="23"
+	is_toggle="true"
+	label="Advanced"
+	layout="topleft"
+	left="10"
+	name="Advanced"
+	bottom="-10"
+	width="115" />
+    </panel>  
+  </tab_container>
+</panel>
