@@ -94,14 +94,23 @@ public:
 	void selectChatPanel();
 	void getControlNames(std::vector<std::string>& names);
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	void registerPrefPanel(LLPanelPreference* pPrefPanel);
+	void unregisterPrefpanel(LLPanelPreference* pPrefPanel);
+	void showPanel(const std::string& strPanel);
+// [/SL:KB]
+
 protected:	
 	void		onBtnOK(const LLSD& userdata);
 	void		onBtnCancel(const LLSD& userdata);
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-04-03 (Catznip-3.6)
+	void		onShowPanel(const LLSD& sdParam);
+// [/SL:KB]
 
 	void		onClickClearCache();			// Clear viewer texture cache, vfs, and VO cache on next startup
 	void		onClickBrowserClearCache();		// Clear web history and caches as well as viewer caches above
 	void		onLanguageChange();
-	void		onNotificationsChange(const std::string& OptionName);
+//	void		onNotificationsChange(const std::string& OptionName);
 	void		onNameTagOpacityChange(const LLSD& newvalue);
 
 	// set value of "DoNotDisturbResponseChanged" in account settings depending on whether do not disturb response
@@ -126,9 +135,9 @@ protected:
 	void updateClickActionControls();
 
 public:
-	// This function squirrels away the current values of the controls so that
-	// cancel() can restore them.	
-	void saveSettings();
+//	// This function squirrels away the current values of the controls so that
+//	// cancel() can restore them.	
+//	void saveSettings();
 
 	void setCacheLocation(const LLStringExplicit& location);
 
@@ -163,17 +172,17 @@ public:
 	void onChangeMaturity();
 	void onClickBlockList();
 	void onClickProxySettings();
-	void onClickTranslationSettings();
+//	void onClickTranslationSettings();
 	void onClickPermsDefault();
-	void onClickAutoReplace();
-	void onClickSpellChecker();
+//	void onClickAutoReplace();
+//	void onClickSpellChecker();
 	void onClickAdvanced();
 	void applyUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void getUIColor(LLUICtrl* ctrl, const LLSD& param);
 	void onLogChatHistorySaved();	
 	void buildPopupLists();
 	static void refreshSkin(void* data);
-	void selectPanel(const LLSD& name);
+//	void selectPanel(const LLSD& name);
 	void saveGraphicsPreset(std::string& preset);
 
 private:
@@ -184,7 +193,7 @@ private:
 	void updateMaxComplexity();
 
 	static std::string sSkin;
-	notifications_map mNotificationOptions;
+//	notifications_map mNotificationOptions;
 	bool mClickActionDirty; ///< Set to true when the click/double-click options get changed by user.
 	bool mGotPersonalInfo;
 	bool mOriginalIMViaEmail;
@@ -198,6 +207,11 @@ private:
 	LLAvatarData mAvatarProperties;
 	std::string mSavedGraphicsPreset;
 	LOG_CLASS(LLFloaterPreference);
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mCancelOnClose; // If TRUE then onClose() will call cancel(); set by apply() and cancel()
+	std::list<LLPanelPreference*> mPreferencePanels;
+// [/SL:KB]
 };
 
 class LLPanelPreference : public LLPanel
@@ -208,6 +222,26 @@ public:
 	
 	virtual ~LLPanelPreference();
 
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Calls onOpen and onClose on derived panels as appropriate
+	/*virtual*/ void onVisibilityChange(BOOL new_visibility);
+	
+	// Only declared in LLFloater so we hev to declare it here as well
+	virtual void onClose() {}
+	
+	// Returns TRUE if the panel has been initialized (been visible at least once)
+	bool isInitialized() const { return mInitialized; }
+
+	// Returns TRUE if the user may have made any chances to the state of this panel (currently we return "was opened this sessio")
+	/*virtual*/ BOOL isDirty() const { return !mRefreshOnOpen; }
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Called only once when the panel becomes visible for the first time
+	virtual void init() {}
+	// Called the first time the panel becomes visible in the currently preferences floater session
+	virtual void refresh() {}
+// [/SL:KB]
 	virtual void apply();
 	virtual void cancel();
 	void setControlFalse(const LLSD& user_data);
@@ -230,6 +264,12 @@ public:
 protected:
 	typedef std::map<LLControlVariable*, LLSD> control_values_map_t;
 	control_values_map_t mSavedValues;
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	bool mInitialized;
+	bool mRefreshOnOpen;
+
+	void onParentFloaterClose() { mRefreshOnOpen = true; }
+// [/SL:KB]
 
 private:
 	//for "Only friends and groups can call or IM me"

@@ -64,9 +64,11 @@
 #include "llnotificationmanager.h"
 #include "llnotificationsutil.h"
 
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+static LLPanelInjector<LLPanelPreferenceAutoReplaceSettings> t_pref_chat_autoreplace("panel_preference_chat_autoreplace");
 
-LLFloaterAutoReplaceSettings::LLFloaterAutoReplaceSettings(const LLSD& key)
- : LLFloater(key)
+LLPanelPreferenceAutoReplaceSettings::LLPanelPreferenceAutoReplaceSettings()
+ : LLPanelPreference()
  , mSelectedListName("")
  , mListNames(NULL)
  , mReplacementsList(NULL)
@@ -75,70 +77,144 @@ LLFloaterAutoReplaceSettings::LLFloaterAutoReplaceSettings(const LLSD& key)
  , mReplacement(NULL)
 {
 }
+// [/SL:KB]
+//LLFloaterAutoReplaceSettings::LLFloaterAutoReplaceSettings(const LLSD& key)
+// : LLFloater(key)
+// , mSelectedListName("")
+// , mListNames(NULL)
+// , mReplacementsList(NULL)
+// , mKeyword(NULL)
+// , mPreviousKeyword("")
+// , mReplacement(NULL)
+//{
+//}
 
-void LLFloaterAutoReplaceSettings::onClose(bool app_quitting)
+//void LLFloaterAutoReplaceSettings::onClose(bool app_quitting)
+//{
+//	cleanUp();
+//}
+
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+BOOL LLPanelPreferenceAutoReplaceSettings::postBuild(void)
 {
-	cleanUp();
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+	LLPanelPreference::postBuild();
+// [/SL:KB]
+
+	// global checkbox for whether or not autoreplace is active
+	LLUICtrl* enabledCheckbox = getChild<LLUICtrl>("autoreplace_enable");
+	enabledCheckbox->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onAutoReplaceToggled, this));
+
+	// top row list creation and deletion
+	getChild<LLUICtrl>("autoreplace_import_list")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onImportList,this));
+	getChild<LLUICtrl>("autoreplace_export_list")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onExportList,this));
+	getChild<LLUICtrl>("autoreplace_new_list")->setCommitCallback(   boost::bind(&LLPanelPreferenceAutoReplaceSettings::onNewList,this));
+	getChild<LLUICtrl>("autoreplace_delete_list")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onDeleteList,this));
+
+	// the list of keyword->replacement lists
+	mListNames = getChild<LLScrollListCtrl>("autoreplace_list_name");
+	mListNames->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onSelectList, this));
+	mListNames->setCommitOnSelectionChange(true);
+	
+	// list ordering
+	getChild<LLUICtrl>("autoreplace_list_up")->setCommitCallback(  boost::bind(&LLPanelPreferenceAutoReplaceSettings::onListUp,this));
+	getChild<LLUICtrl>("autoreplace_list_down")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onListDown,this));
+
+	// keyword->replacement entry add / delete
+	getChild<LLUICtrl>("autoreplace_add_entry")->setCommitCallback(   boost::bind(&LLPanelPreferenceAutoReplaceSettings::onAddEntry,this));
+	getChild<LLUICtrl>("autoreplace_delete_entry")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onDeleteEntry,this));
+
+	// entry edits
+	mKeyword     = getChild<LLLineEditor>("autoreplace_keyword");
+	mReplacement = getChild<LLLineEditor>("autoreplace_replacement");
+	getChild<LLUICtrl>("autoreplace_save_entry")->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onSaveEntry, this));
+
+	// the list of keyword->replacement pairs
+	mReplacementsList = getChild<LLScrollListCtrl>("autoreplace_list_replacements");
+	mReplacementsList->setCommitCallback(boost::bind(&LLPanelPreferenceAutoReplaceSettings::onSelectEntry, this));
+	mReplacementsList->setCommitOnSelectionChange(true);
+
+	return true;
 }
 
-BOOL LLFloaterAutoReplaceSettings::postBuild(void)
+void LLPanelPreferenceAutoReplaceSettings::refresh()
 {
 	// get copies of the current settings that we will operate on
 	mEnabled  = gSavedSettings.getBOOL("AutoReplace");
 	LL_DEBUGS("AutoReplace") << ( mEnabled ? "enabled" : "disabled") << LL_ENDL;
 
-	mSettings = LLAutoReplace::getInstance()->getSettings();
-	
-	// global checkbox for whether or not autoreplace is active
 	LLUICtrl* enabledCheckbox = getChild<LLUICtrl>("autoreplace_enable");
-	enabledCheckbox->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onAutoReplaceToggled, this));
 	enabledCheckbox->setValue(LLSD(mEnabled));
 
-	// top row list creation and deletion
-	getChild<LLUICtrl>("autoreplace_import_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onImportList,this));
-	getChild<LLUICtrl>("autoreplace_export_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onExportList,this));
-	getChild<LLUICtrl>("autoreplace_new_list")->setCommitCallback(   boost::bind(&LLFloaterAutoReplaceSettings::onNewList,this));
-	getChild<LLUICtrl>("autoreplace_delete_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onDeleteList,this));
-
-	// the list of keyword->replacement lists
-	mListNames = getChild<LLScrollListCtrl>("autoreplace_list_name");
-	mListNames->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSelectList, this));
-	mListNames->setCommitOnSelectionChange(true);
-	
-	// list ordering
-	getChild<LLUICtrl>("autoreplace_list_up")->setCommitCallback(  boost::bind(&LLFloaterAutoReplaceSettings::onListUp,this));
-	getChild<LLUICtrl>("autoreplace_list_down")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onListDown,this));
-
-	// keyword->replacement entry add / delete
-	getChild<LLUICtrl>("autoreplace_add_entry")->setCommitCallback(   boost::bind(&LLFloaterAutoReplaceSettings::onAddEntry,this));
-	getChild<LLUICtrl>("autoreplace_delete_entry")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onDeleteEntry,this));
-
-	// entry edits
-	mKeyword     = getChild<LLLineEditor>("autoreplace_keyword");
-	mReplacement = getChild<LLLineEditor>("autoreplace_replacement");
-	getChild<LLUICtrl>("autoreplace_save_entry")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSaveEntry, this));
-
-	// dialog termination ( Save Changes / Cancel )
-	getChild<LLUICtrl>("autoreplace_save_changes")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSaveChanges, this));
-	getChild<LLUICtrl>("autoreplace_cancel")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onCancel, this));
-
-	// the list of keyword->replacement pairs
-	mReplacementsList = getChild<LLScrollListCtrl>("autoreplace_list_replacements");
-	mReplacementsList->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSelectEntry, this));
-	mReplacementsList->setCommitOnSelectionChange(true);
-
-	center();
+	mSettings = LLAutoReplace::getInstance()->getSettings();
 
 	mSelectedListName.clear();
 	updateListNames();
 	updateListNamesControls();
 	updateReplacementsList();
-
-	return true;
 }
+// [/SL:KB]
+//BOOL LLFloaterAutoReplaceSettings::postBuild(void)
+//{
+//	// get copies of the current settings that we will operate on
+//	mEnabled  = gSavedSettings.getBOOL("AutoReplace");
+//	LL_DEBUGS("AutoReplace") << ( mEnabled ? "enabled" : "disabled") << LL_ENDL;
+//
+//	mSettings = LLAutoReplace::getInstance()->getSettings();
+//	
+//	// global checkbox for whether or not autoreplace is active
+//	LLUICtrl* enabledCheckbox = getChild<LLUICtrl>("autoreplace_enable");
+//	enabledCheckbox->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onAutoReplaceToggled, this));
+//	enabledCheckbox->setValue(LLSD(mEnabled));
+//
+//	// top row list creation and deletion
+//	getChild<LLUICtrl>("autoreplace_import_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onImportList,this));
+//	getChild<LLUICtrl>("autoreplace_export_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onExportList,this));
+//	getChild<LLUICtrl>("autoreplace_new_list")->setCommitCallback(   boost::bind(&LLFloaterAutoReplaceSettings::onNewList,this));
+//	getChild<LLUICtrl>("autoreplace_delete_list")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onDeleteList,this));
+//
+//	// the list of keyword->replacement lists
+//	mListNames = getChild<LLScrollListCtrl>("autoreplace_list_name");
+//	mListNames->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSelectList, this));
+//	mListNames->setCommitOnSelectionChange(true);
+//	
+//	// list ordering
+//	getChild<LLUICtrl>("autoreplace_list_up")->setCommitCallback(  boost::bind(&LLFloaterAutoReplaceSettings::onListUp,this));
+//	getChild<LLUICtrl>("autoreplace_list_down")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onListDown,this));
+//
+//	// keyword->replacement entry add / delete
+//	getChild<LLUICtrl>("autoreplace_add_entry")->setCommitCallback(   boost::bind(&LLFloaterAutoReplaceSettings::onAddEntry,this));
+//	getChild<LLUICtrl>("autoreplace_delete_entry")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onDeleteEntry,this));
+//
+//	// entry edits
+//	mKeyword     = getChild<LLLineEditor>("autoreplace_keyword");
+//	mReplacement = getChild<LLLineEditor>("autoreplace_replacement");
+//	getChild<LLUICtrl>("autoreplace_save_entry")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSaveEntry, this));
+//
+//	// dialog termination ( Save Changes / Cancel )
+//	getChild<LLUICtrl>("autoreplace_save_changes")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSaveChanges, this));
+//	getChild<LLUICtrl>("autoreplace_cancel")->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onCancel, this));
+//
+//	// the list of keyword->replacement pairs
+//	mReplacementsList = getChild<LLScrollListCtrl>("autoreplace_list_replacements");
+//	mReplacementsList->setCommitCallback(boost::bind(&LLFloaterAutoReplaceSettings::onSelectEntry, this));
+//	mReplacementsList->setCommitOnSelectionChange(true);
+//
+//	center();
+//
+//	mSelectedListName.clear();
+//	updateListNames();
+//	updateListNamesControls();
+//	updateReplacementsList();
+//
+//	return true;
+//}
 
 
-void LLFloaterAutoReplaceSettings::updateListNames()
+//void LLFloaterAutoReplaceSettings::updateListNames()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::updateListNames()
+// [/SL:KB]
 {
 	mListNames->deleteAllItems(); // start from scratch
 
@@ -159,7 +235,10 @@ void LLFloaterAutoReplaceSettings::updateListNames()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::updateListNamesControls()
+//void LLFloaterAutoReplaceSettings::updateListNamesControls()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::updateListNamesControls()
+// [/SL:KB]
 {
 	if ( mSelectedListName.empty() )
 	{
@@ -183,7 +262,10 @@ void LLFloaterAutoReplaceSettings::updateListNamesControls()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::onSelectList()
+//void LLFloaterAutoReplaceSettings::onSelectList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onSelectList()
+// [/SL:KB]
 {
 	std::string previousSelectedListName = mSelectedListName;
 	// only one selection allowed
@@ -207,7 +289,10 @@ void LLFloaterAutoReplaceSettings::onSelectList()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::onSelectEntry()
+//void LLFloaterAutoReplaceSettings::onSelectEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onSelectEntry()
+// [/SL:KB]
 {
     LLSD selectedRow = mReplacementsList->getSelectedValue();
 	if (selectedRow.isDefined())
@@ -228,7 +313,10 @@ void LLFloaterAutoReplaceSettings::onSelectEntry()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::updateReplacementsList()
+//void LLFloaterAutoReplaceSettings::updateReplacementsList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::updateReplacementsList()
+// [/SL:KB]
 {
 	// start from scratch, since this should only be called when the list changes
 	mReplacementsList->deleteAllItems();
@@ -266,7 +354,10 @@ void LLFloaterAutoReplaceSettings::updateReplacementsList()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::enableReplacementEntry()
+//void LLFloaterAutoReplaceSettings::enableReplacementEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::enableReplacementEntry()
+// [/SL:KB]
 {
 	LL_DEBUGS("AutoReplace")<<LL_ENDL;
 	mKeyword->setEnabled(true);
@@ -275,7 +366,10 @@ void LLFloaterAutoReplaceSettings::enableReplacementEntry()
 	getChild<LLButton>("autoreplace_delete_entry")->setEnabled(true);
 }
 
-void LLFloaterAutoReplaceSettings::disableReplacementEntry()
+//void LLFloaterAutoReplaceSettings::disableReplacementEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::disableReplacementEntry()
+// [/SL:KB]
 {
 	LL_DEBUGS("AutoReplace")<<LL_ENDL;
 	mPreviousKeyword.clear();
@@ -288,7 +382,10 @@ void LLFloaterAutoReplaceSettings::disableReplacementEntry()
 }
 
 // called when the global settings checkbox is changed
-void LLFloaterAutoReplaceSettings::onAutoReplaceToggled()
+//void LLFloaterAutoReplaceSettings::onAutoReplaceToggled()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onAutoReplaceToggled()
+// [/SL:KB]
 {
 	// set our local copy of the flag, copied to the global preference in onOk
 	mEnabled = childGetValue("autoreplace_enable").asBoolean();
@@ -296,7 +393,10 @@ void LLFloaterAutoReplaceSettings::onAutoReplaceToggled()
 }
 
 // called when the List Up button is pressed
-void LLFloaterAutoReplaceSettings::onListUp()
+//void LLFloaterAutoReplaceSettings::onListUp()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onListUp()
+// [/SL:KB]
 {
 	S32 selectedRow = mListNames->getFirstSelectedIndex();
 	LLSD selectedName = mListNames->getSelectedValue().asString();
@@ -315,7 +415,10 @@ void LLFloaterAutoReplaceSettings::onListUp()
 }
 
 // called when the List Down button is pressed
-void LLFloaterAutoReplaceSettings::onListDown()
+//void LLFloaterAutoReplaceSettings::onListDown()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onListDown()
+// [/SL:KB]
 {
 	S32 selectedRow = mListNames->getFirstSelectedIndex();
 	std::string selectedName = mListNames->getSelectedValue().asString();
@@ -334,7 +437,10 @@ void LLFloaterAutoReplaceSettings::onListDown()
 }
 
 // called when the Delete Entry button is pressed
-void LLFloaterAutoReplaceSettings::onDeleteEntry()
+//void LLFloaterAutoReplaceSettings::onDeleteEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onDeleteEntry()
+// [/SL:KB]
 {
     LLSD selectedRow = mReplacementsList->getSelectedValue();
 	if (selectedRow.isDefined())
@@ -347,7 +453,10 @@ void LLFloaterAutoReplaceSettings::onDeleteEntry()
 }
 
 // called when the Import List button is pressed
-void LLFloaterAutoReplaceSettings::onImportList()
+//void LLFloaterAutoReplaceSettings::onImportList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onImportList()
+// [/SL:KB]
 {
 	LLFilePicker& picker = LLFilePicker::instance();
 	if( picker.getOpenFile( LLFilePicker::FFLOAD_XML) )
@@ -380,8 +489,12 @@ void LLFloaterAutoReplaceSettings::onImportList()
 				LLSD args;
 				args["DUPNAME"] = newName;
 	
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
 				LLNotificationsUtil::add("RenameAutoReplaceList", args, newPayload,
-										 boost::bind(&LLFloaterAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
+										 boost::bind(&LLPanelPreferenceAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
+// [/SL:KB]
+//				LLNotificationsUtil::add("RenameAutoReplaceList", args, newPayload,
+//										 boost::bind(&LLFloaterAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
 			}
 			break;
 
@@ -407,7 +520,10 @@ void LLFloaterAutoReplaceSettings::onImportList()
 	}		
 }
 
-void LLFloaterAutoReplaceSettings::onNewList()
+//void LLFloaterAutoReplaceSettings::onNewList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onNewList()
+// [/SL:KB]
 {
 	LLSD payload;
 	LLSD emptyList;
@@ -415,11 +531,18 @@ void LLFloaterAutoReplaceSettings::onNewList()
 	payload["list"] = emptyList;
     LLSD args;
 	
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
 	LLNotificationsUtil::add("AddAutoReplaceList", args, payload,
-							 boost::bind(&LLFloaterAutoReplaceSettings::callbackNewListName, this, _1, _2));
+							 boost::bind(&LLPanelPreferenceAutoReplaceSettings::callbackNewListName, this, _1, _2));
+// [/SL:KB]
+//	LLNotificationsUtil::add("AddAutoReplaceList", args, payload,
+//							 boost::bind(&LLFloaterAutoReplaceSettings::callbackNewListName, this, _1, _2));
 }
 
-bool LLFloaterAutoReplaceSettings::callbackNewListName(const LLSD& notification, const LLSD& response)
+//bool LLFloaterAutoReplaceSettings::callbackNewListName(const LLSD& notification, const LLSD& response)
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+bool LLPanelPreferenceAutoReplaceSettings::callbackNewListName(const LLSD& notification, const LLSD& response)
+// [/SL:KB]
 {
 	LL_DEBUGS("AutoReplace")<<"called"<<LL_ENDL;
 	
@@ -448,8 +571,12 @@ bool LLFloaterAutoReplaceSettings::callbackNewListName(const LLSD& notification,
 				LLSD args;
 				args["DUPNAME"] = newName;
 	
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
 				LLNotificationsUtil::add("RenameAutoReplaceList", args, newPayload,
-										 boost::bind(&LLFloaterAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
+										 boost::bind(&LLPanelPreferenceAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
+// [/SL:KB]
+//				LLNotificationsUtil::add("RenameAutoReplaceList", args, newPayload,
+//										 boost::bind(&LLFloaterAutoReplaceSettings::callbackListNameConflict, this, _1, _2));
 			}
 			break;
 
@@ -474,7 +601,10 @@ bool LLFloaterAutoReplaceSettings::callbackNewListName(const LLSD& notification,
 }
 
 // callback for the RenameAutoReplaceList notification
-bool LLFloaterAutoReplaceSettings::callbackListNameConflict(const LLSD& notification, const LLSD& response)
+//bool LLFloaterAutoReplaceSettings::callbackListNameConflict(const LLSD& notification, const LLSD& response)
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+bool LLPanelPreferenceAutoReplaceSettings::callbackListNameConflict(const LLSD& notification, const LLSD& response)
+// [/SL:KB]
 {
 	LLSD newList = notification["payload"]["list"];
 	std::string listName = LLAutoReplaceSettings::getListName(newList);
@@ -511,7 +641,10 @@ bool LLFloaterAutoReplaceSettings::callbackListNameConflict(const LLSD& notifica
 	return false;
 }
 
-void LLFloaterAutoReplaceSettings::onDeleteList()
+//void LLFloaterAutoReplaceSettings::onDeleteList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onDeleteList()
+// [/SL:KB]
 {
 	std::string listName = mListNames->getSelectedValue().asString();
 	if ( ! listName.empty() )
@@ -536,7 +669,10 @@ void LLFloaterAutoReplaceSettings::onDeleteList()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::onExportList()
+//void LLFloaterAutoReplaceSettings::onExportList()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onExportList()
+// [/SL:KB]
 {
 	std::string listName=mListNames->getFirstSelected()->getColumn(0)->getValue().asString();
 	const LLSD* list = mSettings.exportList(listName);
@@ -551,7 +687,10 @@ void LLFloaterAutoReplaceSettings::onExportList()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::onAddEntry()
+//void LLFloaterAutoReplaceSettings::onAddEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onAddEntry()
+// [/SL:KB]
 {
 	mPreviousKeyword.clear();
 	mReplacementsList->deselectAllItems(false /* don't call commit */);
@@ -561,7 +700,10 @@ void LLFloaterAutoReplaceSettings::onAddEntry()
 	mKeyword->setFocus(true);
 }
 
-void LLFloaterAutoReplaceSettings::onSaveEntry()
+//void LLFloaterAutoReplaceSettings::onSaveEntry()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::onSaveEntry()
+// [/SL:KB]
 {
 	LL_DEBUGS("AutoReplace")<<"called"<<LL_ENDL;
 	
@@ -598,28 +740,54 @@ void LLFloaterAutoReplaceSettings::onSaveEntry()
 	}
 }
 
-void LLFloaterAutoReplaceSettings::onCancel()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::cancel()
 {
-	cleanUp();
-	closeFloater(false /* not quitting */);
-}
+	LLPanelPreference::cancel();
 
-void LLFloaterAutoReplaceSettings::onSaveChanges()
+	cleanUp();
+}
+// [/SL:KB]
+//void LLFloaterAutoReplaceSettings::onCancel()
+//{
+//	cleanUp();
+//	closeFloater(false /* not quitting */);
+//}
+
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::apply()
 {
+	LLPanelPreference::apply();
+
 	// put our local copy of the settings into the active copy
 	LLAutoReplace::getInstance()->setSettings( mSettings );
 	// save our local copy of the global feature enable/disable value
 	gSavedSettings.setBOOL("AutoReplace", mEnabled);
 	cleanUp();
-	closeFloater(false /* not quitting */);
 }
+// [/SL:KB]
+//void LLFloaterAutoReplaceSettings::onSaveChanges()
+//{
+//	// put our local copy of the settings into the active copy
+//	LLAutoReplace::getInstance()->setSettings( mSettings );
+//	// save our local copy of the global feature enable/disable value
+//	gSavedSettings.setBOOL("AutoReplace", mEnabled);
+//	cleanUp();
+//	closeFloater(false /* not quitting */);
+//}
 
-void LLFloaterAutoReplaceSettings::cleanUp()
+//void LLFloaterAutoReplaceSettings::cleanUp()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+void LLPanelPreferenceAutoReplaceSettings::cleanUp()
+// [/SL:KB]
 {
 
 }
 
-bool LLFloaterAutoReplaceSettings::selectedListIsFirst()
+//bool LLFloaterAutoReplaceSettings::selectedListIsFirst()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+bool LLPanelPreferenceAutoReplaceSettings::selectedListIsFirst()
+// [/SL:KB]
 {
 	bool isFirst = false;
 	
@@ -635,7 +803,10 @@ bool LLFloaterAutoReplaceSettings::selectedListIsFirst()
 	return isFirst;
 }
 
-bool LLFloaterAutoReplaceSettings::selectedListIsLast()
+//bool LLFloaterAutoReplaceSettings::selectedListIsLast()
+// [SL:KB] - Patch: Preferences-AutoReplace | Checked: 2014-03-04 (Catznip-3.6)
+bool LLPanelPreferenceAutoReplaceSettings::selectedListIsLast()
+// [/SL:KB]
 {
 	bool isLast = false;
 	
