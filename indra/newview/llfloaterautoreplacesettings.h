@@ -77,7 +77,13 @@ private:
 	void onSelectList();
 
 	void onImportList();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	void onImportListCallback(const std::string& filepath);
+// [/SL:KB]
 	void onExportList();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	void onExportListCallback(const std::string& listName, const std::string& filepath);
+// [/SL:KB]
 	void onNewList();
 	void onDeleteList();
 

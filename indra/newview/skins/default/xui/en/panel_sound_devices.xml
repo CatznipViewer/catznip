@@ -96,7 +96,7 @@
      layout="topleft"
      left_delta="-300"
      name="My volume label"
-     top_pad="14"
+     top_pad="8"
      width="200">
         Mic volume:
     </text>

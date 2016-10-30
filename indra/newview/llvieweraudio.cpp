@@ -350,9 +350,12 @@ void init_audio()
 
 // load up our initial set of sounds we'll want so they're in memory and ready to be played
 
-	BOOL mute_audio = gSavedSettings.getBOOL("MuteAudio");
+//	BOOL mute_audio = gSavedSettings.getBOOL("MuteAudio");
 
-	if (!mute_audio && FALSE == gSavedSettings.getBOOL("NoPreload"))
+//	if (!mute_audio && FALSE == gSavedSettings.getBOOL("NoPreload"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (!LLAudioEngine::s_fMuteAudio && FALSE == gSavedSettings.getBOOL("NoPreload"))
+// [/SL:KB]
 	{
 		gAudiop->preloadSound(LLUUID(gSavedSettings.getString("UISndAlert")));
 		gAudiop->preloadSound(LLUUID(gSavedSettings.getString("UISndBadKeystroke")));
@@ -392,8 +395,9 @@ void init_audio()
 
 void audio_update_volume(bool force_update)
 {
-	F32 master_volume = gSavedSettings.getF32("AudioLevelMaster");
-	BOOL mute_audio = gSavedSettings.getBOOL("MuteAudio");
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	F32 master_volume = LLAudioEngine::s_nLevelMaster;
+	BOOL mute_audio = LLAudioEngine::s_fMuteAudio;
 
 	LLProgressView* progress = gViewerWindow->getProgressView();
 	BOOL progress_view_visible = FALSE;
@@ -415,12 +419,12 @@ void audio_update_volume(bool force_update)
 
 		gAudiop->setMasterGain ( master_volume );
 
-		gAudiop->setDopplerFactor(gSavedSettings.getF32("AudioLevelDoppler"));
+		gAudiop->setDopplerFactor(LLAudioEngine::s_nLevelDoppler);
 
 		if(!LLViewerCamera::getInstance()->cameraUnderWater())
-		gAudiop->setRolloffFactor(gSavedSettings.getF32("AudioLevelRolloff"));
+			gAudiop->setRolloffFactor(LLAudioEngine::s_nLevelRolloff);
 		else
-			gAudiop->setRolloffFactor(gSavedSettings.getF32("AudioLevelUnderwaterRolloff"));
+			gAudiop->setRolloffFactor(LLAudioEngine::s_nLevelUnderwaterRolloff);
 
 		gAudiop->setMuted(mute_audio || progress_view_visible);
 		
@@ -437,11 +441,11 @@ void audio_update_volume(bool force_update)
 
 		// handle secondary gains
 		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_SFX,
-								  gSavedSettings.getBOOL("MuteSounds") ? 0.f : gSavedSettings.getF32("AudioLevelSFX"));
+								  LLAudioEngine::s_fMuteSounds ? 0.f : LLAudioEngine::s_nLevelSounds);
 		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_UI,
-								  gSavedSettings.getBOOL("MuteUI") ? 0.f : gSavedSettings.getF32("AudioLevelUI"));
+								  LLAudioEngine::s_fMuteUI ? 0.f : LLAudioEngine::s_nLevelUI);
 		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_AMBIENT,
-								  gSavedSettings.getBOOL("MuteAmbient") ? 0.f : gSavedSettings.getF32("AudioLevelAmbient"));
+								  LLAudioEngine::s_fMuteAmbient ? 0.f : LLAudioEngine::s_nLevelAmbient);
 
 		// Streaming Music
 
@@ -451,8 +455,8 @@ void audio_update_volume(bool force_update)
 			LLViewerAudio::getInstance()->setForcedTeleportFade(false);
 		}
 
-		F32 music_volume = gSavedSettings.getF32("AudioLevelMusic");
-		BOOL music_muted = gSavedSettings.getBOOL("MuteMusic");
+		F32 music_volume = LLAudioEngine::s_nLevelMusic;
+		BOOL music_muted = LLAudioEngine::s_fMuteMusic;
 		F32 fade_volume = LLViewerAudio::getInstance()->getFadeVolume();
 
 		music_volume = mute_volume * master_volume * music_volume * fade_volume;
@@ -460,19 +464,19 @@ void audio_update_volume(bool force_update)
 	}
 
 	// Streaming Media
-	F32 media_volume = gSavedSettings.getF32("AudioLevelMedia");
-	BOOL media_muted = gSavedSettings.getBOOL("MuteMedia");
+	F32 media_volume = LLAudioEngine::s_nLevelMedia;
+	BOOL media_muted = LLAudioEngine::s_fMuteMedia;
 	media_volume = mute_volume * master_volume * media_volume;
 	LLViewerMedia::setVolume( media_muted ? 0.0f : media_volume );
 
 	// Voice
 	if (LLVoiceClient::getInstance())
 	{
-		F32 voice_volume = gSavedSettings.getF32("AudioLevelVoice");
+		F32 voice_volume = LLAudioEngine::s_nLevelVoice;
 		voice_volume = mute_volume * master_volume * voice_volume;
-		BOOL voice_mute = gSavedSettings.getBOOL("MuteVoice");
+		BOOL voice_mute = LLAudioEngine::s_fMuteVoice;
 		LLVoiceClient::getInstance()->setVoiceVolume(voice_mute ? 0.f : voice_volume);
-		LLVoiceClient::getInstance()->setMicGain(voice_mute ? 0.f : gSavedSettings.getF32("AudioLevelMic"));
+		LLVoiceClient::getInstance()->setMicGain(voice_mute ? 0.f : LLAudioEngine::s_nLevelMic);
 
 		if (!gViewerWindow->getActive() && (gSavedSettings.getBOOL("MuteWhenMinimized")))
 		{
@@ -483,6 +487,99 @@ void audio_update_volume(bool force_update)
 			LLVoiceClient::getInstance()->setMuteMic(false);
 		}
 	}
+// [/SL:KB]
+//	F32 master_volume = gSavedSettings.getF32("AudioLevelMaster");
+//	BOOL mute_audio = gSavedSettings.getBOOL("MuteAudio");
+//
+//	LLProgressView* progress = gViewerWindow->getProgressView();
+//	BOOL progress_view_visible = FALSE;
+//
+//	if (progress)
+//	{
+//		progress_view_visible = progress->getVisible();
+//	}
+//
+//	if (!gViewerWindow->getActive() && gSavedSettings.getBOOL("MuteWhenMinimized"))
+//	{
+//		mute_audio = TRUE;
+//	}
+//	F32 mute_volume = mute_audio ? 0.0f : 1.0f;
+//
+//	// Sound Effects
+//	if (gAudiop) 
+//	{
+//		gAudiop->setMasterGain ( master_volume );
+//
+//		gAudiop->setDopplerFactor(gSavedSettings.getF32("AudioLevelDoppler"));
+//
+//		if(!LLViewerCamera::getInstance()->cameraUnderWater())
+//		gAudiop->setRolloffFactor(gSavedSettings.getF32("AudioLevelRolloff"));
+//		else
+//			gAudiop->setRolloffFactor(gSavedSettings.getF32("AudioLevelUnderwaterRolloff"));
+//
+//		gAudiop->setMuted(mute_audio || progress_view_visible);
+//		
+//		//Play any deferred sounds when unmuted
+//		if(!gAudiop->getMuted())
+//		{
+//			LLDeferredSounds::instance().playdeferredSounds();
+//		}
+//
+//		if (force_update)
+//		{
+//			audio_update_wind(true);
+//		}
+//
+//		// handle secondary gains
+//		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_SFX,
+//								  gSavedSettings.getBOOL("MuteSounds") ? 0.f : gSavedSettings.getF32("AudioLevelSFX"));
+//		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_UI,
+//								  gSavedSettings.getBOOL("MuteUI") ? 0.f : gSavedSettings.getF32("AudioLevelUI"));
+//		gAudiop->setSecondaryGain(LLAudioEngine::AUDIO_TYPE_AMBIENT,
+//								  gSavedSettings.getBOOL("MuteAmbient") ? 0.f : gSavedSettings.getF32("AudioLevelAmbient"));
+//	}
+//
+//	// Streaming Music
+//	if (gAudiop) 
+//	{
+//		if (!progress_view_visible && LLViewerAudio::getInstance()->getForcedTeleportFade())
+//		{
+//			LLViewerAudio::getInstance()->setWasPlaying(!gAudiop->getInternetStreamURL().empty());
+//			LLViewerAudio::getInstance()->setForcedTeleportFade(false);
+//		}
+//
+//		F32 music_volume = gSavedSettings.getF32("AudioLevelMusic");
+//		BOOL music_muted = gSavedSettings.getBOOL("MuteMusic");
+//		F32 fade_volume = LLViewerAudio::getInstance()->getFadeVolume();
+//
+//		music_volume = mute_volume * master_volume * music_volume * fade_volume;
+//		gAudiop->setInternetStreamGain (music_muted ? 0.f : music_volume);
+//	}
+//
+//	// Streaming Media
+//	F32 media_volume = gSavedSettings.getF32("AudioLevelMedia");
+//	BOOL media_muted = gSavedSettings.getBOOL("MuteMedia");
+//	media_volume = mute_volume * master_volume * media_volume;
+//	LLViewerMedia::setVolume( media_muted ? 0.0f : media_volume );
+//
+//	// Voice
+//	if (LLVoiceClient::getInstance())
+//	{
+//		F32 voice_volume = gSavedSettings.getF32("AudioLevelVoice");
+//		voice_volume = mute_volume * master_volume * voice_volume;
+//		BOOL voice_mute = gSavedSettings.getBOOL("MuteVoice");
+//		LLVoiceClient::getInstance()->setVoiceVolume(voice_mute ? 0.f : voice_volume);
+//		LLVoiceClient::getInstance()->setMicGain(voice_mute ? 0.f : gSavedSettings.getF32("AudioLevelMic"));
+//
+//		if (!gViewerWindow->getActive() && (gSavedSettings.getBOOL("MuteWhenMinimized")))
+//		{
+//			LLVoiceClient::getInstance()->setMuteMic(true);
+//		}
+//		else
+//		{
+//			LLVoiceClient::getInstance()->setMuteMic(false);
+//		}
+//	}
 }
 
 void audio_update_listener()
@@ -502,6 +599,31 @@ void audio_update_listener()
 							 LLViewerCamera::getInstance()->getAtAxis());
 	}
 }
+
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+void audio_update_settings()
+{
+	LLAudioEngine::s_fMuteAudio = gSavedSettings.getBOOL("MuteAudio");
+	LLAudioEngine::s_nLevelMaster = gSavedSettings.getF32("AudioLevelMaster");
+	LLAudioEngine::s_fMuteAmbient = gSavedSettings.getBOOL("MuteAmbient");
+	LLAudioEngine::s_nLevelAmbient = gSavedSettings.getF32("AudioLevelAmbient");
+	LLAudioEngine::s_fMuteMedia = gSavedSettings.getBOOL("MuteMedia");
+	LLAudioEngine::s_nLevelMedia = gSavedSettings.getF32("AudioLevelMedia");
+	LLAudioEngine::s_fMuteMusic = gSavedSettings.getBOOL("MuteMusic");
+	LLAudioEngine::s_nLevelMusic = gSavedSettings.getF32("AudioLevelMusic");
+	LLAudioEngine::s_fMuteSounds = gSavedSettings.getBOOL("MuteSounds");
+	LLAudioEngine::s_nLevelSounds = gSavedSettings.getF32("AudioLevelSFX");
+	LLAudioEngine::s_fMuteUI = gSavedSettings.getBOOL("MuteUI");
+	LLAudioEngine::s_nLevelUI = gSavedSettings.getF32("AudioLevelUI");
+	LLAudioEngine::s_fMuteVoice = gSavedSettings.getBOOL("MuteVoice");
+	LLAudioEngine::s_nLevelVoice = gSavedSettings.getF32("AudioLevelVoice");
+	LLAudioEngine::s_nLevelMic = gSavedSettings.getF32("AudioLevelMic");
+
+	LLAudioEngine::s_nLevelDoppler = gSavedSettings.getF32("AudioLevelDoppler");
+	LLAudioEngine::s_nLevelRolloff = gSavedSettings.getF32("AudioLevelRolloff");
+	LLAudioEngine::s_nLevelUnderwaterRolloff = gSavedSettings.getF32("AudioLevelUnderwaterRolloff");
+}
+// [/SL:KB]
 
 void audio_update_wind(bool force_update)
 {
@@ -528,8 +650,12 @@ void audio_update_wind(bool force_update)
 		// don't use the setter setMaxWindGain() because we don't
 		// want to screw up the fade-in on startup by setting actual source gain
 		// outside the fade-in.
-		F32 master_volume  = gSavedSettings.getBOOL("MuteAudio") ? 0.f : gSavedSettings.getF32("AudioLevelMaster");
-		F32 ambient_volume = gSavedSettings.getBOOL("MuteAmbient") ? 0.f : gSavedSettings.getF32("AudioLevelAmbient");
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+		F32 master_volume  = LLAudioEngine::s_fMuteAudio ? 0.f : LLAudioEngine::s_nLevelMaster;
+		F32 ambient_volume = LLAudioEngine::s_fMuteAmbient ? 0.f : LLAudioEngine::s_nLevelAmbient;
+// [/SL:KB]
+//		F32 master_volume  = gSavedSettings.getBOOL("MuteAudio") ? 0.f : gSavedSettings.getF32("AudioLevelMaster");
+//		F32 ambient_volume = gSavedSettings.getBOOL("MuteAmbient") ? 0.f : gSavedSettings.getF32("AudioLevelAmbient");
 		F32 max_wind_volume = master_volume * ambient_volume;
 
 		const F32 WIND_SOUND_TRANSITION_TIME = 2.f;

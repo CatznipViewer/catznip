@@ -8,12 +8,12 @@
 	<check_box label="İnşa Et/Düzenle" name="edit_camera_movement" tool_tip="Düzenleme moduna girerken ve düzenleme modundan çıkarken otomatik kamera konumunu kullanın"/>
 	<check_box label="Görünüm" name="appearance_camera_movement" tool_tip="Düzenleme modundayken otomatik kamera konumunu kullan"/>
 	<text name="keyboard_lbl">
-		Klavye:
+		Klavye
 	</text>
 	<check_box label="Ok tuşları beni her zaman hareket ettirir" name="arrow_keys_move_avatar_check"/>
 	<check_box label="Koşmak için iki kez dokun ve tut" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		Fare:
+		Fare
 	</text>
 	<check_box label="Fare üzerinden görünümde beni göster" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">

@@ -381,6 +381,15 @@ public:
 	static F32 sLODFactor;				// LOD scale factor
 	static F32 sDistanceFactor;			// LOD distance factor
 
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	static void updateCachedSettings();
+
+	static F32 sOctreeObjectSizeFactor;
+	static S32 sOctreeAttachmentSizeFactor;
+	static LLVector3 sOctreeDistanceFactor;
+	static LLVector3 sOctreeAlphaDistanceFactor;
+// [/SL:KB]
+
 	static LLPointer<LLObjectMediaDataClient> sObjectMediaClient;
 	static LLPointer<LLObjectMediaNavigateClient> sObjectMediaNavigateClient;
 

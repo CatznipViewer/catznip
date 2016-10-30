@@ -189,6 +189,23 @@ LLConversationLog::LLConversationLog() :
 	mAvatarNameCacheConnection(),
 	mLoggingEnabled(false)
 {
+//	if(gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
+//	{
+//		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("KeepConversationLogTranscripts").get();
+//		S32 log_mode = keep_log_ctrlp->getValue();
+//		keep_log_ctrlp->getSignal()->connect(boost::bind(&LLConversationLog::enableLogging, this, _2));
+//		if (log_mode > 0)
+//		{
+//			loadFromFile(getFileName());
+//
+//			enableLogging(log_mode);
+//		}
+//	}
+}
+
+// [SL:KB] - Patch: Settings-Misc | Checked: 2014-02-27 (Catznip-3.6)
+void LLConversationLog::initClass()
+{
 	if(gSavedPerAccountSettings.controlExists("KeepConversationLogTranscripts"))
 	{
 		LLControlVariable * keep_log_ctrlp = gSavedPerAccountSettings.getControl("KeepConversationLogTranscripts").get();
@@ -202,6 +219,7 @@ LLConversationLog::LLConversationLog() :
 		}
 	}
 }
+// [/SL:KB]
 
 void LLConversationLog::enableLogging(S32 log_mode)
 {
