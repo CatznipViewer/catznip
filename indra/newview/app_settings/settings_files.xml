@@ -13,9 +13,18 @@
     <file name="CrashSettings"
           file_name="settings_crash_behavior.xml"
           required="true"/>
+    <file name="StartupSettings"
+          file_name="settings_startup.xml"
+          required="true"/>
     <file name="Warnings"
           file_name="ignorable_dialogs.xml"
           required="true"/>
+  </group>
+  <group name="Startup"
+         path_index="1">
+    <file name="StartupSettings"
+          file_name="settings_startup.xml"
+          file_name_setting="StartupSettingsFile"/>
   </group>
   <group name="User"
          path_index="1">

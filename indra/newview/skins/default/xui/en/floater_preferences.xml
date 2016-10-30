@@ -120,6 +120,12 @@
          layout="topleft"
          help_topic="preferences_advanced1_tab"
          name="advanced1" />
+        <panel
+         class="panel_preference_troubleshooting"
+         filename="panel_preferences_troubleshooting.xml"
+         label="Troubleshooting"
+         layout="topleft"
+         name="troubleshoot" />
     </tab_container>
 
 </floater>
