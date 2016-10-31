@@ -184,7 +184,10 @@ bool friendship_offer_callback(const LLSD& notification, const LLSD& response)
     if (notification_ptr)
     {
 	    // add friend to recent people list
-	    LLRecentPeople::instance().add(payload["from_id"]);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	    LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//	    LLRecentPeople::instance().add(payload["from_id"]);
 
 	    switch(option)
 	    {
@@ -1571,7 +1574,12 @@ void LLOfferInfo::send_auto_receive_response(void)
 		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
 			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, mFromID)) || (!RlvUtil::isNearbyAgent(mFromID)) || (RlvUIEnabler::hasOpenIM(mFromID)) || (RlvUIEnabler::hasOpenProfile(mFromID));
 		if (fRlvCanShowName)
-			LLRecentPeople::instance().add(mFromID);
+		{
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			LLRecentPeople::instance().add(mFromID, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//			LLRecentPeople::instance().add(mFromID);
+		}
 // [/RLVa:KB]
 	}
 }
@@ -3201,7 +3209,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			}	
 
 //			chat.mURL = LLSLURL("objectim", session_id, "").getSLURLString();
-// [SL:KB] - Checked: 2010-11-02 (RLVa-1.2.2a) | Added: RLVa-1.2.2a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-02 (Catznip-2.4)
 			chat.mURL = LLSLURL("objectim", session_id, LLURI::mapToQueryString(query_string)).getSLURLString();
 // [/SL:KB]
 			chat.mText = message;
@@ -4012,6 +4020,14 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		}
 	}
 
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2011-07-25 (Catznip-2.6)
+	if ( (!chatter) && (chat.mPosAgent.isExactlyZero()) )
+	{
+		// If we don't know about the object then grab its position from the message
+		msg->getVector3("ChatData", "Position", chat.mPosAgent);
+	}
+// [/SL:KB]
+
 	if (is_audible)
 	{
 		//BOOL visible_in_chat_bubble = FALSE;
@@ -4343,8 +4359,8 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 // then this info is news to us.
 void process_teleport_start(LLMessageSystem *msg, void**)
 {
-	// on teleport, don't tell them about destination guide anymore
-	LLFirstUse::notUsingDestinationGuide(false);
+//	// on teleport, don't tell them about destination guide anymore
+//	LLFirstUse::notUsingDestinationGuide(false);
 	U32 teleport_flags = 0x0;
 	msg->getU32("Info", "TeleportFlags", teleport_flags);
 
@@ -5368,8 +5384,12 @@ void process_sound_trigger(LLMessageSystem *msg, void **)
 		return;
 	}
 		
-	// Don't play sounds from gestures if they are not enabled.
-	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+//	// Don't play sounds from gestures if they are not enabled.
+//	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [SL:KB] - Patch: Settings-Misc | Checked: 2012-08-30 (Catznip-3.3)
+	// Don't play sounds from gestures if they are not enabled (unless the user is playing them).
+	if (object_id == owner_id && gAgentID != owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [/SL:KB]
 	{
 		return;
 	}
@@ -7782,7 +7802,12 @@ void send_lures(const LLSD& notification, const LLSD& response)
 			// Add the recepient to the recent people list.
 // [RLVa:KB] - Checked: RLVa-2.0.1
 			if (fRlvCanShowName)
-				LLRecentPeople::instance().add(target_id);
+			{
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+				LLRecentPeople::instance().add(target_id, LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//				LLRecentPeople::instance().add(target_id);
+			}
 // [/RLVa:KB]
 //			LLRecentPeople::instance().add(target_id);
 		}

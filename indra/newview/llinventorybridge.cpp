@@ -6950,6 +6950,21 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 		{
 			if (!isAgentAvatarValid()) return;
 
+//			if( get_is_item_worn( mUUID ) )
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Detach From Yourself"));
+//			}
+//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
+//			{
+//				items.push_back(std::string("Wearable And Object Separator"));
+//				items.push_back(std::string("Wearable And Object Wear"));
+//				items.push_back(std::string("Wearable Add"));
+//				items.push_back(std::string("Attach To"));
+//				items.push_back(std::string("Attach To HUD"));
+//				// commented out for DEV-32347
+//				//items.push_back(std::string("Restore to Last Position"));
+
 // [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2010-09-31 (Catznip-2.2)
 			items.push_back(std::string("Wearable And Object Separator"));
 
@@ -7008,20 +7023,6 @@ void LLObjectBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 					}
 				}
 // [/SL:KB]
-//			if( get_is_item_worn( mUUID ) )
-//			{
-//				items.push_back(std::string("Wearable And Object Separator"));
-//				items.push_back(std::string("Detach From Yourself"));
-//			}
-//			else if (!isItemInTrash() && !isLinkedObjectInTrash() && !isLinkedObjectMissing() && !isCOFFolder())
-//			{
-//				items.push_back(std::string("Wearable And Object Separator"));
-//				items.push_back(std::string("Wearable And Object Wear"));
-//				items.push_back(std::string("Wearable Add"));
-//				items.push_back(std::string("Attach To"));
-//				items.push_back(std::string("Attach To HUD"));
-//				// commented out for DEV-32347
-//				//items.push_back(std::string("Restore to Last Position"));
 
 //				if (!gAgentAvatarp->canAttachMoreObjects())
 // [SL:KB] - Patch: Inventory-ContextMenu | Checked: 2011-04-17 (Catznip-2.6)
@@ -7463,6 +7464,14 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 				items.push_back(std::string("Wearable And Object Take Off"));
 			else
 				items.push_back(std::string("Take Off"));
+
+			// Disable "Take Off / Detach" if at least one of the worn items is a bodypart
+			if ( (fIsWorn) && (item) && (LLAssetType::AT_BODYPART == item->getType()) )
+			{
+				disabled_items.push_back(std::string("Take Off"));
+				disabled_items.push_back(std::string("Wearable And Object Take Off"));
+			}
+
 // [RLVa:KB] - Checked: 2010-04-04 (RLVa-1.2.0c) | Added: RLVa-1.2.0c
 			if ( (rlv_handler_t::isEnabled()) && (!gRlvWearableLocks.canRemove(item)) )
 			{
@@ -7471,12 +7480,15 @@ void LLWearableBridge::buildContextMenu(LLMenuGL& menu, U32 flags)
 			}
 // [/RLVa:KB]
 
-			// Disable "Take Off / Detach" if at least one of the worn items is a bodypart
-			if ( (fIsWorn) && (item) && (LLAssetType::AT_BODYPART == item->getType()) )
+// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-08-15 (Catznip-3.3)
+			items.push_back(std::string("Wearable Edit"));
+
+			bool modifiable = !gAgentWearables.isWearableModifiable(item->getUUID());
+			if (((flags & FIRST_SELECTED_ITEM) == 0) || modifiable)
 			{
-				disabled_items.push_back(std::string("Take Off"));
-				disabled_items.push_back(std::string("Wearable And Object Take Off"));
+				disabled_items.push_back(std::string("Wearable Edit"));
 			}
+// [/SL:KB]
 		}
 // [/SL:KB]
 

@@ -62,6 +62,9 @@ public:
 	void showWearableEditPanel(LLViewerWearable *wearable = NULL, BOOL disable_camera_switch = FALSE);
 	void setWearablesLoading(bool val);
 	void showDefaultSubpart();
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+	void showWearableParam(const std::string& strParamName);
+// [/SL:KB]
 // [SL:KB] Patch: Appearance-Wearing | Checked: Catznip-4.1
 	void updateComplexityTitle();
 // [/SL:KB]

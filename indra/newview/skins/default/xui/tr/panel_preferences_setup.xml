@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Ayarlar" name="Input panel">
 	<text name="Network:">
-		Ağ:
+		Ağ
 	</text>
 	<text name="Maximum bandwidth">
 		Maksimum bant genişliği
@@ -12,7 +12,7 @@
 	<check_box label="Özel port" name="connection_port_enabled"/>
 	<spinner label="Port numarası:" name="connection_port"/>
 	<text name="Web:">
-		Web:
+		Web
 	</text>
 	<radio_group name="preferred_browser_behavior">
 		<radio_item label="Tüm bağlantılar için kendi tarayıcımı kullan (Chrome, Firefox, IE)" name="internal" tool_tip="Yardım, web bağlantıları vb. için sistemin varsayılan web tarayıcısını kullanın. Tam ekran çalıştırılıyorsa tavsiye edilmez." value="0"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Çerezleri kabul et" name="cookies_enabled"/>
 	<check_box initial_value="true" label="Javascript&apos;i etkinleştir" name="browser_javascript_enabled"/>
 	<text name="Software updates:">
-		Yazılım güncelleştirmeleri:
+		Yazılım güncelleştirmeleri
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Otomatik olarak kurulsun" name="Install_automatically"/>

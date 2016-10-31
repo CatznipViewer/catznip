@@ -950,14 +950,17 @@ void LLPanelNearByMedia::onAdvancedButtonClick()
 	LLFloaterPreference* prefsfloater = dynamic_cast<LLFloaterPreference*>(LLFloaterReg::showInstance("preferences"));
 	if (prefsfloater)
 	{
-		// grab the 'audio' panel from the preferences floater and
-		// bring it the front!
-		LLTabContainer* tabcontainer = prefsfloater->getChild<LLTabContainer>("pref core");
-		LLPanel* audiopanel = prefsfloater->getChild<LLPanel>("audio");
-		if (tabcontainer && audiopanel)
-		{
-			tabcontainer->selectTabPanel(audiopanel);
-		}
+// [SL:KB] - Patch: Settings-Preferences | Checked: 2014-04-09 (Catznip-3.6)
+		prefsfloater->showPanel("audio");
+// [/SL:KB]
+//		// grab the 'audio' panel from the preferences floater and
+//		// bring it the front!
+//		LLTabContainer* tabcontainer = prefsfloater->getChild<LLTabContainer>("pref core");
+//		LLPanel* audiopanel = prefsfloater->getChild<LLPanel>("audio");
+//		if (tabcontainer && audiopanel)
+//		{
+//			tabcontainer->selectTabPanel(audiopanel);
+//		}
 	}
 }
 
@@ -992,8 +995,12 @@ void LLPanelNearByMedia::updateControls()
 			showTimeBasedControls(LLViewerMedia::isParcelAudioPlaying(),
 							  false, // include_zoom
 							  false, // is_zoomed
-							  gSavedSettings.getBOOL("MuteMusic"), 
-							  gSavedSettings.getF32("AudioLevelMusic") );
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+							  LLAudioEngine::s_fMuteMusic,
+							  LLAudioEngine::s_nLevelMusic);
+// [/SL:KB]
+//							  gSavedSettings.getBOOL("MuteMusic"), 
+//							  gSavedSettings.getF32("AudioLevelMusic") );
 		}
 	}
 	else if (selected_media_id == PARCEL_MEDIA_LIST_ITEM_UUID)

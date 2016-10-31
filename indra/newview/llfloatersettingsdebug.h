@@ -42,10 +42,16 @@ public:
 
 	void updateControl(LLControlVariable* control);
 
-	void onSettingSelect(LLUICtrl* ctrl);
+//	void onSettingSelect(LLUICtrl* ctrl);
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+	void onSettingSelect();
+// [/SL:KB]
 	void onCommitSettings();
 	void onClickDefault();
 
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+	/*virtual*/ void onOpen(const LLSD& sdKey);
+// [/SL:KB]
 private:
 	// key - selects which settings to show, one of:
 	// "all", "base", "account", "skin"
@@ -54,6 +60,10 @@ private:
 	
 protected:
 	class LLTextEditor* mComment;
+
+// [SL:KB] - Patch: Settings-Floater | Checked: 2012-08-07 (Catznip-3.3)
+	static std::string g_strLastUsedSetting;
+// [/SL:KB]
 };
 
 #endif //LLFLOATERDEBUGSETTINGS_H

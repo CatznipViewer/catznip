@@ -110,3 +110,10 @@ F32 LLScrollingPanelParamBase::percentToWeight( F32 percent )
 	LLViewerVisualParam* param = mParam;
 	return percent / 100.f * (param->getMaxWeight() - param->getMinWeight()) + param->getMinWeight();
 }
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+const std::string& LLScrollingPanelParamBase::getParamDisplayName() const
+{
+	return mParam->getDisplayName();
+}
+// [/SL:KB]

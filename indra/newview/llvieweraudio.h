@@ -39,6 +39,9 @@
 void init_audio();
 void audio_update_volume(bool force_update = true);
 void audio_update_listener();
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+void audio_update_settings();
+// [/SL:KB]
 void audio_update_wind(bool force_update = true);
 
 class LLViewerAudio : public LLSingleton<LLViewerAudio>

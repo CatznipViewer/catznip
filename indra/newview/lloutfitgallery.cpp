@@ -1059,10 +1059,18 @@ void LLOutfitGallery::uploadPhoto(LLUUID outfit_id)
         return;
     }
 
-    LLFilePicker& picker = LLFilePicker::instance();
-    if (picker.getOpenFile(LLFilePicker::FFLOAD_IMAGE))
+//    LLFilePicker& picker = LLFilePicker::instance();
+//    if (picker.getOpenFile(LLFilePicker::FFLOAD_IMAGE))
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_IMAGE, boost::bind(&LLOutfitGallery::uploadPhotoCallback, this, outfit_id, _1));
+}
+
+void LLOutfitGallery::uploadPhotoCallback(const LLUUID& outfit_id, const std::string& filename)
+{
+	if (!filename.empty())
+// [/SL:KB]
     {
-        std::string filename = picker.getFirstFile();
+//        std::string filename = picker.getFirstFile();
         LLLocalBitmap* unit = new LLLocalBitmap(filename);
         if (unit->getValid())
         {
@@ -1097,8 +1105,8 @@ void LLOutfitGallery::uploadPhoto(LLUUID outfit_id)
             }
 
             S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload(); // kinda hack - assumes that unsubclassed LLFloaterNameDesc is only used for uploading chargeable assets, which it is right now (it's only used unsubclassed for the sound upload dialog, and THAT should be a subclass).
-            void *nruserdata = NULL;
-            nruserdata = (void *)&outfit_id;
+//            void *nruserdata = NULL;
+//            nruserdata = (void *)&outfit_id;
 
             LLViewerInventoryCategory *outfit_cat = gInventory.getCategory(outfit_id);
             if (!outfit_cat) return;
@@ -1106,7 +1114,8 @@ void LLOutfitGallery::uploadPhoto(LLUUID outfit_id)
             checkRemovePhoto(outfit_id);
             std::string upload_pending_name = outfit_id.asString();
             std::string upload_pending_desc = "";
-            LLAssetStorage::LLStoreAssetCallback callback = NULL;
+//            LLAssetStorage::LLStoreAssetCallback callback = NULL;
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
             LLUUID photo_id = upload_new_resource(filename, // file
                 upload_pending_name,
                 upload_pending_desc,
@@ -1114,7 +1123,16 @@ void LLOutfitGallery::uploadPhoto(LLUUID outfit_id)
                 LLFloaterPerms::getNextOwnerPerms("Uploads"),
                 LLFloaterPerms::getGroupPerms("Uploads"),
                 LLFloaterPerms::getEveryonePerms("Uploads"),
-                upload_pending_name, callback, expected_upload_cost, nruserdata);
+                upload_pending_name, NULL, expected_upload_cost);
+// [/SL:KB]
+//            LLUUID photo_id = upload_new_resource(filename, // file
+//                upload_pending_name,
+//                upload_pending_desc,
+//                0, LLFolderType::FT_NONE, LLInventoryType::IT_NONE,
+//                LLFloaterPerms::getNextOwnerPerms("Uploads"),
+//                LLFloaterPerms::getGroupPerms("Uploads"),
+//                LLFloaterPerms::getEveryonePerms("Uploads"),
+//                upload_pending_name, callback, expected_upload_cost, nruserdata);
             mOutfitLinkPending = outfit_id;
         }
     }

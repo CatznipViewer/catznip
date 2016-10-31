@@ -166,7 +166,7 @@ void LLFloaterNameDesc::onBtnOK( )
 
     if (can_afford_transaction(expected_upload_cost))
     {
-        void *nruserdata = NULL;
+ //       void *nruserdata = NULL;
         std::string display_name = LLStringUtil::null;
 
         LLResourceUploadInfo::ptr_t uploadInfo(new LLNewFileResourceUploadInfo(
@@ -179,7 +179,10 @@ void LLFloaterNameDesc::onBtnOK( )
             LLFloaterPerms::getEveryonePerms("Uploads"),
             expected_upload_cost));
 
-        upload_new_resource(uploadInfo, callback, nruserdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
+        upload_new_resource(uploadInfo, callback);
+// [/SL:KB]
+//        upload_new_resource(uploadInfo, callback, nruserdata);
     }
     else
     {

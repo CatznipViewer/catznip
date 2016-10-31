@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<panel label="Chat" name="chat_nearby">
+    <!-- TODO: <text name="chat_appearance_text">Nearby Chat &amp; Instant Message Appearance</text> -->
+    <panel name="sp_showusername">
+    <!-- TODO:<text name="chat_usernames_text"></text> -->
+    <!-- TODO: Show usernames [Always/On Mistmatch/Never]
+    <combo_box name="chat_usernames_combo">
+        <item label="Always" />
+        <item label="On Mismatch" />
+        <item label="Never" />
+    </combo_box>-->
+    </panel>
+    
+    <panel name="sp_fontsize">
+    <text name="chat_font_size_text">字型尺寸:</text>
+    <combo_box name="chat_font_size">
+        <item label="小" name="Small" />
+        <item label="中" name="Medium" />
+        <item label="大" name="Large" /> 
+    </combo_box>
+    </panel>
+    <panel name="sp_chatfont">
+        <!-- TODO:  <check_box label="Chat / IM / Notecards Font:" /> -->
+        <text name="font_editor_restarttext">（須重新啟動）</text>
+    </panel>
+    <!-- TODO:  <check_box label="Show seconds in timestamps." name="chat_timestampseconds_check" /> -->
+    <!-- TODO:  <check_box label="Dock nearby chat to the conversations floater" name="chat_docknearbychat_check" /> -->
+
+    <!-- TODO:  <text name="chat_behavior">Nearby Chat Behavior</text> -->
+    <text name="inworld_typing_rg_label" width="90">按下字母鍵:</text>
+    <radio_group name="inworld_typing_preference">
+        <radio_item label="開始本地聊天" name="radio_start_chat" width="160"/>
+        <radio_item label="影響移動（例如 WASD鍵）" name="radio_move" />
+    </radio_group>
+    <!-- TODO:  <check_box label="Dynamically resize the chat bar to fit typed text (single line vs multi line)" name="chat_chatbartype_check" /> -->
+    <!-- TODO:  <check_box label="Entering a blank line closes the nearby chat floater" name="chat_closeonreturn_check" /> -->
+    <check_box label="聊天時播放打字動作" name="play_typing_animation" />
+    <!-- TODO:  -->
+    <check_box name="play_chatting_animation" left="240"  />
+    <check_box label="Balon Sohbeti" name="聊天泡泡"  />
+    
+    <text name="chat_notifications">通知</text>
+    <!-- TODO: Notification Options -->
+
+
+</panel>

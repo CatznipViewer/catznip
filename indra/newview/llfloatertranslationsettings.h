@@ -27,7 +27,10 @@
 #ifndef LL_LLFLOATERTRANSLATIONSETTINGS_H
 #define LL_LLFLOATERTRANSLATIONSETTINGS_H
 
-#include "llfloater.h"
+//#include "llfloater.h"
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+#include "llfloaterpreference.h"
+// [/SL:KB]
 
 class LLButton;
 class LLCheckBoxCtrl;
@@ -35,16 +38,23 @@ class LLComboBox;
 class LLLineEditor;
 class LLRadioGroup;
 
-class LLFloaterTranslationSettings : public LLFloater
+// [SL:KB] - Patch: Preferences-Translation | Checked: 2014-03-03 (Catznip-3.6)
+class LLPanelPreferenceTranslationSettings : public LLPanelPreference
 {
+	LOG_CLASS(LLPanelPreferenceTranslationSettings);
 public:
-	LLFloaterTranslationSettings(const LLSD& key);
+	LLPanelPreferenceTranslationSettings();
 	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& key);
 
 	void setBingVerified(bool ok, bool alert);
 	void setGoogleVerified(bool ok, bool alert);
-	void onClose(bool app_quitting);
+	void refreshServiceVerification();
+
+	// LLPanelPreference overrides
+public:
+	/*virtual*/ void refresh();
+	/*virtual*/ void saveSettings();
+	/*virtual*/ void apply();
 
 private:
 	std::string getSelectedService() const;
@@ -59,7 +69,6 @@ private:
 	void onGoogleKeyEdited();
 	void onBtnBingVerify();
 	void onBtnGoogleVerify();
-	void onBtnOK();
 
     static void setVerificationStatus(int service, bool alert, bool ok);
 
@@ -70,10 +79,48 @@ private:
 	LLRadioGroup* mTranslationServiceRadioGroup;
 	LLButton* mBingVerifyBtn;
 	LLButton* mGoogleVerifyBtn;
-	LLButton* mOKBtn;
 
 	bool mBingKeyVerified;
 	bool mGoogleKeyVerified;
 };
+// [/SL:KB]
+//class LLFloaterTranslationSettings : public LLFloater
+//{
+//public:
+//	LLFloaterTranslationSettings(const LLSD& key);
+//	/*virtual*/ BOOL postBuild();
+//	/*virtual*/ void onOpen(const LLSD& key);
+//
+//	void setBingVerified(bool ok, bool alert);
+//	void setGoogleVerified(bool ok, bool alert);
+//	void onClose(bool app_quitting);
+//
+//private:
+//	std::string getSelectedService() const;
+//	std::string getEnteredBingKey() const;
+//	std::string getEnteredGoogleKey() const;
+//	void showAlert(const std::string& msg_name) const;
+//	void updateControlsEnabledState();
+//	void verifyKey(int service, const std::string& key, bool alert = true);
+//
+//	void onEditorFocused(LLFocusableElement* control);
+//	void onBingKeyEdited();
+//	void onGoogleKeyEdited();
+//	void onBtnBingVerify();
+//	void onBtnGoogleVerify();
+//	void onBtnOK();
+//
+//	LLCheckBoxCtrl* mMachineTranslationCB;
+//	LLComboBox* mLanguageCombo;
+//	LLLineEditor* mBingAPIKeyEditor;
+//	LLLineEditor* mGoogleAPIKeyEditor;
+//	LLRadioGroup* mTranslationServiceRadioGroup;
+//	LLButton* mBingVerifyBtn;
+//	LLButton* mGoogleVerifyBtn;
+//	LLButton* mOKBtn;
+//
+//	bool mBingKeyVerified;
+//	bool mGoogleKeyVerified;
+//};
 
 #endif // LL_LLFLOATERTRANSLATIONSETTINGS_H

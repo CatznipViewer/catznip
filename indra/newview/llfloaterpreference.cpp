@@ -38,6 +38,9 @@
 #include "llfloaterautoreplacesettings.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+#include "llagentwearables.h"
+// [/SL:KB]
 #include "llcheckboxctrl.h"
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2012-05-26 (Catznip-3.3)
 #include "llclipboard.h"
@@ -111,9 +114,15 @@
 #include "lluictrlfactory.h"
 #include "llviewermedia.h"
 #include "llpluginclassmedia.h"
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-2.8)
+#include "llrecentpeople.h"
+// [/SL:KB]
 #include "llteleporthistorystorage.h"
 #include "llproxy.h"
 #include "llweb.h"
+// [SL:KB] - Patch: Notification-Logging | Checked: 2012-02-01 (Catznip-3.2)
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 // [RLVa:KB] - Checked: 2010-03-18 (RLVa-1.2.0a)
 #include "rlvactions.h"
 #include "rlvhandler.h"
@@ -130,6 +139,14 @@
 const F32 BANDWIDTH_UPDATER_TIMEOUT = 0.5f;
 char const* const VISIBILITY_DEFAULT = "default";
 char const* const VISIBILITY_HIDDEN = "hidden";
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+const U32 CLEAR_MASK_COOKIES	= 0x01;
+const U32 CLEAR_MASK_NAVBAR		= 0x02;
+const U32 CLEAR_MASK_SEARCH		= 0x04;
+const U32 CLEAR_MASK_TELEPORT	= 0x08;
+const U32 CLEAR_MASK_PEOPLE		= 0x10;
+// [/SL:KB]
 
 //control value for middle mouse as talk2push button
 const static std::string MIDDLE_MOUSE_CV = "MiddleMouse";
@@ -248,24 +265,64 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if ( option == 0 ) // YES
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+// [/SL:KB]
+
 		// clean web
 		LLViewerMedia::clearAllCaches();
-		LLViewerMedia::clearAllCookies();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_COOKIES)
+		{
+			LLViewerMedia::clearAllCookies();
+		}
+// [/SL:KB]
+//		LLViewerMedia::clearAllCookies();
 		
 		// clean nav bar history
-		LLNavigationBar::getInstance()->clearHistoryCache();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_NAVBAR)
+		{
+			LLNavigationBar::getInstance()->clearHistoryCache();
+		}
+// [/SL:KB]
+//		LLNavigationBar::getInstance()->clearHistoryCache();
 		
 		// flag client texture cache for clearing next time the client runs
 		gSavedSettings.setBOOL("PurgeCacheOnNextStartup", TRUE);
 		LLNotificationsUtil::add("CacheWillClear");
 
-		LLSearchHistory::getInstance()->clearHistory();
-		LLSearchHistory::getInstance()->save();
-		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
-		search_ctrl->clearHistory();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_SEARCH)
+		{
+			LLSearchHistory::getInstance()->clearHistory();
+			LLSearchHistory::getInstance()->save();
+			LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+			search_ctrl->clearHistory();
+		}
+// [/SL:KB]
+//		LLSearchHistory::getInstance()->clearHistory();
+//		LLSearchHistory::getInstance()->save();
+//		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+//		search_ctrl->clearHistory();
 
-		LLTeleportHistoryStorage::getInstance()->purgeItems();
-		LLTeleportHistoryStorage::getInstance()->save();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_TELEPORT)
+		{
+			LLTeleportHistoryStorage::getInstance()->purgeItems();
+			LLTeleportHistoryStorage::getInstance()->save();
+		}
+// [/SL:KB]
+//		LLTeleportHistoryStorage::getInstance()->purgeItems();
+//		LLTeleportHistoryStorage::getInstance()->save();
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0)
+		if (nClearMask & CLEAR_MASK_PEOPLE)
+		{
+			LLRecentPeople::getInstance()->purgeItems();
+			LLRecentPeople::getInstance()->save();
+		}
+// [/SL:KB]
 	}
 	
 	return false;
@@ -291,7 +348,6 @@ void handleAppearanceCameraMovementChanged(const LLSD& newvalue)
 		gAgentCamera.resetView();
 	}
 }
-
 /*bool callback_skip_dialogs(const LLSD& notification, const LLSD& response, LLFloaterPreference* floater)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -363,6 +419,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	
 	mCommitCallbackRegistrar.add("Pref.Cancel",				boost::bind(&LLFloaterPreference::onBtnCancel, this, _2));
 	mCommitCallbackRegistrar.add("Pref.OK",					boost::bind(&LLFloaterPreference::onBtnOK, this, _2));
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.ShowPanel",			boost::bind(&LLFloaterPreference::onShowPanel, this, _2));
+// [/SL:KB]
 	
 	mCommitCallbackRegistrar.add("Pref.ClearCache",				boost::bind(&LLFloaterPreference::onClickClearCache, this));
 	mCommitCallbackRegistrar.add("Pref.WebClearCache",			boost::bind(&LLFloaterPreference::onClickBrowserClearCache, this));
@@ -376,6 +435,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.AvatarImpostorsEnable",	boost::bind(&LLFloaterPreference::onAvatarImpostorsEnable, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",	boost::bind(&LLFloaterPreference::updateMaxComplexity, this));
@@ -384,14 +446,17 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
 	mCommitCallbackRegistrar.add("Pref.applyUIColor",			boost::bind(&LLFloaterPreference::applyUIColor, this ,_1, _2));
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.applyNameTagColor",		boost::bind(&LLFloaterPreference::applyNameTagColor, this ,_1, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.getUIColor",				boost::bind(&LLFloaterPreference::getUIColor, this ,_1, _2));
 	mCommitCallbackRegistrar.add("Pref.MaturitySettings",		boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
 	mCommitCallbackRegistrar.add("Pref.Proxy",					boost::bind(&LLFloaterPreference::onClickProxySettings, this));
-	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
-	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
+//	mCommitCallbackRegistrar.add("Pref.TranslationSettings",	boost::bind(&LLFloaterPreference::onClickTranslationSettings, this));
+//	mCommitCallbackRegistrar.add("Pref.AutoReplace",            boost::bind(&LLFloaterPreference::onClickAutoReplace, this));
 	mCommitCallbackRegistrar.add("Pref.PermsDefault",           boost::bind(&LLFloaterPreference::onClickPermsDefault, this));
-	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
+//	mCommitCallbackRegistrar.add("Pref.SpellChecker",           boost::bind(&LLFloaterPreference::onClickSpellChecker, this));
 	mCommitCallbackRegistrar.add("Pref.Advanced",				boost::bind(&LLFloaterPreference::onClickAdvanced, this));
 // [SL:KB] - Patch: UI-Font | Checked: 2012-10-10 (Catznip-3.3)
 	mCommitCallbackRegistrar.add("Pref.InitEditorFont",			boost::bind(&initEditorFont, _1));
@@ -495,16 +560,16 @@ BOOL LLFloaterPreference::postBuild()
 	std::string cache_location = gDirUtilp->getExpandedFilename(LL_PATH_CACHE, "");
 	setCacheLocation(cache_location);
 
-	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
+//	getChild<LLUICtrl>("log_path_string")->setEnabled(FALSE); // make it read-only but selectable
 
 	getChild<LLComboBox>("language_combobox")->setCommitCallback(boost::bind(&LLFloaterPreference::onLanguageChange, this));
 
-	getChild<LLComboBox>("FriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"FriendIMOptions"));
-	getChild<LLComboBox>("NonFriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NonFriendIMOptions"));
-	getChild<LLComboBox>("ConferenceIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ConferenceIMOptions"));
-	getChild<LLComboBox>("GroupChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"GroupChatOptions"));
-	getChild<LLComboBox>("NearbyChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NearbyChatOptions"));
-	getChild<LLComboBox>("ObjectIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ObjectIMOptions"));
+//	getChild<LLComboBox>("FriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"FriendIMOptions"));
+//	getChild<LLComboBox>("NonFriendIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NonFriendIMOptions"));
+//	getChild<LLComboBox>("ConferenceIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ConferenceIMOptions"));
+//	getChild<LLComboBox>("GroupChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"GroupChatOptions"));
+//	getChild<LLComboBox>("NearbyChatOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"NearbyChatOptions"));
+//	getChild<LLComboBox>("ObjectIMOptions")->setCommitCallback(boost::bind(&LLFloaterPreference::onNotificationsChange, this,"ObjectIMOptions"));
 
 	// if floater is opened before login set default localized do not disturb message
 	if (LLStartUp::getStartupState() < STATE_STARTED)
@@ -559,12 +624,12 @@ void LLFloaterPreference::onDoNotDisturbResponseChanged()
 
 LLFloaterPreference::~LLFloaterPreference()
 {
-	// clean up user data
-	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
-	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
-	{
-		ctrl_window_size->setCurrentByIndex(i);
-	}
+//	// clean up user data
+//	LLComboBox* ctrl_window_size = getChild<LLComboBox>("windowsize combo");
+//	for (S32 i = 0; i < ctrl_window_size->getItemCount(); i++)
+//	{
+//		ctrl_window_size->setCurrentByIndex(i);
+//	}
 
 	LLConversationLog::instance().removeObserver(this);
 }
@@ -580,25 +645,78 @@ void LLFloaterPreference::draw()
 	LLFloater::draw();
 }
 
-void LLFloaterPreference::saveSettings()
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
+void LLFloaterPreference::registerPrefPanel(LLPanelPreference* pPrefPanel)
 {
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
-	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
-	for ( ; iter != end; ++iter)
+	if (mPreferencePanels.end() == std::find(mPreferencePanels.cbegin(), mPreferencePanels.cend(), pPrefPanel))
 	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
-			panel->saveSettings();
+		mPreferencePanels.push_back(pPrefPanel);
 	}
-}	
+}
+
+void LLFloaterPreference::unregisterPrefpanel(LLPanelPreference* pPrefPanel)
+{
+	std::list<LLPanelPreference*>::const_iterator itPanel = std::find(mPreferencePanels.cbegin(), mPreferencePanels.cend(), pPrefPanel);
+	if (mPreferencePanels.end() != itPanel)
+	{
+		mPreferencePanels.erase(itPanel);
+	}
+}
+
+template<class T> T* LLFloaterPreference::getPanelByType() const
+{
+	T* pRetPanel = nullptr;
+	for (LLPanelPreference* pPanel : mPreferencePanels)
+	{
+		pRetPanel = dynamic_cast<T*>(pPanel);
+		if (pRetPanel)
+			break;
+	}
+	return pRetPanel;
+}
+
+void LLFloaterPreference::showPanel(const std::string& strPanel)
+{
+	if (!strPanel.empty())
+	{
+		auto itPanel = std::find_if(mPreferencePanels.begin(), mPreferencePanels.end(), [&strPanel](const LLPanelPreference* x) { return x->getName() == strPanel; });
+		if (mPreferencePanels.end() != itPanel)
+		{
+			LLPanel* pPanel = *itPanel;
+			while (LLTabContainer* pParent = pPanel->getParentByType<LLTabContainer>())
+			{
+				pParent->selectTabPanel(pPanel);
+				pPanel = pParent;
+			}
+		}
+	}
+}
+
+void LLFloaterPreference::onShowPanel(const LLSD& sdParam)
+{
+	showPanel(sdParam.asString());
+}
+// [/SL:KB]
+
+//void LLFloaterPreference::saveSettings()
+//{
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//	child_list_t::const_iterator end = tabcontainer->getChildList()->end();
+//	for ( ; iter != end; ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
+//		if (panel)
+//			panel->saveSettings();
+//	}
+//}	
 
 void LLFloaterPreference::apply()
 {
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
 	
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
 
 //	if (sSkin != gSavedSettings.getString("SkinCurrent"))
 //	{
@@ -606,15 +724,26 @@ void LLFloaterPreference::apply()
 //		refreshSkin(this);
 //	}
 
-	// Call apply() on all panels that derive from LLPanelPreference
-	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-		 iter != tabcontainer->getChildList()->end(); ++iter)
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
+	// Call apply() on all registered preference panels
+	for (LLPanelPreference* pPrefPanel : mPreferencePanels)
 	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
-			panel->apply();
+		if ( (pPrefPanel) && (pPrefPanel->isInitialized()) && (pPrefPanel->isDirty()) )
+		{
+			pPrefPanel->apply();
+			pPrefPanel->saveSettings();
+		}
 	}
+// [/SL:KB]
+//	// Call apply() on all panels that derive from LLPanelPreference
+//	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//		 iter != tabcontainer->getChildList()->end(); ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
+//		if (panel)
+//			panel->apply();
+//	}
 	
 	gViewerWindow->requestResolutionUpdate(); // for UIScaleFactor
 
@@ -670,27 +799,36 @@ void LLFloaterPreference::apply()
 
 void LLFloaterPreference::cancel()
 {
-	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
 	// Call cancel() on all panels that derive from LLPanelPreference
-	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
-		iter != tabcontainer->getChildList()->end(); ++iter)
+	for (std::list<LLPanelPreference*>::iterator itPanel = mPreferencePanels.begin(); itPanel != mPreferencePanels.end(); ++itPanel)
 	{
-		LLView* view = *iter;
-		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
-		if (panel)
-			panel->cancel();
+		LLPanelPreference* pPrefPanel = *itPanel;
+		if ( (pPrefPanel) && (pPrefPanel->isInitialized()) && (pPrefPanel->isDirty()) )
+			pPrefPanel->cancel();
 	}
+// [/SL:KB]
+//	LLTabContainer* tabcontainer = getChild<LLTabContainer>("pref core");
+//	// Call cancel() on all panels that derive from LLPanelPreference
+//	for (child_list_t::const_iterator iter = tabcontainer->getChildList()->begin();
+//		iter != tabcontainer->getChildList()->end(); ++iter)
+//	{
+//		LLView* view = *iter;
+//		LLPanelPreference* panel = dynamic_cast<LLPanelPreference*>(view);
+//		if (panel)
+//			panel->cancel();
+//	}
 	// hide joystick pref floater
 	LLFloaterReg::hideInstance("pref_joystick");
 
-	// hide translation settings floater
-	LLFloaterReg::hideInstance("prefs_translation");
+//	// hide translation settings floater
+//	LLFloaterReg::hideInstance("prefs_translation");
 	
-	// hide autoreplace settings floater
-	LLFloaterReg::hideInstance("prefs_autoreplace");
+//	// hide autoreplace settings floater
+//	LLFloaterReg::hideInstance("prefs_autoreplace");
 	
-	// hide spellchecker settings folder
-	LLFloaterReg::hideInstance("prefs_spellchecker");
+//	// hide spellchecker settings folder
+//	LLFloaterReg::hideInstance("prefs_spellchecker");
 
 	// hide advancede floater
 	LLFloaterReg::hideInstance("prefs_graphics_advanced");
@@ -789,21 +927,24 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	buildPopupLists();
 
 
-	//get the options that were checked
-	onNotificationsChange("FriendIMOptions");
-	onNotificationsChange("NonFriendIMOptions");
-	onNotificationsChange("ConferenceIMOptions");
-	onNotificationsChange("GroupChatOptions");
-	onNotificationsChange("NearbyChatOptions");
-	onNotificationsChange("ObjectIMOptions");
+//	//get the options that were checked
+//	onNotificationsChange("FriendIMOptions");
+//	onNotificationsChange("NonFriendIMOptions");
+//	onNotificationsChange("ConferenceIMOptions");
+//	onNotificationsChange("GroupChatOptions");
+//	onNotificationsChange("NearbyChatOptions");
+//	onNotificationsChange("ObjectIMOptions");
 
 	LLPanelLogin::setAlwaysRefresh(true);
 	refresh();
 	
-	// Make sure the current state of prefs are saved away when
-	// when the floater is opened.  That will make cancel do its
-	// job
-	saveSettings();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	mCancelOnClose = true;
+// [/SL:KB]
+//	// Make sure the current state of prefs are saved away when
+//	// when the floater is opened.  That will make cancel do its
+//	// job
+//	saveSettings();
 
 	// Make sure there is a default preference file
 	LLPresetsManager::getInstance()->createMissingDefault();
@@ -870,8 +1011,15 @@ void LLFloaterPreference::setHardwareDefaults()
 	std::string preset_graphic_active = gSavedSettings.getString("PresetGraphicActive");
 	if (!preset_graphic_active.empty())
 	{
+// [SL:KB] - Patch: Settings-Preferences | Checked: Catznip-4.1
 		saveGraphicsPreset(preset_graphic_active);
-		saveSettings(); // save here to be able to return to the previous preset by Cancel
+		if (LLPanelPreferenceGraphics* pGraphicsPanel = getPanelByType<LLPanelPreferenceGraphics>())
+		{
+			pGraphicsPanel->saveSettings(); // save here to be able to return to the previous preset by Cancel
+		}
+// [/SL:KB]
+//		saveGraphicsPreset(preset_graphic_active);
+//		saveSettings(); // save here to be able to return to the previous preset by Cancel
 	}
 
 	LLFeatureManager::getInstance()->applyRecommendedSettings();
@@ -941,6 +1089,10 @@ void LLFloaterPreference::onClose(bool app_quitting)
 	gSavedSettings.setS32("LastPrefTab", getChild<LLTabContainer>("pref core")->getCurrentPanelIndex());
 	LLPanelLogin::setAlwaysRefresh(false);
 	if (!app_quitting)
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	// Don't call cancel() if the user closed the floater by clicking the "OK" or "Cancel" button
+	if ( (!app_quitting) && (mCancelOnClose) )
+// [/SL:KB]
 	{
 		cancel();
 	}
@@ -961,8 +1113,11 @@ void LLFloaterPreference::onBtnOK(const LLSD& userdata)
 
 	if (canClose())
 	{
-		saveSettings();
+//		saveSettings();
 		apply();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+		mCancelOnClose = false;
+// [/SL:KB]
 		
 		if (userdata.asString() == "closeadvanced")
 		{
@@ -992,6 +1147,9 @@ void LLFloaterPreference::onBtnOK(const LLSD& userdata)
 
 		LLUIColorTable::instance().saveUserSettings();
 		gSavedSettings.saveToFile(gSavedSettings.getString("ClientSettingsFile"), TRUE);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+		gStartupSettings.saveToFile(gSavedSettings.getString("StartupSettingsFile"), TRUE);
+// [/SL:KB]
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 		// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
 		gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
@@ -1032,6 +1190,9 @@ void LLFloaterPreference::onBtnCancel(const LLSD& userdata)
 		refresh();
 	}
 	cancel();
+// [SL:KB] - Patch: Preferences-General | Checked: 2014-03-03 (Catznip-3.6)
+	mCancelOnClose = false;
+// [/SL:KB]
 
 	if (userdata.asString() == "closeadvanced")
 	{
@@ -1090,22 +1251,22 @@ void LLFloaterPreference::onLanguageChange()
 	}
 }
 
-void LLFloaterPreference::onNotificationsChange(const std::string& OptionName)
-{
-	mNotificationOptions[OptionName] = getChild<LLComboBox>(OptionName)->getSelectedItemLabel();
-
-	bool show_notifications_alert = true;
-	for (notifications_map::iterator it_notification = mNotificationOptions.begin(); it_notification != mNotificationOptions.end(); it_notification++)
-	{
-		if(it_notification->second != "No action")
-		{
-			show_notifications_alert = false;
-			break;
-		}
-	}
-
-	getChild<LLTextBox>("notifications_alert")->setVisible(show_notifications_alert);
-}
+//void LLFloaterPreference::onNotificationsChange(const std::string& OptionName)
+//{
+//	mNotificationOptions[OptionName] = getChild<LLComboBox>(OptionName)->getSelectedItemLabel();
+//
+//	bool show_notifications_alert = true;
+//	for (notifications_map::iterator it_notification = mNotificationOptions.begin(); it_notification != mNotificationOptions.end(); it_notification++)
+//	{
+//		if(it_notification->second != "No action")
+//		{
+//			show_notifications_alert = false;
+//			break;
+//		}
+//	}
+//
+//	getChild<LLTextBox>("notifications_alert")->setVisible(show_notifications_alert);
+//}
 
 void LLFloaterPreference::onNameTagOpacityChange(const LLSD& newvalue)
 {
@@ -1419,6 +1580,12 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 		getChildView("texture compression")->setEnabled(FALSE);
 	}
 
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	// Setting should be disabled when basic shaders is unchecked or deferred rendering is enabled
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+	ctrl_glow->setEnabled((ctrl_shader_enable->get()) && (!ctrl_deferred->get()));
+// [/SL:TD]
+
 	// if no windlight shaders, turn off nighttime brightness, gamma, and fog distance
 	LLUICtrl* gamma_ctrl = getChild<LLUICtrl>("gamma");
 	gamma_ctrl->setEnabled(!gPipeline.canUseWindLightShaders());
@@ -1433,6 +1600,10 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 
 	// Cannot have floater active until caps have been received
 	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
+
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-04-28 (Catznip-3.6)
+	getChild<LLPanel>("soundalerts")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
+// [/SL:KB]
 }
 
 // static
@@ -1484,6 +1655,9 @@ void LLFloaterPreferenceGraphicsAdvanced::disableUnavailableSettings()
 	LLCheckBoxCtrl* ctrl_avatar_vp     = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
 	LLCheckBoxCtrl* ctrl_avatar_cloth  = getChild<LLCheckBoxCtrl>("AvatarCloth");
 	LLCheckBoxCtrl* ctrl_shader_enable = getChild<LLCheckBoxCtrl>("BasicShaders");
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+	LLCheckBoxCtrl* ctrl_glow = getChild<LLCheckBoxCtrl>("UseGlow");
+// [/SL:TD]
 	LLCheckBoxCtrl* ctrl_wind_light    = getChild<LLCheckBoxCtrl>("WindLightUseAtmosShaders");
 	LLCheckBoxCtrl* ctrl_deferred = getChild<LLCheckBoxCtrl>("UseLightShaders");
 	LLComboBox* ctrl_shadows = getChild<LLComboBox>("ShadowDetail");
@@ -1499,6 +1673,11 @@ void LLFloaterPreferenceGraphicsAdvanced::disableUnavailableSettings()
 		ctrl_shader_enable->setEnabled(FALSE);
 		ctrl_shader_enable->setValue(FALSE);
 		
+// [SL:TD] - Patch: Settings-Misc | Checked: 2012-08-23 (Catznip-3.3)
+		ctrl_glow->setEnabled(FALSE);
+		ctrl_glow->setValue(FALSE);
+// [/SL:TD]
+
 		ctrl_wind_light->setEnabled(FALSE);
 		ctrl_wind_light->setValue(FALSE);
 
@@ -1813,6 +1992,22 @@ void LLFloaterPreference::onClickLogPath()
 }
 }
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLFloaterPreference::onClickSnapshotPath()
+{
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
+	
+	LLDirPicker& picker = LLDirPicker::instance();
+	if (!picker.getDir(&proposed_name))
+	{
+		return; //Canceled!
+	}
+
+	gSavedSettings.setString("SnapshotLocalPath", picker.getDirName());
+	gDirUtilp->setSnapshotDir(picker.getDirName());
+}
+// [/SL:KB]
+
 bool LLFloaterPreference::moveTranscriptsAndLog()
 {
 	std::string instantMessageLogPath(gSavedPerAccountSettings.getString("InstantMessageLogPath"));
@@ -2064,20 +2259,20 @@ void LLFloaterPreference::onClickProxySettings()
 	LLFloaterReg::showInstance("prefs_proxy");
 }
 
-void LLFloaterPreference::onClickTranslationSettings()
-{
-	LLFloaterReg::showInstance("prefs_translation");
-}
+//void LLFloaterPreference::onClickTranslationSettings()
+//{
+//	LLFloaterReg::showInstance("prefs_translation");
+//}
 
-void LLFloaterPreference::onClickAutoReplace()
-{
-	LLFloaterReg::showInstance("prefs_autoreplace");
-}
+//void LLFloaterPreference::onClickAutoReplace()
+//{
+//	LLFloaterReg::showInstance("prefs_autoreplace");
+//}
 
-void LLFloaterPreference::onClickSpellChecker()
-{
-		LLFloaterReg::showInstance("prefs_spellchecker");
-}
+//void LLFloaterPreference::onClickSpellChecker()
+//{
+//		LLFloaterReg::showInstance("prefs_spellchecker");
+//}
 
 void LLFloaterPreference::onClickAdvanced()
 {
@@ -2158,6 +2353,14 @@ void LLFloaterPreference::applyUIColor(LLUICtrl* ctrl, const LLSD& param)
 	LLUIColorTable::instance().setColor(param.asString(), LLColor4(ctrl->getValue()));
 }
 
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
+
 void LLFloaterPreference::getUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
 	LLColorSwatchCtrl* color_swatch = (LLColorSwatchCtrl*) ctrl;
@@ -2171,29 +2374,35 @@ void LLFloaterPreference::setCacheLocation(const LLStringExplicit& location)
 	cache_location_editor->setToolTip(location);
 }
 
-void LLFloaterPreference::selectPanel(const LLSD& name)
-{
-	LLTabContainer * tab_containerp = getChild<LLTabContainer>("pref core");
-	LLPanel * panel = tab_containerp->getPanelByName(name);
-	if (NULL != panel)
-	{
-		tab_containerp->selectTabPanel(panel);
-	}
-}
+//void LLFloaterPreference::selectPanel(const LLSD& name)
+//{
+//	LLTabContainer * tab_containerp = getChild<LLTabContainer>("pref core");
+//	LLPanel * panel = tab_containerp->getPanelByName(name);
+//	if (NULL != panel)
+//	{
+//		tab_containerp->selectTabPanel(panel);
+//	}
+//}
 
 void LLFloaterPreference::selectPrivacyPanel()
 {
-	selectPanel("im");
+// [SL:KB] - Patch: Settings-Preferences | Checked: 2014-04-12 (Catznip-3.6)
+	showPanel("im");
+// [/SL:KB]
+//	selectPanel("im");
 }
 
 void LLFloaterPreference::selectChatPanel()
 {
-	selectPanel("chat");
+// [SL:KB] - Patch: Settings-Preferences | Checked: 2014-04-12 (Catznip-3.6)
+	showPanel("chat");
+// [/SL:KB]
+//	selectPanel("chat");
 }
 
 void LLFloaterPreference::changed()
 {
-	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
+//	getChild<LLButton>("clear_log")->setEnabled(LLConversationLog::instance().getConversations().size() > 0);
 
 	// set 'enable' property for 'Delete transcripts...' button
 	updateDeleteTranscriptsButton();
@@ -2417,7 +2626,28 @@ BOOL LLPanelPreference::postBuild()
 	}
 #endif
 
-	apply();
+// [SL:KB] - Checked: 2011-06-27 (Catznip-2.6)
+	//////////////////////PanelCatznip ///////////////////
+	if (hasChild("windowedfullscreen_check", TRUE))
+	{
+#ifdef CATZNIP
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setEnabled( (gViewerWindow) && (gViewerWindow->canFullscreenWindow()) );
+		getChild<LLCheckBoxCtrl>("windowedfullscreen_check")->setValue( (gViewerWindow) && (gViewerWindow->getFullscreenWindow()) );
+#endif // CATZNIP
+	}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
+	LLFloaterPreference* pFloater = getParentByType<LLFloaterPreference>();
+	if (pFloater)
+	{
+		pFloater->registerPrefPanel(this);
+		// We're using the close callback since onVisibilityChanged() will fire before the open callback does causing the currently selected panel to not
+		// have refresh() called. Setting things up on close (and the default to true) causes 'mRefreshOnOpen' to be true on the panel visibility change
+		pFloater->setCloseCallback(boost::bind(&LLPanelPreference::onParentFloaterClose, this));
+	}
+// [/SL:KB]
+//	apply();
 	return true;
 }
 
@@ -2428,6 +2658,133 @@ LLPanelPreference::~LLPanelPreference()
 		delete mBandWidthUpdater;
 	}
 }
+
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-3.6
+void LLPanelPreference::onVisibilityChange(BOOL new_visibility)
+{
+	LLPanel::onVisibilityChange(new_visibility);
+
+	if (new_visibility)
+	{
+		if (!mInitialized)
+		{
+			init();
+			saveSettings();
+			mInitialized = true;
+		}
+
+		if (mRefreshOnOpen)
+		{
+			refresh();
+			mRefreshOnOpen = false;
+		}
+		onOpen(LLSD());
+	}
+	else if (mInitialized)
+	{
+		onClose();
+	}
+}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Preferences-Chat | Checked: 2014-03-04 (Catznip-3.6)
+class LLPanelPreferenceChat : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceChat()
+		: LLPanelPreference()
+	{
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationChat",boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.InitLogNotificationIM",  boost::bind(&LLPanelPreferenceChat::onInitLogNotification, _1, _2, "im"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationChat",    boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "chat"));
+		mCommitCallbackRegistrar.add("PrefChat.LogNotificationIM",      boost::bind(&LLPanelPreferenceChat::onToggleLogNotification, _1, _2, "im"));
+	}
+
+	/*virtual*/ BOOL postBuild()
+	{
+		LLPanelPreference::postBuild();
+
+		LLUICtrl* pCtrl = findChild<LLUICtrl>("nearbychattornoff_check", TRUE);
+		if (pCtrl)
+		{
+			pCtrl->setCommitCallback(boost::bind(LLPanelPreferenceChat::onNearbyChatTornOffChanged));
+		}
+
+		return TRUE;
+	}
+
+protected:
+	static void onInitLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				pCtrl->setValue(templ->canLogToNearbyChat());
+			else if (0 == strcmp(pstrScope, "im"))
+				pCtrl->setValue(templ->canLogToIM(true));
+		}
+#endif // CATZNIP
+	}
+
+	static void onToggleLogNotification(LLUICtrl* pCtrl, const LLSD& sdParam, const char* pstrScope)
+	{
+#ifdef CATZNIP
+		std::vector<std::string> notifications; const std::string strParam = sdParam.asString();
+		boost::split(notifications, strParam, boost::is_any_of(std::string(",")));
+
+		for (std::vector<std::string>::const_iterator itNotif = notifications.begin(); itNotif != notifications.end(); ++itNotif)
+		{
+			LLNotificationTemplatePtr templ = LLNotifications::instance().getTemplate(*itNotif);
+			if (*itNotif != templ->mName)
+				continue;
+
+			if (0 == strcmp(pstrScope, "chat"))
+				templ->setLogToNearbyChat(pCtrl->getValue().asBoolean());
+			else if (0 == strcmp(pstrScope, "im"))
+				templ->setLogToIM(pCtrl->getValue().asBoolean());
+		}
+#endif // CATZNIP
+	}
+
+	static void onNearbyChatTornOffChanged()
+	{
+#ifdef CATZNIP
+		LLFloater* pNearbyChat = LLFloaterReg::findInstance("nearby_chat");
+		LLFloater* pConversations = LLFloaterReg::findInstance("im_container");
+
+		if ( (pNearbyChat) && (pConversations) )
+		{
+			bool fNearbyVisible = pNearbyChat->isInVisibleChain();
+			bool fConvVisible = pConversations->isInVisibleChain();
+
+			bool fTornOff = !gSavedPerAccountSettings.getBOOL("NearbyChatIsNotTornOff");
+			if ( (fTornOff) && (!pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pNearbyChat->setVisible(fNearbyVisible);
+				pConversations->setVisible(fConvVisible);
+			}
+			else if ( (!fTornOff) && (pNearbyChat->isTornOff()) )
+			{
+				pNearbyChat->onTearOffClicked();
+				pConversations->setVisible(fConvVisible || fNearbyVisible);
+			}
+		}
+#endif // CATZNIP
+	}
+};
+
+static LLPanelInjector<LLPanelPreferenceChat> t_pref_chat("panel_preference_chat");
+// [/SL:KB]
+
 void LLPanelPreference::apply()
 {
 	// no-op
@@ -2577,9 +2934,25 @@ class LLPanelPreferencePrivacy : public LLPanelPreference
 public:
 	LLPanelPreferencePrivacy()
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2)
+		mCommitCallbackRegistrar.add("Privacy.ToggleClearSetting", boost::bind(&LLPanelPreferencePrivacy::onToggleClearSetting, this, _1, _2));
+// [/SL:KB]
+
 		mAccountIndependentSettings.push_back("VoiceCallsFriendsOnly");
 		mAccountIndependentSettings.push_back("AutoDisengageMic");
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+	/*virtual*/ void refresh()
+	{
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
+		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
+		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
+		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+		getChild<LLCheckBoxCtrl>("clear_people_history")->set(nClearMask & CLEAR_MASK_PEOPLE);
+	}
+// [/SL:KB]
 
 	/*virtual*/ void saveSettings()
 	{
@@ -2604,7 +2977,44 @@ public:
 				}
 			}
 		}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
+		LLControlVariablePtr pControl = gSavedSettings.getControl("ClearCacheMask");
+		if (pControl.notNull())
+		{
+			mSavedValues[pControl] = pControl->getValue();
+		}
+// [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+protected:
+	void onToggleClearSetting(LLUICtrl* pUICtrl, const LLSD& sdParam)
+	{
+		/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(pUICtrl);
+		if (pCheckCtrl)
+		{
+			U32 nClearToggle = 0; const std::string strParam = sdParam.asString();
+			if ("cookies" == strParam)
+				nClearToggle = CLEAR_MASK_COOKIES;
+			else if ("navbar" == strParam)
+				nClearToggle = CLEAR_MASK_NAVBAR;
+			else if ("search" == strParam)
+				nClearToggle = CLEAR_MASK_SEARCH;
+			else if ("teleport" == strParam)
+				nClearToggle = CLEAR_MASK_TELEPORT;
+			else if ("people" == strParam)
+				nClearToggle = CLEAR_MASK_PEOPLE;
+
+			U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+			if (pCheckCtrl->get())
+				nClearMask |= nClearToggle;
+			else
+				nClearMask &= ~nClearToggle;
+			gSavedSettings.setU32("ClearCacheMask", nClearMask);
+		}
+	}
+// [/SL:KB]
 
 private:
 	std::list<std::string> mAccountIndependentSettings;
@@ -2612,6 +3022,78 @@ private:
 
 static LLPanelInjector<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
 static LLPanelInjector<LLPanelPreferencePrivacy> t_pref_privacy("panel_preference_privacy");
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-04-03 (Catznip-3.6)
+class LLPanelPreferenceTroubleshooting : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceTroubleshooting()
+	{
+		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClearSettings, _2));
+		mCommitCallbackRegistrar.add("Pref.ForceInitialOutfit", boost::bind(&LLPanelPreferenceTroubleshooting::onForceInitialOutfit));
+	}
+
+	/*virtual*/ void refresh()
+	{
+		const EStartupState eStartupState = LLStartUp::getStartupState();
+
+		getChild<LLUICtrl>("catznip_group_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("reset_avatar_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("clear_account_settings_btn")->setEnabled(eStartupState == STATE_STARTED);
+	}
+
+	static void onClearSettings(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+
+		std::string strNotifName;
+		if ("user" == strParam)
+			strNotifName = "ConfirmResetUserSettings";
+		else if ("account" == strParam)
+			strNotifName = "ConfirmResetAccountSettings";
+
+		if (!strNotifName.empty())
+		{
+			LLNotificationsUtil::add(strNotifName, LLSD(), sdParam, onClearSettingsCallback);
+		}
+	}
+
+	static void onClearSettingsCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			const std::string strParam = sdNotification["payload"].asString();
+			if ("user" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
+			}
+			else if ("account" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+			}
+			LLNotificationsUtil::add("SettingsWillReset");
+		}
+	}
+
+	static void onForceInitialOutfit()
+	{
+		LLNotificationsUtil::add("ConfirmResetOutfit", LLSD(), LLSD(), onForceInitialOutfitCallback);
+	}
+
+	static void onForceInitialOutfitCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			gSavedPerAccountSettings.setBOOL("WearInitialOutfit", TRUE);
+			LLNotificationsUtil::add("OutfitWillReset");
+		}
+	}
+};
+
+static LLPanelInjector<LLPanelPreferenceTroubleshooting> t_pref_troubleshooting("panel_preference_troubleshooting");
+// [SL:KB]
 
 BOOL LLPanelPreferenceGraphics::postBuild()
 {
@@ -2654,7 +3136,10 @@ void LLPanelPreferenceGraphics::onPresetsListChange()
 	LLFloaterPreference* instance = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
 	if (instance && !gSavedSettings.getString("PresetGraphicActive").empty())
 	{
-		instance->saveSettings(); //make cancel work correctly after changing the preset
+// [SL:KB] - Patch: Preferences-General | Checked: Catznip-4.1
+		saveSettings(); //make cancel work correctly after changing the preset
+// [/SL:KB]
+//		instance->saveSettings(); //make cancel work correctly after changing the preset
 	}
 }
 

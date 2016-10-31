@@ -697,7 +697,12 @@ void LLFloaterIMNearbyChatHandler::processChat(const LLChat& chat_msg,
  		// Add sender to the recent people list.
 // [RLVa:KB] - Checked: RLVa-2.0.0
 		if ( (!RlvActions::isRlvEnabled()) || (RlvActions::canShowName(RlvActions::SNC_DEFAULT, chat_msg.mFromID)) )
-	 		LLRecentPeople::instance().add(chat_msg.mFromID);
+		{
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			LLRecentPeople::instance().add(chat_msg.mFromID, LLRecentPeople::IT_CHAT);
+// [/SL:KB]
+// 			LLRecentPeople::instance().add(chat_msg.mFromID);
+	 	}
 // [/RLVa:KB]
 // 		LLRecentPeople::instance().add(chat_msg.mFromID);
 	}

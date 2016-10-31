@@ -456,7 +456,10 @@ void LLGiveInventory::commitGiveInventoryItem(const LLUUID& to_agent,
 	if ( (!RlvActions::isRlvEnabled()) ||
 	     (RlvActions::canShowName(RlvActions::SNC_DEFAULT, to_agent)) || (im_session_id.notNull()) || (!RlvUtil::isNearbyAgent(to_agent)) || (RlvUIEnabler::hasOpenProfile(to_agent)) )
 	{
-		LLRecentPeople::instance().add(to_agent);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+		LLRecentPeople::instance().add(to_agent, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//		LLRecentPeople::instance().add(to_agent);
 	}
 // [/RLVa:KB]
 }
@@ -530,7 +533,10 @@ bool LLGiveInventory::commitGiveInventoryCategory(const LLUUID& to_agent,
 	if ( (!RlvActions::isRlvEnabled()) ||
 	     (RlvActions::canShowName(RlvActions::SNC_DEFAULT, to_agent)) || (im_session_id.notNull()) || (!RlvUtil::isNearbyAgent(to_agent)) || (RlvUIEnabler::hasOpenProfile(to_agent)) )
 	{
-		LLRecentPeople::instance().add(to_agent);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+		LLRecentPeople::instance().add(to_agent, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//		LLRecentPeople::instance().add(to_agent);
 	}
 // [/RLVa:KB]
 

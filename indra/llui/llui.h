@@ -318,6 +318,9 @@ public:
 	static void glRectToScreen(const LLRect& gl, LLRect *screen);
 	// Returns the control group containing the control name, or the default group
 	static LLControlGroup& getControlControlGroup (const std::string& controlname);
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+	static LLControlVariable* getControl(const std::string& controlname);
+// [/SL:KB]
 	static F32 getMouseIdleTime() { return sMouseIdleTimer.getElapsedTimeF32(); }
 	static void resetMouseIdleTimer() { sMouseIdleTimer.reset(); }
 	static LLWindow* getWindow() { return sWindow; }

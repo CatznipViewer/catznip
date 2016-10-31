@@ -1432,6 +1432,20 @@ Cache will be cleared after you restart [APP_NAME].
 
   <notification
    icon="alertmodal.tga"
+   name="SettingsWillReset"
+   type="alertmodal">
+Settings will be reset after you restart [APP_NAME].
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="OutfitWillReset"
+   type="alertmodal">
+The default outfit will be worn the next time you log on with this account.
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
    name="CacheWillBeMoved"
    type="alertmodal">
 Cache will be moved after you restart [APP_NAME].
@@ -6250,6 +6264,42 @@ Are you sure you want to clear your list of saved URLs?
      name="okcancelbuttons"
      notext="Cancel"
      yestext="Yes"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmResetUserSettings"
+   type="alertmodal">
+    Are you sure you want to reset your viewer settings?
+    <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmResetAccountSettings"
+   type="alertmodal">
+    Are you sure you want to reset your personal settings?
+    <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmResetOutfit"
+   type="alertmodal">
+    Are you sure you want to reset your avatar to the default outfit on the next logon?
+    <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
   </notification>
 
   <notification

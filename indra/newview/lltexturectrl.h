@@ -343,6 +343,9 @@ public:
 	static void		onBtnRemove(void* userdata);
 	static void		onBtnUpload(void* userdata);
 	static void		onLocalScrollCommit(LLUICtrl* ctrl, void* userdata);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+	       void		onFilePickerCallback(const std::vector<std::string>& files);
+// [/SL:KB]
 
 	void 			setLocalTextureEnabled(BOOL enabled);
 

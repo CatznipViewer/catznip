@@ -156,6 +156,8 @@ LL_COMMON_API std::ostream& operator<<(std::ostream& s, const LLDate& date);
 // Helper function to stream in a date
 LL_COMMON_API std::istream& operator>>(std::istream& s, LLDate& date);
 
-
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-10-01 (Catznip-3.0)
+LL_COMMON_API F64 operator-(const LLDate& lhs, const LLDate& rhs);
+// [/SL:KB]
 
 #endif // LL_LLDATE_H

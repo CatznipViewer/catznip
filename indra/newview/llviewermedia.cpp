@@ -3444,18 +3444,22 @@ void LLViewerMediaImpl::handleMediaEvent(LLPluginClassMedia* plugin, LLPluginCla
 
 		case LLViewerMediaObserver::MEDIA_EVENT_PICK_FILE_REQUEST:
 		{
-			// Display a file picker
-			std::string response;
-
-			LLFilePicker& picker = LLFilePicker::instance();
-			if (!picker.getOpenFile(LLFilePicker::FFLOAD_ALL))
-			{
-				// The user didn't pick a file -- the empty response string will indicate this.
-			}
-
-			response = picker.getFirstFile();
-
-			plugin->sendPickFileResponse(response);
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+			LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_ALL, 
+				boost::bind(&LLViewerMediaImpl::onFilePickerCallback, plugin, _1));
+// [/SL:KB]
+//			// Display a file picker
+//			std::string response;
+//			
+//			LLFilePicker& picker = LLFilePicker::instance();
+//			if (!picker.getOpenFile(LLFilePicker::FFLOAD_ALL))
+//			{
+//				// The user didn't pick a file -- the empty response string will indicate this.
+//			}
+//			
+//			response = picker.getFirstFile();
+//			
+//			plugin->sendPickFileResponse(response);
 		}
 		break;
 
@@ -3526,6 +3530,13 @@ void LLViewerMediaImpl::handleMediaEvent(LLPluginClassMedia* plugin, LLPluginCla
 		emitEvent(plugin, event);
 	}
 }
+
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+void LLViewerMediaImpl::onFilePickerCallback(LLPluginClassMedia* plugin, const std::string& filename)
+{
+	plugin->sendPickFileResponse(filename);
+}
+// [/SL:KB]
 
 ////////////////////////////////////////////////////////////////////////////////
 // virtual

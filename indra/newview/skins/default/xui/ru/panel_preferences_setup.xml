@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel label="Конфигурация" name="Input panel">
 	<text name="Network:">
-		Сеть:
+		Сеть
 	</text>
 	<text name="Maximum bandwidth">
 		Макс. ширина канала
@@ -12,7 +12,7 @@
 	<check_box label="Выбор порта" name="connection_port_enabled"/>
 	<spinner label="Номер порта:" name="connection_port"/>
 	<text name="Web:">
-		Браузер:
+		Браузер
 	</text>
 	<radio_group name="preferred_browser_behavior">
 		<radio_item label="Использовать мой браузер (Chrome, Firefox, IE) для всех ссылок" name="internal" tool_tip="Будет использоваться браузер, заданный в системе по умолчанию. Не рекомендуется, если [APP_NAME] работает в полноэкранном режиме." value="0"/>
@@ -23,7 +23,7 @@
 	<check_box initial_value="true" label="Принимать файлы cookie" name="cookies_enabled"/>
 	<check_box initial_value="true" label="Разрешить Javascript" name="browser_javascript_enabled"/>
 	<text name="Software updates:">
-		Обновления ПО:
+		Обновления ПО
 	</text>
 	<combo_box name="updater_service_combobox">
 		<combo_box.item label="Устанавливать автоматически" name="Install_automatically"/>

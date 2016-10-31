@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="376"
+ label="Voice Chat"
+ layout="topleft"
+ name="voice"
+ width="509">
+    <panel.string
+     name="middle_mouse">
+     Middle Mouse
+    </panel.string>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     font.style="BOLD"
+     height="20"
+     layout="topleft"
+     left="30"
+     name="voice_chat_settings"
+     width="200"
+     top_pad="20">
+      Voice Chat Settings
+    </text>
+    <check_box
+     control_name="EnableVoiceChat"
+     follows="left|top"
+     height="16"
+     label="Voice chat"
+     layout="topleft"
+     left="45"
+     name="enable_voice_chat"
+     top_pad="3" 
+     width="237"/>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     layout="topleft"
+	   left="67"
+	   top_pad="10"
+     name="Listen from"
+     width="112">
+        Listen from:
+    </text>
+	<icon
+		follows="left|top"
+		height="18"
+		image_name="Cam_FreeCam_Off"
+		layout="topleft"
+		name="camera_icon"
+		mouse_opaque="false"
+		visible="true"
+		width="18"
+		left="100"
+		top_pad="8"/>
+	<icon
+		follows="left|top"
+		height="18"
+		image_name="Move_Walk_Off"
+		layout="topleft"
+		left_delta="0" 
+		name="avatar_icon"
+		mouse_opaque="false"
+		visible="true"
+		width="18"
+		top_pad="1" />
+   <radio_group
+     enabled_control="EnableVoiceChat"
+     control_name="VoiceEarLocation"
+     draw_border="false"
+     follows="left|top"
+     layout="topleft"
+     left="125"
+     width="360"
+     height="60"
+     name="ear_location"
+     top_delta="-22">
+    <radio_item
+     height="19"
+     label="Camera position"
+     follows="left|top"
+     layout="topleft"
+     name="camera"
+     value="0"
+     top_pad="3"
+     width="200"/>
+    <radio_item
+     height="19"
+     follows="left|top"
+     label="Avatar position"
+     layout="topleft"
+     left_delta="0"
+     name="avatar"
+     value="1"
+     top_pad="1"
+     width="200" />
+    <radio_item
+     height="19"
+     follows="left|top"
+     label="Speaker position (no spatial audio)"
+     layout="topleft"
+     left_delta="0"
+     name="speaker"
+     value="3"
+     top_pad="1"
+     width="200" />
+   </radio_group>
+  <check_box
+   enabled_control="EnableVoiceChat"
+   control_name="LipSyncEnabled"
+   follows="left|top"
+   height="20"
+   label="Move avatar lips when speaking"
+   layout="topleft"
+   left="67"
+   name="enable_lip_sync"
+   top_pad="5" 
+   width="237"/>
+ <check_box
+  follows="top|left"
+  enabled_control="EnableVoiceChat"
+  control_name="PushToTalkToggle"
+  height="20"
+  label="Toggle speak on/off when I press:"
+  layout="topleft"
+  left="67"
+  name="push_to_talk_toggle_check"
+  width="350"
+  tool_tip="When in toggle mode, press and release the trigger key ONCE to switch your microphone on or off. When not in toggle mode, the microphone broadcasts your voice only while the trigger is being held down."
+  top_pad="2"/>
+  <line_editor
+   follows="top|left"
+   control_name="PushToTalkButton"
+   enabled="false"
+   enabled_control="EnableVoiceChat"
+   height="23"
+   left="88"
+   max_length_bytes="200"
+   name="modifier_combo"
+   label="Push-to-Speak trigger"
+   width="200" />
+  <button
+   layout="topleft"
+   follows="top|left"
+   enabled_control="EnableVoiceChat"
+   height="23"
+   label="Set Key"
+   left_pad="5"
+   name="set_voice_hotkey_button"
+   width="100">
+    <button.commit_callback
+    function="Pref.VoiceSetKey" />
+  </button>
+  <button
+     enabled_control="EnableVoiceChat"
+     follows="top|left"
+     halign="center"
+     height="23"
+     image_overlay="Refresh_Off"
+     layout="topleft"
+     tool_tip="Reset to Middle Mouse Button"
+     mouse_opaque="true"
+     name="set_voice_middlemouse_button"
+     left_pad="5"
+     width="25">
+    <button.commit_callback
+    function="Pref.VoiceSetMiddleMouse" />
+  </button>
+  <button
+   control_name="ShowDeviceSettings"
+   follows="left|top"
+   height="23"
+   is_toggle="true"
+   label="Input/Output devices"
+   layout="topleft"
+   left="70"
+   top_pad="10"
+   name="device_settings_btn"
+   width="190">
+  </button>
+    <panel
+    layout="topleft"
+    filename="panel_sound_devices.xml"
+     visiblity_control="ShowDeviceSettings"
+     name="device_settings_panel"
+    top_pad="3"
+    width="480"
+    left="24"
+    class="panel_voice_device_settings"/>
+</panel>
+  

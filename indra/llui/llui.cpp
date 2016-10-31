@@ -436,6 +436,19 @@ LLControlGroup& LLUI::getControlControlGroup (const std::string& controlname)
 	return *sSettingGroups["config"]; // default group
 }
 
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+LLControlVariable* LLUI::getControl(const std::string& controlname)
+{
+	for (auto& itGroup : sSettingGroups)
+	{
+		LLControlGroup* pControlGroup = itGroup.second;
+		if ( (pControlGroup != NULL) && (pControlGroup->controlExists(controlname)) )
+			return pControlGroup->getControl(controlname);
+	}
+	return false;
+}
+// [/SL:KB]
+
 //static 
 void LLUI::addPopup(LLView* viewp)
 {

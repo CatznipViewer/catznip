@@ -132,6 +132,9 @@ protected:
 private:
     void loadPhotos();
     void uploadPhoto(LLUUID outfit_id);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-4.1
+	void uploadPhotoCallback(const LLUUID& outfit_id, const std::string& filename);
+// [/SL:KB]
     LLUUID getPhotoAssetId(const LLUUID& outfit_id);
     LLUUID getDefaultPhoto();
     void linkPhotoToOutfit(LLUUID outfit_id, LLUUID photo_id);

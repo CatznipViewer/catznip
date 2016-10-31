@@ -379,8 +379,12 @@ void display(BOOL rebuild, F32 zoom_factor, int subfield, BOOL for_snapshot)
 
 	LLImageGL::updateStats(gFrameTimeSeconds);
 	
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
 	LLVOAvatar::sRenderName = gSavedSettings.getS32("AvatarNameTagMode");
-	LLVOAvatar::sRenderGroupTitles = (gSavedSettings.getBOOL("NameTagShowGroupTitles") && gSavedSettings.getS32("AvatarNameTagMode"));
+	LLVOAvatar::sRenderGroupTitles = LLVOAvatar::sRenderName && (gSavedSettings.getBOOL("NameTagShowGroupTitles"));
+// [/SL:KB]
+//	LLVOAvatar::sRenderName = gSavedSettings.getS32("AvatarNameTagMode");
+//	LLVOAvatar::sRenderGroupTitles = (gSavedSettings.getBOOL("NameTagShowGroupTitles") && gSavedSettings.getS32("AvatarNameTagMode"));
 	
 	gPipeline.mBackfaceCull = TRUE;
 	gFrameCount++;
@@ -1518,7 +1522,10 @@ void render_ui_2d()
 	}
 	
 
-	if (gSavedSettings.getBOOL("RenderUIBuffer"))
+//	if (gSavedSettings.getBOOL("RenderUIBuffer"))
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	if (LLPipeline::RenderUIBuffer)
+// [/SL:KB]
 	{
 		if (LLUI::sDirty)
 		{

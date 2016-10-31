@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="376"
+ label="Logging"
+ layout="topleft"
+ name="chat_log"
+ width="509">
+
+    <text
+     layout="topleft"
+     follows="top|left"
+     top_pad="15"
+     left="20"
+     width="350"
+     height="15"
+     mouse_opaque="false"
+     type="string"
+     name="log_notification_text"
+     font.style="BOLD">
+        Chat &amp; Instant Message Logging
+    </text>
+
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="35"
+     mouse_opaque="false"
+     name="log_friendstatus_text"
+     top_pad="5"
+     type="string"
+     width="145">
+        Friend online/offline :
+    </text>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Nearby Chat"
+     layout="topleft"
+     left_pad="0"
+     name="log_friendstatus_chat_check"
+     top_delta="-4"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationChat"
+         parameter="FriendOnlineOffline" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationChat"
+         parameter="FriendOnlineOffline" />
+    </check_box>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Instant Messages"
+     layout="topleft"
+     left_delta="135"
+     name="log_friendstatus_im_check"
+     top_delta="0"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationIM"
+         parameter="FriendOnlineOffline" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationIM"
+         parameter="FriendOnlineOffline" />
+    </check_box>
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="35"
+     mouse_opaque="false"
+     name="log_paymentreceived_text"
+     top_pad="5"
+     type="string"
+     width="145">
+        Payment received :
+    </text>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Nearby Chat"
+     layout="topleft"
+     left_pad="0"
+     name="log_paymentreceived_chat_check"
+     top_delta="-4"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationChat"
+         parameter="PaymentReceived" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationChat"
+         parameter="PaymentReceived" />
+    </check_box>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Instant Messages"
+     layout="topleft"
+     left_delta="135"
+     name="log_paymentreceived_im_check"
+     top_delta="0"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationIM"
+         parameter="PaymentReceived" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationIM"
+         parameter="PaymentReceived" />
+    </check_box>
+    <text
+     follows="top|left"
+     height="15"
+     layout="topleft"
+     left="35"
+     mouse_opaque="false"
+     name="log_paymentsent_text"
+     top_pad="5"
+     type="string"
+     width="145">
+        Payment sent :
+    </text>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Nearby Chat"
+     layout="topleft"
+     left_pad="0"
+     name="log_paymentsent_chat_text"
+     top_delta="-4"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationChat"
+         parameter="PaymentSent" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationChat"
+         parameter="PaymentSent" />
+    </check_box>
+    <check_box
+     follows="top|left"
+     height="20"
+     label="Instant Messages"
+     layout="topleft"
+     left_delta="135"
+     name="log_paymentsent_im_text"
+     top_delta="0"
+     width="350">
+        <check_box.init_callback
+         function="PrefChat.InitLogNotificationIM"
+         parameter="PaymentSent" />
+        <check_box.commit_callback
+         function="PrefChat.LogNotificationIM"
+         parameter="PaymentSent" />
+    </check_box>
+
+    <view_border
+     top_pad="10"
+     layout="topleft"
+     left="10"
+     height="0"
+     right="-10"
+     follows="left|top"
+     bevel_style="none"
+     border_thickness="1"
+     mouse_opaque="false"
+     name="divisor1" />
+    <text
+     layout="topleft"
+     follows="top|left"
+     top_pad="8"
+     left="20"
+     width="350"
+     height="15"
+     mouse_opaque="false"
+     type="string"
+     name="log_settings_text"
+     font.style="BOLD">
+        Log Files
+    </text>
+
+    <panel
+     follows="top|left"
+     height="110"
+     layout="topleft"
+     name="log_settings"
+     left="0"
+     top_pad="0"
+     right="-1">
+
+        <!-- Referenced in code -->
+        <check_box
+         control_name="LogNearbyChat"
+         enabled="false"
+         follows="top|left"
+         height="16"
+         label="Save nearby chat logs on my computer"
+         layout="topleft"
+         left="35"
+         name="log_nearby_chat"
+         width="350"
+         top="5">
+        </check_box>
+
+        <!-- Referenced in code -->
+        <check_box
+         control_name="LogInstantMessages"
+         enabled="false"
+         follows="top|left"
+         height="16"
+         label="Save IM logs on my computer"
+         layout="topleft"
+         name="log_instant_messages"
+         width="350">
+        </check_box>
+
+        <!-- Referenced in code -->
+        <check_box
+         control_name="LogUnreadIMs"
+         enabled="false"
+         follows="top|left"
+         height="16"
+         label="Restore unread IM messages on login"
+         layout="topleft"
+         name="log_unread_messages"
+         width="350">
+        </check_box>
+
+        <!-- Referenced in code -->
+        <check_box
+         control_name="LogFileNamewithDate"
+         enabled="false"
+         follows="top|left"
+         height="16"
+         label="Add datestamp to log file name."
+         layout="topleft"
+         name="logfile_name_datestamp"
+         width="350"/>
+
+        <!-- Referenced in code -->
+<!--
+        <button
+         follows="top|left"
+         enabled="false"
+         height="23"
+         label="Clear log..."
+         layout="topleft"
+         left_pad="5"
+         top_pad="0"
+         name="clear_log"
+         width="100">
+            <commit_callback
+             function="Pref.ClearLog" />
+        </button>
+-->
+
+        <text
+         follows="top|left"
+         layout="topleft"
+
+         name="log_path_text"
+         height="16"
+         top_pad="7"
+         width="55">
+            Location
+        </text>
+
+        <!-- Referenced in code -->
+        <line_editor
+         follows="top|left"
+         control_name="InstantMessageLogPath"
+         border_style="line"
+         border_thickness="1"
+         enabled="false"
+         height="23"
+         layout="topleft"
+         left_pad="2"
+         max_length="4096"
+         name="log_path_string"
+         top_delta="-5"
+         width="185" />
+
+        <!-- Referenced in code -->
+        <button
+         enabled="false"
+         follows="left|top"
+         height="23"
+         label="Browse..."
+         label_selected="Browse"
+         layout="topleft"
+         left_pad="5"
+         name="log_path_button"
+         top_delta="0"
+         width="80">
+            <commit_callback function="Pref.LogPath" />
+        </button>
+
+        <!-- Referenced in code -->
+        <button
+         follows="top|left"
+         enabled="false"
+         height="23"
+         label="Delete transcripts..."
+         layout="topleft"
+         left_pad="5"
+         name="delete_transcripts"
+         width="110">
+            <button.commit_callback
+             function="Pref.DeleteTranscripts" />
+        </button>
+
+    </panel>
+
+    <panel
+     bg_alpha_color="DkGray"
+     bg_opaque_color="DkGray"
+     background_visible="true"
+     border="false"
+     follows="top|left"
+     left="0"
+     right="-1"
+     top_pad="0"
+     height="135">
+        <text
+         layout="topleft"
+         follows="top|left"
+         top="5"
+         left="20"
+         width="350"
+         height="15"
+         mouse_opaque="false"
+         type="string"
+         name="log_filename_text"
+         font.style="BOLD">
+            Chat Log Filenames
+        </text>
+        <text
+         follows="top|left"
+         layout="topleft"
+         left="20"
+         height="80"
+         name="log_filename_legacy_text"
+         word_wrap="true"
+         right="-10">
+Legacy format file names are capatilised and seperated by a space and are used by most third party viewers ('Firstname Lastname.txt').
+
+Linden viewers use lowercase seperated by an underscore ('firstname_lastname.txt').
+
+It is recommended you keep the same format as the majority of your log files.
+        </text>
+        <check_box
+         control_name="UseLegacyIMLogNames"
+         follows="top|left"
+         height="20"
+         label="Use Legacy IM Log File Naming Scheme"
+         layout="topleft"
+         left="35"
+         name="log_filename_legacy_check"
+         top_pad="5"
+         width="350" />
+    </panel>
+  
+</panel>

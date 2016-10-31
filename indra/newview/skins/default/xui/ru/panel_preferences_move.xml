@@ -8,12 +8,12 @@
 	<check_box label="создания/редактирования" name="edit_camera_movement" tool_tip="Автоматическое позиционирование камеры при входе в режим редактирования и выходе из него"/>
 	<check_box label="внешности" name="appearance_camera_movement" tool_tip="Автоматическое позиционирование камеры в режиме редактирования"/>
 	<text name="keyboard_lbl">
-		Клавиатура:
+		Клавиатура
 	</text>
 	<check_box label="Клавиши со стрелками всегда перемещают меня" name="arrow_keys_move_avatar_check"/>
 	<check_box label="Бег после двойного нажатия клавиши" name="tap_tap_hold_to_run"/>
 	<text name="mouse_lbl">
-		Мышь:
+		Мышь
 	</text>
 	<check_box label="Показывать меня при обзоре мышью" name="first_person_avatar_visible"/>
 	<text name=" Mouse Sensitivity">

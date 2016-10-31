@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ border="true"
+ follows="all"
+ height="310"
+ label="Auto-Replace Settings"
+ layout="topleft"
+ name="chat_autoreplace"
+ width="509">
+  <text
+   layout="topleft"
+   follows="top|left"
+   top_pad="15"
+   left="20"
+   right="-5"
+   height="15"
+   mouse_opaque="false"
+   type="string"
+   name="catznip_nearbychat_text"
+   font.style="BOLD">
+    Auto-Replace (Local Chat, Instant Messages &amp; Group Chat)
+  </text>
+  <check_box
+   left="35"
+   height="16"
+   width="100"
+   layout="topleft"
+   follows="left|top"
+   label="Enable Auto-Replace"
+   name="autoreplace_enable"
+   tool_tip="As you enter chat text, replace any of the keywords entered with the corresponding replacement"/>
+  <button
+   top_pad="10"
+   layout="topleft"
+   left="10"
+   height="22"
+   width="110"
+   enabled="true"
+   follows="left|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_import_list"
+   label="Import List..."
+   tool_tip="Load a previously exported list from a file."/>
+  <button
+   top_delta="0"
+   layout="topleft"
+   left_pad="10"
+   height="22"
+   width="110"
+   enabled="true"
+   follows="left|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_export_list"
+   label="Export List..."
+   tool_tip="Save the selected list to a file so you can share it."/>
+  <button
+   top_delta="0"
+   layout="topleft"
+   left_pad="10"
+   height="22"
+   width="110"
+   enabled="true"
+   follows="left|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_new_list"
+   label="New List..."
+   tool_tip="Create a new list."/>
+  <button
+   top_delta="0"
+   layout="topleft"
+   left_pad="10"
+   height="22"
+   width="110"
+   enabled="true"
+   follows="left|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_delete_list"
+   label="Delete List"
+   tool_tip="Delete the selected list."/>
+  <scroll_list
+   top_pad="10"
+   layout="topleft"
+   left="10"
+   height="60"
+   right="-110"
+   follows="left|top|right"
+   column_padding="0"
+   draw_heading="false"
+   multi_select="false"
+   name="autoreplace_list_name"
+   search_column="0">
+  </scroll_list>
+  <button
+   top="95"
+   layout="topleft"
+   left="410"
+   height="22"
+   width="90"
+   enabled="true"
+   follows="top|right"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_list_up"
+   image_overlay="Arrow_Up"
+   tool_tip="Move this list up in priority."/>
+  <button
+   top_pad="10"
+   layout="topleft"
+   left_delta="0"
+   height="22"
+   width="90"
+   enabled="true"
+   follows="top|right"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_list_down"
+   image_overlay="Arrow_Down"
+   tool_tip="Move this list down in priority."/>
+  <scroll_list
+   top_pad="10"
+   layout="topleft"
+   left="10"
+   height="100"
+   right="-110"
+   follows="all"
+   column_padding="0"
+   draw_heading="true"
+   multi_select="true"
+   name="autoreplace_list_replacements"
+   search_column="0">
+    <scroll_list.columns
+        type="checkbox"
+        width="20"
+        label=""
+        name="checkbox" />
+    <scroll_list.columns
+        label="Keyword"
+        name="keyword"
+        width="120" />
+    <scroll_list.columns
+        label="Replacement"
+        name="replacement"/>
+  </scroll_list>
+  <button 
+   top="200"
+   layout="topleft"
+   left="410"
+   height="22"
+   width="90"
+   enabled="true"
+   follows="right|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_add_entry"
+   label="Add..."/>
+  <button 
+   top_pad="3"
+   layout="topleft"
+   left="410"
+   height="22"
+   width="90"
+   enabled="true"
+   follows="right|top"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_delete_entry"
+   label="Remove"/>
+  <line_editor
+   name="autoreplace_keyword"
+   follows="left|bottom"
+   height="23"
+   layout="topleft"
+   left="10"
+   max_length_bytes="255"
+   top_pad="38"
+   width="120"/>
+  <line_editor
+   name="autoreplace_replacement"
+   follows="left|bottom|right"
+   height="23"
+   layout="topleft"
+   left_pad="1"
+   max_length_bytes="255"
+   right="-109"
+   />
+  <button
+   layout="topleft"
+   left_pad="10"
+   height="22"
+   width="90"
+   enabled="true"
+   follows="bottom|right"
+   mouse_opaque="true"
+   halign="center"
+   scale_image="true"
+   name="autoreplace_save_entry"
+   label="Save Entry"
+   tool_tip="Save this entry."/>
+</panel>
