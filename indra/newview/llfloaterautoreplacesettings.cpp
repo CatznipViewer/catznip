@@ -458,11 +458,23 @@ void LLPanelPreferenceAutoReplaceSettings::onDeleteEntry()
 void LLPanelPreferenceAutoReplaceSettings::onImportList()
 // [/SL:KB]
 {
-	LLFilePicker& picker = LLFilePicker::instance();
-	if( picker.getOpenFile( LLFilePicker::FFLOAD_XML) )
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if( picker.getOpenFile( LLFilePicker::FFLOAD_XML) )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
+		boost::bind(&LLFloaterAutoReplaceSettings::onImportListCallback, this, _1));
+}
+
+void LLFloaterAutoReplaceSettings::onImportListCallback(const std::string& filepath)
+{
+	if (!filepath.empty())
+// [/SL:KB]
 	{
 		llifstream file;
-		file.open(picker.getFirstFile().c_str());
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+		file.open(filepath.c_str());
+// [/SL:KB]
+//		file.open(picker.getFirstFile().c_str());
 		LLSD newList;
 		if (file.is_open())
 		{
@@ -675,13 +687,25 @@ void LLPanelPreferenceAutoReplaceSettings::onExportList()
 // [/SL:KB]
 {
 	std::string listName=mListNames->getFirstSelected()->getColumn(0)->getValue().asString();
-	const LLSD* list = mSettings.exportList(listName);
+//	const LLSD* list = mSettings.exportList(listName);
 	std::string listFileName = listName + ".xml";
-	LLFilePicker& picker = LLFilePicker::instance();
-	if( picker.getSaveFile( LLFilePicker::FFSAVE_XML, listFileName) )
+//	LLFilePicker& picker = LLFilePicker::instance();
+//	if( picker.getSaveFile( LLFilePicker::FFSAVE_XML, listFileName) )
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_XML, listFileName,  boost::bind(&LLFloaterAutoReplaceSettings::onExportListCallback, this, listName, _1));
+}
+
+void LLFloaterAutoReplaceSettings::onExportListCallback(const std::string& listName, const std::string& filepath)
+{
+	if (!filepath.empty())
+// [/SL:KB]
 	{
 		llofstream file;
-		file.open(picker.getFirstFile().c_str());
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
+		file.open(filepath.c_str());
+		const LLSD* list = mSettings.exportList(listName);
+// [/SL:KB]
+//		file.open(picker.getFirstFile().c_str());
 		LLSDSerialize::toPrettyXML(*list, file);
 		file.close();
 	}

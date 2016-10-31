@@ -53,6 +53,9 @@
 #include "llnotificationsutil.h"
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+#include "llviewerobjectlist.h"
+// [/SL:KB]
 #include "llviewerregion.h"
 #include "llviewertexteditor.h"
 #include "llworld.h"
@@ -99,17 +102,29 @@ public:
 			return false;
 		}
 
-		LLSD payload;
-		payload["object_id"] = object_id;
-		payload["owner_id"] = query_map["owner"];
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+		// If the viewer knows about the object (optionally) show the object inspector, otherwise show the remote object inspector
+		if ( (gSavedSettings.getBOOL("InspectNearbyRemoteObject")) && (gObjectList.findObject(object_id)) )
+		{
+			LLFloaterReg::showInstance("inspect_object", LLSD().with("object_id", object_id));
+		}
+		else
+		{
+// [/SL:KB]
+			LLSD payload;
+			payload["object_id"] = object_id;
+			payload["owner_id"] = query_map["owner"];
 // [RLVa:KB] - Checked: 2010-11-02 (RLVa-1.2.2a) | Modified: RLVa-1.2.2a
 		if (query_map.has("rlv_shownames"))
 			payload["rlv_shownames"] = query_map["rlv_shownames"];
 // [/RLVa:KB]
-		payload["name"] = query_map["name"];
-		payload["slurl"] = LLWeb::escapeURL(query_map["slurl"]);
-		payload["group_owned"] = query_map["groupowned"];
-		LLFloaterReg::showInstance("inspect_remote_object", payload);
+			payload["name"] = query_map["name"];
+			payload["slurl"] = LLWeb::escapeURL(query_map["slurl"]);
+			payload["group_owned"] = query_map["groupowned"];
+			LLFloaterReg::showInstance("inspect_remote_object", payload);
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+		}
+// [/SL:KB]
 		return true;
 	}
 };
@@ -167,7 +182,20 @@ public:
 
 		if (level == "profile")
 		{
-			LLFloaterReg::showInstance("inspect_remote_object", mObjectData);
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+			// If the viewer knows about the object (optionally) show the object inspector, otherwise show the remote object inspector
+			const LLUUID idObj = mObjectData["object_id"].asUUID();
+			if ( (gSavedSettings.getBOOL("InspectNearbyRemoteObject")) && (gObjectList.findObject(idObj)) )
+			{
+				LLFloaterReg::showInstance("inspect_object", LLSD().with("object_id", idObj));
+			}
+			else
+			{
+// [/SL:KB]
+				LLFloaterReg::showInstance("inspect_remote_object", mObjectData);
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+			}
+// [/SL:KB]
 		}
 		else if (level == "block")
 		{
@@ -405,7 +433,20 @@ public:
 		
 		if (mSourceType == CHAT_SOURCE_OBJECT)
 		{
-			LLFloaterReg::showInstance("inspect_remote_object", mObjectData);
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+			// If the viewer knows about the object (optionally) show the object inspector, otherwise show the remote object inspector
+			const LLUUID idObj = mObjectData["object_id"].asUUID();
+			if ( (gSavedSettings.getBOOL("InspectNearbyRemoteObject")) && (gObjectList.findObject(idObj)) )
+			{
+				LLFloaterReg::showInstance("inspect_object", LLSD().with("object_id", idObj));
+			}
+			else
+			{
+// [/SL:KB]
+				LLFloaterReg::showInstance("inspect_remote_object", mObjectData);
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-11 (Catznip-2.4)
+			}
+// [/SL:KB]
 		}
 		else if (mSourceType == CHAT_SOURCE_AGENT)
 		{

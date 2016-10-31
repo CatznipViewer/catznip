@@ -101,6 +101,9 @@ class LLDir
 	const std::string &getLindenUserDir() const;	// Location of the Linden user dir.
 	const std::string &getChatLogsDir() const;	// Location of the chat logs dir.
 	const std::string &getDumpDir() const;	// Location of the per-run dump dir.
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	const std::string &getSnapshotDir() const; // Location for snapshots
+// [/SL:KB]
 	const std::string &getPerAccountChatLogsDir() const;	// Location of the per account chat logs dir.
 	const std::string &getTempDir() const;			// Common temporary directory
 	const std::string  getCacheDir(bool get_default = false) const;	// Location of the cache.
@@ -195,6 +198,9 @@ class LLDir
 
 
 	virtual void setChatLogsDir(const std::string &path);		// Set the chat logs dir to this user's dir
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	virtual void setSnapshotDir(const std::string &path);
+// [/SL:KB]
 	virtual void setPerAccountChatLogsDir(const std::string &username);		// Set the per user chat log directory.
 	virtual void setLindenUserDir(const std::string &username);		// Set the linden user dir to this user's dir
 // [SL:KB] - Patch: Viewer-Skins | Checked: 2010-10-20 (Catznip-3.4)
@@ -246,6 +252,9 @@ protected:
 	std::string mLindenUserDir;		 // Location for Linden user-specific data
 	std::string mPerAccountChatLogsDir;		 // Location for chat logs.
 	std::string mChatLogsDir;		 // Location for chat logs.
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	std::string mSnapshotDir;		 // Location for snapshots
+// [/SL:KB]
 	std::string mCAFile;				 // Location of the TLS certificate authority PEM file.
 	std::string mTempDir;
 	std::string mCacheDir;			// cache directory as set by user preference

@@ -155,6 +155,9 @@ public:
 	std::string getFileName();
 	LLConversation* findConversation(const LLIMModel::LLIMSession* session);
 
+// [SL:KB] - Patch: Settings-Misc | Checked: 2014-02-27 (Catznip-3.6)
+	void initClass();
+// [/SL:KB]
 private:
 
 	LLConversationLog();

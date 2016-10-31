@@ -161,7 +161,10 @@ public:
 	bool isDefault() { return (mValues.size() == 1); }
 	bool shouldSave(bool nondefault_only);
 	bool isPersisted() { return mPersist != PERSIST_NO; }
-	bool isHiddenFromSettingsEditor() { return mHideFromSettingsEditor; }
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+	bool isHiddenFromSettingsEditor() const { return mHideFromSettingsEditor; }
+// [/SL:KB]
+//	bool isHiddenFromSettingsEditor() { return mHideFromSettingsEditor; }
 	LLSD get()			const	{ return getValue(); }
 	LLSD getValue()		const	{ return mValues.back(); }
 	LLSD getDefault()	const	{ return mValues.front(); }

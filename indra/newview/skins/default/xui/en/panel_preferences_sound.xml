@@ -322,6 +322,7 @@
 		control_name="EnableGestureSounds"
 		disabled_control="MuteAudio"
 		follows="top|left"
+     font.style="BOLD"
 		height="20"
 		label="Play sounds from gestures"
 		layout="topleft"

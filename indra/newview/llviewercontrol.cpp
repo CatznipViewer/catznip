@@ -336,6 +336,9 @@ static bool handleVideoMemoryChanged(const LLSD& newvalue)
 
 static void handleAudioVolumeChanged(const LLSD& newvalue)
 {
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	audio_update_settings();
+// [/SL:KB]
 	audio_update_volume(true);
 }
 
@@ -379,6 +382,10 @@ static bool handleResetVertexBuffersChanged(const LLSD&)
 
 static bool handleRepartition(const LLSD&)
 {
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	LLVOVolume::updateCachedSettings();
+// [/SL:KB]
+
 	if (gPipeline.isInit())
 	{
 		gOctreeMaxCapacity = gSavedSettings.getU32("OctreeMaxNodeCapacity");
@@ -756,6 +763,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("AudioLevelAmbient")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("AudioLevelMusic")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("AudioLevelMedia")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	gSavedSettings.getControl("AudioLevelMic")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("AudioLevelVoice")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("AudioLevelDoppler")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("AudioLevelRolloff")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
@@ -765,6 +775,9 @@ void settings_setup_listeners()
 	gSavedSettings.getControl("MuteMedia")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("MuteVoice")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("MuteAmbient")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
+// [SL:KB] - Patch: Settings-Cached | Checked: 2013-10-07 (Catznip-3.6)
+	gSavedSettings.getControl("MuteSounds")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
+// [/SL:KB]
 	gSavedSettings.getControl("MuteUI")->getSignal()->connect(boost::bind(&handleAudioVolumeChanged, _2));
 	gSavedSettings.getControl("RenderVBOEnable")->getSignal()->connect(boost::bind(&handleResetVertexBuffersChanged, _2));
 	gSavedSettings.getControl("RenderUseVAO")->getSignal()->connect(boost::bind(&handleResetVertexBuffersChanged, _2));

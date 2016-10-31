@@ -594,13 +594,7 @@
      name="NameTagFriend"
      value="0.447 0.784 0.663 1" />
     <color
-     name="NameTagLegacy"
-     reference="White" />
-    <color
-     name="NameTagMatch"
-     reference="White" />
-    <color
-     name="NameTagMismatch"
+     name="NameTagOthers"
      reference="White" />
     <color
      name="NetMapBackgroundColor"

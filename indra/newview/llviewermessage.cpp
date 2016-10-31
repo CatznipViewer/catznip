@@ -3209,7 +3209,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			}	
 
 //			chat.mURL = LLSLURL("objectim", session_id, "").getSLURLString();
-// [SL:KB] - Checked: 2010-11-02 (RLVa-1.2.2a) | Added: RLVa-1.2.2a
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2010-11-02 (Catznip-2.4)
 			chat.mURL = LLSLURL("objectim", session_id, LLURI::mapToQueryString(query_string)).getSLURLString();
 // [/SL:KB]
 			chat.mText = message;
@@ -4020,6 +4020,14 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 		}
 	}
 
+// [SL:KB] - Patch: Settings-InspectNearbyRemoteObject | Checked: 2011-07-25 (Catznip-2.6)
+	if ( (!chatter) && (chat.mPosAgent.isExactlyZero()) )
+	{
+		// If we don't know about the object then grab its position from the message
+		msg->getVector3("ChatData", "Position", chat.mPosAgent);
+	}
+// [/SL:KB]
+
 	if (is_audible)
 	{
 		//BOOL visible_in_chat_bubble = FALSE;
@@ -4351,8 +4359,8 @@ void process_chat_from_simulator(LLMessageSystem *msg, void **user_data)
 // then this info is news to us.
 void process_teleport_start(LLMessageSystem *msg, void**)
 {
-	// on teleport, don't tell them about destination guide anymore
-	LLFirstUse::notUsingDestinationGuide(false);
+//	// on teleport, don't tell them about destination guide anymore
+//	LLFirstUse::notUsingDestinationGuide(false);
 	U32 teleport_flags = 0x0;
 	msg->getU32("Info", "TeleportFlags", teleport_flags);
 
@@ -5376,8 +5384,12 @@ void process_sound_trigger(LLMessageSystem *msg, void **)
 		return;
 	}
 		
-	// Don't play sounds from gestures if they are not enabled.
-	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+//	// Don't play sounds from gestures if they are not enabled.
+//	if (object_id == owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [SL:KB] - Patch: Settings-Misc | Checked: 2012-08-30 (Catznip-3.3)
+	// Don't play sounds from gestures if they are not enabled (unless the user is playing them).
+	if (object_id == owner_id && gAgentID != owner_id && !gSavedSettings.getBOOL("EnableGestureSounds"))
+// [/SL:KB]
 	{
 		return;
 	}

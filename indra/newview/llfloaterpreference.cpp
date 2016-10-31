@@ -38,6 +38,9 @@
 #include "llfloaterautoreplacesettings.h"
 #include "llagent.h"
 #include "llagentcamera.h"
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+#include "llagentwearables.h"
+// [/SL:KB]
 #include "llcheckboxctrl.h"
 // [SL:KB] - Patch: Viewer-CrashLookup | Checked: 2012-05-26 (Catznip-3.3)
 #include "llclipboard.h"
@@ -432,6 +435,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
 	mCommitCallbackRegistrar.add("Pref.AvatarImpostorsEnable",	boost::bind(&LLFloaterPreference::onAvatarImpostorsEnable, this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",	boost::bind(&LLFloaterPreference::updateMaxComplexity, this));
@@ -440,6 +446,9 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.UpdateSliderText",		boost::bind(&LLFloaterPreference::refreshUI,this));
 	mCommitCallbackRegistrar.add("Pref.QualityPerformance",		boost::bind(&LLFloaterPreference::onChangeQuality, this, _2));
 	mCommitCallbackRegistrar.add("Pref.applyUIColor",			boost::bind(&LLFloaterPreference::applyUIColor, this ,_1, _2));
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+	mCommitCallbackRegistrar.add("Pref.applyNameTagColor",		boost::bind(&LLFloaterPreference::applyNameTagColor, this ,_1, _2));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.getUIColor",				boost::bind(&LLFloaterPreference::getUIColor, this ,_1, _2));
 	mCommitCallbackRegistrar.add("Pref.MaturitySettings",		boost::bind(&LLFloaterPreference::onChangeMaturity, this));
 	mCommitCallbackRegistrar.add("Pref.BlockList",				boost::bind(&LLFloaterPreference::onClickBlockList, this));
@@ -1983,6 +1992,22 @@ void LLFloaterPreference::onClickLogPath()
 }
 }
 
+// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+void LLFloaterPreference::onClickSnapshotPath()
+{
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
+	
+	LLDirPicker& picker = LLDirPicker::instance();
+	if (!picker.getDir(&proposed_name))
+	{
+		return; //Canceled!
+	}
+
+	gSavedSettings.setString("SnapshotLocalPath", picker.getDirName());
+	gDirUtilp->setSnapshotDir(picker.getDirName());
+}
+// [/SL:KB]
+
 bool LLFloaterPreference::moveTranscriptsAndLog()
 {
 	std::string instantMessageLogPath(gSavedPerAccountSettings.getString("InstantMessageLogPath"));
@@ -2327,6 +2352,14 @@ void LLFloaterPreference::applyUIColor(LLUICtrl* ctrl, const LLSD& param)
 {
 	LLUIColorTable::instance().setColor(param.asString(), LLColor4(ctrl->getValue()));
 }
+
+// [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
+void LLFloaterPreference::applyNameTagColor(LLUICtrl* ctrl, const LLSD& param)
+{
+	applyUIColor(ctrl, param);
+	LLVOAvatar::invalidateNameTags();
+}
+// [/SL:KB]
 
 void LLFloaterPreference::getUIColor(LLUICtrl* ctrl, const LLSD& param)
 {

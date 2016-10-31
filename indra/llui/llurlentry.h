@@ -438,6 +438,19 @@ public:
 	/*virtual*/ std::string getLocation(const std::string &url) const;
 };
 
+// [SL:KB] - Patch: Settings-ControlSLApp | Checked: 2015-07-04 (Catznip-3.7)
+///
+/// LLUrlEntrySetting Describes a Second Life (debug) setting Url, e.g.,
+/// secondlife:///app/setting/<setting>[/show]
+///
+class LLUrlEntrySetting : public LLUrlEntryBase
+{
+public:
+	LLUrlEntrySetting();
+	/*virtual*/ std::string getLabel(const std::string &url, const LLUrlLabelCallback &cb);
+};
+// [/SL:KB]
+
 ///
 /// LLUrlEntryTeleport Describes a Second Life teleport Url, e.g.,
 /// secondlife:///app/teleport/Ahern/50/50/50/

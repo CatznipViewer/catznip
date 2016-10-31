@@ -177,6 +177,13 @@
          name="im" />
         <panel
 		 class="panel_preference"
+         filename="panel_preferences_snapshots.xml"
+         label="Snapshots"
+         layout="topleft"
+         help_topic="preferences_snapshots_tab"
+         name="snapshots" />
+        <panel
+		 class="panel_preference"
          filename="panel_preferences_setup.xml"
          label="Setup"
          layout="topleft"

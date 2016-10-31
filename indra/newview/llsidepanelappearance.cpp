@@ -194,6 +194,12 @@ void LLSidepanelAppearance::onOpen(const LLSD& key)
 		else if (type == "edit_shape")
 		{
 			showWearableEditPanel();
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+			if ( (mEditWearable) && (mEditWearable->getVisible()) && (key.has("wearable_param")) )
+			{
+				mEditWearable->showWearableParam(key["wearable_param"].asString());
+			}
+// [/SL:KB]
 		}
 	}
 
@@ -578,6 +584,16 @@ void LLSidepanelAppearance::showDefaultSubpart()
 		mEditWearable->showDefaultSubpart();
 	}
 }
+
+// [SL:KB] - Patch: Settings-ShapeHover | Checked: 2013-06-05 (Catznip-3.4)
+void LLSidepanelAppearance::showWearableParam(const std::string& strParamName)
+{
+	if ( (mEditWearable) && (mEditWearable->getVisible()) )
+	{
+		mEditWearable->showWearableParam(strParamName);
+	}
+}
+// [/SL:KB]
 
 void LLSidepanelAppearance::updateScrollingPanelList()
 {
