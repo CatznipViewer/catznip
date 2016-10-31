@@ -111,6 +111,9 @@
 #include "lluictrlfactory.h"
 #include "llviewermedia.h"
 #include "llpluginclassmedia.h"
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-2.8)
+#include "llrecentpeople.h"
+// [/SL:KB]
 #include "llteleporthistorystorage.h"
 #include "llproxy.h"
 #include "llweb.h"
@@ -133,6 +136,14 @@
 const F32 BANDWIDTH_UPDATER_TIMEOUT = 0.5f;
 char const* const VISIBILITY_DEFAULT = "default";
 char const* const VISIBILITY_HIDDEN = "hidden";
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+const U32 CLEAR_MASK_COOKIES	= 0x01;
+const U32 CLEAR_MASK_NAVBAR		= 0x02;
+const U32 CLEAR_MASK_SEARCH		= 0x04;
+const U32 CLEAR_MASK_TELEPORT	= 0x08;
+const U32 CLEAR_MASK_PEOPLE		= 0x10;
+// [/SL:KB]
 
 //control value for middle mouse as talk2push button
 const static std::string MIDDLE_MOUSE_CV = "MiddleMouse";
@@ -251,24 +262,64 @@ bool callback_clear_browser_cache(const LLSD& notification, const LLSD& response
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
 	if ( option == 0 ) // YES
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+// [/SL:KB]
+
 		// clean web
 		LLViewerMedia::clearAllCaches();
-		LLViewerMedia::clearAllCookies();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_COOKIES)
+		{
+			LLViewerMedia::clearAllCookies();
+		}
+// [/SL:KB]
+//		LLViewerMedia::clearAllCookies();
 		
 		// clean nav bar history
-		LLNavigationBar::getInstance()->clearHistoryCache();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_NAVBAR)
+		{
+			LLNavigationBar::getInstance()->clearHistoryCache();
+		}
+// [/SL:KB]
+//		LLNavigationBar::getInstance()->clearHistoryCache();
 		
 		// flag client texture cache for clearing next time the client runs
 		gSavedSettings.setBOOL("PurgeCacheOnNextStartup", TRUE);
 		LLNotificationsUtil::add("CacheWillClear");
 
-		LLSearchHistory::getInstance()->clearHistory();
-		LLSearchHistory::getInstance()->save();
-		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
-		search_ctrl->clearHistory();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_SEARCH)
+		{
+			LLSearchHistory::getInstance()->clearHistory();
+			LLSearchHistory::getInstance()->save();
+			LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+			search_ctrl->clearHistory();
+		}
+// [/SL:KB]
+//		LLSearchHistory::getInstance()->clearHistory();
+//		LLSearchHistory::getInstance()->save();
+//		LLSearchComboBox* search_ctrl = LLNavigationBar::getInstance()->getChild<LLSearchComboBox>("search_combo_box");
+//		search_ctrl->clearHistory();
 
-		LLTeleportHistoryStorage::getInstance()->purgeItems();
-		LLTeleportHistoryStorage::getInstance()->save();
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+		if (nClearMask & CLEAR_MASK_TELEPORT)
+		{
+			LLTeleportHistoryStorage::getInstance()->purgeItems();
+			LLTeleportHistoryStorage::getInstance()->save();
+		}
+// [/SL:KB]
+//		LLTeleportHistoryStorage::getInstance()->purgeItems();
+//		LLTeleportHistoryStorage::getInstance()->save();
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-10-01 (Catznip-3.0)
+		if (nClearMask & CLEAR_MASK_PEOPLE)
+		{
+			LLRecentPeople::getInstance()->purgeItems();
+			LLRecentPeople::getInstance()->save();
+		}
+// [/SL:KB]
 	}
 	
 	return false;
@@ -1087,6 +1138,9 @@ void LLFloaterPreference::onBtnOK(const LLSD& userdata)
 
 		LLUIColorTable::instance().saveUserSettings();
 		gSavedSettings.saveToFile(gSavedSettings.getString("ClientSettingsFile"), TRUE);
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+		gStartupSettings.saveToFile(gSavedSettings.getString("StartupSettingsFile"), TRUE);
+// [/SL:KB]
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-10-02 (Catznip-2.8)
 		// We need to save all crash settings, even if they're defaults [see LLCrashLogger::loadCrashBehaviorSetting()]
 		gCrashSettings.saveToFile(gSavedSettings.getString("CrashSettingsFile"), FALSE);
@@ -2847,9 +2901,25 @@ class LLPanelPreferencePrivacy : public LLPanelPreference
 public:
 	LLPanelPreferencePrivacy()
 	{
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.2)
+		mCommitCallbackRegistrar.add("Privacy.ToggleClearSetting", boost::bind(&LLPanelPreferencePrivacy::onToggleClearSetting, this, _1, _2));
+// [/SL:KB]
+
 		mAccountIndependentSettings.push_back("VoiceCallsFriendsOnly");
 		mAccountIndependentSettings.push_back("AutoDisengageMic");
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+	/*virtual*/ void refresh()
+	{
+		U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+		getChild<LLCheckBoxCtrl>("clear_web_cookies")->set(nClearMask & CLEAR_MASK_COOKIES);
+		getChild<LLCheckBoxCtrl>("clear_navbar_history")->set(nClearMask & CLEAR_MASK_NAVBAR);
+		getChild<LLCheckBoxCtrl>("clear_search_history")->set(nClearMask & CLEAR_MASK_SEARCH);
+		getChild<LLCheckBoxCtrl>("clear_teleport_history")->set(nClearMask & CLEAR_MASK_TELEPORT);
+		getChild<LLCheckBoxCtrl>("clear_people_history")->set(nClearMask & CLEAR_MASK_PEOPLE);
+	}
+// [/SL:KB]
 
 	/*virtual*/ void saveSettings()
 	{
@@ -2874,7 +2944,44 @@ public:
 				}
 			}
 		}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2011-01-20 (Catznip-2.5)
+		LLControlVariablePtr pControl = gSavedSettings.getControl("ClearCacheMask");
+		if (pControl.notNull())
+		{
+			mSavedValues[pControl] = pControl->getValue();
+		}
+// [/SL:KB]
 	}
+
+// [SL:KB] - Patch: Settings-ClearCache | Checked: 2010-08-03 (Catznip-2.1)
+protected:
+	void onToggleClearSetting(LLUICtrl* pUICtrl, const LLSD& sdParam)
+	{
+		/*const*/ LLCheckBoxCtrl* pCheckCtrl = dynamic_cast<LLCheckBoxCtrl*>(pUICtrl);
+		if (pCheckCtrl)
+		{
+			U32 nClearToggle = 0; const std::string strParam = sdParam.asString();
+			if ("cookies" == strParam)
+				nClearToggle = CLEAR_MASK_COOKIES;
+			else if ("navbar" == strParam)
+				nClearToggle = CLEAR_MASK_NAVBAR;
+			else if ("search" == strParam)
+				nClearToggle = CLEAR_MASK_SEARCH;
+			else if ("teleport" == strParam)
+				nClearToggle = CLEAR_MASK_TELEPORT;
+			else if ("people" == strParam)
+				nClearToggle = CLEAR_MASK_PEOPLE;
+
+			U32 nClearMask = gSavedSettings.getU32("ClearCacheMask");
+			if (pCheckCtrl->get())
+				nClearMask |= nClearToggle;
+			else
+				nClearMask &= ~nClearToggle;
+			gSavedSettings.setU32("ClearCacheMask", nClearMask);
+		}
+	}
+// [/SL:KB]
 
 private:
 	std::list<std::string> mAccountIndependentSettings;
@@ -2882,6 +2989,78 @@ private:
 
 static LLPanelInjector<LLPanelPreferenceGraphics> t_pref_graph("panel_preference_graphics");
 static LLPanelInjector<LLPanelPreferencePrivacy> t_pref_privacy("panel_preference_privacy");
+
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-04-03 (Catznip-3.6)
+class LLPanelPreferenceTroubleshooting : public LLPanelPreference
+{
+public:
+	LLPanelPreferenceTroubleshooting()
+	{
+		mCommitCallbackRegistrar.add("Pref.ClearSettings", boost::bind(&LLPanelPreferenceTroubleshooting::onClearSettings, _2));
+		mCommitCallbackRegistrar.add("Pref.ForceInitialOutfit", boost::bind(&LLPanelPreferenceTroubleshooting::onForceInitialOutfit));
+	}
+
+	/*virtual*/ void refresh()
+	{
+		const EStartupState eStartupState = LLStartUp::getStartupState();
+
+		getChild<LLUICtrl>("catznip_group_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("reset_avatar_btn")->setEnabled(eStartupState == STATE_STARTED);
+		getChild<LLUICtrl>("clear_account_settings_btn")->setEnabled(eStartupState == STATE_STARTED);
+	}
+
+	static void onClearSettings(const LLSD& sdParam)
+	{
+		const std::string strParam = sdParam.asString();
+
+		std::string strNotifName;
+		if ("user" == strParam)
+			strNotifName = "ConfirmResetUserSettings";
+		else if ("account" == strParam)
+			strNotifName = "ConfirmResetAccountSettings";
+
+		if (!strNotifName.empty())
+		{
+			LLNotificationsUtil::add(strNotifName, LLSD(), sdParam, onClearSettingsCallback);
+		}
+	}
+
+	static void onClearSettingsCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			const std::string strParam = sdNotification["payload"].asString();
+			if ("user" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeUserSettingsOnNextStartup", TRUE);
+			}
+			else if ("account" == strParam)
+			{
+				gStartupSettings.setBOOL("PurgeAccountSettingsOnNextLogin", TRUE);
+			}
+			LLNotificationsUtil::add("SettingsWillReset");
+		}
+	}
+
+	static void onForceInitialOutfit()
+	{
+		LLNotificationsUtil::add("ConfirmResetOutfit", LLSD(), LLSD(), onForceInitialOutfitCallback);
+	}
+
+	static void onForceInitialOutfitCallback(const LLSD& sdNotification, const LLSD& sdResponse)
+	{
+		S32 nOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+		if (nOption == 0) // YES
+		{
+			gSavedPerAccountSettings.setBOOL("WearInitialOutfit", TRUE);
+			LLNotificationsUtil::add("OutfitWillReset");
+		}
+	}
+};
+
+static LLPanelInjector<LLPanelPreferenceTroubleshooting> t_pref_troubleshooting("panel_preference_troubleshooting");
+// [SL:KB]
 
 BOOL LLPanelPreferenceGraphics::postBuild()
 {

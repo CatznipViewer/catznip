@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-             name="Net Map Panel"
-     open_tabs_on_drag_and_drop="true"
- 
 <panel
  follows="all"
  height="383"
- label="RECENT"
+ label="HISTORY"
  layout="topleft"
  left="0"
  help_topic="people_recent_tab"

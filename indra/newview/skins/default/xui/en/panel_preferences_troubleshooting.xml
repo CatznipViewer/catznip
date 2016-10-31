@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<panel
+ border="true"
+ follows="all"
+ height="376"
+ label="Troubleshooting"
+ layout="topleft"
+ name="troubleshoot"
+ width="509">
+    <text
+     follows="top|left"
+     font.style="BOLD"
+     height="12"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="Troubleshooting:"
+     top_pad="20"
+     type="string"
+     width="150">
+     Catznip Help &amp; Support
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Catznip Group Chat"
+     layout="topleft"
+     left="25"
+     name="support_group_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="ShowSupportGroup" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="support_group_text"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       For Catznip help and support, please join the Catznip group.
+    </text>
+    <text
+     follows="top|left"
+     font.style="BOLD"
+     height="12"
+     layout="topleft"
+     left="20"
+     length="1"
+     name="Troubleshooting:"
+     top_pad="40"
+     type="string"
+     width="150">
+     Troubleshooting
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Reset Avatar"
+     layout="topleft"
+     left="25"
+     name="reset_avatar_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ForceInitialOutfit" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="reset_avatar_text"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Reset avatar &amp; attachments to defaults .. )
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Clear Viewer Settings"
+     layout="topleft"
+     left="25"
+     name="clear_user_settings_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ClearSettings"
+         parameter="user" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="clear_user_settings_text"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Preferences, menu options and debug settings .. )
+    </text>
+    <button
+     follows="top|left"
+     height="23"
+     label="Clear Personal Settings"
+     layout="topleft"
+     left="25"
+     name="clear_account_settings_btn"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ClearSettings"
+         parameter="account" />
+    </button>
+    <text
+     follows="top|left"
+     height="10"
+     layout="topleft"
+     left_pad="10"
+     length="1"
+     name="clear_account_settings_text"
+     text_color="LtGray_50"
+     top_delta="5"
+     type="string"
+     width="330">
+       (Toolbar layout, saved notifications, derender list ..)
+    </text>
+    <button
+     follows="left|top"
+     height="23"
+     label="Clear Cache"
+     layout="topleft"
+     left="25"
+     name="clear_cache"
+     top_pad="15"
+     width="150">
+        <button.commit_callback
+         function="Pref.ClearCache" />
+    </button>
+</panel>

@@ -184,7 +184,10 @@ bool friendship_offer_callback(const LLSD& notification, const LLSD& response)
     if (notification_ptr)
     {
 	    // add friend to recent people list
-	    LLRecentPeople::instance().add(payload["from_id"]);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	    LLRecentPeople::instance().add(payload["from_id"], LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//	    LLRecentPeople::instance().add(payload["from_id"]);
 
 	    switch(option)
 	    {
@@ -1571,7 +1574,12 @@ void LLOfferInfo::send_auto_receive_response(void)
 		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
 			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, mFromID)) || (!RlvUtil::isNearbyAgent(mFromID)) || (RlvUIEnabler::hasOpenIM(mFromID)) || (RlvUIEnabler::hasOpenProfile(mFromID));
 		if (fRlvCanShowName)
-			LLRecentPeople::instance().add(mFromID);
+		{
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+			LLRecentPeople::instance().add(mFromID, LLRecentPeople::IT_INVENTORY);
+// [/SL:KB]
+//			LLRecentPeople::instance().add(mFromID);
+		}
 // [/RLVa:KB]
 	}
 }
@@ -7782,7 +7790,12 @@ void send_lures(const LLSD& notification, const LLSD& response)
 			// Add the recepient to the recent people list.
 // [RLVa:KB] - Checked: RLVa-2.0.1
 			if (fRlvCanShowName)
-				LLRecentPeople::instance().add(target_id);
+			{
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+				LLRecentPeople::instance().add(target_id, LLRecentPeople::IT_GENERAL);
+// [/SL:KB]
+//				LLRecentPeople::instance().add(target_id);
+			}
 // [/RLVa:KB]
 //			LLRecentPeople::instance().add(target_id);
 		}

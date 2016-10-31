@@ -111,6 +111,9 @@ BOOL 				gHackGodmode = FALSE;
 LLControlGroup gSavedSettings("Global");	// saved at end of session
 LLControlGroup gSavedPerAccountSettings("PerAccount"); // saved at end of session
 LLControlGroup gCrashSettings("CrashSettings");	// saved at end of session
+// [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2013-08-11 (Catznip-3.6)
+LLControlGroup gStartupSettings("StartupSettings");
+// [/SL:KB]
 LLControlGroup gWarningSettings("Warnings"); // persists ignored dialogs/warnings
 
 std::string gLastRunVersion;

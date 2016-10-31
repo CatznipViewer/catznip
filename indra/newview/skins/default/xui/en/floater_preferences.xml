@@ -197,6 +197,12 @@
          help_topic="preferences_crashreports_tab"
          name="crashreports" />
         <panel
+         class="panel_preference_troubleshooting"
+         filename="panel_preferences_troubleshooting.xml"
+         label="Troubleshooting"
+         layout="topleft"
+         name="troubleshoot" />
+        <panel
          class="panel_preference"
          filename="panel_preferences_catznip.xml"
          label="Catznip"

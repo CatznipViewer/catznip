@@ -70,4 +70,69 @@
      function="CheckControl"
      parameter="RecentListShowIcons" />
   </menu_item_check>
+  <menu_item_separator
+   layout="topleft" />
+  <context_menu
+   label="Expiration"
+   layout="topleft"
+   name="Recent People Expiration" >
+     <menu_item_check
+      label="1 week"
+      name="expiration_one_week">
+       <menu_item_check.on_click
+        function="People.Recent.Expiration.Set"
+        parameter="7" />
+       <menu_item_check.on_check
+        function="People.Recent.Expiration.Check"
+        parameter="7" />
+     </menu_item_check>
+     <menu_item_check
+      label="1 month"
+      name="expiration_one_month">
+       <menu_item_check.on_click
+        function="People.Recent.Expiration.Set"
+        parameter="30" />
+       <menu_item_check.on_check
+        function="People.Recent.Expiration.Check"
+        parameter="30" />
+     </menu_item_check>
+     <menu_item_check
+      label="3 months"
+      name="expiration_three_months">
+       <menu_item_check.on_click
+        function="People.Recent.Expiration.Set"
+        parameter="91" />
+       <menu_item_check.on_check
+        function="People.Recent.Expiration.Check"
+        parameter="91" />
+     </menu_item_check>
+     <menu_item_check
+      label="6 months"
+      name="expiration_six_months">
+       <menu_item_check.on_click
+        function="People.Recent.Expiration.Set"
+        parameter="182" />
+       <menu_item_check.on_check
+        function="People.Recent.Expiration.Check"
+        parameter="182" />
+     </menu_item_check>
+     <menu_item_separator 
+      layout="topleft" />
+     <menu_item_check
+      label="Never"
+      name="expiration_no_expiration">
+       <menu_item_check.on_click
+        function="People.Recent.Expiration.Set"
+        parameter="0" />
+       <menu_item_check.on_check
+        function="People.Recent.Expiration.Check"
+        parameter="0" />
+     </menu_item_check>
+  </context_menu>
+  <menu_item_call
+   label="Clear History"
+   name="Clear Recent History">
+      <menu_item_call.on_click
+       function="People.Recent.ClearHistory" />
+  </menu_item_call>    
 </toggleable_menu>
