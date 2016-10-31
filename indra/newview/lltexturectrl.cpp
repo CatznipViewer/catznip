@@ -809,13 +809,7 @@ void LLFloaterTexturePicker::onBtnAdd(void* userdata)
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 void LLFloaterTexturePicker::onFilePickerCallback(const std::vector<std::string>& files)
 {
-	bool add_successful = false;
-	for (std::vector<std::string>::const_iterator it = files.begin(); it != files.end(); ++it)
-	{
-		add_successful |= LLLocalBitmapMgr::addUnit(*it);
-	}
-
-	if (add_successful)
+	if (LLLocalBitmapMgr::addUnits(files))
 	{
 		LLLocalBitmapMgr::feedScrollList(mLocalScrollCtrl);
 	}

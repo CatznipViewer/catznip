@@ -1430,15 +1430,17 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 									LLSelectMgr::getInstance()->highlightObjectOnly(mDragHoveredObject);
 								}
 							}
-							else 
+							else
 							{
 								LLSelectMgr::getInstance()->unhighlightObjectOnly(mDragHoveredObject);
 								mDragHoveredObject = NULL;
 
-								const std::string& strFilename = mDragItems.front().second; LLUUID idLocalBitmap;
-								if (!LLLocalBitmapMgr::hasUnit(strFilename, &idLocalBitmap))
-								{
-									LLLocalBitmapMgr::addUnit(strFilename, &idLocalBitmap);
+								const std::string& strFilename = mDragItems.front().second;
+
+								LLUUID idLocalBitmap = LLLocalBitmapMgr::getUnitID(strFilename);
+								if (idLocalBitmap.isNull())
+ 								{
+									idLocalBitmap = LLLocalBitmapMgr::addUnit(strFilename);
 								}
 
 								if (idLocalBitmap.notNull())

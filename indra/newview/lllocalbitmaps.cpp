@@ -838,116 +838,44 @@ void LLLocalBitmapMgr::cleanupClass()
 	sBitmapList.clear();
 }
 
-//bool LLLocalBitmapMgr::addUnit()
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-bool LLLocalBitmapMgr::addUnit(const std::string& filename)
-// [/SL:KB]
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-08-11 (Catznip-3.6)
+bool LLLocalBitmapMgr::addUnits(const std::vector<std::string>& files)
 {
 	bool add_successful = false;
 
-//	LLFilePicker& picker = LLFilePicker::instance();
-//	if (picker.getMultipleOpenFiles(LLFilePicker::FFLOAD_IMAGE))
+	sTimer.stopTimer();
+	for (std::vector<std::string>::const_iterator itFile = files.begin(); itFile != files.end(); ++itFile)
 	{
-		sTimer.stopTimer();
-
-//		std::string filename = picker.getFirstFile();
-//		while(!filename.empty())
-		{
-			if(!checkTextureDimensions(filename))
-			{
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-				return false;
-// [/SL:KB]
-//				filename = picker.getNextFile();
-//				continue;
-			}
-
-//			LLLocalBitmap* unit = new LLLocalBitmap(filename);
-//
-//			if (unit->getValid())
-//			{
-//				sBitmapList.push_back(unit);
-//				add_successful = true;
-//			}
-//			else
-//			{
-//				LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
-//					    << "Filename: " << filename << LL_ENDL;
-//
-//				LLSD notif_args;
-//				notif_args["FNAME"] = filename;
-//				LLNotificationsUtil::add("LocalBitmapsVerifyFail", notif_args);
-//
-//				delete unit;
-//				unit = NULL;
-//			}
-// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-			add_successful &= addUnit(filename);
-// [/SL:KB]
-
-			filename = picker.getNextFile();
-		}
-		
-		sTimer.startTimer();
-	{
-		sTimer.stopTimer();
-
-//		std::string filename = picker.getFirstFile();
-//		while(!filename.empty())
-		{
-			if(!checkTextureDimensions(filename))
-			{
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-				return false;
-// [/SL:KB]
-//				filename = picker.getNextFile();
-//				continue;
-			}
-
-//			LLLocalBitmap* unit = new LLLocalBitmap(filename);
-//
-//			if (unit->getValid())
-//			{
-//				sBitmapList.push_back(unit);
-//				add_successful = true;
-//			}
-//			else
-//			{
-//				LL_WARNS() << "Attempted to add invalid or unreadable image file, attempt cancelled.\n"
-//					    << "Filename: " << filename << LL_ENDL;
-//
-//				LLSD notif_args;
-//				notif_args["FNAME"] = filename;
-//				LLNotificationsUtil::add("LocalBitmapsVerifyFail", notif_args);
-//
-//				delete unit;
-//				unit = NULL;
-//			}
-// [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-			add_successful &= addUnit(filename);
-// [/SL:KB]
-
-			filename = picker.getNextFile();
-		}
-		
-		sTimer.startTimer();
+		LLUUID tracking_id = addUnitInternal(*itFile);
+		if (tracking_id.notNull())
+			add_successful = true;
 	}
+	sTimer.startTimer();
 
 	return add_successful;
 }
+// [/SL:KB]
 
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
-bool LLLocalBitmapMgr::addUnit(const std::string& filename, LLUUID* pTrackingId)
+LLUUID LLLocalBitmapMgr::addUnit(const std::string& filename)
 {
-	bool add_successful = false;
+	sTimer.stopTimer();
+	LLUUID tracking_id = addUnitInternal(filename);
+	sTimer.startTimer();
+	return tracking_id;
+}
+
+LLUUID LLLocalBitmapMgr::addUnitInternal(const std::string& filename)
+{
+	if (!checkTextureDimensions(filename))
+	{
+		return LLUUID::null;
+	}
 
 	LLLocalBitmap* unit = new LLLocalBitmap(filename);
 	if (unit->getValid())
 	{
 		sBitmapList.push_back(unit);
-		if (pTrackingId)
-			*pTrackingId = unit->getTrackingID();
-		add_successful = true;
 	}
 	else
 	{
@@ -962,22 +890,20 @@ bool LLLocalBitmapMgr::addUnit(const std::string& filename, LLUUID* pTrackingId)
 		unit = NULL;
 	}
 
-	return add_successful;
+	return (unit) ? unit->getTrackingID() : LLUUID::null;
 }
 
-bool LLLocalBitmapMgr::hasUnit(const std::string& filename, LLUUID* pTrackingId)
+LLUUID LLLocalBitmapMgr::getUnitID(const std::string& filename)
 {
 	for (local_list_iter itBitmap = sBitmapList.begin(); sBitmapList.end() != itBitmap; ++itBitmap)
 	{
 		LLLocalBitmap* unit = *itBitmap;
 		if (filename == unit->getFilename())
 		{
-			if (pTrackingId)
-				*pTrackingId = unit->getTrackingID();
-			return true;
+			return unit->getTrackingID();
 		}
 	}
-	return false;
+	return LLUUID::null;
 }
 // [/SL:KB]
 

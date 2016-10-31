@@ -462,10 +462,10 @@ void LLPanelPreferenceAutoReplaceSettings::onImportList()
 //	if( picker.getOpenFile( LLFilePicker::FFLOAD_XML) )
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
 	LLFilePicker::getOpenFile(LLFilePicker::FFLOAD_XML, 
-		boost::bind(&LLFloaterAutoReplaceSettings::onImportListCallback, this, _1));
+		boost::bind(&LLPanelPreferenceAutoReplaceSettings::onImportListCallback, this, _1));
 }
 
-void LLFloaterAutoReplaceSettings::onImportListCallback(const std::string& filepath)
+void LLPanelPreferenceAutoReplaceSettings::onImportListCallback(const std::string& filepath)
 {
 	if (!filepath.empty())
 // [/SL:KB]
@@ -692,10 +692,10 @@ void LLPanelPreferenceAutoReplaceSettings::onExportList()
 //	LLFilePicker& picker = LLFilePicker::instance();
 //	if( picker.getSaveFile( LLFilePicker::FFSAVE_XML, listFileName) )
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2013-03-14 (Catznip-3.4)
-	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_XML, listFileName,  boost::bind(&LLFloaterAutoReplaceSettings::onExportListCallback, this, listName, _1));
+	LLFilePicker::getSaveFile(LLFilePicker::FFSAVE_XML, listFileName,  boost::bind(&LLPanelPreferenceAutoReplaceSettings::onExportListCallback, this, listName, _1));
 }
 
-void LLFloaterAutoReplaceSettings::onExportListCallback(const std::string& listName, const std::string& filepath)
+void LLPanelPreferenceAutoReplaceSettings::onExportListCallback(const std::string& listName, const std::string& filepath)
 {
 	if (!filepath.empty())
 // [/SL:KB]
