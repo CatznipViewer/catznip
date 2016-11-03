@@ -3138,6 +3138,36 @@ bool LLVOAvatar::isInMuteList()
 	return muted;
 }
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+bool LLVOAvatar::isNearby() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedNearbyUpdateTime)
+	{
+		return mCachedIsNearby;
+	}
+
+	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1;
+	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
+	mCachedIsNearby = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) < CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS;
+	return mCachedIsNearby;
+}
+
+bool LLVOAvatar::isFriend() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedIsFriendUpdateTime)
+	{
+		return mCachedIsFriend;
+	}
+
+	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 1;
+	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
+	mCachedIsFriend = LLAvatarTracker::instance().isBuddy(getID());
+	return mCachedIsFriend;
+}
+// [/SL:KB]
+
 void LLVOAvatar::updateDebugText()
 {
 	// clear debug text
@@ -6524,8 +6554,18 @@ bool LLVOAvatar::isTooComplex() const
 		// If the user has chosen unlimited max complexity, we also disregard max attachment area
         // so that unlimited will completely disable the overly complex impostor rendering
         // yes, this leaves them vulnerable to griefing objects... their choice
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		// NOTE: friends are (optionally) exempt from both complexity and surface area checks but
+		//       nearby avatars are (optionally) only exempt from the complexity but not the surface area check
+		static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
+		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+// [/SL:KB]
         too_complex = (   max_render_cost > 0
-                       && (   mVisualComplexity > max_render_cost
+//                       && (   mVisualComplexity > max_render_cost
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+                       && ( !always_render_friends || !isFriend() )
+                       && (   ( (mVisualComplexity > max_render_cost) && (!always_render_nearby || !isNearby()) )
+// [/SL:KB]
                            || (max_attachment_area > 0.0f && mAttachmentSurfaceArea > max_attachment_area)
                            ));
 	}

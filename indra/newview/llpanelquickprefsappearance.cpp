@@ -16,13 +16,81 @@
 
 #include "llviewerprecompiledheaders.h"
 
+#include "llcheckboxctrl.h"
 #include "llpanelquickprefsappearance.h"
 #include "llviewercontrol.h"
+
+// Appearance panel
+#include "llavatarrendernotifier.h"
+#include "llvoavatarself.h"
 
 // Wearing panel
 #include "llinventorymodel.h"
 #include "llinventoryobserver.h"
 #include "llpanelwearing.h"
+
+// ====================================================================================
+// LLQuickPrefsAppearancePanel class
+//
+
+static LLPanelInjector<LLQuickPrefsAppearancePanel> t_quickprefs_appearance("quickprefs_appearance");
+
+// From llviewermenu.cpp
+void menu_toggle_attached_lights(void* user_data);
+void menu_toggle_attached_particles(void* user_data);
+
+LLQuickPrefsAppearancePanel::LLQuickPrefsAppearancePanel()
+	: LLQuickPrefsPanel()
+{
+}
+
+LLQuickPrefsAppearancePanel::~LLQuickPrefsAppearancePanel()
+{
+	if (m_ComplexityChangedSlot.connected())
+		m_ComplexityChangedSlot.disconnect();
+	if (m_VisibilityChangedSlot.connected())
+		m_VisibilityChangedSlot.disconnect();
+}
+
+// virtual
+BOOL LLQuickPrefsAppearancePanel::postBuild()
+{
+	m_ComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLQuickPrefsAppearancePanel::refreshComplexity, this));
+	m_VisibilityChangedSlot = LLAvatarRenderNotifier::instance().addVisibilityChangedCallback(boost::bind(&LLQuickPrefsAppearancePanel::refreshComplexity, this));
+
+	m_pComplexityText = getChild<LLTextBox>("appearance_complexity_value");
+	m_pVisibilityText = getChild<LLTextBox>("appearance_visibility_value");
+	m_pMaxComplexityText = getChild<LLTextBox>("appearance_maxcomplexity_text");
+	m_pMaxNonImpostorsText = getChild<LLTextBox>("appearance_nonimpostors_value");
+
+	getChild<LLCheckBoxCtrl>("appearance_attachedlights_check")->setCommitCallback(boost::bind(&menu_toggle_attached_lights, nullptr));
+	getChild<LLCheckBoxCtrl>("appearance_attachedparticles_check")->setCommitCallback(boost::bind(&menu_toggle_attached_particles, nullptr));
+
+	return LLQuickPrefsPanel::postBuild();
+}
+
+// virtual
+void LLQuickPrefsAppearancePanel::onVisibilityChange(BOOL fVisible)
+{
+	if (fVisible)
+	{
+		refreshComplexity();
+	}
+}
+
+void LLQuickPrefsAppearancePanel::refreshComplexity()
+{
+	if (isInVisibleChain())
+	{
+		U32 nComplexity = (isAgentAvatarValid()) ? gAgentAvatarp->getVisualComplexity() : 0;
+		m_pComplexityText->setText(llformat("%d", nComplexity));
+
+		LLAvatarRenderNotifier* pAvRenderNotif = LLAvatarRenderNotifier::getInstance();
+		m_pVisibilityText->setText(llformat("%d / %d (%.0f%%)", pAvRenderNotif->getLatestAgentsCount() - pAvRenderNotif->getLatestOverLimitAgents(),
+		                                                        pAvRenderNotif->getLatestAgentsCount(),
+																100.f - pAvRenderNotif->getLatestOverLimitPct()));
+	}
+}
 
 // ====================================================================================
 // LLQuickPrefsWearingPanel class

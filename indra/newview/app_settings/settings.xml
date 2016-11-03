@@ -10150,6 +10150,28 @@
     <key>Value</key>
     <real>10.0E6</real>
   </map>
+  <key>RenderFriendsFull</key>
+  <map>
+    <key>Comment</key>
+    <string>Friends are always fully rendered</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <boolean>1</boolean>
+  </map>
+  <key>RenderNearbyFull</key>
+  <map>
+    <key>Comment</key>
+    <string>Nearby avatars (within chat range) are always fully rendered</string>
+    <key>Persist</key>
+    <integer>1</integer>
+    <key>Type</key>
+    <string>Boolean</string>
+    <key>Value</key>
+    <boolean>0</boolean>
+  </map>
 
     <key>RenderVBOEnable</key>
     <map>

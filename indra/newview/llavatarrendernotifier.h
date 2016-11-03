@@ -52,8 +52,18 @@ public:
 	boost::signals2::connection addComplexityChangedCallback(const complexity_changed_signal_t::slot_type& cb) { return mComplexityChangedSignal.connect(cb); }
 	void                        notifyComplexityChanged(U32 oldScore, U32 newScore) { mComplexityChangedSignal(oldScore, newScore); }
 	void                        removeComplexityChangedCallback(boost::signals2::connection callback) { mComplexityChangedSignal.disconnect(callback); }
+
+	typedef boost::signals2::signal<void(U32, U32)> visibility_changed_signal_t;
+	boost::signals2::connection addVisibilityChangedCallback(const visibility_changed_signal_t::slot_type& cb) { return mVisibilityChangedSignal.connect(cb); }
+	void                        notifyVisibilityChanged(U32 overLimitAgents, U32 countAgents) { mVisibilityChangedSignal(overLimitAgents, countAgents); }
+	void                        removeVisibilityChangedCallback(boost::signals2::connection callback) { mVisibilityChangedSignal.disconnect(callback); }
+
+	U32                         getLatestOverLimitAgents() const { return mLatestOverLimitAgents; }
+	U32                         getLatestAgentsCount() const { return mLatestAgentsCount; }
+	F32                         getLatestOverLimitPct() const { return mLatestOverLimitPct; }
 protected:
 	complexity_changed_signal_t mComplexityChangedSignal;
+	visibility_changed_signal_t mVisibilityChangedSignal;
 // [/SL:KB]
 
 private:

@@ -23,7 +23,52 @@
 //
 
 class LLInventoryCategoriesObserver;
+class LLTextBox;
 class LLWornItemsList;
+
+// ====================================================================================
+// LLQuickPrefsAppearancePanel class
+//
+
+class LLQuickPrefsAppearancePanel : public LLQuickPrefsPanel
+{
+	LOG_CLASS(LLQuickPrefsAppearancePanel);
+public:
+	LLQuickPrefsAppearancePanel();
+	~LLQuickPrefsAppearancePanel() override;
+
+	/*
+	 * LLPanel base class overrides
+	 */
+public:
+	BOOL postBuild() override;
+	void onVisibilityChange(BOOL fVisible) override;
+
+	/*
+	 * Event handlers
+	 */
+protected:
+	void refreshControls();
+	void refreshComplexity();
+
+	/*
+	 * Event handlers
+	 */
+protected:
+	void onComplexityChanged(U32 nOldScore, U32 nNewScore);
+
+	/*
+	 * Member variables
+	 */
+protected:
+	boost::signals2::connection m_ComplexityChangedSlot;
+	boost::signals2::connection m_VisibilityChangedSlot;
+
+	LLTextBox*                  m_pComplexityText = nullptr;
+	LLTextBox*                  m_pVisibilityText = nullptr;
+	LLTextBox*                  m_pMaxComplexityText = nullptr;
+	LLTextBox*                  m_pMaxNonImpostorsText = nullptr;
+};
 
 // ====================================================================================
 // LLQuickPrefsWearingPanel class
@@ -37,21 +82,21 @@ public:
 	~LLQuickPrefsWearingPanel() override;
 
 	/*
-	* LLPanel base class overrides
-	*/
+	 * LLPanel base class overrides
+	 */
 public:
 	BOOL postBuild() override;
 	void onVisibilityChange(BOOL fVisible) override;
 
 	/*
-	* Event handlers
-	*/
+	 * Event handlers
+	 */
 protected:
 	void onCOFChanged();
 
 	/*
-	* Member variables
-	*/
+	 * Member variables
+	 */
 protected:
 	LLUUID                         m_idCOF;
 	LLInventoryCategoriesObserver* m_pCofObserver = nullptr;

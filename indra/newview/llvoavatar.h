@@ -388,6 +388,10 @@ public:
 	U32 		renderImpostor(LLColor4U color = LLColor4U(255,255,255,255), S32 diffuse_channel = 0);
 	bool		isVisuallyMuted();
 	bool 		isInMuteList();
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	bool 		isNearby() const;
+	bool 		isFriend() const;
+// [/SL:KB]
 	void		forceUpdateVisualMuteSettings();
 
 	enum VisualMuteSettings
@@ -427,6 +431,12 @@ public:
 
 	bool		mCachedInMuteList;
 	F64			mCachedMuteListUpdateTime;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	mutable bool mCachedIsNearby = false;
+	mutable F64  mCachedNearbyUpdateTime = 0.f;
+	mutable bool mCachedIsFriend = false;
+	mutable F64  mCachedIsFriendUpdateTime = 0.f;
+// [/SL:KB]
 
 	VisualMuteSettings		mVisuallyMuteSetting;			// Always or never visually mute this AV
 
