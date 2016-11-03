@@ -273,23 +273,6 @@ void LLWornListItem::updateItem(const std::string& strName, EItemState itemState
 
 //////////////////////////////////////////////////////////////////////////
 
-class LLWornItemsList : public LLWearableItemsList
-{
-public:
-	struct Params : public LLInitParam::Block<Params, LLWearableItemsList::Params>
-	{
-		Params() {}
-	};
-protected:
-	friend class LLUICtrlFactory;
-	LLWornItemsList(const LLWornItemsList::Params& p);
-
-public:
-	/*virtual*/ void setSortOrder(ESortOrder sortOrder, bool sortNow = true);
-protected:
-	/*virtual*/ void addNewItem(LLViewerInventoryItem* item, bool rearrange /*= true*/);
-};
-
 static const LLDefaultChildRegistry::Register<LLWornItemsList> r("wearing_items_list");
 
 LLWornItemsList::LLWornItemsList(const LLWornItemsList::Params& p)

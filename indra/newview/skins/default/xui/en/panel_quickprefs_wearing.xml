@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ color="Transparent"
+ follows="all"
+ height="300"
+ layout="topleft"
+ name="panel_quickprefs_wearing"
+ width="300">
+	<wearing_items_list
+	 bottom="-1"
+	 follows="all"
+	 layout="topleft"
+	 left="1"
+	 multi_select="true"
+	 name="cof_items_list"
+	 right="-1"
+	 standalone="true"
+	 top="1"
+	 worn_indication_enabled="false" />
+</panel>
