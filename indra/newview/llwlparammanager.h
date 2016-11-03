@@ -239,7 +239,10 @@ public:
 	bool applyDayCycleParams(const LLSD& params, LLEnvKey::EScope scope, F32 time = 0.5);
 
 	/// apply specified fixed sky params
-	bool applySkyParams(const LLSD& params);
+// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
+	bool applySkyParams(const LLSD& params, bool interpolate);
+// [/SL:KB]
+//	bool applySkyParams(const LLSD& params);
 
 	// get where the light is pointing
 	inline LLVector4 getLightDir(void) const;
