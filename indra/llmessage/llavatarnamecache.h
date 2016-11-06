@@ -82,7 +82,7 @@ namespace LLAvatarNameCache
 //	void setUseUsernames(bool use);
 
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
-	void setShowUsername(LLAvatarName::EShowUsername eShowUsername);
+	void setShowUsername(EShowUsername eShowUsername);
 // [/SL:KB]
 
 	void insert(const LLUUID& agent_id, const LLAvatarName& av_name);

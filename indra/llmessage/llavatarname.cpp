@@ -44,7 +44,7 @@ static const std::string DISPLAY_NAME_EXPIRES("display_name_expires");
 static const std::string DISPLAY_NAME_NEXT_UPDATE("display_name_next_update");
 
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-LLAvatarName::EShowUsername LLAvatarName::s_eShowUsername = LLAvatarName::SHOW_ALWAYS;
+EShowUsername LLAvatarName::s_eShowUsername = EShowUsername::SHOW_ALWAYS;
 // [/SL:KB]
 
 bool LLAvatarName::sUseDisplayNames = true;
@@ -180,7 +180,7 @@ std::string LLAvatarName::getCompleteName(bool use_parentheses, EShowUsername eS
 	{
 //		if (mUsername.empty() || mIsDisplayNameDefault)
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-		if ( (mUsername.empty()) || ((SHOW_NEVER == eShowUsername) || ((SHOW_MISMATCH == eShowUsername) && (mIsDisplayNameDefault))) )
+		if ( (mUsername.empty()) || ((EShowUsername::SHOW_NEVER == eShowUsername) || ((EShowUsername::SHOW_MISMATCH == eShowUsername) && (mIsDisplayNameDefault))) )
 // [/SL:KB]
 		{
 			// If this particular display name is defaulted (i.e. based on user name),
@@ -193,7 +193,7 @@ std::string LLAvatarName::getCompleteName(bool use_parentheses, EShowUsername eS
 			if(use_parentheses)
 				name = mDisplayName + " (" + mUsername + ")";
 			else
-				name = mDisplayName + " [" + mUsername + " ]";
+				name = mDisplayName + " [" + mUsername + "]";
 // [/SL:KB]
 //			name = mDisplayName;
 //			if(sUseUsernames)

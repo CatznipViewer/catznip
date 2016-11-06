@@ -573,7 +573,7 @@ std::string LLUrlEntryAgent::getTooltip(const std::string &string) const
 
 	// If we (sometimes) hide the username, we have to show it as part of the tooltip
 	// NOTE: if the name isn't currently cached then the tooltip will be the default one, regardless of the current setting
-	if ( (LLAvatarName::useDisplayNames()) && (LLAvatarName::SHOW_ALWAYS != LLAvatarName::getShowUsername()) )
+	if ( (LLAvatarName::useDisplayNames()) && (EShowUsername::SHOW_ALWAYS != LLAvatarName::getShowUsername()) )
 	{
 		LLUUID idAgent(getIDStringFromUrl(url)); LLAvatarName avName;
 		if ( (idAgent.notNull()) && (LLAvatarNameCache::get(idAgent, &avName)) )
@@ -808,7 +808,7 @@ std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name
 {
 //	return avatar_name.getCompleteName();
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6)
-	return avatar_name.getCompleteName(LLAvatarName::SHOW_ALWAYS);
+	return avatar_name.getCompleteName(true, EShowUsername::SHOW_ALWAYS);
 // [/SL:KB]
 }
 

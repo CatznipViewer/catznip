@@ -32,6 +32,14 @@
 
 class LLSD;
 
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
+typedef enum class EShowUsername
+{
+	SHOW_ALWAYS = 0,		// Always show the username, i.e. "Kitty Barnett (kitty.barnett)"
+	SHOW_MISMATCH = 1,		// Only show the username on mismatch, i.e. "Kitty Barnett (random.resident)"
+	SHOW_NEVER = 2			// Never show the username
+};
+
 class LL_COMMON_API LLAvatarName
 {
 public:
@@ -68,13 +76,6 @@ public:
 // [/SL:KB]
 
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
-	typedef enum e_show_username_type
-	{
-		SHOW_ALWAYS = 0,		// Always show the username, i.e. "Kitty Barnett (kitty.barnett)"
-		SHOW_MISMATCH = 1,		// Only show the username on mismatch, i.e. "Kitty Barnett (random.resident)"
-		SHOW_NEVER = 2			// Never show the username
-	} EShowUsername;
-
 	static EShowUsername	getShowUsername()                            { return s_eShowUsername; }
 	static void				setShowUsername(EShowUsername eShowUsername) { s_eShowUsername = eShowUsername; }
 // [/SL:KB]
