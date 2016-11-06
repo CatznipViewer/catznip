@@ -420,7 +420,7 @@ LLControlVariable* LLUI::getControl(const std::string& controlname)
 		if ( (pControlGroup != NULL) && (pControlGroup->controlExists(controlname)) )
 			return pControlGroup->getControl(controlname);
 	}
-	return false;
+	return nullptr;
 }
 // [/SL:KB]
 
