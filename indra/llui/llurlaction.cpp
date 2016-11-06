@@ -162,7 +162,7 @@ void LLUrlAction::copyToClipboard(std::string strURL, const LLSD& sdAction)
 			{
 				std::string strAction = sdAction.asString();
 				if ("fullname" == strAction)
-					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getCompleteName(LLAvatarName::SHOW_ALWAYS)));
+					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getCompleteName(true, EShowUsername::SHOW_ALWAYS)));
 				else if ("displayname" == strAction)
 					LLView::getWindow()->copyTextToClipboard(utf8str_to_wstring(avName.getDisplayName()));
 				else if ("username" == strAction)
