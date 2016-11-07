@@ -60,7 +60,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>  
 
-const std::ifstream::pos_type LOG_TRUNC_SIZE = 16384;
+const std::ifstream::pos_type LOG_TRUNC_SIZE = 32768;
 // [/SL:KB]
 
 BOOL gBreak = false;
@@ -587,7 +587,7 @@ std::string getFormDataField(const std::string& strFieldName, const std::string&
 	return streamFormPart.str();
 }
 
-void addFormFile(std::ostringstream& body, const std::string strFileName, const char* pBuffer, unsigned int szBuffer)
+void addFormFile(std::iostream& body, const std::string strFileName, const char* pBuffer, unsigned int szBuffer)
 {
 	body << getFormDataField("filemap[]", llformat("%s;%d", strFileName.c_str(), szBuffer), BOUNDARY);
 	body << "--" << BOUNDARY << "\r\n"
@@ -608,19 +608,19 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
     LLCore::HttpRequest::ptr_t httpRequest(new LLCore::HttpRequest);
     LLCore::HttpOptions::ptr_t httpOpts(new LLCore::HttpOptions);
 
-    httpOpts->setTimeout(timeout);
+	httpOpts->setTimeout(timeout);
 
 	for(int i = 0; i < retries; ++i)
 	{
 		updateApplication(llformat("%s, try %d...", msg.c_str(), i+1));
 
 // [SL:KB] - Patch: Viewer-CrashReporting | Checked: 2011-03-24 (Catznip-2.6)
-		LLSD headers = LLSD::emptyMap();
+		LLCore::HttpHeaders::ptr_t httpHeaders(new LLCore::HttpHeaders);
+		httpHeaders->append("Accept", "*/*");
+		httpHeaders->append("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
 
-		headers["Accept"] = "*/*";
-		headers["Content-Type"] = "multipart/form-data; boundary=" + BOUNDARY;
-
-		std::ostringstream body;
+		LLCore::BufferArray* bodyBuf = new LLCore::BufferArray();
+		LLCore::BufferArrayStream body(bodyBuf);
 
 		/*
 		 * Send viewer information for the upload handler's benefit
@@ -720,13 +720,19 @@ bool LLCrashLogger::runCrashLogPost(const std::string& host, const std::string& 
 		 */
 		body << "--" << BOUNDARY << "--\r\n";
 
-		LLSD data;
-		LLSDSerialize::toPrettyXML(data, body);
-// [/SL:KB]
+		size_t size = bodyBuf->size();
+		char* byteBuf = new char[size];
+		bodyBuf->read(0, byteBuf, size);
+		LL_INFOS() << byteBuf << LL_ENDL;
 
-        LL_INFOS("CRASHREPORT") << "POST crash data to " << host << LL_ENDL;
-        LLCore::HttpHandle handle = LLCoreHttpUtil::requestPostWithLLSD(httpRequest.get(), LLCore::HttpRequest::DEFAULT_POLICY_ID, 0,
-            host, data, httpOpts, LLCore::HttpHeaders::ptr_t(), LLCore::HttpHandler::ptr_t(new LLCrashLoggerHandler));
+		LL_INFOS("CRASHREPORT") << "POST crash data to " << host << LL_ENDL;
+		LLCore::HttpHandle handle =	httpRequest->requestPost(LLCore::HttpRequest::DEFAULT_POLICY_ID, 0, host, bodyBuf, httpOpts, httpHeaders, LLCore::HttpHandler::ptr_t(new LLCrashLoggerHandler));
+
+		bodyBuf->release();
+// [/SL:KB]
+//        LL_INFOS("CRASHREPORT") << "POST crash data to " << host << LL_ENDL;
+//        LLCore::HttpHandle handle = LLCoreHttpUtil::requestPostWithLLSD(httpRequest.get(), LLCore::HttpRequest::DEFAULT_POLICY_ID, 0,
+//            host, data, httpOpts, LLCore::HttpHeaders::ptr_t(), LLCore::HttpHandler::ptr_t(new LLCrashLoggerHandler));
 
         if (handle == LLCORE_HTTP_HANDLE_INVALID)
         {
