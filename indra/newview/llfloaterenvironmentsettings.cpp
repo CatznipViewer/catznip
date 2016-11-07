@@ -73,9 +73,14 @@ BOOL LLFloaterEnvironmentSettings::postBuild()
 	setCloseCallback(boost::bind(&LLFloaterEnvironmentSettings::cancel, this));
 
 	LLEnvManagerNew::instance().setPreferencesChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::refresh, this));
-	LLDayCycleManager::instance().setModifyCallback(boost::bind(&LLFloaterEnvironmentSettings::populateDayCyclePresetsList, this));
-	LLWLParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateSkyPresetsList, this));
-	LLWaterParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateWaterPresetsList, this));
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	LLDayCycleManager::instance().setModifyCallback(boost::bind(&LLFloaterEnvironmentSettings::populateDayCyclePresetsList, mDayCyclePresetCombo));
+	LLWLParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateSkyPresetsList, mSkyPresetCombo));
+	LLWaterParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateWaterPresetsList, mWaterPresetCombo));
+// [/SL:KB]
+//	LLDayCycleManager::instance().setModifyCallback(boost::bind(&LLFloaterEnvironmentSettings::populateDayCyclePresetsList, this));
+//	LLWLParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateSkyPresetsList, this));
+//	LLWaterParamManager::instance().setPresetListChangeCallback(boost::bind(&LLFloaterEnvironmentSettings::populateWaterPresetsList, this));
 
 	return TRUE;
 }
@@ -155,9 +160,14 @@ void LLFloaterEnvironmentSettings::refresh()
 	mDayCycleSettingsRadioGroup->setSelectedIndex(use_fixed_sky ? 0 : 1);
 
 	// Populate the combo boxes with appropriate lists of available presets.
-	populateWaterPresetsList();
-	populateSkyPresetsList();
-	populateDayCyclePresetsList();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	populateWaterPresetsList(mWaterPresetCombo);
+	populateSkyPresetsList(mSkyPresetCombo);
+	populateDayCyclePresetsList(mDayCyclePresetCombo);
+// [/SL:KB]
+//	populateWaterPresetsList();
+//	populateSkyPresetsList();
+//	populateDayCyclePresetsList();
 
 	// Enable/disable other controls based on user preferences.
 	getChild<LLView>("user_environment_settings")->setEnabled(!use_region_settings);
@@ -205,9 +215,15 @@ void LLFloaterEnvironmentSettings::cancel()
 	LLEnvManagerNew::instance().usePrefs();
 }
 
-void LLFloaterEnvironmentSettings::populateWaterPresetsList()
+//void LLFloaterEnvironmentSettings::populateWaterPresetsList()
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+void LLFloaterEnvironmentSettings::populateWaterPresetsList(LLComboBox* pWaterPresetCombo)
+// [/SL:KB]
 {
-	mWaterPresetCombo->removeall();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	pWaterPresetCombo->removeall();
+// [/SL:KB]
+//	mWaterPresetCombo->removeall();
 
 	std::list<std::string> user_presets, system_presets;
 	LLWaterParamManager::instance().getPresetNames(user_presets, system_presets);
@@ -215,24 +231,39 @@ void LLFloaterEnvironmentSettings::populateWaterPresetsList()
 	// Add user presets first.
 	for (std::list<std::string>::const_iterator it = user_presets.begin(); it != user_presets.end(); ++it)
 	{
-		mWaterPresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pWaterPresetCombo->add(*it);
+// [/SL:KB]
+//		mWaterPresetCombo->add(*it);
 	}
 
 	if (user_presets.size() > 0)
 	{
-		mWaterPresetCombo->addSeparator();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pWaterPresetCombo->addSeparator();
+// [/SL:KB]
+//		mWaterPresetCombo->addSeparator();
 	}
 
 	// Add system presets.
 	for (std::list<std::string>::const_iterator it = system_presets.begin(); it != system_presets.end(); ++it)
 	{
-		mWaterPresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pWaterPresetCombo->add(*it);
+// [/SL:KB]
+//		mWaterPresetCombo->add(*it);
 	}
 }
 
-void LLFloaterEnvironmentSettings::populateSkyPresetsList()
+//void LLFloaterEnvironmentSettings::populateSkyPresetsList()
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+void LLFloaterEnvironmentSettings::populateSkyPresetsList(LLComboBox* pSkyPresetCombo)
+// [/SL:KB]
 {
-	mSkyPresetCombo->removeall();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	pSkyPresetCombo->removeall();
+// [/SL:KB]
+//	mSkyPresetCombo->removeall();
 
 	LLWLParamManager::preset_name_list_t region_presets; // unused as we don't list region presets here
 	LLWLParamManager::preset_name_list_t user_presets, sys_presets;
@@ -241,24 +272,39 @@ void LLFloaterEnvironmentSettings::populateSkyPresetsList()
 	// Add user presets.
 	for (LLWLParamManager::preset_name_list_t::const_iterator it = user_presets.begin(); it != user_presets.end(); ++it)
 	{
-		mSkyPresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pSkyPresetCombo->add(*it);
+// [/SL:KB]
+//		mSkyPresetCombo->add(*it);
 	}
 
 	if (!user_presets.empty())
 	{
-		mSkyPresetCombo->addSeparator();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pSkyPresetCombo->addSeparator();
+// [/SL:KB]
+//		mSkyPresetCombo->addSeparator();
 	}
 
 	// Add system presets.
 	for (LLWLParamManager::preset_name_list_t::const_iterator it = sys_presets.begin(); it != sys_presets.end(); ++it)
 	{
-		mSkyPresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pSkyPresetCombo->add(*it);
+// [/SL:KB]
+//		mSkyPresetCombo->add(*it);
 	}
 }
 
-void LLFloaterEnvironmentSettings::populateDayCyclePresetsList()
+//void LLFloaterEnvironmentSettings::populateDayCyclePresetsList()
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+void LLFloaterEnvironmentSettings::populateDayCyclePresetsList(LLComboBox* pDayCyclePresetCombo)
+// [/SL:KB]
 {
-	mDayCyclePresetCombo->removeall();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	pDayCyclePresetCombo->removeall();
+// [/SL:KB]
+//	mDayCyclePresetCombo->removeall();
 
 	LLDayCycleManager::preset_name_list_t user_days, sys_days;
 	LLDayCycleManager::instance().getPresetNames(user_days, sys_days);
@@ -266,17 +312,26 @@ void LLFloaterEnvironmentSettings::populateDayCyclePresetsList()
 	// Add user days.
 	for (LLDayCycleManager::preset_name_list_t::const_iterator it = user_days.begin(); it != user_days.end(); ++it)
 	{
-		mDayCyclePresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pDayCyclePresetCombo->add(*it);
+// [/SL:KB]
+//		mDayCyclePresetCombo->add(*it);
 	}
 
 	if (user_days.size() > 0)
 	{
-		mDayCyclePresetCombo->addSeparator();
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pDayCyclePresetCombo->addSeparator();
+// [/SL:KB]
+//		mDayCyclePresetCombo->addSeparator();
 	}
 
 	// Add system days.
 	for (LLDayCycleManager::preset_name_list_t::const_iterator it = sys_days.begin(); it != sys_days.end(); ++it)
 	{
-		mDayCyclePresetCombo->add(*it);
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+		pDayCyclePresetCombo->add(*it);
+// [/SL:KB]
+//		mDayCyclePresetCombo->add(*it);
 	}
 }
