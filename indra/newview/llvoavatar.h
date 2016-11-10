@@ -910,6 +910,10 @@ private:
 	bool			mNameCloud;
 	F32				mNameAlpha;
 	BOOL      		mRenderGroupTitles;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32				mNameComplexity = 0;
+	LLColor4		mNameComplexityColor;
+// [/SL:KB]
 
 	//--------------------------------------------------------------------
 	// Display the name (then optionally fade it out)

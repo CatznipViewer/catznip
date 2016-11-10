@@ -9781,6 +9781,39 @@
       <key>Value</key>
       <real>1.0</real>
     </map>
+    <key>RenderNameShowComplexity</key>
+    <map>
+      <key>Comment</key>
+      <string>Show an avatar's complexity in their name tag</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>RenderNameShowComplexityAtLimit</key>
+    <map>
+      <key>Comment</key>
+      <string>Show an avatar's complexity number only when it exceeds your current limit</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
+    <key>RenderNameShowComplexitySelf</key>
+    <map>
+      <key>Comment</key>
+      <string>Show your own avatar's complexity in your name tag</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>Boolean</string>
+      <key>Value</key>
+      <boolean>1</boolean>
+    </map>
     <key>RenderNameShowSelf</key>
     <map>
       <key>Comment</key>
