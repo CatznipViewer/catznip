@@ -23,7 +23,9 @@
 //
 
 class LLInventoryCategoriesObserver;
+class LLSliderCtrl;
 class LLTextBox;
+class LLWearableItemsList;
 class LLWornItemsList;
 
 // ====================================================================================
@@ -45,17 +47,19 @@ public:
 	void onVisibilityChange(BOOL fVisible) override;
 
 	/*
-	 * Event handlers
+	 * Member functions
 	 */
 protected:
-	void refreshControls();
 	void refreshComplexity();
+	void refreshMaxComplexity();
+	void refreshMaxNonImpostors();
 
 	/*
 	 * Event handlers
 	 */
 protected:
-	void onComplexityChanged(U32 nOldScore, U32 nNewScore);
+	void onMaxComplexityChange();
+	void onMaxNonImpostorsChange();
 
 	/*
 	 * Member variables
@@ -63,11 +67,48 @@ protected:
 protected:
 	boost::signals2::connection m_ComplexityChangedSlot;
 	boost::signals2::connection m_VisibilityChangedSlot;
+	boost::signals2::connection m_MaxComplexityChangedSlot;
+	boost::signals2::connection m_MaxNonImpostorsChangedSlot;
 
 	LLTextBox*                  m_pComplexityText = nullptr;
 	LLTextBox*                  m_pVisibilityText = nullptr;
+	LLSliderCtrl*               m_pMaxComplexitySlider = nullptr;
 	LLTextBox*                  m_pMaxComplexityText = nullptr;
+	LLSliderCtrl*               m_pMaxNonImpostorsSlider = nullptr;
 	LLTextBox*                  m_pMaxNonImpostorsText = nullptr;
+};
+
+// ====================================================================================
+// LLQuickPrefsInventoryPanel class
+//
+
+class LLQuickPrefsInventoryPanel : public LLQuickPrefsPanel
+{
+	LOG_CLASS(LLQuickPrefsInventoryPanel);
+public:
+	LLQuickPrefsInventoryPanel();
+	~LLQuickPrefsInventoryPanel() override;
+
+	/*
+	* LLPanel base class overrides
+	*/
+public:
+	BOOL postBuild() override;
+	void onVisibilityChange(BOOL fVisible) override;
+
+	/*
+	* Event handlers
+	*/
+protected:
+	void onInventoryChanged();
+
+	/*
+	* Member variables
+	*/
+protected:
+	LLUUID                         m_idQuickFolder;
+	LLInventoryCategoriesObserver* m_pInvenoryObserver = nullptr;
+	LLWearableItemsList*           m_pItemsList = nullptr;
 };
 
 // ====================================================================================

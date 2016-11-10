@@ -18,10 +18,13 @@
 
 #include "llcheckboxctrl.h"
 #include "llpanelquickprefsappearance.h"
+#include "llsliderctrl.h"
+#include "lltrans.h"
 #include "llviewercontrol.h"
 
 // Appearance panel
 #include "llavatarrendernotifier.h"
+#include "llfloaterpreference.h"
 #include "llvoavatarself.h"
 
 // Wearing panel
@@ -30,14 +33,18 @@
 #include "llpanelwearing.h"
 
 // ====================================================================================
+// Externals
+//
+
+// Defined in llviewermenu.cpp
+void menu_toggle_attached_lights(void* user_data);
+void menu_toggle_attached_particles(void* user_data);
+
+// ====================================================================================
 // LLQuickPrefsAppearancePanel class
 //
 
 static LLPanelInjector<LLQuickPrefsAppearancePanel> t_quickprefs_appearance("quickprefs_appearance");
-
-// From llviewermenu.cpp
-void menu_toggle_attached_lights(void* user_data);
-void menu_toggle_attached_particles(void* user_data);
 
 LLQuickPrefsAppearancePanel::LLQuickPrefsAppearancePanel()
 	: LLQuickPrefsPanel()
@@ -50,6 +57,10 @@ LLQuickPrefsAppearancePanel::~LLQuickPrefsAppearancePanel()
 		m_ComplexityChangedSlot.disconnect();
 	if (m_VisibilityChangedSlot.connected())
 		m_VisibilityChangedSlot.disconnect();
+	if (m_MaxComplexityChangedSlot.connected())
+		m_MaxComplexityChangedSlot.disconnect();
+	if (m_MaxNonImpostorsChangedSlot.connected())
+		m_MaxNonImpostorsChangedSlot.disconnect();
 }
 
 // virtual
@@ -60,11 +71,23 @@ BOOL LLQuickPrefsAppearancePanel::postBuild()
 
 	m_pComplexityText = getChild<LLTextBox>("appearance_complexity_value");
 	m_pVisibilityText = getChild<LLTextBox>("appearance_visibility_value");
+
+	m_pMaxComplexitySlider = getChild<LLSliderCtrl>("appearance_maxcomplexity_slider");
 	m_pMaxComplexityText = getChild<LLTextBox>("appearance_maxcomplexity_text");
+	m_pMaxComplexitySlider->setCommitCallback(boost::bind(&LLQuickPrefsAppearancePanel::onMaxComplexityChange, this));
+	m_MaxComplexityChangedSlot = gSavedSettings.getControl("RenderAvatarMaxComplexity")->getSignal()->connect(boost::bind(&LLQuickPrefsAppearancePanel::refreshMaxComplexity, this));
+
+	m_pMaxNonImpostorsSlider = getChild<LLSliderCtrl>("appearance_nonimpostors_slider");
 	m_pMaxNonImpostorsText = getChild<LLTextBox>("appearance_nonimpostors_value");
+	m_pMaxNonImpostorsSlider->setCommitCallback(boost::bind(&LLQuickPrefsAppearancePanel::onMaxNonImpostorsChange, this));
+	m_MaxNonImpostorsChangedSlot = m_pMaxNonImpostorsSlider->getControlVariable()->getSignal()->connect(boost::bind(&LLQuickPrefsAppearancePanel::refreshMaxNonImpostors, this));
 
 	getChild<LLCheckBoxCtrl>("appearance_attachedlights_check")->setCommitCallback(boost::bind(&menu_toggle_attached_lights, nullptr));
 	getChild<LLCheckBoxCtrl>("appearance_attachedparticles_check")->setCommitCallback(boost::bind(&menu_toggle_attached_particles, nullptr));
+
+	// Calling LLAvatarComplexityControls::setIndirectControls repeatedly will continue to lower max complexity values due to direct<->indirect value conversions
+	if (gSavedSettings.getU32("IndirectMaxComplexity") == 0)
+		LLAvatarComplexityControls::setIndirectControls();
 
 	return LLQuickPrefsPanel::postBuild();
 }
@@ -75,6 +98,8 @@ void LLQuickPrefsAppearancePanel::onVisibilityChange(BOOL fVisible)
 	if (fVisible)
 	{
 		refreshComplexity();
+		refreshMaxComplexity();
+		refreshMaxNonImpostors();
 	}
 }
 
@@ -90,6 +115,35 @@ void LLQuickPrefsAppearancePanel::refreshComplexity()
 		                                                        pAvRenderNotif->getLatestAgentsCount(),
 																100.f - pAvRenderNotif->getLatestOverLimitPct()));
 	}
+}
+
+void LLQuickPrefsAppearancePanel::refreshMaxComplexity()
+{
+	if (isInVisibleChain())
+	{
+		U32 nMaxComplexity = gSavedSettings.getU32("RenderAvatarMaxComplexity");
+		m_pMaxComplexityText->setText( (0 != nMaxComplexity) ? llformat("%d", nMaxComplexity) : LLTrans::getString("no_limit") );
+	}
+}
+
+void LLQuickPrefsAppearancePanel::refreshMaxNonImpostors()
+{
+	if (isInVisibleChain())
+	{
+		U32 nMaxNonImpostors = (U32)m_pMaxNonImpostorsSlider->getValue().asInteger();
+		m_pMaxNonImpostorsText->setText( (0 != nMaxNonImpostors) ? llformat("%d", nMaxNonImpostors) : LLTrans::getString("no_limit") );
+	}
+}
+
+void LLQuickPrefsAppearancePanel::onMaxComplexityChange()
+{
+	LLAvatarComplexityControls::updateMax(m_pMaxComplexitySlider, m_pMaxComplexityText);
+}
+
+void LLQuickPrefsAppearancePanel::onMaxNonImpostorsChange()
+{
+	// Updates to the debug setting will trigger its commit signal
+	LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors(m_pMaxNonImpostorsSlider->getValue().asInteger());
 }
 
 // ====================================================================================
