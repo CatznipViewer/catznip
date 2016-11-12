@@ -330,7 +330,11 @@ class LLFloaterPreferenceGraphicsAdvanced : public LLFloater
 	void refreshEnabledGraphics();
 	void refreshEnabledState();
 	void updateSliderText(LLSliderCtrl* ctrl, LLTextBox* text_box);
-	void updateMaxNonImpostors();
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	void onMaxNonImpostorsChange();
+	static void updateMaxNonImpostors(U32 value);
+// [/SL:KB]
+//	void updateMaxNonImpostors();
 	void setMaxNonImpostorsText(U32 value, LLTextBox* text_box);
 	void updateMaxComplexity();
 	void setMaxComplexityText(U32 value, LLTextBox* text_box);

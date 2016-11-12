@@ -2790,6 +2790,31 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		}
 	}
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	U32 complexity = 0;
+	bool use_complexity_color = false;
+	LLColor4 complexity_color;
+
+	static LLUICachedControl<bool> show_avatar_complexity("RenderNameShowComplexity", true);
+	static LLUICachedControl<bool> show_avatar_complexity_atlimit("RenderNameShowComplexityAtLimit", true);
+	static LLUICachedControl<bool> show_avatar_complexity_self("RenderNameShowComplexitySelf", false);
+	if ( (show_avatar_complexity) &&
+	     ( (!isSelf() && (!show_avatar_complexity_atlimit || isVisuallyMuted())) ||
+		   (isSelf() && show_avatar_complexity_self) ) )
+	{
+		// See idleUpdateRenderComplexity()
+		static LLCachedControl<U32> max_render_cost(gSavedSettings, "RenderAvatarMaxComplexity", 0);
+		if (max_render_cost != 0)
+		{
+			F32 green_level = 1.f-llclamp(((F32) mVisualComplexity-(F32)max_render_cost)/(F32)max_render_cost, 0.f, 1.f);
+			F32 red_level   = llmin((F32) mVisualComplexity/(F32)max_render_cost, 1.f);
+			complexity_color.set(red_level, green_level, 0.0, 1.0);
+			use_complexity_color = true;
+		}
+		complexity = mVisualComplexity;
+	}
+// [/SL:KB]
+
 	// Rebuild name tag if state change detected
 	if (!mNameIsSet
 		|| new_name
@@ -2803,6 +2828,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 		|| ( (show_typing) && ((!mVisibleChat) ? (bool)mTyping != mNameTyping : mNameTyping))
 // [/SL:KB]
 		|| is_friend != mNameFriend
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		|| complexity != mNameComplexity
+		|| complexity_color != mNameComplexityColor
+// [/SL:KB]
 		|| is_cloud != mNameCloud)
 	{
 		LLColor4 name_tag_color = getNameTagColor(is_friend);
@@ -2852,6 +2881,14 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 			addNameTagLine(line, name_tag_color, LLFontGL::NORMAL,
 				LLFontGL::getFontSansSerifSmall());
 		}
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		if (complexity > 0)
+		{
+			static const std::string s_strComplexity = LLTrans::getString("av_render_complexity", LLSD().with("COMPLEXITY", "%d"));
+			addNameTagLine(llformat(s_strComplexity.c_str(), complexity), (use_complexity_color) ? complexity_color : name_tag_color, LLFontGL::NORMAL, LLFontGL::getFontSansSerifSmall());
+		}
+// [/SL:KB]
 
 //		if (sRenderGroupTitles
 // [RLVa:KB] - Checked: RLVa-1.2.2
@@ -2933,6 +2970,10 @@ void LLVOAvatar::idleUpdateNameTagText(BOOL new_name)
 // [/SL:KB]
 		mNameFriend = is_friend;
 		mNameCloud = is_cloud;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		mNameComplexity = complexity;
+		mNameComplexityColor = complexity_color;
+// [/SL:KB]
 		mTitle = title ? title->getString() : "";
 		LLStringFn::replace_ascii_controlchars(mTitle,LL_UNKNOWN_CHAR);
 		new_name = TRUE;
@@ -3223,6 +3264,36 @@ bool LLVOAvatar::isInMuteList()
 	}
 	return muted;
 }
+
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+bool LLVOAvatar::isNearby() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedNearbyUpdateTime)
+	{
+		return mCachedIsNearby;
+	}
+
+	const F64 SECONDS_BETWEEN_NEARBY_UPDATES = 1;
+	mCachedNearbyUpdateTime = now + SECONDS_BETWEEN_NEARBY_UPDATES;
+	mCachedIsNearby = dist_vec_squared(gAgent.getPositionGlobal(), getPositionGlobal()) < CHAT_NORMAL_RADIUS * CHAT_NORMAL_RADIUS;
+	return mCachedIsNearby;
+}
+
+bool LLVOAvatar::isFriend() const
+{
+	F64 now = LLFrameTimer::getTotalSeconds();
+	if (now < mCachedIsFriendUpdateTime)
+	{
+		return mCachedIsFriend;
+	}
+
+	const F64 SECONDS_BETWEEN_FRIEND_UPDATES = 1;
+	mCachedIsFriendUpdateTime = now + SECONDS_BETWEEN_FRIEND_UPDATES;
+	mCachedIsFriend = LLAvatarTracker::instance().isBuddy(getID());
+	return mCachedIsFriend;
+}
+// [/SL:KB]
 
 void LLVOAvatar::updateDebugText()
 {
@@ -6624,8 +6695,18 @@ bool LLVOAvatar::isTooComplex() const
 		// If the user has chosen unlimited max complexity, we also disregard max attachment area
         // so that unlimited will completely disable the overly complex impostor rendering
         // yes, this leaves them vulnerable to griefing objects... their choice
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+		// NOTE: friends are (optionally) exempt from both complexity and surface area checks but
+		//       nearby avatars are (optionally) only exempt from the complexity but not the surface area check
+		static LLCachedControl<bool> always_render_friends(gSavedSettings, "RenderFriendsFull", true);
+		static LLCachedControl<bool> always_render_nearby(gSavedSettings, "RenderNearbyFull", false);
+// [/SL:KB]
         too_complex = (   max_render_cost > 0
-                       && (   mVisualComplexity > max_render_cost
+//                       && (   mVisualComplexity > max_render_cost
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+                       && ( !always_render_friends || !isFriend() )
+                       && (   ( (mVisualComplexity > max_render_cost) && (!always_render_nearby || !isNearby()) )
+// [/SL:KB]
                            || (max_attachment_area > 0.0f && mAttachmentSurfaceArea > max_attachment_area)
                            ));
 	}

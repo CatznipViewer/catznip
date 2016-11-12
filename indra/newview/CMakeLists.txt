@@ -489,6 +489,7 @@ set(viewer_SOURCE_FILES
     llpanelprimmediacontrols.cpp
     llpanelprofile.cpp
     llpanelprofileview.cpp
+    llpanelquickprefsappearance.cpp
     llpanelquickprefssettings.cpp
     llpanelsnapshot.cpp
     llpanelsnapshotinventory.cpp
@@ -1138,6 +1139,7 @@ set(viewer_HEADER_FILES
     llpanelprimmediacontrols.h
     llpanelprofile.h
     llpanelprofileview.h
+    llpanelquickprefsappearance.h
     llpanelquickprefssettings.h
     llpanelsnapshot.h
     llpanelteleporthistory.h
