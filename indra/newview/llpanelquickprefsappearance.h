@@ -53,6 +53,7 @@ protected:
 	void refreshComplexity();
 	void refreshMaxComplexity();
 	void refreshMaxNonImpostors();
+	void refreshNotifications();
 
 	/*
 	 * Event handlers
@@ -60,11 +61,14 @@ protected:
 protected:
 	void onMaxComplexityChange();
 	void onMaxNonImpostorsChange();
+	void onShowNotificationsToggle();
 
 	/*
 	 * Member variables
 	 */
 protected:
+	static const std::string s_strNotifications[];
+
 	boost::signals2::connection m_ComplexityChangedSlot;
 	boost::signals2::connection m_VisibilityChangedSlot;
 	boost::signals2::connection m_MaxComplexityChangedSlot;
@@ -72,6 +76,7 @@ protected:
 
 	LLTextBox*                  m_pComplexityText = nullptr;
 	LLTextBox*                  m_pVisibilityText = nullptr;
+	LLCheckBoxCtrl*             m_pShowNotificationsCheck = nullptr;
 	LLSliderCtrl*               m_pMaxComplexitySlider = nullptr;
 	LLTextBox*                  m_pMaxComplexityText = nullptr;
 	LLSliderCtrl*               m_pMaxNonImpostorsSlider = nullptr;
