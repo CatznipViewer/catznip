@@ -1170,7 +1170,7 @@ void LLInventoryFilter::toParams(Params& params) const
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
 	// Only save what isn't a default
 	if (mFilterOps.mFilterObjectTypes != mDefaultFilterOps.mFilterObjectTypes)
-		params.filter_ops.types = getFilterObjectTypes();
+		params.filter_ops.object_types = getFilterObjectTypes();
 	if ( (mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes) && (getFilterObjectTypes() & FILTERTYPE_WEARABLE) )
 		params.filter_ops.wearable_types = getFilterWearableTypes();
 	if (mFilterOps.mFilterCategoryTypes != mDefaultFilterOps.mFilterCategoryTypes)
@@ -1228,9 +1228,9 @@ void LLInventoryFilter::fromParams(const Params& params)
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
 	resetDefault();
 
-	if (params.filter_ops.types.isProvided())
+	if (params.filter_ops.object_types.isProvided())
 	{
-		setFilterObjectTypes(params.filter_ops.types);
+		setFilterObjectTypes(params.filter_ops.object_types);
 	}
 
 	if (params.filter_ops.wearable_types.isProvided())
@@ -1304,7 +1304,10 @@ void LLInventoryFilter::fromParams(const Params& params)
 //	setDateRangeLastLogoff(params.since_logoff);
 }
 
-U64 LLInventoryFilter::getFilterTypes() const
+//U64 LLInventoryFilter::getFilterTypes() const
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-4.3
+U32 LLInventoryFilter::getFilterTypes() const
+// [/SL:KB]
 {
 	return mFilterOps.mFilterTypes;
 }

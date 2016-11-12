@@ -222,7 +222,13 @@ BOOL LLPanelMainInventory::postBuild()
 				LLInventoryFilter::Params p;
 				LLParamSDParser parser;
 				parser.readSD(recent_items, p);
-				recent_items_panel->getFilter().fromParams(p);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-4.3
+				LLInventoryFilter& recent_filter = recent_items_panel->getFilter();
+				recent_filter.fromParams(p);
+				// NOTE: make sure that we're always filtering empty folders from the recent items panel
+				recent_filter.setFilterObjectTypes(recent_filter.getFilterObjectTypes() & ~(0x1 << LLInventoryType::IT_CATEGORY));
+// [/SL:KB]
+//				recent_items_panel->getFilter().fromParams(p);
 				recent_items_panel->setSortOrder(gSavedSettings.getU32(LLInventoryPanel::RECENTITEMS_SORT_ORDER));
 			}
 		}
