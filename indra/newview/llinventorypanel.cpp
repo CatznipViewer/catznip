@@ -295,9 +295,6 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 	{
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_INBOX));
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() & ~(1ULL << LLFolderType::FT_OUTBOX));
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
-		getFilter().markDefault();
-// [/SL:KB]
 	}
     // hide marketplace listing box, unless we are a marketplace panel
 	if (!gSavedSettings.getBOOL("InventoryOutboxMakeVisible") && !mParams.use_marketplace_folders)
@@ -1561,9 +1558,6 @@ public:
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
         // turn off marketplace for recent items
         getFilter().setFilterNoMarketplaceFolder();
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
-		getFilter().markDefault();
-// [/SL:KB]
 	}
 
 protected:
