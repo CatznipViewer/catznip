@@ -330,6 +330,11 @@ void LLInventoryPanel::initFromParams(const LLInventoryPanel::Params& params)
 		getFilter().setFilterEmptySystemFolders();
 	}
 	
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-2.8
+	// Always start from a default filter since we may get instantiated soley from XUI in which case there is no calling code to set it later
+	getFilter().markDefault();
+// [/SL:KB]
+
 //	// keep track of the clipboard state so that we avoid filtering too much
 //	mClipboardState = LLClipboard::instance().getGeneration();
 	
@@ -1762,7 +1767,7 @@ public:
 		getFilter().setFilterCategoryTypes(getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
         // turn off marketplace for recent items
         getFilter().setFilterNoMarketplaceFolder();
-// [SL:KB] - Patch: Inventory-DefaultInboxFilter | Checked: 2011-09-05 (Catznip-2.8)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-2.8
 		getFilter().markDefault();
 // [/SL:KB]
 	}
