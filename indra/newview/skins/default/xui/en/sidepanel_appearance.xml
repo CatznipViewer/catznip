@@ -25,7 +25,7 @@ width="330">
    name="Changing outfits"
    value="Changing outfits" />
    <string
-   name ="Complexity"
+   name="Complexity"
    value="(Complexity: [COMPLEXITY])" />
    <panel
    background_opaque="true"

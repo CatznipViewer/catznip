@@ -543,7 +543,7 @@ public:
 
 //				if (gSavedSettings.getBOOL("NameTagShowUsernames"))
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
-				if (SHOW_NEVER != LLAvatarName::getShowUsername())
+				if (EShowUsername::SHOW_NEVER != LLAvatarName::getShowUsername())
 // [/SL:KB]
 				{
 					std::string username = chat.mFromName.substr(username_start + 2);
@@ -829,7 +829,7 @@ private:
 //			av_name.useDisplayNames() &&
 //			!av_name.isDisplayNameDefault())
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-02 (Catznip-3.8)
-		if ( (SHOW_NEVER != LLAvatarName::getShowUsername()) && 
+		if ( (EShowUsername::SHOW_NEVER != LLAvatarName::getShowUsername()) && 
 		     (av_name.useDisplayNames()) && 
 		     (!av_name.isDisplayNameDefault()) )
 // [/SL:KB]

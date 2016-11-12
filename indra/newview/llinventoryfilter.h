@@ -118,7 +118,11 @@ public:
 			Optional<PermissionMask>	permissions;
 
 			Params()
-			:	types("filter_types", FILTERTYPE_OBJECT),
+//			:	types("filter_types", FILTERTYPE_OBJECT),
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.3
+			// NOTE: types will never actually be persisted since it's set in response to other filters but a bug in the past saved object_types as types so we do want a distinct name
+			:	types("filter_types_v2", FILTERTYPE_OBJECT),
+// [/SL:KB]
 				object_types("object_types", 0xffffFFFFffffFFFFULL),
 				wearable_types("wearable_types", 0xffffFFFFffffFFFFULL),
 				category_types("category_types", 0xffffFFFFffffFFFFULL),
@@ -175,7 +179,10 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Parameters
 	// +-------------------------------------------------------------------+
-	U64 				getFilterTypes() const;
+//	U64 				getFilterTypes() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-4.3
+	U32 				getFilterTypes() const;
+// [/SL:KB]
 	U64 				getFilterObjectTypes() const;
 	U64					getFilterCategoryTypes() const;
 	U64					getFilterWearableTypes() const;

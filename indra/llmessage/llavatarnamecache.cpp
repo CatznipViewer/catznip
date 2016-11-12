@@ -795,7 +795,7 @@ void LLAvatarNameCache::setUseDisplayNames(bool use)
 //}
 
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2016-01-03 (Catznip-3.8)
-void LLAvatarNameCache::setShowUsername(LLAvatarName::EShowUsername eShowUsername)
+void LLAvatarNameCache::setShowUsername(EShowUsername eShowUsername)
 {
 	if (eShowUsername != LLAvatarName::getShowUsername())
 	{

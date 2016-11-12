@@ -2148,21 +2148,44 @@ void LLFloaterPreferenceGraphicsAdvanced::updateSliderText(LLSliderCtrl* ctrl, L
 	}
 }
 
-void LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors()
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+void LLFloaterPreferenceGraphicsAdvanced::onMaxNonImpostorsChange()
 {
 	// Called when the IndirectMaxNonImpostors control changes
 	// Responsible for fixing the slider label (IndirectMaxNonImpostorsText) and setting RenderAvatarMaxNonImpostors
 	LLSliderCtrl* ctrl = getChild<LLSliderCtrl>("IndirectMaxNonImpostors",true);
 	U32 value = ctrl->getValue().asInteger();
 
+	updateMaxNonImpostors(value);
+
+	setMaxNonImpostorsText(value, getChild<LLTextBox>("IndirectMaxNonImpostorsText"));
+}
+
+void LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors(U32 value)
+{
 	if (0 == value || LLVOAvatar::IMPOSTORS_OFF <= value)
 	{
-		value=0;
+		value = 0;
 	}
 	gSavedSettings.setU32("RenderAvatarMaxNonImpostors", value);
 	LLVOAvatar::updateImpostorRendering(value); // make it effective immediately
-	setMaxNonImpostorsText(value, getChild<LLTextBox>("IndirectMaxNonImpostorsText"));
 }
+// [/SL:KB]
+//void LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors()
+//{
+//	// Called when the IndirectMaxNonImpostors control changes
+//	// Responsible for fixing the slider label (IndirectMaxNonImpostorsText) and setting RenderAvatarMaxNonImpostors
+//	LLSliderCtrl* ctrl = getChild<LLSliderCtrl>("IndirectMaxNonImpostors", true);
+//	U32 value = ctrl->getValue().asInteger();
+//
+//	if (0 == value || LLVOAvatar::IMPOSTORS_OFF <= value)
+//	{
+//		value = 0;
+//	}
+//	gSavedSettings.setU32("RenderAvatarMaxNonImpostors", value);
+//	LLVOAvatar::updateImpostorRendering(value); // make it effective immediately
+//	setMaxNonImpostorsText(value, getChild<LLTextBox>("IndirectMaxNonImpostorsText"));
+//}
 
 void LLFloaterPreferenceGraphicsAdvanced::setMaxNonImpostorsText(U32 value, LLTextBox* text_box)
 {
@@ -2197,6 +2220,10 @@ void LLAvatarComplexityControls::updateMax(LLSliderCtrl* slider, LLTextBox* valu
 		max_arc = (U32)exp(MIN_ARC_LOG + (ARC_LIMIT_MAP_SCALE * (indirect_value - MIN_INDIRECT_ARC_LIMIT)));
 	}
 
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	// Make OCD people happy
+	max_arc = (U32)((max_arc + 500) / 1000) * 1000;
+// [/SL:KB]
 	gSavedSettings.setU32("RenderAvatarMaxComplexity", (U32)max_arc);
 	setText(max_arc, value_label);
 }
@@ -3272,7 +3299,10 @@ LLFloaterPreferenceGraphicsAdvanced::LLFloaterPreferenceGraphicsAdvanced(const L
 	: LLFloater(key)
 {
 	mCommitCallbackRegistrar.add("Pref.VertexShaderEnable",		boost::bind(&LLFloaterPreferenceGraphicsAdvanced::onVertexShaderEnable, this));
-	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxNonImpostors", boost::bind(&LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors,this));
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxNonImpostors", boost::bind(&LLFloaterPreferenceGraphicsAdvanced::onMaxNonImpostorsChange, this));
+// [/SL:KB]
+//	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxNonImpostors", boost::bind(&LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors,this));
 	mCommitCallbackRegistrar.add("Pref.UpdateIndirectMaxComplexity",   boost::bind(&LLFloaterPreferenceGraphicsAdvanced::updateMaxComplexity,this));
 }
 

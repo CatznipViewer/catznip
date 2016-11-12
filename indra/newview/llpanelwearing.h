@@ -31,10 +31,13 @@
 
 // newview
 #include "llpanelappearancetab.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.2
+#include "llwearableitemslist.h"
+// [/SL:KB]
 
 class LLInventoryCategoriesObserver;
 class LLListContextMenu;
-class LLWearableItemsList;
+//class LLWearableItemsList;
 class LLWearingGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 class LLWornItemsList;
@@ -42,6 +45,27 @@ class LLInventoryPanel;
 class LLMenuButton;
 class LLWearingSortMenu;
 class LLSaveFolderState;
+
+//////////////////////////////////////////////////////////////////////////
+
+class LLWornItemsList : public LLWearableItemsList
+{
+public:
+	struct Params : public LLInitParam::Block<Params, LLWearableItemsList::Params>
+	{
+		Params() {}
+	};
+protected:
+	friend class LLUICtrlFactory;
+	LLWornItemsList(const LLWornItemsList::Params& p);
+
+public:
+	/*virtual*/ void setSortOrder(ESortOrder sortOrder, bool sortNow = true);
+protected:
+	/*virtual*/ void addNewItem(LLViewerInventoryItem* item, bool rearrange /*= true*/);
+};
+
+//////////////////////////////////////////////////////////////////////////
 // [/SL:KB]
 
 /**

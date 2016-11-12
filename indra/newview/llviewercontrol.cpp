@@ -636,7 +636,7 @@ bool toggle_agent_pause(const LLSD& newvalue)
 bool handleAgentLinkUsernamesChanged(const LLSD& sdValue)
 {
 	U32 nValue = sdValue.asInteger();
-	LLAvatarNameCache::setShowUsername((LLAvatarName::EShowUsername)nValue);
+	LLAvatarNameCache::setShowUsername((EShowUsername)nValue);
 	return true;
 }
 // [/SL:KB]

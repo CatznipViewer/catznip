@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ color="Transparent"
+ follows="all"
+ height="300"
+ layout="topleft"
+ name="panel_quickprefs_appearance"
+ width="300">
+	<text
+	 follows="top|left"
+	 font.style="BOLD"
+	 height="15"
+	 layout="topleft"
+	 left="10"
+	 name="appearance_you_text"
+	 top_pad="3"
+	 width="100">
+		You
+	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_complexity_text"
+	 top_pad="1"
+	 width="100">
+		Complexity:
+	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left_pad="5"
+	 name="appearance_complexity_value"
+	 top_delta="0"
+	 width="150">
+		123,456,789
+	</text>
+	
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_visibility_text"
+	 top_pad="2"
+	 width="100">
+		Visible:
+	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left_pad="5"
+	 name="appearance_visibility_value"
+	 width="150">
+		10 / 40
+	</text>
+	<check_box
+	 height="16"
+	 label="Show complexity notifications"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_notifications_check"
+	 top_pad="2"
+	 width="130" />
+
+	<view_border
+	 bevel_style="none"
+	 follows="top|left|right"
+	 height="0"
+	 layout="topleft"
+	 left="5"
+	 name="appearance_border_1"
+	 top_pad="5"
+	 right="-5"/>
+
+	<text
+	 follows="top|left"
+	 font.style="BOLD"
+	 height="15"
+	 layout="topleft"
+	 left="10"
+	 name="appearance_others_text"
+	 top_pad="6"
+	 width="100">
+		Others
+	</text>
+	<slider
+	 control_name="IndirectMaxComplexity"
+	 follows="top|left"
+	 height="16"
+	 initial_value="101"
+	 increment="1"
+	 tool_tip="Controls at what point a visually complex avatar is drawn as a jelly doll"
+	 label="Complexity limit:"
+	 label_width="100"
+	 layout="topleft"
+	 left="25"
+	 min_val="1"
+	 max_val="101"
+	 name="appearance_maxcomplexity_slider"
+	 show_text="false"
+	 top_pad="1"
+	 right="-65" />
+	<text
+	 follows="top|left"
+	 height="16"
+	 layout="topleft"
+	 length="1"
+	 left="-65"
+	 name="appearance_maxcomplexity_text"
+	 text_readonly_color="LabelDisabledColor"
+	 type="string"
+	 top_delta="0"
+	 width="60">
+		12,345,678
+	</text>
+	<slider
+	 control_name="IndirectMaxNonImpostors"
+	 decimal_digits="0"
+	 follows="top|left"
+	 height="16"
+	 increment="1"
+	 initial_value="12"
+	 label="# Non-impostors:"
+	 label_width="100"
+	 layout="topleft"
+	 left="25"
+	 min_val="1"
+	 max_val="66"
+	 name="appearance_nonimpostors_slider"
+	 show_text="false"
+	 top_pad="2"
+	 right="-65" />
+	<text
+	 follows="top|left"
+	 height="16"
+	 layout="topleft"
+	 length="1"
+	 left="-65"
+	 name="appearance_nonimpostors_value"
+	 text_readonly_color="LabelDisabledColor"
+	 type="string"
+	 top_delta="0"
+	 width="60">
+		15
+	</text>
+	<text
+	 follows="left|top"
+	 height="15"
+	 layout="topleft"
+	 left="25"
+	 name="appearance_show_text"
+	 top_pad="1"
+	 width="100">
+		Always render:
+	</text>
+	<check_box
+	 control_name="RenderFriendsFull"
+	 height="16"
+	 label="Friends"
+	 layout="topleft"
+	 left="35"
+	 name="appearance_showfriends_check"
+	 top_pad="2"
+	 width="130" />
+	<check_box
+	 control_name="RenderNearbyFull"
+	 height="16"
+	 label="Nearby avatars (20m)"
+	 layout="topleft"
+	 left="35"
+	 name="appearance_shownearby_check"
+	 top_pad="2"
+	 width="130" />
+
+	<view_border
+	 bevel_style="none"
+	 follows="top|left|right"
+	 height="0"
+	 layout="topleft"
+	 left="5"
+	 name="appearance_border_2"
+	 top_pad="5"
+	 right="-5"/>
+	 
+	<text
+	 follows="left|top"
+	 font.style="BOLD"
+	 height="15"
+	 layout="topleft"
+	 left="10"
+	 name="appearance_misc_text"
+	 top_pad="6"
+	 width="100">
+		Miscellaneous
+	</text>
+	<check_box
+	 control_name="RenderAttachedLights"
+	 height="16"
+	 label="Render attached lights"
+	 layout="topleft"
+	 left="35"
+	 name="appearance_attachedlights_check"
+	 right="-10"
+	 top_pad="2" />
+	<check_box
+	 control_name="RenderAttachedParticles"
+	 height="16"
+	 label="Render attached particles"
+	 layout="topleft"
+	 left_delta="0"
+	 name="appearance_attachedparticles_check"
+	 right="-10"
+	 top_pad="2" />
+	<check_box
+	 control_name="RenderNameShowComplexity"
+	 enabled_control="AvatarNameTagMode"
+	 height="16"
+	 label="Show complexity in name tags"
+	 layout="topleft"
+	 left="35"
+	 name="appearance_attachedlights_check"
+	 right="-10"
+	 top_pad="2" />
+	<check_box
+	 control_name="RenderNameShowComplexitySelf"
+	 enabled_control="RenderNameShowComplexity"
+	 height="16"
+	 label="Show my complexity"
+	 layout="topleft"
+	 left="55"
+	 name="appearance_attachedlights_check"
+	 right="-10"
+	 top_pad="2" />
+	<check_box
+	 control_name="RenderNameShowComplexityAtLimit"
+	 enabled_control="RenderNameShowComplexity"
+	 height="16"
+	 label="Show only when too complex"
+	 layout="topleft"
+	 left="55"
+	 name="appearance_attachedlights_check"
+	 right="-10"
+	 top_pad="2" />
+</panel>

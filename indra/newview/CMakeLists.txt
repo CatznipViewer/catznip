@@ -286,6 +286,7 @@ set(viewer_SOURCE_FILES
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
     llfloaterproperties.cpp
+    llfloaterquickprefs.cpp
     llfloaterregiondebugconsole.cpp
     llfloaterregioninfo.cpp
     llfloaterreporter.cpp
@@ -488,6 +489,8 @@ set(viewer_SOURCE_FILES
     llpanelprimmediacontrols.cpp
     llpanelprofile.cpp
     llpanelprofileview.cpp
+    llpanelquickprefsappearance.cpp
+    llpanelquickprefssettings.cpp
     llpanelsnapshot.cpp
     llpanelsnapshotinventory.cpp
     llpanelsnapshotlocal.cpp
@@ -942,6 +945,7 @@ set(viewer_HEADER_FILES
     llfloaterpostprocess.h
     llfloaterpreference.h
     llfloaterproperties.h
+    llfloaterquickprefs.h
     llfloaterregiondebugconsole.h
     llfloaterregioninfo.h
     llfloaterreporter.h
@@ -1135,6 +1139,8 @@ set(viewer_HEADER_FILES
     llpanelprimmediacontrols.h
     llpanelprofile.h
     llpanelprofileview.h
+    llpanelquickprefsappearance.h
+    llpanelquickprefssettings.h
     llpanelsnapshot.h
     llpanelteleporthistory.h
     llpaneltiptoast.h

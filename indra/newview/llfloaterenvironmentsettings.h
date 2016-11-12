@@ -41,6 +41,12 @@ public:
 	/*virtual*/	BOOL	postBuild();	
 	/*virtual*/ void	onOpen(const LLSD& key);
 
+// [SL:KB] - Patch: Settings-QuickPrefsWindlight | Checked: Catznip-4.2
+	static void populateWaterPresetsList(LLComboBox* pWaterPresetCombo);
+	static void populateSkyPresetsList(LLComboBox* pSkyPresetCombo);
+	static void populateDayCyclePresetsList(LLComboBox* pDayCyclePresetCombo);
+// [/SL:KB]
+
 private:
 	void onSwitchRegionSettings();
 	void onSwitchDayCycle();
@@ -56,9 +62,9 @@ private:
 	void apply();
 	void cancel();
 
-	void populateWaterPresetsList();
-	void populateSkyPresetsList();
-	void populateDayCyclePresetsList();
+//	void populateWaterPresetsList();
+//	void populateSkyPresetsList();
+//	void populateDayCyclePresetsList();
 
 	LLRadioGroup*	mRegionSettingsRadioGroup;
 	LLRadioGroup*	mDayCycleSettingsRadioGroup;

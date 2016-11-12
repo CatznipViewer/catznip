@@ -491,12 +491,29 @@ bool LLWLParamManager::applyDayCycleParams(const LLSD& params, LLEnvKey::EScope 
 	return true;
 }
 
-bool LLWLParamManager::applySkyParams(const LLSD& params)
+// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
+bool LLWLParamManager::applySkyParams(const LLSD& params, bool interpolate)
 {
-	mAnimator.deactivate();
-	mCurParams.setAll(params);
+	if (interpolate)
+	{
+		if (!mAnimator.getIsRunning())
+			resetAnimator(0.f, true);
+		LLWLParamManager::getInstance()->mAnimator.startInterpolation(params, LLSD());
+	}
+	else
+	{
+		mAnimator.deactivate();
+		mCurParams.setAll(params);
+	}
 	return true;
 }
+// [/SL:KB]
+//bool LLWLParamManager::applySkyParams(const LLSD& params)
+//{
+//	mAnimator.deactivate();
+//	mCurParams.setAll(params);
+//	return true;
+//}
 
 void LLWLParamManager::resetAnimator(F32 curTime, bool run)
 {
