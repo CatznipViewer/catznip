@@ -57,6 +57,9 @@ public:
 	~LLWLAnimator()
 	{
 		delete mInterpBeginWL;
+// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
+		delete mInterpEndWL;
+// [/SL:KB]
 		delete mInterpBeginWater;
 		delete mInterpEndWater;
 	}
@@ -88,7 +91,10 @@ public:
 		mTimeType = time;
 	}
 
-	void startInterpolation(const LLSD& targetWater);
+// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
+	void startInterpolation(const LLSD& targetSky, const LLSD& targetWater);
+// [/SL:KB]
+//	void startInterpolation(const LLSD& targetWater);
 
 	bool getIsRunning()
 	{
@@ -129,7 +135,10 @@ public:
 private:
 	ETime mTimeType;
 	bool mIsRunning, mIsInterpolating;
-	LLWLParamSet *mInterpBeginWL;
+// [SL:KB] - Patch: WindLight-SkyInterpolation | Checked: Catznip-4.2
+	LLWLParamSet *mInterpBeginWL, *mInterpEndWL;
+// [/SL:KB]
+//	LLWLParamSet *mInterpBeginWL;
 	LLWaterParamSet *mInterpBeginWater, *mInterpEndWater;
 	clock_t mInterpStartTime, mInterpEndTime;
 
