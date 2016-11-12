@@ -17,6 +17,7 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llcheckboxctrl.h"
+#include "llfloaterreg.h"
 #include "llpanelquickprefsappearance.h"
 #include "llsliderctrl.h"
 #include "lltrans.h"
@@ -25,6 +26,7 @@
 // Appearance panel
 #include "llavatarrendernotifier.h"
 #include "llfloaterpreference.h"
+#include "llnotificationtemplate.h"
 #include "llvoavatarself.h"
 
 // Wearing panel
@@ -45,6 +47,8 @@ void menu_toggle_attached_particles(void* user_data);
 //
 
 static LLPanelInjector<LLQuickPrefsAppearancePanel> t_quickprefs_appearance("quickprefs_appearance");
+
+const std::string LLQuickPrefsAppearancePanel::s_strNotifications[] = { "AgentComplexity", "AgentComplexityWithVisibility" };
 
 LLQuickPrefsAppearancePanel::LLQuickPrefsAppearancePanel()
 	: LLQuickPrefsPanel()
@@ -71,6 +75,9 @@ BOOL LLQuickPrefsAppearancePanel::postBuild()
 
 	m_pComplexityText = getChild<LLTextBox>("appearance_complexity_value");
 	m_pVisibilityText = getChild<LLTextBox>("appearance_visibility_value");
+
+	m_pShowNotificationsCheck = getChild<LLCheckBoxCtrl>("appearance_notifications_check");
+	m_pShowNotificationsCheck->setCommitCallback(boost::bind(&LLQuickPrefsAppearancePanel::onShowNotificationsToggle, this));
 
 	m_pMaxComplexitySlider = getChild<LLSliderCtrl>("appearance_maxcomplexity_slider");
 	m_pMaxComplexityText = getChild<LLTextBox>("appearance_maxcomplexity_text");
@@ -100,6 +107,7 @@ void LLQuickPrefsAppearancePanel::onVisibilityChange(BOOL fVisible)
 		refreshComplexity();
 		refreshMaxComplexity();
 		refreshMaxNonImpostors();
+		refreshNotifications();
 	}
 }
 
@@ -111,9 +119,17 @@ void LLQuickPrefsAppearancePanel::refreshComplexity()
 		m_pComplexityText->setText(llformat("%d", nComplexity));
 
 		LLAvatarRenderNotifier* pAvRenderNotif = LLAvatarRenderNotifier::getInstance();
-		m_pVisibilityText->setText(llformat("%d / %d (%.0f%%)", pAvRenderNotif->getLatestAgentsCount() - pAvRenderNotif->getLatestOverLimitAgents(),
-		                                                        pAvRenderNotif->getLatestAgentsCount(),
-																100.f - pAvRenderNotif->getLatestOverLimitPct()));
+		if (pAvRenderNotif->getLatestAgentsCount() > 0)
+		{
+			m_pVisibilityText->setText(llformat("%d / %d (%.0f%%)", pAvRenderNotif->getLatestAgentsCount() - pAvRenderNotif->getLatestOverLimitAgents(),
+																	pAvRenderNotif->getLatestAgentsCount(),
+																	100.f - pAvRenderNotif->getLatestOverLimitPct()));
+		}
+		else
+		{
+			m_pVisibilityText->setText(llformat("- / -"));
+
+		}
 	}
 }
 
@@ -135,6 +151,18 @@ void LLQuickPrefsAppearancePanel::refreshMaxNonImpostors()
 	}
 }
 
+void LLQuickPrefsAppearancePanel::refreshNotifications()
+{
+	bool fShowNotifications = false;
+	for (int idxNotif = 0, cntNotif = sizeof(s_strNotifications) / sizeof(std::string); idxNotif < cntNotif; idxNotif++)
+	{
+		LLNotificationTemplatePtr notifPtr = LLNotifications::instance().getTemplate(s_strNotifications[idxNotif]);
+		fShowNotifications |= !notifPtr->mForm->getIgnored();
+	}
+
+	m_pShowNotificationsCheck->set(fShowNotifications);
+}
+
 void LLQuickPrefsAppearancePanel::onMaxComplexityChange()
 {
 	LLAvatarComplexityControls::updateMax(m_pMaxComplexitySlider, m_pMaxComplexityText);
@@ -144,6 +172,21 @@ void LLQuickPrefsAppearancePanel::onMaxNonImpostorsChange()
 {
 	// Updates to the debug setting will trigger its commit signal
 	LLFloaterPreferenceGraphicsAdvanced::updateMaxNonImpostors(m_pMaxNonImpostorsSlider->getValue().asInteger());
+}
+
+void LLQuickPrefsAppearancePanel::onShowNotificationsToggle()
+{
+	for (int idxNotif = 0, cntNotif = sizeof(s_strNotifications) / sizeof(std::string); idxNotif < cntNotif; idxNotif++)
+	{
+		LLNotificationTemplatePtr notifPtr = LLNotifications::instance().getTemplate(s_strNotifications[idxNotif]);
+		notifPtr->mForm->setIgnored(!m_pShowNotificationsCheck->get());
+	}
+
+	LLFloaterPreference* pPrefsFloater = LLFloaterReg::findTypedInstance<LLFloaterPreference>("preferences");
+	if ( (pPrefsFloater) && (pPrefsFloater->isInVisibleChain()) )
+	{
+		pPrefsFloater->buildPopupLists();
+	}
 }
 
 // ====================================================================================
