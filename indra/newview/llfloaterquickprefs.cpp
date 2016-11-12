@@ -24,6 +24,7 @@
 
 const char* LLFloaterQuickPrefs::s_PanelNames[PANEL_COUNT] =
 	{
+		"appearance",
 		"wearing",
 		"inventory",
 		"windlight",
@@ -54,7 +55,7 @@ BOOL LLFloaterQuickPrefs::postBuild()
 	}
 
 	// Show default panel
-	onShowPanel(PANEL_WEARING);
+	onShowPanel(PANEL_APPEARANCE);
 
 	return TRUE;
 }
