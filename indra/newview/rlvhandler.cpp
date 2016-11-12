@@ -1349,6 +1349,7 @@ ERlvCmdRet RlvCommandHandlerBaseImpl<RLV_TYPE_ADDREM>::processCommand(const RlvC
 			gRlvHandler.m_Behaviours[eBhvr]--;
 		}
 
+		gRlvHandler.m_OnBehaviour(eBhvr, rlvCmd.getParamType());
 		if (fHasBhvr != gRlvHandler.hasBehaviour(eBhvr))
 		{
 			if (pToggleHandlerFunc)
@@ -1623,9 +1624,8 @@ void RlvBehaviourToggleHandler<RLV_BHVR_EDIT>::onCommandToggle(ERlvBehaviour eBh
 		if (LLFloaterReg::instanceVisible("beacons"))
 			LLFloaterReg::hideInstance("beacons");
 
-		// Hide the build floater if it's currently visible
-		if (LLFloaterReg::instanceVisible("build"))
-			LLToolMgr::instance().toggleBuildMode();
+		// Hide the build floater
+		LLToolMgr::instance().leaveBuildMode();
 	}
 
 	// Start or stop filtering opening the beacons floater
@@ -1907,7 +1907,7 @@ void RlvBehaviourToggleHandler<RLV_BHVR_SETDEBUG>::onCommandToggle(ERlvBehaviour
 	}
 }
 
-// Handles: @edit=n|y toggles
+// Handles: @setenv=n|y toggles
 template<> template<>
 void RlvBehaviourToggleHandler<RLV_BHVR_SETENV>::onCommandToggle(ERlvBehaviour eBhvr, bool fHasBhvr)
 {
@@ -1960,7 +1960,7 @@ ERlvCmdRet RlvBehaviourHandler<RLV_BHVR_SHOWHOVERTEXT>::onCommand(const RlvComma
 	return RLV_RET_SUCCESS;
 }
 
-// Handles: @edit=n|y toggles
+// Handles: @showinv=n|y toggles
 template<> template<>
 void RlvBehaviourToggleHandler<RLV_BHVR_SHOWINV>::onCommandToggle(ERlvBehaviour eBhvr, bool fHasBhvr)
 {
@@ -2474,21 +2474,33 @@ template<> template<>
 ERlvCmdRet RlvForceHandler<RLV_BHVR_SETGROUP>::onCommand(const RlvCommand& rlvCmd)
 {
 	if (!RlvActions::canChangeActiveGroup(rlvCmd.getObjectID()))
-	{
 		return RLV_RET_FAILED_LOCK;
-	}
 
 	LLUUID idGroup; bool fValid = false;
-	if (idGroup.set(rlvCmd.getOption()))
+	if ("none" == rlvCmd.getOption())
+	{
+		idGroup.setNull();
+		fValid = true;
+	}
+	else if (idGroup.set(rlvCmd.getOption()))
 	{
 		fValid = (idGroup.isNull()) || (gAgent.isInGroup(idGroup, true));
 	}
 	else
 	{
-		for (S32 idxGroup = 0, cntGroup = gAgent.mGroups.size(); (idxGroup < cntGroup) && (idGroup.isNull()); idxGroup++)
-			if (boost::iequals(gAgent.mGroups.at(idxGroup).mName, rlvCmd.getOption()))
-				idGroup = gAgent.mGroups.at(idxGroup).mID;
-		fValid = (idGroup.notNull()) || ("none" == rlvCmd.getOption());
+		bool fExactMatch = false;
+		for (const auto& groupData : gAgent.mGroups)
+		{
+			// NOTE: exact matches take precedence over partial matches; in case of partial matches the last match wins
+			if (boost::istarts_with(groupData.mName, rlvCmd.getOption()))
+			{
+				idGroup = groupData.mID;
+				fExactMatch = groupData.mName.length() == rlvCmd.getOption().length();
+				if (fExactMatch)
+					break;
+			}
+		}
+		fValid = idGroup.notNull();
 	}
 
 	if (fValid)
@@ -2966,9 +2978,11 @@ ERlvCmdRet RlvHandler::onGetInv(const RlvCommand& rlvCmd, std::string& strReply)
 		//   - aren't hidden
 		//   - aren't a folded folder (only really matters when "Enable Legacy Naming" is enabled - see related blog post)
 		//     (we can skip checking for .<composite> folders since the ones we'll want to hide start with '.' anyway)
+		//   - don't have any invalid characters
 		const std::string& strFolder = pFolders->at(idxFolder)->getName();
-		if ( (!strFolder.empty()) && (RLV_FOLDER_PREFIX_HIDDEN != strFolder[0]) && 
-			 (!RlvInventory::isFoldedFolder(pFolders->at(idxFolder).get(), false)) )
+		if ( (!strFolder.empty()) && (RLV_FOLDER_PREFIX_HIDDEN != strFolder[0]) &&
+			 (!RlvInventory::isFoldedFolder(pFolders->at(idxFolder).get(), false)) && 
+			 (std::string::npos == strFolder.find_first_of(RLV_FOLDER_INVALID_CHARS)) )
 		{
 			if (!strReply.empty())
 				strReply.push_back(',');
