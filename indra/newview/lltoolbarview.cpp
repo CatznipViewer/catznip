@@ -46,6 +46,9 @@
 #include "llviewercontrol.h"  // HACK for destinations guide on startup
 
 #include <boost/foreach.hpp>
+// [SL:KB] - Patch: UI-Toolbars | Checked: Catznip-4.3
+#include <boost/algorithm/string.hpp>
+// [/SL:KB]
 
 LLToolBarView* gToolBarView = NULL;
 
@@ -374,6 +377,33 @@ bool LLToolBarView::loadToolbars(bool force_default)
 			}
 		}
 	}
+
+// [SL:KB] - Patch: UI-Toolbars | Checked: Catznip-4.3
+	// When we add new toolbar buttons we'd like to auto-add these to showcase them but we don't want to
+	// constantly annoy the user so do it once and keep track of it in their settings
+	const std::string strAutoAdd = gSavedSettings.getString("ToolbarAutoAddButtons"), strAutoAddUser = gSavedPerAccountSettings.getString("ToolbarAutoAddButtons");
+	if (strAutoAdd != strAutoAddUser)
+	{
+		std::list<std::string> listAutoAdd, listAutoAddUser, listToAdd;
+		boost::split(listAutoAdd, strAutoAdd, boost::is_any_of(std::string(",")));
+		listAutoAdd.sort();
+		boost::split(listAutoAddUser, strAutoAddUser, boost::is_any_of(std::string(",")));
+		listAutoAddUser.sort();
+
+		std::set_difference(listAutoAdd.begin(), listAutoAdd.end(), listAutoAddUser.begin(), listAutoAddUser.end(), std::inserter(listToAdd, listToAdd.begin()));
+		for (const std::string& strToolbar : listToAdd)
+		{
+			LLCommand* pCmd = LLCommandManager::instance().getCommand(strToolbar);
+			if ( (pCmd) && (LLToolBarEnums::TOOLBAR_NONE == hasCommand(pCmd->id())) )
+			{
+				mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]->addCommand(pCmd->id());
+			}
+		}
+
+		gSavedPerAccountSettings.setString("ToolbarAutoAddButtons", strAutoAdd);
+	}
+// [/SL:KB]
+
 	mToolbarsLoaded = true;
 	return true;
 }
