@@ -13491,6 +13491,17 @@
       <key>Value</key>
       <real>1000.0</real>
     </map>
+    <key>ToolbarAutoAddButtons</key>
+    <map>
+      <key>Comment</key>
+      <string>Buttons in this list will be automatically to the user's toolbar</string>
+      <key>Persist</key>
+      <integer>0</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string>quickprefs</string>
+    </map>
     <key>ToolboxAutoMove</key>
     <map>
       <key>Comment</key>
