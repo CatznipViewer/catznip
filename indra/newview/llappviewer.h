@@ -79,7 +79,7 @@ public:
 	//
 	virtual bool init();			// Override to do application initialization
 	virtual bool cleanup();			// Override to do application cleanup
-	virtual bool mainLoop(); // Override for the application main loop.  Needs to at least gracefully notice the QUITTING state and exit.
+	virtual bool frame(); // Override for application body logic
 
 	// Application control
 	void flushVFSIO(); // waits for vfs transfers to complete
@@ -254,6 +254,8 @@ private:
 
     void sendLogoutRequest();
     void disconnectViewer();
+
+	void showReleaseNotesIfRequired();
 	
 	// *FIX: the app viewer class should be some sort of singleton, no?
 	// Perhaps its child class is the singleton and this should be an abstract base.
@@ -283,7 +285,6 @@ private:
 	std::string mSerialNumber;
 	bool mPurgeCache;
     bool mPurgeOnExit;
-	bool mMainLoopInitialized;
 	LLViewerJoystick* joystick;
 
 	bool mSavedFinalSnapshot;
@@ -316,6 +317,7 @@ private:
 	// llcorehttp library init/shutdown helper
 	LLAppCoreHttp mAppCoreHttp;
 
+	bool mIsFirstRun;
 	//---------------------------------------------
 	//*NOTE: Mani - legacy updater stuff
 	// Still useable?

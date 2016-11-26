@@ -31,12 +31,17 @@
 
 // newview
 #include "llpanelappearancetab.h"
+#include "llselectmgr.h"
+#include "lltimer.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.2
 #include "llwearableitemslist.h"
 // [/SL:KB]
 
+class LLAccordionCtrl;
+class LLAccordionCtrlTab;
 class LLInventoryCategoriesObserver;
 class LLListContextMenu;
+class LLScrollListCtrl;
 //class LLWearableItemsList;
 class LLWearingGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -83,6 +88,8 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
+	/*virtual*/ void draw();
+
 	/*virtual*/ void onOpen(const LLSD& info);
 
 	/*virtual*/ void setFilterSubString(const std::string& string);
@@ -93,6 +100,9 @@ public:
 
 	/*virtual*/ void copyToClipboard();
 
+	void startUpdateTimer();
+	void updateAttachmentsList();
+
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
 	typedef boost::signals2::signal<void()> selection_change_signal_t;
 	boost::signals2::connection setSelectionChangeCallback(selection_change_signal_t::slot_type cb);
@@ -100,6 +110,13 @@ public:
 //	boost::signals2::connection setSelectionChangeCallback(commit_callback_t cb);
 
 	bool hasItemSelected();
+
+	bool populateAttachmentsList(bool update = false);
+	void onAccordionTabStateChanged();
+	void setAttachmentDetails(LLSD content);
+	void requestAttachmentDetails();
+	void onEditAttachment();
+	void onRemoveAttachment();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
@@ -119,9 +136,13 @@ private:
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
 	void onSelectionChange();
 // [/SL:KB]
+	void onTempAttachmentsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+
+	void getAttachmentLimitsCoro(std::string url);
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 //	LLWearableItemsList* 			mCOFItemsList;
+	LLScrollListCtrl*				mTempItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	boost::signals2::connection		mComplexityChangedSlot;
 	selection_change_signal_t		mSelectionSignal;
@@ -137,6 +158,18 @@ private:
 	LLWearingSortMenu*				mSortMenu;
 // [/SL:KB]
 	LLListContextMenu*				mContextMenu;
+	LLListContextMenu*				mAttachmentsMenu;
+
+	LLAccordionCtrlTab* 			mWearablesTab;
+	LLAccordionCtrlTab* 			mAttachmentsTab;
+	LLAccordionCtrl*				mAccordionCtrl;
+
+	std::map<LLUUID, LLViewerObject*> mAttachmentsMap;
+
+	std::map<LLUUID, std::string> 	mObjectNames;
+
+	boost::signals2::connection 	mAttachmentsChangedConnection;
+	LLFrameTimer					mUpdateTimer;
 
 	bool							mIsInitialized;
 };
