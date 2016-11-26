@@ -30,7 +30,7 @@
 
 #include "llpanel.h"
 
-class LLOutfitGallery;
+//class LLOutfitGallery;
 class LLOutfitsList;
 class LLOutfitListGearMenuBase;
 class LLPanelAppearanceTab;
@@ -81,7 +81,7 @@ protected:
 	void 					onTabChange();
 	bool 					isCOFPanelActive() const;
 	bool 					isOutfitsListPanelActive() const;
-	bool 					isOutfitsGalleryPanelActive() const;
+//	bool 					isOutfitsGalleryPanelActive() const;
 
 private:
 	LLPanelAppearanceTab*	mActivePanel;
@@ -89,7 +89,7 @@ private:
 // [SL:KB] - Patch: UI-SidepanelOutfitsView | Checked: 2010-11-09 (Catznip-2.4)
 	LLPanelOutfitsTab*		mMyOutfitsPanel;
 // [/SL:KB]
-    LLOutfitGallery*        mOutfitGalleryPanel;
+//    LLOutfitGallery*        mOutfitGalleryPanel;
 	LLPanelWearing*			mCurrentOutfitPanel;
 
 	// tab panels                                                                   //

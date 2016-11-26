@@ -263,7 +263,7 @@ set(viewer_SOURCE_FILES
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
     llfloaternotificationstabbed.cpp 
-    llfloateroutfitsnapshot.cpp
+#    llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
     llfloaterpathfindingcharacters.cpp
@@ -404,7 +404,7 @@ set(viewer_SOURCE_FILES
     llnotificationscripthandler.cpp
     llnotificationstorage.cpp
     llnotificationtiphandler.cpp
-    lloutfitgallery.cpp
+#    lloutfitgallery.cpp
     lloutfitslist.cpp
     lloutfitsview.cpp
     lloutfitobserver.cpp
@@ -884,7 +884,7 @@ set(viewer_HEADER_FILES
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
     llfloaternotificationstabbed.h 
-    llfloateroutfitsnapshot.h
+#    llfloateroutfitsnapshot.h
     llfloaterobjectweights.h
     llfloateropenobject.h
     llfloaterpathfindingcharacters.h
@@ -1015,7 +1015,7 @@ set(viewer_HEADER_FILES
     llnotificationlistview.h
     llnotificationmanager.h
     llnotificationstorage.h
-    lloutfitgallery.h
+#    lloutfitgallery.h
     lloutfitslist.h
     lloutfitsview.h
     lloutfitobserver.h

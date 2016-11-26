@@ -40,7 +40,7 @@
 #include "llcombobox.h"
 // [/SL:KB]
 #include "lloutfitobserver.h"
-#include "lloutfitgallery.h"
+//#include "lloutfitgallery.h"
 #include "lloutfitslist.h"
 #include "llpanelwearing.h"
 #include "llsaveoutfitcombobtn.h"
@@ -48,7 +48,7 @@
 #include "llviewerfoldertype.h"
 
 static const std::string OUTFITS_TAB_NAME = "outfitslist_tab";
-static const std::string OUTFIT_GALLERY_TAB_NAME = "outfit_gallery_tab";
+//static const std::string OUTFIT_GALLERY_TAB_NAME = "outfit_gallery_tab";
 static const std::string COF_TAB_NAME = "cof_tab";
 
 static LLPanelInjector<LLPanelOutfitsInventory> t_inventory("panel_outfits_inventory");
@@ -283,7 +283,7 @@ void LLPanelOutfitsInventory::initListCommandsHandlers()
 	mMyOutfitsPanel->getChild<LLUICtrl>("wear_items_btn")->setCommitCallback(boost::bind(&LLPanelOutfitsInventory::onWearItemsClick, this));
 // [/SL:KB]
 	mMyOutfitsPanel->childSetAction("trash_btn", boost::bind(&LLPanelOutfitsInventory::onTrashButtonClick, this));
-	mOutfitGalleryPanel->childSetAction("trash_btn", boost::bind(&LLPanelOutfitsInventory::onTrashButtonClick, this));
+//	mOutfitGalleryPanel->childSetAction("trash_btn", boost::bind(&LLPanelOutfitsInventory::onTrashButtonClick, this));
 }
 
 void LLPanelOutfitsInventory::updateListCommands()
@@ -295,7 +295,7 @@ void LLPanelOutfitsInventory::updateListCommands()
 
 //	LLButton* wear_btn = mListCommands->getChild<LLButton>("wear_btn");
 	mMyOutfitsPanel->childSetEnabled("trash_btn", trash_enabled);
-	mOutfitGalleryPanel->childSetEnabled("trash_btn", trash_enabled);
+//	mOutfitGalleryPanel->childSetEnabled("trash_btn", trash_enabled);
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLUICtrl* pWearOutfit = mMyOutfitsPanel->getChild<LLUICtrl>("wear_outfit_btn");
 	pWearOutfit->setVisible( (wear_enabled) && (!mMyOutfitsPanel->hasItemSelected()) );
@@ -322,10 +322,10 @@ void LLPanelOutfitsInventory::onTrashButtonClick()
 	{
 		mMyOutfitsPanel->removeSelected();
 	}
-	else if(isOutfitsGalleryPanelActive())
-	{
-		mOutfitGalleryPanel->removeSelected();
-	}
+//	else if(isOutfitsGalleryPanelActive())
+//	{
+//		mOutfitGalleryPanel->removeSelected();
+//	}
 }
 
 bool LLPanelOutfitsInventory::isActionEnabled(const LLSD& userdata)
@@ -350,8 +350,8 @@ void LLPanelOutfitsInventory::initTabPanels()
 // [/SL:KB]
 	mMyOutfitsPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
-    mOutfitGalleryPanel = findChild<LLOutfitGallery>(OUTFIT_GALLERY_TAB_NAME);
-    mOutfitGalleryPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
+//    mOutfitGalleryPanel = findChild<LLOutfitGallery>(OUTFIT_GALLERY_TAB_NAME);
+//    mOutfitGalleryPanel->setSelectionChangeCallback(boost::bind(&LLPanelOutfitsInventory::updateVerbs, this));
 
 	mAppearanceTabs = getChild<LLTabContainer>("appearance_tabs");
 	mAppearanceTabs->setCommitCallback(boost::bind(&LLPanelOutfitsInventory::onTabChange, this));
@@ -382,12 +382,12 @@ bool LLPanelOutfitsInventory::isOutfitsListPanelActive() const
 	return mActivePanel->getName() == OUTFITS_TAB_NAME;
 }
 
-bool LLPanelOutfitsInventory::isOutfitsGalleryPanelActive() const
-{
-	if (!mActivePanel) return false;
-
-	return mActivePanel->getName() == OUTFIT_GALLERY_TAB_NAME;
-}
+//bool LLPanelOutfitsInventory::isOutfitsGalleryPanelActive() const
+//{
+//	if (!mActivePanel) return false;
+//
+//	return mActivePanel->getName() == OUTFIT_GALLERY_TAB_NAME;
+//}
 
 
 
