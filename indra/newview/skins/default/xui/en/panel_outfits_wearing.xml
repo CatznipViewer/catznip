@@ -24,12 +24,12 @@
      name="wearables_accordion"
      background_visible="true"
      bg_alpha_color="DkGray2"
-     width="309">
+     width="300">
      <accordion_tab
      layout="topleft"
      name="tab_wearables"
-     title="Wearables">
-    <wearable_items_list
+     title="Worn Items">
+    <wearing_items_list
      follows="all"
      height="400"
      layout="topleft"
@@ -43,14 +43,29 @@
      </accordion_tab>
      <accordion_tab
      layout="topleft"
+     name="tab_wearables_invpanel"
+     title="Worn Items (Inventory)">
+         <panel
+          follows="all"
+          height="400"
+          layout="topleft"
+          left="0"
+          name="wearing_invpanel_placeholder"
+          top="0"
+          visible="false"
+          width="300" />
+     </accordion_tab>
+     <accordion_tab
+     layout="topleft"
      name="tab_temp_attachments"
-     title="Temporary attachments">
+     title="Temporary Attachments">
     <scroll_list
      draw_heading="false"
-     left="3"
-     width="309"
+     left="0"
+     width="300"
      height="400"
      follows="all"
+     top="0"
      name="temp_attachments_list">
         <scroll_list.columns
          name="icon"
@@ -61,15 +76,6 @@
   </scroll_list>
      </accordion_tab>
      </accordion>
-    <panel
-     follows="all"
-     height="400"
-     layout="topleft"
-     left="0"
-     name="wearing_invpanel_placeholder" 
-     top="0"
-     visible="false"
-     width="300" /> 
     <panel
      background_visible="false"
      follows="bottom|left|right"
@@ -104,32 +110,6 @@
          name="options_sort_btn"
          tool_tip="Show sorting options"
          width="31" />
-        <button
-         follows="bottom|left"
-         height="25"
-         image_hover_unselected="Toolbar_Middle_Over"
-         image_overlay="Hierarchy_View_On"
-         image_selected="Toolbar_Middle_Selected"
-         image_unselected="Toolbar_Middle_Off"
-         is_toggle="true"
-         layout="topleft"
-         left_pad="1"
-         name="folder_view_btn"
-         tool_tip="Switch to inventory view"
-         width="31" />
-        <button
-         follows="bottom|left"
-         height="25"
-         image_hover_unselected="Toolbar_Middle_Over"
-         image_overlay="List_View_On"
-         image_selected="Toolbar_Middle_Selected"
-         image_unselected="Toolbar_Middle_Off"
-         is_toggle="true"
-         layout="topleft"
-         left_pad="1"
-         name="list_view_btn"
-         tool_tip="Switch to list view"
-         width="31" />
         <icon
          follows="bottom|left|right"
          height="25"
@@ -137,7 +117,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="44" />
+         width="106" />
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"

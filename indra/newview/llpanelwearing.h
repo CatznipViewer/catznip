@@ -119,16 +119,16 @@ public:
 	void onRemoveAttachment();
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
-	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
-
 	void onTakeOffClicked();
 	void onTakeOffFolderClicked();
+// [/SL:KB]
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-3.3
+	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
+	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
 protected:
-	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
+	enum class EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
+	void createInventoryPanel();
 	void onToggleWearingView(EWearingView eView);
-
-	bool createInventoryPanel();
 // [/SL:KB]
 
 private:
@@ -150,8 +150,6 @@ private:
 	LLInventoryPanel*				mInvPanel;
 	LLSaveFolderState*				mSavedFolderState;
 	LLMenuButton*					mSortMenuButton;
-	LLButton*						mToggleFolderView;
-	LLButton*						mToggleListView;
 // [/SL:KB]
 	LLWearingGearMenu*				mGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -161,6 +159,9 @@ private:
 	LLListContextMenu*				mAttachmentsMenu;
 
 	LLAccordionCtrlTab* 			mWearablesTab;
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-5.0
+	LLAccordionCtrlTab* 			mWearablesInvTab = nullptr;
+// [/SL:KB]
 	LLAccordionCtrlTab* 			mAttachmentsTab;
 	LLAccordionCtrl*				mAccordionCtrl;
 

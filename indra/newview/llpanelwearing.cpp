@@ -616,8 +616,6 @@ LLPanelWearing::LLPanelWearing()
 	,	mInvPanel(NULL)
 	,	mSavedFolderState(NULL)
 	,	mSortMenuButton(NULL)
-	,	mToggleFolderView(NULL)
-	,	mToggleListView(NULL)
 // [/SL:KB]
 	,	mIsInitialized(false)
 	,	mAttachmentsChangedConnection()
@@ -665,6 +663,11 @@ BOOL LLPanelWearing::postBuild()
 {
 	mAccordionCtrl = getChild<LLAccordionCtrl>("wearables_accordion");
 	mWearablesTab = getChild<LLAccordionCtrlTab>("tab_wearables");
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-5.0
+	mWearablesTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, EWearingView::LIST_VIEW));
+	mWearablesInvTab = getChild<LLAccordionCtrlTab>("tab_wearables_invpanel");
+	mWearablesInvTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, EWearingView::FOLDER_VIEW));
+// [/SL:KB]
 	mAttachmentsTab = getChild<LLAccordionCtrlTab>("tab_temp_attachments");
 	mAttachmentsTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onAccordionTabStateChanged, this));
 //	mCOFItemsList = getChild<LLWearableItemsList>("cof_items_list");
@@ -684,11 +687,6 @@ BOOL LLPanelWearing::postBuild()
 	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
 	mSortMenuButton = getChild<LLMenuButton>("options_sort_btn");
 
-	mToggleFolderView = getChild<LLButton>("folder_view_btn");
-	mToggleFolderView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, FOLDER_VIEW));
-	mToggleListView = getChild<LLButton>("list_view_btn");
-	mToggleListView->setCommitCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, LIST_VIEW));
-
 	getChild<LLUICtrl>("take_off_btn")->setCommitCallback(boost::bind(&LLPanelWearing::onTakeOffClicked, this));
 // [/SL:KB]
 //	LLMenuButton* menu_gear_btn = getChild<LLMenuButton>("options_gear_btn");
@@ -703,9 +701,25 @@ void LLPanelWearing::onOpen(const LLSD& /*info*/)
 {
 	if (!mIsInitialized)
 	{
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-3.3
 		// Delay creating the inventory view until the user actually opens this panel
-		onToggleWearingView((EWearingView)gSavedSettings.getU32("WearingViewType"));
+		LLAccordionCtrlTab* pDefaultTab = nullptr;
+		switch ((EWearingView)gSavedSettings.getU32("WearingViewType"))
+		{
+			case EWearingView::LIST_VIEW:
+				pDefaultTab = mWearablesTab;
+				break;
+			case EWearingView::FOLDER_VIEW:
+				pDefaultTab = mWearablesInvTab;
+				break;
+		}
+
+		if (pDefaultTab)
+		{
+			pDefaultTab->changeOpenClose(false);
+			pDefaultTab->showAndFocusHeader();
+			mAccordionCtrl->notifyParent(LLSD().with("action", "select_current"));
+		}
 // [/SL:KB]
 
 		// *TODO: I'm not sure is this check necessary but it never match while developing.
@@ -1111,36 +1125,27 @@ void LLPanelWearing::onTakeOffFolderClicked()
 
 	LLAppearanceMgr::instance().removeFoldersFromAvatar(folder_ids);
 }
+// [/SL:KB]
 
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-3.3
 void LLPanelWearing::onToggleWearingView(EWearingView eView)
 {
-	if (FOLDER_VIEW == eView)
+	if ( (EWearingView::FOLDER_VIEW == eView) && (!mInvPanel) )
 	{
-		if ( (mInvPanel) || (createInventoryPanel()) )
-		{
-			mCOFItemsList->setVisible(false);
-			mInvPanel->setVisible(true);
-		}
+		createInventoryPanel();
 	}
-	else
-	{
-		mCOFItemsList->setVisible(true);
-		if (mInvPanel)
-			mInvPanel->setVisible(false);
-	}
-	mSortMenuButton->setMenu( (FOLDER_VIEW == eView) ? mSortMenu->getFolderMenu() : mSortMenu->getListMenu());
-	mToggleFolderView->setToggleState(FOLDER_VIEW == eView);
-	mToggleListView->setToggleState(LIST_VIEW == eView);
-	gSavedSettings.setU32("WearingViewType", eView);
+
+	mSortMenuButton->setMenu( (EWearingView::FOLDER_VIEW == eView) ? mSortMenu->getFolderMenu() : mSortMenu->getListMenu());
+	gSavedSettings.setU32("WearingViewType", (U32)eView);
 }
 
-bool LLPanelWearing::createInventoryPanel()
+void LLPanelWearing::createInventoryPanel()
 {
 	if (mInvPanel)
-		return true;
+		return;
 
 	LLView* pInvPanelPlaceholder = findChild<LLView>("wearing_invpanel_placeholder");
-	
+
 	mSavedFolderState = new LLSaveFolderState();
 	mSavedFolderState->setApply(FALSE);
 
@@ -1157,8 +1162,6 @@ bool LLPanelWearing::createInventoryPanel()
 
 	if (!sFilterSubString.empty())
 		mInvPanel->setFilterSubString(sFilterSubString);
-
-	return (mInvPanel != NULL);
 }
 // [/SL:KB]
 
