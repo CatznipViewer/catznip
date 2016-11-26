@@ -122,8 +122,11 @@ protected:
 								mIsMouseOverTitle,
 								mAllowWear,
                                 mAllowDrop,
-								mSelectPending;
-	
+								mSelectPending,
+								mIsItemCut;
+
+	S32							mCutGeneration;
+
 	LLUIColor                   mFontColor;
 	LLUIColor                   mFontHighlightColor;
 
@@ -146,6 +149,7 @@ protected:
 	virtual void addFolder(LLFolderViewFolder*) { }
 	virtual bool isHighlightAllowed();
 	virtual bool isHighlightActive();
+	virtual bool isFadeItem();
 	virtual bool isFlashing() { return false; }
 	virtual void setFlashState(bool) { }
 

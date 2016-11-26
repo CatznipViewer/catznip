@@ -120,9 +120,7 @@ public:
 // [/SL:KB]
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
-	/*virtual*/ bool isClipboardCut() const;
-// [/SL:KB]
+	virtual bool isCutToClipboard();
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	virtual void pasteFromClipboard() {}
@@ -189,10 +187,6 @@ protected:
 	LLInventoryType::EType mInvType;
 	bool						mIsLink;
 	LLTimer						mTimeSinceRequestStart;
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
-	mutable int					mClipboardGeneration;
-	mutable bool				mIsClipboardCut;			// Only access this through isClipboardCut()
-// [/SL:KB]
 	mutable std::string			mDisplayName;
 	mutable std::string			mSearchableName;
 
