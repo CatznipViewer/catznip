@@ -28,6 +28,10 @@
 #include "llchicletbar.h"
 
 #include "llchiclet.h"
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+#include "llfloaterimsession.h"
+#include "llfloaterreg.h"
+// [/SL:KB]
 #include "lllayoutstack.h"
 #include "llpaneltopinfobar.h"
 #include "llsyswellwindow.h"
@@ -42,14 +46,108 @@ LLChicletBar::LLChicletBar(const LLSD&)
 :	mChicletPanel(NULL),
 	mToolbarStack(NULL)
 {
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	// Firstly add our self to IMSession observers, so we catch session events before chiclets do that.
+	LLIMMgr::getInstance()->addSessionObserver(this);
+// [/SL:KB]
+
 	buildFromFile("panel_chiclet_bar.xml");
 }
+
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+LLChicletBar::~LLChicletBar()
+{
+	if (!LLSingleton<LLIMMgr>::destroyed())
+	{
+		LLIMMgr::getInstance()->removeSessionObserver(this);
+	}
+}
+
+LLIMChiclet* LLChicletBar::createIMChiclet(const LLUUID& session_id)
+{
+	LLIMChiclet::EType im_chiclet_type = LLIMChiclet::getIMSessionType(session_id);
+	switch (im_chiclet_type)
+	{
+		case LLIMChiclet::TYPE_IM:
+			return getChicletPanel()->createChiclet<LLIMP2PChiclet>(session_id);
+		case LLIMChiclet::TYPE_GROUP:
+			return getChicletPanel()->createChiclet<LLIMGroupChiclet>(session_id);
+		case LLIMChiclet::TYPE_AD_HOC:
+			return getChicletPanel()->createChiclet<LLAdHocChiclet>(session_id);
+		case LLIMChiclet::TYPE_UNKNOWN:
+			break;
+	}
+	return NULL;
+}
+
+//virtual
+void LLChicletBar::sessionAdded(const LLUUID& session_id, const std::string& name, const LLUUID& other_participant_id, BOOL has_offline_msg)
+{
+	if (!getChicletPanel())
+		return;
+
+	LLIMModel::LLIMSession* session = LLIMModel::getInstance()->findIMSession(session_id);
+	if (!session)
+		return;
+
+	// No need to spawn chiclets for participants in P2P calls called through Avaline
+	if ( (session->isP2P()) && (session->isOtherParticipantAvaline()) )
+		return;
+
+	// No need to spawn a chiclet if one already exists for the session
+	if (getChicletPanel()->findChiclet<LLChiclet>(session_id))
+		return;
+
+	LLIMChiclet* chiclet = createIMChiclet(session_id);
+	if (chiclet)
+	{
+		chiclet->setIMSessionName(name);
+		chiclet->setOtherParticipantId(other_participant_id);
+	}
+	else
+	{
+		LL_WARNS() << "Could not create chiclet" << LL_ENDL;
+	}
+}
+
+//virtual
+void LLChicletBar::sessionRemoved(const LLUUID& session_id)
+{
+	if (getChicletPanel())
+	{
+		getChicletPanel()->removeChiclet(session_id);
+	}
+}
+
+void LLChicletBar::sessionIDUpdated(const LLUUID& old_session_id, const LLUUID& new_session_id)
+{
+	// This is only needed in case of outgoing ad-hoc/group chat sessions
+	LLChicletPanel* chiclet_panel = getChicletPanel();
+	if (chiclet_panel)
+	{
+		// It should be ad-hoc IM chiclet or group IM chiclet
+		LLChiclet* chiclet = chiclet_panel->findChiclet<LLChiclet>(old_session_id);
+		if (chiclet)
+		{
+			chiclet->setSessionId(new_session_id);
+		}
+	}
+}
+
+S32 LLChicletBar::getTotalUnreadIMCount()
+{
+	return (getChicletPanel()) ? getChicletPanel()->getTotalUnreadIMCount() : 0;
+}
+// [/SL:KB]
 
 BOOL LLChicletBar::postBuild()
 {
 	mToolbarStack = getChild<LLLayoutStack>("toolbar_stack");
 	mChicletPanel = getChild<LLChicletPanel>("chiclet_list");
 
+// [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
+	showWellButton("im_well", !LLIMWellWindow::getInstance()->isWindowEmpty());
+// [/SL:KB]
 	showWellButton("notification_well", !LLFloaterNotificationsTabbed::getInstance()->isWindowEmpty());
 
 	LLPanelTopInfoBar::instance().setResizeCallback(boost::bind(&LLChicletBar::fitWithTopInfoBar, this));

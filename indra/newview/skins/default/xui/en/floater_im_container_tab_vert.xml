@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<multi_floater
+ can_close="true"  
+ can_minimize="true"
+ can_resize="true"
+ height="210"
+ layout="topleft"
+ name="floater_im_box"
+ help_topic="floater_im_box"
+ save_rect="true"
+ single_instance="true"
+ reuse_instance="true"
+ title="CONVERSATIONS"
+ bottom="-50"
+ right="-5"
+ width="450"
+ min_width="38">
+    <string
+     name="collapse_icon"
+     value="Conv_toolbar_collapse"/>
+    <string
+     name="expand_icon"
+     value="Conv_toolbar_expand"/>
+
+    <tab_container
+     bottom="-1"
+     follows="all"
+     halign="left"
+     layout="topleft"
+     left="0"
+     name="im_box_tab_container"
+     right="-1"
+     tab_height="20"
+     tab_icon_ctrl_pad="2"
+     tab_max_width = "115"
+     tab_position="left"
+     tab_width="115"
+     top="0"
+     use_custom_icon_ctrl="true"
+     use_ellipses="true">
+        <first_tab
+         tab_left_image_flash="Toolbar_Left_Flash" />
+        <middle_tab
+         tab_left_image_flash="Toolbar_Middle_Flash" />
+        <last_tab
+         tab_left_image_flash="Toolbar_Right_Flash" />
+    </tab_container>
+</multi_floater>
