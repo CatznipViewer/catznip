@@ -67,6 +67,10 @@ protected:
 		 */
 		S32 getTextPixelHeight();
 
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+		void setCanShowExpander(bool show_expander);
+// [/SL:KB]
+
 		/**
 		 * Shows "More" link
 		 */
@@ -91,7 +95,13 @@ protected:
 	private:
 		std::string mExpanderLabel;
 
-		bool mExpanderVisible;
+// [SL:KB] - Patch: Control-ExpandableTextBox | Checked: 2014-03-06 (Catznip-3.7)
+		bool             mShowExpander;
+		LLTextSegmentPtr mExpanderSegment;
+		S32              mExpanderPos;
+		segment_set_t    mHiddenSegments;
+// [/SL:KB]
+//		bool mExpanderVisible;
 	};
 
 public:
