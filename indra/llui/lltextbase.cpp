@@ -181,7 +181,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mMaxTextByteLength( p.max_text_length ),
 	mFont(p.font),
 	mFontShadow(p.font_shadow),
-//	mPopupMenu(NULL),
+	mPopupMenuHandle(),
 	mReadOnly(p.read_only),
 	mSpellCheck(p.spellcheck),
 	mSpellCheckStart(-1),
@@ -268,9 +268,10 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 LLTextBase::~LLTextBase()
 {
 // [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3)
-	if (!mUrlContextMenuHandle.isDead())
+	if (!mPopupMenuHandle.isDead())
 	{
-		mUrlContextMenuHandle.get()->die();
+		mPopupMenuHandle.get()->die();
+		mPopupMenuHandle.markDead();
 	}
 // [/SL:KB]
 
@@ -1270,16 +1271,11 @@ void LLTextBase::setReadOnlyColor(const LLColor4 &c)
 //virtual
 void LLTextBase::onVisibilityChange( BOOL new_visibility )
 {
-//	if(!new_visibility && mPopupMenu)
-//	{
-//		mPopupMenu->hide();
-//	}
-// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3)
-	if ( (!new_visibility) && (!mUrlContextMenuHandle.isDead()) )
+	LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+	if(!new_visibility && menu)
 	{
-		mUrlContextMenuHandle.get()->hide();
+		menu->hide();
 	}
-// [/SL:KB]
 	LLUICtrl::onVisibilityChange(new_visibility);
 }
 
@@ -1969,89 +1965,57 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
 
 	// create and return the context menu from the XUI file
+
+    LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+    if (menu)
+    {
 // [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3)
-	LLContextMenu* pUrlMenu = mUrlContextMenuHandle.get();
-	if (pUrlMenu)
-	{
-		LLView* pParent = pUrlMenu->getParent();
+		LLView* pParent = menu->getParent();
 		if (pParent)
-			pParent->removeChild(pUrlMenu);
-		pUrlMenu->die();
-	}
+			pParent->removeChild(menu);
+// [SL:KB]
+        menu->die();
+        mPopupMenuHandle.markDead();
+    }
 	llassert(LLMenuGL::sMenuContainer != NULL);
-	pUrlMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(
-		xui_file,
-		LLMenuGL::sMenuContainer,
-		LLMenuHolderGL::child_registry_t::instance());
-	mUrlContextMenuHandle = pUrlMenu->getHandle();
+    menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
+																		 LLMenuHolderGL::child_registry_t::instance());
+    if (menu)
+    {
+        mPopupMenuHandle = menu->getHandle();
 
-	if (pUrlMenu)
-	{
-		if (mIsFriendSignal)
-		{
-			bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-			LLView* addFriendButton = pUrlMenu->getChild<LLView>("add_friend");
-			LLView* removeFriendButton = pUrlMenu->getChild<LLView>("remove_friend");
+        if (mIsFriendSignal)
+        {
+            bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
+            LLView* addFriendButton = menu->getChild<LLView>("add_friend");
+            LLView* removeFriendButton = menu->getChild<LLView>("remove_friend");
 
-			if (addFriendButton && removeFriendButton)
-			{
+            if (addFriendButton && removeFriendButton)
+            {
+// [SL:KB] - Patch: Control-TextBase | Checked: 2012-07-08 (Catznip-3.3)
 				addFriendButton->setVisible(!isFriend);
 				removeFriendButton->setVisible(isFriend);
-			}
-		}
-
-		if (mIsObjectBlockedSignal)
-		{
-			bool isBlocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
-			LLView* blockButton = pUrlMenu->getChild<LLView>("block_object");
-			LLView* unblockButton = pUrlMenu->getChild<LLView>("unblock_object");
-
-			if (blockButton && unblockButton)
-			{
-				blockButton->setVisible(!isBlocked);
-				unblockButton->setVisible(isBlocked);
-			}
-		}
-
-		pUrlMenu->show(x, y);
-		LLMenuGL::showPopup(this, pUrlMenu, x, y);
-	}
 // [/SL:KB]
-//	delete mPopupMenu;
-//	llassert(LLMenuGL::sMenuContainer != NULL);
-//	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
-//		LLMenuHolderGL::child_registry_t::instance());
-//	if (mIsFriendSignal)
-//	{
-//		bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-//		LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
-//		LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
-//
-//		if (addFriendButton && removeFriendButton)
-//		{
-//			addFriendButton->setEnabled(!isFriend);
-//			removeFriendButton->setEnabled(isFriend);
-//		}
-//	}
-//
-//	if (mIsObjectBlockedSignal)
-//	{
-//		bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
-//		LLView* blockButton = mPopupMenu->getChild<LLView>("block_object");
-//		LLView* unblockButton = mPopupMenu->getChild<LLView>("unblock_object");
-//
-//		if (blockButton && unblockButton)
-//		{
-//			blockButton->setVisible(!is_blocked);
-//			unblockButton->setVisible(is_blocked);
-//		}
-//	}
-//
-//	if (mPopupMenu)
-//	{
-//		mPopupMenu->show(x, y);
-//		LLMenuGL::showPopup(this, mPopupMenu, x, y);
-//	}
+//                addFriendButton->setEnabled(!isFriend);
+//                removeFriendButton->setEnabled(isFriend);
+            }
+        }
+
+        if (mIsObjectBlockedSignal)
+        {
+            bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
+            LLView* blockButton = menu->getChild<LLView>("block_object");
+            LLView* unblockButton = menu->getChild<LLView>("unblock_object");
+
+            if (blockButton && unblockButton)
+            {
+                blockButton->setVisible(!is_blocked);
+                unblockButton->setVisible(is_blocked);
+            }
+        }
+        menu->show(x, y);
+        LLMenuGL::showPopup(this, menu, x, y);
+    }
 }
 
 void LLTextBase::setText(const LLStringExplicit &utf8str, const LLStyle::Params& input_params)
