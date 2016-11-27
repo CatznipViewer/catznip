@@ -272,7 +272,11 @@ public:
 
 	void			setReplaceNewlinesWithSpaces(BOOL replace);
 
-	void			resetContextMenu() { setContextMenu(NULL); };
+//	void			resetContextMenu() { setContextMenu(NULL); };
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	void			resetContextMenu() { setContextMenu(nullptr, false); };
+	void			setContextMenu(LLContextMenu* new_context_menu, bool fTakeOwnership);
+// [/SL:KB]
 
 private:
 	// private helper methods
@@ -308,7 +312,7 @@ private:
 	virtual S32		getPreeditFontSize() const;
 	virtual LLWString getPreeditString() const { return getWText(); }
 
-	void			setContextMenu(LLContextMenu* new_context_menu);
+//	void			setContextMenu(LLContextMenu* new_context_menu);
 
 protected:
 	LLUIString		mText;					// The string being edited.
@@ -385,6 +389,10 @@ protected:
 	std::vector<S32> mPreeditPositions;
 	LLPreeditor::standouts_t mPreeditStandouts;
 
+// [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	LLHandle<LLContextMenu> mDefaultMenuHandle;
+	bool                    mContextMenuOwned;		// TRUE if this instance owns the context menu handle
+// [/SL:KB]
 	LLHandle<LLContextMenu> mContextMenuHandle;
 
 private:
