@@ -2690,10 +2690,17 @@ void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu, bool fTakeOwn
 // [/SL:KB]
 //void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu)
 //{
-//	if (new_context_menu)
-//		mContextMenuHandle = new_context_menu->getHandle();
-//	else
-//		mContextMenuHandle.markDead();
+//    LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
+//    if (menu)
+//    {
+//        menu->die();
+//        mContextMenuHandle.markDead();
+//    }
+//
+//    if (new_context_menu)
+//    {
+//        mContextMenuHandle = new_context_menu->getHandle();
+//    }
 //}
 
 void LLLineEditor::setFont(const LLFontGL* font)
