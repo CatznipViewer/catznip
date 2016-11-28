@@ -31,12 +31,17 @@
 
 // newview
 #include "llpanelappearancetab.h"
+#include "llselectmgr.h"
+#include "lltimer.h"
 // [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-4.2
 #include "llwearableitemslist.h"
 // [/SL:KB]
 
+class LLAccordionCtrl;
+class LLAccordionCtrlTab;
 class LLInventoryCategoriesObserver;
 class LLListContextMenu;
+class LLScrollListCtrl;
 //class LLWearableItemsList;
 class LLWearingGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
@@ -83,6 +88,8 @@ public:
 
 	/*virtual*/ BOOL postBuild();
 
+	/*virtual*/ void draw();
+
 	/*virtual*/ void onOpen(const LLSD& info);
 
 	/*virtual*/ void setFilterSubString(const std::string& string);
@@ -93,6 +100,9 @@ public:
 
 	/*virtual*/ void copyToClipboard();
 
+	void startUpdateTimer();
+	void updateAttachmentsList();
+
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
 	typedef boost::signals2::signal<void()> selection_change_signal_t;
 	boost::signals2::connection setSelectionChangeCallback(selection_change_signal_t::slot_type cb);
@@ -101,17 +111,24 @@ public:
 
 	bool hasItemSelected();
 
-// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
-	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
-	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
+	bool populateAttachmentsList(bool update = false);
+	void onAccordionTabStateChanged();
+	void setAttachmentDetails(LLSD content);
+	void requestAttachmentDetails();
+	void onEditAttachment();
+	void onRemoveAttachment();
 
+// [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	void onTakeOffClicked();
 	void onTakeOffFolderClicked();
+// [/SL:KB]
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-3.3
+	LLInventoryPanel* getInvPanel() const  { return mInvPanel; }
+	LLWornItemsList*  getItemsList() const { return mCOFItemsList; }
 protected:
-	enum EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
+	enum class EWearingView { FOLDER_VIEW = 0, LIST_VIEW = 1 };
+	void createInventoryPanel();
 	void onToggleWearingView(EWearingView eView);
-
-	bool createInventoryPanel();
 // [/SL:KB]
 
 private:
@@ -119,9 +136,13 @@ private:
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-23 (Catznip-3.3)
 	void onSelectionChange();
 // [/SL:KB]
+	void onTempAttachmentsListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+
+	void getAttachmentLimitsCoro(std::string url);
 
 	LLInventoryCategoriesObserver* 	mCategoriesObserver;
 //	LLWearableItemsList* 			mCOFItemsList;
+	LLScrollListCtrl*				mTempItemsList;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	boost::signals2::connection		mComplexityChangedSlot;
 	selection_change_signal_t		mSelectionSignal;
@@ -129,14 +150,27 @@ private:
 	LLInventoryPanel*				mInvPanel;
 	LLSaveFolderState*				mSavedFolderState;
 	LLMenuButton*					mSortMenuButton;
-	LLButton*						mToggleFolderView;
-	LLButton*						mToggleListView;
 // [/SL:KB]
 	LLWearingGearMenu*				mGearMenu;
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-11 (Catznip-3.3)
 	LLWearingSortMenu*				mSortMenu;
 // [/SL:KB]
 	LLListContextMenu*				mContextMenu;
+	LLListContextMenu*				mAttachmentsMenu;
+
+	LLAccordionCtrlTab* 			mWearablesTab;
+// [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-5.0
+	LLAccordionCtrlTab* 			mWearablesInvTab = nullptr;
+// [/SL:KB]
+	LLAccordionCtrlTab* 			mAttachmentsTab;
+	LLAccordionCtrl*				mAccordionCtrl;
+
+	std::map<LLUUID, LLViewerObject*> mAttachmentsMap;
+
+	std::map<LLUUID, std::string> 	mObjectNames;
+
+	boost::signals2::connection 	mAttachmentsChangedConnection;
+	LLFrameTimer					mUpdateTimer;
 
 	bool							mIsInitialized;
 };

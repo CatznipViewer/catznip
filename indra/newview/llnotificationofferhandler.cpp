@@ -106,32 +106,40 @@ bool LLOfferHandler::processNotification(const LLNotificationPtr& notification)
 
 			LLUUID from_id = notification->getPayload()["from_id"];
 
-// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
-			bool playSound = (!notification->isDND()
-							  && ((notification->getName() == "UserGiveItem"
-			                  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
-			                  || ((notification->getName() == "TeleportOffered" || notification->getName() == "TeleportRequest")
-			                  && gSavedSettings.getBOOL("PlaySoundTeleportOffer"))));
-			if (playSound)
+			if (!notification->isDND())
 			{
-				const std::string& strSound = notification->getSound();
-				if (!strSound.empty())
+// [SL:KB] - Patch: Settings-Sounds | Checked: 2014-20-23 (Catznip-3.7)
+				//Will not play a notification sound for inventory and teleport offer based upon chat preference
+				bool playSound = (notification->getName() == "UserGiveItem"
+								  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
+								 || ((notification->getName() == "TeleportOffered"
+								     || notification->getName() == "TeleportRequest"
+								     || notification->getName() == "TeleportOffered_MaturityExceeded"
+								     || notification->getName() == "TeleportOffered_MaturityBlocked")
+								    && gSavedSettings.getBOOL("PlaySoundTeleportOffer"));
+
+				if (playSound)
 				{
-					make_ui_sound(LLViewerChat::getUISoundFromSetting(strSound));
+					const std::string& strSound = notification->getSound();
+					if (!strSound.empty())
+					{
+						make_ui_sound(LLViewerChat::getUISoundFromSetting(strSound));
+					}
 				}
-			}
 // [/SL:KB]
-//			//Will not play a notification sound for inventory and teleport offer based upon chat preference
-//			bool playSound = (!notification->isDND()
-//							  && ((notification->getName() == "UserGiveItem"
-//			                  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
-//			                  || (notification->getName() == "TeleportOffered"
-//			                  && gSavedSettings.getBOOL("PlaySoundTeleportOffer"))));
+//				//Will not play a notification sound for inventory and teleport offer based upon chat preference
+//				bool playSound = (notification->getName() == "UserGiveItem"
+//								  && gSavedSettings.getBOOL("PlaySoundInventoryOffer"))
+//								 || ((notification->getName() == "TeleportOffered"
+//								     || notification->getName() == "TeleportOffered_MaturityExceeded"
+//								     || notification->getName() == "TeleportOffered_MaturityBlocked")
+//								    && gSavedSettings.getBOOL("PlaySoundTeleportOffer"));
 //
-//			            if(playSound)
-//			            {
-//			                notification->playSound();
-//			            }
+//				if (playSound)
+//				{
+//					notification->playSound();
+//				}
+			}
 
 // [RLVa:KB] - Checked: 2013-05-09 (RLVa-1.4.9)
 			// Don't spawn an IM session for non-chat related events

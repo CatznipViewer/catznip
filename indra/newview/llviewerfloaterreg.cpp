@@ -109,7 +109,7 @@
 #include "llfloaternotificationstabbed.h"
 #include "llfloaterobjectweights.h"
 #include "llfloateropenobject.h"
-#include "llfloateroutfitsnapshot.h"
+//#include "llfloateroutfitsnapshot.h"
 // [SL:KB] - Patch: World-Objects | Checked: 2013-12-18 (Catznip-3.6)
 #include "llfloaterownedobjects.h"
 // [/SL:KB]
@@ -440,7 +440,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("scene_load_stats", "floater_scene_load_stats.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSceneLoadStats>);
 	LLFloaterReg::add("stop_queue", "floater_script_queue.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotRunQueue>);
 	LLFloaterReg::add("snapshot", "floater_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSnapshot>);
-    LLFloaterReg::add("outfit_snapshot", "floater_outfit_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutfitSnapshot>);
+//    LLFloaterReg::add("outfit_snapshot", "floater_outfit_snapshot.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutfitSnapshot>);
 //	LLFloaterReg::add("search", "floater_search.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearch>);
 // [SL:KB] - Patch: UI-Search | Checked: 2012-09-03 (Catznip-3.3)
 	LLFloaterReg::add("search", "floater_search_container.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterSearchContainer>);

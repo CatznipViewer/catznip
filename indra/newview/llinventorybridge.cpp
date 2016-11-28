@@ -196,10 +196,6 @@ LLInvFVBridge::LLInvFVBridge(LLInventoryPanel* inventory,
 	mFolderType(LLFolderType::FT_INVALID),
 // [/SL:KB]
 	mIsLink(FALSE),
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
-	mClipboardGeneration(-1),
-	mIsClipboardCut(false),
-// [/SL:KB]
 	LLFolderViewModelItemInventory(inventory->getRootViewModel())
 {
 	mInventoryPanel = inventory->getInventoryPanelHandle();
@@ -324,6 +320,16 @@ BOOL LLInvFVBridge::cutToClipboard()
 	return FALSE;
 }
 
+// virtual
+bool LLInvFVBridge::isCutToClipboard()
+{
+    if (LLClipboard::instance().isCutMode())
+    {
+        return LLClipboard::instance().isOnClipboard(mUUID);
+    }
+    return false;
+}
+
 // Callback for cutToClipboard if DAMA required...
 BOOL LLInvFVBridge::callback_cutToClipboard(const LLSD& notification, const LLSD& response)
 {
@@ -348,9 +354,7 @@ BOOL LLInvFVBridge::perform_cutToClipboard()
 // [/SL:KB]
 	{
 		LLClipboard::instance().setCutMode(true);
-		BOOL added_to_clipboard = LLClipboard::instance().addToClipboard(mUUID);
-//        removeObject(&gInventory, mUUID);   // Always perform the remove even if the object couldn't make it to the clipboard
-        return added_to_clipboard;
+		return LLClipboard::instance().addToClipboard(mUUID);
 	}
 	return FALSE;
 }
@@ -559,26 +563,6 @@ void  LLInvFVBridge::removeBatchNoCheck(std::vector<LLFolderViewModelItem*>&  ba
 	// notify inventory observers.
 	model->notifyObservers();
 }
-
-// [SL:KB] - Patch: Inventory-Actions | Checked: 2012-06-30 (Catznip-3.3)
-bool LLInvFVBridge::isClipboardCut() const
-{
-	const LLClipboard* pClipboard = LLClipboard::getInstance();
-	if (mClipboardGeneration != pClipboard->getGeneration())
-	{
-		mClipboardGeneration = pClipboard->getGeneration();
-
-		mIsClipboardCut = false;
-		if (pClipboard->isCutMode())
-		{
-			mIsClipboardCut |= pClipboard->isOnClipboard(mUUID);
-			if (mParent)
-				mIsClipboardCut |= mParent->isClipboardCut();
-		}
-	}
-	return mIsClipboardCut;
-}
-// [/SL:KB]
 
 BOOL LLInvFVBridge::isClipboardPasteable() const
 {
@@ -1532,6 +1516,12 @@ bool LLInvFVBridge::canShare() const
 				// Categories can be given.
 				can_share = (model->getCategory(mUUID) != NULL);
 			}
+
+			const LLUUID trash_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_TRASH);
+			if ((mUUID == trash_id) || gInventory.isObjectDescendentOf(mUUID, trash_id))
+			{
+				can_share = false;
+			}
 		}
 	}
 
@@ -2124,13 +2114,15 @@ BOOL LLItemBridge::removeItem()
 	}
 
 	// move it to the trash
-	LLPreview::hide(mUUID, TRUE);
 	LLInventoryModel* model = getInventoryModel();
 	if(!model) return FALSE;
 	const LLUUID& trash_id = model->findCategoryUUIDForType(LLFolderType::FT_TRASH);
 	LLViewerInventoryItem* item = getItem();
 	if (!item) return FALSE;
-
+	if (item->getType() != LLAssetType::AT_LSL_TEXT)
+	{
+		LLPreview::hide(mUUID, TRUE);
+	}
 	// Already in trash
 	if (model->isObjectDescendentOf(mUUID, trash_id)) return FALSE;
 

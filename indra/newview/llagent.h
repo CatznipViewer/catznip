@@ -706,6 +706,8 @@ private:
 	void            handleTeleportFinished();
 	void            handleTeleportFailed();
 
+    static void     onCapabilitiesReceivedAfterTeleport();
+
 	//--------------------------------------------------------------------
 	// Teleport State
 	//--------------------------------------------------------------------
