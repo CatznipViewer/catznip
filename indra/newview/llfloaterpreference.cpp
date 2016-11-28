@@ -1435,6 +1435,9 @@ void LLFloaterPreference::refreshEnabledState()
 						(ctrl_wind_light->get()) ? TRUE : FALSE;
 
 	ctrl_deferred->setEnabled(enabled);
+
+	// Cannot have floater active until caps have been received
+	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
 }
 
 void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
@@ -1598,9 +1601,6 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 
 	getChildView("block_list")->setEnabled(LLLoginInstance::getInstance()->authSuccess());
 
-	// Cannot have floater active until caps have been received
-	getChild<LLButton>("default_creation_permissions")->setEnabled(LLStartUp::getStartupState() < STATE_STARTED ? false : true);
-
 // [SL:KB] - Patch: Settings-Sounds | Checked: 2014-04-28 (Catznip-3.6)
 	getChild<LLPanel>("soundalerts")->setEnabled(LLStartUp::getStartupState() == STATE_STARTED);
 // [/SL:KB]
@@ -1643,7 +1643,7 @@ void LLAvatarComplexityControls::setIndirectMaxArc()
 	else
 	{
 		// This is the inverse of the calculation in updateMaxComplexity
-		indirect_max_arc = (U32)((log(max_arc) - MIN_ARC_LOG) / ARC_LIMIT_MAP_SCALE) + MIN_INDIRECT_ARC_LIMIT;
+		indirect_max_arc = (U32)ll_round(((log(F32(max_arc)) - MIN_ARC_LOG) / ARC_LIMIT_MAP_SCALE)) + MIN_INDIRECT_ARC_LIMIT;
 	}
 	gSavedSettings.setU32("IndirectMaxComplexity", indirect_max_arc);
 }
@@ -2217,7 +2217,7 @@ void LLAvatarComplexityControls::updateMax(LLSliderCtrl* slider, LLTextBox* valu
 	{
 		// if this is changed, the inverse calculation in setIndirectMaxArc
 		// must be changed to match
-		max_arc = (U32)exp(MIN_ARC_LOG + (ARC_LIMIT_MAP_SCALE * (indirect_value - MIN_INDIRECT_ARC_LIMIT)));
+		max_arc = (U32)ll_round(exp(MIN_ARC_LOG + (ARC_LIMIT_MAP_SCALE * (indirect_value - MIN_INDIRECT_ARC_LIMIT))));
 	}
 
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1

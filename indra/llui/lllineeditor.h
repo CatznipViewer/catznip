@@ -272,10 +272,11 @@ public:
 
 	void			setReplaceNewlinesWithSpaces(BOOL replace);
 
+//	void			resetContextMenu() { setContextMenu(NULL); };
 // [SL:KB] - Patch: Control-LineEditor | Checked: 2012-02-09 (Catznip-3.2)
+	void			resetContextMenu() { setContextMenu(nullptr, false); };
 	void			setContextMenu(LLContextMenu* new_context_menu, bool fTakeOwnership);
 // [/SL:KB]
-//	void			setContextMenu(LLContextMenu* new_context_menu);
 
 private:
 	// private helper methods
@@ -310,6 +311,8 @@ private:
 	virtual BOOL	getPreeditLocation(S32 query_position, LLCoordGL *coord, LLRect *bounds, LLRect *control) const;
 	virtual S32		getPreeditFontSize() const;
 	virtual LLWString getPreeditString() const { return getWText(); }
+
+//	void			setContextMenu(LLContextMenu* new_context_menu);
 
 protected:
 	LLUIString		mText;					// The string being edited.

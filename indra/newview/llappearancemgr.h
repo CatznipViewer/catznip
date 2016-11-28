@@ -261,6 +261,10 @@ public:
 	void setAppearanceServiceURL(const std::string& url) { mAppearanceServiceURL = url; }
 	std::string getAppearanceServiceURL() const;
 
+	typedef boost::function<void ()> attachments_changed_callback_t;
+	typedef boost::signals2::signal<void ()> attachments_changed_signal_t;
+	boost::signals2::connection setAttachmentsChangedCallback(attachments_changed_callback_t cb);
+
 // [SL:KB] - Patch: Settings-Troubleshooting | Checked: 2014-03-16 (Catznip-3.6)
 	void purgeCategory(const LLUUID& category, bool keep_outfit_links, LLInventoryModel::item_array_t* keep_items = NULL);
 // [/SL:KB]
@@ -312,6 +316,8 @@ private:
 	LLTimer mInFlightTimer;
 	static bool mActive;
 
+	attachments_changed_signal_t		mAttachmentsChangeSignal;
+	
 	LLUUID mCOFImageID;
 
 	std::auto_ptr<LLOutfitUnLockTimer> mUnlockOutfitTimer;

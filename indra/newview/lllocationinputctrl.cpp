@@ -278,10 +278,7 @@ LLLocationInputCtrl::LLLocationInputCtrl(const LLLocationInputCtrl::Params& p)
 	params.commit_on_focus_lost(false);
 	params.follows.flags(FOLLOWS_ALL);
 	mTextEntry = LLUICtrlFactory::create<LLURLLineEditor>(params);
-// [SL:KB] - Patch: Control-LocationInputCtrl | Checked: 2016-01-08 (Catznip-3.8)
-	mTextEntry->setContextMenu(NULL, false);
-// [/SL:KB]
-//	mTextEntry->setContextMenu(NULL);
+	mTextEntry->resetContextMenu();
 	addChild(mTextEntry);
 	// LLLineEditor is replaced with LLLocationLineEditor
 

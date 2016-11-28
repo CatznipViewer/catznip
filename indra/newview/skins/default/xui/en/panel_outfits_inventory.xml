@@ -32,6 +32,7 @@
      halign="center"
      top="0"
      width="324">
+<!--
          <panel
            class="outfit_gallery"
            filename="panel_outfit_gallery.xml"
@@ -43,6 +44,7 @@
            label="OUTFIT GALLERY"
            layout="topleft"
            width="315" />
+-->
          <panel
            class="outfits_tab"
            height="520"
