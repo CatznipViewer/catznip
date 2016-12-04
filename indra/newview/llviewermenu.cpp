@@ -49,6 +49,9 @@
 #include "llagentui.h"
 #include "llagentwearables.h"
 #include "llagentpilot.h"
+// [SL:KB] - Patch: Appearance-PhantomAttach | Checked: Catznip-5.0
+#include "llattachmentsmgr.h"
+// [/SL:KB]
 #include "llcompilequeue.h"
 #include "llconsole.h"
 #include "lldaycyclemanager.h"
@@ -1988,6 +1991,13 @@ class LLAdvancedRebakeTextures : public view_listener_t
 };
 	
 	
+// [SL:KB] - Patch: Appearance-PhantomAttach | Checked: Catznip-5.0
+void handle_refresh_attachments()
+{
+	LLAttachmentsMgr::instance().refreshAttachments();
+}
+// [/SL:KB]
+
 #if 1 //ndef LL_RELEASE_FOR_DOWNLOAD
 ///////////////////////////
 // DEBUG AVATAR TEXTURES //
@@ -2670,12 +2680,12 @@ void handle_object_touch()
 	LLPickInfo pick = LLToolPie::getInstance()->getPick();
 
 // [RLVa:KB] - Checked: 2010-04-11 (RLVa-1.2.0e) | Modified: RLVa-1.1.0l
-		// NOTE: fallback code since we really shouldn't be getting an active selection if we can't touch this
-		if ( (rlv_handler_t::isEnabled()) && (!gRlvHandler.canTouch(object, pick.mObjectOffset)) )
-		{
-			RLV_ASSERT(false);
-			return;
-		}
+	// NOTE: fallback code since we really shouldn't be getting an active selection if we can't touch this
+	if ( (RlvActions::isRlvEnabled()) && (!RlvActions::canTouch(object, pick.mObjectOffset)) )
+	{
+		RLV_ASSERT(false);
+		return;
+	}
 // [/RLVa:KB]
 
 	// *NOTE: Hope the packets arrive safely and in order or else
@@ -2742,10 +2752,10 @@ bool enable_object_touch(LLUICtrl* ctrl)
 	}
 
 // [RLVa:KB] - Checked: 2010-11-12 (RLVa-1.2.1g) | Added: RLVa-1.2.1g
-	if ( (rlv_handler_t::isEnabled()) && (new_value) )
+	if ( (RlvActions::isRlvEnabled()) && (new_value) )
 	{
 		// RELEASE-RLVa: [RLVa-1.2.1] Make sure this stays in sync with handle_object_touch()
-		new_value = gRlvHandler.canTouch(obj, LLToolPie::getInstance()->getPick().mObjectOffset);
+		new_value = RlvActions::canTouch(obj, LLToolPie::getInstance()->getPick().mObjectOffset);
 	}
 // [/RLVa:KB]
 
@@ -3008,7 +3018,7 @@ bool enable_attachment_touch(const LLUUID& idItem)
 // [RLVa:KB] - Checked: 2012-08-15 (RLVa-1.4.7)
 		return (pAttachObj) && (pAttachObj->flagHandleTouch()) &&
 			( (!rlv_handler_t::isEnabled()) ||
-			  ((isAgentAvatarValid()) && (gRlvHandler.canTouch(gAgentAvatarp->getWornAttachment(idItem)))) );
+			  ((isAgentAvatarValid()) && (RlvActions::canTouch(gAgentAvatarp->getWornAttachment(idItem)))) );
 // [/RLVa:KB]
 //		return (pAttachObj) && (pAttachObj->flagHandleTouch());
 	}
@@ -9932,6 +9942,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLAdvancedCheckDebugCharacterVis(), "Advanced.CheckDebugCharacterVis");
 	view_listener_t::addMenu(new LLAdvancedDumpAttachments(), "Advanced.DumpAttachments");
 	view_listener_t::addMenu(new LLAdvancedRebakeTextures(), "Advanced.RebakeTextures");
+// [SL:KB] - Patch: Appearance-PhantomAttach | Checked: Catznip-5.0
+	commit.add("Advanced.RefreshAttachments", boost::bind(&handle_refresh_attachments));
+// [/SL:KB]
 	view_listener_t::addMenu(new LLAdvancedDebugAvatarTextures(), "Advanced.DebugAvatarTextures");
 	view_listener_t::addMenu(new LLAdvancedDumpAvatarLocalTextures(), "Advanced.DumpAvatarLocalTextures");
 	// Advanced > Network
