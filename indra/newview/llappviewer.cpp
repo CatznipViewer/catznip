@@ -3178,6 +3178,21 @@ bool LLAppViewer::initConfiguration()
 		LLEventPumps::instance().obtain("LLControlGroup").post(LLSDMap("init", *ki));
 	}
 
+// [RLVa:KB] - Patch: RLVa-2.1.0
+	if (LLControlVariable* pControl = gSavedSettings.getControl(RLV_SETTING_MAIN))
+	{
+		if ( (pControl->getValue().asBoolean()) && (pControl->hasUnsavedValue()) )
+		{
+			pControl->resetToDefault();
+			pControl->setValue(false);
+
+			std::ostringstream msg;
+			msg << LLTrans::getString("RLVaToggleMessageLogin", LLSD().with("[STATE]", LLTrans::getString("RLVaToggleDisabled")));
+			OSMessageBox(msg.str(), LLStringUtil::null, OSMB_OK);
+		}
+	}
+// [/RLVa:KB]
+
 	return true; // Config was successful.
 }
 
@@ -6077,6 +6092,11 @@ void LLAppViewer::disconnectViewer()
 
 //	// close inventory interface, close all windows
 //	LLFloaterInventory::cleanup();
+
+// [SL:KB] - Patch: Appearance-Misc | Checked: 2013-02-12 (Catznip-3.4)
+	// Destroying all objects below will trigger attachment detaching code and attempt to remove the COF links for them
+	LLAppearanceMgr::instance().setAttachmentInvLinkEnable(false);
+// [/SL:KB]
 
 // [SL:KB] - Patch: Appearance-Misc | Checked: 2013-02-12 (Catznip-3.4)
 	// Destroying all objects below will trigger attachment detaching code and attempt to remove the COF links for them

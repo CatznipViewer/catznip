@@ -35,8 +35,8 @@ const S32 RLV_VERSION_BUILD_COMPAT = 0;
 
 // Implementation version
 const S32 RLVa_VERSION_MAJOR = 2;
-const S32 RLVa_VERSION_MINOR = 0;
-const S32 RLVa_VERSION_PATCH = 3;
+const S32 RLVa_VERSION_MINOR = 1;
+const S32 RLVa_VERSION_PATCH = 0;
 
 // Uncomment before a final release
 //#define RLV_RELEASE
@@ -388,6 +388,9 @@ enum ERlvAttachGroupType
 #define RLV_STRING_BLOCKED_TPLUREREQ_REMOTE	"blocked_tplurerequest_remote"
 #define RLV_STRING_BLOCKED_VIEWXXX			"blocked_viewxxx"
 #define RLV_STRING_BLOCKED_WIREFRAME		"blocked_wireframe"
+#define RLV_STRING_STOPIM_NOSESSION         "stopim_nosession"
+#define RLV_STRING_STOPIM_ENDSESSION_REMOTE "stopim_endsession_remote"
+#define RLV_STRING_STOPIM_ENDSESSION_LOCAL  "stopim_endsession_local"
 
 // ============================================================================
 
