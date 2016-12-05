@@ -511,7 +511,7 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 {
 // [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
 	U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
-	if (nLogTo)
+	if ( (nLogTo) || ("notifytip" == mType) )
 	{
 		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
 	}
