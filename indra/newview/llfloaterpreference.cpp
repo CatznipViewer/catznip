@@ -1463,7 +1463,7 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	LLCheckBoxCtrl* bumpshiny_ctrl = getChild<LLCheckBoxCtrl>("BumpShiny");
 	bool bumpshiny = gGLManager.mHasCubeMap && LLCubeMap::sUseCubeMaps && LLFeatureManager::getInstance()->isFeatureAvailable("RenderObjectBump");
 	bumpshiny_ctrl->setEnabled(bumpshiny ? TRUE : FALSE);
-	
+    
 	// Avatar Mode
 	// Enable Avatar Shaders
 	LLCheckBoxCtrl* ctrl_avatar_vp = getChild<LLCheckBoxCtrl>("AvatarVertexProgram");
@@ -2298,7 +2298,7 @@ void LLFloaterPreference::onClickProxySettings()
 
 //void LLFloaterPreference::onClickSpellChecker()
 //{
-//		LLFloaterReg::showInstance("prefs_spellchecker");
+//    LLFloaterReg::showInstance("prefs_spellchecker");
 //}
 
 void LLFloaterPreference::onClickAdvanced()

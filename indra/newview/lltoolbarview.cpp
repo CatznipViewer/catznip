@@ -302,10 +302,7 @@ bool LLToolBarView::loadToolbars(bool force_default)
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.left_toolbar.commands)
 		{
-//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_LEFT]))
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
 			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_LEFT]))
-// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to left toolbar." << LL_ENDL;
 			}
@@ -325,10 +322,7 @@ bool LLToolBarView::loadToolbars(bool force_default)
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.right_toolbar.commands)
 		{
-//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]))
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
 			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_RIGHT]))
-// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to right toolbar." << LL_ENDL;
 			}
@@ -368,10 +362,7 @@ bool LLToolBarView::loadToolbars(bool force_default)
 		}
 		BOOST_FOREACH(const LLCommandId::Params& command_params, toolbar_set.bottom_toolbar.commands)
 		{
-//			if (addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]))
-// [SL:KB] - Patch: UI-Toolbars | Checked: 2013-10-13 (Catznip-3.6)
 			if (!addCommandInternal(LLCommandId(command_params), mToolbars[LLToolBarEnums::TOOLBAR_BOTTOM]))
-// [/SL:KB]
 			{
 				LL_WARNS() << "Error adding command '" << command_params.name() << "' to bottom toolbar." << LL_ENDL;
 			}
