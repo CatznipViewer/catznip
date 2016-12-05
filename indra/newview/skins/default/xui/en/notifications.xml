@@ -3432,6 +3432,7 @@ Your [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Renderin
    icon = "notifytip.tga"
    name = "AgentComplexity"
    type = "notifytip">
+   can_logto = "">
    <unique combine = "cancel_old">
      <context>AgentComplexityNotice</context>
    </unique>
@@ -3445,7 +3446,7 @@ Your [https://community.secondlife.com/t5/English-Knowledge-Base/Avatar-Renderin
    icon = "notifytip.tga"
    name = "HUDComplexityWarning"
    type = "notifytip"
-   log_to_chat = "false">
+   can_logto = "">
     <unique combine = "cancel_old">
       <context>HUDComplexityWarning</context>
     </unique>
