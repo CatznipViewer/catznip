@@ -224,7 +224,7 @@ void LLSidepanelAppearance::updateComplexityTitle()
 
 		LLStringUtil::format_map_t args;
 		args["[COMPLEXITY]"] = std::to_string(gAgentAvatarp->getVisualComplexity());
-		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), getString("Complexity", args)));
+		pFloater->setTitle(llformat("%s %s", mFloaterTitle.c_str(), getString("Complexity", args).c_str()));
 	}
 }
 // [/SL:KB]
