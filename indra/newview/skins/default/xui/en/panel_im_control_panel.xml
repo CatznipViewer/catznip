@@ -5,9 +5,13 @@
  height="300"
  name="panel_im_control_panel"
  width="150">
-    <avatar_icon
+    <texture_picker
+     allow_no_texture="true"
      bevel_style="in"
      border_style="line"
+     default_image_name="None"
+     enabled="false"
+     fallback_image="Generic_Person_Large"
      follows="top|left|right"
      height="130"
      layout="topleft"
