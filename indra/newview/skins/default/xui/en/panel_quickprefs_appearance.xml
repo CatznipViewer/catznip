@@ -13,17 +13,33 @@
 	 layout="topleft"
 	 left="10"
 	 name="appearance_you_text"
-	 top_pad="3"
+	 top_pad="1"
 	 width="100">
 		You
 	</text>
+
+  <slider
+   can_edit_text="true"
+   decimal_digits="3"
+   follows="top|left"
+   height="16"
+   increment="0.001"
+   initial_value="0.0"
+   label="Hover height:"
+	 label_width="100"
+	 left="25"
+   layout="topleft"
+   name="appearance_hover_value"
+	 top_pad="1"
+	 right="-30" />
+
 	<text
 	 follows="left|top"
 	 height="15"
 	 layout="topleft"
 	 left="25"
 	 name="appearance_complexity_text"
-	 top_pad="1"
+	 top_pad="2"
 	 width="100">
 		Complexity:
 	</text>
@@ -37,7 +53,7 @@
 	 width="150">
 		123,456,789
 	</text>
-	
+
 	<text
 	 follows="left|top"
 	 height="15"
@@ -73,7 +89,7 @@
 	 layout="topleft"
 	 left="5"
 	 name="appearance_border_1"
-	 top_pad="5"
+	 top_pad="4"
 	 right="-5"/>
 
 	<text
@@ -83,7 +99,7 @@
 	 layout="topleft"
 	 left="10"
 	 name="appearance_others_text"
-	 top_pad="6"
+	 top_pad="5"
 	 width="100">
 		Others
 	</text>
@@ -153,7 +169,7 @@
 	 layout="topleft"
 	 left="25"
 	 name="appearance_show_text"
-	 top_pad="1"
+	 top_pad="3"
 	 width="100">
 		Always render:
 	</text>
@@ -162,16 +178,16 @@
 	 height="16"
 	 label="Friends"
 	 layout="topleft"
-	 left="35"
+	 left_pad="2"
 	 name="appearance_showfriends_check"
-	 top_pad="2"
+	 top_delta="0"
 	 width="130" />
 	<check_box
 	 control_name="RenderNearbyFull"
 	 height="16"
 	 label="Nearby avatars (20m)"
 	 layout="topleft"
-	 left="35"
+	 left_delta="0"
 	 name="appearance_shownearby_check"
 	 top_pad="2"
 	 width="130" />
@@ -183,7 +199,7 @@
 	 layout="topleft"
 	 left="5"
 	 name="appearance_border_2"
-	 top_pad="5"
+	 top_pad="4"
 	 right="-5"/>
 	 
 	<text
@@ -193,7 +209,7 @@
 	 layout="topleft"
 	 left="10"
 	 name="appearance_misc_text"
-	 top_pad="6"
+	 top_pad="5"
 	 width="100">
 		Miscellaneous
 	</text>
