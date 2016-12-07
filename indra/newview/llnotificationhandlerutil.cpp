@@ -188,7 +188,7 @@ void log_name_callback(const LLUUID& agent_id, const LLAvatarName& av_name, cons
 	{
 // [SL:KB] - Patch: Notifications-Logging | Checked: 2014-01-18 (Catznip-3.6)
 		const LLUUID idSession = LLIMMgr::computeSessionID(IM_NOTHING_SPECIAL, from_id);
-		LLHandlerUtil::logToIM(idSession, av_name.getLegacyName(), from_name, LLUUID(), raw_message, substitutions);
+		LLHandlerUtil::logToIM(idSession, strFilename, from_name, LLUUID(), raw_message, substitutions);
 // [/SL:KB]
 //		LLHandlerUtil::logToIM(IM_NOTHING_SPECIAL, strFilename, from_name, message, from_id, LLUUID());
 	}
