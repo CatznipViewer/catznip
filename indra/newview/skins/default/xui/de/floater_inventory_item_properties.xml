@@ -21,7 +21,7 @@
 	<check_box label="Kopieren" name="CheckEveryoneCopy"/>
 	<text name="GroupLabel">Gruppe:</text>
 	<check_box label="Teilen" name="CheckShareWithGroup"/>
-	<text name="NextOwnerLabel" width="150">Nächster Eigentümer:</text>
+	<text name="NextOwnerLabel">Nächster Eigentümer:</text>
 	<check_box label="Bearbeiten" name="CheckNextOwnerModify"/>
 	<check_box label="Kopieren" name="CheckNextOwnerCopy"/>
 	<check_box label="Wiederverkaufen" name="CheckNextOwnerTransfer"/>
