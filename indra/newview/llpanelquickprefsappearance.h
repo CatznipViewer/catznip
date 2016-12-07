@@ -51,6 +51,7 @@ public:
 	 */
 protected:
 	void refreshComplexity();
+	void refreshHover();
 	void refreshMaxComplexity();
 	void refreshMaxNonImpostors();
 	void refreshNotifications();
@@ -59,6 +60,7 @@ protected:
 	 * Event handlers
 	 */
 protected:
+	void onHoverChange(bool fCommit);
 	void onMaxComplexityChange();
 	void onMaxNonImpostorsChange();
 	void onShowNotificationsToggle();
@@ -70,10 +72,12 @@ protected:
 	static const std::string s_strNotifications[];
 
 	boost::signals2::connection m_ComplexityChangedSlot;
+	boost::signals2::connection m_HoverChangedSlot;
 	boost::signals2::connection m_VisibilityChangedSlot;
 	boost::signals2::connection m_MaxComplexityChangedSlot;
 	boost::signals2::connection m_MaxNonImpostorsChangedSlot;
 
+	LLSliderCtrl*               m_pHoverSlider = nullptr;
 	LLTextBox*                  m_pComplexityText = nullptr;
 	LLTextBox*                  m_pVisibilityText = nullptr;
 	LLCheckBoxCtrl*             m_pShowNotificationsCheck = nullptr;
