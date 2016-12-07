@@ -11426,8 +11426,8 @@ Changes won't take effect until after you restart [APP_NAME].
    icon="notify.tga"
    name="RLVaListRequested"
    label="Restriction request from [NAME_LABEL]"
-   log_to_im="true"
-   log_to_chat="false"
+   can_logto="im"
+   logto="im"
    type="offer">
 [NAME_SLURL] has requested to be sent a list of your currently active RLV restrictions.
     <tag>confirm</tag>
