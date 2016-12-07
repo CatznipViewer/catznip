@@ -1154,7 +1154,7 @@ LLUUID LLIMModel::LLIMSession::generateOutgoingAdHocHash() const
 void LLIMModel::LLIMSession::onAvatarNameCache(const LLUUID& avatar_id, const LLAvatarName& av_name)
 {
 	// Standardize P2P IM session names to "complete name"
-	mName = av_name.getCompleteName(false, EShowUsername::SHOW_ALWAYS);
+	mName = av_name.getCompleteName(true, EShowUsername::SHOW_ALWAYS);
 }
 // [/SL:KB]
 
