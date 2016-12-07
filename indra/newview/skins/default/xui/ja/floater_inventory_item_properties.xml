@@ -21,7 +21,7 @@
 	<check_box label="コピー" name="CheckEveryoneCopy"/>
 	<text name="GroupLabel">グループ：</text>
 	<check_box label="共有" name="CheckShareWithGroup"/>
-	<text name="NextOwnerLabel" width="158">次の所有者：</text>
+	<text name="NextOwnerLabel">次の所有者：</text>
 	<check_box label="編集" name="CheckNextOwnerModify"/>
 	<check_box label="コピー" name="CheckNextOwnerCopy"/>
 	<check_box label="再販・プレゼント" name="CheckNextOwnerTransfer"/>
