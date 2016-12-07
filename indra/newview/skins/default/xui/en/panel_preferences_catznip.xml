@@ -109,56 +109,6 @@
 			 layout="topleft"
 			 left="30"
 			 mouse_opaque="false"
-			 name="catznip_avatar_text"
-			 top_pad="10"
-			 type="string"
-			 width="350">
-				Avatar
-			</text>
-			<text
-			 follows="top|left"
-			 height="10"
-			 layout="topleft"
-			 left="55"
-			 length="1"
-			 mouse_opaque="false"
-			 name="hover_text"
-			 top_pad="10"
-			 type="string"
-			 width="80">
-				Height offset :
-			</text>
-			<button
-			 commit_callback.function="Pref.ShapeEditHover"
-			 enabled="true"
-			 follows="top|left"
-			 height="23"
-			 label="Edit Hover"
-			 layout="topleft"
-			 left_pad="10"
-			 name="hover_edit_btn"
-			 top_delta="-5"
-			 width="75" />
-			<text
-			 follows="top|left"
-			 font.style="BOLD"
-			 height="20"
-			 layout="topleft"
-			 left_pad="10" 
-			 name="hover_modifyshape_text"
-			 text_color="White_25"
-			 top_delta="5" 
-			 width="180">
-				(requires modifiable shape)
-			</text>
-
-			<text
-			 follows="top|left"
-			 font.style="BOLD"
-			 height="15"
-			 layout="topleft"
-			 left="30"
-			 mouse_opaque="false"
 			 name="catznip_snapshot_text"
 			 top_pad="10"
 			 type="string"
