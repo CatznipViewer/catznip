@@ -1,17 +1,17 @@
-/** 
+/**
  *
  * Copyright (c) 2016, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -35,6 +35,7 @@ LLFloaterFeedback::~LLFloaterFeedback()
 {
 }
 
+// virtual
 BOOL LLFloaterFeedback::postBuild()
 {
 	const LLSD& sdFeedbackInfo = gAgent.mFeedbackInfo;
@@ -57,9 +58,25 @@ BOOL LLFloaterFeedback::postBuild()
 	 */
 	m_pWebBrowser = getChild<LLMediaCtrl>("floater_feedback_browser");
 	if (sdFeedbackInfo.has("url"))
-		m_pWebBrowser->navigateTo(LLWeb::expandURLSubstitutions(sdFeedbackInfo["url"], LLSD().with("AGENT_NAME", gAgentUsername)));
+	{
+		m_pWebBrowser->addObserver(this);
+		m_pWebBrowser->setTarget("");
+		const std::string strUrl = LLWeb::expandURLSubstitutions(sdFeedbackInfo["url"], LLSD().with("AGENT_NAME", gAgentUsername));
+		m_pWebBrowser->navigateTo(strUrl);
+	}
 
 	return TRUE;
+}
+
+// virtual
+void LLFloaterFeedback::handleMediaEvent(LLPluginClassMedia* pSelf, EMediaEvent eEvent)
+{
+	if (MEDIA_EVENT_LOCATION_CHANGED == eEvent)
+	{
+		const std::string strUrl = pSelf->getLocation();
+		if ("about:blank" == strUrl)
+			closeFloater();
+	}
 }
 
 // =========================================================================
