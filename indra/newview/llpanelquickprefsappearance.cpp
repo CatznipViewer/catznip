@@ -59,6 +59,8 @@ LLQuickPrefsAppearancePanel::~LLQuickPrefsAppearancePanel()
 {
 	if (m_ComplexityChangedSlot.connected())
 		m_ComplexityChangedSlot.disconnect();
+	if (m_HoverChangedSlot.connected())
+		m_HoverChangedSlot.disconnect();
 	if (m_VisibilityChangedSlot.connected())
 		m_VisibilityChangedSlot.disconnect();
 	if (m_MaxComplexityChangedSlot.connected())
@@ -72,6 +74,14 @@ BOOL LLQuickPrefsAppearancePanel::postBuild()
 {
 	m_ComplexityChangedSlot = LLAvatarRenderNotifier::instance().addComplexityChangedCallback(boost::bind(&LLQuickPrefsAppearancePanel::refreshComplexity, this));
 	m_VisibilityChangedSlot = LLAvatarRenderNotifier::instance().addVisibilityChangedCallback(boost::bind(&LLQuickPrefsAppearancePanel::refreshComplexity, this));
+	m_HoverChangedSlot = gSavedPerAccountSettings.getControl("AvatarHoverOffsetZ")->getCommitSignal()->connect(boost::bind(&LLQuickPrefsAppearancePanel::refreshHover, this));
+
+	m_pHoverSlider = getChild<LLSliderCtrl>("appearance_hover_value");
+	m_pHoverSlider->setMinValue(MIN_HOVER_Z);
+	m_pHoverSlider->setMaxValue(MAX_HOVER_Z);
+	m_pHoverSlider->setSliderMouseUpCallback(boost::bind(&LLQuickPrefsAppearancePanel::onHoverChange, this, true));
+	m_pHoverSlider->setSliderEditorCommitCallback(boost::bind(&LLQuickPrefsAppearancePanel::onHoverChange, this, true));
+	m_pHoverSlider->setCommitCallback(boost::bind(&LLQuickPrefsAppearancePanel::onHoverChange, this, false));
 
 	m_pComplexityText = getChild<LLTextBox>("appearance_complexity_value");
 	m_pVisibilityText = getChild<LLTextBox>("appearance_visibility_value");
@@ -133,6 +143,15 @@ void LLQuickPrefsAppearancePanel::refreshComplexity()
 	}
 }
 
+void LLQuickPrefsAppearancePanel::refreshHover()
+{
+	if (isInVisibleChain())
+	{
+		F32 nHoverValue = gSavedPerAccountSettings.getF32("AvatarHoverOffsetZ");
+		m_pHoverSlider->setValue(nHoverValue, false);
+	}
+}
+
 void LLQuickPrefsAppearancePanel::refreshMaxComplexity()
 {
 	if (isInVisibleChain())
@@ -161,6 +180,15 @@ void LLQuickPrefsAppearancePanel::refreshNotifications()
 	}
 
 	m_pShowNotificationsCheck->set(fShowNotifications);
+}
+
+void LLQuickPrefsAppearancePanel::onHoverChange(bool fCommit)
+{
+	F32 nHoverValue = m_pHoverSlider->getValueF32();
+	LLVector3 vecHoverOffset(0.0, 0.0, llclamp(nHoverValue, MIN_HOVER_Z, MAX_HOVER_Z));
+	if (fCommit)
+		gSavedPerAccountSettings.setF32("AvatarHoverOffsetZ", nHoverValue);
+	gAgentAvatarp->setHoverOffset(vecHoverOffset, fCommit);
 }
 
 void LLQuickPrefsAppearancePanel::onMaxComplexityChange()
