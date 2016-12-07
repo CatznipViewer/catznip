@@ -676,11 +676,17 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 				{ LLAssetType::AT_OBJECT,  2 }, // Skull
 				{ LLAssetType::AT_OBJECT, 15 }, // Left Eyeball
 				{ LLAssetType::AT_OBJECT, 16 }, // Right Eyeball
+				{ LLAssetType::AT_OBJECT, 50 }, // Alt Left Eye
+				{ LLAssetType::AT_OBJECT, 51 }, // Alt Right Eye
 				{ LLAssetType::AT_OBJECT, 13 }, // Left Ear
 				{ LLAssetType::AT_OBJECT, 14 }, // Right Ear
+				{ LLAssetType::AT_OBJECT, 48 }, // Alt Left Ear
+				{ LLAssetType::AT_OBJECT, 49 }, // Alt Right Ear
 				{ LLAssetType::AT_OBJECT, 17 }, // Nose
 				{ LLAssetType::AT_OBJECT, 11 }, // Mouth
+				{ LLAssetType::AT_OBJECT, 52 }, // Tongue
 				{ LLAssetType::AT_OBJECT, 12 }, // Chin
+				{ LLAssetType::AT_OBJECT, 47 }, // Jaw
 
 				// Torso
 				{ LLAssetType::AT_CLOTHING, (int)LLWearableType::WT_JACKET },
@@ -694,16 +700,23 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 				{ LLAssetType::AT_OBJECT, 30 }, // Right Pec
 				{ LLAssetType::AT_OBJECT,  3 }, // Left Shoulder
 				{ LLAssetType::AT_OBJECT,  4 }, // Right Shoulder
+				{ LLAssetType::AT_OBJECT, 45 }, // Left Wing
+				{ LLAssetType::AT_OBJECT, 46 }, // Right Wing
 				{ LLAssetType::AT_OBJECT, 20 }, // L Upper Arm
 				{ LLAssetType::AT_OBJECT, 18 }, // R Upper Arm
 				{ LLAssetType::AT_OBJECT, 21 }, // L Forearm
 				{ LLAssetType::AT_OBJECT, 19 }, // R Forearm
 				{ LLAssetType::AT_OBJECT,  5 }, // Left Hand
+				{ LLAssetType::AT_OBJECT, 41 }, // Left Ring Finger
 				{ LLAssetType::AT_OBJECT,  6 }, // Right Hand
+				{ LLAssetType::AT_OBJECT, 42 }, // Right Ring Finger
 				{ LLAssetType::AT_OBJECT, 25 }, // Left Hip
 				{ LLAssetType::AT_OBJECT, 22 }, // Right Hip
 				{ LLAssetType::AT_OBJECT, 28 }, // Stomach
 				{ LLAssetType::AT_OBJECT, 10 }, // Pelvis
+				{ LLAssetType::AT_OBJECT, 53 }, // Groin
+				{ LLAssetType::AT_OBJECT, 43 }, // Tail Base
+				{ LLAssetType::AT_OBJECT, 44 }, // Tail Tip
 				{ LLAssetType::AT_OBJECT, 40 }, // Avatar Center
 
 				// Legs
@@ -718,6 +731,8 @@ LLWearableItemAppearanceComparator::LLWearableItemAppearanceComparator()
 				{ LLAssetType::AT_OBJECT, 24 }, // R Lower Leg
 				{ LLAssetType::AT_OBJECT,  7 }, // Left Foot
 				{ LLAssetType::AT_OBJECT,  8 }, // Right Foot
+				{ LLAssetType::AT_OBJECT, 54 }, // Left Hind Foot
+				{ LLAssetType::AT_OBJECT, 55 }, // Right Hind Foot
 
 				// HUD attachments
 				{ LLAssetType::AT_OBJECT, 34 }, // Top Left
