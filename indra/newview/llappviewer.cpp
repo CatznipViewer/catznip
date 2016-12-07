@@ -3097,6 +3097,9 @@ bool LLAppViewer::initConfiguration()
 	// Set the name of the window
 	//
 	gWindowTitle = LLTrans::getString("APP_NAME");
+// [SL:KB] - Patch: Viewer-Branding | Checked: Catznip-5.0
+	gWindowTitle.append(" ").append(LLVersionInfo::getReleaseVersion());
+// [/SL:KB]
 #if LL_DEBUG
 	gWindowTitle += std::string(" [DEBUG]");
 #endif
@@ -3783,6 +3786,8 @@ LLSD LLAppViewer::getViewerInfo() const
 	info["VIEWER_VERSION"] = version;
 // [SL:KB] - Patch: Viewer-Branding | Checked: 2012-03-20 (Catznip-3.2)
 	info["VIEWER_VERSION_STR"] = LLVersionInfo::getReleaseVersion();
+	info["BUILD_DATE"] = __DATE__;
+	info["BUILD_TIME"] = __TIME__;
 // [/SL:KB]
 //	info["VIEWER_VERSION_STR"] = LLVersionInfo::getVersion();
 	info["CHANNEL"] = LLVersionInfo::getChannel();
