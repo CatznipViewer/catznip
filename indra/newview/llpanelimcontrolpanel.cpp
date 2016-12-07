@@ -44,8 +44,6 @@ void LLPanelIMControlPanel::refreshFromProperties()
 {
 	if ( (mAvatarId.notNull()) && (!mRequestSent) )
 	{
-		getChild<LLAvatarIconCtrl>("avatar_icon")->setValue(mAvatarId);
-
 		LLAvatarPropertiesProcessor* pAvPropProcessor = LLAvatarPropertiesProcessor::getInstance();
 		pAvPropProcessor->addObserver(mAvatarId, this);
 		pAvPropProcessor->sendAvatarPropertiesRequest(mAvatarId);
@@ -74,6 +72,8 @@ void LLPanelIMControlPanel::processProperties(void* pData, EAvatarProcessorType 
 		LLAvatarData* pAvatarData = static_cast<LLAvatarData*>(pData);
 		if (pAvatarData)
 		{
+			getChild<LLUICtrl>("avatar_icon")->setValue(pAvatarData->image_id);
+
 			LLAvatarPropertiesProcessor::getInstance()->removeObserver(pAvatarData->agent_id, this);
 			if (pAvatarData->avatar_id != mAvatarId)
 				return;
