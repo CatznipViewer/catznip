@@ -114,6 +114,7 @@ void LLQuickPrefsAppearancePanel::onVisibilityChange(BOOL fVisible)
 {
 	if (fVisible)
 	{
+		refreshHover();
 		refreshComplexity();
 		refreshMaxComplexity();
 		refreshMaxNonImpostors();
