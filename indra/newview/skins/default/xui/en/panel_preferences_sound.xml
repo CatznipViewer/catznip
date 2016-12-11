@@ -22,6 +22,7 @@
     </text>
     <panel
       border="false"
+      follows="left|top"
       height="155"
       layout="topleft"
       name="sound_volume_controls" 

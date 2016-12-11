@@ -229,7 +229,7 @@
            />
   <command name="quickprefs"
            available_in_toybox="true"
-           icon="Command_Preferences_Icon"
+           icon="Edit_Wrench"
            label_ref="Command_QuickPrefs_Label"
            tooltip_ref="Command_QuickPrefs_Tooltip"
            execute_function="Floater.ToggleOrBringToFront"

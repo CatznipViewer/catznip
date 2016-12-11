@@ -1135,7 +1135,7 @@ bool LLPanelWearing::hasItemSelected()
 	{
 		return mCOFItemsList->getSelectedItem() != NULL;
 	}
-	else if (mInvPanel->getVisible())
+	else if ( (mInvPanel) && (mInvPanel->getVisible()) )
 	{
 		return mInvPanel->getRootFolder()->getCurSelectedItem() != NULL;
 	}
