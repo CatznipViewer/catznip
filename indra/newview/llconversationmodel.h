@@ -243,12 +243,15 @@ public:
 	LLConversationFilter() { mEmpty = ""; }
 	~LLConversationFilter() {}
 		
-	bool 				check(const LLFolderViewModelItem* item) { return true; }
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	bool				check(const LLFolderViewModelItem* listener, std::string::size_type* substring_idx = nullptr) override { return true; }
+// [/SL:KB]
+//	bool 				check(const LLFolderViewModelItem* item) { return true; }
 	bool				checkFolder(const LLFolderViewModelItem* folder) const { return true; }
 	void 				setEmptyLookupMessage(const std::string& message) { }
 	std::string			getEmptyLookupMessage() const { return mEmpty; }
 	bool				showAllResults() const { return true; }
-	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const { return std::string::npos; }
+//	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const { return std::string::npos; }
 	std::string::size_type getFilterStringSize() const { return 0; }
 		
 	bool 				isActive() const { return false; }

@@ -6,7 +6,7 @@
 * $LicenseInfo:firstyear=2005&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
-* Copyright (C) 2010-2015, Kitty Barnett
+* Copyright (C) 2010-2017, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -138,7 +138,7 @@ public:
 						mFilterWearableTypes,
 //						mFilterLinks,
 						mFilterCategoryTypes; // For _CATEGORY
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.5
 		EFilterLink		mFilterLinks;
 // [/SL:KB]
 		LLUUID      	mFilterUUID; 		  // for UUID
@@ -212,7 +212,7 @@ public:
 	void				setDateSearchDirection(U32 direction);
 	U32					getDateSearchDirection() const;
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.5
 	void 				setFilterLinks(EFilterLink filter_link);
 	EFilterLink			getFilterLinks() const;
 // [/SL:KB]
@@ -225,14 +225,17 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Execution And Results
 	// +-------------------------------------------------------------------+
-	bool				check(const LLFolderViewModelItem* listener);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	bool				check(const LLFolderViewModelItem* listener, std::string::size_type* substring_idx = nullptr) override;
+// [/SL:KB]
+//	bool				check(const LLFolderViewModelItem* listener);
 	bool				check(const LLInventoryItem* item);
 	bool				checkFolder(const LLFolderViewModelItem* listener) const;
 	bool				checkFolder(const LLUUID& folder_id) const;
 
 	bool				showAllResults() const;
 
-	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const;
+//	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const;
 	std::string::size_type getFilterStringSize() const;
 	// +-------------------------------------------------------------------+
 	// + Presentation

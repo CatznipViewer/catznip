@@ -66,7 +66,10 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Execution And Results
 	// +-------------------------------------------------------------------+
-	virtual bool 				check(const LLFolderViewModelItem* item) = 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual bool 				check(const LLFolderViewModelItem* item, std::string::size_type* substring_idx = nullptr) = 0;
+// [/SL:KB]
+//	virtual bool 				check(const LLFolderViewModelItem* item) = 0;
 	virtual bool				checkFolder(const LLFolderViewModelItem* folder) const = 0;
 
 	virtual void 				setEmptyLookupMessage(const std::string& message) = 0;
@@ -74,7 +77,7 @@ public:
 
 	virtual bool				showAllResults() const = 0;
 
-	virtual std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const = 0;
+//	virtual std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const = 0;
 	virtual std::string::size_type getFilterStringSize() const = 0;
 	// +-------------------------------------------------------------------+
 	// + Status

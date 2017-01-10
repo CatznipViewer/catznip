@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -260,9 +261,12 @@ bool LLFolderViewModelItemInventory::filter( LLFolderViewFilter& filter)
     if (continue_filtering)
 	{
         // This is where filter check on the item done (CHUI-849)
-		const bool passed_filter = filter.check(this);
-		setPassedFilter(passed_filter, filter_generation, filter.getStringMatchOffset(this), filter.getFilterStringSize());
+//		const bool passed_filter = filter.check(this);
+//		setPassedFilter(passed_filter, filter_generation, filter.getStringMatchOffset(this), filter.getFilterStringSize());
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2014-04-20 (Catznip-3.6)
+		std::string::size_type string_offset = std::string::npos;
+		const bool passed_filter = filter.check(this, &string_offset);
+		setPassedFilter(passed_filter, filter_generation, string_offset, filter.getFilterStringSize());
 		if ( ((passed_filter) || (descendantsPassedFilter(filter_generation))) && (mFolderViewItem->getRoot()) && (mFolderViewItem->getRoot()->needsAutoOpen()) )
 		{
 			LLFolderViewFolder* pFolder = dynamic_cast<LLFolderViewFolder*>(mFolderViewItem);
