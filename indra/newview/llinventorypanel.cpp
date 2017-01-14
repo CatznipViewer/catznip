@@ -453,6 +453,13 @@ void LLInventoryPanel::setHoursAgo(U32 hours)
 	getFilter().setHoursAgo(hours);
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+void LLInventoryPanel::setDateRange(time_t min_date, time_t max_date)
+{
+	getFilter().setDateRange(min_date, max_date);
+}
+// [/SL:KB]
+
 void LLInventoryPanel::setDateSearchDirection(U32 direction)
 {
 	getFilter().setDateSearchDirection(direction);

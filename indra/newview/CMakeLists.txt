@@ -120,6 +120,7 @@ set(viewer_SOURCE_FILES
     llaudiosourcevo.cpp
     llautoreplace.cpp
     llavataractions.cpp
+    llavatareditor.cpp
     llavatariconctrl.cpp
     llavatarlist.cpp
     llavatarlistitem.cpp
@@ -249,6 +250,7 @@ set(viewer_SOURCE_FILES
     llfloaterimcontainer.cpp
     llfloaterinspect.cpp
     llfloaterinventory.cpp
+    llfloaterinventoryfinder.cpp
     llfloaterjoystick.cpp
     llfloaterlagmeter.cpp
     llfloaterland.cpp
@@ -735,6 +737,7 @@ set(viewer_HEADER_FILES
     llaudiosourcevo.h
     llautoreplace.h
     llavataractions.h
+    llavatareditor.h
     llavatariconctrl.h
     llavatarlist.h
     llavatarlistitem.h
@@ -867,6 +870,7 @@ set(viewer_HEADER_FILES
     llfloaterimcontainer.h
     llfloaterinspect.h
     llfloaterinventory.h
+    llfloaterinventoryfinder.h
     llfloaterjoystick.h
     llfloaterlagmeter.h
     llfloaterland.h

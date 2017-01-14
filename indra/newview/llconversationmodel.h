@@ -71,6 +71,9 @@ public:
 	virtual const std::string& getName() const { return mName; }
 	virtual const std::string& getDisplayName() const { return mName; }
 	virtual const std::string& getSearchableName() const { return mName; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	const std::string& getDescription(void) const override { return LLStringUtil::null; }
+// [/SL:KB]
 	virtual const LLUUID& getUUID() const { return mUUID; }
 	virtual time_t getCreationDate() const { return 0; }
 	virtual LLPointer<LLUIImage> getIcon() const { return NULL; }

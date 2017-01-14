@@ -94,9 +94,15 @@ public:
 	virtual const std::string& getName() const;
 	virtual const std::string& getDisplayName() const;
 	const std::string& getSearchableName() const { return mSearchableName; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        const std::string& getDescription(void) const override;
+// [/SL:KB]
 
 	virtual PermissionMask getPermissionMask() const;
 	virtual LLFolderType::EType getPreferredType() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        const LLUUID& getCreatorUUID() const override;
+// [/SL:KB]
 	virtual time_t getCreationDate() const;
         virtual void setCreationDate(time_t creation_date_utc);
 	virtual LLFontGL::StyleFlags getLabelStyle() const { return LLFontGL::NORMAL; }
@@ -238,6 +244,10 @@ public:
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
 	virtual PermissionMask getPermissionMask() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        const std::string& getDescription(void) const override;
+	        const LLUUID& getCreatorUUID() const override;
+// [/SL:KB]
 	virtual time_t getCreationDate() const;
 	virtual BOOL isItemRenameable() const;
 	virtual BOOL renameItem(const std::string& new_name);

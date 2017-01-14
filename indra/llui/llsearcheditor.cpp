@@ -77,7 +77,10 @@ LLSearchEditor::LLSearchEditor(const LLSearchEditor::Params& p)
 		srch_btn_params.rect(srch_btn_rect) ;
 		srch_btn_params.follows.flags(FOLLOWS_LEFT|FOLLOWS_TOP);
 		srch_btn_params.tab_stop(false);
-		srch_btn_params.click_callback.function(boost::bind(&LLUICtrl::onCommit, this));
+// [SL:KB] - Patch: Control-AvatarEditor | Checked: Catznip-5.2
+		srch_btn_params.click_callback.function(boost::bind(&LLSearchEditor::onSearchButtonClick, this));
+// [/SL:KB]
+//		srch_btn_params.click_callback.function(boost::bind(&LLUICtrl::onCommit, this));
 	
 		mSearchButton = LLUICtrlFactory::create<LLButton>(srch_btn_params);
 		mSearchEditor->addChild(mSearchButton);
@@ -160,6 +163,13 @@ void LLSearchEditor::onClearButtonClick(const LLSD& data)
 	setText(LLStringUtil::null);
 	mSearchEditor->onCommit(); // force keystroke callback
 }
+
+// [SL:KB] - Patch: Control-AvatarEditor | Checked: Catznip-5.2
+void LLSearchEditor::onSearchButtonClick()
+{
+	onCommit();
+}
+// [/SL:KB]
 
 void LLSearchEditor::handleKeystroke()
 {

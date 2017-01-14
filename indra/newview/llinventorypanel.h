@@ -181,6 +181,9 @@ public:
 	const std::string getFilterSubString();
 	void setSinceLogoff(BOOL sl);
 	void setHoursAgo(U32 hours);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	void setDateRange(time_t min_date, time_t max_date);
+// [/SL:KB]
 	void setDateSearchDirection(U32 direction);
 	BOOL getSinceLogoff();
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)

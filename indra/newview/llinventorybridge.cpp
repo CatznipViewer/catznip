@@ -219,6 +219,17 @@ LLFolderType::EType LLInvFVBridge::getPreferredType() const
 	return LLFolderType::FT_NONE;
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+const std::string& LLInvFVBridge::getDescription() const
+{
+	return LLStringUtil::null;
+}
+
+const LLUUID& LLInvFVBridge::getCreatorUUID() const
+{
+	return LLUUID::null;
+}
+// [/SL:KB]
 
 // Folders don't have creation dates.
 time_t LLInvFVBridge::getCreationDate() const
@@ -1928,6 +1939,28 @@ std::string LLItemBridge::getLabelSuffix() const
 	}
 	return suffix;
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+const std::string& LLItemBridge::getDescription() const
+{
+	LLViewerInventoryItem* item = getItem();
+	if (item)
+	{
+		return item->getDescription();
+	}
+	return LLStringUtil::null;
+}
+
+const LLUUID& LLItemBridge::getCreatorUUID() const
+{
+	LLViewerInventoryItem* item = getItem();
+	if (item)
+	{
+		return item->getCreatorUUID();
+	}
+	return LLUUID::null;
+}
+// [/SL:KB]
 
 time_t LLItemBridge::getCreationDate() const
 {

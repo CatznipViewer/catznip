@@ -150,6 +150,9 @@ public:
 	virtual const std::string& getName() const = 0;
 	virtual const std::string& getDisplayName() const = 0;
 	virtual const std::string& getSearchableName() const = 0;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	virtual const std::string& getDescription(void) const = 0;
+// [/SL:KB]
 
 	virtual LLPointer<LLUIImage> getIcon() const = 0;
 	virtual LLPointer<LLUIImage> getIconOpen() const { return getIcon(); }

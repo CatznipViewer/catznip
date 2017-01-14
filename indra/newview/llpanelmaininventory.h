@@ -117,6 +117,9 @@ protected:
 // [/SL:KB]
 
 	const std::string getFilterSubString();
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+	void setFilterSubStringFromFilter();
+// [/SL:KB]
 	void setFilterSubString(const std::string& string);
 	
 	// menu callbacks
