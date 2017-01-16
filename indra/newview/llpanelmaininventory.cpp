@@ -602,7 +602,7 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 //	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = search_string;
-	if (mActivePanel->getFilterSubString().empty() && search_string.empty())
+	if (!mActivePanel->hasFilterSubString() && search_string.empty())
 // [/SL:KB]
 	{
 			// current filter and new filter empty, do nothing
@@ -772,10 +772,10 @@ void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool& fDeletePanel)
 }
 // [/SL:KB]
 
-const std::string LLPanelMainInventory::getFilterSubString() 
-{ 
-	return mActivePanel->getFilterSubString(); 
-}
+//const std::string LLPanelMainInventory::getFilterSubString() 
+//{ 
+//	return mActivePanel->getFilterSubString(); 
+//}
 
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
 void LLPanelMainInventory::setFilterSubStringFromFilter()

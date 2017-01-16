@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -383,10 +383,17 @@ void LLInventoryPanel::setFilterSubString(const std::string& string)
 	getFilter().setFilterSubString(string);
 }
 
-const std::string LLInventoryPanel::getFilterSubString() 
-{ 
-	return getFilter().getFilterSubString();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+bool LLInventoryPanel::hasFilterSubString() const
+{
+	return getFilter().hasFilterString();
 }
+// [/SL:KB]
+
+//const std::string LLInventoryPanel::getFilterSubString() 
+//{ 
+//	return getFilter().getFilterSubString();
+//}
 
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-12 (Catznip-3.3)
 void LLInventoryPanel::setSortBy(const std::string& sort_type)

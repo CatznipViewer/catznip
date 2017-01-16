@@ -363,7 +363,10 @@ void LLLandmarksPanel::onSelectorButtonClicked()
 
 void LLLandmarksPanel::updateShowFolderState()
 {
-	bool show_all_folders =   mLandmarksInventoryPanel->getFilterSubString().empty();
+//	bool show_all_folders =   mLandmarksInventoryPanel->getFilterSubString().empty();
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	bool show_all_folders =   !mLandmarksInventoryPanel->hasFilterSubString();
+// [/SL:KB]
 	if (show_all_folders)
 	{
 		show_all_folders = category_has_descendents(mLandmarksInventoryPanel);
@@ -1372,21 +1375,30 @@ void LLLandmarksPanel::doCreatePick(LLLandmark* landmark)
 static void filter_list(LLPlacesInventoryPanel* inventory_list, const std::string& string)
 {
 	// When search is cleared, restore the old folder state.
-	if (!inventory_list->getFilterSubString().empty() && string == "")
+//	if (!inventory_list->getFilterSubString().empty() && string == "")
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if (inventory_list->hasFilterSubString() && string == "")
+// [/SL:KB]
 	{
 		inventory_list->setFilterSubString(LLStringUtil::null);
 		// Re-open folders that were open before
 		inventory_list->restoreFolderState();
 	}
 
-	if (inventory_list->getFilterSubString().empty() && string.empty())
+//	if (inventory_list->getFilterSubString().empty() && string.empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if (!inventory_list->hasFilterSubString() && string.empty())
+// [/SL:KB]
 	{
 		// current filter and new filter empty, do nothing
 		return;
 	}
 
 	// save current folder open state if no filter currently applied
-	if (inventory_list->getFilterSubString().empty())
+//	if (inventory_list->getFilterSubString().empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if (!inventory_list->hasFilterSubString())
+// [/SL:KB]
 	{
 		inventory_list->saveFolderState();
 	}

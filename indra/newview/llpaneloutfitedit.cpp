@@ -732,14 +732,20 @@ void LLPanelOutfitEdit::onSearchEdit(const std::string& string)
 	
 	LLInventoryModelBackgroundFetch::instance().start();
 	
-	if (mInventoryItemsPanel->getFilterSubString().empty() && mSearchString.empty())
+//	if (mInventoryItemsPanel->getFilterSubString().empty() && mSearchString.empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if (!mInventoryItemsPanel->hasFilterSubString() && mSearchString.empty())
+// [/SL:KB]
 	{
 		// current filter and new filter empty, do nothing
 		return;
 	}
 	
 	// save current folder open state if no filter currently applied
-	if (mInventoryItemsPanel->getFilterSubString().empty())
+//	if (mInventoryItemsPanel->getFilterSubString().empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if (!mInventoryItemsPanel->hasFilterSubString())
+// [/SL:KB]
 	{
 		mSavedFolderState->setApply(FALSE);
 		mInventoryItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);

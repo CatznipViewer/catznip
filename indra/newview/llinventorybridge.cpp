@@ -5622,7 +5622,10 @@ void LLCallingCardBridge::checkSearchBySuffixChanges()
 		if (new_length<old_length)
 		{
 			LLInventoryFilter* filter = getInventoryFilter();
-			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
+//			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+			if (filter && mPassedFilter && filter->checkAgainstName(mSearchableName))
+// [/SL:KB]
 			{
 				// string no longer contains substring 
 				// we either have to update all parents manually or restart filter.

@@ -26,8 +26,19 @@
 #include "llpanelmaininventory.h"
 #include "llradiogroup.h"
 #include "llspinctrl.h"
+#include "llviewercontrol.h"
+
+#include <boost/algorithm/string.hpp>
 
 #pragma warning(disable : 4351)
+
+// ====================================================================================
+// Constants
+//
+
+#define PREFIX_MATCH_EXACT "exact"
+#define PREFIX_MATCH_ANY   "any"
+#define PREFIX_MATCH_ALL   "all"
 
 // ====================================================================================
 // LLFloaterInventoryFinder class
@@ -38,7 +49,18 @@ LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* invento
 	, m_pPanelMainInventory(inventory_view)
 	, m_pFilterTypeCtrls{}
 {
-	buildFromFile("floater_inventory_view_finder_new.xml");
+	mCommitCallbackRegistrar.add("Filter.Refresh", boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	mCommitCallbackRegistrar.add("Filter.Reset", boost::bind(&LLPanelMainInventory::resetFilters, inventory_view));
+	mCommitCallbackRegistrar.add("Filter.SelectNoTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, false));
+	mCommitCallbackRegistrar.add("Filter.SelectAllTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, true));
+	mCommitCallbackRegistrar.add("Floater.Collapse", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, true));
+	mCommitCallbackRegistrar.add("Floater.Expand", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, false));
+
+	if (!gSavedSettings.getBOOL("InventoryFinderExpanded"))
+		buildFromFile("floater_inventory_view_finder_tabbed.xml");
+	else
+		buildFromFile("floater_inventory_view_finder_expanded.xml");
+
 	setFilterFromPanel();
 }
 
@@ -52,17 +74,23 @@ BOOL LLFloaterInventoryFinder::postBuild()
 	const LLRect& rct = m_pPanelMainInventory->getRect();
 	setRect(LLRect(rct.mLeft - getRect().getWidth(), rct.mTop, rct.mLeft, rct.mTop - getRect().getHeight()));
 
-	findChild<LLUICtrl>("button_reset")->setCommitCallback(boost::bind(&LLPanelMainInventory::resetFilters, m_pPanelMainInventory));
-
 	//
-	// Filter by name/description/creator
+	// Filter by name/description/creator/permissions
 	//
 	m_pFilterName = findChild<LLFilterEditor>("filter_name");
 	m_pFilterName->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterNameMatchType = findChild<LLRadioGroup>("radio_name_match_type");
+	m_pFilterNameMatchType->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
 	m_pFilterDescription = findChild<LLFilterEditor>("filter_description");
 	m_pFilterDescription->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
 	m_pFilterCreator = findChild<LLAvatarEditor>("filter_creator");
 	m_pFilterCreator->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermModify = findChild<LLCheckBoxCtrl>("check_perm_modify");
+	m_pFilterPermModify->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermCopy = findChild<LLCheckBoxCtrl>("check_perm_copy");
+	m_pFilterPermCopy->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
+	m_pFilterPermTransfer = findChild<LLCheckBoxCtrl>("check_perm_transfer");
+	m_pFilterPermTransfer->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
 
 	//
 	// Filter by (inventory) type
@@ -84,8 +112,6 @@ BOOL LLFloaterInventoryFinder::postBuild()
 		if (m_pFilterTypeCtrls[idxType])
 			m_pFilterTypeCtrls[idxType]->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
 	}
-	findChild<LLUICtrl>("check_all")->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, true));
-	findChild<LLUICtrl>("check_none")->setCommitCallback(boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, false));
 
 	//
 	// Filter by date
@@ -140,9 +166,12 @@ void LLFloaterInventoryFinder::refreshControls()
 	//
 	// Filter by name/description/creator
 	//
-	m_pFilterName->setValue( (m_pFilter->hasFilterString()) ? m_pFilter->getFilterSubStringOrig() : LLStringUtil::null);
-	m_pFilterDescription->setValue( (m_pFilter->hasFilterDescriptionString()) ? m_pFilter->getFilterDescriptionSubString() : LLStringUtil::null);
-	m_pFilterCreator->setValue( (m_pFilter->isFilterCreatorUUID()) ? m_pFilter->getFilterCreatorUUID() : LLUUID::null);
+	setNameFilterValue( (m_pFilter->hasFilterString()) ? m_pFilter->getFilterSubStringOrig() : LLStringUtil::null );
+	m_pFilterDescription->setValue( (m_pFilter->hasFilterDescriptionString()) ? m_pFilter->getFilterDescriptionSubString() : LLStringUtil::null );
+	m_pFilterCreator->setValue( (m_pFilter->isFilterCreatorUUID()) ? m_pFilter->getFilterCreatorUUID() : LLUUID::null );
+	m_pFilterPermModify->set(m_pFilter->getFilterPermissions() & PERM_MODIFY);
+	m_pFilterPermCopy->set(m_pFilter->getFilterPermissions() & PERM_COPY);
+	m_pFilterPermTransfer->set(m_pFilter->getFilterPermissions() & PERM_TRANSFER);
 
 	//
 	// Filter by (inventory) type
@@ -167,7 +196,7 @@ void LLFloaterInventoryFinder::refreshControls()
 		bool fOlderThan = (LLInventoryFilter::FILTERDATEDIRECTION_OLDER == m_pFilter->getDateSearchDirection());
 		pActiveDateCtrl = (fOlderThan) ? m_pFilterMinAgeCheck : m_pFilterMaxAgeCheck;
 		pActiveDateCtrl->set(true);
-		setDateSpinnerValue( (fOlderThan) ? m_pFilterMinAgeSpin : m_pFilterMaxAgeSpin, (fOlderThan) ? m_pFilterMinAgeType : m_pFilterMaxAgeType, m_pFilter->getHoursAgo());
+		setDateSpinnerValue( (fOlderThan) ? m_pFilterMinAgeSpin : m_pFilterMaxAgeSpin, (fOlderThan) ? m_pFilterMinAgeType : m_pFilterMaxAgeType, m_pFilter->getHoursAgo() );
 	}
 	else if (m_pFilter->isDateRange())
 	{
@@ -219,9 +248,27 @@ void LLFloaterInventoryFinder::refreshFilter()
 	//
 	// Filter by name/description/creator
 	//
-	m_pFilter->setFilterSubString(m_pFilterName->getValue());
+	m_pFilter->setFilterSubString(getNameFilterValue());
 	m_pFilter->setFilterDescriptionSubString(m_pFilterDescription->getValue());
 	m_pFilter->setFilterCreatorUUID(m_pFilterCreator->getValue().asUUID());
+
+	//
+	// Filter by permissions
+	//
+	PermissionMask maskPerm = m_pFilter->getFilterPermissions();
+	if (m_pFilterPermModify->get())
+		maskPerm |= PERM_MODIFY;
+	else
+		maskPerm &= ~PERM_MODIFY;
+	if (m_pFilterPermCopy->get())
+		maskPerm |= PERM_COPY;
+	else
+		maskPerm &= ~PERM_COPY;
+	if (m_pFilterPermTransfer->get())
+		maskPerm |= PERM_TRANSFER;
+	else
+		maskPerm &= ~PERM_TRANSFER;
+	m_pFilter->setFilterPermissions(maskPerm);
 
 	//
 	// Filter by (inventory) type
@@ -267,7 +314,7 @@ void LLFloaterInventoryFinder::refreshFilter()
 			nHours = nValue * 24;
 
 		pInvPanel->setHoursAgo(nHours);
-		pInvPanel->setDateSearchDirection((fOlderThan) ? LLInventoryFilter::FILTERDATEDIRECTION_OLDER : LLInventoryFilter::FILTERDATEDIRECTION_NEWER);
+		pInvPanel->setDateSearchDirection( (fOlderThan) ? LLInventoryFilter::FILTERDATEDIRECTION_OLDER : LLInventoryFilter::FILTERDATEDIRECTION_NEWER );
 	}
 	else if (m_pFilterAgeRangeCheck->get())
 	{
@@ -333,6 +380,78 @@ bool LLFloaterInventoryFinder::areDateLimitsSet() const
 
 }
 
+void LLFloaterInventoryFinder::resetDateControls()
+{
+	onFilterByDate(nullptr, false);
+	m_pFilterMinAgeSpin->setValue(0);
+	m_pFilterMaxAgeSpin->setValue(0);
+	m_pFilterAgeRangeStart->setValue(0);
+	m_pFilterAgeRangeEnd->setValue(0);
+}
+
+void LLFloaterInventoryFinder::setDateSpinnerValue(LLSpinCtrl* pDateSpinCtrl, LLComboBox* pDateTypeCtrl, U32 nHoursValue)
+{
+	// Don't reapply the same value (keeps us from switching from hours -> days when going from 23 to 24)
+	U32 nCurValue = pDateSpinCtrl->getValue().asInteger() * ((pDateTypeCtrl->getSelectedValue().asString() == "hours") ? 1 : 24);
+	if (nCurValue == nHoursValue)
+		return;
+
+	if (0 == nHoursValue % 24)
+	{
+		pDateSpinCtrl->setValue((S32)(nHoursValue / 24));
+		pDateTypeCtrl->setValue("days");
+	}
+	else
+	{
+		pDateSpinCtrl->setValue((S32)nHoursValue);
+		pDateTypeCtrl->setValue("hours");
+	}
+}
+
+std::string LLFloaterInventoryFinder::getNameFilterValue() const
+{
+	const std::string strFilterType = m_pFilterNameMatchType->getSelectedValue().asString();
+	if (PREFIX_MATCH_EXACT == strFilterType)
+	{
+		return m_pFilterName->getText();
+	}
+	else if (PREFIX_MATCH_ALL == strFilterType)
+	{
+		std::string strFilter(PREFIX_MATCH_ALL":");
+		boost::replace_all(strFilter.append(m_pFilterName->getText()), " ", "|");
+		return strFilter;
+	}
+	else if (PREFIX_MATCH_ANY == strFilterType)
+	{
+		std::string strFilter(PREFIX_MATCH_ANY":");
+		boost::replace_all(strFilter.append(m_pFilterName->getText()), " ", "|");
+		return strFilter;
+	}
+	return LLStringUtil::null;
+}
+
+void LLFloaterInventoryFinder::setNameFilterValue(std::string strFilter)
+{
+	std::string strFilterType = (strFilter.size() >= 4) ? strFilter.substr(0, 4) : LLStringUtil::null;
+	if ( (PREFIX_MATCH_ALL":" == strFilterType) || (PREFIX_MATCH_ANY":" == strFilterType) )
+	{
+		strFilter = (strFilter.size() > 4) ? strFilter.substr(4) : LLStringUtil::null;
+		boost::replace_all(strFilter, "|", " ");
+		m_pFilterName->setText(strFilter);
+		strFilterType.pop_back();
+		m_pFilterNameMatchType->selectByValue(strFilterType);
+	}
+	else
+	{
+		m_pFilterName->setText(strFilter);
+		m_pFilterNameMatchType->selectByValue(PREFIX_MATCH_EXACT);
+	}
+}
+
+void LLFloaterInventoryFinder::onExpandCollapse(bool fExpand)
+{
+}
+
 void LLFloaterInventoryFinder::onFilterAllTypes(bool fSelectAll)
 {
 	for (int idxType = 0; idxType < LLInventoryType::IT_COUNT; idxType++)
@@ -372,34 +491,6 @@ void LLFloaterInventoryFinder::onFilterByDate(const LLUICtrl* pCheckCtrl, bool f
 	{
 		m_pFilter->resetDateLimits();
 		refreshFilter();
-	}
-}
-
-void LLFloaterInventoryFinder::resetDateControls()
-{
-	onFilterByDate(nullptr, false);
-	m_pFilterMinAgeSpin->setValue(0);
-	m_pFilterMaxAgeSpin->setValue(0);
-	m_pFilterAgeRangeStart->setValue(0);
-	m_pFilterAgeRangeEnd->setValue(0);
-}
-
-void LLFloaterInventoryFinder::setDateSpinnerValue(LLSpinCtrl* pDateSpinCtrl, LLComboBox* pDateTypeCtrl, U32 nHoursValue)
-{
-	// Don't reapply the same value (keeps us from switching from hours -> days when going from 23 to 24)
-	U32 nCurValue = pDateSpinCtrl->getValue().asInteger() * ((pDateTypeCtrl->getSelectedValue().asString() == "hours") ? 1 : 24);
-	if (nCurValue == nHoursValue)
-		return;
-
-	if (0 == nHoursValue % 24)
-	{
-		pDateSpinCtrl->setValue((S32)(nHoursValue / 24));
-		pDateTypeCtrl->setValue("days");
-	}
-	else
-	{
-		pDateSpinCtrl->setValue((S32)nHoursValue);
-		pDateTypeCtrl->setValue("hours");
 	}
 }
 

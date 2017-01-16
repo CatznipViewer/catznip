@@ -116,7 +116,7 @@ protected:
 	void onFilterRemoved(S32 idxTab, bool& fDeletePanel);
 // [/SL:KB]
 
-	const std::string getFilterSubString();
+//	const std::string getFilterSubString();
 // [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
 	void setFilterSubStringFromFilter();
 // [/SL:KB]

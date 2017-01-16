@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <floater
  can_minimize="false"
- height="255"
+ height="237"
  help_topic="inventory_finder"
  layout="topleft"
- legacy_header_height="18"
  name="Inventory Finder"
  title="Filter Items"
  width="300">
@@ -18,7 +17,7 @@
      tab_group="1"
      tab_position="top"
      tab_width="65"
-     top="20"
+     top="2"
      tab_padding_right="0"
      width="290">
 
@@ -33,10 +32,10 @@
             <text
              follows="left|top"
              height="10"
-             left="10"
+             left="7"
              name="text_name"
              top="12"
-             width="70">
+             width="73">
               Name :
             </text>
             <filter_editor
@@ -50,14 +49,46 @@
              text_pad_left="10"
              top_delta="-5"
              width="205" />
+            <radio_group
+             follows="top|left"
+             height="13"
+             layout="topleft"
+             left_delta="5"
+             name="radio_name_match_type"
+             top_pad="7"
+             width="200">
+                <radio_item
+                 label="Exact"
+                 layout="topleft"
+                 name="radio_name_match_exact"
+                 tool_tip="Search for items with a name that contains the search text exactly"
+                 value="exact"
+                 width="62" />
+                <radio_item
+                 label="All"
+                 layout="topleft"
+                 left_pad="0"
+                 name="radio_name_match_all"
+                 tool_tip="Search for items with a name that contains all of the search words"
+                 value="all"
+                 width="62" />
+                <radio_item
+                 label="Any"
+                 layout="topleft"
+                 left_pad="0"
+                 name="radio_name_match_any"
+                 tool_tip="Search for items with a name that contains any of the search words"
+                 value="any"
+                 width="62" />
+            </radio_group>
 
             <text
              follows="left|top"
              height="10"
-             left="10"
+             left="7"
              name="text_description"
              top_pad="10"
-             width="70">
+             width="73">
               Description :
             </text>
             <filter_editor
@@ -75,10 +106,10 @@
             <text
              follows="left|top"
              height="10"
-             left="10"
+             left="7"
              name="text_creator"
              top_pad="10"
-             width="70">
+             width="73">
               Creator :
             </text>
             <avatar_editor
@@ -92,6 +123,40 @@
              text_pad_left="10"
              top_delta="-5"
              width="205" />
+
+            <text
+             follows="left|top"
+             height="10"
+             left="7"
+             name="text_permissions"
+             top_pad="8"
+             width="73">
+              Permissions :
+            </text>
+            <check_box
+             height="16"
+             label="No Mod"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_modify"
+             top_delta="0"
+             width="60" />
+            <check_box
+             height="16"
+             label="No Copy"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_copy"
+             top_delta="0"
+             width="64" />
+            <check_box
+             height="16"
+             label="No Trans"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_transfer"
+             top_delta="0"
+             width="60" />
 
         </panel>
 
@@ -293,6 +358,7 @@
              width="126" />
             
             <button
+             commit_callback.function="Filter.SelectAllTypes"
              follows="left|top"
              height="20"
              label="Check All"
@@ -303,6 +369,7 @@
              top="138"
              width="80" />
             <button
+             commit_callback.function="Filter.SelectNoTypes"
              follows="left|top"
              height="20"
              label="Clear All"
@@ -505,8 +572,19 @@
      name="check_show_links"
      top_pad="2"
      width="144" />
+    <button
+     commit_callback.function="Floater.Expand"
+     follows="left|top"
+     height="22"
+     image_overlay="Conv_toolbar_expand_down"
+     layout="topleft"
+     name="button_expand"
+     right="-5"
+     top_delta="-8"
+     width="27" />
 
 	<button
+     commit_callback.function="Filter.Reset"
      follows="top|right"
      height="20"
      label="Reset Filter"
@@ -514,7 +592,7 @@
      layout="topleft"
      name="button_reset"
      right="-6"
-     top="21"
+     top="3"
      width="76" />
 
 </floater>

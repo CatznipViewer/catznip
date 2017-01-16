@@ -32,6 +32,10 @@
 #include "llpermissionsflags.h"
 #include "llfolderviewmodel.h"
 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+#include <boost/regex.hpp>
+// [/SL:KB]
+
 class LLFolderViewItem;
 class LLFolderViewFolder;
 class LLInventoryItem;
@@ -59,7 +63,7 @@ public:
         FILTERTYPE_MARKETPLACE_UNASSOCIATED = 0x1 << 8,	// pass if folder is a marketplace non associated (no market ID) folder
         FILTERTYPE_MARKETPLACE_LISTING_FOLDER = 0x1 << 9,	// pass iff folder is a listing folder
         FILTERTYPE_NO_MARKETPLACE_ITEMS = 0x1 << 10,         // pass iff folder is not under the marketplace
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 		FILTERTYPE_CREATOR = 0x1 << 30		// search by creator UUID
 // [/SL:KB]
 	};
@@ -109,7 +113,7 @@ public:
 										category_types;
 			Optional<EFilterLink>		links;
 			Optional<LLUUID>			uuid;
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 			Optional<LLUUID>			creator_uuid;
 // [/SL:KB]
 			Optional<DateRange>			date_range;
@@ -148,7 +152,7 @@ public:
 		EFilterLink		mFilterLinks;
 // [/SL:KB]
 		LLUUID      	mFilterUUID; 		  // for UUID
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 		LLUUID			mFilterCreatorUUID;
 // [/SL:KB]
 
@@ -166,7 +170,7 @@ public:
 		Optional<std::string>		name;
 		Optional<FilterOps::Params>	filter_ops;
 		Optional<std::string>		substring;
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 		Optional<std::string>		description_substring;
 // [/SL:KB]
 		Optional<bool>				since_logoff;
@@ -196,7 +200,7 @@ public:
 	bool 				isFilterObjectTypesWith(LLInventoryType::EType t) const;
 	void 				setFilterObjectTypes(U64 types);
 	void 				setFilterCategoryTypes(U64 types);
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	bool 				isFilterUUID() const;
 // [/SL:KB]
 	void 				setFilterUUID(const LLUUID &object_id);
@@ -210,11 +214,11 @@ public:
 	void				updateFilterTypes(U64 types, U64& current_types);
 
 	void 				setFilterSubString(const std::string& string);
-	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
+//	const std::string& 	getFilterSubString(BOOL trim = FALSE) const;
 	const std::string& 	getFilterSubStringOrig() const { return mFilterSubStringOrig; } 
 	bool 				hasFilterString() const;
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	void 				setFilterDescriptionSubString(const std::string& string);
 	const std::string& 	getFilterDescriptionSubString(BOOL trim = FALSE) const;
 	bool 				hasFilterDescriptionString() const;
@@ -233,7 +237,7 @@ public:
 	void				setDateSearchDirection(U32 direction);
 	U32					getDateSearchDirection() const;
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.5
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	bool				areDateLimitsSet();
 	bool 				isDateRange() const;
 	bool 				isHoursAgo() const;
@@ -256,7 +260,8 @@ public:
 	// + Execution And Results
 	// +-------------------------------------------------------------------+
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
-	bool				check(const LLFolderViewModelItem* listener, std::string::size_type* substring_idx = nullptr) override;
+	bool				check(const LLFolderViewModelItem* listener, filter_stringmatch_results_t& match_offsets) override;
+	bool 				checkAgainstName(const std::string& item_name, filter_stringmatch_results_t* match_offsets_p = nullptr) const;
 // [/SL:KB]
 //	bool				check(const LLFolderViewModelItem* listener);
 	bool				check(const LLInventoryItem* item);
@@ -331,9 +336,15 @@ private:
 	FilterOps				mDefaultFilterOps;
 	FilterOps				mBackupFilterOps; // for backup purposes when leaving 'search link' mode
 
-	std::string				mFilterSubString;
+//	std::string				mFilterSubString;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	enum class EFilterStringMatchType { All, Any, RegEx };
+	EFilterStringMatchType  mFilterSubStringMatchType = EFilterStringMatchType::All;
+	std::vector<std::string> mFilterSubStrings;
+	boost::regex			mFilterSubStringRegEx;
+// [/SL:KB]
 	std::string				mFilterSubStringOrig;
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	std::string				mFilterDescriptionSubString;
 // [/SL:KB]
 	const std::string		mName;

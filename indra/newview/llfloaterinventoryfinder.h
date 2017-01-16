@@ -27,6 +27,7 @@ class LLAvatarEditor;
 class LLComboBox;
 class LLInventoryFilter;
 class LLPanelMainInventory;
+class LLRadioGroup;
 class LLSpinCtrl;
 
 // ====================================================================================
@@ -43,23 +44,28 @@ public:
 	 * Base class overrides
 	 */
 public:
-	BOOL postBuild() override;
+	BOOL        postBuild() override;
 
 	/*
 	 * Member functions
 	 */
 public:
-	void refreshControls();
-	void refreshFilter();
-	void selectAllTypes() { onFilterAllTypes(true); }
-	void selectNoTypes() { onFilterAllTypes(false); }
-	void setFilterFromPanel();
+	void        refreshControls();
+	void        refreshFilter();
+	void        selectAllTypes() { onFilterAllTypes(true); }
+	void        selectNoTypes() { onFilterAllTypes(false); }
+	void        setFilterFromPanel();
 protected:
-	bool areDateLimitsSet() const;
-	void onFilterAllTypes(bool fSelectAll);
-	void onFilterByDate(const LLUICtrl* pCheckCtrl, bool fRefreshFilter);
-	void resetDateControls();
-	void setDateSpinnerValue(LLSpinCtrl* pDateSpinCtrl, LLComboBox* pDateTypeCtrl, U32 nHoursValue);
+	bool        areDateLimitsSet() const;
+	void        resetDateControls();
+	void        setDateSpinnerValue(LLSpinCtrl* pDateSpinCtrl, LLComboBox* pDateTypeCtrl, U32 nHoursValue);
+
+	std::string getNameFilterValue() const;
+	void        setNameFilterValue(std::string strFilter);
+
+	void        onExpandCollapse(bool fExpand);
+	void        onFilterAllTypes(bool fSelectAll);
+	void        onFilterByDate(const LLUICtrl* pCheckCtrl, bool fRefreshFilter);
 
 	/*
 	 * Member variables
@@ -70,10 +76,14 @@ protected:
 	bool m_FilterRefreshing = false;
 	LLPanelMainInventory* m_pPanelMainInventory = nullptr;
 
-	// Filter by name/description/creator
+	// Filter by name/description/creator/permissions
 	LLFilterEditor* m_pFilterName = nullptr;
+	LLRadioGroup* m_pFilterNameMatchType = nullptr;
 	LLFilterEditor* m_pFilterDescription = nullptr;
 	LLAvatarEditor* m_pFilterCreator = nullptr;
+	LLCheckBoxCtrl* m_pFilterPermModify = nullptr;
+	LLCheckBoxCtrl* m_pFilterPermCopy = nullptr;
+	LLCheckBoxCtrl* m_pFilterPermTransfer = nullptr;
 
 	// Filter by type
 	LLCheckBoxCtrl* m_pFilterTypeCtrls[LLInventoryType::IT_COUNT];

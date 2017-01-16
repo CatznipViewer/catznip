@@ -914,7 +914,10 @@ void LLFloaterTexturePicker::onFilterEdit(const std::string& search_string )
 
 	if (upper_case_search_string.empty())
 	{
-		if (mInventoryPanel->getFilterSubString().empty())
+//		if (mInventoryPanel->getFilterSubString().empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		if (!mInventoryPanel->hasFilterSubString())
+// [/SL:KB]
 		{
 			// current filter and new filter empty, do nothing
 			return;
@@ -928,7 +931,10 @@ void LLFloaterTexturePicker::onFilterEdit(const std::string& search_string )
 		mInventoryPanel->getRootFolder()->scrollToShowSelection();
 
 	}
-	else if (mInventoryPanel->getFilterSubString().empty())
+//	else if (mInventoryPanel->getFilterSubString().empty())
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	else if (!mInventoryPanel->hasFilterSubString())
+// [/SL:KB]
 	{
 		// first letter in search term, save existing folder open state
 		if (!mInventoryPanel->getFilter().isNotDefault())
