@@ -458,7 +458,7 @@ LLIMWellWindow::LLIMWellWindow(const LLSD& key)
 LLIMWellWindow::~LLIMWellWindow()
 {
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
-	if (!LLSingleton<LLIMMgr>::destroyed())
+	if (LLIMMgr::instanceExists())
 	{
 		LLIMMgr::getInstance()->removeSessionObserver(this);
 	}

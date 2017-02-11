@@ -42,7 +42,7 @@ namespace
 	const std::string& PANEL_CHICLET_NAME	= "chiclet_list_panel";
 }
 
-LLChicletBar::LLChicletBar(const LLSD&)
+LLChicletBar::LLChicletBar()
 :	mChicletPanel(NULL),
 	mToolbarStack(NULL)
 {
@@ -57,7 +57,7 @@ LLChicletBar::LLChicletBar(const LLSD&)
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 LLChicletBar::~LLChicletBar()
 {
-	if (!LLSingleton<LLIMMgr>::destroyed())
+	if (LLIMMgr::instanceExists())
 	{
 		LLIMMgr::getInstance()->removeSessionObserver(this);
 	}

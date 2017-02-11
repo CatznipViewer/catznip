@@ -145,24 +145,8 @@ void append_to_last_message(std::list<LLSD>& messages, const std::string& line)
 
 class LLLogChatTimeScanner: public LLSingleton<LLLogChatTimeScanner>
 {
+	LLSINGLETON(LLLogChatTimeScanner);
 public:
-	LLLogChatTimeScanner()
-	{
-		// Note, date/time facets will be destroyed by string streams
-//		mDateStream.imbue(std::locale(mDateStream.getloc(), new date_input_facet(DATE_FORMAT)));
-//		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_facet(TIME_FORMAT)));
-//		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_input_facet(DATE_FORMAT)));
-// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
-		mDateInputFacet = new date_input_facet();
-		mDateStream.imbue(std::locale(mDateStream.getloc(), mDateInputFacet));
-
-		mTimeInputFacet = new time_input_facet();
-		mTimeStream.imbue(std::locale(mTimeStream.getloc(), mTimeInputFacet));
-		mTimeOutputFacet = new time_facet();
-		mTimeStream.imbue(std::locale(mTimeStream.getloc(), mTimeOutputFacet));
-// [/SL:KB]
-	}
-
 	date getTodayPacificDate()
 	{
 		typedef	boost::date_time::local_adjustor<ptime, -8, no_dst> pst;
@@ -240,6 +224,24 @@ private:
 	time_facet*       mTimeOutputFacet;
 // [/SL:KB]
 };
+
+inline
+LLLogChatTimeScanner::LLLogChatTimeScanner()
+{
+	// Note, date/time facets will be destroyed by string streams
+//		mDateStream.imbue(std::locale(mDateStream.getloc(), new date_input_facet(DATE_FORMAT)));
+//		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_facet(TIME_FORMAT)));
+//		mTimeStream.imbue(std::locale(mTimeStream.getloc(), new time_input_facet(DATE_FORMAT)));
+// [SL:KB] - Patch: Chat-TimestampSeconds | Checked: 2011-12-07 (Catznip-3.2)
+		mDateInputFacet = new date_input_facet();
+		mDateStream.imbue(std::locale(mDateStream.getloc(), mDateInputFacet));
+
+		mTimeInputFacet = new time_input_facet();
+		mTimeStream.imbue(std::locale(mTimeStream.getloc(), mTimeInputFacet));
+		mTimeOutputFacet = new time_facet();
+		mTimeStream.imbue(std::locale(mTimeStream.getloc(), mTimeOutputFacet));
+// [/SL:KB]
+}
 
 LLLogChat::save_history_signal_t * LLLogChat::sSaveHistorySignal = NULL;
 

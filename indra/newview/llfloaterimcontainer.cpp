@@ -111,7 +111,7 @@ LLFloaterIMContainerView::~LLFloaterIMContainerView()
 	gSavedPerAccountSettings.setBOOL("ConversationsMessagePaneCollapsed", mMessagesPane->isCollapsed());
 	gSavedPerAccountSettings.setBOOL("ConversationsParticipantListCollapsed", !isParticipantListExpanded());
 
-//	if (!LLSingleton<LLIMMgr>::destroyed())
+//	if (LLIMMgr::instanceExists())
 //	{
 //		LLIMMgr::getInstance()->removeSessionObserver(this);
 //	}
