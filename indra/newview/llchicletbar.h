@@ -44,8 +44,9 @@ class LLChicletBar
 	, public LLIMSessionObserver
 // [/SL:KB]
 {
+	LLSINGLETON(LLChicletBar);
 	LOG_CLASS(LLChicletBar);
-	friend class LLSingleton<LLChicletBar>;
+
 public:
 // [SL:KB] - Patch: Chat-Chiclets | Checked: 2013-04-25 (Catznip-3.6)
 	~LLChicletBar();
@@ -109,8 +110,6 @@ private:
 	void fitWithTopInfoBar();
 
 protected:
-	LLChicletBar(const LLSD& key = LLSD());
-
 	LLChicletPanel* 	mChicletPanel;
 	LLLayoutStack*		mToolbarStack;
 };
