@@ -49,7 +49,7 @@ LLFloaterIMContainerBase::LLFloaterIMContainerBase(const LLSD& seed, const Param
 // Checked: 2013-09-01 (Catznip-3.6)
 LLFloaterIMContainerBase::~LLFloaterIMContainerBase()
 {
-	if (!LLSingleton<LLIMMgr>::destroyed())
+	if (LLIMMgr::instanceExists())
 	{
 		LLIMMgr::getInstance()->removeSessionObserver(this);
 	}
