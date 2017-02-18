@@ -925,9 +925,9 @@ class LLNotifications :
 	public LLSingleton<LLNotifications>, 
 	public LLNotificationChannelBase
 {
+	LLSINGLETON(LLNotifications);
 	LOG_CLASS(LLNotifications);
 
-	friend class LLSingleton<LLNotifications>;
 public:
 
     // Needed to clear up RefCounted things prior to actual destruction
@@ -1007,8 +1007,6 @@ public:
 	bool isVisibleByRules(LLNotificationPtr pNotification);
 	
 private:
-	// we're a singleton, so we don't have a public constructor
-	LLNotifications();
 	/*virtual*/ void initSingleton();
 	
 	void loadPersistentNotifications();
