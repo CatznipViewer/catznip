@@ -164,6 +164,10 @@ public:
 	void onCommitMusicEnabled();
 	void applyResolution();
 	void onChangeMaturity();
+	void onChangeModelFolder();
+	void onChangeTextureFolder();
+	void onChangeSoundFolder();
+	void onChangeAnimationFolder();
 	void onClickBlockList();
 	void onClickProxySettings();
 	void onClickTranslationSettings();
