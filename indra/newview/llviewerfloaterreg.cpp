@@ -77,7 +77,6 @@
 #include "llfloaterimagepreview.h"
 #include "llfloaterimsession.h"
 #include "llfloaterinspect.h"
-#include "llfloaterinventory.h"
 #include "llfloaterjoystick.h"
 #include "llfloaterlagmeter.h"
 #include "llfloaterland.h"
@@ -93,6 +92,7 @@
 #include "llfloaternotificationstabbed.h"
 #include "llfloaterobjectweights.h"
 #include "llfloateropenobject.h"
+#include "llfloateroutfitphotopreview.h"
 #include "llfloateroutfitsnapshot.h"
 // [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
 #include "llfloaterparcelinfo.h"
@@ -283,6 +283,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("object_weights", "floater_object_weights.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterObjectWeights>);
 	LLFloaterReg::add("openobject", "floater_openobject.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOpenObject>);
 	LLFloaterReg::add("outgoing_call", "floater_outgoing_call.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLOutgoingCallDialog>);
+	LLFloaterReg::add("outfit_photo_preview", "floater_outfit_photo_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutfitPhotoPreview>);
 	LLFloaterPayUtil::registerFloater();
 
 // [SL:KB] - Patch: UI-ParcelInfoFloater | Checked: 2012-06-09 (Catznip-3.3)
