@@ -108,7 +108,6 @@ private:
 // [SL:KB] - Patch: UI-Notecards | Checked: 2011-09-04 (Catznip-2.8)
 	void			teleportToEmbeddedLandmark(LLPointer<LLInventoryItem> item_ptr, llwchar wc);
 // [/SL:KB]
-	void			openEmbeddedNotecard( LLInventoryItem* item, llwchar wc);
 	void			openEmbeddedCallingcard( LLInventoryItem* item, llwchar wc);
 	void			showCopyToInvDialog( LLInventoryItem* item, llwchar wc );
 	void			showUnsavedAlertDialog( LLInventoryItem* item );
