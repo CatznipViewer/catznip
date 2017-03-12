@@ -15,6 +15,12 @@
 	<floater.string name="NotRunning">
 		Inerte
 	</floater.string>
+	<floater.string name="Timeout">
+		Limite de tempo: [OBJECT_NAME]
+	</floater.string>
+	<floater.string name="LoadingObjInv">
+		Carregando inventário de: [OBJECT_NAME]
+	</floater.string>
 	<panel name="bottom_panel">
 	<button label="Fechar" label_selected="Fechar" name="close"/>
 	</panel>
