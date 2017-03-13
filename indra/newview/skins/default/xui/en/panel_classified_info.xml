@@ -95,11 +95,12 @@
         >
         <texture_picker
          fallback_image="default_land_picture.j2c"
-         enabled="false"
+         enabled="true"
          follows="left|top|right"
          height="197"
          layout="topleft"
          left="0"
+         mode="zoom"
          name="classified_snapshot"
          top="0"
          width="275" />

@@ -69,9 +69,29 @@ public:
 		TEXTURE_CANCEL
 	} ETexturePickOp;
 
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	enum class EControlMode
+	{
+		DISABLED,
+		EDIT,
+		ZOOM
+	};
+// [/SL:KB]
+
 public:
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	struct ControlModes
+		: public LLInitParam::TypeValuesHelper<EControlMode, ControlModes>
+	{
+		static void declareValues();
+	};
+// [/SL:KB]
+
 	struct Params : public LLInitParam::Block<Params, LLUICtrl::Params>
 	{
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		Optional<EControlMode, ControlModes> mode;
+// [/SL:KB]
 		Optional<LLUUID>		image_id;
 		Optional<LLUUID>		default_image_id;
 		Optional<std::string>	default_image_name;
@@ -90,6 +110,9 @@ public:
 
 		Params()
 		:	image_id("image"),
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+			mode("mode", EControlMode::EDIT),
+// [/SL:KB]
 			default_image_id("default_image_id"),
 			default_image_name("default_image_name"),
 			allow_no_texture("allow_no_texture"),
@@ -141,6 +164,11 @@ public:
 
 	void			setAllowNoTexture( BOOL b )					{ mAllowNoTexture = b; }
 	bool			getAllowNoTexture() const					{ return mAllowNoTexture; }
+
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	void			setControlMode(EControlMode ctrlMode);
+	EControlMode	getControlMode() const						{ return mControlMode; }
+// [/SL:KB]
 
 	const LLUUID&	getImageItemID() { return mImageItemID; }
 
@@ -218,10 +246,17 @@ private:
 	LLUIImagePtr				mFallbackImage;
 	std::string					mDefaultImageName;
 	LLHandle<LLFloater>			mFloaterHandle;
-	LLTextBox*				 	mTentativeLabel;
-	LLTextBox*				 	mCaption;
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	LLTextBox*				 	mTentativeLabel = nullptr;
+	LLTextBox*				 	mCaption = nullptr;
+// [/SL:KB]
+//	LLTextBox*				 	mTentativeLabel;
+//	LLTextBox*				 	mCaption;
 	std::string				 	mLabel;
 	BOOL					 	mAllowNoTexture; // If true, the user can select "none" as an option
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	EControlMode				mControlMode = EControlMode::DISABLED;
+// [/SL:KB]
 	PermissionMask			 	mImmediateFilterPermMask;
 	PermissionMask				mDnDFilterPermMask;
 	PermissionMask			 	mNonImmediateFilterPermMask;

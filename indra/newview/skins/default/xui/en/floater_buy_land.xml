@@ -381,12 +381,13 @@ supports [AMOUNT2] objects
      right="725"
      width="275" />
     <texture_picker
-     enabled="false"
+     enabled="true"
      fallback_image="default_land_picture.j2c"
      follows="top|left"
      height="135"
      layout="topleft"
      left="16"
+     mode="zoom"
      name="info_image"
      top="28"
      width="180" />
