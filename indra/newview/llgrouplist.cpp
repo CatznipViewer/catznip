@@ -125,21 +125,21 @@ BOOL LLGroupList::handleRightMouseDown(S32 x, S32 y, MASK mask)
 	return handled;
 }
 
-// virtual
-BOOL LLGroupList::handleDoubleClick(S32 x, S32 y, MASK mask)
-{
-	BOOL handled = LLView::handleDoubleClick(x, y, mask);
-	// Handle double click only for the selected item in the list, skip clicks on empty space.
-	if (handled)
-	{
-		if (mDoubleClickSignal)
-		{
-			(*mDoubleClickSignal)(this, x, y, mask);
-		}
-	}
-
-	return handled;
-}
+//// virtual
+//BOOL LLGroupList::handleDoubleClick(S32 x, S32 y, MASK mask)
+//{
+//	BOOL handled = LLView::handleDoubleClick(x, y, mask);
+//	// Handle double click only for the selected item in the list, skip clicks on empty space.
+//	if (handled)
+//	{
+//		if (mDoubleClickSignal)
+//		{
+//			(*mDoubleClickSignal)(this, x, y, mask);
+//		}
+//	}
+//
+//	return handled;
+//}
 
 void LLGroupList::setNameFilter(const std::string& filter)
 {
@@ -228,6 +228,10 @@ void LLGroupList::addNewItem(const LLUUID& id, const std::string& name, const LL
 	item->getChildView("profile_btn")->setVisible( false);
 	item->setGroupIconVisible(mShowIcons);
 
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+	item->setDoubleClickCallback(boost::bind(&LLGroupList::onItemDoubleClicked, this, _1, _2, _3, _4));
+// [/SL:KB]
+
 	addItem(item, id, pos);
 
 //	setCommentVisible(false);
@@ -289,6 +293,18 @@ bool LLGroupList::onContextMenuItemEnable(const LLSD& userdata)
 
 	return real_group_selected;
 }
+
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+boost::signals2::connection LLGroupList::setItemDoubleClickCallback(const mouse_signal_t::slot_type& cb)
+{
+	return mItemDoubleClickSignal.connect(cb);
+}
+
+void LLGroupList::onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask)
+{
+	mItemDoubleClickSignal(ctrl, x, y, mask);
+}
+// [/SL:KB]
 
 /************************************************************************/
 /*          LLGroupListItem implementation                              */
