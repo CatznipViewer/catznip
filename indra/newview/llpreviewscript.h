@@ -119,6 +119,8 @@ public:
 
 	void 			setScriptName(const std::string& name){mScriptName = name;};
 
+	void 			setItemRemoved(bool script_removed){mScriptRemoved = script_removed;};
+
 private:
 	void		onBtnHelp();
 	void		onBtnDynamicHelp();
@@ -166,6 +168,7 @@ private:
 	BOOL			mHasScriptData;
 	LLLiveLSLFile*	mLiveFile;
 	LLUUID			mAssociatedExperience;
+	BOOL			mScriptRemoved;
 
 	LLScriptEdContainer* mContainer; // parent view
 
@@ -205,6 +208,7 @@ public:
 	/*virtual*/ BOOL postBuild();
 
 protected:
+	virtual void draw();
 	virtual BOOL canClose();
 	void closeIfNeeded();
 
