@@ -43,7 +43,6 @@
 #include "llinventorymodelbackgroundfetch.h"
 #include "llinventoryobserver.h"
 #include "llinventorypanel.h"
-#include "llfloaterinventory.h"
 #include "lllineeditor.h"
 #include "llui.h"
 #include "llviewerinventory.h"
@@ -572,15 +571,15 @@ void LLFloaterTexturePicker::draw()
 	}
 }
 
-const LLUUID& LLFloaterTexturePicker::findItemID(const LLUUID& asset_id, BOOL copyable_only)
+const LLUUID& LLFloaterTexturePicker::findItemID(const LLUUID& asset_id, BOOL copyable_only, BOOL ignore_library)
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
 {
-	return find_item_from_asset(asset_id, copyable_only);
+	return find_item_from_asset(asset_id, copyable_only, ignore_library);
 }
 // [/SL:KB]
 
 // [SL:KB] - Patch: Build-TexturePipette | Checked: 2012-09-11 (Catznip-3.3)
-const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only)
+const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only, BOOL ignore_library)
 // [/SL:KB]
 {
 	LLViewerInventoryCategory::cat_array_t cats;
@@ -601,7 +600,10 @@ const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only)
 			LLPermissions item_permissions = itemp->getPermissions();
 			if (item_permissions.allowCopyBy(gAgent.getID(), gAgent.getGroupID()))
 			{
-				return itemp->getUUID();
+				if(!ignore_library || !gInventory.isObjectDescendentOf(itemp->getUUID(),gInventory.getLibraryRootFolderID()))
+				{
+					return itemp->getUUID();
+				}
 			}
 		}
 		// otherwise just return first instance, unless copyable requested
@@ -611,7 +613,10 @@ const LLUUID& find_item_from_asset(const LLUUID& asset_id, BOOL copyable_only)
 		}
 		else
 		{
-			return items[0]->getUUID();
+			if(!ignore_library || !gInventory.isObjectDescendentOf(items[0]->getUUID(),gInventory.getLibraryRootFolderID()))
+			{
+				return items[0]->getUUID();
+			}
 		}
 	}
 
@@ -1361,7 +1366,7 @@ void LLTextureCtrl::setOnTextureSelectedCallback(texture_selected_callback cb)
 
 void	LLTextureCtrl::setImageAssetName(const std::string& name)
 {
-	LLPointer<LLUIImage> imagep = LLUI::getUIImage(name, LLGLTexture::BOOST_PREVIEW);
+	LLPointer<LLUIImage> imagep = LLUI::getUIImage(name);
 	if(imagep)
 	{
 		LLViewerFetchedTexture* pTexture = dynamic_cast<LLViewerFetchedTexture*>(imagep->getImage().get());

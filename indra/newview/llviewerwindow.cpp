@@ -214,6 +214,7 @@
 #include "llwindowlistener.h"
 #include "llviewerwindowlistener.h"
 #include "llpaneltopinfobar.h"
+#include "llcleanup.h"
 
 #if LL_WINDOWS
 #include <tchar.h> // For Unicode conversion methods
@@ -257,6 +258,11 @@ BOOL				gDisplayBadge = FALSE;
 static const U8 NO_FACE = 255;
 BOOL gQuietSnapshot = FALSE;
 
+// Minimum value for UIScaleFactor, also defined in preferences, ui_scale_slider
+static const F32 MIN_UI_SCALE = 0.75f;
+// 4.0 in preferences, but win10 supports larger scaling and value is used more as
+// sanity check, so leaving space for larger values from DPI updates.
+static const F32 MAX_UI_SCALE = 7.0f;
 static const F32 MIN_DISPLAY_SCALE = 0.75f;
 
 std::string	LLViewerWindow::sSnapshotBaseName;
@@ -293,19 +299,19 @@ public:
 
 class RecordToChatConsole : public LLSingleton<RecordToChatConsole>
 {
+	LLSINGLETON(RecordToChatConsole);
 public:
-	RecordToChatConsole()
-		: LLSingleton<RecordToChatConsole>(),
-		mRecorder(new RecordToChatConsoleRecorder())
-	{
-	}
-
 	void startRecorder() { LLError::addRecorder(mRecorder); }
 	void stopRecorder() { LLError::removeRecorder(mRecorder); }
 
 private:
 	LLError::RecorderPtr mRecorder;
 };
+
+RecordToChatConsole::RecordToChatConsole():
+	mRecorder(new RecordToChatConsoleRecorder())
+{
+}
 
 ////////////////////////////////////////////////////////////////////////////
 //
@@ -1382,7 +1388,7 @@ LLWindowCallbacks::DragNDropResult LLViewerWindow::handleDragNDropFile(LLWindow 
 						if (fDrop)
 						{
 							// getPriceUpload() returns -1 if no data available yet.
-							S32 nUploadCost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+							S32 nUploadCost = LLGlobalEconomy::getInstance()->getPriceUpload();
 							std::string strUploadCost = llformat("%d", (nUploadCost >= 0) ? nUploadCost : gSavedSettings.getU32("DefaultUploadCost"));
 
 							std::string strUploadList; LLSD sdFiles = LLSD::emptyArray();
@@ -1788,6 +1794,23 @@ BOOL LLViewerWindow::handleDeviceChange(LLWindow *window)
 	return FALSE;
 }
 
+BOOL LLViewerWindow::handleDPIChanged(LLWindow *window, F32 ui_scale_factor, S32 window_width, S32 window_height)
+{
+    if (ui_scale_factor >= MIN_UI_SCALE && ui_scale_factor <= MAX_UI_SCALE)
+    {
+        gSavedSettings.setF32("LastSystemUIScaleFactor", ui_scale_factor);
+        gSavedSettings.setF32("UIScaleFactor", ui_scale_factor);
+        LLViewerWindow::reshape(window_width, window_height);
+        mResDirty = true;
+        return TRUE;
+    }
+    else
+    {
+        LL_WARNS() << "DPI change caused UI scale to go out of bounds: " << ui_scale_factor << LL_ENDL;
+        return FALSE;
+    }
+}
+
 void LLViewerWindow::handlePingWatchdog(LLWindow *window, const char * msg)
 {
 	LLAppViewer::instance()->pingMainloopTimeout(msg);
@@ -1850,7 +1873,8 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 	mResDirty(false),
 	mStatesDirty(false),
 	mCurrResolutionIndex(0),
-	mProgressView(NULL)
+	mProgressView(NULL),
+	mSystemUIScaleFactorChanged(false)
 {
 	// gKeyboard is still NULL, so it doesn't do LLWindowListener any good to
 	// pass its value right now. Instead, pass it a nullary function that
@@ -1938,9 +1962,24 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 		gSavedSettings.setS32("FullScreenHeight",scr.mY);
     }
 
+
+	F32 system_scale_factor = mWindow->getSystemUISize();
+	if (system_scale_factor < MIN_UI_SCALE || system_scale_factor > MAX_UI_SCALE)
+	{
+		// reset to default;
+		system_scale_factor = 1.f;
+	}
+	if (p.first_run || gSavedSettings.getF32("LastSystemUIScaleFactor") != system_scale_factor)
+	{
+		mSystemUIScaleFactorChanged = !p.first_run;
+		gSavedSettings.setF32("LastSystemUIScaleFactor", system_scale_factor);
+		gSavedSettings.setF32("UIScaleFactor", system_scale_factor);
+	}
+
+
 	// Get the real window rect the window was created with (since there are various OS-dependent reasons why
 	// the size of a window or fullscreen context may have been adjusted slightly...)
-	F32 ui_scale_factor = gSavedSettings.getF32("UIScaleFactor");
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE);
 	
 	mDisplayScale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	mDisplayScale *= ui_scale_factor;
@@ -2032,6 +2071,28 @@ LLViewerWindow::LLViewerWindow(const Params& p)
 
 	mWorldViewRectScaled = calcScaledRect(mWorldViewRectRaw, mDisplayScale);
 }
+
+//static
+void LLViewerWindow::showSystemUIScaleFactorChanged()
+{
+	LLNotificationsUtil::add("SystemUIScaleFactorChanged", LLSD(), LLSD(), onSystemUIScaleFactorChanged);
+}
+
+//static
+bool LLViewerWindow::onSystemUIScaleFactorChanged(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if(option == 0)
+	{
+		LLFloaterReg::toggleInstanceOrBringToFront("preferences");
+		LLFloater* pref_floater = LLFloaterReg::getInstance("preferences");
+		LLTabContainer* tab_container = pref_floater->getChild<LLTabContainer>("pref core");
+		tab_container->selectTabByName("advanced1");
+
+	}
+	return false; 
+}
+
 
 void LLViewerWindow::initGLDefaults()
 {
@@ -2314,10 +2375,7 @@ void LLViewerWindow::shutdownViews()
 
 	// destroy the nav bar, not currently part of gViewerWindow
 	// *TODO: Make LLNavigationBar part of gViewerWindow
-	if (LLNavigationBar::instanceExists())
-	{
-		delete LLNavigationBar::getInstance();
-	}
+	LLNavigationBar::deleteSingleton();
 	LL_INFOS() << "LLNavigationBar destroyed." << LL_ENDL ;
 	
 	// destroy menus after instantiating navbar above, as it needs
@@ -2353,7 +2411,7 @@ void LLViewerWindow::shutdownGL()
 	// Shutdown GL cleanly.  Order is very important here.
 	//--------------------------------------------------------
 	LLFontGL::destroyDefaultFonts();
-	LLFontManager::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLFontManager);
 	stop_glerror();
 
 	gSky.cleanup();
@@ -2376,7 +2434,7 @@ void LLViewerWindow::shutdownGL()
 	LLWorldMapView::cleanupTextures();
 
 	LLViewerTextureManager::cleanup() ;
-	LLImageGL::cleanupClass() ;
+	SUBSYSTEM_CLEANUP(LLImageGL) ;
 
 	LL_INFOS() << "All textures and llimagegl images are destroyed!" << LL_ENDL ;
 
@@ -2389,7 +2447,7 @@ void LLViewerWindow::shutdownGL()
 
 	gGL.shutdown();
 
-	LLVertexBuffer::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLVertexBuffer);
 
 	LL_INFOS() << "LLVertexBuffer cleaned." << LL_ENDL ;
 }
@@ -5406,7 +5464,7 @@ F32	LLViewerWindow::getWorldViewAspectRatio() const
 
 void LLViewerWindow::calcDisplayScale()
 {
-	F32 ui_scale_factor = gSavedSettings.getF32("UIScaleFactor");
+	F32 ui_scale_factor = llclamp(gSavedSettings.getF32("UIScaleFactor"), MIN_UI_SCALE, MAX_UI_SCALE);
 	LLVector2 display_scale;
 	display_scale.setVec(llmax(1.f / mWindow->getPixelAspectRatio(), 1.f), llmax(mWindow->getPixelAspectRatio(), 1.f));
 	display_scale *= ui_scale_factor;
@@ -5419,7 +5477,7 @@ void LLViewerWindow::calcDisplayScale()
 	
 	if (display_scale != mDisplayScale)
 	{
-		LL_INFOS() << "Setting display scale to " << display_scale << LL_ENDL;
+		LL_INFOS() << "Setting display scale to " << display_scale << " for ui scale: " << ui_scale_factor << LL_ENDL;
 
 		mDisplayScale = display_scale;
 		// Init default fonts

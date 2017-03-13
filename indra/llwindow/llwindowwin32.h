@@ -110,6 +110,8 @@ public:
 	/*virtual*/ void interruptLanguageTextInput();
 	/*virtual*/ void spawnWebBrowser(const std::string& escaped_url, bool async);
 
+	/*virtual*/ F32 getSystemUISize();
+
 // [SL:KB] - Patch: Build-DragNDrop | Checked: 2013-07-22 (Catznip-3.6)
 	LLWindowCallbacks::DragNDropResult completeDragNDropRequest(const LLCoordGL gl_coord, const MASK mask, LLWindowCallbacks::DragNDropAction action, 
 		LLWindowCallbacks::DragNDropType type, const std::vector<std::string>& data);
@@ -117,7 +119,7 @@ public:
 //	LLWindowCallbacks::DragNDropResult completeDragNDropRequest( const LLCoordGL gl_coord, const MASK mask, LLWindowCallbacks::DragNDropAction action, const std::string url );
 
 	static std::vector<std::string> getDynamicFallbackFontList();
-
+	static void setDPIAwareness();
 protected:
 	LLWindowWin32(LLWindowCallbacks* callbacks,
 		const std::string& title, const std::string& name, int x, int y, int width, int height, U32 flags, 
