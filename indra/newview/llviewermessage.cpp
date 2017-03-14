@@ -1645,7 +1645,7 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 			
 			LLDiscardAgentOffer* discard_agent_offer = new LLDiscardAgentOffer(mFolderID, mObjectID);
 			discard_agent_offer->startFetch();
-			if (catp || (itemp && itemp->isFinished()))
+			if ((catp && gInventory.isCategoryComplete(mObjectID)) || (itemp && itemp->isFinished()))
 			{
 				discard_agent_offer->done();
 			}
@@ -4725,7 +4725,9 @@ void process_sound_trigger(LLMessageSystem *msg, void **)
 {
 	if (!gAudiop)
 	{
+#if !LL_LINUX
 		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
+#endif
 		return;
 	}
 
@@ -4787,7 +4789,9 @@ void process_preload_sound(LLMessageSystem *msg, void **user_data)
 {
 	if (!gAudiop)
 	{
+#if !LL_LINUX
 		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
+#endif
 		return;
 	}
 
@@ -5469,9 +5473,12 @@ static std::string reason_from_transaction_type(S32 transaction_type,
 		case TRANS_CLASSIFIED_CHARGE:
 			return LLTrans::getString("to publish a classified ad");
 			
+		case TRANS_GIFT:
+			// Simulator returns "Payment" if no custom description has been entered
+			return (item_desc == "Payment" ? std::string() : item_desc);
+
 		// These have no reason to display, but are expected and should not
 		// generate warnings
-		case TRANS_GIFT:
 		case TRANS_PAY_OBJECT:
 		case TRANS_OBJECT_PAYS:
 			return std::string();
@@ -5581,6 +5588,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	LLSD payload;
 	
 	bool you_paid_someone = (source_id == gAgentID);
+	std::string gift_suffix = (transaction_type == TRANS_GIFT ? "_gift" : "");
 	if (you_paid_someone)
 	{
 		if(!gSavedSettings.getBOOL("NotifyMoneySpend"))
@@ -5594,8 +5602,8 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		{
 			if (dest_id.notNull())
 			{
-				message = success ? LLTrans::getString("you_paid_ldollars", args) :
-									LLTrans::getString("you_paid_failure_ldollars", args);
+				message = success ? LLTrans::getString("you_paid_ldollars" + gift_suffix, args) :
+									LLTrans::getString("you_paid_failure_ldollars" + gift_suffix, args);
 			}
 			else
 			{
@@ -5622,7 +5630,8 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		payload["dest_id"] = dest_id;
 		notification = success ? "PaymentSent" : "PaymentFailure";
 	}
-	else {
+	else
+	{
 		// ...someone paid you
 		if(!gSavedSettings.getBOOL("NotifyMoneyReceived"))
 		{
@@ -5633,9 +5642,10 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		name_id = source_id;
 		if (!reason.empty())
 		{
-			message = LLTrans::getString("paid_you_ldollars", args);
+			message = LLTrans::getString("paid_you_ldollars" + gift_suffix, args);
 		}
-		else {
+		else
+		{
 			message = LLTrans::getString("paid_you_ldollars_no_reason", args);
 		}
 		final_args["MESSAGE"] = message;
@@ -6280,9 +6290,9 @@ void process_frozen_message(LLMessageSystem *msgsystem, void **user_data)
 // do some extra stuff once we get our economy data
 void process_economy_data(LLMessageSystem *msg, void** /*user_data*/)
 {
-	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::Singleton::getInstance());
+	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::getInstance());
 
-	S32 upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+	S32 upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
 
 	LL_INFOS_ONCE("Messaging") << "EconomyData message arrived; upload cost is L$" << upload_cost << LL_ENDL;
 
@@ -6387,6 +6397,16 @@ bool unknown_script_question_cb(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+void experiencePermissionBlock(LLUUID experience, LLSD result)
+{
+    LLSD permission;
+    LLSD data;
+    permission["permission"] = "Block";
+    data[experience.asString()] = permission;
+    data["experience"] = experience;
+    LLEventPumps::instance().obtain("experience_permission").post(data);
+}
+
 bool script_question_cb(const LLSD& notification, const LLSD& response)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -6463,14 +6483,8 @@ bool script_question_cb(const LLSD& notification, const LLSD& response)
 			if (!region)
 			    return false;
 
-            LLExperienceCache::instance().setExperiencePermission(experience, std::string("Block"), LLExperienceCache::ExperienceGetFn_t());
+            LLExperienceCache::instance().setExperiencePermission(experience, std::string("Block"), boost::bind(&experiencePermissionBlock, experience, _1));
 
-            LLSD permission;
-            LLSD data;
-            permission["permission"] = "Block";
-            data[experience.asString()] = permission;
-            data["experience"] = experience;
-            LLEventPumps::instance().obtain("experience_permission").post(data);
 		}
 }
 	return false;
@@ -6606,6 +6620,11 @@ void process_script_question(LLMessageSystem *msg, void **user_data)
 
 				if (("ScriptTakeMoney" == script_perm.question) && has_not_only_debit)
 					continue;
+
+                if (script_perm.question == "JoinAnExperience")
+                { // Some experience only permissions do not have an explicit permission bit.  Add them here.
+                    script_question += "    " + LLTrans::getString("ForceSitAvatar") + "\n";
+                }
 
 				script_question += "    " + LLTrans::getString(script_perm.question) + "\n";
 			}

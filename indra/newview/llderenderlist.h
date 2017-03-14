@@ -136,9 +136,8 @@ public:
 
 class LLDerenderList : public LLSingleton<LLDerenderList>
 {
-	friend class LLSingleton<LLDerenderList>;
+	LLSINGLETON(LLDerenderList);
 protected:
-	LLDerenderList();
 	/*virtual*/ ~LLDerenderList();
 
 	void load();

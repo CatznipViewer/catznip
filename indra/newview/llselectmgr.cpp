@@ -4421,6 +4421,9 @@ void LLSelectMgr::sendAttach(U8 attachment_point, bool replace)
 			SEND_ONLY_ROOTS );
 		if (!build_mode)
 		{
+			// After "ObjectAttach" server will unsubscribe us from properties updates
+			// so either deselect objects or resend selection after attach packet reaches server
+			// In case of build_mode LLPanelObjectInventory::refresh() will deal with selection
 			deselectAll();
 		}
 	}
@@ -6011,6 +6014,11 @@ S32 LLSelectNode::getLastSelectedTE()
 	return mLastTESelected;
 }
 
+S32 LLSelectNode::getLastOperatedTE()
+{
+	return mLastTESelected;
+}
+
 //LLViewerObject* LLSelectNode::getObject()
 // [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
 LLViewerObject* LLSelectNode::getObject() const
@@ -6252,6 +6260,9 @@ void pushWireframe(LLDrawable* drawable)
 
 void LLSelectNode::renderOneWireframe(const LLColor4& color)
 {
+	//Need to because crash on ATI 3800 (and similar cards) MAINT-5018 
+	LLGLDisable multisample(LLPipeline::RenderFSAASamples > 0 ? GL_MULTISAMPLE_ARB : 0);
+
 	LLViewerObject* objectp = getObject();
 	if (!objectp)
 	{
@@ -7101,7 +7112,7 @@ F32 LLObjectSelection::getSelectedLinksetCost()
 		LLSelectNode* node = *iter;
 		LLViewerObject* object = node->getObject();
 		
-		if (object)
+		if (object && !object->isAttachment())
 		{
 			LLViewerObject* root = static_cast<LLViewerObject*>(object->getRoot());
 			if (root)
@@ -7205,7 +7216,9 @@ U32 LLObjectSelection::getSelectedObjectTriangleCount(S32* vcount)
 		
 		if (object)
 		{
-			count += object->getTriangleCount(vcount);
+			S32 vt = 0;
+			count += object->getTriangleCount(&vt);
+			*vcount += vt;
 		}
 	}
 
