@@ -217,6 +217,8 @@ with the same filename but different name
 
   <texture name="Flag" file_name="navbar/Flag.png" preload="false" />
 
+  <texture name="Flip" file_name="icons/Flip.png" preload="true" />
+
   <texture name="Flyout_Left" file_name="windows/Flyout_Left.png" preload="false" />
   <texture name="Flyout_Pointer" file_name="windows/Flyout_Pointer.png" preload="false" />
   <texture name="Flyout_Right" file_name="windows/Flyout_Right.png" preload="false" />
