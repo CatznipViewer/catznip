@@ -1626,15 +1626,21 @@ bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uui
 
 bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 {
+	const LLConversationItem *conversation_item = getCurSelectedViewModelItem();
+	if(!conversation_item)
+	{
+		return false;
+	}
+
 	const std::string& item = userdata.asString();
 
 	if ("show_mute" == item)
 	{
-		return !isMuted(getCurSelectedViewModelItem()->getUUID());
+		return !isMuted(conversation_item->getUUID());
 	}
 	else if ("show_unmute" == item)
 	{
-		return isMuted(getCurSelectedViewModelItem()->getUUID());
+		return isMuted(conversation_item->getUUID());
 	}
 
 	return true;
