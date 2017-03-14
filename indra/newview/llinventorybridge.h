@@ -116,6 +116,7 @@ public:
 	virtual BOOL isItemCopyable() const { return FALSE; }
 	virtual BOOL copyToClipboard() const;
 	virtual BOOL cutToClipboard();
+	virtual bool isCutToClipboard();
 	virtual BOOL isClipboardPasteable() const;
 	virtual BOOL isClipboardPasteableAsLink() const;
 	virtual void pasteFromClipboard() {}
@@ -343,6 +344,7 @@ protected:
 	BOOL checkFolderForContentsOfType(LLInventoryModel* model, LLInventoryCollectFunctor& typeToCheck);
 
 	void modifyOutfit(BOOL append);
+	void copyOutfitToClipboard();
 // [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
 	void wearItems();
 	static void wearItemsFinal(const LLUUID& idFolder);
