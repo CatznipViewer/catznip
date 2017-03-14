@@ -104,6 +104,9 @@
         <on_click
          function="Inventory.GearDefault.Custom.Action"
          parameter="empty_lostnfound" />
+        <on_enable
+         function="Inventory.GearDefault.Enable"
+         parameter="empty_lostnfound" />
     </menu_item_call>
 -->
     <menu_item_separator
@@ -152,4 +155,7 @@
 			 function="Inventory.GearDefault.Enable"
 			 parameter="find_links" />
         </menu_item_call>
+         parameter="empty_trash" />
+        <on_enable
+         function="Inventory.GearDefault.Enable"
 </toggleable_menu>

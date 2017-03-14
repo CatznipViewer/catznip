@@ -34,9 +34,7 @@
 #include "llbutton.h"
 #include "lldate.h"
 #include "llfirstuse.h"
-// [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 #include "llfloaterreg.h"
-// [/SL:KB]
 #include "llfloatersidepanelcontainer.h"
 #include "llfoldertype.h"
 #include "llfolderview.h"
@@ -753,4 +751,17 @@ std::set<LLFolderViewItem*> LLSidepanelInventory::getInboxSelectionList()
 	}
 	
 	return inventory_selected_uuids;
+}
+
+void LLSidepanelInventory::cleanup()
+{
+	LLFloaterReg::const_instance_list_t& inst_list = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator iter = inst_list.begin(); iter != inst_list.end();)
+	{
+		LLFloaterSidePanelContainer* iv = dynamic_cast<LLFloaterSidePanelContainer*>(*iter++);
+		if (iv)
+		{
+			iv->cleanup();
+		}
+	}
 }

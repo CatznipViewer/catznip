@@ -48,7 +48,6 @@
 #include "llavataractions.h"
 #include "llclipboard.h"
 #include "lldonotdisturbnotificationstorage.h"
-//#include "llfloaterinventory.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfocusmgr.h"
 #include "llfolderview.h"

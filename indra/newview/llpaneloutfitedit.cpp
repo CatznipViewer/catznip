@@ -51,7 +51,6 @@
 #include "llbutton.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
-//#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -782,6 +781,10 @@ void LLPanelOutfitEdit::onVisibilityChanged(const LLSD &in_visible_chain)
 	{
 		update();
 	}
+	else
+	{
+		mWearableListManager->holdProgress(); //list population restarts with visibility
+	}
 }
 
 void LLPanelOutfitEdit::onAddWearableClicked(void)
@@ -1061,9 +1064,6 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 			break;
 		case LLAssetType::AT_BODYPART:
 			applyListViewFilter(LVIT_BODYPART);
-			break;
-		case LLAssetType::AT_GESTURE:
-			applyListViewFilter(LVIT_GESTURES);
 			break;
 		case LLAssetType::AT_CLOTHING:
 		default:
