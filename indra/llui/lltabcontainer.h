@@ -89,6 +89,7 @@ public:
 											label_pad_left;
 
 		Optional<bool>						hide_tabs;
+		Optional<bool>						hide_scroll_arrows;
 		Optional<S32>						tab_padding_right;
 
 		Optional<TabParams>					first_tab,
@@ -308,6 +309,7 @@ private:
 
 	S32								mCurrentTabIdx;
 	BOOL							mTabsHidden;
+	BOOL							mHideScrollArrows;
 
 	BOOL							mScrolled;
 	LLFrameTimer					mScrollTimer;
