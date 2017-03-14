@@ -339,13 +339,14 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 			bool is_hidden_if_empty = LLViewerFolderType::lookupIsHiddenIfEmpty(listener->getPreferredType());
 			if (is_hidden_if_empty)
 			{
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+				const LLUUID& object_id = listener->getUUID();
+// [/SL:KB]
+
 				// Force the fetching of those folders so they are hidden if they really are empty...
 				// But don't interfere with startup download
 				if (LLStartUp::getStartupState() > STATE_WEARABLES_WAIT)
 				{
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
-					const LLUUID& object_id = listener->getUUID();
-// [/SL:KB]
 					gInventory.fetchDescendentsOf(object_id);
 				}
 
