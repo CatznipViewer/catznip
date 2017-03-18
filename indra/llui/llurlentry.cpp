@@ -183,8 +183,9 @@ bool LLUrlEntryBase::isLinkDisabled() const
 
 bool LLUrlEntryBase::isWikiLinkCorrect(std::string url)
 {
-	std::string label = getLabelFromWikiLink(url);
-	return (LLUrlRegistry::instance().hasUrl(label)) ? false : true;
+	LLWString label = utf8str_to_wstring(getLabelFromWikiLink(url));
+	label.erase(std::remove(label.begin(), label.end(), L'\u200B'), label.end());
+	return (LLUrlRegistry::instance().hasUrl(wstring_to_utf8str(label))) ? false : true;
 }
 
 std::string LLUrlEntryBase::urlToLabelWithGreyQuery(const std::string &url) const
@@ -205,9 +206,15 @@ std::string LLUrlEntryBase::urlToGreyQuery(const std::string &url) const
 
 	std::string label;
 	up.extractParts();
-	up.glueFirst(label);
-	std::string query = url.substr(label.size());
-	return query;
+	up.glueFirst(label, false);
+
+	size_t pos = url.find(label);
+	if (pos == std::string::npos)
+	{
+		return "";
+	}
+	pos += label.size();
+	return url.substr(pos);
 }
 
 
@@ -806,10 +813,26 @@ LLUrlEntryAgentCompleteName::LLUrlEntryAgentCompleteName()
 
 std::string LLUrlEntryAgentCompleteName::getName(const LLAvatarName& avatar_name)
 {
-//	return avatar_name.getCompleteName();
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-18 (Catznip-2.6)
 	return avatar_name.getCompleteName(true, EShowUsername::SHOW_ALWAYS);
 // [/SL:KB]
+//	return avatar_name.getCompleteName(true, true);
+}
+
+//
+// LLUrlEntryAgentLegacyName describes a Second Life agent legacy name Url, e.g.,
+// secondlife:///app/agent/0e346d8b-4433-4d66-a6b0-fd37083abc4c/legacyname
+// x-grid-location-info://lincoln.lindenlab.com/app/agent/0e346d8b-4433-4d66-a6b0-fd37083abc4c/legacyname
+//
+LLUrlEntryAgentLegacyName::LLUrlEntryAgentLegacyName()
+{
+	mPattern = boost::regex(APP_HEADER_REGEX "/agent/[\\da-f-]+/legacyname",
+							boost::regex::perl|boost::regex::icase);
+}
+
+std::string LLUrlEntryAgentLegacyName::getName(const LLAvatarName& avatar_name)
+{
+	return avatar_name.getLegacyName();
 }
 
 //
@@ -825,7 +848,7 @@ LLUrlEntryAgentDisplayName::LLUrlEntryAgentDisplayName()
 
 std::string LLUrlEntryAgentDisplayName::getName(const LLAvatarName& avatar_name)
 {
-	return avatar_name.getDisplayName();
+	return avatar_name.getDisplayName(true);
 }
 
 //
@@ -1422,7 +1445,7 @@ std::string LLUrlEntryIcon::getIcon(const std::string &url)
 LLUrlEntryEmail::LLUrlEntryEmail()
 	: LLUrlEntryBase()
 {
-	mPattern = boost::regex("(mailto:)?[\\w\\.\\-]+@[\\w\\.\\-]+\\.[a-z]{2,6}",
+	mPattern = boost::regex("(mailto:)?[\\w\\.\\-]+@[\\w\\.\\-]+\\.[a-z]{2,63}",
 							boost::regex::perl | boost::regex::icase);
 	mMenuName = "menu_url_email.xml";
 	mTooltip = LLTrans::getString("TooltipEmail");

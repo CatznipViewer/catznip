@@ -170,13 +170,16 @@ void LLAvatarName::setExpires(F64 expires)
 	mExpires = LLFrameTimer::getTotalSeconds() + expires;
 }
 
-//std::string LLAvatarName::getCompleteName(bool use_parentheses) const
+//std::string LLAvatarName::getCompleteName(bool use_parentheses, bool force_use_complete_name) const
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 std::string LLAvatarName::getCompleteName(bool use_parentheses, EShowUsername eShowUsername) const
 // [/SL:KB]
 {
 	std::string name;
+//	if (sUseDisplayNames || force_use_complete_name)
+// [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
 	if (sUseDisplayNames)
+// [/SL:KB]
 	{
 //		if (mUsername.empty() || mIsDisplayNameDefault)
 // [SL:KB] - Patch: Agent-LinkShowUsernames | Checked: 2011-04-17 (Catznip-2.6)
@@ -196,7 +199,7 @@ std::string LLAvatarName::getCompleteName(bool use_parentheses, EShowUsername eS
 				name = mDisplayName + " [" + mUsername + "]";
 // [/SL:KB]
 //			name = mDisplayName;
-//			if(sUseUsernames)
+//			if(sUseUsernames || force_use_complete_name)
 //			{
 //				if(use_parentheses)
 //				{
@@ -231,9 +234,9 @@ std::string LLAvatarName::getLegacyName() const
 	return name;
 }
 
-std::string LLAvatarName::getDisplayName() const
+std::string LLAvatarName::getDisplayName(bool force_use_display_name) const
 {
-	if (sUseDisplayNames)
+	if (sUseDisplayNames || force_use_display_name)
 	{
 		return mDisplayName;
 	}
