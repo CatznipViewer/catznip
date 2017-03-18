@@ -89,13 +89,11 @@
      name="controls"
      right="-1">
        <panel
-         color="Transparent"
          follows="all"
          height="88"
          layout="topleft"
          left="4"
          name="preset_views_list"
-         opaque="true"
          right="-20"
          top="0"
          visible="false">
@@ -165,14 +163,11 @@
         
       </panel>
       <panel
-          color="Transparent"
           follows="all"
           height="88"
-          item_pad="4"
           layout="topleft"
           left="10"
           name="camera_modes_list"
-          opaque="true"
           right="-20"
           top="0"
           visible="false">

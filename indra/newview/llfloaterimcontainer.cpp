@@ -111,7 +111,7 @@ LLFloaterIMContainerView::~LLFloaterIMContainerView()
 	gSavedPerAccountSettings.setBOOL("ConversationsMessagePaneCollapsed", mMessagesPane->isCollapsed());
 	gSavedPerAccountSettings.setBOOL("ConversationsParticipantListCollapsed", !isParticipantListExpanded());
 
-//	if (!LLSingleton<LLIMMgr>::destroyed())
+//	if (LLIMMgr::instanceExists())
 //	{
 //		LLIMMgr::getInstance()->removeSessionObserver(this);
 //	}
@@ -1671,15 +1671,21 @@ bool LLFloaterIMContainerView::checkContextMenuItem(const std::string& item, uui
 
 bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 {
+	const LLConversationItem *conversation_item = getCurSelectedViewModelItem();
+	if(!conversation_item)
+	{
+		return false;
+	}
+
 	const std::string& item = userdata.asString();
 
 	if ("show_mute" == item)
 	{
-		return !isMuted(getCurSelectedViewModelItem()->getUUID());
+		return !isMuted(conversation_item->getUUID());
 	}
 	else if ("show_unmute" == item)
 	{
-		return isMuted(getCurSelectedViewModelItem()->getUUID());
+		return isMuted(conversation_item->getUUID());
 	}
 // [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
 	else if ("eject_from_group" == item)

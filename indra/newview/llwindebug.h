@@ -34,6 +34,7 @@
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
 class LLWinDebug
 {
+	LLSINGLETON_EMPTY_CTOR(LLWinDebug);
 public:
 	static void init();
 	static void cleanup();

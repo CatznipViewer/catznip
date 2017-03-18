@@ -18,4 +18,6 @@
 		<menu_item_call label="SLurl kopieren" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="Ignorieren/Nicht mehr ignorieren" name="block_unblock"/>
+	<menu_item_call label="Einfrieren" name="freeze"/>
+	<menu_item_call label="Hinauswerfen" name="eject"/>
 </context_menu>

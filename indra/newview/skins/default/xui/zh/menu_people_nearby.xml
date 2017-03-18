@@ -18,4 +18,6 @@
 		<menu_item_call label="覆製 SLurl 到剪貼簿" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="封鎖/不再封鎖" name="block_unblock"/>
+	<menu_item_call label="凍結" name="freeze"/>
+	<menu_item_call label="踢出" name="eject"/>
 </context_menu>

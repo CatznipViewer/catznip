@@ -18,4 +18,6 @@
 		<menu_item_call label="SLurl&apos;yi Panoya Kopyala" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="Engelle/Engeli Kaldır" name="block_unblock"/>
+	<menu_item_call label="Dondur" name="freeze"/>
+	<menu_item_call label="Çıkar" name="eject"/>
 </context_menu>

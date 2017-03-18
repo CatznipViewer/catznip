@@ -28,6 +28,7 @@
 #define LLPANELTOPINFOBAR_H_
 
 #include "llpanel.h"
+#include "llinitdestroyclass.h"
 
 class LLButton;
 class LLTextBox;
@@ -39,6 +40,8 @@ class LLParcelChangeObserver;
 class LLPanelTopInfoBar : public LLPanel
 // [/SL:KB]
 {
+//	LLSINGLETON(LLPanelTopInfoBar);
+//	~LLPanelTopInfoBar();
 	LOG_CLASS(LLPanelTopInfoBar);
 
 //	friend class LLDestroyClass<LLPanelTopInfoBar>;
@@ -46,9 +49,10 @@ class LLPanelTopInfoBar : public LLPanel
 public:
 	typedef boost::signals2::signal<void ()> resize_signal_t;
 
+// [SL:KB] - Patch: UI-TopBarInfo | Checked: 2011-05-12 (Catznip-2.6)
 	LLPanelTopInfoBar();
 	~LLPanelTopInfoBar();
-
+// [/SL:KB]
 	/*virtual*/ BOOL postBuild();
 	/*virtual*/ void draw();
 // [SL:KB] - Patch: UI-TopBarInfo | Checked: 2012-01-15 (Catznip-3.2)

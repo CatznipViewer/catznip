@@ -26,9 +26,8 @@
 
 class LLPersistentUnreadIMStorage : public LLSingleton<LLPersistentUnreadIMStorage>
 {
-	friend class LLSingleton<LLPersistentUnreadIMStorage>;
+	LLSINGLETON(LLPersistentUnreadIMStorage);
 protected:
-	LLPersistentUnreadIMStorage();
 	virtual ~LLPersistentUnreadIMStorage();
 
 	/*

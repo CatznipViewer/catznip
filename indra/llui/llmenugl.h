@@ -362,7 +362,9 @@ private:
 
 // child widget registry
 struct MenuRegistry : public LLChildRegistry<MenuRegistry>
-{};
+{
+	LLSINGLETON_EMPTY_CTOR(MenuRegistry);
+};
 
 
 class LLMenuGL 
@@ -547,6 +549,9 @@ public:
 	void resetScrollPositionOnShow(bool reset_scroll_pos) { mResetScrollPositionOnShow = reset_scroll_pos; }
 	bool isScrollPositionOnShowReset() { return mResetScrollPositionOnShow; }
 
+	void setAlwaysShowMenu(BOOL show) { mAlwaysShowMenu = show; }
+	BOOL getAlwaysShowMenu() { return mAlwaysShowMenu; }
+
 	// add a context menu branch
 	BOOL appendContextSubMenu(LLMenuGL *menu);
 
@@ -587,6 +592,8 @@ private:
 
 	static LLColor4 sDefaultBackgroundColor;
 	static BOOL		sKeyboardMode;
+
+	BOOL			mAlwaysShowMenu;
 
 	LLUIColor		mBackgroundColor;
 	BOOL			mBgVisible;

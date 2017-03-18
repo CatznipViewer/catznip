@@ -38,7 +38,6 @@
 #include "llinventoryfunctions.h"
 #include "llinventoryicon.h"
 #include "llinventorymodel.h"
-//#include "llfloaterinventory.h"
 // [SL:KB] - Patch: Notification-GroupCreateNotice | Checked: 2012-02-26 (Catznip-3.2.2)
 #include "llfloaterreg.h"
 // [/SL:KB]

@@ -45,6 +45,7 @@
 #include "llpanelwearing.h"
 #include "llsaveoutfitcombobtn.h"
 #include "llsidepanelappearance.h"
+#include "llviewercontrol.h"
 #include "llviewerfoldertype.h"
 
 static const std::string OUTFITS_TAB_NAME = "outfitslist_tab";
@@ -70,6 +71,10 @@ LLPanelOutfitsInventory::LLPanelOutfitsInventory() :
 
 LLPanelOutfitsInventory::~LLPanelOutfitsInventory()
 {
+	if (mAppearanceTabs)
+	{
+		gSavedSettings.setS32("LastAppearanceTab", mAppearanceTabs->getCurrentPanelIndex());
+	}
 }
 
 // virtual
@@ -112,6 +117,10 @@ void LLPanelOutfitsInventory::onOpen(const LLSD& key)
 			panel_appearance->fetchInventory();
 			panel_appearance->refreshCurrentOutfitName();
 		}
+
+		if (!mAppearanceTabs->selectTab(gSavedSettings.getS32("LastAppearanceTab")))
+			mAppearanceTabs->selectFirstTab();
+
 		mInitialized = true;
 	}
 

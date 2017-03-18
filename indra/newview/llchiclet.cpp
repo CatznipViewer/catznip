@@ -228,7 +228,7 @@ LLIMWellChiclet::LLIMWellChiclet(const Params& p)
 
 LLIMWellChiclet::~LLIMWellChiclet()
 {
-	if (!LLSingleton<LLIMMgr>::destroyed())
+	if (LLIMMgr::instanceExists())
 	{
 		LLIMMgr::getInstance()->removeSessionObserver(this);
 	}

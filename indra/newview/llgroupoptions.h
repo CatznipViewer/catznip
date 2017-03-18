@@ -40,13 +40,11 @@ struct LLGroupOptions
 //
 class LLGroupOptionsMgr : public LLSingleton<LLGroupOptionsMgr>
 {
-	friend class LLSingleton<LLGroupOptionsMgr>;
-
 	/*
 	 * Constructor
 	 */
+	LLSINGLETON(LLGroupOptionsMgr);
 protected:
-	LLGroupOptionsMgr();
 	virtual ~LLGroupOptionsMgr();
 
 	/*

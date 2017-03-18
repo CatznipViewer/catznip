@@ -18,4 +18,6 @@
 		<menu_item_call label="Copiar la SLurl" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="Ignorar / No ignorar" name="block_unblock"/>
+	<menu_item_call label="Congelar" name="freeze"/>
+	<menu_item_call label="Expulsar" name="eject"/>
 </context_menu>

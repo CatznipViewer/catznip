@@ -1206,6 +1206,7 @@ void LLFloaterModelPreview::onMouseCaptureLostModelPreview(LLMouseHandler* handl
 LLModelPreview::LLModelPreview(S32 width, S32 height, LLFloater* fmp)
 : LLViewerDynamicTexture(width, height, 3, ORDER_MIDDLE, FALSE), LLMutex(NULL)
 , mLodsQuery()
+, mLodsWithParsingError()
 , mPelvisZOffset( 0.0f )
 , mLegacyRigValid( false )
 , mRigValidJointUpload( false )
@@ -1789,8 +1790,8 @@ void LLModelPreview::loadModel(std::string filename, S32 lod, bool force_disable
 			// this is the initial file picking. Close the whole floater
 			// if we don't have a base model to show for high LOD.
 			mFMP->closeFloater(false);
-			mLoading = false;
 		}
+		mLoading = false;
 		return;
 	}
 
@@ -1947,7 +1948,14 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 	{
 		mLoading = false ;
 		mModelLoader = NULL;
+		mLodsWithParsingError.push_back(loaded_lod);
 		return ;
+	}
+
+	mLodsWithParsingError.erase(std::remove(mLodsWithParsingError.begin(), mLodsWithParsingError.end(), loaded_lod), mLodsWithParsingError.end());
+	if(mLodsWithParsingError.empty())
+	{
+		mFMP->childEnable( "calculate_btn" );
 	}
 
 	// Copy determinations about rig so UI will reflect them
@@ -2171,7 +2179,11 @@ void LLModelPreview::loadModelCallback(S32 loaded_lod)
 		if (!mBaseModel.empty())
 		{
 			const std::string& model_name = mBaseModel[0]->getName();
-			mFMP->getChild<LLUICtrl>("description_form")->setValue(model_name);
+			LLLineEditor* description_form = mFMP->getChild<LLLineEditor>("description_form");
+			if (description_form->getText().empty())
+			{
+				description_form->setText(model_name);
+			}
 		}
 	}
 	refresh();
@@ -2696,17 +2708,7 @@ void LLModelPreview::updateStatusMessages()
                 setLoadState( LLModelLoader::ERROR_MATERIALS );
                 mFMP->childDisable( "calculate_btn" );
             }
-
-            int refFaceCnt = 0;
-            int modelFaceCnt = 0;
-
-            if (!lod_model->matchMaterialOrder(model_high_lod, refFaceCnt, modelFaceCnt ) )
-			{
-                setLoadState( LLModelLoader::ERROR_MATERIALS );
-				mFMP->childDisable( "calculate_btn" );
-			}
-
-            if (lod_model)
+            else
 			{
 					//for each model in the lod
 				S32 cur_tris = 0;
@@ -3639,7 +3641,7 @@ BOOL LLModelPreview::render()
 		}
 	}
 
-	if (has_skin_weights)
+	if (has_skin_weights && lodsReady())
 	{ //model has skin weights, enable view options for skin weights and joint positions
 		if (fmp && isLegacyRigValid() )
 		{
@@ -4564,4 +4566,12 @@ void LLFloaterModelPreview::setPermissonsErrorStatus(S32 status, const std::stri
 	LLNotificationsUtil::add("MeshUploadPermError");
 }
 
+bool LLFloaterModelPreview::isModelLoading()
+{
+	if(mModelPreview)
+	{
+		return mModelPreview->mLoading;
+	}
+	return false;
+}
 

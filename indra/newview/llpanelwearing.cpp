@@ -737,6 +737,7 @@ BOOL LLPanelWearing::postBuild()
 {
 	mAccordionCtrl = getChild<LLAccordionCtrl>("wearables_accordion");
 	mWearablesTab = getChild<LLAccordionCtrlTab>("tab_wearables");
+	mWearablesTab->setIgnoreResizeNotification(true);
 // [SL:KB] - Patch: Appearance-InvPanel | Checked: Catznip-5.0
 	mWearablesTab->setDropDownStateChangedCallback(boost::bind(&LLPanelWearing::onToggleWearingView, this, EWearingView::LIST_VIEW));
 	mWearablesInvTab = getChild<LLAccordionCtrlTab>("tab_wearables_invpanel");

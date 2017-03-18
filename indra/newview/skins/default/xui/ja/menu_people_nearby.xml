@@ -18,4 +18,6 @@
 		<menu_item_call label="SLurl をクリップボードにコピー" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="ブロック・ブロック解除" name="block_unblock"/>
+	<menu_item_call label="フリーズ" name="freeze"/>
+	<menu_item_call label="追放" name="eject"/>
 </context_menu>

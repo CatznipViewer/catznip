@@ -56,13 +56,12 @@ class LLRecentPeoplePersistentItem;
 class LLRecentPeople : public LLSingleton<LLRecentPeople>
 // [/SL:KB]
 {
+//	LLSINGLETON_EMPTY_CTOR(LLRecentPeople);
+// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)
+	LLSINGLETON(LLRecentPeople);
+// [/SL:KB]
 	LOG_CLASS(LLRecentPeople);
 
-// [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-01-21 (Catznip-2.5)
-	friend class LLSingleton<LLRecentPeople>;
-protected:
-	LLRecentPeople();
-// [/SL:KB]
 public:
 	typedef boost::signals2::signal<void ()> signal_t;
 // [SL:KB] - Patch: Settings-RecentPeopleStorage | Checked: 2011-08-22 (Catznip-2.8)

@@ -825,6 +825,8 @@ namespace action_give_inventory
 
 	struct LLShareInfo : public LLSingleton<LLShareInfo>
 	{
+		LLSINGLETON_EMPTY_CTOR(LLShareInfo);
+	public:
 		std::vector<LLAvatarName> mAvatarNames;
 		uuid_vec_t mAvatarUuids;
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2013-09-07 (Catznip-3.6)

@@ -721,7 +721,7 @@ void LLPanelFace::getState()
 	updateUI();
 }
 
-void LLPanelFace::updateUI()
+void LLPanelFace::updateUI(bool force_set_values /*false*/)
 { //set state of UI to match state of texture entry(ies)  (calls setEnabled, setValue, etc, but NOT setVisible)
 	LLViewerObject* objectp = LLSelectMgr::getInstance()->getSelection()->getFirstObject();
 
@@ -1125,7 +1125,14 @@ void LLPanelFace::updateUI()
 			getChildView("shinyScaleV")->setEnabled(editable && specmap_id.notNull());
 			getChildView("bumpyScaleV")->setEnabled(editable && normmap_id.notNull());
 
-			getChild<LLUICtrl>("TexScaleV")->setValue(diff_scale_t);
+			if (force_set_values)
+			{
+				getChild<LLSpinCtrl>("TexScaleV")->forceSetValue(diff_scale_t);
+			}
+			else
+			{
+				getChild<LLSpinCtrl>("TexScaleV")->setValue(diff_scale_t);
+			}
 			getChild<LLUICtrl>("shinyScaleV")->setValue(norm_scale_t);
 			getChild<LLUICtrl>("bumpyScaleV")->setValue(spec_scale_t);
 
@@ -1338,8 +1345,17 @@ void LLPanelFace::updateUI()
 				BOOL repeats_tentative = !identical_repeats;
 
 				getChildView("rptctrl")->setEnabled(identical_planar_texgen ? FALSE : enabled);
-				getChild<LLUICtrl>("rptctrl")->setValue(editable ? repeats : 1.0f);
-				getChild<LLUICtrl>("rptctrl")->setTentative(LLSD(repeats_tentative));
+				LLSpinCtrl* rpt_ctrl = getChild<LLSpinCtrl>("rptctrl");
+				if (force_set_values)
+				{
+					//onCommit, previosly edited element updates related ones
+					rpt_ctrl->forceSetValue(editable ? repeats : 1.0f);
+				}
+				else
+				{
+					rpt_ctrl->setValue(editable ? repeats : 1.0f);
+				}
+				rpt_ctrl->setTentative(LLSD(repeats_tentative));
 			}
 		}
 
@@ -1990,7 +2006,7 @@ struct LLSelectedTEGetLLSDFunctor : public LLSelectedTEFunctor, public LLSelecte
 
 	static void setCommonParams(LLSD& sdFaceParams, const LLUUID& idTexture, F32 nScaleS, F32 nScaleT, F32 nRotation, F32 nOffsetS, F32 nOffsetT)
 	{
-		if (find_item_from_asset(idTexture, TRUE) != LLUUID::null)
+		if (find_item_from_asset(idTexture, true, false) != LLUUID::null)
 			sdFaceParams["texture_id"] = idTexture;
 		else
 			sdFaceParams["texture_id"] = LL_DEFAULT_WOOD_UUID;
@@ -2299,7 +2315,7 @@ void LLPanelFace::onSelectPipette(LLToolPipette::EType typePipette, LLViewerObje
 				LLTextureCtrl* pTextureCtrl = findChild<LLTextureCtrl>("texture control");
 				if ( (pTextureCtrl) && (!pTextureCtrl->getPickerVisible()) )
 				{
-					const LLUUID& idItem = find_item_from_asset(te.getID(), true);
+					const LLUUID& idItem = find_item_from_asset(te.getID(), true, false);
 					if (idItem.notNull())
 					{
 						pTextureCtrl->setImageItemID(idItem);
@@ -2512,6 +2528,8 @@ void LLPanelFace::onCommitTextureInfo( LLUICtrl* ctrl, void* userdata )
 {
 	LLPanelFace* self = (LLPanelFace*) userdata;
 	self->sendTextureInfo();
+	// vertical scale and repeats per meter depends on each other, so force set on changes
+	self->updateUI(true);
 }
 
 // Commit the number of repeats per meter
@@ -2582,6 +2600,8 @@ void LLPanelFace::onCommitRepeatsPerMeter(LLUICtrl* ctrl, void* userdata)
 			llassert(false);
 		break;
 	}
+	// vertical scale and repeats per meter depends on each other, so force set on changes
+	self->updateUI(true);
 }
 
 struct LLPanelFaceSetMediaFunctor : public LLSelectedTEFunctor

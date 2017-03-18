@@ -44,9 +44,8 @@ struct LLSearchPlaceResult
 
 class LLSearchDirectory : public LLSingleton<LLSearchDirectory>
 {
-	friend class LLSingleton<LLSearchDirectory>;
+	LLSINGLETON(LLSearchDirectory);
 private:
-	LLSearchDirectory();
 	/*virtual*/ ~LLSearchDirectory();
 
 	/*

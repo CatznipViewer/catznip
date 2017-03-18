@@ -256,7 +256,6 @@ set(viewer_SOURCE_FILES
     llfloaterimcontainerbase.cpp
     llfloaterimcontainertab.cpp
     llfloaterinspect.cpp
-    llfloaterinventory.cpp
     llfloaterjoystick.cpp
     llfloaterlagmeter.cpp
     llfloaterland.cpp
@@ -271,7 +270,8 @@ set(viewer_SOURCE_FILES
     llfloaternamedesc.cpp
     llfloaternotificationsconsole.cpp
     llfloaternotificationsflat.cpp
-    llfloaternotificationstabbed.cpp 
+    llfloaternotificationstabbed.cpp
+#    llfloateroutfitphotopreview.cpp 
 #    llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
     llfloateropenobject.cpp
@@ -916,7 +916,6 @@ set(viewer_HEADER_FILES
     llfloaterimcontainerbase.h
     llfloaterimcontainertab.h
     llfloaterinspect.h
-    llfloaterinventory.h
     llfloaterjoystick.h
     llfloaterlagmeter.h
     llfloaterland.h
@@ -931,7 +930,8 @@ set(viewer_HEADER_FILES
     llfloaternamedesc.h
     llfloaternotificationsconsole.h
     llfloaternotificationsflat.h
-    llfloaternotificationstabbed.h 
+    llfloaternotificationstabbed.h
+#    llfloateroutfitphotopreview.h
 #    llfloateroutfitsnapshot.h
     llfloaterobjectweights.h
     llfloateropenobject.h
