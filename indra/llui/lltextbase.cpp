@@ -181,7 +181,7 @@ LLTextBase::LLTextBase(const LLTextBase::Params &p)
 	mMaxTextByteLength( p.max_text_length ),
 	mFont(p.font),
 	mFontShadow(p.font_shadow),
-	mPopupMenu(NULL),
+	mPopupMenuHandle(),
 	mReadOnly(p.read_only),
 	mSpellCheck(p.spellcheck),
 	mSpellCheckStart(-1),
@@ -1263,9 +1263,10 @@ void LLTextBase::setReadOnlyColor(const LLColor4 &c)
 //virtual
 void LLTextBase::onVisibilityChange( BOOL new_visibility )
 {
-	if(!new_visibility && mPopupMenu)
+	LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+	if(!new_visibility && menu)
 	{
-		mPopupMenu->hide();
+		menu->hide();
 	}
 	LLUICtrl::onVisibilityChange(new_visibility);
 }
@@ -1524,6 +1525,7 @@ void LLTextBase::reflow()
 		}
 
 		S32 line_height = 0;
+		S32 seg_line_offset = line_count;
 
 		while(seg_iter != mSegments.end())
 		{
@@ -1536,7 +1538,8 @@ void LLTextBase::reflow()
 			S32 character_count = segment->getNumChars(getWordWrap() ? llmax(0, remaining_pixels) : S32_MAX,
 														seg_offset, 
 														cur_index - line_start_index, 
-														S32_MAX);
+														S32_MAX,
+														line_count - seg_line_offset);
 
 			S32 segment_width, segment_height;
 			bool force_newline = segment->getDimensions(seg_offset, character_count, segment_width, segment_height);
@@ -1599,6 +1602,7 @@ void LLTextBase::reflow()
 				}
 				++seg_iter;
 				seg_offset = 0;
+				seg_line_offset = force_newline ? line_count + 1 : line_count;
 			}
 			if (force_newline) 
 			{
@@ -1964,41 +1968,48 @@ void LLTextBase::createUrlContextMenu(S32 x, S32 y, const std::string &in_url)
 	registrar.add("Url.CopyUrl", boost::bind(&LLUrlAction::copyURLToClipboard, url));
 
 	// create and return the context menu from the XUI file
-	delete mPopupMenu;
+
+    LLContextMenu* menu = static_cast<LLContextMenu*>(mPopupMenuHandle.get());
+    if (menu)
+    {
+        menu->die();
+        mPopupMenuHandle.markDead();
+    }
 	llassert(LLMenuGL::sMenuContainer != NULL);
-	mPopupMenu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
-																		 LLMenuHolderGL::child_registry_t::instance());	
-	if (mIsFriendSignal)
-	{
-		bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
-		LLView* addFriendButton = mPopupMenu->getChild<LLView>("add_friend");
-		LLView* removeFriendButton = mPopupMenu->getChild<LLView>("remove_friend");
+    menu = LLUICtrlFactory::getInstance()->createFromFile<LLContextMenu>(xui_file, LLMenuGL::sMenuContainer,
+																		 LLMenuHolderGL::child_registry_t::instance());
+    if (menu)
+    {
+        mPopupMenuHandle = menu->getHandle();
 
-		if (addFriendButton && removeFriendButton)
-		{
-			addFriendButton->setEnabled(!isFriend);
-			removeFriendButton->setEnabled(isFriend);
-		}
-	}
+        if (mIsFriendSignal)
+        {
+            bool isFriend = *(*mIsFriendSignal)(LLUUID(LLUrlAction::getUserID(url)));
+            LLView* addFriendButton = menu->getChild<LLView>("add_friend");
+            LLView* removeFriendButton = menu->getChild<LLView>("remove_friend");
 
-	if (mIsObjectBlockedSignal)
-	{
-		bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
-		LLView* blockButton = mPopupMenu->getChild<LLView>("block_object");
-		LLView* unblockButton = mPopupMenu->getChild<LLView>("unblock_object");
+            if (addFriendButton && removeFriendButton)
+            {
+                addFriendButton->setEnabled(!isFriend);
+                removeFriendButton->setEnabled(isFriend);
+            }
+        }
 
-		if (blockButton && unblockButton)
-		{
-			blockButton->setVisible(!is_blocked);
-			unblockButton->setVisible(is_blocked);
-		}
-	}
-	
-	if (mPopupMenu)
-	{
-		mPopupMenu->show(x, y);
-		LLMenuGL::showPopup(this, mPopupMenu, x, y);
-	}
+        if (mIsObjectBlockedSignal)
+        {
+            bool is_blocked = *(*mIsObjectBlockedSignal)(LLUUID(LLUrlAction::getObjectId(url)), LLUrlAction::getObjectName(url));
+            LLView* blockButton = menu->getChild<LLView>("block_object");
+            LLView* unblockButton = menu->getChild<LLView>("unblock_object");
+
+            if (blockButton && unblockButton)
+            {
+                blockButton->setVisible(!is_blocked);
+                unblockButton->setVisible(is_blocked);
+            }
+        }
+        menu->show(x, y);
+        LLMenuGL::showPopup(this, menu, x, y);
+    }
 }
 
 void LLTextBase::setText(const LLStringExplicit &utf8str, const LLStyle::Params& input_params)
@@ -3065,7 +3076,7 @@ LLTextSegment::~LLTextSegment()
 
 bool LLTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const { width = 0; height = 0; return false;}
 S32	LLTextSegment::getOffset(S32 segment_local_x_coord, S32 start_offset, S32 num_chars, bool round) const { return 0; }
-S32	LLTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const { return 0; }
+S32	LLTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const { return 0; }
 void LLTextSegment::updateLayout(const LLTextBase& editor) {}
 F32	LLTextSegment::draw(S32 start, S32 end, S32 selection_start, S32 selection_end, const LLRectf& draw_rect) { return draw_rect.mLeft; }
 bool LLTextSegment::canEdit() const { return false; }
@@ -3335,7 +3346,7 @@ S32	LLNormalTextSegment::getOffset(S32 segment_local_x_coord, S32 start_offset, 
 											   round);
 }
 
-S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	const LLWString &text = getWText();
 
@@ -3352,7 +3363,7 @@ S32	LLNormalTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 lin
 
 	// if no character yet displayed on this line, don't require word wrapping since
 	// we can just move to the next line, otherwise insist on it so we make forward progress
-	LLFontGL::EWordWrapStyle word_wrap_style = (line_offset == 0) 
+	LLFontGL::EWordWrapStyle word_wrap_style = (line_offset == 0)
 		? LLFontGL::WORD_BOUNDARY_IF_POSSIBLE 
 		: LLFontGL::ONLY_WORD_BOUNDARIES;
 	
@@ -3490,12 +3501,26 @@ LLInlineViewSegment::~LLInlineViewSegment()
 
 bool LLInlineViewSegment::getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
 {
-	if (first_char == 0 && num_chars == 0) 
+	if (first_char == 0 && num_chars == 0)
 	{
-		// we didn't fit on a line, the widget will fall on the next line
-		// so dimensions here are 0
+		// We didn't fit on a line or were forced to new string
+		// the widget will fall on the next line, so width here is 0
 		width = 0;
-		height = 0;
+
+		if (mForceNewLine)
+		{
+			// Chat, string can't be smaller then font height even if it is empty
+			LLStyleSP s(new LLStyle(LLStyle::Params().visible(true)));
+			height = s->getFont()->getLineHeight();
+
+			return true; // new line
+		}
+		else
+		{
+			// height from previous segment in same string will be used, word-wrap
+			height = 0;
+		}
+
 	}
 	else
 	{
@@ -3506,13 +3531,16 @@ bool LLInlineViewSegment::getDimensions(S32 first_char, S32 num_chars, S32& widt
 	return false;
 }
 
-S32	LLInlineViewSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLInlineViewSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	// if putting a widget anywhere but at the beginning of a line
 	// and the widget doesn't fit or mForceNewLine is true
 	// then return 0 chars for that line, and all characters for the next
-	if (line_offset != 0 
-		&& (mForceNewLine || num_pixels < mView->getRect().getWidth())) 
+	if (mForceNewLine && line_ind == 0)
+	{
+		return 0;
+	}
+	else if (line_offset != 0 && num_pixels < mView->getRect().getWidth())
 	{
 		return 0;
 	}
@@ -3565,7 +3593,7 @@ bool LLLineBreakTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& w
 
 	return true;
 }
-S32	LLLineBreakTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	LLLineBreakTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	return 1;
 }
@@ -3601,7 +3629,7 @@ bool LLImageTextSegment::getDimensions(S32 first_char, S32 num_chars, S32& width
 	return false;
 }
 
-S32	 LLImageTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const
+S32	 LLImageTextSegment::getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 {
 	LLUIImagePtr image = mStyle->getImage();
 	

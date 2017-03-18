@@ -163,6 +163,9 @@ LLLineEditor::LLLineEditor(const LLLineEditor::Params& p)
 {
 	llassert( mMaxLengthBytes > 0 );
 
+	LLUICtrl::setEnabled(TRUE);
+	setEnabled(p.enabled);
+
 	mScrollTimer.reset();
 	mTripleClickTimer.reset();
 	setText(p.default_text());
@@ -216,6 +219,13 @@ LLLineEditor::~LLLineEditor()
 
 	// calls onCommit() while LLLineEditor still valid
 	gFocusMgr.releaseFocusIfNeeded( this );
+}
+
+void LLLineEditor::initFromParams(const LLLineEditor::Params& params)
+{
+	LLUICtrl::initFromParams(params);
+	LLUICtrl::setEnabled(TRUE);
+	setEnabled(params.enabled);
 }
 
 void LLLineEditor::onFocusReceived()
@@ -2636,10 +2646,17 @@ void LLLineEditor::showContextMenu(S32 x, S32 y)
 
 void LLLineEditor::setContextMenu(LLContextMenu* new_context_menu)
 {
-	if (new_context_menu)
-		mContextMenuHandle = new_context_menu->getHandle();
-	else
-		mContextMenuHandle.markDead();
+    LLContextMenu* menu = static_cast<LLContextMenu*>(mContextMenuHandle.get());
+    if (menu)
+    {
+        menu->die();
+        mContextMenuHandle.markDead();
+    }
+
+    if (new_context_menu)
+    {
+        mContextMenuHandle = new_context_menu->getHandle();
+    }
 }
 
 void LLLineEditor::setFont(const LLFontGL* font)
