@@ -6,7 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -104,6 +104,10 @@ protected:
 	void setFilterTextFromFilter();
 	void startSearch();
 	
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	LLFloaterInventoryFinder* getFinder();
+	void showFindOptions(bool fShow);
+// [/SL:KB]
 	void toggleFindOptions();
 	void onSelectionChange(LLInventoryPanel *panel, const std::deque<LLFolderViewItem*>& items, BOOL user_action);
 
@@ -141,7 +145,7 @@ protected:
 	void onFocusReceived();
 
 private:
-	LLFloaterInventoryFinder* getFinder();
+//	LLFloaterInventoryFinder* getFinder();
 
 	LLFilterEditor*				mFilterEditor;
 	LLTabContainer*				mFilterTabs;

@@ -34,6 +34,9 @@ class LLSpinCtrl;
 // LLFloaterUpdate class
 //
 
+#pragma warning(push)
+#pragma warning(disable : 4351)
+
 class LLFloaterInventoryFinder : public LLFloater
 {
 public:
@@ -86,7 +89,7 @@ protected:
 	LLCheckBoxCtrl* m_pFilterPermTransfer = nullptr;
 
 	// Filter by type
-	LLCheckBoxCtrl* m_pFilterTypeCtrls[LLInventoryType::IT_COUNT];
+	LLCheckBoxCtrl* m_pFilterTypeCtrls[LLInventoryType::IT_COUNT] = {};
 
 	// Filter by date
 	LLCheckBoxCtrl* m_pFilterSinceLogoff = nullptr;
@@ -105,5 +108,7 @@ protected:
 	LLCheckBoxCtrl* m_pFilterShowEmpty = nullptr;
 	LLCheckBoxCtrl* m_pFilterShowLinks = nullptr;
 };
+
+#pragma warning(pop)
 
 // ====================================================================================

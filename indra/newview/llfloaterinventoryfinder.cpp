@@ -53,8 +53,8 @@ LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* invento
 	mCommitCallbackRegistrar.add("Filter.Reset", boost::bind(&LLPanelMainInventory::resetFilters, inventory_view));
 	mCommitCallbackRegistrar.add("Filter.SelectNoTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, false));
 	mCommitCallbackRegistrar.add("Filter.SelectAllTypes", boost::bind(&LLFloaterInventoryFinder::onFilterAllTypes, this, true));
-	mCommitCallbackRegistrar.add("Floater.Collapse", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, true));
-	mCommitCallbackRegistrar.add("Floater.Expand", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, false));
+	mCommitCallbackRegistrar.add("Floater.Collapse", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, false));
+	mCommitCallbackRegistrar.add("Floater.Expand", boost::bind(&LLFloaterInventoryFinder::onExpandCollapse, this, true));
 
 	if (!gSavedSettings.getBOOL("InventoryFinderExpanded"))
 		buildFromFile("floater_inventory_view_finder_tabbed.xml");
@@ -450,6 +450,20 @@ void LLFloaterInventoryFinder::setNameFilterValue(std::string strFilter)
 
 void LLFloaterInventoryFinder::onExpandCollapse(bool fExpand)
 {
+	gSavedSettings.setBOOL("InventoryFinderExpanded", fExpand);
+
+	LLHandle<LLFloater> hSnapTarget = getSnapTarget();
+	LLRect curRect = getRect();
+
+	m_pPanelMainInventory->showFindOptions(false);
+	m_pPanelMainInventory->showFindOptions(true);
+
+	LLFloaterInventoryFinder* pNewInst = m_pPanelMainInventory->getFinder();
+	if (!hSnapTarget.isDead())
+		pNewInst->setSnappedTo(hSnapTarget.get());
+	else
+		pNewInst->clearSnapTarget();
+	pNewInst->translate(curRect.mLeft - pNewInst->getRect().mLeft, curRect.mTop - pNewInst->getRect().mTop);
 }
 
 void LLFloaterInventoryFinder::onFilterAllTypes(bool fSelectAll)

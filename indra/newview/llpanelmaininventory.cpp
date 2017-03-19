@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -917,10 +917,11 @@ void LLPanelMainInventory::setFilterTextFromFilter()
 // [/SL:KB]
 }
 
-void LLPanelMainInventory::toggleFindOptions()
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+void LLPanelMainInventory::showFindOptions(bool fShow)
 {
 	LLFloater *floater = getFinder();
-	if (!floater)
+	if ( (!floater) && (fShow) )
 	{
 		LLFloaterInventoryFinder * finder = new LLFloaterInventoryFinder(this);
 		mFinderHandle = finder->getHandle();
@@ -932,11 +933,41 @@ void LLPanelMainInventory::toggleFindOptions()
 		// start background fetch of folders
 		LLInventoryModelBackgroundFetch::instance().start();
 	}
-	else
+	else if ( (floater) && (!fShow) )
 	{
 		floater->closeFloater();
+		mFinderHandle.markDead();
 	}
 }
+
+void LLPanelMainInventory::toggleFindOptions()
+{
+	if (!getFinder())
+		showFindOptions(true);
+	else
+		showFindOptions(false);
+}
+// [/SL:KB]
+//void LLPanelMainInventory::toggleFindOptions()
+//{
+//	LLFloater *floater = getFinder();
+//	if (!floater)
+//	{
+//		LLFloaterInventoryFinder * finder = new LLFloaterInventoryFinder(this);
+//		mFinderHandle = finder->getHandle();
+//		finder->openFloater();
+//
+//		LLFloater* parent_floater = gFloaterView->getParentFloater(this);
+//		if (parent_floater)
+//			parent_floater->addDependentFloater(mFinderHandle);
+//		// start background fetch of folders
+//		LLInventoryModelBackgroundFetch::instance().start();
+//	}
+//	else
+//	{
+//		floater->closeFloater();
+//	}
+//}
 
 void LLPanelMainInventory::setSelectCallback(const LLFolderView::signal_t::slot_type& cb)
 {
