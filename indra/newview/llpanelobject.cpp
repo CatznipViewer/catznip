@@ -2197,7 +2197,7 @@ LLSD LLPanelObject::objectToLLSD(const std::string& strParamType, const LLViewer
 			if (pObj->getParameterEntryInUse(LLNetworkData::PARAMS_SCULPT))
 			{
 				const LLSculptParams* pSculptParams = (LLSculptParams*)pObj->getParameterEntry(LLNetworkData::PARAMS_SCULPT);
-				if ( (!pSculptParams) || (find_item_from_asset(pSculptParams->getSculptTexture(), TRUE).isNull()) )
+				if ( (!pSculptParams) || (find_item_from_asset(pSculptParams->getSculptTexture(), true, false).isNull()) )
 					return LLSD();
 				sdParams["sculpt"] = pSculptParams->asLLSD();
 			}

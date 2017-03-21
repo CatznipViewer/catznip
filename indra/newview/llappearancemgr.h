@@ -42,9 +42,10 @@ class LLOutfitUnLockTimer;
 
 class LLAppearanceMgr: public LLSingleton<LLAppearanceMgr>
 {
+	LLSINGLETON(LLAppearanceMgr);
+	~LLAppearanceMgr();
 	LOG_CLASS(LLAppearanceMgr);
 
-	friend class LLSingleton<LLAppearanceMgr>;
 	friend class LLOutfitUnLockTimer;
 	
 public:
@@ -253,6 +254,7 @@ public:
 
 	bool isInUpdateAppearanceFromCOF() { return mIsInUpdateAppearanceFromCOF; }
 
+	static void onIdle(void *);
 	void requestServerAppearanceUpdate();
 
 // [SL:KB] - Patch: Appearance-Misc | Checked: 2015-06-27 (Catznip-3.7)
@@ -273,17 +275,12 @@ public:
 	// We need this to be public since we use it in LLWearableBridge::performActionBatch
 	static void filterWearableItems(LLInventoryModel::item_array_t& items, S32 max_per_type, S32 max_total);
 // [/SL:KB]
-
 private:
     void serverAppearanceUpdateCoro(LLCoreHttpUtil::HttpCoroutineAdapter::ptr_t &httpAdapter);
 
     static void debugAppearanceUpdateCOF(const LLSD& content);
 
 	std::string		mAppearanceServiceURL;
-	
-protected:
-	LLAppearanceMgr();
-	~LLAppearanceMgr();
 
 private:
 
@@ -312,7 +309,6 @@ private:
 	 * to avoid unsynchronized outfit state or performing duplicate operations.
 	 */
 	bool mOutfitLocked;
-	S32  mInFlightCounter;
 	LLTimer mInFlightTimer;
 	static bool mActive;
 

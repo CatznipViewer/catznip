@@ -75,10 +75,7 @@ protected:
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-07-10 (Catznip-3.3)
 class LLTextParser : public LLSingleton<LLTextParser>
 {
-	friend class LLSingleton<LLTextParser>;
-protected:
-	LLTextParser();
-
+	LLSINGLETON(LLTextParser);
 public:
 	typedef std::vector<LLHighlightEntry> highlight_list_t;
 	void                    addHighlight(const LLHighlightEntry& entry);

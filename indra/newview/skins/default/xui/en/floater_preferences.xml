@@ -197,6 +197,13 @@
          help_topic="preferences_advanced1_tab"
          name="advanced1" />
         <panel
+         class="panel_preference"
+         filename="panel_preferences_uploads.xml"
+         label="Uploads"
+         layout="topleft"
+         help_topic="preferences_uploads_tab"
+         name="uploads" />
+        <panel
 		 class="panel_preference_crashreports"
          filename="panel_preferences_crashreports.xml"
          label="Crash Reports"

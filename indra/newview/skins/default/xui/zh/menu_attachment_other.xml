@@ -7,6 +7,7 @@
 	<menu_item_call label="通話" name="Call"/>
 	<menu_item_call label="邀請加入群組" name="Invite..."/>
 	<menu_item_call label="重設骨架" name="Reset Skeleton"/>
+	<menu_item_call label="重設骨架和動作" name="Reset Skeleton And Animations"/>
 	<context_menu label="Copy" name="avatar_copy">
 		<menu_item_call label="覆製顯示名稱到剪貼簿" name="avatar_copy_displayname"/>
 		<menu_item_call label="覆製名稱到剪貼簿" name="avatar_copy_fullname"/>

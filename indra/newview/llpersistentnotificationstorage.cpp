@@ -40,9 +40,8 @@
 #include "llscriptfloater.h"
 #include "llviewermessage.h"
 #include "llviewernetwork.h"
-LLPersistentNotificationStorage::LLPersistentNotificationStorage()
-	: LLSingleton<LLPersistentNotificationStorage>()
-	, LLNotificationStorage("")
+LLPersistentNotificationStorage::LLPersistentNotificationStorage():
+	  LLNotificationStorage("")
 	, mLoaded(false)
 // [SL:KB] Patch: Notification-Logging | Checked: 2014-07-21 (Catznip-3.6)
 	, mPendingSave(false)

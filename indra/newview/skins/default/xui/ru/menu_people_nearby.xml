@@ -18,4 +18,6 @@
 		<menu_item_call label="Копировать URL-адрес SL" name="avatar_copy_slurl"/>
 	</context_menu>
 	<menu_item_check label="Черный список" name="block_unblock"/>
+	<menu_item_call label="Заморозить" name="freeze"/>
+	<menu_item_call label="Выкинуть" name="eject"/>
 </context_menu>

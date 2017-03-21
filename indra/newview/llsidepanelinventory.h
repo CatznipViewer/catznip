@@ -92,6 +92,8 @@ public:
 
 	void updateVerbs();
 
+	static void cleanup();
+
 protected:
 	// Tracks highlighted (selected) item in inventory panel.
 // [SL:KB] - Patch: UI-SidepanelInventory | Checked: 2012-01-17 (Catznip-3.2)

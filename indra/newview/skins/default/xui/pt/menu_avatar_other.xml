@@ -7,6 +7,7 @@
 	<menu_item_call label="Ligar" name="Call"/>
 	<menu_item_call label="Convidar para entrar no grupo" name="Invite..."/>
 	<menu_item_call label="Redefinir esqueleto" name="Reset Skeleton"/>
+	<menu_item_call label="Redefinir esqueleto e animações" name="Reset Skeleton And Animations"/>
 	<context_menu label="Copy" name="avatar_copy">
 		<menu_item_call label="Copiar nome de tela" name="avatar_copy_displayname"/>
 		<menu_item_call label="Copiar nome" name="avatar_copy_fullname"/>

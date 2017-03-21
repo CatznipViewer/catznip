@@ -109,7 +109,7 @@ private:
 
 class LLConversationLog : public LLSingleton<LLConversationLog>, LLIMSessionObserver
 {
-	friend class LLSingleton<LLConversationLog>;
+	LLSINGLETON(LLConversationLog);
 public:
 
 	void removeConversation(const LLConversation& conversation);
@@ -160,7 +160,6 @@ public:
 // [/SL:KB]
 private:
 
-	LLConversationLog();
 	virtual ~LLConversationLog()
 	{
 		if (mAvatarNameCacheConnection.connected())

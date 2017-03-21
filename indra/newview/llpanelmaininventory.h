@@ -105,6 +105,8 @@ public:
 
 	void setFocusFilterEditor();
 
+//	static void newWindow();
+
 protected:
 	//
 	// Misc functions
@@ -132,7 +134,6 @@ protected:
 	// menu callbacks
 	void doToSelected(const LLSD& userdata);
 	void closeAllFolders();
-//	void newWindow();
 	void doCreate(const LLSD& userdata);
 // [SL:KB] - Patch: Inventory-Panel | Checked: 2012-07-18 (Catznip-3.3)
 	bool checkCreate(const LLSD& sdParam);
