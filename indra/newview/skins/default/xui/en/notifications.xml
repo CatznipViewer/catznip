@@ -7311,6 +7311,12 @@ An object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; owned by [NAME_SLU
        name="Mute"
        text="Block Owner"/>
 -->
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 
@@ -7329,6 +7335,12 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        index="1"
        name="Discard"
        text="Discard"/>
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 
@@ -7357,6 +7369,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        name="check"
        control="ShowOfferedInventory"
        text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 

@@ -76,6 +76,9 @@
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "llpanelgrouplandmoney.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+// [/SL:KB]
 #include "llrecentpeople.h"
 #include "llscriptfloater.h"
 #include "llscriptruntimeperms.h"
@@ -1564,6 +1567,22 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 				// This is an offer from an agent. In this case, the back
 				// end has already copied the items into your inventory,
 				// so we can fetch it out of our inventory.
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+				{
+					const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+					if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+					{
+						LLAcceptInFolderAgentOffer* pOfferObserver = new LLAcceptInFolderAgentOffer(mObjectID, idDestFolder);
+						pOfferObserver->startFetch();
+						if (pOfferObserver->isFinished())
+							pOfferObserver->done();
+						else
+							gInventory.addObserver(pOfferObserver);
+					}
+				}
+// [/SL:KB]
+
 				if (gSavedSettings.getBOOL("ShowOfferedInventory"))
 				{
 					LLOpenAgentOffer* open_agent_offer = new LLOpenAgentOffer(mObjectID, from_string);
@@ -1772,6 +1791,18 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 		case IOR_ACCEPT:
 			// ACCEPT. The math for the dialog works, because the accept
 			// for inventory_offered, task_inventory_offer or
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+			if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn")) )
+			{
+				const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+				if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+				{
+					mFolderID = idDestFolder;
+				}
+			}
+// [/SL:KB]
+
 			// group_notice_inventory is 1 greater than the offer integer value.
 			// Generates IM_INVENTORY_ACCEPTED, IM_TASK_INVENTORY_ACCEPTED, 
 			// or IM_GROUP_NOTICE_INVENTORY_ACCEPTED
