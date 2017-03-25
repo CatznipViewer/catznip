@@ -5,7 +5,7 @@
 * $LicenseInfo:firstyear=2008&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
-* Copyright (C) 2010-2016, Kitty Barnett
+* Copyright (C) 2010-2017, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -74,13 +74,21 @@ LLNotificationForm::FormIgnore::FormIgnore()
 	save_option("save_option", false)
 {}
 
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 LLNotificationForm::FormCheck::FormCheck()
 :	control("control"),
 	text("text"),
 	type("type")
 {
 	type = "check";
+}
+
+LLNotificationForm::FormPanel::FormPanel()
+:	type("type"),
+	class_name("class"),
+	filename("filename")
+{
+	type = "panel";
 }
 // [/SL:KB]
 
@@ -106,8 +114,9 @@ LLNotificationForm::FormInput::FormInput()
 LLNotificationForm::FormElement::FormElement()
 :	button("button"),
 	input("input")
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 ,	check("check")
+,	panel("panel")
 // [/SL:KB]
 {}
 

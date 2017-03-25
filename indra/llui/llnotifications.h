@@ -6,7 +6,7 @@
 * $LicenseInfo:firstyear=2008&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
-* Copyright (C) 2010-2016, Kitty Barnett
+* Copyright (C) 2010-2017, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -184,7 +184,7 @@ public:
 		FormIgnore();
 	};
 
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 	struct FormCheck : public LLInitParam::Block<FormCheck, FormElementBase>
 	{
 		Mandatory<std::string>	type;
@@ -192,6 +192,15 @@ public:
 		Optional<std::string>	control;
 
 		FormCheck();
+	};
+
+	struct FormPanel : public LLInitParam::Block<FormPanel, FormElementBase>
+	{
+		Mandatory<std::string>	type;
+		Optional<std::string>	class_name;
+		Optional<std::string>	filename;
+
+		FormPanel();
 	};
 // [/SL:KB]
 
@@ -222,8 +231,9 @@ public:
 	{
 		Alternative<FormButton> button;
 		Alternative<FormInput>	input;
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 		Alternative<FormCheck>	check;
+		Alternative<FormPanel>	panel;
 // [/SL:KB]
 
 		FormElement();

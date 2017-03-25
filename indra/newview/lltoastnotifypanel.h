@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2016, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -38,7 +38,7 @@
 #include "lltextbox.h"
 
 class LLNotificationForm;
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
 class LLCheckBoxCtrl;
 // [/SL:KB]
 
@@ -77,8 +77,9 @@ public:
 
 protected:
 	LLButton* createButton(const LLSD& form_element, BOOL is_option);
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
-	LLCheckBoxCtrl* createCheckBox(const std::string& strMessage, const std::string& strControl);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
+	LLCheckBoxCtrl* createCheckBox(const LLSD& sdFormElement);
+	LLPanel* createPanel(const LLSD& sdFormElement);
 // [/SL:KB]
 
 	// Used for callbacks
@@ -99,8 +100,8 @@ protected:
 	 * @param  h_pad horizontal space between buttons. It is depend on number of buttons.
 	 * @param buttons vector of button to be added. 
 	 */
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2014-01-04 (Catznip-3.6)
-	void updateControlPanelLayout(const std::vector<index_button_pair_t>& buttons, const std::vector<LLCheckBoxCtrl*>& checkboxes, S32 h_pad);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.6
+	void updateControlPanelLayout(const std::vector<index_button_pair_t>& buttons, const std::vector<LLUICtrl*>& controls, S32 h_pad);
 // [/SL:KB]
 //	void updateButtonsLayout(const std::vector<index_button_pair_t>& buttons, S32 h_pad);
 
@@ -129,8 +130,8 @@ protected:
 	 */
 	void onToastPanelButtonClicked(const LLUUID& notification_id, const std::string btn_name);
 
-// [SL:KB] - Patch: Inventory-OfferToast | Checked: 2012-07-02 (Catznip-3.3)
-	void onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl) const;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
+	static void onToggleCheck(LLCheckBoxCtrl* pCheckCtrl, LLControlVariable* pControl);
 // [/SL:KB]
 
 	/**
