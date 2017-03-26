@@ -47,6 +47,8 @@ public:
 	 * Member functions
 	 */
 protected:
+	void onBrowseFolder();
+	void onBrowseFolderCb(const LLSD& sdData);
 	void refreshControls();
 
 	/*
@@ -56,6 +58,7 @@ protected:
 	LLCheckBoxCtrl* m_pAcceptInCheck = nullptr;
 	LLComboBox* m_pAcceptInList = nullptr;
 	LLButton* m_pBrowseBtn = nullptr;
+	LLHandle<LLFloater> m_BrowseFloaterHandle;
 };
 
 // ============================================================================

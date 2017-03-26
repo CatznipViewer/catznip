@@ -19,8 +19,11 @@
 // UI
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
+#include "llfloater.h"
 // Viewer
 #include "llappviewer.h"
+#include "llfloaterofferinvfolderbrowse.h"
+#include "llfloaterreg.h"
 #include "llinventorymodel.h"
 #include "llpanelinventoryoffer.h"
 #include "llviewercontrol.h"
@@ -40,6 +43,9 @@ LLPanelInventoryOfferFolder::LLPanelInventoryOfferFolder()
 
 LLPanelInventoryOfferFolder::~LLPanelInventoryOfferFolder()
 {
+	if (LLFloater* pBrowseFloater = m_BrowseFloaterHandle.get())
+		pBrowseFloater->closeFloater();
+	m_BrowseFloaterHandle.markDead();
 }
 
 //virtual
@@ -49,6 +55,7 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	m_pAcceptInCheck->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::refreshControls, this));
 
 	m_pAcceptInList = findChild<LLComboBox>("list_folders");
+	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
 
 	// Add the 'Received Items' option
 	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false));
@@ -69,6 +76,7 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
 
 	m_pBrowseBtn = findChild<LLButton>("btn_folder_browse");
+	m_pBrowseBtn->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolder, this));
 
 	refreshControls();
 	return TRUE;
@@ -79,6 +87,29 @@ void LLPanelInventoryOfferFolder::refreshControls()
 	bool fAcceptIn = m_pAcceptInCheck->get();
 	m_pAcceptInList->setEnabled(fAcceptIn);
 	m_pBrowseBtn->setEnabled(fAcceptIn);
+}
+
+void LLPanelInventoryOfferFolder::onBrowseFolder()
+{
+	if (LLFloater* pBrowseFloater = new LLFloaterInventoryOfferFolderBrowse())
+	{
+		pBrowseFloater->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolderCb, this, _2));
+		pBrowseFloater->openFloater();
+
+		m_BrowseFloaterHandle = pBrowseFloater->getHandle();
+	}
+}
+
+void LLPanelInventoryOfferFolder::onBrowseFolderCb(const LLSD& sdData)
+{
+	const std::string& strFolderName = sdData["name"].asString();
+	const LLUUID idFolder = sdData["uuid"].asUUID();
+
+	if (!m_pAcceptInList->selectByValue(idFolder))
+	{
+		m_pAcceptInList->add(strFolderName, idFolder);
+		m_pAcceptInList->selectByValue(idFolder);
+	}
 }
 
 // ============================================================================
