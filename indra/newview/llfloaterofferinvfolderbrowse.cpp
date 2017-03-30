@@ -33,12 +33,14 @@ LLFloaterInventoryOfferFolderBrowse::LLFloaterInventoryOfferFolderBrowse(const L
 	buildFromFile("floater_offer_invfolder_browse.xml");
 }
 
+// virtual
 LLFloaterInventoryOfferFolderBrowse::~LLFloaterInventoryOfferFolderBrowse()
 {
 	delete m_pSavedFolderState;
 	m_pSavedFolderState = nullptr;
 }
 
+// virtual
 BOOL LLFloaterInventoryOfferFolderBrowse::postBuild()
 {
 	m_pFilterEditor = findChild<LLFilterEditor>("inv_filter_editor");
@@ -62,6 +64,7 @@ BOOL LLFloaterInventoryOfferFolderBrowse::postBuild()
 	return TRUE;
 }
 
+// virtual
 void LLFloaterInventoryOfferFolderBrowse::onCommit()
 {
 	if (mCommitSignal)
@@ -73,6 +76,7 @@ void LLFloaterInventoryOfferFolderBrowse::onCommit()
 	}
 }
 
+// virtual
 void LLFloaterInventoryOfferFolderBrowse::onOpen(const LLSD& sdKey)
 {
 	const LLUUID idInvObject = sdKey["uuid"].asUUID();

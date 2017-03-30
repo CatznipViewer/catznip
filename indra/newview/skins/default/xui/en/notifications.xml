@@ -6667,6 +6667,20 @@ You don&apos;t have permission to copy this.
   </notification>
 
   <notification
+   icon="alertmodal.tga"
+   name="InventoryOfferFolderConfigSaveChanges"
+   type="alertmodal">
+There are unsaved changes to the '[NAME]' folder.
+
+Do you want to save your changes?
+    <usetemplate
+     name="yesnocancelbuttons"
+     canceltext="Cancel"
+     notext="Don&apos;t Save"
+     yestext="Save" />
+  </notification>
+
+  <notification
    icon="notifytip.tga"
    name="ObjectMessage"
    type="notifytip">

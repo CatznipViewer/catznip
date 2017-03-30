@@ -57,6 +57,7 @@ LLPanelInventoryOfferFolder::LLPanelInventoryOfferFolder()
 	buildFromFile("panel_offer_invfolder.xml");
 }
 
+// virtual
 LLPanelInventoryOfferFolder::~LLPanelInventoryOfferFolder()
 {
 	if (LLFloater* pBrowseFloater = m_BrowseFloaterHandle.get())
@@ -75,17 +76,16 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	m_pAcceptInCheck->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::refreshControls, this));
 
 	m_pAcceptInList = findChild<LLComboBox>("list_folders");
-	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
-
-	// Select the item (LLComboBox::postBuild has already been called at this point)
-	m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
 
 	m_pBrowseBtn = findChild<LLButton>("btn_folder_browse");
 	m_pBrowseBtn->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolder, this));
 	findChild<LLButton>("btn_folder_configure")->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onConfigureFolders, this));
 
-	refreshControls();
 	refreshFolders();
+	// Select the item (LLComboBox::postBuild has already been called at this point)
+	m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
+
+	refreshControls();
 	return TRUE;
 }
 
@@ -99,6 +99,8 @@ void LLPanelInventoryOfferFolder::refreshControls()
 void LLPanelInventoryOfferFolder::refreshFolders()
 {
 	LLSD sdSelValue = m_pAcceptInList->getSelectedValue();
+
+	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(false);
 	m_pAcceptInList->clearRows();
 
 	// Add the user list options
@@ -124,6 +126,7 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	// Restore selection
 	if (!sdSelValue.isUndefined())
 		m_pAcceptInList->selectByValue(sdSelValue);
+	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
 }
 
 void LLPanelInventoryOfferFolder::onBrowseFolder()
@@ -316,6 +319,7 @@ LLAcceptInFolderTaskOffer::LLAcceptInFolderTaskOffer(const std::string& strDescr
 {
 }
 
+//virtual
 void LLAcceptInFolderTaskOffer::changed(U32 mask)
 {
 	if (mask & LLInventoryObserver::ADD)
@@ -400,6 +404,7 @@ void LLAcceptInFolderTaskOffer::doneIdle()
 		delete this;
 }
 
+//virtual
 void LLAcceptInFolderTaskOffer::onDestinationCreated(const LLUUID& idFolder)
 {
 	if (!m_Folders.empty())
@@ -439,6 +444,7 @@ void LLAcceptInFolderAgentOffer::doneIdle()
 		delete this;
 }
 
+//virtual
 void LLAcceptInFolderAgentOffer::onDestinationCreated(const LLUUID& idFolder)
 {
 	if (LLViewerInventoryItem* pInvItem = gInventory.getItem(m_InvObjectId))

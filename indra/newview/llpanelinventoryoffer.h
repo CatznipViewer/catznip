@@ -93,7 +93,7 @@ private:
 
 // [See LLInventoryTransactionObserver which says it's not entirely complete?]
 // NOTE: the offer may span mulitple BulkUpdateInventory messages so if we're no longer around then (ie due to "delete this") then
-//       we'll miss those; in this specific case we only care about a single object (folder or itemà and in case of a folder its
+//       we'll miss those; in this specific case we only care about a single object (folder or item and in case of a folder its
 //       data is present in the very first message
 class LLAcceptInFolderTaskOffer : public LLAcceptInFolderOfferBase, public LLInventoryObserver
 {

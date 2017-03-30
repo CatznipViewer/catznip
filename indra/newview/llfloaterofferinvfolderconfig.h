@@ -65,6 +65,7 @@ public:
 	 */
 public:
 	LLSD getValue() const { return m_sdFolderItems; }
+	BOOL isDirty() const override;
 	void onCommit() override;
 	void onOpen(const LLSD& sdKey) override;
 	BOOL postBuild() override;
@@ -80,6 +81,7 @@ protected:
 	void onBrowseFolderCb(const LLSD& sdData);
 	void onSaveFolder();
 	void onOk();
+	void onOkCb(const LLSD& sdNotification, const LLSD& sdResponse);
 	void onCancel();
 
 	void addItem(const LLAcceptInFolder& folderInfo);

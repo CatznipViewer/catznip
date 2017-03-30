@@ -4,46 +4,46 @@
  layout="topleft"
  name="panel_offer_invfolder"
  width="250">
-		<panel.string
-		 name="default_text">
-			[Default]
-		</panel.string>
-		<check_box
-		 control_name="InventoryOfferAcceptIn"
-		 follows="top|left"
-		 height="18"
-		 label="Accept in"
-		 layout="topleft"
-		 left="0"
-		 name="chk_acceptin"
-		 top="3"
-		 width="85" />
-		<combo_box
-		 control_name="InventoryOfferAcceptInFolder"
-		 follows="left|top|right"
-		 height="23"
-		 layout="topleft"
-		 left_pad="0"
-		 name="list_folders"
-		 right="-85"
-		 top="0" />
-		<button
-		 follows="bottom|right"
-		 height="23"
-		 label="Browse"
-		 layout="topleft"
-		 name="btn_folder_browse"
-		 right="-25"
-		 top="0"
-		 width="60" />
-		<button
-		 follows="bottom|right"
-		 height="23"
-		 image_overlay="Edit_Wrench"
-		 layout="topleft"
-		 name="btn_folder_configure"
-		 right="-3"
-		 tool_tip="Configure folders"
-		 top="0"
-		 width="22" />
+    <panel.string
+     name="default_text">
+        [Default]
+    </panel.string>
+    <check_box
+     control_name="InventoryOfferAcceptIn"
+     follows="top|left"
+     height="18"
+     label="Accept in"
+     layout="topleft"
+     left="0"
+     name="chk_acceptin"
+     top="3"
+     width="85" />
+    <combo_box
+     control_name="InventoryOfferAcceptInFolder"
+     follows="left|top|right"
+     height="23"
+     layout="topleft"
+     left_pad="0"
+     name="list_folders"
+     right="-85"
+     top="0" />
+    <button
+     follows="bottom|right"
+     height="23"
+     label="Browse"
+     layout="topleft"
+     name="btn_folder_browse"
+     right="-25"
+     top="0"
+     width="60" />
+    <button
+     follows="bottom|right"
+     height="23"
+     image_overlay="Edit_Wrench"
+     layout="topleft"
+     name="btn_folder_configure"
+     right="-3"
+     tool_tip="Configure folders"
+     top="0"
+     width="22" />
 </panel>

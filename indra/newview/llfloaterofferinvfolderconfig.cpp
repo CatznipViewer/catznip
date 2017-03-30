@@ -24,6 +24,7 @@
 #include "llfloaterofferinvfolderbrowse.h"
 #include "llfloaterofferinvfolderconfig.h"
 #include "llinventoryfunctions.h"
+#include "llnotificationsutil.h"
 #include "llviewercontrol.h"
 
 // ============================================================================
@@ -35,6 +36,7 @@ LLFloaterInventoryOfferFolderConfig::LLFloaterInventoryOfferFolderConfig(const L
 {
 }
 
+// virtual
 LLFloaterInventoryOfferFolderConfig::~LLFloaterInventoryOfferFolderConfig()
 {
 	if (LLFloater* pBrowseFloater = m_BrowseFloaterHandle.get())
@@ -42,6 +44,7 @@ LLFloaterInventoryOfferFolderConfig::~LLFloaterInventoryOfferFolderConfig()
 	m_BrowseFloaterHandle.markDead();
 }
 
+// virtual
 BOOL LLFloaterInventoryOfferFolderConfig::postBuild()
 {
 	m_pFolderList = findChild<LLScrollListCtrl>("list_folders");
@@ -70,12 +73,14 @@ BOOL LLFloaterInventoryOfferFolderConfig::postBuild()
 	return TRUE;
 }
 
+// virtual
 void LLFloaterInventoryOfferFolderConfig::onCommit()
 {
 	gSavedPerAccountSettings.setLLSD("InventoryOfferAcceptInOptions", m_sdFolderItems);
 	LLFloater::onCommit();
 }
 
+// virtual
 void LLFloaterInventoryOfferFolderConfig::onOpen(const LLSD& sdKey)
 {
 	m_sdFolderItems = gSavedPerAccountSettings.getLLSD("InventoryOfferAcceptInOptions");
@@ -111,6 +116,7 @@ void LLFloaterInventoryOfferFolderConfig::addItem(const LLAcceptInFolder& folder
 
 void LLFloaterInventoryOfferFolderConfig::refreshItems()
 {
+	m_pFolderList->operateOnSelection(LLScrollListCtrl::OP_DESELECT);
 	m_pFolderList->clearRows();
 	for (LLSD::array_const_iterator itFolder = m_sdFolderItems.beginArray(), endFolder = m_sdFolderItems.endArray(); itFolder != endFolder; ++itFolder)
 	{
@@ -135,6 +141,12 @@ void LLFloaterInventoryOfferFolderConfig::clearControls()
 	m_pEditFolderSubfolder->clear();
 }
 
+// virtual
+BOOL LLFloaterInventoryOfferFolderConfig::isDirty() const
+{
+	return (m_pEditFolderItem != nullptr) && (m_idEditFolder.notNull()) && ((m_pEditFolderName->isDirty()) || (m_pEditFolderPath->isDirty()) || (m_pEditFolderSubfolder->isDirty()));
+}
+
 void LLFloaterInventoryOfferFolderConfig::refreshControls()
 {
 	bool fFolderSelected = m_pFolderList->getNumSelected() > 0;
@@ -145,7 +157,7 @@ void LLFloaterInventoryOfferFolderConfig::refreshControls()
 	m_pEditFolderBrowse->setEnabled(m_pEditFolderItem != nullptr);
 	m_pEditFolderSubfolder->setEnabled(m_pEditFolderItem != nullptr);
 
-	m_pFolderSaveBtn->setEnabled( (m_pEditFolderItem != nullptr) && (m_idEditFolder.notNull()) && ((m_pEditFolderName->isDirty()) || (m_pEditFolderPath->isDirty()) || (m_pEditFolderSubfolder->isDirty())) );
+	m_pFolderSaveBtn->setEnabled(isDirty());
 }
 
 void LLFloaterInventoryOfferFolderConfig::onAddFolder()
@@ -252,6 +264,28 @@ void LLFloaterInventoryOfferFolderConfig::onSaveFolder()
 
 void LLFloaterInventoryOfferFolderConfig::onOk()
 {
+	if (isDirty())
+	{
+		LLNotificationsUtil::add("InventoryOfferFolderConfigSaveChanges", LLSD().with("NAME", m_pEditFolderName->getText()), LLSD(), boost::bind(&LLFloaterInventoryOfferFolderConfig::onOkCb, this, _1, _2));
+		return;
+	}
+
+	onCommit();
+	closeFloater();
+}
+
+void LLFloaterInventoryOfferFolderConfig::onOkCb(const LLSD& sdNotification, const LLSD& sdResponse)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResponse);
+	switch (idxOption)
+	{
+		case 0: // Save
+			onSaveFolder();
+			break;
+		case 2: // Cancel
+			return;
+	}
+
 	onCommit();
 	closeFloater();
 }
