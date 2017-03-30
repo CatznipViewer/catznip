@@ -67,29 +67,83 @@ protected:
 };
 
 // ============================================================================
-// LLAcceptInFolderAgentOffer - move an agent-to-agent accepted inventory offer to the specified folder
+// LLAcceptInFolderOfferBase - base class (based on RLVa)
 //
 
-class LLAcceptInFolderAgentOffer : public LLInventoryFetchItemsObserver
+class LLAcceptInFolderOfferBase
+{
+protected:
+	LLAcceptInFolderOfferBase(LLUUID idBaseFolder) : m_idBaseFolder(idBaseFolder) {}
+	virtual ~LLAcceptInFolderOfferBase() {}
+protected:
+	bool         createDestinationFolder();
+	virtual void onDestinationCreated(const LLUUID& idFolder) = 0;
+private:
+	static void  onCategoryCreateCallback(LLUUID idFolder, LLAcceptInFolderOfferBase* pInstance);
+
+protected:
+	LLUUID m_idBaseFolder;
+private:
+	std::list<std::string> m_DestPath;
+};
+
+// ============================================================================
+// LLAcceptInFolderTaskOffer - move an task-to-agent accepted inventory offer to the user-configured folder
+//
+
+// [See LLInventoryTransactionObserver which says it's not entirely complete?]
+// NOTE: the offer may span mulitple BulkUpdateInventory messages so if we're no longer around then (ie due to "delete this") then
+//       we'll miss those; in this specific case we only care about a single object (folder or itemà and in case of a folder its
+//       data is present in the very first message
+class LLAcceptInFolderTaskOffer : public LLAcceptInFolderOfferBase, public LLInventoryObserver
+{
+public:
+	LLAcceptInFolderTaskOffer(const std::string& strDescription, const LLUUID& idTransaction, const LLUUID& idBaseFolder);
+
+	/*
+	 * Member functions (+ base class overrides)
+	 */
+public:
+	void changed(U32 mask) override;
+protected:
+	void done();
+	void doneIdle();
+	void onDestinationCreated(const LLUUID& idFolder) override;
+
+	/*
+	 * Member variables
+	 */
+protected:
+	uuid_vec_t  m_Folders;
+	uuid_vec_t  m_Items;
+	LLUUID      m_idTransaction;
+	std::string m_strDescription;
+};
+
+// ============================================================================
+// LLAcceptInFolderAgentOffer - move an agent-to-agent accepted inventory offer to the user-configured folder
+//
+
+class LLAcceptInFolderAgentOffer : public LLAcceptInFolderOfferBase, public LLInventoryFetchItemsObserver
 {
 	LOG_CLASS(LLAcceptInFolderAgentOffer);
 public:
-	LLAcceptInFolderAgentOffer(const LLUUID& idInvObject, const LLUUID& idDestFolder);
+	LLAcceptInFolderAgentOffer(const LLUUID& idInvObject, const LLUUID& idBaseFolder);
 
 	/*
-	 * LLInventoryFetchItemsObserver overrides
+	 * Member functions (+ base class overrides)
 	 */
 public:
 	void done() override;
 protected:
-	void onDone();
+	void doneIdle();
+	void onDestinationCreated(const LLUUID& idFolder) override;
 
 	/*
 	 * Member variables
 	 */
 protected:
 	LLUUID m_InvObjectId;
-	LLUUID m_DestFolderId;
 };
 
 // ============================================================================

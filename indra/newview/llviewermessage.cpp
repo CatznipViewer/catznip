@@ -1799,6 +1799,9 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 				{
 					mFolderID = idDestFolder;
+
+					LLAcceptInFolderTaskOffer* pOfferObserver = new LLAcceptInFolderTaskOffer(mDesc, mTransactionID, idDestFolder);
+					gInventory.addObserver(pOfferObserver);
 				}
 			}
 // [/SL:KB]

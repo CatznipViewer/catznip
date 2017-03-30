@@ -16,19 +16,34 @@
 
 #include "llviewerprecompiledheaders.h"
 
+// Message
+#include "message.h"
 // UI
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
 #include "llfloater.h"
 // Viewer
+#include "llagent.h"
 #include "llappviewer.h"
 #include "llfloaterofferinvfolderbrowse.h"
 #include "llfloaterofferinvfolderconfig.h"
 #include "llfloaterreg.h"
 #include "llinventorymodel.h"
+#include "lltrans.h"
 #include "llpanelinventoryoffer.h"
 #include "llviewercontrol.h"
 #include "llviewerfoldertype.h"
+#include "llviewerregion.h"
+// Boost
+#include <boost/algorithm/string.hpp>
+// STL
+#include <chrono>
+
+// ============================================================================
+// Constants
+//
+
+#define MAX_SUBFOLDERS_DEPTH 3
 
 // ============================================================================
 // LLPanelInventoryOfferFolder class
@@ -160,29 +175,276 @@ void LLPanelInventoryOfferFolder::onConfigureFoldersCb()
 }
 
 // ============================================================================
-// LLAcceptInFolderAgentOffer - move an agent-to-agent accepted inventory offer to the specified folder
+// LLAcceptInFolderOfferBase class
 //
 
-LLAcceptInFolderAgentOffer::LLAcceptInFolderAgentOffer(const LLUUID& idInvObject, const LLUUID& idDestFolder)
-	: LLInventoryFetchItemsObserver(idInvObject)
+bool LLAcceptInFolderOfferBase::createDestinationFolder()
+{
+	// NOTE: derived classes will delete the instance in their onDestinationCreated override, so don't do anything after triggering the callback
+
+	m_DestPath.clear();
+
+	//
+	// Find the user-configured subfolder path (if there is one)
+	//
+	const LLSD sdOptionsList = gSavedPerAccountSettings.getLLSD("InventoryOfferAcceptInOptions");
+	if (!sdOptionsList.isArray())
+		return false;
+
+	std::string strSubfolderPath;
+	for (LLSD::array_const_iterator itFolder = sdOptionsList.beginArray(), endFolder = sdOptionsList.endArray(); itFolder != endFolder; ++itFolder)
+	{
+		const LLAcceptInFolder folderInfo(*itFolder);
+		if (folderInfo.getId() == m_idBaseFolder)
+		{
+			strSubfolderPath = folderInfo.getSubFolder();
+			break;
+		}
+	}
+
+	// If there's no subfolder path then we're done
+	if (strSubfolderPath.empty())
+	{
+		onCategoryCreateCallback(m_idBaseFolder, this);
+		return true;
+	}
+
+	//
+	// Perform replacements
+	//
+	time_t timeNow;
+	time(&timeNow);
+	struct tm* timeParts = std::localtime(&timeNow);
+
+	// %yyyy and %yy
+	boost::replace_all(strSubfolderPath, "%yyyy", llformat("%d", 1900 + timeParts->tm_year));
+	boost::replace_all(strSubfolderPath, "%yy", llformat("%d", timeParts->tm_year % 100));
+	// %mmm and %mm
+	if (LLStringOps::sMonthList.empty())
+		LLStringOps::setupMonthNames(LLTrans::getString("dateTimeMonthNames"));
+	if (LLStringOps::sMonthList.size() == 12)
+		boost::replace_all(strSubfolderPath, "%mmm", LLStringOps::sMonthList[timeParts->tm_mon]);
+	boost::replace_all(strSubfolderPath, "%mm", llformat("%02d", timeParts->tm_mon));
+	// %dd
+	boost::replace_all(strSubfolderPath, "%dd", llformat("%02d", timeParts->tm_mday));
+	// %date
+	{
+		char strDateBuf[32];
+		strftime(strDateBuf, sizeof(strDateBuf) / sizeof(char), "%Y-%m-%d", localtime(&timeNow));
+		boost::replace_all(strSubfolderPath, "%date", strDateBuf);
+	}
+	// %region
+	{
+		std::string strRegion;
+		if (gAgent.getRegion())
+			strRegion = gAgent.getRegion()->getName();
+		boost::replace_all(strSubfolderPath, "%region", strRegion);
+	}
+
+	//
+	// Split the path up in individual folders
+	//
+	if (std::string::npos != strSubfolderPath.find("/"))
+		boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")));
+
+	//
+	// Kick off creating the destination folder (if it doesn't already exist)
+	//
+	if (m_DestPath.size() <= MAX_SUBFOLDERS_DEPTH)
+	{
+		onCategoryCreateCallback(m_idBaseFolder, this);
+		return true;
+	}
+
+	m_DestPath.clear();
+	return false;
+}
+
+void LLAcceptInFolderOfferBase::onCategoryCreateCallback(LLUUID idFolder, LLAcceptInFolderOfferBase* pInstance)
+{
+	if (idFolder.isNull())
+	{
+		// Problem encountered, abort
+		pInstance->onDestinationCreated(LLUUID::null);
+		return;
+	}
+
+	while (pInstance->m_DestPath.size() > 1)
+	{
+		std::string strFolder = pInstance->m_DestPath.front();
+		pInstance->m_DestPath.pop_front();
+
+		LLInventoryModel::cat_array_t* folders;
+		LLInventoryModel::item_array_t* items;
+		gInventory.getDirectDescendentsOf(idFolder, folders, items);
+		if (!folders)
+		{
+			// Problem encountered, abort
+			pInstance->onDestinationCreated(LLUUID::null);
+			return;
+		}
+
+		LLInventoryModel::cat_array_t::const_iterator itFolder = std::find_if(folders->begin(), folders->end(), [&strFolder](const LLViewerInventoryCategory* pFolder) { return pFolder->getName() == strFolder; });
+		if (folders->cend() != itFolder)
+		{
+			idFolder = (*itFolder)->getUUID();
+		}
+		else
+		{
+			LLInventoryObject::correctInventoryName(strFolder);
+			inventory_func_type f = boost::bind(LLAcceptInFolderOfferBase::onCategoryCreateCallback, _1, pInstance);
+			const LLUUID idTemp = gInventory.createNewCategory(idFolder, LLFolderType::FT_NONE, strFolder, f);
+			if (idTemp.notNull())
+				onCategoryCreateCallback(idTemp, pInstance);
+			return;
+		}
+	}
+
+	// Destination folder should exist at this point (we'll be deallocated when the function returns)
+	pInstance->onDestinationCreated(idFolder);
+}
+
+// ============================================================================
+// LLAcceptInFolderOfferBase class
+//
+
+LLAcceptInFolderTaskOffer::LLAcceptInFolderTaskOffer(const std::string& strDescription, const LLUUID& idTransaction, const LLUUID& idBaseFolder)
+	: LLAcceptInFolderOfferBase(idBaseFolder)
+	, LLInventoryObserver()
+	, m_strDescription(strDescription)
+	, m_idTransaction(idTransaction)
+{
+}
+
+void LLAcceptInFolderTaskOffer::changed(U32 mask)
+{
+	if (mask & LLInventoryObserver::ADD)
+	{
+		LLMessageSystem* pMsg = gMessageSystem;
+		if ( (pMsg->getMessageName()) && (0 == strcmp(pMsg->getMessageName(), _PREHASH_BulkUpdateInventory)) )
+		{
+			LLUUID idTransaction;
+
+			pMsg->getUUIDFast(_PREHASH_AgentData, _PREHASH_TransactionID, idTransaction);
+			if (m_idTransaction == idTransaction)
+			{
+				LLUUID idInvObject;
+
+				for (S32 idxBlock = 0, cntBlock = pMsg->getNumberOfBlocksFast(_PREHASH_FolderData); idxBlock < cntBlock; idxBlock++)
+				{
+					pMsg->getUUIDFast(_PREHASH_FolderData, _PREHASH_FolderID, idInvObject, idxBlock);
+					if ( (idInvObject.notNull()) && (std::find(m_Folders.begin(), m_Folders.end(), idInvObject) == m_Folders.end()) )
+						m_Folders.push_back(idInvObject);
+				}
+
+				for (S32 idxBlock = 0, cntBlock = pMsg->getNumberOfBlocksFast(_PREHASH_ItemData); idxBlock < cntBlock; idxBlock++)
+				{
+					// We don't care about items we're already tracking the parent folder of
+					pMsg->getUUIDFast(_PREHASH_ItemData, _PREHASH_FolderID, idInvObject, idxBlock);
+					if ( (idInvObject.notNull()) && (std::find(m_Folders.begin(), m_Folders.end(), idInvObject) != m_Folders.end()) )
+						continue;
+
+					pMsg->getUUIDFast(_PREHASH_ItemData, _PREHASH_ItemID, idInvObject, idxBlock);
+					if ( (idInvObject.notNull()) && (std::find(m_Items.begin(), m_Items.end(), idInvObject) == m_Items.end()) )
+						m_Items.push_back(idInvObject);
+				}
+
+				done();
+			}
+		}
+		else if ( (pMsg->getMessageName()) && (0 == strcmp(pMsg->getMessageName(), _PREHASH_UpdateCreateInventoryItem)) )
+		{
+			LLUUID idInvObject;
+			pMsg->getUUIDFast(_PREHASH_InventoryData, _PREHASH_ItemID, idInvObject);
+			if (idInvObject.notNull())
+			{
+				if (LLInventoryItem* pItem = gInventory.getItem(idInvObject))
+				{
+					if (boost::starts_with(m_strDescription, llformat("'%s'", pItem->getName().c_str())))
+					{
+						m_Items.push_back(idInvObject);
+
+						done();
+					}
+				}
+			}
+
+			//LLUUID idTransaction;
+			//
+			//pMsg->getUUIDFast(_PREHASH_AgentData, _PREHASH_TransactionID, idTransaction);
+			//if (m_idTransaction == idTransaction)
+			//{
+			//	LLUUID idInvObject;
+			//
+			//	pMsg->getUUIDFast(_PREHASH_InventoryData, _PREHASH_ItemID, idInvObject);
+			//	if (idInvObject.notNull())
+			//		m_Items.push_back(idInvObject);
+			//
+			//	done();
+			//}
+		}
+	}
+}
+
+void LLAcceptInFolderTaskOffer::done()
+{
+	gInventory.removeObserver(this);
+
+	// We shouldn't be messing with inventory items during LLInventoryModel::notifyObservers()
+	LLAppViewer::instance()->addOnIdleCallback(boost::bind(&LLAcceptInFolderTaskOffer::doneIdle, this));
+}
+
+void LLAcceptInFolderTaskOffer::doneIdle()
+{
+	if (!createDestinationFolder())
+		delete this;
+}
+
+void LLAcceptInFolderTaskOffer::onDestinationCreated(const LLUUID& idFolder)
+{
+	if (!m_Folders.empty())
+		if (LLViewerInventoryCategory* pInvFolder = gInventory.getCategory(m_Folders.front()))
+			gInventory.changeCategoryParent(pInvFolder, idFolder, false);
+
+	if (!m_Items.empty())
+		if (LLViewerInventoryItem* pInvItem = gInventory.getItem(m_Items.front()))
+			gInventory.changeItemParent(pInvItem, idFolder, false);
+
+	delete this;
+}
+
+// ============================================================================
+// LLAcceptInFolderAgentOffer class
+//
+
+LLAcceptInFolderAgentOffer::LLAcceptInFolderAgentOffer(const LLUUID& idInvObject, const LLUUID& idBaseFolder)
+	: LLAcceptInFolderOfferBase(idBaseFolder)
+	, LLInventoryFetchItemsObserver(idInvObject)
 	, m_InvObjectId(idInvObject)
-	, m_DestFolderId(idDestFolder)
 {
 }
 
 void LLAcceptInFolderAgentOffer::done()
 {
-	LLAppViewer::instance()->addOnIdleCallback(boost::bind(&LLAcceptInFolderAgentOffer::onDone, this));
 	gInventory.removeObserver(this);
+
+	// We shouldn't be messing with inventory items during LLInventoryModel::notifyObservers()
+	LLAppViewer::instance()->addOnIdleCallback(boost::bind(&LLAcceptInFolderAgentOffer::doneIdle, this));
 }
 
 // static
-void LLAcceptInFolderAgentOffer::onDone()
+void LLAcceptInFolderAgentOffer::doneIdle()
+{
+	if (!createDestinationFolder())
+		delete this;
+}
+
+void LLAcceptInFolderAgentOffer::onDestinationCreated(const LLUUID& idFolder)
 {
 	if (LLViewerInventoryItem* pInvItem = gInventory.getItem(m_InvObjectId))
-		gInventory.changeItemParent(pInvItem, m_DestFolderId, false);
+		gInventory.changeItemParent(pInvItem, idFolder, false);
 	else if (LLViewerInventoryCategory* pInvFolder = gInventory.getCategory(m_InvObjectId))
-		gInventory.changeCategoryParent(pInvFolder, m_DestFolderId, false);
+		gInventory.changeCategoryParent(pInvFolder, idFolder, false);
 	delete this;
 }
 
