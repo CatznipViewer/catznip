@@ -265,6 +265,7 @@ set(viewer_SOURCE_FILES
     llfloaternotificationsflat.cpp
     llfloaternotificationstabbed.cpp
     llfloaterofferinvfolderbrowse.cpp
+    llfloaterofferinvfolderconfig.cpp
     llfloateroutfitphotopreview.cpp 
     llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
@@ -891,6 +892,7 @@ set(viewer_HEADER_FILES
     llfloateroutfitsnapshot.h
     llfloaterobjectweights.h
     llfloaterofferinvfolderbrowse.h
+    llfloaterofferinvfolderconfig.h
     llfloateropenobject.h
     llfloaterpathfindingcharacters.h
     llfloaterpathfindingconsole.h

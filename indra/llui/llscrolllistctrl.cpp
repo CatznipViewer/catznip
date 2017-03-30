@@ -132,6 +132,9 @@ LLScrollListCtrl::Params::Params()
 	sort_ascending("sort_ascending", true),
 	mouse_wheel_opaque("mouse_wheel_opaque", false),
 	commit_on_keyboard_movement("commit_on_keyboard_movement", true),
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	select_on_focus("select_on_focus", true),
+// [/SL:KB]
 	heading_height("heading_height"),
 	page_lines("page_lines", 0),
 	background_visible("background_visible"),
@@ -162,6 +165,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mAllowKeyboardMovement(true),
 	mCommitOnKeyboardMovement(p.commit_on_keyboard_movement),
 	mCommitOnSelectionChange(false),
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	mSelectOnFocus(p.select_on_focus),
+// [/SL:KB]
 	mSelectionChanged(false),
 	mNeedsScroll(false),
 	mCanSelect(true),
@@ -3036,7 +3042,10 @@ BOOL LLScrollListCtrl::operateOnAll(EOperation op)
 void LLScrollListCtrl::setFocus(BOOL b)
 {
 	// for tabbing into pristine scroll lists (Finder)
-	if (!getFirstSelected())
+//	if (!getFirstSelected())
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	if ( (mSelectOnFocus) && (!getFirstSelected()) )
+// [/SL:KB]
 	{
 		selectFirstItem();
 		//onCommit(); // SJB: selectFirstItem() will call onCommit() if appropriate

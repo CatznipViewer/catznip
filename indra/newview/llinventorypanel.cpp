@@ -143,6 +143,9 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	mAllowMultiSelect(p.allow_multi_select),
 	mShowItemLinkOverlays(p.show_item_link_overlays),
 	mShowEmptyMessage(p.show_empty_message),
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+	mShowItems(p.show_items),
+// [/SL:KB]
 	mViewsInitialized(false),
 	mInvFVBridgeBuilder(NULL),
 	mInventoryViewModel(p.name),
@@ -852,7 +855,10 @@ LLFolderViewItem* LLInventoryPanel::buildNewViews(const LLUUID& id)
                     folder_view_item = createFolderViewFolder(new_listener,allow_drop);
   				}
   			}
-  			else
+ // 			else
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+			else if (mShowItems)
+// [/SL:KB]
   			{
   				// Build new view for item.
   				LLInventoryItem* item = (LLInventoryItem*)objectp;

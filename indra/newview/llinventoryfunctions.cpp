@@ -213,23 +213,41 @@ bool contains_nocopy_items(const LLUUID& id)
 
 // Generates a string containing the path to the item specified by
 // item_id.
-void append_path(const LLUUID& id, std::string& path)
+//void append_path(const LLUUID& id, std::string& path)
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+void append_path(const LLUUID& id, std::string& path, bool include_root /*=true*/, bool prepend_slash /*=true*/)
+// [/SL:KB]
 {
 	std::string temp;
 	const LLInventoryObject* obj = gInventory.getObject(id);
 	LLUUID parent_id;
 	if(obj) parent_id = obj->getParentUUID();
 	std::string forward_slash("/");
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if ( (obj) && (LLAssetType::AT_CATEGORY == obj->getType()) )
+		temp.assign(forward_slash + obj->getName());
+// [/SL/KB]
 	while(obj)
 	{
 		obj = gInventory.getCategory(parent_id);
 		if(obj)
 		{
-			temp.assign(forward_slash + obj->getName() + temp);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
 			parent_id = obj->getParentUUID();
+			if ( (include_root) || (parent_id.notNull()) )
+				temp.assign(forward_slash + obj->getName() + temp);
+// [/SL/KB]
+//			temp.assign(forward_slash + obj->getName() + temp);
+//			parent_id = obj->getParentUUID();
 		}
 	}
-	path.append(temp);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (prepend_slash)
+		path.append(temp);
+	else if (!temp.empty())
+		path.append(temp.erase(0, 1));
+// [/SL/KB]
+//	path.append(temp);
 }
 
 void update_marketplace_folder_hierarchy(const LLUUID cat_id)

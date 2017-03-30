@@ -49,7 +49,10 @@ public:
 protected:
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
+	void onConfigureFolders();
+	void onConfigureFoldersCb();
 	void refreshControls();
+	void refreshFolders();
 
 	/*
 	 * Member variables
@@ -58,7 +61,9 @@ protected:
 	LLCheckBoxCtrl* m_pAcceptInCheck = nullptr;
 	LLComboBox* m_pAcceptInList = nullptr;
 	LLButton* m_pBrowseBtn = nullptr;
+
 	LLHandle<LLFloater> m_BrowseFloaterHandle;
+	LLHandle<LLFloater> m_ConfigureFloaterHandle;
 };
 
 // ============================================================================

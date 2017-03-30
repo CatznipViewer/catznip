@@ -185,9 +185,7 @@
         <key>Type</key>
         <string>LLSD</string>
         <key>Value</key>
-        <array>
-            <string />
-        </array>
+        <array />
     </map>
     <key>LastLogoff</key>
         <map>

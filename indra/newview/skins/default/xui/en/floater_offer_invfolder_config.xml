@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_close="true"
+ can_minimize="false"
+ can_resize="false"
+ height="375"
+ name="offer_invfolder_configure"
+ layout="topleft"
+ positioning="centered"
+ title="ACCEPT IN DESTINATION FOLDERS"
+ width="550">
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="lbl_folders"
+     top="5"
+     type="string"
+     width="250">
+       Configured destination folders:
+    </text>
+    <scroll_list
+     column_padding="0"
+     draw_heading="true"
+     follows="top|left"
+     height="125"
+     left="10"
+     name="list_folders"
+     right="-90"
+     select_on_focus="false"
+     top_pad="0">
+        <scroll_list.columns
+         label="Name"
+         name="name"
+         relative_width="0.20" />
+        <scroll_list.columns
+         label="Path"
+         name="path"
+         relative_width="0.50" />
+        <scroll_list.columns
+         label="Subfolder"
+         name="subfolder"
+         relative_width="0.30" />
+    </scroll_list>
+    <button
+     enabled="true"
+     follows="top|left"
+     height="22"
+     label="Add..."
+     name="btn_folder_add"
+     right="-10"
+     top_delta="25"
+     width="75" />
+    <button 
+     enabled="true"
+     follows="top|left"
+     height="22"
+     label="Remove"
+     name="btn_folder_remove"
+     right="-10"
+     top_pad="5"
+     width="75" />
+    
+    <view_border
+     bevel_style="none"
+     border_thickness="1"
+     follows="top|left"
+     height="0"
+     left="10"
+     mouse_opaque="false"
+     name="divisor1"
+     right="-10"
+     top="155" />
+	   
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="lbl_folder_name"
+     top_pad="12"
+     type="string"
+     width="100">
+       Friendly name:
+    </text>
+    <line_editor
+     commit_on_focus_lost="false"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="2"
+     max_length_bytes="255"
+     name="input_folder_name"
+     right="-90"
+     top_delta="-5" />
+    
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="lbl_folder_path"
+     top_pad="7"
+     type="string"
+     width="100">
+       Folder path:
+    </text>
+    <line_editor
+     commit_on_focus_lost="false"
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="2"
+     max_length_bytes="255"
+     name="input_folder_path"
+     top_delta="-5"
+     right="-155" />
+    <button 
+     enabled="true"
+     follows="top|left"
+     height="22"
+     label="Browse"
+     name="btn_folder_path_browse"
+     left_pad="5"
+     top_delta="0"
+     width="60" />
+    
+    <text
+     commit_on_focus_lost="false"
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="10"
+     name="lbl_folder_subfolder"
+     top_pad="8"
+     type="string"
+     width="100">
+       Subfolder:
+    </text>
+    <line_editor
+     follows="top|left"
+     height="23"
+     layout="topleft"
+     left_pad="2"
+     max_length_bytes="255"
+     name="input_folder_subfolder"
+     right="-90"
+     top_delta="-5" />
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_pad="10"
+     name="lbl_folder_subfolder_optional"
+     top_delta="4"
+     type="string"
+     width="100">
+       (Optional)
+    </text>
+    
+    <button
+     enabled="true"
+     follows="top|left"
+     height="22"
+     label="Save Entry"
+     name="btn_folder_save"
+     left="110"
+     top_pad="6"
+     width="90"
+     />
+    
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left="113"
+     name="lbl_legend_main"
+     top_pad="4"
+     type="string"
+     width="300">
+      Cheatsheet for subfolder replacements:
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="10"
+     name="lbl_legend_line1a"
+     top_pad="0"
+     type="string"
+     width="250">
+       %yy - year (last 2 digits, e.g. 17)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="200"
+     name="lbl_legend_line1b"
+     top_delta="0"
+     type="string"
+     width="250">
+       %yyyy - year (all digits, e.g. 2017)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="-200"
+     name="lbl_legend_line2a"
+     top_pad="0"
+     type="string"
+     width="250">
+       %mm - month (2 digits, e.g. 01)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="200"
+     name="lbl_legend_line2b"
+     top_delta="0"
+     type="string"
+     width="250">
+       %mmm - month (letters, e.g. January)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="-200"
+     name="lbl_legend_line3a"
+     top_pad="0"
+     type="string"
+     width="250">
+       %dd - day (2 digits, e.g. 04)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="200"
+     name="lbl_legend_line3b"
+     top_delta="0"
+     type="string"
+     width="250">
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="-200"
+     name="lbl_legend_line4a"
+     top_pad="0"
+     type="string"
+     width="250">
+       %region - region name (e.g. Ahern)
+    </text>
+    <text
+     follows="top|left"
+     height="16"
+     layout="topleft"
+     left_delta="200"
+     name="lbl_legend_line4b"
+     top_delta="0"
+     type="string"
+     width="250">
+    </text>
+  
+    <button
+     follows="bottom|left"
+     height="23"
+     label="Save"
+     layout="topleft"
+     left="170"
+     name="btn_save"
+     top_pad="2"
+     width="100" />
+    <button
+     follows="bottom|left"
+     height="23"
+     label="Cancel"
+     layout="topleft"
+     left_pad="10"
+     name="btn_cancel"
+     top_delta="0"
+     width="100" />
+</floater>

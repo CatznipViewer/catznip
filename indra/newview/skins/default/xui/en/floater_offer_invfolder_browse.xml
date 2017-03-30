@@ -10,7 +10,6 @@
  positioning="centered"
  title="PICK: FOLDER"
  width="400">
- 
     <filter_editor
      follows="left|top|right"
      height="23"
@@ -31,6 +30,7 @@
      left="10"
      name="inv_panel"
      right="-10"
+     show_items="false"
      top_pad="4" />
 
     <button

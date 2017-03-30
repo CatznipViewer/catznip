@@ -383,7 +383,10 @@ void LLLineEditor::updateTextPadding()
 }
 
 
-void LLLineEditor::setText(const LLStringExplicit &new_text)
+//void LLLineEditor::setText(const LLStringExplicit &new_text)
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-5.2
+void LLLineEditor::setText(const LLStringExplicit &new_text, bool reset_dirty /*=true*/)
+// [/SL:KB]
 {
 	// If new text is identical, don't copy and don't move insertion point
 	if (mText.getString() == new_text)
@@ -435,7 +438,13 @@ void LLLineEditor::setText(const LLStringExplicit &new_text)
 		mCurrentHistoryLine = mLineHistory.end() - 1;
 	}
 
-	mPrevText = mText;
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-5.2
+	if (reset_dirty)
+	{
+		mPrevText = mText;
+	}
+// [/SL:KB]
+//	mPrevText = mText;
 }
 
 

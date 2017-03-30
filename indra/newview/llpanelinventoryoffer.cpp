@@ -23,6 +23,7 @@
 // Viewer
 #include "llappviewer.h"
 #include "llfloaterofferinvfolderbrowse.h"
+#include "llfloaterofferinvfolderconfig.h"
 #include "llfloaterreg.h"
 #include "llinventorymodel.h"
 #include "llpanelinventoryoffer.h"
@@ -46,6 +47,10 @@ LLPanelInventoryOfferFolder::~LLPanelInventoryOfferFolder()
 	if (LLFloater* pBrowseFloater = m_BrowseFloaterHandle.get())
 		pBrowseFloater->closeFloater();
 	m_BrowseFloaterHandle.markDead();
+
+	if (LLFloater* pConfigureFloater = m_ConfigureFloaterHandle.get())
+		pConfigureFloater->closeFloater();
+	m_ConfigureFloaterHandle.markDead();
 }
 
 //virtual
@@ -57,28 +62,15 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	m_pAcceptInList = findChild<LLComboBox>("list_folders");
 	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
 
-	// Add the 'Received Items' option
-	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false));
-	m_pAcceptInList->addSeparator();
-
-	// Add the user list options
-	const LLSD sdOptionsList = gSavedPerAccountSettings.getLLSD("InventoryOfferAcceptInOptions");
-	if (sdOptionsList.isArray())
-	{
-		for (LLSD::array_const_iterator itOption = sdOptionsList.beginArray(), endOption = sdOptionsList.endArray(); itOption != endOption; ++itOption)
-		{
-			if (const LLInventoryCategory* pFolder = gInventory.getCategory((*itOption).asUUID()))
-				m_pAcceptInList->add(pFolder->getName(), pFolder->getUUID());
-		}
-	}
-
 	// Select the item (LLComboBox::postBuild has already been called at this point)
 	m_pAcceptInList->setValue(m_pAcceptInList->getControlVariable()->getValue());
 
 	m_pBrowseBtn = findChild<LLButton>("btn_folder_browse");
 	m_pBrowseBtn->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolder, this));
+	findChild<LLButton>("btn_folder_configure")->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onConfigureFolders, this));
 
 	refreshControls();
+	refreshFolders();
 	return TRUE;
 }
 
@@ -89,8 +81,41 @@ void LLPanelInventoryOfferFolder::refreshControls()
 	m_pBrowseBtn->setEnabled(fAcceptIn);
 }
 
+void LLPanelInventoryOfferFolder::refreshFolders()
+{
+	LLSD sdSelValue = m_pAcceptInList->getSelectedValue();
+	m_pAcceptInList->clearRows();
+
+	// Add the user list options
+	const LLSD sdOptionsList = gSavedPerAccountSettings.getLLSD("InventoryOfferAcceptInOptions");
+	if (sdOptionsList.isArray())
+	{
+		for (LLSD::array_const_iterator itFolder = sdOptionsList.beginArray(), endFolder = sdOptionsList.endArray(); itFolder != endFolder; ++itFolder)
+		{
+			const LLAcceptInFolder folderInfo(*itFolder);
+			if (const LLInventoryCategory* pFolder = gInventory.getCategory(folderInfo.getId()))
+				m_pAcceptInList->add(folderInfo.getName(), pFolder->getUUID());
+		}
+	}
+	m_pAcceptInList->sortByName();
+	m_pAcceptInList->addSeparator(ADD_TOP);
+
+	// Add the 'Received Items' option
+	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false), ADD_TOP);
+
+	// Add the default option
+	m_pAcceptInList->add(getString("default_text"), LLUUID::null, ADD_TOP);
+
+	// Restore selection
+	if (!sdSelValue.isUndefined())
+		m_pAcceptInList->selectByValue(sdSelValue);
+}
+
 void LLPanelInventoryOfferFolder::onBrowseFolder()
 {
+	if (!m_BrowseFloaterHandle.isDead())
+		return;
+
 	if (LLFloater* pBrowseFloater = new LLFloaterInventoryOfferFolderBrowse())
 	{
 		pBrowseFloater->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolderCb, this, _2));
@@ -107,9 +132,31 @@ void LLPanelInventoryOfferFolder::onBrowseFolderCb(const LLSD& sdData)
 
 	if (!m_pAcceptInList->selectByValue(idFolder))
 	{
-		m_pAcceptInList->add(strFolderName, idFolder);
+		const LLAcceptInFolder folderInfo(idFolder, strFolderName, LLStringUtil::null);
+		LLSD sdOptionsList = gSavedPerAccountSettings.getLLSD("InventoryOfferAcceptInOptions");
+		sdOptionsList.append(folderInfo.toLLSD());
+		gSavedPerAccountSettings.setLLSD("InventoryOfferAcceptInOptions", sdOptionsList);
+
+		refreshFolders();
 		m_pAcceptInList->selectByValue(idFolder);
 	}
+}
+
+void LLPanelInventoryOfferFolder::onConfigureFolders()
+{
+	bool fOwnInstance = !LLFloaterReg::findInstance("offer_invfolder_configure");
+
+	LLFloater* pConfigFloater = LLFloaterReg::showInstance("offer_invfolder_configure");
+	if ( (pConfigFloater) && (fOwnInstance) )
+	{
+		m_ConfigureFloaterHandle = pConfigFloater->getHandle();
+	}
+	pConfigFloater->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onConfigureFoldersCb, this));
+}
+
+void LLPanelInventoryOfferFolder::onConfigureFoldersCb()
+{
+	refreshFolders();
 }
 
 // ============================================================================

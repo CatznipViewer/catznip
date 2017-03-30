@@ -98,6 +98,9 @@ public:
 		Optional<bool>						use_label_suffix;
 		Optional<bool>						show_empty_message;
 		Optional<bool>						show_root_folder;
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+		Optional<bool>						show_items;
+// [/SL:KB]
 		Optional<bool>						allow_drop_on_root;
 		Optional<bool>						use_marketplace_folders;
 		Optional<LLScrollContainer::Params>	scroll;
@@ -116,6 +119,9 @@ public:
 			use_label_suffix("use_label_suffix", true),
             show_empty_message("show_empty_message", true),
             show_root_folder("show_root_folder", false),
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+            show_items("show_items", true),
+// [/SL:KB]
             allow_drop_on_root("allow_drop_on_root", true),
             use_marketplace_folders("use_marketplace_folders", false),
 			scroll("scroll"),
@@ -244,6 +250,9 @@ protected:
 	bool 						mAllowMultiSelect;
 	bool 						mShowItemLinkOverlays; // Shows link graphic over inventory item icons
 	bool						mShowEmptyMessage;
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+	bool						mShowItems = true;
+// [/SL:KB]
 
 	LLHandle<LLFolderView>      mFolderRoot;
 	LLScrollContainer*			mScroller;

@@ -28,7 +28,7 @@
 //
 
 LLFloaterInventoryOfferFolderBrowse::LLFloaterInventoryOfferFolderBrowse(const LLUUID& idFolder)
-	: LLFloater(LLSD().with("item_id", idFolder))
+	: LLFloater(LLSD().with("uuid", idFolder))
 {
 	buildFromFile("floater_offer_invfolder_browse.xml");
 }
@@ -75,7 +75,7 @@ void LLFloaterInventoryOfferFolderBrowse::onCommit()
 
 void LLFloaterInventoryOfferFolderBrowse::onOpen(const LLSD& sdKey)
 {
-	const LLUUID idInvObject = sdKey["item_id"].asUUID();
+	const LLUUID idInvObject = sdKey["uuid"].asUUID();
 	if (idInvObject.notNull())
 	{
 		m_pInvPanel->setSelection(idInvObject, TAKE_FOCUS_NO);

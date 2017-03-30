@@ -96,6 +96,9 @@ public:
 		// behavioral flags
 		Optional<bool>	multi_select,
 						commit_on_keyboard_movement,
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+						select_on_focus,
+// [/SL:KB]
 						mouse_wheel_opaque;
 
 		// display flags
@@ -446,6 +449,9 @@ private:
 	bool			mAllowKeyboardMovement;
 	bool			mCommitOnKeyboardMovement;
 	bool			mCommitOnSelectionChange;
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	bool			mSelectOnFocus = true;
+// [/SL:KB]
 	bool			mSelectionChanged;
 	bool			mNeedsScroll;
 	bool			mMouseWheelOpaque;
