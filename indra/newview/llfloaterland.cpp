@@ -2088,7 +2088,11 @@ void LLPanelLandOptions::refresh()
 				LLViewerParcelMgr::isParcelModifiableByAgent(
 					parcel, GP_LAND_CHANGE_IDENTITY);
 		mSnapshotCtrl->setImageAssetID(parcel->getSnapshotID());
-		mSnapshotCtrl->setEnabled( can_change_identity );
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		mSnapshotCtrl->setControlMode(can_change_identity ? LLTextureCtrl::EControlMode::EDIT : LLTextureCtrl::EControlMode::ZOOM );
+		mSnapshotCtrl->setEnabled(true);
+// [/SL:KB]
+//		mSnapshotCtrl->setEnabled( can_change_identity );
 
 		// find out where we're looking and convert that to an angle in degrees on a regular compass (not the internal representation)
 		LLVector3 user_look_at = parcel->getUserLookAt();

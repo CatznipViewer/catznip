@@ -79,6 +79,9 @@
 #include "llnotifications.h"
 #include "llnotificationsutil.h"
 #include "llpanelgrouplandmoney.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+// [/SL:KB]
 #include "llrecentpeople.h"
 #include "llscriptfloater.h"
 #include "llscriptruntimeperms.h"
@@ -1661,6 +1664,21 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 						gInventory.addObserver(pOfferObserver);
 				}
 // [/RLVa:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				else if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+				{
+					const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+					if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+					{
+						LLAcceptInFolderAgentOffer* pOfferObserver = new LLAcceptInFolderAgentOffer(mObjectID, idDestFolder);
+						pOfferObserver->startFetch();
+						if (pOfferObserver->isFinished())
+							pOfferObserver->done();
+						else
+							gInventory.addObserver(pOfferObserver);
+					}
+				}
+// [/SL:KB]
 
 				if (gSavedSettings.getBOOL("ShowOfferedInventory"))
 				{
@@ -1913,6 +1931,19 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 				}
 			}
 // [/RLVa:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+			else if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn")) )
+			{
+				const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+				if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+				{
+					mFolderID = idDestFolder;
+
+					LLAcceptInFolderTaskOffer* pOfferObserver = new LLAcceptInFolderTaskOffer(mDesc, mTransactionID, idDestFolder);
+					gInventory.addObserver(pOfferObserver);
+				}
+			}
+// [/SL:KB]
 
 			// Generates IM_INVENTORY_ACCEPTED, IM_TASK_INVENTORY_ACCEPTED, 
 			// or IM_GROUP_NOTICE_INVENTORY_ACCEPTED

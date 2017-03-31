@@ -271,6 +271,8 @@ set(viewer_SOURCE_FILES
     llfloaternotificationsconsole.cpp
     llfloaternotificationsflat.cpp
     llfloaternotificationstabbed.cpp
+    llfloaterofferinvfolderbrowse.cpp
+    llfloaterofferinvfolderconfig.cpp
 #    llfloateroutfitphotopreview.cpp 
 #    llfloateroutfitsnapshot.cpp
     llfloaterobjectweights.cpp
@@ -451,6 +453,7 @@ set(viewer_SOURCE_FILES
     llpanelgroupnotices.cpp
     llpanelgrouproles.cpp
     llpanelhome.cpp
+    llpanelinventoryoffer.cpp
     llpanelimcontrolpanel.cpp
     llpanelland.cpp
     llpanellandaudio.cpp
@@ -934,6 +937,8 @@ set(viewer_HEADER_FILES
 #    llfloateroutfitphotopreview.h
 #    llfloateroutfitsnapshot.h
     llfloaterobjectweights.h
+    llfloaterofferinvfolderbrowse.h
+    llfloaterofferinvfolderconfig.h
     llfloateropenobject.h
     llfloaterownedobjects.h
     llfloaterparcelinfo.h
@@ -1102,6 +1107,7 @@ set(viewer_HEADER_FILES
     llpanelgroupnotices.h
     llpanelgrouproles.h
     llpanelhome.h
+    llpanelinventoryoffer.h
     llpanelimcontrolpanel.h
     llpanelland.h
     llpanellandaudio.h

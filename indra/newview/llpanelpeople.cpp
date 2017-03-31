@@ -918,7 +918,10 @@ BOOL LLPanelPeople::postBuild()
 	mNearbyList->setReturnCallback(boost::bind(&LLPanelPeople::onImButtonClicked, this));
 	mRecentList->setReturnCallback(boost::bind(&LLPanelPeople::onImButtonClicked, this));
 
-	mGroupList->setDoubleClickCallback(boost::bind(&LLPanelPeople::onChatButtonClicked, this));
+//	mGroupList->setDoubleClickCallback(boost::bind(&LLPanelPeople::onChatButtonClicked, this));
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+	mGroupList->setItemDoubleClickCallback(boost::bind(&LLPanelPeople::onChatButtonClicked, this));
+// [/SL:KB]
 	mGroupList->setCommitCallback(boost::bind(&LLPanelPeople::updateButtons, this));
 	mGroupList->setReturnCallback(boost::bind(&LLPanelPeople::onChatButtonClicked, this));
 

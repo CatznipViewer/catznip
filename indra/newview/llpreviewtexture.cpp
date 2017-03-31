@@ -186,9 +186,31 @@ BOOL LLPreviewTexture::postBuild()
 
 	childSetCommitCallback("combo_aspect_ratio", onAspectRatioCommit, this);
 	combo->setCurrentByIndex(0);
-	
-// [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
+
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if (getKey().has("title"))
+	{
+		LLStringUtil::format_map_t args;
+		args["[NAME]"] = getKey().get("title").asString();
+		LLUIString title = getString("Title", args);
+		setTitle(title.getString());
+	}
+
 	mTexturePlaceholder = getChild<LLView>("texture_placeholder");
+	if (getKey().has("read_only"))
+	{
+		LLPanel* pPanelTop = getChild<LLPanel>("panel_top");
+		pPanelTop->setVisible(false);
+
+		//LLPanel* pPanelBottom = getChild<LLPanel>("panel_bottom");
+		//pPanelBottom->setVisible(false);
+
+		LLRect rctPlaceholder = mTexturePlaceholder->getRect();
+		//rctPlaceholder.mBottom = pPanelBottom->getRect().mBottom;
+		rctPlaceholder.mTop = pPanelTop->getRect().mTop;
+		mTexturePlaceholder->setShape(rctPlaceholder);
+	}
+
 	mClientRect = calcClientRect();
 // [/SL:KB]
 
@@ -571,7 +593,14 @@ void LLPreviewTexture::updateDimensions()
 	{
 		mAssetStatus = PREVIEW_ASSET_LOADED;
 		// Asset has been fully loaded, adjust aspect ratio
-		adjustAspectRatio();
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		const LLSD& sdKey = getKey();
+		if (!sdKey.has("aspect_ratio"))
+			adjustAspectRatio();
+		else
+			setAspectRatio(sdKey["aspect_ratio"].asReal(), 1.0f);
+// [/SL:KB]
+//		adjustAspectRatio();
 	}
 	
 	// Update the width/height display every time
@@ -762,9 +791,13 @@ void LLPreviewTexture::updateImageID()
 	{
 		mImageID = mItemUUID;
 		mShowKeepDiscard = FALSE;
-		mCopyToInv = TRUE;
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		mCopyToInv = FALSE;
+		mIsFullPerm = !getKey().has("read_only");
+// [/SL:KB]
+//		mCopyToInv = TRUE;
 		mIsCopyable = TRUE;
-		mIsFullPerm = TRUE;
+//		mIsFullPerm = TRUE;
 	}
 
 }

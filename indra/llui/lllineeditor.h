@@ -14,6 +14,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -196,7 +197,10 @@ public:
 	void			setLabel(const LLStringExplicit &new_label) { mLabel = new_label; }
 	const std::string& 	getLabel()	{ return mLabel.getString(); }
 
-	void			setText(const LLStringExplicit &new_text);
+// [SL:KB] - Patch: Control-LineEditor | Checked: Catznip-5.2
+	void			setText(const LLStringExplicit &new_text, bool reset_dirty = true);
+// [/SL:KB]
+//	void			setText(const LLStringExplicit &new_text);
 
 	const std::string& getText() const		{ return mText.getString(); }
 	LLWString       getWText() const	{ return mText.getWString(); }
