@@ -149,21 +149,54 @@ BOOL	LLPanelFace::postBuild()
 	childSetCommitCallback("combobox shininess",&LLPanelFace::onCommitShiny,this);
 	childSetCommitCallback("combobox bumpiness",&LLPanelFace::onCommitBump,this);
 	childSetCommitCallback("combobox alphamode",&LLPanelFace::onCommitAlphaMode,this);
-	childSetCommitCallback("TexScaleU",&LLPanelFace::onCommitTextureInfo, this);
-	childSetCommitCallback("TexScaleV",&LLPanelFace::onCommitTextureInfo, this);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	{
+		LLUICtrl* pTexScaleUCtrl = getChild<LLSpinCtrl>("TexScaleU");
+		pTexScaleUCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitTextureInfo, pTexScaleUCtrl, this));
+		getChild<LLButton>("TexScaleUFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pTexScaleUCtrl));
+
+		LLUICtrl* pTexScaleVCtrl = getChild<LLSpinCtrl>("TexScaleV");
+		pTexScaleVCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitTextureInfo, pTexScaleVCtrl, this));
+		getChild<LLButton>("TexScaleVFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pTexScaleVCtrl));
+	}
+// [/SL:KB]
+//	childSetCommitCallback("TexScaleU",&LLPanelFace::onCommitTextureInfo, this);
+//	childSetCommitCallback("TexScaleV",&LLPanelFace::onCommitTextureInfo, this);
 	childSetCommitCallback("TexRot",&LLPanelFace::onCommitTextureInfo, this);
 	childSetCommitCallback("rptctrl",&LLPanelFace::onCommitRepeatsPerMeter, this);
 	childSetCommitCallback("checkbox planar align",&LLPanelFace::onCommitPlanarAlign, this);
 	childSetCommitCallback("TexOffsetU",LLPanelFace::onCommitTextureInfo, this);
 	childSetCommitCallback("TexOffsetV",LLPanelFace::onCommitTextureInfo, this);
 
-	childSetCommitCallback("bumpyScaleU",&LLPanelFace::onCommitMaterialBumpyScaleX, this);
-	childSetCommitCallback("bumpyScaleV",&LLPanelFace::onCommitMaterialBumpyScaleY, this);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	{
+		LLUICtrl* pBumpyScaleUCtrl = getChild<LLSpinCtrl>("bumpyScaleU");
+		pBumpyScaleUCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitMaterialBumpyScaleX, pBumpyScaleUCtrl, this));
+		getChild<LLButton>("bumpyScaleUFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pBumpyScaleUCtrl));
+
+		LLUICtrl* pBumpyScaleVCtrl = getChild<LLSpinCtrl>("bumpyScaleV");
+		pBumpyScaleVCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitMaterialBumpyScaleY, pBumpyScaleVCtrl, this));
+		getChild<LLButton>("bumpyScaleVFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pBumpyScaleVCtrl));
+	}
+// [/SL:KB]
+//	childSetCommitCallback("bumpyScaleU",&LLPanelFace::onCommitMaterialBumpyScaleX, this);
+//	childSetCommitCallback("bumpyScaleV",&LLPanelFace::onCommitMaterialBumpyScaleY, this);
 	childSetCommitCallback("bumpyRot",&LLPanelFace::onCommitMaterialBumpyRot, this);
 	childSetCommitCallback("bumpyOffsetU",&LLPanelFace::onCommitMaterialBumpyOffsetX, this);
 	childSetCommitCallback("bumpyOffsetV",&LLPanelFace::onCommitMaterialBumpyOffsetY, this);
-	childSetCommitCallback("shinyScaleU",&LLPanelFace::onCommitMaterialShinyScaleX, this);
-	childSetCommitCallback("shinyScaleV",&LLPanelFace::onCommitMaterialShinyScaleY, this);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	{
+		LLUICtrl* pShinyScaleUCtrl = getChild<LLSpinCtrl>("shinyScaleU");
+		pShinyScaleUCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitMaterialShinyScaleX, pShinyScaleUCtrl, this));
+		getChild<LLButton>("shinyScaleUFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pShinyScaleUCtrl));
+
+		LLUICtrl* pShinyScaleVCtrl = getChild<LLSpinCtrl>("shinyScaleV");
+		pShinyScaleVCtrl->setCommitCallback(boost::bind(&LLPanelFace::onCommitMaterialShinyScaleY, pShinyScaleVCtrl, this));
+		getChild<LLButton>("shinyScaleVFlip")->setCommitCallback(boost::bind(&LLPanelFace::onCommitScaleFlip, pShinyScaleVCtrl));
+	}
+// [/SL:KB]
+//	childSetCommitCallback("shinyScaleU",&LLPanelFace::onCommitMaterialShinyScaleX, this);
+//	childSetCommitCallback("shinyScaleV",&LLPanelFace::onCommitMaterialShinyScaleY, this);
 	childSetCommitCallback("shinyRot",&LLPanelFace::onCommitMaterialShinyRot, this);
 	childSetCommitCallback("shinyOffsetU",&LLPanelFace::onCommitMaterialShinyOffsetX, this);
 	childSetCommitCallback("shinyOffsetV",&LLPanelFace::onCommitMaterialShinyOffsetY, this);
@@ -1085,6 +1118,11 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			getChildView("TexScaleU")->setEnabled(editable);
 			getChildView("shinyScaleU")->setEnabled(editable && specmap_id.notNull());
 			getChildView("bumpyScaleU")->setEnabled(editable && normmap_id.notNull());
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+			getChildView("TexScaleUFlip")->setEnabled(editable);
+			getChildView("shinyScaleUFlip")->setEnabled(editable && specmap_id.notNull());
+			getChildView("bumpyScaleUFlip")->setEnabled(editable && normmap_id.notNull());
+// [/SL:KB]
 
 			BOOL diff_scale_tentative = !(identical && identical_diff_scale_s);
 			BOOL norm_scale_tentative = !(identical && identical_norm_scale_s);
@@ -1124,6 +1162,11 @@ void LLPanelFace::updateUI(bool force_set_values /*false*/)
 			getChildView("TexScaleV")->setEnabled(editable);
 			getChildView("shinyScaleV")->setEnabled(editable && specmap_id.notNull());
 			getChildView("bumpyScaleV")->setEnabled(editable && normmap_id.notNull());
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+			getChildView("TexScaleVFlip")->setEnabled(editable);
+			getChildView("shinyScaleVFlip")->setEnabled(editable && specmap_id.notNull());
+			getChildView("bumpyScaleVFlip")->setEnabled(editable && normmap_id.notNull());
+// [/SL:KB]
 
 			if (force_set_values)
 			{
@@ -1639,6 +1682,10 @@ void LLPanelFace::updateVisibility()
 	}
 	getChildView("TexScaleU")->setVisible(show_texture);
 	getChildView("TexScaleV")->setVisible(show_texture);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	getChildView("TexScaleUFlip")->setVisible(show_texture);
+	getChildView("TexScaleVFlip")->setVisible(show_texture);
+// [/SL:KB]
 	getChildView("TexRot")->setVisible(show_texture);
 	getChildView("TexOffsetU")->setVisible(show_texture);
 	getChildView("TexOffsetV")->setVisible(show_texture);
@@ -1659,6 +1706,10 @@ void LLPanelFace::updateVisibility()
 	}
 	getChildView("shinyScaleU")->setVisible(show_shininess);
 	getChildView("shinyScaleV")->setVisible(show_shininess);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	getChildView("shinyScaleUFlip")->setVisible(show_shininess);
+	getChildView("shinyScaleVFlip")->setVisible(show_shininess);
+// [/SL:KB]
 	getChildView("shinyRot")->setVisible(show_shininess);
 	getChildView("shinyOffsetU")->setVisible(show_shininess);
 	getChildView("shinyOffsetV")->setVisible(show_shininess);
@@ -1673,6 +1724,10 @@ void LLPanelFace::updateVisibility()
 	getChildView("label bumpiness")->setVisible(show_bumpiness);
 	getChildView("bumpyScaleU")->setVisible(show_bumpiness);
 	getChildView("bumpyScaleV")->setVisible(show_bumpiness);
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	getChildView("bumpyScaleUFlip")->setVisible(show_bumpiness);
+	getChildView("bumpyScaleVFlip")->setVisible(show_bumpiness);
+// [/SL:KB]
 	getChildView("bumpyRot")->setVisible(show_bumpiness);
 	getChildView("bumpyOffsetU")->setVisible(show_bumpiness);
 	getChildView("bumpyOffsetV")->setVisible(show_bumpiness);
@@ -2941,3 +2996,16 @@ void LLPanelFace::LLSelectedTE::getMaxDiffuseRepeats(F32& repeats, bool& identic
 	} max_diff_repeats_func;
 	identical = LLSelectMgr::getInstance()->getSelection()->getSelectedTEValue( &max_diff_repeats_func, repeats );
 }
+
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+void LLPanelFace::onCommitScaleFlip(LLUICtrl* ctrl)
+{
+	LLSpinCtrl* pSpinCtrl = dynamic_cast<LLSpinCtrl*>(ctrl);
+	if (pSpinCtrl)
+	{
+		F32 nValue = pSpinCtrl->get();
+		pSpinCtrl->set(-nValue);
+		pSpinCtrl->onCommit();
+	}
+}
+// [/SL:KB]

@@ -207,6 +207,10 @@ protected:
 	static void		onCommitRepeatsPerMeter(	LLUICtrl* ctrl, void* userinfo);
 	static void		onClickAutoFix(void*);
 
+// [SL:KB] - Patch: Build-ScaleParamFlip | Checked: Catznip-5.2
+	static void		onCommitScaleFlip(LLUICtrl* ctrl);
+// [/SL:KB]
+
 	static F32     valueGlow(LLViewerObject* object, S32 face);
 
 	
