@@ -1117,7 +1117,7 @@ BOOL LLWorldMapView::handleToolTip( S32 x, S32 y, MASK mask )
 // [SL:KB] - Patch: Control-LocationInspector | Checked: 2012-06-09 (Catznip-3.3)
 //		if (gSavedSettings.getBOOL("ShowLocationInspector"))
 // [RLVa:KB] - Checked: 2012-08-12 (RLVa-1.4.7)
-		if ( (gSavedSettings.getBOOL("ShowLocationInspector")) && (!RlvActions::canShowLocation()) )
+		if ( (gSavedSettings.getBOOL("ShowLocationInspector")) && (RlvActions::canShowLocation()) )
 // [/RLVa:KB]
 		{
 			bool fShowToolTip = true;
