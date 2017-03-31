@@ -156,6 +156,8 @@ public:
 	virtual const std::string& getSearchableName() const = 0;
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	virtual const std::string& getDescription(void) const = 0;
+	virtual bool getIncludedInFilter() const = 0;
+	virtual void setIncludedInFilter(bool include) = 0;
 // [/SL:KB]
 
 	virtual LLPointer<LLUIImage> getIcon() const = 0;

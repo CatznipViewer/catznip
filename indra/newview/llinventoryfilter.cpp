@@ -104,6 +104,13 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringma
 {
 	const LLFolderViewModelItemInventory* listener = dynamic_cast<const LLFolderViewModelItemInventory*>(item);
 
+// [SL:KB] - Patch: Inventory-Links | Checked: Catznip-5.2
+	if ( (!mIncludedFolders.empty()) && (checkAgainstFolderIncludes(gInventory.getObject(listener->getUUID()))) )
+	{
+		return true;
+	}
+// [/SL:KB]
+
 	// If it's a folder and we're showing all folders, return automatically.
 //	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
 // [SL:KB] - Patch: Inventory-Links | Checked: Catznip-3.6
@@ -129,6 +136,11 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringma
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 bool LLInventoryFilter::check(const LLInventoryItem* item)
 {
+	if ( (!mIncludedFolders.empty()) && (checkAgainstFolderIncludes(item)) )
+	{
+		return true;
+	}
+
 	bool passed = (mFilterSubStringOrig.size()) ? checkAgainstName(item->getName()) : true;
 	passed = passed && (mFilterDescriptionSubString.size()) ? boost::algorithm::icontains(item->getDescription(), mFilterDescriptionSubString) : true;
 	passed = passed && checkAgainstFilterType(item);
@@ -1725,6 +1737,42 @@ LLInventoryFilter::EFilterLink LLInventoryFilter::getFilterLinks() const
 {
 	return mFilterOps.mFilterLinks;
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+void LLInventoryFilter::addIncludeFolder(const LLUUID& idFolder)
+{
+	if ( (isDefault()) || (isIncludeFolder(idFolder)) )
+		return;
+
+	mIncludedFolders.insert(idFolder);
+	setModified(FILTER_LESS_RESTRICTIVE);
+}
+
+void LLInventoryFilter::removeIncludeFolder(const LLUUID& idFolder)
+{
+	mIncludedFolders.erase(idFolder);
+	setModified(FILTER_MORE_RESTRICTIVE);
+}
+
+bool LLInventoryFilter::isIncludeFolder(const LLUUID& idFolder) const
+{
+	return mIncludedFolders.find(idFolder) != mIncludedFolders.end();
+}
+
+void LLInventoryFilter::clearIncludeFolders()
+{
+	mIncludedFolders.clear();
+	setModified(FILTER_MORE_RESTRICTIVE);
+}
+
+bool LLInventoryFilter::checkAgainstFolderIncludes(const LLInventoryObject* pInvObj) const
+{
+	if (mIncludedFolders.empty())
+		return false;
+	return (pInvObj) && (mIncludedFolders.find(pInvObj->getParentUUID()) != mIncludedFolders.end());
+}
+// [/SL:KB]
+
 LLInventoryFilter::EFolderShow LLInventoryFilter::getShowFolderState() const
 { 
 	return mFilterOps.mShowFolderState; 

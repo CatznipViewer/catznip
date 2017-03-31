@@ -32,7 +32,7 @@ LLAvatarEditor::LLAvatarEditor(const LLAvatarEditor::Params& p)
 {
 	// Reset the left text padding since we're moving the search button out of the way
 	S32 nTextPadRight = 0;
-	mSearchEditor->getTextPadding(NULL, &nTextPadRight);
+	mSearchEditor->getTextPadding(nullptr, &nTextPadRight);
 	mSearchEditor->setTextPadding(p.text_pad_left, nTextPadRight);
 
 	// Disable the text editor since we don't want anyone to type into it (instead left-clicks will trigger the search button)
@@ -53,22 +53,26 @@ LLAvatarEditor::~LLAvatarEditor()
 // LLAvatarEditor base class overrides
 //
 
+// virtual
 LLSD LLAvatarEditor::getValue() const
 {
 	return LLSD(getAvatarId());
 }
 
+// virtual
 void LLAvatarEditor::setValue(const LLSD& sdValue)
 {
 	setAvatarId(sdValue.asUUID());
 }
 
+// virtual
 void LLAvatarEditor::onClearButtonClick(const LLSD& sdData)
 {
 	setAvatarId(LLUUID::null);
 	onCommit();
 }
 
+// virtual
 void LLAvatarEditor::onSearchButtonClick()
 {
 	// Clear focus so the next click will trigger focus received

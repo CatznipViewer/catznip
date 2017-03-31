@@ -175,6 +175,9 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	
 	// context menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	mEnableCallbackRegistrar.add("Inventory.IsFilterIncludedFolder", boost::bind(&LLInventoryPanel::isFilterIncludedFolder, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
 //	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLInventoryPanel::doCreate, this, _2));
@@ -1687,6 +1690,17 @@ void LLInventoryPanel::doToSelected(const LLSD& userdata)
 
 	return;
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+bool LLInventoryPanel::isFilterIncludedFolder() const
+{
+	const LLFolderViewItem* pFVItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getCurSelectedItem() : nullptr;
+	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
+	if (pFVItem)
+		return getFilter().isIncludeFolder(pItemBridge->getUUID());
+	return false;
+}
+// [/SL:KB]
 
 BOOL LLInventoryPanel::handleKeyHere( KEY key, MASK mask )
 {
