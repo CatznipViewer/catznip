@@ -107,6 +107,9 @@
 #include "llfloaternotificationsconsole.h"
 #include "llfloaternotificationstabbed.h"
 #include "llfloaterobjectweights.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llfloaterofferinvfolderconfig.h"
+// [/SL:KB]
 #include "llfloateropenobject.h"
 //#include "llfloateroutfitphotopreview.h"
 //#include "llfloateroutfitsnapshot.h"
@@ -366,6 +369,9 @@ void LLViewerFloaterReg::registerFloaters()
 //	LLFloaterReg::add("notification_well_window", "floater_notifications_tabbed.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterNotificationsTabbed>);
 
 	LLFloaterReg::add("object_weights", "floater_object_weights.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterObjectWeights>);
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	LLFloaterReg::add("offer_invfolder_configure", "floater_offer_invfolder_config.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterInventoryOfferFolderConfig>);
+// [/SL:KB]
 	LLFloaterReg::add("openobject", "floater_openobject.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOpenObject>);
 	LLFloaterReg::add("outgoing_call", "floater_outgoing_call.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLOutgoingCallDialog>);
 //	LLFloaterReg::add("outfit_photo_preview", "floater_outfit_photo_preview.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterOutfitPhotoPreview>);

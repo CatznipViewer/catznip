@@ -7,6 +7,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -99,6 +100,9 @@ public:
 		// behavioral flags
 		Optional<bool>	multi_select,
 						commit_on_keyboard_movement,
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+						select_on_focus,
+// [/SL:KB]
 						mouse_wheel_opaque;
 
 		// display flags
@@ -467,6 +471,9 @@ private:
 	bool			mCommitOnSelectionChange;
 // [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
 	bool			mCommitOnDelete;
+// [/SL:KB]
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	bool			mSelectOnFocus = true;
 // [/SL:KB]
 	bool			mSelectionChanged;
 // [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)

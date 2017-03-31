@@ -6,6 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -132,6 +133,9 @@ LLScrollListCtrl::Params::Params()
 	sort_ascending("sort_ascending", true),
 	mouse_wheel_opaque("mouse_wheel_opaque", false),
 	commit_on_keyboard_movement("commit_on_keyboard_movement", true),
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	select_on_focus("select_on_focus", true),
+// [/SL:KB]
 	heading_height("heading_height"),
 	page_lines("page_lines", 0),
 	background_visible("background_visible"),
@@ -164,6 +168,9 @@ LLScrollListCtrl::LLScrollListCtrl(const LLScrollListCtrl::Params& p)
 	mCommitOnSelectionChange(false),
 // [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
 	mCommitOnDelete(false),
+// [/SL:KB]
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	mSelectOnFocus(p.select_on_focus),
 // [/SL:KB]
 	mSelectionChanged(false),
 // [SL:KB] - Patch: Control-ComboItemRemove | Checked: 2013-11-11 (Catznip-3.6)
@@ -3212,7 +3219,10 @@ BOOL LLScrollListCtrl::operateOnAll(EOperation op)
 void LLScrollListCtrl::setFocus(BOOL b)
 {
 	// for tabbing into pristine scroll lists (Finder)
-	if (!getFirstSelected())
+//	if (!getFirstSelected())
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	if ( (mSelectOnFocus) && (!getFirstSelected()) )
+// [/SL:KB]
 	{
 		selectFirstItem();
 		//onCommit(); // SJB: selectFirstItem() will call onCommit() if appropriate

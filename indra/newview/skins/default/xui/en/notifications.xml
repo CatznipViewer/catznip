@@ -6934,6 +6934,20 @@ You don&apos;t have permission to copy this.
   </notification>
 
   <notification
+   icon="alertmodal.tga"
+   name="InventoryOfferFolderConfigSaveChanges"
+   type="alertmodal">
+There are unsaved changes to the '[NAME]' folder.
+
+Do you want to save your changes?
+    <usetemplate
+     name="yesnocancelbuttons"
+     canceltext="Cancel"
+     notext="Don&apos;t Save"
+     yestext="Save" />
+  </notification>
+
+  <notification
    icon="notifytip.tga"
    name="ObjectMessage"
    type="notifytip">
@@ -7578,6 +7592,12 @@ An object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; owned by [NAME_SLU
        name="Mute"
        text="Block Owner"/>
 -->
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 
@@ -7596,6 +7616,12 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        index="1"
        name="Discard"
        text="Discard"/>
+      <check
+       name="check"
+       control="ShowOfferedInventory"
+       text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 
@@ -7625,6 +7651,8 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
        name="check"
        control="ShowOfferedInventory"
        text="Show in inventory" />
+      <panel
+       class="panel_offer_invfolder" />
     </form>
   </notification>
 
