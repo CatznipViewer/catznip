@@ -109,7 +109,7 @@ void LLFloaterInventoryOfferFolderBrowse::onFilterEdit(const std::string& strFil
 	}
 	else
 	{
-		if (m_pInvPanel->getFilterSubString().empty())
+		if (!m_pInvPanel->hasFilterSubString())
 		{
 			// New and existing filter both empty; nothing to do
 			return;

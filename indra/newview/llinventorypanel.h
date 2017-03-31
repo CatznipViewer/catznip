@@ -6,7 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -193,9 +193,15 @@ public:
 	U32 getFilterPermMask() const;
 	void setFilterWearableTypes(U64 filter);
 	void setFilterSubString(const std::string& string);
-	const std::string getFilterSubString();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	bool hasFilterSubString() const;
+// [/SL:KB]
+//	const std::string getFilterSubString();
 	void setSinceLogoff(BOOL sl);
 	void setHoursAgo(U32 hours);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	void setDateRange(time_t min_date, time_t max_date);
+// [/SL:KB]
 	void setDateSearchDirection(U32 direction);
 	BOOL getSinceLogoff();
 //	void setFilterLinks(U64 filter_links);
@@ -228,6 +234,9 @@ public:
 	bool beginIMSession();
 	void fileUploadLocation(const LLSD& userdata);
 	bool attachObject(const LLSD& userdata);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	bool isFilterIncludedFolder() const;
+// [/SL:KB]
 	static void idle(void* user_data);
 
 	// DEBUG ONLY:

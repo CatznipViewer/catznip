@@ -1,0 +1,622 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<floater
+ can_minimize="false"
+ height="475"
+ help_topic="inventory_finder"
+ layout="topleft"
+ name="Inventory Finder"
+ title="Filter Items"
+ width="310">
+
+        <panel
+         follows="all"
+         height="130"
+         label="General"
+         layout="topleft"
+         left="10"
+         name="General"
+         top="0"
+         width="290">
+            <text
+             follows="left|top"
+             height="10"
+             left="7"
+             name="text_name"
+             top="12"
+             width="73">
+              Name :
+            </text>
+            <filter_editor
+             follows="left|top|right"
+             height="23"
+             label="Filter by Name"
+             layout="topleft"
+             left_pad="0"
+             max_length_chars="300"
+             name="filter_name"
+             text_pad_left="10"
+             top_delta="-5"
+             width="205" />
+            <radio_group
+             follows="top|left"
+             height="13"
+             layout="topleft"
+             left_delta="5"
+             name="radio_name_match_type"
+             top_pad="7"
+             width="200">
+                <radio_item
+                 label="Exact"
+                 layout="topleft"
+                 name="radio_name_match_exact"
+                 tool_tip="Search for items with a name that contains the search text exactly"
+                 value="exact"
+                 width="62" />
+                <radio_item
+                 label="All"
+                 layout="topleft"
+                 left_pad="0"
+                 name="radio_name_match_all"
+                 tool_tip="Search for items with a name that contains all of the search words"
+                 value="all"
+                 width="62" />
+                <radio_item
+                 label="Any"
+                 layout="topleft"
+                 left_pad="0"
+                 name="radio_name_match_any"
+                 tool_tip="Search for items with a name that contains any of the search words"
+                 value="any"
+                 width="62" />
+            </radio_group>
+
+            <text
+             follows="left|top"
+             height="10"
+             left="7"
+             name="text_description"
+             top_pad="10"
+             width="73">
+              Description :
+            </text>
+            <filter_editor
+             follows="left|top|right"
+             height="23"
+             label="Filter by Description"
+             layout="topleft"
+             left_pad="0"
+             max_length_chars="300"
+             name="filter_description"
+             text_pad_left="10"
+             top_delta="-5"
+             width="205" />
+
+            <text
+             follows="left|top"
+             height="10"
+             left="7"
+             name="text_creator"
+             top_pad="10"
+             width="73">
+              Creator :
+            </text>
+            <avatar_editor
+             follows="left|top|right"
+             height="23"
+             label="Filter by Creator"
+             layout="topleft"
+             left_pad="0"
+             max_length_chars="300"
+             name="filter_creator"
+             text_pad_left="10"
+             top_delta="-5"
+             width="205" />
+
+            <text
+             follows="left|top"
+             height="10"
+             left="7"
+             name="text_permissions"
+             top_pad="8"
+             width="73">
+              Permissions :
+            </text>
+            <check_box
+             height="16"
+             label="No Mod"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_modify"
+             top_delta="0"
+             width="60" />
+            <check_box
+             height="16"
+             label="No Copy"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_copy"
+             top_delta="0"
+             width="64" />
+            <check_box
+             height="16"
+             label="No Trans"
+             layout="topleft"
+             left_pad="4"
+             name="check_perm_transfer"
+             top_delta="0"
+             width="60" />
+
+        </panel>
+
+        <view_border
+         bevel_style="none"
+         border_thickness="1"
+         follows="left|top"
+         height="0"
+         layout="topleft"
+         left="10"
+         right="-10"
+         mouse_opaque="false"
+         name="divisor1"
+         top_pad="7" />
+			 
+        <panel
+         follows="all"
+         height="155"
+         label="By Type"
+         layout="topleft"
+         left="10"
+         name="By Type"
+         top_pad="-4"
+         width="290">
+            <icon
+             height="16"
+             image_name="Inv_Animation"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_animation"
+             top="12"
+             width="16" />
+            <check_box
+             height="16"
+             label="Animation"
+             layout="topleft"
+             left_pad="4"
+             name="check_animation"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_CallingCard"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_calling_card"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Calling Cards"
+             layout="topleft"
+             left_pad="4"
+             name="check_calling_card"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Shirt"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_clothing"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Clothing"
+             layout="topleft"
+             left_pad="4"
+             name="check_clothing"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Gesture"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_gesture"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Gestures"
+             layout="topleft"
+             left_pad="4"
+             name="check_gesture"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Landmark"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_landmark"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Landmarks"
+             layout="topleft"
+             left_pad="4"
+             name="check_landmark"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Notecard"
+             layout="topleft"
+             left="30"
+             mouse_opaque="true"
+             name="icon_notecard"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Notecards"
+             layout="topleft"
+             left_pad="4"
+             name="check_notecard"
+             top_delta="2"
+             width="126" />
+            
+            <icon
+             height="16"
+             image_name="Inv_Object"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_object"
+             top="12"
+             width="16" />
+            <check_box
+             height="16"
+             label="Objects"
+             layout="topleft"
+             left_pad="4"
+             name="check_object"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Script"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_script"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Scripts"
+             layout="topleft"
+             left_pad="4"
+             name="check_script"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Snapshot"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_snapshot"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Snapshots"
+             layout="topleft"
+             left_pad="4"
+             name="check_snapshot"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Sound"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_sound"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Sounds"
+             layout="topleft"
+             left_pad="4"
+             name="check_sound"
+             top_delta="2"
+             width="126" />
+            <icon
+             height="16"
+             image_name="Inv_Texture"
+             layout="topleft"
+             left="160"
+             mouse_opaque="true"
+             name="icon_texture"
+             top_pad="2"
+             width="16" />
+            <check_box
+             height="16"
+             label="Textures"
+             layout="topleft"
+             left_pad="4"
+             name="check_texture"
+             top_delta="2"
+             width="126" />
+            
+            <button
+             commit_callback.function="Filter.SelectAllTypes"
+             follows="left|top"
+             height="20"
+             label="Check All"
+             label_selected="All"
+             layout="topleft"
+             left="60"
+             name="check_all"
+             top="135"
+             width="80" />
+            <button
+             commit_callback.function="Filter.SelectNoTypes"
+             follows="left|top"
+             height="20"
+             label="Clear All"
+             label_selected="None"
+             layout="topleft"
+             left_pad="10"
+             name="check_none"
+             top_delta="0"
+             width="80" />
+        </panel>
+
+        <view_border
+         bevel_style="none"
+         border_thickness="1"
+         follows="left|top"
+         height="0"
+         layout="topleft"
+         left="10"
+         right="-10"
+         mouse_opaque="false"
+         name="divisor2"
+         top_pad="7" />
+			 
+        <panel
+         follows="all"
+         height="103"
+         label="By Date"
+         layout="topleft"
+         left="10"
+         name="By Date"
+         top_pad="-3"
+         width="290">
+            
+            <!-- Since logoff -->
+            <check_box
+             height="16"
+             label="Since Logoff"
+             layout="topleft"
+             left="7"
+             name="check_since_logoff"
+             top="12"
+             width="144" />
+            
+            <!-- Older than X [hours|days] -->
+            <check_box
+             height="16"
+             label="Older than"
+             layout="topleft"
+             left="7"
+             name="check_min_age"
+             top_pad="7"
+             width="90" />
+            <spinner
+             decimal_digits="0"
+             enabled="false"
+             follows="left|top"
+             height="16"
+             increment="1"
+             initial_value="0"
+             label=""
+             label_width="64"
+             layout="topleft"
+             left_pad="0"
+             max_val="240000"
+             name="spin_min_age"
+             top_delta="-5"
+             width="60" />
+            <combo_box
+             enabled="false"
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             name="combo_min_age"
+             width="80"
+             left_pad="2"
+             top_delta="0">
+                <combo_box.item
+                 label="hour(s)"
+                 name="hours"
+                 value="hours" />
+                <combo_box.item
+                 label="day(s)"
+                 name="days"
+                 value="days" />
+            </combo_box>
+            
+            <!-- Newer than X [hours|days] -->
+            <check_box
+             height="16"
+             label="Newer than"
+             layout="topleft"
+             left="7"
+             name="check_max_age"
+             top_pad="7"
+             width="90" />
+            <spinner
+             decimal_digits="0"
+             enabled="false"
+             follows="left|top"
+             height="16"
+             increment="1"
+             initial_value="0"
+             label=""
+             label_width="64"
+             layout="topleft"
+             left_pad="0"
+             max_val="240000"
+             name="spin_max_age"
+             top_delta="-5"
+             width="60" />
+            <combo_box
+             enabled="false"
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             name="combo_max_age"
+             width="80"
+             left_pad="2"
+             top_delta="0">
+                <combo_box.item
+                 label="hour(s)"
+                 name="hours"
+                 value="hours" />
+                <combo_box.item
+                 label="day(s)"
+                 name="days"
+                 value="days" />
+            </combo_box>
+
+            <!-- Between X and Y [hours|days] -->
+            <check_box
+             height="16"
+             label="Between"
+             layout="topleft"
+             left="7"
+             name="check_range"
+             top_pad="7"
+             width="70" />
+            <spinner
+             decimal_digits="0"
+             enabled="false"
+             follows="left|top"
+             height="16"
+             increment="1"
+             initial_value="0"
+             label=""
+             label_width="64"
+             layout="topleft"
+             left_pad="0"
+             max_val="240000"
+             name="spin_range_start"
+             top_delta="-5"
+             width="50" />
+            <text
+             follows="left|top"
+             height="10"
+             left_pad="5"
+             name="text_range"
+             top_delta="5"
+             width="30">
+              and
+            </text>
+            <spinner
+             decimal_digits="0"
+             enabled="false"
+             follows="left|top"
+             height="16"
+             increment="1"
+             initial_value="0"
+             label=""
+             label_width="64"
+             layout="topleft"
+             left_pad="0"
+             max_val="240000"
+             name="spin_range_end"
+             top_delta="-5"
+             width="50" />
+            <combo_box
+             enabled="false"
+             follows="left|top"
+             height="23"
+             layout="topleft"
+             name="combo_range"
+             width="70"
+             left_pad="2"
+             top_delta="0">
+                <combo_box.item
+                 label="hour(s)"
+                 name="hours"
+                 value="hours" />
+                <combo_box.item
+                 label="day(s)"
+                 name="days"
+                 value="days" />
+            </combo_box>
+        </panel>
+        
+    <view_border
+     bevel_style="none"
+     border_thickness="1"
+     follows="left|top"
+     height="0"
+     layout="topleft"
+     left="10"
+     right="-10"
+     mouse_opaque="false"
+     name="divisor3"
+     top_pad="7" />
+			 
+    <check_box
+     height="16"
+     label="Always show folders"
+     layout="topleft"
+     left="17"
+     name="check_show_empty"
+     top_pad="8"
+     width="144" />
+    <check_box
+     height="16"
+     label="Show links"
+     layout="topleft"
+     left="17"
+     name="check_show_links"
+     top_pad="3"
+     width="144" />
+
+	<button
+     commit_callback.function="Filter.Reset"
+     follows="top|right"
+     height="20"
+     label="Reset Filter"
+     label_selected="Reset Filter"
+     layout="topleft"
+     name="button_reset"
+     left="17"
+     top_pad="3"
+     width="76" />
+    <button
+     commit_callback.function="Floater.Collapse"
+     follows="left|top"
+     height="22"
+     image_overlay="Conv_toolbar_collapse_up"
+     layout="topleft"
+     name="button_collapse"
+     right="-5"
+     top_delta="-1"
+     width="27" />
+
+</floater>

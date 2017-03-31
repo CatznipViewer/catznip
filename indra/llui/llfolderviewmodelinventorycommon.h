@@ -42,6 +42,9 @@ public:
 	}
 	
 	virtual const LLUUID& getUUID() const = 0;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	virtual const LLUUID& getCreatorUUID() const = 0;
+// [/SL:KB]
 	virtual time_t getCreationDate() const = 0;	// UTC seconds
 	virtual void setCreationDate(time_t creation_date_utc) = 0;
 	virtual PermissionMask getPermissionMask() const = 0;

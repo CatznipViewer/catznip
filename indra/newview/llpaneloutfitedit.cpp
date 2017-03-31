@@ -877,7 +877,10 @@ void LLPanelOutfitEdit::onSearchEdit(const std::string& string)
 	
 // [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 	// save current folder open state if no filter currently applied
-	if ( (mItemsPanel) && (mItemsPanel->getFilterSubString().empty()) )
+//	if ( (mItemsPanel) && (mItemsPanel->getFilterSubString().empty()) )
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	if ( (mItemsPanel) && (!mItemsPanel->hasFilterSubString()) )
+// [/SL:KB]
 	{
 		mSavedFolderState->setApply(FALSE);
 		mItemsPanel->getRootFolder()->applyFunctorRecursively(*mSavedFolderState);

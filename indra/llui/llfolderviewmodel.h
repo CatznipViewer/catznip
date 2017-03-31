@@ -4,7 +4,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,10 @@ class LLUUID;
 class LLFolderViewItem;
 class LLFolderViewFolder;
 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+typedef std::vector<std::pair<int, int>> filter_stringmatch_results_t;
+// [/SL:KB]
+
 class LLFolderViewFilter
 {
 public:
@@ -66,7 +70,10 @@ public:
 	// +-------------------------------------------------------------------+
 	// + Execution And Results
 	// +-------------------------------------------------------------------+
-	virtual bool 				check(const LLFolderViewModelItem* item) = 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual bool 				check(const LLFolderViewModelItem* item, filter_stringmatch_results_t& match_offsets) = 0;
+// [/SL:KB]
+//	virtual bool 				check(const LLFolderViewModelItem* item) = 0;
 	virtual bool				checkFolder(const LLFolderViewModelItem* folder) const = 0;
 
 	virtual void 				setEmptyLookupMessage(const std::string& message) = 0;
@@ -74,7 +81,7 @@ public:
 
 	virtual bool				showAllResults() const = 0;
 
-	virtual std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const = 0;
+//	virtual std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const = 0;
 	virtual std::string::size_type getFilterStringSize() const = 0;
 	// +-------------------------------------------------------------------+
 	// + Status
@@ -147,6 +154,11 @@ public:
 	virtual const std::string& getName() const = 0;
 	virtual const std::string& getDisplayName() const = 0;
 	virtual const std::string& getSearchableName() const = 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual const std::string& getDescription(void) const = 0;
+	virtual bool getIncludedInFilter() const = 0;
+	virtual void setIncludedInFilter(bool include) = 0;
+// [/SL:KB]
 
 	virtual LLPointer<LLUIImage> getIcon() const = 0;
 	virtual LLPointer<LLUIImage> getIconOpen() const { return getIcon(); }
@@ -190,12 +202,20 @@ public:
 	virtual bool filter( LLFolderViewFilter& filter) = 0;
 	virtual bool passedFilter(S32 filter_generation = -1) = 0;
 	virtual bool descendantsPassedFilter(S32 filter_generation = -1) = 0;
-	virtual void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0) = 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual void setPassedFilter(bool passed, S32 filter_generation, filter_stringmatch_results_t& match_offsets, std::string::size_type string_size = 0) = 0;
+// [/SL:KB]
+//	virtual void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0) = 0;
 	virtual void setPassedFolderFilter(bool passed, S32 filter_generation) = 0;
 	virtual void dirtyFilter() = 0;
 	virtual void dirtyDescendantsFilter() = 0;
 	virtual bool hasFilterStringMatch() = 0;
-	virtual std::string::size_type getFilterStringOffset() = 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual int getFilterStringMatchCount() const = 0;
+	virtual filter_stringmatch_results_t::value_type getFilterStringMatchOffset(int index = 0) const = 0;
+	virtual const filter_stringmatch_results_t& getFilterStringMatchOffsets() const = 0;
+// [/Sl:KB]
+//	virtual std::string::size_type getFilterStringOffset() = 0;
 	virtual std::string::size_type getFilterStringSize() = 0;
 
 	virtual S32	getLastFilterGeneration() const = 0;
@@ -235,7 +255,7 @@ public:
 	:	mSortVersion(-1),
 		mPassedFilter(true),
 		mPassedFolderFilter(true),
-		mStringMatchOffsetFilter(std::string::npos),
+//		mStringMatchOffsetFilter(std::string::npos),
 		mStringFilterSize(0),
 		mFolderViewItem(NULL),
 		mLastFilterGeneration(-1),
@@ -279,7 +299,12 @@ public:
 		}
 	}
 	bool hasFilterStringMatch();
-	std::string::size_type getFilterStringOffset();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	int getFilterStringMatchCount() const override;
+	filter_stringmatch_results_t::value_type getFilterStringMatchOffset(int index = 0) const override;
+	const filter_stringmatch_results_t& getFilterStringMatchOffsets() const override;
+// [/Sl:KB]
+//	std::string::size_type getFilterStringOffset();
 	std::string::size_type getFilterStringSize();
 	
 	typedef std::list<LLFolderViewModelItem*> child_list_t;
@@ -323,11 +348,17 @@ public:
 	child_list_t::const_iterator getChildrenEnd() const { return mChildren.end(); }
 	child_list_t::size_type getChildrenCount() const { return mChildren.size(); }
 	
-	void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0)
+//	void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	void setPassedFilter(bool passed, S32 filter_generation, filter_stringmatch_results_t& match_offsets, std::string::size_type string_size = 0)
+// [/SL:KB]
 	{
 		mPassedFilter = passed;
 		mLastFilterGeneration = filter_generation;
-		mStringMatchOffsetFilter = string_offset;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+		mStringMatchOffsets = std::move(match_offsets);
+// [/SL:KB]
+//		mStringMatchOffsetFilter = string_offset;
 		mStringFilterSize = string_size;
 		mMarkedDirtyGeneration = -1;
 	}
@@ -373,7 +404,10 @@ protected:
 	S32							mSortVersion;
 	bool						mPassedFilter;
 	bool						mPassedFolderFilter;
-	std::string::size_type		mStringMatchOffsetFilter;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	filter_stringmatch_results_t mStringMatchOffsets;
+// [/SL:KB]
+//	std::string::size_type		mStringMatchOffsetFilter;
 	std::string::size_type		mStringFilterSize;
 
 	S32							mLastFilterGeneration,

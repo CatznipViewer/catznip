@@ -301,25 +301,22 @@ void LLFolderView::addFolder( LLFolderViewFolder* folder)
 	LLFolderViewFolder::addFolder(folder);
 }
 
-// [SL:KB] - Patch: Inventory-Panel | Checked: 2012-02-14 (Catzip-3.2)
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catzip-3.2
 void LLFolderView::closeAllFolders()
 {
 	folders_t openTopLevel;
-	for (folders_t::const_iterator itFolder = mFolders.begin(); itFolder != mFolders.end(); ++itFolder)
+	for (LLFolderViewFolder* pFolder : mFolders)
 	{
-		LLFolderViewFolder* pFolder = *itFolder;
 		if (pFolder->isOpen())
 			openTopLevel.push_back(pFolder);
 	}
-//	std::for_each(mFolders.begin(), mFolders.end(), [&openTopLevel](LLFolderViewFolder* f) { if (f->isOpen()) { openTopLevel.push_back(f); } });
 
 	// Close all the folders
 	setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
-	for (folders_t::const_iterator itFolder = openTopLevel.begin(); itFolder != openTopLevel.end(); ++itFolder)
+	for (LLFolderViewFolder* pFolder : openTopLevel)
 	{
-		(*itFolder)->setOpen(TRUE);
+		pFolder->setOpen(TRUE);
 	}
-//	std::for_each(openTopLevel.begin(), openTopLevel.end(), [](LLFolderViewFolder* f) { f->setOpen(TRUE); });
 
 	clearSelection();
 	mSignalSelectCallback = SIGNAL_KEYBOARD_FOCUS;

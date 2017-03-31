@@ -244,6 +244,17 @@ LLFolderType::EType LLInvFVBridge::getPreferredType() const
 	return LLFolderType::FT_NONE;
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+const std::string& LLInvFVBridge::getDescription() const
+{
+	return LLStringUtil::null;
+}
+
+const LLUUID& LLInvFVBridge::getCreatorUUID() const
+{
+	return LLUUID::null;
+}
+// [/SL:KB]
 
 // Folders don't have creation dates.
 time_t LLInvFVBridge::getCreationDate() const
@@ -2042,6 +2053,28 @@ std::string LLItemBridge::getLabelSuffix() const
 	return suffix;
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+const std::string& LLItemBridge::getDescription() const
+{
+	LLViewerInventoryItem* item = getItem();
+	if (item)
+	{
+		return item->getDescription();
+	}
+	return LLStringUtil::null;
+}
+
+const LLUUID& LLItemBridge::getCreatorUUID() const
+{
+	LLViewerInventoryItem* item = getItem();
+	if (item)
+	{
+		return item->getCreatorUUID();
+	}
+	return LLUUID::null;
+}
+// [/SL:KB]
+
 time_t LLItemBridge::getCreationDate() const
 {
 	LLViewerInventoryItem* item = getItem();
@@ -2342,6 +2375,28 @@ LLFontGL::StyleFlags LLFolderBridge::getLabelStyle() const
 // [/SL:KB]
 //    return LLFontGL::NORMAL;
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+bool LLFolderBridge::getIncludedInFilter() const
+{
+	if (mInventoryPanel.isDead())
+		return false;
+
+	return mInventoryPanel.get()->getFilter().isIncludeFolder(mUUID);
+}
+
+void LLFolderBridge::setIncludedInFilter(bool include)
+{
+	if (mInventoryPanel.isDead())
+		return;
+
+	LLInventoryFilter& invFilter = mInventoryPanel.get()->getFilter();
+	if (!invFilter.isIncludeFolder(mUUID))
+		invFilter.addIncludeFolder(mUUID);
+	else
+		invFilter.removeIncludeFolder(mUUID);
+}
+// [/SL:KB]
 
 void LLFolderBridge::update()
 {
@@ -3351,6 +3406,20 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 			}
  		}
  	}
+	else if ("toggle_filtered" == action)
+	{
+		if (LLPanelMainInventory* pMainInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : nullptr)
+		{
+			if (LLInventoryPanel* pInvPanel = pMainInvPanel->getActivePanel())
+			{
+				LLInventoryFilter& invFilter = pInvPanel->getFilter();
+				if (!invFilter.isIncludeFolder(mUUID))
+					pInvPanel->getFilter().addIncludeFolder(mUUID);
+				else
+					pInvPanel->getFilter().removeIncludeFolder(mUUID);
+			}
+		}
+	}
 // [/SL:KB]
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
 	else if ("open_newwindow" == action)
@@ -4309,6 +4378,9 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-11-14 (Catznip-3.2)
 		items.push_back(std::string("Outfit Separator"));
 		items.push_back(std::string("Open in XXX"));
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		items.push_back(std::string("Show Contents in XXX"));
 // [/SL:KB]
 	}
 // [SL:KB] - Patch: Inventory-Misc | Checked: 2011-05-28 (Catznip-2.6)
@@ -6053,7 +6125,10 @@ LLCallingCardBridge::~LLCallingCardBridge()
 //		if (new_length<old_length)
 //		{
 //			LLInventoryFilter* filter = getInventoryFilter();
-//			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
+////			if (filter && mPassedFilter && mSearchableName.find(filter->getFilterSubString()) == std::string::npos)
+//// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+//			if (filter && mPassedFilter && filter->checkAgainstName(mSearchableName))
+//// [/SL:KB]
 //			{
 //				// string no longer contains substring 
 //				// we either have to update all parents manually or restart filter.

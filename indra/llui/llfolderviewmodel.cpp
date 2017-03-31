@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -53,15 +53,36 @@ void LLFolderViewModelCommon::filter()
 	mFolderView->getViewModelItem()->filter(getFilter());
 }
 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 bool LLFolderViewModelItemCommon::hasFilterStringMatch()
 {
-	return mStringMatchOffsetFilter != std::string::npos;
+	return !mStringMatchOffsets.empty();
 }
 
-std::string::size_type LLFolderViewModelItemCommon::getFilterStringOffset()
+int LLFolderViewModelItemCommon::getFilterStringMatchCount() const
 {
-	return mStringMatchOffsetFilter;
+	return mStringMatchOffsets.size();
 }
+
+filter_stringmatch_results_t::value_type LLFolderViewModelItemCommon::getFilterStringMatchOffset(int index) const
+{
+	return (mStringMatchOffsets.size() > index) ? mStringMatchOffsets[index] : std::make_pair(0, 0);
+}
+
+const filter_stringmatch_results_t& LLFolderViewModelItemCommon::getFilterStringMatchOffsets() const
+{
+	return mStringMatchOffsets;
+}
+// [/Sl:KB]
+//bool LLFolderViewModelItemCommon::hasFilterStringMatch()
+//{
+//	return mStringMatchOffsetFilter != std::string::npos;
+//}
+//
+//std::string::size_type LLFolderViewModelItemCommon::getFilterStringOffset()
+//{
+//	return mStringMatchOffsetFilter;
+//}
 
 std::string::size_type LLFolderViewModelItemCommon::getFilterStringSize()
 {

@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -175,6 +175,9 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	
 	// context menu callbacks
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	mEnableCallbackRegistrar.add("Inventory.IsFilterIncludedFolder", boost::bind(&LLInventoryPanel::isFilterIncludedFolder, this));
+// [/SL:KB]
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
 //	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
 	mCommitCallbackRegistrar.add("Inventory.DoCreate", boost::bind(&LLInventoryPanel::doCreate, this, _2));
@@ -406,10 +409,17 @@ void LLInventoryPanel::setFilterSubString(const std::string& string)
 	getFilter().setFilterSubString(string);
 }
 
-const std::string LLInventoryPanel::getFilterSubString() 
-{ 
-	return getFilter().getFilterSubString();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+bool LLInventoryPanel::hasFilterSubString() const
+{
+	return getFilter().hasFilterString();
 }
+// [/SL:KB]
+
+//const std::string LLInventoryPanel::getFilterSubString() 
+//{ 
+//	return getFilter().getFilterSubString();
+//}
 
 // [SL:KB] - Patch: Inventory-SortMenu | Checked: 2012-07-12 (Catznip-3.3)
 void LLInventoryPanel::setSortBy(const std::string& sort_type)
@@ -475,6 +485,13 @@ void LLInventoryPanel::setHoursAgo(U32 hours)
 {
 	getFilter().setHoursAgo(hours);
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+void LLInventoryPanel::setDateRange(time_t min_date, time_t max_date)
+{
+	getFilter().setDateRange(min_date, max_date);
+}
+// [/SL:KB]
 
 void LLInventoryPanel::setDateSearchDirection(U32 direction)
 {
@@ -1673,6 +1690,17 @@ void LLInventoryPanel::doToSelected(const LLSD& userdata)
 
 	return;
 }
+
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+bool LLInventoryPanel::isFilterIncludedFolder() const
+{
+	const LLFolderViewItem* pFVItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getCurSelectedItem() : nullptr;
+	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
+	if (pFVItem)
+		return getFilter().isIncludeFolder(pItemBridge->getUUID());
+	return false;
+}
+// [/SL:KB]
 
 BOOL LLInventoryPanel::handleKeyHere( KEY key, MASK mask )
 {
