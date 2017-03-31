@@ -6,7 +6,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -73,7 +73,10 @@ public:
 //	virtual EInventorySortGroup getSortGroup() const = 0;
 //	virtual LLInventoryObject* getInventoryObject() const = 0;
 	virtual void requestSort();
-	virtual void setPassedFilter(bool filtered, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	        void setPassedFilter(bool filtered, S32 filter_generation, filter_stringmatch_results_t& match_offsets, std::string::size_type string_size = 0) override;
+// [/SL:KB]
+//	virtual void setPassedFilter(bool filtered, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0);
 	virtual bool filter( LLFolderViewFilter& filter);
 	virtual bool filterChildItem( LLFolderViewModelItem* item, LLFolderViewFilter& filter);
 

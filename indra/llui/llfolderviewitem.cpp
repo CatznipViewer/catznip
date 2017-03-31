@@ -5,7 +5,7 @@
 * $LicenseInfo:firstyear=2001&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
-* Copyright (C) 2010-2015, Kitty Barnett
+* Copyright (C) 2010-2017, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -937,14 +937,28 @@ void LLFolderViewItem::draw()
 
 	if (filter_string_length > 0)
 	{
-		S32 left = ll_round(text_left) + font->getWidth(combined_string, 0, mViewModelItem->getFilterStringOffset()) - 2;
-		S32 right = left + font->getWidth(combined_string, mViewModelItem->getFilterStringOffset(), filter_string_length) + 2;
-		S32 bottom = llfloor(getRect().getHeight() - font->getLineHeight() - 3 - TOP_PAD);
-		S32 top = getRect().getHeight() - TOP_PAD;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+		const LLUIImage* box_image = default_params.selection_image;
 
-		LLUIImage* box_image = default_params.selection_image;
-		LLRect box_rect(left, top, right, bottom);
-		box_image->draw(box_rect, sFilterBGColor);
+		LLRect box_rect;
+		box_rect.mTop = getRect().getHeight() - TOP_PAD;
+		box_rect.mBottom = box_rect.mTop - font->getLineHeight() - 3;
+
+		for (const auto& offset_pair : mViewModelItem->getFilterStringMatchOffsets())
+		{
+			box_rect.mLeft = ll_round(text_left) + font->getWidth(combined_string, 0, offset_pair.first) - 2;
+			box_rect.mRight = box_rect.mLeft + font->getWidth(combined_string, offset_pair.first, offset_pair.second - offset_pair.first) + 2;
+			box_image->draw(box_rect, sFilterBGColor);
+		}
+// [/SL:KB]
+//		S32 left = ll_round(text_left) + font->getWidth(combined_string, 0, mViewModelItem->getFilterStringOffset()) - 2;
+//		S32 right = left + font->getWidth(combined_string, mViewModelItem->getFilterStringOffset(), filter_string_length) + 2;
+//		S32 bottom = llfloor(getRect().getHeight() - font->getLineHeight() - 3 - TOP_PAD);
+//		S32 top = getRect().getHeight() - TOP_PAD;
+//
+//		LLUIImage* box_image = default_params.selection_image;
+//		LLRect box_rect(left, top, right, bottom);
+//		box_image->draw(box_rect, sFilterBGColor);
     }
 
     LLColor4 color = (mIsSelected && filled) ? mFontHighlightColor : mFontColor;
@@ -974,11 +988,21 @@ void LLFolderViewItem::draw()
 	//
     if (filter_string_length > 0)
     {
-        F32 match_string_left = text_left + font->getWidthF32(combined_string, 0, mViewModelItem->getFilterStringOffset());
-        F32 yy = (F32)getRect().getHeight() - font->getLineHeight() - (F32)mTextPad - (F32)TOP_PAD;
-        font->renderUTF8( combined_string, mViewModelItem->getFilterStringOffset(), match_string_left, yy,
-            sFilterTextColor, LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL, LLFontGL::NO_SHADOW,
-            filter_string_length, S32_MAX, &right_x, FALSE );
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+		F32 yy = (F32)getRect().getHeight() - font->getLineHeight() - (F32)mTextPad - (F32)TOP_PAD;
+		for (const auto& offset_pair : mViewModelItem->getFilterStringMatchOffsets())
+		{
+			F32 match_string_left = text_left + font->getWidthF32(combined_string, 0, offset_pair.first);
+			font->renderUTF8(combined_string, offset_pair.first, match_string_left, yy,
+				sFilterTextColor, LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL, LLFontGL::NO_SHADOW,
+				offset_pair.second - offset_pair.first, S32_MAX, &right_x, FALSE);
+		}
+// [/SL:KB]
+//        F32 match_string_left = text_left + font->getWidthF32(combined_string, 0, mViewModelItem->getFilterStringOffset());
+//        F32 yy = (F32)getRect().getHeight() - font->getLineHeight() - (F32)mTextPad - (F32)TOP_PAD;
+//        font->renderUTF8( combined_string, mViewModelItem->getFilterStringOffset(), match_string_left, yy,
+//            sFilterTextColor, LLFontGL::LEFT, LLFontGL::BOTTOM, LLFontGL::NORMAL, LLFontGL::NO_SHADOW,
+//            filter_string_length, S32_MAX, &right_x, FALSE );
     }
 
     //Gilbert Linden 9-20-2012: Although this should be legal, removing it because it causes the mLabelSuffix rendering to

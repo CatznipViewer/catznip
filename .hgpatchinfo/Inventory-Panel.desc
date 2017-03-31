@@ -3,8 +3,6 @@
     -> don't delete the last user-added inventory panel so it can be reused (controlled by InventoryReuseUserTab)
 - added   : sort button to the inventory floater's toolbar panel
     -> sort options were removed from the main gear menu and moved to the sort menu
-- added   : "Collapse All" button to the inventory floater toolbar
-    -> will not collapse top-level folders (= My Inventory of Library) if they are currently open
 - added   : "Show Filter" button to the main inventory floater
 - added   : "InventoryDnDCheckFilter" setting to keep current drag-and-drop inventory behaviour or restore "legacy" behaviour
     -> behaviour changed as a result of EXP-1335
@@ -39,3 +37,7 @@
     -> always enabled for items outside of COF
 - fixed : folder links aren't visible
     -> since they have the inentory type of LLInventoryType::IT_CATEGORY they were being treated as folders
+
+	
+"Collapse All" button to the inventory floater toolbar
+  -> will not collapse top-level folders (= My Inventory of Library) if they are currently open

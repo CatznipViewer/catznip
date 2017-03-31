@@ -386,8 +386,14 @@ void LLLineEditor::setMaxTextChars(S32 max_text_chars)
 
 void LLLineEditor::getTextPadding(S32 *left, S32 *right)
 {
-	*left = mTextPadLeft;
-	*right = mTextPadRight;
+// [SL:KB] - Patch: Control-AvatarEditor | Checked: Catznip-5.2
+	if (left)
+		*left = mTextPadLeft;
+	if (right)
+		*right = mTextPadRight;
+// [/SL:KB]
+//	*left = mTextPadLeft;
+//	*right = mTextPadRight;
 }
 
 void LLLineEditor::setTextPadding(S32 left, S32 right)

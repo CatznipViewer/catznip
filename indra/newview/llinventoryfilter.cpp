@@ -6,7 +6,7 @@
 * $LicenseInfo:firstyear=2005&license=viewerlgpl$
 * Second Life Viewer Source Code
 * Copyright (C) 2010, Linden Research, Inc.
-* Copyright (C) 2010-2015, Kitty Barnett
+* Copyright (C) 2010-2017, Kitty Barnett
 * 
 * This library is free software; you can redistribute it and/or
 * modify it under the terms of the GNU Lesser General Public
@@ -50,11 +50,9 @@
 //#include "llclipboard.h"
 #include "lltrans.h"
 
-// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: Catznip-3.3
 #include <boost/algorithm/string.hpp>
 // [/SL:KB]
-
-//LLTrace::BlockTimerStatHandle FT_FILTER_CLIPBOARD("Filter Clipboard");
 
 LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 :	mFilterObjectTypes(p.object_types),
@@ -68,6 +66,9 @@ LLInventoryFilter::FilterOps::FilterOps(const Params& p)
 	mPermissions(p.permissions),
 	mFilterTypes(p.types),
 	mFilterUUID(p.uuid),
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	mFilterCreatorUUID(p.creator_uuid),
+// [/SL:KB]
 	mFilterLinks(p.links)
 {
 }
@@ -84,7 +85,10 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 	mEmptyLookupMessage("InventoryNoMatchingItems"),
 	mFilterOps(p.filter_ops),
 	mBackupFilterOps(mFilterOps),
-	mFilterSubString(p.substring),
+//	mFilterSubString(p.substring),
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	mFilterDescriptionSubString(p.description_substring),
+// [/SL:KB]
 	mCurrentGeneration(0),
 	mFirstRequiredGeneration(0),
 	mFirstSuccessGeneration(0)
@@ -93,13 +97,16 @@ LLInventoryFilter::LLInventoryFilter(const Params& p)
 	markDefault();
 }
 
-bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
+//bool LLInventoryFilter::check(const LLFolderViewModelItem* item) 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+bool LLInventoryFilter::check(const LLFolderViewModelItem* item, filter_stringmatch_results_t& match_offsets)
+// [/SL:KB]
 {
 	const LLFolderViewModelItemInventory* listener = dynamic_cast<const LLFolderViewModelItemInventory*>(item);
 
 	// If it's a folder and we're showing all folders, return automatically.
 //	const BOOL is_folder = listener->getInventoryType() == LLInventoryType::IT_CATEGORY;
-// [SL:KB] - Patch: Inventory-Links | Checked: 2013-09-19 (Catznip-3.6)
+// [SL:KB] - Patch: Inventory-Links | Checked: Catznip-3.6
 	const BOOL is_folder = (listener->getInventoryType() == LLInventoryType::IT_CATEGORY) && (!listener->isLink());
 // [/SL:KB]
 	if (is_folder && (mFilterOps.mShowFolderState == LLInventoryFilter::SHOW_ALL_FOLDERS))
@@ -107,7 +114,11 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 		return true;
 	}
 
-	bool passed = (mFilterSubString.size() ? listener->getSearchableName().find(mFilterSubString) != std::string::npos : true);
+//	bool passed = (mFilterSubString.size() ? listener->getSearchableName().find(mFilterSubString) != std::string::npos : true);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	bool passed = (mFilterSubStringOrig.size()) ? checkAgainstName(listener->getSearchableName(), &match_offsets) : true;
+	passed = passed && (mFilterDescriptionSubString.size() ? boost::algorithm::icontains(listener->getDescription(), mFilterDescriptionSubString) : true);
+// [/SL:KB]
 	passed = passed && checkAgainstFilterType(listener);
 	passed = passed && checkAgainstPermissions(listener);
 	passed = passed && checkAgainstFilterLinks(listener);
@@ -115,18 +126,69 @@ bool LLInventoryFilter::check(const LLFolderViewModelItem* item)
 	return passed;
 }
 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 bool LLInventoryFilter::check(const LLInventoryItem* item)
 {
-//	const bool passed_string = (mFilterSubString.size() ? item->getName().find(mFilterSubString) != std::string::npos : true);
-// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2012-08-11 (Catznip-3.3)
-	const bool passed_string = !boost::ifind_first(item->getName(), mFilterSubString).empty();
-// [/SL:KB]
-
-	const bool passed_filtertype = checkAgainstFilterType(item);
-	const bool passed_permissions = checkAgainstPermissions(item);
-
-	return passed_filtertype && passed_permissions && passed_string;
+	bool passed = (mFilterSubStringOrig.size()) ? checkAgainstName(item->getName()) : true;
+	passed = passed && (mFilterDescriptionSubString.size()) ? boost::algorithm::icontains(item->getDescription(), mFilterDescriptionSubString) : true;
+	passed = passed && checkAgainstFilterType(item);
+	passed = passed && checkAgainstPermissions(item);
+	return passed;
 }
+
+bool LLInventoryFilter::checkAgainstName(const std::string& item_name, filter_stringmatch_results_t* match_offsets_p) const
+{
+	// Most common so bail early
+	if (mFilterSubStrings.empty())
+		return true;
+
+	switch (mFilterSubStringMatchType)
+	{
+		case EFilterStringMatchType::All:
+			for (const std::string& strSearchToken : mFilterSubStrings)
+			{
+				const auto itMatchRange = boost::ifind_first(item_name, strSearchToken);
+				if (itMatchRange.empty())
+					return false;
+				if (match_offsets_p)
+					match_offsets_p->push_back(std::make_pair(itMatchRange.begin() - item_name.begin(), itMatchRange.end() - item_name.begin()));
+			}
+			return true;
+		case EFilterStringMatchType::Any:
+			for (const std::string& strSearchToken : mFilterSubStrings)
+			{
+				const auto itMatchRange = boost::ifind_first(item_name, strSearchToken);
+				if (!itMatchRange.empty())
+				{
+					if (match_offsets_p)
+						match_offsets_p->push_back(std::make_pair(itMatchRange.begin() - item_name.begin(), itMatchRange.end() - item_name.begin()));
+					return true;
+				}
+			}
+			return false;
+		case EFilterStringMatchType::RegEx:
+			{
+				boost::match_results<std::string::const_iterator> match_results;
+				if (!boost::regex_search(item_name.begin(), item_name.end(), match_results, mFilterSubStringRegEx))
+					return false;
+				if (match_offsets_p)
+					match_offsets_p->push_back(std::make_pair(match_results.position(), match_results.position() + match_results.length()));
+				return true;
+			}
+		default:
+			return false;
+	}
+}
+// [/SL:KB]
+//bool LLInventoryFilter::check(const LLInventoryItem* item)
+//{
+//	const bool passed_string = (mFilterSubString.size() ? item->getName().find(mFilterSubString) != std::string::npos : true);
+//
+//	const bool passed_filtertype = checkAgainstFilterType(item);
+//	const bool passed_permissions = checkAgainstPermissions(item);
+//
+//	return passed_filtertype && passed_permissions && passed_string;
+//}
 
 bool LLInventoryFilter::checkFolder(const LLFolderViewModelItem* item) const
 {
@@ -253,7 +315,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		if (object_type == LLInventoryType::IT_NONE)
 		{
 //			if (object && object->getIsLinkType())
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
 			const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
 			if ( (bridge) && (bridge->isLink()) )
 // [/SL:KB]
@@ -272,7 +334,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 	// Pass if this item is the target UUID or if it links to the target UUID
 	if (filterTypes & FILTERTYPE_UUID)
 	{
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
 		LLUUID object_id = listener->getUUID();
 
 		const LLInvFVBridge* bridge = dynamic_cast<const LLInvFVBridge*>(listener);
@@ -280,7 +342,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 		{
 			object_id = gInventory.getLinkedItemID(object_id);
 		}
-		
+
 		if (object_id != mFilterOps.mFilterUUID)
 		{
 			return FALSE;
@@ -345,7 +407,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 			bool is_hidden_if_empty = LLViewerFolderType::lookupIsHiddenIfEmpty(listener->getPreferredType());
 			if (is_hidden_if_empty)
 			{
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
 				const LLUUID& object_id = listener->getUUID();
 // [/SL:KB]
 
@@ -388,6 +450,19 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLFolderViewModelItemInvent
 				break;
 			default:
 				return FALSE;
+		}
+	}
+// [/SL:KB]
+
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	////////////////////////////////////////////////////////////////////////////////
+	// FILTERTYPE_CREATOR
+	// Pass if this item was created by the specified avatar UUID
+	if (filterTypes & FILTERTYPE_CREATOR)
+	{
+		if (listener->getCreatorUUID() != mFilterOps.mFilterCreatorUUID)
+		{
+			return FALSE;
 		}
 	}
 // [/SL:KB]
@@ -472,7 +547,7 @@ bool LLInventoryFilter::checkAgainstFilterType(const LLInventoryItem* item) cons
 
 bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInventory* listener) const
 {
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
 	if (PERM_NONE == mFilterOps.mPermissions)
 		return TRUE;
 // [/SL:KB]
@@ -488,11 +563,19 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLFolderViewModelItemInven
 		if (linked_item)
 			perm = linked_item->getPermissionMask();
 	}
-	return (perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	return (~perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
+// [/SL:KB]
+//	return (perm & mFilterOps.mPermissions) == mFilterOps.mPermissions;
 }
 
 bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) const
 {
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	if (PERM_NONE == mFilterOps.mPermissions)
+		return TRUE;
+// [/SL:KB]
+
 	if (!item) return false;
 
 	LLPointer<LLViewerInventoryItem> new_item = new LLViewerInventoryItem(item);
@@ -504,7 +587,7 @@ bool LLInventoryFilter::checkAgainstPermissions(const LLInventoryItem* item) con
 
 bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInventory* listener) const
 {
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2012-01-05 (Catznip-3.2)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.2
 	if (FILTERLINK_INCLUDE_LINKS == mFilterOps.mFilterLinks)
 		return TRUE;
 // [/SL:KB]
@@ -516,7 +599,7 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 //	if (!object) return TRUE;
 //
 //	const BOOL is_link = object->getIsLinkType();
-// [SL:KB] - Patch: Inventory-FilterCore | Checked: 2015-12-22 (Catznip-4.0)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-4.0
 	const bool is_link = listener->isLink();
 // [/SL:KB]
 	if (is_link && (mFilterOps.mFilterLinks == FILTERLINK_EXCLUDE_LINKS))
@@ -526,15 +609,15 @@ bool LLInventoryFilter::checkAgainstFilterLinks(const LLFolderViewModelItemInven
 	return TRUE;
 }
 
-const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
-{
-	return mFilterSubString;
-}
+//const std::string& LLInventoryFilter::getFilterSubString(BOOL trim) const
+//{
+//	return mFilterSubString;
+//}
 
-std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
-{
-	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
-}
+//std::string::size_type LLInventoryFilter::getStringMatchOffset(LLFolderViewModelItem* item) const
+//{
+//	return mFilterSubString.size() ? item->getSearchableName().find(mFilterSubString) : std::string::npos;
+//}
 
 bool LLInventoryFilter::isDefault() const
 {
@@ -551,7 +634,11 @@ bool LLInventoryFilter::isNotDefault() const
 	not_default |= (mFilterOps.mFilterWearableTypes != mDefaultFilterOps.mFilterWearableTypes);
 	not_default |= (mFilterOps.mFilterTypes != mDefaultFilterOps.mFilterTypes);
 	not_default |= (mFilterOps.mFilterLinks != mDefaultFilterOps.mFilterLinks);
-	not_default |= (mFilterSubString.size());
+//	not_default |= (mFilterSubString.size());
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	not_default |= (mFilterSubStringOrig.size());
+	not_default |= (mFilterDescriptionSubString.size());
+// [/SL:KB]
 	not_default |= (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions);
 	not_default |= (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate);
 	not_default |= (mFilterOps.mMaxDate != mDefaultFilterOps.mMaxDate);
@@ -567,7 +654,11 @@ bool LLInventoryFilter::isActive() const
 		|| mFilterOps.mFilterWearableTypes != 0xffffffffffffffffULL
 		|| mFilterOps.mFilterTypes != FILTERTYPE_OBJECT
 		|| mFilterOps.mFilterLinks != FILTERLINK_INCLUDE_LINKS
-		|| mFilterSubString.size() 
+//		|| mFilterSubString.size() 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		|| mFilterSubStringOrig.size()
+		|| mFilterDescriptionSubString.size()
+// [/SL:KB]
 		|| mFilterOps.mPermissions != PERM_NONE 
 		|| mFilterOps.mMinDate != time_min()
 		|| mFilterOps.mMaxDate != time_max()
@@ -695,22 +786,134 @@ void LLInventoryFilter::setFilterUUID(const LLUUID& object_id)
 
 void LLInventoryFilter::setFilterSubString(const std::string& string)
 {
-	std::string filter_sub_string_new = string;
-	mFilterSubStringOrig = string;
-	LLStringUtil::trimHead(filter_sub_string_new);
-	LLStringUtil::toUpper(filter_sub_string_new);
+//	std::string filter_sub_string_new = string;
+//	mFilterSubStringOrig = string;
+//	LLStringUtil::trimHead(filter_sub_string_new);
+//	LLStringUtil::toUpper(filter_sub_string_new);
 
-	if (mFilterSubString != filter_sub_string_new)
+//	if (mFilterSubString != filter_sub_string_new)
+//	{
+//		// hitting BACKSPACE, for example
+//		const BOOL less_restrictive = mFilterSubString.size() >= filter_sub_string_new.size()
+//			&& !mFilterSubString.substr(0, filter_sub_string_new.size()).compare(filter_sub_string_new);
+//
+//		// appending new characters
+//		const BOOL more_restrictive = mFilterSubString.size() < filter_sub_string_new.size()
+//			&& !filter_sub_string_new.substr(0, mFilterSubString.size()).compare(mFilterSubString);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	if (mFilterSubStringOrig != string)
 	{
-		// hitting BACKSPACE, for example
-		const BOOL less_restrictive = mFilterSubString.size() >= filter_sub_string_new.size()
-			&& !mFilterSubString.substr(0, filter_sub_string_new.size()).compare(filter_sub_string_new);
+		std::string filter_sub_string_new = string;
+		mFilterSubStringOrig = string;
+		LLStringUtil::trimHead(filter_sub_string_new);
+		LLStringUtil::toUpper(filter_sub_string_new);
 
-		// appending new characters
-		const BOOL more_restrictive = mFilterSubString.size() < filter_sub_string_new.size()
-			&& !filter_sub_string_new.substr(0, mFilterSubString.size()).compare(mFilterSubString);
+		//
+		// Check match type prefix
+		//
+		EFilterStringMatchType match_type_new = EFilterStringMatchType::All;
 
-		mFilterSubString = filter_sub_string_new;
+		const std::string filter_type = (filter_sub_string_new.size() >= 4) ? filter_sub_string_new.substr(0, 4) : LLStringUtil::null;
+		if ("ALL:" == filter_type)
+		{
+			match_type_new = EFilterStringMatchType::All;
+			filter_sub_string_new.erase(0, 4);
+		}
+		else if ("ANY:" == filter_type)
+		{
+			match_type_new = EFilterStringMatchType::Any;
+			filter_sub_string_new.erase(0, 4);
+		}
+		else if ("RGX:" == filter_type)
+		{
+			match_type_new = EFilterStringMatchType::RegEx;
+		}
+
+		//
+		// Compare old and new search terms
+		//
+		// NOTE: bug/edge case fixing turned this into a big mess - refactor once it's functionally done
+		bool less_restrictive = false, more_restrictive = false;
+
+		if (EFilterStringMatchType::RegEx != match_type_new)
+		{
+			std::vector<std::string> search_tokens;
+			if (!filter_sub_string_new.empty())
+			{
+				boost::trim_if(filter_sub_string_new, boost::is_any_of("|"));
+				boost::split(search_tokens, filter_sub_string_new, boost::is_any_of(std::string("|")), boost::algorithm::token_compress_on);
+			}
+
+			// Less/more restrictive logic only applies if only one search token differs (unless we're not currently filtering on name)
+			bool is_different = (!mFilterSubStrings.empty()) && (std::abs<int>(mFilterSubStrings.size() - search_tokens.size()) > 1);
+			if (!is_different)
+			{
+				for (int idxToken = 0, cntToken = std::max(mFilterSubStrings.size(), search_tokens.size()); idxToken < cntToken; idxToken++)
+				{
+					const std::string& oldToken = (mFilterSubStrings.size() > idxToken) ? mFilterSubStrings[idxToken] : LLStringUtil::null;
+					const std::string& newToken = (search_tokens.size() > idxToken) ? search_tokens[idxToken] : LLStringUtil::null;
+					if ( (!is_different) && (oldToken != newToken) )
+					{
+						if (oldToken.size() >= newToken.size())
+						{
+							// Removal of a token with all-matching is less restrictive (as is removing letters at the end of a search term)
+							less_restrictive =
+								( (newToken.empty()) && (EFilterStringMatchType::All == mFilterSubStringMatchType) ) ||
+								(!oldToken.substr(0, newToken.size()).compare(newToken));
+							// Removal of a token with any-matching is more restrictive
+							more_restrictive = (newToken.empty()) && (EFilterStringMatchType::Any == mFilterSubStringMatchType);
+						}
+						else if (oldToken.size() < newToken.size())
+						{
+							// Adding a token with any-matching is less restrictive (unless it's the first one)
+							less_restrictive = (oldToken.empty()) && (EFilterStringMatchType::Any == mFilterSubStringMatchType) && (!mFilterSubStrings.empty());
+							// Adding a token with all-matching is more restrictive (as is adding letters at the end of a search term)
+							more_restrictive = (!less_restrictive) &&
+								( ((oldToken.empty()) && (EFilterStringMatchType::Any == mFilterSubStringMatchType)) || (!newToken.substr(0, oldToken.size()).compare(oldToken)) );
+						}
+						is_different = true;
+					}
+					else if (is_different)
+					{
+						less_restrictive = false;
+						more_restrictive = mFilterSubStrings.empty();
+						break;
+					}
+				}
+			}
+
+			if (mFilterSubStringMatchType != match_type_new)
+			{
+				// NOTE: we might be able to optimize here but for now let's just start over when both search type *and* terms changed
+				llassert_always( (is_different) || ((!less_restrictive) && (!more_restrictive)) );
+
+				// All to Any => less restrictive
+				less_restrictive = (!is_different) ? (EFilterStringMatchType::All == mFilterSubStringMatchType) && (EFilterStringMatchType::Any == match_type_new) : false;
+				// Any to All => more restrictive
+				more_restrictive = (!is_different) ? (EFilterStringMatchType::Any == mFilterSubStringMatchType) && (EFilterStringMatchType::All == match_type_new) : false;
+			}
+			else if (!is_different)
+			{
+				// Search type or terms didn't change - no change (e.g. empty search token)
+				return;
+			}
+
+			mFilterSubStringMatchType = match_type_new;
+			mFilterSubStrings = std::move(search_tokens);
+			mFilterSubStringRegEx = boost::regex();
+		}
+		else
+		{
+			mFilterSubStringMatchType = EFilterStringMatchType::RegEx;
+			mFilterSubStrings.assign(1, string.substr(4));
+			mFilterSubStringRegEx = boost::regex(mFilterSubStrings[0], boost::regex::perl | boost::regex::icase);
+
+			// Regular expressions always have to start fresh unfortunately
+			less_restrictive = more_restrictive = false;
+		}
+// [/SL:KB]
+
+//		mFilterSubString = filter_sub_string_new;
 		if (less_restrictive)
 		{
 			setModified(FILTER_LESS_RESTRICTIVE);
@@ -755,6 +958,43 @@ void LLInventoryFilter::setFilterSubString(const std::string& string)
 		}
 	}
 }
+
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+void LLInventoryFilter::setFilterDescriptionSubString(const std::string& string)
+{
+	std::string filter_descr_string_new = string;
+	LLStringUtil::trimHead(filter_descr_string_new);
+
+	if (mFilterDescriptionSubString != filter_descr_string_new)
+	{
+		// hitting BACKSPACE, for example
+		const BOOL less_restrictive = mFilterDescriptionSubString.size() >= filter_descr_string_new.size()
+			&& !mFilterDescriptionSubString.substr(0, filter_descr_string_new.size()).compare(filter_descr_string_new);
+
+		// appending new characters
+		const BOOL more_restrictive = mFilterDescriptionSubString.size() < filter_descr_string_new.size()
+			&& !filter_descr_string_new.substr(0, mFilterDescriptionSubString.size()).compare(mFilterDescriptionSubString);
+
+		mFilterDescriptionSubString = filter_descr_string_new;
+		if (less_restrictive)
+			setModified(FILTER_LESS_RESTRICTIVE);
+		else if (more_restrictive)
+			setModified(FILTER_MORE_RESTRICTIVE);
+		else
+			setModified(FILTER_RESTART);
+	}
+}
+
+const std::string& LLInventoryFilter::getFilterDescriptionSubString(BOOL trim) const
+{
+	return mFilterDescriptionSubString;
+}
+
+bool LLInventoryFilter::hasFilterDescriptionString() const
+{
+	return !mFilterDescriptionSubString.empty();
+}
+// [/SL:KB]
 
 void LLInventoryFilter::setFilterPermissions(PermissionMask perms)
 {
@@ -908,10 +1148,64 @@ U32 LLInventoryFilter::getDateSearchDirection() const
 	return mFilterOps.mDateSearchDirection;
 }
 
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+bool LLInventoryFilter::isFilterUUID() const
+{
+	return mFilterOps.mFilterTypes & FILTERTYPE_UUID;
+}
+
+bool LLInventoryFilter::isFilterCreatorUUID() const
+{
+	return mFilterOps.mFilterTypes & FILTERTYPE_CREATOR;
+}
+
+const LLUUID& LLInventoryFilter::getFilterCreatorUUID() const
+{
+	return mFilterOps.mFilterCreatorUUID;
+}
+
+void LLInventoryFilter::setFilterCreatorUUID(const LLUUID& creator_id)
+{
+	if (mFilterOps.mFilterCreatorUUID != creator_id)
+	{
+		if (mFilterOps.mFilterCreatorUUID.isNull())
+			setModified(FILTER_MORE_RESTRICTIVE);
+		else
+			setModified(FILTER_RESTART);
+
+		mFilterOps.mFilterCreatorUUID = creator_id;
+	}
+
+	if (mFilterOps.mFilterCreatorUUID.isNull())
+		mFilterOps.mFilterTypes &= ~FILTERTYPE_CREATOR;
+	else
+		mFilterOps.mFilterTypes |= FILTERTYPE_CREATOR;
+}
+
+bool LLInventoryFilter::isHoursAgo() const
+{
+	return (mFilterOps.mHoursAgo != 0) && (mFilterOps.mFilterTypes & FILTERTYPE_DATE);
+}
+
+bool LLInventoryFilter::isDateRange() const
+{
+	return (mFilterOps.mMinDate != time_min()) && (mFilterOps.mMaxDate != time_max()) && (mFilterOps.mFilterTypes & FILTERTYPE_DATE);
+}
+
+void LLInventoryFilter::resetDateLimits()
+{
+	if ( (mFilterOps.mHoursAgo != mDefaultFilterOps.mHoursAgo) || (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate) || (mFilterOps.mMaxDate != mDefaultFilterOps.mMaxDate) )
+	{
+		setHoursAgo(mDefaultFilterOps.mHoursAgo);
+		setDateRange(mDefaultFilterOps.mMinDate, mDefaultFilterOps.mMaxDate);
+	}
+}
+// [/SL:KB]
+
 //void LLInventoryFilter::setFilterLinks(U64 filter_links)
 // [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-24 (Catznip-3.3)
 //void LLInventoryFilter::setFilterLinks(U64 filter_links, bool substring_reset)
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.5
 void LLInventoryFilter::setFilterLinks(EFilterLink filter_links, bool substring_reset)
 // [/SL:KB]
 // [/SL:KB]
@@ -979,6 +1273,9 @@ void LLInventoryFilter::markDefault()
 void LLInventoryFilter::resetDefault()
 {
 	mFilterOps = mDefaultFilterOps;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	setFilterDescriptionSubString(LLStringUtil::null);
+// [/SL:KB]
 	setModified();
 }
 
@@ -1203,7 +1500,10 @@ LLInventoryFilter& LLInventoryFilter::operator=( const  LLInventoryFilter&  othe
 	setDateSearchDirection(other.getDateSearchDirection());
 	setShowFolderState(other.getShowFolderState());
 	setFilterPermissions(other.getFilterPermissions());
-	setFilterSubString(other.getFilterSubString());
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-3.3
+	setFilterSubString(other.getFilterSubStringOrig());
+// [/SL:KB]
+//	setFilterSubString(other.getFilterSubString());
 	setDateRangeLastLogoff(other.isSinceLogoff());
 	return *this;
 }
@@ -1211,7 +1511,7 @@ LLInventoryFilter& LLInventoryFilter::operator=( const  LLInventoryFilter&  othe
 
 void LLInventoryFilter::toParams(Params& params) const
 {
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.3
 	// Only save what isn't a default
 	if (mFilterOps.mFilterObjectTypes != mDefaultFilterOps.mFilterObjectTypes)
 		params.filter_ops.object_types = getFilterObjectTypes();
@@ -1223,8 +1523,12 @@ void LLInventoryFilter::toParams(Params& params) const
 		params.filter_ops.links = getFilterLinks();
 	if (mFilterOps.mFilterUUID != mDefaultFilterOps.mFilterUUID)
 		params.filter_ops.uuid = mFilterOps.mFilterUUID;
-	if (mFilterSubString.size())
-		params.substring = getFilterSubString();
+	if (mFilterOps.mFilterCreatorUUID != mDefaultFilterOps.mFilterCreatorUUID)
+		params.filter_ops.creator_uuid = mFilterOps.mFilterCreatorUUID;
+	if (hasFilterString())
+		params.substring = getFilterSubStringOrig();
+	if (mFilterDescriptionSubString.size())
+		params.description_substring = getFilterDescriptionSubString();
 	if (mFilterOps.mPermissions != mDefaultFilterOps.mPermissions)
 		params.filter_ops.permissions = getFilterPermissions();
 
@@ -1232,11 +1536,11 @@ void LLInventoryFilter::toParams(Params& params) const
 	{
 		params.since_logoff = isSinceLogoff();
 	}
-	else if (0 != mFilterOps.mHoursAgo)
+	else if (isHoursAgo())
 	{
 		params.filter_ops.hours_ago = getHoursAgo();
 	}
-	else
+	else if (isDateRange())
 	{
 		if (mFilterOps.mMinDate != mDefaultFilterOps.mMinDate)
 			params.filter_ops.date_range.min_date = getMinDate();
@@ -1269,7 +1573,7 @@ void LLInventoryFilter::fromParams(const Params& params)
 		return;
 	}
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2012-07-22 (Catznip-3.3)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.3
 	resetDefault();
 
 	if (params.filter_ops.object_types.isProvided())
@@ -1297,9 +1601,19 @@ void LLInventoryFilter::fromParams(const Params& params)
 		setFilterUUID(params.filter_ops.uuid);
 	}
 
+	if (params.filter_ops.creator_uuid.isProvided())
+	{
+		setFilterCreatorUUID(params.filter_ops.creator_uuid);
+	}
+
 	if (params.substring.isProvided())
 	{
 		setFilterSubString(params.substring);
+	}
+
+	if (params.description_substring.isProvided())
+	{
+		setFilterDescriptionSubString(params.description_substring);
 	}
 
 	if (params.filter_ops.permissions.isProvided())
@@ -1311,17 +1625,15 @@ void LLInventoryFilter::fromParams(const Params& params)
 	{
 		setDateRangeLastLogoff(params.since_logoff);
 	}
-
-	if ( (params.filter_ops.date_range.min_date.isProvided()) || (params.filter_ops.date_range.max_date.isProvided()) )
+	else if (params.filter_ops.hours_ago.isProvided())
+	{
+		setHoursAgo(params.filter_ops.hours_ago);
+	}
+	else if ( (params.filter_ops.date_range.min_date.isProvided()) || (params.filter_ops.date_range.max_date.isProvided()) )
 	{
 		time_t minDate = (params.filter_ops.date_range.min_date.isProvided()) ? params.filter_ops.date_range.min_date : getMinDate();
 		time_t maxDate = (params.filter_ops.date_range.max_date.isProvided()) ? params.filter_ops.date_range.max_date : getMaxDate();
 		setDateRange(minDate, maxDate);
-	}
-
-	if (params.filter_ops.hours_ago.isProvided())
-	{
-		setHoursAgo(params.filter_ops.hours_ago);
 	}
 
 	if (params.filter_ops.date_search_direction.isProvided())
@@ -1342,6 +1654,7 @@ void LLInventoryFilter::fromParams(const Params& params)
 //	}
 //	setDateRange(params.filter_ops.date_range.min_date,   params.filter_ops.date_range.max_date);
 //	setHoursAgo(params.filter_ops.hours_ago);
+//	setDateSearchDirection(params.filter_ops.date_search_direction);
 //	setShowFolderState(params.filter_ops.show_folder_state);
 //	setFilterPermissions(params.filter_ops.permissions);
 //	setFilterSubString(params.substring);
@@ -1373,12 +1686,18 @@ U64 LLInventoryFilter::getFilterWearableTypes() const
 
 bool LLInventoryFilter::hasFilterString() const
 {
-	return mFilterSubString.size() > 0;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	return mFilterSubStringOrig.size() > 0;
+// [/SL:KB]
+//	return mFilterSubString.size() > 0;
 }
 
 std::string::size_type LLInventoryFilter::getFilterStringSize() const
 {
-	return mFilterSubString.size();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	return mFilterSubStringOrig.size();
+// [/SL:KB]
+//	return mFilterSubString.size();
 }
 
 PermissionMask LLInventoryFilter::getFilterPermissions() const
@@ -1400,7 +1719,7 @@ U32 LLInventoryFilter::getHoursAgo() const
 	return mFilterOps.mHoursAgo; 
 }
 //U64 LLInventoryFilter::getFilterLinks() const
-// [SL:KB] - Patch: Inventory-Filter | Checked: 2013-05-19 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-3.5
 LLInventoryFilter::EFilterLink LLInventoryFilter::getFilterLinks() const
 // [/SL:KB]
 {

@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -40,6 +40,9 @@
 #include "llinventorypanel.h"
 #include "llfiltereditor.h"
 #include "llfloatersidepanelcontainer.h"
+// [SL:KB] - Patch: Inventory-Finder | Checked: Catznip-5.2
+#include "llfloaterinventoryfinder.h"
+// [/SL:KB]
 #include "llfloaterreg.h"
 #include "llmenubutton.h"
 #include "lloutfitobserver.h"
@@ -73,28 +76,28 @@ void on_file_loaded_for_save(BOOL success,
 /// LLFloaterInventoryFinder
 ///----------------------------------------------------------------------------
 
-class LLFloaterInventoryFinder : public LLFloater
-{
-public:
-	LLFloaterInventoryFinder( LLPanelMainInventory* inventory_view);
-	virtual void draw();
-	/*virtual*/	BOOL	postBuild();
-	void changeFilter(LLInventoryFilter* filter);
-	void updateElementsFromFilter();
-	BOOL getCheckShowEmpty();
-	BOOL getCheckSinceLogoff();
-	U32 getDateSearchDirection();
-
-	static void onTimeAgo(LLUICtrl*, void *);
-	static void onCloseBtn(void* user_data);
-	static void selectAllTypes(void* user_data);
-	static void selectNoTypes(void* user_data);
-private:
-	LLPanelMainInventory*	mPanelMainInventory;
-	LLSpinCtrl*			mSpinSinceDays;
-	LLSpinCtrl*			mSpinSinceHours;
-	LLInventoryFilter*	mFilter;
-};
+//class LLFloaterInventoryFinder : public LLFloater
+//{
+//public:
+//	LLFloaterInventoryFinder( LLPanelMainInventory* inventory_view);
+//	virtual void draw();
+//	/*virtual*/	BOOL	postBuild();
+//	void changeFilter(LLInventoryFilter* filter);
+//	void updateElementsFromFilter();
+//	BOOL getCheckShowEmpty();
+//	BOOL getCheckSinceLogoff();
+//	U32 getDateSearchDirection();
+//
+//	static void onTimeAgo(LLUICtrl*, void *);
+//	static void onCloseBtn(void* user_data);
+//	static void selectAllTypes(void* user_data);
+//	static void selectNoTypes(void* user_data);
+//private:
+//	LLPanelMainInventory*	mPanelMainInventory;
+//	LLSpinCtrl*			mSpinSinceDays;
+//	LLSpinCtrl*			mSpinSinceHours;
+//	LLInventoryFilter*	mFilter;
+//};
 
 ///----------------------------------------------------------------------------
 /// LLPanelMainInventory
@@ -531,9 +534,15 @@ void LLPanelMainInventory::resetFilters()
 {
 	LLFloaterInventoryFinder *finder = getFinder();
 	getActivePanel()->getFilter().resetDefault();
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	setFilterSubStringFromFilter();
+// [/SL:KB]
 	if (finder)
 	{
-		finder->updateElementsFromFilter();
+// [SL:KB] - Patch: Inventory-Finder | Checked: Catznip-5.2
+		finder->refreshControls();
+// [/SL:KB]
+//		finder->updateElementsFromFilter();
 	}
 
 	setFilterTextFromFilter();
@@ -628,7 +637,13 @@ void LLPanelMainInventory::onClearSearch()
 
 	if (finder)
 	{
-		LLFloaterInventoryFinder::selectAllTypes(finder);
+// [SL:KB] - Patch: Inventory-Finder | Checked: Catznip-5.2
+		if (LLFloaterInventoryFinder* finder = getFinder())
+		{
+			finder->selectAllTypes();
+		}
+// [/SL:KB]
+//		LLFloaterInventoryFinder::selectAllTypes(finder);
 	}
 
 	// re-open folders that were initially open in case filter was active
@@ -667,7 +682,7 @@ void LLPanelMainInventory::onFilterEdit(const std::string& search_string )
 //	if (mActivePanel->getFilterSubString().empty() && mFilterSubString.empty())
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
 	mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0] = search_string;
-	if (mActivePanel->getFilterSubString().empty() && search_string.empty())
+	if (!mActivePanel->hasFilterSubString() && search_string.empty())
 // [/SL:KB]
 	{
 			// current filter and new filter empty, do nothing
@@ -797,15 +812,17 @@ void LLPanelMainInventory::onFilterSelected()
 
 //	setFilterSubString(mFilterSubString);
 // [SL:KB] - Patch: Inventory-FilterStringPerTab | Checked: 2012-02-18 (Catznip-3.2)
-	if (mFilterEditor)
-		mFilterEditor->setText(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
 	setFilterSubString(mFilterSubStrings[(mFilterSubStringPerTab) ? mActivePanelIndex : 0]);
+	setFilterSubStringFromFilter();
 // [/SL:KB]
 	LLInventoryFilter& filter = mActivePanel->getFilter();
 	LLFloaterInventoryFinder *finder = getFinder();
 	if (finder)
 	{
-		finder->changeFilter(&filter);
+// [SL:KB] - Patch: Inventory-Finder | Checked: Catznip-5.2
+		finder->setFilterFromPanel();
+// [/SL:KB]
+//		finder->changeFilter(&filter);
 	}
 	if (filter.isActive())
 	{
@@ -835,10 +852,20 @@ void LLPanelMainInventory::onFilterRemoved(S32 idxTab, bool& fDeletePanel)
 }
 // [/SL:KB]
 
-const std::string LLPanelMainInventory::getFilterSubString() 
-{ 
-	return mActivePanel->getFilterSubString(); 
+//const std::string LLPanelMainInventory::getFilterSubString() 
+//{ 
+//	return mActivePanel->getFilterSubString(); 
+//}
+
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+void LLPanelMainInventory::setFilterSubStringFromFilter()
+{
+	if (mFilterEditor)
+	{
+		mFilterEditor->setText(mActivePanel->getFilter().getFilterSubStringOrig());
+	}
 }
+// [/SL:KB]
 
 void LLPanelMainInventory::setFilterSubString(const std::string& string) 
 { 
@@ -980,10 +1007,11 @@ void LLPanelMainInventory::setFilterTextFromFilter()
 // [/SL:KB]
 }
 
-void LLPanelMainInventory::toggleFindOptions()
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+void LLPanelMainInventory::showFindOptions(bool fShow)
 {
 	LLFloater *floater = getFinder();
-	if (!floater)
+	if ( (!floater) && (fShow) )
 	{
 		LLFloaterInventoryFinder * finder = new LLFloaterInventoryFinder(this);
 		mFinderHandle = finder->getHandle();
@@ -995,11 +1023,41 @@ void LLPanelMainInventory::toggleFindOptions()
 		// start background fetch of folders
 		LLInventoryModelBackgroundFetch::instance().start();
 	}
-	else
+	else if ( (floater) && (!fShow) )
 	{
 		floater->closeFloater();
+		mFinderHandle.markDead();
 	}
 }
+
+void LLPanelMainInventory::toggleFindOptions()
+{
+	if (!getFinder())
+		showFindOptions(true);
+	else
+		showFindOptions(false);
+}
+// [/SL:KB]
+//void LLPanelMainInventory::toggleFindOptions()
+//{
+//	LLFloater *floater = getFinder();
+//	if (!floater)
+//	{
+//		LLFloaterInventoryFinder * finder = new LLFloaterInventoryFinder(this);
+//		mFinderHandle = finder->getHandle();
+//		finder->openFloater();
+//
+//		LLFloater* parent_floater = gFloaterView->getParentFloater(this);
+//		if (parent_floater)
+//			parent_floater->addDependentFloater(mFinderHandle);
+//		// start background fetch of folders
+//		LLInventoryModelBackgroundFetch::instance().start();
+//	}
+//	else
+//	{
+//		floater->closeFloater();
+//	}
+//}
 
 void LLPanelMainInventory::setSelectCallback(const LLFolderView::signal_t::slot_type& cb)
 {
@@ -1023,289 +1081,289 @@ LLFloaterInventoryFinder* LLPanelMainInventory::getFinder()
 }
 
 
-LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* inventory_view) :	
-	LLFloater(LLSD()),
-	mPanelMainInventory(inventory_view),
-	mFilter(&inventory_view->getPanel()->getFilter())
-{
-	buildFromFile("floater_inventory_view_finder.xml");
-	updateElementsFromFilter();
-}
+//LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* inventory_view) :	
+//	LLFloater(LLSD()),
+//	mPanelMainInventory(inventory_view),
+//	mFilter(&inventory_view->getPanel()->getFilter())
+//{
+//	buildFromFile("floater_inventory_view_finder.xml");
+//	updateElementsFromFilter();
+//}
+//
+//BOOL LLFloaterInventoryFinder::postBuild()
+//{
+//	const LLRect& viewrect = mPanelMainInventory->getRect();
+//	setRect(LLRect(viewrect.mLeft - getRect().getWidth(), viewrect.mTop, viewrect.mLeft, viewrect.mTop - getRect().getHeight()));
+//
+//	childSetAction("All", selectAllTypes, this);
+//	childSetAction("None", selectNoTypes, this);
+//
+//	mSpinSinceHours = getChild<LLSpinCtrl>("spin_hours_ago");
+//	childSetCommitCallback("spin_hours_ago", onTimeAgo, this);
+//
+//	mSpinSinceDays = getChild<LLSpinCtrl>("spin_days_ago");
+//	childSetCommitCallback("spin_days_ago", onTimeAgo, this);
+//
+//	childSetAction("Close", onCloseBtn, this);
+//
+//	updateElementsFromFilter();
+//	return TRUE;
+//}
+//void LLFloaterInventoryFinder::onTimeAgo(LLUICtrl *ctrl, void *user_data)
+//{
+//	LLFloaterInventoryFinder *self = (LLFloaterInventoryFinder *)user_data;
+//	if (!self) return;
+//	
+//	if ( self->mSpinSinceDays->get() ||  self->mSpinSinceHours->get() )
+//	{
+//		self->getChild<LLUICtrl>("check_since_logoff")->setValue(false);
+//
+//		U32 days = (U32)self->mSpinSinceDays->get();
+//		U32 hours = (U32)self->mSpinSinceHours->get();
+//		if (hours >= 24)
+//		{
+//			// Try to handle both cases of spinner clicking and text input in a sensible fashion as best as possible.
+//			// There is no way to tell if someone has clicked the spinner to get to 24 or input 24 manually, so in
+//			// this case add to days.  Any value > 24 means they have input the hours manually, so do not add to the
+//			// current day value.
+//			if (24 == hours)  // Got to 24 via spinner clicking or text input of 24
+//			{
+//				days = days + hours / 24;
+//			}
+//			else	// Text input, so do not add to days
+//			{ 
+//				days = hours / 24;
+//			}
+//			hours = (U32)hours % 24;
+//			self->mSpinSinceHours->setFocus(false);
+//			self->mSpinSinceDays->setFocus(false);
+//			self->mSpinSinceDays->set((F32)days);
+//			self->mSpinSinceHours->set((F32)hours);
+//			self->mSpinSinceHours->setFocus(true);
+//		}
+//	}
+//}
+//
+//void LLFloaterInventoryFinder::changeFilter(LLInventoryFilter* filter)
+//{
+//	mFilter = filter;
+//	updateElementsFromFilter();
+//}
 
-BOOL LLFloaterInventoryFinder::postBuild()
-{
-	const LLRect& viewrect = mPanelMainInventory->getRect();
-	setRect(LLRect(viewrect.mLeft - getRect().getWidth(), viewrect.mTop, viewrect.mLeft, viewrect.mTop - getRect().getHeight()));
+//void LLFloaterInventoryFinder::updateElementsFromFilter()
+//{
+//	if (!mFilter)
+//		return;
+//
+//	// Get data needed for filter display
+//	U32 filter_types = mFilter->getFilterObjectTypes();
+//	std::string filter_string = mFilter->getFilterSubString();
+//	LLInventoryFilter::EFolderShow show_folders = mFilter->getShowFolderState();
+//	U32 hours = mFilter->getHoursAgo();
+//	U32 date_search_direction = mFilter->getDateSearchDirection();
+//
+//	// update the ui elements
+//	setTitle(mFilter->getName());
+//
+//	getChild<LLUICtrl>("check_animation")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_ANIMATION));
+//
+//	getChild<LLUICtrl>("check_calling_card")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_CALLINGCARD));
+//	getChild<LLUICtrl>("check_clothing")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_WEARABLE));
+//	getChild<LLUICtrl>("check_gesture")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_GESTURE));
+//	getChild<LLUICtrl>("check_landmark")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_LANDMARK));
+//	getChild<LLUICtrl>("check_mesh")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_MESH));
+//	getChild<LLUICtrl>("check_notecard")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_NOTECARD));
+//	getChild<LLUICtrl>("check_object")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_OBJECT));
+//	getChild<LLUICtrl>("check_script")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_LSL));
+//	getChild<LLUICtrl>("check_sound")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_SOUND));
+//	getChild<LLUICtrl>("check_texture")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_TEXTURE));
+//	getChild<LLUICtrl>("check_snapshot")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_SNAPSHOT));
+//	getChild<LLUICtrl>("check_show_empty")->setValue(show_folders == LLInventoryFilter::SHOW_ALL_FOLDERS);
+//	getChild<LLUICtrl>("check_since_logoff")->setValue(mFilter->isSinceLogoff());
+//	mSpinSinceHours->set((F32)(hours % 24));
+//	mSpinSinceDays->set((F32)(hours / 24));
+//	getChild<LLRadioGroup>("date_search_direction")->setSelectedIndex(date_search_direction);
+//}
 
-	childSetAction("All", selectAllTypes, this);
-	childSetAction("None", selectNoTypes, this);
+//void LLFloaterInventoryFinder::draw()
+//{
+//	U64 filter = 0xffffffffffffffffULL;
+//	BOOL filtered_by_all_types = TRUE;
+//
+//	if (!getChild<LLUICtrl>("check_animation")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_ANIMATION);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//
+//	if (!getChild<LLUICtrl>("check_calling_card")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_CALLINGCARD);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_clothing")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_WEARABLE);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_gesture")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_GESTURE);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_landmark")->getValue())
+//
+//
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_LANDMARK);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_mesh")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_MESH);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_notecard")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_NOTECARD);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_object")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_OBJECT);
+//		filter &= ~(0x1 << LLInventoryType::IT_ATTACHMENT);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_script")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_LSL);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_sound")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_SOUND);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_texture")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_TEXTURE);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!getChild<LLUICtrl>("check_snapshot")->getValue())
+//	{
+//		filter &= ~(0x1 << LLInventoryType::IT_SNAPSHOT);
+//		filtered_by_all_types = FALSE;
+//	}
+//
+//	if (!filtered_by_all_types || (mPanelMainInventory->getPanel()->getFilter().getFilterTypes() & LLInventoryFilter::FILTERTYPE_DATE))
+//	{
+//		// don't include folders in filter, unless I've selected everything or filtering by date
+//		filter &= ~(0x1 << LLInventoryType::IT_CATEGORY);
+//	}
+//
+//	// update the panel, panel will update the filter
+//	mPanelMainInventory->getPanel()->setShowFolderState(getCheckShowEmpty() ?
+//		LLInventoryFilter::SHOW_ALL_FOLDERS : LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+//	mPanelMainInventory->getPanel()->setFilterTypes(filter);
+//	if (getCheckSinceLogoff())
+//	{
+//		mSpinSinceDays->set(0);
+//		mSpinSinceHours->set(0);
+//	}
+//	U32 days = (U32)mSpinSinceDays->get();
+//	U32 hours = (U32)mSpinSinceHours->get();
+//	if (hours >= 24)
+//	{
+//		days = hours / 24;
+//		hours = (U32)hours % 24;
+//		// A UI element that has focus will not display a new value set to it
+//		mSpinSinceHours->setFocus(false);
+//		mSpinSinceDays->setFocus(false);
+//		mSpinSinceDays->set((F32)days);
+//		mSpinSinceHours->set((F32)hours);
+//		mSpinSinceHours->setFocus(true);
+//	}
+//	hours += days * 24;
+//
+//	mPanelMainInventory->getPanel()->setHoursAgo(hours);
+//	mPanelMainInventory->getPanel()->setSinceLogoff(getCheckSinceLogoff());
+//	mPanelMainInventory->setFilterTextFromFilter();
+//	mPanelMainInventory->getPanel()->setDateSearchDirection(getDateSearchDirection());
+//
+//	LLPanel::draw();
+//}
 
-	mSpinSinceHours = getChild<LLSpinCtrl>("spin_hours_ago");
-	childSetCommitCallback("spin_hours_ago", onTimeAgo, this);
+//BOOL LLFloaterInventoryFinder::getCheckShowEmpty()
+//{
+//	return getChild<LLUICtrl>("check_show_empty")->getValue();
+//}
 
-	mSpinSinceDays = getChild<LLSpinCtrl>("spin_days_ago");
-	childSetCommitCallback("spin_days_ago", onTimeAgo, this);
+//BOOL LLFloaterInventoryFinder::getCheckSinceLogoff()
+//{
+//	return getChild<LLUICtrl>("check_since_logoff")->getValue();
+//}
 
-	childSetAction("Close", onCloseBtn, this);
+//U32 LLFloaterInventoryFinder::getDateSearchDirection()
+//{
+//	return 	getChild<LLRadioGroup>("date_search_direction")->getSelectedIndex();
+//}
 
-	updateElementsFromFilter();
-	return TRUE;
-}
-void LLFloaterInventoryFinder::onTimeAgo(LLUICtrl *ctrl, void *user_data)
-{
-	LLFloaterInventoryFinder *self = (LLFloaterInventoryFinder *)user_data;
-	if (!self) return;
-	
-	if ( self->mSpinSinceDays->get() ||  self->mSpinSinceHours->get() )
-	{
-		self->getChild<LLUICtrl>("check_since_logoff")->setValue(false);
-
-		U32 days = (U32)self->mSpinSinceDays->get();
-		U32 hours = (U32)self->mSpinSinceHours->get();
-		if (hours >= 24)
-		{
-			// Try to handle both cases of spinner clicking and text input in a sensible fashion as best as possible.
-			// There is no way to tell if someone has clicked the spinner to get to 24 or input 24 manually, so in
-			// this case add to days.  Any value > 24 means they have input the hours manually, so do not add to the
-			// current day value.
-			if (24 == hours)  // Got to 24 via spinner clicking or text input of 24
-			{
-				days = days + hours / 24;
-			}
-			else	// Text input, so do not add to days
-			{ 
-				days = hours / 24;
-			}
-			hours = (U32)hours % 24;
-			self->mSpinSinceHours->setFocus(false);
-			self->mSpinSinceDays->setFocus(false);
-			self->mSpinSinceDays->set((F32)days);
-			self->mSpinSinceHours->set((F32)hours);
-			self->mSpinSinceHours->setFocus(true);
-		}
-	}
-}
-
-void LLFloaterInventoryFinder::changeFilter(LLInventoryFilter* filter)
-{
-	mFilter = filter;
-	updateElementsFromFilter();
-}
-
-void LLFloaterInventoryFinder::updateElementsFromFilter()
-{
-	if (!mFilter)
-		return;
-
-	// Get data needed for filter display
-	U32 filter_types = mFilter->getFilterObjectTypes();
-	std::string filter_string = mFilter->getFilterSubString();
-	LLInventoryFilter::EFolderShow show_folders = mFilter->getShowFolderState();
-	U32 hours = mFilter->getHoursAgo();
-	U32 date_search_direction = mFilter->getDateSearchDirection();
-
-	// update the ui elements
-	setTitle(mFilter->getName());
-
-	getChild<LLUICtrl>("check_animation")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_ANIMATION));
-
-	getChild<LLUICtrl>("check_calling_card")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_CALLINGCARD));
-	getChild<LLUICtrl>("check_clothing")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_WEARABLE));
-	getChild<LLUICtrl>("check_gesture")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_GESTURE));
-	getChild<LLUICtrl>("check_landmark")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_LANDMARK));
-	getChild<LLUICtrl>("check_mesh")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_MESH));
-	getChild<LLUICtrl>("check_notecard")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_NOTECARD));
-	getChild<LLUICtrl>("check_object")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_OBJECT));
-	getChild<LLUICtrl>("check_script")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_LSL));
-	getChild<LLUICtrl>("check_sound")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_SOUND));
-	getChild<LLUICtrl>("check_texture")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_TEXTURE));
-	getChild<LLUICtrl>("check_snapshot")->setValue((S32) (filter_types & 0x1 << LLInventoryType::IT_SNAPSHOT));
-	getChild<LLUICtrl>("check_show_empty")->setValue(show_folders == LLInventoryFilter::SHOW_ALL_FOLDERS);
-	getChild<LLUICtrl>("check_since_logoff")->setValue(mFilter->isSinceLogoff());
-	mSpinSinceHours->set((F32)(hours % 24));
-	mSpinSinceDays->set((F32)(hours / 24));
-	getChild<LLRadioGroup>("date_search_direction")->setSelectedIndex(date_search_direction);
-}
-
-void LLFloaterInventoryFinder::draw()
-{
-	U64 filter = 0xffffffffffffffffULL;
-	BOOL filtered_by_all_types = TRUE;
-
-	if (!getChild<LLUICtrl>("check_animation")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_ANIMATION);
-		filtered_by_all_types = FALSE;
-	}
-
-
-	if (!getChild<LLUICtrl>("check_calling_card")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_CALLINGCARD);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_clothing")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_WEARABLE);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_gesture")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_GESTURE);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_landmark")->getValue())
-
-
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_LANDMARK);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_mesh")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_MESH);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_notecard")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_NOTECARD);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_object")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_OBJECT);
-		filter &= ~(0x1 << LLInventoryType::IT_ATTACHMENT);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_script")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_LSL);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_sound")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_SOUND);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_texture")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_TEXTURE);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!getChild<LLUICtrl>("check_snapshot")->getValue())
-	{
-		filter &= ~(0x1 << LLInventoryType::IT_SNAPSHOT);
-		filtered_by_all_types = FALSE;
-	}
-
-	if (!filtered_by_all_types || (mPanelMainInventory->getPanel()->getFilter().getFilterTypes() & LLInventoryFilter::FILTERTYPE_DATE))
-	{
-		// don't include folders in filter, unless I've selected everything or filtering by date
-		filter &= ~(0x1 << LLInventoryType::IT_CATEGORY);
-	}
-
-	// update the panel, panel will update the filter
-	mPanelMainInventory->getPanel()->setShowFolderState(getCheckShowEmpty() ?
-		LLInventoryFilter::SHOW_ALL_FOLDERS : LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
-	mPanelMainInventory->getPanel()->setFilterTypes(filter);
-	if (getCheckSinceLogoff())
-	{
-		mSpinSinceDays->set(0);
-		mSpinSinceHours->set(0);
-	}
-	U32 days = (U32)mSpinSinceDays->get();
-	U32 hours = (U32)mSpinSinceHours->get();
-	if (hours >= 24)
-	{
-		days = hours / 24;
-		hours = (U32)hours % 24;
-		// A UI element that has focus will not display a new value set to it
-		mSpinSinceHours->setFocus(false);
-		mSpinSinceDays->setFocus(false);
-		mSpinSinceDays->set((F32)days);
-		mSpinSinceHours->set((F32)hours);
-		mSpinSinceHours->setFocus(true);
-	}
-	hours += days * 24;
-
-	mPanelMainInventory->getPanel()->setHoursAgo(hours);
-	mPanelMainInventory->getPanel()->setSinceLogoff(getCheckSinceLogoff());
-	mPanelMainInventory->setFilterTextFromFilter();
-	mPanelMainInventory->getPanel()->setDateSearchDirection(getDateSearchDirection());
-
-	LLPanel::draw();
-}
-
-BOOL LLFloaterInventoryFinder::getCheckShowEmpty()
-{
-	return getChild<LLUICtrl>("check_show_empty")->getValue();
-}
-
-BOOL LLFloaterInventoryFinder::getCheckSinceLogoff()
-{
-	return getChild<LLUICtrl>("check_since_logoff")->getValue();
-}
-
-U32 LLFloaterInventoryFinder::getDateSearchDirection()
-{
-	return 	getChild<LLRadioGroup>("date_search_direction")->getSelectedIndex();
-}
-
-void LLFloaterInventoryFinder::onCloseBtn(void* user_data)
-{
-	LLFloaterInventoryFinder* finderp = (LLFloaterInventoryFinder*)user_data;
-	finderp->closeFloater();
-}
+//void LLFloaterInventoryFinder::onCloseBtn(void* user_data)
+//{
+//	LLFloaterInventoryFinder* finderp = (LLFloaterInventoryFinder*)user_data;
+//	finderp->closeFloater();
+//}
 
 // static
-void LLFloaterInventoryFinder::selectAllTypes(void* user_data)
-{
-	LLFloaterInventoryFinder* self = (LLFloaterInventoryFinder*)user_data;
-	if(!self) return;
-
-	self->getChild<LLUICtrl>("check_animation")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_calling_card")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_clothing")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_gesture")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_landmark")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_mesh")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_notecard")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_object")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_script")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_sound")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_texture")->setValue(TRUE);
-	self->getChild<LLUICtrl>("check_snapshot")->setValue(TRUE);
-}
+//void LLFloaterInventoryFinder::selectAllTypes(void* user_data)
+//{
+//	LLFloaterInventoryFinder* self = (LLFloaterInventoryFinder*)user_data;
+//	if(!self) return;
+//
+//	self->getChild<LLUICtrl>("check_animation")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_calling_card")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_clothing")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_gesture")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_landmark")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_mesh")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_notecard")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_object")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_script")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_sound")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_texture")->setValue(TRUE);
+//	self->getChild<LLUICtrl>("check_snapshot")->setValue(TRUE);
+//}
 
 //static
-void LLFloaterInventoryFinder::selectNoTypes(void* user_data)
-{
-	LLFloaterInventoryFinder* self = (LLFloaterInventoryFinder*)user_data;
-	if(!self) return;
-
-	self->getChild<LLUICtrl>("check_animation")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_calling_card")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_clothing")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_gesture")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_landmark")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_mesh")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_notecard")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_object")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_script")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_sound")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_texture")->setValue(FALSE);
-	self->getChild<LLUICtrl>("check_snapshot")->setValue(FALSE);
-}
+//void LLFloaterInventoryFinder::selectNoTypes(void* user_data)
+//{
+//	LLFloaterInventoryFinder* self = (LLFloaterInventoryFinder*)user_data;
+//	if(!self) return;
+//
+//	self->getChild<LLUICtrl>("check_animation")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_calling_card")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_clothing")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_gesture")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_landmark")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_mesh")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_notecard")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_object")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_script")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_sound")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_texture")->setValue(FALSE);
+//	self->getChild<LLUICtrl>("check_snapshot")->setValue(FALSE);
+//}
 
 //////////////////////////////////////////////////////////////////////////////////
 // List Commands                                                                //

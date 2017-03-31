@@ -114,10 +114,16 @@ public:
 	virtual const std::string& getName() const;
 	virtual const std::string& getDisplayName() const;
 	virtual const std::string& getSearchableName() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        const std::string& getDescription(void) const override;
+// [/SL:KB]
 
 	virtual PermissionMask getPermissionMask() const { return PERM_NONE; }
 	/*virtual*/ LLFolderType::EType getPreferredType() const { return LLFolderType::FT_NONE; }
 	virtual const LLUUID& getUUID() const { return mUUID; }
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        const LLUUID& getCreatorUUID() const override;
+// [/SL:KB]
 	virtual time_t getCreationDate() const;
 	virtual void setCreationDate(time_t creation_date_utc);
 
@@ -364,6 +370,27 @@ const std::string& LLTaskInvFVBridge::getSearchableName() const
 	return mSearchableName;
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+const std::string& LLTaskInvFVBridge::getDescription() const
+{
+	LLInventoryItem* item = findItem();
+	if (item)
+	{
+		return item->getDescription();
+	}
+	return LLStringUtil::null;
+}
+
+const LLUUID& LLTaskInvFVBridge::getCreatorUUID() const
+{
+	LLInventoryItem* item = findItem();
+	if (item)
+	{
+		return item->getCreatorUUID();
+	}
+	return LLUUID::null;
+}
+// [/SL:KB]
 
 // BUG: No creation dates for task inventory
 time_t LLTaskInvFVBridge::getCreationDate() const

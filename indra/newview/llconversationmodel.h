@@ -5,7 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
- * Copyright (C) 2010-2015, Kitty Barnett
+ * Copyright (C) 2010-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -71,6 +71,9 @@ public:
 	virtual const std::string& getName() const { return mName; }
 	virtual const std::string& getDisplayName() const { return mName; }
 	virtual const std::string& getSearchableName() const { return mName; }
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	const std::string& getDescription(void) const override { return LLStringUtil::null; }
+// [/SL:KB]
 	virtual const LLUUID& getUUID() const { return mUUID; }
 	virtual time_t getCreationDate() const { return 0; }
 	virtual LLPointer<LLUIImage> getIcon() const { return NULL; }
@@ -101,7 +104,10 @@ public:
 	virtual bool potentiallyVisible() { return true; }
 	virtual bool filter( LLFolderViewFilter& filter) { return false; }
 	virtual bool descendantsPassedFilter(S32 filter_generation = -1) { return true; }
-	virtual void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0) { }
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	virtual void setPassedFilter(bool passed, S32 filter_generation, filter_stringmatch_results_t& string_offsets, std::string::size_type string_size = 0) { }
+// [/SL:KB]
+//	virtual void setPassedFilter(bool passed, S32 filter_generation, std::string::size_type string_offset = std::string::npos, std::string::size_type string_size = 0) { }
 	virtual bool passedFilter(S32 filter_generation = -1) { return true; }
 
 	// The action callbacks
@@ -243,12 +249,15 @@ public:
 	LLConversationFilter() { mEmpty = ""; }
 	~LLConversationFilter() {}
 		
-	bool 				check(const LLFolderViewModelItem* item) { return true; }
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	bool				check(const LLFolderViewModelItem* listener, filter_stringmatch_results_t& match_offsets) override { return true; }
+// [/SL:KB]
+//	bool 				check(const LLFolderViewModelItem* item) { return true; }
 	bool				checkFolder(const LLFolderViewModelItem* folder) const { return true; }
 	void 				setEmptyLookupMessage(const std::string& message) { }
 	std::string			getEmptyLookupMessage() const { return mEmpty; }
 	bool				showAllResults() const { return true; }
-	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const { return std::string::npos; }
+//	std::string::size_type getStringMatchOffset(LLFolderViewModelItem* item) const { return std::string::npos; }
 	std::string::size_type getFilterStringSize() const { return 0; }
 		
 	bool 				isActive() const { return false; }

@@ -892,7 +892,7 @@ void LLPanelWearing::setFilterSubString(const std::string& string)
 		}
 		return;
 	}
-	else if ( (mInvPanel) && (mInvPanel->getFilterSubString().empty()) )
+	else if ( (mInvPanel) && (!mInvPanel->hasFilterSubString()) )
 	{
 		// Save current folder open state if no filter currently applied
 		mSavedFolderState->setApply(FALSE);
