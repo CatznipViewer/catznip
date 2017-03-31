@@ -58,7 +58,10 @@ public:
 
 	virtual void draw(); // from LLView
 	/*virtual*/ BOOL handleRightMouseDown(S32 x, S32 y, MASK mask); // from LLView
-	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask); // from LLView
+//	/*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask); // from LLView
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+	boost::signals2::connection setItemDoubleClickCallback(const mouse_signal_t::slot_type& cb);
+// [/SL:KB]
 
 	void setNameFilter(const std::string& filter);
 	void toggleIcons();
@@ -77,12 +80,18 @@ private:
 
 	bool onContextMenuItemClick(const LLSD& userdata);
 	bool onContextMenuItemEnable(const LLSD& userdata);
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+	void onItemDoubleClicked(LLUICtrl* ctrl, S32 x, S32 y, MASK mask);
+// [/SL:KB]
 
 	LLHandle<LLToggleableMenu>	mContextMenuHandle;
 
 	bool mShowIcons;
 // [SL:KB] - Patch: UI-GroupListHidden | CHecked: 2014-01-22 (Catznip-3.6)
 	bool mShowHidden;
+// [/SL:KB]
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
+	mouse_signal_t mItemDoubleClickSignal;
 // [/SL:KB]
 	bool mDirty;
 	std::string mNameFilter;

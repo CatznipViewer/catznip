@@ -1024,6 +1024,14 @@ void LLFloaterTexturePicker::onTextureSelect(LLToolPipette::EType type, const LL
 
 static LLDefaultChildRegistry::Register<LLTextureCtrl> r("texture_picker");
 
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+void LLTextureCtrl::ControlModes::declareValues()
+{
+	declare("edit", EControlMode::EDIT);
+	declare("zoom", EControlMode::ZOOM);
+}
+// [/SL:KB]
+
 LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 :	LLUICtrl(p),
 	mDragCallback(NULL),
@@ -1054,6 +1062,12 @@ LLTextureCtrl::LLTextureCtrl(const LLTextureCtrl::Params& p)
 	setBlankImageAssetID( whiteImage );
 
 	setAllowNoTexture(p.allow_no_texture);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if ( (!p.enabled.isProvided()) || (p.enabled.getValue()))
+		setControlMode(p.mode);
+	else
+		setControlMode(EControlMode::DISABLED);
+// [/SL:KB]
 	setCanApplyImmediately(p.can_apply_immediately);
 	mCommitOnSelection = !p.no_commit_on_selection;
 
@@ -1150,7 +1164,10 @@ void LLTextureCtrl::setVisible( BOOL visible )
 void LLTextureCtrl::setEnabled( BOOL enabled )
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
-	if( enabled )
+//	if( enabled )
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if  ( (enabled) && (mControlMode == EControlMode::EDIT) )
+// [/SL:KB]
 	{
 		std::string tooltip;
 		if (floaterp) tooltip = floaterp->getString("choose_picture");
@@ -1169,7 +1186,11 @@ void LLTextureCtrl::setEnabled( BOOL enabled )
 		floaterp->setActive(enabled);
 	}
 
-	mCaption->setEnabled( enabled );
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if (mCaption)
+		mCaption->setEnabled( enabled );
+// [/SL:KB]
+//	mCaption->setEnabled( enabled );
 
 	LLView::setEnabled( enabled );
 }
@@ -1294,7 +1315,10 @@ public:
 
 BOOL LLTextureCtrl::handleHover(S32 x, S32 y, MASK mask)
 {
-	getWindow()->setCursor(mBorder->parentPointInView(x,y) ? UI_CURSOR_HAND : UI_CURSOR_ARROW);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	getWindow()->setCursor(mBorder->parentPointInView(x,y) ? ((EControlMode::ZOOM == mControlMode) ? UI_CURSOR_TOOLZOOMIN : UI_CURSOR_HAND) : UI_CURSOR_ARROW);
+// [/SL:KB]
+//	getWindow()->setCursor(mBorder->parentPointInView(x,y) ? UI_CURSOR_HAND : UI_CURSOR_ARROW);
 	return TRUE;
 }
 
@@ -1305,11 +1329,38 @@ BOOL LLTextureCtrl::handleMouseDown(S32 x, S32 y, MASK mask)
 
 	if (!handled && mBorder->parentPointInView(x, y))
 	{
-		showPicker(FALSE);
-		//grab textures first...
-		LLInventoryModelBackgroundFetch::instance().start(gInventory.findCategoryUUIDForType(LLFolderType::FT_TEXTURE));
-		//...then start full inventory fetch.
-		LLInventoryModelBackgroundFetch::instance().start();
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		if (EControlMode::EDIT == mControlMode)
+		{
+// [/SL:KB]
+			showPicker(FALSE);
+			//grab textures first...
+			LLInventoryModelBackgroundFetch::instance().start(gInventory.findCategoryUUIDForType(LLFolderType::FT_TEXTURE));
+			//...then start full inventory fetch.
+			LLInventoryModelBackgroundFetch::instance().start();
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+		}
+		else if ( (EControlMode::ZOOM == mControlMode) && (mImageAssetID.notNull()) )
+		{
+			if (!LLFloaterReg::findInstance("preview_texture", LLSD(mImageAssetID)))
+			{
+				LLSD sdParams;
+				sdParams["read_only"] = true;
+				sdParams["itemid"] = mImageAssetID;
+				sdParams["aspect_ratio"] = (F32)getRect().getWidth() / getRect().getHeight();
+
+				LLFloater* pParent = getParentByType<LLFloater>();
+				if (pParent)
+					sdParams["title"] = pParent->getTitle();
+
+				LLFloaterReg::showInstance("preview_texture", sdParams, true);
+			}
+			else
+			{
+				LLFloaterReg::showInstance("preview_texture", LLSD(mImageAssetID), true);
+			}
+		}
+// [/SL:KB]
 		handled = TRUE;
 	}
 
@@ -1336,7 +1387,10 @@ void LLTextureCtrl::onFloaterCommit(ETexturePickOp op, LLUUID id)
 {
 	LLFloaterTexturePicker* floaterp = (LLFloaterTexturePicker*)mFloaterHandle.get();
 
-	if( floaterp && getEnabled())
+//	if( floaterp && getEnabled())
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if ( (floaterp) && (getEnabled()) && (EControlMode::EDIT == mControlMode) )
+// [/SL:KB]
 	{
 		if (op == TEXTURE_CANCEL)
 			mViewModel->resetDirty();
@@ -1450,7 +1504,10 @@ BOOL LLTextureCtrl::handleDragAndDrop(S32 x, S32 y, MASK mask,
 	LLInventoryItem* item = (LLInventoryItem*)cargo_data; 
 	bool is_mesh = cargo_type == DAD_MESH;
 
-	if (getEnabled() &&
+//	if (getEnabled() &&
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if ( (getEnabled()) && (EControlMode::EDIT == mControlMode) &&
+// [/SL:KB]
 		((cargo_type == DAD_TEXTURE) || is_mesh) &&
 		 allowDrop(item))
 	{
@@ -1659,6 +1716,13 @@ LLSD LLTextureCtrl::getValue() const
 	return LLSD(getImageAssetID());
 }
 
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+void LLTextureCtrl::setControlMode(EControlMode ctrlMode)
+{
+	mControlMode = ctrlMode;
+	setEnabled(EControlMode::DISABLED != mControlMode);
+}
+// [/SL:KB]
 
 
 

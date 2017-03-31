@@ -17,6 +17,15 @@
      name="Copy">
         Copy To Inventory
     </floater.string>
+    <panel
+     follows="top|left|right"
+     height="22"
+     layout="topleft"
+     left="1"
+     name="panel_top"
+     top="22"
+     visible="true"
+     right="-1">
     <text
      type="string"
      length="1"
@@ -26,7 +35,7 @@
      layout="topleft"
      left="10"
      name="desc txt"
-     top="23"
+     top="3"
      width="90">
         Description:
     </text>
@@ -51,7 +60,7 @@
      layout="topleft"
      left_pad="10"
      name="aspect_ratio"
-     top="23"
+     top="3"
      width="75">
         Aspect ratio:
     </text>
@@ -68,16 +77,26 @@
      name="combo_aspect_ratio"
      top_delta="-3" 
      tool_tip="Preview at a fixed aspect ratio"
-     width="108">
+     width="103">
 	</combo_box>
+	</panel>
     <view
      follows="all"
-     height="200"
+     height="202"
      layout="topleft"
      left="10"
      name="texture_placeholder"
      right="-10"
-     top_pad="5" />
+     top_pad="3" />
+    <panel
+     follows="bottom|left|right"
+     height="22"
+     layout="topleft"
+     left="1"
+     name="panel_bottom"
+     bottom="-5"
+     visible="true"
+     right="-1">
     <text
      type="string"
      halign="left"
@@ -87,7 +106,7 @@
      layout="topleft"
      left="10"
      name="dimensions"
-     top="255"
+     top="5"
      width="135">
         [WIDTH]px x [HEIGHT]px
     </text>
@@ -98,7 +117,7 @@
      layout="topleft"
      left_pad="-30"
      name="Keep"
-     top="250"
+     top="0"
      width="85" />
     <button
      follows="right|bottom"
@@ -131,4 +150,5 @@
        name="save_tex_bmp"
        value="save_tex_bmp" />
     </flyout_button> />
+	</panel>
 </floater>

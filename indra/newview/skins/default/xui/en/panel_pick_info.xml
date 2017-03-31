@@ -57,11 +57,12 @@
      width="285">
         <texture_picker
          fallback_image="default_land_picture.j2c"
-         enabled="false"
+         enabled="true"
          follows="left|top|right"
          height="197"
          layout="topleft"
          left="11"
+         mode="zoom"
          name="pick_snapshot"
          top="10"
          width="272" />

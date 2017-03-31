@@ -208,12 +208,13 @@
          top="0"
          width="310">
             <texture_picker
-             enabled="false"
+             enabled="true"
              fallback_image="default_land_picture.j2c"
              follows="left|top|right"
              height="197"
              layout="topleft"
              left="11"
+             mode="zoom"
              name="logo"
              top="10"
              width="290" />
