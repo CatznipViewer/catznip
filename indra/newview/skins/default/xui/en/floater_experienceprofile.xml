@@ -133,12 +133,13 @@
               width="315"
               name="image_panel">
               <texture_picker
-                enabled="false"
+                enabled="true"
                 fallback_image="default_land_picture.j2c"
                 follows="left|top"
                 height="197"
                 layout="topleft"
                 left="10"
+                mode="zoom"
                 name="logo"
                 top="10"
                 width="290" />
