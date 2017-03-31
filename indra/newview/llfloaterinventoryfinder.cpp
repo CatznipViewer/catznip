@@ -47,7 +47,6 @@
 LLFloaterInventoryFinder::LLFloaterInventoryFinder(LLPanelMainInventory* inventory_view)
 	: LLFloater(LLSD())
 	, m_pPanelMainInventory(inventory_view)
-	, m_pFilterTypeCtrls{}
 {
 	mCommitCallbackRegistrar.add("Filter.Refresh", boost::bind(&LLFloaterInventoryFinder::refreshFilter, this));
 	mCommitCallbackRegistrar.add("Filter.Reset", boost::bind(&LLPanelMainInventory::resetFilters, inventory_view));
@@ -69,6 +68,7 @@ LLFloaterInventoryFinder::~LLFloaterInventoryFinder()
 	m_FilterModifiedConnection.disconnect();
 }
 
+// virtual
 BOOL LLFloaterInventoryFinder::postBuild()
 {
 	const LLRect& rct = m_pPanelMainInventory->getRect();

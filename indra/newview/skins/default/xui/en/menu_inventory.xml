@@ -554,7 +554,7 @@
          parameter="restore" />
     </menu_item_call>
     <menu
-     label="Open folder in"
+     label="Open Folder in"
      layout="topleft"
      name="Open in XXX">
         <menu_item_call
@@ -565,6 +565,38 @@
              function="Inventory.DoToSelected"
              parameter="open_newtab" />
         </menu_item_call>
+    </menu>
+    <menu
+     label="Show Contents in"
+     layout="topleft"
+     name="Show Contents in XXX">
+        <menu_item_check
+         label="Current Search"
+         layout="topleft"
+         name="Current Search">
+            <menu_item_check.on_check
+             function="Inventory.IsFilterIncludedFolder" />
+            <menu_item_check.on_click
+             function="Inventory.DoToSelected"
+             parameter="toggle_filtered" />
+        </menu_item_check>
+        <menu_item_call
+         enabled="false"
+         label="All Searches"
+         layout="topleft"
+         name="All Searches" />
+        <menu_item_separator
+         layout="topleft" />
+        <menu_item_call
+         enabled="false"
+         label="Exclude from Current Search"
+         layout="topleft"
+         name="Exclude from Current Search" />
+        <menu_item_call
+         enabled="false"
+         label="Exclude from All Searches"
+         layout="topleft"
+         name="Exclude from All Searches" />
     </menu>
     <menu_item_call
      label="Properties"

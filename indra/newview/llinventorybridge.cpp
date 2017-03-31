@@ -2246,6 +2246,28 @@ LLFontGL::StyleFlags LLFolderBridge::getLabelStyle() const
     return LLFontGL::NORMAL;
 }
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+bool LLFolderBridge::getIncludedInFilter() const
+{
+	if (mInventoryPanel.isDead())
+		return false;
+
+	return mInventoryPanel.get()->getFilter().isIncludeFolder(mUUID);
+}
+
+void LLFolderBridge::setIncludedInFilter(bool include)
+{
+	if (mInventoryPanel.isDead())
+		return;
+
+	LLInventoryFilter& invFilter = mInventoryPanel.get()->getFilter();
+	if (!invFilter.isIncludeFolder(mUUID))
+		invFilter.addIncludeFolder(mUUID);
+	else
+		invFilter.removeIncludeFolder(mUUID);
+}
+// [/SL:KB]
+
 void LLFolderBridge::update()
 {
 	// we know we have children but  haven't  fetched them (doesn't obey filter)
@@ -3243,6 +3265,20 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 			}
  		}
  	}
+	else if ("toggle_filtered" == action)
+	{
+		if (LLPanelMainInventory* pMainInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get()->getParentByType<LLPanelMainInventory>() : nullptr)
+		{
+			if (LLInventoryPanel* pInvPanel = pMainInvPanel->getActivePanel())
+			{
+				LLInventoryFilter& invFilter = pInvPanel->getFilter();
+				if (!invFilter.isIncludeFolder(mUUID))
+					pInvPanel->getFilter().addIncludeFolder(mUUID);
+				else
+					pInvPanel->getFilter().removeIncludeFolder(mUUID);
+			}
+		}
+	}
 // [/SL:KB]
 	else if ("paste" == action)
 	{
@@ -4123,6 +4159,9 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 // [SL:KB] - Patch: Inventory-UserAddPanel | Checked: 2012-08-14 (Catznip-3.3)
 		items.push_back(std::string("Outfit Separator"));
 		items.push_back(std::string("Open in XXX"));
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		items.push_back(std::string("Show Contents in XXX"));
 // [/SL:KB]
 	}
 

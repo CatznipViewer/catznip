@@ -253,6 +253,13 @@ public:
 //	void 				setFilterLinks(U64 filter_link);
 //	U64					getFilterLinks() const;
 
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	void 				addIncludeFolder(const LLUUID& idFolder);
+	void 				removeIncludeFolder(const LLUUID& idFolder);
+	bool 				isIncludeFolder(const LLUUID& idFolder) const;
+	void 				clearIncludeFolders();
+// [/SL:KB]
+
 	// sets params for Link-only search and backs up search settings for future restoration
 	void				setFindAllLinksMode(const std::string &search_name, const LLUUID& search_id);
 
@@ -331,6 +338,9 @@ private:
 	bool 				checkAgainstPermissions(const LLInventoryItem* item) const;
 	bool 				checkAgainstFilterLinks(const class LLFolderViewModelItemInventory* listener) const;
 //	bool				checkAgainstClipboard(const LLUUID& object_id) const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	bool 				checkAgainstFolderIncludes(const class LLInventoryObject* pInvObj) const;
+// [/SL:KB]
 
 	FilterOps				mFilterOps;
 	FilterOps				mDefaultFilterOps;
@@ -346,6 +356,9 @@ private:
 	std::string				mFilterSubStringOrig;
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	std::string				mFilterDescriptionSubString;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	uuid_set_t				mIncludedFolders;
 // [/SL:KB]
 	const std::string		mName;
 

@@ -41,7 +41,7 @@ class LLFloaterInventoryFinder : public LLFloater
 {
 public:
 	LLFloaterInventoryFinder(LLPanelMainInventory* inventory_view);
-	~LLFloaterInventoryFinder();
+	~LLFloaterInventoryFinder() override;
 
 	/*
 	 * Base class overrides

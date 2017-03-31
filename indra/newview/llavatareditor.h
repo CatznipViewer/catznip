@@ -34,7 +34,7 @@ class LLAvatarEditor : public LLSearchEditor
 public:
 	struct Params : public LLInitParam::Block<Params, LLSearchEditor::Params> {};
 	LLAvatarEditor(const Params& p);
-	~LLAvatarEditor();
+	~LLAvatarEditor() override;
 
 	/*
 	 * Base class overrides

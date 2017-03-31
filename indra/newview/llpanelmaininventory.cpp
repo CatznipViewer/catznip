@@ -551,6 +551,9 @@ void LLPanelMainInventory::onClearSearch()
 		mActivePanel->setFilterSubString(LLStringUtil::null);
 		mActivePanel->setFilterTypes(0xffffffffffffffffULL);
 		mActivePanel->setFilterLinks(LLInventoryFilter::FILTERLINK_INCLUDE_LINKS);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		mActivePanel->getFilter().clearIncludeFolders();
+// [/SL:KB]
 	}
 
 	if (finder)

@@ -73,6 +73,8 @@ public:
 	virtual const std::string& getSearchableName() const { return mName; }
 // [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
 	const std::string& getDescription(void) const override { return LLStringUtil::null; }
+	bool getIncludedInFilter() const override { return false; }
+	void setIncludedInFilter(bool include) override  {};
 // [/SL:KB]
 	virtual const LLUUID& getUUID() const { return mUUID; }
 	virtual time_t getCreationDate() const { return 0; }

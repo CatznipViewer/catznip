@@ -112,6 +112,8 @@ public:
 	virtual const std::string& getSearchableName() const;
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	        const std::string& getDescription(void) const override;
+			bool getIncludedInFilter() const override { return false; }
+			void setIncludedInFilter(bool include) override {};
 // [/SL:KB]
 
 	virtual PermissionMask getPermissionMask() const { return PERM_NONE; }

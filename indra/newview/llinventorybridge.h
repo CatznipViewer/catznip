@@ -96,6 +96,8 @@ public:
 	const std::string& getSearchableName() const { return mSearchableName; }
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	        const std::string& getDescription(void) const override;
+	        bool getIncludedInFilter() const override { return false; }
+	        void setIncludedInFilter(bool include) override {};
 // [/SL:KB]
 
 	virtual PermissionMask getPermissionMask() const;
@@ -305,6 +307,10 @@ public:
 	static LLUIImagePtr getIcon(LLFolderType::EType preferred_type);
 	virtual std::string getLabelSuffix() const;
 	virtual LLFontGL::StyleFlags getLabelStyle() const;
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	        bool getIncludedInFilter() const override;
+			void setIncludedInFilter(bool include) override;
+// [/SL:KB]
 
 	virtual BOOL renameItem(const std::string& new_name);
 

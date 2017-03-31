@@ -2013,6 +2013,13 @@ BOOL LLFolderViewFolder::handleDoubleClick( S32 x, S32 y, MASK mask )
 	}
 	if( !handled )
 	{
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+		if (mask & MASK_CONTROL)
+		{
+			getViewModelItem()->setIncludedInFilter(!getViewModelItem()->getIncludedInFilter());
+		}
+		else if(mIndentation < x && x < mIndentation + (isCollapsed() ? 0 : mArrowSize) + mTextPad)
+// [/SL:KB]
 		if(mIndentation < x && x < mIndentation + (isCollapsed() ? 0 : mArrowSize) + mTextPad)
 		{
 			// don't select when user double-clicks plus sign
