@@ -34,7 +34,7 @@ class LLFloaterInventoryOfferFolderBrowse : public LLFloater
 {
 	LOG_CLASS(LLFloaterInventoryOfferFolderBrowse);
 public:
-	LLFloaterInventoryOfferFolderBrowse(const LLUUID& idFolder = LLUUID::null);
+	LLFloaterInventoryOfferFolderBrowse();
 	~LLFloaterInventoryOfferFolderBrowse() override;
 
 	/*

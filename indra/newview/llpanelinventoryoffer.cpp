@@ -137,7 +137,7 @@ void LLPanelInventoryOfferFolder::onBrowseFolder()
 	if (LLFloater* pBrowseFloater = new LLFloaterInventoryOfferFolderBrowse())
 	{
 		pBrowseFloater->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolderCb, this, _2));
-		pBrowseFloater->openFloater();
+		pBrowseFloater->openFloater(LLSD().with("folder_id", m_pAcceptInList->getSelectedValue().asUUID()));
 
 		m_BrowseFloaterHandle = pBrowseFloater->getHandle();
 	}
@@ -248,7 +248,7 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 	// Split the path up in individual folders
 	//
 	if (std::string::npos != strSubfolderPath.find("/"))
-		boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")));
+		boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")), boost::algorithm::token_compress_on);
 
 	//
 	// Kick off creating the destination folder (if it doesn't already exist)
@@ -272,9 +272,10 @@ void LLAcceptInFolderOfferBase::onCategoryCreateCallback(LLUUID idFolder, LLAcce
 		return;
 	}
 
-	while (pInstance->m_DestPath.size() > 1)
+	while (!pInstance->m_DestPath.empty())
 	{
 		std::string strFolder = pInstance->m_DestPath.front();
+		LLInventoryObject::correctInventoryName(strFolder);
 		pInstance->m_DestPath.pop_front();
 
 		LLInventoryModel::cat_array_t* folders;
@@ -294,7 +295,6 @@ void LLAcceptInFolderOfferBase::onCategoryCreateCallback(LLUUID idFolder, LLAcce
 		}
 		else
 		{
-			LLInventoryObject::correctInventoryName(strFolder);
 			inventory_func_type f = boost::bind(LLAcceptInFolderOfferBase::onCategoryCreateCallback, _1, pInstance);
 			const LLUUID idTemp = gInventory.createNewCategory(idFolder, LLFolderType::FT_NONE, strFolder, f);
 			if (idTemp.notNull())
