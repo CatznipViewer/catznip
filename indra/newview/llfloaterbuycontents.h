@@ -58,6 +58,9 @@ protected:
 								 void* data);
 	
 	void onClickBuy();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	static void onClickBuyCb(LLHandle<LLFloater> handle, const LLUUID& idDestFolder);
+// [/SL:KB]
 	void onClickCancel();
 
 protected:

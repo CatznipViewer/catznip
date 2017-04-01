@@ -45,6 +45,10 @@
 #include "llscrolllistctrl.h"
 #include "llviewerobject.h"
 #include "lluictrlfactory.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerwindow.h"
 #include "lltrans.h"
 
@@ -179,6 +183,10 @@ void LLFloaterBuy::show(const LLSaleInfo& sale_info)
 	floater->getChild<LLUICtrl>("buy_text")->setTextArg("[AMOUNT]", llformat("%d", sale_info.getSalePrice()));
 	floater->getChild<LLUICtrl>("buy_name_text")->setTextArg("[NAME]", owner_name);
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	floater->getChild<LLUICtrl>("buy_btn")->setEnabled(true);
+// [/SL:KB]
+
 	// Must do this after the floater is created, because
 	// sometimes the inventory is already there and 
 	// the callback is called immediately.
@@ -282,18 +290,52 @@ void LLFloaterBuy::inventoryChanged(LLViewerObject* obj,
 
 void LLFloaterBuy::onClickBuy()
 {
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+	{
+		const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+		if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+		{
+			// Prevent the user from clicking buy a second time while we wait for the folder to be created
+			getChild<LLUICtrl>("buy_btn")->setEnabled(false);
+
+			// Create the destination folder (note: might fire instantly if the folder already exists)
+			new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterBuy::onClickBuyCb, getHandle(), _1));
+
+			return;
+		}
+	}
+
 	// Put the items where we put new folders.
-	LLUUID category_id;
-	category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_OBJECT);
-
-	// *NOTE: doesn't work for multiple object buy, which UI does not
-	// currently support sale info is used for verification only, if
-	// it doesn't match region info then sale is canceled.
-	LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), category_id, mSaleInfo );
-
-	closeFloater();
+	LLUUID category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_OBJECT);
+	onClickBuyCb(getHandle(), category_id);
+// [/SL:KB]
+//	// Put the items where we put new folders.
+//	LLUUID category_id;
+//	category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_OBJECT);
+//
+//	// *NOTE: doesn't work for multiple object buy, which UI does not
+//	// currently support sale info is used for verification only, if
+//	// it doesn't match region info then sale is canceled.
+//	LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), category_id, mSaleInfo );
+//
+//	closeFloater();
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+void LLFloaterBuy::onClickBuyCb(LLHandle<LLFloater> handle, const LLUUID& idDestFolder)
+{
+	LLFloaterBuy* pInstance = dynamic_cast<LLFloaterBuy*>(handle.get());
+	if ( (pInstance) && (!pInstance->isDead()) && (pInstance->isInVisibleChain()) )
+	{
+		// *NOTE: doesn't work for multiple object buy, which UI does not
+		// currently support sale info is used for verification only, if
+		// it doesn't match region info then sale is canceled.
+		LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), idDestFolder, pInstance->mSaleInfo);
+		pInstance->closeFloater();
+	}
+}
+// [/SL:KB]
 
 void LLFloaterBuy::onClickCancel()
 {

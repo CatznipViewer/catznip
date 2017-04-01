@@ -455,3 +455,23 @@ void LLAcceptInFolderAgentOffer::onDestinationCreated(const LLUUID& idFolder)
 }
 
 // ============================================================================
+// LLCreateAcceptInFolder class
+//
+
+LLCreateAcceptInFolder::LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const folder_created_signal_t::slot_type& cb)
+	: LLAcceptInFolderOfferBase(idBaseFolder)
+{
+	m_FolderCreatedSignal.connect(cb);
+
+	if (!createDestinationFolder())
+		delete this;
+}
+
+//virtual
+void LLCreateAcceptInFolder::onDestinationCreated(const LLUUID& idFolder)
+{
+	m_FolderCreatedSignal(idFolder);
+	delete this;
+}
+
+// ============================================================================

@@ -2,9 +2,9 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="290"
+ height="305"
  layout="topleft"
- min_height="150"
+ min_height="175"
  min_width="200"
  name="floater_buy_contents"
  help_topic="floater_buy_contents"
@@ -53,17 +53,27 @@
          name="text"
          relative_width="1" />
     </scroll_list>
+    <panel
+	 class="panel_offer_invfolder"
+     height="23"
+     filename="panel_offer_invfolder.xml"
+     follows="bottom|left|right"
+     layout="topleft"
+     left="10"
+     name="panel_offer_invfolder"
+     right="-5"
+     top_pad="5" />
     <text
      type="string"
      length="1"
      follows="left|right|bottom"
      font="SansSerif"
-     height="16"
+     height="15"
      layout="topleft"
      left="10"
      name="buy_text"
      text_color="White"
-     top="220"
+     top_pad="5"
      use_ellipses="true" 
      width="260">
         Buy for L$[AMOUNT] from [NAME]?
