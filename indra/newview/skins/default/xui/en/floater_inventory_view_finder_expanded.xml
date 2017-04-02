@@ -511,7 +511,6 @@
              width="70" />
             <spinner
              decimal_digits="0"
-             enabled="false"
              follows="left|top"
              height="16"
              increment="1"
@@ -535,7 +534,6 @@
             </text>
             <spinner
              decimal_digits="0"
-             enabled="false"
              follows="left|top"
              height="16"
              increment="1"
@@ -549,7 +547,6 @@
              top_delta="-5"
              width="50" />
             <combo_box
-             enabled="false"
              follows="left|top"
              height="23"
              layout="topleft"

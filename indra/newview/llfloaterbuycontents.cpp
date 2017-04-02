@@ -47,6 +47,10 @@
 #include "llnotificationsutil.h"
 #include "llselectmgr.h"
 #include "llscrolllistctrl.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+#include "llviewercontrol.h"
+// [/SL:KB]
 #include "llviewerobject.h"
 #include "llviewerregion.h"
 #include "lluictrlfactory.h"
@@ -279,10 +283,20 @@ void LLFloaterBuyContents::onClickBuy()
 		return;
 	}
 
-	// We may want to wear this item
-	if (getChild<LLUICtrl>("wear_check")->getValue())
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
 	{
-		LLInventoryState::sWearNewClothing = TRUE;
+		const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+		if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+		{
+			// Prevent the user from clicking buy a second time while we wait for the folder to be created
+			getChild<LLUICtrl>("buy_btn")->setEnabled(false);
+
+			// Create the destination folder (note: might fire instantly if the folder already exists)
+			new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterBuyContents::onClickBuyCb, getHandle(), _1));
+
+			return;
+		}
 	}
 
 // [SL:KB] - Patch: Inventory-ShowNewInventory | Checked: 2014-03-15 (Catznip-3.6)
@@ -293,20 +307,56 @@ void LLFloaterBuyContents::onClickBuy()
 // [/SL:KB]
 
 	// Put the items where we put new folders.
-	LLUUID category_id;
-	category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_ROOT_INVENTORY);
-
-	// *NOTE: doesn't work for multiple object buy, which UI does not
-	// currently support sale info is used for verification only, if
-	// it doesn't match region info then sale is canceled.
-	LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), category_id, mSaleInfo);
-
-	// NOTE: do this here instead of on receipt of object, since contents are transfered
-	// via a generic BulkUpdateInventory message with no way of distinguishing it from
-	// other inventory operations
-	LLFirstUse::newInventory();
-	closeFloater();
+	LLUUID category_id = category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_ROOT_INVENTORY);
+	onClickBuyCb(getHandle(), category_id);
+// [/SL:KB]
+//	// We may want to wear this item
+//	if (getChild<LLUICtrl>("wear_check")->getValue())
+//	{
+//		LLInventoryState::sWearNewClothing = TRUE;
+//	}
+//
+//	// Put the items where we put new folders.
+//	LLUUID category_id;
+//	category_id = gInventory.findCategoryUUIDForType(LLFolderType::FT_ROOT_INVENTORY);
+//
+//	// *NOTE: doesn't work for multiple object buy, which UI does not
+//	// currently support sale info is used for verification only, if
+//	// it doesn't match region info then sale is canceled.
+//	LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), category_id, mSaleInfo);
+//
+//	// NOTE: do this here instead of on receipt of object, since contents are transfered
+//	// via a generic BulkUpdateInventory message with no way of distinguishing it from
+//	// other inventory operations
+//	LLFirstUse::newInventory();
+//	closeFloater();
 }
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+void LLFloaterBuyContents::onClickBuyCb(LLHandle<LLFloater> handle, const LLUUID& idDestFolder)
+{
+	LLFloaterBuyContents* pInstance = dynamic_cast<LLFloaterBuyContents*>(handle.get());
+	if ( (pInstance) && (!pInstance->isDead()) && (pInstance->isInVisibleChain()) )
+	{
+		// We may want to wear this item
+		if (pInstance->getChild<LLUICtrl>("wear_check")->getValue())
+		{
+			LLInventoryState::sWearNewClothing = TRUE;
+		}
+
+		// *NOTE: doesn't work for multiple object buy, which UI does not
+		// currently support sale info is used for verification only, if
+		// it doesn't match region info then sale is canceled.
+		LLSelectMgr::getInstance()->sendBuy(gAgent.getID(), idDestFolder, pInstance->mSaleInfo);
+
+		// NOTE: do this here instead of on receipt of object, since contents are transfered
+		// via a generic BulkUpdateInventory message with no way of distinguishing it from
+		// other inventory operations
+		LLFirstUse::newInventory();
+		pInstance->closeFloater();
+	}
+}
+// [/SL:KB]
 
 void LLFloaterBuyContents::onClickCancel()
 {

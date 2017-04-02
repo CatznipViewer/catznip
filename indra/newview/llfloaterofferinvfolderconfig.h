@@ -64,6 +64,7 @@ public:
 	 * LLFloater overrides
 	 */
 public:
+	void closeFloater(bool app_quitting = false) override;
 	LLSD getValue() const { return m_sdFolderItems; }
 	BOOL isDirty() const override;
 	void onCommit() override;
@@ -77,8 +78,10 @@ protected:
 	void onAddFolder();
 	void onRemoveFolder();
 	void onSelectFolder();
+	void onSelectFolderCb(const LLSD& sdNotification, const LLSD& sdResponse);
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
+	void onSaveChangesCb(const LLSD& sdNotification, const LLSD& sdResponse);
 	void onSaveFolder();
 	void onOk();
 	void onOkCb(const LLSD& sdNotification, const LLSD& sdResponse);
@@ -93,6 +96,7 @@ protected:
 	 * Member variables
 	 */
 protected:
+	bool m_fFolderItemsDirty = false;
 	LLSD m_sdFolderItems;
 
 	LLScrollListCtrl* m_pFolderList = nullptr;

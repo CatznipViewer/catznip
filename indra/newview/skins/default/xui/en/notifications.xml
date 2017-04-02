@@ -6937,6 +6937,20 @@ You don&apos;t have permission to copy this.
    icon="alertmodal.tga"
    name="InventoryOfferFolderConfigSaveChanges"
    type="alertmodal">
+You've made changes to the destination folders. If you close this floater without saving all your changes will be lost.
+
+Do you want to save?
+    <usetemplate
+     name="yesnocancelbuttons"
+     canceltext="Cancel"
+     notext="Don&apos;t Save"
+     yestext="Save" />
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="InventoryOfferFolderConfigSaveChangesFolder"
+   type="alertmodal">
 There are unsaved changes to the '[NAME]' folder.
 
 Do you want to save your changes?

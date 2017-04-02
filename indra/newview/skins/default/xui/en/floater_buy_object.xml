@@ -2,7 +2,7 @@
 <floater
  legacy_header_height="18"
  can_resize="true"
- height="290"
+ height="315"
  layout="topleft"
  min_height="290"
  min_width="280"
@@ -78,6 +78,16 @@
          name="text"
          relative_width="1" />
     </scroll_list>
+    <panel
+	 class="panel_offer_invfolder"
+     height="23"
+     filename="panel_offer_invfolder.xml"
+     follows="bottom|left|right"
+     layout="topleft"
+     left="10"
+     name="panel_offer_invfolder"
+     right="-5"
+     top_pad="4" />
     <text
      type="string"
      length="1"
@@ -88,7 +98,7 @@
 	 line_spacing.pixels="7"
      name="buy_text"
      text_color="White"
-     top_pad="5"
+     top_pad="6"
      use_ellipses="true"
      width="260"
 	 word_wrap="true">
