@@ -27,8 +27,8 @@
 // LLFloaterInventoryOfferFolderBrowse class
 //
 
-LLFloaterInventoryOfferFolderBrowse::LLFloaterInventoryOfferFolderBrowse(const LLUUID& idFolder)
-	: LLFloater(LLSD().with("uuid", idFolder))
+LLFloaterInventoryOfferFolderBrowse::LLFloaterInventoryOfferFolderBrowse()
+	: LLFloater(LLSD())
 {
 	buildFromFile("floater_offer_invfolder_browse.xml");
 }
@@ -52,6 +52,7 @@ BOOL LLFloaterInventoryOfferFolderBrowse::postBuild()
 	U32 maskFilterTypes = 0x1 << LLInventoryType::IT_CATEGORY;
 	m_pInvPanel->setFilterTypes(maskFilterTypes);
 	m_pInvPanel->setShowFolderState(LLInventoryFilter::SHOW_NON_EMPTY_FOLDERS);
+	m_pInvPanel->getFilter().setFilterCategoryTypes(m_pInvPanel->getFilter().getFilterCategoryTypes() | (1ULL << LLFolderType::FT_INBOX));
 	m_pInvPanel->getFilter().markDefault();
 
 	m_pSavedFolderState = new LLSaveFolderState();
@@ -79,7 +80,7 @@ void LLFloaterInventoryOfferFolderBrowse::onCommit()
 // virtual
 void LLFloaterInventoryOfferFolderBrowse::onOpen(const LLSD& sdKey)
 {
-	const LLUUID idInvObject = sdKey["uuid"].asUUID();
+	const LLUUID idInvObject = sdKey["folder_id"].asUUID();
 	if (idInvObject.notNull())
 	{
 		m_pInvPanel->setSelection(idInvObject, TAKE_FOCUS_NO);

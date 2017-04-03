@@ -147,3 +147,27 @@ protected:
 };
 
 // ============================================================================
+// LLCreateAcceptInFolder - create the destination floater and then callback
+//
+
+class LLCreateAcceptInFolder : public LLAcceptInFolderOfferBase
+{
+	LOG_CLASS(LLCreateAcceptInFolder);
+public:
+	typedef boost::signals2::signal<void (const LLUUID& idDestFolder)> folder_created_signal_t;
+	LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const folder_created_signal_t::slot_type& cb);
+
+	/*
+	 * Member functions (+ base class overrides)
+	 */
+protected:
+	void onDestinationCreated(const LLUUID& idFolder) override;
+
+	/*
+	 * Member variables
+	 */
+protected:
+	folder_created_signal_t m_FolderCreatedSignal;
+};
+
+// ============================================================================
