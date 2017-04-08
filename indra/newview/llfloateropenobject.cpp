@@ -41,6 +41,9 @@
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorypanel.h"
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+#include "llpanelinventoryoffer.h"
+// [/SL:KB]
 #include "llpanelobjectinventory.h"
 #include "llfloaterreg.h"
 #include "llselectmgr.h"
@@ -152,6 +155,28 @@ void LLFloaterOpenObject::moveToInventory(bool wear, bool replace)
 
 	LLUUID object_id = object->getID();
 	std::string name = node->mName;
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+	{
+		const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+		if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
+		{
+			// Prevent the user from trying to copy the inventory over multiple times while we wait for the folder to be created
+			for (LLView* pChild : *getChildList())
+			{
+				if (!dynamic_cast<LLButton*>(pChild))
+					continue;
+				pChild->setEnabled(false);
+			}
+
+			// Create the destination folder (note: might fire instantly if the folder already exists)
+			new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterOpenObject::callbackCreateInventoryCategory, _1, object_id, wear, replace));
+
+			return;
+		}
+	}
+// [/SL:KB]
 
 	// Either create a sub-folder of clothing, or of the root folder.
 	LLUUID parent_category_id;

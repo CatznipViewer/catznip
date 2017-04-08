@@ -31,12 +31,22 @@
      background_visible="false"
      draw_border="false"
      follows="all"
-     height="240"
+     height="218"
      layout="topleft"
      left="10"
      name="object_contents"
      top_pad="0"
      width="284" />
+    <panel
+	 class="panel_offer_invfolder"
+     height="23"
+     filename="panel_offer_invfolder.xml"
+     follows="bottom|left|right"
+     layout="topleft"
+     left="10"
+     name="panel_offer_invfolder"
+     right="-5"
+     top_pad="4" />
   	<view_border
      bevel_style="none"
      follows="bottom|left"
@@ -45,13 +55,13 @@
      layout="topleft"
      left="10"
      name="border"
-     top_pad="5"
-     width="270"/> 
+     right="-5"
+     top_pad="5"/> 
   	<text
   	 follows="bottom|left"
   	 height="15"
   	 layout="topleft"
-  	 left="15"
+  	 left="23"
   	 name="border_note"
   	 text_color="White"
   	 top_delta="5">
@@ -63,7 +73,7 @@
      label="Add to outfit"
      label_selected="Add to outfit"
      layout="topleft"
- 	 left="15"    
+ 	 left="23"    
      name="copy_and_wear_button" 	
  	 top_pad="3"	
      width="135">
@@ -88,7 +98,7 @@
      label="Only copy to inventory"
      label_selected="Only copy to inventory"
      layout="topleft"
-     left="15"
+     left="25"
      name="copy_to_inventory_button"
      tab_group="1"
      top_pad="9"
