@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <panel name="Wearing">
+	<panel.string name="no_attachments">
+		No tienes puestos anexos.
+	</panel.string>
+	<accordion name="wearables_accordion">
+		<accordion_tab name="tab_wearables" title="Artículos de vestir"/>
+		<accordion_tab name="tab_temp_attachments" title="Anexos temporales"/>
+	</accordion>
 	<panel name="bottom_panel">
-		<button name="options_gear_btn" tool_tip="Ver más opciones"/>
+		<menu_button name="options_gear_btn" tool_tip="Ver más opciones"/>
 		<icon name="dummy_icon" width="20" />
 		<flyout_button name="save_btn"  label="Guardar como" width="130" />
 	</panel>
