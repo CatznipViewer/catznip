@@ -283,24 +283,16 @@ LLWornItemsList::LLWornItemsList(const LLWornItemsList::Params& p)
 {
 }
 
-void LLWornItemsList::addNewItem(LLViewerInventoryItem* pItem, bool rearrange)
+// virtual
+LLPanel* LLWornItemsList::createNewItem(LLViewerInventoryItem* pItem)
 {
 	if (!pItem)
 	{
 		LL_WARNS() << "No inventory item. Couldn't create new item." << LL_ENDL;
-		llassert(pItem != NULL);
+		llassert(pItem != nullptr);
+		return nullptr;
 	}
-
-	LLWornListItem* pListItem = LLWornListItem::create(pItem);
-	if (!pListItem)
-		return;
-
-	bool fAdded = addItem(pListItem, pItem->getUUID(), ADD_BOTTOM, rearrange);
-	if (!fAdded)
-	{
-		LL_WARNS() << "Couldn't add new item." << LL_ENDL;
-		llassert(fAdded);
-	}
+	return LLWornListItem::create(pItem);
 }
 
 void LLWornItemsList::setSortOrder(ESortOrder sortOrder, bool sortNow)
