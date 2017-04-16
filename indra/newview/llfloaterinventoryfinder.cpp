@@ -354,6 +354,20 @@ void LLFloaterInventoryFinder::refreshFilter()
 	m_FilterRefreshing = false;
 }
 
+void LLFloaterInventoryFinder::selectAllTypes()
+{
+	// Always refresh our current state on external calls (filter may have changed without an event trigger)
+	refreshControls();
+	onFilterAllTypes(true);
+}
+
+void LLFloaterInventoryFinder::selectNoTypes()
+{
+	// Always refresh our current state on external calls (filter may have changed without an event trigger)
+	refreshControls();
+	onFilterAllTypes(false);
+}
+
 void LLFloaterInventoryFinder::setFilterFromPanel()
 {
 	LLInventoryPanel* pInvPanel = m_pPanelMainInventory->getPanel();
