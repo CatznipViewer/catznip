@@ -55,8 +55,8 @@ public:
 public:
 	void        refreshControls();
 	void        refreshFilter();
-	void        selectAllTypes() { onFilterAllTypes(true); }
-	void        selectNoTypes() { onFilterAllTypes(false); }
+	void        selectAllTypes();
+	void        selectNoTypes();
 	void        setFilterFromPanel();
 protected:
 	bool        areDateLimitsSet() const;

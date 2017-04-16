@@ -873,6 +873,9 @@ void LLPanelMainInventory::setFilterSubStringFromFilter()
 void LLPanelMainInventory::setFilterSubString(const std::string& string) 
 { 
 	mActivePanel->setFilterSubString(string); 
+// [SL:KB] - Patch: Inventory-Panel | Checked: Catznip-5.2
+	setFilterSubStringFromFilter();
+// [/SL:KB]
 }
 
 BOOL LLPanelMainInventory::handleDragAndDrop(S32 x, S32 y, MASK mask, BOOL drop,
