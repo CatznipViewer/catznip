@@ -323,7 +323,7 @@ public:
 	void setOrder(LLAssetType::EType items_of_type, ETypeListOrder order_priority, bool sort_items_by_name, bool sort_wearable_items_by_name);
 
 // [SL:KB] - Patch: Appearance-Wearing | Checked: 2012-07-14 (Catznip-3.3)
-	virtual bool areWearablesOrdered() const { return true; }
+	bool areWearablesOrdered() const override { return true; }
 // [/SL:KB]
 protected:
 	/**

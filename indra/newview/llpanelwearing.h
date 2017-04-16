@@ -65,9 +65,9 @@ protected:
 	LLWornItemsList(const LLWornItemsList::Params& p);
 
 public:
-	/*virtual*/ void setSortOrder(ESortOrder sortOrder, bool sortNow = true);
+	void setSortOrder(ESortOrder sortOrder, bool sortNow = true) override;
 protected:
-	/*virtual*/ void addNewItem(LLViewerInventoryItem* item, bool rearrange /*= true*/);
+	LLPanel* createNewItem(LLViewerInventoryItem* pItem) override;
 };
 
 //////////////////////////////////////////////////////////////////////////

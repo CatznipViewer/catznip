@@ -39,23 +39,23 @@ public:
 	void				closeAllFolders();
 	LLInventoryPanel*	getInventoryPanel()	{ return mInvPanel; }
 
-				bool onIdle();
-	/*virtual*/ void onOpen(const LLSD& info);
-	/*virtual*/ BOOL postBuild();
+	bool onIdle();
+	void onOpen(const LLSD& info) override;
+	BOOL postBuild() override;
 
 	// LLPanelAppearanceTab overrides
-	/*virtual*/ void setFilterSubString(const std::string& string);
-	/*virtual*/ bool isActionEnabled(const LLSD& userdata);
-	/*virtual*/ void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const;
+	void setFilterSubString(const std::string& string) override;
+	bool isActionEnabled(const LLSD& userdata) override;
+	void getSelectedItemsUUIDs(uuid_vec_t& selected_uuids) const override;
 
 	// LLPanelOutfitsTab overrides
-	/*virtual*/ bool hasItemSelected();
-	/*virtual*/ void performAction(std::string action);
-	/*virtual*/ void removeSelected();
-	/*virtual*/ void setSelectedOutfitByUUID(const LLUUID& outfit_uuid);
-	/*virtual*/ void wearSelectedItems();
+	bool hasItemSelected() override;
+	void performAction(std::string action) override;
+	void removeSelected() override;
+	void setSelectedOutfitByUUID(const LLUUID& outfit_uuid) override;
+	void wearSelectedItems() override;
 
-	/*virtual*/ boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb);
+	boost::signals2::connection setSelectionChangeCallback(selection_change_callback_t cb) override;
 
 protected:
 	void highlightBaseOutfit();
