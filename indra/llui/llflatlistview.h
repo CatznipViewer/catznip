@@ -489,10 +489,10 @@ public:
 	 * Sets up new filter string and filters the list.
 	 */
 	void setFilterSubString(const std::string& filter_str);
+//	std::string getFilterSubString() { return mFilterSubString; }
 // [SL:KB] - Patch: Appearance-EditInvPanel | Checked: 2012-07-19 (Catznip-3.3)
 	const std::string& getFilterSubString() { return mFilterSubString; }
 // [/SL:KB]
-//	std::string getFilterSubString() { return mFilterSubString; }
 	
 	/**
 	 * Filters the list, rearranges and notifies parent about shape changes.

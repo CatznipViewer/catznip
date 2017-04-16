@@ -9273,7 +9273,10 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
 								// add the cost of each individual texture in the linkset
 								attachment_texture_cost += volume_texture->second;
 							}
-                            attachment_total_cost = attachment_volume_cost + attachment_texture_cost + attachment_children_cost;
+// [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
+							attachment_total_cost = llclamp(attachment_volume_cost + attachment_texture_cost + attachment_children_cost, MIN_ATTACHMENT_COMPLEXITY, MAX_ATTACHMENT_COMPLEXITY);
+// [/SL:KB]
+//                            attachment_total_cost = attachment_volume_cost + attachment_texture_cost + attachment_children_cost;
                             LL_DEBUGS("ARCdetail") << "Attachment costs " << attached_object->getAttachmentItemID()
                                                    << " total: " << attachment_total_cost
                                                    << ", volume: " << attachment_volume_cost
@@ -9281,11 +9284,12 @@ void LLVOAvatar::calculateUpdateRenderComplexity()
                                                    << ", " << volume->numChildren()
                                                    << " children: " << attachment_children_cost
                                                    << LL_ENDL;
+                            // Limit attachment complexity to avoid signed integer flipping of the wearer's ACI
 // [SL:KB] - Patch: Appearance-Complexity | Checked: Catznip-4.1
 							attached_object->setAttachmentComplexity(attachment_total_cost);
+							cost += (U32)attachment_total_cost;
 // [/SL:KB]
-                            // Limit attachment complexity to avoid signed integer flipping of the wearer's ACI
-                            cost += (U32)llclamp(attachment_total_cost, MIN_ATTACHMENT_COMPLEXITY, MAX_ATTACHMENT_COMPLEXITY);
+//							cost += (U32)llclamp(attachment_total_cost, MIN_ATTACHMENT_COMPLEXITY, MAX_ATTACHMENT_COMPLEXITY);
 						}
 					}
 				}
