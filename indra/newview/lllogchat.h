@@ -129,8 +129,9 @@ public:
 		std::vector<std::string>& listOfFilesToMove);
 
 	static void deleteTranscripts();
-// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-3.6
 	static bool hasTranscripts();
+	static std::string getTranscriptName(const LLUUID& avatar_id, bool is_group=false);
 // [/SL:KB]
 	static bool isTranscriptExist(const LLUUID& avatar_id, bool is_group=false);
 	static bool isNearbyTranscriptExist();

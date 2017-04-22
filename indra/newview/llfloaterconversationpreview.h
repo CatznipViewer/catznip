@@ -31,6 +31,10 @@
 
 extern const std::string LL_FCP_COMPLETE_NAME;	//"complete_name"
 extern const std::string LL_FCP_ACCOUNT_NAME;		//"user_name"
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+extern const std::string LL_FCP_SESSION_ID;         //"session_id"
+extern const std::string LL_FCP_CONVERSATION_PATH;  //"conversation_path"
+// [/SL:KB]
 
 class LLSpinCtrl;
 
@@ -60,8 +64,8 @@ private:
 	int				mPageSize;
 
 	std::list<LLSD>*	mMessages;
-	std::string		mAccountName;
-	std::string		mCompleteName;
+//	std::string		mAccountName;
+//	std::string		mCompleteName;
 	std::string		mChatHistoryFileName;
 	bool			mShowHistory;
 	bool			mHistoryThreadsBusy;

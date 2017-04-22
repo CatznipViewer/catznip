@@ -37,15 +37,22 @@
 
 const std::string LL_FCP_COMPLETE_NAME("complete_name");
 const std::string LL_FCP_ACCOUNT_NAME("user_name");
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+const std::string LL_FCP_SESSION_ID("session_id");
+const std::string LL_FCP_CONVERSATION_PATH("conversation_path");
+// [/SL:KB]
 
 LLFloaterConversationPreview::LLFloaterConversationPreview(const LLSD& session_id)
 :	LLFloater(session_id),
 	mChatHistory(NULL),
-	mSessionID(session_id.asUUID()),
+//	mSessionID(session_id.asUUID()),
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	mSessionID( (!session_id.isMap()) ? session_id.asUUID() : session_id[LL_FCP_SESSION_ID].asUUID() ),
+// [/SL:KB]
 	mCurrentPage(0),
 	mPageSize(gSavedSettings.getS32("ConversationHistoryPageSize")),
-	mAccountName(session_id[LL_FCP_ACCOUNT_NAME]),
-	mCompleteName(session_id[LL_FCP_COMPLETE_NAME]),
+//	mAccountName(session_id[LL_FCP_ACCOUNT_NAME]),
+//	mCompleteName(session_id[LL_FCP_COMPLETE_NAME]),
 	mMutex(NULL),
 	mShowHistory(false),
 	mMessages(NULL),
@@ -66,11 +73,19 @@ BOOL LLFloaterConversationPreview::postBuild()
 	std::string name;
 	std::string file;
 
-	if (mAccountName != "")
+//	if (mAccountName != "")
+//	{
+//		name = mCompleteName;
+//		file = mAccountName;
+//	}
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	const LLSD& sdKey = getKey();
+	if (sdKey.isMap())
 	{
-		name = mCompleteName;
-		file = mAccountName;
+		name = sdKey[LL_FCP_COMPLETE_NAME];
+		file = sdKey[LL_FCP_CONVERSATION_PATH];
 	}
+// [/SL:KB]
 	else if (mSessionID != LLUUID::null && conv)
 	{
 		name = conv->getConversationName();

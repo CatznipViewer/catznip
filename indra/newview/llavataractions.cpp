@@ -1103,6 +1103,10 @@ void LLAvatarActions::viewChatHistory(const LLUUID& id)
 		LLAvatarNameCache::get(id, &avatar_name);
 		extended_id[LL_FCP_COMPLETE_NAME] = avatar_name.getCompleteName();
 		extended_id[LL_FCP_ACCOUNT_NAME] = avatar_name.getAccountName();
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		extended_id[LL_FCP_SESSION_ID] = gIMMgr->computeSessionID(IM_NOTHING_SPECIAL, id);
+		extended_id[LL_FCP_CONVERSATION_PATH] = LLLogChat::getTranscriptName(id);
+// [/SL:KB]
 		LLFloaterReg::showInstance("preview_conversation", extended_id, true);
 	}
 }
