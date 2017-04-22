@@ -8,35 +8,76 @@
  min_height="243"
  min_width="234"
  name="preview_conversation"
+ save_rect="true"
  title="CONVERSATION:"
  width="400">
     <floater.string
      name="Title">
         CONVERSATION: [NAME]
     </floater.string>
+    <floater.string
+     name="DefaultFilter">
+        (No filter)
+    </floater.string>
     <chat_history
      font="SansSerifSmall"
      follows="all"
      visible="true"
-     height="330"
+     height="335"
      name="chat_history"
      notify_unread_msg="false"
      parse_highlights="true"
      parse_urls="true"
      left="5"
-     top_pad="25"
-     width="390">
+     top_pad="20"
+     right="-5">
     </chat_history>
+    <text
+     follows="bottom|left"
+     font="SansSerif"
+     height="22"
+     layout="topleft"
+     name="filter_label"
+     left="10"
+     top_pad="10"
+     value="Filter: "
+     width="35" />
+    <combo_box
+     follows="bottom|left"
+     layout="topleft"
+     height="23"
+     left_pad="5"
+     top_delta="-4"
+     name="filter_combo"
+     width="120" />
+    <text
+     follows="bottom|left"
+     font="SansSerif"
+     height="22"
+     layout="topleft"
+     name="filter_label"
+     left_pad="10"
+     top_delta="4"
+     value="Search: "
+     width="45" />
+    <line_editor
+     follows="bottom|left|right"
+     height="23"
+     layout="topleft"
+     name="search_editor"
+     left_pad="5"
+     width="90"
+     top_delta="-3" />
     <text
      follows="bottom|right"
      font="SansSerif"
      height="22"
      layout="topleft"
      name="page_label"
-     right="-110"
-     top_pad="7"
-     value="Page"
-     width="35">
+     right="-105"
+     top_delta="3"
+     value="Page:"
+     width="45">
     </text>
     <spinner
      allow_digits_only="true"
@@ -46,7 +87,7 @@
      increment="1"
      label_width="40"
      layout="topleft"
-     left_pad="0"
+     left_pad="5"
      name="history_page_spin"
      top_delta="-3"
      width="50"/>
@@ -58,6 +99,7 @@
      name="page_num_label"
      left_pad="5"
      top_delta="4"
+     value="/ 1234"
      width="40">
     </text>
 </floater>

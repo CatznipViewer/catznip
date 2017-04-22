@@ -34,6 +34,9 @@
 #include "llspinctrl.h"
 #include "lltrans.h"
 #include "llnotificationsutil.h"
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+#include <boost/lexical_cast.hpp>
+// [/SL:KB]
 
 const std::string LL_FCP_COMPLETE_NAME("complete_name");
 const std::string LL_FCP_ACCOUNT_NAME("user_name");
@@ -68,6 +71,10 @@ LLFloaterConversationPreview::~LLFloaterConversationPreview()
 BOOL LLFloaterConversationPreview::postBuild()
 {
 	mChatHistory = getChild<LLChatHistory>("chat_history");
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	mFilterCombo = findChild<LLComboBox>("filter_combo");
+	mFilterCombo->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onMonthFilterChanged, this));
+// [/SL:KB]
 
 	const LLConversation* conv = LLConversationLog::instance().getConversation(mSessionID);
 	std::string name;
@@ -116,21 +123,135 @@ void LLFloaterConversationPreview::setPages(std::list<LLSD>* messages, const std
 			delete mMessages; // Clean up temporary message list with "Loading..." text
 		}
 		mMessages = messages;
-		mCurrentPage = (mMessages->size() ? (mMessages->size() - 1) / mPageSize : 0);
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		refreshMonthFilter();
+// [/SL:KB]
+//		mCurrentPage = (mMessages->size() ? (mMessages->size() - 1) / mPageSize : 0);
 
 		mPageSpinner->setEnabled(true);
-		mPageSpinner->setMaxValue(mCurrentPage+1);
-		mPageSpinner->set(mCurrentPage+1);
-
-		std::string total_page_num = llformat("/ %d", mCurrentPage+1);
-		getChild<LLTextBox>("page_num_label")->setValue(total_page_num);
-		mShowHistory = true;
+//		mPageSpinner->setMaxValue(mCurrentPage+1);
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		mPageSpinner->forceSetValue(mCurrentPage+1);
+// [/SL:KB]
+//		mPageSpinner->set(mCurrentPage+1);
+//
+//		std::string total_page_num = llformat("/ %d", mCurrentPage+1);
+//		getChild<LLTextBox>("page_num_label")->setValue(total_page_num);
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		onMonthFilterChanged();
+// [/SL:KB]
+//		mShowHistory = true;
 	}
 	LLLoadHistoryThread* loadThread = LLLogChat::getLoadHistoryThread(mSessionID);
 	if (loadThread)
 	{
 		loadThread->removeLoadEndSignal(boost::bind(&LLFloaterConversationPreview::setPages, this, _1, _2));
 	}
+}
+
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+void LLFloaterConversationPreview::onMonthFilterChanged()
+{
+	const LLSD& sdValue = mFilterCombo->getSelectedValue();
+
+	const month_lookup_type_t::iterator monthLookup = mMonthLookup.find(std::make_pair(sdValue["year"].asInteger(), sdValue["month"].asInteger()));
+	if (mMonthLookup.end() != monthLookup)
+	{
+		mMessageFilter = monthLookup->second;
+
+		mCurrentPage = 0;
+		mPageSpinner->setMaxValue((mMessageFilter.second - mMessageFilter.first) / mPageSize + 1);
+		mPageSpinner->forceSetValue(mCurrentPage + 1);
+	}
+	else
+	{
+		mMessageFilter = std::make_pair(0, 0);
+
+		mCurrentPage = (mMessages->size() ? (mMessages->size() - 1) / mPageSize : 0);
+		mPageSpinner->setMaxValue(mCurrentPage + 1);
+		mPageSpinner->forceSetValue(mCurrentPage + 1);
+	}
+
+	getChild<LLTextBox>("page_num_label")->setValue(llformat("/ %d", (int)mPageSpinner->getMaxValue()));
+	mShowHistory = true;
+}
+
+void LLFloaterConversationPreview::onSearch(const std::string& strNeedle, bool fSearchUp)
+{
+	bool fFound = false;
+	do
+	{
+		fFound = mChatHistory->getEditor()->selectNext(strNeedle, true, false, fSearchUp);
+		if (!fFound)
+		{
+			int newPage = (!fSearchUp) ? mPageSpinner->get() + 1 : mPageSpinner->get() - 1;
+			if ( (newPage < mPageSpinner->getMinValue()) || (newPage > mPageSpinner->getMaxValue()) )
+				break;
+
+			mPageSpinner->forceSetValue(mPageSpinner->get() + 1);
+			mPageSpinner->onCommit();
+			showHistory();
+			mShowHistory = false;
+
+			if (!fSearchUp)
+				mChatHistory->getEditor()->startOfDoc();
+			else
+				mChatHistory->getEditor()->endOfDoc();
+		}
+
+	} while (!fFound);
+}
+
+void LLFloaterConversationPreview::refreshMonthFilter()
+{
+	// Timestamps, if present, will conform to TIMESTAMP_AND_STUFF so we can sa saextract by character index (see lllogchat.cpp)
+	int idxMessage = 0; month_lookup_type_t::iterator monthLookup = mMonthLookup.end(), yearLookup = mMonthLookup.end();
+	for (std::list<LLSD>::const_iterator itMessage = mMessages->cbegin(), endMessage = mMessages->cend(); itMessage != endMessage; ++itMessage, ++idxMessage)
+	{
+		const LLSD& sdMessage = *itMessage;
+		if (!sdMessage.has(LL_IM_TIME))
+			continue;
+
+		std::string strTime = sdMessage[LL_IM_TIME].asString();
+		int nYear = boost::lexical_cast<int>(strTime.data(), 4);
+		int nMonth = boost::lexical_cast<int>(strTime.data() + 5, 2);
+
+		if ( (monthLookup != mMonthLookup.end()) || (monthLookup->second.first != nYear) || (monthLookup->second.second != nMonth) )
+		{
+			yearLookup = mMonthLookup.find(std::make_pair(nYear, 0));
+			monthLookup = mMonthLookup.find(std::make_pair(nYear, nMonth));
+		}
+
+		if (mMonthLookup.end() != monthLookup)
+		{
+			monthLookup->second.second = idxMessage;
+		}
+		else
+		{
+			if ( (yearLookup != mMonthLookup.end()) || (yearLookup->second.first != nYear) )
+				yearLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, 0), std::make_pair(idxMessage, idxMessage))).first;
+			monthLookup = mMonthLookup.insert(std::make_pair(std::make_pair(nYear, nMonth), std::make_pair(idxMessage, idxMessage))).first;
+		}
+		yearLookup->second.second = idxMessage;
+	}
+
+	if (LLStringOps::sMonthList.empty())
+		LLStringOps::setupMonthNames(LLTrans::getString("dateTimeMonthNames"));
+
+	mFilterCombo->clear();
+	mFilterCombo->add(getString("DefaultFilter"));
+	mFilterCombo->addSeparator();
+	for (const auto& kvYearMonth : mMonthLookup)
+	{
+		std::string strItem;
+		if (kvYearMonth.first.second > 0)
+			strItem = llformat("%s %d", LLStringOps::sMonthList[kvYearMonth.first.second - 1].c_str(), kvYearMonth.first.first);
+		else
+			strItem = llformat("-- %d --", kvYearMonth.first.first);
+		mFilterCombo->add(strItem, LLSD().with("year", kvYearMonth.first.first).with("month", kvYearMonth.first.second));
+	}
+	mFilterCombo->selectFirstItem();
+// [/SL:KB]
 }
 
 void LLFloaterConversationPreview::draw()
@@ -172,7 +293,10 @@ void LLFloaterConversationPreview::onOpen(const LLSD& key)
 	mPageSpinner = getChild<LLSpinCtrl>("history_page_spin");
 	mPageSpinner->setCommitCallback(boost::bind(&LLFloaterConversationPreview::onMoreHistoryBtnClick, this));
 	mPageSpinner->setMinValue(1);
-	mPageSpinner->set(1);
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	mPageSpinner->forceSetValue(1);
+// [/SL:KB]
+//	mPageSpinner->set(1);
 	mPageSpinner->setEnabled(false);
 
 	// The actual message list to load from file
@@ -218,9 +342,26 @@ void LLFloaterConversationPreview::showHistory()
 	mChatHistory->clear();
 	std::ostringstream message;
 	std::list<LLSD>::const_iterator iter = mMessages->begin();
-	std::advance(iter, mCurrentPage * mPageSize);
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	std::list<LLSD>::const_iterator iter_end = mMessages->end();
+	if (mMessageFilter.first > 0)
+	{
+		int idxStart = mMessageFilter.first + mCurrentPage * mPageSize;
+		std::advance(iter, idxStart);
+		iter_end = iter;
+		std::advance(iter_end, mMessageFilter.second - idxStart + 1);
+	}
+	else
+	{
+		std::advance(iter, mCurrentPage * mPageSize);
+	}
+// [/SL:KB]
+//	std::advance(iter, mCurrentPage * mPageSize);
 
-	for (int msg_num = 0; iter != mMessages->end() && msg_num < mPageSize; ++iter, ++msg_num)
+//	for (int msg_num = 0; iter != mMessages->end() && msg_num < mPageSize; ++iter, ++msg_num)
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	for (int msg_num = 0; iter != iter_end && msg_num < mPageSize; ++iter, ++msg_num)
+// [/SL:KB]
 	{
 		LLSD msg = *iter;
 
@@ -265,6 +406,11 @@ void LLFloaterConversationPreview::showHistory()
 
 		mChatHistory->appendMessage(chat,chat_args);
 	}
+
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	mChatHistory->getEditor()->deselect();
+	mChatHistory->getEditor()->startOfDoc();
+// [/SL:KB]
 }
 
 void LLFloaterConversationPreview::onMoreHistoryBtnClick()
