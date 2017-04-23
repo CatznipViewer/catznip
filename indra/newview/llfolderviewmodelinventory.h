@@ -28,7 +28,7 @@
 #ifndef LL_LLFOLDERVIEWMODELINVENTORY_H
 #define LL_LLFOLDERVIEWMODELINVENTORY_H
 
-// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-20 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Base | Checked: Catznip-3.5
 #include "llfolderviewmodelinventorycommon.h"
 // [/SL:KB]
 #include "llinventoryfilter.h"
@@ -38,7 +38,7 @@
 
 //class LLFolderViewModelItemInventory
 //	:	public LLFolderViewModelItemCommon
-// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-20 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Base | Checked: Catznip-3.5
 class LLFolderViewModelItemInventory : public LLFolderViewModelItemInventoryCommon
 // [/SL:KB]
 {
