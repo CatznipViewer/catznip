@@ -435,6 +435,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickEnablePopup",		boost::bind(&LLFloaterPreference::onClickEnablePopup, this));
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
+	mCommitCallbackRegistrar.add("Pref.RenderExceptions",       boost::bind(&LLFloaterPreference::onClickRenderExceptions, this));
 // [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
 	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
 // [/SL:KB]
@@ -470,7 +471,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	gSavedSettings.getControl("NameTagShowUsernames")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("NameTagShowFriends")->getCommitSignal()->connect(boost::bind(&handleNameTagOptionChanged,  _2));	
 	gSavedSettings.getControl("UseDisplayNames")->getCommitSignal()->connect(boost::bind(&handleDisplayNamesOptionChanged,  _2));
-	
+
 	gSavedSettings.getControl("AppearanceCameraMovement")->getCommitSignal()->connect(boost::bind(&handleAppearanceCameraMovementChanged,  _2));
 
 	LLAvatarPropertiesProcessor::getInstance()->addObserver( gAgent.getID(), this );
@@ -964,10 +965,12 @@ void LLFloaterPreference::onOpen(const LLSD& key)
 	LLButton* load_btn = findChild<LLButton>("PrefLoadButton");
 	LLButton* save_btn = findChild<LLButton>("PrefSaveButton");
 	LLButton* delete_btn = findChild<LLButton>("PrefDeleteButton");
+	LLButton* exceptions_btn = findChild<LLButton>("RenderExceptionsButton");
 
 	load_btn->setEnabled(started);
 	save_btn->setEnabled(started);
 	delete_btn->setEnabled(started);
+	exceptions_btn->setEnabled(started);
 }
 
 void LLFloaterPreference::onVertexShaderEnable()
@@ -2367,6 +2370,11 @@ void LLFloaterPreference::onClickProxySettings()
 //{
 //    LLFloaterReg::showInstance("prefs_spellchecker");
 //}
+
+void LLFloaterPreference::onClickRenderExceptions()
+{
+    LLFloaterReg::showInstance("avatar_render_settings");
+}
 
 void LLFloaterPreference::onClickAdvanced()
 {
