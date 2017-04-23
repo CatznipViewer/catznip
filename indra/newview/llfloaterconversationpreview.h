@@ -31,7 +31,14 @@
 
 extern const std::string LL_FCP_COMPLETE_NAME;	//"complete_name"
 extern const std::string LL_FCP_ACCOUNT_NAME;		//"user_name"
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+extern const std::string LL_FCP_SESSION_ID;         //"session_id"
+extern const std::string LL_FCP_CONVERSATION_PATH;  //"conversation_path"
+// [/SL:KB]
 
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+class LLComboBox;
+// [/SL:KB]
 class LLSpinCtrl;
 
 class LLFloaterConversationPreview : public LLFloater
@@ -48,6 +55,12 @@ public:
 	virtual void onOpen(const LLSD& key);
 	virtual void onClose(bool app_quitting);
 
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+protected:
+	void onMonthFilterChanged();
+	void onSearch(const std::string& strNeedle, bool fSearchUp);
+	void refreshMonthFilter();
+// [/SL:KB]
 private:
 	void onMoreHistoryBtnClick();
 	void showHistory();
@@ -55,13 +68,23 @@ private:
 	LLMutex			mMutex;
 	LLSpinCtrl*		mPageSpinner;
 	LLChatHistory*	mChatHistory;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	LLComboBox*		mFilterCombo = nullptr;
+// [/SL:KB]
 	LLUUID			mSessionID;
 	int				mCurrentPage;
 	int				mPageSize;
 
 	std::list<LLSD>*	mMessages;
-	std::string		mAccountName;
-	std::string		mCompleteName;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	typedef std::pair<short, char> monthyear_pair_t;
+	typedef std::pair<size_t, size_t> message_filter_t;
+	typedef std::map<monthyear_pair_t, message_filter_t> month_lookup_type_t;
+	message_filter_t    mMessageFilter = std::make_pair(0, 0);
+	month_lookup_type_t mMonthLookup;
+// [/SL:KB]
+//	std::string		mAccountName;
+//	std::string		mCompleteName;
 	std::string		mChatHistoryFileName;
 	bool			mShowHistory;
 	bool			mHistoryThreadsBusy;
