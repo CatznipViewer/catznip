@@ -90,12 +90,13 @@
               <texture_picker
                allow_no_texture="true"
                default_image_name="None"
-               enabled="false"
+               enabled="true"
                fallback_image="Generic_Person_Large"
                follows="top|left"
                height="124"
                layout="topleft"
                left="0"
+               mode="zoom"
                name="2nd_life_pic"
                top="10"
                width="102" />
@@ -137,12 +138,13 @@
               <texture_picker
                allow_no_texture="true"
                default_image_name="None"
-               enabled="false"
+               enabled="true"
                fallback_image="Generic_Person_Large"
                follows="top|left"
                height="124"
                layout="topleft"
                left="0"
+               mode="zoom"
                name="real_world_pic"
                width="102" />
               <text
