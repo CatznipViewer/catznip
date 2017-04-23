@@ -56,10 +56,9 @@ void LLFloaterReg::add(const std::string& name, const std::string& filename, con
 	sGroupMap[groupname] = groupname; // for referencing directly by group name
 }
 
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.4)
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
 //static
-void LLFloaterReg::addWithFileCallback(const std::string& name, const LLFloaterFileFunc& fileFunc, 
-									   const LLFloaterBuildFunc& func, const std::string& groupname)
+void LLFloaterReg::addWithFileCallback(const std::string& name, const LLFloaterFileFunc& fileFunc, const LLFloaterBuildFunc& func, const std::string& groupname)
 {
 	sBuildMap[name].mFunc = func;
 	sBuildMap[name].mFileFunc = fileFunc;
@@ -153,7 +152,7 @@ LLFloater* LLFloaterReg::getInstance(const std::string& name, const LLSD& key)
 	{
 		const LLFloaterBuildFunc& build_func = sBuildMap[name].mFunc;
 //		const std::string& xui_file = sBuildMap[name].mFile;
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.5)
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.5
 		const std::string& xui_file = (!sBuildMap[name].mFileFunc) ? sBuildMap[name].mFile : sBuildMap[name].mFileFunc();
 // [/SL:KB]
 		if (build_func)
