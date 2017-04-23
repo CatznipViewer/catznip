@@ -510,18 +510,20 @@ LLNotificationTemplate::LLNotificationTemplate(const LLNotificationTemplate::Par
 	mPriority(p.priority),
 	mPersist(p.persist),
 	mDefaultFunctor(p.functor.isProvided() ? p.functor() : p.name()),
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
-	mCanLogTo(getLogTypeFromString(p.can_logto)),
+// [SL:KB] - Patch: Notification-Logging | Checked: Catznip-3.2
+	mCanLogTo(0),
 // [/SL:KB]
 //	mLogToChat(p.log_to_chat),
 //	mLogToIM(p.log_to_im),
 	mShowToast(p.show_toast),
     mSoundName("")
 {
-// [SL:KB] - Patch: Notification-Logging | Checked: 2012-01-29 (Catznip-3.2)
-	U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
-	if ( (nLogTo) || ("notifytip" == mType) )
+// [SL:KB] - Patch: Notification-Logging | Checked: Catznip-3.2
+	if ( (p.can_logto.isProvided()) || (p.logto.isProvided()) )
 	{
+		mCanLogTo = (p.can_logto.isProvided()) ? getLogTypeFromString(p.can_logto)
+		                                       : ("notifytip" == mType) ? LLNotificationTemplate::LOG_CHAT : 0;
+		U32 nLogTo = (p.logto.isProvided() ? getLogTypeFromString(p.logto) : mCanLogTo);
 		LLUI::sSettingGroups["config"]->declareU32("Log" + mName, nLogTo, "Specifies where this notification will be logged to");
 	}
 

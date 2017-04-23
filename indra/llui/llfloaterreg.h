@@ -49,7 +49,7 @@ class LLModalDialog;
 // [/SL:KB]
 
 typedef boost::function<LLFloater* (const LLSD& key)> LLFloaterBuildFunc;
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.4)
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
 typedef boost::function<const std::string& (void)> LLFloaterFileFunc;
 // [/SL:KB]
 
@@ -66,7 +66,7 @@ public:
 	struct BuildData
 	{
 		LLFloaterBuildFunc mFunc;
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.4)
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
 		LLFloaterFileFunc mFileFunc;
 // [/SL:KB]
 		std::string mFile;
