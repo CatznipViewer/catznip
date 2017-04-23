@@ -42,7 +42,7 @@
 #include "llfloateropenobject.h"
 #include "llfloaterreg.h"
 #include "llfloatermarketplacelistings.h"
-#include "llfloateroutfitphotopreview.h"
+//#include "llfloateroutfitphotopreview.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfloaterworldmap.h"
 #include "llfolderview.h"
@@ -5119,19 +5119,19 @@ void LLFolderBridge::dropToFavorites(LLInventoryItem* inv_item)
 
 void LLFolderBridge::dropToOutfit(LLInventoryItem* inv_item, BOOL move_is_into_current_outfit)
 {
-//	if((inv_item->getInventoryType() == LLInventoryType::IT_TEXTURE) || (inv_item->getInventoryType() == LLInventoryType::IT_SNAPSHOT))
-//	{
-//		const LLUUID &my_outifts_id = getInventoryModel()->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
-//		if(mUUID != my_outifts_id)
-//		{
-//			LLFloaterOutfitPhotoPreview* photo_preview  = LLFloaterReg::showTypedInstance<LLFloaterOutfitPhotoPreview>("outfit_photo_preview", inv_item->getUUID());
-//			if(photo_preview)
-//			{
-//				photo_preview->setOutfitID(mUUID);
-//			}
-//		}
-//		return;
-//	}
+	if((inv_item->getInventoryType() == LLInventoryType::IT_TEXTURE) || (inv_item->getInventoryType() == LLInventoryType::IT_SNAPSHOT))
+	{
+		//const LLUUID &my_outifts_id = getInventoryModel()->findCategoryUUIDForType(LLFolderType::FT_MY_OUTFITS, false);
+		//if(mUUID != my_outifts_id)
+		//{
+		//	LLFloaterOutfitPhotoPreview* photo_preview  = LLFloaterReg::showTypedInstance<LLFloaterOutfitPhotoPreview>("outfit_photo_preview", inv_item->getUUID());
+		//	if(photo_preview)
+		//	{
+		//		photo_preview->setOutfitID(mUUID);
+		//	}
+		//}
+		return;
+	}
 
 	// BAP - should skip if dup.
 	if (move_is_into_current_outfit)
