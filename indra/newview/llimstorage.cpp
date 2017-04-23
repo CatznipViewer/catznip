@@ -1,17 +1,17 @@
-/** 
+/**
  *
  * Copyright (c) 2011-2014, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -155,7 +155,7 @@ void LLPersistentUnreadIMStorage::loadUnreadIMs()
 			{
 				const LLSD& sdIM = *itIM;
 				LLIMModel::getInstance()->addMessage(idSession, sdIM[LL_IM_FROM].asString(), (sdIM.has(LL_IM_FROM_ID)) ? sdIM[LL_IM_FROM_ID].asUUID() : idAgent,
-				                                     sdIM[LL_IM_TEXT].asString(), sdIM[LL_IM_TIME].asString(), false, true);
+				                                     sdIM[LL_IM_TEXT].asString(), sdIM[LL_IM_TIME].asString(), false);
 			}
 			fShowNotice = true;
 		}
