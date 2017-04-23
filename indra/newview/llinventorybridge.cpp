@@ -42,7 +42,7 @@
 #include "llfloateropenobject.h"
 #include "llfloaterreg.h"
 #include "llfloatermarketplacelistings.h"
-#include "llfloateroutfitphotopreview.h"
+//#include "llfloateroutfitphotopreview.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfloaterworldmap.h"
 #include "llfolderview.h"
