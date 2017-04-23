@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <functional>
 #include "llcachename.h"
+#include "llavatarnamecache.h"
 #include "lldbstrings.h"
 #include "llfloaterreg.h"
 
@@ -366,8 +367,8 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 		const LLUUID& creator_id = item->getCreatorUUID();
 		std::string name = LLSLURL("agent", creator_id, "inspect").getSLURLString();
 // [/SL:KB]
-//		std::string name;
-//		gCacheName->getFullName(item->getCreatorUUID(), name);
+//		LLAvatarName av_name;
+//		LLAvatarNameCache::get(item->getCreatorUUID(), &av_name);
 //		getChildView("BtnCreator")->setEnabled(TRUE);
 		getChildView("LabelCreatorTitle")->setEnabled(TRUE);
 		getChildView("LabelCreatorName")->setEnabled(TRUE);
@@ -380,7 +381,10 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 			name = RlvStrings::getAnonym(name);
 		}
 // [/RLVa:KB]
+// [SL:KB] - Patch: Inventory-MultiProperties | Checked: 2011-10-16 (Catznip-3.2)
 		getChild<LLUICtrl>("LabelCreatorName")->setValue(name);
+// [/SL:KB]
+//		getChild<LLUICtrl>("LabelCreatorName")->setValue(av_name.getUserName());
 	}
 	else
 	{
@@ -413,7 +417,9 @@ void LLFloaterProperties::refreshFromItem(LLInventoryItem* item)
 			const LLUUID& owner_id = perm.getOwner();
 			name = LLSLURL("agent", owner_id, "inspect").getSLURLString();
 // [/SL:KB]
-//			gCacheName->getFullName(perm.getOwner(), name);
+//			LLAvatarName av_name;
+//			LLAvatarNameCache::get(perm.getOwner(), &av_name);
+//			name = av_name.getUserName();
 // [RLVa:KB] - Checked: RLVa-2.0.1
 			if (RlvActions::isRlvEnabled())
 			{
