@@ -920,7 +920,8 @@ void LLLogChat::deleteTranscripts()
 	LLFloaterIMSessionTab::processChatHistoryStyleUpdate(true);
 }
 
-// [SL:KB] - Patch: Chat-Logs | Checked: 2014-03-05 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-3.6
+// static
 bool LLLogChat::hasTranscripts()
 {
 	const std::string strPattern = "*." + LL_TRANSCRIPT_FILE_EXTENSION;
@@ -930,17 +931,24 @@ bool LLLogChat::hasTranscripts()
 	LLDirIterator it(strLogPath, strPattern);
 	return it.next(strTemp);
 }
-// [/SL:KB]
 
 // static
-bool LLLogChat::isTranscriptExist(const LLUUID& avatar_id, bool is_group)
+std::string LLLogChat::getTranscriptName(const LLUUID& avatar_id, bool is_group)
 {
-// [SL:KB] - Patch: Chat-Logs | Checked: 2014-01-22 (Catznip-3.6)
 	std::string strFileName;
 	if (!is_group)
 		buildIMP2PLogFilename(avatar_id, LLStringUtil::null, strFileName);
 	else
 		gCacheName->getGroupName(avatar_id, strFileName);
+	return strFileName;
+}
+// [/SL:KB]
+
+// static
+bool LLLogChat::isTranscriptExist(const LLUUID& avatar_id, bool is_group)
+{
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-3.6
+	const std::string strFileName = getTranscriptName(avatar_id, is_group);
 
 	std::string strFilePath = makeLogFileName(strFileName);
 	if ( (!strFilePath.empty()) && (LLFile::isfile(strFilePath)) )

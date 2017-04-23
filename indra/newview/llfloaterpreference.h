@@ -193,6 +193,7 @@ public:
 	void onClickPermsDefault();
 //	void onClickAutoReplace();
 //	void onClickSpellChecker();
+	void onClickRenderExceptions();
 	void onClickAdvanced();
 	void applyUIColor(LLUICtrl* ctrl, const LLSD& param);
 // [SL:KB] - Patch: Settings-NameTags | Checked: 2014-05-17 (Catznip-3.6)
