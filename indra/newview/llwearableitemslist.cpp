@@ -808,7 +808,9 @@ bool LLWearableItemComplexityComparator::doCompare(const LLPanelInventoryListIte
 		{
 			const LLViewerObject* pObjLHS = gAgentAvatarp->getWornAttachment(pLHS->getItemID());
 			const LLViewerObject* pObjRHS = gAgentAvatarp->getWornAttachment(pRHS->getItemID());
-			if (pObjLHS->getAttachmentComplexity() != pObjRHS->getAttachmentComplexity())
+			if ( (!pObjLHS) || (!pObjRHS) )
+				return (pObjLHS) && (!pObjRHS);
+			else if (pObjLHS->getAttachmentComplexity() != pObjRHS->getAttachmentComplexity())
 				return pObjLHS->getAttachmentComplexity() > pObjRHS->getAttachmentComplexity();
 		}
 	}
