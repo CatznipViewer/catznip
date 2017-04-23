@@ -1157,10 +1157,10 @@ void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent,
 // [/SL:KB]
 {
 	std::string item_desc = avatar_id.asString();
-	std::string item_name;
-	gCacheName->getFullName(avatar_id, item_name);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(avatar_id, &av_name);
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
-						  parent, LLTransactionID::tnull, item_name, item_desc, LLAssetType::AT_CALLINGCARD,
+						  parent, LLTransactionID::tnull, av_name.getUserName(), item_desc, LLAssetType::AT_CALLINGCARD,
 						  LLInventoryType::IT_CALLINGCARD, NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, cb);
 }
 
@@ -2173,9 +2173,9 @@ PermissionMask LLViewerInventoryItem::getPermissionMask() const
 
 //----------
 
-void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const std::string& name, bool is_group)
+void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const LLAvatarName& name)
 {
-	rename(name);
+	rename(name.getUserName());
 	gInventory.addChangedMask(LLInventoryObserver::LABEL, getUUID());
 	gInventory.notifyObservers();
 }

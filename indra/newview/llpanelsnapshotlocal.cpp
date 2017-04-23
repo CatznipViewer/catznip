@@ -181,7 +181,6 @@ void LLPanelSnapshotLocal::onSaveCallback(bool saved)
 	if (saved)
 	{
 		mSnapshotFloater->postSave();
-		goBack();
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 		LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", true).with("msg", "local")));
 // [/SL:KB]
@@ -189,7 +188,10 @@ void LLPanelSnapshotLocal::onSaveCallback(bool saved)
 	}
 	else
 	{
-		cancel();
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+		LLFloaterSnapshot::getInstance()->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "local")));
+// [/SL:KB]
+//		floater->notify(LLSD().with("set-finished", LLSD().with("ok", false).with("msg", "local")));
 	}
 }
 

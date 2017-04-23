@@ -372,12 +372,15 @@ std::string LLTextEditor::getSelectionString() const
 
 //void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap)
 // [SL:KB] - Patch: UI-FloaterSearchReplace | Checked: 2010-10-29 (Catznip-2.3)
-void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
+bool LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insensitive, BOOL wrap, BOOL search_up)
 // [/SL:KB]
 {
 	if (search_text_in.empty())
 	{
-		return;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		return false;
+// [/SL:KB]
+//		return;
 	}
 
 	LLWString text = getWText();
@@ -431,7 +434,10 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 		mIsSelecting = FALSE;
 		mSelectionEnd = 0;
 		mSelectionStart = 0;
-		return;
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+		return false;
+// [/SL:KB]
+//		return;
 	}
 
 	setCursorPos(loc);
@@ -445,6 +451,9 @@ void LLTextEditor::selectNext(const std::string& search_text_in, BOOL case_insen
 	mIsSelecting = TRUE;
 	mSelectionEnd = mCursorPos;
 	mSelectionStart = llmin((S32)getLength(), (S32)(mCursorPos + search_text.size()));
+// [SL:KB] - Patch: Chat-Logs | Checked: Catznip-5.2
+	return true;
+// [/SL:KB]
 }
 
 //BOOL LLTextEditor::replaceText(const std::string& search_text_in, const std::string& replace_text,
@@ -1590,6 +1599,10 @@ void LLTextEditor::pasteHelper(bool is_primary)
 // Clean up string (replace tabs and remove characters that our fonts don't support).
 void LLTextEditor::cleanStringForPaste(LLWString & clean_string)
 {
+	std::string clean_string_utf = wstring_to_utf8str(clean_string);
+	std::replace( clean_string_utf.begin(), clean_string_utf.end(), '\r', '\n');
+	clean_string = utf8str_to_wstring(clean_string_utf);
+
 	LLWStringUtil::replaceTabsWithSpaces(clean_string, SPACES_PER_TAB);
 	if( mAllowEmbeddedItems )
 	{
