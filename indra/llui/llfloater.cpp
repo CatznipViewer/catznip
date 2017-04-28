@@ -182,6 +182,9 @@ LLFloater::Params::Params()
 	reuse_instance("reuse_instance", false),
 	can_resize("can_resize", false),
 	can_minimize("can_minimize", true),
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	can_collapse("can_collapse", true),
+// [/SL:KB]
 	can_close("can_close", true),
 	can_drag_on_left("can_drag_on_left", false),
 	can_tear_off("can_tear_off", true),
@@ -267,6 +270,9 @@ LLFloater::LLFloater(const LLSD& key, const LLFloater::Params& p)
 	mKey(key),
 	mCanTearOff(p.can_tear_off),
 	mCanMinimize(p.can_minimize),
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	mCanCollapse( (p.can_collapse.isProvided()) ? p.can_collapse : p.can_minimize ),
+// [/SL:KB]
 	mCanClose(p.can_close),
 	mDragOnLeft(p.can_drag_on_left),
 	mResizable(p.can_resize),
@@ -346,13 +352,19 @@ void LLFloater::initFloater(const Params& p)
 	}
 
 	// Minimize button only for top draggers
-	if ( !mDragOnLeft && mCanMinimize )
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	if (!mDragOnLeft)
 	{
-		mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
-		mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
-// [/SL:KB]
+		if (mCanMinimize)
+			mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
+		if (mCanCollapse)
+			mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
 	}
+// [/SL:KB]
+//	if ( !mDragOnLeft && mCanMinimize )
+//	{
+//		mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
+//	}
 
 	if(mCanDock)
 	{
@@ -1251,11 +1263,11 @@ void LLFloater::handleReshape(const LLRect& new_rect, bool by_user)
 }
 
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
-void LLFloater::setCollapsed(BOOL collapsed)
+void LLFloater::setCollapsed(bool collapsed)
 {
 	// (mMinimized == true) && (collapse == true)   => currently minimized, can not collapse
 	// (mMinimized == false) && (collapse == false) => currently not minimized, can not restore
-	if (mMinimized == collapsed)
+	if ((bool)mMinimized == collapsed)
 		return;
 
 	mCollapseOnMinimize = collapsed;
@@ -1712,7 +1724,7 @@ BOOL LLFloater::handleDoubleClick(S32 x, S32 y, MASK mask)
 	          ( ((!mDragOnLeft) && (mDragHandle->getRect().mTop >= y) && (mDragHandle->getRect().mTop - mHeaderHeight <= y)) ||
 	            (mDragOnLeft) && (mDragHandle->getRect().pointInRect(x,y))) )
 	{
-		setCollapsed(TRUE);
+		setCollapsed(true);
 		return TRUE;
 	}
 	return LLPanel::handleDoubleClick(x, y, mask);
@@ -2140,13 +2152,23 @@ void	LLFloater::setCanMinimize(BOOL can_minimize)
 	}
 
 	mButtonsEnabled[BUTTON_MINIMIZE] = can_minimize && !isMinimized();
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
-	mButtonsEnabled[BUTTON_COLLAPSE] = can_minimize && !isMinimized() && sShowCollapseButton;
-// [/SL:KB]
 	mButtonsEnabled[BUTTON_RESTORE]  = can_minimize &&  isMinimized();
 
 	updateTitleButtons();
 }
+
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+void LLFloater::setCanCollapse(bool can_collapse)
+{
+	mCanCollapse = can_collapse;
+	if ( (!can_collapse) && (isMinimized()) && (mCollapseOnMinimize) )
+		setCollapsed(false);
+
+	mButtonsEnabled[BUTTON_COLLAPSE] = can_collapse && !isMinimized() && sShowCollapseButton;
+
+	updateTitleButtons();
+}
+// [/SL:KB]
 
 void	LLFloater::setCanClose(BOOL can_close)
 {
@@ -3299,6 +3321,9 @@ void LLFloater::initFromParams(const LLFloater::Params& p)
 
 	setCanTearOff(p.can_tear_off);
 	setCanMinimize(p.can_minimize);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	setCanCollapse( (p.can_collapse.isProvided()) ? p.can_collapse : p.can_minimize );
+// [/SL:KB]
 	setCanClose(p.can_close);
 	setCanDock(p.can_dock);
 	setCanResize(p.can_resize);

@@ -161,6 +161,9 @@ public:
 								reuse_instance,
 								can_resize,
 								can_minimize,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+								can_collapse,
+// [/SL:KB]
 								can_close,
 								can_drag_on_left,
 								can_tear_off,
@@ -268,7 +271,7 @@ public:
 	void			setTitleVisible(BOOL visible);
 // [/SL:KB]
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
-	void            setCollapsed(BOOL collapsed);
+	void            setCollapsed(bool collapsed);
 // [/SL:KB]
 	virtual void	setMinimized(BOOL b);
 	void			moveResizeHandlesToFront();
@@ -289,6 +292,9 @@ public:
 	virtual BOOL	isFrontmost();
 	BOOL			isDependent()					{ return !mDependeeHandle.isDead(); }
 	void			setCanMinimize(BOOL can_minimize);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	void			setCanCollapse(bool can_collapse);
+// [/SL:KB]
 	void			setCanClose(BOOL can_close);
 	void			setCanTearOff(BOOL can_tear_off);
 	virtual void	setCanResize(BOOL can_resize);
@@ -303,6 +309,9 @@ public:
 	static LLControlGroup*	getControlGroup();
 
 	bool			isMinimizeable() const{ return mCanMinimize; }
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	bool			isCollapseable() const{ return mCanCollapse; }
+// [/SL:KB]
 	bool			isCloseable() const{ return mCanClose; }
 	bool			isDragOnLeft() const{ return mDragOnLeft; }
 	S32				getMinWidth() const{ return mMinWidth; }
@@ -498,6 +507,9 @@ private:
 	
 	BOOL			mCanTearOff;
 	BOOL			mCanMinimize;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	bool			mCanCollapse;
+// [/SL:KB]
 	BOOL			mCanClose;
 	BOOL			mDragOnLeft;
 	BOOL			mResizable;
