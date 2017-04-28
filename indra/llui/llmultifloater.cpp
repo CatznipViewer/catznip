@@ -187,7 +187,7 @@ void LLMultiFloater::addFloater(LLFloater* floaterp, BOOL select_added_floater, 
 	floater_data.mHeight = floaterp->getRect().getHeight();
 	floater_data.mCanMinimize = floaterp->isMinimizeable();
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
-	floater_data.mCanCollapse = floaterp->isCollapseable();
+	floater_data.mCanCollapse = floaterp->isCollapsible();
 // [/SL:KB]
 	floater_data.mCanResize = floaterp->isResizable();
     floater_data.mSaveRect = floaterp->mSaveRect;
