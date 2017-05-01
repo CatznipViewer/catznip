@@ -1397,10 +1397,11 @@ void LLFloater::setMinimized(BOOL minimize)
 // [/SL:KB]
 		if (mButtonsEnabled[BUTTON_RESTORE])
 		{
-			mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
 // [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
-			mButtonsEnabled[BUTTON_COLLAPSE] = sShowCollapseButton;
+			mButtonsEnabled[BUTTON_MINIMIZE] = mCanMinimize;
+			mButtonsEnabled[BUTTON_COLLAPSE] = mCanCollapse && sShowCollapseButton;
 // [/SL:KB]
+//			mButtonsEnabled[BUTTON_MINIMIZE] = TRUE;
 			mButtonsEnabled[BUTTON_RESTORE] = FALSE;
 		}
 
