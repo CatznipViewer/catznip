@@ -631,7 +631,13 @@ void LLPanelGroupGeneral::update(LLGroupChange gc)
 	}
 // [/SL:KB]
 
-	if (mInsignia) mInsignia->setEnabled(mAllowEdit && can_change_ident);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	if (mInsignia)
+	{
+		mInsignia->setControlMode( (mAllowEdit && can_change_ident) ? LLTextureCtrl::EControlMode::EDIT : LLTextureCtrl::EControlMode::ZOOM );
+	}
+// [/SL:KB]
+//	if (mInsignia) mInsignia->setEnabled(mAllowEdit && can_change_ident);
 	if (mEditCharter) mEditCharter->setEnabled(mAllowEdit && can_change_ident);
 	
 	if (mGroupNameEditor) mGroupNameEditor->setVisible(FALSE);
@@ -731,7 +737,10 @@ void LLPanelGroupGeneral::reset()
 
 	mInsignia->setImageAssetID(LLUUID::null);
 	
-	mInsignia->setEnabled(true);
+// [SL:KB] - Patch: UI-TexturePreview | Checked: Catznip-5.2
+	mInsignia->setControlMode(LLTextureCtrl::EControlMode::EDIT);
+// [/SL:KB]
+//	mInsignia->setEnabled(true);
 
 	mInsignia->setImageAssetName(mInsignia->getDefaultImageName());
 
