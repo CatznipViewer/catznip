@@ -207,6 +207,9 @@ public:
 	bool beginIMSession();
 	void fileUploadLocation(const LLSD& userdata);
 	bool attachObject(const LLSD& userdata);
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+	bool isUserProtectedFodler() const;
+// [/SL:KB]
 	static void idle(void* user_data);
 
 	// DEBUG ONLY:

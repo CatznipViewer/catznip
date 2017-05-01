@@ -5735,6 +5735,10 @@ void LLAppViewer::handleLoginComplete()
 
 	mOnLoginCompleted();
 
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	LLUserProtectedFolders::instance().fromLLSD(gSavedPerAccountSettings.getLLSD("UserProtectedFolders"));
+// [/SL:KB]
+
 	writeDebugInfo();
 
 	// we logged in successfully, so save settings on logout

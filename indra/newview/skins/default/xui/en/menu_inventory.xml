@@ -566,6 +566,16 @@
              parameter="open_newtab" />
         </menu_item_call>
     </menu>
+    <menu_item_check
+     label="Show as System Folder"
+     layout="topleft"
+     name="Show as System Folder">
+        <menu_item_check.on_click
+         function="Inventory.DoToSelected"
+         parameter="toggle_protected" />
+        <menu_item_check.on_check
+         function="Inventory.IsUserProtected" />
+    </menu_item_check>
     <menu_item_call
      label="Properties"
      layout="topleft"

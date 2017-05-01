@@ -253,6 +253,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>UserProtectedFolders</key>
+    <map>
+      <key>Comment</key>
+      <string>List of user-created folders that are treated as system folders</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>LLSD</string>
+      <key>Value</key>
+      <array />
+    </map>
     <!-- Settings below are for back compatibility only.
     They are not used in current viewer anymore. But they can't be removed to avoid
     influence on previous versions of the viewer in case of settings are not used or default value
