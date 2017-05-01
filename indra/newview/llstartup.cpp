@@ -56,6 +56,7 @@
 #include "llerrorcontrol.h"
 #include "llfloaterreg.h"
 #include "llfocusmgr.h"
+#include "llfloatergridstatus.h"
 #include "llfloaterimsession.h"
 #include "lllocationhistory.h"
 #include "llimageworker.h"
@@ -965,6 +966,8 @@ bool idle_startup()
 		
 		// Load media plugin cookies
 		LLViewerMedia::loadCookieFile();
+
+		LLRenderMuteList::getInstance()->loadFromFile();
 
 		//-------------------------------------------------
 		// Handle startup progress screen
@@ -1877,6 +1880,8 @@ bool idle_startup()
 		gSavedSettings.setBOOL("FirstLoginThisInstall", FALSE);
 
 		LLFloaterReg::showInitialVisibleInstances();
+
+		LLFloaterGridStatus::getInstance()->startGridStatusTimer();
 
 		display_startup();
 
