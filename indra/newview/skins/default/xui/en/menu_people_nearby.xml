@@ -80,7 +80,7 @@
     <menu_item_separator name="separator_actions" />
     <context_menu
      label="Manage"
-     name="menu_manage">
+     name="manage_participant">
         <menu_item_check
          label="Block/Unblock"
          layout="topleft"
@@ -99,7 +99,7 @@
          name="report">
             <menu_item_call.on_click
          function="Avatar.Report"/>
-        </menu_item_call>  
+        </menu_item_call>
         <menu_item_call
          label="Freeze"
          name="freeze">
