@@ -56,7 +56,7 @@ public:
 //	virtual LLWearableType::EType getWearableType() const = 0;
 	virtual EInventorySortGroup getSortGroup() const = 0;
 	virtual LLInventoryObject* getInventoryObject() const = 0;
-// [SL:KB] - Patch: Inventory-Base | Checked: 2013-05-21 (Catznip-3.5)
+// [SL:KB] - Patch: Inventory-Base | Checked: Catznip-3.5
 	template <class T> T* getInventoryObject() const
 	{
 		return dynamic_cast<T*>(getInventoryObject());
