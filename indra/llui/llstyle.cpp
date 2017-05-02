@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2001&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2012-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -41,7 +42,7 @@ LLStyle::Params::Params()
 	font("font", LLFontGL::getFontMonospace()),
 	image("image"),
 	link_href("href"),
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	link_style_override("link_style_override", true),
 // [/SL:KB]
 	is_link("is_link")
@@ -55,7 +56,7 @@ LLStyle::LLStyle(const LLStyle::Params& p)
 	mSelectedColor(p.selected_color),
 	mFont(p.font()),
 	mLink(p.link_href),
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	mLinkStyleOverrides(p.link_style_override),
 // [/SL:KB]
 	mIsLink(p.is_link.isProvided() ? p.is_link : !p.link_href().empty()),

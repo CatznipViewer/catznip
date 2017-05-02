@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2011-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -29,8 +30,8 @@
 
 #include "lllistcontextmenu.h"
 
-// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
-class LLParticipantList;
+// [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
+class LLSpeakerMgr;
 // [/SL:KB]
 
 namespace LLPanelPeopleMenus
@@ -47,7 +48,10 @@ public:
 protected:
 	virtual void buildContextMenu(class LLMenuGL& menu, U32 flags);
 
-private:
+//private:
+// [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
+protected:
+// [/SL:KB]
 	bool enableContextMenuItem(const LLSD& userdata);
 	bool checkContextMenuItem(const LLSD& userdata);
 	bool enableFreezeEject(const LLSD& userdata);
@@ -78,35 +82,43 @@ protected:
 	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
 };
 
-// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
-
+// [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
 /**
  * Menu used in the participant list
  */
 class ParticipantContextMenu : public PeopleContextMenu
 {
+	/*
+	 * Constructor
+	 */
 public:
-	ParticipantContextMenu(LLParticipantList* pParticipantList);
-	virtual ~ParticipantContextMenu() { }
+	ParticipantContextMenu(LLSpeakerMgr* pSpeakerMgr);
 
+	/*
+	 * Base class overrides
+	 */
 public:
-	/*virtual*/ LLContextMenu* createMenu();
+	LLContextMenu* createMenu() override;
 protected:
-	/*virtual*/ void buildContextMenu(class LLMenuGL& menu, U32 flags);
+	void buildContextMenu(class LLMenuGL& menu, U32 flags) override;
 
+	/*
+	 * Helper functions
+	 */
 protected:
-	bool canEjectAvatar(const LLUUID& idAgent) const;
-	void ejectAvatar(const LLUUID& idAgent);
-	bool hasBlockedText(const LLUUID& idAgent) const;
-	bool hasBlockedVoice(const LLUUID& idAgent) const;
-	bool isModerator() const;
-	void toggleBlockText(const LLUUID& idAgent);
-	void toggleBlockVoice(const LLUUID& idAgent);
+	bool checkGroupContextMenuItem(const LLSD& sdData);
+	bool enableGroupContextMenuItem(const LLSD& sdData);
+	void banFromGroup(const LLUUID& idAgent);
+	void ejectFromGroup(const LLUUID& idAgent);
+	void toggleGroupText(const LLUUID& idAgent);
+	void toggleGroupVoice(const LLUUID& idAgent);
 
+	/*
+	 * Member variables
+	 */
 protected:
-	LLParticipantList* m_pParticipantList;
+	LLSpeakerMgr* m_pSpeakerMgr = nullptr;
 };
-
 // [/SL:KB]
 
 extern PeopleContextMenu gPeopleContextMenu;

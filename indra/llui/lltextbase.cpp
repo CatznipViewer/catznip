@@ -2073,7 +2073,7 @@ void LLTextBase::appendTextImpl(const std::string &new_text, const LLStyle::Para
 
 			LLStyle::Params link_params(style_params);
 			link_params.overwriteFrom(match.getStyle());
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 			if (!style_params.link_style_override)
 			{
 				U8 style = LLFontGL::getStyleFromString(input_params.font.style) | LLFontGL::getStyleFromString(link_params.font.style);
@@ -2284,7 +2284,7 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 			LLTextSegmentPtr segmentp;
 			if(underline_on_hover_only)
 			{
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 				U8 style = LLFontGL::getStyleFromString(highlight_params.font.style) & ~LLFontGL::UNDERLINE;
 				highlight_params.font.style = LLFontGL::getStringFromStyle(style);
 // [/SL:KB]
@@ -2313,7 +2313,7 @@ void LLTextBase::appendAndHighlightTextImpl(const std::string &new_text, S32 hig
 		if (underline_on_hover_only)
 		{
 			LLStyle::Params normal_style_params(style_params);
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 			U8 style = LLFontGL::getStyleFromString(normal_style_params.font.style) & ~LLFontGL::UNDERLINE;
 			normal_style_params.font.style = LLFontGL::getStringFromStyle(style);
 // [/SL:KB]

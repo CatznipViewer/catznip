@@ -150,7 +150,7 @@ public:
     void closeSelectedConversations(const uuid_vec_t& ids);
 	/*virtual*/ BOOL isFrontmost();
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 	void setSortOrderSessions(const LLConversationFilter::ESortOrderType order);
 	void setSortOrderParticipants(const LLConversationFilter::ESortOrderType order);
 	void setSortOrder(const LLConversationSort& order);

@@ -81,7 +81,7 @@
     </menu_item_call>
     <context_menu
      label="Manage"
-     name="menu_manage_participant">
+     name="manage_participant">
         <menu_item_check
          label="Block/Unblock"
          layout="topleft"
@@ -100,38 +100,60 @@
          name="report">
             <menu_item_call.on_click
              function="Avatar.Report"/>
-        </menu_item_call>  
+        </menu_item_call>
         <menu_item_separator
-         on_visible.function="Group.IsModerator"/>
+         on_visible.function="Group.CheckItem"
+         on_visible.parameter="is_moderator" />
         <menu_item_check
          label="Allow Text Chat"
-         name="block_group_text">
+         name="group_toggle_text">
             <menu_item_check.on_click
-             function="Group.ToggleBlockText"/>
+             function="Group.ToggleAllowText"/>
+            <menu_item_check.on_check
+             function="Group.CheckItem"
+             parameter="can_text_chat" />
             <menu_item_check.on_visible
-             function="Group.CheckBlockText"/>
-            <menu_item_check.on_visible
-             function="Group.IsModerator"/>
+             function="Group.CheckItem"
+             parameter="is_moderator" />
         </menu_item_check>
         <menu_item_check
          label="Allow Voice Chat"
-         name="block_group_voice">
+         name="group_toggle_voice">
             <menu_item_check.on_click
-             function="Group.ToggleBlockVoice"/>
-            <mmenu_item_check.on_visible
-             function="Group.CheckBlockVoice"/>
+             function="Group.ToggleAllowVoice"/>
+            <menu_item_check.on_check
+             function="Group.CheckItem"
+             parameter="can_voice_chat" />
             <menu_item_check.on_visible
-             function="Group.IsModerator"/>
+             function="Group.CheckItem"
+             parameter="is_moderator" />
         </menu_item_check>
         <menu_item_separator
-         on_visible.function="Group.CanEjectAvatar"/>
+         on_visible.function="Group.CheckItem"
+         on_visible.parameter="is_moderator" />
         <menu_item_call
          label="Eject from Group"
-         name="eject_from_group">
+         name="group_eject">
             <menu_item_call.on_click
-             function="Group.EjectAvatar"/>
+             function="Group.Eject"/>
+            <menu_item_call.on_enable
+             function="Group.EnableItem"
+             parameter="can_eject" />
             <menu_item_call.on_visible
-             function="Group.CanEjectAvatar"/>
+             function="Group.CheckItem"
+             parameter="is_moderator" />
+        </menu_item_call>
+        <menu_item_call
+         label="Ban from Group"
+         name="group_ban">
+            <menu_item_call.on_click
+             function="Group.Ban"/>
+            <menu_item_call.on_enable
+             function="Group.EnableItem"
+             parameter="can_ban" />
+            <menu_item_call.on_visible
+             function="Group.CheckItem"
+             parameter="is_moderator" />
         </menu_item_call>
     </context_menu>
     <menu_item_call

@@ -32,7 +32,7 @@
 
 class LLTimer;
 class LLListContextMenu;
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 class LLSpeakerMgr;
 // [/SL:KB]
 
@@ -198,17 +198,16 @@ protected:
 	virtual bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
 };
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 class LLAvatarItemRecentSpeakerComparator : public LLAvatarItemNameComparator, public LLRefCount
 {
 	LOG_CLASS(LLAvatarItemRecentSpeakerComparator);
 
 public:
 	LLAvatarItemRecentSpeakerComparator(LLSpeakerMgr* pSpeakerMgr = NULL) : m_pSpeakerMgr(pSpeakerMgr) { }
-	virtual ~LLAvatarItemRecentSpeakerComparator() { }
 
 protected:
-	/*virtual*/ bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const;
+	bool doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const override;
 
 private:
 	LLSpeakerMgr* m_pSpeakerMgr;

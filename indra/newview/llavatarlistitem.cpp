@@ -56,7 +56,7 @@ LLAvatarListItem::Params::Params()
 	voice_call_left_style("voice_call_left_style"),
 	online_style("online_style"),
 	offline_style("offline_style"),
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	moderator_style("moderator_style"),
 // [/SL:KB]
 	name_right_pad("name_right_pad", 0)
@@ -271,7 +271,7 @@ void LLAvatarListItem::setState(EItemState item_style)
 	case IS_OFFLINE:
 		mAvatarNameStyle = params.offline_style();
 		break;
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	case IS_MODERATOR:
 		mAvatarNameStyle = params.moderator_style();
 		break;
@@ -515,7 +515,7 @@ LLAvatarListItem::icon_color_map_t& LLAvatarListItem::getItemIconColorMap()
 		std::make_pair(IS_OFFLINE,
 		LLUIColorTable::instance().getColor("AvatarListItemIconOfflineColor", LLColor4::white)));
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	item_icon_color_map.insert(
 		std::make_pair(IS_MODERATOR,
 		LLUIColorTable::instance().getColor("AvatarListItemIconModeratorColor", LLColor4::white)));

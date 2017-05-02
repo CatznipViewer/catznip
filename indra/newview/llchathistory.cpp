@@ -112,7 +112,7 @@ public:
 		mPopupMenuHandleObject(),
 		mAvatarID(),
 		mSourceType(CHAT_SOURCE_UNKNOWN),
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.7)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.7
 		mChatFlags(CHAT_FLAG_NONE),
 // [/SL:KB]
 		mFrom(),
@@ -382,7 +382,7 @@ public:
 		mAvatarID = chat.mFromID;
 		mSessionID = chat.mSessionID;
 		mSourceType = chat.mSourceType;
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.7)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.7
 		mChatFlags = (args.has("chat_flags")) ? args["chat_flags"].asInteger() : CHAT_FLAG_NONE;
 // [/SL:KB]
 
@@ -447,7 +447,7 @@ public:
 					user_name->appendText("  - " + username, FALSE, style_params_name);
 				}
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 				if (mChatFlags & CHAT_FLAG_MODERATOR)
 				{
 					LLStyle::Params style_params_name;
@@ -709,7 +709,7 @@ private:
 			user_name->appendText("  - " + av_name.getUserName(), FALSE, style_params_name);
 		}
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 		if (mChatFlags & CHAT_FLAG_MODERATOR)
 		{
 			LLStyle::Params style_params_name;
@@ -736,7 +736,7 @@ protected:
 	LLUUID			    mAvatarID;
 	LLSD				mObjectData;
 	EChatSourceType		mSourceType;
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.7)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.7
 	U32					mChatFlags;
 // [/SL:KB]
 	std::string			mFrom;
@@ -889,7 +889,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 	bool use_plain_text_chat_history = args["use_plain_text_chat_history"].asBoolean();
 	bool square_brackets = false; // square brackets necessary for a system messages
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	U32 chat_flags = (args.has("chat_flags")) ? args["chat_flags"].asInteger() : CHAT_FLAG_NONE;
 // [/SL:KB]
 
@@ -1048,7 +1048,7 @@ void LLChatHistory::appendMessage(const LLChat& chat, const LLSD &args, const LL
 			{
 				LLStyle::Params link_params(body_message_params);
 				link_params.overwriteFrom(LLStyleMap::instance().lookupAgent(chat.mFromID));
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 				U8 font_style = LLFontGL::getStyleFromString(link_params.font.style) | LLViewerChat::getChatNameFontStyle((EChatFlags)chat_flags);
 				link_params.font.style = LLFontGL::getStringFromStyle(font_style);
 				link_params.link_style_override = false;
