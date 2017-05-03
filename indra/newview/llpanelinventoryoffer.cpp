@@ -205,6 +205,9 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 		}
 	}
 
+	// Trim excess slashes and append optional destination folder
+	boost::trim_if(strSubfolderPath, boost::is_any_of("/"));
+
 	// If there's no subfolder path then we're done
 	if (strSubfolderPath.empty())
 	{
@@ -248,10 +251,7 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 	// Split the path up in individual folders
 	//
 	if (std::string::npos != strSubfolderPath.find("/"))
-	{
-		boost::trim(strSubfolderPath);
 		boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")), boost::algorithm::token_compress_on);
-	}
 
 	//
 	// Kick off creating the destination folder (if it doesn't already exist)
@@ -298,12 +298,23 @@ void LLAcceptInFolderOfferBase::onCategoryCreateCallback(LLUUID idFolder, LLAcce
 		}
 		else
 		{
-			inventory_func_type f = boost::bind(LLAcceptInFolderOfferBase::onCategoryCreateCallback, _1, pInstance);
+			inventory_func_type f = boost::bind(&LLAcceptInFolderOfferBase::onCategoryCreateCallback, _1, pInstance);
 			const LLUUID idTemp = gInventory.createNewCategory(idFolder, LLFolderType::FT_NONE, strFolder, f);
 			if (idTemp.notNull())
 				onCategoryCreateCallback(idTemp, pInstance);
 			return;
 		}
+	}
+
+	// Create a brand new folder (if requested)
+	if (!pInstance->m_strNewFolder.empty())
+	{
+		inventory_func_type f = boost::bind(&LLAcceptInFolderOfferBase::onDestinationCreated, pInstance, _1);
+		const LLUUID idTemp = gInventory.createNewCategory(idFolder, LLFolderType::FT_NONE, pInstance->m_strNewFolder, f);
+		if (idTemp.notNull())
+			pInstance->onDestinationCreated(idTemp);
+		pInstance->m_strNewFolder.clear();
+		return;
 	}
 
 	// Destination folder should exist at this point (we'll be deallocated when the function returns)
@@ -463,6 +474,15 @@ void LLAcceptInFolderAgentOffer::onDestinationCreated(const LLUUID& idFolder)
 
 LLCreateAcceptInFolder::LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const folder_created_signal_t::slot_type& cb)
 	: LLAcceptInFolderOfferBase(idBaseFolder)
+{
+	m_FolderCreatedSignal.connect(cb);
+
+	if (!createDestinationFolder())
+		delete this;
+}
+
+LLCreateAcceptInFolder::LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const std::string& strNewFolder, const folder_created_signal_t::slot_type& cb)
+	: LLAcceptInFolderOfferBase(idBaseFolder, strNewFolder)
 {
 	m_FolderCreatedSignal.connect(cb);
 

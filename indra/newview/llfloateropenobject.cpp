@@ -171,7 +171,7 @@ void LLFloaterOpenObject::moveToInventory(bool wear, bool replace)
 			}
 
 			// Create the destination folder (note: might fire instantly if the folder already exists)
-			new LLCreateAcceptInFolder(idDestFolder, boost::bind(&LLFloaterOpenObject::callbackCreateInventoryCategory, _1, object_id, wear, replace));
+			new LLCreateAcceptInFolder(idDestFolder, name, boost::bind(&LLFloaterOpenObject::callbackCreateInventoryCategory, _1, object_id, wear, replace));
 
 			return;
 		}
