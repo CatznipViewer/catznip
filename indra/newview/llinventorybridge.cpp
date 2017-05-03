@@ -795,13 +795,29 @@ void LLInvFVBridge::getClipboardEntries(bool show_asset_id,
 
                 if (gMenuHolder->getChild<LLView>("MarketplaceListings")->getVisible())
                 {
-                    items.push_back(std::string("Marketplace Copy"));
-                    items.push_back(std::string("Marketplace Move"));
-                    if (!canListOnMarketplaceNow())
-                    {
-                        disabled_items.push_back(std::string("Marketplace Copy"));
-                        disabled_items.push_back(std::string("Marketplace Move"));
-                    }
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: Catznip-5.2
+					if (LLAssetType::AT_CATEGORY == obj->getType())
+					{
+						items.push_back(std::string("Marketplace Listings"));
+						if (!canListOnMarketplaceNow())
+						{
+							disabled_items.push_back(std::string("Marketplace Listings"));
+						}
+					}
+					else
+					{
+// [/SL:KB]
+						items.push_back(std::string("Marketplace Copy"));
+						items.push_back(std::string("Marketplace Move"));
+						if (!canListOnMarketplaceNow())
+						{
+							disabled_items.push_back(std::string("Marketplace Copy"));
+							disabled_items.push_back(std::string("Marketplace Move"));
+						}
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: Catznip-5.2
+
+					}
+// [/SL:KB]
                 }
 			}
 		}
@@ -3853,12 +3869,14 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 			disabled_items.push_back(std::string("Empty Lost And Found"));
 		}
 
-		disabled_items.push_back(std::string("New Folder"));
-		disabled_items.push_back(std::string("New Script"));
-		disabled_items.push_back(std::string("New Note"));
-		disabled_items.push_back(std::string("New Gesture"));
-		disabled_items.push_back(std::string("New Clothes"));
-		disabled_items.push_back(std::string("New Body Parts"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: Catznip-5.2
+		disabled_items.push_back(std::string("New Items"));
+// [/SL:KB]
+//		disabled_items.push_back(std::string("New Script"));
+//		disabled_items.push_back(std::string("New Note"));
+//		disabled_items.push_back(std::string("New Gesture"));
+//		disabled_items.push_back(std::string("New Clothes"));
+//		disabled_items.push_back(std::string("New Body Parts"));
 		disabled_items.push_back(std::string("upload_def"));
 	}
 	if (favorites == mUUID)
@@ -3880,12 +3898,14 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
     }
     if (getPreferredType() == LLFolderType::FT_MARKETPLACE_STOCK)
     {
-        disabled_items.push_back(std::string("New Folder"));
-		disabled_items.push_back(std::string("New Script"));
-		disabled_items.push_back(std::string("New Note"));
-		disabled_items.push_back(std::string("New Gesture"));
-		disabled_items.push_back(std::string("New Clothes"));
-		disabled_items.push_back(std::string("New Body Parts"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: Catznip-5.2
+		disabled_items.push_back(std::string("New Items"));
+// [/SL:KB]
+//		disabled_items.push_back(std::string("New Script"));
+//		disabled_items.push_back(std::string("New Note"));
+//		disabled_items.push_back(std::string("New Gesture"));
+//		disabled_items.push_back(std::string("New Clothes"));
+//		disabled_items.push_back(std::string("New Body Parts"));
 		disabled_items.push_back(std::string("upload_def"));
     }
     if (marketplace_listings_id == mUUID)
@@ -3931,11 +3951,14 @@ void LLFolderBridge::buildContextMenuOptions(U32 flags, menuentry_vec_t&   items
 				}
                 if (!isMarketplaceListingsFolder())
                 {
-                    items.push_back(std::string("New Script"));
-                    items.push_back(std::string("New Note"));
-                    items.push_back(std::string("New Gesture"));
-                    items.push_back(std::string("New Clothes"));
-                    items.push_back(std::string("New Body Parts"));
+// [SL:KB] - Patch: Inventory-ContextMenu | Checked: Catznip-5.2
+                    items.push_back(std::string("New Items"));
+// [/SL:KB]
+//                    items.push_back(std::string("New Script"));
+//                    items.push_back(std::string("New Note"));
+//                    items.push_back(std::string("New Gesture"));
+//                    items.push_back(std::string("New Clothes"));
+//                    items.push_back(std::string("New Body Parts"));
                     items.push_back(std::string("upload_def"));
                 }
 			}
