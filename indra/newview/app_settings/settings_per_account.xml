@@ -343,6 +343,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>UserProtectedFolders</key>
+    <map>
+      <key>Comment</key>
+      <string>List of user-created folders that are treated as system folders</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>LLSD</string>
+      <key>Value</key>
+      <array />
+    </map>
     <key>WearInitialOutfit</key>
       <map>
         <key>Comment</key>

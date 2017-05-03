@@ -49,7 +49,7 @@
 #include "llpanelgroup.h"
 #include "llgroupactions.h"
 #include "llnotificationsutil.h"
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2.1)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 #include "llimview.h"
 #include "llspeakers.h"
 // [/SL:KB]
@@ -1889,7 +1889,7 @@ void LLGroupMgr::sendGroupMemberInvites(const LLUUID& group_id, std::map<LLUUID,
 //		// Make sure they are in the group, and we need the member data
 //		LLGroupMgrGroupData::member_list_t::iterator mit = group_datap->mMembers.find(ejected_member_id);
 //		if (mit != group_datap->mMembers.end())
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t& member_ids)
 {
 	bool start_message = true;
@@ -1940,7 +1940,7 @@ void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t&
 				start_message = true;
 			}
 
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 			if (mit != group_datap->mMembers.end())
 			{
 // [/SL:KB]
@@ -1961,7 +1961,7 @@ void LLGroupMgr::sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t&
 				// member_data was introduced and is used here instead of (*mit).second to avoid crash because of invalid iterator
 				// It becomes invalid after line with erase above. EXT-4778
 				delete member_data;
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 			}
 // [/SL:KB]
 		}

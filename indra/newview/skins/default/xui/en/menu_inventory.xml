@@ -79,6 +79,7 @@
 	<menu_item_separator
     layout="topleft"
     name="Marketplace Listings Separator" />
+    <!--
     <menu_item_call
      label="Share"
      layout="topleft"
@@ -87,6 +88,7 @@
         <menu_item_call.on_click
          function="Inventory.Share" />
     </menu_item_call>
+    -->
     <menu_item_call
      label="Buy"
      layout="topleft"
@@ -153,38 +155,10 @@
          parameter="rename" />
     </menu_item_call>
 -->
-    <menu_item_call
-     label="New Folder"
+    <menu
+     label="New Items"
      layout="topleft"
-     name="New Folder">
-        <menu_item_call.on_click
-         function="Inventory.DoCreate"
-         parameter="category" />
-    </menu_item_call>
-    <menu_item_call
-     label="New Script"
-     layout="topleft"
-     name="New Script">
-        <menu_item_call.on_click
-         function="Inventory.DoCreate"
-         parameter="lsl" />
-    </menu_item_call>
-    <menu_item_call
-     label="New Notecard"
-     layout="topleft"
-     name="New Note">
-        <menu_item_call.on_click
-         function="Inventory.DoCreate"
-         parameter="notecard" />
-    </menu_item_call>
-    <menu_item_call
-     label="New Gesture"
-     layout="topleft"
-     name="New Gesture">
-        <menu_item_call.on_click
-         function="Inventory.DoCreate"
-         parameter="gesture" />
-    </menu_item_call>
+     name="New Items">
     <menu
      label="New Clothes"
      layout="topleft"
@@ -323,6 +297,113 @@
              parameter="eyes" />
         </menu_item_call>
     </menu>
+    <menu_item_call
+     label="New Folder"
+     layout="topleft"
+     name="New Folder">
+        <menu_item_call.on_click
+         function="Inventory.DoCreate"
+         parameter="category" />
+    </menu_item_call>
+    <menu_item_call
+     label="New Script"
+     layout="topleft"
+     name="New Script">
+        <menu_item_call.on_click
+         function="Inventory.DoCreate"
+         parameter="lsl" />
+    </menu_item_call>
+    <menu_item_call
+     label="New Notecard"
+     layout="topleft"
+     name="New Note">
+        <menu_item_call.on_click
+         function="Inventory.DoCreate"
+         parameter="notecard" />
+    </menu_item_call>
+    <menu_item_call
+     label="New Gesture"
+     layout="topleft"
+     name="New Gesture">
+        <menu_item_call.on_click
+         function="Inventory.DoCreate"
+         parameter="gesture" />
+    </menu_item_call>
+    </menu>
+    <menu
+     label="Open folder in"
+     layout="topleft"
+     name="Open in XXX">
+        <menu_item_call
+         label="New Tab"
+         layout="topleft"
+         name="Open in New Tab">
+            <menu_item_call.on_click
+             function="Inventory.DoToSelected"
+             parameter="open_newtab" />
+        </menu_item_call>
+        <menu_item_call
+         label="New Window"
+         layout="topleft"
+         name="Open in New Window">
+            <menu_item_call.on_click
+             function="Inventory.DoToSelected"
+             parameter="open_newwindow" />
+        </menu_item_call>
+    </menu>
+    <menu
+     label="Show Contents in"
+     layout="topleft"
+     name="Show Contents in XXX">
+        <menu_item_check
+         label="Current Search"
+         layout="topleft"
+         name="Current Search">
+            <menu_item_check.on_check
+             function="Inventory.IsFilterIncludedFolder" />
+            <menu_item_check.on_click
+             function="Inventory.DoToSelected"
+             parameter="toggle_filtered" />
+        </menu_item_check>
+        <menu_item_call
+         enabled="false"
+         label="All Searches"
+         layout="topleft"
+         name="All Searches" />
+        <menu_item_separator
+         layout="topleft" />
+        <menu_item_call
+         enabled="false"
+         label="Exclude from Current Search"
+         layout="topleft"
+         name="Exclude from Current Search" />
+        <menu_item_call
+         enabled="false"
+         label="Exclude from All Searches"
+         layout="topleft"
+         name="Exclude from All Searches" />
+    </menu>
+    <menu
+     label="Marketplace Listings"
+     layout="topleft"
+     name="Marketplace Listings">
+      <menu_item_call
+       label="Copy to Listings"
+       layout="topleft"
+       name="Marketplace Copy">
+      	<menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="copy_to_marketplace_listings" />
+      </menu_item_call>
+      <menu_item_call
+       label="Move to Listings"
+       layout="topleft"
+       name="Marketplace Move">
+      	<menu_item_call.on_click
+         function="Inventory.DoToSelected"
+         parameter="move_to_marketplace_listings" />
+      </menu_item_call>
+    </menu>
     <menu
      label="Use as default for"
      layout="topleft"
@@ -445,6 +526,16 @@
              parameter="change_folder_type_undershirt" />
         </menu_item_call>
     </menu>
+    <menu_item_check
+     label="Show as System Folder"
+     layout="topleft"
+     name="Show as System Folder">
+        <menu_item_check.on_click
+         function="Inventory.DoToSelected"
+         parameter="toggle_protected" />
+        <menu_item_check.on_check
+         function="Inventory.IsUserProtected" />
+    </menu_item_check>
     <menu_item_call
      label="Open"
      layout="topleft"
@@ -571,59 +662,6 @@
          function="Inventory.DoToSelected"
          parameter="restore" />
     </menu_item_call>
-    <menu
-     label="Open Folder in"
-     layout="topleft"
-     name="Open in XXX">
-        <menu_item_call
-         label="New Tab"
-         layout="topleft"
-         name="Open in New Tab">
-            <menu_item_call.on_click
-             function="Inventory.DoToSelected"
-             parameter="open_newtab" />
-        </menu_item_call>
-        <menu_item_call
-         label="New Window"
-         layout="topleft"
-         name="Open in New Window">
-            <menu_item_call.on_click
-             function="Inventory.DoToSelected"
-             parameter="open_newwindow" />
-        </menu_item_call>
-    </menu>
-    <menu
-     label="Show Contents in"
-     layout="topleft"
-     name="Show Contents in XXX">
-        <menu_item_check
-         label="Current Search"
-         layout="topleft"
-         name="Current Search">
-            <menu_item_check.on_check
-             function="Inventory.IsFilterIncludedFolder" />
-            <menu_item_check.on_click
-             function="Inventory.DoToSelected"
-             parameter="toggle_filtered" />
-        </menu_item_check>
-        <menu_item_call
-         enabled="false"
-         label="All Searches"
-         layout="topleft"
-         name="All Searches" />
-        <menu_item_separator
-         layout="topleft" />
-        <menu_item_call
-         enabled="false"
-         label="Exclude from Current Search"
-         layout="topleft"
-         name="Exclude from Current Search" />
-        <menu_item_call
-         enabled="false"
-         label="Exclude from All Searches"
-         layout="topleft"
-         name="Exclude from All Searches" />
-    </menu>
     <menu_item_call
      label="Properties"
      layout="topleft"

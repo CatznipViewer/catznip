@@ -29,6 +29,10 @@
 
 #include <string>
 #include "llassettype.h"
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+#include "llsingleton.h"
+#include "lluuid.h"
+// [/SL:KB]
 
 // This class handles folder types (similar to assettype, except for folders)
 // and operations on those.
@@ -103,7 +107,10 @@ public:
 	static EType 				lookup(const std::string& type_name);
 	static const std::string&	lookup(EType folder_type);
 
-	static bool 				lookupIsProtectedType(EType folder_type);
+//	static bool 				lookupIsProtectedType(EType folder_type);
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	static bool 				lookupIsProtectedType(EType folder_type, const LLUUID& folder_id);
+// [/SL:KB]
 	static bool 				lookupIsEnsembleType(EType folder_type);
 
 	static LLAssetType::EType	folderTypeToAssetType(LLFolderType::EType folder_type);
@@ -115,5 +122,24 @@ protected:
 	LLFolderType() {}
 	~LLFolderType() {}
 };
+
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+class LLUserProtectedFolders : public LLSingleton<LLUserProtectedFolders>
+{
+private:
+	LLSINGLETON_EMPTY_CTOR(LLUserProtectedFolders);
+
+public:
+	void add(const LLUUID& folder_id) { if (folder_id.notNull()) m_Folders.insert(folder_id); }
+	bool contains(const LLUUID& folder_id) const { return m_Folders.end() != m_Folders.find(folder_id); }
+	void remove(const LLUUID& folder_id) { m_Folders.erase(folder_id); }
+
+	void fromLLSD(const LLSD& folder_list);
+	LLSD toLLSD() const;
+
+protected:
+	uuid_set_t m_Folders;
+};
+// [/SL:KB]
 
 #endif // LL_LLFOLDERTYPE_H

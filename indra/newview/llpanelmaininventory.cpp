@@ -273,6 +273,10 @@ BOOL LLPanelMainInventory::postBuild()
 	// Trigger callback for focus received so we can deselect items in inbox/outbox
 	LLFocusableElement::setFocusReceivedCallback(boost::bind(&LLPanelMainInventory::onFocusReceived, this));
 
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	m_UserProtectedFoldersConn = gSavedPerAccountSettings.getControl("UserProtectedFolders")->getSignal()->connect(boost::bind(&LLPanelMainInventory::onChangeUserProtectedFolders, this));
+// [/SL:KB]
+
 	return TRUE;
 }
 
@@ -1492,6 +1496,18 @@ void LLPanelMainInventory::onClipboardAction(const LLSD& userdata)
 void LLPanelMainInventory::onChangeFolderSortOrder(const LLSD& sdParam)
 {
 	setSortBy(sdParam);
+}
+
+void LLPanelMainInventory::onChangeUserProtectedFolders()
+{
+	for (int idxPanel = 0, cntPanel = mFilterTabs->getTabCount(); idxPanel < cntPanel; idxPanel++)
+	{
+		LLInventoryPanel* pInvPanel = dynamic_cast<LLInventoryPanel*>(mFilterTabs->getPanelByIndex(idxPanel));
+		if (!pInvPanel)
+			continue;
+		pInvPanel->getFolderViewModel()->requestSortAll();
+		pInvPanel->getRootFolder()->arrangeAll();
+	}
 }
 // [/SL:KB]
 

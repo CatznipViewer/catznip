@@ -2,11 +2,12 @@
 <floater
  bg_alpha_image="Window_NoTitle_Background"
  bg_opaque_image="Window_NoTitle_Foreground"
+ can_collapse="true"
  can_close="true"
  can_minimize="false"
  chrome="true"
  follows="top|left"
- header_height="0"
+ legacy_header_height="25"
  height="330"
  layout="topleft"
  name="floater_quickprefs"
@@ -23,10 +24,11 @@
      image_selected="PushButton_Selected_Press"
      label=""
      layout="topleft"
-     right="-100"
+     right="-115"
      name="appearance_btn"
      tab_stop="false"
      tool_tip="Quick Appearance"
+     top="3"
      width="25">
     </button>
     <button

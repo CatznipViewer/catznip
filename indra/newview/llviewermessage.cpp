@@ -1347,7 +1347,10 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 								// Localize folder name.
 								// *TODO: share this code?
 								folder_name = parent_folder->getName();
-								if (LLFolderType::lookupIsProtectedType(parent_folder->getPreferredType()))
+//								if (LLFolderType::lookupIsProtectedType(parent_folder->getPreferredType()))
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+								if (LLFolderType::lookupIsProtectedType(parent_folder->getPreferredType(), LLUUID::null))
+// [/SL:KB]
 								{
 									LLTrans::findString(folder_name, "InvFolder " + folder_name);
 								}

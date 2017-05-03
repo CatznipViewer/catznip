@@ -905,6 +905,9 @@ void LLFloaterIMContainerView::reshapeFloaterAndSetResizeLimits(bool collapse, S
 
 	setCanResize(at_least_one_panel_is_expanded);
 	setCanMinimize(at_least_one_panel_is_expanded);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	setCanCollapse(at_least_one_panel_is_expanded);
+// [/SL:KB]
 
     assignResizeLimits();
 }
@@ -1285,12 +1288,12 @@ void LLFloaterIMContainerView::doToParticipants(const std::string& command, uuid
 		}
 	}
 
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.6
 	// This handles both single and multiple selection
-	if ("eject_from_group" == command)
+	if ("eject_member" == command)
 	{
-		LLGroupActions::ejectFromGroup(mSelectedSession, selectedIDS);
-			
+		LLGroupActions::eject(mSelectedSession, selectedIDS);
+
 		fHandled = true;
 	}
 // [/SL:KB]
@@ -1604,15 +1607,13 @@ bool LLFloaterIMContainerView::enableContextMenuItem(const std::string& item, uu
 		// *TODO : get that out of here...
 		return enableModerateContextMenuItem(item);
 	}
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
-	else if ("eject_from_group" == item)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.6
+	else if ("can_eject_member" == item)
 	{
-		bool fRet = true;
-		for (uuid_vec_t::const_iterator itId = uuids.begin(); itId != uuids.end(); ++itId)
-		{
-			fRet &= LLGroupActions::canEjectFromGroup(mSelectedSession, *itId);
-		}
-		return fRet;
+		for (const LLUUID& idAgent : uuids)
+			if (!LLGroupActions::canEject(mSelectedSession, idAgent))
+				return false;
+		return true;
 	}
 // [/SL:KB]
 	return LLFloaterIMContainerBase::enableContextMenuItem(item, uuids);
@@ -1687,15 +1688,6 @@ bool LLFloaterIMContainerView::visibleContextMenuItem(const LLSD& userdata)
 	{
 		return isMuted(conversation_item->getUUID());
 	}
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2013-08-19 (Catznip-3.6)
-	else if ("eject_from_group" == item)
-	{
-		// Show if we have a group member selection (not when the group itself is selected)
-		const LLIMModel::LLIMSession* pIMSession = LLIMModel::getInstance()->findIMSession(getSelectedSession());
-		const LLConversationItem* pConvItem = getCurSelectedViewModelItem();
-		return (pIMSession) && (pIMSession->isGroupSessionType()) && (pConvItem) && (pConvItem->getType() == LLConversationItem::CONV_PARTICIPANT);
-	}
-// [/SL:KB]
 
 	return true;
 }

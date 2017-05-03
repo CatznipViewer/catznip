@@ -99,7 +99,7 @@ public:
 	void clearRoles() { mRolesList.clear(); };
 	role_list_t::iterator roleBegin() { return mRolesList.begin(); }
 	role_list_t::iterator roleEnd() { return mRolesList.end(); }
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 	role_list_t::const_iterator roleBegin() const { return mRolesList.begin(); }
 	role_list_t::const_iterator roleEnd() const { return mRolesList.end(); }
 // [/SL:KB]
@@ -257,7 +257,7 @@ public:
 	void recalcAllAgentPowers();
 	void recalcAgentPowers(const LLUUID& agent_id);
 
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 	bool isMemberDataComplete() const { return mMemberDataComplete; }
 	bool isRoleDataComplete() const { return mRoleDataComplete; }
 	bool isRoleMemberDataComplete() const { return mRoleMemberDataComplete; }
@@ -409,7 +409,7 @@ public:
 
 	static void sendGroupMemberJoin(const LLUUID& group_id);
 	static void sendGroupMemberInvites(const LLUUID& group_id, std::map<LLUUID,LLUUID>& role_member_pairs);
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 	static void sendGroupMemberEjects(const LLUUID& group_id, const uuid_vec_t& member_ids);
 // [/SL:KB]
 //	static void sendGroupMemberEjects(const LLUUID& group_id,

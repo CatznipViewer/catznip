@@ -142,7 +142,7 @@ public:
 	{
 		BUTTON_CLOSE = 0,
 		BUTTON_RESTORE,
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
 		BUTTON_COLLAPSE,
 // [/SL:KB]
 		BUTTON_MINIMIZE,
@@ -162,6 +162,9 @@ public:
 								reuse_instance,
 								can_resize,
 								can_minimize,
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+								can_collapse,
+// [/SL:KB]
 								can_close,
 								can_drag_on_left,
 								can_tear_off,
@@ -180,7 +183,7 @@ public:
 		Optional<LLUIImage*>	close_image,
 								restore_image,
 								minimize_image,
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
 								collapse_image,
 // [/SL:KB]
 								tear_off_image,
@@ -189,14 +192,14 @@ public:
 		Optional<LLUIImage*>	close_pressed_image,
 								restore_pressed_image,
 								minimize_pressed_image,
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
 								collapse_pressed_image,
 // [/SL:KB]
 								tear_off_pressed_image,
 								dock_pressed_image,
 								help_pressed_image;
 		
-// [SL:KB] - Patch: Control-Floater | Checked: 2013-08-15 (Catznip-3.6)
+// [SL:KB] - Patch: Control-Floater | Checked: Catznip-3.6)
 		Optional<F32>			active_transparency;
 		Optional<F32>			inactive_transparency;
 // [/SL:KB]
@@ -271,8 +274,8 @@ public:
 // [SL:KB] - Patch: Control-Floater | Checked: 2012-09-03 (Catznip-3.3)
 	void			setTitleVisible(BOOL visible);
 // [/SL:KB]
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2013-07-15 (Catznip-3.4)
-	void            setCollapsed(BOOL collapsed);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.4
+	void            setCollapsed(bool collapsed);
 // [/SL:KB]
 	virtual void	setMinimized(BOOL b);
 	void			moveResizeHandlesToFront();
@@ -283,7 +286,10 @@ public:
 // [SL:KB] - Patch: Build-Misc | Checked: 2011-12-11 (Catznip-3.2)
 	bool			isDependentFloater(const LLFloater* dependent) const;
 // [/SL:KB]
-	BOOL			isMinimized() const				{ return mMinimized; }
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	bool			isMinimized() const				{ return mMinimized; }
+// [/SL:KB]
+//	BOOL			isMinimized() const				{ return mMinimized; }
 	/// isShown() differs from getVisible() in that isShown() also considers
 	/// isMinimized(). isShown() is true only if visible and not minimized.
 	bool			isShown() const;
@@ -299,6 +305,9 @@ public:
 	void			setButtonsVisible(bool visible);
 // [/SL:KB]
 	void			setCanMinimize(BOOL can_minimize);
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	void			setCanCollapse(bool can_collapse);
+// [/SL:KB]
 	void			setCanClose(BOOL can_close);
 	void			setCanTearOff(BOOL can_tear_off);
 	virtual void	setCanResize(BOOL can_resize);
@@ -313,6 +322,9 @@ public:
 	static LLControlGroup*	getControlGroup();
 
 	bool			isMinimizeable() const{ return mCanMinimize; }
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	bool			isCollapsible() const { return mCanCollapse; }
+// [/SL:KB]
 	bool			isCloseable() const{ return mCanClose; }
 	bool			isDragOnLeft() const{ return mDragOnLeft; }
 	S32				getMinWidth() const{ return mMinWidth; }
@@ -393,7 +405,7 @@ public:
 
 	static void		onClickClose(LLFloater* floater);
 	static void		onClickMinimize(LLFloater* floater);
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
 	static void		onClickCollapse(LLFloater* floater);
 // [/SL:KB]
 //	static void		onClickTearOff(LLFloater* floater);
@@ -407,7 +419,7 @@ public:
 	// Naming decided mostly by LLFloaterIMSessionTab to reduce the amount of LL code changes
 	virtual void	onTearOffClicked();
 // [/SL:KB]
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
 	static void		handleShowCollapseButtonChanged(const LLSD& sdValue);
 // [/SL:KB]
 
@@ -532,6 +544,9 @@ private:
 	
 	BOOL			mCanTearOff;
 	BOOL			mCanMinimize;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-5.2
+	bool			mCanCollapse;
+// [/SL:KB]
 	BOOL			mCanClose;
 // [SL:KB] - Patch: Control-FloaterFocus | Checked: 2014-01-28 (Catznip-3.6)
 	bool			mFocusStealsFrontmost;	// FALSE if we don't want the currently focused floater to cover this floater without user interaction
@@ -553,8 +568,8 @@ private:
 // [/SL:KB]
 
 	BOOL			mMinimized;
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
-	BOOL			mCollapseOnMinimize;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
+	bool			mCollapseOnMinimize;
 // [/SL:KB]
 	BOOL			mForeground;
 	LLHandle<LLFloater>	mDependeeHandle;
@@ -586,8 +601,8 @@ private:
 	static std::string	sButtonNames[BUTTON_COUNT];
 	static std::string	sButtonToolTips[BUTTON_COUNT];
 	static std::string  sButtonToolTipsIndex[BUTTON_COUNT];
-// [SL:KB] - Patch: UI-FloaterCollapse | Checked: 2011-12-12 (Catznip-3.2)
-	static BOOL			sShowCollapseButton;
+// [SL:KB] - Patch: UI-FloaterCollapse | Checked: Catznip-3.2
+	static bool			sShowCollapseButton;
 // [/SL:KB]
 	
 	typedef void(*click_callback)(LLFloater*);
