@@ -223,28 +223,28 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 	struct tm* timeParts = std::localtime(&timeNow);
 
 	// %yyyy and %yy
-	boost::replace_all(strSubfolderPath, "%yyyy", llformat("%d", 1900 + timeParts->tm_year));
-	boost::replace_all(strSubfolderPath, "%yy", llformat("%d", timeParts->tm_year % 100));
+	boost::ireplace_all(strSubfolderPath, "%yyyy", llformat("%d", 1900 + timeParts->tm_year));
+	boost::ireplace_all(strSubfolderPath, "%yy", llformat("%d", timeParts->tm_year % 100));
 	// %mmm and %mm
 	if (LLStringOps::sMonthList.empty())
 		LLStringOps::setupMonthNames(LLTrans::getString("dateTimeMonthNames"));
 	if (LLStringOps::sMonthList.size() == 12)
-		boost::replace_all(strSubfolderPath, "%mmm", LLStringOps::sMonthList[timeParts->tm_mon]);
-	boost::replace_all(strSubfolderPath, "%mm", llformat("%02d", timeParts->tm_mon));
+		boost::ireplace_all(strSubfolderPath, "%mmm", LLStringOps::sMonthList[timeParts->tm_mon]);
+	boost::ireplace_all(strSubfolderPath, "%mm", llformat("%02d", timeParts->tm_mon));
 	// %dd
-	boost::replace_all(strSubfolderPath, "%dd", llformat("%02d", timeParts->tm_mday));
+	boost::ireplace_all(strSubfolderPath, "%dd", llformat("%02d", timeParts->tm_mday));
 	// %date
 	{
 		char strDateBuf[32];
 		strftime(strDateBuf, sizeof(strDateBuf) / sizeof(char), "%Y-%m-%d", localtime(&timeNow));
-		boost::replace_all(strSubfolderPath, "%date", strDateBuf);
+		boost::ireplace_all(strSubfolderPath, "%date", strDateBuf);
 	}
 	// %region
 	{
 		std::string strRegion;
 		if (gAgent.getRegion())
 			strRegion = gAgent.getRegion()->getName();
-		boost::replace_all(strSubfolderPath, "%region", strRegion);
+		boost::ireplace_all(strSubfolderPath, "%region", strRegion);
 	}
 
 	//
