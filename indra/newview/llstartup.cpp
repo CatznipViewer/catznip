@@ -56,6 +56,7 @@
 #include "llerrorcontrol.h"
 #include "llfloaterreg.h"
 #include "llfocusmgr.h"
+#include "llfloatergridstatus.h"
 #include "llfloaterimsession.h"
 #include "lllocationhistory.h"
 #include "llimageworker.h"
@@ -971,6 +972,8 @@ bool idle_startup()
 		
 		// Load media plugin cookies
 		LLViewerMedia::loadCookieFile();
+
+		LLRenderMuteList::getInstance()->loadFromFile();
 
 // [SL:KB] - Patch: Control-TextParser | Checked: 2012-09-22 (Catznip-3.3)
 		if ( (LLTextParser::instance().loadKeywords()) && (LLTextParser::instance().getHighlightCount() > 0) )
@@ -1890,6 +1893,8 @@ bool idle_startup()
 		gSavedSettings.setBOOL("FirstLoginThisInstall", FALSE);
 
 		LLFloaterReg::showInitialVisibleInstances();
+
+		LLFloaterGridStatus::getInstance()->startGridStatusTimer();
 
 		display_startup();
 

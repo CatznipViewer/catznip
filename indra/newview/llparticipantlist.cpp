@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2012-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -595,6 +596,7 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 
 	m_pAvatarList->setNoItemsCommentText(LLTrans::getString("LoadingData"));
 	m_pAvatarList->setSessionID(data_source->getSessionID());
+
 	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
 }
 
