@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2002&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2012-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -47,7 +48,7 @@ public:
 	static boost::signals2::connection setFontChangedCallback(const font_change_signal_t::slot_type& cb);
 	static void signalChatFontChanged();
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 	static U8 getChatNameFontStyle(EChatFlags chat_flags);
 // [/SL:KB]
 

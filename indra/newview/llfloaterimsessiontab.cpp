@@ -114,7 +114,7 @@ LLFloaterIMSessionTab::LLFloaterIMSessionTab(const LLSD& session_id)
 	mEnableCallbackRegistrar.add("IMSession.Menu.ShowModes.Enable",
 			boost::bind(&LLFloaterIMSessionTab::onIMShowModesMenuItemEnable,  this, _2));
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 	mCommitCallbackRegistrar.add("IMSession.Menu.ParticipantList", boost::bind(&LLFloaterIMSessionTab::onMenuParticipantListItemClicked,  this, _2));
 	mEnableCallbackRegistrar.add("IMSession.Menu.CheckParticipantList", boost::bind(&LLFloaterIMSessionTab::onMenuParticipantListItemEnable,  this, _2));
 // [/SL:KB]
@@ -350,7 +350,7 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	}
 //	mViewBtn = getChild<LLButton>("view_options_btn");
 // [/SL:KB]
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 	mViewBtn = getChild<LLMenuButton>("view_options_btn");
 	if (mViewBtn->getMenu())
 	{
@@ -494,7 +494,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	}
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
-	mChatHistory->getEditor()->getInplaceSearchPanel()->setVisibleCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchVisibilityChanged, this));
+	if ( (mChatHistory) && (mChatHistory->getEditor()) && (mChatHistory->getEditor()->getInplaceSearchPanel()) )
+		mChatHistory->getEditor()->getInplaceSearchPanel()->setVisibleCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchVisibilityChanged, this));
 // [/SL:KB]
 
 	setMessagePaneExpanded(true);
@@ -1045,7 +1046,7 @@ bool LLFloaterIMSessionTab::onIMShowModesMenuItemEnable(const LLSD& userdata)
 	return (plain_text && (is_not_names || mIsP2PChat));
 }
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 void LLFloaterIMSessionTab::onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdParam)
 {
 	if ( (pCtrl) && (sdParam["visibility"].asBoolean()) )
@@ -1066,8 +1067,7 @@ void LLFloaterIMSessionTab::onMenuParticipantListItemClicked(const LLSD& sdParam
 	}
 	else
 	{
-		LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
-		if (pIMContainer)
+		if (LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance()))
 		{
 			if ("sort_name" == strParam)
 				pIMContainer->setSortOrderParticipants(LLConversationFilter::SO_NAME);
@@ -1089,8 +1089,7 @@ bool LLFloaterIMSessionTab::onMenuParticipantListItemEnable(const LLSD& sdParam)
 	}
 	else
 	{
-		LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance());
-		if (pIMContainer)
+		if (LLFloaterIMContainerView* pIMContainer = dynamic_cast<LLFloaterIMContainerView*>(LLFloaterIMContainerBase::getInstance()))
 		{
 			if ("sort_name" == strParam)
 				return (pIMContainer->getSortOrder().getSortOrderParticipants() == LLConversationFilter::SO_NAME);

@@ -1117,7 +1117,7 @@ void LLFloaterIMSession::updateMessages()
 			}
 			
 			// Add the message to the chat log
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-06-01 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 			LLSD args;
 			args["chat_flags"] = (msg.has("chat_flags")) ? msg["chat_flags"].asInteger() : CHAT_FLAG_NONE;
 

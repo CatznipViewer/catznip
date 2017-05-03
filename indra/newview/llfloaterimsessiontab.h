@@ -151,7 +151,7 @@ protected:
 	static bool onIMCheckFontSize(const LLSD& sdParam);
 // [/SL:KB]
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 	void onToggleViewMenu(LLUICtrl* pCtrl, const LLSD& sdParam);
 	void onMenuParticipantListItemClicked(const LLSD& sdParam);
 	bool onMenuParticipantListItemEnable(const LLSD& sdParam);
@@ -249,7 +249,7 @@ protected:
 	LLHandle<LLToggleableMenu> mGearMenuHandle;
 //	LLButton* mViewBtn;
 // [/SL:KB]
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.6
 	LLMenuButton* mViewBtn;
 // [/SL:KB]
 	LLButton* mAddBtn;
