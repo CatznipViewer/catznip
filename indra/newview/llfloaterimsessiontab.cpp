@@ -467,7 +467,8 @@ BOOL LLFloaterIMSessionTab::postBuild()
 	}
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
-	mChatHistory->getEditor()->getInplaceSearchPanel()->setVisibleCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchVisibilityChanged, this));
+	if ( (mChatHistory) && (mChatHistory->getEditor()) && (mChatHistory->getEditor()->getInplaceSearchPanel()) )
+		mChatHistory->getEditor()->getInplaceSearchPanel()->setVisibleCallback(boost::bind(&LLFloaterIMSessionTab::onHistorySearchVisibilityChanged, this));
 // [/SL:KB]
 
 	setMessagePaneExpanded(true);
