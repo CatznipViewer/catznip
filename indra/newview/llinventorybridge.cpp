@@ -3232,12 +3232,6 @@ void LLFolderBridge::performAction(LLInventoryModel* model, std::string action)
 		else
 			LLUserProtectedFolders::instance().remove(mUUID);
 
-		if (LLInventoryPanel* pInvPanel = (!mInventoryPanel.isDead()) ? mInventoryPanel.get() : nullptr)
-		{
-			pInvPanel->getFolderViewModel()->requestSortAll();
-			pInvPanel->getRootFolder()->arrangeAll();
-		}
-
 		gSavedPerAccountSettings.setLLSD("UserProtectedFolders", LLUserProtectedFolders::instance().toLLSD());
 	}
 // [/SL:KB]

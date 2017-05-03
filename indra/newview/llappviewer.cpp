@@ -210,6 +210,9 @@
 #include "llfloateroutfitsnapshot.h"
 #include "llfloatersnapshot.h"
 #include "llsidepanelinventory.h"
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+#include "llpanelmaininventory.h"
+// [/SL:KB]
 
 // includes for idle() idleShutdown()
 #include "llviewercontrol.h"
@@ -5737,6 +5740,16 @@ void LLAppViewer::handleLoginComplete()
 
 // [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
 	LLUserProtectedFolders::instance().fromLLSD(gSavedPerAccountSettings.getLLSD("UserProtectedFolders"));
+
+	// *TODO: find a better home for this code
+	LLFloaterReg::const_instance_list_t invFloaterList = LLFloaterReg::getFloaterList("inventory");
+	for (LLFloaterReg::const_instance_list_t::const_iterator itInvFloater = invFloaterList.begin(); itInvFloater != invFloaterList.end(); ++itInvFloater)
+	{
+		LLPanelMainInventory* pMainInvPanel = (*itInvFloater)->findChild<LLPanelMainInventory>("panel_main_inventory");
+		if (!pMainInvPanel)
+			continue;
+		pMainInvPanel->onChangeUserProtectedFolders();
+	}
 // [/SL:KB]
 
 	writeDebugInfo();
