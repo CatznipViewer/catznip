@@ -74,6 +74,7 @@ class LLAcceptInFolderOfferBase
 {
 protected:
 	LLAcceptInFolderOfferBase(LLUUID idBaseFolder) : m_idBaseFolder(idBaseFolder) {}
+	LLAcceptInFolderOfferBase(LLUUID idBaseFolder, const std::string& strNewFolder) : m_idBaseFolder(idBaseFolder), m_strNewFolder(strNewFolder) {}
 	virtual ~LLAcceptInFolderOfferBase() {}
 protected:
 	bool         createDestinationFolder();
@@ -85,6 +86,7 @@ protected:
 	LLUUID m_idBaseFolder;
 private:
 	std::list<std::string> m_DestPath;
+	std::string m_strNewFolder;
 };
 
 // ============================================================================
@@ -147,7 +149,7 @@ protected:
 };
 
 // ============================================================================
-// LLCreateAcceptInFolder - create the destination floater and then callback
+// LLCreateAcceptInFolder - create the destination folder and then callback
 //
 
 class LLCreateAcceptInFolder : public LLAcceptInFolderOfferBase
@@ -156,6 +158,7 @@ class LLCreateAcceptInFolder : public LLAcceptInFolderOfferBase
 public:
 	typedef boost::signals2::signal<void (const LLUUID& idDestFolder)> folder_created_signal_t;
 	LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const folder_created_signal_t::slot_type& cb);
+	LLCreateAcceptInFolder(const LLUUID& idBaseFolder, const std::string& strNewFolder, const folder_created_signal_t::slot_type& cb);
 
 	/*
 	 * Member functions (+ base class overrides)
