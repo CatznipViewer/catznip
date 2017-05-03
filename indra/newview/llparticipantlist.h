@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2012-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -62,14 +63,17 @@ public:
 	 */
 	void addAvatarIDExceptAgent(const LLUUID& avatar_id);
 
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6)
 	LLSpeakerMgr* getSpeakerManager() const { return mSpeakerMgr; }
 // [/SL:KB]
 
 	/**
 	 * Refreshes the participant list.
 	 */
-	void update();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
+	virtual void update();
+// [/SL:KB]
+//	void update();
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-02-24(Catznip-3.6)
 	void initInitialSpeakers();
@@ -223,7 +227,20 @@ class LLParticipantAvatarList : public LLParticipantList
 	 */
 public:
 	LLParticipantAvatarList(LLSpeakerMgr* pDataSource, LLAvatarList* pAvatarList);
-	virtual ~LLParticipantAvatarList();
+	~LLParticipantAvatarList() override;
+
+	/*
+	 * Base class overrides
+	 */
+protected:
+	void addAvatarParticipant(const LLUUID& particpant_id) override;
+	void addAvalineParticipant(const LLUUID& particpant_id) override;
+	void clearParticipants() override;
+	const LLUUID& getSessionID() const override;
+	bool isParticipant(const LLUUID& particpant_id) override;
+	void removeParticipant(const LLUUID& particpant_id) override;
+	void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted) override;
+	void update() override;
 
 	/*
 	 * Member functions
@@ -231,7 +248,7 @@ public:
 public:
 	void getSelectedUUIDs(uuid_vec_t& idsSelected);
 
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6
 public:
 	enum ESortOrder
 	{
@@ -245,22 +262,6 @@ protected:
 // [/SL:KB]
 
 	/*
-	 * LLParticipantList overrides
-	 */
-public:
-	// Bit of a hack here since in LL's viewer LLParticipantList::update() would override LLConversationItemSession::update()
-	/*virtual*/ void update();
-protected:
-	/*virtual*/ const LLUUID& getSessionID() const;
-
-	/*virtual*/ void addAvatarParticipant(const LLUUID& particpant_id);
-	/*virtual*/ void addAvalineParticipant(const LLUUID& particpant_id);
-	/*virtual*/ void clearParticipants();
-	/*virtual*/ bool isParticipant(const LLUUID& particpant_id);
-	/*virtual*/ void removeParticipant(const LLUUID& particpant_id);
-	/*virtual*/ void setParticipantIsMuted(const LLUUID& particpant_id, bool is_muted);
-
-	/*
 	 * Event handlers
 	 */
 public:
@@ -271,14 +272,14 @@ public:
 	 */
 protected:
 	LLAvatarList* m_pAvatarList;
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
-	LLListContextMenu* m_pContextMenu;
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6
+	LLListContextMenu* m_pContextMenu = nullptr;
 	LLPointer<class LLAvatarItemStatusAndNameComparator> m_SortByStatusAndName;
 	LLPointer<class LLAvatarItemRecentSpeakerComparator> m_SortByRecentSpeakers;
 // [/SL:KB]
 
 	boost::signals2::scoped_connection m_AvatarListRefreshConn;
-// [SL:KB] - Patch: Chat-ParticipantList | Checked: 2014-03-01 (Catznip-3.6)
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-3.6
 	boost::signals2::scoped_connection m_AvatarListSortOrderConn;
 // [/SL:KB]
 };

@@ -43,7 +43,7 @@
 #include "llcachename.h"
 #include "lllistcontextmenu.h"
 #include "llrecentpeople.h"
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 #include "llspeakers.h"
 // [/SL:KB]
 #include "lluuid.h"
@@ -869,14 +869,13 @@ bool LLAvatarItemAgentOnTopComparator::doCompare(const LLAvatarListItem* avatar_
 	return LLAvatarItemNameComparator::doCompare(avatar_item1,avatar_item2);
 }
 
-// [SL:KB] - Patch: Chat-GroupModerators | Checked: 2012-05-30 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupModerators | Checked: Catznip-3.3
 bool LLAvatarItemRecentSpeakerComparator::doCompare(const LLAvatarListItem* avatar_item1, const LLAvatarListItem* avatar_item2) const
 {
-	LLSpeakerMgr* pSpeakerMgr = (m_pSpeakerMgr) ? m_pSpeakerMgr : LLActiveSpeakerMgr::getInstance();
-	if (pSpeakerMgr)
+	if (LLSpeakerMgr* pSpeakerMgr = (m_pSpeakerMgr) ? m_pSpeakerMgr : LLActiveSpeakerMgr::getInstance())
 	{
-		LLPointer<LLSpeaker> lhs = pSpeakerMgr->findSpeaker(avatar_item1->getAvatarId());
-		LLPointer<LLSpeaker> rhs = pSpeakerMgr->findSpeaker(avatar_item2->getAvatarId());
+		LLPointer<LLSpeaker> lhs = (avatar_item1) ? pSpeakerMgr->findSpeaker(avatar_item1->getAvatarId()) : nullptr;
+		LLPointer<LLSpeaker> rhs = (avatar_item2) ? pSpeakerMgr->findSpeaker(avatar_item2->getAvatarId()) : nullptr;
 		if ( (lhs.notNull()) && (rhs.notNull()) )
 		{
 			// Compare by last speaking time
@@ -885,16 +884,9 @@ bool LLAvatarItemRecentSpeakerComparator::doCompare(const LLAvatarListItem* avat
 			else if (lhs->mSortIndex != rhs->mSortIndex)
 				return (lhs->mSortIndex < rhs->mSortIndex);
 		}
-		else if (lhs.notNull())
-		{
-			// True if only avatar_item1 speaker info available
-			return true;
-		}
-		else if (rhs.notNull())
-		{
-			// False if only avatar_item2 speaker info available
-			return false;
-		}
+
+		// True if only avatar_item1 speaker info available
+		return lhs.notNull();
 	}
 
 	// By default compare by name.

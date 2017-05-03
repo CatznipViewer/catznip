@@ -5,6 +5,7 @@
  * $LicenseInfo:firstyear=2009&license=viewerlgpl$
  * Second Life Viewer Source Code
  * Copyright (C) 2010, Linden Research, Inc.
+ * Copyright (C) 2011-2017, Kitty Barnett
  * 
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -39,8 +40,10 @@
 #include "llcallingcard.h"			// for LLAvatarTracker
 #include "lllogchat.h"
 #include "llparcel.h"
-// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
+#include "llavatarnamecache.h"
 #include "llgroupactions.h"
+#include "llnotificationsutil.h"
 #include "llparticipantlist.h"
 #include "llspeakers.h"
 // [/SL:KB]
@@ -185,7 +188,7 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("map"));
 		items.push_back(std::string("separator_chat_history"));
@@ -493,7 +496,7 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friends"));
 		items.push_back(std::string("remove_friends"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 // [/SL:KB]
 //		items.push_back(std::string("add_friends"));
 //		items.push_back(std::string("remove_friends"));
@@ -515,7 +518,7 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("map"));
 		items.push_back(std::string("zoom_in"));
@@ -582,15 +585,14 @@ void SuggestedFriendsContextMenu::buildContextMenu(class LLMenuGL& menu, U32 fla
 	hide_context_entries(menu, items, disabled_items);
 }
 
-// [SL:KB] - Patch: Control-ParticipantList | Checked: 2014-03-02 (Catznip-3.6)
+// [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
 
 //== ParticipantContextMenu ===============================================================
 
-ParticipantContextMenu::ParticipantContextMenu(LLParticipantList* pParticipantList)
+ParticipantContextMenu::ParticipantContextMenu(LLSpeakerMgr* pSpeakerMgr)
 	: PeopleContextMenu()
-	, m_pParticipantList(pParticipantList)
+	, m_pSpeakerMgr(pSpeakerMgr)
 {
-
 }
 
 LLContextMenu* ParticipantContextMenu::createMenu()
@@ -599,30 +601,30 @@ LLContextMenu* ParticipantContextMenu::createMenu()
 	LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
 	LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
 
-	enable_registrar.add("Group.IsModerator", boost::bind(&ParticipantContextMenu::isModerator, this));
-	
 	if (mUUIDs.size() == 1)
 	{
-		const LLUUID& id = mUUIDs.front();
+		const LLUUID& idAgent = mUUIDs.front();
 
-		registrar.add("Group.ToggleBlockText",   boost::bind(&ParticipantContextMenu::toggleBlockText, this, id));
-		enable_registrar.add("Group.CheckBlockText",   boost::bind(&ParticipantContextMenu::hasBlockedText, this, id));
-		registrar.add("Group.ToggleBlockVoice",  boost::bind(&ParticipantContextMenu::toggleBlockVoice, this, id));
-		enable_registrar.add("Group.CheckBlockVoice",  boost::bind(&ParticipantContextMenu::hasBlockedVoice, this, id));
-		registrar.add("Group.EjectAvatar", boost::bind(&ParticipantContextMenu::ejectAvatar, this, id));
-		enable_registrar.add("Group.CanEjectAvatar", boost::bind(&ParticipantContextMenu::canEjectAvatar, this, id));
+		registrar.add("Group.Ban", boost::bind(&ParticipantContextMenu::banFromGroup, this));
+		registrar.add("Group.Eject", boost::bind(&ParticipantContextMenu::ejectFromGroup, this));
+		registrar.add("Group.ToggleAllowText", boost::bind(&ParticipantContextMenu::toggleGroupText, this, idAgent));
+		registrar.add("Group.ToggleAllowVoice", boost::bind(&ParticipantContextMenu::toggleGroupVoice, this, idAgent));
+
+		enable_registrar.add("Group.EnableItem", boost::bind(&ParticipantContextMenu::enableGroupContextMenuItem, this, _2));
+		enable_registrar.add("Group.CheckItem", boost::bind(&ParticipantContextMenu::checkGroupContextMenuItem, this, _2));
 	}
 	else
 	{
 	}
-    return PeopleContextMenu::createMenu();
+
+	return PeopleContextMenu::createMenu();
 }
 
 void ParticipantContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 {
     menuentry_vec_t items;
     menuentry_vec_t disabled_items;
-	
+
 	if ((flags & ITEM_IN_MULTI_SELECTION) == 0)
 	{
 		items.push_back(std::string("view_profile"));
@@ -635,95 +637,149 @@ void ParticipantContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_contact"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage_participant"));
+		items.push_back(std::string("manage_participant"));
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("separator_chat_history"));
 		items.push_back(std::string("chat_history"));
 		items.push_back(std::string("avatar_copy"));
 	}
-	else 
+	else
 	{
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
 		items.push_back(std::string("offer_teleport"));
-		items.push_back(std::string("pay"));
-		items.push_back(std::string("add_friends"));
-		items.push_back(std::string("remove_friends"));
+		items.push_back(std::string("manage_participant"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
 }
 
-bool ParticipantContextMenu::canEjectAvatar(const LLUUID& idAgent) const
+void ParticipantContextMenu::banFromGroup()
 {
-	const LLSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? m_pParticipantList->getSpeakerManager() : NULL;
-	return (pSpeakerMgr) && (LLGroupActions::canEjectFromGroup(pSpeakerMgr->getSessionID(), idAgent));
-}
-
-void ParticipantContextMenu::ejectAvatar(const LLUUID& idAgent)
-{
-	const LLSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? m_pParticipantList->getSpeakerManager() : NULL;
-	if (pSpeakerMgr)
+	if (m_pSpeakerMgr)
 	{
-		LLGroupActions::ejectFromGroup(pSpeakerMgr->getSessionID(), idAgent);
+		if (1 == mUUIDs.size())
+		{
+			LLAvatarName avName;
+			LLAvatarNameCache::get(mUUIDs.front(), &avName);
+			LLNotificationsUtil::add("BanGroupMemberWarning", LLSD().with("AVATAR_NAME", avName.getUserName()), LLSD(), boost::bind(&ParticipantContextMenu::onBanFromGroupCb, this, _1, _2));
+		}
+		else
+		{
+			LLNotificationsUtil::add("BanGroupMembersWarning", LLSD().with("COUNT", llformat("%d", mUUIDs.size())), LLSD(), boost::bind(&ParticipantContextMenu::onBanFromGroupCb, this, _1, _2));
+		}
 	}
 }
 
-bool ParticipantContextMenu::hasBlockedText(const LLUUID& idAgent) const
+void ParticipantContextMenu::onBanFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne)
 {
-	const LLSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? m_pParticipantList->getSpeakerManager() : NULL;
-	if ( (pSpeakerMgr) && (gAgent.isInGroup(pSpeakerMgr->getSessionID())) )
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResposne);
+	if (0 == idxOption) // Ban button
 	{
-		LLPointer<LLSpeaker> pSpeaker = pSpeakerMgr->findSpeaker(gAgentID);
-		return (pSpeaker.notNull()) && (!pSpeaker->mModeratorMutedText);
+		LLGroupActions::ban(m_pSpeakerMgr->getSessionID(), mUUIDs);
+		LLGroupActions::eject(m_pSpeakerMgr->getSessionID(), mUUIDs);
 	}
-	return false;
 }
 
-bool ParticipantContextMenu::hasBlockedVoice(const LLUUID& idAgent) const
+void ParticipantContextMenu::ejectFromGroup()
 {
-	const LLSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? m_pParticipantList->getSpeakerManager() : NULL;
-	if ( (pSpeakerMgr) && (gAgent.isInGroup(pSpeakerMgr->getSessionID())) )
+	if (m_pSpeakerMgr)
 	{
-		LLPointer<LLSpeaker> pSpeaker = pSpeakerMgr->findSpeaker(gAgentID);
-		return (pSpeaker.notNull()) && (!pSpeaker->mModeratorMutedVoice);
+		if (1 == mUUIDs.size())
+		{
+			LLAvatarName avName;
+			LLAvatarNameCache::get(mUUIDs.front(), &avName);
+			LLNotificationsUtil::add("EjectGroupMemberWarning", LLSD().with("AVATAR_NAME", avName.getUserName()), LLSD(), boost::bind(&ParticipantContextMenu::onEjectFromGroupCb, this, _1, _2));
+		}
+		else
+		{
+			LLNotificationsUtil::add("EjectGroupMembersWarning", LLSD().with("COUNT", llformat("%d", mUUIDs.size())), LLSD(), boost::bind(&ParticipantContextMenu::onEjectFromGroupCb, this, _1, _2));
+		}
 	}
-	return false;
 }
 
-bool ParticipantContextMenu::isModerator() const
+void ParticipantContextMenu::onEjectFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne)
 {
-	const LLSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? m_pParticipantList->getSpeakerManager() : NULL;
-	if ( (pSpeakerMgr) && (gAgent.isInGroup(pSpeakerMgr->getSessionID())) )
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResposne);
+	if (0 == idxOption) // Eject button
 	{
-		LLPointer<LLSpeaker> pSpeaker = pSpeakerMgr->findSpeaker(gAgentID);
-		return (pSpeaker.notNull()) && (pSpeaker->mIsModerator);
+		LLGroupActions::eject(m_pSpeakerMgr->getSessionID(), mUUIDs);
 	}
-	return false;
 }
 
-void ParticipantContextMenu::toggleBlockText(const LLUUID& idAgent)
+void ParticipantContextMenu::toggleGroupText(const LLUUID& idAgent)
 {
-	LLIMSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? dynamic_cast<LLIMSpeakerMgr*>(m_pParticipantList->getSpeakerManager()) : NULL;
-	if (pSpeakerMgr)
+	if (LLIMSpeakerMgr* pSpeakerMgr = dynamic_cast<LLIMSpeakerMgr*>(m_pSpeakerMgr))
 	{
 		pSpeakerMgr->toggleAllowTextChat(idAgent);
 	}
 }
 
-void ParticipantContextMenu::toggleBlockVoice(const LLUUID& idAgent)
+void ParticipantContextMenu::toggleGroupVoice(const LLUUID& idAgent)
 {
-	LLIMSpeakerMgr* pSpeakerMgr = (m_pParticipantList) ? dynamic_cast<LLIMSpeakerMgr*>(m_pParticipantList->getSpeakerManager()) : NULL;
-	if (pSpeakerMgr)
+	if (LLIMSpeakerMgr* pSpeakerMgr = dynamic_cast<LLIMSpeakerMgr*>(m_pSpeakerMgr))
 	{
-		LLPointer<LLSpeaker> pSpeaker = pSpeakerMgr->findSpeaker(gAgentID);
-		if (pSpeaker.notNull())
-		{
+		if (LLSpeaker* pSpeaker = pSpeakerMgr->findSpeaker(gAgentID))
 			pSpeakerMgr->moderateVoiceParticipant(idAgent, !pSpeaker->mModeratorMutedVoice);
-		}
 	}
 }
 
+bool ParticipantContextMenu::enableGroupContextMenuItem(const LLSD& sdData)
+{
+	const std::string strParam = sdData.asString();
+
+	if ("can_eject" == strParam)
+	{
+		if (m_pSpeakerMgr)
+		{
+			for (const LLUUID& idAgent : mUUIDs)
+				if (!LLGroupActions::canEject(m_pSpeakerMgr->getSessionID(), idAgent))
+					return false;
+			return true;
+		}
+		return false;
+	}
+	else if ("can_ban" == strParam)
+	{
+		if (m_pSpeakerMgr)
+		{
+			for (const LLUUID& idAgent : mUUIDs)
+				if (!LLGroupActions::canBan(m_pSpeakerMgr->getSessionID(), idAgent))
+					return false;
+			return true;
+		}
+		return false;
+	}
+
+	return false;
+}
+
+bool ParticipantContextMenu::checkGroupContextMenuItem(const LLSD& sdData)
+{
+	const std::string strParam = sdData.asString();
+	const LLUUID& idAgent = mUUIDs.front();
+
+	if ("is_moderator" == strParam)
+	{
+		if (LLSpeaker* pSpeaker = (m_pSpeakerMgr) ? m_pSpeakerMgr->findSpeaker(gAgentID) : nullptr)
+			return pSpeaker->mIsModerator;
+		return false;
+	}
+	else if ("can_text_chat" == strParam)
+	{
+		if (LLSpeaker* pSpeaker = (m_pSpeakerMgr) ? m_pSpeakerMgr->findSpeaker(idAgent) : nullptr)
+			return !pSpeaker->mModeratorMutedText;
+		return true;
+	}
+	else if ("can_voice_chat" == strParam)
+	{
+		if (LLSpeaker* pSpeaker = (m_pSpeakerMgr) ? m_pSpeakerMgr->findSpeaker(idAgent) : nullptr)
+			return !pSpeaker->mModeratorMutedVoice;
+		return true;
+	}
+
+	return false;
+}
 // [/SL:KB]
 
 } // namespace LLPanelPeopleMenus

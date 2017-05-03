@@ -43,7 +43,7 @@
 // [/SL:KB]
 #include "llimview.h" // for gIMMgr
 #include "llnotificationsutil.h"
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
 #include "llspeakers.h"
 // [/SL:KB]
 #include "llstatusbar.h"	// can_afford_transaction()
@@ -740,8 +740,51 @@ bool LLGroupActions::isAvatarMemberOfGroup(const LLUUID& group_id, const LLUUID&
 	return true;
 }
 
-// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: 2012-02-04 (Catznip-3.2)
-bool LLGroupActions::canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent)
+// [SL:KB] - Patch: Chat-GroupSessionEject | Checked: Catznip-3.2
+bool LLGroupActions::canBan(const LLUUID& idGroup, const LLUUID& idAgent)
+{
+	if (gAgent.isGodlike())
+	{
+		return true;
+	}
+
+	if (gAgent.hasPowerInGroup(idGroup, GP_GROUP_BAN_ACCESS))
+	{
+		const LLGroupMgrGroupData* pGroupData = LLGroupMgr::getInstance()->getGroupData(idGroup);
+		if ( (pGroupData) && (pGroupData->isMemberDataComplete()) )
+		{
+			LLGroupMgrGroupData::member_list_t::const_iterator itMember = pGroupData->mMembers.find(idAgent);
+			if (pGroupData->mMembers.end() != itMember)
+			{
+				// Owners can never be banned
+				return (itMember->second) && (!itMember->second->isOwner());
+			}
+		}
+
+		// There is no (or not enough) information on this group but the user does have the group ban power
+		return true;
+	}
+	return false;
+}
+
+void LLGroupActions::ban(const LLUUID& idGroup, const LLUUID& idAgent)
+{
+	uuid_vec_t idAgents(1, idAgent);
+	ban(idGroup, idAgents);
+}
+
+void LLGroupActions::ban(const LLUUID& idGroup, const uuid_vec_t& idAgents)
+{
+	for (uuid_vec_t::const_iterator itAgent = idAgents.begin(); itAgent != idAgents.end(); ++itAgent)
+	{
+		if (!canBan(idGroup, *itAgent))
+			return;
+	}
+
+	LLGroupMgr::instance().sendGroupBanRequest(LLGroupMgr::REQUEST_POST, idGroup, LLGroupMgr::BAN_CREATE, idAgents);
+}
+
+bool LLGroupActions::canEject(const LLUUID& idGroup, const LLUUID& idAgent)
 {
 	if (gAgent.isGodlike())
 	{
@@ -751,52 +794,33 @@ bool LLGroupActions::canEjectFromGroup(const LLUUID& idGroup, const LLUUID& idAg
 	if (gAgent.hasPowerInGroup(idGroup, GP_MEMBER_EJECT))
 	{
 		const LLGroupMgrGroupData* pGroupData = LLGroupMgr::getInstance()->getGroupData(idGroup);
-		if ( (!pGroupData) || (!pGroupData->isMemberDataComplete()) )
+		if ( (pGroupData) && (pGroupData->isMemberDataComplete()) )
 		{
-			// There is no (or not enough) information on this group but the user does have the group eject power
-			return true;
+			LLGroupMgrGroupData::member_list_t::const_iterator itMember = pGroupData->mMembers.find(idAgent);
+			if (pGroupData->mMembers.end() != itMember)
+			{
+				// Owners can never be ejected
+				return (itMember->second) && (!itMember->second->isOwner());
+			}
 		}
 
-		LLGroupMgrGroupData::member_list_t::const_iterator itMember = pGroupData->mMembers.find(idAgent);
-		if (pGroupData->mMembers.end() != itMember)
-		{
-			const LLGroupMemberData* pMemberData = (*itMember).second;
-			if ( (pGroupData->isRoleDataComplete()) && (pGroupData->isRoleMemberDataComplete()) )
-			{
-				for (LLGroupMemberData::role_list_t::const_iterator itRole = pMemberData->roleBegin(); 
-						itRole != pMemberData->roleEnd(); ++itRole)
-				{
-					if ((*itRole).first.notNull())
-					{
-						// Someone who belongs to any roles other than "Everyone" can't be ejected
-						return false;
-					}
-				}
-			}
-			// Owners can never be ejected
-			return (itMember->second) && (!itMember->second->isOwner());
-		}
-		else
-		{
-			// Group member information may be out of date, check for presence in an active group session
-			LLIMSpeakerMgr* pSpeakerMgr = LLIMModel::instance().getSpeakerManager(LLIMMgr::computeSessionID(IM_SESSION_GROUP_START, idGroup));
-			return (pSpeakerMgr) && (pSpeakerMgr->findSpeaker(idAgent).notNull());
-		}
+		// There is no (or not enough) information on this group but the user does have the group eject power
+		return true;
 	}
 	return false;
 }
 
-void LLGroupActions::ejectFromGroup(const LLUUID& idGroup, const LLUUID& idAgent)
+void LLGroupActions::eject(const LLUUID& idGroup, const LLUUID& idAgent)
 {
 	uuid_vec_t idAgents(1, idAgent);
-	ejectFromGroup(idGroup, idAgents);
+	eject(idGroup, idAgents);
 }
 
-void LLGroupActions::ejectFromGroup(const LLUUID& idGroup, const uuid_vec_t& idAgents)
+void LLGroupActions::eject(const LLUUID& idGroup, const uuid_vec_t& idAgents)
 {
 	for (uuid_vec_t::const_iterator itAgent = idAgents.begin(); itAgent != idAgents.end(); ++itAgent)
 	{
-		if (!canEjectFromGroup(idGroup, *itAgent))
+		if (!canEject(idGroup, *itAgent))
 			return;
 	}
 
