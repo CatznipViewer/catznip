@@ -171,7 +171,7 @@ void PeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("map"));
 		items.push_back(std::string("separator_chat_history"));
@@ -433,7 +433,7 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friends"));
 		items.push_back(std::string("remove_friends"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 // [/SL:KB]
 //		items.push_back(std::string("add_friends"));
 //		items.push_back(std::string("remove_friends"));
@@ -455,7 +455,7 @@ void NearbyPeopleContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("add_friend"));
 		items.push_back(std::string("remove_friend"));
 		items.push_back(std::string("separator_actions"));
-		items.push_back(std::string("menu_manage"));
+		items.push_back(std::string("manage"));
 		items.push_back(std::string("invite_to_group"));
 		items.push_back(std::string("map"));
 		items.push_back(std::string("zoom_in"));
