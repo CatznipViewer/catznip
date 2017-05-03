@@ -108,8 +108,10 @@ protected:
 protected:
 	bool checkGroupContextMenuItem(const LLSD& sdData);
 	bool enableGroupContextMenuItem(const LLSD& sdData);
-	void banFromGroup(const LLUUID& idAgent);
-	void ejectFromGroup(const LLUUID& idAgent);
+	void banFromGroup();
+	void onBanFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne);
+	void ejectFromGroup();
+	void onEjectFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne);
 	void toggleGroupText(const LLUUID& idAgent);
 	void toggleGroupVoice(const LLUUID& idAgent);
 

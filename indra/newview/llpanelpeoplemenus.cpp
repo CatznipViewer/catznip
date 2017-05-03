@@ -41,7 +41,9 @@
 #include "lllogchat.h"
 #include "llparcel.h"
 // [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.6
+#include "llavatarnamecache.h"
 #include "llgroupactions.h"
+#include "llnotificationsutil.h"
 #include "llparticipantlist.h"
 #include "llspeakers.h"
 // [/SL:KB]
@@ -471,8 +473,8 @@ LLContextMenu* ParticipantContextMenu::createMenu()
 	{
 		const LLUUID& idAgent = mUUIDs.front();
 
-		registrar.add("Group.Ban", boost::bind(&ParticipantContextMenu::banFromGroup, this, idAgent));
-		registrar.add("Group.Eject", boost::bind(&ParticipantContextMenu::ejectFromGroup, this, idAgent));
+		registrar.add("Group.Ban", boost::bind(&ParticipantContextMenu::banFromGroup, this));
+		registrar.add("Group.Eject", boost::bind(&ParticipantContextMenu::ejectFromGroup, this));
 		registrar.add("Group.ToggleAllowText", boost::bind(&ParticipantContextMenu::toggleGroupText, this, idAgent));
 		registrar.add("Group.ToggleAllowVoice", boost::bind(&ParticipantContextMenu::toggleGroupVoice, this, idAgent));
 
@@ -514,24 +516,62 @@ void ParticipantContextMenu::buildContextMenu(class LLMenuGL& menu, U32 flags)
 		items.push_back(std::string("im"));
 		items.push_back(std::string("call"));
 		items.push_back(std::string("offer_teleport"));
+		items.push_back(std::string("manage_participant"));
 	}
 
     hide_context_entries(menu, items, disabled_items);
 }
 
-void ParticipantContextMenu::banFromGroup(const LLUUID& idAgent)
+void ParticipantContextMenu::banFromGroup()
 {
 	if (m_pSpeakerMgr)
 	{
-		LLGroupActions::ban(m_pSpeakerMgr->getSessionID(), idAgent);
+		if (1 == mUUIDs.size())
+		{
+			LLAvatarName avName;
+			LLAvatarNameCache::get(mUUIDs.front(), &avName);
+			LLNotificationsUtil::add("BanGroupMemberWarning", LLSD().with("AVATAR_NAME", avName.getUserName()), LLSD(), boost::bind(&ParticipantContextMenu::onBanFromGroupCb, this, _1, _2));
+		}
+		else
+		{
+			LLNotificationsUtil::add("BanGroupMembersWarning", LLSD().with("COUNT", llformat("%d", mUUIDs.size())), LLSD(), boost::bind(&ParticipantContextMenu::onBanFromGroupCb, this, _1, _2));
+		}
 	}
 }
 
-void ParticipantContextMenu::ejectFromGroup(const LLUUID& idAgent)
+void ParticipantContextMenu::onBanFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResposne);
+	if (0 == idxOption) // Ban button
+	{
+		LLGroupActions::ban(m_pSpeakerMgr->getSessionID(), mUUIDs);
+		LLGroupActions::eject(m_pSpeakerMgr->getSessionID(), mUUIDs);
+	}
+}
+
+void ParticipantContextMenu::ejectFromGroup()
 {
 	if (m_pSpeakerMgr)
 	{
-		LLGroupActions::eject(m_pSpeakerMgr->getSessionID(), idAgent);
+		if (1 == mUUIDs.size())
+		{
+			LLAvatarName avName;
+			LLAvatarNameCache::get(mUUIDs.front(), &avName);
+			LLNotificationsUtil::add("EjectGroupMemberWarning", LLSD().with("AVATAR_NAME", avName.getUserName()), LLSD(), boost::bind(&ParticipantContextMenu::onEjectFromGroupCb, this, _1, _2));
+		}
+		else
+		{
+			LLNotificationsUtil::add("EjectGroupMembersWarning", LLSD().with("COUNT", llformat("%d", mUUIDs.size())), LLSD(), boost::bind(&ParticipantContextMenu::onEjectFromGroupCb, this, _1, _2));
+		}
+	}
+}
+
+void ParticipantContextMenu::onEjectFromGroupCb(const LLSD& sdNotification, const LLSD& sdResposne)
+{
+	S32 idxOption = LLNotificationsUtil::getSelectedOption(sdNotification, sdResposne);
+	if (0 == idxOption) // Eject button
+	{
+		LLGroupActions::eject(m_pSpeakerMgr->getSessionID(), mUUIDs);
 	}
 }
 
@@ -555,11 +595,28 @@ void ParticipantContextMenu::toggleGroupVoice(const LLUUID& idAgent)
 bool ParticipantContextMenu::enableGroupContextMenuItem(const LLSD& sdData)
 {
 	const std::string strParam = sdData.asString();
-	const LLUUID& idAgent = mUUIDs.front();
 
 	if ("can_eject" == strParam)
 	{
-		return (m_pSpeakerMgr) && (LLGroupActions::canEject(m_pSpeakerMgr->getSessionID(), idAgent));
+		if (m_pSpeakerMgr)
+		{
+			for (const LLUUID& idAgent : mUUIDs)
+				if (!LLGroupActions::canEject(m_pSpeakerMgr->getSessionID(), idAgent))
+					return false;
+			return true;
+		}
+		return false;
+	}
+	else if ("can_ban" == strParam)
+	{
+		if (m_pSpeakerMgr)
+		{
+			for (const LLUUID& idAgent : mUUIDs)
+				if (!LLGroupActions::canBan(m_pSpeakerMgr->getSessionID(), idAgent))
+					return false;
+			return true;
+		}
+		return false;
 	}
 
 	return false;
