@@ -6365,6 +6365,10 @@ void LLAppViewer::handleLoginComplete()
 
 	mOnLoginCompleted();
 
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	LLUserProtectedFolders::instance().fromLLSD(gSavedPerAccountSettings.getLLSD("UserProtectedFolders"));
+// [/SL:KB]
+
 // [SL:KB] - Patch: Build-AssetRecovery | Checked: 2011-11-24 (Catznip-3.2)
 	LLAssetRecoverQueue::recoverIfNeeded();
 // [/SL:KB]

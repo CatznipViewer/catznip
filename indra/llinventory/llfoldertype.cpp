@@ -30,6 +30,9 @@
 #include "lldictionary.h"
 #include "llmemory.h"
 #include "llsingleton.h"
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+#include "llsd.h"
+// [/SL:KB]
 
 ///----------------------------------------------------------------------------
 /// Class LLFolderType
@@ -126,8 +129,18 @@ const std::string &LLFolderType::lookup(LLFolderType::EType folder_type)
 // static
 // Only ensembles and plain folders aren't protected.  "Protected" means
 // you can't change certain properties such as their type.
-bool LLFolderType::lookupIsProtectedType(EType folder_type)
+//bool LLFolderType::lookupIsProtectedType(EType folder_type)
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+bool LLFolderType::lookupIsProtectedType(EType folder_type, const LLUUID& folder_id)
+// [/SL:KB]
 {
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	if (FT_NONE == folder_type)
+	{
+		return LLUserProtectedFolders::instance().contains(folder_id);
+	}
+// [/SL:KB]
+
 	const LLFolderDictionary *dict = LLFolderDictionary::getInstance();
 	const FolderEntry *entry = dict->lookup(folder_type);
 	if (entry)
@@ -170,3 +183,24 @@ const std::string &LLFolderType::badLookup()
 	static const std::string sBadLookup = "llfoldertype_bad_lookup";
 	return sBadLookup;
 }
+
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+void LLUserProtectedFolders::fromLLSD(const LLSD& folder_list)
+{
+	m_Folders.clear();
+	for (LLSD::array_const_iterator itFolder = folder_list.beginArray(), endFolder = folder_list.endArray(); itFolder != endFolder; ++itFolder)
+	{
+		if (!itFolder->isUUID())
+			continue;
+		add(itFolder->asUUID());
+	}
+}
+
+LLSD LLUserProtectedFolders::toLLSD() const
+{
+	LLSD sdFolders = LLSD::emptyArray();
+	for (const LLUUID& idFolder : m_Folders)
+		sdFolders.append(idFolder);
+	return sdFolders;
+}
+// [/SL:KB]
