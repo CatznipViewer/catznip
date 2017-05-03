@@ -216,6 +216,14 @@
              function="Floater.Toggle"
              parameter="preferences" />
         </menu_item_call>
+        <menu_item_call
+         label="Quick Preferences..."
+         name="Quick Preferences"
+         shortcut="control|shift|P">
+            <menu_item_call.on_click
+             function="Floater.Toggle"
+             parameter="quickprefs" />
+        </menu_item_call>
          <menu_item_call
          label="Toolbar buttons..."
          name="Toolbars">
@@ -3617,7 +3625,7 @@
             <menu_item_call
              label="Print Selected Object Info"
              name="Print Selected Object Info"
-             shortcut="control|shift|P">
+             shortcut="alt|shift|P">
                 <menu_item_call.on_click
                  function="Advanced.PrintSelectedObjectInfo" />
             </menu_item_call>
