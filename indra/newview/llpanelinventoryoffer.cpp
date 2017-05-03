@@ -250,8 +250,7 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 	//
 	// Split the path up in individual folders
 	//
-	if (std::string::npos != strSubfolderPath.find("/"))
-		boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")), boost::algorithm::token_compress_on);
+	boost::split(m_DestPath, strSubfolderPath, boost::is_any_of(std::string("/")), boost::algorithm::token_compress_on);
 
 	//
 	// Kick off creating the destination folder (if it doesn't already exist)
