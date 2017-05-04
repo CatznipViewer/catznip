@@ -38,9 +38,8 @@
      top_pad="0"
      width="284" />
     <panel
-	 class="panel_offer_invfolder"
+     class="panel_offer_invfolder"
      height="23"
-     filename="panel_offer_invfolder.xml"
      follows="bottom|left|right"
      layout="topleft"
      left="10"

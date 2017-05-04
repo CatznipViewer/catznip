@@ -569,6 +569,7 @@ LLPanel* LLToastNotifyPanel::createPanel(const LLSD& form_element)
 	LLPanel* pPanel = LLRegisterPanelClass::instance().createPanelClass(form_element["class"].asString());
 	if (pPanel)
 	{
+		pPanel->buildFromFile(pPanel->getXMLFilename());
 		pPanel->reshape(mControlPanel->getRect().getWidth(), pPanel->getRect().getHeight());
 	}
 	return pPanel;
