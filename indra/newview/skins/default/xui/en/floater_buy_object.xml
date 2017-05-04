@@ -79,9 +79,8 @@
          relative_width="1" />
     </scroll_list>
     <panel
-	 class="panel_offer_invfolder"
+     class="panel_offer_invfolder"
      height="23"
-     filename="panel_offer_invfolder.xml"
      follows="bottom|left|right"
      layout="topleft"
      left="10"
