@@ -54,7 +54,7 @@ static LLPanelInjector<LLPanelInventoryOfferFolder> t_places("panel_offer_invfol
 LLPanelInventoryOfferFolder::LLPanelInventoryOfferFolder()
 	: LLPanel()
 {
-	buildFromFile("panel_offer_invfolder.xml");
+	setXMLFilename("panel_offer_invfolder.xml");
 }
 
 // virtual
