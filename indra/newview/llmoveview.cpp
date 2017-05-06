@@ -252,7 +252,7 @@ void LLFloaterMove::setSittingMode(BOOL bSitting)
 			LLPanelStandStopFlying::setStandStopFlyingMode(LLPanelStandStopFlying::SSFM_STOP_FLYING);
 		}
 	}
-	enableInstance(!bSitting);
+	enableInstance();
 }
 
 // protected 
@@ -459,7 +459,7 @@ void LLFloaterMove::showModeButtons(BOOL bShow)
 }
 
 //static
-void LLFloaterMove::enableInstance(BOOL bEnable)
+void LLFloaterMove::enableInstance()
 {
 	LLFloaterMove* instance = LLFloaterReg::findTypedInstance<LLFloaterMove>("moveview");
 	if (instance)
@@ -470,7 +470,7 @@ void LLFloaterMove::enableInstance(BOOL bEnable)
 		}
 		else
 		{
-			instance->showModeButtons(bEnable);
+            instance->showModeButtons(isAgentAvatarValid() && !gAgentAvatarp->isSitting());
 		}
 	}
 }
@@ -566,7 +566,7 @@ BOOL LLPanelStandStopFlying::postBuild()
 {
 	mStandButton = getChild<LLButton>("stand_btn");
 	mStandButton->setCommitCallback(boost::bind(&LLPanelStandStopFlying::onStandButtonClick, this));
-	mStandButton->setCommitCallback(boost::bind(&LLFloaterMove::enableInstance, TRUE));
+	mStandButton->setCommitCallback(boost::bind(&LLFloaterMove::enableInstance));
 	mStandButton->setVisible(FALSE);
 	LLHints::registerHintTarget("stand_btn", mStandButton->getHandle());
 	
@@ -685,8 +685,7 @@ void LLPanelStandStopFlying::onStandButtonClick()
 	LLSelectMgr::getInstance()->deselectAllForStandingUp();
 	gAgent.setControlFlags(AGENT_CONTROL_STAND_UP);
 
-	setFocus(FALSE); // EXT-482
-	mStandButton->setVisible(FALSE); // force visibility changing to avoid seeing Stand & Move buttons at once.
+	setFocus(FALSE); 
 }
 
 void LLPanelStandStopFlying::onStopFlyingButtonClick()
@@ -694,7 +693,6 @@ void LLPanelStandStopFlying::onStopFlyingButtonClick()
 	gAgent.setFlying(FALSE);
 
 	setFocus(FALSE); // EXT-482
-	mStopFlyingButton->setVisible(FALSE);
 }
 
 /**
@@ -732,9 +730,16 @@ void LLPanelStandStopFlying::updatePosition()
 		panel_ssf_container->setOrigin(0, y_pos);
 	}
 
-	S32 x_pos = bottom_tb_center-getRect().getWidth()/2 - left_tb_width;
-
-	setOrigin( x_pos, 0);
+	if (gToolBarView != NULL && gToolBarView->getToolbar(LLToolBarEnums::TOOLBAR_LEFT)->hasButtons())
+	{
+		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2 - left_tb_width;
+		setOrigin( x_pos, 0);
+	}
+	else 
+	{
+		S32 x_pos = bottom_tb_center - getRect().getWidth() / 2;
+		setOrigin( x_pos, 0);
+	}
 }
 
 // EOF

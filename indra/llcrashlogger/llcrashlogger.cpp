@@ -45,6 +45,7 @@
 #include "llhttpsdhandler.h"
 #include "httpcommon.h"
 #include "httpresponse.h"
+#include "llcleanup.h"
 
 #include <curl/curl.h>
 #include <openssl/crypto.h>
@@ -1092,7 +1093,7 @@ void LLCrashLogger::commonCleanup()
 {
     term_curl();
 	LLError::logToFile("");   //close crashreport.log
-	LLProxy::cleanupClass();
+	SUBSYSTEM_CLEANUP(LLProxy);
 }
 
 void LLCrashLogger::init_curl()
