@@ -508,7 +508,8 @@ bool LLAppViewerWin32::init()
 	LLWinDebug::init();
 // [/SL:KB]
 //#ifndef LL_RELEASE_FOR_DOWNLOAD
-//	LLWinDebug::instance().init();
+//	// Merely requesting the LLSingleton instance initializes it.
+//	LLWinDebug::instance();
 //#endif
 
 #if LL_WINDOWS
@@ -536,7 +537,6 @@ bool LLAppViewerWin32::cleanup()
 // [SL:KB] Patch: Viewer-CrashReporting | Checked: 2015-05-08 (Catznip-3.7)
 	LLWinDebug::cleanup();
 // [/SL:KB]
-//	LLWinDebug::instance().cleanup();
 #endif
 
 	if (mIsConsoleAllocated)
