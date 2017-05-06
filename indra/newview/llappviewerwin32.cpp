@@ -507,9 +507,10 @@ bool LLAppViewerWin32::init()
 // [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
 	LLWinDebug::init();
 // [/SL:KB]
+//#ifndef LL_RELEASE_FOR_DOWNLOAD
 //	// Merely requesting the LLSingleton instance initializes it.
 //	LLWinDebug::instance();
-#endif
+//#endif
 
 #if LL_WINDOWS
 #if LL_SEND_CRASH_REPORTS

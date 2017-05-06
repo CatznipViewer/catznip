@@ -93,7 +93,10 @@ LONG NTAPI vectoredHandler(PEXCEPTION_POINTERS exception_infop)
 }
 
 // static
-void  LLWinDebug::initSingleton()
+//void  LLWinDebug::initSingleton()
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+void  LLWinDebug::init()
+// [/SL:KB]
 {
 	static bool s_first_run = true;
 	// Load the dbghelp dll now, instead of waiting for the crash.
@@ -138,7 +141,10 @@ void  LLWinDebug::initSingleton()
 	}
 }
 
-void LLWinDebug::cleanupSingleton()
+//void LLWinDebug::cleanupSingleton()
+// [SL:KB] - Patch: Viewer-CrashWatchDog | Checked: 2012-08-06 (Catznip-3.3)
+void LLWinDebug::cleanup()
+// [/SL:KB]
 {
 //	gEmergencyMemoryReserve.release();
 }
