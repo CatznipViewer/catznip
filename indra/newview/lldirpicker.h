@@ -52,6 +52,9 @@ class LLFilePicker;
 class LLDirPicker : public LLSingleton<LLDirPicker>
 // [/SL:KB]
 {
+// [SL:KB] - Patch: Control-FilePicker | Checked: 2013-09-28 (Catznip-3.6)
+	LLSINGLETON(LLDirPicker);
+// [/SL:KB]
 public:
 //	// calling this before main() is undefined
 //	static LLDirPicker& instance( void ) { return sInstance; }
@@ -87,7 +90,7 @@ private:
 	
 public:
 	// don't call these directly please.
-	LLDirPicker();
+//	LLDirPicker();
 	~LLDirPicker();
 };
 
