@@ -94,8 +94,11 @@ LicenseText "Catznip License and Vivox AUP"
 LicenseData "licenses-installer.rtf"
 Page license
 
-InstallDir "$PROGRAMFILES\${INSTNAME}"
-InstallDirRegKey HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
+# initial location of install (default when not already installed)
+#   note: Now we defer looking for existing install until onInit when we
+#   are able to engage the 32/64 registry function
+InstallDir "%%PROGRAMFILES%%\${INSTNAME}"
+
 UninstallText $(UninstallTextMsg)
 DirText $(DirectoryChooseTitle) $(DirectoryChooseSetup)
 Page directory dirPre
@@ -122,6 +125,8 @@ Var SKIP_AUTORUN		# Skip automatic launch of the viewer after install
 !insertmacro GetParameters
 !insertmacro GetOptions
 !include WinVer.nsh			# For OS and SP detection
+!include 'LogicLib.nsh'     # for value comparison
+!include "x64.nsh"			# for 64bit detection
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Pre-directory page callback
@@ -140,6 +145,21 @@ FunctionEnd
 ;; entry to the language ID selector below
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function .onInit
+
+%%ENGAGEREGISTRY%%
+
+# read the current location of the install for this version
+# if $0 is empty, this is the first time for this viewer name
+ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" ""
+
+# viewer with this name not installed before
+${If} $0 == ""
+    # nothing to do here
+${Else}
+	# use the value we got from registry as install location
+    StrCpy $INSTDIR $0
+${EndIf}
+
 Call CheckCPUFlags							# Make sure we have SSE2 support
 Call CheckWindowsVersion					# Don't install On unsupported systems
     Push $0
@@ -198,6 +218,9 @@ FunctionEnd
 ;; Prep Uninstaller Section
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 Function un.onInit
+
+%%ENGAGEREGISTRY%%
+
 # Read language from registry and set for uninstaller. Key will be removed on successful uninstall
 	ReadRegStr $0 HKEY_LOCAL_MACHINE "SOFTWARE\${PRODUCT_SHORT}\${INSTNAME}" "InstallerLanguage"
     IfErrors lbl_end
@@ -322,6 +345,10 @@ WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninst
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "UninstallString" '"$INSTDIR\uninst.exe"'
 WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayVersion" "${VERSION_LONG}"
 WriteRegDWORD HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "EstimatedSize" "0x0001D500"		# ~117 MB
+
+# from FS:Ansariel
+WriteRegStr HKEY_LOCAL_MACHINE "Software\Microsoft\Windows\CurrentVersion\Uninstall\$INSTPROG" "DisplayIcon" '"$INSTDIR\$INSTEXE"'
+
 # BUG-2707 Disable SEHOP for installed viewer.
 WriteRegDWORD HKEY_LOCAL_MACHINE "Software\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\$INSTEXE" "DisableExceptionChainValidation" 1
 
@@ -563,7 +590,7 @@ FunctionEnd
 Function RemoveProgFilesOnInst
 
 # Remove old Catznip.exe to invalidate any old shortcuts to it that may be in non-standard locations. See MAINT-3575
-Delete "$INSTDIR\${PRODUCT_SHORT}.exe"
+Delete "$INSTDIR\$INSTEXE"
 
 # Remove old shader files first so fallbacks will work. See DEV-5663
 RMDir /r "$INSTDIR\app_settings\shaders"
