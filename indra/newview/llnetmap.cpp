@@ -1043,14 +1043,14 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 	{
 		S32 curX = llclamp(originX, 0, imgWidth), endX = llclamp(originX + ll_round(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgWidth - 1);
 		for (; curX <= endX; curX++)
-			pTextureData[borderY * imgWidth + curX] = clrOverlay.mAll;
+			pTextureData[borderY * imgWidth + curX] = clrOverlay.asRGBA();
 	}
 	const S32 borderX = originX + ll_round(REGION_WIDTH_METERS * mObjectMapTPM);
 	if ( (borderX >= 0) && (borderX < imgWidth) )
 	{
 		S32 curY = llclamp(originY, 0, imgHeight), endY = llclamp(originY + ll_round(REGION_WIDTH_METERS * mObjectMapTPM), 0, imgHeight - 1);
 		for (; curY <= endY; curY++)
-			pTextureData[curY * imgWidth + borderX] = clrOverlay.mAll;
+			pTextureData[curY * imgWidth + borderX] = clrOverlay.asRGBA();
 	}
 
 	//
@@ -1085,8 +1085,8 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 					S32 curX = llclamp(posX, 0, imgWidth) , endX = llclamp(posX + ll_round(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
 					{
-						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).mAll
-						                                                  : LLColor4U(255, 128, 128, 192).mAll;
+						pTextureData[curY * imgWidth + curX] = (fForSale) ? LLColor4U(255, 255, 128, 192).asRGBA()
+							: LLColor4U(255, 128, 128, 192).asRGBA();
 					}
 				}
 			}
@@ -1096,7 +1096,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 				{
 					S32 curX = llclamp(posX, 0, imgWidth), endX = llclamp(posX + ll_round(GRID_STEP * mObjectMapTPM), 0, imgWidth - 1);
 					for (; curX <= endX; curX++)
-						pTextureData[posY * imgWidth + curX] = clrOverlay.mAll;
+						pTextureData[posY * imgWidth + curX] = clrOverlay.asRGBA();
 				}
 			}
 			if (overlay & PARCEL_WEST_LINE)
@@ -1105,7 +1105,7 @@ void LLNetMap::renderPropertyLinesForRegion(const LLViewerRegion* pRegion, const
 				{
 					S32 curY = llclamp(posY, 0, imgHeight), endY = llclamp(posY + ll_round(GRID_STEP * mObjectMapTPM), 0, imgHeight - 1);
 					for (; curY <= endY; curY++)
-						pTextureData[curY * imgWidth + posX] = clrOverlay.mAll;
+						pTextureData[curY * imgWidth + posX] = clrOverlay.asRGBA();
 				}
 			}
 		}
