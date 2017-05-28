@@ -174,7 +174,7 @@ public:
 	
 	// A successful response was received from the viewer version manager
 	virtual void response(LLSD const & content);
-
+	
 	// LLUpdateDownloader::Client
 	void downloadComplete(LLSD const & data);
 	void downloadError(std::string const & message);

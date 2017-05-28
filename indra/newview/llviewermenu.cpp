@@ -100,9 +100,6 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
-#include "llstartup.h"
-// [/SL:KB]
 #include "lltextureview.h"
 #include "lltoolbarview.h"
 #include "lltoolcomp.h"
@@ -7286,12 +7283,12 @@ void handle_selected_material_info()
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 void handle_updater_check()
 {
 	LLUpdaterService updater_service;
 
-	// Make sure the update is actually running
+	// Make sure the updater is actually running
 	if (!updater_service.isChecking())
 		updater_service.startChecking();
 

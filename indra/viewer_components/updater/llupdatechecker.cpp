@@ -183,7 +183,7 @@ std::string LLUpdateChecker::Implementation::buildUrl(std::string const & urlBas
 {
 	LLSD path;
 //	path.append(mProtocol);
-	path.append("Catznip Beta");
+	path.append(channel);
 	path.append(version);
 // [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.2
 	LLSD query;

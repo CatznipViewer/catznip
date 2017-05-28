@@ -822,7 +822,7 @@ bool idle_startup()
         display_startup();
         timeout.reset();
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 		if (LLUpdaterService::UPDATER_DISABLED != gSavedSettings.getU32("UpdaterServiceSetting"))
 		{
 			LLUpdaterService updaterService;
@@ -886,7 +886,7 @@ bool idle_startup()
 		// STATE_LOGIN_SHOW state if we've gone backwards
 		mLoginStatePastUI = true;
 
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 		// Limit bandwidth for the updater download once the user passes the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
