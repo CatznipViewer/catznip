@@ -51,7 +51,6 @@
 #include "llbutton.h"
 #include "llcombobox.h"
 #include "llfiltereditor.h"
-#include "llfloaterinventory.h"
 #include "llinventorybridge.h"
 #include "llinventorymodel.h"
 #include "llinventorymodelbackgroundfetch.h"
@@ -579,7 +578,6 @@ void LLPanelOutfitEdit::onOpen(const LLSD& key)
 		// *TODO: this method is called even panel is not visible to user because its parent layout panel is hidden.
 		// So, we can defer initializing a bit.
 		mWearableListManager = new LLFilteredWearableListManager(mWearableItemsList, mListViewItemTypes[LVIT_ALL]->collector);
-		mWearableListManager->populateList();
 		displayCurrentOutfit();
 		mInitialized = true;
 	}
@@ -633,6 +631,10 @@ void LLPanelOutfitEdit::showAddWearablesPanel(bool show_add_wearables)
 		// Reset mWearableItemsList position to top. See EXT-8180.
 		mWearableItemsList->goToTop();
 	}
+	else
+	{
+		mWearableListManager->populateIfNeeded();
+	}
 
 	//switching button bars
 	getChildView("no_add_wearables_button_bar")->setVisible( !show_add_wearables);
@@ -662,6 +664,7 @@ void LLPanelOutfitEdit::showWearablesListView()
 	{
 		updateWearablesPanelVerbButtons();
 		updateFiltersVisibility();
+		mWearableListManager->populateIfNeeded();
 	}
 	mListViewBtn->setToggleState(TRUE);
 }
@@ -778,6 +781,10 @@ void LLPanelOutfitEdit::onVisibilityChanged(const LLSD &in_visible_chain)
 	if (in_visible_chain.asBoolean())
 	{
 		update();
+	}
+	else
+	{
+		mWearableListManager->holdProgress(); //list population restarts with visibility
 	}
 }
 
@@ -1058,9 +1065,6 @@ void LLPanelOutfitEdit::filterWearablesBySelectedItem(void)
 			break;
 		case LLAssetType::AT_BODYPART:
 			applyListViewFilter(LVIT_BODYPART);
-			break;
-		case LLAssetType::AT_GESTURE:
-			applyListViewFilter(LVIT_GESTURES);
 			break;
 		case LLAssetType::AT_CLOTHING:
 		default:

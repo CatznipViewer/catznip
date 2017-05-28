@@ -34,6 +34,7 @@
 #include "llagent.h"
 #include "llagentwearables.h"
 #include "llappearancemgr.h"
+#include "llavatarnamecache.h"
 #include "llclipboard.h"
 #include "llinventorypanel.h"
 #include "llinventorybridge.h"
@@ -515,6 +516,42 @@ const LLUUID LLInventoryModel::findCategoryUUIDForType(LLFolderType::EType prefe
 	return findCategoryUUIDForTypeInRoot(preferred_type, create_folder, gInventory.getRootFolderID());
 }
 
+const LLUUID LLInventoryModel::findUserDefinedCategoryUUIDForType(LLFolderType::EType preferred_type)
+{
+    LLUUID cat_id;
+    switch (preferred_type)
+    {
+    case LLFolderType::FT_OBJECT:
+    {
+        cat_id = LLUUID(gSavedPerAccountSettings.getString("ModelUploadFolder"));
+        break;
+    }
+    case LLFolderType::FT_TEXTURE:
+    {
+        cat_id = LLUUID(gSavedPerAccountSettings.getString("TextureUploadFolder"));
+        break;
+    }
+    case LLFolderType::FT_SOUND:
+    {
+        cat_id = LLUUID(gSavedPerAccountSettings.getString("SoundUploadFolder"));
+        break;
+    }
+    case LLFolderType::FT_ANIMATION:
+    {
+        cat_id = LLUUID(gSavedPerAccountSettings.getString("AnimationUploadFolder"));
+        break;
+    }
+    default:
+        break;
+    }
+    
+    if (cat_id.isNull() || !getCategory(cat_id))
+    {
+        cat_id = findCategoryUUIDForTypeInRoot(preferred_type, true, getRootFolderID());
+    }
+    return cat_id;
+}
+
 const LLUUID LLInventoryModel::findLibraryCategoryUUIDForType(LLFolderType::EType preferred_type, bool create_folder)
 {
 	return findCategoryUUIDForTypeInRoot(preferred_type, create_folder, gInventory.getLibraryRootFolderID());
@@ -582,7 +619,7 @@ LLUUID LLInventoryModel::createNewCategory(const LLUUID& parent_id,
 	// Add the category to the internal representation
 	LLPointer<LLViewerInventoryCategory> cat =
 		new LLViewerInventoryCategory(id, parent_id, preferred_type, name, gAgent.getID());
-	cat->setVersion(LLViewerInventoryCategory::VERSION_INITIAL);
+	cat->setVersion(LLViewerInventoryCategory::VERSION_INITIAL - 1); // accountForUpdate() will icrease version by 1
 	cat->setDescendentCount(0);
 	LLCategoryUpdate update(cat->getParentUUID(), 1);
 	accountForUpdate(update);
@@ -640,7 +677,7 @@ void LLInventoryModel::createNewCategoryCoro(std::string url, LLSD postData, inv
         result["parent_id"].asUUID(), (LLFolderType::EType)result["type"].asInteger(),
         result["name"].asString(), gAgent.getID());
 
-    cat->setVersion(LLViewerInventoryCategory::VERSION_INITIAL);
+    cat->setVersion(LLViewerInventoryCategory::VERSION_INITIAL - 1); // accountForUpdate() will icrease version by 1
     cat->setDescendentCount(0);
     LLInventoryModel::LLCategoryUpdate update(cat->getParentUUID(), 1);
     
@@ -914,8 +951,11 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 			item_array_t* item_array = get_ptr_in_map(mParentChildItemTree, category_id);
 			if( item_array )
 			{
+				LLInventoryModel::LLCategoryUpdate update(category_id, 1);
+				gInventory.accountForUpdate(update);
+
 				// *FIX: bit of a hack to call update server from here...
-				new_item->updateServer(TRUE);
+				new_item->updateParentOnServer(FALSE);
 				item_array->push_back(new_item);
 			}
 			else
@@ -956,9 +996,11 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 				item_array = get_ptr_in_map(mParentChildItemTree, parent_id);
 				if(item_array)
 				{
+					LLInventoryModel::LLCategoryUpdate update(parent_id, 1);
+					gInventory.accountForUpdate(update);
 					// *FIX: bit of a hack to call update server from
 					// here...
-					new_item->updateServer(TRUE);
+					new_item->updateParentOnServer(FALSE);
 					item_array->push_back(new_item);
 				}
 				else
@@ -981,19 +1023,19 @@ U32 LLInventoryModel::updateItem(const LLViewerInventoryItem* item, U32 mask)
 		{
 			// Valid UUID; set the item UUID and rename it
 			new_item->setCreator(id);
-			std::string avatar_name;
+			LLAvatarName av_name;
 
-			if (gCacheName->getFullName(id, avatar_name))
+			if (LLAvatarNameCache::get(id, &av_name))
 			{
-				new_item->rename(avatar_name);
+				new_item->rename(av_name.getUserName());
 				mask |= LLInventoryObserver::LABEL;
 			}
 			else
 			{
 				// Fetch the current name
-				gCacheName->get(id, FALSE,
+				LLAvatarNameCache::get(id,
 					boost::bind(&LLViewerInventoryItem::onCallingCardNameLookup, new_item.get(),
-					_1, _2, _3));
+					_1, _2));
 			}
 
 		}
@@ -1045,7 +1087,6 @@ void LLInventoryModel::updateCategory(const LLViewerInventoryCategory* cat, U32 
 	if(old_cat)
 	{
 		// We already have an old category, modify its values
-		U32 mask = LLInventoryObserver::NONE;
 		LLUUID old_parent_id = old_cat->getParentUUID();
 		LLUUID new_parent_id = cat->getParentUUID();
 		if(old_parent_id != new_parent_id)
@@ -1100,7 +1141,8 @@ void LLInventoryModel::updateCategory(const LLViewerInventoryCategory* cat, U32 
 		item_array_t* itemsp = new item_array_t;
 		mParentChildCategoryTree[new_cat->getUUID()] = catsp;
 		mParentChildItemTree[new_cat->getUUID()] = itemsp;
-		addChangedMask(LLInventoryObserver::ADD, cat->getUUID());
+		mask |= LLInventoryObserver::ADD;
+		addChangedMask(mask, cat->getUUID());
 	}
 }
 
@@ -1390,7 +1432,11 @@ void LLInventoryModel::onObjectDeletedFromServer(const LLUUID& object_id, bool f
 		}
 
 		// From purgeObject()
-		LLPreview::hide(object_id);
+		LLViewerInventoryItem *item = getItem(object_id);
+		if (item && (item->getType() != LLAssetType::AT_LSL_TEXT))
+		{
+			LLPreview::hide(object_id, TRUE);
+		}
 		deleteObject(object_id, fix_broken_links, do_notify_observers);
 	}
 }
