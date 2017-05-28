@@ -73,13 +73,13 @@ void LLUpdateChecker::checkVersion(std::string const & urlBase,
 
 // LLUpdateChecker::Implementation
 //-----------------------------------------------------------------------------
-const char * LLUpdateChecker::Implementation::sProtocolVersion = "v1.1";
+//const char * LLUpdateChecker::Implementation::sProtocolVersion = "v1.1";
 
 
 LLUpdateChecker::Implementation::Implementation(LLUpdateChecker::Client & client):
 	mClient(client),
-	mInProgress(false),
-	mProtocol(sProtocolVersion)
+	mInProgress(false)
+//	mProtocol(sProtocolVersion)
 {
 	; // No op.
 }
@@ -111,7 +111,7 @@ void LLUpdateChecker::Implementation::checkVersion(std::string const & urlBase,
 		memcpy(mUniqueId, uniqueid, MD5HEX_STR_SIZE);
 		mWillingToTest   = willing_to_test;
 	
-		mProtocol = sProtocolVersion;
+//		mProtocol = sProtocolVersion;
 
 		std::string checkUrl = buildUrl(urlBase, channel, version, platform, platform_version, uniqueid, willing_to_test);
 		LL_INFOS("UpdaterService") << "checking for updates at " << checkUrl << LL_ENDL;
@@ -135,14 +135,20 @@ void LLUpdateChecker::Implementation::checkVersionCoro(std::string url)
 
     LL_INFOS("checkVersionCoro") << "Getting update information from " << url << LL_ENDL;
 
-    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.2
+    LLSD result = httpAdapter->getJsonAndSuspend(httpRequest, url);
+// [/SL:KB]
+//    LLSD result = httpAdapter->getAndSuspend(httpRequest, url);
 
     LLSD httpResults = result[LLCoreHttpUtil::HttpCoroutineAdapter::HTTP_RESULTS];
     LLCore::HttpStatus status = LLCoreHttpUtil::HttpCoroutineAdapter::getStatusFromLLSD(httpResults);
 
     mInProgress = false;
 
-    if (status != LLCore::HttpStatus(HTTP_OK))
+//    if (status != LLCore::HttpStatus(HTTP_OK))
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.2
+	if ( (status != LLCore::HttpStatus(HTTP_OK)) && (status != LLCore::HttpStatus(HTTP_NO_CONTENT)) )
+// [/SL:KB]
     {
         std::string server_error;
         if (result.has("error_code"))
@@ -176,12 +182,19 @@ std::string LLUpdateChecker::Implementation::buildUrl(std::string const & urlBas
 													  bool                willing_to_test)
 {
 	LLSD path;
-	path.append(mProtocol);
-	path.append(channel);
+//	path.append(mProtocol);
+	path.append("Catznip Beta");
 	path.append(version);
-	path.append(platform);
-	path.append(platform_version);
-	path.append(willing_to_test ? "testok" : "testno");
-	path.append((char*)uniqueid);
-	return LLURI::buildHTTP(urlBase, path).asString();
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-5.2
+	LLSD query;
+	query["userPlatform"] = platform;
+	query["platformVersion"] = platform_version;
+	query["checkBeta"] = willing_to_test;
+	return LLURI::buildHTTP(urlBase, path, query).asString();
+// [/SL:KB]
+//	path.append(platform);
+//	path.append(platform_version);
+//	path.append(willing_to_test ? "testok" : "testno");
+//	path.append((char*)uniqueid);
+//	return LLURI::buildHTTP(urlBase, path).asString();
 }
