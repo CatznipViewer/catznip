@@ -21,6 +21,7 @@
 #include "llfloater.h"
 #include "llmutelist.h"
 
+class LLScrollListCell;
 class LLScrollListCtrl;
 class LLTabContainer;
 
@@ -47,6 +48,7 @@ public:
 protected:
 	void refresh();
 	void removePicker();
+	void selectEntry(const LLMute& muteEntry);
 	void updateButtons();
 
 	/*
@@ -62,6 +64,7 @@ protected:
 	       void onClickRemoveSelection();
 		   void onColumnSortChange();
 	       void onSelectionChange();
+		   void onToggleMuteFlag(const LLSD& sdValue, const LLScrollListCell* pCell);
 
 	/*
 	 * Member variables

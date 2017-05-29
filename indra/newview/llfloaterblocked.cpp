@@ -97,20 +97,60 @@ void LLPanelBlockList::refresh()
 	const LLSD& sdSel = m_pBlockList->getSelectedValue();
 	m_pBlockList->deleteAllItems();
 
-	LLSD sdRow;	LLSD& sdColumns = sdRow["columns"];
-	sdColumns[0]["column"] = "item_name"; sdColumns[0]["type"] = "text";
-	sdColumns[1]["column"] = "item_type"; sdColumns[1]["type"] = "text";
+	LLSD sdGenericRow; LLSD& sdGenericColumns = sdGenericRow["columns"];
+	sdGenericColumns[0]["column"] = "item_name"; sdGenericColumns[0]["type"] = "text";
+	sdGenericColumns[1]["column"] = "item_type"; sdGenericColumns[1]["type"] = "text";
 
-	std::vector<LLMute> lMutes = LLMuteList::getInstance()->getMutes();
-	for (std::vector<LLMute>::const_iterator itMute = lMutes.begin(); itMute != lMutes.end(); ++itMute)
+	LLSD sdAgentRow(sdGenericRow); LLSD& sdAgentColumns = sdAgentRow["columns"];
+	sdAgentColumns[2]["column"] = "item_text"; sdAgentColumns[2]["type"] = "checkbox";
+	sdAgentColumns[3]["column"] = "item_voice"; sdAgentColumns[3]["type"] = "checkbox";
+	sdAgentColumns[4]["column"] = "item_particles"; sdAgentColumns[4]["type"] = "checkbox";
+	sdAgentColumns[5]["column"] = "item_sounds"; sdAgentColumns[5]["type"] = "checkbox";
+
+	const std::vector<LLMute> lMutes = LLMuteList::getInstance()->getMutes();
+	for (const LLMute& entryMute : lMutes)
 	{
-		sdRow["value"] = LLSD().with("id", itMute->mID).with("name", itMute->mName);
-		sdColumns[0]["value"] = itMute->mName;
-		sdColumns[1]["value"] = itMute->getDisplayType();
-
-		m_pBlockList->addElement(sdRow, ADD_BOTTOM);
+		switch (entryMute.mType)
+		{
+			case LLMute::AGENT:
+				{
+					sdAgentRow["value"] = LLSD().with("id", entryMute.mID).with("name", entryMute.mName);
+					sdAgentColumns[0]["value"] = entryMute.mName;
+					sdAgentColumns[1]["value"] = entryMute.getDisplayType();
+					sdAgentColumns[2]["value"] = (entryMute.mFlags & LLMute::flagTextChat) == 0;
+					sdAgentColumns[3]["value"] = (entryMute.mFlags & LLMute::flagVoiceChat) == 0;
+					sdAgentColumns[4]["value"] = (entryMute.mFlags & LLMute::flagParticles) == 0;
+					sdAgentColumns[5]["value"] = (entryMute.mFlags & LLMute::flagObjectSounds) == 0;
+					m_pBlockList->addElement(sdAgentRow, boost::bind(&LLPanelBlockList::onToggleMuteFlag, this, _1, _2), ADD_BOTTOM);
+				}
+				break;
+			default:
+				{
+					sdGenericRow["value"] = LLSD().with("id", entryMute.mID).with("name", entryMute.mName);
+					sdGenericColumns[0]["value"] = entryMute.mName;
+					sdGenericColumns[1]["value"] = entryMute.getDisplayType();
+					m_pBlockList->addElement(sdGenericRow, ADD_BOTTOM);
+				}
+				break;
+		}
 	}
-	m_pBlockList->setSelectedByValue(sdSel, TRUE);
+	m_pBlockList->setSelectedByValue(sdSel, true);
+}
+
+void LLPanelBlockList::selectEntry(const LLMute& muteEntry)
+{
+	m_pBlockList->deselectAllItems();
+
+	const std::vector<LLScrollListItem*> muteEntries = m_pBlockList->getAllData();
+	for (auto itEntry = muteEntries.begin(); itEntry != muteEntries.end(); ++itEntry)
+	{
+		const LLSD& sdValue = (*itEntry)->getValue();
+		if ( (muteEntry.mID == sdValue["id"].asUUID()) && (muteEntry.mName == sdValue["name"].asString()) )
+		{
+			m_pBlockList->selectNthItem(itEntry - muteEntries.begin());
+			break;
+		}
+	}
 }
 
 void LLPanelBlockList::removePicker()
@@ -222,6 +262,35 @@ void LLPanelBlockList::onColumnSortChange()
 void LLPanelBlockList::onSelectionChange()
 {
 	updateButtons();
+}
+
+void LLPanelBlockList::onToggleMuteFlag(const LLSD& sdValue, const LLScrollListCell* pCell)
+{
+	if (!pCell)
+		return;
+
+	LLMute muteEntry(sdValue["id"].asUUID(), sdValue["name"].asString(), LLMute::AGENT); U32 muteFlag = 0;
+
+	const std::string& strColumnName = pCell->getColumnName();
+	if ("item_text" == strColumnName)
+		muteFlag = LLMute::flagTextChat;
+	else if ("item_voice" == strColumnName)
+		muteFlag = LLMute::flagVoiceChat;
+	else if ("item_particles" == strColumnName)
+		muteFlag = LLMute::flagParticles;
+	else if ("item_sounds" == strColumnName)
+		muteFlag = LLMute::flagObjectSounds;
+
+	if (muteFlag)
+	{
+		if (pCell->getValue().asBoolean())
+			LLMuteList::getInstance()->add(muteEntry, muteFlag);
+		else
+			LLMuteList::getInstance()->remove(muteEntry, muteFlag);
+
+		refresh();
+		selectEntry(muteEntry);
+	}
 }
 
 // ============================================================================
