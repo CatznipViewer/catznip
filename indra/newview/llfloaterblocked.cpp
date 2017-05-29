@@ -1,23 +1,25 @@
-/** 
+/**
  *
- * Copyright (c) 2012-2013, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2012-2017, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
 
 #include "llavatarname.h"
+#include "llcallbacklist.h"
 #include "llderenderlist.h"
+#include "llfiltereditor.h"
 #include "llfloateravatarpicker.h"
 #include "llfloaterblocked.h"
 #include "llfloaterreg.h"
@@ -26,6 +28,8 @@
 #include "llscrolllistctrl.h"
 #include "lltabcontainer.h"
 #include "llviewercontrol.h"
+
+#include <boost/algorithm/string.hpp>
 
 // ============================================================================
 // Constants
@@ -44,9 +48,6 @@ static LLPanelInjector<LLPanelBlockList> t_panel_blocked_list("panel_block_list"
 
 LLPanelBlockList::LLPanelBlockList()
 	: LLPanel()
-	, m_fRefreshOnChange(true)
-	, m_pBlockList(NULL)
-	, m_pTrashBtn(NULL)
 {
 	mCommitCallbackRegistrar.add("Block.AddAvatar", boost::bind(&LLPanelBlockList::onClickAddAvatar, this, _1));
 	mCommitCallbackRegistrar.add("Block.AddByName",	boost::bind(&LLPanelBlockList::onClickAddByName));
@@ -58,9 +59,10 @@ LLPanelBlockList::~LLPanelBlockList()
 	LLMuteList::getInstance()->removeObserver(this);
 }
 
+// virtual
 BOOL LLPanelBlockList::postBuild()
 {
-    setVisibleCallback(boost::bind(&LLPanelBlockList::removePicker, this));
+	setVisibleCallback(boost::bind(&LLPanelBlockList::removePicker, this));
 
 	m_pBlockList = findChild<LLScrollListCtrl>("block_list");
 	m_pBlockList->setCommitOnDelete(true);
@@ -68,11 +70,8 @@ BOOL LLPanelBlockList::postBuild()
 	m_pBlockList->setCommitCallback(boost::bind(&LLPanelBlockList::onSelectionChange, this));
 
 	// Restore last sort order
-	U32 nSortValue = gSavedSettings.getU32("BlockMuteSortOrder");
-	if (nSortValue)
-	{
+	if (U32 nSortValue = gSavedSettings.getU32("BlockMuteSortOrder"))
 		m_pBlockList->sortByColumnIndex(nSortValue >> 4, nSortValue & 0xF);
-	}
 	m_pBlockList->setSortChangedCallback(boost::bind(&LLPanelBlockList::onColumnSortChange, this));
 
 	m_pTrashBtn = findChild<LLButton>("block_trash_btn");
@@ -82,20 +81,21 @@ BOOL LLPanelBlockList::postBuild()
 	return TRUE;
 }
 
+// virtual
 void LLPanelBlockList::onOpen(const LLSD& sdParam)
 {
 	refresh();
 
 	if ( (sdParam.has(BLOCKED_PARAM_NAME)) && (sdParam[BLOCKED_PARAM_NAME].asUUID().notNull()) )
 	{
-		m_pBlockList->selectByID(sdParam[BLOCKED_PARAM_NAME].asUUID());
+		LLMute muteEntry(sdParam[BLOCKED_PARAM_NAME].asUUID());
+		selectEntry(muteEntry);
 	}
 }
 
 void LLPanelBlockList::refresh()
 {
 	const LLSD& sdSel = m_pBlockList->getSelectedValue();
-	m_pBlockList->deleteAllItems();
 
 	LLSD sdGenericRow; LLSD& sdGenericColumns = sdGenericRow["columns"];
 	sdGenericColumns[0]["column"] = "item_name"; sdGenericColumns[0]["type"] = "text";
@@ -107,63 +107,76 @@ void LLPanelBlockList::refresh()
 	sdAgentColumns[4]["column"] = "item_particles"; sdAgentColumns[4]["type"] = "checkbox";
 	sdAgentColumns[5]["column"] = "item_sounds"; sdAgentColumns[5]["type"] = "checkbox";
 
-	const std::vector<LLMute> lMutes = LLMuteList::getInstance()->getMutes();
-	for (const LLMute& entryMute : lMutes)
+	m_pBlockList->deleteAllItems();
+	const std::vector<LLMute> muteEntries = LLMuteList::getInstance()->getMutes();
+	for (const LLMute& muteEntry : muteEntries)
 	{
-		switch (entryMute.mType)
+		if ( (!m_strFilter.empty()) && (!boost::icontains(muteEntry.mName, m_strFilter)) )
+			continue;
+
+		switch (muteEntry.mType)
 		{
 			case LLMute::AGENT:
 				{
-					sdAgentRow["value"] = LLSD().with("id", entryMute.mID).with("name", entryMute.mName);
-					sdAgentColumns[0]["value"] = entryMute.mName;
-					sdAgentColumns[1]["value"] = entryMute.getDisplayType();
-					sdAgentColumns[2]["value"] = (entryMute.mFlags & LLMute::flagTextChat) == 0;
-					sdAgentColumns[3]["value"] = (entryMute.mFlags & LLMute::flagVoiceChat) == 0;
-					sdAgentColumns[4]["value"] = (entryMute.mFlags & LLMute::flagParticles) == 0;
-					sdAgentColumns[5]["value"] = (entryMute.mFlags & LLMute::flagObjectSounds) == 0;
+					sdAgentRow["value"] = LLSD().with("id", muteEntry.mID).with("name", muteEntry.mName);
+					sdAgentColumns[0]["value"] = muteEntry.mName;
+					sdAgentColumns[1]["value"] = muteEntry.getDisplayType();
+					sdAgentColumns[2]["value"] = (muteEntry.mFlags & LLMute::flagTextChat) == 0;
+					sdAgentColumns[3]["value"] = (muteEntry.mFlags & LLMute::flagVoiceChat) == 0;
+					sdAgentColumns[4]["value"] = (muteEntry.mFlags & LLMute::flagParticles) == 0;
+					sdAgentColumns[5]["value"] = (muteEntry.mFlags & LLMute::flagObjectSounds) == 0;
 					m_pBlockList->addElement(sdAgentRow, boost::bind(&LLPanelBlockList::onToggleMuteFlag, this, _1, _2), ADD_BOTTOM);
 				}
 				break;
 			default:
 				{
-					sdGenericRow["value"] = LLSD().with("id", entryMute.mID).with("name", entryMute.mName);
-					sdGenericColumns[0]["value"] = entryMute.mName;
-					sdGenericColumns[1]["value"] = entryMute.getDisplayType();
+					sdGenericRow["value"] = LLSD().with("id", muteEntry.mID).with("name", muteEntry.mName);
+					sdGenericColumns[0]["value"] = muteEntry.mName;
+					sdGenericColumns[1]["value"] = muteEntry.getDisplayType();
 					m_pBlockList->addElement(sdGenericRow, ADD_BOTTOM);
 				}
 				break;
 		}
 	}
-	m_pBlockList->setSelectedByValue(sdSel, true);
-}
-
-void LLPanelBlockList::selectEntry(const LLMute& muteEntry)
-{
-	m_pBlockList->deselectAllItems();
-
-	const std::vector<LLScrollListItem*> muteEntries = m_pBlockList->getAllData();
-	for (auto itEntry = muteEntries.begin(); itEntry != muteEntries.end(); ++itEntry)
-	{
-		const LLSD& sdValue = (*itEntry)->getValue();
-		if ( (muteEntry.mID == sdValue["id"].asUUID()) && (muteEntry.mName == sdValue["name"].asString()) )
-		{
-			m_pBlockList->selectNthItem(itEntry - muteEntries.begin());
-			break;
-		}
-	}
+	selectEntry(sdSel);
 }
 
 void LLPanelBlockList::removePicker()
 {
-    if(m_hPicker.get())
-    {
-        m_hPicker.get()->closeFloater();
-    }
+	if (m_hPicker.get())
+	{
+		m_hPicker.get()->closeFloater();
+	}
+}
+
+void LLPanelBlockList::selectEntry(const LLMute& muteEntry)
+{
+	const std::vector<LLScrollListItem*> muteItems = m_pBlockList->getAllData();
+	for (auto itItem = muteItems.begin(); itItem != muteItems.end(); ++itItem)
+	{
+		const LLSD& sdValue = (*itItem)->getValue();
+		if ( (muteEntry.mID == sdValue["id"].asUUID()) && ((muteEntry.mName.empty()) ||(muteEntry.mName == sdValue["name"].asString())) )
+		{
+			S32 idxItem = itItem - muteItems.begin();
+			if (idxItem != m_pBlockList->getFirstSelectedIndex())
+			{
+				m_pBlockList->deselectAllItems();
+				m_pBlockList->selectNthItem(idxItem);
+				break;
+			}
+		}
+	}
+}
+
+void LLPanelBlockList::setFilterString(const std::string& strFilter)
+{
+	m_strFilter = strFilter;
+	refresh();
 }
 
 void LLPanelBlockList::updateButtons()
 {
-	bool fHasSelection = (NULL != m_pBlockList->getFirstSelected());
+	bool fHasSelection = (nullptr != m_pBlockList->getFirstSelected());
 	m_pTrashBtn->setEnabled(fHasSelection);
 }
 
@@ -177,18 +190,20 @@ void LLPanelBlockList::onChange()
 
 void LLPanelBlockList::onClickAddAvatar(LLUICtrl* pCtrl)
 {
-    LLFloater* pRootFloater = gFloaterView->getParentFloater(pCtrl);
+	if (!m_hPicker.isDead())
+	{
+		m_hPicker.get()->setVisibleAndFrontmost(true);
+		return;
+	}
 
-	LLFloaterAvatarPicker* pPicker = LLFloaterAvatarPicker::show(
-		boost::bind(&LLPanelBlockList::onClickAddAvatarCallback, _1, _2),
-		FALSE /*allow_multiple*/, TRUE /*close_on_select*/, FALSE /*skip_agent*/, pRootFloater->getName(), pCtrl);
-    
-    if (pRootFloater)
-    {
-        pRootFloater->addDependentFloater(pPicker);
-    }
-
-	m_hPicker = pPicker->getHandle();
+	if (LLFloater* pRootFloater = gFloaterView->getParentFloater(pCtrl))
+	{
+		LLFloaterAvatarPicker* pPicker = LLFloaterAvatarPicker::show(
+			boost::bind(&LLPanelBlockList::onClickAddAvatarCallback, _1, _2),
+			false /*allow_multiple*/, true /*close_on_select*/, false /*skip_agent*/, pRootFloater->getName(), pCtrl);
+		pRootFloater->addDependentFloater(pPicker);
+		m_hPicker = pPicker->getHandle();
+	}
 }
 
 // static
@@ -249,7 +264,7 @@ void LLPanelBlockList::onClickRemoveSelection()
 void LLPanelBlockList::onColumnSortChange()
 {
 	U32 nSortValue = 0;
-	
+
 	S32 idxColumn = m_pBlockList->getSortColumnIndex();
 	if (-1 != idxColumn)
 	{
@@ -257,6 +272,14 @@ void LLPanelBlockList::onColumnSortChange()
 	}
 
 	gSavedSettings.setU32("BlockMuteSortOrder", nSortValue);
+}
+
+void LLPanelBlockList::onIdleRefresh(LLHandle<LLPanel> hPanel)
+{
+	if (!hPanel.isDead())
+	{
+		((LLPanelBlockList*)hPanel.get())->refresh();
+	}
 }
 
 void LLPanelBlockList::onSelectionChange()
@@ -283,13 +306,17 @@ void LLPanelBlockList::onToggleMuteFlag(const LLSD& sdValue, const LLScrollListC
 
 	if (muteFlag)
 	{
+		m_fRefreshOnChange = false;
 		if (pCell->getValue().asBoolean())
 			LLMuteList::getInstance()->add(muteEntry, muteFlag);
 		else
 			LLMuteList::getInstance()->remove(muteEntry, muteFlag);
+		m_fRefreshOnChange = true;
 
-		refresh();
 		selectEntry(muteEntry);
+
+		// Refreshing now will invalidate an iterator upstream so do it on the next idle tick
+		doOnIdleOneTime(boost::bind(&LLPanelBlockList::onIdleRefresh, getHandle()));
 	}
 }
 
@@ -404,7 +431,6 @@ void LLPanelDerenderList::refresh()
 
 LLFloaterBlocked::LLFloaterBlocked(const LLSD& sdKey)
 	: LLFloater(sdKey)
-	, m_pBlockedTabs(NULL)
 {
 }
 
@@ -414,6 +440,9 @@ LLFloaterBlocked::~LLFloaterBlocked()
 
 BOOL LLFloaterBlocked::postBuild()
 {
+	m_pFilterEditor = findChild<LLFilterEditor>("blocked_filter");
+	m_pFilterEditor->setCommitCallback(boost::bind(&LLFloaterBlocked::onFilterEdit, this, _2));
+
 	m_pBlockedTabs = findChild<LLTabContainer>("blocked_tabs");
 	m_pBlockedTabs->setCommitCallback(boost::bind(&LLFloaterBlocked::onTabSelect, this, _2));
 
@@ -431,11 +460,21 @@ void LLFloaterBlocked::onOpen(const LLSD& sdParam)
 	mKey.clear();
 }
 
+void LLFloaterBlocked::onFilterEdit(const std::string& strFilter)
+{
+	if (LLPanelBlockBase* pCurPanel = dynamic_cast<LLPanelBlockBase*>(m_pBlockedTabs->getCurrentPanel()))
+	{
+		pCurPanel->setFilterString(strFilter);
+	}
+}
+
 void LLFloaterBlocked::onTabSelect(const LLSD& sdParam)
 {
 	LLPanel* pActivePanel = m_pBlockedTabs->getPanelByName(sdParam.asString());
 	if (pActivePanel)
 	{
+		if (LLPanelBlockBase* pActivePanelBase = dynamic_cast<LLPanelBlockBase*>(pActivePanel))
+			m_pFilterEditor->setText(pActivePanelBase->getFilterString());
 		pActivePanel->onOpen(mKey);
 	}
 }

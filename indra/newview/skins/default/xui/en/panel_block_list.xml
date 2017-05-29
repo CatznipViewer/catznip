@@ -27,24 +27,28 @@
          name="item_type"
          width="100" />
         <scroll_list.columns
+         can_sort="false"
          halign="center"
          label="T"
          name="item_text"
          tool_tip="Text"
          width="20" />
         <scroll_list.columns
+         can_sort="false"
          halign="center"
          label="V"
          name="item_voice"
          tool_tip="Voice"
          width="20" />
         <scroll_list.columns
+         can_sort="false"
          halign="center"
          label="P"
          name="item_particles"
          tool_tip="Particles"
          width="20" />
         <scroll_list.columns
+         can_sort="false"
          halign="center"
          label="S"
          name="item_sounds"
