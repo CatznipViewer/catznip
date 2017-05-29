@@ -2778,6 +2778,9 @@ void LLScrollListCtrl::addColumn(const LLScrollListColumn::Params& column_params
 			params.tool_tip = column_params.tool_tip;
 			params.tab_stop = false;
 			params.visible = mDisplayColumnHeaders;
+// [SL:KB] - Patch: Controls-ScrollList | Checked: Catznip-5.2
+			params.font_halign = column_params.halign;
+// [/SL:KB]
 
 			if(column_params.header.image.isProvided())
 			{
