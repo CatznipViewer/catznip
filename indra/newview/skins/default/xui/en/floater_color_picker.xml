@@ -153,6 +153,42 @@
      name="lspin"
      top_delta="0"
      width="50" />
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="20"
+     layout="topleft"
+     left="10"
+     mouse_opaque="false"
+     name="hex_val_text"
+     top_pad="9"
+     width="55">
+        Hex:
+    </text>
+    <text
+     type="string"
+     length="1"
+     follows="left|top"
+     height="20"
+     layout="topleft"
+     left_delta="53"
+     mouse_opaque="false"
+     name="hex_val_prefix"
+     top_delta="0"
+     width="10">
+        #
+    </text>
+    <line_editor
+     follows="left|top"
+     font="Monospace"
+     height="23"
+     layout="topleft"
+     left_delta="10"
+     max_length_bytes="6"
+     name="hex_val"
+     top_delta="-5"
+     width="50" />
     <check_box
      follows="left|bottom"
      height="20"
@@ -160,7 +196,7 @@
      layout="topleft"
      left="10"
      name="apply_immediate"
-     top_pad="185"
+     bottom="-12"
      width="100" />
     <button
      follows="left|bottom"
@@ -199,7 +235,7 @@
      layout="topleft"
      left="10"
      name="Current color:"
-     top="172"
+     top="194"
      width="110">
         Current color:
     </text>
@@ -211,7 +247,7 @@
      layout="topleft"
      left="10"
      name="(Drag below to save.)"
-     top_pad="66"
+     top_pad="60"
      width="130"
      wrap="true">
         (Drag below to save)

@@ -86,9 +86,9 @@ LLFloaterColorPicker::LLFloaterColorPicker (LLColorSwatchCtrl* swatch, BOOL show
 	  mLumMarkerSize		( 6 ),
 	  // *TODO: Specify this in XML
 	  mSwatchRegionLeft		( 12 ),
-	  mSwatchRegionTop		( 190 ),
+	  mSwatchRegionTop		( 172 ),
 	  mSwatchRegionWidth	( 116 ),
-	  mSwatchRegionHeight	( 60 ),
+	  mSwatchRegionHeight	( 57 ),
 	  mSwatchView			( NULL ),
 	  // *TODO: Specify this in XML
 	  numPaletteColumns		( 16 ),
@@ -227,6 +227,9 @@ BOOL LLFloaterColorPicker::postBuild()
 	childSetCommitCallback("hspin", onTextCommit, (void*)this );
 	childSetCommitCallback("sspin", onTextCommit, (void*)this );
 	childSetCommitCallback("lspin", onTextCommit, (void*)this );
+// [SL:KB] - Patch: Viewer-Skins | Checked: Catznip-5.2
+	childSetCommitCallback("hex_val", onTextCommit, (void*)this );
+// [/SL:KB]
 
 	LLToolPipette::getInstance()->setToolSelectCallback(boost::bind(&LLFloaterColorPicker::onColorSelect, this, _1));
 
@@ -726,6 +729,9 @@ void LLFloaterColorPicker::updateTextEntry ()
 	getChild<LLUICtrl>("hspin")->setValue(( getCurH () * 360.0f ) );
 	getChild<LLUICtrl>("sspin")->setValue(( getCurS () * 100.0f ) );
 	getChild<LLUICtrl>("lspin")->setValue(( getCurL () * 100.0f ) );
+// [SL:KB] - Patch: Viewer-Skins | Checked: Catznip-5.2
+	getChild<LLUICtrl>("hex_val")->setValue(llformat("%02X%02X%02X", (int)(getCurR() * 255.0f), (int)(getCurG() * 255.0f), (int)(getCurB() * 255.0f)));
+// [/SL:KB]
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -784,6 +790,22 @@ void LLFloaterColorPicker::onTextEntryChanged ( LLUICtrl* ctrl )
 
 		updateTextEntry ();
 	}
+// [SL:KB] - Patch: Viewer-Skins | Checked: Catznip-5.2
+	else if (name == "hex_val")
+	{
+		// Check for a valid 6 numer string
+		const std::string strColorHex = ctrl->getValue().asString();
+		if ( (strColorHex.size() == 6) && (std::all_of(strColorHex.cbegin(), strColorHex.cend(), [](const char& ch) { return isxdigit(ch); })) )
+		{
+			U32 color = strtol(strColorHex.c_str(), nullptr, 16);
+			if (color)
+			{
+				selectCurRgb( ((color >> 16) & 0xFF) / 255.0f, ((color >> 8) & 0xFF) / 255.0f, (color & 0xFF) / 255.0f );
+				updateTextEntry();
+			}
+		}
+	}
+// [/SL:KB]
 }
 
 //////////////////////////////////////////////////////////////////////////////
