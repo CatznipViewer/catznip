@@ -33,6 +33,9 @@
 #include "lluistring.h"
 #include "v4color.h"
 #include "llui.h"
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+#include "lluictrl.h"
+// [/SL:KB]
 
 class LLCheckBoxCtrl;
 class LLSD;
@@ -49,6 +52,11 @@ class LLUIImage;
 class LLScrollListCell
 {
 public:
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	typedef boost::function<void(LLScrollListCell* cell)> commit_callback_t;
+	typedef boost::signals2::signal<void(LLScrollListCell* cell)> commit_signal_t;
+// [/SL:KB]
+
 	struct Params : public LLInitParam::Block<Params>
 	{
 		Optional<std::string>		type,
@@ -57,6 +65,10 @@ public:
 		Optional<S32>				width;
 		Optional<bool>				enabled,
 									visible;
+
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+		Optional<commit_callback_t> commit_callback;
+// [/SL:KB]
 
 		Optional<void*>				userdata;
 		Optional<LLSD>				value;
@@ -74,6 +86,9 @@ public:
 			width("width"),
 			enabled("enabled", true),
 			visible("visible", true),
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+			commit_callback("commit_callback"),
+// [/SL:KB]
 			value("value"),
 			tool_tip("tool_tip", ""),
 			font("font", LLFontGL::getFontSansSerifSmall()),
@@ -97,6 +112,9 @@ public:
 	virtual S32				getHeight() const { return 0; }
 	virtual const LLSD		getValue() const;
 	virtual void			setValue(const LLSD& value) { }
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	virtual const std::string &getColumnName() const { return mColumnName; }
+// [/SL:KB]
 	virtual const std::string &getToolTip() const { return mToolTip; }
 	virtual void			setToolTip(const std::string &str) { mToolTip = str; }
 	virtual BOOL			getVisible() const { return TRUE; }
@@ -112,6 +130,9 @@ public:
 
 private:
 	S32 mWidth;
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	std::string mColumnName;
+// [/SL:KB]
 	std::string mToolTip;
 };
 
@@ -210,6 +231,9 @@ public:
 
 private:
 	LLCheckBoxCtrl* mCheckBox;
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	commit_signal_t* mCommitSignal = nullptr;
+// [/SL:KB]
 };
 
 class LLScrollListDate : public LLScrollListText

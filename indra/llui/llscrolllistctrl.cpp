@@ -2778,7 +2778,7 @@ void LLScrollListCtrl::addColumn(const LLScrollListColumn::Params& column_params
 			params.tool_tip = column_params.tool_tip;
 			params.tab_stop = false;
 			params.visible = mDisplayColumnHeaders;
-// [SL:KB] - Patch: Controls-ScrollList | Checked: Catznip-5.2
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
 			params.font_halign = column_params.halign;
 // [/SL:KB]
 
@@ -2924,6 +2924,18 @@ LLScrollListItem* LLScrollListCtrl::addElement(const LLSD& element, EAddPosition
 	return addRow(item_params, pos);
 }
 
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+LLScrollListItem* LLScrollListCtrl::addElement(const LLSD& element, const LLScrollListItem::commit_signal_t::slot_type& cb, EAddPosition pos)
+{
+	LL_RECORD_BLOCK_TIME(FTM_ADD_SCROLLLIST_ELEMENT);
+	LLScrollListItem::Params item_params;
+	LLParamSDParser parser;
+	parser.readSD(element, item_params);
+	item_params.commit_callback = cb;
+	return addRow(item_params, pos);
+}
+// [/SL:KB]
+
 LLScrollListItem* LLScrollListCtrl::addRow(const LLScrollListItem::Params& item_p, EAddPosition pos)
 {
 	LL_RECORD_BLOCK_TIME(FTM_ADD_SCROLLLIST_ELEMENT);
@@ -2978,6 +2990,13 @@ LLScrollListItem* LLScrollListCtrl::addRow(LLScrollListItem *new_item, const LLS
 		{
 			cell_p.width = columnp->getWidth();
 		}
+
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+		if (item_p.commit_callback.isProvided())
+		{
+			cell_p.commit_callback = boost::bind(item_p.commit_callback(), item_p.value(), _1);
+		}
+// [/SL:KB]
 
 		LLScrollListCell* cell = LLScrollListCell::create(cell_p);
 
