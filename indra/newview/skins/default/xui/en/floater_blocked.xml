@@ -15,17 +15,30 @@
  single_instance="true"
  title="BLOCKED / DERENDER LIST"
  width="350">
+    <filter_editor
+     follows="left|top|right"
+     height="23"
+     layout="topleft"
+     left="15"
+     label="Filter"
+     max_length_chars="300"
+     name="blocked_filter"
+     right="-15"
+     text_color="Black"
+     text_pad_left="10"
+     top="4"
+     />
     <tab_container
      follows="all"
      layout="topleft"
      left="8"  
      name="blocked_tabs"
-     height="292"
+     height="267"
      right="-8"   
      tab_height="25"
      tab_min_width="120"
      tab_position="top"
-     top="4" >
+     top_pad="4" >
         <panel
          class="panel_block_list"
          filename="panel_block_list.xml"

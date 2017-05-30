@@ -1,76 +1,96 @@
-/** 
+/**
  *
- * Copyright (c) 2012-2013, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2012-2017, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
-#ifndef LLFLOATERBLOCKED_H
-#define LLFLOATERBLOCKED_H
+#pragma once
 
 #include "llavatarname.h"
 #include "llfloater.h"
 #include "llmutelist.h"
 
+class LLFilterEditor;
+class LLScrollListCell;
 class LLScrollListCtrl;
 class LLTabContainer;
+
+// ============================================================================
+// LLPanelBlockBase
+//
+
+class LLPanelBlockBase
+{
+public:
+	virtual const std::string& getFilterString() const = 0;
+	virtual void               setFilterString(const std::string& strFilter) = 0;
+};
 
 // ============================================================================
 // LLPanelBlockList
 //
 
-class LLPanelBlockList : public LLPanel, public LLMuteListObserver
+class LLPanelBlockList : public LLPanel, public LLMuteListObserver, public LLPanelBlockBase
 {
 public:
 	LLPanelBlockList();
-	/*virtual*/ ~LLPanelBlockList();
+	~LLPanelBlockList();
 
 	/*
 	 * LLPanel overrides
 	 */
 public:
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& sdParam);
+	BOOL postBuild() override;
+	void onOpen(const LLSD& sdParam) override;
 
 	/*
 	 * Member functions
 	 */
+public:
+	const std::string& getFilterString() const override { return m_strFilter; }
+	void setFilterString(const std::string& strFilter) override;
 protected:
 	void refresh();
 	void removePicker();
+	void selectEntry(const LLSD& sdValue) { LLMute muteEntry(sdValue["id"].asUUID(), sdValue["name"].asString()); selectEntry(muteEntry); }
+	void selectEntry(const LLMute& muteEntry);
 	void updateButtons();
 
 	/*
 	 * Event handlers
 	 */
 public:
-	/*virtual*/ void onChange();
+	       void onChange() override;
 protected:
 	       void onClickAddAvatar(LLUICtrl* pCtrl);
 	static void onClickAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents);
 	static void onClickAddByName();
 	static void onClickAddByNameCallback(const std::string& strBlockName);
-	       void onClickRemoveSelection();
+		   void onClickRemoveSelection();
 		   void onColumnSortChange();
-	       void onSelectionChange();
+	static void onIdleRefresh(LLHandle<LLPanel> hPanel);
+		   void onSelectionChange();
+		   void onToggleMuteFlag(const LLSD& sdValue, const LLScrollListCell* pCell);
 
 	/*
 	 * Member variables
 	 */
 protected:
-	bool                m_fRefreshOnChange;
-	LLScrollListCtrl*   m_pBlockList;
-	LLButton*           m_pTrashBtn;
-    LLHandle<LLFloater> m_hPicker;
+	bool                m_fRefreshOnChange = true;
+	std::string         m_strFilter;
+	LLScrollListCtrl*   m_pBlockList = nullptr;
+	LLButton*           m_pTrashBtn = nullptr;
+	LLHandle<LLFloater> m_hPicker;
 };
 
 // ============================================================================
@@ -81,14 +101,14 @@ class LLPanelDerenderList : public LLPanel
 {
 public:
 	LLPanelDerenderList();
-	/*virtual*/ ~LLPanelDerenderList();
+	~LLPanelDerenderList();
 
 	/*
 	 * LLPanel overrides
 	 */
 public:
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& sdParam);
+	BOOL postBuild() override;
+	void onOpen(const LLSD& sdParam) override;
 
 	/*
 	 * Member functions
@@ -120,16 +140,20 @@ class LLFloaterBlocked : public LLFloater
 {
 public:
 	LLFloaterBlocked(const LLSD& sdKey);
-	/*virtual*/ ~LLFloaterBlocked();
+	~LLFloaterBlocked();
 
+	/*
+	 * LLFloater overrides
+	 */
 public:
-	/*virtual*/ BOOL postBuild();
-	/*virtual*/ void onOpen(const LLSD& sdParam);
+	BOOL postBuild() override;
+	void onOpen(const LLSD& sdParam) override;
 
 	/*
 	 * Event handlers
 	 */
 protected:
+	void onFilterEdit(const std::string& strFilter);
 	void onTabSelect(const LLSD& sdParam);
 
 	/*
@@ -143,9 +167,8 @@ public:
 	 * Member variables
 	 */
 protected:
-	LLTabContainer*             m_pBlockedTabs;
+	LLFilterEditor* m_pFilterEditor = nullptr;
+	LLTabContainer* m_pBlockedTabs = nullptr;
 };
 
 // ============================================================================
-
-#endif // LLFLOATERBLOCKED_H

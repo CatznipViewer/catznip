@@ -376,7 +376,7 @@ BOOL LLMuteList::remove(const LLMute& mute, U32 flags)
 	{
 		LLMute localmute = *it;
 		bool remove = true;
-// [SL:KB] - World-Mute | Checked: 2013-07-13 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 		found = TRUE;
 // [/SL:KB]
 		if(flags)
@@ -427,7 +427,7 @@ BOOL LLMuteList::remove(const LLMute& mute, U32 flags)
 		string_set_t::iterator legacy_it = mLegacyMutes.find(mute.mName);
 		if (legacy_it != mLegacyMutes.end())
 		{
-// [SL:KB] - World-Mute | Checked: 2013-07-13 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 			found = TRUE;
 // [/SL:KB]
 

@@ -46,7 +46,7 @@
 #include "llfloateravatartextures.h"
 #include "llfloaterbigpreview.h"
 #include "llfloaterbeacons.h"
-// [SL:KB] - Patch: World-Derender | Checked: 2012-02-27 (Catznip-3.2)
+// [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
 #include "llfloaterblocked.h"
 // [/SL:KB]
 #include "llfloaterbuildoptions.h"
@@ -254,7 +254,7 @@ void LLViewerFloaterReg::registerFloaters()
 	LLFloaterReg::add("avatar_textures", "floater_avatar_textures.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterAvatarTextures>);
 
 	LLFloaterReg::add("beacons", "floater_beacons.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBeacons>);
-// [SL:KB] - Patch: World-Derender | Checked: 2012-02-27 (Catznip-3.2)
+// [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
 	LLFloaterReg::add("blocked", "floater_blocked.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBlocked>);
 // [/SL:KB]
 	LLFloaterReg::add("bulk_perms", "floater_bulk_perms.xml", (LLFloaterBuildFunc)&LLFloaterReg::build<LLFloaterBulkPermission>);
