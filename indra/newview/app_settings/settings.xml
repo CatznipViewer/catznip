@@ -13609,7 +13609,7 @@
       <key>Type</key>
       <string>F32</string>
       <key>Value</key>
-      <real>1024.0</real>
+      <real>1280.0</real>
     </map>
     <key>ToolTipDelay</key>
     <map>
@@ -14919,28 +14919,6 @@
       <string>U32</string>
       <key>Value</key>
       <integer>3600</integer>
-    </map>
-    <key>UpdaterServiceURL</key>
-    <map>
-      <key>Comment</key>
-      <string>Default location for the updater service.</string>
-      <key>Persist</key>
-      <integer>0</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>http://viewer.catznip.com</string>
-    </map>
-    <key>UpdaterServicePath</key>
-    <map>
-      <key>Comment</key>
-      <string>Path on the update server host.</string>
-      <key>Persist</key>
-      <integer>0</integer>
-      <key>Type</key>
-      <string>String</string>
-      <key>Value</key>
-      <string>update</string>
     </map>
     <key>UpdaterWillingToTest</key>
     <map>
