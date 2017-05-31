@@ -27,49 +27,49 @@
 #ifndef LL_LLFLOATERAVATARRENDERSETTINGS_H
 #define LL_LLFLOATERAVATARRENDERSETTINGS_H
 
-#include "llfloater.h"
-#include "lllistcontextmenu.h"
-#include "llmutelist.h"
-
-class LLNameListCtrl;
-
-class LLFloaterAvatarRenderSettings : public LLFloater
-{
-public:
-
-    LLFloaterAvatarRenderSettings(const LLSD& key);
-    virtual ~LLFloaterAvatarRenderSettings();
-
-    /*virtual*/ BOOL postBuild();
-    /*virtual*/ void onOpen(const LLSD& key);
-    /*virtual*/ void draw();
-    /*virtual*/ BOOL handleKeyHere(KEY key, MASK mask );
-
-    void onAvatarListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
-
-    void updateList();
-    void onFilterEdit(const std::string& search_string);
-    void onCustomAction (const LLSD& userdata, const LLUUID& av_id);
-    bool isActionChecked(const LLSD& userdata, const LLUUID& av_id);
-    void onClickAdd(const LLSD& userdata);
-    void setAvatarRenderSetting(const LLUUID& av_id, S32 new_setting);
-
-    std::string createTimestamp(S32 datetime);
-
-    static void setNeedsUpdate();
-
-private:
-    bool isHiddenRow(const std::string& av_name);
-    void callbackAvatarPicked(const uuid_vec_t& ids, S32 visual_setting);
-    void removePicker();
-
-    bool mNeedsUpdate;
-    LLListContextMenu* mContextMenu;
-    LLNameListCtrl* mAvatarSettingsList;
-    LLHandle<LLFloater> mPicker;
-
-    std::string mNameFilter;
-};
+//#include "llfloater.h"
+//#include "lllistcontextmenu.h"
+//#include "llmutelist.h"
+//
+//class LLNameListCtrl;
+//
+//class LLFloaterAvatarRenderSettings : public LLFloater
+//{
+//public:
+//
+//    LLFloaterAvatarRenderSettings(const LLSD& key);
+//    virtual ~LLFloaterAvatarRenderSettings();
+//
+//    /*virtual*/ BOOL postBuild();
+//    /*virtual*/ void onOpen(const LLSD& key);
+//    /*virtual*/ void draw();
+//    /*virtual*/ BOOL handleKeyHere(KEY key, MASK mask );
+//
+//    void onAvatarListRightClick(LLUICtrl* ctrl, S32 x, S32 y);
+//
+//    void updateList();
+//    void onFilterEdit(const std::string& search_string);
+//    void onCustomAction (const LLSD& userdata, const LLUUID& av_id);
+//    bool isActionChecked(const LLSD& userdata, const LLUUID& av_id);
+//    void onClickAdd(const LLSD& userdata);
+//    void setAvatarRenderSetting(const LLUUID& av_id, S32 new_setting);
+//
+//    std::string createTimestamp(S32 datetime);
+//
+//    static void setNeedsUpdate();
+//
+//private:
+//    bool isHiddenRow(const std::string& av_name);
+//    void callbackAvatarPicked(const uuid_vec_t& ids, S32 visual_setting);
+//    void removePicker();
+//
+//    bool mNeedsUpdate;
+//    LLListContextMenu* mContextMenu;
+//    LLNameListCtrl* mAvatarSettingsList;
+//    LLHandle<LLFloater> mPicker;
+//
+//    std::string mNameFilter;
+//};
 
 
 #endif //LL_LLFLOATERAVATARRENDERSETTINGS_H

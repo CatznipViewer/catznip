@@ -49,6 +49,9 @@
 //#include "llfirstuse.h"
 #include "llfloaterreg.h"
 #include "llfloaterabout.h"
+// [SL:KB] - Patch: World-RenderExceptions | Checked: Catznip-5.2
+#include "llfloaterblocked.h"
+// [/SL:KB]
 #include "llfavoritesbar.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfloaterimsession.h"
@@ -2083,7 +2086,10 @@ void LLFloaterPreference::onClickSpellChecker()
 
 void LLFloaterPreference::onClickRenderExceptions()
 {
-    LLFloaterReg::showInstance("avatar_render_settings");
+// [SL:KB] - Patch: World-RenderExceptions | Checked: Catznip-5.2
+	LLFloaterReg::showInstance("blocked", LLSD("avatar_rendering_tab"));
+// [/SL:KB]
+//    LLFloaterReg::showInstance("avatar_render_settings");
 }
 
 void LLFloaterPreference::onClickAdvanced()

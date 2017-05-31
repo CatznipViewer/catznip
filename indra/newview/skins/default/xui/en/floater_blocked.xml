@@ -36,7 +36,7 @@
      height="267"
      right="-8"   
      tab_height="25"
-     tab_min_width="120"
+     tab_min_width="100"
      tab_position="top"
      top_pad="4" >
         <panel
@@ -51,5 +51,11 @@
          label="DERENDERED"
          layout="topleft"
          name="derender_tab" />
+        <panel
+         class="panel_block_avatar_rendering"
+         filename="panel_block_avatar_rendering.xml"
+         label="AVATAR RENDERING"
+         layout="topleft"
+         name="avatar_rendering_tab" />
     </tab_container>
 </floater>

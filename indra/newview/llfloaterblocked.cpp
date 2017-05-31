@@ -17,17 +17,25 @@
 #include "llviewerprecompiledheaders.h"
 
 #include "llavatarname.h"
+#include "llavatarnamecache.h"
 #include "llcallbacklist.h"
 #include "llderenderlist.h"
 #include "llfiltereditor.h"
 #include "llfloateravatarpicker.h"
 #include "llfloaterblocked.h"
 #include "llfloaterreg.h"
+#include "lllistcontextmenu.h"
+#include "llmenugl.h"
+#include "llnamelistctrl.h"
 #include "llnotificationsutil.h"
 #include "llpanelblockedlist.h"
 #include "llscrolllistctrl.h"
 #include "lltabcontainer.h"
+#include "lltrans.h"
 #include "llviewercontrol.h"
+#include "llviewermenu.h"
+#include "llviewerobjectlist.h"
+#include "llvoavatar.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -37,8 +45,10 @@
 
 const std::string BLOCKED_PARAM_NAME  = "blocked_to_select";
 const std::string DERENDER_PARAM_NAME = "derender_to_select";
-const std::string BLOCKED_TAB_NAME  = "mute_tab";
+const std::string EXCEPTION_PARAM_NAME = "exception_to_select";
+const std::string BLOCKED_TAB_NAME = "mute_tab";
 const std::string DERENDER_TAB_NAME = "derender_tab";
+const std::string EXCEPTION_TAB_NAME = "avatar_rendering_tab";
 
 // ============================================================================
 // LLPanelBlockList
@@ -49,9 +59,9 @@ static LLPanelInjector<LLPanelBlockList> t_panel_blocked_list("panel_block_list"
 LLPanelBlockList::LLPanelBlockList()
 	: LLPanel()
 {
-	mCommitCallbackRegistrar.add("Block.AddAvatar", boost::bind(&LLPanelBlockList::onClickAddAvatar, this, _1));
-	mCommitCallbackRegistrar.add("Block.AddByName",	boost::bind(&LLPanelBlockList::onClickAddByName));
-	mCommitCallbackRegistrar.add("Block.Remove", boost::bind(&LLPanelBlockList::onClickRemoveSelection, this));
+	mCommitCallbackRegistrar.add("Block.AddAvatar", boost::bind(&LLPanelBlockList::onAddAvatar, this, _1));
+	mCommitCallbackRegistrar.add("Block.AddByName",	boost::bind(&LLPanelBlockList::onAddByName));
+	mCommitCallbackRegistrar.add("Block.Remove", boost::bind(&LLPanelBlockList::onRemoveSelection, this));
 }
 
 LLPanelBlockList::~LLPanelBlockList()
@@ -188,7 +198,7 @@ void LLPanelBlockList::onChange()
 	}
 }
 
-void LLPanelBlockList::onClickAddAvatar(LLUICtrl* pCtrl)
+void LLPanelBlockList::onAddAvatar(LLUICtrl* pCtrl)
 {
 	if (!m_hPicker.isDead())
 	{
@@ -199,7 +209,7 @@ void LLPanelBlockList::onClickAddAvatar(LLUICtrl* pCtrl)
 	if (LLFloater* pRootFloater = gFloaterView->getParentFloater(pCtrl))
 	{
 		LLFloaterAvatarPicker* pPicker = LLFloaterAvatarPicker::show(
-			boost::bind(&LLPanelBlockList::onClickAddAvatarCallback, _1, _2),
+			boost::bind(&LLPanelBlockList::onAddAvatarCallback, _1, _2),
 			false /*allow_multiple*/, true /*close_on_select*/, false /*skip_agent*/, pRootFloater->getName(), pCtrl);
 		pRootFloater->addDependentFloater(pPicker);
 		m_hPicker = pPicker->getHandle();
@@ -207,7 +217,7 @@ void LLPanelBlockList::onClickAddAvatar(LLUICtrl* pCtrl)
 }
 
 // static
-void LLPanelBlockList::onClickAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents)
+void LLPanelBlockList::onAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents)
 {
 	if ( (idAgents.empty()) || (avAgents.empty()) )
 	{
@@ -222,13 +232,13 @@ void LLPanelBlockList::onClickAddAvatarCallback(const uuid_vec_t& idAgents, cons
 }
 
 // static
-void LLPanelBlockList::onClickAddByName()
+void LLPanelBlockList::onAddByName()
 {
-	LLFloaterGetBlockedObjectName::show(&LLPanelBlockList::onClickAddByNameCallback);
+	LLFloaterGetBlockedObjectName::show(&LLPanelBlockList::onAddByNameCallback);
 }
 
 // static
-void LLPanelBlockList::onClickAddByNameCallback(const std::string& strBlockName)
+void LLPanelBlockList::onAddByNameCallback(const std::string& strBlockName)
 {
 	if (strBlockName.empty())
 	{
@@ -242,7 +252,7 @@ void LLPanelBlockList::onClickAddByNameCallback(const std::string& strBlockName)
 	}
 }
 
-void LLPanelBlockList::onClickRemoveSelection()
+void LLPanelBlockList::onRemoveSelection()
 {
 	m_fRefreshOnChange = false;
 
@@ -426,6 +436,284 @@ void LLPanelDerenderList::refresh()
 }
 
 // ============================================================================
+// LLPanelAvatarRendering - Menu helper class
+//
+
+class LLPanelAvatarRenderingContextMenu : public LLListContextMenu
+{
+public:
+	LLPanelAvatarRenderingContextMenu(LLPanelAvatarRendering* pAvRenderingPanel)
+		: m_pAvRenderingPanel(pAvRenderingPanel)
+	{
+	}
+
+protected:
+	LLContextMenu* createMenu() override
+	{
+		LLUICtrl::CommitCallbackRegistry::ScopedRegistrar registrar;
+		registrar.add("Rendering.SetException", boost::bind(&LLPanelAvatarRendering::onSetException, m_pAvRenderingPanel, mUUIDs.front(), _2));
+
+		LLUICtrl::EnableCallbackRegistry::ScopedRegistrar enable_registrar;
+		enable_registrar.add("Rendering.HasException", boost::bind(&LLPanelAvatarRendering::onHasException, m_pAvRenderingPanel, mUUIDs.front(), _2));
+
+		LLContextMenu* pMenu = createFromFile("menu_avatar_rendering_settings.xml");
+		return pMenu;
+	}
+
+protected:
+	LLPanelAvatarRendering* m_pAvRenderingPanel;
+};
+
+// ============================================================================
+// LLPanelAvatarRendering - Helper functions
+//
+
+static std::string createTimestamp(S32 datetime)
+{
+	std::string timeStr = "[" + LLTrans::getString("TimeMonth") + "]/[" + LLTrans::getString("TimeDay") + "]/[" + LLTrans::getString("TimeYear") + "]";
+	LLStringUtil::format(timeStr, LLSD().with("datetime", datetime));
+	return timeStr;
+}
+
+static LLVOAvatar* findAvatar(const LLUUID& idAgent)
+{
+	LLViewerObject* pAvObj = gObjectList.findObject(idAgent);
+	while ( (pAvObj) && (pAvObj->isAttachment()) )
+		pAvObj = (LLViewerObject*)pAvObj->getParent();
+
+	if ((pAvObj) && (pAvObj->isAvatar()) )
+		return (LLVOAvatar*)pAvObj;
+	return nullptr;
+}
+
+static void setAvatarRenderSetting(const LLUUID& idAgent, LLVOAvatar::VisualMuteSettings eSetting)
+{
+	if (LLVOAvatar* pAvatar = findAvatar(idAgent))
+		pAvatar->setVisualMuteSettings(LLVOAvatar::VisualMuteSettings(eSetting));
+	else
+		LLRenderMuteList::getInstance()->saveVisualMuteSetting(idAgent, eSetting);
+}
+
+// ============================================================================
+// LLPanelAvatarRendering - Configure avatar complexity excpetions
+//
+
+static LLPanelInjector<LLPanelAvatarRendering> t_panel_block_avatar_rendering("panel_block_avatar_rendering");
+
+LLPanelAvatarRendering::LLPanelAvatarRendering()
+	: LLPanel()
+{
+	mCommitCallbackRegistrar.add("Rendering.AddException", boost::bind(&LLPanelAvatarRendering::onAddException, this, _1, _2));
+	mCommitCallbackRegistrar.add("Rendering.RemoveException", boost::bind(&LLPanelAvatarRendering::onRemoveException, this));
+}
+
+LLPanelAvatarRendering::~LLPanelAvatarRendering()
+{
+	delete m_pContextMenu;
+	LLRenderMuteList::getInstance()->removeObserver(this);
+}
+
+// virtual
+BOOL LLPanelAvatarRendering::postBuild()
+{
+	setVisibleCallback(boost::bind(&LLPanelAvatarRendering::removePicker, this));
+
+	m_pExceptionList = findChild<LLNameListCtrl>("exception_list");
+	m_pExceptionList->setCommitOnDelete(true);
+	m_pExceptionList->setCommitOnSelectionChange(true);
+	m_pExceptionList->setCommitCallback(boost::bind(&LLPanelAvatarRendering::onSelectionChange, this));
+	m_pExceptionList->setRightMouseDownCallback(boost::bind(&LLPanelAvatarRendering::onExceptionMenu, this, _2, _3));
+
+	// Restore last sort order
+	if (U32 nSortValue = gSavedSettings.getU32("BlockRenderingSortOrder"))
+		m_pExceptionList->sortByColumnIndex(nSortValue >> 4, nSortValue & 0xF);
+	m_pExceptionList->setSortChangedCallback(boost::bind(&LLPanelAvatarRendering::onColumnSortChange, this));
+
+	m_pTrashBtn = findChild<LLButton>("rendering_exception_trash_btn");
+
+	LLRenderMuteList::getInstance()->addObserver(this);
+	m_pContextMenu = new LLPanelAvatarRenderingContextMenu(this);
+
+	return TRUE;
+}
+
+// virtual
+void LLPanelAvatarRendering::onOpen(const LLSD& sdParam)
+{
+	refresh();
+
+	if ((sdParam.has(EXCEPTION_PARAM_NAME)) && (sdParam[EXCEPTION_PARAM_NAME].asUUID().notNull()))
+	{
+		m_pExceptionList->selectByID(sdParam[EXCEPTION_PARAM_NAME].asUUID());
+	}
+}
+
+void LLPanelAvatarRendering::refresh()
+{
+	const LLUUID idSel = m_pExceptionList->getSelectedValue().asUUID();
+
+	m_pExceptionList->deleteAllItems();
+
+	LLAvatarName avName; LLNameListCtrl::NameItem paramItem;
+	for (const auto& kvEntry : LLRenderMuteList::getInstance()->sVisuallyMuteSettingsMap)
+	{
+		if ( (!LLAvatarNameCache::get(kvEntry.first, &avName)) || ((!m_strFilter.empty()) && (!boost::icontains(avName.getCompleteName(), m_strFilter))) )
+			continue;
+
+		paramItem.value = kvEntry.first;
+		paramItem.columns.add().value(avName.getCompleteName()).column("name");
+		paramItem.columns.add().value(getString(kvEntry.second == 1 ? "av_never_render" : "av_always_render")).column("setting");
+		paramItem.columns.add().value(createTimestamp(LLRenderMuteList::getInstance()->getVisualMuteDate(kvEntry.first))).column("timestamp");
+		m_pExceptionList->addNameItemRow(paramItem);
+	}
+
+	if (idSel.notNull())
+	{
+		m_pExceptionList->selectByID(idSel);
+	}
+}
+
+void LLPanelAvatarRendering::removePicker()
+{
+	if (m_hPicker.get())
+	{
+		m_hPicker.get()->closeFloater();
+	}
+}
+
+void LLPanelAvatarRendering::setFilterString(const std::string& strFilter)
+{
+	m_strFilter = strFilter;
+	refresh();
+}
+
+void LLPanelAvatarRendering::updateButtons()
+{
+	bool fHasSelection = (nullptr != m_pExceptionList->getFirstSelected());
+	m_pTrashBtn->setEnabled(fHasSelection);
+}
+
+void LLPanelAvatarRendering::onChange()
+{
+	if (m_fRefreshOnChange)
+	{
+		refresh();
+	}
+}
+
+void LLPanelAvatarRendering::onAddException(LLUICtrl* pCtrl, const LLSD& sdParam)
+{
+	const std::string strParam = sdParam.asString();
+
+	LLVOAvatar::VisualMuteSettings eSetting = (LLVOAvatar::VisualMuteSettings)0;
+	if ("never" == strParam)
+		eSetting = LLVOAvatar::AV_DO_NOT_RENDER;
+	else if ("always" == strParam)
+		eSetting = LLVOAvatar::AV_ALWAYS_RENDER;
+
+	if (LLFloater* pRootFloater = gFloaterView->getParentFloater(pCtrl))
+	{
+		removePicker();
+
+		LLFloaterAvatarPicker* pPicker = LLFloaterAvatarPicker::show(
+			boost::bind(&LLPanelAvatarRendering::onAddExceptionCb, _1, eSetting),
+			false /*allow_multiple*/, true /*close_on_select*/, false /*skip_agent*/, pRootFloater->getName(), pCtrl);
+		pRootFloater->addDependentFloater(pPicker);
+		m_hPicker = pPicker->getHandle();
+	}
+}
+
+void LLPanelAvatarRendering::onAddExceptionCb(const uuid_vec_t& idAgents, S32 nSetting)
+{
+	if (idAgents.empty())
+		return;
+
+	for (const LLUUID& idAgent : idAgents)
+	{
+		setAvatarRenderSetting(idAgent, (LLVOAvatar::VisualMuteSettings)nSetting);
+	}
+
+	LLFloaterBlocked::showRenderExceptionAndSelect(idAgents[0]);
+}
+
+bool LLPanelAvatarRendering::onHasException(const LLUUID& idAgent, const LLSD& sdParamn)
+{
+	const std::string strParam = sdParamn.asString();
+
+	LLVOAvatar::VisualMuteSettings eSetting = (LLVOAvatar::VisualMuteSettings)LLRenderMuteList::getInstance()->getSavedVisualMuteSetting(idAgent);
+	if ("default" == strParam)
+		return (eSetting == LLVOAvatar::AV_RENDER_NORMALLY);
+	else if ("never" == strParam)
+		return (eSetting == LLVOAvatar::AV_DO_NOT_RENDER);
+	else if ("always" == strParam)
+		return (eSetting == LLVOAvatar::AV_ALWAYS_RENDER);
+	return false;
+}
+
+void LLPanelAvatarRendering::onExceptionMenu(S32 x, S32 y)
+{
+	m_pExceptionList->selectItemAt(x, y, MASK_NONE);
+
+	uuid_vec_t selected_uuids;
+	if (m_pExceptionList->getCurrentID().notNull())
+	{
+		selected_uuids.push_back(m_pExceptionList->getCurrentID());
+		m_pContextMenu->show(m_pExceptionList, selected_uuids, x, y);
+	}
+}
+
+void LLPanelAvatarRendering::onRemoveException()
+{
+	m_fRefreshOnChange = false;
+
+	const std::vector<LLScrollListItem*> selItems = m_pExceptionList->getAllSelected();
+	for (auto* pSelItem : selItems)
+	{
+		const LLSD sdValue = pSelItem->getValue();
+		if (sdValue.isUUID())
+		{
+			setAvatarRenderSetting(sdValue.asUUID(), LLVOAvatar::AV_RENDER_NORMALLY);
+			m_pExceptionList->deleteSingleItem(pSelItem);
+		}
+	}
+
+	m_fRefreshOnChange = true;
+}
+
+void LLPanelAvatarRendering::onSetException(const LLUUID& idAgent, const LLSD& sdParamn)
+{
+	const std::string strParam = sdParamn.asString();
+
+	LLVOAvatar::VisualMuteSettings nSetting = (LLVOAvatar::VisualMuteSettings)0;
+	if ("default" == strParam)
+		nSetting = LLVOAvatar::AV_RENDER_NORMALLY;
+	else if ("never" == strParam)
+		nSetting = LLVOAvatar::AV_DO_NOT_RENDER;
+	else if ("always" == strParam)
+		nSetting = LLVOAvatar::AV_ALWAYS_RENDER;
+
+	setAvatarRenderSetting(idAgent, nSetting);
+}
+
+void LLPanelAvatarRendering::onColumnSortChange()
+{
+	U32 nSortValue = 0;
+
+	S32 idxColumn = m_pExceptionList->getSortColumnIndex();
+	if (-1 != idxColumn)
+	{
+		nSortValue = idxColumn << 4 | ((m_pExceptionList->getSortAscending()) ? 1 : 0);
+	}
+
+	gSavedSettings.setU32("BlockRenderingSortOrder", nSortValue);
+}
+
+void LLPanelAvatarRendering::onSelectionChange()
+{
+	updateButtons();
+}
+
+// ============================================================================
 // LLFloaterBlocked
 //
 
@@ -455,6 +743,10 @@ void LLFloaterBlocked::onOpen(const LLSD& sdParam)
 		m_pBlockedTabs->selectTabByName(BLOCKED_TAB_NAME);
 	else if (sdParam.has(DERENDER_PARAM_NAME))
 		m_pBlockedTabs->selectTabByName(DERENDER_TAB_NAME);
+	if (sdParam.has(EXCEPTION_PARAM_NAME))
+		m_pBlockedTabs->selectTabByName(EXCEPTION_TAB_NAME);
+	else if ( (sdParam.isString()) && (m_pBlockedTabs->hasChild(sdParam.asString())) )
+		m_pBlockedTabs->selectTabByName(sdParam.asString());
 	else
 		m_pBlockedTabs->getCurrentPanel()->onOpen(sdParam);
 	mKey.clear();
@@ -487,6 +779,11 @@ void LLFloaterBlocked::showMuteAndSelect(const LLUUID& idMute)
 void LLFloaterBlocked::showDerenderAndSelect(const LLUUID& idEntry)
 {
 	LLFloaterReg::showInstance("blocked", LLSD().with(DERENDER_PARAM_NAME, idEntry));
+}
+
+void LLFloaterBlocked::showRenderExceptionAndSelect(const LLUUID& idEntry)
+{
+	LLFloaterReg::showInstance("blocked", LLSD().with(EXCEPTION_PARAM_NAME, idEntry));
 }
 
 // ============================================================================
