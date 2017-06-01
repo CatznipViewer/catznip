@@ -51,11 +51,11 @@ LLFloaterRegionRestarting::LLFloaterRegionRestarting(const LLSD& key) :
 	LLFloater(key),
 	LLEventTimer(1)
 {
+// [SL:KB] - Patch: UI-RegionRestart | Checked: Catznip-3.6
+	sSeconds = (key.has("SECONDS")) ? key["SECONDS"].asInteger() : 300;
+// [/SL:KB]
 //	mName = (std::string)key["NAME"];
 //	sSeconds = (LLSD::Integer)key["SECONDS"];
-// [SL:KB] - Patch: UI-RegionRestart | Checked: 2014-03-15 (Catznip-3.6)
-	sSeconds = (key.has("[SECONDS]")) ? key["SECONDS"].asInteger() : 300;
-// [/SL:KB]
 }
 
 LLFloaterRegionRestarting::~LLFloaterRegionRestarting()
