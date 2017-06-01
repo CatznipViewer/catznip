@@ -726,6 +726,41 @@ bool LLInventoryModel::hasMatchingDirectDescendent(const LLUUID& cat_id,
 	return false;
 }
 												  
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+bool LLInventoryModel::hasMatchingDirectDescendentRecursive(const LLUUID& cat_id, BOOL include_trash, LLInventoryCollectFunctor& filter)
+{
+	// Check trash
+	if (!include_trash)
+	{
+		const LLUUID trash_id = findCategoryUUIDForType(LLFolderType::FT_TRASH);
+		if (trash_id.notNull() && (trash_id == cat_id))
+			return false;
+	}
+
+	// Start with categories
+	if (cat_array_t* cat_array = get_ptr_in_map(mParentChildCategoryTree, cat_id))
+	{
+		for (LLViewerInventoryCategory* cat : *cat_array)
+		{
+			if ( (filter(cat, nullptr)) || (hasMatchingDirectDescendentRecursive(cat->getUUID(), include_trash, filter)) )
+				return true;
+		}
+	}
+
+	// Move onto items
+	if (item_array_t* item_array = get_ptr_in_map(mParentChildItemTree, cat_id))
+	{
+		for (LLViewerInventoryItem* item : *item_array)
+		{
+			if (filter(nullptr, item))
+				return true;
+		}
+	}
+
+	return false;
+}
+// [/SL:KB]
+
 // Starting with the object specified, add its descendents to the
 // array provided, but do not add the inventory object specified by
 // id. There is no guaranteed order. Neither array will be erased

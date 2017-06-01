@@ -29,6 +29,9 @@
 
 #include "llassettype.h"
 #include "llinstantmessage.h"
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+#include "llinventoryobserver.h"
+// [/SL:KB]
 #include "llpointer.h"
 #include "lltransactiontypes.h"
 #include "lluuid.h"
@@ -265,5 +268,41 @@ private:
 };
 
 void process_feature_disabled_message(LLMessageSystem* msg, void**);
+
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+class LLInventoryTakeReplaceLinksObserver : public LLInventoryAddedObserver
+{
+	struct watch_item_t {
+		LLUUID      FolderId;
+		LLUUID      ItemIdOrig;
+		std::string ItemName;
+		F64         Expiration;
+	};
+
+	/*
+	 * Constructor
+	 */
+public:
+	LLInventoryTakeReplaceLinksObserver() {}
+	~LLInventoryTakeReplaceLinksObserver() override {}
+
+	/*
+	 * Member functions
+	 */
+public:
+	void addWatchItem(const LLUUID& idFolder, const LLUUID& idItemOrig, const std::string strItemName);
+protected:
+	void expireOldItems();
+	void done() override;
+
+	/*
+	 * Member variables
+	 */
+protected:
+	std::list<watch_item_t> m_WatchItems;
+};
+
+extern LLInventoryTakeReplaceLinksObserver* gInventoryTakeReplaceLinksObserver;
+// [/SL:KB]
 
 #endif

@@ -7552,6 +7552,43 @@ bool enable_object_take_copy()
 	return all_valid;
 }
 
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+void handle_object_take_replace_links()
+{
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	if ( (hSel->getRootObjectCount() == 1) && (ESelectType::SELECT_TYPE_WORLD == hSel->getSelectType()) )
+	{
+		if (LLSelectNode* pNode = hSel->getFirstRootNode(nullptr, false))
+		{
+			// Observer is deleted by gInventory
+			if (!gInventoryTakeReplaceLinksObserver)
+			{
+				gInventoryTakeReplaceLinksObserver = new LLInventoryTakeReplaceLinksObserver();
+				gInventory.addObserver(gInventoryTakeReplaceLinksObserver);
+			}
+
+			gInventoryTakeReplaceLinksObserver->addWatchItem(pNode->mFolderID, pNode->mItemID, pNode->mName);
+		}
+	}
+
+	handle_take();
+}
+
+bool enable_object_take_replace_links()
+{
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	if ( (hSel->getRootObjectCount() == 1) && (ESelectType::SELECT_TYPE_WORLD == hSel->getSelectType()) )
+	{
+		if (LLSelectNode* pNode = hSel->getFirstRootNode(nullptr, false))
+		{
+			LLLinkedItemIDMatches f(pNode->mItemID);
+			return (pNode->mPermissions) && (pNode->mPermissions->getOwner() == gAgentID) &&
+			       (pNode->mItemID.notNull()) && (gInventory.hasMatchingDirectDescendentRecursive(gInventory.getRootFolderID(), false, f));
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 class LLHasAsset : public LLInventoryCollectFunctor
 {
@@ -8901,6 +8938,10 @@ void initialize_menus()
 	enable.add("Tools.EnableUnlink", boost::bind(&LLSelectMgr::enableUnlinkObjects, LLSelectMgr::getInstance()));
 	view_listener_t::addMenu(new LLToolsEnableBuyOrTake(), "Tools.EnableBuyOrTake");
 	enable.add("Tools.EnableTakeCopy", boost::bind(&enable_object_take_copy));
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+	commit.add("Tools.TakeReplaceLinks", boost::bind(&handle_object_take_replace_links));
+	enable.add("Tools.EnableTakeReplaceLinks", boost::bind(&enable_object_take_replace_links));
+// [/SL:KB]
 	enable.add("Tools.VisibleBuyObject", boost::bind(&tools_visible_buy_object));
 	enable.add("Tools.VisibleTakeObject", boost::bind(&tools_visible_take_object));
 	view_listener_t::addMenu(new LLToolsEnableSaveToObjectInventory(), "Tools.EnableSaveToObjectInventory");
