@@ -115,9 +115,6 @@
 #include "llselectmgr.h"
 #include "llspellcheckmenuhandler.h"
 #include "llstatusbar.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
-#include "llstartup.h"
-// [/SL:KB]
 // [SL:KB] - Patch: UI-TextureRefresh | Checked: 2012-07-26 (Catznip-3.3)
 #include "lltexturecache.h"
 // [/SL:KB]
@@ -6203,6 +6200,26 @@ void handle_force_delete(void*)
 }
 
 // [SL:KB] - Patch: World-Derender | Checked: 2012-06-08 (Catznip-3.3)
+void handle_view_blocked(const LLSD& sdParam)
+{
+	if (LLVOAvatar* pAvatar = find_avatar_from_object(LLSelectMgr::getInstance()->getSelection()->getPrimaryObject()))
+	{
+		std::string strParam = sdParam.asString();
+		if (BLOCKED_TAB_NAME == strParam)
+			strParam = BLOCKED_PARAM_NAME;
+		else if (DERENDER_TAB_NAME == strParam)
+			strParam = DERENDER_PARAM_NAME;
+		else if (EXCEPTION_TAB_NAME == strParam)
+			strParam = EXCEPTION_PARAM_NAME;
+
+		LLFloaterReg::showInstance("blocked", LLSD().with(strParam, pAvatar->getID()));
+	}
+	else
+	{
+		LLFloaterReg::showInstance("blocked", sdParam);
+	}
+}
+
 void handle_object_derender(const LLSD& sdParam)
 {
 	std::vector<LLUUID> idList;
@@ -8181,12 +8198,12 @@ void handle_selected_material_info()
 	}
 }
 
-// [SL:KB] - Patch: Viewer-Updater | Catznip-4.0
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-4.0
 void handle_updater_check()
 {
 	LLUpdaterService updater_service;
 
-	// Make sure the update is actually running
+	// Make sure the updater is actually running
 	if (!updater_service.isChecking())
 		updater_service.startChecking();
 
@@ -8475,6 +8492,43 @@ bool enable_object_take_copy()
 	return all_valid;
 }
 
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+void handle_object_take_replace_links()
+{
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	if ( (hSel->getRootObjectCount() == 1) && (ESelectType::SELECT_TYPE_WORLD == hSel->getSelectType()) )
+	{
+		if (LLSelectNode* pNode = hSel->getFirstRootNode(nullptr, false))
+		{
+			// Observer is deleted by gInventory
+			if (!gInventoryTakeReplaceLinksObserver)
+			{
+				gInventoryTakeReplaceLinksObserver = new LLInventoryTakeReplaceLinksObserver();
+				gInventory.addObserver(gInventoryTakeReplaceLinksObserver);
+			}
+
+			gInventoryTakeReplaceLinksObserver->addWatchItem(pNode->mFolderID, pNode->mItemID, pNode->mName);
+		}
+	}
+
+	handle_take();
+}
+
+bool enable_object_take_replace_links()
+{
+	LLObjectSelectionHandle hSel = LLSelectMgr::getInstance()->getSelection();
+	if ( (hSel->getRootObjectCount() == 1) && (ESelectType::SELECT_TYPE_WORLD == hSel->getSelectType()) )
+	{
+		if (LLSelectNode* pNode = hSel->getFirstRootNode(nullptr, false))
+		{
+			LLLinkedItemIDMatches f(pNode->mItemID);
+			return (pNode->mPermissions) && (pNode->mPermissions->getOwner() == gAgentID) &&
+			       (pNode->mItemID.notNull()) && (gInventory.hasMatchingDirectDescendentRecursive(gInventory.getRootFolderID(), false, f));
+		}
+	}
+	return false;
+}
+// [/SL:KB]
 
 class LLHasAsset : public LLInventoryCollectFunctor
 {
@@ -9832,6 +9886,9 @@ void initialize_menus()
 	view_listener_t::addMenu(new LLViewStatusAway(), "View.Status.CheckAway");
 	view_listener_t::addMenu(new LLViewStatusDoNotDisturb(), "View.Status.CheckDoNotDisturb");
 	view_listener_t::addMenu(new LLViewCheckHUDAttachments(), "View.CheckHUDAttachments");
+// [SL:KB] - Patch: World-RenderExceptions | Checked: Catznip-5.2
+	commit.add("View.Blocked", boost::bind(&handle_view_blocked, _2));
+// [/SL:KB]
 	
 	// Me > Movement
 	view_listener_t::addMenu(new LLAdvancedAgentFlyingInfo(), "Agent.getFlying");
@@ -9902,6 +9959,10 @@ void initialize_menus()
 	enable.add("Tools.EnableUnlink", boost::bind(&LLSelectMgr::enableUnlinkObjects, LLSelectMgr::getInstance()));
 	view_listener_t::addMenu(new LLToolsEnableBuyOrTake(), "Tools.EnableBuyOrTake");
 	enable.add("Tools.EnableTakeCopy", boost::bind(&enable_object_take_copy));
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+	commit.add("Tools.TakeReplaceLinks", boost::bind(&handle_object_take_replace_links));
+	enable.add("Tools.EnableTakeReplaceLinks", boost::bind(&enable_object_take_replace_links));
+// [/SL:KB]
 	enable.add("Tools.VisibleBuyObject", boost::bind(&tools_visible_buy_object));
 	enable.add("Tools.VisibleTakeObject", boost::bind(&tools_visible_take_object));
 	view_listener_t::addMenu(new LLToolsEnableSaveToObjectInventory(), "Tools.EnableSaveToObjectInventory");

@@ -1134,6 +1134,50 @@ protected:
 
 LLNewInventoryHintObserver* gNewInventoryHintObserver=NULL;
 
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+LLInventoryTakeReplaceLinksObserver* gInventoryTakeReplaceLinksObserver = nullptr;
+
+void LLInventoryTakeReplaceLinksObserver::addWatchItem(const LLUUID& idFolder, const LLUUID& idItemOrig, const std::string strItemName)
+{
+	auto itItem = std::find_if(m_WatchItems.begin(), m_WatchItems.end(), [&idFolder, &idItemOrig](const LLInventoryTakeReplaceLinksObserver::watch_item_t& item) { return (item.FolderId == idFolder) && (item.ItemIdOrig == idItemOrig); });
+	if (m_WatchItems.end() == itItem)
+	{
+		watch_item_t watchItem;
+		watchItem.FolderId = idFolder;
+		watchItem.ItemIdOrig = idItemOrig;
+		watchItem.ItemName = strItemName;
+		m_WatchItems.push_back(watchItem);
+		itItem = --m_WatchItems.end();
+	}
+	itItem->Expiration = LLTimer::getElapsedSeconds() + 5 * 60;
+
+	expireOldItems();
+}
+
+void LLInventoryTakeReplaceLinksObserver::expireOldItems()
+{
+	m_WatchItems.erase(std::remove_if(m_WatchItems.begin(), m_WatchItems.end(), [](const watch_item_t& item) { return LLTimer::getElapsedSeconds() >= item.Expiration; }), m_WatchItems.end());
+}
+
+void LLInventoryTakeReplaceLinksObserver::done()
+{
+	expireOldItems();
+	for (const LLUUID& idItem : gInventory.getAddedIDs())
+	{
+		if (const LLViewerInventoryItem* pItem = gInventory.getItem(idItem))
+		{
+			auto itItem = std::find_if(m_WatchItems.begin(), m_WatchItems.end(), [pItem](const watch_item_t& item) { return (item.FolderId == pItem->getParentUUID()) && (item.ItemName == pItem->getName()); });
+			if (m_WatchItems.end() != itItem)
+			{
+				const watch_item_t& watchItem = *itItem;
+				LLFloaterReg::showInstance("linkreplace", LLSD().with("src_id", watchItem.ItemIdOrig).with("src_name", watchItem.ItemName).with("target_id", idItem));
+				m_WatchItems.erase(itItem);
+			}
+		}
+	}
+}
+// [/SL:KB]
+
 void start_new_inventory_observer()
 {
 	if (!gNewInventoryObserver) //task offer observer 
@@ -6683,7 +6727,14 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
                 return LLMarketplaceData::instance().getListing(llsdBlock["listing_id"].asInteger());
             }
         }
-        
+
+		// Error Notification can come with and without reason
+		if (notificationID == "JoinGroupError" && llsdBlock.has("reason"))
+		{
+			LLNotificationsUtil::add("JoinGroupErrorReason", llsdBlock);
+			return true;
+		}
+
 		LLNotificationsUtil::add(notificationID, llsdBlock);
 		return true;
 	}	

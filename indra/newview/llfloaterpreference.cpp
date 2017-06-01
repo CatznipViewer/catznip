@@ -58,6 +58,9 @@
 //#include "llfirstuse.h"
 #include "llfloaterreg.h"
 #include "llfloaterabout.h"
+// [SL:KB] - Patch: World-RenderExceptions | Checked: Catznip-5.2
+#include "llfloaterblocked.h"
+// [/SL:KB]
 #include "llfavoritesbar.h"
 #include "llfloatersidepanelcontainer.h"
 #include "llfloaterimsession.h"
@@ -2344,7 +2347,7 @@ void LLFloaterPreference::onChangeAnimationFolder()
 // but the UI for this will still be enabled
 void LLFloaterPreference::onClickBlockList()
 {
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
+// [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
 	LLFloaterReg::showInstance("blocked");
 // [/SL:KB]
 //	LLFloaterSidePanelContainer::showPanel("people", "panel_people",
@@ -2373,7 +2376,10 @@ void LLFloaterPreference::onClickProxySettings()
 
 void LLFloaterPreference::onClickRenderExceptions()
 {
-    LLFloaterReg::showInstance("avatar_render_settings");
+// [SL:KB] - Patch: World-RenderExceptions | Checked: Catznip-5.2
+	LLFloaterReg::showInstance("blocked", LLSD("avatar_rendering_tab"));
+// [/SL:KB]
+//    LLFloaterReg::showInstance("avatar_render_settings");
 }
 
 void LLFloaterPreference::onClickAdvanced()
