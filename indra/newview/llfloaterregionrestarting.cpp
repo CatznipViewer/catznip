@@ -115,6 +115,13 @@ void LLFloaterRegionRestarting::refresh()
 	getChild<LLTextBox>("restart_seconds")->setValue(getString("RestartSeconds", args));
 
 	sSeconds = sSeconds - 1;
+// [SL:TD] - Patch: UI-RegionRestart | Checked: Catznip-3.6
+	if (LLUIImage* pBgImg = LLUI::getUIImage( (sSeconds > 60.f) ? "Window_Green_Background" : "Window_Red_Background") )
+	{
+		setTransparentImage(pBgImg);
+		setBackgroundImage(pBgImg);
+	}
+// [/SL:KB]
 	if(sSeconds < 0.0)
 	{
 		sSeconds = 0;

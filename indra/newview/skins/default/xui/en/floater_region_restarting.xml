@@ -4,6 +4,7 @@
  bg_opaque_image="Window_Green_Background"
  can_minimise="false"
  height="180"
+ help_topic="floater_region_restarting"
  width="330"
  layout="topleft"
  name="region_restarting"
@@ -11,8 +12,6 @@
  reuse_instance="false"
  title="">
     <string name="RestartSeconds">[MINUTES]m [SECONDS]s</string>
-    <string name="GreenBG">Window_Green_Background</string>
-    <string name="RedBG">Window_Red_Background</string>
     <panel
      name="layout_panel_1"
      height="150"
