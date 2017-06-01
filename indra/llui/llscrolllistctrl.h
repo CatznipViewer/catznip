@@ -173,6 +173,9 @@ public:
 	// "columns" => [ "column" => column name, "value" => value, "type" => type, "font" => font, "font-style" => style ], "id" => uuid
 	// Creates missing columns automatically.
 	virtual LLScrollListItem* addElement(const LLSD& element, EAddPosition pos = ADD_BOTTOM, void* userdata = NULL);
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	virtual LLScrollListItem* addElement(const LLSD& element, const LLScrollListItem::commit_signal_t::slot_type& cb, EAddPosition pos = ADD_BOTTOM);
+// [/SL:KB]
 	virtual LLScrollListItem* addRow(LLScrollListItem *new_item, const LLScrollListItem::Params& value, EAddPosition pos = ADD_BOTTOM);
 	virtual LLScrollListItem* addRow(const LLScrollListItem::Params& value, EAddPosition pos = ADD_BOTTOM);
 	// Simple add element. Takes a single array of:
@@ -215,7 +218,7 @@ public:
 	BOOL			selectItemAt(S32 x, S32 y, MASK mask);
 	
 	void			deleteSingleItem( S32 index );
-// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-08 (Catznip-3.5)
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.5
 	void			deleteSingleItem(LLScrollListItem* itemp);
 // [/SL:KB]
 	void			deleteItems(const LLSD& sd);
@@ -301,7 +304,7 @@ public:
 	S32  getColumnPadding()						{ return mColumnPadding; }
 	void setCommitOnKeyboardMovement(BOOL b)	{ mCommitOnKeyboardMovement = b; }
 	void setCommitOnSelectionChange(BOOL b)		{ mCommitOnSelectionChange = b; }
-// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.3
 	void setCommitOnDelete(BOOL b)				{ mCommitOnDelete = b; }
 // [/SL:KB]
 	void setAllowKeyboardMovement(BOOL b)		{ mAllowKeyboardMovement = b; }
@@ -391,7 +394,7 @@ public:
 	S32 getTotalStaticColumnWidth() { return mTotalStaticColumnWidth; }
 
 	std::string     getSortColumnName();
-// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2013-07-13 (Catznip-3.5)
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.5
 	S32				getSortColumnIndex() const;
 // [/SL:KB]
 	BOOL			getSortAscending() { return mSortColumns.empty() ? TRUE : mSortColumns.back().second; }
@@ -470,7 +473,7 @@ private:
 	bool			mAllowKeyboardMovement;
 	bool			mCommitOnKeyboardMovement;
 	bool			mCommitOnSelectionChange;
-// [SL:KB] - Patch: Control-ScrollListCtrl | Checked: 2012-08-06 (Catznip-3.3)
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-3.3
 	bool			mCommitOnDelete;
 // [/SL:KB]
 // [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2

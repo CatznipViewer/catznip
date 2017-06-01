@@ -43,7 +43,7 @@
 #include "llagentui.h"
 #include "llagentwearables.h"
 #include "llfloaterimcontainer.h"
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-04-09 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 #include "llfloaterupdate.h"
 // [/SL:KB]
 #include "llwindow.h"
@@ -3297,7 +3297,7 @@ namespace {
 		LLUpdaterService().startChecking(install_if_ready);
 	}
 	
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-07-05 (Catznip-3.3)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
 	void on_update_available_callback(const LLSD& sdData)
 	{
 		LLUpdaterService updaterSerivce;
@@ -3482,7 +3482,7 @@ namespace {
 		std::string notification_name;
 		switch (evt["type"].asInteger())
 		{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2011-11-06 (Catznip-3.1)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.1
 			case LLUpdaterService::CHECK_COMPLETE:
 				if (!evt["up_to_date"].asBoolean())
 				{
@@ -3556,7 +3556,7 @@ namespace {
 	
 	bool on_bandwidth_throttle(LLUpdaterService * updater, LLSD const & evt)
 	{
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2014-09-04 (Catznip-3.6)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.6
 		// Only limit updater download bandwidth once the user has passed the login screen
 		if (LLStartUp::getStartupState() >= STATE_LOGIN_CLEANUP)
 		{
@@ -3608,7 +3608,7 @@ void LLAppViewer::initUpdater()
 	}
 
 //	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::forceQuit, this));
-// [SL:KB] - Patch: Viewer-Updater | Checked: 2012-09-19 (Catznip-3.3)
+// [SL:KB] - Patch: Viewer-Updater | Checked: Catznip-3.3
 	mUpdater->setAppExitCallback(boost::bind(&LLAppViewer::requestQuit, this));
 // [/SL:KB]
 	mUpdater->initialize(channel, 
