@@ -736,6 +736,11 @@ with the same filename but different name
   <texture name="Window_NoTitle_Foreground" file_name="windows/Window_NoTitle_Foreground.png" preload="true"
            scale.left="4" scale.top="24" scale.right="26" scale.bottom="4" />
 
+  <texture name="Window_Green_Background" file_name="windows/Window_Green_Background.png" preload="true"
+           scale.left="8" scale.top="22" scale.right="22" scale.bottom="8" />
+  <texture name="Window_Red_Background" file_name="windows/Window_Red_Background.png" preload="true"
+           scale.left="8" scale.top="22" scale.right="22" scale.bottom="8" />
+
   <texture name="YouAreHere_Badge" file_name="icons/YouAreHere_Badge.png" preload="false" />
 
   <texture name="Zoom_Off" file_name="icons/Zoom_Off.png" preload="false" />
