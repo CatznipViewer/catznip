@@ -8,6 +8,7 @@
  width="330"
  layout="topleft"
  name="region_restarting"
+ positioning="centered"
  single_instance="true"
  reuse_instance="false"
  title="">
@@ -117,4 +118,13 @@
      top_delta="0"
      width="28" />
   </panel>
+   <check_box
+   control_name="RegionRestartFloaterShake"
+   height="16"
+   label="Shake floater"
+   layout="topleft"
+   left="30"
+   name="shake_check"
+   top_pad="5"
+   width="100" />
 </floater>
