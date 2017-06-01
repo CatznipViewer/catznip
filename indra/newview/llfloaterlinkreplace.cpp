@@ -81,6 +81,27 @@ void LLFloaterLinkReplace::onOpen(const LLSD& key)
 		mSourceEditor->setItem(item);
 		onSourceItemDrop(item->getLinkedUUID());
 	}
+// // [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+	else if ( (key["src_id"].isUUID()) && (key["target_id"].isUUID()) )
+	{
+		if (LLViewerInventoryItem* pSrcItem = gInventory.getItem(key["src_id"].asUUID()))
+		{
+			mSourceEditor->setItem(pSrcItem);
+			onSourceItemDrop(pSrcItem->getLinkedUUID());
+		}
+		else
+		{
+			mSourceEditor->setText(key["src_name"].asString());
+			onSourceItemDrop(key["src_id"].asUUID());
+		}
+
+		if (LLViewerInventoryItem* pDestItem = gInventory.getItem(key["target_id"].asUUID()))
+		{
+			mTargetEditor->setItem(pDestItem);
+			onTargetItemDrop(pDestItem->getLinkedUUID());
+		}
+	}
+// [/SL:KB]
 	else
 	{
 		checkEnableStart();
