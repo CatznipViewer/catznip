@@ -227,8 +227,8 @@
         label="Exceptions..."
         name="RenderExceptions">
         <menu_item_call.on_click
-          function="Floater.ToggleOrBringToFront"
-          parameter="avatar_render_settings" />
+          function="View.Blocked"
+          parameter="avatar_rendering_tab" />
       </menu_item_call>
       </context_menu>
 

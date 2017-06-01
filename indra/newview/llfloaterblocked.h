@@ -21,9 +21,22 @@
 #include "llmutelist.h"
 
 class LLFilterEditor;
+class LLListContextMenu;
+class LLNameListCtrl;
 class LLScrollListCell;
 class LLScrollListCtrl;
 class LLTabContainer;
+
+// ============================================================================
+// Constants
+//
+
+extern const std::string BLOCKED_PARAM_NAME;
+extern const std::string DERENDER_PARAM_NAME;
+extern const std::string EXCEPTION_PARAM_NAME;
+extern const std::string BLOCKED_TAB_NAME;
+extern const std::string DERENDER_TAB_NAME;
+extern const std::string EXCEPTION_TAB_NAME;
 
 // ============================================================================
 // LLPanelBlockBase
@@ -72,11 +85,11 @@ protected:
 public:
 	       void onChange() override;
 protected:
-	       void onClickAddAvatar(LLUICtrl* pCtrl);
-	static void onClickAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents);
-	static void onClickAddByName();
-	static void onClickAddByNameCallback(const std::string& strBlockName);
-		   void onClickRemoveSelection();
+	       void onAddAvatar(LLUICtrl* pCtrl);
+	static void onAddAvatarCallback(const uuid_vec_t& idAgents, const std::vector<LLAvatarName>& avAgents);
+	static void onAddByName();
+	static void onAddByNameCallback(const std::string& strBlockName);
+		   void onRemoveSelection();
 		   void onColumnSortChange();
 	static void onIdleRefresh(LLHandle<LLPanel> hPanel);
 		   void onSelectionChange();
@@ -133,6 +146,63 @@ protected:
 };
 
 // ============================================================================
+// LLPanelAvatarRendering - Configure avatar complexity excpetions
+//
+
+class LLPanelAvatarRendering : public LLPanel, public LLMuteListObserver, public LLPanelBlockBase
+{
+	friend class LLPanelAvatarRenderingContextMenu;
+public:
+	LLPanelAvatarRendering();
+	~LLPanelAvatarRendering();
+
+	/*
+	 * LLPanel overrides
+	 */
+public:
+	BOOL postBuild() override;
+	void onOpen(const LLSD& sdParam) override;
+
+	/*
+	 * Member functions
+	 */
+public:
+	const std::string& getFilterString() const override { return m_strFilter; }
+	void setFilterString(const std::string& strFilter) override;
+protected:
+	void refresh();
+	void removePicker();
+	void updateButtons();
+
+	/*
+	 * Event handlers
+	 */
+public:
+	void onChange() override;
+protected:
+	void onAddException(LLUICtrl* pCtrl, const LLSD& sdParam);
+	static void onAddExceptionCb(const uuid_vec_t& idAgents, S32 nSetting);
+	bool onHasException(const LLUUID& idAgent, const LLSD& sdParamn);
+	void onExceptionMenu(S32 x, S32 y);
+	void onRemoveException();
+	void onSetException(const LLUUID& idAgent, const LLSD& sdParamn);
+
+	void onColumnSortChange();
+	void onSelectionChange();
+
+	/*
+	 * Member variables
+	 */
+protected:
+	bool                m_fRefreshOnChange = true;
+	std::string         m_strFilter;
+	LLNameListCtrl*     m_pExceptionList = nullptr;
+	LLButton*           m_pTrashBtn = nullptr;
+	LLListContextMenu*  m_pContextMenu = nullptr;
+	LLHandle<LLFloater> m_hPicker;
+};
+
+// ============================================================================
 // LLFloaterBlocked
 //
 
@@ -162,6 +232,7 @@ protected:
 public:
 	static void showMuteAndSelect(const LLUUID& idMute);
 	static void showDerenderAndSelect(const LLUUID& idEntry);
+	static void showRenderExceptionAndSelect(const LLUUID& idEntry);
 
 	/*
 	 * Member variables
