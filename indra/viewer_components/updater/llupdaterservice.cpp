@@ -177,7 +177,7 @@ public:
 	
 	// A successful response was received from the viewer version manager
 	virtual void response(LLSD const & content);
-
+	
 	// LLUpdateDownloader::Client
 	void downloadComplete(LLSD const & data);
 	void downloadError(std::string const & message);
@@ -631,16 +631,26 @@ void LLUpdaterServiceImpl::response(LLSD const & content)
 		}
 		mNewVersion = content["version"].asString();
 		mNewUpdateData = content;
+		if ( (mNewUpdateData.has("description") && (!mNewUpdateData.has("more_info")) ) )
+		{
+			mNewUpdateData["more_info"] = mNewUpdateData["description"];
+			mNewUpdateData.erase("description");
+		}
+		if ((mNewUpdateData.has("infoUrl") && (!mNewUpdateData.has("info_url"))))
+		{
+			mNewUpdateData["info_url"] = mNewUpdateData["infoUrl"];
+			mNewUpdateData.erase("infoUrl");
+		}
 
 		LLSD sdEventData;
 		sdEventData["pump"] = LLUpdaterService::pumpName();
-		sdEventData["payload"] = content;
+		sdEventData["payload"] = mNewUpdateData;
 
 		LLSD& sdPayload = sdEventData["payload"];
 		sdPayload["type"] = LLSD(LLUpdaterService::CHECK_COMPLETE);
 		sdPayload["up_to_date"] = false;
 		sdPayload["show_ui"] = mShowUserFeedback;
-		sdPayload["required"] = content["required"].asBoolean();
+		sdPayload["required"] = mNewUpdateData["required"].asBoolean();
 		sdPayload["channel"] = mNewChannel;
 		sdPayload["version"] = mNewVersion;
 

@@ -264,6 +264,7 @@ set(viewer_SOURCE_FILES
     llfloaterlagmeter.cpp
     llfloaterland.cpp
     llfloaterlandholdings.cpp
+    llfloaterlinkreplace.cpp
     llfloaterloadprefpreset.cpp
     llfloatermarketplacelistings.cpp
     llfloatermap.cpp
@@ -291,6 +292,7 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
+    llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterquickprefs.cpp
     llfloaterregiondebugconsole.cpp
@@ -931,6 +933,7 @@ set(viewer_HEADER_FILES
     llfloaterlagmeter.h
     llfloaterland.h
     llfloaterlandholdings.h
+    llfloaterlinkreplace.h
     llfloaterloadprefpreset.h
     llfloatermap.h
     llfloatermarketplacelistings.h
@@ -958,6 +961,7 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
+    llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterquickprefs.h
     llfloaterregiondebugconsole.h

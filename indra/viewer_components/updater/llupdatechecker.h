@@ -86,7 +86,7 @@ private:
     private:
         static const char * sLegacyProtocolVersion;
         static const char * sProtocolVersion;
-        const char* mProtocol;
+//        const char* mProtocol;
 
         Client & mClient;
         bool         mInProgress;

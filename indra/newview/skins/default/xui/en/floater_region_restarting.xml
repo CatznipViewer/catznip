@@ -4,15 +4,15 @@
  bg_opaque_image="Window_Green_Background"
  can_minimise="false"
  height="180"
+ help_topic="floater_region_restarting"
  width="330"
  layout="topleft"
  name="region_restarting"
+ positioning="centered"
  single_instance="true"
  reuse_instance="false"
  title="">
     <string name="RestartSeconds">[MINUTES]m [SECONDS]s</string>
-    <string name="GreenBG">Window_Green_Background</string>
-    <string name="RedBG">Window_Red_Background</string>
     <panel
      name="layout_panel_1"
      height="150"
@@ -118,4 +118,13 @@
      top_delta="0"
      width="28" />
   </panel>
+   <check_box
+   control_name="RegionRestartFloaterShake"
+   height="16"
+   label="Shake floater"
+   layout="topleft"
+   left="30"
+   name="shake_check"
+   top_pad="5"
+   width="100" />
 </floater>

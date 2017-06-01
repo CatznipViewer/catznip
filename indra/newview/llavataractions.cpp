@@ -1102,7 +1102,6 @@ void LLAvatarActions::shareWithAvatars(LLInventoryPanel* inv_panel)
 	LLNotificationsUtil::add("ShareNotification");
 }
 
-
 // static
 //bool LLAvatarActions::canShareSelectedItems(LLInventoryPanel* inv_panel /* = NULL*/)
 // [SL:KB] - Patch: Inventory-ShareSelection | Checked: 2012-07-19 (Catznip-3.3)

@@ -72,6 +72,9 @@ LLScrollListCell* LLScrollListCell::create(const LLScrollListCell::Params& cell_
 
 LLScrollListCell::LLScrollListCell(const LLScrollListCell::Params& p)
 :	mWidth(p.width), 
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	mColumnName(p.column),
+// [/SL:KB]
 	mToolTip(p.tool_tip)
 {}
 
@@ -412,6 +415,14 @@ LLScrollListCheck::LLScrollListCheck(const LLScrollListCell::Params& p)
 {
 	LLCheckBoxCtrl::Params checkbox_p;
 	checkbox_p.name("checkbox");
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	if (p.commit_callback.isProvided())
+	{
+		if (!mCommitSignal)
+			mCommitSignal = new commit_signal_t();
+		mCommitSignal->connect(p.commit_callback());
+	}
+// [/SL:KB]
 	checkbox_p.rect = LLRect(0, p.width, p.width, 0);
 	checkbox_p.enabled(p.enabled);
 	checkbox_p.initial_value(p.value());
@@ -436,6 +447,9 @@ LLScrollListCheck::LLScrollListCheck(const LLScrollListCell::Params& p)
 
 LLScrollListCheck::~LLScrollListCheck()
 {
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	delete mCommitSignal;
+// [/SL:KB]
 	delete mCheckBox;
 	mCheckBox = NULL;
 }
@@ -471,6 +485,10 @@ void LLScrollListCheck::setValue(const LLSD& value)
 void LLScrollListCheck::onCommit()
 {
 	mCheckBox->onCommit();
+// [SL:KB] - Patch: Control-ScrollList | Checked: Catznip-5.2
+	if (mCommitSignal)
+		(*mCommitSignal)(this);
+// [/SL:KB]
 }
 
 /*virtual*/
