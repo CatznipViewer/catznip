@@ -215,6 +215,7 @@ public:
 	bool attachObject(const LLSD& userdata);
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	bool isFilterIncludedFolder() const;
+	bool isUserProtectedFodler() const;
 // [/SL:KB]
 	static void idle(void* user_data);
 

@@ -639,7 +639,10 @@ void LLViewerInventoryCategory::updateServer(BOOL is_new) const
 {
 	// communicate that change with the server.
 
-	if (LLFolderType::lookupIsProtectedType(mPreferredType))
+//	if (LLFolderType::lookupIsProtectedType(mPreferredType))
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+	if (LLFolderType::lookupIsProtectedType(mPreferredType, LLUUID::null))
+// [/SL:KB]
 	{
 		LLNotificationsUtil::add("CannotModifyProtectedCategories");
 		return;
@@ -1126,10 +1129,10 @@ void create_inventory_item(const LLUUID& agent_id, const LLUUID& session_id,
 void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent /*= LLUUID::null*/, LLPointer<LLInventoryCallback> cb/*=NULL*/)
 {
 	std::string item_desc = avatar_id.asString();
-	std::string item_name;
-	gCacheName->getFullName(avatar_id, item_name);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(avatar_id, &av_name);
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
-						  parent, LLTransactionID::tnull, item_name, item_desc, LLAssetType::AT_CALLINGCARD,
+						  parent, LLTransactionID::tnull, av_name.getUserName(), item_desc, LLAssetType::AT_CALLINGCARD,
 						  LLInventoryType::IT_CALLINGCARD, NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, cb);
 }
 
@@ -1340,7 +1343,10 @@ void update_inventory_category(
 	LL_DEBUGS(LOG_INV) << "cat_id: [" << cat_id << "] name " << (obj ? obj->getName() : "(NOT FOUND)") << LL_ENDL;
 	if(obj)
 	{
-		if (LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
+//		if (LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+		if (LLFolderType::lookupIsProtectedType(obj->getPreferredType(), LLUUID::null))
+// [/SL:KB]
 		{
 			LLNotificationsUtil::add("CannotModifyProtectedCategories");
 			return;
@@ -1463,7 +1469,10 @@ void remove_inventory_category(
 	LLPointer<LLViewerInventoryCategory> obj = gInventory.getCategory(cat_id);
 	if(obj)
 	{
-		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
+//		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
+// [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
+		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType(), obj->getUUID()))
+// [/SL:KB]
 		{
 			LLNotificationsUtil::add("CannotRemoveProtectedCategories");
 			return;
@@ -2071,9 +2080,9 @@ PermissionMask LLViewerInventoryItem::getPermissionMask() const
 
 //----------
 
-void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const std::string& name, bool is_group)
+void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const LLAvatarName& name)
 {
-	rename(name);
+	rename(name.getUserName());
 	gInventory.addChangedMask(LLInventoryObserver::LABEL, getUUID());
 	gInventory.notifyObservers();
 }

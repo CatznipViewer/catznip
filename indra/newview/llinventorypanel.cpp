@@ -164,6 +164,7 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	mEnableCallbackRegistrar.add("Inventory.IsFilterIncludedFolder", boost::bind(&LLInventoryPanel::isFilterIncludedFolder, this));
+	mEnableCallbackRegistrar.add("Inventory.IsUserProtected", boost::bind(&LLInventoryPanel::isUserProtectedFodler, this));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
 	mCommitCallbackRegistrar.add("Inventory.EmptyLostAndFound", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyLostAndFound", LLFolderType::FT_LOST_AND_FOUND));
@@ -1529,6 +1530,15 @@ bool LLInventoryPanel::isFilterIncludedFolder() const
 	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
 	if (pFVItem)
 		return getFilter().isIncludeFolder(pItemBridge->getUUID());
+	return false;
+}
+
+bool LLInventoryPanel::isUserProtectedFodler() const
+{
+	const LLFolderViewItem* pFVItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getCurSelectedItem() : nullptr;
+	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
+	if (pFVItem)
+		return LLUserProtectedFolders::instance().contains(pItemBridge->getUUID());
 	return false;
 }
 // [/SL:KB]
