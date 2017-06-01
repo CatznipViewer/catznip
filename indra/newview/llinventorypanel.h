@@ -233,6 +233,7 @@ public:
 	void doCreate(const LLSD& userdata);
 	bool beginIMSession();
 	void fileUploadLocation(const LLSD& userdata);
+	void purgeSelectedItems();
 	bool attachObject(const LLSD& userdata);
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	bool isFilterIncludedFolder() const;
@@ -268,6 +269,8 @@ public:
     
     // Clean up stuff when the folder root gets deleted
     void clearFolderRoot();
+
+    void callbackPurgeSelectedItems(const LLSD& notification, const LLSD& response);
 
 protected:
 	void openStartFolderOrMyInventory(); // open the first level of inventory

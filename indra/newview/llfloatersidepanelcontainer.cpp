@@ -167,7 +167,7 @@ void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, con
 
 void LLFloaterSidePanelContainer::showPanel(const std::string& floater_name, const std::string& panel_name, const LLSD& key)
 {
-// [SL:KB] - Patch: World-Derender | Checked: 2011-12-15 (Catznip-3.2)
+// [SL:KB] - Patch: World-Derender | Checked: Catznip-3.2
 	// Hack in case we forget a reference somewhere
 	if ( (!panel_name.empty()) && ("panel_people" == panel_name) && (key.has("people_panel_tab_name")) && ("blocked_panel" == key["people_panel_tab_name"].asString()) )
 	{
