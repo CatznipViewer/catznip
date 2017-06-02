@@ -192,7 +192,7 @@
              left="10"
              name="texture control"
              tool_tip="Click to choose a picture"
-             top_pad="7"
+             top_pad="5"
              width="64" />
             <button
              follows="left|top"
@@ -574,7 +574,7 @@
              left="10"
              name="tex gen"
              text_readonly_color="LabelDisabledColor"
-             top_pad="50"
+             top_pad="48"
              width="140">
                 Mapping
             </text>
@@ -594,6 +594,18 @@
                  name="Planar"
                  value="Planar" />
             </combo_box>
+            <check_box
+             control_name="SyncMaterialSettings"
+             follows="top|left"
+             height="17"
+             initial_value="false"
+             label="Lock repeat"
+             layout="topleft"
+             left="205"
+             name="checkbox_sync_settings"
+             tool_tip="Adjust all maps repeats simultaneously"
+             top_pad="0"
+             width="160" />
             <spinner
              follows="left|top"
              height="19"
@@ -605,7 +617,7 @@
              min_val="-100"
              max_val="100"
              name="TexScaleU"
-             top_pad="5"
+             top_pad="0"
              width="255" />
             <button
              follows="top|right"
@@ -650,7 +662,7 @@
 			 label_width="195"
              left="10"
              max_val="100"
-             min_val="0.1"
+             min_val="-100"
              name="rptctrl"
              top_pad="0"
              width="255" />

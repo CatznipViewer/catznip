@@ -47,6 +47,7 @@
 #include "llinventorybridge.h"
 #include "llinventoryfunctions.h"
 #include "llinventorymodelbackgroundfetch.h"
+#include "llnotificationsutil.h"
 #include "llpreview.h"
 // [SL:KB] - Patch: Inventory-ActivePanel | Checked: 2011-11-02 (Catznip-3.2)
 #include "llpanelmaininventory.h"
@@ -177,8 +178,6 @@ LLInventoryPanel::LLInventoryPanel(const LLInventoryPanel::Params& p) :
 	mCommitCallbackRegistrar.add("Inventory.DoToSelected", boost::bind(&LLInventoryPanel::doToSelected, this, _2));
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	mEnableCallbackRegistrar.add("Inventory.IsFilterIncludedFolder", boost::bind(&LLInventoryPanel::isFilterIncludedFolder, this));
-// [/SL:KB]
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 	mEnableCallbackRegistrar.add("Inventory.IsUserProtected", boost::bind(&LLInventoryPanel::isUserProtectedFodler, this));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Inventory.EmptyTrash", boost::bind(&LLInventoryModel::emptyFolderType, &gInventory, "ConfirmEmptyTrash", LLFolderType::FT_TRASH));
@@ -1426,6 +1425,33 @@ void LLInventoryPanel::fileUploadLocation(const LLSD& userdata)
     }
 }
 
+void LLInventoryPanel::purgeSelectedItems()
+{
+    const std::set<LLFolderViewItem*> inventory_selected = mFolderRoot.get()->getSelectionList();
+    if (inventory_selected.empty()) return;
+    LLSD args;
+    args["COUNT"] = (S32)inventory_selected.size();
+    LLNotificationsUtil::add("PurgeSelectedItems", args, LLSD(), boost::bind(&LLInventoryPanel::callbackPurgeSelectedItems, this, _1, _2));
+}
+
+void LLInventoryPanel::callbackPurgeSelectedItems(const LLSD& notification, const LLSD& response)
+{
+    S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+    if (option == 0)
+    {
+        const std::set<LLFolderViewItem*> inventory_selected = mFolderRoot.get()->getSelectionList();
+        if (inventory_selected.empty()) return;
+
+        std::set<LLFolderViewItem*>::const_iterator it = inventory_selected.begin();
+        const std::set<LLFolderViewItem*>::const_iterator it_end = inventory_selected.end();
+        for (; it != it_end; ++it)
+        {
+            LLUUID item_id = static_cast<LLFolderViewModelItemInventory*>((*it)->getViewModelItem())->getUUID();
+            remove_inventory_object(item_id, NULL);
+        }
+    }
+}
+
 bool LLInventoryPanel::attachObject(const LLSD& userdata)
 {
 	// Copy selected item UUIDs to a vector.
@@ -1689,21 +1715,15 @@ void LLInventoryPanel::updateSelection()
 
 void LLInventoryPanel::doToSelected(const LLSD& userdata)
 {
+	if (("purge" == userdata.asString()))
+	{
+		purgeSelectedItems();
+		return;
+	}
 	LLInventoryAction::doToSelected(mInventory, mFolderRoot.get(), userdata.asString());
 
 	return;
 }
-
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
-bool LLInventoryPanel::isUserProtectedFodler() const
-{
-	const LLFolderViewItem* pFVItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getCurSelectedItem() : nullptr;
-	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
-	if (pFVItem)
-		return LLUserProtectedFolders::instance().contains(pItemBridge->getUUID());
-	return false;
-}
-// [/SL:KB]
 
 // [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 bool LLInventoryPanel::isFilterIncludedFolder() const
@@ -1712,6 +1732,15 @@ bool LLInventoryPanel::isFilterIncludedFolder() const
 	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
 	if (pFVItem)
 		return getFilter().isIncludeFolder(pItemBridge->getUUID());
+	return false;
+}
+
+bool LLInventoryPanel::isUserProtectedFodler() const
+{
+	const LLFolderViewItem* pFVItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getCurSelectedItem() : nullptr;
+	const LLInvFVBridge* pItemBridge = (pFVItem) ? dynamic_cast<const LLInvFVBridge*>(pFVItem->getViewModelItem()) : nullptr;
+	if (pFVItem)
+		return LLUserProtectedFolders::instance().contains(pItemBridge->getUUID());
 	return false;
 }
 // [/SL:KB]
@@ -1749,7 +1778,9 @@ BOOL LLInventoryPanel::handleKeyHere( KEY key, MASK mask )
 		}
 		break;
 	case KEY_DELETE:
+#if LL_DARWIN
 	case KEY_BACKSPACE:
+#endif
 		// Delete selected items if delete or backspace key hit on the inventory panel
 		// Note: on Mac laptop keyboards, backspace and delete are one and the same
 		if (isSelectionRemovable() && (mask == MASK_NONE))

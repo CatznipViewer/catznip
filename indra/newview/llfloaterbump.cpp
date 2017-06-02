@@ -35,7 +35,7 @@
 #include "llfloaterreg.h"
 #include "llfloaterreporter.h"
 #include "llmutelist.h"
-// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 #include "llfloaterblocked.h"
 // [/SL:KB]
 //#include "llpanelblockedlist.h"
@@ -236,7 +236,7 @@ void LLFloaterBump::muteAvatar()
 	else
 	{
 		LLMuteList::getInstance()->add(mute);
-// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 		LLFloaterBlocked::showMuteAndSelect(mute.mID);
 // [/SL:KB]
 //		LLPanelBlockedList::showPanelAndSelect(mute.mID);
