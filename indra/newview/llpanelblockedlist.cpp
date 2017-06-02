@@ -123,6 +123,7 @@
 
 //void LLPanelBlockedList::selectBlocked(const LLUUID& mute_id)
 //{
+//	mBlockedList->resetSelection();
 //	mBlockedList->selectItemByUUID(mute_id);
 //}
 

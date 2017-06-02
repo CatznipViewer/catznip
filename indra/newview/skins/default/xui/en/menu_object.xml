@@ -219,6 +219,14 @@
         function="Tools.EnableTakeCopy" />
   </menu_item_call>
   <menu_item_call
+      label="Take (Replace Links)"
+      name="Take and Replace Links">
+    <menu_item_call.on_click
+        function="Tools.TakeReplaceLinks" />
+    <menu_item_call.on_visible
+        function="Tools.EnableTakeReplaceLinks" />
+  </menu_item_call>
+  <menu_item_call
       enabled="false"
       label="Pay"
       name="Pay...">

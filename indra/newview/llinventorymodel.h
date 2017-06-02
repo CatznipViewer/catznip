@@ -245,6 +245,9 @@ public:
 	// Simpler existence test if matches don't actually need to be collected.
 	bool hasMatchingDirectDescendent(const LLUUID& cat_id,
 									 LLInventoryCollectFunctor& filter);
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+	bool hasMatchingDirectDescendentRecursive(const LLUUID& cat_id, BOOL include_trash, LLInventoryCollectFunctor& filter);
+// [/SL:KB]
 	void collectDescendents(const LLUUID& id,
 							cat_array_t& categories,
 							item_array_t& items,
@@ -419,6 +422,7 @@ public:
 	/// removeItem() or removeCategory(), whichever is appropriate
 	void removeObject(const LLUUID& object_id);
 
+	// "TrashIsFull" when trash exceeds maximum capacity
 	void checkTrashOverflow();
 
 protected:

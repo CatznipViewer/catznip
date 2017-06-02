@@ -29,7 +29,7 @@
 #include "llinspectremoteobject.h"
 #include "llinspect.h"
 #include "llmutelist.h"
-// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 #include "llfloaterblocked.h"
 // [/SL:KB]
 //#include "llpanelblockedlist.h"
@@ -151,7 +151,7 @@ void LLInspectRemoteObject::onClickBlock()
 {
 	LLMute mute(mObjectID, mName, LLMute::OBJECT);
 	LLMuteList::getInstance()->add(mute);
-// [SL:KB] - World-Mute | Checked: 2013-07-10 (Catznip-3.5)
+// [SL:KB] - World-Mute | Checked: Catznip-3.5
 	LLFloaterBlocked::showMuteAndSelect(mute.mID);
 // [/SL:KB]
 //	LLPanelBlockedList::showPanelAndSelect(mute.mID);

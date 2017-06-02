@@ -41,6 +41,7 @@
 #include "llinventoryfunctions.h"
 #include "llinventoryobserver.h"
 #include "llinventorypanel.h"
+#include "llfloaterpreviewtrash.h"
 #include "llnotificationsutil.h"
 #include "llmarketplacefunctions.h"
 #include "llwindow.h"
@@ -729,6 +730,41 @@ bool LLInventoryModel::hasMatchingDirectDescendent(const LLUUID& cat_id,
 	return false;
 }
 												  
+// [SL:KB] - Patch: Appearance-TakeReplaceLinks | Checked: Catznip-5.2
+bool LLInventoryModel::hasMatchingDirectDescendentRecursive(const LLUUID& cat_id, BOOL include_trash, LLInventoryCollectFunctor& filter)
+{
+	// Check trash
+	if (!include_trash)
+	{
+		const LLUUID trash_id = findCategoryUUIDForType(LLFolderType::FT_TRASH);
+		if (trash_id.notNull() && (trash_id == cat_id))
+			return false;
+	}
+
+	// Start with categories
+	if (cat_array_t* cat_array = get_ptr_in_map(mParentChildCategoryTree, cat_id))
+	{
+		for (LLViewerInventoryCategory* cat : *cat_array)
+		{
+			if ( (filter(cat, nullptr)) || (hasMatchingDirectDescendentRecursive(cat->getUUID(), include_trash, filter)) )
+				return true;
+		}
+	}
+
+	// Move onto items
+	if (item_array_t* item_array = get_ptr_in_map(mParentChildItemTree, cat_id))
+	{
+		for (LLViewerInventoryItem* item : *item_array)
+		{
+			if (filter(nullptr, item))
+				return true;
+		}
+	}
+
+	return false;
+}
+// [/SL:KB]
+
 // Starting with the object specified, add its descendents to the
 // array provided, but do not add the inventory object specified by
 // id. There is no guaranteed order. Neither array will be erased
@@ -3383,9 +3419,7 @@ void LLInventoryModel::processMoveInventoryItem(LLMessageSystem* msg, void**)
 }
 
 //----------------------------------------------------------------------------
-
 // Trash: LLFolderType::FT_TRASH, "ConfirmEmptyTrash"
-// Trash: LLFolderType::FT_TRASH, "TrashIsFull" when trash exceeds maximum capacity
 // Lost&Found: LLFolderType::FT_LOST_AND_FOUND, "ConfirmEmptyLostAndFound"
 
 bool LLInventoryModel::callbackEmptyFolderType(const LLSD& notification, const LLSD& response, LLFolderType::EType preferred_type)
@@ -3403,7 +3437,14 @@ void LLInventoryModel::emptyFolderType(const std::string notification, LLFolderT
 {
 	if (!notification.empty())
 	{
-		LLNotificationsUtil::add(notification, LLSD(), LLSD(),
+		LLSD args;
+		if(LLFolderType::FT_TRASH == preferred_type)
+		{
+			static const U32 trash_max_capacity = gSavedSettings.getU32("InventoryTrashMaxCapacity");
+			const LLUUID trash_id = findCategoryUUIDForType(preferred_type);
+			args["COUNT"] = (S32)getDescendentsCountRecursive(trash_id, trash_max_capacity);
+		}
+		LLNotificationsUtil::add(notification, args, LLSD(),
 										boost::bind(&LLInventoryModel::callbackEmptyFolderType, this, _1, _2, preferred_type));
 	}
 	else
@@ -3499,13 +3540,32 @@ void LLInventoryModel::removeObject(const LLUUID& object_id)
 	}
 }
 
+bool callback_preview_trash_folder(const LLSD& notification, const LLSD& response)
+{
+	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
+	if (option == 0) // YES
+	{
+		LLFloaterPreviewTrash::show();
+	}
+	return false;
+}
+
 void  LLInventoryModel::checkTrashOverflow()
 {
 	static const U32 trash_max_capacity = gSavedSettings.getU32("InventoryTrashMaxCapacity");
 	const LLUUID trash_id = findCategoryUUIDForType(LLFolderType::FT_TRASH);
 	if (getDescendentsCountRecursive(trash_id, trash_max_capacity) >= trash_max_capacity)
 	{
-		gInventory.emptyFolderType("TrashIsFull", LLFolderType::FT_TRASH);
+		if (LLFloaterPreviewTrash::isVisible())
+		{
+			// bring to front
+			LLFloaterPreviewTrash::show();
+		}
+		else
+		{
+			LLNotificationsUtil::add("TrashIsFull", LLSD(), LLSD(),
+				boost::bind(callback_preview_trash_folder, _1, _2));
+		}
 	}
 }
 

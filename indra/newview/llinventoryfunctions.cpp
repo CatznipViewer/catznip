@@ -65,6 +65,9 @@
 #include "llmarketplacenotifications.h"
 #include "llmarketplacefunctions.h"
 #include "llmenugl.h"
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+#include "llnotificationtemplate.h"
+// [/SL:KB]
 #include "llnotificationsutil.h"
 #include "llpanelmaininventory.h"
 #include "llpreviewanim.h"
@@ -2763,9 +2766,43 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
     
 	if ("delete" == action)
 	{
-		LLSD args;
-		args["QUESTION"] = LLTrans::getString(root->getSelectedCount() > 1 ? "DeleteItems" :  "DeleteItem");
-		LLNotificationsUtil::add("DeleteItems", args, LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		bool showWarning = false;
+		for (LLFolderViewItem* pSelItem : selected_items)
+		{
+			LLFolderViewFolder* pSelFolder = dynamic_cast<LLFolderViewFolder*>(pSelItem);
+			if (pSelFolder)
+			{
+				LLHasUnfilteredDescendents f;
+				pSelFolder->applyFunctorRecursively(f);
+				if (f.hasUnfilteredDescendent())
+				{
+					showWarning = true;
+					break;
+				}
+			}
+		}
+
+		// If the user chose to ignore our warning then fall through to the default just in case they chose to still see that one
+		if (showWarning)
+		{
+			LLNotificationTemplatePtr notifTempl = LLNotifications::instance().getTemplate("DeleteFilteredItems");
+			showWarning = (notifTempl->mForm->getIgnoreType() == LLNotificationForm::IGNORE_NO) || (!notifTempl->mForm->getIgnored());
+		}
+
+		if (showWarning)
+		{
+			LLNotificationsUtil::add("DeleteFilteredItems", LLSD(), LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+		}
+		else
+		{
+// [/SL:KB]
+			LLSD args;
+			args["QUESTION"] = LLTrans::getString(root->getSelectedCount() > 1 ? "DeleteItems" :  "DeleteItem");
+			LLNotificationsUtil::add("DeleteItems", args, LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
+// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
+		}
+// [/SL:KB]
         // Note: marketplace listings will be updated in the callback if delete confirmed
 		return;
 	}
@@ -2773,6 +2810,26 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
 	{	
 		// Clear the clipboard before we start adding things on it
 		LLClipboard::instance().reset();
+	}
+	if ("replace_links" == action)
+	{
+		LLSD params;
+		if (root->getSelectedCount() == 1)
+		{
+			LLFolderViewItem* folder_item = root->getSelectedItems().front();
+			LLInvFVBridge* bridge = (LLInvFVBridge*)folder_item->getViewModelItem();
+
+			if (bridge)
+			{
+				LLInventoryObject* obj = bridge->getInventoryObject();
+				if (obj && obj->getType() != LLAssetType::AT_CATEGORY && obj->getActualType() != LLAssetType::AT_LINK_FOLDER)
+				{
+					params = LLSD(obj->getUUID());
+				}
+			}
+		}
+		LLFloaterReg::showInstance("linkreplace", params);
+		return;
 	}
 
 	static const std::string change_folder_string = "change_folder_type_";

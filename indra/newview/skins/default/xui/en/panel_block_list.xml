@@ -4,6 +4,7 @@
  height="300"
  label="BLOCKED LIST"
  layout="topleft"
+ name="panel_block_list"
  width="350">
     <scroll_list
      draw_border="false"
@@ -25,6 +26,34 @@
          label="Block Type"
          name="item_type"
          width="100" />
+        <scroll_list.columns
+         can_sort="false"
+         halign="center"
+         label="T"
+         name="item_text"
+         tool_tip="Text"
+         width="20" />
+        <scroll_list.columns
+         can_sort="false"
+         halign="center"
+         label="V"
+         name="item_voice"
+         tool_tip="Voice"
+         width="20" />
+        <scroll_list.columns
+         can_sort="false"
+         halign="center"
+         label="P"
+         name="item_particles"
+         tool_tip="Particles"
+         width="20" />
+        <scroll_list.columns
+         can_sort="false"
+         halign="center"
+         label="S"
+         name="item_sounds"
+         tool_tip="Object Sounds"
+         width="20" />
     </scroll_list>
     <panel
      follows="left|right|bottom"
