@@ -652,13 +652,14 @@ void LLParticipantAvatarList::update()
 	LLParticipantList::update();
 
 	// Refresh the sort if the mouse isn't hovering over us
-	if ( (E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) && (m_pAvatarList) )
+	if ( ((E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) || (m_NeedSort)) && (m_pAvatarList) )
 	{
 		S32 x, y;
 		LLUI::getMousePositionScreen(&x, &y);
 		if (!m_pAvatarList->calcScreenRect().pointInRect(x, y))
 		{
 			sort();
+			m_NeedSort = false;
 		}
 	}
 }
@@ -681,16 +682,14 @@ void LLParticipantAvatarList::addAvatarParticipant(const LLUUID& particpant_id)
 {
 	m_pAvatarList->getIDs().push_back(particpant_id);
 	m_pAvatarList->setDirty();
-
-	//sort();
+	m_NeedSort = true;
 }
 
 void LLParticipantAvatarList::addAvalineParticipant(const LLUUID& particpant_id)
 {
 	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
 	m_pAvatarList->addAvalineItem(particpant_id, m_pAvatarList->getSessionID(), display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name);
-
-	//sort();
+	m_NeedSort = true;
 }
 
 void LLParticipantAvatarList::clearParticipants()

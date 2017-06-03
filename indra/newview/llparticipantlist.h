@@ -273,6 +273,7 @@ protected:
 	LLListContextMenu* m_pContextMenu = nullptr;
 	LLPointer<class LLAvatarItemStatusAndNameComparator> m_SortByStatusAndName;
 	LLPointer<class LLAvatarItemRecentSpeakerComparator> m_SortByRecentSpeakers;
+	bool m_NeedSort = false;
 // [/SL:KB]
 
 	boost::signals2::scoped_connection m_AvatarListRefreshConn;
