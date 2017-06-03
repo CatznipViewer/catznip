@@ -45,6 +45,18 @@
          name="options_gear_btn"
          top="0"
          width="31" />
+        <menu_button
+         follows="bottom|left"
+         height="25"
+         image_hover_unselected="Toolbar_Middle_Over"
+         image_overlay="Conv_toolbar_sort"
+         image_selected="Toolbar_Middle_Selected"
+         image_unselected="Toolbar_Middle_Off"
+         layout="topleft"
+         left_pad="1"
+         name="options_sort_btn"
+         tool_tip="Show sorting options"
+         width="31" />
         <button
          follows="bottom|left"
          height="25"
@@ -65,7 +77,7 @@
          layout="topleft"
          left_pad="1"
          name="dummy_icon"
-         width="30"/>
+         width="0"/>
         <flyout_button
          arrow_button_width="18"
          follows="bottom|right"
