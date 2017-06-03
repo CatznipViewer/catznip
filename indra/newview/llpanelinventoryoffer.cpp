@@ -230,7 +230,7 @@ bool LLAcceptInFolderOfferBase::createDestinationFolder()
 		LLStringOps::setupMonthNames(LLTrans::getString("dateTimeMonthNames"));
 	if (LLStringOps::sMonthList.size() == 12)
 		boost::ireplace_all(strSubfolderPath, "%mmm", LLStringOps::sMonthList[timeParts->tm_mon]);
-	boost::ireplace_all(strSubfolderPath, "%mm", llformat("%02d", timeParts->tm_mon));
+	boost::ireplace_all(strSubfolderPath, "%mm", llformat("%02d", timeParts->tm_mon + 1));
 	// %dd
 	boost::ireplace_all(strSubfolderPath, "%dd", llformat("%02d", timeParts->tm_mday));
 	// %date
