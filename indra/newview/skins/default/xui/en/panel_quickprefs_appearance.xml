@@ -238,7 +238,7 @@
 	 label="Show complexity in name tags"
 	 layout="topleft"
 	 left="35"
-	 name="appearance_attachedlights_check"
+	 name="appearance_name_complexity_check"
 	 right="-10"
 	 top_pad="2" />
 	<check_box
@@ -248,7 +248,7 @@
 	 label="Show my complexity"
 	 layout="topleft"
 	 left="55"
-	 name="appearance_attachedlights_check"
+	 name="appearance_name_complexity_self_check"
 	 right="-10"
 	 top_pad="2" />
 	<check_box
@@ -258,7 +258,7 @@
 	 label="Show only when too complex"
 	 layout="topleft"
 	 left="55"
-	 name="appearance_attachedlights_check"
+	 name="appearance_name_complexity_atlimit_check"
 	 right="-10"
 	 top_pad="2" />
 </panel>

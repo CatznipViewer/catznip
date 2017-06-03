@@ -1,31 +1,35 @@
-/** 
+/**
  *
- * Copyright (c) 2010, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ * Copyright (c) 2010-2017, Kitty Barnett
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
 
-#include "llappearancemgr.h"
+// UI
 #include "llfolderview.h"
-#include "llinventoryfunctions.h"
-#include "llinventorypanel.h"
 #include "llmenubutton.h"
 #include "llnotificationsutil.h"
+#include "lltoggleablemenu.h"
+// Viewer
+#include "llappearancemgr.h"
+#include "llinventoryfunctions.h"
+#include "llinventorypanel.h"
 #include "lloutfitobserver.h"
 #include "lloutfitsview.h"
-#include "lltoggleablemenu.h"
 #include "llviewermenu.h"
+#include "llviewercontrol.h"
+
 
 // ============================================================================
 // LLOutfitListGearMenu helper class
@@ -98,6 +102,8 @@ LLOutfitsView::LLOutfitsView()
 LLOutfitsView::~LLOutfitsView()
 {
 	delete mGearMenu;
+	if (!mSortMenuHandle.isDead())
+		mSortMenuHandle.get()->die();
 	delete mSavedFolderState;
 }
 
@@ -111,6 +117,13 @@ BOOL LLOutfitsView::postBuild()
 	getChild<LLMenuButton>("options_gear_btn")->setMenu(mGearMenu->getMenu());
 	getChild<LLUICtrl>("collapse_btn")->setCommitCallback(boost::bind(&LLOutfitsView::closeAllFolders, this));
 
+	mCommitCallbackRegistrar.add("Sort.Folder", boost::bind(&LLOutfitsView::onChangeSortOrder, this, _2));
+	mEnableCallbackRegistrar.add("Sort.CheckFolder", boost::bind(&LLOutfitsView::onCheckSortOrder, this, _2));
+
+	LLToggleableMenu* pToggleMenu = LLUICtrlFactory::getInstance()->createFromFile<LLToggleableMenu>("menu_outfits_sort.xml", LLMenuGL::sMenuContainer, LLMenuHolderGL::child_registry_t::instance());
+	mSortMenuHandle = pToggleMenu->getHandle();
+	getChild<LLMenuButton>("options_sort_btn")->setMenu(pToggleMenu);
+
 	return TRUE;
 }
 
@@ -123,6 +136,7 @@ bool LLOutfitsView::onIdle()
 		mInvPanel = LLUICtrlFactory::createFromFile<LLInventoryPanel>("panel_outfits_invpanel.xml", pInvPanelPlaceholder->getParent(), LLInventoryPanel::child_registry_t::instance());
 		mInvPanel->setShape(pInvPanelPlaceholder->getRect());
 		mInvPanel->setSelectCallback(boost::bind(&LLOutfitsView::onSelectionChange, this, _1, _2));
+		mInvPanel->setSortOrder(gSavedSettings.getU32("OutfitSortOrder"));
 
 		mInvPanel->getFilter().markDefault();
 		mInvPanel->getRootFolder()->setAutoSelectOverride(true);
@@ -469,6 +483,23 @@ void LLOutfitsView::closeAllFolders()
 	pStartFolder->setOpenArrangeRecursively(FALSE, LLFolderViewFolder::RECURSE_DOWN);
 	pStartFolder->setOpen(TRUE);
 	pRootFolder->arrangeAll();
+}
+
+void LLOutfitsView::onChangeSortOrder(const LLSD& sdParam)
+{
+	mInvPanel->setSortBy(sdParam.asString());
+	gSavedSettings.setU32("OutfitSortOrder", mInvPanel->getSortOrder());
+}
+
+bool LLOutfitsView::onCheckSortOrder(const LLSD& sdParam)
+{
+	U32 nSortOderMask = mInvPanel->getSortOrder();
+	const std::string strParam = sdParam.asString();
+	if ("name" == strParam)
+		return ~nSortOderMask & LLInventoryFilter::SO_DATE;
+	else if ("date" == strParam)
+		return nSortOderMask & LLInventoryFilter::SO_DATE;
+	return false;
 }
 
 // ============================================================================
