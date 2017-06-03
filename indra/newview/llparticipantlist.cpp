@@ -29,6 +29,7 @@
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 #include "llavatarlist.h"
+#include "llavataractions.h"
 #include "lltrans.h"
 // [/SL:KB]
 #include "llavatarnamecache.h"
@@ -622,6 +623,8 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 // [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.3
 	m_pContextMenu = new LLPanelPeopleMenus::ParticipantContextMenu(data_source);
 	m_pAvatarList->setContextMenu(m_pContextMenu);
+	m_pAvatarList->setItemDoubleClickCallback(boost::bind(&LLParticipantAvatarList::onStartIM, this));
+	m_pAvatarList->setReturnCallback(boost::bind(&LLParticipantAvatarList::onStartIM, this));
 // [/SL:KB]
 
 	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
@@ -782,6 +785,17 @@ void LLParticipantAvatarList::onAvatarListRefreshed()
 // [/SL:KB]
 		}
 	}
+}
+
+void LLParticipantAvatarList::onStartIM()
+{
+	uuid_vec_t selected_uuids;
+	getSelectedUUIDs(selected_uuids);
+
+	if (selected_uuids.size() == 1)
+		LLAvatarActions::startIM(selected_uuids.at(0));
+	else if (selected_uuids.size() > 1)
+		LLAvatarActions::startConference(selected_uuids);
 }
 // [/SL:KB]
 

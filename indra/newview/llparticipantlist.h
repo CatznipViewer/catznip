@@ -262,6 +262,7 @@ protected:
 	 */
 public:
 	void onAvatarListRefreshed();
+	void onStartIM();
 
 	/*
 	 * Member variables
