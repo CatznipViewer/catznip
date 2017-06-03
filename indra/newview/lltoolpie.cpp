@@ -65,6 +65,9 @@
 #include "llviewerwindow.h"
 #include "llviewermedia.h"
 #include "llvoavatarself.h"
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+#include "llvoiceclient.h"
+// [/SL:KB]
 #include "llviewermediafocus.h"
 #include "llworld.h"
 #include "llui.h"
@@ -122,6 +125,28 @@ BOOL LLToolPie::handleMouseDown(S32 x, S32 y, MASK mask)
 
 	return TRUE;
 }
+
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+BOOL LLToolPie::handleMiddleMouseDown(S32 x, S32 y, MASK mask)
+{
+	mPick = gViewerWindow->pickImmediate(x, y, TRUE, FALSE);
+	mPick.mKeyMask = mask;
+
+	// claim not handled so UI focus stays same
+	if (gAgentCamera.getCameraMode() != CAMERA_MODE_MOUSELOOK)
+	{
+		handleMiddleClickPick();
+	}
+
+	return FALSE;
+}
+
+BOOL LLToolPie::handleMiddleMouseUp(S32 x, S32 y, MASK mask)
+{
+	LLToolMgr::getInstance()->clearTransientTool();
+	return LLTool::handleMiddleMouseUp(x, y, mask);
+}
+// [/SL:KB]
 
 // Spawn context menus on right mouse down so you can drag over and select
 // an item.
@@ -1719,6 +1744,44 @@ static ECursorType cursor_from_parcel_media(U8 click_action)
 	}
 }
 
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+BOOL LLToolPie::handleMiddleClickPick()
+{
+	S32 x = mPick.mMousePt.mX;
+	S32 y = mPick.mMousePt.mY;
+	MASK mask = mPick.mKeyMask;
+
+	LLViewerObject* pPickObj = mPick.getObject();
+
+	LLViewerObject* pAvObj = pPickObj;
+	while ( (pAvObj) && (pAvObj->isAttachment()) && (!pAvObj->flagHandleTouch()) )
+	{
+		// Don't pick avatar through hud attachment (keep this same as left-click)
+		if (pAvObj->isHUDAttachment())
+			break;
+
+		pAvObj = (LLViewerObject*)pAvObj->getParent();
+	}
+
+	if (pPickObj)
+	{
+		if ( ( (!LLVoiceClient::instance().voiceEnabled()) || (!LLVoiceClient::instance().isPTTMiddleMouse()) ) )
+		{
+			// We clicked on an object, switch to focus mode
+			LLToolMgr::getInstance()->setTransientTool(LLToolCamera::getInstance());
+			gViewerWindow->hideCursor();
+			LLToolCamera::getInstance()->setMouseCapture(true);
+			LLToolCamera::getInstance()->pickCallback(mPick);
+			if ((pAvObj) && (pAvObj == gAgentAvatarp))
+				gAgentCamera.setFocusOnAvatar(false, true);
+			return TRUE;
+		}
+	}
+
+	// Eat the event
+	return LLTool::handleMiddleMouseDown(x, y, mask);
+}
+// [/SL:KB]
 
 // True if we handled the event.
 BOOL LLToolPie::handleRightClickPick()

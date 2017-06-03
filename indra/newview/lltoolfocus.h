@@ -41,6 +41,12 @@ public:
 	virtual BOOL	handleMouseDown(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleMouseUp(S32 x, S32 y, MASK mask);
 	virtual BOOL	handleHover(S32 x, S32 y, MASK mask);
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	        BOOL	handleMiddleMouseDown(S32 x, S32 y, MASK mask) override;
+	        BOOL	handleMiddleMouseUp(S32 x, S32 y, MASK mask) override;
+	        BOOL	handleRightMouseDown(S32 x, S32 y, MASK mask) override;
+	        BOOL	handleRightMouseUp(S32 x, S32 y, MASK mask) override;
+// [/SL:KB]
 
 	virtual void	onMouseCaptureLost();
 
@@ -53,6 +59,10 @@ public:
 	BOOL mouseSteerMode() { return mMouseSteering; }
 
 protected:
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	BOOL handleMouseUpInternal(S32 x, S32 y, MASK mask);
+// [/SL:KB]
+
 	// called from handleMouseUp and onMouseCaptureLost to "let go"
 	// of the mouse and make it visible JC
 	void releaseMouse();
@@ -67,6 +77,10 @@ protected:
 	BOOL	mValidClickPoint;
 	BOOL	mValidSelection;
 	BOOL	mMouseSteering;
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	bool	mMouseWalking = false;
+	bool    mMouseCamming = false;
+// [/SL:KB]
 	S32		mMouseUpX;	// needed for releaseMouse()
 	S32		mMouseUpY;
 	MASK	mMouseUpMask;

@@ -44,8 +44,14 @@ public:
 	// Virtual functions inherited from LLMouseHandler
 	virtual BOOL		handleAnyMouseClick(S32 x, S32 y, MASK mask, EClickType clicktype, BOOL down);
 	virtual BOOL		handleMouseDown(S32 x, S32 y, MASK mask);
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	        BOOL		handleMiddleMouseDown(S32 x, S32 y, MASK mask) override;
+// [/SL:KB]
 	virtual BOOL		handleRightMouseDown(S32 x, S32 y, MASK mask);
 	virtual BOOL		handleMouseUp(S32 x, S32 y, MASK mask);
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	        BOOL		handleMiddleMouseUp(S32 x, S32 y, MASK mask) override;
+// [/SL:KB]
 	virtual BOOL		handleRightMouseUp(S32 x, S32 y, MASK mask);
 	virtual BOOL		handleHover(S32 x, S32 y, MASK mask);
 	virtual BOOL		handleDoubleClick(S32 x, S32 y, MASK mask);
@@ -81,6 +87,9 @@ public:
 private:
 	BOOL outsideSlop		(S32 x, S32 y, S32 start_x, S32 start_y);
 	BOOL handleLeftClickPick();
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	BOOL handleMiddleClickPick();
+// [/SL:KB]
 	BOOL handleRightClickPick();
 	BOOL useClickAction		(MASK mask, LLViewerObject* object,LLViewerObject* parent);
 	

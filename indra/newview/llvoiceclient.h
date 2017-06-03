@@ -396,6 +396,9 @@ public:
 	void setUsePTT(bool usePTT);
 	void setPTTIsToggle(bool PTTIsToggle);
 	bool getPTTIsToggle();	
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+	bool isPTTMiddleMouse() const { return mPTTIsMiddleMouse; }
+// [/SL:KB]
 	void setPTTKey(std::string &key);
 	
 	void updateMicMuteLogic();

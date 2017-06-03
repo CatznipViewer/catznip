@@ -47,9 +47,15 @@
 #include "llstatusbar.h"
 #include "lltoolmgr.h"
 #include "llviewercamera.h"
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+#include "llviewerkeyboard.h"
+// [/SL:KB]
 #include "llviewerobject.h"
 #include "llviewerwindow.h"
 #include "llvoavatarself.h"
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+#include "llvoiceclient.h"
+// [/SL:KB]
 #include "llmorphview.h"
 #include "llfloaterreg.h"
 #include "llfloatercamera.h"
@@ -119,6 +125,20 @@ BOOL LLToolCamera::handleMouseDown(S32 x, S32 y, MASK mask)
 	// call the base class to propogate info to sim
 	LLTool::handleMouseDown(x, y, mask);
 
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	// Once we're in mouse steering, don't allow anything else to change
+	if (mMouseSteering)
+	{
+		if ( (gViewerWindow->getLeftMouseDown()) && (gViewerWindow->getRightMouseDown()) )
+		{
+			gAgentCamera.setFocusOnAvatar(true, true);
+			agent_push_forward(KEYSTATE_DOWN);
+			mMouseWalking = true;
+		}
+		return TRUE;
+	}
+// [/SL:KB]
+
 	mAccumX = 0;
 	mAccumY = 0;
 
@@ -140,6 +160,60 @@ BOOL LLToolCamera::handleMouseDown(S32 x, S32 y, MASK mask)
 	return TRUE;
 }
 
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+BOOL LLToolCamera::handleMiddleMouseDown(S32 x, S32 y, MASK mask)
+{
+	// Do nothing if any of the other mouse buttons are down already
+	if ( (gViewerWindow->getLeftMouseDown()) || (gViewerWindow->getRightMouseDown()) )
+	{
+		return LLTool::handleMiddleMouseDown(x, y, mask);
+	}
+
+	// Copy/pasted from the original handleMouseDown() above
+
+	// Ensure a mouseup
+	setMouseCapture(TRUE);
+
+	// call the base class to propogate info to sim
+	LLTool::handleMiddleMouseDown(x, y, mask);
+
+	mAccumX = 0;
+	mAccumY = 0;
+
+	mOutsideSlopX = FALSE;
+	mOutsideSlopY = FALSE;
+
+	mValidClickPoint = FALSE;
+
+	// If mouse capture gets ripped away, claim we moused up
+	// at the point we moused down. JC
+	mMouseUpX = x;
+	mMouseUpY = y;
+	mMouseUpMask = mask;
+
+	gViewerWindow->hideCursor();
+
+	gViewerWindow->pickAsync(x, y, mask, pickCallback, /*BOOL pick_transparent*/ FALSE, /*BOOL pick_rigged*/ FALSE, /*BOOL pick_unselectable*/ TRUE);
+
+	return TRUE;
+}
+
+BOOL LLToolCamera::handleRightMouseDown(S32 x, S32 y, MASK mask)
+{
+	// Call the base class to propogate info to sim
+	LLTool::handleRightMouseDown(x, y, mask);
+
+	if ( (mMouseSteering) && (gViewerWindow->getLeftMouseDown()) && (gViewerWindow->getRightMouseDown()) )
+	{
+		gAgentCamera.setFocusOnAvatar(true, true);
+		agent_push_forward(KEYSTATE_DOWN);
+		mMouseWalking = true;
+	}
+
+	return TRUE;
+}
+// [/SL:KB]
+
 void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 {
 	if (!LLToolCamera::getInstance()->hasMouseCapture())
@@ -149,6 +223,9 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 
 	LLToolCamera::getInstance()->mMouseDownX = pick_info.mMousePt.mX;
 	LLToolCamera::getInstance()->mMouseDownY = pick_info.mMousePt.mY;
+// [SL:KB] - Patch: Settings-MouseCamming | Checked: Catznip-5.2
+	LLToolCamera::getInstance()->mMouseCamming = false;
+// [/SL:KB]
 
 	gViewerWindow->moveCursorToCenter();
 
@@ -213,6 +290,12 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 			{
 				gAgentCamera.setFocusOnAvatar(FALSE, ANIMATE);
 				gAgentCamera.setFocusGlobal(pick_info);
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+				if ( (!LLVoiceClient::instance().voiceEnabled()) || (!LLVoiceClient::instance().isPTTMiddleMouse()) )
+				{
+					LLToolCamera::getInstance()->mMouseCamming = gViewerWindow->getMiddleMouseDown();
+				}
+// [/SL:KB]
 			}
 		}
 		else if (!pick_info.mPosGlobal.isExactlyZero())
@@ -220,11 +303,20 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 			// Hit the ground
 			gAgentCamera.setFocusOnAvatar(FALSE, ANIMATE);
 			gAgentCamera.setFocusGlobal(pick_info);
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+			if ( (!LLVoiceClient::instance().voiceEnabled()) || (!LLVoiceClient::instance().isPTTMiddleMouse()) )
+			{
+				LLToolCamera::getInstance()->mMouseCamming = gViewerWindow->getMiddleMouseDown();
+			}
+// [/SL:KB]
 		}
 
 		if (!(pick_info.mKeyMask & MASK_ALT) &&
 			gAgentCamera.cameraThirdPerson() &&
-			gViewerWindow->getLeftMouseDown() && 
+//			gViewerWindow->getLeftMouseDown() && 
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+			( (gViewerWindow->getLeftMouseDown()) || (gViewerWindow->getRightMouseDown()) ) &&
+// [/SL:KB]
 			!gSavedSettings.getBOOL("FreezeTime") &&
 			(hit_obj == gAgentAvatarp || 
 			 (hit_obj && hit_obj->isAttachment() && LLVOAvatar::findAvatarFromAttachment(hit_obj)->isSelf())))
@@ -255,7 +347,15 @@ void LLToolCamera::releaseMouse()
 	// Need to tell the sim that the mouse button is up, since this
 	// tool is no longer working and cursor is visible (despite actual
 	// mouse button status).
-	LLTool::handleMouseUp(mMouseUpX, mMouseUpY, mMouseUpMask);
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	if (gViewerWindow->getLeftMouseDown())
+		LLTool::handleMouseUp(mMouseUpX, mMouseUpY, mMouseUpMask);
+	if (gViewerWindow->getMiddleMouseDown())
+		LLTool::handleMiddleMouseUp(mMouseUpX, mMouseUpY, mMouseUpMask);
+	if (gViewerWindow->getRightMouseDown())
+		LLTool::handleRightMouseUp(mMouseUpX, mMouseUpY, mMouseUpMask);
+// [/SL:KB]
+//	LLTool::handleMouseUp(mMouseUpX, mMouseUpY, mMouseUpMask);
 
 	gViewerWindow->showCursor();
 
@@ -266,6 +366,14 @@ void LLToolCamera::releaseMouse()
 	}
 
 	mMouseSteering = FALSE;
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	if (mMouseWalking)
+	{
+		agent_push_forward(KEYSTATE_UP);
+		mMouseWalking = false;
+	}
+	mMouseCamming = false;
+// [/SL:KB]
 	mValidClickPoint = FALSE;
 	mOutsideSlopX = FALSE;
 	mOutsideSlopY = FALSE;
@@ -273,6 +381,64 @@ void LLToolCamera::releaseMouse()
 
 
 BOOL LLToolCamera::handleMouseUp(S32 x, S32 y, MASK mask)
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+{
+	// In mouse steering mode only the last mouse up releases everything; otherwise call base class only
+	if ( ((!mMouseSteering) || (!gViewerWindow->getRightMouseDown())) && (!mMouseCamming) )
+		return handleMouseUpInternal(x, y, mask);
+
+	if ( (mMouseSteering) && (!mMouseCamming) )
+	{
+		if (mMouseWalking)
+		{
+			agent_push_forward(KEYSTATE_UP);
+			mMouseWalking = false;
+		}
+
+		// Right mouse is down - so orbit around the avatar without turning
+		gAgentCamera.setFocusOnAvatar(false, true);
+	}
+
+	return LLTool::handleMouseUp(x, y, mask);
+}
+
+BOOL LLToolCamera::handleMiddleMouseUp(S32 x, S32 y, MASK mask)
+{
+	// In mouse steering mode only the last mouse up releases everything; otherwise call base class only
+	if ( (!mMouseSteering) || ((!gViewerWindow->getLeftMouseDown()) && (!gViewerWindow->getRightMouseDown())) )
+	{
+		return handleMouseUpInternal(x, y, mask);
+	}
+
+	return LLTool::handleMiddleMouseDown(x, y, mask);
+}
+
+BOOL LLToolCamera::handleRightMouseUp(S32 x, S32 y, MASK mask)
+{
+	// In mouse steering mode only the last mouse up releases everything; otherwise call base class only
+	if ( (mMouseSteering) && ((!gViewerWindow->getLeftMouseDown()) && (!gViewerWindow->getMiddleMouseDown())) )
+		return handleMouseUpInternal(x, y, mask);
+
+	if (mMouseSteering)
+	{
+		if (mMouseWalking)
+		{
+			agent_push_forward(KEYSTATE_UP);
+			mMouseWalking = false;
+		}
+
+		// Left mouse is down - so turn the avatar while orbiting
+		if (gViewerWindow->getLeftMouseDown())
+		{
+			gAgentCamera.setFocusOnAvatar(true, true);
+		}
+	}
+
+	return LLTool::handleMouseUp(x, y, mask);
+}
+
+BOOL LLToolCamera::handleMouseUpInternal(S32 x, S32 y, MASK mask)
+// [/SL:KB]
 {
 	// Claim that we're mousing up somewhere
 	mMouseUpX = x;
@@ -293,7 +459,10 @@ BOOL LLToolCamera::handleMouseUp(S32 x, S32 y, MASK mask)
 					LLUI::setMousePositionScreen(mouse_pos.mX, mouse_pos.mY);
 				}
 			}
-			else if (mMouseSteering)
+//			else if (mMouseSteering)
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+			else if ((mMouseSteering) || (mMouseCamming) )
+// [/SL:KB]
 			{
 				LLUI::setMousePositionScreen(mMouseDownX, mMouseDownY);
 			}
@@ -322,6 +491,13 @@ BOOL LLToolCamera::handleMouseUp(S32 x, S32 y, MASK mask)
 
 BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 {
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+	if ( (mMouseSteering) && (gViewerWindow->getLeftMouseDown()) && (gViewerWindow->getRightMouseDown()) )
+	{
+		agent_push_forward(KEYSTATE_LEVEL);
+	}
+// [/SL:KB]
+
 	S32 dx = gViewerWindow->getCurrentMouseDX();
 	S32 dy = gViewerWindow->getCurrentMouseDY();
 	
@@ -343,6 +519,16 @@ BOOL LLToolCamera::handleHover(S32 x, S32 y, MASK mask)
 
 	if (mOutsideSlopX || mOutsideSlopY)
 	{
+// [SL:KB] - Patch: Settings-MouseCam | Checked: Catznip-5.2
+		if (mMouseCamming)
+		{
+			if (gViewerWindow->getLeftMouseDown())
+				mask |= MASK_ORBIT;
+			if (gViewerWindow->getRightMouseDown())
+				mask |= MASK_PAN;
+		}
+// [/SL:KB]
+
 		if (!mValidClickPoint)
 		{
 			LL_DEBUGS("UserInput") << "hover handled by LLToolFocus [invalid point]" << LL_ENDL;
