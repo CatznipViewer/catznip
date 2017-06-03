@@ -29,6 +29,7 @@
 
 // [SL:KB] - Patch: Chat-ParticipantList | Checked: 2013-11-21 (Catznip-3.6)
 #include "llavatarlist.h"
+#include "llavataractions.h"
 #include "lltrans.h"
 // [/SL:KB]
 #include "llavatarnamecache.h"
@@ -650,6 +651,8 @@ LLParticipantAvatarList::LLParticipantAvatarList(LLSpeakerMgr* data_source, LLAv
 // [SL:KB] - Patch: Control-ParticipantList | Checked: Catznip-3.3
 	m_pContextMenu = new LLPanelPeopleMenus::ParticipantContextMenu(data_source);
 	m_pAvatarList->setContextMenu(m_pContextMenu);
+	m_pAvatarList->setItemDoubleClickCallback(boost::bind(&LLParticipantAvatarList::onStartIM, this));
+	m_pAvatarList->setReturnCallback(boost::bind(&LLParticipantAvatarList::onStartIM, this));
 // [/SL:KB]
 
 	m_AvatarListRefreshConn = m_pAvatarList->setRefreshCompleteCallback(boost::bind(&LLParticipantAvatarList::onAvatarListRefreshed, this));
@@ -677,13 +680,14 @@ void LLParticipantAvatarList::update()
 	LLParticipantList::update();
 
 	// Refresh the sort if the mouse isn't hovering over us
-	if ( (E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) && (m_pAvatarList) )
+	if ( ((E_SORT_BY_RECENT_SPEAKERS == getSortOrder()) || (m_NeedSort)) && (m_pAvatarList) )
 	{
 		S32 x, y;
 		LLUI::getMousePositionScreen(&x, &y);
 		if (!m_pAvatarList->calcScreenRect().pointInRect(x, y))
 		{
 			sort();
+			m_NeedSort = false;
 		}
 	}
 }
@@ -706,16 +710,14 @@ void LLParticipantAvatarList::addAvatarParticipant(const LLUUID& particpant_id)
 {
 	m_pAvatarList->getIDs().push_back(particpant_id);
 	m_pAvatarList->setDirty();
-
-	//sort();
+	m_NeedSort = true;
 }
 
 void LLParticipantAvatarList::addAvalineParticipant(const LLUUID& particpant_id)
 {
 	std::string display_name = LLVoiceClient::getInstance()->getDisplayName(particpant_id);
 	m_pAvatarList->addAvalineItem(particpant_id, m_pAvatarList->getSessionID(), display_name.empty() ? LLTrans::getString("AvatarNameWaiting") : display_name);
-
-	//sort();
+	m_NeedSort = true;
 }
 
 void LLParticipantAvatarList::clearParticipants()
@@ -810,6 +812,17 @@ void LLParticipantAvatarList::onAvatarListRefreshed()
 // [/SL:KB]
 		}
 	}
+}
+
+void LLParticipantAvatarList::onStartIM()
+{
+	uuid_vec_t selected_uuids;
+	getSelectedUUIDs(selected_uuids);
+
+	if (selected_uuids.size() == 1)
+		LLAvatarActions::startIM(selected_uuids.at(0));
+	else if (selected_uuids.size() > 1)
+		LLAvatarActions::startConference(selected_uuids);
 }
 // [/SL:KB]
 
