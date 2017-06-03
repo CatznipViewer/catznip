@@ -14988,6 +14988,17 @@
       <key>Value</key>
       <integer>180</integer>
     </map>
+    <key>OutfitSortOrder</key>
+    <map>
+      <key>Comment</key>
+      <string>Specifies sort key for inventory items (+0 = name, +1 = date)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>HeightUnits</key>
     <map>
       <key>Comment</key>
