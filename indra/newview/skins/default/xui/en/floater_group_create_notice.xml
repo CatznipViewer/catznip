@@ -24,6 +24,7 @@
      top="20"
      visible="true">
         <group_drop_target
+         follows="all"
          height="230"
          layout="topleft"
          left="5"
@@ -137,6 +138,7 @@
          layout="topleft"
          left_pad="0"
          max_length_bytes="90"
+         mouse_opaque="false"
          name="attach_editor"
          right="-5"
          text_color="EmphasisColor"
@@ -182,7 +184,7 @@
             <layout_panel
              auto_resize="false"
              height="23"
-             name="button_spacer_left"
+             name="button_spacer_middle"
              width="220">
                 <button
                  follows="bottom|left"
