@@ -115,4 +115,13 @@ private:
 
 extern LLViewerKeyboard gViewerKeyboard;
 
+// [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2
+void agent_push_forward(EKeystate s);
+void agent_push_backward(EKeystate s);
+void agent_slide_left(EKeystate s);
+void agent_slide_right(EKeystate s);
+void agent_turn_left(EKeystate s);
+void agent_turn_right(EKeystate s);
+// [/SL:KB]
+
 #endif // LL_LLVIEWERKEYBOARD_H
