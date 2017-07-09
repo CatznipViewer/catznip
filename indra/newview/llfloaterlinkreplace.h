@@ -98,12 +98,17 @@ private:
 	void updateFoundLinks();
 	void processBatch(LLInventoryModel::item_array_t items);
 
-	void linkCreatedCallback(const LLUUID& old_item_id,
-								const LLUUID& target_item_id,
-								bool needs_wearable_ordering_update,
-								bool needs_description_update,
-								const LLUUID& outfit_folder_id);
-	void itemRemovedCallback(const LLUUID& outfit_folder_id);
+// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
+	static void linkCreatedCallback(LLHandle<LLFloaterLinkReplace> floater_handle, const LLUUID& old_item_id, const LLUUID& target_item_id,
+	                                bool needs_wearable_ordering_update, bool needs_description_update, const LLUUID& outfit_folder_id);
+	static void itemRemovedCallback(LLHandle<LLFloaterLinkReplace> floater_handle, const LLUUID& outfit_folder_id);
+// [/SL:KB]
+//	void linkCreatedCallback(const LLUUID& old_item_id,
+//								const LLUUID& target_item_id,
+//								bool needs_wearable_ordering_update,
+//								bool needs_description_update,
+//								const LLUUID& outfit_folder_id);
+//	void itemRemovedCallback(const LLUUID& outfit_folder_id);
 
 	void onSourceItemDrop(const LLUUID& source_item_id);
 	void onTargetItemDrop(const LLUUID& target_item_id);
@@ -121,7 +126,7 @@ private:
 
 	LLInventoryModel::item_array_t	mRemainingInventoryItems;
 
-	LLFloaterLinkReplace* mInstance;
+//	LLFloaterLinkReplace* mInstance;
 };
 
 #endif // LL_FLOATERLINKREPLACE_H
