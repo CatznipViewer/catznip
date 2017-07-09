@@ -1060,7 +1060,10 @@ BOOL LLInventoryPanel::handleHover(S32 x, S32 y, MASK mask)
 BOOL LLInventoryPanel::handleToolTip(S32 x, S32 y, MASK mask)
 {
 	const LLFolderViewItem* pHoverItem = (!mFolderRoot.isDead()) ? mFolderRoot.get()->getHoveredItem() : NULL;
-	if (pHoverItem)
+//	if (pHoverItem)
+// [RLVa:KB] - Checked: RLVa-2.2
+	if ( (pHoverItem) && (RlvActions::canPreviewTextures()) )
+// [/RLVa:KB]
 	{
 		// NOTE-Catznip: inventory type and item UUID are cached by the bridge (view model item) and don't require going through the inventory model
 		const LLFolderViewModelItemInventory* pVMItem = static_cast<const LLFolderViewModelItemInventory*>(pHoverItem->getViewModelItem());
