@@ -3786,10 +3786,17 @@ class LLTogglePanelPeopleTab : public view_listener_t
 		LLSD param;
 		param["people_panel_tab_name"] = panel_name;
 
+//		if (   panel_name == "friends_panel"
+//			|| panel_name == "groups_panel"
+//			|| panel_name == "nearby_panel"
+//			|| panel_name == "blocked_panel")
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
 		if (   panel_name == "friends_panel"
 			|| panel_name == "groups_panel"
 			|| panel_name == "nearby_panel"
+			|| panel_name == "recent_panel"
 			|| panel_name == "blocked_panel")
+// [/SL:KB]
 		{
 			return togglePeoplePanel(panel_name, param);
 		}
