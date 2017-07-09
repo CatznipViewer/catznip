@@ -1219,6 +1219,29 @@
                      parameter="ShowSelectionBeam" />
                 </menu_item_check>
 
+                <menu_item_separator/>
+
+                <menu_item_check
+                 label="Arm Points Towards Selection"
+                 name="Arm Points Towards Selection">
+                    <menu_item_check.on_check
+                     function="CheckControl"
+                     parameter="SendPointAt" />
+                    <menu_item_check.on_click
+                     function="ToggleControl"
+                     parameter="SendPointAt" />
+                </menu_item_check>
+                <menu_item_check
+                 label="Turn Towards Selection"
+                 name="Turn Towards Selection">
+                    <menu_item_check.on_check
+                     function="CheckControl"
+                     parameter="RotateAtSelection" />
+                    <menu_item_check.on_click
+                     function="ToggleControl"
+                     parameter="RotateAtSelection" />
+                </menu_item_check>
+
         <menu_item_separator/>
 
                 <menu_item_check
