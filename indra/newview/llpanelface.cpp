@@ -162,6 +162,7 @@ BOOL	LLPanelFace::postBuild()
 // [/SL:KB]
 //	childSetCommitCallback("TexScaleU",&LLPanelFace::onCommitTextureInfo, this);
 //	childSetCommitCallback("TexScaleV",&LLPanelFace::onCommitTextureInfo, this);
+	childSetCommitCallback("TexRot", &LLPanelFace::onCommitTextureRot, this);
 	childSetCommitCallback("rptctrl",&LLPanelFace::onCommitRepeatsPerMeter, this);
 	childSetCommitCallback("checkbox planar align",&LLPanelFace::onCommitPlanarAlign, this);
 	childSetCommitCallback("TexOffsetU",LLPanelFace::onCommitTextureOffsetX, this);
