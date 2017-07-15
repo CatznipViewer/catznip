@@ -112,6 +112,7 @@ public:
 	void GearDoToSelected(const LLSD& userdata);
 	bool checkGearMenuItem(const LLSD& userdata);
 // [SL:KB] - Patch: Chat-Misc | Checked: 2014-03-22 (Catznip-3.6)
+	void onSnoozeGroupClicked(const LLUICtrl* pCtrl);
 	void onTeleportClicked(const LLUICtrl* pCtrl);
 // [/SL:KB]
 // [SL:KB] - Patch: Chat-BaseGearBtn | Checked: 2014-04-10 (Catznip-3.6)
