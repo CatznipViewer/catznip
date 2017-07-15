@@ -105,6 +105,7 @@
        layout="topleft"
        name="notification_list"
        left="8"
+       show_vertical_scrollbar="always"
        top="1"
        height="466"
        right="-8"/>

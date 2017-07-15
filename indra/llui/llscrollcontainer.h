@@ -52,6 +52,19 @@ struct ScrollContainerRegistry : public LLChildRegistry<ScrollContainerRegistry>
 	LLSINGLETON_EMPTY_CTOR(ScrollContainerRegistry);
 };
 
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+enum class EScrollbarVisibility { ALWAYS, NEVER, AUTO };
+
+namespace LLInitParam
+{
+	template<>
+	struct TypeValues<EScrollbarVisibility> : public TypeValuesHelper<EScrollbarVisibility>
+	{
+		static void declareValues();
+	};
+}
+// [/SL:KB]
+
 class LLScrollContainer : public LLUICtrl
 {
 public:
@@ -69,6 +82,11 @@ public:
 		Optional<LLUIColor>	bg_color;
 		Optional<LLScrollbar::callback_t> scroll_callback;
 		Optional<S32>		size;
+
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+		Optional<EScrollbarVisibility> show_horizontal_scrollbar,
+		                               show_vertical_scrollbar;
+// [/SL:KB]
 		
 		Params();
 	};
@@ -100,6 +118,9 @@ public:
 	bool			isAtTop() { return mScrollbar[VERTICAL]->isAtBeginning(); }
 	bool			isAtBottom() { return mScrollbar[VERTICAL]->isAtEnd(); }
 	S32				getBorderWidth() const;
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	EScrollbarVisibility getScrollbarVisibility(EOrientation orientation) const { return mScrollbarVisibility[orientation];  }
+// [/SL:KB]
 
 	// LLView functionality
 	virtual void	reshape(S32 width, S32 height, BOOL called_from_parent = TRUE);
@@ -141,7 +162,10 @@ private:
 	F32			mAutoScrollRate;
 	F32			mMinAutoScrollRate;
 	F32			mMaxAutoScrollRate;
-	bool		mHideScrollbar;
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	EScrollbarVisibility mScrollbarVisibility[ORIENTATION_COUNT];
+// [/SL:KB]
+//	bool		mHideScrollbar;
 };
 
 
