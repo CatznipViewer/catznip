@@ -262,6 +262,14 @@ void LLToastNotifyPanel::onClickButton(void* data)
 		response[button_name] = true;
 	}
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	self->mControlPanel->notifyChildren(LLSD().with("action", "response_values"));
+	for (LLSD::map_const_iterator itMap = self->mResponseValues.beginMap(); itMap != self->mResponseValues.endMap(); ++itMap)
+	{
+		response[itMap->first] = itMap->second;
+	}
+// [/SL:KB]
+
 	// disable all buttons
 	self->mControlPanel->setEnabled(FALSE);
 
@@ -543,6 +551,18 @@ void LLIMToastNotifyPanel::snapToMessageHeight()
 }
 
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-3.3
+S32 LLToastNotifyPanel::notifyParent(const LLSD& sdInfo)
+{
+	if ( (sdInfo.has("response_values")) && (sdInfo["response_values"].isMap()) )
+	{
+		const LLSD& sdValues = sdInfo["response_values"];
+		for (LLSD::map_const_iterator itMap = sdValues.beginMap(); itMap != sdValues.endMap(); ++itMap)
+			mResponseValues[itMap->first] = itMap->second;
+		return 1;
+	}
+	return LLToastPanel::notifyParent(sdInfo);
+}
+
 LLCheckBoxCtrl* LLToastNotifyPanel::createCheckBox(const LLSD& form_element)
 {
 	LLControlVariable* pControl = gSavedSettings.getControl(form_element["control"].asString());
@@ -569,7 +589,9 @@ LLPanel* LLToastNotifyPanel::createPanel(const LLSD& form_element)
 	LLPanel* pPanel = LLRegisterPanelClass::instance().createPanelClass(form_element["class"].asString());
 	if (pPanel)
 	{
-		pPanel->buildFromFile(pPanel->getXMLFilename());
+		const std::string panel_file = pPanel->getXMLFilename();
+		pPanel->setXMLFilename(LLStringUtil::null); // Prevent double-creating all our controls
+		pPanel->buildFromFile(panel_file);
 		pPanel->reshape(mControlPanel->getRect().getWidth(), pPanel->getRect().getHeight());
 	}
 	return pPanel;
