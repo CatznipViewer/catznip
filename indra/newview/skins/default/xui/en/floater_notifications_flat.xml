@@ -68,6 +68,9 @@
          label="All"
          value="0" />
         <combo_box.item
+         label="Since Logoff"
+         value="5" />
+        <combo_box.item
          label="System"
          value="1" />
         <combo_box.item
