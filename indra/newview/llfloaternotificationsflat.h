@@ -56,7 +56,8 @@ protected:
 		NF_SYSTEM,
 		NF_GROUP_NOTICE,
 		NF_OFFERS,
-		NF_TRANSACTION
+		NF_TRANSACTION,
+		NF_SINCE_LOGOFF
 	};
 
 	bool checkFilter(const LLNotificationListItem* pItem) const;
@@ -85,6 +86,7 @@ private:
 	LLComboBox*     m_pFilterType;
 	LLFilterEditor* m_pFilterText;
 
+	bool            m_fSinceLogoff = false;
 	std::string     m_strFilterText;
 	std::string     m_strFilterType;
 	std::set<std::string> m_FilterNames;

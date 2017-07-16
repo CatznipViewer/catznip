@@ -1,17 +1,17 @@
-/** 
+/**
  *
  * Copyright (c) 2012-2014, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #ifndef LL_LLGROUPOPTIONS_H
@@ -32,7 +32,9 @@ struct LLGroupOptions
 	LLSD toLLSD() const;
 
 	LLUUID mGroupId;
-	bool   mReceiveGroupChat;
+	bool   mReceiveGroupChat = true;
+	bool   mSnoozeOnClose = false;
+	int    mSnoozeDuration = -1;
 };
 
 // ============================================================================
@@ -51,13 +53,15 @@ protected:
 	 * Member functions
 	 */
 public:
-	void clearOptions(const LLUUID& idGroup);
+	void            clearOptions(const LLUUID& idGroup);
 	LLGroupOptions* getOptions(const LLUUID& idGroup);
-	void setOptionReceiveChat(const LLUUID& idGroup, bool fReceiveChat);
+	void            setOptionReceiveChat(const LLUUID& idGroup, bool fReceiveChat);
+	void            setOptionSnoozeOnClose(const LLUUID& idGroup, bool fSnoozeOnClose);
+	void            setOptionSnoozeDuration(const LLUUID& idGroup, int nSnoozeDuration);
 protected:
-	bool load();
-	bool loadLegacy();
-	bool save();
+	bool            load();
+//	bool            loadLegacy();
+	bool            save();
 
 	/*
 	 * Member variables

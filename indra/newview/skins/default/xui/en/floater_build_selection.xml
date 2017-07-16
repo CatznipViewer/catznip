@@ -137,7 +137,7 @@
      height="18"
      label="Turn Towards Selection"
      layout="topleft"
-     name="LimitSelectDistance"
+     name="RotateAtSelection"
      top_pad="0"
      width="200" />
 </floater>

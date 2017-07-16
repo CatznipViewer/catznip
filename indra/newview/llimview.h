@@ -77,13 +77,13 @@ public:
 			NONE_SESSION,
 		} SType;
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2014-03-01 (Catznip-3.6)
-		typedef enum e_session_close_action
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.6
+		enum class SCloseAction
 		{
 			CLOSE_DEFAULT,
 			CLOSE_LEAVE,
 			CLOSE_SNOOZE
-		} SCloseAction;
+		};
 // [/SL:KB]
 
 		LLIMSession(const LLUUID& session_id, const std::string& name, 
@@ -124,8 +124,9 @@ public:
 		std::string mName;
 		EInstantMessage mType;
 		SType mSessionType;
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2014-03-01 (Catznip-3.6)
-		SCloseAction mCloseAction;
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.6
+		SCloseAction mCloseAction = SCloseAction::CLOSE_DEFAULT;
+		int mSnoozeDuration = -1;
 // [/SL:KB]
 		LLUUID mOtherParticipantID;
 		uuid_vec_t mInitialTargetIDs;
@@ -134,8 +135,8 @@ public:
 		// connection to voice channel state change signal
 		boost::signals2::connection mVoiceChannelStateChangeConnection;
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-08-01 (Catznip-3.3)
-		LLDate mParticipantLastMessageTime;
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
+		LLDate mParticipantLastMessageTime = LLDate::now();
 // [/SL:KB]
 
 		//does NOT include system messages and agent's messages
@@ -463,7 +464,7 @@ public:
 
 	BOOL hasSession(const LLUUID& session_id);
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 	bool checkSnoozeExpiration(const LLUUID& session_id) const;
 	bool isSnoozedSession(const LLUUID& session_id) const;
 	bool restoreSnoozedSession(const LLUUID& session_id);
@@ -554,7 +555,7 @@ private:
 	LLSD mPendingInvitations;
 	LLSD mPendingAgentListUpdates;
 
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 	typedef std::map<LLUUID, F64> snoozed_sessions_t;
 	snoozed_sessions_t mSnoozedSessions;
 // [/SL:KB]
