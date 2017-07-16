@@ -10,6 +10,14 @@
          function="IMChicletMenu.Action"
          parameter="profile" />
     </menu_item_call>
+    <menu_item_call
+     label="Group Notices"
+     layout="topleft"
+     name="Show Notices">
+        <menu_item_call.on_click
+         function="IMChicletMenu.Action"
+         parameter="notices" />
+    </menu_item_call>
     <menu_item_separator
      layout="topleft" />
     <menu_item_call

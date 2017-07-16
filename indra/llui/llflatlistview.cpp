@@ -525,9 +525,9 @@ BOOL LLFlatListView::postBuild()
 
 void LLFlatListView::rearrangeItems()
 {
-	static LLUICachedControl<S32> scrollbar_size ("UIScrollbarSize", 0);
+	static LLUICachedControl<S32> scrollbar_size("UIScrollbarSize", 0);
 
-	setNoItemsCommentVisible(0==size());
+	setNoItemsCommentVisible(0 == size());
 
 	if (mItemPairs.empty()) return;
 
@@ -558,8 +558,14 @@ void LLFlatListView::rearrangeItems()
 	S32 width = mItemsNoScrollWidth;
 
 	// update width to avoid horizontal scrollbar
-	if (height > getRect().getHeight() - 2 * mBorderThickness)
+// [SL:KB] - Patch: Control-ScrollContainer | Checked: Catznip-5.2
+	if ( (EScrollbarVisibility::ALWAYS == getScrollbarVisibility(VERTICAL)) || (height > getRect().getHeight() - 2 * mBorderThickness) )
+	{
 		width -= scrollbar_size;
+	}
+// [/SL:KB]
+//	if (height > getRect().getHeight() - 2 * mBorderThickness)
+//		width -= scrollbar_size;
 
 	//changes the bottom, end of the list goes down in the scroll container
 	rc.setLeftTopAndSize(rc.mLeft, rc.mTop, width, height);

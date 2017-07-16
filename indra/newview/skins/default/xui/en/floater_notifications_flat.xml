@@ -68,6 +68,9 @@
          label="All"
          value="0" />
         <combo_box.item
+         label="Since Logoff"
+         value="5" />
+        <combo_box.item
          label="System"
          value="1" />
         <combo_box.item
@@ -105,6 +108,7 @@
        layout="topleft"
        name="notification_list"
        left="8"
+       show_vertical_scrollbar="always"
        top="1"
        height="466"
        right="-8"/>
