@@ -1139,6 +1139,12 @@ void LLIMGroupChiclet::onMenuItemClicked(const LLSD& user_data)
 	{
 		LLGroupActions::show(group_id);
 	}
+// [SL:KB] - Patch: Chat-Misc | Checked: Catznip-5.2
+	else if("notices" == param)
+	{
+		LLGroupActions::showNotices(group_id);
+	}
+// [/SL:KB]
 	else if("end" == param)
 	{
 		LLGroupActions::endIM(group_id);
