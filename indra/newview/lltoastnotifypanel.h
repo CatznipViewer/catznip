@@ -71,6 +71,10 @@ public:
 	virtual ~LLToastNotifyPanel();
 	LLPanel * getControlPanel() { return mControlPanel; }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	S32	notifyParent(const LLSD& sdInfo) override;
+// [/SL:KB]
+
 	virtual void updateNotification() {}
 
 	bool isControlPanelEnabled() const;
@@ -147,6 +151,10 @@ protected:
 	std::string mMessage;
 	S32 mNumOptions;
 	S32 mNumButtons;
+
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	LLSD mResponseValues;
+// [/SL:KB]
 
 	static const LLFontGL* sFont;
 	static const LLFontGL* sFontSmall;
