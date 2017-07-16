@@ -1541,6 +1541,12 @@ void LLPanelMainInventory::onCustomAction(const LLSD& userdata)
 //		const LLSD arg = "systemfolderstotop";
 //		setSortBy(arg);
 //	}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if (command_name == "show_invfolder_configure")
+	{
+		LLFloaterReg::showInstance("offer_invfolder_configure");
+	}
+// [/SL:KB]
 	if (command_name == "show_filters")
 	{
 		toggleFindOptions();

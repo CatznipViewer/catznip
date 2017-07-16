@@ -512,6 +512,12 @@ void LLUICtrl::setControlName(const std::string& control_name, LLView *context)
 		LLControlVariable* control = context->findControl(control_name);
 		setControlVariable(control);
 	}
+// [SL:KB] - Patch: Control-Base | Checked: Catznip-5.2
+	else
+	{
+		setControlVariable(nullptr);
+	}
+// [/SL:KB]
 }
 
 void LLUICtrl::setEnabledControlVariable(LLControlVariable* control)
