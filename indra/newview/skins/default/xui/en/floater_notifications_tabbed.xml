@@ -129,6 +129,7 @@
           layout="topleft"
           name="group_notice_notification_list"
           left="0"
+          show_vertical_scrollbar="always"
           top="5"
           height="0"
           width="328"/>

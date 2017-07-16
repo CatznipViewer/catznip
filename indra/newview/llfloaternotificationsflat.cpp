@@ -62,6 +62,13 @@ bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pItem
 	LLNotificationPtr pNotification = (pItem) ? LLNotifications::getInstance()->find(pItem->getID()) : nullptr;
 	if (pNotification)
 	{
+		// Filter by date
+		if ( (fVisible) && (m_fSinceLogoff) )
+		{
+			static LLCachedControl<U32> s_LastLogoff(gSavedPerAccountSettings, "LastLogoff", 0);
+			fVisible = (pNotification->getDate() > LLDate((F64)s_LastLogoff));
+		}
+
 		// Filter by type
 		if ( (fVisible) && (!m_strFilterType.empty()))
 		{
@@ -122,6 +129,7 @@ bool LLFloaterNotificationsFlat::checkFilter(const LLNotificationListItem* pItem
 
 void LLFloaterNotificationsFlat::refreshFilter()
 {
+	bool fSinceLogoff = false;
 	std::string strNewFilterText = m_pFilterText->getText(), strNewFilterType;
 	std::set<std::string> NewFilterNames, NewFilterNamesExclude;
 	switch ((ENotificationFilter)m_pFilterType->getSelectedValue().asInteger())
@@ -140,17 +148,22 @@ void LLFloaterNotificationsFlat::refreshFilter()
 			strNewFilterType = "notify";
 			NewFilterNames = LLNotificationListItem::getTransactionTypes();
 			break;
+		case NF_SINCE_LOGOFF:
+			fSinceLogoff = true;
+			break;
 	}
 
 	const bool fHasFilter = (!strNewFilterType.empty()) || (!strNewFilterText.empty()) || (NewFilterNames.empty()) || (NewFilterNamesExclude.empty());
 
 	const bool fFilterSubset =
-		(fHasFilter) && 
-		(strNewFilterType == m_strFilterType) && 
+		(fHasFilter) &&
+		(fSinceLogoff == m_fSinceLogoff) &&
+		(strNewFilterType == m_strFilterType) &&
 		(!m_strFilterText.empty()) && (!boost::ifind_first(strNewFilterText, m_strFilterText).empty()) &&
 		(NewFilterNames == m_FilterNames) &&
 		(NewFilterNamesExclude == m_FilterNamesExclude);
 
+	m_fSinceLogoff = fSinceLogoff;
 	m_strFilterType = strNewFilterType;
 	m_strFilterText = strNewFilterText;
 	m_FilterNames = NewFilterNames;
