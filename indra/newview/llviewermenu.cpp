@@ -4182,10 +4182,11 @@ class LLTogglePanelPeopleTab : public view_listener_t
 //			|| panel_name == "groups_panel"
 //			|| panel_name == "nearby_panel"
 //			|| panel_name == "blocked_panel")
-// [SL:KB] - Patch: World-Derender | Checked: 2013-07-08 (Catznip-3.5)
+// [SL:KB] - Patch: UI-SidepanelPeople | Checked: Catznip-5.2
 		if (   panel_name == "friends_panel"
 			|| panel_name == "groups_panel"
-			|| panel_name == "nearby_panel")
+			|| panel_name == "nearby_panel"
+			|| panel_name == "recent_panel")
 // [/SL:KB]
 		{
 			return togglePeoplePanel(panel_name, param);

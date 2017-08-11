@@ -1,17 +1,17 @@
-/** 
+/**
  *
  * Copyright (c) 2012-2014, Kitty Barnett
- * 
- * The source code in this file is provided to you under the terms of the 
+ *
+ * The source code in this file is provided to you under the terms of the
  * GNU Lesser General Public License, version 2.1, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt 
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. Terms of the LGPL can be found in doc/LGPL-licence.txt
  * in this distribution, or online at http://www.gnu.org/licenses/lgpl-2.1.txt
- * 
+ *
  * By copying, modifying or distributing this software, you acknowledge that
- * you have read and understood your obligations described above, and agree to 
+ * you have read and understood your obligations described above, and agree to
  * abide by those obligations.
- * 
+ *
  */
 
 #include "llviewerprecompiledheaders.h"
@@ -34,6 +34,8 @@ LLGroupOptions::LLGroupOptions(const LLSD& sdData)
 {
 	mGroupId = (sdData.has("group_id")) ? sdData["group_id"].asUUID() : LLUUID::null;
 	mReceiveGroupChat = (sdData.has("receive_chat")) ? sdData["receive_chat"].asBoolean() : true;
+	mSnoozeOnClose = (sdData.has("snooze_chat")) ? sdData["snooze_chat"].asBoolean() : false;
+	mSnoozeDuration = (sdData.has("snooze_chat_duration")) ? sdData["snooze_chat_duration"].asInteger() : -1;
 }
 
 bool LLGroupOptions::isValid() const
@@ -43,23 +45,24 @@ bool LLGroupOptions::isValid() const
 
 LLSD LLGroupOptions::toLLSD() const
 {
-	return LLSD().with("group_id", mGroupId).with("receive_chat", mReceiveGroupChat);
+	LLSD sdData;
+	sdData["group_id"] = mGroupId;
+	sdData["receive_chat"] = mReceiveGroupChat;
+	sdData["snooze_chat"] = mSnoozeOnClose;
+	sdData["snooze_chat_duration"] = mSnoozeDuration;
+	return sdData;
 }
 
 // ============================================================================
 // LLGroupOptionsMgr
 //
 
-static const char* GROUP_OPTIONS_FILENAME        = "group_options.xml";
-static const char* GROUP_OPTIONS_FILENAME_LEGACY = "group_options.txt";
+static const char* GROUP_OPTIONS_FILENAME = "group_options.xml";
 
 LLGroupOptionsMgr::LLGroupOptionsMgr()
 {
 	// Try to load the new format first, fallback to legacy otherwise
-	if (!load())
-	{
-		loadLegacy();
-	}
+	load();
 }
 
 LLGroupOptionsMgr::~LLGroupOptionsMgr()
@@ -79,10 +82,27 @@ void LLGroupOptionsMgr::clearOptions(const LLUUID& idGroup)
 
 void LLGroupOptionsMgr::setOptionReceiveChat(const LLUUID& idGroup, bool fReceiveChat)
 {
-	LLGroupOptions* pOptions = getOptions(idGroup);
-	if (pOptions)
+	if (LLGroupOptions* pOptions = getOptions(idGroup))
 	{
 		pOptions->mReceiveGroupChat = fReceiveChat;
+		save();
+	}
+}
+
+void LLGroupOptionsMgr::setOptionSnoozeOnClose(const LLUUID& idGroup, bool fSnoozeOnClose)
+{
+	if (LLGroupOptions* pOptions = getOptions(idGroup))
+	{
+		pOptions->mSnoozeOnClose = fSnoozeOnClose;
+		save();
+	}
+}
+
+void LLGroupOptionsMgr::setOptionSnoozeDuration(const LLUUID& idGroup, int nSnoozeDuration)
+{
+	if (LLGroupOptions* pOptions = getOptions(idGroup))
+	{
+		pOptions->mSnoozeDuration = nSnoozeDuration;
 		save();
 	}
 }
@@ -92,7 +112,7 @@ LLGroupOptions* LLGroupOptionsMgr::getOptions(const LLUUID& idGroup)
 	options_map_t::iterator itOption = mGroupOptions.find(idGroup);
 	if (mGroupOptions.end() != itOption)
 		return itOption->second;
-		
+
 	LLGroupOptions* pOptions = NULL;
 	if (gAgent.isInGroup(idGroup))
 	{
@@ -138,53 +158,53 @@ bool LLGroupOptionsMgr::load()
 	return true;
 }
 
-bool LLGroupOptionsMgr::loadLegacy()
-{
-	const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, GROUP_OPTIONS_FILENAME_LEGACY);
-	if (!gDirUtilp->fileExists(strFile))
-	{
-		return false;
-	}
-
-	llifstream fileGroupOptions(strFile);
-	if (!fileGroupOptions.is_open())
-	{
-		LL_WARNS() << "Can't open group options file" << LL_ENDL;
-		return false;
-	}
-
-	for_each(mGroupOptions.begin(), mGroupOptions.end(), DeletePairedPointer());
-	mGroupOptions.clear();
-
-	LLPointer<LLSDNotationParser> sdParser = new LLSDNotationParser(); std::string strLine;
-	while (std::getline(fileGroupOptions, strLine))
-	{
-		std::istringstream iss(strLine); LLSD sdData;
-		if (LLSDParser::PARSE_FAILURE == sdParser->parse(iss, sdData, strLine.length()))
-		{
-			LL_INFOS() << "Failed to parse group option entry" << LL_ENDL;
-			continue;
-		}
-
-		LLGroupOptions* pOptions = new LLGroupOptions(sdData);
-		if (!pOptions->isValid())
-		{
-			delete pOptions;
-			continue;
-		}
-		mGroupOptions.insert(std::pair<LLUUID, LLGroupOptions*>(pOptions->mGroupId, pOptions));
-	}
-
-	fileGroupOptions.close();
-
-	// Save in the new format and delete the legacy file
-	if (save())
-	{
-		LLFile::remove(strFile);
-	}
-
-	return true;
-}
+//bool LLGroupOptionsMgr::loadLegacy()
+//{
+//	const std::string strFile = gDirUtilp->getExpandedFilename(LL_PATH_PER_SL_ACCOUNT, GROUP_OPTIONS_FILENAME_LEGACY);
+//	if (!gDirUtilp->fileExists(strFile))
+//	{
+//		return false;
+//	}
+//
+//	llifstream fileGroupOptions(strFile);
+//	if (!fileGroupOptions.is_open())
+//	{
+//		LL_WARNS() << "Can't open group options file" << LL_ENDL;
+//		return false;
+//	}
+//
+//	for_each(mGroupOptions.begin(), mGroupOptions.end(), DeletePairedPointer());
+//	mGroupOptions.clear();
+//
+//	LLPointer<LLSDNotationParser> sdParser = new LLSDNotationParser(); std::string strLine;
+//	while (std::getline(fileGroupOptions, strLine))
+//	{
+//		std::istringstream iss(strLine); LLSD sdData;
+//		if (LLSDParser::PARSE_FAILURE == sdParser->parse(iss, sdData, strLine.length()))
+//		{
+//			LL_INFOS() << "Failed to parse group option entry" << LL_ENDL;
+//			continue;
+//		}
+//
+//		LLGroupOptions* pOptions = new LLGroupOptions(sdData);
+//		if (!pOptions->isValid())
+//		{
+//			delete pOptions;
+//			continue;
+//		}
+//		mGroupOptions.insert(std::pair<LLUUID, LLGroupOptions*>(pOptions->mGroupId, pOptions));
+//	}
+//
+//	fileGroupOptions.close();
+//
+//	// Save in the new format and delete the legacy file
+//	if (save())
+//	{
+//		LLFile::remove(strFile);
+//	}
+//
+//	return true;
+//}
 
 bool LLGroupOptionsMgr::save()
 {

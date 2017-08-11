@@ -41,11 +41,17 @@ public:
 	 * LLPanel overrides
 	 */
 public:
+	bool notifyChildren(const LLSD& sdData) override;
+	void onOpen(const LLSD& sdKey) override;
+	void onVisibilityChange(BOOL new_visibility) override;
 	BOOL postBuild() override;
 
 	/*
 	 * Member functions
 	 */
+public:
+	bool         getAcceptIn() const;
+	const LLUUID getSelectedFolder() const;
 protected:
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
@@ -58,9 +64,10 @@ protected:
 	 * Member variables
 	 */
 protected:
+	bool            m_fHasBeenVisible = false;
 	LLCheckBoxCtrl* m_pAcceptInCheck = nullptr;
-	LLComboBox* m_pAcceptInList = nullptr;
-	LLButton* m_pBrowseBtn = nullptr;
+	LLComboBox*     m_pAcceptInList = nullptr;
+	LLButton*       m_pBrowseBtn = nullptr;
 
 	LLHandle<LLFloater> m_BrowseFloaterHandle;
 	LLHandle<LLFloater> m_ConfigureFloaterHandle;

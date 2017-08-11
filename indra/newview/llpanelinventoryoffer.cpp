@@ -22,6 +22,7 @@
 #include "llcheckboxctrl.h"
 #include "llcombobox.h"
 #include "llfloater.h"
+#include "llnotifications.h"
 // Viewer
 #include "llagent.h"
 #include "llappviewer.h"
@@ -29,6 +30,7 @@
 #include "llfloaterofferinvfolderconfig.h"
 #include "llfloaterreg.h"
 #include "llinventorymodel.h"
+#include "lltoastnotifypanel.h"
 #include "lltrans.h"
 #include "llpanelinventoryoffer.h"
 #include "llviewercontrol.h"
@@ -89,6 +91,56 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	return TRUE;
 }
 
+// virtual
+void LLPanelInventoryOfferFolder::onVisibilityChange(BOOL new_visibility)
+{
+	if ( (new_visibility) && (!m_fHasBeenVisible) )
+	{
+		onOpen(LLSD());
+		m_fHasBeenVisible = true;
+	}
+	LLPanel::onVisibilityChange(new_visibility);
+}
+
+// virtual
+void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
+{
+	// If we're part of a notification then default behaviour can be overriden
+	if (LLToastNotifyPanel* pToastPanel = getParentByType<LLToastNotifyPanel>())
+	{
+		const LLNotificationPtr notification = pToastPanel->getNotification();
+		if (notification)
+		{
+			const LLSD& sdPayload = notification->getPayload();
+
+			if ((sdPayload.has("accept_in")) && (sdPayload["accept_in"].isBoolean()))
+			{
+				m_pAcceptInCheck->setControlName(LLStringUtil::null, nullptr);
+				m_pAcceptInCheck->set(sdPayload["accept_in"].asBoolean());
+			}
+
+			if ((sdPayload.has("accept_in_folder")) && (sdPayload["accept_in_folder"].isUUID()))
+			{
+				m_pAcceptInList->setControlName(LLStringUtil::null, nullptr);
+				m_pAcceptInList->setValue(sdPayload["accept_in_folder"]);
+			}
+
+			refreshControls();
+		}
+	}
+}
+
+// virtual
+bool LLPanelInventoryOfferFolder::notifyChildren(const LLSD& sdData)
+{
+	if (sdData["action"] == "response_values")
+	{
+		notifyParent(LLSD().with("response_values", LLSD().with("accept_in", m_pAcceptInCheck->get()).with("accept_in_folder", m_pAcceptInList->getValue().asUUID())));
+		return true;
+	}
+	return LLPanel::notifyChildren(sdData);
+}
+
 void LLPanelInventoryOfferFolder::refreshControls()
 {
 	bool fAcceptIn = m_pAcceptInCheck->get();
@@ -127,6 +179,16 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	if (!sdSelValue.isUndefined())
 		m_pAcceptInList->selectByValue(sdSelValue);
 	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
+}
+
+bool LLPanelInventoryOfferFolder::getAcceptIn() const
+{
+	return m_pAcceptInCheck->get();
+}
+
+const LLUUID LLPanelInventoryOfferFolder::getSelectedFolder() const
+{
+	return (m_pAcceptInCheck->get()) ? m_pAcceptInList->getValue().asUUID() : LLUUID::null;
 }
 
 void LLPanelInventoryOfferFolder::onBrowseFolder()

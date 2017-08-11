@@ -1727,9 +1727,10 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 				}
 // [/RLVa:KB]
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-				else if (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn"))
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				else if ( (response["accept_in"].asBoolean()) && (response.has("accept_in_folder")) )
 				{
-					const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+					const LLUUID idDestFolder(response["accept_in_folder"].asUUID());
 					if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 					{
 						LLAcceptInFolderAgentOffer* pOfferObserver = new LLAcceptInFolderAgentOffer(mObjectID, idDestFolder);
@@ -2001,9 +2002,9 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 			}
 // [/RLVa:KB]
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
-			else if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (gSavedPerAccountSettings.getBOOL("InventoryOfferAcceptIn")) )
+			else if ( (IM_TASK_INVENTORY_OFFERED == mIM) && (response["accept_in"].asBoolean()) && (response.has("accept_in_folder")) )
 			{
-				const LLUUID idDestFolder(gSavedPerAccountSettings.getString("InventoryOfferAcceptInFolder"));
+				const LLUUID idDestFolder(response["accept_in_folder"].asUUID());
 				if ( (idDestFolder.notNull()) && (gInventory.getCategory(idDestFolder)) )
 				{
 					mFolderID = idDestFolder;
@@ -2238,6 +2239,13 @@ void inventory_offer_handler(LLOfferInfo* info)
 // [SL:KB] - Patch: Notification-ScriptDialogBlock | Checked: 2011-11-22 (Catznip-3.2)
 	payload["owner_id"] = info->mFromID;
 	payload["owner_is_group"] = info->mFromGroup;
+// [/SL:KB]
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	if ( (info->mType != LLAssetType::AT_OBJECT) && (info->mType != LLAssetType::AT_CATEGORY) )
+	{
+		payload["accept_in"] = false;
+		payload["accept_in_folder"] = LLUUID::null;
+	}
 // [/SL:KB]
 	// Flag indicating that this notification is faked for toast.
 	payload["give_inventory_notification"] = FALSE;
@@ -3360,12 +3368,11 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 		break;
 
 	case IM_SESSION_SEND:		// ad-hoc or group IMs
-// [SL:KB] - Patch: Chat-GroupSnooze | Checked: 2012-06-16 (Catznip-3.3)
+// [SL:KB] - Patch: Chat-GroupSnooze | Checked: Catznip-3.3
 		{
 			// Only show messages if we have a session open (which
 			// should happen after you get an "invitation"
-			if ( (!gIMMgr->hasSession(session_id)) &&
-				 ( (!gAgent.isInGroup(session_id)) || (!gIMMgr->checkSnoozeExpiration(session_id)) || (!gIMMgr->restoreSnoozedSession(session_id)) ) )
+			if ( (!gIMMgr->hasSession(session_id)) && ( (!gAgent.isInGroup(session_id)) || (!gIMMgr->checkSnoozeExpiration(session_id)) || (!gIMMgr->restoreSnoozedSession(session_id)) ) )
 			{
 				return;
 			}
