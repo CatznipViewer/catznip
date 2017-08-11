@@ -120,7 +120,11 @@ public:
 			Optional<U32>				hours_ago;
 			Optional<U32>				date_search_direction;
 			Optional<EFolderShow>		show_folder_state;
-			Optional<PermissionMask>	permissions;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+			Optional<PermissionMask>	permissions_allow;
+			Optional<PermissionMask>	permissions_deny;
+// [/SL:KB]
+//			Optional<PermissionMask>	permissions;
 
 			Params()
 //			:	types("filter_types", FILTERTYPE_OBJECT),
@@ -137,7 +141,11 @@ public:
 				hours_ago("hours_ago", 0),
 				date_search_direction("date_search_direction", FILTERDATEDIRECTION_NEWER),
 				show_folder_state("show_folder_state", SHOW_NON_EMPTY_FOLDERS),
-				permissions("permissions", PERM_NONE)
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+				permissions_allow("permissions", PERM_NONE),
+				permissions_deny("permissions_deny", PERM_NONE)
+// [/SL:KB]
+//				permissions("permissions", PERM_NONE)
 			{}
 		};
 
@@ -162,7 +170,11 @@ public:
 		U32				mDateSearchDirection;
 
 		EFolderShow		mShowFolderState;
-		PermissionMask	mPermissions;
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+		PermissionMask	mPermissionsAllow;
+		PermissionMask	mPermissionsDeny;
+// [/SL:KB]
+//		PermissionMask	mPermissions;
 	};
 							
 	struct Params : public LLInitParam::Block<Params>
@@ -222,10 +234,14 @@ public:
 	void 				setFilterDescriptionSubString(const std::string& string);
 	const std::string& 	getFilterDescriptionSubString(BOOL trim = FALSE) const;
 	bool 				hasFilterDescriptionString() const;
-// [/SL:KB]
 
-	void 				setFilterPermissions(PermissionMask perms);
-	PermissionMask 		getFilterPermissions() const;
+	void 				setFilterPermissionsAllow(PermissionMask perms);
+	PermissionMask 		getFilterPermissionsAllow() const;
+	void 				setFilterPermissionsDeny(PermissionMask perms);
+	PermissionMask 		getFilterPermissionsDeny() const;
+// [/SL:KB]
+//	void 				setFilterPermissions(PermissionMask perms);
+//	PermissionMask 		getFilterPermissions() const;
 
 	void 				setDateRange(time_t min_date, time_t max_date);
 	void 				setDateRangeLastLogoff(BOOL sl);

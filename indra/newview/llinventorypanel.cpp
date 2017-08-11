@@ -373,13 +373,19 @@ U32 LLInventoryPanel::getFilterObjectTypes() const
 
 U32 LLInventoryPanel::getFilterPermMask() const 
 { 
-	return getFilter().getFilterPermissions();
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	return getFilter().getFilterPermissionsAllow();
+// [/SL:KB]
+//	return getFilter().getFilterPermissions();
 }
 
 
 void LLInventoryPanel::setFilterPermMask(PermissionMask filter_perm_mask)
 {
-	getFilter().setFilterPermissions(filter_perm_mask);
+// [SL:KB] - Patch: Inventory-FilterCore | Checked: Catznip-5.2
+	getFilter().setFilterPermissionsAllow(filter_perm_mask);
+// [/SL:KB]
+//	getFilter().setFilterPermissions(filter_perm_mask);
 }
 
 void LLInventoryPanel::setFilterWearableTypes(U64 types)

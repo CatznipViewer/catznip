@@ -169,9 +169,9 @@ void LLFloaterInventoryFinder::refreshControls()
 	setNameFilterValue( (m_pFilter->hasFilterString()) ? m_pFilter->getFilterSubStringOrig() : LLStringUtil::null );
 	m_pFilterDescription->setValue( (m_pFilter->hasFilterDescriptionString()) ? m_pFilter->getFilterDescriptionSubString() : LLStringUtil::null );
 	m_pFilterCreator->setValue( (m_pFilter->isFilterCreatorUUID()) ? m_pFilter->getFilterCreatorUUID() : LLUUID::null );
-	m_pFilterPermModify->set(m_pFilter->getFilterPermissions() & PERM_MODIFY);
-	m_pFilterPermCopy->set(m_pFilter->getFilterPermissions() & PERM_COPY);
-	m_pFilterPermTransfer->set(m_pFilter->getFilterPermissions() & PERM_TRANSFER);
+	m_pFilterPermModify->set(m_pFilter->getFilterPermissionsDeny() & PERM_MODIFY);
+	m_pFilterPermCopy->set(m_pFilter->getFilterPermissionsDeny() & PERM_COPY);
+	m_pFilterPermTransfer->set(m_pFilter->getFilterPermissionsDeny() & PERM_TRANSFER);
 
 	//
 	// Filter by (inventory) type
@@ -255,7 +255,7 @@ void LLFloaterInventoryFinder::refreshFilter()
 	//
 	// Filter by permissions
 	//
-	PermissionMask maskPerm = m_pFilter->getFilterPermissions();
+	PermissionMask maskPerm = m_pFilter->getFilterPermissionsDeny();
 	if (m_pFilterPermModify->get())
 		maskPerm |= PERM_MODIFY;
 	else
@@ -268,7 +268,7 @@ void LLFloaterInventoryFinder::refreshFilter()
 		maskPerm |= PERM_TRANSFER;
 	else
 		maskPerm &= ~PERM_TRANSFER;
-	m_pFilter->setFilterPermissions(maskPerm);
+	m_pFilter->setFilterPermissionsDeny(maskPerm);
 
 	//
 	// Filter by (inventory) type
