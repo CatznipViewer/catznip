@@ -182,7 +182,7 @@ Hover your mouse over the options for more help.
          top_pad="2"
          width="150">
             <combo_box.item
-             label="Until next occurance"
+             label="Until next message"
              value="0" />
             <combo_box.item
              label="Snooze for 5 minutes"
