@@ -65,6 +65,17 @@
       width="350" />
     
   <check_box
+   enabled_control="EnableVoiceChat"
+   control_name="VoiceCallsRejectGroup"
+   height="16"
+   enabled="false"
+   label="Ignore all group voice calls"
+   layout="topleft"
+   name="voice_call_nongroups_only_check"
+   top_pad="5"
+   width="350" />
+
+  <check_box
    control_name="ConferencesFriendsOnly"
    height="16"
    label="Only friends can add me to a conference"
