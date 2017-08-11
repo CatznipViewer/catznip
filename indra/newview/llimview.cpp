@@ -3120,6 +3120,7 @@ void LLIMMgr::inviteToSession(
 		{
 			if (voice_invite)
 				LLIncomingCallDialog::processCallResponse(1, payload);
+			LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", caller_id, "about").getSLURLString())));
 			return;
 		}
 // [/SL:KB]
@@ -3797,6 +3798,12 @@ public:
 
 					LLCoreHttpUtil::HttpCoroutineAdapter::messageHttpPost(strUrl, sdData, "Invitation declined", "Invitation decline failed.");
 				}
+
+				if (!is_muted)
+				{
+					LLNotifications::instance().add(LLNotification::Params("InviteAdHocBlocked").substitutions(LLSD().with("NAME_SLURL", LLSLURL("agent", from_id, "about").getSLURLString())));
+				}
+
 				return;
 			}
 // [/SL:KB]
