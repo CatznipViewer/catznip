@@ -3115,6 +3115,14 @@ void LLIMMgr::inviteToSession(
 			LL_INFOS() << "Rejecting session invite from initiating muted resident " << caller_name << LL_ENDL;
 			return;
 		}
+ // [SL:KB] - Patch: Chat-GroupOptions | Checked: Catznip-5.2
+		else if ( (gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (LLAvatarTracker::instance().getBuddyInfo(caller_id) == nullptr) )
+		{
+			if (voice_invite)
+				LLIncomingCallDialog::processCallResponse(1, payload);
+			return;
+		}
+// [/SL:KB]
 	}
 
 	LLVoiceChannel* channelp = LLVoiceChannel::getChannelByID(session_id);
@@ -3752,8 +3760,10 @@ public:
 				return;
 			}
 
-			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends and groups can IM me" is checked
-			if ( (!is_group) && ( (is_muted) || ((gSavedSettings.getBOOL("VoiceCallsFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id))) ) )
+			// Decline the invitiation if it's a conference that was started by someone on the mute list or a non-friend if "Only friends/groups can IM me" or "Only friends can conference me" is checked
+			if ( (!is_group) && 
+				 ( (is_muted) ||
+			       ( (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") || gSavedSettings.getBOOL("ConferencesFriendsOnly")) && (!LLAvatarTracker::instance().getBuddyInfo(from_id)) ) ) )
 			{
 				const std::string strUrl = gAgent.getRegion()->getCapability("ChatSessionRequest");
 				if (!strUrl.empty())

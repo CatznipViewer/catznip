@@ -64,6 +64,15 @@
       top_pad="30"
       width="350" />
     
+  <check_box
+   control_name="ConferencesFriendsOnly"
+   height="16"
+   label="Only friends can add me to a conference"
+   layout="topleft"
+   name="conference_friends_only_check"
+   top_pad="5"
+   width="350" />
+
     <check_box
      enabled_control="EnableVoiceChat"
      control_name="AutoDisengageMic"
