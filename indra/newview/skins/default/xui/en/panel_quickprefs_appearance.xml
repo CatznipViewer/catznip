@@ -170,7 +170,7 @@
 	 left="25"
 	 name="appearance_show_text"
 	 top_pad="3"
-	 width="100">
+	 width="90">
 		Always render:
 	</text>
 	<check_box
@@ -181,15 +181,28 @@
 	 left_pad="2"
 	 name="appearance_showfriends_check"
 	 top_delta="0"
-	 width="130" />
+	 width="70" />
+	<button
+	 follows="top|right"
+	 height="18"
+	 label="Exceptions"
+	 layout="topleft"
+	 right="-10"
+	 name="appearance_exceptions_btn"
+	 top_delta="-2"
+	 width="80">
+		<button.commit_callback
+		 function="View.Blocked"
+		 parameter="avatar_rendering_tab" />
+	</button>
 	<check_box
 	 control_name="RenderNearbyFull"
 	 height="16"
 	 label="Nearby avatars (20m)"
 	 layout="topleft"
-	 left_delta="0"
+	 left="117"
 	 name="appearance_shownearby_check"
-	 top_pad="2"
+	 top_pad="3"
 	 width="130" />
 
 	<view_border
@@ -199,7 +212,7 @@
 	 layout="topleft"
 	 left="5"
 	 name="appearance_border_2"
-	 top_pad="4"
+	 top_pad="3"
 	 right="-5"/>
 	 
 	<text
