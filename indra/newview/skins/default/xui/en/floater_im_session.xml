@@ -334,6 +334,9 @@
                     <flyout_button.item
                      label="1 hour"
                      value="60" />
+                    <flyout_button.item
+                     label="Next relog"
+                     value="-1" />
                     <flyout_button.action_button
                      image_hover_unselected="Toolbar_Middle_Over"
                      image_overlay="Conv_toolbar_snooze"
