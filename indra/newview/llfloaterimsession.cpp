@@ -301,7 +301,9 @@ void LLFloaterIMSession::onSnoozeGroupClicked(const LLUICtrl* pCtrl)
 		const std::string strValue = pCtrl->getValue().asString();
 		if (strValue.empty())
 			LLGroupActions::snoozeIM(mSessionID);
-		else if ("request_teleport")
+		else if ("-1" == strValue)
+			LLGroupActions::leaveIM(mSessionID);
+		else
 			LLGroupActions::snoozeIM(mSessionID, boost::lexical_cast<int>(strValue) * 60);
 	}
 #endif // CATZNIP
@@ -314,7 +316,7 @@ void LLFloaterIMSession::onTeleportClicked(const LLUICtrl* pCtrl)
 		const std::string strValue = pCtrl->getValue().asString();
 		if ( (strValue.empty()) || ("offer_teleport" == strValue) )
 			GearDoToSelected("offer_teleport");
-		else if ("request_teleport")
+		else if ("request_teleport" == strValue)
 			GearDoToSelected("request_teleport");
 	}
 }
