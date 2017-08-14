@@ -35,6 +35,7 @@
 #include "llpanelinventoryoffer.h"
 #include "llviewercontrol.h"
 #include "llviewerfoldertype.h"
+#include "llviewerobjectlist.h"
 #include "llviewerregion.h"
 // Boost
 #include <boost/algorithm/string.hpp>
@@ -52,6 +53,7 @@
 //
 
 static LLPanelInjector<LLPanelInventoryOfferFolder> t_places("panel_offer_invfolder");
+static std::string s_strUnknownFolder = "unknown";
 
 LLPanelInventoryOfferFolder::LLPanelInventoryOfferFolder()
 	: LLPanel()
@@ -69,6 +71,11 @@ LLPanelInventoryOfferFolder::~LLPanelInventoryOfferFolder()
 	if (LLFloater* pConfigureFloater = m_ConfigureFloaterHandle.get())
 		pConfigureFloater->closeFloater();
 	m_ConfigureFloaterHandle.markDead();
+
+	if (m_SelectionUpdateConnection.connected())
+		m_SelectionUpdateConnection.disconnect();
+
+	m_ObjectSelectionHandle.clear();
 }
 
 //virtual
@@ -78,6 +85,7 @@ BOOL LLPanelInventoryOfferFolder::postBuild()
 	m_pAcceptInCheck->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::refreshControls, this));
 
 	m_pAcceptInList = findChild<LLComboBox>("list_folders");
+	m_pAcceptInList->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onSelectedFolderChanged, this));
 
 	m_pBrowseBtn = findChild<LLButton>("btn_folder_browse");
 	m_pBrowseBtn->setCommitCallback(boost::bind(&LLPanelInventoryOfferFolder::onBrowseFolder, this));
@@ -123,6 +131,13 @@ void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
 			{
 				m_pAcceptInList->setControlName(LLStringUtil::null, nullptr);
 				m_pAcceptInList->setValue(sdPayload["accept_in_folder"]);
+			}
+
+			if ((sdPayload.has("from_object_id")) && (sdPayload["from_object_id"]).isUUID())
+			{
+				m_idObject = sdPayload["from_object_id"].asUUID();
+				m_idObjectFolder = sdPayload["from_object_folder_id"].asUUID();
+				refreshFolders();
 			}
 
 			refreshControls();
@@ -172,12 +187,32 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	// Add the 'Received Items' option
 	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false), ADD_TOP);
 
+	// Add the originating folder (if it exists)
+	if (m_idObject.notNull())
+	{
+		if (m_idObjectFolder.notNull())
+		{
+			if (LLViewerInventoryCategory* pFolder = gInventory.getCategory(m_idObjectFolder))
+				m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), pFolder->getName().c_str()), pFolder->getUUID(), ADD_TOP);
+		}
+		else if (LLViewerObject* pObj = gObjectList.findObject(m_idObject))
+		{
+			if (pObj->permYouOwner())
+				m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), getString("originating_unknown_text")).c_str(), s_strUnknownFolder, ADD_TOP);
+		}
+	}
+
 	// Add the default option
 	m_pAcceptInList->add(getString("default_text"), LLUUID::null, ADD_TOP);
 
 	// Restore selection
 	if (!sdSelValue.isUndefined())
-		m_pAcceptInList->selectByValue(sdSelValue);
+	{
+		if (sdSelValue.isUUID())
+			m_pAcceptInList->selectByValue(sdSelValue);
+		else if (s_strUnknownFolder == sdSelValue.asString())
+			m_pAcceptInList->selectNthItem(1);
+	}
 	m_pAcceptInList->getListControl()->setCommitOnSelectionChange(true);
 }
 
@@ -237,6 +272,64 @@ void LLPanelInventoryOfferFolder::onConfigureFolders()
 void LLPanelInventoryOfferFolder::onConfigureFoldersCb()
 {
 	refreshFolders();
+}
+
+LLUUID LLPanelInventoryOfferFolder::getFolderFromObject(const LLViewerObject* pObj, const std::string& strName)
+{
+	if ( (pObj) && (pObj->permYouOwner()) )
+	{
+		if (pObj->isAttachment())
+		{
+			LLViewerInventoryItem* pItem = gInventory.getItem(pObj->getAttachmentItemID());
+			if ( (pItem) && ((strName.empty()) ||(pItem->getName() == strName)) )
+				return pItem->getParentUUID();
+		}
+		else if (pObj->isSelected())
+		{
+			LLObjectSelectionHandle hSel = LLSelectMgr::instance().getSelection();
+			LLSelectNode* pSelNode = hSel->findNode(const_cast<LLViewerObject*>(pObj));
+			if ( (pSelNode) && ((strName.empty()) || (pSelNode->mName == strName)) )
+				return pSelNode->mFolderID;
+		}
+	}
+	return LLUUID::null;
+}
+
+void LLPanelInventoryOfferFolder::onSelectedFolderChanged()
+{
+	if ( (m_idObject.isNull()) || (m_idObjectFolder.notNull()) )
+		return;
+
+	const LLSD sdSelValue = m_pAcceptInList->getSelectedValue();
+	if ( (m_ObjectSelectionHandle.notNull()) && (s_strUnknownFolder != sdSelValue.asString()) )
+	{
+		m_ObjectSelectionHandle.clear();
+		m_SelectionUpdateConnection.disconnect();
+	}
+	else if ( (m_ObjectSelectionHandle.isNull()) && (s_strUnknownFolder == sdSelValue.asString()) )
+	{
+		if (LLViewerObject* pObj = gObjectList.findObject(m_idObject))
+		{
+			LLSelectMgr::instance().deselectAll();
+			m_ObjectSelectionHandle = LLSelectMgr::instance().selectObjectAndFamily(pObj, false, true);
+			m_ObjectSelectionHandle->getFirstRootNode()->setTransient(true);
+
+			m_SelectionUpdateConnection = LLSelectMgr::getInstance()->mUpdateSignal.connect(boost::bind(&LLPanelInventoryOfferFolder::onUpdateSelection, this));
+		}
+	}
+}
+
+void LLPanelInventoryOfferFolder::onUpdateSelection()
+{
+	if (m_ObjectSelectionHandle.notNull())
+	{
+		LLSelectNode* pSelNode = m_ObjectSelectionHandle->getFirstRootNode();
+		if ( (!pSelNode) || (!pSelNode->mValid) || (pSelNode->getObject()->getID() != m_idObject) )
+			return;
+
+		m_idObjectFolder = pSelNode->mFolderID;
+		refreshFolders();
+	}
 }
 
 // ============================================================================

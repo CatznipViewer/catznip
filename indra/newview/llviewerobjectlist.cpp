@@ -2220,6 +2220,20 @@ void LLViewerObjectList::findOrphans(LLViewerObject* objectp, U32 ip, U32 port)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+bool LLViewerObjectList::findOwnObjects(const LLUUID& region_id, const LLVector3& region_pos, std::list<LLViewerObject*>& object_list) const
+{
+	object_list.clear();
+	for (const auto& itObj : mMapObjects)
+	{
+		LLViewerObject* pObj = itObj.get();
+		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) && (pObj->getPositionRegion() == region_pos) )
+			object_list.push_back(pObj);
+	}
+	return !object_list.empty();
+}
+// [/SL:KB]
+
 ////////////////////////////////////////////////////////////////////////////
 
 LLViewerObjectList::OrphanInfo::OrphanInfo()
