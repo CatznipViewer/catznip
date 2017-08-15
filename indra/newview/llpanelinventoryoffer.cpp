@@ -188,7 +188,7 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 	m_pAcceptInList->add(LLViewerFolderType::lookupNewCategoryName(LLFolderType::FT_INBOX), gInventory.findCategoryUUIDForType(LLFolderType::FT_INBOX, false), ADD_TOP);
 
 	// Add the originating folder (if it exists)
-	if (m_idObject.notNull())
+	if ( (m_idObject.notNull()) && (m_fShowObjectFolder) )
 	{
 		if (m_idObjectFolder.notNull())
 		{
@@ -274,7 +274,7 @@ void LLPanelInventoryOfferFolder::onConfigureFoldersCb()
 	refreshFolders();
 }
 
-LLUUID LLPanelInventoryOfferFolder::getFolderFromObject(const LLViewerObject* pObj, const std::string& strName)
+LLUUID LLPanelInventoryOfferFolder::getFolderFromObject(const LLViewerObject* pObj, const std::string& strName, bool* pfFound)
 {
 	if ( (pObj) && (pObj->permYouOwner()) )
 	{
@@ -282,17 +282,40 @@ LLUUID LLPanelInventoryOfferFolder::getFolderFromObject(const LLViewerObject* pO
 		{
 			LLViewerInventoryItem* pItem = gInventory.getItem(pObj->getAttachmentItemID());
 			if ( (pItem) && ((strName.empty()) ||(pItem->getName() == strName)) )
+			{
+				if (pfFound)
+					*pfFound = true;
 				return pItem->getParentUUID();
+			}
 		}
 		else if (pObj->isSelected())
 		{
 			LLObjectSelectionHandle hSel = LLSelectMgr::instance().getSelection();
 			LLSelectNode* pSelNode = hSel->findNode(const_cast<LLViewerObject*>(pObj));
 			if ( (pSelNode) && ((strName.empty()) || (pSelNode->mName == strName)) )
+			{
+				if (pfFound)
+					*pfFound = true;
 				return pSelNode->mFolderID;
+			}
 		}
 	}
+	if (pfFound)
+		*pfFound = false;
 	return LLUUID::null;
+}
+
+void LLPanelInventoryOfferFolder::setObjectId(const LLUUID& idObject)
+{
+	if (m_idObject != idObject)
+	{
+		m_idObject = idObject;
+
+		m_idObjectFolder = getFolderFromObject(gObjectList.findObject(idObject), LLStringUtil::null, &m_fShowObjectFolder);
+		m_fShowObjectFolder &= (bool)m_idObjectFolder.notNull();
+
+		refreshFolders();
+	}
 }
 
 void LLPanelInventoryOfferFolder::onSelectedFolderChanged()
@@ -328,6 +351,7 @@ void LLPanelInventoryOfferFolder::onUpdateSelection()
 			return;
 
 		m_idObjectFolder = pSelNode->mFolderID;
+		m_fShowObjectFolder = m_idObjectFolder.notNull();
 		refreshFolders();
 	}
 }

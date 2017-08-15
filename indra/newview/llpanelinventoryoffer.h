@@ -47,7 +47,7 @@ public:
 	void onVisibilityChange(BOOL new_visibility) override;
 	BOOL postBuild() override;
 
-	static LLUUID getFolderFromObject(const LLViewerObject* pObj, const std::string& strName = LLStringUtil::null);
+	static LLUUID getFolderFromObject(const LLViewerObject* pObj, const std::string& strName = LLStringUtil::null, bool* pfFound = nullptr);
 
 	/*
 	 * Member functions
@@ -55,6 +55,7 @@ public:
 public:
 	bool         getAcceptIn() const;
 	const LLUUID getSelectedFolder() const;
+	void         setObjectId(const LLUUID& idObject);
 protected:
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
@@ -75,6 +76,7 @@ protected:
 	LLButton*       m_pBrowseBtn = nullptr;
 
 	LLUUID          m_idObject;
+	bool            m_fShowObjectFolder = true;
 	LLUUID          m_idObjectFolder;
 	LLObjectSelectionHandle m_ObjectSelectionHandle;
 	boost::signals2::connection m_SelectionUpdateConnection;
