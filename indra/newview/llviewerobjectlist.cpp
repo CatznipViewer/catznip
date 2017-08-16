@@ -2224,10 +2224,10 @@ void LLViewerObjectList::findOrphans(LLViewerObject* objectp, U32 ip, U32 port)
 bool LLViewerObjectList::findOwnObjects(const LLUUID& region_id, const LLVector3& region_pos, std::list<LLViewerObject*>& object_list) const
 {
 	object_list.clear();
-	for (const auto& itObj : mMapObjects)
+	for (const auto& itObj : mObjects)
 	{
 		LLViewerObject* pObj = itObj.get();
-		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) && (pObj->getPositionRegion() == region_pos) )
+		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) && (dist_vec(pObj->getPositionRegion(), region_pos) < F_ALMOST_ZERO) )
 			object_list.push_back(pObj);
 	}
 	return !object_list.empty();
