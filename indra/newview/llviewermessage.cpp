@@ -2884,11 +2884,13 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 					{
 						for (LLViewerObject* pObj : lObjects)
 						{
-							const LLUUID idFolder = LLPanelInventoryOfferFolder::getFolderFromObject(pObj);
-							if (idFolder.notNull())
+							bool fFound = false;
+							const LLUUID idFolder = LLPanelInventoryOfferFolder::getFolderFromObject(pObj, name, &fFound);
+							if (fFound)
 							{
 								info->mFromObjectID = pObj->getID();
 								info->mFromObjectFolderID = idFolder;
+								break;
 							}
 						}
 
