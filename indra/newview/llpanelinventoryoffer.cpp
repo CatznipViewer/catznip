@@ -309,7 +309,10 @@ void LLPanelInventoryOfferFolder::setObjectId(const LLUUID& idObject)
 {
 	if (m_idObject != idObject)
 	{
-		m_idObject = idObject;
+		LLViewerObject* pObj = gObjectList.findObject(idObject);
+		if (pObj)
+			pObj = pObj->getRootEdit();
+		m_idObject = (pObj) ? pObj->getID() : idObject;
 
 		m_idObjectFolder = getFolderFromObject(gObjectList.findObject(idObject), LLStringUtil::null, &m_fShowObjectFolder);
 		m_fShowObjectFolder &= (bool)m_idObjectFolder.notNull();
@@ -335,8 +338,10 @@ void LLPanelInventoryOfferFolder::onSelectedFolderChanged()
 		{
 			LLSelectMgr::instance().deselectAll();
 			m_ObjectSelectionHandle = LLSelectMgr::instance().selectObjectAndFamily(pObj, false, true);
-			m_ObjectSelectionHandle->getFirstRootNode()->setTransient(true);
-
+			if (m_ObjectSelectionHandle.notNull())
+				m_ObjectSelectionHandle->getFirstRootNode()->setTransient(true);
+			if (m_SelectionUpdateConnection.connected())
+				m_SelectionUpdateConnection.disconnect();
 			m_SelectionUpdateConnection = LLSelectMgr::getInstance()->mUpdateSignal.connect(boost::bind(&LLPanelInventoryOfferFolder::onUpdateSelection, this));
 		}
 	}
@@ -344,16 +349,13 @@ void LLPanelInventoryOfferFolder::onSelectedFolderChanged()
 
 void LLPanelInventoryOfferFolder::onUpdateSelection()
 {
-	if (m_ObjectSelectionHandle.notNull())
-	{
-		LLSelectNode* pSelNode = m_ObjectSelectionHandle->getFirstRootNode();
-		if ( (!pSelNode) || (!pSelNode->mValid) || (pSelNode->getObject()->getID() != m_idObject) )
-			return;
+	LLSelectNode* pSelNode = m_ObjectSelectionHandle->getFirstRootNode();
+	if ( (!pSelNode) || (!pSelNode->mValid) || (pSelNode->getObject()->getID() != m_idObject) )
+		return;
 
-		m_idObjectFolder = pSelNode->mFolderID;
-		m_fShowObjectFolder = m_idObjectFolder.notNull();
-		refreshFolders();
-	}
+	m_idObjectFolder = pSelNode->mFolderID;
+	m_fShowObjectFolder = m_idObjectFolder.notNull();
+	refreshFolders();
 }
 
 // ============================================================================

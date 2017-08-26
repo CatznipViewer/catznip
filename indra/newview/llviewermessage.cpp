@@ -2884,6 +2884,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 					{
 						for (LLViewerObject* pObj : lObjects)
 						{
+							pObj = pObj->getRootEdit();
 							bool fFound = false;
 							const LLUUID idFolder = LLPanelInventoryOfferFolder::getFolderFromObject(pObj, name, &fFound);
 							if (fFound)
@@ -2895,7 +2896,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 						}
 
 						if (info->mFromObjectID.isNull())
-							info->mFromObjectID = lObjects.front()->getID();
+							info->mFromObjectID = lObjects.front()->getRootEdit()->getID();
 					}
 				}
 // [/SL:KB]

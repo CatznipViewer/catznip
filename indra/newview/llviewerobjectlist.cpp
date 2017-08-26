@@ -2227,8 +2227,15 @@ bool LLViewerObjectList::findOwnObjects(const LLUUID& region_id, const LLVector3
 	for (const auto& itObj : mObjects)
 	{
 		LLViewerObject* pObj = itObj.get();
-		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) && (dist_vec(pObj->getPositionRegion(), region_pos) < F_ALMOST_ZERO) )
-			object_list.push_back(pObj);
+		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) )
+		{
+			if ( (dist_vec(pObj->getPositionRegion(), region_pos) < F_ALMOST_ZERO) ||
+				 ( (pObj->isAttachment()) && (!pObj->isRootEdit()) && (isAgentAvatarValid()) &&
+			       (dist_vec(gAgentAvatarp->getPositionRegion() - (pObj->getRootEdit()->getPositionRegion() - pObj->getPositionRegion()) * gAgentAvatarp->getRotationRegion(), region_pos) < F_ALMOST_ZERO) ) )
+			{
+				object_list.push_back(pObj);
+			}
+		}
 	}
 	return !object_list.empty();
 }
