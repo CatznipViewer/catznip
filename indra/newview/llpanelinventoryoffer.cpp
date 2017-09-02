@@ -123,13 +123,13 @@ void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
 
 			if ((sdPayload.has("accept_in")) && (sdPayload["accept_in"].isBoolean()))
 			{
-				m_pAcceptInCheck->setControlName(LLStringUtil::null, nullptr);
+				m_pAcceptInCheck->clearControlName();
 				m_pAcceptInCheck->set(sdPayload["accept_in"].asBoolean());
 			}
 
 			if ((sdPayload.has("accept_in_folder")) && (sdPayload["accept_in_folder"].isUUID()))
 			{
-				m_pAcceptInList->setControlName(LLStringUtil::null, nullptr);
+				m_pAcceptInList->clearControlName();
 				m_pAcceptInList->setValue(sdPayload["accept_in_folder"]);
 			}
 

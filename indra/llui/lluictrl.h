@@ -173,6 +173,9 @@ public:
 
 	bool setControlValue(const LLSD& value);
 	void setControlVariable(LLControlVariable* control);
+// [SL:KB] - Patch: Control-Base | Checked: Catznip-5.2
+	virtual void clearControlName() { setControlVariable(nullptr); }
+// [/SL:KB]
 	virtual void setControlName(const std::string& control, LLView *context = NULL);
 	
 	LLControlVariable* getControlVariable() { return mControlVariable; } 
