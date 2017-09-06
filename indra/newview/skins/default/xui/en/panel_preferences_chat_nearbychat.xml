@@ -296,7 +296,18 @@
      name="bubble_text_chat"
      top_pad="3"
      width="330" />
-    
+    <check_box
+     control_name="ChatAutocompleteGestures"
+     follows="top|left"
+     height="20"
+     initial_value="true"
+     label="Auto-complete gestures in nearby chat"
+     layout="topleft"
+     left="35"
+     name="auto_complete_gestures"
+     top_pad="3"
+     width="330" />
+   
     <view_border
      top_pad="10"
      layout="topleft"
