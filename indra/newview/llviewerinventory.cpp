@@ -1126,10 +1126,10 @@ void create_inventory_item(const LLUUID& agent_id, const LLUUID& session_id,
 void create_inventory_callingcard(const LLUUID& avatar_id, const LLUUID& parent /*= LLUUID::null*/, LLPointer<LLInventoryCallback> cb/*=NULL*/)
 {
 	std::string item_desc = avatar_id.asString();
-	std::string item_name;
-	gCacheName->getFullName(avatar_id, item_name);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(avatar_id, &av_name);
 	create_inventory_item(gAgent.getID(), gAgent.getSessionID(),
-						  parent, LLTransactionID::tnull, item_name, item_desc, LLAssetType::AT_CALLINGCARD,
+						  parent, LLTransactionID::tnull, av_name.getUserName(), item_desc, LLAssetType::AT_CALLINGCARD,
 						  LLInventoryType::IT_CALLINGCARD, NOT_WEARABLE, PERM_MOVE | PERM_TRANSFER, cb);
 }
 
@@ -1463,6 +1463,10 @@ void remove_inventory_category(
 	LLPointer<LLViewerInventoryCategory> obj = gInventory.getCategory(cat_id);
 	if(obj)
 	{
+		if (!gInventory.isCategoryComplete(cat_id))
+		{
+			LL_WARNS() << "Removing (purging) incomplete category " << obj->getName() << LL_ENDL;
+		}
 		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
 		{
 			LLNotificationsUtil::add("CannotRemoveProtectedCategories");
@@ -1540,6 +1544,10 @@ void purge_descendents_of(const LLUUID& id, LLPointer<LLInventoryCallback> cb)
 		{
             if (AISAPI::isAvailable())
 			{
+				if (cat->getVersion() == LLViewerInventoryCategory::VERSION_UNKNOWN)
+				{
+					LL_WARNS() << "Purging not fetched folder: " << cat->getName() << LL_ENDL;
+				}
                 AISAPI::completion_t cr = (cb) ? boost::bind(&doInventoryCb, cb, _1) : AISAPI::completion_t();
                 AISAPI::PurgeDescendents(id, cr);
 			}
@@ -2071,9 +2079,9 @@ PermissionMask LLViewerInventoryItem::getPermissionMask() const
 
 //----------
 
-void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const std::string& name, bool is_group)
+void LLViewerInventoryItem::onCallingCardNameLookup(const LLUUID& id, const LLAvatarName& name)
 {
-	rename(name);
+	rename(name.getUserName());
 	gInventory.addChangedMask(LLInventoryObserver::LABEL, getUUID());
 	gInventory.notifyObservers();
 }
