@@ -2252,11 +2252,12 @@ bool LLPanelEstateInfo::estateUpdate(LLMessageSystem* msg)
 BOOL LLPanelEstateInfo::postBuild()
 {
 	// set up the callbacks for the generic controls
-	initCtrl("externally_visible_check");
+	initCtrl("externally_visible_radio");
 	initCtrl("allow_direct_teleport");
 	initCtrl("limit_payment");
 	initCtrl("limit_age_verified");
 	initCtrl("voice_chat_check");
+    initCtrl("parcel_access_override");
 
 	getChild<LLUICtrl>("allowed_avatar_name_list")->setCommitCallback(boost::bind(&LLPanelEstateInfo::onChangeChildCtrl, this, _1));	
 	LLNameListCtrl *avatar_name_list = getChild<LLNameListCtrl>("allowed_avatar_name_list");
@@ -2304,13 +2305,17 @@ BOOL LLPanelEstateInfo::postBuild()
 	childSetAction("message_estate_btn", boost::bind(&LLPanelEstateInfo::onClickMessageEstate, this));
 	childSetAction("kick_user_from_estate_btn", boost::bind(&LLPanelEstateInfo::onClickKickUser, this));
 
+	getChild<LLUICtrl>("parcel_access_override")->setCommitCallback(boost::bind(&LLPanelEstateInfo::onChangeAccessOverride, this));
+
+	getChild<LLUICtrl>("externally_visible_radio")->setFocus(TRUE);
+
 	return LLPanelRegionInfo::postBuild();
 }
 
 void LLPanelEstateInfo::refresh()
 {
 	// Disable access restriction controls if they make no sense.
-	bool public_access = getChild<LLUICtrl>("externally_visible_check")->getValue().asBoolean();
+	bool public_access = ("estate_public_access" == getChild<LLUICtrl>("externally_visible_radio")->getValue().asString());
 
 	getChildView("Only Allow")->setEnabled(public_access);
 	getChildView("limit_payment")->setEnabled(public_access);
@@ -2331,11 +2336,12 @@ void LLPanelEstateInfo::refreshFromEstate()
 	getChild<LLUICtrl>("estate_name")->setValue(estate_info.getName());
 	setOwnerName(LLSLURL("agent", estate_info.getOwnerID(), "inspect").getSLURLString());
 
-	getChild<LLUICtrl>("externally_visible_check")->setValue(estate_info.getIsExternallyVisible());
+	getChild<LLUICtrl>("externally_visible_radio")->setValue(estate_info.getIsExternallyVisible() ? "estate_public_access" : "estate_restricted_access");
 	getChild<LLUICtrl>("voice_chat_check")->setValue(estate_info.getAllowVoiceChat());
 	getChild<LLUICtrl>("allow_direct_teleport")->setValue(estate_info.getAllowDirectTeleport());
 	getChild<LLUICtrl>("limit_payment")->setValue(estate_info.getDenyAnonymous());
 	getChild<LLUICtrl>("limit_age_verified")->setValue(estate_info.getDenyAgeUnverified());
+    getChild<LLUICtrl>("parcel_access_override")->setValue(estate_info.getAllowAccessOverride());
 
 	// Ensure appriopriate state of the management UI
 	updateControls(gAgent.getRegion());
@@ -2373,12 +2379,14 @@ bool LLPanelEstateInfo::callbackChangeLindenEstate(const LLSD& notification, con
 
 			// update model
 			estate_info.setUseFixedSun(false); // we don't support fixed sun estates anymore
-			estate_info.setIsExternallyVisible(getChild<LLUICtrl>("externally_visible_check")->getValue().asBoolean());
+			estate_info.setIsExternallyVisible("estate_public_access" == getChild<LLUICtrl>("externally_visible_radio")->getValue().asString());
 			estate_info.setAllowDirectTeleport(getChild<LLUICtrl>("allow_direct_teleport")->getValue().asBoolean());
 			estate_info.setDenyAnonymous(getChild<LLUICtrl>("limit_payment")->getValue().asBoolean());
 			estate_info.setDenyAgeUnverified(getChild<LLUICtrl>("limit_age_verified")->getValue().asBoolean());
 			estate_info.setAllowVoiceChat(getChild<LLUICtrl>("voice_chat_check")->getValue().asBoolean());
-
+            estate_info.setAllowAccessOverride(getChild<LLUICtrl>("parcel_access_override")->getValue().asBoolean());
+            // JIGGLYPUFF
+            //estate_info.setAllowAccessOverride(getChild<LLUICtrl>("")->getValue().asBoolean());
 			// send the update to sim
 			estate_info.sendEstateInfo();
 		}
@@ -2477,6 +2485,14 @@ bool LLPanelEstateInfo::onMessageCommit(const LLSD& notification, const LLSD& re
 	LLUUID invoice(LLFloaterRegionInfo::getLastInvoice());
 	sendEstateOwnerMessage(gMessageSystem, "instantmessage", invoice, strings);
 	return false;
+}
+
+void LLPanelEstateInfo::onChangeAccessOverride()
+{
+	if (!getChild<LLUICtrl>("parcel_access_override")->getValue().asBoolean())
+	{
+		LLNotificationsUtil::add("EstateParcelAccessOverride");
+	}
 }
 
 LLPanelEstateCovenant::LLPanelEstateCovenant()

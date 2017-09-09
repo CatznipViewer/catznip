@@ -278,6 +278,7 @@ public:
 	
 	void onChangeFixedSun();
 	void onChangeUseGlobalTime();
+	void onChangeAccessOverride();
 	
 	void onClickEditSky();
 	void onClickEditSkyHelp();	
