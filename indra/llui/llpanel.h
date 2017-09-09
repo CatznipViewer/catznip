@@ -304,8 +304,8 @@ template<typename T>
 public:
 	// register with either the provided builder, or the generic templated builder
 	LLPanelInjector(const std::string& tag);
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.4)
-	LLPanelInjector(const std::string& tag, LLPanelClassCreatorFunc func);
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
+	LLPanelInjector(const std::string& tag, const LLPanelClassCreatorFunc& func);
 // [/SL:KB]
 };
 
@@ -316,9 +316,9 @@ template<typename T>
 	LLRegisterPanelClass::instance().addPanelClass(tag,&LLRegisterPanelClass::defaultPanelClassBuilder<T>);
 }
 
-// [SL:KB] - Patch: UI-Base | Checked: 2010-12-01 (Catznip-2.4)
+// [SL:KB] - Patch: UI-Base | Checked: Catznip-2.4
 template<typename T>
-LLPanelInjector<T>::LLPanelInjector(const std::string& tag, LLPanelClassCreatorFunc func) 
+LLPanelInjector<T>::LLPanelInjector(const std::string& tag, const LLPanelClassCreatorFunc& func)
 {
 	LLRegisterPanelClass::instance().addPanelClass(tag, func);
 }
