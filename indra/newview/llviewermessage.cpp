@@ -1393,6 +1393,14 @@ void inventory_offer_mute_callback(const LLUUID& blocked_id,
 			gSavedSettings.getString("NotificationChannelUUID")), OfferMatcher(blocked_id));
 }
 
+
+void inventory_offer_mute_avatar_callback(const LLUUID& blocked_id,
+    const LLAvatarName& av_name)
+{
+    inventory_offer_mute_callback(blocked_id, av_name.getUserName(), false);
+}
+
+
 std::string LLOfferInfo::mResponderType = "offer_info";
 
 LLOfferInfo::LLOfferInfo()
@@ -1544,7 +1552,14 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 	{
 		if (notification_ptr != NULL)
 		{
-			gCacheName->get(mFromID, mFromGroup, boost::bind(&inventory_offer_mute_callback, _1, _2, _3));
+			if (mFromGroup)
+			{
+				gCacheName->getGroup(mFromID, boost::bind(&inventory_offer_mute_callback, _1, _2, _3));
+			}
+			else
+			{
+				LLAvatarNameCache::get(mFromID, boost::bind(&inventory_offer_mute_avatar_callback, _1, _2));
+			}
 		}
 	}
 
@@ -1645,7 +1660,7 @@ bool LLOfferInfo::inventory_offer_callback(const LLSD& notification, const LLSD&
 			
 			LLDiscardAgentOffer* discard_agent_offer = new LLDiscardAgentOffer(mFolderID, mObjectID);
 			discard_agent_offer->startFetch();
-			if (catp || (itemp && itemp->isFinished()))
+			if ((catp && gInventory.isCategoryComplete(mObjectID)) || (itemp && itemp->isFinished()))
 			{
 				discard_agent_offer->done();
 			}
@@ -1701,7 +1716,14 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 		llassert(notification_ptr != NULL);
 		if (notification_ptr != NULL)
 		{
-			gCacheName->get(mFromID, mFromGroup, boost::bind(&inventory_offer_mute_callback, _1, _2, _3));
+			if (mFromGroup)
+			{
+				gCacheName->getGroup(mFromID, boost::bind(&inventory_offer_mute_callback, _1, _2, _3));
+			}
+			else
+			{
+				LLAvatarNameCache::get(mFromID, boost::bind(&inventory_offer_mute_avatar_callback, _1, _2));
+			}
 		}
 	}
 	
@@ -1750,12 +1772,12 @@ bool LLOfferInfo::inventory_task_offer_callback(const LLSD& notification, const 
 		}
 		else
 		{
-			std::string full_name;
-			if (gCacheName->getFullName(mFromID, full_name))
+			LLAvatarName av_name;
+			if (LLAvatarNameCache::get(mFromID, &av_name))
 			{
 				from_string = LLTrans::getString("InvOfferAnObjectNamed") + " "+ LLTrans::getString("'") + mFromName 
-					+ LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedBy") + full_name;
-				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedBy") + " " + full_name;
+					+ LLTrans::getString("'")+" " + LLTrans::getString("InvOfferOwnedBy") + av_name.getUserName();
+				chatHistory_string = mFromName + " " + LLTrans::getString("InvOfferOwnedBy") + " " + av_name.getUserName();
 			}
 			else
 			{
@@ -2607,9 +2629,9 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{
 				original_name = original_name.substr(0, index);
 			}
+
 			std::string legacy_name = gCacheName->buildLegacyName(original_name);
-			LLUUID agent_id;
-			gCacheName->getUUID(legacy_name, agent_id);
+			LLUUID agent_id = LLAvatarNameCache::findIdByName(legacy_name);
 
 			if (agent_id.isNull())
 			{
@@ -2668,6 +2690,7 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				payload["subject"] = subj;
 				payload["message"] = mes;
 				payload["sender_name"] = name;
+				payload["sender_id"] = agent_id;
 				payload["group_id"] = group_id;
 				payload["inventory_name"] = item_name;
  				payload["received_time"] = LLDate::now();
@@ -3044,16 +3067,17 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 			{ 
 				return;
 			}
-			else if (is_do_not_disturb) 
-			{
-				send_do_not_disturb_message(msg, from_id);
-			}
 			else if (gSavedSettings.getBOOL("VoiceCallsFriendsOnly") && (LLAvatarTracker::instance().getBuddyInfo(from_id) == NULL))
 			{
 				return;
 			}
 			else
 			{
+				if (is_do_not_disturb)
+				{
+					send_do_not_disturb_message(msg, from_id);
+				}
+
 				LLVector3 pos, look_at;
 				U64 region_handle(0);
 				U8 region_access(SIM_ACCESS_MIN);
@@ -4725,7 +4749,9 @@ void process_sound_trigger(LLMessageSystem *msg, void **)
 {
 	if (!gAudiop)
 	{
+#if !LL_LINUX
 		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
+#endif
 		return;
 	}
 
@@ -4787,7 +4813,9 @@ void process_preload_sound(LLMessageSystem *msg, void **user_data)
 {
 	if (!gAudiop)
 	{
+#if !LL_LINUX
 		LL_WARNS("AudioEngine") << "LLAudioEngine instance doesn't exist!" << LL_ENDL;
+#endif
 		return;
 	}
 
@@ -5469,9 +5497,12 @@ static std::string reason_from_transaction_type(S32 transaction_type,
 		case TRANS_CLASSIFIED_CHARGE:
 			return LLTrans::getString("to publish a classified ad");
 			
+		case TRANS_GIFT:
+			// Simulator returns "Payment" if no custom description has been entered
+			return (item_desc == "Payment" ? std::string() : item_desc);
+
 		// These have no reason to display, but are expected and should not
 		// generate warnings
-		case TRANS_GIFT:
 		case TRANS_PAY_OBJECT:
 		case TRANS_OBJECT_PAYS:
 			return std::string();
@@ -5581,6 +5612,7 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 	LLSD payload;
 	
 	bool you_paid_someone = (source_id == gAgentID);
+	std::string gift_suffix = (transaction_type == TRANS_GIFT ? "_gift" : "");
 	if (you_paid_someone)
 	{
 		if(!gSavedSettings.getBOOL("NotifyMoneySpend"))
@@ -5594,8 +5626,8 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		{
 			if (dest_id.notNull())
 			{
-				message = success ? LLTrans::getString("you_paid_ldollars", args) :
-									LLTrans::getString("you_paid_failure_ldollars", args);
+				message = success ? LLTrans::getString("you_paid_ldollars" + gift_suffix, args) :
+									LLTrans::getString("you_paid_failure_ldollars" + gift_suffix, args);
 			}
 			else
 			{
@@ -5622,7 +5654,8 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		payload["dest_id"] = dest_id;
 		notification = success ? "PaymentSent" : "PaymentFailure";
 	}
-	else {
+	else
+	{
 		// ...someone paid you
 		if(!gSavedSettings.getBOOL("NotifyMoneyReceived"))
 		{
@@ -5633,9 +5666,10 @@ static void process_money_balance_reply_extended(LLMessageSystem* msg)
 		name_id = source_id;
 		if (!reason.empty())
 		{
-			message = LLTrans::getString("paid_you_ldollars", args);
+			message = LLTrans::getString("paid_you_ldollars" + gift_suffix, args);
 		}
-		else {
+		else
+		{
 			message = LLTrans::getString("paid_you_ldollars_no_reason", args);
 		}
 		final_args["MESSAGE"] = message;
@@ -6014,7 +6048,14 @@ bool attempt_standard_notification(LLMessageSystem* msgsystem)
                 return LLMarketplaceData::instance().getListing(llsdBlock["listing_id"].asInteger());
             }
         }
-        
+
+		// Error Notification can come with and without reason
+		if (notificationID == "JoinGroupError" && llsdBlock.has("reason"))
+		{
+			LLNotificationsUtil::add("JoinGroupErrorReason", llsdBlock);
+			return true;
+		}
+
 		LLNotificationsUtil::add(notificationID, llsdBlock);
 		return true;
 	}	
@@ -6178,7 +6219,7 @@ void handle_show_mean_events(void *)
 	//LLFloaterBump::showInstance();
 }
 
-void mean_name_callback(const LLUUID &id, const std::string& full_name, bool is_group)
+void mean_name_callback(const LLUUID &id, const LLAvatarName& av_name)
 {
 	static const U32 max_collision_list_size = 20;
 	if (gMeanCollisionList.size() > max_collision_list_size)
@@ -6195,7 +6236,7 @@ void mean_name_callback(const LLUUID &id, const std::string& full_name, bool is_
 		LLMeanCollisionData *mcd = *iter;
 		if (mcd->mPerp == id)
 		{
-			mcd->mFullName = full_name;
+			mcd->mFullName = av_name.getUserName();
 		}
 	}
 }
@@ -6249,7 +6290,7 @@ void process_mean_collision_alert_message(LLMessageSystem *msgsystem, void **use
 		{
 			LLMeanCollisionData *mcd = new LLMeanCollisionData(gAgentID, perp, time, type, mag);
 			gMeanCollisionList.push_front(mcd);
-			gCacheName->get(perp, false, boost::bind(&mean_name_callback, _1, _2, _3));
+			LLAvatarNameCache::get(perp, boost::bind(&mean_name_callback, _1, _2));
 		}
 	}
 	LLFloaterBump* bumps_floater = LLFloaterBump::getInstance();
@@ -6280,9 +6321,9 @@ void process_frozen_message(LLMessageSystem *msgsystem, void **user_data)
 // do some extra stuff once we get our economy data
 void process_economy_data(LLMessageSystem *msg, void** /*user_data*/)
 {
-	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::Singleton::getInstance());
+	LLGlobalEconomy::processEconomyData(msg, LLGlobalEconomy::getInstance());
 
-	S32 upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload();
+	S32 upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload();
 
 	LL_INFOS_ONCE("Messaging") << "EconomyData message arrived; upload cost is L$" << upload_cost << LL_ENDL;
 
@@ -6387,6 +6428,16 @@ bool unknown_script_question_cb(const LLSD& notification, const LLSD& response)
 	return false;
 }
 
+void experiencePermissionBlock(LLUUID experience, LLSD result)
+{
+    LLSD permission;
+    LLSD data;
+    permission["permission"] = "Block";
+    data[experience.asString()] = permission;
+    data["experience"] = experience;
+    LLEventPumps::instance().obtain("experience_permission").post(data);
+}
+
 bool script_question_cb(const LLSD& notification, const LLSD& response)
 {
 	S32 option = LLNotificationsUtil::getSelectedOption(notification, response);
@@ -6463,14 +6514,8 @@ bool script_question_cb(const LLSD& notification, const LLSD& response)
 			if (!region)
 			    return false;
 
-            LLExperienceCache::instance().setExperiencePermission(experience, std::string("Block"), LLExperienceCache::ExperienceGetFn_t());
+            LLExperienceCache::instance().setExperiencePermission(experience, std::string("Block"), boost::bind(&experiencePermissionBlock, experience, _1));
 
-            LLSD permission;
-            LLSD data;
-            permission["permission"] = "Block";
-            data[experience.asString()] = permission;
-            data["experience"] = experience;
-            LLEventPumps::instance().obtain("experience_permission").post(data);
 		}
 }
 	return false;
@@ -6606,6 +6651,11 @@ void process_script_question(LLMessageSystem *msg, void **user_data)
 
 				if (("ScriptTakeMoney" == script_perm.question) && has_not_only_debit)
 					continue;
+
+                if (script_perm.question == "JoinAnExperience")
+                { // Some experience only permissions do not have an explicit permission bit.  Add them here.
+                    script_question += "    " + LLTrans::getString("ForceSitAvatar") + "\n";
+                }
 
 				script_question += "    " + LLTrans::getString(script_perm.question) + "\n";
 			}
@@ -7017,10 +7067,10 @@ void send_lures(const LLSD& notification, const LLSD& response)
 
 		// Record the offer.
 		{
-			std::string target_name;
-			gCacheName->getFullName(target_id, target_name);  // for im log filenames
+			LLAvatarName av_name;
+			LLAvatarNameCache::get(target_id, &av_name);  // for im log filenames
 			LLSD args;
-			args["TO_NAME"] = LLSLURL("agent", target_id, "displayname").getSLURLString();;
+			args["TO_NAME"] = LLSLURL("agent", target_id, "completename").getSLURLString();;
 	
 			LLSD payload;
 				
@@ -7106,10 +7156,10 @@ bool teleport_request_callback(const LLSD& notification, const LLSD& response)
 		return false;
 	}
 
-	std::string from_name;
-	gCacheName->getFullName(from_id, from_name);
+	LLAvatarName av_name;
+	LLAvatarNameCache::get(from_id, &av_name);
 
-	if(LLMuteList::getInstance()->isMuted(from_id) && !LLMuteList::getInstance()->isLinden(from_name))
+	if(LLMuteList::getInstance()->isMuted(from_id) && !LLMuteList::getInstance()->isLinden(av_name.getUserName()))
 	{
 		return false;
 	}
@@ -7384,8 +7434,7 @@ bool callback_load_url(const LLSD& notification, const LLSD& response)
 }
 static LLNotificationFunctorRegistration callback_load_url_reg("LoadWebPage", callback_load_url);
 
-
-// We've got the name of the person who owns the object hurling the url.
+// We've got the name of the person or group that owns the object hurling the url.
 // Display confirmation dialog.
 void callback_load_url_name(const LLUUID& id, const std::string& full_name, bool is_group)
 {
@@ -7427,6 +7476,12 @@ void callback_load_url_name(const LLUUID& id, const std::string& full_name, bool
 	}
 }
 
+// We've got the name of the person who owns the object hurling the url.
+void callback_load_url_avatar_name(const LLUUID& id, const LLAvatarName& av_name)
+{
+    callback_load_url_name(id, av_name.getUserName(), false);
+}
+
 void process_load_url(LLMessageSystem* msg, void**)
 {
 	LLUUID object_id;
@@ -7464,8 +7519,14 @@ void process_load_url(LLMessageSystem* msg, void**)
 	// Add to list of pending name lookups
 	gLoadUrlList.push_back(payload);
 
-	gCacheName->get(owner_id, owner_is_group,
-		boost::bind(&callback_load_url_name, _1, _2, _3));
+	if (owner_is_group)
+	{
+		gCacheName->getGroup(owner_id, boost::bind(&callback_load_url_name, _1, _2, _3));
+	}
+	else
+	{
+		LLAvatarNameCache::get(owner_id, boost::bind(&callback_load_url_avatar_name, _1, _2));
+	}
 }
 
 

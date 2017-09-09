@@ -44,7 +44,7 @@ public:
 		mExpanderLabel(more_text)
 	{}
 
-	/*virtual*/ bool	getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const 
+	/*virtual*/ bool	getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const 
 	{
 		// more label always spans width of text box
 		if (num_chars == 0)
@@ -63,10 +63,10 @@ public:
 	{ 
 		return start_offset;
 	}
-	/*virtual*/ S32		getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars) const 
+	/*virtual*/ S32		getNumChars(S32 num_pixels, S32 segment_offset, S32 line_offset, S32 max_chars, S32 line_ind) const
 	{ 
 		// require full line to ourselves
-		if (line_offset == 0) 
+		if (line_offset == 0)
 		{
 			// print all our text
 			return getEnd() - getStart(); 

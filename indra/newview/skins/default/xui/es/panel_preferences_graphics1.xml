@@ -26,8 +26,15 @@
 	</text>
 	<check_box initial_value="true" label="Shaders de la atmósfera" name="WindLightUseAtmosShaders"/>
 	<check_box initial_value="true" label="Modelo de iluminación avanzado" name="UseLightShaders"/>
+	<slider label="Complejidad máxima de avatar:" name="IndirectMaxComplexity" tool_tip="Controla en qué momento un avatar visualmente complejo se dibuja como un &quot;JellyDoll&quot;"/>
+	<text name="IndirectMaxComplexityText">
+		0
+	</text>
+	<check_box initial_value="true" label="Renderizar siempre los amigos" name="AlwaysRenderFriends"/>
+	<button label="Excepciones..." name="RenderExceptionsButton"/>
 	<button label="Guardar configuración como valor predefinido..." name="PrefSaveButton"/>
 	<button label="Cargar predefinido..." name="PrefLoadButton"/>
+	min_val=&quot;0.125&quot;
 	<button label="Eliminar predefinido..." name="PrefDeleteButton"/>
 	<button label="Restablecer la configuración recomendada" name="Defaults"/>
 	<button label="Configuración avanzada..." name="AdvancedSettings"/>
