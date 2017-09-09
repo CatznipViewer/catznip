@@ -203,6 +203,7 @@ set(viewer_SOURCE_FILES
     llfloaterautoreplacesettings.cpp
     llfloateravatar.cpp
     llfloateravatarpicker.cpp
+    llfloateravatarrendersettings.cpp
     llfloateravatartextures.cpp
     llfloaterbeacons.cpp
     llfloaterbigpreview.cpp
@@ -236,6 +237,7 @@ set(viewer_SOURCE_FILES
     llfloatergesture.cpp
     llfloatergodtools.cpp
     llfloatergotoline.cpp
+    llfloatergridstatus.cpp
     llfloatergroupbulkban.cpp
     llfloatergroupinvite.cpp
     llfloatergroups.cpp
@@ -254,6 +256,7 @@ set(viewer_SOURCE_FILES
     llfloaterlagmeter.cpp
     llfloaterland.cpp
     llfloaterlandholdings.cpp
+    llfloaterlinkreplace.cpp
     llfloaterloadprefpreset.cpp
     llfloatermarketplacelistings.cpp
     llfloatermap.cpp
@@ -276,6 +279,7 @@ set(viewer_SOURCE_FILES
     llfloaterperms.cpp
     llfloaterpostprocess.cpp
     llfloaterpreference.cpp
+    llfloaterpreviewtrash.cpp
     llfloaterproperties.cpp
     llfloaterregiondebugconsole.cpp
     llfloaterregioninfo.cpp
@@ -822,6 +826,7 @@ set(viewer_HEADER_FILES
     llfloaterautoreplacesettings.h
     llfloateravatar.h
     llfloateravatarpicker.h
+    llfloateravatarrendersettings.h
     llfloateravatartextures.h
     llfloaterbeacons.h
     llfloaterbigpreview.h
@@ -855,6 +860,7 @@ set(viewer_HEADER_FILES
     llfloatergesture.h
     llfloatergodtools.h
     llfloatergotoline.h
+    llfloatergridstatus.h
     llfloatergroupbulkban.h
     llfloatergroupinvite.h
     llfloatergroups.h
@@ -876,6 +882,7 @@ set(viewer_HEADER_FILES
     llfloaterlagmeter.h
     llfloaterland.h
     llfloaterlandholdings.h
+    llfloaterlinkreplace.h
     llfloaterloadprefpreset.h
     llfloatermap.h
     llfloatermarketplacelistings.h
@@ -898,6 +905,7 @@ set(viewer_HEADER_FILES
     llfloaterperms.h
     llfloaterpostprocess.h
     llfloaterpreference.h
+    llfloaterpreviewtrash.h
     llfloaterproperties.h
     llfloaterregiondebugconsole.h
     llfloaterregioninfo.h
