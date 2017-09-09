@@ -312,6 +312,7 @@ void LLToolCamera::pickCallback(const LLPickInfo& pick_info)
 		}
 
 		if (!(pick_info.mKeyMask & MASK_ALT) &&
+			!LLFloaterCamera::inFreeCameraMode() &&
 			gAgentCamera.cameraThirdPerson() &&
 //			gViewerWindow->getLeftMouseDown() && 
 // [SL:KB] - Patch: Settings-MouseWalk | Checked: Catznip-5.2

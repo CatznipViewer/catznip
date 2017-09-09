@@ -114,6 +114,9 @@ public:
     void onTexturePickerUpdateImageStats(LLPointer<LLViewerTexture> texture);
     void onBeforeOutfitSnapshotSave();
     void onAfterOutfitSnapshotSave();
+
+    /*virtual*/ BOOL handleDoubleClick(S32 x, S32 y, MASK mask);
+
 protected:
     /*virtual*/ void onHighlightBaseOutfit(LLUUID base_id, LLUUID prev_id);
     /*virtual*/ void onSetSelectedOutfitByUUID(const LLUUID& outfit_uuid);
@@ -161,6 +164,8 @@ private:
     void moveRowPanel(LLPanel* stack, int left, int bottom);
     std::vector<LLPanel*> mRowPanels;
     std::vector<LLPanel*> mItemPanels;
+    std::vector<LLPanel*> mUnusedRowPanels;
+    std::vector<LLPanel*> mUnusedItemPanels;
     std::vector<LLOutfitGalleryItem*> mItems;
     std::vector<LLOutfitGalleryItem*> mHiddenItems;
     LLScrollContainer* mScrollPanel;
@@ -276,7 +281,6 @@ private:
     LLTextBox* mOutfitNameText;
     LLTextBox* mOutfitWornText;
     LLPanel* mTextBgPanel;
-    LLPanel* mFotoBgPanel;
     bool     mSelected;
     bool     mWorn;
     bool     mDefaultImage;

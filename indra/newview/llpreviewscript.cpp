@@ -375,7 +375,8 @@ LLScriptEdCore::LLScriptEdCore(
 	mLiveFile(NULL),
 	mLive(live),
 	mContainer(container),
-	mHasScriptData(FALSE)
+	mHasScriptData(FALSE),
+	mScriptRemoved(FALSE)
 {
 	setFollowsAll();
 	setBorderVisible(FALSE);
@@ -666,7 +667,7 @@ bool LLScriptEdCore::hasChanged()
 void LLScriptEdCore::draw()
 {
 	BOOL script_changed	= hasChanged();
-	getChildView("Save_btn")->setEnabled(script_changed);
+	getChildView("Save_btn")->setEnabled(script_changed && !mScriptRemoved);
 
 	if( mEditor->hasFocus() )
 	{
@@ -840,7 +841,7 @@ void LLScriptEdCore::addHelpItemToHistory(const std::string& help_string)
 
 BOOL LLScriptEdCore::canClose()
 {
-	if(mForceClose || !hasChanged())
+	if(mForceClose || !hasChanged() || mScriptRemoved)
 	{
 		return TRUE;
 	}
@@ -1547,6 +1548,17 @@ BOOL LLPreviewLSL::postBuild()
 	return LLPreview::postBuild();
 }
 
+void LLPreviewLSL::draw()
+{
+	const LLInventoryItem* item = getItem();
+	if(!item)
+	{
+		setTitle(LLTrans::getString("ScriptWasDeleted"));
+		mScriptEd->setItemRemoved(TRUE);
+	}
+
+	LLPreview::draw();
+}
 // virtual
 void LLPreviewLSL::callbackLSLCompileSucceeded()
 {
@@ -1894,8 +1906,14 @@ void LLLiveLSLEditor::loadAsset()
 
 			if(item)
 			{
-                LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(),
-                        boost::bind(&LLLiveLSLEditor::setAssociatedExperience, getDerivedHandle<LLLiveLSLEditor>(), _1));
+				LLViewerRegion* region = object->getRegion();
+				std::string url = std::string();
+				if(region)
+				{
+					url = region->getCapability("GetMetadata");
+				}
+				LLExperienceCache::instance().fetchAssociatedExperience(item->getParentUUID(), item->getUUID(), url,
+					boost::bind(&LLLiveLSLEditor::setAssociatedExperience, getDerivedHandle<LLLiveLSLEditor>(), _1));
 
 				bool isGodlike = gAgent.isGodlike();
 				bool copyManipulate = gAgent.allowOperation(PERM_COPY, item->getPermissions(), GP_OBJECT_MANIPULATE);

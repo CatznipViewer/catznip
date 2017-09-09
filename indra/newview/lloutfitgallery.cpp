@@ -34,6 +34,7 @@
 #include "llcommonutils.h"
 #include "llvfile.h"
 
+#include "llaccordionctrltab.h"
 #include "llappearancemgr.h"
 #include "lleconomy.h"
 #include "llerror.h"
@@ -46,6 +47,8 @@
 #include "llinventorymodel.h"
 #include "lllocalbitmaps.h"
 #include "llnotificationsutil.h"
+#include "llpaneloutfitsinventory.h"
+#include "lltabcontainer.h"
 #include "lltexturectrl.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
@@ -106,7 +109,8 @@ BOOL LLOutfitGallery::postBuild()
 {
     BOOL rv = LLOutfitListBase::postBuild();
     mScrollPanel = getChild<LLScrollContainer>("gallery_scroll_panel");
-    mGalleryPanel = getChild<LLPanel>("gallery_panel");
+    LLPanel::Params params = LLPanel::getDefaultParams(); // Don't parse XML when creating dummy LLPanel
+    mGalleryPanel = LLUICtrlFactory::create<LLPanel>(params);
     mMessageTextBox = getChild<LLTextBox>("no_outfits_txt");
     mOutfitGalleryMenu = new LLOutfitGalleryContextMenu(this);
     return rv;
@@ -234,6 +238,7 @@ void LLOutfitGallery::removeLastRow()
 {
     mRowCount--;
     mGalleryPanel->removeChild(mLastRowPanel);
+    mUnusedRowPanels.push_back(mLastRowPanel);
     mRowPanels.pop_back();
     mLastRowPanel = mRowPanels.back();
 }
@@ -335,6 +340,7 @@ void LLOutfitGallery::removeFromLastRow(LLOutfitGalleryItem* item)
 {
     mItemPanels.back()->removeChild(item);
     mLastRowPanel->removeChild(mItemPanels.back());
+    mUnusedItemPanels.push_back(mItemPanels.back());
     mItemPanels.pop_back();
 }
 
@@ -374,7 +380,16 @@ LLPanel* LLOutfitGallery::buildItemPanel(int left)
 {
     LLPanel::Params lpparams;
     int top = 0;
-    LLPanel* lpanel = LLUICtrlFactory::create<LLPanel>(lpparams);
+    LLPanel* lpanel = NULL;
+    if(mUnusedItemPanels.empty())
+    {
+        lpanel = LLUICtrlFactory::create<LLPanel>(lpparams);
+    }
+    else
+    {
+        lpanel = mUnusedItemPanels.back();
+        mUnusedItemPanels.pop_back();
+    }
     LLRect rect = LLRect(left, top + mItemHeight, left + mItemWidth + mItemHorizontalGap, top);
     lpanel->setRect(rect);
     lpanel->reshape(mItemWidth + mItemHorizontalGap, mItemHeight);
@@ -387,7 +402,16 @@ LLPanel* LLOutfitGallery::buildItemPanel(int left)
 LLPanel* LLOutfitGallery::buildRowPanel(int left, int bottom)
 {
     LLPanel::Params sparams;
-    LLPanel* stack = LLUICtrlFactory::create<LLPanel>(sparams);
+    LLPanel* stack = NULL;
+    if(mUnusedRowPanels.empty())
+    {
+        stack = LLUICtrlFactory::create<LLPanel>(sparams);
+    }
+    else
+    {
+        stack = mUnusedRowPanels.back();
+        mUnusedRowPanels.pop_back();
+    }
     moveRowPanel(stack, left, bottom);
     return stack;
 }
@@ -417,6 +441,19 @@ LLOutfitGallery::~LLOutfitGallery()
         gInventory.removeObserver(mOutfitsObserver);
     }
     delete mOutfitsObserver;
+
+    while (!mUnusedRowPanels.empty())
+    {
+        LLPanel* panelp = mUnusedRowPanels.back();
+        mUnusedRowPanels.pop_back();
+        panelp->die();
+    }
+    while (!mUnusedItemPanels.empty())
+    {
+        LLPanel* panelp = mUnusedItemPanels.back();
+        mUnusedItemPanels.pop_back();
+        panelp->die();
+    }
 }
 
 void LLOutfitGallery::setFilterSubString(const std::string& string)
@@ -497,7 +534,7 @@ void LLOutfitGallery::updateAddedCategory(LLUUID cat_id)
 
     // Start observing changes in "My Outfits" category.
     mOutfitsObserver->addCategory(cat_id,
-        boost::bind(&LLOutfitGallery::refreshOutfit, this, cat_id));
+        boost::bind(&LLOutfitGallery::refreshOutfit, this, cat_id), true);
 
     outfit_category->fetch();
     refreshOutfit(cat_id);
@@ -640,7 +677,6 @@ BOOL LLOutfitGalleryItem::postBuild()
 
     mOutfitNameText = getChild<LLTextBox>("outfit_name");
     mOutfitWornText = getChild<LLTextBox>("outfit_worn_text");
-    mFotoBgPanel = getChild<LLPanel>("foto_bg_panel");
     mTextBgPanel = getChild<LLPanel>("text_bg_panel");
     setOutfitWorn(false);
     mHidden = false;
@@ -707,6 +743,33 @@ BOOL LLOutfitGalleryItem::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
     setFocus(TRUE);
     return LLUICtrl::handleRightMouseDown(x, y, mask);
+}
+
+BOOL LLOutfitGallery::handleDoubleClick(S32 x, S32 y, MASK mask)
+{
+    LLTabContainer* appearence_tabs = LLPanelOutfitsInventory::findInstance()->getChild<LLTabContainer>("appearance_tabs");
+    LLPanel* panel = NULL;
+    LLAccordionCtrl* accordion = NULL;
+    if (appearence_tabs != NULL)
+    {
+        appearence_tabs->selectTabByName("outfitslist_tab");
+        panel = appearence_tabs->getCurrentPanel();
+        if (panel != NULL)
+        {
+            accordion = panel->getChild<LLAccordionCtrl>("outfits_accordion");
+            LLOutfitsList* outfit_list = dynamic_cast<LLOutfitsList*>(panel);
+            if (accordion != NULL && outfit_list != NULL)
+            {
+                LLUUID item_id = getSelectedOutfitUUID();
+                outfit_list->setSelectedOutfitByUUID(item_id);
+                LLAccordionCtrlTab* tab = accordion->getSelectedTab();
+                tab->showAndFocusHeader();
+                return TRUE;
+            }
+        }
+    }
+
+	return LLUICtrl::handleDoubleClick(x, y, mask);
 }
 
 void LLOutfitGalleryItem::setImageAssetId(LLUUID image_asset_id)
@@ -999,7 +1062,7 @@ void LLOutfitGallery::refreshOutfit(const LLUUID& category_id)
         }
     }
     
-    if (mGalleryCreated)
+    if (mGalleryCreated && !LLApp::isQuitting())
     {
         reArrangeRows();
     }
@@ -1101,7 +1164,7 @@ void LLOutfitGallery::uploadPhotoCallback(const LLUUID& outfit_id, const std::st
                 return;
             }
 
-            S32 expected_upload_cost = LLGlobalEconomy::Singleton::getInstance()->getPriceUpload(); // kinda hack - assumes that unsubclassed LLFloaterNameDesc is only used for uploading chargeable assets, which it is right now (it's only used unsubclassed for the sound upload dialog, and THAT should be a subclass).
+            S32 expected_upload_cost = LLGlobalEconomy::getInstance()->getPriceUpload(); // kinda hack - assumes that unsubclassed LLFloaterNameDesc is only used for uploading chargeable assets, which it is right now (it's only used unsubclassed for the sound upload dialog, and THAT should be a subclass).
 //            void *nruserdata = NULL;
 //            nruserdata = (void *)&outfit_id;
 
@@ -1179,7 +1242,7 @@ void LLOutfitGallery::onTexturePickerCommit(LLTextureCtrl::ETexturePickOp op, LL
         }
         else
         {
-            image_item_id = floaterp->findItemID(floaterp->getAssetID(), FALSE);
+            image_item_id = floaterp->findItemID(floaterp->getAssetID(), FALSE, TRUE);
             if (image_item_id.isNull())
             {
                 LL_WARNS() << "id or image_item_id is NULL!" << LL_ENDL;

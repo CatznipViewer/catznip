@@ -40,8 +40,11 @@ set(llcommon_SOURCE_FILES
     llbase64.cpp
     llbitpack.cpp
     llcallbacklist.cpp
+    llcallstack.cpp
+    llcleanup.cpp
     llcommon.cpp
     llcommonutils.cpp
+    llcoro_get_id.cpp
     llcoros.cpp
     llcrc.cpp
     llcriticaldamp.cpp
@@ -66,7 +69,9 @@ set(llcommon_SOURCE_FILES
     llformat.cpp
     llframetimer.cpp
     llheartbeat.cpp
+    llheteromap.cpp
     llinitparam.cpp
+    llinitdestroyclass.cpp
     llinstancetracker.cpp
     llleap.cpp
     llleaplistener.cpp
@@ -115,6 +120,7 @@ set(llcommon_SOURCE_FILES
     llworkerthread.cpp
     timing.cpp
     u64.cpp
+    StackWalker.cpp
     )
     
 set(llcommon_HEADER_FILES
@@ -135,8 +141,11 @@ set(llcommon_HEADER_FILES
     llbitpack.h
     llboost.h
     llcallbacklist.h
+    llcallstack.h
+    llcleanup.h
     llcommon.h
     llcommonutils.h
+    llcoro_get_id.h
     llcoros.h
     llcrc.h
     llcriticaldamp.h
@@ -168,7 +177,9 @@ set(llcommon_HEADER_FILES
     llhandle.h
     llhash.h
     llheartbeat.h
+    llheteromap.h
     llindexedvector.h
+    llinitdestroyclass.h
     llinitparam.h
     llinstancetracker.h
     llkeythrottle.h
@@ -185,6 +196,7 @@ set(llcommon_HEADER_FILES
     llmortician.h
     llnametable.h
     llpointer.h
+    llpounceable.h
     llpredicate.h
     llpreprocessor.h
     llpriqueuemap.h
@@ -237,6 +249,7 @@ set(llcommon_HEADER_FILES
     stringize.h
     timer.h
     u64.h
+    StackWalker.h
     )
 
 set_source_files_properties(${llcommon_HEADER_FILES}
@@ -311,24 +324,27 @@ if (LL_TESTS)
   LL_ADD_INTEGRATION_TEST(lldeadmantimer "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lldependencies "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llerror "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(lleventfilter "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llframetimer "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llheteromap "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llinstancetracker "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llpounceable "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llprocessor "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llprocinfo "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llrand "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llsdserialize "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llsingleton "" "${test_libs}")
+  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llstring "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lltrace "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lltreeiterators "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(lluri "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(llunits "" "${test_libs}")
   LL_ADD_INTEGRATION_TEST(stringize "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventdispatcher "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(lleventcoro "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llprocess "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llleap "" "${test_libs}")
-  LL_ADD_INTEGRATION_TEST(llstreamqueue "" "${test_libs}")
 
 ## llexception_test.cpp isn't a regression test, and doesn't need to be run
 ## every build. It's to help a developer make implementation choices about

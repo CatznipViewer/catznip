@@ -22,7 +22,6 @@
 			<menu_item_check label="着信拒否" name="Do Not Disturb"/>
 		</menu>
 		<menu_item_call label="L$ の購入..." name="Buy and Sell L$"/>
-		<menu_item_call label="マーチャントアウトボックス..." name="MerchantOutbox"/>
 		<menu_item_call label="マーケティングプレイスのリスト..." name="MarketplaceListings"/>
 		<menu_item_call label="マイアカウント..." name="Manage My Account">
 			<menu_item_call.on_click name="ManageMyAccount_url" parameter="WebLaunchJoinNow,http://secondlife.com/account/index.php?lang=ja"/>
@@ -45,6 +44,7 @@
 			<menu_item_check label="ボイスモーフィングなし" name="NoVoiceMorphing"/>
 			<menu_item_check label="プレビュー..." name="Preview"/>
 			<menu_item_call label="申し込む..." name="Subscribe"/>
+			<menu_item_call label="プレミアム会員特典..." name="PremiumPerk"/>
 		</menu>
 		<menu_item_check label="ジェスチャー..." name="Gestures"/>
 		<menu_item_check label="フレンド" name="My Friends"/>
@@ -58,7 +58,8 @@
 		<menu_item_call label="行き先..." name="Destinations"/>
 		<menu_item_check label="世界地図" name="World Map"/>
 		<menu_item_check label="ミニマップ" name="Mini-Map"/>
-		<menu_item_check label="検索" name="Search"/>
+		<menu_item_call label="イベント" name="Events"/>
+		<menu_item_check label="検索..." name="Search"/>
 		<menu_item_call label="ホームにテレポート" name="Teleport Home"/>
 		<menu_item_call label="現在地をホームに設定" name="Set Home to Here"/>
 		<menu_item_call label="スナップショット" name="Take Snapshot"/>
@@ -114,11 +115,11 @@
 		<menu_item_call label="リンク" name="Link"/>
 		<menu_item_call label="リンクを外す" name="Unlink"/>
 		<menu_item_check label="リンクした部分を編集" name="Edit Linked Parts"/>
-		<menu label="リンクした部分を選択する" name="Select Linked Parts">
-			<menu_item_call label="次の部分を選択する" name="Select Next Part"/>
-			<menu_item_call label="前回の部分を選択する" name="Select Previous Part"/>
-			<menu_item_call label="次の部分を含める" name="Include Next Part"/>
-			<menu_item_call label="前回の部分を含める" name="Include Previous Part"/>
+		<menu label="要素を選択" name="Select Elements">
+			<menu_item_call label="次のパーツまたは面を選択" name="Select Next Part or Face"/>
+			<menu_item_call label="前のパーツまたは面を選択" name="Select Previous Part or Face"/>
+			<menu_item_call label="次のパーツまたは面を含める" name="Include Next Part or Face"/>
+			<menu_item_call label="前のパーツまたは面を含める" name="Include Previous Part or Face"/>
 		</menu>
 		<menu_item_call label="リンクセット..." name="pathfinding_linkset_menu_item"/>
 		<menu_item_call label="選択したものに焦点を合わせる" name="Focus on Selection"/>
@@ -129,8 +130,10 @@
 			<menu_item_call label="コピーを取る" name="Take Copy"/>
 			<menu_item_call label="オブジェクトの中身に保存" name="Save Object Back to Object Contents"/>
 			<menu_item_call label="オブジェクトを返却する" name="Return Object back to Owner"/>
+			<menu_item_call label="複製" name="DuplicateObject"/>
 		</menu>
 		<menu label="スクリプト" name="Scripts">
+			<menu_item_check label="スクリプトの警告/エラー..." name="Script debug"/>
 			<menu_item_call label="スクリプトのリコンパイル（Mono）" name="Mono"/>
 			<menu_item_call label="スクリプトのリコンパイル（LSL）" name="LSL"/>
 			<menu_item_call label="スクリプトのリセット" name="Reset Scripts"/>
@@ -369,8 +372,7 @@
 			<menu_item_call label="リージョンオブジェクトのキャッシュをダンプ" name="Dump Region Object Cache"/>
 		</menu>
 		<menu label="UI" name="UI">
-			<menu_item_call label="メディアブラウザのテスト" name="Web Browser Test"/>
-			<menu_item_call label="Web コンテンツブラウザ" name="Web Content Browser"/>
+			<menu_item_call label="メディアブラウザ" name="Media Browser"/>
 			<menu_item_call label="SelectMgr をダンプ" name="Dump SelectMgr"/>
 			<menu_item_call label="インベントリの出力" name="Dump Inventory"/>
 			<menu_item_call label="タイマーをダンプ" name="Dump Timers"/>
@@ -421,6 +423,7 @@
 			<menu_item_check label="LOD を無効にする" name="Disable LOD"/>
 			<menu_item_check label="キャラクター Vis のデバッグ" name="Debug Character Vis"/>
 			<menu_item_check label="骨組みの衝突判定を表示する" name="Show Collision Skeleton"/>
+			<menu_item_check label="骨を表示" name="Show Bones"/>
 			<menu_item_check label="エージェントのターゲットを表示する" name="Display Agent Target"/>
 			<menu_item_call label="アタッチメントをダンプ" name="Dump Attachments"/>
 			<menu_item_call label="アバターテクスチャをデバッグ" name="Debug Avatar Textures"/>
