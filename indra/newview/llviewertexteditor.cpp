@@ -211,7 +211,7 @@ public:
 	}
 // [/SL:KB]
 
-	/*virtual*/ bool getDimensions(S32 first_char, S32 num_chars, S32& width, S32& height) const
+	/*virtual*/ bool getDimensionsF32(S32 first_char, S32 num_chars, F32& width, S32& height) const
 	{
 		if (num_chars == 0)
 		{
@@ -220,7 +220,7 @@ public:
 		}
 		else
 		{
-			width = EMBEDDED_ITEM_LABEL_PADDING + mImage->getWidth() + mStyle->getFont()->getWidth(mLabel.c_str());
+			width = EMBEDDED_ITEM_LABEL_PADDING + mImage->getWidth() + mStyle->getFont()->getWidthF32(mLabel.c_str());
 			height = llmax(mImage->getHeight(), mStyle->getFont()->getLineHeight());
 		}
 		return false;
