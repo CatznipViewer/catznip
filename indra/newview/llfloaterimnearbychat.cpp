@@ -87,6 +87,10 @@ static LLChatTypeTrigger sChatTypeTriggers[] = {
 	{ "/shout"	, CHAT_TYPE_SHOUT}
 };
 
+bool cb_do_nothing()
+{
+	return false;
+}
 
 LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
 :	LLFloaterIMSessionTab(LLSD(LLUUID::null)),
@@ -100,6 +104,12 @@ LLFloaterIMNearbyChat::LLFloaterIMNearbyChat(const LLSD& llsd)
     mIsP2PChat = false;
 	mIsNearbyChat = true;
 	mSpeakerMgr = LLLocalSpeakerMgr::getInstance();
+
+	// Required by LLFloaterIMSessionTab::mGearBtn
+	// But nearby floater has no 'per agent' menu items, 
+	mEnableCallbackRegistrar.add("Avatar.EnableGearItem", boost::bind(&cb_do_nothing));
+	mCommitCallbackRegistrar.add("Avatar.GearDoToSelected", boost::bind(&cb_do_nothing));
+	mEnableCallbackRegistrar.add("Avatar.CheckGearItem", boost::bind(&cb_do_nothing));
 }
 
 // [SL:KB] - Patch: Chat-NearbyToastWidth | Checked: 2010-11-10 (Catznip-2.4)
@@ -228,7 +238,7 @@ void LLFloaterIMNearbyChat::loadHistory()
 		else
  		{
 			std::string legacy_name = gCacheName->buildLegacyName(from);
- 			gCacheName->getUUID(legacy_name, from_id);
+			from_id = LLAvatarNameCache::findIdByName(legacy_name);
  		}
 
 		LLChat chat;
@@ -517,7 +527,8 @@ void LLFloaterIMNearbyChat::onChatBoxKeystroke()
 	KEY key = gKeyboard->currentKey();
 
 	// Ignore "special" keys, like backspace, arrows, etc.
-	if (length > 1 
+	if (gSavedSettings.getBOOL("ChatAutocompleteGestures")
+		&& length > 1
 		&& raw_text[0] == '/'
 		&& key < KEY_SPECIAL)
 	{
