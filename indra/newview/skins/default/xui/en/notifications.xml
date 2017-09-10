@@ -4,6 +4,11 @@
 		Don&apos;t show me this again
   </global>
 
+  <global name="skipnexttimesessiononly">
+Don&apos;t show me this again
+(for current session)
+  </global>
+
   <global name="alwayschoose">
 
 		Always choose this option
@@ -884,7 +889,7 @@ Do you wish to proceed?
    icon="alertmodal.tga"
    name="JoinGroupNoCost"
    type="alertmodal">
-You are joining group [NAME].
+You are joining group &lt;nolink&gt;[NAME]&lt;/nolink&gt;.
 Do you wish to proceed?
     <tag>group</tag>
     <tag>confirm</tag>
@@ -922,6 +927,108 @@ Please invite members within 48 hours.
      yestext="Create group for L$100"/>
   </notification>
 
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupInaccessible"
+   type="alertmodal">
+This group is not accessible to you.
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupError"
+   type="alertmodal">
+Error processing your group membership request.
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupErrorReason"
+   type="alertmodal">
+Unable to join group: [reason]
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <tag>reason</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupTrialUser"
+   type="alertmodal">
+Sorry, trial users can't join groups.
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupMaxGroups"
+   type="alertmodal">
+You cannot join &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;:
+You are already a member of [group_count] groups, the maximum number allowed is [max_groups]
+    <tag>success</tag>
+    <tag>group_id</tag>
+    <tag>group_name</tag>
+    <tag>group_count</tag>
+    <tag>max_groups</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupClosedEnrollment"
+   type="alertmodal">
+You cannot join &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;:
+The group no longer has open enrollment.
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupSuccess"
+   type="alertmodal">
+You have been added to the group
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+  
+  <notification
+   icon="alertmodal.tga"
+   name="JoinGroupInsufficientFunds"
+   type="alertmodal">
+Unable to transfer the required L$ [membership_fee] membership fee.
+    <tag>group_id</tag>
+    <tag>success</tag>
+    <usetemplate
+       name="okbutton"
+       yestext="OK"/>
+  </notification>
+  
   <notification
    icon="alertmodal.tga"
    name="LandBuyPass"
@@ -978,7 +1085,7 @@ Your selling price will be L$[SALE_PRICE] and will be authorized for sale to [NA
    icon="alertmodal.tga"
    name="ReturnObjectsDeededToGroup"
    type="alertmodal">
-Are you sure you want to return all objects shared with the group &apos;[NAME]&apos; on this parcel of land back to their previous owner&apos;s inventory?
+Are you sure you want to return all objects shared with the group &apos;&lt;nolink&gt;[NAME]&lt;/nolink&gt;&apos; on this parcel of land back to their previous owner&apos;s inventory?
 
 *WARNING* This will delete the non-transferable objects deeded to the group!
 
@@ -1081,7 +1188,7 @@ Are you sure you want to disable all objects in this region?
    icon="alertmodal.tga"
    name="ReturnObjectsNotOwnedByGroup"
    type="alertmodal">
-Return the objects on this parcel of land that are NOT shared with the group [NAME] back to their owners?
+Return the objects on this parcel of land that are NOT shared with the group &lt;nolink&gt;[NAME]&lt;/nolink&gt; back to their owners?
 
 Objects: [N]
     <tag>confirm</tag>
@@ -1206,7 +1313,7 @@ There was a problem uploading a report screenshot due to the following reason: [
    name="MustAgreeToLogIn"
    type="alertmodal">
    <tag>fail</tag>
-You must agree to the Terms of Service to continue logging into [SECOND_LIFE].
+You must agree to the Second Life Terms and Conditions, Privacy Policy, and Terms of Service to continue logging into [SECOND_LIFE].
   </notification>
 
   <notification
@@ -1869,7 +1976,7 @@ Eject [AVATAR_NAME] from your land?
    name="EjectAvatarFromGroup"
    persist="true"
    type="notify">
-You ejected [AVATAR_NAME] from group [GROUP_NAME]
+You ejected [AVATAR_NAME] from group &lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;
     <tag>group</tag>
   </notification>
 
@@ -3244,7 +3351,7 @@ Please select a smaller area and try again.
 By deeding this parcel, the group will be required to have and maintain sufficient land use credits.
 The purchase price of the land is not refunded to the owner. If a deeded parcel is sold, the sale price will be divided evenly among group members.
 
-Deed this [AREA] m² of land to the group &apos;[GROUP_NAME]&apos;?
+Deed this [AREA] m² of land to the group &apos;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
     <tag>group</tag>
     <tag>confirm</tag>
     <usetemplate
@@ -3261,7 +3368,7 @@ By deeding this parcel, the group will be required to have and maintain sufficie
 The deed will include a simultaneous land contribution to the group from &apos;[NAME]&apos;.
 The purchase price of the land is not refunded to the owner. If a deeded parcel is sold, the sale price will be divided evenly among group members.
 
-Deed this [AREA] m² of land to the group &apos;[GROUP_NAME]&apos;?
+Deed this [AREA] m² of land to the group &apos;&lt;nolink&gt;[GROUP_NAME]&lt;/nolink&gt;&apos;?
     <tag>group</tag>
     <tag>confirm</tag>
     <usetemplate
@@ -4237,7 +4344,7 @@ Leave Group?
    icon="notify.tga"
    name="GroupDepart"
    type="notify">
-You have left the group &apos;[group_name]&apos;.
+You have left the group &apos;&lt;nolink&gt;[group_name]&lt;/nolink&gt;&apos;.
     <tag>group</tag>
   </notification>
 
@@ -4995,6 +5102,17 @@ Are you sure you want to change the Estate Covenant?
     <usetemplate
      name="okcancelbuttons"
      notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="EstateParcelAccessOverride"
+   type="alertmodal">
+Unchecking this option may remove restrictions that parcel owners have added to prevent griefing, maintain privacy, or protect underage residents from adult material. Please discuss with your parcel owners as needed.
+    <tag>confirm</tag>
+    <usetemplate
+     name="okbutton"
      yestext="OK"/>
   </notification>
 
@@ -5906,8 +6024,33 @@ You cannot undo this action.
     <unique/>
     [QUESTION]
     <tag>confirm</tag>
+    <form name="form">
+     <ignore name="ignore"
+      session_only="true"
+      text="Confirm before deleting items"/>
+      <button
+       default="true"
+       index="0"
+       name="Yes"
+       text="OK"/>
+      <button
+       index="1"
+       name="No"
+       text="Cancel"/>
+    </form>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="DeleteFilteredItems"
+   type="alertmodal">
+    <unique/>
+    Your inventory is currently filtered and not all of the items you're about to delete are currently visible.
+
+Are you sure you want to delete them?
+    <tag>confirm</tag>
     <usetemplate
-     ignoretext="Confirm before deleting items"
+     ignoretext="Confirm before deleting filtered items"
      name="okcancelignore"
      notext="Cancel"
      yestext="OK"/>
@@ -6090,13 +6233,24 @@ The folder &apos;[FOLDERNAME]&apos; is a system folder. Deleting system folders 
 
   <notification
    icon="alertmodal.tga"
-   name="ConfirmEmptyTrash"
+   name="PurgeSelectedItems"
    type="alertmodal">
-Are you sure you want to permanently delete the contents of your Trash?
+[COUNT] item(s) will be permanently deleted. Are you sure you want to permanently delete selected item(s) from your Trash?
     <tag>confirm</tag>
     <usetemplate
-     ignoretext="Confirm before I empty the inventory Trash folder"
-     name="okcancelignore"
+     name="okcancelbuttons"
+     notext="Cancel"
+     yestext="OK"/>
+  </notification>
+
+  <notification
+   icon="alertmodal.tga"
+   name="ConfirmEmptyTrash"
+   type="alertmodal">
+[COUNT] items will be permanently deleted. Are you sure you want to permanently delete the contents of your Trash?
+    <tag>confirm</tag>
+    <usetemplate
+     name="okcancelbuttons"
      notext="Cancel"
      yestext="OK"/>
   </notification>
@@ -6110,7 +6264,7 @@ Your trash is overflowing. This may cause problems logging in.
         <usetemplate
          name="okcancelbuttons"
          notext="I will empty trash later"
-         yestext="Empty trash now"/>
+         yestext="Check trash folder"/>
   </notification>
 
   <notification
@@ -6403,13 +6557,6 @@ The string [STRING_NAME] is missing from strings.xml
    name="Cancelled"
    type="notifytip">
 Cancelled
-  </notification>
-
-  <notification
-   icon="notifytip.tga"
-   name="CancelledSit"
-   type="notifytip">
-Cancelled Sit
   </notification>
 
   <notification
@@ -6937,7 +7084,7 @@ The objects on the selected parcel of land owned by the Resident &apos;[NAME]&ap
    name="GroupObjectsReturned"
    persist="true"
    type="notify">
-The objects on the selected parcel of land shared with the group [GROUPNAME] have been returned back to their owner&apos;s inventory.
+The objects on the selected parcel of land shared with the group &lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt; have been returned back to their owner&apos;s inventory.
 Transferable deeded objects have been returned to their previous owners.
 Non-transferable objects that are deeded to the group have been deleted.
     <tag>group</tag>
@@ -7425,6 +7572,7 @@ Your object named &lt;nolink&gt;[OBJECTFROMNAME]&lt;/nolink&gt; has given you th
    name="TeleportOffered"
    log_to_im="true"
    log_to_chat="false"
+   fade_toast="false"
    type="offer"
    sound="UISndNewIncomingIMSession">
 [NAME_SLURL] has offered to teleport you to their location:
@@ -7500,6 +7648,7 @@ However, this region contains content accessible to adults only.
    icon="notify.tga"
    name="TeleportRequest"
    log_to_im="true"
+   fade_toast="false"
    type="offer">
 [NAME_SLURL] is requesting to be teleported to your location.
 [MESSAGE]
@@ -7856,6 +8005,7 @@ Other Key Experiences may be available.
    icon="notify.tga"
    name="ScriptQuestionExperience"
    persist="false"
+   fade_toast="false"
    type="notify">
 &apos;&lt;nolink&gt;[OBJECTNAME]&lt;/nolink&gt;&apos;, an object owned by &apos;[NAME]&apos;, requests your participation in the [GRID_WIDE] experience:
 
@@ -7965,7 +8115,7 @@ To grant this permission please update your viewer to the latest version from [D
    show_toast="false"
    type="notify">
     <tag>group</tag>
-[GROUPNAME]&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
+&lt;nolink&gt;[GROUPNAME]&lt;/nolink&gt;&apos;s &apos;&lt;nolink&gt;[TITLE]&lt;/nolink&gt;&apos;
 [MESSAGE]
     <form name="form">
       <button
@@ -8096,7 +8246,7 @@ Click Accept to join the call or Decline to decline the invitation. Click Block 
    icon="notify.tga"
    name="VoiceInviteGroup"
    type="notify">
-[NAME] has joined a Voice Chat call with the group [GROUP].
+[NAME] has joined a Voice Chat call with the group &lt;nolink&gt;[GROUP]&lt;/nolink&gt;.
 Click Accept to join the call or Decline to decline the invitation. Click Block to block this caller.
     <tag>group</tag>
     <tag>confirm</tag>
@@ -8428,6 +8578,11 @@ Appearance has been saved to XML to [PATH]
 Failed to save appearance to XML.
   </notification>
 
+  <notification icon="notifytip.tga"
+    name="SnapshotToComputerFailed" type="notifytip">
+Failed to save snapshot to [PATH]: Disk is full. [NEED_MEMORY]KB is required but only [FREE_MEMORY]KB is free.
+  </notification>
+
   <notification
     icon="notifytip.tga"
     name="PresetNotSaved"
@@ -8523,11 +8678,20 @@ Select residents to share with.
   </notification>
 
   <notification
+    name="MeshUploadErrorDetails"
+    icon="alert.tga"
+    type="alert">
+      [LABEL] failed to upload: [MESSAGE]
+[DETAILS]See SecondLife.log for details
+  </notification>
+
+  <notification
     name="MeshUploadError"
     icon="alert.tga"
     type="alert">
-      [LABEL] failed to upload: [MESSAGE] [IDENTIFIER]
-[DETAILS]See SecondLife.log for details
+      [LABEL] failed to upload: [MESSAGE]
+
+See SecondLife.log for details
   </notification>
    
   <notification

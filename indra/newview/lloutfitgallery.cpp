@@ -34,6 +34,7 @@
 #include "llcommonutils.h"
 #include "llvfile.h"
 
+#include "llaccordionctrltab.h"
 #include "llappearancemgr.h"
 #include "lleconomy.h"
 #include "llerror.h"
@@ -46,6 +47,8 @@
 #include "llinventorymodel.h"
 #include "lllocalbitmaps.h"
 #include "llnotificationsutil.h"
+#include "llpaneloutfitsinventory.h"
+#include "lltabcontainer.h"
 #include "lltexturectrl.h"
 #include "lltrans.h"
 #include "llviewercontrol.h"
@@ -341,7 +344,7 @@ void LLOutfitGallery::removeFromLastRow(LLOutfitGalleryItem* item)
     mItemPanels.pop_back();
 }
 
-LLOutfitGalleryItem* LLOutfitGallery::buildGalleryItem(std::string name)
+LLOutfitGalleryItem* LLOutfitGallery::buildGalleryItem(std::string name, LLUUID outfit_id)
 {
     LLOutfitGalleryItem::Params giparams;
     LLOutfitGalleryItem* gitem = LLUICtrlFactory::create<LLOutfitGalleryItem>(giparams);
@@ -350,6 +353,7 @@ LLOutfitGalleryItem* LLOutfitGallery::buildGalleryItem(std::string name)
     gitem->setFollowsLeft();
     gitem->setFollowsTop();
     gitem->setOutfitName(name);
+    gitem->setUUID(outfit_id);
     return gitem;
 }
 
@@ -508,7 +512,7 @@ void LLOutfitGallery::updateAddedCategory(LLUUID cat_id)
     if (!cat) return;
 
     std::string name = cat->getName();
-    LLOutfitGalleryItem* item = buildGalleryItem(name);
+    LLOutfitGalleryItem* item = buildGalleryItem(name, cat_id);
     mOutfitMap.insert(LLOutfitGallery::outfit_map_value_t(cat_id, item));
     item->setRightMouseDownCallback(boost::bind(&LLOutfitListBase::outfitRightClickCallBack, this,
         _1, _2, _3, cat_id));
@@ -658,7 +662,8 @@ LLOutfitGalleryItem::LLOutfitGalleryItem(const Params& p)
     mSelected(false),
     mWorn(false),
     mDefaultImage(true),
-    mOutfitName("")
+    mOutfitName(""),
+    mUUID(LLUUID())
 {
     buildFromFile("panel_outfit_gallery_item.xml");
 }
@@ -740,6 +745,30 @@ BOOL LLOutfitGalleryItem::handleRightMouseDown(S32 x, S32 y, MASK mask)
 {
     setFocus(TRUE);
     return LLUICtrl::handleRightMouseDown(x, y, mask);
+}
+
+BOOL LLOutfitGalleryItem::handleDoubleClick(S32 x, S32 y, MASK mask)
+{
+    LLTabContainer* appearence_tabs = LLPanelOutfitsInventory::findInstance()->getChild<LLTabContainer>("appearance_tabs");
+    if (appearence_tabs && (mUUID != LLUUID()))
+    {
+        appearence_tabs->selectTabByName("outfitslist_tab");
+        LLPanel* panel = appearence_tabs->getCurrentPanel();
+        if (panel)
+        {
+            LLAccordionCtrl* accordion = panel->getChild<LLAccordionCtrl>("outfits_accordion");
+            LLOutfitsList* outfit_list = dynamic_cast<LLOutfitsList*>(panel);
+            if (accordion != NULL && outfit_list != NULL)
+            {
+                outfit_list->setSelectedOutfitByUUID(mUUID);
+                LLAccordionCtrlTab* tab = accordion->getSelectedTab();
+                tab->showAndFocusHeader();
+                return TRUE;
+            }
+        }
+    }
+
+    return LLPanel::handleDoubleClick(x, y, mask);
 }
 
 void LLOutfitGalleryItem::setImageAssetId(LLUUID image_asset_id)
