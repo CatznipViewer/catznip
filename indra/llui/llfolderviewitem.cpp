@@ -1246,12 +1246,10 @@ BOOL LLFolderViewFolder::needsArrange()
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
 }
 
-// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2013-05-19 (Catznip-3.5)
 bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
 {
 	return getViewModelItem()->descendantsPassedFilter(filter_generation);
 }
-// [/SL:KB]
 
 // Passes selection information on to children and record selection
 // information if necessary.
@@ -2020,7 +2018,7 @@ BOOL LLFolderViewFolder::handleDoubleClick( S32 x, S32 y, MASK mask )
 		}
 		else if(mIndentation < x && x < mIndentation + (isCollapsed() ? 0 : mArrowSize) + mTextPad)
 // [/SL:KB]
-		if(mIndentation < x && x < mIndentation + (isCollapsed() ? 0 : mArrowSize) + mTextPad)
+//		if(mIndentation < x && x < mIndentation + (isCollapsed() ? 0 : mArrowSize) + mTextPad)
 		{
 			// don't select when user double-clicks plus sign
 			// so as not to contradict single-click behavior

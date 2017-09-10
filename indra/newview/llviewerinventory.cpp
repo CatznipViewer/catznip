@@ -1469,6 +1469,10 @@ void remove_inventory_category(
 	LLPointer<LLViewerInventoryCategory> obj = gInventory.getCategory(cat_id);
 	if(obj)
 	{
+		if (!gInventory.isCategoryComplete(cat_id))
+		{
+			LL_WARNS() << "Removing (purging) incomplete category " << obj->getName() << LL_ENDL;
+		}
 //		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType()))
 // [SL:KB] - Patch: Inventory-UserProtectedFolders | Checked: Catznip-5.2
 		if(LLFolderType::lookupIsProtectedType(obj->getPreferredType(), obj->getUUID()))
@@ -1549,6 +1553,10 @@ void purge_descendents_of(const LLUUID& id, LLPointer<LLInventoryCallback> cb)
 		{
             if (AISAPI::isAvailable())
 			{
+				if (cat->getVersion() == LLViewerInventoryCategory::VERSION_UNKNOWN)
+				{
+					LL_WARNS() << "Purging not fetched folder: " << cat->getName() << LL_ENDL;
+				}
                 AISAPI::completion_t cr = (cb) ? boost::bind(&doInventoryCb, cb, _1) : AISAPI::completion_t();
                 AISAPI::PurgeDescendents(id, cr);
 			}
