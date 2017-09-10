@@ -982,7 +982,13 @@ void LLFloaterIMSession::sessionInitReplyReceived(const LLUUID& im_session_id)
 	if (mSessionID != im_session_id)
 	{
 		initIMSession(im_session_id);
-		buildConversationViewParticipant();
+// [SL:KB] - Patch: Chat-ParticipantList | Checked: Catznip-5.2
+		if (LLFloaterIMContainerBase::CT_VIEW == LLFloaterIMContainerBase::getContainerType())
+		{
+			buildConversationViewParticipant();
+		}
+// [/SL:KB]
+//		buildConversationViewParticipant();
 	}
 
 	initIMFloater();
