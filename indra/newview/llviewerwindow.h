@@ -352,10 +352,10 @@ public:
 	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type);
 //	BOOL			isSnapshotLocSet() const { return ! sSnapshotDir.empty(); }
 //	void			resetSnapshotLoc() const { sSnapshotDir.clear(); }
-//	BOOL		    saveImageNumbered(LLImageFormatted *image, bool force_picker = false);
+//	BOOL			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory);
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
 	typedef boost::function<void(bool)> save_image_callback_t;
-	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker = false);
+	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool& insufficient_memory, bool force_picker = false);
 // [/SL:KB]
 
 //	// Reset the directory where snapshots are saved.
@@ -423,6 +423,7 @@ public:
 
 	bool getSystemUIScaleFactorChanged() { return mSystemUIScaleFactorChanged; }
 	static void showSystemUIScaleFactorChanged();
+//	static std::string getLastSnapshotDir() { return sSnapshotDir; }
 
 private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);

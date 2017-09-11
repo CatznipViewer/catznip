@@ -33,6 +33,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <boost/lambda/core.hpp>
 #include <boost/regex.hpp>
 
@@ -4363,11 +4364,13 @@ BOOL LLViewerWindow::mousePointOnLandGlobal(const S32 x, const S32 y, LLVector3d
 }
 
 // Saves an image to the harddrive as "SnapshotX" where X >= 1.
-//BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, bool force_picker)
+//BOOL LLViewerWindow::saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory)
 // [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-bool LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker)
+bool LLViewerWindow::saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool& insufficient_memory, bool force_picker)
 // [/SL:KB]
 {
+	insufficient_memory = FALSE;
+
 	if (!image)
 	{
 		LL_WARNS() << "No image to save" << LL_ENDL;
@@ -4532,6 +4535,17 @@ void LLViewerWindow::saveImageNumbered(LLImageFormatted* image, const std::strin
 		base_name += "_%c";
 // [/SL:KB]
 
+// Check if there is enough free space to save snapshot
+#ifdef LL_WINDOWS
+	boost::filesystem::space_info b_space = boost::filesystem::space(utf8str_to_utf16str(sSnapshotDir));
+#else
+	boost::filesystem::space_info b_space = boost::filesystem::space(sSnapshotDir);
+#endif
+	if (b_space.free < image->getDataSize())
+	{
+		insufficient_memory = TRUE;
+		return FALSE;
+	}
 	// Look for an unused file name
 	std::string filepath;
 	S32 i = 1;
