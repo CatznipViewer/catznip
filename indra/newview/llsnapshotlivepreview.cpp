@@ -1065,7 +1065,7 @@ void LLSnapshotLivePreview::saveTexture(BOOL outfit_snapshot, std::string name)
 	mDataSize = 0;
 }
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 void LLSnapshotLivePreview::saveLocal(bool prompt_path, const LLViewerWindow::save_image_callback_t& cb)
 {
 	// Update mFormattedImage if necessary
@@ -1077,7 +1077,22 @@ void LLSnapshotLivePreview::saveLocal(bool prompt_path, const LLViewerWindow::sa
 		gViewerWindow->playSnapshotAnimAndSound();
 	}
 }
-
+// [/SL:KB]
+//BOOL LLSnapshotLivePreview::saveLocal()
+//{
+//    // Update mFormattedImage if necessary
+//    getFormattedImage();
+//    
+//    // Save the formatted image
+//	BOOL success = saveLocal(mFormattedImage);
+//
+//	if(success)
+//	{
+//		gViewerWindow->playSnapshotAnimAndSound();
+//	}
+//	return success;
+//}
+//
 ////Check if failed due to insufficient memory
 //BOOL LLSnapshotLivePreview::saveLocal(LLPointer<LLImageFormatted> mFormattedImage)
 //{

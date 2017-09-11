@@ -815,7 +815,7 @@ bool LLAppViewer::init()
 	// initialize skinning util
 	LLSkinningUtil::initClass();
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 	// Don't set the snapshot directory if it doesn't exist; the user will be asked for a location the first time they try to save one
 	const std::string strSnapshotPath = gSavedSettings.getString("SnapshotLocalPath");
 	if (gDirUtilp->fileExists(strSnapshotPath))

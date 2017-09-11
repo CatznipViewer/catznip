@@ -350,13 +350,13 @@ public:
 	BOOL			rawSnapshot(LLImageRaw *raw, S32 image_width, S32 image_height, BOOL keep_window_aspect = TRUE, BOOL is_texture = FALSE,
 		BOOL show_ui = TRUE, BOOL do_rebuild = FALSE, LLSnapshotModel::ESnapshotLayerType type = LLSnapshotModel::SNAPSHOT_TYPE_COLOR, S32 max_size = MAX_SNAPSHOT_IMAGE_SIZE);
 	BOOL			thumbnailSnapshot(LLImageRaw *raw, S32 preview_width, S32 preview_height, BOOL show_ui, BOOL do_rebuild, LLSnapshotModel::ESnapshotLayerType type);
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
+	typedef boost::function<void(bool)> save_image_callback_t;
+	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool force_picker = false);
+// [/SL:KB]
 //	BOOL			isSnapshotLocSet() const { return ! sSnapshotDir.empty(); }
 //	void			resetSnapshotLoc() const { sSnapshotDir.clear(); }
 //	BOOL			saveImageNumbered(LLImageFormatted *image, BOOL force_picker, BOOL& insufficient_memory);
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-	typedef boost::function<void(bool)> save_image_callback_t;
-	bool		    saveImage(LLPointer<LLImageFormatted> image, const save_image_callback_t& cb, bool& insufficient_memory, bool force_picker = false);
-// [/SL:KB]
 
 //	// Reset the directory where snapshots are saved.
 //	// Client will open directory picker on next snapshot save.
@@ -428,7 +428,7 @@ public:
 private:
 	bool                    shouldShowToolTipFor(LLMouseHandler *mh);
 
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	void		    saveImageCallback(LLPointer<LLImageFormatted> image, const std::string& filename, bool force_picker, const save_image_callback_t& cb);
 	static void		saveImageNumbered(LLImageFormatted* image, const std::string& path, std::string base_name, const save_image_callback_t& cb);
 // [/SL:KB]
