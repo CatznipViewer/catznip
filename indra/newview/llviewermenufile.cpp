@@ -702,7 +702,7 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 // [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 			gViewerWindow->saveImage(formatted, NULL, false);
 // [/SL:KB]
-//			gViewerWindow->saveImageNumbered(formatted);
+//			LLSnapshotLivePreview::saveLocal(formatted);
 		}
 		return true;
 	}
