@@ -156,7 +156,7 @@ public:
 	static LLFloaterSnapshot* getInstance();
 	static LLFloaterSnapshot* findInstance();
 	/*virtual*/ void saveTexture();
-// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
+// [SL:KB] - Patch: Control-FilePicker | Checked: Catznip-3.3
 	typedef boost::function<void(bool)> save_image_callback_t;
 	void saveLocal(bool prompt_path, const save_image_callback_t& cb);
 // [/SL:KB]

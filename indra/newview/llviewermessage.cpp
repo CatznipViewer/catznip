@@ -1329,6 +1329,11 @@ void open_inventory_offer(const uuid_vec_t& objects, const std::string& from_nam
 		const LLUUID& obj_id = (*obj_iter);
 		if(!highlight_offered_object(obj_id))
 		{
+			const LLViewerInventoryCategory *parent = gInventory.getFirstNondefaultParent(obj_id);
+			if (parent && (parent->getPreferredType() == LLFolderType::FT_TRASH))
+			{
+				gInventory.checkTrashOverflow();
+			}
 			continue;
 		}
 
@@ -3208,11 +3213,16 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 	case IM_INVENTORY_ACCEPTED:
 	{
 //		args["NAME"] = LLSLURL("agent", from_id, "completename").getSLURLString();;
+//		args["ORIGINAL_NAME"] = original_name;
 // [RLVa:KB] - Checked: RLVa-1.2.2
 		// Only anonymize the name if the agent is nearby, there isn't an open IM session to them and their profile isn't open
 		bool fRlvCanShowName = (!RlvActions::isRlvEnabled()) ||
 			(RlvActions::canShowName(RlvActions::SNC_DEFAULT, from_id)) || (!RlvUtil::isNearbyAgent(from_id)) || (RlvUIEnabler::hasOpenProfile(from_id)) || (RlvUIEnabler::hasOpenIM(from_id));
-		args["NAME"] = LLSLURL("agent", from_id, (fRlvCanShowName) ? "completename" : "rlvanonym").getSLURLString();;
+		args["NAME"] = LLSLURL("agent", from_id, (fRlvCanShowName) ? "completename" : "rlvanonym").getSLURLString();
+		if (RlvActions::canShowName(RlvActions::SNC_DEFAULT, from_id))
+			args["ORIGINAL_NAME"] = original_name;
+		else
+			args["ORIGINAL_NAME"] = RlvStrings::getAnonym(original_name);
 // [/RLVa:KB]
 		LLSD payload;
 		payload["from_id"] = from_id;

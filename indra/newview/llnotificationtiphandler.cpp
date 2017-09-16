@@ -109,7 +109,7 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 
 		if (notification->hasFormElements())
 		{
-			const std::string strName = notification->getSubstitutions()["NAME"];
+			const std::string strName = LLHandlerUtil::getSubstitutionOriginalName(notification);
 			const LLUUID idFrom = notification->getPayload()["from_id"];
 
 			LLHandlerUtil::spawnIMSession(strName, idFrom);
@@ -133,7 +133,7 @@ bool LLTipHandler::processNotification(const LLNotificationPtr& notification)
 //	}
 //
 //	std::string session_name = notification->getPayload()["SESSION_NAME"];
-//	const std::string name = notification->getSubstitutions()["NAME"];
+//	const std::string name = LLHandlerUtil::getSubstitutionOriginalName(notification);
 //	if (session_name.empty())
 //	{
 //		session_name = name;
