@@ -45,6 +45,7 @@
 #include "llimagepng.h"
 #include "lllandmarkactions.h"
 #include "lllocalcliprect.h"
+#include "llresmgr.h"
 #include "llnotificationsutil.h"
 #include "llslurl.h"
 #include "llsnapshotlivepreview.h"
@@ -56,6 +57,7 @@
 #include "llvfs.h"
 #include "llwindow.h"
 #include "llworld.h"
+#include <boost/filesystem.hpp>
 
 const F32 AUTO_SNAPSHOT_TIME_DELAY = 1.f;
 
@@ -1075,24 +1077,39 @@ void LLSnapshotLivePreview::saveLocal(bool prompt_path, const LLViewerWindow::sa
 		gViewerWindow->playSnapshotAnimAndSound();
 	}
 }
-//// [SL:KB] - Patch: Control-FilePicker | Checked: 2012-08-21 (Catznip-3.3)
-//void LLSnapshotLivePreview::saveLocal(const LLViewerWindow::save_image_callback_t& cb)
+
+////Check if failed due to insufficient memory
+//BOOL LLSnapshotLivePreview::saveLocal(LLPointer<LLImageFormatted> mFormattedImage)
 //{
-//	gViewerWindow->saveImage(mFormattedImage, cb);
-//	gViewerWindow->playSnapshotAnimAndSound();
-//}
-//// [/SL:KB]
-//BOOL LLSnapshotLivePreview::saveLocal()
-//{
-//    // Update mFormattedImage if necessary
-//    getFormattedImage();
-//    
-//    // Save the formatted image
-//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage);
+//	BOOL insufficient_memory;
+//	BOOL success = gViewerWindow->saveImageNumbered(mFormattedImage, FALSE, insufficient_memory);
 //
-//	if(success)
+//	if (insufficient_memory)
 //	{
-//		gViewerWindow->playSnapshotAnimAndSound();
+//		std::string lastSnapshotDir = LLViewerWindow::getLastSnapshotDir();
+//
+//#ifdef LL_WINDOWS
+//		boost::filesystem::path b_path(utf8str_to_utf16str(lastSnapshotDir));
+//#else
+//		boost::filesystem::path b_path(lastSnapshotDir);
+//#endif
+//		boost::filesystem::space_info b_space = boost::filesystem::space(b_path);
+//		if (b_space.free < mFormattedImage->getDataSize())
+//		{
+//			LLSD args;
+//			args["PATH"] = lastSnapshotDir;
+//
+//			std::string needM_bytes_string;
+//			LLResMgr::getInstance()->getIntegerString(needM_bytes_string, (mFormattedImage->getDataSize()) >> 10);
+//			args["NEED_MEMORY"] = needM_bytes_string;
+//
+//			std::string freeM_bytes_string;
+//			LLResMgr::getInstance()->getIntegerString(freeM_bytes_string, (b_space.free) >> 10);
+//			args["FREE_MEMORY"] = freeM_bytes_string;
+//
+//			LLNotificationsUtil::add("SnapshotToComputerFailed", args);
+//			return false;
+//		}
 //	}
 //	return success;
 //}
