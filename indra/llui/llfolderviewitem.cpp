@@ -1261,12 +1261,10 @@ BOOL LLFolderViewFolder::needsArrange()
 	return mLastArrangeGeneration < getRoot()->getArrangeGeneration();
 }
 
-// [SL:KB] - Patch: Inventory-DnDCheckFilter | Checked: 2013-05-19 (Catznip-3.5)
 bool LLFolderViewFolder::descendantsPassedFilter(S32 filter_generation)
 {
 	return getViewModelItem()->descendantsPassedFilter(filter_generation);
 }
-// [/SL:KB]
 
 // Passes selection information on to children and record selection
 // information if necessary.

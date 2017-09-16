@@ -41,16 +41,13 @@ LLFloaterLinkReplace::LLFloaterLinkReplace(const LLSD& key)
 	mRemainingItems(0),
 	mSourceUUID(LLUUID::null),
 	mTargetUUID(LLUUID::null),
-//	mInstance(NULL),
 	mBatchSize(gSavedSettings.getU32("LinkReplaceBatchSize"))
 {
 	mEventTimer.stop();
-//	mInstance = this;
 }
 
 LLFloaterLinkReplace::~LLFloaterLinkReplace()
 {
-//	mInstance = NULL;
 }
 
 BOOL LLFloaterLinkReplace::postBuild()
@@ -201,16 +198,9 @@ void LLFloaterLinkReplace::onStartClicked()
 	}
 }
 
-//void LLFloaterLinkReplace::linkCreatedCallback(const LLUUID& old_item_id,
-//												const LLUUID& target_item_id,
-//												bool needs_wearable_ordering_update,
-//												bool needs_description_update,
-//												const LLUUID& outfit_folder_id)
-// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
 // static
 void LLFloaterLinkReplace::linkCreatedCallback(LLHandle<LLFloaterLinkReplace> floater_handle, const LLUUID& old_item_id, const LLUUID& target_item_id,
 												bool needs_wearable_ordering_update, bool needs_description_update, const LLUUID& outfit_folder_id)
-// [/SL:KB]
 {
 	LL_DEBUGS() << "Inventory link replace:" << LL_NEWLINE
 		<< " - old_item_id = " << old_item_id.asString() << LL_NEWLINE
@@ -265,33 +255,21 @@ void LLFloaterLinkReplace::linkCreatedCallback(LLHandle<LLFloaterLinkReplace> fl
 		outfit_update_folder = outfit_folder_id;
 	}
 
-//	LLPointer<LLInventoryCallback> cb = new LLBoostFuncInventoryCallback(boost::bind(&LLFloaterLinkReplace::itemRemovedCallback, this, outfit_update_folder));
-// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
 	LLPointer<LLInventoryCallback> cb = new LLBoostFuncInventoryCallback(boost::bind(&LLFloaterLinkReplace::itemRemovedCallback, floater_handle, outfit_update_folder));
-// [/SL:KB]
 	remove_inventory_object(old_item_id, cb);
 }
 
-//void LLFloaterLinkReplace::itemRemovedCallback(const LLUUID& outfit_folder_id)
-// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
 // static
 void LLFloaterLinkReplace::itemRemovedCallback(LLHandle<LLFloaterLinkReplace> floater_handle, const LLUUID& outfit_folder_id)
-// [/SL:KB]
 {
 	if (outfit_folder_id.notNull())
 	{
 		LLAppearanceMgr::getInstance()->updateClothingOrderingInfo(outfit_folder_id);
 	}
 
-//	if (mInstance)
-// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
 	if (!floater_handle.isDead())
-// [/SL:KB]
 	{
-// [SL:KB] - Patch: Viewer-Crash | Checked: Catznip-5.3
 		floater_handle.get()->decreaseOpenItemCount();
-// [/SL:KB]
-//		decreaseOpenItemCount();
 	}
 }
 

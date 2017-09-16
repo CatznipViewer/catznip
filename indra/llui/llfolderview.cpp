@@ -106,17 +106,17 @@ void LLCloseAllFoldersFunctor::doFolder(LLFolderViewFolder* folder)
 void LLCloseAllFoldersFunctor::doItem(LLFolderViewItem* item)
 { }
 
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
-void LLHasUnfilteredDescendents::doFolder(LLFolderViewFolder* pFolder)
+//---------------------------------------------------------------------------
+
+void LLAllDescendentsPassedFilter::doFolder(LLFolderViewFolder* folder)
 {
-	m_fHasUnfilteredDescendent |= (pFolder) && ((!pFolder->passedFilter()) || (!pFolder->descendantsPassedFilter()));
+	mAllDescendentsPassedFilter &= (folder) && (folder->passedFilter()) && (folder->descendantsPassedFilter());
 }
 
-void LLHasUnfilteredDescendents::doItem(LLFolderViewItem* pItem)
+void LLAllDescendentsPassedFilter::doItem(LLFolderViewItem* item)
 {
-	m_fHasUnfilteredDescendent |= (pItem) && (!pItem->passedFilter());
+	mAllDescendentsPassedFilter &= (item) && (item->passedFilter());
 }
-// [/SL:KB]
 
 ///----------------------------------------------------------------------------
 /// Class LLFolderViewScrollContainer

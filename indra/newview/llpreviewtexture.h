@@ -79,6 +79,7 @@ public:
 	/*virtual*/ void setObjectID(const LLUUID& object_id);
 protected:
 	void				init();
+	void				populateRatioList();
 	/* virtual */ BOOL	postBuild();
 // [SL:KB] - Patch: UI-TexturePreview | Checked: 2013-09-23 (Catznip-3.6)
 	LLRect				calcClientRect(S32 nWidth = -1, S32 nHeight = -1) const;

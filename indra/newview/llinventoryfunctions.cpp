@@ -2766,43 +2766,33 @@ void LLInventoryAction::doToSelected(LLInventoryModel* model, LLFolderView* root
     
 	if ("delete" == action)
 	{
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
-		bool showWarning = false;
-		for (LLFolderViewItem* pSelItem : selected_items)
+		static bool sDisplayedAtSession = false;
+		
+		LLAllDescendentsPassedFilter f;
+		for (std::set<LLFolderViewItem*>::iterator it = selected_items.begin(); (it != selected_items.end()) && (f.allDescendentsPassedFilter()); ++it)
 		{
-			LLFolderViewFolder* pSelFolder = dynamic_cast<LLFolderViewFolder*>(pSelItem);
-			if (pSelFolder)
+			if (LLFolderViewFolder* folder = dynamic_cast<LLFolderViewFolder*>(*it))
 			{
-				LLHasUnfilteredDescendents f;
-				pSelFolder->applyFunctorRecursively(f);
-				if (f.hasUnfilteredDescendent())
-				{
-					showWarning = true;
-					break;
-				}
+				folder->applyFunctorRecursively(f);
 			}
 		}
-
-		// If the user chose to ignore our warning then fall through to the default just in case they chose to still see that one
-		if (showWarning)
-		{
-			LLNotificationTemplatePtr notifTempl = LLNotifications::instance().getTemplate("DeleteFilteredItems");
-			showWarning = (notifTempl->mForm->getIgnoreType() == LLNotificationForm::IGNORE_NO) || (!notifTempl->mForm->getIgnored());
-		}
-
-		if (showWarning)
+		// Fall through to the generic confirmation if the user choose to ignore the specialized one
+		if ( (!f.allDescendentsPassedFilter()) && (!LLNotifications::instance().getIgnored("DeleteFilteredItems")) )
 		{
 			LLNotificationsUtil::add("DeleteFilteredItems", LLSD(), LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
 		}
 		else
 		{
-// [/SL:KB]
+			if (!sDisplayedAtSession) // ask for the confirmation at least once per session
+			{
+				LLNotifications::instance().setIgnored("DeleteItems", false);
+				sDisplayedAtSession = true;
+			}
+
 			LLSD args;
 			args["QUESTION"] = LLTrans::getString(root->getSelectedCount() > 1 ? "DeleteItems" :  "DeleteItem");
 			LLNotificationsUtil::add("DeleteItems", args, LLSD(), boost::bind(&LLInventoryAction::onItemsRemovalConfirmation, _1, _2, root->getHandle()));
-// [SL:KB] - Patch: Inventory-Filter | Checked: Catznip-5.2
 		}
-// [/SL:KB]
         // Note: marketplace listings will be updated in the callback if delete confirmed
 		return;
 	}
