@@ -439,7 +439,7 @@ LLFloaterPreference::LLFloaterPreference(const LLSD& key)
 	mCommitCallbackRegistrar.add("Pref.ClickDisablePopup",		boost::bind(&LLFloaterPreference::onClickDisablePopup, this));	
 	mCommitCallbackRegistrar.add("Pref.LogPath",				boost::bind(&LLFloaterPreference::onClickLogPath, this));
 	mCommitCallbackRegistrar.add("Pref.RenderExceptions",       boost::bind(&LLFloaterPreference::onClickRenderExceptions, this));
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 	mCommitCallbackRegistrar.add("Pref.SnapshotPath",			boost::bind(&LLFloaterPreference::onClickSnapshotPath, this));
 // [/SL:KB]
 	mCommitCallbackRegistrar.add("Pref.HardwareDefaults",		boost::bind(&LLFloaterPreference::setHardwareDefaults, this));
@@ -2008,11 +2008,11 @@ void LLFloaterPreference::onClickLogPath()
 }
 }
 
-// [SL:KB] - Patch: Settings-Snapshot | Checked: 2011-10-27 (Catznip-3.2)
+// [SL:KB] - Patch: Settings-Snapshot | Checked: Catznip-3.2
 void LLFloaterPreference::onClickSnapshotPath()
 {
-	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));	 
-	
+	std::string proposed_name(gSavedSettings.getString("SnapshotLocalPath"));
+
 	LLDirPicker& picker = LLDirPicker::instance();
 	if (!picker.getDir(&proposed_name))
 	{

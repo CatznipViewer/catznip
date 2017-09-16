@@ -38,10 +38,14 @@
 #include "llpanel.h"
 #include "lluictrlfactory.h"
 #include "llscrollcontainer.h"
-#include "llavatariconctrl.h"
-#include "llcallingcard.h" //for LLAvatarTracker
+#include "llagent.h"
 #include "llagentdata.h"
 #include "llavataractions.h"
+#include "llavatariconctrl.h"
+#include "llcallingcard.h" //for LLAvatarTracker
+#include "llgroupactions.h"
+#include "llgroupmgr.h"
+#include "llspeakers.h" //for LLIMSpeakerMgr
 #include "lltrans.h"
 #include "llfloaterreg.h"
 #include "llfloatersidepanelcontainer.h"
@@ -49,7 +53,6 @@
 #include "llstylemap.h"
 #include "llslurl.h"
 #include "lllayoutstack.h"
-#include "llagent.h"
 #include "llnotificationsutil.h"
 #include "lltoastnotifypanel.h"
 #include "lltooltip.h"
@@ -70,7 +73,6 @@
 // [/SL:KB]
 #include "llviewercontrol.h"
 #include "llviewerobjectlist.h"
-#include "llmutelist.h"
 // [RLVa:KB] - Checked: 2010-04-22 (RLVa-1.2.0f)
 #include "rlvcommon.h"
 // [/RLVa:KB]
@@ -238,6 +240,161 @@ public:
         return false;
     }
 
+	void banGroupMember(const LLUUID& participant_uuid)
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return;
+		}
+
+		gdatap->banMemberById(participant_uuid);
+	}
+
+	bool canBanInGroup()
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return false;
+		}
+
+		if (gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+			&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+		{
+			return true;
+		}
+
+		return false;
+	}
+
+	bool canBanGroupMember(const LLUUID& participant_uuid)
+	{
+		LLUUID group_uuid = mSessionID;
+		LLGroupMgrGroupData* gdatap = LLGroupMgr::getInstance()->getGroupData(group_uuid);
+		if (!gdatap)
+		{
+			// Not a group
+			return false;
+		}
+
+		if (gdatap->mPendingBanRequest)
+		{
+			return false;
+		}
+
+		if (gAgentID == getAvatarId())
+		{
+			//Don't ban self
+			return false;
+		}
+
+		if (gdatap->isRoleMemberDataComplete())
+		{
+			if (gdatap->mMembers.size())
+			{
+				LLGroupMgrGroupData::member_list_t::iterator mi = gdatap->mMembers.find(participant_uuid);
+				if (mi != gdatap->mMembers.end())
+				{
+					LLGroupMemberData* member_data = (*mi).second;
+					// Is the member an owner?
+					if (member_data && member_data->isInRole(gdatap->mOwnerRole))
+					{
+						return false;
+					}
+
+					if (gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+						&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (speaker_mgr)
+		{
+			LLSpeaker * speakerp = speaker_mgr->findSpeaker(participant_uuid).get();
+
+			if (speakerp
+				&& gAgent.hasPowerInGroup(group_uuid, GP_ROLE_REMOVE_MEMBER)
+				&& gAgent.hasPowerInGroup(group_uuid, GP_GROUP_BAN_ACCESS))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool isGroupModerator()
+	{
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (!speaker_mgr)
+		{
+			LL_WARNS() << "Speaker manager is missing" << LL_ENDL;
+			return false;
+		}
+
+		// Is session a group call/chat?
+		if(gAgent.isInGroup(mSessionID))
+		{
+			LLSpeaker * speakerp = speaker_mgr->findSpeaker(gAgentID).get();
+
+			// Is agent a moderator?
+			return speakerp && speakerp->mIsModerator;
+		}
+
+		return false;
+	}
+
+	bool canModerate(const std::string& userdata)
+	{
+		// only group moderators can perform actions related to this "enable callback"
+		if (!isGroupModerator() || gAgentID == getAvatarId())
+		{
+			return false;
+		}
+
+		LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+		if (!speaker_mgr)
+		{
+			return false;
+		}
+
+		LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+		if (!speakerp)
+		{
+			return false;
+		}
+
+		bool voice_channel = speakerp->isInVoiceChannel();
+
+		if ("can_moderate_voice" == userdata)
+		{
+			return voice_channel;
+		}
+		else if ("can_mute" == userdata)
+		{
+			return voice_channel && (speakerp->mStatus != LLSpeaker::STATUS_MUTED);
+		}
+		else if ("can_unmute" == userdata)
+		{
+			return speakerp->mStatus == LLSpeaker::STATUS_MUTED;
+		}
+		else if ("can_allow_text_chat" == userdata)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	void onAvatarIconContextMenuItemClicked(const LLSD& userdata)
 	{
 		std::string level = userdata.asString();
@@ -302,11 +459,36 @@ public:
 		}
 		else if(level == "block_unblock")
 		{
-			mute(getAvatarId(), LLMute::flagVoiceChat);
+			LLAvatarActions::toggleMute(getAvatarId(), LLMute::flagVoiceChat);
 		}
 		else if(level == "mute_unmute")
 		{
-			mute(getAvatarId(), LLMute::flagTextChat);
+			LLAvatarActions::toggleMute(getAvatarId(), LLMute::flagTextChat);
+		}
+		else if(level == "toggle_allow_text_chat")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			speaker_mgr->toggleAllowTextChat(getAvatarId());
+		}
+		else if(level == "group_mute")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				speaker_mgr->moderateVoiceParticipant(getAvatarId(), false);
+			}
+		}
+		else if(level == "group_unmute")
+		{
+			LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				speaker_mgr->moderateVoiceParticipant(getAvatarId(), true);
+			}
+		}
+		else if(level == "ban_member")
+		{
+			banGroupMember(getAvatarId());
 		}
 	}
 
@@ -322,42 +504,82 @@ public:
 		{
 			return LLMuteList::getInstance()->isMuted(getAvatarId(), LLMute::flagTextChat);
 		}
+		else if (level == "is_allowed_text_chat")
+		{
+			if (gAgent.isInGroup(mSessionID))
+			{
+				LLIMSpeakerMgr* speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+				if(speaker_mgr)
+				{
+					const LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId());
+					if (NULL != speakerp)
+					{
+						return !speakerp->mModeratorMutedText;
+					}
+				}
+			}
+			return false;
+		}
 		return false;
 	}
 
-// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
-	bool onAvatarIconContextMenuItemEnabled(const LLSD& sdParam)
+	bool onAvatarIconContextMenuItemEnabled(const LLSD& userdata)
 	{
-		const std::string strParam = sdParam.asString();
-		if (strParam == "is_friend")
+		std::string level = userdata.asString();
+
+		if (level == "can_allow_text_chat" || level == "can_mute" || level == "can_unmute")
+		{
+			return canModerate(userdata);
+		}
+		else if (level == "can_ban_member")
+		{
+			return canBanGroupMember(getAvatarId());
+		}
+// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
+		else if (level == "is_friend")
 		{
 			return LLAvatarActions::isFriend(getAvatarId());
 		}
-		else if (strParam == "is_not_friend")
+		else if (level == "is_not_friend")
 		{
 			return !LLAvatarActions::isFriend(getAvatarId());
 		}
+// [/SL:KB]
 		return false;
 	}
-// [/SL:KB]
 
-	void mute(const LLUUID& participant_id, U32 flags)
+	bool onAvatarIconContextMenuItemVisible(const LLSD& userdata)
 	{
-		BOOL is_muted = LLMuteList::getInstance()->isMuted(participant_id, flags);
-		LLAvatarName av_name;
-		LLAvatarNameCache::get(participant_id, &av_name);
-		LLMute mute(participant_id, av_name.getUserName(), LLMute::AGENT);
+		std::string level = userdata.asString();
 
-		if (!is_muted)
+		if (level == "show_mute")
 		{
-			LLMuteList::getInstance()->add(mute, flags);
+			LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+				if (speakerp)
+				{
+					return speakerp->isInVoiceChannel() && speakerp->mStatus != LLSpeaker::STATUS_MUTED;
+				}
+			}
+			return false;
 		}
-		else
+		else if (level == "show_unmute")
 		{
-			LLMuteList::getInstance()->remove(mute, flags);
+			LLSpeakerMgr * speaker_mgr = LLIMModel::getInstance()->getSpeakerManager(mSessionID);
+			if (speaker_mgr)
+			{
+				LLSpeaker * speakerp = speaker_mgr->findSpeaker(getAvatarId()).get();
+				if (speakerp)
+				{
+					return speakerp->mStatus == LLSpeaker::STATUS_MUTED;
+				}
+			}
+			return false;
 		}
+		return false;
 	}
-// [/SL:KB]
 
 	BOOL postBuild()
 	{
@@ -366,9 +588,8 @@ public:
 
 		registrar.add("AvatarIcon.Action", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("AvatarIcon.Check", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemChecked, this, _2));
-// [SL:KB] - Patch: UI-AddContact | Checked: 2013-09-25 (Catznip-3.6)
 		registrar_enable.add("AvatarIcon.Enable", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemEnabled, this, _2));
-// [/SL:KB]
+		registrar_enable.add("AvatarIcon.Visible", boost::bind(&LLChatHistoryHeader::onAvatarIconContextMenuItemVisible, this, _2));
 		registrar.add("ObjectIcon.Action", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemClicked, this, _2));
 		registrar_enable.add("ObjectIcon.Visible", boost::bind(&LLChatHistoryHeader::onObjectIconContextMenuItemVisible, this, _2));
 
@@ -709,9 +930,14 @@ protected:
 		if(menu)
 		{
 			bool is_friend = LLAvatarActions::isFriend(mAvatarID);
+			bool is_group_session = gAgent.isInGroup(mSessionID);
 			
 			menu->setItemEnabled("Add Friend", !is_friend);
 			menu->setItemEnabled("Remove Friend", is_friend);
+			menu->setItemVisible("Moderator Options Separator", is_group_session && isGroupModerator());
+			menu->setItemVisible("Moderator Options", is_group_session && isGroupModerator());
+			menu->setItemVisible("Group Ban Separator", is_group_session && canBanInGroup());
+			menu->setItemVisible("BanMember", is_group_session && canBanInGroup());
 
 			if(gAgentID == mAvatarID)
 			{
