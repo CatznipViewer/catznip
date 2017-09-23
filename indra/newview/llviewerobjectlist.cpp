@@ -2276,6 +2276,27 @@ void LLViewerObjectList::findOrphans(LLViewerObject* objectp, U32 ip, U32 port)
 	}
 }
 
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+bool LLViewerObjectList::findOwnObjects(const LLUUID& region_id, const LLVector3& region_pos, std::list<LLViewerObject*>& object_list) const
+{
+	object_list.clear();
+	for (const auto& itObj : mObjects)
+	{
+		LLViewerObject* pObj = itObj.get();
+		if ( (pObj) && (pObj->permYouOwner()) && (pObj->getRegion()) && (pObj->getRegion()->getRegionID() == region_id) )
+		{
+			if ( (dist_vec(pObj->getPositionRegion(), region_pos) < F_ALMOST_ZERO) ||
+				 ( (pObj->isAttachment()) && ( (!pObj->isDrawableState(LLDrawable::RIGGED)) || (!pObj->isRootEdit()) ) && (isAgentAvatarValid()) &&
+			       (dist_vec(gAgentAvatarp->getPositionRegion() - (pObj->getRootEdit()->getPositionRegion() - pObj->getPositionRegion()) * gAgentAvatarp->getRotationRegion(), region_pos) < F_ALMOST_ZERO) ) )
+			{
+				object_list.push_back(pObj);
+			}
+		}
+	}
+	return !object_list.empty();
+}
+// [/SL:KB]
+
 ////////////////////////////////////////////////////////////////////////////
 
 LLViewerObjectList::OrphanInfo::OrphanInfo()
