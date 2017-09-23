@@ -138,6 +138,9 @@ void LLPanelInventoryOfferFolder::onOpen(const LLSD& sdKey)
 				m_idObject = sdPayload["from_object_id"].asUUID();
 				m_idObjectFolder = sdPayload["from_object_folder_id"].asUUID();
 				refreshFolders();
+
+				m_pAcceptInList->clearControlName();
+				m_pAcceptInList->setValue( (m_idObjectFolder.notNull()) ? LLSD(m_idObjectFolder ) : LLSD(s_strUnknownFolder) );
 			}
 
 			refreshControls();
