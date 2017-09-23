@@ -1549,6 +1549,10 @@ LLOfferInfo::LLOfferInfo(const LLSD& sd)
 	mTransactionID = sd["transaction_id"].asUUID();
 	mFolderID = sd["folder_id"].asUUID();
 	mObjectID = sd["object_id"].asUUID();
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	mFromObjectID = sd["from_object_id"].asUUID();
+	mFromObjectFolderID = sd["from_object_folder_id"].asUUID();
+// [/SL:KB]
 	mType = LLAssetType::lookup(sd["type"].asString().c_str());
 	mFromName = sd["from_name"].asString();
 	mDesc = sd["description"].asString();
@@ -1565,6 +1569,10 @@ LLOfferInfo::LLOfferInfo(const LLOfferInfo& info)
 	mTransactionID = info.mTransactionID;
 	mFolderID = info.mFolderID;
 	mObjectID = info.mObjectID;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	mFromObjectID = info.mFromObjectID;
+	mFromObjectFolderID = info.mFromObjectFolderID;
+// [/SL:KB]
 	mType = info.mType;
 	mFromName = info.mFromName;
 	mDesc = info.mDesc;
@@ -1583,6 +1591,10 @@ LLSD LLOfferInfo::asLLSD()
 	sd["transaction_id"] = mTransactionID;
 	sd["folder_id"] = mFolderID;
 	sd["object_id"] = mObjectID;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	sd["from_object_id"] = mFromObjectID;
+	sd["from_object_folder_id"] = mFromObjectFolderID;
+// [/SL:KB]
 	sd["type"] = LLAssetType::lookup(mType);
 	sd["from_name"] = mFromName;
 	sd["description"] = mDesc;
@@ -2246,6 +2258,8 @@ void inventory_offer_handler(LLOfferInfo* info)
 	payload["owner_is_group"] = info->mFromGroup;
 // [/SL:KB]
 // [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	payload["from_object_id"] = info->mFromObjectID;
+	payload["from_object_folder_id"] = info->mFromObjectFolderID;
 	if ( (info->mType != LLAssetType::AT_OBJECT) && (info->mType != LLAssetType::AT_CATEGORY) )
 	{
 		payload["accept_in"] = false;
@@ -3158,6 +3172,30 @@ void process_improved_im(LLMessageSystem *msg, void **user_data)
 				}
 				info->mType = (LLAssetType::EType) binary_bucket[0];
 				info->mObjectID = LLUUID::null;
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+				if ( (from_id == gAgentID) && (region_id == gAgent.getRegion()->getRegionID()) )
+				{
+					std::list<LLViewerObject*> lObjects;
+					if (gObjectList.findOwnObjects(region_id, position, lObjects))
+					{
+						for (LLViewerObject* pObj : lObjects)
+						{
+							pObj = pObj->getRootEdit();
+							bool fFound = false;
+							const LLUUID idFolder = LLPanelInventoryOfferFolder::getFolderFromObject(pObj, name, &fFound);
+							if (fFound)
+							{
+								info->mFromObjectID = pObj->getID();
+								info->mFromObjectFolderID = idFolder;
+								break;
+							}
+						}
+
+						if (info->mFromObjectID.isNull())
+							info->mFromObjectID = lObjects.front()->getRootEdit()->getID();
+					}
+				}
+// [/SL:KB]
 				info->mFromObject = TRUE;
 			}
 

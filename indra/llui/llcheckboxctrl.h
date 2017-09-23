@@ -101,6 +101,9 @@ public:
 	void				setFont( const LLFontGL* font ) { mFont = font; }
 	const LLFontGL*		getFont() { return mFont; }
 	
+// [SL:KB] - Patch: Control-Base | Checked: Catznip-5.2
+	        void		clearControlName() override;
+// [/SL:KB]
 	virtual void		setControlName(const std::string& control_name, LLView* context);
 
 	virtual BOOL		isDirty()	const;		// Returns TRUE if the user has modified this control.
