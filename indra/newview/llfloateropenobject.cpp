@@ -115,6 +115,9 @@ void LLFloaterOpenObject::refresh()
 		name = "";
 		enabled = FALSE;
 	}
+// [SL:KB] - Patch: Inventory-OfferToast | Checked: Catznip-5.2
+	findChild<LLPanelInventoryOfferFolder>("panel_offer_invfolder")->setObjectId( ((node) && (node->getObject())) ? node->getObject()->getID() : LLUUID::null );
+// [/SL:KB]
 	
 	getChild<LLUICtrl>("object_name")->setTextArg("[DESC]", name);
 	getChildView("copy_to_inventory_button")->setEnabled(enabled);

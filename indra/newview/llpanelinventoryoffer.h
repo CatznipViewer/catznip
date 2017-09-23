@@ -16,6 +16,7 @@
 
 #include "llinventoryobserver.h"
 #include "llpanel.h"
+#include "llselectmgr.h"
 
 #pragma once
 
@@ -46,17 +47,22 @@ public:
 	void onVisibilityChange(BOOL new_visibility) override;
 	BOOL postBuild() override;
 
+	static LLUUID getFolderFromObject(const LLViewerObject* pObj, const std::string& strName = LLStringUtil::null, bool* pfFound = nullptr);
+
 	/*
 	 * Member functions
 	 */
 public:
 	bool         getAcceptIn() const;
 	const LLUUID getSelectedFolder() const;
+	void         setObjectId(const LLUUID& idObject);
 protected:
 	void onBrowseFolder();
 	void onBrowseFolderCb(const LLSD& sdData);
 	void onConfigureFolders();
 	void onConfigureFoldersCb();
+	void onSelectedFolderChanged();
+	void onUpdateSelection();
 	void refreshControls();
 	void refreshFolders();
 
@@ -68,6 +74,12 @@ protected:
 	LLCheckBoxCtrl* m_pAcceptInCheck = nullptr;
 	LLComboBox*     m_pAcceptInList = nullptr;
 	LLButton*       m_pBrowseBtn = nullptr;
+
+	LLUUID          m_idObject;
+	bool            m_fShowObjectFolder = true;
+	LLUUID          m_idObjectFolder;
+	LLObjectSelectionHandle m_ObjectSelectionHandle;
+	boost::signals2::connection m_SelectionUpdateConnection;
 
 	LLHandle<LLFloater> m_BrowseFloaterHandle;
 	LLHandle<LLFloater> m_ConfigureFloaterHandle;
