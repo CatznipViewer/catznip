@@ -198,7 +198,7 @@ void LLPanelInventoryOfferFolder::refreshFolders()
 		else if (LLViewerObject* pObj = gObjectList.findObject(m_idObject))
 		{
 			if (pObj->permYouOwner())
-				m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), getString("originating_unknown_text")).c_str(), s_strUnknownFolder, ADD_TOP);
+				m_pAcceptInList->add(llformat("[%s: %s]", getString("originating_text").c_str(), getString("originating_unknown_text").c_str()), s_strUnknownFolder, ADD_TOP);
 		}
 	}
 
