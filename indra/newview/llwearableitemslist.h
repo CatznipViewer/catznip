@@ -477,7 +477,12 @@ public:
 			MASK_BODYPART		= 0x02,
 			MASK_ATTACHMENT		= 0x04,
 			MASK_GESTURE		= 0x08,
-			MASK_UNKNOWN		= 0x10,
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+			MASK_CATEGORY		= 0x10,
+			MASK_OUTFIT			= 0x20,
+			MASK_UNKNOWN		= 0x40,
+// [/SL:KB]
+//			MASK_UNKNOWN		= 0x10,
 		};
 
 		/* virtual */ LLContextMenu* createMenu();
@@ -488,7 +493,10 @@ public:
 		void updateItemsLabels(LLContextMenu* menu);
 		static void setMenuItemVisible(LLContextMenu* menu, const std::string& name, bool val);
 		static void setMenuItemEnabled(LLContextMenu* menu, const std::string& name, bool val);
-		static void updateMask(U32& mask, LLAssetType::EType at);
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+		static void updateMask(U32& mask, LLViewerInventoryItem* item);
+// [/SL:KB]
+//		static void updateMask(U32& mask, LLAssetType::EType at);
 		static void createNewWearable(const LLUUID& item_id);
 
 		LLWearableItemsList*	mParent;
