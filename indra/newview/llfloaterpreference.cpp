@@ -1583,7 +1583,10 @@ void LLFloaterPreferenceGraphicsAdvanced::refreshEnabledState()
 	// Hardware settings
 	F32 mem_multiplier = gSavedSettings.getF32("RenderTextureMemoryMultiple");
 	S32Megabytes min_tex_mem = LLViewerTextureList::getMinVideoRamSetting();
-	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(false, mem_multiplier);
+// [SL:DP] - Patch: Viewer-TextureMemory | Checked: Catznip-5.3
+	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(true, mem_multiplier);
+// [/SL:DP]
+//	S32Megabytes max_tex_mem = LLViewerTextureList::getMaxVideoRamSetting(false, mem_multiplier);
 	getChild<LLSliderCtrl>("GraphicsCardTextureMemory")->setMinValue(min_tex_mem.value());
 	getChild<LLSliderCtrl>("GraphicsCardTextureMemory")->setMaxValue(max_tex_mem.value());
 

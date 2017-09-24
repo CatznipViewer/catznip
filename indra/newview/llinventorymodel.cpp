@@ -369,6 +369,29 @@ void LLInventoryModel::getDirectDescendentsOf(const LLUUID& cat_id,
 	items = get_ptr_in_map(mParentChildItemTree, cat_id);
 }
 
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+void LLInventoryModel::getDirectDescendentsOf(const LLUUID& cat_id, cat_array_t& categories, item_array_t& items, LLInventoryCollectFunctor& f)
+{
+	if (cat_array_t* pCategories = get_ptr_in_map(mParentChildCategoryTree, cat_id))
+	{
+		for (LLViewerInventoryCategory* pFolder : *pCategories)
+		{
+			if (f(pFolder, nullptr))
+				categories.push_back(pFolder);
+		}
+	}
+
+	if (item_array_t* pItems = get_ptr_in_map(mParentChildItemTree, cat_id))
+	{
+		for (LLViewerInventoryItem* pItem : *pItems)
+		{
+			if (f(nullptr, pItem))
+				items.push_back(pItem);
+		}
+	}
+}
+// [/SL:KB]
+
 LLMD5 LLInventoryModel::hashDirectDescendentNames(const LLUUID& cat_id) const
 {
 	LLInventoryModel::cat_array_t* cat_array;

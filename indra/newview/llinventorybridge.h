@@ -371,6 +371,10 @@ public:
 
 	bool isLoading() { return mIsLoading; }
 
+// [SL:KB] - Patch: Inventory-WearItems | Checked: 2011-12-15 (Catznip-3.2.0d) | Added: Catznip-3.2.0d
+	static void wearItems(const LLInventoryModel* pMode, const LLUUID& idFolder);
+// [/SL:KB]
+
 protected:
 	void buildContextMenuOptions(U32 flags, menuentry_vec_t& items,   menuentry_vec_t& disabled_items);
 	void buildContextMenuFolderOptions(U32 flags, menuentry_vec_t& items,   menuentry_vec_t& disabled_items);

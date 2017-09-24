@@ -4974,6 +4974,14 @@ void LLFolderBridge::wearItems()
 }
 
 // static
+void LLFolderBridge::wearItems(const LLInventoryModel* pModel, const LLUUID& idFolder)
+{
+	if ( (!pModel) || (pModel != &gInventory) || (!gInventory.getCategory(idFolder)) )
+		return;
+	callAfterCategoryFetch(idFolder, boost::bind(&LLFolderBridge::wearItemsFinal, idFolder));
+}
+
+// static
 void LLFolderBridge::wearItemsFinal(const LLUUID& idFolder)
 {
 	LLPointer<LLInventoryCallback> cb = new LLUpdateAppearanceOnDestroy(true);

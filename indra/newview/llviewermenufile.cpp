@@ -47,6 +47,9 @@
 #include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
 #include "llfloaterperms.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+#include "llsnapshotlivepreview.h"
+// [/SL:KB]
 #include "llstatusbar.h"
 #include "llviewercontrol.h"	// gSavedSettings
 #include "llviewertexturelist.h"
