@@ -228,6 +228,9 @@ public:
 	void getDirectDescendentsOf(const LLUUID& cat_id,
 								cat_array_t*& categories,
 								item_array_t*& items) const;
+// [SL:KB] - Patch: Settings-QuickPrefsInventory | Checked: Catznip-5.2
+	void getDirectDescendentsOf(const LLUUID& cat_id, cat_array_t& categories, item_array_t& items, LLInventoryCollectFunctor& f);
+// [/SL:KB]
 
 	// Compute a hash of direct descendant names (for detecting child name changes)
 	LLMD5 hashDirectDescendentNames(const LLUUID& cat_id) const;
