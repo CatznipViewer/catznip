@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<panel
+ follows="all"
+ height="300"
+ layout="topleft"
+ name="panel_quickprefs_inventory"
+ width="300">
+	<string name="folder_select_label">Folder: &lt;click to select&gt;</string>
+	<string name="folder_selected_label">[NAME]</string>
+	<menu_button
+	 follows="top|left"
+	 height="25"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_overlay="Conv_toolbar_sort"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 layout="topleft"
+	 left="1"
+	 menu_filename="menu_category_list_sort.xml"
+	 menu_position="topleft"
+	 name="options_sort_btn"
+	 tool_tip="Show sorting options"
+	 top="0"
+	 width="31" />
+	<button
+	 follows="top|left"
+	 height="25"
+	 image_hover_unselected="Toolbar_Middle_Over"
+	 image_selected="Toolbar_Middle_Selected"
+	 image_unselected="Toolbar_Middle_Off"
+	 layout="topleft"
+	 left_pad="1"
+	 name="inv_folder_btn"
+	 tool_tip="Click here to select a new folder"
+	 top="0"
+	 right="-1" />
+
+	<category_items_list
+	 bottom="-1"
+	 follows="all"
+	 layout="topleft"
+	 left="1"
+	 multi_select="true"
+	 name="items_list"
+	 right="-1"
+	 top="27" />
+</panel>

@@ -8137,6 +8137,28 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>QuickPrefsInventoryFolder</key>
+    <map>
+      <key>Comment</key>
+      <string>Inventory folder to show when opening the quick preference inventory tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>String</string>
+      <key>Value</key>
+      <string />
+    </map>
+    <key>QuickPrefsInventorySort</key>
+    <map>
+      <key>Comment</key>
+      <string>Quick preference inventory tab sort order (0: by name; 1: by most recent)</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>QuietSnapshotsToDisk</key>
     <map>
       <key>Comment</key>

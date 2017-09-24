@@ -22,6 +22,7 @@
 // Foward declarations
 //
 
+class LLCategoryItemsList;
 class LLInventoryCategoriesObserver;
 class LLSliderCtrl;
 class LLTextBox;
@@ -108,16 +109,19 @@ public:
 	/*
 	* Event handlers
 	*/
-protected:
-	void onInventoryChanged();
+	void onBrowseFolder();
+	void onBrowseFolderCb(const LLSD& sdData);
+	void onFolderChanged();
+	void onSortOrderChanged(const LLSD& sdParam);
+	bool onSortOrderCheck(const LLSD& sdParam);
 
 	/*
 	* Member variables
 	*/
 protected:
-	LLUUID                         m_idQuickFolder;
-	LLInventoryCategoriesObserver* m_pInvenoryObserver = nullptr;
-	LLWearableItemsList*           m_pItemsList = nullptr;
+	LLButton*            m_pFolderBrowseBtn = nullptr;
+	LLHandle<LLFloater>  m_BrowseFloaterHandle;
+	LLCategoryItemsList* m_pItemsList = nullptr;
 };
 
 // ====================================================================================
