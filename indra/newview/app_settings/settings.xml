@@ -8137,6 +8137,17 @@
       <key>Value</key>
       <integer>0</integer>
     </map>
+    <key>QuickPrefsTab</key>
+    <map>
+      <key>Comment</key>
+      <string>Last selected quick preferences tab</string>
+      <key>Persist</key>
+      <integer>1</integer>
+      <key>Type</key>
+      <string>U32</string>
+      <key>Value</key>
+      <integer>0</integer>
+    </map>
     <key>QuietSnapshotsToDisk</key>
     <map>
       <key>Comment</key>
