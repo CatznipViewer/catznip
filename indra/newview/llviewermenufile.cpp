@@ -47,6 +47,9 @@
 #include "llinventorymodel.h"	// gInventory
 #include "llresourcedata.h"
 #include "llfloaterperms.h"
+// [SL:KB] - Patch: Appearance-Wearing | Checked: Catznip-5.2
+#include "llsnapshotlivepreview.h"
+// [/SL:KB]
 #include "llstatusbar.h"
 #include "llviewercontrol.h"	// gSavedSettings
 #include "llviewertexturelist.h"
@@ -586,7 +589,7 @@ class LLFileTakeSnapshotToDisk : public view_listener_t
 			formatted->enableOverSize() ;
 			formatted->encode(raw, 0);
 			formatted->disableOverSize() ;
-			gViewerWindow->saveImageNumbered(formatted);
+			LLSnapshotLivePreview::saveLocal(formatted);
 		}
 		return true;
 	}
